@@ -31,6 +31,12 @@ def _no_provisioning_record(tmp_path, monkeypatch):
     different code paths depending on where they ran.
     """
     monkeypatch.setattr(pv, "PROV_FILE", tmp_path / "no-provisioning.json")
+    # ENABLEMENT IS PINNED FOR THE SAME REASON. `enabled_state()` reads the
+    # real settings.json, so without this a suite about installs would answer
+    # DISABLED or not depending on whether the machine running it happens to
+    # have the plugin switched on. The tests that are ABOUT enablement point
+    # it back at fixtures of their own.
+    monkeypatch.setattr(pv, "SETTINGS_FILES", (tmp_path / "no-settings.json",))
 
 
 def _plugin_tree(plugin_dir: Path, version="0.8.1", agents=47, skills=6):
@@ -141,9 +147,15 @@ def test_same_version_different_content_is_caught(tmp_path):
     v = pv.compare(repo, state)
     assert v["status"] == "DIVERGED" and not v["ok"]
     assert "vetter.md" in v["reasons"][0]
-    assert "bump the version in BOTH manifests" in v["fix"], (
-        "reinstalling without a bump leaves the cache on a version number "
-        "that no longer describes its contents")
+    # The fix must say BOTH things, and it did not always. It used to
+    # prescribe only the version bump — correct as durable advice and useless
+    # to a firing that cannot edit the repo. It now leads with the
+    # container-local repair (measured to work) and still names the bump,
+    # because reinstalling without one leaves the cache on a version number
+    # that no longer describes its contents.
+    assert "uninstall" in v["fix"], (
+        "an update is a no-op on an equal version number — measured")
+    assert "bump it in BOTH manifests" in v["fix"]
 
 
 def test_a_pycache_difference_is_not_divergence(tmp_path):
@@ -584,3 +596,122 @@ def test_the_root_cause_line_is_printed_separately(tmp_path, capsys):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── enablement: installed, current, and loading nothing ───────────────────
+#
+# MEASURED 2026-08-31 on a live container. `claude plugin install` prints
+# "This plugin is disabled by default — enable it with: claude plugin enable"
+# and the install record carries no flag saying so. So a heal that installed
+# and stopped there left the container holding a complete, current plugin
+# that loaded none of it — and every check that read only
+# installed_plugins.json called that OK.
+
+def _settings(tmp_path, value, name="settings.json"):
+    path = tmp_path / name
+    path.write_text(json.dumps(
+        {"enabledPlugins": {"dma-insights@zennify-dma": value}}
+        if value is not None else {}))
+    return path
+
+
+def test_a_switched_off_plugin_is_not_ok(tmp_path, monkeypatch):
+    repo, state = _repo(tmp_path), _state(tmp_path)
+    monkeypatch.setattr(pv, "SETTINGS_FILES", (_settings(tmp_path, False),))
+    v = pv.compare(repo, state)
+    assert v["status"] == "DISABLED" and not v["ok"]
+    assert "enable" in v["fix"]
+    assert "loads none of its" in " ".join(v["reasons"])
+
+
+def test_an_enabled_plugin_at_the_right_version_is_ok(tmp_path, monkeypatch):
+    repo, state = _repo(tmp_path), _state(tmp_path)
+    monkeypatch.setattr(pv, "SETTINGS_FILES", (_settings(tmp_path, True),))
+    assert pv.compare(repo, state)["status"] == "OK"
+
+
+def test_no_settings_file_is_not_read_as_disabled(tmp_path, monkeypatch):
+    """A CI runner and a bare checkout have no settings.json. Manufacturing
+    DISABLED out of that would red-flag every machine that is simply not a
+    Claude Code container."""
+    repo, state = _repo(tmp_path), _state(tmp_path)
+    monkeypatch.setattr(pv, "SETTINGS_FILES", (tmp_path / "absent.json",))
+    assert pv.enabled_state((tmp_path / "absent.json",)) is None
+    assert pv.compare(repo, state)["status"] == "OK"
+
+
+def test_enabled_at_either_scope_is_enough(tmp_path):
+    """User and project scope both register the plugin, and the session loads
+    from whichever carries it. True anywhere wins over False elsewhere."""
+    off = _settings(tmp_path, False, "off.json")
+    on = _settings(tmp_path, True, "on.json")
+    assert pv.enabled_state((off, on)) is True
+    assert pv.enabled_state((on, off)) is True
+    assert pv.enabled_state((off,)) is False
+
+
+def test_a_wrong_tree_is_reported_before_a_switched_off_one(tmp_path,
+                                                            monkeypatch):
+    """Both wrong at once: the tree is named, because its repair (uninstall,
+    install, enable) fixes the enablement on the way out, while enabling a
+    stale tree fixes nothing."""
+    repo = _repo(tmp_path, version="0.9.0")
+    state = _state(tmp_path, version="0.8.1")
+    monkeypatch.setattr(pv, "SETTINGS_FILES", (_settings(tmp_path, False),))
+    assert pv.compare(repo, state)["status"] == "STALE"
+
+
+# ── the heal plans, and why they are not one plan ─────────────────────────
+
+def test_every_heal_path_ends_by_enabling_the_plugin():
+    """The measured defect this table exists for: an install lands the plugin
+    disabled, so a plan that installs and stops leaves a container loading
+    nothing. Every plan therefore ends in `enable` — including DISABLED's,
+    which is only that."""
+    for status in ("STALE", "MISSING", "INCOMPLETE", "DIVERGED", "DISABLED"):
+        plan = pv._plan_for({"status": status, "installed": {}})
+        assert plan, status
+        assert plan[-1][:3] == ["claude", "plugin", "enable"], status
+
+
+def test_a_diverged_tree_is_reinstalled_and_never_merely_updated():
+    """MEASURED 2026-08-31, and the whole reason this is a table rather than
+    one command list: with the checkout and the install both at 1.13.0 and
+    their trees differing, `plugin update` answered 'already at the latest
+    version' and `plugin install` answered 'already installed' — both exit 0,
+    neither copying a byte. Only an uninstall first replaced the tree."""
+    plan = pv._plan_for({"status": "DIVERGED", "installed": {}})
+    verbs = [c[2] for c in plan if c[1] == "plugin"]
+    assert "uninstall" in verbs, "an update cannot reconcile an equal version"
+    assert verbs.index("uninstall") < verbs.index("install")
+    assert "update" not in verbs
+
+
+def test_the_stale_plan_updates_rather_than_uninstalling():
+    """A version bump is what `update` is for, and uninstalling to get it
+    would throw away a working install to solve a problem it does not have."""
+    verbs = [c[2] for c in pv._plan_for({"status": "STALE", "installed": {}})
+             if c[1] == "plugin"]
+    assert "update" in verbs and "uninstall" not in verbs
+
+
+def test_every_heal_command_pins_the_user_scope(tmp_path):
+    """MEASURED: `install --scope project` records `projectPath` as the
+    CURRENT WORKING DIRECTORY, so a repair run from anywhere but the repo
+    root writes a third, wrong registration. All scopes share one cache
+    directory keyed by version, so user scope releases the tree the project
+    record points at too. A repair must not depend on where it was invoked."""
+    for status in ("STALE", "DIVERGED", "DISABLED"):
+        for argv in pv._plan_for({"status": status,
+                                  "installed": {"scope": "project"}}):
+            if "--scope" in argv:
+                assert argv[argv.index("--scope") + 1] == "user", (status, argv)
+
+
+def test_the_diverged_fix_text_names_the_command_that_works():
+    """The fix line used to prescribe UPDATE, which is the command measured
+    NOT to reconcile a diverged tree. A fix that cannot fix is worse than
+    none: it spends the firing and reports success."""
+    assert "uninstall" in pv.REINSTALL
+    assert pv.REINSTALL.endswith(pv.ENABLE), (
+        "a reinstall that does not re-enable leaves the plugin switched off")

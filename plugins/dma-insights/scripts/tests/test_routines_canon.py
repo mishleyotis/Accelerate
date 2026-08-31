@@ -40,6 +40,17 @@ def test_an_intake_routine_exists_and_is_live():
     assert "LIVE" in head and "trig_" in head, head
 
 
+def _step_0a(body: str) -> str:
+    """STEP 0a's own text, sliced FORWARD to the step that follows it.
+
+    Not `index("STEP 0.5")`: the prompt refers to STEP 0.5 by name before it
+    reaches it, so a plain search finds a mention and returns an empty slice
+    — which made four assertions about STEP 0a pass against ''.
+    """
+    start = body.index("STEP 0a")
+    return body[start:body.index("STEP 0.5 —", start)]
+
+
 def test_the_intake_prompt_stops_at_the_question_when_it_is_a_question():
     """A headless firing cannot answer AskUserQuestion, and a run bound on a
     guess researches the wrong 851 cells to completion.
@@ -142,14 +153,17 @@ def test_the_intake_prompt_enforces_tooling_and_connectors_first():
     head = next(l for l in lines if l.startswith("STEP 0a"))
     assert "ENFORCED BEFORE ANY WORK" in head
 
-    for name in ("Exa", "Tavily", "Firecrawl", "Clay", "Vibe-Prospecting"):
-        assert name in body, f"{name} is not required by the preflight"
-
-    for cmd in ("doctor.py", "audit_autoapprove.py --strict",
+    # THE REQUIRED SET IS DERIVED, NEVER TYPED. This assertion used to name
+    # five connectors literally — including Firecrawl, which no agent
+    # declares, no role grants and the pipeline cannot call. The test passed
+    # and the gate it guarded would have stopped every firing. So what is
+    # pinned now is the derivation: the prompt asks the registry.
+    assert "connector_contract.py declare" in body
+    for cmd in ("doctor.py --heal", "audit_autoapprove.py --strict",
                 "drive_fetch.py check"):
         assert cmd in body, f"{cmd} is not run by the preflight"
 
-    assert "Read this SESSION's toolset, not the Routine record" in body
+    assert "measure THIS SESSION, never the Routine record" in body
     assert "Prepare anything before STEP 0a's four checks all pass" in body
 
     # ordering: 0a must come before the manual path and before the queue
@@ -251,3 +265,55 @@ def test_a_failed_routing_check_is_not_read_as_a_verdict():
     body = _fenced(_sections()["2g"])
     assert "Exit 2 is the script failing" in body
     assert "NOT a routing answer" in body
+# ── the gate that could never go green ────────────────────────────────────
+#
+# MEASURED FIRING, 2026-08-31. The intake Routine fired, read
+# `STALE: installed 0.9.12 (47 agents) vs published 1.13.0 (68 agents)`, and
+# stopped having produced nothing — because STEP 0a(a) said "not green, STOP"
+# while running the BARE doctor, which only measures. A stale container could
+# not be made current by the command the gate ran, so the gate's pass
+# condition was unreachable and every firing on that snapshot died in the
+# same place. Owner: "Please fix this; no guessing. This has usually been an
+# issue. Plugin version should always pick the most recent bump and self
+# heal."
+
+def test_the_intake_prompt_heals_the_plugin_rather_than_only_measuring_it():
+    p = _fenced(_sections()["2g"])
+    assert "doctor.py --heal" in p, (
+        "the bare doctor cannot make a stale container current, so a gate "
+        "that runs it and stops on red can never be satisfied")
+    step = _step_0a(p)
+    bare = [ln for ln in step.splitlines()
+            if "doctor.py" in ln and "doctor.py --heal" not in ln]
+    assert not bare, f"a bare doctor invocation survives the gate: {bare}"
+
+
+def test_the_intake_prompt_treats_a_mid_session_update_as_recovery():
+    """UPDATED_MID_SESSION is the NORMAL result of a heal that worked: the
+    disk is fixed and this session bound the old roster before it ran. Read
+    as a failure it turns every successful repair into a dead firing."""
+    step = _step_0a(_fenced(_sections()["2g"]))
+    assert "UPDATED_MID_SESSION" in step
+    assert "RECOVERY MODE, NOT A STOP" in step
+    assert "agent_run.py" in step, (
+        "recovery mode is only real if the prompt says how to dispatch "
+        "against the repaired install")
+
+
+def test_the_intake_prompt_requires_no_connector_the_agents_lack():
+    """THE FIRECRAWL CLAUSE. For one day the gate hard-STOPPED on a connector
+    no agent declares, no role grants and the pipeline cannot call."""
+    step = _step_0a(_fenced(_sections()["2g"]))
+    assert "connector_contract.py declare" in step, (
+        "the required set must be derived from the agents' own registry, "
+        "not typed into a prompt where nothing compares it to anything")
+    required = step[step.index("(d) ENRICHMENT CONNECTORS"):]
+    head = required[:required.index("This clause named")]
+    assert "Firecrawl" not in head and "firecrawl" not in head
+
+
+def test_only_the_intake_stops_that_a_container_cannot_fix_are_stops():
+    step = _step_0a(_fenced(_sections()["2g"]))
+    assert "provisioning defect to report, not a transient" in step, (
+        "a red that survives the heal reproduces on the next container, so "
+        "ending the firing hands the next one the same wall")

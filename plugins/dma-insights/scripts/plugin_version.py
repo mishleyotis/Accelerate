@@ -54,6 +54,19 @@ INSTALL_STATE = Path(
     os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude")
 ) / "plugins" / "installed_plugins.json"
 
+#: WHERE ENABLEMENT LIVES, which is not the install state file. Measured
+#: 2026-08-31: `claude plugin install` lands a plugin DISABLED ("This plugin
+#: is disabled by default — enable it with: claude plugin enable"), and the
+#: install record carries no flag saying so. A container can therefore hold a
+#: correct, current install that loads nothing, and every check that read only
+#: installed_plugins.json called that OK.
+SETTINGS_FILES = (
+    Path(os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude"))
+    / "settings.json",
+    Path(os.environ.get("CLAUDE_PROJECT_DIR", REPO_ROOT))
+    / ".claude" / "settings.json",
+)
+
 #: What the environment setup script recorded about this container, written by
 #: bootstrap_session.sh section 4b before the session existed. Absence is
 #: itself a reading — see `provisioning()`.
@@ -232,6 +245,32 @@ def _stamp(epoch: float | None) -> str:
         epoch, _dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def enabled_state(paths=None) -> bool | None:
+    """Whether the plugin is ENABLED, or None when no settings file says.
+
+    Enablement is a separate fact from installation and lives in a separate
+    file: `enabledPlugins["<plugin>@<marketplace>"]` in settings.json, user
+    scope and project scope. True at either scope is enough — that is the
+    scope the session loads from.
+
+    None rather than False when nothing is readable, because "no settings
+    file on this machine" is not "someone disabled the plugin", and a check
+    that manufactured the second from the first would red-flag every CI
+    runner and bare checkout.
+    """
+    seen = None
+    for f in (paths if paths is not None else SETTINGS_FILES):
+        block = (_load(Path(f)) or {}).get("enabledPlugins")
+        if not isinstance(block, dict):
+            continue
+        v = block.get(f"{PLUGIN_NAME}@{MARKETPLACE_NAME}")
+        if v is True:
+            return True
+        if v is False:
+            seen = False
+    return seen
+
+
 def installed(state_path: Path | None = None) -> dict:
     """What the running session loads — version, install path, and the
     components actually present in that path.
@@ -296,6 +335,7 @@ def installed(state_path: Path | None = None) -> dict:
         "skills": skills,
         "declared_agents": len(declared.get("agents") or []),
         "digest": digest(install_path),
+        "enabled": enabled_state(),
         "shadowed": shadowed,
         "state_file": str(path),
         "source": "installed_plugins.json",
@@ -435,6 +475,22 @@ def provisioning(prov_path: Path | None = None) -> dict:
 
 UPDATE = (f"claude plugin marketplace update {MARKETPLACE_NAME} && "
           f"claude plugin update {PLUGIN_NAME}@{MARKETPLACE_NAME}")
+
+#: The DIVERGED command, and it is deliberately not UPDATE. Measured on this
+#: container 2026-08-31: with the checkout and the install both at 1.13.0 and
+#: their trees differing, `plugin update` answered "already at the latest
+#: version (1.13.0)" and `plugin install` answered "already installed" — both
+#: exit 0, neither copying a byte. Uninstalling first took the same tree from
+#: DIVERGED to OK in one pass.
+REINSTALL = (f"claude plugin uninstall {PLUGIN_NAME}@{MARKETPLACE_NAME} "
+             f"--scope user && claude plugin install "
+             f"{PLUGIN_NAME}@{MARKETPLACE_NAME} --scope user && "
+             f"claude plugin enable {PLUGIN_NAME}@{MARKETPLACE_NAME}")
+
+#: Every install path ends here. A fresh install lands DISABLED by default
+#: (the CLI says so on the way out), so an install that is not followed by an
+#: enable leaves a container holding the right plugin and loading none of it.
+ENABLE = f"claude plugin enable {PLUGIN_NAME}@{MARKETPLACE_NAME}"
 #: WHAT AN UPDATE ACTUALLY DOES, and the correction that produced this text.
 #: Until 2026-08-23 this note read "the update applies at NEXT session start,
 #: so re-check there" — and a session that ran the update, re-checked in the
@@ -561,6 +617,23 @@ def compare(repo_root: Path | None = None,
             f"{pub['version']} is installed and {pub['version']} is published, "
             f"but the two trees differ — the plugin was edited after this "
             f"version was built. Differing: {', '.join(changed)}")
+    elif inst.get("enabled") is False:
+        # AFTER the tree checks and before the session check. A disabled
+        # plugin loads nothing at all, which sounds like it should come
+        # first — but the heal for a wrong tree (uninstall, install) lands
+        # the plugin disabled anyway and re-enables it on the way out, so
+        # naming the tree problem first is what gets both fixed in one pass.
+        # Reached only once the tree is right, which is when "is it switched
+        # on" is the whole remaining question.
+        status = "DISABLED"
+        reasons.append(
+            f"{inst['version']} is installed at {inst.get('scope')} scope and "
+            f"matches the checkout, but enabledPlugins says it is switched "
+            f"off — the session loads none of its {inst.get('agents', 0)} "
+            f"agents, {inst.get('skills', 0)} skills or its connector. A "
+            f"fresh `claude plugin install` lands disabled by default, so "
+            f"this is the state an install leaves behind when nothing "
+            f"enables it")
     elif inst.get("loaded_by_this_session") is False:
         # LAST, deliberately. Every branch above is a disagreement about what
         # is ON DISK, and those are worse: a session running a stale tree that
@@ -595,9 +668,14 @@ def compare(repo_root: Path | None = None,
     elif status == "UPDATED_MID_SESSION":
         fix = f"nothing to install — {SESSION_NOTE}"
     elif status == "DIVERGED":
-        fix = ("bump the version in BOTH manifests, then " + UPDATE +
-               f" — reinstalling without a bump leaves the cache on a "
-               f"version number that no longer describes its contents")
+        fix = (REINSTALL + "  (measured 2026-08-31: `plugin update` and "
+               "`plugin install` both short-circuit on an equal version "
+               "number — 'already at the latest version' — so only an "
+               "uninstall first replaces the tree. The version number then "
+               "describes contents it was not built from, which is why the "
+               "durable fix is still to bump it in BOTH manifests)")
+    elif status == "DISABLED":
+        fix = ENABLE
     elif status == "AHEAD":
         fix = ("pull the branch — the checkout, not the plugin, is what needs "
                "to move")
@@ -609,7 +687,7 @@ def compare(repo_root: Path | None = None,
     # check that narrates a working machine trains people to skim it.
     prov = provisioning(prov_path)
     if status in ("STALE", "MISSING", "INCOMPLETE", "UPDATED_MID_SESSION",
-                  "DIVERGED"):
+                  "DIVERGED", "DISABLED"):
         reasons.append(f"cause: {prov['reason']}")
         if prov["recurs"]:
             # The correction that matters. Both prompts and this script have
@@ -639,32 +717,105 @@ def summary(verdict: dict) -> str:
             f"{pub.get('version') or 'unreadable'} ({pub.get('agents', 0)} agents)")
 
 
+#: What each healable status actually needs run, as data. Split because the
+#: commands are NOT interchangeable — see REINSTALL: an update is a no-op on
+#: a tree that diverged without a version bump, and an install is a no-op on
+#: a plugin already recorded at that version. Every path ends in ENABLE,
+#: because an install lands the plugin switched off. The placeholders are
+#: filled by `_plan_for`, which records why the scope is what it is.
+_HEAL_PLAN: dict[str, tuple[tuple[str, ...], ...]] = {
+    "STALE": (
+        ("claude", "plugin", "marketplace", "update", MARKETPLACE_NAME),
+        ("claude", "plugin", "update", "{plugin}", "--scope", "{scope}"),
+        ("claude", "plugin", "install", "{plugin}", "--scope", "{scope}"),
+        ("claude", "plugin", "enable", "{plugin}", "--scope", "{scope}"),
+    ),
+    "DIVERGED": (
+        ("claude", "plugin", "marketplace", "update", MARKETPLACE_NAME),
+        ("claude", "plugin", "uninstall", "{plugin}", "--scope", "{scope}"),
+        ("claude", "plugin", "install", "{plugin}", "--scope", "{scope}"),
+        ("claude", "plugin", "enable", "{plugin}", "--scope", "{scope}"),
+    ),
+    "DISABLED": (
+        ("claude", "plugin", "enable", "{plugin}", "--scope", "{scope}"),
+    ),
+}
+_HEAL_PLAN["MISSING"] = _HEAL_PLAN["STALE"]
+_HEAL_PLAN["INCOMPLETE"] = _HEAL_PLAN["DIVERGED"]   # a short tree, same cure
+
+
+def _plan_for(verdict: dict) -> list:
+    """The healable status's commands, bound to the plugin identifier.
+
+    WHY EVERY COMMAND SAYS `--scope user`, measured on a live container
+    2026-08-31 rather than assumed:
+
+    * All scopes share ONE cache directory —
+      `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>` — keyed by
+      version, not by scope. Scope is a registration, not a copy. So a
+      user-scope uninstall releases the tree the project-scope record also
+      points at, and the following install re-copies it for both. That is
+      what took this container from DIVERGED to OK.
+    * `install --scope project` records `projectPath` as the CURRENT WORKING
+      DIRECTORY. Run from anywhere but the repo root it writes a third,
+      wrong registration — observed, then cleaned up by hand. A repair must
+      not depend on where it was invoked from.
+    * `enable` and `uninstall` exit 1 for "already enabled" and "not
+      installed at this scope". Those are the states the repair wants, so
+      the exit codes are logged and never treated as a failure; the re-check
+      afterwards is what judges the outcome.
+
+    bootstrap_session.sh installs at user scope for the same reasons.
+    """
+    plan = _HEAL_PLAN.get(verdict["status"])
+    if not plan:
+        return []
+    ident = f"{PLUGIN_NAME}@{MARKETPLACE_NAME}"
+    return [[a.format(plugin=ident, scope="user") for a in argv]
+            for argv in plan]
+
+
 def heal(verdict: dict) -> tuple:
-    """Run the update this verdict prescribes, then re-measure.
+    """Run the repair this verdict prescribes, then let the caller re-measure.
 
     THE SELF-HEALING LOOP (owner, 2026-08-24: "It should be a self healing
-    loop"). Before this, a stale verdict printed a command and left a
-    judgment point: the session had to choose to run it, choose to re-check,
-    and choose what the re-check's answer meant — and every one of those
-    choices was made wrongly at least once in a single morning. --heal
-    collapses them: the check runs the update itself, re-reads the disk, and
+    loop"; again 2026-08-31: "Plugin version should always pick the most
+    recent bump and self heal"). Before this, a stale verdict printed a
+    command and left a judgment point: the session had to choose to run it,
+    choose to re-check, and choose what the re-check's answer meant — and
+    every one of those choices was made wrongly at least once in a single
+    morning. --heal collapses them: the check runs the repair itself, and
     hands back ONE final verdict whose fix text already says what to do.
+
+    WHAT EACH STATUS NEEDS IS DIFFERENT, and running the wrong commands
+    looks exactly like running the right ones — every command here exits 0
+    whether or not it copied anything. Measured on a live container
+    2026-08-31, with the checkout and the install both at 1.13.0 and their
+    trees differing:
+
+        plugin update  -> exit 0, "already at the latest version (1.13.0)"
+        plugin install -> exit 0, "already installed (scope: user)"
+        AFTER: still DIVERGED, not one byte replaced
+
+        plugin uninstall -> exit 0
+        plugin install   -> exit 0, "This plugin is disabled by default"
+        AFTER: OK — and switched off
+
+    So DIVERGED reinstalls rather than updates, and EVERY path ends with an
+    enable. That last line is why the plan is a table: an earlier heal ran
+    `install` on a MISSING container and left it holding a complete, current
+    plugin that loaded nothing, which every version check called OK.
 
     The commands mutate only this container's local install cache (~/.claude
     on an ephemeral VM); the marketplace is the repo checkout on this disk.
-    Returns (final_verdict, heal_log_lines). No-op unless the verdict is one
-    an update can change.
+    Returns (final_verdict, heal_log_lines) — (None, log) when something ran
+    and the caller must re-measure, (verdict, log) when nothing could.
     """
-    import subprocess
-    if verdict["status"] not in ("STALE", "MISSING", "INCOMPLETE"):
+    plan = _plan_for(verdict)
+    if not plan:
         return verdict, []
     log = []
-    for argv_ in (["claude", "plugin", "marketplace", "update",
-                   MARKETPLACE_NAME],
-                  ["claude", "plugin", "update",
-                   f"{PLUGIN_NAME}@{MARKETPLACE_NAME}"],
-                  ["claude", "plugin", "install",
-                   f"{PLUGIN_NAME}@{MARKETPLACE_NAME}", "--scope", "user"]):
+    for argv_ in plan:
         try:
             r = subprocess.run(argv_, capture_output=True, text=True,
                                timeout=180)
@@ -690,9 +841,10 @@ def main(argv=None) -> int:
                     help="path to the setup script's provisioning record "
                          "(default: beside the service-account key)")
     ap.add_argument("--heal", action="store_true",
-                    help="on STALE/MISSING/INCOMPLETE, run the plugin update "
-                         "itself (container-local install cache only) and "
-                         "re-check, printing one final verdict")
+                    help="on STALE/MISSING/INCOMPLETE/DIVERGED/DISABLED, run "
+                         "the repair that status needs (container-local "
+                         "install cache only) and re-check, printing one "
+                         "final verdict")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
     v = compare(a.repo_root, a.state, a.provisioning)

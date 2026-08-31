@@ -289,6 +289,51 @@ elif command -v claude >/dev/null 2>&1; then
   else
     log "plugin at ${HAVE:-unknown} (origin/$BRANCH ships ${WANT:-unknown})"
   fi
+
+  # ---- 4a · the check the version NUMBER cannot make ---------------------
+  # WHY THIS RUNS EVEN AFTER THE VERSION MATCHES. Everything above compares
+  # version STRINGS, and two of the three ways this container goes wrong are
+  # invisible to a string:
+  #
+  #   * DIVERGED — same number, different tree. Measured 2026-08-31: with the
+  #     checkout and the install both at 1.13.0 and six files differing,
+  #     `plugin update` said "already at the latest version" and `plugin
+  #     install` said "already installed", both exit 0, neither copying a
+  #     byte. The retry above is made of exactly those two commands, so it
+  #     could not have fixed it, and `HAVE = WANT` reported it green.
+  #   * DISABLED — measured the same morning: a fresh `plugin install` lands
+  #     the plugin switched OFF ("This plugin is disabled by default"), and
+  #     the install record carries no flag saying so. The enable above runs
+  #     before the retry install, which switches it back off.
+  #
+  # plugin_version.py --heal reads the tree DIGEST and the enabledPlugins
+  # entry, and applies the repair each status actually needs (uninstall then
+  # install for a diverged tree; enable for a disabled one). It is the same
+  # command the intake Routine's preflight runs, so what the firing checks is
+  # what provisioning already tried.
+  HEAL_OUT="$(timeout 420 python3 "$REPO_DIR/plugins/dma-insights/scripts/plugin_version.py" --heal 2>&1 | head -1)"     || HEAL_OUT="${HEAL_OUT:-plugin_version.py --heal did not complete}"
+  log "tree check: ${HEAL_OUT:-no verdict}"
+  case "$HEAL_OUT" in
+    OK:*|UPDATED_MID_SESSION:*) : ;;
+    *) log "the install still disagrees with the checkout after a heal — the"
+       log "session will report this at its own preflight and run in recovery"
+       log "mode; it is a provisioning defect, not a transient" ;;
+  esac
+
+  # ---- 4a2 · the connector requirement, derived rather than typed --------
+  # A firing that stops for a connector no agent declares stops for nothing.
+  # `declare` reads EXTERNAL in scripts/provision_agent_tools.py — the one
+  # table the agents are provisioned from — and exits 2 if the required set
+  # names a family that table does not define. That is a repo defect and is
+  # worth failing setup loudly for; which connectors a SESSION holds cannot
+  # be read from here at all and is checked inside the firing.
+  if ! CONTRACT="$(python3 "$REPO_DIR/plugins/dma-insights/scripts/connector_contract.py" declare 2>&1)"; then
+    log "CONNECTOR CONTRACT BROKEN — a required family is not in the agents'"
+    log "own registry, so every firing would stop on a connector the pipeline"
+    log "cannot call: $(printf '%s' "$CONTRACT" | head -2 | tr '\n' ' ')"
+  else
+    log "connector contract: $(printf '%s' "$CONTRACT" | sed -n '2,4p' | tr -s ' ' | tr '\n' ';')"
+  fi
 else
   log "claude CLI not found — cannot install the plugin"
 fi

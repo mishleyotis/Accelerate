@@ -52,6 +52,14 @@ from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parent
+
+# The two sibling modules that own facts this file only reports. Imported at
+# module level rather than inside a check so that a broken sibling fails the
+# doctor loudly at import, where it is one obvious traceback, instead of
+# silently skipping the row that was supposed to catch the problem.
+sys.path.insert(0, str(HERE))
+import connector_contract                                       # noqa: E402
+import plugin_version                                           # noqa: E402
 DEFAULT_AUD = "https://dmai-mcp-dukrne5v4a-uc.a.run.app"
 
 # The plugin ships exactly these counts. A floor (agents >=5, skills >=6)
@@ -407,18 +415,44 @@ def inventory_checks(plugin_root: Path = PLUGIN) -> list:
     return rows
 
 
-def installed_plugin_check() -> dict:
+def installed_plugin_check(heal: bool = False) -> dict:
     """Is the plugin the session LOADS the one this checkout publishes?
 
     The row `inventory_checks` cannot be. Those counts come from the repo;
     this one comes from the install cache, and on 2026-08-23 they read 47
     and 5 on the same container. Everything it compares is read at call
     time from a manifest or the install state — no version literal lives in
-    this file, which is the whole point (see plugin_version.py)."""
+    this file, which is the whole point (see plugin_version.py).
+
+    WHY THIS ROW CAN HEAL ITSELF (owner, 2026-08-31: "Plugin version should
+    always pick the most recent bump and self heal"). It could not, and the
+    consequence was measured the same day: a firing whose STEP 0a read
+    "doctor.py — not green, STOP" met `STALE: installed 0.9.12 (47 agents)
+    vs published 1.13.0 (68 agents)` and stopped, having done nothing. STALE
+    is the one verdict an update fixes without a judgment call, and
+    `plugin_version.heal()` has run that update since 2026-08-24 — but this
+    row only ever called `compare()`, so the doctor could NEVER go green on
+    a stale container and every caller that required a green doctor was
+    requiring something unreachable. A gate whose pass condition cannot be
+    reached is not a gate, it is a stop.
+
+    So `--heal` threads through to the same self-healing loop
+    `plugin_version.py --heal` runs: update, re-measure, one final verdict.
+    It is opt-in because a plain `doctor.py` must stay a pure measurement —
+    a check that mutates the machine it is measuring cannot be trusted to
+    report what it found.
+    """
     try:
-        sys.path.insert(0, str(HERE))
-        import plugin_version                                   # noqa: PLC0415
         v = plugin_version.compare()
+        if heal and not v["ok"]:
+            healed, heal_log = plugin_version.heal(v)
+            if healed is None:                  # the update ran — re-measure
+                before = plugin_version.summary(v)
+                v = plugin_version.compare()
+                v.setdefault("reasons", []).insert(0, f"before --heal: {before}")
+                v["reasons"][1:1] = heal_log
+            elif heal_log:                      # heal attempted, could not run
+                v.setdefault("reasons", []).extend(heal_log)
     except Exception as exc:                                    # noqa: BLE001
         return _check("installed plugin", False,
                       f"could not be determined: {exc}",
@@ -427,17 +461,65 @@ def installed_plugin_check() -> dict:
     detail = plugin_version.summary(v)
     if v["reasons"]:
         detail += " — " + "; ".join(v["reasons"])
-    return _check("installed plugin", v["ok"], detail, v["fix"])
+    fix = v["fix"]
+    if not v["ok"] and not heal:
+        fix = (f"{fix}  |  or re-run this doctor as `doctor.py --heal`, which "
+               "runs that update and re-checks in one command")
+    return _check("installed plugin", v["ok"], detail, fix)
 
 
 def enabled_state_check(manifest: dict) -> dict:
-    """Informational only: defaultEnabled=false is the shipped state, not a
-    defect, so this row reports and never fails."""
+    """What the manifest ships as, and what this container actually has.
+
+    Informational only, and deliberately: `defaultEnabled=false` is the
+    shipped state rather than a defect, and the LIVE reading — measured from
+    `enabledPlugins` in settings.json, which is where a switched-off plugin
+    is actually recorded — already fails the installed-plugin row above as
+    DISABLED, where the heal that fixes it lives. Reporting it twice would
+    give one fact two verdicts.
+    """
     enabled = manifest.get("defaultEnabled")
+    live = plugin_version.enabled_state()
+    live_txt = {True: "enabled", False: "DISABLED — loads nothing",
+                None: "no settings file says either way"}[live]
     return _check(
         "plugin enabled state", True,
         f"defaultEnabled={json.dumps(enabled)} — the plugin ships disabled and "
-        "must be enabled per install (informational row, never fails)")
+        f"must be enabled per install; this container: {live_txt} "
+        "(informational row, never fails)")
+
+
+def connector_contract_check() -> dict:
+    """Which connector families a firing REQUIRES, derived not typed.
+
+    THE HALF A SCRIPT CAN CHECK. A session's bound MCP tools live in the
+    model's context and no subprocess can enumerate them (MEM-0112), so this
+    row proves the other half: that every family the contract stops a firing
+    for is one the agents are actually provisioned with. On 2026-08-31 a
+    Routine prompt required "Firecrawl" — named in no agent's tools, in no
+    role in the provisioner, and nowhere in docs/CONNECTORS.md — which would
+    have stopped every firing on a connector the pipeline cannot call. A
+    requirement written as prose is never compared to anything.
+    """
+    name = "connector contract"
+    try:
+        c = connector_contract.contract()
+    except connector_contract.ContractBroken as exc:
+        return _check(name, False, str(exc),
+                      "reconcile the required set in "
+                      "plugins/dma-insights/scripts/connector_contract.py "
+                      "with EXTERNAL in scripts/provision_agent_tools.py — "
+                      "one of them is wrong, and the registry is the one the "
+                      "agents are built from")
+    anyof = "; ".join(" or ".join(g) for g in c["required_any"])
+    return _check(
+        name, True,
+        f"required {', '.join(c['required'])}"
+        + (f"; at least one of {anyof}" if anyof else "")
+        + f"; optional {', '.join(c['optional'])} — derived from EXTERNAL, so "
+        "no firing stops on a family no agent declares. A session's OWN bound "
+        "tools cannot be read from here: pipe them to "
+        "`connector_contract.py check --tools -`")
 
 
 def deps_check(plugin_root: Path = PLUGIN, offline: bool = False) -> dict:
@@ -747,7 +829,7 @@ def tool_roster_check(base_url, gcloud, id_token, manifest: dict) -> dict:
                   f"(path token via {source}, value not shown)")
 
 
-def run_checks(base_url: str | None) -> list:
+def run_checks(base_url: str | None, heal: bool = False) -> list:
     out = []
     manifest = read_manifest()
 
@@ -758,11 +840,12 @@ def run_checks(base_url: str | None) -> list:
         str(manifest_path) if manifest_path.exists() else "not found",
         "install the plugin from the marketplace: /plugin marketplace add "
         "mishleyotis/Accelerate, then /plugin install dma-insights@zennify-dma"))
-    out.append(installed_plugin_check())
+    out.append(installed_plugin_check(heal))
     out.append(enabled_state_check(manifest))
     mcp_json = PLUGIN / ".mcp.json"
     out.append(_check("connector definition", mcp_json.exists(),
                       str(mcp_json) if mcp_json.exists() else "not found"))
+    out.append(connector_contract_check())
     out.append(hooks_wired_check())
     out.extend(inventory_checks())
     out.append(deps_check(offline=base_url is None))
@@ -880,6 +963,10 @@ def main() -> int:
                     help="offline run: skip the network rows (audience "
                          "comparison, enforcement probe, tool roster)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--heal", action="store_true",
+                    help="on a STALE/MISSING/INCOMPLETE install, run the "
+                         "plugin update itself (container-local cache only) "
+                         "and re-check, so one command can reach green")
     args = ap.parse_args()
 
     # The audience and enforcement rows are the two SECURITY checks, and a
@@ -889,7 +976,7 @@ def main() -> int:
     base_url = None if args.no_probe else (
         args.base_url or manifest_base_url() or DEFAULT_AUD)
 
-    checks = run_checks(base_url)
+    checks = run_checks(base_url, args.heal)
     if args.json:
         print(json.dumps({"checks": checks}, indent=1))
     else:
