@@ -82,6 +82,27 @@ workbook is the substrate: anything not written there did not happen.
    entity, position, mode, `binding_stated`, catalogue drift and whether
    the KG was built; act on what it reports.
 
+**DISPATCH SO SOMEBODY CAN WATCH** (owner, 2026-08-31: "I have no
+visibility onto how the agents are doing the research or how they think
+through challenges. I cannot even see them on the background task list").
+Both halves of that have one cause: a dispatched child used to be silent
+until it exited, and sixteen children spawned inside one Bash call look
+like one Bash call to any task list. So dispatch with `--stream`:
+
+    python3 plugins/dma-insights/scripts/agent_run.py --batch <file> \
+        --stream --log-dir <ROOT>/agent_logs
+
+Each lane then writes `<agent>.jsonl` — every event verbatim as it happens —
+and a live `<agent>.status.json`. Anyone, in any shell or any session, can
+run `agent_run.py watch --log-dir <ROOT>/agent_logs` and see which agents
+are alive, what each is doing this second, and the IDLE column that is how a
+hung lane is spotted before its timeout. Report that path in your first
+status line so the owner does not have to ask where to look. The workbook
+remains the substrate — anything not written there did not happen — but a
+substrate that only updates when a stage completes is not progress
+reporting, and waiting forty minutes to discover a lane died on its first
+tool call is the cost this removes.
+
 1b. **PRELIM — buy the deep background ONCE, before any capability work.**
    `engine.prelim state --run <RUN_ID> --root <ROOT>` lists seven sections
    and the fix line for each. `orient` serves NO category card until they
