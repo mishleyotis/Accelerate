@@ -509,10 +509,29 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
                 if str(r.get("SubCap_ID") or "").startswith(category + ".")]
     synthesised = sum(1 for r in rows if str(r.get("Dominant_Claim") or "").strip())
     n = len(searches)
+    # THE DECISION MUST MEASURE WHAT THE WALL MEASURES (MEM-0436).
+    #
+    # `append_search` refuses on `_ops_since_checkpoint` — a window that a
+    # checkpoint resets, because the ceiling is per CONVERSATION and a long
+    # run must be able to checkpoint and legitimately continue. This
+    # function computed the same decision from the LIFETIME count, so once a
+    # run passed 40 searches ever, `checkpoint_required` was true forever and
+    # no checkpoint could clear it. orient prints this first, so every
+    # conductor obediently stopped and re-stopped: three runs walled on
+    # 2026-08-31 at 141, ~180 and 567 ops, the last of them still being told
+    # to checkpoint after a revival had already reset its window.
+    #
+    # Two measurements of one rule is the defect; the fix is to keep one.
+    # The LIFETIME count stays reported, because spend is worth seeing — it
+    # just no longer decides. The gate itself is unchanged in strength: over
+    # the cap since the last checkpoint still stops, which is the half a
+    # loosened ceiling would have silently lost (MEM-0338 / R27).
+    since = _ops_since_checkpoint(wb)
     return {
         "search_ops": n,
+        "search_ops_since_checkpoint": since,
         "search_op_ceiling": SEARCH_OP_CEILING,
-        "checkpoint_required": n >= SEARCH_OP_CEILING,
+        "checkpoint_required": since >= SEARCH_OP_CEILING,
         "evidence_items": len(ev),
         "subcaps_selected": len(rows),
         "subcaps_synthesised": synthesised,
