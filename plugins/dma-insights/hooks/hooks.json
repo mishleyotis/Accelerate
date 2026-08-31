@@ -43,7 +43,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__submit_page_payload",
+        "matcher": "mcp__.*__submit_page_payload",
         "hooks": [
           {
             "type": "command",
@@ -53,7 +53,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__promote_run",
+        "matcher": "mcp__.*__promote_run",
         "hooks": [
           {
             "type": "command",
@@ -65,7 +65,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__plugin_dma-insights_connector__submit_page_payload",
+        "matcher": "mcp__.*__submit_page_payload",
         "hooks": [
           {
             "type": "command",
@@ -75,7 +75,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__promote_run",
+        "matcher": "mcp__.*__promote_run",
         "hooks": [
           {
             "type": "command",

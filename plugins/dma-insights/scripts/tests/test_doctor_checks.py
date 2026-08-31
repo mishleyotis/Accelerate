@@ -41,10 +41,26 @@ class HooksWired(unittest.TestCase):
 
     def test_real_tree_matchers_stay_fully_scoped(self):
         matchers = doctor.hook_matchers()
-        self.assertIn(
-            "mcp__plugin_dma-insights_connector__submit_page_payload", matchers)
-        self.assertIn(
-            "mcp__plugin_dma-insights_connector__promote_run", matchers)
+        # MATCHES, not CONTAINS. On 2026-08-31 these matchers became
+        # regexes so the prechecks also fire when the SAME connector is
+        # attached under its claude.ai server name (`mcp__DMA-Insights__…`),
+        # which is what a Routine sees. `mcp__.*__submit_page_payload` no
+        # longer contains the literal tool name; it still matches it, and
+        # that is the property worth pinning — the fully-scoped-ness this
+        # test guards is that the matcher ends in a specific TOOL, never a
+        # bare `mcp__.*` that would claim every connector call.
+        import re as _re
+        for tool in (
+                "mcp__plugin_dma-insights_connector__submit_page_payload",
+                "mcp__DMA-Insights__submit_page_payload"):
+            self.assertTrue(
+                any(_re.fullmatch(m, tool) for m in matchers
+                    if m.endswith("submit_page_payload")),
+                f"no precheck matcher fires for {tool}")
+        for m in matchers:
+            if m.startswith("mcp__") and m != "mcp__.*":
+                self.assertRegex(m, r"__[a-z_]+$",
+                                 f"{m} is not scoped to a named tool")
 
     def test_unparseable_hooks_json_fails(self):
         with tempfile.TemporaryDirectory() as td:

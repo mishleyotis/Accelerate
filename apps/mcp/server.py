@@ -74,21 +74,43 @@ def _encoder():
     return _ENCODER
 
 
+# ── ONE Cloud SQL Connector, imported ────────────────────────────────
+#
+# `Connector()` per connection is one Cloud SQL ADMIN API call per
+# connection (it fetches connectSettings on construction), and under
+# NullPool every checkout is a new connection. That is what produced the
+# 429 on sqladmin.googleapis.com/.../connectSettings during a live intake
+# firing on 2026-08-31. packages/shared/cloudsql.py holds the cached one.
+#
+# Roots built LAZILY and image-first: in the image this module is
+# /app/<pkg>/<name>.py, so `parents[3]` raises IndexError and a tuple
+# literal would raise before the image path it would have found is tried.
+import sys as _sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in _sys.path:
+        _sys.path.insert(0, str(_cand))
+
+from cloudsql import connect as _cloudsql_connect  # noqa: E402
+
 @contextmanager
 def _conn():
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        url = os.environ["LOCAL_DATABASE_URL"]
-        host = url.split("@")[1].split(":")[0]
-        c = pg8000.dbapi.connect(user="dmai-mcp@digital-maturity-assessor.iam",
-                                 password="local", host=host, port=5432,
-                                 database="dma_insights")
-    else:
-        from google.cloud.sql.connector import Connector
-        c = Connector().connect(
-            os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-            user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-            enable_iam_auth=True, ip_type="PRIVATE")
+    # The CONNECTION closes per call; the CONNECTOR does not. Building a
+    # Connector here — which this did until 2026-08-31 — spends one Cloud
+    # SQL Admin API request per tool call and leaks its refresh task, and
+    # a firing that walks the queue makes dozens in a minute.
+    c = _cloudsql_connect(
+        local_user="dmai-mcp@digital-maturity-assessor.iam")
     try:
         yield c
     finally:

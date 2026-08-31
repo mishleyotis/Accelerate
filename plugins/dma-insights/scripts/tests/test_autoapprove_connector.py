@@ -470,7 +470,15 @@ def test_the_guarded_pair_is_answered_by_its_own_hooks_not_left_prompting():
     pre = json.dumps(cfg["hooks"]["PreToolUse"])
     for tool, script in ((PREFIX + "submit_page_payload", "precheck_submit.py"),
                          (PREFIX + "promote_run", "precheck_promote.py")):
-        assert tool in pre, f"{tool} has no PreToolUse entry of its own"
+        # MATCHES rather than CONTAINS. The matchers became regexes on
+        # 2026-08-31 so the prechecks fire for the connector under its
+        # claude.ai server name too — `mcp__.*__submit_page_payload` no
+        # longer contains the literal tool name, and asserting containment
+        # would have failed the widening that closed the gap.
+        import re as _re
+        pats = [e.get("matcher") for e in json.loads(pre)
+                if e.get("matcher") and _re.fullmatch(str(e["matcher"]), tool)]
+        assert pats, f"{tool} has no PreToolUse entry of its own"
         assert script in pre, f"{script} is not wired for {tool}"
         assert (HOOKS / script).exists(), f"{script} is missing from the plugin"
 
@@ -694,3 +702,78 @@ def test_every_conditional_tool_states_why_and_what_it_is_scoped_to():
         assert rule["why"].strip(), tool
         assert rule["scope"].strip(), tool
         assert callable(rule["test"]), tool
+
+
+# ── the same connector under a different server name ──────────────────────
+#
+# OWNER, 2026-08-31: "I keep on getting requests to approve the get client
+# state tool." The plugin installs the DMA connector as
+# `mcp__plugin_dma-insights_connector__*`. A Routine attaches the SAME
+# server as a claude.ai connector, and its trigger record names it
+# `DMA-Insights` — so a trigger-fired session sees
+# `mcp__DMA-Insights__get_client_state`, which matched nothing here and
+# prompted. A scheduled container has nobody to answer.
+#
+# `audit_autoapprove.py --strict` reported PASS through all of it, because
+# it audits the names this hook already knows: a check that reads the config
+# it is checking can only ever confirm it.
+
+_ALT = "mcp__DMA-Insights__"
+
+
+def test_the_connector_is_approved_under_a_claude_ai_server_name():
+    for tool in ("get_client_state", "list_pending_runs", "get_evidence",
+                 "claim_run", "get_memory_digest"):
+        assert _decide(_ALT + tool) == "allow", tool
+
+
+def test_the_guarded_pair_still_prompts_under_any_server_name():
+    """Auto-approving these would wave a submit or a promote through with
+    no precheck at all if the precheck matcher did not fire for that server
+    segment. A prompt in a scheduled session STOPS the firing, which is the
+    safe direction for the two calls that write serving content."""
+    for tool in ("submit_page_payload", "promote_run"):
+        assert _decide(_ALT + tool) != "allow", tool
+        assert _decide(PREFIX + tool) != "allow", tool
+
+
+def test_the_precheck_hooks_fire_for_both_server_names():
+    """The other half of the same fix: widening the auto-approve without
+    widening the prechecks would move the guarded pair out from under its
+    own gate."""
+    import json as _json
+    import re as _re
+    hooks = _json.loads(
+        (HOOKS.parent.parent / "hooks" / "hooks.json").read_text())
+    matchers = [e.get("matcher") for lst in hooks["hooks"].values()
+                for e in lst if e.get("matcher")]
+    for suffix in ("submit_page_payload", "promote_run"):
+        pats = [m for m in matchers if m.endswith(suffix)]
+        assert pats, suffix
+        for m in pats:
+            for name in (PREFIX + suffix, _ALT + suffix):
+                assert _re.fullmatch(m, name), (m, name)
+
+
+def test_the_allowed_set_is_exactly_what_the_connector_serves():
+    """DERIVED, not typed. The 33 tool names are read out of
+    apps/mcp/server.py, so a tool added to the connector and forgotten here
+    fails this test rather than prompting in production."""
+    import ast
+    import pathlib as _pl
+    h = aac
+    server = (_pl.Path(__file__).resolve().parents[4]
+              / "apps" / "mcp" / "server.py")
+    if not server.is_file():                       # packaged install
+        import pytest as _pytest
+        _pytest.skip("apps/mcp/server.py is not in this tree")
+    tree = ast.parse(server.read_text())
+    served = {n.name for n in tree.body if isinstance(n, ast.FunctionDef)
+              and any(getattr(d, "attr", None) == "tool"
+                      or (isinstance(d, ast.Call)
+                          and getattr(d.func, "attr", "") == "tool")
+                      for d in n.decorator_list)}
+    assert served, "no @mcp.tool functions found — the parser is wrong"
+    assert h.DMA_TOOLS == served, (
+        f"only in the hook: {sorted(h.DMA_TOOLS - served)}; "
+        f"only in the connector: {sorted(served - h.DMA_TOOLS)}")

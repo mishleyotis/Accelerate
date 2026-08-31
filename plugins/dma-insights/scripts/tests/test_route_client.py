@@ -49,9 +49,17 @@ def test_a_research_package_is_neither_an_intake_nor_a_synthesis():
                            display_id="goeasy-ltd"), "goeasy-ltd")
     assert out["verdict"] == RC.NEEDS_SCORING
     assert "dma-assessment" in out["next"]
-    assert "already done" in out["why"], (
-        "the verdict must say the research EXISTS, or the reader routes it "
-        "back to intake — which is the mistake being fixed")
+    # The property, not the phrase. This asserted the words "already done"
+    # until 2026-08-31, when that turned out to be an overclaim: the verdict
+    # is decided from runs>0 and scored==0, and `get_client_state` reports
+    # nothing about coverage — so a finished package awaiting scoring and one
+    # abandoned at 11 of 16 categories reach here identically. What must
+    # survive is that a package EXISTS, or the reader routes it back to
+    # intake, which is the mistake being fixed.
+    assert "a package exists" in out["why"].lower(), out["why"]
+    assert "run_manifest.json" in out["next"], (
+        "the verdict cannot see whether the research is finished, so it must "
+        "name the check that can")
 
 
 def test_the_bare_name_does_not_read_as_a_new_client():
