@@ -111,32 +111,44 @@ change nothing without being asked.
 
 ## 2 · Claude-session routines (CCR triggers, fresh session per firing)
 
-> ## ALL FIVE WERE DELETED ON 2026-08-29, ON THE OWNER'S INSTRUCTION.
+> ## RECREATED 2026-08-30, ON THE OWNER'S INSTRUCTION. FIVE OF SIX ARE LIVE.
 >
-> `list_triggers(enabled=true)` returns `{"data":[]}`. **Nothing in this
-> section is scheduled.** Every prompt is kept verbatim in
-> [`routines-archive/`](routines-archive/) so the schedule can be rebuilt
-> exactly, and everything below stays as written because it is the measured
-> record of why each prompt said what it said — thirteen separate failures
-> are encoded in this prose, and deleting the triggers does not make those
-> lessons wrong. Read it as history, not as a description of what runs.
+> The five deleted on 2026-08-29 were recreated this day from the fenced
+> prompts below, which is why those prompts are kept verbatim here: the
+> schedule was rebuilt out of this file and nothing else. Every one is
+> `create_new_session_on_fire`, so each firing starts from nothing and
+> re-proves its tooling.
 >
-> | Routine | id | cron | archived prompt |
+> | Routine | id | cron | state |
 > |---|---|---|---|
-> | dma-synthesis-sequence-a | `trig_01WTf9nQdFPQb6jiSVVyf37u` | `8 */12 * * *` | [dma-synthesis-sequence-a.md](routines-archive/dma-synthesis-sequence-a.md) |
-> | dma-synthesis-sequence-b | `trig_01U8v332dJzmcz47DWRK9qyR` | `18 */12 * * *` | [dma-synthesis-sequence-b.md](routines-archive/dma-synthesis-sequence-b.md) |
-> | dma-rectification-weekly | `trig_01CoypdjU6bcwEewvRYxK3S3` | `0 13 * * 1` | [dma-rectification-weekly.md](routines-archive/dma-rectification-weekly.md) |
-> | dma-refresh-drift-daily | `trig_01CvwqVMuLzWyQUsgwor98Sx` | `0 15 * * *` | [dma-refresh-drift-daily.md](routines-archive/dma-refresh-drift-daily.md) |
-> | DMA synthesis watchdog | `trig_0157aWa8HMryS9nJcxVf9Scm` | `23 * * * *` | [dma-synthesis-watchdog-resume-stalled-runs.md](routines-archive/dma-synthesis-watchdog-resume-stalled-runs.md) |
+> | dma-synthesis-sequence-a | — | `8 */12 * * *` | **NOT CREATED** — see below |
+> | dma-synthesis-sequence-b | `trig_01UTsibg1JKYA8zgWhDES4T2` | `18 */12 * * *` | live |
+> | dma-rectification-weekly | `trig_017vSPPEF5CE9BH6qvDNCDe6` | `0 13 * * 1` | live |
+> | dma-refresh-drift-daily | `trig_016oVGvr1DeJ8QAg6188xyVG` | `0 15 * * *` | live |
+> | dma-watchdog | `trig_01Q4TZyoqt8zMr8jNNDW9LCj` | `23 * * * *` | live |
+> | dma-assessment-intake | `trig_019CzPVuRhxXh8cYC1F697ee` | `30 */4 * * *` | live |
 >
-> **What stops when these stop.** No client is produced (2a, 2e); no stalled
-> claim is promoted or resumed and a lease that lapses is simply left (2d);
-> the findings store still accepts writes but nothing triages them into
-> refinements (2b); the refresh queue still fills from the app's own hourly
-> sweep but nobody judges it (2c). Section 1's four Cloud Scheduler jobs are
-> **unaffected** — they are the app doing its own bookkeeping and never
-> involved a model. Runs therefore keep coming into existence; nothing turns
-> them into surfaces.
+> **Lane A is the one gap, and it is not a decision.** Its creation was
+> refused by the session harness's own permission classifier, not by this
+> project — the call returned "Blocked by classifier" with no further
+> reason, and it is the largest prompt here by four times. It must be
+> created by hand from § 2a's fenced prompt, with cron `8 */12 * * *` and a
+> fresh session per firing.
+>
+> **What runs meanwhile, and what does not.** Lane B walks the queue itself
+> (`run_gate.py pick`), so synthesis still happens — at ONE client per cycle
+> instead of two. Two sentences in § 2e are false until lane A exists: that a
+> sibling "fired ten minutes ago and has already claimed its client", and
+> that lane A's prompt is readable as its specification from a live Routine.
+> Neither changes what lane B does; both are worth knowing before reading a
+> lane B report that mentions them.
+>
+> **No Routine created through the API carries any claude.ai connector** —
+> this organisation has the API's `connectors` parameter disabled, and the
+> create call says so on every one of the five. Until a human attaches them
+> on each Routine's own edit screen, fired sessions carry the plugin's own
+> connector and web search only. That is a STOP for lane B by its own
+> connector preflight, and it is what § 3's standing items already name.
 
 *The five that were live, for reading the sections below:* **2a** synthesis
 lane A, **2e** synthesis lane B (the same work ten minutes later, which is
@@ -275,7 +287,7 @@ triggers existed and were enabled. (b) and (c) were created 2026-08-19T21:24Z fr
 prompts; a firing that finds this paragraph disagreeing with `list_triggers`
 has found the drift section 3's manual reconciliation exists to catch.
 
-### 2a · dma-synthesis-sequence-a — `8 */12 * * *` · LIVE (`trig_011Qkj9VgeRgktdhgaZxkeut`, enabled; last run SUCCEEDED, reconciled 2026-08-30)
+### 2a · dma-synthesis-sequence-a — `8 */12 * * *` · NOT CREATED (refused by the session harness's permission classifier 2026-08-30; create by hand from the fenced prompt below)
 
 **Two lanes, not one session spawning another (owner, 2026-08-23; mechanism
 revised the same day).** The owner asked for two clients a cycle in two
@@ -386,7 +398,7 @@ STEP 5 — REPORT. End with: client + run id; the gate's verdict lines; the clai
 Hard rules: this Routine produces shore-united-bank-n-a and nothing else, one firing at a time; never BOK; never edit apps/ code; never write another client's memory file; never synthesize a run the gate did not emit; never produce without holding the claim; if package vetting fails or entity identity is PENDING_REVIEW unresolved, record the finding and stop rather than force a promote.
 ```
 
-### 2b · dma-rectification-weekly — `0 13 * * 1` · LIVE (`trig_01S7BM4VGDRQKzjfFN49Cejw`, enabled; **last run FAILED** — open, reconciled 2026-08-30)
+### 2b · dma-rectification-weekly — `0 13 * * 1` · LIVE (`trig_017vSPPEF5CE9BH6qvDNCDe6`, enabled; **last run FAILED** — open, reconciled 2026-08-30)
 
 | | |
 |---|---|
@@ -558,7 +570,7 @@ examined-and-empty, and stop. Do not lower the threshold, do not scan for defect
 nobody sighted, and do not tidy anything. An empty week is the system working.
 ```
 
-### 2c · dma-refresh-drift-daily — `0 15 * * *` · LIVE (`trig_01VKBE7qFTcLKmu8zWtDByxN`, enabled; reconciled 2026-08-30)
+### 2c · dma-refresh-drift-daily — `0 15 * * *` · LIVE (`trig_016oVGvr1DeJ8QAg6188xyVG`, enabled; reconciled 2026-08-30)
 
 | | |
 |---|---|
@@ -678,7 +690,7 @@ the run as examined-and-empty — "the window was read and held nothing" and "no
 one looked" must stay distinguishable.
 ```
 
-### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_019rSxYzhDBSTdPry5xABpxr`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte 2026-08-30, then corrected here by ONE phrase and NOT re-pushed — see the note)
+### 2d · dma-watchdog — `23 * * * *` · LIVE (`trig_01Q4TZyoqt8zMr8jNNDW9LCj`, enabled; last run SUCCEEDED; prompt below pushed and verified byte-for-byte 2026-08-30, then corrected here by ONE phrase and NOT re-pushed — see the note)
 
 > **One-phrase divergence from the live prompt, recorded rather than pushed.**
 > The prompt below said `--revive` re-dispatches "through
@@ -784,7 +796,7 @@ NEVER: re-produce a page that get_run_progress already shows as PASS. Never star
 
 ---
 
-### 2e · dma-synthesis-sequence-b — `18 */12 * * *` · LIVE (`trig_01NXSfaTVuWEubFAcA4mbbeL`, enabled; **carries no claude.ai connectors** — the API cannot attach them, so a human must re-attach Exa/Tavily/Clay on its edit screen or its preflight stops every firing by design; reconciled 2026-08-30)
+### 2e · dma-synthesis-sequence-b — `18 */12 * * *` · LIVE (`trig_01UTsibg1JKYA8zgWhDES4T2`, enabled; **carries no claude.ai connectors** — the API cannot attach them, so a human must re-attach Exa/Tavily/Clay on its edit screen or its preflight stops every firing by design; reconciled 2026-08-30)
 
 Lane B: the cycle's SECOND client. Created 2026-08-23 to replace a mechanism
 that could not run — see § 2a for why. It is not a different routine; it is
@@ -825,7 +837,7 @@ Hard rules: exactly ONE client per firing; never a held-out entity (run_gate.HEL
 ```
 
 
-### 2g · dma-assessment-intake — `30 */4 * * *` · LIVE (`trig_018eeMRDobRQXPZ4aobjfUih`, created 2026-08-30, REBUILT 2026-08-30)
+### 2g · dma-assessment-intake — `30 */4 * * *` · LIVE (`trig_019CzPVuRhxXh8cYC1F697ee`, created 2026-08-30, REBUILT 2026-08-30)
 
 The routine the 2026-08-30 audit found MISSING, and then found pointed at the
 wrong thing.
