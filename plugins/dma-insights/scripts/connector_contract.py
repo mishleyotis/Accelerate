@@ -165,6 +165,103 @@ def check(tool_names, *, now_families=None) -> dict:
     }
 
 
+#: Where a run's connector baseline lives. Run-scoped on purpose: two runs
+#: in one container are two different sessions with two different rosters,
+#: and a shared file would have the second overwrite the first's evidence of
+#: what it started with.
+def baseline_path(root=None) -> Path:
+    import os
+    base = Path(root) if root else Path(
+        os.environ.get("DMA_RUN_ROOT") or ".")
+    return base / "connectors_baseline.json"
+
+
+def write_baseline(tool_names, root=None) -> dict:
+    """Record what this session ACTUALLY held when it started producing.
+
+    WHY A BASELINE AND NOT JUST A CHECK (owner, 2026-08-31: "The connectors
+    may be lost mid session even after being attached"). A check alone
+    cannot tell the two cases apart, and they call for opposite responses:
+
+      never had it   -> a preflight STOP. Nothing has been researched yet,
+                        nothing is corrupted, and the fix is a human
+                        attaching it before the next firing.
+      had it, lost it -> NOT a stop, and not a silent thinning either. Work
+                        already done under that connector stays valid; work
+                        after the loss must record NOT_RUN with the loss as
+                        its reason, so a later firing can close the gap
+                        instead of a reader mistaking a dead connector for
+                        an absence of evidence about the client.
+
+    The second case is invisible without a record of the first. So the
+    orchestrator writes this once, at the boundary where its preflight
+    passed, and diffs against it at every stage boundary after.
+    """
+    import datetime as _dt
+    fam = families()
+    held = {t.strip() for t in tool_names if t.strip()}
+    present = sorted(f for f in fam if _present(f, fam, held))
+    rec = {"recorded_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+           "present": present,
+           "mcp_tools": sorted(t for t in held if t.startswith("mcp__"))}
+    path = baseline_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rec, indent=2) + "\n")
+    rec["path"] = str(path)
+    return rec
+
+
+def probe(tool_names, root=None) -> dict:
+    """Diff this session's connectors against its own recorded baseline.
+
+    Returns a verdict a stage boundary can act on without interpretation:
+    STABLE, DEGRADED (something present at baseline no longer answers) or
+    RECOVERED. A family lost from the REQUIRED set is what makes DEGRADED
+    worth stopping the stage for; an optional one is worth recording and
+    continuing.
+    """
+    path = baseline_path(root)
+    if not path.is_file():
+        raise ContractBroken(
+            f"no connector baseline at {path}. It is written once, when the "
+            "preflight passes, and nothing can say what this session LOST "
+            "without it — only what it currently lacks, which is a different "
+            "question with a different answer.")
+    base = json.loads(path.read_text())
+    fam = families()
+    held = {t.strip() for t in tool_names if t.strip()}
+    now = sorted(f for f in fam if _present(f, fam, held))
+    was = list(base.get("present") or [])
+
+    lost = [f for f in was if f not in now]
+    regained = [f for f in now if f not in was]
+    required = set(REQUIRED) | {n for g in REQUIRED_ANY for n in g}
+    lost_required = [f for f in lost if f in required]
+
+    verdict = "STABLE"
+    if lost:
+        verdict = "DEGRADED"
+    elif regained:
+        verdict = "RECOVERED"
+    return {
+        "verdict": verdict,
+        "ok": not lost_required,
+        "baseline_at": base.get("recorded_at"),
+        "was": was, "now": now,
+        "lost": lost, "lost_required": lost_required, "regained": regained,
+        "why": ("every connector this session started with still answers"
+                if not lost else
+                f"lost since the preflight: {', '.join(lost)}. Work already "
+                "done under them stands; from here on record every facet "
+                "they would have answered as NOT_RUN with THIS as the "
+                "reason, and never as an absence of evidence about the "
+                "client — a dead connector and an empty world read "
+                "identically in a payload and mean opposite things. "
+                "A session cannot re-attach a connector: they bind once at "
+                "start, so the close is a later firing, not this one."),
+    }
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -176,6 +273,22 @@ def main(argv=None) -> int:
     k.add_argument("--json", action="store_true")
     k.add_argument("--strict", action="store_true",
                    help="exit 1 when a required family is missing")
+    b = sub.add_parser("baseline",
+                       help="record what this session holds, once, so a "
+                            "later loss is distinguishable from never "
+                            "having had it")
+    b.add_argument("--tools", required=True)
+    b.add_argument("--root", default=None,
+                   help="the run root (default: $DMA_RUN_ROOT, else cwd)")
+    b.add_argument("--json", action="store_true")
+    r = sub.add_parser("probe",
+                       help="diff this session's connectors against its own "
+                            "baseline; run at every stage boundary")
+    r.add_argument("--tools", required=True)
+    r.add_argument("--root", default=None)
+    r.add_argument("--json", action="store_true")
+    r.add_argument("--strict", action="store_true",
+                   help="exit 1 when a REQUIRED family has been lost")
     a = ap.parse_args(argv)
 
     try:
@@ -196,6 +309,32 @@ def main(argv=None) -> int:
 
         raw = (sys.stdin.read() if a.tools == "-"
                else Path(a.tools).read_text())
+
+        if a.cmd == "baseline":
+            rec = write_baseline(raw.splitlines(), a.root)
+            if a.json:
+                print(json.dumps(rec, indent=2))
+            else:
+                print(f"baseline recorded at {rec['path']}")
+                print(f"  present  {', '.join(rec['present']) or 'none'}")
+                print("  a stage boundary compares against this; without it "
+                      "a lost connector is indistinguishable from one that "
+                      "was never attached")
+            return 0
+
+        if a.cmd == "probe":
+            out = probe(raw.splitlines(), a.root)
+            if a.json:
+                print(json.dumps(out, indent=2))
+            else:
+                print(f"{out['verdict']}: {out['why']}")
+                print(f"  baseline {out['baseline_at']}")
+                print(f"  was      {', '.join(out['was']) or 'none'}")
+                print(f"  now      {', '.join(out['now']) or 'none'}")
+                if out["lost_required"]:
+                    print(f"  LOST REQUIRED: {', '.join(out['lost_required'])}")
+            return 1 if (a.strict and not out["ok"]) else 0
+
         out = check(raw.splitlines())
         if a.json:
             print(json.dumps(out, indent=2))

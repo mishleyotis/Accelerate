@@ -145,3 +145,102 @@ def test_declare_prints_the_derivation_and_json_round_trips():
     assert "provision_agent_tools.py" in human, (
         "the output must name where the answer came from, so a reader can "
         "check it rather than believe it")
+
+
+# ── a connector lost mid-session ──────────────────────────────────────────
+#
+# Owner, 2026-08-31: "The connectors may be lost mid session even after being
+# attached. How do we safeguard against this?" A session cannot re-attach one
+# — they bind at start — so the safeguard is not recovery, it is TELLING THE
+# TWO CASES APART, because they call for opposite responses:
+#
+#   never had it    -> a preflight stop; nothing is researched yet
+#   had it, lost it -> not a stop. Prior work stands; everything after must
+#                      record NOT_RUN with the loss as its reason, because a
+#                      dead connector and an empty world read identically in
+#                      a payload and mean opposite things.
+#
+# A check alone cannot see the difference. Only a baseline can.
+
+def _tools(*families):
+    fam = cc.families()
+    return [fam[f][0] for f in families]
+
+
+def test_a_baseline_records_what_the_session_actually_held(tmp_path):
+    rec = cc.write_baseline(_tools("exa", "tavily", "clay"), tmp_path)
+    assert sorted(rec["present"]) == ["clay", "exa", "tavily"]
+    assert cc.baseline_path(tmp_path).is_file()
+    assert rec["recorded_at"], "a baseline with no time cannot date a loss"
+
+
+def test_a_lost_required_connector_is_degraded_and_not_ok(tmp_path):
+    cc.write_baseline(_tools("exa", "tavily", "clay"), tmp_path)
+    out = cc.probe(_tools("exa", "tavily"), tmp_path)
+    assert out["verdict"] == "DEGRADED" and not out["ok"]
+    assert out["lost"] == ["clay"] and out["lost_required"] == ["clay"]
+    assert "NOT_RUN" in out["why"], (
+        "a loss the payload cannot distinguish from an absence of evidence "
+        "is the defect this exists to prevent")
+
+
+def test_a_lost_optional_connector_degrades_without_stopping(tmp_path):
+    """Quartr going away is worth recording and not worth abandoning a run
+    for: the facets it answers become honest NOT_RUNs."""
+    cc.write_baseline(_tools("exa", "tavily", "clay", "quartr"), tmp_path)
+    out = cc.probe(_tools("exa", "tavily", "clay"), tmp_path)
+    assert out["verdict"] == "DEGRADED"
+    assert out["ok"], "an optional family is not a required one"
+    assert out["lost"] == ["quartr"] and not out["lost_required"]
+
+
+def test_an_unchanged_session_is_stable(tmp_path):
+    held = _tools("exa", "tavily", "clay")
+    cc.write_baseline(held, tmp_path)
+    out = cc.probe(held, tmp_path)
+    assert out["verdict"] == "STABLE" and out["ok"] and not out["lost"]
+
+
+def test_a_connector_that_comes_back_is_named_as_recovered(tmp_path):
+    cc.write_baseline(_tools("exa", "tavily"), tmp_path)
+    out = cc.probe(_tools("exa", "tavily", "clay"), tmp_path)
+    assert out["verdict"] == "RECOVERED" and out["regained"] == ["clay"]
+    assert out["ok"]
+
+
+def test_probing_without_a_baseline_refuses_rather_than_guessing(tmp_path):
+    """The whole point is the comparison. Answering 'nothing lost' from no
+    baseline would report the safest-sounding thing and mean nothing."""
+    with pytest.raises(cc.ContractBroken) as e:
+        cc.probe(_tools("exa"), tmp_path)
+    assert "no connector baseline" in str(e.value)
+
+
+def test_the_baseline_is_run_scoped_not_container_scoped(tmp_path):
+    """Two runs in one container are two sessions with two rosters. A shared
+    file would have the second overwrite the first's evidence."""
+    a, b = tmp_path / "run-a", tmp_path / "run-b"
+    cc.write_baseline(_tools("exa", "tavily", "clay"), a)
+    cc.write_baseline(_tools("exa", "tavily"), b)
+    assert cc.probe(_tools("exa", "tavily", "clay"), a)["verdict"] == "STABLE"
+    assert cc.probe(_tools("exa", "tavily", "clay"), b)["verdict"] == "RECOVERED"
+
+
+def test_the_probe_cli_separates_a_loss_from_a_broken_contract(tmp_path):
+    def run(cmd, stdin, *args):
+        return subprocess.run(
+            [sys.executable, str(HERE / "connector_contract.py"), cmd,
+             "--tools", "-", "--root", str(tmp_path), *args],
+            input=stdin, capture_output=True, text=True, timeout=60)
+
+    full = "\n".join(_tools("exa", "tavily", "clay"))
+    assert run("baseline", full).returncode == 0
+    assert run("probe", full, "--strict").returncode == 0
+    lost = run("probe", "\n".join(_tools("exa", "tavily")), "--strict")
+    assert lost.returncode == 1 and "DEGRADED" in lost.stdout
+    # 2 is reserved for a contract that cannot be evaluated at all
+    missing = subprocess.run(
+        [sys.executable, str(HERE / "connector_contract.py"), "probe",
+         "--tools", "-", "--root", str(tmp_path / "never")],
+        input=full, capture_output=True, text=True, timeout=60)
+    assert missing.returncode == 2 and "CONTRACT BROKEN" in missing.stderr
