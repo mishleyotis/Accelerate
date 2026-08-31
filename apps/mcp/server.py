@@ -460,7 +460,8 @@ def open_payload(run_id: str, page: str, producer_version: str = "") -> dict:
 @_traced
 def append_payload_part(upload_id: str, part: int, parts_total: int,
                         path: str = "", items: list = None,
-                        fields: dict = None, item_count: int = 0) -> dict:
+                        fields: dict = None, item_count: int = 0,
+                        repartition: bool = False) -> dict:
     """Send one part of a chunked payload. Returns a receipt, never a verdict —
     nothing is validated until the whole assembles.
 
@@ -479,11 +480,39 @@ def append_payload_part(upload_id: str, part: int, parts_total: int,
     Parts are applied in ascending index at assembly, so the same set of parts
     always assembles to the same bytes. Resending an index REPLACES it: a
     dropped connection costs one part, not the transmission.
+
+    `parts_total` is fixed by the first part that arrives — that is what makes
+    an incomplete transmission detectable. If the chunking plan genuinely
+    changes, send part 1 of the NEW plan with `repartition=true`: it discards
+    the old plan's parts and adopts the new length, and the receipt says how
+    many it discarded. Resuming an interrupted transmission needs none of
+    that — call `get_upload_status(upload_id)` and resend only its
+    `missing_parts` with the parts_total already declared.
     """
     with _conn() as c:
         return transport_mod.append_payload_part(
             c, upload_id, part, parts_total, path=path, items=items,
-            fields=fields, item_count=item_count)
+            fields=fields, item_count=item_count, repartition=repartition)
+
+
+@mcp.tool()
+@_traced
+def get_upload_status(upload_id: str = "", run_id: str = "",
+                      page: str = "") -> dict:
+    """What has already arrived on a chunked upload — read-only.
+
+    Answers the question a producer resuming after an interruption could not
+    previously ask: which parts landed, which are missing, how many bytes and
+    items are held, and whether the set is complete. Nothing is written.
+
+    Pass `upload_id` for one upload, or `run_id` (optionally with `page`) to
+    list that run's OPEN uploads newest first — so a session that lost its
+    place finds the upload it already opened instead of starting a new one and
+    resending everything.
+    """
+    with _conn() as c:
+        return transport_mod.upload_status(c, upload_id=upload_id or None,
+                                           run_id=run_id or None, page=page)
 
 
 @mcp.tool()

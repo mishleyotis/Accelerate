@@ -98,6 +98,10 @@ DMA_TOOLS = {
     "get_report_bundle", "get_capability_catalogue", "get_platform_fit",
     "get_page_contract", "get_evidence", "get_run_progress",
     "get_staged_payload", "get_client_state", "list_open_rejections",
+    # Read-only: what a chunked upload has already received. Added with the
+    # tool itself — a connector tool missing from this set does not fail
+    # closed, it PROMPTS, and a scheduled session has nobody to answer.
+    "get_upload_status",
     "list_pending_runs", "claim_run", "register_evidence", "open_payload",
     "append_payload_part", "submit_page_payload", "promote_run",
     "withdraw_run", "list_withdrawn_runs", "get_validation_verdict",

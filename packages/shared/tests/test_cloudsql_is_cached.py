@@ -15,6 +15,7 @@ it right, and its own docstring had already warned why four copies is the
 problem: "two places for `ip_type` or IAM auth to drift".
 """
 import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -33,9 +34,15 @@ def _clean():
 
 class _FakeConnector:
     made = 0
+    #: Construction kwargs of the most recent one. The real Connector takes
+    #: several (refresh_strategy among them), so a fake with a bare __init__
+    #: fails on any of them and reads as a defect in the module rather than
+    #: a gap in the double.
+    last_kwargs: dict = {}
 
-    def __init__(self):
+    def __init__(self, **kw):
         type(self).made += 1
+        type(self).last_kwargs = kw
         self.closed = False
 
     def connect(self, *a, **k):
@@ -124,9 +131,27 @@ def test_no_service_constructs_its_own_connector_any_more():
     coming back, in any of four files."""
     import re
     root = SHARED.parents[1]
+
+    # SOURCE ONLY — never what a build staged. `infra/deploy.sh` copies this
+    # very module into apps/api/shared/ and apps/mcp/shared/ so each image
+    # carries it, and those copies are gitignored build artifacts. An rglob
+    # finds them and reports cloudsql.py itself as a service constructing its
+    # own Connector, which is both false and confusing: measured the first
+    # time anyone ran deploy.sh in a checkout that then ran this test.
+    # `apps/<svc>/shared/` is staged FROM packages/shared — both of its
+    # .gitignores say so on their first line — so nothing in it is service
+    # code, whether or not a given file happens to be tracked. (They differ:
+    # mcp ignores *.py, api ignores only *.json, so four staged modules are
+    # committed under apps/api/shared. That asymmetry is a separate finding;
+    # this scan is correct either way by excluding the directory itself.)
+    files = [f for f in (root / "apps").rglob("*.py")
+             if "shared" not in f.relative_to(root / "apps").parts]
+
     offenders = []
-    for f in (root / "apps").rglob("*.py"):
+    for f in files:
         if "tests" in f.parts or f.name.startswith("test_"):
+            continue
+        if not f.is_file():
             continue
         for i, line in enumerate(f.read_text().splitlines(), 1):
             if re.search(r"\bConnector\(\)", line.split("#")[0]):
@@ -136,3 +161,86 @@ def test_no_service_constructs_its_own_connector_any_more():
     assert not offenders, (
         f"a per-call Connector is back: {offenders}. Use "
         f"packages/shared/cloudsql.connect() — one per process.")
+
+
+# ── two properties the first pass did not pin ────────────────────────────
+
+def test_concurrent_first_calls_still_build_only_one(monkeypatch):
+    """The lock has a re-check inside it. Without one, two threads racing the
+    very FIRST call each construct a Connector and each spends a
+    connectSettings request — the same defect this module exists to end,
+    reached at low volume instead of high. A cold Cloud Run instance taking
+    two requests at once is exactly that race, and it is the common shape at
+    --min-instances=1 with --concurrency=80.
+    """
+    import threading
+    built = []
+
+    class _C:
+        def __init__(self, **kw):
+            built.append(kw)
+
+        def connect(self, *a, **kw):
+            return object()
+
+        def close(self):
+            pass
+
+    fake = types.ModuleType("google.cloud.sql.connector")
+    fake.Connector = _C
+    monkeypatch.setitem(sys.modules, "google.cloud.sql.connector", fake)
+    monkeypatch.delenv("LOCAL_DATABASE_URL", raising=False)
+    monkeypatch.setenv("DB_INSTANCE_CONNECTION_NAME", "p:r:i")
+    monkeypatch.setenv("DB_USER", "svc@p.iam")
+    monkeypatch.setenv("DB_NAME", "dma_insights")
+    cloudsql.close()
+
+    barrier = threading.Barrier(8)
+
+    def go():
+        barrier.wait()
+        cloudsql.connect()
+
+    ts = [threading.Thread(target=go) for _ in range(8)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert len(built) == 1, (
+        f"{len(built)} Connectors from 8 concurrent first calls — the "
+        f"membership check is not repeated inside the lock")
+    cloudsql.close()
+
+
+def test_the_refresh_is_lazy_because_cloud_run_throttles_cpu(monkeypatch):
+    """`infra/deploy.sh` sets no --no-cpu-throttling, so between requests the
+    instance gets close to no CPU. The default background refresh is an
+    asyncio task on a ~55-minute timer, and a timer that only advances while
+    a request is in flight wakes late, finds the metadata stale, and sends
+    every starved instance to `connectSettings` at once — the same endpoint
+    and the same 429 this module exists to make rare."""
+    built = []
+
+    class _C:
+        def __init__(self, **kw):
+            built.append(kw)
+
+        def connect(self, *a, **kw):
+            return object()
+
+        def close(self):
+            pass
+
+    fake = types.ModuleType("google.cloud.sql.connector")
+    fake.Connector = _C
+    monkeypatch.setitem(sys.modules, "google.cloud.sql.connector", fake)
+    monkeypatch.delenv("LOCAL_DATABASE_URL", raising=False)
+    monkeypatch.setenv("DB_INSTANCE_CONNECTION_NAME", "p:r:i")
+    monkeypatch.setenv("DB_USER", "svc@p.iam")
+    monkeypatch.setenv("DB_NAME", "dma_insights")
+    cloudsql.close()
+    cloudsql.connect()
+    assert built[0].get("refresh_strategy") == "lazy", (
+        f"constructed with {built[0]!r}; on Cloud Run the refresh has to be "
+        f"lazy or it is scheduled on CPU the instance does not get")
+    cloudsql.close()
