@@ -489,6 +489,59 @@ def enabled_state_check(manifest: dict) -> dict:
         "(informational row, never fails)")
 
 
+def concurrent_writers_check() -> dict:
+    """Whether THIS install's engine can survive two writers on one workbook.
+
+    WHY A CHECK AND NOT A DOCSTRING. Until 2026-08-31 `next_evidence_id`
+    ended with "two writers to one workbook is not a supported topology and
+    never was". That was a statement of scope; it was read as a guarantee,
+    and it was read again AFTER the lock landed — a session on a stale
+    install quoted the deleted sentence as authority and began building a
+    shard-and-merge harness with disjoint evidence-id ranges to work around
+    a defect that no longer existed. Prose in a file cannot tell you which
+    version of the file you are running. A capability check can.
+
+    Answered from the INSTALLED tree rather than the checkout, because the
+    installed tree is what a session's agents actually execute.
+    """
+    name = "concurrent workbook writers"
+    try:
+        v = plugin_version.compare()
+        root = (v.get("installed") or {}).get("install_path")
+        eng = (Path(root) / "skills" / "dma-research" / "engine" /
+               "workbook.py") if root else None
+        if not eng or not eng.is_file():
+            return _check(name, True,
+                          "SKIPPED: no installed engine to read "
+                          f"({eng or 'no install path'})")
+        src = eng.read_text()
+        # `fcntl` OR `flock`: the marker is the LOCK, not one spelling
+        # of it. Pinning a single token would make this check fail on
+        # a correct engine that acquired the lock another way, which
+        # is the false alarm that sends someone back to sharding.
+        safe = ("def transaction(" in src
+                and ("flock" in src or "fcntl" in src))
+        stale_claim = "not a supported topology and never was" in src
+        detail = (
+            "SAFE: the installed engine takes an exclusive lock across "
+            "reload-mutate-save, so concurrent writers to one workbook do "
+            "not lose each other's rows"
+            if safe else
+            "UNSAFE: the installed engine has no cross-process lock, so two "
+            "writers to one workbook silently clobber each other. Shard onto "
+            "separate workbooks, or update the plugin")
+        if stale_claim:
+            detail += (". This install still carries the docstring saying "
+                       "two writers are 'not a supported topology' — that "
+                       "sentence was deleted when the lock landed, so a "
+                       "session reading it here is reading a STALE install")
+        return _check(name, True, detail,
+                      "" if safe else "doctor.py --heal, then re-dispatch: "
+                      "a running session keeps the engine it started with")
+    except Exception as exc:                                # noqa: BLE001
+        return _check(name, True, f"SKIPPED: {exc}")
+
+
 def connector_contract_check() -> dict:
     """Which connector families a firing REQUIRES, derived not typed.
 
@@ -846,6 +899,7 @@ def run_checks(base_url: str | None, heal: bool = False) -> list:
     out.append(_check("connector definition", mcp_json.exists(),
                       str(mcp_json) if mcp_json.exists() else "not found"))
     out.append(connector_contract_check())
+    out.append(concurrent_writers_check())
     out.append(hooks_wired_check())
     out.extend(inventory_checks())
     out.append(deps_check(offline=base_url is None))

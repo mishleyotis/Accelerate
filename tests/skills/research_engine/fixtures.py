@@ -213,11 +213,21 @@ def close_prelim(run, *, entity="Acme Credit Union"):
               f"dominated by consumer lending."))
     prelim.narrate(
         wb, "leadership", heading=None, evidence=[eid],
-        body=("Digital ownership sits with a named Chief Digital Officer "
-              "reporting to the CEO, alongside a CIO who owns the core "
-              "platform. Both roles predate the current programme, so the "
-              "institution is not standing up digital ownership for the "
-              "first time."))
+        body=("Maria Alvarez has been Chief Digital Officer since 2022, "
+              "reporting to chief executive Devon Whitfield, alongside a "
+              "CIO who owns the core platform. Both roles predate the "
+              "current programme, so the institution is not standing up "
+              "digital ownership for the first time."))
+    # PRELIM now carries what these leaders say in public, not only who they
+    # are: the category researchers read a finding against stated direction.
+    prelim.narrate(
+        wb, "thought_leadership", heading=None, evidence=[eid],
+        body=("Maria Alvarez has spoken twice at industry conferences on "
+              "moving decisioning off the core, and the institution's own "
+              "2025 report repeats that framing. The stated direction is "
+              "consistent across both, so a category finding that "
+              "contradicts it is worth a second source rather than a "
+              "restatement."))
     # Signal is the DIRECTION, kind is the CLASS — the two questions the C1
     # surface asks separately and the tab used to answer with one column.
     for d, ev, sig, kind, effect in (
@@ -238,15 +248,28 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                  rule=("US credit unions in the 15-25bn asset band with a "
                        "geographic field of membership and a public core "
                        "platform decision since 2022"))
-    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami",
-                    layer="CUST", status="CONFIRMED",
-                    method="public_document",
-                    basis="named as the digital banking platform in the 2025 "
-                          "call report",
-                    providers=["clay", "web"],
-                    subcaps=[], evidence_ids=[eid],
-                    source_urls=["https://ncua.example/callreport/2025"],
-                    as_of="2025-12-31")
+    # ALL FOUR LAYERS, in PRELIM. A layer nothing was found in is an
+    # ABSENT row carrying the ladder — never a layer left out, which reads
+    # to every later surface as a clean estate.
+    for product, vendor, layer, status, basis in (
+            ("Alkami Digital Banking", "Alkami", "CUST", "CONFIRMED",
+             "named as the digital banking platform in the 2025 call report"),
+            ("Fiserv DNA", "Fiserv", "OPS", "CONFIRMED",
+             "named as the core processor in the 2025 call report"),
+            ("Snowflake", "Snowflake", "DATA", "INFERRED",
+             "two 2025 engineering postings require production Snowflake"),
+            ("public cloud hosting", "none named", "INFRA", "ABSENT",
+             "searched the call report, the careers site and three vendor "
+             "case-study indexes for a named hosting or datacentre "
+             "platform; none is stated anywhere public"),):
+        techscan.record(wb, product=product, vendor=vendor,
+                        layer=layer, status=status,
+                        method="public_document",
+                        basis=basis,
+                        providers=["clay", "web"],
+                        subcaps=[], evidence_ids=[eid],
+                        source_urls=["https://ncua.example/callreport/2025"],
+                        as_of="2025-12-31")
     prelim.complete(wb)
     return eid
 

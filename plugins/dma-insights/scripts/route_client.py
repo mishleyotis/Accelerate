@@ -144,12 +144,27 @@ def decide(state: dict, asked_for: str) -> dict:
         return {
             "verdict": NEEDS_SCORING, "display_id": display_id,
             "runs": len(runs), "scored_runs": 0,
-            "why": (f"{len(runs)} run(s) ingested and not one scored a cell. "
-                    f"That is a RESEARCH package: its score column is empty "
-                    f"by contract and synthesis may not derive one. This is "
-                    f"not an intake either — the research is already done."),
-            "next": ("`dma-assessment` against the existing research package, "
-                     "producing a DMA-ASM-* scoring workbook"),
+            "why": (f"{len(runs)} run(s) ingested and not one scored a "
+                    f"cell. That is a RESEARCH package: its score column is "
+                    f"empty by contract and synthesis may not derive one. It "
+                    f"is not an intake either — a package exists. WHETHER "
+                    f"THAT PACKAGE IS FINISHED, THIS CANNOT SEE: "
+                    f"`get_client_state` reports scored_cells and nothing "
+                    f"about coverage, so a complete research run awaiting "
+                    f"scoring and one abandoned halfway are the same shape "
+                    f"here. Measured 2026-08-31 on this very client: four "
+                    f"INGESTED runs, 0 scored — and 11 of 16 category "
+                    f"notebooks, a manifest at IN_PROGRESS and an empty "
+                    f"deliverables_present. Scoring that would score an "
+                    f"unfinished package."),
+            "next": ("read the client folder's run_manifest.json first "
+                     "(`drive_fetch.py find-artifact --client ...`): "
+                     "status COMPLETE with deliverables_present populated "
+                     "means `dma-assessment` against the existing package, "
+                     "producing a DMA-ASM-* scoring workbook; IN_PROGRESS or "
+                     "an empty deliverables_present means the research run "
+                     "is unfinished and RESUMES under dma-research — never "
+                     "restarts, and never gets scored as it stands"),
         }
     return {
         "verdict": READY_TO_SYNTHESISE, "display_id": display_id,

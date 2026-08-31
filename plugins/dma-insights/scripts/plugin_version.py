@@ -460,6 +460,49 @@ def provisioning(prov_path: Path | None = None) -> dict:
                     "a working tree with local modifications is never reset "
                     "by the setup script, by design"),
         }
+    # THE FOURTH STATE, and the one that was costing a firing a day.
+    #
+    # `ok` says the setup script ran, brought the checkout to the tip, and
+    # installed the version it expected — all true, and all true LAST TIME
+    # IT RAN. It says nothing about when that was. Measured 2026-08-31: a
+    # firing's record was stamped 2026-08-27, four days before it fired, and
+    # this container's was 17.8 hours old. Setup runs when the environment's
+    # SNAPSHOT is built, not at session start, so every session on that
+    # image inherits whatever plugin was current whenever setup last ran.
+    #
+    # Under the old `ok` the report said a stale bind here "is a genuinely
+    # new fact, and ending the firing is the right answer". For a restored
+    # snapshot that is precisely backwards: it recurs on every session until
+    # the environment changes, which is the livelock this function exists to
+    # name. It is also why opening a FRESH SESSION does not reliably help —
+    # the staleness is in the image, not the session, so a new session on
+    # the same image binds the same old roster.
+    age = provisioning_age_h(rec)
+    if age is not None and age > SNAPSHOT_AGE_H:
+        return {
+            "state": "stale_snapshot",
+            "recurs": True,
+            "record": str(path),
+            "age_hours": round(age, 1),
+            "reason": (
+                f"the setup script ran {age:.0f} hours ago "
+                f"({rec.get('bootstrap_ran_at')}) and installed "
+                f"{rec.get('plugin_installed') or 'nothing'}. A container "
+                f"that provisions at session start carries a record minutes "
+                f"old, so this one is a RESTORED SNAPSHOT: setup is not "
+                f"re-running per session, and every session on this image "
+                f"begins on the plugin that was current {age:.0f} hours ago. "
+                f"That is why the roster binds short and why a fresh session "
+                f"on the same image does not fix it"),
+            "fix": ("run bootstrap_session.sh at SESSION START rather than "
+                    "only at snapshot build — in the claude.ai/code "
+                    "environment settings, the setup script must execute on "
+                    "each session, not once when the image is baked. Until "
+                    "then `doctor.py --heal` repairs the DISK every firing "
+                    "and the session still binds the roster it started with, "
+                    f"so every firing pays it: {SETUP_CURL}"),
+        }
+
     return {
         "state": "ok",
         "recurs": False,
@@ -471,6 +514,22 @@ def provisioning(prov_path: Path | None = None) -> dict:
             f"{rec.get('plugin_expected') or 'unknown'}"),
         "fix": "",
     }
+
+
+#: How old a provisioning record may be before the container it describes is
+#: a RESTORED SNAPSHOT rather than a freshly provisioned machine. Setup that
+#: runs per session leaves a record minutes old; two hours is far outside
+#: that and far inside the days actually observed.
+SNAPSHOT_AGE_H = 2.0
+
+
+def provisioning_age_h(rec: dict) -> float | None:
+    """Hours since the setup script ran, or None when it cannot be read."""
+    began = _epoch(rec.get("bootstrap_ran_at"))
+    if began is None:
+        return None
+    import time
+    return max(0.0, (time.time() - began) / 3600.0)
 
 
 UPDATE = (f"claude plugin marketplace update {MARKETPLACE_NAME} && "

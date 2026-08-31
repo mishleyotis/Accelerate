@@ -206,3 +206,56 @@ def test_strict_fails_on_an_empty_account_against_the_real_canon(tmp_path):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── a Routine can be healthy at doing the wrong thing ─────────────────────
+
+def test_a_firing_routine_running_a_stale_prompt_is_not_healthy(tmp_path):
+    """MEASURED 2026-08-31. The intake's STEP 0a was fixed in the canon,
+    tested, committed and pushed; the Routine went on firing the OLD prompt
+    and stopping on a stale plugin. It was enabled, on schedule, and its
+    last run SUCCEEDED — so every verdict in this report said HEALTHY while
+    the work was not being done. Success at running the wrong text is the
+    failure mode a run-outcome check cannot see."""
+    import routine_health as rh
+    import routine_sync as rs
+    sec = rs.sections()["2g"]
+    doc = [{"name": sec["name"], "id": sec["trigger_id"],
+            "cron_expression": "30 */4 * * *", "enabled": True,
+            "prompt": "run doctor.py and stop if it is not green",
+            "last_run": {"status": rh.HEALTHY,
+                         "fired_at": "2026-08-31T05:00:00Z",
+                         "finished_at": "2026-08-31T05:02:00Z"}}]
+    out = rh.report(doc, now=datetime(2026, 8, 31, 6, tzinfo=timezone.utc))
+    row = next(r for r in out["routines"] if r["name"] == sec["name"])
+    assert row["verdict"] == "PROMPT_DRIFT", row
+    assert "the prompt that FIRES is not the prompt" in row["detail"]
+    assert row in out["unhealthy"], (
+        "drift that does not reach the unhealthy list is drift nothing acts on")
+
+
+def test_a_matching_prompt_stays_healthy(tmp_path):
+    import routine_health as rh
+    import routine_sync as rs
+    sec = rs.sections()["2g"]
+    doc = [{"name": sec["name"], "id": sec["trigger_id"],
+            "cron_expression": "30 */4 * * *", "enabled": True,
+            "prompt": sec["prompt"],
+            "last_run": {"status": rh.HEALTHY,
+                         "fired_at": "2026-08-31T05:00:00Z",
+                         "finished_at": "2026-08-31T05:02:00Z"}}]
+    out = rh.report(doc, now=datetime(2026, 8, 31, 6, tzinfo=timezone.utc))
+    row = next(r for r in out["routines"] if r["name"] == sec["name"])
+    assert row["verdict"] == "HEALTHY", row
+
+
+def test_an_input_without_prompts_is_not_read_as_agreement():
+    """A caller that supplies no prompt has given no evidence either way.
+    Reporting HEALTHY there would be the same 'silence means fine' defect
+    the MISSING verdict was added to close."""
+    import routine_health as rh
+    import routine_sync as rs
+    sec = rs.sections()["2g"]
+    assert rh._prompt_of([{"name": sec["name"]}], sec["name"], None) is None
+    assert rh._drift(sec["name"], "", rh.CANON) is not None, (
+        "an empty live prompt IS drift, and must not be silently skipped")

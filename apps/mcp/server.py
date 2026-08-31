@@ -36,7 +36,6 @@ import os
 from mcp.server import MCPServer
 
 from dma_mcp import bundle as bundle_mod
-from dma_mcp import db as db_mod
 from dma_mcp import rejections
 from dma_mcp import claims as claims_mod
 from dma_mcp import evidence_tools
@@ -74,14 +73,47 @@ def _encoder():
     return _ENCODER
 
 
-# The connection factory lives in `dma_mcp.db` — importable without the MCP
-# SDK, so the one path every tool call goes through is finally reachable by a
-# test. It holds ONE Cloud SQL Connector for the process: constructing one per
-# call cost an Admin API `connectSettings` request every time and leaked a
-# refresher that kept making more, which is what returned
-# "429 Too Many Requests" to `open_payload` on 2026-08-31 before a single
-# payload part had been sent. See that module's docstring.
-_conn = db_mod.connect
+# ── ONE Cloud SQL Connector, imported ────────────────────────────────
+#
+# `Connector()` per connection is one Cloud SQL ADMIN API call per
+# connection (it fetches connectSettings on construction), and under
+# NullPool every checkout is a new connection. That is what produced the
+# 429 on sqladmin.googleapis.com/.../connectSettings during a live intake
+# firing on 2026-08-31. packages/shared/cloudsql.py holds the cached one.
+#
+# Roots built LAZILY and image-first: in the image this module is
+# /app/<pkg>/<name>.py, so `parents[3]` raises IndexError and a tuple
+# literal would raise before the image path it would have found is tried.
+import sys as _sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in _sys.path:
+        _sys.path.insert(0, str(_cand))
+
+from cloudsql import connect as _cloudsql_connect  # noqa: E402
+
+@contextmanager
+def _conn():
+    # The CONNECTION closes per call; the CONNECTOR does not. Building a
+    # Connector here — which this did until 2026-08-31 — spends one Cloud
+    # SQL Admin API request per tool call and leaks its refresh task, and
+    # a firing that walks the queue makes dozens in a minute.
+    c = _cloudsql_connect(
+        local_user="dmai-mcp@digital-maturity-assessor.iam")
+    try:
+        yield c
+    finally:
+        c.close()
 
 
 def _traced(fn):

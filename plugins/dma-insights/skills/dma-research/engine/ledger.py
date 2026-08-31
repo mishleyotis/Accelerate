@@ -97,48 +97,62 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         # the halt: there is no route around it.
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
-    eid = wb.next_evidence_id()
-    # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
-    # calculator existed, and nothing joined them — twenty rows, twenty
-    # empty cells, in every run ever produced). Scored INLINE here so the
-    # append pays no second save; the cross-register pass that updates
-    # everyone else's corroboration runs at synthesis, where a second
-    # source actually changes a judgement.
-    from . import ers as _ers
-    _existing = [r for r in wb.rows("Evidence_Detail") if r.get("E_ID")]
-    _new = {"E_ID": eid, "Source_Name": source_name, "Source_URL": source_url,
-            "Tier": tier, "Recency": recency_band(published, wb),
-            "SubCap_IDs": ", ".join(cells), "Excerpt": text}
-    _score = _ers.score_row(_new, _existing + [_new])["ers"]
-    if ers is not None:
-        wb.append("Provenance", {
-            "SubCap_ID": "", "Step": "ers_supplied_ignored",
-            "Actor": "ledger", "At": _utcnow(),
-            "Detail": f"{eid}: caller passed ERS={ers}; the score is computed "
-                      f"server-side from tier, recency, specificity and "
-                      f"corroboration"}, save=False)
-    wb.append("Evidence_Detail", {
-        "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
-        "Source_URL": source_url, "Tier": tier, "ERS": _score,
-        "Date_Published": published, "Recency": recency_band(published, wb),
-        "Claim_Type": claim_type, "Fact_Count": 1,
-        "SubCap_IDs": ", ".join(cells), "Excerpt": text,
-        "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
-        "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
-    })
-    for cell in cells:
-        row = wb.scoring_row(cell) or {}
-        have = [i for i in _split_ids(row.get("Evidence_IDs"))
-                if i and i != C.NO_EVIDENCE]
-        urls = [u for u in _split_ids(row.get("Source_URLs")) if u]
-        have.append(f"{eid}:{fact_id}")
-        if source_url and source_url not in urls:
-            urls.append(source_url)
-        wb.set_scoring(cell, {"Evidence_IDs": ", ".join(have),
-                              "Source_URLs": ", ".join(urls) or None},
-                       save=False)
-    wb.save()
-    wb.recompute_coverage()
+    # ONE TRANSACTION FOR THE ID AND THE ROWS IT NAMES.
+    #
+    # `next_evidence_id` reads the highest E-id in the register and adds
+    # one. Outside a lock that is a read-modify-write across processes: two
+    # writers both see E-006 and both mint E-007, and the second append
+    # overwrites the first's row in every surface that later resolves that
+    # id. Measured 2026-08-31 alongside the PRELIM section a concurrent
+    # scanner erased. Minting and appending inside ONE `transaction()`
+    # closes both: the lock is held from the read of the maximum through the
+    # save of the rows that use it.
+    with wb.transaction("append_evidence"):
+        eid = wb.next_evidence_id()
+        # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
+        # calculator existed, and nothing joined them — twenty rows, twenty
+        # empty cells, in every run ever produced). Scored INLINE here so the
+        # append pays no second save; the cross-register pass that updates
+        # everyone else's corroboration runs at synthesis, where a second
+        # source actually changes a judgement.
+        from . import ers as _ers
+        _existing = [r for r in wb.rows("Evidence_Detail") if r.get("E_ID")]
+        _new = {"E_ID": eid, "Source_Name": source_name, "Source_URL": source_url,
+                "Tier": tier, "Recency": recency_band(published, wb),
+                "SubCap_IDs": ", ".join(cells), "Excerpt": text}
+        _score = _ers.score_row(_new, _existing + [_new])["ers"]
+        if ers is not None:
+            wb.append("Provenance", {
+                "SubCap_ID": "", "Step": "ers_supplied_ignored",
+                "Actor": "ledger", "At": _utcnow(),
+                "Detail": f"{eid}: caller passed ERS={ers}; the score is computed "
+                          f"server-side from tier, recency, specificity and "
+                          f"corroboration"}, save=False)
+        wb.append("Evidence_Detail", {
+            "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
+            "Source_URL": source_url, "Tier": tier, "ERS": _score,
+            "Date_Published": published, "Recency": recency_band(published, wb),
+            "Claim_Type": claim_type, "Fact_Count": 1,
+            "SubCap_IDs": ", ".join(cells), "Excerpt": text,
+            "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
+            "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
+        })
+        for cell in cells:
+            row = wb.scoring_row(cell) or {}
+            have = [i for i in _split_ids(row.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            urls = [u for u in _split_ids(row.get("Source_URLs")) if u]
+            have.append(f"{eid}:{fact_id}")
+            if source_url and source_url not in urls:
+                urls.append(source_url)
+            wb.set_scoring(cell, {"Evidence_IDs": ", ".join(have),
+                                  "Source_URLs": ", ".join(urls) or None},
+                           save=False)
+        # INSIDE the transaction. Both of these WRITE, and a write that
+        # lands after the lock is released is a write another process can
+        # interleave with — the whole defect, moved four lines down.
+        wb.save()
+        wb.recompute_coverage()
     return eid
 
 
@@ -495,10 +509,29 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
                 if str(r.get("SubCap_ID") or "").startswith(category + ".")]
     synthesised = sum(1 for r in rows if str(r.get("Dominant_Claim") or "").strip())
     n = len(searches)
+    # THE DECISION MUST MEASURE WHAT THE WALL MEASURES (MEM-0436).
+    #
+    # `append_search` refuses on `_ops_since_checkpoint` — a window that a
+    # checkpoint resets, because the ceiling is per CONVERSATION and a long
+    # run must be able to checkpoint and legitimately continue. This
+    # function computed the same decision from the LIFETIME count, so once a
+    # run passed 40 searches ever, `checkpoint_required` was true forever and
+    # no checkpoint could clear it. orient prints this first, so every
+    # conductor obediently stopped and re-stopped: three runs walled on
+    # 2026-08-31 at 141, ~180 and 567 ops, the last of them still being told
+    # to checkpoint after a revival had already reset its window.
+    #
+    # Two measurements of one rule is the defect; the fix is to keep one.
+    # The LIFETIME count stays reported, because spend is worth seeing — it
+    # just no longer decides. The gate itself is unchanged in strength: over
+    # the cap since the last checkpoint still stops, which is the half a
+    # loosened ceiling would have silently lost (MEM-0338 / R27).
+    since = _ops_since_checkpoint(wb)
     return {
         "search_ops": n,
+        "search_ops_since_checkpoint": since,
         "search_op_ceiling": SEARCH_OP_CEILING,
-        "checkpoint_required": n >= SEARCH_OP_CEILING,
+        "checkpoint_required": since >= SEARCH_OP_CEILING,
         "evidence_items": len(ev),
         "subcaps_selected": len(rows),
         "subcaps_synthesised": synthesised,

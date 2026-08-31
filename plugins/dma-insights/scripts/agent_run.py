@@ -231,6 +231,209 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
             "note": note}
 
 
+# ── LIVE VISIBILITY ──────────────────────────────────────────────────────
+#
+# THE COMPLAINT, and it is structural rather than a missing print statement
+# (owner, 2026-08-31): "I have no visibility onto how the agents are doing
+# the research or how they think through challenges. I cannot even see them
+# on the background task list."
+#
+# Both halves are true and they have the same cause. `dispatch` ran the child
+# through `subprocess.run(capture_output=True)`, which returns nothing until
+# the process exits — so a forty-minute researcher is a black box for forty
+# minutes. And because the children are spawned INSIDE one Bash call, the
+# harness sees a single task, not sixteen agents: there is nothing for a task
+# list to show. Neither is fixed by logging harder at the end.
+#
+# The claude CLI can emit events as they happen — `--output-format
+# stream-json` with `--print` — so the fix is to read that stream line by
+# line and land it somewhere a person can watch. Each agent gets its own
+# JSONL transcript and a small status file; `agent_run.py watch` renders
+# them as a table that updates.
+#
+# OPT-IN, deliberately. `--stream` selects this path and the default is
+# unchanged, because a run is in flight in another session as this lands and
+# a rewritten dispatch path that breaks the return contract would cost more
+# than the blindness it cures.
+#
+# EVERY LINE IS LOGGED VERBATIM before anything tries to interpret it. The
+# event schema is the CLI's, not ours; a parser that recognises nothing must
+# still leave a complete transcript behind, because "the monitor showed
+# nothing" is the exact failure being fixed and it must never be caused BY
+# the monitor.
+
+def log_dir_for(explicit: str | None = None) -> Path:
+    """Where transcripts land: --log-dir, else the run root, else /root/.dma.
+
+    Run-scoped by preference so two runs in one container cannot overwrite
+    each other's transcripts, which is the same reason the connector
+    baseline is run-scoped.
+    """
+    if explicit:
+        return Path(explicit)
+    root = os.environ.get("DMA_RUN_ROOT")
+    return (Path(root) / "agent_logs") if root else Path("/root/.dma/agent_logs")
+
+
+def _summarise(event: dict, st: dict) -> None:
+    """Best-effort: pull what is recognisable, ignore what is not.
+
+    Written defensively on purpose. These shapes are the CLI's and can
+    change; an unrecognised event increments `events` and nothing else, so a
+    schema drift degrades the SUMMARY and never the transcript.
+    """
+    st["events"] = st.get("events", 0) + 1
+    kind = event.get("type")
+    if kind == "assistant":
+        for block in (event.get("message") or {}).get("content") or []:
+            btype = block.get("type")
+            if btype == "tool_use":
+                st["tools"] = st.get("tools", 0) + 1
+                st["last_tool"] = block.get("name") or "?"
+                st["doing"] = f"calling {st['last_tool']}"
+            elif btype == "text":
+                text = " ".join(str(block.get("text") or "").split())
+                if text:
+                    st["last_text"] = text[-300:]
+                    st["doing"] = "writing"
+            elif btype == "thinking":
+                st["doing"] = "thinking"
+    elif kind == "user":
+        st["doing"] = "reading a tool result"
+    elif kind == "result":
+        st["doing"] = "done"
+        st["result_subtype"] = event.get("subtype")
+        for key in ("total_cost_usd", "num_turns", "duration_ms",
+                    "is_error"):
+            if key in event:
+                st[key] = event[key]
+
+
+def _final_text(events: list, raw: str) -> str:
+    """The agent's answer, reconstructed from the stream.
+
+    THE COMPATIBILITY REQUIREMENT. `verdict_of` and every caller read this
+    as the agent's text, so the fallback chain has to end somewhere real:
+    the result event's own text, then the assistant text blocks in order,
+    then the raw stream. Returning "" on an unfamiliar shape would turn a
+    working stage into a silent empty verdict — the defect class this repo
+    keeps meeting.
+    """
+    for e in reversed(events):
+        if e.get("type") == "result":
+            for key in ("result", "text", "content"):
+                v = e.get(key)
+                if isinstance(v, str) and v.strip():
+                    return v
+    blocks = [b.get("text") for e in events if e.get("type") == "assistant"
+              for b in (e.get("message") or {}).get("content") or []
+              if b.get("type") == "text" and b.get("text")]
+    return "\n".join(blocks) if blocks else raw
+
+
+def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
+                       allowed: str, logs: Path) -> dict:
+    """`dispatch`, with the child's events written as they arrive."""
+    import time
+    logs.mkdir(parents=True, exist_ok=True)
+    jsonl = logs / f"{name}.jsonl"
+    status = logs / f"{name}.status.json"
+    st = {"agent": name, "state": "running", "doing": "starting",
+          "started_at": time.time(), "last_event_at": time.time(),
+          "events": 0, "tools": 0}
+
+    def flush_status():
+        status.write_text(json.dumps(st, indent=1, sort_keys=True))
+
+    flush_status()
+    cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
+           "--permission-mode", "dontAsk",
+           "--add-dir", "/root/.dma",
+           "--output-format", "stream-json", "--verbose",
+           f"--allowedTools={allowed}", prompt]
+    events, raw = [], []
+    try:
+        proc = subprocess.Popen(cmd, cwd=repo_root, text=True, bufsize=1,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                env={**os.environ})
+    except FileNotFoundError:
+        st.update(state="failed", doing="claude CLI not on PATH")
+        flush_status()
+        return {"agent": name, "code": 127, "stdout": "", "stderr": "",
+                "note": "DISPATCH FAILED: the claude CLI is not on PATH in "
+                        "this container"}
+
+    deadline = time.time() + timeout
+    with jsonl.open("w", encoding="utf-8") as fh:
+        for line in proc.stdout:
+            fh.write(line)          # VERBATIM, before any interpretation
+            fh.flush()
+            raw.append(line)
+            st["last_event_at"] = time.time()
+            try:
+                ev = json.loads(line)
+            except ValueError:
+                st["events"] = st.get("events", 0) + 1
+            else:
+                events.append(ev)
+                _summarise(ev, st)
+            flush_status()
+            if time.time() > deadline:
+                proc.kill()
+                st.update(state="timeout",
+                          doing=f"exceeded {timeout}s")
+                flush_status()
+                return {"agent": name, "code": 124,
+                        "stdout": _final_text(events, "".join(raw)),
+                        "stderr": "", "note":
+                        f"DISPATCH TIMEOUT: {name} exceeded {timeout}s — "
+                        f"treat as a failed stage, never as an empty verdict"}
+    err = proc.stderr.read() if proc.stderr else ""
+    rc = proc.wait()
+    out = _final_text(events, "".join(raw))
+    code, note = verdict_of(name, rc, out, err)
+    st.update(state="ok" if code == 0 else "failed",
+              doing="done", exit_code=code, transcript=str(jsonl))
+    flush_status()
+    return {"agent": name, "code": code, "stdout": out, "stderr": err,
+            "note": note}
+
+
+def watch(logs: Path, once: bool = False, interval: float = 3.0) -> int:
+    """Render every agent's live status as a table.
+
+    Reads the status files rather than the processes, so it works from a
+    different shell, a different session, or after the fact.
+    """
+    import time
+    while True:
+        rows = []
+        for f in sorted(logs.glob("*.status.json")):
+            try:
+                rows.append(json.loads(f.read_text()))
+            except (OSError, ValueError):
+                continue
+        now = time.time()
+        print(f"\n{logs}  —  {len(rows)} agent(s)")
+        if not rows:
+            print("  nothing yet. Dispatch with --stream to populate this.")
+        print(f"  {'agent':34s} {'state':9s} {'for':>7s} {'idle':>6s} "
+              f"{'ev':>5s} {'tools':>6s}  doing")
+        for r in rows:
+            age = now - float(r.get("started_at") or now)
+            idle = now - float(r.get("last_event_at") or now)
+            print(f"  {r.get('agent','?'):34s} {r.get('state','?'):9s} "
+                  f"{age:6.0f}s {idle:5.0f}s {r.get('events',0):5d} "
+                  f"{r.get('tools',0):6d}  {str(r.get('doing',''))[:40]}")
+            if r.get("last_text"):
+                print(f"      last said: {str(r['last_text'])[:100]}")
+        if once or all(r.get("state") not in ("running",) for r in rows) \
+                and rows:
+            return 0
+        time.sleep(interval)
+
+
 def read_batch(path: Path) -> list:
     """[{agent, prompt}] from a batch file, validated before anything runs.
 
@@ -262,11 +465,22 @@ def read_batch(path: Path) -> list:
 
 
 def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
-              allowed: str, out_dir: Path | None) -> int:
+              allowed: str, out_dir: Path | None,
+              logs: Path | None = None) -> int:
     """Run every row, `lanes` at a time. Exit non-zero if ANY lane failed."""
     results, done = [], 0
+    # With --stream every lane writes its own live transcript and status, so
+    # a person watching `agent_run.py watch` sees sixteen agents working
+    # rather than one Bash call that has not returned yet.
+    run = ((lambda n, p, t, rr, al: dispatch_streaming(n, p, t, rr, al, logs))
+           if logs else dispatch)
+    if logs:
+        logs.mkdir(parents=True, exist_ok=True)
+        print(f"streaming {len(rows)} lane(s) to {logs}\n"
+              f"watch them with: python3 {Path(__file__).name} watch "
+              f"--log-dir {logs}", flush=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
-        futures = {pool.submit(dispatch, r["agent"], r["prompt"], timeout,
+        futures = {pool.submit(run, r["agent"], r["prompt"], timeout,
                                repo_root, allowed): r["agent"]
                    for r in rows}
         for fut in concurrent.futures.as_completed(futures):
@@ -317,7 +531,24 @@ def main(argv=None) -> int:
                          f"(default {DEFAULT_LANES})")
     ap.add_argument("--out-dir", help="with --batch: write each lane's "
                                       "stdout to <agent>.out here")
+    ap.add_argument("--stream", action="store_true",
+                    help="stream each child's events to <log-dir>/"
+                         "<agent>.jsonl as they happen, and keep a live "
+                         "<agent>.status.json beside it. Without this a "
+                         "dispatched agent is silent until it exits")
+    ap.add_argument("--log-dir", default=None,
+                    help="where --stream and `watch` keep transcripts "
+                         "(default: $DMA_RUN_ROOT/agent_logs, else "
+                         "/root/.dma/agent_logs)")
+    ap.add_argument("cmd", nargs="?", choices=["watch"],
+                    help="`watch` renders the live status table and exits "
+                         "when every agent has stopped")
+    ap.add_argument("--once", action="store_true",
+                    help="with watch: print one snapshot and exit")
     a = ap.parse_args(argv)
+
+    if a.cmd == "watch":
+        return watch(log_dir_for(a.log_dir), once=a.once)
 
     names = roster()
     if a.list:
@@ -339,7 +570,8 @@ def main(argv=None) -> int:
         print(f"dispatching {len(rows)} agent(s), {lanes} at a time",
               file=sys.stderr, flush=True)
         return run_batch(rows, lanes, a.timeout, repo_root, ALLOWED,
-                         Path(a.out_dir) if a.out_dir else None)
+                         Path(a.out_dir) if a.out_dir else None,
+                         log_dir_for(a.log_dir) if a.stream else None)
 
     name = a.agent.removeprefix(f"{PLUGIN_PREFIX}:")
     if name not in names:
@@ -365,7 +597,9 @@ def main(argv=None) -> int:
     # was blocked. For security, Claude Code may only list files in the
     # allowed working directories for this session: '/home/user/Accelerate'."
     # The package, the bundles and the client memory all live under /root/.dma.
-    res = dispatch(name, prompt, a.timeout, repo_root, ALLOWED)
+    logs = log_dir_for(a.log_dir) if a.stream else None
+    res = (dispatch_streaming(name, prompt, a.timeout, repo_root, ALLOWED, logs)
+           if logs else dispatch(name, prompt, a.timeout, repo_root, ALLOWED))
     sys.stdout.write(res["stdout"])
     if res["stderr"]:
         sys.stderr.write(res["stderr"])

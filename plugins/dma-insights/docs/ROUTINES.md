@@ -25,8 +25,24 @@ system ready to run — with `scripts/readiness.py`, whose third verdict,
    `plugins/dma-insights/scripts/setup_routines.py`.
 2. **Claude-session routines** — CCR triggers that start a **fresh Claude
    session per firing** with a standalone prompt. These are the reasoning
-   work: synthesis, rectification, drift review. They have no reconciler
-   today; this file is their declaration.
+   work: synthesis, rectification, drift review. This file is their
+   declaration, and `scripts/routine_sync.py` is their reconciler.
+
+   **THE RECONCILER IS NEW, AND THE DEFECT THAT BUILT IT IS WORTH KEEPING
+   HERE.** Until 2026-08-31 this bullet ended "they have no reconciler
+   today", and that sentence was load-bearing in the worst way. The intake
+   Routine's STEP 0a was rewritten that morning to heal a stale plugin
+   instead of stopping on one. The canon was edited, tests were written
+   against the canon, the tests passed, the change was committed and pushed
+   to the default branch — and the Routine then fired and stopped on a stale
+   plugin exactly as before, because THE PROMPT THAT FIRES LIVES IN THE
+   TRIGGER RECORD and nothing had ever copied this file into it. Every step
+   looked like progress; none of them touched production. The app-side
+   routines in section 1 have had `setup_routines.py` since the beginning,
+   so half this document was enforced and half was fiction, with nothing in
+   the shape of either half to say which. Run
+   `routine_sync.py diff --live <list_triggers output>` before believing a
+   prompt change has landed.
 
 The split is the build charter's invariant 1 applied to scheduling: the app
 performs no inference, so anything that reasons runs as a Claude session, and
@@ -966,7 +982,7 @@ STEP 0a — TOOLING AND CONNECTORS, ENFORCED BEFORE ANY WORK (owner, 2026-08-31:
 (a) `python3 plugins/dma-insights/scripts/doctor.py --heal` — the plugin, the Google identity, the agent inventory and the live connector roster. **`--heal`, never the bare doctor** (owner, 2026-08-31: "Plugin version should always pick the most recent bump and self heal", after a firing read `STALE: installed 0.9.12 (47 agents) vs published 1.13.0 (68 agents)` and stopped having produced nothing). The bare doctor only MEASURES: it cannot make a stale container current, so on a container whose snapshot carries an old plugin the pass condition of this gate is unreachable and the firing dies every time, in the same place, on a defect the container could have fixed in ninety seconds. `--heal` runs the repair each status needs — update for STALE and MISSING, uninstall-then-install for a tree that DIVERGED at the same version number, enable for one that is installed but switched off — re-measures once, and prints one final verdict. Then read that verdict, because the two remaining reds are not the same thing:
 
   * `OK` — proceed.
-  * `UPDATED_MID_SESSION` — **RECOVERY MODE, NOT A STOP, and it is the NORMAL outcome of a successful heal.** The disk is now correct and THIS session bound the old roster before the heal ran; agents, skills and hooks load once at session start and never reload. So produce this firing anyway, dispatching every routed stage as a fresh child process via `python3 plugins/dma-insights/scripts/agent_run.py --agent <name> --prompt-file <file>` — a child binds the just-healed install at its own start, where the in-process Agent tool would dispatch the stale roster this session is holding. Follow skill files from the checkout rather than the Skill tool. Connectors are unaffected in the session that holds them — they are attached to the Routine, not to the plugin — but a child does not inherit them: `agent_run.py` prepends a dispatch preamble telling the agent to emit `search_requests` rather than search, and YOU run those through your own connectors, register the evidence and re-invoke. Say RECOVERY MODE and both version numbers in the report.
+  * `UPDATED_MID_SESSION` — **RECOVERY MODE, NOT A STOP, and it is the NORMAL outcome of a successful heal.** The disk is now correct and THIS session bound the old roster before the heal ran; agents, skills and hooks load once at session start and never reload. So produce this firing anyway, dispatching every routed stage as a fresh child process via `python3 plugins/dma-insights/scripts/agent_run.py --agent <name> --prompt-file <file> --stream` — `--stream` writes the child's events as they happen, so `agent_run.py watch --log-dir <dir>` shows what it is doing instead of nothing until it exits — a child binds the just-healed install at its own start, where the in-process Agent tool would dispatch the stale roster this session is holding. Follow skill files from the checkout rather than the Skill tool. Connectors are unaffected in the session that holds them — they are attached to the Routine, not to the plugin — but a child does not inherit them: `agent_run.py` prepends a dispatch preamble telling the agent to emit `search_requests` rather than search, and YOU run those through your own connectors, register the evidence and re-invoke. Say RECOVERY MODE and both version numbers in the report.
   * Anything still red after the heal — a `STALE` that survived the update, a `DIVERGED` an uninstall could not reconcile — is the one true ending, and it is a provisioning defect to report, not a transient to wait out: the next container is built from the same snapshot and reproduces it. Quote the failing row and the `cause:` line, which names what provisioning actually did.
 (b) `python3 plugins/dma-insights/scripts/audit_autoapprove.py --strict` — proves no MCP call this firing makes will sit on a permission prompt. A trigger-fired container has nobody to answer one, so a prompt is a silent death: the firing burns its slot and records nothing. Non-zero, STOP and name the tools that would prompt.
 (c) `python3 plugins/dma-insights/scripts/drive_fetch.py check` — the intake folder answers the service account. It fails, STOP with its exact message; an intake that cannot reach Drive cannot check for existing work and must not guess.

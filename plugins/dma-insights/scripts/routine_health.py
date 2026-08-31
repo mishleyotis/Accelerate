@@ -208,6 +208,48 @@ def declared_live(canon: Path = CANON) -> list[str]:
             if any(s in m.group(0) for s in _REQUIRED_STATES)]
 
 
+def _prompt_of(doc, name: str, tid: str | None) -> str | None:
+    """The live prompt for one Routine, when the input carries prompts.
+
+    `list_triggers` returns them; a caller that hand-built a summary may
+    not. None means "not supplied", which is never read as "matches" —
+    a drift check that treats missing data as agreement is a check that
+    reports green on no evidence.
+    """
+    for r in _rows(doc):
+        if r.get("name") == name or (tid and r.get("id") == tid):
+            p = r.get("prompt")
+            return p if isinstance(p, str) else None
+    return None
+
+
+def _drift(name: str, live_prompt: str, canon: Path) -> str | None:
+    """A one-line description of how the live prompt differs from canon."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import routine_sync                                  # noqa: PLC0415
+        sec = next((v for v in routine_sync.sections(canon).values()
+                    if v["name"] == name and v["live"]), None)
+        if not sec or not sec["prompt"]:
+            return None
+        c = routine_sync.compare(sec["prompt"], live_prompt)
+        if c["in_sync"]:
+            return None
+        moved = [k for k, m in c["markers"].items() if m["canon"] != m["live"]]
+        return (f"the prompt that FIRES is not the prompt in "
+                f"docs/ROUTINES.md ({c['live_chars']} chars live vs "
+                f"{c['canon_chars']} in the canon"
+                + (f"; differs on: {', '.join(moved)}" if moved else "")
+                + "). The canon is the intended text, so the Routine is "
+                  "running behind it: `routine_sync.py push --routine "
+                  "<key>` renders the update_trigger call that closes it")
+    except Exception:                                        # noqa: BLE001
+        # A drift check that crashes must not take the health report with
+        # it — the run-outcome verdicts above are the older, load-bearing
+        # half and they stand on their own.
+        return None
+
+
 def report(doc, now: datetime | None = None,
            canon: Path = CANON) -> dict:
     rows = [assess(r, now) for r in _rows(doc)]
@@ -236,6 +278,24 @@ def report(doc, now: datetime | None = None,
                        "prompt, or record the deletion there; an "
                        "undocumented absence is drift, not a decision."),
         })
+
+    # PROMPT DRIFT IS A HEALTH PROBLEM, and until 2026-08-31 nothing here
+    # looked at it. A Routine can be enabled, firing on schedule and
+    # SUCCEEDING every time while running a prompt nobody has read in weeks
+    # — which is exactly what happened: the intake's STEP 0a was fixed in
+    # the canon, pushed to the default branch, and the Routine went on
+    # firing the old text and stopping on a stale plugin. Every row here
+    # said HEALTHY. It was, at doing the wrong thing.
+    for r in rows:
+        if r["verdict"] not in ("HEALTHY", "IN_FLIGHT", "NO_RUN"):
+            continue
+        live_prompt = _prompt_of(doc, r["name"], r.get("id"))
+        if live_prompt is None:
+            continue
+        d = _drift(r["name"], live_prompt, canon)
+        if d:
+            r["verdict"] = "PROMPT_DRIFT"
+            r["detail"] = d
 
     rows.sort(key=lambda r: (r["verdict"] in ("HEALTHY", "IN_FLIGHT"),
                              r["name"]))

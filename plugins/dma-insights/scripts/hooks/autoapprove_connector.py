@@ -48,9 +48,64 @@ PREFIX = "mcp__plugin_dma-insights_connector__"
 # Tools whose own PreToolUse hook owns the decision. Listed here rather than
 # excluded by the matcher regex, because a matcher that has to express "all of
 # these except two" is a matcher nobody will read correctly later.
-GUARDED = {
-    PREFIX + "submit_page_payload",   # precheck_submit.py
-    PREFIX + "promote_run",           # precheck_promote.py
+GUARDED_SUFFIXES = {
+    "submit_page_payload",            # precheck_submit.py
+    "promote_run",                    # precheck_promote.py
+}
+GUARDED = {PREFIX + t for t in GUARDED_SUFFIXES}
+
+# ── THE SAME CONNECTOR UNDER A DIFFERENT NAME ────────────────────────────
+#
+# MEASURED 2026-08-31, from the owner: "I keep on getting requests to
+# approve the get client state tool." The plugin installs the DMA connector
+# as `mcp__plugin_dma-insights_connector__*`, which the PREFIX rule above
+# allows. But a Routine attaches the SAME server as a claude.ai connector,
+# and the trigger record names it `DMA-Insights` — so in a trigger-fired
+# session the very same tool arrives as
+# `mcp__DMA-Insights__get_client_state`, matches no rule here, and prompts.
+# A scheduled container has nobody to answer, so the firing hangs or dies on
+# the one connector the whole pipeline is built around.
+#
+# `audit_autoapprove.py --strict` passed through all of this, because it
+# audits the names this file already knows. That is the same shape as the
+# routines canon measuring itself: a check that reads the config it is
+# checking can only ever confirm it.
+#
+# So the DMA connector is matched under a SECOND, exactly-named server
+# identity — never by tool name alone under any server. That distinction is
+# the whole safety of this rule and an earlier draft of it got this wrong:
+# matching `claim_run` under any segment also matched
+# `mcp__notplugin_dma-insights_connector__claim_run`, which the lookalike
+# test has guarded against since this hook was written. A server whose name
+# merely CONTAINS ours is not ours. So the segment is normalised (lowercased,
+# separators dropped) and compared for EQUALITY against the identities the
+# DMA connector actually attaches under.
+#
+# `test_autoapprove_connector.py` reconciles the tool set below against
+# `apps/mcp/server.py`, so it cannot drift from the 33 the connector serves.
+SERVER_IDS = {
+    "dmainsights",                    # the claude.ai connector, per trigger
+    "plugindmainsightsconnector",     # the plugin install (PREFIX handles it)
+}
+
+
+def _is_ours(server: str) -> bool:
+    """Equality on a normalised segment, never a substring."""
+    return "".join(ch for ch in server.lower() if ch.isalnum()) in SERVER_IDS
+
+
+DMA_TOOLS = {
+    "get_report_bundle", "get_capability_catalogue", "get_platform_fit",
+    "get_page_contract", "get_evidence", "get_run_progress",
+    "get_staged_payload", "get_client_state", "list_open_rejections",
+    "list_pending_runs", "claim_run", "register_evidence", "open_payload",
+    "append_payload_part", "submit_page_payload", "promote_run",
+    "withdraw_run", "list_withdrawn_runs", "get_validation_verdict",
+    "explain_gate", "record_enrichment", "record_finding", "search_findings",
+    "list_open_findings", "list_enrichment_gaps", "get_finding",
+    "list_defect_classes", "record_refinement", "resolve_finding",
+    "report_recurrence", "get_memory_digest", "list_reviewer_feedback",
+    "ingest_reviewer_feedback",
 }
 
 REASON = (
@@ -424,6 +479,22 @@ def main() -> int:
         if tool in GUARDED:
             return 0
         return _allow(REASON)
+
+    # The same connector attached under a claude.ai server name. Everything
+    # the PREFIX branch allows, allowed here too — EXCEPT the guarded pair,
+    # and that exception is not symmetry for its own sake. The precheck
+    # hooks are registered in hooks.json against tool-name matchers; if a
+    # matcher does not fire for this server segment, auto-approving here
+    # would wave a submit or a promote through with NO precheck at all.
+    # Leaving them to prompt fails closed: a prompt in a scheduled session
+    # stops the firing, which is the safe direction for the two calls that
+    # write serving content.
+    if tool.startswith("mcp__") and tool.count("__") >= 2:
+        parts = tool.split("__")
+        server, suffix = parts[1], parts[-1]
+        if (_is_ours(server) and suffix in DMA_TOOLS
+                and suffix not in GUARDED_SUFFIXES):
+            return _allow(REASON)
 
     # Allowed only when an ARGUMENT says so. Checked before the name rules
     # because it is the strictest of the three: it is the only one that can
