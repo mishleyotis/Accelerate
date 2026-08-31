@@ -32,6 +32,7 @@ name is "DMA Insights".
 from __future__ import annotations
 
 import os
+from contextlib import contextmanager
 
 from mcp.server import MCPServer
 
