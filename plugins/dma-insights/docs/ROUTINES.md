@@ -25,8 +25,24 @@ system ready to run — with `scripts/readiness.py`, whose third verdict,
    `plugins/dma-insights/scripts/setup_routines.py`.
 2. **Claude-session routines** — CCR triggers that start a **fresh Claude
    session per firing** with a standalone prompt. These are the reasoning
-   work: synthesis, rectification, drift review. They have no reconciler
-   today; this file is their declaration.
+   work: synthesis, rectification, drift review. This file is their
+   declaration, and `scripts/routine_sync.py` is their reconciler.
+
+   **THE RECONCILER IS NEW, AND THE DEFECT THAT BUILT IT IS WORTH KEEPING
+   HERE.** Until 2026-08-31 this bullet ended "they have no reconciler
+   today", and that sentence was load-bearing in the worst way. The intake
+   Routine's STEP 0a was rewritten that morning to heal a stale plugin
+   instead of stopping on one. The canon was edited, tests were written
+   against the canon, the tests passed, the change was committed and pushed
+   to the default branch — and the Routine then fired and stopped on a stale
+   plugin exactly as before, because THE PROMPT THAT FIRES LIVES IN THE
+   TRIGGER RECORD and nothing had ever copied this file into it. Every step
+   looked like progress; none of them touched production. The app-side
+   routines in section 1 have had `setup_routines.py` since the beginning,
+   so half this document was enforced and half was fiction, with nothing in
+   the shape of either half to say which. Run
+   `routine_sync.py diff --live <list_triggers output>` before believing a
+   prompt change has landed.
 
 The split is the build charter's invariant 1 applied to scheduling: the app
 performs no inference, so anything that reasons runs as a Claude session, and
