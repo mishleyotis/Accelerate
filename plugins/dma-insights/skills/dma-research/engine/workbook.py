@@ -37,10 +37,17 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
         _os.path.abspath(__file__))))
     __package__ = "engine"
 
+import contextlib
 import datetime as _dt
 import os
 import tempfile
+import time
 from pathlib import Path
+
+try:
+    import fcntl                       # POSIX only; see `transaction`
+except ImportError:                    # pragma: no cover
+    fcntl = None
 
 import openpyxl
 from openpyxl.utils import get_column_letter
@@ -202,8 +209,120 @@ class RunWorkbook:
             raise WorkbookError(f"no sheet {name!r}")
         return self._wb[name]
 
+    # ── CONCURRENT WRITERS ───────────────────────────────────────────
+    #
+    # THE INCIDENT, 2026-08-31: REV Federal Credit Union's
+    # `thought_leadership` PRELIM row was silently overwritten by a
+    # concurrent write from the technographic scanner. Real work, really
+    # lost, with nothing raised — which for a client deliverable is worse
+    # than running slower.
+    #
+    # WHY A LOCK ON `save()` WOULD NOT HAVE FIXED IT, and this is the part
+    # that matters. `__init__` loads the ENTIRE workbook into `self._wb`,
+    # and `save()` writes that whole in-memory copy back. So the lost-update
+    # window is not inside `save()` — it opens at LOAD and stays open for
+    # the life of the object. A process that opened the workbook at t=0 and
+    # appends one row at t=30min writes back a t=0 snapshot plus its row,
+    # erasing everything every other process wrote in between. Serialising
+    # the writes alone would have produced a fix that passes a smoke test
+    # and still loses data.
+    #
+    # So the critical section spans RELOAD -> MUTATE -> SAVE:
+    #
+    #   with wb.transaction():        # exclusive flock on <path>.lock
+    #       ...                       # re-read from disk if it moved
+    #       wb.append(...)            # mutate the fresh copy
+    #                                 # saved once, on exit
+    #
+    # Every mutator wraps itself in one, so existing call sites became safe
+    # without being edited. It is REENTRANT: a nested `transaction` joins
+    # the outer one, which is what lets `ledger.append_evidence` mint an id
+    # and append the row under a single lock — the other half of the bug,
+    # where two processes both read `E-006` and both minted `E-007`.
+
+    #: How long a writer waits for the lock before giving up. Generous
+    #: because a legitimate holder is doing a whole-file xlsx write, and a
+    #: spurious timeout under load would be indistinguishable from the
+    #: corruption this prevents.
+    LOCK_TIMEOUT_S = 120.0
+
+    def _lock_path(self) -> Path:
+        return self.path.with_name(self.path.name + ".lock")
+
+    def _stamp(self):
+        """(mtime_ns, size) — cheap identity for 'has the file moved'."""
+        try:
+            st = self.path.stat()
+            return (st.st_mtime_ns, st.st_size)
+        except OSError:
+            return None
+
+    def _reload_if_changed(self) -> bool:
+        """Re-read the file when another process has written it.
+
+        Refuses rather than reloads when this object holds unsaved edits:
+        discarding them silently would be the same data loss wearing a fix.
+        """
+        now = self._stamp()
+        if now == getattr(self, "_seen", None):
+            return False
+        if getattr(self, "_dirty", False):
+            raise WorkbookError(
+                f"{self.path.name} changed on disk while this process held "
+                f"unsaved edits. Reloading would discard them and keeping "
+                f"them would discard the other writer's. Save before "
+                f"mutating, or do the whole read-modify-write inside one "
+                f"`transaction()`.")
+        self._wb = openpyxl.load_workbook(self.path)
+        self._seen = now
+        return True
+
+    @contextlib.contextmanager
+    def transaction(self, why: str = ""):
+        """Exclusive, cross-process, reentrant. Reloads on entry, saves on exit."""
+        if getattr(self, "_depth", 0):
+            yield self                       # already inside one
+            return
+        self._depth = 1
+        fh = None
+        try:
+            if fcntl is None:                # pragma: no cover
+                # Non-POSIX: say so rather than pretend. A silent no-op lock
+                # is how this class of bug survives a fix.
+                raise WorkbookError(
+                    "fcntl is unavailable, so concurrent writers to one "
+                    "workbook cannot be made safe on this platform. Run "
+                    "writers sequentially.")
+            self._lock_path().parent.mkdir(parents=True, exist_ok=True)
+            fh = open(self._lock_path(), "a+")
+            deadline = time.monotonic() + self.LOCK_TIMEOUT_S
+            while True:
+                try:
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except OSError:
+                    if time.monotonic() > deadline:
+                        raise WorkbookError(
+                            f"waited {self.LOCK_TIMEOUT_S:.0f}s for "
+                            f"{self._lock_path().name}{(' — ' + why) if why else ''}. "
+                            f"Another writer is holding it; this is a stall, "
+                            f"never a reason to write without the lock.")
+                    time.sleep(0.05)
+            self._reload_if_changed()
+            yield self
+            if getattr(self, "_dirty", False):
+                self.save()
+        finally:
+            self._depth = 0
+            if fh is not None:
+                with contextlib.suppress(OSError):
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+                fh.close()
+
     def save(self) -> None:
         _atomic_save(self._wb, self.path)
+        self._dirty = False
+        self._seen = self._stamp()
 
     def _touch(self) -> None:
         self.set_metadata("last_written_at", _utcnow(), save=False)
@@ -219,12 +338,14 @@ class RunWorkbook:
         if unknown:
             raise WorkbookError(
                 f"{sheet}: no such column(s) {unknown}; contract is {list(cols)}")
-        ws = self._sheet(sheet)
-        ws.append([_cell(row.get(c)) for c in cols])
-        self._touch()
-        if save if save is not None else self.autosave:
-            self.save()
-        return ws.max_row
+        with self.transaction(f"append {sheet}"):
+            ws = self._sheet(sheet)
+            ws.append([_cell(row.get(c)) for c in cols])
+            self._dirty = True
+            self._touch()
+            if save if save is not None else self.autosave:
+                self.save()
+            return ws.max_row
 
     def rows(self, sheet: str) -> list[dict]:
         """Every data row of `sheet` as a dict keyed by the contract."""
@@ -245,16 +366,18 @@ class RunWorkbook:
         unknown = [k for k in values if k not in cols]
         if unknown:
             raise WorkbookError(f"{sheet}: no such column(s) {unknown}")
-        ws = self._sheet(sheet)
-        kidx = cols.index(key_col) + 1
-        for r in range(2, ws.max_row + 1):
-            if str(ws.cell(row=r, column=kidx).value or "").strip() == key:
-                for k, v in values.items():
-                    ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
-                self._touch()
-                if save if save is not None else self.autosave:
-                    self.save()
-                return r
+        with self.transaction(f"update {sheet}"):
+            ws = self._sheet(sheet)
+            kidx = cols.index(key_col) + 1
+            for r in range(2, ws.max_row + 1):
+                if str(ws.cell(row=r, column=kidx).value or "").strip() == key:
+                    for k, v in values.items():
+                        ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                    self._dirty = True
+                    self._touch()
+                    if save if save is not None else self.autosave:
+                        self.save()
+                    return r
         raise WorkbookError(f"{sheet}: no row where {key_col} == {key!r}")
 
     def update_row_where(self, sheet: str, match: dict, values: dict,
@@ -273,17 +396,19 @@ class RunWorkbook:
         unknown = [k for k in list(values) + list(match) if k not in cols]
         if unknown:
             raise WorkbookError(f"{sheet}: no such column(s) {unknown}")
-        ws = self._sheet(sheet)
-        idx = {k: cols.index(k) + 1 for k in match}
-        for r in range(2, ws.max_row + 1):
-            if all(str(ws.cell(row=r, column=i).value or "").strip()
-                   == str(match[k] or "").strip() for k, i in idx.items()):
-                for k, v in values.items():
-                    ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
-                self._touch()
-                if save if save is not None else self.autosave:
-                    self.save()
-                return r
+        with self.transaction(f"update {sheet}"):
+            ws = self._sheet(sheet)
+            idx = {k: cols.index(k) + 1 for k in match}
+            for r in range(2, ws.max_row + 1):
+                if all(str(ws.cell(row=r, column=i).value or "").strip()
+                       == str(match[k] or "").strip() for k, i in idx.items()):
+                    for k, v in values.items():
+                        ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                    self._dirty = True
+                    self._touch()
+                    if save if save is not None else self.autosave:
+                        self.save()
+                    return r
         raise WorkbookError(f"{sheet}: no row where {match!r}")
 
     # ── metadata, and the two anti-drift anchors ─────────────────────────
@@ -656,9 +781,23 @@ class RunWorkbook:
         AUD-0133: the archive minted ids under an fcntl lock on a local
         counter file — safe only among processes on one host sharing one
         filesystem, and $RUN could not be shared at all. The workbook is the
-        shared object, so the id comes from it. Two writers to one workbook
-        is not a supported topology and never was; one writer reading its own
-        maximum is correct and needs no lock."""
+        shared object, so the id comes from it.
+
+        THIS DOCSTRING USED TO END "two writers to one workbook is not a
+        supported topology and never was; one writer reading its own maximum
+        is correct and needs no lock." That was a statement of scope, and it
+        was read as a guarantee. On 2026-08-31 two writers happened anyway —
+        a technographic scanner and a conductor on one run — and the missing
+        lock cost a PRELIM section. Reading the maximum is only correct while
+        nobody else is appending: two processes both see E-006 and both mint
+        E-007.
+
+        So the id must be allocated INSIDE the same `transaction()` as the
+        append that uses it, which is what `ledger.append_evidence` now does.
+        Called outside one it still returns the right answer for a single
+        writer, and says so rather than pretending otherwise."""
+        if not getattr(self, "_depth", 0):
+            self._reload_if_changed()
         n = 0
         for r in self.rows("Evidence_Detail"):
             eid = str(r.get("E_ID") or "")
