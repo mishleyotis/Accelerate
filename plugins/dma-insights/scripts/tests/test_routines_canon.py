@@ -96,6 +96,68 @@ def test_every_fenced_prompt_is_runnable_prose():
                 f"§{key}: indented heredoc terminator {line!r} cannot run")
 
 
+def test_the_intake_prompt_orders_the_queue_fifo():
+    """Measured 2026-08-31: a firing saw three pending DMAs and picked among
+    them with no stated rule. "Newest priority first" was the rule it had,
+    and it starves the oldest request indefinitely."""
+    body = _fenced(_sections()["2g"])
+    assert "FIFO IS THE ORDER, ALWAYS, AND IT IS NOT A TIE-BREAK" in body
+    assert "in that FIFO order" in body
+    assert "Sort the PENDING set by the request's own timestamp" in body
+    assert "Priority does NOT reorder the queue" in body
+    assert "newest priority first" not in body, \
+        "the old ordering rule is still in the prompt"
+    assert "reorder the queue by priority instead of FIFO" in body
+
+
+def test_the_intake_prompt_checks_for_existing_work_before_researching():
+    """Redoing research somebody already paid for is invisible afterwards —
+    a second run looks exactly like a first. Three places answer three
+    different questions, and a client can be in one and not the others."""
+    body = _fenced(_sections()["2g"])
+    assert "WHAT ALREADY EXISTS FOR THIS CLIENT, IN THREE PLACES" in body
+    assert "registry.py list --open-only" in body          # in flight
+    assert "drive_fetch.py find-artifact" in body          # the folder
+    assert "get_client_state" in body                      # the serving tier
+
+    # a folder is not read as finished until its manifest says so
+    assert "run_manifest.json" in body
+    assert "deliverables_present" in body
+    assert "memory-backup" in body
+
+    # and an unknown display_id is not proof of absence
+    assert "unknown_entity" in body
+    assert "search the pending queue by entity NAME" in body
+
+
+def test_the_intake_prompt_enforces_tooling_and_connectors_first():
+    """The routine never runs in degrade mode, and the check measures THIS
+    session rather than the trigger record — a trigger can list a connector
+    the session did not bind. It also has to precede the manual path, or a
+    named client gets researched on unproven tooling."""
+    body = _fenced(_sections()["2g"])
+    lines = body.splitlines()
+
+    assert "STEP 0a" in body
+    head = next(l for l in lines if l.startswith("STEP 0a"))
+    assert "ENFORCED BEFORE ANY WORK" in head
+
+    for name in ("Exa", "Tavily", "Firecrawl", "Clay", "Vibe-Prospecting"):
+        assert name in body, f"{name} is not required by the preflight"
+
+    for cmd in ("doctor.py", "audit_autoapprove.py --strict",
+                "drive_fetch.py check"):
+        assert cmd in body, f"{cmd} is not run by the preflight"
+
+    assert "Read this SESSION's toolset, not the Routine record" in body
+    assert "Prepare anything before STEP 0a's four checks all pass" in body
+
+    # ordering: 0a must come before the manual path and before the queue
+    at = {k: next(i for i, l in enumerate(lines) if l.startswith(k))
+          for k in ("STEP 0a", "STEP 0.5", "STEP 5")}
+    assert at["STEP 0a"] < at["STEP 0.5"] < at["STEP 5"], at
+
+
 if __name__ == "__main__":
     import sys
     sys.exit(pytest.main([__file__, "-q"]))
