@@ -156,3 +156,36 @@ def test_the_manual_path_answers_no_thread():
     body = _fenced(_sections()["2g"])
     assert "answerable:false" in body or "answerable: false" in body
     assert "a manual run answers no thread" in body
+
+
+def test_the_intake_routes_the_name_before_it_prepares_anything():
+    """A client that already has a package is not an intake.
+
+    Measured 2026-08-30: GoEasy was passed to this routine. It has four
+    ingested runs and a finished research package, so the preflight it would
+    have prepared recommends research that is already done. STEP 0.5 let a
+    named client through on the name alone, which is the whole gap — the
+    routine had no way to ask what the corpus already held.
+
+    `route_client.py` answers that in one call, and the prompt has to OBEY
+    it rather than merely mention it: a verdict a firing can read past is
+    the advisory-number failure this repo keeps meeting.
+    """
+    body = _fenced(_sections()["2g"])
+    assert "route_client.py" in body, (
+        "STEP 0.5 accepts a named client without asking whether it already "
+        "has a package")
+    for verdict in ("NEEDS_SCORING", "READY_TO_SYNTHESISE", "ALREADY_SERVED",
+                    "AMBIGUOUS", "NEW_ENGAGEMENT"):
+        assert verdict in body, f"the prompt does not say what {verdict} means"
+    assert "do NOT prepare a preflight" in body, (
+        "the prompt names the NEEDS_SCORING verdict without saying to stop, "
+        "which is what GoEasy needed it to say")
+
+
+def test_a_failed_routing_check_is_not_read_as_a_verdict():
+    """The distinction that keeps the check from causing the defect it
+    prevents: an unreachable connector must not read as NEW_ENGAGEMENT."""
+    body = _fenced(_sections()["2g"])
+    assert "Exit 2 is the script failing" in body
+    assert "NOT a routing answer" in body

@@ -23,9 +23,20 @@ sys.modules["synthesis_queue"] = sq
 _spec.loader.exec_module(sq)
 
 
-def _run(rid, ent, when=None, seq=None, live=None):
+def _run(rid, ent, when=None, seq=None, live=None, scored=12):
+    """An ordinary pending run: an ASSESSMENT with cells in it.
+
+    `scored` defaults to a positive count because every test below is about
+    CHOOSING between runs a producer could work — dedupe, claims, ordering.
+    A run with no scores is not a choice among those; it is not work at all,
+    and it has its own tests further down. Leaving the field off would make
+    each of these silently exercise the unknown-score path instead of the
+    thing it was written for.
+    """
     r = {"run_id": rid, "display_id": ent, "completed_at": when,
-         "request_id": f"REQ-{ent}", "status": "INGESTED"}
+         "request_id": f"REQ-{ent}", "status": "INGESTED",
+         "scored_cells": scored,
+         "synthesisable": None if scored is None else scored > 0}
     if seq is not None:
         r["run_seq"] = seq
     if live is not None:
@@ -170,11 +181,14 @@ def test_a_different_request_for_the_same_entity_is_named():
     from synthesis_queue import SKIP_ABSORBED, select
     pending = [
         {"run_id": "r1", "display_id": "acme", "request_id": "REQ-1",
-         "completed_at": "2026-08-01"},
+         "completed_at": "2026-08-01",
+             "scored_cells": 12, "synthesisable": True},
         {"run_id": "r2", "display_id": "acme", "request_id": "REQ-1",
-         "completed_at": "2026-07-01"},
+         "completed_at": "2026-07-01",
+             "scored_cells": 12, "synthesisable": True},
         {"run_id": "r3", "display_id": "acme", "request_id": "REQ-2",
-         "completed_at": "2026-06-01"},
+         "completed_at": "2026-06-01",
+             "scored_cells": 12, "synthesisable": True},
     ]
     out = select(pending)
     assert out["counts"]["selected"] == 1
@@ -190,10 +204,126 @@ def test_runs_of_one_request_are_still_plain_supersession():
     from synthesis_queue import select
     pending = [
         {"run_id": "r1", "display_id": "acme", "request_id": "REQ-1",
-         "completed_at": "2026-08-01"},
+         "completed_at": "2026-08-01",
+             "scored_cells": 12, "synthesisable": True},
         {"run_id": "r2", "display_id": "acme", "request_id": "REQ-1",
-         "completed_at": "2026-07-01"},
+         "completed_at": "2026-07-01",
+             "scored_cells": 12, "synthesisable": True},
     ]
     out = select(pending)
     assert out["counts"]["absorbed_requests"] == 0
     assert out["counts"]["superseded"] == 1
+
+
+# ── nothing to serve is not work ─────────────────────────────────────────
+#
+# MEASURED 2026-08-30 on goeasy-ltd. Four runs at INGESTED, `scored_cells` 0
+# on every one, `composite` null, request id DMA-RES-GSY-20260830-0002 — the
+# corpus convention being DMA-ASM-… for an assessment and DMA-RES-… for
+# research. The workbook parser had ALREADY worked this out at ingest and
+# filed a `workbook_stage` observation reading "research — column D is empty
+# by contract", 696 rows seen, 679 in scope and unscored, 0 scored.
+#
+# That observation went into the ingest record and stopped there. The queue
+# row carried run_seq, claim state and duplicate counts — everything needed
+# to choose BETWEEN runs and nothing about whether any could be synthesised
+# at all. So a session was spent opening a run whose only possible outcome
+# was "there is nothing here", because synthesis reads scores and is
+# forbidden from deriving them.
+#
+# The waste is the point: this is not a correctness bug in the pages that
+# get produced, it is a bill for producing none.
+
+def test_a_run_that_scored_nothing_is_not_offered():
+    """THE DEFECT. A research-stage package is not synthesis work."""
+    from synthesis_queue import SKIP_UNSCORED, select
+    out = select([_run("r1", "goeasy-ltd", "2026-08-30", 4, scored=0)])
+    assert out["counts"]["selected"] == 0
+    assert out["counts"]["unscored"] == 1
+    assert [s["why"] for s in out["skipped"]] == [SKIP_UNSCORED]
+
+
+def test_the_skip_names_scoring_as_the_missing_step():
+    """A queue that drops work without saying what would make it workable
+    sends the reader back to the same wrong routine. The reason has to name
+    dma-assessment, because that IS the missing step."""
+    from synthesis_queue import SKIP_UNSCORED
+    assert "dma-assessment" in SKIP_UNSCORED
+    assert "research" in SKIP_UNSCORED.lower()
+
+
+def test_the_census_still_counts_the_run_it_refused():
+    """A filter that shrinks `pending` makes the queue look shorter instead
+    of making the waste visible — the same defect one level up."""
+    from synthesis_queue import select
+    out = select([_run("r1", "a", "2026-08-01", 1, scored=0),
+                  _run("r2", "b", "2026-08-02", 1)])
+    assert out["counts"]["pending"] == 2
+    assert out["counts"]["entities"] == 2
+    assert out["counts"]["selected"] == 1
+
+
+def test_an_older_scored_run_survives_a_newer_unscored_one():
+    """THE ORDERING, and why it is the opposite of the claim handling.
+
+    A claim is a fact about the ENTITY, so it is applied AFTER the dedupe and
+    holds every one of that entity's runs. Scorability is a fact about the
+    RUN. Filtering it after the dedupe would let a research package win
+    `best` as "newest", fail the check, and take the entity's real
+    assessment down with it — losing work that was ready to do.
+    """
+    from synthesis_queue import select
+    out = select([_run("asm", "acme", "2026-07-01", 3),
+                  _run("res", "acme", "2026-08-01", 4, scored=0)])
+    assert [r["run_id"] for r in out["selected"]] == ["asm"], (
+        "the entity's scored assessment was dropped behind an unscorable "
+        "research package that was never synthesis work")
+
+
+def test_a_live_claim_still_holds_the_whole_entity():
+    """The property the ordering above must not break: an entity under a
+    live claim is held whole, scored runs included."""
+    from synthesis_queue import SKIP_CLAIMED, select
+    out = select([_run("a", "acme", "2026-07-01", 3),
+                  _run("b", "acme", "2026-08-01", 4, live=True)])
+    assert out["counts"]["selected"] == 0
+    assert SKIP_CLAIMED in {s["why"] for s in out["skipped"]}
+
+
+def test_an_unrecorded_score_count_is_held_back_and_named():
+    """UNKNOWN is not zero, and it is not fine either. A run whose ingest
+    recorded no count may be real work or another research package; offering
+    it is the gamble this filter exists to stop."""
+    from synthesis_queue import SKIP_SCORE_UNKNOWN, select
+    out = select([_run("r1", "acme", "2026-08-01", 1, scored=None)])
+    assert out["counts"]["selected"] == 0
+    assert out["counts"]["score_unknown"] == 1
+    assert out["counts"]["unscored"] == 0, "unknown must not read as zero"
+    assert [s["why"] for s in out["skipped"]] == [SKIP_SCORE_UNKNOWN]
+
+
+def test_the_unknown_gamble_can_be_taken_deliberately():
+    """Fail-closed by default, openable on purpose — never silently."""
+    from synthesis_queue import select
+    pending = [_run("r1", "acme", "2026-08-01", 1, scored=None)]
+    assert select(pending, allow_unknown_scores=True)["counts"]["selected"] == 1
+    assert select(pending)["counts"]["selected"] == 0
+
+
+def test_an_unknown_count_never_opens_a_known_zero():
+    """The override is for UNKNOWN only. A run measured at 0 scored cells
+    stays refused however the flag is set — there is nothing there to serve
+    and no operator judgement changes that."""
+    from synthesis_queue import select
+    pending = [_run("r1", "goeasy-ltd", "2026-08-30", 4, scored=0)]
+    assert select(pending, allow_unknown_scores=True)["counts"]["selected"] == 0
+
+
+def test_a_captured_queue_without_the_field_is_unknown_not_broken():
+    """An operator re-running an old `list_pending_runs` capture must get a
+    stated hold, not a crash and not a silent pass."""
+    from synthesis_queue import SKIP_SCORE_UNKNOWN, select
+    out = select([{"run_id": "r1", "display_id": "acme",
+                   "request_id": "REQ-1", "completed_at": "2026-08-01"}])
+    assert out["counts"]["score_unknown"] == 1
+    assert out["skipped"][0]["why"] == SKIP_SCORE_UNKNOWN
