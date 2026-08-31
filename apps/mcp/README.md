@@ -1,9 +1,9 @@
 # mcp — MCP connector (Python MCP SDK, streamable HTTP)
 
-The only door through which content enters: 22 production tools — the TRD's
+The only door through which content enters: 23 production tools — the TRD's
 original 15 plus those added since (the fit engine, staged-payload reads,
 withdrawal, the enrichment ledger, gate explanation) — and the 11 memory and
-feedback tools below, 33 in all;
+feedback tools below, 34 in all;
 validation gate families AG/SG/ET/CG + contract pass + evidence pass; the
 atomic six-page promote (SELECT … FOR UPDATE, ordered 34-writer registry).
 Bundled 384-dim embedding model (CPU, L2-normalised) for the V4 grounding
