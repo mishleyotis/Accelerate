@@ -131,9 +131,27 @@ def test_no_service_constructs_its_own_connector_any_more():
     coming back, in any of four files."""
     import re
     root = SHARED.parents[1]
+
+    # SOURCE ONLY — never what a build staged. `infra/deploy.sh` copies this
+    # very module into apps/api/shared/ and apps/mcp/shared/ so each image
+    # carries it, and those copies are gitignored build artifacts. An rglob
+    # finds them and reports cloudsql.py itself as a service constructing its
+    # own Connector, which is both false and confusing: measured the first
+    # time anyone ran deploy.sh in a checkout that then ran this test.
+    # `apps/<svc>/shared/` is staged FROM packages/shared — both of its
+    # .gitignores say so on their first line — so nothing in it is service
+    # code, whether or not a given file happens to be tracked. (They differ:
+    # mcp ignores *.py, api ignores only *.json, so four staged modules are
+    # committed under apps/api/shared. That asymmetry is a separate finding;
+    # this scan is correct either way by excluding the directory itself.)
+    files = [f for f in (root / "apps").rglob("*.py")
+             if "shared" not in f.relative_to(root / "apps").parts]
+
     offenders = []
-    for f in (root / "apps").rglob("*.py"):
+    for f in files:
         if "tests" in f.parts or f.name.startswith("test_"):
+            continue
+        if not f.is_file():
             continue
         for i, line in enumerate(f.read_text().splitlines(), 1):
             if re.search(r"\bConnector\(\)", line.split("#")[0]):
