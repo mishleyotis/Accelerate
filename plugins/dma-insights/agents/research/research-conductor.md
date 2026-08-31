@@ -82,21 +82,36 @@ workbook is the substrate: anything not written there did not happen.
    entity, position, mode, `binding_stated`, catalogue drift and whether
    the KG was built; act on what it reports.
 
-1b. **PRELIM — research the institution before its capabilities.**
-   `engine.prelim state --run <RUN_ID> --root <ROOT>` lists six sections
+1b. **PRELIM — buy the deep background ONCE, before any capability work.**
+   `engine.prelim state --run <RUN_ID> --root <ROOT>` lists seven sections
    and the fix line for each. `orient` serves NO category card until they
    are closed, because dispatching sixteen researchers against an entity
    nobody has profiled spends the whole budget discovering that the profile
    mattered.
 
+   THIS IS THE ENRICHMENT PHASE (owner, 2026-08-31: "Let the technographic
+   scans happen in the prelim alongside leadership enrichment with contacts
+   and thought leadership signals such that when the category research
+   happens they already have deep background"). The connector-driven work —
+   the four-layer technographic scan, the Clay or Explorium contact pass,
+   and the public positions those contacts have taken — happens HERE, not
+   after the categories. It is the same spend either way; bought here it is
+   context every one of the sixteen researchers starts from, and bought
+   later it is context each of them pays a volley to approximate alone, in
+   sixteen mutually invisible pieces. Dispatch
+   `dma-insights:technographic-scanner` and
+   `dma-insights:enrichment-connector-specialist` in this step, in parallel
+   — they touch different tabs.
+
    | section | closed by | why the run needs it |
    |---|---|---|
    | `financials` | written by the preflight at `start` | the revenue split the binding rests on |
    | `firmographics` | `engine.prelim narrate --section firmographics` | charter, scale, geography, membership — the frame every capability finding is read against |
-   | `leadership` | `engine.prelim narrate --section leadership` | who owns digital, and whether the role exists at all |
+   | `leadership` | the contact pass, then `engine.prelim narrate --section leadership` | who owns digital, and whether the role exists at all. **Names at least two people**, because "a Chief Digital Officer reports to the CEO" is a structure a researcher cannot search, match to a platform decision, or date. A role with no public holder is a finding — state it with its ladder |
+   | `thought_leadership` | `engine.prelim narrate --section thought_leadership` | what those named people say in public about where the institution is going — the talks, bylines and interviews a category finding is weighed against, and the only PRELIM section in the client's own voice |
    | `timeline` | `engine.prelim timeline` x3+ | dated events, so "modernising since 2022" is a row somebody can check |
    | `peers` | `engine.prelim peers --peer ... --rule ...` | the comparison set, frozen BEFORE any score exists |
-   | `tech_baseline` | `engine.cli techscan clay-plan` then `import-explorium` / `record --provider …` x1+ | the platforms already visible, so researchers recognise a system instead of re-discovering it. Explorium and Clay are the contracted sources — `techscan status` names any that never ran |
+   | `tech_baseline` | `engine.cli techscan clay-plan` then `import-explorium` / `record --provider …` — **one row minimum in EACH of OPS, CUST, DATA, INFRA** | the platforms already visible, so researchers recognise a system instead of re-discovering it. Explorium and Clay are the contracted sources — `techscan status` names any that never ran. A layer you searched and found nothing in closes as an `ABSENT` row carrying the ladder; a layer simply left out reads to every later surface as a clean estate, which is the one thing a scan must never say by accident |
 
    Every narrative section must CITE registered evidence — an uncited
    paragraph about a named institution is refused, because the research

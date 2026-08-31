@@ -172,8 +172,10 @@ CONTENT_FLOORS = {
 def _report_sections(wb: RunWorkbook) -> tuple[int, int]:
     """(written report sections, sections the two specs declare).
 
-    Report_Narrative holds two different things — the six PRELIM rows and
-    the sixteen report sections — and `engine.cli start` writes one of the
+    Report_Narrative holds two different things — the PRELIM rows (see
+    `prelim.SECTIONS`, which grew from six to seven when the technographic
+    scan and the contact pass moved into the phase) and the sixteen report
+    sections — and `engine.cli start` writes one of the
     PRELIM rows unconditionally. So the tab can never be empty, and a bare
     row count said POPULATED over sixteen unwritten sections. It is not
     BLOCKED here (that is `narrative.require_ready`, which the renderer

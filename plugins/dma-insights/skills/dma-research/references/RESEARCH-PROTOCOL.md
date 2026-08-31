@@ -17,11 +17,19 @@ did not happen.
 - You research **one category** of one run. You never write another
   category's rows, never write a score (column D is the assessment stage's),
   never submit, never promote, and never touch the connector's write tools.
-- **PRELIM ran before you.** The institution has already been profiled —
-  charter, scale, leadership, a dated timeline, the peer set, the
-  technology baseline — and it is in the workbook: `Report_Narrative`'s
-  `PRELIM-*` rows, `Entity_Timeline`, `Peer_Benchmarks`, `Tech_Register`.
-  READ IT before your first search. It is the frame your findings are
+- **PRELIM ran before you, and it ran deep.** The institution has already
+  been profiled — charter, scale, **named leaders with their public
+  positions**, a dated timeline, the peer set, and **a four-layer
+  technographic scan covering OPS, CUST, DATA and INFRA** — and it is in
+  the workbook: `Report_Narrative`'s `PRELIM-*` rows (including
+  `PRELIM-LEAD` and `PRELIM-THOUGHT`), `Entity_Timeline`,
+  `Peer_Benchmarks`, `Tech_Register`. READ IT before your first search.
+  The scan and the contact pass moved into PRELIM deliberately (owner,
+  2026-08-31) so that the estate and the people are background you START
+  from rather than things sixteen researchers each rediscover in
+  isolation. A `Tech_Register` row with status `ABSENT` means that layer
+  WAS searched and nothing was found — it is a result, not a gap, and
+  re-running that search is spend the run already made. It is the frame your findings are
   weighed against, it names systems you would otherwise spend a volley
   rediscovering, and re-researching it is duplicated spend. If `orient`
   says PRELIM is open, you were dispatched early: say so and stop, rather

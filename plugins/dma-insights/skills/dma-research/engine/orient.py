@@ -163,12 +163,92 @@ def orient(wb: RunWorkbook, category: str | None, *,
                                         for c, g in gates.items()},
         "prelim": {k: prelim_state[k] for k in
                    ("prelim_status", "open", "blocks_category_dispatch")},
+        "background": _background(wb, prelim_state),
         "do_first": do_first,
         "next_card": card,
         "next_card_withheld_because": blocked if card is None else None,
         "clean": not open_volleyed and not open_pending
                  and not prelim_state["blocks_category_dispatch"]
                  and all(g.get("gate") == "PASS" for g in gates.values()),
+    }
+
+
+def _background(wb: RunWorkbook, prelim_state: dict) -> dict | None:
+    """The PRELIM findings themselves, handed over rather than pointed at.
+
+    WHY orient CARRIES THIS (owner, 2026-08-31: the category researchers
+    should "already have deep background from enrichment"). PRELIM's status
+    was in this payload from the start; its CONTENT never was. So the
+    compass every researcher runs first said "PRELIM is closed" and left the
+    material in the workbook for an agent to go and find — and an agent that
+    has to go and find context mostly does not, which is how sixteen
+    researchers each spent a volley rediscovering a core platform the run
+    had already named.
+
+    Deliberately compact. This is read by a model at the top of its work,
+    so it carries the facts a first search would otherwise be spent on — who
+    the leaders are, what they say in public, which products sit on which
+    layer, and which layers were searched and found empty — and not the
+    prose behind them, which is a `Report_Narrative` read away for anything
+    that needs the full argument.
+
+    None while PRELIM is open: there is no background yet, and a half-filled
+    block reads as a complete one.
+    """
+    if prelim_state.get("blocks_category_dispatch"):
+        return None
+
+    narr = {}
+    for r in wb.rows("Report_Narrative"):
+        sid = str(r.get("Section_ID") or "").strip()
+        if sid.startswith("PRELIM-"):
+            narr[sid] = " ".join(str(r.get("Body") or "").split())
+
+    def _gist(sid: str, limit: int = 320) -> str:
+        body = narr.get(sid, "")
+        return body if len(body) <= limit else body[:limit].rsplit(" ", 1)[0] + " …"
+
+    by_layer: dict[str, list] = {}
+    for r in wb.rows("Tech_Register"):
+        layer = str(r.get("Layer") or "").strip().upper()
+        if not layer:
+            continue
+        by_layer.setdefault(layer, []).append({
+            "product": str(r.get("Product") or "").strip(),
+            "vendor": str(r.get("Vendor") or "").strip() or None,
+            "status": str(r.get("Status") or "").strip(),
+        })
+
+    tl = [r for r in wb.rows("Entity_Timeline")
+          if str(r.get("Event_Date") or "").strip()]
+    dates = sorted(str(r.get("Event_Date"))[:10] for r in tl)
+
+    return {
+        "read_this_before_your_first_search": True,
+        "firmographics": _gist("PRELIM-FIRM"),
+        "leadership": {
+            "named": prelim._named_people(narr.get("PRELIM-LEAD", "")),
+            "gist": _gist("PRELIM-LEAD"),
+        },
+        "thought_leadership": _gist("PRELIM-THOUGHT"),
+        "tech_estate": {
+            "by_layer": by_layer,
+            "searched_and_empty": sorted(
+                lay for lay, rows in by_layer.items()
+                if rows and all(r["status"] == "ABSENT" for r in rows)),
+            "note": ("a row with status ABSENT means that layer WAS searched "
+                     "and nothing was found — a result, not a gap. Do not "
+                     "re-run that search; the run already paid for it"),
+        },
+        # Peer_Benchmarks is one row per CATEGORY carrying the peer set in
+        # `Peer_Names`, not one row per peer — so the names are unioned out
+        # of it rather than counted as rows.
+        "peers": sorted({n.strip() for r in wb.rows("Peer_Benchmarks")
+                         for n in str(r.get("Peer_Names") or "").split(",")
+                         if n.strip()}),
+        "timeline": {"events": len(tl),
+                     "from": dates[0] if dates else None,
+                     "to": dates[-1] if dates else None},
     }
 
 

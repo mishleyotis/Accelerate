@@ -69,11 +69,20 @@ any of those. Four gates and one registry close that:
   `<Entity> - DMA` is created locally and in the intake Drive when the run
   begins, carrying `run_manifest.json` at `status: IN_PROGRESS`. A run that
   stops early is still findable.
-- **PRELIM** (`engine/prelim.py`). Six sections — financials, firmographics,
-  leadership, timeline, peers, technology baseline — each closed by research
-  or by a declared absence with its ladder. `orient` serves no category card
-  until they are, and every narrative section must cite registered evidence
-  (bank institution-profile sources with `cli evidence --profile`).
+- **PRELIM** (`engine/prelim.py`). Seven sections — financials,
+  firmographics, leadership, timeline, peers, technology baseline, thought
+  leadership — each closed by research or by a declared absence with its
+  ladder. `orient` serves no category card until they are, and every
+  narrative section must cite registered evidence (bank institution-profile
+  sources with `cli evidence --profile`). **This is the enrichment phase,
+  not a summary of one** (owner, 2026-08-31): `leadership` will not close
+  on a description of a structure, it wants named people from the contact
+  pass; `thought_leadership` wants what those people say in public; and
+  `tech_baseline` wants the full four-layer scan — OPS, CUST, DATA, INFRA —
+  with a layer that was searched and came back empty recorded as an
+  `ABSENT` row rather than left out. The deep background is bought once,
+  here, instead of sixteen category researchers each paying for a piece of
+  it without knowing what the others found.
 - **Completeness** (`engine/completeness.py`). Every workbook tab is
   populated or carries a recorded reason; nine may never be declared empty.
   Blocks the handoff and the package. The validator checks shape; this
