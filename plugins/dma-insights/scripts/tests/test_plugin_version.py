@@ -479,7 +479,16 @@ def test_session_start_is_read_from_the_process_not_guessed(monkeypatch):
 # distinction the report needs to make.
 
 def _prov(tmp_path, **fields):
-    rec = {"bootstrap_ran_at": "2026-08-24T09:11:02Z",
+    # FRESH BY DEFAULT, and it used to be a hardcoded date. Once
+    # `provisioning()` learned to read the record's AGE — a record hours old
+    # means setup ran at snapshot-build time and is not re-running per
+    # session — a literal timestamp made every fixture a stale snapshot the
+    # moment the calendar passed it. A fixture that ages into a different
+    # verdict tests something other than what it says. Tests that want an
+    # OLD record now pass one explicitly.
+    import datetime as _d
+    _now = _d.datetime.now(_d.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    rec = {"bootstrap_ran_at": _now,
            "repo_dir": "/home/user/Accelerate",
            "branch": "claude/dma-insights-onboarding-0ryrd0",
            "checkout_current": True, "checkout_state": "reset",
@@ -715,3 +724,67 @@ def test_the_diverged_fix_text_names_the_command_that_works():
     assert "uninstall" in pv.REINSTALL
     assert pv.REINSTALL.endswith(pv.ENABLE), (
         "a reinstall that does not re-enable leaves the plugin switched off")
+
+
+# ── the snapshot that provisions once and is restored for days ────────────
+#
+# OWNER, 2026-08-31: "I keep on getting this." The recurrence is the point.
+# `ok` said the setup script ran, brought the checkout to the tip and
+# installed what it expected — all true, and all true LAST TIME IT RAN. It
+# said nothing about when. Measured: one firing's record was stamped
+# 2026-08-27, four days before it fired; this container's was 17.8 hours
+# old. Setup runs when the environment SNAPSHOT is built, not at session
+# start, so every session on that image inherits the plugin that was current
+# whenever setup last ran — the roster binds short, --heal fixes the disk
+# too late, and the firing falls back to agent_run.py, which is why nothing
+# appears in the agent panel.
+
+def test_a_provisioning_record_hours_old_is_a_restored_snapshot(tmp_path):
+    import datetime as _d
+    old = (_d.datetime.now(_d.timezone.utc)
+           - _d.timedelta(hours=18)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    prov = _prov(tmp_path, bootstrap_ran_at=old)
+    out = pv.provisioning(prov)
+    assert out["state"] == "stale_snapshot"
+    assert out["recurs"] is True, (
+        "a snapshot reproduces this on every session; reporting it as a "
+        "one-off is the livelock this function exists to name")
+    assert 17 <= out["age_hours"] <= 19
+
+
+def test_a_freshly_provisioned_container_is_still_ok(tmp_path):
+    """Setup that runs per session leaves a record minutes old."""
+    import datetime as _d
+    fresh = (_d.datetime.now(_d.timezone.utc)
+             - _d.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=fresh))
+    assert out["state"] == "ok" and out["recurs"] is False
+
+
+def test_the_fix_names_session_start_not_another_heal(tmp_path):
+    """--heal repairs the DISK and the session has already bound its roster,
+    so prescribing it again would prescribe paying the same cost forever."""
+    import datetime as _d
+    old = (_d.datetime.now(_d.timezone.utc)
+           - _d.timedelta(days=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    fix = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old))["fix"]
+    assert "SESSION START" in fix
+    assert "not once when the image is baked" in fix
+
+
+def test_a_stale_snapshot_says_a_fresh_session_will_not_fix_it(tmp_path):
+    """The correction that matters operationally: the staleness is in the
+    IMAGE, not the session, so a new session on the same image binds the
+    same short roster."""
+    import datetime as _d
+    old = (_d.datetime.now(_d.timezone.utc)
+           - _d.timedelta(hours=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    why = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old))["reason"]
+    assert "fresh session" in why and "does not fix it" in why
+
+
+def test_an_unreadable_timestamp_does_not_manufacture_a_verdict(tmp_path):
+    assert pv.provisioning_age_h({}) is None
+    assert pv.provisioning_age_h({"bootstrap_ran_at": "not a date"}) is None
+    out = pv.provisioning(_prov(tmp_path, bootstrap_ran_at="not a date"))
+    assert out["state"] == "ok", "no timestamp is not evidence of staleness"
