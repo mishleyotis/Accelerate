@@ -332,14 +332,32 @@ def test_the_real_name_is_used_when_the_scope_is_there(monkeypatch):
     assert "#deal-desk" in head, head
 
 
+#: A value that is NOT credential-shaped, assembled rather than written.
+#: The first version of this test passed a literal `xoxb-`-prefixed string,
+#: which is what a real Slack token looks like — and `scripts/scan_secrets.py`
+#: rightly failed CI on it twice over, as a Slack token and as a hardcoded
+#: credential assignment. The scanner was correct: a fake credential
+#: committed to the tree is how people learn to wave its failures through.
+#:
+#: The shape was never load-bearing. `fetch_channel` does not parse the
+#: token, it passes it to `call`, which these tests monkeypatch — so the
+#: property under test ("whatever was handed in must not reach stderr") is
+#: proved by any distinctive value, and better by one nobody can mistake for
+#: real. Split so the joined form appears nowhere in the source.
+_NEVER_ECHOED = "not-a-real-value-" + "canary" + "-do-not-print"
+
+
 def test_the_note_names_the_scope_and_never_the_token(monkeypatch, capsys):
-    """An operator reading the log must learn what to grant, and the token
-    must not appear in the note — the file's standing rule."""
+    """An operator reading the log must learn what to grant, and the value
+    handed in as the token must not appear in the note — the file's standing
+    rule, stated in its own docstring: the token is never echoed."""
     monkeypatch.setattr(SC, "call", _slack_granting("channels:history"))
-    SC.fetch_channel("C0AD83KJ4DU", token="xoxb-SECRET-VALUE")
+    SC.fetch_channel("C0AD83KJ4DU", token=_NEVER_ECHOED)
     err = capsys.readouterr().err
     assert "channels:read" in err and "channels:history" in err, err
-    assert "SECRET" not in err, "the note echoed the token"
+    assert _NEVER_ECHOED not in err, "the note echoed the token"
+    assert "canary" not in err, (
+        "no fragment of the token reached the note either")
 
 
 def test_a_refused_history_is_still_a_failure(monkeypatch):
