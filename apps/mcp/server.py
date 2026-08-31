@@ -32,11 +32,11 @@ name is "DMA Insights".
 from __future__ import annotations
 
 import os
-from contextlib import contextmanager
 
 from mcp.server import MCPServer
 
 from dma_mcp import bundle as bundle_mod
+from dma_mcp import db as db_mod
 from dma_mcp import rejections
 from dma_mcp import claims as claims_mod
 from dma_mcp import evidence_tools
@@ -74,25 +74,14 @@ def _encoder():
     return _ENCODER
 
 
-@contextmanager
-def _conn():
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        url = os.environ["LOCAL_DATABASE_URL"]
-        host = url.split("@")[1].split(":")[0]
-        c = pg8000.dbapi.connect(user="dmai-mcp@digital-maturity-assessor.iam",
-                                 password="local", host=host, port=5432,
-                                 database="dma_insights")
-    else:
-        from google.cloud.sql.connector import Connector
-        c = Connector().connect(
-            os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-            user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-            enable_iam_auth=True, ip_type="PRIVATE")
-    try:
-        yield c
-    finally:
-        c.close()
+# The connection factory lives in `dma_mcp.db` — importable without the MCP
+# SDK, so the one path every tool call goes through is finally reachable by a
+# test. It holds ONE Cloud SQL Connector for the process: constructing one per
+# call cost an Admin API `connectSettings` request every time and leaked a
+# refresher that kept making more, which is what returned
+# "429 Too Many Requests" to `open_payload` on 2026-08-31 before a single
+# payload part had been sent. See that module's docstring.
+_conn = db_mod.connect
 
 
 def _traced(fn):
@@ -438,7 +427,8 @@ def open_payload(run_id: str, page: str, producer_version: str = "") -> dict:
 @_traced
 def append_payload_part(upload_id: str, part: int, parts_total: int,
                         path: str = "", items: list = None,
-                        fields: dict = None, item_count: int = 0) -> dict:
+                        fields: dict = None, item_count: int = 0,
+                        repartition: bool = False) -> dict:
     """Send one part of a chunked payload. Returns a receipt, never a verdict —
     nothing is validated until the whole assembles.
 
@@ -457,11 +447,39 @@ def append_payload_part(upload_id: str, part: int, parts_total: int,
     Parts are applied in ascending index at assembly, so the same set of parts
     always assembles to the same bytes. Resending an index REPLACES it: a
     dropped connection costs one part, not the transmission.
+
+    `parts_total` is fixed by the first part that arrives — that is what makes
+    an incomplete transmission detectable. If the chunking plan genuinely
+    changes, send part 1 of the NEW plan with `repartition=true`: it discards
+    the old plan's parts and adopts the new length, and the receipt says how
+    many it discarded. Resuming an interrupted transmission needs none of
+    that — call `get_upload_status(upload_id)` and resend only its
+    `missing_parts` with the parts_total already declared.
     """
     with _conn() as c:
         return transport_mod.append_payload_part(
             c, upload_id, part, parts_total, path=path, items=items,
-            fields=fields, item_count=item_count)
+            fields=fields, item_count=item_count, repartition=repartition)
+
+
+@mcp.tool()
+@_traced
+def get_upload_status(upload_id: str = "", run_id: str = "",
+                      page: str = "") -> dict:
+    """What has already arrived on a chunked upload — read-only.
+
+    Answers the question a producer resuming after an interruption could not
+    previously ask: which parts landed, which are missing, how many bytes and
+    items are held, and whether the set is complete. Nothing is written.
+
+    Pass `upload_id` for one upload, or `run_id` (optionally with `page`) to
+    list that run's OPEN uploads newest first — so a session that lost its
+    place finds the upload it already opened instead of starting a new one and
+    resending everything.
+    """
+    with _conn() as c:
+        return transport_mod.upload_status(c, upload_id=upload_id or None,
+                                           run_id=run_id or None, page=page)
 
 
 @mcp.tool()
