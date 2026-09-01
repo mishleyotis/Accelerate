@@ -882,6 +882,67 @@ _EV_MISS_COST = {
 }
 
 
+def _sibling_detail_index(wb, chosen_tab):
+    """Excerpt / date / recency by e_id from a sibling evidence tab that
+    carries a verbatim excerpt column, for FILLING rows the chosen ledger
+    left blank.
+
+    The chosen ledger tab is authoritative for ids, source, url, tier and
+    claim. Some generations (general_dma) put those in `Evidence_Master` and
+    the VERBATIM SPANS — plus the publication date and the recency band — in
+    a separate `Evidence_Detail` anchored on the same ids. `_EV_TABS` names
+    the first present tab as the ledger, so on those packages `Evidence_Master`
+    won every time and `Evidence_Detail` was never read: every row landed
+    excerpt-less (mined weakly from Rationale) and date-less (banded
+    UNVERIFIED), and the heatmap the whole corpus feeds cited a chip a reader
+    could open onto nothing (ET-04). The spans were in the workbook the whole
+    time, one tab over.
+
+    This joins that sibling back on by EXACT id. It is deliberately additive:
+    it lends nothing to a row whose ledger already carried the field (the
+    ledger stays authoritative), and it reads only a sibling that actually
+    holds a verbatim column, so a package with a single evidence tab is
+    unchanged.
+    """
+    for name in _EV_TABS:
+        if name == chosen_tab or name not in wb.sheetnames:
+            continue
+        ws = wb[name]
+        headers = first = None
+        for anchor in _EV_ID_ANCHORS:
+            try:
+                headers, first = _header_map(ws, anchor)
+                break
+            except ValueError:
+                continue
+        if headers is None:
+            continue
+        excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
+        id_i = _pick(headers, _EV_E_ID_KEYS)
+        if not excerpt_cols or id_i is None:
+            continue            # no verbatim span to lend, or no id to join on
+        pub_i = _pick(headers, _EV_ALIASES["published"])
+        rec_i = _pick(headers, _EV_ALIASES["recency"])
+        index = {}
+        for row in ws.iter_rows(min_row=first, values_only=True):
+            e_id = str(row[id_i]).strip() if id_i < len(row) and row[id_i] else ""
+            if not (e_id.startswith("E-") or e_id.startswith("INT-")):
+                continue
+            pub_raw = row[pub_i] if pub_i is not None and pub_i < len(row) else None
+            rec_raw = row[rec_i] if rec_i is not None and rec_i < len(row) else None
+            index[e_id] = {
+                "excerpt": _best_excerpt(
+                    [row[i] if i < len(row) else None for i in excerpt_cols]),
+                "published_date": parse_fuzzy_date(pub_raw),
+                "stated_recency": _stated_band(rec_raw, pub_raw),
+            }
+        # Only a sibling that actually carries spans is worth returning; an
+        # empty verbatim column lends nothing and should not shadow the next.
+        if any(v["excerpt"] for v in index.values()):
+            return name, index
+    return None, {}
+
+
 def parse_evidence_master(path: str, obs: list | None = None) -> list:
     def observe(kind, detail):
         if obs is not None:
@@ -979,6 +1040,42 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
                             (x.strip() for x in str(v("subcaps") or "").split(","))
                             if SUBCAP_RE.match(s)],
             })
+        # FILL EXCERPT / DATE / RECENCY FROM A SIBLING DETAIL TAB.
+        #
+        # The chosen ledger tab is authoritative and read first; where it
+        # carried ids but no verbatim span or publication date (general_dma
+        # ships those in a separate `Evidence_Detail`), join them back on by
+        # exact id rather than leave every row excerpt- and date-less. Additive
+        # only: a field the ledger already filled is never overwritten.
+        if out:
+            detail_tab, detail_idx = _sibling_detail_index(wb, tab)
+            if detail_idx:
+                excerpts_filled = dates_filled = 0
+                for r in out:
+                    d = detail_idx.get(r["e_id"])
+                    if not d:
+                        continue
+                    if not r.get("excerpt") and d["excerpt"]:
+                        r["excerpt"] = d["excerpt"]
+                        excerpts_filled += 1
+                    if r.get("published_date") is None \
+                            and d["published_date"] is not None:
+                        r["published_date"] = d["published_date"]
+                        r["stated_recency"] = d["stated_recency"]
+                        dates_filled += 1
+                if excerpts_filled or dates_filled:
+                    observe("evidence_detail_enrichment", {
+                        "ledger_tab": tab, "detail_tab": detail_tab,
+                        "excerpts_filled": excerpts_filled,
+                        "dates_filled": dates_filled,
+                        "reason": "the ledger tab carried ids, source and tier "
+                                  "but no verbatim excerpt or publication date; "
+                                  "these were joined by exact id from the "
+                                  "sibling detail tab that does, so a cited chip "
+                                  "opens onto a quotation instead of nothing "
+                                  "(ET-04) and dated rows band by their date "
+                                  "instead of UNVERIFIED."})
+
         if rows_seen and not out:
             observe("evidence_ledger_ids_unrecognised", {
                 "tab": tab, "rows_seen": rows_seen,
