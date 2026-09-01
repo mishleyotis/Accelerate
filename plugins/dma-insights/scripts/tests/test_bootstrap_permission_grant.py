@@ -334,3 +334,17 @@ def test_the_set_is_derived_rather_than_a_typed_list():
         "was this witness until 2026-08-30; it is now granted by exact read "
         "name because the hook classifies it, so it can no longer show that "
         "an UNCLASSIFIED server is picked up from the tree.)")
+
+
+# ── self-healing: a new session must LOAD the current hooks (owner 2026-09-01) ──
+
+def test_bootstrap_self_heals_the_install_unconditionally():
+    """A session must LOAD the current hooks, not a snapshot's stale copy.
+    bootstrap runs plugin_version.py --heal — which uninstalls and reinstalls a
+    DIVERGED tree (same version, different content: exactly how a stale
+    auto-approve hook survives) — and it is not gated behind a version-string
+    match. Favouring self-healing is this line staying present and ungated."""
+    code = code_lines()
+    assert "plugin_version.py" in code and "--heal" in code, (
+        "bootstrap no longer self-heals the install; a new session can bind a "
+        "stale auto-approve hook that prompts on tools this repo auto-approves")

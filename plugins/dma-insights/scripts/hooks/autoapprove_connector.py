@@ -465,6 +465,21 @@ ENRICHMENT_REASON = (
 )
 
 
+def _canonical(tool: str) -> str:
+    """The same tool with its SERVER segment's hyphens turned to underscores.
+
+    A classified server may attach under either spelling — the Routine record
+    and this file's tables use `Google_Drive`, the live connector attaches as
+    `Google-Drive` — and a full-name rule written one way misses the other.
+    Only the server segment (index 1) is touched; the tool id keeps its own
+    hyphens (`enrich-business` stays `enrich-business`)."""
+    parts = tool.split("__")
+    if len(parts) >= 3 and parts[0] == "mcp":
+        parts[1] = parts[1].replace("-", "_")
+        return "__".join(parts)
+    return tool
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -520,7 +535,15 @@ def main() -> int:
     # A connector that attaches under a stable, nameable server segment, so
     # its full tool name can be written down exactly. This is checked BEFORE
     # the suffix rule because it is the stricter of the two.
-    if tool in QUALIFIED_TOOLS:
+    #
+    # MEASURED 2026-09-01, owner: still prompting on Google-Drive / Vibe-
+    # Prospecting. The SERVER_SURFACES keys are written with underscores
+    # (Google_Drive), but the connector attaches under a HYPHEN segment
+    # (Google-Drive) in this environment — so the exact full name missed and
+    # the read fell through to a prompt. The tool SUFFIX never carries this
+    # ambiguity (it is the connector's own tool id), so only the SERVER
+    # segment is canonicalised, hyphen to underscore, before the lookup.
+    if tool in QUALIFIED_TOOLS or _canonical(tool) in QUALIFIED_TOOLS:
         return _allow(ENRICHMENT_REASON)
 
     # An enrichment connector, matched by TOOL NAME because its server segment

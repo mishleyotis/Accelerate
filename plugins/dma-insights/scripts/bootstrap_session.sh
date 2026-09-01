@@ -470,7 +470,10 @@ out = []
 # Every classified server, whether or not the tree names it: the hook already
 # rules on Slack, Salesforce, Google Admin, Auctor and GitHub, and a settings
 # grant that agrees with it costs nothing and survives a session whose hooks
-# bound from a stale install.
+# bound from a stale install. The routine attaches these under UNDERSCORE tool
+# names, so the belt names them that way; the claude.ai interactive attach
+# (which uses hyphens) is covered by the hook's own read-time canonicalisation
+# and the project-scope .claude/settings.json, not by this user-scope belt.
 for server in sorted(seen | set(aac.SERVER_SURFACES)):
     if server in aac.SERVER_SURFACES:
         # A CONDITIONAL tool must never reach this list. A settings grant is

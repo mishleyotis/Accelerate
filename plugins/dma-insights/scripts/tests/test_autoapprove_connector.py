@@ -777,3 +777,61 @@ def test_the_allowed_set_is_exactly_what_the_connector_serves():
     assert h.DMA_TOOLS == served, (
         f"only in the hook: {sorted(h.DMA_TOOLS - served)}; "
         f"only in the connector: {sorted(served - h.DMA_TOOLS)}")
+
+
+# ── stress: server spelling resilience (AUD-0114, owner 2026-09-01) ──
+#
+# The owner kept being prompted for Google-Drive / Vibe-Prospecting: the tables
+# spell those servers with underscores, the live connector attaches under a
+# HYPHEN segment, and a full-name rule written one way missed the other. These
+# tests drive from SERVER_SURFACES itself so coverage cannot drift, and assert
+# every classified read approves under BOTH spellings while every write still
+# prompts under both.
+import importlib as _importlib
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "hooks"))
+_AAC = _importlib.import_module("autoapprove_connector")
+
+
+def _hyphen_server(tool: str) -> str:
+    parts = tool.split("__")
+    parts[1] = parts[1].replace("_", "-")
+    return "__".join(parts)
+
+
+@pytest.mark.parametrize("server", sorted(_AAC.SERVER_SURFACES))
+def test_classified_reads_approve_under_both_server_spellings(server):
+    for t in sorted(_AAC.SERVER_SURFACES[server]["read"]):
+        full = f"mcp__{server}__{t}"
+        if full in _AAC.CONDITIONAL_TOOLS:
+            continue
+        for name in (full, _hyphen_server(full)):
+            assert decision(AUTO, {"tool_name": name, "tool_input": {}}) == "allow", \
+                f"{name}: a classified read must auto-approve under either spelling"
+
+
+@pytest.mark.parametrize("server", sorted(_AAC.SERVER_SURFACES))
+def test_classified_writes_still_prompt_under_both_server_spellings(server):
+    for t in sorted(_AAC.SERVER_SURFACES[server]["withheld"]):
+        full = f"mcp__{server}__{t}"
+        for name in (full, _hyphen_server(full)):
+            assert decision(AUTO, {"tool_name": name, "tool_input": {}}) is None, \
+                f"{name}: a withheld write must NOT be auto-approved under any spelling"
+
+
+@pytest.mark.parametrize("tool", [
+    # every connector the owner named, plus the multi-word ones both ways
+    "mcp__Tavily__tavily_search", "mcp__Tavily__tavily_extract",
+    "mcp__Exa__web_search_exa", "mcp__Exa__web_fetch_exa",
+    "mcp__Clay__find-and-enrich-company", "mcp__Clay__get-task-context",
+    "mcp__Indeed__search_jobs", "mcp__Indeed__get_company_data",
+    "mcp__Vibe-Prospecting__enrich-business",
+    "mcp__Vibe_Prospecting__enrich-business",
+    "mcp__Google-Drive__search_files", "mcp__Google_Drive__search_files",
+    "mcp__Google-Drive__get_file_permissions",
+    "mcp__DMA-Insights__get_client_state",
+    "mcp__plugin_dma-insights_connector__get_client_state",
+])
+def test_the_connectors_the_owner_named_all_auto_approve(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
+        f"{tool} must auto-approve without a human — the routine runs headless"
