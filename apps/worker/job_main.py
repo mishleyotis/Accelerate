@@ -35,6 +35,8 @@ from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_research_workbook,
                                         parse_scoring_workbook,
                                         parse_technographic_scan,
+                                        parse_tech_register,
+                                        workbook_tab_coverage,
                                         merge_evidence_sources)
 
 
@@ -392,6 +394,26 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                   f"{len(research.get('absent') or [])} recorded absences")
 
         wb = parse_scoring_workbook(wb_path)
+
+        # WHICH TABS DOES ANYTHING READ? Recorded on every ingest, before the
+        # readers run, because the answer changed under us: the Golden 1
+        # workbook ships 43 tabs against readers that claimed 12, and the
+        # gap was invisible. A surface written from a tab in this census's
+        # worklist renders empty because nothing read it, and a producer who
+        # cannot tell that apart from a client with nothing to say will write
+        # the absence.
+        workbook_tab_coverage(wb_path, companion)
+
+        # The technology register at the grain the techstack contract wants.
+        # Run for its OBSERVATIONS as well as its rows: CG-20 (product and
+        # vendor stating one string) and CG-12 (a detection_basis over the
+        # face-slot budget) are properties of the workbook, and naming them
+        # here reports them against the run instead of surfacing them as a
+        # producer defect at validation time.
+        tech_register = parse_tech_register(wb_path, companion)
+        if tech_register:
+            print(f"ingest: tech register {len(tech_register)} product row(s)")
+
         # Every companion tab appends what it could not read to one list; the
         # persist writes them as parser_observations against the run, so a tab
         # the parser did not recognise leaves a record naming the tab, the
