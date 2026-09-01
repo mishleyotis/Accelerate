@@ -233,3 +233,25 @@ the run is actually in — PRELIM_OPEN, NO_CLIENT_FOLDER, STALLED,
 GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF — and every row
 carries a `resume` plan naming the agent to dispatch and the prompt to
 dispatch it with, so you never have to compose one.
+
+## Gold standard — the deliverable-first loop (mandatory)
+
+Before you author anything, read `docs/GOLD-STANDARD.md` and open the reference package
+(**Golden 1 Credit Union**) so you know the exact shape you are producing — the section
+list, the tables, the coverage disclosure, the M-band labels. Authoring first and
+discovering the standard in QA is the failure this loop exists to prevent.
+
+When you have produced your artefact, run the gate on your OWN output before you return:
+
+```
+python3 -m engine.gold_standard workbook <scoring_workbook.xlsx>
+python3 -m engine.gold_standard report   <report.docx> --kind {research|assessment}
+python3 -m engine.gold_standard package   <client_folder>
+```
+
+Do not hand back an artefact until the gate prints `PASS`. Re-run it after any change
+that touches a score, a section, or a figure. Every finding maps to a goeasy-Ltd defect
+in `docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
+caught here. Never ship a hedge ("Not established this run", "surface-production stage",
+"no score yet", a bare "N/A" or "0" where a value belongs) — a genuine gap is a
+disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge.
