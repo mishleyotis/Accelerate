@@ -524,6 +524,24 @@ VERB_READ_REASON = (
 )
 
 
+#: Built-in (non-MCP) tools this routine runs headless. MEASURED 2026-09-01,
+#: owner: "still getting approval prompts" while sixteen research producers ran.
+#: Root cause: this hook was wired ONLY to `mcp__.*`, and the enrichment
+#: connectors it covers are not the whole story — the producers' PRIMARY
+#: retrieval is the BUILT-IN `WebSearch` and `WebFetch`, which no auto-approve
+#: hook matched and `permissions.allow` did not list, so every one fell through
+#: to a prompt. They are READ-ONLY web reads (no state written anywhere), the
+#: exact tools a headless research routine must run without a human. `Bash` is
+#: deliberately NOT here — it has its own deny hooks and auto-approving every
+#: shell call from this hook would wave through far more than web reads.
+#: hooks.json registers this hook against the `WebSearch` and `WebFetch`
+#: matchers as well as `mcp__.*`, so this branch actually fires.
+READ_ONLY_BUILTINS = frozenset({"WebSearch", "WebFetch"})
+BUILTIN_WEB_REASON = (
+    "read-only web retrieval (WebSearch/WebFetch) — the research routine's "
+    "primary evidence-gathering tools, auto-approved so it runs headless")
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -535,6 +553,10 @@ def main() -> int:
     tool = event.get("tool_name")
     if not isinstance(tool, str):
         return 0
+    # Built-in read-only web tools first: they carry no `mcp__` prefix, so none
+    # of the connector logic below would ever reach them.
+    if tool in READ_ONLY_BUILTINS:
+        return _allow(BUILTIN_WEB_REASON)
     # startswith on the full prefix — never a substring match, never a regex.
     # `mcp__plugin_dma-insights_connector__x` is ours; anything else is not,
     # including a server that merely contains this name inside a longer one.

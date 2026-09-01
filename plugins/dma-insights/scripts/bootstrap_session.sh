@@ -503,8 +503,22 @@ if "mcp__plugin_dma-insights_connector__*" not in wanted:
     wanted.append("mcp__plugin_dma-insights_connector__*")
 # `mcp__*` is skipped by the permission engine with a warning and approves
 # nothing, so a glob that reached the server segment would look like a grant
-# and be none. Dropped here rather than written and trusted.
+# and be none. Dropped here rather than written and trusted. (Runs BEFORE the
+# built-in grants below, which carry no `__` for rindex to find.)
 wanted = [w for w in wanted if "*" not in w[: w.rindex("__") + 2]]
+# The built-in web tools are NOT MCP, so the derived-from-SERVER_SURFACES set
+# above never reaches them — and they are the research routine's PRIMARY
+# retrieval path (the producers search and fetch far more than they call any
+# connector). Owner report 2026-09-01: "still getting approval prompts" while
+# the producers ran, because WebSearch/WebFetch fell through to a prompt. They
+# are read-only web reads; grant them so a new session runs headless. (The
+# autoapprove hook also allows them via the WebSearch|WebFetch matcher; this is
+# the belt to that suspenders, for a session whose hook binding is stale.)
+# Appended AFTER the mcp-glob filter above, which assumes every entry contains
+# `__`.
+for _builtin in ("WebSearch", "WebFetch"):
+    if _builtin not in wanted:
+        wanted.append(_builtin)
 p = pathlib.Path(os.environ["CLAUDE_SETTINGS"])
 p.parent.mkdir(parents=True, exist_ok=True)
 try:

@@ -37,6 +37,11 @@ import pytest
 HERE = Path(__file__).resolve().parent
 BOOTSTRAP = HERE.parent / "bootstrap_session.sh"
 GRANT = "mcp__plugin_dma-insights_connector__*"
+# The built-in web tools the grant block always adds (AUD-0117), in append
+# order after the connector. The research routine's primary retrieval is
+# WebSearch/WebFetch; granting them is what keeps a new session headless.
+WEB = ["WebSearch", "WebFetch"]
+BASE_GRANTS = [GRANT] + WEB
 
 
 def grant_block() -> str:
@@ -109,7 +114,7 @@ def test_the_grant_targets_user_scope_not_the_repo():
 def test_a_missing_settings_file_is_created(tmp_path):
     s = tmp_path / ".claude" / "settings.json"
     assert "granted" in run_grant(s)
-    assert json.loads(s.read_text())["permissions"]["allow"] == [GRANT]
+    assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_running_twice_does_not_duplicate_the_rule(tmp_path):
@@ -117,7 +122,7 @@ def test_running_twice_does_not_duplicate_the_rule(tmp_path):
     run_grant(s)
     out = run_grant(s)
     assert "already granted" in out
-    assert json.loads(s.read_text())["permissions"]["allow"] == [GRANT]
+    assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_the_plugin_install_keys_survive_the_grant(tmp_path):
@@ -135,7 +140,7 @@ def test_the_plugin_install_keys_survive_the_grant(tmp_path):
     assert cfg["enabledPlugins"] == {"dma-insights@zennify-dma": True}
     assert cfg["extraKnownMarketplaces"]["zennify-dma"]["source"]["path"] == "/x"
     assert "pluginConfigs" in cfg
-    assert cfg["permissions"]["allow"] == [GRANT]
+    assert cfg["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_an_unrelated_allow_rule_is_kept(tmp_path):
@@ -144,7 +149,7 @@ def test_an_unrelated_allow_rule_is_kept(tmp_path):
                                              "deny": ["Read(//root/.dma/sa.json)"]}}))
     run_grant(s)
     cfg = json.loads(s.read_text())
-    assert cfg["permissions"]["allow"] == ["Bash(git status)", GRANT]
+    assert cfg["permissions"]["allow"] == ["Bash(git status)"] + BASE_GRANTS
     assert cfg["permissions"]["deny"] == ["Read(//root/.dma/sa.json)"]
 
 

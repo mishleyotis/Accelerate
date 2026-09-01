@@ -23,6 +23,8 @@
   "permissions": {
     "allow": [
       "Bash(git push -u origin claude/:*)",
+      "WebSearch",
+      "WebFetch",
       "mcp__Clay",
       "mcp__Exa",
       "mcp__Tavily",

@@ -43,6 +43,16 @@
         ]
       },
       {
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: autoapprove_connector.py is MISSING from the installed plugin, so the built-in web tools are NOT auto-approved. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "mcp__.*__submit_page_payload",
         "hooks": [
           {

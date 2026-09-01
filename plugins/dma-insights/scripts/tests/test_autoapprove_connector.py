@@ -71,7 +71,7 @@ def test_a_connector_tool_is_approved_without_a_human(tool):
 
 
 @pytest.mark.parametrize("tool", [
-    "Bash", "Write", "Edit", "Read", "WebFetch", "Task",
+    "Bash", "Write", "Edit", "Read", "Task",
     "mcp__Gmail__send_message",
     "mcp__Google_Drive__update_file",
     "mcp__github__create_pull_request",
@@ -81,6 +81,29 @@ def test_no_other_tool_is_ever_approved(tool):
     assert decision(AUTO, {"tool_name": tool}) is None, (
         f"{tool} drew a decision from a hook that must only speak for this "
         f"plugin's connector")
+
+
+# ── the built-in web tools ARE approved (AUD-0117) ──
+#
+# Owner, 2026-09-01: "still getting approval prompts" while sixteen research
+# producers ran. Root cause: this hook was wired only to `mcp__.*`, but the
+# producers' PRIMARY retrieval is the built-in WebSearch/WebFetch, which no
+# auto-approve hook matched and permissions.allow did not list — so each fell
+# through to a prompt. They are read-only web reads and must run headless.
+
+
+@pytest.mark.parametrize("tool", ["WebSearch", "WebFetch"])
+def test_the_builtin_web_tools_are_approved_without_a_human(tool):
+    assert decision(AUTO, {"tool_name": tool}) == "allow", (
+        f"{tool} must auto-approve — it is the research routine's primary "
+        f"read-only retrieval path and blocking it stops headless operation")
+
+
+def test_bash_and_write_are_still_not_web_approved():
+    """The web allowance is exactly WebSearch/WebFetch — not a blanket
+    built-in grant. Bash keeps its own deny hooks; Write/Edit are never web."""
+    for tool in ("Bash", "Write", "Edit"):
+        assert decision(AUTO, {"tool_name": tool}) is None, tool
 
 
 def test_a_lookalike_prefix_is_not_ours():
