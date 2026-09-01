@@ -1,6 +1,6 @@
 ---
 name: enrichment-connector-specialist
-description: Owns the connector half of enrichment for one run — the Clay call plan and the machine technographic scan. Invoke it when a producer needs a facet enriched before it can write, when a contact pass or a technographic scan must be run or re-run, when a peer-deployment claim needs AG-04's shape, or when a section's `enrichment_status` disagrees with the rows underneath it. It returns candidate sources for registration plus the ledger state it recorded, and it never submits, promotes or mints an evidence id.
+description: Owns the connector half of enrichment for one run — the Clay call plan and the machine technographic scan. Invoke it FIRST inside a research run's PRELIM phase, before any category is dispatched — the contact pass that names the leaders and the four-layer technographic scan are the background all sixteen category researchers read, and bought later each of them pays for a piece of it alone. Invoke it again when a producer needs a facet enriched before it can write, when a contact pass or a technographic scan must be re-run, when a peer-deployment claim needs AG-04's shape, or when a section's `enrichment_status` disagrees with the rows underneath it. It returns candidate sources for registration plus the ledger state it recorded, and it never submits, promotes or mints an evidence id.
 model: sonnet
 effort: high
 maxTurns: 90

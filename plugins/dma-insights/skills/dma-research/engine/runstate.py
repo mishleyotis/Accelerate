@@ -210,10 +210,19 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
 
 
 def checkpoint(wb: RunWorkbook, position: str) -> None:
-    """Record where the run got to, in the artefact that survives."""
+    """Record where the run got to, in the artefact that survives.
+
+    The search-op count is recorded WITH the position because the ceiling is
+    per conversation, not per run: `ledger.append_search` refuses once this
+    many searches have been fired since the last checkpoint, and needs a
+    mark to measure from. Without it the ceiling would be a lifetime budget
+    and a long run could never legitimately continue past it.
+    """
     wb.set_metadata("checkpoint", json.dumps(
         {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-         "position": position}, separators=(",", ":")))
+         "position": position,
+         "search_ops": len(wb.rows("Search_Log"))},
+        separators=(",", ":")))
 
 
 # ── getting the workbook out of an ephemeral container ───────────────────

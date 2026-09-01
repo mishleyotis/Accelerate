@@ -44,6 +44,14 @@ stage_shared_into_api() {
   # abbreviations in a package-supplied source label. Missing means the api
   # does not start, which is the intended failure: a silent fallback here
   # would serve "Logix FCU" to a client and pass every test.
+  # The cached Cloud SQL Connector. Per-connection `Connector()` spends one
+  # Cloud SQL ADMIN API request per connection, and under NullPool that is
+  # one per checkout — measured as a 429 on
+  # sqladmin.googleapis.com/.../connectSettings during a live firing on
+  # 2026-08-31. Every service that opens a database connection needs this
+  # copy, so a missing one is FATAL rather than a silent fallback.
+  cp packages/shared/cloudsql.py apps/api/shared/ 2>/dev/null || {
+    echo "FATAL: packages/shared/cloudsql.py is missing" >&2; exit 1; }
   cp packages/shared/abbreviations.py apps/api/shared/ 2>/dev/null || {
     echo "FATAL: packages/shared/abbreviations.py is missing" >&2
     exit 1
@@ -103,6 +111,14 @@ if [ -f apps/mcp/Dockerfile ]; then
   # reads it, and it is the same copy the api's evidence projection reads.
   cp packages/shared/abbreviations.py apps/mcp/shared/ || {
     echo "FATAL: packages/shared/abbreviations.py is missing" >&2; exit 1; }
+  # The cached Cloud SQL Connector. Per-connection `Connector()` spends one
+  # Cloud SQL ADMIN API request per connection, and under NullPool that is
+  # one per checkout — measured as a 429 on
+  # sqladmin.googleapis.com/.../connectSettings during a live firing on
+  # 2026-08-31. Every service that opens a database connection needs this
+  # copy, so a missing one is FATAL rather than a silent fallback.
+  cp packages/shared/cloudsql.py apps/mcp/shared/ || {
+    echo "FATAL: packages/shared/cloudsql.py is missing" >&2; exit 1; }
   # The platform fit engine. `get_platform_fit` computes from it and CG-30
   # re-runs it at submit, so a missing copy would take the tool down and the
   # gate with it -- the gate that exists because four definitions of one
@@ -327,6 +343,14 @@ if [ -f apps/worker/Dockerfile ]; then
   # The enrichment routine reads the gap computation and the contract at
   # runtime; the Dockerfile copies only dma_worker, so both are staged in here
   # the same way the api's register is. Gate D fails CI if either is missing.
+  # The cached Cloud SQL Connector. Per-connection `Connector()` spends one
+  # Cloud SQL ADMIN API request per connection, and under NullPool that is
+  # one per checkout — measured as a 429 on
+  # sqladmin.googleapis.com/.../connectSettings during a live firing on
+  # 2026-08-31. Every service that opens a database connection needs this
+  # copy, so a missing one is FATAL rather than a silent fallback.
+  cp packages/shared/cloudsql.py apps/worker/shared/ || {
+    echo "FATAL: packages/shared/cloudsql.py is missing" >&2; exit 1; }
   cp packages/shared/enrichment_gaps.py apps/worker/shared/ || {
     echo "FATAL: packages/shared/enrichment_gaps.py is missing" >&2; exit 1; }
   cp packages/shared/contracts_data.json apps/worker/shared/ || {

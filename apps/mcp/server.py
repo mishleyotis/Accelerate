@@ -74,21 +74,43 @@ def _encoder():
     return _ENCODER
 
 
+# ── ONE Cloud SQL Connector, imported ────────────────────────────────
+#
+# `Connector()` per connection is one Cloud SQL ADMIN API call per
+# connection (it fetches connectSettings on construction), and under
+# NullPool every checkout is a new connection. That is what produced the
+# 429 on sqladmin.googleapis.com/.../connectSettings during a live intake
+# firing on 2026-08-31. packages/shared/cloudsql.py holds the cached one.
+#
+# Roots built LAZILY and image-first: in the image this module is
+# /app/<pkg>/<name>.py, so `parents[3]` raises IndexError and a tuple
+# literal would raise before the image path it would have found is tried.
+import sys as _sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in _sys.path:
+        _sys.path.insert(0, str(_cand))
+
+from cloudsql import connect as _cloudsql_connect  # noqa: E402
+
 @contextmanager
 def _conn():
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        url = os.environ["LOCAL_DATABASE_URL"]
-        host = url.split("@")[1].split(":")[0]
-        c = pg8000.dbapi.connect(user="dmai-mcp@digital-maturity-assessor.iam",
-                                 password="local", host=host, port=5432,
-                                 database="dma_insights")
-    else:
-        from google.cloud.sql.connector import Connector
-        c = Connector().connect(
-            os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-            user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-            enable_iam_auth=True, ip_type="PRIVATE")
+    # The CONNECTION closes per call; the CONNECTOR does not. Building a
+    # Connector here — which this did until 2026-08-31 — spends one Cloud
+    # SQL Admin API request per tool call and leaks its refresh task, and
+    # a firing that walks the queue makes dozens in a minute.
+    c = _cloudsql_connect(
+        local_user="dmai-mcp@digital-maturity-assessor.iam")
     try:
         yield c
     finally:
@@ -302,13 +324,20 @@ def list_open_rejections(display_id: str = "", page: str = "",
 @_traced
 def list_pending_runs() -> dict:
     """Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest
-    first, with their claim state."""
+    first, with their claim state and whether they can be synthesised at all.
+
+    `scored_cells` 0 means a RESEARCH-stage package: its score column is
+    empty by contract, so there is nothing for a producer to serve and
+    nothing it is permitted to derive. `synthesisable` is None where the
+    ingest recorded no count — unknown, which is not the same claim as zero.
+    """
     with _conn() as c:
         cur = c.cursor()
         cur.execute("""
             SELECT r.id, e.display_id, e.legal_name, r.request_id,
                    enum_label(r.status), r.completed_at,
-                   cl.held_by, cl.expires_at > now(), r.run_seq
+                   cl.held_by, cl.expires_at > now(), r.run_seq,
+                   r.scored_cells
               FROM runs r
               JOIN entities e ON e.id = r.entity_id
               LEFT JOIN run_claims cl ON cl.run_id = r.id
@@ -341,9 +370,41 @@ def list_pending_runs() -> dict:
              "run_seq": r[8],
              "runs_for_request": len(per_request[(r[1], r[3])]),
              "is_latest_for_request": r[8] == max(per_request[(r[1], r[3])]),
+             # WHETHER THERE IS ANYTHING TO SERVE, said here rather than
+             # discovered by a producer that has already been spent.
+             #
+             # Measured 2026-08-30 on goeasy-ltd: four INGESTED runs, all
+             # `scored_cells` 0, `composite` null, request id
+             # DMA-RES-GSY-... — a RESEARCH package, whose score column is
+             # empty BY CONTRACT (rule 4) and which the workbook parser had
+             # already identified as such, filing a `workbook_stage`
+             # observation reading "research — column D is empty by
+             # contract" with 679 of 696 rows in scope and unscored.
+             #
+             # That observation went into the ingest record and no further.
+             # This queue row carried run_seq, claim state and duplicate
+             # counts — everything needed to pick BETWEEN runs, and nothing
+             # about whether any of them could be synthesised at all. So the
+             # run read as ordinary work, a session was spent opening it,
+             # and synthesis is forbidden from deriving a score
+             # (invariant: the app writes no prose and ranks nothing), so
+             # there was never an outcome other than "nothing to serve".
+             #
+             # `scored_cells` is None where the ingest never wrote one. That
+             # is UNKNOWN, not zero, and the two are different claims — a
+             # caller that collapsed them would either spend on emptiness or
+             # refuse honest work. Both are reported; `synthesis_queue.py`
+             # decides what to do with each.
+             "scored_cells": r[9],
+             "synthesisable": None if r[9] is None else r[9] > 0,
              "claim": None if r[6] is None else
                       {"held_by": r[6], "live": bool(r[7])}}
             for r in rows],
+            # The corpus-level shape of the same fact, so a scheduler about
+            # to fan out knows before it starts how much of this queue is
+            # research-stage rather than assessment work.
+            "unscored_runs": sum(1 for r in rows if r[9] == 0),
+            "unknown_score_runs": sum(1 for r in rows if r[9] is None),
             # The corpus-level number, so a scheduler about to fan out over
             # this list knows what share of it is duplicate before it starts.
             "duplicate_requests": sum(1 for v in per_request.values() if len(v) > 1),
@@ -565,7 +626,12 @@ def record_enrichment(display_id: str, facet: str, source: str,
                     (display_id,))
         row = cur.fetchone()
         if row is None:
-            return {"error": "unknown_entity", "display_id": display_id}
+            # Same dead end `get_client_state` had, and the same repair. A
+            # rule enforced in one of the two places it is needed is the
+            # half-fix this codebase keeps meeting.
+            return {"error": "unknown_entity", "display_id": display_id,
+                    "did_you_mean": bundle_mod.near_display_ids(
+                        cur, display_id)}
         entity_id = row[0]
         try:
             version = ledger_mod.record_enrichment(

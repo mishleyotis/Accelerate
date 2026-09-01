@@ -1,7 +1,7 @@
 {
   "name": "zennify-dma",
   "description": "Zennify Digital Maturity Assessment tooling: the skills, agents and connector that produce and audit DMA Insights surfaces.",
-  "version": "0.15.4",
+  "version": "0.16.0",
   "owner": {
     "name": "Zennify \u2014 DMA Insights build",
     "email": "mishley.otiende@zennify.com"
@@ -12,7 +12,7 @@
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
       "description": "The six Digital Maturity Assessment skills, 68 DMA agents \u2014 16 category researchers, a technographic scanner, two report producers and a report validator \u2014 the remote MCP connector (33 tools), and the research ENGINE: a binding preflight the engagement owner answers, a PRELIM phase that gates dispatch, ERS computed from RRF retrieval, report sections written as arguments with independent review, a measured cost model, and a watchdog that revives a stopped run.",
-      "version": "1.12.4",
+      "version": "1.15.0",
       "category": "domain",
       "tags": [
         "dma",

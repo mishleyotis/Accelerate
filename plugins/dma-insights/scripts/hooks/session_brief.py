@@ -33,6 +33,7 @@ failing closed costs the brief on exactly the session that needed it.
 """
 import json
 import sys
+from pathlib import Path
 
 ROUTING = "skills/dma-surface-production/05-lifecycle/routing.md"
 
@@ -101,6 +102,50 @@ SUBAGENT = (
 )
 
 
+def install_warning() -> str:
+    """One sentence when this container's plugin is not what the repo ships.
+
+    WHY THE HOOK CARRIES IT (owner, 2026-08-31: "Does the plugin have similar
+    routine ingrained?"). Until now the staleness check lived only in a
+    Routine prompt: the intake Routine ran it, and every other session — an
+    interactive one, a synthesis lane, a watchdog firing — started on
+    whatever the container's snapshot happened to hold and found out only
+    when something behaved oddly. A firing had already died on
+    `STALE: installed 0.9.12 (47 agents) vs published 1.13.0 (68 agents)`,
+    and nothing outside that one prompt would ever have said so.
+
+    IT REPORTS AND DOES NOT REPAIR, deliberately. The repair uninstalls and
+    reinstalls the plugin cache — the very directory the session is binding
+    its agents from as this hook runs — and it takes far longer than the
+    hook's 10-second budget. Mutating an install underneath a binding session
+    would turn a stale roster into no roster. So the hook names the state and
+    the one command that fixes it, and the session decides.
+
+    Fails OPEN, like the rest of this file: a version check that cannot run
+    must never cost the routing brief.
+    """
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        sys.path.insert(0, str(here))
+        import plugin_version                                  # noqa: PLC0415
+        v = plugin_version.compare()
+        if v["ok"]:
+            return ""
+        return (f" INSTALL CHECK, from this container rather than from "
+                f"expectation: {plugin_version.summary(v)}. This session is "
+                f"NOT running what the checkout publishes. Before you rely on "
+                f"an agent, a skill or a hook, run `python3 "
+                f"plugins/dma-insights/scripts/doctor.py --heal` — it applies "
+                f"the repair this status needs and re-checks in one command. "
+                f"If it comes back UPDATED_MID_SESSION the disk is fixed and "
+                f"THIS session still holds the old roster (they bind once, at "
+                f"start): keep working, but dispatch stages as fresh child "
+                f"processes via `agent_run.py`, which bind the repaired "
+                f"install.")
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        return ""
+
+
 def brief(event: dict) -> str:
     hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
     agent = str(event.get("agent_type") or event.get("agentType") or "")
@@ -109,7 +154,10 @@ def brief(event: dict) -> str:
             return RESEARCH_BRIEF
         return CORE + SUBAGENT
     source = str(event.get("source") or "startup")
-    return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"])
+    # Top-level sessions only. A subagent runs inside a parent that already
+    # saw this and cannot act on it — its parent is mid-flight — so telling
+    # each of 68 of them turns a warning into wallpaper.
+    return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"]) + install_warning()
 
 
 def main() -> int:

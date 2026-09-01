@@ -350,12 +350,23 @@ def test_the_connect_helper_matches_job_main():
     """Both must reach the same database the same way. job_main.py is the
     canonical one; a second connect that drifts would work locally and fail on
     IAM in production, where no DB password exists at all."""
+    # SAMENESS BY DELEGATION, not by matching literals. This used to assert
+    # that both copies contained DB_INSTANCE_CONNECTION_NAME, enable_iam_auth
+    # and ip_type — which proved they were the same only for as long as
+    # somebody kept two copies in step by hand. On 2026-08-31 the four copies
+    # in this repo were replaced by packages/shared/cloudsql.py, after a
+    # per-connection `Connector()` spent one Cloud SQL ADMIN API request per
+    # connection and produced a 429 in production. The strongest form of "both
+    # reach the database the same way" is that neither one decides how.
     import inspect
     from pathlib import Path as _P
 
     mine = inspect.getsource(E._connect)
     canonical = (_P(E.__file__).resolve().parent.parent / "job_main.py").read_text()
-    for token in ("LOCAL_DATABASE_URL", "DB_INSTANCE_CONNECTION_NAME",
-                  "enable_iam_auth=True", 'ip_type="PRIVATE"', "pg8000"):
-        assert token in mine, f"_connect is missing {token}"
-        assert token in canonical, f"job_main.py no longer uses {token}"
+    assert "_cloudsql_connect(" in mine, "_connect no longer delegates"
+    assert "_cloudsql_connect(" in canonical, "job_main.py no longer delegates"
+    for banned in ("DB_INSTANCE_CONNECTION_NAME", "enable_iam_auth",
+                   "ip_type", "Connector()"):
+        assert banned not in mine, (
+            f"_connect decides {banned} for itself again — that is the "
+            f"second copy this delegation removed")

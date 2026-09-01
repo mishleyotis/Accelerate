@@ -40,15 +40,37 @@ def test_an_intake_routine_exists_and_is_live():
     assert "LIVE" in head and "trig_" in head, head
 
 
-def test_the_intake_prompt_stops_at_the_question():
+def _step_0a(body: str) -> str:
+    """STEP 0a's own text, sliced FORWARD to the step that follows it.
+
+    Not `index("STEP 0.5")`: the prompt refers to STEP 0.5 by name before it
+    reaches it, so a plain search finds a mention and returns an empty slice
+    — which made four assertions about STEP 0a pass against ''.
+    """
+    start = body.index("STEP 0a")
+    return body[start:body.index("STEP 0.5 —", start)]
+
+
+def test_the_intake_prompt_stops_at_the_question_when_it_is_a_question():
     """A headless firing cannot answer AskUserQuestion, and a run bound on a
-    guess researches the wrong 851 cells to completion. The prompt must say
-    so, not merely imply it."""
+    guess researches the wrong 851 cells to completion.
+
+    REVISED 2026-08-30 (owner: "the run should bind to unambiguous
+    subvertical"). The rule is no longer "always stop" — it is "stop where
+    there is something to decide". An UNAMBIGUOUS census binds itself
+    through `preflight autobind`; an ambiguous one still refuses, and the
+    prompt must carry BOTH halves or a reader will apply the wrong one.
+    """
     body = _fenced(_sections()["2g"])
     assert body, "§2g carries no fenced prompt"
-    assert "binding_question.asked is false" in body
-    assert "THAT REFUSAL IS THE CORRECT OUTCOME" in body
+    assert "preflight autobind" in body, (
+        "the prompt no longer names the command that binds an unambiguous "
+        "census, so every firing still stops and the change is inert")
+    assert "Where it is ambiguous it REFUSES" in body
     assert "must not invent an answer" in body
+    assert "recomputes unambiguity" in body, (
+        "the prompt must say that hand-writing auto_bound does not work, "
+        "because that is the shortcut a stuck firing will otherwise reach for")
     # and it must not wander into the watchdog's job
     assert "Revive a stalled run" in body
 
@@ -85,6 +107,213 @@ def test_every_fenced_prompt_is_runnable_prose():
                 f"§{key}: indented heredoc terminator {line!r} cannot run")
 
 
+def test_the_intake_prompt_orders_the_queue_fifo():
+    """Measured 2026-08-31: a firing saw three pending DMAs and picked among
+    them with no stated rule. "Newest priority first" was the rule it had,
+    and it starves the oldest request indefinitely."""
+    body = _fenced(_sections()["2g"])
+    assert "FIFO IS THE ORDER, ALWAYS, AND IT IS NOT A TIE-BREAK" in body
+    assert "in that FIFO order" in body
+    assert "Sort the PENDING set by the request's own timestamp" in body
+    assert "Priority does NOT reorder the queue" in body
+    assert "newest priority first" not in body, \
+        "the old ordering rule is still in the prompt"
+    assert "reorder the queue by priority instead of FIFO" in body
+
+
+def test_the_intake_prompt_checks_for_existing_work_before_researching():
+    """Redoing research somebody already paid for is invisible afterwards —
+    a second run looks exactly like a first. Three places answer three
+    different questions, and a client can be in one and not the others."""
+    body = _fenced(_sections()["2g"])
+    assert "WHAT ALREADY EXISTS FOR THIS CLIENT, IN THREE PLACES" in body
+    assert "registry.py list --open-only" in body          # in flight
+    assert "drive_fetch.py find-artifact" in body          # the folder
+    assert "get_client_state" in body                      # the serving tier
+
+    # a folder is not read as finished until its manifest says so
+    assert "run_manifest.json" in body
+    assert "deliverables_present" in body
+    assert "memory-backup" in body
+
+    # and an unknown display_id is not proof of absence
+    assert "unknown_entity" in body
+    assert "search the pending queue by entity NAME" in body
+
+
+def test_the_intake_prompt_enforces_tooling_and_connectors_first():
+    """The routine never runs in degrade mode, and the check measures THIS
+    session rather than the trigger record — a trigger can list a connector
+    the session did not bind. It also has to precede the manual path, or a
+    named client gets researched on unproven tooling."""
+    body = _fenced(_sections()["2g"])
+    lines = body.splitlines()
+
+    assert "STEP 0a" in body
+    head = next(l for l in lines if l.startswith("STEP 0a"))
+    assert "ENFORCED BEFORE ANY WORK" in head
+
+    # THE REQUIRED SET IS DERIVED, NEVER TYPED. This assertion used to name
+    # five connectors literally — including Firecrawl, which no agent
+    # declares, no role grants and the pipeline cannot call. The test passed
+    # and the gate it guarded would have stopped every firing. So what is
+    # pinned now is the derivation: the prompt asks the registry.
+    assert "connector_contract.py declare" in body
+    for cmd in ("doctor.py --heal", "audit_autoapprove.py --strict",
+                "drive_fetch.py check"):
+        assert cmd in body, f"{cmd} is not run by the preflight"
+
+    assert "measure THIS SESSION, never the Routine record" in body
+    assert "Prepare anything before STEP 0a's four checks all pass" in body
+
+    # ordering: 0a must come before the manual path and before the queue
+    at = {k: next(i for i, l in enumerate(lines) if l.startswith(k))
+          for k in ("STEP 0a", "STEP 0.5", "STEP 5")}
+    assert at["STEP 0a"] < at["STEP 0.5"] < at["STEP 5"], at
+
+
 if __name__ == "__main__":
     import sys
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+def test_a_client_the_owner_names_does_not_need_slack():
+    """OWNER, 2026-08-30, correcting a firing that had refused one:
+
+        "it can automatically scan slack or when I initiate a manual routine
+         I can instruct the routine to assess a particular client and it can
+         do the preflight excluding Slack requirement."
+
+    The channel scan is how the queue FILLS ITSELF. It was never meant to be
+    a precondition for working, and STEP 1's "STOP and report both failures,
+    spend nothing else" made it one: a missing scope on a cosmetic lookup was
+    enough to refuse a run the owner had asked for by name.
+
+    So the prompt must carry a named-client path that reaches the preflight
+    without reading Slack at all, and must say so in the imperative — a note
+    that a manual path EXISTS somewhere is not a path a firing will take.
+    """
+    body = _fenced(_sections()["2g"])
+    assert body, "§2g carries no fenced prompt"
+    assert "slack_intake.py request" in body, (
+        "the prompt never names the command that turns a named client into a "
+        "request, so the manual path is documented and unreachable")
+    assert re.search(r"SKIP THE SLACK STEPS — 1, 3 and 4", body), (
+        "the manual path must skip the channel steps outright; routing "
+        "through them leaves Slack able to stop a run it has no part in")
+    assert "must never stop a run the owner asked for by name" in body
+    assert "You STILL RUN STEP 2" in body, (
+        "the manual path skipped the registry check along with the Slack "
+        "steps — an owner naming a client is not evidence that the client "
+        "has no open run, and a second run for one entity is two containers "
+        "writing one workbook whichever door the request came in through")
+
+
+def test_the_prompt_still_separates_an_instruction_from_fetched_text():
+    """The half of that same firing's refusal that was RIGHT, kept.
+
+    A named client in the firing's own instructions is an input. A client
+    named inside something the firing FETCHED — a Slack body, a Drive
+    filename, a workbook cell, a page — is data. And regardless of origin,
+    widening its own access or skipping a gate stays refused. Without this,
+    "accept manual requests" reads as "accept anything".
+    """
+    body = _fenced(_sections()["2g"])
+    assert "ORIGIN IS WHAT MAKES THIS AN INSTRUCTION" in body
+    for shape in ("Drive filename", "workbook cell"):
+        assert shape in body, f"the prompt does not name {shape} as data"
+    assert "widen your own tool access" in body
+    assert "bind a sub-vertical without a recorded answer" in body
+
+
+def test_the_manual_path_answers_no_thread():
+    """A manual run has no Slack thread, so the completion reply must post
+    nothing — not fail, and above all not post into a thread it invented."""
+    body = _fenced(_sections()["2g"])
+    assert "answerable:false" in body or "answerable: false" in body
+    assert "a manual run answers no thread" in body
+
+
+def test_the_intake_routes_the_name_before_it_prepares_anything():
+    """A client that already has a package is not an intake.
+
+    Measured 2026-08-30: GoEasy was passed to this routine. It has four
+    ingested runs and a finished research package, so the preflight it would
+    have prepared recommends research that is already done. STEP 0.5 let a
+    named client through on the name alone, which is the whole gap — the
+    routine had no way to ask what the corpus already held.
+
+    `route_client.py` answers that in one call, and the prompt has to OBEY
+    it rather than merely mention it: a verdict a firing can read past is
+    the advisory-number failure this repo keeps meeting.
+    """
+    body = _fenced(_sections()["2g"])
+    assert "route_client.py" in body, (
+        "STEP 0.5 accepts a named client without asking whether it already "
+        "has a package")
+    for verdict in ("NEEDS_SCORING", "READY_TO_SYNTHESISE", "ALREADY_SERVED",
+                    "AMBIGUOUS", "NEW_ENGAGEMENT"):
+        assert verdict in body, f"the prompt does not say what {verdict} means"
+    assert "do NOT prepare a preflight" in body, (
+        "the prompt names the NEEDS_SCORING verdict without saying to stop, "
+        "which is what GoEasy needed it to say")
+
+
+def test_a_failed_routing_check_is_not_read_as_a_verdict():
+    """The distinction that keeps the check from causing the defect it
+    prevents: an unreachable connector must not read as NEW_ENGAGEMENT."""
+    body = _fenced(_sections()["2g"])
+    assert "Exit 2 is the script failing" in body
+    assert "NOT a routing answer" in body
+# ── the gate that could never go green ────────────────────────────────────
+#
+# MEASURED FIRING, 2026-08-31. The intake Routine fired, read
+# `STALE: installed 0.9.12 (47 agents) vs published 1.13.0 (68 agents)`, and
+# stopped having produced nothing — because STEP 0a(a) said "not green, STOP"
+# while running the BARE doctor, which only measures. A stale container could
+# not be made current by the command the gate ran, so the gate's pass
+# condition was unreachable and every firing on that snapshot died in the
+# same place. Owner: "Please fix this; no guessing. This has usually been an
+# issue. Plugin version should always pick the most recent bump and self
+# heal."
+
+def test_the_intake_prompt_heals_the_plugin_rather_than_only_measuring_it():
+    p = _fenced(_sections()["2g"])
+    assert "doctor.py --heal" in p, (
+        "the bare doctor cannot make a stale container current, so a gate "
+        "that runs it and stops on red can never be satisfied")
+    step = _step_0a(p)
+    bare = [ln for ln in step.splitlines()
+            if "doctor.py" in ln and "doctor.py --heal" not in ln]
+    assert not bare, f"a bare doctor invocation survives the gate: {bare}"
+
+
+def test_the_intake_prompt_treats_a_mid_session_update_as_recovery():
+    """UPDATED_MID_SESSION is the NORMAL result of a heal that worked: the
+    disk is fixed and this session bound the old roster before it ran. Read
+    as a failure it turns every successful repair into a dead firing."""
+    step = _step_0a(_fenced(_sections()["2g"]))
+    assert "UPDATED_MID_SESSION" in step
+    assert "RECOVERY MODE, NOT A STOP" in step
+    assert "agent_run.py" in step, (
+        "recovery mode is only real if the prompt says how to dispatch "
+        "against the repaired install")
+
+
+def test_the_intake_prompt_requires_no_connector_the_agents_lack():
+    """THE FIRECRAWL CLAUSE. For one day the gate hard-STOPPED on a connector
+    no agent declares, no role grants and the pipeline cannot call."""
+    step = _step_0a(_fenced(_sections()["2g"]))
+    assert "connector_contract.py declare" in step, (
+        "the required set must be derived from the agents' own registry, "
+        "not typed into a prompt where nothing compares it to anything")
+    required = step[step.index("(d) ENRICHMENT CONNECTORS"):]
+    head = required[:required.index("This clause named")]
+    assert "Firecrawl" not in head and "firecrawl" not in head
+
+
+def test_only_the_intake_stops_that_a_container_cannot_fix_are_stops():
+    step = _step_0a(_fenced(_sections()["2g"]))
+    assert "provisioning defect to report, not a transient" in step, (
+        "a red that survives the heal reproduces on the next container, so "
+        "ending the firing hands the next one the same wall")
