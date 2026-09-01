@@ -26,6 +26,7 @@ below are the ones the audit proved absent:
     AUD-0080            ladders counted, not attested
     AUD-0083            every cited id resolved against the register
     AUD-0021            proxy-only evidence cannot close as FACT
+    AUD-0115            >=70% of a category's subcaps carry resolvable evidence
 """
 from __future__ import annotations
 
@@ -50,7 +51,7 @@ from . import ledger as L
 from . import quality as Q
 from . import runstate
 from .workbook import (RunWorkbook, FLOOR_ITEMS, FLOOR_CATEGORY_ITEMS,
-                       _split_ids)
+                       COVERAGE_FLOOR, _split_ids)
 
 
 #: Computed every run, and deliberately NOT blocking. Kept as a named set so
@@ -92,11 +93,17 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     }
     items = 0
     searched_cells = 0
+    evidenced_cells = 0
     for r in rows:
         cell = str(r["SubCap_ID"]).strip()
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         items += len(eids)
+        # AUD-0115: a subcap COUNTS toward coverage only if at least one of
+        # its cited ids actually resolves in the register — a dead citation is
+        # not evidence, and neither is an empty cell.
+        if any(e in register for e in eids):
+            evidenced_cells += 1
 
         # AUD-0083: the archive's own golden fixture cited an item that did
         # not exist, and nothing resolved a citation at any point.
@@ -225,6 +232,14 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     # then not used. It is a gate term here.
     category_floor_met = items >= FLOOR_CATEGORY_ITEMS
 
+    # AUD-0115: the per-category evidence-COVERAGE floor. `evidenced_cells` is
+    # subcaps carrying at least one resolvable citation; the floor is a
+    # fraction of the category's selected subcaps. A category with no selected
+    # subcaps has undefined coverage and is not blocked on this term (its
+    # emptiness is caught by category_never_searched / the item floors).
+    coverage = (evidenced_cells / len(rows)) if rows else None
+    coverage_floor_met = coverage is None or coverage >= COVERAGE_FLOOR
+
     # AUD-0027 / timeline: a run with dated evidence and no timeline row for
     # this category cannot argue an arc.
     if not any(str(t.get("SubCap_IDs") or "").find(category) >= 0
@@ -246,6 +261,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     ) if findings[k]]
     if not category_floor_met:
         blocking.append("category_items_below_floor")
+    if not coverage_floor_met:
+        blocking.append("coverage_below_floor")
     # REPORTED 2026-08-30, from a live run in another account: "enrichment
     # connectors not being called by the agents for enrichment purposes
     # before close of a category". They were right, and no gate term could
@@ -274,6 +291,12 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "run_id": wb.metadata().get("run_id"),
         "category_evidence": f"{items}/{FLOOR_CATEGORY_ITEMS}",
         "category_floor_met": category_floor_met,
+        "evidence_coverage": (
+            f"{evidenced_cells}/{len(rows)} "
+            f"({round(100 * coverage)}%)" if coverage is not None
+            else f"{evidenced_cells}/0 (n/a)"),
+        "coverage_floor": COVERAGE_FLOOR,
+        "coverage_floor_met": coverage_floor_met,
         "subcaps": len(rows),
         "search_ops": len(cat_searches),
         "tools_used": tools_used,
