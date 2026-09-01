@@ -79,6 +79,33 @@ def test_the_connector_survives_between_calls(monkeypatch):
     assert _FakeConnector.made == 1
 
 
+def test_the_refresh_is_lazy_because_cloud_run_throttles_the_cpu(monkeypatch):
+    """The setting the caching hid.
+
+    One Connector per process was never the whole rule. `Connector()`
+    defaults to a BACKGROUND refresh — an asyncio timer on the connector's
+    own thread that renews the instance metadata and the ephemeral
+    certificate before they expire. `infra/deploy.sh` gives no service
+    --no-cpu-throttling, so between requests a Cloud Run instance gets
+    almost no CPU and that timer does not advance. It wakes late, or a
+    request arrives first and blocks on a refresh that cannot finish.
+
+    MEASURED 2026-09-01: dmai-api, which built its own default Connector,
+    served normally until 15:13 and then answered every database-backed
+    route with a 504 after the full 300-second request timeout, with
+    `num_backends` on the database at 0-2 — the requests never got there.
+    dmai-mcp, on this module, was serving throughout.
+
+    This assertion is cheap and it is the whole difference, so it is pinned
+    here rather than left to the deployment to be right about.
+    """
+    _patch(monkeypatch)
+    cloudsql.connect()
+    assert _FakeConnector.last_kwargs.get("refresh_strategy") == "lazy", (
+        "a background refresh needs a scheduler, and a CPU-throttled "
+        "Cloud Run instance is not one")
+
+
 def test_iam_auth_and_private_ip_are_not_negotiable(monkeypatch):
     """The two settings db.py's docstring says drift when copied."""
     _patch(monkeypatch)
@@ -127,9 +154,9 @@ def test_local_development_never_touches_cloud_sql(monkeypatch):
 
 
 def test_no_service_constructs_its_own_connector_any_more():
-    """The regression that matters: this bug is one `Connector()` away from
-    coming back, in any of four files."""
-    import re
+    """The regression that matters: this bug is one Connector construction
+    away from coming back, in any of four files."""
+    import ast
     root = SHARED.parents[1]
 
     # SOURCE ONLY — never what a build staged. `infra/deploy.sh` copies this
@@ -147,17 +174,46 @@ def test_no_service_constructs_its_own_connector_any_more():
     files = [f for f in (root / "apps").rglob("*.py")
              if "shared" not in f.relative_to(root / "apps").parts]
 
+    # PARSED, NOT GREPPED, for two reasons the line regex got wrong.
+    #
+    # It read `\bConnector\(\)` off raw lines with only `#` stripped, so
+    # every prose mention of the constructor in a docstring counted as a
+    # construction — the module that explains WHY not to build one failed
+    # the scan for saying its name.
+    #
+    # And `\(\)` matches only a BARE call. `Connector(refresh_strategy=
+    # "background")` is the exact defect that took dmai-api down on
+    # 2026-09-01 and the regex would have waved it through, as it waves
+    # through `Connector(ip_type=...)`. The rule is one Connector per
+    # process from the shared module — not one particular spelling of the
+    # wrong thing — so the scan looks for the call itself, whatever its
+    # arguments.
     offenders = []
     for f in files:
         if "tests" in f.parts or f.name.startswith("test_"):
             continue
         if not f.is_file():
             continue
-        for i, line in enumerate(f.read_text().splitlines(), 1):
-            if re.search(r"\bConnector\(\)", line.split("#")[0]):
-                offenders.append(f"{f.relative_to(root)}:{i}")
-    allowed = {"apps/api/dma_api/db.py"}
-    offenders = [o for o in offenders if o.rsplit(":", 1)[0] not in allowed]
+        try:
+            tree = ast.parse(f.read_text())
+        except SyntaxError:                     # not this test's job to judge
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            fn = node.func
+            name = (fn.id if isinstance(fn, ast.Name)
+                    else fn.attr if isinstance(fn, ast.Attribute) else None)
+            if name == "Connector":
+                offenders.append(f"{f.relative_to(root)}:{node.lineno}")
+    # THERE IS NO ALLOWLIST. There was one, holding exactly one entry —
+    # apps/api/dma_api/db.py — excused because it built its Connector once
+    # per process and this module's docstring names it as the copy that
+    # "already had it right". It had the CACHING right and the REFRESH
+    # STRATEGY wrong, and an exemption is how a rule stops being read: the
+    # suite was green while dmai-api answered every database-backed route
+    # with a 504 for the whole afternoon of 2026-09-01. A file that needs
+    # excusing from this scan needs fixing instead.
     assert not offenders, (
         f"a per-call Connector is back: {offenders}. Use "
         f"packages/shared/cloudsql.connect() — one per process.")

@@ -517,6 +517,48 @@ if [ -f scripts/verify_deployed.py ]; then
   }
 fi
 
+# ── READY IS NOT WORKING: probe a route that opens a connection ──────
+#
+# On 2026-08-31 this script exited 0 with all three services Ready, 100% of
+# traffic on the new revisions, and verify_deployed.py reporting "MATCH —
+# every compiled module in production is byte-identical to a local build of
+# HEAD". Every word of that was true. The next afternoon dmai-api answered
+# /v1/directory, /v1/catalogue and /v1/ops/import-scans with a 504 after the
+# full 300-second request timeout, because its Cloud SQL Connector was built
+# with the default background refresh and a CPU-throttled instance has no CPU
+# to advance that timer with. The bytes were right; the service was dead.
+#
+# So the probe hits a route that OPENS A DATABASE CONNECTION. /healthz stayed
+# green through the entire outage — it touches nothing — which is exactly why
+# it is the wrong thing to ask.
+#
+# A refusal is reported as a refusal, never as a pass: an operator whose
+# account cannot invoke dmai-api gets NOT PROBED with the reason, in the
+# shape the gates use, rather than silence that reads like success.
+if command -v curl >/dev/null 2>&1; then
+  say "smoke: does the api still reach the database?"
+  API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
+             --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
+  SMOKE_TOKEN="$(gcloud auth print-identity-token \
+                 --audiences="$API_URL" 2>/dev/null || true)"
+  if [ -z "$API_URL" ] || [ -z "$SMOKE_TOKEN" ]; then
+    echo "   NOT PROBED — no api URL or no identity token for this account"
+  else
+    # 45s, not 300: a healthy connection is milliseconds and the failure
+    # being watched for is an unbounded hang, so waiting out Cloud Run's
+    # whole request timeout only makes the report slower, never truer.
+    SMOKE_CODE="$(curl -s -o /dev/null -m 45 -w '%{http_code}' \
+                  -H "Authorization: Bearer $SMOKE_TOKEN" \
+                  "$API_URL/v1/directory?audience=internal&limit=1" || echo 000)"
+    case "$SMOKE_CODE" in
+      200) echo "   OK — /v1/directory 200 (the api reached the database)" ;;
+      401|403) echo "   NOT PROBED — this account cannot invoke dmai-api ($SMOKE_CODE)" ;;
+      000) echo "!! /v1/directory did not answer in 45s — the api is not serving" >&2 ;;
+      *)   echo "!! /v1/directory answered $SMOKE_CODE — the api is not serving" >&2 ;;
+    esac
+  fi
+fi
+
 say "deployed. Service URLs:"
 gcloud run services list --project="$PROJECT_ID" --region="$REGION" \
   --filter="metadata.name:dmai-" --format='value(metadata.name,status.url)' || true

@@ -370,7 +370,19 @@ jobs:
           # ^SKIPPED matched nothing, every time. The build that overran the
           # ceiling printed the header and then no reasons, which is how a
           # diagnostic fails: not by being absent, by being empty.
+          # packages/shared/tests/ joined this list on 2026-09-01. It holds
+          # one file — the guard that every service takes its Cloud SQL
+          # Connector from packages/shared/cloudsql.py — and no pytest
+          # invocation in this workflow had ever collected it, so the rule was
+          # enforced only where someone happened to run it by hand. It also
+          # carried an allowlist excusing apps/api/dma_api/db.py; that file's
+          # Connector defaulted to a background refresh, which a CPU-throttled
+          # Cloud Run instance cannot advance, and dmai-api answered every
+          # database-backed route with a 504 through the afternoon of
+          # 2026-09-01 with the suite green. A check CI cannot see is not a
+          # check.
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
+                 packages/shared/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
                  tests/skills/ infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
