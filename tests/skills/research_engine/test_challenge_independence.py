@@ -76,3 +76,49 @@ def test_distinct_sessions_prove_independence_despite_a_shared_base(tmp_path):
     r = L.record_challenge(wb, cell, verdict="PASS", actor="research-p2c4-challenger",
                            dimensions=dict(DIMS), rationale=RAT, session="S-B")
     assert r["verdict"] == "PASS"
+
+
+# ── the gate READS with the same rule the write path enforces (AUD-0117) ──
+#
+# A relabel challenge written before the rule existed (or by a tool that
+# bypassed record_challenge) sits on the workbook. The gate must flag it, not
+# bless it — read and write must agree.
+
+def _synthesised_cell(tmp_path, author, session=""):
+    from fixtures import bank_evidence, good_synthesis
+    run = new_run(tmp_path, n=3)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    L.append_synthesis(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)),
+                       actor=author, session=session)
+    return run, wb, cell
+
+
+def test_the_gate_flags_a_relabel_challenge_already_on_the_workbook(tmp_path):
+    from engine import floors_gate
+    run, wb, cell = _synthesised_cell(tmp_path, "research-p2c4-producer")
+    # A pre-existing RELABEL challenge, written straight to the log as a
+    # pre-rule session did — record_challenge would now refuse it, so we bypass
+    # it to reproduce what is already sitting on real workbooks.
+    wb.append("Challenge_Log", {
+        "SubCap_ID": cell, "Verdict": "PASS",
+        "Actor": "research-p2c4-challenger", "Dimensions": dict(DIMS),
+        "Rationale": RAT, "Ceiling_Band_Delta": "", "At": L._utcnow(),
+        "Session": ""})
+    wb.set_scoring(cell, {"Challenge_Verdict": "PASS"})
+    v = floors_gate.run(wb, "P1C1", qa_dir=run.qa_dir)
+    flagged = [x["subcap"] for x in v["challenge_not_independent"]]
+    assert cell in flagged, (
+        f"the gate blessed a relabel challenge the write path would refuse: "
+        f"{v['challenge_not_independent']}")
+
+
+def test_the_gate_accepts_a_genuinely_independent_challenge(tmp_path):
+    from engine import floors_gate
+    run, wb, cell = _synthesised_cell(tmp_path, "research-p2c4-producer")
+    # A real independent challenger, recorded the proper way.
+    L.record_challenge(wb, cell, verdict="PASS", actor="finding-challenger",
+                       dimensions=dict(DIMS), rationale=RAT)
+    v = floors_gate.run(wb, "P1C1", qa_dir=run.qa_dir)
+    assert not any(x["subcap"] == cell for x in v["challenge_not_independent"]), (
+        "a genuinely independent challenge was flagged as dependent")

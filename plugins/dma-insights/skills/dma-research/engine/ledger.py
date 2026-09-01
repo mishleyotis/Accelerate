@@ -294,6 +294,38 @@ def _base_identity(name: str) -> str:
     return " ".join(core)
 
 
+def challenge_independence(author: str, author_session: str,
+                           challenger: str, challenger_session: str
+                           ) -> tuple[bool, str]:
+    """Is a challenge INDEPENDENT of the synthesis it reviews? (AUD-0113/0117)
+
+    ONE rule, used by BOTH the write path (`record_challenge`, which refuses a
+    dependent challenge) and the READ path (the floors gate, which flags one
+    already on the workbook — a challenge written before this rule existed, or
+    by a tool that bypassed the ledger). Two answers to one question must not
+    drift: the gate used to catch only an EXACT actor match, so a relabel
+    (`x-producer` synthesises, `x-challenger` challenges, no session tokens)
+    passed the gate though the write path would now refuse it.
+
+    Session proof wins: two present, distinct sessions are two runs, and the
+    labels may then legitimately share a base. Absent that proof, a shared base
+    identity is a relabel of one run. Returns (independent, reason) where reason
+    is '' when independent, else 'same_actor' / 'same_session' / 'relabel'."""
+    a = str(author or "").strip()
+    c = str(challenger or "").strip()
+    asess = str(author_session or "").strip()
+    csess = str(challenger_session or "").strip()
+    if a and c and a == c:
+        return (False, "same_actor")
+    if asess and csess and asess == csess:
+        return (False, "same_session")
+    if asess and csess and asess != csess:
+        return (True, "")            # distinct sessions prove two runs
+    if _base_identity(c) and _base_identity(c) == _base_identity(a):
+        return (False, "relabel")    # shared base, no session proof
+    return (True, "")
+
+
 def record_provenance(wb: RunWorkbook, subcap: str, step: str, actor: str,
                       detail: str = "", session: str = "") -> None:
     """Who did this step. Authorship is what makes independence checkable."""
@@ -355,33 +387,28 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
             f"{subcap} has no recorded synthesis author, so a challenge on it "
             f"cannot be shown to be independent. Write the synthesis with an "
             f"actor first.")
-    if str(actor).strip() == author:
-        raise LedgerRefusal(
-            f"{actor!r} wrote this synthesis and cannot also be its "
-            f"challenger. A verdict on your own work is a feeling; the "
-            f"learning loop's grader is independent BY CONSTRUCTION and the "
-            f"research challenge has to be independent by record.")
-    # AUD-0113: the exact-string check above was defeated by a RELABEL — one
-    # agent writing its synthesis as `x-producer` and its own challenge as
-    # `x-challenger`. Independence is a property of the agent RUN, not the
-    # label it types. A distinct SESSION token (set by the harness per agent,
-    # inherited by the subprocesses it spawns) is the proof of a different
-    # run; when both sessions are present and differ, that proves independence
-    # and the label may legitimately share a base (a real `x-challenger`
-    # agent reviewing `x-producer`). Absent that proof, a shared base identity
-    # is treated as the same agent relabeled, and refused.
+    # ONE independence rule, shared with the floors gate (challenge_independence).
+    # A distinct SESSION token (set by the harness per agent, inherited by the
+    # subprocesses it spawns) proves a different run; absent it, a shared base
+    # identity is a relabel of one run (AUD-0113) and refused.
     ch_session = str(session or _agent_session()).strip()
     syn_session = session_for(wb, subcap, "synthesis")
-    sessions_prove_independence = bool(ch_session and syn_session
-                                       and ch_session != syn_session)
-    if ch_session and syn_session and ch_session == syn_session:
-        raise LedgerRefusal(
-            f"the challenge was recorded in the SAME session ({ch_session!r}) "
-            f"as the synthesis it reviews. One agent run cannot be its own "
-            f"independent challenger, whatever actor label it uses. Record the "
-            f"challenge from a genuinely separate agent run.")
-    if not sessions_prove_independence and _base_identity(actor) \
-            and _base_identity(actor) == _base_identity(author):
+    independent, why = challenge_independence(
+        author, syn_session, str(actor).strip(), ch_session)
+    if not independent:
+        if why == "same_actor":
+            raise LedgerRefusal(
+                f"{actor!r} wrote this synthesis and cannot also be its "
+                f"challenger. A verdict on your own work is a feeling; the "
+                f"learning loop's grader is independent BY CONSTRUCTION and the "
+                f"research challenge has to be independent by record.")
+        if why == "same_session":
+            raise LedgerRefusal(
+                f"the challenge was recorded in the SAME session "
+                f"({ch_session!r}) as the synthesis it reviews. One agent run "
+                f"cannot be its own independent challenger, whatever actor "
+                f"label it uses. Record the challenge from a genuinely separate "
+                f"agent run.")
         raise LedgerRefusal(
             f"{actor!r} and the synthesis author {author!r} are the same "
             f"identity under a different role label ('{_base_identity(actor)}') "

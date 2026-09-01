@@ -229,9 +229,20 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             else:
                 author = L.actor_for(wb, cell, "synthesis")
                 challenger = str(logged.get("Actor") or "")
-                if author and challenger == author:
-                    findings["challenge_not_independent"].append(
-                        {"subcap": cell, "actor": challenger})
+                # AUD-0117: use the SAME independence rule the write path uses,
+                # not a weaker exact-match. A relabel challenge (x-producer
+                # synthesises, x-challenger challenges, no session tokens) was
+                # written before the rule existed and passed the gate though
+                # record_challenge would now refuse it. Read and write must
+                # agree, or the gate blesses what the ledger would reject.
+                if author:
+                    ch_session = str(logged.get("Session") or "").strip()
+                    syn_session = L.session_for(wb, cell, "synthesis")
+                    indep, why = L.challenge_independence(
+                        author, syn_session, challenger, ch_session)
+                    if not indep:
+                        findings["challenge_not_independent"].append(
+                            {"subcap": cell, "actor": challenger, "why": why})
                 if str(logged.get("Verdict") or "").upper() != verdict:
                     findings["challenge_missing"].append(cell)
 
