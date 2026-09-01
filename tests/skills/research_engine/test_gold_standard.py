@@ -79,6 +79,16 @@ def _gold_workbook(path, n_per_pillar=3):
     tr.append(["TS_ID", "Product", "Vendor", "Layer", "Status"])
     tr.append(["TS-1", "Core", "Vendor", "OPS", "CONFIRMED"])
 
+    ft = wb.create_sheet("Financial_Trends")
+    ft.append(["Metric", "Unit", "FY2020", "FY2021", "FY2022", "FY2023",
+               "FY2024", "CAGR (FY20-24)", "Evidence"])
+    for name, vals in [("Revenue", [100, 120, 140, 165, 190]),
+                       ("Net income", [10, 14, 12, 18, 22]),
+                       ("Total assets", [500, 620, 730, 840, 960]),
+                       ("Loans receivable", [400, 520, 640, 760, 900]),
+                       ("Return on equity", [12.1, 13.4, 11.9, 14.2, 15.0])]:
+        ft.append([name, "$000s"] + vals + ["17.4%", "E-1"])
+
     wb.save(str(path))
     return path
 
@@ -177,6 +187,10 @@ def _assessment_body(overall="2.25"):
     for i in range(1, 4):
         body.append(("Heading 2", f"REC-R{i}: do a thing"))
         body.append(("Normal", "Strongest counter. It survives because."))
+    # 5-year financial trajectory (GS-RPT-FINANCIALS)
+    body.append(("Normal", "Revenue grew across FY2020, FY2021, FY2022, FY2023 and "
+                 "FY2024, a 17% CAGR; net income and total assets rose over the "
+                 "five-year trajectory."))
     # depth: citations + words
     body.append(("Normal", " ".join(f"E-{i}" for i in range(1, 70)) + " " + "word " * 3600))
     return body
@@ -216,3 +230,37 @@ def test_missing_ai_overlay_is_caught(tmp_path):
              + " ".join(f"E-{i}" for i in range(1, 70)))]
     rp = _docx(tmp_path / "DMA_Assessment_Report_x.docx", body)
     assert "GS-RPT-AIOVERLAY" in {f["code"] for f in GS.report_findings(rp, kind="assessment")}
+
+
+# ── GSY-18 · depth: a real 5-year financial trajectory must be present ────
+
+def test_workbook_without_a_5_year_financial_trajectory_is_caught(tmp_path):
+    wb = _gold_workbook(tmp_path / "wb.xlsx")
+    w = openpyxl.load_workbook(wb)
+    del w["Financial_Trends"]          # remove the only 5-year series
+    w.save(wb)
+    assert "GS-WB-FINANCIALS" in {f["code"] for f in GS.workbook_findings(wb)}
+
+
+def test_financial_trends_sheet_with_too_few_years_is_caught(tmp_path):
+    wb = _gold_workbook(tmp_path / "wb.xlsx")
+    w = openpyxl.load_workbook(wb)
+    ws = w["Financial_Trends"]
+    for col in (5, 6, 7):              # blank FY2022..FY2024 headers -> < 5 year cols
+        ws.cell(1, col).value = None
+    w.save(wb)
+    assert "GS-WB-FINANCIALS" in {f["code"] for f in GS.workbook_findings(wb)}
+
+
+def test_report_without_financial_trajectory_is_caught(tmp_path):
+    body = [("Heading 1", "1. Executive Summary"),
+            ("Normal", "Overall 2.25. coverage disclosed. AI and data overlay. "
+             + "word " * 3600 + " ".join(f"E-{i}" for i in range(1, 70)))]
+    rp = _docx(tmp_path / "DMA_Assessment_Report_x.docx", body)
+    assert "GS-RPT-FINANCIALS" in {f["code"] for f in GS.report_findings(rp, kind="assessment")}
+
+
+def test_fy_prefixed_years_count_as_fiscal_years(tmp_path):
+    # regression: "FY2020" has no \b before the digits — the year regex must
+    # still see it, or a real trends sheet reads as zero year columns.
+    assert len(GS.re.findall(r"(?<!\d)20[0-3]\d(?!\d)", "FY2020 FY2021 FY2022")) == 3

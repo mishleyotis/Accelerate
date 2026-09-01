@@ -34,6 +34,7 @@ PRODUCER on its own output before returning — not by a reviewer after.
 | GSY-12 | Pillar_Summary duplicated to 8 rows during recompute. | **NOT an engine bug** — reproduced in isolation, `grains._replace` is correct. It was caused by hand-editing the workbook out-of-band between engine calls. The fix is to stop editing the workbook outside the engine, which GSY-15's gate enforces by requiring the assessment artefact. | `GS-WB-GRAINS` |
 | GSY-13 | Report figures drifted from the workbook when scores changed. | No reconcile check between the two. | `GS-RPT-RECONCILE` |
 | GSY-14 | Package not verified conducive for app ingestion. | No ingestion gate. | `GS-ING-*` |
+| GSY-18 | Reports and workbook lacked depth — no multi-year financial trajectory (the reference carries a 5-year+ series; a public issuer's is richer still). | No depth floor for financials; the series was authored only when asked, then had to be back-filled. | `GS-WB-FINANCIALS`, `GS-RPT-FINANCIALS` |
 
 ## The one-turn discipline (why issues were caught in QA, not prevented)
 

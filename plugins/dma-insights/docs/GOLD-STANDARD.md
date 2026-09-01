@@ -45,6 +45,11 @@ engine's. It carries, at minimum:
 - `Issue_Register` — real matters with `Severity, Status, Capability impact`.
 - `Solution_Catalogue`, `Cap_Triggers`, `Platform_Peer_Adoption`, `Maturity_Rubric`,
   `Capability_Definitions`, `Technographic_Scan`, `Enrichment_Needed`.
+- **A 5-year financial trajectory** — the deepest fiscal series in the workbook must span
+  **≥5 years** of real financial metrics (revenue, income, assets, loans, ROE…). Carry it
+  in a `Financial_Trends` sheet (≥5 fiscal-year columns, ≥5 metric rows, a CAGR/growth
+  column) or dispersed across the evidence/scoring sheets as the reference does — either
+  satisfies the floor, but the depth is not optional.
 
 Only a **source-link** column (`Source_URLs`) may be empty on a row with no located
 source — the contract forbids a placeholder there and a URL cannot be invented.
@@ -58,6 +63,9 @@ source — the contract forbids a placeholder there and a URL cannot be invented
   fonts). Authoring a blank `Document()` throws the template away — do not.
 - **Depth**: ≥60 distinct evidence citations; assessment ≥3,500 words, research ≥2,500.
   Cite the evidence base, do not summarise it.
+- **Financial trajectory**: render a **5-year+ financial series** in prose — ≥5 fiscal
+  years, real financial metrics, and an explicit trend (CAGR / growth / year-over-year),
+  reconciling to the workbook's `Financial_Trends`.
 - **Assessment content contracts**: an **AI-and-data overlay in every pillar** (×4); a
   **rebuttal on every recommendation** (steelman the strongest counter, then adjudicate);
   pillar deep-dive headings carry **score vs peer median** ("2.40 vs 3.10").

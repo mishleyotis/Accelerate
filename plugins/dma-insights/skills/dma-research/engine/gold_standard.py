@@ -42,6 +42,9 @@ FINDINGS -> GATES (full register: docs/goeasy-findings-register.md):
   GSY-16 coverage hidden, gaps proxied silently -> GS-WB-COVERAGE (Coverage discloses
          Scored / Unknown_EvidenceGap / Coverage_Pct; Executive_Summary headlines it)
   GSY-17 no Executive_Summary dashboard       -> GS-WB-DASHBOARD
+  GSY-18 no 5-year financial trajectory        -> GS-WB-FINANCIALS, GS-RPT-FINANCIALS
+         (depth: >=5 fiscal years of real metrics, in a Financial_Trends sheet or
+          dispersed as the reference carries it; the report renders it with a trend)
 """
 from __future__ import annotations
 
@@ -210,6 +213,52 @@ def workbook_findings(path) -> list[Finding]:
             hedge = sum(1 for r in real for c in r if _is_hedge(c))
             if hedge:
                 out.append(Finding("GS-WB-PEERS", f"{hedge} hedge cell(s) in Peer_Benchmarks", "GSY-04"))
+
+    # GS-WB-FINANCIALS — a real multi-year financial trajectory is present
+    # ("depth and all 5-year trends including 5-year financials", GSY-18). The
+    # reference (Golden 1) carries it dispersed across its scoring and evidence
+    # sheets, so the floor is depth-of-series, NOT a mandated sheet name: at
+    # least one sheet must show >=5 distinct fiscal years co-occurring with
+    # financial metrics.
+    year_re = re.compile(r"(?<!\d)20[0-3]\d(?!\d)")  # matches FY2020, 2020, 2020-24
+    fin_re = re.compile(r"revenue|asset|income|deposit|loan|equity|eps|cagr|"
+                        r"net charge|roe|roa|dividend|margin|capital", re.I)
+    best_years, best_sheet = 0, None
+    for sh in wb.sheetnames:
+        yrs, kw = set(), False
+        for r in wb[sh].iter_rows(values_only=True):
+            for c in r:
+                t = _norm(c)
+                if not t:
+                    continue
+                yrs.update(year_re.findall(t))
+                kw = kw or bool(fin_re.search(t))
+        if kw and len(yrs) > best_years:
+            best_years, best_sheet = len(yrs), sh
+    if best_years < 5:
+        out.append(Finding("GS-WB-FINANCIALS",
+            f"no 5-year financial trajectory in the workbook (deepest series: "
+            f"{best_years} fiscal year(s) in {best_sheet!r})", "GSY-18"))
+
+    # When a dedicated financial-trends sheet exists it must be a real series:
+    # >=5 fiscal-year columns, >=5 metric rows, and a growth/CAGR/trend column.
+    fin_sheet = next((s for s in wb.sheetnames if s.lower()
+                      in ("financial_trends", "financials", "financial_summary")), None)
+    if fin_sheet:
+        hdr, data = rows(fin_sheet)
+        yr_cols = [h for h in hdr if year_re.search(_norm(h))]
+        has_trend = any(re.search(r"cagr|growth|trend|delta|change", _norm(h), re.I)
+                        for h in hdr)
+        metric_rows = [r for r in data if r and _norm(r[0])]
+        if len(yr_cols) < 5:
+            out.append(Finding("GS-WB-FINANCIALS",
+                f"{fin_sheet}: only {len(yr_cols)} fiscal-year column(s), need >=5", "GSY-18"))
+        if len(metric_rows) < 5:
+            out.append(Finding("GS-WB-FINANCIALS",
+                f"{fin_sheet}: only {len(metric_rows)} metric row(s), need >=5", "GSY-18"))
+        if not has_trend:
+            out.append(Finding("GS-WB-FINANCIALS",
+                f"{fin_sheet}: no CAGR/growth/trend column", "GSY-18"))
     return out
 
 
@@ -295,6 +344,19 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto") -
         rebut = max(low.count("strongest counter"), low.count("rebuttal"))
         if recs and rebut < recs:
             out.append(Finding("GS-RPT-REBUTTALS", f"{rebut} rebuttals for {recs} recs", "GSY-10"))
+
+    # GS-RPT-FINANCIALS — the report renders a multi-year financial trajectory
+    # ("depth and all 5-year trends including 5-year financials", GSY-18): >=5
+    # distinct fiscal years, a financial metric, and an explicit trend word.
+    fyears = set(re.findall(r"(?<!\d)20[0-3]\d(?!\d)", whole))
+    has_fin = bool(re.search(r"revenue|asset|income|deposit|loan|equity|eps|cagr|"
+                             r"net charge|roe|roa|dividend|margin|capital", low))
+    has_trend = bool(re.search(r"cagr|growth|grew|year-over-year|yoy|compound|"
+                               r"trajectory|five-year|5-year", low))
+    if not (len(fyears) >= 5 and has_fin and has_trend):
+        out.append(Finding("GS-RPT-FINANCIALS",
+            f"no 5-year financial trajectory ({len(fyears)} yrs, "
+            f"fin={has_fin}, trend={has_trend})", "GSY-18"))
 
     if scores and scores.get("overall") is not None:
         ov = scores["overall"]
