@@ -882,6 +882,85 @@ _EV_MISS_COST = {
 }
 
 
+def _read_ev_tab(wb, tab: str, observe) -> dict | None:
+    """Read ONE ledger tab into rows keyed by e_id, plus the columns it carried.
+
+    Returns None when the tab has no locatable id column, so a workbook that
+    merely *has* the tab is not mistaken for one that could be read.
+    """
+    ws = wb[tab]
+    headers = first = None
+    for anchor in _EV_ID_ANCHORS:
+        try:
+            headers, first = _header_map(ws, anchor)
+            break
+        except ValueError:
+            continue
+    if headers is None:
+        # No recognisable ledger: the package lands without this tab
+        # (links absent, counts computed zero) rather than failing
+        # wholesale — but never without saying so.
+        observe("evidence_ledger_header_not_found",
+                {"tab": tab, "expected_any_of": list(_EV_ID_ANCHORS),
+                 "reason": "the ledger tab exists and its id column could "
+                           "not be located; no evidence row was read"})
+        return None
+    cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
+    cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
+    # Every excerpt-class column, because a row can carry two and the
+    # first alias is not always the verbatim one (MEM-0162).
+    excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
+
+    rows: dict = {}
+    order: list = []
+    rows_seen = 0
+    for row in ws.iter_rows(min_row=first, values_only=True):
+        def v(key):
+            i = cols.get(key)
+            return row[i] if i is not None and i < len(row) else None
+        e_id = str(v("e_id") or "").strip()
+        if e_id:
+            rows_seen += 1
+        if not (e_id.startswith("E-") or e_id.startswith("INT-")):
+            continue
+        tier = str(v("tier") or "").strip().upper()
+        ers = _decimal(v("ers"))
+        claim = str(v("claim_type") or "").strip().upper() or None
+        facts = _decimal(v("fact_count"))
+        rec = {
+            "e_id": e_id,
+            "source_name": (str(v("source_name")).strip()
+                            if v("source_name") else None),
+            "source_url": (str(v("source_url")).strip()
+                           if v("source_url") else None),
+            "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
+            "ers": None if ers in (None, "UNPARSEABLE") else ers,
+            # "Recency" ships a BAND word ("CURRENT"), not a date. A band
+            # asserted without a date cannot be honoured: undated evidence
+            # is UNVERIFIED, never current (charter invariant 9), so the
+            # stated word is carried for the record and the date stays null.
+            "published_date": parse_fuzzy_date(v("published")),
+            "stated_recency": _stated_band(v("recency"), v("published")),
+            "claim_type": claim if claim in
+                          ("FACT", "INFERENCE", "HYPOTHESIS",
+                           "CEILING_ESTIMATE") else None,
+            "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
+            "excerpt": _best_excerpt(
+                [row[i] if i < len(row) else None for i in excerpt_cols]),
+            "subcaps": [s for s in
+                        (x.strip() for x in str(v("subcaps") or "").split(","))
+                        if SUBCAP_RE.match(s)],
+        }
+        if e_id not in rows:
+            order.append(e_id)
+        rows[e_id] = rec
+    return {"tab": tab, "cols": cols, "rows": rows,
+            "order": order, "rows_seen": rows_seen}
+
+
+_EV_EMPTY = (None, "", [], {})
+
+
 def parse_evidence_master(path: str, obs: list | None = None) -> list:
     def observe(kind, detail):
         if obs is not None:
@@ -889,40 +968,58 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
 
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        tab = next((t for t in _EV_TABS if t in wb.sheetnames), None)
-        if tab is None:
+        # EVERY ledger tab present, not the first one that matches.
+        #
+        # `_EV_TABS` was written as an either/or — 15 of 153 packages have no
+        # `Evidence_Master` and name the same tab something else — and reading
+        # `next(...)` served that case correctly while silently losing the
+        # other one: a workbook carrying `Evidence_Master` AND a richer
+        # `Evidence_Detail` beside it. Those are not alternate spellings of one
+        # tab, they are a thin index and the ledger it indexes, and precedence
+        # order put the thin one first.
+        #
+        # Measured on the Golden 1 package (DMA-2026-GOLDEN1-001, 43 tabs):
+        # `Evidence_Master` carries 731 rows over 8 columns and NO excerpt,
+        # date or subcap column at all, while `Evidence_Detail` carries 727 of
+        # those same ids over 17 columns with an excerpt on 727 of 727 — every
+        # one inside the 50-500 verbatim window — a `Date_Published` on 727 and
+        # `SubCap_IDs` on 723. Reading only the first tab landed 589 rows
+        # excerpt-less, banded the whole package UNVERIFIED for want of a date
+        # column that was one tab over, and left the producer to be refused by
+        # ET-04 and CG-50 for citing evidence the workbook had all along.
+        #
+        # So: the first tab by precedence establishes the row set (it is the
+        # widest — the 4 ids `Evidence_Detail` lacks are enrichment rows), and
+        # every other present tab FILLS FIELDS IT LEFT EMPTY. A tab is never
+        # allowed to overwrite a value another tab already stated; merging only
+        # into holes keeps this from re-ordering anyone's evidence.
+        present = [t for t in _EV_TABS if t in wb.sheetnames]
+        if not present:
             observe("evidence_ledger_tab_not_found",
                     {"expected_any_of": list(_EV_TABS),
                      "tabs_present": list(wb.sheetnames)[:30],
                      "reason": "no evidence ledger tab: this package lands "
                                "with no evidence rows at all"})
             return []
-        ws = wb[tab]
-        headers = first = None
-        for anchor in _EV_ID_ANCHORS:
-            try:
-                headers, first = _header_map(ws, anchor)
-                break
-            except ValueError:
-                continue
-        if headers is None:
-            # No recognisable ledger: the package lands without its
-            # evidence tab (links absent, counts computed zero) rather
-            # than failing wholesale — but never without saying so.
-            observe("evidence_ledger_header_not_found",
-                    {"tab": tab, "expected_any_of": list(_EV_ID_ANCHORS),
-                     "reason": "the ledger tab exists and its id column could "
-                               "not be located; no evidence row was read"})
+        reads = [r for r in (_read_ev_tab(wb, t, observe) for t in present) if r]
+        if not reads:
             return []
-        cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
-        cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
-        # Every excerpt-class column, because a row can carry two and the
-        # first alias is not always the verbatim one (MEM-0162). `_pick`
-        # still answers `cols["excerpt"]` for the per-column census below,
-        # which asks whether the field landed at all.
-        excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
+        primary, secondaries = reads[0], reads[1:]
+        tab = primary["tab"]
 
-        # A COLUMN THIS READER DID NOT RECOGNISE IS NAMED, ALWAYS.
+        # A column counts as FOUND when any present tab carries it; the census
+        # below reports only what no tab had. Reporting the primary's misses
+        # alone is what made a missing `excerpt` look like a property of the
+        # package rather than of which tab was opened.
+        cols = dict(primary["cols"])
+        supplied_by = {}
+        for r in reads[1:]:
+            for field, idx in r["cols"].items():
+                if cols.get(field) is None and idx is not None:
+                    cols[field] = idx
+                    supplied_by[field] = r["tab"]
+
+        # A COLUMN NO TAB RECOGNISED IS NAMED, ALWAYS.
         #
         # Until this loop existed, `_pick` returning None was indistinguishable
         # from a column full of blanks: every row landed with the field null,
@@ -936,52 +1033,63 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
         # it), while an absent date bands every row UNVERIFIED.
         for field, names in list(_EV_ALIASES.items()) + [("e_id", _EV_E_ID_KEYS)]:
             if cols.get(field) is None:
-                miss = _column_not_found(tab, field, names, headers)
+                miss = _column_not_found(tab, field, names, primary["cols"])
                 miss.detail["consequence"] = _EV_MISS_COST[field]
+                miss.detail["tabs_searched"] = [r["tab"] for r in reads]
                 if obs is not None:
                     obs.append(miss)
+
         out = []
-        rows_seen = 0
-        for row in ws.iter_rows(min_row=first, values_only=True):
-            def v(key):
-                i = cols.get(key)
-                return row[i] if i is not None and i < len(row) else None
-            e_id = str(v("e_id") or "").strip()
-            if e_id:
-                rows_seen += 1
-            if not (e_id.startswith("E-") or e_id.startswith("INT-")):
+        merged_from: dict = {}
+        for e_id in primary["order"]:
+            rec = dict(primary["rows"][e_id])
+            for sec in secondaries:
+                other = sec["rows"].get(e_id)
+                if not other:
+                    continue
+                for field, val in other.items():
+                    if field == "e_id":
+                        continue
+                    if rec.get(field) in _EV_EMPTY and val not in _EV_EMPTY:
+                        rec[field] = val
+                        merged_from.setdefault(sec["tab"], {})
+                        merged_from[sec["tab"]][field] = \
+                            merged_from[sec["tab"]].get(field, 0) + 1
+            out.append(rec)
+
+        # A row only a secondary tab carries is still evidence. Appended rather
+        # than dropped, and counted, because a ledger that indexes 731 of 735
+        # facts is exactly the silent loss this reader exists to refuse.
+        seen = set(primary["order"])
+        for sec in secondaries:
+            extra = [i for i in sec["order"] if i not in seen]
+            if not extra:
                 continue
-            tier = str(v("tier") or "").strip().upper()
-            ers = _decimal(v("ers"))
-            claim = str(v("claim_type") or "").strip().upper() or None
-            facts = _decimal(v("fact_count"))
-            out.append({
-                "e_id": e_id,
-                "source_name": (str(v("source_name")).strip()
-                                if v("source_name") else None),
-                "source_url": (str(v("source_url")).strip()
-                               if v("source_url") else None),
-                "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
-                "ers": None if ers in (None, "UNPARSEABLE") else ers,
-                # "Recency" ships a BAND word ("CURRENT"), not a date. A band
-                # asserted without a date cannot be honoured: undated evidence
-                # is UNVERIFIED, never current (charter invariant 9), so the
-                # stated word is carried for the record and the date stays null.
-                "published_date": parse_fuzzy_date(v("published")),
-                "stated_recency": _stated_band(v("recency"), v("published")),
-                "claim_type": claim if claim in
-                              ("FACT", "INFERENCE", "HYPOTHESIS",
-                               "CEILING_ESTIMATE") else None,
-                "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
-                "excerpt": _best_excerpt(
-                    [row[i] if i < len(row) else None for i in excerpt_cols]),
-                "subcaps": [s for s in
-                            (x.strip() for x in str(v("subcaps") or "").split(","))
-                            if SUBCAP_RE.match(s)],
-            })
-        if rows_seen and not out:
+            for e_id in extra:
+                out.append(dict(sec["rows"][e_id]))
+                seen.add(e_id)
+            observe("evidence_ledger_rows_only_in_secondary", {
+                "tab": sec["tab"], "primary_tab": tab, "rows_added": len(extra),
+                "example": extra[:5],
+                "reason": "these ids appear in a ledger tab the primary does "
+                          "not index. They are carried rather than dropped: a "
+                          "row missing from the index is still a row."})
+
+        if merged_from:
+            observe("evidence_ledger_merged", {
+                "primary_tab": tab,
+                "tabs_present": present,
+                "filled_from": {t: dict(f) for t, f in merged_from.items()},
+                "columns_supplied_by": supplied_by,
+                "rows": len(out),
+                "reason": "fields the primary ledger tab left empty were "
+                          "filled from another ledger tab in the same "
+                          "workbook. Only holes were filled; no tab "
+                          "overwrote a value another had already stated."})
+
+        if primary["rows_seen"] and not out:
             observe("evidence_ledger_ids_unrecognised", {
-                "tab": tab, "rows_seen": rows_seen,
+                "tab": tab, "rows_seen": primary["rows_seen"],
                 "expected": "E-… or INT-…-…",
                 "reason": "the ledger has rows and not one id was in a form "
                           "this parser recognises; no evidence was read"})
