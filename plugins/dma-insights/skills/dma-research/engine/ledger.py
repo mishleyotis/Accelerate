@@ -266,8 +266,68 @@ DQ_FIELDS = ("DQ_Works", "DQ_Fails", "DQ_Value", "DQ_Corroborates",
              "DQ_Contradicts")
 
 
+def _agent_session() -> str:
+    """A token stable across ONE agent run and distinct between runs, so
+    independence can be checked by SESSION rather than by a free-text label a
+    single agent can relabel. The harness sets it per dispatched agent; a
+    subprocess the agent spawns inherits it. Empty when unset (older records)."""
+    import os
+    for k in ("DMA_AGENT_SESSION", "CLAUDE_AGENT_ID", "CLAUDE_SESSION_ID"):
+        v = os.environ.get(k)
+        if v and str(v).strip():
+            return str(v).strip()
+    return ""
+
+
+#: Role/function suffix tokens that name what an actor DID, not WHO it is.
+#: Stripping them leaves the base identity, so `x-producer` and `x-challenger`
+#: collapse to the same `x` — a relabel of one agent, not two agents.
+_ROLE_TOKENS = frozenset({
+    "producer", "challenger", "reviewer", "review", "challenge", "synthesis",
+    "synthesist", "synthesiser", "synthesizer", "synth", "author", "verifier",
+    "grader", "critic", "adjudicator", "independent", "self", "actor", "agent"})
+
+
+def _base_identity(name: str) -> str:
+    toks = [t for t in re.split(r"[^a-z0-9]+", str(name or "").lower()) if t]
+    core = [t for t in toks if t not in _ROLE_TOKENS]
+    return " ".join(core)
+
+
+def challenge_independence(author: str, author_session: str,
+                           challenger: str, challenger_session: str
+                           ) -> tuple[bool, str]:
+    """Is a challenge INDEPENDENT of the synthesis it reviews? (AUD-0113/0117)
+
+    ONE rule, used by BOTH the write path (`record_challenge`, which refuses a
+    dependent challenge) and the READ path (the floors gate, which flags one
+    already on the workbook — a challenge written before this rule existed, or
+    by a tool that bypassed the ledger). Two answers to one question must not
+    drift: the gate used to catch only an EXACT actor match, so a relabel
+    (`x-producer` synthesises, `x-challenger` challenges, no session tokens)
+    passed the gate though the write path would now refuse it.
+
+    Session proof wins: two present, distinct sessions are two runs, and the
+    labels may then legitimately share a base. Absent that proof, a shared base
+    identity is a relabel of one run. Returns (independent, reason) where reason
+    is '' when independent, else 'same_actor' / 'same_session' / 'relabel'."""
+    a = str(author or "").strip()
+    c = str(challenger or "").strip()
+    asess = str(author_session or "").strip()
+    csess = str(challenger_session or "").strip()
+    if a and c and a == c:
+        return (False, "same_actor")
+    if asess and csess and asess == csess:
+        return (False, "same_session")
+    if asess and csess and asess != csess:
+        return (True, "")            # distinct sessions prove two runs
+    if _base_identity(c) and _base_identity(c) == _base_identity(a):
+        return (False, "relabel")    # shared base, no session proof
+    return (True, "")
+
+
 def record_provenance(wb: RunWorkbook, subcap: str, step: str, actor: str,
-                      detail: str = "") -> None:
+                      detail: str = "", session: str = "") -> None:
     """Who did this step. Authorship is what makes independence checkable."""
     if step not in C.PROVENANCE_STEPS:
         raise LedgerRefusal(f"step {step!r} not in {C.PROVENANCE_STEPS}")
@@ -277,7 +337,8 @@ def record_provenance(wb: RunWorkbook, subcap: str, step: str, actor: str,
             "the actor (an agent name, a session id, a person)")
     wb.append("Provenance", {"SubCap_ID": subcap, "Step": step,
                              "Actor": str(actor).strip(), "At": _utcnow(),
-                             "Detail": detail})
+                             "Detail": detail,
+                             "Session": str(session or _agent_session()).strip()})
 
 
 def actor_for(wb: RunWorkbook, subcap: str, step: str) -> str | None:
@@ -288,9 +349,17 @@ def actor_for(wb: RunWorkbook, subcap: str, step: str) -> str | None:
     return str(hits[-1]["Actor"]) if hits else None
 
 
+def session_for(wb: RunWorkbook, subcap: str, step: str) -> str:
+    """The most recent session token for one step of one subcap ('' if none)."""
+    hits = [r for r in wb.rows("Provenance")
+            if str(r.get("SubCap_ID") or "") == subcap
+            and str(r.get("Step") or "") == step]
+    return str(hits[-1].get("Session") or "").strip() if hits else ""
+
+
 def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
                      dimensions: dict, rationale: str,
-                     ceiling_band_delta: str = "") -> dict:
+                     ceiling_band_delta: str = "", session: str = "") -> dict:
     """Record a challenge — and refuse one the synthesis's own author wrote.
 
     AUD-0018 / AUD-0024: this repository already solves reviewer independence
@@ -318,12 +387,35 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
             f"{subcap} has no recorded synthesis author, so a challenge on it "
             f"cannot be shown to be independent. Write the synthesis with an "
             f"actor first.")
-    if str(actor).strip() == author:
+    # ONE independence rule, shared with the floors gate (challenge_independence).
+    # A distinct SESSION token (set by the harness per agent, inherited by the
+    # subprocesses it spawns) proves a different run; absent it, a shared base
+    # identity is a relabel of one run (AUD-0113) and refused.
+    ch_session = str(session or _agent_session()).strip()
+    syn_session = session_for(wb, subcap, "synthesis")
+    independent, why = challenge_independence(
+        author, syn_session, str(actor).strip(), ch_session)
+    if not independent:
+        if why == "same_actor":
+            raise LedgerRefusal(
+                f"{actor!r} wrote this synthesis and cannot also be its "
+                f"challenger. A verdict on your own work is a feeling; the "
+                f"learning loop's grader is independent BY CONSTRUCTION and the "
+                f"research challenge has to be independent by record.")
+        if why == "same_session":
+            raise LedgerRefusal(
+                f"the challenge was recorded in the SAME session "
+                f"({ch_session!r}) as the synthesis it reviews. One agent run "
+                f"cannot be its own independent challenger, whatever actor "
+                f"label it uses. Record the challenge from a genuinely separate "
+                f"agent run.")
         raise LedgerRefusal(
-            f"{actor!r} wrote this synthesis and cannot also be its "
-            f"challenger. A verdict on your own work is a feeling; the "
-            f"learning loop's grader is independent BY CONSTRUCTION and the "
-            f"research challenge has to be independent by record.")
+            f"{actor!r} and the synthesis author {author!r} are the same "
+            f"identity under a different role label ('{_base_identity(actor)}') "
+            f"— a relabel is not independence. Record the challenge from a "
+            f"genuinely separate agent run, or carry a distinct session token "
+            f"(both this challenge and the synthesis must record one) to prove "
+            f"the runs differ.")
     missing = [d for d in C.CHALLENGE_DIMENSIONS if d not in (dimensions or {})]
     if missing:
         raise LedgerRefusal(
@@ -345,9 +437,11 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
     wb.append("Challenge_Log", {
         "SubCap_ID": subcap, "Verdict": verdict, "Actor": str(actor).strip(),
         "Dimensions": dimensions, "Rationale": rationale,
-        "Ceiling_Band_Delta": ceiling_band_delta, "At": _utcnow()})
+        "Ceiling_Band_Delta": ceiling_band_delta, "At": _utcnow(),
+        "Session": ch_session})
     record_provenance(wb, subcap, "challenge", actor,
-                      f"{verdict}; {len(dimensions)} dimensions")
+                      f"{verdict}; {len(dimensions)} dimensions",
+                      session=ch_session)
     wb.set_scoring(subcap, {"Challenge_Verdict": verdict})
     return {"subcap": subcap, "verdict": verdict, "challenger": actor,
             "author": author, "failed_dimensions": failed}
@@ -360,7 +454,7 @@ def challenge_for(wb: RunWorkbook, subcap: str) -> dict | None:
 
 
 def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
-                     actor: str | None = None) -> dict:
+                     actor: str | None = None, session: str = "") -> dict:
     """Write one subcap's synthesis onto its scoring row, or refuse.
 
     This is the write AUD-0009 measured accepting an unmodified skeleton.
@@ -461,7 +555,7 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     payload["Retrieved_At"] = _utcnow()
     wb.set_scoring(subcap, payload)
     if actor:
-        record_provenance(wb, subcap, "synthesis", actor)
+        record_provenance(wb, subcap, "synthesis", actor, session=session)
     wb.recompute_coverage()
     # The cross-register ERS pass lands HERE rather than at every append.
     # Corroboration is a property of the whole register — a row banked first

@@ -71,7 +71,7 @@ def test_a_connector_tool_is_approved_without_a_human(tool):
 
 
 @pytest.mark.parametrize("tool", [
-    "Bash", "Write", "Edit", "Read", "WebFetch", "Task",
+    "Bash", "Write", "Edit", "Read", "Task",
     "mcp__Gmail__send_message",
     "mcp__Google_Drive__update_file",
     "mcp__github__create_pull_request",
@@ -81,6 +81,29 @@ def test_no_other_tool_is_ever_approved(tool):
     assert decision(AUTO, {"tool_name": tool}) is None, (
         f"{tool} drew a decision from a hook that must only speak for this "
         f"plugin's connector")
+
+
+# ── the built-in web tools ARE approved (AUD-0117) ──
+#
+# Owner, 2026-09-01: "still getting approval prompts" while sixteen research
+# producers ran. Root cause: this hook was wired only to `mcp__.*`, but the
+# producers' PRIMARY retrieval is the built-in WebSearch/WebFetch, which no
+# auto-approve hook matched and permissions.allow did not list — so each fell
+# through to a prompt. They are read-only web reads and must run headless.
+
+
+@pytest.mark.parametrize("tool", ["WebSearch", "WebFetch"])
+def test_the_builtin_web_tools_are_approved_without_a_human(tool):
+    assert decision(AUTO, {"tool_name": tool}) == "allow", (
+        f"{tool} must auto-approve — it is the research routine's primary "
+        f"read-only retrieval path and blocking it stops headless operation")
+
+
+def test_bash_and_write_are_still_not_web_approved():
+    """The web allowance is exactly WebSearch/WebFetch — not a blanket
+    built-in grant. Bash keeps its own deny hooks; Write/Edit are never web."""
+    for tool in ("Bash", "Write", "Edit"):
+        assert decision(AUTO, {"tool_name": tool}) is None, tool
 
 
 def test_a_lookalike_prefix_is_not_ours():
@@ -777,3 +800,121 @@ def test_the_allowed_set_is_exactly_what_the_connector_serves():
     assert h.DMA_TOOLS == served, (
         f"only in the hook: {sorted(h.DMA_TOOLS - served)}; "
         f"only in the connector: {sorted(served - h.DMA_TOOLS)}")
+
+
+# ── stress: server spelling resilience (AUD-0114, owner 2026-09-01) ──
+#
+# The owner kept being prompted for Google-Drive / Vibe-Prospecting: the tables
+# spell those servers with underscores, the live connector attaches under a
+# HYPHEN segment, and a full-name rule written one way missed the other. These
+# tests drive from SERVER_SURFACES itself so coverage cannot drift, and assert
+# every classified read approves under BOTH spellings while every write still
+# prompts under both.
+import importlib as _importlib
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "hooks"))
+_AAC = _importlib.import_module("autoapprove_connector")
+
+
+def _hyphen_server(tool: str) -> str:
+    parts = tool.split("__")
+    parts[1] = parts[1].replace("_", "-")
+    return "__".join(parts)
+
+
+@pytest.mark.parametrize("server", sorted(_AAC.SERVER_SURFACES))
+def test_classified_reads_approve_under_both_server_spellings(server):
+    for t in sorted(_AAC.SERVER_SURFACES[server]["read"]):
+        full = f"mcp__{server}__{t}"
+        if full in _AAC.CONDITIONAL_TOOLS:
+            continue
+        for name in (full, _hyphen_server(full)):
+            assert decision(AUTO, {"tool_name": name, "tool_input": {}}) == "allow", \
+                f"{name}: a classified read must auto-approve under either spelling"
+
+
+@pytest.mark.parametrize("server", sorted(_AAC.SERVER_SURFACES))
+def test_classified_writes_still_prompt_under_both_server_spellings(server):
+    for t in sorted(_AAC.SERVER_SURFACES[server]["withheld"]):
+        full = f"mcp__{server}__{t}"
+        for name in (full, _hyphen_server(full)):
+            assert decision(AUTO, {"tool_name": name, "tool_input": {}}) is None, \
+                f"{name}: a withheld write must NOT be auto-approved under any spelling"
+
+
+@pytest.mark.parametrize("tool", [
+    # every connector the owner named, plus the multi-word ones both ways
+    "mcp__Tavily__tavily_search", "mcp__Tavily__tavily_extract",
+    "mcp__Exa__web_search_exa", "mcp__Exa__web_fetch_exa",
+    "mcp__Clay__find-and-enrich-company", "mcp__Clay__get-task-context",
+    "mcp__Indeed__search_jobs", "mcp__Indeed__get_company_data",
+    "mcp__Vibe-Prospecting__enrich-business",
+    "mcp__Vibe_Prospecting__enrich-business",
+    "mcp__Google-Drive__search_files", "mcp__Google_Drive__search_files",
+    "mcp__Google-Drive__get_file_permissions",
+    "mcp__DMA-Insights__get_client_state",
+    "mcp__plugin_dma-insights_connector__get_client_state",
+])
+def test_the_connectors_the_owner_named_all_auto_approve(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
+        f"{tool} must auto-approve without a human — the routine runs headless"
+
+
+# ── the resilient default: new / renamed tools classified by verb ──
+#
+# Owner 2026-09-01: the hook must factor in tools nobody listed — new ones and
+# renamed ones — the moment they appear. A read verb approves; a write/send
+# verb prompts; an unrecognised verb prompts; explicit withholds win.
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__get_widgets", "mcp__BrandNewCo__list_accounts",
+    "mcp__Whatever__search_v2_results", "mcp__Exa__web_search_v3_exa",
+    "mcp__NewCo__retrieve_report", "mcp__NewCo__fetch_thing",
+    "mcp__NewCo__describe_dataset", "mcp__NewCo__lookup_entity",
+])
+def test_an_unlisted_read_tool_on_any_connector_auto_approves(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
+        f"{tool}: a read verb must auto-approve without a rule change"
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__create_widget", "mcp__BrandNewCo__update_record",
+    "mcp__BrandNewCo__delete_thing", "mcp__BrandNewCo__send_email",
+    "mcp__BrandNewCo__export_data", "mcp__BrandNewCo__run_job",
+    "mcp__BrandNewCo__post_message", "mcp__BrandNewCo__share_folder",
+    "mcp__BrandNewCo__get_and_delete_record",   # WRITE wins over the read verb
+])
+def test_an_unlisted_write_tool_still_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) is None, \
+        f"{tool}: a write/send verb must still prompt"
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__frobnicate", "mcp__BrandNewCo__handshake",
+    "mcp__BrandNewCo__widgetize",
+])
+def test_an_unrecognised_verb_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) is None, \
+        f"{tool}: a name with no read or write verb must prompt, not guess"
+
+
+def test_an_explicit_withhold_wins_over_a_read_looking_name():
+    # github resolve_review_thread is a WRITE the hook withholds; it must stay a
+    # prompt even though a naive reader might see "resolve" as harmless.
+    assert decision(AUTO, {"tool_name": "mcp__github__resolve_review_thread",
+                           "tool_input": {}}) is None
+
+
+@pytest.mark.parametrize("evil", [
+    {"tool_name": "mcp__x__y__z__weird", "tool_input": {}},
+    {"tool_name": "mcp__", "tool_input": None},
+    {"tool_name": "mcp__a__b", "tool_input": {"weird": "☃"}},
+    {"tool_name": "mcp__a__b__" + "x" * 5000},
+    {"tool_name": 12345},
+    {},
+])
+def test_the_hook_never_crashes_and_never_errors(evil):
+    # A hook that can exit non-zero is not resilient. Whatever valid JSON event
+    # arrives, it must exit 0 — a decision or silence, never an error.
+    r = run(AUTO, evil)
+    assert r.returncode == 0, f"hook errored on {evil!r}: {r.stderr}"

@@ -254,6 +254,30 @@ def render(name: str, description: str, rel: str, model: str, effort: str,
             f"tools: {allow}\ndisallowedTools: {deny}\n---\n{body.strip()}\n")
 
 
+GOLD_BLOCK = """
+
+## Gold standard — the deliverable-first loop (mandatory)
+
+Before you write a word, read `docs/GOLD-STANDARD.md` and open the reference package
+(**Golden 1 Credit Union**) so you know the exact shape — the section list, the tables,
+the coverage disclosure, the M-band labels, the AI-and-data overlay per pillar, the
+rebuttal per recommendation. Authoring first and meeting the standard only in QA is the
+failure this loop exists to prevent.
+
+When the report is written, run the gate on your OWN output before you hand back:
+
+```
+python3 -m engine.gold_standard report <report.docx> --kind <research|assessment>
+```
+
+Do not return until it prints `PASS`, and re-run it after any change to a section, a
+score reference, or a figure. Every finding maps to a goeasy-Ltd defect in
+`docs/goeasy-findings-register.md`. Never ship a hedge — "Not established this run",
+"surface-production stage", "no score yet", a bare "N/A" or "0" where a value belongs. A
+genuine gap is a disclosed Coverage Unknown or an ABSENT firmographic with a route,
+never a hedge. Reproduce every numbered template section and leave no `{{token}}`."""
+
+
 def build() -> dict[str, str]:
     out = {}
     producers = [
@@ -280,7 +304,7 @@ def build() -> dict[str, str]:
         out[f"{name}.md"] = render(
             name, desc, f"reports/{name}.md", "sonnet", "high", 200,
             PRODUCER_BODY.format(title=spec.title, table=_section_table(key),
-                                 key=key, name=name))
+                                 key=key, name=name) + GOLD_BLOCK)
     out["report-validator.md"] = render(
         "report-validator",
         ("Gives every section of both DMA reports its independent verdict "

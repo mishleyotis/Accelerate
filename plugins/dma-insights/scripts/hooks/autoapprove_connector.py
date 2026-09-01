@@ -41,6 +41,7 @@ them from here as well would put two hooks on one tool with opposite
 opinions, and the resolution order is not something to bet a promote on.
 """
 import json
+import re
 import sys
 
 PREFIX = "mcp__plugin_dma-insights_connector__"
@@ -465,6 +466,82 @@ ENRICHMENT_REASON = (
 )
 
 
+def _canonical(tool: str) -> str:
+    """The same tool with its SERVER segment's hyphens turned to underscores.
+
+    A classified server may attach under either spelling — the Routine record
+    and this file's tables use `Google_Drive`, the live connector attaches as
+    `Google-Drive` — and a full-name rule written one way misses the other.
+    Only the server segment (index 1) is touched; the tool id keeps its own
+    hyphens (`enrich-business` stays `enrich-business`)."""
+    parts = tool.split("__")
+    if len(parts) >= 3 and parts[0] == "mcp":
+        parts[1] = parts[1].replace("-", "_")
+        return "__".join(parts)
+    return tool
+
+
+# ── verb vocabulary for the resilient default ────────────────────────────
+#
+# A tool id is a run of words; the WORD is what says read from write. These
+# sets are deliberately asymmetric: WRITE is broad (anything that could change,
+# send, spend or run something the routine did not author prompts), READ is the
+# narrow set of words that only ever fetch and return. WRITE is tested first so
+# a compound like `get_and_delete` prompts.
+_WRITE_VERBS = frozenset({
+    "create", "update", "delete", "remove", "send", "write", "post", "add",
+    "set", "merge", "trash", "share", "move", "copy", "upload", "export",
+    "run", "exec", "execute", "schedule", "submit", "promote", "save",
+    "archive", "suspend", "offboard", "swap", "invite", "revoke", "install",
+    "deploy", "publish", "reply", "trigger", "bulk", "draft", "cancel",
+    "approve", "reject", "put", "patch", "insert", "drop", "enable", "disable",
+    "subscribe", "unsubscribe", "withdraw", "claim", "append", "register",
+    "ingest", "resolve", "unresolve", "clear", "edit", "rename", "star",
+    "fork", "dispatch", "comment", "assign", "close", "reopen", "sync"})
+_READ_VERBS = frozenset({
+    "get", "list", "search", "read", "fetch", "find", "download", "query",
+    "describe", "show", "view", "lookup", "count", "check", "status",
+    "enrich", "match", "autocomplete", "map", "crawl", "extract", "inspect",
+    "related", "estimate", "sample", "retrieve", "soql", "display", "explain"})
+
+
+def _verb_disposition(suffix: str) -> str:
+    """'write', 'read', or 'unknown' from the words in a tool id. WRITE wins."""
+    words = {w for w in re.split(r"[^a-z0-9]+", str(suffix).lower()) if w}
+    if words & _WRITE_VERBS:
+        return "write"
+    if words & _READ_VERBS:
+        return "read"
+    return "unknown"
+
+
+VERB_READ_REASON = (
+    "read-only connector tool, auto-approved by the dma-insights hook's "
+    "resilient default: the tool id carries a read verb and no write/send "
+    "verb, so it fetches and returns. New or renamed read tools are covered "
+    "with no rule change; a write, send, or unrecognised verb still prompts, "
+    "and the explicit withheld lists win over this classification."
+)
+
+
+#: Built-in (non-MCP) tools this routine runs headless. MEASURED 2026-09-01,
+#: owner: "still getting approval prompts" while sixteen research producers ran.
+#: Root cause: this hook was wired ONLY to `mcp__.*`, and the enrichment
+#: connectors it covers are not the whole story — the producers' PRIMARY
+#: retrieval is the BUILT-IN `WebSearch` and `WebFetch`, which no auto-approve
+#: hook matched and `permissions.allow` did not list, so every one fell through
+#: to a prompt. They are READ-ONLY web reads (no state written anywhere), the
+#: exact tools a headless research routine must run without a human. `Bash` is
+#: deliberately NOT here — it has its own deny hooks and auto-approving every
+#: shell call from this hook would wave through far more than web reads.
+#: hooks.json registers this hook against the `WebSearch` and `WebFetch`
+#: matchers as well as `mcp__.*`, so this branch actually fires.
+READ_ONLY_BUILTINS = frozenset({"WebSearch", "WebFetch"})
+BUILTIN_WEB_REASON = (
+    "read-only web retrieval (WebSearch/WebFetch) — the research routine's "
+    "primary evidence-gathering tools, auto-approved so it runs headless")
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -476,6 +553,10 @@ def main() -> int:
     tool = event.get("tool_name")
     if not isinstance(tool, str):
         return 0
+    # Built-in read-only web tools first: they carry no `mcp__` prefix, so none
+    # of the connector logic below would ever reach them.
+    if tool in READ_ONLY_BUILTINS:
+        return _allow(BUILTIN_WEB_REASON)
     # startswith on the full prefix — never a substring match, never a regex.
     # `mcp__plugin_dma-insights_connector__x` is ours; anything else is not,
     # including a server that merely contains this name inside a longer one.
@@ -520,7 +601,15 @@ def main() -> int:
     # A connector that attaches under a stable, nameable server segment, so
     # its full tool name can be written down exactly. This is checked BEFORE
     # the suffix rule because it is the stricter of the two.
-    if tool in QUALIFIED_TOOLS:
+    #
+    # MEASURED 2026-09-01, owner: still prompting on Google-Drive / Vibe-
+    # Prospecting. The SERVER_SURFACES keys are written with underscores
+    # (Google_Drive), but the connector attaches under a HYPHEN segment
+    # (Google-Drive) in this environment — so the exact full name missed and
+    # the read fell through to a prompt. The tool SUFFIX never carries this
+    # ambiguity (it is the connector's own tool id), so only the SERVER
+    # segment is canonicalised, hyphen to underscore, before the lookup.
+    if tool in QUALIFIED_TOOLS or _canonical(tool) in QUALIFIED_TOOLS:
         return _allow(ENRICHMENT_REASON)
 
     # An enrichment connector, matched by TOOL NAME because its server segment
@@ -530,6 +619,28 @@ def main() -> int:
         suffix = tool.rsplit("__", 1)[1]
         if suffix in ENRICHMENT_TOOLS:
             return _allow(ENRICHMENT_REASON)
+
+    # ── the resilient default: classify by VERB, so a tool nobody listed is
+    # still handled the moment it appears (owner 2026-09-01: "even when new
+    # tools surface or tool names change, everything is already factored in").
+    #
+    # The explicit tables above are the RECORD of specific decisions; this is
+    # the rule that does not need editing when a connector adds `get_widgets`
+    # or renames `search` to `search_v2`. A READ verb in the tool id approves;
+    # a WRITE/SEND verb prompts; a name that carries neither prompts, because a
+    # tool this rule cannot read is exactly the one a person should still see.
+    # WRITE wins over READ (a `get_and_delete` is a delete), and the explicit
+    # WITHHELD lists win over both, so a known write named with a read verb
+    # (github `resolve_review_thread`) still prompts.
+    if tool.startswith("mcp__") and tool.count("__") >= 2:
+        suffix = tool.rsplit("__", 1)[1]
+        if (tool in WITHHELD_TOOLS or _canonical(tool) in WITHHELD_TOOLS
+                or suffix in WITHHELD_SUFFIXES):
+            return 0
+        disp = _verb_disposition(suffix)
+        if disp == "read":
+            return _allow(VERB_READ_REASON)
+        # "write" and "unknown" both fall through to a prompt.
 
     return 0
 
@@ -544,4 +655,11 @@ def _allow(reason: str) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception:                                        # noqa: BLE001
+        # A hook must NEVER crash: a non-zero exit is an error the harness can
+        # act on, and no output is no decision (the tool prompts) — the safe
+        # direction. An internal bug must degrade to a prompt, never to a
+        # broken session. This is the resilience floor beneath every rule above.
+        sys.exit(0)

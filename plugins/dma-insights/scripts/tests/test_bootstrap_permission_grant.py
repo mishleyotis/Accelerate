@@ -37,6 +37,11 @@ import pytest
 HERE = Path(__file__).resolve().parent
 BOOTSTRAP = HERE.parent / "bootstrap_session.sh"
 GRANT = "mcp__plugin_dma-insights_connector__*"
+# The built-in web tools the grant block always adds (AUD-0117), in append
+# order after the connector. The research routine's primary retrieval is
+# WebSearch/WebFetch; granting them is what keeps a new session headless.
+WEB = ["WebSearch", "WebFetch"]
+BASE_GRANTS = [GRANT] + WEB
 
 
 def grant_block() -> str:
@@ -109,7 +114,7 @@ def test_the_grant_targets_user_scope_not_the_repo():
 def test_a_missing_settings_file_is_created(tmp_path):
     s = tmp_path / ".claude" / "settings.json"
     assert "granted" in run_grant(s)
-    assert json.loads(s.read_text())["permissions"]["allow"] == [GRANT]
+    assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_running_twice_does_not_duplicate_the_rule(tmp_path):
@@ -117,7 +122,41 @@ def test_running_twice_does_not_duplicate_the_rule(tmp_path):
     run_grant(s)
     out = run_grant(s)
     assert "already granted" in out
-    assert json.loads(s.read_text())["permissions"]["allow"] == [GRANT]
+    assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
+
+
+def test_headless_never_prompt_mode_is_set(tmp_path):
+    """The mode-level guarantee that survives a stale plugin bind (owner
+    2026-09-01, third recurring-prompt report). A fresh settings file must come
+    out with defaultMode dontAsk, so a session that boots a snapshot's stale
+    auto-approve hook still never queues a prompt no headless container can
+    answer — anything the allow-list and hook do not cover is denied, not hung."""
+    s = tmp_path / ".claude" / "settings.json"
+    run_grant(s)
+    assert json.loads(s.read_text())["permissions"]["defaultMode"] == "dontAsk"
+
+
+def test_an_existing_mode_is_never_overridden(tmp_path):
+    """A human who chose a mode keeps it — dontAsk is set only when unset."""
+    s = tmp_path / "settings.json"
+    s.write_text(json.dumps({"permissions": {"allow": [], "defaultMode": "plan"}}))
+    run_grant(s)
+    cfg = json.loads(s.read_text())
+    assert cfg["permissions"]["defaultMode"] == "plan"
+    assert cfg["permissions"]["allow"] == BASE_GRANTS  # grants still applied
+
+
+def test_the_mode_persists_even_when_every_grant_is_present(tmp_path):
+    """The bug this guards: the write used to be skipped when no grant was
+    added, so a mode set on a fully-granted file was computed and thrown away.
+    A second run adds no grant, yet the mode must be on disk."""
+    s = tmp_path / "settings.json"
+    run_grant(s)                              # first run grants + sets mode
+    s.write_text(json.dumps({"permissions": {  # mode stripped, grants kept
+        "allow": json.loads(s.read_text())["permissions"]["allow"]}}))
+    out = run_grant(s)
+    assert "already granted" in out
+    assert json.loads(s.read_text())["permissions"]["defaultMode"] == "dontAsk"
 
 
 def test_the_plugin_install_keys_survive_the_grant(tmp_path):
@@ -135,7 +174,7 @@ def test_the_plugin_install_keys_survive_the_grant(tmp_path):
     assert cfg["enabledPlugins"] == {"dma-insights@zennify-dma": True}
     assert cfg["extraKnownMarketplaces"]["zennify-dma"]["source"]["path"] == "/x"
     assert "pluginConfigs" in cfg
-    assert cfg["permissions"]["allow"] == [GRANT]
+    assert cfg["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_an_unrelated_allow_rule_is_kept(tmp_path):
@@ -144,7 +183,7 @@ def test_an_unrelated_allow_rule_is_kept(tmp_path):
                                              "deny": ["Read(//root/.dma/sa.json)"]}}))
     run_grant(s)
     cfg = json.loads(s.read_text())
-    assert cfg["permissions"]["allow"] == ["Bash(git status)", GRANT]
+    assert cfg["permissions"]["allow"] == ["Bash(git status)"] + BASE_GRANTS
     assert cfg["permissions"]["deny"] == ["Read(//root/.dma/sa.json)"]
 
 
@@ -334,3 +373,17 @@ def test_the_set_is_derived_rather_than_a_typed_list():
         "was this witness until 2026-08-30; it is now granted by exact read "
         "name because the hook classifies it, so it can no longer show that "
         "an UNCLASSIFIED server is picked up from the tree.)")
+
+
+# ── self-healing: a new session must LOAD the current hooks (owner 2026-09-01) ──
+
+def test_bootstrap_self_heals_the_install_unconditionally():
+    """A session must LOAD the current hooks, not a snapshot's stale copy.
+    bootstrap runs plugin_version.py --heal — which uninstalls and reinstalls a
+    DIVERGED tree (same version, different content: exactly how a stale
+    auto-approve hook survives) — and it is not gated behind a version-string
+    match. Favouring self-healing is this line staying present and ungated."""
+    code = code_lines()
+    assert "plugin_version.py" in code and "--heal" in code, (
+        "bootstrap no longer self-heals the install; a new session can bind a "
+        "stale auto-approve hook that prompts on tools this repo auto-approves")

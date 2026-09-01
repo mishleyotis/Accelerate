@@ -813,6 +813,26 @@ class RunWorkbook:
 FLOOR_ITEMS = 3          # the per-subcap evidence floor
 FLOOR_CATEGORY_ITEMS = 20  # the per-category minimum (AUD-0022)
 
+# THE PER-CATEGORY EVIDENCE-COVERAGE FLOOR (AUD-0115).
+#
+# Reported 2026-09-01 against a live run whose sixteen categories all passed
+# the floors gate at 35% coverage — 241 of 688 subcaps carrying any evidence
+# at all, the rest closed as "no evidence" without the proxy and
+# diagnostic-question discovery that would have found it. The item floors
+# above (>=3 per subcap, >=20 per category) let a category pass on a handful
+# of worked subcaps while the majority sat empty, and `absence_unsearched`
+# only caught a subcap searched ZERO times — one shallow query per empty cell
+# slipped straight through.
+#
+# COVERAGE is the fraction of a category's selected subcaps that carry at
+# least one resolvable evidence id. The floor forces the DQ-driven deep search
+# the failure was skipping: to clear 70% you must actually work the long tail
+# of subcaps, not stop at the first twenty items. It is deliberately a
+# fraction of SUBCAPS (breadth), where FLOOR_CATEGORY_ITEMS is a count of
+# ITEMS (depth) — the two together stop both "few subcaps, many citations" and
+# "many subcaps, one citation each" from passing.
+COVERAGE_FLOOR = 0.70
+
 
 def _coverage_verdict(d: dict, pct) -> str:
     """A verdict word, computed — never a template token."""

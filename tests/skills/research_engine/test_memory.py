@@ -231,3 +231,34 @@ def test_backup_reports_honestly_when_drive_is_absent(tmp_path, monkeypatch):
     out = M.backup(run)
     assert out["outcome"] == "NOT_RUN"
     assert "only in this container" in out["reason"]
+
+
+def test_backup_pushes_every_category_notebook_and_the_workbook(tmp_path, monkeypatch):
+    # The per-category guarantee: a category's reasoning trail is durable only
+    # once it is off-container, so backup must carry EVERY 03_memory notebook
+    # plus the workbook. A backup that silently skipped a category's notebook
+    # would leave that category with no backup at all — the gap that prompted
+    # this test. (goeasy/BoTR: back up per category, not just at the end.)
+    from pathlib import Path
+    run, wb, cells = _noted_run(tmp_path)
+    # one real notebook via a note, plus a second category's notebook on disk
+    M.note(run, category=CAT, subcap=cells[0], facet="works", kind="note",
+           claim="a provenance note for this category")
+    mem = run.root / M.MEMORY_DIR
+    mem.mkdir(exist_ok=True)
+    (mem / "P9C9.md").write_text("# P9C9\n- [NOTED] a second category notebook\n")
+
+    pushed = []
+    monkeypatch.setattr(M, "_drive_fetch", lambda: Path("/x/drive_fetch.py"))
+
+    def fake_run(cmd, **kw):
+        pushed.append(Path(cmd[cmd.index("--file") + 1]).name)
+        return type("R", (), {"returncode": 0, "stdout": "ok", "stderr": ""})()
+    monkeypatch.setattr(M.subprocess, "run", fake_run)
+
+    out = M.backup(run)
+    assert out["outcome"] == "RESOLVED"
+    names = set(pushed)
+    assert f"{CAT}.md" in names, "the noted category's notebook must be backed up"
+    assert "P9C9.md" in names, "every category notebook must be backed up, not just one"
+    assert run.workbook_path.name in names, "the durable workbook must be backed up too"

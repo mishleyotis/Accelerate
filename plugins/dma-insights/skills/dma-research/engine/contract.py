@@ -464,7 +464,7 @@ GATE_LOG_COLUMNS = (
 #:
 #: Independence is only checkable if authorship is RECORDED, so every write
 #: names its actor here and the gate compares them.
-PROVENANCE_COLUMNS = ("SubCap_ID", "Step", "Actor", "At", "Detail")
+PROVENANCE_COLUMNS = ("SubCap_ID", "Step", "Actor", "At", "Detail", "Session")
 
 #: The steps whose authorship is load-bearing.
 PROVENANCE_STEPS = ("synthesis", "challenge", "repair", "enrichment")
@@ -473,7 +473,7 @@ PROVENANCE_STEPS = ("synthesis", "challenge", "repair", "enrichment")
 #: denormalised copy of the latest row here, and the gate reconciles them.
 CHALLENGE_LOG_COLUMNS = (
     "SubCap_ID", "Verdict", "Actor", "Dimensions", "Rationale",
-    "Ceiling_Band_Delta", "At",
+    "Ceiling_Band_Delta", "At", "Session",
 )
 
 #: A challenge verdict says one of these. AUD-0102: the schema required a

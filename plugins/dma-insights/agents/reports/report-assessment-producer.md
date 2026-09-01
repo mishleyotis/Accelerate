@@ -124,3 +124,25 @@ Write the other report's sections. Write a score (column D belongs to
 dma-assessment). Re-run a category researcher. Cite an id you did not read.
 Soften an absence into an implication, or harden an inference into a fact —
 both are refusals, and both are the reason this tier exists.
+
+
+## Gold standard — the deliverable-first loop (mandatory)
+
+Before you write a word, read `docs/GOLD-STANDARD.md` and open the reference package
+(**Golden 1 Credit Union**) so you know the exact shape — the section list, the tables,
+the coverage disclosure, the M-band labels, the AI-and-data overlay per pillar, the
+rebuttal per recommendation. Authoring first and meeting the standard only in QA is the
+failure this loop exists to prevent.
+
+When the report is written, run the gate on your OWN output before you hand back:
+
+```
+python3 -m engine.gold_standard report <report.docx> --kind <research|assessment>
+```
+
+Do not return until it prints `PASS`, and re-run it after any change to a section, a
+score reference, or a figure. Every finding maps to a goeasy-Ltd defect in
+`docs/goeasy-findings-register.md`. Never ship a hedge — "Not established this run",
+"surface-production stage", "no score yet", a bare "N/A" or "0" where a value belongs. A
+genuine gap is a disclosed Coverage Unknown or an ABSENT firmographic with a route,
+never a hedge. Reproduce every numbered template section and leave no `{{token}}`.

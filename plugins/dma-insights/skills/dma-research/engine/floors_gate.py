@@ -26,6 +26,7 @@ below are the ones the audit proved absent:
     AUD-0080            ladders counted, not attested
     AUD-0083            every cited id resolved against the register
     AUD-0021            proxy-only evidence cannot close as FACT
+    AUD-0115            >=70% of a category's subcaps carry resolvable evidence
 """
 from __future__ import annotations
 
@@ -50,7 +51,7 @@ from . import ledger as L
 from . import quality as Q
 from . import runstate
 from .workbook import (RunWorkbook, FLOOR_ITEMS, FLOOR_CATEGORY_ITEMS,
-                       _split_ids)
+                       COVERAGE_FLOOR, _split_ids)
 
 
 #: Computed every run, and deliberately NOT blocking. Kept as a named set so
@@ -92,11 +93,17 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     }
     items = 0
     searched_cells = 0
+    evidenced_cells = 0
     for r in rows:
         cell = str(r["SubCap_ID"]).strip()
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         items += len(eids)
+        # AUD-0115: a subcap COUNTS toward coverage only if at least one of
+        # its cited ids actually resolves in the register — a dead citation is
+        # not evidence, and neither is an empty cell.
+        if any(e in register for e in eids):
+            evidenced_cells += 1
 
         # AUD-0083: the archive's own golden fixture cited an item that did
         # not exist, and nothing resolved a citation at any point.
@@ -109,7 +116,16 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         if len(eids) < FLOOR_ITEMS:
             findings["closed_below_floor"].append(
                 {"subcap": cell, "items": len(eids), "floor": FLOOR_ITEMS})
-        if require_synthesis and not synthesised:
+        # AUD-0116: synthesis is REQUIRED of a subcap that has evidence, not of
+        # one honestly declared empty. Making the requirement conditional on
+        # `eids` is what lets `require_synthesis` be MANDATORY at handoff (see
+        # handoff.build) without being unsatisfiable for an entity whose tail
+        # is genuine absence — the failure that had left the whole
+        # synthesis-and-challenge chain opt-in, and so skippable, before
+        # scoring. An evidenced-but-unsynthesised subcap is "volleyed": gathered
+        # and not analysed. It must be synthesised (and then, by the terms
+        # below, independently challenged) before the category is done.
+        if require_synthesis and not synthesised and eids:
             findings["synthesis_missing"].append(cell)
 
         # YOU CANNOT REPORT THAT THERE IS NOTHING WITHOUT HAVING LOOKED.
@@ -213,9 +229,20 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             else:
                 author = L.actor_for(wb, cell, "synthesis")
                 challenger = str(logged.get("Actor") or "")
-                if author and challenger == author:
-                    findings["challenge_not_independent"].append(
-                        {"subcap": cell, "actor": challenger})
+                # AUD-0117: use the SAME independence rule the write path uses,
+                # not a weaker exact-match. A relabel challenge (x-producer
+                # synthesises, x-challenger challenges, no session tokens) was
+                # written before the rule existed and passed the gate though
+                # record_challenge would now refuse it. Read and write must
+                # agree, or the gate blesses what the ledger would reject.
+                if author:
+                    ch_session = str(logged.get("Session") or "").strip()
+                    syn_session = L.session_for(wb, cell, "synthesis")
+                    indep, why = L.challenge_independence(
+                        author, syn_session, challenger, ch_session)
+                    if not indep:
+                        findings["challenge_not_independent"].append(
+                            {"subcap": cell, "actor": challenger, "why": why})
                 if str(logged.get("Verdict") or "").upper() != verdict:
                     findings["challenge_missing"].append(cell)
 
@@ -224,6 +251,14 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     # AUD-0022: the >=20-items-per-category floor was computed, reported and
     # then not used. It is a gate term here.
     category_floor_met = items >= FLOOR_CATEGORY_ITEMS
+
+    # AUD-0115: the per-category evidence-COVERAGE floor. `evidenced_cells` is
+    # subcaps carrying at least one resolvable citation; the floor is a
+    # fraction of the category's selected subcaps. A category with no selected
+    # subcaps has undefined coverage and is not blocked on this term (its
+    # emptiness is caught by category_never_searched / the item floors).
+    coverage = (evidenced_cells / len(rows)) if rows else None
+    coverage_floor_met = coverage is None or coverage >= COVERAGE_FLOOR
 
     # AUD-0027 / timeline: a run with dated evidence and no timeline row for
     # this category cannot argue an arc.
@@ -246,6 +281,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     ) if findings[k]]
     if not category_floor_met:
         blocking.append("category_items_below_floor")
+    if not coverage_floor_met:
+        blocking.append("coverage_below_floor")
     # REPORTED 2026-08-30, from a live run in another account: "enrichment
     # connectors not being called by the agents for enrichment purposes
     # before close of a category". They were right, and no gate term could
@@ -272,8 +309,20 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "gate": verdict,
         "category": category,
         "run_id": wb.metadata().get("run_id"),
+        # AUD-0116: whether this verdict was produced under the
+        # synthesis-and-challenge-requiring mode. handoff.build refuses to hand
+        # a category to the assessment/scoring stage unless a PASS was recorded
+        # with this True — the structural fix that stops a coverage-only pass
+        # from being mistaken for a finished category.
+        "require_synthesis": bool(require_synthesis),
         "category_evidence": f"{items}/{FLOOR_CATEGORY_ITEMS}",
         "category_floor_met": category_floor_met,
+        "evidence_coverage": (
+            f"{evidenced_cells}/{len(rows)} "
+            f"({round(100 * coverage)}%)" if coverage is not None
+            else f"{evidenced_cells}/0 (n/a)"),
+        "coverage_floor": COVERAGE_FLOOR,
+        "coverage_floor_met": coverage_floor_met,
         "subcaps": len(rows),
         "search_ops": len(cat_searches),
         "tools_used": tools_used,

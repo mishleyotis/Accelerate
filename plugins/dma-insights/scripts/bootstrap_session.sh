@@ -470,7 +470,10 @@ out = []
 # Every classified server, whether or not the tree names it: the hook already
 # rules on Slack, Salesforce, Google Admin, Auctor and GitHub, and a settings
 # grant that agrees with it costs nothing and survives a session whose hooks
-# bound from a stale install.
+# bound from a stale install. The routine attaches these under UNDERSCORE tool
+# names, so the belt names them that way; the claude.ai interactive attach
+# (which uses hyphens) is covered by the hook's own read-time canonicalisation
+# and the project-scope .claude/settings.json, not by this user-scope belt.
 for server in sorted(seen | set(aac.SERVER_SURFACES)):
     if server in aac.SERVER_SURFACES:
         # A CONDITIONAL tool must never reach this list. A settings grant is
@@ -500,8 +503,22 @@ if "mcp__plugin_dma-insights_connector__*" not in wanted:
     wanted.append("mcp__plugin_dma-insights_connector__*")
 # `mcp__*` is skipped by the permission engine with a warning and approves
 # nothing, so a glob that reached the server segment would look like a grant
-# and be none. Dropped here rather than written and trusted.
+# and be none. Dropped here rather than written and trusted. (Runs BEFORE the
+# built-in grants below, which carry no `__` for rindex to find.)
 wanted = [w for w in wanted if "*" not in w[: w.rindex("__") + 2]]
+# The built-in web tools are NOT MCP, so the derived-from-SERVER_SURFACES set
+# above never reaches them — and they are the research routine's PRIMARY
+# retrieval path (the producers search and fetch far more than they call any
+# connector). Owner report 2026-09-01: "still getting approval prompts" while
+# the producers ran, because WebSearch/WebFetch fell through to a prompt. They
+# are read-only web reads; grant them so a new session runs headless. (The
+# autoapprove hook also allows them via the WebSearch|WebFetch matcher; this is
+# the belt to that suspenders, for a session whose hook binding is stale.)
+# Appended AFTER the mcp-glob filter above, which assumes every entry contains
+# `__`.
+for _builtin in ("WebSearch", "WebFetch"):
+    if _builtin not in wanted:
+        wanted.append(_builtin)
 p = pathlib.Path(os.environ["CLAUDE_SETTINGS"])
 p.parent.mkdir(parents=True, exist_ok=True)
 try:
@@ -517,20 +534,49 @@ except Exception as e:                                       # noqa: BLE001
     raise SystemExit(0)
 
 perms = cfg.setdefault("permissions", {})
+# THE MODE-LEVEL NEVER-PROMPT GUARANTEE, and it is the one that survives a
+# STALE PLUGIN BIND (owner 2026-09-01, third report of recurring prompts).
+# The auto-approve hook and this allow-list both travel with the plugin and
+# refresh together; when a container boots a restored snapshot whose plugin
+# predates the hook's WebSearch/verb-default rules, neither is current, and a
+# tool the stale hook does not know falls through to a PROMPT that a headless
+# session hangs on forever. `dontAsk` is read from USER settings at session
+# start — before any plugin binds — so it holds whatever version the snapshot
+# carries. In it, nothing ever prompts: the allow-list below and the hook's
+# `permissionDecision:"allow"` still run the routine's reads and connector
+# writes (a hook "allow" and an allow rule both override the mode baseline),
+# and anything neither covers is DENIED rather than queued behind a prompt no
+# scheduled container can answer — fail-fast, never hang. It is the documented
+# safe headless posture (dontAsk + explicit allow rules), not bypassPermissions,
+# which would also wave through the writes the hook deliberately withholds and
+# is refused as root anyway. Set only when unset: a human who chose a mode
+# (default, plan, acceptEdits) is never overridden.
+mode = perms.get("defaultMode")
+if not mode:
+    perms["defaultMode"] = "dontAsk"
+    _mode_note = " defaultMode=dontAsk (headless never-prompt)"
+else:
+    _mode_note = f" defaultMode kept={mode}"
 allow = perms.setdefault("allow", [])
 if not isinstance(allow, list):
     print("permission grant SKIPPED — permissions.allow is not a list")
     raise SystemExit(0)
 added = [w for w in wanted if w not in allow]
-if not added:
-    print(f"all {len(wanted)} MCP grants already granted in user settings")
-else:
-    allow.extend(added)
+allow.extend(added)
+# Write when EITHER the grants OR the mode changed — a settings file that
+# already carries every grant must still be written when this run added the
+# never-prompt mode, or the guarantee is computed and thrown away.
+if added or not mode:
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(cfg, indent=2) + "\n")
     tmp.replace(p)                                           # atomic
+if not added:
+    print(f"all {len(wanted)} MCP grants already granted in user settings."
+          f"{_mode_note}")
+else:
     print(f"granted {len(added)} of {len(wanted)} MCP servers in user "
-          f"settings: {', '.join(a.replace('mcp__', '').rstrip('_*') for a in added)}")
+          f"settings: {', '.join(a.replace('mcp__', '').rstrip('_*') for a in added)}."
+          f"{_mode_note}")
 PY
 log "$(cat "$GRANT_OUT")"
 rm -f "$GRANT_OUT"

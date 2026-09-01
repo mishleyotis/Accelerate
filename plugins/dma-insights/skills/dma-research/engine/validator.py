@@ -47,6 +47,67 @@ from . import contract as C
 
 URL_RE = re.compile(r"https?://", re.I)
 
+#: Source_URLs holds a LIST. These are the separators the workbook writers
+#: use between entries, and rule 6 judges each entry on its own.
+ENTRY_SEP_RE = re.compile(r"[,;]")
+
+#: A bare host with no scheme — "kpmg.com", "www.example.co.uk/x". Together
+#: with URL_RE this is what "the entry is a location" means. No banned token
+#: contains a dot, so no placeholder can satisfy this.
+HOSTISH_RE = re.compile(
+    r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9-]+)+(?:[/:?#].*)?$", re.I)
+
+#: Punctuation an entry may be wrapped in and still BE the placeholder:
+#: "(TBD)", "N/A.", "- see above". Deliberately excludes "/" so that the
+#: "n/a" token keeps its slash and cannot be reached by stripping.
+TRIVIAL_EDGE = " \t\r\n.,;:!?-–—_'\"“”‘’()[]{}<>*"
+
+
+def _is_location(entry: str) -> bool:
+    """Does this entry name a place to go? A scheme, or a dotted host.
+
+    This is the whole anti-false-positive guard: a location is never a
+    placeholder, however its characters happen to spell.
+    """
+    return bool(URL_RE.match(entry) or HOSTISH_RE.match(entry))
+
+
+def placeholder_entries(cell) -> list[str]:
+    """The entries in one Source_URLs cell that ARE placeholders.
+
+    THE SEMANTICS, and why they are not `token in cell` (MEM-0467).
+
+      A cell fails rule 6 when the cell — or a comma/semicolon-separated
+      entry within it — IS a placeholder. It does NOT fail because a banned
+      token appears somewhere inside a longer string. The tokens are short
+      and ordinary: "n/a" occurs inside every LinkedIn profile of anyone
+      called An-n/a-, and inside every path segment "e-n/a-rticles", so the
+      containment test refused 12 of 12 real, resolving URLs on
+      bank-of-travelers-rest and blocked a run with no data defect in it.
+      "tbd" and "various" are the same hazard one client away
+      ("/tbd-holdings/", "/various-rates").
+
+    Order matters: a location is excluded FIRST, so no amount of stripping
+    or prefixing can ever reach a URL. Only then is a non-location entry
+    judged, and it is judged generously — equal to a banned token after
+    trivial punctuation, or opening with one at a word boundary, so
+    "N/A.", "(TBD)" and "n/a - nothing found" all still fail.
+
+    Returns the offending entries themselves, because the reader needs the
+    value that is wrong, not the token that matched it.
+    """
+    out = []
+    for raw in ENTRY_SEP_RE.split(str(cell or "")):
+        entry = raw.strip()
+        if not entry or _is_location(entry):
+            continue
+        core = entry.strip(TRIVIAL_EDGE).casefold()
+        for bad in C.BANNED_URL_PLACEHOLDERS:
+            if core == bad or re.match(rf"{re.escape(bad)}\b", core):
+                out.append(entry)
+                break
+    return out
+
 
 class Failure(dict):
     def __init__(self, rule: int, name: str, detail: str, **kw):
@@ -275,13 +336,16 @@ def _rule6_placeholders(wb) -> list[Failure]:
         gi = C.PILLAR_COLUMNS.index("Source_URLs") + 1
         hits = []
         for r in range(2, ws.max_row + 1):
-            g = str(ws.cell(row=r, column=gi).value or "").strip().lower()
+            g = str(ws.cell(row=r, column=gi).value or "").strip()
             if not g:
                 continue
-            for bad in C.BANNED_URL_PLACEHOLDERS:
-                if bad in g:
-                    hits.append((str(ws.cell(row=r, column=1).value), bad))
-                    break
+            bad_entries = placeholder_entries(g)
+            if bad_entries:
+                # The offending VALUE, not the token that matched it: the old
+                # message printed "n/a" for a cell holding a LinkedIn URL,
+                # which reads as a data defect and is not one (MEM-0467).
+                hits.append((str(ws.cell(row=r, column=1).value),
+                             bad_entries[0]))
         if hits:
             out.append(Failure(
                 6, "placeholders",
