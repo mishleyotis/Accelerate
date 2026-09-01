@@ -77,6 +77,14 @@ DEFINING_COL_RE = re.compile(
     r"excerpt|anchor_quote|quote|passage|verbatim|url|link|source_doc|"
     r"source_name|source_title|title|publisher|published", re.I)
 
+#: The two columns that make a tab an evidence REGISTER rather than a list:
+#: something that identifies the row, and something carrying the source's own
+#: words. Matched on the normalised header, so `E_ID`/`Evidence_ID` and
+#: `Excerpt`/`Anchor_Quote` all answer.
+EID_COL_RE = re.compile(r"e[-_]?id|evidence[-_]?id", re.I)
+EXCERPT_COL_RE = re.compile(
+    r"excerpt|anchor[-_]?quote|verbatim|quote|passage", re.I)
+
 CELL_RE = re.compile(r"^P[1-4]C\d+(\.\d+)*(\.[A-Z]{2,3}\d+)?$", re.I)
 EID_RE = re.compile(r"^E[-_][A-Z0-9]+[-_]?\d*(:F\d+)?$", re.I)
 
@@ -796,6 +804,48 @@ def vet_research(path: Path, evidence_stores: list | None = None) -> None:
                          f"ladder cannot rank them.")
 
 
+def embedded_evidence_register(path: Path) -> tuple | None:
+    """A research-grade evidence register carried as a TAB of the scoring
+    workbook, rather than as a separate research workbook FILE.
+
+    V7 searched for a FILE and read every other shape as nothing. Measured on
+    Golden 1 Credit Union, 2026-09-01: the tree holds one .xlsx, so V7 fired
+    and its message asserted that "nothing carries an excerpt, so every item
+    would band UNVERIFIED" — while `Evidence_Detail`, a tab of that very
+    workbook, carried 727 rows with 727 verbatim excerpts inside the 50-500
+    band, 727 dated and 723 subcap-linked. All three of that sentence's
+    assertions were false, and a refusal costs the whole firing.
+
+    Third recorded instance of the slot resolver that knows one shape (with
+    MEM-0151 and MEM-0190), so this classifies by SHAPE: any tab whose header
+    carries an evidence-id column and an excerpt-class column is a register,
+    whatever it is called.
+
+    → (tab, rows_with_an_excerpt, excerpt_header) or None.
+    """
+    try:
+        sheets = sheets_of(path)
+    except Exception:                                          # noqa: BLE001
+        return None
+    for title, rows in sheets.items():
+        idx, hdr = header_row(rows)
+        if idx is None:
+            continue
+        norm = [h.strip().lower().replace(" ", "_") for h in hdr]
+        if not any(EID_COL_RE.fullmatch(h) for h in norm):
+            continue
+        cols = [i for i, h in enumerate(norm) if EXCERPT_COL_RE.fullmatch(h)]
+        if not cols:
+            continue
+        filled = sum(
+            1 for r in rows[idx + 1:]
+            if any(i < len(r) and isinstance(r[i], str) and r[i].strip()
+                   for i in cols))
+        if filled:
+            return title, filled, hdr[cols[0]]
+    return None
+
+
 def main(argv: list[str]) -> int:
     global entity_sv
     argv = list(argv)
@@ -873,10 +923,23 @@ def main(argv: list[str]) -> int:
                          f"dates are vetted THERE, not here. Expect gaps to "
                          f"go out as GAPs, never as inventions")
         else:
-            note("REFUSE", "no research workbook AND no evidence store of any "
-                           "format anywhere in the tree — nothing carries an "
-                           "excerpt, so every item would band UNVERIFIED.",
-                 code="V7")
+            embedded = embedded_evidence_register(scoring)
+            if embedded:
+                tab, filled, col = embedded
+                note("WARN",
+                     f"no research workbook FILE, but the scoring workbook "
+                     f"carries a research-grade register in its '{tab}' tab "
+                     f"({filled:,} rows with a populated '{col}' column). V7 "
+                     f"does not fire: excerpts, dates and subcap links are "
+                     f"vetted THERE. Confirm the ingest reads that tab and "
+                     f"not a poorer ledger beside it")
+            else:
+                note("REFUSE", "no research workbook, no evidence store of "
+                               "any format in the tree, and no register tab "
+                               "inside the scoring workbook — nothing carries "
+                               "an excerpt, so every item would band "
+                               "UNVERIFIED.",
+                     code="V7")
     except Exception as e:                                     # noqa: BLE001
         print(f"could not read: {type(e).__name__}: {e}", file=sys.stderr)
         return 2

@@ -773,9 +773,28 @@ _EV_ALIASES = {
     # column that NAMES a quotation now outranks every summary spelling;
     # the summaries stay last because for some generations they are the only
     # text that exists and an evidence drawer cannot ship empty.
+    #
+    # `finding` joins that summary tail. Measured on Golden 1's
+    # Evidence_Master, 2026-09-01: 731 of 731 rows populated at 64-227
+    # characters, entirely inside the 50-500 band — an excerpt-class column
+    # under a name this table did not list, so a register carrying it and
+    # nothing else served no excerpt at all. It ranks last with the other
+    # summaries because a column named for the assessor's finding is not one
+    # named for the source's words; `_best_excerpt` still picks by condition
+    # wherever a real quotation column sits beside it.
     "excerpt": ("excerpt", "anchor_quote", "verbatim", "quote", "passage",
-                "fact_summary", "summary"),
+                "fact_summary", "summary", "finding"),
 }
+
+#: alias-table key -> the key the parsed row actually carries. Two fields are
+#: renamed on the way out: a band word becomes `stated_recency` because the
+#: package only ASSERTS it, and a date becomes `published_date`. The
+#: per-column census reads the PARSED rows, so it must ask under the names the
+#: rows use. Keyed on the alias name it counted zero every time and reported a
+#: fully populated column as `column_mapped_but_empty` — Golden 1, 2026-09-01:
+#: Evidence_Master.Recency, 731/731 populated (CURRENT 299, DATED 235,
+#: RECENT 114, UNVERIFIED 42, LEGACY 31, ARCHIVAL 10), reported empty.
+_EV_ROW_KEY = {"published": "published_date", "recency": "stated_recency"}
 
 # The excerpt tag the scoring rationales use: "[E-012:F1] Board committees: …"
 # — one fact of one evidence item, verbatim, and the only place in the
@@ -882,6 +901,59 @@ _EV_MISS_COST = {
 }
 
 
+#: The three columns that decide whether a citation can be READ, DATED and
+#: LINKED. A ledger carrying all three is a research-grade register; one
+#: carrying none is a source list. Weighted above everything else because
+#: those are the three invariant-4 obligations — a verbatim excerpt, a date
+#: that bands it, and the cell it bears on.
+_LEDGER_CORE = ("excerpt", "published", "subcaps")
+_LEDGER_EXTRA = ("source_name", "source_url", "tier", "ers", "claim_type")
+
+
+def _ledger_shape(headers: dict) -> tuple:
+    """(core, extra) — how much of an evidence ledger these columns carry."""
+    core = sum(1 for f in _LEDGER_CORE
+               if _pick(headers, _EV_ALIASES[f]) is not None)
+    extra = sum(1 for f in _LEDGER_EXTRA
+                if _pick(headers, _EV_ALIASES[f]) is not None)
+    return core, extra
+
+
+def _shape_words(shape: tuple) -> str:
+    return f"{shape[0]}/3 core columns (excerpt, date, subcap), {shape[1]}/5 supporting"
+
+
+def _ledger_candidates(wb) -> list:
+    """Every readable evidence ledger in the workbook, RICHEST FIRST.
+
+    Tab-name order was the whole rule and it picked the poorest register a
+    package carried. `_EV_TABS` exists because 15 of 153 packages name the tab
+    something other than `Evidence_Master`; it was never meant to rank tabs
+    when several are present, and a `next(...)` over an ordered tuple silently
+    did. Golden 1 carries Evidence_Master (index 0), Evidence_Register (2) and
+    Evidence_Detail (4); the first won, and it is the only one of the three
+    with no excerpt column, no date column and no subcap column.
+
+    Order is now (core, extra, -position): shape decides, and the tuple's
+    order survives only as the tie-break, so a package carrying exactly one
+    ledger — or several of identical shape — reads exactly as it did before.
+    """
+    out = []
+    for pos, name in enumerate(_EV_TABS):
+        if name not in wb.sheetnames:
+            continue
+        ws = wb[name]
+        for anchor in _EV_ID_ANCHORS:
+            try:
+                headers, first = _header_map(ws, anchor)
+            except ValueError:
+                continue
+            out.append((name, ws, headers, first, _ledger_shape(headers), pos))
+            break
+    out.sort(key=lambda c: (c[4][0], c[4][1], -c[5]), reverse=True)
+    return [(n, ws, h, f, shape) for n, ws, h, f, shape, _pos in out]
+
+
 def parse_evidence_master(path: str, obs: list | None = None) -> list:
     def observe(kind, detail):
         if obs is not None:
@@ -889,31 +961,42 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
 
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        tab = next((t for t in _EV_TABS if t in wb.sheetnames), None)
-        if tab is None:
-            observe("evidence_ledger_tab_not_found",
-                    {"expected_any_of": list(_EV_TABS),
-                     "tabs_present": list(wb.sheetnames)[:30],
-                     "reason": "no evidence ledger tab: this package lands "
-                               "with no evidence rows at all"})
+        candidates = _ledger_candidates(wb)
+        if not candidates:
+            present = [t for t in _EV_TABS if t in wb.sheetnames]
+            if present:
+                # A ledger tab exists and its id column could not be located.
+                # The package lands without its evidence (links absent, counts
+                # computed zero) rather than failing wholesale — but never
+                # without saying so.
+                observe("evidence_ledger_header_not_found",
+                        {"tabs_tried": present,
+                         "expected_any_of": list(_EV_ID_ANCHORS),
+                         "reason": "an evidence ledger tab exists and its id "
+                                   "column could not be located in any of "
+                                   "them; no evidence row was read"})
+            else:
+                observe("evidence_ledger_tab_not_found",
+                        {"expected_any_of": list(_EV_TABS),
+                         "tabs_present": list(wb.sheetnames)[:30],
+                         "reason": "no evidence ledger tab: this package "
+                                   "lands with no evidence rows at all"})
             return []
-        ws = wb[tab]
-        headers = first = None
-        for anchor in _EV_ID_ANCHORS:
-            try:
-                headers, first = _header_map(ws, anchor)
-                break
-            except ValueError:
-                continue
-        if headers is None:
-            # No recognisable ledger: the package lands without its
-            # evidence tab (links absent, counts computed zero) rather
-            # than failing wholesale — but never without saying so.
-            observe("evidence_ledger_header_not_found",
-                    {"tab": tab, "expected_any_of": list(_EV_ID_ANCHORS),
-                     "reason": "the ledger tab exists and its id column could "
-                               "not be located; no evidence row was read"})
-            return []
+        tab, ws, headers, first, shape = candidates[0]
+        if len(candidates) > 1:
+            observe("evidence_ledger_tab_chosen", {
+                "chose": tab,
+                "shape": _shape_words(shape),
+                "passed_over": [{"tab": c[0], "shape": _shape_words(c[4])}
+                                for c in candidates[1:]],
+                "rule": "the RICHEST ledger wins, scored by column shape; "
+                        "tab-name order is the tie-break only. Measured on "
+                        "Golden 1, 2026-09-01: Evidence_Master (8 columns, no "
+                        "excerpt, no date, no subcap) won on name order over "
+                        "Evidence_Detail (17 columns, 727/727 excerpts in "
+                        "band, 727/727 dated, 723/727 subcap-linked), and 589 "
+                        "evidence rows landed uncitable while the package "
+                        "carried every one of their spans."})
         cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
         cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
         # Every excerpt-class column, because a row can carry two and the
@@ -1053,8 +1136,9 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
             for field in list(_EV_ALIASES) + ["e_id"]:
                 if cols.get(field) is None:
                     continue            # already reported as not found
+                row_key = _EV_ROW_KEY.get(field, field)
                 filled = sum(1 for r in out
-                             if r.get(field) not in (None, "", [], {}))
+                             if r.get(row_key) not in (None, "", [], {}))
                 if filled == 0:
                     observe("column_mapped_but_empty", {
                         "tab": tab, "field": field,

@@ -143,14 +143,32 @@ def _find_client_folder(tok: str, client: str) -> dict:
     partial = [f for f in folders
                if _norm(f["name"]).startswith(want + "-")
                or want.startswith(_norm(f["name"]) + "-")]
-    hit = exact or partial
+    # ONE POOL, NOT `exact or partial`. The fallback spelling made an exact
+    # match SHADOW every partial one instead of competing with it, so a second
+    # candidate was dropped without a word. Measured 2026-09-01: the intake
+    # tree held both 'Golden 1 Credit Union - DMA' (June, v5.0) and 'Golden 1
+    # Credit Union - DMA HYBRID' (August, v7.0, the one being ingested);
+    # `_norm` strips the 'dma' token but not the mode suffix, so the June
+    # folder matched exactly, the August folder matched partially, and
+    # `pull --client "Golden 1 Credit Union"` silently returned the WRONG,
+    # OLDER assessment. The failure mode is substitution, not not-found, which
+    # is the one a caller cannot detect. REF-0004: a resolver holding two
+    # candidates names both and refuses.
+    seen, hit = set(), []
+    for f in exact + partial:
+        if f["id"] not in seen:
+            seen.add(f["id"])
+            hit.append(f)
     if len(hit) == 1:
         return hit[0]
     if len(hit) > 1:
         names = " | ".join(sorted(f["name"] for f in hit))
+        ids = " ".join(f"{f['name']!r}={f['id']}" for f in sorted(
+            hit, key=lambda x: x["name"]))
         raise SystemExit(
             f"multiple client folders matching {client!r}: {names} — "
-            f"duplicate folders are adjudicated by a human, never guessed")
+            f"duplicate folders are adjudicated by a human, never guessed. "
+            f"Name the one you mean with --folder-id: {ids}")
     names = ", ".join(sorted(f["name"] for f in folders)) or "none visible"
     raise SystemExit(
         f"no client folder matching {client!r} under the intake tree — "
@@ -233,9 +251,19 @@ def _find_memory_file(tok: str, folder_id: str, client: str) -> dict | None:
     return None
 
 
-def pull(client: str) -> int:
+def pull(client: str, folder_id: str | None = None) -> int:
     tok = _token()
-    folder = _find_client_folder(tok, client)
+    if folder_id:
+        # The operator has adjudicated the ambiguity the resolver refuses to
+        # guess through. Read the folder's real name back rather than trusting
+        # the caller's, so the local slug still matches what Drive holds.
+        with _req(tok, f"{API}/files/{folder_id}"
+                       f"?fields=id,name,mimeType&supportsAllDrives=true") as r:
+            folder = json.loads(r.read())
+        if folder.get("mimeType") != FOLDER_MIME:
+            raise SystemExit(f"--folder-id {folder_id} is not a folder")
+    else:
+        folder = _find_client_folder(tok, client)
     dest = PACKAGES_DIR / _slug(folder["name"])
     got = _pull_tree(tok, folder["id"], dest)
     print(f"pulled {got} files from {folder['name']!r} -> {dest} (recursive)")
@@ -710,6 +738,10 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("check")
     p_pull = sub.add_parser("pull")
+    p_pull.add_argument("--folder-id", default=None,
+                        help="the intake folder to pull, by Drive id — "
+                             "how a caller resolves the ambiguity the "
+                             "client-name resolver refuses to guess through")
     p_pull.add_argument("--client", required=True)
     p_push = sub.add_parser("push-memory")
     p_push.add_argument("--client", required=True)
@@ -799,7 +831,7 @@ def main(argv=None) -> int:
     if a.cmd == "check":
         return check()
     if a.cmd == "pull":
-        return pull(a.client)
+        return pull(a.client, a.folder_id)
     if a.cmd == "push-memory":
         return push_memory(a.client)
     if a.cmd == "push-bundle":

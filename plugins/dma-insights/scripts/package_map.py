@@ -45,7 +45,16 @@ SLIDES_RE = re.compile(r"(^|/)05[_ ]?narrative|presentation|deck|slides|"
 AUX_RE = re.compile(r"explorium|techstack[_ ]?validation|benefit model|"
                     r"internal_evidence|attachment|crosswalk|sources[_ ]"
                     r"inventory", re.I)
-INTERIM_RE = re.compile(r"interim|draft|copy of|backup|old", re.I)
+# ANCHORED ON SEPARATORS, because these are filename TOKENS and not
+# substrings. Unanchored, `old` matched inside "golden": Golden 1 Credit
+# Union's only scoring workbook was set aside as a draft and package_map
+# reported "only interim/draft candidates exist — using ... under protest"
+# (measured 2026-09-01, span (22,25) of
+# DMA_Scoring_Workbook_golden-1-credit-union_2026-08-31.xlsx). The same bug
+# reaches Goldman, Oldham, Copeland and Drafthouse.
+INTERIM_RE = re.compile(
+    r"(?:^|[_\-. ])(interim|draft|copy[_\-. ]of|backup|old)(?:$|[_\-. ])",
+    re.I)
 FINAL_RE = re.compile(r"final", re.I)
 VER_RE = re.compile(r"v(\d+)(?:\.\d+)?", re.I)
 EVID_HDR_RE = re.compile(r"evidence_id|evidence id", re.I)
@@ -283,12 +292,16 @@ def map_package(root) -> dict:
             f"scoring workbook: one file never serves both roles")
     if research["primary"] is None and scoring["primary"]:
         ambiguities.append(
-            f"NO RESEARCH WORKBOOK anywhere in the tree. Verbatim excerpts "
-            f"live in its register tab and nowhere else — the scoring "
-            f"workbook's Evidence_Master carries a summary column at best. "
-            f"Expect an evidence pass with excerpts missing, NOT excerpts "
-            f"invented to fill the gap; the vetter decides whether the "
-            f"package can be produced from at all")
+            f"no research workbook FILE in the tree. Verbatim excerpts "
+            f"usually live in its register tab — but LOOK INSIDE THE SCORING "
+            f"WORKBOOK before concluding there are none: a register carried "
+            f"as a TAB is the same evidence in a different place. Measured "
+            f"2026-09-01 on Golden 1, whose scoring workbook holds an "
+            f"Evidence_Detail tab with 727 verbatim excerpts, 727 dated and "
+            f"723 subcap-linked, while this line said excerpts lived "
+            f"'nowhere else'. Where there genuinely is no register, expect an "
+            f"evidence pass with excerpts missing, NOT excerpts invented to "
+            f"fill the gap; the vetter decides either way")
     score_exports = sorted(
         str(q.relative_to(root)) for q in entries
         if q.name.lower().startswith("export_")
