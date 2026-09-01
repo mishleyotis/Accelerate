@@ -33,8 +33,65 @@ from .subverticals import SCOPE_TAG, scope_to_entity
 _connect = db_connect
 
 
+#: How long startup will wait for the first connection before giving up and
+#: serving anyway. Bounded because Cloud Run reads a container that never
+#: reports ready as a failed revision — a slow first request is a bad minute,
+#: a revision that never goes live is an outage.
+WARMUP_TIMEOUT_S = 120
+
+
 @asynccontextmanager
 async def _lifespan(app):
+    """Open one connection BEFORE the first request, and say how long it took.
+
+    MEASURED 2026-09-01, on the revision that fixed the connector's refresh
+    strategy: the first requests to a new instance took 150s, 140s, 128s and
+    99s and then settled to 0.4s. All returned 200. A user reloading the app
+    in that window saw a browser that simply span. The database was idle
+    throughout — the time is the FIRST CONNECTION: constructing the
+    Connector, fetching instance metadata and minting the ephemeral
+    certificate, on a Cloud Run instance whose CPU is throttled outside a
+    request.
+
+    `run.googleapis.com/startup-cpu-boost` is already true on this service,
+    and it was no help, because boost covers container STARTUP and the first
+    connection happened on the first REQUEST. Opening it here moves that cost
+    inside the boosted window, before uvicorn accepts anything.
+
+    NEVER FATAL. A warm-up that raises must not stop the service from
+    starting — the routes still work, they just pay the cost once, which is
+    exactly today's behaviour and no worse. And it is BOUNDED: an unbounded
+    warm-up would trade a slow first request for a container that never
+    reports ready, which Cloud Run reads as a failed revision.
+
+    The print is the other half. Through the whole of today's outage this
+    service emitted no application log at all: uvicorn's access lines and
+    nothing else. One line naming the connection cost would have identified
+    it in seconds rather than from request latencies read backwards.
+    """
+    import asyncio
+    import time
+    t0 = time.monotonic()
+    try:
+        def _warm():
+            c = _connect()
+            try:
+                cur = c.cursor()
+                cur.execute("SELECT 1")
+                cur.fetchone()
+            finally:
+                c.close()
+        await asyncio.wait_for(asyncio.to_thread(_warm),
+                               timeout=WARMUP_TIMEOUT_S)
+        print(f"db: warm connection ready in {time.monotonic() - t0:.1f}s",
+              flush=True)
+    except asyncio.TimeoutError:
+        print(f"db: warm-up did not finish in {WARMUP_TIMEOUT_S}s "
+              f"({time.monotonic() - t0:.1f}s) — serving anyway, the first "
+              f"request will pay it", flush=True)
+    except Exception as exc:                      # noqa: BLE001 — see above
+        print(f"db: warm-up failed after {time.monotonic() - t0:.1f}s: "
+              f"{type(exc).__name__}: {exc} — serving anyway", flush=True)
     yield
     db_close()
 

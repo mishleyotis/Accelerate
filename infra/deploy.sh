@@ -279,30 +279,81 @@ if [ -f apps/web/Dockerfile ]; then
   # Google authenticates every request (Google-managed OAuth client,
   # org-internal), the app verifies the forwarded assertion (lib/iap.js)
   # and enforces @zennify.com. Grants: the Workspace domain.
-  # IAP is configured once; the deploy service account may lack the
-  # org-level permission to (re-)enable the API or bind IAP policy. These
-  # steps are idempotent and must not abort a release that has already
-  # rolled the services — so each tolerates a permission failure and the
-  # release continues to the worker Job and Scheduler sync below.
-  gcloud services enable iap.googleapis.com --project="$PROJECT_ID" --quiet || true
-  gcloud beta services identity create --service=iap.googleapis.com \
-    --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
-  gcloud run services add-iam-policy-binding dmai-web \
-    --project="$PROJECT_ID" --region="$REGION" \
-    --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-iap.iam.gserviceaccount.com" \
-    --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
-  gcloud run services update dmai-web \
-    --project="$PROJECT_ID" --region="$REGION" --iap --quiet || true
-  # Direct (non-IAP) invocation stays closed: drop the public grant.
-  gcloud run services remove-iam-policy-binding dmai-web \
-    --project="$PROJECT_ID" --region="$REGION" \
-    --member="allUsers" --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+  #
+  # CONVERGE, DO NOT RE-APPLY. This block said "IAP is configured once" and
+  # then reconfigured it on every single release: enable the API, create the
+  # service identity, bind the invoker, `services update --iap`, drop
+  # allUsers, bind the domain — six writes to the door, unconditionally,
+  # every deploy. MEASURED 2026-09-01: a user loading the app at 17:56:03
+  # got IAP "Error code: 11 — incorrectly configured OAuth client ID" while
+  # the audit log shows this block running ReplaceService at 17:56:18 and
+  # three SetIamPolicy calls at 17:56:19, 17:56:22 and 17:56:25. The OAuth
+  # client id was identical before and after; nothing was misconfigured. The
+  # door was simply being rebuilt around someone standing in it.
+  #
+  # So each step now READS first and writes only when the state is actually
+  # wrong. On the steady-state path this whole block is six describes and no
+  # writes, and a release stops interrupting the people using the app.
+  #
+  # Each write still tolerates a permission failure: the deploy service
+  # account may lack the org-level permission to enable the API or bind IAP
+  # policy, and a release that has already rolled the services must not
+  # abort on it.
+  if ! gcloud services list --enabled --project="$PROJECT_ID" \
+       --filter="config.name:iap.googleapis.com" --format='value(config.name)' \
+       2>/dev/null | grep -q iap; then
+    say "  iap: enabling the API (first time)"
+    gcloud services enable iap.googleapis.com --project="$PROJECT_ID" --quiet || true
+    gcloud beta services identity create --service=iap.googleapis.com \
+      --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
+  fi
+
+  IAP_SA="service-${PROJECT_NUMBER}@gcp-sa-iap.iam.gserviceaccount.com"
+  WEB_POLICY="$(gcloud run services get-iam-policy dmai-web \
+                --project="$PROJECT_ID" --region="$REGION" \
+                --format=json 2>/dev/null || echo '{}')"
+  if ! printf '%s' "$WEB_POLICY" | grep -q "$IAP_SA"; then
+    say "  iap: granting the IAP service agent run.invoker"
+    gcloud run services add-iam-policy-binding dmai-web \
+      --project="$PROJECT_ID" --region="$REGION" \
+      --member="serviceAccount:${IAP_SA}" \
+      --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+  fi
+
+  # The one that took the door down. `--iap` on an already-IAP-enabled
+  # service is a no-op in intent and a ReplaceService in fact.
+  IAP_ON="$(gcloud run services describe dmai-web \
+            --project="$PROJECT_ID" --region="$REGION" \
+            --format='value(metadata.annotations."run.googleapis.com/iap-enabled")' \
+            2>/dev/null || true)"
+  if [ "$IAP_ON" != "true" ]; then
+    say "  iap: enabling on dmai-web (currently '${IAP_ON:-unset}')"
+    gcloud run services update dmai-web \
+      --project="$PROJECT_ID" --region="$REGION" --iap --quiet || true
+  fi
+
+  # Direct (non-IAP) invocation stays closed: drop the public grant, but
+  # only if it is actually there — removing a binding that does not exist
+  # is still a SetIamPolicy write.
+  if printf '%s' "$WEB_POLICY" | grep -q "allUsers"; then
+    say "  iap: removing the public invoker grant"
+    gcloud run services remove-iam-policy-binding dmai-web \
+      --project="$PROJECT_ID" --region="$REGION" \
+      --member="allUsers" --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+  fi
+
   # Who may pass Google's door: the Zennify workspace. (Tolerant: this
   # org-level grant may require an admin; a release must not abort on it.)
-  gcloud iap web add-iam-policy-binding \
-    --project="$PROJECT_ID" --resource-type=cloud-run \
-    --service=dmai-web --region="$REGION" \
-    --member="domain:zennify.com" --role="roles/iap.httpsResourceAccessor" --quiet >/dev/null 2>&1 || true
+  if ! gcloud iap web get-iam-policy --project="$PROJECT_ID" \
+       --resource-type=cloud-run --service=dmai-web --region="$REGION" \
+       --format=json 2>/dev/null | grep -q "domain:zennify.com"; then
+    say "  iap: granting zennify.com access"
+    gcloud iap web add-iam-policy-binding \
+      --project="$PROJECT_ID" --resource-type=cloud-run \
+      --service=dmai-web --region="$REGION" \
+      --member="domain:zennify.com" --role="roles/iap.httpsResourceAccessor" \
+      --quiet >/dev/null 2>&1 || true
+  fi
 
   # The admin "Run scan now" button fires the worker Job as dmai-web.
   gcloud run jobs add-iam-policy-binding dmai-worker \
