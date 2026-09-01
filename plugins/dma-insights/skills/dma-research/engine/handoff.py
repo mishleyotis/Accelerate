@@ -145,7 +145,15 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         gates[cat] = ({"verdict": "NOT_RUN",
                        "reason": "the floors gate has no recorded verdict for "
                                  "this category"} if v is None
-                      else {"verdict": v["gate"], "blocking": v["blocking"]})
+                      else {"verdict": v["gate"], "blocking": v["blocking"],
+                            "require_synthesis": bool(v.get("require_synthesis"))})
+
+    # AUD-0116: THE SYNTHESIS-AND-CHALLENGE CHAIN IS SEQUENCED HERE, not left to
+    # whoever runs the assessment stage to remember. (Extracted to
+    # `_assert_scoreable` so it is unit-testable without first satisfying the
+    # validator and completeness gates above.)
+    if strict:
+        _assert_scoreable(gates)
 
     return {
         "_contract": {
@@ -179,6 +187,46 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         # AUD-0138: measured, or NOT_RUN with a reason. Never `[]`.
         **_facets(wb, records),
     }
+
+
+def _assert_scoreable(gates: dict) -> None:
+    """Refuse a handoff whose categories are not ready to be SCORED (AUD-0116).
+
+    ROOT CAUSE this fixes: `--require-synthesis` was opt-in on the floors gate,
+    and handoff — the one boundary between research and scoring — only REPORTED
+    whatever verdict happened to be recorded. So a category could reach scoring
+    "volleyed" (evidence gathered, never synthesised, never challenged), and the
+    score would be struck on raw evidence rather than on a challenged claim. The
+    independent challenge existed as a gate TERM but nothing forced the mode
+    that runs it before the score.
+
+    A handoff feeds the assessment/scoring stage. So it is refused unless every
+    category cleared the gate in the mode that REQUIRES every evidenced subcap
+    to be synthesised AND independently challenged (the synthesis_missing,
+    challenge_missing and challenge_not_independent terms all live behind
+    require_synthesis / the synthesised-row checks). That makes "synthesise and
+    independently challenge before you score" structural: a run cannot skip it
+    and reach a handoff, whoever is driving."""
+    not_ready = {}
+    for cat in sorted(gates):
+        g = gates[cat]
+        if g.get("verdict") != "PASS":
+            not_ready[cat] = (f"floors gate is {g.get('verdict')}"
+                              + (f" (blocking: {g.get('blocking')})"
+                                 if g.get("blocking") else ""))
+        elif not g.get("require_synthesis"):
+            not_ready[cat] = (
+                "floors gate passed WITHOUT --require-synthesis, so its "
+                "evidenced subcaps were never required to be synthesised and "
+                "independently challenged")
+    if not_ready:
+        lines = "\n  ".join(f"{c}: {why}" for c, why in not_ready.items())
+        raise SystemExit(
+            "REFUSED: a handoff feeds the scoring stage, and these categories "
+            "are not ready to be scored — every evidenced subcap must be "
+            "synthesised and then independently challenged (run the floors gate "
+            "with --require-synthesis and clear it) BEFORE a handoff, so the "
+            f"score reflects a challenged claim and not raw evidence:\n  {lines}")
 
 
 def _facets(wb: RunWorkbook, records: list[dict]) -> dict:

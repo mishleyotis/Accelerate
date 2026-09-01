@@ -116,7 +116,16 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         if len(eids) < FLOOR_ITEMS:
             findings["closed_below_floor"].append(
                 {"subcap": cell, "items": len(eids), "floor": FLOOR_ITEMS})
-        if require_synthesis and not synthesised:
+        # AUD-0116: synthesis is REQUIRED of a subcap that has evidence, not of
+        # one honestly declared empty. Making the requirement conditional on
+        # `eids` is what lets `require_synthesis` be MANDATORY at handoff (see
+        # handoff.build) without being unsatisfiable for an entity whose tail
+        # is genuine absence — the failure that had left the whole
+        # synthesis-and-challenge chain opt-in, and so skippable, before
+        # scoring. An evidenced-but-unsynthesised subcap is "volleyed": gathered
+        # and not analysed. It must be synthesised (and then, by the terms
+        # below, independently challenged) before the category is done.
+        if require_synthesis and not synthesised and eids:
             findings["synthesis_missing"].append(cell)
 
         # YOU CANNOT REPORT THAT THERE IS NOTHING WITHOUT HAVING LOOKED.
@@ -289,6 +298,12 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "gate": verdict,
         "category": category,
         "run_id": wb.metadata().get("run_id"),
+        # AUD-0116: whether this verdict was produced under the
+        # synthesis-and-challenge-requiring mode. handoff.build refuses to hand
+        # a category to the assessment/scoring stage unless a PASS was recorded
+        # with this True — the structural fix that stops a coverage-only pass
+        # from being mistaken for a finished category.
+        "require_synthesis": bool(require_synthesis),
         "category_evidence": f"{items}/{FLOOR_CATEGORY_ITEMS}",
         "category_floor_met": category_floor_met,
         "evidence_coverage": (

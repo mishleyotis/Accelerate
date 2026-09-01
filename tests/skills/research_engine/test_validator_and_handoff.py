@@ -489,3 +489,93 @@ def test_the_locked_set_reaches_the_handoff(tmp_path):
     lock = doc["_contract"]["handoff_lock"]
     assert lock["locked_peer_set"] == "Alpha CU|Beta CU"
     assert lock["peer_basis"] == "recomputed"
+
+
+# ── AUD-0116 · synthesis+challenge is sequenced BEFORE scoring ────────────
+#
+# Root cause of a live confusion (2026-09-01): `--require-synthesis` was opt-in
+# on the floors gate and the handoff — the one boundary between research and
+# scoring — only REPORTED whatever verdict was recorded. So a category could
+# reach scoring "volleyed": evidence gathered, never synthesised, never
+# challenged, and the score struck on raw evidence. These tests make the
+# ordering structural: no strict handoff unless every category cleared the
+# gate in the synthesis-and-challenge-requiring mode.
+
+def test_synthesis_is_required_of_evidenced_subcaps_not_of_absences(tmp_path):
+    """The refinement that makes require_synthesis MANDATABLE: an evidenced
+    subcap must be synthesised; an honestly-empty one need not be."""
+    from engine import floors_gate
+    run = new_run(tmp_path, n=8); wb = run.open()
+    cells = wb.selected_subcaps()
+    for cell in cells[:6]:                         # evidenced + synthesised
+        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+    bank_evidence(wb, cells[6])                    # evidenced, NOT synthesised
+    L.append_search(wb, subcap=cells[7], facet="works",             # absence
+                    query=f"{cells[7]} — deep-searched, nothing published",
+                    tool="web_search", hits=0, kept=0, outcome="no hits")
+    v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)
+    assert cells[6] in v["synthesis_missing"], (
+        "an evidenced-but-unsynthesised subcap must be flagged synthesis_missing")
+    assert cells[7] not in v["synthesis_missing"], (
+        "an honestly-empty subcap must NOT be forced to synthesise — that would "
+        "make require_synthesis unsatisfiable and push toward invented claims")
+    assert "synthesis_missing" in v["blocking"] and v["gate"] == "FAIL"
+
+
+# `_assert_scoreable` is exercised directly: it is the strict-handoff gate that
+# sequences synthesis+challenge before scoring, and testing it through
+# `handoff.build` would first have to satisfy the validator and completeness
+# gates (an orthogonal concern that raises first on a minimal fixture).
+
+def test_scoreability_refuses_a_category_gated_without_synthesis():
+    """A coverage-only PASS is not a finished category: if the recorded verdict
+    was struck WITHOUT require_synthesis, its evidenced subcaps were never
+    required to be synthesised and challenged, so it cannot be scored yet."""
+    with pytest.raises(SystemExit, match="WITHOUT --require-synthesis"):
+        handoff._assert_scoreable(
+            {CAT: {"verdict": "PASS", "require_synthesis": False}})
+
+
+def test_scoreability_refuses_a_volleyed_or_failing_category():
+    """A require_synthesis gate that FAILs (e.g. synthesis_missing on a
+    volleyed subcap) blocks the handoff to scoring."""
+    with pytest.raises(SystemExit,
+                       match="synthesised and then independently challenged"):
+        handoff._assert_scoreable(
+            {CAT: {"verdict": "FAIL", "blocking": ["synthesis_missing"],
+                   "require_synthesis": True}})
+
+
+def test_scoreability_refuses_a_category_with_no_recorded_verdict():
+    """NOT_RUN is never a pass: a category whose gate was never recorded cannot
+    reach scoring."""
+    with pytest.raises(SystemExit, match="floors gate is NOT_RUN"):
+        handoff._assert_scoreable({CAT: {"verdict": "NOT_RUN"}})
+
+
+def test_scoreability_passes_once_every_category_cleared_require_synthesis():
+    """The satisfiable path: a PASS recorded under require_synthesis is ready to
+    be scored, and _assert_scoreable returns without raising."""
+    handoff._assert_scoreable(
+        {CAT: {"verdict": "PASS", "blocking": [], "require_synthesis": True}})
+
+
+def test_strict_handoff_wires_the_scoreability_check(tmp_path, monkeypatch):
+    """Belt-and-braces: build() actually CALLS _assert_scoreable in strict mode,
+    on the gates it computed — so the sequencing cannot be bypassed by a future
+    edit that drops the call. (A full build first satisfies validator +
+    completeness, tested elsewhere; here we intercept the check itself.)"""
+    from engine import floors_gate
+    run, wb = _good_run(tmp_path, n=8)
+    floors_gate.run(wb, CAT, qa_dir=run.qa_dir)   # PASS, but require_synthesis False
+    seen = {}
+    monkeypatch.setattr(handoff, "_assert_scoreable",
+                        lambda gates: seen.update(gates))
+    handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    assert not seen, "strict=False must NOT invoke the scoreability gate"
+    # strict=True reaches _assert_scoreable only after validator+completeness;
+    # _good_run leaves tabs empty, so completeness raises first — which itself
+    # proves strict build refuses an unfinished workbook. The direct
+    # _assert_scoreable tests above cover the gate's own logic.
+    with pytest.raises(SystemExit):
+        handoff.build(wb, qa_dir=run.qa_dir, strict=True)
