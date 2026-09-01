@@ -835,3 +835,63 @@ def test_classified_writes_still_prompt_under_both_server_spellings(server):
 def test_the_connectors_the_owner_named_all_auto_approve(tool):
     assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
         f"{tool} must auto-approve without a human — the routine runs headless"
+
+
+# ── the resilient default: new / renamed tools classified by verb ──
+#
+# Owner 2026-09-01: the hook must factor in tools nobody listed — new ones and
+# renamed ones — the moment they appear. A read verb approves; a write/send
+# verb prompts; an unrecognised verb prompts; explicit withholds win.
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__get_widgets", "mcp__BrandNewCo__list_accounts",
+    "mcp__Whatever__search_v2_results", "mcp__Exa__web_search_v3_exa",
+    "mcp__NewCo__retrieve_report", "mcp__NewCo__fetch_thing",
+    "mcp__NewCo__describe_dataset", "mcp__NewCo__lookup_entity",
+])
+def test_an_unlisted_read_tool_on_any_connector_auto_approves(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
+        f"{tool}: a read verb must auto-approve without a rule change"
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__create_widget", "mcp__BrandNewCo__update_record",
+    "mcp__BrandNewCo__delete_thing", "mcp__BrandNewCo__send_email",
+    "mcp__BrandNewCo__export_data", "mcp__BrandNewCo__run_job",
+    "mcp__BrandNewCo__post_message", "mcp__BrandNewCo__share_folder",
+    "mcp__BrandNewCo__get_and_delete_record",   # WRITE wins over the read verb
+])
+def test_an_unlisted_write_tool_still_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) is None, \
+        f"{tool}: a write/send verb must still prompt"
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__frobnicate", "mcp__BrandNewCo__handshake",
+    "mcp__BrandNewCo__widgetize",
+])
+def test_an_unrecognised_verb_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) is None, \
+        f"{tool}: a name with no read or write verb must prompt, not guess"
+
+
+def test_an_explicit_withhold_wins_over_a_read_looking_name():
+    # github resolve_review_thread is a WRITE the hook withholds; it must stay a
+    # prompt even though a naive reader might see "resolve" as harmless.
+    assert decision(AUTO, {"tool_name": "mcp__github__resolve_review_thread",
+                           "tool_input": {}}) is None
+
+
+@pytest.mark.parametrize("evil", [
+    {"tool_name": "mcp__x__y__z__weird", "tool_input": {}},
+    {"tool_name": "mcp__", "tool_input": None},
+    {"tool_name": "mcp__a__b", "tool_input": {"weird": "☃"}},
+    {"tool_name": "mcp__a__b__" + "x" * 5000},
+    {"tool_name": 12345},
+    {},
+])
+def test_the_hook_never_crashes_and_never_errors(evil):
+    # A hook that can exit non-zero is not resilient. Whatever valid JSON event
+    # arrives, it must exit 0 — a decision or silence, never an error.
+    r = run(AUTO, evil)
+    assert r.returncode == 0, f"hook errored on {evil!r}: {r.stderr}"

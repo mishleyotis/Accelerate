@@ -41,6 +41,7 @@ them from here as well would put two hooks on one tool with opposite
 opinions, and the resolution order is not something to bet a promote on.
 """
 import json
+import re
 import sys
 
 PREFIX = "mcp__plugin_dma-insights_connector__"
@@ -480,6 +481,49 @@ def _canonical(tool: str) -> str:
     return tool
 
 
+# ── verb vocabulary for the resilient default ────────────────────────────
+#
+# A tool id is a run of words; the WORD is what says read from write. These
+# sets are deliberately asymmetric: WRITE is broad (anything that could change,
+# send, spend or run something the routine did not author prompts), READ is the
+# narrow set of words that only ever fetch and return. WRITE is tested first so
+# a compound like `get_and_delete` prompts.
+_WRITE_VERBS = frozenset({
+    "create", "update", "delete", "remove", "send", "write", "post", "add",
+    "set", "merge", "trash", "share", "move", "copy", "upload", "export",
+    "run", "exec", "execute", "schedule", "submit", "promote", "save",
+    "archive", "suspend", "offboard", "swap", "invite", "revoke", "install",
+    "deploy", "publish", "reply", "trigger", "bulk", "draft", "cancel",
+    "approve", "reject", "put", "patch", "insert", "drop", "enable", "disable",
+    "subscribe", "unsubscribe", "withdraw", "claim", "append", "register",
+    "ingest", "resolve", "unresolve", "clear", "edit", "rename", "star",
+    "fork", "dispatch", "comment", "assign", "close", "reopen", "sync"})
+_READ_VERBS = frozenset({
+    "get", "list", "search", "read", "fetch", "find", "download", "query",
+    "describe", "show", "view", "lookup", "count", "check", "status",
+    "enrich", "match", "autocomplete", "map", "crawl", "extract", "inspect",
+    "related", "estimate", "sample", "retrieve", "soql", "display", "explain"})
+
+
+def _verb_disposition(suffix: str) -> str:
+    """'write', 'read', or 'unknown' from the words in a tool id. WRITE wins."""
+    words = {w for w in re.split(r"[^a-z0-9]+", str(suffix).lower()) if w}
+    if words & _WRITE_VERBS:
+        return "write"
+    if words & _READ_VERBS:
+        return "read"
+    return "unknown"
+
+
+VERB_READ_REASON = (
+    "read-only connector tool, auto-approved by the dma-insights hook's "
+    "resilient default: the tool id carries a read verb and no write/send "
+    "verb, so it fetches and returns. New or renamed read tools are covered "
+    "with no rule change; a write, send, or unrecognised verb still prompts, "
+    "and the explicit withheld lists win over this classification."
+)
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -554,6 +598,28 @@ def main() -> int:
         if suffix in ENRICHMENT_TOOLS:
             return _allow(ENRICHMENT_REASON)
 
+    # ── the resilient default: classify by VERB, so a tool nobody listed is
+    # still handled the moment it appears (owner 2026-09-01: "even when new
+    # tools surface or tool names change, everything is already factored in").
+    #
+    # The explicit tables above are the RECORD of specific decisions; this is
+    # the rule that does not need editing when a connector adds `get_widgets`
+    # or renames `search` to `search_v2`. A READ verb in the tool id approves;
+    # a WRITE/SEND verb prompts; a name that carries neither prompts, because a
+    # tool this rule cannot read is exactly the one a person should still see.
+    # WRITE wins over READ (a `get_and_delete` is a delete), and the explicit
+    # WITHHELD lists win over both, so a known write named with a read verb
+    # (github `resolve_review_thread`) still prompts.
+    if tool.startswith("mcp__") and tool.count("__") >= 2:
+        suffix = tool.rsplit("__", 1)[1]
+        if (tool in WITHHELD_TOOLS or _canonical(tool) in WITHHELD_TOOLS
+                or suffix in WITHHELD_SUFFIXES):
+            return 0
+        disp = _verb_disposition(suffix)
+        if disp == "read":
+            return _allow(VERB_READ_REASON)
+        # "write" and "unknown" both fall through to a prompt.
+
     return 0
 
 
@@ -567,4 +633,11 @@ def _allow(reason: str) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception:                                        # noqa: BLE001
+        # A hook must NEVER crash: a non-zero exit is an error the harness can
+        # act on, and no output is no decision (the tool prompts) — the safe
+        # direction. An internal bug must degrade to a prompt, never to a
+        # broken session. This is the resilience floor beneath every rule above.
+        sys.exit(0)
