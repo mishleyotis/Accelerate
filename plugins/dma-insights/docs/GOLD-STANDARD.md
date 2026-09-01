@@ -70,8 +70,9 @@ source — the contract forbids a placeholder there and a URL cannot be invented
   **rebuttal on every recommendation** (steelman the strongest counter, then adjudicate);
   pillar deep-dive headings carry **score vs peer median** ("2.40 vs 3.10").
 - **Coverage disclosed** in prose (evidenced vs Unknown), matching the workbook.
-- **Bands**: the four display bands only; **M1..M5 is the score scale** and is expected.
-  A fifth *band* word ("Transformational") is the invariant breach.
+- **Bands**: the four display bands only — Activating, Building, Competing, Differentiating.
+  The numeric maturity **score** (1–5, e.g. "2.25") is a different axis and is expected; a fifth
+  *band* word must never appear, and inventing one is the invariant 6 breach.
 - **Reconcile**: every figure the report renders equals the workbook's stated grain
   within 0.01 on the overall.
 
