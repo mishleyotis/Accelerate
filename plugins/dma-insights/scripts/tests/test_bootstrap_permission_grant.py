@@ -125,6 +125,40 @@ def test_running_twice_does_not_duplicate_the_rule(tmp_path):
     assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
 
 
+def test_headless_never_prompt_mode_is_set(tmp_path):
+    """The mode-level guarantee that survives a stale plugin bind (owner
+    2026-09-01, third recurring-prompt report). A fresh settings file must come
+    out with defaultMode dontAsk, so a session that boots a snapshot's stale
+    auto-approve hook still never queues a prompt no headless container can
+    answer — anything the allow-list and hook do not cover is denied, not hung."""
+    s = tmp_path / ".claude" / "settings.json"
+    run_grant(s)
+    assert json.loads(s.read_text())["permissions"]["defaultMode"] == "dontAsk"
+
+
+def test_an_existing_mode_is_never_overridden(tmp_path):
+    """A human who chose a mode keeps it — dontAsk is set only when unset."""
+    s = tmp_path / "settings.json"
+    s.write_text(json.dumps({"permissions": {"allow": [], "defaultMode": "plan"}}))
+    run_grant(s)
+    cfg = json.loads(s.read_text())
+    assert cfg["permissions"]["defaultMode"] == "plan"
+    assert cfg["permissions"]["allow"] == BASE_GRANTS  # grants still applied
+
+
+def test_the_mode_persists_even_when_every_grant_is_present(tmp_path):
+    """The bug this guards: the write used to be skipped when no grant was
+    added, so a mode set on a fully-granted file was computed and thrown away.
+    A second run adds no grant, yet the mode must be on disk."""
+    s = tmp_path / "settings.json"
+    run_grant(s)                              # first run grants + sets mode
+    s.write_text(json.dumps({"permissions": {  # mode stripped, grants kept
+        "allow": json.loads(s.read_text())["permissions"]["allow"]}}))
+    out = run_grant(s)
+    assert "already granted" in out
+    assert json.loads(s.read_text())["permissions"]["defaultMode"] == "dontAsk"
+
+
 def test_the_plugin_install_keys_survive_the_grant(tmp_path):
     """bootstrap writes enabledPlugins/extraKnownMarketplaces/pluginConfigs to
     this same file earlier in its own run. Clobbering them to fix permissions

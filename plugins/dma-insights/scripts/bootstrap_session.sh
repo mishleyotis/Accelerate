@@ -534,20 +534,49 @@ except Exception as e:                                       # noqa: BLE001
     raise SystemExit(0)
 
 perms = cfg.setdefault("permissions", {})
+# THE MODE-LEVEL NEVER-PROMPT GUARANTEE, and it is the one that survives a
+# STALE PLUGIN BIND (owner 2026-09-01, third report of recurring prompts).
+# The auto-approve hook and this allow-list both travel with the plugin and
+# refresh together; when a container boots a restored snapshot whose plugin
+# predates the hook's WebSearch/verb-default rules, neither is current, and a
+# tool the stale hook does not know falls through to a PROMPT that a headless
+# session hangs on forever. `dontAsk` is read from USER settings at session
+# start — before any plugin binds — so it holds whatever version the snapshot
+# carries. In it, nothing ever prompts: the allow-list below and the hook's
+# `permissionDecision:"allow"` still run the routine's reads and connector
+# writes (a hook "allow" and an allow rule both override the mode baseline),
+# and anything neither covers is DENIED rather than queued behind a prompt no
+# scheduled container can answer — fail-fast, never hang. It is the documented
+# safe headless posture (dontAsk + explicit allow rules), not bypassPermissions,
+# which would also wave through the writes the hook deliberately withholds and
+# is refused as root anyway. Set only when unset: a human who chose a mode
+# (default, plan, acceptEdits) is never overridden.
+mode = perms.get("defaultMode")
+if not mode:
+    perms["defaultMode"] = "dontAsk"
+    _mode_note = " defaultMode=dontAsk (headless never-prompt)"
+else:
+    _mode_note = f" defaultMode kept={mode}"
 allow = perms.setdefault("allow", [])
 if not isinstance(allow, list):
     print("permission grant SKIPPED — permissions.allow is not a list")
     raise SystemExit(0)
 added = [w for w in wanted if w not in allow]
-if not added:
-    print(f"all {len(wanted)} MCP grants already granted in user settings")
-else:
-    allow.extend(added)
+allow.extend(added)
+# Write when EITHER the grants OR the mode changed — a settings file that
+# already carries every grant must still be written when this run added the
+# never-prompt mode, or the guarantee is computed and thrown away.
+if added or not mode:
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(cfg, indent=2) + "\n")
     tmp.replace(p)                                           # atomic
+if not added:
+    print(f"all {len(wanted)} MCP grants already granted in user settings."
+          f"{_mode_note}")
+else:
     print(f"granted {len(added)} of {len(wanted)} MCP servers in user "
-          f"settings: {', '.join(a.replace('mcp__', '').rstrip('_*') for a in added)}")
+          f"settings: {', '.join(a.replace('mcp__', '').rstrip('_*') for a in added)}."
+          f"{_mode_note}")
 PY
 log "$(cat "$GRANT_OUT")"
 rm -f "$GRANT_OUT"
