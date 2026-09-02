@@ -35,6 +35,8 @@ from dma_worker.workbook_parser import (mine_evidence_from_rationales,
                                         parse_research_workbook,
                                         parse_scoring_workbook,
                                         parse_technographic_scan,
+                                        parse_tech_register,
+                                        workbook_tab_coverage,
                                         merge_evidence_sources)
 
 
@@ -392,6 +394,26 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                   f"{len(research.get('absent') or [])} recorded absences")
 
         wb = parse_scoring_workbook(wb_path)
+
+        # WHICH TABS DOES ANYTHING READ? Recorded on every ingest, before the
+        # readers run, because the answer changed under us: the Golden 1
+        # workbook ships 43 tabs against readers that claimed 12, and the
+        # gap was invisible. A surface written from a tab in this census's
+        # worklist renders empty because nothing read it, and a producer who
+        # cannot tell that apart from a client with nothing to say will write
+        # the absence.
+        workbook_tab_coverage(wb_path, companion)
+
+        # The technology register at the grain the techstack contract wants.
+        # Run for its OBSERVATIONS as well as its rows: CG-20 (product and
+        # vendor stating one string) and CG-12 (a detection_basis over the
+        # face-slot budget) are properties of the workbook, and naming them
+        # here reports them against the run instead of surfacing them as a
+        # producer defect at validation time.
+        tech_register = parse_tech_register(wb_path, companion)
+        if tech_register:
+            print(f"ingest: tech register {len(tech_register)} product row(s)")
+
         # Every companion tab appends what it could not read to one list; the
         # persist writes them as parser_observations against the run, so a tab
         # the parser did not recognise leaves a record naming the tab, the
@@ -436,6 +458,89 @@ def _ingest_one(conn, token, folder, parts, remint=False):
         )
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}
         return res, rationales
+
+
+def backfill_grains(conn, token, groups) -> int:
+    """Fill the STATED pillar/category grains a run was ingested without.
+
+    `run_manifest.workbook_grains` is written once, at ingest, and there is
+    no update path — so a run ingested while the grain reader could not find
+    its Score column keeps `pillars: 0, categories: 0` for ever, and
+    re-scanning cannot repair it: the diff is idempotent, so an unchanged
+    tree creates nothing to re-ingest.
+
+    WHAT THAT COSTS, measured on Golden 1 (run 40971653) 2026-09-02. The
+    workbook states 2.40 / 2.11 / 2.25 / 2.25 in Pillar_Summary and again in
+    Pillar_Rollup. The reader looked for a column literally named `score` in
+    a tab that names it `Weighted_Score`, so the run stored no grain. With no
+    STATED grain, CG-07 resolves a quoted pillar figure against the mean of
+    the run's own cells (2.1115 / 2.0345 / 2.0920 / 2.0585) and refuses the
+    workbook's weighted figure at 0.05 — so the overview hero rendered four
+    EMPTY BARS beside a peer tick, and the client directory card with them,
+    on a run whose own report states all four scores.
+
+    The aliases are already fixed in `parse_grain_summaries`. This is the
+    other half: a run ingested before that fix cannot benefit from it without
+    re-reading its own workbook.
+
+    Additive and idempotent, on the pattern `backfill_sections` set. It
+    re-parses the workbook and UPDATES the existing run's manifest in place:
+    a run already holding grains is left alone, a folder shipping no workbook
+    is skipped, and no run is created, deleted or re-scored. Only the
+    `workbook_grains` key is written — `payload["manifest"]` is untouched.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                     JOIN run_manifest m ON m.run_id = r.id
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND COALESCE(
+                            jsonb_array_length(
+                              COALESCE(m.payload->'workbook_grains'->'pillars',
+                                       '[]'::jsonb)), 0) = 0
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-grains: {len(todo)} run(s) hold no stated pillar grain")
+    filled = skipped = empty = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            obs: list = []
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                grains = parse_grain_summaries(wp, obs)
+            n_p = len(grains.get("pillars") or [])
+            n_c = len(grains.get("categories") or [])
+            if not n_p and not n_c:
+                # The reader still finds nothing. That is a real answer about
+                # this workbook rather than a failure to record — the
+                # observations say which of the three ways it came back empty.
+                empty += 1
+                for o in obs:
+                    print(f"backfill-grains: {folder}: {o.kind} {o.detail}")
+                continue
+            cur.execute(
+                """UPDATE run_manifest
+                      SET payload = jsonb_set(payload, '{workbook_grains}',
+                                              %s::jsonb, true)
+                    WHERE run_id = %s""",
+                (json.dumps(grains), run_id))
+            conn.commit()
+            print(f"backfill-grains: {folder} -> {n_p} pillar(s), "
+                  f"{n_c} categor(ies)")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-grains FAILED: {folder}: {exc!r}")
+    print(f"backfill-grains: {filled} filled, {skipped} have no workbook "
+          f"artefact, {empty} state none, {failed} failed")
+    return 1 if failed else 0
 
 
 def backfill_sections(conn, token, groups) -> int:
@@ -1041,6 +1146,7 @@ def main() -> int:
     # that dies is recorded rather than invisible (the 403 that killed the
     # tree recursion left no import_scans row at all).
     diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
+                      or os.environ.get("BACKFILL_GRAINS")
                       or os.environ.get("BACKFILL_EVIDENCE")
                       or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
@@ -1069,6 +1175,11 @@ def main() -> int:
         # firing's diff and the changed packages would never be ingested.
         if os.environ.get("BACKFILL_SECTIONS"):
             rc = backfill_sections(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_GRAINS"):
+            rc = backfill_grains(conn, drive.metadata_token(), groups)
             conn.close()
             return rc
 

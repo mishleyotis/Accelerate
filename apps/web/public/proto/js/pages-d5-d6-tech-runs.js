@@ -1219,9 +1219,26 @@ function InteractiveGantt({
       // not stated rather than inventing either endpoint.
       const TERMINAL = /^(REMEDIATED|RESOLVED|CLOSED|RETIRED|EXPIRED|S\d\s+EXPIRED)/i.test(String(iss.status || "").trim());
       const b = iss.end ? at(iss.end) ?? now : TERMINAL ? Math.min((a ?? now) + (now - (a ?? now)) * 0.12 + 1, now) : now;
-      const left = Math.max(0, Math.min(100, pct(a)));
+      const left0 = Math.max(0, Math.min(100, pct(a)));
       const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
-      const width = Math.max(2, right - left);
+      // The minimum width is what keeps a same-day matter visible, but it
+      // was applied WITHOUT re-checking the right edge, so a bar pinned
+      // near the end of the axis ran off the lane. Measured on Golden 1,
+      // 2026-09-02: I-001 and I-002 opened 2026-08-25, eight days before
+      // the axis end, giving left 99.55% and a floored width of 2% — a bar
+      // ending at 101.55%, hanging over the card edge with its label
+      // clipped to a single letter. Clamp the stub back inside the track:
+      // the bar keeps its width and gives up its exact position, which is
+      // the honest trade at this scale (two days is a sub-pixel distinction
+      // on this axis, and the row states the date).
+      const width = Math.min(100, Math.max(2, right - left0));
+      const left = Math.min(left0, 100 - width);
+      // A bar this narrow cannot carry a title — an 85-character matter in
+      // a 2% bar rendered as "D". The label goes in when there is room for
+      // it to mean something; below that the bar is a position marker and
+      // the row's own label, its tooltip and the panel it opens carry the
+      // text. Never a single clipped letter presented as a name.
+      const barFitsLabel = width >= 12;
       const tone = severityTone(iss.severity);
       const color = tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)";
       const isOpen = issueOpen === iss.id;
@@ -1289,7 +1306,13 @@ function InteractiveGantt({
           height: 28
         }
       }, /*#__PURE__*/React.createElement("div", {
-        title: `${iss.start}${iss.end ? ` → ${iss.end}` : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`,
+        title: `${iss.start}${iss.end ? ` → ${iss.end}` : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`
+        /* The horizontal padding insets the LABEL, so a bar with
+           no label must not carry it: 6px each side is a 12px
+           floor on the rendered box that a 2% width cannot go
+           under, and at 960px that floor put the stub 3px past
+           the lane even with the percentage clamped. Padding on
+           an empty bar is pure overflow. */,
         style: {
           position: "absolute",
           left: `${left}%`,
@@ -1301,7 +1324,8 @@ function InteractiveGantt({
           opacity: .85,
           display: "flex",
           alignItems: "center",
-          padding: "0 6px",
+          boxSizing: "border-box",
+          padding: barFitsLabel ? "0 6px" : 0,
           color: "#fff",
           fontSize: 10,
           fontWeight: 500,
@@ -1309,7 +1333,7 @@ function InteractiveGantt({
           whiteSpace: "nowrap",
           textOverflow: "ellipsis"
         }
-      }, iss.title || iss.type || iss.id)));
+      }, barFitsLabel ? iss.title || iss.type || iss.id : "")));
     }), undated.length ? /*#__PURE__*/React.createElement("div", {
       style: {
         borderTop: "1px solid var(--z-sep)",

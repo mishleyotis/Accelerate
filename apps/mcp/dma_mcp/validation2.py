@@ -1893,6 +1893,31 @@ def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
     for i, r in enumerate(rows):
         pid = r.get("pillar_id") or r.get("pillar") or f"[{i}]"
         score, peer = _num(r.get("score")), _num(r.get("peer_median"))
+        delta_stated = _num(r.get("delta"))
+        if score is None and peer is not None and delta_stated is not None:
+            # The mirror of the delta branch below, and the hole this gate
+            # had: `score is None` used to skip every check, so a strip could
+            # serve four EMPTY BARS beside a peer tick and pass. Measured on
+            # Golden 1, 2026-09-02: all four pillars null while the workbook
+            # stated 2.40/2.11/2.25/2.25 twice over, the heatmap already
+            # served those same figures with their source cells, and the
+            # composite on this very section was their mean. Nothing was
+            # missing — the bar simply had no number to draw.
+            #
+            # A row that states a peer median AND a delta has the score in
+            # hand: it is the addition. Invariant 9 cuts both ways — a
+            # derived value with its operands present is computed, never
+            # left null.
+            out.append(_reason(
+                "CG-44", "scores", f"overview.scores.pillars[{i}].score",
+                f"{pid} leaves its score empty while stating a peer median "
+                f"({peer}) and a delta ({delta_stated:+.2f}). The score is "
+                f"the addition — it is {round(peer + delta_stated, 2)}. This "
+                f"renders as an EMPTY BAR beside a peer tick, which reads to "
+                f"a client as 'not assessed' for a pillar the run scored. "
+                f"Serve the figure; if the workbook truly states none at "
+                f"this grain, then the delta beside it cannot stand either."))
+            continue
         if score is None or peer is None:
             continue
         want = round(score - peer, 4)
