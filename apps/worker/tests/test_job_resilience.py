@@ -284,3 +284,122 @@ def test_backfill_returns_before_the_scan_consumes_the_diff():
     be ingested — the backfill branch must precede the scan call."""
     src = (Path(__file__).resolve().parents[1] / "job_main.py").read_text()
     assert src.index("BACKFILL_SECTIONS") < src.index("summary = run_scan(")
+
+
+class _GrainCursor:
+    """Enough of a cursor for backfill_grains: one SELECT of runs holding no
+    stated pillar grain, then UPDATEs of run_manifest."""
+
+    def __init__(self, runs):
+        self._runs, self.updated = runs, []
+        self._rows = []
+
+    def execute(self, sql, params=None):
+        if "FROM runs r" in sql:
+            assert "workbook_grains" in sql and "jsonb_array_length" in sql, \
+                "must only pick runs whose stated pillar grain is empty"
+            self._rows = list(self._runs)
+        elif "UPDATE run_manifest" in sql:
+            assert "jsonb_set" in sql and "'{workbook_grains}'" in sql, \
+                "only the workbook_grains key may be written"
+            self.updated.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self._rows
+
+
+class _GrainConn:
+    def __init__(self, runs):
+        self.cur = _GrainCursor(runs)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):                          # pragma: no cover
+        pass
+
+
+def test_backfill_grains_fills_the_run_that_lost_its_stated_pillars(monkeypatch):
+    """Golden 1's own case. The workbook states 2.40/2.11/2.25/2.25; the run
+    stored none because its reader wanted a column named `score` in a tab
+    that names it `Weighted_Score`. The recovery updates the EXISTING run."""
+    import json as _json
+
+    import job_main
+
+    tree = [_f("Golden 1 Credit Union - DMA", "DMA_Scoring_Workbook_G1.xlsx"),
+            _f("No Workbook - DMA", "DMA_Assessment_Report_X.docx")]
+    groups = job_main._package_groups(tree)
+
+    stated = {"pillars": [{"pillar_id": "P1", "score": 2.4,
+                           "peer_median": 3.1, "source_cell": "Pillar_Summary!C2"},
+                          {"pillar_id": "P2", "score": 2.11,
+                           "peer_median": 3.0, "source_cell": "Pillar_Summary!C3"},
+                          {"pillar_id": "P3", "score": 2.25,
+                           "peer_median": 3.0, "source_cell": "Pillar_Summary!C4"},
+                          {"pillar_id": "P4", "score": 2.25,
+                           "peer_median": 3.1, "source_cell": "Pillar_Summary!C5"}],
+              "categories": [{"category_id": "P1C1", "score": 2.9}]}
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_grain_summaries",
+                        lambda p, obs=None: stated)
+
+    conn = _GrainConn([("run-g1", "Golden 1 Credit Union - DMA"),
+                       ("run-x", "No Workbook - DMA")])
+    rc = job_main.backfill_grains(conn, "token", groups)
+
+    assert rc == 0
+    assert len(conn.cur.updated) == 1, "only the folder shipping a workbook"
+    payload, run_id = conn.cur.updated[0]
+    assert run_id == "run-g1"
+    got = _json.loads(payload)
+    assert [p["score"] for p in got["pillars"]] == [2.4, 2.11, 2.25, 2.25]
+    assert conn.commits == 1
+
+
+def test_backfill_grains_writes_nothing_when_the_workbook_states_none(monkeypatch):
+    """A workbook that genuinely states no grain is reported, not written —
+    an empty grain object must never overwrite the manifest."""
+    import job_main
+
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_grain_summaries",
+                        lambda p, obs=None: {"pillars": [], "categories": []})
+
+    conn = _GrainConn([("run-s", "Silent - DMA")])
+    assert job_main.backfill_grains(conn, "token", groups) == 0
+    assert conn.cur.updated == [], "no UPDATE for a workbook stating nothing"
+    assert conn.commits == 0
+
+
+def test_backfill_grains_survives_one_unreadable_workbook(monkeypatch):
+    """One bad workbook must not sink the pass, and must be reported."""
+    import job_main
+
+    tree = [_f("Bad - DMA", "DMA_Scoring_Workbook_B.xlsx"),
+            _f("Good - DMA", "DMA_Scoring_Workbook_G.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+
+    def _parse(p, obs=None):
+        _parse.n += 1
+        if _parse.n == 1:
+            raise ValueError("not a zip file")
+        return {"pillars": [{"pillar_id": "P1", "score": 2.4}], "categories": []}
+    _parse.n = 0
+    monkeypatch.setattr(job_main, "parse_grain_summaries", _parse)
+
+    conn = _GrainConn([("run-bad", "Bad - DMA"), ("run-good", "Good - DMA")])
+    rc = job_main.backfill_grains(conn, "token", groups)
+
+    assert rc == 1, "a failure is reported in the exit code"
+    assert len(conn.cur.updated) == 1, "the good run still lands"
+    assert conn.cur.updated[0][1] == "run-good"
