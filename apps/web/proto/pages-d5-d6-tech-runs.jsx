@@ -897,7 +897,13 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
               <div title={`${iss.start}${iss.end ? ` → ${iss.end}`
                      : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated`
                      : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`}
-                   style={{ position: "absolute", left: `${left}%`, width: `${width}%`, height: 18, top: 5, background: color, borderRadius: 4, opacity: .85, display: "flex", alignItems: "center", padding: "0 6px", color: "#fff", fontSize: 10, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+                   /* The horizontal padding insets the LABEL, so a bar with
+                      no label must not carry it: 6px each side is a 12px
+                      floor on the rendered box that a 2% width cannot go
+                      under, and at 960px that floor put the stub 3px past
+                      the lane even with the percentage clamped. Padding on
+                      an empty bar is pure overflow. */
+                   style={{ position: "absolute", left: `${left}%`, width: `${width}%`, height: 18, top: 5, background: color, borderRadius: 4, opacity: .85, display: "flex", alignItems: "center", boxSizing: "border-box", padding: barFitsLabel ? "0 6px" : 0, color: "#fff", fontSize: 10, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
                 {barFitsLabel ? (iss.title || iss.type || iss.id) : ""}
               </div>
             </div>

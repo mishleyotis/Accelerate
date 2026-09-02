@@ -158,6 +158,14 @@ async function bars(page) {
       if (!lane) continue;
       const b = el.getBoundingClientRect(), l = lane.getBoundingClientRect();
       if (b.width === 0 || b.height === 0) continue;
+      /* Bars only. The axis year ticks are absolutely positioned in the
+         header lane too, and they are SUPPOSED to be narrow and to carry
+         text ("2021") — measuring them reported the axis as a defect. A
+         bar is the thing with a filled background in a full-height lane;
+         a tick is a dashed border in a 14px one. */
+      const filled = s.backgroundColor && s.backgroundColor !== "transparent"
+        && !/^rgba\(0, 0, 0, 0\)$/.test(s.backgroundColor);
+      if (!filled || l.height < 20) continue;
       out.push({ text: (el.textContent || "").trim(),
                  left: b.left, right: b.right, width: b.width,
                  laneLeft: l.left, laneRight: l.right });
