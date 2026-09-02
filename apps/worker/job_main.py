@@ -18,6 +18,8 @@ import re
 import sys
 import tempfile
 import traceback
+
+import openpyxl
 from datetime import datetime, timezone
 
 from dma_worker import drive, intake_status, persist
@@ -26,7 +28,8 @@ from dma_worker.persist import _institution, persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
                                     open_scan, run_scan)
-from dma_worker.workbook_parser import (mine_evidence_from_rationales,
+from dma_worker.workbook_parser import (_stated_overall_grain,
+                                        mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
                                         parse_peer_benchmarks,
@@ -459,6 +462,86 @@ def _ingest_one(conn, token, folder, parts, remint=False):
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}
         return res, rationales
 
+
+
+def backfill_composite(conn, token, groups) -> int:
+    """Fill `runs.composite` for a run whose workbook states it and whose
+    ingest had nowhere to read it.
+
+    THE DEFECT. `composite` is written once, at INSERT, from
+    `WorkbookParse.composite` — and that field was set in exactly one place,
+    `_parse_scorecard`, off the `2_Scorecard` tab. Only the claude_dma
+    generation ships that tab. Every general_dma workbook (`P{n}_Subcap_Scoring`)
+    and every rollup-only one took a different branch of
+    `parse_scoring_workbook`, so the field came back None for the whole
+    generation and `runs.composite` was written NULL.
+
+    WHAT THAT COSTS, seen on Golden 1 (run 40971653) 2026-09-02. The
+    directory card reads `serving_directory.composite` for its header
+    figure. Golden 1's read NULL, so the card rendered the word "maturity"
+    over an empty slot — beside its own four pillar bars, which resolve, and
+    beside Axos Bank, which ships the other generation and shows 1.9. The
+    workbook states the figure FOUR times: `Pillar_Summary!C6`,
+    `Pillar_Rollup!C6`, `Executive_Summary` "Overall Maturity", and the
+    OVERALL row's weighted contribution. No reader claimed any of them.
+
+    `_stated_overall_grain` is the reader half and is already fixed. This is
+    the other half: a run ingested before that fix cannot benefit from it
+    without re-reading its own workbook, and the package scan is idempotent
+    — an unchanged tree creates nothing to re-ingest.
+
+    READ, never derived. The value written is the one on the row the
+    workbook labels OVERALL. A run whose workbook states no overall is left
+    NULL and says so; a mean of the pillars would be a derived figure in a
+    column whose contract is that it was read, and indistinguishable from
+    one afterwards.
+
+    Additive and idempotent, on `backfill_grains`' pattern: a run already
+    holding a composite is not in the work list, a folder shipping no
+    workbook is skipped, and no run is created, deleted or re-scored.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND r.composite IS NULL
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-composite: {len(todo)} run(s) hold no composite")
+    filled = skipped = empty = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                wb = openpyxl.load_workbook(wp, read_only=True, data_only=True)
+                try:
+                    value, cell = _stated_overall_grain(wb)
+                finally:
+                    wb.close()
+            if value is None:
+                # A workbook that states no overall is a fact about the
+                # workbook. Absent beats a number nobody wrote down.
+                empty += 1
+                print(f"backfill-composite: {folder}: workbook states none")
+                continue
+            cur.execute("UPDATE runs SET composite = %s WHERE id = %s",
+                        (value, run_id))
+            conn.commit()
+            print(f"backfill-composite: {folder} -> {value} (from {cell})")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-composite FAILED: {folder}: {exc!r}")
+    print(f"backfill-composite: {filled} filled, {skipped} have no workbook "
+          f"artefact, {empty} state none, {failed} failed")
+    return 1 if failed else 0
 
 def backfill_grains(conn, token, groups) -> int:
     """Fill the STATED pillar/category grains a run was ingested without.
@@ -1147,6 +1230,7 @@ def main() -> int:
     # tree recursion left no import_scans row at all).
     diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
                       or os.environ.get("BACKFILL_GRAINS")
+                      or os.environ.get("BACKFILL_COMPOSITE")
                       or os.environ.get("BACKFILL_EVIDENCE")
                       or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
@@ -1180,6 +1264,11 @@ def main() -> int:
 
         if os.environ.get("BACKFILL_GRAINS"):
             rc = backfill_grains(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_COMPOSITE"):
+            rc = backfill_composite(conn, drive.metadata_token(), groups)
             conn.close()
             return rc
 

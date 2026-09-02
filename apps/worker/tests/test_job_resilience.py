@@ -403,3 +403,122 @@ def test_backfill_grains_survives_one_unreadable_workbook(monkeypatch):
     assert rc == 1, "a failure is reported in the exit code"
     assert len(conn.cur.updated) == 1, "the good run still lands"
     assert conn.cur.updated[0][1] == "run-good"
+
+
+class _CompositeCursor:
+    """Enough of a cursor for backfill_composite: one SELECT of runs holding
+    no composite, then UPDATEs of runs."""
+
+    def __init__(self, runs):
+        self._runs, self.updated = runs, []
+        self._rows = []
+
+    def execute(self, sql, params=None):
+        if "FROM runs r" in sql:
+            assert "r.composite IS NULL" in sql, \
+                "must only pick runs whose composite is unset"
+            self._rows = list(self._runs)
+        elif "UPDATE runs" in sql:
+            assert "SET composite" in sql, "only the composite may be written"
+            self.updated.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self._rows
+
+
+class _CompositeConn:
+    def __init__(self, runs):
+        self.cur = _CompositeCursor(runs)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        pass
+
+
+def _stub_overall(monkeypatch, value, cell="Pillar_Summary!C6"):
+    """The reader and the workbook load are both stubbed: these tests are
+    about the backfill's own decisions, and the reader has its own suite."""
+    import job_main
+
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main.openpyxl, "load_workbook",
+                        lambda p, **kw: type("W", (), {"close": lambda s: None})())
+    monkeypatch.setattr(job_main, "_stated_overall_grain",
+                        lambda wb: (value, cell))
+
+
+def test_backfill_composite_fills_the_run_whose_card_showed_no_maturity(monkeypatch):
+    """Golden 1's own case. The workbook states 2.25 at Pillar_Summary!C6;
+    the run stored NULL because its generation has no 2_Scorecard tab, and
+    the directory card rendered the word "maturity" over an empty slot."""
+    from decimal import Decimal
+
+    import job_main
+
+    tree = [_f("Golden 1 Credit Union - DMA", "DMA_Scoring_Workbook_G1.xlsx"),
+            _f("No Workbook - DMA", "DMA_Assessment_Report_X.docx")]
+    groups = job_main._package_groups(tree)
+    _stub_overall(monkeypatch, Decimal("2.25"))
+
+    conn = _CompositeConn([("run-g1", "Golden 1 Credit Union - DMA"),
+                           ("run-x", "No Workbook - DMA")])
+    rc = job_main.backfill_composite(conn, "token", groups)
+
+    assert rc == 0
+    assert len(conn.cur.updated) == 1, "only the folder shipping a workbook"
+    value, run_id = conn.cur.updated[0]
+    assert run_id == "run-g1"
+    assert value == Decimal("2.25")
+    assert conn.commits == 1
+
+
+def test_backfill_composite_writes_nothing_when_the_workbook_states_none(monkeypatch):
+    """Absent beats invented: a workbook stating no OVERALL leaves the column
+    NULL rather than acquiring a mean of the pillars."""
+    import job_main
+
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    _stub_overall(monkeypatch, None, None)
+
+    conn = _CompositeConn([("run-s", "Silent - DMA")])
+    assert job_main.backfill_composite(conn, "token", groups) == 0
+    assert conn.cur.updated == [], "no UPDATE for a workbook stating nothing"
+    assert conn.commits == 0
+
+
+def test_backfill_composite_survives_one_unreadable_workbook(monkeypatch):
+    """One bad workbook must not sink the pass, and must be reported."""
+    from decimal import Decimal
+
+    import job_main
+
+    tree = [_f("Bad - DMA", "DMA_Scoring_Workbook_B.xlsx"),
+            _f("Good - DMA", "DMA_Scoring_Workbook_G.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main.openpyxl, "load_workbook",
+                        lambda p, **kw: type("W", (), {"close": lambda s: None})())
+
+    def _read(wb):
+        _read.n += 1
+        if _read.n == 1:
+            raise ValueError("not a zip file")
+        return Decimal("3.10"), "Pillar_Rollup!C6"
+    _read.n = 0
+    monkeypatch.setattr(job_main, "_stated_overall_grain", _read)
+
+    conn = _CompositeConn([("bad", "Bad - DMA"), ("good", "Good - DMA")])
+    rc = job_main.backfill_composite(conn, "token", groups)
+
+    assert rc == 1, "a failure must be reported in the exit code"
+    assert len(conn.cur.updated) == 1, "the good workbook still lands"
+    assert conn.cur.updated[0][1] == "good"

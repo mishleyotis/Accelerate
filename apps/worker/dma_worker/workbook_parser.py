@@ -231,6 +231,77 @@ def _header_map(ws, anchor: str, marker: str | None = None, max_scan: int = 30):
     raise ValueError(f"header row with {anchor!r} not found (marker={marker!r})")
 
 
+#: The label the OVERALL row of a grain tab carries. `_PILLAR_RE` rejects it
+#: — correctly, it is not a pillar — which is why the row is read here and
+#: not in the grain loop.
+_OVERALL_LABELS = ("overall", "total", "composite", "overall_score",
+                   "weighted_total")
+
+
+def _stated_overall_grain(wb):
+    """The composite the workbook STATES on its own rollup tab.
+
+    THE SILENCE THIS CLOSES. `composite` is set in exactly one place —
+    `_parse_scorecard`, from the cell under "Overall Effective Score" on
+    `2_Scorecard`. That tab exists only in the claude_dma generation. Every
+    general_dma workbook (`P{n}_Subcap_Scoring` tabs) and every rollup-only
+    one takes a different branch, so `WorkbookParse.composite` came back
+    None for all of them, `runs.composite` was written NULL, and
+    `serving_directory` served a header with no maturity figure on a run
+    whose six pages had promoted.
+
+    Measured on Golden 1 CU (`DMA-2026-GOLDEN1-001`, 43 tabs): the overall
+    is stated FOUR times — `Pillar_Summary!C6`, `Pillar_Rollup!C6`,
+    `Executive_Summary` "Overall Maturity", and again as the OVERALL row's
+    weighted contribution — and no reader claimed any of them. The directory
+    card rendered the word "maturity" over an empty slot while the same
+    card's four pillar bars resolved.
+
+    READ, never derived: the value is the one on the row labelled OVERALL,
+    not a mean of the pillars above it. Where both tabs are present the
+    first spelling in `_GRAIN_TABS["pillars"]` wins and the source cell
+    records which — they agree on every package measured, and a disagreement
+    must surface as two readings of one figure, not be averaged away.
+
+    Returns `(Decimal, "Tab!C6")`, or `(None, None)` when the tab, the
+    header row, the score column or the OVERALL row is absent — a workbook
+    that states no composite is a fact, and inventing one from the pillars
+    would be exactly the derivation the contract forbids.
+    """
+    present = {_tab_key(n): n for n in wb.sheetnames}
+    name = next((present[_tab_key(c)] for c in _GRAIN_TABS["pillars"]
+                 if _tab_key(c) in present), None)
+    if name is None:
+        return None, None
+    ws = wb[name]
+    for anchor in _GRAIN_ANCHORS["pillars"]:
+        try:
+            headers, first = _header_map(ws, anchor)
+            break
+        except ValueError:
+            continue
+    else:
+        return None, None
+    score_key = next((k for k in _GRAIN_SCORE_KEYS if k in headers), None)
+    if score_key is None:
+        return None, None
+    label_col = next((headers[k] for k in ("pillar", "pillar_id")
+                      if k in headers), None)
+    if label_col is None:
+        return None, None
+    score_col = headers[score_key]
+    for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
+        label = row[label_col] if label_col < len(row) else None
+        if _norm(label or "") not in _OVERALL_LABELS:
+            continue
+        value = _decimal(row[score_col] if score_col < len(row) else None)
+        if value in (None, "UNPARSEABLE"):
+            return None, None
+        letter = openpyxl.utils.get_column_letter(score_col + 1)
+        return value, f"{ws.title}!{letter}{r}"
+    return None, None
+
+
 def parse_scoring_workbook(path: str) -> WorkbookParse:
     """Two shipped generations, detected by tab set:
     - claude_dma:  2_Scorecard (Effective_Score) + 3_Assessment facets
@@ -255,6 +326,9 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                      "reason": "pillar-grain tabs were found and read, and no "
                                "cell, observation or toggled-out variant came "
                                "out of any of them"}))
+            # The composite is stated on the rollup tab, not on a tab this
+            # generation has. Read there or the header serves no figure.
+            out.composite, out.composite_source_cell = _stated_overall_grain(wb)
             return out
         # Rollup-only variant: recognisably a DMA workbook (stated pillar/
         # category grains present) but carrying no subcap-grain tabs at
@@ -267,6 +341,7 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                 {"tabs": list(wb.sheetnames)[:20],
                  "note": "rollup-only workbook: stated grains land, no cells"}))
             out.scored_cells = 0
+            out.composite, out.composite_source_cell = _stated_overall_grain(wb)
             return out
         # A generation nobody has taught this parser. Raising is deliberate:
         # the caller records it and quarantines the package by name after
