@@ -9,6 +9,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/ensure_headless.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: ensure_headless.py is MISSING from the installed plugin, so a new session is NOT auto-provisioned headless (defaultMode/workspace-trust). Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a SessionStart hook must never block a session from starting.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreToolUse": [
