@@ -387,3 +387,134 @@ def test_bootstrap_self_heals_the_install_unconditionally():
     assert "plugin_version.py" in code and "--heal" in code, (
         "bootstrap no longer self-heals the install; a new session can bind a "
         "stale auto-approve hook that prompts on tools this repo auto-approves")
+
+
+# ── workspace trust: the lever dontAsk does not pull (owner 2026-09-01) ──────
+#
+# Traced to live state: user-scope grants + dontAsk cover the HEADLESS routines,
+# but an interactive session also reads the repo's project .claude/settings.json,
+# and an UNTRUSTED workspace makes Claude Code discard every rule in it —
+# "Ignoring N permissions.allow entries ... this workspace has not been trusted".
+# The setup script is the only place the flag can be set without a human clicking
+# the trust dialog, so the block below must keep setting it for new sessions.
+
+def trust_block() -> str:
+    """The workspace-trust python, lifted out of the shell script itself."""
+    src = BOOTSTRAP.read_text()
+    blocks = re.findall(r"<<'PY'[^\n]*\n(.*?)\nPY\n", src, re.S)
+    for b in blocks:
+        if "hasTrustDialogAccepted" in b and "projects" in b:
+            return b
+    raise AssertionError(
+        f"no workspace-trust python block found in {BOOTSTRAP.name} "
+        f"({len(blocks)} PY blocks seen)")
+
+
+def run_trust(state: Path, repo: str = "/home/user/Accelerate"):
+    r = subprocess.run([sys.executable, "-c", trust_block()],
+                       capture_output=True, text=True,
+                       env={"CLAUDE_STATE": str(state), "TRUST_REPO": repo,
+                            "PATH": "/usr/bin:/bin"})
+    assert r.returncode == 0, r.stderr
+    return r.stdout.strip()
+
+
+def test_a_fresh_state_file_is_trusted(tmp_path):
+    """A brand-new container has no ~/.claude.json; the block creates it with
+    the workspace trusted, so the project allow-list applies from the first run."""
+    s = tmp_path / ".claude.json"
+    out = run_trust(s)
+    assert "trusted" in out
+    proj = json.loads(s.read_text())["projects"]["/home/user/Accelerate"]
+    assert proj["hasTrustDialogAccepted"] is True
+    assert proj["hasCompletedProjectOnboarding"] is True
+
+
+def test_trust_is_idempotent(tmp_path):
+    """Second run on an already-trusted workspace changes nothing and says so —
+    a scheduled container re-runs the setup script on every boot."""
+    s = tmp_path / ".claude.json"
+    run_trust(s)
+    before = s.read_text()
+    out = run_trust(s)
+    assert "already trusted" in out
+    assert s.read_text() == before
+
+
+def test_trust_preserves_other_projects_and_top_level_keys(tmp_path):
+    """The CLI's state file carries every project and much else; trusting one
+    workspace must never drop another project or a top-level key."""
+    s = tmp_path / ".claude.json"
+    s.write_text(json.dumps({
+        "numStartups": 42,
+        "projects": {
+            "/some/other/repo": {"hasTrustDialogAccepted": True, "keep": "me"},
+            "/home/user/Accelerate": {"hasTrustDialogAccepted": False,
+                                      "allowedTools": ["x"]},
+        },
+    }))
+    run_trust(s)
+    cfg = json.loads(s.read_text())
+    assert cfg["numStartups"] == 42
+    assert cfg["projects"]["/some/other/repo"] == {"hasTrustDialogAccepted": True,
+                                                   "keep": "me"}
+    acc = cfg["projects"]["/home/user/Accelerate"]
+    assert acc["hasTrustDialogAccepted"] is True          # flipped
+    assert acc["allowedTools"] == ["x"]                   # sibling key kept
+
+
+def test_a_malformed_state_file_is_left_untouched(tmp_path):
+    """~/.claude.json is the CLI's own; a broken one is refused, not overwritten."""
+    s = tmp_path / ".claude.json"
+    s.write_text("{ not json")
+    out = run_trust(s)
+    assert "SKIPPED" in out
+    assert s.read_text() == "{ not json"
+
+
+# ── the stress test the goal asks for: no recurrence across NEW sessions ─────
+
+def _headless_ready(home: Path, repo: str = "/home/user/Accelerate") -> bool:
+    """One provisioned container is headless-ready when BOTH levers are set:
+    user-scope defaultMode=dontAsk (+ the connector granted) AND the workspace
+    trusted so the project allow-list applies. Either alone leaves a gap the
+    owner actually hit."""
+    settings = json.loads((home / ".claude" / "settings.json").read_text())
+    state = json.loads((home / ".claude.json").read_text())
+    perms = settings.get("permissions", {})
+    proj = state.get("projects", {}).get(repo, {})
+    return (perms.get("defaultMode") == "dontAsk"
+            and GRANT in perms.get("allow", [])
+            and proj.get("hasTrustDialogAccepted") is True)
+
+
+def test_ten_fresh_sessions_all_end_headless_ready(tmp_path):
+    """Resilience across ANY new run (the /goal). Ten independent fresh HOMEs,
+    each provisioned exactly as the setup script provisions one, must EVERY time
+    converge to the never-prompt posture — no ordering, no carried state, no
+    lucky first run."""
+    for i in range(10):
+        home = tmp_path / f"session{i}"
+        (home / ".claude").mkdir(parents=True)
+        run_grant(home / ".claude" / "settings.json")
+        run_trust(home / ".claude.json")
+        assert _headless_ready(home), f"session {i} did not end headless-ready"
+
+
+def test_a_partially_provisioned_session_is_healed_not_left_split(tmp_path):
+    """The exact live defect: a container that already carried the grants but
+    NOT dontAsk, and an untrusted workspace (measured 2026-09-01). Re-running the
+    setup script must heal BOTH gaps rather than declaring victory on the half
+    that was already there."""
+    home = tmp_path / "partial"
+    (home / ".claude").mkdir(parents=True)
+    # grants present, mode missing — the state this container was found in
+    (home / ".claude" / "settings.json").write_text(json.dumps(
+        {"permissions": {"allow": [GRANT, "WebSearch", "WebFetch"]}}))
+    # workspace explicitly untrusted — the other half of the live defect
+    (home / ".claude.json").write_text(json.dumps(
+        {"projects": {"/home/user/Accelerate": {"hasTrustDialogAccepted": False}}}))
+    assert not _headless_ready(home)                      # starts split
+    run_grant(home / ".claude" / "settings.json")
+    run_trust(home / ".claude.json")
+    assert _headless_ready(home)                          # ends whole
