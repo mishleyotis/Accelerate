@@ -87,3 +87,62 @@ def test_file_choice_is_the_workers_and_not_re_implemented():
     assert "_package_groups" in src, "grouping must be imported, not rebuilt"
     assert "modifiedTime\"]) > (rank" not in src, (
         "a local tie-break has crept back in; the worker's is the only one")
+
+
+# ------------------------------------------------------- recording map
+
+def test_the_recording_map_is_generated_and_current():
+    """The map joins workbook TABS to page SECTIONS. It is generated from the
+    worker's `_TAB_TARGET` and the live page contracts; a hand-edited copy is
+    one refactor away from being confidently wrong, so this asserts it still
+    matches the tab map it was generated from."""
+    import json
+    import sys as _s
+    from pathlib import Path as _P
+
+    repo = _P(fp.__file__).resolve().parents[3]
+    _s.path.insert(0, str(repo / "apps" / "worker"))
+    from dma_worker.workbook_parser import _TAB_TARGET
+
+    doc = json.loads((repo / "plugins" / "dma-insights" / "references"
+                      / "tab_recording_map.json").read_text(encoding="utf-8"))
+    assert "GENERATED" in doc["_readme"][0]
+    assert {r["tab"] for r in doc["tabs"]} == set(_TAB_TARGET), (
+        "the recording map has drifted from _TAB_TARGET — re-run "
+        "scripts/gen_recording_map.py")
+
+
+def test_every_binding_carries_its_confidence():
+    """`_TAB_TARGET` marks a mapping `verified` (checked field-by-field
+    against get_page_contract) or `proposed` (read off the tab's shape). An
+    agent relying on a proposed binding should know it is a reading, not a
+    promise, so the map must never drop that column."""
+    import json
+    from pathlib import Path as _P
+
+    repo = _P(fp.__file__).resolve().parents[3]
+    doc = json.loads((repo / "plugins" / "dma-insights" / "references"
+                      / "tab_recording_map.json").read_text(encoding="utf-8"))
+    # `not_client_facing` is the third value the parser uses, for run config
+    # and provenance tabs that feed no client surface. A test that allowed
+    # only verified/proposed asserted a vocabulary the code does not have.
+    for r in doc["tabs"]:
+        assert r["confidence"] in ("verified", "proposed",
+                                   "not_client_facing", "unstated"), r
+    assert doc["counts"]["verified_bindings"] >= 1
+    assert doc["counts"]["not_client_facing"] >= 1
+
+
+def test_a_bound_row_names_a_real_section():
+    """A binding that names a section the contract does not declare would
+    send a producer to write into a field that will be dropped."""
+    import json
+    from pathlib import Path as _P
+
+    repo = _P(fp.__file__).resolve().parents[3]
+    doc = json.loads((repo / "plugins" / "dma-insights" / "references"
+                      / "tab_recording_map.json").read_text(encoding="utf-8"))
+    known = set(doc["sections"])
+    for r in doc["tabs"]:
+        if r["section"]:
+            assert f"{r['page']}.{r['section']}" in known, r

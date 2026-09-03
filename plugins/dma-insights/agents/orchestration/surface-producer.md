@@ -75,6 +75,39 @@ column, and how many rows. A refusal is a finding.
    `techstack-surface-producer`, like the other four. You produce no page
    inline.
 
+## Ship each page as it finishes, not all six at the end
+
+A page is submittable the moment its own required sections exist. Waiting
+until all six are written is what made every gate refusal expensive: it
+arrived after the whole run had been produced, when repairing one page meant
+re-running transport for all of them. The connector RETAINS staged rows, so
+five pages can sit staged and passing while the sixth is still being made.
+
+Write each producer's fragment to `sections/<page>.<section>.json`, and after
+every producer returns, run:
+
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/ship_page.py" \
+       <run_id> all --sections sections/ --incremental
+```
+
+It asks `get_page_contract` which sections each page REQUIRES, ships every
+page that has them, and prints what the rest are waiting on. Safe to re-run
+after every producer: a page already passing is simply submitted again with
+the same content. When the last producer returns, the sixth page ships and
+the run is ready to promote — the client page is live as the assessment ends
+rather than a transport exercise afterwards.
+
+**Never retype a payload into `append_payload_part`.** `ship_page.py` sends
+every part from disk. Retyping is the only step in this pipeline that can
+INVENT content, and on the Golden 1 run it did: an agent paraphrased
+`P4C3.5.6.reach_note` and a two-byte receipt delta was the only thing that
+caught it. It also cost roughly 330,000 subagent tokens for one page.
+
+Where each producer's output lands, and which workbook tab feeds it:
+`references/tab_recording_map.json` — generated from the worker's own
+`_TAB_TARGET` and the live page contracts, so it cannot drift from either.
+
 ## Spend submissions on what only the server can answer
 
 A submission is not free. It supersedes the staged row, so a FAIL on a page
@@ -89,7 +122,19 @@ python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_langua
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/precheck_gates.py" <payload.json> --page <page> \
        --evidence <get_evidence.json> --bundle <get_report_bundle.json>
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/ --subvertical <CODE>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/self_heal.py" --sections sections/ \
+       --page <page> --entity "<the entity's legal name>"
 ```
+
+`self_heal.py` restates the gates that have actually cost cycles, over the
+section files, for free: ET-09 matched CASE-INSENSITIVELY (three manual
+sweeps missed the same twelve strings by searching only the capitalised
+form), CG-12 face budgets keyed by PATH (`basis` is a chip only under
+`prerequisites`), CG-27 abbreviations against the connector's own table,
+CG-11 lowercase prose openings, CG-44 a peer median and delta with a null
+score, and an unmarked `r_layer`. It separates BLOCKING from ADVISORY and
+exits non-zero only on the former — a heuristic never holds a gate it cannot
+justify.
 
 `--subvertical` turns on ET-05 and `--cells` turns on CG-14; without them
 those two print "not run" rather than passing silently. Read that distinction
@@ -123,7 +168,10 @@ on, and a storyline can be true, cited, grain-locked and worthless because
 the client already says it.
 
 Promotion is atomic across all six pages. There is no partial promote and no
-half-built page a client could see.
+half-built page a client could see. That invariant is untouched by shipping
+incrementally: submitting early stages a page, and staging is not serving.
+What moves earlier is validation and transport, not the moment a client can
+read anything.
 
 ## Standing constraints
 
