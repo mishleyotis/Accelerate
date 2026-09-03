@@ -240,6 +240,59 @@ def submit(run_id: str, page: str, payload: dict, producer: str) -> dict:
 
 # ------------------------------------------------------------------- main
 
+
+def contract_sections(page: str) -> list[str] | None:
+    """The sections this page's contract declares, from the connector.
+
+    Asked rather than hard-coded: the contract is the thing that decides
+    whether a page is complete, and a copy of it here would be wrong the
+    first time a section was added. None when the connector cannot be
+    reached — the caller then ships nothing rather than guessing a page is
+    ready.
+    """
+    d = mcp("get_page_contract", {"page": page})
+    sections = d.get("sections")
+    if not isinstance(sections, dict):
+        return None
+    # REQUIRED only. The contract marks some sections optional — heatmap's
+    # `value_chain` and `cohort_patterns` are `required: False` — and a
+    # readiness check that ignored that reported a page as "waiting" on a
+    # section it never needed. The heatmap had promoted six times without
+    # `value_chain` while this said it was incomplete.
+    return sorted(n for n, m in sections.items()
+                  if not isinstance(m, dict) or m.get("required", True))
+
+
+def ready_pages(sections: Path, pages=PAGES) -> tuple[list, list]:
+    """(ready, waiting) — which pages have every section their contract
+    names, and what the others are still missing.
+
+    THIS IS THE CONCURRENT INGESTION. A run does not have to be finished
+    before anything reaches the app: a page whose sections are all written
+    is submittable the moment they are, and the connector RETAINS staged
+    rows, so five pages can sit staged and passing while the sixth is still
+    being produced. Promotion stays atomic across all six — that invariant
+    is untouched — but the validation, the gate refusals and the byte cost
+    of transport all move earlier, to where a producer can still act on
+    them cheaply.
+
+    Submitting late is what made a gate refusal expensive: it arrived after
+    every page had been written, when fixing one meant re-running the
+    transport for all of them.
+    """
+    ready, waiting = [], []
+    for page in pages:
+        have = {f.name[len(page) + 1:-len(".json")].split(".")[0]
+                for f in sections.glob(f"{page}.*.json")}
+        want = contract_sections(page)
+        if want is None:
+            waiting.append((page, ["contract unreadable"]))
+            continue
+        missing = [w for w in want if w not in have]
+        (ready if have and not missing else waiting).append(
+            (page, missing if have else ["no section file written yet"]))
+    return ready, waiting
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("run_id")
@@ -249,9 +302,25 @@ def main(argv=None) -> int:
     ap.add_argument("--promote", action="store_true")
     ap.add_argument("--dry-run", action="store_true",
                     help="assemble and plan, submit nothing")
+    ap.add_argument("--incremental", action="store_true",
+                    help="ship every page whose contract sections are all "
+                         "written, and report what the rest are waiting on. "
+                         "Safe to re-run as production proceeds: a page "
+                         "already passing is simply submitted again with the "
+                         "same content.")
     a = ap.parse_args(argv)
 
     pages = PAGES if a.page == "all" else (a.page,)
+    if a.incremental:
+        ready, waiting = ready_pages(a.sections, pages)
+        for page, why in waiting:
+            print(f"{page}: waiting on {', '.join(why[:6])}"
+                  + (f" (+{len(why) - 6} more)" if len(why) > 6 else ""))
+        pages = [p for p, _ in ready]
+        if not pages:
+            print("\nno page is complete yet — nothing submitted")
+            return 0
+        print(f"\nshipping {len(pages)} complete page(s): {', '.join(pages)}\n")
     failed = []
     for page in pages:
         payload = assemble(a.sections, page)

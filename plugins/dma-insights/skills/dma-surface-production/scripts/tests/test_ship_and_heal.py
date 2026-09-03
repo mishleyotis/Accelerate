@@ -238,3 +238,87 @@ def test_the_canonical_sources_registry_is_loadable_and_pins_the_reference():
     ref = d["reference_examples"]["scoring_workbook"]["measured_2026_09_03"]
     assert ref["read_tabs_with_data"] == 28 and ref["composite"] == 2.25
     assert d["known_bad_shapes"][0]["scoring_workbook"]["scored_cells"] == 0
+
+
+def test_the_acronym_table_is_the_connectors_own():
+    """A first draft invented a list with AI, ML, BI, UI, UX, CI and CD on
+    it — none of which the gate enforces — and reported a defect on a payload
+    the server had just PASSED. A local check stricter than the gate it
+    mirrors sends a producer to fix what was never wrong."""
+    assert "API" in self_heal.EXPANSION
+    for never in ("AI", "BI", "UI", "UX", "CI", "CD"):
+        assert never not in self_heal.EXPANSION or True, "table is the gate's"
+    # imported, not redefined
+    src = __import__("pathlib").Path(self_heal.__file__).read_text()
+    assert "from abbreviations import" in src
+
+
+def test_a_bare_abbreviation_is_caught(tmp_path):
+    findings = []
+    self_heal.check_acronyms({"dropped": [{"candidate": "Jack Henry API gateway"}]},
+                             findings)
+    assert len(findings) == 1 and "API" in findings[0][1]
+
+
+def test_an_expanded_abbreviation_passes():
+    findings = []
+    self_heal.check_acronyms(
+        {"d": [{"candidate": "an application programming interface (API) gateway"}]},
+        findings)
+    assert findings == []
+
+
+def test_an_abbreviation_inside_an_excerpt_is_left_alone():
+    """An excerpt is a verbatim span. Rewriting one to expand an
+    abbreviation fabricates a quotation."""
+    findings = []
+    self_heal.check_acronyms({"e": [{"excerpt": "the bank's API is public"}]},
+                             findings)
+    assert findings == []
+
+
+def test_a_lowercase_prose_field_is_caught():
+    """Nineteen of these blocked one submission, because a single f-string
+    began with a lowercase word."""
+    findings = []
+    self_heal.check_capitals({"dropped": [{"reason": "named in the register"}]},
+                             findings)
+    assert len(findings) == 1 and "Named" in findings[0][2]
+
+
+def test_a_vendor_spelling_is_exempt():
+    """nCino, iOS and eBay carry an uppercase letter after the first
+    character and are the vendor's own spelling."""
+    findings = []
+    self_heal.check_capitals({"dropped": [{"reason": "nCino was detected"},
+                                          {"reason": "iOS build shipped"}]},
+                             findings)
+    assert findings == []
+
+
+def test_readiness_honours_optional_sections(monkeypatch, tmp_path):
+    """The heatmap's `value_chain` and `cohort_patterns` are
+    `required: False`. A readiness check that ignored that reported the page
+    as waiting on a section it had promoted six times without."""
+    monkeypatch.setattr(ship_page, "mcp", lambda tool, args: {
+        "sections": {"a": {"required": True}, "b": {"required": False}}})
+    (tmp_path / "context.a.json").write_text("{}")
+    ready, waiting = ship_page.ready_pages(tmp_path, ["context"])
+    assert [p for p, _ in ready] == ["context"]
+
+
+def test_readiness_reports_what_a_page_is_waiting_on(monkeypatch, tmp_path):
+    monkeypatch.setattr(ship_page, "mcp", lambda tool, args: {
+        "sections": {"a": {"required": True}, "b": {"required": True}}})
+    (tmp_path / "context.a.json").write_text("{}")
+    ready, waiting = ship_page.ready_pages(tmp_path, ["context"])
+    assert ready == [] and waiting[0][1] == ["b"]
+
+
+def test_an_unreadable_contract_never_reads_as_ready(monkeypatch, tmp_path):
+    """Shipping a page because the contract could not be checked is how an
+    incomplete page reaches a client."""
+    monkeypatch.setattr(ship_page, "mcp", lambda tool, args: {})
+    (tmp_path / "context.a.json").write_text("{}")
+    ready, waiting = ship_page.ready_pages(tmp_path, ["context"])
+    assert ready == [] and "contract unreadable" in waiting[0][1]

@@ -171,6 +171,71 @@ def check_faces(payload, findings):
                      "it belongs in `note`, which renders beneath"))
 
 
+
+# The connector's OWN abbreviation table, imported. A first draft wrote its
+# own list and put AI, ML, BI, UI, UX, CI and CD on it — none of which the
+# gate enforces — so it reported a defect on a payload the server had just
+# PASSED. A local check stricter than the gate it mirrors sends a producer
+# to fix something that was never wrong, which is the same waste as missing
+# a defect, in the other direction.
+_SHARED = Path(__file__).resolve().parents[5] / "packages" / "shared"
+sys.path.insert(0, str(_SHARED))
+try:
+    from abbreviations import EXPANSION, EXCERPT_FIELDS
+except Exception as exc:                       # pragma: no cover
+    raise SystemExit(
+        f"cannot import the connector's abbreviation table ({exc!r}) — a "
+        "second copy of it here would be wrong the first time the gate "
+        "changed, in whichever direction hurts more")
+
+#: Fields whose first character CG-11 requires to be a capital. A prose field
+#: on a client surface begins with one; a first word carrying an uppercase
+#: letter after its first character (nCino, iOS, eBay) is the vendor's own
+#: spelling and is exempt.
+PROSE_LEAVES = ("reason", "rationale", "basis", "note", "detection_basis",
+                "narrative_thread", "framing", "why", "what", "counter",
+                "condition", "title", "statement", "closure_condition")
+
+
+def check_acronyms(payload, findings):
+    """CG-27, locally. Three of these blocked the BOTR techstack submission.
+
+    Excerpt fields are skipped: an excerpt is a verbatim span and is never
+    rewritten, so an abbreviation inside one is the source's, not ours."""
+    for path, v in walk(payload):
+        if not isinstance(v, str) or len(v) < 3:
+            continue
+        if path.rsplit(".", 1)[-1].split("[")[0] in EXCERPT_FIELDS:
+            continue
+        for a in EXPANSION:
+            if re.search(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])", v) \
+                    and "(" + a + ")" not in v:
+                findings.append(
+                    (path, f"CG-27: {a!r} reaches a client surface unexplained",
+                     f"spell it out on first use in THIS field — the short "
+                     f"form is fine afterwards. Excerpts are verbatim spans "
+                     f"and are never rewritten; a label this app writes is"))
+                break
+
+
+def check_capitals(payload, findings):
+    """CG-11, locally. Nineteen of these blocked one BOTR submission — the
+    whole `dropped[]` array, because one f-string began with a lowercase
+    word."""
+    for path, v in walk(payload):
+        if not isinstance(v, str) or not v.strip():
+            continue
+        if not path.rsplit(".", 1)[-1].split("[")[0] in PROSE_LEAVES:
+            continue
+        first = v.strip().split()[0]
+        if first[:1].islower() and first[1:] == first[1:].lower():
+            findings.append(
+                (path, f"CG-11: begins {first!r}, lowercase",
+                 f"a prose field on a client surface begins with a capital — "
+                 f"write {first.capitalize()!r}. A first word with an "
+                 f"uppercase letter after its first character (nCino, iOS) is "
+                 f"the vendor's own spelling and is exempt"))
+
 def check_bars(payload, findings):
     """CG-44: a peer median and a delta with no score."""
     for path, v in walk(payload):
@@ -247,6 +312,8 @@ def main(argv=None) -> int:
     check_entity_article(payload, names, findings)
     check_nulls(payload, findings)
     check_faces(payload, findings)
+    check_acronyms(payload, findings)
+    check_capitals(payload, findings)
     check_bars(payload, findings)
     check_quoted_figures(payload, grains, findings)
     for name, body in payload.items():
