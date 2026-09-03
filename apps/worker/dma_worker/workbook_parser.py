@@ -269,11 +269,33 @@ def _stated_overall_grain(wb):
     would be exactly the derivation the contract forbids.
     """
     present = {_tab_key(n): n for n in wb.sheetnames}
-    name = next((present[_tab_key(c)] for c in _GRAIN_TABS["pillars"]
-                 if _tab_key(c) in present), None)
-    if name is None:
-        return None, None
-    ws = wb[name]
+    # EVERY candidate tab in order, not the first that merely EXISTS.
+    #
+    # goEasy Ltd. (measured 2026-09-03) ships both `Pillar_Summary` and
+    # `Pillar_Rollup`, and only the second carries an OVERALL row — the
+    # first stops at P4. Taking the first tab that exists and giving up when
+    # it stated no overall returned None for a workbook that states 2.11
+    # plainly, on a tab this reader already knew about. Golden 1's
+    # `Pillar_Summary` happens to carry the row, which is why the shape held
+    # until a client shipped the other arrangement.
+    for cand in _GRAIN_TABS["pillars"]:
+        key = _tab_key(cand)
+        if key not in present:
+            continue
+        value, cell = _overall_on_tab(wb[present[key]])
+        if value is not None:
+            return value, cell
+    return None, None
+
+
+def _overall_on_tab(ws):
+    """The OVERALL row on ONE grain tab, or `(None, None)`.
+
+    Split out so the caller can try the next tab. Every `return None, None`
+    here means "not on THIS tab" — a missing header row, no score column, no
+    label column, no OVERALL row, or an unparseable figure — and none of
+    them is a statement about the workbook as a whole.
+    """
     for anchor in _GRAIN_ANCHORS["pillars"]:
         try:
             headers, first = _header_map(ws, anchor)
