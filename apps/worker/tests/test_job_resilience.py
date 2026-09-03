@@ -760,3 +760,44 @@ def test_a_package_with_one_workbook_is_unchanged(monkeypatch, tmp_path):
     path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
     assert path.endswith("wb.xlsx") and note is None
     assert called == [], "with no alternate there is nothing to compare against"
+
+
+def test_a_backfill_does_not_contend_with_the_scan_for_a_lock(monkeypatch):
+    """A diagnostic pass takes 815003; a scan takes 815002.
+
+    They shared 815002 until 2026-09-03, which made every manual backfill a
+    coin toss against a job that fires every thirty minutes. `BACKFILL_WBMETA`
+    lost twice in a row and printed "another execution holds the scan lock;
+    exiting" — a CLEAN EXIT that reads exactly like a completed pass and
+    wrote nothing. On a repair someone is watching, that is the difference
+    between "done" and "silently did nothing".
+
+    Read from the source, because the branch sits between a database
+    connection and a Drive walk that a unit test cannot reach."""
+    import inspect
+    import re
+
+    import job_main
+
+    src = inspect.getsource(job_main.main)
+    assert "815003 if diagnostic else 815002" in src, (
+        "a diagnostic pass must not take the scan's lock")
+
+    # and the flag must be settled BEFORE the lock, or it is a NameError
+    at_flag = src.index("diagnostic = bool(")
+    at_lock = src.index("pg_try_advisory_lock")
+    assert at_flag < at_lock, (
+        "`diagnostic` is read by the lock line; defining it later raises "
+        "NameError on every firing")
+
+    # every backfill mode must set the flag, or it silently takes 815002
+    modes = set(re.findall(r'os\.environ\.get\("(BACKFILL_[A-Z]+)"\)', src))
+    # the flag's own expression: from `diagnostic = bool(` to its closing
+    # paren. Anchoring on the first "EVIDENCE_NAMESPACE" in the whole
+    # function found an earlier one and sliced an EMPTY block, which made
+    # this loop assert nothing at all.
+    flag_block = src[at_flag:src.index("\n", src.index('== "repair")', at_flag))]
+    for m in modes:
+        assert m in flag_block, (
+            f"{m} runs a backfill but is not in the `diagnostic` flag, so it "
+            "would contend with the scan and open a scan row")

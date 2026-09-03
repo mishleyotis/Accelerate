@@ -1362,10 +1362,38 @@ def main() -> int:
     # executions overlap it. The session-level lock releases when this
     # connection closes (or the container dies) — a second execution
     # exits clean instead of racing the diff into duplicate runs.
+    #
+    # Which kind of pass this is decides which lock it takes, so it is
+    # settled BEFORE the lock rather than beside the scan row below.
+    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
+                      or os.environ.get("BACKFILL_GRAINS")
+                      or os.environ.get("BACKFILL_COMPOSITE")
+                      or os.environ.get("BACKFILL_WBMETA")
+                      or os.environ.get("BACKFILL_EVIDENCE")
+                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
+
+    # A DIAGNOSTIC pass takes a DIFFERENT lock (815003).
+    #
+    # It used to take 815002, the scan's own, which made every manual
+    # backfill a coin toss against a job that fires every thirty minutes:
+    # measured 2026-09-03, `BACKFILL_WBMETA` lost twice in a row and printed
+    # "another execution holds the scan lock; exiting" — a clean exit that
+    # reads exactly like a completed pass and wrote nothing. On a repair the
+    # operator is watching, that is the difference between "done" and
+    # "silently did nothing".
+    #
+    # Sharing the lock was never necessary. A backfill updates columns of
+    # runs that already exist and are already NULL there; the scan creates
+    # new runs from changed artefacts and writes the checksums. They do not
+    # contend for a row. What DOES need serialising is two diagnostics
+    # against each other — both re-read workbooks and update the same
+    # manifests — and 815003 gives them exactly that.
+    lock_id = 815003 if diagnostic else 815002
+    what = "backfill" if diagnostic else "scan"
     cur = conn.cursor()
-    cur.execute("SELECT pg_try_advisory_lock(815002)")
+    cur.execute("SELECT pg_try_advisory_lock(%s)", (lock_id,))
     if not cur.fetchone()[0]:
-        print("scan: another execution holds the scan lock; exiting")
+        print(f"{what}: another execution holds the {what} lock; exiting")
         conn.close()
         return 0
 
@@ -1405,12 +1433,6 @@ def main() -> int:
     # else from here on is one, and gets its row BEFORE the walk so a walk
     # that dies is recorded rather than invisible (the 403 that killed the
     # tree recursion left no import_scans row at all).
-    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
-                      or os.environ.get("BACKFILL_GRAINS")
-                      or os.environ.get("BACKFILL_COMPOSITE")
-                      or os.environ.get("BACKFILL_WBMETA")
-                      or os.environ.get("BACKFILL_EVIDENCE")
-                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
     scan_id = None if diagnostic else open_scan(conn, started_at)
     tally = {"ingested": 0, "failed": 0, "deferred": 0, "quarantined": []}
