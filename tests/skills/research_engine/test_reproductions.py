@@ -277,13 +277,14 @@ def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     synthesise(wb, cell, good_synthesis(cell, eids))
     # Reopened from disk by a DIFFERENT reader — the container-death test.
     fresh = RunWorkbook(run.workbook_path)
-    # TWO searches, not one: the explicit append_search above, plus the one
-    # bank_evidence now records for the rows it banks. That second row exists
+    # SIX searches, not one: the explicit append_search above, plus the FIVE
+    # volleys bank_evidence fires for the rows it banks. Those rows exist
     # because `absence_unsearched` became a gate term (2026-08-30) — evidence
-    # that never came from a search is evidence from nowhere, and a fixture
-    # that banked rows with an empty Search_Log was modelling exactly the
-    # unresearched-subcap shape the gate now refuses.
-    assert len(fresh.rows("Search_Log")) == before_s + 2
+    # that never came from a search is evidence from nowhere — and because
+    # `volleys_incomplete` (2026-09-03) counts every askable facet per cell:
+    # a fixture banking rows on one query was modelling the one-shallow-
+    # search shape the gate now refuses.
+    assert len(fresh.rows("Search_Log")) == before_s + 1 + len(L.askable_facets(fresh, cell))
     assert len(fresh.rows("Evidence_Detail")) == before_e + 3
     assert fresh.scoring_row(cell)["Dominant_Claim"]
     assert fresh.coverage()[0]["Researched"] == 1

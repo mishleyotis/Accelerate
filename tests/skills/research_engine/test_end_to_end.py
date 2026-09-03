@@ -61,6 +61,7 @@ def finished_run(tmp_path_factory):
     close_prelim(run)
     wb = run.open()
 
+    ev = {}
     for i, cell in enumerate(wb.selected_subcaps()):
         # All five volleys per cell — the gate counts them (2026-09-03).
         fire_volleys(wb, cell, n=2)
@@ -80,8 +81,11 @@ def finished_run(tmp_path_factory):
                      f"47 percent member adoption within ninety days, "
                      f"restated at {50 + j} percent in the 2025 report."),
             subcaps=[cell], published="2025-03-01") for j in range(3)]
+        ev[cell] = eids
         synthesise(wb, cell, _synthesis(cell, eids))
 
+    from fixtures import client_facts, score_stage, write_both_reports
+    client_facts(wb, wb.selected_subcaps(), ev)
     for cat in CATS:
         wb.append("Entity_Timeline", {
             "Event_Date": "2024-09-01",
@@ -94,9 +98,12 @@ def finished_run(tmp_path_factory):
         v = floors_gate.run(wb, cat, require_synthesis=True, qa_dir=run.qa_dir)
         assert v["gate"] == "PASS", (cat, v["blocking"])
 
-    _narrate(wb)
-    sign_off_sections(wb)   # the renderer refuses unreviewed prose
+    # Then the SCORING stage — column D, critic, rollup, gate — and both
+    # reports through the writer under the stage preconditions (2026-09-03:
+    # no report before scoring). The render itself is the `report` test.
     make_shippable(wb)
+    score_stage(run, wb, wb.selected_subcaps(), ev)
+    write_both_reports(run, wb, wb.selected_subcaps(), ev, render=False)
     return run
 
 
@@ -137,37 +144,16 @@ def _synthesis(cell, eids):
     }
 
 
-BODY = ("Acme Credit Union runs member-facing digital banking on Alkami, live "
-        "since the third quarter of 2024, with member adoption measured at 47 "
-        "percent within ninety days and restated at 52 percent in the 2025 "
-        "annual report [E-001]. The board reviews the figure quarterly and it "
-        "is tied to the 2025 cost-to-serve target, which makes this the "
-        "channel the programme leans on rather than a pilot it is still "
-        "evaluating. ")
-
-
-def _narrate(wb):
-    for spec in RS.SPECS.values():
-        for sec in spec.sections:
-            n = RS.INSIGHT_CARD_MIN if sec.kind == "insight_card" else 1
-            words = max(1, (sec.min_words + 200) // 60)
-            for i in range(n):
-                wb.append("Report_Narrative", {
-                    "Report": spec.key, "Section_ID": sec.id,
-                    "Heading": f"{sec.heading} {i + 1}" if n > 1 else sec.heading,
-                    "Body": BODY * words, "Evidence_IDs": "E-001",
-                    "Kind": sec.kind, "Author": "e2e",
-                    "Written_At": "2026-08-29T00:00:00Z"}, save=False)
-    wb.save()
-
-
-# ── 1 · the workbook is the substrate, and it holds the run ─────────────
-
 def test_the_workbook_carries_the_whole_run(finished_run):
     wb = finished_run.open()
     assert len(wb.rows("Search_Log")) == 90       # 18 subcaps x 5 volleys
     assert len(wb.rows("Evidence_Detail")) == 56  # 18 x 3, + 2 profile rows
-    assert len(wb.rows("Gate_Log")) == 2
+    gates = wb.rows("Gate_Log")
+    assert [g["Scope"] for g in gates if g["Gate"] == "FLOORS"] == list(CATS)
+    # then the scoring stage: opened, a critic per pillar, the gate itself
+    assert [g["Gate"] for g in gates if g["Gate"].startswith("SCORING")] == \
+        ["SCORING_OPENED", "SCORING_CRITIC", "SCORING_CRITIC", "SCORING"]
+    assert gates[-1]["Gate"] == "SCORING" and gates[-1]["Verdict"] == "PASS"
     assert all(r["Dominant_Claim"] for r in wb.scoring_rows())
     assert wb.verify_handoff_lock() == []
 
@@ -271,10 +257,12 @@ def test_the_artefact_grouper_takes_the_workbook_and_the_report(finished_run):
 def test_the_app_parses_the_workbook_and_keeps_every_linkage(finished_run):
     from dma_worker import workbook_parser as wp
     p = wp.parse_scoring_workbook(str(finished_run.workbook_path))
-    assert p.scores == [] and p.toggled_out == []
-    assert len(p.in_scope_unscored) == 18
+    # a FINISHED run is scored: eighteen scores in column D, nothing left
+    # unscored, and the workbook says so
+    assert len(p.scores) == 18 and p.toggled_out == []
+    assert p.in_scope_unscored == []
     stage = [o for o in p.observations if o.kind == "workbook_stage"][0]
-    assert stage.detail["stage"].startswith("research")
+    assert stage.detail["stage"].startswith("assessment")
 
     r = wp.parse_research_workbook(str(finished_run.workbook_path))
     # 18 subcaps x 3 sources, plus the two PRELIM profile rows (the binding
@@ -296,9 +284,12 @@ def test_the_report_the_app_reads_carries_the_workbooks_own_figures(finished_run
     assert sections, "the app's report parser found no sections"
     doc = Document(str(path))
     cells = [c.text for t in doc.tables for row in t.rows for c in row.cells]
-    cov = wb.coverage()[0]
-    assert cov["Category_ID"] in cells
-    assert str(cov["Selected"]) in cells
+    # the Doc's §10 carries the Coverage_Map, curated from the sheet
+    cov = wb.rows("Coverage_Map")[0]
+    assert cov["category_id"] in cells
+    assert str(cov["subcaps"]) in cells
+    roll = {r["pillar_id"]: r for r in wb.rows("Pillar_Rollup")}
+    assert str(roll["P1"]["score"]) in cells
 
 
 # ── 4 · the strip, last, and only once the analysis has survived ────────

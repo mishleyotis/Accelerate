@@ -147,7 +147,7 @@ pointed at it.
    `peer_coverage` or `peer_deployments`, not only on the register), **CG-09** on
    closed vocabularies, **CG-12** on face fields, and **ET-04**.
 7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
-   — the 33 tools, and specifically `record_enrichment`'s contract: facet from
+   — the 34 tools, and specifically `record_enrichment`'s contract: facet from
    the fixed seven, `source` required, `rows_written: 0` distinguishing "ran,
    found nothing" from "never ran". Never invent a tool name; the list in that
    file is the whole surface.

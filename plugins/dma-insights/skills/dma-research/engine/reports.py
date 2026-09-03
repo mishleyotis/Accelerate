@@ -125,6 +125,27 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section) -> list[dict]:
         if rows:
             out.append(_table("Coverage by category", list(C.COVERAGE_COLUMNS),
                               [[r[c] for c in C.COVERAGE_COLUMNS] for r in rows]))
+    # The scoring stage's own tables (2026-09-03): the Doc's §4 reads the
+    # STATED rollups and §10 the coverage map — curated from the sheets at
+    # render time so the report cannot disagree with the workbook (AUD-0052).
+    if "Coverage_Map" in sec.inputs:
+        rows = wb.rows("Coverage_Map")
+        if rows:
+            cols = list(C.COVERAGE_MAP_COLUMNS)
+            out.append(_table("Coverage by category", cols,
+                              [[r.get(c) for c in cols] for r in rows]))
+    if "Pillar_Rollup" in sec.inputs:
+        rows = wb.rows("Pillar_Rollup")
+        if rows:
+            cols = list(C.PILLAR_ROLLUP_COLUMNS)
+            out.append(_table("Pillar rollup (stated)", cols,
+                              [[r.get(c) for c in cols] for r in rows]))
+    if "Category_Rollup" in sec.inputs:
+        rows = wb.rows("Category_Rollup")
+        if rows:
+            cols = list(C.CATEGORY_ROLLUP_COLUMNS)
+            out.append(_table("Category rollup (stated)", cols,
+                              [[r.get(c) for c in cols] for r in rows]))
     if "Evidence_Detail" in sec.inputs:
         ev = wb.rows("Evidence_Detail")
         if ev:
@@ -425,7 +446,18 @@ def _front_matter(doc, wb, spec, md: dict) -> None:
         ["Peer set", str(lock.get("locked_peer_set") or "not locked")],
         ["Stage", str(md.get("stage") or "research")],
     ]
+    in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
+    out_of_scope = [p for p in ("P1", "P2", "P3", "P4") if p not in in_scope]
+    rows.append(["Pillars in scope", ", ".join(in_scope) or "none"])
     _write_table(doc, {"cols": ["Field", "Value"], "rows": rows})
+    if out_of_scope:
+        # A focused engagement STATES its scope rather than refusing: the
+        # sheets it leaves empty are named here, once, so a reader does not
+        # take an unassessed pillar for a silent one.
+        doc.add_paragraph(
+            "Pillars assessed in this engagement: " + ", ".join(in_scope)
+            + ". Not in this engagement's scope, and therefore not reported on: "
+            + ", ".join(f"{p}_Subcap_Scoring" for p in out_of_scope) + ".")
     doc.add_heading("Surface Alignment", level=1)
     doc.add_paragraph(
         "This report is one input to the DMA Insights app. Each section "

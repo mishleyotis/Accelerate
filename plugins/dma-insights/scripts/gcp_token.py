@@ -194,7 +194,7 @@ def load_key(path: str | None = None) -> tuple:
     register at session START, and mcp_auth_headers.sh is invoked at that
     moment; bootstrap_session.sh, if it runs as a step inside the session,
     lands /root/.dma/sa.json minutes too late — the connector has already
-    failed to authenticate and its 33 tools never resolve into the session
+    failed to authenticate and its 34 tools never resolve into the session
     (measured 2026-08-20: a firing bootstrapped successfully, the doctor went
     14/14 green over direct HTTP, and the connector's tools were still absent
     because the session had already started). Reading the key straight from

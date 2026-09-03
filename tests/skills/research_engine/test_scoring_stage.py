@@ -277,3 +277,42 @@ def test_the_preconditions_clear_once_the_run_is_gated_and_scored(tmp_path):
     make_shippable(wb)
     pre = N.stage_preconditions(wb, "assessment", run.qa_dir)
     assert [p for p in pre if "SCORING" in p or "research stage" in p] == []
+
+
+# ── the peer FIGURE has a writer, and Gap_to_Peer is computed from it ────
+
+def test_peer_median_is_recorded_through_its_own_refusals(tmp_path):
+    """Measured 2026-09-03: `prelim.peers` froze the SET and left every
+    Peer_Median blank, nothing wrote the figure, and every Gap_to_Peer shipped
+    null. The writer refuses a figure off the scale, a median outside its own
+    quartiles, a `cannot_estimate` that still carries a number, and a
+    category this run does not assess."""
+    from engine import prelim
+    run, wb, cells, ev = _researched(tmp_path)
+    # PRELIM froze the peer set and wrote the grid; the figure is still blank
+    row = next(r for r in wb.rows("Peer_Benchmarks") if r["Category_ID"] == "P1C1")
+    assert row["Peer_Median"] in (None, "")
+    bare = new_run(tmp_path / "bare", n=2, prelim=False).open()
+    with pytest.raises(prelim.PrelimRefusal, match="freeze the peer set first"):
+        prelim.peer_median(bare, category="P1C1", median=3.0, basis="table",
+                           source="published peer table")
+    with pytest.raises(prelim.PrelimRefusal, match="not a category in this run"):
+        prelim.peer_median(wb, category="P2C1", median=3.0, basis="table",
+                           source="published peer table")
+    with pytest.raises(prelim.PrelimRefusal, match="off the 1.0"):
+        prelim.peer_median(wb, category="P1C1", median=7, basis="table",
+                           source="published peer table")
+    with pytest.raises(prelim.PrelimRefusal, match="outside its own quartiles"):
+        prelim.peer_median(wb, category="P1C1", median=3.9, p25=2.5, p75=3.5,
+                           basis="table", source="published peer table")
+    with pytest.raises(prelim.PrelimRefusal, match="NO median"):
+        prelim.peer_median(wb, category="P1C1", median=3.0, basis="cannot_estimate",
+                           source="no peer table could be located")
+    out = prelim.peer_median(wb, category="P1C1", median=None, basis="cannot_estimate",
+                             source="no peer table could be located for the band")
+    assert out["median"] is None
+    row = next(r for r in wb.rows("Peer_Benchmarks") if r["Category_ID"] == "P1C1")
+    assert row["Peer_Median"] in (None, "") and row["Peer_Basis"].startswith("cannot_estimate")
+    out = prelim.peer_median(wb, category="P1C1", median=3.0, p25=2.5, p75=3.5,
+                             basis="table", source="published peer table, FY2025")
+    assert out["median"] == 3.0

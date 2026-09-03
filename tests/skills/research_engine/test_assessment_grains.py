@@ -63,8 +63,11 @@ def test_an_older_workbook_with_no_stage_key_reads_as_research(tmp_path):
 
 
 def test_the_three_grains_belong_to_the_assessment_stage():
-    assert set(C.SHEET_STAGE) == {"Pillar_Summary", "Category_Detail",
-                                  "Recommendations"}
+    """The three grains, and (2026-09-03) every scoring-stage tab the
+    template workbook carries — all of them assessment-stage, none of them
+    producible while column D is empty."""
+    assert {"Pillar_Summary", "Category_Detail", "Recommendations",
+            "Subcap_Scores", "Pillar_Rollup", "Executive_Summary"} <= set(C.SHEET_STAGE)
     assert set(C.SHEET_STAGE.values()) == {"assessment"}
 
 
@@ -165,12 +168,12 @@ def test_recommendations_project_the_reports_own_rows(tmp_path):
     for i in range(3):
         N.write(wb, "assessment", sec.id,
                 _rec(sec.id, eids, report="assessment"),
-                actor="report-assessment-producer", card=f"R-{i + 1}")
+                actor="report-assessment-producer", card=f"REC-{i + 1:02d}")
     G.set_stage(wb, "assessment")
     out = G.recommendations(wb)
     assert out["rows"] == 3
     rows = [r for r in wb.rows("Recommendations") if r.get("Rec_ID")]
-    assert [r["Rec_ID"] for r in rows] == ["REC-R-1", "REC-R-2", "REC-R-3"]
+    assert [r["Rec_ID"] for r in rows] == ["REC-01", "REC-02", "REC-03"]
     assert all(r["Rationale"] for r in rows), "the argument travels with it"
 
 
@@ -191,14 +194,14 @@ def test_the_app_parser_reads_the_recommendations_this_engine_writes(
     sec = next(s for s in RS.SPECS["assessment"].sections
                if s.kind == "recommendation")
     N.write(wb, "assessment", sec.id, _rec(sec.id, eids, report="assessment"),
-            actor="report-assessment-producer", card="R-1")
+            actor="report-assessment-producer", card="REC-01")
     G.set_stage(wb, "assessment")
     G.recommendations(wb)
 
     obs: list = []
     got = parse_recommendations(str(run.workbook_path), obs)
     assert got, f"the parser read no recommendation: {[o.kind for o in obs]}"
-    assert got[0]["rec_id"] == "REC-R-1", got[0]
+    assert got[0]["rec_id"] == "REC-01", got[0]
     assert got[0]["payload"].get("rationale"), got[0]["payload"].keys()
 
 
@@ -208,9 +211,13 @@ def test_the_assessment_report_names_the_grains_it_reads():
     """H4's grain lock forbids re-deriving a pillar figure by averaging its
     subcaps, so §3 must read what was STATED, not only the subcap sheets."""
     spec = RS.SPECS["assessment"]
-    assert "Pillar_Summary" in spec.section("3").inputs
-    assert "Category_Detail" in spec.section("3").inputs
-    assert "Recommendations" in spec.section("7").inputs
+    # The pinned Doc: §4 Assessment Results reads the STATED rollups, and
+    # the roadmap (§9) reads the Recommendations tab the REC cards project.
+    assert "Pillar_Rollup" in spec.section("4").inputs
+    assert "Category_Rollup" in spec.section("4").inputs
+    assert "Recommendations" in spec.section("9").inputs
+    rec = next(s for s in spec.sections if s.kind == "recommendation")
+    assert "Recommendations" in rec.inputs
 
 
 if __name__ == "__main__":

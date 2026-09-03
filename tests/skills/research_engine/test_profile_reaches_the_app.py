@@ -43,14 +43,8 @@ def rendered(tmp_path_factory):
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     spec = RS.SPECS["client_research"]
-    for sec in spec.sections:
-        if sec.kind in RS.CARD_KINDS:
-            for i in range(RS.INSIGHT_CARD_MIN):
-                N.write(wb, spec.key, sec.id, _rec(sec.id, eids),
-                        actor="report-research-producer", card=f"IC-{i + 1}")
-        else:
-            N.write(wb, spec.key, sec.id, _rec(sec.id, eids),
-                    actor="report-research-producer")
+    from fixtures import write_report
+    write_report(wb, spec.key, eids)
     sign_off_sections(wb)
     out = R.render(wb, spec, tmp / "out", force=False)
     return Path(out["path"] if isinstance(out, dict) else out)
@@ -78,14 +72,14 @@ def test_the_rendered_filename_is_the_one_the_app_classifies(rendered):
 #: under a kind nobody can ask for by name is as unreachable as one that
 #: never landed, which is exactly what `unmapped:*` was.
 EXPECTED_KINDS = {
-    "1": "entity_and_scope",
-    "2": "search_scope",
-    "3": "evidence_sources",
-    "4": "capability_picture",
-    "5": "insight_cards",
-    "6": "technology_utilisation",
-    "7": "findings",
-    "8": "artefact_index",
+    "1": "firmographics",
+    "2": "executive_summary",
+    "3": "entity_profile",
+    "4": "market_position",
+    "5": "strategic_intelligence",
+    "6": "client_priorities",
+    "7": "risk_and_issues",
+    "8": "evidence_sources",
 }
 
 
@@ -150,7 +144,7 @@ def test_the_two_reports_kinds_do_not_collide_once_namespaced(rendered):
     from dma_worker.report_parser import parse_report
 
     kinds = {s.section_kind for s in parse_report(str(rendered), [])}
-    assert "evidence_sources" in kinds or "findings" in kinds, (
+    assert "evidence_sources" in kinds or "executive_summary" in kinds, (
         f"expected a colliding kind to exist before namespacing: {kinds}")
 
     namespaced = {f"{J.PROFILE_KIND_PREFIX}{k}" for k in kinds}

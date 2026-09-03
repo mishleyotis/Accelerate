@@ -381,6 +381,15 @@ def make_shippable(wb):
                 wb, "Tech_Peer_Deployments",
                 "the technology register carries no rows, so there is no "
                 "product whose peer deployment could be examined")
+    # The client's own facts (2026-09-03): filled where the register has a
+    # cell to hang a priority on, declared where the run honestly has none.
+    ev = {}
+    for e in wb.rows("Evidence_Detail"):
+        for sc in str(e.get("SubCap_IDs") or e.get("SubCaps") or "").replace(";", ",").split(","):
+            sc = sc.strip()
+            if sc and sc in wb.selected_subcaps():
+                ev.setdefault(sc, []).append(e["E_ID"])
+    client_facts(wb, wb.selected_subcaps(), ev)
     return completeness.check(wb)
 
 
@@ -630,7 +639,15 @@ def client_facts(wb, cells, ev):
     where the run honestly has none (no live matter, nothing outstanding)."""
     from engine import completeness, profile
     first = next((c for c in cells if c in ev), None)
-    if first and not [r for r in wb.rows("Focus_Areas") if r.get("ID")]:
+    have_focus = [r for r in wb.rows("Focus_Areas") if r.get("ID")]
+    if not first and not have_focus \
+            and "Focus_Areas" not in completeness.reasons(wb):
+        completeness.declare(
+            wb, "Focus_Areas",
+            "no client-authored document naming a stated priority was located "
+            "in this run's evidence; the priorities section is written as an "
+            "honest absence rather than from inference")
+    elif first and not have_focus:
         profile.focus(
             wb, fa_id="FA-01", title="Grow digital member adoption",
             quote=("Our members increasingly expect to open accounts, apply for "
@@ -676,34 +693,67 @@ def score_all(wb, cells, ev):
             score_cell(wb, cell, [], score=1.5, confidence="LOW")
 
 
-def scored_run(tmp_path, n=6, absent=1):
+def score_stage(run, wb, cells, ev):
+    """Take a researched run through the SCORING stage to a PASS on the
+    SCORING gate: open, score every row, an independent critic, the rollup,
+    then the stage's own catalogue tabs (filled where there is a platform to
+    name, declared where the fixture's estate has no peers)."""
     from engine import assessment as A
-    run, wb, cells, ev = researched_run(tmp_path, n=n, absent=absent)
+    from engine import completeness
     A.open_stage(wb, run.qa_dir)
     score_all(wb, cells, ev)
-    A.critique(wb, pillar="P1", verdict="PASS", actor="scoring-critic",
-               note="Re-derived 4 of 6 rows across the capabilities; ceilings hold; "
-                    "differentiation present; would move nothing.")
+    for pillar in sorted({c[:2] for c in cells}):
+        A.critique(wb, pillar=pillar, verdict="PASS", actor="scoring-critic",
+                   note="Re-derived 4 of 6 rows across the capabilities; ceilings hold; "
+                        "differentiation present; would move nothing.")
     A.rollup(wb, headline="Modern rails, unbuilt member-relationship layer: "
                           "sits a band below digital-leader peers")
     v = A.gate(wb, run.qa_dir)
     assert v["gate"] == "PASS", v["blocking"]
-    # the scoring stage's own catalogue tabs — filled where there is a
-    # platform to name, declared where the fixture's estate has no peers
-    from engine import completeness
     A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
                platform="Alkami", categories=["P1C1"])
     if not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())]:
         completeness.declare(
             wb, "Platform_Peer_Adoption",
-            "the technology register carries no rows in this fixture run, so "
-            "there is no product whose peer adoption could be examined")
+            "no peer institution's deployment of the named products could be "
+            "examined in this fixture run, so no adoption verdict is recorded")
+    return v
+
+
+def scored_run(tmp_path, n=6, absent=1):
+    run, wb, cells, ev = researched_run(tmp_path, n=n, absent=absent)
+    score_stage(run, wb, cells, ev)
     return run, wb, cells, ev
 
 
+def write_both_reports(run, wb, cells, ev, *, render=True):
+    """Every section of both reports through the sanctioned writer, on a
+    scored run, under the stage preconditions; signed off by a different
+    actor; rendered. The whole real path, not `wb.append`."""
+    from engine import report_spec as RS
+    from engine import reports
+    make_shippable(wb)
+    eids = []
+    for c in cells:
+        eids += ev.get(c, [])
+    eids = eids[:10]
+    for key in RS.SPECS:
+        write_report(wb, key, eids, run=run)
+    sign_off_sections(wb)
+    # the REC cards project into the tab the app reads
+    from engine import grains
+    grains.recommendations(wb)
+    out = {}
+    if render:
+        for key, spec in RS.SPECS.items():
+            out[key] = reports.render(wb, spec, run.deliverables)
+    return out
+
+
 def bank_peer_medians(wb, *, median=3.0, p25=2.5, p75=3.5):
-    """Freeze a peer set and record a median per category in scope — the
-    research-stage input the assessment's Gap_to_Peer is computed from."""
+    """Record a peer median per category in scope — the research-stage input
+    the assessment's Gap_to_Peer is computed from. PRELIM has already frozen
+    the peer set (close_prelim); if a bare run has not, freeze one first."""
     from engine import prelim
     if not [r for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")]:
         prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU"],

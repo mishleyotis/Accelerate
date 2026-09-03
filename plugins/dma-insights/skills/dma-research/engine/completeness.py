@@ -91,8 +91,8 @@ FILLED_BY = {
                        "engine.cli grains recompute"),
     "Category_Detail": ("the ASSESSMENT stage's rollup — "
                         "engine.cli grains recompute"),
-    "Recommendations": ("projected from the assessment report's §7 rows — "
-                        "engine.cli grains recommendations"),
+    "Recommendations": ("projected from the assessment report's REC-NN cards "
+                        "(the pinned Doc's §8) — engine.cli grains recommendations"),
     "Tech_Peer_Deployments": ("engine.cli techscan peer-record --ts … "
                               "--peer … --deployed|--not-deployed|--unknown "
                               "--basis …"),

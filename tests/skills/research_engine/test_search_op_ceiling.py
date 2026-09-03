@@ -108,7 +108,9 @@ def test_stats_and_the_wall_agree(tmp_path):
 def test_the_ceiling_is_still_reachable_by_normal_work(tmp_path):
     """A guard that fires on ordinary volumes would push agents to stop
     logging searches, which would blind every other check that reads the
-    Search_Log. Forty is well clear of a single category's honest work."""
+    Search_Log. Under the five-volley rule eight cells cost forty searches
+    — the old cap exactly — so the wall is sixty: twelve fully volleyed
+    cells between checkpoints, still one conversation's worth."""
     run = new_run(tmp_path, n=8, prelim=False)
     wb = run.open()
     from fixtures import bank_evidence

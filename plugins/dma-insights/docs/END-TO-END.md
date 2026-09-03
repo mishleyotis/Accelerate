@@ -287,12 +287,43 @@ reason is a disclosure; an empty tab without one blocks the handoff and the
 package. Nine sheets may never be declared empty at all — the run does not
 exist without them.
 
-## Stage 6 · Hand off, and report
+## Stage 6 · Score — column D, gated at both ends
+
+```
+python3 -m engine.assessment open     --run $RUN      # refuses until every category gate is PASS
+python3 -m engine.assessment score    --run $RUN --subcap P1C1.1.1 --score 2.75 --confidence MEDIUM \
+        --rationale '[EVIDENCE] E-0012 … [CEILING] …' --actor scoring-p1-producer \
+        --ai-applicability ASSISTIVE --data-dependency '…' --data-readiness AMBER
+python3 -m engine.assessment critique --run $RUN --pillar P1 --verdict PASS --actor scoring-critic --note '…'
+python3 -m engine.assessment rollup   --run $RUN --headline '…'
+python3 -m engine.assessment gate     --run $RUN      # PASS recorded in Gate_Log, 07_qa/scoring.json
+python3 -m engine.assemble checkpoint --run $RUN --stage SCORED --push   # the app ingests the scored workbook now
+```
+
+Four scoring producers, one per pillar, in parallel; the critic per pillar
+as it lands; the conductor rolls up and gates. Every refusal is the
+engine's: a row that was never challenged, a score above its evidence
+ceiling, a rationale that cites none of the row's E-ids, an overlay left
+blank, a pillar whose critic was one of its scorers, a rollup that drifts
+from column D by more than 0.01. `SubCap_Name` was seeded from the
+catalogue at `start`, so the workbook the app ingests names every cell.
+
+## Stage 6b · Hand off, and report — only on a scored run
 
 ```
 python3 -m engine.cli handoff --run $RUN
+python3 -m engine.cli narrative preconditions --run $RUN --report assessment   # must print nothing
 python3 -m engine.cli report  --run $RUN            # both .docx
 ```
+
+`narrative write` refuses a section while any precondition fails: PRELIM
+open, no template binding, a category gate not PASS, the workbook not
+complete (every tab filled or declared, except the tabs the report itself
+projects), and for the assessment report a SCORING gate that is not PASS.
+The section spec is loaded from the pinned templates
+(`references/templates/report_templates.json`, exported from the owner's two
+Docs); the body must carry the Doc's blocks in order, its card shape and the
+countable minimum data of its control block.
 
 `research_handoff.json` is emitted as a **read-only index** over the
 workbook's sheets and says so in its own `_contract` block. The workbook is
@@ -309,8 +340,11 @@ are read from the sheets at render time, so the two cannot disagree
 
 * one unresolvable citation anywhere (AUD-0033);
 * a section under its blocking word minimum (AUD-0105);
-* fewer than eight insight cards — the template's number, not the renderer's
-  three (AUD-0145);
+* fewer cards than the Doc's floor — one pillar deep dive per pillar in
+  scope, five to eight `REC-NN` recommendations, eight `IC-NNN` insight
+  cards inside the profile's §5 (AUD-0145, the template's numbers);
+* a control-block count under its floor — five fiscal years in the
+  trajectory, the four technology layers, an AI-and-data overlay per pillar;
 * a section every one of whose declared inputs is empty (AUD-0107). A focused
   engagement that leaves three pillar sheets empty **states its scope**
   instead, because refusing that would reject a correct run.
@@ -331,11 +365,21 @@ The script the pinned workbook mandates, which existed nowhere in any tree
 "nothing that matters downstream", and that is true of seven fields and false
 of three, which the handoff did not carry (AUD-0065).
 
-## Stage 7b · Assemble the client folder, and ship it
+## Stage 7b · Assemble the client folder, and ship it — as you go
 
 ```
+python3 -m engine.ship state --run $RUN              # which pages the workbook can already feed
 python3 -m engine.techscan render --run $RUN
 python3 -m engine.assemble package --run $RUN --push
+```
+
+Promotion is not a final act. `engine.ship state` reads the workbook and
+names the pages whose inputs are complete (`ready_pages`) and the ones to
+dispatch now (`dispatch_now`, in the surface map's order); the surface
+producer ships those with `ship_page.py --incremental` while later stages
+are still running, so by the time the reports land the six pages are
+staged and promotion is one call. That is the token budget the owner asked
+for: no page is produced twice, and nothing waits on everything.
 python3 -m engine.memory backup --run $RUN && python3 -m engine.memory cleanup --run $RUN --apply
 ```
 
