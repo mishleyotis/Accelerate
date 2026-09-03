@@ -14,26 +14,27 @@
     "is named 'template' — it is correct when it carries the tabs the app",
     "reads. `scripts/check_template.py` measures any workbook against the",
     "worker's own `_TAB_TARGET` map (29 tabs, each bound to the surface it",
-    "feeds) and prints what starves. Run it before synthesis, not after."
+    "feeds) and prints what starves. Run it before synthesis, not after.",
+    "",
+    "2026-09-03 (this revision): the templates ARE readable and are PINNED under",
+    "references/templates/ — report_templates.json (both report Docs' control blocks,",
+    "the spec the engine enforces), the two Doc markdown exports, workbook_template.json",
+    "(the Drive sheet's measured shape) and gold_reference.json (Golden 1 measured).",
+    "`engine.template bind` hashes them into every run at start; `engine.template",
+    "report-drift` fails when a re-exported Doc no longer matches the JSON."
   ],
-
   "scoring_workbook_template": {
     "drive_file_id": "18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc",
     "url": "https://docs.google.com/spreadsheets/d/18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc/edit?gid=23852937",
-    "status": "NOT_YET_READABLE",
+    "status": "PINNED — references/templates/workbook_template.json (measured 2026-09-03: 11 sheets, contract v3, template 2.0.0; DQ_Bank carries SubCap_Name for all 851 cells, extracted to engine/data/catalogue_v70_names.json)",
     "note": [
-      "Supplied by the owner 2026-09-03 as the canonical scoring workbook.",
-      "Neither the ingest service account",
-      "(mishleyotiende@digital-maturity-assessor.iam.gserviceaccount.com) nor",
-      "the session's Drive connection can open it — both return 404, which",
-      "for Drive means 'not shared with you' and not 'does not exist'.",
-      "Share it with the service account and this entry becomes checkable:",
-      "check_template.py will then measure the template itself and pin its",
-      "expected coverage here, so a client workbook can be diffed against",
-      "the template rather than against a reference client."
+      "Readable through the session's Drive connection as of 2026-09-03.",
+      "The engine contract (v6, 40 sheets) is this template's research shape plus the",
+      "assessment-stage and client-fact tabs the gold-standard workbook carries and the",
+      "app reads; `engine.template check` diffs a workbook against the contract and",
+      "workbook_template.json records each known divergence with its reason."
     ]
   },
-
   "reference_examples": {
     "_why": [
       "Until the template is readable these are what 'correct' looks like,",
@@ -57,21 +58,34 @@
       }
     },
     "promoted_surface": {
-      "heatmap_rows": 1383, "overview_rows": 66, "techstack_rows": 56,
-      "platform_rows": 22, "context_rows": 22, "insights_rows": 9,
-      "evidence_rows": 541, "evidence_age_rows": 537, "open_alerts": 116
-    }
+      "heatmap_rows": 1383,
+      "overview_rows": 66,
+      "techstack_rows": 56,
+      "platform_rows": 22,
+      "context_rows": 22,
+      "insights_rows": 9,
+      "evidence_rows": 541,
+      "evidence_age_rows": 537,
+      "open_alerts": 116
+    },
+    "measured_2026_09_03_full": "references/templates/gold_reference.json"
   },
-
   "known_bad_shapes": [
     {
       "entity": "Bank of Travelers Rest",
       "measured_2026_09_03": "the package ships TWO workbooks and neither is viable alone",
-      "assessment_workbook": {"tabs": 20, "read_tabs_with_data": 11,
-                              "scored_cells": 688, "composite": 1.71},
-      "scoring_workbook": {"tabs": 23, "read_tabs_with_data": 13,
-                           "scored_cells": 0,
-                           "why": "research-stage v5 contract: 688 rows seen, column D empty BY CONTRACT"},
+      "assessment_workbook": {
+        "tabs": 20,
+        "read_tabs_with_data": 11,
+        "scored_cells": 688,
+        "composite": 1.71
+      },
+      "scoring_workbook": {
+        "tabs": 23,
+        "read_tabs_with_data": 13,
+        "scored_cells": 0,
+        "why": "research-stage v5 contract: 688 rows seen, column D empty BY CONTRACT"
+      },
       "complementary": [
         "the assessment workbook holds Firmographics, Focus_Areas,",
         "Issue_Register, Solution_Catalogue, Subcap_Scores;",
@@ -84,11 +98,27 @@
       ]
     }
   ],
-
   "rules": [
     "Bind to the template named above, not to whatever workbook is already in the client folder.",
     "One workbook and one report per client folder. Copies belong outside the intake tree — the scan now ignores memory-backup/, archive/, old/ and their siblings, and among equal-ranked candidates reads the most recently modified.",
     "Run check_template.py on the workbook BEFORE synthesis. A workbook carrying fewer than the reference's read-tabs will render empty states no producer can fill.",
-    "Never hand-edit a promoted workbook. Re-ingest is idempotent on an unchanged tree, so an edit that changes no checksum changes nothing."
-  ]
+    "Never hand-edit a promoted workbook. Re-ingest is idempotent on an unchanged tree, so an edit that changes no checksum changes nothing.",
+    "Read references/templates/gold_reference.json and the pinned Doc BEFORE authoring; `engine.template binding --run <R>` must say bound and current.",
+    "Scores are struck only through `engine.assessment score`; no report section is written until `engine.cli narrative preconditions` passes."
+  ],
+  "report_templates": {
+    "client_profile": {
+      "drive_doc_id": "142FoFcgs2-zzMm2_y4ykQW_gSUVbIOWSMHV_sgITs0Y",
+      "title": "Client Profile Research Report",
+      "sections": 8,
+      "pinned": "references/templates/client_profile_template.md + report_templates.json"
+    },
+    "assessment": {
+      "drive_doc_id": "1FPr7wNuo2-Fk7PPTvk1VkQxYBvjLbEWwU7kZQY8TuDA",
+      "title": "Digital Maturity Assessment Report",
+      "sections": 11,
+      "pinned": "references/templates/assessment_report_template.md + report_templates.json"
+    },
+    "rule": "engine/report_spec.py is BUILT from report_templates.json; narrative.write refuses a section outside the Doc's control block; gold_standard.report_findings checks the rendered docx against the same pin."
+  }
 }

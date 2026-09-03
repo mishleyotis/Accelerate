@@ -99,6 +99,11 @@
     "./agents/research/categories/research-p4c3-producer.md",
     "./agents/research/categories/research-p4c4-producer.md",
     "./agents/research/research-conductor.md",
-    "./agents/research/technographic-scanner.md"
+    "./agents/research/technographic-scanner.md",
+    "./agents/scoring/scoring-critic.md",
+    "./agents/scoring/scoring-p1-producer.md",
+    "./agents/scoring/scoring-p2-producer.md",
+    "./agents/scoring/scoring-p3-producer.md",
+    "./agents/scoring/scoring-p4-producer.md"
   ]
 }

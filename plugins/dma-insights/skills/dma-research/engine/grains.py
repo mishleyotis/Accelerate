@@ -148,12 +148,13 @@ def recompute(wb: RunWorkbook) -> dict:
 
 
 def recommendations(wb: RunWorkbook) -> dict:
-    """Project the assessment report's §7 rows into the tab the app reads.
+    """Project the assessment report's REC cards into the tab the app reads.
 
-    The recommendations already exist — one Report_Narrative row per card,
+    The recommendations already exist — one Report_Narrative row per REC-NN
+    card of the pinned template's recommendation section (§8 of the Doc),
     written through `engine.narrative write --card`, each carrying the
-    section's declared blocks (Recommendation · Root cause · Prerequisites ·
-    How we would know it worked). This does not author anything; it puts
+    section's declared blocks (Root cause · Cost of inaction · Solution ·
+    Platform readiness contract · Rebuttal · …). This does not author anything; it puts
     them where `parse_recommendations` looks, so the app stops landing every
     package with zero of them.
     """
@@ -198,7 +199,9 @@ def set_stage(wb: RunWorkbook, to: str) -> dict:
         raise GrainRefused(
             "a workbook with no scored subcapability is not at the "
             "assessment stage, whatever it is told. Column D is what the "
-            "stage means.")
+            "stage means. To BEGIN scoring, `engine.assessment open` flips "
+            "the stage after checking the research gates and writes the "
+            "weight set, rubric and cap rules the scores are struck against.")
     wb.set_metadata("stage", to)
     return {"stage": to, "was": was}
 

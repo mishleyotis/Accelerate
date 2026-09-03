@@ -51,6 +51,7 @@ import sys
 from pathlib import Path
 
 from . import contract as C
+from . import ledger as L
 from . import completeness, floors_gate, quality as Q, runstate, validator
 from .workbook import RunWorkbook, FLOOR_ITEMS, _split_ids
 
@@ -100,7 +101,8 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
             # AUD-0078: null, not a default that looks like data.
             "ceiling_band": band if synth else None,
             "uncertainty": _num(r.get("Uncertainty")) if synth else None,
-            "state": ("closed" if synth else
+            "state": ("declared_absent" if (not eids and L.is_declared_absent(r))
+                      else "closed" if synth else
                       "volleyed" if eids else "not_researched"),
             "research_synthesis": None if not synth else {
                 "dominant_claim": r.get("Dominant_Claim"),

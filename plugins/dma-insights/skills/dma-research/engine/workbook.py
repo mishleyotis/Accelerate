@@ -50,6 +50,7 @@ except ImportError:                    # pragma: no cover
     fcntl = None
 
 import openpyxl
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from . import contract as C
@@ -107,7 +108,9 @@ class RunWorkbook:
         notes = []
         for name, cols in C.SHEETS.items():
             if name not in self._wb.sheetnames:
-                self._wb.create_sheet(name).append(list(cols))
+                ws_new = self._wb.create_sheet(name)
+                ws_new.append(list(cols))
+                _format_sheet(ws_new, cols)
                 notes.append(f"added sheet {name}")
                 continue
             ws = self._wb[name]
@@ -126,6 +129,7 @@ class RunWorkbook:
             new.append(list(cols))
             for row in body:
                 new.append([row.get(c) for c in cols])
+            _format_sheet(new, cols)
             notes.append(
                 f"{name}: " + ", ".join(
                     ([f"added {', '.join(added)}"] if added else [])
@@ -182,10 +186,7 @@ class RunWorkbook:
         for name, cols in C.SHEETS.items():
             ws = wb.create_sheet(name)
             ws.append(list(cols))
-            ws.freeze_panes = "A2"
-            for i, col in enumerate(cols, start=1):
-                ws.column_dimensions[get_column_letter(i)].width = \
-                    max(12, min(40, len(col) + 4))
+            _format_sheet(ws, cols)
         path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_save(wb, path)
         self = cls(path)
@@ -490,6 +491,9 @@ class RunWorkbook:
             "slack_channel": "",
             "slack_thread_ts": "",
             "requested_by": "",
+            # Written by `engine.template bind` (runstate.start calls it);
+            # blank means unbound, and orient serves no card while it is.
+            "template_binding": "",
         }
         for k in ("run_id", "entity_name", "entity_id", "reference_date"):
             v = str(vals[k])
@@ -680,11 +684,29 @@ class RunWorkbook:
                 f"{foreign[:6]}. Select with Taxonomy.selected(sv, scope), "
                 f"which resolves the overlay for THIS sub-vertical and "
                 f"withdraws the base cells it supersedes.")
+        # SubCap_Name from the catalogue, at seed time. Owner, 2026-09-03:
+        # "missing subcaps names" — column B was empty on every run this
+        # engine ever built (goeasy GSY-03: 656 blank names shipped), because
+        # the tier catalogue carried no names and the toolkits that do are
+        # pulled after start. The names ship with the catalogue now
+        # (data/catalogue_v70_names.json, from the template's own DQ_Bank),
+        # and a cell the file does not name is refused rather than seeded
+        # blank: an unnamed row reads as jargon to a client and as a hole to
+        # the gold gate.
+        names = C.subcap_names()
+        unnamed = [c for c in selected if not names.get(c)]
+        if unnamed:
+            raise WorkbookError(
+                f"{len(unnamed)} selected cell(s) have no display name in "
+                f"{C._NAMES_NAME}: {unnamed[:6]}. Every seeded row carries "
+                f"its SubCap_Name from the catalogue; re-pin the names file "
+                f"from the template's DQ_Bank rather than seeding blanks.")
         for sheet, cells in by_sheet.items():
             ws = self._sheet(sheet)
             for cell in sorted(cells):
                 row = {c: None for c in C.PILLAR_COLUMNS}
                 row["SubCap_ID"] = cell
+                row["SubCap_Name"] = names[cell]
                 row["Category"] = cell.split(".")[0]
                 row["Evidence_IDs"] = C.NO_EVIDENCE
                 row["Proxy_Searched"] = "NOT_RUN"
@@ -866,6 +888,47 @@ def _cell(v):
         import json
         return json.dumps(v, separators=(",", ":"), sort_keys=True)
     return str(v)
+
+
+#: Columns that carry prose and render better wrapped and wide. Everything
+#: else is sized to its header. Formatting is presentation only — no reader
+#: in the pipeline depends on it — but a client opens this file, and a sheet
+#: of unbolded headers with every column 12 wide is the "missing formatting"
+#: the owner named (2026-09-03).
+_WIDE_COLUMNS = frozenset({
+    "Rationale", "Dominant_Claim", "What_We_Found", "Triangulation",
+    "Ceiling_Reasoning", "Why_It_Matters", "DMA_Impact", "Excerpt",
+    "Anchor_Quote", "Body", "Question", "Query", "Detail", "Verbatim quote",
+    "Description", "Reason", "What would close it", "Weighing",
+    "Absence_Basis", "Assumptions", "Bias_Notes", "Value", "value",
+    "rationale", "Detection_Basis", "Basis", "Headline",
+})
+_HEADER_FILL = PatternFill("solid", start_color="1F3A5F", end_color="1F3A5F")
+_HEADER_FONT = Font(bold=True, color="FFFFFF")
+
+
+def _format_sheet(ws, cols) -> None:
+    """Bold, filled, frozen header row; widths by content class; wrapped
+    prose columns; a two-decimal number format on score columns."""
+    ws.freeze_panes = "A2"
+    for i, col in enumerate(cols, start=1):
+        c = ws.cell(row=1, column=i)
+        c.font = _HEADER_FONT
+        c.fill = _HEADER_FILL
+        c.alignment = Alignment(vertical="center", wrap_text=True)
+        letter = get_column_letter(i)
+        if col in _WIDE_COLUMNS:
+            ws.column_dimensions[letter].width = 60
+        elif col.lower() in ("score", "peer_median", "gap", "gap_to_peer",
+                             "weight", "weighted_contribution",
+                             "evidence_ceiling", "final_score", "ers",
+                             "overall_score_est", "coverage_pct"):
+            ws.column_dimensions[letter].width = 12
+        else:
+            ws.column_dimensions[letter].width = max(12, min(40, len(col) + 4))
+    ws.row_dimensions[1].height = 30
+    if ws.max_row > 1 and ws.max_column:
+        ws.auto_filter.ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
 
 
 def _atomic_save(wb, path: Path) -> None:

@@ -261,6 +261,15 @@ DEFAULTS = {
     # toolkits come via drive_fetch.py under Bash.
     "research": dict(writes=(), extra=[],
                      external=["exa", "tavily", "drive"], research=True),
+    # The SCORING stage (generated — gen_scoring_agents.py derives its tools
+    # line from THIS table): four pillar scorers and one critic. They write
+    # only through `engine.assessment` over Bash — the ledger's refusals are
+    # the write control — so Write/Edit stay denied and no connector write is
+    # reachable. Drive reads are for the internal artefacts a HYBRID score
+    # rests on; exa/tavily let a scorer re-open a cited source, never search
+    # for new evidence (the research stage is closed by the time they run).
+    "scoring": dict(writes=(), extra=[],
+                    external=["exa", "tavily", "drive"], research=True),
 }
 
 

@@ -34,6 +34,12 @@ did not happen.
   rediscovering, and re-researching it is duplicated spend. If `orient`
   says PRELIM is open, you were dispatched early: say so and stop, rather
   than working a card the phase gate is holding.
+- **The deliverables are bound before you start.** `engine.cli start` pinned
+  the report Docs, the workbook shape and the Golden 1 reference into the run
+  (`00_entity_profile/template_binding.json`; `engine.template binding`), and
+  `orient` serves no card while that binding is blank. Your rows land in a
+  workbook whose every scoring row already carries its `SubCap_Name` from the
+  catalogue — never leave a blank where a name belongs, and never rename one.
 - The conductor dispatched you with a `--run` id and `--root`. Everything
   else you need is in the workbook: `engine.cli orient --run R --root ROOT
   --category <YOURS>` is your first command and your compass after every
@@ -115,6 +121,17 @@ Rules the gates enforce and you must not soften:
 - **Every volley fires or is `NOT_RUN: <reason>`** — the synthesise path
   refuses a facet that is neither (AUD-0017). Rich evidence on `works` is
   not a reason to skip `fails`; it is the reason `fails` matters.
+- **The gate COUNTS the volleys per cell, evidence or none** (2026-09-03;
+  owner: "not even looking at the 5 volley structure and related DQ set").
+  `volleys_incomplete` is a BLOCKING floors term: every askable facet of
+  every cell in the category needs a logged `engine.cli search --subcap X
+  --facet <f>` row. The card carries `volleys.missing` — the facets still
+  owed for this cell — and `orient`'s work list serves `in_volley` cells
+  (some volleys fired) before any new `pending` cell. A cell with one
+  shallow `works` query and four unfired volleys is not researched; it is
+  opened. Fire the toolkit's NAMED artefacts and the connectors (Exa,
+  Tavily) on each volley — `absence_single_tool` names the cells whose
+  whole search was one web engine.
 - **`NOT_RUN` means the volley never fired — nothing else.** A volley that
   RAN and surfaced nothing relevant writes
   `NO_FINDING after <n> logged searches: <what was hunted and what came
@@ -142,6 +159,37 @@ Rules the gates enforce and you must not soften:
 - The three AI-overlay questions (`ai_deployment`, `ai_data`,
   `ai_constraint`) ride after the volleys and follow the same
   answered-or-NOT_RUN rule.
+
+## Closing an EMPTY cell — the declared absence
+
+A cell ends your category in exactly one of two states, and the floors gate
+refuses a category with a cell in neither: SYNTHESISED, or DECLARED ABSENT.
+`absence_undeclared_empty` is blocking. A seeded row left at `NO_EVIDENCE`
+is not a finding; it is a cell nobody finished.
+
+When every askable volley has fired for a cell (`orient` lists it under
+`searched_empty` and serves it with `mode: declare`) and nothing citable came
+back, close it:
+
+```
+engine.cli absence --run R --root ROOT --subcap X --actor <your-agent-name> \
+    --ladder '[{"rung":"direct","query":"<the works query, as logged>"},
+              {"rung":"proxy","query":"<the proxy query, as logged>"}]' \
+    --proxy-log "hunted the <proxy class> for this cell — <where> — and found <what instead>" \
+    --hunted "<what was looked for, where, and what came back instead>"
+```
+
+The write REFUSES while any askable volley is unfired, while a ladder rung
+names a query the Search_Log never saw, while `direct` and `proxy` rungs
+are not both established, or while the proxy log or the hunt statement is
+under 40 characters. The card's `proxy_class_if_absent` names the rung the
+template expects for this cell (leadership_title, regulator_filing,
+org_talent, ecosystem_vendor, artifact_disclosure, behavioral_delivery).
+The declared row carries `Absence_Claimed=YES`, the ladder, the proxy log,
+every `DQ_*` as a `NO_FINDING after n searches` line and a Provenance row
+naming you; the scoring stage scores it at the no-evidence cap and the
+Coverage_Map discloses it as an Unknown. An absence declared this way is a
+result the run can defend in the room; a `NO_EVIDENCE` left standing is not.
 
 ## Internal artefacts (HYBRID / INTERNAL runs)
 

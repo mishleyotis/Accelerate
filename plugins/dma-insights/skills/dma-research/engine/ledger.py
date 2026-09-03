@@ -40,7 +40,14 @@ from .workbook import RunWorkbook, FLOOR_ITEMS, _split_ids
 #: R27's wall. A conversation that has fired this many searches must
 #: checkpoint and stop; `stats()` returns the decision, and orient.py leads
 #: `do_first` with it so it cannot be walked past (AUD-0037).
-SEARCH_OP_CEILING = 40
+#:
+#: 40 → 60 on 2026-09-03, with the five-volley rule: forty was set when a
+#: subcap took one or two searches. Under `volleys_incomplete` every cell
+#: costs at least five, and forty stopped a conversation at its eighth cell
+#: in the middle of a volley. Sixty is twelve fully volleyed cells between
+#: checkpoints — still a wall, still per conversation, still resumed from
+#: the position the checkpoint recorded.
+SEARCH_OP_CEILING = 60
 
 EXCERPT_MIN, EXCERPT_MAX = 50, 500
 
@@ -636,14 +643,184 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     }
 
 
-def worklist(wb: RunWorkbook, category: str) -> dict:
-    """closed / volleyed / pending for one category, from the workbook.
+# ── the five volleys, measured per subcap ────────────────────────────────
 
-    The three states AUD-0006 turned on. `volleyed` — evidence banked, no
-    synthesis — is the state the archive served past and then declared
-    clean; here it is first-class and `pending` is not the only servable
-    thing."""
-    closed, volleyed, pending = [], [], []
+def askable_facets(wb: RunWorkbook, subcap: str) -> list[str]:
+    """The volley facets this run's evidence mode can fire for one subcap.
+
+    From the DQ bank when the KG was built (a facet whose DQ is deferred in
+    this mode — `contradicts` in an INTERNAL run — is not owed a search);
+    the five catalogue facets when it was not."""
+    from . import kg as _kg
+    split = _kg.dqs_for(wb, subcap)
+    if split["ask"] or split["deferred"]:
+        return [str(d["facet"]) for d in split["ask"]
+                if str(d["facet"]) in C.FACETS]
+    return list(C.FACETS)
+
+
+def volley_status(wb: RunWorkbook, subcap: str,
+                  searches: list[dict] | None = None) -> dict:
+    """Which of the subcap's askable volleys have a LOGGED search behind them.
+
+    Owner, 2026-09-03: "some subcaps are marked as no evidence without any
+    enrichment efforts … not even looking at the 5 volley structure and
+    related DQ set." The protocol has said 'every volley fires or is NOT_RUN
+    with a reason' since AUD-0017, and nothing measured it for a subcap that
+    never reached synthesis: one logged query cleared `absence_unsearched`
+    and the other four volleys were never asked about. Measured on the
+    Golden 1 reference: 307 searches for 690 subcaps, `fails` fired 3 times.
+    This is the measurement, per subcap and per facet, that the gate, the
+    card and the absence declaration all read."""
+    rows = searches if searches is not None else wb.rows("Search_Log")
+    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip() == subcap]
+    want = askable_facets(wb, subcap)
+    fired = {}
+    tools = set()
+    for r in mine:
+        f = str(r.get("Facet") or "").strip()
+        fired[f] = fired.get(f, 0) + 1
+        t = str(r.get("Tool") or "").strip()
+        if t:
+            tools.add(t)
+    missing = [f for f in want if not fired.get(f)]
+    return {"subcap": subcap, "askable": want,
+            "fired": {f: fired.get(f, 0) for f in want},
+            "missing": missing, "complete": not missing,
+            "searches": len(mine), "tools": sorted(tools)}
+
+
+#: The rungs an absence ladder is climbed in, and the two that are always
+#: owed. `direct` is the entity itself; `proxy` is the template's own proxy
+#: class for the cell (leadership_title, regulator_filing, org_talent …).
+ABSENCE_RUNGS_REQUIRED = ("direct", "proxy")
+
+
+def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
+                    ladder: list[dict], proxy_log: str,
+                    what_was_hunted: str, session: str = "") -> dict:
+    """Close a subcap as a SEARCHED, DECLARED absence — or refuse.
+
+    The only sanctioned way a cell ends a run with NO_EVIDENCE. Before this
+    existed a researcher who found nothing had nothing to write, so the row
+    stayed seeded (NO_EVIDENCE / NOT_RUN) and read exactly like a cell nobody
+    had opened. Refused unless:
+
+      * every askable volley has a logged search for THIS subcap (the five
+        facets, in this run's mode) — a volley you did not fire is not a
+        volley that found nothing;
+      * the ladder names its rungs (direct, proxy, then peer / regulatory as
+        reached), each with the query that was fired, and every query is in
+        the Search_Log (quality.ladder_report counts the rungs it can prove);
+      * the proxy log says what proxy class was hunted (the template names
+        one per cell) and what came back instead;
+      * the row carries no evidence — a row with evidence is synthesised,
+        not declared.
+
+    Writes Absence_Claimed=YES, Proxy_Log, Negative_Ladder, Dominant_Claim
+    (the honest sentence), the five DQ_* fields as NO_FINDING lines, and a
+    Provenance row naming who declared it. The floors gate then reads the
+    row as CLOSED-BY-ABSENCE rather than PENDING."""
+    row = wb.scoring_row(subcap)
+    if row is None:
+        raise LedgerRefusal(f"{subcap} is not in this run's engagement set")
+    if not str(actor or "").strip():
+        raise LedgerRefusal("an absence records who declared it (--actor)")
+    eids = [i for i in _split_ids(row.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+    if eids:
+        raise LedgerRefusal(
+            f"{subcap} carries evidence ({', '.join(eids[:4])}); a cell with "
+            f"evidence is SYNTHESISED, not declared absent")
+    searches = wb.rows("Search_Log")
+    vs = volley_status(wb, subcap, searches)
+    problems = []
+    if vs["missing"]:
+        problems.append(
+            f"volley(s) never fired for {subcap}: {', '.join(vs['missing'])}. "
+            f"Every askable facet needs a logged `engine.cli search --subcap "
+            f"{subcap} --facet <f>` before the cell may be declared empty — "
+            f"'we looked and found nothing' has to be true of ALL five angles")
+    rep = Q.ladder_report(ladder or [], searches)
+    rungs = set(rep["rungs"])
+    owed = [r for r in ABSENCE_RUNGS_REQUIRED if r not in rungs]
+    if owed:
+        problems.append(
+            f"the ladder establishes rungs {sorted(rungs) or 'none'}; "
+            f"{', '.join(owed)} are owed on every absence (each rung = the "
+            f"rung name plus the query that was FIRED and is in the Search_Log)")
+    if rep["claimed_not_fired"]:
+        problems.append(
+            f"ladder rung(s) claim a query the Search_Log never saw: "
+            f"{rep['claimed_not_fired'][:3]}")
+    if len(str(proxy_log or "").strip()) < 40:
+        proxy_class = C.proxy_classes().get(subcap, "")
+        problems.append(
+            f"the proxy log is {len(str(proxy_log or '').strip())} chars; say "
+            f"which proxy class was hunted"
+            + (f" (the template names {proxy_class!r} for this cell)" if proxy_class else "")
+            + " and what came back instead (>= 40 chars)")
+    if len(str(what_was_hunted or "").strip()) < 40:
+        problems.append("--hunted: name what was looked for, where, and what "
+                        "came back instead (>= 40 chars)")
+    if problems:
+        raise LedgerRefusal(f"{subcap}: absence refused — " + "; ".join(problems))
+    hunted = str(what_was_hunted).strip()
+    n = vs["searches"]
+    claim = (f"No evidence located for this capability after {n} logged "
+             f"searches across {len(vs['askable'])} volleys and a "
+             f"{len(rungs)}-rung ladder ({', '.join(sorted(rungs))}); "
+             f"{hunted}")
+    dq = {f"DQ_{f.capitalize()}": f"NO_FINDING after {vs['fired'].get(f, 0)} logged "
+                                  f"search(es): {hunted[:160]}"
+          for f in C.FACETS}
+    payload = {
+        "Absence_Claimed": "YES", "Proxy_Log": str(proxy_log).strip(),
+        "Negative_Ladder": json.dumps(ladder, separators=(",", ":")),
+        "Dominant_Claim": claim, "Claim_Label": "HYPOTHESIS",
+        "Proxy_Searched": "Yes", "Facet_Coverage": ", ".join(vs["askable"]),
+        "What_We_Found": (f"Searched and not found: {hunted}. Volleys fired: "
+                          + ", ".join(f"{f} x{vs['fired'].get(f, 0)}" for f in vs["askable"])
+                          + f". Ladder rungs established: {', '.join(sorted(rungs))}."),
+        "Triangulation": (f"{n} searches over {len(vs['tools']) or 1} tool(s) "
+                          f"({', '.join(vs['tools']) or 'web_search'}) agree that no "
+                          f"public artefact names this capability at the entity."),
+        "Ceiling_Reasoning": ("A documented absence supports no maturity ceiling; "
+                              "the assessment scores the cell at the no-evidence "
+                              "cap and discloses it as an Unknown."),
+        "Why_It_Matters": ("An unevidenced cell is a discovery question for the "
+                           "client conversation, not a verdict on the institution."),
+        "DMA_Impact": ("Scored at the no-evidence cap and disclosed in Coverage as "
+                       "an evidence gap; lifts when an internal artefact is supplied."),
+        "Ceiling_Band": "", "Uncertainty": 1.0,
+        **dq,
+    }
+    wb.set_scoring(subcap, payload)
+    record_provenance(wb, subcap, "absence", actor,
+                      f"{n} searches, rungs {sorted(rungs)}", session=session)
+    wb.recompute_coverage()
+    return {"subcap": subcap, "searches": n, "volleys": vs["fired"],
+            "rungs": sorted(rungs), "tools": vs["tools"]}
+
+
+def is_declared_absent(row: dict) -> bool:
+    return (str(row.get("Absence_Claimed") or "").strip().upper()
+            in ("YES", "TRUE", "1")
+            and not [i for i in _split_ids(row.get("Evidence_IDs"))
+                     if i and i != C.NO_EVIDENCE])
+
+
+def worklist(wb: RunWorkbook, category: str) -> dict:
+    """closed / volleyed / in_volley / pending for one category.
+
+    The three states AUD-0006 turned on, plus the one 2026-09-03 added:
+    `in_volley` — some but not all askable volleys fired and no evidence yet.
+    Before it, a cell with one shallow query looked exactly like an untouched
+    one, and orient served the next untouched card instead of finishing the
+    volley. A DECLARED absence (Absence_Claimed=YES, no evidence, all volleys
+    fired) is CLOSED — searched and honestly empty."""
+    closed, volleyed, in_volley, pending, declared = [], [], [], [], []
+    searched_empty = []
+    searches = wb.rows("Search_Log")
     for r in wb.scoring_rows():
         cell = str(r.get("SubCap_ID") or "").strip()
         if not cell.startswith(category + "."):
@@ -651,14 +828,28 @@ def worklist(wb: RunWorkbook, category: str) -> dict:
         has_ev = bool([i for i in _split_ids(r.get("Evidence_IDs"))
                        if i and i != C.NO_EVIDENCE])
         has_syn = bool(str(r.get("Dominant_Claim") or "").strip())
-        if has_syn:
+        if is_declared_absent(r):
+            declared.append(cell)
+            closed.append(cell)
+        elif has_syn:
             closed.append(cell)
         elif has_ev:
             volleyed.append(cell)
         else:
-            pending.append(cell)
+            vs = volley_status(wb, cell, searches)
+            if vs["searches"] and vs["missing"]:
+                in_volley.append(cell)
+            elif vs["searches"] and vs["complete"]:
+                # every volley fired, nothing registered, not yet declared:
+                # the card mode is DECLARE (or register what was found)
+                searched_empty.append(cell)
+            else:
+                pending.append(cell)
     return {"category": category, "closed": sorted(closed),
-            "volleyed": sorted(volleyed), "pending": sorted(pending)}
+            "declared_absent": sorted(declared),
+            "volleyed": sorted(volleyed), "in_volley": sorted(in_volley),
+            "searched_empty": sorted(searched_empty),
+            "pending": sorted(pending)}
 
 
 if __name__ == "__main__":  # a library, but it must answer --help

@@ -34,7 +34,15 @@ verbatim to the module that owns it (its --help lists the subcommands):
                                  (the report sections, as arguments)
     ers …       engine.ers       recompute / show / explain / formula
     cost …      engine.cost      model / estimate / budget / schedule
-    template …  engine.template  id / check   (contract vs the Drive template)
+    template …  engine.template  id / check / bind / binding / report-drift
+                                 (the pinned templates, bound INTO the run)
+    profile …   engine.profile   firmographic / focus / issue /
+                                 enrichment-needed   (the client's own facts)
+    assessment … engine.assessment open / score / critique / rollup /
+                                 solution / peer-adoption / gate   (SCORING)
+    ship …      engine.ship      state   (which app pages are producible now)
+    absence     engine.cli absence --run R --subcap X --ladder <json> …
+                                 (close a searched cell as a declared absence)
 
 Every subcommand reads and writes the SAME workbook. There is no second
 substrate to fall out of step with, which is the whole point (AUD-0001).
@@ -66,7 +74,7 @@ from . import (assemble, contract, floors_gate, handoff, ledger, orient,
 #: argparse so the family's own --help answers, not this wrapper's.
 _FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble", "preflight",
              "prelim", "registry", "complete", "narrative", "ers",
-             "cost", "template", "grains")
+             "cost", "template", "grains", "profile", "assessment", "ship")
 
 
 def _family_main(name: str):
@@ -96,6 +104,12 @@ def _family_main(name: str):
         from . import cost as m
     elif name == "template":
         from . import template as m
+    elif name == "profile":
+        from . import profile as m
+    elif name == "assessment":
+        from . import assessment as m
+    elif name == "ship":
+        from . import ship as m
     else:
         from . import assemble as m
     return m.main
@@ -200,6 +214,22 @@ def main(argv=None) -> int:
     g = common(sub.add_parser("gate"))
     g.add_argument("--category", required=True)
     g.add_argument("--require-synthesis", action="store_true")
+
+    ab = common(sub.add_parser(
+        "absence",
+        help="close a subcap with NO evidence as a DECLARED absence: every "
+             "askable volley logged, a ladder whose rungs name fired queries, "
+             "a proxy log, and what was hunted. The only sanctioned way a "
+             "cell ends a run empty."))
+    ab.add_argument("--subcap", required=True)
+    ab.add_argument("--actor", required=True)
+    ab.add_argument("--ladder", required=True,
+                    help="JSON list of {rung: direct|proxy|peer|regulatory, "
+                         "query: <the query as logged>}")
+    ab.add_argument("--proxy-log", required=True,
+                    help="which proxy class was hunted and what came back")
+    ab.add_argument("--hunted", required=True,
+                    help="what was looked for, where, and what came back instead")
 
     common(sub.add_parser("validate"))
     common(sub.add_parser("handoff"))
@@ -317,6 +347,14 @@ def main(argv=None) -> int:
         rec = json.loads(Path(a.json).read_text())
         print(json.dumps(ledger.append_synthesis(wb, a.subcap, rec,
                                                  actor=a.actor), indent=2))
+        return 0
+    if a.cmd == "absence":
+        lad = json.loads(a.ladder)
+        if isinstance(lad, dict):
+            lad = [lad]
+        print(json.dumps(ledger.declare_absence(
+            wb, a.subcap, actor=a.actor, ladder=lad, proxy_log=a.proxy_log,
+            what_was_hunted=a.hunted), indent=2))
         return 0
     if a.cmd == "gate":
         out = floors_gate.run(wb, a.category,

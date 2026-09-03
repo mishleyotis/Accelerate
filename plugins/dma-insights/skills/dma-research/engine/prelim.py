@@ -233,6 +233,26 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                                 "ownership role is one of the most "
                                 "load-bearing facts a run can carry"),
                     }
+            # THE STRUCTURED STRIP, NOT ONLY THE PROSE (contract v6,
+            # 2026-09-03). The Client Profile's §1 and the app's O2 strip
+            # read the Firmographics TAB — Field / Value / Unit / As at /
+            # Evidence / Conf. — and every must-present field is either
+            # STATED or ABSENT with a route. A firmographics paragraph with
+            # no rows behind it was how "57 of 138 clients shipped with no
+            # focus areas at all" had its firmographic twin.
+            if key == "firmographics":
+                from . import profile as _profile
+                missing = _profile.missing_firmographics(wb)
+                if missing:
+                    return {
+                        "section": key, "status": "OPEN",
+                        "detail": (f"{len(body)} chars of narrative, but the "
+                                   f"Firmographics tab lacks {len(missing)} "
+                                   f"must-present field(s): {', '.join(missing)}"),
+                        "fix": ("engine.profile firmographic --field <f> --value … "
+                                "--unit … --as-of … --evidence E-… (or --state "
+                                "ABSENT --reason … --route …) for each"),
+                    }
             return {"section": key, "status": "RESEARCHED",
                     "detail": f"{len(body)} chars, evidence "
                               f"{_clean(row.get('Evidence_IDs')) or 'none'}"}
@@ -543,6 +563,65 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "categories": cats}
 
 
+def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
+                basis: str, source: str, peer_scores: str = "") -> dict:
+    """Record the peer FIGURES for one category — the median (and quartiles)
+    the assessment's Gap_to_Peer is computed against.
+
+    Measured 2026-09-03: `peers` froze the SET and wrote the grid with every
+    Peer_Median blank, and nothing anywhere wrote the figure — so the rollup
+    computed `gap` from a column that was always empty and every Pillar_Summary
+    shipped Gap_to_Peer as null. A run that has peer figures records them here;
+    one that cannot estimate them says so with `basis=cannot_estimate` and no
+    median, and the gap stays null honestly (invariant 9)."""
+    cid = _clean(category).upper()
+    cats = {_category_of(c) for c in wb.selected_subcaps()}
+    if cid not in cats:
+        raise PrelimRefusal(f"{cid!r} is not a category in this run's scope "
+                            f"({', '.join(sorted(c for c in cats if c))})")
+    if basis not in C.PEER_BASIS:
+        raise PrelimRefusal(
+            f"peer basis {basis!r} is not one of {', '.join(C.PEER_BASIS)}")
+    rows = [r for r in wb.rows("Peer_Benchmarks")
+            if _clean(r.get("Category_ID")).upper() == cid]
+    if not rows:
+        raise PrelimRefusal(
+            f"no Peer_Benchmarks row for {cid}: freeze the peer set first "
+            f"(`engine.prelim peers --peer … --rule …`), which writes the grid")
+    if len(_clean(source)) < 12:
+        raise PrelimRefusal("say where the peer figure came from (--source, >=12 chars)")
+
+    def _num(v, name):
+        if v is None or _clean(v) == "":
+            return None
+        try:
+            x = float(v)
+        except (TypeError, ValueError):
+            raise PrelimRefusal(f"{name} {v!r} is not a number")
+        if not 1.0 <= x <= 5.0:
+            raise PrelimRefusal(f"{name} {x} is off the 1.0–5.0 maturity scale")
+        return x
+
+    med, lo, hi = _num(median, "median"), _num(p25, "p25"), _num(p75, "p75")
+    if basis == "cannot_estimate":
+        if med is not None:
+            raise PrelimRefusal("cannot_estimate carries NO median — a figure "
+                                "with that basis is a guess wearing a number")
+    elif med is None:
+        raise PrelimRefusal(f"basis {basis!r} carries a median; use "
+                            f"cannot_estimate to record that none could be had")
+    if lo is not None and hi is not None and med is not None and not lo <= med <= hi:
+        raise PrelimRefusal(f"median {med} is outside its own quartiles [{lo}, {hi}]")
+    wb.update_row("Peer_Benchmarks", "Category_ID", rows[0]["Category_ID"], {
+        "Peer_Median": med if med is not None else "",
+        "Peer_P25": lo if lo is not None else "",
+        "Peer_P75": hi if hi is not None else "",
+        "Peer_Basis": f"{basis}: {_clean(source)}",
+        "Peer_Scores": _clean(peer_scores),
+        "As_Of": _utcnow()[:10]})
+    return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
+
+
 def complete(wb: RunWorkbook) -> dict:
     """Sign PRELIM off — refusing while anything is open."""
     st = state(wb)
@@ -604,6 +683,15 @@ def main(argv=None) -> int:
                    help="how the peer FIGURES will be obtained; this is the "
                         "token the handoff lock freezes")
 
+    m = common(sub.add_parser("peer-median"))
+    m.add_argument("--category", required=True)
+    m.add_argument("--median"); m.add_argument("--p25"); m.add_argument("--p75")
+    m.add_argument("--basis", required=True, choices=C.PEER_BASIS)
+    m.add_argument("--source", required=True,
+                   help="where the figure came from — the table, the "
+                        "recomputation, the inference")
+    m.add_argument("--peer-scores", default="")
+
     common(sub.add_parser("complete"))
 
     a = ap.parse_args(argv)
@@ -640,6 +728,11 @@ def main(argv=None) -> int:
                                       evidence=a.evidence), indent=2))
         elif a.cmd == "peers":
             print(json.dumps(peers(wb, a.peer, rule=a.rule, basis=a.basis),
+                             indent=2, default=str))
+        elif a.cmd == "peer-median":
+            print(json.dumps(peer_median(wb, category=a.category, median=a.median,
+                                         p25=a.p25, p75=a.p75, basis=a.basis,
+                                         source=a.source, peer_scores=a.peer_scores),
                              indent=2, default=str))
         else:
             print(json.dumps(complete(wb), indent=2))

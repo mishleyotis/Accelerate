@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO / "apps" / "worker"))
 
 from engine import contract as C, ledger as L, report_spec as RS   # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from fixtures import (close_prelim, make_shippable,  # noqa: E402
+from fixtures import (close_prelim, fire_volleys, make_shippable,  # noqa: E402
                       sign_off_sections, synthesise)
 from engine import floors_gate, runstate                           # noqa: E402
 
@@ -62,14 +62,8 @@ def finished_run(tmp_path_factory):
     wb = run.open()
 
     for i, cell in enumerate(wb.selected_subcaps()):
-        L.append_search(wb, subcap=cell, facet="works",
-                        query=f'"Acme Credit Union" {cell} rollout {i}',
-                        tool="web_search", hits=6, kept=2)
-        L.append_search(
-            wb, subcap=cell, facet="contradicts",
-            query=f'"Acme Credit Union" enforcement OR lawsuit OR criticism '
-                  f'OR abandoned OR delayed {i}',
-            tool="web_search", hits=0, kept=0, outcome="no hits")
+        # All five volleys per cell — the gate counts them (2026-09-03).
+        fire_volleys(wb, cell, n=2)
         # Two source identities per subcap: single_source_fact (a blocking
         # gate term since the 2026-08-29 calibration) refuses a FACT whose
         # whole base is one host, and the synthesis below claims two
@@ -171,7 +165,7 @@ def _narrate(wb):
 
 def test_the_workbook_carries_the_whole_run(finished_run):
     wb = finished_run.open()
-    assert len(wb.rows("Search_Log")) == 36       # 18 subcaps x 2 volleys
+    assert len(wb.rows("Search_Log")) == 90       # 18 subcaps x 5 volleys
     assert len(wb.rows("Evidence_Detail")) == 56  # 18 x 3, + 2 profile rows
     assert len(wb.rows("Gate_Log")) == 2
     assert all(r["Dominant_Claim"] for r in wb.scoring_rows())

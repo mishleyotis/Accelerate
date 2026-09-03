@@ -64,6 +64,7 @@ ADVISORY_TERMS = (
     "followups_outstanding",
     "ladder_overstated",
     "timeline_missing",
+    "absence_single_tool",
 )
 
 
@@ -90,6 +91,11 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "challenge_not_independent": [],
         "timeline_missing": [], "followups_outstanding": [],
         "absence_unsearched": [],
+        # 2026-09-03 (owner: "marked as no evidence without any enrichment
+        # efforts … not even looking at the 5 volley structure"): the two
+        # terms that make an empty cell EARN its emptiness.
+        "volleys_incomplete": [], "absence_undeclared_empty": [],
+        "absence_single_tool": [],
     }
     items = 0
     searched_cells = 0
@@ -152,6 +158,34 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             searched_cells += 1
         if not eids and not cell_searches:
             findings["absence_unsearched"].append(cell)
+
+        # THE FIVE VOLLEYS, PER SUBCAP. `absence_unsearched` asked whether
+        # ANYBODY looked; one shallow query cleared it, and the protocol's
+        # own rule — every volley fires or is NOT_RUN with a reason — was
+        # only measured on rows that reached synthesis (`dq_gaps`, below the
+        # `continue`). So a cell could close NO_EVIDENCE on a single `works`
+        # query while `fails`, `value`, `contradicts` and `corroborates`
+        # were never asked: the Golden 1 reference fired `fails` three times
+        # in 690 cells. Here every askable facet must have a LOGGED search
+        # for THIS cell, evidence or none — a volley that did not fire is not
+        # a volley that found nothing.
+        vs = L.volley_status(wb, cell, searches)
+        if vs["missing"]:
+            findings["volleys_incomplete"].append(
+                {"subcap": cell, "missing": vs["missing"],
+                 "fired": vs["fired"]})
+        if not eids:
+            # An empty cell closes ONLY as a declared absence — the ladder,
+            # the proxy log, the volleys — written by `engine.cli absence`.
+            # Anything else is a seeded row nobody finished.
+            if not L.is_declared_absent(r):
+                findings["absence_undeclared_empty"].append(cell)
+            # Enrichment effort: an absence that only ever asked one tool
+            # (a single web engine) is advisory — the connectors (Exa,
+            # Tavily, the toolkit's named artefacts) are the deep search.
+            if len(vs["tools"]) < 2 and cell_searches:
+                findings["absence_single_tool"].append(
+                    {"subcap": cell, "tools": vs["tools"]})
 
         if not synthesised:
             continue
@@ -219,7 +253,16 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # structural independence — the same actor wrote the synthesis and
         # its verdict.
         verdict = str(r.get("Challenge_Verdict") or "").strip().upper()
-        if verdict not in ("PASS", "FAIL", "NOT_RUN") and \
+        if L.is_declared_absent(r):
+            # A DECLARED absence (2026-09-03) is closed by `declare_absence`'s
+            # own refusals — every volley fired, every ladder rung in the
+            # Search_Log, a proxy log — not by a challenger's opinion of
+            # prose the engine wrote. Its honesty is proven mechanically
+            # above (volleys_incomplete, absence_undeclared_empty,
+            # ladder_overstated); demanding a challenge verdict on it would
+            # only add a token-costly step with nothing to falsify.
+            pass
+        elif verdict not in ("PASS", "FAIL", "NOT_RUN") and \
                 not verdict.startswith("NOT_RUN"):
             findings["challenge_missing"].append(cell)
         else:
@@ -278,6 +321,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "absence_undeclared", "evidence_smear", "challenge_missing",
         "challenge_not_independent", "single_source_fact",
         "synthesis_missing", "dq_gaps", "absence_unsearched",
+        "volleys_incomplete", "absence_undeclared_empty",
     ) if findings[k]]
     if not category_floor_met:
         blocking.append("category_items_below_floor")
