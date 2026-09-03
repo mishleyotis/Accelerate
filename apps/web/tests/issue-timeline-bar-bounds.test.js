@@ -103,10 +103,11 @@ const ISSUES = [
   linked_subcap_ids: [], e_ids: ["E-CC-188"],
 }));
 
-function contextPage() {
+function contextPage(issues) {
   return {
     sections: {
-      issue_register: { data: { ...ENV, verified_absent: false, issues: ISSUES } },
+      issue_register: { data: { ...ENV, verified_absent: false,
+                                        issues: issues || ISSUES } },
       timeline: { data: { ...ENV, events: [], arc_shape: null, storyline: null,
                           verified_sparse: true } },
       acquisitions: { data: { ...ENV, rows: [], empty_state: {
@@ -122,7 +123,7 @@ function contextPage() {
   };
 }
 
-async function renderContext(width) {
+async function renderContext(width, issues) {
   const { server, base } = await startServer(BOOT);
   const browser = await pw.chromium.launch({ executablePath: CHROME,
                                              args: ["--no-sandbox"] });
@@ -131,7 +132,7 @@ async function renderContext(width) {
     await page.route("**/api/entity/**", async (route) => {
       const which = new URL(route.request().url()).pathname
         .split("/").pop().split("?")[0];
-      const body = which === "context" ? contextPage() : { sections: {} };
+      const body = which === "context" ? contextPage(issues) : { sections: {} };
       return route.fulfill({ status: 200, contentType: "application/json",
                              body: JSON.stringify(body) });
     });
@@ -220,5 +221,69 @@ test("issue timeline · every matter is still named in its row",
       assert.ok(body.includes(head) || body.includes(i.issue_id),
         `${i.issue_id} is not named anywhere on the page`);
     }
+  } finally { await browser.close(); server.close(); }
+});
+
+/* ---------------------------------------------------------------------------
+ * The label inside the bar, which is a SEPARATE defect from the bar's bounds.
+ *
+ * Reported again 2026-09-03 from the promoted page, after the bounds fix had
+ * landed and held: a 432px bar carrying a 71-character title rendered
+ * "Integration architecture runs point to p…", cut mid-word.
+ *
+ * The guard at the time was `width >= 12` — a PERCENTAGE. A percentage cannot
+ * answer whether text fits: the lane's pixel width depends on the viewport
+ * and the label's on the string. Both earlier attempts guessed and both
+ * shipped a truncated title (the first rendered an 85-character matter as the
+ * single letter "D").
+ *
+ * `IssueBar` measures instead: it compares `scrollWidth` to `clientWidth` and
+ * drops the label when it overflows, re-checking on resize. These tests pin
+ * both directions, because a guard that always hides the label would pass the
+ * first assertion and be useless.
+ * ------------------------------------------------------------------------ */
+
+async function labelled(page) {
+  return page.evaluate(() => {
+    const out = [];
+    for (const el of document.querySelectorAll("div[style*='position: absolute']")) {
+      const s = getComputedStyle(el);
+      if (s.position !== "absolute") continue;
+      const lane = el.offsetParent;
+      if (!lane || lane.getBoundingClientRect().height < 20) continue;
+      const filled = s.backgroundColor && !/^rgba\(0, 0, 0, 0\)$/.test(s.backgroundColor);
+      if (!filled) continue;
+      const text = (el.textContent || "").trim();
+      if (!text) continue;
+      out.push({ text, clipped: el.scrollWidth > el.clientWidth });
+    }
+    return out;
+  });
+}
+
+for (const width of [1512, 1180, 960]) {
+  test(`issue timeline · no bar shows a clipped title at ${width}px`,
+       { skip }, async () => {
+    const { page, browser, server } = await renderContext(width);
+    try {
+      const bad = (await labelled(page)).filter((b) => b.clipped);
+      assert.deepEqual(bad, [],
+        `bar(s) showing a title cut mid-word: ${JSON.stringify(bad)}`);
+    } finally { await browser.close(); server.close(); }
+  });
+}
+
+test("issue timeline · a title that fits is still shown", { skip }, async () => {
+  /* The other direction, and the one that keeps this honest. A guard that
+     hid every label would satisfy every assertion above while making the
+     chart strictly worse. I-003 spans two years, so its bar is the widest on
+     the axis; with a short title it must carry it. */
+  const short = ISSUES.map((i) =>
+    i.issue_id === "I-003" ? { ...i, title: "Point to point" } : i);
+  const { page, browser, server } = await renderContext(1512, short);
+  try {
+    const shown = (await labelled(page)).map((b) => b.text);
+    assert.ok(shown.includes("Point to point"),
+      `a short title on the widest bar must render; saw ${JSON.stringify(shown)}`);
   } finally { await browser.close(); server.close(); }
 });
