@@ -167,3 +167,74 @@ def test_a_marked_r_layer_passes():
     self_heal.check_internal_marking(
         {"scores": {"r_layer": {}, "internal_only": ["r_layer"]}}, findings)
     assert findings == []
+
+
+# ---------------------------------------------------------------- template
+
+import openpyxl                                             # noqa: E402
+import check_template                                       # noqa: E402
+
+
+def _wb(tmp_path, tabs, rows=2):
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for t in tabs:
+        ws = wb.create_sheet(t[:31])
+        for r in range(rows):
+            ws.append([f"h{r}", "v"])
+    p = tmp_path / "wb.xlsx"
+    wb.save(p)
+    return str(p)
+
+
+def test_the_tab_contract_comes_from_the_worker_not_a_copy():
+    """A second copy of the read-tab list in this script would be wrong the
+    first time the app changed. It is imported."""
+    assert len(check_template._TAB_TARGET) >= 20
+    assert "Subcap_Scores" in check_template._TAB_TARGET
+
+
+def test_a_missing_tab_names_the_surface_it_starves(tmp_path):
+    """The whole point: "Entity_Timeline missing" is not actionable, "the
+    context page will render an empty timeline" is."""
+    r = check_template.inspect(_wb(tmp_path, ["Subcap_Scores", "Firmographics"]))
+    missing = dict(r["missing"])
+    assert "Entity_Timeline" in missing
+    assert missing["Entity_Timeline"], "every missing tab must name a surface"
+
+
+def test_a_present_but_empty_tab_counts_as_missing(tmp_path):
+    """A template copied and never filled reaches the app identically to one
+    that was never copied, and is the more common failure."""
+    r = check_template.inspect(_wb(tmp_path, ["Subcap_Scores"], rows=1))
+    assert [t for t, _ in r["empty"]] == ["Subcap_Scores"]
+    assert not r["ok"]
+
+
+def test_a_tab_nothing_reads_is_reported_but_is_not_an_error(tmp_path):
+    r = check_template.inspect(_wb(tmp_path, ["Subcap_Scores", "Scratch_Notes"]))
+    assert "Scratch_Notes" in r["unread"]
+    assert "Scratch_Notes" not in dict(r["missing"])
+
+
+def test_tab_names_are_matched_the_way_the_parser_matches_them(tmp_path):
+    """`_tab_key` normalises case and punctuation, so a workbook spelling a
+    tab `subcap scores` must not be reported missing."""
+    r = check_template.inspect(_wb(tmp_path, ["subcap scores"]))
+    assert "Subcap_Scores" not in dict(r["missing"])
+
+
+def test_the_canonical_sources_registry_is_loadable_and_pins_the_reference():
+    """The file exists so an agent cannot lose the answer between sessions;
+    this asserts it stays parseable and keeps naming both the template and
+    the measured reference."""
+    import json
+    from pathlib import Path
+
+    p = (Path(check_template.__file__).resolve().parents[3]
+         / "references" / "canonical_sources.json")
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["scoring_workbook_template"]["drive_file_id"]
+    ref = d["reference_examples"]["scoring_workbook"]["measured_2026_09_03"]
+    assert ref["read_tabs_with_data"] == 28 and ref["composite"] == 2.25
+    assert d["known_bad_shapes"][0]["scoring_workbook"]["scored_cells"] == 0
