@@ -37,17 +37,50 @@ function IssueBar({
        client width, so a hidden label would always report "fits" and the
        first render would latch it on forever. */
     const measure = () => {
-      const prev = el.textContent;
+      /* Measure in the state the label will RENDER in, which means with the
+         horizontal padding applied.
+          The padding is only present when a label is shown, and `fits` starts
+         false — so measuring as-is compares the text against the FULL box
+         and a label needing every pixel "fits", then clips the moment the
+         6px each side arrives. That is a second, quieter version of the
+         mistake this component replaced: deciding from a proxy instead of
+         from what the reader sees. */
+      const prevText = el.textContent;
+      const prevPad = el.style.padding;
+      el.style.padding = "0 6px";
       el.textContent = label || "";
       const ok = el.scrollWidth <= el.clientWidth;
-      el.textContent = prev;
+      el.textContent = prevText;
+      el.style.padding = prevPad;
       setFits(ok);
     };
     measure();
-    if (typeof ResizeObserver === "undefined") return undefined;
+
+    /* Re-measure when the WEB FONT arrives. `useLayoutEffect` runs before
+       a late font swap, so the first measurement can be taken in a narrower
+       fallback face: the label "fits", the real face loads, and the label
+       clips — with no resize to notice it. That is exactly how this test
+       passed locally (font cached) and failed on a cold CI runner at
+       1512px, showing the full title with `clipped: true`.
+        `document.fonts.ready` settles once, after which the measurement is
+       against the face the reader actually sees. Guarded, because jsdom and
+       older engines have no font-loading API. */
+    let live = true;
+    const remeasure = () => {
+      if (live) measure();
+    };
+    if (typeof document !== "undefined" && document.fonts && document.fonts.ready && document.fonts.ready.then) {
+      document.fonts.ready.then(remeasure).catch(() => {});
+    }
+    if (typeof ResizeObserver === "undefined") return () => {
+      live = false;
+    };
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      live = false;
+      ro.disconnect();
+    };
   }, [label, width, left]);
   return /*#__PURE__*/React.createElement("div", {
     ref: ref,
