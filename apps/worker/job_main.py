@@ -85,6 +85,24 @@ _RPT_DECOYS = ("template",)
 #: two are one name and this comment is the only place that says so.
 ARCHIVE_SEGMENT = "_superseded"
 
+#: Directories inside a client folder that hold COPIES, not the package.
+#:
+#: `_superseded` is the engine's own archive and was always excluded. These
+#: are the ones agents create while working, and nothing excluded them:
+#: measured 2026-09-03 on Bank of Travelers Rest, one client folder held four
+#: workbooks at three depths — root, `DMAI - <client>/`, and
+#: `DMAI - <client>/memory-backup/` — three of them byte-identical. The scan
+#: reads the whole tree at any depth and keeps ONE artefact per kind, so
+#: every copy was a candidate to be chosen over the current one, and the copy
+#: it chose was a research-stage workbook with zero scored cells while the
+#: assessment workbook holding all 688 sat in `memory-backup`.
+#:
+#: Matched on a whole path SEGMENT, case-insensitively, so a client legitimately
+#: named "Backup Bancorp" is untouched.
+COPY_SEGMENTS = ("memory-backup", "memory_backup", "backup", "backups",
+                 "archive", "archived", "old", "_old", "superseded",
+                 "previous", "versions", ".trash")
+
 #: The Client Research Profile, in the spelling `classification.py` already
 #: uses for it (priority 3). One artefact, one pattern, two classifiers that
 #: now agree.
@@ -111,6 +129,11 @@ def _classify_artefact(f):
     # is a candidate to be chosen over the current one — the retention would
     # have created the very ambiguity it exists to remove.
     if any(seg.strip().lower() == ARCHIVE_SEGMENT for seg in f.path_segments):
+        return None
+    # The same rule for the directories AGENTS leave copies in. Without it a
+    # backup of last week's workbook competes with this week's on equal
+    # terms, and filename order decides which the client sees.
+    if any(seg.strip().lower() in COPY_SEGMENTS for seg in f.path_segments[:-1]):
         return None
     if name.endswith(".json") and "manifest" in name:
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
@@ -214,6 +237,14 @@ def package_key(tree):
     return key
 
 
+
+def _mtime(f) -> str:
+    """A file's modified time as a sortable string, "" when the source gives
+    none. RFC-3339 from Drive sorts lexicographically, so no parsing is
+    needed and a missing value loses every comparison — which is right: an
+    undated candidate should never displace a dated one."""
+    return getattr(f, "modified_time", "") or ""
+
 def _package_groups(to_process, key=None):
     """Group changed files by client folder and keep the best candidate per
     artefact kind. Returns ALL groups — the caller splits ingestable packages
@@ -230,7 +261,16 @@ def _package_groups(to_process, key=None):
         if not c:
             continue
         kind, rank = c
-        if kind not in g or rank < r[kind]:
+        # Lowest rank wins; among EQUAL ranks the most recently modified
+        # does. The tie used to fall to whichever file the walk met first —
+        # stable, arbitrary, and unrelated to which copy is current. That is
+        # the "agents using old cached reports" report of 2026-09-03: an
+        # agent rewrites the workbook, an older sibling of the same rank is
+        # still met first, and the run reads the stale one while the scores
+        # look missing.
+        prev = g.get(kind)
+        if prev is None or rank < r[kind] or (
+                rank == r[kind] and _mtime(f) > _mtime(prev)):
             g[kind], r[kind] = f, rank
         # The runners-up are KEPT, under `<kind>__alt`, in rank order.
         #

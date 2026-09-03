@@ -801,3 +801,86 @@ def test_a_backfill_does_not_contend_with_the_scan_for_a_lock(monkeypatch):
         assert m in flag_block, (
             f"{m} runs a backfill but is not in the `diagnostic` flag, so it "
             "would contend with the scan and open a scan row")
+
+
+def _fm(folder, name, mtime, sub=None, fid=None):
+    """A FileStat with a modified time, optionally inside a subfolder."""
+    segs = (folder,) + ((sub,) if sub else ()) + (name,)
+    return FileStat(file_id=fid or "/".join(segs), path_segments=segs,
+                    name=name, checksum=fid or name, size_bytes=10,
+                    mime_type="", modified_time=mtime)
+
+
+def test_a_copy_directory_is_not_a_package():
+    """Bank of Travelers Rest, measured 2026-09-03: ONE client folder held
+    four workbooks at three depths — root, `DMAI - <client>/`, and
+    `DMAI - <client>/memory-backup/` — three byte-identical. The scan reads
+    the whole tree at any depth and keeps one artefact per kind, so every
+    copy competed with the current one on equal terms."""
+    import job_main
+
+    tree = [_fm("BOTR - DMA", "DMA_Scoring_Workbook_b.xlsx", "2026-09-02T15:35:02Z"),
+            _fm("BOTR - DMA", "DMA_Scoring_Workbook_b.xlsx", "2026-09-02T15:36:46Z",
+                sub="memory-backup", fid="backup-copy")]
+    parts = job_main._package_groups(tree)["BOTR - DMA"]
+    assert parts["workbook"].file_id != "backup-copy", (
+        "a workbook under memory-backup/ must not be a candidate, however "
+        "recently it was written")
+
+
+def test_a_client_named_backup_is_not_excluded():
+    """The exclusion matches a whole path SEGMENT, so an institution whose
+    name contains the word is untouched."""
+    import job_main
+
+    tree = [_fm("Backup Bancorp - DMA", "DMA_Scoring_Workbook_b.xlsx",
+                "2026-09-01T00:00:00Z")]
+    parts = job_main._package_groups(tree)["Backup Bancorp - DMA"]
+    assert "workbook" in parts, "a client folder is not a copy directory"
+
+
+def test_the_newest_copy_of_equal_rank_wins():
+    """The reported defect: an agent rewrites the workbook and the scan reads
+    an older sibling, so the scores read as missing and the work is redone.
+
+    Both files rank 0 (`scoring`), so rank cannot separate them; the tie used
+    to fall to whichever the walk met first — stable, arbitrary, unrelated to
+    which copy is current."""
+    import job_main
+
+    older = _fm("C - DMA", "DMA_Scoring_Workbook_c.xlsx", "2026-09-01T10:00:00Z",
+                fid="older")
+    newer = _fm("C - DMA", "DMA_Scoring_Workbook_c.xlsx", "2026-09-02T10:00:00Z",
+                sub="DMAI - C", fid="newer")
+    for order in ([older, newer], [newer, older]):
+        parts = job_main._package_groups(order)["C - DMA"]
+        assert parts["workbook"].file_id == "newer", (
+            "the most recently modified copy of equal rank must win, "
+            "whichever order the walk met them in")
+
+
+def test_rank_still_beats_recency():
+    """Recency breaks a tie WITHIN a rank; it does not overturn precedence.
+    A newer `assessment` workbook must not displace a `scoring` one — the
+    content fall-through (`_pick_workbook`) is what handles an empty
+    scoring workbook, and it needs the ranked choice to be the ranked one."""
+    import job_main
+
+    tree = [_fm("D - DMA", "DMA_Scoring_Workbook_d.xlsx", "2026-09-01T00:00:00Z",
+                fid="scoring"),
+            _fm("D - DMA", "DMA_Assessment_Workbook_d.xlsx", "2026-09-09T00:00:00Z",
+                fid="assessment")]
+    parts = job_main._package_groups(tree)["D - DMA"]
+    assert parts["workbook"].file_id == "scoring"
+    assert [a.file_id for a in parts["workbook__alt"]] == ["assessment"]
+
+
+def test_an_undated_candidate_never_displaces_a_dated_one():
+    import job_main
+
+    tree = [_fm("E - DMA", "DMA_Scoring_Workbook_e.xlsx", "2026-09-01T00:00:00Z",
+                fid="dated"),
+            _fm("E - DMA", "DMA_Scoring_Workbook_e.xlsx", "", sub="DMAI - E",
+                fid="undated")]
+    parts = job_main._package_groups(tree)["E - DMA"]
+    assert parts["workbook"].file_id == "dated"
