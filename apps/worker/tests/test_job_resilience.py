@@ -522,3 +522,153 @@ def test_backfill_composite_survives_one_unreadable_workbook(monkeypatch):
     assert rc == 1, "a failure must be reported in the exit code"
     assert len(conn.cur.updated) == 1, "the good workbook still lands"
     assert conn.cur.updated[0][1] == "good"
+
+
+class _MetaCursor:
+    """Enough of a cursor for backfill_workbook_metadata: one SELECT of runs
+    holding no workbook metadata, then UPDATEs of run_manifest and runs."""
+
+    def __init__(self, runs, completed_at_rowcount=1):
+        self._runs = runs
+        self.meta_updates, self.date_updates = [], []
+        self._rows = []
+        self.rowcount = completed_at_rowcount
+
+    def execute(self, sql, params=None):
+        if "FROM runs r" in sql and "SELECT" in sql:
+            assert "'workbook_metadata' IS NULL" in sql, \
+                "must only pick runs whose workbook metadata is unset"
+            self._rows = list(self._runs)
+        elif "UPDATE run_manifest" in sql:
+            assert "'{workbook_metadata}'" in sql, \
+                "only the workbook_metadata key may be written"
+            assert "manifest" not in sql.split("jsonb_set")[1][:60], \
+                "the package's own manifest must never be edited"
+            self.meta_updates.append(params)
+        elif "UPDATE runs" in sql:
+            assert "completed_at IS NULL" in sql, \
+                "a stated completion date must never be overwritten"
+            self.date_updates.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self._rows
+
+
+class _MetaConn:
+    def __init__(self, runs, **kw):
+        self.cur = _MetaCursor(runs, **kw)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        pass
+
+
+def test_backfill_wbmeta_fills_the_run_that_served_no_date(monkeypatch):
+    """Golden 1's own case: no manifest date key, no YYYYMMDD token in
+    `DMA-2026-GOLDEN1-001`, and `last_written_at` sitting unread on the
+    workbook's own Run_Metadata tab."""
+    import json as _json
+
+    import job_main
+
+    tree = [_f("Golden 1 Credit Union - DMA HYBRID", "DMA_Scoring_Workbook_G1.xlsx"),
+            _f("No Workbook - DMA", "DMA_Assessment_Report_X.docx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_run_metadata",
+                        lambda p: {"run_id": "DMA-2026-GOLDEN1-001",
+                                   "last_written_at": "2026-08-31T09:33:59Z"})
+
+    conn = _MetaConn([("run-g1", "Golden 1 Credit Union - DMA HYBRID"),
+                      ("run-x", "No Workbook - DMA")])
+    assert job_main.backfill_workbook_metadata(conn, "token", groups) == 0
+
+    assert len(conn.cur.meta_updates) == 1, "only the folder shipping a workbook"
+    payload, run_id = conn.cur.meta_updates[0]
+    assert run_id == "run-g1"
+    assert _json.loads(payload)["last_written_at"] == "2026-08-31T09:33:59Z"
+
+    assert len(conn.cur.date_updates) == 1, (
+        "the date the evidence bands hang off must be filled in the same pass")
+    stamp, dated_run = conn.cur.date_updates[0]
+    assert dated_run == "run-g1"
+    assert stamp.startswith("2026-08-31")
+
+
+def test_backfill_wbmeta_writes_no_date_when_the_tab_states_none(monkeypatch):
+    """A Run_Metadata tab without any date key still lands as metadata, but
+    must not invent a completion date."""
+    import job_main
+
+    tree = [_f("Undated - DMA", "DMA_Scoring_Workbook_U.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_run_metadata",
+                        lambda p: {"scope_mode": "FULL"})
+
+    conn = _MetaConn([("run-u", "Undated - DMA")])
+    assert job_main.backfill_workbook_metadata(conn, "token", groups) == 0
+    assert len(conn.cur.meta_updates) == 1
+    assert conn.cur.date_updates == [], "no date key means no completed_at"
+
+
+def test_backfill_wbmeta_writes_nothing_for_a_workbook_with_no_tab(monkeypatch):
+    """An empty read is a fact about the workbook, not something to store."""
+    import job_main
+
+    tree = [_f("Bare - DMA", "DMA_Scoring_Workbook_B.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_run_metadata", lambda p: {})
+
+    conn = _MetaConn([("run-b", "Bare - DMA")])
+    assert job_main.backfill_workbook_metadata(conn, "token", groups) == 0
+    assert conn.cur.meta_updates == [] and conn.cur.date_updates == []
+    assert conn.commits == 0
+
+
+def test_the_worker_and_the_sql_walk_the_same_date_candidates():
+    """0031's rule, pinned. `_stated_completed_at` and the probe array in
+    `run_assessment_date` must name the same fields in the same order, or a
+    run's `completed_at` and its served `assessment_date` disagree — the same
+    date resolved twice, differently, from one document.
+
+    Both sides are read from what actually RUNS: the worker's own source, and
+    the SQL the migration emits (not its source, which also mentions the field
+    in the template that inserts it).
+    """
+    import importlib.util as _u
+    import inspect
+    import os as _os
+    import re
+    import sys as _sys
+    import types as _types
+
+    from dma_worker import persist
+
+    src = inspect.getsource(persist._stated_completed_at)
+    # `a.get("date")` is the nested `assessment.date`; the flat keys follow.
+    worker = ["assessment.date"] + re.findall(r'manifest\.get\("([a-z_]+)"\)', src)
+    worker = [k for k in worker if k != "assessment"]
+
+    mig = _os.path.join(_os.path.dirname(__file__), "..", "..", "..",
+                        "migrations", "versions",
+                        "0058_workbook_metadata_dates.py")
+    _sys.modules.setdefault("alembic", _types.SimpleNamespace(
+        op=_types.SimpleNamespace(execute=lambda *a: None)))
+    spec = _u.spec_from_file_location("_m0058", mig)
+    mod = _u.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    probe = re.findall(r"\['([a-z_.]+)',\s+'[A-Z_]+'\]", mod._fn(True))
+
+    assert worker == probe, (
+        f"the worker walks {worker} and the SQL walks {probe}; 0031 requires "
+        "one candidate list in one order")

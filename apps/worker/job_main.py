@@ -32,6 +32,7 @@ from dma_worker.workbook_parser import (_stated_overall_grain,
                                         mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
+                                        parse_run_metadata,
                                         parse_peer_benchmarks,
                                         parse_evidence_index,
                                         parse_recommendations,
@@ -457,12 +458,100 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             report_artefact_id=(parts["report"].file_id
                                 if "report" in parts else None),
             grains=parse_grain_summaries(wb_path, companion),
+            # The workbook's Run_Metadata tab, stored beside the
+            # manifest so `last_written_at` can resolve a date the
+            # package's own manifest never stated.
+            wb_metadata=parse_run_metadata(wb_path),
             research=research,
         )
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}
         return res, rationales
 
 
+
+
+def backfill_workbook_metadata(conn, token, groups) -> int:
+    """Fill `run_manifest.payload.workbook_metadata` for runs ingested before
+    anything read the workbook's own `Run_Metadata` tab.
+
+    THE DEFECT. `run_assessment_date` walks six manifest keys and then the
+    YYYYMMDD token in the request id. Golden 1 carries none of the six, and
+    `DMA-2026-GOLDEN1-001` has no eight-digit token, so the run resolved
+    UNKNOWN and served no assessment date — while its own workbook states
+    `last_written_at = 2026-08-31T09:33:59Z` on a tab nothing read for a date.
+
+    WHAT THAT COSTS. Not one header line: the freshness dot has nothing to
+    draw, and the same candidate list feeds `runs.completed_at`, which is
+    every evidence row's `reference_date`. With it null the generated
+    `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY
+    item — 537 rows on this run, each rendering "unverified" beside evidence
+    the package dated.
+
+    Migration 0058 is the read half (the probe row, and the view handing the
+    resolver `workbook_metadata || manifest`). This is the other half: a run
+    ingested before it cannot benefit without re-reading its own workbook,
+    and the package scan is idempotent, so an unchanged tree re-ingests
+    nothing.
+
+    Writes ONLY the `workbook_metadata` key — `payload["manifest"]` is never
+    touched, because a key written into the package's own artefact after the
+    fact is indistinguishable from one the package shipped.
+
+    `completed_at` is filled in the same pass and only where it is NULL: it
+    is the column the evidence bands hang off, and leaving it behind would
+    fix the dot while every row still read UNVERIFIED.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                     JOIN run_manifest m ON m.run_id = r.id
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND m.payload -> 'workbook_metadata' IS NULL
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-wbmeta: {len(todo)} run(s) hold no workbook metadata")
+    filled = skipped = empty = dated = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                md = parse_run_metadata(wp)
+            if not md:
+                empty += 1
+                print(f"backfill-wbmeta: {folder}: workbook states no Run_Metadata")
+                continue
+            cur.execute(
+                """UPDATE run_manifest
+                      SET payload = jsonb_set(payload, '{workbook_metadata}',
+                                              %s::jsonb, true)
+                    WHERE run_id = %s""",
+                (json.dumps(md), run_id))
+            # The date the bands hang off, only where nothing stated one.
+            stamp = persist._stated_completed_at(md)
+            if stamp:
+                cur.execute(
+                    "UPDATE runs SET completed_at = %s "
+                    " WHERE id = %s AND completed_at IS NULL",
+                    (stamp, run_id))
+                dated += cur.rowcount or 0
+            conn.commit()
+            print(f"backfill-wbmeta: {folder} -> {len(md)} key(s)"
+                  + (f", completed_at {stamp}" if stamp else ""))
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-wbmeta FAILED: {folder}: {exc!r}")
+    print(f"backfill-wbmeta: {filled} filled ({dated} gained a completed_at), "
+          f"{skipped} have no workbook artefact, {empty} state none, "
+          f"{failed} failed")
+    return 1 if failed else 0
 
 def backfill_composite(conn, token, groups) -> int:
     """Fill `runs.composite` for a run whose workbook states it and whose
@@ -1231,6 +1320,7 @@ def main() -> int:
     diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
                       or os.environ.get("BACKFILL_GRAINS")
                       or os.environ.get("BACKFILL_COMPOSITE")
+                      or os.environ.get("BACKFILL_WBMETA")
                       or os.environ.get("BACKFILL_EVIDENCE")
                       or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
@@ -1264,6 +1354,11 @@ def main() -> int:
 
         if os.environ.get("BACKFILL_GRAINS"):
             rc = backfill_grains(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_WBMETA"):
+            rc = backfill_workbook_metadata(conn, drive.metadata_token(), groups)
             conn.close()
             return rc
 

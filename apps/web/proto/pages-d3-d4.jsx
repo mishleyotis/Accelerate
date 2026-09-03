@@ -1479,10 +1479,21 @@ function ClientPlatform({ entity, run }) {
                   <button onClick={() => setOpenPrereq(o => o === idx ? null : idx)}
                     title={pfText(p.condition) || ""}
                     style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
-                    <div className="row" style={{ gap: 6, marginBottom: 3 }}>
+                    {/* WRAPS, and the basis chip does not pin itself.
+                        Reported 2026-09-02 from the promoted platform page:
+                        chips read "Governed member domain owed in the cat…"
+                        and "Licence and user-seat audit decides a…", cut
+                        mid-word at the card edge. `basis` is a sentence-shaped
+                        status label with no contract length, and this column
+                        is ~300px, so a row that cannot wrap around a chip that
+                        cannot shrink has exactly one outcome. The chip keeps
+                        `.b`'s own wrapping (app.css) instead of an inline
+                        `flexShrink: 0` that overrides it; the row wraps so the
+                        chip takes its own line before it takes the card's. */}
+                    <div className="row" style={{ gap: 6, marginBottom: 3, flexWrap: "wrap" }}>
                       <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase", flexShrink: 0 }}>Condition</span>
                       <span className="spacer" />
-                      {p.basis ? <span className="b b-above" style={{ flexShrink: 0 }}>{pfText(p.basis)}</span> : null}
+                      {p.basis ? <span className="b b-above">{pfText(p.basis)}</span> : null}
                       <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                     </div>
                     <div style={{ fontSize: 12, lineHeight: 1.45 }} className="txt-fit-2">{pfText(p.condition)}</div>

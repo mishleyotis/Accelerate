@@ -515,6 +515,46 @@ def _declared_stage(wb) -> dict | None:
     return md
 
 
+
+def parse_run_metadata(path: str) -> dict:
+    """The workbook's own `Run_Metadata` key/value tab, whole.
+
+    `_declared_stage` already reads this tab, but returns None unless the
+    workbook is a contract-v3 one — it exists to answer "what stage is this",
+    not "what does the package say about itself". So every other key on the
+    tab has been unreadable to the app, and one of them matters a great deal.
+
+    THE SILENCE THIS CLOSES. `run_assessment_date` walks six manifest keys
+    and then the request id's YYYYMMDD token. Golden 1's manifest carries
+    none of the six, and its request id is `DMA-2026-GOLDEN1-001` — no eight
+    digit token — so the run resolved UNKNOWN and served no date. Meanwhile
+    `Run_Metadata!last_written_at` states `2026-08-31T09:33:59Z`.
+
+    The cost is not one missing header line. `completed_at` becomes every
+    evidence row's `reference_date`, so with it null the generated
+    `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY
+    item — 537 rows on this run — and the freshness dot has nothing to draw.
+
+    Returned as a flat dict of normalised key -> value. The caller stores it
+    BESIDE the manifest (`run_manifest.payload.workbook_metadata`), never
+    inside it: the manifest is the package's own artefact and the ingested
+    tier is read-only once scanned. Same shape and same reason as
+    `workbook_grains`.
+    """
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        if "Run_Metadata" not in wb.sheetnames:
+            return {}
+        md = {}
+        for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
+            if row and row[0] and len(row) > 1 and row[1] is not None:
+                key = _norm(row[0])
+                if key and key not in md:
+                    md[key] = str(row[1]).strip()
+        return md
+    finally:
+        wb.close()
+
 def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     result = WorkbookParse(scores=[], observations=[], toggled_out=[])
     stage = _declared_stage(wb)
