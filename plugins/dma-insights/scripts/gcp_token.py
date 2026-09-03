@@ -81,6 +81,37 @@ def path_token(project: str = "digital-maturity-assessor") -> str:
                 return v
     except OSError:
         pass                      # unreadable is the same as absent here
+    # Secret Manager over REST, with the service account this module already
+    # mints tokens for.
+    #
+    # The gcloud rung below is kept, but it must not be the ONLY route:
+    # gcloud is a separate installation with its own vendored certifi, and on
+    # 2026-09-03 that store stopped trusting the environment's proxy CA — so
+    # every `gcloud secrets versions access` failed CERTIFICATE_VERIFY_FAILED
+    # while plain urllib in THIS process reached the same host without
+    # trouble. A module that already speaks Google APIs over HTTPS has no
+    # reason to shell out to another tool to read one string, and depending
+    # on one is how a working credential path disappears for a reason that
+    # has nothing to do with credentials.
+    try:
+        key, _src = load_key()
+        if key is not None:
+            tok = exchange(mint_assertion(key, {"scope": DEFAULT_SCOPE}))
+            at = tok.get("access_token")
+            if at:
+                url = (f"https://secretmanager.googleapis.com/v1/projects/"
+                       f"{project}/secrets/{PATHTOK_SECRET}/versions/latest:access")
+                req = urllib.request.Request(
+                    url, headers={"Authorization": f"Bearer {at}"})
+                with urllib.request.urlopen(req, timeout=60) as r:
+                    body = json.loads(r.read().decode())
+                v = base64.b64decode(
+                    body["payload"]["data"]).decode("utf-8").strip()
+                if v:
+                    return v
+    except Exception:                                        # noqa: BLE001
+        pass                      # fall through to gcloud, then to the error
+
     gcloud = "/opt/google-cloud-sdk/bin/gcloud"
     if not Path(gcloud).exists():
         gcloud = "gcloud"
