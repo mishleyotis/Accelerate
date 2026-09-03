@@ -1,0 +1,899 @@
+{
+  "_readme": [
+    "THE REPORT TEMPLATES, AS DATA. Built 2026-09-03 from the two owner Google Docs",
+    "(ids in each report's `drive_doc_id`; markdown exports beside this file). Until this",
+    "existed, engine/report_spec.py declared its OWN eight sections per report with headings",
+    "the templates do not carry (AUD-0069 said the Docs could not be resolved; they can), so",
+    "every report the engine rendered followed a format nobody had asked for — the owner's",
+    "2026-09-03 finding 'the reports do not follow the required format'.",
+    "",
+    "Every section carries the Doc's own control block: LENGTH (words_min is blocking,",
+    "words_max advisory), the subsections the Doc numbers (blocks — they become real Heading2s",
+    "so the app parses the report at the grain the Doc defines), INPUTS mapped to the engine's",
+    "sheet names, FEEDS (the app surfaces the Doc's Surface Alignment table names), and the",
+    "MINIMUM DATA / MUST INCLUDE / MUST NOT / FAIL IF prose verbatim in spirit. `checks` are",
+    "the countable half of MINIMUM DATA (a regex, a floor, optionally a ceiling and",
+    "distinct-ness); `forbid` are the countable half of MUST NOT. narrative.write refuses a",
+    "section that fails one, and gold_standard.report_findings re-checks the rendered docx.",
+    "",
+    "Card sections (kind pillar / recommendation) are LISTS: one row per card, `card_prefix`",
+    "names the id shape, cards_min/max bound the list, card_words_min is the per-card floor.",
+    "",
+    "Regenerate the markdown exports with `engine.template pin-reports` after the owner edits",
+    "a Doc, then run `engine.template report-drift` — a heading in the export that this file",
+    "does not carry fails the test suite, which is the point: the format is pinned in one",
+    "reviewable place and the renderer, the writer and the gates all read it."
+  ],
+  "pinned_at": "2026-09-03",
+  "reports": {
+    "client_research": {
+      "key": "client_research",
+      "title": "Client Profile Research Report",
+      "short_title": "Client Research Profile",
+      "filename": "Client_Profile_Research_{entity}_{date}.docx",
+      "drive_doc_id": "142FoFcgs2-zzMm2_y4ykQW_gSUVbIOWSMHV_sgITs0Y",
+      "markdown": "client_profile_template.md",
+      "front_matter": [
+        "Document Control and Catalogue Binding",
+        "Surface Alignment"
+      ],
+      "sections": [
+        {
+          "id": "1",
+          "heading": "Firmographics",
+          "kind": "section",
+          "words_min": 150,
+          "words_max": 250,
+          "blocks": [
+            "1.1 Must-present fields",
+            "1.2 Quarantined and absent fields",
+            "1.3 Which registry holds the figure",
+            "1.4 Identity check"
+          ],
+          "inputs": [
+            "Firmographics",
+            "Evidence_Detail"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.firmographics"
+          ],
+          "purpose": "Establish the identity anchor. Every later claim in both documents hangs on these figures being about this legal entity.",
+          "minimum_data": "Every must-present field either stated with a value or quarantined with a written reason. Blank is neither. Each populated field carries value, unit, as_of, source_e_id and confidence.",
+          "must_include": "Website, bare and lowercased. It is required on every sub-vertical and it is the only firmographic that is load-bearing elsewhere in the app.",
+          "must_not": "Model a figure the entity does not disclose. Send footprint as a firmographic. Serialise branches as anything other than an integer.",
+          "fail_if": "A must-present field is blank rather than stated or quarantined, website is written with a scheme or a www prefix, or any figure fails the identity check.",
+          "checks": [
+            {
+              "pattern": "(?i)\\bwebsite\\b",
+              "min": 1,
+              "label": "the website field"
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "(?i)\\b(queued for enrichment|pending|held for|tbd)\\b",
+              "label": "a status word standing in for a reason"
+            }
+          ]
+        },
+        {
+          "id": "2",
+          "heading": "Executive Summary",
+          "kind": "section",
+          "words_min": 500,
+          "words_max": 800,
+          "blocks": [
+            "2.1 Entity snapshot",
+            "2.2 Top findings",
+            "2.3 Critical gaps",
+            "2.4 Strategic objectives",
+            "2.5 Why-now signals"
+          ],
+          "inputs": [
+            "Evidence_Detail",
+            "Tech_Register",
+            "Coverage",
+            "Report_Narrative"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.exec_summary",
+            "overview.why_now"
+          ],
+          "purpose": "Tell an account executive what this institution is, what matters about it, and where Zennify has a right to a conversation.",
+          "minimum_data": "Snapshot fully populated with a classification confidence. 5 to 7 findings, each carrying a quantified observation with an E-ID, a maturity implication and a named Zennify solution. Every critical gap with a priority and the capabilities it affects. 3 or more strategic objectives tied to a source.",
+          "must_include": "For every finding, why it matters to a sales conversation and which solution applies. At least one finding on the AI or data position.",
+          "must_not": "State a finding without a quantified observation.",
+          "fail_if": "Fewer than 5 findings, or any finding lacking an E-ID.",
+          "checks": [
+            {
+              "pattern": "\\bF-\\d{3}\\b",
+              "min": 5,
+              "max": 7,
+              "distinct": true,
+              "label": "findings F-NNN"
+            },
+            {
+              "pattern": "\\bWN-\\d{2}\\b",
+              "min": 2,
+              "max": 4,
+              "distinct": true,
+              "label": "why-now signals WN-NN"
+            },
+            {
+              "pattern": "\\bG-\\d{3}\\b",
+              "min": 1,
+              "distinct": true,
+              "label": "critical gaps G-NNN"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "3",
+          "heading": "Entity Profile",
+          "kind": "section",
+          "words_min": 400,
+          "words_max": 700,
+          "blocks": [
+            "3.1 Corporate identity",
+            "3.2 Scale metrics",
+            "3.3 Regulatory standing",
+            "3.4 Business composition"
+          ],
+          "inputs": [
+            "Evidence_Detail",
+            "Firmographics",
+            "Issue_Register",
+            "Report_Narrative"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.firmographics",
+            "context.regulatory_standing"
+          ],
+          "purpose": "Establish the organisational facts every later section depends on.",
+          "minimum_data": "3 or more years of the primary financial metric. Named primary regulator with licence status. Enforcement history searched, with a nil result recorded explicitly where nothing is found. Business lines with revenue contribution where published.",
+          "must_include": "An E-ID against every claim. A CAGR where 3 or more years are available, shown with its inputs.",
+          "must_not": "Treat an absence of published data as an absence of the underlying function.",
+          "fail_if": "Fewer than 3 years of financial data with no explanation, or the regulator is unnamed.",
+          "checks": [
+            {
+              "pattern": "(?<!\\d)20[0-3]\\d(?!\\d)",
+              "min": 3,
+              "distinct": true,
+              "label": "fiscal years"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "4",
+          "heading": "Market Position and Trends",
+          "kind": "section",
+          "words_min": 500,
+          "words_max": 850,
+          "blocks": [
+            "4.1 Peer comparison",
+            "4.2 Financial trajectory",
+            "4.3 Digital evolution timeline",
+            "4.4 Sentiment overview"
+          ],
+          "inputs": [
+            "Peer_Benchmarks",
+            "Entity_Timeline",
+            "Evidence_Detail",
+            "Handoff_Lock"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.scores",
+            "overview.financial_series",
+            "context.timeline",
+            "overview.sentiment",
+            "context.context_sentiment"
+          ],
+          "purpose": "Lock the peer set and establish the direction of travel before any scoring begins.",
+          "minimum_data": "3 to 5 peers, each with size tier, key metric, geographic overlap percentage and a selection rationale. 5 years of financial data with a trend classification and a computed CAGR. 6 or more timeline rows across 3 or more distinct years. Sentiment from 2 or more sources with numeric ratings, sample sizes where published, and observation dates.",
+          "must_include": "The peer set lock statement. Once this section is approved the peer set is immutable for the assessment.",
+          "must_not": "Select peers on size alone.",
+          "fail_if": "Fewer than 3 peers, more than 5 peers, or any peer without a selection rationale.",
+          "checks": [
+            {
+              "pattern": "(?<!\\d)20[0-3]\\d(?!\\d)",
+              "min": 5,
+              "distinct": true,
+              "label": "fiscal years in the trajectory"
+            },
+            {
+              "pattern": "(?i)\\bCAGR\\b",
+              "min": 1,
+              "label": "a computed CAGR"
+            },
+            {
+              "pattern": "(?i)peer set (?:is )?lock",
+              "min": 1,
+              "label": "the peer set lock statement"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "5",
+          "heading": "Strategic Intelligence",
+          "kind": "section",
+          "words_min": 700,
+          "words_max": 1100,
+          "blocks": [
+            "5.1 Insight cards",
+            "5.2 Technology landscape",
+            "5.3 Leadership",
+            "5.4 Acquisition history",
+            "5.5 Thought leadership and public voice"
+          ],
+          "inputs": [
+            "Evidence_Detail",
+            "Tech_Register",
+            "Tech_Peer_Deployments",
+            "Report_Narrative"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "insights.insights",
+            "insights.landscape",
+            "techstack.techstack",
+            "overview.leadership",
+            "overview.thought_leadership",
+            "context.acquisitions"
+          ],
+          "purpose": "The analytical core. Move from facts to judgement to implication, and gather the raw material the assessment overlay depends on.",
+          "minimum_data": "8 or more insight cards, each with observation, interpretation, implication, capabilities touched and a confidence. Technology landscape populated across all four layers. Peer technographic scan covering the locked peer set. AI and data signals recorded for every pillar. Leadership with tenure and an explicit gap list. Acquisitions, or an explicit nil.",
+          "must_include": "Interpretation that a reader could disagree with. A card that only restates a fact is not an insight card.",
+          "must_not": "List facts without judgement. Treat a leadership title being absent from public sources as proof the function is absent.",
+          "fail_if": "Fewer than 8 insight cards, or the technographic scan is missing with no fallback recorded.",
+          "checks": [
+            {
+              "pattern": "\\bIC-\\d{3}\\b",
+              "min": 8,
+              "distinct": true,
+              "label": "insight cards IC-NNN"
+            },
+            {
+              "pattern": "\\bTS-\\d{2,3}\\b",
+              "min": 1,
+              "distinct": true,
+              "label": "technology register rows TS-NN"
+            },
+            {
+              "pattern": "\\b(OPS|CUST|DATA|INFRA)\\b",
+              "min": 4,
+              "distinct": true,
+              "label": "the four technology layers"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "6",
+          "heading": "Client Priorities",
+          "kind": "section",
+          "words_min": 300,
+          "words_max": 500,
+          "blocks": [
+            "6.1 Stated priorities",
+            "6.2 Currency check",
+            "6.3 Sources checked for current voice",
+            "6.4 Counter-evidence pass"
+          ],
+          "inputs": [
+            "Focus_Areas",
+            "Evidence_Detail"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "heatmap.focus_areas",
+            "platform.starters"
+          ],
+          "purpose": "Capture what the client says its own priorities are, in the client's own words, with a page number an account executive can point at in the room.",
+          "minimum_data": "3 to 5 priorities. Each carries a verbatim quote of 50 to 400 characters, the source document, the page number, the filename, and the capability cells it bears on. Each carries a currency status and a note.",
+          "must_include": "The page number. Document, page and filename together are the provenance triple.",
+          "must_not": "Quote the scoring ledger, a diagnostic question, a scoring rationale, a section tag, or any text containing a capability code or a maturity level. Map a priority to a cell this run does not serve.",
+          "fail_if": "Fewer than 3 priorities on a client with a full assessment, any quote without a page number, or any quote that reads as though a system rather than a person wrote it.",
+          "checks": [
+            {
+              "pattern": "\\bFA-\\d{2}\\b",
+              "min": 3,
+              "max": 5,
+              "distinct": true,
+              "label": "stated priorities FA-NN"
+            },
+            {
+              "pattern": "\\b(CONFIRMED_CURRENT|AGING|SUPERSEDED|UNCONFIRMED)\\b",
+              "min": 1,
+              "label": "a currency status"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "7",
+          "heading": "Risk and Issues",
+          "kind": "section",
+          "words_min": 400,
+          "words_max": 650,
+          "blocks": [
+            "7.1 Issue register",
+            "7.2 Negative search results",
+            "7.3 Assumptions register"
+          ],
+          "inputs": [
+            "Issue_Register",
+            "Search_Log",
+            "Evidence_Detail",
+            "Cap_Triggers"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "context.issue_register",
+            "context.regulatory_standing"
+          ],
+          "purpose": "Surface everything that will cap a score, and record the boundaries of what the research established.",
+          "minimum_data": "Every issue with type, severity, status, capability impact and cap value. Negative searches across 4 or more categories, each with the search date. Every assumption with a validation method that internal discovery could execute.",
+          "must_include": "The severity to cap mapping in force, read from Cap_Triggers rather than restated from memory.",
+          "must_not": "Record an assumption without a way to test it.",
+          "fail_if": "An issue carries a severity but no capability impact, or an assumption has no validation method.",
+          "checks": [
+            {
+              "pattern": "\\bA-\\d{3}\\b",
+              "min": 1,
+              "distinct": true,
+              "label": "assumptions A-NNN"
+            },
+            {
+              "pattern": "(?i)\\b(NONE_FOUND|none found|\\d+_FOUND|\\d+ found)\\b",
+              "min": 1,
+              "label": "a recorded negative-search result"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "8",
+          "heading": "Workbook References",
+          "kind": "section",
+          "words_min": 100,
+          "words_max": 150,
+          "blocks": [
+            "8.1 Where each artefact lives",
+            "8.2 Handoff status"
+          ],
+          "inputs": [
+            "Run_Metadata",
+            "Handoff_Lock",
+            "Gate_Log"
+          ],
+          "requires_citation": false,
+          "feeds": [],
+          "purpose": "Point to where the machine-readable artefacts live. This profile carries no appendices.",
+          "minimum_data": "Both workbook filenames with revision identifiers. Every relocated artefact mapped to a named tab.",
+          "must_include": "",
+          "must_not": "Reproduce any workbook content here. This section is a pointer and nothing else.",
+          "fail_if": "A tab named below is absent from the workbook, or either revision identifier is unresolved.",
+          "checks": [
+            {
+              "pattern": "\\b(READY|BLOCKED)\\b",
+              "min": 1,
+              "label": "the handoff status"
+            }
+          ],
+          "forbid": []
+        }
+      ]
+    },
+    "assessment": {
+      "key": "assessment",
+      "title": "Digital Maturity Assessment Report",
+      "short_title": "DMA Assessment Report",
+      "filename": "DMA_Assessment_Report_{entity}_{date}.docx",
+      "drive_doc_id": "1FPr7wNuo2-Fk7PPTvk1VkQxYBvjLbEWwU7kZQY8TuDA",
+      "markdown": "assessment_report_template.md",
+      "front_matter": [
+        "Document Control and Catalogue Binding",
+        "Surface Alignment"
+      ],
+      "sections": [
+        {
+          "id": "1",
+          "heading": "Executive Summary",
+          "kind": "section",
+          "words_min": 600,
+          "words_max": 900,
+          "blocks": [
+            "1.1 SCQA context",
+            "1.2 Key strengths",
+            "1.3 Critical development areas",
+            "1.4 Assessment by pillar"
+          ],
+          "inputs": [
+            "Pillar_Rollup",
+            "Category_Rollup",
+            "Peer_Benchmarks",
+            "Subcap_Scores",
+            "Evidence_Detail"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.exec_summary",
+            "overview.findings"
+          ],
+          "purpose": "Give a client executive the verdict, the three patterns that define this institution, and the trajectory that closes the gap, in a single read.",
+          "minimum_data": "7 unique E-IDs. 3 to 5 strength rows. 3 to 5 development rows. Every pillar row populated with score, peer median, gap, level and finding. At least one finding drawn from the AI and data overlay.",
+          "must_include": "The numeric overall score and its level. The gap to peer median in points. A named trajectory with a phase count and the condition that gates the second horizon. A cross-reference to at least three REC identifiers.",
+          "must_not": "Carry any claim without an E-ID. Recommend an appointment, committee or centre of excellence unless proxy evidence confirms the gap exists.",
+          "fail_if": "Swapping the entity name and the numbers would leave the summary true for a different institution.",
+          "checks": [
+            {
+              "pattern": "E-\\d{3,4}",
+              "min": 7,
+              "distinct": true,
+              "label": "unique E-IDs"
+            },
+            {
+              "pattern": "\\bREC-\\d{2}\\b",
+              "min": 3,
+              "distinct": true,
+              "label": "REC cross-references"
+            },
+            {
+              "pattern": "\\bP[1-4]\\b",
+              "min": 4,
+              "distinct": true,
+              "label": "the four pillar rows"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "2",
+          "heading": "Assessment Methodology",
+          "kind": "section",
+          "words_min": 300,
+          "words_max": 450,
+          "blocks": [
+            "2.1 How the scores were produced",
+            "2.2 Framework elements applied"
+          ],
+          "inputs": [
+            "Catalogue_Meta",
+            "Pillar_Weights",
+            "Maturity_Rubric",
+            "Peer_Benchmarks"
+          ],
+          "requires_citation": false,
+          "feeds": [],
+          "purpose": "Let a sceptical reader reconstruct how the scores were produced.",
+          "minimum_data": "Resolved structure counts. Scale bounds. Tier count and the weighting applied to each tier. Peer set size and the basis on which it was locked. Weight set identifier.",
+          "must_include": "A statement that structure counts are resolved from the catalogue at render time, quoting the catalogue version and hash.",
+          "must_not": "Restate the maturity rubric or the capability definitions.",
+          "fail_if": "Any structure count in the prose is written as a literal rather than a token.",
+          "checks": [
+            {
+              "pattern": "(?i)\\bv7\\.0\\b|catalogue version",
+              "min": 1,
+              "label": "the catalogue version"
+            }
+          ],
+          "forbid": [],
+          "blocks_note": "The Doc writes §2 as {{METHODOLOGY_NARRATIVE}} followed by the Element / Applied / Defined-in table; the two blocks name those two parts."
+        },
+        {
+          "id": "3",
+          "heading": "Issue Impact and Cap Analysis",
+          "kind": "section",
+          "words_min": 400,
+          "words_max": 700,
+          "blocks": [
+            "3.1 Capped capabilities",
+            "3.2 When each cap lifts",
+            "3.3 Aggregate effect"
+          ],
+          "inputs": [
+            "Issue_Register",
+            "Cap_Triggers",
+            "Subcap_Scores",
+            "Caps_Applied_Log"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.ceilings",
+            "heatmap.safeguard_gates"
+          ],
+          "purpose": "Show what the live issues cost in score terms, which capabilities carry the cost, when each cap lifts, and what the overall score would be without them.",
+          "minimum_data": "Every capped capability with its uncapped score, the rule that fired, the reported score and the points withheld. A lift condition for every cap. The aggregate withheld and the uncapped overall. Every cap traced to a dated matter.",
+          "must_include": "The severity to cap mapping in force, read from Cap_Triggers rather than restated from memory, and the rule id that fired on each row.",
+          "must_not": "Restate the issue register. Present a cap as permanent when the rule that set it carries a horizon.",
+          "fail_if": "A cap is applied in Subcap_Scores and does not appear here, a cap has no lift condition, or the aggregate withheld does not reconcile against the row sum.",
+          "checks": [
+            {
+              "pattern": "\\bCAP-[A-Z0-9]{2,3}\\b",
+              "min": 1,
+              "label": "a Cap_Triggers rule id"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "4",
+          "heading": "Assessment Results",
+          "kind": "section",
+          "words_min": 350,
+          "words_max": 600,
+          "blocks": [
+            "4.1 Overall score",
+            "4.2 Category scores and gaps"
+          ],
+          "inputs": [
+            "Pillar_Rollup",
+            "Category_Rollup",
+            "Pillar_Weights",
+            "Peer_Benchmarks"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.scores",
+            "heatmap.workbook_scores"
+          ],
+          "purpose": "Present the scorecard and show the arithmetic that produced the overall score.",
+          "minimum_data": "Overall score with the weighted calculation written out. Every category in the catalogue present as a row, with score, peer median, gap and status. No category omitted, including those scored on thin evidence.",
+          "must_include": "The weight applied to each pillar and a check that the weights sum to 1.00.",
+          "must_not": "Hardcode a category list. Rows are generated by iterating the catalogue.",
+          "fail_if": "The category row count is not equal to the catalogue's, or the recomputed weighted score differs from the workbook's overall by more than 0.01.",
+          "checks": [
+            {
+              "pattern": "\\bP[1-4]C[1-4]\\b",
+              "min": 16,
+              "distinct": true,
+              "label": "all sixteen category rows"
+            },
+            {
+              "pattern": "(?i)1\\.00\\b|sum to 1",
+              "min": 1,
+              "label": "the weights-sum check"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "5",
+          "heading": "Pillar Deep Dives",
+          "kind": "pillar",
+          "words_min": 3200,
+          "words_max": 5000,
+          "blocks": [
+            "Capability scorecard",
+            "What we see",
+            "AI and data overlay",
+            "Why it matters"
+          ],
+          "inputs": [
+            "Subcap_Scores",
+            "Category_Rollup",
+            "Peer_Benchmarks",
+            "Platform_Peer_Adoption",
+            "Evidence_Detail",
+            "Tech_Register"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "heatmap.workbook_scores",
+            "heatmap.cell_evidence",
+            "techstack.techstack",
+            "insights.landscape",
+            "platform.platform_story"
+          ],
+          "purpose": "Separate what the evidence shows from what it means, and expose the AI and data position that sits underneath both. One deep dive per pillar.",
+          "minimum_data": "Per pillar: 5 or more unique E-IDs. The 3 strongest and 3 weakest capabilities named with scores and peer deltas. All 6 overlay rows populated, with UNKNOWN written explicitly where evidence is absent. At least 1 REC cross-reference.",
+          "must_include": "Named technologies, named leaders, named programmes and numeric metrics. Every capability discussed cites a subcapability score.",
+          "must_not": "Infer in What We See. Introduce new facts in Why It Matters. Leave an overlay row blank rather than writing UNKNOWN.",
+          "fail_if": "A sentence would survive substitution of a different institution.",
+          "checks": [
+            {
+              "pattern": "E-\\d{3,4}",
+              "min": 5,
+              "distinct": true,
+              "label": "unique E-IDs per pillar",
+              "per_card": true
+            },
+            {
+              "pattern": "\\bREC-\\d{2}\\b",
+              "min": 1,
+              "distinct": true,
+              "label": "a REC cross-reference per pillar",
+              "per_card": true
+            },
+            {
+              "pattern": "(?i)\\bAI and data overlay\\b",
+              "min": 1,
+              "label": "the AI and data overlay",
+              "per_card": true
+            }
+          ],
+          "forbid": [],
+          "card_prefix": "P",
+          "cards_min": 4,
+          "cards_max": 4,
+          "card_words_min": 800,
+          "card_words_max": 1250,
+          "card_heading": "5.{n} Pillar deep dive ({card}): {name} — score {score} against median {median} ({gap})"
+        },
+        {
+          "id": "6",
+          "heading": "Benchmark and Technology Estate",
+          "kind": "section",
+          "words_min": 700,
+          "words_max": 1100,
+          "blocks": [
+            "6.1 Peer scores",
+            "6.2 Strategic positioning",
+            "6.3 Lead competitor",
+            "6.4 Technology estate",
+            "6.5 Peer deployment"
+          ],
+          "inputs": [
+            "Peer_Benchmarks",
+            "Platform_Peer_Adoption",
+            "Tech_Register",
+            "Tech_Peer_Deployments",
+            "Handoff_Lock",
+            "Evidence_Detail"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.scores",
+            "techstack.techstack",
+            "insights.landscape"
+          ],
+          "purpose": "Place the institution against the peer set locked during research, then do the same for the technology it actually runs.",
+          "minimum_data": "Between 3 and 5 peers, each with an overall score. Position stated for every pillar. Every register row a reader would ask about carries a peer breakdown. Every ABSENT row carries one too.",
+          "must_include": "The vendor's own scope statement, fetched and cited, before any boundary claim is written.",
+          "must_not": "Introduce a peer that was not locked at research. Derive or project a score for any product. Assign fault to a vendor.",
+          "fail_if": "The peer list differs from Handoff_Lock, a coverage share has no breakdown behind it, a deployed row has no source or no date, or a share disagrees with its own breakdown by more than one peer.",
+          "checks": [
+            {
+              "pattern": "\\b(OPS|CUST|DATA|INFRA)\\b",
+              "min": 4,
+              "distinct": true,
+              "label": "the four technology layers"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "7",
+          "heading": "Gap Prioritisation",
+          "kind": "section",
+          "words_min": 450,
+          "words_max": 700,
+          "blocks": [
+            "7.1 Prioritisation formula",
+            "7.2 Gap priority register",
+            "7.3 Critical gap root causes"
+          ],
+          "inputs": [
+            "Category_Rollup",
+            "Peer_Benchmarks",
+            "Issue_Register",
+            "Evidence_Detail"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "overview.opportunity",
+            "overview.findings",
+            "heatmap.focus_areas"
+          ],
+          "purpose": "Rank every gap on a repeatable formula so the roadmap sequence can be defended.",
+          "minimum_data": "Every gap ranked. All six factors scored per gap. Root cause at gap grain for the top 3 to 5, each with at least 2 E-IDs and the REC id where it is stated again.",
+          "must_include": "The weighted calculation shown in full for the top-ranked gap, so the ranking is checkable by hand.",
+          "must_not": "Rank on gap size alone.",
+          "fail_if": "The six weights do not sum to 1.00, a gap ranked in the top 5 lacks a root cause, or a root cause here names a different cause from the one its recommendation gives in section 8.",
+          "checks": [
+            {
+              "pattern": "\\bREC-\\d{2}\\b",
+              "min": 3,
+              "distinct": true,
+              "label": "REC ids on the root causes"
+            },
+            {
+              "pattern": "0\\.(25|20|15|10)",
+              "min": 4,
+              "label": "the six factor weights"
+            }
+          ],
+          "forbid": []
+        },
+        {
+          "id": "8",
+          "heading": "Recommendations",
+          "kind": "recommendation",
+          "words_min": 1750,
+          "words_max": 4400,
+          "blocks": [
+            "Root cause",
+            "Cost of inaction",
+            "Solution",
+            "Platform readiness contract",
+            "Rebuttal",
+            "Impact on assessed capabilities",
+            "Measure of success",
+            "Why this phase"
+          ],
+          "inputs": [
+            "Solution_Catalogue",
+            "Platform_Peer_Adoption",
+            "Category_Rollup",
+            "Subcap_Scores",
+            "Tech_Register",
+            "Evidence_Detail",
+            "Recommendations"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "platform.recommendations",
+            "platform.platform_story",
+            "platform.roadmap",
+            "overview.opportunity"
+          ],
+          "purpose": "Convert ranked gaps into named, evidenced actions, each with a platform choice that states its own readiness and each argued against before it ships.",
+          "minimum_data": "Per recommendation: a provenance label, a root cause of 30 to 60 words with citations, a cost of inaction of 30 to 60 words, a KPI triple whose baseline exists with a date, one impact row per affected cell, a readiness contract for every platform named, and a completed rebuttal.",
+          "must_include": "A rebuttal on every recommendation without exception. A readiness contract on every platform named, covering conditions met, conditions not met and open discovery questions.",
+          "must_not": "Present a derived recommendation as analyst judgement. State a duration in weeks or months anywhere. Name a platform with no readiness contract.",
+          "fail_if": "A recommendation ships with an empty rebuttal, a platform is named with no readiness contract, a KPI baseline has no source, an impact figure disagrees with the served score by more than 0.05, or its root cause contradicts the one section 7.3 gives for the same gap.",
+          "checks": [
+            {
+              "pattern": "E-\\d{3,4}",
+              "min": 2,
+              "distinct": true,
+              "label": "E-IDs per recommendation",
+              "per_card": true
+            },
+            {
+              "pattern": "(?i)\\b(ANALYST|DERIVED)\\b",
+              "min": 1,
+              "label": "the provenance label",
+              "per_card": true
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "(?i)\\b\\d+\\s*(?:-\\s*\\d+\\s*)?(weeks?|months?)\\b",
+              "label": "a duration in weeks or months (sequencing is horizon and dependency)"
+            }
+          ],
+          "card_prefix": "REC-",
+          "cards_min": 5,
+          "cards_max": 8,
+          "card_words_min": 350,
+          "card_words_max": 550,
+          "card_heading": "{card}: {title}"
+        },
+        {
+          "id": "9",
+          "heading": "Transformation Roadmap",
+          "kind": "section",
+          "words_min": 300,
+          "words_max": 500,
+          "blocks": [
+            "9.1 Horizon vocabulary",
+            "9.2 Phases",
+            "9.3 Stair-step",
+            "9.4 Maturity trajectory"
+          ],
+          "inputs": [
+            "Recommendations",
+            "Pillar_Rollup",
+            "Report_Narrative"
+          ],
+          "requires_citation": true,
+          "feeds": [
+            "platform.roadmap",
+            "platform.stairstep"
+          ],
+          "purpose": "Put the recommendations in an order that follows dependency, and say what fixes each position.",
+          "minimum_data": "3 or more phases. Every recommendation assigned to exactly one phase. A rationale of 30 to 60 words per phase. A dependency chain that does not loop back on itself.",
+          "must_include": "A horizon drawn from the fixed vocabulary, spelled exactly as given. Where the order cannot be settled, a discovery phase that carries no recommendations and states which unresolved dependencies it exists to resolve.",
+          "must_not": "State a duration, an elapsed time, a week count, a month count or a date range anywhere in this section. A phase rationale that restates the phase title.",
+          "fail_if": "A recommendation from section 8 appears in no phase, a phase precedes something it depends on, the dependency chain loops, or any duration appears.",
+          "checks": [
+            {
+              "pattern": "\\bREC-\\d{2}\\b",
+              "min": 5,
+              "distinct": true,
+              "label": "every recommendation placed in a phase"
+            },
+            {
+              "pattern": "(?i)\\bphase\\b",
+              "min": 3,
+              "label": "three or more phases"
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "(?i)\\b\\d+\\s*(?:-\\s*\\d+\\s*)?(weeks?|months?)\\b",
+              "label": "a duration (the app carries horizon and dependency, never elapsed time)"
+            }
+          ]
+        },
+        {
+          "id": "10",
+          "heading": "Data Gaps and Confidence",
+          "kind": "section",
+          "words_min": 250,
+          "words_max": 400,
+          "blocks": [
+            "10.1 Gaps by pillar",
+            "10.2 Recommended next steps"
+          ],
+          "inputs": [
+            "Subcap_Scores",
+            "Coverage_Map",
+            "Search_Log",
+            "Enrichment_Needed"
+          ],
+          "requires_citation": false,
+          "feeds": [
+            "heatmap.alerts",
+            "heatmap.evidence_age"
+          ],
+          "purpose": "State plainly what the assessment could not see. Transparency here is what makes the rest of the report credible.",
+          "minimum_data": "Gaps listed per pillar. The count of cells scored on tier 4 or weaker evidence only. The count scored on no direct evidence. Named next steps that would close each material gap.",
+          "must_include": "What internal evidence would move each low-confidence score, and by roughly how much.",
+          "must_not": "Present a gap without saying what it would take to close it. Express any of this as a coverage percentage.",
+          "fail_if": "A pillar has low-confidence scores and no corresponding entry here.",
+          "checks": [
+            {
+              "pattern": "\\bP[1-4]\\b",
+              "min": 4,
+              "distinct": true,
+              "label": "gaps listed per pillar"
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "(?i)\\d{1,3}(?:\\.\\d+)?\\s?%\\s*(?:evidence\\s+)?coverage",
+              "label": "a coverage percentage (coverage is O10, internal, a second denominator contradicts the heatmap)"
+            }
+          ],
+          "blocks_note": "The Doc writes §10 as the per-pillar thin-evidence table followed by {{RECOMMENDED_NEXT_STEPS}}; the two blocks name those two parts."
+        },
+        {
+          "id": "11",
+          "heading": "Workbook Traceability",
+          "kind": "section",
+          "words_min": 100,
+          "words_max": 150,
+          "blocks": [
+            "11.1 Where to verify a claim"
+          ],
+          "inputs": [
+            "Evidence_Detail",
+            "Subcap_Scores",
+            "Run_Metadata"
+          ],
+          "requires_citation": false,
+          "feeds": [
+            "heatmap.evidence",
+            "heatmap.cell_evidence"
+          ],
+          "purpose": "Let a reader verify any claim in this report by locating the artefact behind it.",
+          "minimum_data": "Both workbook filenames with revision identifiers. Every artefact class mapped to a named tab and a match key.",
+          "must_include": "",
+          "must_not": "Reproduce the evidence register. Carry evidence coverage, tier distribution or self-sourced share.",
+          "fail_if": "An E-ID cited anywhere in this report does not resolve in Evidence_Register, or a tab named below is absent.",
+          "checks": [],
+          "forbid": []
+        }
+      ]
+    }
+  }
+}

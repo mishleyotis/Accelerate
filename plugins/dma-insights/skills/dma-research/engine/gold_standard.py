@@ -54,6 +54,28 @@ import sys
 import zipfile
 from pathlib import Path
 
+#: The pinned templates and the measured reference (references/templates/).
+#: Every threshold below is read against gold_reference.json by
+#: tests/skills/research_engine/test_gold_reference.py: a floor this gate
+#: demands that the Golden 1 package itself would fail is a floor nobody
+#: measured, and is refused by the suite.
+_TEMPLATES = Path(__file__).resolve().parents[3] / "references" / "templates"
+
+
+def _pinned_sections(kind: str) -> list[str]:
+    """`N. Heading` for every numbered section the pinned Doc carries."""
+    try:
+        from . import report_spec as RS
+    except Exception:            # noqa: BLE001 — the gate must still run
+        return []
+    key = "assessment" if kind == "assessment" else "client_research"
+    return RS.numbered_headings(key)
+
+
+def gold_reference() -> dict:
+    p = _TEMPLATES / "gold_reference.json"
+    return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {}
+
 # ── the verdict shape ────────────────────────────────────────────────────
 
 class Finding(dict):
@@ -294,13 +316,28 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto") -
     if kind == "auto":
         kind = "assessment" if "assessment" in report_path.name.lower() else "research"
 
-    if template_path:
-        want = _template_sections(template_path)
-        havenums = {re.match(r"^(\d+)\.", h.strip()).group(1)
-                    for h in h1 if re.match(r"^\d+\.", h.strip())}
-        for s in want:
-            if re.match(r"^(\d+)\.", s.strip()).group(1) not in havenums:
-                out.append(Finding("GS-RPT-SECTIONS", f"missing template section {s!r}", "GSY-06"))
+    # GS-RPT-SECTIONS — every numbered section of the PINNED template, by
+    # number AND heading. A docx template is accepted for a one-off check, but
+    # the default is the pin the engine renders to, so the gate and the
+    # renderer cannot disagree about what "the required format" is.
+    want = _template_sections(template_path) if template_path else _pinned_sections(kind)
+    have_h1 = {}
+    for h in h1:
+        m = re.match(r"^(\d+)\.\s*(.*)$", h.strip())
+        if m:
+            have_h1[m.group(1)] = m.group(2).strip()
+    for s_ in want:
+        m = re.match(r"^(\d+)\.\s*(.*)$", s_.strip())
+        if not m:
+            continue
+        n, head = m.group(1), m.group(2).strip()
+        if n not in have_h1:
+            out.append(Finding("GS-RPT-SECTIONS", f"missing template section {s_!r}", "GSY-06"))
+        elif head and have_h1[n].casefold() != head.casefold() \
+                and not have_h1[n].casefold().startswith(head.casefold()):
+            out.append(Finding("GS-RPT-SECTIONS",
+                f"section {n} is titled {have_h1[n]!r}; the template says {head!r}",
+                "GSY-06"))
 
     tok = re.findall(r"\{\{[^}]*\}\}", whole)
     if tok:

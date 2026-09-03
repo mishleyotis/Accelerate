@@ -1,0 +1,720 @@
+{
+ "_readme": [
+  "THE GOLD STANDARD, MEASURED. Golden 1 Credit Union — the package the owner named",
+  "'the best gold standard so far' (2026-09-01) — measured 2026-09-03 from the Drive",
+  "copies named below. Every gate threshold in engine/gold_standard.py must be AT OR",
+  "BELOW what this package meets (tests/skills/research_engine/test_gold_reference.py",
+  "asserts it), and every producer reads this file before authoring so 'what does",
+  "done look like' has one numeric answer rather than a remembered one.",
+  "Two known weaknesses of the reference are recorded rather than copied: its Search_Log",
+  "(307 rows for 690 subcaps, 245 subcaps searched, facets works 95 / fails 3 / value 10 /",
+  "contradicts 183 / corroborates 14) does not follow the five-volley discipline, and its",
+  "Recommendations tab is empty (the recs live in the report §8 and Solution_Catalogue).",
+  "The volley gate and the scoring gate are therefore STRICTER than the reference on",
+  "exactly those two points, by the owner's instruction (2026-09-03, issues 1 and 6)."
+ ],
+ "entity": "Golden 1 Credit Union",
+ "run_id": "DMA-2026-GOLDEN1-001",
+ "evidence_mode": "HYBRID",
+ "intake_folder": {
+  "name": "Golden 1 Credit Union - DMA HYBRID",
+  "drive_folder_id": "1gSX2V_DW-h0NXuodLfIXGfpHdVdFWG4_"
+ },
+ "files": {
+  "scoring_workbook": {
+   "drive_file_id": "1KG1AteIs3Zpq9XAX1ayMxZ0rdWVGxtW5",
+   "name": "DMA_Scoring_Workbook_golden-1-credit-union_2026-08-31.xlsx"
+  },
+  "assessment_report": {
+   "drive_file_id": "1aWrbaG0RM8L4jM-I36UgVAzlJv52IiBY",
+   "name": "Golden1_CU_Assessment_Report_DMA-2026-GOLDEN1-001.docx"
+  },
+  "research_report": {
+   "drive_file_id": "1Le0vIoavOY-KWngIS0YmzvfS_eB80dHa",
+   "name": "Golden1_CU_Research_Report_DMA-2026-GOLDEN1-001.docx"
+  }
+ },
+ "workbook": {
+  "sheets_total": 43,
+  "subcaps": 690,
+  "scored": 690,
+  "named": 690,
+  "evidence_rows": 727,
+  "subcaps_with_evidence": 442,
+  "composite": 2.25,
+  "peer_median": 3.05,
+  "coverage_pct": 81.3,
+  "search_log_rows": 307,
+  "subcaps_searched": 245,
+  "search_facets": {
+   "works": 95,
+   "fails": 3,
+   "value": 10,
+   "contradicts": 183,
+   "corroborates": 14,
+   "ai_deployment": 1,
+   "ai_constraint": 1
+  },
+  "sheets": {
+   "Executive_Summary": {
+    "rows": 13,
+    "headers": [
+     "Field",
+     "Value"
+    ]
+   },
+   "00_README": {
+    "rows": 6,
+    "headers": [
+     "Key",
+     "Value"
+    ]
+   },
+   "DQ_Bank": {
+    "rows": 6182,
+    "headers": [
+     "SubCap_ID",
+     "Order",
+     "Facet",
+     "Probe_Tier",
+     "Question",
+     "Mode_Fit",
+     "Internal_Sources",
+     "Public_Sources",
+     "Weight_Pct"
+    ]
+   },
+   "P1_Subcap_Scoring": {
+    "rows": 183,
+    "headers": [
+     "SubCap_ID",
+     "SubCap_Name",
+     "Category",
+     "Score",
+     "Confidence",
+     "Evidence_IDs",
+     "Source_URLs",
+     "Evidence_Ceiling",
+     "Caps_Applied",
+     "Rationale",
+     "Proxy_Searched",
+     "Dominant_Claim",
+     "Claim_Label",
+     "What_We_Found",
+     "Facet_Coverage",
+     "DQ_Works",
+     "DQ_Fails",
+     "DQ_Value",
+     "DQ_Corroborates",
+     "Triangulation",
+     "Ceiling_Reasoning",
+     "Why_It_Matters",
+     "DMA_Impact",
+     "DQ_Contradicts",
+     "Contradiction_Disposition",
+     "Absence_Claimed",
+     "Proxy_Log",
+     "Negative_Ladder",
+     "Discovery_Questions",
+     "Challenge_Verdict",
+     "Ceiling_Band",
+     "Uncertainty",
+     "Retrieved_At"
+    ]
+   },
+   "P2_Subcap_Scoring": {
+    "rows": 223,
+    "headers": [
+     "SubCap_ID",
+     "SubCap_Name",
+     "Category",
+     "Score",
+     "Confidence",
+     "Evidence_IDs",
+     "Source_URLs",
+     "Evidence_Ceiling",
+     "Caps_Applied",
+     "Rationale",
+     "Proxy_Searched",
+     "Dominant_Claim",
+     "Claim_Label",
+     "What_We_Found",
+     "Facet_Coverage",
+     "DQ_Works",
+     "DQ_Fails",
+     "DQ_Value",
+     "DQ_Corroborates",
+     "Triangulation",
+     "Ceiling_Reasoning",
+     "Why_It_Matters",
+     "DMA_Impact",
+     "DQ_Contradicts",
+     "Contradiction_Disposition",
+     "Absence_Claimed",
+     "Proxy_Log",
+     "Negative_Ladder",
+     "Discovery_Questions",
+     "Challenge_Verdict",
+     "Ceiling_Band",
+     "Uncertainty",
+     "Retrieved_At"
+    ]
+   },
+   "P3_Subcap_Scoring": {
+    "rows": 113,
+    "headers": [
+     "SubCap_ID",
+     "SubCap_Name",
+     "Category",
+     "Score",
+     "Confidence",
+     "Evidence_IDs",
+     "Source_URLs",
+     "Evidence_Ceiling",
+     "Caps_Applied",
+     "Rationale",
+     "Proxy_Searched",
+     "Dominant_Claim",
+     "Claim_Label",
+     "What_We_Found",
+     "Facet_Coverage",
+     "DQ_Works",
+     "DQ_Fails",
+     "DQ_Value",
+     "DQ_Corroborates",
+     "Triangulation",
+     "Ceiling_Reasoning",
+     "Why_It_Matters",
+     "DMA_Impact",
+     "DQ_Contradicts",
+     "Contradiction_Disposition",
+     "Absence_Claimed",
+     "Proxy_Log",
+     "Negative_Ladder",
+     "Discovery_Questions",
+     "Challenge_Verdict",
+     "Ceiling_Band",
+     "Uncertainty",
+     "Retrieved_At"
+    ]
+   },
+   "P4_Subcap_Scoring": {
+    "rows": 171,
+    "headers": [
+     "SubCap_ID",
+     "SubCap_Name",
+     "Category",
+     "Score",
+     "Confidence",
+     "Evidence_IDs",
+     "Source_URLs",
+     "Evidence_Ceiling",
+     "Caps_Applied",
+     "Rationale",
+     "Proxy_Searched",
+     "Dominant_Claim",
+     "Claim_Label",
+     "What_We_Found",
+     "Facet_Coverage",
+     "DQ_Works",
+     "DQ_Fails",
+     "DQ_Value",
+     "DQ_Corroborates",
+     "Triangulation",
+     "Ceiling_Reasoning",
+     "Why_It_Matters",
+     "DMA_Impact",
+     "DQ_Contradicts",
+     "Contradiction_Disposition",
+     "Absence_Claimed",
+     "Proxy_Log",
+     "Negative_Ladder",
+     "Discovery_Questions",
+     "Challenge_Verdict",
+     "Ceiling_Band",
+     "Uncertainty",
+     "Retrieved_At"
+    ]
+   },
+   "Evidence_Detail": {
+    "rows": 727,
+    "headers": [
+     "E_ID",
+     "Fact_ID",
+     "Source_Name",
+     "Source_URL",
+     "Tier",
+     "ERS",
+     "Date_Published",
+     "Recency",
+     "Claim_Type",
+     "Fact_Count",
+     "SubCap_IDs",
+     "Excerpt",
+     "Anchor_Quote",
+     "Retrieved_At",
+     "Origin",
+     "Access_Status",
+     "Conflict"
+    ]
+   },
+   "Entity_Timeline": {
+    "rows": 16,
+    "headers": [
+     "Event_Date",
+     "Title",
+     "Body",
+     "Kind",
+     "Signal",
+     "Maturity_Effect",
+     "Claim_Label",
+     "SubCap_IDs",
+     "Evidence_IDs"
+    ]
+   },
+   "Tech_Register": {
+    "rows": 42,
+    "headers": [
+     "TS_ID",
+     "Product",
+     "Vendor",
+     "Layer",
+     "Status",
+     "Evidence_Level",
+     "Detection_Basis",
+     "Detection_Method",
+     "Providers",
+     "SubCap_IDs",
+     "Evidence_IDs",
+     "Source_URLs",
+     "As_Of",
+     "DMA_Impact"
+    ]
+   },
+   "Tech_Peer_Deployments": {
+    "rows": 12,
+    "headers": [
+     "TS_ID",
+     "Peer",
+     "Deployed",
+     "Basis",
+     "Source_URL",
+     "As_Of"
+    ]
+   },
+   "Pillar_Summary": {
+    "rows": 5,
+    "headers": [
+     "Pillar",
+     "Name",
+     "Weighted_Score",
+     "Maturity",
+     "Peer_Median",
+     "Gap_to_Peer"
+    ]
+   },
+   "Category_Detail": {
+    "rows": 16,
+    "headers": [
+     "Category",
+     "Pillar",
+     "Score",
+     "Maturity",
+     "Coverage",
+     "Peer_Median_Est",
+     "Priority"
+    ]
+   },
+   "Recommendations": {
+    "rows": 0,
+    "headers": [
+     "Rec_ID",
+     "Title",
+     "Category_ID",
+     "Priority",
+     "Horizon",
+     "Owner",
+     "Rationale"
+    ]
+   },
+   "Coverage": {
+    "rows": 16,
+    "headers": [
+     "Category",
+     "Subcaps",
+     "Scored",
+     "Unknown_EvidenceGap",
+     "Coverage_Pct"
+    ]
+   },
+   "Search_Log": {
+    "rows": 307,
+    "headers": [
+     "Seq",
+     "Timestamp",
+     "SubCap_ID",
+     "Facet",
+     "Query",
+     "Tool",
+     "Hits",
+     "Kept",
+     "Outcome"
+    ]
+   },
+   "Gate_Log": {
+    "rows": 40,
+    "headers": [
+     "Timestamp",
+     "Gate",
+     "Scope",
+     "Verdict",
+     "Detail",
+     "Blocking"
+    ]
+   },
+   "Report_Narrative": {
+    "rows": 3,
+    "headers": [
+     "Report",
+     "Section_ID",
+     "Heading",
+     "Body",
+     "Evidence_IDs",
+     "Kind",
+     "Author",
+     "Written_At",
+     "Weighing",
+     "Absence_Basis",
+     "Assumptions",
+     "Bias_Notes",
+     "Inference_Tags",
+     "Accuracy_Basis",
+     "Review_Verdict",
+     "Review_Actor",
+     "Review_At",
+     "Card_ID"
+    ]
+   },
+   "Provenance": {
+    "rows": 1643,
+    "headers": [
+     "SubCap_ID",
+     "Step",
+     "Actor",
+     "At",
+     "Detail"
+    ]
+   },
+   "Challenge_Log": {
+    "rows": 277,
+    "headers": [
+     "SubCap_ID",
+     "Verdict",
+     "Actor",
+     "Dimensions",
+     "Rationale",
+     "Ceiling_Band_Delta",
+     "At"
+    ]
+   },
+   "Run_Metadata": {
+    "rows": 34,
+    "headers": [
+     "Key",
+     "Value"
+    ]
+   },
+   "REF_Method": {
+    "rows": 9,
+    "headers": [
+     "Key",
+     "Value"
+    ]
+   },
+   "Evidence_Master": {
+    "rows": 731,
+    "headers": [
+     "Evidence_ID",
+     "Source",
+     "URL",
+     "Tier",
+     "Recency",
+     "Claim_Type",
+     "Finding",
+     "Origin"
+    ]
+   },
+   "Subcap_Scores": {
+    "rows": 690,
+    "headers": [
+     "subcap_id",
+     "subcap_name",
+     "category",
+     "source_cell",
+     "score",
+     "confidence",
+     "evidence_ids",
+     "source_urls",
+     "evidence_ceiling",
+     "caps_applied",
+     "rationale",
+     "ai_applicability",
+     "data_dependency",
+     "data_readiness",
+     "ai_evidence_ids",
+     "ai_blocker",
+     "peer_ai_signal"
+    ]
+   },
+   "Catalogue_Meta": {
+    "rows": 21,
+    "headers": [
+     "key",
+     "value"
+    ]
+   },
+   "Pillar_Weights": {
+    "rows": 5,
+    "headers": [
+     "weight_set_id",
+     "pillar_id",
+     "pillar_name",
+     "weight"
+    ]
+   },
+   "Maturity_Rubric": {
+    "rows": 5,
+    "headers": [
+     "level",
+     "name",
+     "range",
+     "meaning"
+    ]
+   },
+   "Pillar_Rollup": {
+    "rows": 5,
+    "headers": [
+     "pillar_id",
+     "pillar_name",
+     "score",
+     "weight",
+     "weighted_contribution",
+     "peer_median",
+     "gap",
+     "level"
+    ]
+   },
+   "Category_Rollup": {
+    "rows": 16,
+    "headers": [
+     "category_id",
+     "category_name",
+     "pillar_id",
+     "score",
+     "peer_median",
+     "gap",
+     "level",
+     "coverage"
+    ]
+   },
+   "Peer_Benchmarks": {
+    "rows": 4,
+    "headers": [
+     "peer_id",
+     "peer_name",
+     "size_tier",
+     "overall_score_est",
+     "strongest_pillar",
+     "weakest_pillar",
+     "ai_data_posture",
+     "basis"
+    ]
+   },
+   "Handoff_Lock": {
+    "rows": 13,
+    "headers": [
+     "parameter",
+     "locked_value"
+    ]
+   },
+   "Cap_Triggers": {
+    "rows": 5,
+    "headers": [
+     "rule_id",
+     "severity",
+     "max_score",
+     "effect",
+     "horizon"
+    ]
+   },
+   "Solution_Catalogue": {
+    "rows": 6,
+    "headers": [
+     "solution_id",
+     "solution_name"
+    ]
+   },
+   "Issue_Register": {
+    "rows": 5,
+    "headers": [
+     "ID",
+     "Type",
+     "Severity",
+     "Status",
+     "Description",
+     "Capability impact",
+     "Cap"
+    ]
+   },
+   "Caps_Applied_Log": {
+    "rows": 400,
+    "headers": [
+     "subcap_id",
+     "category",
+     "final_score",
+     "evidence_ceiling",
+     "caps_applied"
+    ]
+   },
+   "Platform_Peer_Adoption": {
+    "rows": 20,
+    "headers": [
+     "Product / Layer",
+     "Peer",
+     "Verdict",
+     "Basis",
+     "Source",
+     "As at"
+    ]
+   },
+   "Capability_Definitions": {
+    "rows": 16,
+    "headers": [
+     "category_id",
+     "category_name",
+     "pillar",
+     "assessed_through"
+    ]
+   },
+   "Evidence_Register": {
+    "rows": 731,
+    "headers": [
+     "Evidence_ID",
+     "Source",
+     "URL",
+     "Tier",
+     "Recency",
+     "Claim_Type",
+     "Finding",
+     "Origin"
+    ]
+   },
+   "Coverage_Map": {
+    "rows": 16,
+    "headers": [
+     "category_id",
+     "category_name",
+     "subcaps",
+     "evidenced",
+     "evidence_gap",
+     "confidence_posture"
+    ]
+   },
+   "Firmographics": {
+    "rows": 10,
+    "headers": [
+     "Field",
+     "Value",
+     "Unit",
+     "As at",
+     "Evidence",
+     "Conf."
+    ]
+   },
+   "Focus_Areas": {
+    "rows": 4,
+    "headers": [
+     "ID",
+     "Priority in the client's words",
+     "Verbatim quote",
+     "Document",
+     "Page",
+     "Cells"
+    ]
+   },
+   "Technographic_Scan": {
+    "rows": 42,
+    "headers": [
+     "TS_ID",
+     "Product",
+     "Vendor",
+     "Layer",
+     "Status",
+     "Evidence_Level",
+     "Detection_Basis",
+     "Detection_Method",
+     "Providers",
+     "SubCap_IDs",
+     "Evidence_IDs",
+     "Source_URLs",
+     "As_Of",
+     "DMA_Impact"
+    ]
+   },
+   "Enrichment_Needed": {
+    "rows": 7,
+    "headers": [
+     "Area",
+     "Field / cell",
+     "Status",
+     "What would close it"
+    ]
+   }
+  }
+ },
+ "reports": {
+  "assessment": {
+   "words_paragraphs": 11633,
+   "words_including_tables": 23227,
+   "distinct_e_ids": 115,
+   "tables": 92,
+   "heading1": [
+    "Contents",
+    "Document Control and Catalogue Binding",
+    "1. Executive Summary",
+    "2. Assessment Methodology",
+    "3. Issue Impact and Cap Analysis",
+    "4. Assessment Results",
+    "5. Pillar Deep Dive — P1: Strategy, Governance & Culture (2.40 vs 3.10)",
+    "5. Pillar Deep Dive — P2: Member Experience (2.11 vs 3.00)",
+    "5. Pillar Deep Dive — P3: Operations, Risk & Compliance (2.25 vs 3.00)",
+    "5. Pillar Deep Dive — P4: Data, Analytics & Technology (2.25 vs 3.10)",
+    "6. Benchmark and Technology Estate",
+    "7. Gap Prioritisation",
+    "8. Recommendations",
+    "9. Transformation Roadmap",
+    "10. Data Gaps and Confidence",
+    "11. Workbook Traceability",
+    "Appendix: Strategic Objective Alignment and Recommendation Validation"
+   ]
+  },
+  "research": {
+   "words_paragraphs": 4910,
+   "words_including_tables": 12091,
+   "distinct_e_ids": 47,
+   "tables": 39,
+   "heading1": [
+    "Contents",
+    "Document Control and Catalogue Binding",
+    "1. Firmographics",
+    "2. Executive Summary",
+    "3. Entity Profile",
+    "4. Market Position and Trends",
+    "5. Strategic Intelligence",
+    "6. Client Priorities",
+    "7. Risk and Issues",
+    "8. Workbook References"
+   ]
+  }
+ }
+}

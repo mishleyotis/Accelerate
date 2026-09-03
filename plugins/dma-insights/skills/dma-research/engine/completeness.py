@@ -72,7 +72,12 @@ NEVER_EMPTY = ("00_README", "DQ_Bank", "Evidence_Detail", "Coverage",
                # reason — `ledger.append_gate` already requires one — which
                # is the disclosure the SG discipline mandates everywhere
                # else.
-               "Gate_Log")
+               "Gate_Log",
+               # Added 2026-09-03 (contract v6). The Client Profile's §1 is
+               # the identity anchor and `website` is load-bearing in the
+               # app; a run with no firmographic row has no §1 and no O2
+               # strip. `engine.profile firmographic` writes it in PRELIM.
+               "Firmographics")
 
 #: Sheets filled by a phase, with the command that fills each. A refusal
 #: that names the fix is one an unattended session can act on.
@@ -86,8 +91,8 @@ FILLED_BY = {
                        "engine.cli grains recompute"),
     "Category_Detail": ("the ASSESSMENT stage's rollup — "
                         "engine.cli grains recompute"),
-    "Recommendations": ("projected from the assessment report's §7 rows — "
-                        "engine.cli grains recommendations"),
+    "Recommendations": ("projected from the assessment report's REC-NN cards "
+                        "(the pinned Doc's §8) — engine.cli grains recommendations"),
     "Tech_Peer_Deployments": ("engine.cli techscan peer-record --ts … "
                               "--peer … --deployed|--not-deployed|--unknown "
                               "--basis …"),
@@ -104,6 +109,33 @@ FILLED_BY = {
     "DQ_Bank": "engine.cli kg build",
     "Handoff_Lock": "written at workbook creation; a blank one is corruption",
     "Coverage": "recomputed on every synthesis; a blank one means none landed",
+    # v6 — the client's own facts, written in PRELIM / by the profile writers
+    "Firmographics": ("engine.profile firmographic --field website --value … "
+                      "--as-of … --evidence E-… (or --state ABSENT --reason … "
+                      "--route …), for every must-present field"),
+    "Focus_Areas": ("engine.profile focus --id FA-01 --title … --quote '<verbatim "
+                    "50-400 chars>' --document … --page … --cells … --evidence …"),
+    "Issue_Register": ("engine.profile issue --id I-001 --type … --severity … "
+                       "--status … --description … --cells … --evidence … ; or "
+                       "declare it with the negative-search ladder"),
+    "Enrichment_Needed": ("engine.profile enrichment-needed --area … --field … "
+                          "--status … --closes …; or declare it when nothing is "
+                          "outstanding"),
+    # v6 — the scoring stage
+    "Executive_Summary": "engine.assessment rollup (after every subcap is scored)",
+    "Subcap_Scores": "engine.assessment score --subcap … (one row per scored cell)",
+    "Pillar_Rollup": "engine.assessment rollup",
+    "Category_Rollup": "engine.assessment rollup",
+    "Pillar_Weights": "engine.assessment stage --to assessment (writes the sub-vertical weight set)",
+    "Maturity_Rubric": "engine.assessment stage --to assessment",
+    "Catalogue_Meta": "engine.assessment stage --to assessment",
+    "Cap_Triggers": "engine.assessment stage --to assessment",
+    "Caps_Applied_Log": "engine.assessment score (one row per scored cell)",
+    "Coverage_Map": "engine.assessment rollup",
+    "Capability_Definitions": "engine.assessment stage --to assessment",
+    "Solution_Catalogue": "engine.assessment solution --id … --name … --platform …",
+    "Platform_Peer_Adoption": ("engine.assessment peer-adoption --product … --peer … "
+                               "--verdict … --basis … --source …; or declare it"),
 }
 
 #: The four pillar sheets are scoped: a run selects subcaps in some pillars
@@ -208,8 +240,17 @@ def _rowcount(wb: RunWorkbook, sheet: str) -> int:
                 if any(_clean(v) for v in r.values())])
 
 
-def check(wb: RunWorkbook) -> dict:
-    """Every tab, its row count, and its verdict."""
+#: Tabs that are PROJECTED FROM the assessment report after it is written
+#: (`engine.grains recommendations` reads the report's REC cards into the
+#: Recommendations tab). A gate that runs BEFORE the report is written must
+#: not demand them: it would be asking the report for its own output as a
+#: precondition of starting, and nothing could ever pass it.
+REPORT_DERIVED = ("Recommendations",)
+
+
+def check(wb: RunWorkbook, *, exclude=()) -> dict:
+    """Every tab, its row count, and its verdict. `exclude` names tabs this
+    caller has a stated reason not to judge (see REPORT_DERIVED)."""
     md = wb.metadata()
     declared = reasons(wb)
     selected = wb.selected_subcaps()
@@ -218,6 +259,8 @@ def check(wb: RunWorkbook) -> dict:
 
     stage = C.stage_of(md)
     for sheet in C.SHEETS:
+        if sheet in exclude:
+            continue
         n = _rowcount(wb, sheet)
         # A sheet that belongs to the OTHER stage is neither populated nor
         # an omission: there is nothing at this stage that could fill it.
@@ -322,8 +365,8 @@ def check(wb: RunWorkbook) -> dict:
     }
 
 
-def require(wb: RunWorkbook) -> dict:
-    out = check(wb)
+def require(wb: RunWorkbook, *, exclude=()) -> dict:
+    out = check(wb, exclude=exclude)
     if not out["complete"]:
         raise CompletenessRefusal(
             f"{len(out['blocking'])} tab(s) are empty with no reason "

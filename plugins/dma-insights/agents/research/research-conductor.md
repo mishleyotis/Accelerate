@@ -150,13 +150,47 @@ tool call is the cost this removes.
    routing table: sixteen categories, each naming its agent, its subcaps,
    its askable-DQ count and its deferred questions.
 
-3. **Dispatch by category.** Each category goes to its own researcher —
-   `research-p1c1-producer` through `research-p4c4-producer` — with the run
-   id, the root, and nothing else (the workbook carries the rest). Dispatch
-   independent categories in parallel where the harness allows; a category
-   is DONE when its researcher reports a PASSING floors gate, not when it
-   reports effort. Re-dispatch on a FAIL with the gate's blocking terms in
-   the prompt.
+3. **Dispatch by category — over a brief you did not write, and hold every
+   cell to the five volleys.**
+
+       python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
+       python3 plugins/dma-insights/scripts/agent_run.py \
+               --batch $ROOT/briefs/batch.json --stream --lanes 4
+
+   `brief batch` writes one bounded packet per category and the batch array
+   that dispatches them. Do NOT compose those prompts yourself: a
+   hand-written prompt is where context either goes missing (the lane
+   re-finds what the run knows) or goes twice (the lane is handed your whole
+   context). The packet carries the run's shared state, each open cell's
+   owed volleys, **the evidence already registered for that cell**, the
+   lane's own notebook digest for a resumed lane, and its search budget —
+   measured against `BRIEF_CHAR_CEILING`, so "more context" cannot become
+   the token bleed.
+
+   A category is DONE when its researcher reports a PASSING floors gate, not
+   when it reports effort. Read `engine.brief handback --category <C>` rather
+   than trusting the lane's prose: it is computed from the sheets, it has the
+   same shape whether the lane finished or died, and its
+   `leads_for_other_categories` names the sources one lane opened that
+   another lane's cells need — route those before re-dispatching anything.
+   Re-dispatch on a FAIL with the gate's blocking terms in the prompt (a
+   fresh `brief dispatch --category <C>` already carries them).
+
+   THE RULE THE GATE NOW COUNTS (owner, 2026-09-03: "some subcaps are marked
+   as no evidence without any enrichment efforts … not even looking at the 5
+   volley structure"). Every cell in scope ends the category in exactly one
+   of two states, and the floors gate refuses a category with a cell in
+   neither: SYNTHESISED (evidence registered, `engine.cli synthesise`,
+   independently challenged) or DECLARED ABSENT (`engine.cli absence` — every
+   askable volley logged for that cell, a ladder whose rungs name fired
+   queries, a proxy log, what was hunted). `volleys_incomplete` and
+   `absence_undeclared_empty` are BLOCKING terms; `absence_single_tool` is
+   advisory and names the cells whose whole search was one web engine. The
+   card `orient` serves carries `volleys.missing` — the facets still owed —
+   and the work list distinguishes `in_volley` (some fired) from
+   `searched_empty` (all fired, nothing registered, not yet declared) from
+   `pending`; a researcher that opens a new cell while one of its own is
+   in_volley is the failure this exists to stop.
 
 4. **Challenge independently.** For each synthesised subcap, the challenge
    verdict must come from an actor that did not write the synthesis —
@@ -171,27 +205,96 @@ tool call is the cost this removes.
    handoff JSON is a read-only index; the workbook with its Handoff_Lock is
    what the assessment stage trusts.
 
-6. **Render the four deliverables.**
-   `engine.cli report --run <RUN_ID>` (both reports; a refusal names the
-   section and the fix — write the missing narrative into Report_Narrative
-   through the researchers, never force past a citation failure) and
-   `engine.techscan render --run <RUN_ID>`.
+5b. **The client's own facts, in their tabs.** Before scoring opens, the
+   Firmographics (every must-present field STATED or ABSENT with a route —
+   PRELIM's `firmographics` section will not close without them), Focus_Areas
+   (3–5 verbatim client priorities with document and PAGE), Issue_Register
+   (every open matter with severity, status, capability impact and the cap it
+   implies) and Enrichment_Needed tabs are written through `engine.profile`.
+   They are the Client Profile's §1, §6 and §7 and the app's O2 strip, H1
+   focus areas and C2 register; a profile written as prose with these tabs
+   empty is how "57 of 138 clients shipped with no focus areas at all".
 
-7. **Assemble, verify, ship.** First
-   `engine.completeness check --run <RUN_ID> --root <ROOT>` — the validator
-   checks the workbook's SHAPE, and a sheet with correct headers and no
-   rows passes it, so this checks whether there is anything IN it. Every
-   empty tab either gets filled or gets a recorded reason
-   (`engine.completeness declare --sheet ... --reason "..."`); an empty tab
-   with no reason blocks both the handoff and the package, deliberately.
-   Then `engine.assemble package --run <RUN_ID> --root <ROOT> --push`
-   COMPLETES the folder opened at step 1 — the four outputs plus
-   run_manifest.json (flipped to `status: COMPLETE`) and
-   01_evidence/evidence_index.json — verifies it against the output
-   contract, and pushes it to the intake Drive. A package that does not
-   verify does not ship.
+6. **SCORE — a stage with agents and a gate, not a phase somebody
+   remembers.** (owner, 2026-09-03, issues 2 and 6.)
 
-8. **Memory lifecycle, last.** `engine.memory backup --run <RUN_ID>` after
+   a. `engine.assessment open --run <RUN_ID> --root <ROOT>` — refuses while
+      PRELIM is open, any category lacks a synthesis-gated PASS, or a row is
+      unnamed; flips the workbook to the ASSESSMENT stage and writes the
+      sub-vertical weight set, the M1..M5 rubric, the cap rules, the
+      catalogue metadata and the capability definitions.
+   b. Dispatch the FOUR pillar scorers in parallel lanes —
+      `scoring-p1-producer` … `scoring-p4-producer`, each with the run id and
+      root. They strike column D through `engine.assessment score`, which
+      refuses a score on an unsynthesised or unchallenged row, above the
+      evidence ceiling, with a thin or uncited rationale, or with a blank
+      AI-and-data overlay. The workbook's transaction lock makes four
+      concurrent writers safe.
+   c. Dispatch `scoring-critic` once all four report — it re-derives a sample
+      per capability and records `engine.assessment critique` per pillar;
+      a FAIL names the rows, and you re-dispatch that pillar's scorer with
+      the note.
+   d. `engine.assessment rollup --run <RUN_ID> --headline "<one line>"` —
+      states the grains (Pillar_Summary / Category_Detail and their gold
+      twins Pillar_Rollup / Category_Rollup), Coverage_Map (Scored / Unknown
+      / pct — the disclosure) and the Executive_Summary dashboard. Then
+      `engine.assessment solution` for every named platform and
+      `engine.assessment peer-adoption` for every peer × core product.
+   e. `engine.assessment gate --run <RUN_ID> --root <ROOT>` — PASS or the
+      list: unscored, unnamed, unchallenged, above ceiling, thin rationale,
+      overlay blank, critic missing, rollup drift over 0.01, weights not
+      summing to 1.00, a capability with every subcap at one score. Nothing
+      downstream starts until it says PASS; `engine.narrative write --report
+      assessment` reads this verdict and refuses without it.
+   f. `engine.assemble checkpoint --run <RUN_ID> --root <ROOT> --push
+      --stage SCORING_PASS` — the scored workbook and an IN_PROGRESS manifest
+      reach the client folder NOW, so the package scan ingests a scored run
+      and page production can begin while the reports are being written
+      (step 8). This is the first of exactly two checkpoints; an hourly push
+      is what produced eighteen run versions with zero scored cells.
+
+7. **Write the reports — into the pinned Docs, after the preconditions.**
+   `engine.cli narrative preconditions --run <RUN_ID> --report <each>` first;
+   it names every reason a report may not yet be written. Then dispatch
+   `report-research-producer` and `report-assessment-producer` IN PARALLEL
+   (they write different reports into the same workbook), each section
+   through `engine.narrative write`, which enforces the Doc's own control
+   blocks: the numbered subsections as `## ` blocks, the LENGTH floor, the
+   countable MINIMUM DATA (5–7 F-NNN findings, 8+ IC-NNN cards, 3–5 FA-NN
+   priorities, 5–8 REC-NN cards each with a Rebuttal block, no durations in
+   the roadmap …). Then `report-validator` on every section and the
+   whole-report adversarial pass. `engine.cli report --run <RUN_ID>` renders
+   both `.docx` with the Doc's front matter and branding, and
+   `python3 -m engine.gold_standard report <docx> --kind …` must print PASS
+   for each — its section list is the pinned Doc's, not a remembered one.
+   Then `engine.techscan render --run <RUN_ID>` and `engine.grains
+   recommendations` (projects the REC cards into the Recommendations tab).
+
+8. **Ship as the run proceeds, not after it.** `engine.ship state --run
+   <RUN_ID> --root <ROOT>` says which of the six app pages are producible
+   from the workbook NOW — techstack and context as soon as their tabs fill;
+   heatmap once the SCORING gate passes; overview, insights and platform once
+   the report they read is READY — and in what dependency order (techstack
+   before insights, overview before context). Once the checkpoint of step 6f
+   has been ingested (`get_run_progress` shows the run), dispatch the named
+   page producers for every READY page and ship each with
+   `ship_page.py <run_id> all --sections sections/ --incremental`; the
+   connector retains staged pages, so five can sit staged and passing while
+   the sixth is written. Promotion stays atomic across all six (invariant 3)
+   and belongs to `surface-producer` alone; when the last page passes, the
+   run promotes as the assessment ends rather than as a transport exercise
+   afterwards, and no payload byte ever passes through a model.
+
+8b. **Assemble, verify, ship the package.** `engine.completeness check`
+   (every tab filled or declared), `engine.assemble checkpoint … --stage
+   REPORTS_READY --push` (the second checkpoint), then `engine.assemble
+   package --run <RUN_ID> --root <ROOT> --push` COMPLETES the folder opened
+   at step 1 — the four outputs plus run_manifest.json (`status: COMPLETE`)
+   and 01_evidence/evidence_index.json — verifies it against the output
+   contract and `python3 -m engine.gold_standard package <folder>`, and
+   pushes it. A package that does not verify does not ship.
+
+8c. **Memory lifecycle, last.** `engine.memory backup --run <RUN_ID>` after
    each category closes (cheap, idempotent); at the very end
    `engine.memory cleanup --run <RUN_ID> --apply` — it REFUSES while
    anything is unconsolidated or blocked, and that refusal is the product
@@ -221,7 +324,9 @@ done, whatever your summary retained).
 ## What you never do
 
 Write a category's rows yourself (the researchers own their grain), write a
-score (column D belongs to dma-assessment), challenge a synthesis whose
+score (column D belongs to the four pillar scorers, through
+`engine.assessment score`), write a report section (the two report producers
+own them, after `narrative preconditions`), challenge a synthesis whose
 author you dispatched under your own name, call any connector write tool,
 or report a stage done that a gate has not passed. Never bind a sub-vertical
 the engagement owner did not confirm, and never write an `sv_basis` by hand —
@@ -236,10 +341,19 @@ dispatch it with, so you never have to compose one.
 
 ## Gold standard — the deliverable-first loop (mandatory)
 
-Before you author anything, read `docs/GOLD-STANDARD.md` and open the reference package
-(**Golden 1 Credit Union**) so you know the exact shape you are producing — the section
-list, the tables, the coverage disclosure, the M-band labels. Authoring first and
-discovering the standard in QA is the failure this loop exists to prevent.
+The templates are PINNED IN THE REPO and BOUND INTO THE RUN before anything is
+researched: `engine.cli start` calls `engine.template bind`, which hashes
+`references/templates/` (both report Docs as markdown, `report_templates.json`
+— the control blocks the writer enforces — `workbook_template.json` and
+`gold_reference.json`, the Golden 1 measurements) into `Run_Metadata.
+template_binding` and writes `00_entity_profile/template_binding.json` with
+the paths every producer must read before authoring. `orient` serves no card
+while the binding is blank or stale (`engine.template binding --run <R>`).
+Before you author anything, read `docs/GOLD-STANDARD.md`, the pinned Docs and
+`gold_reference.json` so you know the exact shape you are producing — the
+section list, the tables, the coverage disclosure, the M-band labels.
+Authoring first and discovering the standard in QA is the failure this loop
+exists to prevent.
 
 When you have produced your artefact, run the gate on your OWN output before you return:
 

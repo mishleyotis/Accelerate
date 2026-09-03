@@ -516,6 +516,18 @@ Search enforcement databases → Issue Time Map → severity S1/S2/S3 → determ
 
 ## Phase 4: Scoring & Workbook Production
 
+**On a research-engine run (a `DMA_Scoring_Workbook_*.xlsx` with a
+`Run_Metadata.stage` key), this phase IS the engine's SCORING stage — do not
+build a second workbook.** `python3 -m engine.assessment open --run <R>`
+refuses until every category's floors gate is PASS; each score goes in
+through `engine.assessment score` (refuses an unchallenged row, a score
+above its evidence ceiling, a rationale that cites none of the row's E-ids,
+a blank AI/data overlay); the four `scoring-p<N>-producer` agents run one
+pillar each in parallel and `scoring-critic` records the SCORING_CRITIC
+verdict per pillar; `engine.assessment rollup` then `engine.assessment gate`
+must record PASS before Phase 7 may start. The 11-column contract below is
+the same sheet — column D is what the stage writes.
+
 Execute Phase Gate Protocol. Apply ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-008, ERR-009.
 
 **Read first:** `references/scoring_methodology.md`, `references/workbook_specification.md`.
@@ -650,7 +662,13 @@ Generate in order: **1. Workbook** → **2. Report** (.docx) → **3. Charts** �
 
 **Template is MANDATORY — NO deviation.**
 
-**STEP 0:** Retrieve `DMA_Assessment_Report_Template.docx` from the project knowledge base.
+**STEP 0:** The template is PINNED in the repo —
+`plugins/dma-insights/references/templates/assessment_report_template.md` with
+its section spec in `report_templates.json` — and every run is bound to it at
+`engine.cli start`. Read the pinned export (and `gold_reference.json`, the
+Golden 1 depth) before writing; `python3 -m engine.cli narrative preconditions
+--run <R> --report assessment` must print nothing (SCORING gate PASS, workbook
+complete, PRELIM closed, binding recorded) or no section may be written.
 This is the ONLY acceptable report structure. Do NOT create ad hoc layouts. Do NOT invent
 sections. Fill the template exactly as structured.
 

@@ -76,6 +76,31 @@ source — the contract forbids a placeholder there and a URL cannot be invented
 - **Reconcile**: every figure the report renders equals the workbook's stated grain
   within 0.01 on the overall.
 
+## Templates are pinned, bound and enforced — before the process begins
+
+- **Pinned**: the owner's two report Docs and the workbook template live in
+  `plugins/dma-insights/references/templates/` — `client_profile_template.md`,
+  `assessment_report_template.md`, `report_templates.json` (the section spec
+  the engine writes to: blocks, feeds, control-block checks), `workbook_template.json`
+  and `gold_reference.json` (the Golden 1 shape and depth measured, not recalled).
+- **Bound**: `engine.cli start` binds every run to the pinned digest
+  (`00_entity_profile/template_binding.json`, `Run_Metadata.template_binding`).
+  `orient` withholds the first card until the binding exists; the report
+  preconditions refuse without it; `engine.template report-drift` reports a Doc
+  export that has moved away from the JSON.
+- **Enforced**: `engine.narrative write` refuses a body that is not the Doc's
+  (blocks, card shape, countable minimum data); `gold_standard` checks the
+  rendered .docx by section number AND heading against the pin (GS-RPT-SECTIONS);
+  `workbook.create` seeds every `SubCap_Name` from the catalogue and refuses an
+  unnamed cell (GS-WB-NAMES). The session brief names the templates on every
+  research and report session, so no agent starts from a remembered shape.
+- **Evidence depth is gated per cell, not per category**: every askable volley
+  has a logged search for the cell (`volleys_incomplete`, blocking) and an
+  empty cell closes only as a DECLARED absence through `engine.cli absence`
+  (`absence_undeclared_empty`, blocking) — the Golden 1 reference fired
+  `fails` three times in 690 cells; a run to this standard fires it in every
+  cell that has no direct evidence.
+
 ## No hedges
 
 These read as "the work was not finished" and must never ship: "Not established this

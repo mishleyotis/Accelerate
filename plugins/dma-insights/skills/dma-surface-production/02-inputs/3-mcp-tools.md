@@ -1,6 +1,6 @@
 # The MCP connector
 
-33 tools in six groups. Read tools are free, idempotent and side-effect free. Write
+34 tools in six groups. Read tools are free, idempotent and side-effect free. Write
 tools are the only path into anything the product serves. Input schemas live
 server-side in `apps/mcp` (the `server.py` signatures, validated in `dma_mcp/*`) —
 this document is the map, not the schema; the connector's own refusals are the

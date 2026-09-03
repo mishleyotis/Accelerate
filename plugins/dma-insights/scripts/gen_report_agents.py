@@ -80,6 +80,27 @@ def _section_table(key: str) -> str:
         if sec.blocks:
             rows.append(f"- **§{sec.id}** — "
                         + "  ·  ".join(f"`## {b}`" for b in sec.blocks))
+        elif sec.kind == "section":
+            rows.append(f"- **§{sec.id}** — one passage; the Doc numbers no "
+                        f"subsections here")
+    rows.append("")
+    rows.append("**The countable MINIMUM DATA and MUST NOT rules the write "
+                "refuses on** (the rest of each control block is in the "
+                "pinned Doc, and the validator reads it):")
+    rows.append("")
+    for sec in spec.sections:
+        bits = []
+        for chk in sec.checks:
+            bits.append(f">= {chk.min}" + (f" (<= {chk.max})" if chk.max else "")
+                        + f" {chk.label}" + (" per card" if chk.per_card else ""))
+        for fb in sec.forbid:
+            bits.append(f"never: {fb.label}")
+        if sec.is_card:
+            bits.insert(0, f"{sec.card_floor}"
+                        + (f"-{sec.cards_max}" if sec.cards_max else "+")
+                        + f" cards `{sec.card_prefix}…`, each {sec.card_min_words}+ words")
+        if bits:
+            rows.append(f"- **§{sec.id}** — " + "; ".join(bits))
     return "\n".join(rows)
 
 
@@ -109,6 +130,29 @@ Re-researching any of it is duplicated spend and, worse, a second opinion
 that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
+
+## Before you write a word: the preconditions, then the template
+
+```
+engine.cli narrative preconditions --run <R> --root <ROOT> --report {key}
+```
+
+It refuses — and names every reason at once — while PRELIM is open, while
+any category's floors gate is not a PASS recorded with `--require-synthesis`,
+while the run's templates are unbound, and (for the assessment report) while
+the workbook is still at the research stage, the SCORING gate has no recorded
+PASS, or the completeness gate holds a tab empty with no reason. `engine.cli
+narrative write` runs the same check and refuses the write; do not route
+around it by writing rows with any other tool. Owner, 2026-09-03: "Report
+writing starts without scoring happening" — this is the check that stops it.
+
+Then read the Doc you are writing INTO, pinned in the repo:
+`references/templates/{markdown}` — every section's control block (PURPOSE,
+FEEDS, INPUTS, LENGTH, MINIMUM DATA, MUST INCLUDE, MUST NOT, FAIL IF) and its
+tables — and `references/templates/gold_reference.json`, the Golden 1
+measurements a finished report meets. `engine.cli narrative contract --report
+{key}` prints the same contract as the engine enforces it, block by block,
+with the countable MINIMUM DATA rules the write refuses on.
 
 ## The sections you own
 
@@ -304,7 +348,8 @@ def build() -> dict[str, str]:
         out[f"{name}.md"] = render(
             name, desc, f"reports/{name}.md", "sonnet", "high", 200,
             PRODUCER_BODY.format(title=spec.title, table=_section_table(key),
-                                 key=key, name=name) + GOLD_BLOCK)
+                                 key=key, name=name, markdown=spec.markdown)
+            + GOLD_BLOCK)
     out["report-validator.md"] = render(
         "report-validator",
         ("Gives every section of both DMA reports its independent verdict "

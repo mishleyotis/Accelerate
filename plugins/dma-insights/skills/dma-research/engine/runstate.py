@@ -168,6 +168,11 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
                        evidence_mode=evidence_mode, sv_basis=sv_basis,
                        mode_basis=mode_basis, lob_census=lob_census)
     run = Run(run_id=run_id, root=base, workbook_path=path)
+    # BIND THE TEMPLATES BEFORE ANYTHING IS RESEARCHED. The pinned report
+    # Docs, workbook shape and gold reference are hashed into the workbook
+    # and written beside the run; orient will not serve a card without it.
+    from . import template as _template
+    _template.bind(run)
     (base / "00_entity_profile" / "context.json").write_text(json.dumps({
         "entity": entity_name, "entity_id": entity_id,
         "sub_vertical": sub_vertical, "scope_mode": scope_mode,

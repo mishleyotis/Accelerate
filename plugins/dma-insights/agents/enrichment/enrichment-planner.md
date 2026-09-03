@@ -186,7 +186,7 @@ general opinion about which fields matter.
     plan; `get_memory_digest` for what came back. A gap whose defect class is
     already open in memory is ranked differently from a fresh one.
 12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
-    — the 33 tools. `list_enrichment_gaps` and `record_enrichment` are the two
+    — the 34 tools. `list_enrichment_gaps` and `record_enrichment` are the two
     your plan turns on; never name a tool that is not on that list.
 
 ## THE CONTRACT — the worklist's kinds, and the surface that renders the plan

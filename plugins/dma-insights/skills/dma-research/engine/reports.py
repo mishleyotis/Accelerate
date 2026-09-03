@@ -125,6 +125,27 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section) -> list[dict]:
         if rows:
             out.append(_table("Coverage by category", list(C.COVERAGE_COLUMNS),
                               [[r[c] for c in C.COVERAGE_COLUMNS] for r in rows]))
+    # The scoring stage's own tables (2026-09-03): the Doc's §4 reads the
+    # STATED rollups and §10 the coverage map — curated from the sheets at
+    # render time so the report cannot disagree with the workbook (AUD-0052).
+    if "Coverage_Map" in sec.inputs:
+        rows = wb.rows("Coverage_Map")
+        if rows:
+            cols = list(C.COVERAGE_MAP_COLUMNS)
+            out.append(_table("Coverage by category", cols,
+                              [[r.get(c) for c in cols] for r in rows]))
+    if "Pillar_Rollup" in sec.inputs:
+        rows = wb.rows("Pillar_Rollup")
+        if rows:
+            cols = list(C.PILLAR_ROLLUP_COLUMNS)
+            out.append(_table("Pillar rollup (stated)", cols,
+                              [[r.get(c) for c in cols] for r in rows]))
+    if "Category_Rollup" in sec.inputs:
+        rows = wb.rows("Category_Rollup")
+        if rows:
+            cols = list(C.CATEGORY_ROLLUP_COLUMNS)
+            out.append(_table("Category rollup (stated)", cols,
+                              [[r.get(c) for c in cols] for r in rows]))
     if "Evidence_Detail" in sec.inputs:
         ev = wb.rows("Evidence_Detail")
         if ev:
@@ -210,13 +231,14 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
     problems: list[str] = []
     total = 0
 
+    from . import narrative as _N
     for b in curated["blocks"]:
         sec = b["section"]
         total += b["words"]
-        if b["words"] < sec.min_words:
+        if b["words"] < _N.min_words_for(wb, sec):
             problems.append(
                 f"§{sec.id} {sec.heading}: {b['words']} words against a "
-                f"blocking minimum of {sec.min_words}. Write it into "
+                f"blocking minimum of {_N.min_words_for(wb, sec)}. Write it into "
                 f"Report_Narrative (Report={spec.key}, Section_ID={sec.id}).")
         dead = [c for c in b["citations"] if c not in register]
         if dead:
@@ -233,16 +255,31 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
                 f"{b['declared_inputs']} is empty, so the section has no "
                 f"source at all. Populate them or remove the section from "
                 f"the spec.")
-        if sec.kind in ("insight_card", "recommendation", "finding"):
+        if sec.kind in RS.CARD_KINDS:
             n = len([r for r in b["rows"]
                      if str(r.get("Kind") or "") == sec.kind])
-            if sec.kind == "insight_card" and n < RS.INSIGHT_CARD_MIN:
+            floor = _N.card_floor_for(wb, sec)
+            if n < floor:
                 problems.append(
-                    f"§{sec.id} {sec.heading}: {n} insight cards against the "
-                    f"template's blocking minimum of {RS.INSIGHT_CARD_MIN}.")
-            elif sec.kind != "insight_card" and n == 0:
+                    f"§{sec.id} {sec.heading}: {n} {sec.kind.replace('_', ' ')}"
+                    f"(s) against the template's blocking minimum of "
+                    f"{floor}.")
+            elif sec.cards_max and n > int(sec.cards_max):
                 problems.append(
-                    f"§{sec.id} {sec.heading}: no {sec.kind} rows.")
+                    f"§{sec.id} {sec.heading}: {n} {sec.kind}s, the template "
+                    f"allows at most {sec.cards_max}.")
+        # The countable MINIMUM DATA / MUST NOT rules of the Doc's control
+        # block, re-checked on what will actually be rendered.
+        whole = "\n".join(str(r.get("Body") or "") for r in b["rows"])
+        for why in _N._check_counts(sec, whole, per_card=False):
+            problems.append(f"§{sec.id} {sec.heading}: {why}")
+        if sec.kind in RS.CARD_KINDS:
+            for r in b["rows"]:
+                for why in _N._check_counts(sec, str(r.get("Body") or ""),
+                                            per_card=True):
+                    problems.append(
+                        f"§{sec.id} {sec.heading} card "
+                        f"{r.get('Card_ID')}: {why}")
         # Functional language on everything a client reads: report bodies
         # are impact prose by definition, so both tiers apply — verdict
         # words and blame constructions alike
@@ -254,10 +291,10 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
                     f"§{sec.id} {sec.heading}: {why}")
                 break
 
-    if total < spec.min_words:
+    if total < _N.report_min_words_for(wb, spec):
         problems.append(
             f"whole report: {total} words against a blocking minimum of "
-            f"{spec.min_words}")
+            f"{_N.report_min_words_for(wb, spec)}")
     return problems
 
 
@@ -290,6 +327,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
 
     doc = Document()
     _style(doc)
+    _brand(doc, spec, entity, md)
     doc.add_heading(spec.title, level=0)
     p = doc.add_paragraph(entity)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -301,11 +339,14 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
         "Every figure and every citation in this document is read from the "
         "assessment workbook at render time. The report and the workbook "
         "cannot disagree, because there is only one of them.")
+    _front_matter(doc, wb, spec, md)
 
     for b in curated["blocks"]:
         sec = b["section"]
         doc.add_heading(f"{sec.id}. {sec.heading}", level=1)
-        if b["body"]:
+        if sec.kind in RS.CARD_KINDS and b["rows"]:
+            _emit_cards(doc, wb, sec, b["rows"])
+        elif b["body"]:
             _emit_body(doc, b["body"])
         elif force:
             _warn(doc, f"NO SOURCE — §{sec.id} has no narrative in "
@@ -325,7 +366,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
                 + ". Not in this engagement's scope, and therefore not "
                   "reported on: " + ", ".join(b["empty_inputs"]) + ".")
 
-    doc.add_heading("Citations", level=1)
+    doc.add_heading("Sources cited", level=1)
     register = wb.evidence_index()
     used = sorted({c for b in curated["blocks"] for c in b["citations"]})
     if not used:
@@ -351,6 +392,137 @@ def _style(doc) -> None:
     st = doc.styles["Normal"]
     st.font.name = "Calibri"
     st.font.size = Pt(10.5)
+
+
+def _brand(doc, spec, entity: str, md: dict) -> None:
+    """The branded chrome the reference package carries (header1.xml), so the
+    document is authored INTO a template rather than as a blank `Document()`
+    — goeasy GSY-05, gold gate GS-RPT-BRANDING."""
+    sec = doc.sections[0]
+    h = sec.header.paragraphs[0] if sec.header.paragraphs else sec.header.add_paragraph()
+    h.text = f"Zennify · Digital Maturity Assessment · {spec.title} · {entity}"
+    h.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    for r in h.runs:
+        r.font.size = Pt(8)
+        r.font.color.rgb = RGBColor(0x1F, 0x3A, 0x5F)
+    f = sec.footer.paragraphs[0] if sec.footer.paragraphs else sec.footer.add_paragraph()
+    f.text = (f"Run {md.get('run_id')} · catalogue {md.get('catalogue_version')} "
+              f"({str(md.get('catalogue_hash'))[:8]}) · prepared by Zennify "
+              f"Digital Maturity Assessment · confidential")
+    f.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    for r in f.runs:
+        r.font.size = Pt(8)
+
+
+def _front_matter(doc, wb, spec, md: dict) -> None:
+    """The Doc's two unnumbered front sections, filled from the run.
+
+    'Document Control and Catalogue Binding' resolves every value from the
+    workbook — nothing typed — and 'Surface Alignment' is the Doc's own
+    section -> app-surface table, rendered from the pinned spec so it cannot
+    drift from what the sections declare they feed. Unnumbered Heading1s are
+    front matter to the app's parser and are never stored as sections."""
+    doc.add_heading("Document Control and Catalogue Binding", level=1)
+    doc.add_paragraph(
+        "Every value below is resolved at render time from the run's own "
+        "workbook and the active catalogue. Nothing here is typed by hand.")
+    tax = C.taxonomy()
+    lock = wb.handoff_lock()
+    rows = [
+        ["Catalogue version", str(md.get("catalogue_version"))],
+        ["Catalogue content hash", str(md.get("catalogue_hash"))],
+        ["Structure counts", f"{tax.n_pillars} pillars / {tax.n_categories} "
+                             f"categories / {tax.n_capabilities} capabilities / "
+                             f"{tax.n_cells} subcapabilities"],
+        ["Sub-vertical", str(md.get("sub_vertical") or "")],
+        ["Evidence mode", str(md.get("evidence_mode") or "")],
+        ["Scope", f"{md.get('scope_mode')} — {md.get('subcaps_selected')} "
+                  f"subcapabilities selected"],
+        ["Reference date", str(md.get("reference_date"))],
+        ["Workbook contract", f"{md.get('workbook_contract')} · engine "
+                              f"{md.get('engine_version')}"],
+        ["Scoring workbook", wb.path.name],
+        ["Template binding", str(md.get("template_binding") or "UNBOUND")],
+        ["Peer set", str(lock.get("locked_peer_set") or "not locked")],
+        ["Stage", str(md.get("stage") or "research")],
+    ]
+    in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
+    out_of_scope = [p for p in ("P1", "P2", "P3", "P4") if p not in in_scope]
+    rows.append(["Pillars in scope", ", ".join(in_scope) or "none"])
+    _write_table(doc, {"cols": ["Field", "Value"], "rows": rows})
+    if out_of_scope:
+        # A focused engagement STATES its scope rather than refusing: the
+        # sheets it leaves empty are named here, once, so a reader does not
+        # take an unassessed pillar for a silent one.
+        doc.add_paragraph(
+            "Pillars assessed in this engagement: " + ", ".join(in_scope)
+            + ". Not in this engagement's scope, and therefore not reported on: "
+            + ", ".join(f"{p}_Subcap_Scoring" for p in out_of_scope) + ".")
+    doc.add_heading("Surface Alignment", level=1)
+    doc.add_paragraph(
+        "This report is one input to the DMA Insights app. Each section "
+        "feeds the named app surfaces; producing a section without knowing "
+        "what it feeds is how a report and a dashboard end up disagreeing "
+        "under the same client name.")
+    _write_table(doc, {
+        "cols": ["Section", "Feeds app surface"],
+        "rows": [[f"{s.id}. {s.heading}",
+                  ", ".join(s.surfaces) or "No served surface; internal"]
+                 for s in spec.sections]})
+
+
+def _card_heading(wb, sec, row) -> str:
+    """The Doc's own heading for one card — '5.N Pillar deep dive (P1): …'
+    with the served score and median, or 'REC-NN: Title'."""
+    card = str(row.get("Card_ID") or "").strip()
+    title = str(row.get("Heading") or "").strip()
+    if sec.kind == "pillar":
+        n = card[1:] if card.startswith("P") else "?"
+        score = median = gap = "—"
+        for r in wb.rows("Pillar_Rollup"):
+            if str(r.get("pillar_id") or "").strip() == card:
+                score = str(r.get("score") or "—")
+                median = str(r.get("peer_median") or "—")
+                gap = str(r.get("gap") or "—")
+        name = C.PILLAR_NAMES.get(card, title or card)
+        # '(P1)' is the token the app's parser (DEEP_DIVE_PILLAR) and the
+        # embedder (_PILLAR_TOKEN) scope on; it stays in the heading.
+        return (f"{sec.id}.{n} Pillar deep dive ({card}): {name} — score "
+                f"{score} against median {median} ({gap})")
+    if title and title != sec.heading and not title.startswith(card):
+        return f"{card}: {title}"
+    return title or card
+
+
+def _emit_cards(doc, wb, sec, rows) -> None:
+    """A list section: one Heading2 per card, its blocks as Heading3s.
+
+    That is the Doc's shape ('## 5.N …' / '### Capability scorecard';
+    '## REC-NN: …' / '#### Root cause') and the grain the app parses: rows
+    land per Heading2, so a pillar's four blocks arrive under one heading
+    carrying its pillar token, and a recommendation's under its REC id."""
+    def key(r):
+        c = str(r.get("Card_ID") or "")
+        m = re.search(r"(\d+)$", c)
+        return (0, int(m.group(1))) if m else (1, c)
+    for r in sorted(rows, key=key):
+        doc.add_heading(_card_heading(wb, sec, r), level=2)
+        buf: list[str] = []
+
+        def flush():
+            if buf:
+                doc.add_paragraph("\n".join(buf).strip())
+                buf.clear()
+        for line in str(r.get("Body") or "").splitlines():
+            m = _BLOCK_LINE.match(line)
+            if m:
+                flush()
+                doc.add_heading(m.group(1), level=3)
+            elif not line.strip():
+                flush()
+            else:
+                buf.append(line)
+        flush()
 
 
 def _warn(doc, text: str) -> None:

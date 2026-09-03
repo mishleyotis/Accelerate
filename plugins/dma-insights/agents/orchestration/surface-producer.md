@@ -98,6 +98,24 @@ the same content. When the last producer returns, the sixth page ships and
 the run is ready to promote — the client page is live as the assessment ends
 rather than a transport exercise afterwards.
 
+**On a research-engine run, do not wait for the assessment to end before
+producing anything.** The research workbook tells you which pages it can
+already feed:
+
+```bash
+python3 -m engine.ship state --run <run_id>      # from skills/dma-research
+```
+
+`ready_pages` are the pages whose workbook inputs are complete (PRELIM's
+firmographics, timeline and peers feed OVERVIEW and CONTEXT before a single
+category is scored; the SCORING gate releases HEATMAP and PLATFORM);
+`dispatch_now` is the subset to produce next, in the surface map's order.
+Dispatch those producers while later research and scoring stages are still
+running, ship each page with `--incremental` as it returns, and the
+`research-conductor` calls you at its stage 8 with the last pages. That is
+how promotion becomes one call at the end rather than the six-page,
+from-scratch pass that bled tokens on every run before 2026-09-03.
+
 **Never retype a payload into `append_payload_part`.** `ship_page.py` sends
 every part from disk. Retyping is the only step in this pipeline that can
 INVENT content, and on the Golden 1 run it did: an agent paraphrased

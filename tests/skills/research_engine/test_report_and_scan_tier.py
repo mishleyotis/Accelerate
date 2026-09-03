@@ -16,6 +16,8 @@ import json
 import sys
 from pathlib import Path
 
+import re
+
 import pytest
 
 REPO = Path(__file__).resolve().parents[3]
@@ -27,96 +29,74 @@ from engine import ers as ERS                      # noqa: E402
 from engine import narrative as N                  # noqa: E402
 from engine import report_spec as RS               # noqa: E402
 from engine import techscan                        # noqa: E402
-from fixtures import bank_evidence, new_run        # noqa: E402
+from fixtures import bank_evidence, new_run, section_record  # noqa: E402
 
 
-def _section(**over) -> dict:
+#: The prose the tests reason about — one [INF] mark, a figure the fixture
+#: evidence grounds — and the ARGUMENT fields behind it. The body wears
+#: whichever section's PINNED blocks the test writes to (`section_record`),
+#: with this prose inside the first block, so each test can break exactly
+#: one field the writer must refuse.
+_PROSE = (
+    "Acme Credit Union is a state-chartered, federally insured credit union "
+    "assessed under the CU sub-vertical in PUBLIC evidence mode. Its digital "
+    "banking platform went live in the third quarter of 2024 and member "
+    "adoption is reported at 47 percent within ninety days of launch. No "
+    "public evidence names a documented cadence for reviewing the digital "
+    "strategy itself. [INF] That silence more likely reflects the disclosure "
+    "habits of a member-owned institution than an absence of internal "
+    "practice, and it is carried forward as an open question rather than as "
+    "a finding.")
+_ARGUMENT = {
+    "Weighing": (
+        "The adoption reading was weighed against the possibility that a "
+        "launch figure flatters a platform in its first quarter; the "
+        "ninety-day restatement was preferred because it is the later "
+        "of the two and the more conservative. The alternative reading, "
+        "that adoption reflects forced migration rather than uptake, was "
+        "rejected because no migration deadline appears in any source."),
+    "Absence_Basis": (
+        "Direct disclosure, delay-and-criticism proxy and the NCUA "
+        "regulatory rung were all searched on 2026-08-29; the published "
+        "board roster names members only and no regulator has posted a "
+        "governance report addressing digital oversight."),
+    "Assumptions": (
+        "Assumed the 2024 platform decision is still in force, which "
+        "cuts in favour of the maturity reading; a reversal would lower "
+        "the ceiling rather than raise it."),
+    "Bias_Notes": (
+        "A public-evidence run over-reads what an institution publishes "
+        "and under-reads what it does not. This client issues press "
+        "releases readily, so its intent is better evidenced than its "
+        "delivery, and this section is correspondingly stronger on the "
+        "former."),
+    "Inference_Tags": (
+        "[INF] the cadence silence reflects disclosure habit rather than "
+        "absent practice — would be confirmed by requesting the "
+        "strategic-planning calendar in discovery"),
+}
+
+
+def _section(report="client_research", section="1", **over) -> dict:
     """A section that passes every check, so each test can break exactly one."""
-    rec = {
-        # The blocks are §1's declared anatomy, and the writer refuses a body
-        # without them: they become real Heading2s in the .docx, which is the
-        # grain the app parses and scopes its vectors at.
-        "Body": (
-            "## Who this is\n"
-            "Acme Credit Union is a state-chartered, federally insured credit "
-            "union assessed under the CU sub-vertical in PUBLIC evidence "
-            "mode. Its digital banking platform went live in the third "
-            "quarter of 2024 and member adoption is reported at 47 percent "
-            "within ninety days of launch.\n\n"
-            "## What was in scope\n"
-            "The scope of this profile is the "
-            "retail estate the call report describes. No public evidence "
-            "names a documented cadence for reviewing the digital strategy "
-            "itself. [INF] That silence more likely reflects the disclosure "
-            "habits of a member-owned institution than an absence of "
-            "internal practice, and it is carried forward as an open "
-            "question rather than as a finding.\n\n"
-            "## What was out of scope, and what that bounds\n"
-            "Every claim here rests on a "
-            "source a reader can reopen, and the ceiling on each is set by "
-            "what a public-evidence engagement can reach rather than by what "
-            "the institution does internally. The profile is written to be "
-            "argued with rather than believed, and every figure in it can be "
-            "traced to the excerpt that carries it rather than to any "
-            "recollection of having read one somewhere in the record."),
-        "Evidence_IDs": "",          # filled by the caller
-        "Weighing": (
-            "The adoption reading was weighed against the possibility that a "
-            "launch figure flatters a platform in its first quarter; the "
-            "ninety-day restatement was preferred because it is the later "
-            "of the two and the more conservative. The alternative reading, "
-            "that adoption reflects forced migration rather than uptake, was "
-            "rejected because no migration deadline appears in any source."),
-        "Absence_Basis": (
-            "Direct disclosure, delay-and-criticism proxy and the NCUA "
-            "regulatory rung were all searched on 2026-08-29; the published "
-            "board roster names members only and no regulator has posted a "
-            "governance report addressing digital oversight."),
-        "Assumptions": (
-            "Assumed the 2024 platform decision is still in force, which "
-            "cuts in favour of the maturity reading; a reversal would lower "
-            "the ceiling rather than raise it."),
-        "Bias_Notes": (
-            "A public-evidence run over-reads what an institution publishes "
-            "and under-reads what it does not. This client issues press "
-            "releases readily, so its intent is better evidenced than its "
-            "delivery, and this section is correspondingly stronger on the "
-            "former."),
-        "Inference_Tags": (
-            "[INF] the cadence silence reflects disclosure habit rather than "
-            "absent practice — would be confirmed by requesting the "
-            "strategic-planning calendar in discovery"),
-    }
+    eids = [e for e in re.split(r",\s*", str(over.get("Evidence_IDs") or "")) if e]
+    rec = section_record(section, eids, report=report)
+    lines = rec["Body"].splitlines()
+    # the prose under test goes into the first block, after its heading
+    first = next((i for i, ln in enumerate(lines) if ln.startswith("## ")), -1)
+    lines.insert(first + 1, _PROSE)
+    rec["Body"] = "\n".join(lines)
+    rec.update(_ARGUMENT)
+    rec["Evidence_IDs"] = ", ".join(eids)
     rec.update(over)
     return rec
 
 
 def _for_section(rec: dict, report: str, section: str) -> dict:
-    """The same record, wearing another section's declared block anatomy.
+    """The same argument, wearing another section's declared block anatomy."""
+    keep = {k: rec[k] for k in ("Evidence_IDs", *_ARGUMENT) if k in rec}
+    return _section(report=report, section=section, **keep)
 
-    `narrative.write` refuses a body that does not carry its section's
-    blocks in order, so a test that moves to a different section has to
-    move its subheadings too. The prose is deliberately unchanged: these
-    tests are about the refusals, not about the writing.
-    """
-    from engine import report_spec as RS
-    sec = RS.SPECS[report].section(section)
-    rec = dict(rec)
-    prose = [ln for ln in rec["Body"].splitlines()
-             if ln.strip() and not ln.strip().startswith("##")]
-    if not sec.blocks:
-        rec["Body"] = "\n".join(prose)
-        return rec
-    per = max(1, len(prose) // len(sec.blocks))
-    out, i = [], 0
-    for n, block in enumerate(sec.blocks):
-        out.append(f"## {block}")
-        chunk = prose[i:i + per] if n < len(sec.blocks) - 1 else prose[i:]
-        out.extend(chunk or ["Nothing further is recorded for this block."])
-        out.append("")
-        i += per
-    rec["Body"] = "\n".join(out).strip()
-    return rec
 
 def _ready_run(tmp_path):
     run = new_run(tmp_path, n=6)
@@ -205,10 +185,13 @@ def test_a_section_the_spec_exempts_may_ship_uncited(tmp_path):
     for it to cite, and a spec field only half the pipeline reads is a
     contradiction rather than a safeguard."""
     _, wb, _ = _ready_run(tmp_path)
-    assert RS.SPECS["client_research"].section("1").requires_citation is False
-    out = N.write(wb, "client_research", "1", _section(Evidence_IDs=""),
+    # The pinned Doc exempts §8 (the workbook references) — it describes
+    # the run's artefacts, not the client, so there is nothing to cite.
+    assert RS.SPECS["client_research"].section("1").requires_citation is True
+    assert RS.SPECS["client_research"].section("8").requires_citation is False
+    out = N.write(wb, "client_research", "8", _section(section="8", Evidence_IDs=""),
                   actor="report-research-producer")
-    assert out["section"] == "1"
+    assert out["section"] == "8"
 
 
 def test_an_unresolvable_citation_is_refused(tmp_path):

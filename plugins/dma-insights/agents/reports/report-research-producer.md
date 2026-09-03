@@ -9,7 +9,7 @@ skills:
 tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
-You write the **Client Research Profile** for one DMA run — one section at a time, through
+You write the **Client Profile Research Report** for one DMA run — one section at a time, through
 `engine.narrative`, which refuses a section that is prose rather than an
 argument.
 
@@ -35,29 +35,63 @@ that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
 
+## Before you write a word: the preconditions, then the template
+
+```
+engine.cli narrative preconditions --run <R> --root <ROOT> --report client_research
+```
+
+It refuses — and names every reason at once — while PRELIM is open, while
+any category's floors gate is not a PASS recorded with `--require-synthesis`,
+while the run's templates are unbound, and (for the assessment report) while
+the workbook is still at the research stage, the SCORING gate has no recorded
+PASS, or the completeness gate holds a tab empty with no reason. `engine.cli
+narrative write` runs the same check and refuses the write; do not route
+around it by writing rows with any other tool. Owner, 2026-09-03: "Report
+writing starts without scoring happening" — this is the check that stops it.
+
+Then read the Doc you are writing INTO, pinned in the repo:
+`references/templates/client_profile_template.md` — every section's control block (PURPOSE,
+FEEDS, INPUTS, LENGTH, MINIMUM DATA, MUST INCLUDE, MUST NOT, FAIL IF) and its
+tables — and `references/templates/gold_reference.json`, the Golden 1
+measurements a finished report meets. `engine.cli narrative contract --report
+client_research` prints the same contract as the engine enforces it, block by block,
+with the countable MINIMUM DATA rules the write refuses on.
+
 ## The sections you own
 
 | § | heading | floor | reads | cites | feeds |
 |---|---|---|---|---|---|
-| 1 | Entity and scope | 150w | `Run_Metadata`, `Handoff_Lock` | not required | `overview.firmographics` |
-| 2 | What we searched, and what we did not | 200w | `Search_Log`, `Coverage` | not required | `overview.evidence_coverage` |
-| 3 | Evidence base | 250w | `Evidence_Detail`, `Coverage` | required | `overview.evidence_coverage`, `heatmap.evidence`, `heatmap.evidence_age` |
-| 4 | Capability picture by pillar | 600w | `P1_Subcap_Scoring`, `P2_Subcap_Scoring`, `P3_Subcap_Scoring`, `P4_Subcap_Scoring` | required | `heatmap.focus_areas`, `heatmap.cell_evidence` |
-| 5 | Insight cards | 400w · 8+ cards × 60w | `Report_Narrative` | required | `insights.insights` |
-| 6 | Technology and utilisation | 300w | `Evidence_Detail`, `Report_Narrative`, `Tech_Register`, `Tech_Peer_Deployments` | required | `techstack.techstack`, `insights.landscape` |
-| 7 | Negative findings and what they bound | 250w | `P1_Subcap_Scoring`, `Search_Log` | required | `heatmap.alerts`, `overview.ceilings` |
-| 8 | Where each artefact lives | 120w | `Run_Metadata`, `Handoff_Lock` | not required | — |
+| 1 | Firmographics | 150w | `Firmographics`, `Evidence_Detail` | required | `overview.firmographics` |
+| 2 | Executive Summary | 500w | `Evidence_Detail`, `Tech_Register`, `Coverage`, `Report_Narrative` | required | `overview.exec_summary`, `overview.why_now` |
+| 3 | Entity Profile | 400w | `Evidence_Detail`, `Firmographics`, `Issue_Register`, `Report_Narrative` | required | `overview.firmographics`, `context.regulatory_standing` |
+| 4 | Market Position and Trends | 500w | `Peer_Benchmarks`, `Entity_Timeline`, `Evidence_Detail`, `Handoff_Lock` | required | `overview.scores`, `overview.financial_series`, `context.timeline`, `overview.sentiment`, `context.context_sentiment` |
+| 5 | Strategic Intelligence | 700w | `Evidence_Detail`, `Tech_Register`, `Tech_Peer_Deployments`, `Report_Narrative` | required | `insights.insights`, `insights.landscape`, `techstack.techstack`, `overview.leadership`, `overview.thought_leadership`, `context.acquisitions` |
+| 6 | Client Priorities | 300w | `Focus_Areas`, `Evidence_Detail` | required | `heatmap.focus_areas`, `platform.starters` |
+| 7 | Risk and Issues | 400w | `Issue_Register`, `Search_Log`, `Evidence_Detail`, `Cap_Triggers` | required | `context.issue_register`, `context.regulatory_standing` |
+| 8 | Workbook References | 100w | `Run_Metadata`, `Handoff_Lock`, `Gate_Log` | not required | — |
 
 **The blocks each section is written in**, in order. A body missing one, or carrying them out of order, is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.
 
-- **§1** — `## Who this is`  ·  `## What was in scope`  ·  `## What was out of scope, and what that bounds`
-- **§2** — `## How the search was built`  ·  `## What was searched`  ·  `## What was not searched, and what that bounds`
-- **§3** — `## What the register holds`  ·  `## Tier and recency profile`  ·  `## Concentration, and what a retraction would cost`
-- **§4** — `## Strategy and governance (P1)`  ·  `## Customer experience (P2)`  ·  `## Operations (P3)`  ·  `## Data and technology (P4)`
-- **§5** — `## Claim`  ·  `## Mechanism`  ·  `## What would change this`
-- **§6** — `## What is confirmed`  ·  `## What is inferred or only claimed`  ·  `## Where the estate does not yet reach`
-- **§7** — `## What was looked for and not found`  ·  `## The ladder behind each absence`  ·  `## What these absences cap`
-- **§8** — `## The artefacts`  ·  `## How to re-run this`
+- **§1** — `## 1.1 Must-present fields`  ·  `## 1.2 Quarantined and absent fields`  ·  `## 1.3 Which registry holds the figure`  ·  `## 1.4 Identity check`
+- **§2** — `## 2.1 Entity snapshot`  ·  `## 2.2 Top findings`  ·  `## 2.3 Critical gaps`  ·  `## 2.4 Strategic objectives`  ·  `## 2.5 Why-now signals`
+- **§3** — `## 3.1 Corporate identity`  ·  `## 3.2 Scale metrics`  ·  `## 3.3 Regulatory standing`  ·  `## 3.4 Business composition`
+- **§4** — `## 4.1 Peer comparison`  ·  `## 4.2 Financial trajectory`  ·  `## 4.3 Digital evolution timeline`  ·  `## 4.4 Sentiment overview`
+- **§5** — `## 5.1 Insight cards`  ·  `## 5.2 Technology landscape`  ·  `## 5.3 Leadership`  ·  `## 5.4 Acquisition history`  ·  `## 5.5 Thought leadership and public voice`
+- **§6** — `## 6.1 Stated priorities`  ·  `## 6.2 Currency check`  ·  `## 6.3 Sources checked for current voice`  ·  `## 6.4 Counter-evidence pass`
+- **§7** — `## 7.1 Issue register`  ·  `## 7.2 Negative search results`  ·  `## 7.3 Assumptions register`
+- **§8** — `## 8.1 Where each artefact lives`  ·  `## 8.2 Handoff status`
+
+**The countable MINIMUM DATA and MUST NOT rules the write refuses on** (the rest of each control block is in the pinned Doc, and the validator reads it):
+
+- **§1** — >= 1 the website field; never: a status word standing in for a reason
+- **§2** — >= 5 (<= 7) findings F-NNN; >= 2 (<= 4) why-now signals WN-NN; >= 1 critical gaps G-NNN
+- **§3** — >= 3 fiscal years
+- **§4** — >= 5 fiscal years in the trajectory; >= 1 a computed CAGR; >= 1 the peer set lock statement
+- **§5** — >= 8 insight cards IC-NNN; >= 1 technology register rows TS-NN; >= 4 the four technology layers
+- **§6** — >= 3 (<= 5) stated priorities FA-NN; >= 1 a currency status
+- **§7** — >= 1 assumptions A-NNN; >= 1 a recorded negative-search result
+- **§8** — >= 1 the handoff status
 
 ## Writing one
 

@@ -197,6 +197,39 @@ paragraph.
 
 ---
 
+## Scoring tier — five agents
+
+Added 2026-09-03 after the owner reported reports being written before any
+score existed. They own column D of the research workbook under
+`engine.assessment`, which refuses every score that is not earned: the stage
+opens only on a run whose categories all pass the floors gate with synthesis
+required, a row is scored only after an independent challenge, a score never
+exceeds its evidence ceiling (T1/T2 5.0 · T3 4.0 · T4 2.5 · T5 2.0 · no
+evidence 2.0 · single source 3.0), and the rationale cites the row's own
+E-ids. The four producers run in parallel; the critic may not have scored the
+pillar it judges. The SCORING gate must be PASS before the assessment report
+producer may write.
+
+| Agent | Tier | Owns | Invoked by |
+|---|---|---|---|
+| `scoring-p1-producer` … `scoring-p4-producer` | scoring | one pillar's `engine.assessment score` rows, with the AI/data overlay | `research-conductor`, after every category gate is PASS |
+| `scoring-critic` | scoring | the SCORING_CRITIC verdict per pillar | `research-conductor`, as each pillar lands |
+
+---
+
+## How a dispatch carries its context
+
+Added 2026-09-03, after the owner reported that nothing orchestrated the
+subagents. No agent in this plugin is dispatched with a prompt somebody
+typed any more: `engine.brief batch` writes one bounded packet per lane and
+the batch array that dispatches them, `engine.brief dispatch --category C`
+is a producer's first command, and `engine.brief handback --category C` is
+what it reports — computed from the sheets, so the conductor never has to
+trust a lane's prose, and carrying `leads_for_other_categories` so one
+lane's source reaches the lane whose cells need it. Packets are measured
+against `BRIEF_CHAR_CEILING`: unbounded context sharing is the token bleed
+under another name.
+
 ## The taxonomy on disk
 
 ```
@@ -211,6 +244,7 @@ agents/
     context/                context-surface-producer (router) + risk · sentiment · timeline
     insights/               insights-surface-producer (router) + cards · landscape
     techstack/              techstack-surface-producer (router) + register · layers
+  scoring/                  scoring-p1-producer … scoring-p4-producer · scoring-critic
   enrichment/               enrichment-planner · enrichment-web-specialist ·
                             enrichment-connector-specialist · enrichment-ledger-auditor
   checkers/                 finding-challenger · evidence-integrity-checker ·

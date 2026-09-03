@@ -179,14 +179,27 @@ def _docx(path, paragraphs, add_header=True):
 
 
 def _assessment_body(overall="2.25"):
-    body = [("Heading 1", "1. Executive Summary"),
-            ("Normal", f"Overall {overall} (M2). Coverage 75%, Unknown gaps disclosed.")]
-    for p in "P1 P2 P3 P4".split():
-        body.append(("Heading 1", f"5. Pillar Deep Dive — {p}"))
-        body.append(("Normal", "AI and data overlay: models."))
-    for i in range(1, 4):
-        body.append(("Heading 2", f"REC-R{i}: do a thing"))
-        body.append(("Normal", "Strongest counter. It survives because."))
+    """A report in the PINNED template's shape: every numbered section as a
+    Heading 1 (GS-RPT-SECTIONS checks number AND heading), the four pillar
+    deep dives as cards under §5, the REC cards under §8."""
+    from engine import report_spec as RS
+    body = []
+    for h in RS.numbered_headings("assessment"):
+        body.append(("Heading 1", h))
+        n = h.split(".")[0]
+        if n == "1":
+            body.append(("Normal", f"Overall {overall} (M2). Coverage 75%, Unknown gaps disclosed."))
+        elif n == "5":
+            for p in "P1 P2 P3 P4".split():
+                body.append(("Heading 2", f"5.{p[1]} Pillar deep dive ({p}): a pillar"))
+                body.append(("Normal", "AI and data overlay: models."))
+        elif n == "8":
+            for i in range(1, 6):
+                body.append(("Heading 2", f"REC-0{i}: do a thing"))
+                body.append(("Heading 3", "Rebuttal"))
+                body.append(("Normal", "Strongest counter. It survives because."))
+        else:
+            body.append(("Normal", "Section body."))
     # 5-year financial trajectory (GS-RPT-FINANCIALS)
     body.append(("Normal", "Revenue grew across FY2020, FY2021, FY2022, FY2023 and "
                  "FY2024, a 17% CAGR; net income and total assets rose over the "

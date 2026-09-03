@@ -116,33 +116,26 @@ def test_an_empty_register_refuses_unless_forced_and_then_says_not_run(tmp_path)
 # ── assembly: the four outputs, in the defined folder ────────────────────
 
 def _full_package(tmp_path):
-    from engine import floors_gate, report_spec as RS, reports
+    """The whole real path: researched, gated, SCORED, both reports through
+    the writer under the stage preconditions, the scan rendered, every tab
+    filled or stated."""
+    from engine import floors_gate
+    from fixtures import client_facts, score_stage, write_both_reports
     run, wb, cells = _run_with_scan(tmp_path, n=8, prelim=True)
+    ev = {}
     for cell in cells:
-        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+        ev[cell] = bank_evidence(wb, cell)
+        synthesise(wb, cell, good_synthesis(cell, ev[cell]))
     wb.append("Entity_Timeline", {
         "Event_Date": "2024-09-01", "Title": "Alkami go-live",
         "Kind": "PLATFORM", "Signal": "POSITIVE",
         "Signal": "EXPANSION", "SubCap_IDs": ", ".join(cells),
         "Evidence_IDs": "E-001"})
-    floors_gate.run(wb, CAT, qa_dir=run.qa_dir)
-    body = ("Acme Credit Union runs member-facing digital banking on Alkami, "
-            "live since Q3 2024, with adoption at 52 percent in the 2025 "
-            "annual report [E-001]. The board reviews the figure quarterly "
-            "and ties it to the cost-to-serve target for 2026 planning. ")
-    for spec in RS.SPECS.values():
-        for sec in spec.sections:
-            nn = RS.INSIGHT_CARD_MIN if sec.kind == "insight_card" else 1
-            for i in range(nn):
-                wb.append("Report_Narrative", {
-                    "Report": spec.key, "Section_ID": sec.id,
-                    "Heading": sec.heading, "Kind": sec.kind,
-                    "Body": body * max(1, (sec.min_words + 200) // 45),
-                    "Evidence_IDs": "E-001", "Author": "t",
-                    "Written_At": "2026-08-29T00:00:00Z"}, save=False)
-        wb.save()
-        sign_off_sections(wb)
-        reports.render(wb, spec, run.deliverables)
+    client_facts(wb, cells, ev)
+    v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)
+    assert v["gate"] == "PASS", v["blocking"]
+    score_stage(run, wb, cells, ev)
+    write_both_reports(run, wb, cells, ev)
     techscan.render(wb, run.deliverables)
     make_shippable(wb)      # every tab filled or stated — the package gate
     return run, wb
