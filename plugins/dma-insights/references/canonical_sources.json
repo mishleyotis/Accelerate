@@ -1,0 +1,94 @@
+{
+  "_readme": [
+    "The sources every DMA producer binds to. Checked into the repo so an",
+    "agent cannot lose them between sessions, and so 'which template?' has",
+    "one answer that is reviewable in a diff rather than remembered.",
+    "",
+    "Owner instruction, 2026-09-03: 'ensure all agents bind to the correct",
+    "template and also use the most recent version of the workbook copy",
+    "pasted on to the client folder', and 'use the Golden 1 CU examples as",
+    "the templated examples. Ensure there is a way to ensure the agents do",
+    "not lose context of this.'",
+    "",
+    "The measured column is the point. A template is not correct because it",
+    "is named 'template' — it is correct when it carries the tabs the app",
+    "reads. `scripts/check_template.py` measures any workbook against the",
+    "worker's own `_TAB_TARGET` map (29 tabs, each bound to the surface it",
+    "feeds) and prints what starves. Run it before synthesis, not after."
+  ],
+
+  "scoring_workbook_template": {
+    "drive_file_id": "18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc",
+    "url": "https://docs.google.com/spreadsheets/d/18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc/edit?gid=23852937",
+    "status": "NOT_YET_READABLE",
+    "note": [
+      "Supplied by the owner 2026-09-03 as the canonical scoring workbook.",
+      "Neither the ingest service account",
+      "(mishleyotiende@digital-maturity-assessor.iam.gserviceaccount.com) nor",
+      "the session's Drive connection can open it — both return 404, which",
+      "for Drive means 'not shared with you' and not 'does not exist'.",
+      "Share it with the service account and this entry becomes checkable:",
+      "check_template.py will then measure the template itself and pin its",
+      "expected coverage here, so a client workbook can be diffed against",
+      "the template rather than against a reference client."
+    ]
+  },
+
+  "reference_examples": {
+    "_why": [
+      "Until the template is readable these are what 'correct' looks like,",
+      "and they are better evidence than a template anyway: they are real",
+      "packages that produced a promoted, six-page client surface."
+    ],
+    "entity": "Golden 1 Credit Union",
+    "intake_folder": "Golden 1 Credit Union - DMA HYBRID",
+    "run_id": "40971653-aa3e-4373-9163-a967c57a9305",
+    "scoring_workbook": {
+      "drive_file_id": "1KG1AteIs3Zpq9XAX1ayMxZ0rdWVGxtW5",
+      "name": "DMA_Scoring_Workbook_golden-1-credit-union_2026-08-31.xlsx",
+      "measured_2026_09_03": {
+        "tabs": 43,
+        "read_tabs_with_data": 28,
+        "read_tabs_total": 29,
+        "scored_cells": 690,
+        "composite": 2.25,
+        "composite_source_cell": "Pillar_Summary!C6",
+        "stated_grains": "4 pillars / 16 categories"
+      }
+    },
+    "promoted_surface": {
+      "heatmap_rows": 1383, "overview_rows": 66, "techstack_rows": 56,
+      "platform_rows": 22, "context_rows": 22, "insights_rows": 9,
+      "evidence_rows": 541, "evidence_age_rows": 537, "open_alerts": 116
+    }
+  },
+
+  "known_bad_shapes": [
+    {
+      "entity": "Bank of Travelers Rest",
+      "measured_2026_09_03": "the package ships TWO workbooks and neither is viable alone",
+      "assessment_workbook": {"tabs": 20, "read_tabs_with_data": 11,
+                              "scored_cells": 688, "composite": 1.71},
+      "scoring_workbook": {"tabs": 23, "read_tabs_with_data": 13,
+                           "scored_cells": 0,
+                           "why": "research-stage v5 contract: 688 rows seen, column D empty BY CONTRACT"},
+      "complementary": [
+        "the assessment workbook holds Firmographics, Focus_Areas,",
+        "Issue_Register, Solution_Catalogue, Subcap_Scores;",
+        "the research workbook holds Entity_Timeline, Tech_Register,",
+        "Tech_Peer_Deployments, Report_Narrative, Provenance, Gate_Log.",
+        "Together ~26 of 29; separately 11 and 13. This is what an agent",
+        "binding to the wrong (split, older) template produces, and it is",
+        "why eighteen of that entity's nineteen runs landed with zero",
+        "scored cells."
+      ]
+    }
+  ],
+
+  "rules": [
+    "Bind to the template named above, not to whatever workbook is already in the client folder.",
+    "One workbook and one report per client folder. Copies belong outside the intake tree — the scan now ignores memory-backup/, archive/, old/ and their siblings, and among equal-ranked candidates reads the most recently modified.",
+    "Run check_template.py on the workbook BEFORE synthesis. A workbook carrying fewer than the reference's read-tabs will render empty states no producer can fill.",
+    "Never hand-edit a promoted workbook. Re-ingest is idempotent on an unchanged tree, so an edit that changes no checksum changes nothing."
+  ]
+}

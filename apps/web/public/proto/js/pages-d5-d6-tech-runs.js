@@ -1,3 +1,117 @@
+/* One bar on the issue-register timeline, which shows its label only when the
+   label FITS.
+ *
+ * Two earlier attempts guessed, and both shipped a truncated title.
+ *
+ *   1 · no guard at all — an 85-character title in a 2%-wide bar rendered as
+ *       the single letter "D".
+ *   2 · `width >= 12` — a PERCENTAGE threshold, which has no relationship to
+ *       whether text fits. Reported 2026-09-03 from the promoted page: a
+ *       432px bar carrying a 71-character title rendered "Integration
+ *       architecture runs point to p…", cut mid-word.
+ *
+ * A percentage cannot answer this question. The lane's pixel width depends on
+ * the viewport, the label's on the string, and the only thing that knows both
+ * is the browser. So the bar asks it: render the label, compare `scrollWidth`
+ * to `clientWidth`, and drop the label when it overflows — re-checked on
+ * every resize, because a bar that fits at 1512px need not at 960px.
+ *
+ * Dropping it loses nothing. The row's own label column carries `I-003`, the
+ * severity chip, the full title and the status, and this bar's `title`
+ * attribute carries the dates and the rationale. A truncated title is not a
+ * shorter title — it is a claim the reader cannot finish, next to a row that
+ * already states it in full. */
+function IssueBar({
+  left,
+  width,
+  color,
+  label,
+  title
+}) {
+  const ref = React.useRef(null);
+  const [fits, setFits] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    /* Measure with the label PRESENT — `scrollWidth` of an empty box is its
+       client width, so a hidden label would always report "fits" and the
+       first render would latch it on forever. */
+    const measure = () => {
+      /* Measure in the state the label will RENDER in, which means with the
+         horizontal padding applied.
+          The padding is only present when a label is shown, and `fits` starts
+         false — so measuring as-is compares the text against the FULL box
+         and a label needing every pixel "fits", then clips the moment the
+         6px each side arrives. That is a second, quieter version of the
+         mistake this component replaced: deciding from a proxy instead of
+         from what the reader sees. */
+      const prevText = el.textContent;
+      const prevPad = el.style.padding;
+      el.style.padding = "0 6px";
+      el.textContent = label || "";
+      const ok = el.scrollWidth <= el.clientWidth;
+      el.textContent = prevText;
+      el.style.padding = prevPad;
+      setFits(ok);
+    };
+    measure();
+
+    /* Re-measure when the WEB FONT arrives. `useLayoutEffect` runs before
+       a late font swap, so the first measurement can be taken in a narrower
+       fallback face: the label "fits", the real face loads, and the label
+       clips — with no resize to notice it. That is exactly how this test
+       passed locally (font cached) and failed on a cold CI runner at
+       1512px, showing the full title with `clipped: true`.
+        `document.fonts.ready` settles once, after which the measurement is
+       against the face the reader actually sees. Guarded, because jsdom and
+       older engines have no font-loading API. */
+    let live = true;
+    const remeasure = () => {
+      if (live) measure();
+    };
+    if (typeof document !== "undefined" && document.fonts && document.fonts.ready && document.fonts.ready.then) {
+      document.fonts.ready.then(remeasure).catch(() => {});
+    }
+    if (typeof ResizeObserver === "undefined") return () => {
+      live = false;
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      live = false;
+      ro.disconnect();
+    };
+  }, [label, width, left]);
+  return /*#__PURE__*/React.createElement("div", {
+    ref: ref,
+    title: title
+    /* The horizontal padding insets the LABEL, so a bar with no label
+       must not carry it: 6px each side is a 12px floor on the rendered
+       box that a 2% width cannot go under, and at 960px that floor put
+       the stub 3px past the lane even with the percentage clamped.
+       Padding on an empty bar is pure overflow. */,
+    style: {
+      position: "absolute",
+      left: `${left}%`,
+      width: `${width}%`,
+      height: 18,
+      top: 5,
+      background: color,
+      borderRadius: 4,
+      opacity: .85,
+      display: "flex",
+      alignItems: "center",
+      boxSizing: "border-box",
+      padding: fits ? "0 6px" : 0,
+      color: "#fff",
+      fontSize: 10,
+      fontWeight: 500,
+      overflow: "hidden",
+      whiteSpace: "nowrap"
+    }
+  }, fits ? label : "");
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    DMA INSIGHTS · Client pages - D5 Context, D6 Health, Tech stack, Runs
    ═══════════════════════════════════════════════════════════════════════ */
@@ -1233,12 +1347,6 @@ function InteractiveGantt({
       // on this axis, and the row states the date).
       const width = Math.min(100, Math.max(2, right - left0));
       const left = Math.min(left0, 100 - width);
-      // A bar this narrow cannot carry a title — an 85-character matter in
-      // a 2% bar rendered as "D". The label goes in when there is room for
-      // it to mean something; below that the bar is a position marker and
-      // the row's own label, its tooltip and the panel it opens carry the
-      // text. Never a single clipped letter presented as a name.
-      const barFitsLabel = width >= 12;
       const tone = severityTone(iss.severity);
       const color = tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)";
       const isOpen = issueOpen === iss.id;
@@ -1305,35 +1413,13 @@ function InteractiveGantt({
           position: "relative",
           height: 28
         }
-      }, /*#__PURE__*/React.createElement("div", {
+      }, /*#__PURE__*/React.createElement(IssueBar, {
+        left: left,
+        width: width,
+        color: color,
+        label: iss.title || iss.type || iss.id,
         title: `${iss.start}${iss.end ? ` → ${iss.end}` : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`
-        /* The horizontal padding insets the LABEL, so a bar with
-           no label must not carry it: 6px each side is a 12px
-           floor on the rendered box that a 2% width cannot go
-           under, and at 960px that floor put the stub 3px past
-           the lane even with the percentage clamped. Padding on
-           an empty bar is pure overflow. */,
-        style: {
-          position: "absolute",
-          left: `${left}%`,
-          width: `${width}%`,
-          height: 18,
-          top: 5,
-          background: color,
-          borderRadius: 4,
-          opacity: .85,
-          display: "flex",
-          alignItems: "center",
-          boxSizing: "border-box",
-          padding: barFitsLabel ? "0 6px" : 0,
-          color: "#fff",
-          fontSize: 10,
-          fontWeight: 500,
-          overflow: "hidden",
-          whiteSpace: "nowrap",
-          textOverflow: "ellipsis"
-        }
-      }, barFitsLabel ? iss.title || iss.type || iss.id : "")));
+      })));
     }), undated.length ? /*#__PURE__*/React.createElement("div", {
       style: {
         borderTop: "1px solid var(--z-sep)",

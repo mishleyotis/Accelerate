@@ -18,6 +18,8 @@ import re
 import sys
 import tempfile
 import traceback
+
+import openpyxl
 from datetime import datetime, timezone
 
 from dma_worker import drive, intake_status, persist
@@ -26,9 +28,12 @@ from dma_worker.persist import _institution, persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
                                     open_scan, run_scan)
-from dma_worker.workbook_parser import (mine_evidence_from_rationales,
+from dma_worker.workbook_parser import (Observation,
+                                        _stated_overall_grain,
+                                        mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
+                                        parse_run_metadata,
                                         parse_peer_benchmarks,
                                         parse_evidence_index,
                                         parse_recommendations,
@@ -80,6 +85,24 @@ _RPT_DECOYS = ("template",)
 #: two are one name and this comment is the only place that says so.
 ARCHIVE_SEGMENT = "_superseded"
 
+#: Directories inside a client folder that hold COPIES, not the package.
+#:
+#: `_superseded` is the engine's own archive and was always excluded. These
+#: are the ones agents create while working, and nothing excluded them:
+#: measured 2026-09-03 on Bank of Travelers Rest, one client folder held four
+#: workbooks at three depths — root, `DMAI - <client>/`, and
+#: `DMAI - <client>/memory-backup/` — three of them byte-identical. The scan
+#: reads the whole tree at any depth and keeps ONE artefact per kind, so
+#: every copy was a candidate to be chosen over the current one, and the copy
+#: it chose was a research-stage workbook with zero scored cells while the
+#: assessment workbook holding all 688 sat in `memory-backup`.
+#:
+#: Matched on a whole path SEGMENT, case-insensitively, so a client legitimately
+#: named "Backup Bancorp" is untouched.
+COPY_SEGMENTS = ("memory-backup", "memory_backup", "backup", "backups",
+                 "archive", "archived", "old", "_old", "superseded",
+                 "previous", "versions", ".trash")
+
 #: The Client Research Profile, in the spelling `classification.py` already
 #: uses for it (priority 3). One artefact, one pattern, two classifiers that
 #: now agree.
@@ -106,6 +129,11 @@ def _classify_artefact(f):
     # is a candidate to be chosen over the current one — the retention would
     # have created the very ambiguity it exists to remove.
     if any(seg.strip().lower() == ARCHIVE_SEGMENT for seg in f.path_segments):
+        return None
+    # The same rule for the directories AGENTS leave copies in. Without it a
+    # backup of last week's workbook competes with this week's on equal
+    # terms, and filename order decides which the client sees.
+    if any(seg.strip().lower() in COPY_SEGMENTS for seg in f.path_segments[:-1]):
         return None
     if name.endswith(".json") and "manifest" in name:
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
@@ -209,6 +237,14 @@ def package_key(tree):
     return key
 
 
+
+def _mtime(f) -> str:
+    """A file's modified time as a sortable string, "" when the source gives
+    none. RFC-3339 from Drive sorts lexicographically, so no parsing is
+    needed and a missing value loses every comparison — which is right: an
+    undated candidate should never displace a dated one."""
+    return getattr(f, "modified_time", "") or ""
+
 def _package_groups(to_process, key=None):
     """Group changed files by client folder and keep the best candidate per
     artefact kind. Returns ALL groups — the caller splits ingestable packages
@@ -225,8 +261,36 @@ def _package_groups(to_process, key=None):
         if not c:
             continue
         kind, rank = c
-        if kind not in g or rank < r[kind]:
+        # Lowest rank wins; among EQUAL ranks the most recently modified
+        # does. The tie used to fall to whichever file the walk met first —
+        # stable, arbitrary, and unrelated to which copy is current. That is
+        # the "agents using old cached reports" report of 2026-09-03: an
+        # agent rewrites the workbook, an older sibling of the same rank is
+        # still met first, and the run reads the stale one while the scores
+        # look missing.
+        prev = g.get(kind)
+        if prev is None or rank < r[kind] or (
+                rank == r[kind] and _mtime(f) > _mtime(prev)):
             g[kind], r[kind] = f, rank
+        # The runners-up are KEPT, under `<kind>__alt`, in rank order.
+        #
+        # Precedence here is decided by FILENAME, and a filename is not a
+        # claim about content. Bank of Travelers Rest ships both
+        # `DMA_Scoring_Workbook_*` (rank 0 — and a RESEARCH-stage v5 file:
+        # 688 rows seen, column D empty by contract, 0 scored) and
+        # `DMA_Assessment_Workbook_*` (rank 1, 688 scored, composite 1.71 at
+        # Pillar_Summary!C6). The name won, the scores lost, and eighteen of
+        # that entity's nineteen runs landed with `scored_cells = 0`.
+        #
+        # Discarding the runner-up made that unrecoverable without a human
+        # renaming files in Drive. Kept, the ingest can fall through to it
+        # when the chosen workbook states no scores — see `_pick_workbook`.
+        g.setdefault(f"{kind}__alt", []).append((rank, f))
+    for gk in groups.values():
+        for k in [k for k in gk if k.endswith("__alt")]:
+            gk[k] = [f for _, f in sorted(gk[k], key=lambda t: t[0])][1:]
+            if not gk[k]:
+                del gk[k]
     return groups
 
 
@@ -307,6 +371,72 @@ def _record_package_failure(conn, parts, folder, exc) -> bool:
     return True
 
 
+
+def _pick_workbook(token, td, parts):
+    """The workbook that actually CARRIES SCORES, not the one whose filename
+    ranked first.
+
+    `_classify_artefact` ranks `scoring` above `assessment` above `workbook`,
+    on the filename alone. That is a reasonable default and it is not a claim
+    about content. Bank of Travelers Rest ships both:
+
+        DMA_Scoring_Workbook_...xlsx      rank 0   research-stage v5:
+                                                   688 rows seen, column D
+                                                   empty BY CONTRACT, 0 scored
+        DMA_Assessment_Workbook_...xlsx   rank 1   688 scored, composite 1.71
+                                                   at Pillar_Summary!C6
+
+    The name won and the scores lost: eighteen of that entity's nineteen runs
+    landed with `scored_cells = 0`, each one a promoted-looking package with
+    nothing in it. Nothing in the pipeline could recover from it, because the
+    runner-up was discarded at grouping time.
+
+    So: parse the chosen file, and if it yields NO scored cell while an
+    alternate exists, parse the alternate. Take the first one that states
+    scores. An empty workbook is still a legitimate answer (a research-stage
+    package genuinely has no scores yet) — this only prefers a sibling that
+    HAS them, and never prefers a smaller score set over a larger one.
+
+    Returns `(path, note)`; `note` is None when the first choice stood, and
+    otherwise an Observation-shaped dict recording which file was read
+    instead and why, so the substitution is never silent.
+    """
+    def _fetch(stat, name):
+        path = os.path.join(td, name)
+        with open(path, "wb") as fh:
+            fh.write(drive.download(token, stat.file_id))
+        return path
+
+    chosen = parts["workbook"]
+    path = _fetch(chosen, "wb.xlsx")
+    alts = parts.get("workbook__alt") or []
+    if not alts:
+        return path, None
+    try:
+        scored = len({s.subcap_id for s in parse_scoring_workbook(path).scores})
+    except Exception:                      # noqa: BLE001 — a bad parse is the caller's to report
+        return path, None
+    if scored:
+        return path, None
+
+    for i, alt in enumerate(alts):
+        try:
+            apath = _fetch(alt, f"wb_alt{i}.xlsx")
+            n = len({s.subcap_id for s in parse_scoring_workbook(apath).scores})
+        except Exception:                  # noqa: BLE001
+            continue
+        if n:
+            note = {"kind": "workbook_substituted",
+                    "detail": {"chosen_by_name": chosen.name, "chosen_scored": 0,
+                               "read_instead": alt.name, "scored": n,
+                               "why": ("the filename-ranked workbook states no "
+                                       "scored cell and a sibling does; the "
+                                       "name is not a claim about content")}}
+            print(f"workbook: {chosen.name} states 0 scored cells — "
+                  f"reading {alt.name} instead ({n} cells)")
+            return apath, note
+    return path, None
+
 def _ingest_one(conn, token, folder, parts, remint=False):
     """Download, parse and persist one package. Atomic: persist_package
     commits once at the end, so an exception anywhere leaves nothing."""
@@ -320,11 +450,13 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                 drive.download(token, parts["manifest"].file_id).decode("utf-8-sig"))
         else:
             manifest = {}
-        wb_path = os.path.join(td, "wb.xlsx")
-        with open(wb_path, "wb") as fh:
-            fh.write(drive.download(token, parts["workbook"].file_id))
+        wb_path, wb_note = _pick_workbook(token, td, parts)
         # Declared BEFORE the report parse, which appends to it.
         companion: list = []
+        if wb_note:
+            # A substitution the run must be able to explain later: which
+            # file was read, which was ranked first, and why.
+            companion.append(Observation(wb_note["kind"], None, wb_note["detail"]))
         sections = []
         if "report" in parts:
             rp = os.path.join(td, "report.docx")
@@ -454,11 +586,179 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             report_artefact_id=(parts["report"].file_id
                                 if "report" in parts else None),
             grains=parse_grain_summaries(wb_path, companion),
+            # The workbook's Run_Metadata tab, stored beside the
+            # manifest so `last_written_at` can resolve a date the
+            # package's own manifest never stated.
+            wb_metadata=parse_run_metadata(wb_path),
             research=research,
         )
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}
         return res, rationales
 
+
+
+
+def backfill_workbook_metadata(conn, token, groups) -> int:
+    """Fill `run_manifest.payload.workbook_metadata` for runs ingested before
+    anything read the workbook's own `Run_Metadata` tab.
+
+    THE DEFECT. `run_assessment_date` walks six manifest keys and then the
+    YYYYMMDD token in the request id. Golden 1 carries none of the six, and
+    `DMA-2026-GOLDEN1-001` has no eight-digit token, so the run resolved
+    UNKNOWN and served no assessment date — while its own workbook states
+    `last_written_at = 2026-08-31T09:33:59Z` on a tab nothing read for a date.
+
+    WHAT THAT COSTS. Not one header line: the freshness dot has nothing to
+    draw, and the same candidate list feeds `runs.completed_at`, which is
+    every evidence row's `reference_date`. With it null the generated
+    `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY
+    item — 537 rows on this run, each rendering "unverified" beside evidence
+    the package dated.
+
+    Migration 0058 is the read half (the probe row, and the view handing the
+    resolver `workbook_metadata || manifest`). This is the other half: a run
+    ingested before it cannot benefit without re-reading its own workbook,
+    and the package scan is idempotent, so an unchanged tree re-ingests
+    nothing.
+
+    Writes ONLY the `workbook_metadata` key — `payload["manifest"]` is never
+    touched, because a key written into the package's own artefact after the
+    fact is indistinguishable from one the package shipped.
+
+    `completed_at` is filled in the same pass and only where it is NULL: it
+    is the column the evidence bands hang off, and leaving it behind would
+    fix the dot while every row still read UNVERIFIED.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                     JOIN run_manifest m ON m.run_id = r.id
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND m.payload -> 'workbook_metadata' IS NULL
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-wbmeta: {len(todo)} run(s) hold no workbook metadata")
+    filled = skipped = empty = dated = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                md = parse_run_metadata(wp)
+            if not md:
+                empty += 1
+                print(f"backfill-wbmeta: {folder}: workbook states no Run_Metadata")
+                continue
+            cur.execute(
+                """UPDATE run_manifest
+                      SET payload = jsonb_set(payload, '{workbook_metadata}',
+                                              %s::jsonb, true)
+                    WHERE run_id = %s""",
+                (json.dumps(md), run_id))
+            # The date the bands hang off, only where nothing stated one.
+            stamp = persist._stated_completed_at(md)
+            if stamp:
+                cur.execute(
+                    "UPDATE runs SET completed_at = %s "
+                    " WHERE id = %s AND completed_at IS NULL",
+                    (stamp, run_id))
+                dated += cur.rowcount or 0
+            conn.commit()
+            print(f"backfill-wbmeta: {folder} -> {len(md)} key(s)"
+                  + (f", completed_at {stamp}" if stamp else ""))
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-wbmeta FAILED: {folder}: {exc!r}")
+    print(f"backfill-wbmeta: {filled} filled ({dated} gained a completed_at), "
+          f"{skipped} have no workbook artefact, {empty} state none, "
+          f"{failed} failed")
+    return 1 if failed else 0
+
+def backfill_composite(conn, token, groups) -> int:
+    """Fill `runs.composite` for a run whose workbook states it and whose
+    ingest had nowhere to read it.
+
+    THE DEFECT. `composite` is written once, at INSERT, from
+    `WorkbookParse.composite` — and that field was set in exactly one place,
+    `_parse_scorecard`, off the `2_Scorecard` tab. Only the claude_dma
+    generation ships that tab. Every general_dma workbook (`P{n}_Subcap_Scoring`)
+    and every rollup-only one took a different branch of
+    `parse_scoring_workbook`, so the field came back None for the whole
+    generation and `runs.composite` was written NULL.
+
+    WHAT THAT COSTS, seen on Golden 1 (run 40971653) 2026-09-02. The
+    directory card reads `serving_directory.composite` for its header
+    figure. Golden 1's read NULL, so the card rendered the word "maturity"
+    over an empty slot — beside its own four pillar bars, which resolve, and
+    beside Axos Bank, which ships the other generation and shows 1.9. The
+    workbook states the figure FOUR times: `Pillar_Summary!C6`,
+    `Pillar_Rollup!C6`, `Executive_Summary` "Overall Maturity", and the
+    OVERALL row's weighted contribution. No reader claimed any of them.
+
+    `_stated_overall_grain` is the reader half and is already fixed. This is
+    the other half: a run ingested before that fix cannot benefit from it
+    without re-reading its own workbook, and the package scan is idempotent
+    — an unchanged tree creates nothing to re-ingest.
+
+    READ, never derived. The value written is the one on the row the
+    workbook labels OVERALL. A run whose workbook states no overall is left
+    NULL and says so; a mean of the pillars would be a derived figure in a
+    column whose contract is that it was read, and indistinguishable from
+    one afterwards.
+
+    Additive and idempotent, on `backfill_grains`' pattern: a run already
+    holding a composite is not in the work list, a folder shipping no
+    workbook is skipped, and no run is created, deleted or re-scored.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND r.composite IS NULL
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-composite: {len(todo)} run(s) hold no composite")
+    filled = skipped = empty = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                wb = openpyxl.load_workbook(wp, read_only=True, data_only=True)
+                try:
+                    value, cell = _stated_overall_grain(wb)
+                finally:
+                    wb.close()
+            if value is None:
+                # A workbook that states no overall is a fact about the
+                # workbook. Absent beats a number nobody wrote down.
+                empty += 1
+                print(f"backfill-composite: {folder}: workbook states none")
+                continue
+            cur.execute("UPDATE runs SET composite = %s WHERE id = %s",
+                        (value, run_id))
+            conn.commit()
+            print(f"backfill-composite: {folder} -> {value} (from {cell})")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-composite FAILED: {folder}: {exc!r}")
+    print(f"backfill-composite: {filled} filled, {skipped} have no workbook "
+          f"artefact, {empty} state none, {failed} failed")
+    return 1 if failed else 0
 
 def backfill_grains(conn, token, groups) -> int:
     """Fill the STATED pillar/category grains a run was ingested without.
@@ -1102,10 +1402,38 @@ def main() -> int:
     # executions overlap it. The session-level lock releases when this
     # connection closes (or the container dies) — a second execution
     # exits clean instead of racing the diff into duplicate runs.
+    #
+    # Which kind of pass this is decides which lock it takes, so it is
+    # settled BEFORE the lock rather than beside the scan row below.
+    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
+                      or os.environ.get("BACKFILL_GRAINS")
+                      or os.environ.get("BACKFILL_COMPOSITE")
+                      or os.environ.get("BACKFILL_WBMETA")
+                      or os.environ.get("BACKFILL_EVIDENCE")
+                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
+
+    # A DIAGNOSTIC pass takes a DIFFERENT lock (815003).
+    #
+    # It used to take 815002, the scan's own, which made every manual
+    # backfill a coin toss against a job that fires every thirty minutes:
+    # measured 2026-09-03, `BACKFILL_WBMETA` lost twice in a row and printed
+    # "another execution holds the scan lock; exiting" — a clean exit that
+    # reads exactly like a completed pass and wrote nothing. On a repair the
+    # operator is watching, that is the difference between "done" and
+    # "silently did nothing".
+    #
+    # Sharing the lock was never necessary. A backfill updates columns of
+    # runs that already exist and are already NULL there; the scan creates
+    # new runs from changed artefacts and writes the checksums. They do not
+    # contend for a row. What DOES need serialising is two diagnostics
+    # against each other — both re-read workbooks and update the same
+    # manifests — and 815003 gives them exactly that.
+    lock_id = 815003 if diagnostic else 815002
+    what = "backfill" if diagnostic else "scan"
     cur = conn.cursor()
-    cur.execute("SELECT pg_try_advisory_lock(815002)")
+    cur.execute("SELECT pg_try_advisory_lock(%s)", (lock_id,))
     if not cur.fetchone()[0]:
-        print("scan: another execution holds the scan lock; exiting")
+        print(f"{what}: another execution holds the {what} lock; exiting")
         conn.close()
         return 0
 
@@ -1145,10 +1473,6 @@ def main() -> int:
     # else from here on is one, and gets its row BEFORE the walk so a walk
     # that dies is recorded rather than invisible (the 403 that killed the
     # tree recursion left no import_scans row at all).
-    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
-                      or os.environ.get("BACKFILL_GRAINS")
-                      or os.environ.get("BACKFILL_EVIDENCE")
-                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
     scan_id = None if diagnostic else open_scan(conn, started_at)
     tally = {"ingested": 0, "failed": 0, "deferred": 0, "quarantined": []}
@@ -1180,6 +1504,16 @@ def main() -> int:
 
         if os.environ.get("BACKFILL_GRAINS"):
             rc = backfill_grains(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_WBMETA"):
+            rc = backfill_workbook_metadata(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_COMPOSITE"):
+            rc = backfill_composite(conn, drive.metadata_token(), groups)
             conn.close()
             return rc
 

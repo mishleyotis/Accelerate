@@ -1829,7 +1829,11 @@ function LiveRecommendations({ data, state, audience }) {
                       <div className="eyebrow" style={{ fontSize: 9.5 }}>Prerequisites</div>
                       <div style={{ display: "grid", gap: 4 }}>
                         {r.prerequisites.map((q, j) => (
-                          <div key={j} className="row" style={{ gap: 6, fontSize: 11 }}>
+                          /* wrap: the basis chip is a sentence-shaped status
+                             label, so on a narrow card it takes its own line
+                             rather than running past the card edge. */
+                          <div key={j} className="row"
+                               style={{ gap: 6, fontSize: 11, flexWrap: "wrap" }}>
                             {q.verdict ? (
                               <span className={`b ${q.verdict === "MET" ? "b-ph1" : "b-org"}`}>
                                 {q.verdict}</span>) : null}
