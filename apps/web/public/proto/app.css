@@ -1704,6 +1704,32 @@ img, svg, video { max-width: 100%; }
    opening that a reader can tell the starters apart, few enough that several
    fit on one screen. */
 .txt-fit-4 { -webkit-line-clamp: 4; }
+/* The issue-register row: a label column and a time lane.
+ *
+ * Reported 2026-09-03 with a screenshot: every row title truncated —
+ * "October 2021 post-upgrade…", "Databricks lakehouse runs live i…". The
+ * column was `minmax(90px, 200px)` with the title clamped to ONE line, and
+ * an issue title is 8-16 words by contract. One line in a 200px track shows
+ * about four of them.
+ *
+ * The title is the row's IDENTITY: the id chip says which row, the title
+ * says what it is. Truncating it leaves the reader with "Databricks
+ * lakehouse runs live i…" and a tooltip they have to discover — the same
+ * defect as the clipped chips and the clipped bar labels, in the one place
+ * where the text cannot move anywhere else.
+ *
+ * So the track widens and the clamp goes to three lines, which holds a
+ * 16-word title at every width this page is read at. Below 720px the two
+ * columns stack: a 90px label beside a time axis is not a compromise, it is
+ * two unreadable things instead of one. */
+.issue-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 280px) minmax(0, 1fr);
+  gap: 12px;
+}
+@media (max-width: 720px) {
+  .issue-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
 .txt-trunc {
   overflow: hidden;
   text-overflow: ellipsis;
