@@ -4,7 +4,8 @@ A promoted run whose workbook omits the rollup composite writes runs.composite
 NULL by design; the overview hero still shows overview_scores.composite. Before
 0059 the directory read r.composite alone, so such a client's card showed its
 four pillar bars and no overall score while its own overview page showed one
-(measured on goeasy Ltd., run 02e840d4: runs.composite NULL, hero 2.11).
+(measured on a run whose workbook stated no rollup: runs.composite NULL,
+hero populated).
 
 0059 rebuilds serving_directory to read COALESCE(r.composite, os.composite).
 This test is STATIC (no database): it reads the latest migration that rebuilds

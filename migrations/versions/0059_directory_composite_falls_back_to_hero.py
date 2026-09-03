@@ -11,10 +11,11 @@ shown on the client's own overview page. `serving_directory` read
 bars and NO overall score on the clients page while its overview page showed a
 number.
 
-Measured 2026-09-03: goeasy Ltd. (run 02e840d4-ee23-40b6-9eb1-c1ad06fce222)
-carried `runs.composite` NULL and `overview_scores.composite` 2.11 -- the card
-showed the word "maturity" with no figure. Golden 1 Credit Union, whose
-workbook stated 2.25, showed 2.3 on both card and hero. That gap -- one card
+Measured on a promoted run whose workbook stated no rollup figure:
+`runs.composite` resolved NULL while `overview_scores.composite` was
+populated -- the card showed the word "maturity" with no figure. The golden
+fixture, whose
+workbook states its rollup, shows the same figure on both card and hero. That gap -- one card
 scored, one not -- is the recurrent defect this closes: it recurs for every
 promoted client whose workbook omits the rollup composite, which is a property
 of the workbook generation, not of the client.
