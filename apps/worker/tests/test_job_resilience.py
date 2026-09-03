@@ -672,3 +672,91 @@ def test_the_worker_and_the_sql_walk_the_same_date_candidates():
     assert worker == probe, (
         f"the worker walks {worker} and the SQL walks {probe}; 0031 requires "
         "one candidate list in one order")
+
+
+def test_the_runner_up_workbook_is_kept_not_discarded():
+    """`_package_groups` used to keep only the best-ranked file per kind, so
+    a package shipping two workbooks lost one irrecoverably."""
+    import job_main
+
+    tree = [_f("BOTR - DMA", "DMA_Scoring_Workbook_botr_2026-08-28.xlsx"),
+            _f("BOTR - DMA", "DMA_Assessment_Workbook_botr_2026-08-28.xlsx")]
+    parts = job_main._package_groups(tree)["BOTR - DMA"]
+
+    assert "scoring" in parts["workbook"].name.lower(), "rank 0 still wins first"
+    alts = parts.get("workbook__alt") or []
+    assert [a.name for a in alts] == \
+        ["DMA_Assessment_Workbook_botr_2026-08-28.xlsx"], \
+        "the runner-up must survive grouping or the fall-through has nothing"
+
+
+def test_a_workbook_with_no_scores_falls_through_to_the_one_that_has_them(monkeypatch, tmp_path):
+    """Bank of Travelers Rest, verbatim. `DMA_Scoring_Workbook_*` is a
+    RESEARCH-stage v5 file — 688 rows seen, column D empty by contract, 0
+    scored — and `DMA_Assessment_Workbook_*` carries all 688 and a composite
+    of 1.71. The filename ranked the empty one first and eighteen of that
+    entity's nineteen runs landed with `scored_cells = 0`."""
+    import job_main
+
+    tree = [_f("BOTR - DMA", "DMA_Scoring_Workbook_botr.xlsx"),
+            _f("BOTR - DMA", "DMA_Assessment_Workbook_botr.xlsx")]
+    parts = job_main._package_groups(tree)["BOTR - DMA"]
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx")
+
+    class _P:
+        def __init__(self, n):
+            self.scores = [type("S", (), {"subcap_id": f"P1C1.1.{i}"})()
+                           for i in range(n)]
+
+    seen = []
+
+    def _parse(path):
+        seen.append(path)
+        return _P(0 if path.endswith("wb.xlsx") else 688)
+    monkeypatch.setattr(job_main, "parse_scoring_workbook", _parse)
+
+    path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
+
+    assert path.endswith("wb_alt0.xlsx"), "the scored workbook must be read"
+    assert note and note["kind"] == "workbook_substituted"
+    assert note["detail"]["scored"] == 688
+    assert note["detail"]["chosen_scored"] == 0
+    assert "Assessment" in note["detail"]["read_instead"]
+
+
+def test_a_scored_first_choice_is_never_second_guessed(monkeypatch, tmp_path):
+    """The fall-through must not run when the ranked workbook has scores —
+    and must not download an alternate it does not need."""
+    import job_main
+
+    tree = [_f("Good - DMA", "DMA_Scoring_Workbook_g.xlsx"),
+            _f("Good - DMA", "DMA_Assessment_Workbook_g.xlsx")]
+    parts = job_main._package_groups(tree)["Good - DMA"]
+    downloads = []
+    monkeypatch.setattr(job_main.drive, "download",
+                        lambda t, fid: downloads.append(fid) or b"xlsx")
+    monkeypatch.setattr(job_main, "parse_scoring_workbook",
+                        lambda p: type("P", (), {"scores": [
+                            type("S", (), {"subcap_id": "P1C1.1.1"})()]})())
+
+    path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
+    assert path.endswith("wb.xlsx") and note is None
+    assert len(downloads) == 1, "no alternate should be fetched"
+
+
+def test_a_package_with_one_workbook_is_unchanged(monkeypatch, tmp_path):
+    """A research-stage package genuinely has no scores yet; an empty
+    workbook with no sibling is a legitimate answer, not a failure."""
+    import job_main
+
+    tree = [_f("Solo - DMA", "DMA_Scoring_Workbook_s.xlsx")]
+    parts = job_main._package_groups(tree)["Solo - DMA"]
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx")
+    called = []
+    monkeypatch.setattr(job_main, "parse_scoring_workbook",
+                        lambda p: called.append(p) or type(
+                            "P", (), {"scores": []})())
+
+    path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
+    assert path.endswith("wb.xlsx") and note is None
+    assert called == [], "with no alternate there is nothing to compare against"

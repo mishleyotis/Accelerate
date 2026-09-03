@@ -28,7 +28,8 @@ from dma_worker.persist import _institution, persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
                                     open_scan, run_scan)
-from dma_worker.workbook_parser import (_stated_overall_grain,
+from dma_worker.workbook_parser import (Observation,
+                                        _stated_overall_grain,
                                         mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
@@ -231,6 +232,25 @@ def _package_groups(to_process, key=None):
         kind, rank = c
         if kind not in g or rank < r[kind]:
             g[kind], r[kind] = f, rank
+        # The runners-up are KEPT, under `<kind>__alt`, in rank order.
+        #
+        # Precedence here is decided by FILENAME, and a filename is not a
+        # claim about content. Bank of Travelers Rest ships both
+        # `DMA_Scoring_Workbook_*` (rank 0 — and a RESEARCH-stage v5 file:
+        # 688 rows seen, column D empty by contract, 0 scored) and
+        # `DMA_Assessment_Workbook_*` (rank 1, 688 scored, composite 1.71 at
+        # Pillar_Summary!C6). The name won, the scores lost, and eighteen of
+        # that entity's nineteen runs landed with `scored_cells = 0`.
+        #
+        # Discarding the runner-up made that unrecoverable without a human
+        # renaming files in Drive. Kept, the ingest can fall through to it
+        # when the chosen workbook states no scores — see `_pick_workbook`.
+        g.setdefault(f"{kind}__alt", []).append((rank, f))
+    for gk in groups.values():
+        for k in [k for k in gk if k.endswith("__alt")]:
+            gk[k] = [f for _, f in sorted(gk[k], key=lambda t: t[0])][1:]
+            if not gk[k]:
+                del gk[k]
     return groups
 
 
@@ -311,6 +331,72 @@ def _record_package_failure(conn, parts, folder, exc) -> bool:
     return True
 
 
+
+def _pick_workbook(token, td, parts):
+    """The workbook that actually CARRIES SCORES, not the one whose filename
+    ranked first.
+
+    `_classify_artefact` ranks `scoring` above `assessment` above `workbook`,
+    on the filename alone. That is a reasonable default and it is not a claim
+    about content. Bank of Travelers Rest ships both:
+
+        DMA_Scoring_Workbook_...xlsx      rank 0   research-stage v5:
+                                                   688 rows seen, column D
+                                                   empty BY CONTRACT, 0 scored
+        DMA_Assessment_Workbook_...xlsx   rank 1   688 scored, composite 1.71
+                                                   at Pillar_Summary!C6
+
+    The name won and the scores lost: eighteen of that entity's nineteen runs
+    landed with `scored_cells = 0`, each one a promoted-looking package with
+    nothing in it. Nothing in the pipeline could recover from it, because the
+    runner-up was discarded at grouping time.
+
+    So: parse the chosen file, and if it yields NO scored cell while an
+    alternate exists, parse the alternate. Take the first one that states
+    scores. An empty workbook is still a legitimate answer (a research-stage
+    package genuinely has no scores yet) — this only prefers a sibling that
+    HAS them, and never prefers a smaller score set over a larger one.
+
+    Returns `(path, note)`; `note` is None when the first choice stood, and
+    otherwise an Observation-shaped dict recording which file was read
+    instead and why, so the substitution is never silent.
+    """
+    def _fetch(stat, name):
+        path = os.path.join(td, name)
+        with open(path, "wb") as fh:
+            fh.write(drive.download(token, stat.file_id))
+        return path
+
+    chosen = parts["workbook"]
+    path = _fetch(chosen, "wb.xlsx")
+    alts = parts.get("workbook__alt") or []
+    if not alts:
+        return path, None
+    try:
+        scored = len({s.subcap_id for s in parse_scoring_workbook(path).scores})
+    except Exception:                      # noqa: BLE001 — a bad parse is the caller's to report
+        return path, None
+    if scored:
+        return path, None
+
+    for i, alt in enumerate(alts):
+        try:
+            apath = _fetch(alt, f"wb_alt{i}.xlsx")
+            n = len({s.subcap_id for s in parse_scoring_workbook(apath).scores})
+        except Exception:                  # noqa: BLE001
+            continue
+        if n:
+            note = {"kind": "workbook_substituted",
+                    "detail": {"chosen_by_name": chosen.name, "chosen_scored": 0,
+                               "read_instead": alt.name, "scored": n,
+                               "why": ("the filename-ranked workbook states no "
+                                       "scored cell and a sibling does; the "
+                                       "name is not a claim about content")}}
+            print(f"workbook: {chosen.name} states 0 scored cells — "
+                  f"reading {alt.name} instead ({n} cells)")
+            return apath, note
+    return path, None
+
 def _ingest_one(conn, token, folder, parts, remint=False):
     """Download, parse and persist one package. Atomic: persist_package
     commits once at the end, so an exception anywhere leaves nothing."""
@@ -324,11 +410,13 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                 drive.download(token, parts["manifest"].file_id).decode("utf-8-sig"))
         else:
             manifest = {}
-        wb_path = os.path.join(td, "wb.xlsx")
-        with open(wb_path, "wb") as fh:
-            fh.write(drive.download(token, parts["workbook"].file_id))
+        wb_path, wb_note = _pick_workbook(token, td, parts)
         # Declared BEFORE the report parse, which appends to it.
         companion: list = []
+        if wb_note:
+            # A substitution the run must be able to explain later: which
+            # file was read, which was ranked first, and why.
+            companion.append(Observation(wb_note["kind"], None, wb_note["detail"]))
         sections = []
         if "report" in parts:
             rp = os.path.join(td, "report.docx")
