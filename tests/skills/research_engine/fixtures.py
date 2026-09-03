@@ -18,8 +18,20 @@ def small_selection(n: int = 6) -> list[str]:
     return list(tax.cells_in(CAT))[:n]
 
 
+def two_category_selection(n: int = 4) -> list[str]:
+    """Cells from TWO categories — what a run that can exercise
+    cross-lane behaviour needs, and what `small_selection` (P1C1 only)
+    deliberately is not."""
+    tax = C.taxonomy()
+    cats = list(tax.categories)[:2]
+    out = []
+    for cat in cats:
+        out += list(tax.cells_in(cat))[:n]
+    return out
+
+
 def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1",
-            prelim: bool = True, folder: bool = True):
+            prelim: bool = True, folder: bool = True, selected=None):
     """A started run with its PRELIM phase closed and its client folder open.
 
     Both default ON because both are what a real run has: `orient` withholds
@@ -29,7 +41,8 @@ def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1",
     run = runstate.start(
         run_id=run_id, entity_name="Acme Credit Union", entity_id="acme-cu",
         sub_vertical="CU", scope_mode="T1_CORE", reference_date="2026-08-29",
-        root=tmp_path / "run", selected=small_selection(n))
+        root=tmp_path / "run",
+        selected=list(selected) if selected else small_selection(n))
     if folder:
         from engine import assemble
         assemble.open_folder(run, tmp_path / "client", push=False)

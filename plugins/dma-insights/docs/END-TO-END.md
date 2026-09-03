@@ -166,7 +166,36 @@ category → one researcher (`research-p1c1-producer` …
 `research-conductor`; the per-agent loop is
 `skills/dma-research/references/RESEARCH-PROTOCOL.md`.
 
-## Stage 2 · Work the categories
+## Stage 2 · Work the categories — dispatched over a brief
+
+```
+python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
+python3 plugins/dma-insights/scripts/agent_run.py \
+        --batch $ROOT/briefs/batch.json --stream --lanes 4
+```
+
+REPORTED 2026-09-03: *"There is no orchestration existing between the
+subagents and main agents … as they work independently, they should also
+have enough context of the compacted data they have collected to avoid
+redoing."*
+
+Sixteen lanes worked the same entity and could not see one fact any of the
+others had found. The conductor's choice was to dispatch with "the run id
+and nothing else" (each lane re-finds the run's own background) or to paste
+its context into the prompt (the token bleed of stage 7b). `engine.brief` is
+the third option, and it is the one the conductor now uses:
+
+| view | what it carries | who reads it |
+|---|---|---|
+| `brief batch` / `brief dispatch --category C` | the run's shared state, each open cell's owed volleys AND **the evidence already registered for that cell**, sibling sources worth reading, the lane's own notebook digest, its search budget | every category producer, as its first command |
+| `brief shared` | estate by layer (an `ABSENT` row is a RESULT — that layer was searched), peers, register reach, open contradictions, per-category state | anyone, once |
+| `brief reuse --subcap X` | the rows the register names for X that X does not cite, then the capability siblings' rows | a producer before it searches |
+| `brief handback --category C` | what the category established, computed from the sheets: closed, declared absent, still open, tools used, and `leads_for_other_categories` | the conductor, instead of trusting prose |
+
+Every packet is DERIVED from the workbook — no second record to drift — and
+measured against `BRIEF_CHAR_CEILING` (6400 chars), trimming its detailed
+cells rather than truncating a field; `orient` remains the paged reader for
+the cells a packet drops. Then, per card:
 
 ```
 python3 -m engine.cli orient --run $RUN --category P1C1
@@ -209,6 +238,8 @@ Each write is checked **before it lands**:
 | a DQ facet neither answered nor `NOT_RUN: <reason>` | AUD-0017 |
 | an absence claim with no `Absence_Claimed` and no proxy log | AUD-0079 |
 | `FACT` resting on proxy searching alone | AUD-0021 |
+| an empty cell declared absent while any askable volley never fired | owner, 2026-09-03 |
+| an empty cell declared absent while the run's own register NAMES it | owner, 2026-09-03 |
 
 ## Stage 3 · Challenge — by somebody else
 
@@ -418,6 +449,22 @@ On the app side:
 * `get_run_progress` reports what the intake could not read, so a producer
   can tell an unrecognised column from an entity with nothing to say
   (AUD-0030).
+
+## Acceptance tests — the eight reported issues, and one run end to end
+
+```
+python3 -m pytest tests/acceptance -q
+```
+
+39 tests, written from the owner's own sentences rather than from the
+modules: `test_acceptance_reported_issues.py` reproduces each reported
+failure shape and asserts the engine refuses it AND that the corrected work
+passes; `test_acceptance_orchestration.py` holds the brief layer to its four
+properties (shared, bounded, resumable, handed back) and asserts the agents
+are actually told it exists; `test_acceptance_full_run.py` walks ONE run
+from `start` to a verified package, asserting every stage is blocked before
+its predecessor is done and open after — which is the only test that can
+catch two stages disagreeing about what "done" means.
 
 ## Stress-testing the pipeline
 

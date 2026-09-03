@@ -291,6 +291,31 @@ folder, and runs the memory backup-then-cleanup lifecycle. None of them
 touches the connector's write tools — a research run that is ready for
 surface production enters, like every package, through the package-vetter.
 
+## Orchestration — what one agent hands the next
+
+REPORTED 2026-09-03 by the engagement owner: "There is no orchestration
+existing between the subagents and main agents. Ensure efficient context
+management and information sharing where needed."
+
+Every dispatch in this table now carries a BRIEF rather than a prompt
+somebody typed. `engine.brief` is four derived views over the run's own
+sheets, so there is no second record to drift and no context to paste:
+
+| command | what it hands over |
+|---|---|
+| `engine.brief batch --out-dir <D>` | one bounded packet per category plus the `agent_run.py --batch` array — the conductor's whole dispatch |
+| `engine.brief dispatch --category C` | that category's packet: the run's shared state, each open cell's owed volleys AND the evidence already registered for it, sibling sources worth reading, the lane's own notebook digest, its search budget |
+| `engine.brief reuse --subcap X` | what the run already holds for X — read before searching, because the run has paid for it |
+| `engine.brief handback --category C` | what the category established, computed from the sheets, plus the leads its sources open for OTHER categories |
+
+Two rules follow from it, and both are enforced rather than advised: a
+producer's FIRST command is its brief (the manifests say so, and the session
+hook repeats it), and an empty cell cannot be declared absent while the
+register names it (`ledger.declare_absence` refuses; the floors gate carries
+`absence_over_evidence` blocking and `evidence_unattached` advisory). Every
+packet is measured against `BRIEF_CHAR_CEILING` — context sharing that is
+not bounded is the token bleed under another name.
+
 ## The scoring tier — column D, after the research and before the reports
 
 REPORTED 2026-09-03 by the engagement owner: "Report writing starts without

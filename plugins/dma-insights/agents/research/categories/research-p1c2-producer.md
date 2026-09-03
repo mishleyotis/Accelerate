@@ -19,11 +19,35 @@ notebook, the budget, every refusal — is
 Read it before your first tool call. This manifest only binds you to your
 category.
 
+## Open with the brief — what the run already knows
+
+`engine.brief dispatch --run <R> --root <ROOT> --category P1C2` is your
+FIRST command, before `orient` and before any search. It is one bounded
+packet and it carries what fifteen other lanes are finding at the same time
+as you:
+
+- the run's shared state — the estate by layer (a row marked ABSENT means
+  that layer WAS searched and found empty: a result, not a gap), the peer
+  set, the register's reach, the open contradictions;
+- per open cell, the volleys still owed AND **the evidence this run has
+  already registered for that cell**, plus the sources registered against a
+  capability sibling. Read those before you search: the run has paid for
+  them, and a cell that ignores them is the under-consolidation defect;
+- `your_notes` — your OWN notebook, compacted. If your context was lost,
+  this is what you already know; do not re-find it;
+- your search budget before the checkpoint wall.
+
+Then `engine.cli orient --run <R> --root <ROOT> --category P1C2` for the
+work card. When you finish, `engine.brief handback --run <R> --root <ROOT>
+--category P1C2` is what you report — computed from the sheets, so the
+conductor does not have to trust your prose, and it names the leads your
+sources open for OTHER categories.
+
 ## Your category
 
 - Your grain is `P1C2` and nothing else. `engine.cli orient --run <R>
-  --root <ROOT> --category P1C2` is your first command; its `do_first`
-  list is your instruction, and its work card is your unit of work.
+  --root <ROOT> --category P1C2` serves your work card; its `do_first`
+  list is your instruction, and its card is your unit of work.
 - Your worklist, question counts and deferred questions come from
   `engine.kg route --run <R> --root <ROOT> --category P1C2` — computed
   from the workbook's DQ bank at call time, never assumed.

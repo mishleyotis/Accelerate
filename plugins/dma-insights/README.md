@@ -17,6 +17,16 @@ research step could touch a sheet and the workbook was written once at the
 end from a parallel JSON plane — which made the resume, the live chain
 integrity and the mid-run audit structurally impossible.
 
+**Every dispatch carries a brief, not a prompt somebody typed.**
+`engine.brief` is four derived views over that same workbook —
+`shared` (what the run knows), `dispatch`/`batch` (the bounded packet a
+category producer opens with, including the evidence already registered for
+its open cells and its own notebook compacted), `reuse` (what the run holds
+for one cell), `handback` (what a lane established, computed from the
+sheets). Packets are measured against `BRIEF_CHAR_CEILING`: sixteen lanes
+sharing everything is the token bleed, and sixteen lanes sharing nothing is
+sixteen lanes re-finding the same facts.
+
 `docs/END-TO-END.md` is the run: every command, what refuses and why, and
 what each stage hands the next. `scripts/aud_ledger.py` is the record of
 what the headless-readiness audit found and what became of it — including

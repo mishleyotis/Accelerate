@@ -731,6 +731,31 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
         raise LedgerRefusal(
             f"{subcap} carries evidence ({', '.join(eids[:4])}); a cell with "
             f"evidence is SYNTHESISED, not declared absent")
+    # THE RUN'S OWN REGISTER IS EVIDENCE (2026-09-03, owner: "limited
+    # evidence is consolidated in most runs making the entire assessment
+    # very evidence deficient"). A row above is refused when the CELL cites
+    # evidence; this refuses the case that actually happens with sixteen
+    # parallel lanes — a sibling registered a source that NAMES this cell,
+    # the cell never cited it, and this lane is about to declare the cell
+    # empty. The run bought that source. Consolidating it is not optional,
+    # and `engine.brief reuse --subcap <cell>` is the read that finds it.
+    named_by_register = []
+    for eid, ev in sorted(wb.evidence_index().items()):
+        named = [i.strip().split(":")[0]
+                 for i in _split_ids(ev.get("SubCap_IDs"))]
+        if subcap in named:
+            named_by_register.append(eid)
+    if named_by_register:
+        raise LedgerRefusal(
+            f"{subcap} cannot be declared empty: this run's evidence "
+            f"register already names it — {', '.join(named_by_register[:5])}"
+            + (f" (+{len(named_by_register) - 5} more)"
+               if len(named_by_register) > 5 else "")
+            + f". Read them (`engine.brief reuse --subcap {subcap}`) and "
+            f"either synthesise the cell on them or re-register the row "
+            f"against the cell it is really about. A declared absence over "
+            f"the run's own evidence is the under-consolidation defect, not "
+            f"an absence.")
     searches = wb.rows("Search_Log")
     vs = volley_status(wb, subcap, searches)
     problems = []

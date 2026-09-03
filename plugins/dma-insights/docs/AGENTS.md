@@ -217,6 +217,19 @@ producer may write.
 
 ---
 
+## How a dispatch carries its context
+
+Added 2026-09-03, after the owner reported that nothing orchestrated the
+subagents. No agent in this plugin is dispatched with a prompt somebody
+typed any more: `engine.brief batch` writes one bounded packet per lane and
+the batch array that dispatches them, `engine.brief dispatch --category C`
+is a producer's first command, and `engine.brief handback --category C` is
+what it reports — computed from the sheets, so the conductor never has to
+trust a lane's prose, and carrying `leads_for_other_categories` so one
+lane's source reaches the lane whose cells need it. Packets are measured
+against `BRIEF_CHAR_CEILING`: unbounded context sharing is the token bleed
+under another name.
+
 ## The taxonomy on disk
 
 ```

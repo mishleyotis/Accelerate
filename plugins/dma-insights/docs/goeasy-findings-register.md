@@ -41,6 +41,8 @@ PRODUCER on its own output before returning — not by a reviewer after.
 | GSY-22 | Every Gap_to_Peer shipped null. | `prelim.peers` froze the set and left `Peer_Median` blank; no writer for the figure existed anywhere. | `engine.prelim peer-median` (basis vocabulary, quartile sanity, `cannot_estimate` → honest null) |
 | GSY-23 | Token bleed at promotion — the six pages produced from scratch after the assessment ended. | Nothing told the surface producer which pages the workbook could already feed. | `engine.ship state` (`ready_pages` / `dispatch_now`), `engine.assemble checkpoint`, `ship_page.py --incremental` |
 
+| GSY-24 | No orchestration between the main agent and its subagents: sixteen category lanes worked the same entity and could see nothing the others had found, a resumed lane got a COUNT of its notes rather than the notes, and the conductor either dispatched with "the run id and nothing else" (the lane re-finds the background) or pasted its own context (the token bleed). | `orient` carried PRELIM's background and nothing since; `memory.status` reported counts; no view existed of the run's own state, and no dispatch packet existed at all. | `engine.brief` — `shared`, `dispatch`/`batch`, `reuse`, `handback`; bounded by `BRIEF_CHAR_CEILING`, derived from the sheets, wired into the conductor's dispatch, all sixteen producer manifests and the session hook. Acceptance: `tests/acceptance/test_acceptance_orchestration.py`. |
+
 ## The one-turn discipline (why issues were caught in QA, not prevented)
 
 The session reached the gold standard by **iteration** — each defect was found by the

@@ -150,14 +150,31 @@ tool call is the cost this removes.
    routing table: sixteen categories, each naming its agent, its subcaps,
    its askable-DQ count and its deferred questions.
 
-3. **Dispatch by category — and hold every cell to the five volleys.**
-   Each category goes to its own researcher —
-   `research-p1c1-producer` through `research-p4c4-producer` — with the run
-   id, the root, and nothing else (the workbook carries the rest). Dispatch
-   independent categories in parallel lanes (`agent_run.py --batch --stream`);
-   a category is DONE when its researcher reports a PASSING floors gate, not
-   when it reports effort. Re-dispatch on a FAIL with the gate's blocking
-   terms in the prompt.
+3. **Dispatch by category — over a brief you did not write, and hold every
+   cell to the five volleys.**
+
+       python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
+       python3 plugins/dma-insights/scripts/agent_run.py \
+               --batch $ROOT/briefs/batch.json --stream --lanes 4
+
+   `brief batch` writes one bounded packet per category and the batch array
+   that dispatches them. Do NOT compose those prompts yourself: a
+   hand-written prompt is where context either goes missing (the lane
+   re-finds what the run knows) or goes twice (the lane is handed your whole
+   context). The packet carries the run's shared state, each open cell's
+   owed volleys, **the evidence already registered for that cell**, the
+   lane's own notebook digest for a resumed lane, and its search budget —
+   measured against `BRIEF_CHAR_CEILING`, so "more context" cannot become
+   the token bleed.
+
+   A category is DONE when its researcher reports a PASSING floors gate, not
+   when it reports effort. Read `engine.brief handback --category <C>` rather
+   than trusting the lane's prose: it is computed from the sheets, it has the
+   same shape whether the lane finished or died, and its
+   `leads_for_other_categories` names the sources one lane opened that
+   another lane's cells need — route those before re-dispatching anything.
+   Re-dispatch on a FAIL with the gate's blocking terms in the prompt (a
+   fresh `brief dispatch --category <C>` already carries them).
 
    THE RULE THE GATE NOW COUNTS (owner, 2026-09-03: "some subcaps are marked
    as no evidence without any enrichment efforts … not even looking at the 5

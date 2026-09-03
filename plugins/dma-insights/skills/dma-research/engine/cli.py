@@ -74,7 +74,8 @@ from . import (assemble, contract, floors_gate, handoff, ledger, orient,
 #: argparse so the family's own --help answers, not this wrapper's.
 _FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble", "preflight",
              "prelim", "registry", "complete", "narrative", "ers",
-             "cost", "template", "grains", "profile", "assessment", "ship")
+             "cost", "template", "grains", "profile", "assessment", "ship",
+             "brief")
 
 
 def _family_main(name: str):
@@ -110,6 +111,8 @@ def _family_main(name: str):
         from . import assessment as m
     elif name == "ship":
         from . import ship as m
+    elif name == "brief":
+        from . import brief as m
     else:
         from . import assemble as m
     return m.main

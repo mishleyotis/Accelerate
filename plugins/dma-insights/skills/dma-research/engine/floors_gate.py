@@ -65,6 +65,7 @@ ADVISORY_TERMS = (
     "ladder_overstated",
     "timeline_missing",
     "absence_single_tool",
+    "evidence_unattached",
 )
 
 
@@ -96,6 +97,15 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # terms that make an empty cell EARN its emptiness.
         "volleys_incomplete": [], "absence_undeclared_empty": [],
         "absence_single_tool": [],
+        # 2026-09-03 (owner: "limited evidence is consolidated in most runs
+        # … very evidence deficient"): the register is run-wide and its rows
+        # name their cells, so a cell that does not cite the row naming it
+        # is evidence the run bought and never consolidated. BLOCKING when
+        # the cell was declared absent over it (the write path refuses the
+        # same thing — read and write must agree, AUD-0117), advisory
+        # otherwise, because a cell mid-synthesis legitimately has rows it
+        # has not yet decided about.
+        "absence_over_evidence": [], "evidence_unattached": [],
     }
     items = 0
     searched_cells = 0
@@ -291,6 +301,16 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
 
     findings["evidence_smear"] = Q.evidence_smear(rows)
 
+    # WHAT THE RUN BOUGHT AND DID NOT USE. Computed once for the category
+    # from the same register: `brief.unattached` is the read an agent makes,
+    # and this is the gate that measures it.
+    from . import brief as _brief
+    for u in _brief.unattached(wb, category):
+        if u["declared_absent"]:
+            findings["absence_over_evidence"].append(u)
+        else:
+            findings["evidence_unattached"].append(u)
+
     # AUD-0022: the >=20-items-per-category floor was computed, reported and
     # then not used. It is a gate term here.
     category_floor_met = items >= FLOOR_CATEGORY_ITEMS
@@ -322,6 +342,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "challenge_not_independent", "single_source_fact",
         "synthesis_missing", "dq_gaps", "absence_unsearched",
         "volleys_incomplete", "absence_undeclared_empty",
+        "absence_over_evidence",
     ) if findings[k]]
     if not category_floor_met:
         blocking.append("category_items_below_floor")

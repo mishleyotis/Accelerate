@@ -47,6 +47,34 @@ did not happen.
   "clean" while your work is open, and when it says STOP (the search-op
   ceiling), you checkpoint and end your turn.
 
+## Before the loop: read what the run already knows
+
+    python3 -m engine.brief dispatch --run <R> --root <ROOT> --category <YOURS>
+
+This is your FIRST command — before `orient`, before any search, and again
+after any interruption or compaction. One bounded packet (measured against
+`BRIEF_CHAR_CEILING`, derived from the workbook, never a second record):
+
+- **the run's shared state** — the estate by layer, the peer set, how far
+  the register already reaches, the contradictions somebody logged. A
+  `Tech_Register` row marked `ABSENT` means that layer WAS searched and
+  nothing was found: a result, not a gap. Do not re-run it.
+- **per open cell, what the run already holds for it** — rows the register
+  names for that cell, and rows registered against a capability sibling.
+  Read them before you search. The run has already paid for them, and a
+  cell that ignores them is the under-consolidation the owner reported on
+  2026-09-03. `engine.brief reuse --subcap <cell>` is the same read for one
+  cell.
+- **your own notebook, compacted** (`your_notes`). If your context was lost,
+  this is what you already found; continue from it rather than re-finding
+  it. `engine.memory status` counts notes — this hands them back.
+- **your budget** before the checkpoint wall.
+
+When your category is done, `engine.brief handback --run <R> --root <ROOT>
+--category <YOURS>` is your report: computed from the sheets, the same shape
+whether you finished or stopped, and it names the leads your sources open
+for other categories so nobody searches for them twice.
+
 ## The loop, per work card
 
 `orient` hands you one card: a subcap, its diagnostic questions already
