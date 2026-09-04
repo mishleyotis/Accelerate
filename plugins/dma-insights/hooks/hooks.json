@@ -42,7 +42,7 @@
         "matcher": "Bash"
       },
       {
-        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit|mcp__workspace__bash|mcp__workspace__web_fetch",
         "hooks": [
           {
             "type": "command",

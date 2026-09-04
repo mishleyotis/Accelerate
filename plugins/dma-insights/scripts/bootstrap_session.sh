@@ -474,19 +474,34 @@ out = []
 # names, so the belt names them that way; the claude.ai interactive attach
 # (which uses hyphens) is covered by the hook's own read-time canonicalisation
 # and the project-scope .claude/settings.json, not by this user-scope belt.
+# THREE SPELLINGS OF ONE SERVER (permission-rule reference, measured 2026-09-04):
+# a connector a cloud host or the desktop app DELIVERS attaches as
+# `mcp__<Server>__…`; one Claude Code FETCHES from claude.ai itself attaches
+# as `mcp__claude_ai_<Server>__…`. A grant written for the first spelling
+# matches nothing in a session that got the second, and the owner's Tavily
+# and Exa prompts survived a grant that looked complete. Both spellings are
+# written for every server; the hook canonicalises the prefix away too.
+def spellings(server):
+    # The plugin's own connector is installed BY the plugin, never fetched
+    # from claude.ai, so it has exactly one spelling.
+    if server.startswith("plugin_"):
+        return (server,)
+    return (server, f"claude_ai_{server}")
+
 for server in sorted(seen | set(aac.SERVER_SURFACES)):
-    if server in aac.SERVER_SURFACES:
-        # A CONDITIONAL tool must never reach this list. A settings grant is
-        # honoured without the hook being consulted, so granting one here
-        # would approve it everywhere and leave its argument check running
-        # on nothing. Belt to the hook's braces: conditional tools are not
-        # in any `read` set today, and this makes that a rule rather than a
-        # coincidence somebody could undo.
-        out += [f"mcp__{server}__{t}"
-                for t in sorted(aac.SERVER_SURFACES[server]["read"])
-                if f"mcp__{server}__{t}" not in aac.CONDITIONAL_TOOLS]
-    else:
-        out.append(f"mcp__{server}__*")
+    for spelled in spellings(server):
+        if server in aac.SERVER_SURFACES:
+            # A CONDITIONAL tool must never reach this list. A settings grant
+            # is honoured without the hook being consulted, so granting one
+            # here would approve it everywhere and leave its argument check
+            # running on nothing. Belt to the hook's braces: conditional
+            # tools are not in any `read` set today, and this makes that a
+            # rule rather than a coincidence somebody could undo.
+            out += [f"mcp__{spelled}__{t}"
+                    for t in sorted(aac.SERVER_SURFACES[server]["read"])
+                    if f"mcp__{server}__{t}" not in aac.CONDITIONAL_TOOLS]
+        else:
+            out.append(f"mcp__{spelled}__*")
 print("\n".join(out))
 PY
 )"

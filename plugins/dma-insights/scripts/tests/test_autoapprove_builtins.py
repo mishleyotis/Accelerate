@@ -282,3 +282,29 @@ def test_the_bootstrap_grants_the_same_builtin_prefixes():
         assert grant in src, f"bootstrap does not grant {grant!r}"
     for too_wide in ('"Bash"', '"Write"', '"Edit"', "Bash(*)", "Write(**)"):
         assert too_wide not in src, f"bootstrap grants {too_wide!r} — too wide"
+
+
+# ── Cowork: shell runs through mcp__workspace__bash, not Bash ──────────────
+#
+# Permissions reference: "Claude Code never applies a `Bash` allow rule to
+# `mcp__workspace__bash`". So in a Cowork session the grammar must be reached
+# under that name too, and the read-only workspace fetch approved like the
+# built-in WebFetch is.
+
+def test_a_cowork_shell_command_is_judged_by_the_same_grammar():
+    ok = "python3 -m engine.cli orient --run R --root /root/.dma/runs/R --category P1C1"
+    assert decision("mcp__workspace__bash", command=ok) == "allow"
+    assert decision("mcp__workspace__bash", command="git push -u origin main") is None
+    assert decision("mcp__workspace__bash", command="printenv") is None
+
+
+def test_the_cowork_web_fetch_is_a_read():
+    assert decision("mcp__workspace__web_fetch", url="https://example.com") == "allow"
+
+
+def test_the_hook_is_registered_for_the_cowork_workspace_tools():
+    cfg = json.loads(HOOKS_JSON.read_text())
+    entry = next(e for e in cfg["hooks"]["PreToolUse"]
+                 if "autoapprove_builtins.py" in e["hooks"][0]["command"])
+    for tool in ("mcp__workspace__bash", "mcp__workspace__web_fetch"):
+        assert tool in entry["matcher"].split("|"), entry["matcher"]

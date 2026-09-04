@@ -347,8 +347,13 @@ def test_every_granted_tool_is_one_the_hook_would_also_approve():
     _sys.path.insert(0, str(HERE.parent / "hooks"))
     import autoapprove_connector as _aac
 
+    # Compared through the hook's OWN canonical form: a grant written for the
+    # `mcp__claude_ai_<Server>__` spelling (the one Claude Code gives a
+    # connector it fetches itself) is the same decision as the delivered
+    # spelling, and the hook reads it that way at call time.
     disagree = [g for g in derived_grants()
-                if not g.endswith("__*") and g not in _aac.QUALIFIED_TOOLS
+                if not g.endswith("__*")
+                and _aac._canonical(g) not in _aac.QUALIFIED_TOOLS
                 and not g.startswith(_aac.PREFIX)]
     assert not disagree, (
         f"granted in user settings and NOT on the hook's read allowlist: "

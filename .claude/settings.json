@@ -37,7 +37,19 @@
       "mcp__Google-Drive",
       "mcp__PDF-Viewer",
       "mcp__DMA-Insights",
-      "mcp__plugin_dma-insights_connector"
+      "mcp__plugin_dma-insights_connector",
+      "mcp__claude_ai_Clay",
+      "mcp__claude_ai_Exa",
+      "mcp__claude_ai_Tavily",
+      "mcp__claude_ai_Indeed",
+      "mcp__claude_ai_Quartr",
+      "mcp__claude_ai_Vibe_Prospecting",
+      "mcp__claude_ai_Vibe-Prospecting",
+      "mcp__claude_ai_Google_Drive",
+      "mcp__claude_ai_Google-Drive",
+      "mcp__claude_ai_DMA-Insights",
+      "mcp__claude_ai_DMA_Insights",
+      "mcp__workspace__web_fetch"
     ],
     "deny": [
       "WebFetch(domain:docs.google.com)",

@@ -476,7 +476,16 @@ def _canonical(tool: str) -> str:
     hyphens (`enrich-business` stays `enrich-business`)."""
     parts = tool.split("__")
     if len(parts) >= 3 and parts[0] == "mcp":
-        parts[1] = parts[1].replace("-", "_")
+        server = parts[1].replace("-", "_")
+        # A connector Claude Code fetches from claude.ai ITSELF attaches as
+        # `mcp__claude_ai_<server>__<tool>` (permissions reference, measured
+        # 2026-09-04 while chasing Tavily/Exa prompts the owner still saw on
+        # every surface). Same server, third spelling; the classified tables
+        # and the withheld lists must see through it or a write on Google
+        # Drive under this prefix is judged by the verb heuristic alone.
+        if server.startswith("claude_ai_"):
+            server = server[len("claude_ai_"):]
+        parts[1] = server
         return "__".join(parts)
     return tool
 

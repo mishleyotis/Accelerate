@@ -98,6 +98,40 @@ already knows that nobody ever ruled on, prompting on every call forever.
 Measured 2026-08-30 before the split existed: **16 of 86 approved.** After:
 124 of 184, 58 refused on the record, 2 guarded, **0 unclassified**.
 
+## When a connector still prompts — the five layers, by surface
+
+Owner, 2026-09-04: *"the mcp tools eg tavily, exa etc are what I get prompts
+of to approve"* — on claude.ai/code, the terminal, Cowork and claude.ai chat
+alike — and *"when I place allow for all sessions, it prompts again."* Both
+plugin hooks approve every Tavily and Exa spelling (measured, table below),
+and the user-scope grant carries `mcp__Tavily__*` and `mcp__Exa__*`. So the
+prompt is coming from a layer neither governs. Ask the question with the
+exact name the prompt showed:
+
+```
+python3 plugins/dma-insights/scripts/why_did_it_prompt.py mcp__Tavily__tavily_search
+```
+
+Four layers can remove a prompt and one control puts one back over all four:
+
+| layer | what it does | where it fails |
+|---|---|---|
+| plugin hooks | `autoapprove_connector` (MCP) and `autoapprove_builtins` (Bash/Write/Edit, Cowork's `mcp__workspace__bash`) decide at call time | only where the plugin is installed AND enabled when the session binds; a snapshot container binds the old hook |
+| `permissions.allow` | user scope (bootstrap), project scope (`.claude/settings.json`), project-local | a rule matches ONE spelling. A connector a host delivers is `mcp__Tavily__…`; one Claude Code fetches itself is `mcp__claude_ai_Tavily__…` (permissions reference). Both are granted now. "Allow for all sessions" writes to `.claude/settings.local.json`, which a cloud container discards |
+| permission mode | `dontAsk` denies instead of prompting | the harness chooses the mode for a cloud session (`auto`), not the settings file |
+| install | hooks bind once, at session start | a restored snapshot boots the old plugin every time until `bootstrap_session.sh` runs before the session |
+| **organisation per-tool control = `ask`** | prompts on EVERY call, in EVERY mode, with the reason *"Your organization requires approval for this tool"*, **never offers to remember the choice, and no allow rule skips it** (permissions reference § MCP; `mcp` § Organization controls on connector tools). In `dontAsk` it becomes a silent denial | this is the only layer that matches "prompts on every surface, allow-for-all-sessions does nothing"; the user's own "allow unsupervised" connector setting does not override it. `/mcp` in the prompting session shows the setting per tool; the org's claude.ai admin changes it |
+
+Per surface: **claude.ai/code web** — hooks + user/project settings + the
+auto classifier; only the bootstrap's writes survive to the next session.
+**Claude Code CLI** — the same on your machine; a saved rule persists for the
+spelling it was saved under. **Cowork desktop** — hooks run; shell is
+`mcp__workspace__bash` and a `Bash` rule never carries over (the builtins hook
+matches it since 1.17.0); the org `ask` does NOT reach these sessions.
+**claude.ai chat** — no Claude Code hooks or settings at all; only the
+connector's permission setting and any org control apply, and nothing in
+this repository can change what it asks.
+
 ## Slack — a bot token, not a connector (PORTABLE, 2026-08-30)
 
 **Status: code LIVE; the secret is the owner's to provision.**

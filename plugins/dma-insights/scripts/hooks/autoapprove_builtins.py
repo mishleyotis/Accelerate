@@ -546,6 +546,23 @@ def decide(event: dict) -> dict | None:
     cwd = event.get("cwd")
     if isinstance(cwd, str) and cwd:
         _CWD = cwd
+    # COWORK (Claude Desktop) runs shell commands through its own
+    # `mcp__workspace__bash` tool and web reads through
+    # `mcp__workspace__web_fetch`, not the built-in Bash/WebFetch — and the
+    # permissions reference is explicit that a `Bash` allow rule never
+    # carries over to it. Measured 2026-09-04: the owner sees prompts in
+    # Cowork too, and there the connector hook's verb heuristic reads "bash"
+    # as unknown and says nothing. Same grammar, same guards, same roots.
+    if tool == "mcp__workspace__bash":
+        tool = "Bash"
+        if "command" not in ti:
+            for key in ("cmd", "script", "input"):
+                if isinstance(ti.get(key), str):
+                    ti = {"command": ti[key]}
+                    break
+    elif tool == "mcp__workspace__web_fetch":
+        return _allow("read-only web fetch through Cowork's workspace tool — "
+                      "the same read the built-in WebFetch is approved for")
     if tool == "Bash":
         cmd = ti.get("command")
         if not isinstance(cmd, str) or guards_would_deny(cmd) or not bash_ok(cmd):
