@@ -284,7 +284,8 @@ def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     # `volleys_incomplete` (2026-09-03) counts every askable facet per cell:
     # a fixture banking rows on one query was modelling the one-shallow-
     # search shape the gate now refuses.
-    assert len(fresh.rows("Search_Log")) == before_s + 1 + len(L.askable_facets(fresh, cell))
+    # the primary question plus the five volleys (fire_volleys, 2026-09-03)
+    assert len(fresh.rows("Search_Log")) == before_s + 1 + 1 + len(L.askable_facets(fresh, cell))
     assert len(fresh.rows("Evidence_Detail")) == before_e + 3
     assert fresh.scoring_row(cell)["Dominant_Claim"]
     assert fresh.coverage()[0]["Researched"] == 1

@@ -35,15 +35,12 @@ from .test_report_structure import _rec
 def _scored(tmp_path, n=6):
     """A workbook whose column D carries scores — an assessment, not a run
     that has merely finished researching."""
-    run = new_run(tmp_path, n=n)
-    wb = run.open()
-    cells = wb.selected_subcaps()
-    for cell in cells:
-        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
-    # score them the way the assessment stage does: column D, one per subcap
-    for i, cell in enumerate(cells):
-        wb.update_row(cells and "P1_Subcap_Scoring", "SubCap_ID", cell,
-                      {"Score": 2 + (i % 3)})
+    # THROUGH the assessment stage — `engine.assessment open/score/rollup/
+    # gate` — not column D written by hand: the report writer now checks the
+    # SCORING gate before it lands a section (2026-09-03), and a workbook
+    # scored out-of-band has no gate to show.
+    from fixtures import scored_run
+    run, wb, cells, ev = scored_run(tmp_path, n=n)
     return run, wb, cells
 
 
@@ -110,7 +107,9 @@ def test_the_stage_cannot_be_set_to_assessment_with_no_scores(tmp_path):
 # ── the grains themselves ────────────────────────────────────────────────
 
 def test_recompute_refuses_at_the_research_stage(tmp_path):
-    run, wb, cells = _scored(tmp_path)
+    # a RESEARCHED run — still at the research stage; `scored_run` is past it
+    from fixtures import researched_run
+    run, wb, cells, ev = researched_run(tmp_path)
     with pytest.raises(GrainRefused, match="research stage"):
         G.recompute(wb)
 

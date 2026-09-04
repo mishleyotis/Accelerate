@@ -256,11 +256,20 @@ def test_issue3_the_workbook_is_the_templates_shape_not_a_remembered_one(tmp_pat
         (PLUGIN / "references" / "templates" / "workbook_template.json").read_text())
     wb = new_run(tmp_path, n=2).open()
     have = {ws.title for ws in wb._wb.worksheets}          # noqa: SLF001
-    missing = [s for s in tmpl["sheets"] if s not in have
-               and s not in tmpl.get("known_divergences", {})]
+    # The pin's own key. This test once read `known_divergences`, which the
+    # file does not carry, so the exclusion set was always empty and the
+    # second assertion degraded to `len(C.SHEETS) >= 11` (measured
+    # 2026-09-03). The divergence block is named in the file's readme.
+    divergences = tmpl["known_divergences_from_contract"]
+    assert divergences, "the pin must name its divergences from the contract"
+    missing = [s for s in tmpl["sheets"] if s not in have]
     assert missing == [], missing
-    assert len(C.SHEETS) >= len(tmpl["sheets"]) - len(
-        tmpl.get("known_divergences", {}))
+    # Every divergence the pin records is a sheet the contract carries under
+    # the contract's own columns — a reviewed decision, not a missing tab.
+    for sheet in divergences:
+        if sheet in tmpl["sheets"]:
+            assert sheet in C.SHEETS, sheet
+    assert len(C.SHEETS) >= len(tmpl["sheets"])
 
 
 def test_issue3_every_scored_row_carries_its_catalogue_name(tmp_path):

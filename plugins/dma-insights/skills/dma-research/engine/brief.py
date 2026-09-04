@@ -270,6 +270,11 @@ def unattached(wb: RunWorkbook, category: str | None = None) -> list[dict]:
             out.append({
                 "subcap": cell,
                 "e_ids": [i["e_id"] for i in got["names_this_cell"]],
+                # The FLAG, not the proven declaration: a cell that claims
+                # absence over rows the register names is the
+                # under-consolidation defect whether the flag was earned
+                # (`engine.cli absence`) or written around it — the gate's
+                # `absence_over_evidence` must block both.
                 "declared_absent": L.is_declared_absent(r),
                 "synthesised": bool(_clean(r.get("Dominant_Claim"))),
             })
@@ -563,7 +568,7 @@ def handback(wb: RunWorkbook, category: str) -> dict:
         r = wb.scoring_row(cell) or {}
         eids = _ids(r.get("Evidence_IDs"))
         items += len(eids)
-        if L.is_declared_absent(r):
+        if L.is_declared_absent(r, wb):
             absent.append(cell)
         elif _clean(r.get("Dominant_Claim")):
             closed.append(cell)

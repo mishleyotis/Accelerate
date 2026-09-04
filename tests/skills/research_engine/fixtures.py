@@ -88,6 +88,10 @@ def fire_volleys(wb, subcap, *, n=3, tool="web_search"):
     (`volleys_incomplete`, 2026-09-03). The `contradicts` query carries two
     adversarial operators so `quality.probes_contradicts` recognises it."""
     queries = {
+        # The toolkit's own diagnostic question comes first: the five
+        # volleys answer it, and `primary_unfired` blocks a category whose
+        # cell never asked it (2026-09-03).
+        "primary": f'"Acme Credit Union" {subcap} digital capability statement',
         "works": f'"Acme Credit Union" {subcap} rollout OR "went live"',
         "fails": f'"Acme Credit Union" {subcap} delayed OR descoped OR outage',
         "value": f'"Acme Credit Union" {subcap} adoption OR "reduced by" OR results',
@@ -319,6 +323,7 @@ def close_prelim(run, *, entity="Acme Credit Union"):
         prelim.timeline(wb, date=d, event=ev, signal=sig, kind=kind,
                         body=f"{ev}, as reported in the run's register.",
                         maturity_effect=effect, evidence=[eid])
+    bank_financials(wb, eid)
     prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU"],
                  basis="inferred",
                  rule=("US credit unions in the 15-25bn asset band with a "
@@ -350,6 +355,22 @@ def close_prelim(run, *, entity="Acme Credit Union"):
     return eid
 
 
+def bank_financials(wb, eid, *, years=5, metrics=("total_assets", "net_income",
+                                                  "total_loans")):
+    """The five-year trajectory Golden 1 carries (GSY-18): `years` fiscal
+    years × `metrics` series, every point resolving to the call report."""
+    from engine import profile
+    for m_i, metric in enumerate(metrics):
+        for y_i in range(years):
+            fy = 2021 + y_i
+            profile.financial(
+                wb, metric=metric, fiscal_year=f"FY{fy}",
+                value=round(1000 * (1.08 ** y_i) * (1 + m_i), 1),
+                unit="USD m", evidence=eid,
+                source_url=f"https://ncua.example/callreport/{fy}",
+                basis="NCUA 5300 call report, year-end")
+
+
 def make_shippable(wb):
     """Close the completeness gate the honest way — by FILLING, not declaring.
 
@@ -360,7 +381,8 @@ def make_shippable(wb):
     if not [r for r in wb.rows("Search_Log") if any(r.values())]:
         L.append_search(wb, subcap=None, facet="works",
                         query="fixture: the search the banked evidence came from",
-                        tool="web_search", hits=4, kept=1, outcome="kept 1")
+                        tool="web_search", hits=4, kept=1, outcome="kept 1",
+                        prelim=True)
     if not [r for r in wb.rows("DQ_Bank") if any(r.values())]:
         # A minimal bank. `kg build` seeds the real one from the pillar
         # toolkits; a fixture that has no toolkits still needs the sheet to
@@ -733,9 +755,31 @@ def score_stage(run, wb, cells, ev):
     return v
 
 
+def report_ready_run(tmp_path, n=6, absent=1):
+    """A run a REPORT SECTION may be written on — researched, gated, scored,
+    the SCORING gate PASS — returned as the Run alone, so a test that used to
+    open with `new_run(tmp_path)` and write a section can swap one call.
+
+    Since 2026-09-03 `narrative.write` runs the stage preconditions on every
+    call (a library write with no run landed a section on an unscored
+    workbook — the owner's issue 2 in miniature), so a section can only be
+    written on a run in this state. The scored cells' evidence ids are on
+    `run.ev`, keyed by cell, and the cells on `run.cells`."""
+    run, wb, cells, ev = scored_run(tmp_path, n=n, absent=absent)
+    run.cells = cells
+    run.ev = ev
+    return run
+
+
 def scored_run(tmp_path, n=6, absent=1):
+    """A scored run is also a SHIPPABLE one: the report preconditions read
+    `completeness.check`, so a run whose DQ_Bank or Tech_Peer_Deployments is
+    empty with no reason recorded cannot take a report section. Filled here
+    the honest way (`make_shippable`), so every test that scores a run can
+    write on it without re-deriving that list."""
     run, wb, cells, ev = researched_run(tmp_path, n=n, absent=absent)
     score_stage(run, wb, cells, ev)
+    make_shippable(wb)
     return run, wb, cells, ev
 
 

@@ -431,8 +431,33 @@ class AssessmentRunner:
         return workbook_path
 
 
+RETIRED = """REFUSED: assessment_runner.py is retired (2026-09-03). It built a fresh
+openpyxl.Workbook() with an 11-column layout beside the run — a SECOND scoring
+workbook the gates never saw (owner issue 3; goeasy GSY-15/21: "the work went
+around the pipeline"). The scoring stage lives in the engine, on the run's own
+workbook, and is gated at both ends:
+
+    python3 -m engine.assessment open     --run R --root ROOT   # refuses until every category gate is PASS
+    python3 -m engine.assessment score    --run R --root ROOT --subcap P1C1.1.1 --score 2.75 \\
+            --confidence MEDIUM --rationale '[EVIDENCE] E-0012 … [CEILING] …' --actor scoring-p1-producer \\
+            --ai-applicability ASSISTIVE --data-dependency '…' --data-readiness AMBER
+    python3 -m engine.assessment critique --run R --root ROOT --pillar P1 --verdict PASS --actor scoring-critic --note '…'
+    python3 -m engine.assessment rollup   --run R --root ROOT
+    python3 -m engine.assessment gate     --run R --root ROOT
+
+The four pillar scorers and the critic are agents (agents/scoring/); the
+brief that dispatches them is `engine.brief scoring-batch`.
+"""
+
+
 def main():
-    """CLI entry point."""
+    """CLI entry point — retired; prints the engine path and exits 1."""
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():           # kept for reference; unreachable
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -467,4 +492,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys as _sys
+    _sys.exit(main())

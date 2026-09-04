@@ -152,16 +152,39 @@ def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
     if unnamed:
         out.append(f"{len(unnamed)} row(s) carry no SubCap_Name "
                    f"({unnamed[:5]}…): re-seed the names from the catalogue")
+    # The five-year trajectory (GSY-18) is research-stage material the
+    # assessment report's §1 and §6 render; scoring a run that never banked
+    # it produces a report with no trend to argue from.
+    from . import profile
+    depth = profile.financial_depth(wb)
+    if not depth["met"]:
+        out.append(depth["fix"])
+    # Evidence density against the Golden 1 reference — the run-level floor
+    # the owner asked for (2026-09-03, issue 1: "limited evidence …
+    # evidence deficient"). Per-category floors cannot see a run that is
+    # thin everywhere.
+    density = floors_gate.run_density(wb)
+    if not density["met"]:
+        out.extend(density["shortfall"])
     return out
 
 
-def open_stage(wb: RunWorkbook, qa_dir: Path | None, *, force: bool = False) -> dict:
-    """Flip the workbook to the ASSESSMENT stage and write the config tabs."""
+def open_stage(wb: RunWorkbook, qa_dir: Path | None) -> dict:
+    """Flip the workbook to the ASSESSMENT stage and write the config tabs.
+
+    There is no `force`. Measured 2026-09-03: `open_stage(force=True)` opened
+    scoring on a run whose categories had never been gated, recording the
+    bypass only as text on the SCORING_OPENED row — every floors term,
+    including the five-volley rule, could be walked past by one flag."""
     pre = research_ready(wb, qa_dir)
-    if pre and not force:
+    if pre:
         raise ScoringRefusal(
             "the research is not ready to be scored — "
-            + "\n  - ".join([""] + pre))
+            + "\n  - ".join([""] + pre)
+            + "\nThere is no --force. Gate each category with `engine.cli gate "
+            "--run <R> --root <ROOT> --category <C> --require-synthesis`, close "
+            "PRELIM with `engine.prelim complete`, bank what research_ready "
+            "names, and re-run `engine.assessment open`.")
     md = wb.metadata()
     sv = str(md.get("sub_vertical") or "").strip()
     weights = C.PILLAR_WEIGHTS.get(sv, C.DEFAULT_PILLAR_WEIGHTS)
@@ -212,13 +235,18 @@ def open_stage(wb: RunWorkbook, qa_dir: Path | None, *, force: bool = False) -> 
                                      f"{len(tax.cells_in(cat))} catalogue cells")},
                       save=False)
         wb.set_metadata("stage", "assessment", save=False)
+        # The dashboard is the first tab a reader opens (Golden 1 lists
+        # Executive_Summary first); at research stage it sits among the
+        # assessment tabs because nothing has filled it yet.
+        names = wb._wb.sheetnames
+        if "Executive_Summary" in names and names[0] != "Executive_Summary":
+            wb._wb.move_sheet("Executive_Summary",
+                              offset=-names.index("Executive_Summary"))
         wb.save()
     L.append_gate(wb, gate="SCORING_OPENED", scope="run", verdict="PASS",
-                  detail=(f"weight set {set_id}; research gates held"
-                          + (" (FORCED past: " + "; ".join(pre)[:200] + ")" if pre else "")),
+                  detail=f"weight set {set_id}; research gates held",
                   blocking=False)
-    return {"stage": "assessment", "weight_set": set_id, "weights": weights,
-            "forced_past": pre}
+    return {"stage": "assessment", "weight_set": set_id, "weights": weights}
 
 
 def _category_names() -> dict[str, str]:
@@ -281,7 +309,7 @@ def score(wb: RunWorkbook, subcap: str, *, score, confidence: str, rationale: st
     synthesised = bool(_clean(row.get("Dominant_Claim")))
     eids = [i.split(":")[0] for i in _split_ids(row.get("Evidence_IDs"))
             if i and i != C.NO_EVIDENCE]
-    declared = _clean(row.get("Absence_Claimed")).upper() in ("YES", "TRUE", "1")
+    declared = L.is_declared_absent(row, wb)
     if eids and not synthesised:
         problems.append("the row holds evidence and no synthesis (volleyed): a "
                         "score on raw evidence is the defect the research → "
@@ -669,6 +697,7 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     register = wb.evidence_index()
     ss = {_clean(r.get("subcap_id")): r for r in wb.rows("Subcap_Scores")}
     cl = {_clean(r.get("subcap_id")) for r in wb.rows("Caps_Applied_Log")}
+    declared_set = L.declared_absences(wb)
     by_cap: dict[str, list[float]] = {}
     for r in wb.scoring_rows():
         cell = _clean(r.get("SubCap_ID"))
@@ -685,7 +714,7 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         by_cap.setdefault(cell.rsplit(".", 1)[0], []).append(sc)
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
-        declared = _clean(r.get("Absence_Claimed")).upper() in ("YES", "TRUE", "1")
+        declared = L.is_declared_absent(r, declared=declared_set)
         if eids and _clean(r.get("Challenge_Verdict")).upper() != "PASS":
             f["unchallenged_scored"].append(cell)
         if not eids and not declared:
@@ -803,10 +832,7 @@ def main(argv=None) -> int:
         p.add_argument("--root")
         return p
 
-    o = common(sub.add_parser("open"))
-    o.add_argument("--force", action="store_true",
-                   help="flip the stage even though a research gate is open; "
-                        "recorded on the SCORING_OPENED row, never silent")
+    common(sub.add_parser("open"))          # no --force: the gates are the gate
     sc = common(sub.add_parser("score"))
     sc.add_argument("--subcap", required=True); sc.add_argument("--score", required=True)
     sc.add_argument("--confidence", required=True); sc.add_argument("--rationale", required=True)
@@ -837,7 +863,7 @@ def main(argv=None) -> int:
     wb = run.open()
     try:
         if a.cmd == "open":
-            out = open_stage(wb, run.qa_dir, force=a.force)
+            out = open_stage(wb, run.qa_dir)
         elif a.cmd == "score":
             out = score(wb, a.subcap, score=a.score, confidence=a.confidence,
                         rationale=a.rationale, actor=a.actor,

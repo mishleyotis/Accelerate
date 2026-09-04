@@ -12,9 +12,9 @@ the spec fails the build until an owner exists.
 
 Three agents, and the split is the independence rule rather than a taste:
 
-  report-research-producer     writes the eight Client Research Profile
+  report-research-producer     writes the Client Research Profile's
                                sections. Knows the research run.
-  report-assessment-producer   writes the eight DMA Assessment Report
+  report-assessment-producer   writes the DMA Assessment Report's
                                sections. Reads scores, never writes one.
   report-validator             gives every section its verdict, and may
                                write none of them. `engine.narrative review`
@@ -60,11 +60,17 @@ def _section_table(key: str) -> str:
     rows = ["| § | heading | floor | reads | cites | feeds |",
             "|---|---|---|---|---|---|"]
     for sec in spec.sections:
-        floor = (f"{sec.min_words}w"
-                 + (f" · {RS.INSIGHT_CARD_MIN}+ cards × "
-                    f"{RS.CARD_MIN_WORDS}w" if sec.kind == "insight_card"
-                    else f" · 1+ × {RS.CARD_MIN_WORDS}w"
-                    if sec.kind in RS.CARD_KINDS else ""))
+        # The SECTION's own floors from the pinned Doc, not the module
+        # defaults: this once printed "1+ × 60w" for the pillar deep dives
+        # (pinned: 4 × 800w) and the recommendations (pinned: 5-8 × 350w),
+        # so each manifest stated two different floors for the same section.
+        if sec.kind in RS.CARD_KINDS:
+            span = (f"{sec.card_floor}-{sec.cards_max}" if sec.cards_max
+                    and int(sec.cards_max) != sec.card_floor else f"{sec.card_floor}")
+            floor = (f"{sec.min_words}w · {span} cards `{sec.card_prefix or ''}…` × "
+                     f"{sec.card_min_words}w")
+        else:
+            floor = f"{sec.min_words}w"
         rows.append(
             f"| {sec.id} | {sec.heading} | {floor} | "
             f"{', '.join(f'`{i}`' for i in sec.inputs)} | "
@@ -165,12 +171,14 @@ engine.cli narrative write --run <R> --root <ROOT> \\
     --report {key} --section <N> --json section.json --actor {name}
 ```
 
-A section whose kind is `insight_card`, `finding` or `recommendation` is a
-**list**, not a passage: each item is its own row and needs its own
-`--card <id>`. Without one the write is refused — and before that refusal
-existed, every write to such a section overwrote the last, so §5 held one
-row against a blocking minimum of eight and the floor was arithmetically
-unreachable through the only sanctioned writer.
+A section whose kind is `pillar` or `recommendation` (the Doc's card
+sections — one pillar deep dive per pillar in scope, five to eight `REC-NN`
+recommendations) is a **list**, not a passage: each card is its own row and
+needs its own `--card <id>`. Without one the write is refused — and before
+that refusal existed, every write to such a section overwrote the last, so a
+list section held one row against its blocking card floor and the floor was
+arithmetically unreachable through the only sanctioned writer. The floors
+column in the table above is the pinned Doc's, per section.
 
 `engine.cli narrative contract --report {key}` prints each section's blocks,
 inputs, citation rule and the surfaces it feeds. Read it before you write.
@@ -232,6 +240,37 @@ You give report sections their verdict, and you write none of them.
 this separation is enforced by the ledger rather than by your good
 intentions. If you find yourself wanting to fix a section, you have found a
 REVISE, not a repair.
+
+## Before you review anything
+
+You are the gate that admits a .docx: `engine.cli report` renders only when
+every section carries your PASS. So you check the run before the prose —
+a PASS on a section of a run that should not have been written is your
+defect, not the producer's.
+
+```
+engine.cli narrative preconditions --run <R> --root <ROOT> --report <key>
+engine.template binding --run <R> --root <ROOT>
+```
+
+The first must print `ready: true` — PRELIM closed, every category gated
+with `--require-synthesis`, the templates bound, the SCORING gate PASS and
+the workbook complete for the assessment report, the five-year financial
+trajectory banked for both. The second names the pinned Doc the report is
+written to; read that Doc's markdown export
+(`references/templates/client_profile_template.md` or
+`assessment_report_template.md`) and `references/templates/gold_reference.json`
+before you open a section — you are reviewing against the Doc's control
+blocks and the Golden 1 depth, not against your sense of a good report.
+A section written before the run was ready gets FAIL, whatever its prose.
+
+Your last act before handing back is the gold gate on the rendered file:
+
+```
+python3 -m engine.gold_standard report <report.docx> --kind <research|assessment>
+```
+
+A report you passed that the gate fails is a review that was not done.
 
 ## Reviewing one section
 

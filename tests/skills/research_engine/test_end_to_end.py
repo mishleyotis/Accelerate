@@ -146,7 +146,7 @@ def _synthesis(cell, eids):
 
 def test_the_workbook_carries_the_whole_run(finished_run):
     wb = finished_run.open()
-    assert len(wb.rows("Search_Log")) == 90       # 18 subcaps x 5 volleys
+    assert len(wb.rows("Search_Log")) == 108      # 18 subcaps x (primary + 5 volleys)
     assert len(wb.rows("Evidence_Detail")) == 56  # 18 x 3, + 2 profile rows
     gates = wb.rows("Gate_Log")
     assert [g["Scope"] for g in gates if g["Gate"] == "FLOORS"] == list(CATS)

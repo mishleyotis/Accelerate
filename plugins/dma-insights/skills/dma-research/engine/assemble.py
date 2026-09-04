@@ -535,8 +535,24 @@ def verify(folder) -> dict:
           folder.name if name_ok else
           f"{folder.name!r} does not follow '<Entity> - DMA'")
 
+    # THE GOLD GATE, AT VERIFY TIME. Until 2026-09-03 `engine.gold_standard`
+    # was an instruction in the agents' manifests — "run it on your own output
+    # before you return" — and nothing in the pipeline ran it. A package is
+    # complete only when the Golden 1 gate has nothing to say about it; each
+    # finding is repaired at its source (the workbook or the section), never
+    # in the rendered file.
+    from . import gold_standard as GS
+    gold = [str(f) for f in GS.package_findings(folder)] if all(
+        c["ok"] for c in checks if c["check"].startswith("deliverable:")) else [
+        "gold gate not run: a deliverable is missing"]
+    check("gold_standard", not gold,
+          "PASS — 0 findings" if not gold else
+          f"{len(gold)} finding(s); run `python3 -m engine.gold_standard package "
+          f"<folder>` and repair each at its source: " + "; ".join(gold[:4]))
+
     complete = all(c["ok"] for c in checks)
-    return {"folder": str(folder), "complete": complete, "checks": checks}
+    return {"folder": str(folder), "complete": complete, "checks": checks,
+            "gold_findings": gold}
 
 
 def main(argv=None) -> int:

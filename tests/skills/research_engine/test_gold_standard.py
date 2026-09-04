@@ -204,8 +204,10 @@ def _assessment_body(overall="2.25"):
     body.append(("Normal", "Revenue grew across FY2020, FY2021, FY2022, FY2023 and "
                  "FY2024, a 17% CAGR; net income and total assets rose over the "
                  "five-year trajectory."))
-    # depth: citations + words
-    body.append(("Normal", " ".join(f"E-{i}" for i in range(1, 70)) + " " + "word " * 3600))
+    # depth: citations + words, at the FULL-SIZE Golden 1 floors (a bare
+    # `report_findings` holds a report to the reference's 690 subcaps: 115
+    # distinct citations and the pinned Doc's 8,400-word contract).
+    body.append(("Normal", " ".join(f"E-{i}" for i in range(1, 121)) + " " + "word " * 8600))
     return body
 
 

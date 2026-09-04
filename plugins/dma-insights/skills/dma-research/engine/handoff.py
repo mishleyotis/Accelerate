@@ -78,6 +78,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
     md = wb.metadata()
     register = wb.evidence_index()
     tax = C.taxonomy()
+    declared_set = L.declared_absences(wb)
 
     records, by_cat = [], {}
     for r in wb.scoring_rows():
@@ -101,9 +102,19 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
             # AUD-0078: null, not a default that looks like data.
             "ceiling_band": band if synth else None,
             "uncertainty": _num(r.get("Uncertainty")) if synth else None,
-            "state": ("declared_absent" if (not eids and L.is_declared_absent(r))
+            "state": ("declared_absent"
+                      if (not eids and L.is_declared_absent(r, declared=declared_set))
                       else "closed" if synth else
                       "volleyed" if eids else "not_researched"),
+            # The ladder behind a declared absence outlives the strip only
+            # here (AUD-0065's family: the strip deletes Z/AA/AB, and a
+            # declared absence and an untouched seeded row then read alike).
+            "absence": (None if not (not eids and L.is_declared_absent(
+                            r, declared=declared_set)) else {
+                "proxy_log": r.get("Proxy_Log"),
+                "negative_ladder": r.get("Negative_Ladder"),
+                "declared_by": L.actor_for(wb, cell, "absence"),
+            }),
             "research_synthesis": None if not synth else {
                 "dominant_claim": r.get("Dominant_Claim"),
                 "claim_label": r.get("Claim_Label"),

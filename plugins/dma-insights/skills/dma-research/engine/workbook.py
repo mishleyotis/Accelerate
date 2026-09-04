@@ -52,6 +52,7 @@ except ImportError:                    # pragma: no cover
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.datavalidation import DataValidation
 
 from . import contract as C
 
@@ -85,6 +86,12 @@ class RunWorkbook:
                 f"{self.path} is not a contract-{C.WORKBOOK_CONTRACT} workbook; "
                 f"missing sheets: {', '.join(missing)}")
         if notes:
+            # Land the upgraded shape BEFORE recording it: `_record_upgrade`
+            # appends through `transaction()`, whose first act is to reload a
+            # file this object has not yet seen — which threw the in-memory
+            # upgrade away and wrote the note into the OLD shape (measured
+            # 2026-09-03: a v6 workbook opened under v7 kept 40 sheets).
+            _atomic_save(self._wb, self.path)
             self._record_upgrade(notes)
 
     # ── shape upgrade: expand, migrate, contract ─────────────────────────
@@ -321,6 +328,8 @@ class RunWorkbook:
                 fh.close()
 
     def save(self) -> None:
+        for ws in self._wb.worksheets:
+            _refresh_filter(ws)
         _atomic_save(self._wb, self.path)
         self._dirty = False
         self._seen = self._stamp()
@@ -342,6 +351,7 @@ class RunWorkbook:
         with self.transaction(f"append {sheet}"):
             ws = self._sheet(sheet)
             ws.append([_cell(row.get(c)) for c in cols])
+            _apply_cell_format(ws, sheet, cols, ws.max_row)
             self._dirty = True
             self._touch()
             if save if save is not None else self.autosave:
@@ -374,6 +384,7 @@ class RunWorkbook:
                 if str(ws.cell(row=r, column=kidx).value or "").strip() == key:
                     for k, v in values.items():
                         ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                    _apply_cell_format(ws, sheet, cols, r)
                     self._dirty = True
                     self._touch()
                     if save if save is not None else self.autosave:
@@ -405,6 +416,7 @@ class RunWorkbook:
                        == str(match[k] or "").strip() for k, i in idx.items()):
                     for k, v in values.items():
                         ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                    _apply_cell_format(ws, sheet, cols, r)
                     self._dirty = True
                     self._touch()
                     if save if save is not None else self.autosave:
@@ -494,6 +506,16 @@ class RunWorkbook:
             # Written by `engine.template bind` (runstate.start calls it);
             # blank means unbound, and orient serves no card while it is.
             "template_binding": "",
+            # The run's clock, bill and connector anchors — written by
+            # engine.pipeline / engine.cost as the run proceeds. Blank on a
+            # hand-narrated run, which is a readable state.
+            "stage_timings": "",
+            "cost_summary": "",
+            "connector_run_id": "",
+            "connector_run_id_prev": "",
+            "connector_ingest_after_seq": "",
+            "promoted_at": "",
+            "pipeline_version": "",
         }
         for k in ("run_id", "entity_name", "entity_id", "reference_date"):
             v = str(vals[k])
@@ -906,11 +928,86 @@ _WIDE_COLUMNS = frozenset({
 _HEADER_FILL = PatternFill("solid", start_color="1F3A5F", end_color="1F3A5F")
 _HEADER_FONT = Font(bold=True, color="FFFFFF")
 
+#: Number formats BY COLUMN NAME, applied to every data cell at write time
+#: (Excel honours a number format on the cell, not on the column dimension —
+#: which is why the previous docstring promised "a two-decimal number format
+#: on score columns" and nothing in the file did it; measured 2026-09-03:
+#: D2 read `General` on a fresh workbook). Scores, medians and gaps read to
+#: two decimals; percentages to one; counts as integers.
+_NUMBER_FORMATS: dict[str, str] = {}
+for _n in ("Score", "Peer_Median", "Gap", "Gap_to_Peer", "Weight",
+           "Weighted_Contribution", "Evidence_Ceiling", "Final_Score", "ERS",
+           "Overall_Score_Est", "Uncertainty", "Entity_Score", "Peer_P25",
+           "Peer_P75", "Priority_Score", "Ceiling_Band_Delta", "max_score",
+           "score", "peer_median", "gap", "weight", "weighted_contribution",
+           "evidence_ceiling", "final_score", "Value"):
+    _NUMBER_FORMATS[_n] = "0.00"
+for _n in ("coverage_pct", "Coverage_Pct", "Floor_Pass_Pct", "Weight_Pct"):
+    _NUMBER_FORMATS[_n] = "0.0"
+for _n in ("Selected", "Researched", "Items", "Floor_Pass", "Synthesised",
+           "Hits", "Kept", "Seq", "Fact_Count", "subcaps", "evidenced",
+           "evidence_gap", "Peer_N", "Order", "Page"):
+    _NUMBER_FORMATS[_n] = "0"
+#: `Value` is prose on Firmographics / Executive_Summary / Run_Metadata /
+#: Catalogue_Meta and numeric on Financial_Trends; only the numeric one gets
+#: the format (see `_number_format`).
+_NUMERIC_VALUE_SHEETS = frozenset({"Financial_Trends"})
 
-def _format_sheet(ws, cols) -> None:
+
+def _number_format(sheet: str, col: str) -> str | None:
+    if col == "Value" and sheet not in _NUMERIC_VALUE_SHEETS:
+        return None
+    return _NUMBER_FORMATS.get(col)
+
+
+def _validation_lists() -> dict[str, tuple]:
+    """Column → the closed vocabulary a dropdown offers, from the contract
+    (so the sheet cannot offer a value the engine would refuse)."""
+    return {
+        "Confidence": ("HIGH", "MEDIUM", "LOW", "High", "Medium", "Low"),
+        "Claim_Label": C.CLAIM_LABELS,
+        "Claim_Type": C.CLAIM_LABELS,
+        "Ceiling_Band": C.BANDS,
+        "Tier": C.TIERS,
+        "Recency": tuple(n for n, _ in C.RECENCY_LADDER)
+                   + (C.RECENCY_ARCHIVAL, C.RECENCY_UNVERIFIED),
+        "Challenge_Verdict": C.CHALLENGE_VERDICTS,
+        "Absence_Claimed": ("YES", "NO"),
+        "Verdict": ("PASS", "FAIL", "NOT_RUN"),
+        "Facet": C.DQ_FACETS,
+        "Layer": C.TECH_LAYERS,
+        "Signal": C.TIMELINE_SIGNALS,
+        "Kind": C.TIMELINE_KINDS,
+        "Severity": C.ISSUE_SEVERITIES,
+        "State": C.FIRMOGRAPHIC_STATES,
+        "Currency_Status": C.CURRENCY_STATUSES,
+        "Tool": C.SEARCH_TOOLS,
+        "Mode_Fit": C.DQ_MODE_FIT,
+        "ai_applicability": C.AI_APPLICABILITY,
+        "data_readiness": C.DATA_READINESS,
+        "Peer_Basis": C.PEER_BASIS,
+        "Origin": ("public", "internal"),
+        "Evidence_Level": ("L1", "L2", "L3", "L4"),
+    }
+
+
+#: `Status` means different things on different tabs; the dropdown follows
+#: the tab.
+_STATUS_BY_SHEET = {
+    "Tech_Register": C.TECH_STATUS,
+    "Issue_Register": C.ISSUE_STATUSES,
+}
+
+
+def _format_sheet(ws, cols, sheet_name: str | None = None) -> None:
     """Bold, filled, frozen header row; widths by content class; wrapped
-    prose columns; a two-decimal number format on score columns."""
+    prose columns; a dropdown on every closed-vocabulary column. Number
+    formats are set per CELL at write time (`_apply_cell_format`) and the
+    autofilter is refreshed on every save (`_refresh_filters`), because
+    neither survives being set once on an empty sheet."""
     ws.freeze_panes = "A2"
+    lists = _validation_lists()
+    name = sheet_name or ws.title
     for i, col in enumerate(cols, start=1):
         c = ws.cell(row=1, column=i)
         c.font = _HEADER_FONT
@@ -926,9 +1023,37 @@ def _format_sheet(ws, cols) -> None:
             ws.column_dimensions[letter].width = 12
         else:
             ws.column_dimensions[letter].width = max(12, min(40, len(col) + 4))
+        vocab = (_STATUS_BY_SHEET.get(name) if col == "Status"
+                 else lists.get(col))
+        if vocab:
+            formula = '"' + ",".join(str(v) for v in vocab) + '"'
+            if len(formula) <= 255:            # Excel's inline-list limit
+                dv = DataValidation(type="list", formula1=formula,
+                                    allow_blank=True, showDropDown=False)
+                dv.error = f"{col} must be one of the contract's values"
+                dv.errorTitle = "DMA contract"
+                ws.add_data_validation(dv)
+                dv.add(f"{letter}2:{letter}1048576")
     ws.row_dimensions[1].height = 30
+    _refresh_filter(ws)
+
+
+def _refresh_filter(ws) -> None:
+    """Autofilter over the rows the sheet HAS. At `create` a sheet holds one
+    row, so a filter set then covered nothing (measured 2026-09-03)."""
     if ws.max_row > 1 and ws.max_column:
         ws.auto_filter.ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+
+
+def _apply_cell_format(ws, sheet: str, cols, row_idx: int) -> None:
+    """Per-cell number formats for one data row, by column name."""
+    for i, col in enumerate(cols, start=1):
+        fmt = _number_format(sheet, col)
+        if fmt:
+            cell = ws.cell(row=row_idx, column=i)
+            if isinstance(cell.value, (int, float)) and not isinstance(cell.value, bool):
+                cell.number_format = fmt
+                cell.alignment = Alignment(horizontal="right")
 
 
 def _atomic_save(wb, path: Path) -> None:

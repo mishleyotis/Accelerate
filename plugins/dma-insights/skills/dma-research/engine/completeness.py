@@ -108,6 +108,11 @@ FILLED_BY = {
     "Search_Log": "engine.cli search …",
     "DQ_Bank": "engine.cli kg build",
     "Handoff_Lock": "written at workbook creation; a blank one is corruption",
+    "Financial_Trends": ("engine.profile financial --metric … --fy FY20NN "
+                         "--value … --unit … --evidence E-NNNN (≥5 fiscal "
+                         "years × ≥3 metrics, the Golden 1 depth), or "
+                         "engine.completeness declare --sheet Financial_Trends "
+                         "--reason … for an institution that publishes fewer"),
     "Coverage": "recomputed on every synthesis; a blank one means none landed",
     # v6 — the client's own facts, written in PRELIM / by the profile writers
     "Firmographics": ("engine.profile firmographic --field website --value … "

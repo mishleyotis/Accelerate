@@ -193,21 +193,25 @@ def test_the_card_names_the_proxy_class_the_template_expects(tmp_path):
         "artifact_disclosure", "behavioral_delivery")
 
 
-def test_a_single_tool_absence_is_advisory_not_blocking(tmp_path):
+def test_a_single_tool_absence_is_refused_and_blocks(tmp_path):
+    """Inverted 2026-09-03 (owner issue 1: "marked as no evidence without
+    any enrichment efforts"). An empty cell whose every search ran through
+    the built-in web tools shows no enrichment effort: the declaration is
+    refused, and the gate blocks the category on the same predicate."""
     run = new_run(tmp_path, n=1)
     wb = run.open()
     cell = wb.selected_subcaps()[0]
     fire_volleys(wb, cell, n=0, tool="web_search")        # one tool only
-    L.declare_absence(
-        wb, cell, actor="research-p1c1-producer",
-        ladder=[{"rung": "direct", "query": f'"Acme Credit Union" {cell} rollout OR "went live"'},
-                {"rung": "proxy", "query": f'"Acme Credit Union" {cell} regulator OR analyst OR rating'}],
-        proxy_log="hunted the regulator_filing proxy — NCUA and DFPI registries — nothing names it",
-        what_was_hunted="a public artefact naming the capability at Acme across five volleys; nothing")
+    with pytest.raises(L.LedgerRefusal, match="enrichment connector"):
+        L.declare_absence(
+            wb, cell, actor="research-p1c1-producer",
+            ladder=[{"rung": "direct", "query": f'"Acme Credit Union" {cell} rollout OR "went live"'},
+                    {"rung": "proxy", "query": f'"Acme Credit Union" {cell} regulator OR analyst OR rating'}],
+            proxy_log="hunted the regulator_filing proxy — NCUA and DFPI registries — nothing names it",
+            what_was_hunted="a public artefact naming the capability at Acme across five volleys; nothing")
     v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
-    assert "absence_single_tool" in v["advisory"]
-    assert "absence_single_tool" not in v["blocking"]
-    assert "absence_undeclared_empty" not in v["blocking"]
+    assert "absence_single_tool" in v["blocking"]
+    assert "absence_single_tool" not in floors_gate.ADVISORY_TERMS
     assert "volleys_incomplete" not in v["blocking"]
 
 

@@ -29,7 +29,7 @@ from engine import narrative as N
 from engine import report_spec as RS
 from engine import reports as R
 
-from .fixtures import bank_evidence, new_run, sign_off_sections
+from .fixtures import report_ready_run, sign_off_sections
 from .test_report_structure import _rec
 
 sys.path.insert(0, "/home/user/Accelerate/apps/worker")
@@ -39,12 +39,14 @@ sys.path.insert(0, "/home/user/Accelerate/apps/worker")
 def rendered(tmp_path_factory):
     """The real Client Research Profile, rendered by the engine."""
     tmp = tmp_path_factory.mktemp("profile")
-    run = new_run(tmp, n=6)
+    # A REPORT-READY run (researched, gated, scored): since 2026-09-03 a
+    # section cannot be written on ungated research, whoever is driving.
+    run = report_ready_run(tmp, n=6)
     wb = run.open()
-    eids = bank_evidence(wb, wb.selected_subcaps()[0])
+    eids = [e for c in run.cells for e in run.ev.get(c, [])][:10]
     spec = RS.SPECS["client_research"]
     from fixtures import write_report
-    write_report(wb, spec.key, eids)
+    write_report(wb, spec.key, eids, run=run)
     sign_off_sections(wb)
     out = R.render(wb, spec, tmp / "out", force=False)
     return Path(out["path"] if isinstance(out, dict) else out)

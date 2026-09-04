@@ -31,7 +31,7 @@ from engine import narrative as N
 from engine import report_spec as RS
 from engine import reports as R
 
-from fixtures import bank_evidence, new_run
+from fixtures import bank_evidence, new_run, report_ready_run
 
 
 # ── every section declares its anatomy and its counterpart ───────────────
@@ -62,7 +62,7 @@ def test_the_pillar_deep_dive_headings_carry_the_token_the_app_scopes_on(tmp_pat
     per-pillar deep dives are the ones whose vectors should be pillar-scoped.
     The Doc's own heading for a deep dive is one per pillar card; the
     renderer's heading for that card is what carries the token."""
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     sec = next(s for s in RS.SPECS["assessment"].sections if s.kind == "pillar")
     for p in ("P1", "P2", "P3", "P4"):
@@ -90,7 +90,7 @@ from fixtures import section_record as _rec  # noqa: E402  (shared with test_sco
 
 
 def test_a_body_without_its_blocks_is_refused(tmp_path):
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     rec = _rec("3", eids)
@@ -100,7 +100,7 @@ def test_a_body_without_its_blocks_is_refused(tmp_path):
 
 
 def test_blocks_out_of_order_are_refused(tmp_path):
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     sec = RS.SPECS["client_research"].section("3")
@@ -119,7 +119,7 @@ def test_the_written_body_keeps_its_line_structure(tmp_path):
     """`_clean` collapses every run of whitespace, newlines included. Applied
     to Body it deleted the very structure the same module then refused the
     body for lacking."""
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     N.write(wb, "client_research", "3", _rec("3", eids),
@@ -140,7 +140,7 @@ REC = RS.SPECS["assessment"].section("8")
 
 
 def test_a_list_section_refuses_a_write_with_no_card_id(tmp_path):
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     with pytest.raises(N.NarrativeRefusal, match="needs its own --card"):
@@ -149,7 +149,7 @@ def test_a_list_section_refuses_a_write_with_no_card_id(tmp_path):
 
 
 def test_a_card_id_must_wear_the_docs_shape(tmp_path):
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     with pytest.raises(N.NarrativeRefusal, match="REC-"):
@@ -161,7 +161,7 @@ def test_a_card_id_must_wear_the_docs_shape(tmp_path):
 
 
 def test_a_passage_section_refuses_a_card_id(tmp_path):
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     with pytest.raises(N.NarrativeRefusal, match="--card does not"):
@@ -173,7 +173,7 @@ def test_five_cards_land_as_five_rows(tmp_path):
     """The floor `reports.check` enforces was unreachable through the only
     sanctioned writer: every write overwrote the last, so the section held
     one row against a blocking minimum. The Doc's floor for §8 is five."""
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     floor = REC.card_floor
@@ -199,7 +199,7 @@ def test_five_cards_land_as_five_rows(tmp_path):
 
 
 def test_a_list_sections_floor_is_measured_across_its_cards(tmp_path):
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment"),
@@ -216,7 +216,7 @@ def test_the_pillar_floor_is_the_pillars_this_run_assesses(tmp_path):
     selects only P1 owes ONE, and its word floor is one card's worth — the
     writer refuses P2..P4 as out of scope, so a four-card floor would be a
     wall nothing could pass."""
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     sec = RS.SPECS["assessment"].section("5")
     assert sec.card_floor == 4
@@ -233,7 +233,7 @@ def test_writing_the_other_reports_section_one_does_not_eat_this_one(tmp_path):
     Section_ID alone, walked the sheet, found the OTHER report's §1 first and
     overwrote it — relabelling the victim as belonging to the other report,
     because the values dict carries `Report` too."""
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     N.write(wb, "client_research", "3", _rec("3", eids),
@@ -265,7 +265,7 @@ def test_the_renderer_promotes_blocks_to_real_headings(tmp_path):
 
     from fixtures import sign_off_sections, write_report
 
-    run = new_run(tmp_path)
+    run = report_ready_run(tmp_path)
     wb = run.open()
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     spec = RS.SPECS["client_research"]

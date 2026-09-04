@@ -15,11 +15,18 @@ description: >
 
 # DMA Assessment Skill v5.5
 
-**v5.5 Changes:** 11-column workbook structure (matching CFC workbook: SubCap_ID, SubCap_Name,
+**v5.6 Changes (2026-09-03):** the workbook is `skills/dma-research/engine/contract.py`'s and this skill
+BUILDS NO WORKBOOK. The scoring stage writes column D of the run's existing workbook through
+`engine.assessment open / score / critique / rollup / gate`. The retired `scripts/assessment_runner.py`
+(it built a fresh 11-sheet openpyxl workbook) refuses and names those commands. The eleven app-facing
+columns A–K below are unchanged — they are the first eleven of the contract's 33 (L–AG are the
+research working area, stripped after the handoff). Category count is 16 (v7.0), not 17.
+
+**v5.5 Changes:** 11-column app-facing layout (matching CFC workbook: SubCap_ID, SubCap_Name,
 Category, Score, Confidence, Evidence_IDs, Source_URLs, Evidence_Ceiling, Caps_Applied,
 Rationale, Proxy_Searched). Subcap-level scoring reinforced with row count checks. Explicit
 calculation chain rollup instructions. Taxonomy vs workbook row count clarified. QA checks
-aligned with 11-column format. URL enforcement. Cross-skill consistency (3-5 queries/subcap).
+aligned with the A–K columns. URL enforcement. Cross-skill consistency (3-5 queries/subcap).
 
 ## ⛔ NON-NEGOTIABLE RULES
 
@@ -29,7 +36,7 @@ aligned with 11-column format. URL enforcement. Cross-skill consistency (3-5 que
 | 2 | **Differentiate scores** — ≥2 unique scores per capability. Each subcap's diagnostic question asks something DIFFERENT — scores should reflect that. | Identical scores (2.5, 2.5, 2.5...) across all subcaps |
 | 3 | **Map evidence to INDIVIDUAL subcaps** — cite E-xxx:Fy fact-level refs. Different subcaps within the same capability must cite DIFFERENT evidence facts. | Same evidence cited for every subcap |
 | 4 | **≥150-char rationales per subcap** — institution-specific, cite E-IDs, reference M-level descriptor, explain gap to next level. | Generic "demonstrates capability" text |
-| 5 | **Use 11-column workbook structure** — SubCap_ID, SubCap_Name, Category, Score, Confidence, Evidence_IDs, Source_URLs, Evidence_Ceiling, Caps_Applied, Rationale, Proxy_Searched. See "Workbook Column Structure" below. | Wrong column layout, confusion with 22-column spec |
+| 5 | **Never build a workbook** — the run's ONE workbook already exists (`engine.cli start` created it from `skills/dma-research/engine/contract.py`: 41 sheets, P#_Subcap_Scoring seeded with every selected subcap and its `SubCap_Name`). Scores go into ITS column D through `engine.assessment score`; a fresh `openpyxl.Workbook()`, a "single Python script that generates the XLSX" or the retired `scripts/assessment_runner.py` is REFUSED by the PreToolUse hook. See "Workbook Column Structure" below for the A–K columns you write. | A second workbook with the wrong shape, missing fields, formatting and subcap names — the "workbook defaults to the wrong structure every run" defect |
 | 6 | **Cite evidence inline in report** — (E-xxx, Source, Tier, Date) | Generic consulting prose |
 | 7 | **Run `scripts/validate_scoring_quality.py` after Phase 4** | Undetected quality failures |
 | 8 | **Web searches at SUBCAPABILITY level** — 3-5 per subcap via `web_search`. Each subcap's diagnostic question drives DIFFERENT queries. | Thin single-source assessments |
@@ -38,10 +45,16 @@ aligned with 11-column format. URL enforcement. Cross-skill consistency (3-5 que
 
 ---
 
-## Workbook Column Structure (CANONICAL — 11 columns per P#_Subcap_Scoring sheet)
+## Workbook Column Structure (the contract's P#_Subcap_Scoring sheet — columns A–K are yours)
 
-This is the ONLY acceptable column layout. It matches the proven CFC workbook format.
-**Do NOT use the legacy 22-column (A-V) layout. Do NOT invent additional columns.**
+The layout is `skills/dma-research/engine/contract.py: PILLAR_COLUMNS` (33 columns) and nothing else — not this
+table, not a template recalled from memory, not the CFC workbook it descends from. Columns
+A–K below are the eleven the app ingests and the ones the scoring stage writes (D, E, H, I, J
+through `engine.assessment score`; A, B, C, F, G, K were filled at the research stage).
+Columns L–AG are the research working area (synthesis, volleys, triangulation, absence proof);
+`engine.cli strip` removes them AFTER the handoff carries them, so the shipped workbook reads
+as A–K. **Do NOT create a sheet, add a column, or rename a header; `engine.cli validate`
+fails the workbook on any deviation and the app's parser will not read it.**
 
 | Col | Header | Description |
 |-----|--------|-------------|
@@ -64,14 +77,12 @@ This is the ONLY acceptable column layout. It matches the proven CFC workbook fo
 - P4_Subcap_Scoring: ~172 rows (range 155-190)
 - **TOTAL: ~708 subcap rows across all 4 pillar sheets**
 
-**Additional sheets (same as CFC workbook):**
-- Executive_Summary — Overall maturity snapshot
-- Pillar_Summary — 4 pillar rows + Overall, with weights, scores, peer medians, gaps
-- Category_Detail — 16 category rows with scores, weights, peer medians, priorities
-- Evidence_Master — All evidence items with ID, Source, URL, Tier, Recency, Claim_Type, Finding
-- Peer_Benchmarks — Peer scores per category
-- Recommendations — Top recommendations with evidence linkage
-- Run_Metadata — Assessment ID, evidence mode, parameters
+**The other sheets** are the contract's (`skills/dma-research/engine/contract.py: SHEETS`, 41 in all — among them
+Executive_Summary, Pillar_Summary, Category_Detail (16 rows), Evidence_Detail, Peer_Benchmarks,
+Recommendations, Run_Metadata, and the scoring-stage tabs Subcap_Scores, Pillar_Rollup,
+Category_Rollup, Pillar_Weights, Maturity_Rubric, Cap_Triggers, Caps_Applied_Log, Coverage_Map).
+They exist from `engine.cli start`; `engine.assessment rollup` and `engine.grains recompute`
+fill the rollups; `engine.cli complete check` refuses an empty tab with no reason recorded.
 
 **Self-check:** If any P#_Subcap_Scoring sheet has <50 rows → you scored at CATEGORY level.
 STOP. Delete the sheet. Redo with one row per subcap ID.
@@ -226,7 +237,7 @@ Authoritative: `references/scoring_methodology.md` Step 3, Step 7.
 
 ## Deterministic Score States (MANDATORY)
 
-In the 11-column workbook, scoring flows through these states:
+In the P#_Subcap_Scoring sheet (columns A–K), scoring flows through these states:
 
 | State | Where | Description |
 |-------|-------|-------------|
@@ -353,7 +364,7 @@ all evidence for related subcaps together while keeping the context footprint bo
 
 ## Proof-Carrying Scoring
 
-In the 11-column workbook, proof is carried in these columns:
+In the P#_Subcap_Scoring sheet, proof is carried in these columns:
 
 **Column J (Rationale):** ≥150 chars, human narrative with evidence citations, M-level match,
 gap analysis, and institution-specific "so what". This is the primary audit trail.
@@ -525,8 +536,8 @@ above its evidence ceiling, a rationale that cites none of the row's E-ids,
 a blank AI/data overlay); the four `scoring-p<N>-producer` agents run one
 pillar each in parallel and `scoring-critic` records the SCORING_CRITIC
 verdict per pillar; `engine.assessment rollup` then `engine.assessment gate`
-must record PASS before Phase 7 may start. The 11-column contract below is
-the same sheet — column D is what the stage writes.
+must record PASS before Phase 7 may start. The A–K columns below are the same
+sheet — column D is what the stage writes.
 
 Execute Phase Gate Protocol. Apply ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-008, ERR-009.
 
@@ -534,7 +545,7 @@ Execute Phase Gate Protocol. Apply ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, 
 
 **Load evidence per-capability** (see "Evidence Loading During Scoring" in Memory section).
 
-**OUTPUT FORMAT: 11-column P#_Subcap_Scoring sheets (see "Workbook Column Structure" above).**
+**OUTPUT FORMAT: the run's existing P#_Subcap_Scoring sheets, columns A–K (see "Workbook Column Structure" above).**
 Each row = one subcap ID (e.g., P1C1.1.1). Column D = final score. Column J = rationale.
 If your sheet has <50 rows, you are scoring at the WRONG LEVEL — STOP.
 
@@ -577,42 +588,26 @@ FORBIDDEN: "Category-based scoring", "Based on public evidence analysis", anythi
 
 ### Post-Scoring Steps
 
-5. **GENERATE WORKBOOK FROM SCRATCHPAD (single Python script):**
-   Read `scoring_scratchpad.json` → generate XLSX with ALL 11 sheets:
-   ```
-   Sheet order (must match CFC workbook):
-   1. Executive_Summary   — Populate AFTER Pillar_Summary is computed
-   2. Pillar_Summary      — 5 rows (P1-P4 + Overall) with weights, scores, peer medians, gaps
-   3. Category_Detail     — 17 rows with rollup scores
-   4. P1_Subcap_Scoring   — ~186 rows, 11 columns A-K
-   5. P2_Subcap_Scoring   — ~232 rows, 11 columns A-K
-   6. P3_Subcap_Scoring   — ~118 rows, 11 columns A-K
-   7. P4_Subcap_Scoring   — ~172 rows, 11 columns A-K
-   8. Evidence_Master     — All evidence items
-   9. Peer_Benchmarks     — Peer scores per category
-   10. Recommendations    — Top recommendations
-   11. Run_Metadata       — Assessment ID, evidence mode, parameters
-   ```
-   **Every sheet must exist. Missing sheets = QA failure.**
-   **Read the `xlsx` skill before generating** (invoke it by name; do not hardcode a path to it).
+5. **THERE IS NO WORKBOOK GENERATION STEP.** The workbook exists since `engine.cli start`;
+   every score you struck is already in its column D. A "single Python script" that reads a
+   scratchpad and generates an XLSX is the retired `scripts/assessment_runner.py`'s defect
+   (a fresh `openpyxl.Workbook()`, 11 sheets, no `SubCap_Name`s, no formatting, the retired 17-category count)
+   and the `deny_artefact_writes` PreToolUse hook refuses it. If a sheet is missing, the
+   workbook is not the run's — stop and find the run's (`engine.cli status --run <R>`).
 
-5.5. **EVIDENCE COMPLETENESS GATE (blocks Phase 5):**
-   For every scored subcap row, verify: F (Evidence_IDs) non-empty, G (Source_URLs)
-   contains specific URL (not blank, not "multiple searches"), H (Evidence_Ceiling)
-   contains valid tier ceiling, J (Rationale) ≥150 characters.
-   Rows with score but empty/invalid evidence fields = BLOCKED. Fix before proceeding.
-6. **Build Calculation Chain (MANDATORY — populates Category_Detail + Pillar_Summary sheets):**
-   The calculation chain is the auditable rollup from subcap to overall score:
-   ```
-   a. CAPABILITY score = weighted average of subcap Score (Col D) values within that capability
-      (weights from Pillar XLSX → Capability Map → Weight column)
-   b. CATEGORY score = weighted average of capability scores within that category
-   c. PILLAR score = weighted average of category scores within that pillar
-   d. OVERALL score = weighted average of pillar scores using Sub-Vertical Pillar Weights
-   ```
-   Write results to Category_Detail sheet (17 rows: Category_ID, Category_Name, Pillar,
-   Score, Weight, Peer_Median, Gap, Priority) and Pillar_Summary sheet (5 rows: P1-P4 + Overall).
-   **Reconciliation:** Recompute pillar from categories — must match ±0.01. Fix before proceeding.
+5.5. **EVIDENCE COMPLETENESS GATE (blocks Phase 5):** `engine.assessment score` already
+   refused a score with no E-ids, a rationale under 150 characters, a rationale citing nothing
+   the row carries, or a score above the row's evidence ceiling — so a row that carries a
+   score carries its proof. Confirm with `engine.assessment state --run <R> --root <ROOT>`
+   (unscored rows, ceilings, critic verdicts) and `engine.cli validate --run <R> --root <ROOT>`.
+6. **Calculation chain — `engine.assessment rollup --run <R> --root <ROOT> --headline "…"`:**
+   capability → category → pillar → overall, weights from the run's `Pillar_Weights` (the
+   sub-vertical's), written to Pillar_Summary, Category_Detail (16 rows), Pillar_Rollup,
+   Category_Rollup and Executive_Summary in one call; `engine.grains recompute` re-derives the
+   stated grains and refuses a copy that drifts past the 0.05 tolerance. Then
+   `engine.assessment gate --run <R> --root <ROOT>` must record PASS (every selected row
+   scored, a SCORING_CRITIC verdict per pillar from an actor that struck none of them,
+   differentiation, ceilings) before Phase 5.
 7. Run Workbook QA (G.1-G.9 from `references/quality_assurance.md`).
 8. **RUN `scripts/validate_scoring_quality.py`** — exit code 1 = BLOCK Phase 5.
 9. Generate canonical export CSVs to `$DMA_ROOT/04_scoring/exports/`.
@@ -889,7 +884,7 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `scripts/ingest_evidence.py` | 1 | Pre-process documents |
 | `scripts/build_index.py` | 1 | BM25 retrieval index |
 | `scripts/retrieve.py` | 1 | Evidence retrieval per subcap |
-| `scripts/assessment_runner.py` | 0-4 | Batch scoring orchestrator |
+| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment open / score / critique / rollup / gate` on the run's one workbook |
 | `scripts/validate_scoring_quality.py` | 4 | **MANDATORY** 8-gate validator |
 | `scripts/qa_auditor.py` | 8 | Automated QA checks |
 | `scripts/generate_governance_outputs.py` | 7 | CSVs + manifest from workbook |

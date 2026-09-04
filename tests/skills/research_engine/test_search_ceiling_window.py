@@ -38,7 +38,7 @@ CAP = L.SEARCH_OP_CEILING
 
 def _search(wb, i):
     L.append_search(wb, subcap=None, facet=None, query=f"q{i}",
-                    tool="web", hits=1, kept=1)
+                    tool="web_search", hits=1, kept=1, prelim=True)
 
 
 # ── direction one: the gate must still STOP ──────────────────────────────

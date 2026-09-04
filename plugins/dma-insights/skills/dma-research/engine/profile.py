@@ -292,8 +292,86 @@ def enrichment_needed(wb: RunWorkbook, *, area: str, field: str, status: str,
 
 # ── state ────────────────────────────────────────────────────────────────
 
+# ── the financial trajectory ─────────────────────────────────────────────
+#
+# Golden 1 carries a five-year series (GSY-18); the goeasy package had none
+# until it was asked for. The series lives in Financial_Trends in LONG
+# format — one row per (metric, fiscal year) — written here through the same
+# refusals as every other client fact: the evidence must resolve, the year
+# must be a fiscal year, the value must be a number.
+
+_FY_RE = re.compile(r"^(?:FY)?(20[0-3]\d)$")
+
+
+def _fiscal_year(fy) -> str:
+    m = _FY_RE.match(_clean(fy).upper().replace(" ", ""))
+    if not m:
+        raise ProfileRefusal(
+            f"fiscal year {fy!r} is not FY20NN or 20NN — a trajectory is "
+            f"keyed by fiscal year, never by a label like 'latest'")
+    return f"FY{m.group(1)}"
+
+
+def financial(wb: RunWorkbook, *, metric: str, fiscal_year, value, unit: str,
+              evidence: str, source_url: str = "", basis: str = "") -> dict:
+    """Upsert one (metric, fiscal year) point of the financial trajectory."""
+    metric = _clean(metric)
+    if len(metric) < 3:
+        raise ProfileRefusal("a financial metric needs a name (revenue, net "
+                             "income, total assets, loans, members, ROE …)")
+    fy = _fiscal_year(fiscal_year)
+    try:
+        num = float(str(value).replace(",", "").replace("$", ""))
+    except (TypeError, ValueError):
+        raise ProfileRefusal(
+            f"value {value!r} for {metric} {fy} is not a number — the series "
+            f"is computed on (CAGR, year-over-year), so a figure in prose "
+            f"cannot stand here") from None
+    if not _clean(unit):
+        raise ProfileRefusal(f"{metric} {fy}: name the unit (USD, USD m, %, count)")
+    ids = _resolve(wb, evidence, where=f"Financial_Trends {metric} {fy}")
+    row = {"Metric": metric, "Fiscal_Year": fy, "Value": num,
+           "Unit": _clean(unit), "Evidence_IDs": ", ".join(ids),
+           "Source_URL": _clean(source_url), "Basis": _clean(basis)}
+    try:
+        wb.update_row_where("Financial_Trends",
+                            {"Metric": metric, "Fiscal_Year": fy}, row)
+        action = "updated"
+    except Exception:
+        wb.append("Financial_Trends", row)
+        action = "added"
+    return {"action": action, **row}
+
+
+def financial_depth(wb: RunWorkbook) -> dict:
+    """Years × metrics the trajectory carries, against the Golden 1 floor.
+
+    `met` is True when the floor holds OR the sheet was declared empty with
+    a reason (an institution that publishes fewer years is a disclosure,
+    not a defect). `fix` names the command that closes the gap."""
+    from . import completeness
+    rows = wb.rows("Financial_Trends")
+    years = {_clean(r.get("Fiscal_Year")) for r in rows if _clean(r.get("Fiscal_Year"))}
+    metrics = {_clean(r.get("Metric")) for r in rows if _clean(r.get("Metric"))}
+    declared = "Financial_Trends" in completeness.reasons(wb)
+    met = (len(years) >= C.FINANCIAL_YEARS_FLOOR
+           and len(metrics) >= C.FINANCIAL_METRICS_FLOOR) or declared
+    fix = "" if met else (
+        f"Financial_Trends carries {len(years)} fiscal year(s) across "
+        f"{len(metrics)} metric(s); Golden 1 carries a five-year trajectory "
+        f"(floor {C.FINANCIAL_YEARS_FLOOR} years × {C.FINANCIAL_METRICS_FLOOR} "
+        f"metrics). Bank the series with `engine.profile financial --run <R> "
+        f"--root <ROOT> --metric <m> --fy FY20NN --value <v> --unit <u> "
+        f"--evidence E-NNNN`, or declare why fewer exist with "
+        f"`engine.completeness declare --sheet Financial_Trends --reason …`.")
+    return {"years": len(years), "metrics": len(metrics), "declared": declared,
+            "met": met, "fix": fix,
+            "fiscal_years": sorted(years), "metric_names": sorted(metrics)}
+
+
 def state(wb: RunWorkbook) -> dict:
     return {
+        "financial_trends": financial_depth(wb),
         "firmographics": {
             "rows": len(wb.rows("Firmographics")),
             "must_present_missing": missing_firmographics(wb),
@@ -344,6 +422,13 @@ def main(argv=None) -> int:
     e.add_argument("--status", required=True, choices=ENRICHMENT_STATUSES)
     e.add_argument("--closes", required=True)
 
+    fin = common(sub.add_parser("financial"))
+    fin.add_argument("--metric", required=True)
+    fin.add_argument("--fy", "--fiscal-year", dest="fy", required=True)
+    fin.add_argument("--value", required=True); fin.add_argument("--unit", required=True)
+    fin.add_argument("--evidence", required=True)
+    fin.add_argument("--source-url", default=""); fin.add_argument("--basis", default="")
+
     common(sub.add_parser("state"))
     a = ap.parse_args(argv)
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
@@ -365,6 +450,10 @@ def main(argv=None) -> int:
         elif a.cmd == "enrichment-needed":
             out = enrichment_needed(wb, area=a.area, field=a.field,
                                     status=a.status, closes=a.closes)
+        elif a.cmd == "financial":
+            out = financial(wb, metric=a.metric, fiscal_year=a.fy, value=a.value,
+                            unit=a.unit, evidence=a.evidence,
+                            source_url=a.source_url, basis=a.basis)
         else:
             out = state(wb)
         print(json.dumps(out, indent=2, default=str))

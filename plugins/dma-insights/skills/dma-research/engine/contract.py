@@ -432,6 +432,19 @@ TECH_PROVIDERS = ("clay", "explorium", "indeed", "exa", "tavily", "web",
 #: agree, because two brokers reselling one crawl is one observation.
 TECH_BROKERS = ("clay", "explorium")
 
+#: The tools a Search_Log row may name. Owner, 2026-09-03: cells were closed
+#: "no evidence" with no enrichment effort — and the log could not show it,
+#: because `--tool` was free text (measured: "my-made-up-tool" accepted). A
+#: closed vocabulary is what lets the floors gate COUNT which connectors were
+#: asked before a cell is declared absent. `web_search`/`web_fetch` are the
+#: built-in tools; everything after them is an enrichment connector.
+SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
+                "explorium", "vibe", "indeed", "quartr", "drive", "internal")
+#: The connectors whose absence from a cell's searches means "no enrichment
+#: was attempted" — a declared absence must show at least one of these.
+ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS
+                         if t not in ("web_search", "web_fetch"))
+
 #: T3, the drilldown. A register row answers "what do they run"; the detail
 #: page a click opens answers "so what" — and it has three content cards, two
 #: of which render from nothing the research run used to capture. The
@@ -589,6 +602,19 @@ CAPABILITY_DEFINITIONS_COLUMNS = ("category_id", "category_name", "pillar",
 COVERAGE_MAP_COLUMNS = ("category_id", "category_name", "subcaps", "evidenced",
                         "evidence_gap", "coverage_pct", "confidence_posture")
 ENRICHMENT_NEEDED_COLUMNS = ("Area", "Field / cell", "Status", "What would close it")
+
+#: The multi-year financial trajectory (research stage; Client Profile §3/§4,
+#: assessment §1/§6; gold gate GS-WB-FINANCIALS / GSY-18). LONG format — one
+#: row per (metric, fiscal year) — because a fixed-width contract cannot carry
+#: a variable number of year columns; the report renderer pivots it wide and
+#: computes the CAGR at render time. Golden 1 carries a five-year series; the
+#: floor is FINANCIAL_YEARS_FLOOR fiscal years across FINANCIAL_METRICS_FLOOR
+#: metrics, declarable away only through `engine.completeness declare` with a
+#: reason (an institution that publishes fewer years).
+FINANCIAL_TRENDS_COLUMNS = ("Metric", "Fiscal_Year", "Value", "Unit",
+                            "Evidence_IDs", "Source_URL", "Basis")
+FINANCIAL_YEARS_FLOOR = 5
+FINANCIAL_METRICS_FLOOR = 3
 
 #: The Recommendations tab. Its header row is recognised when at least TWO
 #: of its cells are in the parser's 29-token vocabulary — these are seven of
@@ -788,6 +814,21 @@ RUN_METADATA_KEYS = (
     # orient refuses to serve a card while it is blank, so no run can begin
     # without the shape of its own deliverables pinned in the workbook.
     "template_binding",
+    # THE RUN'S OWN CLOCK AND BILL (2026-09-03, owner issue 9: "the assessment
+    # takes more than 6 hours" — and nothing recorded how long any stage took,
+    # so the claim could be neither measured nor regressed). `engine.pipeline`
+    # writes stage_timings at every stage boundary; `engine.cost record`
+    # folds each dispatched lane into cost_summary. Both are JSON objects.
+    "stage_timings", "cost_summary",
+    # THE CONNECTOR SIDE OF SHIP-AS-YOU-GO (owner issue 7). The pipeline
+    # ingests exactly twice — the SCORING_PASS checkpoint and the package —
+    # and each ingest is a connector run version; these anchor which version
+    # the staged pages belong to, and `promoted_at` is the run's end.
+    "connector_run_id", "connector_run_id_prev", "connector_ingest_after_seq",
+    "promoted_at",
+    # Which engine.pipeline drove the run (blank for a hand-narrated one), so
+    # a resumed run knows whether the STAGE_* gates in Gate_Log are its own.
+    "pipeline_version",
 )
 
 # ── THE STAGE, which nothing recorded ────────────────────────────────────
@@ -876,8 +917,8 @@ PILLAR_NAMES = {
 #: stage's dashboard, rollups, weights, rubric, caps, overlay and catalogue
 #: (Executive_Summary … Platform_Peer_Adoption) — plus Gap_to_Peer / Maturity
 #: on the two stated grains. Additive; a v5 workbook upgrades in place.
-WORKBOOK_CONTRACT = "v6"
-ENGINE_VERSION = "6.0.0"
+WORKBOOK_CONTRACT = "v7"
+ENGINE_VERSION = "7.0.0"
 
 SHEETS = {
     "00_README": ("Key", "Value"),
@@ -908,6 +949,10 @@ SHEETS = {
     "Focus_Areas": FOCUS_AREAS_COLUMNS,
     "Issue_Register": ISSUE_REGISTER_COLUMNS,
     "Enrichment_Needed": ENRICHMENT_NEEDED_COLUMNS,
+    # Added 2026-09-03 (contract v7). The five-year trajectory the gold
+    # standard carries had no sheet and no writer; `engine.profile financial`
+    # fills it in PRELIM and both reports render it.
+    "Financial_Trends": FINANCIAL_TRENDS_COLUMNS,
     # ── the scoring stage (assessment; the report's §1-§5, §8) ────────────
     "Executive_Summary": EXECUTIVE_SUMMARY_COLUMNS,
     "Subcap_Scores": SUBCAP_SCORES_COLUMNS,
