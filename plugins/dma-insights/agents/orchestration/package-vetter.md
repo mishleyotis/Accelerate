@@ -37,7 +37,7 @@ does not get tired; it is also blind to everything that requires knowing what
 the institution is.
 
 ```bash
-python scripts/vet_workbooks.py <package-dir> --subvertical <CODE>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/vet_workbooks.py" <package-dir> --subvertical <CODE>
 ```
 
 Then read both workbooks yourself. `02-inputs/4-vetting.md` is the full

@@ -595,20 +595,34 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
                 "reason": "scripts/agent_run.py is not in this install, so "
                           "no agent can be dispatched from here",
                 "state": row.get("state"), "resume_prompt": plan.get("prompt")}
+    # THE WHOLE PLAN, not its first name. `parallel` carries the four pillar
+    # scorers, or a report producer AND the validator; reviving only
+    # `plan["agent"]` did one per hourly firing, so a state the plan asked
+    # to close in one pass took four cycles and REPORTS_OPEN never reached
+    # the validator at all (review, 2026-09-04).
+    agents = [a for a in (plan.get("parallel") or [plan["agent"]]) if a]
     if dry_run:
         return {"run_id": row.get("run_id"), "outcome": "DRY_RUN",
                 "state": row.get("state"), "agent": plan["agent"],
-                "would_run": f"agent_run.py --agent {plan['agent']}",
+                "agents": agents,
+                "would_run": "agent_run.py --batch "
+                             + ",".join(f"--agent {a}" for a in agents),
                 "resume_prompt": plan.get("prompt")}
     pf = Path(tempfile.gettempdir()) / f"revive_{row.get('run_id')}.md"
     pf.write_text(plan.get("prompt") or "")
-    r = subprocess.run(
-        [sys.executable, str(runner), "--agent", plan["agent"],
-         "--prompt-file", str(pf)],
-        capture_output=True, text=True, timeout=timeout)
+    if len(agents) > 1:
+        batch = Path(tempfile.gettempdir()) / f"revive_{row.get('run_id')}.json"
+        batch.write_text(json.dumps([{"agent": a, "prompt_file": str(pf)}
+                                     for a in agents]))
+        argv = ["--batch", str(batch), "--lanes", str(min(len(agents), 4))]
+    else:
+        argv = ["--agent", agents[0], "--prompt-file", str(pf)]
+    r = subprocess.run([sys.executable, str(runner), *argv],
+                       capture_output=True, text=True, timeout=timeout)
     return {"run_id": row.get("run_id"),
             "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
             "state": row.get("state"), "agent": plan["agent"],
+            "agents": agents,
             "detail": (r.stdout or r.stderr).strip()[-400:]}
 
 

@@ -58,12 +58,23 @@ AGENT_RUN = PLUGIN / "scripts" / "agent_run.py"
 #: A run last written to longer ago than this is not this session's run.
 RECENT_HOURS = float(os.environ.get("DMA_STAGE_RECENT_HOURS", "12"))
 
-#: Bash commands that mean a stage may have moved. Anything else on Bash is
-#: ignored so the hook does not open a workbook after every `ls`.
+#: Bash commands that can MOVE a run between stages. Deliberately narrow.
+#: It used to match `engine.cli` and `engine.assessment` wholesale, so every
+#: one of the 50-200 per-cell `engine.cli evidence` writes a researcher makes
+#: in a firing re-opened every workbook in the root and re-injected the same
+#: paragraph — thousands of workbook loads and thousands of duplicate
+#: paragraphs for a state that only changes at a gate boundary (review,
+#: 2026-09-04). A write is not a transition; a gate, a stage flip, a verdict,
+#: a package and a dispatch are.
 STAGE_COMMANDS = re.compile(
-    r"agent_run\.py|engine\.(cli|assessment|narrative|assemble|prelim|"
-    r"completeness|ship|watchdog)\b|engine/(registry|watchdog)\.py|"
-    r"ship_page\.py")
+    r"agent_run\.py"
+    r"|engine\.cli\s+(gate|handoff|validate|report)\b"
+    r"|engine\.assessment\s+(open|gate|critique|rollup)\b"
+    r"|engine\.narrative\s+(review|state|preconditions)\b"
+    r"|engine\.prelim\s+complete\b"
+    r"|engine\.(assemble|ship|watchdog)\b"
+    r"|engine/(registry|watchdog)\.py"
+    r"|ship_page\.py")
 
 MARKER = "stage_advance.json"
 
@@ -186,10 +197,49 @@ def _record_block(row: dict) -> None:
         # of lanes) must leave a marker that is one JSON document or the
         # other, never an interleaving that the next Stop cannot parse
         tmp = p.with_suffix(f".{os.getpid()}.tmp")
-        tmp.write_text(json.dumps({"blocked_on": row.get("state"),
-                                   "at": time.strftime("%Y-%m-%dT%H:%M:%SZ",
-                                                       time.gmtime()),
-                                   "detail": row.get("detail")}, indent=1))
+        # MERGE: the announcement key lives in the same marker, and a block
+        # that clobbered it would let the next transition command re-inject
+        # a paragraph the session has already read.
+        try:
+            doc = json.loads(p.read_text()) if p.is_file() else {}
+            if not isinstance(doc, dict):
+                doc = {}
+        except (OSError, ValueError):
+            doc = {}
+        doc.update({"blocked_on": row.get("state"),
+                    "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    "detail": row.get("detail")})
+        tmp.write_text(json.dumps(doc, indent=1))
+        os.replace(tmp, p)
+    except OSError:
+        pass
+
+
+def _announced_state(row: dict) -> str | None:
+    p = _marker_path(row)
+    if not p or not p.is_file():
+        return None
+    try:
+        return json.loads(p.read_text()).get("announced")
+    except (OSError, ValueError):
+        return None
+
+
+def _record_announcement(row: dict) -> None:
+    p = _marker_path(row)
+    if not p:
+        return
+    try:
+        doc = json.loads(p.read_text()) if p.is_file() else {}
+        if not isinstance(doc, dict):
+            doc = {}
+    except (OSError, ValueError):
+        doc = {}
+    doc["announced"] = row.get("state")
+    try:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        tmp = p.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_text(json.dumps(doc, indent=1))
         os.replace(tmp, p)
     except OSError:
         pass
@@ -211,9 +261,17 @@ def on_post_tool_use(event: dict) -> dict | None:
         _, watchdog = _engine()
     except Exception:                                      # noqa: BLE001
         return None
-    texts = [next_step(r) for r in rows
-             if r.get("state") in watchdog.ACTIONABLE
-             or r.get("state") == "SHIPPED"]
+    texts = []
+    for r in rows:
+        if r.get("state") not in watchdog.ACTIONABLE and r.get("state") != "SHIPPED":
+            continue
+        # Say it ONCE per state per run. The same paragraph after every
+        # transition command is context a session pays for and stops
+        # reading; the announcement is only news when the state changed.
+        if _announced_state(r) == r.get("state"):
+            continue
+        _record_announcement(r)
+        texts.append(next_step(r))
     if not texts:
         return None
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse",

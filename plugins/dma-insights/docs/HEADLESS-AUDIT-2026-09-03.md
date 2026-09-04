@@ -69,23 +69,26 @@ and the workflow still could not run headless. That is the recurring report.
   `.claude/` draw NO decision — they fall through exactly as before.
 - Write/Edit — approved when the target is under `$DMA_RUN_ROOT`,
   `/home/claude/dma_output`, `/root/.dma`, `/tmp`, or the repository's
-  `plugins/dma-insights`, `fixtures`, `scripts`, `tests`, `docs` (the
-  rectifier's writer scope). The deployables (`apps/`, `infra/`,
-  `migrations/`, `packages/`) and every settings or credential file never.
+  `plugins/dma-insights`, `fixtures`, `scripts`, `tests` (the rectifier's
+  writer scope). The deployables (`apps/`, `infra/`, `migrations/`,
+  `packages/`), the charter's read-only `docs/`, every settings or
+  credential file, and the plugin's own trust boundary (`.mcp.json`,
+  `hooks/hooks.json`, `scripts/hooks/*.py`) never — see §10.
 - The two deny guards (`deny_credential_ops`, `deny_bulk_read`) are imported
   and asked FIRST; the hook says nothing when either would refuse. The
   harness resolves deny over allow anyway; this hook does not lean on it.
 - It never denies. Its only power is to remove a prompt.
 
 **`bootstrap_session.sh`** now also writes the same shapes as narrower
-prefix grants (`Bash(python3 -m engine.*)`, `Write(/root/.dma/**)`, …) in
+prefix grants (`Bash(python3 -m engine.*)`, `Write(//root/.dma/**)` — the
+double slash is load-bearing, §10 #5 — …) in
 user settings — the belt for a session whose hooks bound from a stale
 install. No bare `Bash`, no `Write` without a path.
 
 **`audit_builtin_approvals.py`** harvests every command the 73 manifests,
 the two skills and the six Routine prompts tell a session to run (124 on
 this checkout), normalises the placeholders, and runs the real hook against
-each. Result: **124 approved, 0 prompting.** `readiness.py`'s `approvals`
+each. Result: **125 approved, 0 prompting.** `readiness.py`'s `approvals`
 lane now runs both audits, and `test_audit_builtin_approvals.py` fails CI on
 the first manifest line the grammar does not know.
 
@@ -397,6 +400,37 @@ reads BLOCKED with the owner's next move. The schema lane also read NOT
 MEASURABLE while PostgreSQL was up: the system cluster does not survive
 the shell that started it in this container, so `pg_ctlcluster 16 main
 start` precedes the measurement and the lane reads READY.
+
+## 10 · The review that found the grammar wide open (2026-09-04)
+
+Before landing, a high-effort adversarial review was run over the whole diff.
+It found **ten** defects, every one verified by executing the real hook, and
+every one now closed with a test. The first four are the serious ones: the
+grammar this audit added was, as shipped in §9, still approving `git push`
+and arbitrary code execution.
+
+| # | what it approved | why the grammar missed it | closed by |
+|---|---|---|---|
+| 1 | `echo x&&git push`, `echo x&git push` | `&` is not in shlex's `punctuation_chars` (so `2>&1` survives as one token), so an UNSPACED `&&` was absorbed into the previous argument and the second command was never read at all | the quote-aware walker now treats `&&` as a separator and a bare `&` as no-decision, keeping redirections intact |
+| 2 | `Write /tmp/scripts/evil.py` then `python3 /tmp/scripts/evil.py` | `REPO_SCRIPT`/`PLUGIN_PATH` accepted on SHAPE — any `…/scripts/x.py` — and `/tmp` is a write root, so two approved steps ran code that bypassed every module, token and push rule | an executed script is now always resolved on disk and must live under the real plugin tree or the real repo `scripts/`; the regexes only expand `$CLAUDE_PLUGIN_ROOT` |
+| 3 | `sed -n 's/.*/git push/e'` (GNU sed EXECUTES), `sed 'w /…/apps/evil.py'`, `sed --in-place`, `sed -Ei`, `sort -o`, `tar --to-command`, `tar -C`, `gzip <file>`, `unzip -d`, `cp -t <dir> src`, `command sed -i` | verbs were trusted as "read-only" by name; several have write or exec modes, and the `command` wrapper stripped the WRAPPED command's flags | a sed script must match the read-only sentence grammar (`p`/`d`/`s///`), `-i` needs a writable target, `sort -o` is refused, the archivers left `READ_VERBS`, `-t` is read as the destination, and `command` peels only its own flags |
+| 4 | `claude -p … --dangerously-skip-permissions` | the verb was approved on `-p` plus any `dma-insights:` token, without reading the permission flags | only the argv `agent_run.py` emits: no `dangerously`, no `bypassPermissions`, no `--permission-prompt-tool`, and a known `--permission-mode` |
+| 5 | — | the settings belt used `Write(/root/.dma/**)`; a SINGLE leading slash is anchored at the settings source, so it resolved to `~/.claude/root/.dma/**` and matched nothing — an inert belt for exactly the stale-hook session it exists for | `//` everywhere, and a test that fails any absolute grant not rooted at `/` |
+| 6 | — | the Stop nudge fired inside dispatched CHILDREN: a scorer finishing first was told to dispatch its three siblings, and (it now carries `Agent`) would re-dispatch scorers already running, double-writing column D | `agent_run.py` sets `DMA_STAGE_GUARD=off` in every child; the guard is the conductor's alone |
+| 7 | — | `watchdog.revive()` dispatched `plan["agent"]` and ignored `plan["parallel"]`, so a state asking for four scorers took four hourly cycles, and REPORTS_OPEN never reached the validator | revive dispatches the whole plan, as a batch when there is more than one |
+| 8 | writes to `docs/` (charter: read-only) and to the deny guards themselves | `REPO_WRITABLE` was wider than the documented boundary | `docs/` left the list; `scripts/hooks/*.py` joined `NEVER_WRITE` — a hook that approves a rewrite of its own judges has approved everything once |
+| 9 | `echo "$SA_KEY" > /tmp/k` | `echo`/`printf` were `VAR_TOLERANT`, so an unresolved environment name printed the secret `env`/`printenv` are blocked for | they left `VAR_TOLERANT`; a literal `echo '{"probe": 1}'` still passes, and a `$(…)` this grammar already checked is still printable |
+| 10 | — | `STAGE_COMMANDS` matched `engine.cli` and `engine.assessment` wholesale, so each of the 50–200 per-cell writes in a firing reopened every workbook in the root and re-injected the same paragraph | narrowed to transition commands only (gate, stage flip, verdict, package, dispatch), and a state is announced ONCE per run |
+
+One genuine manifest defect fell out of #2: `package-vetter.md` told its agent
+to run `python scripts/vet_workbooks.py`, a path that resolves only if the cwd
+happens to be the skill directory — it had been passing the audit on shape
+alone. It now names `${CLAUDE_PLUGIN_ROOT}/skills/…`, as its two sibling
+manifests already did.
+
+The corpus in `test_autoapprove_adversarial.py` grew to cover all of these;
+`audit_builtin_approvals.py --strict` still reports every one of the
+pipeline's own commands approved and none prompting.
 
 ## How to re-ask every question in this document
 

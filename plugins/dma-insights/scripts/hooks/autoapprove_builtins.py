@@ -147,8 +147,11 @@ def _repo_root() -> Path | None:
 #: tree and its tests; the synthesis lanes write the two learning ledgers in
 #: fixtures/ (subcap_match.py learn, source_yield.py log) — through python,
 #: but the Write tool is the same boundary. The deployables are not here.
+#: `docs/` is ABSENT on purpose: the charter calls the six design docs
+#: read-only, and `plugins/dma-insights/docs` (the plugin's own notes, which
+#: the rectifier does write) is reached through the plugin entry above.
 REPO_WRITABLE = ("plugins/dma-insights", "fixtures", "scripts", "tests",
-                 "docs", ".qa")
+                 ".qa")
 
 #: Files that carry a credential, the session's own permission posture, or
 #: the plugin's trust boundary (its MCP server URL and its hooks). Never
@@ -156,7 +159,10 @@ REPO_WRITABLE = ("plugins/dma-insights", "fixtures", "scripts", "tests",
 NEVER_WRITE = re.compile(
     r"(^|/)(\.claude(\.json)?|settings(\.local)?\.json|sa\.json|pathtok|"
     r"slack_token|\.env[^/]*|id_rsa[^/]*|\.netrc|\.git/config|\.mcp\.json|"
-    r"hooks/hooks\.json)(/|$)")
+    r"hooks/hooks\.json)(/|$)"
+    # The guards themselves. A hook that approves a rewrite of the hooks
+    # that judge the next call has approved everything exactly once.
+    r"|(^|/)scripts/hooks/[^/]+\.py$")
 
 #: The event's cwd — the harness sends it; relative paths resolve against it.
 _CWD = os.getcwd()
@@ -227,7 +233,11 @@ READ_VERBS = frozenset({
     "mkdir", "cp", "mv", "touch", "diff", "cmp", "basename", "dirname",
     "realpath", "readlink", "which", "command", "type", "file", "md5sum",
     "sha256sum", "tee", "column", "nl", "tac", "rev", "paste", "comm",
-    "unzip", "zipinfo", "tar", "gzip", "gunzip", "sleep", "timeout",
+    # tar / gzip / gunzip / unzip are ABSENT: `tar --to-command` runs a
+    # program, `-C` writes anywhere, `gzip <file>` replaces its argument in
+    # place, `unzip -d` chooses its own destination. Each was approved on
+    # 2026-09-04 because the verb "only reads".
+    "zipinfo", "sleep", "timeout",
     "python3", "python", "bash", "sh", "git", "pytest", "claude", "export",
     "unset", "rm",
 })
@@ -235,8 +245,13 @@ READ_VERBS = frozenset({
 #: Verbs whose arguments are not file paths the SHELL opens, so an
 #: unresolved `$VAR` or a lifted `$(…)` among them is data, not a path this
 #: grammar failed to see. Every other verb refuses such a token.
+#: `echo` and `printf` are ABSENT: an unresolved `$VAR` among their
+#: arguments prints the environment the service-account key lives in — the
+#: exposure `env` / `printenv` are blocked for (`echo "$SA_KEY" > /tmp/k`
+#: was approved, 2026-09-04). A literal `echo '{"probe": 1}'` still passes,
+#: because it carries no `$`.
 VAR_TOLERANT = frozenset({
-    "echo", "printf", "test", "[", "true", "false", "cd", "export", "unset",
+    "test", "[", "true", "false", "cd", "export", "unset",
     "date", "sleep", "python3", "python", "git", "claude", "pytest", "bash",
     "sh", "mkdir", "basename", "dirname", "which", "command", "type",
 })
@@ -321,6 +336,45 @@ SECRET_PATHS = re.compile(
 #: Inline python naming the TOP of the key directory — `'/root/.dma/' +
 #: 'sa.json'`, `'/root/.dma/x.json'` — as opposed to a run root beneath it.
 INLINE_SECRET_LEVEL = re.compile(r"/root/\.dma(?!/[\w.-]+/)")
+
+#: The sed sentences this grammar reads: line addresses with `p`/`d`, and
+#: `s///` with printing flags. `w`/`W` write a file, `e` EXECUTES the
+#: pattern space, `r`/`R` read one in — all four were approved while sed sat
+#: in READ_VERBS (`sed -n 's/.*/git push/e' README.md`, 2026-09-04).
+_SED_OK = re.compile(
+    r"^(?:\s*(?:[0-9]+|\$|/(?:\\.|[^/])*/|\d+,\d+|\d+,\$)?\s*"
+    r"(?:[pdq=]|s(.)(?:\\.|(?!\1).)*\1(?:\\.|(?!\1).)*\1[gipIm0-9]*)"
+    r"\s*;?\s*)+$")
+
+
+def _sed_ok(tokens: list[str], cwd: str) -> bool:
+    args = tokens[1:]
+    inplace = [a for a in args if a == "--in-place" or a.startswith("--in-place=")
+               or (a.startswith("-") and not a.startswith("--") and "i" in a[1:])]
+    scripts, files, i = [], [], 0
+    while i < len(args):
+        a = args[i]
+        if a in ("-e", "--expression", "-f", "--file"):
+            if a in ("-f", "--file"):
+                return False                 # a script this grammar cannot see
+            i += 1
+            if i < len(args):
+                scripts.append(args[i])
+        elif a.startswith("--expression="):
+            scripts.append(a.split("=", 1)[1])
+        elif a.startswith("-"):
+            pass
+        elif not scripts:
+            scripts.append(a)
+        else:
+            files.append(a)
+        i += 1
+    if not scripts or not all(_SED_OK.match(x) for x in scripts):
+        return False
+    if inplace:
+        return bool(files) and all(path_is_writable(f, cwd=cwd) for f in files)
+    return True
+
 
 #: Environment names a command may reference and this grammar will resolve.
 #: Anything else stays a `$` and is refused where a path is expected.
@@ -424,6 +478,22 @@ def _newlines_are_separators(s: str) -> str | None:
             out.append(c)
         elif c == "\n":
             out.append(" ; ")
+        elif c == "&":
+            # `&` is not in shlex's punctuation_chars (so `2>&1` survives as
+            # one token), which means an UNSPACED `x&&git push` was absorbed
+            # into the previous argument and the second command was never
+            # read. Measured 2026-09-04: `echo x&&git push` was approved.
+            # Redirections keep their `&`; everything else is an operator.
+            prev = "".join(out).rstrip()
+            if prev.endswith(">") or re.search(r"\d?>$", prev):
+                out.append(c)                # 2>&1, &>, 1>&2
+            elif s[i:i + 2] == "&&":
+                out.append(" ; ")
+                i += 1
+            elif s[i:i + 2] == "&>":
+                out.append(c)                # &> file
+            else:
+                return None                  # backgrounding, or `a &b`
         else:
             out.append(c)
         i += 1
@@ -635,13 +705,27 @@ def _script_roots() -> list[Path]:
 
 
 def _script_ok(path: str) -> bool:
-    if PLUGIN_PATH.match(path) or REPO_SCRIPT.match(path):
-        return True
-    if not path.endswith(".py") or "$" in path:
+    """Executable only from the REAL plugin tree or the real repo `scripts/`.
+
+    The regexes above used to be a fast path that ACCEPTED on shape alone,
+    and shape is forgeable: `/tmp/scripts/evil.py` matches REPO_SCRIPT and
+    `/tmp/x/plugins/dma-insights/scripts/evil.py` matches PLUGIN_PATH, while
+    `/tmp` is a write root — so two approved steps (Write then Bash) ran
+    arbitrary code and every module, token and push rule in this file was
+    moot. Measured 2026-09-04. The path is now always resolved on disk and
+    checked against the directories that actually exist; the regexes only
+    expand `$CLAUDE_PLUGIN_ROOT`, which a resolver cannot see through."""
+    if not path.endswith(".py"):
         return False
-    p = _abs(path)
+    raw = path
+    if "$" in raw:
+        expanded = re.sub(r"\$\{?(CLAUDE_PLUGIN_ROOT|PLUGIN)\}?",
+                          str(PLUGIN_DIR), raw)
+        if "$" in expanded:
+            return False                     # a name this grammar cannot see
+        raw = expanded
     try:
-        rp = p.resolve()
+        rp = _abs(raw).resolve()
     except OSError:
         return False
     return rp.is_file() and any(_under(rp, r) for r in _script_roots())
@@ -663,10 +747,15 @@ def _wrapped(tokens: list[str]) -> list[str] | None:
             _, tokens = _split_env_prefix(tokens)
             continue
         if v == "command":
-            flags = [a for a in tokens[1:] if a.startswith("-")]
-            if any(f in ("-v", "-V") for f in flags):
+            rest = tokens[1:]
+            if rest and rest[0] in ("-v", "-V"):
                 return tokens                  # a query: `command -v claude`
-            tokens = [a for a in tokens[1:] if not a.startswith("-")]
+            # ONLY `command`'s own leading flags are peeled. Stripping every
+            # flag turned `command sed -i …` into a plain `sed` read and
+            # `command git push` into a bare `git` (2026-09-04).
+            while rest and rest[0] in ("-p", "--"):
+                rest = rest[1:]
+            tokens = rest
             continue
         break
     return tokens
@@ -705,8 +794,13 @@ def _segment_ok(segment: str, bodies: list[str], ctx: dict) -> bool:
     args = tokens[1:]
     if verb not in VAR_TOLERANT:
         for a in args:
-            if "$" in a or "__SUBST__" in a:
+            if "$" in a:
                 return False                # a path the grammar cannot see
+            # `__SUBST__` is the output of a `$(…)` this grammar ALREADY
+            # checked as its own segment, so printing it exposes nothing the
+            # command could not print directly. It is still not a path.
+            if "__SUBST__" in a and verb not in ("echo", "printf"):
+                return False
     if any(_reaches_secret_level(a, cwd) for a in args):
         return False
     if verb == "cd":
@@ -736,8 +830,23 @@ def _segment_ok(segment: str, bodies: list[str], ctx: dict) -> bool:
             return bool(keys) and keys[0].startswith("user.")
         return True
     if verb == "claude":
-        return "-p" in tokens and any(a.startswith("dma-insights:")
-                                      for a in tokens)
+        # The argv `agent_run.py` emits, and no wider. Approving any
+        # `claude -p … dma-insights:x` approved
+        # `--dangerously-skip-permissions` too, which is this hook waving
+        # through a child that answers to nothing (2026-09-04).
+        if not ("-p" in args or "--print" in args):
+            return False
+        if not any(a.startswith("dma-insights:") for a in args):
+            return False
+        if any("dangerously" in a or "bypassPermissions" in a
+               or a.startswith("--permission-prompt-tool") for a in args):
+            return False
+        for i, a in enumerate(args):
+            if a == "--permission-mode" and i + 1 < len(args):
+                if args[i + 1] not in ("dontAsk", "default", "plan",
+                                       "acceptEdits"):
+                    return False
+        return True
     if verb == "export":
         return bool(args) and all(re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", a)
                                   for a in args)
@@ -748,20 +857,28 @@ def _segment_ok(segment: str, bodies: list[str], ctx: dict) -> bool:
                                    Path(p).name not in ("", ".", "..", "*")
                                    for p in paths)
     if verb in ("cp", "mv", "tee", "touch", "mkdir"):
-        # the destination (last non-flag arg) must be writable; a read from
-        # anywhere below the secret level is fine
+        # the destination must be writable; a read from anywhere below the
+        # secret level is fine. `-t DIR` puts the destination FIRST, which
+        # read as a source while the last argument read as the destination
+        # (`cp -t apps /tmp/evil.py` was approved, 2026-09-04).
+        target = None
+        for i, a in enumerate(args):
+            if a in ("-t", "--target-directory") and i + 1 < len(args):
+                target = args[i + 1]
+            elif a.startswith("--target-directory="):
+                target = a.split("=", 1)[1]
         paths = [a for a in args if not a.startswith("-")]
+        if target is not None:
+            return path_is_writable(target, cwd=cwd)
         if not paths:
             return False
         dests = paths[-1:] if verb in ("cp", "mv") else paths
         return all(path_is_writable(d, cwd=cwd) for d in dests)
     if verb == "sed":
-        # in-place editing is a write; require a writable target
-        if any(a.startswith("-i") for a in args):
-            files = [a for a in tokens[2:] if not a.startswith("-")][1:]
-            return bool(files) and all(path_is_writable(f, cwd=cwd)
-                                       for f in files)
-        return True
+        return _sed_ok(tokens, cwd)
+    if verb == "sort":
+        return not any(a in ("-o", "--output") or a.startswith("--output=")
+                       or (a.startswith("-o") and len(a) > 2) for a in args)
     if verb in ("command", "type", "which"):
         return all("/" not in a for a in args)
     return True

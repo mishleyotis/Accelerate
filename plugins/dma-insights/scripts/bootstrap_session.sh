@@ -552,9 +552,9 @@ for _builtin in (
     "Bash(python3 -m pytest *)",
     "Bash(bash plugins/dma-insights/scripts/*)",
     "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
-    "Write(/root/.dma/**)", "Edit(/root/.dma/**)",
-    "Write(/home/claude/dma_output/**)", "Edit(/home/claude/dma_output/**)",
-    "Write(/tmp/**)", "Edit(/tmp/**)",
+    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
+    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
+    "Write(//tmp/**)", "Edit(//tmp/**)",
 ):
     if _builtin not in wanted:
         wanted.append(_builtin)

@@ -93,12 +93,14 @@ def _state(run):
 def _expect_block(env, state, agent_fragment):
     """The Stop hook refuses once, names the state and the next agent, and
     then lets the same state stop. The agent-return hook announces the same
-    state without blocking."""
+    state ONCE, without blocking — a paragraph repeated after every engine
+    command is context the session pays for and stops reading."""
     ctx = after_agent(env)
     assert ctx, f"no announcement at {state}"
     text = ctx["hookSpecificOutput"]["additionalContext"]
     assert state in text and agent_fragment in text, text
     assert "Completion criterion" in text, text
+    assert after_agent(env) is None, f"{state}: announced twice"
     first = stop(env)
     assert first and first["decision"] == "block", f"{state}: no block"
     assert state in first["reason"] and agent_fragment in first["reason"], \
@@ -139,8 +141,8 @@ def test_the_run_is_carried_through_every_stage_by_the_hook(walk):
                note="Two rows flatter the evidence: the first reads M3 on a "
                     "single T3 source; the fourth ignores its own counter.")
     assert _state(run) == "CRITIC_PENDING"
-    ctx = after_agent(env)["hookSpecificOutput"]["additionalContext"]
-    assert "re-scored" in ctx
+    assert after_agent(env) is None, "CRITIC_PENDING was already announced"
+    assert "re-scored" in watchdog.inspect(run)["resume"]["prompt"]
     assert stop(env) is None, "the marker already holds CRITIC_PENDING"
 
     A.critique(wb, pillar="P1", verdict="PASS", actor="scoring-critic",
@@ -214,13 +216,18 @@ def test_only_stage_moving_bash_commands_open_a_workbook(walk):
     A.open_stage(wb, run.qa_dir)
     assert after_bash(env, "ls -la /root/.dma") is None
     assert after_bash(env, "git status") is None
-    for cmd in ("python3 -m engine.assessment score --run R --subcap x",
-                "python3 plugins/dma-insights/scripts/agent_run.py --agent x",
-                "cd skills/dma-research && python3 -m engine.narrative state --run R",
-                "python3 skills/dma-surface-production/scripts/ship_page.py x"):
-        out = after_bash(env, cmd)
-        assert out and "SCORING_OPEN" in \
-            out["hookSpecificOutput"]["additionalContext"], cmd
+    # a per-cell WRITE is not a transition: a researcher makes 50-200 of
+    # them per firing and each used to reopen every workbook in the root
+    for cmd in ("python3 -m engine.cli evidence --run R --source x",
+                "python3 -m engine.assessment score --run R --subcap x",
+                "python3 -m engine.prelim narrate --run R --section x"):
+        assert after_bash(env, cmd) is None, cmd
+    # a transition command announces — once
+    out = after_bash(env, "python3 plugins/dma-insights/scripts/agent_run.py --agent x")
+    assert out and "SCORING_OPEN" in out["hookSpecificOutput"]["additionalContext"]
+    for cmd in ("cd skills/dma-research && python3 -m engine.narrative state --run R",
+                "python3 -m engine.assessment gate --run R"):
+        assert after_bash(env, cmd) is None, f"{cmd}: re-announced"
 
 
 def test_the_marker_survives_concurrent_stops(walk):

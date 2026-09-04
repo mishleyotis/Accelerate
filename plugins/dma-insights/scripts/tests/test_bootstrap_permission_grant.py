@@ -51,10 +51,27 @@ BUILTIN = [
     "Bash(python3 -m pytest *)",
     "Bash(bash plugins/dma-insights/scripts/*)",
     "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
-    "Write(/root/.dma/**)", "Edit(/root/.dma/**)",
-    "Write(/home/claude/dma_output/**)", "Edit(/home/claude/dma_output/**)",
-    "Write(/tmp/**)", "Edit(/tmp/**)",
+    # DOUBLE slash. A single leading slash is anchored at the SETTINGS
+    # SOURCE, not the filesystem root, so `Write(/root/.dma/**)` in user
+    # settings resolves to ~/.claude/root/.dma/** and matches nothing —
+    # an inert belt for exactly the stale-hook session it exists to cover
+    # (permissions reference; the repo's own deny rules already use
+    # `Read(//root/.dma/sa.json)`). Found in review, 2026-09-04.
+    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
+    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
+    "Write(//tmp/**)", "Edit(//tmp/**)",
 ]
+
+
+def test_every_absolute_grant_is_rooted_at_the_filesystem():
+    """A single leading slash is settings-source-relative and silently
+    matches nothing; only `//` means `/`."""
+    import re as _re
+    for rule in BASE_GRANTS:
+        m = _re.match(r"^(?:Write|Edit|Read)\((/[^)]*)\)$", rule)
+        if m and not m.group(1).startswith("//"):
+            raise AssertionError(
+                f"{rule} is anchored at the settings source, not at /")
 BASE_GRANTS = [GRANT] + WEB + BUILTIN
 
 
