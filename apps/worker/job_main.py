@@ -760,17 +760,44 @@ def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
     # steady state is zero downloads and a reader change re-opens the lot.
     # `forced` (the BACKFILL_COMPOSITE mode) ignores the record and re-reads
     # everything, which is what a human reaching for the manual pass wants.
-    cur.execute("""SELECT r.id, r.source_folder_id
+    #
+    # THE RUN THAT SERVES IS THE ONE THAT MATTERS, and it is not always the
+    # one holding the folder. MEASURED 2026-09-04: goeasy Ltd. carries
+    # EIGHTEEN runs under one request id (`DMA-RES-GSY-20260830-0002`), every
+    # one with a null composite, and this query — which required the run's own
+    # `source_folder_id` — matched exactly ONE of them across the whole
+    # database. A run re-ingested from the same package does not always carry
+    # the folder forward, so the promoted run, the only one the directory
+    # reads, was invisible to its own repair.
+    #
+    # A sibling under the SAME request id and the same entity is the same
+    # package by definition — that is what a request id identifies — so its
+    # folder is the right place to look, and the newest one wins. Not the
+    # entity alone: two assessments of one client are two packages, and
+    # reading one's composite out of the other's workbook would be a figure
+    # from the wrong run wearing the right name.
+    cur.execute("""SELECT r.id,
+                          COALESCE(r.source_folder_id, sib.source_folder_id),
+                          r.request_id
                      FROM runs r
-                    WHERE r.source_folder_id IS NOT NULL
-                      AND r.composite IS NULL
+                     LEFT JOIN LATERAL (
+                           SELECT s.source_folder_id
+                             FROM runs s
+                            WHERE s.request_id = r.request_id
+                              AND s.entity_id = r.entity_id
+                              AND s.source_folder_id IS NOT NULL
+                            ORDER BY s.run_seq DESC
+                            LIMIT 1) sib ON TRUE
+                    WHERE r.composite IS NULL
+                      AND COALESCE(r.source_folder_id,
+                                   sib.source_folder_id) IS NOT NULL
                       AND (%s OR NOT EXISTS (
                             SELECT 1 FROM parser_observations o
                              WHERE o.run_id = r.id
                                AND o.kind = 'composite_absent'
                                AND o.detail->>'reader' = %s))
-                    ORDER BY r.source_folder_id""", (forced, reader))
-    todo = cur.fetchall()
+                    ORDER BY 2, r.id""", (forced, reader))
+    todo = [(rid, folder) for rid, folder, _req in cur.fetchall()]
     deferred = 0
     if not forced and len(todo) > COMPOSITE_REPAIR_PER_FIRING:
         deferred = len(todo) - COMPOSITE_REPAIR_PER_FIRING
@@ -782,7 +809,15 @@ def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
     for run_id, folder in todo:
         parts = groups.get(folder) or {}
         if "workbook" not in parts:
+            # NAMED, not tallied. The first production firing reported
+            # "1 have no workbook artefact" and stopped there: which run,
+            # and under what key, went unsaid — and the key is exactly what
+            # goes wrong when a folder is renamed or a package moves.
             skipped += 1
+            why = ("no folder by that key in this scan" if folder not in groups
+                   else "folder is in the scan but ships no workbook")
+            print(f"backfill-composite: run {run_id} skipped — {why} "
+                  f"(key {folder!r})")
             continue
         try:
             with tempfile.TemporaryDirectory() as td:
