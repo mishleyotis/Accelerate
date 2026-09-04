@@ -270,15 +270,19 @@ def test_a_run_scoped_to_one_id_ignores_the_others(walk):
     assert "SCORING_OPEN" in out["hookSpecificOutput"]["additionalContext"]
 
 
-def test_a_halted_run_reports_and_never_blocks(walk, monkeypatch):
+def test_a_halted_run_reports_and_never_blocks(walk):
+    """HALTED is the catalogue moving under a locked run — a decision a
+    person makes (re-pin or retire). The hook must say so and never hold
+    the session open for it. Simulated the way it happens: the lock the run
+    carries no longer matches the catalogue hash the engine computes."""
     run, wb, cells, ev, env, _ = walk
     A.open_stage(wb, run.qa_dir)
-    # a gate a PERSON must read: the watchdog's own HALTED shape
-    from engine import runstate
-    (run.qa_dir / "HALT").write_text("evidence foreign to this run — halted")
-    st = watchdog.inspect(run)["state"]
-    if st != "HALTED":
-        pytest.skip(f"the engine marks a halt differently here ({st})")
-    assert stop(env) is None
+    wb.append("Handoff_Lock", {"Key": "catalogue_hash",
+                               "Value": "v7.0-moved-under-this-run"})
+    row = watchdog.inspect(run)
+    assert row["state"] == "HALTED", row["state"]
+    assert row["resume"]["actionable"] is False
+    assert stop(env) is None, "a person's decision must never block a Stop"
     ctx = after_agent(env)
     assert ctx and "HALTED" in ctx["hookSpecificOutput"]["additionalContext"]
+    assert "catalogue" in ctx["hookSpecificOutput"]["additionalContext"]
