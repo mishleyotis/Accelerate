@@ -25,6 +25,7 @@ that the system uses it.
 
 Run with `pytest apps/worker/tests/test_composite_repair_runs_on_the_schedule.py`.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -326,3 +327,109 @@ def test_a_skipped_run_is_named_not_merely_counted(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "run-gsy" in out, "the skipped run was not named"
     assert "goeasy Ltd. - DMA" in out, "the key it looked under was not named"
+
+
+# ── a run that does not know its own package ─────────────────────────────
+
+class _AdoptCursor:
+    def __init__(self, orphans):
+        self._orphans, self.updated = orphans, []
+        self.rows = []
+
+    def execute(self, sql, params=None):
+        if "source_folder_id IS NULL" in sql and "SELECT" in sql.split("WHERE")[0]:
+            self.rows = list(self._orphans)
+        elif "UPDATE runs SET source_folder_id" in sql:
+            assert "source_folder_id IS NULL" in sql, \
+                "must never overwrite a folder a run already records"
+            self.updated.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:70]}")
+
+    @property
+    def rowcount(self):
+        return 1
+
+    def fetchall(self):
+        return self.rows
+
+
+class _AdoptConn:
+    def __init__(self, orphans):
+        self.cur = _AdoptCursor(orphans)
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+
+def _manifest_groups(monkeypatch, mapping):
+    """{folder -> stated run_id}, served as the package's run_manifest.json."""
+    groups, blobs = {}, {}
+    for folder, run_id in mapping.items():
+        stat = _f(folder, "run_manifest.json")
+        groups[folder] = {"folder": folder, "manifest": stat}
+        blobs[stat.file_id] = json.dumps({"run_id": run_id}).encode()
+    monkeypatch.setattr(job_main.drive, "download",
+                        lambda t, fid: blobs[fid])
+    return groups
+
+
+def test_a_folderless_run_is_adopted_by_the_package_that_names_it(monkeypatch):
+    """THE ONE THAT MATTERS FOR goeasy. Its promoted run records no source
+    folder, so every folder-keyed repair in this file is blind to it. The
+    package's own manifest states the run id the ingest stored as
+    `request_id` — the package saying which run it produced."""
+    groups = _manifest_groups(monkeypatch, {
+        "goeasy Ltd. - DMA": "DMA-RES-GSY-20260830-0002",
+        "Golden 1 Credit Union - DMA HYBRID": "DMA-2026-GOLDEN1-001",
+    })
+    conn = _AdoptConn([("run-gsy", "DMA-RES-GSY-20260830-0002")])
+
+    job_main.adopt_orphan_runs(conn, "t", groups)
+
+    assert conn.cur.updated == [("goeasy Ltd. - DMA", "run-gsy")], \
+        "the run was not adopted by the package that names it"
+
+
+def test_two_packages_claiming_one_run_id_adopt_neither(monkeypatch, capsys):
+    """Ambiguity is refused, not resolved by order. Attaching a run to the
+    wrong client's workbook is worse than leaving it unplaced."""
+    groups = _manifest_groups(monkeypatch, {
+        "Client A - DMA": "DMA-DUPE-0001",
+        "Client B - DMA": "DMA-DUPE-0001",
+    })
+    conn = _AdoptConn([("run-x", "DMA-DUPE-0001")])
+
+    job_main.adopt_orphan_runs(conn, "t", groups)
+
+    assert conn.cur.updated == [], "adopted an ambiguous run"
+    assert "REFUSED" in capsys.readouterr().out, "the refusal was silent"
+
+
+def test_a_run_whose_request_id_no_package_states_is_left_alone(monkeypatch):
+    groups = _manifest_groups(monkeypatch, {"Other - DMA": "DMA-OTHER-1"})
+    conn = _AdoptConn([("run-y", "DMA-NOBODY-1")])
+
+    job_main.adopt_orphan_runs(conn, "t", groups)
+
+    assert conn.cur.updated == [], "invented a package for an unplaced run"
+
+
+def test_the_scheduled_scan_adopts_before_it_repairs(monkeypatch, fakedb):
+    """Order is the point: a run that does not know its package cannot be
+    repaired by a pass that looks it up by package."""
+    order = []
+    monkeypatch.setattr(job_main, "adopt_orphan_runs",
+                        lambda *a, **k: order.append("adopt") or 0)
+    monkeypatch.setattr(job_main, "backfill_composite",
+                        lambda *a, **k: order.append("repair") or 0)
+
+    _run_main(monkeypatch, fakedb, TREE)
+
+    assert order == ["adopt", "repair"], f"ran in the wrong order: {order}"

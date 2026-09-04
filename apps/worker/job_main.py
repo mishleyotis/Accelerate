@@ -716,6 +716,88 @@ def composite_reader_fingerprint() -> str:
     return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
 
 
+def adopt_orphan_runs(conn, token, groups) -> int:
+    """Give a run with no `source_folder_id` its package back, by IDENTITY.
+
+    MEASURED 2026-09-04. goeasy Ltd. carries eighteen runs under request id
+    `DMA-RES-GSY-20260830-0002`, and NONE of them — including the promoted
+    one the client directory reads — records a source folder. Every repair
+    pass in this file finds a run's package through
+    `runs.source_folder_id`, so all of them are blind to that client
+    entirely: the composite repair reported one candidate run in the whole
+    database and it was a different institution. The card renders the word
+    "maturity" over an empty slot and no amount of folder fallback reaches
+    it, because there is no folder to fall back to.
+
+    A NAME IS NOT AN IDENTITY, and this deliberately does not use one. The
+    package's own `run_manifest.json` states `run_id`, and that is the same
+    string the ingest stored as `runs.request_id`. Matching those two is the
+    package saying which run it produced, not this code guessing from a
+    folder title — the distinction that `repair_evidence_namespace` was
+    written about after a name-derived token was found owned by fourteen
+    different entities.
+
+    REFUSES AMBIGUITY. If two packages state the same run id, neither is
+    adopted and both are named: one of them is wrong and picking either
+    would attach a client's scores to another client's workbook.
+
+    Writes only `source_folder_id`, only where it is NULL, and only from a
+    manifest that names the run. Every other repair works afterwards because
+    the run is finally traceable to the package it came from.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.request_id
+                     FROM runs r
+                    WHERE r.source_folder_id IS NULL
+                      AND r.request_id IS NOT NULL
+                    ORDER BY r.id""")
+    orphans = cur.fetchall()
+    if not orphans:
+        return 0
+    wanted = {req for _rid, req in orphans}
+    print(f"adopt: {len(orphans)} run(s) carry no source folder "
+          f"({len(wanted)} distinct request id(s))")
+
+    # One manifest read per folder, and only folders that ship one.
+    stated: dict = {}
+    clashes: dict = {}
+    for folder, parts in sorted(groups.items()):
+        if "manifest" not in parts:
+            continue
+        try:
+            raw = drive.download(token, parts["manifest"].file_id)
+            run_id = (json.loads(raw.decode("utf-8-sig")) or {}).get("run_id")
+        except Exception as exc:      # noqa: BLE001 — one manifest, not the pass
+            print(f"adopt: {folder}: manifest unreadable ({exc!r})")
+            continue
+        if not run_id or run_id not in wanted:
+            continue
+        if run_id in stated and stated[run_id] != folder:
+            clashes.setdefault(run_id, {stated[run_id]}).add(folder)
+            continue
+        stated[run_id] = folder
+
+    for run_id, folders in clashes.items():
+        stated.pop(run_id, None)
+        print(f"adopt: REFUSED {run_id} — stated by {len(folders)} packages "
+              f"({', '.join(sorted(folders))}); adopting either would attach "
+              f"one client's run to another's workbook")
+
+    adopted = 0
+    for rid, req in orphans:
+        folder = stated.get(req)
+        if not folder:
+            continue
+        cur.execute("UPDATE runs SET source_folder_id = %s "
+                    " WHERE id = %s AND source_folder_id IS NULL", (folder, rid))
+        adopted += cur.rowcount or 0
+    conn.commit()
+    unplaced = len(orphans) - adopted
+    print(f"adopt: {adopted} run(s) adopted by the package that names them, "
+          f"{unplaced} still unplaced (no manifest states their request id)")
+    return 0
+
+
 def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
     """Fill `runs.composite` for a run whose workbook states it and whose
     ingest had nowhere to read it.
@@ -1678,6 +1760,14 @@ def main() -> int:
         # steady state is one query and no downloads. It is deliberately NOT
         # fatal to the scan — a repair that cannot reach Drive must not stop
         # this Job doing the thing it exists to do.
+        try:
+            # FIRST: a run that does not know its own package cannot be
+            # repaired by anything below. goeasy's eighteen runs had no
+            # source folder at all, which is why two rounds of fixing the
+            # folder LOOKUP moved nothing.
+            adopt_orphan_runs(conn, drive.metadata_token(), groups)
+        except Exception as exc:            # noqa: BLE001 — see below
+            print(f"orphan adoption skipped this firing: {exc!r}")
         try:
             backfill_composite(conn, drive.metadata_token(), groups,
                                forced=False)
