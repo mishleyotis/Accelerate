@@ -77,6 +77,8 @@ class _Cursor:
                           if not only or only.lower() in r[2].lower()]
         elif "SELECT e_id, source_name, excerpt" in sql:
             self._rows = []
+        elif sql.lstrip().startswith("SELECT e_id FROM evidence_index"):
+            self._rows = []              # no suffix-matched row in this fake
         elif "UPDATE evidence_index" in sql:
             self.rowcount = 1
         elif "parser_observations" in sql:

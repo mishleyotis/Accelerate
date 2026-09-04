@@ -158,3 +158,88 @@ def test_the_whole_evidence_pass_runs_against_the_real_schema(worker_conn,
         cur.execute("DELETE FROM runs WHERE id = %s", (run_id,))
         cur.execute("DELETE FROM entities WHERE id = %s", (entity_id,))
         worker_conn.commit()
+
+
+def test_a_colliding_sibling_does_not_take_the_fillable_row_with_it(worker_conn,
+                                                                    monkeypatch):
+    """MEASURED 2026-09-04T14:05:55Z, against production.
+
+        backfill-evidence: Golden 1 … HYBRID -> 540 row(s) filled … 604 dedup
+        clash(es)
+
+    …and afterwards 214 rows whose suffix matched a ledger row perfectly were
+    still serving no URL at all.
+
+    The suffix pass keyed on `entity_id` and `split_part(e_id,'-',3)`, which
+    matches every row the client has with that number — across all NINE of
+    Golden 1's runs. Setting them all to the same (url, claim_type, excerpt)
+    makes them byte-identical, `evidence_dedup_uq` refuses the duplicate, and
+    because it was ONE statement the savepoint rolled back all of them. The
+    duplicate was real; taking the fillable row down with it was not.
+
+    Two rows, same suffix, same client. One already carries the ledger's
+    exact content, so filling the other duplicates it. The other has a
+    different quote, so it can be filled. Exactly one row must change, and
+    the pass must not lose it."""
+    cur = worker_conn.cursor()
+    cur.execute("""INSERT INTO entities (display_id, legal_name)
+                   VALUES ('COLLIDE-PROBE','Collide Probe') RETURNING id""")
+    entity_id = cur.fetchone()[0]
+    cur.execute("""INSERT INTO runs (entity_id, request_id, run_seq,
+                                     source_folder_id)
+                   VALUES (%s,'REQ-COLLIDE',1,'Collide Probe - DMA')
+                RETURNING id""", (entity_id,))
+    run_id = cur.fetchone()[0]
+    url, quote = "https://example.test/collide", "Q" * 60
+    # the twin: already holds exactly what the ledger would write
+    cur.execute("""INSERT INTO evidence_index (e_id, entity_id, origin,
+                       source_name, source_url, excerpt, claim_type)
+                   VALUES ('E-PROBE-007',%s,'package','n',%s,%s,'FACT')""",
+                (entity_id, url, quote))
+    # the one that WILL collide: no quote of its own, so the ledger's quote
+    # goes in and it becomes byte-identical to the twin above
+    cur.execute("""INSERT INTO evidence_index (e_id, entity_id, origin,
+                       source_name, source_url, excerpt, claim_type)
+                   VALUES ('E-PROBE-007-R2',%s,'package','n',NULL,NULL,
+                           'FACT')""", (entity_id,))
+    # the fillable one: same suffix, its own quote, no URL. Nothing about
+    # this row duplicates anything — it must not be lost to its sibling.
+    cur.execute("""INSERT INTO evidence_index (e_id, entity_id, origin,
+                       source_name, source_url, excerpt, claim_type)
+                   VALUES ('E-PROBE-007-R3',%s,'package','n',NULL,
+                           'a different passage entirely, quoted at length',
+                           'FACT')""", (entity_id,))
+    worker_conn.commit()
+
+    ledger = [{"e_id": "E-007", "source_name": "n", "source_url": url,
+               "claim_type": "FACT", "excerpt": quote}]
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"bytes")
+    monkeypatch.setattr(job_main, "parse_evidence_master", lambda p: ledger)
+    monkeypatch.setattr(job_main, "parse_scoring_workbook",
+                        lambda p: type("W", (), {"scores": []})())
+    monkeypatch.setattr(job_main, "mine_evidence_from_rationales",
+                        lambda scores: {})
+
+    from dma_worker.scan_diff import FileStat
+    groups = job_main._package_groups([FileStat(
+        file_id="wb", path_segments=("Collide Probe - DMA", "wb.xlsx"),
+        name="DMA_Scoring_Workbook_probe.xlsx", checksum="c",
+        size_bytes=10, mime_type="")])
+
+    try:
+        job_main.backfill_evidence(worker_conn, "tok", groups, forced=True)
+        assert _still_usable(worker_conn)
+        cur = worker_conn.cursor()
+        cur.execute("""SELECT source_url FROM evidence_index
+                        WHERE entity_id = %s AND e_id = 'E-PROBE-007-R3'""",
+                    (entity_id,))
+        assert cur.fetchone()[0] == url, \
+            "a row whose sibling would have duplicated was left with no URL; " \
+            "the collision took the fillable row down with it"
+    finally:
+        cur = worker_conn.cursor()
+        cur.execute("DELETE FROM parser_observations WHERE run_id = %s", (run_id,))
+        cur.execute("DELETE FROM evidence_index WHERE entity_id = %s", (entity_id,))
+        cur.execute("DELETE FROM runs WHERE id = %s", (run_id,))
+        cur.execute("DELETE FROM entities WHERE id = %s", (entity_id,))
+        worker_conn.commit()

@@ -790,6 +790,13 @@ def evidence_reader_fingerprint() -> str:
     src = inspect.getsource(_wp.parse_evidence_master)
     src += inspect.getsource(stated_package_id)
     src += inspect.getsource(excerpt_agrees)
+    # AND HOW THE ROWS ARE CHOSEN AND WRITTEN, not only how they are read.
+    # Changing the fill from one entity-wide statement to one row at a time
+    # changed WHICH rows end up with a URL — 214 of Golden 1's on
+    # 2026-09-04 — and the fingerprint did not move, so every run stayed
+    # stamped "already read" and the fix would have reached none of them.
+    # A pass whose behaviour changed is a different reader.
+    src += inspect.getsource(backfill_evidence)
     consts = repr((_wp._EV_TABS, _wp._EV_ID_ANCHORS, _wp._FILLABLE,
                    _PACKAGE_ID_MARKER.pattern, _EXCERPT_HEAD))
     return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
@@ -1261,6 +1268,12 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
                 wb = parse_scoring_workbook(p)
             mined = mine_evidence_from_rationales(wb.scores)
             n = clashes = 0
+            # WHAT ACTUALLY WENT WRONG, not what we assume went wrong. This
+            # used to record a fixed sentence blaming the dedup index for
+            # every refused row, which is a claim the code never checked —
+            # the same defect as "117 row(s) filled" for a client that was
+            # already complete. The message PostgreSQL returned goes in.
+            why: dict = {}
             for ev in ledger:
                 m = mined.get(ev["e_id"]) or {}
                 excerpt = ev.get("excerpt") or m.get("excerpt")
@@ -1271,41 +1284,55 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
                 # connector's own E-CC-nnn namespace instead. origin='package'
                 # is exactly the set the ingest created from this ledger.
                 suffix = ev["e_id"].split("-")[-1]
-                # A savepoint per row: filling in an excerpt can collide with
-                # the (entity_id, content_hash) dedup index when two ledger
-                # rows cite the same url and fact. That is a real duplicate,
-                # recorded and skipped — it must not sink the whole run.
-                cur.execute("SAVEPOINT ev_row")
-                try:
-                    # ONLY ROWS THAT WILL ACTUALLY CHANGE. `COALESCE` leaves
-                    # a populated column alone, so without this the statement
-                    # matches every row of the entity and `rowcount` reports
-                    # work that did not happen. MEASURED 2026-09-04T13:41:29Z:
-                    # "Baxter Credit Union - DMA -> 117 row(s) filled", three
-                    # times, for a client already serving 154 of 154 URLs.
-                    # The number has to mean what it says.
-                    cur.execute(
-                        """UPDATE evidence_index
-                              SET source_name = COALESCE(source_name, %s),
-                                  source_url  = COALESCE(source_url, %s),
-                                  excerpt     = COALESCE(excerpt, %s),
-                                  claim_type  = COALESCE(claim_type, %s)
-                            WHERE entity_id = %s
-                              AND origin = 'package'
-                              AND split_part(e_id, '-', 3) = %s
-                              AND ((%s::text IS NOT NULL AND source_name IS NULL)
-                                OR (%s::text IS NOT NULL AND source_url  IS NULL)
-                                OR (%s::text IS NOT NULL AND excerpt     IS NULL)
-                                OR (%s::text IS NOT NULL AND claim_type  IS NULL))""",
-                        (ev.get("source_name"), ev.get("source_url"), excerpt,
-                         ev.get("claim_type"), entity_id, suffix,
-                         ev.get("source_name"), ev.get("source_url"), excerpt,
-                         ev.get("claim_type")))
-                    n += cur.rowcount or 0
-                    cur.execute("RELEASE SAVEPOINT ev_row")
-                except Exception:       # noqa: BLE001 — one row, not the run
-                    cur.execute("ROLLBACK TO SAVEPOINT ev_row")
-                    clashes += 1
+                # ONE ROW AT A TIME, NOT ONE STATEMENT PER LEDGER ROW.
+                #
+                # `split_part(e_id,'-',3) = suffix` with only `entity_id` to
+                # narrow it matches EVERY row this client has with that
+                # number — across all of its runs. Golden 1 has nine.
+                # Setting them all to the same (url, claim_type, excerpt)
+                # makes them byte-identical, the `(entity_id, content_hash)`
+                # dedup index refuses the duplicate, and because it was ONE
+                # statement the savepoint rolled back ALL of them — including
+                # the row that could have been filled.
+                #
+                # MEASURED 2026-09-04T14:05:55Z:
+                #   Golden 1 … HYBRID -> 540 row(s) filled … 604 dedup clash(es)
+                # and 214 rows whose suffix matched a ledger row perfectly
+                # were still serving no URL afterwards. Resolving the ids
+                # first and updating each in its own savepoint costs more
+                # statements and loses only the row that genuinely collides.
+                cur.execute(
+                    """SELECT e_id FROM evidence_index
+                        WHERE entity_id = %s AND origin = 'package'
+                          AND split_part(e_id, '-', 3) = %s
+                          AND (source_name IS NULL OR source_url IS NULL
+                            OR excerpt IS NULL OR claim_type IS NULL)""",
+                    (entity_id, suffix))
+                targets = [row[0] for row in cur.fetchall()]
+                for _target in targets:
+                    cur.execute("SAVEPOINT ev_row")
+                    try:
+                        cur.execute(
+                            """UPDATE evidence_index
+                                  SET source_name = COALESCE(source_name, %s),
+                                      source_url  = COALESCE(source_url, %s),
+                                      excerpt     = COALESCE(excerpt, %s),
+                                      claim_type  = COALESCE(claim_type, %s)
+                                WHERE entity_id = %s AND e_id = %s
+                                  AND ((%s::text IS NOT NULL AND source_name IS NULL)
+                                    OR (%s::text IS NOT NULL AND source_url  IS NULL)
+                                    OR (%s::text IS NOT NULL AND excerpt     IS NULL)
+                                    OR (%s::text IS NOT NULL AND claim_type  IS NULL))""",
+                            (ev.get("source_name"), ev.get("source_url"),
+                             excerpt, ev.get("claim_type"), entity_id, _target,
+                             ev.get("source_name"), ev.get("source_url"),
+                             excerpt, ev.get("claim_type")))
+                        n += cur.rowcount or 0
+                        cur.execute("RELEASE SAVEPOINT ev_row")
+                    except Exception as exc:  # noqa: BLE001 — one row, not the run
+                        cur.execute("ROLLBACK TO SAVEPOINT ev_row")
+                        clashes += 1
+                        why[str(exc)[:120]] = why.get(str(exc)[:120], 0) + 1
             # SECOND PASS, by the id the row itself names. The suffix join
             # above reaches only the rows the INGEST minted from this ledger;
             # a row the connector registered wears `E-CC-nnn` and states its
@@ -1385,10 +1412,11 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
             if clashes:
                 cur.execute(
                     """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
-                       VALUES (%s,'evidence_backfill_dedup_clash',%s, now())""",
-                    (run_id, json.dumps({"rows_skipped": clashes,
-                                         "reason": "filling the excerpt would "
-                                                   "duplicate (entity, content_hash)"})))
+                       VALUES (%s,'evidence_backfill_row_refused',%s, now())""",
+                    (run_id, json.dumps(
+                        {"rows_skipped": str(clashes),
+                         "errors": {k: str(v) for k, v in
+                                    sorted(why.items(), key=lambda kv: -kv[1])[:5]}})))
             conn.commit()
             # RECORDED, stamped with the reader that did it, ON EVERY RUN
             # THIS CLIENT HAS. Without this the scheduled pass re-downloads a

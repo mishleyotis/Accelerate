@@ -82,6 +82,10 @@ class _Cursor:
             self._mode = "todo"
         elif "SELECT e_id, source_name, excerpt" in sql:
             self._mode = "named"
+        elif sql.lstrip().startswith("SELECT e_id FROM evidence_index"):
+            # the suffix pass resolves its targets before touching any of
+            # them, so a collision on one loses only that row
+            self._mode = "targets"
         elif "split_part(e_id, '-', 3)" in sql:
             self.suffix_updates.append(params)
             self.rowcount = 0            # nothing here has a matching suffix
@@ -95,7 +99,11 @@ class _Cursor:
             raise AssertionError(f"unexpected sql: {sql[:70]}")
 
     def fetchall(self):
-        return self._todo if self._mode == "todo" else self._unresolved
+        if self._mode == "todo":
+            return self._todo
+        if self._mode == "targets":
+            return []                    # no suffix-matched row in these cases
+        return self._unresolved
 
 
 class _Conn:
@@ -355,3 +363,20 @@ def test_tightening_the_quote_rule_re_opens_every_run(monkeypatch):
     before = job_main.evidence_reader_fingerprint()
     monkeypatch.setattr(job_main, "_EXCERPT_HEAD", 200)
     assert job_main.evidence_reader_fingerprint() != before
+
+
+def test_changing_how_rows_are_written_re_opens_every_run(monkeypatch):
+    """MEASURED 2026-09-04. The fill changed from one entity-wide statement
+    to one row at a time — which changed WHICH rows end up with a URL, 214 of
+    Golden 1's among them — and the fingerprint covered only the READER. Every
+    run stayed stamped "already been through", so the fix would have reached
+    none of them. A pass whose behaviour changed is a different reader."""
+    before = job_main.evidence_reader_fingerprint()
+
+    def _different(conn, token, groups, *, forced=True, only=""):
+        return 0                                    # a different fill entirely
+
+    monkeypatch.setattr(job_main, "backfill_evidence", _different)
+    assert job_main.evidence_reader_fingerprint() != before, \
+        "the fill changed and the fingerprint did not, so every run already " \
+        "stamped stays closed to the change"
