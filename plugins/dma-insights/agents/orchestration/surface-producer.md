@@ -98,6 +98,22 @@ the same content. When the last producer returns, the sixth page ships and
 the run is ready to promote — the client page is live as the assessment ends
 rather than a transport exercise afterwards.
 
+**On a research-engine run the DRIVER ships, and you are one of its lanes.**
+`engine.pipeline run` (2026-09-03, issue 7) dispatches each `<page>-surface-
+producer` over an `engine.brief page-batch` packet — the connector run id,
+the PATH of the page contract on disk, the reasons the last verdict gave for
+that page, never a payload byte — and then runs `ship_page.py <run> <page>
+--claim --verdicts-out …` itself: the claim takes the run's lease first
+(exit 3 when another session holds it), the verdict lands in a file the
+driver reads, a FAIL re-dispatches only that page with the reasons, and
+`promote_run` is the driver's last call once all six pass on the package's
+version. Two versions, two ingests: techstack and heatmap ship to the scored
+checkpoint while the reports are written and are restaged from disk to the
+packaged version; overview, insights, platform and then context ship there.
+When the driver is running you produce your section files and return; you
+do not submit or promote alongside it. The paragraphs below are for a run
+you drive by hand.
+
 **On a research-engine run, do not wait for the assessment to end before
 producing anything.** The research workbook tells you which pages it can
 already feed:

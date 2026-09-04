@@ -87,6 +87,64 @@ RESEARCH_BRIEF = (
     "Work only your own category; never score, never submit, never promote."
 )
 
+#: The SCORING tier (scoring-p1..p4-producer, scoring-critic). Measured
+#: 2026-09-03: these agents received CORE + SUBAGENT — the production
+#: submit-boundary rule — and no word about the assessment stage they run.
+SCORING_BRIEF = (
+    "dma-insights scoring tier: the workbook is the substrate and column D is "
+    "yours alone. First command (and after ANY interruption or compaction): "
+    "engine.assessment state --run <R> --root <ROOT>. `engine.assessment "
+    "open` has NO --force: it refuses until every category's floors gate is a "
+    "PASS recorded with --require-synthesis, PRELIM is closed, the five-year "
+    "financial trajectory is banked and the run's evidence density meets the "
+    "Golden 1 floors — if it refuses, the research is not finished and you "
+    "say so rather than scoring around it. Score only through "
+    "`engine.assessment score` (it refuses an unsynthesised or unchallenged "
+    "row, a score above its evidence ceiling, a rationale under 150 chars or "
+    "one citing nothing the row carries, a blank AI-and-data overlay); the "
+    "critic is a DIFFERENT actor from every scorer; `engine.assessment gate` "
+    "must record PASS before any report section may be written. Read "
+    "references/templates/gold_reference.json (the Golden 1 shape) and "
+    "skills/dma-assessment/references/scoring_methodology.md before the "
+    "first score. Score only your own pillar; never write a report section, "
+    "never submit, never promote."
+)
+
+#: The REPORT tier (report-research-producer, report-assessment-producer,
+#: report-validator). Measured 2026-09-03: `report-research-producer` matched
+#: the substring "research-" and received the CATEGORY RESEARCHER's brief —
+#: "fire five volleys, engine.brief dispatch --category <YOURS>" — while the
+#: other two received no template or precondition pointer at all.
+REPORT_BRIEF = (
+    "dma-insights report tier: the run is finished before you start, and the "
+    "report is written INTO a pinned Doc, not a remembered shape. First "
+    "command (and after ANY interruption or compaction): engine.cli "
+    "narrative preconditions --run <R> --root <ROOT> --report "
+    "<client_research|assessment> — it must print ready; if it does not, STOP "
+    "and report what it names (PRELIM open, a category gate not PASS, the "
+    "templates unbound, the SCORING gate not PASS, the workbook incomplete, "
+    "the five-year financial trajectory missing). Owner, 2026-09-03: 'report "
+    "writing starts without scoring happening' — this is the check that stops "
+    "it, and `engine.cli narrative write` runs it again on every write. Then "
+    "engine.template binding --run <R> --root <ROOT>, and read the Doc you "
+    "write to — references/templates/client_profile_template.md or "
+    "assessment_report_template.md — and references/templates/"
+    "gold_reference.json (the Golden 1 depth) before you open a section. "
+    "Write only through `engine.cli narrative write` (blocks in the Doc's "
+    "order, the card floors, the countable minimum data); render only through "
+    "`engine.cli report`, which authors into the branded shell; run `python3 "
+    "-m engine.gold_standard report <docx> --kind <k>` on your own output "
+    "before you hand back. The validator writes no section and passes none "
+    "whose citations it did not open. Never score, never submit, never "
+    "promote."
+)
+
+#: The install states on which research, scoring and report work is REFUSED
+#: rather than warned about. UPDATED_MID_SESSION is not one: the disk is
+#: fixed and child processes bind the healed install.
+REFUSING_INSTALL_STATES = ("STALE", "MISSING", "INCOMPLETE", "DIVERGED",
+                           "DISABLED", "MANIFEST_SPLIT")
+
 #: What each start source needs ON TOP of the core rule. `resume`, `compact`
 #: and `fork` used to print nothing at all.
 BY_SOURCE = {
@@ -134,33 +192,69 @@ def install_warning() -> str:
     Fails OPEN, like the rest of this file: a version check that cannot run
     must never cost the routing brief.
     """
+    zip_text = ""
+    try:
+        # The install judging ITSELF (the Cowork zip path): manifest version
+        # vs the plugin version the pinned templates were pinned for.
+        eng = Path(__file__).resolve().parent.parent.parent / "skills" / "dma-research"
+        sys.path.insert(0, str(eng))
+        from engine import template as _T                      # noqa: PLC0415
+        g = _T.zip_guard()
+        if not g.get("ok"):
+            zip_text = (f" INSTALL CHECK (zip guard): this install's manifest is "
+                        f"{g.get('installed')} but its pinned templates require plugin "
+                        f"{g.get('required')} — the upload PREDATES ITS OWN TEMPLATES. "
+                        f"RESEARCH, SCORING AND REPORT WORK IS REFUSED ON THIS INSTALL: "
+                        f"`engine.cli start` refuses it too. {g.get('fix')}")
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        zip_text = ""
     try:
         here = Path(__file__).resolve().parent.parent          # scripts/
         sys.path.insert(0, str(here))
         import plugin_version                                  # noqa: PLC0415
         v = plugin_version.compare()
         if v["ok"]:
-            return ""
+            return zip_text
+        status = str(v.get("status") or "")
+        refusing = status in REFUSING_INSTALL_STATES
         return (f" INSTALL CHECK, from this container rather than from "
                 f"expectation: {plugin_version.summary(v)}. This session is "
-                f"NOT running what the checkout publishes. Before you rely on "
-                f"an agent, a skill or a hook, run `python3 "
-                f"plugins/dma-insights/scripts/doctor.py --heal` — it applies "
-                f"the repair this status needs and re-checks in one command. "
-                f"If it comes back UPDATED_MID_SESSION the disk is fixed and "
+                f"NOT running what the checkout publishes."
+                + (f" RESEARCH, SCORING AND REPORT WORK IS REFUSED ON THIS "
+                   f"INSTALL: do not run /dma-insights:run-assessment, "
+                   f"`engine.pipeline run` or `engine.cli start`, and do not "
+                   f"dispatch any research, scoring or report agent, until "
+                   f"`python3 plugins/dma-insights/scripts/doctor.py --heal` "
+                   f"reports OK — the engine's own `start` refuses on this "
+                   f"state too (measured 2026-09-03: a 0.9.12 install ran "
+                   f"none of the gates the checkout publishes)."
+                   if refusing else
+                   f" Before you rely on an agent, a skill or a hook, run "
+                   f"`python3 plugins/dma-insights/scripts/doctor.py --heal` "
+                   f"— it applies the repair this status needs and re-checks "
+                   f"in one command.")
+                + f" If it comes back UPDATED_MID_SESSION the disk is fixed and "
                 f"THIS session still holds the old roster (they bind once, at "
                 f"start): keep working, but dispatch stages as fresh child "
-                f"processes via `agent_run.py`, which bind the repaired "
-                f"install.")
+                f"processes via `agent_run.py` / `engine.pipeline run`, which "
+                f"bind the repaired install.") + zip_text
     except Exception:            # noqa: BLE001 — fail OPEN, on purpose
-        return ""
+        return zip_text
 
 
 def brief(event: dict) -> str:
     hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
     agent = str(event.get("agent_type") or event.get("agentType") or "")
     if hook == "SubagentStart" or agent:
-        if "research-" in agent:
+        # Route by the agent's TIER, on its name after the plugin prefix.
+        # A substring test on "research-" sent report-research-producer the
+        # category researcher's brief (measured 2026-09-03).
+        name = agent.split(":", 1)[-1]
+        if name.startswith("report-"):
+            return REPORT_BRIEF
+        if name.startswith("scoring-"):
+            return SCORING_BRIEF
+        if name.startswith("research-") or name == "technographic-scanner":
             return RESEARCH_BRIEF
         return CORE + SUBAGENT
     source = str(event.get("source") or "startup")

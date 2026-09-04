@@ -28,6 +28,7 @@ from engine import narrative as N, report_spec as RS, reports
 from engine import ship, template as T, validator
 
 from fixtures import (bank_evidence, bank_peer_medians, client_facts,
+                      report_ready_run,
                       declare_absent, good_synthesis, make_shippable, new_run,
                       score_stage, section_record, sign_off_sections,
                       synthesise, write_report)
@@ -186,7 +187,13 @@ def test_a_focused_engagement_is_a_valid_run_not_a_broken_one(tmp_path):
     assert N.report_min_words_for(wb, RS.SPECS["assessment"]) < \
         RS.SPECS["assessment"].min_words
 
+    # On a REPORT-READY run (the stage preconditions refuse first on an
+    # unscored one, and that refusal is issue 2's, not this test's), a deep
+    # dive on a pillar the run did not assess is refused as INVENTION —
+    # the scope is stated, the run is not broken.
+    ready = report_ready_run(tmp_path / "ready", n=6)
+    rwb = ready.open()
     with pytest.raises(N.NarrativeRefusal, match="no selected subcapability"):
-        N.write(wb, "assessment", "5",
+        N.write(rwb, "assessment", "5",
                 section_record("5", [], report="assessment"),
-                actor="report-assessment-producer", card="P3")
+                actor="report-assessment-producer", card="P3", run=ready)

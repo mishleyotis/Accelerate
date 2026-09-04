@@ -61,8 +61,16 @@ source — the contract forbids a placeholder there and a URL cannot be invented
   plus the alignment appendix). Fill every `{{token}}`; leave none.
 - **Branding via the template's header** (the reference uses `header1.xml`, not embedded
   fonts). Authoring a blank `Document()` throws the template away — do not.
-- **Depth**: ≥60 distinct evidence citations; assessment ≥3,500 words, research ≥2,500.
-  Cite the evidence base, do not summarise it.
+- **Depth, scaled from the reference and enforced**: distinct evidence citations at the
+  Golden 1 density — 115/690 subcaps for the assessment report, 47/690 for the research
+  report, scaled to the run's selected subcaps (`gold_standard.depth_floors`,
+  `reports.citation_floor`); words at the pinned Doc's own LENGTH floors (assessment
+  8,400, research 3,050, scaled by pillars in scope) and never above what the reference
+  itself meets. The old flat "≥60 citations" would have failed Golden 1's own research
+  report (47); a floor the reference fails is not a standard. Cite the evidence base, do
+  not summarise it. Both floors are checked by `reports.check`, `engine.gold_standard
+  report` and `assemble verify` (the gold gate), and `tests/skills/research_engine/
+  test_gold_reference.py` proves every floor is one the reference meets.
 - **Financial trajectory**: render a **5-year+ financial series** in prose — ≥5 fiscal
   years, real financial metrics, and an explicit trend (CAGR / growth / year-over-year),
   reconciling to the workbook's `Financial_Trends`.
@@ -95,11 +103,25 @@ source — the contract forbids a placeholder there and a URL cannot be invented
   unnamed cell (GS-WB-NAMES). The session brief names the templates on every
   research and report session, so no agent starts from a remembered shape.
 - **Evidence depth is gated per cell, not per category**: every askable volley
-  has a logged search for the cell (`volleys_incomplete`, blocking) and an
-  empty cell closes only as a DECLARED absence through `engine.cli absence`
-  (`absence_undeclared_empty`, blocking) — the Golden 1 reference fired
-  `fails` three times in 690 cells; a run to this standard fires it in every
-  cell that has no direct evidence.
+  has a logged search for the cell (`volleys_incomplete`, blocking), the
+  primary diagnostic question is fired (`primary_unfired`, blocking), an
+  empty cell closes only as a DECLARED absence through `engine.cli absence` —
+  refused until an enrichment connector was asked (`absence_single_tool`,
+  blocking) — and the flag has ONE writer, proven by a Provenance row
+  (validator rule 8). Run-level density floors come from `gold_reference.json`
+  (rows per subcap, evidenced share) and gate `assessment open`.
+- **Mechanical, not advisory (2026-09-04)**: the `deny_artefact_writes`
+  PreToolUse hook refuses any `.xlsx`/`.docx` written outside the engine and
+  the retired writers (`populate_workbook.py`, `validate_workbook.py`,
+  `assessment_runner.py`) refuse and name the engine; `engine.cli start`
+  refuses on a stale marketplace install and on a zip whose manifest predates
+  its pinned templates (`engine.template zip-guard`); `narrative.write` and
+  `reports.render` run the stage preconditions on every call (`--force` is a
+  `DRAFT_` no package accepts); the report agents, the scoring tier and the
+  category researchers each get their own session brief naming the templates
+  and the gold reference; the driver (`engine.pipeline`) dispatches every lane
+  over a brief that carries the template paths. Nothing in this list depends
+  on an agent choosing to read this document.
 
 ## No hedges
 

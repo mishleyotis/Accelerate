@@ -142,6 +142,7 @@ def validate(path, *, run_id: str | None = None,
         fails += _rule5_evidence_and_urls(wb)
         fails += _rule6_placeholders(wb)
         fails += _rule7_run_id(wb, run_id)
+        fails += _rule8_absence_declared(wb, want)
     finally:
         wb.close()
     return fails
@@ -244,6 +245,20 @@ def _rule3_rows(wb) -> list[Failure]:
             out.append(Failure(
                 3, "rows", f"{sheet}: id(s) belonging to another pillar: "
                            f"{wrong[:8]}", sheet=sheet))
+        # A seeded row carries its catalogue name (goeasy GSY-03: 656 blank
+        # names shipped). The seed refuses an unnamed cell; this makes a
+        # name blanked AFTER seeding fail the workbook's own validator too,
+        # at every stage, rather than only at `assessment open`.
+        unnamed = [str(r[0]).strip() for r in
+                   ws.iter_rows(min_row=2, max_row=ws.max_row, values_only=True)
+                   if r and r[0] is not None and str(r[0]).strip()
+                   and (len(r) < 2 or r[1] is None or not str(r[1]).strip())]
+        if unnamed:
+            out.append(Failure(
+                3, "rows",
+                f"{sheet}: {len(unnamed)} row(s) carry no SubCap_Name "
+                f"({unnamed[:6]}); names come from the catalogue at seed "
+                f"time and are never blank", sheet=sheet))
         seen |= set(ids)
     if not seen:
         out.append(Failure(3, "rows",
@@ -284,6 +299,54 @@ def _rule4_scores(wb, expect_scores: bool) -> list[Failure]:
                 f"{sheet}: {len(scored)} scored row(s) at the research stage, "
                 f"first {scored[0]}. Column D is the assessment's to write.",
                 sheet=sheet))
+    return out
+
+
+# ── rule 8 · an absence is DECLARED, never merely flagged ────────────────
+
+def _rule8_absence_declared(wb, expect_scores: bool) -> list[Failure]:
+    """The absence flag has one writer, and the validator can prove it.
+
+    `engine.cli absence` is the only path that writes `Absence_Claimed` AND
+    the Provenance row Step == 'absence'; a flag without its row was written
+    around the command (a notebook consolidation, a synthesis record, a hand
+    edit — all measured 2026-09-03). At the assessment stage an undeclared
+    NO_EVIDENCE row is a cell nobody searched, and it must not be scored."""
+    out = []
+    prov = wb["Provenance"] if "Provenance" in wb.sheetnames else None
+    declared: set[str] = set()
+    if prov is not None:
+        for r in prov.iter_rows(min_row=2, values_only=True):
+            if r and len(r) > 1 and str(r[1] or "").strip() == "absence":
+                declared.add(str(r[0] or "").strip())
+    fi = C.PILLAR_COLUMNS.index("Evidence_IDs") + 1
+    ai = C.PILLAR_COLUMNS.index("Absence_Claimed") + 1
+    for sheet in C.PILLAR_SHEETS:
+        ws = wb[sheet]
+        forged, undeclared = [], []
+        for r in range(2, ws.max_row + 1):
+            sub = str(ws.cell(row=r, column=1).value or "").strip()
+            if not sub:
+                continue
+            flag = str(ws.cell(row=r, column=ai).value or "").strip().upper() \
+                if ws.max_column >= ai else ""
+            eids = str(ws.cell(row=r, column=fi).value or "").strip()
+            if flag in ("YES", "TRUE", "1") and sub not in declared:
+                forged.append(sub)
+            if expect_scores and eids == C.NO_EVIDENCE and sub not in declared:
+                undeclared.append(sub)
+        if forged:
+            out.append(Failure(
+                8, "absence",
+                f"{sheet}: {len(forged)} row(s) carry Absence_Claimed with no "
+                f"Provenance 'absence' row — the flag was written around "
+                f"`engine.cli absence`: {forged[:8]}", sheet=sheet))
+        if undeclared:
+            out.append(Failure(
+                8, "absence",
+                f"{sheet}: {len(undeclared)} NO_EVIDENCE row(s) reach the "
+                f"assessment stage undeclared — score nothing that was not "
+                f"searched: {undeclared[:8]}", sheet=sheet))
     return out
 
 

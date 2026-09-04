@@ -211,13 +211,38 @@ def _ops_since_checkpoint(wb: RunWorkbook) -> int:
 
 def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
-                  outcome: str = "") -> int:
+                  outcome: str = "", prelim: bool = False) -> int:
     """Log one search op and return the running count.
 
     Every search is logged before its results are used, so the budget check
-    reads a real number rather than an agent's recollection of one."""
+    reads a real number rather than an agent's recollection of one.
+
+    A search names its CELL and its FACET, or it is a PRELIM search
+    (`prelim=True`: institution-profile retrieval that belongs to no cell).
+    Measured 2026-09-03: `append_search(subcap=None, facet=None,
+    tool="my-made-up-tool")` was accepted — a row that spent the search
+    budget and counted toward no volley, with a tool nobody could census.
+    The tool vocabulary is closed (contract.SEARCH_TOOLS) so the gate can
+    see WHICH connectors were asked before a cell is declared empty."""
     if facet is not None and facet not in C.DQ_FACETS:
         raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
+    tool = str(tool or "").strip().lower()
+    if tool not in C.SEARCH_TOOLS:
+        raise LedgerRefusal(
+            f"tool {tool!r} is not one of {C.SEARCH_TOOLS}. The Search_Log "
+            f"records WHICH connector ran so the gate can count the "
+            f"enrichment effort behind an empty cell; a free-text tool name "
+            f"is a tool nobody can count.")
+    if not prelim and (not str(subcap or "").strip() or not str(facet or "").strip()):
+        raise LedgerRefusal(
+            "a search that names no --subcap and no --facet counts toward "
+            "nothing the gate measures. Pass --subcap <cell> --facet "
+            "<primary|works|fails|value|contradicts|corroborates|ai_*>, or "
+            "--prelim for institution-profile retrieval that belongs to no "
+            "cell.")
+    if prelim:
+        subcap = subcap or None
+        facet = facet or None
     # THE CEILING IS A WALL, NOT A NUMBER IN A REPORT.
     #
     # SEARCH_OP_CEILING has been the rule since R27 — "a conversation that
@@ -499,6 +524,26 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
                 problems.append(f"{f}: NOT_RUN with no reason worth reading")
         elif Q.is_boilerplate(v):
             problems.append(f"{f}: {Q.is_boilerplate(v)}")
+    # THE ABSENCE FLAG HAS ONE WRITER. A synthesis record on an EMPTY row
+    # that carries Absence_Claimed is trying to close the cell as an absence
+    # without the volleys, the ladder and the register check that
+    # `declare_absence` proves — refused, naming the sanctioned command. On
+    # an evidenced row the flag is a label on the claim (the source itself
+    # documents an absence) and `is_declared_absent` never reads it as a
+    # closed cell, because the row carries evidence.
+    row_eids = [i for i in _split_ids(row.get("Evidence_IDs"))
+                if i and i != C.NO_EVIDENCE]
+    if (not row_eids
+            and str(record.get("Absence_Claimed") or "").strip().upper()
+            in ("YES", "TRUE", "1")
+            and subcap not in declared_absences(wb)):
+        problems.append(
+            "Absence_Claimed is not a synthesis field on an empty cell. A "
+            "cell with no evidence closes ONLY through `engine.cli absence "
+            f"--run <R> --subcap {subcap} --actor <you> --ladder '<json>' "
+            "--proxy-log '…' --hunted '…'`, which proves the five volleys, "
+            "the primary question, an enrichment connector and the ladder "
+            "before it writes the flag")
     # A claim of absence carries obligations (AUD-0079).
     if Q.claims_absence(claim):
         if str(record.get("Absence_Claimed") or "").strip().upper() not in \
@@ -687,7 +732,15 @@ def volley_status(wb: RunWorkbook, subcap: str,
     return {"subcap": subcap, "askable": want,
             "fired": {f: fired.get(f, 0) for f in want},
             "missing": missing, "complete": not missing,
-            "searches": len(mine), "tools": sorted(tools)}
+            # The toolkit's own diagnostic question (DQ order 0) and the
+            # three AI-overlay probes (orders 6-8) were on every card and in
+            # no count — a cell could close with its primary question never
+            # asked. Counted here; the gate blocks on the primary.
+            "primary_fired": fired.get(C.PRIMARY_FACET, 0),
+            "ai_fired": {f: fired.get(f, 0) for f in C.AI_FACETS},
+            "searches": len(mine), "tools": sorted(tools),
+            "enrichment_tools": sorted(t for t in tools
+                                       if t in C.ENRICHMENT_TOOLS)}
 
 
 #: The rungs an absence ladder is climbed in, and the two that are always
@@ -765,6 +818,22 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
             f"Every askable facet needs a logged `engine.cli search --subcap "
             f"{subcap} --facet <f>` before the cell may be declared empty — "
             f"'we looked and found nothing' has to be true of ALL five angles")
+    if not vs["primary_fired"]:
+        problems.append(
+            f"the primary diagnostic question was never searched for {subcap}: "
+            f"`engine.cli search --run <R> --subcap {subcap} --facet primary "
+            f"--query '<the toolkit's DQ, bound to the entity>'` — the five "
+            f"volleys answer the primary question, and without it they answer "
+            f"nothing in particular")
+    if not vs["enrichment_tools"]:
+        problems.append(
+            f"every search for {subcap} ran through {vs['tools'] or ['nothing']}; "
+            f"an absence is declared only after an enrichment connector has "
+            f"also been asked (one of {list(C.ENRICHMENT_TOOLS)}). Fire "
+            f"`engine.cli search --run <R> --subcap {subcap} --facet <f> --tool "
+            f"exa --query …` (or tavily / clay / drive) and retry — 'no "
+            f"enrichment effort' is the owner's 2026-09-03 finding, and this "
+            f"is the check that stops it")
     rep = Q.ladder_report(ladder or [], searches)
     rungs = set(rep["rungs"])
     owed = [r for r in ABSENCE_RUNGS_REQUIRED if r not in rungs]
@@ -827,11 +896,38 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
             "rungs": sorted(rungs), "tools": vs["tools"]}
 
 
-def is_declared_absent(row: dict) -> bool:
-    return (str(row.get("Absence_Claimed") or "").strip().upper()
-            in ("YES", "TRUE", "1")
-            and not [i for i in _split_ids(row.get("Evidence_IDs"))
-                     if i and i != C.NO_EVIDENCE])
+def declared_absences(wb: RunWorkbook) -> set[str]:
+    """Cells with a Provenance row Step == 'absence' — the record only
+    `declare_absence` writes, after its volley, ladder and register checks."""
+    return {str(r.get("SubCap_ID") or "").strip()
+            for r in wb.rows("Provenance")
+            if str(r.get("Step") or "").strip() == "absence"}
+
+
+def is_declared_absent(row: dict, wb: RunWorkbook | None = None, *,
+                       declared: set[str] | None = None) -> bool:
+    """True only for a cell CLOSED BY `declare_absence`.
+
+    Measured 2026-09-03: this read two cells — the flag and an empty
+    Evidence_IDs — so anything that could set `Absence_Claimed` (a notebook
+    consolidation, a synthesis record, a hand edit) produced a row the
+    worklist, the handoff and the scorer all treated as a searched, declared
+    absence, with zero Search_Log rows behind it. Now the flag is necessary
+    and not sufficient: the cell must also carry the Provenance row that
+    only `declare_absence` writes. Callers that hold the workbook pass it
+    (or a precomputed `declared` set inside a loop); a bare `row` call keeps
+    the two-cell answer for legacy readers and is the weaker check."""
+    flagged = (str(row.get("Absence_Claimed") or "").strip().upper()
+               in ("YES", "TRUE", "1")
+               and not [i for i in _split_ids(row.get("Evidence_IDs"))
+                        if i and i != C.NO_EVIDENCE])
+    if not flagged:
+        return False
+    if declared is None and wb is not None:
+        declared = declared_absences(wb)
+    if declared is None:
+        return True
+    return str(row.get("SubCap_ID") or "").strip() in declared
 
 
 def worklist(wb: RunWorkbook, category: str) -> dict:
@@ -846,6 +942,7 @@ def worklist(wb: RunWorkbook, category: str) -> dict:
     closed, volleyed, in_volley, pending, declared = [], [], [], [], []
     searched_empty = []
     searches = wb.rows("Search_Log")
+    declared_set = declared_absences(wb)
     for r in wb.scoring_rows():
         cell = str(r.get("SubCap_ID") or "").strip()
         if not cell.startswith(category + "."):
@@ -853,7 +950,7 @@ def worklist(wb: RunWorkbook, category: str) -> dict:
         has_ev = bool([i for i in _split_ids(r.get("Evidence_IDs"))
                        if i and i != C.NO_EVIDENCE])
         has_syn = bool(str(r.get("Dominant_Claim") or "").strip())
-        if is_declared_absent(r):
+        if is_declared_absent(r, declared=declared_set):
             declared.append(cell)
             closed.append(cell)
         elif has_syn:

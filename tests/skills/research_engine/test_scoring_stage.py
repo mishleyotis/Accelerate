@@ -130,10 +130,16 @@ def test_a_declared_absence_scores_at_the_cap_with_low_confidence(tmp_path):
 
 
 def test_high_confidence_needs_two_source_identities(tmp_path):
-    run = new_run(tmp_path, n=2)
+    # A GATED run — `open_stage` has no --force any more (2026-09-03), so the
+    # category must actually pass its floors gate before scoring opens.
+    run = new_run(tmp_path, n=6)
     wb = run.open()
-    cell = wb.selected_subcaps()[0]
-    from fixtures import fire_volleys
+    cells = wb.selected_subcaps()
+    cell = cells[0]
+    from fixtures import declare_absent, fire_volleys
+    for c in cells[2:5]:            # five rows each: the category floor is 20 items
+        synthesise(wb, c, good_synthesis(c, bank_evidence(wb, c, n=5)))
+    declare_absent(wb, cells[5])
     fire_volleys(wb, cell)
     eids = [L.append_evidence(
         wb, source_name=f"Annual Report p{i}", source_url=f"https://acme.example/ar#{i}",
@@ -143,10 +149,10 @@ def test_high_confidence_needs_two_source_identities(tmp_path):
                  "in the 2025 report.")) for i in range(3)]
     syn = good_synthesis(cell, eids); syn["Claim_Label"] = "INFERENCE"
     synthesise(wb, cell, syn)
-    synthesise(wb, wb.selected_subcaps()[1],
-               good_synthesis(wb.selected_subcaps()[1], bank_evidence(wb, wb.selected_subcaps()[1])))
-    floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
-    A.open_stage(wb, run.qa_dir, force=True)
+    synthesise(wb, cells[1], good_synthesis(cells[1], bank_evidence(wb, cells[1], n=5)))
+    v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert v["gate"] == "PASS", v["blocking"]
+    A.open_stage(wb, run.qa_dir)
     with pytest.raises(ScoringRefusal, match="two source identities"):
         _score(wb, cell, eids, confidence="HIGH")
 

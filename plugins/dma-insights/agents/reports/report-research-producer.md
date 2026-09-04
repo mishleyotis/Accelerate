@@ -35,7 +35,14 @@ that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
 
-## Before you write a word: the preconditions, then the template
+## Before you write a word: the brief, the preconditions, then the template
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over an `engine.brief report-batch` packet: the pinned
+template paths, this report's sections with THIS run's floors (card minimums
+and word floors scale with the pillars in scope), the failing preconditions
+if any, and the exact `engine.cli narrative write` command. Read it before
+anything else; the command below confirms what it says.
 
 ```
 engine.cli narrative preconditions --run <R> --root <ROOT> --report client_research
@@ -64,8 +71,8 @@ with the countable MINIMUM DATA rules the write refuses on.
 |---|---|---|---|---|---|
 | 1 | Firmographics | 150w | `Firmographics`, `Evidence_Detail` | required | `overview.firmographics` |
 | 2 | Executive Summary | 500w | `Evidence_Detail`, `Tech_Register`, `Coverage`, `Report_Narrative` | required | `overview.exec_summary`, `overview.why_now` |
-| 3 | Entity Profile | 400w | `Evidence_Detail`, `Firmographics`, `Issue_Register`, `Report_Narrative` | required | `overview.firmographics`, `context.regulatory_standing` |
-| 4 | Market Position and Trends | 500w | `Peer_Benchmarks`, `Entity_Timeline`, `Evidence_Detail`, `Handoff_Lock` | required | `overview.scores`, `overview.financial_series`, `context.timeline`, `overview.sentiment`, `context.context_sentiment` |
+| 3 | Entity Profile | 400w | `Evidence_Detail`, `Firmographics`, `Issue_Register`, `Report_Narrative`, `Financial_Trends` | required | `overview.firmographics`, `context.regulatory_standing` |
+| 4 | Market Position and Trends | 500w | `Peer_Benchmarks`, `Entity_Timeline`, `Evidence_Detail`, `Handoff_Lock`, `Financial_Trends` | required | `overview.scores`, `overview.financial_series`, `context.timeline`, `overview.sentiment`, `context.context_sentiment` |
 | 5 | Strategic Intelligence | 700w | `Evidence_Detail`, `Tech_Register`, `Tech_Peer_Deployments`, `Report_Narrative` | required | `insights.insights`, `insights.landscape`, `techstack.techstack`, `overview.leadership`, `overview.thought_leadership`, `context.acquisitions` |
 | 6 | Client Priorities | 300w | `Focus_Areas`, `Evidence_Detail` | required | `heatmap.focus_areas`, `platform.starters` |
 | 7 | Risk and Issues | 400w | `Issue_Register`, `Search_Log`, `Evidence_Detail`, `Cap_Triggers` | required | `context.issue_register`, `context.regulatory_standing` |
@@ -100,12 +107,14 @@ engine.cli narrative write --run <R> --root <ROOT> \
     --report client_research --section <N> --json section.json --actor report-research-producer
 ```
 
-A section whose kind is `insight_card`, `finding` or `recommendation` is a
-**list**, not a passage: each item is its own row and needs its own
-`--card <id>`. Without one the write is refused — and before that refusal
-existed, every write to such a section overwrote the last, so §5 held one
-row against a blocking minimum of eight and the floor was arithmetically
-unreachable through the only sanctioned writer.
+A section whose kind is `pillar` or `recommendation` (the Doc's card
+sections — one pillar deep dive per pillar in scope, five to eight `REC-NN`
+recommendations) is a **list**, not a passage: each card is its own row and
+needs its own `--card <id>`. Without one the write is refused — and before
+that refusal existed, every write to such a section overwrote the last, so a
+list section held one row against its blocking card floor and the floor was
+arithmetically unreachable through the only sanctioned writer. The floors
+column in the table above is the pinned Doc's, per section.
 
 `engine.cli narrative contract --report client_research` prints each section's blocks,
 inputs, citation rule and the surfaces it feeds. Read it before you write.

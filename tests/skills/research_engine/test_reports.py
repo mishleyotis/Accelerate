@@ -160,12 +160,23 @@ def test_the_coverage_table_is_read_from_the_workbook_at_render_time(tmp_path):
 
 
 def test_changing_the_workbook_changes_the_report(tmp_path):
-    """The property that makes 'one substrate' true rather than asserted."""
+    """The property that makes 'one substrate' true rather than asserted:
+    a sheet the report CURATES is read at render time, so a row added
+    through the engine after the narrative was written is in the next
+    render. And the register is NOT one of those sheets — the pinned Doc's
+    §11 MUST NOT "reproduce the evidence register" (it lives in the
+    workbook), so an uncited register row stays out of the document while
+    the sections' own citations are unchanged."""
+    from engine import assessment as A
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["assessment"]
     _narrate(wb, spec)
     sign_off_sections(wb)
     before = reports.render(wb, spec, run.deliverables)["citations"]
+    # a sanctioned write to a sheet §8 curates …
+    A.solution(wb, sol_id="SOL-02", name="Real-time fraud analytics",
+               platform="Verafin", categories=[wb.selected_subcaps()[0][:4]])
+    # … and an uncited register row, which the Doc forbids reproducing
     L.append_evidence(wb, source_name="NCUA call report 2025",
                       source_url="https://ncua.example/cr25", tier="T1",
                       excerpt="Digital channel volumes for Acme Credit Union "
@@ -175,7 +186,8 @@ def test_changing_the_workbook_changes_the_report(tmp_path):
     doc = Document(r["path"])
     text = "\n".join(p.text for p in doc.paragraphs) + "".join(
         c.text for t in doc.tables for row in t.rows for c in row.cells)
-    assert "NCUA call report 2025" in text
+    assert "Real-time fraud analytics" in text
+    assert "NCUA call report 2025" not in text       # not cited → not reproduced
     assert before == r["citations"]  # the narrative's citations, unchanged
 
 

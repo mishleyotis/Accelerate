@@ -34,7 +34,8 @@ def _fire(wb, n, *, start=0):
     for i in range(start, start + n):
         L.append_search(wb, subcap=None, facet="works",
                         query=f"probe {i} — distinct query text",
-                        tool="web_search", hits=2, kept=1, outcome="kept 1")
+                        tool="web_search", hits=2, kept=1, outcome="kept 1",
+                        prelim=True)
 
 
 def test_the_ceiling_refuses_rather_than_reporting(tmp_path):

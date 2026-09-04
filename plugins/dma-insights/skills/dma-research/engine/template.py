@@ -60,7 +60,14 @@ from . import contract as C
 TEMPLATES_DIR = Path(__file__).resolve().parents[3] / "references" / "templates"
 PINNED_FILES = ("report_templates.json", "workbook_template.json",
                 "gold_reference.json", "client_profile_template.md",
-                "assessment_report_template.md")
+                "assessment_report_template.md",
+                # The branded .docx SHELL both reports are authored INTO
+                # (header1.xml / footer1.xml chrome, embedded DM Sans). Its own
+                # headings are an older section list and are cleared on
+                # render; the pinned Docs above are the format. Owner,
+                # 2026-09-03: "Doc sections inside the branded docx".
+                "report_shell.docx")
+REPORT_SHELL = TEMPLATES_DIR / "report_shell.docx"
 
 #: The scoring-workbook template of record, in the owner's Drive.
 SHEET_ID = "18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc"
@@ -157,6 +164,8 @@ def bind(run, wb=None) -> dict:
         "digest": d["_all"],
         "files": {k: v for k, v in d.items() if k != "_all"},
         "templates_dir": str(TEMPLATES_DIR),
+        "plugin_version": installed_manifest_version(),
+        "requires_plugin_version": templates_require(),
         "workbook": {"contract": C.WORKBOOK_CONTRACT, "sheets": len(C.SHEETS),
                      "drive_template_id": SHEET_ID},
         "reports": {k: {"title": s.title, "drive_doc_id": s.drive_doc_id,
@@ -194,6 +203,62 @@ def binding_state(wb) -> dict:
             "fix": None if rec.startswith(now) else
             "the pinned templates changed since this run was bound; re-run "
             "`engine.template bind` and re-read the report contract"}
+
+
+# ── the zip guard: does the install carry the engine its templates need? ─
+#
+# Owner decision 2026-09-03: the plugin runs BOTH as a Claude Code marketplace
+# checkout and as a zip uploaded to Cowork. `plugin_version.compare()` guards
+# the first (installed cache vs the repo's published manifest); a Cowork
+# session has no repo to compare against, so the zip has to judge itself. The
+# pinned templates record the plugin version they were pinned FOR
+# (`requires_plugin_version`); an install whose own manifest is older than
+# that carries templates from a newer tree than its engine, hooks and agents
+# — a mixed upload — and refuses. Fail-open on anything unreadable, like every
+# other guard in this plugin.
+
+PLUGIN_MANIFEST = Path(__file__).resolve().parents[3] / ".claude-plugin" / "plugin.json"
+
+
+def _semver(v) -> tuple | None:
+    m = re.fullmatch(r"\s*(\d+)\.(\d+)\.(\d+)\s*", str(v or ""))
+    return tuple(int(x) for x in m.groups()) if m else None
+
+
+def installed_manifest_version(manifest: Path | None = None) -> str | None:
+    try:
+        return json.loads((manifest or PLUGIN_MANIFEST).read_text()).get("version")
+    except (OSError, ValueError):
+        return None
+
+
+def templates_require(templates_dir: Path | None = None) -> str | None:
+    try:
+        return json.loads(((templates_dir or TEMPLATES_DIR) / "report_templates.json")
+                          .read_text()).get("requires_plugin_version")
+    except (OSError, ValueError):
+        return None
+
+
+def zip_guard(manifest: Path | None = None, templates_dir: Path | None = None) -> dict:
+    """{ok, installed, required, status, fix}. `status` is one of
+    OK · PREDATES_TEMPLATES (refuse) · UNREADABLE (fail open, say so)."""
+    inst = installed_manifest_version(manifest)
+    req = templates_require(templates_dir)
+    a, b = _semver(inst), _semver(req)
+    if a is None or b is None:
+        return {"ok": True, "status": "UNREADABLE", "installed": inst, "required": req,
+                "fix": None, "note": "manifest or templates unreadable; not judged"}
+    if a < b:
+        return {"ok": False, "status": "PREDATES_TEMPLATES", "installed": inst,
+                "required": req,
+                "fix": (f"this install's manifest is {inst} but its pinned templates "
+                        f"were pinned for plugin {req}: the zip (or cache) predates the "
+                        f"engine that enforces them. Re-upload the zip that "
+                        f"`python3 plugins/dma-insights/scripts/package_plugin.py` "
+                        f"builds from the current checkout, or `doctor.py --heal` "
+                        f"the marketplace install.")}
+    return {"ok": True, "status": "OK", "installed": inst, "required": req, "fix": None}
 
 
 def _utcnow() -> str:
@@ -248,8 +313,15 @@ def main(argv=None) -> int:
     sub.add_parser("report-drift",
                    help="the Doc exports vs report_templates.json, heading by heading")
     sub.add_parser("pins", help="the pinned files and their digests")
+    sub.add_parser("zip-guard",
+                   help="does this install's manifest carry the plugin version "
+                        "its pinned templates require? (Cowork zip / cache)")
 
     a = ap.parse_args(argv)
+    if a.cmd == "zip-guard":
+        g = zip_guard()
+        print(json.dumps(g, indent=2))
+        return 0 if g["ok"] else 1
     if a.cmd == "pins":
         print(json.dumps(pinned_digest(), indent=2)); return 0
     if a.cmd == "report-drift":

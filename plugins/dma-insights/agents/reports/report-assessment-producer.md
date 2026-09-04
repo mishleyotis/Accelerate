@@ -35,7 +35,14 @@ that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
 
-## Before you write a word: the preconditions, then the template
+## Before you write a word: the brief, the preconditions, then the template
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over an `engine.brief report-batch` packet: the pinned
+template paths, this report's sections with THIS run's floors (card minimums
+and word floors scale with the pillars in scope), the failing preconditions
+if any, and the exact `engine.cli narrative write` command. Read it before
+anything else; the command below confirms what it says.
 
 ```
 engine.cli narrative preconditions --run <R> --root <ROOT> --report assessment
@@ -62,14 +69,14 @@ with the countable MINIMUM DATA rules the write refuses on.
 
 | § | heading | floor | reads | cites | feeds |
 |---|---|---|---|---|---|
-| 1 | Executive Summary | 600w | `Pillar_Rollup`, `Category_Rollup`, `Peer_Benchmarks`, `Subcap_Scores`, `Evidence_Detail` | required | `overview.exec_summary`, `overview.findings` |
+| 1 | Executive Summary | 600w | `Pillar_Rollup`, `Category_Rollup`, `Peer_Benchmarks`, `Subcap_Scores`, `Evidence_Detail`, `Financial_Trends` | required | `overview.exec_summary`, `overview.findings` |
 | 2 | Assessment Methodology | 300w | `Catalogue_Meta`, `Pillar_Weights`, `Maturity_Rubric`, `Peer_Benchmarks` | not required | — |
 | 3 | Issue Impact and Cap Analysis | 400w | `Issue_Register`, `Cap_Triggers`, `Subcap_Scores`, `Caps_Applied_Log` | required | `overview.ceilings`, `heatmap.safeguard_gates` |
 | 4 | Assessment Results | 350w | `Pillar_Rollup`, `Category_Rollup`, `Pillar_Weights`, `Peer_Benchmarks` | required | `overview.scores`, `heatmap.workbook_scores` |
-| 5 | Pillar Deep Dives | 3200w · 1+ × 60w | `Subcap_Scores`, `Category_Rollup`, `Peer_Benchmarks`, `Platform_Peer_Adoption`, `Evidence_Detail`, `Tech_Register` | required | `heatmap.workbook_scores`, `heatmap.cell_evidence`, `techstack.techstack`, `insights.landscape`, `platform.platform_story` |
-| 6 | Benchmark and Technology Estate | 700w | `Peer_Benchmarks`, `Platform_Peer_Adoption`, `Tech_Register`, `Tech_Peer_Deployments`, `Handoff_Lock`, `Evidence_Detail` | required | `overview.scores`, `techstack.techstack`, `insights.landscape` |
+| 5 | Pillar Deep Dives | 3200w · 4 cards `P…` × 800w | `Subcap_Scores`, `Category_Rollup`, `Peer_Benchmarks`, `Platform_Peer_Adoption`, `Evidence_Detail`, `Tech_Register` | required | `heatmap.workbook_scores`, `heatmap.cell_evidence`, `techstack.techstack`, `insights.landscape`, `platform.platform_story` |
+| 6 | Benchmark and Technology Estate | 700w | `Peer_Benchmarks`, `Platform_Peer_Adoption`, `Tech_Register`, `Tech_Peer_Deployments`, `Handoff_Lock`, `Evidence_Detail`, `Financial_Trends` | required | `overview.scores`, `techstack.techstack`, `insights.landscape` |
 | 7 | Gap Prioritisation | 450w | `Category_Rollup`, `Peer_Benchmarks`, `Issue_Register`, `Evidence_Detail` | required | `overview.opportunity`, `overview.findings`, `heatmap.focus_areas` |
-| 8 | Recommendations | 1750w · 1+ × 60w | `Solution_Catalogue`, `Platform_Peer_Adoption`, `Category_Rollup`, `Subcap_Scores`, `Tech_Register`, `Evidence_Detail`, `Recommendations` | required | `platform.recommendations`, `platform.platform_story`, `platform.roadmap`, `overview.opportunity` |
+| 8 | Recommendations | 1750w · 5-8 cards `REC-…` × 350w | `Solution_Catalogue`, `Platform_Peer_Adoption`, `Category_Rollup`, `Subcap_Scores`, `Tech_Register`, `Evidence_Detail`, `Recommendations` | required | `platform.recommendations`, `platform.platform_story`, `platform.roadmap`, `overview.opportunity` |
 | 9 | Transformation Roadmap | 300w | `Recommendations`, `Pillar_Rollup`, `Report_Narrative` | required | `platform.roadmap`, `platform.stairstep` |
 | 10 | Data Gaps and Confidence | 250w | `Subcap_Scores`, `Coverage_Map`, `Search_Log`, `Enrichment_Needed` | not required | `heatmap.alerts`, `heatmap.evidence_age` |
 | 11 | Workbook Traceability | 100w | `Evidence_Detail`, `Subcap_Scores`, `Run_Metadata` | not required | `heatmap.evidence`, `heatmap.cell_evidence` |
@@ -108,12 +115,14 @@ engine.cli narrative write --run <R> --root <ROOT> \
     --report assessment --section <N> --json section.json --actor report-assessment-producer
 ```
 
-A section whose kind is `insight_card`, `finding` or `recommendation` is a
-**list**, not a passage: each item is its own row and needs its own
-`--card <id>`. Without one the write is refused — and before that refusal
-existed, every write to such a section overwrote the last, so §5 held one
-row against a blocking minimum of eight and the floor was arithmetically
-unreachable through the only sanctioned writer.
+A section whose kind is `pillar` or `recommendation` (the Doc's card
+sections — one pillar deep dive per pillar in scope, five to eight `REC-NN`
+recommendations) is a **list**, not a passage: each card is its own row and
+needs its own `--card <id>`. Without one the write is refused — and before
+that refusal existed, every write to such a section overwrote the last, so a
+list section held one row against its blocking card floor and the floor was
+arithmetically unreachable through the only sanctioned writer. The floors
+column in the table above is the pinned Doc's, per section.
 
 `engine.cli narrative contract --report assessment` prints each section's blocks,
 inputs, citation rule and the surfaces it feeds. Read it before you write.

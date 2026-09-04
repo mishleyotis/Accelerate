@@ -99,10 +99,12 @@ def _for_section(rec: dict, report: str, section: str) -> dict:
 
 
 def _ready_run(tmp_path):
-    run = new_run(tmp_path, n=6)
-    wb = run.open()
-    eids = bank_evidence(wb, wb.selected_subcaps()[0], n=3)
-    return run, wb, eids
+    # A run a section may be WRITTEN on: researched, gated, scored. The
+    # stage preconditions run on every write since 2026-09-03, so the
+    # anatomy tests below need a run that has earned its report.
+    from fixtures import scored_run
+    run, wb, cells, ev = scored_run(tmp_path, n=6)
+    return run, wb, list(ev[cells[0]])
 
 
 # ── the section is an argument, or it is refused ─────────────────────────

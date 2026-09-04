@@ -279,9 +279,12 @@ This prevents the schema inconsistencies documented in QA-010.
 }
 ```
 
-**Hard enforcement:** `scripts/merge_evidence.py` and `scripts/validate_workbook.py` reject
-items not conforming to this schema. Field aliases (e.g., `id` instead of `evidence_id`,
-`finding` instead of `facts`) are NOT accepted.
+**Hard enforcement:** `engine.cli evidence` refuses an item not conforming to this
+schema (an excerpt outside 50–500 verbatim characters, an off-vocabulary tier, a cell the run
+did not select), and `engine.cli validate` fails the workbook on any row that got in around it.
+Field aliases (e.g., `id` instead of `evidence_id`, `finding` instead of `facts`) are NOT
+accepted. (`scripts/validate_workbook.py` is retired — it validated the 22-column layout the
+engine replaced, and it refuses, naming `engine.cli validate`.)
 
 ---
 
@@ -410,22 +413,39 @@ Per subcap: search → fact-level extraction `[E-xxx:Fy]` → tier classify → 
 calculate ERS → label claim → map to subcap IDs → check red flags.
 For HYBRID/INTERNAL: 5-Layer Analysis on every internal doc.
 
-**Thin Evidence Gate (per subcap, fires BEFORE moving to next subcap):**
-- If <3 evidence items after initial searches → execute proxy searches (Tiers 7-10) immediately
-- If signals still unknown after proxy → document as NO_EVIDENCE with full search log
-- NEVER record thin/vague evidence — either substantive evidence or NO_EVIDENCE
-- Every evidence item MUST have a specific URL (not blank, not "multiple searches")
+**The empty-cell gate — what the ENGINE enforces (2026-09-03; owner: "some
+subcaps are marked as no evidence without any enrichment efforts").** The
+tiers above are how you THINK about a search; what closes a cell is
+measured by `engine.floors_gate` and refused by `engine.cli absence`:
 
-### Step 4: Populate Workbook Row
-Columns A-I (from Pillar XLSX), K (Evidence_IDs), L (URLs), M (Tier), U (Excerpt), V (Source).
-**J, N-T: LEAVE EMPTY.** No evidence found: G=`NO_EVIDENCE`, U=search attempt documentation.
+- every askable volley (`primary`, `works`, `fails`, `value`, `contradicts`,
+  `corroborates`) has a LOGGED `engine.cli search --subcap <cell> --facet <f>`
+  — `volleys_incomplete` and `primary_unfired` are blocking gate terms;
+- at least one search for the cell ran through an ENRICHMENT connector
+  (`--tool exa|tavily|clay|explorium|vibe|indeed|quartr|drive`), not only the
+  built-in web tools — `absence_single_tool` blocks, and the declaration
+  refuses without it;
+- the run's own register does not already NAME the cell (`engine.brief
+  reuse --subcap <cell>` shows what a sibling lane bought);
+- the ladder names its `direct` and `proxy` rungs with queries the
+  Search_Log carries, and the proxy log says which proxy class was hunted.
 
-**URL Enforcement (per row):**
-- Column L MUST contain a specific, resolvable URL for every evidence item
-- "multiple searches", blank, or placeholder URLs = REJECTED
-- For Moody's data: use the Moody's report/document URL
-- For web_search results: use the source page URL from web_fetch
-- For NO_EVIDENCE rows: Column L = "N/A — no evidence found"
+Only `engine.cli absence` may close an empty cell; a notebook note, a
+synthesis record or a hand-set `Absence_Claimed` does NOT (the validator's
+rule 8 and `is_declared_absent` read the Provenance row the command writes).
+Every evidence item MUST carry a specific, resolvable URL — the ledger
+refuses a public row without one.
+
+### Step 4: Register into the workbook — through the engine only
+There is ONE workbook and ONE writer. `engine.cli evidence` registers a
+source (excerpt 50–500 verbatim chars, tier, date, the cells it supports);
+`engine.cli synthesise` closes an evidenced cell; `engine.cli absence`
+closes an empty one. Column D (Score) is the assessment stage's, struck by
+`engine.assessment score` and never here. The workbook's shape is
+`engine/contract.py` (40 sheets, `SubCap_Name` seeded from the catalogue,
+formatted) — never a layout recalled from a template or from this file, and
+never a second workbook built beside the run (the retired
+`populate_workbook.py` refuses for this reason).
 
 ---
 
@@ -462,8 +482,11 @@ governance evidence is often indirect. For EVERY governance/strategy subcap:
 3. Search LinkedIn for leadership with digital titles (Tier 7)
 4. Search conference presentations by entity leadership (Tier 8)
 5. Search for strategic plan filings or investor deck mentions (Tier 2)
-Only AFTER all 5 proxy types are attempted can you conclude NO_EVIDENCE.
-"No CDO found" without these searches = research failure, not a finding.
+These five are the `proxy` rung of the absence ladder for P1: log each as an
+`engine.cli search --subcap <cell> --facet <f> --tool <connector>` and name
+them in `--ladder` / `--proxy-log` when you declare. "No CDO found" without
+them is a research failure, not a finding — and `engine.cli absence` refuses
+it, because the Search_Log will not show the searches.
 
 ---
 
@@ -558,13 +581,30 @@ P4 adds utilization analysis per `references/tech_discovery.md`:
 For HYBRID/INTERNAL: Load internal evidence FIRST per Internal Evidence Integration Protocol.
 **Stop:** "--- BATCH 3 COMPLETE ---"
 
-### Batch 4: WORKBOOK POPULATION & CONSOLIDATION
-1. `scripts/merge_evidence.py` → 2. Recalculate ERS → 3. `scripts/validate_coverage.py`
-(HARD GATE: ≥80% coverage) → 4. Safeguard gates → 5. Uncertainty bands →
-6. `scripts/populate_workbook.py` (read `references/research_workbook_spec.md` + xlsx skill FIRST)
-→ 7. `scripts/validate_workbook.py` → 8. Generate CSVs (A1,A3-A6)
+### Batch 4: CONSOLIDATION — the workbook is already populated
 
-**Column U format:** `[ERS: X.XX] [CLAIM_TYPE] [E-xxx:Fy] Source (Tier, Recency): Finding.`
+There is NO population step. Every evidence item, search, synthesis and declared absence
+went into the run's ONE workbook as it was found (`engine.cli evidence / search / synthesise /
+absence`, Step 4 above); a batch that "builds the workbook" at the end is the defect the
+retired `scripts/populate_workbook.py` produced — a second, differently-shaped workbook beside
+the run. That retired script and the retired `scripts/validate_workbook.py` (it validated the
+22-column layout the engine replaced) both refuse and name the engine commands.
+
+Batch 4 is the close-out, in this order, every command refusing on its own terms:
+1. `engine.cli gate --run <R> --root <ROOT> --category <CAT> --require-synthesis` for every
+   category in scope — the floors gate (five volleys + primary question fired, ≥20 items per
+   category, every evidenced cell synthesised and independently challenged, every empty cell
+   DECLARED through `engine.cli absence` with an enrichment connector in its Search_Log).
+2. `engine.cli validate --run <R> --root <ROOT>` — shape against `engine/contract.py`,
+   vocabularies, cross-references, rule 8 (no absence flag without its Provenance row).
+3. `engine.cli ers recompute --run <R> --root <ROOT>` — ERS is computed, never typed.
+4. `engine.cli complete check --run <R> --root <ROOT>` — every tab filled or its emptiness
+   declared with a reason (`engine.cli complete declare`), never silently blank.
+5. `engine.cli handoff --run <R> --root <ROOT>` — the research handoff the scoring stage and
+   the strip read; `engine.cli strip` refuses until the handoff carries the working area.
+
+**Rationale format (Column J at the scoring stage; the research columns L–AG carry the
+synthesis):** `[ERS: X.XX] [CLAIM_TYPE] [E-xxx:Fy] Source (Tier, Recency): Finding.`
 **Stop:** "--- BATCH 4 COMPLETE ---"
 
 ### Batch 5: RESEARCH REPORT (Client Profile)
@@ -655,9 +695,9 @@ CONTINUE to resume from [subcap ID]. ---
 | `scripts/generate_query_plan.py` | 2-3 | Diagnostic Qs + entity → 10-tier query plan |
 | `scripts/calculate_ers.py` | All | Calculate ERS scores, optionally write back |
 | `scripts/merge_evidence.py` | 4 | Deduplicate, link corroborations, coverage stats |
-| `scripts/populate_workbook.py` | 4 | Evidence index + diagnostic Qs → 10-sheet workbook |
+| `scripts/populate_workbook.py` | — | **RETIRED** (refuses): it built a second, 10-sheet workbook beside the run. The run's one workbook is created by `engine.cli start` and written only through `engine.cli evidence / search / synthesise / absence` |
 | `scripts/validate_coverage.py` | 4 | Coverage thresholds, tier distribution, hard gates |
-| `scripts/validate_workbook.py` | 4 | Structure, evidence quality, cross-references |
+| `scripts/validate_workbook.py` | — | **RETIRED** (refuses): it validated the 22-column layout the engine replaced. Use `engine.cli validate` |
 
 ---
 

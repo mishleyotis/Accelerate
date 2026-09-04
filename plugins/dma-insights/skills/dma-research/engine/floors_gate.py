@@ -64,9 +64,84 @@ ADVISORY_TERMS = (
     "followups_outstanding",
     "ladder_overstated",
     "timeline_missing",
-    "absence_single_tool",
+    # The three AI-overlay probes (DQ orders 6-8). Advisory at the research
+    # stage because Golden 1 fired two of them in 690 cells; the scoring
+    # gate's overlay columns are the blocking half.
+    "ai_overlay_unsearched",
     "evidence_unattached",
 )
+# `absence_single_tool` left this set 2026-09-03: an empty cell whose only
+# searches ran through the built-in web tools shows no enrichment effort,
+# which is the owner's issue 1 verbatim. It blocks now, and it is computed
+# as "no enrichment connector among the cell's tools" — the same predicate
+# `declare_absence` refuses on — so the gate and the writer agree.
+
+
+#: Fallbacks for the two run-level density floors when gold_reference.json
+#: cannot be read — the Golden 1 ratios as measured 2026-09-03 (727 evidence
+#: rows over 690 subcaps; 442 of 690 subcaps evidenced).
+_DENSITY_ROWS_PER_SUBCAP_FALLBACK = 727 / 690
+_DENSITY_EVIDENCED_SHARE_FALLBACK = 442 / 690
+
+
+def density_floors() -> dict:
+    """The run-level evidence floors, READ from the Golden 1 measurement so
+    they move with the reference rather than with anyone's memory."""
+    try:
+        from . import gold_standard
+        g = gold_standard.gold_reference()["workbook"]
+        return {"rows_per_subcap": g["evidence_rows"] / g["subcaps"],
+                "evidenced_share": g["subcaps_with_evidence"] / g["subcaps"],
+                "source": "gold_reference.json"}
+    except Exception:
+        return {"rows_per_subcap": _DENSITY_ROWS_PER_SUBCAP_FALLBACK,
+                "evidenced_share": _DENSITY_EVIDENCED_SHARE_FALLBACK,
+                "source": "fallback constants"}
+
+
+def run_density(wb: RunWorkbook) -> dict:
+    """Evidence density for the WHOLE run against the Golden 1 floors.
+
+    Owner, 2026-09-03 (issue 1): "limited evidence is consolidated in most
+    runs making the entire assessment very evidence deficient". The
+    per-category gate cannot see a run that is thin everywhere — every
+    category can clear its own 20-item floor while the run as a whole
+    carries a third of the reference's evidence. Two ratios, both from the
+    gold reference: registered evidence rows per selected subcap, and the
+    share of selected subcaps that cite at least one resolving row. A
+    declared absence is neither (it is the honest empty cell); the floors
+    are set where Golden 1 sits, and Golden 1 has 36% declared/empty cells.
+    """
+    floors = density_floors()
+    rows = wb.scoring_rows()
+    register = wb.evidence_index()
+    n = len(rows) or 1
+    evidenced = 0
+    for r in rows:
+        eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
+                if i and i != C.NO_EVIDENCE]
+        if any(e in register for e in eids):
+            evidenced += 1
+    ev_rows = len(register)
+    rps, share = ev_rows / n, evidenced / n
+    shortfall = []
+    if rps < floors["rows_per_subcap"] - 1e-9:
+        shortfall.append(
+            f"the run is thinner than the Golden 1 reference: {ev_rows} "
+            f"evidence rows over {n} subcaps = {rps:.2f} per subcap (floor "
+            f"{floors['rows_per_subcap']:.2f}). Work the long tail through "
+            f"`engine.brief dispatch --category <C>` and `engine.cli orient` "
+            f"before scoring.")
+    if share < floors["evidenced_share"] - 1e-9:
+        shortfall.append(
+            f"{evidenced} of {n} subcaps carry resolving evidence "
+            f"({share:.0%}; floor {floors['evidenced_share']:.0%} — Golden 1's "
+            f"own coverage). Fire the five volleys on the empty cells and "
+            f"register what they find; a declared absence is honest but it "
+            f"is not evidence.")
+    return {"evidence_rows": ev_rows, "subcaps": n, "evidenced": evidenced,
+            "rows_per_subcap": round(rps, 3), "evidenced_share": round(share, 3),
+            "floors": floors, "met": not shortfall, "shortfall": shortfall}
 
 
 def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
@@ -97,6 +172,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # terms that make an empty cell EARN its emptiness.
         "volleys_incomplete": [], "absence_undeclared_empty": [],
         "absence_single_tool": [],
+        "primary_unfired": [], "ai_overlay_unsearched": [],
         # 2026-09-03 (owner: "limited evidence is consolidated in most runs
         # … very evidence deficient"): the register is run-wide and its rows
         # name their cells, so a cell that does not cite the row naming it
@@ -110,6 +186,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     items = 0
     searched_cells = 0
     evidenced_cells = 0
+    declared_set = L.declared_absences(wb)
     for r in rows:
         cell = str(r["SubCap_ID"]).strip()
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
@@ -184,16 +261,26 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             findings["volleys_incomplete"].append(
                 {"subcap": cell, "missing": vs["missing"],
                  "fired": vs["fired"]})
+        # The toolkit's own diagnostic question is the one the five volleys
+        # answer; a cell that never asked it has volleyed at nothing.
+        if cell_searches and not vs["primary_fired"]:
+            findings["primary_unfired"].append(cell)
+        if cell_searches and any(n == 0 for n in vs["ai_fired"].values()):
+            findings["ai_overlay_unsearched"].append(
+                {"subcap": cell,
+                 "unfired": [f for f, n in vs["ai_fired"].items() if not n]})
         if not eids:
             # An empty cell closes ONLY as a declared absence — the ladder,
-            # the proxy log, the volleys — written by `engine.cli absence`.
-            # Anything else is a seeded row nobody finished.
-            if not L.is_declared_absent(r):
+            # the proxy log, the volleys — written by `engine.cli absence`,
+            # which is the only writer of the Provenance 'absence' row this
+            # predicate now requires. Anything else is a seeded row nobody
+            # finished, or a flag written around the command.
+            if not L.is_declared_absent(r, declared=declared_set):
                 findings["absence_undeclared_empty"].append(cell)
-            # Enrichment effort: an absence that only ever asked one tool
-            # (a single web engine) is advisory — the connectors (Exa,
-            # Tavily, the toolkit's named artefacts) are the deep search.
-            if len(vs["tools"]) < 2 and cell_searches:
+            # Enrichment effort, BLOCKING: an empty cell whose searches all
+            # ran through the built-in web tools shows no enrichment effort
+            # (owner, 2026-09-03). Same predicate `declare_absence` refuses.
+            if cell_searches and not vs["enrichment_tools"]:
                 findings["absence_single_tool"].append(
                     {"subcap": cell, "tools": vs["tools"]})
 
@@ -263,7 +350,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # structural independence — the same actor wrote the synthesis and
         # its verdict.
         verdict = str(r.get("Challenge_Verdict") or "").strip().upper()
-        if L.is_declared_absent(r):
+        if L.is_declared_absent(r, declared=declared_set):
             # A DECLARED absence (2026-09-03) is closed by `declare_absence`'s
             # own refusals — every volley fired, every ladder rung in the
             # Search_Log, a proxy log — not by a challenger's opinion of
@@ -343,6 +430,9 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "synthesis_missing", "dq_gaps", "absence_unsearched",
         "volleys_incomplete", "absence_undeclared_empty",
         "absence_over_evidence",
+        # 2026-09-03 (owner issue 1): the primary question is owed on every
+        # searched cell, and an empty cell must show an enrichment connector.
+        "primary_unfired", "absence_single_tool",
     ) if findings[k]]
     if not category_floor_met:
         blocking.append("category_items_below_floor")

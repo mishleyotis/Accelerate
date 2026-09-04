@@ -55,3 +55,35 @@ def test_a_skill_relative_path_resolves_from_the_skill_directory():
     skill = A.PLUGIN / "skills" / "dma-surface-production"
     assert A.classify(cmd, str(skill)) == "ALLOWED"
     assert A.classify(cmd, str(A.REPO)) == "PROMPTS"
+
+
+def test_a_scripts_own_subcommand_is_not_read_as_a_shell_verb():
+    """Measured 2026-09-04: `agent_run.py watch --log-dir …` — the live status
+    table the conductor and /dma-insights:run-assessment both open — drew no
+    decision, because `watch` is blocked wherever it appears. Immediately
+    after a `.py` it is an argument python hands the script, not a verb; every
+    other shape still draws none."""
+    import importlib.util
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+    hook = (Path(__file__).resolve().parents[1] / "hooks" / "autoapprove_builtins.py")
+
+    def decide(cmd):
+        r = subprocess.run([sys.executable, str(hook)], text=True, timeout=60,
+                           input=json.dumps({"tool_name": "Bash",
+                                             "tool_input": {"command": cmd}}),
+                           capture_output=True)
+        out = (r.stdout or "").strip()
+        return (json.loads(out)["hookSpecificOutput"]["permissionDecision"]
+                if out else None)
+
+    assert decide("python3 plugins/dma-insights/scripts/agent_run.py watch "
+                  "--log-dir /root/.dma/runs/R-1/agent_logs") == "allow"
+    assert decide("python3 plugins/dma-insights/scripts/agent_run.py watch --once "
+                  "--log-dir /tmp/x") == "allow"
+    # the verb itself, and the wrapper that would smuggle it, still draw none
+    for cmd in ("watch -n 5 ls", "timeout 5 watch ls", "watch ls",
+                "python3 -c 'x' && watch ls"):
+        assert decide(cmd) is None, cmd

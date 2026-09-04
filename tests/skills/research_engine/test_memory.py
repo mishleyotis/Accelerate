@@ -143,9 +143,15 @@ def test_an_absence_with_a_ladder_binds_the_row_obligations(tmp_path):
                   "proxy: 'Acme CU' data governance owner — 0 hits")
     out = M.consolidate(run, CAT)
     assert out["consolidated"] == 1
-    row = run.open().scoring_row(cells[0])
-    assert str(row["Absence_Claimed"]) == "YES"
+    wb2 = run.open()
+    row = wb2.scoring_row(cells[0])
+    # STAGED, NOT DECLARED (2026-09-03): the notebook may carry the ladder
+    # into Proxy_Log, and only `engine.cli absence` may set the flag — a
+    # consolidation that declared an absence closed a cell nobody searched.
     assert "proxy:" in str(row["Proxy_Log"])
+    assert str(row.get("Absence_Claimed") or "").upper() != "YES"
+    from engine import ledger as L
+    assert L.is_declared_absent(row, wb2) is False
 
 
 def test_multiple_entries_consolidate_in_order_and_marks_stay_aligned(tmp_path):

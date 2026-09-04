@@ -377,6 +377,13 @@ def stage_preconditions(wb: RunWorkbook, report: str,
     except SystemExit as e:
         out.append(str(e).replace("a handoff feeds the scoring stage",
                                   "a report reads the finished research"))
+    # The five-year trajectory both reports render (Client Profile §3/§4,
+    # assessment §1/§6; GSY-18). A short series is a disclosure when it is
+    # declared, and a blocker when it is merely missing.
+    from . import profile
+    depth = profile.financial_depth(wb)
+    if not depth["met"]:
+        out.append(depth["fix"])
     if report == "assessment":
         if C.stage_of(md) != "assessment":
             out.append(
@@ -411,20 +418,25 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
     """Write one section — or one CARD of a list section — or refuse and say
     which field is not an argument.
 
-    `run` (a runstate.Run) turns on the STAGE PRECONDITIONS: the CLI always
-    passes it, so an agent cannot write a report section on a run whose
-    research is ungated or whose scores are unstruck. The bare library call
-    checks the section's own anatomy only."""
+    The STAGE PRECONDITIONS run UNCONDITIONALLY. Until 2026-09-03 they ran
+    only when `run` was passed, "because the CLI always passes it" — and a
+    library call with `run=None` landed an assessment §1 on an unscored
+    workbook (measured). The qa_dir is derived from the workbook's own
+    layout when no run is given, so there is no calling shape that skips
+    the check: a report section on ungated research or unstruck scores
+    cannot be written, whoever is driving."""
     spec, sec = section_spec(report, section_id)
     if not _clean(actor):
         raise NarrativeRefusal("every section records its author; --actor is "
                                "how the review can refuse a self-review")
-    if run is not None:
-        pre = stage_preconditions(wb, report, getattr(run, "qa_dir", None))
-        if pre:
-            raise NarrativeRefusal(
-                f"the run is not ready for the {spec.title} — "
-                f"{len(pre)} precondition(s) fail:\n  - " + "\n  - ".join(pre))
+    qa_dir = getattr(run, "qa_dir", None) if run is not None else None
+    if qa_dir is None:
+        qa_dir = Path(wb.path).resolve().parent / "07_qa"    # runstate layout
+    pre = stage_preconditions(wb, report, qa_dir)
+    if pre:
+        raise NarrativeRefusal(
+            f"the run is not ready for the {spec.title} — "
+            f"{len(pre)} precondition(s) fail:\n  - " + "\n  - ".join(pre))
     body = _clean_body(record.get("Body"))
     problems: list[str] = []
 

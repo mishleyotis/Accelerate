@@ -210,6 +210,40 @@ def verdict_line(res: dict) -> tuple[str, list]:
     return v.get("status", res.get("_error", "?")), (v.get("reasons") or [])
 
 
+#: Exit code when the run's lease is held elsewhere. A refused claim is not a
+#: failed page: the driver (`engine.pipeline`) waits for the lease to lapse
+#: and runs again, and it needs to tell the two apart.
+EXIT_CLAIM_REFUSED = 3
+
+
+def session_id() -> str:
+    """The session token the claim is made under — the harness's when it
+    exports one, otherwise a fresh one for this process."""
+    for k in ("DMA_AGENT_SESSION", "CLAUDE_SESSION_ID", "CLAUDE_AGENT_ID"):
+        v = os.environ.get(k)
+        if v:
+            return v
+    import uuid
+    return f"ship-page-{uuid.uuid4().hex[:12]}"
+
+
+def claim(run_id: str, producer: str) -> dict:
+    """Take (or renew) the run's exclusive lease before writing to it.
+
+    `claim_run` is an expiring lease, one session per run; another session's
+    live lease refuses. Owner issue 7 (2026-09-03): pages shipped as the work
+    proceeds means several processes could touch one run over an afternoon —
+    the claim is what makes that safe, and the driver never submits without
+    it."""
+    res = mcp("claim_run", {"run_id": run_id, "session_id": session_id(),
+                            "producer_version": producer})
+    ok = bool(res.get("claimed") or res.get("ok") or res.get("lease")
+              or (res.get("status") or "").lower() in ("claimed", "renewed", "ok"))
+    if res.get("_error") or res.get("refused") or (not ok and res.get("held_by")):
+        return {"ok": False, "detail": res}
+    return {"ok": ok or not res.get("_error"), "detail": res}
+
+
 def submit(run_id: str, page: str, payload: dict, producer: str) -> dict:
     exp = expect_of(payload, page)
     if size(payload) <= INLINE_MAX:
@@ -308,7 +342,29 @@ def main(argv=None) -> int:
                          "Safe to re-run as production proceeds: a page "
                          "already passing is simply submitted again with the "
                          "same content.")
+    ap.add_argument("--claim", action="store_true",
+                    help="take the run's lease (claim_run) before submitting; "
+                         f"exit {EXIT_CLAIM_REFUSED} if another session holds it")
+    ap.add_argument("--verdicts-out", type=Path,
+                    help="write {page: {status, reasons}} JSON here — the "
+                         "driver reads this rather than the transcript")
     a = ap.parse_args(argv)
+    verdicts: dict = {}
+
+    def _write_verdicts():
+        if a.verdicts_out:
+            a.verdicts_out.parent.mkdir(parents=True, exist_ok=True)
+            a.verdicts_out.write_text(json.dumps(verdicts, indent=2, default=str))
+
+    if a.claim and not a.dry_run:
+        c = claim(a.run_id, a.producer)
+        if not c["ok"]:
+            print(f"claim on {a.run_id} REFUSED: {json.dumps(c['detail'])[:300]}",
+                  file=sys.stderr)
+            verdicts["_claim"] = {"status": "claim_refused", "detail": c["detail"]}
+            _write_verdicts()
+            return EXIT_CLAIM_REFUSED
+        print(f"claimed {a.run_id} as {session_id()}")
 
     pages = PAGES if a.page == "all" else (a.page,)
     if a.incremental:
@@ -338,12 +394,15 @@ def main(argv=None) -> int:
             continue
         res = submit(a.run_id, page, payload, a.producer)
         status, reasons = verdict_line(res)
+        verdicts[page] = {"status": status, "reasons": reasons[:40]}
+        _write_verdicts()
         print(f"{page}: {status.upper()} — {len(reasons)} blocking reason(s)")
         for r in reasons[:20]:
             print("   ", json.dumps(r) if isinstance(r, dict) else r)
         if status != "pass":
             failed.append(page)
 
+    _write_verdicts()
     if failed:
         print(f"\nnot submitted clean: {', '.join(failed)}")
         return 1

@@ -70,6 +70,13 @@ you do not go and find more. If a row is not scoreable, the refusal says why,
 and the repair belongs to the research tier (re-dispatch its category), never
 to you.
 
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over a packet from `engine.brief scoring-batch` — the
+rows of your pillar still unscored, their claim labels, ceiling bands,
+challenge verdicts and evidence counts, the weight set, the exact
+`engine.assessment score` command and the refusals it carries. Read it
+before `engine.assessment state`; do not re-derive it from the workbook.
+
 Read first, in this order — these are the deliverable you are producing, not
 background: `references/templates/gold_reference.json` (the Golden 1 numbers a
 finished workbook meets), `skills/dma-assessment/references/scoring_methodology.md`
@@ -153,8 +160,17 @@ python3 -m engine.assessment critique --run <R> --root <ROOT> --pillar P1 \\
     --note "Re-derived 9 of 47 rows across all 12 capabilities; ceilings hold; P1C2.3 differentiates 4 ways; would move P1C4.2.1 from 2.5 to 2.25 on E-088's date"
 ```
 
-A FAIL names the rows and the direction they should move; the conductor
-re-dispatches that pillar's scorer with your note, and you critique again.
+A FAIL names the rows and the direction they should move; the driver
+(`engine.pipeline`) re-dispatches that pillar's scorer with your note in the
+next scoring round, and you critique again. Once every pillar carries your
+PASS, record the rollup's headline — the one line an executive reads first —
+`engine.assessment rollup --run <R> --root <ROOT> --headline "<40+ chars,
+institution-specific>"`; the driver runs the rollup and the SCORING gate
+after your lane returns, and a rollup with no headline refuses.
+
+**Your first command is the brief the driver handed you** (`engine.brief
+scoring-batch --critic`): the pillars in scope, what is scored, the verdicts
+already recorded.
 
 ## What you never do
 

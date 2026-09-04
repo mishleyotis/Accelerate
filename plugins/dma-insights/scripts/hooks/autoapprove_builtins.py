@@ -315,6 +315,24 @@ BLOCKED_TOKENS = frozenset({
     "-exec", "-execdir", "-delete", "-ok",
 })
 
+#: A blocked word that is a SCRIPT'S OWN SUBCOMMAND, not a verb.
+#:
+#: Measured 2026-09-04: `agent_run.py watch --log-dir …` — the live-status
+#: table the conductor and the run-assessment command both tell a session to
+#: open — drew no decision, because `watch` is banned wherever it appears
+#: (`watch(1)` re-runs a command forever). Immediately after a `.py` path it
+#: cannot be that: the executable is python, the script is resolved on disk by
+#: `_script_ok`, and this token is an argument python hands it. Kept to that
+#: one shape — the token directly after a `.py` — so `timeout 5 watch ls`
+#: still draws no decision.
+_SUBCOMMANDABLE = frozenset({"watch", "set", "env"})
+
+
+def _subcommand_of_a_script(tok: str, cur: list) -> bool:
+    return (tok in _SUBCOMMANDABLE and bool(cur)
+            and cur[-1].endswith(".py"))
+
+
 #: The plugin's own tree, in every spelling a prompt uses for it.
 PLUGIN_PATH = re.compile(
     r"^(?:\$\{?CLAUDE_PLUGIN_ROOT\}?|\$PLUGIN|"
@@ -575,7 +593,7 @@ def _split_segments(command: str) -> tuple[list[str], list[str]] | None:
             return None                      # backgrounding, case, stderr pipe
         if "`" in tok or "$((" in tok or tok.startswith(("<(", ">(")):
             return None                      # substitutions the grammar skips
-        if tok in BLOCKED_TOKENS:
+        if tok in BLOCKED_TOKENS and not _subcommand_of_a_script(tok, cur):
             return None
         cur.append(tok)
     if cur:

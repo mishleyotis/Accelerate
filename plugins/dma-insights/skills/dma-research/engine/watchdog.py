@@ -363,6 +363,15 @@ def resume_plan(row: dict) -> dict:
     base = (f"Resume DMA research run {run_id} for {row.get('entity')}. "
             f"The run root is {root}. Read `engine.cli orient {where}` FIRST "
             f"and work its do_first list in order. ")
+    #: THE DRIVER is how a resumable run continues (2026-09-04, issues 6-9):
+    #: `engine.pipeline run` reads the workbook, finds the first stage whose
+    #: done-predicate is false, and dispatches THAT stage's lanes over a brief
+    #: it writes — rather than one hand-written prompt to one agent. Every
+    #: actionable state carries it; `agent`, `parallel` and `prompt` stay for a
+    #: container without the driver, and `revive` prefers the driver when both
+    #: are present because it closes the whole stage rather than one lane.
+    pipeline_cmd = ["python3", "-m", "engine.pipeline", "run",
+                    "--run", str(run_id)] + (["--root", root] if root else [])
 
     if state == "HALTED":
         return {"actionable": False, "agent": None,
@@ -377,6 +386,7 @@ def resume_plan(row: dict) -> dict:
                 "why": "the folder is opened by a command, not an agent"}
     if state == "PRELIM_OPEN":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     f"PRELIM is open: {', '.join(row.get('prelim_open') or [])}. "
                     f"Close every open PRELIM section — the conductor owns "
@@ -401,10 +411,12 @@ def resume_plan(row: dict) -> dict:
                                  "checkpoint before any further search.",
         }[state]
         return {"actionable": True, "agent": agent,
+                "pipeline": pipeline_cmd,
                 "prompt": base + what + " Take it from where it stopped.",
                 "why": f"{cat or 'the conductor'} owns the open work"}
     if state == "READY_FOR_HANDOFF":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     "Every category is closed and gated. Run `engine.cli "
                     "validate` (FAILS=0) and `engine.cli handoff`, write the "
@@ -418,6 +430,7 @@ def resume_plan(row: dict) -> dict:
         pillars = sorted(unscored) or ["P1"]
         agents = [f"scoring-{p.lower()}-producer" for p in pillars]
         return {"actionable": True, "agent": agents[0], "parallel": agents,
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     f"The assessment stage is open and column D is not "
                     f"struck: unscored rows by pillar "
@@ -430,6 +443,7 @@ def resume_plan(row: dict) -> dict:
                 "why": "column D belongs to the pillar scorers"}
     if state == "CRITIC_PENDING":
         return {"actionable": True, "agent": "scoring-critic",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     f"Every row is scored and the critic pass is owed on "
                     f"{', '.join(row.get('critic_missing') or [])}"
@@ -442,6 +456,7 @@ def resume_plan(row: dict) -> dict:
                 "why": "the gate will not pass without an independent critic"}
     if state == "SCORING_GATE_OPEN":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     f"Scores and critic verdicts are in; the SCORING gate is "
                     f"not PASS ({row.get('detail')}). Run `engine.assessment "
@@ -454,6 +469,7 @@ def resume_plan(row: dict) -> dict:
     if state == "REPORT_PRECONDITIONS_OPEN":
         pre = row.get("preconditions") or []
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     "The SCORING gate has PASSED but `engine.narrative write` "
                     "will refuse every section until these hold: "
@@ -473,6 +489,7 @@ def resume_plan(row: dict) -> dict:
         agents = _report_agents(row)
         due = row.get("checkpoint_due")
         return {"actionable": True, "agent": agents[0], "parallel": agents,
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     "The SCORING gate has PASSED"
                     + (" and the SCORING_PASS checkpoint has NOT been pushed "
@@ -490,6 +507,7 @@ def resume_plan(row: dict) -> dict:
                 "why": "the report tier owns the sections; the validator the verdicts"}
     if state == "PACKAGE_UNSHIPPED":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     "Both reports read READY. `engine.completeness check`, "
                     "`engine.cli report` (both .docx, gold_standard PASS), "
@@ -588,6 +606,26 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
         return {"run_id": row.get("run_id"),
                 "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
                 "state": row.get("state"),
+                "detail": (r.stdout or r.stderr).strip()[-400:]}
+    if plan.get("pipeline"):
+        # THE DRIVER FIRST. `engine.pipeline run` continues the run from its
+        # first undone stage, dispatching that stage's lanes over briefs it
+        # writes — so one revive closes a stage rather than one lane of it,
+        # and the stage's gate decides when it is done. The agent dispatch
+        # below stays for a container without the driver.
+        cmd = list(plan["pipeline"])
+        if dry_run:
+            return {"run_id": row.get("run_id"), "outcome": "DRY_RUN",
+                    "state": row.get("state"), "agent": plan.get("agent"),
+                    "via": "engine.pipeline run",
+                    "would_run": " ".join(cmd),
+                    "resume_prompt": plan.get("prompt")}
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                           cwd=str(Path(__file__).resolve().parents[1]))
+        return {"run_id": row.get("run_id"),
+                "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
+                "state": row.get("state"), "agent": plan.get("agent"),
+                "via": "engine.pipeline run",
                 "detail": (r.stdout or r.stderr).strip()[-400:]}
     runner = _agent_run()
     if runner is None:

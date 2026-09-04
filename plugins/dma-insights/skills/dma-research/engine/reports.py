@@ -50,6 +50,8 @@ import re
 import sys
 from pathlib import Path
 
+import math
+
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
@@ -58,6 +60,7 @@ from . import contract as C
 from . import quality as Q
 from . import report_spec as RS
 from . import runstate
+from . import template as T
 from .workbook import RunWorkbook, _split_ids
 
 CITE_RE = re.compile(r"\[(E-\d+)(?::F\d+)?\]")
@@ -95,6 +98,10 @@ def curate(wb: RunWorkbook, spec: RS.ReportSpec) -> dict:
         body = "\n\n".join(str(r.get("Body") or "").strip() for r in rows
                            if str(r.get("Body") or "").strip())
         tables = _tables_for(wb, sec)
+        if "Evidence_Detail" in sec.inputs:
+            cited = _evidence_cited_table(wb, sorted(set(CITE_RE.findall(body))))
+            if cited:
+                tables.append(cited)
         declared = [s for s in sec.inputs if s in C.SHEETS]
         empty_inputs = [s for s in declared if not wb.rows(s)]
         # A section has NO SOURCE only when EVERY declared input is empty.
@@ -114,72 +121,131 @@ def curate(wb: RunWorkbook, spec: RS.ReportSpec) -> dict:
     return {"meta": md, "spec": spec, "blocks": blocks}
 
 
-def _tables_for(wb: RunWorkbook, sec: RS.Section) -> list[dict]:
+#: Every declared input renders as ONE table, titled, with the columns a
+#: reader can argue with. Measured 2026-09-03: the old if-chain knew eight
+#: sheet names of the ~28 the pinned Docs declare as inputs, so
+#: `Peer_Benchmarks`, `Firmographics`, `Focus_Areas`, `Issue_Register`,
+#: `Tech_Register`, `Solution_Catalogue`, `Recommendations` … produced no
+#: table at all — while the full evidence register was rendered SIX times in
+#: one document. A sheet not listed here falls back to its contract columns.
+_TABLE_TITLES: dict[str, tuple[str, tuple[str, ...] | None]] = {
+    "Coverage": ("Coverage by category (research floors)", None),
+    "Coverage_Map": ("Coverage disclosure — scored, unknown, coverage %", None),
+    "Pillar_Rollup": ("Pillar rollup (stated)", None),
+    "Category_Rollup": ("Category rollup (stated)", None),
+    "Pillar_Summary": ("Pillar summary", None),
+    "Category_Detail": ("Category detail", None),
+    "Firmographics": ("Firmographics", None),
+    "Issue_Register": ("Issue register", None),
+    "Focus_Areas": ("Client priorities, in the client's words", None),
+    "Tech_Register": ("Technology register",
+                      ("TS_ID", "Product", "Vendor", "Layer", "Status",
+                       "Evidence_Level", "Detection_Basis", "As_Of")),
+    "Tech_Peer_Deployments": ("Peer deployments", None),
+    "Peer_Benchmarks": ("Peer benchmarks", None),
+    "Platform_Peer_Adoption": ("Platform adoption among peers", None),
+    "Caps_Applied_Log": ("Caps applied", None),
+    "Cap_Triggers": ("Cap rules", None),
+    "Pillar_Weights": ("Pillar weights", None),
+    "Maturity_Rubric": ("Maturity rubric", None),
+    "Catalogue_Meta": ("Catalogue binding", None),
+    "Solution_Catalogue": ("Solution catalogue", None),
+    "Recommendations": ("Recommendations (projected from §8)", None),
+    "Enrichment_Needed": ("Enrichment still needed", None),
+    "Entity_Timeline": ("Digital evolution timeline",
+                        ("Event_Date", "Title", "Kind", "Signal",
+                         "Maturity_Effect", "Evidence_IDs")),
+    "Gate_Log": ("Gates run on this assessment",
+                 ("Gate", "Scope", "Verdict", "Detail")),
+    "Run_Metadata": ("Run metadata", None),
+    "Handoff_Lock": ("Catalogue lock", None),
+    "Subcap_Scores": ("Subcapability scores",
+                      ("subcap_id", "subcap_name", "category", "score",
+                       "confidence", "evidence_ceiling", "caps_applied",
+                       "ai_applicability", "data_readiness")),
+}
+#: Sheets a section may declare as an INPUT without rendering as a table —
+#: they are the section's own prose source or a per-cell working area.
+_NO_TABLE = frozenset({"Report_Narrative", "Search_Log"})
+
+
+def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> list[dict]:
     """The workbook-derived tables a section carries.
 
     These are the CURATION: the numbers in the report are the numbers in the
-    sheets, read at render time, so the two cannot disagree."""
+    sheets, read at render time, so the two cannot disagree. Each declared
+    input renders ONCE; the evidence register renders as "Evidence cited in
+    this section" (the rows this section actually cites) rather than the
+    whole register per section; a pillar card's score table is filtered to
+    its pillar; the financial trajectory is pivoted wide with its CAGR."""
     out = []
-    if "Coverage" in sec.inputs:
-        rows = wb.coverage()
-        if rows:
-            out.append(_table("Coverage by category", list(C.COVERAGE_COLUMNS),
-                              [[r[c] for c in C.COVERAGE_COLUMNS] for r in rows]))
-    # The scoring stage's own tables (2026-09-03): the Doc's §4 reads the
-    # STATED rollups and §10 the coverage map — curated from the sheets at
-    # render time so the report cannot disagree with the workbook (AUD-0052).
-    if "Coverage_Map" in sec.inputs:
-        rows = wb.rows("Coverage_Map")
-        if rows:
-            cols = list(C.COVERAGE_MAP_COLUMNS)
-            out.append(_table("Coverage by category", cols,
-                              [[r.get(c) for c in cols] for r in rows]))
-    if "Pillar_Rollup" in sec.inputs:
-        rows = wb.rows("Pillar_Rollup")
-        if rows:
-            cols = list(C.PILLAR_ROLLUP_COLUMNS)
-            out.append(_table("Pillar rollup (stated)", cols,
-                              [[r.get(c) for c in cols] for r in rows]))
-    if "Category_Rollup" in sec.inputs:
-        rows = wb.rows("Category_Rollup")
-        if rows:
-            cols = list(C.CATEGORY_ROLLUP_COLUMNS)
-            out.append(_table("Category rollup (stated)", cols,
-                              [[r.get(c) for c in cols] for r in rows]))
-    if "Evidence_Detail" in sec.inputs:
-        ev = wb.rows("Evidence_Detail")
-        if ev:
-            cols = ["E_ID", "Source_Name", "Tier", "Date_Published",
-                    "Recency", "Claim_Type", "Origin"]
-            out.append(_table("Evidence register", cols,
-                              [[e[c] for c in cols] for e in ev]))
-    if "Gate_Log" in sec.inputs:
-        g = wb.rows("Gate_Log")
-        if g:
-            cols = ["Gate", "Scope", "Verdict", "Detail"]
-            out.append(_table("Gates run on this assessment", cols,
-                              [[x[c] for c in cols] for x in g]))
-    if "Search_Log" in sec.inputs:
-        s = wb.rows("Search_Log")
-        cols = ["Seq", "SubCap_ID", "Facet", "Query", "Hits", "Kept", "Outcome"]
-        out.append(_table(f"Searches run ({len(s)})", cols,
-                          [[x[c] for c in cols] for x in s]))
-    scoring = [i for i in sec.inputs if i.endswith("_Subcap_Scoring")]
-    if scoring:
-        rows = []
-        for sheet in scoring:
-            for r in wb.rows(sheet):
-                claim = str(r.get("Dominant_Claim") or "").strip()
-                if not claim:
-                    continue
-                rows.append([r["SubCap_ID"], r.get("Ceiling_Band"),
-                             r.get("Claim_Label"), claim,
-                             r.get("Evidence_IDs")])
-        if rows:
-            out.append(_table("Capability findings",
-                              ["SubCap", "Band", "Claim", "Dominant claim",
-                               "Evidence"], rows))
+    for name in sec.inputs:
+        if name in _NO_TABLE or name == "Evidence_Detail" or name not in C.SHEETS:
+            continue
+        if name == "Coverage":
+            rows = wb.coverage()
+        else:
+            rows = wb.rows(name)
+        if not rows:
+            continue
+        if name == "Financial_Trends":
+            out.append(_financial_table(rows))
+            continue
+        title, cols = _TABLE_TITLES.get(name, (name.replace("_", " "), None))
+        cols = list(cols or C.SHEETS[name])
+        if name == "Subcap_Scores" and card and re.fullmatch(r"P[1-4]", card):
+            rows = [r for r in rows
+                    if str(r.get("subcap_id") or "").startswith(card)]
+            title = f"{title} — {card}"
+        if name == "Search_Log":
+            title = f"Searches run ({len(rows)})"
+        out.append(_table(title, cols, [[r.get(c) for c in cols] for r in rows]))
     return out
+
+
+def _evidence_cited_table(wb: RunWorkbook, citations: list[str]) -> dict | None:
+    """The register rows THIS section cites — the drawer a reader opens from
+    the section, not the whole register repeated per section."""
+    if not citations:
+        return None
+    register = wb.evidence_index()
+    cols = ["E_ID", "Source_Name", "Tier", "Date_Published", "Recency",
+            "Claim_Type", "Origin"]
+    rows = [[register[c].get(k) for k in cols] for c in citations if c in register]
+    return _table("Evidence cited in this section", cols, rows) if rows else None
+
+
+def _financial_table(rows: list[dict]) -> dict:
+    """Financial_Trends (long) pivoted wide: metric × fiscal year, plus the
+    compound annual growth rate over the series — the five-year trajectory
+    the gold standard carries (GSY-18), computed at render time."""
+    years = sorted({str(r.get("Fiscal_Year") or "") for r in rows if r.get("Fiscal_Year")})
+    by_metric: dict[str, dict[str, float]] = {}
+    units: dict[str, str] = {}
+    cites: set[str] = set()
+    for r in rows:
+        m = str(r.get("Metric") or "").strip()
+        if not m:
+            continue
+        try:
+            by_metric.setdefault(m, {})[str(r.get("Fiscal_Year"))] = float(r.get("Value"))
+        except (TypeError, ValueError):
+            continue
+        units[m] = str(r.get("Unit") or "")
+        cites.update(_split_ids(r.get("Evidence_IDs")))
+    body = []
+    for m, series in by_metric.items():
+        vals = [series.get(y) for y in years]
+        present = [(y, v) for y, v in zip(years, vals) if v is not None]
+        cagr = "—"
+        if len(present) >= 2 and present[0][1] and present[0][1] > 0 and present[-1][1] > 0:
+            n = len(present) - 1
+            cagr = f"{((present[-1][1] / present[0][1]) ** (1 / n) - 1) * 100:.1f}%"
+        body.append([m, units.get(m, "")] + [("" if v is None else f"{v:,.1f}") for v in vals]
+                    + [cagr, " ".join(f"[{c}]" for c in sorted(cites))])
+    return _table(f"Financial trajectory — {len(years)} fiscal years "
+                  f"({years[0] if years else ''}–{years[-1] if years else ''})",
+                  ["Metric", "Unit"] + years + ["CAGR", "Evidence"], body)
 
 
 #: A section's declared block, as `narrative.write` requires it in the body.
@@ -295,13 +361,48 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
         problems.append(
             f"whole report: {total} words against a blocking minimum of "
             f"{_N.report_min_words_for(wb, spec)}")
+    # DEPTH, at the Golden 1 density (owner issue 5). The reference cites 47
+    # distinct sources in its research report and 115 in its assessment over
+    # 690 subcaps; the floor scales with THIS run's cell count so a focused
+    # engagement is held to the same density, not the same absolute number.
+    distinct = {c for b in curated["blocks"] for c in b["citations"]}
+    floor = citation_floor(wb, spec)
+    if len(distinct) < floor:
+        problems.append(
+            f"whole report: {len(distinct)} distinct citations against a floor "
+            f"of {floor} (Golden 1 density × {len(wb.selected_subcaps())} "
+            f"subcaps). Cite the evidence base, do not summarise it.")
     return problems
+
+
+def citation_floor(wb: RunWorkbook, spec: RS.ReportSpec) -> int:
+    """Distinct citations owed by a report of this run's size, at the density
+    the Golden 1 reference meets — never above what the reference itself
+    would pass (tests/skills/research_engine/test_gold_reference.py)."""
+    from . import gold_standard as GS
+    g = GS.gold_reference()
+    kind = "assessment" if spec.key == "assessment" else "research"
+    try:
+        per_subcap = (g["reports"][kind]["distinct_e_ids"]
+                      / g["workbook"]["subcaps"])
+    except (KeyError, ZeroDivisionError, TypeError):
+        per_subcap = (115 if kind == "assessment" else 47) / 690
+    return max(1, math.ceil(per_subcap * len(wb.selected_subcaps())))
 
 
 # ── rendering ────────────────────────────────────────────────────────────
 
 def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
-           *, force: bool = False) -> dict:
+           *, force: bool = False, qa_dir: Path | None = None) -> dict:
+    from . import narrative as N
+    # THE STAGE PRECONDITIONS, AT RENDER TIME TOO. Measured 2026-09-03: this
+    # function never asked whether the run was scored — `narrative.write`
+    # did, but only when handed the run, and `--force` swallowed the one
+    # readiness check that remained. So a report could be RENDERED on an
+    # unscored workbook. The qa_dir is derived from the workbook's own
+    # layout when the caller passes none, so no calling shape skips it.
+    qa_dir = qa_dir if qa_dir is not None else Path(wb.path).resolve().parent / "07_qa"
+    pre = N.stage_preconditions(wb, spec.key, qa_dir)
     curated = curate(wb, spec)
     problems = check(wb, curated)
     # Every section carries an INDEPENDENT verdict, or the report does not
@@ -309,25 +410,48 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
     # an unreviewed one, so a report could ship on prose nobody had
     # adversarially read.
     if not force:
-        from . import narrative as N
         try:
             N.require_ready(wb, spec.key)
         except N.NarrativeRefusal as e:
             problems = list(problems) + [str(e)]
-    if problems and not force:
+    if (pre or problems) and not force:
+        # Every reason at once — the run's readiness AND the sections' own
+        # problems — so one pass closes them all (an unattended session acts
+        # on a list and stalls on a sentence).
+        lines = ([f"the run is not ready for it: {p}" for p in pre]
+                 + list(problems))
         raise ReportRefused(
-            f"REFUSED: {spec.title} is not renderable yet —\n  "
-            + "\n  ".join(problems))
+            f"REFUSED: {spec.title} cannot be rendered —\n  - "
+            + "\n  - ".join(lines)
+            + (f"\nRun `engine.cli narrative preconditions --run <R> --root <ROOT> "
+               f"--report {spec.key}` until it prints ready. --force does not "
+               f"waive this; it writes a DRAFT_ file that no package accepts."
+               if pre else ""))
+    problems = list(problems) + list(pre)
+    draft = bool(force and problems)
     md = curated["meta"]
     entity = str(md.get("entity_name") or "client")
     name = spec.filename.format(entity=_slug(entity),
                                 date=str(md.get("reference_date"))[:10])
+    if draft:
+        # A forced render is a DRAFT: named so no deliverable glob
+        # (assemble.DELIVERABLES, gold_standard.package_findings) can pick it
+        # up, banner-marked, and recorded as a FAIL on the Gate_Log.
+        name = "DRAFT_" + name
     out = Path(out_dir) / name
     out.parent.mkdir(parents=True, exist_ok=True)
 
-    doc = Document()
+    doc = _shell()
     _style(doc)
     _brand(doc, spec, entity, md)
+    if draft:
+        _warn(doc, f"DRAFT — NOT A DELIVERABLE: rendered with --force while "
+                   f"{len(problems)} precondition(s)/problem(s) were open. "
+                   f"Every gap below is marked NO SOURCE.")
+        from . import ledger as L
+        L.append_gate(wb, gate="REPORT_RENDER", scope=spec.key, verdict="FAIL",
+                      detail=("forced draft: " + "; ".join(problems))[:900],
+                      blocking=False)
     doc.add_heading(spec.title, level=0)
     p = doc.add_paragraph(entity)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
@@ -371,12 +495,16 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
     used = sorted({c for b in curated["blocks"] for c in b["citations"]})
     if not used:
         _warn(doc, "This report cites nothing.")
+    bullet = _style_named(doc, "List Bullet", "List Paragraph")
     for e in used:
         r = register.get(e, {})
-        doc.add_paragraph(
-            f"[{e}] {r.get('Source_Name')} — {r.get('Source_URL')} "
-            f"(tier {r.get('Tier')}, {r.get('Recency')}, published "
-            f"{r.get('Date_Published') or 'undated'})", style="List Bullet")
+        line = (f"[{e}] {r.get('Source_Name')} — {r.get('Source_URL')} "
+                f"(tier {r.get('Tier')}, {r.get('Recency')}, published "
+                f"{r.get('Date_Published') or 'undated'})")
+        if bullet is not None:
+            doc.add_paragraph(line, style=bullet)
+        else:
+            doc.add_paragraph("• " + line)
 
     doc.save(out)
     return {
@@ -384,34 +512,63 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
         "words": sum(b["words"] for b in curated["blocks"]),
         "citations": len(used), "unresolved": [c for c in used
                                                if c not in register],
-        "forced": bool(problems and force), "problems": problems,
+        "forced": draft, "draft": draft, "problems": problems,
+        "shell": str(T.REPORT_SHELL),
     }
 
 
+def _shell():
+    """The branded .docx shell, emptied of its own (older) body.
+
+    goeasy GSY-05: the reports were built as a blank `Document()`, throwing
+    the client's fonts, header and footer away; until 2026-09-03 the fix was
+    a header STRING synthesised onto a blank document, which passed the
+    branding gate by the letter and matched the reference by nothing else.
+    The shell carries header1.xml, footer1.xml and the embedded DM Sans faces
+    (python-docx cannot embed a font into a blank document); its body — an
+    older twelve-section outline — is cleared, and the pinned Docs' sections
+    are emitted into its styles. Format from the Docs; chrome from the shell.
+    """
+    if not T.REPORT_SHELL.is_file():
+        raise ReportRefused(
+            f"REFUSED: the branded report shell is missing at {T.REPORT_SHELL}; "
+            f"the plugin ships it, so this is a partial install — reinstall.")
+    doc = Document(str(T.REPORT_SHELL))
+    body = doc.element.body
+    for child in list(body):
+        if child.tag.endswith("}sectPr"):
+            continue
+        body.remove(child)
+    return doc
+
+
 def _style(doc) -> None:
-    st = doc.styles["Normal"]
-    st.font.name = "Calibri"
-    st.font.size = Pt(10.5)
+    """The shell's own styles carry the brand; nothing is overridden here.
+    The size is pinned so a shell edit cannot silently shrink the body."""
+    st = _style_named(doc, "Normal")
+    if st is not None and st.font.size is None:
+        st.font.size = Pt(10.5)
 
 
 def _brand(doc, spec, entity: str, md: dict) -> None:
-    """The branded chrome the reference package carries (header1.xml), so the
-    document is authored INTO a template rather than as a blank `Document()`
-    — goeasy GSY-05, gold gate GS-RPT-BRANDING."""
+    """Fill the shell's header and footer with THIS report's identity. The
+    chrome itself (header1.xml / footer1.xml, the DM Sans faces) is the
+    shell's — goeasy GSY-05, gold gate GS-RPT-BRANDING."""
     sec = doc.sections[0]
     h = sec.header.paragraphs[0] if sec.header.paragraphs else sec.header.add_paragraph()
-    h.text = f"Zennify · Digital Maturity Assessment · {spec.title} · {entity}"
-    h.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    for r in h.runs:
-        r.font.size = Pt(8)
-        r.font.color.rgb = RGBColor(0x1F, 0x3A, 0x5F)
+    for r in list(h.runs)[1:]:
+        r._r.getparent().remove(r._r)
+    if h.runs:
+        h.runs[0].text = f"{spec.title} | ZENNIFY · {entity}"
+    else:
+        h.text = f"{spec.title} | ZENNIFY · {entity}"
     f = sec.footer.paragraphs[0] if sec.footer.paragraphs else sec.footer.add_paragraph()
-    f.text = (f"Run {md.get('run_id')} · catalogue {md.get('catalogue_version')} "
-              f"({str(md.get('catalogue_hash'))[:8]}) · prepared by Zennify "
-              f"Digital Maturity Assessment · confidential")
-    f.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    for r in f.runs:
-        r.font.size = Pt(8)
+    tail = (f" · Run {md.get('run_id')} · catalogue {md.get('catalogue_version')} "
+            f"({str(md.get('catalogue_hash'))[:8]}) · Confidential")
+    if f.runs:
+        f.add_run(tail).font.size = Pt(8)
+    else:
+        f.text = "Zennify" + tail
 
 
 def _front_matter(doc, wb, spec, md: dict) -> None:
@@ -532,11 +689,29 @@ def _warn(doc, text: str) -> None:
     r.font.color.rgb = RGBColor(0xB0, 0x00, 0x20)
 
 
+def _style_named(doc, *names):
+    """The first of `names` the document defines, by NAME (the shell's
+    `Normal` is registered as `normal`; python-docx's id lookup is
+    deprecated and case-sensitive). None when the shell has none of them."""
+    want = {n.casefold() for n in names}
+    for s in doc.styles:
+        if s.name and s.name.casefold() in want:
+            return s
+    return None
+
+
 def _write_table(doc, t) -> None:
     table = doc.add_table(rows=1, cols=len(t["cols"]))
-    table.style = "Light Grid Accent 1"
+    st = _style_named(doc, "Light Grid Accent 1", "Table Grid", "TableNormal",
+                      "Normal Table")
+    if st is not None:
+        table.style = st
     for i, c in enumerate(t["cols"]):
-        table.rows[0].cells[i].text = str(c)
+        cell = table.rows[0].cells[i]
+        cell.text = str(c)
+        for p in cell.paragraphs:
+            for r in p.runs:
+                r.bold = True
     for row in t["rows"]:
         cells = table.add_row().cells
         for i, v in enumerate(row):
@@ -552,7 +727,9 @@ def main(argv=None) -> int:
     ap.add_argument("--out")
     ap.add_argument("--spec", help="JSON export of a template's control blocks")
     ap.add_argument("--force", action="store_true",
-                    help="render anyway, marking every unmet block NO SOURCE")
+                    help="render a DRAFT_ file with every gap marked NO SOURCE "
+                         "and a REPORT_RENDER FAIL on the Gate_Log; never a "
+                         "deliverable — no package glob picks it up")
     a = ap.parse_args(argv)
     r = runstate.locate(a.run, Path(a.root) if a.root else None)
     wb = r.open()
