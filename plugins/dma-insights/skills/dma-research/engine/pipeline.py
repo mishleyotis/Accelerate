@@ -329,8 +329,8 @@ class Pipeline:
             # the other proof (`preflight.record`, which `engine.cli start`
             # and the binding preflight both write).
             sv = str(md.get("sv_basis") or "").strip()
-            ok = (bool(sv) and not sv.upper().startswith("UNSTATED")) or \
-                (self.run.root / "00_entity_profile" / "preflight.json").is_file()
+            sha = str(md.get("preflight_sha") or "").strip()
+            ok = bool(sha) or (bool(sv) and not sv.upper().startswith("UNSTATED"))
             return ok, ("binding recorded" if ok else
                         "no binding basis on the run: start it with `engine.cli start "
                         "--preflight <answered preflight.json>`")
