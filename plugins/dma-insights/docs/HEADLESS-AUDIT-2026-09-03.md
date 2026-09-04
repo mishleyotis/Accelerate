@@ -256,9 +256,75 @@ Routine and not to this session (inhibitor 2); every Routine is paused
 tree to watch the scan ingest it would put a fake client in front of the
 package scan and the synthesis lanes, which I will not do without the owner
 asking for it. The package-to-promotion half is proved by existence
-(`audit_chain.py`, 11/11) and by the acceptance walk
+(`audit_chain.py`, 11/11), by the acceptance walk
 (`tests/acceptance`, 557 passed, `test_acceptance_full_run` from `start` to
-a verified package), not by a live promotion.
+a verified package), and — §8 — by the app's own ingest and promote code
+running against a real PostgreSQL 16 in this container, not by a live
+promotion.
+
+## 8 · Ingest → promote, exercised against a real database (2026-09-04)
+
+The half §7 could not reach live was run the way CI runs it, on this
+container: `infra/local/up.sh` fell back to the system PostgreSQL 16 (no
+docker daemon), installed pgvector, created the IAM-parity roles and
+migrated the schema to head with Alembic — the same migrations the `migrate`
+Job applies in production. Then the suites that open that database:
+
+| suite | result | what it proves about the chain |
+|---|---|---|
+| `tests/schema/` | 35 passed, 12 skipped (catalogue not loaded) | four bands on the RAW score with no fifth enum value, generated columns STORED, api role denied on staging, null date → UNVERIFIED |
+| `apps/worker/tests` + `apps/mcp/tests` + `apps/api/tests` + `packages/shared/tests` + `infra/jobs/tests` | **2431 passed, 11 skipped** (2 EDGAR unreachable, 2 catalogue not loaded, 2 deploy artefacts absent, others environment-gated) | the package scan, the parser, evidence persistence, the connector's validation and promote, the API's reads |
+| `test_promote.py` + `test_ledger.py` + scan/persist/re-upload tests, `-v` | **70 passed, 0 skipped** | see below |
+
+The promote tests that ran, by name, against the migrated schema rather than
+a mock: `test_promote_all_or_nothing_then_idempotent`,
+`test_injected_writer_failure_rolls_back_everything`,
+`test_incomplete_run_writes_nothing_and_names_pages`,
+`test_fix_one_page_repromotes_from_retained_staging`,
+`test_registry_order_is_stable_and_covers_all_34`,
+`test_a_retained_safeguard_failure_discloses_and_still_promotes`,
+`test_a_retained_pass_that_fails_a_current_gate_refuses`,
+`test_promotion_state_never_moves_backwards`. The ingest tests that ran:
+`test_rerunning_on_unchanged_tree_processes_nothing`,
+`test_changed_checksum_is_detected_and_reprocessed`,
+`test_an_empty_walk_is_recorded_as_failed_not_succeeded`,
+`test_a_package_retries_then_quarantines_instead_of_churning`,
+`test_duplicate_content_lands_once_and_citations_resolve`,
+`test_the_guard_matches_on_content_not_on_the_drive_file_id`. Invariants 3,
+8, 9, 11 and 12 are therefore measured on a real database in this
+container, not inferred from the tests' existence.
+
+**The live serving tier, read and not written.** Two read-only walks of
+production, with the container's own service identity (no token printed):
+
+- `run_gate.py pick --count 1` gated the pending queue in its own order and
+  came back `GATE: PRODUCE` for one client (run `bfc6cb31…`, 195 scored
+  cells, 114 evidence rows, catalogue v7.0, first production) with two
+  RESERVEs behind it. It walked past three: one already serving 6/6 and
+  current, two whose ingested run parsed to **0 scored cells** — a stub the
+  gate refuses with "report a scan finding", which is the package-quality
+  failure the chain is built to stop, stopping it.
+- `synthesis_watchdog.py --json` (observe only; `--promote-ready` was NOT
+  passed): **17 pending runs, 0 promotable, 14 with all six pages missing,
+  3 with one page PASS, 0 live claims, 0 sessions.** The newest claim
+  expired 2026-09-03; the newest claim holder is a lane label from
+  2026-09-01. Nothing has staged a page since the Routines stopped
+  (inhibitor 1) — the queue is the shape of a pipeline whose producer is
+  paused and whose gate is ready, which is exactly what the inhibitor table
+  says.
+
+**So what remains unproved, and why.** A page has not been staged and a run
+has not been promoted *by a headless firing* since 2026-08-30. The code that
+does both is proved here against the real schema; the connector is reachable
+from a headless session (§7); the gate offers a producible run today. What
+is missing is a firing — and every firing is paused at the account, every
+research firing lacks Exa and Tavily, and every fresh session binds a stale
+image until the setup script is wired. Those are the four rows of the
+inhibitor table, and each is an owner's or admin's action. This container
+will not stand in for that firing by pushing a synthetic package into the
+production intake tree or by passing `--promote-ready` against a client's
+run: both would put content in front of the scan and the synthesis lanes
+that no person asked for.
 
 ## How to re-ask every question in this document
 
@@ -272,4 +338,9 @@ python3 plugins/dma-insights/scripts/stress_run_lifecycle.py
 python3 plugins/dma-insights/scripts/routine_health.py --file <list_triggers.json> --strict
 python3 plugins/dma-insights/scripts/routine_sync.py diff --live <list_triggers.json>
 python3 plugins/dma-insights/scripts/readiness.py --triggers <list_triggers.json> --lifecycle
+bash infra/local/up.sh                                                      # real PostgreSQL 16, schema at head
+LOCAL_DATABASE_URL='postgresql://postgres:local@localhost:5432/dma_insights' \
+  python3 -m pytest tests/schema/ apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ -q -rs
+python3 plugins/dma-insights/scripts/run_gate.py pick --count 1             # live queue, read-only
+python3 scripts/synthesis_watchdog.py --state /tmp/wd.json --json           # live serving tier, observe only
 ```
