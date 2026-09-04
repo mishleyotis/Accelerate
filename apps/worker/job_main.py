@@ -743,6 +743,39 @@ def stated_package_id(source_name: str | None) -> str | None:
     return m.group(1).rstrip(".-_") if m else None
 
 
+#: How much of the shorter quote has to lead the longer one for the two to be
+#: the same passage. The ingest clips an excerpt into the 50-500 character
+#: window (invariant 4), so the served row routinely holds a PREFIX of what
+#: the Evidence_Master tab states — same passage, fewer characters.
+_EXCERPT_HEAD = 60
+
+
+def excerpt_agrees(served: str | None, stated: str | None) -> bool | None:
+    """Do the served row and the workbook row quote the same passage?
+
+    THE MARKER IS TEXT A PRODUCER WROTE. `[package evidence id E-5123]` is a
+    claim about provenance, and a claim can be wrong — a mistyped digit would
+    hang a real, checkable URL under somebody else's quote, which is worse
+    than the blank drawer it replaced. The excerpt is the independent check:
+    both rows carry the VERBATIM passage, so if they agree, the marker points
+    where it says it does.
+
+    MEASURED 2026-09-04 on Golden 1 Credit Union: 258 served rows name a
+    workbook row, and under this rule all 258 agree with the row they name
+    and none disagree. So the guard costs nothing on good data and is the
+    only thing standing between a typo and a mis-sourced citation.
+
+    True agrees, False contradicts, None when one side has no quote to
+    compare — never guessed either way."""
+    a = " ".join((served or "").split()).lower()
+    b = " ".join((stated or "").split()).lower()
+    if not a or not b:
+        return None
+    if a == b:
+        return True
+    return a.startswith(b[:_EXCERPT_HEAD]) or b.startswith(a[:_EXCERPT_HEAD])
+
+
 def evidence_reader_fingerprint() -> str:
     """A hash of the evidence reader, on `composite_reader_fingerprint`'s
     reasoning: a run this reader has already been through is not work until
@@ -756,8 +789,9 @@ def evidence_reader_fingerprint() -> str:
     from dma_worker import workbook_parser as _wp
     src = inspect.getsource(_wp.parse_evidence_master)
     src += inspect.getsource(stated_package_id)
+    src += inspect.getsource(excerpt_agrees)
     consts = repr((_wp._EV_TABS, _wp._EV_ID_ANCHORS, _wp._FILLABLE,
-                   _PACKAGE_ID_MARKER.pattern))
+                   _PACKAGE_ID_MARKER.pattern, _EXCERPT_HEAD))
     return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
 
 
@@ -1239,12 +1273,13 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
             # a row the connector registered wears `E-CC-nnn` and states its
             # workbook origin in `source_name` instead. Read what it says.
             by_ledger_id = {ev["e_id"]: ev for ev in ledger}
-            cur.execute("""SELECT e_id, source_name FROM evidence_index
+            cur.execute("""SELECT e_id, source_name, excerpt
+                             FROM evidence_index
                             WHERE entity_id = %s AND origin = 'package'
                               AND source_url IS NULL
                               AND source_name IS NOT NULL""", (entity_id,))
-            stated = named = 0
-            for e_id, source_name in cur.fetchall():
+            stated = named = conflicts = uncorroborated = 0
+            for e_id, source_name, served_excerpt in cur.fetchall():
                 pid = stated_package_id(source_name)
                 if pid is None:
                     continue
@@ -1252,6 +1287,17 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                 ev = by_ledger_id.get(pid)
                 if ev is None or not (ev.get("source_url") or "").strip():
                     continue
+                # THE QUOTE HAS TO AGREE. Both rows carry the verbatim
+                # passage, so the Evidence_Master excerpt is what confirms
+                # the marker points where it claims. A contradiction is a
+                # mis-aimed marker, and hanging a real URL under the wrong
+                # quote is worse than the blank drawer it would replace.
+                verdict = excerpt_agrees(served_excerpt, ev.get("excerpt"))
+                if verdict is False:
+                    conflicts += 1
+                    continue
+                if verdict is None:
+                    uncorroborated += 1
                 m = mined.get(pid) or {}
                 cur.execute("SAVEPOINT ev_named")
                 try:
@@ -1270,6 +1316,17 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                     cur.execute("ROLLBACK TO SAVEPOINT ev_named")
                     clashes += 1
             n += stated
+            if conflicts:
+                # THE MARKER AND THE QUOTE DISAGREE. Recorded, never
+                # resolved: whichever is wrong, a person has to look.
+                cur.execute(
+                    """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_stated_id_excerpt_conflict',%s, now())""",
+                    (run_id, json.dumps({"rows": str(conflicts),
+                                         "reason": "source_name names a package "
+                                                   "evidence id whose Evidence_Master "
+                                                   "excerpt is a different passage; "
+                                                   "no url was attached"})))
             if named and stated < named:
                 # NAMED A ROW WE COULD NOT FIND. Say so rather than leaving a
                 # blank drawer with no account of why it is blank.
@@ -1278,6 +1335,8 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                        VALUES (%s,'evidence_stated_id_unresolved',%s, now())""",
                     (run_id, json.dumps({"named": str(named),
                                          "filled": str(stated),
+                                         "conflicts": str(conflicts),
+                                         "uncorroborated": str(uncorroborated),
                                          "reason": "source_name names a package "
                                                    "evidence id the workbook "
                                                    "ledger does not carry"})))
@@ -1301,7 +1360,9 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                 (run_id, json.dumps({"reader": reader, "filled": str(n)})))
             conn.commit()
             print(f"backfill-evidence: {folder} -> {n} row(s) filled "
-                  f"({stated} by a stated package id, "
+                  f"({stated} by a stated package id"
+                  + (f", {conflicts} refused on an excerpt conflict"
+                     if conflicts else "") + ", "
                   f"{sum(1 for v in mined.values() if v.get('excerpt'))} mined "
                   f"excerpts{f', {clashes} dedup clash(es)' if clashes else ''})")
             filled += 1

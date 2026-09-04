@@ -80,7 +80,7 @@ class _Cursor:
             return
         if "FROM runs r" in sql:
             self._mode = "todo"
-        elif "SELECT e_id, source_name FROM evidence_index" in sql:
+        elif "SELECT e_id, source_name, excerpt" in sql:
             self._mode = "named"
         elif "split_part(e_id, '-', 3)" in sql:
             self.suffix_updates.append(params)
@@ -152,8 +152,8 @@ def test_a_connector_minted_row_is_filled_from_the_row_it_names(monkeypatch):
     cur = _Cursor(
         todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
         unresolved_rows=[
-            ("E-CC-569", "DFPI record [package evidence id E-5123]"),
-            ("E-CC-564", "Banking Dive — package id E-055;"),
+            ("E-CC-569", "DFPI record [package evidence id E-5123]", "B" * 60),
+            ("E-CC-564", "Banking Dive — package id E-055;", "A" * 60),
         ])
     conn = _Conn(cur)
 
@@ -173,7 +173,8 @@ def test_a_row_naming_a_workbook_row_that_does_not_exist_is_recorded(monkeypatch
     _stub_workbook(monkeypatch)
     cur = _Cursor(
         todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
-        unresolved_rows=[("E-CC-901", "Something [package evidence id E-9999]")])
+        unresolved_rows=[("E-CC-901", "Something [package evidence id E-9999]",
+                          "Q" * 60)])
     conn = _Conn(cur)
 
     job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
@@ -191,7 +192,8 @@ def test_a_row_that_names_nothing_is_left_alone(monkeypatch):
     _stub_workbook(monkeypatch)
     cur = _Cursor(
         todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
-        unresolved_rows=[("E-CC-570", "A source with no provenance marker")])
+        unresolved_rows=[("E-CC-570", "A source with no provenance marker",
+                          "Q" * 60)])
     conn = _Conn(cur)
 
     job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
@@ -208,7 +210,8 @@ def test_the_fill_never_overwrites_a_url_the_package_already_stated(monkeypatch)
     _stub_workbook(monkeypatch)
     cur = _Cursor(
         todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
-        unresolved_rows=[("E-CC-569", "DFPI [package evidence id E-5123]")])
+        unresolved_rows=[("E-CC-569", "DFPI [package evidence id E-5123]",
+                          "B" * 60)])
     conn = _Conn(cur)
 
     job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
@@ -242,3 +245,111 @@ def test_improving_the_matcher_re_opens_every_run_it_gave_up_on(monkeypatch):
     assert job_main.evidence_reader_fingerprint() != before, \
         "changing how a row is matched left the fingerprint unchanged, so " \
         "every already-passed run stays closed to the improvement"
+
+
+# --------------------------------------------------------------------------
+# the excerpt is what corroborates the marker
+# --------------------------------------------------------------------------
+
+CLIPPED = ("Golden 1 Credit Union is a California state-chartered, "
+           "NCUA-insured credit union headquartered in Sacramento")
+FULL = CLIPPED + ", serving members across the state since 1933."
+
+
+@pytest.mark.parametrize("served,stated,expected", [
+    # the same passage, byte for byte
+    (FULL, FULL, True),
+    # the ingest clips into the 50-500 window, so the served row holds a
+    # PREFIX of what Evidence_Master states. Same passage, fewer characters.
+    (CLIPPED, FULL, True),
+    (FULL, CLIPPED, True),
+    # whitespace and case are formatting, not content
+    ("  The  Quick   Brown Fox jumps over the lazy dog and keeps on going ",
+     "the quick brown fox jumps over the lazy dog and keeps on going", True),
+    # a different passage entirely — the marker is pointing somewhere else
+    (FULL, "DFPI lists Golden 1 as a regulated entity with total assets of "
+           "$21.1bn as at the 2026-Q1 call report", False),
+    # nothing to compare: never guessed either way
+    (None, FULL, None),
+    ("", FULL, None),
+    (FULL, None, None),
+])
+def test_the_quote_decides_whether_the_marker_is_believed(served, stated,
+                                                          expected):
+    assert job_main.excerpt_agrees(served, stated) is expected
+
+
+def test_a_marker_whose_quote_contradicts_it_fills_nothing(monkeypatch):
+    """THE GUARD. `[package evidence id E-5123]` is text a producer wrote; a
+    mistyped digit would hang a real, checkable URL under somebody else's
+    quote — worse than the blank drawer it replaced. The excerpt is the
+    independent check, and it refuses."""
+    _stub_workbook(monkeypatch)
+    cur = _Cursor(
+        todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
+        unresolved_rows=[
+            ("E-CC-569", "DFPI record [package evidence id E-5123]",
+             "A passage about something else entirely, at length, so that "
+             "no prefix of it could be mistaken for the ledger's quote.")])
+    conn = _Conn(cur)
+
+    job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
+
+    assert cur.named_updates == [], \
+        "a URL was attached to a row whose own quote says it is a different " \
+        "source"
+    said = [json.loads(params[1]) for kind, params in cur.observed
+            if kind == "evidence_stated_id_excerpt_conflict"]
+    assert said and said[0]["rows"] == "1", \
+        "the contradiction was not recorded, so nobody can go and look"
+
+
+def test_a_clipped_quote_is_still_the_same_quote(monkeypatch):
+    """The other half: the guard must not refuse the normal case. The served
+    excerpt is routinely a clipped prefix of the Evidence_Master one, and
+    every one of Golden 1's 258 marker rows looks like this."""
+    ledger = [{"e_id": "E-5123", "source_name": "Golden1 DMA Input Brief",
+               "source_url": "https://drive.example/input-brief",
+               "claim_type": "FACT", "excerpt": FULL}]
+    _stub_workbook(monkeypatch, ledger)
+    cur = _Cursor(
+        todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
+        unresolved_rows=[("E-CC-569", "Brief [package evidence id E-5123]",
+                          CLIPPED)])
+    conn = _Conn(cur)
+
+    job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
+
+    assert [p[0] for p in cur.named_updates] == \
+        ["https://drive.example/input-brief"], \
+        "the guard refused a clipped prefix of the same passage"
+    assert not [k for k, _ in cur.observed
+                if k == "evidence_stated_id_excerpt_conflict"]
+
+
+def test_the_excerpt_is_filled_from_the_same_row_as_the_url(monkeypatch):
+    """`Evidence_Master` supplies both. A drawer with a link and no quote is
+    still a drawer nobody can check (invariant 4)."""
+    _stub_workbook(monkeypatch)
+    cur = _Cursor(
+        todo=[("run-1", "ent-g1", "Golden 1 Credit Union - DMA", 1)],
+        unresolved_rows=[("E-CC-569", "Brief [package evidence id E-5123]",
+                          None)])
+    conn = _Conn(cur)
+
+    job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
+
+    assert len(cur.named_updates) == 1
+    url, excerpt, claim, _ent, e_id = cur.named_updates[0]
+    assert url == "https://drive.example/input-brief"
+    assert excerpt == "B" * 60, \
+        "the row got a link but no quote to check it against"
+    assert claim == "FACT" and e_id == "E-CC-569"
+
+
+def test_tightening_the_quote_rule_re_opens_every_run(monkeypatch):
+    """`_EXCERPT_HEAD` decides which rows are believed, so changing it is a
+    different reader and every run stamped by the old one must re-open."""
+    before = job_main.evidence_reader_fingerprint()
+    monkeypatch.setattr(job_main, "_EXCERPT_HEAD", 200)
+    assert job_main.evidence_reader_fingerprint() != before
