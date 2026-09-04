@@ -148,13 +148,71 @@ def test_the_deploy_verifies_the_posture_it_just_set():
 
 
 def test_web_is_exempt_and_the_reason_is_written_down():
-    """`dmai-web` IS deployed public, correctly — IAP sits in front of it and
-    does the authenticating. That exemption is load-bearing, so it must be
-    explained in the file rather than inferred from its absence here."""
+    """`dmai-web` is exempt from the closed-at-IAM rule because IAP sits in
+    front of it and does the authenticating. That exemption is load-bearing,
+    so it must be explained in the file rather than inferred from its
+    absence here."""
     text = DEPLOY.read_text()
     assert "dmai-web" in text and "iap" in text.lower(), (
         "dmai-web is deployed public with no IAP configuration in the same "
         "file; either it is protected somewhere unstated or it is exposed")
+
+
+def _web_deploy_block() -> str:
+    """The `gcloud run deploy dmai-web` invocation, flags and all."""
+    text = DEPLOY.read_text()
+    i = text.index("gcloud run deploy dmai-web")
+    # up to the first line that is not a continuation of the command
+    out = []
+    for line in text[i:].splitlines():
+        out.append(line)
+        if not line.rstrip().endswith("\\"):
+            break
+    return "\n".join(out)
+
+
+def test_the_web_deploy_does_not_re_open_the_door_it_then_closes():
+    """MEASURED 2026-09-04, in a release log.
+
+    The IAP block was rewritten on 2026-09-01 to converge — "read first and
+    write only when the state is actually wrong" — after a user loading the
+    app at 17:56:03 got IAP `Error code: 11` while that block rebuilt the
+    door around them. It still wrote on every release, because this command
+    two blocks earlier passed `--allow-unauthenticated` and re-granted
+    `allUsers`; the converge step then dutifully found it and removed it.
+    A guaranteed SetIamPolicy on the door, every release, from a block whose
+    entire purpose was to stop doing that.
+
+    On an existing service gcloud touches the IAM policy only when one of
+    the two flags is given. So the web deploy must give NEITHER, and the
+    converge block owns dmai-web's policy alone."""
+    block = _web_deploy_block()
+    assert PUBLIC_FLAG.search(block) is None, (
+        "the dmai-web deploy passes --allow-unauthenticated, which re-grants "
+        "allUsers on every release and forces the IAP converge block to "
+        "write to the service IAM policy every time — the churn that "
+        "produced IAP Error code: 11")
+    assert "--no-allow-unauthenticated" not in block, (
+        "the dmai-web deploy passes --no-allow-unauthenticated; that is also "
+        "an IAM write on a door IAP's converge block already owns. Pass "
+        "neither flag and let that block read-then-write")
+
+
+def test_the_converge_block_still_owns_the_web_door():
+    """Dropping the flag is only safe because something else guarantees the
+    two bindings that matter. If this block stops granting the IAP service
+    agent, dmai-web becomes uninvokable by the only principal that reaches
+    it."""
+    text = DEPLOY.read_text()
+    i = text.index("IAP_SA=")
+    block = text[i:i + 2500]
+    assert "add-iam-policy-binding dmai-web" in block and "IAP_SA" in block, (
+        "nothing grants the IAP service agent run.invoker on dmai-web; with "
+        "no --allow-unauthenticated on the deploy either, the door has no "
+        "one behind it")
+    assert "allUsers" in block and "remove-iam-policy-binding" in block, (
+        "nothing removes a public invoker grant from dmai-web, so one added "
+        "by hand would never be converged away")
 
 
 # ── the OAuth secrets a deploy must carry, derived from the code ──────────

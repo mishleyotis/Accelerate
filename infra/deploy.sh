@@ -273,7 +273,26 @@ if [ -f apps/web/Dockerfile ]; then
     --service-account="dmai-web@${SA_DOMAIN}" \
     --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo}" \
     --set-secrets="SESSION_SECRET=dmai-session-secret:latest" \
-    --allow-unauthenticated --quiet
+    --quiet
+  # NO `--allow-unauthenticated` HERE, DELIBERATELY, AND NO
+  # `--no-allow-unauthenticated` EITHER. On an existing service gcloud
+  # touches the IAM policy only when one of those flags is given, so
+  # omitting both leaves dmai-web's door to the converge block below —
+  # which is the whole point of that block.
+  #
+  # MEASURED 2026-09-04. That block was rewritten on 2026-09-01 to "read
+  # first and write only when the state is actually wrong", and it still
+  # wrote on every single release: this command re-granted `allUsers` a few
+  # lines earlier ("Setting IAM Policy...done" in the release log), so the
+  # converge step always found it and always removed it again. One
+  # guaranteed SetIamPolicy per release, on the door, while people are
+  # using the app — exactly the churn behind the IAP "Error code: 11" a
+  # user hit at 17:56:03 on 2026-09-01. The fix was two blocks away from
+  # the thing that undid it.
+  #
+  # The posture is unchanged and is stated below rather than here: IAP
+  # authenticates at the door and invokes as the IAP service agent, which
+  # the converge block grants; direct public invocation stays closed.
 
   # ── Google sign-in at the door: Cloud Run integrated IAP ─────────────
   # Google authenticates every request (Google-managed OAuth client,
