@@ -716,6 +716,23 @@ def composite_reader_fingerprint() -> str:
     return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
 
 
+#: Workbook downloads are ~1.5 MB each and this pass re-parses whole
+#: workbooks, so the per-firing cap is small. What is left over is NAMED.
+EVIDENCE_REPAIR_PER_FIRING = 5
+
+
+def evidence_reader_fingerprint() -> str:
+    """A hash of the evidence reader, on `composite_reader_fingerprint`'s
+    reasoning: a run this reader has already been through is not work until
+    the reader itself changes, and nobody should have to remember to say so."""
+    import hashlib
+    import inspect
+    from dma_worker import workbook_parser as _wp
+    src = inspect.getsource(_wp.parse_evidence_master)
+    consts = repr((_wp._EV_TABS, _wp._EV_ID_ANCHORS, _wp._FILLABLE))
+    return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
+
+
 def adopt_orphan_runs(conn, token, groups) -> int:
     """Give a run with no `source_folder_id` its package back, by IDENTITY.
 
@@ -1096,7 +1113,7 @@ def backfill_sections(conn, token, groups) -> int:
     return 1 if failed else 0
 
 
-def backfill_evidence(conn, token, groups) -> int:
+def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
     """Fill in the evidence text that already-ingested rows never got.
 
     Evidence rows insert with ON CONFLICT DO NOTHING, so re-ingesting a
@@ -1109,12 +1126,32 @@ def backfill_evidence(conn, token, groups) -> int:
     Matched on runs.source_folder_id, which stores the client folder's name.
     """
     cur = conn.cursor()
+    reader = evidence_reader_fingerprint()
+    # THE SCHEDULED PASS IS INCREMENTAL. Unbounded, this re-downloads and
+    # re-parses every run's workbook every thirty minutes for ever. A run
+    # with no unlinked citation left is not work, and a run THIS reader has
+    # already been through is not work until the reader changes.
+    # `forced` (BACKFILL_EVIDENCE) re-reads everything, which is what a
+    # human reaching for the manual pass is asking for.
     cur.execute("""SELECT r.id, r.entity_id, r.source_folder_id, r.run_seq
                      FROM runs r
                     WHERE r.source_folder_id IS NOT NULL
-                    ORDER BY r.source_folder_id""")
+                      AND (%s OR (
+                            EXISTS (SELECT 1 FROM evidence_index i
+                                     WHERE i.run_id = r.id
+                                       AND i.source_url IS NULL)
+                        AND NOT EXISTS (SELECT 1 FROM parser_observations o
+                                         WHERE o.run_id = r.id
+                                           AND o.kind = 'evidence_reader_pass'
+                                           AND o.detail->>'reader' = %s)))
+                    ORDER BY r.source_folder_id""", (forced, reader))
     todo = cur.fetchall()
-    print(f"backfill-evidence: {len(todo)} run(s)")
+    deferred = 0
+    if not forced and len(todo) > EVIDENCE_REPAIR_PER_FIRING:
+        deferred = len(todo) - EVIDENCE_REPAIR_PER_FIRING
+        todo = todo[:EVIDENCE_REPAIR_PER_FIRING]
+    print(f"backfill-evidence: {len(todo)} run(s) (reader {reader}"
+          + (f", {deferred} deferred to the next firing)" if deferred else ")"))
     filled = skipped = failed = 0
     for run_id, entity_id, folder, run_seq in todo:
         parts = groups.get(folder) or {}
@@ -1169,6 +1206,17 @@ def backfill_evidence(conn, token, groups) -> int:
                     (run_id, json.dumps({"rows_skipped": clashes,
                                          "reason": "filling the excerpt would "
                                                    "duplicate (entity, content_hash)"})))
+            conn.commit()
+            # RECORDED, stamped with the reader that did it. Without this
+            # the scheduled pass re-downloads a 1.5 MB workbook every thirty
+            # minutes to re-learn that it has nothing left to give; with it
+            # the steady state is one query, and improving the reader
+            # re-opens every run by itself.
+            cur.execute(
+                """INSERT INTO parser_observations
+                       (run_id, kind, detail, occurred_at)
+                   VALUES (%s,'evidence_reader_pass',%s, now())""",
+                (run_id, json.dumps({"reader": reader, "filled": str(n)})))
             conn.commit()
             print(f"backfill-evidence: {folder} -> {n} row(s) filled "
                   f"({sum(1 for v in mined.values() if v.get('excerpt'))} mined "
@@ -1773,6 +1821,17 @@ def main() -> int:
                                forced=False)
         except Exception as exc:            # noqa: BLE001 — see above
             print(f"composite repair skipped this firing: {exc!r}")
+        try:
+            # THE EVIDENCE DRAWER'S LINKS, on the same schedule and for the
+            # same reason. Golden 1 Credit Union served 728 citations with
+            # 193 URLs while Baxter served 154 of 154; the missing ones were
+            # in the package's own `Evidence_Detail` tab, and this pass —
+            # which fills ONLY nulls, from the workbook, never inventing —
+            # had never run outside a human setting BACKFILL_EVIDENCE.
+            backfill_evidence(conn, drive.metadata_token(), groups,
+                              forced=False)
+        except Exception as exc:            # noqa: BLE001 — see above
+            print(f"evidence repair skipped this firing: {exc!r}")
 
         _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
                          key)

@@ -1391,17 +1391,55 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
             return ws, headers, first
 
         # ── the ledger: ERS, dates, fact counts, claim classes ────────────
-        ws = headers = first = None
-        # Linkage matrix first: it is the research generation's own ledger and
-        # the only one carrying ERS and a publication date per item.
-        for name in ("Evidence_Linkage_Matrix",) + _EV_TABS:
+        #
+        # EVERY EVIDENCE TAB, NOT THE FIRST ONE THAT ANSWERS.
+        #
+        # This loop used to `break` on the first tab that yielded headers,
+        # with the linkage matrix tried first because it is "the only one
+        # carrying ERS and a publication date per item". True, and it is not
+        # the only one carrying a URL. `contract.py` names `Evidence_Detail`
+        # as the research generation's evidence table and `ledger.py` writes
+        # `Source_URL` into it on every banked item — and a workbook shipping
+        # BOTH tabs had Evidence_Detail read by nothing at all.
+        #
+        # MEASURED 2026-09-04 on Golden 1 Credit Union: 728 evidence items
+        # served, 193 with a URL. 497 package-origin citations — Banking
+        # Dive, The Financial Brand, Fiserv case studies, an AML RightSource
+        # press release — rendered in the drawer as a quote nobody can open,
+        # beside Baxter Credit Union at 154 of 154. The URLs were in the
+        # workbook the whole time, one tab further down this list.
+        #
+        # So: the first tab that answers is PRIMARY, and every other evidence
+        # tab present is read as a fill source. `merge_evidence_sources`
+        # already has exactly the right asymmetry — a field the primary
+        # STATED is never overwritten, a field it left blank is filled and
+        # the fill is recorded, and a disagreement is an observation rather
+        # than a silent resolution. Nothing here invents a URL: a row whose
+        # every tab is blank stays blank.
+        _seen_tabs, _fill_rows = [], []
+
+        def _read_ev_tab(name):
+            """(ws, headers, first) for one evidence tab, or (None, None, None)."""
             for anchor in _EV_ID_ANCHORS:
-                ws, headers, first = tab(name, anchor)
-                if headers is not None:
-                    break
-            if headers is not None:
-                break
-        if headers is not None:
+                w, h, f = tab(name, anchor)
+                if h is not None:
+                    return w, h, f
+            return None, None, None
+
+        ws = headers = first = None
+        _order = ("Evidence_Linkage_Matrix",) + _EV_TABS
+        for name in _order:
+            w, h, f = _read_ev_tab(name)
+            if h is None or name in _seen_tabs:
+                continue
+            _seen_tabs.append(name)
+            if headers is None:
+                ws, headers, first = w, h, f          # primary
+            else:
+                _fill_rows.append((name, w, h, f))    # fill source
+        def _ledger_rows(ws, headers, first):
+            """One evidence tab, read into ledger rows."""
+            rows = []
             for row in ws.iter_rows(min_row=first, values_only=True):
                 def v(*keys, _row=row):
                     for k in keys:
@@ -1416,7 +1454,7 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                 ers = _decimal(v("ers_total", "ers", "ers_score"))
                 facts = _decimal(v("fact_count", "facts"))
                 claim = str(v("claim_types", "claim_type") or "").split(",")[0].strip().upper()
-                out["ledger"].append({
+                rows.append({
                     "e_id": e_id,
                     "source_name": (str(v("source_name")).strip() if v("source_name") else None),
                     "source_url": (str(v("source_url", "url")).strip() if v("source_url", "url") else None),
@@ -1479,6 +1517,18 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                     "signal_direction": (str(v("signal_direction")).strip().upper()
                                          if v("signal_direction") else None),
                 })
+            return rows
+
+        if headers is not None:
+            out["ledger"] = _ledger_rows(ws, headers, first)
+            # Every other evidence tab present fills what the primary
+            # left blank — above all `Source_URL`, which
+            # `Evidence_Detail` carries per item and the linkage
+            # matrix does not. The merge never overwrites a stated
+            # value and records both its fills and any disagreement.
+            for _name, _w, _h, _f in _fill_rows:
+                out["ledger"] = merge_evidence_sources(
+                    out["ledger"], _ledger_rows(_w, _h, _f), obs)
 
         # ── per-subcap linkage at fact grain, with its verbatim passages ──
         for name in _rw_detail_tabs(wb.sheetnames):
