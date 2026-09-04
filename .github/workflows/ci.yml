@@ -497,6 +497,32 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+  # THE WALKS. The unit and acceptance suites pin every refusal; these shell
+  # the REAL command line in the order a run meets it — start, PRELIM, the
+  # gates, the stage flip, the second run that supersedes, and the driver
+  # (`engine.pipeline run --dispatcher stub`) end to end with chaos: a lane
+  # that produces nothing twice, an ingest that never arrives, a page verdict
+  # FAIL, a wall-clock stop, a refused promote, a v6 workbook in flight.
+  # Until 2026-09-04 four stress_*.py scripts existed and none ran in CI.
+  # The toolkit-dependent walk (stress_research_pipeline.py, real pillar
+  # toolkits from Drive) stays manual and is documented as such.
+  research-walks:
+    name: Research walks (lifecycle, stage, pipeline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q openpyxl python-docx pypdf httpx pg8000
+      - name: Lifecycle walk
+        run: python plugins/dma-insights/scripts/stress_run_lifecycle.py
+      - name: Stage and supersede walk
+        run: python plugins/dma-insights/scripts/stress_stage_and_supersede.py
+      - name: Pipeline walk (stub dispatcher, with chaos)
+        run: python plugins/dma-insights/scripts/stress_pipeline_stub.py
+
   # The frontend has its own suite (node's built-in runner, no framework) and
   # it too had never run here. It is the only place the COMPILED bundle is
   # asserted against the register and the adapter — the check that caught four

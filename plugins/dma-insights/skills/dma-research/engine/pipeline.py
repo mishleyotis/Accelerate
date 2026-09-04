@@ -54,6 +54,14 @@ connector READS go through `mcp_raw.py`; the driver never holds a payload.
 """
 from __future__ import annotations
 
+# Runnable both ways: -m engine.<module>, or by path for --help (audit_skills).
+if __package__ in (None, ""):  # noqa: E402
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.dirname(_os.path.dirname(
+        _os.path.abspath(__file__))))
+    __package__ = "engine"
+
 import argparse
 import json
 import os

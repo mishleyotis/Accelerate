@@ -124,17 +124,36 @@ def compute(wb: RunWorkbook) -> dict:
 
 
 def _replace(wb: RunWorkbook, sheet: str, rows: list[dict]) -> int:
-    ws = wb._sheet(sheet)
-    if ws.max_row > 1:
-        ws.delete_rows(2, ws.max_row)
-    for row in rows:
-        wb.append(sheet, row, save=False)
-    wb.save()
+    """Replace every data row of `sheet` — inside ONE transaction.
+
+    Measured 2026-09-04 (the stage walk): the delete ran on the in-memory
+    sheet, then the first `wb.append` opened its own transaction, which
+    RELOADS the workbook from disk on entry — so the deletion was lost and
+    the new rows landed after the old ones (`['P1','P2','P3','P4','OVERALL',
+    'P1']`), which the gold gate then refused as duplicate grains. Holding
+    the transaction across delete-and-append makes the replacement atomic
+    and idempotent, like `assessment._replace` already was."""
+    with wb.transaction(f"grains.replace {sheet}"):
+        ws = wb._sheet(sheet)
+        if ws.max_row > 1:
+            ws.delete_rows(2, ws.max_row)
+        for row in rows:
+            wb.append(sheet, row, save=False)
+        wb.save()
     return len(rows)
 
 
 def recompute(wb: RunWorkbook) -> dict:
-    """State both grains. Refuses a workbook with no scores at all."""
+    """State both grains. Refuses a workbook with no scores at all.
+
+    ONE WRITER (2026-09-04). Until now this wrote Pillar_Summary /
+    Category_Detail itself — pillars in scope only, weights and peer medians
+    blank — while `engine.assessment rollup` wrote the same two sheets with
+    all four pillars, OVERALL, the weight set and the peer figures. Two
+    writers, two shapes, and the gold gate (GS-WB-GRAINS: "pillars not all
+    present"; GS-WB-EMPTY) refused whichever ran second. The stated grains
+    are the assessment stage's; this command now delegates to its writer and
+    keeps only the refusals that were its own."""
     require_assessment(wb)
     got = compute(wb)
     if not got["subcaps_scored"]:
@@ -142,9 +161,23 @@ def recompute(wb: RunWorkbook) -> dict:
             "no subcapability carries a score, so there is no grain to "
             "state. An assessment-stage workbook with an empty column D is "
             "the thing the stage key exists to make visible.")
-    return {"pillars": _replace(wb, "Pillar_Summary", got["pillars"]),
-            "categories": _replace(wb, "Category_Detail", got["categories"]),
-            "subcaps_scored": got["subcaps_scored"]}
+    from . import assessment as A
+    try:
+        A.rollup(wb)
+    except A.ScoringRefusal as e:
+        if "headline" in str(e).lower():
+            raise GrainRefused(
+                "the stated grains are written by `engine.assessment rollup`, and "
+                "the Executive_Summary has no headline yet — run "
+                "`engine.assessment rollup --run <R> --root <ROOT> --headline "
+                "'<one institution-specific line, 40+ chars>'` once; recompute "
+                "re-derives from it after that") from None
+        raise GrainRefused(str(e)) from None
+    return {"pillars": len([r for r in wb.rows("Pillar_Summary") if _clean(r.get("Pillar"))]),
+            "categories": len([r for r in wb.rows("Category_Detail")
+                               if _clean(r.get("Category_ID"))]),
+            "subcaps_scored": got["subcaps_scored"],
+            "writer": "engine.assessment rollup"}
 
 
 def recommendations(wb: RunWorkbook) -> dict:

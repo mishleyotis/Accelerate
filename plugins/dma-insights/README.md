@@ -62,6 +62,10 @@ hooks/     precheck_submit (refuses a doomed submit before the network)
            deny_bulk_read (the never-cat rule, enforced rather than written)
 commands/  /dma-insights:doctor          is this install able to do the work?
            /dma-insights:setup-routines  reconcile the scheduled routines
+           /dma-insights:run-assessment  one client's DMA, end to end: preflight
+                                         the binding with the person, then
+                                         `engine.pipeline run` drives research,
+                                         scoring, reports, pages and promotion
 scripts/   dma-deps · mcp_auth_headers.sh · doctor.py · setup_routines.py
            audit_skills.py (broken-reference ceiling: 0)
            check_taxonomy_drift.py (counts come from the catalogue)
@@ -180,6 +184,7 @@ Then, in a session, prove it rather than assuming it:
 ```
 /dma-insights:doctor            # plugin, gcloud identity, audience, path token
 /dma-insights:setup-routines    # the four scheduled routines, reconciled
+/dma-insights:run-assessment "Acme Credit Union"   # or --resume <RUN_ID>
 ```
 
 The plugin ships disabled (`defaultEnabled: false`): nothing loads until it is

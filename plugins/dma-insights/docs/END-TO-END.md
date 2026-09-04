@@ -34,6 +34,60 @@ Everything below follows from it.
 
 ---
 
+## The run is ONE command: `engine.pipeline run`
+
+Added 2026-09-04 (owner issues 6–9). The stages below are still the run —
+but nobody narrates them any more. `engine.pipeline` is the DRIVER: it walks
+the stage table in order, reads a DONE predicate for each stage from the
+workbook and the run tree, dispatches that stage's lanes over a brief it
+writes (`engine.brief batch` / `challenge-batch` / `scoring-batch` /
+`report-batch` / `page-batch`), runs the engine commands, and refuses to
+start the next stage until the gate PASSES.
+
+```
+python3 -m engine.pipeline env                                  # every hard dependency, measured
+python3 -m engine.pipeline plan   --run $RUN --root $ROOT      # done / next / blockers — dispatches nothing
+python3 -m engine.pipeline run    --run $RUN --root $ROOT --max-wall-min 240 --lane-retries 1 --page-retries 2
+python3 -m engine.pipeline status --run $RUN --root $ROOT --watch
+```
+
+| stage | done when | the driver runs |
+|---|---|---|
+| PREFLIGHT | the binding preflight is recorded on the run | (checked; `engine.cli start` does it, with a person) |
+| START | the workbook exists and is bound to the pinned templates | (checked) |
+| PRELIM | `engine.prelim state` reads COMPLETE | three lanes over `brief prelim` — conductor (PRELIM-only), technographic-scanner, enrichment-connector-specialist — then `prelim complete` |
+| KG | DQ_Bank carries rows (or a declared reason) | `engine.kg build` (fallback stated when no toolkits) |
+| RESEARCH | every category's last FLOORS gate is PASS | rounds: `brief batch` (`--with-handback` after round 1; a PASSED category is never re-dispatched) → sixteen researcher lanes → `challenge-batch` lanes → `floors_gate.run --require-synthesis` |
+| HANDOFF | `research_handoff.json` written; `assessment.research_ready` empty | `engine.handoff` (strict) |
+| SCORING | the SCORING gate is PASS | `assessment open` → rounds: four scorer lanes (`scoring-batch`), the solutions lane (`--solutions`), the critic (`--critic`, who also records the rollup headline) → `assessment rollup` → `assessment gate` |
+| INGEST_A | `Run_Metadata.connector_run_id` set | `assemble checkpoint --stage SCORING_PASS --push`, then poll `list_pending_runs` until the scan ingests version A |
+| REPORTS | both reports READY and rendered; Recommendations projected | rounds: two producer lanes (`report-batch`) → the validator (`--validator`) → `grains recommendations` → `engine.cli report` ×2 into the branded shell |
+| PAGES_A | techstack and heatmap PASS on version A | page lanes (`page-batch`: the connector run id, the contract PATH, the last verdict's reasons — no payload bytes) → `ship_page.py --claim --verdicts-out`; a FAIL re-dispatches only that page |
+| PACKAGE | `assemble verify` complete, gold gate clean | `techscan render`, `assemble package --push` |
+| INGEST_B | a newer connector version than A | poll `list_pending_runs` |
+| PAGES_B | all six pages PASS on version B | the A pages restaged from disk (no lanes); overview, insights, platform lanes; then context (after overview) |
+| PROMOTE | `Run_Metadata.promoted_at` set | `promote_run` — the last call |
+
+Every stage lands a `STAGE_<NAME>` row in Gate_Log with its verdict and wall
+clock, a line in `07_qa/cost_ledger.jsonl` (`engine.cost report` reads it
+back against the schedule and the budget, and `--as-baseline` replaces the
+hand-typed constant with a measured run) and `07_qa/pipeline_state.json`. A
+lane that timed out or produced nothing is retried once (`agent_run.py
+--retries`); a lane that failed on its own terms is not, and the stage says
+so. `--max-wall-min` stops cleanly BETWEEN stages (exit 0); `run` again
+continues from the first stage whose predicate is false, and nothing done is
+redone — that is also the watchdog's `resume` plan. Exactly two ingests, so a
+run gets two versions rather than eighteen. The stub dispatcher
+(`--dispatcher stub`) plays every lane with the engine's own fixtures through
+the engine's own refusals: `scripts/stress_pipeline_stub.py` walks it in CI.
+
+`ship.PAGE_NEEDS` decides which pages ship early: techstack and heatmap need
+the scored workbook and no report; overview, insights and platform read a
+READY report; context renders after overview (O9 before C4). That is why the
+early set is two pages, not three.
+
+---
+
 ## Stage 0 · Preflight the binding — with the financials, and with a person
 
 ```
@@ -459,17 +513,31 @@ On the app side:
 python3 -m pytest tests/acceptance -q
 ```
 
-39 tests, written from the owner's own sentences rather than from the
-modules: `test_acceptance_reported_issues.py` reproduces each reported
-failure shape and asserts the engine refuses it AND that the corrected work
+Written from the owner's own sentences rather than from the modules:
+`test_acceptance_reported_issues.py` reproduces each reported failure shape
+(issues 1–7) and asserts the engine refuses it AND that the corrected work
 passes; `test_acceptance_orchestration.py` holds the brief layer to its four
-properties (shared, bounded, resumable, handed back) and asserts the agents
-are actually told it exists; `test_acceptance_full_run.py` walks ONE run
-from `start` to a verified package, asserting every stage is blocked before
-its predecessor is done and open after — which is the only test that can
-catch two stages disagreeing about what "done" means.
+properties (shared, bounded, resumable, handed back); `test_acceptance_
+issues_8_9.py` covers every lane type's bounded brief, the re-dispatch that
+carries the gate's blocking terms, the cost ledger and the one lane constant;
+`test_acceptance_pipeline.py` drives the DRIVER with the stub doubles —
+order, gates, re-dispatch on a critic or page FAIL, retries, ingest timeout,
+wall-clock stop and resume, idempotence, no payload bytes in a prompt;
+`test_acceptance_issue10.py` covers the command, the routine and the
+install guards; `test_acceptance_full_run.py` walks ONE run from `start` to
+a verified package, asserting every stage is blocked before its predecessor
+is done and open after — the only test that can catch two stages disagreeing
+about what "done" means.
 
 ## Stress-testing the pipeline
+
+Three walks run in CI (`research-walks`): `stress_run_lifecycle.py` (the
+binding preflight, start, PRELIM gating, completeness, the watchdog),
+`stress_stage_and_supersede.py` (the stage flip, the grains, a second run
+superseding the first) and `stress_pipeline_stub.py` (the driver over the
+real CLI with chaos: a lane that produces nothing twice, an ingest that never
+arrives, a page verdict FAIL, a wall-clock stop, a refused promote, a v6
+workbook in flight — 18 steps). The toolkit-dependent walk stays manual:
 
 `scripts/stress_research_pipeline.py --toolkits <dir> --workdir <dir>`
 drives every stage above through the same CLI the agents use, against the

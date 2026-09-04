@@ -20,6 +20,14 @@ fixtures.py`), not in the plugin: a stub run needs the checkout.
 """
 from __future__ import annotations
 
+# Runnable both ways: -m engine.<module>, or by path for --help (audit_skills).
+if __package__ in (None, ""):  # noqa: E402
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.dirname(_os.path.dirname(
+        _os.path.abspath(__file__))))
+    __package__ = "engine"
+
 import importlib.util
 import json
 import sys

@@ -119,11 +119,17 @@ def test_the_stated_grains_land_in_the_columns_the_app_reads(tmp_path):
     G.set_stage(wb, "assessment")
     out = G.recompute(wb)
     assert out["subcaps_scored"] == len(cells)
-    assert out["pillars"] == 1 and out["categories"] >= 1
+    # ONE writer: the assessment stage's rollup states all four pillars and
+    # OVERALL (unassessed pillars with a blank score, which the gold gate
+    # accepts), so a focused run still ships the shape the app and the
+    # reference carry.
+    assert out["pillars"] == 5 and out["categories"] >= 1
+    assert out["writer"] == "engine.assessment rollup"
 
     pillars = [r for r in wb.rows("Pillar_Summary") if r.get("Pillar")]
-    assert [r["Pillar"] for r in pillars] == ["P1"]
+    assert [r["Pillar"] for r in pillars] == ["P1", "P2", "P3", "P4", "OVERALL"]
     assert pillars[0]["Score"] is not None
+    assert all(r["Score"] in (None, "") for r in pillars[1:4])
 
     cats = [r for r in wb.rows("Category_Detail") if r.get("Category_ID")]
     assert all(str(r["Category_ID"]).startswith("P1C") for r in cats)
@@ -221,3 +227,26 @@ def test_the_assessment_report_names_the_grains_it_reads():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+def test_recompute_replaces_rather_than_appends_across_processes(tmp_path):
+    """Measured 2026-09-04: `grains recompute` from a fresh process after
+    `assessment.rollup` left ['P1','P2','P3','P4','OVERALL','P1'] — the
+    delete ran in memory and the first append reloaded from disk. The
+    replacement is one transaction now, so a second writer states the grain
+    once."""
+    import subprocess
+    import sys
+    from pathlib import Path
+    from fixtures import scored_run
+    run, wb, cells, ev = scored_run(tmp_path)
+    skill = Path(__file__).resolve().parents[2].parent / "plugins/dma-insights/skills/dma-research"
+    for _ in range(2):
+        r = subprocess.run([sys.executable, "-m", "engine.grains", "recompute",
+                            "--run", run.run_id, "--root", str(run.root)],
+                           capture_output=True, text=True, cwd=str(skill))
+        assert r.returncode == 0, r.stderr
+    pillars = [r["Pillar"] for r in run.open().rows("Pillar_Summary")]
+    assert pillars == ["P1", "P2", "P3", "P4", "OVERALL"], pillars
+    cats = [r["Category_ID"] for r in run.open().rows("Category_Detail")]
+    assert len(cats) == len(set(cats))
