@@ -205,8 +205,63 @@ def cost_of(*, cache_read: int = 0, cache_write: int = 0, uncached: int = 0,
                        "uncached": uncached, "output": output}}
 
 
-def measured_baseline() -> dict:
-    m = MEASURED
+#: A run's own measurements. `record` appends one JSON line per stage to
+#: `<qa_dir>/cost_ledger.jsonl` and mirrors the totals into Run_Metadata
+#: (`stage_timings`, `cost_summary`); `report` reads the ledger back against
+#: the schedule and the budget; `report --as-baseline` writes
+#: `cost_baseline.json`, which replaces the hand-typed MEASURED constant for
+#: every projection (owner issue 9, 2026-09-03: "the assessment takes more
+#: than six hours" — and nothing recorded where the hours went).
+LEDGER_NAME = "cost_ledger.jsonl"
+BASELINE_NAME = "cost_baseline.json"
+BASELINE_ENV = "DMA_COST_BASELINE"
+
+#: The stages the driver records, in order, and the schedule phase each one
+#: is measured against (None: not in the schedule's phase table).
+STAGE_PHASE = {
+    "PREFLIGHT": "preflight (financials, census, the question)",
+    "START": None,
+    "PRELIM": "PRELIM (profile, timeline, peers, tech baseline)",
+    "KG": None,
+    "RESEARCH": "category research (16 lanes, in parallel)",
+    "CHALLENGE": "gates + independent challenge",
+    "GATES": "gates + independent challenge",
+    "HANDOFF": None,
+    "SCORING": None,
+    "INGEST_A": None,
+    "REPORTS": "report sections (2 producers, in parallel) + review",
+    "PAGES_A": None,
+    "PACKAGE": "assemble, verify, push",
+    "INGEST_B": None,
+    "PAGES_B": None,
+    "PROMOTE": None,
+}
+
+
+def _baseline_file(path=None):
+    import os
+    p = path or os.environ.get(BASELINE_ENV)
+    return Path(p) if p else None
+
+
+def measured_baseline(baseline_path=None) -> dict:
+    """The baseline every projection starts from: a RECORDED one when the
+    caller (or $DMA_COST_BASELINE) names a `cost_baseline.json`, else the
+    hand-typed MEASURED constant — and the answer says which."""
+    m = dict(MEASURED)
+    src = "constant"
+    bp = _baseline_file(baseline_path)
+    if bp is not None and bp.is_file():
+        try:
+            rec = json.loads(bp.read_text())
+            need = ("model", "subcaps", "turns", "cache_read", "cache_write",
+                    "uncached", "output", "wall_clock_min")
+            if all(k in rec for k in need) and rec["subcaps"] and rec["turns"]:
+                m.update({k: rec[k] for k in need})
+                m["label"] = rec.get("label") or f"recorded baseline {bp.name}"
+                src = str(bp)
+        except (ValueError, OSError):
+            pass
     c = cost_of(cache_read=m["cache_read"], cache_write=m["cache_write"],
                 uncached=m["uncached"], output=m["output"], model=m["model"])
     c.update({
@@ -215,8 +270,201 @@ def measured_baseline() -> dict:
         "usd_per_turn": round(c["total_usd"] / m["turns"], 5),
         "context_per_turn_tokens": round(m["cache_read"] / m["turns"]),
         "minutes_per_subcap": round(m["wall_clock_min"] / m["subcaps"], 2),
+        "source": src,
     })
     return c
+
+
+# ── the ledger: what THIS run spent, stage by stage ──────────────────────
+
+def _ledger_path(run) -> Path:
+    return Path(run.qa_dir) / LEDGER_NAME
+
+
+def ledger(run) -> list[dict]:
+    p = _ledger_path(run)
+    if not p.is_file():
+        return []
+    out = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(json.loads(line))
+        except ValueError:
+            continue
+    return out
+
+
+def _parse_ts(v):
+    if not v:
+        return None
+    try:
+        return _dt.datetime.strptime(str(v), "%Y-%m-%dT%H:%M:%SZ") \
+            .replace(tzinfo=_dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def record(run, *, stage: str, elapsed_s: float | None = None,
+           started_at: str | None = None, ended_at: str | None = None,
+           usd: float | None = None, turns: int | None = None,
+           tokens: dict | None = None, model: str | None = None,
+           lanes: int | None = None, attempts: int | None = None,
+           note: str = "", wb=None) -> dict:
+    """Append one stage record and mirror the totals into Run_Metadata.
+
+    Refuses a record with no duration at all (a timing that cannot be added
+    is not a timing) and an unknown stage name only loudly, as a note — a
+    driver that grows a stage must not be refused by its cost ledger."""
+    stage = str(stage or "").strip().upper()
+    if not stage:
+        raise ValueError("record needs --stage")
+    a, b = _parse_ts(started_at), _parse_ts(ended_at)
+    if elapsed_s is None and a and b:
+        elapsed_s = (b - a).total_seconds()
+    if elapsed_s is None:
+        raise ValueError("record needs --elapsed-s, or --started-at AND "
+                         "--ended-at (UTC, %Y-%m-%dT%H:%M:%SZ)")
+    elapsed_s = float(elapsed_s)
+    if elapsed_s < 0:
+        raise ValueError(f"elapsed {elapsed_s}s is negative")
+    tokens = dict(tokens or {})
+    if usd is None and tokens:
+        usd = cost_of(cache_read=int(tokens.get("cache_read") or 0),
+                      cache_write=int(tokens.get("cache_write") or 0),
+                      uncached=int(tokens.get("uncached") or 0),
+                      output=int(tokens.get("output") or 0),
+                      model=model or "sonnet")["total_usd"]
+    rec = {
+        "recorded_at": _utcnow(), "stage": stage,
+        "started_at": started_at, "ended_at": ended_at,
+        "elapsed_s": round(elapsed_s, 1),
+        "usd": (round(float(usd), 4) if usd is not None else None),
+        "turns": turns, "tokens": tokens or None, "model": model,
+        "lanes": lanes, "attempts": attempts, "note": note or "",
+        "known_stage": stage in STAGE_PHASE,
+    }
+    lp = _ledger_path(run)
+    lp.parent.mkdir(parents=True, exist_ok=True)
+    with lp.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(rec, sort_keys=True) + "\n")
+    # Mirror into the workbook, so the run's own record carries its cost.
+    try:
+        wb = wb or run.open()
+        rows = ledger(run)
+        timings, summary = _totals(rows)
+        wb.set_metadata("stage_timings", json.dumps(timings, sort_keys=True),
+                        save=False)
+        wb.set_metadata("cost_summary", json.dumps(summary, sort_keys=True))
+    except Exception as e:                       # noqa: BLE001
+        rec["metadata_mirror"] = f"not written: {str(e)[:120]}"
+    rec["ledger"] = str(lp)
+    return rec
+
+
+def _totals(rows: list[dict]) -> tuple[dict, dict]:
+    timings: dict = {}
+    usd_total = 0.0
+    usd_known = False
+    turns = 0
+    for r in rows:
+        st = r["stage"]
+        t = timings.setdefault(st, {"elapsed_s": 0.0, "records": 0, "attempts": 0,
+                                    "first_started_at": None, "last_ended_at": None})
+        t["elapsed_s"] = round(t["elapsed_s"] + float(r.get("elapsed_s") or 0), 1)
+        t["records"] += 1
+        t["attempts"] += int(r.get("attempts") or 1)
+        if r.get("started_at") and not t["first_started_at"]:
+            t["first_started_at"] = r["started_at"]
+        if r.get("ended_at"):
+            t["last_ended_at"] = r["ended_at"]
+        if r.get("usd") is not None:
+            usd_total += float(r["usd"])
+            usd_known = True
+        turns += int(r.get("turns") or 0)
+    summary = {"total_usd": (round(usd_total, 4) if usd_known else None),
+               "total_elapsed_s": round(sum(t["elapsed_s"] for t in timings.values()), 1),
+               "turns": turns, "stages": len(timings)}
+    return timings, summary
+
+
+def report(run, *, wb=None) -> dict:
+    """Per-stage wall clock against the schedule, USD against the budget.
+    `within` is False when either is over — and the CLI exits 1 on it."""
+    wb = wb or run.open()
+    rows = ledger(run)
+    timings, summary = _totals(rows)
+    sel = wb.selected_subcaps()
+    caps = len({".".join(str(c).split(".")[:2]) for c in sel})
+    pillars = sorted({str(c).split("C")[0] for c in sel})
+    sch = schedule(len(sel), caps, PARALLEL_LANES)
+    stages = []
+    for st, t in timings.items():
+        phase = STAGE_PHASE.get(st)
+        planned = sch["phases_min"].get(phase) if phase else None
+        actual = round(t["elapsed_s"] / 60.0, 1)
+        stages.append({"stage": st, "actual_min": actual,
+                       "planned_min": planned,
+                       "over_by_min": (round(actual - planned, 1)
+                                       if planned is not None and actual > planned
+                                       else 0.0),
+                       "attempts": t["attempts"], "records": t["records"]})
+    total_min = round(summary["total_elapsed_s"] / 60.0, 1)
+    budget = round(BUDGET_PER_PILLAR * max(1, len(pillars)), 2)
+    usd = summary["total_usd"]
+    over_time = total_min > TARGET_WALL_CLOCK_MIN
+    over_budget = usd is not None and usd > budget
+    return {
+        "run_id": wb.metadata().get("run_id"), "ledger": str(_ledger_path(run)),
+        "records": len(rows), "stages": stages,
+        "total_min": total_min, "target_min": TARGET_WALL_CLOCK_MIN,
+        "schedule_total_min": sch["total_min"],
+        "total_usd": usd, "budget_usd": budget, "pillars": pillars,
+        "over_wall_clock": over_time, "over_budget": over_budget,
+        "within": not (over_time or over_budget),
+        "unrecorded": [st for st in STAGE_PHASE if st not in timings],
+        "note": ("USD is None when no stage carried tokens or a price — "
+                 "wall clock alone is judged" if usd is None else ""),
+    }
+
+
+def as_baseline(run, *, label: str | None = None, wb=None) -> dict:
+    """Write this run's measurements in MEASURED's shape to
+    `<qa_dir>/cost_baseline.json`, so `measured_baseline` can read a real
+    run instead of the 2026-08-29 constant. Refuses a ledger with no tokens
+    or no turns: a baseline with nothing measured in it is the constant
+    under another name."""
+    wb = wb or run.open()
+    rows = ledger(run)
+    tok = {"cache_read": 0, "cache_write": 0, "uncached": 0, "output": 0}
+    turns = 0
+    model = None
+    for r in rows:
+        for k in tok:
+            tok[k] += int((r.get("tokens") or {}).get(k) or 0)
+        turns += int(r.get("turns") or 0)
+        model = model or r.get("model")
+    if not turns or not any(tok.values()):
+        raise ValueError(
+            "the ledger carries no turns or no tokens — record stages with "
+            "--turns and --tokens (agent_run.py --record-run does) before "
+            "calling this a baseline")
+    _t, summary = _totals(rows)
+    rec = {
+        "label": label or f"{wb.metadata().get('entity_name')} {wb.metadata().get('run_id')}, "
+                          f"{_utcnow()[:10]}",
+        "model": model or "sonnet", "subcaps": len(wb.selected_subcaps()),
+        "turns": turns, **tok,
+        "wall_clock_min": round(summary["total_elapsed_s"] / 60.0, 1),
+        "total_usd": summary["total_usd"], "recorded_at": _utcnow(),
+    }
+    out = Path(run.qa_dir) / BASELINE_NAME
+    out.write_text(json.dumps(rec, indent=2))
+    rec["written_to"] = str(out)
+    rec["use"] = f"export {BASELINE_ENV}={out}  # every projection then starts here"
+    return rec
 
 
 def projected(levers: list[str] | None = None) -> dict:
@@ -286,9 +534,73 @@ def main(argv=None) -> int:
     t.add_argument("--sv", default="CU"); t.add_argument("--scope",
                                                          default="T1_CORE")
     t.add_argument("--lanes", type=int, default=PARALLEL_LANES)
+    t.add_argument("--run", help="phases from a RUN's own selection, not the taxonomy")
+    t.add_argument("--root")
     t.add_argument("--json", action="store_true")
+    rc = sub.add_parser("record", help="append one stage's wall clock / cost to the run")
+    rc.add_argument("--run", required=True); rc.add_argument("--root")
+    rc.add_argument("--stage", required=True)
+    rc.add_argument("--elapsed-s", type=float)
+    rc.add_argument("--started-at"); rc.add_argument("--ended-at")
+    rc.add_argument("--usd", type=float); rc.add_argument("--turns", type=int)
+    rc.add_argument("--tokens", help='JSON {"cache_read":…,"cache_write":…,"uncached":…,"output":…}')
+    rc.add_argument("--model"); rc.add_argument("--lanes", type=int)
+    rc.add_argument("--attempts", type=int); rc.add_argument("--note", default="")
+    rp = sub.add_parser("report", help="per-stage wall clock vs schedule, USD vs budget")
+    rp.add_argument("--run", required=True); rp.add_argument("--root")
+    rp.add_argument("--json", action="store_true")
+    rp.add_argument("--as-baseline", action="store_true",
+                    help="also write cost_baseline.json from this run's ledger")
+    rp.add_argument("--label")
 
     a = ap.parse_args(argv)
+    if a.cmd == "record":
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
+        try:
+            rec = record(run, stage=a.stage, elapsed_s=a.elapsed_s,
+                         started_at=a.started_at, ended_at=a.ended_at, usd=a.usd,
+                         turns=a.turns, tokens=json.loads(a.tokens) if a.tokens else None,
+                         model=a.model, lanes=a.lanes, attempts=a.attempts, note=a.note)
+        except (ValueError, TypeError) as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 1
+        print(json.dumps(rec, indent=2))
+        return 0
+    if a.cmd == "report":
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
+        wb = run.open()
+        rep = report(run, wb=wb)
+        if a.as_baseline:
+            try:
+                rep["baseline"] = as_baseline(run, label=a.label, wb=wb)
+            except ValueError as e:
+                print(f"REFUSED: {e}", file=sys.stderr)
+                return 1
+        if a.json:
+            print(json.dumps(rep, indent=2))
+        else:
+            print(f"run {rep['run_id']} · {rep['records']} record(s) in {rep['ledger']}\n")
+            print(f"  {'stage':<12}{'actual':>9}{'planned':>9}  over")
+            for st in rep["stages"]:
+                pl = f"{st['planned_min']:.1f}" if st["planned_min"] is not None else "—"
+                over = f"+{st['over_by_min']:.1f}" if st["over_by_min"] else ""
+                print(f"  {st['stage']:<12}{st['actual_min']:>8.1f}m{pl:>9}  {over}"
+                      + (f"  ({st['attempts']} attempts)" if st["attempts"] > st["records"] else ""))
+            print(f"\n  wall clock {rep['total_min']:.1f} min (target {rep['target_min']}, "
+                  f"schedule {rep['schedule_total_min']})"
+                  + ("  OVER" if rep["over_wall_clock"] else ""))
+            usd = rep["total_usd"]
+            print(f"  cost       {('$%.2f' % usd) if usd is not None else 'not priced'} "
+                  f"(budget ${rep['budget_usd']:.2f} for {len(rep['pillars'])} pillar(s))"
+                  + ("  OVER" if rep["over_budget"] else ""))
+            if rep["unrecorded"]:
+                print(f"  unrecorded stages: {', '.join(rep['unrecorded'])}")
+            if rep.get("baseline"):
+                print(f"\n  baseline written: {rep['baseline']['written_to']}\n"
+                      f"  {rep['baseline']['use']}")
+        return 0 if rep["within"] else 1
     if a.cmd == "model":
         base = measured_baseline()
         print(f"RATE CARD ($/1M tokens)")
@@ -322,8 +634,13 @@ def main(argv=None) -> int:
         return 0
 
     if a.cmd == "schedule":
-        tax = C.taxonomy()
-        cells = tax.selected(a.sv, a.scope)
+        if a.run:
+            from . import runstate
+            run = runstate.locate(a.run, Path(a.root) if a.root else None)
+            cells = run.open().selected_subcaps()
+        else:
+            tax = C.taxonomy()
+            cells = tax.selected(a.sv, a.scope)
         caps = len({".".join(str(c).split(".")[:2]) for c in cells})
         sch = schedule(len(cells), caps, a.lanes)
         if a.json:

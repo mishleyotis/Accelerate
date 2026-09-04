@@ -257,9 +257,15 @@ def test_the_cli_serves_every_view_an_agent_needs(tmp_path):
     import os
     env = {**os.environ, **env}
     for args in (["shared"],
+                 ["needs"],
                  ["dispatch", "--category", "P1C1"],
+                 ["dispatch", "--category", "P1C1", "--with-handback"],
                  ["handback", "--category", "P1C1"],
-                 ["reuse", "--subcap", cells[0]]):
+                 ["reuse", "--subcap", cells[0]],
+                 ["prelim", "--out-dir", str(tmp_path / "p")],
+                 ["challenge-batch", "--out-dir", str(tmp_path / "c")],
+                 ["scoring-batch", "--out-dir", str(tmp_path / "s")],
+                 ["report-batch", "--out-dir", str(tmp_path / "r")]):
         out = subprocess.run(
             [sys.executable, "-m", "engine.brief", *args,
              "--run", run.run_id, "--root", str(run.root)],

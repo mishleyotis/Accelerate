@@ -38,6 +38,7 @@ import re
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -396,8 +397,11 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
     st.update(state="ok" if code == 0 else "failed",
               doing="done", exit_code=code, transcript=str(jsonl))
     flush_status()
+    # The child's own usage rides up to the batch summary and the cost
+    # ledger (`--record-run`): turns and USD from the CLI's result event.
     return {"agent": name, "code": code, "stdout": out, "stderr": err,
-            "note": note}
+            "note": note, "turns": st.get("num_turns"),
+            "usd": st.get("total_cost_usd")}
 
 
 def watch(logs: Path, once: bool = False, interval: float = 3.0) -> int:
@@ -464,16 +468,106 @@ def read_batch(path: Path) -> list:
     return out
 
 
+# ── RETRIES, TIMINGS, THE COST LEDGER ────────────────────────────────────
+#
+# Owner issue 9 (2026-09-03): "the assessment takes more than six hours" and
+# nothing recorded where the hours went; a lane that timed out or came back
+# empty was re-dispatched by hand, once somebody noticed. Two codes and ONLY
+# two are retryable: 124 (the child exceeded the timeout) and 125 (it exited
+# 0 having produced nothing — MEM-0111's starvation shape). A child that
+# failed on its own terms (any other code) is not retried, because a retry
+# of a real failure is the same failure at twice the price.
+RETRYABLE = (124, 125)
+DEFAULT_RETRY_BACKOFF_S = 5.0
+_ATTEMPT_NOTE = ("\n\nATTEMPT {k} OF {n}: the previous attempt {why}. Do not "
+                 "restart the stage from nothing — read the run's state first "
+                 "(`engine.cli orient`, your notebook, the handback) and "
+                 "continue from where the work stands.\n")
+
+
+def _why(code: int) -> str:
+    return ("timed out" if code == 124 else
+            "produced nothing (exited 0 with an empty verdict)" if code == 125
+            else f"failed with exit {code}")
+
+
+def _now() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
+                          repo_root: Path, allowed: str, *, retries: int = 0,
+                          backoff_s: float = DEFAULT_RETRY_BACKOFF_S,
+                          sleep=time.sleep) -> dict:
+    """`run_fn` until it returns a non-retryable code or the retries are
+    spent. The result carries `attempts`, `started_at`, `ended_at`,
+    `elapsed_s` and the per-attempt codes, so the batch summary — and the
+    cost ledger — can say what a lane actually cost in wall clock."""
+    started = _now()
+    t0 = time.monotonic()
+    codes = []
+    res = None
+    total = max(0, int(retries)) + 1
+    for k in range(1, total + 1):
+        p = prompt
+        if k > 1:
+            p = prompt + _ATTEMPT_NOTE.format(k=k, n=total, why=_why(codes[-1]))
+        res = run_fn(name, p, timeout, repo_root, allowed)
+        codes.append(res["code"])
+        if res["code"] not in RETRYABLE or k == total:
+            break
+        sleep(backoff_s * k)
+    res = dict(res)
+    res.update({"attempts": len(codes), "attempt_codes": codes,
+                "started_at": started, "ended_at": _now(),
+                "elapsed_s": round(time.monotonic() - t0, 1)})
+    if len(codes) > 1 and res["code"] in RETRYABLE:
+        res["note"] = (res.get("note") or "") + (
+            f" — {len(codes)} attempts, all {_why(res['code'])}; this lane "
+            f"needs a person or a bigger timeout, not a fourth try.")
+    return res
+
+
+def _record_cost(record: dict, summary: dict, repo_root: Path) -> dict:
+    """Shell `engine.cost record` for the batch, so the run's own ledger
+    carries the stage's wall clock, lane count and attempts. Separate from
+    the dispatch seam on purpose: a test that fakes `subprocess.run` for
+    the children does not fake this."""
+    eng = repo_root / "plugins" / "dma-insights" / "skills" / "dma-research"
+    cmd = [sys.executable, "-m", "engine.cost", "record",
+           "--run", str(record["run"]), "--stage", str(record["stage"]),
+           "--elapsed-s", str(summary["elapsed_s"]),
+           "--started-at", summary["started_at"], "--ended-at", summary["ended_at"],
+           "--lanes", str(summary["lanes"]),
+           "--attempts", str(sum(l["attempts"] for l in summary["lanes_detail"])),
+           "--note", f"agent_run batch: {summary['ok']}/{summary['dispatched']} ok"]
+    if record.get("root"):
+        cmd += ["--root", str(record["root"])]
+    if summary.get("turns"):
+        cmd += ["--turns", str(summary["turns"])]
+    if summary.get("usd") is not None:
+        cmd += ["--usd", str(summary["usd"])]
+    r = subprocess.run(cmd, cwd=eng, capture_output=True, text=True)
+    return {"recorded": r.returncode == 0,
+            "detail": (r.stdout if r.returncode == 0 else r.stderr).strip()[-400:]}
+
+
 def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
               allowed: str, out_dir: Path | None,
-              logs: Path | None = None) -> int:
+              logs: Path | None = None, *, retries: int = 0,
+              backoff_s: float = DEFAULT_RETRY_BACKOFF_S,
+              timing_out: Path | None = None,
+              record: dict | None = None) -> int:
     """Run every row, `lanes` at a time. Exit non-zero if ANY lane failed."""
     results, done = [], 0
+    batch_started, batch_t0 = _now(), time.monotonic()
     # With --stream every lane writes its own live transcript and status, so
     # a person watching `agent_run.py watch` sees sixteen agents working
     # rather than one Bash call that has not returned yet.
-    run = ((lambda n, p, t, rr, al: dispatch_streaming(n, p, t, rr, al, logs))
-           if logs else dispatch)
+    base = ((lambda n, p, t, rr, al: dispatch_streaming(n, p, t, rr, al, logs))
+            if logs else dispatch)
+    run = (lambda n, p, t, rr, al: dispatch_with_retries(
+        base, n, p, t, rr, al, retries=retries, backoff_s=backoff_s))
     if logs:
         logs.mkdir(parents=True, exist_ok=True)
         print(f"streaming {len(rows)} lane(s) to {logs}\n"
@@ -496,15 +590,40 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
                     res["stdout"], encoding="utf-8")
             with _PRINT_LOCK:
                 state = "ok" if res["code"] == 0 else f"FAILED({res['code']})"
-                print(f"[{done}/{len(rows)}] {res['agent']:34s} {state}",
+                extra = (f"  {res.get('elapsed_s', 0):.0f}s"
+                         + (f", {res['attempts']} attempts"
+                            if res.get("attempts", 1) > 1 else ""))
+                print(f"[{done}/{len(rows)}] {res['agent']:34s} {state}{extra}",
                       flush=True)
                 if res["note"]:
                     print(f"    {res['note']}", file=sys.stderr, flush=True)
     failed = [r for r in results if r["code"] != 0]
+    # Streamed children carry their usage (turns, cost) on the status file;
+    # sum what is there and say nothing where it is not.
+    turns = sum(int(r.get("turns") or 0) for r in results)
+    usd_vals = [r.get("usd") for r in results if r.get("usd") is not None]
     summary = {"lanes": lanes, "dispatched": len(rows),
                "ok": len(results) - len(failed),
-               "failed": [{"agent": r["agent"], "code": r["code"]}
-                          for r in failed]}
+               "failed": [{"agent": r["agent"], "code": r["code"],
+                           "attempts": r.get("attempts", 1)} for r in failed],
+               "started_at": batch_started, "ended_at": _now(),
+               "elapsed_s": round(time.monotonic() - batch_t0, 1),
+               "retries_allowed": retries,
+               "turns": turns or None,
+               "usd": round(sum(usd_vals), 4) if usd_vals else None,
+               "lanes_detail": sorted(
+                   [{"agent": r["agent"], "code": r["code"],
+                     "attempts": r.get("attempts", 1),
+                     "attempt_codes": r.get("attempt_codes", [r["code"]]),
+                     "started_at": r.get("started_at"),
+                     "ended_at": r.get("ended_at"),
+                     "elapsed_s": r.get("elapsed_s")} for r in results],
+                   key=lambda d: d["agent"])}
+    if timing_out:
+        timing_out.parent.mkdir(parents=True, exist_ok=True)
+        timing_out.write_text(json.dumps(summary, indent=2, sort_keys=True))
+    if record:
+        summary["cost_record"] = _record_cost(record, summary, repo_root)
     print(json.dumps(summary, indent=2, sort_keys=True))
     if failed:
         print(f"\n{len(failed)} of {len(rows)} lane(s) failed. A batch is "
@@ -531,6 +650,22 @@ def main(argv=None) -> int:
                          f"(default {DEFAULT_LANES})")
     ap.add_argument("--out-dir", help="with --batch: write each lane's "
                                       "stdout to <agent>.out here")
+    ap.add_argument("--retries", type=int, default=0,
+                    help="re-dispatch a lane that timed out (124) or produced "
+                         "nothing (125) up to this many times; a lane that "
+                         "failed on its own terms is never retried")
+    ap.add_argument("--retry-backoff-s", type=float, default=DEFAULT_RETRY_BACKOFF_S,
+                    help=f"seconds x attempt between retries "
+                         f"(default {DEFAULT_RETRY_BACKOFF_S:g})")
+    ap.add_argument("--timing-out", help="with --batch: write the summary "
+                                         "(per-lane started/ended/elapsed/"
+                                         "attempts) to this JSON file")
+    ap.add_argument("--record-run", help="with --batch: append the batch's "
+                                         "wall clock to this run's cost ledger "
+                                         "(`engine.cost record`)")
+    ap.add_argument("--record-root", help="the run root for --record-run")
+    ap.add_argument("--record-stage", help="the stage name for --record-run "
+                                           "(RESEARCH, SCORING, REPORTS, …)")
     ap.add_argument("--stream", action="store_true",
                     help="stream each child's events to <log-dir>/"
                          "<agent>.jsonl as they happen, and keep a live "
@@ -567,11 +702,20 @@ def main(argv=None) -> int:
             for r in rows:
                 r["prompt"] = PREAMBLE + r["prompt"]
         lanes = max(1, min(a.lanes, len(rows)))
-        print(f"dispatching {len(rows)} agent(s), {lanes} at a time",
+        if a.record_run and not a.record_stage:
+            ap.error("--record-run needs --record-stage")
+        print(f"dispatching {len(rows)} agent(s), {lanes} at a time"
+              + (f", up to {a.retries} retr{'y' if a.retries == 1 else 'ies'} "
+                 f"per lane" if a.retries else ""),
               file=sys.stderr, flush=True)
         return run_batch(rows, lanes, a.timeout, repo_root, ALLOWED,
                          Path(a.out_dir) if a.out_dir else None,
-                         log_dir_for(a.log_dir) if a.stream else None)
+                         log_dir_for(a.log_dir) if a.stream else None,
+                         retries=a.retries, backoff_s=a.retry_backoff_s,
+                         timing_out=Path(a.timing_out) if a.timing_out else None,
+                         record=({"run": a.record_run, "root": a.record_root,
+                                  "stage": a.record_stage}
+                                 if a.record_run else None))
 
     name = a.agent.removeprefix(f"{PLUGIN_PREFIX}:")
     if name not in names:
@@ -598,8 +742,10 @@ def main(argv=None) -> int:
     # allowed working directories for this session: '/home/user/Accelerate'."
     # The package, the bundles and the client memory all live under /root/.dma.
     logs = log_dir_for(a.log_dir) if a.stream else None
-    res = (dispatch_streaming(name, prompt, a.timeout, repo_root, ALLOWED, logs)
-           if logs else dispatch(name, prompt, a.timeout, repo_root, ALLOWED))
+    base = ((lambda n, p, t, rr, al: dispatch_streaming(n, p, t, rr, al, logs))
+            if logs else dispatch)
+    res = dispatch_with_retries(base, name, prompt, a.timeout, repo_root, ALLOWED,
+                                retries=a.retries, backoff_s=a.retry_backoff_s)
     sys.stdout.write(res["stdout"])
     if res["stderr"]:
         sys.stderr.write(res["stderr"])

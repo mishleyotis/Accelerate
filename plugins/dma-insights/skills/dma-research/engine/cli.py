@@ -304,6 +304,21 @@ def main(argv=None) -> int:
                     help="what was looked for, where, and what came back instead")
 
     common(sub.add_parser("validate"))
+    ch = common(sub.add_parser(
+        "challenge", help="record an INDEPENDENT challenge verdict on a synthesis "
+                          "(refuses the synthesis's own author / session)"))
+    ch.add_argument("--subcap", required=True)
+    ch.add_argument("--verdict", required=True, choices=contract.CHALLENGE_VERDICTS)
+    ch.add_argument("--actor", required=True)
+    ch.add_argument("--rationale", required=True)
+    ch.add_argument("--dimension", action="append", default=[],
+                    metavar="NAME=PASS|FAIL|NOT_RUN",
+                    help="one per dimension; all seven are required: "
+                         + ", ".join(contract.CHALLENGE_DIMENSIONS))
+    ch.add_argument("--all", choices=("PASS", "NOT_RUN"),
+                    help="set every dimension not given by --dimension to this")
+    ch.add_argument("--ceiling-band-delta", default="")
+    ch.add_argument("--session", default="")
     common(sub.add_parser("handoff"))
     r = common(sub.add_parser("report"))
     r.add_argument("--report", default="both",
@@ -442,6 +457,27 @@ def main(argv=None) -> int:
     if a.cmd == "validate":
         return validator.main(["--workbook", str(run.workbook_path),
                                "--run-id", a.run])
+    if a.cmd == "challenge":
+        dims = {}
+        for d in a.dimension:
+            if "=" not in d:
+                print(f"REFUSED: --dimension {d!r} is not NAME=VERDICT", file=sys.stderr)
+                return 1
+            k, v = d.split("=", 1)
+            dims[k.strip()] = v.strip().upper()
+        if a.all:
+            for k in contract.CHALLENGE_DIMENSIONS:
+                dims.setdefault(k, a.all)
+        try:
+            out = ledger.record_challenge(
+                wb, a.subcap, verdict=a.verdict, actor=a.actor, dimensions=dims,
+                rationale=a.rationale, ceiling_band_delta=a.ceiling_band_delta,
+                session=a.session)
+        except ledger.LedgerRefusal as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2, default=str))
+        return 0
     if a.cmd == "handoff":
         return handoff.main(["--run", a.run] + (["--root", str(root)] if root else []))
     if a.cmd == "report":

@@ -171,7 +171,10 @@ category → one researcher (`research-p1c1-producer` …
 ```
 python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
 python3 plugins/dma-insights/scripts/agent_run.py \
-        --batch $ROOT/briefs/batch.json --stream --lanes 4
+        --batch $ROOT/briefs/batch.json --stream --lanes 16 --retries 1 \
+        --record-run $RUN --record-root $ROOT --record-stage RESEARCH
+
+The lane count is ONE constant (`engine.cost.PARALLEL_LANES`, 16 — one per category) and `brief batch` prints this exact `dispatch` line: run what it prints. Measured 2026-09-03: this page said a lane count of four while the schedule divided by 16, so the documented dispatch ran the research phase at a quarter of the promised speed. `--retries 1` re-dispatches only a lane that timed out (124) or produced nothing (125); `--record-run` appends the stage's wall clock to `07_qa/cost_ledger.jsonl`, which `engine.cost report` reads back against the schedule and the budget.
 ```
 
 REPORTED 2026-09-03: *"There is no orchestration existing between the

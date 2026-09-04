@@ -155,7 +155,10 @@ tool call is the cost this removes.
 
        python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
        python3 plugins/dma-insights/scripts/agent_run.py \
-               --batch $ROOT/briefs/batch.json --stream --lanes 4
+               --batch $ROOT/briefs/batch.json --stream --lanes 16 --retries 1 \
+               --record-run $RUN --record-root $ROOT --record-stage RESEARCH
+
+   The lane count is ONE constant (`engine.cost.PARALLEL_LANES`, 16 — one per category); `brief batch` prints this exact `dispatch` line, so run what it prints rather than retyping it. `--retries 1` re-dispatches only a lane that timed out or came back empty; `--record-run` lands the stage's wall clock in the run's cost ledger (`engine.cost report` reads it back).
 
    `brief batch` writes one bounded packet per category and the batch array
    that dispatches them. Do NOT compose those prompts yourself: a

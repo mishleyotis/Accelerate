@@ -122,3 +122,29 @@ def test_the_gate_accepts_a_genuinely_independent_challenge(tmp_path):
     v = floors_gate.run(wb, "P1C1", qa_dir=run.qa_dir)
     assert not any(x["subcap"] == cell for x in v["challenge_not_independent"]), (
         "a genuinely independent challenge was flagged as dependent")
+
+
+def test_the_cli_carries_the_same_refusal(tmp_path):
+    """`engine.cli challenge` is how a headless finding-challenger records;
+    it must refuse the author exactly as the library does (2026-09-03: there
+    was no CLI, so a dispatched challenger could not record at all)."""
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+    run, wb, cell = _run_with_synthesis(tmp_path, "research-p1c1-producer")
+    skill = Path(__file__).resolve().parents[2].parent / "plugins/dma-insights/skills/dma-research"
+
+    def cli(actor):
+        return subprocess.run(
+            [sys.executable, "-m", "engine.cli", "challenge", "--subcap", cell,
+             "--verdict", "PASS", "--all", "PASS", "--actor", actor, "--rationale", RAT,
+             "--run", run.run_id, "--root", str(run.root)],
+            capture_output=True, text=True, cwd=str(skill),
+            env={k: v for k, v in __import__("os").environ.items()
+                 if k not in ("DMA_AGENT_SESSION", "CLAUDE_AGENT_ID", "CLAUDE_SESSION_ID")})
+    r = cli("research-p1c1-producer")
+    assert r.returncode == 1 and "cannot also be its challenger" in r.stderr
+    r = cli("finding-challenger")
+    assert r.returncode == 0, r.stderr
+    assert json.loads(r.stdout)["challenger"] == "finding-challenger"
