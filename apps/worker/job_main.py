@@ -721,15 +721,43 @@ def composite_reader_fingerprint() -> str:
 EVIDENCE_REPAIR_PER_FIRING = 5
 
 
+#: An evidence row the CONNECTOR minted carries its own `E-CC-nnn` id, so the
+#: numeric-suffix join below cannot reach it — `E-CC-569` is the 569th id the
+#: connector allocated, not the 569th row of anyone's workbook. Those rows do
+#: say which workbook row they came from, in words, inside `source_name`:
+#:     "DFPI Regulated Entity Record … [package evidence id E-5123]"
+#:     "Banking Dive — How Golden 1 used AI … — package id E-055;"
+#: MEASURED 2026-09-04 on Golden 1 Credit Union: 223 served rows had no URL
+#: after the suffix pass, 222 of them named a workbook row this way, and every
+#: one of those 222 resolved to a ledger row that states a URL. That marker is
+#: the package's own statement of provenance — the honest join key — and it is
+#: the difference between a drawer with a source and a drawer without one.
+_PACKAGE_ID_MARKER = re.compile(
+    r"package\s+(?:evidence\s+)?id[:\s]\s*([A-Za-z0-9][A-Za-z0-9._-]*)",
+    re.IGNORECASE)
+
+
+def stated_package_id(source_name: str | None) -> str | None:
+    """The workbook evidence id a served row names in its own source_name."""
+    m = _PACKAGE_ID_MARKER.search(source_name or "")
+    return m.group(1).rstrip(".-_") if m else None
+
+
 def evidence_reader_fingerprint() -> str:
     """A hash of the evidence reader, on `composite_reader_fingerprint`'s
     reasoning: a run this reader has already been through is not work until
-    the reader itself changes, and nobody should have to remember to say so."""
+    the reader itself changes, and nobody should have to remember to say so.
+
+    It covers the MATCHERS as well as the parser: teaching the pass a second
+    way to reach a row is an improvement to the reader, and every run that
+    was given up on under the old one has to re-open by itself."""
     import hashlib
     import inspect
     from dma_worker import workbook_parser as _wp
     src = inspect.getsource(_wp.parse_evidence_master)
-    consts = repr((_wp._EV_TABS, _wp._EV_ID_ANCHORS, _wp._FILLABLE))
+    src += inspect.getsource(stated_package_id)
+    consts = repr((_wp._EV_TABS, _wp._EV_ID_ANCHORS, _wp._FILLABLE,
+                   _PACKAGE_ID_MARKER.pattern))
     return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
 
 
@@ -1137,8 +1165,15 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                      FROM runs r
                     WHERE r.source_folder_id IS NOT NULL
                       AND (%s OR (
+                            -- BY ENTITY, not by run: `evidence_index` is
+                            -- keyed (e_id) and scoped (entity_id) — it has
+                            -- NO run_id, and asking for one aborted the
+                            -- whole transaction in production on
+                            -- 2026-09-04T12:13:20Z, taking the scan that
+                            -- runs after it down with a 25P02. The UPDATE
+                            -- below is entity-scoped for the same reason.
                             EXISTS (SELECT 1 FROM evidence_index i
-                                     WHERE i.run_id = r.id
+                                     WHERE i.entity_id = r.entity_id
                                        AND i.source_url IS NULL)
                         AND NOT EXISTS (SELECT 1 FROM parser_observations o
                                          WHERE o.run_id = r.id
@@ -1199,6 +1234,53 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                 except Exception:       # noqa: BLE001 — one row, not the run
                     cur.execute("ROLLBACK TO SAVEPOINT ev_row")
                     clashes += 1
+            # SECOND PASS, by the id the row itself names. The suffix join
+            # above reaches only the rows the INGEST minted from this ledger;
+            # a row the connector registered wears `E-CC-nnn` and states its
+            # workbook origin in `source_name` instead. Read what it says.
+            by_ledger_id = {ev["e_id"]: ev for ev in ledger}
+            cur.execute("""SELECT e_id, source_name FROM evidence_index
+                            WHERE entity_id = %s AND origin = 'package'
+                              AND source_url IS NULL
+                              AND source_name IS NOT NULL""", (entity_id,))
+            stated = named = 0
+            for e_id, source_name in cur.fetchall():
+                pid = stated_package_id(source_name)
+                if pid is None:
+                    continue
+                named += 1
+                ev = by_ledger_id.get(pid)
+                if ev is None or not (ev.get("source_url") or "").strip():
+                    continue
+                m = mined.get(pid) or {}
+                cur.execute("SAVEPOINT ev_named")
+                try:
+                    cur.execute(
+                        """UPDATE evidence_index
+                              SET source_url = COALESCE(source_url, %s),
+                                  excerpt    = COALESCE(excerpt, %s),
+                                  claim_type = COALESCE(claim_type, %s)
+                            WHERE entity_id = %s AND e_id = %s""",
+                        (ev.get("source_url"),
+                         ev.get("excerpt") or m.get("excerpt"),
+                         ev.get("claim_type"), entity_id, e_id))
+                    stated += cur.rowcount or 0
+                    cur.execute("RELEASE SAVEPOINT ev_named")
+                except Exception:       # noqa: BLE001 — one row, not the run
+                    cur.execute("ROLLBACK TO SAVEPOINT ev_named")
+                    clashes += 1
+            n += stated
+            if named and stated < named:
+                # NAMED A ROW WE COULD NOT FIND. Say so rather than leaving a
+                # blank drawer with no account of why it is blank.
+                cur.execute(
+                    """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_stated_id_unresolved',%s, now())""",
+                    (run_id, json.dumps({"named": str(named),
+                                         "filled": str(stated),
+                                         "reason": "source_name names a package "
+                                                   "evidence id the workbook "
+                                                   "ledger does not carry"})))
             if clashes:
                 cur.execute(
                     """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
@@ -1219,7 +1301,8 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                 (run_id, json.dumps({"reader": reader, "filled": str(n)})))
             conn.commit()
             print(f"backfill-evidence: {folder} -> {n} row(s) filled "
-                  f"({sum(1 for v in mined.values() if v.get('excerpt'))} mined "
+                  f"({stated} by a stated package id, "
+                  f"{sum(1 for v in mined.values() if v.get('excerpt'))} mined "
                   f"excerpts{f', {clashes} dedup clash(es)' if clashes else ''})")
             filled += 1
         except Exception as exc:  # noqa: BLE001 — one bad workbook sinks nothing
@@ -1808,30 +1891,41 @@ def main() -> int:
         # steady state is one query and no downloads. It is deliberately NOT
         # fatal to the scan — a repair that cannot reach Drive must not stop
         # this Job doing the thing it exists to do.
-        try:
-            # FIRST: a run that does not know its own package cannot be
-            # repaired by anything below. goeasy's eighteen runs had no
-            # source folder at all, which is why two rounds of fixing the
-            # folder LOOKUP moved nothing.
-            adopt_orphan_runs(conn, drive.metadata_token(), groups)
-        except Exception as exc:            # noqa: BLE001 — see below
-            print(f"orphan adoption skipped this firing: {exc!r}")
-        try:
-            backfill_composite(conn, drive.metadata_token(), groups,
-                               forced=False)
-        except Exception as exc:            # noqa: BLE001 — see above
-            print(f"composite repair skipped this firing: {exc!r}")
-        try:
-            # THE EVIDENCE DRAWER'S LINKS, on the same schedule and for the
-            # same reason. Golden 1 Credit Union served 728 citations with
-            # 193 URLs while Baxter served 154 of 154; the missing ones were
-            # in the package's own `Evidence_Detail` tab, and this pass —
-            # which fills ONLY nulls, from the workbook, never inventing —
-            # had never run outside a human setting BACKFILL_EVIDENCE.
-            backfill_evidence(conn, drive.metadata_token(), groups,
-                              forced=False)
-        except Exception as exc:            # noqa: BLE001 — see above
-            print(f"evidence repair skipped this firing: {exc!r}")
+        # "NON-FATAL" HAS TO MEAN IT. Catching the exception is only half:
+        # a failed statement leaves PostgreSQL's transaction aborted, and
+        # every command after it dies `25P02 current transaction is aborted`
+        # — including the scan this Job exists to run. MEASURED
+        # 2026-09-04T12:13:20Z: one bad column name in the evidence work
+        # list, and `_scan_and_ingest` fell over on its first SELECT. Roll
+        # back, then carry on.
+        def _repair(label, fn):
+            try:
+                fn()
+            except Exception as exc:        # noqa: BLE001 — see above
+                print(f"{label} skipped this firing: {exc!r}")
+                try:
+                    conn.rollback()
+                except Exception:           # noqa: BLE001 — nothing left to do
+                    pass
+
+        # FIRST: a run that does not know its own package cannot be repaired
+        # by anything below. goeasy's eighteen runs had no source folder at
+        # all, which is why two rounds of fixing the folder LOOKUP moved
+        # nothing.
+        _repair("orphan adoption",
+                lambda: adopt_orphan_runs(conn, drive.metadata_token(), groups))
+        _repair("composite repair",
+                lambda: backfill_composite(conn, drive.metadata_token(),
+                                           groups, forced=False))
+        # THE EVIDENCE DRAWER'S LINKS, on the same schedule and for the same
+        # reason. Golden 1 Credit Union served 728 citations with 193 URLs
+        # while Baxter served 154 of 154; the missing ones were in the
+        # package's own `Evidence_Detail` tab, and this pass — which fills
+        # ONLY nulls, from the workbook, never inventing — had never run
+        # outside a human setting BACKFILL_EVIDENCE.
+        _repair("evidence repair",
+                lambda: backfill_evidence(conn, drive.metadata_token(),
+                                          groups, forced=False))
 
         _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
                          key)
