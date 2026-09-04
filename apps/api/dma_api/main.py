@@ -12,6 +12,8 @@ writes serving content (invariant 2).
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
@@ -701,7 +703,19 @@ def entity_evidence(display_id: str, request: Request, response: Response,
         res = ev_fetch(cur, entity_id, wanted or None,
                        run_id=run_meta["run_id"])
         res["items"] = ev_redact(res["items"], audience)
-        tag = etag_for(run_meta, f"{audience}.evidence")
+        # THE DRAWER IS A LIVE READ, so its tag cannot be pinned to the
+        # promotion. `evidence_index` changes outside promotion — the worker's
+        # repair pass fills a null `source_url` from the package's own
+        # workbook without touching `promoted_at` — and a tag that ignores
+        # that answers 304 and keeps serving the URL-less copy the browser
+        # already has. MEASURED 2026-09-04: Golden 1's 497 blank drawers were
+        # filled by the pass and every cached client would have gone on
+        # seeing them blank. The content digest is a FOURTH component beside
+        # `SERVE_RULES`, which exists for the same reason one layer up.
+        digest = hashlib.sha256(
+            json.dumps(res, sort_keys=True, default=str).encode()
+        ).hexdigest()[:12]
+        tag = etag_for(run_meta, f"{audience}.evidence.{digest}")
         if request.headers.get("if-none-match") == tag:
             return Response(status_code=304, headers={"ETag": tag,
                                                       "Cache-Control": "private, max-age=0"})
