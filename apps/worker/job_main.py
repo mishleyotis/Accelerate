@@ -1277,6 +1277,13 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
                 # recorded and skipped — it must not sink the whole run.
                 cur.execute("SAVEPOINT ev_row")
                 try:
+                    # ONLY ROWS THAT WILL ACTUALLY CHANGE. `COALESCE` leaves
+                    # a populated column alone, so without this the statement
+                    # matches every row of the entity and `rowcount` reports
+                    # work that did not happen. MEASURED 2026-09-04T13:41:29Z:
+                    # "Baxter Credit Union - DMA -> 117 row(s) filled", three
+                    # times, for a client already serving 154 of 154 URLs.
+                    # The number has to mean what it says.
                     cur.execute(
                         """UPDATE evidence_index
                               SET source_name = COALESCE(source_name, %s),
@@ -1285,9 +1292,15 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
                                   claim_type  = COALESCE(claim_type, %s)
                             WHERE entity_id = %s
                               AND origin = 'package'
-                              AND split_part(e_id, '-', 3) = %s""",
+                              AND split_part(e_id, '-', 3) = %s
+                              AND ((%s::text IS NOT NULL AND source_name IS NULL)
+                                OR (%s::text IS NOT NULL AND source_url  IS NULL)
+                                OR (%s::text IS NOT NULL AND excerpt     IS NULL)
+                                OR (%s::text IS NOT NULL AND claim_type  IS NULL))""",
                         (ev.get("source_name"), ev.get("source_url"), excerpt,
-                         ev.get("claim_type"), entity_id, suffix))
+                         ev.get("claim_type"), entity_id, suffix,
+                         ev.get("source_name"), ev.get("source_url"), excerpt,
+                         ev.get("claim_type")))
                     n += cur.rowcount or 0
                     cur.execute("RELEASE SAVEPOINT ev_row")
                 except Exception:       # noqa: BLE001 — one row, not the run
@@ -1326,15 +1339,19 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
                 m = mined.get(pid) or {}
                 cur.execute("SAVEPOINT ev_named")
                 try:
+                    _exc = ev.get("excerpt") or m.get("excerpt")
                     cur.execute(
                         """UPDATE evidence_index
                               SET source_url = COALESCE(source_url, %s),
                                   excerpt    = COALESCE(excerpt, %s),
                                   claim_type = COALESCE(claim_type, %s)
-                            WHERE entity_id = %s AND e_id = %s""",
-                        (ev.get("source_url"),
-                         ev.get("excerpt") or m.get("excerpt"),
-                         ev.get("claim_type"), entity_id, e_id))
+                            WHERE entity_id = %s AND e_id = %s
+                              AND ((%s::text IS NOT NULL AND source_url IS NULL)
+                                OR (%s::text IS NOT NULL AND excerpt    IS NULL)
+                                OR (%s::text IS NOT NULL AND claim_type IS NULL))""",
+                        (ev.get("source_url"), _exc, ev.get("claim_type"),
+                         entity_id, e_id,
+                         ev.get("source_url"), _exc, ev.get("claim_type")))
                     stated += cur.rowcount or 0
                     cur.execute("RELEASE SAVEPOINT ev_named")
                 except Exception:       # noqa: BLE001 — one row, not the run

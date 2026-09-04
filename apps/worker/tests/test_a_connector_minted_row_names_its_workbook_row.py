@@ -340,7 +340,9 @@ def test_the_excerpt_is_filled_from_the_same_row_as_the_url(monkeypatch):
     job_main.backfill_evidence(conn, "tok", _groups(), forced=True)
 
     assert len(cur.named_updates) == 1
-    url, excerpt, claim, _ent, e_id = cur.named_updates[0]
+    # the trailing three repeat url/excerpt/claim so the statement can match
+    # only rows it will actually change (see the WHERE in `backfill_evidence`)
+    url, excerpt, claim, _ent, e_id = cur.named_updates[0][:5]
     assert url == "https://drive.example/input-brief"
     assert excerpt == "B" * 60, \
         "the row got a link but no quote to check it against"
