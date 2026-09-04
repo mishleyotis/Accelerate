@@ -434,7 +434,10 @@ class _CompositeCursor:
             raise AssertionError(f"unexpected sql: {sql[:60]}")
 
     def fetchall(self):
-        return self._rows
+        # (run_id, folder, request_id): a run carrying no folder of its
+        # own is reached through a sibling under the same request id.
+        return [(r[0], r[1], r[2] if len(r) > 2 else "REQ-1")
+                for r in self._rows]
 
 
 class _CompositeConn:

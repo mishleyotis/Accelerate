@@ -151,7 +151,10 @@ class _Cursor:
             raise AssertionError(f"unexpected sql: {sql[:60]}")
 
     def fetchall(self):
-        return self.rows
+        # (run_id, folder, request_id) — the work list resolves a run's
+        # package through a sibling under the same request id when the run
+        # itself carries no folder.
+        return [(r[0], r[1], r[2] if len(r) > 2 else "REQ-1") for r in self.rows]
 
 
 class _Conn:
@@ -281,3 +284,45 @@ def test_a_pass_that_filled_nothing_does_not_rebuild_the_view(monkeypatch):
 
     assert conn.cur.updated == []
     assert conn.cur.refreshed == 0, "rebuilt the view for nothing"
+
+
+# ── the run that serves is not always the run holding the folder ─────────
+
+def test_the_work_list_reaches_a_run_that_carries_no_folder_of_its_own():
+    """MEASURED 2026-09-04. goeasy Ltd. carries EIGHTEEN runs under one
+    request id, every one with a null composite, and the first version of
+    this work list — which required `r.source_folder_id IS NOT NULL` —
+    matched exactly ONE run across the whole database. The promoted run, the
+    only one the directory reads, was invisible to its own repair.
+
+    A sibling under the same request id and entity is the same package by
+    definition. Not the entity alone: two assessments of one client are two
+    packages, and reading one's composite out of the other's workbook is a
+    figure from the wrong run wearing the right name.
+    """
+    conn = _Conn([])
+    job_main.backfill_composite(conn, "t", {}, forced=False)
+    sql, _params = conn.cur.selects[0]
+
+    assert "r.source_folder_id IS NOT NULL" not in sql, (
+        "the work list still requires the run's own folder, so a re-ingested "
+        "run that did not carry it forward can never be repaired")
+    assert "COALESCE(r.source_folder_id" in sql, "no fallback to a sibling"
+    assert "s.request_id = r.request_id" in sql, \
+        "the sibling must be the same PACKAGE, not merely the same client"
+    assert "s.entity_id = r.entity_id" in sql, \
+        "a request id alone could collide across clients"
+
+
+def test_a_skipped_run_is_named_not_merely_counted(monkeypatch, capsys):
+    """The first production firing said "1 have no workbook artefact" and
+    stopped there — which run, and under what key, went unsaid, and the key
+    is exactly what goes wrong when a folder is renamed or a package moves."""
+    _stub_reader(monkeypatch, None, None)
+    conn = _Conn([("run-gsy", "goeasy Ltd. - DMA")])
+
+    job_main.backfill_composite(conn, "t", {}, forced=False)
+
+    out = capsys.readouterr().out
+    assert "run-gsy" in out, "the skipped run was not named"
+    assert "goeasy Ltd. - DMA" in out, "the key it looked under was not named"
