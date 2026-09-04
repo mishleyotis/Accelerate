@@ -468,7 +468,11 @@ def test_a_failed_repair_rolls_back_so_the_scan_still_runs(monkeypatch, fakedb,
         ingested.append(folder)
         return _Res(), []
 
-    rc = _run_main(monkeypatch, fakedb, TREE, ingest=_spy)
+    # The repair only runs for a NAMED client (owner's instruction,
+    # 2026-09-04), so name one — otherwise this test proves nothing about
+    # rollback, because nothing runs to fail.
+    rc = _run_main(monkeypatch, fakedb, TREE, ingest=_spy,
+                   EVIDENCE_REPAIR_ONLY="goeasy")
 
     assert ingested == ["goeasy Ltd - DMA"], \
         "the failed repair left the transaction aborted, so the scan after " \

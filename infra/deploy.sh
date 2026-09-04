@@ -434,8 +434,21 @@ if [ -f apps/worker/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-worker@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};MAX_PACKAGES=${MAX_PACKAGES:-10}" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-worker@${PROJECT_ID}.iam;DB_NAME=dma_insights;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};MAX_PACKAGES=${MAX_PACKAGES:-10};EVIDENCE_REPAIR_ONLY=${EVIDENCE_REPAIR_ONLY-Golden 1}" \
     --max-retries=0 --task-timeout=3600 --memory=2Gi --cpu=2 --quiet
+  # EVIDENCE_REPAIR_ONLY NAMES THE ONE CLIENT THE EVIDENCE REPAIR MAY TOUCH.
+  #
+  # The pass fills a null `source_url` from the client's own workbook. Its
+  # first production firing (2026-09-04T13:13:20Z) reported `99 run(s)` of
+  # work across the corpus and started at the top of the alphabet — 1st
+  # Security Bank, Amalgamated, ATB — none of which anybody had asked about.
+  # Owner's instruction the same day: strictly Golden 1, do not add clients.
+  #
+  # It is set HERE rather than by hand because `--set-env-vars` replaces the
+  # whole set: a value bound onto one execution is dropped by the very next
+  # release, silently. Unset (`EVIDENCE_REPAIR_ONLY=`) turns the pass OFF; it
+  # does not widen it to everyone. To repair a different client, name it —
+  # deliberately, one client at a time.
   gcloud run jobs add-iam-policy-binding dmai-worker \
     --project="$PROJECT_ID" --region="$REGION" \
     --member="serviceAccount:dmai-worker@${SA_DOMAIN}" \

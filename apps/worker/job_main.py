@@ -1175,7 +1175,8 @@ def backfill_sections(conn, token, groups) -> int:
     return 1 if failed else 0
 
 
-def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
+def backfill_evidence(conn, token, groups, *, forced: bool = True,
+                      only: str = "") -> int:
     """Fill in the evidence text that already-ingested rows never got.
 
     Evidence rows insert with ON CONFLICT DO NOTHING, so re-ingesting a
@@ -1213,16 +1214,40 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                                          WHERE o.run_id = r.id
                                            AND o.kind = 'evidence_reader_pass'
                                            AND o.detail->>'reader' = %s)))
-                    ORDER BY r.source_folder_id""", (forced, reader))
+                      AND (%s = '' OR r.source_folder_id ILIKE %s)
+                    ORDER BY r.source_folder_id""",
+                (forced, reader, only or '', f"%{only}%"))
     todo = cur.fetchall()
-    deferred = 0
-    if not forced and len(todo) > EVIDENCE_REPAIR_PER_FIRING:
-        deferred = len(todo) - EVIDENCE_REPAIR_PER_FIRING
-        todo = todo[:EVIDENCE_REPAIR_PER_FIRING]
-    print(f"backfill-evidence: {len(todo)} run(s) (reader {reader}"
-          + (f", {deferred} deferred to the next firing)" if deferred else ")"))
-    filled = skipped = failed = 0
+
+    # ONE WORKBOOK PER CLIENT, NOT PER RUN. The fill is entity-scoped —
+    # every UPDATE below keys on `entity_id`, because `evidence_index` has
+    # no run column — so a client's second run has nothing left to give and
+    # downloading its 1.5 MB workbook again to discover that is pure waste.
+    # MEASURED in the first production firing, 2026-09-04T13:13:20Z:
+    #   backfill-evidence: Amalgamated Bank - DMA -> 34 row(s) filled
+    #   backfill-evidence: Amalgamated Bank - DMA -> 34 row(s) filled
+    #   backfill-evidence: ATB - DMA -> 352 row(s) filled
+    #   backfill-evidence: ATB - DMA -> 352 row(s) filled
+    # two downloads and two parses each, for one client's worth of work, out
+    # of a per-firing budget of five. The cap now counts DOWNLOADS, which is
+    # what actually costs, and the pass is recorded against every run the
+    # client has so none of them comes back asking again.
+    by_client: dict = {}
     for run_id, entity_id, folder, run_seq in todo:
+        by_client.setdefault((folder, entity_id), []).append(run_id)
+    clients = list(by_client.items())
+    deferred = 0
+    if not forced and len(clients) > EVIDENCE_REPAIR_PER_FIRING:
+        deferred = len(clients) - EVIDENCE_REPAIR_PER_FIRING
+        clients = clients[:EVIDENCE_REPAIR_PER_FIRING]
+    print(f"backfill-evidence: {len(clients)} client(s), "
+          f"{sum(len(v) for _k, v in clients)} run(s) (reader {reader}"
+          + (f", {only!r} only" if only else "")
+          + (f", {deferred} client(s) deferred to the next firing)"
+             if deferred else ")"))
+    filled = skipped = failed = 0
+    for (folder, entity_id), run_ids in clients:
+        run_id = run_ids[0]
         parts = groups.get(folder) or {}
         if "workbook" not in parts:
             skipped += 1
@@ -1348,16 +1373,23 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True) -> int:
                                          "reason": "filling the excerpt would "
                                                    "duplicate (entity, content_hash)"})))
             conn.commit()
-            # RECORDED, stamped with the reader that did it. Without this
-            # the scheduled pass re-downloads a 1.5 MB workbook every thirty
-            # minutes to re-learn that it has nothing left to give; with it
-            # the steady state is one query, and improving the reader
-            # re-opens every run by itself.
-            cur.execute(
-                """INSERT INTO parser_observations
-                       (run_id, kind, detail, occurred_at)
-                   VALUES (%s,'evidence_reader_pass',%s, now())""",
-                (run_id, json.dumps({"reader": reader, "filled": str(n)})))
+            # RECORDED, stamped with the reader that did it, ON EVERY RUN
+            # THIS CLIENT HAS. Without this the scheduled pass re-downloads a
+            # 1.5 MB workbook every thirty minutes to re-learn that it has
+            # nothing left to give; with it the steady state is one query,
+            # and improving the reader re-opens every run by itself.
+            #
+            # Every run, not just the one that did the download: the fill is
+            # entity-scoped, so a sibling run genuinely has nothing left to
+            # give — and stamping only the first leaves the siblings in the
+            # work list, asking for the same download again next firing.
+            for _rid in run_ids:
+                cur.execute(
+                    """INSERT INTO parser_observations
+                           (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_reader_pass',%s, now())""",
+                    (_rid, json.dumps({"reader": reader, "filled": str(n),
+                                       "by_run": str(run_id)})))
             conn.commit()
             print(f"backfill-evidence: {folder} -> {n} row(s) filled "
                   f"({stated} by a stated package id"
@@ -1911,7 +1943,15 @@ def main() -> int:
             return rc
 
         if os.environ.get("BACKFILL_EVIDENCE"):
-            rc = backfill_evidence(conn, drive.metadata_token(), groups)
+            # The manual pass is unbounded by design, so it takes the same
+            # client filter: `BACKFILL_EVIDENCE="Golden 1"` repairs that
+            # client and reads no other workbook. A bare truthy value still
+            # means the whole corpus — 99 runs and as many downloads — which
+            # is a thing to ask for on purpose, not by default.
+            want = os.environ["BACKFILL_EVIDENCE"].strip()
+            only = "" if want.lower() in ("1", "true", "yes", "all") else want
+            rc = backfill_evidence(conn, drive.metadata_token(), groups,
+                                   only=only)
             conn.close()
             return rc
 
@@ -1978,15 +2018,29 @@ def main() -> int:
         _repair("composite repair",
                 lambda: backfill_composite(conn, drive.metadata_token(),
                                            groups, forced=False))
-        # THE EVIDENCE DRAWER'S LINKS, on the same schedule and for the same
-        # reason. Golden 1 Credit Union served 728 citations with 193 URLs
-        # while Baxter served 154 of 154; the missing ones were in the
-        # package's own `Evidence_Detail` tab, and this pass — which fills
-        # ONLY nulls, from the workbook, never inventing — had never run
-        # outside a human setting BACKFILL_EVIDENCE.
-        _repair("evidence repair",
-                lambda: backfill_evidence(conn, drive.metadata_token(),
-                                          groups, forced=False))
+        # THE EVIDENCE DRAWER'S LINKS — FOR THE CLIENT NAMED, AND NO OTHER.
+        #
+        # Golden 1 Credit Union served 728 citations with 193 URLs while
+        # Baxter served 154 of 154; the missing ones were in the package's
+        # own `Evidence_Detail` tab. The first firing that could run this
+        # pass reported the true size of that: `99 run(s)` across the whole
+        # corpus, and went off repairing 1st Security Bank, Amalgamated and
+        # ATB — none of which anybody had asked about. Owner's instruction,
+        # 2026-09-04: strictly Golden 1, do not add clients.
+        #
+        # So the pass does NOTHING unless `EVIDENCE_REPAIR_ONLY` names a
+        # client. Unset is off — not "on for everyone" — because the corpus
+        # is 99 runs and a repair nobody asked for is still work nobody
+        # asked for. `infra/deploy.sh` sets it; emptying it turns the pass
+        # off, it does not widen it.
+        only = (os.environ.get("EVIDENCE_REPAIR_ONLY") or "").strip()
+        if only:
+            _repair("evidence repair",
+                    lambda: backfill_evidence(conn, drive.metadata_token(),
+                                              groups, forced=False, only=only))
+        else:
+            print("evidence repair: EVIDENCE_REPAIR_ONLY names no client, "
+                  "so nothing is repaired this firing")
 
         _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
                          key)
