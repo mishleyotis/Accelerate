@@ -1,0 +1,283 @@
+"""The composite repair has to RUN, not merely work.
+
+MEASURED 2026-09-04 from the promoted client directory. goeasy Ltd.
+(`DMA-RES-GSY-20260830-0002`) served `overall: null` beside its own four
+pillar bars — P1 2.09, P2 2.19, P3 2.01, P4 2.16 — every one of which
+resolved, and beside six other institutions every one of which showed a
+maturity figure. The card rendered the word "maturity" over an empty slot.
+
+`runs.composite` is written exactly ONCE, at INSERT, from the reader that ran
+that day. goeasy's workbook was last read by this Job at 04:14:58 on
+2026-09-03; `_stated_overall_grain`, the reader that can find the composite
+in its generation, merged at 06:08 the same day. So the run was ingested
+under a reader that could not see the figure, and nothing ever looked again:
+the package scan is idempotent, so an unchanged tree re-reads nothing.
+
+The repair existed the whole time. `backfill_composite` had three tests —
+it fills, it declines to invent, it survives a bad workbook — and NOT ONE
+that it is ever called. It sat behind `if os.environ.get(
+"BACKFILL_COMPOSITE")`, which no schedule sets, and no worker firing has
+ever logged a line from it.
+
+That is the defect these tests pin, and it is not the reader: a capability
+built, tested, and never reached. A test that a function works is not a test
+that the system uses it.
+
+Run with `pytest apps/worker/tests/test_composite_repair_runs_on_the_schedule.py`.
+"""
+import sys
+from pathlib import Path
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import job_main
+from dma_worker.scan_diff import FileStat
+
+
+def _f(folder, name, checksum="abc"):
+    return FileStat(file_id=f"{folder}/{name}", path_segments=(folder, name),
+                    name=name, checksum=checksum, size_bytes=10, mime_type="")
+
+
+TREE = [_f("goeasy Ltd - DMA", "run_manifest.json", "m1"),
+        _f("goeasy Ltd - DMA", "DMA_Scoring_Workbook_goeasy-ltd.xlsx", "w1")]
+
+
+def _run_main(monkeypatch, db, tree, ingest=None, **env):
+    monkeypatch.setenv("INTAKE_FOLDER_ID", "intake-root")
+    monkeypatch.setenv("MAX_PACKAGES", "10")
+    for k in ("DUMP_HEADERS", "LINK_PROPOSE_RUN_ID", "RESET_SCAN",
+              "INTAKE_STATUS", "BACKFILL_SECTIONS", "BACKFILL_EVIDENCE",
+              "BACKFILL_GRAINS", "BACKFILL_WBMETA", "BACKFILL_COMPOSITE",
+              "EVIDENCE_URL_BACKFILL", "EVIDENCE_NAMESPACE",
+              "EMBED_MODEL_DIR", "FORCE_FOLDER"):
+        monkeypatch.delenv(k, raising=False)
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    monkeypatch.setattr(job_main, "_connect", lambda: db)
+    monkeypatch.setattr(job_main.drive, "walk_tree", lambda _i: tree)
+    monkeypatch.setattr(job_main.drive, "metadata_token", lambda: "tok")
+    monkeypatch.setattr(job_main, "_ingest_one", ingest or _ok_ingest)
+    return job_main.main()
+
+
+class _Res:
+    """What `_scan_and_ingest` reads off a successful ingest."""
+    run_id, scored_cells, observations = "run-gsy", 696, 0
+
+
+def _ok_ingest(conn, token, folder, parts, remint=False):
+    return _Res(), []
+
+
+# ── the test that was missing ────────────────────────────────────────────
+
+def test_the_scheduled_scan_runs_the_composite_repair(monkeypatch, fakedb):
+    """THE POINT OF THIS FILE.
+
+    Against the code that shipped, this fails: the only call to
+    `backfill_composite` was inside `if os.environ.get("BACKFILL_COMPOSITE")`,
+    and the scheduled firing sets no such variable.
+    """
+    calls = []
+    monkeypatch.setattr(job_main, "backfill_composite",
+                        lambda conn, token, groups, **kw: calls.append(kw) or 0)
+
+    _run_main(monkeypatch, fakedb, TREE)
+
+    assert calls, ("the scheduled scan never ran the composite repair — a run "
+                   "ingested under an older reader stays null for ever")
+    assert calls[0].get("forced") is False, (
+        "the scheduled pass must be the incremental one; forced=True re-reads "
+        "every workbook on every firing")
+
+
+def test_a_repair_that_cannot_reach_drive_does_not_stop_the_scan(monkeypatch, fakedb):
+    """The repair is a passenger. This Job exists to scan the intake tree, and
+    a workbook download that fails must not cost that."""
+    def boom(conn, token, groups, **kw):
+        raise RuntimeError("drive 503")
+
+    monkeypatch.setattr(job_main, "backfill_composite", boom)
+    ingested = []
+
+    def _spy(conn, token, folder, parts, remint=False):
+        ingested.append(folder)
+        return _Res(), []
+
+    rc = _run_main(monkeypatch, fakedb, TREE, ingest=_spy)
+
+    assert rc == 0, "a failed repair must not fail the scan"
+    assert ingested, "the scan still ingested its package"
+
+
+def test_the_manual_mode_still_forces_a_full_re_read(monkeypatch, fakedb):
+    """BACKFILL_COMPOSITE is the human's escape hatch: re-read everything,
+    including runs already recorded as stating none."""
+    calls = []
+    monkeypatch.setattr(job_main, "backfill_composite",
+                        lambda conn, token, groups, **kw: calls.append(kw) or 0)
+
+    _run_main(monkeypatch, fakedb, TREE, BACKFILL_COMPOSITE="1")
+
+    assert calls, "the manual mode did not run"
+    assert calls[0].get("forced", True) is True, \
+        "the manual pass must ignore the already-looked-at record"
+
+
+# ── the bound that makes running it on every firing affordable ───────────
+
+class _Cursor:
+    """Records the SELECT that builds the work list and every write."""
+
+    def __init__(self, runs):
+        self._runs, self.rows = runs, []
+        self.selects, self.updated, self.observed = [], [], []
+        self.refreshed = 0
+
+    def execute(self, sql, params=None):
+        if "refresh_serving_directory" in sql:
+            self.refreshed += 1
+        elif "FROM runs r" in sql:
+            self.selects.append((sql, params))
+            self.rows = list(self._runs)
+        elif "UPDATE runs" in sql:
+            self.updated.append(params)
+        elif "parser_observations" in sql:
+            self.observed.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self.rows
+
+
+class _Conn:
+    def __init__(self, runs):
+        self.cur = _Cursor(runs)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        pass
+
+
+def _stub_reader(monkeypatch, value, cell="Pillar_Summary!C6"):
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"bytes")
+    monkeypatch.setattr(job_main.openpyxl, "load_workbook",
+                        lambda p, **kw: type("W", (), {"close": lambda s: None})())
+    monkeypatch.setattr(job_main, "_stated_overall_grain",
+                        lambda wb: (value, cell))
+
+
+def test_a_workbook_stating_none_is_recorded_so_it_is_not_re_read(monkeypatch):
+    """Running on every firing is only affordable if "nothing here" is
+    remembered. Otherwise every composite-less workbook is downloaded again
+    every thirty minutes, for ever."""
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    _stub_reader(monkeypatch, None, None)
+
+    conn = _Conn([("run-s", "Silent - DMA")])
+    assert job_main.backfill_composite(conn, "t", groups, forced=False) == 0
+
+    assert conn.cur.updated == [], "nothing was invented"
+    assert len(conn.cur.observed) == 1, \
+        "the determination was not recorded, so it will be paid for again"
+    import json as _json
+    detail = _json.loads(conn.cur.observed[0][1])
+    assert detail["reader"] == job_main.composite_reader_fingerprint(), \
+        "the record must name the reader that concluded it"
+
+
+def test_the_incremental_work_list_excludes_what_this_reader_already_read(monkeypatch):
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    _stub_reader(monkeypatch, None, None)
+
+    conn = _Conn([])
+    job_main.backfill_composite(conn, "t", groups, forced=False)
+
+    sql, params = conn.cur.selects[0]
+    assert "composite_absent" in sql, "the work list does not exclude anything"
+    assert job_main.composite_reader_fingerprint() in params, \
+        "the exclusion must be scoped to the reader that made the record"
+    assert params[0] is False, "forced must reach the query as False"
+
+
+def test_a_better_reader_re_opens_every_run_it_had_given_up_on(monkeypatch):
+    """The recurrence this whole change exists to prevent, arriving through
+    its own fix. If the record were not stamped with the reader, improving
+    `_stated_overall_grain` would reach new packages only and every existing
+    run would stay silently empty."""
+    before = job_main.composite_reader_fingerprint()
+
+    from dma_worker import workbook_parser as wp
+    monkeypatch.setattr(wp, "_OVERALL_LABELS",
+                        wp._OVERALL_LABELS + ("overall_maturity",))
+    after = job_main.composite_reader_fingerprint()
+
+    assert after != before, (
+        "the fingerprint ignored a change to the reader's own vocabulary, so "
+        "every run recorded absent would stay excluded from the work list")
+
+
+def test_a_backlog_is_capped_per_firing_and_says_what_it_deferred(monkeypatch, capsys):
+    """No silent caps. A firing that cannot get through the backlog must name
+    what is left, or the log reads as though there was nothing else."""
+    from decimal import Decimal
+
+    n = job_main.COMPOSITE_REPAIR_PER_FIRING + 3
+    tree = [_f(f"Client {i} - DMA", f"DMA_Scoring_Workbook_{i}.xlsx")
+            for i in range(n)]
+    groups = job_main._package_groups(tree)
+    _stub_reader(monkeypatch, Decimal("2.11"))
+
+    conn = _Conn([(f"run-{i}", f"Client {i} - DMA") for i in range(n)])
+    job_main.backfill_composite(conn, "t", groups, forced=False)
+
+    assert len(conn.cur.updated) == job_main.COMPOSITE_REPAIR_PER_FIRING
+    assert "3 deferred" in capsys.readouterr().out, \
+        "the cap was silent, which reads as an empty backlog"
+
+
+# ── and the repaired figure has to be PUBLISHED ──────────────────────────
+
+def test_a_filled_composite_refreshes_the_directory(monkeypatch):
+    """`serving_directory` is materialised. A repair that commits the value
+    and stops has changed nothing anyone can see — the client card keeps its
+    empty slot until some unrelated promote happens to rebuild the view."""
+    from decimal import Decimal
+
+    tree = [_f("goeasy Ltd - DMA", "DMA_Scoring_Workbook_goeasy.xlsx")]
+    groups = job_main._package_groups(tree)
+    _stub_reader(monkeypatch, Decimal("2.11"))
+
+    conn = _Conn([("run-gsy", "goeasy Ltd - DMA")])
+    job_main.backfill_composite(conn, "t", groups, forced=False)
+
+    assert conn.cur.updated, "nothing was filled, so this test proves nothing"
+    assert conn.cur.refreshed == 1, (
+        "the composite was written but the materialised directory was never "
+        "refreshed, so the card stays blank")
+
+
+def test_a_pass_that_filled_nothing_does_not_rebuild_the_view(monkeypatch):
+    """A refresh is a full rebuild of the view. Every firing paying for one
+    when there was nothing to publish is a cost with no reader."""
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    _stub_reader(monkeypatch, None, None)
+
+    conn = _Conn([("run-s", "Silent - DMA")])
+    job_main.backfill_composite(conn, "t", groups, forced=False)
+
+    assert conn.cur.updated == []
+    assert conn.cur.refreshed == 0, "rebuilt the view for nothing"

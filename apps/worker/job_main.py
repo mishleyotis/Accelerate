@@ -681,7 +681,42 @@ def backfill_workbook_metadata(conn, token, groups) -> int:
           f"{failed} failed")
     return 1 if failed else 0
 
-def backfill_composite(conn, token, groups) -> int:
+#: How many null-composite runs one scheduled firing will re-read. The pass
+#: downloads a workbook per run, and the Job's task timeout is 3600s; a
+#: backlog must not be able to spend the whole firing here and starve the
+#: scan that is this Job's actual purpose. What is left over is NAMED in the
+#: log rather than dropped silently — a cap nobody can see is a cap that
+#: reads as "there was nothing else".
+COMPOSITE_REPAIR_PER_FIRING = 25
+
+
+def composite_reader_fingerprint() -> str:
+    """A hash of the composite reader itself.
+
+    WHY A HASH AND NOT A VERSION NUMBER. The repair below records
+    `composite_absent` for a run whose workbook states no overall, so the
+    next firing does not download it again. That record is only safe while
+    the reader is unchanged: improve the reader and every one of those runs
+    must be looked at again, or the improvement reaches new packages only
+    and every existing one stays silently empty — which is precisely the
+    failure this whole change exists to end, reintroduced by the fix for it.
+
+    A hand-maintained `READER_VERSION = 3` would work exactly as long as
+    everyone remembers to bump it. Hashing the reader's own source and the
+    constants it reads cannot be forgotten. A comment-only edit re-opens the
+    work list too; re-reading is cheap and correct, being silently stale is
+    neither.
+    """
+    import hashlib
+    import inspect
+    from dma_worker import workbook_parser as _wp
+    src = inspect.getsource(_wp._stated_overall_grain)
+    consts = repr((_wp._GRAIN_TABS["pillars"], _wp._GRAIN_ANCHORS["pillars"],
+                   _wp._GRAIN_SCORE_KEYS, _wp._OVERALL_LABELS))
+    return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
+
+
+def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
     """Fill `runs.composite` for a run whose workbook states it and whose
     ingest had nowhere to read it.
 
@@ -718,13 +753,31 @@ def backfill_composite(conn, token, groups) -> int:
     workbook is skipped, and no run is created, deleted or re-scored.
     """
     cur = conn.cursor()
+    reader = composite_reader_fingerprint()
+    # A run whose workbook THIS reader already found nothing in is not work.
+    # Without that exclusion the scheduled pass re-downloads every genuinely
+    # composite-less workbook every thirty minutes, for ever; with it the
+    # steady state is zero downloads and a reader change re-opens the lot.
+    # `forced` (the BACKFILL_COMPOSITE mode) ignores the record and re-reads
+    # everything, which is what a human reaching for the manual pass wants.
     cur.execute("""SELECT r.id, r.source_folder_id
                      FROM runs r
                     WHERE r.source_folder_id IS NOT NULL
                       AND r.composite IS NULL
-                    ORDER BY r.source_folder_id""")
+                      AND (%s OR NOT EXISTS (
+                            SELECT 1 FROM parser_observations o
+                             WHERE o.run_id = r.id
+                               AND o.kind = 'composite_absent'
+                               AND o.detail->>'reader' = %s))
+                    ORDER BY r.source_folder_id""", (forced, reader))
     todo = cur.fetchall()
-    print(f"backfill-composite: {len(todo)} run(s) hold no composite")
+    deferred = 0
+    if not forced and len(todo) > COMPOSITE_REPAIR_PER_FIRING:
+        deferred = len(todo) - COMPOSITE_REPAIR_PER_FIRING
+        todo = todo[:COMPOSITE_REPAIR_PER_FIRING]
+    print(f"backfill-composite: {len(todo)} run(s) hold no composite "
+          f"(reader {reader}"
+          + (f", {deferred} deferred to the next firing)" if deferred else ")"))
     filled = skipped = empty = failed = 0
     for run_id, folder in todo:
         parts = groups.get(folder) or {}
@@ -744,6 +797,18 @@ def backfill_composite(conn, token, groups) -> int:
             if value is None:
                 # A workbook that states no overall is a fact about the
                 # workbook. Absent beats a number nobody wrote down.
+                #
+                # RECORDED, so the next firing does not pay for the same
+                # download to learn the same thing. Stamped with the reader
+                # that concluded it: a better reader has a different
+                # fingerprint and the run returns to the work list on its own.
+                cur.execute(
+                    """INSERT INTO parser_observations
+                           (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'composite_absent',%s, now())""",
+                    (run_id, json.dumps({"reader": reader,
+                                         "reason": "workbook states no overall"})))
+                conn.commit()
                 empty += 1
                 print(f"backfill-composite: {folder}: workbook states none")
                 continue
@@ -756,6 +821,22 @@ def backfill_composite(conn, token, groups) -> int:
             conn.rollback()
             failed += 1
             print(f"backfill-composite FAILED: {folder}: {exc!r}")
+    # PUBLISH IT. `serving_directory` is materialised: a repaired
+    # `runs.composite` is invisible to every client until the view is
+    # rebuilt, and until 0059 the worker's role could not ask for that — so
+    # the repair committed a correct value that nothing could show. Once per
+    # pass, and only when something actually changed; a refresh costs a full
+    # rebuild and a pass that filled nothing has nothing to publish.
+    if filled:
+        try:
+            cur.execute("SELECT refresh_serving_directory()")
+            conn.commit()
+            print("backfill-composite: directory refreshed")
+        except Exception as exc:  # noqa: BLE001 — the values are committed
+            conn.rollback()
+            print(f"backfill-composite: filled {filled} but could NOT refresh "
+                  f"the directory ({exc!r}) — the figures are in `runs` and "
+                  f"will surface on the next refresh")
     print(f"backfill-composite: {filled} filled, {skipped} have no workbook "
           f"artefact, {empty} state none, {failed} failed")
     return 1 if failed else 0
@@ -1513,6 +1594,9 @@ def main() -> int:
             return rc
 
         if os.environ.get("BACKFILL_COMPOSITE"):
+            # The MANUAL pass: re-read every null-composite run, including the
+            # ones already recorded as stating none. A human reaching for this
+            # is asking for a full re-read, not the incremental one.
             rc = backfill_composite(conn, drive.metadata_token(), groups)
             conn.close()
             return rc
@@ -1536,6 +1620,34 @@ def main() -> int:
                 limit=int(os.environ.get("EVIDENCE_NAMESPACE_LIMIT", "0")))
             conn.close()
             return rc
+
+        # ── THE REPAIR RUNS ON THE SCHEDULE, NOT ON SOMEONE REMEMBERING ──
+        #
+        # `runs.composite` is written exactly once, at INSERT. Every path that
+        # could repair a NULL was behind an env var no schedule sets, so a run
+        # ingested under an older reader kept its null for ever: the package
+        # scan is idempotent, so an unchanged tree re-reads nothing.
+        #
+        # MEASURED 2026-09-04. goeasy Ltd. (`DMA-RES-GSY-20260830-0002`) served
+        # `overall: null` in the client directory beside its own four pillar
+        # bars — 2.09 / 2.19 / 2.01 / 2.16 — all of which resolved. Its
+        # workbook was last read by this Job at 04:14:58 on 2026-09-03; the
+        # reader that can find its composite merged at 06:08 the same day. The
+        # run was ingested under the older reader and nothing ever looked
+        # again. `backfill_composite` had three tests proving it works and not
+        # one proving it runs, and no worker firing has ever logged a line
+        # from it.
+        #
+        # So it runs here, incrementally: null composites only, minus the ones
+        # this reader has already found nothing in, capped per firing. The
+        # steady state is one query and no downloads. It is deliberately NOT
+        # fatal to the scan — a repair that cannot reach Drive must not stop
+        # this Job doing the thing it exists to do.
+        try:
+            backfill_composite(conn, drive.metadata_token(), groups,
+                               forced=False)
+        except Exception as exc:            # noqa: BLE001 — see above
+            print(f"composite repair skipped this firing: {exc!r}")
 
         _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
                          key)
