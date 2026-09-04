@@ -433,3 +433,46 @@ def test_the_scheduled_scan_adopts_before_it_repairs(monkeypatch, fakedb):
     _run_main(monkeypatch, fakedb, TREE)
 
     assert order == ["adopt", "repair"], f"ran in the wrong order: {order}"
+
+
+# ── the other half of "non-fatal" ────────────────────────────────────────
+
+def test_a_failed_repair_rolls_back_so_the_scan_still_runs(monkeypatch, fakedb,
+                                                           capsys):
+    """MEASURED IN PRODUCTION 2026-09-04T12:13:20Z.
+
+    The repairs were already wrapped in `except Exception: print(...)`, and
+    that was believed to be enough. It is not. A statement that fails leaves
+    PostgreSQL's transaction ABORTED, so every command after it dies `25P02
+    current transaction is aborted, commands ignored until end of transaction
+    block` — and the very next command is the scan's own
+    `SELECT artefact_id, checksum FROM import_files`. One wrong column name
+    in the evidence work list took the whole job down with a traceback while
+    printing the reassuring line "evidence repair skipped this firing".
+
+    Catching is half. Rolling back is the other half. `FakeDB` models the
+    aborted state (`failed_transaction`), so this fails without the rollback
+    rather than merely counting a call somebody else might have made."""
+
+    def boom(conn, *a, **kw):
+        # exactly what a bad column name does: the statement fails AND the
+        # transaction is left aborted behind it.
+        conn.failed_transaction = True
+        raise RuntimeError("column i.run_id does not exist")
+
+    monkeypatch.setattr(job_main, "backfill_evidence", boom)
+
+    ingested = []
+
+    def _spy(conn, token, folder, parts, remint=False):
+        ingested.append(folder)
+        return _Res(), []
+
+    rc = _run_main(monkeypatch, fakedb, TREE, ingest=_spy)
+
+    assert ingested == ["goeasy Ltd - DMA"], \
+        "the failed repair left the transaction aborted, so the scan after " \
+        "it died 25P02 and the job did nothing it exists to do"
+    assert rc == 0
+    assert fakedb.rollbacks, "nothing rolled the aborted transaction back"
+    assert "evidence repair skipped this firing" in capsys.readouterr().out
