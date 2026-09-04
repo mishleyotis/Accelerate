@@ -25,6 +25,12 @@ HERE = Path(__file__).resolve().parent
 HOOKS = HERE.parent / "hooks"
 HOOK = HOOKS / "autoapprove_builtins.py"
 REPO = HERE.parents[3]
+# The checkout root, as a string, for the command corpora below. These
+# cases used to hardcode /home/user/Accelerate: the allow-cases then
+# passed only on a checkout at that path and failed on every CI runner,
+# and the deny-cases passed vacuously there, refused for being outside
+# the tree rather than for the reason under test.
+R = str(REPO)
 
 sys.path.insert(0, str(HOOKS))
 import autoapprove_builtins as ab  # noqa: E402
@@ -90,8 +96,8 @@ SECRET_READ_BY_INDIRECTION = [
     "cat ~/.claude/settings.json",
     "cat $HOME/.claude/settings.json",
     'cat "$HOME"/.claude/settings.json',
-    "cat /home/user/Accelerate/.claude/settings.json",
-    "cat /home/user/Accelerate/.claude/*.json",
+    f"cat {R}/.claude/settings.json",
+    f"cat {R}/.claude/*.json",
 ]
 
 # Things that execute something the grammar did not read.
@@ -107,19 +113,19 @@ EXECUTION_SMUGGLED = [
     "python3 /tmp/evil/plugins/dma-insights/scripts/evil.py",
     "python3 ./scripts/../../tmp/evil.py",
     "sed -n 's/.*/git push/e' README.md",   # GNU sed executes on `e`
-    "sed 'w /home/user/Accelerate/apps/api/evil.py' README.md",
+    f"sed 'w {R}/apps/api/evil.py' README.md",
     "sed --in-place 's/x/y/' apps/api/main.py",
     "sed -Ei 's/x/y/' apps/api/main.py",
     "sed -f /tmp/script.sed README.md",
     "sort -o apps/api/main.py README.md",
     "sort --output=apps/api/main.py README.md",
     "tar -xf /tmp/x.tar --to-command='git push'",
-    "tar -xf /tmp/x.tar -C /home/user/Accelerate/apps",
+    f"tar -xf /tmp/x.tar -C {R}/apps",
     "gzip apps/api/main.py",
-    "gunzip /home/user/Accelerate/apps/x.gz",
-    "unzip /tmp/x.zip -d /home/user/Accelerate/apps",
-    "cp -t /home/user/Accelerate/apps /tmp/evil.py",
-    "cp --target-directory=/home/user/Accelerate/apps /tmp/evil.py",
+    f"gunzip {R}/apps/x.gz",
+    f"unzip /tmp/x.zip -d {R}/apps",
+    f"cp -t {R}/apps /tmp/evil.py",
+    f"cp --target-directory={R}/apps /tmp/evil.py",
     "command sed -i 's/x/y/' apps/api/main.py",
     "command git push origin main",
     "command -p git push origin main",
@@ -220,36 +226,36 @@ WRITES_OUTSIDE_THE_ROOTS = [
     "echo x > /root/.dma/pathtok",
     "echo x >> ~/.claude/settings.json",
     "echo x > $HOME/.claude/settings.json",
-    "echo x > /home/user/Accelerate/.claude/settings.json",
-    "echo x > /home/user/Accelerate/.claude/settings.local.json",
-    "echo x > /home/user/Accelerate/apps/api/main.py",
-    "echo x > /home/user/Accelerate/infra/deploy.sh",
-    "echo x > /home/user/Accelerate/migrations/env.py",
-    "echo x > /home/user/Accelerate/packages/shared/x.py",
+    f"echo x > {R}/.claude/settings.json",
+    f"echo x > {R}/.claude/settings.local.json",
+    f"echo x > {R}/apps/api/main.py",
+    f"echo x > {R}/infra/deploy.sh",
+    f"echo x > {R}/migrations/env.py",
+    f"echo x > {R}/packages/shared/x.py",
     "echo x > /etc/passwd",
     "echo x > /usr/bin/python3",
     "echo x > /tmp/../etc/x",
     "echo x > /root/.dma/../.claude/settings.json",
-    "echo x > /home/user/Accelerate/plugins/dma-insights/.mcp.json",
-    "echo x > /home/user/Accelerate/plugins/dma-insights/hooks/hooks.json",
-    "echo x > /home/user/Accelerate/plugins/dma-insights/../../.claude/settings.json",
+    f"echo x > {R}/plugins/dma-insights/.mcp.json",
+    f"echo x > {R}/plugins/dma-insights/hooks/hooks.json",
+    f"echo x > {R}/plugins/dma-insights/../../.claude/settings.json",
     "tee /root/.claude/settings.json < /tmp/x",
     "tee -a ~/.claude/settings.json < /tmp/x",
     "cp /tmp/x /root/.claude/settings.json",
-    "cp /tmp/x /home/user/Accelerate/apps/api/x.py",
+    f"cp /tmp/x {R}/apps/api/x.py",
     "mv /tmp/x /etc/x",
     "touch /etc/x",
     "mkdir -p /etc/x",
-    "sed -i 's/a/b/' /home/user/Accelerate/.claude/settings.json",
-    "sed -i 's/a/b/' /home/user/Accelerate/apps/api/main.py",
+    f"sed -i 's/a/b/' {R}/.claude/settings.json",
+    f"sed -i 's/a/b/' {R}/apps/api/main.py",
     "sed -e 's/a/b/' -i /root/.dma/sa.json",
     "rm -rf /",
     "rm -rf /root/.dma",
     "rm -rf /root/.dma/",
     "rm -rf /root/.dma/*",
     "rm /root/.dma/sa.json",
-    "rm -rf /home/user/Accelerate/apps",
-    "rm -rf /home/user/Accelerate/plugins/dma-insights/..",
+    f"rm -rf {R}/apps",
+    f"rm -rf {R}/plugins/dma-insights/..",
     "rm -rf /tmp/../etc",
     "python3 -c \"open('/etc/x', 'w').write('x')\"",
     "python3 -c \"import pathlib; pathlib.Path('/etc/x').write_text('x')\"",
@@ -285,12 +291,12 @@ def test_the_cowork_shell_is_held_to_the_same_grammar():
 
 EDIT_TARGETS_THAT_MUST_NOT_PASS = [
     # the guards that judge the next call, and the charter's read-only docs
-    "/home/user/Accelerate/plugins/dma-insights/scripts/hooks/deny_credential_ops.py",
-    "/home/user/Accelerate/plugins/dma-insights/scripts/hooks/deny_bulk_read.py",
-    "/home/user/Accelerate/plugins/dma-insights/scripts/hooks/autoapprove_builtins.py",
-    "/home/user/Accelerate/plugins/dma-insights/scripts/hooks/stage_advance.py",
-    "/home/user/Accelerate/docs/DMA Insights - Backend Schema.html",
-    "/home/user/Accelerate/docs/text/anything.txt",
+    f"{R}/plugins/dma-insights/scripts/hooks/deny_credential_ops.py",
+    f"{R}/plugins/dma-insights/scripts/hooks/deny_bulk_read.py",
+    f"{R}/plugins/dma-insights/scripts/hooks/autoapprove_builtins.py",
+    f"{R}/plugins/dma-insights/scripts/hooks/stage_advance.py",
+    f"{R}/docs/DMA Insights - Backend Schema.html",
+    f"{R}/docs/text/anything.txt",
     "/root/.dma/sa.json",
     "/root/.dma/pathtok",
     "/root/.dma/slack_token",
@@ -300,19 +306,19 @@ EDIT_TARGETS_THAT_MUST_NOT_PASS = [
     "~/.claude/settings.json",
     "~/.claude.json",
     "/root/.claude/settings.local.json",
-    "/home/user/Accelerate/.claude/settings.json",
-    "/home/user/Accelerate/plugins/dma-insights/../../.claude/settings.json",
-    "/home/user/Accelerate/plugins/dma-insights/.mcp.json",
-    "/home/user/Accelerate/plugins/dma-insights/hooks/hooks.json",
-    "/home/user/Accelerate/apps/api/dma_api/main.py",
-    "/home/user/Accelerate/infra/deploy.sh",
-    "/home/user/Accelerate/migrations/env.py",
-    "/home/user/Accelerate/packages/shared/x.py",
-    "/home/user/Accelerate/.github/workflows/ci.yml",
-    "/home/user/Accelerate/CLAUDE.md",
-    "/home/user/Accelerate/.env",
-    "/home/user/Accelerate/.env.production",
-    "/home/user/Accelerate/.git/config",
+    f"{R}/.claude/settings.json",
+    f"{R}/plugins/dma-insights/../../.claude/settings.json",
+    f"{R}/plugins/dma-insights/.mcp.json",
+    f"{R}/plugins/dma-insights/hooks/hooks.json",
+    f"{R}/apps/api/dma_api/main.py",
+    f"{R}/infra/deploy.sh",
+    f"{R}/migrations/env.py",
+    f"{R}/packages/shared/x.py",
+    f"{R}/.github/workflows/ci.yml",
+    f"{R}/CLAUDE.md",
+    f"{R}/.env",
+    f"{R}/.env.production",
+    f"{R}/.git/config",
     "/etc/x",
     "/usr/lib/python3/dist-packages/x.py",
     "relative/../../../../etc/x",
@@ -343,11 +349,11 @@ def test_a_symlink_out_of_a_write_root_is_followed_to_its_target(tmp_path):
 def test_a_relative_edit_path_resolves_against_the_event_cwd():
     """The harness sends cwd; a relative path under a writable cwd is fine,
     the same relative path under the deployables is not."""
-    assert decision("Write", cwd="/home/user/Accelerate/plugins/dma-insights",
+    assert decision("Write", cwd=f"{R}/plugins/dma-insights",
                     file_path="notes/x.md", content="x") == "allow"
-    assert decision("Write", cwd="/home/user/Accelerate/apps/api",
+    assert decision("Write", cwd=f"{R}/apps/api",
                     file_path="x.py", content="x") is None
-    assert decision("Write", cwd="/home/user/Accelerate/apps/api",
+    assert decision("Write", cwd=f"{R}/apps/api",
                     file_path="../../plugins/dma-insights/x.md",
                     content="x") == "allow"
 
@@ -356,7 +362,7 @@ def test_a_relative_edit_path_resolves_against_the_event_cwd():
 
 PIPELINE_SHAPES_THAT_MUST_STILL_PASS = [
     "python3 -m engine.cli counts",
-    "cd /home/user/Accelerate/plugins/dma-insights/skills/dma-research && "
+    f"cd {R}/plugins/dma-insights/skills/dma-research && "
     "python3 -m engine.cli start --run R --root /root/.dma/runs/R --entity 'X Bank' "
     "--entity-id x --preflight /root/.dma/pf.json --folder-root /root/.dma/clients --no-push",
     "W=$(python3 -m engine.cli workbook --run R --root /root/.dma/runs/R); "
@@ -367,9 +373,9 @@ PIPELINE_SHAPES_THAT_MUST_STILL_PASS = [
     "--score 2 --rationale \"[EVIDENCE] E-1 & E-2; ceiling 3\"",
     "python3 plugins/dma-insights/scripts/agent_run.py --agent research-conductor "
     "--prompt-file /root/.dma/probe/p.md --stream --log-dir /root/.dma/agent_logs",
-    "python3 /home/user/Accelerate/plugins/dma-insights/scripts/doctor.py --heal",
+    f"python3 {R}/plugins/dma-insights/scripts/doctor.py --heal",
     "python3 plugins/dma-insights/scripts/audit_builtin_approvals.py --strict | head -3",
-    "bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh",
+    f"bash {R}/plugins/dma-insights/scripts/bootstrap_session.sh",
     "python3 -m pytest plugins/dma-insights/scripts/tests -q -x",
     "python3 -c \"import json; print(json.dumps({'a': 1}))\"",
     # the shapes the hardening must NOT have broken
@@ -386,7 +392,7 @@ PIPELINE_SHAPES_THAT_MUST_STILL_PASS = [
     "python3 - <<'PY'\nimport json\nprint(json.dumps({'ok': True}))\nPY",
     "cat /root/.dma/probe/run/note.json",
     "cd /root/.dma/runs/R && cat 07_qa/*.json && ls ../R/07_qa",
-    "cd /home/user/Accelerate/plugins/dma-insights/skills/dma-research && "
+    f"cd {R}/plugins/dma-insights/skills/dma-research && "
     "python3 -m engine.cli counts && cat engine/*.py | wc -l",
     "cd /root/.dma/probe/run; rm note.json",
     "jq '.facts[].fact_id' /root/.dma/bundles/x/state.json",
@@ -406,7 +412,7 @@ PIPELINE_SHAPES_THAT_MUST_STILL_PASS = [
     "tail -f /root/.dma/agent_logs/x.jsonl 2>&1 | head -20",
     "timeout 600 python3 -m engine.watchdog revive --run R --root /root/.dma/runs/R",
     "claude -p --agent dma-insights:package-vetter --permission-mode dontAsk 'vet /root/.dma/x'",
-    "sed -n '1,40p' /home/user/Accelerate/plugins/dma-insights/docs/ROUTINES.md",
+    f"sed -n '1,40p' {R}/plugins/dma-insights/docs/ROUTINES.md",
     "find /root/.dma/runs -name '*.xlsx' -newer /root/.dma/runs/R/07_qa/x.json",
     "which python3 && python3 --version",
     "command -v claude",

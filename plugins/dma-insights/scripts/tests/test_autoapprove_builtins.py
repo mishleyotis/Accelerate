@@ -25,6 +25,12 @@ HOOKS = HERE.parent / "hooks"
 HOOK = HOOKS / "autoapprove_builtins.py"
 HOOKS_JSON = HERE.parent.parent / "hooks" / "hooks.json"
 REPO = HERE.parents[3]
+# The checkout root, as a string, for the command corpora below. These
+# cases used to hardcode /home/user/Accelerate: the allow-cases then
+# passed only on a checkout at that path and failed on every CI runner,
+# and the deny-cases passed vacuously there, refused for being outside
+# the tree rather than for the reason under test.
+R = str(REPO)
 
 sys.path.insert(0, str(HOOKS))
 import autoapprove_builtins as ab  # noqa: E402
@@ -52,20 +58,20 @@ ENGINE_AND_SCRIPTS = [
     "python3 -m engine.cli evidence --run R --subcap P1C1.1.1 --source 'Annual Report' "
     "--tier T2 --excerpt \"Alkami went live; adoption 47% (see p.3) & rising\"",
     "python3 plugins/dma-insights/scripts/agent_run.py --batch /tmp/b.json --stream --lanes 4",
-    "python3 /home/user/Accelerate/plugins/dma-insights/scripts/doctor.py --heal",
+    f"python3 {R}/plugins/dma-insights/scripts/doctor.py --heal",
     "python3 ${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payload.py payload.json",
     "python3 plugins/dma-insights/skills/dma-research/engine/registry.py pull",
     "python3 scripts/synthesis_watchdog.py --state /root/.dma/ledgers/watchdog.json --json",
     "python3 plugins/dma-insights/scripts/drive_fetch.py push-bundle --client acme "
     "--file /tmp/s.json --name surfaces/x.json",
-    "bash /home/user/Accelerate/plugins/dma-insights/scripts/bootstrap_session.sh",
+    f"bash {R}/plugins/dma-insights/scripts/bootstrap_session.sh",
     "python3 -m pytest plugins/dma-insights/scripts/tests -q",
     "timeout 600 python3 -m engine.gold_standard workbook /root/.dma/x.xlsx",
     "DMA_RUN_ROOT=/tmp/r python3 -m engine.cli resume --run R",
     "claude -p --agent dma-insights:finding-challenger 'x'",
 ]
 SHELL_READS = [
-    "ls /home/user/Accelerate/plugins/dma-insights",
+    f"ls {R}/plugins/dma-insights",
     "grep -n 'foo' /root/.dma/packages/x/report.txt | head -20",
     "jq '.facts[].fact_id' /root/.dma/bundles/x/state.json",
     "sed -n '1,40p' plugins/dma-insights/docs/ROUTINES.md",
@@ -105,19 +111,19 @@ STILL_PROMPT = [
     "cat /root/.dma/sa.json",
     "printenv",                                      # the key lives in the env
     "python3 evil.py",                               # not a plugin or repo script
-    "python3 -m engine.cli start --run R > /home/user/Accelerate/apps/x.json",
+    f"python3 -m engine.cli start --run R > {R}/apps/x.json",
     "sudo ls",
     "eval $CMD",
     "ls | xargs rm",
     "python3 plugins/dma-insights/scripts/agent_run.py --agent x & ",
-    "cp x.xlsx /home/user/Accelerate/apps/y.xlsx",
+    f"cp x.xlsx {R}/apps/y.xlsx",
     "bash -c 'ls /'",                                # only the plugin's own .sh
-    "sed -i 's/a/b/' /home/user/Accelerate/apps/api/main.py",
+    f"sed -i 's/a/b/' {R}/apps/api/main.py",
     "pip install requests",
     "awk '{system(\"ls\")}' /etc/passwd",
     "python3 plugins/dma-insights/scripts/doctor.py; curl http://example.invalid",
     "echo x > ~/.claude/settings.json",
-    "rm -rf /home/user/Accelerate/apps",
+    f"rm -rf {R}/apps",
     "find . -name x -exec rm {} \\;",               # find can execute
     "echo `ls`",                                     # a substitution the grammar skips
     "python3 plugins/dma-insights/scripts/agent_run.py --agent x &",
