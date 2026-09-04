@@ -490,6 +490,31 @@ research side had nothing, so a turn that died mid-category left no artefact
 saying so (AUD-0063). `UNGATED` exists because running out of cards is not
 closure.
 
+**The machine continues past research (2026-09-03).** `READY_FOR_HANDOFF`
+used to be a resting state that lasted through scoring, the reports and
+the package. It now means only "research closed, assessment not open", and
+the watchdog computes the rest from the same substrate the gates read:
+
+| state | computed from | owner it names | closes when |
+|---|---|---|---|
+| `SCORING_OPEN` | stage `assessment`, column D has blanks (per pillar) | `scoring-p<N>-producer`, in parallel lanes | `engine.assessment state` scored == subcaps |
+| `CRITIC_PENDING` | every row scored, `SCORING_CRITIC` missing or FAIL | `scoring-critic` | a PASS row per pillar in `Gate_Log` |
+| `SCORING_GATE_OPEN` | critic in, `SCORING` gate never run or FAIL | `research-conductor` (rollup, gate, checkpoint) | `engine.assessment gate` PASS, then `assemble checkpoint --stage SCORING_PASS --push` |
+| `REPORT_PRECONDITIONS_OPEN` | gate PASS, `engine.narrative preconditions --report assessment` lists a failure (the stage's Solution_Catalogue / Platform_Peer_Adoption tabs empty and undeclared) | `research-conductor` (`assessment solution`, `peer-adoption`, `completeness declare`) | the preconditions list is empty — found by the hook walk on 2026-09-04, when a run in this shape sent two report producers into `narrative write`'s refusal |
+| `REPORTS_OPEN` | gate PASS, preconditions hold, `engine.narrative state` not READY | `report-*-producer` for OPEN/SHORT/REVISE sections, `report-validator` for UNREVIEWED | both reports READY |
+| `PACKAGE_UNSHIPPED` | both READY, `run_manifest.json` not COMPLETE | `research-conductor` (`assemble package --push`) | manifest `status: COMPLETE` |
+| `SHIPPED` | manifest COMPLETE | nobody here — the package scan and the synthesis lanes | — |
+
+Every row carries `criterion` (the sentence above, as data) and a `resume`
+plan with `agent`, `parallel` and `prompt`. Three hooks put the answer where
+a session reads it — `hooks/stage_advance.py`, registered on
+`PostToolUse(Agent|Task)`, `PostToolUse(Bash)` for a headless dispatch or an
+engine gate, and `Stop`: after an agent returns it announces the state, the
+criterion and the next agent; on Stop it refuses ONCE per state to end a
+session whose run an agent could still advance, then lets it stop (the same
+state twice needs a reader, not a third attempt). The hourly watchdog
+Routine's `--revive` dispatches the same plans when no session is alive.
+
 Two later defects, both closed:
 
 * **It could not see a new DMA.** `sweep` listed `$DMA_RUN_ROOT`, a

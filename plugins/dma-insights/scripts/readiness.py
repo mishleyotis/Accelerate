@@ -257,16 +257,25 @@ def check_schema():
 
 
 def check_approvals():
+    """Both halves of the prompt surface. The MCP half was measured green on
+    2026-09-03 while the owner was still approving Bash, Write and Edit —
+    a lane that reads only one half reports the other as ready."""
     code, out = _run([sys.executable,
                       f"{PLUGIN}/scripts/audit_autoapprove.py", "--strict"])
+    code2, out2 = _run([sys.executable,
+                        f"{PLUGIN}/scripts/audit_builtin_approvals.py",
+                        "--strict"])
     return lane("approvals",
-                "every MCP tool a session attaches is either auto-approved or "
-                "refused on the record — nothing prompts by omission",
-                code, out,
-                "audit_autoapprove.py names each UNCLASSIFIED tool; rule on "
-                "it in SERVER_SURFACES, read or withheld. A scheduled firing "
-                "has nobody to answer a prompt, so a tool nobody ruled on is "
-                "a firing that stops")
+                "every MCP tool a session attaches is auto-approved or refused "
+                "on the record, AND every command the agents and Routines are "
+                "told to run passes the built-in hook — nothing prompts by "
+                "omission",
+                code or code2, out + "\n" + out2,
+                "audit_autoapprove.py names each UNCLASSIFIED MCP tool; rule on "
+                "it in SERVER_SURFACES. audit_builtin_approvals.py names each "
+                "command that would PROMPT; teach hooks/autoapprove_builtins.py "
+                "its shape, or fix the manifest that asks for it. A scheduled "
+                "firing has nobody to answer a prompt")
 
 
 def check_install():

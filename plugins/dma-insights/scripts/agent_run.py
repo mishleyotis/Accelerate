@@ -173,6 +173,13 @@ ALLOWED = ",".join([
     "Bash", "Read", "Glob", "Grep",         # the four local checkers
     "Write", "Edit",                        # denied per-agent where wrong
     "TodoWrite", "Skill", "WebSearch", "WebFetch",
+    # The conductor, the surface-producer and the rectifier fan out through
+    # the Agent tool. A headless child that is one of them needs the tool
+    # pre-approved or dontAsk denies every dispatch it tries (2026-09-03).
+    # AskUserQuestion is deliberately absent: nobody can answer it in a
+    # child, and its denial is what routes the conductor to
+    # `engine.preflight autobind` rather than a hang.
+    "Agent",
 ])
 
 #: Serialise nothing but the writing. Lanes run concurrently; their output
@@ -215,8 +222,16 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
            "--add-dir", "/root/.dma",
            f"--allowedTools={allowed}", prompt]
     try:
+        # DMA_STAGE_GUARD=off in the CHILD. The Stop hook holds a session
+        # open while a run has a stage an agent can advance — correct for
+        # the driving session, wrong for a lane: a scorer that finishes
+        # first sees its three siblings' rows still unscored, is told to
+        # dispatch them, and (it now carries `Agent`) re-dispatches scorers
+        # already running, writing column D twice. The guard belongs to the
+        # conductor, which is the only actor that knows the fan-out.
         r = subprocess.run(cmd, cwd=repo_root, timeout=timeout,
-                           capture_output=True, text=True, env={**os.environ})
+                           capture_output=True, text=True,
+                           env={**os.environ, "DMA_STAGE_GUARD": "off"})
     except subprocess.TimeoutExpired:
         return {"agent": name, "code": 124, "stdout": "", "stderr": "",
                 "note": f"DISPATCH TIMEOUT: {name} exceeded {timeout}s — "
@@ -356,7 +371,9 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
         proc = subprocess.Popen(cmd, cwd=repo_root, text=True, bufsize=1,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                env={**os.environ})
+                                # same reason as `dispatch`: the stage guard
+                                # is the conductor's, never a lane's
+                                env={**os.environ, "DMA_STAGE_GUARD": "off"})
     except FileNotFoundError:
         st.update(state="failed", doing="claude CLI not on PATH")
         flush_status()

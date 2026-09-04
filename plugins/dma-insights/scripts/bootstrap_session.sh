@@ -474,19 +474,34 @@ out = []
 # names, so the belt names them that way; the claude.ai interactive attach
 # (which uses hyphens) is covered by the hook's own read-time canonicalisation
 # and the project-scope .claude/settings.json, not by this user-scope belt.
+# THREE SPELLINGS OF ONE SERVER (permission-rule reference, measured 2026-09-04):
+# a connector a cloud host or the desktop app DELIVERS attaches as
+# `mcp__<Server>__…`; one Claude Code FETCHES from claude.ai itself attaches
+# as `mcp__claude_ai_<Server>__…`. A grant written for the first spelling
+# matches nothing in a session that got the second, and the owner's Tavily
+# and Exa prompts survived a grant that looked complete. Both spellings are
+# written for every server; the hook canonicalises the prefix away too.
+def spellings(server):
+    # The plugin's own connector is installed BY the plugin, never fetched
+    # from claude.ai, so it has exactly one spelling.
+    if server.startswith("plugin_"):
+        return (server,)
+    return (server, f"claude_ai_{server}")
+
 for server in sorted(seen | set(aac.SERVER_SURFACES)):
-    if server in aac.SERVER_SURFACES:
-        # A CONDITIONAL tool must never reach this list. A settings grant is
-        # honoured without the hook being consulted, so granting one here
-        # would approve it everywhere and leave its argument check running
-        # on nothing. Belt to the hook's braces: conditional tools are not
-        # in any `read` set today, and this makes that a rule rather than a
-        # coincidence somebody could undo.
-        out += [f"mcp__{server}__{t}"
-                for t in sorted(aac.SERVER_SURFACES[server]["read"])
-                if f"mcp__{server}__{t}" not in aac.CONDITIONAL_TOOLS]
-    else:
-        out.append(f"mcp__{server}__*")
+    for spelled in spellings(server):
+        if server in aac.SERVER_SURFACES:
+            # A CONDITIONAL tool must never reach this list. A settings grant
+            # is honoured without the hook being consulted, so granting one
+            # here would approve it everywhere and leave its argument check
+            # running on nothing. Belt to the hook's braces: conditional
+            # tools are not in any `read` set today, and this makes that a
+            # rule rather than a coincidence somebody could undo.
+            out += [f"mcp__{spelled}__{t}"
+                    for t in sorted(aac.SERVER_SURFACES[server]["read"])
+                    if f"mcp__{server}__{t}" not in aac.CONDITIONAL_TOOLS]
+        else:
+            out.append(f"mcp__{spelled}__*")
 print("\n".join(out))
 PY
 )"
@@ -517,6 +532,30 @@ wanted = [w for w in wanted if "*" not in w[: w.rindex("__") + 2]]
 # Appended AFTER the mcp-glob filter above, which assumes every entry contains
 # `__`.
 for _builtin in ("WebSearch", "WebFetch"):
+    if _builtin not in wanted:
+        wanted.append(_builtin)
+# THE PIPELINE'S OWN COMMANDS AND FILES (measured 2026-09-03, the headless
+# audit, after the fifth recurring-prompt report). With every MCP tool ruled
+# on, the prompts that remained were Bash, Write and Edit: every agent writes
+# through `python3 -m engine.…`, every producer writes section JSON to disk,
+# and neither had a decision anywhere. `hooks/autoapprove_builtins.py` is the
+# decision of record (a grammar: the engine, the plugin's and repo's scripts,
+# read-only shell verbs, writes only into a run root); these prefix rules are
+# the belt for a session whose hooks bound from a stale install. They are
+# deliberately NARROWER than the hook — a settings grant is honoured without
+# the guards being consulted, so nothing here can reach a push, a credential
+# or the deployables: no bare `Bash`, no `Write` without a path.
+for _builtin in (
+    "Bash(python3 -m engine.*)",                 # the research engine
+    "Bash(python3 plugins/dma-insights/*)",      # plugin scripts, both spellings
+    "Bash(python3 /home/user/Accelerate/plugins/dma-insights/*)",
+    "Bash(python3 -m pytest *)",
+    "Bash(bash plugins/dma-insights/scripts/*)",
+    "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
+    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
+    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
+    "Write(//tmp/**)", "Edit(//tmp/**)",
+):
     if _builtin not in wanted:
         wanted.append(_builtin)
 p = pathlib.Path(os.environ["CLAUDE_SETTINGS"])
