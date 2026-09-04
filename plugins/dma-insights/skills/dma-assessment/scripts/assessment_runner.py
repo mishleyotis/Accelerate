@@ -26,9 +26,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment
+# THE REFUSAL MUST NOT DEPEND ON THE ENVIRONMENT. Measured 2026-09-04 on a
+# CI runner without pandas: this module died at `import pandas` before
+# `main()` could print its refusal, so the retirement read as a crash. A
+# retired writer's whole remaining job is to say why it will not run, and it
+# has to be able to say it anywhere. The legacy body below is unreachable, so
+# a missing third-party import costs nothing.
+try:
+    import pandas as pd
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+except ImportError:                                  # pragma: no cover
+    pd = Workbook = Font = PatternFill = Alignment = None
 
 # Configure logging
 logging.basicConfig(

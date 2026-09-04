@@ -74,6 +74,23 @@ def test_an_engine_command_is_allowed():
         assert _bash(cmd) == {}, cmd
 
 
+def test_reading_a_retired_writer_is_allowed():
+    """Measured 2026-09-04: the rule matched the bare filename, so `sed -n`
+    and `grep` on the retired script were denied — the guard blocked reading
+    the very file whose refusal it enforces. Only RUNNING one is denied."""
+    for cmd in ("sed -n '1,40p' plugins/dma-insights/skills/dma-assessment/scripts/assessment_runner.py",
+                "grep -n 'import' skills/dma-research/scripts/populate_workbook.py",
+                "cat skills/dma-research/scripts/validate_workbook.py",
+                "git log --oneline -- skills/dma-research/scripts/populate_workbook.py"):
+        assert _bash(cmd) == {}, cmd
+    for cmd in ("python3 skills/dma-research/scripts/validate_workbook.py wb.xlsx",
+                "python plugins/dma-insights/skills/dma-assessment/scripts/assessment_runner.py --corpus c",
+                "./skills/dma-research/scripts/populate_workbook.py a b"):
+        out = _bash(cmd)
+        assert out["hookSpecificOutput"]["permissionDecision"] == "deny", cmd
+        assert "retired writer" in out["hookSpecificOutput"]["permissionDecisionReason"]
+
+
 def test_a_scratch_file_that_is_not_a_deliverable_is_allowed():
     assert _run(json.dumps({"tool_name": "Write",
                             "tool_input": {"file_path": "/tmp/notes.md", "content": "x"}})) == {}

@@ -11,8 +11,9 @@ interception the plugin already uses for credentials and bulk reads, pointed
 at the deliverables.
 
 WHAT IT DENIES. On Bash: an inline/one-off Python that constructs a workbook
-or document and saves it to a deliverable-shaped path, or that invokes a
-retired writer (`populate_workbook.py`, `assessment_runner.py`). On
+or document and saves it to a deliverable-shaped path, or that RUNS a
+retired writer (`populate_workbook.py`, `validate_workbook.py`,
+`assessment_runner.py` — running one, not reading it). On
 Write/Edit/MultiEdit/NotebookEdit: a target path ending in .xlsx/.xlsm/.docx.
 
 WHAT IT ALLOWS, deliberately. Anything that runs the engine (`-m engine.` or
@@ -48,13 +49,22 @@ ALLOW = re.compile(
 CONSTRUCT = re.compile(
     r"(openpyxl\.Workbook\s*\(|\bWorkbook\s*\(\s*\)|load_workbook\s*\(.*\)\s*\.save\s*\(|"
     r"\bdocx\.Document\s*\(|\bDocument\s*\(\s*\)|\.save\s*\(\s*[\"'][^\"']*\.(xlsx|xlsm|docx)[\"']|"
-    r"populate_workbook\.py|assessment_runner\.py|\bDocument\s*\(\s*[\"'][^\"']*\.docx[\"']\s*\))")
+    r"\bDocument\s*\(\s*[\"'][^\"']*\.docx[\"']\s*\))")
 
 #: The deliverable shapes, so a scratch spreadsheet in /tmp is not a denial.
 DELIVERABLE = re.compile(
     r"(DMA_Scoring_Workbook|Scoring_Workbook|DMA_Assessment_Report|Assessment_Report|"
     r"Client_Profile_Research|Research_Report|Technographic_Scan|09_deliverables|"
     r"\s-\sDMA[/\"']|dma_output|DMA_RUN_ROOT|\.xlsx|\.docx)", re.I)
+
+#: RUNNING a retired writer — an interpreter (or a shebang path) immediately
+#: before it. Measured 2026-09-04: matching the bare filename denied `sed -n`
+#: and `grep` on the file too, so the guard blocked reading the very script
+#: whose refusal it exists to enforce. A guard that stops a reader has stopped
+#: being a guard.
+RETIRED = re.compile(
+    r"(python3?|py|uv\s+run|\./|bash|sh)\s*\S*"
+    r"(populate_workbook|validate_workbook|assessment_runner)\.py")
 
 FILE_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 FILE_EXT = re.compile(r"\.(xlsx|xlsm|docx)$", re.I)
@@ -80,7 +90,7 @@ def decide(payload: dict) -> str | None:
         return None
     if CONSTRUCT.search(cmd) and DELIVERABLE.search(cmd):
         return REASON.format(what="a workbook or document")
-    if re.search(r"populate_workbook\.py|assessment_runner\.py", cmd):
+    if RETIRED.search(cmd):
         return REASON.format(what="through a retired writer")
     return None
 

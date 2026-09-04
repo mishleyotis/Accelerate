@@ -19,11 +19,13 @@ import os
 import re
 import sys
 
+# The refusal must not depend on the environment (2026-09-04): a retired
+# writer that dies on a missing import reads as a crash rather than as the
+# refusal it is. The legacy body below is unreachable, so None is enough.
 try:
     import openpyxl
-except ImportError:
-    print("ERROR: openpyxl not installed. Run: pip install openpyxl --break-system-packages")
-    sys.exit(1)
+except ImportError:                                  # pragma: no cover
+    openpyxl = None
 
 
 # Default quality thresholds

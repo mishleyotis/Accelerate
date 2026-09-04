@@ -835,6 +835,25 @@ class Pipeline:
 
 # ── env: every hard dependency, measured ─────────────────────────────────
 
+def _readable(path: Path) -> bool:
+    """`Path.is_file()` swallows ENOENT and RE-RAISES everything else — EACCES
+    included. Measured 2026-09-04: on a CI runner `/root/.dma/sa.json` is
+    unreadable rather than absent, and `env` raised PermissionError instead of
+    reporting a missing identity rung. An environment check that crashes on the
+    environment it is checking has answered nothing."""
+    try:
+        return Path(path).is_file()
+    except OSError:
+        return False
+
+
+def _is_dir(path) -> bool:
+    try:
+        return Path(path).is_dir()
+    except OSError:
+        return False
+
+
 def env_check() -> dict:
     checks = []
 
@@ -848,18 +867,21 @@ def env_check() -> dict:
         except ImportError:
             ck(f"python:{mod}", False, f"pip install {'python-docx' if mod == 'docx' else mod}")
     ck("claude CLI", shutil.which("claude") is not None,
-       "on PATH" if shutil.which("claude") else "not on PATH — lanes cannot be dispatched")
+       "on PATH" if shutil.which("claude") else
+       "not on PATH: real lanes cannot be dispatched (--dispatcher stub can)")
     for name, p in (("agent_run.py", AGENT_RUN), ("mcp_raw.py", MCP_RAW),
                     ("ship_page.py", SHIP_PAGE),
                     ("drive_fetch.py", PLUGIN / "scripts" / "drive_fetch.py")):
-        ck(name, p.is_file(), str(p))
-    ident = any([shutil.which("gcloud"), Path("/root/.dma/sa.json").is_file(),
+        ck(name, _readable(p), str(p))
+    ident = any([shutil.which("gcloud"), _readable(Path("/root/.dma/sa.json")),
                  os.environ.get("DMA_ROUTINE_SA_KEY_B64")])
     ck("connector identity", ident,
        "gcloud / /root/.dma/sa.json / DMA_ROUTINE_SA_KEY_B64" if ident else
-       "no identity rung: connector reads and ship_page will fail")
+       "no identity rung readable here: the connector stages (INGEST_A, "
+       "PAGES_*, PROMOTE) will fail; PRELIM..PACKAGE and --dispatcher stub "
+       "do not need one")
     tk = os.environ.get("DMA_TOOLKITS_DIR")
-    ck("toolkits", bool(tk and Path(tk).is_dir()),
+    ck("toolkits", bool(tk and _is_dir(tk)),
        tk or "DMA_TOOLKITS_DIR unset — kg build falls back to the 71 category questions and says so")
     from . import template as T
     g = T.zip_guard()
@@ -870,7 +892,11 @@ def env_check() -> dict:
         ck("install", not stale, stale[:200] if stale else "not judged stale")
     except Exception as e:                           # noqa: BLE001
         ck("install", True, f"not judged: {str(e)[:100]}")
-    hard = [c for c in checks if not c["ok"] and c["check"] not in ("toolkits",)]
+    # A hard failure is one that stops a run HERE. `toolkits` is a stated
+    # fallback, and an identity rung is only needed for the connector stages —
+    # a checkout with neither still plans, tests and drives the stub.
+    hard = [c for c in checks if not c["ok"]
+            and c["check"] not in ("toolkits", "connector identity", "claude CLI")]
     return {"ok": not hard, "checks": checks,
             "hard_failures": [c["check"] for c in hard]}
 

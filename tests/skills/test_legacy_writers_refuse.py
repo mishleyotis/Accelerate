@@ -68,6 +68,37 @@ def test_the_audit_script_flags_a_skill_that_names_a_retired_writer(tmp_path):
     assert [h["line"] for h in hits] == [1]
 
 
+def test_a_retired_writer_refuses_without_its_third_party_imports(tmp_path):
+    """Measured 2026-09-04 on a CI runner with no pandas: assessment_runner
+    died at `import pandas` before `main()` could refuse, so the retirement
+    read as a crash. A retired writer's whole remaining job is to say why it
+    will not run, and it must be able to say it anywhere."""
+    import re
+    for rel in ("skills/dma-assessment/scripts/assessment_runner.py",
+                "skills/dma-research/scripts/populate_workbook.py",
+                "skills/dma-research/scripts/validate_workbook.py"):
+        src = (PLUGIN / rel).read_text()
+        top = src[:src.index("def main(")] if "def main(" in src else src
+        bare = [l for l in top.splitlines()
+                if re.match(r"^(import|from)\s+(pandas|openpyxl|docx)\b", l)]
+        assert not bare, f"{rel}: {bare} is imported outside a try/except"
+        # and it refuses under an interpreter that cannot import them
+        r = subprocess.run(
+            [sys.executable, "-c",
+             "import sys, builtins; _r = builtins.__import__\n"
+             "def block(name, *a, **k):\n"
+             "    if name.split('.')[0] in ('pandas', 'openpyxl', 'docx'):\n"
+             "        raise ImportError(name)\n"
+             "    return _r(name, *a, **k)\n"
+             "builtins.__import__ = block\n"
+             f"sys.argv = ['x']\n"
+             f"exec(compile(open({str(PLUGIN / rel)!r}).read(), 'x', 'exec'), "
+             "{'__name__': 'notmain'})\n"
+             "import runpy\n"],
+            capture_output=True, text=True, timeout=60)
+        assert r.returncode == 0, f"{rel} cannot even be imported without them: {r.stderr[-300:]}"
+
+
 def test_no_skill_tells_an_agent_to_run_a_retired_writer():
     """The prose half: a SKILL.md that names a retired writer as a step is
     an instruction to go around the pipeline."""

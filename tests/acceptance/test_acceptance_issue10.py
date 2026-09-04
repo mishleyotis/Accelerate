@@ -141,8 +141,32 @@ def test_issue10_env_check_names_every_hard_dependency():
         assert must in names, must
     for c in out["checks"]:
         assert c["detail"], c["check"]               # every row says what it measured
-    # toolkits absent is a stated fallback, never a hard failure
-    assert "toolkits" not in out["hard_failures"]
+    # toolkits absent is a stated fallback, never a hard failure; nor are the
+    # two rows a checkout legitimately lacks — a stub run needs neither
+    for soft in ("toolkits", "connector identity", "claude CLI"):
+        assert soft not in out["hard_failures"], soft
+
+
+def test_issue10_env_does_not_crash_on_a_path_it_cannot_read(monkeypatch):
+    """Measured 2026-09-04 on a CI runner: `/root/.dma/sa.json` is unreadable
+    rather than absent, `Path.is_file()` re-raises EACCES, and `env` died with
+    PermissionError — so the check that reports the environment crashed on the
+    environment. Every rung is probed through a guard now."""
+    def boom(self, *a, **k):
+        raise PermissionError(13, "Permission denied", str(self))
+    import shutil
+    monkeypatch.setattr(Path, "stat", boom)
+    monkeypatch.setattr(shutil, "which", lambda _n: None)
+    monkeypatch.delenv("DMA_ROUTINE_SA_KEY_B64", raising=False)
+    assert P._readable(Path("/root/.dma/sa.json")) is False
+    assert P._is_dir(Path("/root/.dma")) is False
+    out = P.env_check()                       # must ANSWER, not raise
+    assert {c["check"] for c in out["checks"]} >= {"connector identity", "agent_run.py"}
+    ident = next(c for c in out["checks"] if c["check"] == "connector identity")
+    assert ident["ok"] is False and "stub" in ident["detail"]
+    # and a container with no identity and no CLI still is not "hard failed":
+    # PRELIM..PACKAGE and the stub dispatcher need neither
+    assert out["hard_failures"] == [] or "connector identity" not in out["hard_failures"]
 
 
 def test_issue10_the_zip_and_the_checkout_carry_the_same_version():
