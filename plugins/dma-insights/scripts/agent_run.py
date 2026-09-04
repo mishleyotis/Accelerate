@@ -173,6 +173,13 @@ ALLOWED = ",".join([
     "Bash", "Read", "Glob", "Grep",         # the four local checkers
     "Write", "Edit",                        # denied per-agent where wrong
     "TodoWrite", "Skill", "WebSearch", "WebFetch",
+    # The conductor, the surface-producer and the rectifier fan out through
+    # the Agent tool. A headless child that is one of them needs the tool
+    # pre-approved or dontAsk denies every dispatch it tries (2026-09-03).
+    # AskUserQuestion is deliberately absent: nobody can answer it in a
+    # child, and its denial is what routes the conductor to
+    # `engine.preflight autobind` rather than a hang.
+    "Agent",
 ])
 
 #: Serialise nothing but the writing. Lanes run concurrently; their output

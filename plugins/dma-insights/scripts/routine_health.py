@@ -116,16 +116,23 @@ def assess(row: dict, now: datetime | None = None) -> dict:
     name = row.get("name") or "?"
     last = row.get("last_run") or {}
     status = last.get("status") or ""
+    # `enabled` is ABSENT from the records the API returned on 2026-09-03
+    # (six Routines, none carrying the key). Read as `bool(None)`, every one
+    # of them was reported DISABLED — "a person paused it" — which is the
+    # wrong diagnosis for a field that was never sent. A missing key is
+    # unknown, not False; the schedule itself (next_run_at against now) is
+    # what says whether the Routine is firing.
+    enabled = row.get("enabled")
     out = {
         "name": name, "id": row.get("id"),
         "cron": row.get("cron_expression") or row.get("run_once_at"),
-        "enabled": bool(row.get("enabled")),
+        "enabled": None if enabled is None else bool(enabled),
         "last_status": status or None,
         "last_fired_at": last.get("fired_at"),
         "session_id": last.get("session_id"),
         "next_run_at": row.get("next_run_at"),
     }
-    if not out["enabled"]:
+    if enabled is not None and not enabled:
         reason = (row.get("ended_reason") or row.get("suspension_reason")
                   or "")
         out["verdict"] = "DISABLED"
@@ -139,14 +146,40 @@ def assess(row: dict, now: datetime | None = None) -> dict:
         out["verdict"] = "NO_RUN"
         out["detail"] = NO_RUN
         return out
-    if status == HEALTHY:
-        out["verdict"] = "HEALTHY"
-        out["detail"] = f"last run SUCCEEDED at {last.get('fired_at')}"
-        return out
 
     fired = _parse(last.get("fired_at"))
     if fired:
         out["stale_hours"] = round((now - fired).total_seconds() / 3600, 1)
+
+    # THE SCHEDULE ITSELF, before the last run's status. Measured 2026-09-03:
+    # all six Routines read `last_run SUCCEEDED` and `next_run_at` three to
+    # four DAYS in the past — nothing had fired since 2026-08-30, and a check
+    # that trusted the last status alone would have called every one of them
+    # HEALTHY. A Routine whose next scheduled firing is more than two of its
+    # own intervals overdue is not firing, whatever its last run said; the
+    # measured cause was the account's usage limit, which pauses every
+    # Routine and writes no reason into the record.
+    nxt = _parse(row.get("next_run_at"))
+    if nxt and fired and nxt > fired and status != "ROUTINE_RUN_STATUS_PENDING":
+        interval_h = (nxt - fired).total_seconds() / 3600
+        overdue_h = (now - nxt).total_seconds() / 3600
+        if overdue_h > PENDING_INTERVALS * max(interval_h, 1.0):
+            out["verdict"] = "OVERDUE"
+            out["overdue_hours"] = round(overdue_h, 1)
+            out["detail"] = (
+                f"next_run_at {row.get('next_run_at')} is {overdue_h:.0f}h in "
+                f"the past against a {interval_h:.1f}h interval — the schedule "
+                f"has not fired, whatever the last run said. The measured "
+                f"cause is an account-level pause (a usage or spend limit "
+                f"suspends every Routine and records no reason on it); check "
+                f"claude.ai/settings/usage and the Routines UI, then the "
+                f"trigger's own `enabled` state.")
+            return out
+
+    if status == HEALTHY:
+        out["verdict"] = "HEALTHY"
+        out["detail"] = f"last run SUCCEEDED at {last.get('fired_at')}"
+        return out
 
     if status == "ROUTINE_RUN_STATUS_PENDING":
         # A firing IN FLIGHT is the ordinary state of an hourly Routine most

@@ -42,6 +42,16 @@
         "matcher": "Bash"
       },
       {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_builtins.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: autoapprove_builtins.py is MISSING from the installed plugin, so Bash, Write and Edit are NOT auto-approved and a headless session prompts on every engine command. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "mcp__.*",
         "hooks": [
           {
@@ -110,6 +120,37 @@
             "type": "command",
             "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/artifact_cadence.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: artifact_cadence.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/stage_advance.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: stage_advance.py is MISSING from the installed plugin, so the run stage machine (research -> scoring -> reports -> package) is NOT announced after a dispatched agent returns. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 90
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/stage_advance.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: stage_advance.py is MISSING from the installed plugin, so a headless dispatch or an engine gate finishing does NOT announce the next stage. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 90
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/stage_advance.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: stage_advance.py is MISSING from the installed plugin, so a session may stop with a run stage still runnable by an agent. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. Stopping is ALLOWED on purpose: a Stop hook must never trap a session.\"}'; exit 0; fi",
+            "timeout": 90
           }
         ]
       }

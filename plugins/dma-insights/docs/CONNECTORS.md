@@ -40,6 +40,32 @@ Two mechanisms decide, and they must agree.
 The rule is one line: **a read is auto-approved; a write, a publication, a
 deletion, a spend, or code somebody else authored still asks.**
 
+**The MCP surface is only half of it (measured 2026-09-03).** With every
+connector tool ruled on, the owner was still approving tool calls — because
+the prompts were `Bash`, `Write` and `Edit`. Every agent writes through
+`python3 -m engine.…`, every producer writes section JSON to disk, and
+neither tool had a decision anywhere. `hooks/autoapprove_builtins.py` rules
+on them by GRAMMAR rather than by list: a command is approved when every
+segment is the research engine, a plugin or repo script, pytest, a local git
+operation or a read-only shell verb, and every redirection lands inside a
+run root; a `Write`/`Edit` is approved when its target is under a run root
+or the plugin's own writer scope. A push, a credential path, `printenv`, a
+pipe into an interpreter, anything the grammar cannot parse, and every write
+into the deployables or a settings file draw NO decision — they fall through
+exactly as before. The two deny guards are asked first, so the hook never
+holds the opposite opinion to a refusal. `bootstrap_session.sh` writes the
+same shapes as narrower `Bash(prefix *)` / `Edit(path/**)` grants in user
+settings, the belt for a session whose hooks bound from a stale install.
+
+```
+python3 plugins/dma-insights/scripts/audit_builtin_approvals.py --strict
+```
+
+harvests every command the agent manifests, skill files and Routine prompts
+tell a session to run, feeds each to the real hook, and fails on any that
+would prompt. Measured 2026-09-03: 124 commands, 124 approved, 0 prompting.
+`readiness.py`'s `approvals` lane runs both audits.
+
 - Servers with a **stable segment** (Slack, Salesforce, Google Admin, Auctor,
   GitHub, Google Drive, Quartr, Indeed, Grace) are split tool by tool in
   `SERVER_SURFACES` — `read` is approved, `withheld` is refused **on the

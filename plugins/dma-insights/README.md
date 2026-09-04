@@ -60,6 +60,18 @@ hooks/     precheck_submit (refuses a doomed submit before the network)
                           SubagentStart, which is the channel the live
                           Routine actually dispatches producers through)
            deny_bulk_read (the never-cat rule, enforced rather than written)
+           autoapprove_connector (every MCP read approved or refused on the
+                          record; the connector by prefix, enrichment by
+                          suffix, stable servers by exact name)
+           autoapprove_builtins (Bash, Write, Edit — the pipeline's own
+                          engine commands, scripts and run-root writes, by
+                          grammar; the guards are asked first and a push, a
+                          credential or the deployables never pass)
+           stage_advance (the research→scoring→reports→package machine, at
+                          the three moments a session can act: after an
+                          agent returns, after a headless dispatch or gate,
+                          and on Stop — names the next agent and the
+                          criterion that closes the stage)
 commands/  /dma-insights:doctor          is this install able to do the work?
            /dma-insights:setup-routines  reconcile the scheduled routines
 scripts/   dma-deps · mcp_auth_headers.sh · doctor.py · setup_routines.py

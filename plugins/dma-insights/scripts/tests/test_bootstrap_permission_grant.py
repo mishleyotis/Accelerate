@@ -41,7 +41,21 @@ GRANT = "mcp__plugin_dma-insights_connector__*"
 # order after the connector. The research routine's primary retrieval is
 # WebSearch/WebFetch; granting them is what keeps a new session headless.
 WEB = ["WebSearch", "WebFetch"]
-BASE_GRANTS = [GRANT] + WEB
+# The pipeline's own commands and files (2026-09-03, the headless audit): the
+# belt for `hooks/autoapprove_builtins.py`, in the order the block appends
+# them. Prefix rules only — no bare Bash, no Write without a path.
+BUILTIN = [
+    "Bash(python3 -m engine.*)",
+    "Bash(python3 plugins/dma-insights/*)",
+    "Bash(python3 /home/user/Accelerate/plugins/dma-insights/*)",
+    "Bash(python3 -m pytest *)",
+    "Bash(bash plugins/dma-insights/scripts/*)",
+    "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
+    "Write(/root/.dma/**)", "Edit(/root/.dma/**)",
+    "Write(/home/claude/dma_output/**)", "Edit(/home/claude/dma_output/**)",
+    "Write(/tmp/**)", "Edit(/tmp/**)",
+]
+BASE_GRANTS = [GRANT] + WEB + BUILTIN
 
 
 def grant_block() -> str:

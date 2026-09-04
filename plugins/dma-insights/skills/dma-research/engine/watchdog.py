@@ -104,6 +104,7 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
     budget = L.stats(wb)
     pre = prelim.state(wb)
     folder = str(md.get("client_folder") or "").strip()
+    post: dict = {}
 
     if drift:
         state, detail = "HALTED", "; ".join(drift)
@@ -128,7 +129,7 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
     elif failed:
         state, detail = "GATE_FAILED", f"floors gate FAILED on {', '.join(failed)}"
     elif not open_work and not ungated:
-        state, detail = "READY_FOR_HANDOFF", "every category closed and gated"
+        state, detail, post = post_research_state(wb, run, md)
     elif not open_work and ungated:
         state, detail = "UNGATED", (
             f"no open work and no recorded gate verdict for "
@@ -151,9 +152,178 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         "prelim_open": pre["open"],
         "search_ops": budget["search_ops"],
         "catalogue_drift": drift,
+        "stage": C.stage_of(md),
     }
+    row.update(post)
+    row["criterion"] = COMPLETION_CRITERIA.get(state, "")
     row["resume"] = resume_plan(row)
     return row
+
+
+# ── after research: the stage machine the conductor's manifest describes ──
+#
+# WHY (owner, 2026-09-03, the headless-workflow audit): the states above end
+# at READY_FOR_HANDOFF — "every category closed and gated" — and stayed there
+# through scoring, the reports and the package. A run that died with three
+# pillars scored, or with both reports written and nothing reviewed, read as
+# the same resting state as one that had never opened the assessment stage,
+# and the only revive plan was "render the four deliverables", which is the
+# conductor's whole step list compressed into a sentence.
+#
+# So the machine continues, computed from the SAME substrate the gates read:
+# the workbook's stage, column D, the Gate_Log, Report_Narrative, and the
+# client folder's manifest. Each state names the agent that owns the next
+# unit of work and the criterion that closes it — which is what turns "the
+# scoring agents fire once research is done, the report writers once scoring
+# is done" from prose in a manifest into something a hook and the hourly
+# watchdog can act on.
+
+#: What "done" means for each state — the gate that closes it, in one line,
+#: so a session or a hook reports a criterion rather than an impression.
+COMPLETION_CRITERIA = {
+    "PRELIM_OPEN": ("`engine.prelim complete` succeeds: all seven sections "
+                    "narrated with cited evidence or declared with a ladder"),
+    "STALLED": ("`engine.cli gate --category <C> --require-synthesis` "
+                "returns PASS for every open category"),
+    "GATE_FAILED": ("`engine.cli gate --category <C> --require-synthesis` "
+                    "returns PASS — every cell SYNTHESISED and independently "
+                    "challenged, or DECLARED ABSENT with its volley ladder"),
+    "UNGATED": "a recorded floors-gate verdict of PASS for every category",
+    "AT_BUDGET_CEILING": "`engine.memory backup` then a checkpoint, before any search",
+    "READY_FOR_HANDOFF": ("`engine.cli validate` FAILS=0, `engine.cli handoff` "
+                          "written, `engine.assessment open` flips the stage"),
+    "SCORING_OPEN": ("`engine.assessment state` shows scored == subcaps for "
+                     "every pillar in scope"),
+    "CRITIC_PENDING": ("a SCORING_CRITIC PASS row in Gate_Log for every pillar "
+                       "in scope, recorded by scoring-critic"),
+    "SCORING_GATE_OPEN": ("`engine.assessment gate` returns PASS and writes "
+                          "07_qa/scoring.json; then `engine.assemble "
+                          "checkpoint --stage SCORING_PASS --push`"),
+    "REPORTS_OPEN": ("`engine.narrative state` reads READY for both reports: "
+                     "every section written to its control block AND reviewed "
+                     "PASS by an actor that did not write it"),
+    "PACKAGE_UNSHIPPED": ("`engine.assemble package --push` verifies and pushes "
+                          "the folder; run_manifest.json reads status COMPLETE"),
+    "SHIPPED": ("done here — the package scan ingests the folder on its "
+                "half-hour cadence and the synthesis lanes produce the pages"),
+}
+
+
+def _manifest(md: dict) -> dict:
+    folder = str(md.get("client_folder") or "").strip()
+    if not folder:
+        return {}
+    p = Path(folder) / "run_manifest.json"
+    if not p.is_file():
+        return {}
+    try:
+        doc = json.loads(p.read_text())
+        return doc if isinstance(doc, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _unscored_by_pillar(wb: RunWorkbook) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for r in wb.scoring_rows():
+        cell = str(r.get("SubCap_ID") or "").strip()
+        if not cell:
+            continue
+        sc = str(r.get("Score") or "").strip()
+        if not sc:
+            out[cell[:2]] = out.get(cell[:2], 0) + 1
+    return out
+
+
+def post_research_state(wb: RunWorkbook, run: runstate.Run, md: dict) -> tuple:
+    """(state, detail, extras) for a run whose categories are all gated."""
+    from . import assessment as A
+    extras: dict = {}
+    if C.stage_of(md) != "assessment":
+        return ("READY_FOR_HANDOFF",
+                "every category closed and gated; the assessment stage is not "
+                "open — validate, hand off, then `engine.assessment open`",
+                extras)
+    unscored = _unscored_by_pillar(wb)
+    extras["unscored_by_pillar"] = unscored
+    if unscored:
+        return ("SCORING_OPEN",
+                "assessment stage open; unscored rows by pillar: "
+                + ", ".join(f"{p}={n}" for p, n in sorted(unscored.items())),
+                extras)
+    pillars = sorted({c[:2] for c in wb.selected_subcaps()})
+    critics = {}
+    for g in wb.rows("Gate_Log"):
+        if str(g.get("Gate") or "").strip() == "SCORING_CRITIC":
+            critics[str(g.get("Scope") or "").strip()] = \
+                str(g.get("Verdict") or "").strip().upper()
+    missing = [p for p in pillars if p not in critics]
+    failed_c = [p for p in pillars if critics.get(p) not in (None, "PASS")]
+    extras["critic_missing"], extras["critic_failed"] = missing, failed_c
+    if missing or failed_c:
+        return ("CRITIC_PENDING",
+                ("no critic verdict on " + ", ".join(missing) if missing else "")
+                + ("; critic FAIL on " + ", ".join(failed_c) if failed_c else ""),
+                extras)
+    last = None
+    for g in wb.rows("Gate_Log"):
+        if str(g.get("Gate") or "").strip() == "SCORING":
+            last = g
+    if last is None or str(last.get("Verdict") or "").strip().upper() != "PASS":
+        detail = ("the SCORING gate has never been run" if last is None else
+                  f"last SCORING gate verdict {last.get('Verdict')}: "
+                  f"{str(last.get('Detail') or '')[:200]}")
+        return "SCORING_GATE_OPEN", detail, extras
+    manifest = _manifest(md)
+    extras["checkpoint_due"] = manifest.get("stage_reached") not in (
+        "SCORING_PASS", "REPORTS_READY") and manifest.get("status") != "COMPLETE"
+    try:
+        from . import narrative as N
+        ns = N.state(wb)
+        reports = {k: {"open": v["open"], "ready": v["ready"],
+                       "sections": [{"section": s["section"],
+                                     "status": s["status"], "fix": s["fix"]}
+                                    for s in v["sections"]
+                                    if s["status"] != "READY"]}
+                   for k, v in ns["reports"].items()}
+    except Exception as e:                                # noqa: BLE001
+        reports = {"_error": str(e)[:200]}
+    extras["reports"] = reports
+    open_reports = [k for k, v in reports.items()
+                    if k != "_error" and not v.get("ready")]
+    if "_error" in reports or open_reports:
+        return ("REPORTS_OPEN",
+                "SCORING gate PASS; reports not READY: "
+                + ", ".join(f"{k} ({len(reports[k]['open'])} open)"
+                            for k in open_reports)
+                + (f"; narrative state unreadable: {reports['_error']}"
+                   if "_error" in reports else ""),
+                extras)
+    if manifest.get("status") == "COMPLETE":
+        return ("SHIPPED",
+                f"package complete in {md.get('client_folder')}; the package "
+                f"scan ingests it", extras)
+    return ("PACKAGE_UNSHIPPED",
+            "both reports READY and the client folder's manifest is not "
+            "COMPLETE — assemble, verify and push the package", extras)
+
+
+def _report_agents(row: dict) -> list[str]:
+    """Which report-tier agents the open sections call for, producers first."""
+    agents: list[str] = []
+    for key, v in (row.get("reports") or {}).items():
+        if key == "_error" or v.get("ready"):
+            continue
+        statuses = {s["status"] for s in v.get("sections", [])}
+        producer = ("report-assessment-producer" if key == "assessment"
+                    else "report-research-producer")
+        if statuses & {"OPEN", "SHORT", "REVISE"} and producer not in agents:
+            agents.append(producer)
+        if "UNREVIEWED" in statuses and "report-validator" not in agents:
+            agents.append("report-validator")
+    if not agents:
+        agents.append("report-validator")
+    return agents
 
 
 #: What each stopped state needs done, and who does it. `agent` is the plugin
@@ -213,10 +383,86 @@ def resume_plan(row: dict) -> dict:
                 "why": f"{cat or 'the conductor'} owns the open work"}
     if state == "READY_FOR_HANDOFF":
         return {"actionable": True, "agent": "research-conductor",
-                "prompt": base + ("Every category is closed and gated. Render "
-                                  "the four deliverables, assemble and verify "
-                                  "the client folder, and push it to intake."),
+                "prompt": base + (
+                    "Every category is closed and gated. Run `engine.cli "
+                    "validate` (FAILS=0) and `engine.cli handoff`, write the "
+                    "client tabs through `engine.profile`, then OPEN THE "
+                    "SCORING STAGE with `engine.assessment open` and dispatch "
+                    "the four pillar scorers in parallel. Render the four "
+                    "deliverables only after the SCORING gate PASSes."),
+                "why": "research is finished; the scoring stage has not opened"}
+    if state == "SCORING_OPEN":
+        unscored = row.get("unscored_by_pillar") or {}
+        pillars = sorted(unscored) or ["P1"]
+        agents = [f"scoring-{p.lower()}-producer" for p in pillars]
+        return {"actionable": True, "agent": agents[0], "parallel": agents,
+                "prompt": base + (
+                    f"The assessment stage is open and column D is not "
+                    f"struck: unscored rows by pillar "
+                    f"{json.dumps(unscored, sort_keys=True)}. Score every "
+                    f"row of your pillar through `engine.assessment score` — "
+                    f"one command per subcap, rationale over 150 characters "
+                    f"citing the row's own E-ids, the six overlay columns "
+                    f"filled. Done when `engine.assessment state` shows "
+                    f"scored == subcaps for your pillar."),
+                "why": "column D belongs to the pillar scorers"}
+    if state == "CRITIC_PENDING":
+        return {"actionable": True, "agent": "scoring-critic",
+                "prompt": base + (
+                    f"Every row is scored and the critic pass is owed on "
+                    f"{', '.join(row.get('critic_missing') or [])}"
+                    + (f"; the critic FAILED {', '.join(row.get('critic_failed') or [])}"
+                       " and those pillars must be re-scored then re-critiqued"
+                       if row.get("critic_failed") else "")
+                    + ". Re-derive a sample per capability and record "
+                    "`engine.assessment critique` per pillar; never change a "
+                    "score."),
+                "why": "the gate will not pass without an independent critic"}
+    if state == "SCORING_GATE_OPEN":
+        return {"actionable": True, "agent": "research-conductor",
+                "prompt": base + (
+                    f"Scores and critic verdicts are in; the SCORING gate is "
+                    f"not PASS ({row.get('detail')}). Run `engine.assessment "
+                    f"rollup --headline …`, `engine.assessment solution` and "
+                    f"`peer-adoption`, then `engine.assessment gate`. Re-"
+                    f"dispatch the pillar scorer the gate names for any "
+                    f"blocking term, then `engine.assemble checkpoint --stage "
+                    f"SCORING_PASS --push` so the scan ingests a scored run."),
+                "why": "the rollup and the gate are the conductor's"}
+    if state == "REPORTS_OPEN":
+        agents = _report_agents(row)
+        due = row.get("checkpoint_due")
+        return {"actionable": True, "agent": agents[0], "parallel": agents,
+                "prompt": base + (
+                    "The SCORING gate has PASSED"
+                    + (" and the SCORING_PASS checkpoint has NOT been pushed "
+                       "— run `engine.assemble checkpoint --stage SCORING_PASS "
+                       "--push` first" if due else "")
+                    + ". Reports open: "
+                    + json.dumps({k: v.get("open") for k, v in
+                                  (row.get("reports") or {}).items()
+                                  if k != "_error"}, sort_keys=True)
+                    + ". Producers write each OPEN/SHORT/REVISE section "
+                    "through `engine.narrative write`; the validator "
+                    "reviews every UNREVIEWED one through `engine.narrative "
+                    "review`. Done when `engine.narrative state` reads READY "
+                    "for both."),
+                "why": "the report tier owns the sections; the validator the verdicts"}
+    if state == "PACKAGE_UNSHIPPED":
+        return {"actionable": True, "agent": "research-conductor",
+                "prompt": base + (
+                    "Both reports read READY. `engine.completeness check`, "
+                    "`engine.cli report` (both .docx, gold_standard PASS), "
+                    "`engine.techscan render`, `engine.grains "
+                    "recommendations`, `engine.assemble checkpoint --stage "
+                    "REPORTS_READY --push`, then `engine.assemble package "
+                    "--push` and `engine.memory cleanup --apply`. Done when "
+                    "run_manifest.json reads status COMPLETE."),
                 "why": "the run is finished and nothing has shipped it"}
+    if state == "SHIPPED":
+        return {"actionable": False, "agent": None,
+                "why": "the package is complete; the package scan and the "
+                       "synthesis lanes take it from here"}
     if state == "MISSING_LOCALLY":
         return {"actionable": True, "agent": None,
                 "command": ["python3", "-m", "engine.registry", "pull"],
@@ -329,7 +575,15 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
 #: The states that need someone told. Everything else is the run working.
 ACTIONABLE = ("UNREADABLE", "HALTED", "STALLED", "GATE_FAILED", "UNGATED",
               "AT_BUDGET_CEILING", "PRELIM_OPEN", "NO_CLIENT_FOLDER",
-              "MISSING_LOCALLY", "READY_FOR_HANDOFF")
+              "MISSING_LOCALLY", "READY_FOR_HANDOFF",
+              # the assessment-stage machine (2026-09-03)
+              "SCORING_OPEN", "CRITIC_PENDING", "SCORING_GATE_OPEN",
+              "REPORTS_OPEN", "PACKAGE_UNSHIPPED")
+
+#: States an AGENT can advance without a person: the ones a stage-advance
+#: hook may keep a session working on, and the watchdog may revive.
+AGENT_ADVANCEABLE = tuple(s for s in ACTIONABLE
+                          if s not in ("UNREADABLE", "HALTED", "MISSING_LOCALLY"))
 
 
 def main(argv=None) -> int:
