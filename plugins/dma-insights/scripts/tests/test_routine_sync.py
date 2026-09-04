@@ -75,14 +75,57 @@ def test_the_markers_name_the_properties_a_firing_turns_on():
 
 
 def test_push_refuses_a_section_with_no_trigger():
-    """§2a is declared but NOT CREATED. Pushing it would be a create, not an
-    update — a different act, with a schedule nobody chose."""
-    secs = rs.sections()
-    a = secs.get("2a")
-    assert a is not None and not a["trigger_id"]
+    """A section with no trigger id does not exist yet. Pushing it would be
+    a create, not an update — a different act, with a schedule nobody
+    chose. (§2a carried this shape until 2026-09-03, when `list_triggers`
+    found lane A standing; the rule outlives the example.)"""
     with pytest.raises(rs.SyncRefusal) as e:
-        rs.push_payload(a)
+        rs.push_payload({"key": "2z", "name": "dma-not-yet", "trigger_id": None,
+                         "prompt": "You are a routine that does not exist.",
+                         "live": False})
     assert "does not exist yet" in str(e.value)
+
+
+def test_every_canon_section_marked_live_carries_the_id_the_api_returned():
+    """The canon's ids drifted from the live set once already (2026-08-30 →
+    2026-09-03: five of six). Pin the measured set, so a re-creation that
+    changes an id fails here rather than leaving `push` aimed at a trigger
+    that no longer exists."""
+    live = {
+        "2a": "trig_011Qkj9VgeRgktdhgaZxkeut",
+        "2b": "trig_01S7BM4VGDRQKzjfFN49Cejw",
+        "2c": "trig_01VKBE7qFTcLKmu8zWtDByxN",
+        "2d": "trig_019rSxYzhDBSTdPry5xABpxr",
+        "2e": "trig_01NXSfaTVuWEubFAcA4mbbeL",
+        "2g": "trig_018eeMRDobRQXPZ4aobjfUih",
+    }
+    secs = rs.sections()
+    for key, tid in live.items():
+        assert secs[key]["live"], f"§{key} is not marked LIVE"
+        assert secs[key]["trigger_id"] == tid, (
+            f"§{key} names {secs[key]['trigger_id']}, the API returned {tid} "
+            f"on 2026-09-03 — re-measure with list_triggers before changing "
+            f"this test")
+
+
+def test_the_live_prompt_is_read_from_where_the_api_puts_it():
+    """Measured 2026-09-03: records arrive as `{"data": [...]}` with the
+    prompt under `derived_state.prompt`, not top-level. Read as `prompt`
+    only, every live Routine reported NOT IN THE SUPPLIED LIVE SET."""
+    rec = {"id": "trig_x", "name": "dma-watchdog",
+           "derived_state": {"prompt": "hello from derived_state"}}
+    assert rs.live_prompt(rec) == "hello from derived_state"
+    rec2 = {"id": "trig_y", "name": "dma-x", "session_request": {"events": [
+        {"payload": {"internal_anthropic_catchall": {"message": {
+            "content": "hello from the first event"}}}}]}}
+    assert rs.live_prompt(rec2) == "hello from the first event"
+    import tempfile
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        json.dump({"data": [rec, rec2]}, f)
+        path = f.name
+    live = rs.load_live(path)
+    assert live["dma-watchdog"] == "hello from derived_state"
+    assert live["trig_y"] == "hello from the first event"
 
 
 def test_push_refuses_to_blank_a_live_routine():

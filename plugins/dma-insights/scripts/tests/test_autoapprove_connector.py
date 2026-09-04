@@ -403,6 +403,13 @@ _DELIBERATELY_PROMPTING = {
     # discharged, and the tool moved to CONDITIONAL_TOOLS: allowed into that
     # one channel, still prompting everywhere else. Leaving it here would
     # have made this table say a thing that is no longer true.
+    #
+    # Cowork's shell tool (2026-09-04). Not blanket-approved by THIS hook on
+    # purpose: a shell command is approved or not by its CONTENT, and that
+    # decision is autoapprove_builtins.py's, which is registered against
+    # `mcp__workspace__bash` and applies the same grammar it applies to Bash.
+    # Approving the tool by name here would wave through `git push` in Cowork.
+    "bash": "Cowork's shell — decided command by command by autoapprove_builtins.py",
 }
 
 
@@ -918,3 +925,43 @@ def test_the_hook_never_crashes_and_never_errors(evil):
     # arrives, it must exit 0 — a decision or silence, never an error.
     r = run(AUTO, evil)
     assert r.returncode == 0, f"hook errored on {evil!r}: {r.stderr}"
+
+
+# ── the third spelling: connectors Claude Code fetches from claude.ai itself ─
+#
+# Permissions reference, measured 2026-09-04 while chasing the Tavily and Exa
+# prompts the owner still saw on every surface: "Tools from connectors Claude
+# Code fetches itself appear as `mcp__claude_ai_<server>__<tool>`". A read
+# set written for `Google_Drive` must see through that prefix, and so must
+# the withheld set — or a Drive write under this spelling is judged by the
+# verb heuristic alone.
+
+@pytest.mark.parametrize("tool", [
+    "mcp__claude_ai_Tavily__tavily_search",
+    "mcp__claude_ai_Exa__web_search_exa",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google-Drive__read_file_content",
+    "mcp__claude_ai_Quartr__search",
+    "mcp__claude_ai_Clay__find-and-enrich-company",
+])
+def test_a_read_under_the_claude_ai_prefix_is_approved(tool):
+    assert decision(AUTO, {"tool_name": tool}) == "allow", tool
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Slack__slack_send_message_draft",
+    "mcp__claude_ai_Clay__run_subroutine",
+])
+def test_a_write_under_the_claude_ai_prefix_still_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool}) is None, tool
+
+
+def test_the_canonical_form_strips_the_claude_ai_prefix_only_on_the_server():
+    assert aac._canonical("mcp__claude_ai_Google-Drive__search_files") == \
+        "mcp__Google_Drive__search_files"
+    assert aac._canonical("mcp__Google_Drive__search_files") == \
+        "mcp__Google_Drive__search_files"
+    # a TOOL id that happens to contain the prefix is left alone
+    assert aac._canonical("mcp__X__claude_ai_thing") == "mcp__X__claude_ai_thing"

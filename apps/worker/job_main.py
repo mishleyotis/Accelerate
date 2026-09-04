@@ -681,7 +681,124 @@ def backfill_workbook_metadata(conn, token, groups) -> int:
           f"{failed} failed")
     return 1 if failed else 0
 
-def backfill_composite(conn, token, groups) -> int:
+#: How many null-composite runs one scheduled firing will re-read. The pass
+#: downloads a workbook per run, and the Job's task timeout is 3600s; a
+#: backlog must not be able to spend the whole firing here and starve the
+#: scan that is this Job's actual purpose. What is left over is NAMED in the
+#: log rather than dropped silently — a cap nobody can see is a cap that
+#: reads as "there was nothing else".
+COMPOSITE_REPAIR_PER_FIRING = 25
+
+
+def composite_reader_fingerprint() -> str:
+    """A hash of the composite reader itself.
+
+    WHY A HASH AND NOT A VERSION NUMBER. The repair below records
+    `composite_absent` for a run whose workbook states no overall, so the
+    next firing does not download it again. That record is only safe while
+    the reader is unchanged: improve the reader and every one of those runs
+    must be looked at again, or the improvement reaches new packages only
+    and every existing one stays silently empty — which is precisely the
+    failure this whole change exists to end, reintroduced by the fix for it.
+
+    A hand-maintained `READER_VERSION = 3` would work exactly as long as
+    everyone remembers to bump it. Hashing the reader's own source and the
+    constants it reads cannot be forgotten. A comment-only edit re-opens the
+    work list too; re-reading is cheap and correct, being silently stale is
+    neither.
+    """
+    import hashlib
+    import inspect
+    from dma_worker import workbook_parser as _wp
+    src = inspect.getsource(_wp._stated_overall_grain)
+    consts = repr((_wp._GRAIN_TABS["pillars"], _wp._GRAIN_ANCHORS["pillars"],
+                   _wp._GRAIN_SCORE_KEYS, _wp._OVERALL_LABELS))
+    return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
+
+
+def adopt_orphan_runs(conn, token, groups) -> int:
+    """Give a run with no `source_folder_id` its package back, by IDENTITY.
+
+    MEASURED 2026-09-04. goeasy Ltd. carries eighteen runs under request id
+    `DMA-RES-GSY-20260830-0002`, and NONE of them — including the promoted
+    one the client directory reads — records a source folder. Every repair
+    pass in this file finds a run's package through
+    `runs.source_folder_id`, so all of them are blind to that client
+    entirely: the composite repair reported one candidate run in the whole
+    database and it was a different institution. The card renders the word
+    "maturity" over an empty slot and no amount of folder fallback reaches
+    it, because there is no folder to fall back to.
+
+    A NAME IS NOT AN IDENTITY, and this deliberately does not use one. The
+    package's own `run_manifest.json` states `run_id`, and that is the same
+    string the ingest stored as `runs.request_id`. Matching those two is the
+    package saying which run it produced, not this code guessing from a
+    folder title — the distinction that `repair_evidence_namespace` was
+    written about after a name-derived token was found owned by fourteen
+    different entities.
+
+    REFUSES AMBIGUITY. If two packages state the same run id, neither is
+    adopted and both are named: one of them is wrong and picking either
+    would attach a client's scores to another client's workbook.
+
+    Writes only `source_folder_id`, only where it is NULL, and only from a
+    manifest that names the run. Every other repair works afterwards because
+    the run is finally traceable to the package it came from.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.request_id
+                     FROM runs r
+                    WHERE r.source_folder_id IS NULL
+                      AND r.request_id IS NOT NULL
+                    ORDER BY r.id""")
+    orphans = cur.fetchall()
+    if not orphans:
+        return 0
+    wanted = {req for _rid, req in orphans}
+    print(f"adopt: {len(orphans)} run(s) carry no source folder "
+          f"({len(wanted)} distinct request id(s))")
+
+    # One manifest read per folder, and only folders that ship one.
+    stated: dict = {}
+    clashes: dict = {}
+    for folder, parts in sorted(groups.items()):
+        if "manifest" not in parts:
+            continue
+        try:
+            raw = drive.download(token, parts["manifest"].file_id)
+            run_id = (json.loads(raw.decode("utf-8-sig")) or {}).get("run_id")
+        except Exception as exc:      # noqa: BLE001 — one manifest, not the pass
+            print(f"adopt: {folder}: manifest unreadable ({exc!r})")
+            continue
+        if not run_id or run_id not in wanted:
+            continue
+        if run_id in stated and stated[run_id] != folder:
+            clashes.setdefault(run_id, {stated[run_id]}).add(folder)
+            continue
+        stated[run_id] = folder
+
+    for run_id, folders in clashes.items():
+        stated.pop(run_id, None)
+        print(f"adopt: REFUSED {run_id} — stated by {len(folders)} packages "
+              f"({', '.join(sorted(folders))}); adopting either would attach "
+              f"one client's run to another's workbook")
+
+    adopted = 0
+    for rid, req in orphans:
+        folder = stated.get(req)
+        if not folder:
+            continue
+        cur.execute("UPDATE runs SET source_folder_id = %s "
+                    " WHERE id = %s AND source_folder_id IS NULL", (folder, rid))
+        adopted += cur.rowcount or 0
+    conn.commit()
+    unplaced = len(orphans) - adopted
+    print(f"adopt: {adopted} run(s) adopted by the package that names them, "
+          f"{unplaced} still unplaced (no manifest states their request id)")
+    return 0
+
+
+def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
     """Fill `runs.composite` for a run whose workbook states it and whose
     ingest had nowhere to read it.
 
@@ -718,18 +835,71 @@ def backfill_composite(conn, token, groups) -> int:
     workbook is skipped, and no run is created, deleted or re-scored.
     """
     cur = conn.cursor()
-    cur.execute("""SELECT r.id, r.source_folder_id
+    reader = composite_reader_fingerprint()
+    # A run whose workbook THIS reader already found nothing in is not work.
+    # Without that exclusion the scheduled pass re-downloads every genuinely
+    # composite-less workbook every thirty minutes, for ever; with it the
+    # steady state is zero downloads and a reader change re-opens the lot.
+    # `forced` (the BACKFILL_COMPOSITE mode) ignores the record and re-reads
+    # everything, which is what a human reaching for the manual pass wants.
+    #
+    # THE RUN THAT SERVES IS THE ONE THAT MATTERS, and it is not always the
+    # one holding the folder. MEASURED 2026-09-04: goeasy Ltd. carries
+    # EIGHTEEN runs under one request id (`DMA-RES-GSY-20260830-0002`), every
+    # one with a null composite, and this query — which required the run's own
+    # `source_folder_id` — matched exactly ONE of them across the whole
+    # database. A run re-ingested from the same package does not always carry
+    # the folder forward, so the promoted run, the only one the directory
+    # reads, was invisible to its own repair.
+    #
+    # A sibling under the SAME request id and the same entity is the same
+    # package by definition — that is what a request id identifies — so its
+    # folder is the right place to look, and the newest one wins. Not the
+    # entity alone: two assessments of one client are two packages, and
+    # reading one's composite out of the other's workbook would be a figure
+    # from the wrong run wearing the right name.
+    cur.execute("""SELECT r.id,
+                          COALESCE(r.source_folder_id, sib.source_folder_id),
+                          r.request_id
                      FROM runs r
-                    WHERE r.source_folder_id IS NOT NULL
-                      AND r.composite IS NULL
-                    ORDER BY r.source_folder_id""")
-    todo = cur.fetchall()
-    print(f"backfill-composite: {len(todo)} run(s) hold no composite")
+                     LEFT JOIN LATERAL (
+                           SELECT s.source_folder_id
+                             FROM runs s
+                            WHERE s.request_id = r.request_id
+                              AND s.entity_id = r.entity_id
+                              AND s.source_folder_id IS NOT NULL
+                            ORDER BY s.run_seq DESC
+                            LIMIT 1) sib ON TRUE
+                    WHERE r.composite IS NULL
+                      AND COALESCE(r.source_folder_id,
+                                   sib.source_folder_id) IS NOT NULL
+                      AND (%s OR NOT EXISTS (
+                            SELECT 1 FROM parser_observations o
+                             WHERE o.run_id = r.id
+                               AND o.kind = 'composite_absent'
+                               AND o.detail->>'reader' = %s))
+                    ORDER BY 2, r.id""", (forced, reader))
+    todo = [(rid, folder) for rid, folder, _req in cur.fetchall()]
+    deferred = 0
+    if not forced and len(todo) > COMPOSITE_REPAIR_PER_FIRING:
+        deferred = len(todo) - COMPOSITE_REPAIR_PER_FIRING
+        todo = todo[:COMPOSITE_REPAIR_PER_FIRING]
+    print(f"backfill-composite: {len(todo)} run(s) hold no composite "
+          f"(reader {reader}"
+          + (f", {deferred} deferred to the next firing)" if deferred else ")"))
     filled = skipped = empty = failed = 0
     for run_id, folder in todo:
         parts = groups.get(folder) or {}
         if "workbook" not in parts:
+            # NAMED, not tallied. The first production firing reported
+            # "1 have no workbook artefact" and stopped there: which run,
+            # and under what key, went unsaid — and the key is exactly what
+            # goes wrong when a folder is renamed or a package moves.
             skipped += 1
+            why = ("no folder by that key in this scan" if folder not in groups
+                   else "folder is in the scan but ships no workbook")
+            print(f"backfill-composite: run {run_id} skipped — {why} "
+                  f"(key {folder!r})")
             continue
         try:
             with tempfile.TemporaryDirectory() as td:
@@ -744,6 +914,18 @@ def backfill_composite(conn, token, groups) -> int:
             if value is None:
                 # A workbook that states no overall is a fact about the
                 # workbook. Absent beats a number nobody wrote down.
+                #
+                # RECORDED, so the next firing does not pay for the same
+                # download to learn the same thing. Stamped with the reader
+                # that concluded it: a better reader has a different
+                # fingerprint and the run returns to the work list on its own.
+                cur.execute(
+                    """INSERT INTO parser_observations
+                           (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'composite_absent',%s, now())""",
+                    (run_id, json.dumps({"reader": reader,
+                                         "reason": "workbook states no overall"})))
+                conn.commit()
                 empty += 1
                 print(f"backfill-composite: {folder}: workbook states none")
                 continue
@@ -756,6 +938,22 @@ def backfill_composite(conn, token, groups) -> int:
             conn.rollback()
             failed += 1
             print(f"backfill-composite FAILED: {folder}: {exc!r}")
+    # PUBLISH IT. `serving_directory` is materialised: a repaired
+    # `runs.composite` is invisible to every client until the view is
+    # rebuilt, and until 0059 the worker's role could not ask for that — so
+    # the repair committed a correct value that nothing could show. Once per
+    # pass, and only when something actually changed; a refresh costs a full
+    # rebuild and a pass that filled nothing has nothing to publish.
+    if filled:
+        try:
+            cur.execute("SELECT refresh_serving_directory()")
+            conn.commit()
+            print("backfill-composite: directory refreshed")
+        except Exception as exc:  # noqa: BLE001 — the values are committed
+            conn.rollback()
+            print(f"backfill-composite: filled {filled} but could NOT refresh "
+                  f"the directory ({exc!r}) — the figures are in `runs` and "
+                  f"will surface on the next refresh")
     print(f"backfill-composite: {filled} filled, {skipped} have no workbook "
           f"artefact, {empty} state none, {failed} failed")
     return 1 if failed else 0
@@ -1513,6 +1711,9 @@ def main() -> int:
             return rc
 
         if os.environ.get("BACKFILL_COMPOSITE"):
+            # The MANUAL pass: re-read every null-composite run, including the
+            # ones already recorded as stating none. A human reaching for this
+            # is asking for a full re-read, not the incremental one.
             rc = backfill_composite(conn, drive.metadata_token(), groups)
             conn.close()
             return rc
@@ -1536,6 +1737,42 @@ def main() -> int:
                 limit=int(os.environ.get("EVIDENCE_NAMESPACE_LIMIT", "0")))
             conn.close()
             return rc
+
+        # ── THE REPAIR RUNS ON THE SCHEDULE, NOT ON SOMEONE REMEMBERING ──
+        #
+        # `runs.composite` is written exactly once, at INSERT. Every path that
+        # could repair a NULL was behind an env var no schedule sets, so a run
+        # ingested under an older reader kept its null for ever: the package
+        # scan is idempotent, so an unchanged tree re-reads nothing.
+        #
+        # MEASURED 2026-09-04. goeasy Ltd. (`DMA-RES-GSY-20260830-0002`) served
+        # `overall: null` in the client directory beside its own four pillar
+        # bars — 2.09 / 2.19 / 2.01 / 2.16 — all of which resolved. Its
+        # workbook was last read by this Job at 04:14:58 on 2026-09-03; the
+        # reader that can find its composite merged at 06:08 the same day. The
+        # run was ingested under the older reader and nothing ever looked
+        # again. `backfill_composite` had three tests proving it works and not
+        # one proving it runs, and no worker firing has ever logged a line
+        # from it.
+        #
+        # So it runs here, incrementally: null composites only, minus the ones
+        # this reader has already found nothing in, capped per firing. The
+        # steady state is one query and no downloads. It is deliberately NOT
+        # fatal to the scan — a repair that cannot reach Drive must not stop
+        # this Job doing the thing it exists to do.
+        try:
+            # FIRST: a run that does not know its own package cannot be
+            # repaired by anything below. goeasy's eighteen runs had no
+            # source folder at all, which is why two rounds of fixing the
+            # folder LOOKUP moved nothing.
+            adopt_orphan_runs(conn, drive.metadata_token(), groups)
+        except Exception as exc:            # noqa: BLE001 — see below
+            print(f"orphan adoption skipped this firing: {exc!r}")
+        try:
+            backfill_composite(conn, drive.metadata_token(), groups,
+                               forced=False)
+        except Exception as exc:            # noqa: BLE001 — see above
+            print(f"composite repair skipped this firing: {exc!r}")
 
         _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
                          key)

@@ -174,5 +174,12 @@ def test_issue10_the_zip_and_the_checkout_carry_the_same_version():
     plugin = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"]
     market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
     entry = next(p for p in market["plugins"] if p["name"] == "dma-insights")
-    assert plugin == entry["version"] == T.templates_require() == "1.17.0"
+    import re
+    # AGREEMENT is the property, not the number: a literal here goes stale on
+    # every release and pins nothing (measured 2026-09-04, when the base
+    # branch bumped to 1.17.2 under this test).
+    assert re.fullmatch(r"\d+\.\d+\.\d+", plugin), plugin
+    assert plugin == entry["version"] == T.templates_require(), (
+        f"plugin.json {plugin}, marketplace {entry['version']}, templates "
+        f"{T.templates_require()} — one version, three places")
     assert T.zip_guard()["ok"]

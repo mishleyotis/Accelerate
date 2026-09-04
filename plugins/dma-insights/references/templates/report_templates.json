@@ -25,7 +25,7 @@
   "reviewable place and the renderer, the writer and the gates all read it."
  ],
  "pinned_at": "2026-09-03",
- "requires_plugin_version": "1.17.0",
+ "requires_plugin_version": "1.18.0",
  "_requires_note": "The plugin version these templates were pinned for. An install (Cowork zip or marketplace cache) whose own manifest is OLDER than this predates the engine that enforces them; engine.template zip-guard / engine.cli start refuse it.",
  "reports": {
   "client_research": {

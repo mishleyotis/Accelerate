@@ -109,8 +109,17 @@ def load_live(path: str) -> dict[str, str]:
     """
     raw = json.loads(sys.stdin.read() if path == "-"
                      else Path(path).read_text())
-    if isinstance(raw, dict) and "triggers" in raw:
-        raw = raw["triggers"]
+    # The API's envelope. Measured 2026-09-03: `list_triggers` returns
+    # `{"data": [...]}`, and each record carries the prompt that fires under
+    # `derived_state.prompt` (or, older, as the first user event's message),
+    # NOT a top-level `prompt`. Read as `prompt` only, this reported every
+    # live Routine as NOT IN THE SUPPLIED LIVE SET — a reconciler blind to
+    # the shape it reconciles, which is the defect this file exists to end.
+    if isinstance(raw, dict):
+        for key in ("triggers", "data", "items", "results"):
+            if isinstance(raw.get(key), list):
+                raw = raw[key]
+                break
     if isinstance(raw, dict):
         return {k: v for k, v in raw.items() if isinstance(v, str)}
     out = {}
@@ -119,8 +128,32 @@ def load_live(path: str) -> dict[str, str]:
             continue
         for key in (t.get("name"), t.get("id")):
             if key:
-                out[key] = t.get("prompt") or ""
+                out[key] = live_prompt(t)
     return out
+
+
+def live_prompt(t: dict) -> str:
+    """The prompt a trigger record actually fires, wherever the API put it."""
+    if isinstance(t.get("prompt"), str) and t["prompt"]:
+        return t["prompt"]
+    ds = t.get("derived_state") or {}
+    if isinstance(ds, dict) and isinstance(ds.get("prompt"), str) and ds["prompt"]:
+        return ds["prompt"]
+    try:
+        for ev in (t.get("session_request") or {}).get("events") or []:
+            msg = ((ev.get("payload") or {}).get("internal_anthropic_catchall")
+                   or {}).get("message") or {}
+            content = msg.get("content")
+            if isinstance(content, str) and content:
+                return content
+            if isinstance(content, list):
+                text = "".join(b.get("text", "") for b in content
+                               if isinstance(b, dict))
+                if text:
+                    return text
+    except AttributeError:
+        pass
+    return ""
 
 
 def push_payload(sec: dict) -> dict:

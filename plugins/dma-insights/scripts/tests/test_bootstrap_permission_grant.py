@@ -41,7 +41,38 @@ GRANT = "mcp__plugin_dma-insights_connector__*"
 # order after the connector. The research routine's primary retrieval is
 # WebSearch/WebFetch; granting them is what keeps a new session headless.
 WEB = ["WebSearch", "WebFetch"]
-BASE_GRANTS = [GRANT] + WEB
+# The pipeline's own commands and files (2026-09-03, the headless audit): the
+# belt for `hooks/autoapprove_builtins.py`, in the order the block appends
+# them. Prefix rules only — no bare Bash, no Write without a path.
+BUILTIN = [
+    "Bash(python3 -m engine.*)",
+    "Bash(python3 plugins/dma-insights/*)",
+    "Bash(python3 /home/user/Accelerate/plugins/dma-insights/*)",
+    "Bash(python3 -m pytest *)",
+    "Bash(bash plugins/dma-insights/scripts/*)",
+    "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
+    # DOUBLE slash. A single leading slash is anchored at the SETTINGS
+    # SOURCE, not the filesystem root, so `Write(/root/.dma/**)` in user
+    # settings resolves to ~/.claude/root/.dma/** and matches nothing —
+    # an inert belt for exactly the stale-hook session it exists to cover
+    # (permissions reference; the repo's own deny rules already use
+    # `Read(//root/.dma/sa.json)`). Found in review, 2026-09-04.
+    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
+    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
+    "Write(//tmp/**)", "Edit(//tmp/**)",
+]
+
+
+def test_every_absolute_grant_is_rooted_at_the_filesystem():
+    """A single leading slash is settings-source-relative and silently
+    matches nothing; only `//` means `/`."""
+    import re as _re
+    for rule in BASE_GRANTS:
+        m = _re.match(r"^(?:Write|Edit|Read)\((/[^)]*)\)$", rule)
+        if m and not m.group(1).startswith("//"):
+            raise AssertionError(
+                f"{rule} is anchored at the settings source, not at /")
+BASE_GRANTS = [GRANT] + WEB + BUILTIN
 
 
 def grant_block() -> str:
@@ -333,8 +364,13 @@ def test_every_granted_tool_is_one_the_hook_would_also_approve():
     _sys.path.insert(0, str(HERE.parent / "hooks"))
     import autoapprove_connector as _aac
 
+    # Compared through the hook's OWN canonical form: a grant written for the
+    # `mcp__claude_ai_<Server>__` spelling (the one Claude Code gives a
+    # connector it fetches itself) is the same decision as the delivered
+    # spelling, and the hook reads it that way at call time.
     disagree = [g for g in derived_grants()
-                if not g.endswith("__*") and g not in _aac.QUALIFIED_TOOLS
+                if not g.endswith("__*")
+                and _aac._canonical(g) not in _aac.QUALIFIED_TOOLS
                 and not g.startswith(_aac.PREFIX)]
     assert not disagree, (
         f"granted in user settings and NOT on the hook's read allowlist: "

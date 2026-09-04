@@ -412,20 +412,32 @@ class _CompositeCursor:
     def __init__(self, runs):
         self._runs, self.updated = runs, []
         self._rows = []
+        self.observed, self.refreshed = [], 0
 
     def execute(self, sql, params=None):
-        if "FROM runs r" in sql:
+        if "refresh_serving_directory" in sql:
+            # `serving_directory` is materialised: a filled composite that is
+            # never published leaves the client card blank anyway.
+            self.refreshed += 1
+        elif "FROM runs r" in sql:
             assert "r.composite IS NULL" in sql, \
                 "must only pick runs whose composite is unset"
             self._rows = list(self._runs)
         elif "UPDATE runs" in sql:
             assert "SET composite" in sql, "only the composite may be written"
             self.updated.append(params)
+        elif "parser_observations" in sql:
+            # The reader's "this workbook states none" verdict, recorded so
+            # the scheduled pass does not download it again every firing.
+            self.observed.append(params)
         else:                                    # pragma: no cover
             raise AssertionError(f"unexpected sql: {sql[:60]}")
 
     def fetchall(self):
-        return self._rows
+        # (run_id, folder, request_id): a run carrying no folder of its
+        # own is reached through a sibling under the same request id.
+        return [(r[0], r[1], r[2] if len(r) > 2 else "REQ-1")
+                for r in self._rows]
 
 
 class _CompositeConn:
@@ -477,7 +489,12 @@ def test_backfill_composite_fills_the_run_whose_card_showed_no_maturity(monkeypa
     value, run_id = conn.cur.updated[0]
     assert run_id == "run-g1"
     assert value == Decimal("2.25")
-    assert conn.commits == 1
+    # Two commits: the repaired value, then the view rebuild that publishes
+    # it. `serving_directory` is materialised, so without the second one the
+    # card this test is named after stays blank with the right value in the
+    # table behind it.
+    assert conn.commits == 2
+    assert conn.cur.refreshed == 1, "the repaired figure was never published"
 
 
 def test_backfill_composite_writes_nothing_when_the_workbook_states_none(monkeypatch):
@@ -492,7 +509,11 @@ def test_backfill_composite_writes_nothing_when_the_workbook_states_none(monkeyp
     conn = _CompositeConn([("run-s", "Silent - DMA")])
     assert job_main.backfill_composite(conn, "token", groups) == 0
     assert conn.cur.updated == [], "no UPDATE for a workbook stating nothing"
-    assert conn.commits == 0
+    assert conn.cur.refreshed == 0, "nothing to publish, so no view rebuild"
+    # The verdict IS recorded now (and committed), so the scheduled pass does
+    # not pay for this download again on every firing. That record is what
+    # makes running the repair on the schedule affordable at all.
+    assert len(conn.cur.observed) == 1, "the determination was not recorded"
 
 
 def test_backfill_composite_survives_one_unreadable_workbook(monkeypatch):

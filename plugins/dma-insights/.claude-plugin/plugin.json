@@ -1,7 +1,7 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "The six Digital Maturity Assessment skills, 73 DMA agents — 16 category researchers, a technographic scanner, two report producers, a report validator and a five-agent scoring tier — the remote MCP connector (34 tools), and the research ENGINE: a binding preflight the engagement owner answers, a PRELIM phase that gates dispatch, ERS computed from RRF retrieval, report sections written as arguments with independent review, a measured cost model, and a watchdog that revives a stopped run.",
   "author": {
     "name": "Zennify — DMA Insights build"

@@ -317,3 +317,37 @@ def test_only_the_intake_stops_that_a_container_cannot_fix_are_stops():
     assert "provisioning defect to report, not a transient" in step, (
         "a red that survives the heal reproduces on the next container, so "
         "ending the firing hands the next one the same wall")
+
+
+def test_the_intake_prompt_starts_the_run_it_binds_and_dispatches_the_conductor():
+    """THE CHAIN HOLE, measured 2026-09-03. Every firing ended at "the run
+    may START" and nothing ever started one: no Routine in the schedule
+    dispatched research-conductor, and the watchdog had no registry row to
+    revive because only `engine.cli start` writes one. The auto-bound
+    preflight sat in Drive until a person ran the start by hand.
+
+    So STEP 6 must START the run it binds — the command, with the thread
+    flags — and dispatch the conductor in the same firing, and it must still
+    hand over the ambiguous case rather than guess."""
+    body = _fenced(_sections()["2g"])
+    assert "STEP 6" in body
+    step6 = body[body.index("STEP 6"):body.index("STEP 7")]
+    assert "engine.cli start" in step6 and "--preflight" in step6
+    assert "--slack-thread-ts" in step6, "the thread must travel with the run"
+    assert "agent_run.py --agent research-conductor" in step6, (
+        "binding a run and not dispatching the conductor is the gap that "
+        "left auto-bound preflights sitting in Drive")
+    assert "HANDOVER" in step6 and "watchdog" in step6, (
+        "a firing that ends before the run does hands over to the watchdog; "
+        "the prompt must say so or the next session will start a second run")
+    assert "AMBIGUOUS" in step6 and "push-package" in step6, (
+        "the ambiguous case is still handed over, never guessed")
+
+
+def test_the_intake_prompt_audits_both_halves_of_the_prompt_surface():
+    """Measured 2026-09-03: the MCP audit was green while every engine
+    command still prompted. Both audits, or the check reads half the
+    surface as the whole."""
+    body = _fenced(_sections()["2g"])
+    assert "audit_autoapprove.py --strict" in body
+    assert "audit_builtin_approvals.py --strict" in body

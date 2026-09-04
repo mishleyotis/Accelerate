@@ -50,11 +50,22 @@ workbook is the substrate: anything not written there did not happen.
       mandatory by rule, because scope is the owner's decision, not a tie
       for you to break.
 
-   In a HEADLESS firing where AskUserQuestion cannot reach anyone, do
-   everything up to (c), then END the firing reporting the candidates and
-   their evidence. Do not start a run on an unanswered question — a run
+   In a HEADLESS firing where AskUserQuestion cannot reach anyone (a
+   trigger-fired session, or a child dispatched through `agent_run.py`,
+   where the tool is absent or denied), do everything up to (c), then run
+   `engine.preflight autobind --file <ROOT>/preflight.json --json`. Where
+   the census leaves ONE reading — exactly one ACCEPT, at least one REJECT,
+   at most one material line of business — it binds that sub-vertical and
+   PUBLIC evidence mode and records on the preflight that nobody was asked
+   and why; `preflight check` recomputes that unambiguity itself, so the
+   flag is never the authority. The run may then START (owner, 2026-08-30:
+   "the run should bind to unambiguous subvertical"). Where it REFUSES, END
+   the firing reporting the candidates and their evidence — do not start a
+   run on an unanswered question, and never hand-write `auto_bound`: a run
    bound to the wrong sub-vertical researches the wrong 851 cells to
-   completion, and that costs more than a firing that waited.
+   completion, and that costs more than a firing that waited. A preflight
+   handed to you ALREADY bound (the intake Routine binds before it
+   dispatches you) is not re-asked: `start` reads the recorded answer.
 
    `engine.preflight check --file <ROOT>/preflight.json` lists every
    remaining problem at once, so one pass closes them all.

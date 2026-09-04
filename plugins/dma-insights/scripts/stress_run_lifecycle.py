@@ -259,17 +259,24 @@ def main(argv=None) -> int:
                         "field of membership is geographic, and its balance "
                         "sheet is dominated by consumer lending."
               ).returncode == 0
-    # THE FIRMOGRAPHICS TAB, not only the paragraph. `firmographics` closes on
-    # both: every must-present field STATED, or ABSENT with the route that was
-    # searched (the Client Profile's §1.1/§1.2 and the app's O2 strip read the
-    # tab, and a paragraph with an empty tab is how 57 of 138 clients shipped
-    # with no firmographics at all).
-    for field, value, unit in (("website", "stress-cu.example", "n/a"),
+    # The section closes on NAMED people (min_named=2), not on a structure —
+    # the 2026-08-31 rule; and the Firmographics TAB must carry every
+    # must-present field STATED or ABSENT with a route (contract v6).
+    ok &= run("engine.prelim", "narrate", "--run", run_id, "--root", str(root),
+              "--section", "leadership", "--evidence", eid2,
+              "--body", "Maria Alvarez has been Chief Digital Officer since "
+                        "2022 on the 2025 officer schedule, reporting to "
+                        "chief executive Devon Whitfield, alongside a CIO who "
+                        "owns the core platform. Both roles predate the "
+                        "current programme, so the institution is not "
+                        "standing up digital ownership for the first time."
+              ).returncode == 0
+    for field, value, unit in (("website", "stress.example", "n/a"),
                                ("employees", "1240", "headcount"),
-                               ("assets_or_aum_or_revenue", "8.3bn", "USD assets"),
+                               ("assets_or_aum_or_revenue", "9.1bn", "USD assets"),
                                ("branches", "38", "count"),
-                               ("headquarters", "Fresno, CA", "n/a"),
-                               ("founded", "1947", "year"),
+                               ("headquarters", "Reno, NV", "n/a"),
+                               ("founded", "1951", "year"),
                                ("primary_regulator", "NCUA", "n/a"),
                                ("charter", "state-chartered credit union", "n/a"),
                                ("ownership", "member-owned cooperative", "n/a")):
@@ -277,27 +284,13 @@ def main(argv=None) -> int:
                   str(root), "--field", field, "--value", value, "--unit", unit,
                   "--as-of", "2025-12-31", "--evidence", eid2,
                   "--confidence", "High").returncode == 0
-    ok &= run("engine.profile", "firmographic", "--run", run_id, "--root", str(root),
-              "--field", "cagr", "--state", "ABSENT",
+    ok &= run("engine.profile", "firmographic", "--run", run_id, "--root",
+              str(root), "--field", "cagr", "--state", "ABSENT",
               "--reason", "a credit union publishes no revenue CAGR; the call "
                           "report carries assets and shares by quarter, not a "
                           "growth series",
               "--route", "NCUA 5300 call reports FY2021-FY2025, searched "
-                         "2026-08-30").returncode == 0
-    # TWO NAMED PEOPLE is the floor: "a Chief Digital Officer reports to the
-    # CEO" is a structure a researcher cannot search, match to a platform
-    # decision, or date.
-    ok &= run("engine.prelim", "narrate", "--run", run_id, "--root", str(root),
-              "--section", "leadership", "--evidence", eid2,
-              "--body", "Maria Alvarez has been Chief Digital Officer since "
-                        "2022, reporting to chief executive Devon Whitfield, "
-                        "alongside a CIO who owns the core platform. Both "
-                        "roles predate the current programme, so the "
-                        "institution is not standing up digital ownership "
-                        "for the first time."
-              ).returncode == 0
-    # And what those named people say in public — the only PRELIM section in
-    # the client's own voice, and the one a category finding is weighed against.
+                         "2026-08-29").returncode == 0
     ok &= run("engine.prelim", "narrate", "--run", run_id, "--root", str(root),
               "--section", "thought_leadership", "--evidence", eid2,
               "--body", "Maria Alvarez has spoken twice at industry "
@@ -326,26 +319,33 @@ def main(argv=None) -> int:
               "--rule", "US credit unions in the 5-15bn asset band with a "
                         "geographic field of membership and a public core "
                         "platform decision since 2022").returncode == 0
-    # ALL FOUR LAYERS, in PRELIM. A layer nothing was found in is an ABSENT
-    # row carrying the ladder — never a layer left out, which reads to every
-    # later surface as a clean estate. Both contracted providers are named,
-    # and a row is CONFIRMED only because a non-broker saw it too: two
-    # brokers reselling one crawl is one observation.
+    ok &= run("engine.cli", "techscan", "record", "--run", run_id, "--root",
+              str(root), "--product", "Alkami Digital Banking",
+              "--vendor", "Alkami", "--layer", "CUST", "--status", "CONFIRMED",
+              "--method", "public_document", "--evidence", eid2,
+              # Both contracted providers, and the row is CONFIRMED only
+              # because a non-broker saw it too: a broker-only CONFIRMED is
+              # refused, because two brokers reselling one crawl is one
+              # observation.
+              "--provider", "clay", "--provider", "web",
+              "--basis", "named as the digital banking platform in the 2025 "
+                         "call report").returncode == 0
+    # ALL FOUR LAYERS: tech_baseline will not close with one row. A layer
+    # searched and found empty closes as an ABSENT row carrying the ladder;
+    # a layer left out reads to every later surface as a clean estate.
     for product, vendor, layer, status, basis in (
-            ("Alkami Digital Banking", "Alkami", "CUST", "CONFIRMED",
-             "named as the digital banking platform in the 2025 call report"),
             ("Fiserv DNA", "Fiserv", "OPS", "CONFIRMED",
              "named as the core processor in the 2025 call report"),
             ("Snowflake", "Snowflake", "DATA", "INFERRED",
              "two 2025 engineering postings require production Snowflake"),
             ("public cloud hosting", "none named", "INFRA", "ABSENT",
              "searched the call report, the careers site and three vendor "
-             "case-study indexes for a named hosting platform; none is "
-             "stated anywhere public")):
-        ok &= run("engine.cli", "techscan", "record", "--run", run_id, "--root",
-                  str(root), "--product", product, "--vendor", vendor,
-                  "--layer", layer, "--status", status,
-                  "--method", "public_document", "--evidence-id", eid2,
+             "case-study indexes for a named hosting or datacentre platform; "
+             "none is stated anywhere public")):
+        ok &= run("engine.cli", "techscan", "record", "--run", run_id,
+                  "--root", str(root), "--product", product, "--vendor",
+                  vendor, "--layer", layer, "--status", status,
+                  "--method", "public_document", "--evidence", eid2,
                   "--provider", "clay", "--provider", "web",
                   "--basis", basis).returncode == 0
     check("every PRELIM section closes through the real commands", ok)
