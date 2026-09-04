@@ -161,7 +161,8 @@ tool call is the cost this removes.
    `page-batch` — a bounded packet each, never "the run id and the root"),
    (c) runs the engine commands (`kg build`, the floors gates, `handoff`,
    `assessment open/rollup/gate`, `assemble checkpoint`, the two report
-   renders, `grains recommendations`, `techscan render`, `assemble package`),
+   renders, `engine.grains recommendations`, `engine.techscan render`,
+   `engine.assemble package`),
    and (d) refuses to start the next stage until the gate PASSES. Every
    stage lands a `STAGE_<NAME>` row in Gate_Log with its wall clock, a line
    in `07_qa/cost_ledger.jsonl` (`engine.cost report` reads it back against
@@ -188,6 +189,12 @@ tool call is the cost this removes.
    died — `engine.pipeline plan` says where, and `run` again continues from
    the first stage whose predicate is false (nothing done is redone; the
    watchdog's `resume` plan is this command).
+
+   The four deliverables are the driver's too, each by its own command:
+   `engine.cli report --report client_research` and `engine.cli report
+   --report assessment` (into the pinned Docs, at REPORTS),
+   `engine.techscan render` and the workbook itself (at PACKAGE). You never
+   render one by hand; when a stage FAILs on one, the refusal names it.
 
    What the driver does NOT do, and you still own: the binding preflight
    (step 0, with a person), `engine.cli start` (step 1), and the PRELIM lane
