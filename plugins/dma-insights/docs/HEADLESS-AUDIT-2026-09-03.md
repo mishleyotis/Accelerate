@@ -215,6 +215,51 @@ deployed-app-auditor reads what production serves.
    (2026-08-24) and has not fired since; the ledgers the synthesis lanes push
    to Drive are merged only by it.
 
+## 7 · Live headless probe — measured, not inferred (2026-09-04)
+
+A real `claude -p` session, in **`default` permission mode** (the mode that
+prompts, chosen deliberately — `dontAsk` would have hidden a prompt as a
+silent denial), on this container after `doctor.py --heal` installed 1.17.1,
+with the plugin's hooks bound at its start. The task exercised every tool
+class the pipeline uses:
+
+| step | tool | result |
+|---|---|---|
+| `python3 -m engine.cli counts` | Bash | ran |
+| `python3 -m engine.preflight init …` into a run root | Bash | ran, wrote `preflight.json` |
+| `audit_builtin_approvals.py --strict` | Bash | ran: 125/125, 0 would prompt |
+| `grep -c` on the run root | Bash | ran |
+| create `note.json` in the run root | Write | ran |
+| replace a value in it | Edit | ran (`edit-ok` read back) |
+| read it back | Read | ran |
+| `get_memory_digest` | connector MCP | returned |
+| `list_pending_runs` | connector MCP | returned |
+| inline `python3 -c` (json only) | Bash | ran |
+
+Stream summary: 14 tool calls, `permission_denials: []`, 80 hook events, 15
+turns, final line `PROBE COMPLETE: 10 of 10 steps ran, refused: none`. Zero
+permission prompts, zero denials, in the mode that prompts. Re-run it:
+
+```
+claude -p --permission-mode default --model haiku --output-format stream-json \
+  --verbose --add-dir /root/.dma < plugins/dma-insights/scripts/probe_headless.md > stream.jsonl
+python3 -c "import json;print([json.loads(l)['permission_denials'] for l in open('stream.jsonl') if '\"result\"' in l])"
+```
+
+**What this does and does not prove.** It proves the permission layer this
+repository controls lets a headless session through every tool class the
+agents use, against the live connector. It does not prove a full assessment
+ends promoted in the web app from this container, and it cannot: the research
+tier's connector preflight REQUIRES Exa and Tavily, which are attached to no
+Routine and not to this session (inhibitor 2); every Routine is paused
+(inhibitor 1); and pushing a synthetic package into the production intake
+tree to watch the scan ingest it would put a fake client in front of the
+package scan and the synthesis lanes, which I will not do without the owner
+asking for it. The package-to-promotion half is proved by existence
+(`audit_chain.py`, 11/11) and by the acceptance walk
+(`tests/acceptance`, 557 passed, `test_acceptance_full_run` from `start` to
+a verified package), not by a live promotion.
+
 ## How to re-ask every question in this document
 
 ```
