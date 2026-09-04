@@ -500,7 +500,8 @@ the watchdog computes the rest from the same substrate the gates read:
 | `SCORING_OPEN` | stage `assessment`, column D has blanks (per pillar) | `scoring-p<N>-producer`, in parallel lanes | `engine.assessment state` scored == subcaps |
 | `CRITIC_PENDING` | every row scored, `SCORING_CRITIC` missing or FAIL | `scoring-critic` | a PASS row per pillar in `Gate_Log` |
 | `SCORING_GATE_OPEN` | critic in, `SCORING` gate never run or FAIL | `research-conductor` (rollup, gate, checkpoint) | `engine.assessment gate` PASS, then `assemble checkpoint --stage SCORING_PASS --push` |
-| `REPORTS_OPEN` | gate PASS, `engine.narrative state` not READY | `report-*-producer` for OPEN/SHORT/REVISE sections, `report-validator` for UNREVIEWED | both reports READY |
+| `REPORT_PRECONDITIONS_OPEN` | gate PASS, `engine.narrative preconditions --report assessment` lists a failure (the stage's Solution_Catalogue / Platform_Peer_Adoption tabs empty and undeclared) | `research-conductor` (`assessment solution`, `peer-adoption`, `completeness declare`) | the preconditions list is empty — found by the hook walk on 2026-09-04, when a run in this shape sent two report producers into `narrative write`'s refusal |
+| `REPORTS_OPEN` | gate PASS, preconditions hold, `engine.narrative state` not READY | `report-*-producer` for OPEN/SHORT/REVISE sections, `report-validator` for UNREVIEWED | both reports READY |
 | `PACKAGE_UNSHIPPED` | both READY, `run_manifest.json` not COMPLETE | `research-conductor` (`assemble package --push`) | manifest `status: COMPLETE` |
 | `SHIPPED` | manifest COMPLETE | nobody here — the package scan and the synthesis lanes | — |
 

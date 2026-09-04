@@ -140,7 +140,8 @@ judgment unnecessary for the pipeline's own commands.
 `engine.watchdog.COMPLETION_CRITERIA` names, per state, the gate that closes
 it. The research half was already computed (PRELIM_OPEN … READY_FOR_HANDOFF);
 the assessment half is new: `SCORING_OPEN` → `CRITIC_PENDING` →
-`SCORING_GATE_OPEN` → `REPORTS_OPEN` → `PACKAGE_UNSHIPPED` → `SHIPPED`, each
+`SCORING_GATE_OPEN` → `REPORT_PRECONDITIONS_OPEN` → `REPORTS_OPEN` →
+`PACKAGE_UNSHIPPED` → `SHIPPED`, each
 with the agent that owns the next unit of work (`parallel` lanes for the
 four scorers and the two report producers). This is what "the scoring
 agents fire once research is done, the report writers and the validator
@@ -326,6 +327,77 @@ production intake tree or by passing `--promote-ready` against a client's
 run: both would put content in front of the scan and the synthesis lanes
 that no person asked for.
 
+## 9 · Stressed, not assumed (2026-09-04, before landing)
+
+The owner's instruction before the merge: "stress test solutions above to
+check that everything functions as required rather than assuming
+functionality." Four stresses, each against the real artefact, each of
+which found something the unit tests had not.
+
+**9.1 The approval grammar, attacked.** A corpus of 290 commands shaped to
+slip past ONE check each — `scripts/tests/test_autoapprove_adversarial.py`,
+now the regression gate — run through the real hook as a subprocess. The
+first version of the hook approved **58** of them: a second command behind
+an unquoted newline (`ls\ngit push origin main`); globs, `..` and variables
+that land on the key directory's own level (`cat /root/.dma/*.json`,
+`X=sa; cat /root/.dma/$X.json`, `grep -r private_key /root/.dma`); `git
+config core.sshCommand …` and its siblings, which run a program on the next
+innocent git call; `import os as o` and `from os import system`, which the
+alias-blind regex missed; `rm -rf /root/.dma` (a root itself, not a write
+into one); a write to the plugin's own `.mcp.json` and `hooks/hooks.json`;
+`command git push`. Every one is refused now, by construction rather than
+by pattern: unquoted newlines are separators, the secret LEVEL (not just
+the file names) is unnameable by any shell verb through any spelling,
+`cd` is tracked across segments, `$VAR` and `$(…)` inside a path draw no
+decision, inline python imports from an allow-list of modules, `git config`
+reads or sets `user.*` only, and the trust-boundary files joined
+NEVER_WRITE. The pipeline's own 125 harvested commands still pass
+(`audit_builtin_approvals.py --strict`), and the hook answers in ~50 ms.
+
+**9.2 One run, every stage, the hook as the harness fires it.**
+`scripts/tests/test_stage_advance_walk.py` builds a run through the
+engine's own writers and drives it READY_FOR_HANDOFF → SCORING_OPEN →
+CRITIC_PENDING → SCORING_GATE_OPEN → … → SHIPPED, invoking the real Stop
+and PostToolUse hooks at each state. It found a **missing state**: the
+SCORING gate passes with the stage's Solution_Catalogue and
+Platform_Peer_Adoption tabs empty, and `engine.narrative write` refuses
+every section until they are filled or declared — so a run in that shape
+read REPORTS_OPEN and dispatched two report producers into a refusal. The
+watchdog now asks the report tier's own door first and reports
+`REPORT_PRECONDITIONS_OPEN`, owned by the conductor, with the three
+commands that close it. Also proved on the walk: one block per state and
+never a second; `stop_hook_active` honoured; partial progress inside a
+state does not re-block; SHIPPED never blocks and hands over to the
+synthesis side; the marker survives sixteen concurrent Stop hooks (it is
+now written atomically); and the hook answers in **0.45 s per run** on a
+real workbook — twelve runs in the root stay far inside the 90 s hook
+timeout.
+
+**9.3 A real headless child, on a real run.** `agent_run.py --agent
+scoring-p1-producer` in `dontAsk` mode against a SCORING_OPEN run built by
+the engine, with the healed plugin's hooks bound: 19 turns, 17 tool calls
+(15 Bash through `engine.assessment score`, 2 Read), **`permission_denials:
+[]`**, `SCORED 6 of 6, refused: none`, 196 s, $0.68. `engine.assessment
+state` afterwards: scored 6/6, overall 2.88. The Stop hook fired in the
+child and blocked once at CRITIC_PENDING (marker
+`07_qa/stage_advance.json`); the child answered in one line that the
+critic is not its role and ended cleanly — the loop guard holding, no
+hang, the next unit of work named for the conductor.
+
+**9.4 The reconcilers against fresh live data.** A fresh `list_triggers`
+(2026-09-04) shows all six LIVE Routines `enabled: false`, no
+`ended_reason`, no `suspension_reason` — a person paused them; lane A
+still the only one carrying Clay + Google-Drive, drift-daily Google-Drive,
+none Exa or Tavily. `routine_sync.py diff --live`: every lane in sync with
+the canon. `routine_health.py` reported 0/6 healthy and **0 needing
+attention**, and the readiness board's routines lane read READY on a
+schedule that fires nothing — the same vacuous green the empty-account
+case was fixed for. DISABLED now counts as needing attention; the lane
+reads BLOCKED with the owner's next move. The schema lane also read NOT
+MEASURABLE while PostgreSQL was up: the system cluster does not survive
+the shell that started it in this container, so `pg_ctlcluster 16 main
+start` precedes the measurement and the lane reads READY.
+
 ## How to re-ask every question in this document
 
 ```
@@ -341,6 +413,8 @@ python3 plugins/dma-insights/scripts/readiness.py --triggers <list_triggers.json
 bash infra/local/up.sh                                                      # real PostgreSQL 16, schema at head
 LOCAL_DATABASE_URL='postgresql://postgres:local@localhost:5432/dma_insights' \
   python3 -m pytest tests/schema/ apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ -q -rs
+python3 -m pytest plugins/dma-insights/scripts/tests/test_autoapprove_adversarial.py \
+  plugins/dma-insights/scripts/tests/test_stage_advance_walk.py -q          # the two stresses
 python3 plugins/dma-insights/scripts/run_gate.py pick --count 1             # live queue, read-only
 python3 scripts/synthesis_watchdog.py --state /tmp/wd.json --json           # live serving tier, observe only
 ```

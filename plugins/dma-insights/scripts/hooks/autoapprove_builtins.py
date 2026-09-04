@@ -27,7 +27,7 @@ could not run headless.
 WHAT IT APPROVES, and the reason each line is as narrow as it is:
 
   Bash   a command whose EVERY segment (split on `&&`, `||`, `;`, `|`, and
-         newlines) is one of:
+         unquoted newlines) is one of:
            * the research engine:      python3 -m engine.<module> …
            * a plugin script:          python3 <plugin>/scripts/*.py …
                                        python3 <plugin>/skills/*/scripts/*.py …
@@ -38,21 +38,29 @@ WHAT IT APPROVES, and the reason each line is as narrow as it is:
            * a read-only shell verb: ls, find, grep, rg, sed -n, head, tail,
              wc, cut, sort, uniq, tr, jq, cat, stat, du, date, echo, printf,
              test, true, cd, mkdir -p, cp, mv, touch, diff, basename …
-           * git, without a push: status, log, diff, show, fetch, checkout,
-             branch, rev-parse, add, commit, stash, remote -v. `git push` is
-             NOT here: the synthesis Routines are forbidden to push and the
-             rectifier's push rides the harness's own credential path, so a
-             push stays a decision a person (or the harness) makes.
-           * inline python (`python3 -c`, `python3 - <<'PY'`) ONLY when the
-             code names none of the process-, network- or filesystem-mutating
-             modules in INLINE_BANNED — an interpreter is a shell, and this
-             list is what keeps "python3 -c" from being a hole in the wall.
+           * git, without a push and without a configuration that runs a
+             command: status, log, diff, show, fetch, checkout, branch,
+             rev-parse, add, commit, stash, remote -v, `config --get`.
+             `git push` is NOT here: the synthesis Routines are forbidden
+             to push and the rectifier's push rides the harness's own
+             credential path, so a push stays a decision a person (or the
+             harness) makes. Neither is `git config <key> <value>` beyond
+             `user.*`: sshCommand, pager, fsmonitor, hooksPath and alias
+             each run a program on the next innocent-looking git call.
+           * inline python (`python3 -c`, `python3 - <<'PY'`) ONLY when
+             every module it imports is in INLINE_MODULES (json, re, csv,
+             datetime, openpyxl …) and the code names nothing in
+             INLINE_BANNED — an interpreter is a shell, and an allow-list
+             of modules is what keeps "python3 -c" from being a hole in the
+             wall. `import os as o` is refused by the import, not by a
+             regex that has to guess the alias.
          Redirections (`>`, `>>`) are allowed only INTO a write root (below).
          Anything this parser cannot read — `eval`, `exec`, `sudo`, `xargs`,
-         `source`, backgrounding with `&`, a pipe INTO an interpreter — draws
-         NO decision and falls through exactly as before. So the blast radius
-         of this file being wrong is "the routine still asks", never "the
-         routine did something nobody sanctioned".
+         `source`, backgrounding with `&`, a pipe INTO an interpreter, an
+         unresolved `$VAR` or `$(…)` inside a path — draws NO decision and
+         falls through exactly as before. So the blast radius of this file
+         being wrong is "the routine still asks", never "the routine did
+         something nobody sanctioned".
 
   Write / Edit / MultiEdit / NotebookEdit
          a target under one of the WRITE ROOTS: the run root
@@ -60,9 +68,20 @@ WHAT IT APPROVES, and the reason each line is as narrow as it is:
          `/root/.dma` (packages, bundles, ledgers, agent logs), the scratch
          dirs, and — inside the repository — ONLY the plugin tree, `fixtures/`,
          `scripts/`, `tests/` and `docs/`: the rectifier's writer scope. The
-         deployables (`apps/`, `infra/`, `migrations/`, `packages/`) and every
+         deployables (`apps/`, `infra/`, `migrations/`, `packages/`), every
          settings or credential file (`.claude/`, `sa.json`, `pathtok`,
-         `slack_token`, `.env`) draw no decision from here, ever.
+         `slack_token`, `.env`) and the plugin's own trust boundary
+         (`.mcp.json`, `hooks/hooks.json`) draw no decision from here, ever.
+
+THE SECRET LEVEL. The service-account key and the connector path token live
+at the TOP of `/root/.dma`, beside the run roots the agents legitimately read
+underneath it. So the top level of that directory — and of `~/.claude`, and
+the ancestors `/root`, `/home`, `/etc`, `/` — is a level no shell verb here
+may name: not by its literal path, not through a glob whose literal prefix
+lands there (`/root/.dma/*.json`), not through `..` (`/root/.dma/runs/..`),
+not through a variable or a `$(…)` assembled inside a path, and not by
+archiving or recursing the directory itself. Deeper paths
+(`/root/.dma/runs/R/07_qa/*.json`) are the pipeline's and stay approved.
 
 THE DENY HOOKS STILL WIN. `deny_credential_ops.py` and `deny_bulk_read.py`
 run beside this one and the harness resolves deny over allow — but this file
@@ -73,6 +92,13 @@ resolution order nobody should have to bet a firing on.
 FAIL-OPEN AND SILENT. Unreadable input, a tool this file does not know, a
 command it cannot parse: no output, no decision, exit 0. The hook must never
 crash and must never deny — denial is the two guards' job.
+
+STRESSED, NOT ASSUMED. `tests/test_autoapprove_adversarial.py` holds the
+corpus that found the first version of this file approving 58 shapes it
+should not have (2026-09-04): newline-smuggled second commands, globs and
+variables reaching the key directory, `git config core.sshCommand`, `import
+os as o`, `rm -rf` on a write root itself, a write to `.mcp.json`. Every
+one of them is refused now and the corpus is the regression gate.
 """
 from __future__ import annotations
 
@@ -92,6 +118,7 @@ except Exception:                                  # noqa: BLE001
     _bulk = _cred = None
 
 EDIT_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
+PLUGIN_DIR = HERE.parents[1]
 
 # ── where a run may write ────────────────────────────────────────────────
 
@@ -109,7 +136,7 @@ def _repo_root() -> Path | None:
         v = os.environ.get(env)
         if v and (Path(v) / "plugins" / "dma-insights").is_dir():
             return Path(v)
-    cwd = Path(os.getcwd())
+    cwd = Path(_CWD)
     for c in (cwd, *cwd.parents):
         if (c / "plugins" / "dma-insights").is_dir():
             return c
@@ -123,11 +150,16 @@ def _repo_root() -> Path | None:
 REPO_WRITABLE = ("plugins/dma-insights", "fixtures", "scripts", "tests",
                  "docs", ".qa")
 
-#: Files that carry a credential or the session's own permission posture.
-#: Never approved from here whatever root they sit under.
+#: Files that carry a credential, the session's own permission posture, or
+#: the plugin's trust boundary (its MCP server URL and its hooks). Never
+#: approved from here whatever root they sit under.
 NEVER_WRITE = re.compile(
     r"(^|/)(\.claude(\.json)?|settings(\.local)?\.json|sa\.json|pathtok|"
-    r"slack_token|\.env[^/]*|id_rsa[^/]*|\.netrc|\.git/config)(/|$)")
+    r"slack_token|\.env[^/]*|id_rsa[^/]*|\.netrc|\.git/config|\.mcp\.json|"
+    r"hooks/hooks\.json)(/|$)")
+
+#: The event's cwd — the harness sends it; relative paths resolve against it.
+_CWD = os.getcwd()
 
 
 def write_roots() -> list[Path]:
@@ -145,23 +177,40 @@ def write_roots() -> list[Path]:
     return roots
 
 
-def _under(path: Path, root: Path) -> bool:
+def _under(path: Path, root: Path, strict: bool = False) -> bool:
     try:
-        path.resolve().relative_to(root.resolve())
-        return True
+        rel = path.resolve().relative_to(root.resolve())
     except (ValueError, OSError):
         return False
+    return not (strict and str(rel) == ".")
 
 
-def path_is_writable(raw: str) -> bool:
-    if not isinstance(raw, str) or not raw.strip():
-        return False
+def _abs(raw: str) -> Path:
     p = Path(os.path.expanduser(raw.strip()))
     if not p.is_absolute():
-        p = Path(os.getcwd()) / p
+        p = Path(_CWD) / p
+    return p
+
+
+def path_is_writable(raw: str, strict: bool = False,
+                     cwd: str | None = None) -> bool:
+    """`strict` — the path must lie INSIDE a root, never be the root itself
+    (an `rm -rf` on `/root/.dma` is not a write into it)."""
+    if not isinstance(raw, str) or not raw.strip():
+        return False
+    if "$" in raw or "__SUBST__" in raw:
+        return False                        # an unresolved name is no path
+    p = Path(os.path.expanduser(raw.strip()))
+    if not p.is_absolute():
+        p = Path(cwd or _CWD) / p
     if NEVER_WRITE.search(str(p)):
         return False
-    return any(_under(p, r) for r in write_roots())
+    try:
+        if NEVER_WRITE.search(str(p.resolve())):
+            return False
+    except OSError:
+        return False
+    return any(_under(p, r, strict) for r in write_roots())
 
 
 # ── the shell grammar ────────────────────────────────────────────────────
@@ -183,6 +232,15 @@ READ_VERBS = frozenset({
     "unset", "rm",
 })
 
+#: Verbs whose arguments are not file paths the SHELL opens, so an
+#: unresolved `$VAR` or a lifted `$(…)` among them is data, not a path this
+#: grammar failed to see. Every other verb refuses such a token.
+VAR_TOLERANT = frozenset({
+    "echo", "printf", "test", "[", "true", "false", "cd", "export", "unset",
+    "date", "sleep", "python3", "python", "git", "claude", "pytest", "bash",
+    "sh", "mkdir", "basename", "dirname", "which", "command", "type",
+})
+
 #: Git subcommands that read, or write only the LOCAL clone. No push.
 GIT_OK = frozenset({
     "status", "log", "diff", "show", "fetch", "checkout", "switch", "branch",
@@ -191,15 +249,42 @@ GIT_OK = frozenset({
     "clone", "pull", "worktree",
 })
 
-#: Tokens that make an inline python program a shell in disguise. Any one of
-#: them and the program draws no decision.
+#: A git token that makes the NEXT git call run a program, or reaches a
+#: credential. Any one of them and the segment draws no decision.
+GIT_BAD = re.compile(
+    r"^(-c|--config(-env)?|-C)$|^--config=|sshCommand|core\.pager|"
+    r"core\.fsmonitor|core\.editor|core\.hooksPath|hooksPath|^alias\.|"
+    r"--upload-pack|--receive-pack|--exec|credential|sequence\.editor|"
+    r"diff\.external|\.textconv|filter\..*\.(clean|smudge)|^!|"
+    r"url\..*insteadof|http\.proxy|core\.askpass|GIT_SSH", re.I)
+
+#: `git config` forms that only read. A set is allowed for `user.*` alone.
+GIT_CONFIG_READ = frozenset({"--get", "--get-all", "--get-regexp", "--list",
+                             "-l", "--show-origin", "--show-scope"})
+
+#: Modules inline python may import. Anything else — os, subprocess, shutil,
+#: socket, glob, importlib, ctypes … — and the program draws no decision.
+INLINE_MODULES = frozenset({
+    "json", "re", "sys", "math", "csv", "datetime", "collections",
+    "itertools", "functools", "statistics", "textwrap", "string", "decimal",
+    "fractions", "hashlib", "pathlib", "typing", "dataclasses", "enum",
+    "copy", "operator", "pprint", "time", "uuid", "random", "io", "base64",
+    "difflib", "unicodedata", "html", "argparse", "heapq", "bisect",
+    "openpyxl", "docx", "pypdf",
+})
+
+#: Tokens that make an inline python program a shell in disguise, whatever
+#: it imported. Any one of them and the program draws no decision.
 INLINE_BANNED = re.compile(
     r"\b(subprocess|os\.system|os\.popen|os\.exec\w*|os\.spawn\w*|os\.remove|"
     r"os\.unlink|os\.rmdir|os\.rename|shutil|socket|http\.client|urllib|"
     r"requests|httpx|aiohttp|ftplib|smtplib|pty|ctypes|importlib|__import__|"
-    r"eval|exec|compile|open\([^)]*['\"][wax]|pathlib[^\n]*write_|"
-    r"\.write_text|\.write_bytes|\.unlink\(|\.rmdir\(|rmtree|chmod|chown|"
-    r"setattr|globals\(\)|builtins)\b")
+    r"eval|exec|compile|rmtree|chmod|chown|setattr|getattr|builtins|"
+    r"__dict__|__class__|__subclasses__|sys\.modules|sys\.path|environ)\b"
+    r"|open\([^)]*['\"][wax]"           # open(…, 'w'|'a'|'x')
+    r"|open\(\s*[^'\"\s)]"              # open(<not a literal>) — a built path
+    r"|\.write_(text|bytes)\(|\.unlink\(|\.rmdir\(|\.save\(|\.touch\(|"
+    r"\.mkdir\(|\.rename\(|\.replace\(|globals\(|vars\(|locals\(")
 
 #: Words this parser will not reason about, wherever they appear as a token
 #: (a verb, an argument to `timeout`, a `find -exec`). Their presence means
@@ -230,8 +315,66 @@ ENGINE_MOD = re.compile(r"^engine(\.[A-Za-z_][A-Za-z0-9_]*)+$")
 #: command that so much as NAMES one draws no decision — reading a key with
 #: `cat` or `open()` is not a read this hook will ever wave through.
 SECRET_PATHS = re.compile(
-    r"sa\.json|pathtok|slack_token|/\.claude(\.json|/)|\.netrc|id_rsa|"
-    r"\.env\b|/etc/(passwd|shadow|sudoers)", re.I)
+    r"sa\.json|pathtok|slack_token|/\.claude(\.json|/(?!plugins/)|$)|"
+    r"\.netrc|id_rsa|\.env\b|/etc/(passwd|shadow|sudoers)", re.I)
+
+#: Inline python naming the TOP of the key directory — `'/root/.dma/' +
+#: 'sa.json'`, `'/root/.dma/x.json'` — as opposed to a run root beneath it.
+INLINE_SECRET_LEVEL = re.compile(r"/root/\.dma(?!/[\w.-]+/)")
+
+#: Environment names a command may reference and this grammar will resolve.
+#: Anything else stays a `$` and is refused where a path is expected.
+SAFE_ENV = ("HOME", "DMA_RUN_ROOT", "DMA_ARTIFACT_ROOT", "DMA_BUNDLE_CACHE",
+            "CLAUDE_PLUGIN_ROOT", "CLAUDE_PROJECT_DIR", "TMPDIR", "PWD")
+
+_GLOB = frozenset("*?[{")
+_VAR = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)")
+
+
+def _secret_dirs() -> set[str]:
+    """The levels a shell verb may not name: the key directory, the settings
+    directories, and their ancestors. The repository root is NOT here — its
+    `.claude/` is, and NEVER_WRITE / SECRET_PATHS cover the file itself."""
+    home = str(Path.home())
+    dirs = {"/", "/root", "/home", "/etc", "/root/.dma", "/root/.claude",
+            home, os.path.join(home, ".dma"), os.path.join(home, ".claude")}
+    repo = _repo_root()
+    if repo:
+        dirs.add(str(repo / ".claude"))
+    return dirs
+
+
+def _reaches_secret_level(tok: str, cwd: str) -> bool:
+    """A token that names the secret level itself: the directory, an
+    ancestor of it, or a glob / `..` whose literal part lands there. A
+    relative token resolves against the cwd the command has `cd`-ed to."""
+    if not tok or tok.startswith("-"):
+        return False
+    t = os.path.expanduser(tok)
+    has_glob = any(c in _GLOB for c in t)
+    if not t.startswith("/"):
+        t = os.path.join(cwd, t)             # `cd /root; grep -r x .dma`
+    dirs = _secret_dirs()
+    if has_glob:
+        i = min(t.index(c) for c in _GLOB if c in t)
+        lit = t[:i]
+        if not lit or "/" not in lit:
+            return False                    # `[EVIDENCE] …`, `*.xlsx`
+        d = lit if lit.endswith("/") else os.path.dirname(lit)
+        return os.path.normpath(d) in dirs
+    return os.path.normpath(t) in dirs
+
+
+def _expand(tok: str, assigns: dict) -> str:
+    def sub(m):
+        name = m.group(1) or m.group(2)
+        if name in assigns:
+            return assigns[name]
+        if name in SAFE_ENV and os.environ.get(name):
+            return os.environ[name]
+        return m.group(0)
+    return _VAR.sub(sub, tok)
+
 
 _HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[ \t]*\n")
 
@@ -258,6 +401,37 @@ def _lift_heredocs(command: str) -> tuple[str, list[str]] | None:
     return "".join(out), bodies
 
 
+def _newlines_are_separators(s: str) -> str | None:
+    """An unquoted newline ends a command as surely as `;` — `ls\\ngit push`
+    is two commands. Quoted newlines are data. A backslash-newline
+    continuation is whitespace."""
+    out, q, i = [], None, 0
+    while i < len(s):
+        c = s[i]
+        if c == "\\" and i + 1 < len(s) and q != "'":
+            if s[i + 1] == "\n":
+                out.append(" ")
+            else:
+                out.append(s[i:i + 2])
+            i += 2
+            continue
+        if q:
+            if c == q:
+                q = None
+            out.append(c)
+        elif c in ("'", '"'):
+            q = c
+            out.append(c)
+        elif c == "\n":
+            out.append(" ; ")
+        else:
+            out.append(c)
+        i += 1
+    if q:
+        return None                          # unterminated quote
+    return "".join(out)
+
+
 def _split_segments(command: str) -> tuple[list[str], list[str]] | None:
     """(segments, heredoc bodies), or None when the command has a construct
     the grammar does not reason about.
@@ -266,11 +440,15 @@ def _split_segments(command: str) -> tuple[list[str], list[str]] | None:
     engine's own `--excerpt "…; …"` and `--rationale "[EVIDENCE] …; …"` are
     exactly that shape. `$(…)` substitutions are lifted OUT and checked as
     their own segments — `W=$(python3 -m engine.cli …)` is a shape the
-    conductor's own manifest uses."""
+    conductor's own manifest uses — and the place they were lifted from
+    carries a `__SUBST__` marker so a path built around one is refused."""
     lifted = _lift_heredocs(command)
     if lifted is None:
         return None
     flat, bodies = lifted
+    flat = _newlines_are_separators(flat)
+    if flat is None:
+        return None
     segs: list[str] = []
 
     def _lift_subst(s: str) -> str | None:
@@ -371,30 +549,66 @@ def _redirect_targets(tokens: list[str]) -> tuple[list[str], list[str]]:
     return keep, targets
 
 
-def _drop_env_prefix(tokens: list[str]) -> list[str]:
+def _split_env_prefix(tokens: list[str]) -> tuple[list[tuple[str, str]], list[str]]:
+    pre: list[tuple[str, str]] = []
     while tokens and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[0]):
+        name, _, value = tokens[0].partition("=")
+        pre.append((name, value))
         tokens = tokens[1:]
-    return tokens
+    return pre, tokens
+
+
+def _imports_ok(code: str) -> bool:
+    for m in re.finditer(r"\b(?:import|from)\s+([\w.]+(?:\s*,\s*[\w.]+)*)", code):
+        for name in re.split(r"\s*,\s*", m.group(1)):
+            if name.split(".")[0] not in INLINE_MODULES:
+                return False
+    return True
+
+
+def _inline_ok(code: str) -> bool:
+    if not code.strip():
+        return False
+    if INLINE_BANNED.search(code) or SECRET_PATHS.search(code):
+        return False
+    if INLINE_SECRET_LEVEL.search(code):
+        return False
+    return _imports_ok(code)
 
 
 def _python_ok(argv: list[str], heredoc: str) -> bool:
     """`python3 …`: the engine, a plugin or repo script, pytest, or inline
-    code that names nothing in INLINE_BANNED."""
+    code that imports only INLINE_MODULES and names nothing in INLINE_BANNED."""
     args = argv[1:]
     if not args:
         return False
+    if args[0] in ("--version", "-V", "-VV"):
+        return len(args) == 1
     if args[0] == "-m":
         if len(args) < 2:
             return False
         mod = args[1]
-        return bool(ENGINE_MOD.match(mod)) or mod in ("pytest", "json.tool")
+        if ENGINE_MOD.match(mod):
+            return True
+        if mod == "pytest":
+            rest = args[2:]
+            for i, a in enumerate(rest):
+                if a in ("-p", "--plugin") or a.startswith("-p"):
+                    val = a[2:] if len(a) > 2 else (rest[i + 1] if i + 1 < len(rest) else "")
+                    if not val.startswith("no:"):
+                        return False
+                if a.startswith("--rootdir") or a.startswith("-c") and a != "-c":
+                    return False
+            return True
+        return mod == "json.tool"
     if args[0] == "-c":
-        code = " ".join(args[1:])
-        return bool(code.strip()) and not INLINE_BANNED.search(code)
+        return _inline_ok(" ".join(args[1:]))
     if args[0] == "-":
-        return bool(heredoc.strip()) and not INLINE_BANNED.search(heredoc)
+        return _inline_ok(heredoc)
     if args[0].startswith("-"):
-        # -u, -B, -W … then the script
+        # -u, -B, -W … then the script; never -c/-m hidden behind a flag
+        if any(a in ("-c", "-m") for a in args):
+            return False
         rest = [a for a in args if not a.startswith("-")]
         return bool(rest) and _script_ok(rest[0])
     return _script_ok(args[0])
@@ -406,7 +620,6 @@ def _python_ok(argv: list[str], heredoc: str) -> bool:
 #: skill directory, `python scripts/ship_page.py` from the surface-production
 #: skill) that the regexes cannot see the target of. Resolved against the
 #: event's cwd, then checked against the same roots.
-_CWD = os.getcwd()
 
 
 def _script_roots() -> list[Path]:
@@ -421,17 +634,12 @@ def _script_roots() -> list[Path]:
     return roots
 
 
-PLUGIN_DIR = HERE.parents[1]
-
-
 def _script_ok(path: str) -> bool:
     if PLUGIN_PATH.match(path) or REPO_SCRIPT.match(path):
         return True
     if not path.endswith(".py") or "$" in path:
         return False
-    p = Path(os.path.expanduser(path))
-    if not p.is_absolute():
-        p = Path(_CWD) / p
+    p = _abs(path)
     try:
         rp = p.resolve()
     except OSError:
@@ -439,63 +647,123 @@ def _script_ok(path: str) -> bool:
     return rp.is_file() and any(_under(rp, r) for r in _script_roots())
 
 
-def _segment_ok(segment: str, bodies: list[str]) -> bool:
+def _wrapped(tokens: list[str]) -> list[str] | None:
+    """Peel `timeout [-k N] [-s SIG] DURATION cmd…` and `command [-p] cmd…`
+    down to the command they run. `command -v x` / `type x` / `which x`
+    are queries and stay as they are. None when the wrapper is malformed."""
+    while tokens:
+        v = tokens[0]
+        if v == "timeout":
+            i = 1
+            while i < len(tokens) and tokens[i].startswith("-"):
+                i += 2 if tokens[i] in ("-k", "-s", "--kill-after", "--signal") else 1
+            if i + 1 >= len(tokens):
+                return None
+            tokens = tokens[i + 1:]
+            _, tokens = _split_env_prefix(tokens)
+            continue
+        if v == "command":
+            flags = [a for a in tokens[1:] if a.startswith("-")]
+            if any(f in ("-v", "-V") for f in flags):
+                return tokens                  # a query: `command -v claude`
+            tokens = [a for a in tokens[1:] if not a.startswith("-")]
+            continue
+        break
+    return tokens
+
+
+def _segment_ok(segment: str, bodies: list[str], ctx: dict) -> bool:
+    """`ctx` carries what earlier segments of the same command established:
+    `assigns` (NAME=value) and `cwd` (after a `cd`), so a later segment's
+    `$NAME` and relative paths are judged where the shell would put them."""
+    assigns, cwd = ctx["assigns"], ctx["cwd"]
     line, heredoc = _strip_heredoc(segment, bodies)
     if SECRET_PATHS.search(line) or SECRET_PATHS.search(heredoc):
         return False
-    line = line.replace("__SUBST__", "SUBST")
     try:
         tokens = shlex.split(line, posix=True)
     except ValueError:
         return False
+    pre, tokens = _split_env_prefix(tokens)
+    for name, value in pre:
+        assigns[name] = _expand(value, assigns)
+    tokens = [_expand(t, assigns) for t in tokens]
+    if SECRET_PATHS.search(" ".join(tokens)):
+        return False                      # assembled from pieces or a $VAR
     tokens, targets = _redirect_targets(tokens)
     for t in targets:
-        if not path_is_writable(t.replace("SUBST", "")):
+        if not path_is_writable(t, strict=True, cwd=cwd):
             return False
-    tokens = _drop_env_prefix(tokens)
     if not tokens:
         return True                                 # a bare assignment
-    # `timeout 600 cmd …` — check the wrapped command
-    if tokens[0] == "timeout" and len(tokens) > 2:
-        tokens = tokens[2:]
-        tokens = _drop_env_prefix(tokens)
+    tokens = _wrapped(tokens)
+    if not tokens:
+        return False
     verb = tokens[0]
     if verb not in READ_VERBS:
         return False
+    args = tokens[1:]
+    if verb not in VAR_TOLERANT:
+        for a in args:
+            if "$" in a or "__SUBST__" in a:
+                return False                # a path the grammar cannot see
+    if any(_reaches_secret_level(a, cwd) for a in args):
+        return False
+    if verb == "cd":
+        target = next((a for a in args if not a.startswith("-")), "")
+        if not target or "$" in target or "__SUBST__" in target:
+            return False                    # a cwd the grammar cannot follow
+        ctx["cwd"] = os.path.normpath(os.path.join(
+            cwd, os.path.expanduser(target)))
+        return True
     if verb in ("python3", "python"):
         return _python_ok(tokens, heredoc)
     if verb in ("bash", "sh"):
-        rest = [a for a in tokens[1:] if not a.startswith("-")]
+        rest = [a for a in args if not a.startswith("-")]
         return bool(rest) and bool(PLUGIN_PATH.match(rest[0])) \
             and rest[0].endswith(".sh")
     if verb == "git":
-        sub = next((a for a in tokens[1:] if not a.startswith("-")), "")
-        return sub in GIT_OK
+        if any(GIT_BAD.search(a) for a in args):
+            return False
+        sub = next((a for a in args if not a.startswith("-")), "")
+        if sub not in GIT_OK:
+            return False
+        if sub == "config":
+            rest = [a for a in args[args.index("config") + 1:]]
+            if any(a in GIT_CONFIG_READ for a in rest):
+                return True
+            keys = [a for a in rest if not a.startswith("-")]
+            return bool(keys) and keys[0].startswith("user.")
+        return True
     if verb == "claude":
         return "-p" in tokens and any(a.startswith("dma-insights:")
                                       for a in tokens)
+    if verb == "export":
+        return bool(args) and all(re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", a)
+                                  for a in args)
     if verb == "rm":
-        # only inside a write root, never recursive-force on a root itself
-        paths = [a for a in tokens[1:] if not a.startswith("-")]
-        return bool(paths) and all(path_is_writable(p) and
+        # only strictly inside a write root, never a root itself
+        paths = [a for a in args if not a.startswith("-")]
+        return bool(paths) and all(path_is_writable(p, strict=True, cwd=cwd) and
                                    Path(p).name not in ("", ".", "..", "*")
                                    for p in paths)
     if verb in ("cp", "mv", "tee", "touch", "mkdir"):
         # the destination (last non-flag arg) must be writable; a read from
-        # anywhere is fine
-        paths = [a for a in tokens[1:] if not a.startswith("-")]
+        # anywhere below the secret level is fine
+        paths = [a for a in args if not a.startswith("-")]
         if not paths:
             return False
         dests = paths[-1:] if verb in ("cp", "mv") else paths
-        return all(path_is_writable(d) for d in dests)
+        return all(path_is_writable(d, cwd=cwd) for d in dests)
     if verb == "sed":
         # in-place editing is a write; require a writable target
-        if any(a.startswith("-i") for a in tokens[1:]):
+        if any(a.startswith("-i") for a in args):
             files = [a for a in tokens[2:] if not a.startswith("-")][1:]
-            return bool(files) and all(path_is_writable(f) for f in files)
+            return bool(files) and all(path_is_writable(f, cwd=cwd)
+                                       for f in files)
         return True
-    if verb == "cd":
-        return True
+    if verb in ("command", "type", "which"):
+        return all("/" not in a for a in args)
     return True
 
 
@@ -506,7 +774,8 @@ def bash_ok(command: str) -> bool:
     if split is None:
         return False
     segs, bodies = split
-    return bool(segs) and all(_segment_ok(s, bodies) for s in segs)
+    ctx: dict = {"assigns": {}, "cwd": _CWD}
+    return bool(segs) and all(_segment_ok(s, bodies, ctx) for s in segs)
 
 
 # ── the two guards, asked first ──────────────────────────────────────────

@@ -182,10 +182,15 @@ def _record_block(row: dict) -> None:
         return
     try:
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps({"blocked_on": row.get("state"),
-                                 "at": time.strftime("%Y-%m-%dT%H:%M:%SZ",
-                                                     time.gmtime()),
-                                 "detail": row.get("detail")}, indent=1))
+        # write-then-rename: two hook processes finishing together (a batch
+        # of lanes) must leave a marker that is one JSON document or the
+        # other, never an interleaving that the next Stop cannot parse
+        tmp = p.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_text(json.dumps({"blocked_on": row.get("state"),
+                                   "at": time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                                       time.gmtime()),
+                                   "detail": row.get("detail")}, indent=1))
+        os.replace(tmp, p)
     except OSError:
         pass
 

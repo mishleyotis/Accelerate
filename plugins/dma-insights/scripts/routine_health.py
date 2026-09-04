@@ -332,9 +332,14 @@ def report(doc, now: datetime | None = None,
 
     rows.sort(key=lambda r: (r["verdict"] in ("HEALTHY", "IN_FLIGHT"),
                              r["name"]))
+    # DISABLED counts as needing attention. It did not until 2026-09-04,
+    # when all six LIVE Routines came back `enabled: false` and the board's
+    # routines lane read READY on a schedule that fires nothing — the same
+    # vacuous green as the empty-account case above. A person pausing a
+    # Routine the canon declares LIVE is a state the owner must see, not one
+    # the report files under "fine".
     unhealthy = [r for r in rows
-                 if r["verdict"] not in ("HEALTHY", "IN_FLIGHT", "NO_RUN",
-                                         "DISABLED")]
+                 if r["verdict"] not in ("HEALTHY", "IN_FLIGHT", "NO_RUN")]
     return {"routines": rows, "unhealthy": unhealthy,
             "healthy": sum(1 for r in rows if r["verdict"] == "HEALTHY"),
             "declared": len(declared_live(canon)),

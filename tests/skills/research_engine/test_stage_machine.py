@@ -36,7 +36,23 @@ def _gated(tmp_path):
                           "sits a band below digital-leader peers")
     assert A.gate(wb, run.qa_dir)["gate"] == "PASS"
     make_shippable(wb)
+    _close_stage_tabs(wb)
     return run, wb, cells, ev
+
+
+def _close_stage_tabs(wb):
+    """The SCORING stage's own catalogue tabs — filled where there is a
+    platform to name, declared where the fixture's estate has none. Until
+    they are, `engine.narrative write` refuses every section."""
+    from engine import completeness
+    if not [r for r in wb.rows("Solution_Catalogue") if any(r.values())]:
+        A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
+                   platform="Alkami", categories=["P1C1"])
+    if not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())]:
+        completeness.declare(
+            wb, "Platform_Peer_Adoption",
+            "no peer institution's deployment of the named products could be "
+            "examined in this fixture run, so no adoption verdict is recorded")
 
 
 # ── research closed, assessment not open ──────────────────────────────────
@@ -124,6 +140,34 @@ def test_a_failing_gate_names_its_verdict(tmp_path):
 
 
 # ── the report tier, once the gate has passed ─────────────────────────────
+
+def test_a_passing_gate_with_open_preconditions_routes_to_the_conductor(tmp_path):
+    """Found by the hook walk on 2026-09-04: the SCORING gate passes with the
+    stage's catalogue tabs still empty, and `engine.narrative write` refuses
+    every section until they are filled or declared. That is the conductor's
+    unit of work, and it has its own state so the report producers are not
+    dispatched into a refusal."""
+    run, wb, cells, ev = _scored(tmp_path)
+    score_all(wb, cells, ev)
+    A.critique(wb, pillar="P1", verdict="PASS", actor="scoring-critic",
+               note="Re-derived 4 of 6 rows across the capabilities; ceilings hold; "
+                    "differentiation present; would move nothing.")
+    A.rollup(wb, headline="Modern rails, unbuilt member-relationship layer: "
+                          "sits a band below digital-leader peers")
+    assert A.gate(wb, run.qa_dir)["gate"] == "PASS"
+    make_shippable(wb)
+    row = watchdog.inspect(run)
+    assert row["state"] == "REPORT_PRECONDITIONS_OPEN"
+    assert row["state"] in watchdog.AGENT_ADVANCEABLE
+    assert any("Solution_Catalogue" in p for p in row["preconditions"])
+    plan = row["resume"]
+    assert plan["agent"] == "research-conductor"
+    assert "engine.assessment solution" in plan["prompt"]
+    assert "engine.completeness declare" in plan["prompt"]
+    assert row["criterion"]
+    _close_stage_tabs(wb)
+    assert watchdog.inspect(run)["state"] == "REPORTS_OPEN"
+
 
 def test_a_passing_gate_with_no_report_written_routes_to_both_producers(tmp_path):
     run, wb, cells, ev = _gated(tmp_path)

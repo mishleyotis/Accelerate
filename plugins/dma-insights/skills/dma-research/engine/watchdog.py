@@ -199,6 +199,10 @@ COMPLETION_CRITERIA = {
     "SCORING_GATE_OPEN": ("`engine.assessment gate` returns PASS and writes "
                           "07_qa/scoring.json; then `engine.assemble "
                           "checkpoint --stage SCORING_PASS --push`"),
+    "REPORT_PRECONDITIONS_OPEN": (
+        "`engine.narrative preconditions --report assessment` lists nothing: "
+        "every stage tab filled (`engine.assessment solution`, `peer-adoption`) "
+        "or declared with a real reason (`engine.completeness declare`)"),
     "REPORTS_OPEN": ("`engine.narrative state` reads READY for both reports: "
                      "every section written to its control block AND reviewed "
                      "PASS by an actor that did not write it"),
@@ -277,8 +281,26 @@ def post_research_state(wb: RunWorkbook, run: runstate.Run, md: dict) -> tuple:
     manifest = _manifest(md)
     extras["checkpoint_due"] = manifest.get("stage_reached") not in (
         "SCORING_PASS", "REPORTS_READY") and manifest.get("status") != "COMPLETE"
+    # The report tier's own door. `engine.narrative write` refuses a section
+    # while a stage precondition fails — the SCORING gate can PASS with the
+    # Solution_Catalogue and Platform_Peer_Adoption tabs still empty, and a
+    # run in that shape used to read REPORTS_OPEN here, which sent two report
+    # producers to a writer that turned them both away (found by the walk
+    # test, 2026-09-04). Ask the door first; while it is shut, the work is
+    # the conductor's, not the producers'.
     try:
         from . import narrative as N
+        pre = N.stage_preconditions(wb, "assessment", run.qa_dir)
+    except Exception as e:                                # noqa: BLE001
+        pre = [f"preconditions unreadable: {str(e)[:200]}"]
+    if pre:
+        extras["preconditions"] = pre
+        return ("REPORT_PRECONDITIONS_OPEN",
+                "SCORING gate PASS; the report tier's preconditions fail: "
+                + "; ".join(p.split("\n")[0][:120] for p in pre[:4])
+                + (f"; +{len(pre) - 4} more" if len(pre) > 4 else ""),
+                extras)
+    try:
         ns = N.state(wb)
         reports = {k: {"open": v["open"], "ready": v["ready"],
                        "sections": [{"section": s["section"],
@@ -429,6 +451,24 @@ def resume_plan(row: dict) -> dict:
                     f"blocking term, then `engine.assemble checkpoint --stage "
                     f"SCORING_PASS --push` so the scan ingests a scored run."),
                 "why": "the rollup and the gate are the conductor's"}
+    if state == "REPORT_PRECONDITIONS_OPEN":
+        pre = row.get("preconditions") or []
+        return {"actionable": True, "agent": "research-conductor",
+                "prompt": base + (
+                    "The SCORING gate has PASSED but `engine.narrative write` "
+                    "will refuse every section until these hold: "
+                    + " | ".join(p.replace("\n", " ")[:300] for p in pre)
+                    + ". Fill each stage tab that has content to carry "
+                    "(`engine.assessment solution --id … --name … --platform "
+                    "…`, `engine.assessment peer-adoption …`) and declare each "
+                    "that legitimately has none (`engine.completeness declare "
+                    "--sheet <Sheet> --reason '…'`, a real reason — filler is "
+                    "refused). Then `engine.assemble checkpoint --stage "
+                    "SCORING_PASS --push` if not yet pushed. Done when "
+                    "`engine.narrative preconditions --report assessment` "
+                    "lists nothing; the report producers are dispatched next."),
+                "why": ("the stage tabs are the conductor's to close; a report "
+                        "producer sent now is refused at the door")}
     if state == "REPORTS_OPEN":
         agents = _report_agents(row)
         due = row.get("checkpoint_due")
@@ -578,7 +618,7 @@ ACTIONABLE = ("UNREADABLE", "HALTED", "STALLED", "GATE_FAILED", "UNGATED",
               "MISSING_LOCALLY", "READY_FOR_HANDOFF",
               # the assessment-stage machine (2026-09-03)
               "SCORING_OPEN", "CRITIC_PENDING", "SCORING_GATE_OPEN",
-              "REPORTS_OPEN", "PACKAGE_UNSHIPPED")
+              "REPORT_PRECONDITIONS_OPEN", "REPORTS_OPEN", "PACKAGE_UNSHIPPED")
 
 #: States an AGENT can advance without a person: the ones a stage-advance
 #: hook may keep a session working on, and the watchdog may revive.
