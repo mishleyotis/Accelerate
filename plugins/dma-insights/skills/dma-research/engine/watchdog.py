@@ -168,6 +168,13 @@ def resume_plan(row: dict) -> dict:
     state = row.get("state")
     run_id, root = row.get("run_id"), row.get("root")
     where = f"--run {run_id}" + (f" --root {root}" if root else "")
+    #: THE DRIVER is how a resumable run continues (2026-09-03, issues 6–9):
+    #: `engine.pipeline run` reads the workbook, finds the first stage whose
+    #: done-predicate is false, and dispatches THAT lane over a brief —
+    #: rather than a hand-written resume prompt to one agent. `agent` and
+    #: `prompt` stay on the plan for a container without the driver.
+    pipeline_cmd = ["python3", "-m", "engine.pipeline", "run", "--run", str(run_id)] \
+        + (["--root", root] if root else [])
     base = (f"Resume DMA research run {run_id} for {row.get('entity')}. "
             f"The run root is {root}. Read `engine.cli orient {where}` FIRST "
             f"and work its do_first list in order. ")
@@ -185,6 +192,7 @@ def resume_plan(row: dict) -> dict:
                 "why": "the folder is opened by a command, not an agent"}
     if state == "PRELIM_OPEN":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     f"PRELIM is open: {', '.join(row.get('prelim_open') or [])}. "
                     f"Close every open PRELIM section — the conductor owns "
@@ -208,11 +216,12 @@ def resume_plan(row: dict) -> dict:
             "AT_BUDGET_CEILING": "The run hit its search-op ceiling and must "
                                  "checkpoint before any further search.",
         }[state]
-        return {"actionable": True, "agent": agent,
+        return {"actionable": True, "agent": agent, "pipeline": pipeline_cmd,
                 "prompt": base + what + " Take it from where it stopped.",
                 "why": f"{cat or 'the conductor'} owns the open work"}
     if state == "READY_FOR_HANDOFF":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + ("Every category is closed and gated. Render "
                                   "the four deliverables, assemble and verify "
                                   "the client folder, and push it to intake."),
@@ -302,6 +311,20 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
         return {"run_id": row.get("run_id"),
                 "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
                 "state": row.get("state"),
+                "detail": (r.stdout or r.stderr).strip()[-400:]}
+    if plan.get("pipeline"):
+        # The driver continues the run from its first undone stage.
+        cmd = list(plan["pipeline"])
+        if dry_run:
+            return {"run_id": row.get("run_id"), "outcome": "DRY_RUN",
+                    "state": row.get("state"), "agent": plan.get("agent"),
+                    "would_run": " ".join(cmd), "resume_prompt": plan.get("prompt")}
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                           cwd=str(Path(__file__).resolve().parents[1]))
+        return {"run_id": row.get("run_id"),
+                "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
+                "state": row.get("state"), "agent": plan.get("agent"),
+                "via": "engine.pipeline run",
                 "detail": (r.stdout or r.stderr).strip()[-400:]}
     runner = _agent_run()
     if runner is None:

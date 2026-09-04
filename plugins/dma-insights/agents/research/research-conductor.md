@@ -142,160 +142,80 @@ tool call is the cost this removes.
    `financials` is the one section that may never be declared away. Then
    `engine.prelim complete`, which refuses while anything is open.
 
-2. **Build the knowledge graph.** Pull the DQ source, then build:
-   `scripts/drive_fetch.py pull-toolkits --dest <ROOT>/toolkits`, then
-   `engine.kg build --run <RUN_ID> --root <ROOT> --toolkits <ROOT>/toolkits`.
-   Read `toolkit_problems` and `subcaps_without_primary` — a degraded build
-   is workable and DISCLOSED, never silent. `engine.kg route` is now the
-   routing table: sixteen categories, each naming its agent, its subcaps,
-   its askable-DQ count and its deferred questions.
+2. **Run the driver.** From here the run is ONE command, and it is not you
+   narrating stages (owner, 2026-09-03, issues 6–9: the conductor described
+   ten stages, dispatched most of them "with the run id and the root", and
+   nothing recorded where six hours went):
 
-3. **Dispatch by category — over a brief you did not write, and hold every
-   cell to the five volleys.**
+       python3 -m engine.pipeline env                       # every hard dependency, measured
+       python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>
+       python3 -m engine.pipeline run  --run <RUN_ID> --root <ROOT> \
+               --max-wall-min 240 --lane-retries 1 --page-retries 2
 
-       python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
-       python3 plugins/dma-insights/scripts/agent_run.py \
-               --batch $ROOT/briefs/batch.json --stream --lanes 16 --retries 1 \
-               --record-run $RUN --record-root $ROOT --record-stage RESEARCH
+   `engine.pipeline run` walks the stage table in order — PRELIM → KG →
+   RESEARCH → HANDOFF → SCORING → INGEST_A → REPORTS → PAGES_A → PACKAGE →
+   INGEST_B → PAGES_B → PROMOTE — and at every stage it (a) reads a DONE
+   predicate from the workbook and the run tree, (b) dispatches the lanes
+   that stage owns over a brief IT wrote (`engine.brief batch` for the
+   sixteen researchers, `challenge-batch`, `scoring-batch`, `report-batch`,
+   `page-batch` — a bounded packet each, never "the run id and the root"),
+   (c) runs the engine commands (`kg build`, the floors gates, `handoff`,
+   `assessment open/rollup/gate`, `assemble checkpoint`, the two report
+   renders, `grains recommendations`, `techscan render`, `assemble package`),
+   and (d) refuses to start the next stage until the gate PASSES. Every
+   stage lands a `STAGE_<NAME>` row in Gate_Log with its wall clock, a line
+   in `07_qa/cost_ledger.jsonl` (`engine.cost report` reads it back against
+   the schedule and the budget) and `07_qa/pipeline_state.json`. A
+   category whose floors gate FAILED is re-dispatched with `--with-handback`
+   — the lane's handback and the gate's blocking terms in its brief — and a
+   category that PASSED is never dispatched again. A lane that timed out or
+   produced nothing is retried once; a lane that failed on its own terms is
+   not, and the stage says so.
 
-   The lane count is ONE constant (`engine.cost.PARALLEL_LANES`, 16 — one per category); `brief batch` prints this exact `dispatch` line, so run what it prints rather than retyping it. `--retries 1` re-dispatches only a lane that timed out or came back empty; `--record-run` lands the stage's wall clock in the run's cost ledger (`engine.cost report` reads it back).
+   Ship-as-you-go is the driver's, not yours: after the SCORING gate it
+   pushes the scored checkpoint (`assemble checkpoint --stage SCORING_PASS`),
+   waits for the package scan to ingest it, ships techstack and heatmap to
+   that version through `ship_page.py --claim` while the report lanes write,
+   packages, waits for the second ingest, restages the early pages from disk,
+   ships overview, insights, platform and then context, and makes
+   `promote_run` the last call. Exactly two ingests; no payload byte passes
+   through a model — page briefs carry the PATH of the contract and the last
+   verdict's reasons.
 
-   `brief batch` writes one bounded packet per category and the batch array
-   that dispatches them. Do NOT compose those prompts yourself: a
-   hand-written prompt is where context either goes missing (the lane
-   re-finds what the run knows) or goes twice (the lane is handed your whole
-   context). The packet carries the run's shared state, each open cell's
-   owed volleys, **the evidence already registered for that cell**, the
-   lane's own notebook digest for a resumed lane, and its search budget —
-   measured against `BRIEF_CHAR_CEILING`, so "more context" cannot become
-   the token bleed.
+   Watch it: `engine.pipeline status --run <RUN_ID> --root <ROOT> --watch`
+   and `agent_run.py watch --log-dir <ROOT>/agent_logs`. If it stops — a
+   stage FAIL names the blocker, `--max-wall-min` reached, the container
+   died — `engine.pipeline plan` says where, and `run` again continues from
+   the first stage whose predicate is false (nothing done is redone; the
+   watchdog's `resume` plan is this command).
 
-   A category is DONE when its researcher reports a PASSING floors gate, not
-   when it reports effort. Read `engine.brief handback --category <C>` rather
-   than trusting the lane's prose: it is computed from the sheets, it has the
-   same shape whether the lane finished or died, and its
-   `leads_for_other_categories` names the sources one lane opened that
-   another lane's cells need — route those before re-dispatching anything.
-   Re-dispatch on a FAIL with the gate's blocking terms in the prompt (a
-   fresh `brief dispatch --category <C>` already carries them).
+   What the driver does NOT do, and you still own: the binding preflight
+   (step 0, with a person), `engine.cli start` (step 1), and the PRELIM lane
+   when the driver dispatches you in PRELIM-ONLY mode — the seven sections
+   below, through `engine.prelim`, and nothing past `engine.prelim complete`.
 
-   THE RULE THE GATE NOW COUNTS (owner, 2026-09-03: "some subcaps are marked
-   as no evidence without any enrichment efforts … not even looking at the 5
-   volley structure"). Every cell in scope ends the category in exactly one
-   of two states, and the floors gate refuses a category with a cell in
-   neither: SYNTHESISED (evidence registered, `engine.cli synthesise`,
-   independently challenged) or DECLARED ABSENT (`engine.cli absence` — every
-   askable volley logged for that cell, a ladder whose rungs name fired
-   queries, a proxy log, what was hunted). `volleys_incomplete` and
-   `absence_undeclared_empty` are BLOCKING terms; `absence_single_tool` is
-   advisory and names the cells whose whole search was one web engine. The
-   card `orient` serves carries `volleys.missing` — the facets still owed —
-   and the work list distinguishes `in_volley` (some fired) from
-   `searched_empty` (all fired, nothing registered, not yet declared) from
-   `pending`; a researcher that opens a new cell while one of its own is
-   in_volley is the failure this exists to stop.
+3. **When a stage FAILs, read the refusal, not your memory.** The stage's
+   Gate_Log detail and `07_qa/pipeline_state.json` name the blocker: a
+   category's blocking terms (`engine.brief needs`), the SCORING gate's list,
+   a report's failing precondition, a page verdict's gate + JSON path, an
+   ingest that never arrived (the scan runs every 30 minutes; the intake push
+   is the thing to check). Repair at the source the refusal names, then run
+   the driver again. Never `--force` anything: `assessment open` has none,
+   `report --force` yields a DRAFT_ no package accepts, and a waived install
+   check is recorded on the run.
 
-4. **Challenge independently.** For each synthesised subcap, the challenge
-   verdict must come from an actor that did not write the synthesis —
-   dispatch challenge passes under a distinct actor name working the
-   finding-challenger discipline (steelman, then falsify; all seven
-   dimensions by name). `record_challenge` refuses self-challenges and
-   rubber stamps; do not route around a refusal.
+4. **Read what a lane established from the substrate.** `engine.brief
+   handback --category <C>` is computed from the sheets and has the same
+   shape whether the lane finished or died; its `leads_for_other_categories`
+   names sources one lane opened that another lane's cells need. The driver
+   feeds it back on re-dispatch; you read it when a stage FAIL asks you why.
 
-5. **Gate, validate, hand off.**
-   `engine.cli gate --run <RUN_ID> --category <each> --require-synthesis`
-   all PASS → `engine.cli validate` FAILS=0 → `engine.cli handoff`. The
-   handoff JSON is a read-only index; the workbook with its Handoff_Lock is
-   what the assessment stage trusts.
-
-5b. **The client's own facts, in their tabs.** Before scoring opens, the
-   Firmographics (every must-present field STATED or ABSENT with a route —
-   PRELIM's `firmographics` section will not close without them), Focus_Areas
-   (3–5 verbatim client priorities with document and PAGE), Issue_Register
-   (every open matter with severity, status, capability impact and the cap it
-   implies) and Enrichment_Needed tabs are written through `engine.profile`.
-   They are the Client Profile's §1, §6 and §7 and the app's O2 strip, H1
-   focus areas and C2 register; a profile written as prose with these tabs
-   empty is how "57 of 138 clients shipped with no focus areas at all".
-
-6. **SCORE — a stage with agents and a gate, not a phase somebody
-   remembers.** (owner, 2026-09-03, issues 2 and 6.)
-
-   a. `engine.assessment open --run <RUN_ID> --root <ROOT>` — refuses while
-      PRELIM is open, any category lacks a synthesis-gated PASS, or a row is
-      unnamed; flips the workbook to the ASSESSMENT stage and writes the
-      sub-vertical weight set, the M1..M5 rubric, the cap rules, the
-      catalogue metadata and the capability definitions.
-   b. Dispatch the FOUR pillar scorers in parallel lanes —
-      `scoring-p1-producer` … `scoring-p4-producer`, each with the run id and
-      root. They strike column D through `engine.assessment score`, which
-      refuses a score on an unsynthesised or unchallenged row, above the
-      evidence ceiling, with a thin or uncited rationale, or with a blank
-      AI-and-data overlay. The workbook's transaction lock makes four
-      concurrent writers safe.
-   c. Dispatch `scoring-critic` once all four report — it re-derives a sample
-      per capability and records `engine.assessment critique` per pillar;
-      a FAIL names the rows, and you re-dispatch that pillar's scorer with
-      the note.
-   d. `engine.assessment rollup --run <RUN_ID> --headline "<one line>"` —
-      states the grains (Pillar_Summary / Category_Detail and their gold
-      twins Pillar_Rollup / Category_Rollup), Coverage_Map (Scored / Unknown
-      / pct — the disclosure) and the Executive_Summary dashboard. Then
-      `engine.assessment solution` for every named platform and
-      `engine.assessment peer-adoption` for every peer × core product.
-   e. `engine.assessment gate --run <RUN_ID> --root <ROOT>` — PASS or the
-      list: unscored, unnamed, unchallenged, above ceiling, thin rationale,
-      overlay blank, critic missing, rollup drift over 0.01, weights not
-      summing to 1.00, a capability with every subcap at one score. Nothing
-      downstream starts until it says PASS; `engine.narrative write --report
-      assessment` reads this verdict and refuses without it.
-   f. `engine.assemble checkpoint --run <RUN_ID> --root <ROOT> --push
-      --stage SCORING_PASS` — the scored workbook and an IN_PROGRESS manifest
-      reach the client folder NOW, so the package scan ingests a scored run
-      and page production can begin while the reports are being written
-      (step 8). This is the first of exactly two checkpoints; an hourly push
-      is what produced eighteen run versions with zero scored cells.
-
-7. **Write the reports — into the pinned Docs, after the preconditions.**
-   `engine.cli narrative preconditions --run <RUN_ID> --report <each>` first;
-   it names every reason a report may not yet be written. Then dispatch
-   `report-research-producer` and `report-assessment-producer` IN PARALLEL
-   (they write different reports into the same workbook), each section
-   through `engine.narrative write`, which enforces the Doc's own control
-   blocks: the numbered subsections as `## ` blocks, the LENGTH floor, the
-   countable MINIMUM DATA (5–7 F-NNN findings, 8+ IC-NNN cards, 3–5 FA-NN
-   priorities, 5–8 REC-NN cards each with a Rebuttal block, no durations in
-   the roadmap …). Then `report-validator` on every section and the
-   whole-report adversarial pass. `engine.cli report --run <RUN_ID>` renders
-   both `.docx` with the Doc's front matter and branding, and
-   `python3 -m engine.gold_standard report <docx> --kind …` must print PASS
-   for each — its section list is the pinned Doc's, not a remembered one.
-   Then `engine.techscan render --run <RUN_ID>` and `engine.grains
-   recommendations` (projects the REC cards into the Recommendations tab).
-
-8. **Ship as the run proceeds, not after it.** `engine.ship state --run
-   <RUN_ID> --root <ROOT>` says which of the six app pages are producible
-   from the workbook NOW — techstack and context as soon as their tabs fill;
-   heatmap once the SCORING gate passes; overview, insights and platform once
-   the report they read is READY — and in what dependency order (techstack
-   before insights, overview before context). Once the checkpoint of step 6f
-   has been ingested (`get_run_progress` shows the run), dispatch the named
-   page producers for every READY page and ship each with
-   `ship_page.py <run_id> all --sections sections/ --incremental`; the
-   connector retains staged pages, so five can sit staged and passing while
-   the sixth is written. Promotion stays atomic across all six (invariant 3)
-   and belongs to `surface-producer` alone; when the last page passes, the
-   run promotes as the assessment ends rather than as a transport exercise
-   afterwards, and no payload byte ever passes through a model.
-
-8b. **Assemble, verify, ship the package.** `engine.completeness check`
-   (every tab filled or declared), `engine.assemble checkpoint … --stage
-   REPORTS_READY --push` (the second checkpoint), then `engine.assemble
-   package --run <RUN_ID> --root <ROOT> --push` COMPLETES the folder opened
-   at step 1 — the four outputs plus run_manifest.json (`status: COMPLETE`)
-   and 01_evidence/evidence_index.json — verifies it against the output
-   contract and `python3 -m engine.gold_standard package <folder>`, and
-   pushes it. A package that does not verify does not ship.
+5–8. *(the stages the driver runs — challenge, gate, validate, hand off, the
+   client's own tabs through `engine.profile`, SCORE with four pillar lanes
+   behind two gates, the two checkpoints, the reports into the pinned Docs,
+   ship as the run proceeds, assemble + verify + push the package — are the
+   stage table above; their commands and refusals are documented in
+   `docs/END-TO-END.md`, and the driver runs them in that order.)*
 
 8c. **Memory lifecycle, last.** `engine.memory backup --run <RUN_ID>` after
    each category closes (cheap, idempotent); at the very end
@@ -303,7 +223,8 @@ tool call is the cost this removes.
    anything is unconsolidated or blocked, and that refusal is the product
    working. Then `engine.cli strip --run <RUN_ID>` if the engagement ships
    a stripped workbook (the strip refuses until the handoff carries the
-   three analysis fields).
+   three analysis fields). The package the driver pushed already verified
+   against the gold gate; the strip is the run tree's own tidy-up.
 
 9. **Say it shipped.** Your final report names the client folder, the four
    deliverables, every gate verdict, the deferred-question total and
@@ -339,8 +260,9 @@ sentence passes every check a sentence can be given.
 When a researcher stalls, `engine.cli status --root <ROOT>` says which state
 the run is actually in — PRELIM_OPEN, NO_CLIENT_FOLDER, STALLED,
 GATE_FAILED, UNGATED, AT_BUDGET_CEILING, READY_FOR_HANDOFF — and every row
-carries a `resume` plan naming the agent to dispatch and the prompt to
-dispatch it with, so you never have to compose one.
+carries a `resume` plan: the `engine.pipeline run` command that continues
+the run from its first undone stage (and, for a container without the
+driver, the agent and prompt to dispatch), so you never have to compose one.
 
 ## Gold standard — the deliverable-first loop (mandatory)
 

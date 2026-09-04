@@ -249,6 +249,23 @@ that reads like a clean scan. If the scan genuinely found nothing, record
 the `ABSENT` rows with the searches behind them — that is a finding — or
 render with `--force`, which stamps the document `NOT_RUN` with the reason.
 
+## At the scoring stage: the solutions and peer-adoption duty
+
+The driver (`engine.pipeline`) dispatches you a second time, after the pillar
+scorers, over `engine.brief scoring-batch --solutions`: the estate you
+recorded is what the platform recommendations are argued against, so you
+name the platforms the assessment can argue for —
+
+```
+engine.assessment solution      --run <R> --root <ROOT> --sol-id SOL-NN --name "…" --platform "…" --categories P1C1,…
+engine.assessment peer-adoption --run <R> --root <ROOT> …
+```
+
+— one `Solution_Catalogue` row per platform, against the categories it
+addresses, and `Platform_Peer_Adoption` filled where a peer's deployment can
+be examined and DECLARED (`engine.cli complete declare`) where it cannot. The
+SCORING gate does not pass with either tab silently empty.
+
 ## What you never do
 
 Record a detection you did not source, or one whose provider you cannot

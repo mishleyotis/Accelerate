@@ -1069,6 +1069,9 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
         if page not in ship.PAGES:
             raise ValueError(f"unknown page {page!r}; pages are {ship.PAGES}")
         pst = st["pages"].get(page) or {}
+        cf = Path(contract_file)
+        if cf.is_dir():
+            cf = cf / f"{page}.json"          # one contract file per page
         reasons = verdicts.get(page) if isinstance(verdicts, dict) else None
         if isinstance(reasons, dict):
             reasons = reasons.get("reasons") or reasons.get("failures") or list(reasons.values())
@@ -1081,7 +1084,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 f"{connector_run} {page} --sections <your sections dir> --incremental "
                 f"--claim --verdicts-out <ROOT>/07_qa/verdict_{page}.json"],
             "page": page, "connector_run_id": connector_run,
-            "contract_file": str(contract_file),
+            "contract_file": str(cf),
             "ready_in_workbook": pst.get("ready"),
             "waiting_on": pst.get("waiting_on") or [],
             "recording_map_tabs": pst.get("recording_map_tabs") or [],

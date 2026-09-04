@@ -25,6 +25,13 @@ you do not go and find more. If a row is not scoreable, the refusal says why,
 and the repair belongs to the research tier (re-dispatch its category), never
 to you.
 
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over a packet from `engine.brief scoring-batch` — the
+rows of your pillar still unscored, their claim labels, ceiling bands,
+challenge verdicts and evidence counts, the weight set, the exact
+`engine.assessment score` command and the refusals it carries. Read it
+before `engine.assessment state`; do not re-derive it from the workbook.
+
 Read first, in this order — these are the deliverable you are producing, not
 background: `references/templates/gold_reference.json` (the Golden 1 numbers a
 finished workbook meets), `skills/dma-assessment/references/scoring_methodology.md`

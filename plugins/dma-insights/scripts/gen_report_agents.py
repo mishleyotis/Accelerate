@@ -137,7 +137,14 @@ that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
 
-## Before you write a word: the preconditions, then the template
+## Before you write a word: the brief, the preconditions, then the template
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over an `engine.brief report-batch` packet: the pinned
+template paths, this report's sections with THIS run's floors (card minimums
+and word floors scale with the pillars in scope), the failing preconditions
+if any, and the exact `engine.cli narrative write` command. Read it before
+anything else; the command below confirms what it says.
 
 ```
 engine.cli narrative preconditions --run <R> --root <ROOT> --report {key}
@@ -252,6 +259,13 @@ defect, not the producer's.
 engine.cli narrative preconditions --run <R> --root <ROOT> --report <key>
 engine.template binding --run <R> --root <ROOT>
 ```
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over a packet from `engine.brief report-batch`: the
+pinned template paths, the Doc's sections with THIS run's floors (card
+minimums and word floors scale with the pillars in scope), the failing
+preconditions if any, and the exact write command. Read it before anything
+else; the two commands above confirm what it says.
 
 The first must print `ready: true` — PRELIM closed, every category gated
 with `--require-synthesis`, the templates bound, the SCORING gate PASS and

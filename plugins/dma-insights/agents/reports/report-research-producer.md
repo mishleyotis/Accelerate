@@ -35,7 +35,14 @@ that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
 
-## Before you write a word: the preconditions, then the template
+## Before you write a word: the brief, the preconditions, then the template
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over an `engine.brief report-batch` packet: the pinned
+template paths, this report's sections with THIS run's floors (card minimums
+and word floors scale with the pillars in scope), the failing preconditions
+if any, and the exact `engine.cli narrative write` command. Read it before
+anything else; the command below confirms what it says.
 
 ```
 engine.cli narrative preconditions --run <R> --root <ROOT> --report client_research

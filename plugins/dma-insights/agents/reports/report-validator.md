@@ -28,6 +28,13 @@ engine.cli narrative preconditions --run <R> --root <ROOT> --report <key>
 engine.template binding --run <R> --root <ROOT>
 ```
 
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over a packet from `engine.brief report-batch`: the
+pinned template paths, the Doc's sections with THIS run's floors (card
+minimums and word floors scale with the pillars in scope), the failing
+preconditions if any, and the exact write command. Read it before anything
+else; the two commands above confirm what it says.
+
 The first must print `ready: true` — PRELIM closed, every category gated
 with `--require-synthesis`, the templates bound, the SCORING gate PASS and
 the workbook complete for the assessment report, the five-year financial

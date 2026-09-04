@@ -372,10 +372,12 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
     for r in rows:
         st = r["stage"]
         t = timings.setdefault(st, {"elapsed_s": 0.0, "records": 0, "attempts": 0,
-                                    "first_started_at": None, "last_ended_at": None})
+                                    "lanes": 0, "first_started_at": None,
+                                    "last_ended_at": None})
         t["elapsed_s"] = round(t["elapsed_s"] + float(r.get("elapsed_s") or 0), 1)
         t["records"] += 1
-        t["attempts"] += int(r.get("attempts") or 1)
+        t["attempts"] += int(r.get("attempts") or 0)
+        t["lanes"] += int(r.get("lanes") or 0)
         if r.get("started_at") and not t["first_started_at"]:
             t["first_started_at"] = r["started_at"]
         if r.get("ended_at"):
@@ -410,7 +412,9 @@ def report(run, *, wb=None) -> dict:
                        "over_by_min": (round(actual - planned, 1)
                                        if planned is not None and actual > planned
                                        else 0.0),
-                       "attempts": t["attempts"], "records": t["records"]})
+                       "attempts": t["attempts"], "lanes": t["lanes"],
+                       "records": t["records"],
+                       "retried": t["attempts"] > t["lanes"] > 0})
     total_min = round(summary["total_elapsed_s"] / 60.0, 1)
     budget = round(BUDGET_PER_PILLAR * max(1, len(pillars)), 2)
     usd = summary["total_usd"]
@@ -587,7 +591,8 @@ def main(argv=None) -> int:
                 pl = f"{st['planned_min']:.1f}" if st["planned_min"] is not None else "—"
                 over = f"+{st['over_by_min']:.1f}" if st["over_by_min"] else ""
                 print(f"  {st['stage']:<12}{st['actual_min']:>8.1f}m{pl:>9}  {over}"
-                      + (f"  ({st['attempts']} attempts)" if st["attempts"] > st["records"] else ""))
+                      + (f"  ({st['attempts']} attempts over {st['lanes']} lanes)"
+                         if st.get("retried") else ""))
             print(f"\n  wall clock {rep['total_min']:.1f} min (target {rep['target_min']}, "
                   f"schedule {rep['schedule_total_min']})"
                   + ("  OVER" if rep["over_wall_clock"] else ""))
