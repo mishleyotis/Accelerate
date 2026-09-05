@@ -32,6 +32,7 @@ name is "DMA Insights".
 from __future__ import annotations
 
 import os
+import re
 from contextlib import contextmanager
 
 from mcp.server import MCPServer
@@ -980,6 +981,34 @@ def ingest_reviewer_feedback(limit: int = 200) -> dict:
     with _conn() as c:
         return feedback_mod.ingest_reviewer_feedback(c, limit=limit,
                                                      encoder=_encoder())
+
+
+# ── resources: the schemas an agent fills, as first-class MCP resources ──
+#
+# The same page contracts, the dual-source section map and the gold-standard
+# web-app requirements the read TOOLS above serve, exposed as resources so a
+# producer can enumerate (resources/list) and read (resources/read) them.
+# Read-only, no database, no encoder; the content lives in dma_mcp.resources
+# (pure, offline-testable) and each entry is registered as a concrete
+# resource so every schema is discoverable rather than hidden behind a
+# template. Registration adds no @mcp.tool, so the documented tool count is
+# unchanged.
+from dma_mcp import resources as resources_mod
+
+
+def _register_resources() -> None:
+    for entry in resources_mod.resource_index():
+        uri = entry["uri"]
+
+        def _reader(_uri=uri):
+            return resources_mod.read_resource(_uri)["text"]
+
+        _reader.__name__ = "resource_" + re.sub(r"[^0-9a-zA-Z]+", "_", uri).strip("_")
+        mcp.resource(uri, name=entry["name"], description=entry["description"],
+                     mime_type=entry["mime_type"])(_reader)
+
+
+_register_resources()
 
 
 def build_app():

@@ -322,13 +322,21 @@ def main(argv=None) -> int:
     ap.add_argument("--out-tabs", type=Path, default=ref / "tab_recording_map.json")
     ap.add_argument("--out-sections", type=Path,
                     default=ref / "section_sources.json")
+    # The connector serves section_sources.json as an MCP resource, so it is a
+    # cross-service contract: written to packages/shared too (deploy.sh stages
+    # that into the mcp image, exactly as contracts_data.json is), and the
+    # freeze gate asserts the two copies are byte-identical.
+    ap.add_argument("--out-shared", type=Path,
+                    default=REPO / "packages" / "shared" / "section_sources.json")
     a = ap.parse_args(argv)
 
     tab_doc, sec_doc = build()
     a.out_tabs.parent.mkdir(parents=True, exist_ok=True)
     a.out_tabs.write_text(json.dumps(tab_doc, indent=1) + "\n", encoding="utf-8")
-    a.out_sections.write_text(json.dumps(sec_doc, indent=1) + "\n",
-                              encoding="utf-8")
+    sections_text = json.dumps(sec_doc, indent=1) + "\n"
+    a.out_sections.write_text(sections_text, encoding="utf-8")
+    a.out_shared.parent.mkdir(parents=True, exist_ok=True)
+    a.out_shared.write_text(sections_text, encoding="utf-8")
 
     tc = tab_doc["counts"]
     sc = sec_doc["coverage"]

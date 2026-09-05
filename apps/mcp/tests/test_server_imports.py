@@ -50,6 +50,9 @@ def server(monkeypatch):
         def tool(self, *a, **k):
             return lambda fn: fn
 
+        def resource(self, *a, **k):
+            return lambda fn: fn
+
         def streamable_http_app(self):
             return object()
 
