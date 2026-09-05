@@ -187,6 +187,10 @@ def bind(run, wb=None) -> dict:
             str(TEMPLATES_DIR / "gold_reference.json"),
             str(TEMPLATES_DIR / "client_profile_template.md"),
             str(TEMPLATES_DIR / "assessment_report_template.md"),
+            # The dual-source map: which app section each workbook tab and
+            # report section feeds, and how each is produced. Bound into the
+            # run so an agent never loses which resource its work lands in.
+            str(TEMPLATES_DIR.parent / "section_sources.json"),
         ],
     }
     out = run.root / "00_entity_profile" / "template_binding.json"

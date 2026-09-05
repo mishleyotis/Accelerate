@@ -47,6 +47,14 @@ Reading the columns:
   payload that says nothing) sweep every produced surface — none of that is
   repeated per row.
 
+Where a surface's content COMES FROM, and whether it is formatted or
+synthesised, is not in this census — it is in `references/section_sources.json`
+(generated; `python3 -m engine.surface_export plan`), which joins each payload
+section to its workbook tab(s), its report section(s), its enrichment source
+and a disposition (`workbook` / `report` / `enrichment` / `synthesis` /
+`server`). Read it before producing: a `workbook` or `report` section is
+formatted, not re-synthesised, and not re-challenged.
+
 ## The page census — 38 surfaces
 
 | ID | Name | Dashboard | Parent (if drilldown) | Producing agent | Rulebook anchor | Payload section(s) | Enrichment facets | Gate families |

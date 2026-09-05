@@ -40,6 +40,33 @@ method assumes per-claim verdicts exist, and it refuses input without them.
 The qa-overseer runs at the END of every production or repair, green or not
 — a green run with a buried defect still gets its finding recorded.
 
+## Not every section is synthesised — check its disposition first
+
+`produce → challenge → consolidate` is the path for a section that is
+genuinely SYNTHESISED. Most sections are not. `references/section_sources.json`
+(read it, or run `python3 -m engine.surface_export plan --page <page>`) gives
+every section a disposition, and the page brief carries the same split:
+
+- **convert** (`workbook` / `report`) — the section is FORMATTED from its
+  workbook tab(s) or a challenged report section. It is **not re-synthesised
+  and not re-challenged** — the research layer already challenged that
+  content, and a second challenge is the duplicate work this split exists to
+  remove. `engine.surface_export.scaffold` shapes and validates it against the
+  page contract before `ship_page.py` spends a submission. This is the large
+  majority of sections.
+- **produce** (`enrichment` / `synthesis`) — a per-surface producer writes it,
+  through `produce → challenge → consolidate`. `enrichment` sections need
+  their enrichment registered as evidence first. This is the ONLY set the
+  challenger and consolidator run on. Today that is `overview.leadership`,
+  `overview.sentiment`, `overview.thought_leadership` and
+  `heatmap.cohort_patterns`.
+- **server** — the section submits `fields: {}` plus the page thread; the app
+  joins the arrangement server-side (`heatmap.value_chain`).
+
+So before dispatching a per-surface producer, confirm the section's
+disposition is `produce`. A `convert` section routed through a producer is the
+duplicate synthesis (and the duplicate challenge) this table is drawn to avoid.
+
 ## Dispatch mode — the top session orchestrates, one level deep
 
 Trigger-fired sessions DO carry the Agent tool, but only ONE nesting level:

@@ -967,6 +967,10 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
         "client_profile_markdown": str(T.TEMPLATES_DIR / "client_profile_template.md"),
         "assessment_markdown": str(T.TEMPLATES_DIR / "assessment_report_template.md"),
         "shell_docx": str(T.REPORT_SHELL),
+        # The dual-source map: which app surface each report section feeds and
+        # how it is produced. Write a section so `engine.surface_export` can
+        # FORMAT it into the app payload without re-synthesis or re-challenge.
+        "section_sources": str(T.TEMPLATES_DIR.parent / "section_sources.json"),
     }
     for key, spec in RS.SPECS.items():
         pre = N.stage_preconditions(wb, key, qa_dir)
@@ -1013,6 +1017,9 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "register carries",
                 "you never review your own sections — `report-validator` does",
                 "the gold gate (`engine.gold_standard report`) reads gold_reference.json",
+                "each section feeds a named app surface (`section_sources.json`); "
+                "write it so surface production can FORMAT it into the payload — "
+                "it is not re-synthesised or re-challenged downstream",
             ],
         }, "sections")
         lanes.append((f"report-{key}", packet, f"Report — {spec.title}"))
