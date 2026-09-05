@@ -390,12 +390,16 @@ aac = _load_hook()
 #: A tool may only sit here because approving it would be WRONG, never because
 #: nobody got to it.
 _DELIBERATELY_PROMPTING = {
-    # Clay writes into the user's own workspace. Granted in the enrichment
-    # specialist's frontmatter, never actually called anywhere in its prose,
-    # so leaving the prompt costs no firing and auto-approving would hand a
-    # scheduled session a write nobody sanctioned.
-    "add-company-data-points": "writes to the user's Clay workspace",
-    "add-contact-data-points": "writes to the user's Clay workspace",
+    # add-company-data-points / add-contact-data-points were here until
+    # 2026-09-05 with the reason "writes to the user's Clay workspace". They are
+    # REQUIRED by the technographic scan and the enrichment rulebooks and were
+    # measured prompting a plain session, so — owner's decision — they moved to
+    # SANCTIONED_WORKSPACE_WRITES and are auto-approved by the hook
+    # (test_the_clay_data_point_writes_are_sanctioned proves it). The Clay
+    # writes that STAY refused are run_subroutine / run_subroutine_direct, a
+    # user-authored subroutine that can do anything.
+    "run_subroutine": "a user-authored workspace subroutine can do anything",
+    "run_subroutine_direct": "a user-authored workspace subroutine can do anything",
     # `slack_send_message` was here until 2026-08-30 with the reason "the
     # channel that would use it is specified and not built". The channel IS
     # built now — the assessment intake reads #deal-desk and replies in the
@@ -428,7 +432,9 @@ def _is_allowed(full: str) -> bool:
         return full not in aac.GUARDED          # the connector's own tools
     if full in aac.QUALIFIED_TOOLS:
         return True
-    return full.rsplit("__", 1)[1] in aac.ENRICHMENT_TOOLS
+    suffix = full.rsplit("__", 1)[1]
+    return (suffix in aac.ENRICHMENT_TOOLS
+            or suffix in aac.SANCTIONED_WORKSPACE_WRITES)
 
 
 def test_every_mcp_tool_the_plugin_names_is_allowed_or_deliberately_not():
@@ -484,10 +490,15 @@ def test_the_qualified_list_never_carries_an_opaque_server_segment():
         assert t.startswith("mcp__") and t.count("__") >= 2, t
 
 
-def test_the_clay_writes_are_still_refused():
+def test_the_clay_data_point_writes_are_sanctioned_and_subroutines_are_not():
+    # Owner 2026-09-05: the two data-point writes are REQUIRED by the
+    # technographic scan and the enrichment rulebooks and must run headless, so
+    # they are approved by the plugin's own hook rather than a bootstrap wildcard.
     for t in ("mcp__Clay__add-company-data-points",
-              "mcp__Clay__add-contact-data-points",
-              "mcp__Clay__run_subroutine",
+              "mcp__Clay__add-contact-data-points"):
+        assert _is_allowed(t), t
+    # A workspace subroutine is user-authored and can do anything: still refused.
+    for t in ("mcp__Clay__run_subroutine",
               "mcp__Clay__run_subroutine_direct"):
         assert not _is_allowed(t), t
 
