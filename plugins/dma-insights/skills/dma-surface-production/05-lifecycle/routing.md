@@ -67,6 +67,17 @@ So before dispatching a per-surface producer, confirm the section's
 disposition is `produce`. A `convert` section routed through a producer is the
 duplicate synthesis (and the duplicate challenge) this table is drawn to avoid.
 
+The same map reaches the **card and the drawer**: `section_sources.json`'s
+`cards` block (also `join://cards`, or `engine.surface_export cards --section
+<page.section>`) gives every card array — each finding, insight, recommendation,
+tile, bar, register row — its own route and the exact tab COLUMNS / report
+section / enrichment facet that feed it; a card flagged `connector_authored`
+(safeguard gates) or a key under `computed_never_sent` is written by the app and
+must never be authored. `scaffold_card` refuses an item key the contract card
+does not declare. The `drilldowns` atlas (`join://drilldowns`, `… drawers`)
+says which drawer carries its own synthesis prompt (DD-1/2/3/4/7) and which
+render the parent card's payload — so a drawer is never produced twice either.
+
 ## Dispatch mode — the top session orchestrates, one level deep
 
 Trigger-fired sessions DO carry the Agent tool, but only ONE nesting level:

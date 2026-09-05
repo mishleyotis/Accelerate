@@ -29,8 +29,8 @@ def test_index_lists_unique_readable_resources():
     idx = R.resource_index()
     uris = [e["uri"] for e in idx]
     assert len(uris) == len(set(uris)), "duplicate resource uris"
-    # six page contracts + index + join + gold
-    assert len(uris) == len(PAGES) + 3
+    # six page contracts + index + section-join + cards + drilldowns + gold
+    assert len(uris) == len(PAGES) + 5
     for e in idx:
         assert e["mime_type"] == "application/json"
         assert e["name"] and e["description"]
@@ -60,6 +60,34 @@ def test_join_resource_covers_every_served_required_section():
     body = json.loads(R.read_resource("join://section-sources")["text"])
     assert body.get("sections"), "join resource is empty — was it staged?"
     assert body["coverage"]["served_required_unsourced"] == []
+
+
+def test_cards_resource_covers_every_contract_card():
+    """join://cards must carry every list-of-object card the contract declares,
+    with its item keys — the card-grain half of the map."""
+    body = json.loads(R.read_resource("join://cards")["text"])
+    secs = body["sections"]
+    for page in PAGES:
+        for name, meta in get_page_contract(page)["sections"].items():
+            for f, m in meta["fields"].items():
+                if m["type"] == "list" and m.get("item_type") == "object":
+                    card = secs.get(f"{page}.{name}", {}).get(f)
+                    assert card, f"{page}.{name}.{f} missing from join://cards"
+                    assert card["item_keys"], f"{page}.{name}.{f} has no item keys"
+
+
+def test_drilldowns_resource_is_the_full_atlas():
+    body = json.loads(R.read_resource("join://drilldowns")["text"])
+    dds = body["drilldowns"]
+    assert len(dds) == 15
+    prompts = {d["dd"] for d in dds if d["has_synthesis_prompt"]}
+    assert prompts == {"DD-1", "DD-2", "DD-3", "DD-4", "DD-7"}
+
+
+def test_gold_names_the_connector_authored_card():
+    g = json.loads(R.read_resource("gold://web-app-requirements")["text"])
+    assert "heatmap.safeguard_gates.gates" in g["connector_authored_cards"]
+    assert g["card_floors"]          # non-empty
 
 
 def test_gold_requirements_agree_with_the_join():

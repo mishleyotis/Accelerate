@@ -201,6 +201,64 @@ def write_section(out_dir: Path, page: str, section: str, payload: dict) -> Path
     return p
 
 
+def card_route(card: dict) -> str:
+    """How ONE card is produced: connector (the connector writes it at submit,
+    the agent must not), else the same routes as a section."""
+    if card.get("connector_authored"):
+        return "connector"
+    return ROUTE.get(card.get("disposition", "synthesis"), "produce")
+
+
+def cards(section: str | None = None) -> dict:
+    """Every card the app renders, per section, with its route and source —
+    the card-grain counterpart to `plan`."""
+    ss = _load_sources()["sections"]
+    out = {}
+    for sec, v in ss.items():
+        if section and sec != section:
+            continue
+        for field, card in (v.get("cards") or {}).items():
+            out[f"{sec}.{field}"] = {
+                "route": card_route(card),
+                "kind": card.get("kind"),
+                "disposition": card.get("disposition"),
+                "item_keys": card.get("item_keys", []),
+                "nested": sorted((card.get("nested") or {}).keys()),
+                "nested_shape_count": len(card.get("nested_shapes") or []),
+                "tab": card.get("tab"),
+                "columns": card.get("columns", []),
+                "report_sections": card.get("report_sections", []),
+                "enrichment_facet": card.get("enrichment_facet"),
+                "floor": card.get("floor"),
+                "connector_authored": bool(card.get("connector_authored")),
+                "computed_never_sent": card.get("computed_never_sent", []),
+            }
+    return out
+
+
+def drawers() -> list[dict]:
+    """The 15-panel drilldown atlas (drawers, modals, inline expansions)."""
+    return _load_sources().get("drilldowns", [])
+
+
+def scaffold_card(page: str, section: str, field: str, item: dict, *,
+                  strict_unknown: bool = True) -> dict:
+    """Validate ONE card's item against the contract card's item keys before
+    it is assembled into the section payload — reject a key the contract card
+    does not declare (a render-derived or invented field). The card-grain
+    counterpart to `scaffold`; the section still goes through `scaffold`."""
+    sec = f"{page}.{section}"
+    card = ((_load_sources()["sections"].get(sec) or {}).get("cards") or {}).get(field)
+    if not card:
+        raise KeyError(f"{sec} has no card field {field!r}")
+    keys = set(card.get("item_keys", []))
+    unknown = [k for k in item if k not in keys]
+    if unknown and strict_unknown:
+        raise ValueError(f"{sec}.{field}: item carries key(s) the contract card "
+                         f"does not declare: {unknown}")
+    return item
+
+
 def server_section(page: str, section: str, *, producer_version: str,
                    narrative_thread: str, e_ids: list[str] | None = None,
                    internal_only: list[str] | None = None) -> dict:
@@ -223,7 +281,41 @@ def main(argv=None) -> int:
     pl = sub.add_parser("plan", help="route every section (convert/produce/server)")
     pl.add_argument("--page", choices=PAGES)
     pl.add_argument("--json", action="store_true")
+    cd = sub.add_parser("cards", help="route every CARD, with its source columns")
+    cd.add_argument("--section", help="page.section, e.g. overview.findings")
+    cd.add_argument("--json", action="store_true")
+    dr = sub.add_parser("drawers", help="the 15-panel drilldown atlas")
+    dr.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.cmd == "cards":
+        c = cards(a.section)
+        if a.json:
+            print(json.dumps(c, indent=2))
+            return 0
+        for key, r in c.items():
+            src = (f"{r['tab']}[{len(r['columns'])} cols]" if r["tab"]
+                   else ", ".join(r["report_sections"]) or r["enrichment_facet"]
+                   or r["disposition"])
+            flags = " ⚙connector" if r["connector_authored"] else ""
+            flags += f" ⚙computed={r['computed_never_sent']}" if r["computed_never_sent"] else ""
+            nested = (f" +nested{r['nested']}" if r["nested"]
+                      else f" +{r['nested_shape_count']} sub-cards"
+                      if r["nested_shape_count"] else "")
+            print(f"  {key:<40} {r['route']:<9} <- {src}{nested}{flags}")
+        print(f"  {len(c)} cards")
+        return 0
+
+    if a.cmd == "drawers":
+        dd = drawers()
+        if a.json:
+            print(json.dumps(dd, indent=2))
+            return 0
+        for d in dd:
+            p = "PROMPT" if d["has_synthesis_prompt"] else "renders parent"
+            print(f"  {d['dd']:<6} {d['name']:<26} {d['shell']:<7} "
+                  f"{d['renders_section'] or '—':<28} {p}")
+        return 0
 
     if a.cmd == "plan":
         p = plan(a.page)

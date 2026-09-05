@@ -1106,6 +1106,26 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             "format_only_sections": sp["convert"],
             "produce_sections": sp["produce"],
             "server_sections": sp["server"],
+            # Card-grain: every CARD this page renders (finding, tile, row, ...)
+            # with its route and the tab COLUMNS / report section / enrichment
+            # that feed it; plus the page's drawers. `⚙connector` cards and
+            # `computed_never_sent` keys are written by the app, never authored.
+            # Compact (item keys stay in the contract / join://cards, so the
+            # brief carries no payload-shaped bytes).
+            "card_plan": {
+                k: {"route": v["route"], "kind": v["kind"],
+                    "src": (f"{v['tab']}[{len(v['columns'])} cols]" if v["tab"]
+                            else ", ".join(v["report_sections"])
+                            or v["enrichment_facet"] or v["disposition"]),
+                    "floor": v.get("floor"),
+                    "connector_authored": v["connector_authored"],
+                    "computed_never_sent": v["computed_never_sent"]}
+                for k, v in SX.cards().items() if k.split(".", 1)[0] == page},
+            "drawers": [{"dd": d["dd"], "name": d["name"], "shell": d["shell"],
+                         "renders": d.get("renders_section"),
+                         "has_synthesis_prompt": d["has_synthesis_prompt"]}
+                        for d in SX.drawers()
+                        if str(d.get("renders_section") or "").startswith(f"{page}.")],
             "last_verdict_reasons": [str(r)[:300] for r in (reasons or [])][:12],
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
@@ -1123,6 +1143,12 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "synthesis (and enrichment registered as evidence first)",
                 "`server_sections` submit fields:{} plus this page's "
                 "narrative_thread — the app joins the arrangement server-side",
+                "`card_plan` gives every CARD its route and the exact tab "
+                "COLUMNS / report section / enrichment that feed it; a card "
+                "marked `⚙connector` (safeguard gates) or a key under "
+                "`computed_never_sent` is written by the app — never author it. "
+                "`engine.surface_export.scaffold_card` refuses an item key the "
+                "contract card does not declare",
             ],
         }, "last_verdict_reasons", "waiting_on")
         lanes.append((f"page-{page}", packet, f"Page — {page}"))

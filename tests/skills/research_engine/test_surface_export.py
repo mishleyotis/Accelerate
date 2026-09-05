@@ -88,6 +88,40 @@ def test_scaffold_accepts_a_reasoned_empty_state():
     assert p["empty_state"]["reason"]
 
 
+def test_cards_routes_every_card_with_a_source():
+    c = SX.cards()
+    assert len(c) >= 43
+    for key, r in c.items():
+        assert r["route"] in ("convert", "produce", "server", "connector")
+        # a routed card names a source, or is connector/computed/synthesis
+        assert (r["tab"] or r["report_sections"] or r["enrichment_facet"]
+                or r["connector_authored"] or r["route"] in ("produce", "server")), key
+
+
+def test_connector_authored_card_routes_connector():
+    c = SX.cards("heatmap.safeguard_gates")
+    assert c["heatmap.safeguard_gates.gates"]["route"] == "connector"
+    assert c["heatmap.safeguard_gates.gates"]["connector_authored"] is True
+
+
+def test_scaffold_card_accepts_valid_and_rejects_unknown_key():
+    ok = SX.scaffold_card("overview", "findings", "findings",
+                          {"f_id": "F1", "title": "x", "body": "y"})
+    assert ok["f_id"] == "F1"
+    with pytest.raises(ValueError):
+        SX.scaffold_card("overview", "findings", "findings",
+                         {"f_id": "F1", "not_a_contract_key": 1})
+    with pytest.raises(KeyError):
+        SX.scaffold_card("overview", "findings", "no_such_card", {})
+
+
+def test_drawers_is_the_full_atlas():
+    dd = SX.drawers()
+    assert len(dd) == 15
+    assert {d["dd"] for d in dd if d["has_synthesis_prompt"]} == {
+        "DD-1", "DD-2", "DD-3", "DD-4", "DD-7"}
+
+
 def test_server_section_carries_the_page_thread_and_passes_pass1():
     from dma_mcp.validation import validate_pass1
     thread = ("The heatmap opens on the workbook grid, tracks the thin-evidence "

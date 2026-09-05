@@ -55,6 +55,17 @@ and a disposition (`workbook` / `report` / `enrichment` / `synthesis` /
 `server`). Read it before producing: a `workbook` or `report` section is
 formatted, not re-synthesised, and not re-challenged.
 
+That map goes down to the **card and the drawer**. Every card array a section
+renders — each finding, insight, recommendation, tile, bar, register row — is in
+the same file under the section's `cards`, with its item keys, its nested
+sub-cards, and the exact workbook tab COLUMNS / report section / enrichment facet
+that feed it, plus its floor and the flags that say what NOT to author
+(`connector_authored`, `computed_never_sent`). The 15 drawers (DD-1..DD-15) are
+the top-level `drilldowns` block — each panel's parent card, the section it
+renders, and whether it carries its own synthesis prompt (DD-1/2/3/4/7). Ask the
+connector for `join://cards` and `join://drilldowns`, or run
+`engine.surface_export cards --section <page.section>` and `… drawers`.
+
 ## The page census — 38 surfaces
 
 | ID | Name | Dashboard | Parent (if drilldown) | Producing agent | Rulebook anchor | Payload section(s) | Enrichment facets | Gate families |

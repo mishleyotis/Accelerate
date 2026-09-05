@@ -84,6 +84,34 @@ def contract_index() -> dict:
             "how_to_read_one": "resources/read contract://page/<page>"}
 
 
+def cards() -> dict:
+    """Every card the app renders, per section: its item keys, nested
+    sub-cards, and card-grain source (workbook tab COLUMNS / report section /
+    enrichment facet), plus floor and flags. The card-grain half of the map."""
+    ss = section_sources()
+    out = {}
+    for sec, v in ss.get("sections", {}).items():
+        if v.get("cards"):
+            out[sec] = v["cards"]
+    return {"_doc": "Every card array the app renders, keyed by page.section "
+                    "then card field. `kind` is card | grid | object_nested; "
+                    "`item_keys` come from the contract; `nested`/`nested_shapes` "
+                    "are the sub-cards; `columns` are the workbook tab columns; "
+                    "`connector_authored`/`computed_never_sent` mark what a "
+                    "producer must NOT send.",
+            "sections": out}
+
+
+def drilldowns() -> dict:
+    """The 15-panel atlas: every drawer, modal and inline expansion — its
+    parent card, the section it renders, and whether it carries its own
+    synthesis prompt (DD-1/2/3/4/7)."""
+    ss = section_sources()
+    return {"_doc": "Every drilldown panel. It renders its parent surface's "
+                    "payload; five carry their own synthesis prompt.",
+            "drilldowns": ss.get("drilldowns", [])}
+
+
 def web_app_requirements() -> dict:
     """What the deployed app serves for the gold standard, and how each
     section is produced — derived from the dual-source map's own `served` and
@@ -95,17 +123,32 @@ def web_app_requirements() -> dict:
         page, _, name = sec.partition(".")
         (served if v.get("served") else excluded).setdefault(page, []).append(name)
         how[sec] = v.get("disposition")
+    # card-grain requirements: floors, and the cards a producer must NOT author
+    floors, connector_authored, computed_never_sent = {}, [], {}
+    for sec, v in secs.items():
+        for field, c in (v.get("cards") or {}).items():
+            key = f"{sec}.{field}"
+            if c.get("floor"):
+                floors[key] = c["floor"]
+            if c.get("connector_authored"):
+                connector_authored.append(key)
+            if c.get("computed_never_sent"):
+                computed_never_sent[key] = c["computed_never_sent"]
     return {
         "_doc": "The sections the deployed app SERVES for the gold-standard "
                 "client, and how each is produced. A page promotes only when "
                 "every required section holds a passing submission; a section "
                 "under `excluded` is produced and audited but withheld from "
                 "every audience by the redaction allowlist. Check a produced "
-                "section's disposition here before submitting.",
+                "section's disposition here before submitting; check a card's "
+                "floor and the do-not-author lists before authoring one.",
         "workbook_contract": ss.get("workbook_contract"),
         "served_sections": {k: sorted(v) for k, v in served.items()},
         "excluded_sections": {k: sorted(v) for k, v in excluded.items()},
         "how_produced": how,
+        "card_floors": floors,
+        "connector_authored_cards": sorted(connector_authored),
+        "computed_never_sent": computed_never_sent,
         "coverage": ss.get("coverage", {}),
     }
 
@@ -141,6 +184,23 @@ def _index() -> list[dict]:
         "mime_type": "application/json",
     })
     entries.append({
+        "uri": "join://cards",
+        "name": "card-grain source map",
+        "description": "Every card the app renders (finding, insight, "
+                       "recommendation, tile, bar, register row) with its item "
+                       "keys, nested sub-cards, and the workbook tab COLUMNS / "
+                       "report section / enrichment facet that feed it.",
+        "mime_type": "application/json",
+    })
+    entries.append({
+        "uri": "join://drilldowns",
+        "name": "drilldown atlas",
+        "description": "The 15 drawers/modals/expansions — each panel's parent "
+                       "card, the section it renders, and whether it carries "
+                       "its own synthesis prompt.",
+        "mime_type": "application/json",
+    })
+    entries.append({
         "uri": "gold://web-app-requirements",
         "name": "gold-standard web-app requirements",
         "description": "What the deployed app serves for the gold standard "
@@ -160,6 +220,10 @@ def _content(uri: str) -> dict:
         return contract_index()
     if uri == "join://section-sources":
         return section_sources()
+    if uri == "join://cards":
+        return cards()
+    if uri == "join://drilldowns":
+        return drilldowns()
     if uri == "gold://web-app-requirements":
         return web_app_requirements()
     prefix = "contract://page/"
