@@ -194,6 +194,14 @@ def scaffold(page: str, section: str, fields: dict | None = None, *,
 
 
 def write_section(out_dir: Path, page: str, section: str, payload: dict) -> Path:
+    # The filename is built from page.section, so neither may carry a path
+    # component. Both come from the trusted page contract today; the guard
+    # keeps a mistaken caller from writing outside out_dir rather than
+    # trusting that they never will.
+    if page not in PAGES:
+        raise ValueError(f"unknown page {page!r}; not one of {PAGES}")
+    if not section or any(c in section for c in ("/", "\\")) or ".." in section:
+        raise ValueError(f"illegal section name {section!r}")
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     p = out_dir / f"{page}.{section}.json"

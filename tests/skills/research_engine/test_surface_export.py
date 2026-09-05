@@ -122,6 +122,19 @@ def test_drawers_is_the_full_atlas():
         "DD-1", "DD-2", "DD-3", "DD-4", "DD-7"}
 
 
+def test_write_section_refuses_a_path_component(tmp_path):
+    # page.section builds the filename; a caller must not be able to steer it
+    # out of out_dir. Both come from the trusted contract today; pin the guard.
+    ok = SX.write_section(tmp_path, "overview", "scores", {"x": 1})
+    assert ok.parent == tmp_path and ok.name == "overview.scores.json"
+    with pytest.raises(ValueError):
+        SX.write_section(tmp_path, "overview", "../scores", {})
+    with pytest.raises(ValueError):
+        SX.write_section(tmp_path, "overview", "a/b", {})
+    with pytest.raises(ValueError):
+        SX.write_section(tmp_path, "not_a_page", "scores", {})
+
+
 def test_server_section_carries_the_page_thread_and_passes_pass1():
     from dma_mcp.validation import validate_pass1
     thread = ("The heatmap opens on the workbook grid, tracks the thin-evidence "
