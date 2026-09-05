@@ -606,6 +606,77 @@ def _subcap_count(workbook_path) -> int | None:
 
 # ── PACKAGE / ingestion gate ─────────────────────────────────────────────
 
+#: The four technographic layers, verbatim from the scan's own vocabulary
+#: (techscan.C.TECH_LAYERS). Kept here so a rename in one place is caught by
+#: the other rather than drifting silently.
+_SCAN_LAYERS = ("OPS", "CUST", "DATA", "INFRA")
+
+
+def _scan_layers_unlooked_from_docx(folder) -> list:
+    """The docx fallback: its Coverage table prints a Detections count per
+    layer by the same route as the json's by_layer, so a layer at 0 is one
+    never looked at."""
+    hit = (list(Path(folder).glob("Technographic_Scan_*.docx"))
+           or list(Path(folder).glob("*Tech*Scan*.docx")))
+    if not hit:
+        return []
+    try:
+        from docx import Document
+        d = Document(str(hit[0]))
+    except Exception:                                       # noqa: BLE001
+        return []
+    for t in d.tables:
+        head = [c.text.strip() for c in t.rows[0].cells]
+        if head[:2] == ["Layer", "Detections"]:
+            return [row.cells[0].text.strip() for row in t.rows[1:]
+                    if row.cells[0].text.strip() in _SCAN_LAYERS
+                    and row.cells[1].text.strip() in ("0", "", "—")]
+    return []
+
+
+def scan_findings(folder) -> list[Finding]:
+    """GS-SCAN-DEPTH — the technographic scan looked at all four layers.
+
+    package_findings already refuses a MISSING scan (GS-ING-SCAN); this is the
+    depth floor it never had. It enforces INVESTIGATION, not detections: the
+    scan's own engine computes `layers_never_looked_at` (techscan.scan_state)
+    and its docx prints a red "NOT SCANNED — a gap in the scan, not a clean
+    estate" banner for exactly those layers — the scanner's stated failure
+    mode — yet nothing at the package gate read it, so a scan that covered OPS
+    and left three layers blank passed as a complete estate picture.
+
+    A layer with an ABSENT row is looked-at-and-empty and PASSES; a layer with
+    NO row was never looked at and FAILS. Counting detections instead would
+    push a producer to manufacture them — the opposite of what this build
+    wants — so the floor is depth of investigation, which the reference's own
+    four-layer scan clears by construction.
+    """
+    folder = Path(folder)
+    js = folder / "technographic_scan.json"
+    if not js.is_file():
+        js = next(iter(folder.glob("technographic_scan*.json")), None)
+    if js and js.is_file():
+        try:
+            doc = json.loads(js.read_text(encoding="utf-8"))
+        except Exception:                                   # noqa: BLE001
+            doc = {}
+        counts = doc.get("counts") or {}
+        never = counts.get("layers_never_looked_at")
+        if never is None:
+            by_layer = counts.get("by_layer") or {}
+            never = [l for l in _SCAN_LAYERS if not by_layer.get(l)]
+    else:
+        never = _scan_layers_unlooked_from_docx(folder)
+    return [Finding(
+        "GS-SCAN-DEPTH",
+        f"technographic scan: layer {l} was never looked at — no detection "
+        f"was attempted, so an unscanned gap reads as a clean estate. Record "
+        f"its ABSENT rows with the searches that establish them, or the "
+        f"searches that found products; a scan that covers one layer and "
+        f"leaves the others blank is a fraction of an estate picture.",
+        "GSY-14") for l in (never or [])]
+
+
 def package_findings(folder) -> list[Finding]:
     folder = Path(folder)
     out: list[Finding] = []
@@ -630,6 +701,8 @@ def package_findings(folder) -> list[Finding]:
             out += report_findings(hit[0], kind=k, subcaps=subcaps)
     if not list(folder.glob("Technographic_Scan_*.docx")) and not list(folder.glob("*Tech*Scan*.docx")):
         out.append(Finding("GS-ING-SCAN", "no technographic scan deliverable", "GSY-14"))
+    else:
+        out += scan_findings(folder)
     return out
 
 
