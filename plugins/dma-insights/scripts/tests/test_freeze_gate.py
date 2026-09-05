@@ -146,3 +146,87 @@ def test_a_bound_row_names_a_real_section():
     for r in doc["tabs"]:
         if r["section"]:
             assert f"{r['page']}.{r['section']}" in known, r
+
+
+# ------------------------------------------------------- section sources
+
+def _repo():
+    from pathlib import Path as _P
+    return _P(fp.__file__).resolve().parents[3]
+
+
+def test_section_sources_is_generated_and_byte_reproducible():
+    """Both maps are GENERATED, never hand-edited. Regenerating them to a
+    temp dir must reproduce the committed bytes exactly — a hand-edit is one
+    refactor away from being confidently wrong."""
+    import json
+    import sys as _s
+    import tempfile
+    from pathlib import Path as _P
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "plugins" / "dma-insights" / "scripts"))
+    import gen_recording_map as gen
+
+    ref = repo / "plugins" / "dma-insights" / "references"
+    with tempfile.TemporaryDirectory() as td:
+        rc = gen.main(["--out-tabs", str(_P(td) / "t.json"),
+                       "--out-sections", str(_P(td) / "s.json")])
+        assert rc == 0, "a served+required section is unsourced — see output"
+        for name, committed in (("t.json", "tab_recording_map.json"),
+                                ("s.json", "section_sources.json")):
+            got = (_P(td) / name).read_text(encoding="utf-8")
+            have = (ref / committed).read_text(encoding="utf-8")
+            assert got == have, (
+                f"{committed} has drifted from the generator — re-run "
+                f"scripts/gen_recording_map.py")
+
+
+def test_every_served_required_section_has_a_producible_source():
+    """The join exists so no served, required app section renders empty for a
+    reason nobody can see. Every one must resolve to a workbook tab, a report
+    section, an enrichment source, or a deliberate server/synthesis
+    disposition."""
+    import json
+    doc = json.loads((_repo() / "plugins" / "dma-insights" / "references"
+                      / "section_sources.json").read_text(encoding="utf-8"))
+    assert "GENERATED" in doc["_readme"][0]
+    assert doc["coverage"]["served_required_unsourced"] == []
+    for sec, v in doc["sections"].items():
+        if v["required"] and v["served"]:
+            has_source = (v["workbook_tabs"] or v["report_sections"]
+                          or v["enrichment_sources"])
+            assert has_source or v["disposition"] in ("server", "synthesis"), sec
+        # the two owner-excluded sections must stay unserved
+        if sec in ("overview.ceilings", "overview.evidence_coverage"):
+            assert v["served"] is False, f"{sec} must remain unserved"
+
+
+def test_the_tab_vocabularies_reconcile():
+    """Contract, worker parser and the gold-standard workbook must name ONE
+    tab universe, with the 2026-09-05 deltas recorded rather than silent."""
+    import json
+    import sys as _s
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "apps" / "worker"))
+    _s.path.insert(0, str(repo / "plugins" / "dma-insights" / "skills"
+                          / "dma-research"))
+    from dma_worker.workbook_parser import _TAB_TARGET
+    from engine import contract as C
+
+    read_universe = set(C.SHEETS) | set(C.INGEST_ALIASES)
+
+    # every tab the app maps is a sheet the contract recognises (or an alias)
+    assert set(_TAB_TARGET) <= read_universe, (
+        set(_TAB_TARGET) - read_universe)
+
+    gold = json.loads((repo / "plugins" / "dma-insights" / "references"
+                       / "templates" / "gold_reference.json").read_text())
+    gold_sheets = set(gold["workbook"]["sheets"])
+    # the gold-standard workbook is fully recognised
+    assert gold_sheets <= read_universe, gold_sheets - read_universe
+    # the only contract sheet the (older) gold measurement lacks is the v7
+    # addition Financial_Trends — a recorded, reviewed delta
+    assert set(C.SHEETS) - gold_sheets == {"Financial_Trends"}, (
+        set(C.SHEETS) - gold_sheets)

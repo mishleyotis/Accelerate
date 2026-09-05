@@ -63,7 +63,10 @@ except Exception as exc:                       # pragma: no cover
 
 
 def _surface(v) -> str:
-    return str(v[0] if isinstance(v, (tuple, list)) else v)
+    tgt = v[0] if isinstance(v, (tuple, list)) else v
+    if isinstance(tgt, (tuple, list)):
+        return ", ".join(str(x) for x in tgt)
+    return str(tgt)
 
 
 def inspect(path: str) -> dict:

@@ -977,6 +977,46 @@ PILLAR_SHEETS = tuple(f"{p}_Subcap_Scoring" for p in ("P1", "P2", "P3", "P4"))
 #: are now the same object and cannot disagree.
 REQUIRED_SHEETS = tuple(SHEETS)
 
+#: Tabs the app READS as one of the canonical SHEETS when a package carries
+#: them, without the engine ever WRITING them. This is the reconciliation of
+#: the three tab universes the 2026-09-05 audit surfaced: the gold-standard
+#: workbook (`gold_reference.json`, 43 sheets) carries three tabs the engine
+#: contract (41 sheets) does not — `Technographic_Scan` (also shipped as its
+#: own .docx deliverable) and two evidence copies `Evidence_Master` /
+#: `Evidence_Register` — while the contract carries `Financial_Trends`, added
+#: in v7, that the older gold measurement predates. Declaring the aliases here
+#: (rather than forcing the engine to write three more sheets, which would
+#: fail `engine.template check` on every run) gives the web app ONE
+#: authoritative read universe and defaults it to the gold-standard tabs,
+#: while staying tolerant of a package whose exporter names them differently.
+#: `parse_evidence_master` in the worker already folds the evidence family;
+#: this is the single authoritative statement of that tolerance, which
+#: `engine.template drift` and `scripts/gen_recording_map.py` both read.
+INGEST_ALIASES = {
+    "Evidence_Master": "Evidence_Detail",
+    "Evidence_Register": "Evidence_Detail",
+    "Evidence_Index": "Evidence_Detail",
+    "Evidence_Ledger": "Evidence_Detail",
+    "Evidence_Linkage": "Evidence_Detail",
+    "Evidence_Linkage_Matrix": "Evidence_Detail",
+    "Evidence_Inventory": "Evidence_Detail",
+    "Technographic_Scan": "Tech_Register",
+}
+
+#: The full set of tab names the app RECOGNISES on ingest: the sheets the
+#: engine writes plus the aliases above. A package tab outside this set is a
+#: genuinely unmapped tab (`workbook_tab_coverage.unread_unmapped`), not a
+#: naming variant. The gold-standard workbook's 43 sheets are all in here.
+READ_SHEETS = tuple(SHEETS) + tuple(INGEST_ALIASES)
+
+
+def canonical_sheet(tab: str) -> str | None:
+    """The SHEETS name a tab resolves to (itself, or the sheet it aliases),
+    or None for a tab the contract does not recognise at all."""
+    if tab in SHEETS:
+        return tab
+    return INGEST_ALIASES.get(tab)
+
 #: The literal the contract forbids in Source_URLs, in any casing (rule 6).
 BANNED_URL_PLACEHOLDERS = ("multiple searches", "see report", "various",
                            "n/a", "tbd", "see above")
