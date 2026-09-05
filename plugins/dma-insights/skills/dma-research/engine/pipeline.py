@@ -202,6 +202,7 @@ class ShipPageShipper:
                                            "claim_refused" if r.returncode == 3 else "fail")
         return {"status": status, "reasons": verdict.get("reasons") or
                 ([(r.stderr or r.stdout)[-400:]] if r.returncode else []),
+                "sg_v4_fails": verdict.get("sg_v4_fails") or [],
                 "rc": r.returncode}
 
     def promote(self, connector_run):
@@ -226,6 +227,12 @@ class Options:
     max_rounds: int = 3
     lane_retries: int = 1
     page_retries: int = 2
+    # SG-V4 (embedding grounding) disclosures the connector promotes anyway
+    # (invariant 12); the driver REVISES a page whose FAIL count exceeds this,
+    # so ungrounded prose is re-grounded rather than shipped. A small budget
+    # tolerates a legitimate paraphrase drifting below threshold; 249 (Golden 1)
+    # does not.
+    sg_v4_budget: int = 8
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -745,9 +752,23 @@ class Pipeline:
             for p in todo:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
                                              self.run.qa_dir / f"verdict_{p}_{version}.json")
+                sgv4 = res.get("sg_v4_fails") or []
+                if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
+                    # The connector discloses-and-promotes SG-V4 (invariant 12);
+                    # the driver reads the disclosure and REVISES ungrounded prose
+                    # before accepting the page, rather than shipping the claim the
+                    # grounding gate could not support (measured on the promoted
+                    # Golden 1 overview: 249 SG-V4 FAILs, all ignored).
+                    res = {**res, "status": "sg_v4_over_budget",
+                           "reasons": [f"SG-V4 grounding FAIL x{len(sgv4)} over "
+                                       f"budget {self.opts.sg_v4_budget} — find "
+                                       f"grounding or drop the claim"]
+                           + [f"{w.get('path')} (sim {w.get('similarity')} < "
+                              f"{w.get('threshold')})" for w in sgv4[:6]]}
                 rec = self.state["pages"].setdefault(p, {})
                 rec.update({"version": version, "status": res.get("status"),
                             "reasons": (res.get("reasons") or [])[:12],
+                            "sg_v4_fails": len(sgv4),
                             "attempts": int(rec.get("attempts") or 0) + 1,
                             "connector_run": connector_run, "at": _utcnow()})
                 rec.setdefault("versions", {})[version] = res.get("status")

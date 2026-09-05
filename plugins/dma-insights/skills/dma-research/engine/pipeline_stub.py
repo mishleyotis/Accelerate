@@ -338,9 +338,12 @@ class StubShipper:
     makes promote_run return incomplete_run."""
 
     def __init__(self, *, verdicts: dict | None = None, refuse_claim: set | None = None,
-                 refuse_promote: bool | None = None):
+                 refuse_promote: bool | None = None, sg_v4: dict | None = None):
         import os
         self.verdicts = dict(verdicts or {})
+        # {("overview", 1): [{"path": "...", "similarity": 0.39, "threshold": 0.5}, ...]}
+        # — the SG-V4 grounding FAILs a page's submission discloses on an attempt.
+        self.sg_v4 = dict(sg_v4 or {})
         # From the environment (the CLI walk): DMA_STUB_PAGE_FAIL="heatmap:1,overview:2"
         # fails that page's Nth ship; DMA_STUB_REFUSE_PROMOTE=1.
         for part in filter(None, os.environ.get("DMA_STUB_PAGE_FAIL", "").split(",")):
@@ -362,7 +365,8 @@ class StubShipper:
             res = {"status": "claim_refused", "reasons": ["another session holds the lease"]}
         else:
             status, reasons = self.verdicts.get((page, n), ("pass", []))
-            res = {"status": status, "reasons": list(reasons)}
+            res = {"status": status, "reasons": list(reasons),
+                   "sg_v4_fails": list(self.sg_v4.get((page, n), []))}
         self.ships.append({"run": connector_run, "page": page, "attempt": n, **res,
                            "sections_dir": str(sections_dir)})
         Path(verdicts_out).parent.mkdir(parents=True, exist_ok=True)

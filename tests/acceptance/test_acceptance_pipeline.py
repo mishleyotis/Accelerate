@@ -217,6 +217,36 @@ def test_issue7_a_page_fail_redispatches_only_that_page_with_the_reasons(tmp_pat
     assert st["pages"]["heatmap"]["attempts"] >= 2
 
 
+def test_issue7_ungrounded_prose_is_revised_not_shipped(tmp_path):
+    """R1 / the owner's "no orchestrator checks the outputs": the connector
+    DISCLOSES SG-V4 grounding FAILs and promotes anyway (invariant 12) — on the
+    promoted Golden 1 overview, 249 rode through as warnings the loop ignored.
+    The driver now REVISES a page whose SG-V4 FAIL count is over budget,
+    re-dispatching it with the failing paths, instead of accepting ungrounded
+    prose. A handful under budget is tolerated: disclosed, but shipped."""
+    run = _fresh(tmp_path)
+    over = [{"path": f"heatmap.workbook_scores[{i}].narrative", "similarity": 0.39,
+             "threshold": 0.5} for i in range(20)]         # 20 > the default budget of 8
+    opts = _opts(tmp_path, shipper=S.StubShipper(sg_v4={("heatmap", 1): over}))
+    out = P.Pipeline(run, opts).run_all()
+    assert out["outcome"] == "COMPLETE", out
+    a_calls = [c for c in opts.dispatcher.calls if c["stage"] == "PAGES_A"]
+    agents = [c["agent"] for c in a_calls]
+    assert agents.count("heatmap-surface-producer") == 2   # revised once, then clean
+    assert agents.count("techstack-surface-producer") == 1  # the grounded page shipped once
+    redo = Path(a_calls[-1]["prompt_file"]).read_text()
+    assert "SG-V4" in redo and "narrative" in redo
+    assert json.loads((run.qa_dir / P.STATE_NAME).read_text())["pages"]["heatmap"]["attempts"] >= 2
+
+    # a handful, under budget, rides through — disclosed but shipped
+    run2 = _fresh(tmp_path / "under")
+    few = [{"path": "heatmap.x", "similarity": 0.48, "threshold": 0.5}]
+    opts2 = _opts(tmp_path / "under", shipper=S.StubShipper(sg_v4={("heatmap", 1): few}))
+    assert P.Pipeline(run2, opts2).run_all()["outcome"] == "COMPLETE"
+    assert [c["agent"] for c in opts2.dispatcher.calls
+            if c["stage"] == "PAGES_A"].count("heatmap-surface-producer") == 1
+
+
 def test_issue7_a_page_that_keeps_failing_is_a_loud_stage_fail(tmp_path):
     run = _fresh(tmp_path)
     shipper = S.StubShipper(verdicts={("heatmap", n): ("fail", [f"CG-09 attempt {n}"])

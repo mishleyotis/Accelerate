@@ -210,6 +210,24 @@ def verdict_line(res: dict) -> tuple[str, list]:
     return v.get("status", res.get("_error", "?")), (v.get("reasons") or [])
 
 
+def sg_v4_grounding_fails(res: dict) -> list:
+    """The SG-V4 (embedding-grounding) disclosures that FAILED. The connector
+    discloses-and-promotes SG results (invariant 12), so these ride in
+    `warnings` and never block the connector — measured on the promoted Golden
+    1 overview: 249 of them, all ignored. The driver reads them to REVISE
+    ungrounded prose before ACCEPTING a page, rather than shipping the claim
+    the grounding gate could not support."""
+    v = res.get("verdict") or {}
+    out = []
+    for w in (v.get("warnings") or []):
+        if isinstance(w, dict) and w.get("gate_id") == "SG-V4" \
+                and str(w.get("result")).upper() == "FAIL":
+            out.append({"path": w.get("path"),
+                        "similarity": w.get("similarity"),
+                        "threshold": w.get("threshold")})
+    return out
+
+
 #: Exit code when the run's lease is held elsewhere. A refused claim is not a
 #: failed page: the driver (`engine.pipeline`) waits for the lease to lapse
 #: and runs again, and it needs to tell the two apart.
@@ -394,7 +412,8 @@ def main(argv=None) -> int:
             continue
         res = submit(a.run_id, page, payload, a.producer)
         status, reasons = verdict_line(res)
-        verdicts[page] = {"status": status, "reasons": reasons[:40]}
+        verdicts[page] = {"status": status, "reasons": reasons[:40],
+                          "sg_v4_fails": sg_v4_grounding_fails(res)}
         _write_verdicts()
         print(f"{page}: {status.upper()} — {len(reasons)} blocking reason(s)")
         for r in reasons[:20]:
