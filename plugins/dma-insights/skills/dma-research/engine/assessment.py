@@ -376,15 +376,35 @@ def score(wb: RunWorkbook, subcap: str, *, score, confidence: str, rationale: st
     dr = _clean(data_readiness).upper()
     if dr not in C.DATA_READINESS:
         problems.append(f"data_readiness {data_readiness!r} not in {C.DATA_READINESS}")
-    if not _clean(data_dependency):
+    dd = _clean(data_dependency)
+    if not dd:
         problems.append("data_dependency is blank — name the data domains the "
                         "subcapability consumes, or NONE")
+    elif eids and dd.upper() != "NONE" and not (
+            len(dd) >= 6 and re.search(r"[A-Za-z]{4,}", dd)):
+        # An evidenced cell's overlay is what T1 and P1 read for readiness; a
+        # one-token filler like "x" makes it thorough-optional (measured on
+        # Golden 1: 690/690 overlay columns empty or defaulted while the report
+        # carried the analysis). Name the domains, or write NONE.
+        problems.append(f"data_dependency {data_dependency!r} names no data "
+                        f"domain — write the domains the subcapability consumes, "
+                        f"or NONE; a one-token filler is not an overlay")
     aie = _clean(ai_evidence) or "NONE_FOUND"
     if aie.upper() != "NONE_FOUND":
         register = wb.evidence_index()
         dead = [e for e in _split_ids(aie) if e.split(":")[0] not in register]
         if dead:
             problems.append(f"ai_evidence_ids {dead} do not resolve")
+    elif eids and aa in ("ASSISTIVE", "AUGMENTED", "AUTONOMOUS"):
+        # A claimed AI posture on an evidenced cell must cite the evidence for
+        # it. Otherwise ai_applicability asserts a deployment the overlay never
+        # grounds — the exact shape the report's free-authored AI paragraphs
+        # took while the structured columns stayed empty (AUD-0052). Cite it,
+        # or the honest applicability on a cell with no AI evidence is NONE.
+        problems.append(f"ai_applicability {aa} claims AI is applied here, but "
+                        f"ai_evidence resolves to NONE_FOUND — cite the evidence "
+                        f"for the AI use (--ai-evidence E-...), or set "
+                        f"ai_applicability NONE")
     pas = _clean(peer_ai_signal) or "UNVERIFIED"
     if not (pas.upper() in ("SCAN", "UNVERIFIED") or re.fullmatch(r"E-\d+", pas)):
         problems.append("peer_ai_signal is an E-ID, SCAN or UNVERIFIED")
@@ -735,12 +755,20 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         if srow is None:
             f["subcap_scores_missing"].append(cell)
         else:
-            if (_clean(srow.get("ai_applicability")).upper() not in C.AI_APPLICABILITY
+            oaa = _clean(srow.get("ai_applicability")).upper()
+            if (oaa not in C.AI_APPLICABILITY
                     or _clean(srow.get("data_readiness")).upper() not in C.DATA_READINESS
                     or not _clean(srow.get("data_dependency"))
                     or not _clean(srow.get("ai_evidence_ids"))
                     or not _clean(srow.get("ai_blocker"))
                     or not _clean(srow.get("peer_ai_signal"))):
+                f["overlay_incomplete"].append(cell)
+            elif (eids and oaa in ("ASSISTIVE", "AUGMENTED", "AUTONOMOUS")
+                    and _clean(srow.get("ai_evidence_ids")).upper() == "NONE_FOUND"):
+                # a claimed AI posture on an evidenced cell with no AI evidence:
+                # the write path refuses this, so a row in this shape was edited
+                # out of band — the gate catches it too (AUD-0052, evidence-tied
+                # overlay).
                 f["overlay_incomplete"].append(cell)
     for cap, scores in sorted(by_cap.items()):
         if len(scores) >= 3:

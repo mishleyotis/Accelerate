@@ -225,6 +225,18 @@ handoff, in words no other section uses (CG-29). **Do not** write a `summary` ke
 `insights.landscape`: that column is deliberately unbound, a summary written there is
 discarded at promotion, and the corpus's one summary line belongs to this page.
 
+**When the run holds a peer set, the thread compares (CG-51).** If the bundle's
+`peer_table` is non-empty — the run has peers with a recorded score — the shape
+read is not enough: the thread must say **where this estate sits relative to
+those peers** (name at least one, or speak to "peers" explicitly), because a
+coverage argument with a peer set behind it that never mentions a peer is the
+half-told page the owner named. This is a comparison, not a courtesy: *"the
+data layer holds no confirmed product where Suncoast and VyStar both run a
+governed platform"* reads the register's shape AND places it. With **no** peer
+set the gate is silent and inventing a comparison would be worse than none —
+say the shape and stop. CG-51 refuses a peer-blind thread only once a peer set
+is demonstrably in hand.
+
 ### Audience
 
 `r_layer` reaches no audience — `NEVER_SERVED_KEYS` strips it before the audience

@@ -192,7 +192,17 @@ def _assessment_body(overall="2.25"):
         elif n == "5":
             for p in "P1 P2 P3 P4".split():
                 body.append(("Heading 2", f"5.{p[1]} Pillar deep dive ({p}): a pillar"))
-                body.append(("Normal", "AI and data overlay: models."))
+                body.append(("Normal",
+                    f"AI and data overlay ({p}): the data foundation rests on the "
+                    f"member master and transaction domains, governed under a "
+                    f"catalogue that went live this year [E-{10 + int(p[1])}]; data "
+                    f"readiness is AMBER because lineage is only partial. "
+                    f"Applicability is ASSISTIVE — a model assists the workflow "
+                    f"rather than deciding it — and the blocker is the absence of a "
+                    f"feature store. Peer AI posture is inferred from public "
+                    f"signals, not audited. The so-what: closing the governance "
+                    f"gap lifts readiness to GREEN and unlocks the autonomous tier "
+                    f"the roadmap sequences after it."))
         elif n == "8":
             for i in range(1, 6):
                 body.append(("Heading 2", f"REC-0{i}: do a thing"))
@@ -245,6 +255,28 @@ def test_missing_ai_overlay_is_caught(tmp_path):
              + " ".join(f"E-{i}" for i in range(1, 70)))]
     rp = _docx(tmp_path / "DMA_Assessment_Report_x.docx", body)
     assert "GS-RPT-AIOVERLAY" in {f["code"] for f in GS.report_findings(rp, kind="assessment")}
+
+
+def test_a_thin_ai_overlay_is_caught_even_with_the_heading(tmp_path):
+    """The heading count passed while the block was 'AI and data overlay:
+    models.' — the exact 2026-09-05 defect ("AI overlays not thorough
+    enough"). Depth is gated now: a one-line overlay fails though its heading
+    is present and counted."""
+    from engine import report_spec as RS
+    body = []
+    for h in RS.numbered_headings("assessment"):
+        body.append(("Heading 1", h))
+        if h.split(".")[0] == "5":
+            for p in "P1 P2 P3 P4".split():
+                body.append(("Heading 2", f"5.{p[1]} Pillar deep dive ({p}): a pillar"))
+                body.append(("Normal", "AI and data overlay: models."))
+        else:
+            body.append(("Normal", "Section body."))
+    body.append(("Normal", " ".join(f"E-{i}" for i in range(1, 121)) + " " + "word " * 8600))
+    rp = _docx(tmp_path / "DMA_Assessment_Report_thin.docx", body)
+    codes = {f["code"] for f in GS.report_findings(rp, kind="assessment")}
+    assert "GS-RPT-AIOVERLAY-DEPTH" in codes      # depth caught
+    assert "GS-RPT-AIOVERLAY" not in codes         # the heading count is satisfied
 
 
 # ── GSY-18 · depth: a real 5-year financial trajectory must be present ────

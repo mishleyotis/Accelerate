@@ -219,6 +219,35 @@ ENRICHMENT_TOOLS = frozenset({
     # below, by its full name, precisely because the suffix alone is unsafe.
 })
 
+
+# ── sanctioned workspace writes ──────────────────────────────────────────
+#
+# Two Clay writes the synthesis workflow REQUIRES — the technographic scan's
+# step 2 (`technographic-scanner.md`), and the O2/O3/O7/O12/T1/C5/P1 enrichment
+# the surface rulebooks map to them (`02-inputs/2-clay-enrichment.md`). Unlike
+# everything in ENRICHMENT_TOOLS these DO write, so they are not read-only
+# lookups — but they write enrichment data points into the CLIENT'S OWN record
+# in the operator's own Clay workspace: not outward, not a message, not a spend.
+# 36 agent manifests grant them, so a prompt on either stops a scheduled firing
+# as dead as a prompt on the connector. They were WITHHELD as "workspace
+# writes", which left them headless-safe only through a bootstrap wildcard THIS
+# plugin cannot guarantee — MEASURED 2026-09-05, they prompt in a plain session.
+# Owner's decision the same day: approve them in the plugin's own hook so a
+# routine OR a plain Claude Code session never prompts. `run_subroutine` /
+# `run_subroutine_direct` stay withheld below — a workspace subroutine is
+# user-authored and can do anything.
+SANCTIONED_WORKSPACE_WRITES = frozenset({
+    "add-company-data-points", "add-contact-data-points",
+})
+WORKSPACE_WRITE_REASON = (
+    "sanctioned Clay enrichment write, auto-approved by the dma-insights hook: "
+    "the technographic scan and the enrichment rulebooks REQUIRE "
+    "add-company-data-points / add-contact-data-points, which write data points "
+    "into the client's own record in the operator's own Clay workspace — never "
+    "outward, never a message, never a spend. A scheduled session has nobody to "
+    "answer a prompt."
+)
+
 # ── tools allowed by their FULL name ─────────────────────────────────────
 #
 # The suffix list above exists because a claude.ai connector's server segment
@@ -446,9 +475,11 @@ CONDITIONAL_TOOLS = {
 #: "nobody looked". Each of these was already argued for in the comments above
 #: — this is where the argument becomes checkable.
 WITHHELD_SUFFIXES = frozenset({
-    # Clay — writes into the user's own workspace.
-    "add-company-data-points", "add-contact-data-points",
     # Clay — a workspace subroutine is user-authored and can do anything.
+    # (add-company-data-points / add-contact-data-points moved to
+    # SANCTIONED_WORKSPACE_WRITES on 2026-09-05 — owner's decision — because
+    # they write only into the client's own Clay record and the workflow
+    # requires them, so a headless firing must not prompt on them.)
     "run_subroutine", "run_subroutine_direct",
     # Vibe Prospecting / Explorium — sends data outward.
     "export-to-csv",
@@ -628,6 +659,8 @@ def main() -> int:
         suffix = tool.rsplit("__", 1)[1]
         if suffix in ENRICHMENT_TOOLS:
             return _allow(ENRICHMENT_REASON)
+        if suffix in SANCTIONED_WORKSPACE_WRITES:
+            return _allow(WORKSPACE_WRITE_REASON)
 
     # ── the resilient default: classify by VERB, so a tool nobody listed is
     # still handled the moment it appears (owner 2026-09-01: "even when new

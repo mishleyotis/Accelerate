@@ -202,6 +202,7 @@ class ShipPageShipper:
                                            "claim_refused" if r.returncode == 3 else "fail")
         return {"status": status, "reasons": verdict.get("reasons") or
                 ([(r.stderr or r.stdout)[-400:]] if r.returncode else []),
+                "sg_v4_fails": verdict.get("sg_v4_fails") or [],
                 "rc": r.returncode}
 
     def promote(self, connector_run):
@@ -226,6 +227,12 @@ class Options:
     max_rounds: int = 3
     lane_retries: int = 1
     page_retries: int = 2
+    # SG-V4 (embedding grounding) disclosures the connector promotes anyway
+    # (invariant 12); the driver REVISES a page whose FAIL count exceeds this,
+    # so ungrounded prose is re-grounded rather than shipped. A small budget
+    # tolerates a legitimate paraphrase drifting below threshold; 249 (Golden 1)
+    # does not.
+    sg_v4_budget: int = 8
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -559,6 +566,7 @@ class Pipeline:
                 self._count(self._dispatch(cb, stage="CHALLENGE"))
             for cat in need["dispatch"]:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
+            self._verify_research(need["dispatch"])
             self.reopen()
         need = brief.categories_needing_dispatch(self.wb)
         if need["dispatch"]:
@@ -568,6 +576,41 @@ class Pipeline:
                 + "; ".join(f"{c}: {', '.join(need['reasons'][c][:4])}"
                             for c in need["dispatch"][:4]))
         return f"every category PASS after {self.opts.max_rounds} round(s)"
+
+    def _verify_research(self, categories) -> None:
+        """The dispatch verifier for RESEARCH. After the floors gate reads the
+        Search_Log a lane wrote, this reads the lane's own transcript and
+        REVISEs a category whose logged searches no retrieval could have
+        produced — the fabrication the substrate gates structurally cannot
+        see. It records a DISPATCH_VERIFY row per category; a FAIL re-enters
+        the round loop through categories_needing_dispatch, with the reason in
+        the re-dispatch brief. FAIL-SAFE BY CONSTRUCTION: any error leaves the
+        category exactly as the floors gate found it, because a verifier that
+        cannot read the work must never block a run on a guess."""
+        try:
+            from . import verify
+        except Exception:                                   # noqa: BLE001
+            return
+        logs = self.run.root / "agent_logs"
+        for cat in categories:
+            try:
+                reasons = verify.research_lane_fabrication(cat, logs)
+            except Exception as e:                          # noqa: BLE001
+                self.opts.log(f"[VERIFY] {cat}: skipped ({e.__class__.__name__})")
+                continue
+            try:
+                if reasons:
+                    L.append_gate(self.wb, gate="DISPATCH_VERIFY", scope=cat,
+                                  verdict="FAIL", detail="; ".join(sorted(reasons)),
+                                  blocking=True)
+                    self.opts.log(f"[VERIFY] {cat}: REVISE — {reasons[0][:120]}")
+                else:
+                    L.append_gate(self.wb, gate="DISPATCH_VERIFY", scope=cat,
+                                  verdict="PASS",
+                                  detail="logged searches witnessed by retrieval "
+                                         "in the lane transcript", blocking=False)
+            except Exception as e:                          # noqa: BLE001
+                self.opts.log(f"[VERIFY] {cat}: gate write skipped ({e.__class__.__name__})")
 
     def _stage_handoff(self) -> str:
         from . import assessment as A
@@ -745,9 +788,23 @@ class Pipeline:
             for p in todo:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
                                              self.run.qa_dir / f"verdict_{p}_{version}.json")
+                sgv4 = res.get("sg_v4_fails") or []
+                if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
+                    # The connector discloses-and-promotes SG-V4 (invariant 12);
+                    # the driver reads the disclosure and REVISES ungrounded prose
+                    # before accepting the page, rather than shipping the claim the
+                    # grounding gate could not support (measured on the promoted
+                    # Golden 1 overview: 249 SG-V4 FAILs, all ignored).
+                    res = {**res, "status": "sg_v4_over_budget",
+                           "reasons": [f"SG-V4 grounding FAIL x{len(sgv4)} over "
+                                       f"budget {self.opts.sg_v4_budget} — find "
+                                       f"grounding or drop the claim"]
+                           + [f"{w.get('path')} (sim {w.get('similarity')} < "
+                              f"{w.get('threshold')})" for w in sgv4[:6]]}
                 rec = self.state["pages"].setdefault(p, {})
                 rec.update({"version": version, "status": res.get("status"),
                             "reasons": (res.get("reasons") or [])[:12],
+                            "sg_v4_fails": len(sgv4),
                             "attempts": int(rec.get("attempts") or 0) + 1,
                             "connector_run": connector_run, "at": _utcnow()})
                 rec.setdefault("versions", {})[version] = res.get("status")

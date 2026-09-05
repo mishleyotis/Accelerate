@@ -426,6 +426,17 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "this is a RE-DISPATCH: `handback` is what your previous run "
             "established and `last_gate.blocking` is exactly what the floors "
             "gate refused — work those terms, not the category from scratch")
+        dv = last_gate(wb, "DISPATCH_VERIFY", category)
+        if dv["verdict"] == "FAIL":
+            packet["dispatch_verify"] = dv
+            packet["rules"].append(
+                "the DISPATCH VERIFIER refused your last run: `dispatch_verify."
+                "blocking` names searches you LOGGED whose retrieval your own "
+                "transcript does not show. Actually run the retrieval "
+                "(WebSearch / WebFetch / a connector) for each logged volley — "
+                "a Search_Log row with no real search behind it satisfies the "
+                "floor with a row nobody ran, and is the fabrication this gate "
+                "exists to stop.")
     packet["packet_chars"] = len(json.dumps(packet, default=str))
     packet["packet_ceiling"] = BRIEF_CHAR_CEILING
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and with_handback:
@@ -628,12 +639,24 @@ def categories_needing_dispatch(wb: RunWorkbook) -> dict:
     out = {"dispatch": [], "passed": [], "reasons": {}}
     for cat in sorted({category_of(c) for c in wb.selected_subcaps()}):
         g = last_gate(wb, "FLOORS", cat)
-        if g["verdict"] == "PASS":
+        # The dispatch verifier is a SECOND gate on the same category: the
+        # floors gate reads the Search_Log a lane wrote, the verifier reads
+        # whether the lane's transcript witnesses those searches. A category
+        # the floors gate passed but the verifier refused is re-dispatched,
+        # because a fabricated search that satisfied the floor is not done.
+        v = last_gate(wb, "DISPATCH_VERIFY", cat)
+        if g["verdict"] == "PASS" and v["verdict"] != "FAIL":
             out["passed"].append(cat)
         else:
             out["dispatch"].append(cat)
-            out["reasons"][cat] = (g["blocking"] or
-                                   [f"floors gate {g['verdict']}"])
+            reasons = list(g["blocking"]) if g["verdict"] != "PASS" else []
+            if g["verdict"] != "PASS" and not reasons:
+                reasons = [f"floors gate {g['verdict']}"]
+            if v["verdict"] == "FAIL":
+                reasons += [f"dispatch verifier: {t}" for t in
+                            (v["blocking"] or ["a logged search the transcript "
+                                               "does not witness"])]
+            out["reasons"][cat] = reasons or [f"floors gate {g['verdict']}"]
     return out
 
 
