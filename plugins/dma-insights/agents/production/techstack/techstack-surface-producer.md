@@ -58,7 +58,17 @@ to fill a gap:
   true` needs a `source_url` and an `as_of`; a peer you could not establish
   stays `null` with what you searched recorded in the basis. An invented
   coverage share fires AG-04 two surfaces later, and MEM-0068 is the
-  measured version of what that costs.
+  measured version of what that costs. **But absence is not the safe default
+  when the run holds peers (CG-51).** If the bundle's `peer_table` is
+  non-empty, at least one register row — the significant-layer anchors and
+  the customer-facing incumbents the peers most obviously bear on — must
+  carry a non-empty `peer_deployments[]`, established or honestly `null` per
+  peer with the search recorded. A run that holds a full peer set and ships
+  every row peer-blind is the exact defect the owner reported ("the tech
+  stack does not enforce peer comparison"): the comparison the run already
+  paid for has to reach the rows a reader clicks into. With an empty
+  `peer_table` the gate is silent — you have no cohort to compare against and
+  must not assemble a second one (read the run's own set, never invent it).
 
 Detail rows never invent arithmetic, and never carry a derived or projected
 score.
