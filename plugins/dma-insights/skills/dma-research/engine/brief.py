@@ -990,6 +990,10 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
         "client_profile_markdown": str(T.TEMPLATES_DIR / "client_profile_template.md"),
         "assessment_markdown": str(T.TEMPLATES_DIR / "assessment_report_template.md"),
         "shell_docx": str(T.REPORT_SHELL),
+        # The dual-source map: which app surface each report section feeds and
+        # how it is produced. Write a section so `engine.surface_export` can
+        # FORMAT it into the app payload without re-synthesis or re-challenge.
+        "section_sources": str(T.TEMPLATES_DIR.parent / "section_sources.json"),
     }
     for key, spec in RS.SPECS.items():
         pre = N.stage_preconditions(wb, key, qa_dir)
@@ -1036,6 +1040,9 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "register carries",
                 "you never review your own sections — `report-validator` does",
                 "the gold gate (`engine.gold_standard report`) reads gold_reference.json",
+                "each section feeds a named app surface (`section_sources.json`); "
+                "write it so surface production can FORMAT it into the payload — "
+                "it is not re-synthesised or re-challenged downstream",
             ],
         }, "sections")
         lanes.append((f"report-{key}", packet, f"Report — {spec.title}"))
@@ -1077,6 +1084,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
     that page — and NO payload bytes. A prompt that carries a payload is the
     stage-7b token bleed (owner issue 7)."""
     from . import ship
+    from . import surface_export as SX
     e = _engine(run)
     sh = shared(wb)
     st = ship.state(wb)
@@ -1098,10 +1106,26 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
         reasons = verdicts.get(page) if isinstance(verdicts, dict) else None
         if isinstance(reasons, dict):
             reasons = reasons.get("reasons") or reasons.get("failures") or list(reasons.values())
+        sp = SX.plan(page)
+        # Card- and drawer-grain detail lives in the join://cards and
+        # join://drilldowns RESOURCES (also `surface_export cards --page`); the
+        # brief carries only the SUMMARY an agent needs to plan — never the full
+        # map, which would both push the packet past its ceiling and duplicate
+        # the very resource it is meant to send the agent to read.
+        page_cards = {k: v for k, v in SX.cards().items()
+                      if k.split(".", 1)[0] == page}
+        by_route: dict[str, int] = {}
+        for _v in page_cards.values():
+            by_route[_v["route"]] = by_route.get(_v["route"], 0) + 1
+        page_drawers = [d for d in SX.drawers()
+                        if str(d.get("renders_section") or "").startswith(f"{page}.")]
         packet = _bound({
             "agent": f"{page}-surface-producer", "shared": sh,
             "first_commands": [
                 f"python3 -m engine.ship state {e}",
+                f"python3 -m engine.surface_export plan --page {page}",
+                f"python3 -m engine.surface_export cards --page {page}"
+                f"   # the full card map (also the join://cards resource)",
                 f"# read the contract at the path below, not from memory",
                 f"python3 plugins/dma-insights/skills/dma-surface-production/scripts/ship_page.py "
                 f"{connector_run} {page} --sections <your sections dir> --incremental "
@@ -1111,6 +1135,44 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             "ready_in_workbook": pst.get("ready"),
             "waiting_on": pst.get("waiting_on") or [],
             "recording_map_tabs": pst.get("recording_map_tabs") or [],
+            # The dual-source plan: for each section on this page, its route and
+            # the tab(s)/report section(s)/enrichment it is fed FROM. A
+            # `format_only` section is a matter of shape, not synthesis; only a
+            # `produce` section needs a per-surface producer and an enrichment
+            # pass. Full per-field detail is in the join://section-sources map.
+            "section_plan": {
+                k: (f"{v['route']} ← " + (" | ".join(
+                    (v.get("workbook_tabs") or []) + (v.get("report_sections") or [])
+                    + (v.get("enrichment_sources") or [])) or v["disposition"]))
+                for k, v in sp["sections"].items()},
+            "format_only_sections": sp["convert"],
+            "produce_sections": sp["produce"],
+            "server_sections": sp["server"],
+            # Card-grain, as a SUMMARY: how many cards take each route, and the
+            # cards a producer must NOT author (the connector writes them, or
+            # the app computes them). The full card map — item keys, tab
+            # COLUMNS, nested sub-cards — is the join://cards resource in `read`.
+            "card_map": {
+                "read": f"join://cards resource, or `python3 -m engine.surface_export "
+                        f"cards --page {page}` — every card's item keys, tab COLUMNS, "
+                        f"nested sub-cards and route",
+                "by_route": by_route,
+                "do_not_author": {
+                    "connector": sorted(k for k, v in page_cards.items()
+                                        if v["connector_authored"]),
+                    "computed_never_sent": {k: v["computed_never_sent"]
+                                            for k, v in page_cards.items()
+                                            if v["computed_never_sent"]}},
+            },
+            # Drawers: the ones an agent AUTHORS (they carry their own synthesis
+            # prompt) named inline; the rest render from their parent surface's
+            # payload and are read from the join://drilldowns atlas.
+            "drawers": {
+                "authored": [f"{d['dd']} {d['name']} → {d.get('renders_section')}"
+                             for d in page_drawers if d["has_synthesis_prompt"]],
+                "read": f"join://drilldowns — {len(page_drawers)} panel(s) on this "
+                        f"page; an authored one carries its synthesis prompt there",
+            },
             "last_verdict_reasons": [str(r)[:300] for r in (reasons or [])][:12],
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
@@ -1121,6 +1183,21 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "repair that path, not the page",
                 "the workbook is the source: every figure comes from a tab in "
                 "`recording_map_tabs`, every citation from Evidence_Detail",
+                "`format_only_sections` (see section_plan) are FORMATTED from the "
+                "workbook tab or report section named there — do NOT re-synthesise "
+                "them and do NOT re-challenge them; the research layer already "
+                "challenged that content. Only `produce_sections` need new "
+                "synthesis (and enrichment registered as evidence first)",
+                "`server_sections` submit fields:{} plus this page's "
+                "narrative_thread — the app joins the arrangement server-side",
+                "`card_map.by_route` counts this page's cards by route; the "
+                "full map — every card's item keys, tab COLUMNS and nested "
+                "sub-cards — is the join://cards resource, or "
+                "`engine.surface_export cards --page`. A card under "
+                "`card_map.do_not_author.connector` (safeguard gates) or a key "
+                "under `computed_never_sent` is written by the app — never "
+                "author it. `engine.surface_export.scaffold_card` refuses an "
+                "item key the contract card does not declare",
             ],
         }, "last_verdict_reasons", "waiting_on")
         lanes.append((f"page-{page}", packet, f"Page — {page}"))

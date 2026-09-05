@@ -3021,38 +3021,80 @@ _TAB_READERS = {
 
 
 #: Where a tab's rows BELONG, so the census can say more than "nothing reads
-#: this": it can name the surface that is rendering empty because of it.
-#: `verified` mappings were checked field-by-field against the page contract
-#: returned by the connector's get_page_contract; `proposed` ones are read off
-#: the tab's own shape and are the worklist, not a promise. Nothing here
-#: parses anything — it is the map a reader consults before writing the next
-#: parser, kept beside the readers so the two cannot drift apart.
+#: this": it can name the surface(s) that render empty because of it.
+#:
+#: The value is `(target, confidence)`. `target` is either a tuple of dotted
+#: `page.section` ids (a tab may feed MORE THAN ONE app section — the flat
+#: `Subcap_Scores` view feeds the grid, the per-cell drawer AND the overview
+#: roll-up) or a prose string where the tab feeds no single client section
+#: (a worklist, a narrative thread, or run configuration). `confidence` is
+#: `verified` where the binding was checked field-by-field against the page
+#: contract get_page_contract returns, `proposed` where it was read off the
+#: tab's own shape (the worklist, not a promise), and `not_client_facing`
+#: where the tab feeds run config or provenance rather than any surface.
+#:
+#: This is the WORKBOOK half of the source of truth (workbook is primary,
+#: owner 2026-09-05); the REPORT half is `report_templates.json`'s per-section
+#: `feeds` arrays. `scripts/gen_recording_map.py` joins both against
+#: get_page_contract into `references/tab_recording_map.json` (tab-centric)
+#: and `references/section_sources.json` (section-centric, dual-source).
+#: Every client-facing sheet the contract declares carries a binding here so
+#: no filled tab is a surface rendering empty for reasons nobody can see.
+#: Nothing here parses anything — it is the map a reader consults before
+#: writing the next parser, kept beside the readers so the two cannot drift.
 _TAB_TARGET = {
-    # verified against get_page_contract
-    "Tech_Register": ("techstack.techstack.items", "verified"),
-    "Technographic_Scan": ("techstack.techstack.items", "verified"),
-    "Tech_Peer_Deployments":
-        ("techstack.techstack.items[].peer_deployments", "verified"),
-    "Platform_Peer_Adoption":
-        ("techstack.techstack.items[].peer_deployments", "verified"),
-    "Recommendations": ("platform.recommendations.recommendations", "verified"),
-    # proposed from the tab's own shape — the worklist
-    "Focus_Areas": ("insights (H1 focus areas)", "proposed"),
-    "Entity_Timeline": ("context", "proposed"),
-    "Firmographics": ("overview", "proposed"),
-    "Subcap_Scores": ("heatmap cells", "proposed"),
-    "Coverage": ("overview coverage posture", "proposed"),
-    "Coverage_Map": ("overview coverage posture", "proposed"),
-    "Solution_Catalogue": ("platform.platform_story candidate set", "proposed"),
-    "Issue_Register":
-        ("platform.stairstep.ladder.steps[].blocking_findings", "proposed"),
+    # ── techstack (verified field-by-field against get_page_contract) ──
+    "Tech_Register": (("techstack.techstack",), "verified"),
+    "Technographic_Scan": (("techstack.techstack",), "verified"),
+    "Tech_Peer_Deployments": (("techstack.techstack",), "verified"),
+    "Platform_Peer_Adoption": (("techstack.techstack",), "verified"),
+    "Recommendations": (("platform.recommendations", "platform.roadmap"),
+                        "verified"),
+    # ── scores & evidence — the workbook is the primary source for every
+    #    figure the app renders (read off the tab's shape) ──
+    "P1_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "P2_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "P3_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "P4_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "Subcap_Scores": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                      "proposed"),
+    "Pillar_Rollup": (("overview.scores", "heatmap.workbook_scores"),
+                      "proposed"),
+    "Category_Rollup": (("heatmap.workbook_scores",), "proposed"),
+    "Pillar_Summary": (("overview.scores", "heatmap.workbook_scores"),
+                       "proposed"),
+    "Category_Detail": (("heatmap.workbook_scores",), "proposed"),
+    "Peer_Benchmarks": (("overview.scores", "heatmap.workbook_scores"),
+                        "proposed"),
+    "Evidence_Detail": (("heatmap.evidence", "heatmap.evidence_age"),
+                        "proposed"),
+    "Coverage": (("overview.evidence_coverage",), "proposed"),
+    "Coverage_Map": (("heatmap.alerts", "heatmap.evidence_age",
+                      "overview.evidence_coverage"), "proposed"),
+    "Caps_Applied_Log": (("heatmap.safeguard_gates",), "proposed"),
+    # ── the client's own facts ──
+    "Firmographics": (("overview.firmographics",), "proposed"),
+    "Focus_Areas": (("heatmap.focus_areas",), "proposed"),
+    "Entity_Timeline": (("context.timeline", "context.acquisitions"),
+                        "proposed"),
+    "Issue_Register": (("context.issue_register", "platform.stairstep"),
+                       "proposed"),
+    "Financial_Trends": (("overview.financial_series",), "proposed"),
+    "Solution_Catalogue": (("platform.platform_story",
+                            "platform.recommendations",
+                            "overview.opportunity"), "proposed"),
+    # ── worklist / provenance: client-relevant but no single section ──
     "Enrichment_Needed": ("enrichment facets", "proposed"),
     "Report_Narrative": ("page narrative_thread / report sections", "proposed"),
     "Challenge_Log": ("internal_only provenance", "proposed"),
     "Gate_Log": ("internal_only provenance", "proposed"),
     "Provenance": ("internal_only provenance", "proposed"),
     "Search_Log": ("internal_only provenance", "proposed"),
-    # run configuration and method, not a client-facing surface
+    # ── run configuration and method, not a client-facing surface ──
     "Maturity_Rubric": ("run config", "not_client_facing"),
     "Pillar_Weights": ("run config", "not_client_facing"),
     "Catalogue_Meta": ("run config", "not_client_facing"),
@@ -3063,6 +3105,7 @@ _TAB_TARGET = {
     "DQ_Bank": ("run config", "not_client_facing"),
     "00_README": ("run config", "not_client_facing"),
     "Executive_Summary": ("run config", "not_client_facing"),
+    "Run_Metadata": ("run config", "not_client_facing"),
 }
 
 

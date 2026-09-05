@@ -146,3 +146,191 @@ def test_a_bound_row_names_a_real_section():
     for r in doc["tabs"]:
         if r["section"]:
             assert f"{r['page']}.{r['section']}" in known, r
+
+
+# ------------------------------------------------------- section sources
+
+def _repo():
+    from pathlib import Path as _P
+    return _P(fp.__file__).resolve().parents[3]
+
+
+def test_section_sources_is_generated_and_byte_reproducible():
+    """Both maps are GENERATED, never hand-edited. Regenerating them to a
+    temp dir must reproduce the committed bytes exactly — a hand-edit is one
+    refactor away from being confidently wrong."""
+    import json
+    import sys as _s
+    import tempfile
+    from pathlib import Path as _P
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "plugins" / "dma-insights" / "scripts"))
+    import gen_recording_map as gen
+
+    ref = repo / "plugins" / "dma-insights" / "references"
+    with tempfile.TemporaryDirectory() as td:
+        rc = gen.main(["--out-tabs", str(_P(td) / "t.json"),
+                       "--out-sections", str(_P(td) / "s.json"),
+                       "--out-shared", str(_P(td) / "shared.json")])
+        assert rc == 0, ("a served+required section is unsourced, or a card is "
+                         "unbound/extra — see output")
+        for name, committed in (("t.json", "tab_recording_map.json"),
+                                ("s.json", "section_sources.json")):
+            got = (_P(td) / name).read_text(encoding="utf-8")
+            have = (ref / committed).read_text(encoding="utf-8")
+            assert got == have, (
+                f"{committed} has drifted from the generator — re-run "
+                f"scripts/gen_recording_map.py")
+        # the connector's shared copy must match the plugin's, byte for byte
+        shared = (repo / "packages" / "shared" / "section_sources.json").read_text("utf-8")
+        assert shared == (ref / "section_sources.json").read_text("utf-8"), (
+            "packages/shared/section_sources.json has drifted from the plugin "
+            "copy — re-run scripts/gen_recording_map.py")
+
+
+def test_every_served_required_section_has_a_producible_source():
+    """The join exists so no served, required app section renders empty for a
+    reason nobody can see. Every one must resolve to a workbook tab, a report
+    section, an enrichment source, or a deliberate server/synthesis
+    disposition."""
+    import json
+    doc = json.loads((_repo() / "plugins" / "dma-insights" / "references"
+                      / "section_sources.json").read_text(encoding="utf-8"))
+    assert "GENERATED" in doc["_readme"][0]
+    assert doc["coverage"]["served_required_unsourced"] == []
+    for sec, v in doc["sections"].items():
+        if v["required"] and v["served"]:
+            has_source = (v["workbook_tabs"] or v["report_sections"]
+                          or v["enrichment_sources"])
+            assert has_source or v["disposition"] in ("server", "synthesis"), sec
+        # the two owner-excluded sections must stay unserved
+        if sec in ("overview.ceilings", "overview.evidence_coverage"):
+            assert v["served"] is False, f"{sec} must remain unserved"
+
+
+def test_cards_cover_every_contract_card_no_more_no_less():
+    """The card map must carry EVERY list-of-object card the contract declares
+    and no card the contract does not — a card added to the contract fails the
+    build until it is bound in card_bindings.json."""
+    import json
+    import sys as _s
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "apps" / "mcp"))
+    from dma_mcp.contracts import PAGES, get_page_contract
+
+    doc = json.loads((repo / "plugins" / "dma-insights" / "references"
+                      / "section_sources.json").read_text(encoding="utf-8"))
+    assert doc["coverage"]["cards_unbound"] == []
+    assert doc["coverage"]["cards_extra"] == []
+    for page in PAGES:
+        for name, meta in get_page_contract(page)["sections"].items():
+            cards = (doc["sections"].get(f"{page}.{name}") or {}).get("cards", {})
+            for f, m in meta["fields"].items():
+                if m["type"] == "list" and m.get("item_type") == "object":
+                    assert f in cards, f"{page}.{name}.{f} not in the card map"
+                    assert cards[f]["item_keys"], f"{page}.{name}.{f} no item keys"
+
+
+def test_every_card_binding_resolves():
+    """A card binding may name only a real contract sheet, a real
+    engine.contract COLUMN tuple, real report sections and a real enrichment
+    facet — a stale binding fails here, not in production."""
+    import json
+    import sys as _s
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "plugins" / "dma-insights" / "skills"
+                          / "dma-research"))
+    from engine import contract as C
+
+    bindings = json.loads((repo / "plugins" / "dma-insights" / "references"
+                           / "card_bindings.json").read_text(encoding="utf-8"))
+    feeds = json.loads((repo / "plugins" / "dma-insights" / "references"
+                        / "templates" / "report_templates.json").read_text())
+    valid_reports = {f"{rk}.{s['id']}" for rk, rv in feeds["reports"].items()
+                     for s in rv.get("sections", [])}
+    reg = json.loads((repo / "packages" / "shared"
+                      / "enrichment_register.json").read_text())
+    facets = {v.get("counts") for v in reg["surfaces"].values()} | {
+        "leadership", "firmographics", "techstack", "sentiment",
+        "thought_leadership"}
+    read_sheets = set(C.SHEETS) | set(getattr(C, "INGEST_ALIASES", {}))
+
+    def check(b):
+        if b.get("tab"):
+            assert b["tab"] in read_sheets, b["tab"]
+        for t in b.get("also_tabs", []):
+            assert t in read_sheets, t
+        if b.get("columns_tuple"):
+            assert hasattr(C, b["columns_tuple"]), b["columns_tuple"]
+        for r in b.get("report_sections", []):
+            assert r in valid_reports, r
+        if b.get("enrichment_facet"):
+            assert b["enrichment_facet"] in facets, b["enrichment_facet"]
+        for nb in (b.get("nested") or {}).values():
+            if nb.get("columns_tuple"):
+                assert hasattr(C, nb["columns_tuple"]), nb["columns_tuple"]
+            if nb.get("tab"):
+                assert nb["tab"] in read_sheets, nb["tab"]
+
+    for group in ("cards", "grids", "object_nested"):
+        for sec, fields in bindings.get(group, {}).items():
+            for f, b in fields.items():
+                check(b)
+
+
+def test_the_drilldown_atlas_is_complete():
+    """All 15 panels, each renders a real section (or is app chrome), and
+    exactly DD-1/2/3/4/7 carry a synthesis prompt."""
+    import json
+    import sys as _s
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "apps" / "mcp"))
+    from dma_mcp.contracts import get_page_contract
+
+    doc = json.loads((repo / "plugins" / "dma-insights" / "references"
+                      / "section_sources.json").read_text(encoding="utf-8"))
+    dds = doc["drilldowns"]
+    assert len(dds) == 15
+    ids = {d["dd"] for d in dds}
+    assert ids == {f"DD-{i}" for i in range(1, 16)}
+    prompts = {d["dd"] for d in dds if d.get("has_synthesis_prompt")}
+    assert prompts == {"DD-1", "DD-2", "DD-3", "DD-4", "DD-7"}
+    real = set(doc["sections"])
+    for d in dds:
+        rs = d.get("renders_section")
+        if rs and rs != "parent":
+            assert rs in real, f"{d['dd']} renders unknown section {rs}"
+
+
+def test_the_tab_vocabularies_reconcile():
+    """Contract, worker parser and the gold-standard workbook must name ONE
+    tab universe, with the 2026-09-05 deltas recorded rather than silent."""
+    import json
+    import sys as _s
+
+    repo = _repo()
+    _s.path.insert(0, str(repo / "apps" / "worker"))
+    _s.path.insert(0, str(repo / "plugins" / "dma-insights" / "skills"
+                          / "dma-research"))
+    from dma_worker.workbook_parser import _TAB_TARGET
+    from engine import contract as C
+
+    read_universe = set(C.SHEETS) | set(C.INGEST_ALIASES)
+
+    # every tab the app maps is a sheet the contract recognises (or an alias)
+    assert set(_TAB_TARGET) <= read_universe, (
+        set(_TAB_TARGET) - read_universe)
+
+    gold = json.loads((repo / "plugins" / "dma-insights" / "references"
+                       / "templates" / "gold_reference.json").read_text())
+    gold_sheets = set(gold["workbook"]["sheets"])
+    # the gold-standard workbook is fully recognised
+    assert gold_sheets <= read_universe, gold_sheets - read_universe
+    # the only contract sheet the (older) gold measurement lacks is the v7
+    # addition Financial_Trends — a recorded, reviewed delta
+    assert set(C.SHEETS) - gold_sheets == {"Financial_Trends"}, (
+        set(C.SHEETS) - gold_sheets)

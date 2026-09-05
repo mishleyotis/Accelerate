@@ -96,15 +96,21 @@ def drift(path) -> dict:
     """Every difference between a template copy and the codified contract."""
     have = _headers(path)
     want = {name: list(cols) for name, cols in C.SHEETS.items()}
+    # A tab the app reads as one of the canonical sheets (an evidence copy,
+    # the technographic-scan tab) is a recognised alias, not drift — the gold
+    # standard carries three of them. See contract.INGEST_ALIASES.
+    aliases = getattr(C, "INGEST_ALIASES", {})
     extra = [s for s in sorted(set(have) - set(want))
-             if s not in TEMPLATE_EXTRAS_ALLOWED]
+             if s not in TEMPLATE_EXTRAS_ALLOWED and s not in aliases]
     ignored = [s for s in sorted(set(have) - set(want))
                if s in TEMPLATE_EXTRAS_ALLOWED]
+    alias_present = [s for s in sorted(set(have) - set(want)) if s in aliases]
     out = {
         "template": str(path), "template_url": URL,
         "contract": C.WORKBOOK_CONTRACT,
         "sheets_in_template_only": extra,
         "sheets_ignored_as_guidance": ignored,
+        "sheets_recognised_as_alias": {s: aliases[s] for s in alias_present},
         "sheets_in_contract_only": sorted(set(want) - set(have)),
         "header_drift": {},
     }
@@ -181,6 +187,10 @@ def bind(run, wb=None) -> dict:
             str(TEMPLATES_DIR / "gold_reference.json"),
             str(TEMPLATES_DIR / "client_profile_template.md"),
             str(TEMPLATES_DIR / "assessment_report_template.md"),
+            # The dual-source map: which app section each workbook tab and
+            # report section feeds, and how each is produced. Bound into the
+            # run so an agent never loses which resource its work lands in.
+            str(TEMPLATES_DIR.parent / "section_sources.json"),
         ],
     }
     out = run.root / "00_entity_profile" / "template_binding.json"
