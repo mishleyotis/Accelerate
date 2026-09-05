@@ -37,6 +37,42 @@ import pytest
 HERE = Path(__file__).resolve().parent
 BOOTSTRAP = HERE.parent / "bootstrap_session.sh"
 GRANT = "mcp__plugin_dma-insights_connector__*"
+# The built-in web tools the grant block always adds (AUD-0117), in append
+# order after the connector. The research routine's primary retrieval is
+# WebSearch/WebFetch; granting them is what keeps a new session headless.
+WEB = ["WebSearch", "WebFetch"]
+# The pipeline's own commands and files (2026-09-03, the headless audit): the
+# belt for `hooks/autoapprove_builtins.py`, in the order the block appends
+# them. Prefix rules only — no bare Bash, no Write without a path.
+BUILTIN = [
+    "Bash(python3 -m engine.*)",
+    "Bash(python3 plugins/dma-insights/*)",
+    "Bash(python3 /home/user/Accelerate/plugins/dma-insights/*)",
+    "Bash(python3 -m pytest *)",
+    "Bash(bash plugins/dma-insights/scripts/*)",
+    "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
+    # DOUBLE slash. A single leading slash is anchored at the SETTINGS
+    # SOURCE, not the filesystem root, so `Write(/root/.dma/**)` in user
+    # settings resolves to ~/.claude/root/.dma/** and matches nothing —
+    # an inert belt for exactly the stale-hook session it exists to cover
+    # (permissions reference; the repo's own deny rules already use
+    # `Read(//root/.dma/sa.json)`). Found in review, 2026-09-04.
+    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
+    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
+    "Write(//tmp/**)", "Edit(//tmp/**)",
+]
+
+
+def test_every_absolute_grant_is_rooted_at_the_filesystem():
+    """A single leading slash is settings-source-relative and silently
+    matches nothing; only `//` means `/`."""
+    import re as _re
+    for rule in BASE_GRANTS:
+        m = _re.match(r"^(?:Write|Edit|Read)\((/[^)]*)\)$", rule)
+        if m and not m.group(1).startswith("//"):
+            raise AssertionError(
+                f"{rule} is anchored at the settings source, not at /")
+BASE_GRANTS = [GRANT] + WEB + BUILTIN
 
 
 def grant_block() -> str:
@@ -109,7 +145,7 @@ def test_the_grant_targets_user_scope_not_the_repo():
 def test_a_missing_settings_file_is_created(tmp_path):
     s = tmp_path / ".claude" / "settings.json"
     assert "granted" in run_grant(s)
-    assert json.loads(s.read_text())["permissions"]["allow"] == [GRANT]
+    assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_running_twice_does_not_duplicate_the_rule(tmp_path):
@@ -117,7 +153,41 @@ def test_running_twice_does_not_duplicate_the_rule(tmp_path):
     run_grant(s)
     out = run_grant(s)
     assert "already granted" in out
-    assert json.loads(s.read_text())["permissions"]["allow"] == [GRANT]
+    assert json.loads(s.read_text())["permissions"]["allow"] == BASE_GRANTS
+
+
+def test_headless_never_prompt_mode_is_set(tmp_path):
+    """The mode-level guarantee that survives a stale plugin bind (owner
+    2026-09-01, third recurring-prompt report). A fresh settings file must come
+    out with defaultMode dontAsk, so a session that boots a snapshot's stale
+    auto-approve hook still never queues a prompt no headless container can
+    answer — anything the allow-list and hook do not cover is denied, not hung."""
+    s = tmp_path / ".claude" / "settings.json"
+    run_grant(s)
+    assert json.loads(s.read_text())["permissions"]["defaultMode"] == "dontAsk"
+
+
+def test_an_existing_mode_is_never_overridden(tmp_path):
+    """A human who chose a mode keeps it — dontAsk is set only when unset."""
+    s = tmp_path / "settings.json"
+    s.write_text(json.dumps({"permissions": {"allow": [], "defaultMode": "plan"}}))
+    run_grant(s)
+    cfg = json.loads(s.read_text())
+    assert cfg["permissions"]["defaultMode"] == "plan"
+    assert cfg["permissions"]["allow"] == BASE_GRANTS  # grants still applied
+
+
+def test_the_mode_persists_even_when_every_grant_is_present(tmp_path):
+    """The bug this guards: the write used to be skipped when no grant was
+    added, so a mode set on a fully-granted file was computed and thrown away.
+    A second run adds no grant, yet the mode must be on disk."""
+    s = tmp_path / "settings.json"
+    run_grant(s)                              # first run grants + sets mode
+    s.write_text(json.dumps({"permissions": {  # mode stripped, grants kept
+        "allow": json.loads(s.read_text())["permissions"]["allow"]}}))
+    out = run_grant(s)
+    assert "already granted" in out
+    assert json.loads(s.read_text())["permissions"]["defaultMode"] == "dontAsk"
 
 
 def test_the_plugin_install_keys_survive_the_grant(tmp_path):
@@ -135,7 +205,7 @@ def test_the_plugin_install_keys_survive_the_grant(tmp_path):
     assert cfg["enabledPlugins"] == {"dma-insights@zennify-dma": True}
     assert cfg["extraKnownMarketplaces"]["zennify-dma"]["source"]["path"] == "/x"
     assert "pluginConfigs" in cfg
-    assert cfg["permissions"]["allow"] == [GRANT]
+    assert cfg["permissions"]["allow"] == BASE_GRANTS
 
 
 def test_an_unrelated_allow_rule_is_kept(tmp_path):
@@ -144,7 +214,7 @@ def test_an_unrelated_allow_rule_is_kept(tmp_path):
                                              "deny": ["Read(//root/.dma/sa.json)"]}}))
     run_grant(s)
     cfg = json.loads(s.read_text())
-    assert cfg["permissions"]["allow"] == ["Bash(git status)", GRANT]
+    assert cfg["permissions"]["allow"] == ["Bash(git status)"] + BASE_GRANTS
     assert cfg["permissions"]["deny"] == ["Read(//root/.dma/sa.json)"]
 
 
@@ -294,8 +364,13 @@ def test_every_granted_tool_is_one_the_hook_would_also_approve():
     _sys.path.insert(0, str(HERE.parent / "hooks"))
     import autoapprove_connector as _aac
 
+    # Compared through the hook's OWN canonical form: a grant written for the
+    # `mcp__claude_ai_<Server>__` spelling (the one Claude Code gives a
+    # connector it fetches itself) is the same decision as the delivered
+    # spelling, and the hook reads it that way at call time.
     disagree = [g for g in derived_grants()
-                if not g.endswith("__*") and g not in _aac.QUALIFIED_TOOLS
+                if not g.endswith("__*")
+                and _aac._canonical(g) not in _aac.QUALIFIED_TOOLS
                 and not g.startswith(_aac.PREFIX)]
     assert not disagree, (
         f"granted in user settings and NOT on the hook's read allowlist: "
@@ -334,3 +409,148 @@ def test_the_set_is_derived_rather_than_a_typed_list():
         "was this witness until 2026-08-30; it is now granted by exact read "
         "name because the hook classifies it, so it can no longer show that "
         "an UNCLASSIFIED server is picked up from the tree.)")
+
+
+# ── self-healing: a new session must LOAD the current hooks (owner 2026-09-01) ──
+
+def test_bootstrap_self_heals_the_install_unconditionally():
+    """A session must LOAD the current hooks, not a snapshot's stale copy.
+    bootstrap runs plugin_version.py --heal — which uninstalls and reinstalls a
+    DIVERGED tree (same version, different content: exactly how a stale
+    auto-approve hook survives) — and it is not gated behind a version-string
+    match. Favouring self-healing is this line staying present and ungated."""
+    code = code_lines()
+    assert "plugin_version.py" in code and "--heal" in code, (
+        "bootstrap no longer self-heals the install; a new session can bind a "
+        "stale auto-approve hook that prompts on tools this repo auto-approves")
+
+
+# ── workspace trust: the lever dontAsk does not pull (owner 2026-09-01) ──────
+#
+# Traced to live state: user-scope grants + dontAsk cover the HEADLESS routines,
+# but an interactive session also reads the repo's project .claude/settings.json,
+# and an UNTRUSTED workspace makes Claude Code discard every rule in it —
+# "Ignoring N permissions.allow entries ... this workspace has not been trusted".
+# The setup script is the only place the flag can be set without a human clicking
+# the trust dialog, so the block below must keep setting it for new sessions.
+
+def trust_block() -> str:
+    """The workspace-trust python, lifted out of the shell script itself."""
+    src = BOOTSTRAP.read_text()
+    blocks = re.findall(r"<<'PY'[^\n]*\n(.*?)\nPY\n", src, re.S)
+    for b in blocks:
+        if "hasTrustDialogAccepted" in b and "projects" in b:
+            return b
+    raise AssertionError(
+        f"no workspace-trust python block found in {BOOTSTRAP.name} "
+        f"({len(blocks)} PY blocks seen)")
+
+
+def run_trust(state: Path, repo: str = "/home/user/Accelerate"):
+    r = subprocess.run([sys.executable, "-c", trust_block()],
+                       capture_output=True, text=True,
+                       env={"CLAUDE_STATE": str(state), "TRUST_REPO": repo,
+                            "PATH": "/usr/bin:/bin"})
+    assert r.returncode == 0, r.stderr
+    return r.stdout.strip()
+
+
+def test_a_fresh_state_file_is_trusted(tmp_path):
+    """A brand-new container has no ~/.claude.json; the block creates it with
+    the workspace trusted, so the project allow-list applies from the first run."""
+    s = tmp_path / ".claude.json"
+    out = run_trust(s)
+    assert "trusted" in out
+    proj = json.loads(s.read_text())["projects"]["/home/user/Accelerate"]
+    assert proj["hasTrustDialogAccepted"] is True
+    assert proj["hasCompletedProjectOnboarding"] is True
+
+
+def test_trust_is_idempotent(tmp_path):
+    """Second run on an already-trusted workspace changes nothing and says so —
+    a scheduled container re-runs the setup script on every boot."""
+    s = tmp_path / ".claude.json"
+    run_trust(s)
+    before = s.read_text()
+    out = run_trust(s)
+    assert "already trusted" in out
+    assert s.read_text() == before
+
+
+def test_trust_preserves_other_projects_and_top_level_keys(tmp_path):
+    """The CLI's state file carries every project and much else; trusting one
+    workspace must never drop another project or a top-level key."""
+    s = tmp_path / ".claude.json"
+    s.write_text(json.dumps({
+        "numStartups": 42,
+        "projects": {
+            "/some/other/repo": {"hasTrustDialogAccepted": True, "keep": "me"},
+            "/home/user/Accelerate": {"hasTrustDialogAccepted": False,
+                                      "allowedTools": ["x"]},
+        },
+    }))
+    run_trust(s)
+    cfg = json.loads(s.read_text())
+    assert cfg["numStartups"] == 42
+    assert cfg["projects"]["/some/other/repo"] == {"hasTrustDialogAccepted": True,
+                                                   "keep": "me"}
+    acc = cfg["projects"]["/home/user/Accelerate"]
+    assert acc["hasTrustDialogAccepted"] is True          # flipped
+    assert acc["allowedTools"] == ["x"]                   # sibling key kept
+
+
+def test_a_malformed_state_file_is_left_untouched(tmp_path):
+    """~/.claude.json is the CLI's own; a broken one is refused, not overwritten."""
+    s = tmp_path / ".claude.json"
+    s.write_text("{ not json")
+    out = run_trust(s)
+    assert "SKIPPED" in out
+    assert s.read_text() == "{ not json"
+
+
+# ── the stress test the goal asks for: no recurrence across NEW sessions ─────
+
+def _headless_ready(home: Path, repo: str = "/home/user/Accelerate") -> bool:
+    """One provisioned container is headless-ready when BOTH levers are set:
+    user-scope defaultMode=dontAsk (+ the connector granted) AND the workspace
+    trusted so the project allow-list applies. Either alone leaves a gap the
+    owner actually hit."""
+    settings = json.loads((home / ".claude" / "settings.json").read_text())
+    state = json.loads((home / ".claude.json").read_text())
+    perms = settings.get("permissions", {})
+    proj = state.get("projects", {}).get(repo, {})
+    return (perms.get("defaultMode") == "dontAsk"
+            and GRANT in perms.get("allow", [])
+            and proj.get("hasTrustDialogAccepted") is True)
+
+
+def test_ten_fresh_sessions_all_end_headless_ready(tmp_path):
+    """Resilience across ANY new run (the /goal). Ten independent fresh HOMEs,
+    each provisioned exactly as the setup script provisions one, must EVERY time
+    converge to the never-prompt posture — no ordering, no carried state, no
+    lucky first run."""
+    for i in range(10):
+        home = tmp_path / f"session{i}"
+        (home / ".claude").mkdir(parents=True)
+        run_grant(home / ".claude" / "settings.json")
+        run_trust(home / ".claude.json")
+        assert _headless_ready(home), f"session {i} did not end headless-ready"
+
+
+def test_a_partially_provisioned_session_is_healed_not_left_split(tmp_path):
+    """The exact live defect: a container that already carried the grants but
+    NOT dontAsk, and an untrusted workspace (measured 2026-09-01). Re-running the
+    setup script must heal BOTH gaps rather than declaring victory on the half
+    that was already there."""
+    home = tmp_path / "partial"
+    (home / ".claude").mkdir(parents=True)
+    # grants present, mode missing — the state this container was found in
+    (home / ".claude" / "settings.json").write_text(json.dumps(
+        {"permissions": {"allow": [GRANT, "WebSearch", "WebFetch"]}}))
+    # workspace explicitly untrusted — the other half of the live defect
+    (home / ".claude.json").write_text(json.dumps(
+        {"projects": {"/home/user/Accelerate": {"hasTrustDialogAccepted": False}}}))
+    assert not _headless_ready(home)                      # starts split
+    run_grant(home / ".claude" / "settings.json")
+    run_trust(home / ".claude.json")
+    assert _headless_ready(home)                          # ends whole

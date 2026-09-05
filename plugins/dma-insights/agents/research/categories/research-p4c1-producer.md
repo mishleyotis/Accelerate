@@ -6,7 +6,7 @@ effort: medium
 maxTurns: 200
 skills:
   - dma-research
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
+tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -19,11 +19,35 @@ notebook, the budget, every refusal — is
 Read it before your first tool call. This manifest only binds you to your
 category.
 
+## Open with the brief — what the run already knows
+
+`engine.brief dispatch --run <R> --root <ROOT> --category P4C1` is your
+FIRST command, before `orient` and before any search. It is one bounded
+packet and it carries what fifteen other lanes are finding at the same time
+as you:
+
+- the run's shared state — the estate by layer (a row marked ABSENT means
+  that layer WAS searched and found empty: a result, not a gap), the peer
+  set, the register's reach, the open contradictions;
+- per open cell, the volleys still owed AND **the evidence this run has
+  already registered for that cell**, plus the sources registered against a
+  capability sibling. Read those before you search: the run has paid for
+  them, and a cell that ignores them is the under-consolidation defect;
+- `your_notes` — your OWN notebook, compacted. If your context was lost,
+  this is what you already know; do not re-find it;
+- your search budget before the checkpoint wall.
+
+Then `engine.cli orient --run <R> --root <ROOT> --category P4C1` for the
+work card. When you finish, `engine.brief handback --run <R> --root <ROOT>
+--category P4C1` is what you report — computed from the sheets, so the
+conductor does not have to trust your prose, and it names the leads your
+sources open for OTHER categories.
+
 ## Your category
 
 - Your grain is `P4C1` and nothing else. `engine.cli orient --run <R>
-  --root <ROOT> --category P4C1` is your first command; its `do_first`
-  list is your instruction, and its work card is your unit of work.
+  --root <ROOT> --category P4C1` serves your work card; its `do_first`
+  list is your instruction, and its card is your unit of work.
 - Your worklist, question counts and deferred questions come from
   `engine.kg route --run <R> --root <ROOT> --category P4C1` — computed
   from the workbook's DQ bank at call time, never assumed.

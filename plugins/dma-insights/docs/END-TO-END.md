@@ -34,6 +34,60 @@ Everything below follows from it.
 
 ---
 
+## The run is ONE command: `engine.pipeline run`
+
+Added 2026-09-04 (owner issues 6–9). The stages below are still the run —
+but nobody narrates them any more. `engine.pipeline` is the DRIVER: it walks
+the stage table in order, reads a DONE predicate for each stage from the
+workbook and the run tree, dispatches that stage's lanes over a brief it
+writes (`engine.brief batch` / `challenge-batch` / `scoring-batch` /
+`report-batch` / `page-batch`), runs the engine commands, and refuses to
+start the next stage until the gate PASSES.
+
+```
+python3 -m engine.pipeline env                                  # every hard dependency, measured
+python3 -m engine.pipeline plan   --run $RUN --root $ROOT      # done / next / blockers — dispatches nothing
+python3 -m engine.pipeline run    --run $RUN --root $ROOT --max-wall-min 240 --lane-retries 1 --page-retries 2
+python3 -m engine.pipeline status --run $RUN --root $ROOT --watch
+```
+
+| stage | done when | the driver runs |
+|---|---|---|
+| PREFLIGHT | the binding preflight is recorded on the run | (checked; `engine.cli start` does it, with a person) |
+| START | the workbook exists and is bound to the pinned templates | (checked) |
+| PRELIM | `engine.prelim state` reads COMPLETE | three lanes over `brief prelim` — conductor (PRELIM-only), technographic-scanner, enrichment-connector-specialist — then `prelim complete` |
+| KG | DQ_Bank carries rows (or a declared reason) | `engine.kg build` (fallback stated when no toolkits) |
+| RESEARCH | every category's last FLOORS gate is PASS | rounds: `brief batch` (`--with-handback` after round 1; a PASSED category is never re-dispatched) → sixteen researcher lanes → `challenge-batch` lanes → `floors_gate.run --require-synthesis` |
+| HANDOFF | `research_handoff.json` written; `assessment.research_ready` empty | `engine.handoff` (strict) |
+| SCORING | the SCORING gate is PASS | `assessment open` → rounds: four scorer lanes (`scoring-batch`), the solutions lane (`--solutions`), the critic (`--critic`, who also records the rollup headline) → `assessment rollup` → `assessment gate` |
+| INGEST_A | `Run_Metadata.connector_run_id` set | `assemble checkpoint --stage SCORING_PASS --push`, then poll `list_pending_runs` until the scan ingests version A |
+| REPORTS | both reports READY and rendered; Recommendations projected | rounds: two producer lanes (`report-batch`) → the validator (`--validator`) → `grains recommendations` → `engine.cli report` ×2 into the branded shell |
+| PAGES_A | techstack and heatmap PASS on version A | page lanes (`page-batch`: the connector run id, the contract PATH, the last verdict's reasons — no payload bytes) → `ship_page.py --claim --verdicts-out`; a FAIL re-dispatches only that page |
+| PACKAGE | `assemble verify` complete, gold gate clean | `techscan render`, `assemble package --push` |
+| INGEST_B | a newer connector version than A | poll `list_pending_runs` |
+| PAGES_B | all six pages PASS on version B | the A pages restaged from disk (no lanes); overview, insights, platform lanes; then context (after overview) |
+| PROMOTE | `Run_Metadata.promoted_at` set | `promote_run` — the last call |
+
+Every stage lands a `STAGE_<NAME>` row in Gate_Log with its verdict and wall
+clock, a line in `07_qa/cost_ledger.jsonl` (`engine.cost report` reads it
+back against the schedule and the budget, and `--as-baseline` replaces the
+hand-typed constant with a measured run) and `07_qa/pipeline_state.json`. A
+lane that timed out or produced nothing is retried once (`agent_run.py
+--retries`); a lane that failed on its own terms is not, and the stage says
+so. `--max-wall-min` stops cleanly BETWEEN stages (exit 0); `run` again
+continues from the first stage whose predicate is false, and nothing done is
+redone — that is also the watchdog's `resume` plan. Exactly two ingests, so a
+run gets two versions rather than eighteen. The stub dispatcher
+(`--dispatcher stub`) plays every lane with the engine's own fixtures through
+the engine's own refusals: `scripts/stress_pipeline_stub.py` walks it in CI.
+
+`ship.PAGE_NEEDS` decides which pages ship early: techstack and heatmap need
+the scored workbook and no report; overview, insights and platform read a
+READY report; context renders after overview (O9 before C4). That is why the
+early set is two pages, not three.
+
+---
+
 ## Stage 0 · Preflight the binding — with the financials, and with a person
 
 ```
@@ -166,7 +220,39 @@ category → one researcher (`research-p1c1-producer` …
 `research-conductor`; the per-agent loop is
 `skills/dma-research/references/RESEARCH-PROTOCOL.md`.
 
-## Stage 2 · Work the categories
+## Stage 2 · Work the categories — dispatched over a brief
+
+```
+python3 -m engine.brief batch --run $RUN --root $ROOT --out-dir $ROOT/briefs
+python3 plugins/dma-insights/scripts/agent_run.py \
+        --batch $ROOT/briefs/batch.json --stream --lanes 16 --retries 1 \
+        --record-run $RUN --record-root $ROOT --record-stage RESEARCH
+
+The lane count is ONE constant (`engine.cost.PARALLEL_LANES`, 16 — one per category) and `brief batch` prints this exact `dispatch` line: run what it prints. Measured 2026-09-03: this page said a lane count of four while the schedule divided by 16, so the documented dispatch ran the research phase at a quarter of the promised speed. `--retries 1` re-dispatches only a lane that timed out (124) or produced nothing (125); `--record-run` appends the stage's wall clock to `07_qa/cost_ledger.jsonl`, which `engine.cost report` reads back against the schedule and the budget.
+```
+
+REPORTED 2026-09-03: *"There is no orchestration existing between the
+subagents and main agents … as they work independently, they should also
+have enough context of the compacted data they have collected to avoid
+redoing."*
+
+Sixteen lanes worked the same entity and could not see one fact any of the
+others had found. The conductor's choice was to dispatch with "the run id
+and nothing else" (each lane re-finds the run's own background) or to paste
+its context into the prompt (the token bleed of stage 7b). `engine.brief` is
+the third option, and it is the one the conductor now uses:
+
+| view | what it carries | who reads it |
+|---|---|---|
+| `brief batch` / `brief dispatch --category C` | the run's shared state, each open cell's owed volleys AND **the evidence already registered for that cell**, sibling sources worth reading, the lane's own notebook digest, its search budget | every category producer, as its first command |
+| `brief shared` | estate by layer (an `ABSENT` row is a RESULT — that layer was searched), peers, register reach, open contradictions, per-category state | anyone, once |
+| `brief reuse --subcap X` | the rows the register names for X that X does not cite, then the capability siblings' rows | a producer before it searches |
+| `brief handback --category C` | what the category established, computed from the sheets: closed, declared absent, still open, tools used, and `leads_for_other_categories` | the conductor, instead of trusting prose |
+
+Every packet is DERIVED from the workbook — no second record to drift — and
+measured against `BRIEF_CHAR_CEILING` (6400 chars), trimming its detailed
+cells rather than truncating a field; `orient` remains the paged reader for
+the cells a packet drops. Then, per card:
 
 ```
 python3 -m engine.cli orient --run $RUN --category P1C1
@@ -209,6 +295,8 @@ Each write is checked **before it lands**:
 | a DQ facet neither answered nor `NOT_RUN: <reason>` | AUD-0017 |
 | an absence claim with no `Absence_Claimed` and no proxy log | AUD-0079 |
 | `FACT` resting on proxy searching alone | AUD-0021 |
+| an empty cell declared absent while any askable volley never fired | owner, 2026-09-03 |
+| an empty cell declared absent while the run's own register NAMES it | owner, 2026-09-03 |
 
 ## Stage 3 · Challenge — by somebody else
 
@@ -287,12 +375,43 @@ reason is a disclosure; an empty tab without one blocks the handoff and the
 package. Nine sheets may never be declared empty at all — the run does not
 exist without them.
 
-## Stage 6 · Hand off, and report
+## Stage 6 · Score — column D, gated at both ends
+
+```
+python3 -m engine.assessment open     --run $RUN      # refuses until every category gate is PASS
+python3 -m engine.assessment score    --run $RUN --subcap P1C1.1.1 --score 2.75 --confidence MEDIUM \
+        --rationale '[EVIDENCE] E-0012 … [CEILING] …' --actor scoring-p1-producer \
+        --ai-applicability ASSISTIVE --data-dependency '…' --data-readiness AMBER
+python3 -m engine.assessment critique --run $RUN --pillar P1 --verdict PASS --actor scoring-critic --note '…'
+python3 -m engine.assessment rollup   --run $RUN --headline '…'
+python3 -m engine.assessment gate     --run $RUN      # PASS recorded in Gate_Log, 07_qa/scoring.json
+python3 -m engine.assemble checkpoint --run $RUN --stage SCORED --push   # the app ingests the scored workbook now
+```
+
+Four scoring producers, one per pillar, in parallel; the critic per pillar
+as it lands; the conductor rolls up and gates. Every refusal is the
+engine's: a row that was never challenged, a score above its evidence
+ceiling, a rationale that cites none of the row's E-ids, an overlay left
+blank, a pillar whose critic was one of its scorers, a rollup that drifts
+from column D by more than 0.01. `SubCap_Name` was seeded from the
+catalogue at `start`, so the workbook the app ingests names every cell.
+
+## Stage 6b · Hand off, and report — only on a scored run
 
 ```
 python3 -m engine.cli handoff --run $RUN
+python3 -m engine.cli narrative preconditions --run $RUN --report assessment   # must print nothing
 python3 -m engine.cli report  --run $RUN            # both .docx
 ```
+
+`narrative write` refuses a section while any precondition fails: PRELIM
+open, no template binding, a category gate not PASS, the workbook not
+complete (every tab filled or declared, except the tabs the report itself
+projects), and for the assessment report a SCORING gate that is not PASS.
+The section spec is loaded from the pinned templates
+(`references/templates/report_templates.json`, exported from the owner's two
+Docs); the body must carry the Doc's blocks in order, its card shape and the
+countable minimum data of its control block.
 
 `research_handoff.json` is emitted as a **read-only index** over the
 workbook's sheets and says so in its own `_contract` block. The workbook is
@@ -309,8 +428,11 @@ are read from the sheets at render time, so the two cannot disagree
 
 * one unresolvable citation anywhere (AUD-0033);
 * a section under its blocking word minimum (AUD-0105);
-* fewer than eight insight cards — the template's number, not the renderer's
-  three (AUD-0145);
+* fewer cards than the Doc's floor — one pillar deep dive per pillar in
+  scope, five to eight `REC-NN` recommendations, eight `IC-NNN` insight
+  cards inside the profile's §5 (AUD-0145, the template's numbers);
+* a control-block count under its floor — five fiscal years in the
+  trajectory, the four technology layers, an AI-and-data overlay per pillar;
 * a section every one of whose declared inputs is empty (AUD-0107). A focused
   engagement that leaves three pillar sheets empty **states its scope**
   instead, because refusing that would reject a correct run.
@@ -331,11 +453,21 @@ The script the pinned workbook mandates, which existed nowhere in any tree
 "nothing that matters downstream", and that is true of seven fields and false
 of three, which the handoff did not carry (AUD-0065).
 
-## Stage 7b · Assemble the client folder, and ship it
+## Stage 7b · Assemble the client folder, and ship it — as you go
 
 ```
+python3 -m engine.ship state --run $RUN              # which pages the workbook can already feed
 python3 -m engine.techscan render --run $RUN
 python3 -m engine.assemble package --run $RUN --push
+```
+
+Promotion is not a final act. `engine.ship state` reads the workbook and
+names the pages whose inputs are complete (`ready_pages`) and the ones to
+dispatch now (`dispatch_now`, in the surface map's order); the surface
+producer ships those with `ship_page.py --incremental` while later stages
+are still running, so by the time the reports land the six pages are
+staged and promotion is one call. That is the token budget the owner asked
+for: no page is produced twice, and nothing waits on everything.
 python3 -m engine.memory backup --run $RUN && python3 -m engine.memory cleanup --run $RUN --apply
 ```
 
@@ -375,7 +507,37 @@ On the app side:
   can tell an unrecognised column from an entity with nothing to say
   (AUD-0030).
 
+## Acceptance tests — the eight reported issues, and one run end to end
+
+```
+python3 -m pytest tests/acceptance -q
+```
+
+Written from the owner's own sentences rather than from the modules:
+`test_acceptance_reported_issues.py` reproduces each reported failure shape
+(issues 1–7) and asserts the engine refuses it AND that the corrected work
+passes; `test_acceptance_orchestration.py` holds the brief layer to its four
+properties (shared, bounded, resumable, handed back); `test_acceptance_
+issues_8_9.py` covers every lane type's bounded brief, the re-dispatch that
+carries the gate's blocking terms, the cost ledger and the one lane constant;
+`test_acceptance_pipeline.py` drives the DRIVER with the stub doubles —
+order, gates, re-dispatch on a critic or page FAIL, retries, ingest timeout,
+wall-clock stop and resume, idempotence, no payload bytes in a prompt;
+`test_acceptance_issue10.py` covers the command, the routine and the
+install guards; `test_acceptance_full_run.py` walks ONE run from `start` to
+a verified package, asserting every stage is blocked before its predecessor
+is done and open after — the only test that can catch two stages disagreeing
+about what "done" means.
+
 ## Stress-testing the pipeline
+
+Three walks run in CI (`research-walks`): `stress_run_lifecycle.py` (the
+binding preflight, start, PRELIM gating, completeness, the watchdog),
+`stress_stage_and_supersede.py` (the stage flip, the grains, a second run
+superseding the first) and `stress_pipeline_stub.py` (the driver over the
+real CLI with chaos: a lane that produces nothing twice, an ingest that never
+arrives, a page verdict FAIL, a wall-clock stop, a refused promote, a v6
+workbook in flight — 18 steps). The toolkit-dependent walk stays manual:
 
 `scripts/stress_research_pipeline.py --toolkits <dir> --workdir <dir>`
 drives every stage above through the same CLI the agents use, against the
@@ -398,6 +560,31 @@ python3 -m engine.watchdog --revive        # act, don't just report
 research side had nothing, so a turn that died mid-category left no artefact
 saying so (AUD-0063). `UNGATED` exists because running out of cards is not
 closure.
+
+**The machine continues past research (2026-09-03).** `READY_FOR_HANDOFF`
+used to be a resting state that lasted through scoring, the reports and
+the package. It now means only "research closed, assessment not open", and
+the watchdog computes the rest from the same substrate the gates read:
+
+| state | computed from | owner it names | closes when |
+|---|---|---|---|
+| `SCORING_OPEN` | stage `assessment`, column D has blanks (per pillar) | `scoring-p<N>-producer`, in parallel lanes | `engine.assessment state` scored == subcaps |
+| `CRITIC_PENDING` | every row scored, `SCORING_CRITIC` missing or FAIL | `scoring-critic` | a PASS row per pillar in `Gate_Log` |
+| `SCORING_GATE_OPEN` | critic in, `SCORING` gate never run or FAIL | `research-conductor` (rollup, gate, checkpoint) | `engine.assessment gate` PASS, then `assemble checkpoint --stage SCORING_PASS --push` |
+| `REPORT_PRECONDITIONS_OPEN` | gate PASS, `engine.narrative preconditions --report assessment` lists a failure (the stage's Solution_Catalogue / Platform_Peer_Adoption tabs empty and undeclared) | `research-conductor` (`assessment solution`, `peer-adoption`, `completeness declare`) | the preconditions list is empty — found by the hook walk on 2026-09-04, when a run in this shape sent two report producers into `narrative write`'s refusal |
+| `REPORTS_OPEN` | gate PASS, preconditions hold, `engine.narrative state` not READY | `report-*-producer` for OPEN/SHORT/REVISE sections, `report-validator` for UNREVIEWED | both reports READY |
+| `PACKAGE_UNSHIPPED` | both READY, `run_manifest.json` not COMPLETE | `research-conductor` (`assemble package --push`) | manifest `status: COMPLETE` |
+| `SHIPPED` | manifest COMPLETE | nobody here — the package scan and the synthesis lanes | — |
+
+Every row carries `criterion` (the sentence above, as data) and a `resume`
+plan with `agent`, `parallel` and `prompt`. Three hooks put the answer where
+a session reads it — `hooks/stage_advance.py`, registered on
+`PostToolUse(Agent|Task)`, `PostToolUse(Bash)` for a headless dispatch or an
+engine gate, and `Stop`: after an agent returns it announces the state, the
+criterion and the next agent; on Stop it refuses ONCE per state to end a
+session whose run an agent could still advance, then lets it stop (the same
+state twice needs a reader, not a third attempt). The hourly watchdog
+Routine's `--revive` dispatches the same plans when no session is alive.
 
 Two later defects, both closed:
 

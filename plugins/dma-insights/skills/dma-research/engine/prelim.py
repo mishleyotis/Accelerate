@@ -76,7 +76,7 @@ SECTIONS = {
         why="the revenue split the sub-vertical binding rests on; written "
             "by the binding preflight, not by hand"),
     "leadership": dict(
-        section_id="PRELIM-LEAD", kind="narrative",
+        section_id="PRELIM-LEAD", kind="narrative", min_named=2,
         heading="Leadership and digital ownership",
         why="who owns digital, and whether the role exists at all — a "
             "finding in itself, and the research report's second section"),
@@ -92,9 +92,17 @@ SECTIONS = {
             "set chosen after the fact is chosen to flatter"),
     "tech_baseline": dict(
         section_id="PRELIM-TECH", kind="tech", min_rows=1,
+        layers=C.TECH_LAYERS,
         heading="Technology baseline",
         why="the platforms already visible from outside, so category "
             "researchers recognise a system instead of re-discovering it"),
+    "thought_leadership": dict(
+        section_id="PRELIM-THOUGHT", kind="narrative",
+        heading="Thought leadership and stated direction",
+        why="what these leaders say in public about where the institution "
+            "is going — the conference talks, bylines and interviews a "
+            "category researcher weighs a finding against, and the only "
+            "PRELIM section written in the client's own voice"),
 }
 
 #: The workbook tab a PRELIM section owns. Declaring the section declares
@@ -105,6 +113,23 @@ OWNS_SHEET = {
     "peers": "Peer_Benchmarks",
     "tech_baseline": "Tech_Register",
 }
+
+#: ONE FIX LINE FOR THE TECHNOLOGY BASELINE, whether it has no rows or
+#: three layers' worth. They are the same instruction and were two: the
+#: empty case printed the old one-row command and said nothing about layers,
+#: so a run that had done no scanning at all was told less than one that had
+#: half-done it.
+_TECH_FIX = (
+    "run the four-layer technographic scan NOW, in PRELIM, not after the "
+    "categories: `engine.cli techscan clay-plan`, then `import-explorium` / "
+    "`record --provider … --layer <LAYER>` until OPS, CUST, DATA and INFRA "
+    "each carry a row — `techscan status` lists the ones still in "
+    "`layers_never_looked_at`. A layer you looked at and found nothing in "
+    "is a row with status ABSENT naming what you searched FOR, with the "
+    "search itself in its detection basis (the engine refuses an ABSENT "
+    "that does not state one). A layer simply left out is not that: the "
+    "scan document prints it as NOT SCANNED in red precisely because a "
+    "missing layer reads to every later surface as a clean estate.")
 
 #: PRELIM sections that must be RESEARCHED and may not be declared away.
 #: The financial review is the binding basis; declaring it absent is what
@@ -136,6 +161,32 @@ def _narrative_rows(wb: RunWorkbook) -> dict[str, dict]:
     return out
 
 
+#: A personal name as it appears in a written section: two or more adjacent
+#: capitalised words. Deliberately crude and deliberately not a lookup — the
+#: floor it enforces is "somebody did the contact pass", and the reviewer who
+#: reads the section is the one who judges whether the names are right. It
+#: skips the openers that would otherwise read as names.
+_NAME_STOPWORDS = {
+    "Chief", "Digital", "Officer", "The", "Its", "Their", "A", "An",
+    "Credit", "Union", "Bank", "Board", "Executive", "Committee", "Group",
+    "Information", "Technology", "Operating", "Financial", "Data", "Product",
+    "Head", "Vice", "President", "Senior", "Managing", "Director", "Chair",
+}
+_NAME_RE = re.compile(r"\b([A-Z][a-z]{1,15})\s+([A-Z][a-z]{1,15})\b")
+
+
+def _named_people(body: str) -> list[str]:
+    """Distinct human names the section actually states."""
+    out = []
+    for first, last in _NAME_RE.findall(body):
+        if first in _NAME_STOPWORDS or last in _NAME_STOPWORDS:
+            continue
+        name = f"{first} {last}"
+        if name not in out:
+            out.append(name)
+    return out
+
+
 def _section_state(wb: RunWorkbook, key: str, spec: dict,
                    narr: dict[str, dict]) -> dict:
     sid = spec["section_id"]
@@ -153,6 +204,55 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
     kind = spec["kind"]
     if kind == "narrative":
         if len(body) >= _MIN_BODY:
+            # NAMED PEOPLE, NOT A DESCRIPTION OF A STRUCTURE (owner,
+            # 2026-08-31: leadership enrichment "with contacts"). A
+            # leadership section that closes on "digital ownership sits with
+            # a Chief Digital Officer" tells a category researcher nothing
+            # it can weigh: it cannot search that person's talks, match a
+            # LinkedIn post to a platform decision, or notice that the role
+            # was filled three months ago. The connector pass that answers
+            # this is Clay or Explorium, and it belongs here, before the
+            # categories, not in a surface producer months downstream.
+            need_named = int(spec.get("min_named") or 0)
+            if need_named:
+                found = _named_people(body)
+                if len(found) < need_named:
+                    return {
+                        "section": key, "status": "OPEN",
+                        "detail": (f"{len(body)} chars but names "
+                                   f"{len(found)} identifiable "
+                                   f"{'person' if len(found) == 1 else 'people'}"
+                                   f" ({', '.join(found) or 'none'}); "
+                                   f"{need_named} is the floor"),
+                        "fix": ("run the contact pass now — Clay or "
+                                "Explorium via the enrichment specialist — "
+                                "and name the people with their roles. "
+                                "Where a role genuinely has no public "
+                                "holder, say so as a finding with the "
+                                "ladder behind it: an unfilled digital "
+                                "ownership role is one of the most "
+                                "load-bearing facts a run can carry"),
+                    }
+            # THE STRUCTURED STRIP, NOT ONLY THE PROSE (contract v6,
+            # 2026-09-03). The Client Profile's §1 and the app's O2 strip
+            # read the Firmographics TAB — Field / Value / Unit / As at /
+            # Evidence / Conf. — and every must-present field is either
+            # STATED or ABSENT with a route. A firmographics paragraph with
+            # no rows behind it was how "57 of 138 clients shipped with no
+            # focus areas at all" had its firmographic twin.
+            if key == "firmographics":
+                from . import profile as _profile
+                missing = _profile.missing_firmographics(wb)
+                if missing:
+                    return {
+                        "section": key, "status": "OPEN",
+                        "detail": (f"{len(body)} chars of narrative, but the "
+                                   f"Firmographics tab lacks {len(missing)} "
+                                   f"must-present field(s): {', '.join(missing)}"),
+                        "fix": ("engine.profile firmographic --field <f> --value … "
+                                "--unit … --as-of … --evidence E-… (or --state "
+                                "ABSENT --reason … --route …) for each"),
+                    }
             return {"section": key, "status": "RESEARCHED",
                     "detail": f"{len(body)} chars, evidence "
                               f"{_clean(row.get('Evidence_IDs')) or 'none'}"}
@@ -166,17 +266,51 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
         "peers": ("Peer_Benchmarks", spec.get("min_rows", 1)),
         "tech": ("Tech_Register", spec.get("min_rows", 1)),
     }[kind]
-    n = len([r for r in wb.rows(sheet) if any(_clean(v) for v in r.values())])
+    rows = [r for r in wb.rows(sheet) if any(_clean(v) for v in r.values())]
+    n = len(rows)
+
+    # THE FOUR-LAYER FLOOR (owner, 2026-08-31: "Let the technographic scans
+    # happen in the prelim … such that when the category research happens
+    # they already have deep background from enrichment").
+    #
+    # One row used to close this section, which made the technology baseline
+    # whatever the first search happened to trip over, and left the
+    # deliberate four-layer scan to run AFTER the categories — by which time
+    # sixteen researchers had already re-discovered the estate one system at
+    # a time, each without knowing what the others found. The scan is the
+    # cheapest context in the run and it was being bought last.
+    #
+    # A layer where nothing was found is NOT a missing layer: it is an
+    # ABSENT row, which is the scanner's own vocabulary and the distinction
+    # that stops a gap in the looking from reading as a clean estate.
+    want_layers = tuple(spec.get("layers") or ())
+    if want_layers and n >= need:
+        # `techscan.scan_state` already computes this, under the name the
+        # scan's own renderer prints in red — "layers never looked at". Read
+        # it rather than recomputing beside it: two answers to one question
+        # is how a gate and the document it gates drift apart.
+        seen = {_clean(r.get("Layer")).upper() for r in rows}
+        missing = [lay for lay in want_layers if lay not in seen]
+        if missing:
+            return {
+                "section": key, "status": "OPEN",
+                "detail": (f"{sheet} has {n} row(s) but covers "
+                           f"{len(want_layers) - len(missing)} of "
+                           f"{len(want_layers)} layers — nothing for "
+                           f"{', '.join(missing)}"),
+                "fix": _TECH_FIX,
+            }
     if n >= need:
         return {"section": key, "status": "RESEARCHED",
-                "detail": f"{n} row(s) in {sheet}"}
+                "detail": (f"{n} row(s) in {sheet}"
+                           + (f", all {len(want_layers)} layers covered"
+                              if want_layers else ""))}
     verb = {"timeline": "timeline", "peers": "peers",
             "tech": "techscan record"}[kind]
     return {"section": key, "status": "OPEN",
             "detail": f"{sheet} has {n} row(s), {need} required",
             "fix": (f"engine.prelim {verb} …" if kind != "tech"
-                    else "engine.cli techscan clay-plan / "
-                         "import-explorium / record --provider …")}
+                    else _TECH_FIX)}
 
 
 def state(wb: RunWorkbook) -> dict:
@@ -429,6 +563,65 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "categories": cats}
 
 
+def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
+                basis: str, source: str, peer_scores: str = "") -> dict:
+    """Record the peer FIGURES for one category — the median (and quartiles)
+    the assessment's Gap_to_Peer is computed against.
+
+    Measured 2026-09-03: `peers` froze the SET and wrote the grid with every
+    Peer_Median blank, and nothing anywhere wrote the figure — so the rollup
+    computed `gap` from a column that was always empty and every Pillar_Summary
+    shipped Gap_to_Peer as null. A run that has peer figures records them here;
+    one that cannot estimate them says so with `basis=cannot_estimate` and no
+    median, and the gap stays null honestly (invariant 9)."""
+    cid = _clean(category).upper()
+    cats = {_category_of(c) for c in wb.selected_subcaps()}
+    if cid not in cats:
+        raise PrelimRefusal(f"{cid!r} is not a category in this run's scope "
+                            f"({', '.join(sorted(c for c in cats if c))})")
+    if basis not in C.PEER_BASIS:
+        raise PrelimRefusal(
+            f"peer basis {basis!r} is not one of {', '.join(C.PEER_BASIS)}")
+    rows = [r for r in wb.rows("Peer_Benchmarks")
+            if _clean(r.get("Category_ID")).upper() == cid]
+    if not rows:
+        raise PrelimRefusal(
+            f"no Peer_Benchmarks row for {cid}: freeze the peer set first "
+            f"(`engine.prelim peers --peer … --rule …`), which writes the grid")
+    if len(_clean(source)) < 12:
+        raise PrelimRefusal("say where the peer figure came from (--source, >=12 chars)")
+
+    def _num(v, name):
+        if v is None or _clean(v) == "":
+            return None
+        try:
+            x = float(v)
+        except (TypeError, ValueError):
+            raise PrelimRefusal(f"{name} {v!r} is not a number")
+        if not 1.0 <= x <= 5.0:
+            raise PrelimRefusal(f"{name} {x} is off the 1.0–5.0 maturity scale")
+        return x
+
+    med, lo, hi = _num(median, "median"), _num(p25, "p25"), _num(p75, "p75")
+    if basis == "cannot_estimate":
+        if med is not None:
+            raise PrelimRefusal("cannot_estimate carries NO median — a figure "
+                                "with that basis is a guess wearing a number")
+    elif med is None:
+        raise PrelimRefusal(f"basis {basis!r} carries a median; use "
+                            f"cannot_estimate to record that none could be had")
+    if lo is not None and hi is not None and med is not None and not lo <= med <= hi:
+        raise PrelimRefusal(f"median {med} is outside its own quartiles [{lo}, {hi}]")
+    wb.update_row("Peer_Benchmarks", "Category_ID", rows[0]["Category_ID"], {
+        "Peer_Median": med if med is not None else "",
+        "Peer_P25": lo if lo is not None else "",
+        "Peer_P75": hi if hi is not None else "",
+        "Peer_Basis": f"{basis}: {_clean(source)}",
+        "Peer_Scores": _clean(peer_scores),
+        "As_Of": _utcnow()[:10]})
+    return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
+
+
 def complete(wb: RunWorkbook) -> dict:
     """Sign PRELIM off — refusing while anything is open."""
     st = state(wb)
@@ -490,6 +683,15 @@ def main(argv=None) -> int:
                    help="how the peer FIGURES will be obtained; this is the "
                         "token the handoff lock freezes")
 
+    m = common(sub.add_parser("peer-median"))
+    m.add_argument("--category", required=True)
+    m.add_argument("--median"); m.add_argument("--p25"); m.add_argument("--p75")
+    m.add_argument("--basis", required=True, choices=C.PEER_BASIS)
+    m.add_argument("--source", required=True,
+                   help="where the figure came from — the table, the "
+                        "recomputation, the inference")
+    m.add_argument("--peer-scores", default="")
+
     common(sub.add_parser("complete"))
 
     a = ap.parse_args(argv)
@@ -526,6 +728,11 @@ def main(argv=None) -> int:
                                       evidence=a.evidence), indent=2))
         elif a.cmd == "peers":
             print(json.dumps(peers(wb, a.peer, rule=a.rule, basis=a.basis),
+                             indent=2, default=str))
+        elif a.cmd == "peer-median":
+            print(json.dumps(peer_median(wb, category=a.category, median=a.median,
+                                         p25=a.p25, p75=a.p75, basis=a.basis,
+                                         source=a.source, peer_scores=a.peer_scores),
                              indent=2, default=str))
         else:
             print(json.dumps(complete(wb), indent=2))

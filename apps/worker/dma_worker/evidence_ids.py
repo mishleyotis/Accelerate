@@ -171,10 +171,36 @@ class EvidenceLander:
     second set of rules would be a second thing to get wrong.
     """
 
-    #: Mirrors CONTENT_HASH_EXPR in 0005 with claim_type NULL (the package
-    #: path never asserts a claim type). Kept byte-identical to the generated
-    #: column so the kept row can be found after the dedup index rejects.
-    HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' || '' || '|' ||
+    #: Mirrors CONTENT_HASH_EXPR in 0005. Three parameters, IN THIS ORDER:
+    #: source_url, claim_type, excerpt.
+    #:
+    #: IT USED TO HARDCODE THE CLAIM-TYPE SEGMENT AS `''`, on the stated
+    #: premise that "the package path never asserts a claim type". The INSERT
+    #: eleven lines below passes `ev.get("claim_type")` — so the premise was
+    #: false in the same file that stated it, and every package evidence item
+    #: carrying a claim type hashed one way into the generated column and
+    #: another way in every lookup that tried to find it again.
+    #:
+    #: Measured against the live generated column on 2026-08-30, same url and
+    #: excerpt:
+    #:     claim_type NULL    generated af4458b1…  mirror af4458b1…   agree
+    #:     claim_type FACT    generated 74b8e86d…  mirror af4458b1…   DIVERGE
+    #:
+    #: The two consequences, both of which the ingest then recorded as though
+    #: they were facts about the package rather than about this expression:
+    #:   * `content_hash IS NOT DISTINCT FROM` (line ~299) reads false, so a
+    #:     row the entity already holds looks like "same id, different
+    #:     content" — a mint under a suffix, logged `evidence_id_collision`.
+    #:   * the dedup lookup below cannot find the row the unique index just
+    #:     rejected against, so the item is UNATTRIBUTABLE AND DROPPED,
+    #:     logged `evidence_conflict_unresolved`.
+    #: goeasy-ltd, one package: 316 collisions and 430 dropped items.
+    #:
+    #: `enum_label` rather than a bare cast because that is what the
+    #: generated column uses, and this has to stay byte-identical to it —
+    #: being nearly identical is what cost the corpus its evidence.
+    HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' ||
+                    coalesce(enum_label(%s::claim_t),'') || '|' ||
                     lower(left(regexp_replace(%s,'\s+',' ','g'),500)),
              'sha256'),'hex')"""
 
@@ -194,16 +220,20 @@ class EvidenceLander:
         self.superseded: dict[str, str] = {}  # minted -> the id it supersedes
 
     # ------------------------------------------------------------------
-    def _lookup(self, local, url, excerpt):
+    def _lookup(self, local, url, claim_type, excerpt):
         """(stored e_id, content matches) for this entity's row under
         `local`, or (None, False). The entity is in the WHERE clause and in
-        the mapping's primary key: this cannot see another institution."""
+        the mapping's primary key: this cannot see another institution.
+
+        `claim_type` is part of the content hash and therefore part of the
+        question. Omitting it made "content matches" read false for every
+        item that carried one — see HASH_SQL."""
         self.cur.execute(
             f"""SELECT m.e_id, e.content_hash IS NOT DISTINCT FROM {self.HASH_SQL}
                   FROM evidence_package_ids m
                   JOIN evidence_index e ON e.e_id = m.e_id
                  WHERE m.entity_id = %s AND m.package_local_id = %s""",
-            (url, excerpt, self.entity_id, local))
+            (url, claim_type, excerpt, self.entity_id, local))
         row = self.cur.fetchone()
         return (row[0], bool(row[1])) if row else (None, False)
 
@@ -235,6 +265,10 @@ class EvidenceLander:
         local = local_id(ev["e_id"])
         url = stored_url(ev.get("source_url"))
         excerpt, uncitable = citable_span(ev.get("excerpt"))
+        # Bound ONCE, here, and passed to the INSERT and to every hash
+        # lookup alike. The defect this repairs was exactly a value that the
+        # insert wrote and the lookups did not know about.
+        claim_type = ev.get("claim_type")
         if uncitable:
             # Recorded per row, so "this package landed evidence nobody can
             # cite" is a number on the scan rather than something a producer
@@ -249,13 +283,13 @@ class EvidenceLander:
                 # The same local number twice in one package. Reading order
                 # wins, as it does for a repeated subcap row; the repeat is
                 # recorded rather than silently overwriting the mapping.
-                prior, _ = self._lookup(local, url, excerpt)
+                prior, _ = self._lookup(local, url, claim_type, excerpt)
                 self._observe("duplicate_package_local_id",
                               {"package_local_id": local, "resolved_to": prior,
                                "reason": "the package states this local id more "
                                          "than once; the first row keeps it"})
                 return prior
-            prior, prior_same = self._lookup(local, url, excerpt)
+            prior, prior_same = self._lookup(local, url, claim_type, excerpt)
             if prior and prior_same and local_id_of_stored(prior) == local:
                 # Idempotent re-scan: this entity already holds this item
                 # under its OWN number. A mapping that points at some other
@@ -277,7 +311,7 @@ class EvidenceLander:
                    VALUES (%s,%s,'package',%s,%s,%s,%s,%s,%s,%s,%s)
                    ON CONFLICT DO NOTHING RETURNING e_id""",
                 (candidate, self.entity_id, ev.get("source_name"), url, excerpt,
-                 ev.get("tier"), ev.get("claim_type"), ev.get("ers"),
+                 ev.get("tier"), claim_type, ev.get("ers"),
                  ev.get("published_date"), self.reference_date))
             if self.cur.fetchone():
                 self.landed.add(candidate)
@@ -298,10 +332,11 @@ class EvidenceLander:
                 f"""SELECT entity_id = %s,
                            content_hash IS NOT DISTINCT FROM {self.HASH_SQL}
                       FROM evidence_index WHERE e_id = %s""",
-                (self.entity_id, url, excerpt, candidate))
+                (self.entity_id, url, claim_type, excerpt, candidate))
             row = self.cur.fetchone()
             if row is None:
-                return self._dedup_branch(ev, candidate, local, url, excerpt)
+                return self._dedup_branch(ev, candidate, local, url,
+                                          claim_type, excerpt)
             same_entity, same_content = row
             if same_entity and same_content:
                 # Idempotent re-scan of a package this entity already holds
@@ -330,14 +365,15 @@ class EvidenceLander:
         return None
 
     # ------------------------------------------------------------------
-    def _dedup_branch(self, ev, candidate, local, url, excerpt):
+    def _dedup_branch(self, ev, candidate, local, url, claim_type,
+                      excerpt):
         """No PK hit -> the (entity_id, content_hash) dedup index fired: this
         content already lives under another of this entity's ids. Map to it
         and record — never silently."""
         self.cur.execute(
             f"""SELECT e_id FROM evidence_index
                  WHERE entity_id = %s AND content_hash = {self.HASH_SQL}""",
-            (self.entity_id, url, excerpt))
+            (self.entity_id, url, claim_type, excerpt))
         hit = self.cur.fetchone()
         if hit is None:
             # Neither lookup resolved: the insert conflicted on a constraint
@@ -357,7 +393,7 @@ class EvidenceLander:
             f"""INSERT INTO evidence_dedup_audit
                   (e_id, content_hash, branch, matched_e_id, occurred_at)
                 VALUES (NULL, {self.HASH_SQL}, %s, %s, now())""",
-            (url, excerpt, branch, kept))
+            (url, claim_type, excerpt, branch, kept))
         self._observe("evidence_dedup", {"package_local_id": ev["e_id"],
                                          "incoming_e_id": candidate,
                                          "kept_e_id": kept, "branch": branch})

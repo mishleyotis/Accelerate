@@ -74,6 +74,8 @@ def orient(wb: RunWorkbook, category: str | None, *,
 
     work = {c: L.worklist(wb, c) for c in cats}
     open_volleyed = [s for c in cats for s in work[c]["volleyed"]]
+    open_in_volley = [s for c in cats for s in work[c].get("in_volley", [])]
+    open_searched_empty = [s for c in cats for s in work[c].get("searched_empty", [])]
     open_pending = [s for c in cats for s in work[c]["pending"]]
 
     gates = {}
@@ -123,6 +125,40 @@ def orient(wb: RunWorkbook, category: str | None, *,
                 f"floors_gate --category {c} --require-synthesis; a category "
                 f"is not closed by running out of cards.")
 
+    # 2b. The templates the run is bound to. A run whose binding is blank
+    #     produces deliverables to a remembered shape; refuse to hand out a
+    #     card until `engine.template bind` has pinned them into the workbook.
+    from . import template as _template
+    tb = _template.binding_state(wb)
+    if not tb["bound"]:
+        do_first.append(
+            "TEMPLATES UNBOUND: run `engine.template bind --run <R> --root "
+            "<ROOT>` — the report Docs, the workbook shape and the Golden 1 "
+            "reference must be pinned into the run before any card is worked.")
+    elif not tb["current"]:
+        do_first.append(f"TEMPLATES MOVED since this run was bound: {tb['fix']}")
+
+    # 2c. A half-fired volley is finished before anything new is opened.
+    #     One shallow query used to make a cell indistinguishable from an
+    #     untouched one; now the card names the facets still owed.
+    if open_in_volley:
+        do_first.append(
+            f"{len(open_in_volley)} subcap(s) have SOME volleys fired and not "
+            f"all five: {', '.join(open_in_volley[:8])}"
+            + (" …" if len(open_in_volley) > 8 else "")
+            + ". Finish their volleys (the card lists the missing facets), "
+              "then register evidence or declare the absence "
+              "(`engine.cli absence`), before opening a new cell.")
+
+    if open_searched_empty:
+        do_first.append(
+            f"{len(open_searched_empty)} subcap(s) have every volley fired and "
+            f"nothing registered: {', '.join(open_searched_empty[:8])}"
+            + (" …" if len(open_searched_empty) > 8 else "")
+            + ". Register what the searches found, or close each as a declared "
+              "absence with its ladder (`engine.cli absence`). A seeded row "
+              "left as NO_EVIDENCE is not a finding.")
+
     # 3. Volleyed work outranks new work. This is AUD-0006's whole fix.
     if open_volleyed:
         do_first.append(
@@ -146,11 +182,17 @@ def orient(wb: RunWorkbook, category: str | None, *,
     if prelim_state["blocks_category_dispatch"]:
         blocked = ("PRELIM is open: "
                    + (", ".join(prelim_state["open"]) or "not signed off"))
+    elif not tb["bound"]:
+        blocked = "templates unbound — engine.template bind first"
     elif budget["checkpoint_required"]:
         blocked = "search-op ceiling reached"
     elif open_volleyed:
         blocked = f"{len(open_volleyed)} volleyed subcap(s) must be synthesised first"
         card = _card(wb, open_volleyed[0], entity, md, mode="synthesise")
+    elif open_in_volley:
+        card = _card(wb, open_in_volley[0], entity, md, mode="research")
+    elif open_searched_empty:
+        card = _card(wb, open_searched_empty[0], entity, md, mode="declare")
     elif open_pending:
         card = _card(wb, open_pending[0], entity, md, mode="research")
 
@@ -158,17 +200,101 @@ def orient(wb: RunWorkbook, category: str | None, *,
         "state": state,
         "worklist": {c: {k: (len(v) if isinstance(v, list) else v)
                          for k, v in work[c].items()} for c in cats},
-        "open": {"volleyed": open_volleyed, "pending_count": len(open_pending)},
+        "open": {"volleyed": open_volleyed, "in_volley": open_in_volley,
+                 "searched_empty": open_searched_empty,
+                 "pending_count": len(open_pending)},
+        "templates": tb,
         "gate": gates if category else {c: g.get("gate") or g.get("verdict")
                                         for c, g in gates.items()},
         "prelim": {k: prelim_state[k] for k in
                    ("prelim_status", "open", "blocks_category_dispatch")},
+        "background": _background(wb, prelim_state),
         "do_first": do_first,
         "next_card": card,
         "next_card_withheld_because": blocked if card is None else None,
-        "clean": not open_volleyed and not open_pending
+        "clean": not open_volleyed and not open_pending and not open_in_volley
+                 and not open_searched_empty and tb["bound"]
                  and not prelim_state["blocks_category_dispatch"]
                  and all(g.get("gate") == "PASS" for g in gates.values()),
+    }
+
+
+def _background(wb: RunWorkbook, prelim_state: dict) -> dict | None:
+    """The PRELIM findings themselves, handed over rather than pointed at.
+
+    WHY orient CARRIES THIS (owner, 2026-08-31: the category researchers
+    should "already have deep background from enrichment"). PRELIM's status
+    was in this payload from the start; its CONTENT never was. So the
+    compass every researcher runs first said "PRELIM is closed" and left the
+    material in the workbook for an agent to go and find — and an agent that
+    has to go and find context mostly does not, which is how sixteen
+    researchers each spent a volley rediscovering a core platform the run
+    had already named.
+
+    Deliberately compact. This is read by a model at the top of its work,
+    so it carries the facts a first search would otherwise be spent on — who
+    the leaders are, what they say in public, which products sit on which
+    layer, and which layers were searched and found empty — and not the
+    prose behind them, which is a `Report_Narrative` read away for anything
+    that needs the full argument.
+
+    None while PRELIM is open: there is no background yet, and a half-filled
+    block reads as a complete one.
+    """
+    if prelim_state.get("blocks_category_dispatch"):
+        return None
+
+    narr = {}
+    for r in wb.rows("Report_Narrative"):
+        sid = str(r.get("Section_ID") or "").strip()
+        if sid.startswith("PRELIM-"):
+            narr[sid] = " ".join(str(r.get("Body") or "").split())
+
+    def _gist(sid: str, limit: int = 320) -> str:
+        body = narr.get(sid, "")
+        return body if len(body) <= limit else body[:limit].rsplit(" ", 1)[0] + " …"
+
+    by_layer: dict[str, list] = {}
+    for r in wb.rows("Tech_Register"):
+        layer = str(r.get("Layer") or "").strip().upper()
+        if not layer:
+            continue
+        by_layer.setdefault(layer, []).append({
+            "product": str(r.get("Product") or "").strip(),
+            "vendor": str(r.get("Vendor") or "").strip() or None,
+            "status": str(r.get("Status") or "").strip(),
+        })
+
+    tl = [r for r in wb.rows("Entity_Timeline")
+          if str(r.get("Event_Date") or "").strip()]
+    dates = sorted(str(r.get("Event_Date"))[:10] for r in tl)
+
+    return {
+        "read_this_before_your_first_search": True,
+        "firmographics": _gist("PRELIM-FIRM"),
+        "leadership": {
+            "named": prelim._named_people(narr.get("PRELIM-LEAD", "")),
+            "gist": _gist("PRELIM-LEAD"),
+        },
+        "thought_leadership": _gist("PRELIM-THOUGHT"),
+        "tech_estate": {
+            "by_layer": by_layer,
+            "searched_and_empty": sorted(
+                lay for lay, rows in by_layer.items()
+                if rows and all(r["status"] == "ABSENT" for r in rows)),
+            "note": ("a row with status ABSENT means that layer WAS searched "
+                     "and nothing was found — a result, not a gap. Do not "
+                     "re-run that search; the run already paid for it"),
+        },
+        # Peer_Benchmarks is one row per CATEGORY carrying the peer set in
+        # `Peer_Names`, not one row per peer — so the names are unioned out
+        # of it rather than counted as rows.
+        "peers": sorted({n.strip() for r in wb.rows("Peer_Benchmarks")
+                         for n in str(r.get("Peer_Names") or "").split(",")
+                         if n.strip()}),
+        "timeline": {"events": len(tl),
+                     "from": dates[0] if dates else None,
+                     "to": dates[-1] if dates else None},
     }
 
 
@@ -208,12 +334,25 @@ def _card(wb: RunWorkbook, subcap: str, entity: str, md: dict,
         deferred = []
     queries = [{"facet": f, "query": _bind(_DEFAULT_Q[f], entity, sv)}
                for f in C.FACETS]
+    vs = L.volley_status(wb, subcap)
     card = {
-        "id": subcap, "mode": mode, "entity": entity,
+        "id": subcap, "name": row.get("SubCap_Name") or tax.name_of(subcap),
+        "mode": mode, "entity": entity,
         "evidence_mode": ev_mode,
         "category": subcap.split(".")[0],
         "tier": tax.tier.get(subcap),
         "evidence_on_row": row.get("Evidence_IDs"),
+        # THE FIVE VOLLEYS, as the gate will count them: every askable facet
+        # needs a logged search for THIS cell before it may close, with
+        # evidence or as a declared absence. `missing` is the work.
+        "volleys": {"fired": vs["fired"], "missing": vs["missing"],
+                    "complete": vs["complete"], "tools": vs["tools"]},
+        "close_by": ("engine.cli synthesise (evidence on the row)" if
+                     [i for i in _split(row.get("Evidence_IDs"))] else
+                     "register evidence, or `engine.cli absence --subcap "
+                     f"{subcap} --ladder <json> --proxy-log … --hunted …` once "
+                     "every volley has fired"),
+        "proxy_class_if_absent": C.proxy_classes().get(subcap),
         "questions": questions,
         "deferred_questions": deferred,
         "queries": queries,
@@ -256,6 +395,11 @@ _DEFAULT_Q = {
                     'abandoned OR "yet to" OR complaint'),
     "corroborates": '"{entity}" regulator OR analyst OR review OR rating',
 }
+
+
+def _split(v) -> list[str]:
+    return [i for i in str(v or "").replace(";", ",").split(",")
+            if i.strip() and i.strip() != C.NO_EVIDENCE]
 
 
 def _bind(text: str, entity: str, sv: str) -> str:

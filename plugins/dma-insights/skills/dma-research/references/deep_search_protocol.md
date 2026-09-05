@@ -382,7 +382,39 @@ signal), what skills are prioritized, what gaps exist.
 
 ---
 
-## Search Volume Management
+## Coverage floor — 70% of every category's subcaps must carry evidence
+
+**Breadth is a gate, not a nicety (AUD-0115).** The floors gate now blocks any
+category where fewer than **70%** of its selected subcaps carry at least one
+resolvable evidence id (`coverage_below_floor`). This exists because a live run
+shipped all sixteen categories at ~35% coverage — most subcaps closed as "no
+evidence" without the proxy and diagnostic-question discovery that would have
+found it.
+
+What clears the floor is **working the long tail**, not stopping at the first
+twenty items:
+
+- A subcap is *done* only when you have either found evidence for it or run the
+  **full diagnostic-question set and the negative-search ladder** against it and
+  come back empty. One shallow query is not a search — `absence_unsearched`
+  catches zero searches; the coverage floor catches shallow ones.
+- Use the DQs (`diagnostic_questions.md`) as **discovery probes**, not just
+  scoring prompts: each DQ names a facet (works / fails / value / corroborates /
+  contradicts) that is its own query. A subcap with no direct hit almost always
+  has a proxy — a parent-capability document, a vendor case study, a job
+  posting, a regulatory filing — that the DQ facets surface.
+- Mine rich documents (annual reports, 10-Ks, call reports, RFPs, vendor pages)
+  **once and map broadly**: a single fetched document routinely evidences a
+  dozen subcaps across the category if you read it against every open cell.
+- Below 70% you are **not finished** — the category is not gated, the handoff is
+  refused, and the run cannot proceed to scoring or reports. Print the coverage
+  figure (`evidenced/total`) at every category checkpoint and keep going until
+  it clears.
+
+Honest emptiness is still allowed: a subcap you searched deeply and found
+nothing for is a finding, not a gap, and does not count against you beyond the
+floor. But the floor forces the deep search *first* — you cannot declare a
+category's tail empty without having actually looked.
 
 ### Expected Volume
 up to 851 subcaps × 3-5 queries = **2,500-4,200 web searches** per assessment.

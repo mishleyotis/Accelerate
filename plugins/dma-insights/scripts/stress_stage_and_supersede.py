@@ -157,38 +157,6 @@ def section_body(spec_key: str, section: str, eids) -> dict:
 
 
 
-def write_both_reports(run, cells) -> int:
-    """Every section of both reports, then an independent review of each.
-
-    The renderer refuses an UNREVIEWED section as well as a missing one
-    (AUD-0153): a report could otherwise ship on prose nobody adversarially
-    read. So the sign-off runs the real review path with a different actor —
-    writing the verdict column directly would prove the renderer accepts a
-    column, not that a section was read.
-    """
-    from engine import narrative as N
-    from engine import report_spec as RS
-    import fixtures as F
-
-    wb = run.open()
-    eids = F.bank_evidence(wb, cells[0])
-    n = 0
-    for key, spec in RS.SPECS.items():
-        actor = ("report-research-producer" if key == "client_research"
-                 else "report-assessment-producer")
-        for sec in spec.sections:
-            body = section_body(key, sec.id, eids)
-            if sec.kind in RS.CARD_KINDS:
-                for i in range(RS.INSIGHT_CARD_MIN):
-                    N.write(wb, key, sec.id, body, actor=actor,
-                            card=f"IC-{i + 1}")
-            else:
-                N.write(wb, key, sec.id, body, actor=actor)
-            n += 1
-    F.sign_off_sections(wb)
-    return n
-
-
 def fill_never_empty(run, root: str) -> None:
     """DQ_Bank, Search_Log and Gate_Log, through the commands that own them.
 
@@ -330,15 +298,33 @@ def walk(work: Path) -> int:
     ws.delete_rows(2, ws.max_row)
     wb3.save()
 
-    # ── 4 · score it, flip the stage, state the grains ───────────────────
+    # ── 4 · research it, score it THROUGH THE STAGE, state the grains ────
+    # Until 2026-09-04 this walk wrote column D by hand and flipped the stage
+    # with `grains stage`. A report section can no longer be written on a
+    # workbook scored out-of-band (the preconditions run on every write —
+    # the owner's issue 2), so the walk now earns its scores the way a run
+    # does: evidence, a challenged synthesis per cell, the floors gate, then
+    # `engine.assessment open / score / critique / rollup / gate`.
+    import fixtures as F
     wb4 = run.open()
     cells = wb4.selected_subcaps()
-    for i, cell in enumerate(cells):
-        wb4.update_row("P1_Subcap_Scoring", "SubCap_ID", cell,
-                       {"Score": 2 + (i % 3)})
+    ev = {}
+    for cell in cells:
+        ev[cell] = F.bank_evidence(wb4, cell, n=5)
+        F.synthesise(wb4, cell, F.good_synthesis(cell, ev[cell]))
+    F.client_facts(wb4, cells, ev)
+    for cat in sorted({c.split(".")[0] for c in cells}):
+        r = cli("gate", "--run", run.run_id, "--root", root, "--category", cat,
+                "--require-synthesis", expect=None)
     r = cli("grains", "stage", "--run", run.run_id, "--root", root,
-            "--to", "assessment")
-    check("the stage flips once column D carries scores", r.returncode == 0)
+            "--to", "assessment", expect=1)
+    check("the stage cannot be flipped by hand on an unscored workbook",
+          r.returncode == 1)
+    F.score_stage(run, run.open(), cells, ev)          # open → score → critic → rollup → gate
+    check("the stage flips once column D carries scores — through the stage's own gate",
+          C.stage_of(run.open().metadata()) == "assessment"
+          and any(str(g.get("Gate")) == "SCORING" and str(g.get("Verdict")) == "PASS"
+                  for g in run.open().rows("Gate_Log")))
 
     r = cli("grains", "recompute", "--run", run.run_id, "--root", root)
     got = json.loads(r.stdout) if r.returncode == 0 else {}
@@ -364,22 +350,23 @@ def walk(work: Path) -> int:
     check("recommendations refuse when the report section is unwritten",
           r.returncode == 1 and "nothing to project" in (r.stderr + r.stdout))
 
-    import fixtures as F
     wb5 = run.open()
-    eids = F.bank_evidence(wb5, cells[0])
+    F.make_shippable(wb5)                  # the completeness half of the report preconditions
+    eids = ev[cells[0]]
     sec = next(s for s in RS.SPECS["assessment"].sections
                if s.kind == "recommendation")
     for i in range(3):
         N.write(wb5, "assessment", sec.id,
-                section_body("assessment", sec.id, eids),
-                actor="report-assessment-producer", card=f"R-{i + 1}")
+                F.section_record(sec.id, eids, report="assessment"),
+                actor="report-assessment-producer", card=f"REC-{i + 1:02d}", run=run)
     r = cli("grains", "recommendations", "--run", run.run_id, "--root", root)
     proj = json.loads(r.stdout) if r.returncode == 0 else {}
     recs = parse_recommendations(str(run.workbook_path), [])
     check("the report's rows are projected and the app reads them",
           proj.get("rows") == 3 and len(recs) == 3
           and all(x["payload"].get("rationale") for x in recs),
-          f"projected={proj.get('rows')} parsed={len(recs)}")
+          f"projected={proj.get('rows')} parsed={len(recs)} "
+          + (r.stderr or "")[-200:])
 
     # ── 7 · a package, then a SECOND run of the same client ──────────────
     # The completeness gate blocks a package whose tabs are empty and
@@ -393,16 +380,21 @@ def walk(work: Path) -> int:
     # the real commands the gate names.
     fill_never_empty(run, root)
     declared = satisfy_completeness(run.run_id, root)
-    wrote = write_both_reports(run, cells)
+    # every section of both reports through the sanctioned writer, on the
+    # scored run, under the stage preconditions, signed off by another actor
+    F.write_both_reports(run, run.open(), cells, ev, render=False)
+    st = N.state(run.open())
+    wrote = sum(len(v.get("sections") or []) for v in st["reports"].values())
     r = cli("techscan", "render", "--run", run.run_id, "--root", root,
             expect=None)
     r1 = cli("report", "--run", run.run_id, "--root", root,
              "--report", "both", expect=None)
-    check("all sixteen sections are written, reviewed, and both reports "
-          "render",
-          wrote == 16 and r1.returncode == 0,
-          f"sections={wrote} report_rc={r1.returncode} "
-          + (r1.stderr or r1.stdout).strip()[-300:])
+    check("every section of both reports is written, reviewed, and both "
+          "reports render",
+          all(v.get("ready") for v in st["reports"].values())
+          and wrote == 19 and r1.returncode == 0,
+          f"sections={wrote} ready={[k for k, v in st['reports'].items() if v.get('ready')]} "
+          f"report_rc={r1.returncode} " + (r1.stderr or r1.stdout).strip()[-300:])
     check("the completeness gate blocks until every empty tab is declared",
           declared is not None,
           f"declared={declared}")

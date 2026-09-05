@@ -423,6 +423,45 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     return out
 
 
+def checkpoint(run: runstate.Run, out_root, *, push: bool = False,
+               stage_reached: str = "") -> dict:
+    """Copy the CURRENT workbook and an IN_PROGRESS manifest into the client
+    folder — at a stage boundary, not every hour.
+
+    Owner, 2026-09-03 (issue 7): the app should be receiving the assessment
+    as it progresses, not in one transport exercise at the end. The package
+    scan ingests the folder; every changed workbook it sees is a run version.
+    So this is called at TWO boundaries the conductor names — the SCORING gate
+    PASS (the app can ingest a scored run and page production can start) and
+    both reports READY — and refuses at any other time, because eighteen
+    versions with zero scored cells is what an hourly push produced for one
+    client. `package` at the end supersedes it with the complete set."""
+    wb = run.open()
+    md = wb.metadata()
+    scoring_pass = any(str(g.get("Gate")) == "SCORING"
+                       and str(g.get("Verdict")).upper() == "PASS"
+                       for g in wb.rows("Gate_Log"))
+    if not scoring_pass:
+        raise SystemExit(
+            "REFUSED: a checkpoint is pushed only after the SCORING gate has "
+            "PASSED — a research-stage workbook in the intake tree is a run "
+            "version with zero scored cells, which the scan will ingest and "
+            "serve as one. Finish scoring (`engine.assessment gate`) first.")
+    entity = str(md.get("entity_name") or run.run_id)
+    dest = _dest_folder(run, md, entity, out_root)
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(run.workbook_path, dest / run.workbook_path.name)
+    doc = manifest_doc(wb, status="IN_PROGRESS")
+    doc["stage_reached"] = stage_reached or "SCORING_PASS"
+    doc["checkpointed_at"] = _utcnow()
+    (dest / "run_manifest.json").write_text(json.dumps(doc, indent=2, default=str))
+    out = {"folder": str(dest), "entity": entity, "stage_reached": doc["stage_reached"],
+           "files": [run.workbook_path.name, "run_manifest.json"]}
+    if push:
+        out["pushed"] = _push(dest, entity)
+    return out
+
+
 def _push(dest: Path, entity: str) -> dict:
     """Every file in the assembled folder to the client's intake folder on
     Drive, through drive_fetch push-package. Honest outcomes per file."""
@@ -496,8 +535,24 @@ def verify(folder) -> dict:
           folder.name if name_ok else
           f"{folder.name!r} does not follow '<Entity> - DMA'")
 
+    # THE GOLD GATE, AT VERIFY TIME. Until 2026-09-03 `engine.gold_standard`
+    # was an instruction in the agents' manifests — "run it on your own output
+    # before you return" — and nothing in the pipeline ran it. A package is
+    # complete only when the Golden 1 gate has nothing to say about it; each
+    # finding is repaired at its source (the workbook or the section), never
+    # in the rendered file.
+    from . import gold_standard as GS
+    gold = [str(f) for f in GS.package_findings(folder)] if all(
+        c["ok"] for c in checks if c["check"].startswith("deliverable:")) else [
+        "gold gate not run: a deliverable is missing"]
+    check("gold_standard", not gold,
+          "PASS — 0 findings" if not gold else
+          f"{len(gold)} finding(s); run `python3 -m engine.gold_standard package "
+          f"<folder>` and repair each at its source: " + "; ".join(gold[:4]))
+
     complete = all(c["ok"] for c in checks)
-    return {"folder": str(folder), "complete": complete, "checks": checks}
+    return {"folder": str(folder), "complete": complete, "checks": checks,
+            "gold_findings": gold}
 
 
 def main(argv=None) -> int:
@@ -520,6 +575,18 @@ def main(argv=None) -> int:
     o.add_argument("--no-push", action="store_true")
     v = sub.add_parser("verify")
     v.add_argument("--folder", required=True)
+    ck = sub.add_parser("checkpoint",
+                        help="copy the CURRENT workbook + an IN_PROGRESS "
+                             "manifest into the client folder at a stage "
+                             "boundary (after the SCORING gate PASSes), so the "
+                             "scan ingests a scored run while the reports are "
+                             "still being written")
+    ck.add_argument("--run", required=True)
+    ck.add_argument("--root")
+    ck.add_argument("--out")
+    ck.add_argument("--push", action="store_true")
+    ck.add_argument("--stage", default="",
+                    help="the boundary reached, e.g. SCORING_PASS or REPORTS_READY")
     sub.add_parser("contract")
     a = ap.parse_args(argv)
     if a.cmd == "contract":
@@ -538,6 +605,11 @@ def main(argv=None) -> int:
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
     if a.cmd == "open":
         print(json.dumps(open_folder(run, a.out, push=not a.no_push),
+                         indent=2, default=str))
+        return 0
+    if a.cmd == "checkpoint":
+        print(json.dumps(checkpoint(run, Path(a.out) if a.out else None,
+                                    push=a.push, stage_reached=a.stage),
                          indent=2, default=str))
         return 0
     out = package(run, Path(a.out) if a.out else None, push=a.push)

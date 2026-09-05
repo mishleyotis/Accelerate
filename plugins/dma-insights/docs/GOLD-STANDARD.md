@@ -1,0 +1,138 @@
+# The DMA deliverable gold standard
+
+**Read this, and open the reference package, BEFORE you author anything.** The gold
+standard is not a description — it is the **Golden 1 Credit Union** package
+(`DMA-2026-GOLDEN1-001`), named by the engagement owner as the best so far. Every
+number below is what that package meets. A producer that authors first and discovers
+the standard in QA has already failed the one-turn test; the point of this file is to
+let you understand the deliverable before you start, and to give you a gate
+(`engine/gold_standard.py`) you run on your OWN output before you return.
+
+## The deliverable-first loop (do this in order, every time)
+
+1. **Read the contract** — this file — and open the reference package's workbook and
+   both reports. Know the shape you are producing before the first cell.
+2. **Author to the contract**, mining the full evidence base (the workbook's
+   `Evidence_Detail`/`Evidence_Master`, `Tech_Register`, `Entity_Timeline`,
+   per-subcap findings), not a summary.
+3. **Run the gate on your own output** — `python3 -m engine.gold_standard {workbook|report|package} <path>` —
+   and do not return until it prints `PASS`. Mid-session, re-run it after any change
+   that touches a score, a section, or a figure. The gate is your pre-flight.
+
+## Workbook — the 43-sheet ASSESSMENT artefact (not the research workbook)
+
+The gold-standard workbook is the **assessment** stage's output, not the research
+engine's. It carries, at minimum:
+
+- `Executive_Summary` — a dashboard: Institution, Sub-Vertical, Evidence Mode,
+  **Overall Maturity with an M-band label** ("2.25 (M2)"), **Peer Median (est.)** with
+  the locked peer set, **Gap to Peer**, **Subcaps Scored** ("561 evidenced of 690,
+  81.3% coverage"), **Evidence Gaps (Unknown)**, per-pillar rows, and a one-line
+  **Headline**.
+- `P1..P4_Subcap_Scoring` — **every subcap carries a numeric score 1..5.** Never blank,
+  never 0, never "N/A". `SubCap_Name` filled from the catalogue on every row.
+- `Coverage` — **discloses the gaps**: `Category, Subcaps, Scored, Unknown_EvidenceGap,
+  Coverage_Pct`. Scoring every cell and hiding which rest on evidence is not the
+  standard; scoring every cell AND disclosing coverage is.
+- `Pillar_Summary` / `Pillar_Rollup` / `Category_Rollup` — **weighted** rollups (read
+  `Pillar_Weights`), an `OVERALL` row, `Gap_to_Peer`, `Maturity` (M-band).
+- `Peer_Benchmarks` — one row per peer with an overall estimate and posture, each
+  **labelled an estimate from public digital-maturity signals, not a formal DMA score**,
+  with a locked peer set.
+- `Firmographics` — `Field, Value, Unit, As at, Evidence`. A genuinely-absent field
+  reads `ABSENT (see 1.2)` with a route, never blank and never "quarantined".
+- `Focus_Areas` — client priorities with a **verbatim quote**, document, page, cells.
+- `Issue_Register` — real matters with `Severity, Status, Capability impact`.
+- `Solution_Catalogue`, `Cap_Triggers`, `Platform_Peer_Adoption`, `Maturity_Rubric`,
+  `Capability_Definitions`, `Technographic_Scan`, `Enrichment_Needed`.
+- **A 5-year financial trajectory** — the deepest fiscal series in the workbook must span
+  **≥5 years** of real financial metrics (revenue, income, assets, loans, ROE…). Carry it
+  in a `Financial_Trends` sheet (≥5 fiscal-year columns, ≥5 metric rows, a CAGR/growth
+  column) or dispersed across the evidence/scoring sheets as the reference does — either
+  satisfies the floor, but the depth is not optional.
+
+Only a **source-link** column (`Source_URLs`) may be empty on a row with no located
+source — the contract forbids a placeholder there and a URL cannot be invented.
+
+## Reports — author INTO the branded template, follow it exactly
+
+- **Every numbered section of the template** is reproduced (research: 1 Firmographics …
+  8 Workbook References; assessment: 1 Executive Summary … 11 Workbook Traceability,
+  plus the alignment appendix). Fill every `{{token}}`; leave none.
+- **Branding via the template's header** (the reference uses `header1.xml`, not embedded
+  fonts). Authoring a blank `Document()` throws the template away — do not.
+- **Depth, scaled from the reference and enforced**: distinct evidence citations at the
+  Golden 1 density — 115/690 subcaps for the assessment report, 47/690 for the research
+  report, scaled to the run's selected subcaps (`gold_standard.depth_floors`,
+  `reports.citation_floor`); words at the pinned Doc's own LENGTH floors (assessment
+  8,400, research 3,050, scaled by pillars in scope) and never above what the reference
+  itself meets. The old flat "≥60 citations" would have failed Golden 1's own research
+  report (47); a floor the reference fails is not a standard. Cite the evidence base, do
+  not summarise it. Both floors are checked by `reports.check`, `engine.gold_standard
+  report` and `assemble verify` (the gold gate), and `tests/skills/research_engine/
+  test_gold_reference.py` proves every floor is one the reference meets.
+- **Financial trajectory**: render a **5-year+ financial series** in prose — ≥5 fiscal
+  years, real financial metrics, and an explicit trend (CAGR / growth / year-over-year),
+  reconciling to the workbook's `Financial_Trends`.
+- **Assessment content contracts**: an **AI-and-data overlay in every pillar** (×4); a
+  **rebuttal on every recommendation** (steelman the strongest counter, then adjudicate);
+  pillar deep-dive headings carry **score vs peer median** ("2.40 vs 3.10").
+- **Coverage disclosed** in prose (evidenced vs Unknown), matching the workbook.
+- **Bands**: the four display bands only — Activating, Building, Competing, Differentiating.
+  The numeric maturity **score** (1–5, e.g. "2.25") is a different axis and is expected; a fifth
+  *band* word must never appear, and inventing one is the invariant 6 breach.
+- **Reconcile**: every figure the report renders equals the workbook's stated grain
+  within 0.01 on the overall.
+
+## Templates are pinned, bound and enforced — before the process begins
+
+- **Pinned**: the owner's two report Docs and the workbook template live in
+  `plugins/dma-insights/references/templates/` — `client_profile_template.md`,
+  `assessment_report_template.md`, `report_templates.json` (the section spec
+  the engine writes to: blocks, feeds, control-block checks), `workbook_template.json`
+  and `gold_reference.json` (the Golden 1 shape and depth measured, not recalled).
+- **Bound**: `engine.cli start` binds every run to the pinned digest
+  (`00_entity_profile/template_binding.json`, `Run_Metadata.template_binding`).
+  `orient` withholds the first card until the binding exists; the report
+  preconditions refuse without it; `engine.template report-drift` reports a Doc
+  export that has moved away from the JSON.
+- **Enforced**: `engine.narrative write` refuses a body that is not the Doc's
+  (blocks, card shape, countable minimum data); `gold_standard` checks the
+  rendered .docx by section number AND heading against the pin (GS-RPT-SECTIONS);
+  `workbook.create` seeds every `SubCap_Name` from the catalogue and refuses an
+  unnamed cell (GS-WB-NAMES). The session brief names the templates on every
+  research and report session, so no agent starts from a remembered shape.
+- **Evidence depth is gated per cell, not per category**: every askable volley
+  has a logged search for the cell (`volleys_incomplete`, blocking), the
+  primary diagnostic question is fired (`primary_unfired`, blocking), an
+  empty cell closes only as a DECLARED absence through `engine.cli absence` —
+  refused until an enrichment connector was asked (`absence_single_tool`,
+  blocking) — and the flag has ONE writer, proven by a Provenance row
+  (validator rule 8). Run-level density floors come from `gold_reference.json`
+  (rows per subcap, evidenced share) and gate `assessment open`.
+- **Mechanical, not advisory (2026-09-04)**: the `deny_artefact_writes`
+  PreToolUse hook refuses any `.xlsx`/`.docx` written outside the engine and
+  the retired writers (`populate_workbook.py`, `validate_workbook.py`,
+  `assessment_runner.py`) refuse and name the engine; `engine.cli start`
+  refuses on a stale marketplace install and on a zip whose manifest predates
+  its pinned templates (`engine.template zip-guard`); `narrative.write` and
+  `reports.render` run the stage preconditions on every call (`--force` is a
+  `DRAFT_` no package accepts); the report agents, the scoring tier and the
+  category researchers each get their own session brief naming the templates
+  and the gold reference; the driver (`engine.pipeline`) dispatches every lane
+  over a brief that carries the template paths. Nothing in this list depends
+  on an agent choosing to read this document.
+
+## No hedges
+
+These read as "the work was not finished" and must never ship: "Not established this
+run", "to be established at the surface-production stage", "no score yet", "queued for
+enrichment", "TBD", "N/A" standing in for a value. If a thing is genuinely unknown, it
+is an **Unknown evidence gap disclosed in Coverage** or an **ABSENT firmographic with a
+route** — a stated, structured absence, never a hedge.
+
+## The gate is the contract, executable
+
+`engine/gold_standard.py` encodes every rule above and maps each to the goeasy finding
+it prevents (`docs/goeasy-findings-register.md`). Run it on your own output. Green is
+the definition of done.

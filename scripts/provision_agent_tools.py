@@ -172,6 +172,56 @@ ROLES = {
     "reports/report-validator": dict(
         writes=(), extra=[], external=["exa", "tavily", "drive"],
         research=True),
+    # THE SEVEN SURFACES CONNECTORS.md SOURCES FROM EXPLORIUM OR INDEED.
+    # The `production` default below gives every surface producer exa,
+    # tavily, clay, quartr and drive. Five surfaces need more, and the
+    # per-surface table in docs/CONNECTORS.md has said so all along while
+    # nothing joined the two: measured 2026-08-30, the table assigned
+    # Explorium to overview.firmographics, overview.leadership,
+    # insights.landscape, platform.platform_story and techstack.techstack,
+    # and not one web-app surface producer declared it. An agent that does
+    # not DECLARE a tool cannot call it, so the doc said Explorium verifies
+    # the technographic register while the agent writing that register had
+    # no way to ask Explorium anything.
+    #
+    # These are per-agent rather than a wider default because the table is
+    # per-surface: granting all thirty producers a contact-and-firmographic
+    # connector to serve five of them widens the surface for the other
+    # twenty-five with nothing asking for it.
+    # `scripts/tests/test_connector_provisioning.py` re-derives the join
+    # from the doc on every run, so a section that moves between producers
+    # fails there rather than drifting quietly.
+    "production/overview/overview-hero-producer": dict(          # firmographics
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive", "explorium"],
+        research=True),
+    "production/overview/overview-people-producer": dict(        # leadership
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive", "explorium"],
+        research=True),
+    "production/insights/insights-landscape-producer": dict(     # landscape
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive", "explorium"],
+        research=True),
+    "production/techstack/techstack-register-producer": dict(    # T1 register
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive", "explorium"],
+        research=True),
+    "production/techstack/techstack-layers-producer": dict(      # T2 rollup
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive", "explorium"],
+        research=True),
+    # Job postings are a demand signal: platform_story argues greenfield and
+    # cell_evidence reads hiring as artefact vocabulary.
+    "production/platform/platform-fit-producer": dict(           # platform_story
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive",
+                  "explorium", "indeed"],
+        research=True),
+    "production/heatmap/heatmap-evidence-producer": dict(        # cell_evidence
+        writes=LEDGER_TOOLS, extra=[],
+        external=["exa", "tavily", "clay", "quartr", "drive", "indeed"],
+        research=True),
     "learning/learning-testgen": dict(
         writes=(), extra=["Write", "Edit"], external=[], research=False),
     "learning/learning-grader": dict(
@@ -211,6 +261,15 @@ DEFAULTS = {
     # toolkits come via drive_fetch.py under Bash.
     "research": dict(writes=(), extra=[],
                      external=["exa", "tavily", "drive"], research=True),
+    # The SCORING stage (generated — gen_scoring_agents.py derives its tools
+    # line from THIS table): four pillar scorers and one critic. They write
+    # only through `engine.assessment` over Bash — the ledger's refusals are
+    # the write control — so Write/Edit stay denied and no connector write is
+    # reachable. Drive reads are for the internal artefacts a HYBRID score
+    # rests on; exa/tavily let a scorer re-open a cited source, never search
+    # for new evidence (the research stage is closed by the time they run).
+    "scoring": dict(writes=(), extra=[],
+                    external=["exa", "tavily", "drive"], research=True),
 }
 
 
