@@ -566,6 +566,7 @@ class Pipeline:
                 self._count(self._dispatch(cb, stage="CHALLENGE"))
             for cat in need["dispatch"]:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
+            self._verify_research(need["dispatch"])
             self.reopen()
         need = brief.categories_needing_dispatch(self.wb)
         if need["dispatch"]:
@@ -575,6 +576,41 @@ class Pipeline:
                 + "; ".join(f"{c}: {', '.join(need['reasons'][c][:4])}"
                             for c in need["dispatch"][:4]))
         return f"every category PASS after {self.opts.max_rounds} round(s)"
+
+    def _verify_research(self, categories) -> None:
+        """The dispatch verifier for RESEARCH. After the floors gate reads the
+        Search_Log a lane wrote, this reads the lane's own transcript and
+        REVISEs a category whose logged searches no retrieval could have
+        produced — the fabrication the substrate gates structurally cannot
+        see. It records a DISPATCH_VERIFY row per category; a FAIL re-enters
+        the round loop through categories_needing_dispatch, with the reason in
+        the re-dispatch brief. FAIL-SAFE BY CONSTRUCTION: any error leaves the
+        category exactly as the floors gate found it, because a verifier that
+        cannot read the work must never block a run on a guess."""
+        try:
+            from . import verify
+        except Exception:                                   # noqa: BLE001
+            return
+        logs = self.run.root / "agent_logs"
+        for cat in categories:
+            try:
+                reasons = verify.research_lane_fabrication(cat, logs)
+            except Exception as e:                          # noqa: BLE001
+                self.opts.log(f"[VERIFY] {cat}: skipped ({e.__class__.__name__})")
+                continue
+            try:
+                if reasons:
+                    L.append_gate(self.wb, gate="DISPATCH_VERIFY", scope=cat,
+                                  verdict="FAIL", detail="; ".join(sorted(reasons)),
+                                  blocking=True)
+                    self.opts.log(f"[VERIFY] {cat}: REVISE — {reasons[0][:120]}")
+                else:
+                    L.append_gate(self.wb, gate="DISPATCH_VERIFY", scope=cat,
+                                  verdict="PASS",
+                                  detail="logged searches witnessed by retrieval "
+                                         "in the lane transcript", blocking=False)
+            except Exception as e:                          # noqa: BLE001
+                self.opts.log(f"[VERIFY] {cat}: gate write skipped ({e.__class__.__name__})")
 
     def _stage_handoff(self) -> str:
         from . import assessment as A
