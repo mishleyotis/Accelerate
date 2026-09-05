@@ -100,6 +100,13 @@ BANNED_HEDGES = (
 # reference package uses throughout ("2.25 (M2)"). Only a reachable 5th band word.
 BANNED_BAND_WORDS = ("transformational",)
 
+# An AI-and-data overlay block runs 150-250 words in the reference; 55 is the
+# floor that separates a real overlay from the one-line "AI and data overlay:
+# models." heading that cleared the old presence-only count (owner 2026-09-05,
+# "AI overlays not thorough enough"). The evidence tie is enforced at the score
+# (assessment.score, evidenced cells), the depth here.
+AIOVERLAY_WORD_FLOOR = 55
+
 # The gold-standard ASSESSMENT workbook's sheet set (from the Golden 1 reference).
 # A workbook missing these is a RESEARCH workbook shipped where an assessment belongs.
 GOLD_SHEETS = (
@@ -524,10 +531,36 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
         # held to the full four.
         dives = len(re.findall(r"pillar deep dive \(p[1-4]\)", low))
         need = dives if 1 <= dives <= 4 else 4
-        if low.count("ai and data overlay") < need:
+        n_overlay = low.count("ai and data overlay")
+        if n_overlay < need:
             out.append(Finding("GS-RPT-AIOVERLAY",
-                f"AI-and-data overlay x{low.count('ai and data overlay')} "
+                f"AI-and-data overlay x{n_overlay} "
                 f"(need {need}, one per pillar deep dive)", "GSY-09"))
+        else:
+            # DEPTH, not just presence (owner 2026-09-05, "AI overlays not
+            # thorough enough"). The reference's overlays run 150-250 words and
+            # CITE the evidence for the readiness and applicability they assert;
+            # a three-word "AI and data overlay: models." cleared the old
+            # heading count while the structured Subcap_Scores overlay columns
+            # stayed empty (AUD-0052). Each block must carry substance AND a
+            # citation. 55 words is the floor — well under the reference, well
+            # over the one-line defect.
+            thin = []
+            for m in re.finditer(r"ai and data overlay", low):
+                seg = whole[m.start(): m.start() + 1400]
+                nxt = re.search(r"(?i)(ai and data overlay|pillar deep dive)", seg[20:])
+                if nxt:
+                    seg = seg[: nxt.start() + 20]
+                w = len(re.findall(r"\w+", seg))
+                if w < AIOVERLAY_WORD_FLOOR:
+                    thin.append(w)
+            if thin:
+                out.append(Finding("GS-RPT-AIOVERLAY-DEPTH",
+                    f"{len(thin)} AI-and-data overlay block(s) below depth "
+                    f"(e.g. {min(thin)} words): a substantive overlay is "
+                    f"~150-250 words on the readiness and applicability of AI for "
+                    f"the pillar — the evidence tie is enforced at the score, the "
+                    f"depth here, not a one-line heading", "GSY-09"))
         recs = len(set(re.findall(r"rec-r?\d+", low)))
         rebut = max(low.count("strongest counter"), low.count("rebuttal"))
         if recs and rebut < recs:

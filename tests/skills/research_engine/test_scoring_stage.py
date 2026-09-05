@@ -166,6 +166,28 @@ def test_the_overlay_is_a_contract_not_a_courtesy(tmp_path):
         _score(wb, cells[0], ev[cells[0]], data_readiness="BLUE")
 
 
+def test_the_overlay_must_be_evidence_tied_on_an_evidenced_cell(tmp_path):
+    """Owner 2026-09-05: "AI overlays not thorough enough". Measured on the
+    promoted Golden 1 run: 690/690 structured overlay columns empty while the
+    report carried the AI analysis (AUD-0052). An evidenced cell that claims an
+    AI posture now cites the evidence for it and names real data domains — a
+    NONE_FOUND overlay under an ASSISTIVE/AUGMENTED/AUTONOMOUS claim, or a
+    one-token data_dependency, is refused rather than stored as a courtesy."""
+    run, wb, cells, ev = _researched(tmp_path)
+    A.open_stage(wb, run.qa_dir)
+    cell, eids = cells[0], ev[cells[0]]
+    with pytest.raises(ScoringRefusal, match="ai_evidence resolves to NONE_FOUND"):
+        _score(wb, cell, eids, ai_applicability="ASSISTIVE", ai_evidence="NONE_FOUND")
+    with pytest.raises(ScoringRefusal, match="names no data domain"):
+        _score(wb, cell, eids, data_dependency="x")
+    # the honest ways through: cite the AI evidence, or claim no AI posture.
+    out = _score(wb, cell, eids, ai_applicability="ASSISTIVE", ai_evidence=eids[0])
+    ss = [r for r in wb.rows("Subcap_Scores") if r["subcap_id"] == cell][0]
+    assert ss["ai_evidence_ids"].split(":")[0] == eids[0].split(":")[0]
+    assert _score(wb, cells[1], ev[cells[1]], ai_applicability="NONE",
+                  data_dependency="NONE", ai_evidence="NONE_FOUND")
+
+
 # ── the critic, the rollup, the gate ─────────────────────────────────────
 
 def test_the_critic_must_not_be_a_scorer(tmp_path):

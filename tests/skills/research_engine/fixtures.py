@@ -580,7 +580,15 @@ _CHECK_TEXT = {
     "all sixteen category rows": lambda c, e: " ".join(
         f"P{p}C{q}" for p in range(1, 5) for q in range(1, 5)),
     "the weights-sum check": lambda c, e: "weights sum to 1.00",
-    "the AI and data overlay": lambda c, e: "the AI and data overlay is stated",
+    "the AI and data overlay": lambda c, e: (
+        "AI and data overlay: the data foundation rests on the member master "
+        "and transaction domains, governed under a catalogue that went live "
+        f"this year [{(str(e[0]).split(':')[0] if e else 'E-1')}]; data readiness "
+        "is AMBER because lineage is only partial. Applicability is ASSISTIVE, a "
+        "model assists the workflow rather than deciding it, and the blocker is "
+        "the absence of a feature store. Peer AI posture is inferred from public "
+        "signals, not audited. Closing the governance gap lifts readiness to "
+        "GREEN and unlocks the autonomous tier the roadmap sequences after it"),
     "the six factor weights": lambda c, e: "0.25 0.20 0.15 0.10 0.10 0.20",
     "three or more phases": lambda c, e: "phase one, phase two, phase three",
     "the provenance label": lambda c, e: "ANALYST",
@@ -716,6 +724,12 @@ def score_cell(wb, cell, eids, score=2.5, actor="scoring-p1-producer", **over):
               data_dependency="member master, transactions",
               data_readiness="AMBER")
     kw.update(over)
+    # A claimed AI posture cites the evidence for it — the overlay is
+    # evidence-tied now, so an evidenced cell scored ASSISTIVE / AUGMENTED /
+    # AUTONOMOUS carries an ai_evidence id. Default to the cell's own first.
+    if eids and str(kw.get("ai_applicability", "")).upper() != "NONE" \
+            and "ai_evidence" not in kw:
+        kw["ai_evidence"] = eids[0]
     from engine import assessment as A
     return A.score(wb, cell, **kw)
 
