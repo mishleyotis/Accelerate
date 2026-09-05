@@ -1054,6 +1054,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
     that page — and NO payload bytes. A prompt that carries a payload is the
     stage-7b token bleed (owner issue 7)."""
     from . import ship
+    from . import surface_export as SX
     e = _engine(run)
     sh = shared(wb)
     st = ship.state(wb)
@@ -1075,10 +1076,12 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
         reasons = verdicts.get(page) if isinstance(verdicts, dict) else None
         if isinstance(reasons, dict):
             reasons = reasons.get("reasons") or reasons.get("failures") or list(reasons.values())
+        sp = SX.plan(page)
         packet = _bound({
             "agent": f"{page}-surface-producer", "shared": sh,
             "first_commands": [
                 f"python3 -m engine.ship state {e}",
+                f"python3 -m engine.surface_export plan --page {page}",
                 f"# read the contract at the path below, not from memory",
                 f"python3 plugins/dma-insights/skills/dma-surface-production/scripts/ship_page.py "
                 f"{connector_run} {page} --sections <your sections dir> --incremental "
@@ -1088,6 +1091,14 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             "ready_in_workbook": pst.get("ready"),
             "waiting_on": pst.get("waiting_on") or [],
             "recording_map_tabs": pst.get("recording_map_tabs") or [],
+            # The dual-source plan: for each section on this page, where it is
+            # fed FROM and how it is produced. `format_only` sections are a
+            # matter of shape, not synthesis; only `produce` sections need a
+            # per-surface producer and an enrichment pass.
+            "section_plan": sp["sections"],
+            "format_only_sections": sp["convert"],
+            "produce_sections": sp["produce"],
+            "server_sections": sp["server"],
             "last_verdict_reasons": [str(r)[:300] for r in (reasons or [])][:12],
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
@@ -1098,6 +1109,13 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "repair that path, not the page",
                 "the workbook is the source: every figure comes from a tab in "
                 "`recording_map_tabs`, every citation from Evidence_Detail",
+                "`format_only_sections` (see section_plan) are FORMATTED from the "
+                "workbook tab or report section named there — do NOT re-synthesise "
+                "them and do NOT re-challenge them; the research layer already "
+                "challenged that content. Only `produce_sections` need new "
+                "synthesis (and enrichment registered as evidence first)",
+                "`server_sections` submit fields:{} plus this page's "
+                "narrative_thread — the app joins the arrangement server-side",
             ],
         }, "last_verdict_reasons", "waiting_on")
         lanes.append((f"page-{page}", packet, f"Page — {page}"))
