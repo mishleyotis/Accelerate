@@ -1441,7 +1441,15 @@ def backfill_evidence(conn, token, groups, *, forced: bool = True,
                   + (f", {conflicts} refused on an excerpt conflict"
                      if conflicts else "") + ", "
                   f"{sum(1 for v in mined.values() if v.get('excerpt'))} mined "
-                  f"excerpts{f', {clashes} dedup clash(es)' if clashes else ''})")
+                  f"excerpts{f', {clashes} row(s) refused' if clashes else ''})")
+            # AND WHY THEY WERE REFUSED, in the log, not only in a row of
+            # `parser_observations` nothing can read from outside the
+            # database. A count without a cause is what sent this pass round
+            # three times: "604 dedup clash(es)" was a guess about the cause
+            # and the guess was wrong. The top few distinct messages are
+            # enough to tell a duplicate from a bug.
+            for _msg, _hits in sorted(why.items(), key=lambda kv: -kv[1])[:3]:
+                print(f"backfill-evidence:   x{_hits} {_msg}")
             filled += 1
         except Exception as exc:  # noqa: BLE001 — one bad workbook sinks nothing
             conn.rollback()
