@@ -1084,11 +1084,25 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
         if isinstance(reasons, dict):
             reasons = reasons.get("reasons") or reasons.get("failures") or list(reasons.values())
         sp = SX.plan(page)
+        # Card- and drawer-grain detail lives in the join://cards and
+        # join://drilldowns RESOURCES (also `surface_export cards --page`); the
+        # brief carries only the SUMMARY an agent needs to plan — never the full
+        # map, which would both push the packet past its ceiling and duplicate
+        # the very resource it is meant to send the agent to read.
+        page_cards = {k: v for k, v in SX.cards().items()
+                      if k.split(".", 1)[0] == page}
+        by_route: dict[str, int] = {}
+        for _v in page_cards.values():
+            by_route[_v["route"]] = by_route.get(_v["route"], 0) + 1
+        page_drawers = [d for d in SX.drawers()
+                        if str(d.get("renders_section") or "").startswith(f"{page}.")]
         packet = _bound({
             "agent": f"{page}-surface-producer", "shared": sh,
             "first_commands": [
                 f"python3 -m engine.ship state {e}",
                 f"python3 -m engine.surface_export plan --page {page}",
+                f"python3 -m engine.surface_export cards --page {page}"
+                f"   # the full card map (also the join://cards resource)",
                 f"# read the contract at the path below, not from memory",
                 f"python3 plugins/dma-insights/skills/dma-surface-production/scripts/ship_page.py "
                 f"{connector_run} {page} --sections <your sections dir> --incremental "
@@ -1098,34 +1112,44 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             "ready_in_workbook": pst.get("ready"),
             "waiting_on": pst.get("waiting_on") or [],
             "recording_map_tabs": pst.get("recording_map_tabs") or [],
-            # The dual-source plan: for each section on this page, where it is
-            # fed FROM and how it is produced. `format_only` sections are a
-            # matter of shape, not synthesis; only `produce` sections need a
-            # per-surface producer and an enrichment pass.
-            "section_plan": sp["sections"],
+            # The dual-source plan: for each section on this page, its route and
+            # the tab(s)/report section(s)/enrichment it is fed FROM. A
+            # `format_only` section is a matter of shape, not synthesis; only a
+            # `produce` section needs a per-surface producer and an enrichment
+            # pass. Full per-field detail is in the join://section-sources map.
+            "section_plan": {
+                k: (f"{v['route']} ← " + (" | ".join(
+                    (v.get("workbook_tabs") or []) + (v.get("report_sections") or [])
+                    + (v.get("enrichment_sources") or [])) or v["disposition"]))
+                for k, v in sp["sections"].items()},
             "format_only_sections": sp["convert"],
             "produce_sections": sp["produce"],
             "server_sections": sp["server"],
-            # Card-grain: every CARD this page renders (finding, tile, row, ...)
-            # with its route and the tab COLUMNS / report section / enrichment
-            # that feed it; plus the page's drawers. `⚙connector` cards and
-            # `computed_never_sent` keys are written by the app, never authored.
-            # Compact (item keys stay in the contract / join://cards, so the
-            # brief carries no payload-shaped bytes).
-            "card_plan": {
-                k: {"route": v["route"], "kind": v["kind"],
-                    "src": (f"{v['tab']}[{len(v['columns'])} cols]" if v["tab"]
-                            else ", ".join(v["report_sections"])
-                            or v["enrichment_facet"] or v["disposition"]),
-                    "floor": v.get("floor"),
-                    "connector_authored": v["connector_authored"],
-                    "computed_never_sent": v["computed_never_sent"]}
-                for k, v in SX.cards().items() if k.split(".", 1)[0] == page},
-            "drawers": [{"dd": d["dd"], "name": d["name"], "shell": d["shell"],
-                         "renders": d.get("renders_section"),
-                         "has_synthesis_prompt": d["has_synthesis_prompt"]}
-                        for d in SX.drawers()
-                        if str(d.get("renders_section") or "").startswith(f"{page}.")],
+            # Card-grain, as a SUMMARY: how many cards take each route, and the
+            # cards a producer must NOT author (the connector writes them, or
+            # the app computes them). The full card map — item keys, tab
+            # COLUMNS, nested sub-cards — is the join://cards resource in `read`.
+            "card_map": {
+                "read": f"join://cards resource, or `python3 -m engine.surface_export "
+                        f"cards --page {page}` — every card's item keys, tab COLUMNS, "
+                        f"nested sub-cards and route",
+                "by_route": by_route,
+                "do_not_author": {
+                    "connector": sorted(k for k, v in page_cards.items()
+                                        if v["connector_authored"]),
+                    "computed_never_sent": {k: v["computed_never_sent"]
+                                            for k, v in page_cards.items()
+                                            if v["computed_never_sent"]}},
+            },
+            # Drawers: the ones an agent AUTHORS (they carry their own synthesis
+            # prompt) named inline; the rest render from their parent surface's
+            # payload and are read from the join://drilldowns atlas.
+            "drawers": {
+                "authored": [f"{d['dd']} {d['name']} → {d.get('renders_section')}"
+                             for d in page_drawers if d["has_synthesis_prompt"]],
+                "read": f"join://drilldowns — {len(page_drawers)} panel(s) on this "
+                        f"page; an authored one carries its synthesis prompt there",
+            },
             "last_verdict_reasons": [str(r)[:300] for r in (reasons or [])][:12],
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
@@ -1143,12 +1167,14 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "synthesis (and enrichment registered as evidence first)",
                 "`server_sections` submit fields:{} plus this page's "
                 "narrative_thread — the app joins the arrangement server-side",
-                "`card_plan` gives every CARD its route and the exact tab "
-                "COLUMNS / report section / enrichment that feed it; a card "
-                "marked `⚙connector` (safeguard gates) or a key under "
-                "`computed_never_sent` is written by the app — never author it. "
-                "`engine.surface_export.scaffold_card` refuses an item key the "
-                "contract card does not declare",
+                "`card_map.by_route` counts this page's cards by route; the "
+                "full map — every card's item keys, tab COLUMNS and nested "
+                "sub-cards — is the join://cards resource, or "
+                "`engine.surface_export cards --page`. A card under "
+                "`card_map.do_not_author.connector` (safeguard gates) or a key "
+                "under `computed_never_sent` is written by the app — never "
+                "author it. `engine.surface_export.scaffold_card` refuses an "
+                "item key the contract card does not declare",
             ],
         }, "last_verdict_reasons", "waiting_on")
         lanes.append((f"page-{page}", packet, f"Page — {page}"))
