@@ -61,3 +61,10 @@ dma-insights-*.zip
 # person it lands on. The routine's headless approvals do not come from here
 # either — they come from the plugin's own PreToolUse hook.
 .claude/settings.local.json
+
+# Working run trees for `engine.pipeline run` / `engine.cli start` invoked
+# directly from a repo checkout (scoring workbooks, preflight.json, per-run
+# client_folder/, agent_logs/, pipeline.log). This is runtime output, not
+# source: the product's own artifact store is the intake Drive tree
+# (`engine.assemble package --push`), not this repository.
+/dma_runs/
