@@ -40,6 +40,32 @@ Two mechanisms decide, and they must agree.
 The rule is one line: **a read is auto-approved; a write, a publication, a
 deletion, a spend, or code somebody else authored still asks.**
 
+**The MCP surface is only half of it (measured 2026-09-03).** With every
+connector tool ruled on, the owner was still approving tool calls — because
+the prompts were `Bash`, `Write` and `Edit`. Every agent writes through
+`python3 -m engine.…`, every producer writes section JSON to disk, and
+neither tool had a decision anywhere. `hooks/autoapprove_builtins.py` rules
+on them by GRAMMAR rather than by list: a command is approved when every
+segment is the research engine, a plugin or repo script, pytest, a local git
+operation or a read-only shell verb, and every redirection lands inside a
+run root; a `Write`/`Edit` is approved when its target is under a run root
+or the plugin's own writer scope. A push, a credential path, `printenv`, a
+pipe into an interpreter, anything the grammar cannot parse, and every write
+into the deployables or a settings file draw NO decision — they fall through
+exactly as before. The two deny guards are asked first, so the hook never
+holds the opposite opinion to a refusal. `bootstrap_session.sh` writes the
+same shapes as narrower `Bash(prefix *)` / `Edit(path/**)` grants in user
+settings, the belt for a session whose hooks bound from a stale install.
+
+```
+python3 plugins/dma-insights/scripts/audit_builtin_approvals.py --strict
+```
+
+harvests every command the agent manifests, skill files and Routine prompts
+tell a session to run, feeds each to the real hook, and fails on any that
+would prompt. Measured 2026-09-03: 124 commands, 124 approved, 0 prompting.
+`readiness.py`'s `approvals` lane runs both audits.
+
 - Servers with a **stable segment** (Slack, Salesforce, Google Admin, Auctor,
   GitHub, Google Drive, Quartr, Indeed, Grace) are split tool by tool in
   `SERVER_SURFACES` — `read` is approved, `withheld` is refused **on the
@@ -71,6 +97,142 @@ UNCLASSIFIED`. `UNCLASSIFIED` is the finding: a tool on a server the hook
 already knows that nobody ever ruled on, prompting on every call forever.
 Measured 2026-08-30 before the split existed: **16 of 86 approved.** After:
 124 of 184, 58 refused on the record, 2 guarded, **0 unclassified**.
+
+## When a connector still prompts — the five layers, by surface
+
+Owner, 2026-09-04: *"the mcp tools eg tavily, exa etc are what I get prompts
+of to approve"* — on claude.ai/code, the terminal, Cowork and claude.ai chat
+alike — and *"when I place allow for all sessions, it prompts again."* Both
+plugin hooks approve every Tavily and Exa spelling (measured, table below),
+and the user-scope grant carries `mcp__Tavily__*` and `mcp__Exa__*`. So the
+prompt is coming from a layer neither governs. Ask the question with the
+exact name the prompt showed:
+
+```
+python3 plugins/dma-insights/scripts/why_did_it_prompt.py mcp__Tavily__tavily_search
+```
+
+Four layers can remove a prompt and one control puts one back over all four:
+
+| layer | what it does | where it fails |
+|---|---|---|
+| plugin hooks | `autoapprove_connector` (MCP) and `autoapprove_builtins` (Bash/Write/Edit, Cowork's `mcp__workspace__bash`) decide at call time | only where the plugin is installed AND enabled when the session binds; a snapshot container binds the old hook |
+| `permissions.allow` | user scope (bootstrap), project scope (`.claude/settings.json`), project-local | a rule matches ONE spelling. A connector a host delivers is `mcp__Tavily__…`; one Claude Code fetches itself is `mcp__claude_ai_Tavily__…` (permissions reference). Both are granted now. "Allow for all sessions" writes to `.claude/settings.local.json`, which a cloud container discards |
+| permission mode | `dontAsk` denies instead of prompting | the harness chooses the mode for a cloud session (`auto`), not the settings file |
+| install | hooks bind once, at session start | a restored snapshot boots the old plugin every time until `bootstrap_session.sh` runs before the session |
+| **organisation per-tool control = `ask`** | prompts on EVERY call, in EVERY mode, with the reason *"Your organization requires approval for this tool"*, **never offers to remember the choice, and no allow rule skips it** (permissions reference § MCP; `mcp` § Organization controls on connector tools). In `dontAsk` it becomes a silent denial | this is the only layer that matches "prompts on every surface, allow-for-all-sessions does nothing"; the user's own "allow unsupervised" connector setting does not override it. `/mcp` in the prompting session shows the setting per tool; the org's claude.ai admin changes it |
+
+Per surface: **claude.ai/code web** — hooks + user/project settings + the
+auto classifier; only the bootstrap's writes survive to the next session.
+**Claude Code CLI** — the same on your machine; a saved rule persists for the
+spelling it was saved under. **Cowork desktop** — hooks run; shell is
+`mcp__workspace__bash` and a `Bash` rule never carries over (the builtins hook
+matches it since 1.17.0); the org `ask` does NOT reach these sessions.
+**claude.ai chat** — no Claude Code hooks or settings at all; only the
+connector's permission setting and any org control apply, and nothing in
+this repository can change what it asks.
+
+## Slack — a bot token, not a connector (PORTABLE, 2026-08-30)
+
+**Status: code LIVE; the secret is the owner's to provision.**
+
+Until 2026-08-30 the only route to `#deal-desk` was the claude.ai Slack
+**connector**, attached per Routine on its own edit screen. That is not
+portable in three measured ways:
+
+1. `dma-assessment-intake` carries no connector of any kind, so the queue
+   that decides which client to assess could not read its own channel
+   (AUD-0190). `update_trigger` cannot attach one; only a human can.
+2. **A script can never call a connector tool.** So the triage rule could be
+   tested over recorded fixtures and never over the live channel — the read
+   half and the decide half could drift with nothing to catch it.
+3. Every new Routine, every fresh container, every teammate's session starts
+   with no Slack until somebody clicks through a UI.
+
+A bot token in Secret Manager has none of those properties.
+`scripts/slack_client.py` reads it by the same three-rung ladder as the
+connector path token, works in any process carrying the service-account key,
+and is rotated without touching code.
+
+### There is no redirect URL, and that is a design decision
+
+The intake **polls**. It calls `conversations.history`, `conversations.replies`
+and `chat.postMessage` outbound, on a schedule. It subscribes to no Slack
+events, so there is:
+
+- no request URL for Slack to call,
+- no **OAuth redirect URL** — the app is installed once, to one workspace,
+  from its own **Install to Workspace** button, which uses Slack's own
+  `https://slack.com/oauth/v2/authorize` flow and hands back a bot token;
+- no **signing secret** to store, because nothing inbound needs verifying.
+
+If Slack's app-config screen insists on a redirect URL before it will let you
+install (it does on some workspace policies), use
+
+```
+https://slack.com/oauth/v2/authorize
+```
+
+as the OAuth entry and leave **Redirect URLs empty**; only a *distributed*
+app (one installable by other workspaces) needs its own callback endpoint,
+and this app is internal to one workspace. Do not invent a callback on the
+MCP service: there is no handler there, so a redirect pointed at it would
+fail closed at install time and read as a Slack problem.
+
+### Scopes the bot needs
+
+Two of the four are load-bearing and two are cosmetic. The distinction is
+not editorial: measured 2026-08-30 on a live `dma-assessment-intake` firing,
+a token holding `channels:history` but not `channels:read` read **nothing**,
+because the transcript's header name was fetched before the messages were.
+A cosmetic lookup must never decide whether the substantive one runs, so
+both cosmetic scopes now degrade in place and the read proceeds.
+
+| scope | what stops working without it | required? |
+|---|---|---|
+| `channels:history` | `conversations.history` — the queue cannot be read | **yes** |
+| `chat:write` | the completion reply | **yes** |
+| `channels:read` | `conversations.info` — the channel NAME in the header line; nothing parses it, so it degrades to the channel id and a note goes to stderr | no |
+| `users:read` | display names on replies; degrades to bare ids, which is what the parser reads anyway | no |
+
+Private channel instead of public → `groups:history` + `groups:read`.
+**The bot must also be in the channel**: `/invite @<app>` in `#deal-desk`.
+`not_in_channel` is the error that says you skipped this, and
+`slack_client.py` names the remedy in the message.
+
+### Provisioning (owner, once)
+
+```bash
+printf %s "$SLACK_BOT_TOKEN" | gcloud secrets create dmai-slack-bot-token \
+    --project=digital-maturity-assessor --data-file=- --replication-policy=automatic
+gcloud secrets add-iam-policy-binding dmai-slack-bot-token \
+    --project=digital-maturity-assessor \
+    --member="serviceAccount:<the routine service account>" \
+    --role=roles/secretmanager.secretAccessor
+```
+
+Rotation is `gcloud secrets versions add dmai-slack-bot-token --data-file=-`
+and nothing else — the ladder always reads `latest`.
+
+Verify without printing the secret:
+
+```bash
+python3 plugins/dma-insights/scripts/slack_client.py whoami
+python3 plugins/dma-insights/scripts/slack_intake.py fetch      # channel + threads
+python3 plugins/dma-insights/scripts/slack_intake.py triage --transcript /tmp/deal_desk.txt --threads /tmp/threads
+```
+
+`whoami` prints team, user and bot id — never the token. No code path in this
+repository prints it, and `test_no_source_file_carries_a_literal_bot_token`
+fails the build if one is ever committed.
+
+### The connector route still works
+
+Nothing was removed. A session that HAS the Slack connector may still read
+the channel with it and save the transcript; `slack_client.py` renders the
+API's JSON into that same text shape, so one parser and one set of fixtures
+serve both. `test_slack_client.py` proves it by running the real parser over
+rendered output and asserting the same verdicts the recordings assert.
 
 ## Preflight (STEP 0 of every synthesis firing)
 

@@ -1,0 +1,122 @@
+{
+  "_readme": [
+    "THE ANTI-PATTERNS A REPORT SECTION MUST NOT SHIP, with the measurement that",
+    "catches each and the repair that clears it. Every entry names a gate in",
+    "engine/gold_standard.py, so a producer reads the same rule the gate enforces",
+    "rather than a remembered paraphrase of it.",
+    "",
+    "WHY THIS FILE EXISTS. Measured 2026-09-06 on a delivered pair of reports that",
+    "passed every gate the build then had: the assessment carried 50 tables against",
+    "the reference's 92 and the research report 26 against 39, while paragraph words",
+    "ran 1.57x the reference in both. The gates counted words and citations and could",
+    "not see shape, and MORE PROSE HELPS A WORD FLOOR — so the defect was not merely",
+    "uncaught, it was rewarded. The owner's report: 'the 2 reports lack depth ... do",
+    "not adhere to template requirements eg where tables are, I see paragraphs.'",
+    "",
+    "engine/authoring.py turns this file into the brief a section's writer receives",
+    "BEFORE authoring, bound to that section's own declared inputs, and",
+    "tests/skills/research_engine/test_report_depth_and_structure.py asserts every",
+    "gate code here exists and fires."
+  ],
+  "antipatterns": [
+    {
+      "id": "PROSE-WHERE-A-TABLE-BELONGS",
+      "gate": "GS-RPT-TABLES",
+      "finding": "GSY-19",
+      "what": "A section describes a register, rollup, cap set, peer set or issue list in paragraphs instead of stating it as the table the pinned Doc declares.",
+      "measured": "Tables in the rendered .docx against the Golden 1 density (92 assessment / 39 research over 690 subcaps), scaled to the run's cell count.",
+      "repair": "State it as a table. Every sheet a section declares in its spec `inputs` renders as one table; a section short of its declared tables is either not declaring the sheet it reasons from, or reasoning from a sheet that carries no rows.",
+      "not_the_repair": "Adding more prose about the same content. That raises the word count the volume gate reads and leaves the structure defect exactly where it was."
+    },
+    {
+      "id": "PROSE-INFLATION",
+      "gate": "GS-RPT-PROSE-FOR-STRUCTURE",
+      "finding": "GSY-19",
+      "what": "Paragraph words run materially above the reference's while the section carries fewer tables than the reference — prose standing in for structure.",
+      "measured": "Paragraph words against the reference's paragraph words, scaled; fires only when the table count is ALSO short, so a genuinely discursive section is not punished for being long.",
+      "repair": "MOVE the content into the table the section declares. The finding is not that the report is too long; it is that the length is in the wrong container.",
+      "not_the_repair": "Cutting the prose. Deleting words clears the ratio and loses the analysis; the content belongs in a table, not in the bin."
+    },
+    {
+      "id": "SHEET-EMITTED-WHOLE",
+      "gate": "GS-RPT-TABLE-DUMP",
+      "finding": "GSY-19",
+      "what": "A whole workbook sheet is pasted in where the Doc asks for the curated extract the section argues from — a 690-row Subcap_Scores or a 3,309-row Search_Log rendered entire.",
+      "measured": "Average words per table against the reference's average (~126 assessment / ~184 research); and, separately, any single table holding over 35% of all table content.",
+      "repair": "Curate. Render the rows the section's argument rests on and let the workbook carry the rest — the package ships the workbook alongside the report for exactly that reason.",
+      "not_the_repair": "Deleting the table. The section still owes its reader the figures it reasons from."
+    },
+    {
+      "id": "PARAGRAPH-IN-A-FACE-SLOT",
+      "gate": "CG-12",
+      "finding": "GSY-19",
+      "what": "A field that renders in a card face or a register row carries a paragraph. Measured live on this run's own ingest: 40 Tech_Register rows over a 160-character detection_basis budget.",
+      "measured": "The connector's own CG-12 face budgets, reported by get_run_progress as tech_register_detection_basis_over_budget.",
+      "repair": "MOVE the prose to the field built to hold it (dma_impact for a tech row), leaving one clause in the face slot.",
+      "not_the_repair": "Trimming the clause to fit. That loses the reasoning rather than relocating it."
+    },
+    {
+      "id": "DECLARED-INPUT-CARRIES-NO-ROWS",
+      "gate": "GS-RPT-TABLES",
+      "finding": "GSY-19",
+      "what": "A section declares a sheet as an input, the sheet is empty, so no table renders and the section silently loses the structure it was specified to have. The ingest reports the same defect from the other side as workbook_tabs_unread.",
+      "measured": "Per section: declared `inputs` that resolve to sheets with zero rows.",
+      "repair": "Populate the sheet, or remove the input from the section's spec so the gap is declared rather than silent. An empty declared input is the difference between 'the client has nothing here' and 'nobody wrote it down'.",
+      "not_the_repair": "Writing a paragraph that describes what the table would have said."
+    },
+    {
+      "id": "VENDOR-EQUALS-PRODUCT",
+      "gate": "CG-20",
+      "finding": "GSY-19",
+      "what": "A register row states the same string as both product and vendor, so one of the two is unstated and the row renders as a product nobody sells. Measured live on this run: 8 rows.",
+      "measured": "The connector's CG-20, reported by get_run_progress as tech_register_vendor_equals_product.",
+      "repair": "Name the company AND the thing it supplies. Where the product genuinely is not known, say so in the status and basis rather than repeating the vendor.",
+      "not_the_repair": "Leaving it, on the grounds that the workbook stated it. The workbook stating it is where the defect entered."
+    },
+    {
+      "id": "COVER-PAGE-IS-A-BARE-HEADING",
+      "gate": "GS-RPT-COVER",
+      "finding": "GSY-05",
+      "what": "The report opens with a plain Title heading and a few loose lines instead of the pinned Doc's cover: a boxed title carrying the entity, then a metadata grid stating the O2 identity strip (OVERALL MATURITY / SUB-VERTICAL / ASSESSMENT ID / ASSESSMENT DATE / EVIDENCE MODE / PREPARED BY). Measured 2026-09-07: the owner flagged the cover as off.",
+      "measured": "The tables before the first numbered section (a title box AND a metadata grid), and the grid carrying the labels the reference renders. Engine-owned: reports._cover_page resolves every value from the run.",
+      "repair": "The renderer builds the cover from the workbook; a writer never types it. If it is missing, the run rendered through an older engine — re-render.",
+      "not_the_repair": "Typing a title line and a date. The identity strip is a grid resolved from the run, not a sentence."
+    },
+    {
+      "id": "FRONT-MATTER-SKIPS-THE-BINDING",
+      "gate": "GS-RPT-FRONTMATTER",
+      "finding": "GSY-06",
+      "what": "The report jumps to section 1 without the two unnumbered sections the reference opens with: Contents, and Document Control and Catalogue Binding (the catalogue version, hash, structure counts and scope, every value resolved from the run).",
+      "measured": "The unnumbered Heading 1s before section 1, against the reference's measured front_matter_h1. Engine-owned: reports._front_matter.",
+      "repair": "Re-render through the current engine, which emits both. Nothing here is authored.",
+      "not_the_repair": "Adding a prose 'about this report' note. The binding is a resolved table, and Contents is a Word TOC field."
+    },
+    {
+      "id": "TABLES-PILED-INTO-ONE-SECTION",
+      "gate": "GS-RPT-SECTION-DISTRIBUTION",
+      "finding": "GSY-19",
+      "what": "The report clears the total-table floor by dumping tables into a few sections while others carry prose alone. Measured 2026-09-07: a delivered assessment held its tables in six sections and left five with none.",
+      "measured": "Per numbered section: tables rendered against a floor scaled from the reference's own count for that section (section_tables in gold_reference.json).",
+      "repair": "Give every section the tables its own argument rests on — the scorecard, the register, the cards, the rollup the pinned Doc names for it. The reference tabulates in every section, not only the easy ones.",
+      "not_the_repair": "Moving tables from a rich section to a thin one. Each section states its OWN data; borrowing another's is a grain violation."
+    },
+    {
+      "id": "TABLE-WITH-NO-COLUMN-THAT-VARIES",
+      "gate": "GS-RPT-DEGENERATE-TABLE",
+      "finding": "GSY-19",
+      "what": "A table whose only varying column is the label — every other column empty or one repeated word ('Field | STATED | ' for ten fields). It occupies the slot of a table while carrying nothing a reader can compare row to row. Measured 2026-09-07 (owner: 'a lot of placeholder ... where tables are, I see paragraphs').",
+      "measured": "Any rendered table of >= 3 data rows where, excluding the first column, every column is empty or constant.",
+      "repair": "Render the fields' own values — value, unit, as-of, evidence, confidence — the columns the Firmographics/register sheet already carries. If there is genuinely one fact, state it in a sentence, not a one-value grid.",
+      "not_the_repair": "Adding a status column ('STATED') to look like data. A column that reads the same on every row is not data."
+    },
+    {
+      "id": "FIELD-REGISTER-TYPED-AS-A-PARAGRAPH",
+      "gate": "GS-RPT-PROSE-DUMP",
+      "finding": "GSY-19",
+      "what": "A firmographic or field register written as a single semicolon-separated sentence: 'website X ([E-1], High); employees 265 ([E-1], Medium); assets $1.18B ([E-2], High); ...'. Measured 2026-09-07 on a delivered research §1.1 that carried nine such clauses; the reference carries none.",
+      "measured": "Short cited field-clauses (3-12 words, with a citation) per paragraph; four or more in one paragraph is a register typed as prose.",
+      "repair": "Move the fields into the table that owns them (Firmographics: Field | Value | Unit | As at | Evidence | Conf.). Keep the paragraph for what the figures MEAN — the interpretive read the reference opens each section with.",
+      "not_the_repair": "Breaking the sentence into bullet points. The fields belong in the sheet's own columns, and the prose belongs in argument."
+    }
+  ]
+}

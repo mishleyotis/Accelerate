@@ -71,7 +71,7 @@ def test_a_connector_tool_is_approved_without_a_human(tool):
 
 
 @pytest.mark.parametrize("tool", [
-    "Bash", "Write", "Edit", "Read", "WebFetch", "Task",
+    "Bash", "Write", "Edit", "Read", "Task",
     "mcp__Gmail__send_message",
     "mcp__Google_Drive__update_file",
     "mcp__github__create_pull_request",
@@ -81,6 +81,29 @@ def test_no_other_tool_is_ever_approved(tool):
     assert decision(AUTO, {"tool_name": tool}) is None, (
         f"{tool} drew a decision from a hook that must only speak for this "
         f"plugin's connector")
+
+
+# ── the built-in web tools ARE approved (AUD-0117) ──
+#
+# Owner, 2026-09-01: "still getting approval prompts" while sixteen research
+# producers ran. Root cause: this hook was wired only to `mcp__.*`, but the
+# producers' PRIMARY retrieval is the built-in WebSearch/WebFetch, which no
+# auto-approve hook matched and permissions.allow did not list — so each fell
+# through to a prompt. They are read-only web reads and must run headless.
+
+
+@pytest.mark.parametrize("tool", ["WebSearch", "WebFetch"])
+def test_the_builtin_web_tools_are_approved_without_a_human(tool):
+    assert decision(AUTO, {"tool_name": tool}) == "allow", (
+        f"{tool} must auto-approve — it is the research routine's primary "
+        f"read-only retrieval path and blocking it stops headless operation")
+
+
+def test_bash_and_write_are_still_not_web_approved():
+    """The web allowance is exactly WebSearch/WebFetch — not a blanket
+    built-in grant. Bash keeps its own deny hooks; Write/Edit are never web."""
+    for tool in ("Bash", "Write", "Edit"):
+        assert decision(AUTO, {"tool_name": tool}) is None, tool
 
 
 def test_a_lookalike_prefix_is_not_ours():
@@ -367,12 +390,16 @@ aac = _load_hook()
 #: A tool may only sit here because approving it would be WRONG, never because
 #: nobody got to it.
 _DELIBERATELY_PROMPTING = {
-    # Clay writes into the user's own workspace. Granted in the enrichment
-    # specialist's frontmatter, never actually called anywhere in its prose,
-    # so leaving the prompt costs no firing and auto-approving would hand a
-    # scheduled session a write nobody sanctioned.
-    "add-company-data-points": "writes to the user's Clay workspace",
-    "add-contact-data-points": "writes to the user's Clay workspace",
+    # add-company-data-points / add-contact-data-points were here until
+    # 2026-09-05 with the reason "writes to the user's Clay workspace". They are
+    # REQUIRED by the technographic scan and the enrichment rulebooks and were
+    # measured prompting a plain session, so — owner's decision — they moved to
+    # SANCTIONED_WORKSPACE_WRITES and are auto-approved by the hook
+    # (test_the_clay_data_point_writes_are_sanctioned proves it). The Clay
+    # writes that STAY refused are run_subroutine / run_subroutine_direct, a
+    # user-authored subroutine that can do anything.
+    "run_subroutine": "a user-authored workspace subroutine can do anything",
+    "run_subroutine_direct": "a user-authored workspace subroutine can do anything",
     # `slack_send_message` was here until 2026-08-30 with the reason "the
     # channel that would use it is specified and not built". The channel IS
     # built now — the assessment intake reads #deal-desk and replies in the
@@ -380,6 +407,13 @@ _DELIBERATELY_PROMPTING = {
     # discharged, and the tool moved to CONDITIONAL_TOOLS: allowed into that
     # one channel, still prompting everywhere else. Leaving it here would
     # have made this table say a thing that is no longer true.
+    #
+    # Cowork's shell tool (2026-09-04). Not blanket-approved by THIS hook on
+    # purpose: a shell command is approved or not by its CONTENT, and that
+    # decision is autoapprove_builtins.py's, which is registered against
+    # `mcp__workspace__bash` and applies the same grammar it applies to Bash.
+    # Approving the tool by name here would wave through `git push` in Cowork.
+    "bash": "Cowork's shell — decided command by command by autoapprove_builtins.py",
 }
 
 
@@ -398,7 +432,9 @@ def _is_allowed(full: str) -> bool:
         return full not in aac.GUARDED          # the connector's own tools
     if full in aac.QUALIFIED_TOOLS:
         return True
-    return full.rsplit("__", 1)[1] in aac.ENRICHMENT_TOOLS
+    suffix = full.rsplit("__", 1)[1]
+    return (suffix in aac.ENRICHMENT_TOOLS
+            or suffix in aac.SANCTIONED_WORKSPACE_WRITES)
 
 
 def test_every_mcp_tool_the_plugin_names_is_allowed_or_deliberately_not():
@@ -454,10 +490,15 @@ def test_the_qualified_list_never_carries_an_opaque_server_segment():
         assert t.startswith("mcp__") and t.count("__") >= 2, t
 
 
-def test_the_clay_writes_are_still_refused():
+def test_the_clay_data_point_writes_are_sanctioned_and_subroutines_are_not():
+    # Owner 2026-09-05: the two data-point writes are REQUIRED by the
+    # technographic scan and the enrichment rulebooks and must run headless, so
+    # they are approved by the plugin's own hook rather than a bootstrap wildcard.
     for t in ("mcp__Clay__add-company-data-points",
-              "mcp__Clay__add-contact-data-points",
-              "mcp__Clay__run_subroutine",
+              "mcp__Clay__add-contact-data-points"):
+        assert _is_allowed(t), t
+    # A workspace subroutine is user-authored and can do anything: still refused.
+    for t in ("mcp__Clay__run_subroutine",
               "mcp__Clay__run_subroutine_direct"):
         assert not _is_allowed(t), t
 
@@ -470,7 +511,15 @@ def test_the_guarded_pair_is_answered_by_its_own_hooks_not_left_prompting():
     pre = json.dumps(cfg["hooks"]["PreToolUse"])
     for tool, script in ((PREFIX + "submit_page_payload", "precheck_submit.py"),
                          (PREFIX + "promote_run", "precheck_promote.py")):
-        assert tool in pre, f"{tool} has no PreToolUse entry of its own"
+        # MATCHES rather than CONTAINS. The matchers became regexes on
+        # 2026-08-31 so the prechecks fire for the connector under its
+        # claude.ai server name too — `mcp__.*__submit_page_payload` no
+        # longer contains the literal tool name, and asserting containment
+        # would have failed the widening that closed the gap.
+        import re as _re
+        pats = [e.get("matcher") for e in json.loads(pre)
+                if e.get("matcher") and _re.fullmatch(str(e["matcher"]), tool)]
+        assert pats, f"{tool} has no PreToolUse entry of its own"
         assert script in pre, f"{script} is not wired for {tool}"
         assert (HOOKS / script).exists(), f"{script} is missing from the plugin"
 
@@ -694,3 +743,236 @@ def test_every_conditional_tool_states_why_and_what_it_is_scoped_to():
         assert rule["why"].strip(), tool
         assert rule["scope"].strip(), tool
         assert callable(rule["test"]), tool
+
+
+# ── the same connector under a different server name ──────────────────────
+#
+# OWNER, 2026-08-31: "I keep on getting requests to approve the get client
+# state tool." The plugin installs the DMA connector as
+# `mcp__plugin_dma-insights_connector__*`. A Routine attaches the SAME
+# server as a claude.ai connector, and its trigger record names it
+# `DMA-Insights` — so a trigger-fired session sees
+# `mcp__DMA-Insights__get_client_state`, which matched nothing here and
+# prompted. A scheduled container has nobody to answer.
+#
+# `audit_autoapprove.py --strict` reported PASS through all of it, because
+# it audits the names this hook already knows: a check that reads the config
+# it is checking can only ever confirm it.
+
+_ALT = "mcp__DMA-Insights__"
+
+
+def test_the_connector_is_approved_under_a_claude_ai_server_name():
+    for tool in ("get_client_state", "list_pending_runs", "get_evidence",
+                 "claim_run", "get_memory_digest"):
+        assert _decide(_ALT + tool) == "allow", tool
+
+
+def test_the_guarded_pair_still_prompts_under_any_server_name():
+    """Auto-approving these would wave a submit or a promote through with
+    no precheck at all if the precheck matcher did not fire for that server
+    segment. A prompt in a scheduled session STOPS the firing, which is the
+    safe direction for the two calls that write serving content."""
+    for tool in ("submit_page_payload", "promote_run"):
+        assert _decide(_ALT + tool) != "allow", tool
+        assert _decide(PREFIX + tool) != "allow", tool
+
+
+def test_the_precheck_hooks_fire_for_both_server_names():
+    """The other half of the same fix: widening the auto-approve without
+    widening the prechecks would move the guarded pair out from under its
+    own gate."""
+    import json as _json
+    import re as _re
+    hooks = _json.loads(
+        (HOOKS.parent.parent / "hooks" / "hooks.json").read_text())
+    matchers = [e.get("matcher") for lst in hooks["hooks"].values()
+                for e in lst if e.get("matcher")]
+    for suffix in ("submit_page_payload", "promote_run"):
+        pats = [m for m in matchers if m.endswith(suffix)]
+        assert pats, suffix
+        for m in pats:
+            for name in (PREFIX + suffix, _ALT + suffix):
+                assert _re.fullmatch(m, name), (m, name)
+
+
+def test_the_allowed_set_is_exactly_what_the_connector_serves():
+    """DERIVED, not typed. The 33 tool names are read out of
+    apps/mcp/server.py, so a tool added to the connector and forgotten here
+    fails this test rather than prompting in production."""
+    import ast
+    import pathlib as _pl
+    h = aac
+    server = (_pl.Path(__file__).resolve().parents[4]
+              / "apps" / "mcp" / "server.py")
+    if not server.is_file():                       # packaged install
+        import pytest as _pytest
+        _pytest.skip("apps/mcp/server.py is not in this tree")
+    tree = ast.parse(server.read_text())
+    served = {n.name for n in tree.body if isinstance(n, ast.FunctionDef)
+              and any(getattr(d, "attr", None) == "tool"
+                      or (isinstance(d, ast.Call)
+                          and getattr(d.func, "attr", "") == "tool")
+                      for d in n.decorator_list)}
+    assert served, "no @mcp.tool functions found — the parser is wrong"
+    assert h.DMA_TOOLS == served, (
+        f"only in the hook: {sorted(h.DMA_TOOLS - served)}; "
+        f"only in the connector: {sorted(served - h.DMA_TOOLS)}")
+
+
+# ── stress: server spelling resilience (AUD-0114, owner 2026-09-01) ──
+#
+# The owner kept being prompted for Google-Drive / Vibe-Prospecting: the tables
+# spell those servers with underscores, the live connector attaches under a
+# HYPHEN segment, and a full-name rule written one way missed the other. These
+# tests drive from SERVER_SURFACES itself so coverage cannot drift, and assert
+# every classified read approves under BOTH spellings while every write still
+# prompts under both.
+import importlib as _importlib
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "hooks"))
+_AAC = _importlib.import_module("autoapprove_connector")
+
+
+def _hyphen_server(tool: str) -> str:
+    parts = tool.split("__")
+    parts[1] = parts[1].replace("_", "-")
+    return "__".join(parts)
+
+
+@pytest.mark.parametrize("server", sorted(_AAC.SERVER_SURFACES))
+def test_classified_reads_approve_under_both_server_spellings(server):
+    for t in sorted(_AAC.SERVER_SURFACES[server]["read"]):
+        full = f"mcp__{server}__{t}"
+        if full in _AAC.CONDITIONAL_TOOLS:
+            continue
+        for name in (full, _hyphen_server(full)):
+            assert decision(AUTO, {"tool_name": name, "tool_input": {}}) == "allow", \
+                f"{name}: a classified read must auto-approve under either spelling"
+
+
+@pytest.mark.parametrize("server", sorted(_AAC.SERVER_SURFACES))
+def test_classified_writes_still_prompt_under_both_server_spellings(server):
+    for t in sorted(_AAC.SERVER_SURFACES[server]["withheld"]):
+        full = f"mcp__{server}__{t}"
+        for name in (full, _hyphen_server(full)):
+            assert decision(AUTO, {"tool_name": name, "tool_input": {}}) is None, \
+                f"{name}: a withheld write must NOT be auto-approved under any spelling"
+
+
+@pytest.mark.parametrize("tool", [
+    # every connector the owner named, plus the multi-word ones both ways
+    "mcp__Tavily__tavily_search", "mcp__Tavily__tavily_extract",
+    "mcp__Exa__web_search_exa", "mcp__Exa__web_fetch_exa",
+    "mcp__Clay__find-and-enrich-company", "mcp__Clay__get-task-context",
+    "mcp__Indeed__search_jobs", "mcp__Indeed__get_company_data",
+    "mcp__Vibe-Prospecting__enrich-business",
+    "mcp__Vibe_Prospecting__enrich-business",
+    "mcp__Google-Drive__search_files", "mcp__Google_Drive__search_files",
+    "mcp__Google-Drive__get_file_permissions",
+    "mcp__DMA-Insights__get_client_state",
+    "mcp__plugin_dma-insights_connector__get_client_state",
+])
+def test_the_connectors_the_owner_named_all_auto_approve(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
+        f"{tool} must auto-approve without a human — the routine runs headless"
+
+
+# ── the resilient default: new / renamed tools classified by verb ──
+#
+# Owner 2026-09-01: the hook must factor in tools nobody listed — new ones and
+# renamed ones — the moment they appear. A read verb approves; a write/send
+# verb prompts; an unrecognised verb prompts; explicit withholds win.
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__get_widgets", "mcp__BrandNewCo__list_accounts",
+    "mcp__Whatever__search_v2_results", "mcp__Exa__web_search_v3_exa",
+    "mcp__NewCo__retrieve_report", "mcp__NewCo__fetch_thing",
+    "mcp__NewCo__describe_dataset", "mcp__NewCo__lookup_entity",
+])
+def test_an_unlisted_read_tool_on_any_connector_auto_approves(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) == "allow", \
+        f"{tool}: a read verb must auto-approve without a rule change"
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__create_widget", "mcp__BrandNewCo__update_record",
+    "mcp__BrandNewCo__delete_thing", "mcp__BrandNewCo__send_email",
+    "mcp__BrandNewCo__export_data", "mcp__BrandNewCo__run_job",
+    "mcp__BrandNewCo__post_message", "mcp__BrandNewCo__share_folder",
+    "mcp__BrandNewCo__get_and_delete_record",   # WRITE wins over the read verb
+])
+def test_an_unlisted_write_tool_still_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) is None, \
+        f"{tool}: a write/send verb must still prompt"
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__BrandNewCo__frobnicate", "mcp__BrandNewCo__handshake",
+    "mcp__BrandNewCo__widgetize",
+])
+def test_an_unrecognised_verb_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {}}) is None, \
+        f"{tool}: a name with no read or write verb must prompt, not guess"
+
+
+def test_an_explicit_withhold_wins_over_a_read_looking_name():
+    # github resolve_review_thread is a WRITE the hook withholds; it must stay a
+    # prompt even though a naive reader might see "resolve" as harmless.
+    assert decision(AUTO, {"tool_name": "mcp__github__resolve_review_thread",
+                           "tool_input": {}}) is None
+
+
+@pytest.mark.parametrize("evil", [
+    {"tool_name": "mcp__x__y__z__weird", "tool_input": {}},
+    {"tool_name": "mcp__", "tool_input": None},
+    {"tool_name": "mcp__a__b", "tool_input": {"weird": "☃"}},
+    {"tool_name": "mcp__a__b__" + "x" * 5000},
+    {"tool_name": 12345},
+    {},
+])
+def test_the_hook_never_crashes_and_never_errors(evil):
+    # A hook that can exit non-zero is not resilient. Whatever valid JSON event
+    # arrives, it must exit 0 — a decision or silence, never an error.
+    r = run(AUTO, evil)
+    assert r.returncode == 0, f"hook errored on {evil!r}: {r.stderr}"
+
+
+# ── the third spelling: connectors Claude Code fetches from claude.ai itself ─
+#
+# Permissions reference, measured 2026-09-04 while chasing the Tavily and Exa
+# prompts the owner still saw on every surface: "Tools from connectors Claude
+# Code fetches itself appear as `mcp__claude_ai_<server>__<tool>`". A read
+# set written for `Google_Drive` must see through that prefix, and so must
+# the withheld set — or a Drive write under this spelling is judged by the
+# verb heuristic alone.
+
+@pytest.mark.parametrize("tool", [
+    "mcp__claude_ai_Tavily__tavily_search",
+    "mcp__claude_ai_Exa__web_search_exa",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google-Drive__read_file_content",
+    "mcp__claude_ai_Quartr__search",
+    "mcp__claude_ai_Clay__find-and-enrich-company",
+])
+def test_a_read_under_the_claude_ai_prefix_is_approved(tool):
+    assert decision(AUTO, {"tool_name": tool}) == "allow", tool
+
+
+@pytest.mark.parametrize("tool", [
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Slack__slack_send_message_draft",
+    "mcp__claude_ai_Clay__run_subroutine",
+])
+def test_a_write_under_the_claude_ai_prefix_still_prompts(tool):
+    assert decision(AUTO, {"tool_name": tool}) is None, tool
+
+
+def test_the_canonical_form_strips_the_claude_ai_prefix_only_on_the_server():
+    assert aac._canonical("mcp__claude_ai_Google-Drive__search_files") == \
+        "mcp__Google_Drive__search_files"
+    assert aac._canonical("mcp__Google_Drive__search_files") == \
+        "mcp__Google_Drive__search_files"
+    # a TOOL id that happens to contain the prefix is left alone
+    assert aac._canonical("mcp__X__claude_ai_thing") == "mcp__X__claude_ai_thing"

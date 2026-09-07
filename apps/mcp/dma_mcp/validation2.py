@@ -1893,6 +1893,31 @@ def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
     for i, r in enumerate(rows):
         pid = r.get("pillar_id") or r.get("pillar") or f"[{i}]"
         score, peer = _num(r.get("score")), _num(r.get("peer_median"))
+        delta_stated = _num(r.get("delta"))
+        if score is None and peer is not None and delta_stated is not None:
+            # The mirror of the delta branch below, and the hole this gate
+            # had: `score is None` used to skip every check, so a strip could
+            # serve four EMPTY BARS beside a peer tick and pass. Measured on
+            # Golden 1, 2026-09-02: all four pillars null while the workbook
+            # stated 2.40/2.11/2.25/2.25 twice over, the heatmap already
+            # served those same figures with their source cells, and the
+            # composite on this very section was their mean. Nothing was
+            # missing — the bar simply had no number to draw.
+            #
+            # A row that states a peer median AND a delta has the score in
+            # hand: it is the addition. Invariant 9 cuts both ways — a
+            # derived value with its operands present is computed, never
+            # left null.
+            out.append(_reason(
+                "CG-44", "scores", f"overview.scores.pillars[{i}].score",
+                f"{pid} leaves its score empty while stating a peer median "
+                f"({peer}) and a delta ({delta_stated:+.2f}). The score is "
+                f"the addition — it is {round(peer + delta_stated, 2)}. This "
+                f"renders as an EMPTY BAR beside a peer tick, which reads to "
+                f"a client as 'not assessed' for a pillar the run scored. "
+                f"Serve the figure; if the workbook truly states none at "
+                f"this grain, then the delta beside it cannot stand either."))
+            continue
         if score is None or peer is None:
             continue
         want = round(score - peer, 4)
@@ -2760,6 +2785,124 @@ def _check_customer_empty_state_prose(page, payload) -> list:
     return out[:6]
 
 
+# ── CG-51 · a run that holds a peer set argues the techstack against it ──
+#
+# The owner, reviewing a promoted run: "the tech stack does not enforce peer
+# comparison; even the narrative itself does not include this." Measured on
+# Golden 1: 56 register rows, ZERO carrying peer_deployments, and a techstack
+# narrative_thread that never compares the estate to a peer — yet the page
+# passed every gate. The T3 peer fields (dma_impact, peer_coverage,
+# peer_deployments) are declared OPTIONAL on the register row
+# (surface-map.md:86), so an estate with a full peer set on the workbook can
+# ship a peer-blind techstack page and nothing says a word. AG-04 only checks
+# a row that ALREADY carries peer_coverage, so a row with none is invisible to
+# it — present-but-optional-and-ungated, the same shape CG-44 fixed on the
+# overview strip.
+#
+# Fixed the same way CG-44 is: a CASCADE that is SILENT unless the run
+# demonstrably HOLDS a peer set — a peer with a score recorded for THIS run,
+# or a register row that already carries peer_deployments. When it does, the
+# page owes two things it was letting itself skip, and the owner named both:
+#
+#   1. STRUCTURED REACH — at least one register row carries a non-empty
+#      peer_deployments[]. Peer figures the run holds must reach the register
+#      a reader clicks into, not sit unrendered on the workbook.
+#   2. NARRATIVE REACH — the section narrative_thread speaks to peers at all
+#      (names a peer the run holds, or uses the word). A page that tabulates a
+#      peer comparison in its rows and never mentions it in its story is the
+#      second complaint exactly.
+#
+# It does NOT invent a peer set: with no recorded peer and no peer_deployments
+# anywhere, the run genuinely has nothing to compare against and the gate is
+# silent — an absence the workbook itself declares is not this gate's to
+# manufacture.
+_PEER_WORD = re.compile(r"\bpeers?\b|\bbenchmark", re.I)
+
+
+def _run_peer_names(conn, run_id) -> set:
+    """The peers this run has a recorded score for, normalised. Empty on any
+    read failure — a gate that cannot read its peer set must not block a run
+    on the strength of a set it never saw (the discipline _check_foreign_
+    entity_prose keeps)."""
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT DISTINCT peer_name FROM peer_scores WHERE run_id = %s",
+            (run_id,))
+        return {_norm_name(r[0]) for r in cur.fetchall() if r[0]}
+    except Exception:                                          # noqa: BLE001
+        return set()
+
+
+def _techstack_peer_findings(section, peer_names, has_recorded_peers) -> list:
+    """CG-51, the pure core: given the techstack section, the peer names the
+    run holds, and whether the run has ANY recorded peer, decide whether the
+    page argues the estate against its peers. No connection, so a unit test
+    drives it with payload dicts alone."""
+    if not isinstance(section, dict):
+        return []
+    items = section.get("items")
+    items = items if isinstance(items, list) else []
+
+    # peer_deployments on any row is itself proof the run holds peers,
+    # independent of the recorded set — and the peer names inside it enrich
+    # the narrative check.
+    rows_with_peers, payload_peer_names = [], set()
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        dep = it.get("peer_deployments")
+        if isinstance(dep, list) and dep:
+            rows_with_peers.append(it)
+            for d in dep:
+                if isinstance(d, dict) and isinstance(d.get("peer"), str):
+                    payload_peer_names.add(_norm_name(d["peer"]))
+
+    if not (has_recorded_peers or rows_with_peers):
+        return []
+
+    out = []
+    if not rows_with_peers:
+        held = f"{len(peer_names)} peer(s) with a recorded score" \
+            if peer_names else "peer figures the run holds"
+        out.append(_reason(
+            "CG-51", "techstack",
+            "techstack.techstack.items[].peer_deployments",
+            f"this run holds a peer set ({held}) and not one register row "
+            f"carries peer_deployments[] — the estate is never compared to "
+            f"the peers the workbook already measured. peer_deployments is "
+            f"declared optional on the row, which is exactly why a peer-blind "
+            f"register passed every other gate; put the comparison the run "
+            f"holds onto the rows it bears on, or state on the section why "
+            f"area-level peers do not reach this estate."))
+
+    thread = section.get("narrative_thread")
+    known = {n for n in (peer_names | payload_peer_names) if n}
+    if isinstance(thread, str) and thread.strip():
+        low = _norm_name(thread)
+        if not (any(n in low for n in known) or _PEER_WORD.search(thread)):
+            out.append(_reason(
+                "CG-51", "techstack", "techstack.techstack.narrative_thread",
+                "the run holds a peer set and the techstack narrative never "
+                "compares the estate to a peer — it names none of the peers "
+                "the run measured and does not use the word. A register that "
+                "carries peer figures under a story that ignores them is the "
+                "half-told page the owner named: the coverage argument has to "
+                "say where this estate sits relative to its peers, not only "
+                "tabulate them."))
+    return out
+
+
+def _check_techstack_peer_comparison(conn, run_id, page, payload) -> list:
+    if page != "techstack" or not isinstance(payload, dict):
+        return []
+    section = payload.get("techstack")
+    if not isinstance(section, dict):
+        return []
+    peer_names = _run_peer_names(conn, run_id) if conn is not None else set()
+    return _techstack_peer_findings(section, peer_names, bool(peer_names))
+
+
 #: The depth floors, and what each is a floor ON. Every one is already in the
 #: contract's own field docs; none had a reader until 2026-08-23.
 DEPTH_FLOORS = {
@@ -3430,6 +3573,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_values_fit_their_columns(page, payload))
     reasons.extend(_check_customer_empty_state_prose(page, payload))
     reasons.extend(_check_named_product_is_in_its_excerpt(
+        conn, run_id, page, payload))
+    reasons.extend(_check_techstack_peer_comparison(
         conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)

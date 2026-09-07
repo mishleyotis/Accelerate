@@ -197,6 +197,47 @@ paragraph.
 
 ---
 
+## Scoring tier — five agents
+
+Added 2026-09-03 after the owner reported reports being written before any
+score existed. They own column D of the research workbook under
+`engine.assessment`, which refuses every score that is not earned: the stage
+opens only on a run whose categories all pass the floors gate with synthesis
+required, a row is scored only after an independent challenge, a score never
+exceeds its evidence ceiling (T1/T2 5.0 · T3 4.0 · T4 2.5 · T5 2.0 · no
+evidence 2.0 · single source 3.0), and the rationale cites the row's own
+E-ids. The four producers run in parallel; the critic may not have scored the
+pillar it judges. The SCORING gate must be PASS before the assessment report
+producer may write.
+
+| Agent | Tier | Owns | Invoked by |
+|---|---|---|---|
+| `scoring-p1-producer` … `scoring-p4-producer` | scoring | one pillar's `engine.assessment score` rows, with the AI/data overlay | the driver (`engine.pipeline`), over `engine.brief scoring-batch`, after every category gate is PASS |
+| `scoring-critic` | scoring | the SCORING_CRITIC verdict per pillar, and the rollup headline | the driver, over `scoring-batch --critic`, after the scorers return; a FAIL re-dispatches the round |
+| `technographic-scanner` (second duty) | research | `Solution_Catalogue` and `Platform_Peer_Adoption` | the driver, over `scoring-batch --solutions` |
+
+---
+
+## How a dispatch carries its context — and who dispatches
+
+Added 2026-09-03, after the owner reported that nothing orchestrated the
+subagents; completed 2026-09-04 with the driver. No agent in this plugin is
+dispatched with a prompt somebody typed any more, and no stage is dispatched
+by prose: `engine.pipeline run` walks the fourteen stages in order and, at
+each, writes one bounded packet per lane (`engine.brief batch` for the
+sixteen researchers, `challenge-batch`, `scoring-batch [--critic|
+--solutions]`, `report-batch [--validator]`, `page-batch`, `prelim`) and
+dispatches them through `agent_run.py --batch --retries 1`. A category
+re-dispatched after a FAILED floors gate gets `--with-handback`: what its
+previous lane established (`engine.brief handback`, computed from the sheets,
+carrying `leads_for_other_categories`) and the gate's blocking terms; a
+category that PASSED is never dispatched again. Every packet is measured
+against `BRIEF_CHAR_CEILING`: unbounded context sharing is the token bleed
+under another name, and a page brief carries the PATH of the contract and the
+last verdict's reasons, never a payload byte. The `research-conductor` owns
+what the driver cannot: the binding preflight with a person, `engine.cli
+start`, and the PRELIM lane's narrative sections.
+
 ## The taxonomy on disk
 
 ```
@@ -211,6 +252,7 @@ agents/
     context/                context-surface-producer (router) + risk · sentiment · timeline
     insights/               insights-surface-producer (router) + cards · landscape
     techstack/              techstack-surface-producer (router) + register · layers
+  scoring/                  scoring-p1-producer … scoring-p4-producer · scoring-critic
   enrichment/               enrichment-planner · enrichment-web-specialist ·
                             enrichment-connector-specialist · enrichment-ledger-auditor
   checkers/                 finding-challenger · evidence-integrity-checker ·

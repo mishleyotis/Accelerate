@@ -65,6 +65,28 @@ from pathlib import Path
 # before the image path it would have found is ever tried. Exactly this killed
 # the api once (computed.py) and the mcp container twice (deploy 8 and 9). The
 # repo layout is optional; the image layout is not.
+# ── ONE Cloud SQL Connector, imported ────────────────────────────────
+# Per-connection `Connector()` is one Cloud SQL ADMIN API call per
+# connection; under NullPool that is one per checkout, and it produced a
+# 429 on sqladmin.googleapis.com/.../connectSettings on 2026-08-31.
+import sys as _sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in _sys.path:
+        _sys.path.insert(0, str(_cand))
+
+from cloudsql import connect as _cloudsql_connect  # noqa: E402
+
 def _shared_roots():
     here = Path(__file__).resolve()
     roots = [here.parent / "shared", here.parent.parent / "shared"]
@@ -361,17 +383,8 @@ def _connect():
     Cloud SQL connector with IAM auth on the private IP. No DB password exists
     in production (charter: IAM DB auth), so these cannot be one path.
     """
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        host = os.environ["LOCAL_DATABASE_URL"].split("@")[1].split(":")[0]
-        return pg8000.dbapi.connect(
-            user="dmai-worker@digital-maturity-assessor.iam",
-            password="local", host=host, port=5432, database="dma_insights")
-    from google.cloud.sql.connector import Connector
-    return Connector().connect(
-        os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-        user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-        enable_iam_auth=True, ip_type="PRIVATE")
+    return _cloudsql_connect(
+        local_user="dmai-worker@digital-maturity-assessor.iam")
 
 
 def main() -> int:
