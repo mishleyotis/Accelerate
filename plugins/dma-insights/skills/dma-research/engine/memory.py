@@ -230,10 +230,19 @@ def _consolidate_one(wb: RunWorkbook, e: dict, actor: str) -> str:
                 "by rung. Without it the synthesis-time absence obligations "
                 "have nothing to bind to.")
         have = str(row.get("Proxy_Log") or "").strip()
+        # STAGE, NEVER DECLARE. Measured 2026-09-03: this wrote
+        # Absence_Claimed=YES from a notebook line, so a cell with ZERO
+        # Search_Log rows read as a searched, declared absence to the
+        # worklist, the handoff and the scorer. The ladder text is kept for
+        # `engine.cli absence` to bind to; the flag is that command's alone,
+        # after its volley, register and enrichment checks.
         wb.set_scoring(sub, {
-            "Proxy_Log": (have + "\n" if have else "") + ladder,
-            "Absence_Claimed": "YES"})
-        return "absence -> Proxy_Log"
+            "Proxy_Log": (have + "\n" if have else "") + ladder})
+        L.record_provenance(
+            wb, sub, "enrichment", actor,
+            "absence note staged from the notebook into Proxy_Log; NOT "
+            "declared — `engine.cli absence` closes the cell")
+        return "absence -> Proxy_Log (staged, undeclared)"
     L.record_provenance(wb, sub, "enrichment", actor,
                         f"note: {(f.get('claim') or f.get('text') or '')[:160]}")
     return "note -> Provenance"

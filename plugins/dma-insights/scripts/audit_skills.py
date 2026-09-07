@@ -197,7 +197,12 @@ def help_audit():
                 # Reported, counted, and not fatal; a first-party import that
                 # fails still is, because that one fails everywhere.
                 m = _MISSING_MODULE.search(out) or _PIP_HINT.search(out)
-                if m and not _is_first_party(m.group(1)):
+                if os.path.basename(p) in RETIRED_WRITERS and "REFUSED" in out \
+                        and "retired" in out.lower():
+                    # A RETIRED writer refusing (and naming the engine) is
+                    # the behaviour the retirement tests pin, not breakage.
+                    kind = "retired"
+                elif m and not _is_first_party(m.group(1)):
                     kind, missing = "env", m.group(1)
                 else:
                     kind = "fail"
@@ -272,6 +277,34 @@ def refs_audit():
     return broken, runtime
 
 
+#: Scripts that BUILT or validated a second workbook beside the run and were
+#: retired on 2026-09-03 (they refuse and name the engine). A SKILL.md line
+#: that names one as a step — without saying it is retired or that it
+#: refuses — is an instruction to go around the pipeline, and the "workbook
+#: defaults to the wrong structure every run" defect in prose form.
+RETIRED_WRITERS = ("populate_workbook.py", "validate_workbook.py",
+                   "assessment_runner.py")
+
+
+def retired_writers_audit(skills_root=None):
+    """Every SKILL.md line that names a retired writer as if it were live."""
+    root = skills_root or ROOT
+    out = []
+    for dirpath, _dirs, files in os.walk(root):
+        for f in files:
+            if f != "SKILL.md":
+                continue
+            path = os.path.join(dirpath, f)
+            with open(path, encoding="utf-8") as fh:
+                for n, line in enumerate(fh, 1):
+                    low = line.lower()
+                    if any(w in line for w in RETIRED_WRITERS) \
+                            and "retired" not in low and "refuse" not in low:
+                        out.append({"path": os.path.relpath(path, root),
+                                    "line": n, "text": line.strip()[:120]})
+    return out
+
+
 def main(argv=None) -> int:
     global ROOT, PLUGIN_ROOT, REPO_ROOT, SKILLS
     ap = argparse.ArgumentParser(
@@ -290,11 +323,15 @@ def main(argv=None) -> int:
     SKILLS = _discover_skills(ROOT)
     h = help_audit()
     broken, runtime = refs_audit()
+    retired = retired_writers_audit()
     fails = [x for x in h if x["kind"] == "fail"]
     env = [x for x in h if x["kind"] == "env"]
+    retired_scripts = [x["path"] for x in h if x["kind"] == "retired"]
     print(json.dumps({
-        "scripts_total": len(h), "scripts_ok": len(h) - len(fails) - len(env),
+        "scripts_total": len(h),
+        "scripts_ok": len(h) - len(fails) - len(env) - len(retired_scripts),
         "scripts_fail": len(fails), "fails": fails,
+        "scripts_retired": retired_scripts,
         "scripts_env": len(env),
         "env_modules": sorted({x["missing"] for x in env}),
         "broken_refs_total": len(broken), "broken_refs": broken,
@@ -302,6 +339,7 @@ def main(argv=None) -> int:
         "runtime_paths_total": len(runtime),
         "runtime_by_skill": {s: sum(1 for x in runtime if x["skill"] == s)
                              for s in SKILLS},
+        "retired_writer_refs": retired,
     }, indent=1))
 
     # THE EXIT CODE. Without it this script printed a defect list forever and
@@ -314,6 +352,14 @@ def main(argv=None) -> int:
     if fails:
         print(f"audit_skills: {len(fails)} script(s) fail --help: "
               f"{', '.join(x['path'] for x in fails[:5])}", file=sys.stderr)
+        return 1
+    if retired:
+        print(f"audit_skills: {len(retired)} SKILL.md line(s) route an agent to a "
+              f"retired writer as if it were live: "
+              + "; ".join(f"{x['path']}:{x['line']}" for x in retired[:5])
+              + " — the workbook has ONE writer (the engine); say 'retired' "
+                "and name the engine command, or delete the line.",
+              file=sys.stderr)
         return 1
     if len(broken) > args.max_broken:
         print(f"audit_skills: {len(broken)} broken references, ceiling "

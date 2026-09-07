@@ -370,9 +370,28 @@ jobs:
           # ^SKIPPED matched nothing, every time. The build that overran the
           # ceiling printed the header and then no reasons, which is how a
           # diagnostic fails: not by being absent, by being empty.
+          # packages/shared/tests/ joined this list on 2026-09-01. It holds
+          # one file — the guard that every service takes its Cloud SQL
+          # Connector from packages/shared/cloudsql.py — and no pytest
+          # invocation in this workflow had ever collected it, so the rule was
+          # enforced only where someone happened to run it by hand. It also
+          # carried an allowlist excusing apps/api/dma_api/db.py; that file's
+          # Connector defaulted to a background refresh, which a CPU-throttled
+          # Cloud Run instance cannot advance, and dmai-api answered every
+          # database-backed route with a 504 through the afternoon of
+          # 2026-09-01 with the suite green. A check CI cannot see is not a
+          # check.
+          # `tests/skills/` and `tests/acceptance/` moved to their own job
+          # on 2026-09-03. The research-engine suite alone runs ~24 minutes
+          # serially against a 25-minute clock, and the merge of #27 (34 new
+          # tests) tipped it: four jobs green, this one CANCELLED at the
+          # timeout on the default branch. Splitting it is the fix rather
+          # than a bigger number — the two halves now run in parallel, and
+          # the engine half runs under xdist, so total wall clock FELL.
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
+                 packages/shared/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 tests/skills/ infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
+                 infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
           # Ceiling raised 11 -> 12 on 2026-08-22 for exactly one test:
           # test_evidence_verbatim.py::test_the_real_package_yields_real_excerpts,
@@ -419,6 +438,90 @@ jobs:
                  /tmp/pytest.txt | tail -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # THE RESEARCH ENGINE AND THE ACCEPTANCE SUITE, on their own clock.
+  #
+  # Carved out of the unit-test job on 2026-09-03 for a measured reason: the
+  # engine suite is 503 tests that walk real .xlsx workbooks through
+  # openpyxl, ~24 minutes serially, and it shared a 25-minute clock with
+  # every other Python suite in the repo. That is not a suite that is too
+  # slow, it is a suite in the wrong job: nothing in it needs Postgres, and
+  # every test writes into its own tmp_path, so it parallelises cleanly.
+  # `--dist loadfile` keeps a module's tests on one worker, which is what
+  # the module-scoped fixtures (the rendered-report ones) need.
+  #
+  # tests/acceptance/ rides here rather than in the unit job because it is
+  # the same substrate and the same cost profile — and because a suite CI
+  # does not collect is not a check. It was written on 2026-09-03 from the
+  # owner's own reported issues; it must run on every push, or it decays
+  # into documentation.
+  research-engine-tests:
+    name: Research engine + acceptance suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      # The same set the unit job installs, plus xdist. `python-docx` is a
+      # COLLECTION-time import in three of these modules, so a missing one
+      # aborts the run rather than skipping a test; `pypdf` and the worker's
+      # own deps are here because tests/skills reaches into dma_worker for
+      # the parser contracts it asserts against.
+      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx
+      - name: Engine and acceptance, in parallel, and a suite that skips silently fails
+        run: |
+          set -o pipefail
+          python -m pytest tests/skills/ tests/acceptance/ \
+                 -q -rfs -p no:cacheprovider -n auto --dist loadfile \
+                 2>&1 | tee /tmp/engine-pytest.txt
+          n=$(grep -oE '[0-9]+ skipped' /tmp/engine-pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          # Measured 2026-09-03 on this runner's shape: the skips are the
+          # Drive-identity and network-gated ones. Same ratchet as the unit
+          # job — the answer to a skip is almost never a bigger number.
+          echo "skipped: ${n:-0} (ceiling 8)"
+          if [ "${n:-0}" -gt 8 ]; then
+            echo "--- the reasons, most common first ---"
+            grep '^SKIPPED' /tmp/engine-pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
+            exit 1
+          fi
+      - name: Report the result where the check can show it
+        if: always()
+        run: |
+          {
+            echo '### Research engine + acceptance'
+            echo '```'
+            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/engine-pytest.txt | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # THE WALKS. The unit and acceptance suites pin every refusal; these shell
+  # the REAL command line in the order a run meets it — start, PRELIM, the
+  # gates, the stage flip, the second run that supersedes, and the driver
+  # (`engine.pipeline run --dispatcher stub`) end to end with chaos: a lane
+  # that produces nothing twice, an ingest that never arrives, a page verdict
+  # FAIL, a wall-clock stop, a refused promote, a v6 workbook in flight.
+  # Until 2026-09-04 four stress_*.py scripts existed and none ran in CI.
+  # The toolkit-dependent walk (stress_research_pipeline.py, real pillar
+  # toolkits from Drive) stays manual and is documented as such.
+  research-walks:
+    name: Research walks (lifecycle, stage, pipeline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q openpyxl python-docx pypdf httpx pg8000
+      - name: Lifecycle walk
+        run: python plugins/dma-insights/scripts/stress_run_lifecycle.py
+      - name: Stage and supersede walk
+        run: python plugins/dma-insights/scripts/stress_stage_and_supersede.py
+      - name: Pipeline walk (stub dispatcher, with chaos)
+        run: python plugins/dma-insights/scripts/stress_pipeline_stub.py
 
   # The frontend has its own suite (node's built-in runner, no framework) and
   # it too had never run here. It is the only place the COMPILED bundle is

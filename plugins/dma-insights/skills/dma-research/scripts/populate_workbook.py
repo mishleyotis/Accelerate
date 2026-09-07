@@ -17,13 +17,16 @@ import os
 import sys
 from datetime import datetime
 
+# The refusal must not depend on the environment (2026-09-04): a retired
+# writer that dies on a missing import reads as a crash rather than as the
+# refusal it is. The legacy body below is unreachable, so None is enough.
 try:
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
-except ImportError:
-    print("ERROR: openpyxl not installed. Run: pip install openpyxl --break-system-packages")
-    sys.exit(1)
+except ImportError:                                  # pragma: no cover
+    openpyxl = None
+    Font = PatternFill = Alignment = Border = Side = get_column_letter = None
 
 
 # Zennify brand colors
@@ -262,7 +265,30 @@ def create_skeleton_sheets(wb, entity_name, subvertical, styles):
     ws.cell(row=1, column=1, value='— Populated by dma-assessment skill —')
 
 
+RETIRED = """REFUSED: populate_workbook.py is retired (2026-09-03). The scoring workbook has
+ONE writer — the research engine — and this script built a SECOND, 10-sheet
+workbook beside it from a JSON plane the engine never wrote, which is the
+"workbook defaults to the wrong structure every run" defect (owner issue 3;
+goeasy GSY-15/21). Use the engine:
+
+    python3 -m engine.cli start    --run R --root ROOT --entity … --entity-id … \\
+                                   --reference-date … --preflight preflight.json
+    python3 -m engine.cli evidence --run R --root ROOT --subcap P1C1.1.1 …
+    python3 -m engine.cli synthesise / absence / gate …
+
+The workbook it creates IS the pinned template's shape (engine/contract.py,
+40 sheets, SubCap_Name seeded from the catalogue), formatted, validated and
+bound to the report templates. Nothing else may write it.
+"""
+
+
 def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():           # kept for reference; unreachable
     parser = argparse.ArgumentParser(description='Populate DMA Research Workbook')
     parser.add_argument('evidence_index', help='Path to evidence_index.json')
     parser.add_argument('diagnostic_questions', help='Path to diagnostic_questions.json')
@@ -322,4 +348,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys as _sys
+    _sys.exit(main())
