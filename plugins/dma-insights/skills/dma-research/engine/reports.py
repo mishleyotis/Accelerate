@@ -168,6 +168,105 @@ _TABLE_TITLES: dict[str, tuple[str, tuple[str, ...] | None]] = {
 #: they are the section's own prose source or a per-cell working area.
 _NO_TABLE = frozenset({"Report_Narrative", "Search_Log"})
 
+#: caps_applied / Caps_Applied values meaning "no cap fired" — everything
+#: else is a REAL cap, worth a reader's attention.
+_NO_CAP = {"", "none", "none applied", "no cap", "n/a", "-"}
+
+#: A table CELL is a face-slot, not a paragraph (the anti-pattern this same
+#: run's intake flagged as CG-12 on `Tech_Register.Detection_Basis`: a
+#: rationale sentence where a clause belongs). A declared-sheet table renders
+#: the workbook's OWN columns, so a verbose column (`Peer_Basis`,
+#: `Detection_Basis`) is trimmed at render time to what a cell can carry —
+#: the full sentence stays in the workbook, which the report cites by ID.
+_CELL_LIMIT = 160
+
+
+def _trim_cell(v):
+    s = "" if v is None else str(v)
+    if len(s) <= _CELL_LIMIT:
+        return v
+    cut = s[:_CELL_LIMIT].rsplit(" ", 1)[0] or s[:_CELL_LIMIT]
+    return cut + "…"
+
+
+def _score_key(r: dict) -> float:
+    try:
+        return float(r.get("score"))
+    except (TypeError, ValueError):
+        return 99.0
+
+
+def _has_no_evidence(r: dict) -> bool:
+    v = str(r.get("evidence_ids") or "").strip().upper()
+    return not v or v == "NO_EVIDENCE" or v.split(",")[0].strip() == "NO_EVIDENCE"
+
+
+def _is_capped(r: dict, field: str = "caps_applied") -> bool:
+    return str(r.get(field) or "").strip().lower() not in _NO_CAP
+
+
+#: A whole 690-row subcap sheet dumped into a section is not a table a reader
+#: can argue with — it is the workbook, pasted (GS-RPT-TABLE-DUMP, measured
+#: 2026-09-06: `Subcap_Scores`/`Caps_Applied_Log` declared as an input on six
+#: assessment sections rendered the SAME 690-row sheet six times, averaging
+#: 18x the reference's per-table words). Each of those sections has its own
+#: argument, and each argument needs a DIFFERENT curated slice of the same
+#: sheet — not the sheet. Keyed by (sheet name, section id); a pair with no
+#: entry here falls through to the section's declared columns, unfiltered
+#: (every OTHER declared sheet is already a legitimate, sized register).
+def _curated_big_sheet(name: str, sec_id: str, rows: list[dict]):
+    """Returns (title, cols, table_rows) to REPLACE the sheet dump for this
+    (sheet, section), "DROP" to omit the table entirely, or None to render
+    the sheet's own declared columns unfiltered (the pre-existing behaviour)."""
+    cols = ("subcap_id", "subcap_name", "category", "score", "confidence",
+            "evidence_ceiling", "caps_applied")
+    if name == "Subcap_Scores":
+        if sec_id == "1":            # Executive Summary — the gaps that
+            gaps = sorted(rows, key=_score_key)[:12]           # ground the headline
+            return ("Primary gaps — lowest-scoring subcapabilities (top 12)",
+                    cols, [[r.get(c) for c in cols] for r in gaps])
+        if sec_id == "3":             # Issue Impact and Cap Analysis
+            capped = [r for r in rows if _is_capped(r)]
+            return ("Subcapabilities with a cap applied", cols,
+                    [[r.get(c) for c in cols] for r in capped])
+        if sec_id == "5":             # Pillar Deep Dives — worst 5 per pillar
+            gaps = []
+            for p in ("P1", "P2", "P3", "P4"):
+                pillar_rows = [r for r in rows
+                              if str(r.get("subcap_id") or "").startswith(p)]
+                gaps += sorted(pillar_rows, key=_score_key)[:5]
+            return ("Primary gaps by pillar — lowest-scoring subcapabilities",
+                    cols, [[r.get(c) for c in cols] for r in gaps])
+        if sec_id == "8":              # Recommendations — grounded by its own
+            return "DROP"               # Recommendations/Category tables already
+        if sec_id == "10":             # Data Gaps and Confidence
+            gaps = [r for r in rows if _has_no_evidence(r)]
+            return ("Subcapabilities without resolved evidence", cols,
+                    [[r.get(c) for c in cols] for r in gaps])
+        if sec_id == "11":             # Workbook Traceability — a rollup, not
+            by_cat: dict[str, list[int]] = {}          # the sheet re-typed
+            for r in rows:
+                cat = str(r.get("category") or "")
+                slot = by_cat.setdefault(cat, [0, 0])
+                slot[0] += 1
+                if not _has_no_evidence(r):
+                    slot[1] += 1
+            rc = ["category", "subcaps", "evidence_resolved", "unresolved",
+                  "resolution_pct"]
+            out_rows = []
+            for cat in sorted(by_cat):
+                total, resolved = by_cat[cat]
+                pct = round(100 * resolved / total, 1) if total else 0.0
+                out_rows.append([cat, total, resolved, total - resolved, pct])
+            return "Evidence resolution by category", rc, out_rows
+    if name == "Caps_Applied_Log" and sec_id == "3":
+        capped = [r for r in rows if _is_capped(r, "caps_applied")]
+        c2 = ("subcap_id", "category", "final_score", "evidence_ceiling",
+              "caps_applied")
+        return ("Cap application log — capped subcapabilities", c2,
+                [[r.get(c) for c in c2] for r in capped])
+    return None
+
 
 def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> list[dict]:
     """The workbook-derived tables a section carries.
@@ -177,7 +276,9 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
     input renders ONCE; the evidence register renders as "Evidence cited in
     this section" (the rows this section actually cites) rather than the
     whole register per section; a pillar card's score table is filtered to
-    its pillar; the financial trajectory is pivoted wide with its CAGR."""
+    its pillar; the financial trajectory is pivoted wide with its CAGR; a
+    subcap-level sheet big enough to be the workbook itself is curated to the
+    slice THIS section argues from (`_curated_big_sheet`)."""
     out = []
     for name in sec.inputs:
         if name in _NO_TABLE or name == "Evidence_Detail" or name not in C.SHEETS:
@@ -191,6 +292,14 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
         if name == "Financial_Trends":
             out.append(_financial_table(rows))
             continue
+        if name in ("Subcap_Scores", "Caps_Applied_Log"):
+            curated = _curated_big_sheet(name, str(sec.id), rows)
+            if curated == "DROP":
+                continue
+            if curated is not None:
+                title, cols, table_rows = curated
+                out.append(_table(title, list(cols), table_rows))
+                continue
         title, cols = _TABLE_TITLES.get(name, (name.replace("_", " "), None))
         cols = list(cols or C.SHEETS[name])
         if name == "Subcap_Scores" and card and re.fullmatch(r"P[1-4]", card):
@@ -199,7 +308,7 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
             title = f"{title} — {card}"
         if name == "Search_Log":
             title = f"Searches run ({len(rows)})"
-        out.append(_table(title, cols, [[r.get(c) for c in cols] for r in rows]))
+        out.append(_table(title, cols, [[_trim_cell(r.get(c)) for c in cols] for r in rows]))
     return out
 
 
