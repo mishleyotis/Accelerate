@@ -294,14 +294,39 @@ grant records as not-run — never invented technographics (MEM-0082).
 
 ## Dispatch mode and where the connectors actually live
 
-The claude.ai connector tools exist ONLY in the top trigger-fired session —
-headless children dispatched via `scripts/agent_run.py` (the fallback for
-sessions without an Agent tool) do not inherit them. The rule that keeps
-enrichment honest across that boundary lives in
-`skills/dma-surface-production/05-lifecycle/routing.md` § Dispatch mode:
-children emit `search_requests`, the top session runs them through the real
-connectors and re-invokes. The dma-insights connector itself reaches every
-layer (static /mcp + header token), children included.
+The claude.ai connector tools are attached to the top session. A headless
+child dispatched via `scripts/agent_run.py` is pre-approved for every
+connector namespace (`agent_run.ALLOWED`) and the agent manifests declare the
+tools, but binding is the harness's and a child can still find them absent —
+which is why the rule that keeps enrichment honest across that boundary
+(`skills/dma-surface-production/05-lifecycle/routing.md` § Dispatch mode) is:
+try the connector first, log it with the tool that ran it, and where it is
+refused emit `search_requests` rather than fabricating or falling back to
+WebSearch. The dma-insights connector itself reaches every layer (static /mcp
++ header token), children included.
+
+**The relay is code, not prose (MEM-0333, closed 2026-09-07).** The 2026-08-28
+headless audit measured that nothing read a lane's `search_requests`; the
+owner's live runs then showed categories passing their floors gate on bare
+WebSearch. `engine.relay` (`skills/dma-research/engine/relay.py`) now runs
+inside every research round of `engine.pipeline`:
+
+| verb | what it does | where it lands |
+|---|---|---|
+| `harvest` | reads each lane's transcript (`agent_logs/<lane>.jsonl` + `.out`) for `search_requests` — whole-JSON, fenced JSON or the key in prose — and queues each once | `07_qa/search_relay.jsonl` (append-only; id = hash of normalised query + cell) |
+| `drain-brief` | one `enrichment-web-specialist` lane per category with OPEN requests, briefed with the exact `engine.cli search --tool exa`, `engine.cli evidence` and `engine.relay record` commands | `briefs/relay_r<N>/`; dispatched as stage `RELAY` |
+| `reconcile` | closes OPEN requests SERVED/EMPTY from the Search_Log itself (an enrichment-tool row whose query matches) | the queue |
+| `heal` | for a category with NO connector search: which half is broken, measured — `grants` (a connector call refused in the transcript), `instruction` (never attempted), `logging` (called, logged as web_search), `manifest` (the lane declares none) | the ENRICHMENT gate row and the fresh lane's brief |
+
+The **ENRICHMENT gate** (per category, from the Search_Log's `Tool` column) is
+the third gate beside FLOORS and DISPATCH_VERIFY. Zero connector searches →
+FAIL, blocking while the driver's heal budget lasts (`--enrichment-heals`,
+default 1: one FRESH lane instance carrying the measured reason and the open
+requests), then the same FAIL written **non-blocking** — disclosed in
+Gate_Log and `07_qa/pipeline_state.json` (`enrichment_disclosed`), never a
+silent pass and never a wall when the harness bound no connector to a child.
+`python3 -m engine.relay enrichment --run R` prints the per-category counts;
+`python3 -m engine.relay state --run R` the queue.
 
 Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's

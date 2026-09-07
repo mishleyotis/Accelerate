@@ -743,6 +743,38 @@ def volley_status(wb: RunWorkbook, subcap: str,
                                        if t in C.ENRICHMENT_TOOLS)}
 
 
+def enrichment_status(wb: RunWorkbook, category: str,
+                      searches: list | None = None) -> dict:
+    """Connector usage for ONE category, read from the Search_Log's Tool
+    column — the only place the run records WHICH tool ran a search.
+
+    Owner, 2026-09-07: categories were passing their floors gate with every
+    search through bare web_search, the connector work left "aspirational".
+    `declare_absence` already refuses an empty cell no enrichment connector
+    was asked about; nothing measured the same thing for a category that
+    found evidence. This is that measurement — a count, not a verdict; the
+    driver's ENRICHMENT gate decides what a zero means and says so."""
+    cat = str(category or "").strip().upper()
+    rows = searches if searches is not None else wb.rows("Search_Log")
+    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip().upper().startswith(cat)]
+    tools: dict[str, int] = {}
+    cells_enriched: set[str] = set()
+    for r in mine:
+        t = str(r.get("Tool") or "").strip().lower()
+        if not t:
+            continue
+        tools[t] = tools.get(t, 0) + 1
+        if t in C.ENRICHMENT_TOOLS:
+            cells_enriched.add(str(r.get("SubCap_ID") or "").strip().upper())
+    enriched = sum(n for t, n in tools.items() if t in C.ENRICHMENT_TOOLS)
+    cells = [c for c in wb.selected_subcaps() if str(c).upper().startswith(cat)]
+    return {"category": cat, "searches": len(mine), "enrichment_searches": enriched,
+            "tools": sorted(tools), "tool_counts": tools,
+            "enrichment_tools": sorted(t for t in tools if t in C.ENRICHMENT_TOOLS),
+            "cells": len(cells), "cells_with_enrichment": len(cells_enriched & set(cells)),
+            "share": (round(enriched / len(mine), 3) if mine else None)}
+
+
 #: The rungs an absence ladder is climbed in, and the two that are always
 #: owed. `direct` is the entity itself; `proxy` is the template's own proxy
 #: class for the cell (leadership_title, regulator_filing, org_talent …).

@@ -437,6 +437,35 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 "a Search_Log row with no real search behind it satisfies the "
                 "floor with a row nobody ran, and is the fabrication this gate "
                 "exists to stop.")
+        en = last_gate(wb, "ENRICHMENT", category)
+        if en["verdict"] == "FAIL" and en["is_blocking"]:
+            # The self-heal (owner, 2026-09-07): a fresh instance carries the
+            # measured reason its predecessor had no connector search, the
+            # instruction that follows from it, and the requests the relay is
+            # still holding for this category — so the new lane starts from
+            # what the gate knows, not from the category.
+            from . import relay
+            packet["enrichment"] = {
+                "last_gate": en,
+                "status": L.enrichment_status(wb, category),
+            }
+            if run is not None:
+                plan = relay.heal_plan(run, wb, category)
+                packet["enrichment"]["heal"] = plan["heal"]
+                packet["enrichment"]["heal_reason"] = plan["reason"]
+                packet["enrichment"]["instruction"] = plan["instruction"]
+                packet["enrichment"]["open_search_requests"] = [
+                    {k: r.get(k) for k in ("id", "query", "falsifier", "facet", "subcap", "tool")}
+                    for r in relay.open_requests(run, category)[:12]]
+            packet["rules"].append(
+                "the ENRICHMENT gate refused your last run: every logged search "
+                "for this category ran through bare web_search/web_fetch. "
+                "`enrichment.instruction` says which half was broken and what "
+                "to do; `enrichment.open_search_requests` are queries a previous "
+                "instance could not run — run them through the connector and "
+                "log them with the tool that ran them (`--tool exa|tavily`), or "
+                "emit them again as `search_requests` if the connector is "
+                "refused. Never log a connector search you did not run.")
     packet["packet_chars"] = len(json.dumps(packet, default=str))
     packet["packet_ceiling"] = BRIEF_CHAR_CEILING
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and with_handback:
@@ -563,6 +592,33 @@ def as_markdown(packet: dict) -> str:
                 lines.append(f"- {k}: " + ", ".join(f"{a} {b}" for a, b in list(v.items())[:8]))
             else:
                 lines.append(f"- {k}: {v}")
+    if packet.get("dispatch_verify"):
+        dv = packet["dispatch_verify"]
+        lines += ["", "### The dispatch verifier refused your last run", ""]
+        for term in dv.get("blocking") or [dv.get("detail") or "a logged search the transcript does not witness"]:
+            lines.append(f"- {term}")
+    if packet.get("enrichment"):
+        en = packet["enrichment"]
+        g, st = en.get("last_gate") or {}, en.get("status") or {}
+        lines += ["", "### The ENRICHMENT gate refused your last run", "",
+                  f"- {st.get('searches')} search(es) logged for this category, "
+                  f"{st.get('enrichment_searches', 0)} through an enrichment connector "
+                  f"(tools seen: {', '.join(st.get('tools') or []) or 'none'})"]
+        if en.get("heal"):
+            lines.append(f"- what was broken, measured: **{en['heal']}** — {en.get('heal_reason')}")
+        if en.get("instruction"):
+            lines += ["", f"**Do this:** {en['instruction']}"]
+        reqs = en.get("open_search_requests") or []
+        if reqs:
+            lines += ["", "Queries a previous instance could not run — run each through the "
+                          "connector and log it with the tool that ran it, or emit it again "
+                          "as `search_requests` if the connector is refused:", ""]
+            for r in reqs:
+                lines.append(f"- `{r.get('id')}` · {r.get('facet') or 'primary'} · "
+                             f"{r.get('subcap') or 'no cell'} · {r.get('tool') or 'exa'}: {r.get('query')}"
+                             + (f" — falsifier: {r['falsifier']}" if r.get("falsifier") else ""))
+        for term in g.get("blocking") or []:
+            lines.append(f"- gate term: {term}")
     if packet.get("trimmed"):
         lines += ["", f"_{packet['trimmed']}_"]
     return "\n".join(lines) + "\n"
@@ -580,15 +636,22 @@ def last_gate(wb: RunWorkbook, gate: str, scope: str | None = None) -> dict:
         last = g
     if last is None:
         return {"gate": gate, "scope": scope, "verdict": "NOT_RUN", "blocking": [],
-                "detail": "", "at": None}
+                "detail": "", "at": None, "is_blocking": False}
     detail = str(last.get("Detail") or "")
     terms = []
     verdict = _clean(last.get("Verdict"))
     if verdict == "FAIL" and detail and detail.lower() != "all terms met":
         # floors_gate records `"; ".join(sorted(blocking))` — the terms, verbatim
         terms = [t.strip() for t in detail.split(";") if t.strip()]
+    # The Blocking column, as written by `ledger.append_gate`. A FAIL that is
+    # not blocking is a DISCLOSED gap (the ENRICHMENT gate after its heal
+    # budget): still a FAIL, still in the log, no longer a re-dispatch.
+    flag = last.get("Blocking")
+    is_blocking = (flag if isinstance(flag, bool)
+                   else str(flag or "").strip().lower() in ("true", "1", "yes"))
     return {"gate": gate, "scope": scope, "verdict": _clean(last.get("Verdict")),
-            "blocking": terms, "detail": detail, "at": last.get("Timestamp")}
+            "blocking": terms, "detail": detail, "at": last.get("Timestamp"),
+            "is_blocking": is_blocking}
 
 
 def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
@@ -645,7 +708,17 @@ def categories_needing_dispatch(wb: RunWorkbook) -> dict:
         # the floors gate passed but the verifier refused is re-dispatched,
         # because a fabricated search that satisfied the floor is not done.
         v = last_gate(wb, "DISPATCH_VERIFY", cat)
-        if g["verdict"] == "PASS" and v["verdict"] != "FAIL":
+        # The ENRICHMENT gate is the THIRD gate on the category (2026-09-07):
+        # the floors gate counts searches, the verifier witnesses them, and
+        # this one asks WHICH tool ran them. A category whose every search
+        # went through bare web_search is re-dispatched — a fresh lane
+        # instance, with the measured reason in its brief — while the gate
+        # row is BLOCKING; once the driver has spent its heal budget it
+        # writes the same FAIL non-blocking, and the gap is disclosed rather
+        # than worked again. `is_blocking` is that distinction.
+        en = last_gate(wb, "ENRICHMENT", cat)
+        en_fail = en["verdict"] == "FAIL" and en["is_blocking"]
+        if g["verdict"] == "PASS" and v["verdict"] != "FAIL" and not en_fail:
             out["passed"].append(cat)
         else:
             out["dispatch"].append(cat)
@@ -656,7 +729,23 @@ def categories_needing_dispatch(wb: RunWorkbook) -> dict:
                 reasons += [f"dispatch verifier: {t}" for t in
                             (v["blocking"] or ["a logged search the transcript "
                                                "does not witness"])]
+            if en_fail:
+                reasons += [f"enrichment: {t}" for t in
+                            (en["blocking"] or ["no enrichment connector was asked"])]
             out["reasons"][cat] = reasons or [f"floors gate {g['verdict']}"]
+    return out
+
+
+def enrichment_failing_only(wb: RunWorkbook, categories: list[str]) -> list[str]:
+    """Of `categories`, those the floors gate PASSED and the verifier did not
+    refuse — i.e. held back by the ENRICHMENT gate alone. The driver discloses
+    these at the end of its budget instead of refusing the stage over them."""
+    out = []
+    for cat in categories:
+        g = last_gate(wb, "FLOORS", cat)
+        v = last_gate(wb, "DISPATCH_VERIFY", cat)
+        if g["verdict"] == "PASS" and v["verdict"] != "FAIL":
+            out.append(cat)
     return out
 
 
