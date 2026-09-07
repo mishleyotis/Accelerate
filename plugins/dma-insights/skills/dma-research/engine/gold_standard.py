@@ -411,11 +411,58 @@ def _template_sections(template_path):
     return [h for h in h1 if re.match(r"^\d+\.", h.strip())]
 
 
+def _docx_shape(path) -> dict:
+    """The report's STRUCTURE, measured: how many tables, how big each is, and
+    how the words divide between prose and tables.
+
+    Separate from `_docx` because that returns one flattened string, and a
+    flattened string cannot tell a report that TABULATES its register from one
+    that describes it in paragraphs. Both carry the same words; only one is the
+    format the pinned Doc asks for. Measured 2026-09-06 on a delivered pair:
+    50 tables against the reference's 92, and 26 against 39, while paragraph
+    words ran 1.41x and 1.33x ABOVE the reference — prose had been written
+    where the template declares a table, and every volume floor passed.
+    """
+    from docx import Document
+
+    def w(text):                      # the same count the volume gate uses
+        return len(re.findall(r"\w+", text or ""))
+
+    d = Document(str(path))
+    para_words = sum(w(p.text) for p in d.paragraphs)
+    sizes = []
+    for t in d.tables:
+        sizes.append(sum(w(c.text) for r in t.rows for c in r.cells))
+    return {"tables": len(d.tables), "table_words": sum(sizes),
+            "table_sizes": sizes, "paragraph_words": para_words,
+            "largest_table": max(sizes) if sizes else 0}
+
+
 #: Golden 1's own depth, per subcap, as the fallback when gold_reference.json
-#: is unreadable: 47 / 115 distinct citations and 4,910 / 11,633 paragraph
-#: words over 690 subcaps.
-_GOLD_DEPTH_FALLBACK = {"research": (47, 4910), "assessment": (115, 11633)}
+#: is unreadable: distinct citations, paragraph words and TABLES over 690
+#: subcaps. The table count is the half of "depth" a word count cannot see.
+_GOLD_DEPTH_FALLBACK = {"research": (47, 4910, 39), "assessment": (115, 11633, 92)}
 _GOLD_SUBCAPS_FALLBACK = 690
+
+#: A report may run this far above the reference's PARAGRAPH words before the
+#: prose is doing a table's job. Set at 1.25x — the delivered pair that
+#: prompted this check ran 1.33x and 1.41x while carrying barely half the
+#: reference's tables, and the reference itself sits at 1.0 by construction.
+PROSE_INFLATION_LIMIT = 1.25
+
+#: One table may hold this share of all table words before it is a DATA DUMP
+#: rather than a curated table. Golden 1 averages ~126 words per table across
+#: 92 tables; the delivered assessment averaged ~2,313 across 50, because whole
+#: 690-row and 3,309-row sheets were emitted where the Doc asks for a curated
+#: extract. A reader cannot argue with a sheet.
+TABLE_DUMP_SHARE = 0.35
+
+#: How far the AVERAGE table may run above the reference's average before the
+#: report is emitting sheets rather than curating tables. The share test above
+#: cannot see this: a report that dumps SIX whole sheets has no single dominant
+#: table and is still six sheets. 4x leaves real headroom — the delivered
+#: assessment sat at 18x.
+TABLE_DUMP_FACTOR = 4.0
 
 
 def depth_floors(kind: str, subcaps: int | None = None) -> dict:
@@ -431,9 +478,10 @@ def depth_floors(kind: str, subcaps: int | None = None) -> dict:
         ref_sub = int(g["workbook"]["subcaps"])
         ref_c = int(g["reports"][kind]["distinct_e_ids"])
         ref_w = int(g["reports"][kind]["words_paragraphs"])
+        ref_t = int(g["reports"][kind]["tables"])
     except (KeyError, TypeError, ValueError):
         ref_sub = _GOLD_SUBCAPS_FALLBACK
-        ref_c, ref_w = _GOLD_DEPTH_FALLBACK[kind]
+        ref_c, ref_w, ref_t = _GOLD_DEPTH_FALLBACK[kind]
     n = int(subcaps) if subcaps else ref_sub
     scale = n / ref_sub
     # The WORD floor is the pinned Doc's own contract (the section LENGTH
@@ -450,8 +498,26 @@ def depth_floors(kind: str, subcaps: int | None = None) -> dict:
     except Exception:            # noqa: BLE001 — the gate must still run
         words = math.ceil(ref_w * scale)
     words = min(words, math.ceil(ref_w * scale))     # never above the reference
+    # The TABLE floor scales the same way and is never above the reference's
+    # own count, by the same discipline: a structure floor Golden 1 would fail
+    # is a floor nobody measured.
     return {"citations": max(1, math.ceil(ref_c * scale)), "words": max(1, words),
+            "tables": max(1, math.ceil(ref_t * scale)),
+            "reference_paragraph_words": math.ceil(ref_w * scale),
             "subcaps": n, "reference_subcaps": ref_sub}
+
+
+def _gold_avg_table_words(kind: str) -> int:
+    """Words per table in the reference — the number that separates a curated
+    table from a sheet emitted whole. Golden 1: ~126 (assessment), ~184
+    (research). A delivered assessment averaged ~2,247."""
+    kind = "assessment" if kind == "assessment" else "research"
+    try:
+        r = gold_reference()["reports"][kind]
+        table_words = int(r["words_including_tables"]) - int(r["words_paragraphs"])
+        return max(1, round(table_words / max(int(r["tables"]), 1)))
+    except (KeyError, TypeError, ValueError, ZeroDivisionError):
+        return 126 if kind == "assessment" else 184
 
 
 def report_findings(report_path, template_path=None, scores=None, kind="auto",
@@ -518,6 +584,55 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
         out.append(Finding("GS-RPT-LENGTH",
             f"{words} words (< {floors['words']}, the Golden 1 density over "
             f"{floors['subcaps']} subcaps)", "GSY-08"))
+
+    # ── STRUCTURE, not just volume (GSY-19) ──────────────────────────────
+    # Every check above counts words or ids, and a report can pass all of
+    # them while being the wrong SHAPE: prose written where the pinned Doc
+    # declares a table. Measured 2026-09-06 on a delivered pair — 50 tables
+    # against the reference's 92 and 26 against 39, with paragraph words
+    # 1.41x and 1.33x ABOVE the reference — and every volume floor passed,
+    # because more prose helps a word floor while being exactly the defect.
+    shape = _docx_shape(report_path)
+    if shape["tables"] < floors["tables"]:
+        out.append(Finding("GS-RPT-TABLES",
+            f"{shape['tables']} tables (< {floors['tables']}, the Golden 1 "
+            f"density over {floors['subcaps']} subcaps). The pinned Doc states "
+            f"its registers, rollups, caps and peer sets as TABLES; a section "
+            f"that describes one in a paragraph carries the same words and "
+            f"none of the structure a reader can scan or argue with", "GSY-19"))
+
+    ref_prose = floors["reference_paragraph_words"]
+    if (shape["tables"] < floors["tables"]
+            and shape["paragraph_words"] > ref_prose * PROSE_INFLATION_LIMIT):
+        out.append(Finding("GS-RPT-PROSE-FOR-STRUCTURE",
+            f"{shape['paragraph_words']} paragraph words against the "
+            f"reference's {ref_prose} ("
+            f"{shape['paragraph_words'] / max(ref_prose, 1):.2f}x) while "
+            f"carrying {shape['tables']} of {floors['tables']} tables — prose "
+            f"is standing in for structure. The repair is to MOVE the content "
+            f"into the table the section declares, not to cut the prose",
+            "GSY-19"))
+
+    # A DUMP is not caught by "one table dominates" — a report that emits six
+    # whole sheets has no single dominant table and is still six sheets. The
+    # measure that sees it is the AVERAGE table, against the reference's.
+    gold_avg = _gold_avg_table_words(kind)
+    avg = shape["table_words"] / shape["tables"] if shape["tables"] else 0
+    if avg > gold_avg * TABLE_DUMP_FACTOR:
+        out.append(Finding("GS-RPT-TABLE-DUMP",
+            f"tables average {avg:,.0f} words against the reference's "
+            f"{gold_avg} ({avg / gold_avg:.0f}x). A 690-row or 3,309-row sheet "
+            f"emitted whole is not a table a reader can argue with — it is the "
+            f"workbook, pasted. Curate the extract each section reasons from, "
+            f"and let the workbook carry the rest", "GSY-19"))
+    elif shape["table_words"] and shape["largest_table"] > shape["table_words"] * TABLE_DUMP_SHARE:
+        share = shape["largest_table"] / shape["table_words"]
+        out.append(Finding("GS-RPT-TABLE-DUMP",
+            f"one table holds {share:.0%} of all table content "
+            f"({shape['largest_table']:,} of {shape['table_words']:,} words). "
+            f"That is a sheet emitted whole, not a curated table: Golden 1 "
+            f"averages ~{gold_avg} words across {floors['tables']} tables. "
+            f"Curate the extract the section argues from", "GSY-19"))
 
     # GS-RPT-COVERAGE — the report discloses coverage, as the reference does.
     if "coverage" not in low and "unknown" not in low:

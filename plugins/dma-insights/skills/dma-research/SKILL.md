@@ -611,6 +611,36 @@ synthesis):** `[ERS: X.XX] [CLAIM_TYPE] [E-xxx:Fy] Source (Tier, Recency): Findi
 
 **Template is MANDATORY — NO deviation.**
 
+**0. BEFORE WRITING A WORD OF ANY SECTION — get that section's brief:**
+```bash
+python3 -m engine.authoring preflight --report client_research --run <R> --root <ROOT>
+python3 -m engine.authoring brief --report client_research --section <N> --run <R> --root <ROOT>
+```
+The brief names, for that section: the blocks it owes, **the sheets it must state
+as TABLES**, which of those sheets currently carry no rows (and so would render
+nothing), and the anti-patterns with the gate that refuses each.
+
+**The anti-pattern this step exists for.** Measured 2026-09-06: a delivered pair
+of reports passed every gate the build then had while carrying 50 tables against
+the reference's 92 and 26 against 39, with paragraph words 1.57x the reference —
+prose written where the template declares a table. *More prose raises a word
+count, so the defect was rewarded rather than caught.* The owner's report: "the 2
+reports lack depth … do not adhere to template requirements eg where tables are,
+I see paragraphs."
+
+**You can author a table** — a markdown pipe-table in a section Body renders as a
+real Word table (`reports._emit_authored_table`). Roughly half of Golden 1's 92
+tables are authored this way, not auto-rendered from sheets. A comparison, a
+scorecard, a ceiling set or a cap list belongs in one:
+```
+| Cell | Score | Peer median |
+|---|---|---|
+| P4C1.2.1 | 1.6 | 3.0 |
+```
+`python3 -m engine.gold_standard report <docx>` checks the table count and the
+prose/table split, not only words and citations. **More prose does not clear a
+structure finding** — move the content into the table, do not describe it.
+
 1. Read the `docx` skill FIRST (invoke it by name; do not hardcode a path to it)
 2. **Retrieve `DMA_Client_Profile_Research_Template.docx` from the project knowledge base.**
    This is the ONLY acceptable report structure. Do NOT create ad hoc layouts.

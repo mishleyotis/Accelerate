@@ -252,8 +252,110 @@ def _financial_table(rows: list[dict]) -> dict:
 _BLOCK_LINE = re.compile(r"^\s*##\s+(.+?)\s*$")
 
 
+#: A markdown pipe-table row, and its header separator (`|---|:--:|`).
+_PIPE_ROW = re.compile(r"^\s*\|.*\|\s*$")
+_PIPE_SEP = re.compile(r"^\s*\|[\s|:-]+\|\s*$")
+
+
+def _pipe_cells(line: str) -> list[str]:
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
+def _parse_pipe_table(lines: list[str]) -> dict | None:
+    """Buffered lines, as a table dict `{cols, rows}` — or None when the lines
+    are not a well-formed pipe table. ONE predicate, shared by the renderer
+    (`_emit_authored_table`, which writes what this returns) and the
+    pre-render structural check (`_predicted_shape`, which only counts it) —
+    so what will render and what the gate counts can never drift apart."""
+    rows = [l for l in lines if _PIPE_ROW.match(l)]
+    if len(rows) < 2 or len(rows) != len(lines):
+        return None
+    body = [r for r in rows if not _PIPE_SEP.match(r)]
+    if len(body) < 2:
+        return None
+    cols = _pipe_cells(body[0])
+    data = [_pipe_cells(r) for r in body[1:]]
+    width = len(cols)
+    if width < 2 or any(len(r) != width for r in data):
+        return None
+    return {"cols": cols, "rows": data}
+
+
+def _body_segments(body: str) -> list[list[str]]:
+    """Split a body into the same buffers `_emit_body`/`_emit_cards` flush one
+    at a time — on a `## ` block line, a blank line, or a transition into or
+    out of a run of pipe-table lines. The ONE grouping rule, shared by the
+    renderer and `_predicted_shape` below, so what a section will render and
+    what the pre-render gate counts can never say two different things."""
+    segs: list[list[str]] = []
+    buf: list[str] = []
+
+    def flush():
+        if buf:
+            segs.append(list(buf))
+            buf.clear()
+
+    for line in (body or "").splitlines():
+        if _BLOCK_LINE.match(line):
+            flush()
+        elif not line.strip():
+            flush()
+        elif _PIPE_ROW.match(line) and buf and not _PIPE_ROW.match(buf[-1]):
+            flush(); buf.append(line)
+        elif buf and _PIPE_ROW.match(buf[-1]) and not _PIPE_ROW.match(line):
+            flush(); buf.append(line)
+        else:
+            buf.append(line)
+    flush()
+    return segs
+
+
+def _predicted_shape(body: str) -> tuple[int, int]:
+    """(authored_tables, prose_words) this body WILL render as, before a
+    single paragraph is written — the pre-render half of the structural gate.
+
+    `prose_words` counts every paragraph python-docx will hold, headings
+    included — `_emit_body` promotes a `## ` line to `doc.add_heading`, which
+    IS a paragraph, and `gold_standard._docx_shape` counts `d.paragraphs`
+    without filtering by style. Excluding headings here would make the
+    pre-render count and the post-render gate disagree by exactly the
+    heading text, on every section that has one."""
+    tables = prose_words = 0
+    for line in (body or "").splitlines():
+        m = _BLOCK_LINE.match(line)
+        if m:
+            prose_words += _words(m.group(1))
+    for seg in _body_segments(body):
+        if _parse_pipe_table(seg) is not None:
+            tables += 1
+        else:
+            prose_words += _words("\n".join(seg))
+    return tables, prose_words
+
+
+def _emit_authored_table(doc, lines: list[str]) -> bool:
+    """Render buffered pipe-table lines as a REAL Word table. False when the
+    lines are not a table, so the caller falls back to a paragraph.
+
+    WHY THIS EXISTS. Until 2026-09-06 a section body rendered as paragraphs and
+    nothing else: the only tables in a report were the whole sheets
+    `_tables_for` emits per declared input. A writer who wanted to STATE a
+    comparison — the shape the pinned Doc asks for and the shape Golden 1
+    uses for roughly half its 92 tables — had no way to produce one, so the
+    content came out as prose. That is not a writer's lapse; it was the only
+    thing the renderer could do. Measured on the delivered pair: 50 tables
+    against the reference's 92, with paragraph words 1.57x the reference.
+    """
+    t = _parse_pipe_table(lines)
+    if t is None:
+        return False
+    _write_table(doc, t)
+    return True
+
+
 def _emit_body(doc, body: str) -> None:
-    """Write a section body, promoting its `## ` block lines to Heading2.
+    """Write a section body, promoting its `## ` block lines to Heading2 and
+    its authored pipe-tables to real tables.
 
     The blocks are not decoration. The app parses a report at Heading2
     grain (`report_parser`) and scopes its vectors from tokens inside those
@@ -267,7 +369,8 @@ def _emit_body(doc, body: str) -> None:
 
     def flush():
         if buf:
-            doc.add_paragraph("\n".join(buf).strip())
+            if not _emit_authored_table(doc, buf):
+                doc.add_paragraph("\n".join(buf).strip())
             buf.clear()
 
     for line in (body or "").splitlines():
@@ -277,6 +380,12 @@ def _emit_body(doc, body: str) -> None:
             doc.add_heading(m.group(1), level=2)
         elif not line.strip():
             flush()
+        elif _PIPE_ROW.match(line) and buf and not _PIPE_ROW.match(buf[-1]):
+            flush()                    # prose then a table: separate blocks
+            buf.append(line)
+        elif buf and _PIPE_ROW.match(buf[-1]) and not _PIPE_ROW.match(line):
+            flush()                    # table then prose: separate blocks
+            buf.append(line)
         else:
             buf.append(line)
     flush()
@@ -290,6 +399,36 @@ def _table(title, cols, rows) -> dict:
 
 
 # ── the checks that refuse ───────────────────────────────────────────────
+
+def _predicted_report_shape(curated: dict) -> dict:
+    """The whole report's structure, predicted from `curated` — BEFORE a
+    single paragraph is rendered: tables (declared-sheet + authored pipe-
+    tables), their sizes, and paragraph words. The pre-render counterpart to
+    `gold_standard._docx_shape`, which measures the same four numbers from an
+    actual rendered .docx; the two are proven to agree (`_predicted_shape`'s
+    own tests) because both walk the body with `_body_segments`."""
+    tables = 0
+    table_sizes: list[int] = []
+    paragraph_words = 0
+    for b in curated["blocks"]:
+        tables += len(b["tables"])                       # whole-sheet tables
+        table_sizes.extend(t["words"] for t in b["tables"])
+        for line in (b["body"] or "").splitlines():       # authored tables
+            m = _BLOCK_LINE.match(line)
+            if m:
+                paragraph_words += _words(m.group(1))     # a heading IS a paragraph
+        for seg in _body_segments(b["body"]):
+            t = _parse_pipe_table(seg)
+            if t is None:
+                paragraph_words += _words("\n".join(seg))
+                continue
+            tables += 1
+            table_sizes.append(_words(" ".join(
+                c for r in ([t["cols"]] + t["rows"]) for c in r)))
+    return {"tables": tables, "table_words": sum(table_sizes),
+            "paragraph_words": paragraph_words,
+            "largest_table": max(table_sizes) if table_sizes else 0}
+
 
 def check(wb: RunWorkbook, curated: dict) -> list[str]:
     spec = curated["spec"]
@@ -372,6 +511,56 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
             f"whole report: {len(distinct)} distinct citations against a floor "
             f"of {floor} (Golden 1 density × {len(wb.selected_subcaps())} "
             f"subcaps). Cite the evidence base, do not summarise it.")
+
+    # STRUCTURE, before a single paragraph is rendered (GSY-19). A report can
+    # pass every check above and still be the wrong SHAPE: prose written
+    # where the template declares a table. Measured 2026-09-06: a delivered
+    # pair carried 50/92 and 26/39 tables against the Golden 1 reference while
+    # paragraph words ran 1.57x above it — and every check above passed,
+    # because more prose raises a word count, which is exactly backwards.
+    # References/templates/report_antipatterns.json names this for a writer
+    # BEFORE it authors (engine.authoring); this is the same rule enforced
+    # after, so a section that skipped the brief is still caught here.
+    from . import gold_standard as GS
+    shape = _predicted_report_shape(curated)
+    floors = GS.depth_floors(spec.key, subcaps=len(wb.selected_subcaps()))
+    if shape["tables"] < floors["tables"]:
+        problems.append(
+            f"whole report: {shape['tables']} tables against a floor of "
+            f"{floors['tables']} (Golden 1 density, GS-RPT-TABLES). The "
+            f"pinned Doc states registers, rollups, caps and peer sets as "
+            f"tables — author one with a markdown pipe-table in the "
+            f"section's Body (`engine.authoring brief` names which sheet "
+            f"each section owes), or populate the declared sheet input that "
+            f"would render it.")
+        ref_prose = floors["reference_paragraph_words"]
+        if shape["paragraph_words"] > ref_prose * GS.PROSE_INFLATION_LIMIT:
+            problems.append(
+                f"whole report: {shape['paragraph_words']} paragraph words "
+                f"against the reference's {ref_prose} "
+                f"({shape['paragraph_words'] / max(ref_prose, 1):.2f}x) "
+                f"while carrying {shape['tables']} of {floors['tables']} "
+                f"tables (GS-RPT-PROSE-FOR-STRUCTURE) — prose is standing "
+                f"in for structure. Move the content into the table its "
+                f"section declares; do not cut it.")
+    if shape["tables"] and shape["table_words"]:
+        avg = shape["table_words"] / shape["tables"]
+        gold_avg = GS._gold_avg_table_words(spec.key)
+        if avg > gold_avg * GS.TABLE_DUMP_FACTOR:
+            problems.append(
+                f"whole report: tables average {avg:,.0f} words against the "
+                f"reference's {gold_avg} ({avg / gold_avg:.0f}x, "
+                f"GS-RPT-TABLE-DUMP) — a whole sheet is being emitted where "
+                f"a curated extract belongs. Filter the table to the rows "
+                f"the section argues from.")
+        elif shape["largest_table"] > shape["table_words"] * GS.TABLE_DUMP_SHARE:
+            share = shape["largest_table"] / shape["table_words"]
+            problems.append(
+                f"whole report: one table holds {share:.0%} of all table "
+                f"content ({shape['largest_table']:,} of "
+                f"{shape['table_words']:,} words, GS-RPT-TABLE-DUMP) — a "
+                f"sheet emitted whole, not a curated table. Curate the "
+                f"extract the section argues from.")
     return problems
 
 
@@ -668,7 +857,11 @@ def _emit_cards(doc, wb, sec, rows) -> None:
 
         def flush():
             if buf:
-                doc.add_paragraph("\n".join(buf).strip())
+                # A card states its scorecard, its ceiling rows and its
+                # KPI triple as TABLES where the writer authored one; only
+                # the rest falls through to a paragraph.
+                if not _emit_authored_table(doc, buf):
+                    doc.add_paragraph("\n".join(buf).strip())
                 buf.clear()
         for line in str(r.get("Body") or "").splitlines():
             m = _BLOCK_LINE.match(line)
@@ -677,6 +870,12 @@ def _emit_cards(doc, wb, sec, rows) -> None:
                 doc.add_heading(m.group(1), level=3)
             elif not line.strip():
                 flush()
+            elif _PIPE_ROW.match(line) and buf and not _PIPE_ROW.match(buf[-1]):
+                flush()
+                buf.append(line)
+            elif buf and _PIPE_ROW.match(buf[-1]) and not _PIPE_ROW.match(line):
+                flush()
+                buf.append(line)
             else:
                 buf.append(line)
         flush()
