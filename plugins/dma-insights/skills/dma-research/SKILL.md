@@ -633,13 +633,27 @@ real Word table (`reports._emit_authored_table`). Roughly half of Golden 1's 92
 tables are authored this way, not auto-rendered from sheets. A comparison, a
 scorecard, a ceiling set or a cap list belongs in one:
 ```
-| Cell | Score | Peer median |
-|---|---|---|
-| P4C1.2.1 | 1.6 | 3.0 |
+| Cell | Score | Peer median | Evidence |
+|---|---|---|---|
+| P4C1.2.1 | 1.6 | 3.0 | E-047 |
 ```
-`python3 -m engine.gold_standard report <docx>` checks the table count and the
-prose/table split, not only words and citations. **More prose does not clear a
-structure finding** — move the content into the table, do not describe it.
+The brief now tells you **how many tables Golden 1 carries in this section** and
+the target for this run. Golden 1's own shapes, measured, per section — author
+the analytical ones (the sheet-derived ones render themselves):
+- **§ Firmographics** — must-present fields (`Field | Value | Unit | As at | Evidence | Conf.`), the registry-routing table, the identity-check table. **Never** a `Field | STATED | ` status strip, and **never** the field list typed as one `;`-separated paragraph — that is `GS-RPT-DEGENERATE-TABLE` / `GS-RPT-PROSE-DUMP`.
+- **§ Executive Summary** — Top findings (`ID | Finding | Quantified observation | Maturity implication | Zennify relevance`), Critical gaps, Strategic objectives, Why-now signals — each an authored table with IDs (F-, G-, WN-) and an Evidence column.
+- **§ Pillar deep dives** — a Capability scorecard and an AI-and-data overlay table PER pillar.
+- **§ Recommendations** — per REC: a conditions-met / conditions-not-met contract, a rebuttal ladder, an impact-on-capabilities table, a measure-of-success table.
+
+Every authored table carries an **Evidence** column, and every section states its
+own data (`GS-RPT-SECTION-DISTRIBUTION` refuses a barren section even when the
+total clears). The prose OPENS each section with the interpretive read — what the
+figures MEAN — and the tables carry the figures.
+
+`python3 -m engine.gold_standard report <docx>` checks the cover page, the front
+matter (Contents + Document Control), the per-section table spread, degenerate
+tables and field-dump paragraphs — not only words and citations. **More prose does
+not clear a structure finding** — move the content into the table, do not describe it.
 
 1. Read the `docx` skill FIRST (invoke it by name; do not hardcode a path to it)
 2. **Retrieve `DMA_Client_Profile_Research_Template.docx` from the project knowledge base.**

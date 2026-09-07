@@ -72,6 +72,51 @@
       "measured": "The connector's CG-20, reported by get_run_progress as tech_register_vendor_equals_product.",
       "repair": "Name the company AND the thing it supplies. Where the product genuinely is not known, say so in the status and basis rather than repeating the vendor.",
       "not_the_repair": "Leaving it, on the grounds that the workbook stated it. The workbook stating it is where the defect entered."
+    },
+    {
+      "id": "COVER-PAGE-IS-A-BARE-HEADING",
+      "gate": "GS-RPT-COVER",
+      "finding": "GSY-05",
+      "what": "The report opens with a plain Title heading and a few loose lines instead of the pinned Doc's cover: a boxed title carrying the entity, then a metadata grid stating the O2 identity strip (OVERALL MATURITY / SUB-VERTICAL / ASSESSMENT ID / ASSESSMENT DATE / EVIDENCE MODE / PREPARED BY). Measured 2026-09-07: the owner flagged the cover as off.",
+      "measured": "The tables before the first numbered section (a title box AND a metadata grid), and the grid carrying the labels the reference renders. Engine-owned: reports._cover_page resolves every value from the run.",
+      "repair": "The renderer builds the cover from the workbook; a writer never types it. If it is missing, the run rendered through an older engine — re-render.",
+      "not_the_repair": "Typing a title line and a date. The identity strip is a grid resolved from the run, not a sentence."
+    },
+    {
+      "id": "FRONT-MATTER-SKIPS-THE-BINDING",
+      "gate": "GS-RPT-FRONTMATTER",
+      "finding": "GSY-06",
+      "what": "The report jumps to section 1 without the two unnumbered sections the reference opens with: Contents, and Document Control and Catalogue Binding (the catalogue version, hash, structure counts and scope, every value resolved from the run).",
+      "measured": "The unnumbered Heading 1s before section 1, against the reference's measured front_matter_h1. Engine-owned: reports._front_matter.",
+      "repair": "Re-render through the current engine, which emits both. Nothing here is authored.",
+      "not_the_repair": "Adding a prose 'about this report' note. The binding is a resolved table, and Contents is a Word TOC field."
+    },
+    {
+      "id": "TABLES-PILED-INTO-ONE-SECTION",
+      "gate": "GS-RPT-SECTION-DISTRIBUTION",
+      "finding": "GSY-19",
+      "what": "The report clears the total-table floor by dumping tables into a few sections while others carry prose alone. Measured 2026-09-07: a delivered assessment held its tables in six sections and left five with none.",
+      "measured": "Per numbered section: tables rendered against a floor scaled from the reference's own count for that section (section_tables in gold_reference.json).",
+      "repair": "Give every section the tables its own argument rests on — the scorecard, the register, the cards, the rollup the pinned Doc names for it. The reference tabulates in every section, not only the easy ones.",
+      "not_the_repair": "Moving tables from a rich section to a thin one. Each section states its OWN data; borrowing another's is a grain violation."
+    },
+    {
+      "id": "TABLE-WITH-NO-COLUMN-THAT-VARIES",
+      "gate": "GS-RPT-DEGENERATE-TABLE",
+      "finding": "GSY-19",
+      "what": "A table whose only varying column is the label — every other column empty or one repeated word ('Field | STATED | ' for ten fields). It occupies the slot of a table while carrying nothing a reader can compare row to row. Measured 2026-09-07 (owner: 'a lot of placeholder ... where tables are, I see paragraphs').",
+      "measured": "Any rendered table of >= 3 data rows where, excluding the first column, every column is empty or constant.",
+      "repair": "Render the fields' own values — value, unit, as-of, evidence, confidence — the columns the Firmographics/register sheet already carries. If there is genuinely one fact, state it in a sentence, not a one-value grid.",
+      "not_the_repair": "Adding a status column ('STATED') to look like data. A column that reads the same on every row is not data."
+    },
+    {
+      "id": "FIELD-REGISTER-TYPED-AS-A-PARAGRAPH",
+      "gate": "GS-RPT-PROSE-DUMP",
+      "finding": "GSY-19",
+      "what": "A firmographic or field register written as a single semicolon-separated sentence: 'website X ([E-1], High); employees 265 ([E-1], Medium); assets $1.18B ([E-2], High); ...'. Measured 2026-09-07 on a delivered research §1.1 that carried nine such clauses; the reference carries none.",
+      "measured": "Short cited field-clauses (3-12 words, with a citation) per paragraph; four or more in one paragraph is a register typed as prose.",
+      "repair": "Move the fields into the table that owns them (Firmographics: Field | Value | Unit | As at | Evidence | Conf.). Keep the paragraph for what the figures MEAN — the interpretive read the reference opens each section with.",
+      "not_the_repair": "Breaking the sentence into bullet points. The fields belong in the sheet's own columns, and the prose belongs in argument."
     }
   ]
 }

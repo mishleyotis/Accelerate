@@ -750,17 +750,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
         L.append_gate(wb, gate="REPORT_RENDER", scope=spec.key, verdict="FAIL",
                       detail=("forced draft: " + "; ".join(problems))[:900],
                       blocking=False)
-    doc.add_heading(spec.title, level=0)
-    p = doc.add_paragraph(entity)
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    doc.add_paragraph(
-        f"Run {md.get('run_id')} · catalogue {md.get('catalogue_version')} "
-        f"({str(md.get('catalogue_hash'))[:12]}) · reference date "
-        f"{md.get('reference_date')} · engine {md.get('engine_version')}")
-    doc.add_paragraph(
-        "Every figure and every citation in this document is read from the "
-        "assessment workbook at render time. The report and the workbook "
-        "cannot disagree, because there is only one of them.")
+    _cover_page(doc, wb, spec, entity, md)
     _front_matter(doc, wb, spec, md)
 
     for b in curated["blocks"]:
@@ -869,42 +859,216 @@ def _brand(doc, spec, entity: str, md: dict) -> None:
         f.text = "Zennify" + tail
 
 
-def _front_matter(doc, wb, spec, md: dict) -> None:
-    """The Doc's two unnumbered front sections, filled from the run.
+#: The sub-vertical code -> the label the cover page prints (the pinned Docs
+#: name the vertical in words, not the two-letter code the workbook carries).
+_SUBVERTICAL_LABEL = {
+    "CU": "Credit Union (CU)", "RB": "Regional Bank (RB)",
+    "CL": "Commercial Lending (CL)", "CIB": "Corporate & Investment Bank (CIB)",
+    "AM": "Asset Management (AM)", "RIA": "Wealth / RIA (RIA)",
+    "WM": "Wealth Management (WM)", "IC": "Insurance Carrier (IC)",
+    "IB": "Insurance Brokerage (IB)", "FC": "Farm Credit (FC)",
+}
+_M_BANDS = (("M1", 1.5), ("M2", 2.5), ("M3", 3.5), ("M4", 4.5))
 
-    'Document Control and Catalogue Binding' resolves every value from the
-    workbook — nothing typed — and 'Surface Alignment' is the Doc's own
-    section -> app-surface table, rendered from the pinned spec so it cannot
-    drift from what the sections declare they feed. Unnumbered Heading1s are
-    front matter to the app's parser and are never stored as sections."""
+
+def _m_level(score) -> str:
+    """The maturity level for a raw score on the M1..M5 rubric the reports
+    are written in (M1 <1.5 · M2 <2.5 · M3 <3.5 · M4 <4.5 · M5). This is the
+    ASSESSMENT scale, distinct from the four serving bands — the reports use
+    M-levels and the gold reference does too; a fifth BAND word is what the
+    gate bans, never the M5 rubric point."""
+    try:
+        s = float(score)
+    except (TypeError, ValueError):
+        return ""
+    for name, ceiling in _M_BANDS:
+        if s < ceiling:
+            return name
+    return "M5"
+
+
+def _overall_maturity(wb) -> tuple[str, str]:
+    """(score, level) for the whole run, read from the Pillar_Rollup OVERALL
+    row (weighted), or empty when the run is not scored (a research-stage
+    report carries no overall)."""
+    for r in wb.rows("Pillar_Rollup"):
+        if str(r.get("pillar_id") or "").strip().upper() == "OVERALL":
+            s = r.get("score")
+            if s in (None, ""):
+                return "", ""
+            lvl = str(r.get("level") or "").strip() or _m_level(s)
+            return f"{s}", lvl
+    return "", ""
+
+
+def _firm_value(wb, field: str) -> str:
+    for r in wb.rows("Firmographics"):
+        if str(r.get("Field") or "").strip().lower() == field.lower():
+            return str(r.get("Value") or "").strip()
+    return ""
+
+
+def _size_tier(wb) -> str:
+    """A one-line scale read for the cover, from Firmographics — assets and
+    the member/branch reach, in the entity's own vocabulary. Empty when the
+    firmographics are not populated."""
+    assets = _firm_value(wb, "assets_or_aum_or_revenue")
+    if assets and assets.replace(".", "").isdigit():
+        n = float(assets)
+        assets = (f"${n / 1e9:.2f}B" if n >= 1e9
+                  else f"${n / 1e6:.0f}M" if n >= 1e6 else f"${n:,.0f}")
+    branches = _firm_value(wb, "branches")
+    parts = [p for p in (f"~{assets} assets" if assets else "",
+                         f"{branches} branches" if branches else "") if p]
+    return ", ".join(parts)
+
+
+def _fmt_date(v) -> str:
+    s = str(v or "").strip()
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+    if not m:
+        return s
+    months = ["", "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"]
+    y, mo, d = m.groups()
+    return f"{int(d)} {months[int(mo)]} {y}"
+
+
+def _assessment_id(wb, md) -> str:
+    """The clean DMA-… run id the folder carries, preferred over the workbook's
+    long internal token for the client-facing cover; falls back to run_id."""
+    for anc in (Path(wb.path).parent, Path(wb.path).parent.parent):
+        if re.match(r"^DMA-", anc.name):
+            return anc.name
+    return str(md.get("run_id") or "")
+
+
+def _cover_grid(doc, pairs: list[tuple[str, str]]) -> None:
+    """The cover metadata grid: two label/value cells per row, the label in
+    small caps bold above its value, as the pinned Docs render it."""
+    n = len(pairs)
+    rows = (n + 1) // 2
+    table = doc.add_table(rows=rows, cols=2)
+    st = _style_named(doc, "Light Grid Accent 1", "Table Grid")
+    if st is not None:
+        table.style = st
+    for i, (label, value) in enumerate(pairs):
+        cell = table.rows[i // 2].cells[i % 2]
+        p = cell.paragraphs[0]
+        r = p.add_run(label.upper())
+        r.bold = True
+        r.font.size = Pt(8)
+        vp = cell.add_paragraph()
+        vr = vp.add_run(str(value) if value else "—")
+        vr.font.size = Pt(11)
+    if n % 2:                                   # blank the trailing odd cell
+        table.rows[-1].cells[1].text = ""
+
+
+def _cover_page(doc, wb, spec, entity: str, md: dict) -> None:
+    """The pinned Doc's cover: a boxed title with the entity, then the
+    metadata grid (the O2 identity strip, in the Doc's own labels), every
+    value resolved from the run. Measured 2026-09-07 against the Golden 1
+    reference, whose cover is a 1-cell title box over a two-column grid; the
+    old render emitted a bare Title heading and three loose paragraphs, and
+    the owner flagged the cover as off."""
+    subtitle = ("Client Profile — Background Research Report"
+                if spec.key == "client_research"
+                else "Digital Maturity Assessment Report")
+    box = doc.add_table(rows=1, cols=1)
+    st = _style_named(doc, "Light Grid Accent 1", "Table Grid")
+    if st is not None:
+        box.style = st
+    cell = box.rows[0].cells[0]
+    tp = cell.paragraphs[0]
+    tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    tr = tp.add_run(entity)
+    tr.bold = True
+    tr.font.size = Pt(20)
+    sp = cell.add_paragraph()
+    sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    sr = sp.add_run(subtitle)
+    sr.font.size = Pt(12)
+    doc.add_paragraph()
+
+    sub = _SUBVERTICAL_LABEL.get(str(md.get("sub_vertical") or "").strip().upper(),
+                                 str(md.get("sub_vertical") or ""))
+    cat = (f"{md.get('catalogue_version')} "
+           f"({str(md.get('catalogue_hash'))[:8]})")
+    aid = _assessment_id(wb, md)
+    date = _fmt_date(md.get("reference_date"))
+    mode = str(md.get("evidence_mode") or "")
+    if spec.key == "client_research":
+        pairs = [("Sub-vertical", sub), ("Size tier", _size_tier(wb)),
+                 ("Assessment ID", aid), ("Assessment date", date),
+                 ("Evidence mode", mode),
+                 ("Website", _firm_value(wb, "website")),
+                 ("Catalogue", cat),
+                 ("Prepared by", "Zennify Digital Maturity Assessment")]
+    else:
+        score, level = _overall_maturity(wb)
+        overall = f"{score} of 5.0 ({level})" if score else "—"
+        pairs = [("Overall maturity", overall), ("Sub-vertical", sub),
+                 ("Assessment ID", aid), ("Assessment date", date),
+                 ("Evidence mode", mode), ("Catalogue", cat),
+                 ("Prepared by", "Zennify Digital Maturity Assessment")]
+    _cover_grid(doc, pairs)
+    doc.add_paragraph()
+
+
+def _front_matter(doc, wb, spec, md: dict) -> None:
+    """The pinned Doc's two unnumbered front sections, in the Golden 1 order:
+    'Contents' (a Word TOC the user refreshes with F9), then 'Document Control
+    and Catalogue Binding' — every value resolved from the run's own workbook
+    and the active catalogue, nothing typed. The reference carries no
+    'Surface Alignment' H1 (gold_reference.json heading1, measured
+    2026-09-03), so it is not emitted: the surface map is the app's, not the
+    client's page. Unnumbered Heading1s are front matter to the app's parser
+    and are never stored as sections."""
+    doc.add_heading("Contents", level=1)
+    note = doc.add_paragraph(
+        "Select all (Ctrl+A) then press F9 in Word to populate the contents "
+        "and page numbers.")
+    note.runs[0].italic = True
+
     doc.add_heading("Document Control and Catalogue Binding", level=1)
     doc.add_paragraph(
         "Every value below is resolved at render time from the run's own "
-        "workbook and the active catalogue. Nothing here is typed by hand.")
+        "workbook and the active catalogue. Structure counts are counted from "
+        "the catalogue, not asserted. Nothing here is typed by hand.")
     tax = C.taxonomy()
     lock = wb.handoff_lock()
-    rows = [
-        ["Catalogue version", str(md.get("catalogue_version"))],
-        ["Catalogue content hash", str(md.get("catalogue_hash"))],
-        ["Structure counts", f"{tax.n_pillars} pillars / {tax.n_categories} "
-                             f"categories / {tax.n_capabilities} capabilities / "
-                             f"{tax.n_cells} subcapabilities"],
-        ["Sub-vertical", str(md.get("sub_vertical") or "")],
-        ["Evidence mode", str(md.get("evidence_mode") or "")],
-        ["Scope", f"{md.get('scope_mode')} — {md.get('subcaps_selected')} "
-                  f"subcapabilities selected"],
-        ["Reference date", str(md.get("reference_date"))],
-        ["Workbook contract", f"{md.get('workbook_contract')} · engine "
-                              f"{md.get('engine_version')}"],
-        ["Scoring workbook", wb.path.name],
-        ["Template binding", str(md.get("template_binding") or "UNBOUND")],
-        ["Peer set", str(lock.get("locked_peer_set") or "not locked")],
-        ["Stage", str(md.get("stage") or "research")],
-    ]
     in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
     out_of_scope = [p for p in ("P1", "P2", "P3", "P4") if p not in in_scope]
-    rows.append(["Pillars in scope", ", ".join(in_scope) or "none"])
-    _write_table(doc, {"cols": ["Field", "Value"], "rows": rows})
+    rows = [
+        ["Catalogue version", str(md.get("catalogue_version")),
+         "Catalogue_Meta!version"],
+        ["Catalogue content hash", str(md.get("catalogue_hash")),
+         "SHA-256 over the catalogue rows, computed at load"],
+        ["Structure counts", f"{tax.n_pillars} pillars / {tax.n_categories} "
+                             f"categories / {tax.n_capabilities} capabilities / "
+                             f"{tax.n_cells} subcapabilities",
+         "Counted from Catalogue_Meta, never asserted"],
+        ["Sub-vertical", str(md.get("sub_vertical") or ""),
+         "Handoff_Lock / classification step"],
+        ["Evidence mode", str(md.get("evidence_mode") or ""),
+         "Run parameters"],
+        ["Scope", f"{md.get('scope_mode')} — {md.get('subcaps_selected')} "
+                  f"subcapabilities selected", "Engagement scope"],
+        ["Pillars in scope", ", ".join(in_scope) or "none",
+         "Selected subcapabilities"],
+        ["Reference date", str(md.get("reference_date")), "Run parameters"],
+        ["Peer set", str(lock.get("locked_peer_set") or "not locked"),
+         "Handoff_Lock!locked_peer_set"],
+        ["Scoring workbook", wb.path.name, "File metadata"],
+        ["Workbook contract", f"{md.get('workbook_contract')} · engine "
+                              f"{md.get('engine_version')}", "File metadata"],
+        ["Template binding", str(md.get("template_binding") or "UNBOUND"),
+         "engine.template bind"],
+        ["Stage", str(md.get("stage") or "research"), "Workbook stage"],
+    ]
+    _write_table(doc, {"cols": ["Field", "Value", "Resolution source"],
+                       "rows": rows})
     if out_of_scope:
         # A focused engagement STATES its scope rather than refusing: the
         # sheets it leaves empty are named here, once, so a reader does not
@@ -913,17 +1077,6 @@ def _front_matter(doc, wb, spec, md: dict) -> None:
             "Pillars assessed in this engagement: " + ", ".join(in_scope)
             + ". Not in this engagement's scope, and therefore not reported on: "
             + ", ".join(f"{p}_Subcap_Scoring" for p in out_of_scope) + ".")
-    doc.add_heading("Surface Alignment", level=1)
-    doc.add_paragraph(
-        "This report is one input to the DMA Insights app. Each section "
-        "feeds the named app surfaces; producing a section without knowing "
-        "what it feeds is how a report and a dashboard end up disagreeing "
-        "under the same client name.")
-    _write_table(doc, {
-        "cols": ["Section", "Feeds app surface"],
-        "rows": [[f"{s.id}. {s.heading}",
-                  ", ".join(s.surfaces) or "No served surface; internal"]
-                 for s in spec.sections]})
 
 
 def _card_heading(wb, sec, row) -> str:

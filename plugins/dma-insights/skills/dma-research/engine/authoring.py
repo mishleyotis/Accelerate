@@ -130,6 +130,26 @@ def brief(report: str, section_id: str, wb=None) -> str:
         for b in ob["blocks"]:
             L.append(f"  - {b}")
     L.append("")
+    # What the Golden 1 reference actually carries in THIS section — the
+    # target a writer aims at, not just the declared-input floor. Some of
+    # these tables are AUTHORED in the body (findings, gaps, why-now cards,
+    # scorecards, the per-recommendation contract), not derived from a sheet;
+    # the renderer turns a markdown pipe-table in Body into a real table.
+    try:
+        from . import gold_standard as _GS
+        anat = _GS.section_floors(report)
+        ref_n = anat["section_reference"].get(str(section_id))
+        floor_n = anat["section_floors"].get(str(section_id))
+        if ref_n:
+            L.append(f"GOLDEN 1 CARRIES {ref_n} TABLE(S) IN THIS SECTION — this "
+                     f"run owes at least {floor_n}. Some are derived from a")
+            L.append("declared sheet (below); the rest are AUTHORED in Body as")
+            L.append("markdown pipe-tables (| col | col |), each with an Evidence")
+            L.append("column: findings, gaps, why-now cards, scorecards, the")
+            L.append("per-recommendation conditions/rebuttal/impact contract.")
+            L.append("")
+    except Exception:            # noqa: BLE001 — the brief must still issue
+        pass
     L.append("TABLES THIS SECTION OWES — the pinned Doc states these as tables,")
     L.append("and the renderer emits one table per declared input:")
     if ob["tables_owed"]:

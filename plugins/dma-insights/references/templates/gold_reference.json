@@ -11,7 +11,8 @@
   "contradicts 183 / corroborates 14) does not follow the five-volley discipline, and its",
   "Recommendations tab is empty (the recs live in the report §8 and Solution_Catalogue).",
   "The volley gate and the scoring gate are therefore STRICTER than the reference on",
-  "exactly those two points, by the owner's instruction (2026-09-03, issues 1 and 6)."
+  "exactly those two points, by the owner's instruction (2026-09-03, issues 1 and 6).",
+  "Per-section table anatomy (reports.*.section_tables / cover_labels / front_matter_*) measured 2026-09-07 from the same two .docx: each section's authored+data tables, front matter (title box, metadata grid, Document Control) counted apart. Drives GS-RPT-COVER / GS-RPT-FRONTMATTER / GS-RPT-SECTION-DISTRIBUTION."
  ],
  "entity": "Golden 1 Credit Union",
  "run_id": "DMA-2026-GOLDEN1-001",
@@ -696,7 +697,32 @@
     "10. Data Gaps and Confidence",
     "11. Workbook Traceability",
     "Appendix: Strategic Objective Alignment and Recommendation Validation"
-   ]
+   ],
+   "front_matter_tables": 3,
+   "front_matter_h1": [
+    "Contents",
+    "Document Control and Catalogue Binding"
+   ],
+   "cover_labels": [
+    "OVERALL MATURITY",
+    "ASSESSMENT ID",
+    "ASSESSMENT DATE",
+    "EVIDENCE MODE",
+    "PREPARED BY"
+   ],
+   "section_tables": {
+    "1": 3,
+    "2": 1,
+    "3": 3,
+    "4": 2,
+    "5": 8,
+    "6": 7,
+    "7": 3,
+    "8": 54,
+    "9": 4,
+    "10": 1,
+    "11": 1
+   }
   },
   "research": {
    "words_paragraphs": 4910,
@@ -714,7 +740,28 @@
     "6. Client Priorities",
     "7. Risk and Issues",
     "8. Workbook References"
-   ]
+   ],
+   "front_matter_tables": 3,
+   "front_matter_h1": [
+    "Contents",
+    "Document Control and Catalogue Binding"
+   ],
+   "cover_labels": [
+    "ASSESSMENT ID",
+    "ASSESSMENT DATE",
+    "EVIDENCE MODE",
+    "PREPARED BY"
+   ],
+   "section_tables": {
+    "1": 3,
+    "2": 5,
+    "3": 4,
+    "4": 4,
+    "5": 10,
+    "6": 4,
+    "7": 4,
+    "8": 2
+   }
   }
  }
 }

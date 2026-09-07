@@ -438,6 +438,108 @@ def _docx_shape(path) -> dict:
             "largest_table": max(sizes) if sizes else 0}
 
 
+def _docx_layout(path) -> dict:
+    """The report in DOCUMENT ORDER — headings, paragraphs and tables as they
+    appear — so the gate can ask WHERE a table sits, not just how many there
+    are. `_docx_shape` counts; this one places, which is what the cover, the
+    front matter and the per-section distribution checks need (measured
+    2026-09-07: a delivered pair carried the right TOTAL tables while a whole
+    section stood barren and another was a dump)."""
+    from docx import Document
+    from docx.text.paragraph import Paragraph
+    from docx.table import Table
+
+    d = Document(str(path))
+    items: list[tuple] = []
+    for child in d.element.body:
+        tag = child.tag.split("}")[-1]
+        if tag == "p":
+            p = Paragraph(child, d)
+            style = (p.style.name if p.style is not None else "") or ""
+            kind = ("h1" if style in ("Heading 1", "Title") else
+                    "h2" if style == "Heading 2" else "para")
+            items.append((kind, p.text or ""))
+        elif tag == "tbl":
+            t = Table(child, d)
+            rows = [[c.text for c in r.cells] for r in t.rows]
+            items.append(("table", rows))
+
+    cover_tables: list[list[list[str]]] = []
+    front_h1: list[str] = []
+    sections: dict[str, int] = {}
+    seen_numbered = False
+    current: str | None = None
+    tables: list[list[list[str]]] = []
+    for kind, payload in items:
+        if kind == "h1":
+            m = re.match(r"^\s*(\d+)\.", payload)
+            if m:
+                seen_numbered = True
+                current = m.group(1)
+                sections.setdefault(current, 0)
+            else:
+                current = None
+                if not seen_numbered:
+                    front_h1.append(payload.strip())
+        elif kind == "table":
+            tables.append(payload)
+            if not seen_numbered:
+                cover_tables.append(payload)
+            elif current is not None:
+                sections[current] = sections.get(current, 0) + 1
+    paras = [p for k, p in items if k == "para" and p.strip()]
+    return {"cover_tables": cover_tables, "front_h1": front_h1,
+            "sections": sections, "tables": tables, "paras": paras}
+
+
+def _flat(cells) -> str:
+    return " ".join(str(c or "") for row in cells for c in row).casefold()
+
+
+def _degenerate_table(rows: list[list[str]]) -> bool:
+    """A table that carries no information a reader can argue with: excluding
+    the first (label) column, EVERY column is empty or one repeated value, so
+    no column varies row to row. This is the `Field | STATED | (blank)` table
+    the owner flagged 2026-09-07 — the Firmographics dump rendered as a status
+    strip. A table whose non-label columns all vary (the identity-check table's
+    Basis column, say) is NOT degenerate even when one column is constant."""
+    if len(rows) < 4:                        # header + >= 3 data rows
+        return False
+    header, data = rows[0], rows[1:]
+    ncols = len(header)
+    if ncols < 2:
+        return False
+    for j in range(1, ncols):
+        col = [(r[j].strip() if j < len(r) else "") for r in data]
+        non_empty = [c for c in col if c]
+        if non_empty and len(set(col)) > 1:
+            return False                     # this column varies — not degenerate
+    return True
+
+
+_DUMP_CITE = re.compile(r"\b(?:E|ENR|PB|TS|INT|US)-\d+")
+
+
+def _prose_dump_clauses(para: str) -> int:
+    """How many `;`-separated clauses in ONE paragraph are a SHORT, cited
+    field entry — the shape of a register typed as a sentence ('website X
+    ([E-1], High); employees 265 ([E-1], Medium); assets $1.18B ([E-2]); …').
+    The reference's interpretive paragraphs cite inline and use semicolons
+    too, but their clauses are whole sentences; the <=14-word bound keeps a
+    field:value:citation entry and drops an argued clause, so the count
+    separates a dump from an argument (measured 2026-09-07: the reference's
+    busiest paragraph carries 1 such clause, a delivered §1.1 carried ten)."""
+    n = 0
+    for c in para.split(";"):
+        words = len(re.findall(r"\w+", c))
+        # 3..12 words: a `field value (citation)` entry. Below 3 is a bare
+        # citation fragment a sentence-spanning `;` split off (the reference's
+        # `; [E-021];`); above 12 is an argued clause, not a register row.
+        if _DUMP_CITE.search(c) and 3 <= words <= 12:
+            n += 1
+    return n
+
+
 #: Golden 1's own depth, per subcap, as the fallback when gold_reference.json
 #: is unreadable: distinct citations, paragraph words and TABLES over 690
 #: subcaps. The table count is the half of "depth" a word count cannot see.
@@ -463,6 +565,47 @@ TABLE_DUMP_SHARE = 0.35
 #: table and is still six sheets. 4x leaves real headroom — the delivered
 #: assessment sat at 18x.
 TABLE_DUMP_FACTOR = 4.0
+
+#: A numbered section owes at least this share of the reference's own table
+#: count FOR THAT SECTION, scaled to the run. The whole-report `tables` floor
+#: already fixes the TOTAL depth; this fixes the DISTRIBUTION, so a report
+#: cannot pass by dumping every table into one section and leaving the rest
+#: barren (measured 2026-09-07: a delivered assessment carried its tables in
+#: six sections and left five carrying prose alone). Kept well under 1.0 so a
+#: section the reference gives one table still only owes one, and the reference
+#: itself clears every floor.
+SECTION_TABLE_SHARE = 0.25
+
+#: This many SHORT cited field-clauses in a single paragraph is a field
+#: register typed as a sentence, not an argument (GS-RPT-PROSE-DUMP). Measured
+#: 2026-09-07: neither reference has a paragraph with even one such clause; a
+#: delivered §1.1 had nine. Four leaves clear margin above the reference and
+#: still catches the dump.
+PROSE_DUMP_CLAUSES = 4
+
+
+def section_floors(kind: str, subcaps: int | None = None) -> dict:
+    """Per-numbered-section table floors, plus the cover labels and front
+    matter the reference carries — the anatomy `depth_floors` does not see.
+    Every floor is at or below the reference's own count for that section
+    (SECTION_TABLE_SHARE < 1), so the reference passes its own gate."""
+    kind = "assessment" if kind == "assessment" else "research"
+    g = gold_reference()
+    rep = g.get("reports", {}).get(kind, {})
+    ref_sub = _GOLD_SUBCAPS_FALLBACK
+    try:
+        ref_sub = int(g["workbook"]["subcaps"])
+    except (KeyError, TypeError, ValueError):
+        pass
+    n = int(subcaps) if subcaps else ref_sub
+    scale = n / ref_sub if ref_sub else 1.0
+    sec = rep.get("section_tables", {}) or {}
+    floors = {k: max(1, math.floor(int(v) * scale * SECTION_TABLE_SHARE))
+              for k, v in sec.items()}
+    return {"section_floors": floors,
+            "section_reference": {k: int(v) for k, v in sec.items()},
+            "cover_labels": [str(x) for x in rep.get("cover_labels", [])],
+            "front_matter_h1": [str(x) for x in rep.get("front_matter_h1", [])]}
 
 
 def depth_floors(kind: str, subcaps: int | None = None) -> dict:
@@ -633,6 +776,78 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
             f"That is a sheet emitted whole, not a curated table: Golden 1 "
             f"averages ~{gold_avg} words across {floors['tables']} tables. "
             f"Curate the extract the section argues from", "GSY-19"))
+
+    # ── COVER, FRONT MATTER and DISTRIBUTION (owner 2026-09-07: "the cover
+    # page is off … a lot of placeholder and unnecessary text") ──────────
+    # The volume and total-table gates above still pass a report whose cover
+    # is a bare Title heading, whose front matter skips the Document Control
+    # binding, whose tables all pile into one section, or which types a field
+    # register as a paragraph. The reference does none of these; these read
+    # its own anatomy (section_floors) and hold the report to it.
+    layout = _docx_layout(report_path)
+    anat = section_floors(kind, subcaps)
+
+    # GS-RPT-COVER — a boxed title carrying the entity, then a metadata grid
+    # carrying the Doc's own labels (OVERALL MATURITY / SUB-VERTICAL / …).
+    cover_flat = _flat([r for t in layout["cover_tables"] for r in t])
+    missing_labels = [lb for lb in anat["cover_labels"]
+                      if lb.casefold() not in cover_flat]
+    if len(layout["cover_tables"]) < 2:
+        out.append(Finding("GS-RPT-COVER",
+            f"the cover carries {len(layout['cover_tables'])} table(s); the "
+            f"pinned Doc opens with a boxed title AND a metadata grid "
+            f"(the O2 identity strip: {', '.join(anat['cover_labels'][:4])} …). "
+            f"A bare Title heading is not the cover", "GSY-05"))
+    elif missing_labels:
+        out.append(Finding("GS-RPT-COVER",
+            f"the cover grid is missing the label(s) "
+            f"{', '.join(missing_labels)} — the Doc's identity strip is "
+            f"resolved from the run, not dropped", "GSY-05"))
+
+    # GS-RPT-FRONTMATTER — the two unnumbered H1s the reference opens with.
+    have_front = {h.casefold() for h in layout["front_h1"]}
+    for want in anat["front_matter_h1"]:
+        if not any(want.casefold() in h for h in have_front):
+            out.append(Finding("GS-RPT-FRONTMATTER",
+                f"front matter is missing the {want!r} section — the reference "
+                f"carries it before section 1 (Contents + the catalogue "
+                f"binding that resolves every figure from the run)", "GSY-06"))
+
+    # GS-RPT-SECTION-DISTRIBUTION — no numbered section barren where the
+    # reference tabulates. Total depth is GS-RPT-TABLES' job; this is spread.
+    for num, floor in sorted(anat["section_floors"].items(),
+                             key=lambda kv: int(kv[0])):
+        got = layout["sections"].get(num)
+        if got is None:                       # section absent — GS-RPT-SECTIONS owns that
+            continue
+        if got < floor:
+            ref_n = anat["section_reference"].get(num, floor)
+            out.append(Finding("GS-RPT-SECTION-DISTRIBUTION",
+                f"section {num} carries {got} table(s); the reference carries "
+                f"{ref_n} there, so this run owes at least {floor}. The section "
+                f"states its register/scorecard/cards as a table, not a "
+                f"paragraph", "GSY-19"))
+
+    # GS-RPT-DEGENERATE-TABLE — a table whose non-label columns are all
+    # constant or empty carries nothing per row (the `Field | STATED | ` strip).
+    degen = sum(1 for t in layout["tables"] if _degenerate_table(t))
+    if degen:
+        out.append(Finding("GS-RPT-DEGENERATE-TABLE",
+            f"{degen} table(s) carry no column that varies row to row — a "
+            f"repeated status word ('STATED') or an empty column is not data. "
+            f"Render the fields' own values (value, unit, as-of, evidence), or "
+            f"drop the table and let the prose carry the point", "GSY-19"))
+
+    # GS-RPT-PROSE-DUMP — a field register typed as a `;`-separated sentence.
+    dumps = [n for n in (_prose_dump_clauses(p) for p in layout["paras"])
+             if n >= PROSE_DUMP_CLAUSES]
+    if dumps:
+        out.append(Finding("GS-RPT-PROSE-DUMP",
+            f"{len(dumps)} paragraph(s) list {max(dumps)}+ cited field clauses "
+            f"in one sentence ('website X ([E-1]); employees Y ([E-1]); …') — "
+            f"that is the Firmographics register typed as prose. Move the "
+            f"fields into the table that owns them; keep the paragraph for what "
+            f"the figures MEAN", "GSY-19"))
 
     # GS-RPT-COVERAGE — the report discloses coverage, as the reference does.
     if "coverage" not in low and "unknown" not in low:

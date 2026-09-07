@@ -185,12 +185,53 @@ def _docx(path, paragraphs, add_header=True):
     return path
 
 
+def _small_table(seed):
+    """A non-degenerate table: every column varies row to row, and it is small,
+    so it clears GS-RPT-DEGENERATE-TABLE and GS-RPT-TABLE-DUMP alike."""
+    return ("TABLE", [
+        ["Cell", "Score", "Evidence"],
+        [f"P{seed}C1.{seed}", f"{(seed % 4) + 1}.0", f"E-{(seed % 115) + 1}"],
+        [f"P{seed}C2.{seed}", f"{(seed % 3) + 2}.0", f"E-{((seed + 7) % 115) + 1}"],
+    ])
+
+
+def _cover_front(overall="2.25"):
+    """The pinned Doc's cover + front matter, in the Golden 1 order: a boxed
+    title, a metadata grid carrying the identity labels, then Contents and the
+    Document Control binding. Without these a good report trips GS-RPT-COVER /
+    GS-RPT-FRONTMATTER (measured 2026-09-07)."""
+    out = [
+        ("TABLE", [["REV Federal Credit Union — Digital Maturity Assessment Report"]]),
+        ("TABLE", [
+            [f"OVERALL MATURITY: {overall} of 5.0 (M2)", "SUB-VERTICAL: Credit Union (CU)"],
+            ["ASSESSMENT ID: DMA-ASM-X-01", "ASSESSMENT DATE: 28 August 2026"],
+            ["EVIDENCE MODE: PUBLIC", "PREPARED BY: Zennify"],
+        ]),
+        ("Heading 1", "Contents"),
+        ("Heading 1", "Document Control and Catalogue Binding"),
+        ("TABLE", [
+            ["Field", "Value", "Resolution source"],
+            ["Catalogue version", "v7.0", "Catalogue_Meta!version"],
+            ["Sub-vertical", "CU", "Handoff_Lock"],
+        ]),
+    ]
+    return out
+
+
 def _assessment_body(overall="2.25"):
-    """A report in the PINNED template's shape: every numbered section as a
-    Heading 1 (GS-RPT-SECTIONS checks number AND heading), the four pillar
-    deep dives as cards under §5, the REC cards under §8."""
+    """A report in the PINNED template's shape: cover + front matter, then every
+    numbered section as a Heading 1 (GS-RPT-SECTIONS checks number AND heading),
+    the four pillar deep dives as cards under §5, the REC cards under §8, and
+    each section carrying the reference's own table count so the cover,
+    front-matter, distribution and total-table gates all clear."""
     from engine import report_spec as RS
-    body = []
+    # The reference's per-section table counts (gold_reference.json), so the
+    # fixture distributes tables the way GS-RPT-SECTION-DISTRIBUTION expects
+    # rather than piling them at the end.
+    section_tables = {"1": 3, "2": 1, "3": 3, "4": 2, "5": 8, "6": 7,
+                      "7": 3, "8": 54, "9": 4, "10": 1, "11": 1}
+    body = list(_cover_front(overall))
+    seed = 0
     for h in RS.numbered_headings("assessment"):
         body.append(("Heading 1", h))
         n = h.split(".")[0]
@@ -217,6 +258,16 @@ def _assessment_body(overall="2.25"):
                 body.append(("Normal", "Strongest counter. It survives because."))
         else:
             body.append(("Normal", "Section body."))
+        # This section's tables, distributed under its own heading (GSY-19).
+        for _ in range(section_tables.get(n, 1)):
+            body.append(_small_table(seed))
+            seed += 1
+    # The reference's Appendix carries two more tables (objective coverage and
+    # per-recommendation validation), bringing the total to the measured 92.
+    body.append(("Heading 1", "Appendix: Strategic Objective Alignment and Recommendation Validation"))
+    for _ in range(2):
+        body.append(_small_table(seed))
+        seed += 1
     # 5-year financial trajectory (GS-RPT-FINANCIALS)
     body.append(("Normal", "Revenue grew across FY2020, FY2021, FY2022, FY2023 and "
                  "FY2024, a 17% CAGR; net income and total assets rose over the "
@@ -225,17 +276,6 @@ def _assessment_body(overall="2.25"):
     # `report_findings` holds a report to the reference's 690 subcaps: 115
     # distinct citations and the pinned Doc's 8,400-word contract).
     body.append(("Normal", " ".join(f"E-{i}" for i in range(1, 121)) + " " + "word " * 8600))
-    # structure (GSY-19): the reference carries 92 tables at ~126 words each
-    # over the same 690 subcaps — a clean fixture must too, or the structure
-    # gate correctly refuses it. 93 small, evenly-sized tables so no single
-    # table dominates (GS-RPT-TABLE-DUMP) and the average stays near the
-    # reference's own, not above TABLE_DUMP_FACTOR.
-    for i in range(93):
-        body.append(("TABLE", [
-            ["Field", "Value", "Evidence"],
-            [f"Row {i}.1", "cell data here for this row", f"E-{(i % 115) + 1}"],
-            [f"Row {i}.2", "more cell data for this table row", f"E-{(i % 115) + 1}"],
-        ]))
     return body
 
 

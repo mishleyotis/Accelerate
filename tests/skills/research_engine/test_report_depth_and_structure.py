@@ -182,7 +182,9 @@ def test_the_register_covers_every_structure_gate():
     about until it refuses them."""
     gates = {a["gate"] for a in A.antipatterns()}
     for code in ("GS-RPT-TABLES", "GS-RPT-PROSE-FOR-STRUCTURE",
-                 "GS-RPT-TABLE-DUMP"):
+                 "GS-RPT-TABLE-DUMP", "GS-RPT-COVER", "GS-RPT-FRONTMATTER",
+                 "GS-RPT-SECTION-DISTRIBUTION", "GS-RPT-DEGENERATE-TABLE",
+                 "GS-RPT-PROSE-DUMP"):
         assert code in gates, (code, gates)
 
 
@@ -224,3 +226,182 @@ def test_preflight_reports_the_whole_reports_table_position():
     assert out["tables_that_will_render"] == out["tables_declared"]
     assert out["empty_declared_inputs"] == []
     assert len(out["sections"]) == len(RS.SPECS["assessment"].sections)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# SAFEGUARDS v2 — cover, front matter, distribution, degenerate table,
+# prose dump. Owner 2026-09-07: "huge discrepancy with the formatting ... even
+# the cover page is off ... a lot of placeholder and unnecessary text ... Did
+# you check how the golden standard was written?" The volume and total-table
+# gates above pass a report whose cover is a bare heading, whose tables pile
+# into one section, or which types a field register as a paragraph. These
+# gates read the reference's own per-section anatomy (measured into
+# gold_reference.json) and hold the report to it.
+# ══════════════════════════════════════════════════════════════════════════
+
+_V2 = ("GS-RPT-COVER", "GS-RPT-FRONTMATTER", "GS-RPT-SECTION-DISTRIBUTION",
+       "GS-RPT-DEGENERATE-TABLE", "GS-RPT-PROSE-DUMP")
+
+
+# ── calibration: no v2 floor exceeds what the reference itself meets ───────
+
+def test_section_floors_never_exceed_the_reference_section_counts(gold):
+    """The same discipline as the table floor: a per-section floor the
+    reference would fail is a floor nobody measured."""
+    for kind in ("research", "assessment"):
+        anat = GS.section_floors(kind)
+        ref = gold["reports"][kind]["section_tables"]
+        for num, floor in anat["section_floors"].items():
+            assert floor <= int(ref[num]), (kind, num, floor, ref[num])
+            assert floor >= 1
+
+
+def test_the_reference_front_matter_and_cover_labels_are_recorded(gold):
+    for kind in ("research", "assessment"):
+        anat = GS.section_floors(kind)
+        # the two unnumbered H1s the reference opens with are a subset of its
+        # measured heading1 list
+        h1 = gold["reports"][kind]["heading1"]
+        for want in anat["front_matter_h1"]:
+            assert want in h1, (kind, want)
+        assert anat["cover_labels"], kind
+
+
+# ── fixture: a full report with cover, front matter and per-section tables ─
+
+def _full_report(path, *, kind="assessment", degenerate=False, dump=False,
+                 barren_section=None, cover=True, front=True):
+    """A report of the reference's SHAPE — cover box + metadata grid + Contents
+    + Document Control, then each numbered section carrying its reference table
+    count — so a v2 finding can be provoked or avoided on purpose."""
+    import docx
+    d = docx.Document()
+    labels = GS.section_floors(kind)["cover_labels"]
+    if cover:
+        box = d.add_table(rows=1, cols=1)
+        box.rows[0].cells[0].text = "REV Federal Credit Union"
+        grid = d.add_table(rows=len(labels), cols=2)
+        for i, lb in enumerate(labels):
+            grid.rows[i].cells[0].text = lb
+            grid.rows[i].cells[1].text = f"{lb.lower()} value {i}"
+    if front:
+        d.add_paragraph("Contents", style="Heading 1")
+        d.add_paragraph("Document Control and Catalogue Binding", style="Heading 1")
+        dc = d.add_table(rows=2, cols=3)
+        for i, c in enumerate(("Field", "Value", "Resolution source")):
+            dc.rows[0].cells[i].text = c
+        dc.rows[1].cells[0].text = "Catalogue version"
+        dc.rows[1].cells[1].text = "v7.0"
+        dc.rows[1].cells[2].text = "Catalogue_Meta!version"
+    ref = json.loads((T.TEMPLATES_DIR / "gold_reference.json").read_text())
+    section_tables = ref["reports"][kind]["section_tables"]
+    d.add_paragraph(" ".join(f"[E-{i}]" for i in range(1, 200)))
+    d.add_paragraph(" ".join(["word"] * 12000) + " coverage unknown")
+    for num, count in sorted(section_tables.items(), key=lambda kv: int(kv[0])):
+        d.add_paragraph(f"{num}. Section {num}", style="Heading 1")
+        n = 0 if (barren_section == num) else count
+        for _ in range(n):
+            t = d.add_table(rows=1, cols=3)
+            for i, c in enumerate(("Cell", "Score", "Evidence")):
+                t.rows[0].cells[i].text = c
+            for r in range(3):
+                cells = t.add_row().cells
+                cells[0].text = f"P{r}C1"
+                cells[1].text = f"{r + 1}.0"
+                cells[2].text = f"E-{r}"
+    if degenerate:
+        t = d.add_table(rows=1, cols=3)
+        for i, c in enumerate(("Field", "State", "Route")):
+            t.rows[0].cells[i].text = c
+        for f in ("website", "employees", "assets", "branches"):
+            cells = t.add_row().cells
+            cells[0].text = f
+            cells[1].text = "STATED"     # constant
+            cells[2].text = ""            # empty
+    if dump:
+        d.add_paragraph(
+            "All ten fields are STATED: website revfcu.com ([E-1], High); "
+            "employees 265 ([E-1], Medium); assets $1.18B ([E-2], High); "
+            "branches 16 ([E-1], High); founded 1955 ([E-1], High); regulator "
+            "NCUA ([E-2], High).")
+    d.save(str(path))
+    with zipfile.ZipFile(str(path), "a") as z:
+        z.writestr("word/header1.xml", "<hdr/>")
+    return path
+
+
+def test_a_full_reference_shaped_report_raises_no_v2_finding(tmp_path):
+    for kind in ("research", "assessment"):
+        p = _full_report(tmp_path / f"{kind}.docx", kind=kind)
+        codes = _codes(p, kind=kind)
+        assert not (codes & set(_V2)), (kind, codes & set(_V2))
+
+
+def test_a_bare_title_with_no_cover_grid_is_refused(tmp_path):
+    p = _full_report(tmp_path / "nocover.docx", cover=False)
+    assert "GS-RPT-COVER" in _codes(p)
+
+
+def test_a_cover_missing_a_required_label_is_refused(tmp_path):
+    import docx
+    d = docx.Document()
+    box = d.add_table(rows=1, cols=1)
+    box.rows[0].cells[0].text = "REV Federal Credit Union"
+    grid = d.add_table(rows=1, cols=2)
+    grid.rows[0].cells[0].text = "ASSESSMENT ID"     # only one label, missing the rest
+    grid.rows[0].cells[1].text = "DMA-X"
+    d.add_paragraph("Contents", style="Heading 1")
+    d.add_paragraph("1. Section 1", style="Heading 1")
+    d.save(str(tmp_path / "partial.docx"))
+    with zipfile.ZipFile(str(tmp_path / "partial.docx"), "a") as z:
+        z.writestr("word/header1.xml", "<hdr/>")
+    assert "GS-RPT-COVER" in _codes(tmp_path / "partial.docx")
+
+
+def test_missing_document_control_front_matter_is_refused(tmp_path):
+    p = _full_report(tmp_path / "nofront.docx", front=False)
+    assert "GS-RPT-FRONTMATTER" in _codes(p)
+
+
+def test_a_barren_section_is_refused(tmp_path):
+    """Section 8 of the reference carries 54 tables; a run that leaves it empty
+    while the total still clears is hiding a prose section behind a rich one."""
+    p = _full_report(tmp_path / "barren.docx", barren_section="8")
+    assert "GS-RPT-SECTION-DISTRIBUTION" in _codes(p)
+
+
+def test_a_degenerate_table_is_refused(tmp_path):
+    p = _full_report(tmp_path / "degen.docx", degenerate=True)
+    assert "GS-RPT-DEGENERATE-TABLE" in _codes(p)
+
+
+def test_a_table_with_one_varying_column_is_not_degenerate():
+    # the reference's identity-check table: Result constant PASS, Basis varies.
+    ok = [["Check", "Result", "Basis"],
+          ["name matches", "PASS", "E-1, E-2"],
+          ["regulator", "PASS", "E-1, E-5"],
+          ["footprint", "PASS", "E-3"],
+          ["charter", "PASS", "E-2"]]
+    assert not GS._degenerate_table(ok)
+    bad = [["Field", "State", "Route"],
+           ["website", "STATED", ""],
+           ["employees", "STATED", ""],
+           ["assets", "STATED", ""],
+           ["branches", "STATED", ""]]
+    assert GS._degenerate_table(bad)
+
+
+def test_a_field_register_typed_as_a_paragraph_is_refused(tmp_path):
+    p = _full_report(tmp_path / "dump.docx", dump=True)
+    assert "GS-RPT-PROSE-DUMP" in _codes(p)
+
+
+def test_interpretive_prose_with_inline_citations_is_not_a_dump():
+    """The reference cites inline in whole sentences; only a short cited field
+    entry counts, and only many of them in one paragraph is a dump."""
+    argued = ("Golden 1 has assembled a modern rails-and-platform foundation "
+              "and, in its own 2024 discovery [E-005], named the value it wants "
+              "to convert next. The core runs on Fiserv DNA; real-time payments "
+              "went live on RTP and FedNow in fall 2024 [E-021]; a custom Zest "
+              "AI scorecard lifted protected-class approvals by 28% [E-055].")
+    assert GS._prose_dump_clauses(argued) < GS.PROSE_DUMP_CLAUSES
