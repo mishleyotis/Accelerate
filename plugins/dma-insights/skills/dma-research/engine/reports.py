@@ -268,6 +268,19 @@ def _curated_big_sheet(name: str, sec_id: str, rows: list[dict]):
     return None
 
 
+def _peer_benchmarks_scored(rows: list[dict]) -> bool:
+    """True when the peer sheet carries at least one real per-category score —
+    an Entity_Score or a Peer_Median. When it does not (peer NAMES and a basis
+    were captured but the per-category scoring never ran), rendering the sheet
+    whole is a degenerate table, so the caller skips it."""
+    for r in rows:
+        for k in ("Entity_Score", "Peer_Median", "Peer_P25", "Peer_P75"):
+            v = r.get(k)
+            if v not in (None, "") and str(v).strip():
+                return True
+    return False
+
+
 def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> list[dict]:
     """The workbook-derived tables a section carries.
 
@@ -291,6 +304,15 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
             continue
         if name == "Financial_Trends":
             out.append(_financial_table(rows))
+            continue
+        if name == "Peer_Benchmarks" and not _peer_benchmarks_scored(rows):
+            # The per-category Peer_Benchmarks sheet with every Entity_Score
+            # and Peer_Median empty is a 16-row strip that varies only in its
+            # category id — a degenerate table (GS-RPT-DEGENERATE-TABLE), and
+            # it renders on every section that declares it. When the run
+            # carries no per-category peer SCORES, the peer comparison belongs
+            # in the section's authored per-peer table (the golden's §4.1 /
+            # §6 shape), not in this empty dump. Skip it here.
             continue
         if name in ("Subcap_Scores", "Caps_Applied_Log"):
             curated = _curated_big_sheet(name, str(sec.id), rows)
