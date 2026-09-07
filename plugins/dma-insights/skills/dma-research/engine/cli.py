@@ -75,7 +75,7 @@ from . import (assemble, contract, floors_gate, handoff, ledger, orient,
 _FAMILIES = ("kg", "fuse", "memory", "techscan", "assemble", "preflight",
              "prelim", "registry", "complete", "narrative", "ers",
              "cost", "template", "grains", "profile", "assessment", "ship",
-             "brief", "pipeline")
+             "brief", "pipeline", "relay")
 
 
 def _family_main(name: str):
@@ -115,6 +115,8 @@ def _family_main(name: str):
         from . import brief as m
     elif name == "pipeline":
         from . import pipeline as m
+    elif name == "relay":
+        from . import relay as m
     else:
         from . import assemble as m
     return m.main

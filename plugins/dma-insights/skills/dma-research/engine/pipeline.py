@@ -4,6 +4,7 @@ shipping pages to the connector as the work becomes ready.
 
     python3 -m engine.pipeline run    --run <R> --root <ROOT> [--dispatcher agent_run|stub]
                                       [--until STAGE] [--max-wall-min N] [--max-rounds N]
+                                      [--stall-rounds N] [--enrichment-heals N] [--no-relay]
                                       [--lane-retries N] [--page-retries N]
                                       [--ingest-poll-s S --ingest-timeout-s S]
                                       [--folder-root DIR] [--no-push] [--allow-stale-install]
@@ -28,7 +29,8 @@ stage starts):
     START      the run exists and is bound to the pinned templates   — checked, never done here
     PRELIM     the institution before its capabilities               lanes: conductor (PRELIM-only), scanner, connectors
     KG         DQ_Bank seeded from the toolkits (fallback stated)     engine.kg build
-    RESEARCH   every category's floors gate PASS                     lanes: 16 researchers → challengers → gates; rounds
+    RESEARCH   every category's floors gate PASS                     lanes: 16 researchers → challengers → gates
+               (+ verifier, + ENRICHMENT gate, + relay drain)         → relay → gates; rounds
     HANDOFF    research_handoff.json, research_ready == []           engine.handoff
     SCORING    SCORING gate PASS                                     lanes: 4 scorers, solutions, critic → rollup → gate
     INGEST_A   checkpoint pushed; connector ingested version A       engine.assemble checkpoint → poll list_pending_runs
@@ -44,6 +46,30 @@ Exactly TWO ingests (a scored checkpoint and the package), so a run gets two
 versions rather than eighteen; the early pages ship to version A while the
 reports are written, are restaged from disk to version B, and `promote_run`
 is the last call the pipeline makes.
+
+ROUNDS ARE A CEILING, NOT A PROXY FOR PROGRESS (owner, 2026-09-07). The
+driver refused a category after three rounds while categories were still
+gaining ground each round — one hit 100% coverage in round two. `--max-rounds`
+now defaults to 10 and every looping stage measures its own progress between
+rounds (research: passing categories, evidence rows, searches, syntheses,
+declared absences, connector searches; scoring: scored rows, critic passes,
+gate terms; reports: READY sections; PRELIM: closed sections). A stage stops
+EARLY only when `--stall-rounds` consecutive rounds advanced none of them —
+so a big budget cannot spin on a stage that has stopped moving, and a stage
+that is moving is not refused for being slow.
+
+CONNECTOR USAGE IS MEASURED, HEALED, THEN DISCLOSED (MEM-0333). After each
+research round the driver (1) harvests the `search_requests` every lane
+emitted into `07_qa/search_relay.jsonl` (`engine.relay`), (2) dispatches
+`enrichment-web-specialist` lanes to run them through the connectors they
+hold and reconciles what came back against the Search_Log, and (3) records an
+ENRICHMENT gate per category from the Search_Log's Tool column. A category
+whose every search ran through bare web_search is re-dispatched as a FRESH
+lane instance carrying the measured reason (grants refused / never attempted /
+logged as web_search) — up to `--enrichment-heals` times — and after that the
+same FAIL is written NON-blocking: disclosed in Gate_Log and the driver
+state, never silently passed and never a wall the run cannot get past when
+the harness bound no connector to a headless child.
 
 Every stage records `STAGE_<NAME>` in Gate_Log with its verdict and wall
 clock, appends to the cost ledger (`engine.cost record`), writes the driver
@@ -143,17 +169,43 @@ class AgentRunDispatcher:
                "--record-stage", stage]
         if self.stream:
             cmd += ["--stream", "--log-dir", str(ctx.run.root / "agent_logs")]
-        r = subprocess.run(cmd, capture_output=True, text=True,
-                           cwd=str(PLUGIN.parents[1]))
+        # Popen + communicate rather than subprocess.run, so that when THIS
+        # process is interrupted (SIGINT, the SIGTERM handler in main, any
+        # exception) the batch gets SIGTERM — which agent_run turns into a
+        # kill of every lane's process group — instead of the SIGKILL
+        # subprocess.run sends, which leaves sixteen `claude` children and
+        # their grandchildren running with nobody to reap them (owner,
+        # 2026-09-07: "50 processes still running, load still climbing").
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, cwd=str(PLUGIN.parents[1]))
+        try:
+            _out, err = proc.communicate()
+        except BaseException:
+            _terminate(proc)
+            raise
         summary = {}
         if timing.is_file():
             try:
                 summary = json.loads(timing.read_text())
             except ValueError:
                 summary = {}
-        summary.setdefault("rc", r.returncode)
-        summary.setdefault("stderr_tail", (r.stderr or "")[-600:])
+        summary.setdefault("rc", proc.returncode)
+        summary.setdefault("stderr_tail", (err or "")[-600:])
         return summary
+
+
+def _terminate(proc: "subprocess.Popen", grace_s: float = 30.0) -> None:
+    """SIGTERM the batch and give it time to reap its lanes; SIGKILL after."""
+    if proc.poll() is not None:
+        return
+    try:
+        proc.terminate()
+        proc.wait(timeout=grace_s)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+    except ProcessLookupError:
+        pass
 
 
 class McpReads:
@@ -224,7 +276,19 @@ class Options:
     shipper: Shipper
     until: str | None = None
     max_wall_min: float | None = None
-    max_rounds: int = 3
+    # A CEILING on rounds per looping stage. 3 refused categories that were
+    # still gaining ground each round (owner, 2026-09-07); 10 is what the
+    # owner resumed those runs with. `stall_rounds` is what keeps a large
+    # ceiling honest: consecutive rounds that advance nothing end the stage.
+    max_rounds: int = 10
+    stall_rounds: int = 2
+    # How many FRESH lane instances the driver spends on a category whose
+    # searches all ran through bare web_search before it discloses the gap
+    # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
+    enrichment_heals: int = 1
+    # Dispatch `enrichment-web-specialist` lanes over the harvested
+    # `search_requests` each round. Off = harvest and disclose, never drain.
+    relay: bool = True
     lane_retries: int = 1
     page_retries: int = 2
     # SG-V4 (embedding grounding) disclosures the connector promotes anyway
@@ -512,9 +576,80 @@ class Pipeline:
     _rounds = 0
     _lane_count = 0
     _attempts = 0
+    _last_sig: tuple | None = None
+    _stalls = 0
+    _stalled_at: int | None = None
 
     def _reset_counters(self):
         self._rounds = self._lane_count = self._attempts = 0
+        self._last_sig, self._stalls, self._stalled_at = None, 0, None
+
+    # ── progress between rounds ────────────────────────────────────────
+    #
+    # Each looping stage has a signature: a tuple of counts that can only
+    # go up as the stage advances. A round that raises none of them advanced
+    # nothing, whatever the lanes reported. The signature is read from the
+    # WORKBOOK the lanes write, so it measures the substrate, not the prose.
+
+    def _progress(self, stage: str) -> tuple:
+        wb = self.wb
+        if stage == "PRELIM":
+            from . import prelim
+            st = prelim.state(wb)
+            return (sum(1 for sec in st.get("sections") or [] if sec.get("status") != "OPEN"),)
+        if stage == "RESEARCH":
+            from . import brief
+            searches = wb.rows("Search_Log")
+            rows = wb.scoring_rows()
+            return (len(brief.categories_needing_dispatch(wb)["passed"]),
+                    len(wb.rows("Evidence_Detail")),
+                    len(searches),
+                    sum(1 for r in rows if str(r.get("Dominant_Claim") or "").strip()),
+                    len(L.declared_absences(wb)),
+                    sum(1 for s in searches
+                        if str(s.get("Tool") or "").strip().lower() in C.ENRICHMENT_TOOLS))
+        if stage == "SCORING":
+            from . import assessment as A
+            st = A.state(wb)
+            last = st.get("last_scoring_gate") or {}
+            blocking = last.get("blocking") or []
+            return (sum(1 for r in wb.scoring_rows()
+                        if str(r.get("SubCap_ID") or "") in set(wb.selected_subcaps())
+                        and r.get("Score") not in (None, "")),
+                    sum(1 for v in (st.get("critic_verdicts") or {}).values() if v == "PASS"),
+                    -len(blocking) if last else -(10 ** 6))
+        if stage == "REPORTS":
+            from . import narrative as N
+            st = N.state(wb)
+            return (sum(1 for x in st["reports"].values()
+                        for sec in (x.get("sections") or []) if sec.get("status") == "READY"),
+                    sum(1 for x in st["reports"].values() if x.get("ready")))
+        return ()
+
+    def _stalled(self, stage: str) -> bool:
+        """Record this round's signature; True when `stall_rounds` consecutive
+        rounds advanced nothing. The first call seeds and never stalls."""
+        sig = self._progress(stage)
+        prev, self._last_sig = self._last_sig, sig
+        if prev is None:
+            self._stalls = 0
+            return False
+        if any(c > p for c, p in zip(sig, prev)):
+            self._stalls = 0
+            return False
+        self._stalls += 1
+        if self.opts.stall_rounds and self._stalls >= self.opts.stall_rounds:
+            self._stalled_at = self._rounds
+            self.opts.log(f"  [{stage}] no progress for {self._stalls} consecutive round(s) "
+                          f"— stopping at round {self._rounds} of {self.opts.max_rounds}")
+            return True
+        return False
+
+    def _stall_note(self) -> str:
+        if self._stalled_at is None:
+            return ""
+        return (f" — stopped at round {self._stalled_at}: the last {self._stalls} round(s) "
+                f"advanced nothing the stage measures, so more rounds would not have helped")
 
     def _count(self, summary: dict):
         self._lane_count += int(summary.get("dispatched") or 0)
@@ -525,6 +660,7 @@ class Pipeline:
     def _stage_prelim(self) -> str:
         from . import brief, prelim
         self._reset_counters()
+        self._stalled("PRELIM")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
             b = brief.prelim_brief(self.wb, run=self.run, out_dir=self._briefs(f"prelim_r{r}"))
@@ -534,8 +670,10 @@ class Pipeline:
                 if st["recorded_status"] != "COMPLETE":
                     prelim.complete(self.wb)
                 return f"PRELIM closed after {r + 1} round(s)"
-        raise StageRefused(f"PRELIM still open after {self.opts.max_rounds} round(s): "
-                           f"{', '.join(prelim.state(self.wb)['open'])}")
+            if self._stalled("PRELIM"):
+                break
+        raise StageRefused(f"PRELIM still open after {self._rounds} round(s): "
+                           f"{', '.join(prelim.state(self.wb)['open'])}{self._stall_note()}")
 
     def _stage_kg(self) -> str:
         from . import kg
@@ -552,11 +690,12 @@ class Pipeline:
     def _stage_research(self) -> str:
         from . import brief, floors_gate
         self._reset_counters()
+        self._stalled("RESEARCH")                        # seed the signature
         for r in range(self.opts.max_rounds):
-            self._rounds = r + 1
             need = brief.categories_needing_dispatch(self.wb)
             if not need["dispatch"]:
-                return f"every category PASS after {r} round(s)"
+                return self._research_summary(r)
+            self._rounds = r + 1               # a round is counted when it dispatches
             b = brief.batch(self.wb, run=self.run, out_dir=self._briefs(f"research_r{r}"),
                             only=need["dispatch"], with_handback=(r > 0))
             self._count(self._dispatch(b, stage="RESEARCH"))
@@ -567,15 +706,152 @@ class Pipeline:
             for cat in need["dispatch"]:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
             self._verify_research(need["dispatch"])
+            self._enrich_research(need["dispatch"], r)
             self.reopen()
+            if self._stalled("RESEARCH"):
+                break
         need = brief.categories_needing_dispatch(self.wb)
+        if need["dispatch"]:
+            # A category held back by the ENRICHMENT gate ALONE is disclosed,
+            # not refused: the budget is spent, the floors gate passed it,
+            # and a stage that cannot end while the harness binds no connector
+            # to a headless child is a wall, not a gate.
+            only_enrichment = brief.enrichment_failing_only(self.wb, need["dispatch"])
+            if only_enrichment:
+                self._disclose_enrichment(only_enrichment, why="round budget spent")
+                self.reopen()
+                need = brief.categories_needing_dispatch(self.wb)
         if need["dispatch"]:
             raise StageRefused(
                 f"{len(need['dispatch'])} category(ies) still failing the floors gate after "
-                f"{self.opts.max_rounds} round(s): "
+                f"{self._rounds} round(s): "
                 + "; ".join(f"{c}: {', '.join(need['reasons'][c][:4])}"
-                            for c in need["dispatch"][:4]))
-        return f"every category PASS after {self.opts.max_rounds} round(s)"
+                            for c in need["dispatch"][:4])
+                + self._stall_note())
+        return self._research_summary(self._rounds)
+
+    def _research_summary(self, rounds: int) -> str:
+        """The stage detail names every category whose connector gap was
+        disclosed rather than closed — on both exits, so the record never
+        reads as a clean pass when it was not one."""
+        disclosed = sorted((self.state.get("enrichment_disclosed") or {}).keys())
+        return (f"every category PASS after {rounds} round(s)"
+                + (f"; ENRICHMENT disclosed (no connector search) for {', '.join(disclosed)}"
+                   if disclosed else ""))
+
+    def _enrich_research(self, categories, round_no: int) -> None:
+        """The connector half of a research round (MEM-0333; owner 2026-09-07).
+
+        1. HARVEST the `search_requests` this round's lanes emitted into the
+           relay queue — a lane that could not run a connector said so; the
+           saying must land somewhere.
+        2. DRAIN: one `enrichment-web-specialist` lane per category with open
+           requests, dispatched with the exact commands that turn a connector
+           result into Search_Log and Evidence rows; then RECONCILE the queue
+           against the Search_Log the lanes wrote.
+        3. GATE: per category, an ENRICHMENT row from the Search_Log's Tool
+           column. Zero connector searches → FAIL, BLOCKING while the heal
+           budget lasts (the category re-enters the round loop as a FRESH lane
+           instance carrying the measured reason — grants / instruction /
+           logging / manifest — and the open requests), then FAIL
+           NON-BLOCKING: disclosed, recorded, and no longer a re-dispatch.
+
+        FAIL-SAFE BY CONSTRUCTION, like the verifier: an error in the relay
+        leaves the category exactly as the floors gate found it, logged."""
+        try:
+            from . import relay
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"[ENRICH] skipped: relay unavailable ({e.__class__.__name__})")
+            return
+        logs = self.run.root / "agent_logs"
+        try:
+            h = relay.harvest(self.run, list(categories), logs_dir=logs, round_no=round_no)
+            if h["harvested"]:
+                self.opts.log(f"[RELAY] harvested {h['harvested']} search request(s): "
+                              f"{h['by_category']}")
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"[RELAY] harvest skipped ({e.__class__.__name__}: {str(e)[:120]})")
+        if self.opts.relay:
+            try:
+                d = relay.drain_batch(self.run, self.wb, out_dir=self._briefs(f"relay_r{round_no}"),
+                                      categories=list(categories))
+                if d.get("lanes"):
+                    self.opts.log(f"[RELAY] draining {d['requests']} request(s) over "
+                                  f"{d['lanes']} specialist lane(s)")
+                    self._count(self._dispatch(d, stage="RELAY"))
+                    rc = relay.reconcile(self.run, self.wb)
+                    self.opts.log(f"[RELAY] reconciled: {rc['closed']}; "
+                                  f"still open {rc['still_open']}")
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[RELAY] drain skipped ({e.__class__.__name__}: {str(e)[:120]})")
+        heals = self.state.setdefault("enrichment_heals", {})
+        for cat in categories:
+            try:
+                plan = relay.heal_plan(self.run, self.wb, cat, logs_dir=logs)
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[ENRICH] {cat}: skipped ({e.__class__.__name__})")
+                continue
+            st = plan["status"]
+            try:
+                if st["searches"] == 0:
+                    L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="NOT_RUN",
+                                  detail=plan["reason"], blocking=False)
+                    continue
+                if st["enrichment_searches"] > 0:
+                    L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="PASS",
+                                  detail=plan["reason"], blocking=False)
+                    heals.pop(cat, None)
+                    (self.state.get("enrichment_disclosed") or {}).pop(cat, None)
+                    continue
+                used = int(heals.get(cat) or 0)
+                terms = [f"no enrichment connector was asked: {st['searches']} search(es) all "
+                         f"through {', '.join(st['tools']) or 'nothing'}",
+                         f"heal={plan['heal']}: {plan['reason']}",
+                         f"open relay requests {plan['open_requests']}"]
+                if used < self.opts.enrichment_heals:
+                    heals[cat] = used + 1
+                    terms.append(f"fresh lane instance {used + 1} of {self.opts.enrichment_heals}")
+                    L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="FAIL",
+                                  detail="; ".join(terms), blocking=True)
+                    self.opts.log(f"[ENRICH] {cat}: REVISE — {terms[0][:100]}; heal={plan['heal']}")
+                else:
+                    self._disclose_enrichment([cat], why=f"heal budget spent ({used})",
+                                              plans={cat: plan})
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[ENRICH] {cat}: gate write skipped ({e.__class__.__name__})")
+        self._save_state()
+
+    def _disclose_enrichment(self, categories, *, why: str, plans: dict | None = None) -> None:
+        """Write the ENRICHMENT FAIL for these categories NON-blocking and
+        record it in the driver state — a stated gap, never a silent pass."""
+        from . import relay
+        disclosed = self.state.setdefault("enrichment_disclosed", {})
+        for cat in categories:
+            plan = (plans or {}).get(cat)
+            if plan is None:
+                try:
+                    plan = relay.heal_plan(self.run, self.wb, cat,
+                                           logs_dir=self.run.root / "agent_logs")
+                except Exception as e:                          # noqa: BLE001
+                    plan = {"heal": "unmeasured", "reason": f"{e.__class__.__name__}",
+                            "status": {"searches": None, "tools": []}, "open_requests": None}
+            st = plan["status"]
+            detail = "; ".join([
+                f"DISCLOSED ({why}): no enrichment connector was asked for {cat}",
+                f"{st.get('searches')} search(es) all through {', '.join(st.get('tools') or []) or 'nothing'}",
+                f"heal={plan['heal']}: {plan['reason']}",
+                f"open relay requests {plan.get('open_requests')}"])
+            try:
+                L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="FAIL",
+                              detail=detail[:900], blocking=False)
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[ENRICH] {cat}: disclosure not written ({e.__class__.__name__})")
+            disclosed[cat] = {"at": _utcnow(), "why": why, "heal": plan["heal"],
+                              "reason": str(plan["reason"])[:300],
+                              "searches": st.get("searches"), "tools": st.get("tools"),
+                              "open_requests": plan.get("open_requests")}
+            self.opts.log(f"[ENRICH] {cat}: DISCLOSED — {detail[:140]}")
+        self._save_state()
 
     def _verify_research(self, categories) -> None:
         """The dispatch verifier for RESEARCH. After the floors gate reads the
@@ -633,6 +909,7 @@ class Pipeline:
         if C.stage_of(self._md()) != "assessment":
             A.open_stage(self.wb, self.run.qa_dir)
             self.reopen()
+        self._stalled("SCORING")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
             b = brief.scoring_batch(self.wb, run=self.run, out_dir=self._briefs(f"scoring_r{r}"))
@@ -659,10 +936,13 @@ class Pipeline:
             if v.get("gate") == "PASS":
                 return f"SCORING gate PASS after {r + 1} round(s)"
             self.opts.log(f"  SCORING gate {v.get('gate')}: {', '.join((v.get('blocking') or [])[:6])}")
+            if self._stalled("SCORING"):
+                break
         v = A.gate(self.wb, self.run.qa_dir)
-        raise StageRefused(f"SCORING gate {v.get('gate')} after {self.opts.max_rounds} round(s): "
+        raise StageRefused(f"SCORING gate {v.get('gate')} after {self._rounds} round(s): "
                            + ", ".join((v.get("blocking") or [])[:8])
-                           + (f"; {rollup_note}" if rollup_note else ""))
+                           + (f"; {rollup_note}" if rollup_note else "")
+                           + self._stall_note())
 
     def _ingest(self, label: str, *, after_seq: int | None) -> dict:
         """Poll list_pending_runs until the entity's newest run is newer than
@@ -710,6 +990,7 @@ class Pipeline:
     def _stage_reports(self) -> str:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
+        self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
             b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
@@ -723,12 +1004,15 @@ class Pipeline:
             self.opts.log("  reports not READY: " + "; ".join(
                 f"{k}: {len([s for s in x.get('sections') or [] if s.get('status') != 'READY'])} "
                 f"section(s) open" for k, x in st["reports"].items() if not x.get("ready")))
+            if self._stalled("REPORTS"):
+                break
         st = N.state(self.wb)
         not_ready = [k for k, x in st["reports"].items() if not x.get("ready")]
         if not_ready:
-            raise StageRefused(f"reports not READY after {self.opts.max_rounds} round(s): "
+            raise StageRefused(f"reports not READY after {self._rounds} round(s): "
                                f"{', '.join(not_ready)}; blocking: "
-                               + "; ".join(str(b)[:120] for b in (st.get("blocking") or [])[:4]))
+                               + "; ".join(str(b)[:120] for b in (st.get("blocking") or [])[:4])
+                               + self._stall_note())
         # The Recommendations tab is PROJECTED from the assessment report's
         # REC cards (the pinned Doc's §8), never authored — an engine step,
         # so the driver runs it, not a lane.
@@ -960,6 +1244,21 @@ def env_check() -> dict:
 
 # ── command line ─────────────────────────────────────────────────────────
 
+def _install_terminate_handler() -> None:
+    """SIGTERM becomes an exception, so the dispatcher can hand the running
+    batch SIGTERM (and it its lanes) before this process exits; the default
+    action would end the driver with the lanes still running."""
+    import signal
+
+    def _on_term(signum, _frame):
+        raise SystemExit(f"terminated by signal {signum}: the running batch was told to stop "
+                         f"its lanes; resume with `engine.pipeline run`")
+    try:
+        signal.signal(signal.SIGTERM, _on_term)
+    except (ValueError, OSError):          # not the main thread, or no signals here
+        pass
+
+
 def _build_opts(a) -> Options:
     if a.dispatcher == "stub":
         from . import pipeline_stub as S
@@ -968,6 +1267,8 @@ def _build_opts(a) -> Options:
         disp, reads, shipper = AgentRunDispatcher(timeout=a.lane_timeout), McpReads(), ShipPageShipper()
     return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
                    max_wall_min=a.max_wall_min, max_rounds=a.max_rounds,
+                   stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
+                   relay=not a.no_relay,
                    lane_retries=a.lane_retries, page_retries=a.page_retries,
                    ingest_poll_s=(0 if a.dispatcher == "stub" else a.ingest_poll_s),
                    ingest_timeout_s=a.ingest_timeout_s,
@@ -990,7 +1291,17 @@ def main(argv=None) -> int:
     r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
     r.add_argument("--until", choices=STAGES, help="stop after this stage")
     r.add_argument("--max-wall-min", type=float)
-    r.add_argument("--max-rounds", type=int, default=3)
+    r.add_argument("--max-rounds", type=int, default=Options.max_rounds,
+                   help=f"ceiling on rounds per looping stage (default {Options.max_rounds}); "
+                        f"a stage stops early only when --stall-rounds rounds advance nothing")
+    r.add_argument("--stall-rounds", type=int, default=Options.stall_rounds,
+                   help=f"consecutive rounds with no measured progress that end a stage "
+                        f"(default {Options.stall_rounds}; 0 disables)")
+    r.add_argument("--enrichment-heals", type=int, default=Options.enrichment_heals,
+                   help=f"fresh lane instances spent on a category with no connector search "
+                        f"before the gap is disclosed instead (default {Options.enrichment_heals})")
+    r.add_argument("--no-relay", action="store_true",
+                   help="harvest search_requests but do not dispatch specialist lanes over them")
     r.add_argument("--lane-retries", type=int, default=1)
     r.add_argument("--page-retries", type=int, default=2)
     r.add_argument("--lane-timeout", type=int, default=2400)
@@ -1035,6 +1346,7 @@ def main(argv=None) -> int:
                 return 0
             time.sleep(a.interval)
     opts = _build_opts(a)
+    _install_terminate_handler()
     out = Pipeline(run, opts).run_all()
     if a.json:
         print(json.dumps(out, indent=2, default=str))

@@ -14,27 +14,46 @@ bans — exactly as the Agent tool would. The child session reaches the DMA
 connector natively (static /mcp + header token), so evidence reads, memory
 digests and gate checks all work.
 
-What the child does NOT have: the claude.ai enrichment connectors (Clay,
-Exa, Tavily, Vibe-Prospecting, Indeed) — those are attached to the Routine
-and exist only in the top session. The DISPATCH-MODE preamble (prepended to
-every prompt) tells the agent to emit `search_requests` instead of running
-or fabricating external searches; the orchestrating session executes them
-through its connectors, registers the evidence, and re-invokes.
+What the child MAY NOT have: the claude.ai enrichment connectors (Clay,
+Exa, Tavily, Vibe-Prospecting, Indeed). This script pre-approves every one
+of their namespaces (`ALLOWED`) and the agent manifests declare them, but
+binding is the harness's business and a headless child can still find them
+absent. So the DISPATCH-MODE preamble (prepended to every prompt) tells the
+agent to TRY the connector first and, where it is refused or absent, to emit
+`search_requests` instead of running WebSearch in its place or fabricating.
+`engine.relay` (MEM-0333) harvests those requests from the lane transcripts,
+dispatches `enrichment-web-specialist` lanes over them, reconciles what
+returned against the Search_Log, and the ENRICHMENT gate says, per
+category, whether any connector was asked at all.
+
+LANES ARE PROCESS GROUPS (owner, 2026-09-07: a paused driver died and its
+lanes' children kept running — "50 processes still running, load still
+climbing"). Every child is spawned as its own session leader, its pid and
+pgid are written to its status file, a timeout kills the whole group, and
+SIGTERM/SIGINT/SIGHUP to this process kill every live group before it
+exits. `agent_run.py reap` kills the groups a dead driver left behind, and
+the lane count is capped by what the host can actually hold.
 
 Usage:
   agent_run.py --agent finding-challenger --prompt-file /tmp/stage.md
   agent_run.py --agent package-vetter < prompt.md
   agent_run.py --list          # the roster this script will accept
+  agent_run.py --batch batch.json --lanes 16 --stream [--no-lane-cap]
+  agent_run.py reap [--log-dir DIR] [--dry-run] [--force]   # kill orphaned lane groups
+  agent_run.py capacity [--lanes N]                         # what the host can hold
 
 Exit code is the child's. Output is the child's stdout, verbatim.
 """
 from __future__ import annotations
 
 import argparse
+import atexit
 import concurrent.futures
 import json
 import os
+import queue
 import re
+import signal
 import subprocess
 import sys
 import threading
@@ -55,16 +74,36 @@ DEFAULT_TIMEOUT = 2400
 #: lying about the wall clock again.
 DEFAULT_LANES = 16
 
+#: The executable a lane runs. Overridable so a test can stand in a script
+#: that behaves like a child (prints, spawns, hangs) without a model.
+CLAUDE_BIN = os.environ.get("DMA_CLAUDE_BIN", "claude")
+
+#: WHAT ONE LANE COSTS THE HOST — an estimate, stated as one. A `claude -p`
+#: child is a Node process holding a model context; measured RSS on the
+#: 2026-09-07 runs sat in the hundreds of MB and climbed with the transcript.
+#: 600 MB per lane plus 1 GB of headroom is the planning figure; set
+#: DMA_LANE_MEM_MB when a measurement on your host says otherwise, or pass
+#: --no-lane-cap to run the requested count regardless. The cap is REPORTED
+#: in the batch summary either way, so a schedule that assumed sixteen lanes
+#: on a four-lane box says so instead of running late silently.
+LANE_MEM_MB = 600
+LANE_MEM_HEADROOM_MB = 1024
+LANES_PER_CPU = 2      # lanes mostly wait on a model; two per core is generous
+
 PREAMBLE = """DISPATCH MODE — you are running as a headless session, not an
 in-process subagent. Two things differ from your usual footing:
-1. You carry the DMA Insights connector tools but NOT the claude.ai
-   enrichment connectors (Clay, Exa, Tavily, Vibe-Prospecting, Indeed).
-   Where your rulebook requires an external search you cannot run, do NOT
-   fabricate and do NOT skip silently: add the exact query, its falsifier
-   pairing and the facet it serves to a `search_requests` array in your
-   final output. The orchestrating session runs them through the real
-   connectors, registers what they return, and re-invokes you with the
-   evidence ids.
+1. You carry the DMA Insights connector tools and, where your manifest
+   declares them, the claude.ai enrichment connectors (Clay, Exa, Tavily,
+   Vibe-Prospecting, Indeed) — but a headless child is NOT guaranteed the
+   binding a top session has. Where your rulebook requires an enrichment
+   search, TRY the connector first and log it with the tool that ran it
+   (`--tool exa|tavily|clay`). If the call is refused or the tool is absent,
+   do NOT run it through WebSearch instead, do NOT fabricate and do NOT skip
+   silently: add it to a `search_requests` array in your final output —
+   JSON objects {"query", "falsifier", "facet", "subcap", "tool", "proves"}.
+   The driver (`engine.relay`) harvests them, runs them through a
+   connector-bearing lane, registers what returns, and re-dispatches you
+   with the evidence in your brief.
 2. Your final output is read by the orchestrating session, not a human —
    return the JSON or report your role defines, nothing else.
 3. ROUTE BEFORE YOU PRODUCE. One surface -> that page's per-surface
@@ -218,11 +257,16 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
     entirely I/O-bound waiting on those children, which is why threads are
     the right primitive and the GIL is not in the way.
     """
-    cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
+    cmd = [CLAUDE_BIN, "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
            f"--allowedTools={allowed}", prompt]
     try:
+        # start_new_session: the child leads its own process group, so a
+        # signal aimed at THIS process never reaches it by accident and the
+        # streaming path can kill child and grandchildren together. On this
+        # path subprocess.run still kills only the direct child at timeout;
+        # the driver dispatches with --stream, where the group is killed.
         # DMA_STAGE_GUARD=off in the CHILD. The Stop hook holds a session
         # open while a run has a stage an agent can advance — correct for
         # the driving session, wrong for a lane: a scorer that finishes
@@ -232,6 +276,7 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
         # conductor, which is the only actor that knows the fan-out.
         r = subprocess.run(cmd, cwd=repo_root, timeout=timeout,
                            capture_output=True, text=True,
+                           start_new_session=True,
                            env={**os.environ, "DMA_STAGE_GUARD": "off"})
     except subprocess.TimeoutExpired:
         return {"agent": name, "code": 124, "stdout": "", "stderr": "",
@@ -245,6 +290,224 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
     code, note = verdict_of(name, r.returncode, out, err)
     return {"agent": name, "code": code, "stdout": out, "stderr": err,
             "note": note}
+
+
+# ── PROCESS GROUPS, AND WHO KILLS THEM ───────────────────────────────────
+#
+# Measured 2026-09-07 (owner): four paused drivers were killed; their lanes'
+# `claude` children — and the children those had spawned — kept running.
+# Fifty processes, load at 115 and climbing, until every subprocess was
+# force-cleared by hand and the surviving drivers redispatched. Three
+# causes, three fixes:
+#   1. a child spawned into the parent's group is not killed with the
+#      parent → every lane is its own session leader (start_new_session),
+#      its pgid recorded, and killed AS A GROUP;
+#   2. `for line in proc.stdout` only wakes when a line arrives, so a silent
+#      child never met its deadline → reader threads feed a queue and the
+#      loop wakes on a clock;
+#   3. nothing reaped anything when this process was told to stop → the
+#      signal handlers below kill every live group first, and `reap` finds
+#      the groups a dead driver left behind from the status files.
+
+_LIVE: dict[int, "subprocess.Popen"] = {}
+_LIVE_LOCK = threading.Lock()
+
+
+def _track(proc) -> None:
+    with _LIVE_LOCK:
+        _LIVE[proc.pid] = proc
+
+
+def _untrack(proc) -> None:
+    with _LIVE_LOCK:
+        _LIVE.pop(proc.pid, None)
+
+
+def _group_alive(pgid: int) -> bool:
+    try:
+        os.killpg(pgid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def kill_group(pgid: int, *, proc=None, grace_s: float = 5.0) -> str:
+    """SIGTERM the whole group, wait `grace_s`, SIGKILL what is left.
+
+    `proc` is the direct child when we hold it: it is reaped with wait() so a
+    zombie does not keep the group "alive" past its grandchildren. Returns
+    gone / terminated / killed."""
+    if not _group_alive(pgid):
+        if proc is not None:
+            try:
+                proc.wait(timeout=1)
+            except Exception:                                   # noqa: BLE001
+                pass
+        return "gone"
+    try:
+        os.killpg(pgid, signal.SIGTERM)
+    except ProcessLookupError:
+        return "gone"
+    deadline = time.monotonic() + grace_s
+    if proc is not None:
+        try:
+            proc.wait(timeout=grace_s)
+        except Exception:                                       # noqa: BLE001
+            pass
+    while time.monotonic() < deadline:
+        if not _group_alive(pgid):
+            return "terminated"
+        time.sleep(0.05)
+    try:
+        os.killpg(pgid, signal.SIGKILL)
+    except ProcessLookupError:
+        return "terminated"
+    if proc is not None:
+        try:
+            proc.wait(timeout=2)
+        except Exception:                                       # noqa: BLE001
+            pass
+    return "killed"
+
+
+def reap_live(reason: str = "exit") -> list:
+    """Kill every lane this process still holds. Called by the signal
+    handlers and at exit; idempotent."""
+    with _LIVE_LOCK:
+        procs = list(_LIVE.values())
+    out = []
+    for proc in procs:
+        out.append({"pid": proc.pid, "result": kill_group(proc.pid, proc=proc)})
+        _untrack(proc)
+    if out:
+        print(f"agent_run: {reason}: stopped {len(out)} lane group(s): "
+              + ", ".join(f"{o['pid']}={o['result']}" for o in out),
+              file=sys.stderr, flush=True)
+    return out
+
+
+_REAP_SIGNALS = tuple(s for s in ("SIGTERM", "SIGINT", "SIGHUP") if hasattr(signal, s))
+
+
+def install_reaper():
+    """Route SIGTERM/SIGINT/SIGHUP through reap_live, then exit with the
+    conventional 128+signum. Returns the handlers to restore, or None off the
+    main thread (where Python refuses to install any)."""
+    if threading.current_thread() is not threading.main_thread():
+        return None
+    prev = {}
+
+    def handler(signum, _frame):
+        reap_live(f"signal {signum}")
+        raise SystemExit(128 + int(signum))
+    for name in _REAP_SIGNALS:
+        sig = getattr(signal, name)
+        try:
+            prev[sig] = signal.signal(sig, handler)
+        except (ValueError, OSError):
+            pass
+    atexit.register(reap_live)
+    return prev
+
+
+def restore_handlers(prev) -> None:
+    for sig, h in (prev or {}).items():
+        try:
+            signal.signal(sig, h if h is not None else signal.SIG_DFL)
+        except (ValueError, OSError, TypeError):
+            pass
+
+
+def reap(logs: Path, *, dry_run: bool = False, force: bool = False) -> list:
+    """Kill the lane groups a dead driver left behind, from the status files.
+
+    A status file still `running` whose recorded driver pid is gone names an
+    orphaned group (the owner's 2026-09-07 shape); `--force` also takes the
+    groups of drivers that are alive. Each reaped file is rewritten to say
+    what happened, so the table never shows a killed lane as running."""
+    out = []
+    for f in sorted(Path(logs).glob("*.status.json")):
+        try:
+            st = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        if st.get("state") != "running" or not st.get("pgid"):
+            continue
+        pgid = int(st["pgid"])
+        driver = st.get("driver_pid")
+        driver_alive = bool(driver) and _pid_alive(int(driver))
+        alive = _group_alive(pgid)
+        row = {"agent": st.get("label") or st.get("agent"), "pgid": pgid,
+               "driver_pid": driver, "driver_alive": driver_alive, "group_alive": alive}
+        if not alive:
+            row["result"] = "gone"
+            st.update(state="gone", doing="group already exited; status was stale")
+        elif driver_alive and not force:
+            row["result"] = "skipped: its driver is alive (use --force)"
+        elif dry_run:
+            row["result"] = "would kill"
+        else:
+            row["result"] = kill_group(pgid)
+            st.update(state="reaped", doing=f"group {row['result']} by agent_run reap",
+                      reaped_at=time.time())
+        if not dry_run and row["result"] not in ("would kill",) and "skipped" not in row["result"]:
+            try:
+                f.write_text(json.dumps(st, indent=1, sort_keys=True))
+            except OSError:
+                pass
+        out.append(row)
+    return out
+
+
+# ── HOST CAPACITY ────────────────────────────────────────────────────────
+
+def _mem_available_mb() -> int | None:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) // 1024
+    except (OSError, ValueError, IndexError):
+        return None
+    return None
+
+
+_MEASURE = object()     # "read it from the host"; None means "unknown"
+
+
+def host_capacity(requested: int, *, mem_mb=_MEASURE, cpus=_MEASURE,
+                  per_lane_mb=_MEASURE) -> dict:
+    """How many lanes this host can hold, and why. Never below one; never
+    above what was asked. Every input is in the result so the cap is a
+    measurement a person can dispute, not a number that appeared. Pass
+    `mem_mb=None` for a host whose memory could not be read: the request
+    stands and the result says the memory bound was not measured."""
+    cpus = (os.cpu_count() or 1) if cpus is _MEASURE else (cpus or 1)
+    mem = _mem_available_mb() if mem_mb is _MEASURE else mem_mb
+    per = (int(os.environ.get("DMA_LANE_MEM_MB") or LANE_MEM_MB)
+           if per_lane_mb is _MEASURE else int(per_lane_mb))
+    by_cpu = max(1, int(cpus) * LANES_PER_CPU)
+    by_mem = max(1, (int(mem) - LANE_MEM_HEADROOM_MB) // max(1, per)) if mem is not None else None
+    lanes = max(1, min(int(requested), by_cpu, by_mem if by_mem is not None else requested))
+    binding = ("requested" if lanes == requested else
+               "memory" if by_mem is not None and lanes == by_mem else "cpu")
+    return {"requested": int(requested), "lanes": lanes, "capped": lanes < int(requested),
+            "binding": binding, "cpus": cpus, "lanes_per_cpu": LANES_PER_CPU,
+            "mem_available_mb": mem, "per_lane_mb": per, "headroom_mb": LANE_MEM_HEADROOM_MB,
+            "by_cpu": by_cpu, "by_mem": by_mem,
+            "note": ("per-lane memory is an estimate (DMA_LANE_MEM_MB overrides; "
+                     "--no-lane-cap runs the requested count)")}
 
 
 # ── LIVE VISIBILITY ──────────────────────────────────────────────────────
@@ -347,68 +610,122 @@ def _final_text(events: list, raw: str) -> str:
     return "\n".join(blocks) if blocks else raw
 
 
+def _pump(stream, kind: str, q: "queue.Queue") -> None:
+    """Feed one pipe into the queue, line by line, then a None sentinel. A
+    daemon thread: if the process is killed mid-line the read ends with it."""
+    try:
+        for line in stream:
+            q.put((kind, line))
+    except (OSError, ValueError):
+        pass
+    finally:
+        q.put((kind, None))
+
+
 def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
-                       allowed: str, logs: Path) -> dict:
-    """`dispatch`, with the child's events written as they arrive."""
-    import time
+                       allowed: str, logs: Path, *, label: str | None = None) -> dict:
+    """`dispatch`, with the child's events written as they arrive.
+
+    The child is its own process group; the deadline is kept on a clock
+    rather than on the next line; stdout and stderr are drained by threads so
+    a chatty stderr cannot deadlock the pipe; and pid/pgid/driver_pid are in
+    the status file so `reap` can find the group after this process is gone.
+    `label` names the transcript when several lanes run the same agent."""
+    label = label or name
     logs.mkdir(parents=True, exist_ok=True)
-    jsonl = logs / f"{name}.jsonl"
-    status = logs / f"{name}.status.json"
-    st = {"agent": name, "state": "running", "doing": "starting",
+    jsonl = logs / f"{label}.jsonl"
+    status = logs / f"{label}.status.json"
+    st = {"agent": name, "label": label, "state": "running", "doing": "starting",
           "started_at": time.time(), "last_event_at": time.time(),
-          "events": 0, "tools": 0}
+          "events": 0, "tools": 0, "driver_pid": os.getpid()}
 
     def flush_status():
-        status.write_text(json.dumps(st, indent=1, sort_keys=True))
+        try:
+            status.write_text(json.dumps(st, indent=1, sort_keys=True))
+        except OSError:
+            pass
 
     flush_status()
-    cmd = ["claude", "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
+    cmd = [CLAUDE_BIN, "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
            "--output-format", "stream-json", "--verbose",
            f"--allowedTools={allowed}", prompt]
-    events, raw = [], []
+    events, raw, err_parts = [], [], []
     try:
         proc = subprocess.Popen(cmd, cwd=repo_root, text=True, bufsize=1,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
+                                start_new_session=True,
                                 # same reason as `dispatch`: the stage guard
                                 # is the conductor's, never a lane's
                                 env={**os.environ, "DMA_STAGE_GUARD": "off"})
     except FileNotFoundError:
         st.update(state="failed", doing="claude CLI not on PATH")
         flush_status()
-        return {"agent": name, "code": 127, "stdout": "", "stderr": "",
+        return {"agent": name, "label": label, "code": 127, "stdout": "", "stderr": "",
                 "note": "DISPATCH FAILED: the claude CLI is not on PATH in "
                         "this container"}
+    _track(proc)
+    st.update(pid=proc.pid, pgid=proc.pid)     # a session leader's pgid is its pid
+    flush_status()
 
-    deadline = time.time() + timeout
-    with jsonl.open("w", encoding="utf-8") as fh:
-        for line in proc.stdout:
-            fh.write(line)          # VERBATIM, before any interpretation
-            fh.flush()
-            raw.append(line)
-            st["last_event_at"] = time.time()
-            try:
-                ev = json.loads(line)
-            except ValueError:
-                st["events"] = st.get("events", 0) + 1
-            else:
-                events.append(ev)
-                _summarise(ev, st)
-            flush_status()
-            if time.time() > deadline:
-                proc.kill()
-                st.update(state="timeout",
-                          doing=f"exceeded {timeout}s")
+    q: "queue.Queue" = queue.Queue()
+    threading.Thread(target=_pump, args=(proc.stdout, "out", q), daemon=True).start()
+    threading.Thread(target=_pump, args=(proc.stderr, "err", q), daemon=True).start()
+    deadline = time.monotonic() + timeout
+    open_ends, timed_out = 2, False
+    try:
+        with jsonl.open("w", encoding="utf-8") as fh:
+            while open_ends:
+                try:
+                    kind, line = q.get(timeout=0.5)
+                except queue.Empty:
+                    if time.monotonic() > deadline:
+                        timed_out = True
+                        break
+                    continue
+                if line is None:
+                    open_ends -= 1
+                    continue
+                if kind == "err":
+                    err_parts.append(line)
+                    continue
+                fh.write(line)          # VERBATIM, before any interpretation
+                fh.flush()
+                raw.append(line)
+                st["last_event_at"] = time.time()
+                try:
+                    ev = json.loads(line)
+                except ValueError:
+                    st["events"] = st.get("events", 0) + 1
+                else:
+                    events.append(ev)
+                    _summarise(ev, st)
                 flush_status()
-                return {"agent": name, "code": 124,
-                        "stdout": _final_text(events, "".join(raw)),
-                        "stderr": "", "note":
-                        f"DISPATCH TIMEOUT: {name} exceeded {timeout}s — "
-                        f"treat as a failed stage, never as an empty verdict"}
-    err = proc.stderr.read() if proc.stderr else ""
-    rc = proc.wait()
+                if time.monotonic() > deadline:
+                    timed_out = True
+                    break
+        if timed_out:
+            result = kill_group(proc.pid, proc=proc)
+            st.update(state="timeout", doing=f"exceeded {timeout}s; group {result}")
+            flush_status()
+            return {"agent": name, "label": label, "code": 124,
+                    "stdout": _final_text(events, "".join(raw)),
+                    "stderr": "".join(err_parts), "note":
+                    f"DISPATCH TIMEOUT: {name} exceeded {timeout}s (process group "
+                    f"{result}) — treat as a failed stage, never as an empty verdict"}
+        rc = proc.wait()
+    except BaseException:
+        # Interrupted (a signal handler raised, or anything else): the lane
+        # must not outlive the dispatch that owns it.
+        kill_group(proc.pid, proc=proc)
+        st.update(state="failed", doing="dispatch interrupted; group killed")
+        flush_status()
+        raise
+    finally:
+        _untrack(proc)
+    err = "".join(err_parts)
     out = _final_text(events, "".join(raw))
     code, note = verdict_of(name, rc, out, err)
     st.update(state="ok" if code == 0 else "failed",
@@ -416,7 +733,7 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
     flush_status()
     # The child's own usage rides up to the batch summary and the cost
     # ledger (`--record-run`): turns and USD from the CLI's result event.
-    return {"agent": name, "code": code, "stdout": out, "stderr": err,
+    return {"agent": name, "label": label, "code": code, "stdout": out, "stderr": err,
             "note": note, "turns": st.get("num_turns"),
             "usd": st.get("total_cost_usd")}
 
@@ -481,8 +798,18 @@ def read_batch(path: Path) -> list:
         if not text.strip():
             raise SystemExit(f"{path}[{i}]: empty prompt for {name} — a "
                              f"stage with no task is a no-op")
-        out.append({"agent": name, "prompt": text})
+        # A label names the lane's transcript and .out when several rows run
+        # the SAME agent (the relay dispatches one enrichment-web-specialist
+        # per category); without it sixteen lanes overwrite one file.
+        label = str(row.get("label") or name).strip()
+        if not _LABEL_OK.match(label):
+            raise SystemExit(f"{path}[{i}]: label {label!r} may only carry "
+                             f"letters, digits, . _ @ : -")
+        out.append({"agent": name, "prompt": text, "label": label})
     return out
+
+
+_LABEL_OK = re.compile(r"^[A-Za-z0-9_.@:\-]{1,120}$")
 
 
 # ── RETRIES, TIMINGS, THE COST LEDGER ────────────────────────────────────
@@ -515,7 +842,7 @@ def _now() -> str:
 def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
                           repo_root: Path, allowed: str, *, retries: int = 0,
                           backoff_s: float = DEFAULT_RETRY_BACKOFF_S,
-                          sleep=time.sleep) -> dict:
+                          sleep=time.sleep, label: str | None = None) -> dict:
     """`run_fn` until it returns a non-retryable code or the retries are
     spent. The result carries `attempts`, `started_at`, `ended_at`,
     `elapsed_s` and the per-attempt codes, so the batch summary — and the
@@ -524,17 +851,19 @@ def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
     t0 = time.monotonic()
     codes = []
     res = None
+    extra = {"label": label} if label and label != name else {}
     total = max(0, int(retries)) + 1
     for k in range(1, total + 1):
         p = prompt
         if k > 1:
             p = prompt + _ATTEMPT_NOTE.format(k=k, n=total, why=_why(codes[-1]))
-        res = run_fn(name, p, timeout, repo_root, allowed)
+        res = run_fn(name, p, timeout, repo_root, allowed, **extra)
         codes.append(res["code"])
         if res["code"] not in RETRYABLE or k == total:
             break
         sleep(backoff_s * k)
     res = dict(res)
+    res.setdefault("label", label or name)
     res.update({"attempts": len(codes), "attempt_codes": codes,
                 "started_at": started, "ended_at": _now(),
                 "elapsed_s": round(time.monotonic() - t0, 1)})
@@ -574,46 +903,54 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
               logs: Path | None = None, *, retries: int = 0,
               backoff_s: float = DEFAULT_RETRY_BACKOFF_S,
               timing_out: Path | None = None,
-              record: dict | None = None) -> int:
+              record: dict | None = None,
+              capacity: dict | None = None) -> int:
     """Run every row, `lanes` at a time. Exit non-zero if ANY lane failed."""
     results, done = [], 0
     batch_started, batch_t0 = _now(), time.monotonic()
     # With --stream every lane writes its own live transcript and status, so
     # a person watching `agent_run.py watch` sees sixteen agents working
     # rather than one Bash call that has not returned yet.
-    base = ((lambda n, p, t, rr, al: dispatch_streaming(n, p, t, rr, al, logs))
-            if logs else dispatch)
-    run = (lambda n, p, t, rr, al: dispatch_with_retries(
-        base, n, p, t, rr, al, retries=retries, backoff_s=backoff_s))
+    base = ((lambda n, p, t, rr, al, label=None: dispatch_streaming(
+                n, p, t, rr, al, logs, label=label))
+            if logs else (lambda n, p, t, rr, al, label=None: dispatch(n, p, t, rr, al)))
+    run = (lambda n, p, t, rr, al, label=None: dispatch_with_retries(
+        base, n, p, t, rr, al, retries=retries, backoff_s=backoff_s, label=label))
     if logs:
         logs.mkdir(parents=True, exist_ok=True)
         print(f"streaming {len(rows)} lane(s) to {logs}\n"
               f"watch them with: python3 {Path(__file__).name} watch "
               f"--log-dir {logs}", flush=True)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
-        futures = {pool.submit(run, r["agent"], r["prompt"], timeout,
-                               repo_root, allowed): r["agent"]
-                   for r in rows}
-        for fut in concurrent.futures.as_completed(futures):
-            res = fut.result()
-            results.append(res)
-            done += 1
-            # Each lane's transcript goes to its OWN file: sixteen children
-            # writing one stream produces a transcript nobody can read, and
-            # the orchestrator needs each verdict whole to relay it.
-            if out_dir:
-                out_dir.mkdir(parents=True, exist_ok=True)
-                (out_dir / f"{res['agent']}.out").write_text(
-                    res["stdout"], encoding="utf-8")
-            with _PRINT_LOCK:
-                state = "ok" if res["code"] == 0 else f"FAILED({res['code']})"
-                extra = (f"  {res.get('elapsed_s', 0):.0f}s"
-                         + (f", {res['attempts']} attempts"
-                            if res.get("attempts", 1) > 1 else ""))
-                print(f"[{done}/{len(rows)}] {res['agent']:34s} {state}{extra}",
-                      flush=True)
-                if res["note"]:
-                    print(f"    {res['note']}", file=sys.stderr, flush=True)
+    # Stop means stop: a signal to this process kills every live lane group
+    # before it exits (installed on the main thread only; restored after).
+    prev_handlers = install_reaper()
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
+            futures = {pool.submit(run, r["agent"], r["prompt"], timeout,
+                                   repo_root, allowed, r.get("label")): r["agent"]
+                       for r in rows}
+            for fut in concurrent.futures.as_completed(futures):
+                res = fut.result()
+                results.append(res)
+                done += 1
+                # Each lane's transcript goes to its OWN file: sixteen children
+                # writing one stream produces a transcript nobody can read, and
+                # the orchestrator needs each verdict whole to relay it.
+                if out_dir:
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    (out_dir / f"{res.get('label') or res['agent']}.out").write_text(
+                        res["stdout"], encoding="utf-8")
+                with _PRINT_LOCK:
+                    state = "ok" if res["code"] == 0 else f"FAILED({res['code']})"
+                    extra = (f"  {res.get('elapsed_s', 0):.0f}s"
+                             + (f", {res['attempts']} attempts"
+                                if res.get("attempts", 1) > 1 else ""))
+                    print(f"[{done}/{len(rows)}] {res.get('label') or res['agent']:34s} "
+                          f"{state}{extra}", flush=True)
+                    if res["note"]:
+                        print(f"    {res['note']}", file=sys.stderr, flush=True)
+    finally:
+        restore_handlers(prev_handlers)
     failed = [r for r in results if r["code"] != 0]
     # Streamed children carry their usage (turns, cost) on the status file;
     # sum what is there and say nothing where it is not.
@@ -621,7 +958,9 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
     usd_vals = [r.get("usd") for r in results if r.get("usd") is not None]
     summary = {"lanes": lanes, "dispatched": len(rows),
                "ok": len(results) - len(failed),
-               "failed": [{"agent": r["agent"], "code": r["code"],
+               "lane_cap": capacity,
+               "failed": [{"agent": r["agent"], "label": r.get("label") or r["agent"],
+                           "code": r["code"],
                            "attempts": r.get("attempts", 1)} for r in failed],
                "started_at": batch_started, "ended_at": _now(),
                "elapsed_s": round(time.monotonic() - batch_t0, 1),
@@ -629,7 +968,8 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
                "turns": turns or None,
                "usd": round(sum(usd_vals), 4) if usd_vals else None,
                "lanes_detail": sorted(
-                   [{"agent": r["agent"], "code": r["code"],
+                   [{"agent": r["agent"], "label": r.get("label") or r["agent"],
+                     "code": r["code"],
                      "attempts": r.get("attempts", 1),
                      "attempt_codes": r.get("attempt_codes", [r["code"]]),
                      "started_at": r.get("started_at"),
@@ -692,15 +1032,35 @@ def main(argv=None) -> int:
                     help="where --stream and `watch` keep transcripts "
                          "(default: $DMA_RUN_ROOT/agent_logs, else "
                          "/root/.dma/agent_logs)")
-    ap.add_argument("cmd", nargs="?", choices=["watch"],
+    ap.add_argument("cmd", nargs="?", choices=["watch", "reap", "capacity"],
                     help="`watch` renders the live status table and exits "
-                         "when every agent has stopped")
+                         "when every agent has stopped; `reap` kills the lane "
+                         "process groups a dead driver left running; "
+                         "`capacity` prints what this host can hold")
     ap.add_argument("--once", action="store_true",
                     help="with watch: print one snapshot and exit")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="with reap: say what would be killed, kill nothing")
+    ap.add_argument("--force", action="store_true",
+                    help="with reap: also kill groups whose driver is still alive")
+    ap.add_argument("--no-lane-cap", action="store_true",
+                    help="with --batch: run the requested lane count even when "
+                         "the host's memory/CPU say fewer")
     a = ap.parse_args(argv)
 
     if a.cmd == "watch":
         return watch(log_dir_for(a.log_dir), once=a.once)
+    if a.cmd == "reap":
+        rows = reap(log_dir_for(a.log_dir), dry_run=a.dry_run, force=a.force)
+        for r in rows:
+            print(f"{str(r['agent']):40s} pgid {r['pgid']:<8} driver "
+                  f"{'alive' if r['driver_alive'] else 'dead ':5s}  {r['result']}")
+        if not rows:
+            print(f"nothing running under {log_dir_for(a.log_dir)}")
+        return 0
+    if a.cmd == "capacity":
+        print(json.dumps(host_capacity(a.lanes), indent=2))
+        return 0
 
     names = roster()
     if a.list:
@@ -719,6 +1079,15 @@ def main(argv=None) -> int:
             for r in rows:
                 r["prompt"] = PREAMBLE + r["prompt"]
         lanes = max(1, min(a.lanes, len(rows)))
+        cap = host_capacity(lanes)
+        if cap["capped"] and not a.no_lane_cap:
+            print(f"lane cap: {cap['requested']} requested, running {cap['lanes']} "
+                  f"(bound by {cap['binding']}: {cap['cpus']} cpu, "
+                  f"{cap['mem_available_mb']} MB available, {cap['per_lane_mb']} MB/lane "
+                  f"estimate; --no-lane-cap overrides)", file=sys.stderr, flush=True)
+            lanes = cap["lanes"]
+        elif cap["capped"]:
+            cap["overridden"] = True
         if a.record_run and not a.record_stage:
             ap.error("--record-run needs --record-stage")
         print(f"dispatching {len(rows)} agent(s), {lanes} at a time"
@@ -732,7 +1101,8 @@ def main(argv=None) -> int:
                          timing_out=Path(a.timing_out) if a.timing_out else None,
                          record=({"run": a.record_run, "root": a.record_root,
                                   "stage": a.record_stage}
-                                 if a.record_run else None))
+                                 if a.record_run else None),
+                         capacity=cap)
 
     name = a.agent.removeprefix(f"{PLUGIN_PREFIX}:")
     if name not in names:
@@ -759,7 +1129,7 @@ def main(argv=None) -> int:
     # allowed working directories for this session: '/home/user/Accelerate'."
     # The package, the bundles and the client memory all live under /root/.dma.
     logs = log_dir_for(a.log_dir) if a.stream else None
-    base = ((lambda n, p, t, rr, al: dispatch_streaming(n, p, t, rr, al, logs))
+    base = ((lambda n, p, t, rr, al, **kw: dispatch_streaming(n, p, t, rr, al, logs, **kw))
             if logs else dispatch)
     res = dispatch_with_retries(base, name, prompt, a.timeout, repo_root, ALLOWED,
                                 retries=a.retries, backoff_s=a.retry_backoff_s)
