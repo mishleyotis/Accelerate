@@ -458,7 +458,15 @@ jobs:
   research-engine-tests:
     name: Research engine + acceptance suites
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Measured 2026-09-07 on a 4-core box matching this runner's shape:
+    # `pytest tests/skills/ tests/acceptance/ -n auto --dist loadfile` alone
+    # is 972 tests in 16:30. The 25-minute ceiling left under 9 minutes for
+    # checkout + a cold `pip install` + this runner's own overhead, and this
+    # job was cancelled at the 25:00 mark on two consecutive pushes that
+    # added no slow test, just grew an already-marginal budget. 35 keeps a
+    # real ceiling — a genuinely hung test still gets caught — with headroom
+    # a cold install and a slower runner don't eat into.
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
