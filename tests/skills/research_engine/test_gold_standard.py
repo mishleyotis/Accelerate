@@ -169,7 +169,14 @@ def _docx(path, paragraphs, add_header=True):
     import docx
     d = docx.Document()
     for style, text in paragraphs:
-        d.add_paragraph(text, style=style)
+        if style == "TABLE":
+            rows = text
+            t = d.add_table(rows=len(rows), cols=len(rows[0]))
+            for r, row in enumerate(rows):
+                for c, cell in enumerate(row):
+                    t.cell(r, c).text = str(cell)
+        else:
+            d.add_paragraph(text, style=style)
     d.save(str(path))
     if add_header:
         # inject a header part so GS-RPT-BRANDING sees branding chrome
@@ -218,6 +225,17 @@ def _assessment_body(overall="2.25"):
     # `report_findings` holds a report to the reference's 690 subcaps: 115
     # distinct citations and the pinned Doc's 8,400-word contract).
     body.append(("Normal", " ".join(f"E-{i}" for i in range(1, 121)) + " " + "word " * 8600))
+    # structure (GSY-19): the reference carries 92 tables at ~126 words each
+    # over the same 690 subcaps — a clean fixture must too, or the structure
+    # gate correctly refuses it. 93 small, evenly-sized tables so no single
+    # table dominates (GS-RPT-TABLE-DUMP) and the average stays near the
+    # reference's own, not above TABLE_DUMP_FACTOR.
+    for i in range(93):
+        body.append(("TABLE", [
+            ["Field", "Value", "Evidence"],
+            [f"Row {i}.1", "cell data here for this row", f"E-{(i % 115) + 1}"],
+            [f"Row {i}.2", "more cell data for this table row", f"E-{(i % 115) + 1}"],
+        ]))
     return body
 
 
