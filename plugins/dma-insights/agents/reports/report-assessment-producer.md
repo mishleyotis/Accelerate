@@ -81,31 +81,31 @@ with the countable MINIMUM DATA rules the write refuses on.
 | 10 | Data Gaps and Confidence | 250w | `Subcap_Scores`, `Coverage_Map`, `Search_Log`, `Enrichment_Needed` | not required | `heatmap.alerts`, `heatmap.evidence_age` |
 | 11 | Workbook Traceability | 100w | `Evidence_Detail`, `Subcap_Scores`, `Run_Metadata` | not required | `heatmap.evidence`, `heatmap.cell_evidence` |
 
-**The blocks each section is written in**, in order. A body missing one, or carrying them out of order, is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.
+**The blocks each section is written in**, in order, each with the word floor IT owes (the Doc's LENGTH band where it states one, the engine's `BLOCK_MIN_WORDS` otherwise). A body missing one, carrying them out of order, or leaving one under its floor or reading as form-filling is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.
 
-- **§1** — `## 1.1 SCQA context`  ·  `## 1.2 Key strengths`  ·  `## 1.3 Critical development areas`  ·  `## 1.4 Assessment by pillar`
-- **§2** — `## 2.1 How the scores were produced`  ·  `## 2.2 Framework elements applied`
-- **§3** — `## 3.1 Capped capabilities`  ·  `## 3.2 When each cap lifts`  ·  `## 3.3 Aggregate effect`
-- **§4** — `## 4.1 Overall score`  ·  `## 4.2 Category scores and gaps`
-- **§5** — `## Capability scorecard`  ·  `## What we see`  ·  `## AI and data overlay`  ·  `## Why it matters`
-- **§6** — `## 6.1 Peer scores`  ·  `## 6.2 Strategic positioning`  ·  `## 6.3 Lead competitor`  ·  `## 6.4 Technology estate`  ·  `## 6.5 Peer deployment`
-- **§7** — `## 7.1 Prioritisation formula`  ·  `## 7.2 Gap priority register`  ·  `## 7.3 Critical gap root causes`
-- **§8** — `## Root cause`  ·  `## Cost of inaction`  ·  `## Solution`  ·  `## Platform readiness contract`  ·  `## Rebuttal`  ·  `## Impact on assessed capabilities`  ·  `## Measure of success`  ·  `## Why this phase`
-- **§9** — `## 9.1 Horizon vocabulary`  ·  `## 9.2 Phases`  ·  `## 9.3 Stair-step`  ·  `## 9.4 Maturity trajectory`
-- **§10** — `## 10.1 Gaps by pillar`  ·  `## 10.2 Recommended next steps`
-- **§11** — `## 11.1 Where to verify a claim`
+- **§1** — `## 1.1 SCQA context` (20w+)  ·  `## 1.2 Key strengths` (20w+)  ·  `## 1.3 Critical development areas` (20w+)  ·  `## 1.4 Assessment by pillar` (20w+)
+- **§2** — `## 2.1 How the scores were produced` (20w+)  ·  `## 2.2 Framework elements applied` (20w+)
+- **§3** — `## 3.1 Capped capabilities` (20w+)  ·  `## 3.2 When each cap lifts` (20w+)  ·  `## 3.3 Aggregate effect` (20w+)
+- **§4** — `## 4.1 Overall score` (20w+)  ·  `## 4.2 Category scores and gaps` (20w+)
+- **§5** — `## Capability scorecard` (20w+)  ·  `## What we see` (350w+–550w)  ·  `## AI and data overlay` (150w+–250w)  ·  `## Why it matters` (300w+–450w)
+- **§6** — `## 6.1 Peer scores` (20w+)  ·  `## 6.2 Strategic positioning` (20w+)  ·  `## 6.3 Lead competitor` (20w+)  ·  `## 6.4 Technology estate` (20w+)  ·  `## 6.5 Peer deployment` (20w+)
+- **§7** — `## 7.1 Prioritisation formula` (20w+)  ·  `## 7.2 Gap priority register` (20w+)  ·  `## 7.3 Critical gap root causes` (20w+)
+- **§8** — `## Root cause` (30w+)  ·  `## Cost of inaction` (30w+)  ·  `## Solution` (20w+)  ·  `## Platform readiness contract` (20w+)  ·  `## Rebuttal` (20w+)  ·  `## Impact on assessed capabilities` (20w+)  ·  `## Measure of success` (20w+)  ·  `## Why this phase` (20w+)
+- **§9** — `## 9.1 Horizon vocabulary` (20w+)  ·  `## 9.2 Phases` (20w+)  ·  `## 9.3 Stair-step` (20w+)  ·  `## 9.4 Maturity trajectory` (20w+)
+- **§10** — `## 10.1 Gaps by pillar` (20w+)  ·  `## 10.2 Recommended next steps` (20w+)
+- **§11** — `## 11.1 Where to verify a claim` (20w+)
 
 **The countable MINIMUM DATA and MUST NOT rules the write refuses on** (the rest of each control block is in the pinned Doc, and the validator reads it):
 
-- **§1** — >= 7 unique E-IDs; >= 3 REC cross-references; >= 4 the four pillar rows
+- **§1** — >= 7 unique E-IDs; >= 3 REC cross-references; >= 4 the four pillar rows; >= 1 the maturity level (M-band)
 - **§2** — >= 1 the catalogue version
 - **§3** — >= 1 a Cap_Triggers rule id
 - **§4** — >= 16 all sixteen category rows; >= 1 the weights-sum check
-- **§5** — 4-4 cards `P…`, each 800+ words; >= 5 unique E-IDs per pillar per card; >= 1 a REC cross-reference per pillar per card; >= 1 the AI and data overlay per card
+- **§5** — 4-4 cards `P…`, each 800+ words; >= 5 unique E-IDs per pillar per card; >= 1 a REC cross-reference per pillar per card; >= 1 the AI and data overlay per card; >= 6 the six AI-and-data overlay dimensions per card
 - **§6** — >= 4 the four technology layers
 - **§7** — >= 3 REC ids on the root causes; >= 4 the six factor weights
-- **§8** — 5-8 cards `REC-…`, each 350+ words; >= 2 E-IDs per recommendation per card; >= 1 the provenance label per card; never: a duration in weeks or months (sequencing is horizon and dependency)
-- **§9** — >= 5 every recommendation placed in a phase; >= 3 three or more phases; never: a duration (the app carries horizon and dependency, never elapsed time)
+- **§8** — 5-8 cards `REC-…`, each 350+ words; >= 2 E-IDs per recommendation per card; >= 1 the provenance label per card; >= 8 the eight rebuttal steps A to E per card; >= 1 a platform readiness verdict per card; >= 1 a KPI baseline per card; >= 1 an impact cell id per card; never: a duration in weeks or months (sequencing is horizon and dependency)
+- **§9** — >= 5 every recommendation placed in a phase; >= 3 three or more phases; >= 1 a horizon from the fixed vocabulary; never: a duration (the app carries horizon and dependency, never elapsed time)
 - **§10** — >= 4 gaps listed per pillar; never: a coverage percentage (coverage is O10, internal, a second denominator contradicts the heatmap)
 
 ## Writing one
@@ -131,13 +131,43 @@ inputs, citation rule and the surfaces it feeds. Read it before you write.
 is REFUSED when it is missing or hollow, and the refusal names what is
 wrong — an unattended session can act on it:
 
-- **`Body`** — the prose, at the section's word floor, **written in that
-  section's declared blocks**: a line `## <block>` for each, in the order the
-  table above gives them. They are not decoration. The app parses a report at
-  Heading2 grain and scopes its vectors from tokens inside those headings, so
-  a section written as one undivided passage arrives as a single row
-  belonging to no pillar. Mark every claim the evidence does not carry on its
-  own with `[INF]`, in place.
+- **`Body`** — the prose, at the section's word floor (**prose only** —
+  table rows and block headings do not count toward any LENGTH floor, as the
+  Doc says), **written in that section's declared blocks**: a line
+  `## <block>` for each, in the order the table above gives them, and **each
+  block carrying its own content at its own floor** — a heading with nothing
+  under it, or with a paragraph pasted from another block, is refused. They
+  are not decoration. The app parses a report at Heading2 grain and scopes
+  its vectors from tokens inside those headings, so a section written as one
+  undivided passage arrives as a single row belonging to no pillar. Mark
+  every claim the evidence does not carry on its own with `[INF]`, in place.
+- **The Doc's tables are part of the Body.** Write them as markdown pipe
+  rows under the block they belong to — `| Capability | Score | Peer median |
+  Gap | Evidence count | Lowest tier relied on |` for the scorecard, the six
+  overlay dimensions (Data dependency · Data readiness · AI footprint today ·
+  AI-addressable subcaps · Blocking constraint · Peer AI posture), the
+  provenance row, the readiness contract with its conditions met / not met /
+  open questions, the rebuttal's steps A–E (Hypothesis · Steelman against ·
+  Falsifier · Cheaper alternative · Case for waiting · Domain test · Probes
+  run · Verdict), the impact rows per cell, the measure of success with its
+  dated baseline. `engine.cli report` renders them as real Word tables; the
+  gold gate refuses a recommendation card with fewer than three tables and a
+  deep dive with fewer than two, because that is the shape Golden 1 has and
+  the Doc's control blocks ask for. Open
+  `references/templates/assessment_report_template.md` at the section and copy the table
+  columns from it — never a whole-sheet dump, and never a table standing in
+  for the prose the block owes.
+- **A recommendation card's `Heading` is its title** — `REC-NN: <what to
+  do>`, three words or more. It is what the roadmap, the app's P2 rows and
+  the Recommendations tab display; the section heading repeated on every
+  card is refused.
+- **Nothing pasted.** A paragraph of 25+ words that appears twice anywhere
+  in the report, a phrase repeated to reach a length, a placeholder marker,
+  or a block that names no figure, date, proper noun or cited id is refused.
+  Measured 2026-09-08: a report whose every block was one paragraph pasted
+  73 times cleared the writer, the reviewer, the renderer and the gold gate.
+  Depth is argued from the evidence base, block by block; it is never
+  reached by repetition.
 - **`Evidence_IDs`** — ids from THIS run's register. Fail-closed: an id that
   does not resolve refuses the write, because this is the artefact a client
   reads. The five sections marked *not required* above describe the RUN

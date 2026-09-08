@@ -79,6 +79,16 @@ A `PASS` while any dimension failed is refused: a verdict that contradicts
 its own dimensions is not a verdict. A note under 80 characters is refused as
 a rubber stamp. Say what you checked and what you found.
 
+**Shape and depth are part of `evidence_support`.** Open the pinned Doc at
+the section. A block that is prose where the Doc draws a table (the
+capability scorecard, the six-row overlay, the readiness contract, the
+rebuttal's steps A–E, the impact rows, the measure of success), a block
+under the Doc's own LENGTH band, a paragraph that also appears in another
+block or card, or a sentence that would survive swapping in a different
+institution is a REVISE — the writer refuses the countable half of this, and
+you are the half it cannot count. Measured 2026-09-08: a report whose every
+block was one paragraph pasted 73 times had been passed by every gate.
+
 ## The adversarial pass, before the reports ship
 
 Section verdicts are necessary and not sufficient — they are per-section, and

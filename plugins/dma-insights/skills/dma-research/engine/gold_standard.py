@@ -406,6 +406,97 @@ def _docx(path):
     return whole, h1, fonts, chrome
 
 
+def _docx_body(path) -> list[tuple[str, str, str]]:
+    """The document in reading order: `("h", level, text)` for a heading,
+    `("p", "", text)` for a paragraph, `("t", "", text)` for a table. The
+    per-card checks below need ORDER — which tables sit under which card —
+    and `Document.paragraphs` / `Document.tables` throw it away."""
+    import docx
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+    d = docx.Document(str(path))
+    out = []
+    for child in d.element.body.iterchildren():
+        tag = child.tag.rsplit("}", 1)[-1]
+        if tag == "p":
+            p = Paragraph(child, d)
+            name = p.style.name if p.style else ""
+            m = re.match(r"Heading (\d)", name or "")
+            if m:
+                out.append(("h", m.group(1), p.text.strip()))
+            elif name == "Title":
+                out.append(("h", "0", p.text.strip()))
+            else:
+                out.append(("p", "", p.text))
+        elif tag == "tbl":
+            tb = Table(child, d)
+            out.append(("t", "", " ".join(c.text for r in tb.rows for c in r.cells)))
+    return out
+
+
+#: Depth of the Doc's tables per card, as the Golden 1 reference meets them:
+#: a recommendation carries provenance, readiness, conditions, rebuttal,
+#: impact and measure tables (nine in the reference); a pillar deep dive
+#: carries its capability scorecard and the six-row overlay (two). The
+#: floors sit well under the reference so a lean card still passes; a card
+#: with NO table under its headings is the measured defect.
+REC_TABLES_MIN = 3
+PILLAR_TABLES_MIN = 2
+#: A paragraph this long, repeated this often, is form-filling.
+REPEAT_MIN_WORDS = 25
+REPEAT_MAX_TIMES = 1
+
+
+def _heading_regions(body: list[tuple[str, str, str]], pattern: str) -> list[int]:
+    """Word counts (prose and table) under every heading whose casefolded
+    text matches `pattern`, each region ending at the next heading of the
+    same or a higher level."""
+    out: list[int] = []
+    cur_level = None
+    for kind, level, text in body:
+        if kind == "h":
+            lvl = int(level or 9)
+            if cur_level is not None and lvl <= cur_level:
+                cur_level = None
+            if re.match(pattern, text.casefold().strip()):
+                cur_level = lvl
+                out.append(0)
+            continue
+        if cur_level is not None:
+            out[-1] += len(re.findall(r"\w+", text))
+    return out
+
+
+def _card_regions(body: list[tuple[str, str, str]]) -> dict:
+    """{card heading: {"tables": n, "words": n}} for every REC-NN and pillar
+    deep-dive heading, at the heading's own level: a region ends at the next
+    heading of the same or a higher level."""
+    out: dict[str, dict] = {}
+    cur = None
+    cur_level = 9
+    for kind, level, text in body:
+        if kind == "h":
+            lvl = int(level or 9)
+            if cur is not None and lvl <= cur_level:
+                cur = None
+            low = text.casefold()
+            # A CARD heading: `REC-NN: …`, or a deep dive that names its
+            # pillar (`5.1 Pillar deep dive (P1): …` from the renderer,
+            # `5. Pillar Deep Dive — P1: …` in the reference). The section
+            # heading `5. Pillar Deep Dives` names no pillar and is not a card.
+            if re.match(r"^rec-\d+", low) or (
+                    "pillar deep dive" in low and re.search(r"\bp[1-4]\b", low)):
+                cur, cur_level = text, lvl
+                out[cur] = {"tables": 0, "words": 0}
+            continue
+        if cur is None:
+            continue
+        if kind == "t":
+            out[cur]["tables"] += 1
+        out[cur]["words"] += len(re.findall(r"\w+", text))
+    return out
+
+
 def _template_sections(template_path):
     _, h1, _, _ = _docx(template_path)
     return [h for h in h1 if re.match(r"^\d+\.", h.strip())]
@@ -513,11 +604,36 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
         out.append(Finding("GS-RPT-CITATIONS",
             f"{cites} distinct citations (< {floors['citations']}, the Golden 1 "
             f"density over {floors['subcaps']} subcaps)", "GSY-08"))
-    words = len(re.findall(r"\w+", whole))
+    # LENGTH is PROSE. The floor is derived from the reference's paragraph
+    # words (gold_reference.json `words_paragraphs`, 11,633 against 23,227
+    # with tables) and the Doc measures "the narrative … excluding table
+    # content"; counting table cells here let a report meet an 8,400-word
+    # floor with sheet dumps (measured 2026-09-08).
+    body = _docx_body(report_path)
+    para_text = "\n".join(text for k_, _, text in body if k_ in ("p", "h"))
+    words = len(re.findall(r"\w+", para_text))
     if words < floors["words"]:
         out.append(Finding("GS-RPT-LENGTH",
-            f"{words} words (< {floors['words']}, the Golden 1 density over "
-            f"{floors['subcaps']} subcaps)", "GSY-08"))
+            f"{words} prose words (< {floors['words']}, the Golden 1 density over "
+            f"{floors['subcaps']} subcaps; table content does not count)", "GSY-08"))
+
+    # GS-RPT-BOILERPLATE — the same paragraph pasted to reach a length. The
+    # reference has no paragraph of 25+ words appearing twice; an engine
+    # render measured 2026-09-08 carried one 73 times and passed.
+    seen: dict[str, int] = {}
+    for k_, _, text in body:          # never `kind`: that is the report's
+        if k_ != "p":
+            continue
+        key = re.sub(r"\s+", " ", text).strip().casefold()
+        if len(re.findall(r"\w+", key)) >= REPEAT_MIN_WORDS:
+            seen[key] = seen.get(key, 0) + 1
+    rep = {k: n for k, n in seen.items() if n > REPEAT_MAX_TIMES}
+    if rep:
+        worst = max(rep.items(), key=lambda kv: kv[1])
+        out.append(Finding("GS-RPT-BOILERPLATE",
+            f"{len(rep)} paragraph(s) of {REPEAT_MIN_WORDS}+ words repeated "
+            f"(worst x{worst[1]}: {worst[0][:80]!r}…) — a pasted paragraph is a "
+            f"length, not an argument", "GSY-08"))
 
     # GS-RPT-COVERAGE — the report discloses coverage, as the reference does.
     if "coverage" not in low and "unknown" not in low:
@@ -546,14 +662,25 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
             # citation. 55 words is the floor — well under the reference, well
             # over the one-line defect.
             thin = []
-            for m in re.finditer(r"ai and data overlay", low):
-                seg = whole[m.start(): m.start() + 1400]
-                nxt = re.search(r"(?i)(ai and data overlay|pillar deep dive)", seg[20:])
-                if nxt:
-                    seg = seg[: nxt.start() + 20]
-                w = len(re.findall(r"\w+", seg))
-                if w < AIOVERLAY_WORD_FLOOR:
-                    thin.append(w)
+            # The renderer emits the overlay as a HEADING, so its depth is
+            # the words (prose and table) between that heading and the next
+            # heading of the same or a higher level — measured in document
+            # order. The string scan below is the fallback for a report that
+            # writes the overlay inline; it cuts the segment at the next
+            # mention of the phrase, so prose that NAMES its own block read
+            # as thin (measured 2026-09-08).
+            regions = _heading_regions(body, r"^ai and data overlay\b")
+            if regions:
+                thin = [w for w in regions if w < AIOVERLAY_WORD_FLOOR]
+            else:
+                for m in re.finditer(r"ai and data overlay", low):
+                    seg = whole[m.start(): m.start() + 1400]
+                    nxt = re.search(r"(?i)(ai and data overlay|pillar deep dive)", seg[20:])
+                    if nxt:
+                        seg = seg[: nxt.start() + 20]
+                    w = len(re.findall(r"\w+", seg))
+                    if w < AIOVERLAY_WORD_FLOOR:
+                        thin.append(w)
             if thin:
                 out.append(Finding("GS-RPT-AIOVERLAY-DEPTH",
                     f"{len(thin)} AI-and-data overlay block(s) below depth "
@@ -562,9 +689,31 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
                     f"the pillar — the evidence tie is enforced at the score, the "
                     f"depth here, not a one-line heading", "GSY-09"))
         recs = len(set(re.findall(r"rec-r?\d+", low)))
-        rebut = max(low.count("strongest counter"), low.count("rebuttal"))
+        # A rebuttal is the Doc's A–E table — hypothesis, STEELMAN, falsifier,
+        # cheaper alternative, case for waiting, domain test, probes, verdict
+        # — not the word "Rebuttal" on a heading. Counting the heading let an
+        # empty rebuttal block pass (measured 2026-09-08); the steelman is
+        # the step no rebuttal can lack, so it is what is counted.
+        rebut = max(low.count("steelman"), low.count("strongest counter"))
         if recs and rebut < recs:
-            out.append(Finding("GS-RPT-REBUTTALS", f"{rebut} rebuttals for {recs} recs", "GSY-10"))
+            out.append(Finding("GS-RPT-REBUTTALS",
+                f"{rebut} rebuttals with a steelman for {recs} recs — a "
+                f"`Rebuttal` heading with no A–E steps under it is an empty "
+                f"rebuttal, the Doc's §8 FAIL IF", "GSY-10"))
+        # GS-RPT-TABLES — the Doc's tables under every card. Golden 1's REC
+        # cards carry nine tables each and its deep dives two; a card whose
+        # headings have only prose under them was written to the block names
+        # and not to the Doc.
+        regions = _card_regions(body)
+        for head, st in regions.items():
+            need = (REC_TABLES_MIN if re.match(r"^rec-", head.casefold())
+                    else PILLAR_TABLES_MIN)
+            if st["tables"] < need:
+                out.append(Finding("GS-RPT-TABLES",
+                    f"{head[:60]!r} carries {st['tables']} table(s); the Doc's "
+                    f"card shape needs at least {need} (scorecard and overlay "
+                    f"for a deep dive; provenance, readiness, rebuttal, impact "
+                    f"and measure of success for a recommendation)", "GSY-06"))
 
     # GS-RPT-FINANCIALS — the report renders a multi-year financial trajectory
     # ("depth and all 5-year trends including 5-year financials", GSY-18): >=5
@@ -580,10 +729,58 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
             f"fin={has_fin}, trend={has_trend})", "GSY-18"))
 
     if scores and scores.get("overall") is not None:
-        ov = scores["overall"]
-        if f"{ov:.2f}" not in whole and f"{ov:.1f}" not in whole:
-            out.append(Finding("GS-RPT-RECONCILE", f"overall {ov} not in report", "GSY-13"))
+        # Reconcile against the NUMBERED sections' prose, not the cover table
+        # the renderer fills from the same sheet: the figure the client
+        # reads in §1/§4 is the one that drifts.
+        numbered = []
+        on = False
+        for k_, level, text in body:
+            if k_ == "h" and level == "1":
+                on = bool(re.match(r"^\d+\.", text.strip()))
+            if on:
+                numbered.append(text)
+        sections_text = "\n".join(numbered)
+        for label, val in [("overall", scores.get("overall"))] + [
+                (f"pillar {k}", v) for k, v in (scores.get("pillars") or {}).items()]:
+            if val is None:
+                continue
+            try:
+                fv = float(val)
+            except (TypeError, ValueError):
+                continue
+            if f"{fv:.2f}" not in sections_text and f"{fv:.1f}" not in sections_text:
+                out.append(Finding("GS-RPT-RECONCILE",
+                    f"{label} score {fv:.2f} from the workbook appears in no "
+                    f"numbered section of the report", "GSY-13"))
     return out
+
+
+def _workbook_scores(workbook_path) -> dict | None:
+    """The stated grain the report must reconcile to: the OVERALL row and the
+    pillar rows of Pillar_Summary. None when unreadable."""
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(workbook_path, read_only=True, data_only=True)
+        if "Pillar_Summary" not in wb.sheetnames:
+            return None
+        rows = list(wb["Pillar_Summary"].iter_rows(values_only=True))
+        wb.close()
+        if not rows:
+            return None
+        hdr = [_norm(h) for h in rows[0]]
+        pi, si = hdr.index("Pillar"), hdr.index("Score")
+        out = {"overall": None, "pillars": {}}
+        for r in rows[1:]:
+            if not r or r[pi] is None or not isinstance(r[si], (int, float)):
+                continue
+            key = _norm(r[pi]).upper()
+            if key == "OVERALL":
+                out["overall"] = float(r[si])
+            elif re.fullmatch(r"P[1-4]", key):
+                out["pillars"][key] = float(r[si])
+        return out
+    except Exception:            # noqa: BLE001 — the gate must still run
+        return None
 
 
 def _subcap_count(workbook_path) -> int | None:
@@ -685,11 +882,16 @@ def package_findings(folder) -> list[Finding]:
         out.append(Finding("GS-ING-MANIFEST", "run_manifest.json absent", "GSY-14"))
     wb = list(folder.glob("DMA_Scoring_Workbook_*.xlsx")) or list(folder.glob("*Scoring_Workbook*.xlsx"))
     subcaps = None
+    scores = None
     if not wb:
         out.append(Finding("GS-ING-DELIVERABLES", "no scoring workbook at root", "GSY-14"))
     else:
         out += workbook_findings(wb[0])
         subcaps = _subcap_count(wb[0])
+        # GS-RPT-RECONCILE ran only when a caller typed --scores; the package
+        # gate never did, so "every figure the report renders equals the
+        # workbook's" was checked nowhere (measured 2026-09-08).
+        scores = _workbook_scores(wb[0])
     for pat, k in ((("Client_Profile_Research_*.docx", "*Research_Report*.docx"), "research"),
                    (("DMA_Assessment_Report_*.docx", "*Assessment_Report*.docx"), "assessment")):
         hit = []
@@ -698,7 +900,8 @@ def package_findings(folder) -> list[Finding]:
         if not hit:
             out.append(Finding("GS-ING-DELIVERABLES", f"no {k} report at root", "GSY-14"))
         else:
-            out += report_findings(hit[0], kind=k, subcaps=subcaps)
+            out += report_findings(hit[0], kind=k, subcaps=subcaps,
+                                   scores=scores if k == "assessment" else None)
     if not list(folder.glob("Technographic_Scan_*.docx")) and not list(folder.glob("*Tech*Scan*.docx")):
         out.append(Finding("GS-ING-SCAN", "no technographic scan deliverable", "GSY-14"))
     else:
@@ -738,6 +941,8 @@ def main(argv=None):
         return _print(workbook_findings(a.path), a.json)
     if a.cmd == "report":
         scores = json.loads(Path(a.scores).read_text()) if a.scores else None
+        if scores is None and a.workbook and a.kind == "assessment":
+            scores = _workbook_scores(a.workbook)
         subcaps = a.subcaps or (_subcap_count(a.workbook) if a.workbook else None)
         return _print(report_findings(a.path, a.template, scores, a.kind,
                                       subcaps=subcaps), a.json)

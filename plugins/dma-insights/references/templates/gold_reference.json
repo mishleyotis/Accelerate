@@ -696,7 +696,20 @@
     "10. Data Gaps and Confidence",
     "11. Workbook Traceability",
     "Appendix: Strategic Objective Alignment and Recommendation Validation"
-   ]
+   ],
+   "tables_per_pillar_card": 2,
+   "tables_per_rec_card": 9,
+   "repeated_paragraphs_25w": 0,
+   "_shape_note": "Measured 2026-09-08 from the Drive copy: every REC card carries nine Doc tables (provenance, readiness, conditions met, conditions not met, open questions, rebuttal A-E, impact, measure of success, why this phase) and every pillar deep dive two (capability scorecard, six-row overlay); no paragraph of 25+ words appears twice. gold_standard.REC_TABLES_MIN / PILLAR_TABLES_MIN / REPEAT_MAX_TIMES sit at or below these.",
+   "block_words_min_measured": {
+    "_note": "The smallest prose word count any card of the reference carries per Doc block (2026-09-08); `Why this phase` is a one-cell table in the reference (36-48 words), so its count includes the table. Every block floor in report_templates.json is at or below these.",
+    "What we see": 531,
+    "AI and data overlay": 195,
+    "Why it matters": 356,
+    "Root cause": 67,
+    "Cost of inaction": 55,
+    "Why this phase": 36
+   }
   },
   "research": {
    "words_paragraphs": 4910,
@@ -714,7 +727,8 @@
     "6. Client Priorities",
     "7. Risk and Issues",
     "8. Workbook References"
-   ]
+   ],
+   "repeated_paragraphs_25w": 0
   }
  }
 }

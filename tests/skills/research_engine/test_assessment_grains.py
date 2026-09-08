@@ -172,7 +172,7 @@ def test_recommendations_project_the_reports_own_rows(tmp_path):
                if s.kind == "recommendation")
     for i in range(3):
         N.write(wb, "assessment", sec.id,
-                _rec(sec.id, eids, report="assessment"),
+                _rec(sec.id, eids, report="assessment", salt=f"REC-{i + 1:02d}"),
                 actor="report-assessment-producer", card=f"REC-{i + 1:02d}")
     G.set_stage(wb, "assessment")
     out = G.recommendations(wb)

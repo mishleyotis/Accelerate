@@ -22,7 +22,17 @@
   "Regenerate the markdown exports with `engine.template pin-reports` after the owner edits",
   "a Doc, then run `engine.template report-drift` — a heading in the export that this file",
   "does not carry fails the test suite, which is the point: the format is pinned in one",
-  "reviewable place and the renderer, the writer and the gates all read it."
+  "reviewable place and the renderer, the writer and the gates all read it.",
+  "",
+  "PER-BLOCK DEPTH (2026-09-08). `block_words` gives a block's own LENGTH floor (and advisory",
+  "ceiling) where the Doc states one: the deep dives' What we see 350-550 / AI and data overlay",
+  "150-250 / Why it matters 300-450, the recommendations' root cause and cost of inaction 30-60",
+  "and why-this-phase 20-40. narrative.write refuses a block under its floor; a block with no",
+  "declared floor still owes a real body (narrative.BLOCK_MIN_WORDS) — a heading with nothing",
+  "under it was passing every gate (measured 2026-09-08). The Doc's tables are written INTO the",
+  "body as markdown pipe tables and render as real Word tables; the six overlay dimensions, the",
+  "eight rebuttal steps, the readiness verdict, the KPI baseline and the impact cells are counted",
+  "as checks so an empty table cannot ship under its heading."
  ],
  "pinned_at": "2026-09-03",
  "requires_plugin_version": "1.19.0",
@@ -455,6 +465,11 @@
        "min": 4,
        "distinct": true,
        "label": "the four pillar rows"
+      },
+      {
+       "pattern": "\\bM[1-5]\\b",
+       "min": 1,
+       "label": "the maturity level (M-band)"
       }
      ],
      "forbid": []
@@ -622,6 +637,13 @@
        "min": 1,
        "label": "the AI and data overlay",
        "per_card": true
+      },
+      {
+       "pattern": "\\b(Data dependency|Data readiness|AI footprint today|AI-addressable subcaps|Blocking constraint|Peer AI posture)\\b",
+       "min": 6,
+       "distinct": true,
+       "label": "the six AI-and-data overlay dimensions",
+       "per_card": true
       }
      ],
      "forbid": [],
@@ -630,7 +652,21 @@
      "cards_max": 4,
      "card_words_min": 800,
      "card_words_max": 1250,
-     "card_heading": "5.{n} Pillar deep dive ({card}): {name} — score {score} against median {median} ({gap})"
+     "card_heading": "5.{n} Pillar deep dive ({card}): {name} — score {score} against median {median} ({gap})",
+     "block_words": {
+      "What we see": [
+       350,
+       550
+      ],
+      "AI and data overlay": [
+       150,
+       250
+      ],
+      "Why it matters": [
+       300,
+       450
+      ]
+     }
     },
     {
      "id": "6",
@@ -768,6 +804,31 @@
        "min": 1,
        "label": "the provenance label",
        "per_card": true
+      },
+      {
+       "pattern": "\\b(Hypothesis|Steelman|Falsifier|Cheaper alternative|Case for waiting|Domain test|Probes run|Verdict)\\b",
+       "min": 8,
+       "distinct": true,
+       "label": "the eight rebuttal steps A to E",
+       "per_card": true
+      },
+      {
+       "pattern": "\\b(READY WITH CONDITIONS|NOT READY YET|READY)\\b",
+       "min": 1,
+       "label": "a platform readiness verdict",
+       "per_card": true
+      },
+      {
+       "pattern": "(?i)\\bbaseline\\b",
+       "min": 1,
+       "label": "a KPI baseline",
+       "per_card": true
+      },
+      {
+       "pattern": "\\bP[1-4]C\\d\\.\\d+\\.[A-Z0-9]+\\b",
+       "min": 1,
+       "label": "an impact cell id",
+       "per_card": true
       }
      ],
      "forbid": [
@@ -781,7 +842,21 @@
      "cards_max": 8,
      "card_words_min": 350,
      "card_words_max": 550,
-     "card_heading": "{card}: {title}"
+     "card_heading": "{card}: {title}",
+     "block_words": {
+      "Root cause": [
+       30,
+       null
+      ],
+      "Cost of inaction": [
+       30,
+       null
+      ],
+      "Why this phase": [
+       20,
+       null
+      ]
+     }
     },
     {
      "id": "9",
@@ -821,6 +896,11 @@
        "pattern": "(?i)\\bphase\\b",
        "min": 3,
        "label": "three or more phases"
+      },
+      {
+       "pattern": "\\b(next two quarters|this year|beyond)\\b",
+       "min": 1,
+       "label": "a horizon from the fixed vocabulary"
       }
      ],
      "forbid": [

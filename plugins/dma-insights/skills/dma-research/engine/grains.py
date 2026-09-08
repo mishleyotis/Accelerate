@@ -207,18 +207,40 @@ def recommendations(wb: RunWorkbook) -> dict:
             f"`engine.narrative write --report assessment --section {sec.id} "
             f"--card <id>`.")
     out = []
+    import re as _re
     for i, r in enumerate(rows, 1):
-        body = _clean(r.get("Body"))
+        raw = str(r.get("Body") or "")
         card = _clean(r.get("Card_ID")) or f"{i:03d}"
+        rec_id = card if card.upper().startswith("REC-") else f"REC-{card}"
+        # The card's own title, without the id the Doc prefixes it with —
+        # never the SECTION heading (measured 2026-09-08: five rows titled
+        # "Recommendations").
+        title = _re.sub(r"^\s*REC-\d{2}\s*[:—-]\s*", "", _clean(r.get("Heading")))
+        if not title or title.lower() == sec.heading.lower():
+            title = rec_id
+        # The argument as prose: block headings become labels, pipe-table
+        # rows become their cells joined, so the tab carries no markdown.
+        lines = []
+        for ln in raw.splitlines():
+            s = ln.strip()
+            if not s:
+                continue
+            m = _re.match(r"^##\s+(.+?)\s*$", s)
+            if m:
+                lines.append(f"{m.group(1)}:")
+            elif s.startswith("|"):
+                if _re.fullmatch(r"\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?", s):
+                    continue
+                lines.append(" | ".join(c.strip() for c in s.strip("|").split("|")))
+            else:
+                lines.append(s)
         out.append({
-            "Rec_ID": card if card.upper().startswith("REC-")
-                      else f"REC-{card}",
-            # The heading a reader sees, which is the card's first block.
-            "Title": _clean(r.get("Heading")) or sec.heading,
+            "Rec_ID": rec_id,
+            "Title": title,
             "Category_ID": "", "Priority": i, "Horizon": "", "Owner": "",
             # The whole argument, so the tab is not a weaker copy of the
             # report — the app stores the payload verbatim.
-            "Rationale": body[:2000],
+            "Rationale": _clean(" ".join(lines))[:2000],
         })
     return {"rows": _replace(wb, "Recommendations", out),
             "from_section": str(sec.id)}

@@ -95,3 +95,28 @@ def test_the_shell_is_the_reference_chrome_and_is_pinned():
     assert any(n.startswith("word/fonts/") for n in names)
     assert "word/header1.xml" in names and "word/footer1.xml" in names
     assert T.pinned_digest()["report_shell.docx"]
+
+
+def test_the_card_shape_floors_are_at_or_below_what_golden_1_carries(gold):
+    """GS-RPT-TABLES and GS-RPT-BOILERPLATE, calibrated: the reference's REC
+    cards carry nine Doc tables and its deep dives two, and no paragraph of
+    25+ words appears twice in either report (measured 2026-09-08)."""
+    ref = gold["reports"]["assessment"]
+    assert GS.REC_TABLES_MIN <= ref["tables_per_rec_card"]
+    assert GS.PILLAR_TABLES_MIN <= ref["tables_per_pillar_card"]
+    assert GS.REPEAT_MAX_TIMES >= 1 + ref["repeated_paragraphs_25w"]
+    assert gold["reports"]["research"]["repeated_paragraphs_25w"] == 0
+
+
+def test_every_block_floor_is_at_or_below_what_golden_1_carries(gold):
+    """`Section.block_words` are the Doc's own LENGTH bands; the reference
+    meets every one of them, measured per card (the smallest card counts)."""
+    from engine import narrative as N
+    measured = gold["reports"]["assessment"]["block_words_min_measured"]
+    for sec in RS.SPECS["assessment"].sections:
+        for block, band in (sec.block_words or {}).items():
+            assert block in measured, block
+            assert band[0] <= measured[block], (sec.id, block, band, measured[block])
+        for block in sec.blocks:
+            if block in measured:
+                assert sec.block_floor(block, N.BLOCK_MIN_WORDS) <= measured[block]

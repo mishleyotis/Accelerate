@@ -28,7 +28,7 @@ def _narrate(wb, spec, *, words_per_section=None, cite=None, rec_cards=None,
         else:
             cards = [None]
         for card in cards:
-            rec = section_record(sec.id, eids, report=spec.key)
+            rec = section_record(sec.id, eids, report=spec.key, salt=card)
             body = rec["Body"]
             if words_per_section is not None:
                 body = " ".join(body.split()[:words_per_section])

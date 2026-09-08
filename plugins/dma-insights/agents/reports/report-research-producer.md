@@ -78,16 +78,16 @@ with the countable MINIMUM DATA rules the write refuses on.
 | 7 | Risk and Issues | 400w | `Issue_Register`, `Search_Log`, `Evidence_Detail`, `Cap_Triggers` | required | `context.issue_register`, `context.regulatory_standing` |
 | 8 | Workbook References | 100w | `Run_Metadata`, `Handoff_Lock`, `Gate_Log` | not required | — |
 
-**The blocks each section is written in**, in order. A body missing one, or carrying them out of order, is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.
+**The blocks each section is written in**, in order, each with the word floor IT owes (the Doc's LENGTH band where it states one, the engine's `BLOCK_MIN_WORDS` otherwise). A body missing one, carrying them out of order, or leaving one under its floor or reading as form-filling is refused: they become real Heading2s in the .docx, which is the grain the app parses and scopes its vectors at.
 
-- **§1** — `## 1.1 Must-present fields`  ·  `## 1.2 Quarantined and absent fields`  ·  `## 1.3 Which registry holds the figure`  ·  `## 1.4 Identity check`
-- **§2** — `## 2.1 Entity snapshot`  ·  `## 2.2 Top findings`  ·  `## 2.3 Critical gaps`  ·  `## 2.4 Strategic objectives`  ·  `## 2.5 Why-now signals`
-- **§3** — `## 3.1 Corporate identity`  ·  `## 3.2 Scale metrics`  ·  `## 3.3 Regulatory standing`  ·  `## 3.4 Business composition`
-- **§4** — `## 4.1 Peer comparison`  ·  `## 4.2 Financial trajectory`  ·  `## 4.3 Digital evolution timeline`  ·  `## 4.4 Sentiment overview`
-- **§5** — `## 5.1 Insight cards`  ·  `## 5.2 Technology landscape`  ·  `## 5.3 Leadership`  ·  `## 5.4 Acquisition history`  ·  `## 5.5 Thought leadership and public voice`
-- **§6** — `## 6.1 Stated priorities`  ·  `## 6.2 Currency check`  ·  `## 6.3 Sources checked for current voice`  ·  `## 6.4 Counter-evidence pass`
-- **§7** — `## 7.1 Issue register`  ·  `## 7.2 Negative search results`  ·  `## 7.3 Assumptions register`
-- **§8** — `## 8.1 Where each artefact lives`  ·  `## 8.2 Handoff status`
+- **§1** — `## 1.1 Must-present fields` (20w+)  ·  `## 1.2 Quarantined and absent fields` (20w+)  ·  `## 1.3 Which registry holds the figure` (20w+)  ·  `## 1.4 Identity check` (20w+)
+- **§2** — `## 2.1 Entity snapshot` (20w+)  ·  `## 2.2 Top findings` (20w+)  ·  `## 2.3 Critical gaps` (20w+)  ·  `## 2.4 Strategic objectives` (20w+)  ·  `## 2.5 Why-now signals` (20w+)
+- **§3** — `## 3.1 Corporate identity` (20w+)  ·  `## 3.2 Scale metrics` (20w+)  ·  `## 3.3 Regulatory standing` (20w+)  ·  `## 3.4 Business composition` (20w+)
+- **§4** — `## 4.1 Peer comparison` (20w+)  ·  `## 4.2 Financial trajectory` (20w+)  ·  `## 4.3 Digital evolution timeline` (20w+)  ·  `## 4.4 Sentiment overview` (20w+)
+- **§5** — `## 5.1 Insight cards` (20w+)  ·  `## 5.2 Technology landscape` (20w+)  ·  `## 5.3 Leadership` (20w+)  ·  `## 5.4 Acquisition history` (20w+)  ·  `## 5.5 Thought leadership and public voice` (20w+)
+- **§6** — `## 6.1 Stated priorities` (20w+)  ·  `## 6.2 Currency check` (20w+)  ·  `## 6.3 Sources checked for current voice` (20w+)  ·  `## 6.4 Counter-evidence pass` (20w+)
+- **§7** — `## 7.1 Issue register` (20w+)  ·  `## 7.2 Negative search results` (20w+)  ·  `## 7.3 Assumptions register` (20w+)
+- **§8** — `## 8.1 Where each artefact lives` (20w+)  ·  `## 8.2 Handoff status` (20w+)
 
 **The countable MINIMUM DATA and MUST NOT rules the write refuses on** (the rest of each control block is in the pinned Doc, and the validator reads it):
 
@@ -123,13 +123,43 @@ inputs, citation rule and the surfaces it feeds. Read it before you write.
 is REFUSED when it is missing or hollow, and the refusal names what is
 wrong — an unattended session can act on it:
 
-- **`Body`** — the prose, at the section's word floor, **written in that
-  section's declared blocks**: a line `## <block>` for each, in the order the
-  table above gives them. They are not decoration. The app parses a report at
-  Heading2 grain and scopes its vectors from tokens inside those headings, so
-  a section written as one undivided passage arrives as a single row
-  belonging to no pillar. Mark every claim the evidence does not carry on its
-  own with `[INF]`, in place.
+- **`Body`** — the prose, at the section's word floor (**prose only** —
+  table rows and block headings do not count toward any LENGTH floor, as the
+  Doc says), **written in that section's declared blocks**: a line
+  `## <block>` for each, in the order the table above gives them, and **each
+  block carrying its own content at its own floor** — a heading with nothing
+  under it, or with a paragraph pasted from another block, is refused. They
+  are not decoration. The app parses a report at Heading2 grain and scopes
+  its vectors from tokens inside those headings, so a section written as one
+  undivided passage arrives as a single row belonging to no pillar. Mark
+  every claim the evidence does not carry on its own with `[INF]`, in place.
+- **The Doc's tables are part of the Body.** Write them as markdown pipe
+  rows under the block they belong to — `| Capability | Score | Peer median |
+  Gap | Evidence count | Lowest tier relied on |` for the scorecard, the six
+  overlay dimensions (Data dependency · Data readiness · AI footprint today ·
+  AI-addressable subcaps · Blocking constraint · Peer AI posture), the
+  provenance row, the readiness contract with its conditions met / not met /
+  open questions, the rebuttal's steps A–E (Hypothesis · Steelman against ·
+  Falsifier · Cheaper alternative · Case for waiting · Domain test · Probes
+  run · Verdict), the impact rows per cell, the measure of success with its
+  dated baseline. `engine.cli report` renders them as real Word tables; the
+  gold gate refuses a recommendation card with fewer than three tables and a
+  deep dive with fewer than two, because that is the shape Golden 1 has and
+  the Doc's control blocks ask for. Open
+  `references/templates/client_profile_template.md` at the section and copy the table
+  columns from it — never a whole-sheet dump, and never a table standing in
+  for the prose the block owes.
+- **A recommendation card's `Heading` is its title** — `REC-NN: <what to
+  do>`, three words or more. It is what the roadmap, the app's P2 rows and
+  the Recommendations tab display; the section heading repeated on every
+  card is refused.
+- **Nothing pasted.** A paragraph of 25+ words that appears twice anywhere
+  in the report, a phrase repeated to reach a length, a placeholder marker,
+  or a block that names no figure, date, proper noun or cited id is refused.
+  Measured 2026-09-08: a report whose every block was one paragraph pasted
+  73 times cleared the writer, the reviewer, the renderer and the gold gate.
+  Depth is argued from the evidence base, block by block; it is never
+  reached by repetition.
 - **`Evidence_IDs`** — ids from THIS run's register. Fail-closed: an id that
   does not resolve refuses the write, because this is the artefact a client
   reads. The five sections marked *not required* above describe the RUN

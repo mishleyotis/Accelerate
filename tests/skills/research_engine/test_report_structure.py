@@ -179,22 +179,24 @@ def test_five_cards_land_as_five_rows(tmp_path):
     floor = REC.card_floor
     assert floor == 5 and REC.cards_max == 8
     for i in range(floor):
-        out = N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment"),
+        out = N.write(wb, "assessment", REC.id,
+                      _rec(REC.id, eids, report="assessment", salt=f"REC-{i + 1:02d}"),
                       actor="report-assessment-producer", card=f"REC-{i + 1:02d}")
     assert out["cards_in_section"] == floor
     rows = N.all_rows_for(wb, "assessment")[REC.id]
     assert len(rows) == floor
     assert {r["Card_ID"] for r in rows} == {f"REC-{i + 1:02d}" for i in range(floor)}
     # and rewriting one card touches only that card
-    N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment"),
+    N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment", salt="REC-03b"),
             actor="report-assessment-producer", card="REC-03")
     assert len(N.all_rows_for(wb, "assessment")[REC.id]) == floor
     # a ninth card is refused: the Doc allows at most eight
     for i in range(floor, REC.cards_max):
-        N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment"),
+        N.write(wb, "assessment", REC.id,
+                _rec(REC.id, eids, report="assessment", salt=f"REC-{i + 1:02d}"),
                 actor="report-assessment-producer", card=f"REC-{i + 1:02d}")
     with pytest.raises(N.NarrativeRefusal, match="at most 8"):
-        N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment"),
+        N.write(wb, "assessment", REC.id, _rec(REC.id, eids, report="assessment", salt="REC-09"),
                 actor="report-assessment-producer", card="REC-09")
 
 

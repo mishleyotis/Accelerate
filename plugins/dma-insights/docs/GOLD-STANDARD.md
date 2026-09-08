@@ -82,7 +82,31 @@ source — the contract forbids a placeholder there and a URL cannot be invented
   The numeric maturity **score** (1–5, e.g. "2.25") is a different axis and is expected; a fifth
   *band* word must never appear, and inventing one is the invariant 6 breach.
 - **Reconcile**: every figure the report renders equals the workbook's stated grain
-  within 0.01 on the overall.
+  within 0.01 on the overall — checked by the package gate against `Pillar_Summary`
+  (GS-RPT-RECONCILE), not only when a caller types `--scores`.
+- **Depth is per block, and it is read** (2026-09-08, GSY-30). Every block a section
+  declares carries its own content at its own floor — the Doc's LENGTH band where it
+  states one (deep dives: What we see 350–550 · AI and data overlay 150–250 · Why it
+  matters 300–450; recommendations: root cause and cost of inaction 30+, why this phase
+  20+) and `narrative.BLOCK_MIN_WORDS` otherwise — and names a figure, a date, a proper
+  noun or a cited id. A paragraph of 25+ words appearing twice anywhere in a report, a
+  phrase repeated to reach a length, or a placeholder marker is refused by the writer
+  (`narrative.write`) and caught again on the rendered file (GS-RPT-BOILERPLATE). The
+  reference has no repeated paragraph; the measured defect was one paragraph pasted 73
+  times passing every gate.
+- **The Doc's tables are authored, not dumped.** A section's tables — the capability
+  scorecard, the six-row overlay, the provenance row, the readiness contract, the
+  rebuttal's steps A–E, the impact rows, the measure of success — are written INTO the
+  body as markdown pipe rows under their block and render as real Word tables. Golden 1
+  carries 92 such tables, none over 22 rows, each inside the block that argues it. The
+  renderer prints each workbook extract once per report and never the per-cell
+  `Subcap_Scores`; table words count toward no LENGTH floor (the Doc: "excluding table
+  content"). The gold gate refuses a recommendation card with fewer than three tables
+  and a deep dive with fewer than two (GS-RPT-TABLES), a rebuttal with no steelman
+  (GS-RPT-REBUTTALS), and measures GS-RPT-LENGTH on prose.
+- **A recommendation card is `REC-NN: Title`.** The writer refuses a card whose heading
+  is the section heading; the Recommendations tab projects the title and the argument
+  without markup.
 
 ## Templates are pinned, bound and enforced — before the process begins
 

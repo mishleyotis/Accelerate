@@ -459,37 +459,151 @@ def sign_off_sections(wb, actor="report-validator"):
     return signed
 
 
-def section_record(section: str, eids, report="client_research", **over) -> dict:
+_METRICS = ("digital account opening", "mobile adoption", "loan origination",
+            "member servicing", "real-time payments", "data governance",
+            "integration", "analytics", "cybersecurity", "vendor resilience",
+            "lifecycle marketing", "personalisation")
+_PRODUCTS = ("Alkami Digital Banking", "Fiserv DNA", "Salesforce Financial "
+             "Services Cloud", "Databricks", "Zest AI", "ServiceNow",
+             "Verafin", "Marketing Cloud")
+_PEERS = ("Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU")
+_SENTENCES = (
+    "Under {block}, section {sid} of the {rep} report reads Acme Credit Union's "
+    "{year} record on {metric} [{e}], which places the figure at {val} against "
+    "a peer median near 3.0 and names {prod} as the platform the finding rests on.",
+    "The {year} NCUA call report and the annual report agree on {metric} [{e}]: "
+    "{prod} was live for members by the fourth quarter, and {peer} ran a "
+    "competing platform at the same layer, so the comparison is between two "
+    "deployed estates rather than a plan and a product.",
+    "Weighed against that reading is the alternative that the {metric} signal "
+    "reflects disclosure habit rather than operating practice; the balance falls "
+    "toward the conservative reading because a member-owned institution "
+    "publishes little of either kind, and {peer}'s public record is thinner still.",
+    "What the {val} figure means for {block} is concrete: {prod} carries the "
+    "channel, the {year} adoption curve is measured quarterly, and the gap to "
+    "{peer} is a governance question before it is a technology question [{e}].",
+    "Paragraph {k} of this block anchors the argument in the register rather "
+    "than in recall: every figure here — {val}, the {year} filing, the "
+    "{metric} programme — reopens from the excerpt that supplied it, and the "
+    "reader can hold {prod} to the same test.",
+    "For Acme Credit Union the consequence of {metric} at {val} is a cost-to-"
+    "serve programme that {prod} can carry once the {year} integration decisions "
+    "land; {peer} made the same move first and the timeline [{e}] shows what "
+    "followed.",
+)
+
+
+def _fixture_paragraph(sec, block, k, eids, report, salt="") -> str:
+    """One paragraph unique to (section, block, k): a figure, a year, a
+    citation, proper nouns — what the writer's block check asks of real
+    prose — and a vocabulary wide enough that `quality.is_boilerplate` reads
+    it as prose rather than as one phrase repeated to a length."""
+    e = (str(eids[k % len(eids)]).split(":")[0] if eids else "E-001")
+    slots = dict(block=(f"{block} of {salt}" if salt else block) or sec.heading,
+                 sid=sec.id,
+                 rep=report.replace("_", " "), year=2019 + (k % 7),
+                 metric=_METRICS[k % len(_METRICS)],
+                 val=f"{1.5 + 0.25 * (k % 9):.2f}",
+                 prod=_PRODUCTS[k % len(_PRODUCTS)],
+                 peer=_PEERS[k % len(_PEERS)], e=e, k=k + 1)
+    order = [(k + i) % len(_SENTENCES) for i in range(3)]
+    return " ".join(_SENTENCES[i].format(**slots) for i in order)
+
+
+def _pipe(rows) -> str:
+    """A markdown pipe table — the shape the Doc's tables are written in."""
+    head, *body = rows
+    return "\n".join(["| " + " | ".join(head) + " |",
+                      "|" + "|".join("---" for _ in head) + "|"]
+                     + ["| " + " | ".join(str(c) for c in r) + " |" for r in body])
+
+
+def _doc_tables(sec, block, eids) -> str:
+    """The Doc's own table(s) for a block of a card section, so a fixture
+    card has the Golden 1 shape: scorecard and six-row overlay on a deep
+    dive; provenance, readiness, rebuttal steps, impact and measure of
+    success on a recommendation."""
+    e = str(eids[0]).split(":")[0] if eids else "E-001"
+    e2 = str(eids[1]).split(":")[0] if len(eids) > 1 else e
+    b = block.lower()
+    if sec.kind == "pillar":
+        if b == "capability scorecard":
+            return _pipe([["Capability", "Score", "Peer median", "Gap",
+                           "Evidence count", "Lowest tier relied on"],
+                          ["P1C1 Digital Strategy & Vision", "2.90", "3.10", "-0.20", "41", "T4"],
+                          ["P1C2 Governance & Risk Appetite", "1.91", "3.10", "-1.19", "31", "T3"],
+                          ["P1C4 Culture & Change Enablement", "2.81", "3.10", "-0.29", "18", "T3"]])
+        if b == "ai and data overlay":
+            return _pipe([["Dimension", "Finding for this pillar", "Evidence"],
+                          ["Data dependency", "member master and transaction domains", e],
+                          ["Data readiness", "AMBER because lineage is only partial", e],
+                          ["AI footprint today", "Zest AI credit scorecard in production", e2],
+                          ["AI-addressable subcaps", "12 of 46, led by P1C1.5.4", "n/a"],
+                          ["Blocking constraint", "no governed feature store", e],
+                          ["Peer AI posture", "Peer Alpha CU runs production models on Azure ML", "SCAN"]])
+    if sec.kind == "recommendation":
+        if b == "solution":
+            return _pipe([["Claim label", "Target area", "Effort band", "Phase"],
+                          ["ANALYST", "P1C1 Digital Strategy & Vision", "M", "PH-1"]])
+        if b == "platform readiness contract":
+            return (_pipe([["Platform", "Readiness verdict", "Depends on", "Effect on fit"],
+                           ["Alkami Digital Banking", "READY", "none; live since 2024", "1.0"]])
+                    + "\n\n"
+                    + _pipe([["Cell", "Minimum", "Current", "Verdict",
+                              "What this makes possible", "Evidence"],
+                             ["P1C1.1.1", "2.0", "2.50", "MET",
+                              "a stated strategy the roadmap can sequence against", e]]))
+        if b == "rebuttal":
+            return _pipe([["Step", "Record"],
+                          ["A. Hypothesis", f"the recommendation closes the gap; held at HIGH confidence [{e}]"],
+                          ["B. Steelman against", "the platform is already live, so spend should go to member-facing value"],
+                          ["B. Falsifier", f"a governed operating model found in the client's own discovery would disprove the gap [{e2}]"],
+                          ["B. Cheaper alternative", "point governance inside each downstream tool; not chosen because it re-creates the per-system pattern"],
+                          ["B. Case for waiting", "none found after looking; the migration is deciding data patterns now"],
+                          ["C. Domain test", "plausible for a credit union at this asset tier under NCUA; the anchor is the client's own discovery finding"],
+                          ["D. Probes run", "dependency inversion; initiative-underway search; stale-metric recompute"],
+                          ["E. Verdict", "ACCEPT"]])
+        if b == "impact on assessed capabilities":
+            return _pipe([["Cell", "Name", "Current", "Target", "Delta", "Evidence"],
+                          ["P1C1.1.1", "Digital Strategy Document", "2.50", "3.00", "+0.50", e]])
+        if b == "measure of success":
+            return _pipe([["Metric", "Baseline", "Baseline as at", "Baseline source", "Target"],
+                          ["Digital strategy maturity (P1C1.1.1)", "2.50", "2025-12-31", e, "3.00"]])
+        if b == "why this phase":
+            return ("Sits in the next two quarters because it can start against "
+                    "what is already true and REC-02 depends on it landing first.")
+    return ""
+
+
+def section_record(section: str, eids, report="client_research", salt=None,
+                   **over) -> dict:
     """A report section record shaped to the PINNED template: every block
-    heading in order, body scaled to the section's own word floor, every
-    block cited in the prose, and the four argument fields filled."""
+    heading in order, each block carrying its own prose at its own floor
+    (the Doc's LENGTH band where it states one), the Doc's tables written as
+    pipe rows under the block they belong to, every block cited and anchored,
+    no paragraph repeated, and the four argument fields filled.
+
+    Until 2026-09-08 this fixture was ONE paragraph pasted to the floor, and
+    it passed the writer, the reviewer, the renderer and the gold gate — the
+    proof that the gates measured length and counted ids and read nothing.
+    The writer now refuses that shape, so the fixture had to become the
+    shape the Doc asks for."""
+    from engine import narrative as N
     sec = RS.SPECS[report].section(section)
-    para = (
-            "The public record for this institution is read here against the "
-            "question the block asks, and the reading is stated so a reader "
-            "can disagree with it rather than accept it. Nothing in this "
-            "paragraph rests on a source that is not in the run's own "
-            "register, and every figure it carries can be reopened from the "
-            "excerpt that supplied it rather than recalled from anywhere "
-            "else in the record of the engagement. Where the record is "
-            "silent the silence is reported as silence, with the ladder "
-            "that establishes it, rather than being read as an answer in "
-            "either direction; and where two sources disagree the "
-            "disagreement is carried forward rather than resolved by "
-            "preference. That is the standard the whole section is written "
-            "to, and it is the standard a reader should hold it to when "
-            "deciding whether any single sentence here has earned its "
-            "place in an argument about this institution.")
-    # Scale the filler to the section's own floor: these tests are about the
-    # refusals, and a body that trips the word floor first proves nothing
-    # about the anatomy the test is aiming at.
-    floor = sec.card_min_words or sec.min_words
-    nblocks = len(sec.blocks) or 1
-    w = len(para.split())
-    per = max(1, -(-floor // (nblocks * w)) + 1)
+    blocks = list(sec.blocks) or [""]
+    total_floor = sec.card_min_words if sec.is_card else sec.min_words
+    per_block_share = -(-total_floor // len(blocks))
+    # `salt` (the card id) makes every paragraph of one card differ from
+    # its siblings': the writer refuses a paragraph pasted across cards,
+    # which is what an unsalted fixture is.
+    salt = str(salt or over.get("Card_ID") or "")
     control = control_block(sec, eids)
+    if control and salt:
+        control = control.replace("Control block, per the Doc:",
+                                  f"Control block for {salt}, per the Doc:", 1)
     body = []
-    for b in sec.blocks or ("",):
+    k = 0
+    for b in blocks:
         if b:
             body.append(f"## {b}")
         if control:
@@ -497,16 +611,28 @@ def section_record(section: str, eids, report="client_research", **over) -> dict
             # once, in the first block; the whole body is what is counted.
             body.append(control)
             control = ""
-        body.extend([para] * per)
+        need = max(sec.block_floor(b, N.BLOCK_MIN_WORDS) if b else N.BLOCK_MIN_WORDS,
+                   per_block_share)
+        words = 0
+        while words < need:
+            para = _fixture_paragraph(sec, b, k, eids, report, salt)
+            body.append(para)
+            body.append("")
+            words += len(para.split())
+            k += 1
+        tbl = _doc_tables(sec, b, eids) if b else ""
+        if tbl:
+            body.append(tbl)
+            body.append("")
         # The renderer reads citations out of the BODY (`reports.CITE_RE`),
         # not out of Evidence_IDs, so a section that cites in the column and
         # not in the prose reads as uncited to the artefact a client opens.
         body.append("Sources for this block: "
-                    + " ".join(f"[{e}]" for e in eids) + ".")
+                    + " ".join(f"[{str(e).split(':')[0]}]" for e in eids) + ".")
         body.append("")
     rec = {
         "Body": "\n".join(body).strip(),
-        "Evidence_IDs": ", ".join(eids),
+        "Evidence_IDs": ", ".join(str(e).split(":")[0] for e in eids),
         "Weighing": (
             "The reading above was weighed against the opposite one — that "
             "the silence in the public record reflects an absence of "
@@ -522,6 +648,8 @@ def section_record(section: str, eids, report="client_research", **over) -> dict
         "Inference_Tags": "",
         "Absence_Basis": "",
     }
+    if sec.kind == "recommendation":
+        rec["Heading"] = "Governed digital foundation for Acme Credit Union"
     rec.update(over)
     return rec
 
@@ -590,6 +718,17 @@ _CHECK_TEXT = {
         "signals, not audited. Closing the governance gap lifts readiness to "
         "GREEN and unlocks the autonomous tier the roadmap sequences after it"),
     "the six factor weights": lambda c, e: "0.25 0.20 0.15 0.10 0.10 0.20",
+    "the six AI-and-data overlay dimensions": lambda c, e: (
+        "Data dependency, Data readiness, AI footprint today, AI-addressable "
+        "subcaps, Blocking constraint, Peer AI posture"),
+    "the eight rebuttal steps A to E": lambda c, e: (
+        "Hypothesis, Steelman, Falsifier, Cheaper alternative, Case for "
+        "waiting, Domain test, Probes run, Verdict"),
+    "a platform readiness verdict": lambda c, e: "READY",
+    "a KPI baseline": lambda c, e: "a dated baseline",
+    "an impact cell id": lambda c, e: "P1C1.1.1",
+    "a horizon from the fixed vocabulary": lambda c, e: "next two quarters",
+    "the maturity level (M-band)": lambda c, e: "M2",
     "three or more phases": lambda c, e: "phase one, phase two, phase three",
     "the provenance label": lambda c, e: "ANALYST",
 }
@@ -625,13 +764,17 @@ def write_report(wb, report, eids, *, actor=None, run=None):
     for sec in spec.sections:
         if sec.kind == "pillar":
             for p in sorted({c[:2] for c in wb.selected_subcaps()}):
-                N.write(wb, report, sec.id, section_record(sec.id, eids, report),
+                N.write(wb, report, sec.id, section_record(sec.id, eids, report, salt=p),
                         actor=actor, card=p, run=run)
                 n += 1
         elif sec.is_card:
             for i in range(N.card_floor_for(wb, sec)):
-                N.write(wb, report, sec.id, section_record(sec.id, eids, report),
-                        actor=actor, card=f"{sec.card_prefix}{i + 1:02d}", run=run)
+                card = f"{sec.card_prefix}{i + 1:02d}"
+                rec = section_record(sec.id, eids, report, salt=card)
+                if sec.kind == "recommendation":
+                    rec["Heading"] = (f"{_METRICS[i % len(_METRICS)].capitalize()} "
+                                      f"on {_PRODUCTS[i % len(_PRODUCTS)]} for Acme Credit Union")
+                N.write(wb, report, sec.id, rec, actor=actor, card=card, run=run)
                 n += 1
         else:
             N.write(wb, report, sec.id, section_record(sec.id, eids, report),

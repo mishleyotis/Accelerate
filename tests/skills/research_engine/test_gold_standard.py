@@ -166,9 +166,18 @@ def test_hedge_string_in_a_value_cell_is_caught(tmp_path):
 # ── REPORT gate, exercised at the string level via a synthetic docx ───────
 
 def _docx(path, paragraphs, add_header=True):
+    """A synthetic report. `("TABLE", [[...], ...])` rows become real Word
+    tables — the Doc's tables under a card are what GS-RPT-TABLES counts."""
     import docx
     d = docx.Document()
     for style, text in paragraphs:
+        if style == "TABLE":
+            tb = d.add_table(rows=0, cols=len(text[0]))
+            for row in text:
+                cells = tb.add_row().cells
+                for i, v in enumerate(row):
+                    cells[i].text = str(v)
+            continue
         d.add_paragraph(text, style=style)
     d.save(str(path))
     if add_header:
@@ -192,6 +201,12 @@ def _assessment_body(overall="2.25"):
         elif n == "5":
             for p in "P1 P2 P3 P4".split():
                 body.append(("Heading 2", f"5.{p[1]} Pillar deep dive ({p}): a pillar"))
+                # the Doc's two tables under a deep dive: scorecard and overlay
+                body.append(("TABLE", [["Capability", "Score", "Peer median", "Gap"],
+                                       [f"{p}C1 A capability", "2.5", "3.0", "-0.5"]]))
+                body.append(("TABLE", [["Dimension", "Finding for this pillar", "Evidence"],
+                                       ["Data dependency", "member master", "E-1"],
+                                       ["Data readiness", "AMBER", "E-1"]]))
                 body.append(("Normal",
                     f"AI and data overlay ({p}): the data foundation rests on the "
                     f"member master and transaction domains, governed under a "
@@ -206,8 +221,16 @@ def _assessment_body(overall="2.25"):
         elif n == "8":
             for i in range(1, 6):
                 body.append(("Heading 2", f"REC-0{i}: do a thing"))
+                # the Doc's tables under a recommendation: provenance,
+                # readiness, the A–E rebuttal (with its steelman), impact
+                body.append(("TABLE", [["Claim label", "Target area"], ["ANALYST", "P1C1"]]))
+                body.append(("TABLE", [["Platform", "Readiness verdict"], ["Alkami", "READY"]]))
                 body.append(("Heading 3", "Rebuttal"))
-                body.append(("Normal", "Strongest counter. It survives because."))
+                body.append(("TABLE", [["Step", "Record"],
+                                       ["A. Hypothesis", "the claim, held at HIGH"],
+                                       ["B. Steelman against", "the strongest case for not doing this"],
+                                       ["E. Verdict", "ACCEPT"]]))
+                body.append(("TABLE", [["Cell", "Current", "Target"], ["P1C1.1.1", "2.5", "3.0"]]))
         else:
             body.append(("Normal", "Section body."))
     # 5-year financial trajectory (GS-RPT-FINANCIALS)
