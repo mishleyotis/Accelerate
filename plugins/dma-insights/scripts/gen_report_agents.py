@@ -77,15 +77,24 @@ def _section_table(key: str) -> str:
             f"{'required' if sec.requires_citation else 'not required'} | "
             f"{', '.join(f'`{x}`' for x in sec.surfaces) or '—'} |")
     rows.append("")
-    rows.append("**The blocks each section is written in**, in order. A body "
-                "missing one, or carrying them out of order, is refused: they "
-                "become real Heading2s in the .docx, which is the grain the "
-                "app parses and scopes its vectors at.")
+    rows.append("**The blocks each section is written in**, in order, each "
+                "with the word floor IT owes (the Doc's LENGTH band where it "
+                "states one, the engine's `BLOCK_MIN_WORDS` otherwise). A body "
+                "missing one, carrying them out of order, or leaving one under "
+                "its floor or reading as form-filling is refused: they become "
+                "real Heading2s in the .docx, which is the grain the app parses "
+                "and scopes its vectors at.")
     rows.append("")
+    from engine import narrative as _N
     for sec in spec.sections:
         if sec.blocks:
             rows.append(f"- **§{sec.id}** — "
-                        + "  ·  ".join(f"`## {b}`" for b in sec.blocks))
+                        + "  ·  ".join(
+                            f"`## {b}` ({sec.block_floor(b, _N.BLOCK_MIN_WORDS)}w+"
+                            + (f"–{sec.block_words[b][1]}w"
+                               if sec.block_words.get(b) and len(sec.block_words[b]) > 1
+                               and sec.block_words[b][1] else "")
+                            + ")" for b in sec.blocks))
         elif sec.kind == "section":
             rows.append(f"- **§{sec.id}** — one passage; the Doc numbers no "
                         f"subsections here")
@@ -194,13 +203,43 @@ inputs, citation rule and the surfaces it feeds. Read it before you write.
 is REFUSED when it is missing or hollow, and the refusal names what is
 wrong — an unattended session can act on it:
 
-- **`Body`** — the prose, at the section's word floor, **written in that
-  section's declared blocks**: a line `## <block>` for each, in the order the
-  table above gives them. They are not decoration. The app parses a report at
-  Heading2 grain and scopes its vectors from tokens inside those headings, so
-  a section written as one undivided passage arrives as a single row
-  belonging to no pillar. Mark every claim the evidence does not carry on its
-  own with `[INF]`, in place.
+- **`Body`** — the prose, at the section's word floor (**prose only** —
+  table rows and block headings do not count toward any LENGTH floor, as the
+  Doc says), **written in that section's declared blocks**: a line
+  `## <block>` for each, in the order the table above gives them, and **each
+  block carrying its own content at its own floor** — a heading with nothing
+  under it, or with a paragraph pasted from another block, is refused. They
+  are not decoration. The app parses a report at Heading2 grain and scopes
+  its vectors from tokens inside those headings, so a section written as one
+  undivided passage arrives as a single row belonging to no pillar. Mark
+  every claim the evidence does not carry on its own with `[INF]`, in place.
+- **The Doc's tables are part of the Body.** Write them as markdown pipe
+  rows under the block they belong to — `| Capability | Score | Peer median |
+  Gap | Evidence count | Lowest tier relied on |` for the scorecard, the six
+  overlay dimensions (Data dependency · Data readiness · AI footprint today ·
+  AI-addressable subcaps · Blocking constraint · Peer AI posture), the
+  provenance row, the readiness contract with its conditions met / not met /
+  open questions, the rebuttal's steps A–E (Hypothesis · Steelman against ·
+  Falsifier · Cheaper alternative · Case for waiting · Domain test · Probes
+  run · Verdict), the impact rows per cell, the measure of success with its
+  dated baseline. `engine.cli report` renders them as real Word tables; the
+  gold gate refuses a recommendation card with fewer than three tables and a
+  deep dive with fewer than two, because that is the shape Golden 1 has and
+  the Doc's control blocks ask for. Open
+  `references/templates/{markdown}` at the section and copy the table
+  columns from it — never a whole-sheet dump, and never a table standing in
+  for the prose the block owes.
+- **A recommendation card's `Heading` is its title** — `REC-NN: <what to
+  do>`, three words or more. It is what the roadmap, the app's P2 rows and
+  the Recommendations tab display; the section heading repeated on every
+  card is refused.
+- **Nothing pasted.** A paragraph of 25+ words that appears twice anywhere
+  in the report, a phrase repeated to reach a length, a placeholder marker,
+  or a block that names no figure, date, proper noun or cited id is refused.
+  Measured 2026-09-08: a report whose every block was one paragraph pasted
+  73 times cleared the writer, the reviewer, the renderer and the gold gate.
+  Depth is argued from the evidence base, block by block; it is never
+  reached by repetition.
 - **`Evidence_IDs`** — ids from THIS run's register. Fail-closed: an id that
   does not resolve refuses the write, because this is the artefact a client
   reads. The five sections marked *not required* above describe the RUN
@@ -310,6 +349,16 @@ is the one that mattered:
 A `PASS` while any dimension failed is refused: a verdict that contradicts
 its own dimensions is not a verdict. A note under 80 characters is refused as
 a rubber stamp. Say what you checked and what you found.
+
+**Shape and depth are part of `evidence_support`.** Open the pinned Doc at
+the section. A block that is prose where the Doc draws a table (the
+capability scorecard, the six-row overlay, the readiness contract, the
+rebuttal's steps A–E, the impact rows, the measure of success), a block
+under the Doc's own LENGTH band, a paragraph that also appears in another
+block or card, or a sentence that would survive swapping in a different
+institution is a REVISE — the writer refuses the countable half of this, and
+you are the half it cannot count. Measured 2026-09-08: a report whose every
+block was one paragraph pasted 73 times had been passed by every gate.
 
 ## The adversarial pass, before the reports ship
 
