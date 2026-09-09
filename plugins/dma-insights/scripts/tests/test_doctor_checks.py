@@ -10,6 +10,7 @@ real tree is never mutated.
     python3 -m pytest tests/
 """
 import json
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -41,10 +42,26 @@ class HooksWired(unittest.TestCase):
 
     def test_real_tree_matchers_stay_fully_scoped(self):
         matchers = doctor.hook_matchers()
-        self.assertIn(
-            "mcp__plugin_dma-insights_connector__submit_page_payload", matchers)
-        self.assertIn(
-            "mcp__plugin_dma-insights_connector__promote_run", matchers)
+        # MATCHES, not CONTAINS. On 2026-08-31 these matchers became
+        # regexes so the prechecks also fire when the SAME connector is
+        # attached under its claude.ai server name (`mcp__DMA-Insights__…`),
+        # which is what a Routine sees. `mcp__.*__submit_page_payload` no
+        # longer contains the literal tool name; it still matches it, and
+        # that is the property worth pinning — the fully-scoped-ness this
+        # test guards is that the matcher ends in a specific TOOL, never a
+        # bare `mcp__.*` that would claim every connector call.
+        import re as _re
+        for tool in (
+                "mcp__plugin_dma-insights_connector__submit_page_payload",
+                "mcp__DMA-Insights__submit_page_payload"):
+            self.assertTrue(
+                any(_re.fullmatch(m, tool) for m in matchers
+                    if m.endswith("submit_page_payload")),
+                f"no precheck matcher fires for {tool}")
+        for m in matchers:
+            if m.startswith("mcp__") and m != "mcp__.*":
+                self.assertRegex(m, r"__[a-z_]+$",
+                                 f"{m} is not scoped to a named tool")
 
     def test_unparseable_hooks_json_fails(self):
         with tempfile.TemporaryDirectory() as td:
@@ -401,3 +418,81 @@ class AutoApproverIsWired(unittest.TestCase):
             row = doctor.hooks_wired_check(root)
         self.assertFalse(row["ok"], row["detail"])
         self.assertIn("no PreToolUse entry runs it", row["detail"])
+
+
+class ConcurrentWriters(unittest.TestCase):
+    """Whether two writers on one workbook are safe must be CHECKABLE.
+
+    Until 2026-08-31 `next_evidence_id` ended "two writers to one workbook
+    is not a supported topology and never was". That was scope, read as a
+    guarantee — and read again AFTER the lock landed: a session on a stale
+    install quoted the deleted sentence as authority and began building a
+    shard-and-merge harness with disjoint evidence-id ranges, to route
+    around a defect that no longer existed. Prose in a file cannot tell you
+    which version of that file you are running.
+    """
+
+    def _write(self, root, body):
+        eng = root / "skills" / "dma-research" / "engine"
+        eng.mkdir(parents=True, exist_ok=True)
+        (eng / "workbook.py").write_text(body)
+
+    def test_a_locked_engine_reports_safe(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "import fcntl\n"
+                              "def transaction(self):\n"
+                              "    fcntl.flock(fh, fcntl.LOCK_EX)\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                row = doctor.concurrent_writers_check()
+            # startswith, not `in`: "SAFE" is a substring of "UNSAFE",
+            # so `assertIn("SAFE", ...)` passes on the failing case too —
+            # an assertion that cannot fail in the direction it cares about.
+            self.assertTrue(row["detail"].startswith("SAFE:"), row["detail"])
+
+    def test_an_unlocked_engine_says_so_and_names_the_workaround(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "def next_evidence_id(self): ...\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                row = doctor.concurrent_writers_check()
+            self.assertTrue(row["detail"].startswith("UNSAFE:"),
+                            row["detail"])
+            self.assertIn("separate workbooks", row["detail"])
+
+    def test_the_deleted_docstring_is_reported_as_a_stale_install(self):
+        """The exact misread: quoting the old sentence off a stale tree."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "# not a supported topology and never was\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                row = doctor.concurrent_writers_check()
+            self.assertIn("STALE install", row["detail"])
+
+    def test_it_reads_the_INSTALLED_tree_not_the_checkout(self):
+        """The checkout is current by definition here; the question is what
+        the session's agents actually execute."""
+        import inspect
+        src = inspect.getsource(doctor.concurrent_writers_check)
+        self.assertIn("install_path", src)
+
+    def test_it_never_fails_the_doctor(self):
+        """Informational: an unlocked engine is a fact to act on, not a
+        reason to refuse to report the other fifteen rows."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "nothing here\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                self.assertTrue(doctor.concurrent_writers_check()["ok"])

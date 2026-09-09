@@ -47,6 +47,67 @@ from . import contract as C
 
 URL_RE = re.compile(r"https?://", re.I)
 
+#: Source_URLs holds a LIST. These are the separators the workbook writers
+#: use between entries, and rule 6 judges each entry on its own.
+ENTRY_SEP_RE = re.compile(r"[,;]")
+
+#: A bare host with no scheme — "kpmg.com", "www.example.co.uk/x". Together
+#: with URL_RE this is what "the entry is a location" means. No banned token
+#: contains a dot, so no placeholder can satisfy this.
+HOSTISH_RE = re.compile(
+    r"^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9-]+)+(?:[/:?#].*)?$", re.I)
+
+#: Punctuation an entry may be wrapped in and still BE the placeholder:
+#: "(TBD)", "N/A.", "- see above". Deliberately excludes "/" so that the
+#: "n/a" token keeps its slash and cannot be reached by stripping.
+TRIVIAL_EDGE = " \t\r\n.,;:!?-–—_'\"“”‘’()[]{}<>*"
+
+
+def _is_location(entry: str) -> bool:
+    """Does this entry name a place to go? A scheme, or a dotted host.
+
+    This is the whole anti-false-positive guard: a location is never a
+    placeholder, however its characters happen to spell.
+    """
+    return bool(URL_RE.match(entry) or HOSTISH_RE.match(entry))
+
+
+def placeholder_entries(cell) -> list[str]:
+    """The entries in one Source_URLs cell that ARE placeholders.
+
+    THE SEMANTICS, and why they are not `token in cell` (MEM-0467).
+
+      A cell fails rule 6 when the cell — or a comma/semicolon-separated
+      entry within it — IS a placeholder. It does NOT fail because a banned
+      token appears somewhere inside a longer string. The tokens are short
+      and ordinary: "n/a" occurs inside every LinkedIn profile of anyone
+      called An-n/a-, and inside every path segment "e-n/a-rticles", so the
+      containment test refused 12 of 12 real, resolving URLs on
+      bank-of-travelers-rest and blocked a run with no data defect in it.
+      "tbd" and "various" are the same hazard one client away
+      ("/tbd-holdings/", "/various-rates").
+
+    Order matters: a location is excluded FIRST, so no amount of stripping
+    or prefixing can ever reach a URL. Only then is a non-location entry
+    judged, and it is judged generously — equal to a banned token after
+    trivial punctuation, or opening with one at a word boundary, so
+    "N/A.", "(TBD)" and "n/a - nothing found" all still fail.
+
+    Returns the offending entries themselves, because the reader needs the
+    value that is wrong, not the token that matched it.
+    """
+    out = []
+    for raw in ENTRY_SEP_RE.split(str(cell or "")):
+        entry = raw.strip()
+        if not entry or _is_location(entry):
+            continue
+        core = entry.strip(TRIVIAL_EDGE).casefold()
+        for bad in C.BANNED_URL_PLACEHOLDERS:
+            if core == bad or re.match(rf"{re.escape(bad)}\b", core):
+                out.append(entry)
+                break
+    return out
+
 
 class Failure(dict):
     def __init__(self, rule: int, name: str, detail: str, **kw):
@@ -81,6 +142,7 @@ def validate(path, *, run_id: str | None = None,
         fails += _rule5_evidence_and_urls(wb)
         fails += _rule6_placeholders(wb)
         fails += _rule7_run_id(wb, run_id)
+        fails += _rule8_absence_declared(wb, want)
     finally:
         wb.close()
     return fails
@@ -183,6 +245,20 @@ def _rule3_rows(wb) -> list[Failure]:
             out.append(Failure(
                 3, "rows", f"{sheet}: id(s) belonging to another pillar: "
                            f"{wrong[:8]}", sheet=sheet))
+        # A seeded row carries its catalogue name (goeasy GSY-03: 656 blank
+        # names shipped). The seed refuses an unnamed cell; this makes a
+        # name blanked AFTER seeding fail the workbook's own validator too,
+        # at every stage, rather than only at `assessment open`.
+        unnamed = [str(r[0]).strip() for r in
+                   ws.iter_rows(min_row=2, max_row=ws.max_row, values_only=True)
+                   if r and r[0] is not None and str(r[0]).strip()
+                   and (len(r) < 2 or r[1] is None or not str(r[1]).strip())]
+        if unnamed:
+            out.append(Failure(
+                3, "rows",
+                f"{sheet}: {len(unnamed)} row(s) carry no SubCap_Name "
+                f"({unnamed[:6]}); names come from the catalogue at seed "
+                f"time and are never blank", sheet=sheet))
         seen |= set(ids)
     if not seen:
         out.append(Failure(3, "rows",
@@ -223,6 +299,54 @@ def _rule4_scores(wb, expect_scores: bool) -> list[Failure]:
                 f"{sheet}: {len(scored)} scored row(s) at the research stage, "
                 f"first {scored[0]}. Column D is the assessment's to write.",
                 sheet=sheet))
+    return out
+
+
+# ── rule 8 · an absence is DECLARED, never merely flagged ────────────────
+
+def _rule8_absence_declared(wb, expect_scores: bool) -> list[Failure]:
+    """The absence flag has one writer, and the validator can prove it.
+
+    `engine.cli absence` is the only path that writes `Absence_Claimed` AND
+    the Provenance row Step == 'absence'; a flag without its row was written
+    around the command (a notebook consolidation, a synthesis record, a hand
+    edit — all measured 2026-09-03). At the assessment stage an undeclared
+    NO_EVIDENCE row is a cell nobody searched, and it must not be scored."""
+    out = []
+    prov = wb["Provenance"] if "Provenance" in wb.sheetnames else None
+    declared: set[str] = set()
+    if prov is not None:
+        for r in prov.iter_rows(min_row=2, values_only=True):
+            if r and len(r) > 1 and str(r[1] or "").strip() == "absence":
+                declared.add(str(r[0] or "").strip())
+    fi = C.PILLAR_COLUMNS.index("Evidence_IDs") + 1
+    ai = C.PILLAR_COLUMNS.index("Absence_Claimed") + 1
+    for sheet in C.PILLAR_SHEETS:
+        ws = wb[sheet]
+        forged, undeclared = [], []
+        for r in range(2, ws.max_row + 1):
+            sub = str(ws.cell(row=r, column=1).value or "").strip()
+            if not sub:
+                continue
+            flag = str(ws.cell(row=r, column=ai).value or "").strip().upper() \
+                if ws.max_column >= ai else ""
+            eids = str(ws.cell(row=r, column=fi).value or "").strip()
+            if flag in ("YES", "TRUE", "1") and sub not in declared:
+                forged.append(sub)
+            if expect_scores and eids == C.NO_EVIDENCE and sub not in declared:
+                undeclared.append(sub)
+        if forged:
+            out.append(Failure(
+                8, "absence",
+                f"{sheet}: {len(forged)} row(s) carry Absence_Claimed with no "
+                f"Provenance 'absence' row — the flag was written around "
+                f"`engine.cli absence`: {forged[:8]}", sheet=sheet))
+        if undeclared:
+            out.append(Failure(
+                8, "absence",
+                f"{sheet}: {len(undeclared)} NO_EVIDENCE row(s) reach the "
+                f"assessment stage undeclared — score nothing that was not "
+                f"searched: {undeclared[:8]}", sheet=sheet))
     return out
 
 
@@ -275,13 +399,16 @@ def _rule6_placeholders(wb) -> list[Failure]:
         gi = C.PILLAR_COLUMNS.index("Source_URLs") + 1
         hits = []
         for r in range(2, ws.max_row + 1):
-            g = str(ws.cell(row=r, column=gi).value or "").strip().lower()
+            g = str(ws.cell(row=r, column=gi).value or "").strip()
             if not g:
                 continue
-            for bad in C.BANNED_URL_PLACEHOLDERS:
-                if bad in g:
-                    hits.append((str(ws.cell(row=r, column=1).value), bad))
-                    break
+            bad_entries = placeholder_entries(g)
+            if bad_entries:
+                # The offending VALUE, not the token that matched it: the old
+                # message printed "n/a" for a cell holding a LinkedIn URL,
+                # which reads as a data defect and is not one (MEM-0467).
+                hits.append((str(ws.cell(row=r, column=1).value),
+                             bad_entries[0]))
         if hits:
             out.append(Failure(
                 6, "placeholders",

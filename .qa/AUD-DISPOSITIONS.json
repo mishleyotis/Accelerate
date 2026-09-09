@@ -52,7 +52,9 @@
   "watchdog_prompt": "python3 -m pytest scripts/tests/test_synthesis_watchdog.py -q",
   "binding": "python3 -m pytest tests/skills/research_engine/test_binding.py -q",
   "ci_flags": "python3 -m pytest scripts/tests/test_gate_l_ci_bounds.py -q",
-  "routine_branch": "python3 -m pytest scripts/tests/test_routine_prompt_commands.py -q"
+  "routine_branch": "python3 -m pytest scripts/tests/test_routine_prompt_commands.py -q",
+  "slack_auth": "python3 -m pytest plugins/dma-insights/scripts/tests/test_slack_client.py -q",
+  "autobind": "python3 -m pytest tests/skills/research_engine/test_binding.py -q"
  },
  "findings": [
   {
@@ -2348,6 +2350,30 @@
     "routine_branch"
    ],
    "note": "Correct while the build lived on that branch and silently wrong from the minute PR #16 merged it into main: the branch became an ancestor and stopped moving, so every scheduled firing would have cloned older code every day with nothing failing. A stale checkout does not error — it runs, and it produces yesterday's answer. The intake would have been the visible case: the Slack queue is on main and that branch has none of it, so STEP 3 would have called a script that is not there. bootstrap_session.sh had carried the instruction in a comment since it was written — 'after the merge, flip this default to main' — which is exactly the kind of note that is never read at the moment it applies. All 14 prompt references, the bootstrap default and the setup curl line now name main, and test_no_live_prompt_checks_out_a_branch_other_than_the_default fails on any live prompt naming another, verified by planting one."
+  },
+  {
+   "id": "AUD-0195",
+   "sev": "MAJOR",
+   "area": "connectors",
+   "title": "Slack was reachable only through a per-Routine UI attachment, so a script could never read the channel and one Routine never could",
+   "target": "slack_intake.py could only parse a transcript somebody else fetched; dma-assessment-intake carries no connector (AUD-0190)",
+   "disposition": "FIXED",
+   "checks": [
+    "slack_auth"
+   ],
+   "note": "Three measured non-portabilities, not one: the intake Routine cannot read its own channel and no API call can attach a connector; a SCRIPT can never call a connector tool, so the read half and the decide half could only ever be tested apart; and every new Routine or container starts blind until somebody clicks a UI. scripts/slack_client.py reads a bot token by the same three-rung ladder as gcp_token.path_token (env, file, Secret Manager) and calls the Web API directly. Secret Manager is reached over REST with an access token minted in pure Python, because gcloud is ABSENT from the routine image — a ladder whose last rung shells out to gcloud has no last rung where it matters. The client RENDERS the API's JSON into the connector's own text shape, so one parser and one set of recorded fixtures serve both routes; test_slack_client.py proves it by running the real parser over rendered output and asserting the same verdicts the recordings assert. The token is never echoed on any path, and test_no_source_file_carries_a_literal_bot_token fails the build if one is ever committed. The connector route still works and was not removed. OWNER STEP REMAINS: create the secret and grant secretAccessor — this session is blocked from handling credential material, so no live auth.test was run from here."
+  },
+  {
+   "id": "AUD-0196",
+   "sev": "MAJOR",
+   "area": "engine",
+   "title": "Every binding needed a human answer, including the ones with nothing to decide",
+   "target": "preflight.check required binding_question.asked on every run, so a trigger-fired intake could prepare a binding and never start one",
+   "disposition": "FIXED",
+   "checks": [
+    "autobind"
+   ],
+   "note": "Owner, 2026-08-30: 'the run should bind to unambiguous subvertical.' unambiguous_binding() requires exactly one ACCEPT, AT LEAST ONE REJECT and at most one material line of business — the reject clause is the load-bearing one, because a census listing a single candidate and accepting it is not unanimity, it is a census that never looked, and that is exactly what a thin research pass emits. check() RE-DERIVES this every call and never reads auto_bound as authority, so a hand-written flag over a multi-LOB entity is refused; that is the test that matters. Evidence mode auto-binds only to PUBLIC: the most restrictive mode can only under-claim, while auto-binding INTERNAL would claim access nobody granted, which is the harm the gate exists to prevent. The record keeps asked:false beside auto_bound:true and the census counts, so an auto-bind is always distinguishable from a human answer."
   }
  ]
 }

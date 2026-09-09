@@ -108,6 +108,12 @@ def _stated_completed_at(manifest: dict):
     candidates = [a.get("date") if isinstance(a, dict) else None,
                   manifest.get("assessment_date"), manifest.get("completed_at"),
                   manifest.get("generated_at"), manifest.get("execution_timestamp"),
+                  # `last_written_at` is the workbook's own Run_Metadata key,
+                  # merged in beside the manifest at ingest. 0031's rule is
+                  # that this list and run_assessment_date()'s probe array
+                  # walk the SAME candidates in the SAME order, or
+                  # `assessment_date` and `completed_at` disagree on a run.
+                  manifest.get("last_written_at"),
                   manifest.get("last_updated")]
     for c in candidates:
         if isinstance(c, str) and _ISOISH.match(c.strip()):
@@ -251,6 +257,7 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     sections: list | None = None,
                     report_artefact_id: str | None = None,
                     grains: dict | None = None,
+                    wb_metadata: dict | None = None,
                     research: dict | None = None,
                     companion_observations: list | None = None,
                     artefact_checksum: str | None = None,
@@ -412,6 +419,10 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     cur.execute("SELECT COALESCE(max(run_seq), 0) + 1 FROM runs "
                 "WHERE entity_id = %s", (entity_id,))
     run_seq = cur.fetchone()[0]
+    # The SAME merge the view does, for the SAME reason: 0031 requires
+    # `completed_at` and `assessment_date` to resolve from one candidate list
+    # over one document. Right-biased, so a real manifest key wins.
+    dated_manifest = {**(wb_metadata or {}), **manifest}
     composite = _round_once(workbook.composite)   # rounded ONCE
     composite_from_manifest = False
     stated_overall = _stated_overall(manifest)
@@ -428,7 +439,7 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
            VALUES (%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s,%s,%s) RETURNING id""",
         (entity_id, manifest.get("run_id"), run_seq, pinned,
          len({s.subcap_id for s in workbook.scores}), catalogue_cells, composite,
-         _stated_completed_at(manifest), source_folder_id,
+         _stated_completed_at(dated_manifest), source_folder_id,
          artefact_id, artefact_checksum),
     )
     run_id = cur.fetchone()[0]
@@ -438,9 +449,16 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     # ingested tier has no stated-grain table, H4's grain lock needs the
     # stated rows server-side, and run_manifest is the run's one-to-one
     # JSONB home. Readers take payload["manifest"].
+    # `workbook_metadata` sits BESIDE the manifest for the same reason
+    # `workbook_grains` does: the manifest is the package's own artefact and
+    # the ingested tier is read-only once scanned, so a key written into it
+    # afterwards would be indistinguishable from one the package shipped.
+    # The view merges the two (`workbook_metadata || manifest`, right-biased)
+    # so a real manifest key always wins.
     cur.execute("INSERT INTO run_manifest (run_id, payload) VALUES (%s, %s)",
                 (run_id, json.dumps({"manifest": manifest,
-                                     "workbook_grains": grains or None})))
+                                     "workbook_grains": grains or None,
+                                     "workbook_metadata": wb_metadata or None})))
     n_obs = 0
     if composite_from_manifest:
         cur.execute(

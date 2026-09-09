@@ -533,6 +533,129 @@ def test_a_ledger_whose_ids_are_all_unrecognised_is_not_an_empty_ledger(tmp_path
     assert named[0].detail["rows_seen"] == 2
 
 
+# ── class 18: two ledger tabs present, and only the thin one read ──────────
+# The converse of class 8, and it hid behind class 8's own fix. `_EV_TABS` was
+# written as an either/or, so `next(t for t in _EV_TABS if t in sheetnames)`
+# served the 15 packages that ship no `Evidence_Master` — and silently lost
+# every package that ships `Evidence_Master` AND a richer ledger beside it.
+# Those are not two spellings of one tab; they are a thin index and the ledger
+# it indexes, and precedence order put the index first.
+#
+# Measured on the Golden 1 package (DMA-2026-GOLDEN1-001, 43 tabs):
+# `Evidence_Master` = 731 rows x 8 columns, no excerpt/date/subcap column at
+# all; `Evidence_Detail` = 727 of those same ids x 17 columns, excerpt on
+# 727 of 727 and every one inside the 50-500 window, `Date_Published` on 727,
+# `SubCap_IDs` on 723. Reading only the first tab landed 589 rows
+# excerpt-less and banded the package UNVERIFIED for want of a date column
+# one tab over — then ET-04 and CG-50 refused the producer for citing
+# evidence the workbook had carried the whole time.
+
+def _two_tab_ledger(tmp_path, detail_rows=None, master_excerpt=None):
+    """A thin `Evidence_Master` index beside a rich `Evidence_Detail`."""
+    wb = openpyxl.Workbook()
+    m = wb.active
+    m.title = "Evidence_Master"
+    m_hdr = ["Evidence_ID", "Source", "URL", "Tier", "Recency", "Claim_Type",
+             "Finding", "Origin"]
+    if master_excerpt is not None:
+        m_hdr.append("Excerpt")
+    m.append(m_hdr)
+    for i in (1, 2):
+        row = [f"E-{i:03d}", f"Source {i}", "https://x", "T2", "CURRENT",
+               "FACT", f"finding text {i}", "public"]
+        if master_excerpt is not None:
+            row.append(master_excerpt)
+        m.append(row)
+
+    d = wb.create_sheet("Evidence_Detail")
+    d.append(["E_ID", "Source_Name", "Source_URL", "Tier", "ERS",
+              "Date_Published", "Recency", "Claim_Type", "Fact_Count",
+              "SubCap_IDs", "Excerpt", "Anchor_Quote", "Retrieved_At"])
+    for r in (detail_rows if detail_rows is not None else [
+        ["E-001", "Source 1", "https://x", "T2", "4.10", "2026-01-15",
+         "CURRENT", "FACT", "1", "P1C1.1.1",
+         "The credit union completed its core data platform migration during "
+         "the first quarter and reported the deposits domain feature complete.",
+         "anchor one", "2026-08-31T06:19:15Z"],
+        ["E-002", "Source 2", "https://x", "T2", "3.80", "2025-11-02",
+         "RECENT", "FACT", "1", "P2C1.2.3",
+         "Marketing automation and the customer data platform are deployed but "
+         "remain disconnected from the governed upstream warehouse today.",
+         "anchor two", "2026-08-31T06:19:15Z"],
+    ]):
+        d.append(r)
+    path = tmp_path / "two_tab.xlsx"
+    wb.save(path)
+    return str(path)
+
+
+def test_golden1_a_rich_detail_tab_beside_a_thin_master_is_not_ignored(tmp_path):
+    from dma_worker.workbook_parser import parse_evidence_master
+    obs = []
+    out = parse_evidence_master(_two_tab_ledger(tmp_path), obs)
+
+    assert [e["e_id"] for e in out] == ["E-001", "E-002"]
+    # The three fields `Evidence_Master` has no column for, each of which sank
+    # a different gate: excerpt (ET-04, CG-50), date (UNVERIFIED banding),
+    # subcaps (ET-07, a citation that links to no cell).
+    for e in out:
+        assert e["excerpt"], "the detail tab's verbatim span must land"
+        assert 50 <= len(e["excerpt"]) <= 500, "and inside the ET-04 window"
+        assert e["published_date"] is not None, "a dated row must not band UNVERIFIED"
+        assert e["subcaps"], "a citation must link to the cells it supports"
+    assert out[0]["subcaps"] == ["P1C1.1.1"]
+    assert out[1]["published_date"].year == 2025
+
+    # A field a SECOND tab supplies must not be reported as a column nobody had.
+    missed = {o.detail["field"] for o in obs if o.kind == "column_not_found"}
+    assert not missed & {"excerpt", "published", "subcaps", "ers"}, \
+        "a column present on another ledger tab must not be reported missing"
+
+    merged = [o for o in obs if o.kind == "evidence_ledger_merged"]
+    assert len(merged) == 1, "the merge is stated once, naming what it filled"
+    d = merged[0].detail
+    assert d["primary_tab"] == "Evidence_Master"
+    assert d["filled_from"]["Evidence_Detail"]["excerpt"] == 2
+    assert d["columns_supplied_by"]["excerpt"] == "Evidence_Detail"
+
+
+def test_golden1_a_secondary_tab_never_overwrites_a_stated_value(tmp_path):
+    """Merging fills HOLES. A ledger that could rewrite another tab's excerpt
+    would re-order a producer's evidence without saying so, which is the same
+    silent substitution this module exists to refuse."""
+    from dma_worker.workbook_parser import parse_evidence_master
+    stated = ("The board approved the multi-year technology roadmap and named "
+              "member experience its first priority for the coming year.")
+    obs = []
+    out = parse_evidence_master(
+        _two_tab_ledger(tmp_path, master_excerpt=stated), obs)
+    assert all(e["excerpt"] == stated for e in out), \
+        "the primary tab's own excerpt must survive the merge"
+    # The detail tab still fills what the master genuinely lacks.
+    assert all(e["published_date"] is not None and e["subcaps"] for e in out)
+
+
+def test_golden1_rows_only_the_detail_tab_carries_are_not_dropped(tmp_path):
+    from dma_worker.workbook_parser import parse_evidence_master
+    rows = [
+        ["E-001", "Source 1", "https://x", "T2", "4.10", "2026-01-15",
+         "CURRENT", "FACT", "1", "P1C1.1.1",
+         "The credit union completed its core data platform migration during "
+         "the first quarter and reported the deposits domain feature complete.",
+         "anchor one", "2026-08-31T06:19:15Z"],
+        ["E-903", "Only in detail", "https://y", "T3", "3.10", "2024-05-05",
+         "DATED", "FACT", "1", "P3C2.1.1",
+         "An interview log records that service case data remains siloed from "
+         "the warehouse and is not available to relationship managers today.",
+         "anchor three", "2026-08-31T06:19:15Z"],
+    ]
+    obs = []
+    out = parse_evidence_master(_two_tab_ledger(tmp_path, detail_rows=rows), obs)
+    ids = [e["e_id"] for e in out]
+    assert "E-903" in ids, "a row missing from the index is still a row"
+    hit = [o for o in obs if o.kind == "evidence_ledger_rows_only_in_secondary"]
+    assert len(hit) == 1 and hit[0].detail["rows_added"] == 1
+    assert hit[0].detail["example"] == ["E-903"]
 # ── class 16: ledger columns read under one spelling, misses unrecorded ───
 # The tab-name fix above (class 8) got the reader to the right sheet. Inside
 # it, two columns were still read under one spelling each:

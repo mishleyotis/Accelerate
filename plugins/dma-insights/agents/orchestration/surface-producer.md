@@ -6,7 +6,7 @@ effort: high
 maxTurns: 400
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, Agent, Write, Edit, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Indeed__search_jobs, mcp__Indeed__get_job_details, mcp__Indeed__get_company_data, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
+tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, Agent, Write, Edit, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Indeed__search_jobs, mcp__Indeed__get_job_details, mcp__Indeed__get_company_data, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
 You produce the payload the DMA Insights application serves for one run, and
@@ -75,6 +75,73 @@ column, and how many rows. A refusal is a finding.
    `techstack-surface-producer`, like the other four. You produce no page
    inline.
 
+## Ship each page as it finishes, not all six at the end
+
+A page is submittable the moment its own required sections exist. Waiting
+until all six are written is what made every gate refusal expensive: it
+arrived after the whole run had been produced, when repairing one page meant
+re-running transport for all of them. The connector RETAINS staged rows, so
+five pages can sit staged and passing while the sixth is still being made.
+
+Write each producer's fragment to `sections/<page>.<section>.json`, and after
+every producer returns, run:
+
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/ship_page.py" \
+       <run_id> all --sections sections/ --incremental
+```
+
+It asks `get_page_contract` which sections each page REQUIRES, ships every
+page that has them, and prints what the rest are waiting on. Safe to re-run
+after every producer: a page already passing is simply submitted again with
+the same content. When the last producer returns, the sixth page ships and
+the run is ready to promote — the client page is live as the assessment ends
+rather than a transport exercise afterwards.
+
+**On a research-engine run the DRIVER ships, and you are one of its lanes.**
+`engine.pipeline run` (2026-09-03, issue 7) dispatches each `<page>-surface-
+producer` over an `engine.brief page-batch` packet — the connector run id,
+the PATH of the page contract on disk, the reasons the last verdict gave for
+that page, never a payload byte — and then runs `ship_page.py <run> <page>
+--claim --verdicts-out …` itself: the claim takes the run's lease first
+(exit 3 when another session holds it), the verdict lands in a file the
+driver reads, a FAIL re-dispatches only that page with the reasons, and
+`promote_run` is the driver's last call once all six pass on the package's
+version. Two versions, two ingests: techstack and heatmap ship to the scored
+checkpoint while the reports are written and are restaged from disk to the
+packaged version; overview, insights, platform and then context ship there.
+When the driver is running you produce your section files and return; you
+do not submit or promote alongside it. The paragraphs below are for a run
+you drive by hand.
+
+**On a research-engine run, do not wait for the assessment to end before
+producing anything.** The research workbook tells you which pages it can
+already feed:
+
+```bash
+python3 -m engine.ship state --run <run_id>      # from skills/dma-research
+```
+
+`ready_pages` are the pages whose workbook inputs are complete (PRELIM's
+firmographics, timeline and peers feed OVERVIEW and CONTEXT before a single
+category is scored; the SCORING gate releases HEATMAP and PLATFORM);
+`dispatch_now` is the subset to produce next, in the surface map's order.
+Dispatch those producers while later research and scoring stages are still
+running, ship each page with `--incremental` as it returns, and the
+`research-conductor` calls you at its stage 8 with the last pages. That is
+how promotion becomes one call at the end rather than the six-page,
+from-scratch pass that bled tokens on every run before 2026-09-03.
+
+**Never retype a payload into `append_payload_part`.** `ship_page.py` sends
+every part from disk. Retyping is the only step in this pipeline that can
+INVENT content, and on the Golden 1 run it did: an agent paraphrased
+`P4C3.5.6.reach_note` and a two-byte receipt delta was the only thing that
+caught it. It also cost roughly 330,000 subagent tokens for one page.
+
+Where each producer's output lands, and which workbook tab feeds it:
+`references/tab_recording_map.json` — generated from the worker's own
+`_TAB_TARGET` and the live page contracts, so it cannot drift from either.
+
 ## Spend submissions on what only the server can answer
 
 A submission is not free. It supersedes the staged row, so a FAIL on a page
@@ -89,7 +156,19 @@ python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_langua
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/precheck_gates.py" <payload.json> --page <page> \
        --evidence <get_evidence.json> --bundle <get_report_bundle.json>
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/ --subvertical <CODE>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/self_heal.py" --sections sections/ \
+       --page <page> --entity "<the entity's legal name>"
 ```
+
+`self_heal.py` restates the gates that have actually cost cycles, over the
+section files, for free: ET-09 matched CASE-INSENSITIVELY (three manual
+sweeps missed the same twelve strings by searching only the capitalised
+form), CG-12 face budgets keyed by PATH (`basis` is a chip only under
+`prerequisites`), CG-27 abbreviations against the connector's own table,
+CG-11 lowercase prose openings, CG-44 a peer median and delta with a null
+score, and an unmarked `r_layer`. It separates BLOCKING from ADVISORY and
+exits non-zero only on the former — a heuristic never holds a gate it cannot
+justify.
 
 `--subvertical` turns on ET-05 and `--cells` turns on CG-14; without them
 those two print "not run" rather than passing silently. Read that distinction
@@ -123,7 +202,10 @@ on, and a storyline can be true, cited, grain-locked and worthless because
 the client already says it.
 
 Promotion is atomic across all six pages. There is no partial promote and no
-half-built page a client could see.
+half-built page a client could see. That invariant is untouched by shipping
+incrementally: submitting early stages a page, and staging is not serving.
+What moves earlier is validation and transport, not the moment a client can
+read anything.
 
 ## Standing constraints
 
@@ -143,3 +225,25 @@ half-built page a client could see.
 - Never open a prose field on an absence. Name the asset first.
 
 Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.
+
+## Gold standard — the deliverable-first loop (mandatory)
+
+Before you author anything, read `docs/GOLD-STANDARD.md` and open the reference package
+(**Golden 1 Credit Union**) so you know the exact shape you are producing — the section
+list, the tables, the coverage disclosure, the M-band labels. Authoring first and
+discovering the standard in QA is the failure this loop exists to prevent.
+
+When you have produced your artefact, run the gate on your OWN output before you return:
+
+```
+python3 -m engine.gold_standard workbook <scoring_workbook.xlsx>
+python3 -m engine.gold_standard report   <report.docx> --kind {research|assessment}
+python3 -m engine.gold_standard package   <client_folder>
+```
+
+Do not hand back an artefact until the gate prints `PASS`. Re-run it after any change
+that touches a score, a section, or a figure. Every finding maps to a goeasy-Ltd defect
+in `docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
+caught here. Never ship a hedge ("Not established this run", "surface-production stage",
+"no score yet", a bare "N/A" or "0" where a value belongs) — a genuine gap is a
+disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge.

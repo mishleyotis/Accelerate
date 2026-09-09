@@ -149,6 +149,37 @@ def section_spec(report: str, section_id: str):
         f"{', '.join(str(s.id) for s in spec.sections)}")
 
 
+def card_floor_for(wb: RunWorkbook, sec) -> int:
+    """How many cards THIS run owes a list section.
+
+    The Doc's floor for §5 is one deep dive per pillar, and a run assesses
+    the pillars its engagement set selects — a run scoped to P1 and P2 owes
+    two deep dives, and a writer that refused P3 as out of scope (see
+    `write`) cannot then be blocked for not writing it. Every other card
+    section owes the Doc's `cards_min`."""
+    if not sec.is_card:
+        return 0
+    if sec.kind == "pillar":
+        in_scope = {c[:2] for c in wb.selected_subcaps()}
+        if in_scope:
+            return min(int(sec.card_floor), len(in_scope))
+    return int(sec.card_floor)
+
+
+def min_words_for(wb: RunWorkbook, sec) -> int:
+    """The section's word floor for THIS run. The Doc's LENGTH for the pillar
+    deep dives is per pillar (800 or more each, four pillars); a run that
+    owes fewer deep dives owes proportionally fewer words."""
+    if sec.kind == "pillar":
+        return card_floor_for(wb, sec) * sec.card_min_words
+    return int(sec.min_words)
+
+
+def report_min_words_for(wb: RunWorkbook, spec) -> int:
+    """The whole-report floor, with the pillar section scaled as above."""
+    return sum(min_words_for(wb, sec) for sec in spec.sections)
+
+
 def all_rows_for(wb: RunWorkbook, report: str) -> dict[str, list[dict]]:
     """Every row per section id. `insight_card`, `finding` and
     `recommendation` sections legitimately carry SEVERAL rows — one card
@@ -261,14 +292,151 @@ def _check_blocks(sec, body: str) -> list[str]:
     return []
 
 
+#: The card-id shape each list section accepts. The Doc names them: §5 is one
+#: deep dive per pillar (P1..P4), §8 is REC-NN.
+_CARD_SHAPES = {
+    "pillar": re.compile(r"^P[1-4]$"),
+    "recommendation": re.compile(r"^REC-\d{2}$"),
+    "finding": re.compile(r"^F-\d{3}$"),
+    "insight_card": re.compile(r"^IC-\d{3}$"),
+}
+
+
+def _check_counts(sec, text: str, *, per_card: bool) -> list[str]:
+    r"""The countable half of the Doc's MINIMUM DATA and MUST NOT blocks.
+
+    A regex per rule, a floor, sometimes a ceiling — "5 to 7 findings, each
+    with an E-ID" becomes `F-\d{3}` between 5 and 7 distinct. Not a substitute
+    for the reviewer reading the section; the part of the control block a
+    reviewer should never have to count by hand."""
+    out = []
+    for chk in sec.checks:
+        if bool(chk.per_card) != per_card:
+            continue
+        n = chk.count(text)
+        if n < chk.min:
+            out.append(
+                f"MINIMUM DATA: {n} of {chk.min} {chk.label or chk.pattern} "
+                f"(the Doc's control block for §{sec.id}: {sec.minimum_data[:160]}…)")
+        elif chk.max is not None and n > chk.max:
+            out.append(
+                f"MINIMUM DATA: {n} {chk.label or chk.pattern}, the Doc allows "
+                f"at most {chk.max}")
+    for fb in sec.forbid:
+        m = re.search(fb.pattern, text or "")
+        if m:
+            out.append(
+                f"MUST NOT: the body carries {m.group(0)!r} — "
+                f"{fb.label or fb.pattern}")
+    return out
+
+
+def stage_preconditions(wb: RunWorkbook, report: str,
+                        qa_dir: Path | None) -> list[str]:
+    """What must be TRUE of the run before a word of this report is written.
+
+    Owner, 2026-09-03: "Report writing starts without scoring happening …
+    can the report writing agents do a preliminary check on scoring and
+    ensure the workbook is complete before writing any report?" Until now
+    nothing between the writer and the run asked: the assessment report's §4
+    read Pillar_Rollup and rendered an empty table when the rollup had never
+    been struck. So:
+
+      both reports     PRELIM signed off; the template binding recorded;
+                       every category in scope carries a floors-gate PASS
+                       recorded WITH --require-synthesis (the same rule the
+                       handoff enforces — a report on unsynthesised,
+                       unchallenged evidence is a report on raw search hits)
+      assessment       the workbook is at the ASSESSMENT stage, the SCORING
+                       gate has a recorded PASS (engine.assessment gate), and
+                       the completeness gate holds — every tab populated or
+                       declared.
+
+    Returned as a list so the refusal can name every missing thing at once;
+    an unattended session acts on a list and stalls on a sentence."""
+    from . import completeness, floors_gate, handoff, prelim
+    out: list[str] = []
+    md = wb.metadata()
+    try:
+        prelim.require_complete(wb)
+    except prelim.PrelimRefusal as e:
+        out.append(f"PRELIM is open: {str(e)[:200]}")
+    if not _clean(md.get("template_binding")):
+        out.append("no template binding recorded on this run — run "
+                   "`engine.template bind --run <R> --root <ROOT>` so the "
+                   "report is written to the pinned Doc, not a remembered shape")
+    cats = sorted({c.split(".")[0] for c in wb.selected_subcaps()})
+    gates = {}
+    for cat in cats:
+        v = floors_gate.read_verdict(qa_dir, cat) if qa_dir else None
+        gates[cat] = ({"verdict": "NOT_RUN"} if v is None else
+                      {"verdict": v.get("gate"), "blocking": v.get("blocking"),
+                       "require_synthesis": bool(v.get("require_synthesis"))})
+    try:
+        handoff._assert_scoreable(gates)
+    except SystemExit as e:
+        out.append(str(e).replace("a handoff feeds the scoring stage",
+                                  "a report reads the finished research"))
+    # The five-year trajectory both reports render (Client Profile §3/§4,
+    # assessment §1/§6; GSY-18). A short series is a disclosure when it is
+    # declared, and a blocker when it is merely missing.
+    from . import profile
+    depth = profile.financial_depth(wb)
+    if not depth["met"]:
+        out.append(depth["fix"])
+    if report == "assessment":
+        if C.stage_of(md) != "assessment":
+            out.append(
+                "the workbook is at the research stage: column D carries no "
+                "scores, so §1, §3, §4, §5, §7 and §8 have nothing to report. "
+                "Run the scoring stage (`engine.assessment score …`, "
+                "`engine.assessment rollup`, `engine.assessment gate`) first.")
+        last = None
+        for g in wb.rows("Gate_Log"):
+            if _clean(g.get("Gate")) == "SCORING":
+                last = g
+        if last is None:
+            out.append("the SCORING gate has never been run on this workbook — "
+                       "`engine.assessment gate --run <R> --root <ROOT>` must "
+                       "record a PASS before the assessment report is written")
+        elif _clean(last.get("Verdict")).upper() != "PASS":
+            out.append(f"the last SCORING gate verdict is "
+                       f"{_clean(last.get('Verdict'))}: {_clean(last.get('Detail'))[:200]}")
+        try:
+            # Every research- and scoring-stage tab is filled or declared
+            # before a word of the assessment is written; the tabs the
+            # report itself projects (REPORT_DERIVED) cannot be asked for
+            # here without making the gate unpassable.
+            completeness.require(wb, exclude=completeness.REPORT_DERIVED)
+        except completeness.CompletenessRefusal as e:
+            out.append(f"the workbook is not complete: {str(e)[:600]}")
+    return out
+
+
 def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
-          actor: str, card: str | None = None) -> dict:
+          actor: str, card: str | None = None, run=None) -> dict:
     """Write one section — or one CARD of a list section — or refuse and say
-    which field is not an argument."""
+    which field is not an argument.
+
+    The STAGE PRECONDITIONS run UNCONDITIONALLY. Until 2026-09-03 they ran
+    only when `run` was passed, "because the CLI always passes it" — and a
+    library call with `run=None` landed an assessment §1 on an unscored
+    workbook (measured). The qa_dir is derived from the workbook's own
+    layout when no run is given, so there is no calling shape that skips
+    the check: a report section on ungated research or unstruck scores
+    cannot be written, whoever is driving."""
     spec, sec = section_spec(report, section_id)
     if not _clean(actor):
         raise NarrativeRefusal("every section records its author; --actor is "
                                "how the review can refuse a self-review")
+    qa_dir = getattr(run, "qa_dir", None) if run is not None else None
+    if qa_dir is None:
+        qa_dir = Path(wb.path).resolve().parent / "07_qa"    # runstate layout
+    pre = stage_preconditions(wb, report, qa_dir)
+    if pre:
+        raise NarrativeRefusal(
+            f"the run is not ready for the {spec.title} — "
+            f"{len(pre)} precondition(s) fail:\n  - " + "\n  - ".join(pre))
     body = _clean_body(record.get("Body"))
     problems: list[str] = []
 
@@ -278,14 +446,37 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
         raise NarrativeRefusal(
             f"§{sec.id} '{sec.heading}' is a list of {sec.kind.replace('_', ' ')}s, "
             f"not a passage — each one is its own row and needs its own "
-            f"--card id. Without one, every write would overwrite the last, "
-            f"which is exactly how this section came to hold one row against "
-            f"a blocking minimum of {RS.INSIGHT_CARD_MIN}.")
+            f"--card id ({sec.card_prefix or sec.kind}…). Without one, every "
+            f"write would overwrite the last, which is exactly how this section "
+            f"came to hold one row against a blocking minimum of "
+            f"{sec.card_floor}.")
     if card_id and not is_card:
         raise NarrativeRefusal(
             f"§{sec.id} '{sec.heading}' is one passage; --card does not "
             f"apply to it. Its structure is its blocks: "
             + " · ".join(sec.blocks or ("(none declared)",)))
+    if is_card:
+        shape = _CARD_SHAPES.get(sec.kind)
+        if shape and not shape.match(card_id):
+            raise NarrativeRefusal(
+                f"card id {card_id!r} does not have the shape §{sec.id} "
+                f"requires ({shape.pattern}); the Doc names its cards "
+                f"{sec.card_prefix}NN and the app reconciles on that id.")
+        if sec.kind == "pillar":
+            in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
+            if card_id not in in_scope:
+                raise NarrativeRefusal(
+                    f"{card_id} carries no selected subcapability in this run "
+                    f"(pillars in scope: {', '.join(in_scope)}); a deep dive "
+                    f"on a pillar the run did not assess is invention.")
+        have_cards = {_clean(r.get("Card_ID"))
+                      for r in all_rows_for(wb, report).get(str(sec.id), [])}
+        if sec.cards_max and card_id not in have_cards \
+                and len(have_cards) >= int(sec.cards_max):
+            raise NarrativeRefusal(
+                f"§{sec.id} already carries {len(have_cards)} cards and the Doc "
+                f"allows at most {sec.cards_max}; replace one by its id rather "
+                f"than adding a {len(have_cards) + 1}th.")
 
     floor = sec.card_min_words if is_card else sec.min_words
     if _words(body) < floor:
@@ -299,6 +490,10 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
             + ". The floor is the section's job description, not a style "
               "preference.")
     problems += _check_blocks(sec, body)
+    # The countable MINIMUM DATA / MUST NOT rules. Per-card rules run on this
+    # body; section-wide rules on a card section are measured across the
+    # cards by `state()`, because a single card cannot know its siblings.
+    problems += _check_counts(sec, body, per_card=is_card)
 
     eids = [e for e in _split_ids(record.get("Evidence_IDs")) if e]
     register = wb.evidence_index()
@@ -519,19 +714,26 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
             body = _clean(r.get("Body")) if r else ""
             sec_words = sum(_words(_clean(x.get("Body"))) for x in rows)
             cards = len(rows) if sec.kind in RS.CARD_KINDS else None
-            card_floor = (RS.INSIGHT_CARD_MIN
-                          if sec.kind == "insight_card" else
-                          1 if sec.kind in RS.CARD_KINDS else 0)
+            card_floor = card_floor_for(wb, sec)
+            whole = "\n".join(_clean_body(x.get("Body")) for x in rows)
+            count_problems = (_check_counts(sec, whole, per_card=False)
+                              if rows and sec.kind in RS.CARD_KINDS else [])
             if not r or not body:
                 st, detail = "OPEN", "not written"
             elif cards is not None and cards < card_floor:
                 st, detail = "SHORT", (
                     f"{cards} of {card_floor} "
                     f"{sec.kind.replace('_', ' ')}s "
-                    f"({sec_words} of {sec.min_words} words)")
-            elif sec_words < sec.min_words:
-                st, detail = "SHORT", (f"{sec_words} of {sec.min_words} "
+                    f"({sec_words} of {min_words_for(wb, sec)} words)")
+            elif cards is not None and sec.cards_max and cards > int(sec.cards_max):
+                st, detail = "SHORT", (
+                    f"{cards} {sec.kind.replace('_', ' ')}s, the Doc allows "
+                    f"at most {sec.cards_max}")
+            elif sec_words < min_words_for(wb, sec):
+                st, detail = "SHORT", (f"{sec_words} of {min_words_for(wb, sec)} "
                                        f"words")
+            elif count_problems:
+                st, detail = "SHORT", "; ".join(count_problems)[:300]
             elif not _clean(r.get("Review_Verdict")):
                 st, detail = "UNREVIEWED", (
                     f"{_words(body)} words, written by "
@@ -563,14 +765,14 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
         words = sum(s["words"] for s in secs)
         out["reports"][key] = {
             "title": spec.title, "sections": secs, "open": open_,
-            "words": words, "min_words": spec.min_words,
-            "ready": not open_ and words >= spec.min_words,
+            "words": words, "min_words": report_min_words_for(wb, spec),
+            "ready": not open_ and words >= report_min_words_for(wb, spec),
         }
         if open_:
             out["blocking"].append(f"{key}: §{', §'.join(open_)} not READY")
-        elif words < spec.min_words:
+        elif words < report_min_words_for(wb, spec):
             out["blocking"].append(
-                f"{key}: {words} words against a {spec.min_words} floor")
+                f"{key}: {words} words against a {report_min_words_for(wb, spec)} floor")
     out["ready"] = not out["blocking"]
     return out
 
@@ -622,11 +824,21 @@ def main(argv=None) -> int:
     c = sub.add_parser("contract")
     c.add_argument("--report", choices=sorted(RS.SPECS))
 
+    pc = common(sub.add_parser(
+        "preconditions",
+        help="is the run READY for this report to be written? PRELIM closed, "
+             "every category gated with synthesis, the template bound, and — "
+             "for the assessment — scores struck, the SCORING gate passed and "
+             "the workbook complete. The report producers run this first."))
+    pc.add_argument("--report", required=True, choices=sorted(RS.SPECS))
+
     a = ap.parse_args(argv)
     if a.cmd == "contract":
         for key in ([a.report] if a.report else sorted(RS.SPECS)):
             spec = RS.SPECS[key]
-            print(f"\n{key} — {spec.title} ({spec.min_words}+ words)")
+            print(f"\n{key} — {spec.title} ({spec.min_words}+ words; pinned "
+                  f"from Doc {spec.drive_doc_id}, "
+                  f"references/templates/{spec.markdown})")
             for sec in spec.sections:
                 print(f"  §{sec.id:<3} {sec.kind:<14} {sec.min_words:>4}w  "
                       f"{sec.heading}")
@@ -637,11 +849,19 @@ def main(argv=None) -> int:
                 print(f"        feeds    : "
                       + (", ".join(sec.surfaces) or "no app surface"))
                 if sec.kind in RS.CARD_KINDS:
-                    floor = (RS.INSIGHT_CARD_MIN
-                             if sec.kind == "insight_card" else 1)
-                    print(f"        a LIST   : {floor}+ rows, one per card, "
-                          f"each {RS.CARD_MIN_WORDS}+ words "
+                    print(f"        a LIST   : {sec.card_floor}"
+                          + (f"-{sec.cards_max}" if sec.cards_max else "+")
+                          + f" cards ({sec.card_prefix}…), one per row, each "
+                          f"{sec.card_min_words}+ words "
                           f"(engine.narrative write --card <id>)")
+                for chk in sec.checks:
+                    print(f"        requires : >= {chk.min} {chk.label}"
+                          + (f", <= {chk.max}" if chk.max else "")
+                          + (" (per card)" if chk.per_card else ""))
+                for fb in sec.forbid:
+                    print(f"        never    : {fb.label}")
+                if sec.fail_if:
+                    print(f"        FAIL IF  : {sec.fail_if}")
         print("\nevery section also requires: Weighing (names the other "
               "side), Absence_Basis (a ladder, when the body asserts an "
               "absence), Assumptions, Bias_Notes, Inference_Tags (matching "
@@ -673,8 +893,14 @@ def main(argv=None) -> int:
         if a.cmd == "write":
             rec = json.loads(Path(a.json).read_text())
             print(json.dumps(write(wb, a.report, a.section, rec,
-                                   actor=a.actor, card=a.card), indent=2))
+                                   actor=a.actor, card=a.card, run=run),
+                             indent=2))
             return 0
+        if a.cmd == "preconditions":
+            pre = stage_preconditions(wb, a.report, run.qa_dir)
+            print(json.dumps({"report": a.report, "ready": not pre,
+                              "blocking": pre}, indent=2))
+            return 0 if not pre else 1
         dims = (json.loads(a.dimensions) if a.dimensions
                 else {d: "PASS" for d in REVIEW_DIMENSIONS})
         print(json.dumps(review(wb, a.report, a.section, verdict=a.verdict,
