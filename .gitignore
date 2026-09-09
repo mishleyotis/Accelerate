@@ -27,6 +27,11 @@ out/
 # Local artefact store (docker-compose filesystem GCS stand-in)
 .local-artefacts/
 
+# Session-local plugin scratch: pulled toolkit copies, in-flight client run
+# workbooks/evidence/agent transcripts. Client engagement data belongs in
+# the connector's own storage (GCS/DB), never in git history.
+plugins/dma-insights/.local/
+
 # OS / editor
 .DS_Store
 

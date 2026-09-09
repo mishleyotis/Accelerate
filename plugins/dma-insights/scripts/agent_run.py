@@ -78,6 +78,40 @@ DEFAULT_LANES = 16
 #: that behaves like a child (prints, spawns, hangs) without a model.
 CLAUDE_BIN = os.environ.get("DMA_CLAUDE_BIN", "claude")
 
+
+def _mcp_config_path() -> str | None:
+    """The parent session's own MCP config file, if one is on disk.
+
+    Measured 2026-09-09 (SWBC run DMA-2026-SWBC-001): a headless `claude -p`
+    child spawned with no `--mcp-config` cannot see mcp__Exa, mcp__Tavily,
+    mcp__Clay, mcp__Vibe_Prospecting or mcp__Indeed AT ALL — not refused,
+    absent from its tool registry, `--allowedTools` naming them or not. A
+    controlled probe (same host, same command shape, `--mcp-config` added)
+    connected mcp__Exa on the first call. Across 16 category lanes and one
+    dedicated enrichment lane, this cost a real run 0 enrichment_searches on
+    every category (`engine.relay enrichment`) despite ~1,900 logged
+    searches — the `search_requests` relay (MEM-0333) is the correct
+    fallback for a genuinely absent connector, but it was catching total
+    absence, not the rare case it was built for.
+
+    The platform writes this session's config to a fixed, discoverable path
+    (`/tmp/mcp-config-<session-id>.json`) once at session start; there is at
+    most one such file per container. Passing it through does not widen
+    what a lane may call — each agent's own `tools:`/`disallowedTools:`
+    front matter still gates that, exactly as `ALLOWED` above only removes
+    the permission-PROMPT layer, not the grant. Returns None (silent no-op,
+    same behaviour as before this fix) where no such file exists, e.g. a
+    local dev container with no platform-injected connectors — the
+    search_requests relay remains correct there."""
+    import glob
+    hits = sorted(glob.glob("/tmp/mcp-config-*.json"),
+                  key=lambda p: Path(p).stat().st_mtime, reverse=True)
+    return hits[0] if hits else None
+
+
+#: Resolved once per process; every lane this driver spawns shares it.
+MCP_CONFIG = _mcp_config_path()
+
 #: WHAT ONE LANE COSTS THE HOST — an estimate, stated as one. A `claude -p`
 #: child is a Node process holding a model context; measured RSS on the
 #: 2026-09-07 runs sat in the hundreds of MB and climbed with the transcript.
@@ -260,6 +294,7 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
     cmd = [CLAUDE_BIN, "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
+           *(["--mcp-config", MCP_CONFIG] if MCP_CONFIG else []),
            f"--allowedTools={allowed}", prompt]
     try:
         # start_new_session: the child leads its own process group, so a
@@ -650,6 +685,7 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
            "--output-format", "stream-json", "--verbose",
+           *(["--mcp-config", MCP_CONFIG] if MCP_CONFIG else []),
            f"--allowedTools={allowed}", prompt]
     events, raw, err_parts = [], [], []
     try:
