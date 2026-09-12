@@ -219,6 +219,15 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
 COMPLETION_CRITERIA = {
     "PRELIM_OPEN": ("`engine.prelim complete` succeeds: all seven sections "
                     "narrated with cited evidence or declared with a ladder"),
+    # The one criterion no agent can satisfy. Stated anyway, because a state
+    # with no criterion is a state nobody can tell is finished — and this one
+    # closes on a PERSON, not on a command.
+    "BLOCKED_NO_CONNECTOR": (
+        "a human attaches the missing connector on the Routine's own edit "
+        "screen, and `connector_contract.py check --tools - --strict` then "
+        "exits 0 from a session that holds it — re-record the baseline with "
+        "`connector_contract.py baseline --tools - --root <ROOT>` and the "
+        "state clears. No lane and no revive can close this one"),
     "STALLED": ("`engine.cli gate --category <C> --require-synthesis` "
                 "returns PASS for every open category"),
     "GATE_FAILED": ("`engine.cli gate --category <C> --require-synthesis` "
