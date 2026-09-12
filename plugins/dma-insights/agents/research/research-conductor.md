@@ -114,6 +114,44 @@ substrate that only updates when a stage completes is not progress
 reporting, and waiting forty minutes to discover a lane died on its first
 tool call is the cost this removes.
 
+1a. **Record the connectors you hold — BEFORE you fan anything out.**
+   No subprocess can enumerate a session's bound MCP tools (MEM-0112), so
+   only you can do this, and nothing downstream can do it for you:
+
+   ```bash
+   printf '%s\n' <every mcp__ tool name you hold> | python3 \
+     "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" baseline --tools - --root <ROOT>
+   printf '%s\n' <the same list> | python3 \
+     "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" check --tools - --strict
+   ```
+
+   **`--strict` or the gate is not a gate** — without it a STOP still exits 0.
+   A STOP means STOP: name the missing families, say a human attaches them on
+   the Routine's own edit screen, and do not dispatch. Measured 2026-09-12: a
+   run began with no enrichment connector bound, so `declare_absence` refused
+   every empty cell (it requires one of `C.ENRICHMENT_TOOLS`; web_search is
+   not one), so no floors gate could pass, so sixteen categories were
+   re-dispatched ~18 times for $96.65 and closed nothing. Sixteen lanes
+   against a session that cannot close a cell is the most expensive way to
+   discover the connectors were missing.
+
+   The baseline is also what tells a LATER loss apart from never having had
+   it: work done while a connector was bound stays valid, and work after it
+   is lost records NOT_RUN with the loss as its reason. **So probe at every
+   stage boundary** — when the driver stops and hands back to you, before you
+   run it again:
+
+   ```bash
+   printf '%s\n' <your mcp__ tools, read fresh> | python3 \
+     "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" probe --tools - --root <ROOT> --strict
+   ```
+
+   STABLE carry on · RECOVERED say so · **DEGRADED is not a stop**: name the
+   lost family in your report, and expect the cells worked after it to close
+   as honest NOT_RUNs rather than as absences nobody could earn. Only you can
+   run this — the engine cannot read a session's bound tools, so a probe it
+   ran for itself could only ever compare the baseline to itself.
+
 1b. **PRELIM — buy the deep background ONCE, before any capability work.**
    `engine.prelim state --run <RUN_ID> --root <ROOT>` lists seven sections
    and the fix line for each. `orient` serves NO category card until they

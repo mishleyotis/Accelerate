@@ -1387,6 +1387,32 @@ def _is_dir(path) -> bool:
         return False
 
 
+def _connector_row() -> tuple:
+    """(name, ok, detail) for the enrichment-connector baseline."""
+    name = "enrichment connectors"
+    fix = ("run `python3 $CLAUDE_PLUGIN_ROOT/scripts/connector_contract.py "
+           "baseline --tools -` from the session that holds the tools, before "
+           "dispatching anything")
+    try:
+        sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        path = cc.baseline_path(os.environ.get("DMA_RUN_ROOT"))
+        if not _readable(path):
+            return (name, False,
+                    f"no connector baseline at {path} — UNVERIFIED, not a pass. {fix}")
+        rec = json.loads(Path(path).read_text())
+        out = cc.check(rec.get("mcp_tools") or [])
+        if out["ok"]:
+            return (name, True, f"present: {', '.join(out['present']) or 'none'}")
+        return (name, False,
+                f"STOP — missing {', '.join(out['missing'])}. Without one of these "
+                f"NO cell can be declared absent, so no floors gate can pass and "
+                f"the run will re-dispatch until its ceiling. {out['why'][:200]}")
+    except Exception as e:                                    # noqa: BLE001
+        return (name, False, f"could not be judged: {e.__class__.__name__}: "
+                             f"{str(e)[:160]} — UNVERIFIED, not a pass. {fix}")
+
+
 def env_check() -> dict:
     checks = []
 
@@ -1413,6 +1439,21 @@ def env_check() -> dict:
        "no identity rung readable here: the connector stages (INGEST_A, "
        "PAGES_*, PROMOTE) will fail; PRELIM..PACKAGE and --dispatcher stub "
        "do not need one")
+    # THE ROW THAT WAS NOT HERE. Measured 2026-09-12: a run started with no
+    # enrichment connector bound at all. Nothing could then be declared absent
+    # (`declare_absence` requires one of C.ENRICHMENT_TOOLS), so no floors gate
+    # could pass, so the driver re-dispatched sixteen categories ~18 times for
+    # $96.65 and closed nothing. `connector_contract.py` already declares the
+    # required set with verdict STOP, is tested, and is wired into the Routine
+    # prompts — and was called from nowhere on the `/run-assessment` path: not
+    # here, not by the command, not by the conductor.
+    #
+    # A session's bound MCP tools live in the model's context and no subprocess
+    # can enumerate them (MEM-0112), so this reads the BASELINE the command
+    # layer writes with `connector_contract.py baseline --tools -`. An absent
+    # baseline is reported as UNVERIFIED, never as a pass: "no enrichment
+    # connector" and "nobody looked" must not wear the same face.
+    ck(*_connector_row())
     tk = os.environ.get("DMA_TOOLKITS_DIR")
     ck("toolkits", bool(tk and _is_dir(tk)),
        tk or "DMA_TOOLKITS_DIR unset — kg build falls back to the 71 category questions and says so")
@@ -1428,6 +1469,10 @@ def env_check() -> dict:
     # A hard failure is one that stops a run HERE. `toolkits` is a stated
     # fallback, and an identity rung is only needed for the connector stages —
     # a checkout with neither still plans, tests and drives the stub.
+    # `enrichment connectors` is deliberately NOT in the exempt list: a run
+    # without one cannot close a single empty cell, so letting it start is
+    # letting it burn. `toolkits` is a stated fallback and an identity rung is
+    # only needed for the connector stages.
     hard = [c for c in checks if not c["ok"]
             and c["check"] not in ("toolkits", "connector identity", "claude CLI")]
     return {"ok": not hard, "checks": checks,

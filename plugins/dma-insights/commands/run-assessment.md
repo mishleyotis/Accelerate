@@ -17,8 +17,33 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
-cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && python3 -m engine.pipeline env
 ```
+
+**Then record the connectors YOU hold, before anything is dispatched.** No
+subprocess can enumerate a session's bound MCP tools (MEM-0112) — only you can.
+Write the list, one tool name per line, and hand it to the contract:
+
+```bash
+printf '%s\n' <every mcp__ tool name you hold> \
+  | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" baseline --tools - --root <ROOT>
+printf '%s\n' <the same list> \
+  | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" check --tools - --strict
+```
+
+`--strict` is not optional. Without it a STOP still exits 0 and the gate you
+just built passes a session with no connectors at all — which is the exact
+condition it exists to catch. A STOP is a **stop**: report which families are
+missing and that a human attaches them on the Routine's own edit screen, and
+do not start the run. Measured 2026-09-12: a run started without Exa or Tavily
+could not declare a single cell absent, so no floors gate could pass, and it
+re-dispatched sixteen categories ~18 times for $96.65 and closed nothing.
+
+```bash
+cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
+```
+
+`env` now reads that baseline as a hard dependency: no baseline is UNVERIFIED,
+never a pass.
 
 `doctor.py --heal` repairs a STALE / MISSING / DIVERGED install and re-checks
 once; `UPDATED_MID_SESSION` means the disk is fixed and THIS session still
@@ -26,9 +51,10 @@ holds the old roster — carry on, because the driver dispatches every lane as
 a fresh child process that binds the repaired install. Anything else red
 after the heal is a provisioning defect: report the row and stop.
 `engine.pipeline env` names every hard dependency (the claude CLI, a
-connector identity rung, `agent_run.py`, `ship_page.py`, `mcp_raw.py`,
-`drive_fetch.py`, the pinned templates against the manifest); a hard failure
-stops you here, with the check's own fix line.
+connector identity rung, the **enrichment-connector baseline** you just wrote,
+`agent_run.py`, `ship_page.py`, `mcp_raw.py`, `drive_fetch.py`, the pinned
+templates against the manifest); a hard failure stops you here, with the
+check's own fix line.
 
 ## 2 · Route the name before you prepare anything
 

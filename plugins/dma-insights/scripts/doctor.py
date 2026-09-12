@@ -565,14 +565,47 @@ def connector_contract_check() -> dict:
                       "one of them is wrong, and the registry is the one the "
                       "agents are built from")
     anyof = "; ".join(" or ".join(g) for g in c["required_any"])
-    return _check(
-        name, True,
-        f"required {', '.join(c['required'])}"
-        + (f"; at least one of {anyof}" if anyof else "")
-        + f"; optional {', '.join(c['optional'])} — derived from EXTERNAL, so "
-        "no firing stops on a family no agent declares. A session's OWN bound "
-        "tools cannot be read from here: pipe them to "
-        "`connector_contract.py check --tools -`")
+    declared = (f"required {', '.join(c['required'])}"
+                + (f"; at least one of {anyof}" if anyof else "")
+                + f"; optional {', '.join(c['optional'])}")
+    # THE HALF THIS ROW USED TO SKIP. It returned True unconditionally — it
+    # only proved the contract NAMES families the registry defines, never that
+    # this session holds any. So the doctor went green on a session with zero
+    # enrichment connectors, which is the exact state that cost a live run
+    # $96.65 (2026-09-12). commands/doctor.md has always said it: "A doctor
+    # that passes while the tools are absent has checked the wrong thing."
+    #
+    # A session's bound tools cannot be read from a subprocess (MEM-0112), so
+    # the honest verdict when no baseline has been written is UNVERIFIED — and
+    # UNVERIFIED is not a pass.
+    try:
+        path = connector_contract.baseline_path(os.environ.get("DMA_RUN_ROOT"))
+        if not Path(path).is_file():
+            return _check(
+                name, False,
+                f"{declared} — derived from EXTERNAL. UNVERIFIED: no baseline at "
+                f"{path}, so nothing here has checked whether THIS session holds "
+                f"any of them.",
+                "from the session that holds the tools: "
+                "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
+                "baseline --tools - --root <RUN_ROOT>`, then re-run the doctor")
+        rec = json.loads(Path(path).read_text())
+        out = connector_contract.check(rec.get("mcp_tools") or [])
+        if not out["ok"]:
+            return _check(name, False,
+                          f"{declared}. BASELINE IS SHORT: missing "
+                          f"{', '.join(out['missing'])} — no cell can be declared "
+                          f"absent without one, so no floors gate can pass.",
+                          out["why"][:240])
+        return _check(name, True,
+                      f"{declared}. Baseline holds: "
+                      f"{', '.join(out['present']) or 'none'}")
+    except Exception as exc:                                  # noqa: BLE001
+        return _check(name, False,
+                      f"{declared} — UNVERIFIED: {exc.__class__.__name__}: "
+                      f"{str(exc)[:160]}",
+                      "re-run `connector_contract.py baseline --tools -` from the "
+                      "session that holds the tools")
 
 
 def deps_check(plugin_root: Path = PLUGIN, offline: bool = False) -> dict:

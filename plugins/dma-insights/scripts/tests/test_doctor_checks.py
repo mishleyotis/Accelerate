@@ -217,6 +217,15 @@ ENVIRONMENT_DEPENDENT_ROWS = {
     "skill script dependencies",
     "active google account",
     "identity source",
+    # `connector contract` was a statement about the REPO — it returned True
+    # whenever the required families appeared in the registry, and so went
+    # green on a session holding no enrichment connectors at all. That is the
+    # state that cost a live run $96.65 (2026-09-12), and commands/doctor.md
+    # had already named the failure: "A doctor that passes while the tools are
+    # absent has checked the wrong thing." It now reads the connector BASELINE
+    # the session writes, which makes it a statement about the machine: red
+    # wherever no baseline has been written, green where one has and it holds.
+    "connector contract",
     # `installed plugin` compares the CHECKOUT to whatever this machine has
     # installed, so it is a statement about the machine by construction: red
     # on a CI runner with no install (NOT_INSTALLED is green, but a stale one

@@ -32,9 +32,17 @@ not given.
     connector_contract.py check --tools tools.txt [--strict]
     printenv | ... | connector_contract.py check --tools - --strict
 
-Exit 0 when every REQUIRED family is present, 1 when one is missing, 2 when
-the contract itself is unusable (the registry moved, a required family is
-not in it) — which is a repo defect and never a session's fault.
+EXIT CODES, and the `--strict` trap. 2 means the contract itself is unusable
+(the registry moved, a required family is not in it) — a repo defect, never a
+session's fault. 1 means a required family is missing — but ONLY under
+`--strict`. Without it a STOP still PRINTS and still exits 0, deliberately, so
+a caller can quote the verdict without the exit code deciding for it.
+
+That default has a sharp edge and it drew blood (measured 2026-09-12): a
+caller that wires this in as a gate and forgets `--strict` gets a silent pass
+on a session with no connectors at all, which is the exact condition the gate
+exists to catch. **Every caller using this to STOP something must pass
+`--strict`.** If you want the verdict rather than the gate, read `--json`.
 """
 from __future__ import annotations
 
