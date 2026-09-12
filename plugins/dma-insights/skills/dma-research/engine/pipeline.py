@@ -276,6 +276,15 @@ class Options:
     shipper: Shipper
     until: str | None = None
     max_wall_min: float | None = None
+    # A DOLLAR CEILING, enforced. `cost.BUDGET_PER_PILLAR` x pillars in scope
+    # when left None. Measured 2026-09-12: the budget was computed, reported
+    # and never enforced — `cost.record` raises only on a missing duration and
+    # `cost report`'s verdict is a shell exit code no automated path reads
+    # ("reported over budget WITH the figure, and still runs",
+    # docs/ROUTINES.md). One research round at the lanes' own 200-turn ceiling
+    # is ~$83 against a $20 four-pillar budget, and ten rounds are allowed.
+    # Set 0 to disable the ceiling and keep the old reporting-only behaviour.
+    max_usd: float | None = None
     # A CEILING on rounds per looping stage. 3 refused categories that were
     # still gaining ground each round (owner, 2026-09-07); 10 is what the
     # owner resumed those runs with. `stall_rounds` is what keeps a large
@@ -377,9 +386,16 @@ class Pipeline:
             from . import cost
             cost.record(self.run, stage=stage, elapsed_s=elapsed, lanes=lanes or None,
                         attempts=attempts or None, note=f"pipeline {verdict}: {detail[:200]}",
-                        wb=self.wb)
+                        wb=self.wb, **self._spend_kw(cost))
         except Exception as e:                       # noqa: BLE001
-            self.opts.log(f"  (cost not recorded: {str(e)[:120]})")
+            # A swallowed cost failure is how a run spends $96 against a $20
+            # budget and leaves a ledger that says nothing. Still non-fatal —
+            # accounting must not kill a good stage — but it is now LOUD and
+            # it is recorded in the run state.
+            self.opts.log(f"  (COST NOT RECORDED — the ledger is now incomplete: "
+                          f"{e.__class__.__name__}: {str(e)[:160]})")
+            self.state.setdefault("cost_errors", []).append(
+                {"stage": stage, "error": f"{e.__class__.__name__}: {str(e)[:200]}"})
         st = self.state["stages"].setdefault(stage, {})
         st.update({"verdict": verdict, "detail": detail[:600], "elapsed_s": elapsed,
                    "ended_at": _utcnow(), "rounds": rounds})
@@ -397,6 +413,39 @@ class Pipeline:
         if self.opts.max_wall_min is None:
             return False
         return (self.opts.clock() - self.t_start) / 60.0 >= self.opts.max_wall_min
+
+    def _spend_kw(self, cost) -> dict:
+        """The spend to attribute to the stage that just ended — the DELTA
+        since the last record, not the run total, so the ledger's rows sum to
+        the run instead of each restating it. Silent when the dispatcher
+        reported no cost (the stub, or a lane whose status file carried none):
+        `cost.record` then falls back to its own estimate, and a zero we made
+        up would be worse than an absence."""
+        kw = {}
+        usd = round(self._spent_usd - self._recorded_usd, 4)
+        turns = self._spent_turns - self._recorded_turns
+        if usd > 0:
+            kw["usd"] = usd
+            self._recorded_usd = self._spent_usd
+        if turns > 0:
+            kw["turns"] = turns
+            self._recorded_turns = self._spent_turns
+        return kw
+
+    def budget_usd(self) -> float | None:
+        """The run's dollar ceiling. `None` disables it."""
+        if self.opts.max_usd is not None:
+            return None if self.opts.max_usd <= 0 else float(self.opts.max_usd)
+        try:
+            from . import cost
+            pillars = {c[:2] for c in self.wb.selected_subcaps()}
+            return cost.BUDGET_PER_PILLAR * max(1, len(pillars))
+        except Exception:                            # noqa: BLE001
+            return None
+
+    def _over_budget(self) -> bool:
+        cap = self.budget_usd()
+        return cap is not None and self._spent_usd >= cap
 
     # ── DONE predicates ────────────────────────────────────────────────
     def done(self, stage: str) -> tuple[bool, str]:
@@ -545,6 +594,14 @@ class Pipeline:
                 self._record(st, "FAIL", why, self.opts.clock())
                 outcome.update(outcome="BLOCKED", stage=st, reason=why)
                 return outcome
+            if self._over_budget():
+                outcome.update(outcome="STOPPED_BUDGET", stage=st,
+                               reason=f"spent ${self._spent_usd:.2f} of a "
+                                      f"${self.budget_usd():.2f} budget before {st}; "
+                                      f"resume: {self.plan()['command']}")
+                self.opts.log(f"[{st}] STOPPED — budget ${self._spent_usd:.2f} "
+                              f"of ${self.budget_usd():.2f}")
+                return outcome
             if self._over_wall():
                 outcome.update(outcome="STOPPED_WALL_CLOCK", stage=st,
                                reason=f"--max-wall-min {self.opts.max_wall_min} reached "
@@ -562,6 +619,20 @@ class Pipeline:
             except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
                     KeyError, RuntimeError) as e:
                 msg = str(e).strip() or e.__class__.__name__
+                # A stage the BUDGET stopped has not failed its gate — it
+                # never got to finish trying. Reporting "still failing the
+                # floors gate" there sends the reader to repair research that
+                # was simply cut short, which is the wrong repair.
+                if self._budget_stopped:
+                    msg = (f"stopped by the ${self.budget_usd():.2f} budget after "
+                           f"spending ${self._spent_usd:.2f} — the stage was cut "
+                           f"short, not refused. Raise --max-usd or narrow scope, "
+                           f"then resume; what it had reached when it stopped: {msg}")
+                    self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    outcome.update(outcome="STOPPED_BUDGET", stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
                 self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
                              lanes=self._lane_count, attempts=self._attempts)
                 outcome.update(outcome="FAILED", stage=st, reason=msg[:800],
@@ -579,10 +650,23 @@ class Pipeline:
     _last_sig: tuple | None = None
     _stalls = 0
     _stalled_at: int | None = None
+    #: per-category stall bookkeeping for RESEARCH (see `_research_stalled`)
+    _cat_sig: dict = {}
+    _cat_stalls: dict = {}
+    _cat_stalled: list = []
+
+    #: run-scoped spend — deliberately NOT cleared by `_reset_counters`,
+    #: because a ceiling that forgets the previous stage is not a ceiling.
+    _spent_usd = 0.0
+    _spent_turns = 0
+    _recorded_usd = 0.0
+    _recorded_turns = 0
+    _budget_stopped = False
 
     def _reset_counters(self):
         self._rounds = self._lane_count = self._attempts = 0
         self._last_sig, self._stalls, self._stalled_at = None, 0, None
+        self._cat_sig, self._cat_stalls, self._cat_stalled = {}, {}, []
 
     # ── progress between rounds ────────────────────────────────────────
     #
@@ -591,6 +675,81 @@ class Pipeline:
     # nothing, whatever the lanes reported. The signature is read from the
     # WORKBOOK the lanes write, so it measures the substrate, not the prose.
 
+    def _research_progress(self) -> dict[str, tuple]:
+        """Per-category OUTCOME counters for the RESEARCH stage.
+
+        THIS DELIBERATELY EXCLUDES THE RAW `Search_Log` ROW COUNT, and the
+        reason is the whole bug. Measured 2026-09-12 against the real
+        driver: `len(searches)` sat in the run-level signature and
+        `_stalled` clears on `any(c > p ...)`, so ONE extra `web_search`
+        row anywhere reset the stall counter for all sixteen categories.
+        A lane that logs searches and resolves nothing is the cheapest
+        thing a stuck lane does — so the counter meant to STOP the loop was
+        the one a stuck loop was guaranteed to raise. Replaying the failing
+        run's shape: nine rounds, `stalls=0` every round, never stopped.
+        With the row count removed it stops at round 2.
+
+        Two changes, both load-bearing:
+          * only OUTCOMES count — a cell closed, a synthesis written, an
+            absence declared, a connector actually asked. A search is
+            activity, not progress.
+          * the counters are PER CATEGORY, so one moving category can no
+            longer vouch for fifteen stuck ones.
+        """
+        from . import brief
+        from .workbook import _split_ids
+        wb = self.wb
+        register = wb.evidence_index()
+        declared = L.declared_absences(wb)
+        passed = set(brief.categories_needing_dispatch(wb)["passed"])
+        acc: dict[str, list] = {}
+
+        def slot(cat: str) -> list:
+            return acc.setdefault(cat, [0, 0, 0, 0, 0])
+
+        for r in wb.scoring_rows():
+            cell = str(r.get("SubCap_ID") or "").strip()
+            if not cell:
+                continue
+            s = slot(cell.split(".")[0])
+            eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            if any(e in register for e in eids):
+                s[0] += 1                                    # evidenced cells
+            if str(r.get("Dominant_Claim") or "").strip():
+                s[1] += 1                                    # syntheses
+            if cell in declared:
+                s[2] += 1                                    # declared absences
+        for sr in wb.rows("Search_Log"):
+            if str(sr.get("Tool") or "").strip().lower() in C.ENRICHMENT_TOOLS:
+                cell = str(sr.get("SubCap_ID") or "").strip()
+                if cell:
+                    slot(cell.split(".")[0])[3] += 1          # connector asked
+        for cat in passed:
+            slot(cat)[4] = 1                                  # category closed
+        return {c: tuple(v) for c, v in acc.items()}
+
+    def _research_stalled(self, categories: list[str]) -> list[str]:
+        """The categories whose OWN outcomes have not moved for
+        `stall_rounds` consecutive rounds. Those stop being dispatched; the
+        rest carry on. Before this, a stall was an all-or-nothing property
+        of the whole stage, so fifteen stuck categories rode along on the
+        one that was still moving."""
+        if not self.opts.stall_rounds:
+            return []
+        now = self._research_progress()
+        stalled = []
+        for cat in categories:
+            sig, prev = now.get(cat, ()), self._cat_sig.get(cat)
+            if prev is not None and not any(c > p for c, p in zip(sig, prev)):
+                self._cat_stalls[cat] = self._cat_stalls.get(cat, 0) + 1
+            else:
+                self._cat_stalls[cat] = 0
+            self._cat_sig[cat] = sig
+            if self._cat_stalls.get(cat, 0) >= self.opts.stall_rounds:
+                stalled.append(cat)
+        return stalled
+
     def _progress(self, stage: str) -> tuple:
         wb = self.wb
         if stage == "PRELIM":
@@ -598,16 +757,13 @@ class Pipeline:
             st = prelim.state(wb)
             return (sum(1 for sec in st.get("sections") or [] if sec.get("status") != "OPEN"),)
         if stage == "RESEARCH":
-            from . import brief
-            searches = wb.rows("Search_Log")
-            rows = wb.scoring_rows()
-            return (len(brief.categories_needing_dispatch(wb)["passed"]),
-                    len(wb.rows("Evidence_Detail")),
-                    len(searches),
-                    sum(1 for r in rows if str(r.get("Dominant_Claim") or "").strip()),
-                    len(L.declared_absences(wb)),
-                    sum(1 for s in searches
-                        if str(s.get("Tool") or "").strip().lower() in C.ENRICHMENT_TOOLS))
+            # The run-level view is the SUM of the per-category outcome
+            # counters, so it stays comparable for the record — but the
+            # decision to keep dispatching is made per category, by
+            # `_research_stalled`. See `_research_progress` for why the raw
+            # Search_Log row count is no longer in here.
+            by = self._research_progress()
+            return tuple(sum(v[i] for v in by.values()) for i in range(5)) if by else (0,) * 5
         if stage == "SCORING":
             from . import assessment as A
             st = A.state(wb)
@@ -655,6 +811,16 @@ class Pipeline:
         self._lane_count += int(summary.get("dispatched") or 0)
         self._attempts += sum(int(l.get("attempts") or 1)
                               for l in (summary.get("lanes_detail") or []))
+        # REAL SPEND, not an estimate. `agent_run.py` already sums each lane's
+        # `total_cost_usd` into the batch summary; this used to read
+        # `dispatched` and `attempts` out of that dict and drop the one figure
+        # that could stop a runaway run.
+        usd = summary.get("usd")
+        if usd is not None:
+            self._spent_usd += float(usd)
+        turns = summary.get("turns")
+        if turns is not None:
+            self._spent_turns += int(turns)
 
     # ── STAGES ─────────────────────────────────────────────────────────
     def _stage_prelim(self) -> str:
@@ -695,19 +861,45 @@ class Pipeline:
             need = brief.categories_needing_dispatch(self.wb)
             if not need["dispatch"]:
                 return self._research_summary(r)
+            # A category whose own outcomes have not moved for `stall_rounds`
+            # rounds stops being dispatched. The rest carry on — a stall is a
+            # property of a category, not of the stage (see
+            # `_research_stalled`).
+            work = [c for c in need["dispatch"] if c not in self._cat_stalled]
+            if not work:
+                self._stalled_at = self._rounds
+                self.opts.log(f"  [RESEARCH] every open category has stalled "
+                              f"({', '.join(sorted(self._cat_stalled))}) — stopping at "
+                              f"round {self._rounds} of {self.opts.max_rounds}")
+                break
             self._rounds = r + 1               # a round is counted when it dispatches
             b = brief.batch(self.wb, run=self.run, out_dir=self._briefs(f"research_r{r}"),
-                            only=need["dispatch"], with_handback=(r > 0))
+                            only=work, with_handback=(r > 0))
             self._count(self._dispatch(b, stage="RESEARCH"))
             cb = brief.challenge_batch(self.wb, run=self.run,
                                        out_dir=self._briefs(f"challenge_r{r}"))
             if cb.get("lanes"):
                 self._count(self._dispatch(cb, stage="CHALLENGE"))
-            for cat in need["dispatch"]:
+            for cat in work:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
-            self._verify_research(need["dispatch"])
-            self._enrich_research(need["dispatch"], r)
+            self._verify_research(work)
+            self._enrich_research(work, r)
             self.reopen()
+            newly = self._research_stalled(work)
+            for cat in newly:
+                if cat not in self._cat_stalled:
+                    self._cat_stalled.append(cat)
+                    self.opts.log(f"  [RESEARCH] {cat}: no outcome moved for "
+                                  f"{self.opts.stall_rounds} round(s) — not dispatching it "
+                                  f"again; more rounds would not have helped")
+            if self._over_budget():
+                # A between-stages-only ceiling cannot stop the stage that
+                # spends the money: ten rounds x 16 lanes all happen inside
+                # ONE stage. This is the check that actually bites.
+                self.opts.log(f"  [RESEARCH] budget ${self._spent_usd:.2f} of "
+                              f"${self.budget_usd():.2f} — stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
             if self._stalled("RESEARCH"):
                 break
         need = brief.categories_needing_dispatch(self.wb)
@@ -1266,7 +1458,8 @@ def _build_opts(a) -> Options:
     else:
         disp, reads, shipper = AgentRunDispatcher(timeout=a.lane_timeout), McpReads(), ShipPageShipper()
     return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
-                   max_wall_min=a.max_wall_min, max_rounds=a.max_rounds,
+                   max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
+                   max_rounds=a.max_rounds,
                    stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
                    relay=not a.no_relay,
                    lane_retries=a.lane_retries, page_retries=a.page_retries,
@@ -1291,6 +1484,10 @@ def main(argv=None) -> int:
     r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
     r.add_argument("--until", choices=STAGES, help="stop after this stage")
     r.add_argument("--max-wall-min", type=float)
+    r.add_argument("--max-usd", type=float, default=Options.max_usd,
+                   help="dollar ceiling for the run; default is "
+                        "cost.BUDGET_PER_PILLAR x pillars in scope. "
+                        "0 disables it (report-only, the old behaviour).")
     r.add_argument("--max-rounds", type=int, default=Options.max_rounds,
                    help=f"ceiling on rounds per looping stage (default {Options.max_rounds}); "
                         f"a stage stops early only when --stall-rounds rounds advance nothing")

@@ -129,20 +129,95 @@ def test_progress_resets_the_stall_count(tmp_path):
     assert len([c for c in disp.calls if c["stage"] == "RESEARCH"]) == 4
 
 
-def test_the_research_signature_measures_the_substrate(tmp_path):
+def test_the_research_signature_measures_outcomes_not_activity(tmp_path):
+    """The signature counts OUTCOMES. It deliberately does NOT count raw
+    Search_Log rows — that is the bug this replaced.
+
+    Measured 2026-09-12 on the real driver: `len(searches)` sat in the
+    signature and `_stalled` clears on `any(c > p ...)`, so one bare
+    web_search row anywhere reset the stall counter for all sixteen
+    categories. The cheapest thing a stuck lane does was the one thing that
+    proved it was not stuck. A connector search still counts, because
+    asking a connector is an outcome a web_search cannot fake."""
     run = _fresh(tmp_path, n=4)
     p = P.Pipeline(run, _opts(tmp_path, S.StubDispatcher({})))
     before = p._progress("RESEARCH")
-    assert len(before) == 6
+    assert len(before) == 5
     wb = run.open()
     cell = wb.selected_subcaps()[0]
+
+    # a bare web_search is ACTIVITY: it must move nothing
+    L.append_search(wb, subcap=cell, facet="works", query='"Acme Credit Union" probe',
+                    tool="web_search", hits=0, kept=0, outcome="no hits")
+    p.reopen()
+    assert p._progress("RESEARCH") == before, "a bare web_search is not progress"
+
+    # a connector search is an OUTCOME: it must move the connector counter only
     L.append_search(wb, subcap=cell, facet="works", query='"Acme Credit Union" vendor',
                     tool="exa", hits=1, kept=1)
     p.reopen()
     after = p._progress("RESEARCH")
-    assert after[2] == before[2] + 1, "one more search"
-    assert after[5] == before[5] + 1, "one more connector search"
-    assert after[:2] == before[:2] and after[3:5] == before[3:5]
+    assert after[3] == before[3] + 1, "one more connector search"
+    assert after[:3] == before[:3] and after[4:] == before[4:]
+
+
+def test_a_lane_that_only_logs_web_searches_is_stopped(tmp_path):
+    """THE REPRODUCTION of the 2026-09-12 burn. Lanes that log one more
+    web_search each round and close nothing ran the full ten-round ceiling
+    (~18 dispatches, $96.65) because the raw row count kept the stall
+    counter at zero. Measured before the fix: 10 dispatches. After: 2."""
+    run = _fresh(tmp_path, n=4)
+
+    def busy_but_useless(agent, prompt_file, ctx):
+        wb = ctx.run.open()
+        cat = agent.split("-")[1].upper()
+        cells = [c for c in wb.selected_subcaps() if c.startswith(cat)]
+        if cells:
+            L.append_search(wb, subcap=cells[0], facet="works",
+                            query=f'"Acme Credit Union" {cells[0]} probe',
+                            tool="web_search", hits=0, kept=0, outcome="no hits")
+
+    disp = S.StubDispatcher({"research-p": busy_but_useless,
+                             "finding-challenger": S.lane_noop})
+    out = P.Pipeline(run, _opts(tmp_path, disp, max_rounds=10, stall_rounds=2)).run_all()
+    assert out["outcome"] == "FAILED"
+    assert len([c for c in disp.calls if c["stage"] == "RESEARCH"]) == 2, (
+        "a lane that only logs searches must stall after the window, not run "
+        "the ceiling — this is the defect that cost $96.65")
+
+
+def test_one_moving_category_no_longer_vouches_for_a_stuck_one(tmp_path):
+    """The stall is a property of a CATEGORY, not of the stage. Before this,
+    the signature was run-global: one category still closing cells reset the
+    counter for every stuck category, so fifteen could ride along on one."""
+    from fixtures import two_category_selection
+    run = new_run(tmp_path, selected=two_category_selection(n=3))
+    preflight.record(run, preflight_doc())
+    moving = _incremental_lane()
+
+    def one_moves_one_does_not(agent, prompt_file, ctx):
+        if agent.split("-")[1].upper().startswith("P1C1"):
+            moving(agent, prompt_file, ctx)
+        # the other category's lane does nothing, every round
+
+    disp = S.StubDispatcher({"research-p": one_moves_one_does_not,
+                             "finding-challenger": S.lane_noop})
+    p = P.Pipeline(run, _opts(tmp_path, disp, max_rounds=10, stall_rounds=2))
+    p.run_all()
+
+    def dispatches(cat):
+        return len([c for c in disp.calls if c["stage"] == "RESEARCH"
+                    and cat.lower() in c["agent"].lower()])
+
+    stuck = sorted({c for c in p._cat_stalled})
+    assert stuck, "the stuck category must be recorded as stalled"
+    # The moving category keeps being worked; the stuck one is dropped after
+    # the window. Both may end stalled once the mover runs out of cells —
+    # what must differ is how long each was worked for.
+    assert dispatches("P1C1") > dispatches("P1C2"), (
+        f"the moving category must be dispatched more than the stuck one; "
+        f"got P1C1={dispatches('P1C1')} P1C2={dispatches('P1C2')}")
+    assert "P1C2" in stuck, "the category that never moved must be stalled"
 
 
 def test_every_looping_stage_checks_for_a_stall():
