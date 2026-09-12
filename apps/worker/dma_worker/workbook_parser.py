@@ -231,6 +231,77 @@ def _header_map(ws, anchor: str, marker: str | None = None, max_scan: int = 30):
     raise ValueError(f"header row with {anchor!r} not found (marker={marker!r})")
 
 
+#: The label the OVERALL row of a grain tab carries. `_PILLAR_RE` rejects it
+#: — correctly, it is not a pillar — which is why the row is read here and
+#: not in the grain loop.
+_OVERALL_LABELS = ("overall", "total", "composite", "overall_score",
+                   "weighted_total")
+
+
+def _stated_overall_grain(wb):
+    """The composite the workbook STATES on its own rollup tab.
+
+    THE SILENCE THIS CLOSES. `composite` is set in exactly one place —
+    `_parse_scorecard`, from the cell under "Overall Effective Score" on
+    `2_Scorecard`. That tab exists only in the claude_dma generation. Every
+    general_dma workbook (`P{n}_Subcap_Scoring` tabs) and every rollup-only
+    one takes a different branch, so `WorkbookParse.composite` came back
+    None for all of them, `runs.composite` was written NULL, and
+    `serving_directory` served a header with no maturity figure on a run
+    whose six pages had promoted.
+
+    Measured on Golden 1 CU (`DMA-2026-GOLDEN1-001`, 43 tabs): the overall
+    is stated FOUR times — `Pillar_Summary!C6`, `Pillar_Rollup!C6`,
+    `Executive_Summary` "Overall Maturity", and again as the OVERALL row's
+    weighted contribution — and no reader claimed any of them. The directory
+    card rendered the word "maturity" over an empty slot while the same
+    card's four pillar bars resolved.
+
+    READ, never derived: the value is the one on the row labelled OVERALL,
+    not a mean of the pillars above it. Where both tabs are present the
+    first spelling in `_GRAIN_TABS["pillars"]` wins and the source cell
+    records which — they agree on every package measured, and a disagreement
+    must surface as two readings of one figure, not be averaged away.
+
+    Returns `(Decimal, "Tab!C6")`, or `(None, None)` when the tab, the
+    header row, the score column or the OVERALL row is absent — a workbook
+    that states no composite is a fact, and inventing one from the pillars
+    would be exactly the derivation the contract forbids.
+    """
+    present = {_tab_key(n): n for n in wb.sheetnames}
+    name = next((present[_tab_key(c)] for c in _GRAIN_TABS["pillars"]
+                 if _tab_key(c) in present), None)
+    if name is None:
+        return None, None
+    ws = wb[name]
+    for anchor in _GRAIN_ANCHORS["pillars"]:
+        try:
+            headers, first = _header_map(ws, anchor)
+            break
+        except ValueError:
+            continue
+    else:
+        return None, None
+    score_key = next((k for k in _GRAIN_SCORE_KEYS if k in headers), None)
+    if score_key is None:
+        return None, None
+    label_col = next((headers[k] for k in ("pillar", "pillar_id")
+                      if k in headers), None)
+    if label_col is None:
+        return None, None
+    score_col = headers[score_key]
+    for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
+        label = row[label_col] if label_col < len(row) else None
+        if _norm(label or "") not in _OVERALL_LABELS:
+            continue
+        value = _decimal(row[score_col] if score_col < len(row) else None)
+        if value in (None, "UNPARSEABLE"):
+            return None, None
+        letter = openpyxl.utils.get_column_letter(score_col + 1)
+        return value, f"{ws.title}!{letter}{r}"
+    return None, None
+
+
 def parse_scoring_workbook(path: str) -> WorkbookParse:
     """Two shipped generations, detected by tab set:
     - claude_dma:  2_Scorecard (Effective_Score) + 3_Assessment facets
@@ -255,6 +326,9 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                      "reason": "pillar-grain tabs were found and read, and no "
                                "cell, observation or toggled-out variant came "
                                "out of any of them"}))
+            # The composite is stated on the rollup tab, not on a tab this
+            # generation has. Read there or the header serves no figure.
+            out.composite, out.composite_source_cell = _stated_overall_grain(wb)
             return out
         # Rollup-only variant: recognisably a DMA workbook (stated pillar/
         # category grains present) but carrying no subcap-grain tabs at
@@ -267,6 +341,7 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                 {"tabs": list(wb.sheetnames)[:20],
                  "note": "rollup-only workbook: stated grains land, no cells"}))
             out.scored_cells = 0
+            out.composite, out.composite_source_cell = _stated_overall_grain(wb)
             return out
         # A generation nobody has taught this parser. Raising is deliberate:
         # the caller records it and quarantines the package by name after
@@ -439,6 +514,46 @@ def _declared_stage(wb) -> dict | None:
         return None
     return md
 
+
+
+def parse_run_metadata(path: str) -> dict:
+    """The workbook's own `Run_Metadata` key/value tab, whole.
+
+    `_declared_stage` already reads this tab, but returns None unless the
+    workbook is a contract-v3 one — it exists to answer "what stage is this",
+    not "what does the package say about itself". So every other key on the
+    tab has been unreadable to the app, and one of them matters a great deal.
+
+    THE SILENCE THIS CLOSES. `run_assessment_date` walks six manifest keys
+    and then the request id's YYYYMMDD token. Golden 1's manifest carries
+    none of the six, and its request id is `DMA-2026-GOLDEN1-001` — no eight
+    digit token — so the run resolved UNKNOWN and served no date. Meanwhile
+    `Run_Metadata!last_written_at` states `2026-08-31T09:33:59Z`.
+
+    The cost is not one missing header line. `completed_at` becomes every
+    evidence row's `reference_date`, so with it null the generated
+    `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY
+    item — 537 rows on this run — and the freshness dot has nothing to draw.
+
+    Returned as a flat dict of normalised key -> value. The caller stores it
+    BESIDE the manifest (`run_manifest.payload.workbook_metadata`), never
+    inside it: the manifest is the package's own artefact and the ingested
+    tier is read-only once scanned. Same shape and same reason as
+    `workbook_grains`.
+    """
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        if "Run_Metadata" not in wb.sheetnames:
+            return {}
+        md = {}
+        for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
+            if row and row[0] and len(row) > 1 and row[1] is not None:
+                key = _norm(row[0])
+                if key and key not in md:
+                    md[key] = str(row[1]).strip()
+        return md
+    finally:
+        wb.close()
 
 def _parse_pillar_scoring(wb, pillar_tabs) -> WorkbookParse:
     result = WorkbookParse(scores=[], observations=[], toggled_out=[])
@@ -882,6 +997,85 @@ _EV_MISS_COST = {
 }
 
 
+def _read_ev_tab(wb, tab: str, observe) -> dict | None:
+    """Read ONE ledger tab into rows keyed by e_id, plus the columns it carried.
+
+    Returns None when the tab has no locatable id column, so a workbook that
+    merely *has* the tab is not mistaken for one that could be read.
+    """
+    ws = wb[tab]
+    headers = first = None
+    for anchor in _EV_ID_ANCHORS:
+        try:
+            headers, first = _header_map(ws, anchor)
+            break
+        except ValueError:
+            continue
+    if headers is None:
+        # No recognisable ledger: the package lands without this tab
+        # (links absent, counts computed zero) rather than failing
+        # wholesale — but never without saying so.
+        observe("evidence_ledger_header_not_found",
+                {"tab": tab, "expected_any_of": list(_EV_ID_ANCHORS),
+                 "reason": "the ledger tab exists and its id column could "
+                           "not be located; no evidence row was read"})
+        return None
+    cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
+    cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
+    # Every excerpt-class column, because a row can carry two and the
+    # first alias is not always the verbatim one (MEM-0162).
+    excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
+
+    rows: dict = {}
+    order: list = []
+    rows_seen = 0
+    for row in ws.iter_rows(min_row=first, values_only=True):
+        def v(key):
+            i = cols.get(key)
+            return row[i] if i is not None and i < len(row) else None
+        e_id = str(v("e_id") or "").strip()
+        if e_id:
+            rows_seen += 1
+        if not (e_id.startswith("E-") or e_id.startswith("INT-")):
+            continue
+        tier = str(v("tier") or "").strip().upper()
+        ers = _decimal(v("ers"))
+        claim = str(v("claim_type") or "").strip().upper() or None
+        facts = _decimal(v("fact_count"))
+        rec = {
+            "e_id": e_id,
+            "source_name": (str(v("source_name")).strip()
+                            if v("source_name") else None),
+            "source_url": (str(v("source_url")).strip()
+                           if v("source_url") else None),
+            "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
+            "ers": None if ers in (None, "UNPARSEABLE") else ers,
+            # "Recency" ships a BAND word ("CURRENT"), not a date. A band
+            # asserted without a date cannot be honoured: undated evidence
+            # is UNVERIFIED, never current (charter invariant 9), so the
+            # stated word is carried for the record and the date stays null.
+            "published_date": parse_fuzzy_date(v("published")),
+            "stated_recency": _stated_band(v("recency"), v("published")),
+            "claim_type": claim if claim in
+                          ("FACT", "INFERENCE", "HYPOTHESIS",
+                           "CEILING_ESTIMATE") else None,
+            "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
+            "excerpt": _best_excerpt(
+                [row[i] if i < len(row) else None for i in excerpt_cols]),
+            "subcaps": [s for s in
+                        (x.strip() for x in str(v("subcaps") or "").split(","))
+                        if SUBCAP_RE.match(s)],
+        }
+        if e_id not in rows:
+            order.append(e_id)
+        rows[e_id] = rec
+    return {"tab": tab, "cols": cols, "rows": rows,
+            "order": order, "rows_seen": rows_seen}
+
+
+_EV_EMPTY = (None, "", [], {})
+
+
 def parse_evidence_master(path: str, obs: list | None = None) -> list:
     def observe(kind, detail):
         if obs is not None:
@@ -889,40 +1083,58 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
 
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        tab = next((t for t in _EV_TABS if t in wb.sheetnames), None)
-        if tab is None:
+        # EVERY ledger tab present, not the first one that matches.
+        #
+        # `_EV_TABS` was written as an either/or — 15 of 153 packages have no
+        # `Evidence_Master` and name the same tab something else — and reading
+        # `next(...)` served that case correctly while silently losing the
+        # other one: a workbook carrying `Evidence_Master` AND a richer
+        # `Evidence_Detail` beside it. Those are not alternate spellings of one
+        # tab, they are a thin index and the ledger it indexes, and precedence
+        # order put the thin one first.
+        #
+        # Measured on the Golden 1 package (DMA-2026-GOLDEN1-001, 43 tabs):
+        # `Evidence_Master` carries 731 rows over 8 columns and NO excerpt,
+        # date or subcap column at all, while `Evidence_Detail` carries 727 of
+        # those same ids over 17 columns with an excerpt on 727 of 727 — every
+        # one inside the 50-500 verbatim window — a `Date_Published` on 727 and
+        # `SubCap_IDs` on 723. Reading only the first tab landed 589 rows
+        # excerpt-less, banded the whole package UNVERIFIED for want of a date
+        # column that was one tab over, and left the producer to be refused by
+        # ET-04 and CG-50 for citing evidence the workbook had all along.
+        #
+        # So: the first tab by precedence establishes the row set (it is the
+        # widest — the 4 ids `Evidence_Detail` lacks are enrichment rows), and
+        # every other present tab FILLS FIELDS IT LEFT EMPTY. A tab is never
+        # allowed to overwrite a value another tab already stated; merging only
+        # into holes keeps this from re-ordering anyone's evidence.
+        present = [t for t in _EV_TABS if t in wb.sheetnames]
+        if not present:
             observe("evidence_ledger_tab_not_found",
                     {"expected_any_of": list(_EV_TABS),
                      "tabs_present": list(wb.sheetnames)[:30],
                      "reason": "no evidence ledger tab: this package lands "
                                "with no evidence rows at all"})
             return []
-        ws = wb[tab]
-        headers = first = None
-        for anchor in _EV_ID_ANCHORS:
-            try:
-                headers, first = _header_map(ws, anchor)
-                break
-            except ValueError:
-                continue
-        if headers is None:
-            # No recognisable ledger: the package lands without its
-            # evidence tab (links absent, counts computed zero) rather
-            # than failing wholesale — but never without saying so.
-            observe("evidence_ledger_header_not_found",
-                    {"tab": tab, "expected_any_of": list(_EV_ID_ANCHORS),
-                     "reason": "the ledger tab exists and its id column could "
-                               "not be located; no evidence row was read"})
+        reads = [r for r in (_read_ev_tab(wb, t, observe) for t in present) if r]
+        if not reads:
             return []
-        cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
-        cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
-        # Every excerpt-class column, because a row can carry two and the
-        # first alias is not always the verbatim one (MEM-0162). `_pick`
-        # still answers `cols["excerpt"]` for the per-column census below,
-        # which asks whether the field landed at all.
-        excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
+        primary, secondaries = reads[0], reads[1:]
+        tab = primary["tab"]
 
-        # A COLUMN THIS READER DID NOT RECOGNISE IS NAMED, ALWAYS.
+        # A column counts as FOUND when any present tab carries it; the census
+        # below reports only what no tab had. Reporting the primary's misses
+        # alone is what made a missing `excerpt` look like a property of the
+        # package rather than of which tab was opened.
+        cols = dict(primary["cols"])
+        supplied_by = {}
+        for r in reads[1:]:
+            for field, idx in r["cols"].items():
+                if cols.get(field) is None and idx is not None:
+                    cols[field] = idx
+                    supplied_by[field] = r["tab"]
+
+        # A COLUMN NO TAB RECOGNISED IS NAMED, ALWAYS.
         #
         # Until this loop existed, `_pick` returning None was indistinguishable
         # from a column full of blanks: every row landed with the field null,
@@ -936,52 +1148,63 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
         # it), while an absent date bands every row UNVERIFIED.
         for field, names in list(_EV_ALIASES.items()) + [("e_id", _EV_E_ID_KEYS)]:
             if cols.get(field) is None:
-                miss = _column_not_found(tab, field, names, headers)
+                miss = _column_not_found(tab, field, names, primary["cols"])
                 miss.detail["consequence"] = _EV_MISS_COST[field]
+                miss.detail["tabs_searched"] = [r["tab"] for r in reads]
                 if obs is not None:
                     obs.append(miss)
+
         out = []
-        rows_seen = 0
-        for row in ws.iter_rows(min_row=first, values_only=True):
-            def v(key):
-                i = cols.get(key)
-                return row[i] if i is not None and i < len(row) else None
-            e_id = str(v("e_id") or "").strip()
-            if e_id:
-                rows_seen += 1
-            if not (e_id.startswith("E-") or e_id.startswith("INT-")):
+        merged_from: dict = {}
+        for e_id in primary["order"]:
+            rec = dict(primary["rows"][e_id])
+            for sec in secondaries:
+                other = sec["rows"].get(e_id)
+                if not other:
+                    continue
+                for field, val in other.items():
+                    if field == "e_id":
+                        continue
+                    if rec.get(field) in _EV_EMPTY and val not in _EV_EMPTY:
+                        rec[field] = val
+                        merged_from.setdefault(sec["tab"], {})
+                        merged_from[sec["tab"]][field] = \
+                            merged_from[sec["tab"]].get(field, 0) + 1
+            out.append(rec)
+
+        # A row only a secondary tab carries is still evidence. Appended rather
+        # than dropped, and counted, because a ledger that indexes 731 of 735
+        # facts is exactly the silent loss this reader exists to refuse.
+        seen = set(primary["order"])
+        for sec in secondaries:
+            extra = [i for i in sec["order"] if i not in seen]
+            if not extra:
                 continue
-            tier = str(v("tier") or "").strip().upper()
-            ers = _decimal(v("ers"))
-            claim = str(v("claim_type") or "").strip().upper() or None
-            facts = _decimal(v("fact_count"))
-            out.append({
-                "e_id": e_id,
-                "source_name": (str(v("source_name")).strip()
-                                if v("source_name") else None),
-                "source_url": (str(v("source_url")).strip()
-                               if v("source_url") else None),
-                "tier": tier if tier in ("T1", "T2", "T3", "T4", "T5") else None,
-                "ers": None if ers in (None, "UNPARSEABLE") else ers,
-                # "Recency" ships a BAND word ("CURRENT"), not a date. A band
-                # asserted without a date cannot be honoured: undated evidence
-                # is UNVERIFIED, never current (charter invariant 9), so the
-                # stated word is carried for the record and the date stays null.
-                "published_date": parse_fuzzy_date(v("published")),
-                "stated_recency": _stated_band(v("recency"), v("published")),
-                "claim_type": claim if claim in
-                              ("FACT", "INFERENCE", "HYPOTHESIS",
-                               "CEILING_ESTIMATE") else None,
-                "fact_count": None if facts in (None, "UNPARSEABLE") else int(facts),
-                "excerpt": _best_excerpt(
-                    [row[i] if i < len(row) else None for i in excerpt_cols]),
-                "subcaps": [s for s in
-                            (x.strip() for x in str(v("subcaps") or "").split(","))
-                            if SUBCAP_RE.match(s)],
-            })
-        if rows_seen and not out:
+            for e_id in extra:
+                out.append(dict(sec["rows"][e_id]))
+                seen.add(e_id)
+            observe("evidence_ledger_rows_only_in_secondary", {
+                "tab": sec["tab"], "primary_tab": tab, "rows_added": len(extra),
+                "example": extra[:5],
+                "reason": "these ids appear in a ledger tab the primary does "
+                          "not index. They are carried rather than dropped: a "
+                          "row missing from the index is still a row."})
+
+        if merged_from:
+            observe("evidence_ledger_merged", {
+                "primary_tab": tab,
+                "tabs_present": present,
+                "filled_from": {t: dict(f) for t, f in merged_from.items()},
+                "columns_supplied_by": supplied_by,
+                "rows": len(out),
+                "reason": "fields the primary ledger tab left empty were "
+                          "filled from another ledger tab in the same "
+                          "workbook. Only holes were filled; no tab "
+                          "overwrote a value another had already stated."})
+
+        if primary["rows_seen"] and not out:
             observe("evidence_ledger_ids_unrecognised", {
-                "tab": tab, "rows_seen": rows_seen,
+                "tab": tab, "rows_seen": primary["rows_seen"],
                 "expected": "E-… or INT-…-…",
                 "reason": "the ledger has rows and not one id was in a form "
                           "this parser recognises; no evidence was read"})
@@ -1168,17 +1391,55 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
             return ws, headers, first
 
         # ── the ledger: ERS, dates, fact counts, claim classes ────────────
-        ws = headers = first = None
-        # Linkage matrix first: it is the research generation's own ledger and
-        # the only one carrying ERS and a publication date per item.
-        for name in ("Evidence_Linkage_Matrix",) + _EV_TABS:
+        #
+        # EVERY EVIDENCE TAB, NOT THE FIRST ONE THAT ANSWERS.
+        #
+        # This loop used to `break` on the first tab that yielded headers,
+        # with the linkage matrix tried first because it is "the only one
+        # carrying ERS and a publication date per item". True, and it is not
+        # the only one carrying a URL. `contract.py` names `Evidence_Detail`
+        # as the research generation's evidence table and `ledger.py` writes
+        # `Source_URL` into it on every banked item — and a workbook shipping
+        # BOTH tabs had Evidence_Detail read by nothing at all.
+        #
+        # MEASURED 2026-09-04 on Golden 1 Credit Union: 728 evidence items
+        # served, 193 with a URL. 497 package-origin citations — Banking
+        # Dive, The Financial Brand, Fiserv case studies, an AML RightSource
+        # press release — rendered in the drawer as a quote nobody can open,
+        # beside Baxter Credit Union at 154 of 154. The URLs were in the
+        # workbook the whole time, one tab further down this list.
+        #
+        # So: the first tab that answers is PRIMARY, and every other evidence
+        # tab present is read as a fill source. `merge_evidence_sources`
+        # already has exactly the right asymmetry — a field the primary
+        # STATED is never overwritten, a field it left blank is filled and
+        # the fill is recorded, and a disagreement is an observation rather
+        # than a silent resolution. Nothing here invents a URL: a row whose
+        # every tab is blank stays blank.
+        _seen_tabs, _fill_rows = [], []
+
+        def _read_ev_tab(name):
+            """(ws, headers, first) for one evidence tab, or (None, None, None)."""
             for anchor in _EV_ID_ANCHORS:
-                ws, headers, first = tab(name, anchor)
-                if headers is not None:
-                    break
-            if headers is not None:
-                break
-        if headers is not None:
+                w, h, f = tab(name, anchor)
+                if h is not None:
+                    return w, h, f
+            return None, None, None
+
+        ws = headers = first = None
+        _order = ("Evidence_Linkage_Matrix",) + _EV_TABS
+        for name in _order:
+            w, h, f = _read_ev_tab(name)
+            if h is None or name in _seen_tabs:
+                continue
+            _seen_tabs.append(name)
+            if headers is None:
+                ws, headers, first = w, h, f          # primary
+            else:
+                _fill_rows.append((name, w, h, f))    # fill source
+        def _ledger_rows(ws, headers, first):
+            """One evidence tab, read into ledger rows."""
+            rows = []
             for row in ws.iter_rows(min_row=first, values_only=True):
                 def v(*keys, _row=row):
                     for k in keys:
@@ -1193,7 +1454,7 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                 ers = _decimal(v("ers_total", "ers", "ers_score"))
                 facts = _decimal(v("fact_count", "facts"))
                 claim = str(v("claim_types", "claim_type") or "").split(",")[0].strip().upper()
-                out["ledger"].append({
+                rows.append({
                     "e_id": e_id,
                     "source_name": (str(v("source_name")).strip() if v("source_name") else None),
                     "source_url": (str(v("source_url", "url")).strip() if v("source_url", "url") else None),
@@ -1256,6 +1517,18 @@ def parse_research_workbook(path: str, obs: list | None = None) -> dict:
                     "signal_direction": (str(v("signal_direction")).strip().upper()
                                          if v("signal_direction") else None),
                 })
+            return rows
+
+        if headers is not None:
+            out["ledger"] = _ledger_rows(ws, headers, first)
+            # Every other evidence tab present fills what the primary
+            # left blank — above all `Source_URL`, which
+            # `Evidence_Detail` carries per item and the linkage
+            # matrix does not. The merge never overwrites a stated
+            # value and records both its fills and any disagreement.
+            for _name, _w, _h, _f in _fill_rows:
+                out["ledger"] = merge_evidence_sources(
+                    out["ledger"], _ledger_rows(_w, _h, _f), obs)
 
         # ── per-subcap linkage at fact grain, with its verbatim passages ──
         for name in _rw_detail_tabs(wb.sheetnames):
@@ -1534,6 +1807,16 @@ _STAT_ALIASES = {
     "category_name": "category_name", "name": "category_name",
     "entity_score": "entity_score", "entity": "entity_score",
     "score": "entity_score", "our_score": "entity_score",
+    # `Weighted_Score` is what the v5 workbook contract calls the entity's
+    # own figure on Pillar_Summary, and it was the one spelling this table
+    # did not know. Measured on the Golden 1 package: the tab carries
+    # Weighted_Score 2.25 and Peer_Median 3.05 side by side, `peer_median`
+    # resolved and `score` did not, so the run recorded a peer median with
+    # no score to compare it against — six `column_not_found` observations
+    # and a grain summary that could state the gap but not the position.
+    "weighted_score": "entity_score", "overall_score": "entity_score",
+    # The gap column under the spelling that ships beside those two.
+    "gap_to_peer": "delta", "gap_vs_peer": "delta",
     "peer_median": "median", "median": "median", "cohort_median": "median",
     "peer_p25": "p25", "p25": "p25", "q1": "p25", "percentile_25": "p25",
     "peer_p75": "p75", "p75": "p75", "q3": "p75", "percentile_75": "p75",
@@ -1676,6 +1959,16 @@ def _stat_key(header: str):
 #: 2026-08-18 and a workbook that spells it any other way lost both grains in
 #: silence. Matched case- and separator-insensitively, so `Pillar Summary`,
 #: `pillar_summary` and `PillarSummary` are one name.
+#: The entity's own figure, under every spelling the corpus gives it. The
+#: gate below used to test `"score" not in headers` literally, so a tab
+#: heading the column `Weighted_Score` — which is what the v5 workbook
+#: contract calls it — lost BOTH grains and every figure on them. Measured on
+#: the Golden 1 package: Pillar_Summary states Weighted_Score 2.25 beside
+#: Peer_Median 3.05, `peer_median` resolved, `score` did not, and the run
+#: landed pillars: 0 with a peer median it had nothing to compare against.
+_GRAIN_SCORE_KEYS = ("score", "weighted_score", "entity_score", "overall_score",
+               "our_score")
+
 _GRAIN_TABS = {
     "pillars": ("Pillar_Summary", "Pillar Summary", "Pillar_Scores",
                 "Pillar Scores", "Pillar_Rollup", "Pillar Rollup",
@@ -1746,7 +2039,7 @@ def parse_grain_summaries(path: str, observations: list | None = None) -> dict:
                      "no peer median exists to compare against; add the "
                      "tab's spelling to _GRAIN_TABS rather than letting the "
                      "run look like a workbook that states none")}))
-            return None, None, None
+            return None, None, None, None
         ws = wb[name]
         for anchor in _GRAIN_ANCHORS[grain]:
             try:
@@ -1759,14 +2052,15 @@ def parse_grain_summaries(path: str, observations: list | None = None) -> dict:
                 "grain_header_not_found", None,
                 {"grain": grain, "tab": name,
                  "anchors_tried": list(_GRAIN_ANCHORS[grain])}))
-            return None, None, None
-        if "score" not in headers:
-            obs.append(_column_not_found(name, "score", ("score",), headers))
-            return None, None, None
-        return ws, headers, first
+            return None, None, None, None
+        score_key = next((k for k in _GRAIN_SCORE_KEYS if k in headers), None)
+        if score_key is None:
+            obs.append(_column_not_found(name, "score", _GRAIN_SCORE_KEYS, headers))
+            return None, None, None, None
+        return ws, headers, first, score_key
 
     try:
-        ws, headers, first = _tab_headers("pillars")
+        ws, headers, first, score_key = _tab_headers("pillars")
         if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
                 def v(*keys, _row=row):
@@ -1782,16 +2076,16 @@ def parse_grain_summaries(path: str, observations: list | None = None) -> dict:
                 pid = str(v("pillar", "pillar_id") or "").strip()
                 if not _PILLAR_RE.match(pid):
                     continue
-                score_col = openpyxl.utils.get_column_letter(headers["score"] + 1)
+                score_col = openpyxl.utils.get_column_letter(headers[score_key] + 1)
                 out["pillars"].append({
                     "pillar_id": pid,
                     "name": (str(v("pillar_name")).strip() if v("pillar_name") else None),
-                    "score": _num(v("score")),
+                    "score": _num(v(score_key)),
                     "weight": _num(v("weight_ib", "weight", "weight_pct")),
                     "peer_median": _num(v("peer_median", "median")),
                     "source_cell": f"{ws.title}!{score_col}{r}",
                 })
-        ws, headers, first = _tab_headers("categories")
+        ws, headers, first, score_key = _tab_headers("categories")
         if headers is not None:
             for r, row in enumerate(ws.iter_rows(min_row=first, values_only=True), first):
                 def v(*keys, _row=row):
@@ -1803,12 +2097,12 @@ def parse_grain_summaries(path: str, observations: list | None = None) -> dict:
                 cid = str(v("category_id", "category") or "").strip()
                 if not _CATEGORY_RE.match(cid):
                     continue
-                score_col = openpyxl.utils.get_column_letter(headers["score"] + 1)
+                score_col = openpyxl.utils.get_column_letter(headers[score_key] + 1)
                 out["categories"].append({
                     "category_id": cid,
                     "name": (str(v("category_name")).strip() if v("category_name") else None),
                     "pillar_id": (str(v("pillar")).strip() if v("pillar") else cid.split("C")[0]),
-                    "score": _num(v("score")),
+                    "score": _num(v(score_key)),
                     "peer_median": _num(v("peer_median", "median")),
                     "priority_score": _num(v("priority_score", "priority")),
                     "priority_tier": (str(v("priority_tier")).strip() if v("priority_tier") else None),
@@ -2361,3 +2655,511 @@ def parse_technographic_scan(path: str, obs: list | None = None) -> int:
                  "be read as ABSENT there"),
     })
     return len(detections)
+
+
+# ── the technology register, at the grain the techstack contract asks for ──
+#
+# `parse_technographic_scan` above reads the Technographic_Scan DOCX. The
+# scoring workbook carries the same estate as a TAB, one row per product with
+# every field the T1/T3 contract names — and nothing read it. Measured on the
+# Golden 1 package: `Tech_Register` holds 42 rows over 14 columns
+# (TS_ID, Product, Vendor, Layer, Status, Evidence_Level, Detection_Basis,
+# Detection_Method, Providers, SubCap_IDs, Evidence_IDs, Source_URLs, As_Of,
+# DMA_Impact), 42 of 42 carrying both SubCap_IDs and Evidence_IDs, statuses
+# already in the four-value vocabulary (CONFIRMED 17 · CLAIMED 17 ·
+# INFERRED 8) and layers already OPS/CUST/DATA/INFRA rather than the
+# prototype's L2-L5. A producer writing the techstack page had to reconstruct
+# all of it from prose.
+_TECH_TABS = ("Tech_Register", "Technographic_Scan", "Technology_Register",
+              "Tech_Stack")
+_TECH_PEER_TABS = ("Tech_Peer_Deployments", "Platform_Peer_Adoption")
+
+#: layer -> the pillar that absorbs it, per the techstack contract.
+_LAYER_PILLAR = {"OPS": "P3", "CUST": "P2", "DATA": "P4", "INFRA": "P4"}
+_TECH_STATUS = ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT")
+
+#: One clause, printed in the register row AND the T3 detail header. The
+#: budget is the contract's, not this reader's; it is checked HERE so an
+#: over-long clause is named at ingest instead of at the gate, where it
+#: reads as a producer defect rather than as the package's own prose.
+_DETECTION_BASIS_BUDGET = 160
+
+_TECH_ALIASES = {
+    "ts_id": ("ts_id", "id", "tech_id"),
+    "product": ("product", "product_name"),
+    "vendor": ("vendor", "supplier", "provider"),
+    "layer": ("layer", "stack_layer"),
+    "status": ("status", "presence"),
+    "evidence_level": ("evidence_level", "level"),
+    "detection_basis": ("detection_basis", "basis"),
+    "detection_method": ("detection_method", "method"),
+    "providers": ("providers", "detected_by"),
+    "subcaps": ("subcap_ids", "subcaps", "linked_subcap_ids", "cells"),
+    "e_ids": ("evidence_ids", "e_ids", "evidence"),
+    "source_urls": ("source_urls", "source_url", "urls"),
+    "as_of": ("as_of", "as_at", "as at", "asof"),
+    "dma_impact": ("dma_impact", "impact"),
+}
+
+_TECH_PEER_ALIASES = {
+    "ts_id": ("ts_id", "id", "product_layer", "product / layer", "product"),
+    "peer": ("peer", "institution"),
+    "deployed": ("deployed", "verdict"),
+    "basis": ("basis",),
+    "source_url": ("source_url", "source"),
+    "as_of": ("as_of", "as_at", "as at", "asof"),
+}
+
+
+def _tech_split(value) -> list:
+    """A multi-value cell, under the separators the corpus actually uses."""
+    if value is None:
+        return []
+    return [p for p in (x.strip() for x in
+                        re.split(r"[,;|\n]+", str(value))) if p]
+
+
+def _tri_state(value):
+    """`deployed` is THREE-valued and the third value is the point: a peer
+    nobody could establish is `null`, never False. A coverage figure of 2/5
+    with three unknowns is not 2/5, and the card has to be able to say so."""
+    s = str(value or "").strip().lower()
+    if s in ("yes", "true", "y", "deployed", "confirmed", "1"):
+        return True
+    if s in ("no", "false", "n", "not deployed", "absent", "0"):
+        return False
+    return None
+
+
+
+def _kept(parts, ok, raw, sink: list, ts_id: str) -> list:
+    """Filter to the values that ARE identifiers, recording a cell that held
+    something and yielded none."""
+    out = [p for p in parts if ok(p)]
+    if not out and str(raw or "").strip():
+        sink.append({"ts_id": ts_id or None, "stated": str(raw).strip()[:60]})
+    return out
+
+
+def parse_tech_register(path: str, obs: list | None = None) -> list:
+    """The workbook's technology register, shaped to the techstack contract.
+
+    Returns one dict per product: {ts_id, product, vendor, layer, pillar_id,
+    status, evidence_level, detection_basis, detection_method, providers[],
+    linked_subcap_ids[], e_ids[], source_urls[], as_of, dma_impact,
+    peer_deployments[]}.
+
+    Two contract rules are checked HERE rather than left to the gates,
+    because a defect the package itself carries must not read as one the
+    producer introduced. On the Golden 1 register both fired at exactly the
+    counts the run was later refused on: 12 rows state the same string as
+    Product AND Vendor (CG-20), and 7 detection_basis clauses exceed the
+    160-character face-slot budget (CG-12). Naming them at ingest turns 19
+    late refusals into 19 rows a producer can see before writing anything.
+    """
+    def observe(kind, detail):
+        if obs is not None:
+            obs.append(Observation(kind, None, detail))
+
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        tab = next((t for t in _TECH_TABS if t in wb.sheetnames), None)
+        if tab is None:
+            observe("tech_register_tab_not_found", {
+                "expected_any_of": list(_TECH_TABS),
+                "tabs_present": list(wb.sheetnames)[:30],
+                "reason": "no technology register tab: the techstack page "
+                          "has no register rows from this workbook"})
+            return []
+        ws = wb[tab]
+        try:
+            headers, first = _header_map(ws, "TS_ID")
+        except ValueError:
+            try:
+                headers, first = _header_map(ws, "Product")
+            except ValueError:
+                observe("tech_register_header_not_found", {
+                    "tab": tab, "expected_any_of": ["TS_ID", "Product"],
+                    "reason": "the register tab exists and its id column "
+                              "could not be located; no row was read"})
+                return []
+        cols = {k: _pick(headers, names) for k, names in _TECH_ALIASES.items()}
+        for field, names in _TECH_ALIASES.items():
+            if cols.get(field) is None:
+                miss = _column_not_found(tab, field, names, headers)
+                if obs is not None:
+                    obs.append(miss)
+
+        out = []
+        id_rows = {}
+        # A cell that HELD something and yielded no id. `category-level` and
+        # `see Technographic_Scan` are cross-references, not identifiers, and
+        # a filter that drops them into an empty list reports a row with no
+        # cells exactly like a row whose cells nothing could parse.
+        unparsed = {"subcaps": [], "e_ids": []}
+        for row in ws.iter_rows(min_row=first, values_only=True):
+            def v(key):
+                i = cols.get(key)
+                return row[i] if i is not None and i < len(row) else None
+            ts_id = str(v("ts_id") or "").strip()
+            product = str(v("product") or "").strip()
+            if not (ts_id or product):
+                continue
+            # NOT de-duplicated on ts_id. Measured on the Golden 1 register:
+            # 42 rows carry 28 distinct ids because the numbering restarts per
+            # layer block — TS-021 alone names Modelshop, Salesforce Marketing
+            # Cloud, AML RightSource, Azure APIM and Okta. Collapsing on the
+            # id drops 14 products the client actually runs, which is the
+            # silent loss this reader exists to refuse. The collision is
+            # reported instead, and every row is carried.
+            if ts_id:
+                id_rows.setdefault(ts_id, []).append(product or "(unnamed)")
+            raw_sub, raw_eid = v("subcaps"), v("e_ids")
+            layer = str(v("layer") or "").strip().upper()
+            status = str(v("status") or "").strip().upper()
+            out.append({
+                "ts_id": ts_id or None,
+                "product": product or None,
+                "vendor": str(v("vendor") or "").strip() or None,
+                "layer": layer if layer in _LAYER_PILLAR else None,
+                "pillar_id": _LAYER_PILLAR.get(layer),
+                # REQUIRED on every row by the contract — the landscape strip
+                # recomputes its four counts from it and is uncomputable
+                # without it. Carried as null rather than defaulted: a status
+                # this reader invented would be indistinguishable from one the
+                # assessment made.
+                "status": status if status in _TECH_STATUS else None,
+                "evidence_level": str(v("evidence_level") or "").strip().upper() or None,
+                "detection_basis": str(v("detection_basis") or "").strip() or None,
+                "detection_method": str(v("detection_method") or "").strip() or None,
+                "providers": _tech_split(v("providers")),
+                "linked_subcap_ids": _kept(_tech_split(raw_sub),
+                                           SUBCAP_RE.match, raw_sub,
+                                           unparsed["subcaps"], ts_id),
+                "e_ids": _kept(_tech_split(raw_eid),
+                               lambda e: e.startswith(("E-", "INT-")), raw_eid,
+                               unparsed["e_ids"], ts_id),
+                "source_urls": _tech_split(v("source_urls")),
+                "as_of": str(v("as_of") or "").strip() or None,
+                "dma_impact": str(v("dma_impact") or "").strip() or None,
+                "peer_deployments": [],
+            })
+
+        _attach_peer_deployments(wb, out, observe)
+
+        collisions = {k: v for k, v in id_rows.items() if len(v) > 1}
+        if collisions:
+            observe("tech_register_ts_id_collision", {
+                "tab": tab, "ids": len(collisions),
+                "rows_affected": sum(len(v) for v in collisions.values()),
+                "example": {k: v for k, v in list(collisions.items())[:3]},
+                "reason": "one ts_id names several DIFFERENT products, so the "
+                          "register's numbering is not unique across the "
+                          "sheet — it restarts per layer block. Every row is "
+                          "carried; a reader that keyed on the id would drop "
+                          "the products sharing it. ts_id is agent-minted, so "
+                          "the repair belongs in the package."})
+        for field, rows_ in unparsed.items():
+            if rows_:
+                observe("tech_register_reference_not_an_id", {
+                    "tab": tab, "field": field, "rows": len(rows_),
+                    "example": rows_[:4],
+                    "reason": "the cell states a cross-reference rather than "
+                              "identifiers, so the row lands with an empty "
+                              "list. That is not a product with no cells and "
+                              "no evidence — it is one whose links were "
+                              "written somewhere a reader cannot follow, and "
+                              "a techstack row that cites nothing is refused "
+                              "by CG-50 whatever the register says."})
+
+        # ── contract defects the PACKAGE carries, named here ──────────────
+        same = [r["ts_id"] for r in out
+                if r["product"] and r["product"] == r["vendor"]]
+        if same:
+            observe("tech_register_vendor_equals_product", {
+                "tab": tab, "rows": len(same), "example": same[:6],
+                "gate": "CG-20",
+                "reason": "product and vendor state the same string, so one "
+                          "of the two is unstated. A register row names a "
+                          "company AND the thing it supplies; repeating the "
+                          "company in both renders as a product nobody "
+                          "sells. Stated by the WORKBOOK, not introduced by "
+                          "a producer — re-ingesting will not change it."})
+        longs = [(r["ts_id"], len(r["detection_basis"])) for r in out
+                 if r["detection_basis"]
+                 and len(r["detection_basis"]) > _DETECTION_BASIS_BUDGET]
+        if longs:
+            observe("tech_register_detection_basis_over_budget", {
+                "tab": tab, "rows": len(longs), "budget": _DETECTION_BASIS_BUDGET,
+                "example": longs[:6], "gate": "CG-12",
+                "reason": "detection_basis renders in the register row and "
+                          "the T3 detail header and holds ONE CLAUSE. The "
+                          "repair is to MOVE the prose into dma_impact, not "
+                          "to trim it; a paragraph in a face slot overflows "
+                          "its container."})
+        missing_status = [r["ts_id"] for r in out if r["status"] is None]
+        if missing_status:
+            observe("tech_register_status_missing", {
+                "tab": tab, "rows": len(missing_status),
+                "example": missing_status[:6], "expected_any_of": list(_TECH_STATUS),
+                "reason": "status is REQUIRED on every register row: the "
+                          "landscape strip recomputes its four counts from "
+                          "it and cannot be computed without it"})
+
+        observe("tech_register_summary", {
+            "tab": tab, "rows": len(out),
+            "by_status": {s: sum(1 for r in out if r["status"] == s)
+                          for s in _TECH_STATUS
+                          if any(r["status"] == s for r in out)},
+            "by_layer": {ly: sum(1 for r in out if r["layer"] == ly)
+                         for ly in _LAYER_PILLAR
+                         if any(r["layer"] == ly for r in out)},
+            "with_cells": sum(1 for r in out if r["linked_subcap_ids"]),
+            "with_evidence": sum(1 for r in out if r["e_ids"]),
+            "with_peer_rows": sum(1 for r in out if r["peer_deployments"]),
+        })
+        return out
+    finally:
+        wb.close()
+
+
+def _attach_peer_deployments(wb, items: list, observe) -> None:
+    """Per-peer rows behind a product's coverage share, keyed on TS_ID.
+
+    The contract wants one row per peer INCLUDING the peers nobody could
+    establish, so `deployed` stays tri-state and an unmatched key is
+    reported rather than dropped.
+    """
+    tab = next((t for t in _TECH_PEER_TABS if t in wb.sheetnames), None)
+    if tab is None:
+        return
+    ws = wb[tab]
+    headers = first = None
+    for anchor in ("TS_ID", "Product / Layer", "Product", "Peer"):
+        try:
+            headers, first = _header_map(ws, anchor)
+            break
+        except ValueError:
+            continue
+    if headers is None:
+        observe("tech_peer_header_not_found", {
+            "tab": tab, "reason": "peer deployment rows exist and their key "
+                                  "column could not be located; no peer row "
+                                  "was attached"})
+        return
+    cols = {k: _pick(headers, names) for k, names in _TECH_PEER_ALIASES.items()}
+    by_id, by_product = {}, {}
+    for it in items:
+        if it["ts_id"]:
+            by_id[it["ts_id"]] = it
+        if it["product"]:
+            by_product[it["product"].strip().lower()] = it
+    attached = unmatched = 0
+    orphans = []
+    for row in ws.iter_rows(min_row=first, values_only=True):
+        def v(key):
+            i = cols.get(key)
+            return row[i] if i is not None and i < len(row) else None
+        key = str(v("ts_id") or "").strip()
+        peer = str(v("peer") or "").strip()
+        if not (key and peer):
+            continue
+        target = by_id.get(key) or by_product.get(key.lower())
+        if target is None:
+            unmatched += 1
+            if len(orphans) < 6:
+                orphans.append(key)
+            continue
+        target["peer_deployments"].append({
+            "peer": peer,
+            "deployed": _tri_state(v("deployed")),
+            "basis": str(v("basis") or "").strip() or None,
+            "source_url": str(v("source_url") or "").strip() or None,
+            "as_of": str(v("as_of") or "").strip() or None,
+        })
+        attached += 1
+    observe("tech_peer_deployments_attached", {
+        "tab": tab, "attached": attached, "unmatched": unmatched,
+        "unmatched_examples": orphans,
+        "reason": "peer rows whose key matches no register row are reported "
+                  "rather than dropped: a coverage share computed over a "
+                  "peer set the register cannot name is not a share."})
+
+
+# ── which tabs does anything actually read? ────────────────────────────────
+#
+# The Golden 1 workbook ships 43 tabs and the readers above claim 12 of them.
+# The other 31 are not empty — Tech_Register (42 product rows), Focus_Areas,
+# Entity_Timeline, Firmographics, Enrichment_Needed and the rest carry the
+# material five of the six pages are written from — and nothing anywhere said
+# so. A producer met them as blank surfaces and wrote absences over live data.
+#
+# This census is the standing answer: for any package, which tabs a reader
+# claims, and which carry rows that nothing will ever read.
+_TAB_READERS = {
+    "Run_Metadata": "parse_scoring_workbook",
+    "Pillar_Summary": "parse_grain_summaries",
+    "Category_Detail": "parse_grain_summaries",
+    "Pillar_Rollup": "parse_grain_summaries",
+    "Category_Rollup": "parse_grain_summaries",
+    "Peer_Benchmarks": "parse_peer_benchmarks",
+    "Recommendations": "parse_recommendations",
+    "Caps_Applied_Log": "parse_scoring_workbook",
+    "Evidence_Master": "parse_evidence_master",
+    "Evidence_Detail": "parse_evidence_master",
+    "Evidence_Register": "parse_evidence_master",
+    "Evidence_Index": "parse_evidence_master",
+    "Evidence_Ledger": "parse_evidence_master",
+    "Evidence_Linkage": "parse_evidence_master",
+    "Evidence_Linkage_Matrix": "parse_evidence_master",
+    "Evidence_Inventory": "parse_evidence_master",
+    "Tech_Register": "parse_tech_register",
+    "Technographic_Scan": "parse_tech_register",
+    "Tech_Peer_Deployments": "parse_tech_register",
+    "Platform_Peer_Adoption": "parse_tech_register",
+}
+
+
+#: Where a tab's rows BELONG, so the census can say more than "nothing reads
+#: this": it can name the surface(s) that render empty because of it.
+#:
+#: The value is `(target, confidence)`. `target` is either a tuple of dotted
+#: `page.section` ids (a tab may feed MORE THAN ONE app section — the flat
+#: `Subcap_Scores` view feeds the grid, the per-cell drawer AND the overview
+#: roll-up) or a prose string where the tab feeds no single client section
+#: (a worklist, a narrative thread, or run configuration). `confidence` is
+#: `verified` where the binding was checked field-by-field against the page
+#: contract get_page_contract returns, `proposed` where it was read off the
+#: tab's own shape (the worklist, not a promise), and `not_client_facing`
+#: where the tab feeds run config or provenance rather than any surface.
+#:
+#: This is the WORKBOOK half of the source of truth (workbook is primary,
+#: owner 2026-09-05); the REPORT half is `report_templates.json`'s per-section
+#: `feeds` arrays. `scripts/gen_recording_map.py` joins both against
+#: get_page_contract into `references/tab_recording_map.json` (tab-centric)
+#: and `references/section_sources.json` (section-centric, dual-source).
+#: Every client-facing sheet the contract declares carries a binding here so
+#: no filled tab is a surface rendering empty for reasons nobody can see.
+#: Nothing here parses anything — it is the map a reader consults before
+#: writing the next parser, kept beside the readers so the two cannot drift.
+_TAB_TARGET = {
+    # ── techstack (verified field-by-field against get_page_contract) ──
+    "Tech_Register": (("techstack.techstack",), "verified"),
+    "Technographic_Scan": (("techstack.techstack",), "verified"),
+    "Tech_Peer_Deployments": (("techstack.techstack",), "verified"),
+    "Platform_Peer_Adoption": (("techstack.techstack",), "verified"),
+    "Recommendations": (("platform.recommendations", "platform.roadmap"),
+                        "verified"),
+    # ── scores & evidence — the workbook is the primary source for every
+    #    figure the app renders (read off the tab's shape) ──
+    "P1_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "P2_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "P3_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "P4_Subcap_Scoring": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                          "proposed"),
+    "Subcap_Scores": (("heatmap.workbook_scores", "heatmap.cell_evidence"),
+                      "proposed"),
+    "Pillar_Rollup": (("overview.scores", "heatmap.workbook_scores"),
+                      "proposed"),
+    "Category_Rollup": (("heatmap.workbook_scores",), "proposed"),
+    "Pillar_Summary": (("overview.scores", "heatmap.workbook_scores"),
+                       "proposed"),
+    "Category_Detail": (("heatmap.workbook_scores",), "proposed"),
+    "Peer_Benchmarks": (("overview.scores", "heatmap.workbook_scores"),
+                        "proposed"),
+    "Evidence_Detail": (("heatmap.evidence", "heatmap.evidence_age"),
+                        "proposed"),
+    "Coverage": (("overview.evidence_coverage",), "proposed"),
+    "Coverage_Map": (("heatmap.alerts", "heatmap.evidence_age",
+                      "overview.evidence_coverage"), "proposed"),
+    "Caps_Applied_Log": (("heatmap.safeguard_gates",), "proposed"),
+    # ── the client's own facts ──
+    "Firmographics": (("overview.firmographics",), "proposed"),
+    "Focus_Areas": (("heatmap.focus_areas",), "proposed"),
+    "Entity_Timeline": (("context.timeline", "context.acquisitions"),
+                        "proposed"),
+    "Issue_Register": (("context.issue_register", "platform.stairstep"),
+                       "proposed"),
+    "Financial_Trends": (("overview.financial_series",), "proposed"),
+    "Solution_Catalogue": (("platform.platform_story",
+                            "platform.recommendations",
+                            "overview.opportunity"), "proposed"),
+    # ── worklist / provenance: client-relevant but no single section ──
+    "Enrichment_Needed": ("enrichment facets", "proposed"),
+    "Report_Narrative": ("page narrative_thread / report sections", "proposed"),
+    "Challenge_Log": ("internal_only provenance", "proposed"),
+    "Gate_Log": ("internal_only provenance", "proposed"),
+    "Provenance": ("internal_only provenance", "proposed"),
+    "Search_Log": ("internal_only provenance", "proposed"),
+    # ── run configuration and method, not a client-facing surface ──
+    "Maturity_Rubric": ("run config", "not_client_facing"),
+    "Pillar_Weights": ("run config", "not_client_facing"),
+    "Catalogue_Meta": ("run config", "not_client_facing"),
+    "Handoff_Lock": ("run config", "not_client_facing"),
+    "Cap_Triggers": ("run config", "not_client_facing"),
+    "Capability_Definitions": ("run config", "not_client_facing"),
+    "REF_Method": ("run config", "not_client_facing"),
+    "DQ_Bank": ("run config", "not_client_facing"),
+    "00_README": ("run config", "not_client_facing"),
+    "Executive_Summary": ("run config", "not_client_facing"),
+    "Run_Metadata": ("run config", "not_client_facing"),
+}
+
+
+def workbook_tab_coverage(path: str, obs: list | None = None) -> dict:
+    """Name every tab in the package and say what reads it.
+
+    Emitted at ingest so an unmapped tab is a recorded fact rather than a
+    surface that renders empty for reasons nobody can see. `unread_with_rows`
+    is the worklist: tabs carrying data no reader claims.
+    """
+    wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        read, unread = {}, {}
+        for name in wb.sheetnames:
+            ws = wb[name]
+            rows = max((ws.max_row or 1) - 1, 0)   # less the header
+            reader = _TAB_READERS.get(name)
+            if reader:
+                read[name] = {"reader": reader, "rows": rows}
+            elif _is_pillar_tab(name):
+                read[name] = {"reader": "_parse_pillar_scoring", "rows": rows}
+            else:
+                unread[name] = rows
+        with_rows = {k: v for k, v in unread.items() if v > 0}
+        ordered = dict(sorted(with_rows.items(), key=lambda kv: -kv[1]))
+        # Worst first, and CLIENT-FACING first within that: a run-config tab
+        # nothing reads costs nothing, while an unread Focus_Areas is a page
+        # rendering empty over live rows.
+        targets, unmapped = {}, []
+        for name in ordered:
+            hit = _TAB_TARGET.get(name)
+            if hit is None:
+                unmapped.append(name)
+            elif hit[1] != "not_client_facing":
+                targets[name] = {"feeds": hit[0], "confidence": hit[1]}
+        report = {
+            "tabs_total": len(wb.sheetnames),
+            "tabs_read": len(read),
+            "tabs_unread": len(unread),
+            "unread_with_rows": ordered,
+            # The subset that costs a surface, with the surface named.
+            "unread_client_facing": targets,
+            # A tab nobody has even classified. Worth a look before the next
+            # package arrives carrying more of them.
+            "unread_unmapped": unmapped,
+        }
+        if obs is not None and with_rows:
+            obs.append(Observation("workbook_tabs_unread", None, {
+                **report,
+                "reason": "these tabs carry rows and no reader claims them. "
+                          "A surface written from a tab in this list renders "
+                          "empty because nothing read it, NOT because the "
+                          "client has nothing to say — which is the absence "
+                          "a producer must never write."}))
+        return report
+    finally:
+        wb.close()

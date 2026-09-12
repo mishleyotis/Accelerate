@@ -25,6 +25,17 @@ class FileStat:
     # both called "Corporate America Credit Union - DMA", each with its own
     # scoring workbook, and grouping by name silently discarded one of them.
     parent_ids: tuple = ()
+    #: Drive's own `modifiedTime` (RFC-3339), when the source provides one.
+    #:
+    #: The walk has always FETCHED this and thrown it away — it was read only
+    #: as a checksum fallback. Nothing could therefore ask "which of these
+    #: copies did the agent write last", and `_package_groups` broke ties on
+    #: the FILENAME instead, which is stable and arbitrary and has no
+    #: relationship to which file is current. Measured 2026-09-03 on Bank of
+    #: Travelers Rest: one client folder holding four workbooks at three
+    #: depths, three of them byte-identical, and the scan reading neither the
+    #: newest nor the one with scores.
+    modified_time: str = ""
 
 
 @dataclass

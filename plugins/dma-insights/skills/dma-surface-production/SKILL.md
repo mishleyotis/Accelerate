@@ -506,11 +506,190 @@ assets/          payload skeletons per section
 | `03-pages/<n>-<page>.md` | Before producing that page |
 | `03-pages/rulebooks/<page>.md` | With the page pack — the rulebook every page is produced against, applied by default |
 
+## Where you record, and when your page can ship
+
+Two vocabularies meet here. An assessment agent writes into workbook **tabs**;
+the connector accepts page **sections**. Nothing joined them, so an agent
+filling `Entity_Timeline` had no way to know it was the only input to the
+context page's timeline, and no way to know that finishing it made a page
+submittable. That is why ingestion was an afterthought: you cannot submit as
+you go if you cannot tell what "done" means for one page.
+
+`references/tab_recording_map.json` is that join, GENERATED from the worker's
+own `_TAB_TARGET` and the live page contracts — never hand-written, because a
+hand-written map is one refactor away from being confidently wrong.
+
+| Workbook tab | Page section it feeds | Binding |
+|---|---|---|
+| `Issue_Register` | `platform.stairstep` | proposed |
+| `Recommendations` | `platform.recommendations` | verified |
+| `Solution_Catalogue` | `platform.platform_story` | proposed |
+| `Platform_Peer_Adoption` | `techstack.techstack` | verified |
+| `Tech_Peer_Deployments` | `techstack.techstack` | verified |
+| `Tech_Register` | `techstack.techstack` | verified |
+| `Technographic_Scan` | `techstack.techstack` | verified |
+
+29 tabs are read in all: 13 feed a
+page, and the remaining 10 are run config, provenance and gate
+logs that feed no client surface — the parser marks those
+`not_client_facing`, so their absence from the table is not a gap.
+
+**Read the Binding column literally.** Only 5 of the 29 mappings are
+marked `verified` — checked field by field against `get_page_contract`.
+14 are `proposed`: read off the tab's shape and not
+yet confirmed. A `proposed` binding is a good guess about where your work
+lands, not a promise, and it is worth confirming against the contract
+before you rely on it.
+
+### Ship as you go
+
+```bash
+python scripts/ship_page.py <run_id> all --sections sections/ --incremental
+```
+
+Run it after every producer returns. It asks the contract which sections each
+page REQUIRES, ships every page that has them, and names what the rest are
+waiting on. A page already passing is simply resubmitted with the same
+content, so re-running is free.
+
+The connector RETAINS staged rows, so five pages can sit staged and passing
+while the sixth is still being produced. **Promotion stays atomic across all
+six** — staging is not serving, and no client sees a half-built run. What
+moves earlier is validation, gate refusals and the byte cost of transport, to
+where a producer can still act on them cheaply. When the last producer
+returns, the sixth page ships and the run promotes: the client page is live as
+the assessment ends, not as a separate exercise afterwards.
+
+## Bind to the template, and to the copy the agent wrote last
+
+`references/canonical_sources.json` names the scoring-workbook template, the
+Golden 1 CU package as the measured reference, and the shapes known to be
+wrong. It is checked in so the answer to "which template?" survives between
+sessions and is reviewable in a diff rather than remembered.
+
+```bash
+python scripts/check_template.py <workbook.xlsx>    # BEFORE synthesis
+python ../../scripts/inspect_client_folders.py --client "<name>"
+```
+
+`check_template.py` measures a workbook against the worker's own
+`_TAB_TARGET` — 29 tabs, each bound to the surface it feeds — and prints
+which are missing or empty **and what starves as a result**. It imports that
+map rather than copying it: a second copy of the list here would be wrong the
+first time the app changed.
+
+A template is not correct because it is named "template". Measured 2026-09-03:
+
+| Workbook | tabs | read-tabs with data |
+|---|---|---|
+| Golden 1 CU (the reference) | 43 | **28 of 29** |
+| Bank of Travelers Rest — assessment | 20 | 11 of 29 |
+| Bank of Travelers Rest — scoring (research v5) | 23 | 13 of 29 |
+
+BOTR's two workbooks are COMPLEMENTARY — one holds `Firmographics`,
+`Focus_Areas`, `Issue_Register`, `Subcap_Scores`; the other holds
+`Entity_Timeline`, `Tech_Register`, `Report_Narrative`, `Provenance`.
+Together ~26 of 29; separately 11 and 13. That is what binding to a split,
+older template produces, and it is why eighteen of that entity's nineteen
+runs landed with zero scored cells while the scores sat in a sibling file.
+
+### One workbook and one report per client folder
+
+`inspect_client_folders.py` reports VERSIONS, STALE PICK, DUPLICATES and
+EMPTY PICK from the live tree. On BOTR it found four workbooks at three
+depths in one folder, three byte-identical, with the scan reading neither the
+newest nor the one with scores.
+
+The scan now defends itself — copy directories (`memory-backup/`, `archive/`,
+`old/` and siblings) are excluded, equal-ranked candidates break the tie on
+**modified time** rather than filename, and a ranked workbook stating no
+scored cell falls through to a sibling that has them. None of that makes the
+copies harmless: a producer should still leave exactly one workbook and one
+report in the client folder, and put working copies outside the intake tree.
+
+## Shipping a page: write files, run one command
+
+**Never retype a payload into `append_payload_part`.** Write each section to
+`sections/<page>.<section>.json` and ship the directory:
+
+```bash
+python scripts/self_heal.py --sections sections/ --page overview \
+       --entity "<the entity's legal name>"      # blocking vs advisory
+python scripts/ship_page.py <run_id> overview --sections sections/ --dry-run
+python scripts/ship_page.py <run_id> overview --sections sections/
+python scripts/ship_page.py <run_id> all --sections sections/ --promote
+```
+
+`ship_page.py` assembles the sections, plans the parts, opens the upload,
+sends every part **from disk** through `plugins/dma-insights/scripts/mcp_raw.py`,
+submits with the `expect` counts, and prints the verdict's status and blocking
+reasons — nothing else.
+
+### Why this is not optional
+
+Golden 1 CU (2026-09-02) shipped its six pages by printing the payload in
+4000-character chunks and having subagents retype them into
+`append_payload_part`, comparing byte receipts to catch drift. That cost about
+**330,000 subagent tokens for one page, done twice**, and it was never
+necessary: `mcp_raw.py` has spoken JSON-RPC to the connector from a file on
+disk since 2026-08-20.
+
+The cost is the smaller half. Retyping is the ONLY step in this pipeline that
+can invent content, and on that run it did — an agent paraphrased
+`P4C3.5.6.reach_note` from "Both spans establish" to "Two spans establishing".
+A two-byte receipt delta was the only thing that caught it, and the substituted
+phrasing genuinely exists on a sibling cell, so a reviewer would have read it
+as ordinary variation. **A file on disk cannot paraphrase itself.** Every byte
+receipt, chunk-boundary check and `emit_part --check` step this skill used to
+require exists to detect a failure mode the file path removes.
+
+Measured on the same six pages: the planner produces byte-identical parts
+(overview: 39,639 / 39,624 / 34,197 / 14,622 / 23,431) in under a second.
+
+### The order that saves the most
+
+1. `self_heal.py` first — it restates the gates that cost a cycle, over the
+   section files, for free. **A submission SUPERSEDES the staged row**, so a
+   FAIL on a page that was passing costs that pass and blocks the promote for
+   the other five.
+2. `--dry-run` next, to see the part plan and the `expect` counts.
+3. Submit. On a FAIL, fix the SECTION FILE and resubmit — never loop
+   resubmitting until the wording happens to pass.
+4. `--promote` only when all six report PASS; promotion is atomic across all
+   six and refuses rather than half-succeeding.
+
+### What self_heal.py blocks on, and what it only advises
+
+**Blocking** — each restates a connector gate: `ET-09` (the entity's own name
+with a leading article, matched CASE-INSENSITIVELY, which is how three manual
+sweeps missed the same twelve strings), `CG-12` face budgets (path-keyed:
+`basis` is a chip only under `prerequisites`), `CG-44` (a `peer_median` and a
+`delta` with a null `score` — it names the recoverable figure), and unmarked
+`r_layer` (redaction is default-deny).
+
+**Advisory** — the sibling-null rule: a field populated on some rows of a list
+and null on others. That is how a producer drops a field mid-list, and also how
+the contract expresses a tri-state (`deployed` is null on purpose; a peer with
+no public filing has no `source_url`). A heuristic never holds a gate it cannot
+justify, so a human reads these.
+
 ## Scripts
 
 Run these rather than eyeballing — they are faster and they do not get tired.
 
 ```bash
+python scripts/ship_page.py <run> <page|all> --sections DIR [--promote]
+                                                    # assemble, plan, submit from DISK.
+                                                    # The only supported way to move a
+                                                    # payload — see the section above for
+                                                    # what retyping one cost and what it
+                                                    # invented
+python scripts/self_heal.py --sections DIR --page <page> --entity "<legal name>"
+                                                    # the gates that cost a cycle on a real
+                                                    # run, replayed locally for free:
+                                                    # ET-09 (case-insensitive), CG-12 face
+                                                    # budgets, CG-44 empty bars, unmarked
+                                                    # r_layer. Blocking vs advisory
 python scripts/preflight.py --run-id <uuid>        # where the run stands, what is blocking
 python scripts/check_payload.py <payload.json> --page <page> \
        --subvertical <CODE> --cells <bundle.json>
