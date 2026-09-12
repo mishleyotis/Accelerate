@@ -854,8 +854,24 @@ class Pipeline:
                                                   f"{probs[0][:120]}" if probs else ""))
 
     def _stage_research(self) -> str:
-        from . import brief, floors_gate
+        from . import brief, cost, floors_gate
         self._reset_counters()
+        # SAY IT BEFORE SPENDING IT. A lane that cannot finish its category in
+        # the turns it is given does not fail loudly — it runs out, hands back,
+        # and is re-dispatched, re-paying its context floor cold each time.
+        # Measured 2026-09-12 at T1_CORE: 16 of 16 categories over, 37.7
+        # lane-equivalents of work against 16 lanes. Knowable before a single
+        # lane starts, and it was never computed.
+        try:
+            fit = cost.lane_fit(self.wb)
+            if not fit["ok"]:
+                self.opts.log(f"  [RESEARCH] LANE FIT: {fit['why'][:400]}")
+                self.state["lane_fit"] = {k: fit[k] for k in
+                                          ("lane_turns", "over", "projected_turns",
+                                           "lane_equivalents")}
+                self._save_state()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (lane fit not projected: {str(e)[:120]})")
         self._stalled("RESEARCH")                        # seed the signature
         for r in range(self.opts.max_rounds):
             need = brief.categories_needing_dispatch(self.wb)

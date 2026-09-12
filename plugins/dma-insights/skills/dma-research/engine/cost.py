@@ -48,6 +48,10 @@ from pathlib import Path
 
 from . import contract as C
 
+#: the plugin root — the agent manifests carry the only turn cap a
+#: lane has, so `lane_turn_budget` reads them rather than restating one
+PLUGIN = __import__('pathlib').Path(__file__).resolve().parents[3]
+
 #: $ per 1M tokens, Anthropic first-party rates. Cache reads bill at 0.1x
 #: input, cache writes at 1.25x — which is why a long-lived context is cheap
 #: to KEEP and expensive to re-read many times.
@@ -242,6 +246,83 @@ def _baseline_file(path=None):
     import os
     p = path or os.environ.get(BASELINE_ENV)
     return Path(p) if p else None
+
+
+#: Turns a lane spends per cell under the CURRENT per-subcap design. Measured
+#: 2026-09-12 from the protocol's own demands: one turn per askable facet
+#: (web searches cannot batch — RESEARCH-PROTOCOL "spend your turns there"),
+#: plus one synthesis and one chained logging call per cell.
+TURNS_PER_CELL_OVERHEAD = 2
+
+
+def lane_turn_budget() -> int:
+    """`maxTurns` as the agent manifests actually declare it.
+
+    Read, never assumed: there is no `--max-turns` on the claude CLI, so the
+    manifest value is the ONLY cap a lane has, and a second copy here would
+    drift from it silently.
+    """
+    import re
+    seen = set()
+    d = PLUGIN / "agents" / "research" / "categories"
+    for f in sorted(d.glob("research-p*-producer.md")):
+        m = re.search(r"^maxTurns:\s*(\d+)", f.read_text(), re.M)
+        if m:
+            seen.add(int(m.group(1)))
+    if not seen:
+        return 0
+    return min(seen)          # the tightest cap is the one that bites
+
+
+def lane_fit(wb) -> dict:
+    """Can each category's work FIT the turn budget of the lane it gets?
+
+    THE QUESTION NOBODY ASKED. Measured 2026-09-12: at T1_CORE scope the
+    per-subcap design needs ~24 lane-equivalents and the driver is given 16;
+    every category was 1.0-2.8x over its lane's 200-turn ceiling. A lane that
+    cannot finish does not fail loudly — it runs out of turns, hands back, and
+    is re-dispatched, re-paying its ~18K-token context floor cold each time.
+    That is the mechanism behind ~18 dispatches and $96.65.
+
+    Projecting it costs nothing and is knowable before a single lane starts.
+    """
+    cap = lane_turn_budget()
+    # The DECLARED facet set. What is ASKABLE per cell narrows to the five
+    # volleys when the toolkits are absent (`askable_facets`), so this is the
+    # with-toolkits case — the one production runs in, and the upper bound.
+    facets = len(C.DQ_FACETS)
+    per_cat: dict[str, int] = {}
+    for r in wb.scoring_rows():
+        cell = str(r.get("SubCap_ID") or "").strip()
+        if cell:
+            cat = cell.split(".")[0]
+            per_cat[cat] = per_cat.get(cat, 0) + 1
+    out = []
+    for cat, cells in sorted(per_cat.items()):
+        need = cells * (facets + TURNS_PER_CELL_OVERHEAD)
+        out.append({"category": cat, "cells": cells, "projected_turns": need,
+                    "lane_turns": cap,
+                    "lanes_needed": round(need / cap, 2) if cap else None,
+                    "fits": bool(cap and need <= cap)})
+    over = [r for r in out if not r["fits"]]
+    return {
+        "lane_turns": cap, "facets_per_cell": facets,
+        "facet_basis": "DQ_FACETS (declared; askable narrows to 5 without toolkits)",
+        "projected_turns": sum(r["projected_turns"] for r in out),
+        "lane_equivalents": (round(sum(r["projected_turns"] for r in out) / cap, 1)
+                             if cap else None),
+        "categories": out,
+        "over": [r["category"] for r in over],
+        "ok": not over,
+        "why": ("every category fits its lane" if not over else
+                f"{len(over)} of {len(out)} categories need more turns than a lane "
+                f"has ({cap}): "
+                + ", ".join(f"{r['category']} {r['projected_turns']}t "
+                            f"({r['lanes_needed']}x)" for r in over[:6])
+                + ". A lane that cannot finish is re-dispatched and re-pays its "
+                  "context floor cold — reduce cells per lane, coarsen the search "
+                  "grain, or raise maxTurns in the manifests."),
+    }
 
 
 def measured_baseline(baseline_path=None) -> dict:
@@ -531,6 +612,10 @@ def main(argv=None) -> int:
     e.add_argument("--sv", default="CU"); e.add_argument("--scope",
                                                          default="T1_CORE")
     e.add_argument("--json", action="store_true")
+    lf = sub.add_parser("lane-fit",
+                        help="can each category's work fit the turns its lane gets?")
+    lf.add_argument("--run"); lf.add_argument("--root")
+    lf.add_argument("--json", action="store_true")
     b = sub.add_parser("budget")
     b.add_argument("--run", required=True); b.add_argument("--root")
     b.add_argument("--json", action="store_true")
@@ -663,6 +748,24 @@ def main(argv=None) -> int:
               f"min serial; {sch['lanes']} lanes make it "
               f"{sch['research_parallel_min']:.0f}.")
         return 0 if sch["within_target"] else 1
+
+    if a.cmd == "lane-fit":
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) / a.run if a.root else None)
+        fit = lane_fit(run.open())
+        if a.json:
+            print(json.dumps(fit, indent=2))
+            return 0 if fit["ok"] else 1
+        print(f"lane turns {fit['lane_turns']} · {fit['facets_per_cell']} facets/cell "
+              f"({fit['facet_basis']})\n")
+        print(f"  {'cat':<7}{'cells':>6}{'turns':>8}{'lanes':>7}  fits")
+        for r in fit["categories"]:
+            print(f"  {r['category']:<7}{r['cells']:>6}{r['projected_turns']:>8}"
+                  f"{r['lanes_needed']:>7}  {'yes' if r['fits'] else 'NO'}")
+        print(f"\n  run total {fit['projected_turns']} turns = "
+              f"{fit['lane_equivalents']} lane-equivalents")
+        print(f"\n  {fit['why']}")
+        return 0 if fit["ok"] else 1
 
     if a.cmd == "estimate":
         if a.subcaps:

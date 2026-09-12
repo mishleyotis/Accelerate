@@ -62,6 +62,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+#: the plugin root, for `scripts/connector_contract.py`
+PLUGIN = Path(__file__).resolve().parents[3]
+
 from . import contract as C
 from . import floors_gate, ledger as L, prelim, registry, runstate
 from .workbook import RunWorkbook
@@ -78,6 +81,32 @@ def _age(ts: str | None) -> float | None:
     except ValueError:
         return None
     return (_dt.datetime.now(_dt.timezone.utc) - t).total_seconds()
+
+
+def _no_enrichment_connector(run) -> str:
+    """The reason a run is STRUCTURALLY blocked, or "" when it is not.
+
+    Measured 2026-09-12: a run with no enrichment connector bound could close
+    no cell, so it read as STALLED — and the hourly `dma-watchdog` Routine is
+    told to `--revive` a STALLED run. A signal meaning "burning time, writing
+    nothing" was wired to a process authorised to spend more on it. This is
+    the one shape revive must never touch: nothing an agent does from inside
+    the container can bind a connector.
+    """
+    try:
+        import sys
+        sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        path = cc.baseline_path(str(run.root))
+        if not Path(path).is_file():
+            return ""                       # unverified is not a diagnosis
+        held = json.loads(Path(path).read_text()).get("mcp_tools") or []
+        out = cc.check(held)
+        if out["ok"]:
+            return ""
+        return f"the connector baseline is short of {', '.join(out['missing'])}"
+    except Exception:                                         # noqa: BLE001
+        return ""
 
 
 def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
@@ -122,6 +151,13 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         state, detail = "AT_BUDGET_CEILING", (
             f"{budget['search_ops']} search-ops against a ceiling of "
             f"{budget['search_op_ceiling']}; the run must checkpoint")
+    elif open_work and _no_enrichment_connector(run):
+        state, detail = "BLOCKED_NO_CONNECTOR", (
+            f"{_no_enrichment_connector(run)} — no cell can be declared absent "
+            f"without one, so no floors gate can pass and re-dispatching only "
+            f"spends money. {len(open_work)} category(ies) still open: "
+            f"{', '.join(open_work[:6])}. A HUMAN attaches the connector on the "
+            f"Routine's own edit screen; no agent can fix this from inside a run")
     elif idle is not None and idle > stall_seconds and open_work:
         state, detail = "STALLED", (
             f"no write for {int(idle)}s with {len(open_work)} category(ies) "
@@ -665,7 +701,8 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
 
 
 #: The states that need someone told. Everything else is the run working.
-ACTIONABLE = ("UNREADABLE", "HALTED", "STALLED", "GATE_FAILED", "UNGATED",
+ACTIONABLE = ("UNREADABLE", "HALTED", "BLOCKED_NO_CONNECTOR",
+              "STALLED", "GATE_FAILED", "UNGATED",
               "AT_BUDGET_CEILING", "PRELIM_OPEN", "NO_CLIENT_FOLDER",
               "MISSING_LOCALLY", "READY_FOR_HANDOFF",
               # the assessment-stage machine (2026-09-03)
@@ -675,7 +712,10 @@ ACTIONABLE = ("UNREADABLE", "HALTED", "STALLED", "GATE_FAILED", "UNGATED",
 #: States an AGENT can advance without a person: the ones a stage-advance
 #: hook may keep a session working on, and the watchdog may revive.
 AGENT_ADVANCEABLE = tuple(s for s in ACTIONABLE
-                          if s not in ("UNREADABLE", "HALTED", "MISSING_LOCALLY"))
+                          if s not in ("UNREADABLE", "HALTED", "MISSING_LOCALLY",
+                                       # a person must attach the connector;
+                                       # a revive here is pure spend
+                                       "BLOCKED_NO_CONNECTOR"))
 
 
 def main(argv=None) -> int:
@@ -701,8 +741,16 @@ def main(argv=None) -> int:
     revived = []
     if a.revive:
         for r in rows:
-            if r["state"] in ACTIONABLE:
+            if r["state"] in AGENT_ADVANCEABLE:
                 revived.append(revive(r, dry_run=a.dry_run))
+            elif r["state"] in ACTIONABLE:
+                # ACTIONABLE means "tell someone", not "an agent can fix it".
+                # `--revive` walked the wrong list and re-dispatched states
+                # AGENT_ADVANCEABLE already excluded.
+                revived.append({"run_id": r.get("run_id"), "state": r["state"],
+                                "revived": False,
+                                "detail": "needs a person, not a re-dispatch: "
+                                          + str(r.get("detail"))[:200]})
     if a.json:
         print(json.dumps({"runs": rows, "revived": revived} if a.revive
                          else rows, indent=2))
