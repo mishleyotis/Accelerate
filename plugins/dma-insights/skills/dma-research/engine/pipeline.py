@@ -167,6 +167,13 @@ class AgentRunDispatcher:
                "--timeout", str(self.timeout), "--timing-out", str(timing),
                "--record-run", ctx.run.run_id, "--record-root", str(ctx.run.root),
                "--record-stage", stage]
+        # Opt-in, default-off: DMA_NO_LANE_CAP=1 lets the batch run the full
+        # requested lane count regardless of the host CPU heuristic. The lanes
+        # wait on the model/API rather than a local core, so where memory has
+        # the headroom (agent_run reports by_mem) running all sixteen at once
+        # is a real speedup; unset, behaviour is unchanged and the cap holds.
+        if os.environ.get("DMA_NO_LANE_CAP"):
+            cmd.append("--no-lane-cap")
         if self.stream:
             cmd += ["--stream", "--log-dir", str(ctx.run.root / "agent_logs")]
         # Popen + communicate rather than subprocess.run, so that when THIS
