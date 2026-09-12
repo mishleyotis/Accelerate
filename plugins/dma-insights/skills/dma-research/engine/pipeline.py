@@ -1016,6 +1016,18 @@ class Pipeline:
                          f"through {', '.join(st['tools']) or 'nothing'}",
                          f"heal={plan['heal']}: {plan['reason']}",
                          f"open relay requests {plan['open_requests']}"]
+                if plan["heal"] == "unbound":
+                    # A heal is a FRESH LANE INSTANCE. Spending one on an
+                    # unbound connector buys a full context floor to rediscover
+                    # that the tool is still absent — there is nothing in the
+                    # container for a retry to reach. Disclose at once and keep
+                    # the budget for the gaps a lane can actually close.
+                    self._disclose_enrichment([cat], why="connector unbound in this "
+                                                         "container — a retry cannot reach it",
+                                              plans={cat: plan})
+                    self.opts.log(f"[ENRICH] {cat}: UNBOUND — disclosed without spending "
+                                  f"a heal; {plan['reason'][:120]}")
+                    continue
                 if used < self.opts.enrichment_heals:
                     heals[cat] = used + 1
                     terms.append(f"fresh lane instance {used + 1} of {self.opts.enrichment_heals}")

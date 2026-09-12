@@ -139,6 +139,18 @@ HEAL_INSTRUCTIONS = {
         "reads the Search_Log, not the transcript: log connector searches with "
         "the tool that ran them (`--tool exa|tavily|clay|drive`), so the "
         "enrichment effort behind each cell is countable."),
+    "unbound": (
+        "the connector is NOT BOUND in this container — the run's own "
+        "connector baseline is short of a required family, your manifest "
+        "declares it and the grants allow it, and your previous instance's "
+        "transcript shows neither an attempt nor a refusal (an absent tool "
+        "produces no tool_use to witness). DO NOT retry it: there is nothing "
+        "to retry against, and a fresh lane told to 'try harder' spends a full "
+        "context floor to discover the same absence. Work the cells through "
+        "web_search, emit every enrichment query you would have run as a "
+        "`search_requests` entry, and declare the cells you cannot close as "
+        "honest absences carrying that reason. A human attaches the connector "
+        "on the Routine's own edit screen; no lane can."),
     "manifest": (
         "this lane's manifest declares NO enrichment connector tool, so a fresh "
         "instance cannot call one either. This is a toolchain defect for the "
@@ -657,6 +669,31 @@ def transcript_connector_witness(transcript: Path) -> dict:
     return out
 
 
+def _baseline_short(run) -> str:
+    """The required connector families the run's baseline does NOT hold, or
+    "" when it holds them all or no baseline was ever written.
+
+    An absent baseline returns "" on purpose: it means nobody measured, which
+    is not evidence that the connector is unbound. The preflight is what makes
+    the baseline exist; this only reads it.
+    """
+    try:
+        import json as _json
+        import sys as _sys
+        _sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                        # noqa: PLC0415
+        path = cc.baseline_path(str(run.root))
+        if not Path(path).is_file():
+            return ""
+        held = _json.loads(Path(path).read_text()).get("mcp_tools") or []
+        out = cc.check(held)
+        if out["ok"]:
+            return ""
+        return f"the run's connector baseline is short of {', '.join(out['missing'])}"
+    except Exception:                                          # noqa: BLE001
+        return ""
+
+
 def heal_plan(run: runstate.Run, wb, category: str, *, logs_dir: Path | None = None) -> dict:
     """For one category: the measured enrichment status and, when it shows
     no connector search, WHICH half is broken and what the fresh lane must do.
@@ -687,6 +724,18 @@ def heal_plan(run: runstate.Run, wb, category: str, *, logs_dir: Path | None = N
         heal, reason = "logging", (f"{tr['attempted']} connector call(s) witnessed "
                                    f"({', '.join(sorted(tr['tools']))}) but every Search_Log row "
                                    f"names {', '.join(st['tools']) or 'nothing'}")
+    elif _baseline_short(run):
+        # THE CASE THAT HAD NO VERDICT. An UNBOUND connector produces no
+        # tool_use to witness and no refusal marker, so manifest and grants
+        # both pass and every branch above falls through to "instruction" —
+        # which tells a fresh lane "you never ATTEMPTED a connector; fire one"
+        # about a tool that does not exist in this container. Measured
+        # 2026-09-12: that is a loop, and each turn of it costs a full lane.
+        # The run's own connector baseline is what tells the two apart.
+        heal, reason = "unbound", (
+            f"{_baseline_short(run)}; {st['searches']} search(es) all through "
+            f"{', '.join(st['tools']) or 'nothing'}, and the transcript shows "
+            f"neither an attempt nor a refusal — the tool is absent, not refused")
     else:
         heal, reason = "instruction", (f"{st['searches']} search(es), all through "
                                        f"{', '.join(st['tools']) or 'nothing'}; no connector "
