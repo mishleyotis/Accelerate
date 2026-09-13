@@ -167,3 +167,31 @@ def test_revive_walks_agent_advanceable_not_actionable():
     text = _inspect.getsource(W.main)
     assert 'r["state"] in AGENT_ADVANCEABLE' in text
     assert 'if r["state"] in ACTIONABLE:\n                revived.append(revive(' not in text
+
+
+def test_the_lanes_share_no_prompt_prefix_to_warm():
+    """The lever that ISN'T. Staggering lane starts so fifteen of sixteen
+    read a warm prompt-prefix cache assumes the lanes share a prefix. They do
+    not: each is its own `claude -p --agent research-p<X>c<Y>-producer`
+    process whose system prompt IS that manifest, prompt caching is a PREFIX
+    match, and two research manifests diverge at the agent's own name on line
+    2 — 98%+ identical in CONTENT, 20 characters of shared prefix.
+
+    Pinned because the reasoning is seductive and the arithmetic is not: a
+    change sold on it would cost dispatch simplicity for nothing."""
+    d = PLUGIN / "agents" / "research" / "categories"
+    a = (d / "research-p1c1-producer.md").read_text()
+    b = (d / "research-p2c2-producer.md").read_text()
+    shared = 0
+    for x, y in zip(a, b):
+        if x != y:
+            break
+        shared += 1
+    assert shared < 64, (
+        f"{shared} characters of shared prefix (~{shared // 4} tokens). If "
+        f"this ever grows past a few hundred tokens the stagger is worth "
+        f"re-measuring; see the note beside cost.PARALLEL_LANES")
+    import difflib
+    assert difflib.SequenceMatcher(None, a, b).ratio() > 0.9, (
+        "the manifests are nearly identical in content — which buys nothing, "
+        "and that gap between similarity and shared PREFIX is the whole point")

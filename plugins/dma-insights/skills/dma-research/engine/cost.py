@@ -146,6 +146,18 @@ LEVERS = [
 #: turns a card that becomes ~4 min per capability pass, and the sixteen
 #: category researchers are independent by construction: each owns its own
 #: grain, writes its own rows, and shares only the workbook, which appends.
+#
+# NOT A LEVER, MEASURED 2026-09-13: staggering lane starts so fifteen of
+# sixteen read a warm prompt-prefix cache. Prompt caching is a PREFIX match,
+# and each lane is its own `claude -p --agent research-p<X>c<Y>-producer`
+# process whose system prompt IS that manifest. Two research manifests are
+# 98.4% identical in content and share a common prefix of TWENTY CHARACTERS
+# — they diverge at the agent's own name, on line 2. There is no shared
+# prefix to warm, so there is nothing for a stagger to buy, and a change
+# sold on that reasoning would have cost dispatch simplicity for zero.
+# `test_lane_fit_and_revive` pins the 20 so the claim cannot quietly return.
+# The measured token lever is the search grain (see `lane_fit`), not the
+# dispatch order.
 TARGET_WALL_CLOCK_MIN = 120
 PARALLEL_LANES = 16                 # one per catalogue category
 MIN_PER_CAPABILITY_PASS = 4.0       # levered: 8 turns at ~30s
