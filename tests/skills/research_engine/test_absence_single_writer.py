@@ -266,7 +266,18 @@ def test_the_strip_refuses_while_a_declared_absence_has_no_surviving_ladder(tmp_
 
 # ── the run-level density floor ──────────────────────────────────────────
 
-def test_a_run_thinner_than_golden_1_cannot_open_scoring(tmp_path):
+def test_a_run_thinner_than_golden_1_is_disclosed_and_still_opens_scoring(tmp_path):
+    """Density is MEASURED and DISCLOSED; since 2026-09-13 it does not block.
+
+    It was refusing to open scoring on a quantity the run does not control —
+    how much the world happened to publish about the client. Measured against
+    the reference the floor is derived from: Golden 1 Credit Union fails its
+    own per-category coverage floor in 9 of 16 categories in HYBRID, the mode
+    it was actually run in, so the floor was never a calibration.
+
+    The containment lives downstream and already existed: `ceiling_for` caps a
+    no-evidence cell at M2, so a thin run scores thin rather than not scoring.
+    """
     run = new_run(tmp_path, n=6)
     wb = run.open()
     cells = wb.selected_subcaps()
@@ -276,13 +287,41 @@ def test_a_run_thinner_than_golden_1_cannot_open_scoring(tmp_path):
         bank_evidence(wb, cell, n=1)
     for cell in cells[2:]:
         declare_absent(wb, cell)
+
+    # still measured, still says exactly how thin
     d = floors_gate.run_density(wb)
     assert d["met"] is False
     assert any("thinner than the Golden 1" in s for s in d["shortfall"])
     assert any("Golden 1's own coverage" in s for s in d["shortfall"])
     assert d["floors"]["source"] == "gold_reference.json"
+
+    # but it no longer stands between the run and a score
     pre = A.research_ready(wb, run.qa_dir)
-    assert any("thinner than the Golden 1" in p for p in pre)
+    assert not any("thinner than the Golden 1" in p for p in pre), (
+        f"density must not block research_ready any more: {pre}")
+
+
+def test_the_thinness_is_stamped_on_the_row_that_opens_scoring(tmp_path):
+    """Not blocking must not mean not said. `open_stage` discloses it once, on
+    the SCORING_OPENED row it already writes, so a Gate_Log reader can see
+    what the assessment was built on without recomputing it."""
+    from engine import preflight
+    from fixtures import preflight_doc
+
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    preflight.record(run, preflight_doc())
+    for cell in wb.selected_subcaps():
+        declare_absent(wb, cell)
+    floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+
+    assert A.research_ready(wb, run.qa_dir) == []
+    opened = A.open_stage(wb, run.qa_dir)
+    assert opened["density"]["met"] is False
+    row = [r for r in wb.rows("Gate_Log") if r.get("Gate") == "SCORING_OPENED"][-1]
+    assert "THIN" in str(row["Detail"])
+    assert "evidence ceiling" in str(row["Detail"]), (
+        "the disclosure must name what DOES contain a thin run")
 
 
 def test_the_density_floors_are_read_from_the_gold_reference():

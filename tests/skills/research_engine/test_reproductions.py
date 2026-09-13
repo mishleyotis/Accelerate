@@ -207,14 +207,32 @@ def test_the_gate_verdict_is_also_in_the_workbook(tmp_path):
 
 # ── AUD-0022 · the >=20-item category floor is a gate term ────────────────
 
-def test_a_category_below_the_item_floor_cannot_pass(tmp_path):
+def test_a_category_below_the_item_floor_is_measured_and_named(tmp_path):
+    """AUD-0022's defect was that the figure was computed, reported, and then
+    NOT USED — it existed and decided nothing.
+
+    Since 2026-09-13 it decides nothing about PASS/FAIL again, but for the
+    opposite reason and without the defect: it is deliberately advisory,
+    because evidence volume measures what the world published about the client
+    rather than how the run behaved. AUD-0022's actual complaint — a
+    computation nobody can see — is what this test now guards: the figure must
+    appear in the verdict, in `advisory`, and in `finding_keys`, so a reader
+    can tell a thin category from a well-worked one and anyone arguing it
+    should block again can see its real hit rate.
+    """
     run = new_run(tmp_path, n=2); wb = run.open()
     for cell in wb.selected_subcaps():
         synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
     v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)
+
     assert v["category_floor_met"] is False
-    assert "category_items_below_floor" in v["blocking"]
-    assert v["gate"] == "FAIL"
+    # visible: named, listed, and quantified
+    assert "category_items_below_floor" in v["advisory"]
+    assert "category_items_below_floor" in v["finding_keys"]
+    assert v["category_items_below_floor"], "the finding must carry its numbers"
+    assert v["category_evidence"].endswith("/20")
+    # and deliberately not blocking
+    assert "category_items_below_floor" not in v["blocking"]
 
 
 # ── AUD-0083 · every cited id resolves ────────────────────────────────────
