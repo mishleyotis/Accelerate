@@ -74,13 +74,27 @@ def memory_path(run: runstate.Run, category: str) -> Path:
     return run.root / MEMORY_DIR / f"{category}.md"
 
 
-def note(run: runstate.Run, *, category: str, subcap: str, facet: str,
+def note(run: runstate.Run, *, category: str, subcap, facet: str,
          kind: str = "evidence", **fields) -> Path:
     """Append one entry. Cheap on purpose: the only validation here is shape
     vocabulary — substance is judged at CONSOLIDATION by the real gates,
-    because a notebook that refuses a hunch defeats its reason to exist."""
+    because a notebook that refuses a hunch defeats its reason to exist.
+
+    `subcap` takes a cell or a SEQUENCE of cells. One source routinely bears
+    on several cells of a capability — `append_evidence` and `engine.cli
+    evidence --subcap` have always accepted a list — and the notebook was the
+    one link in the chain that could not say so, so a lane working a
+    capability had to register the same find once per cell or drop the
+    others. The entry head stores them comma-joined, which the parser's
+    `(\\S+)` already accepts.
+    """
     if kind not in KINDS:
         raise ValueError(f"kind {kind!r} not in {KINDS}")
+    cells = ([subcap] if isinstance(subcap, str)
+             else [str(s).strip() for s in subcap if str(s).strip()])
+    if not cells:
+        raise ValueError("note needs at least one subcap")
+    subcap = ",".join(cells)
     if facet and facet not in C.DQ_FACETS:
         raise ValueError(f"facet {facet!r} not in {C.DQ_FACETS}")
     p = memory_path(run, category)
@@ -188,26 +202,34 @@ def consolidate(run: runstate.Run, category: str, *,
 def _consolidate_one(wb: RunWorkbook, e: dict, actor: str) -> str:
     f = e["fields"]
     kind = f.get("kind") or "note"
-    sub = e["subcap"]
+    # An entry may name several cells (comma-joined by `note`). `sub` stays
+    # the FIRST for the single-cell branches below, which are genuinely
+    # per-cell decisions; the evidence branch registers against all of them,
+    # because one source bearing on four cells of a capability is one
+    # registration, not four.
+    cells = [c.strip() for c in str(e["subcap"]).split(",") if c.strip()]
+    sub = cells[0]
     if kind in ("evidence", "contradiction"):
         eid = L.append_evidence(
             wb, source_name=f.get("source_name") or f.get("source") or "",
             source_url=f.get("url"),
             tier=str(f.get("tier") or "").upper() or "T5",
             excerpt=f.get("excerpt") or "",
-            subcaps=[sub],
+            subcaps=cells,
             published=f.get("published"),
             claim_type=str(f.get("claim_type") or
                            ("INFERENCE" if kind == "contradiction"
                             else "FACT")).upper(),
             origin=f.get("origin") or "public")
         if kind == "contradiction":
-            row = wb.scoring_row(sub) or {}
-            if not str(row.get("Contradiction_Disposition") or "").strip():
-                wb.set_scoring(sub, {"Contradiction_Disposition":
-                                     f"OPEN: {f.get('claim', '')[:160]}"})
-        L.record_provenance(wb, sub, "enrichment", actor,
-                            f"memory consolidation -> {eid}")
+            for cell in cells:
+                row = wb.scoring_row(cell) or {}
+                if not str(row.get("Contradiction_Disposition") or "").strip():
+                    wb.set_scoring(cell, {"Contradiction_Disposition":
+                                          f"OPEN: {f.get('claim', '')[:160]}"})
+        for cell in cells:
+            L.record_provenance(wb, cell, "enrichment", actor,
+                                f"memory consolidation -> {eid}")
         return eid
     if kind == "lead":
         row = wb.scoring_row(sub)
@@ -355,7 +377,11 @@ def main(argv=None) -> int:
         elif name == "status":
             s.add_argument("--category")
         if name == "note":
-            s.add_argument("--subcap", required=True)
+            s.add_argument("--subcap", required=True, action="append",
+                           help="the cell this entry bears on. Repeatable: one "
+                                "source often bears on several cells of a "
+                                "capability, and registering it once against "
+                                "all of them is one find, not several")
             s.add_argument("--facet", default="works")
             s.add_argument("--kind", default="evidence", choices=KINDS)
             for f in ("claim", "excerpt", "url", "source-name", "tier",

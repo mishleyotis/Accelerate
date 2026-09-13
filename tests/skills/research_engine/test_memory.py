@@ -268,3 +268,137 @@ def test_backup_pushes_every_category_notebook_and_the_workbook(tmp_path, monkey
     assert f"{CAT}.md" in names, "the noted category's notebook must be backed up"
     assert "P9C9.md" in names, "every category notebook must be backed up, not just one"
     assert run.workbook_path.name in names, "the durable workbook must be backed up too"
+
+
+# ── one find, several cells (E3, 2026-09-13) ─────────────────────────────
+#
+# `append_evidence(subcaps=[...])` and `engine.cli evidence --subcap A
+# --subcap B` have always been multi-cell and validated per cell. The
+# NOTEBOOK was the one link in the chain that could not say so, so a lane
+# working a capability — measured at 5.32 cells each across the 686 T1_CORE
+# cells — had to register the same source once per cell or drop the others.
+# That is the write half of capability-grain research: one discovery pass
+# grounds the group, and `evidence_smear` still caps shared evidence at half
+# of any cell's citations, so each cell earns its own bearing source too.
+
+
+def _cap_siblings(cells):
+    """Cells of one capability — what a single source plausibly bears on."""
+    from engine.brief import capability_of
+    cap = capability_of(cells[0])
+    return [c for c in cells if capability_of(c) == cap]
+
+
+def test_a_note_may_name_several_cells(tmp_path):
+    run, wb, cells = _noted_run(tmp_path)
+    sibs = _cap_siblings(cells)
+    assert len(sibs) >= 2, "the fixture must give this test a capability group"
+    p = M.note(run, category=CAT, subcap=sibs, facet="works", kind="evidence",
+               claim="Alkami live", excerpt=EXCERPT,
+               url="https://acme.example/ar25", source_name="Annual Report 2025",
+               tier="T2", published="2025-03-01")
+    entry = M.parse(p)[0]
+    assert entry["subcap"] == ",".join(sibs), (
+        "the entry head stores the group comma-joined — the parser's (\\S+) "
+        "already accepts it, which is why this needed no format change")
+
+
+def test_a_scalar_subcap_still_works(tmp_path):
+    """Every existing caller passes a string. The sequence form is additive."""
+    run, wb, cells = _noted_run(tmp_path)
+    p = M.note(run, category=CAT, subcap=cells[0], facet="works", kind="note",
+               text="a lead worth chasing")
+    assert M.parse(p)[0]["subcap"] == cells[0]
+
+
+def test_a_note_naming_no_cell_is_refused(tmp_path):
+    run, wb, cells = _noted_run(tmp_path)
+    with pytest.raises(ValueError):
+        M.note(run, category=CAT, subcap=[], facet="works", kind="note",
+               text="bears on nothing")
+    with pytest.raises(ValueError):
+        M.note(run, category=CAT, subcap=["  "], facet="works", kind="note",
+               text="bears on nothing")
+
+
+def test_one_source_grounds_every_cell_it_names(tmp_path):
+    """ONE evidence row, and the link is bidirectional on every cell — the
+    cell cites the id AND the row names the cell. `run_density` counts only
+    bidirectional links (D3), so a one-way registration would read as
+    unevidenced however honestly it was made."""
+    run, wb, cells = _noted_run(tmp_path)
+    sibs = _cap_siblings(cells)
+    M.note(run, category=CAT, subcap=sibs, facet="works", kind="evidence",
+           claim="Alkami live", excerpt=EXCERPT,
+           url="https://acme.example/ar25", source_name="Annual Report 2025",
+           tier="T2", published="2025-03-01")
+    out = M.consolidate(run, CAT)
+    assert out["consolidated"] == 1 and out["blocked"] == 0
+
+    fresh = run.open()
+    rows = fresh.rows("Evidence_Detail")
+    assert len(rows) == 1, "one find is one registration, not one per cell"
+    eid = str(rows[0]["E_ID"])
+    named = {s.strip() for s in str(rows[0]["SubCap_IDs"]).split(",") if s.strip()}
+    assert named == set(sibs)
+    for cell in sibs:
+        assert eid in str(fresh.scoring_row(cell)["Evidence_IDs"]), (
+            f"{cell} must cite {eid} back")
+
+
+def test_provenance_is_written_for_every_cell_the_note_names(tmp_path):
+    """The scalar sites in `_consolidate_one` recorded provenance for the
+    first cell only. A group registration that leaves four cells with no
+    provenance row is a trail that stops naming who did the work."""
+    run, wb, cells = _noted_run(tmp_path)
+    sibs = _cap_siblings(cells)
+    M.note(run, category=CAT, subcap=sibs, facet="works", kind="evidence",
+           claim="Alkami live", excerpt=EXCERPT,
+           url="https://acme.example/ar25", source_name="AR", tier="T2",
+           published="2025-03-01")
+    M.consolidate(run, CAT)
+    fresh = run.open()
+    marked = [str(r["SubCap_ID"]) for r in fresh.rows("Provenance")
+              if "memory consolidation" in str(r.get("Detail") or "")]
+    assert set(marked) == set(sibs)
+
+
+def test_a_contradiction_opens_its_disposition_on_every_cell(tmp_path):
+    run, wb, cells = _noted_run(tmp_path)
+    sibs = _cap_siblings(cells)
+    M.note(run, category=CAT, subcap=sibs, facet="contradicts",
+           kind="contradiction", claim="the press release and the filing disagree",
+           excerpt=EXCERPT, url="https://acme.example/pr",
+           source_name="Press release", tier="T3", published="2025-04-01")
+    out = M.consolidate(run, CAT)
+    assert out["consolidated"] == 1
+    fresh = run.open()
+    for cell in sibs:
+        assert str(fresh.scoring_row(cell)["Contradiction_Disposition"]
+                   ).startswith("OPEN:"), f"{cell} kept no disposition"
+
+
+def test_a_refused_group_note_is_blocked_whole(tmp_path):
+    """The gates do not soften for a group: a note the ledger refuses stays
+    BLOCKED in the notebook and registers nothing, for every cell it named."""
+    run, wb, cells = _noted_run(tmp_path)
+    sibs = _cap_siblings(cells)
+    M.note(run, category=CAT, subcap=sibs, facet="works", kind="evidence",
+           claim="thin", excerpt="too short",
+           url="https://acme.example/x", source_name="blog", tier="T5")
+    out = M.consolidate(run, CAT)
+    assert out["blocked"] == 1 and out["consolidated"] == 0
+    assert len(run.open().rows("Evidence_Detail")) == 0
+    fresh = run.open()
+    for cell in sibs:
+        # a seeded row reads NO_EVIDENCE, not blank — the property is that no
+        # id was written to it, which is what E- prefixes would show
+        assert "E-" not in str(fresh.scoring_row(cell)["Evidence_IDs"] or "")
+
+
+def test_the_cli_takes_the_group_as_repeated_subcaps(tmp_path):
+    """`engine.cli evidence` already repeated `--subcap`; the notebook CLI
+    was the asymmetry. Read the parser rather than driving a run."""
+    import inspect
+    text = inspect.getsource(M.main)
+    assert '"--subcap", required=True, action="append"' in text

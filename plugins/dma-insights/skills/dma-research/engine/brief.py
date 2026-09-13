@@ -337,7 +337,8 @@ def notebook_digest(run: runstate.Run, category: str, *,
 
 def dispatch(wb: RunWorkbook, category: str, *,
              run: runstate.Run | None = None,
-             with_handback: bool = False) -> dict:
+             with_handback: bool = False,
+             shared_block: dict | None = None) -> dict:
     """The bounded packet one category producer starts from.
 
     `with_handback` is the RE-DISPATCH shape (owner issue 8, 2026-09-03: the
@@ -385,12 +386,46 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 for i in got["capability_siblings"]],
         })
 
+    # E2: the same open cells, grouped by the capability they answer under.
+    #
+    # `work_next` stays exactly as it was — a flat list of per-cell dicts,
+    # which several tests pin and the markdown renders. This is an ADDITIONAL
+    # view, because the flat list hides the one fact that decides how much a
+    # lane spends: measured on a fresh 47-cell category, all eight cells in
+    # the window belong to ONE capability and each is owed the full five
+    # volleys — forty searches for a group a single discovery pass can seed.
+    # The lane could not see that grouping, so it could not exploit it.
+    #
+    # `volleys_owed_across_group` is the union: fire each of those once for
+    # the capability, then differentiate per cell. Sharing is capped at 50%
+    # of any cell's citations by `evidence_smear`, which stays blocking —
+    # that is the containment, and it is what keeps this from becoming the
+    # category-level searching `deep_search_protocol.md` names as the #1
+    # failure mode.
+    by_cap: dict[str, list] = {}
+    for d in detail:
+        by_cap.setdefault(capability_of(d["subcap"]), []).append(d)
+    capabilities = [{
+        "capability": cap,
+        "cells": [d["subcap"] for d in ds],
+        "volleys_owed_across_group": sorted({f for d in ds for f in d["volleys_owed"]}),
+        "cells_shown": len(ds),
+    } for cap, ds in by_cap.items()]
+
     stats = L.stats(wb)
     packet = {
         "category": category,
+        "capabilities": capabilities,
         "agent": f"research-{category.lower()}-producer",
         "cells_in_scope": len(cells),
-        "shared": shared(wb),
+        # E1: `batch()` computes this ONCE and passes it in. It is identical
+        # for every category in a round — it describes the RUN — and
+        # recomputing it per lane walked every category's worklist again:
+        # measured at 16 categories, 16 shared() calls and 272 worklist()
+        # calls where 1 and ~17 would do. Kept IN the packet so
+        # `as_markdown`, the packet_chars ceiling and every test that reads
+        # `packet["shared"]` are untouched.
+        "shared": shared_block if shared_block is not None else shared(wb),
         "worklist": {k: (len(v) if isinstance(v, (list, tuple, set)) else v)
                      for k, v in wl.items() if k != "category"},
         "open_cells": len(open_cells),
@@ -537,6 +572,21 @@ def as_markdown(packet: dict) -> str:
             lines.append(f"- [{e['status']}] {e['subcap']} · {e['facet']}: "
                          f"{e['gist']}")
         lines.append("")
+    caps = packet.get("capabilities") or []
+    if caps:
+        lines += ["### Work next — grouped by capability", "",
+                  "One discovery pass can serve a whole group: fire the volleys "
+                  "owed across it ONCE, then differentiate per cell. Shared "
+                  "evidence may supply at most half of any cell's citations "
+                  "(`evidence_smear` blocks above that), so each cell still "
+                  "needs its own bearing source.", ""]
+        for c in caps:
+            lines.append(f"**{c['capability']}** — {c['cells_shown']} open cell(s): "
+                         f"{', '.join(c['cells'])}")
+            if c["volleys_owed_across_group"]:
+                lines.append(f"  - volleys owed across the group: "
+                             f"{', '.join(c['volleys_owed_across_group'])}")
+        lines.append("")
     lines += ["### Work next", ""]
     for d in packet["work_next"]:
         lines.append(f"**{d['subcap']} — {d['name'] or 'unnamed'}**")
@@ -676,8 +726,13 @@ def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
         skipped = [c for c in cats if c in need["passed"]]
         cats = [c for c in cats if c not in need["passed"]]
     rows, wrote = [], []
+    # One shared block for the whole batch — it describes the run, not the
+    # category. Every other batch builder already does this; `batch` was the
+    # one that did not.
+    sh = shared(wb) if cats else None
     for cat in cats:
-        packet = dispatch(wb, cat, run=run, with_handback=with_handback)
+        packet = dispatch(wb, cat, run=run, with_handback=with_handback,
+                          shared_block=sh)
         path = out_dir / f"{cat}.md"
         path.write_text(as_markdown(packet), encoding="utf-8")
         (out_dir / f"{cat}.json").write_text(
