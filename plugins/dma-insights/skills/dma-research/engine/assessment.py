@@ -159,13 +159,24 @@ def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
     depth = profile.financial_depth(wb)
     if not depth["met"]:
         out.append(depth["fix"])
-    # Evidence density against the Golden 1 reference — the run-level floor
-    # the owner asked for (2026-09-03, issue 1: "limited evidence …
-    # evidence deficient"). Per-category floors cannot see a run that is
-    # thin everywhere.
-    density = floors_gate.run_density(wb)
-    if not density["met"]:
-        out.extend(density["shortfall"])
+    # Evidence density against the Golden 1 reference is COMPUTED AND
+    # REPORTED, and since 2026-09-13 it no longer blocks (owner: "remove the
+    # coverage rule … what matters is that all categories are scored").
+    #
+    # It was refusing to open scoring on a quantity the run does not control:
+    # how much the world happened to publish about the client. Measured on the
+    # reference the floor is derived from — Golden 1 Credit Union, in HYBRID
+    # mode — 9 of its 16 categories fall below the per-category coverage floor
+    # and its public-evidence-only share is 0.35 against a 0.64 floor. The
+    # reference cannot pass its own gate, so the gate was never a calibration.
+    #
+    # The real containment is downstream and already exists: `ceiling_for`
+    # caps a no-evidence cell at M2 (CAP-T5). Verified end to end — a
+    # declared-absent cell scores 1.0 against a ceiling of 2.0. A thin run now
+    # scores thin instead of not scoring at all, which is the honest outcome.
+    # `research_ready` is a pure check — it reports blockers and writes
+    # nothing. The density figure is disclosed once, by `open_stage`, on the
+    # SCORING_OPENED row it already writes.
     return out
 
 
@@ -243,10 +254,24 @@ def open_stage(wb: RunWorkbook, qa_dir: Path | None) -> dict:
             wb._wb.move_sheet("Executive_Summary",
                               offset=-names.index("Executive_Summary"))
         wb.save()
+    # The run-level density, DISCLOSED here rather than enforced in
+    # `research_ready`. A run that opens scoring thin says so on the row that
+    # records the opening, so a reader of the Gate_Log can see what the
+    # assessment was built on without having to recompute it.
+    from . import floors_gate
+    density = floors_gate.run_density(wb)
+    detail = f"weight set {set_id}; research gates held"
+    if not density["met"]:
+        detail += (f"; THIN: {density['evidenced']}/{density['subcaps']} subcaps "
+                   f"carry bidirectional evidence and {density['evidence_rows']} "
+                   f"rows over {density['subcaps']} subcaps — below the Golden 1 "
+                   f"reference. Disclosed, not blocking: scores are capped by the "
+                   f"evidence ceiling, which is where thinness belongs")
     L.append_gate(wb, gate="SCORING_OPENED", scope="run", verdict="PASS",
-                  detail=f"weight set {set_id}; research gates held",
-                  blocking=False)
-    return {"stage": "assessment", "weight_set": set_id, "weights": weights}
+                  detail=detail, blocking=False)
+    return {"stage": "assessment", "weight_set": set_id, "weights": weights,
+            "density": {k: density.get(k) for k in
+                        ("met", "evidenced", "subcaps", "evidence_rows")}}
 
 
 def _category_names() -> dict[str, str]:

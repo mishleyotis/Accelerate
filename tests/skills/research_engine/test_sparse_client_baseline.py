@@ -54,14 +54,17 @@ def test_declare_absence_needs_a_connector_and_web_search_is_not_one(tmp_path):
         assert all(t in str(e) for t in ("exa", "tavily"))
 
 
-def test_a_fully_absent_category_still_fails_every_floor(tmp_path):
-    """THE FINDING THAT REFRAMED THE FIX. Six cells, every one declared
-    absent through the fully legitimate path — real connector rung, full
-    ladder, proxy log. The absence terms clear. The gate still FAILS.
+def test_a_fully_absent_category_passes_and_says_it_is_empty(tmp_path):
+    """THE HEADLINE. Six cells, every one declared absent through the fully
+    legitimate path — real connector rung, full ladder, proxy log.
 
-    EXPECTED TO CHANGE (plan D): this category should reach a disclosed
-    DEGRADED disposition instead, with its evidenced fraction stamped. Until
-    it does, a client with no public footprint cannot be assessed at all.
+    Until 2026-09-13 this FAILED, on `coverage_below_floor` and
+    `category_items_below_floor`, and that was the second blocker behind the
+    stalled run: a client with no public footprint could not be assessed at
+    all, however honestly the work was done. Both terms are now advisory.
+
+    A category of honest absences PASSES, and its emptiness is disclosed
+    rather than hidden — which is the whole contract of the change.
     """
     run = F.new_run(tmp_path, n=6)
     wb = run.open()
@@ -69,10 +72,51 @@ def test_a_fully_absent_category_still_fails_every_floor(tmp_path):
         F.declare_absent(wb, c)
     g = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=None)
 
-    assert "absence_undeclared_empty" not in g["blocking"]
-    assert "absence_single_tool" not in g["blocking"], "the absences are honest"
-    assert g["gate"] == "FAIL", "and it fails anyway"
-    assert set(g["blocking"]) == {"coverage_below_floor", "category_items_below_floor"}
+    assert g["gate"] == "PASS", g["blocking"]
+    assert g["blocking"] == []
+    # the emptiness is stated, not buried
+    assert {"coverage_below_floor", "category_items_below_floor"} <= set(g["advisory"])
+    assert g["evidence_coverage"].startswith("0/6")
+    assert g["category_evidence"].startswith("0/")
+
+
+def test_that_category_reaches_scoring_and_scores_at_the_M2_ceiling(tmp_path):
+    """Passing the gate is not the point — being SCORED is (owner: "what
+    matters is that all categories are scored").
+
+    And the containment that replaced the coverage floor is visible here: a
+    cell with no evidence is capped at M2 by `ceiling_for`, so removing the
+    floor cannot let a thin run claim maturity it has not earned.
+    """
+    from engine import assessment as A, preflight
+
+    run = F.new_run(tmp_path, n=6)
+    wb = run.open()
+    preflight.record(run, F.preflight_doc())
+    cells = _cells(wb, 6)
+    for c in cells:
+        F.declare_absent(wb, c)
+    floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+
+    assert A.research_ready(wb, run.qa_dir) == [], "scoring must be reachable"
+    opened = A.open_stage(wb, run.qa_dir)
+    assert opened["stage"] == "assessment"
+    # the run-level thinness is disclosed on the row that records the opening
+    assert opened["density"]["met"] is False
+    row = [r for r in wb.rows("Gate_Log") if r.get("Gate") == "SCORING_OPENED"][-1]
+    assert "THIN" in str(row["Detail"])
+
+    ceiling, why = A.ceiling_for(wb, wb.scoring_row(cells[0]))
+    assert ceiling == 2.0 and "no evidence" in why
+    out = A.score(wb, cells[0], score=1.0, confidence="LOW",
+                  rationale=("No public artefact names this capability at the entity "
+                             "after five volleys and both ladder rungs; the absence is "
+                             "declared with its proxy log, so the score sits at the "
+                             "floor the evidence ceiling allows."),
+                  actor="scoring-p1-producer", evidence_ceiling=ceiling,
+                  caps="none applied", ai_applicability="NONE",
+                  data_dependency="LOW", data_readiness="UNKNOWN")
+    assert out["score"] == 1.0 and out["evidence_ceiling"] == 2.0
 
 
 def test_an_absence_counts_toward_no_floor_at_all(tmp_path):
@@ -95,8 +139,12 @@ def test_the_floors_come_from_a_hybrid_credit_union(tmp_path):
     private entity with no filing obligations, and `density_floors()` has no
     mode dimension at all.
 
-    EXPECTED TO CHANGE (plan D0/D2): a PUBLIC run should read PUBLIC floors,
-    derived from Golden 1's `Origin == "public"` subset.
+    RESOLVED DIFFERENTLY (2026-09-13). Rather than deriving PUBLIC floors, the
+    two volume terms became advisory — a floor that the reference itself fails
+    in 9 of 16 categories is not a calibration to port to another mode, it is
+    an instrument to retire. `density_floors()` therefore keeps its single
+    HYBRID-derived shape, and this test keeps pinning that it has no mode
+    dimension, because nothing now depends on one.
     """
     ref = json.loads(
         (Path(__file__).resolve().parents[3] / "plugins" / "dma-insights" /
@@ -119,8 +167,13 @@ def test_the_coverage_denominator_ignores_the_runs_own_evidence_mode():
     density denominators never narrow by mode, so a PUBLIC run is scored
     against cells its own mode declares unanswerable.
 
-    EXPECTED TO CHANGE (plan D1): this is a correctness fix, not a
-    relaxation.
+    DEFERRED (2026-09-13), with the reason recorded. Narrowing the denominator
+    mattered while coverage gated; it no longer does, so it now buys only a
+    slightly more honest disclosed percentage — against a real cost:
+    `Mode_Fit` is written by `kg.build` AFTER the cells are seeded by
+    `RunWorkbook.create`, and its default "BOTH" is answerable in every mode,
+    so no cell is ever zero-answerable today. Not worth that surgery for a
+    cosmetic gain. This test stays as the record that the two still disagree.
     """
     import inspect
     assert set(C.MODE_ANSWERABLE["PUBLIC"]) == {"PUBLIC", "BOTH"}

@@ -18,6 +18,35 @@ with the diagnostic-question-driven deep search the failure was skipping.
 The floor is a fraction of SUBCAPS; FLOOR_CATEGORY_ITEMS is a count of ITEMS.
 The two together refuse both "few subcaps, many citations" and "many subcaps,
 one citation each". This term proves the breadth half.
+
+---
+
+UPDATE 2026-09-13 — BOTH TERMS ARE NOW ADVISORY (owner: "remove the coverage
+rule … what matters is that all categories are scored").
+
+The reporter's concern above was real and stands. The instrument was wrong.
+Coverage measures how much the world happened to publish about the client,
+which the run does not control — and the floor was never calibrated: measured
+on the reference it was supposedly set from, Golden 1 Credit Union fails
+`coverage_below_floor` in 9 of its 16 categories in HYBRID, the mode it was
+actually run in. On public evidence alone, 13 of 16 fail. No PUBLIC-mode
+assessment of a private entity could ever have passed it.
+
+What the reporter asked for — deep searches, the DQs, proxy searches before
+an absence — is enforced by the EFFORT terms, which still block:
+`volleys_incomplete`, `primary_unfired`, `absence_unsearched`,
+`absence_undeclared_empty`, `absence_single_tool`. Those measure the work,
+which the run does control.
+
+And the containment against a thin run scoring high already existed
+downstream: `assessment.ceiling_for` caps a no-evidence cell at M2 (CAP-T5).
+Verified end to end — a declared-absent cell scores 1.0 against a ceiling of
+2.0. The floor was redundant protection that blocked honest runs while the
+ceiling did the real work.
+
+Both figures are still computed and still reported. These tests now pin that:
+the measurement must stay exact, because it is disclosed on every verdict and
+anyone re-calibrating reads it.
 """
 from engine import floors_gate
 from engine import ledger as L
@@ -54,13 +83,20 @@ def test_a_fully_covered_category_passes(tmp_path):
     assert v["evidence_coverage"].startswith("8/8")
 
 
-def test_coverage_below_seventy_percent_fails(tmp_path):
-    """The reported condition, reproduced: most subcaps empty but SEARCHED.
+def test_coverage_below_the_floor_is_measured_and_advisory(tmp_path):
+    """The reported condition, reproduced — and no longer blocking.
 
-    The worked cells clear the per-subcap and per-category item floors, and
-    every empty cell was searched — so the ONLY thing that can fail the gate
-    is the coverage term this test exists to prove. Four of eight evidenced is
-    50%, below the 70% floor.
+    Four of eight evidenced is 50%, below the 70% floor. Until 2026-09-13 that
+    FAILED the gate. It is now computed, reported, and advisory: coverage
+    measures how much the world published about the client, which is not a
+    judgement about the run.
+
+    What the reporter actually asked for — "no proxy searches were done …
+    deep searches and use of the DQs" — is enforced by the EFFORT terms, and
+    this fixture shows them doing it: the empty cells here were touched by one
+    shallow query, so `volleys_incomplete`, `primary_unfired` and
+    `absence_undeclared_empty` all fire. The concern was real; the coverage
+    floor was the wrong instrument for it.
     """
     run = new_run(tmp_path, n=8)
     wb = run.open()
@@ -72,14 +108,18 @@ def test_coverage_below_seventy_percent_fails(tmp_path):
 
     v = floors_gate.run(wb, "P1C1", qa_dir=run.qa_dir)
     assert v["category_floor_met"], (
-        "this test needs the ITEM floor met so coverage is the only failure")
-    assert not v["absence_unsearched"], (
-        "every empty cell was searched — absence_unsearched must not fire, or "
-        "it is masking the coverage term")
-    assert "coverage_below_floor" in v["blocking"], (
-        f"50% coverage passed the gate: {v['blocking']}")
-    assert v["gate"] == "FAIL"
+        "this test needs the ITEM floor met so coverage is isolated")
+    assert not v["absence_unsearched"], "every empty cell was searched"
+
+    # measured and disclosed
+    assert v["coverage_floor_met"] is False
     assert v["evidence_coverage"].startswith("4/8")
+    assert "coverage_below_floor" in v["advisory"]
+    # but not blocking
+    assert "coverage_below_floor" not in v["blocking"]
+    # and the shallow work that DID happen is still caught, by the right terms
+    assert {"volleys_incomplete", "primary_unfired",
+            "absence_undeclared_empty"} <= set(v["blocking"]), v["blocking"]
 
 
 def test_coverage_at_or_above_the_floor_passes(tmp_path):

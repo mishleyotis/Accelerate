@@ -69,6 +69,39 @@ ADVISORY_TERMS = (
     # gate's overlay columns are the blocking half.
     "ai_overlay_unsearched",
     "evidence_unattached",
+    # THE TWO VOLUME TERMS, advisory since 2026-09-13 (owner: "remove the
+    # coverage rule; what matters is that all categories are scored").
+    #
+    # This gate answers two different questions and only one of them is its
+    # business. WAS THE WORK DONE HONESTLY — every askable volley fired, the
+    # proxy ladder run, every empty cell evidenced or declared absent with its
+    # ladder — is a check on effort, and the run controls it. HOW MUCH
+    # EVIDENCE CAME BACK is a property of what the world happened to publish
+    # about the client, and the run does not control it at all.
+    #
+    # Grading a run on the second one made a thin public footprint
+    # indistinguishable from bad work. Measured on the reference itself:
+    # Golden 1 Credit Union fails `coverage_below_floor` in 9 of its 16
+    # categories in HYBRID — the mode it was actually run in — so 0.70 was
+    # never a calibration, and on public evidence alone 13 of 16 fail. No
+    # PUBLIC-mode run of a private entity could ever pass.
+    #
+    # Both terms move together because they are the same rule counted twice:
+    # coverage is breadth, category items is depth. Measured 2026-09-13 —
+    # relaxing only coverage leaves a fully-absent category blocked on
+    # `category_items_below_floor` at 0 items, so the goal stays unreachable.
+    #
+    # What replaces them is not weaker, it is just aimed correctly: the
+    # EVIDENCE CEILING. `assessment.ceiling_for` caps a no-evidence cell at
+    # M2 (CAP-T5), verified end to end — a declared-absent cell scores 1.0
+    # against a ceiling of 2.0. The floor was redundant protection that
+    # blocked honest runs while the ceiling did the real work.
+    #
+    # Both figures are still COMPUTED and still REPORTED (`evidence_coverage`,
+    # `coverage_floor`, `coverage_floor_met`, `category_evidence` below) and
+    # still reach the payload. Disclosed, not enforced.
+    "coverage_below_floor",
+    "category_items_below_floor",
 )
 # `absence_single_tool` left this set 2026-09-03: an empty cell whose only
 # searches ran through the built-in web tools shows no enrichment effort,
@@ -82,6 +115,19 @@ ADVISORY_TERMS = (
 #: rows over 690 subcaps; 442 of 690 subcaps evidenced).
 _DENSITY_ROWS_PER_SUBCAP_FALLBACK = 727 / 690
 _DENSITY_EVIDENCED_SHARE_FALLBACK = 442 / 690
+
+
+def _named_by(evidence_row: dict) -> set:
+    """The cells an evidence row names in its own `SubCap_IDs`.
+
+    The other half of the citation link. A cell citing an id proves the cell's
+    author believed the row bore on it; the row naming the cell back proves
+    the register agrees. Golden 1 has 248 cells where only the first is true,
+    which is why its own `subcaps_with_evidence` (442) and a one-way count
+    (690) disagree by exactly that many.
+    """
+    return {s.split(":")[0].strip()
+            for s in _split_ids(evidence_row.get("SubCap_IDs")) if str(s).strip()}
 
 
 def density_floors() -> dict:
@@ -108,9 +154,16 @@ def run_density(wb: RunWorkbook) -> dict:
     category can clear its own 20-item floor while the run as a whole
     carries a third of the reference's evidence. Two ratios, both from the
     gold reference: registered evidence rows per selected subcap, and the
-    share of selected subcaps that cite at least one resolving row. A
-    declared absence is neither (it is the honest empty cell); the floors
-    are set where Golden 1 sits, and Golden 1 has 36% declared/empty cells.
+    share of selected subcaps whose citation link to a register row runs both
+    ways. A declared absence is neither (it is the honest empty cell); the
+    floors are set where Golden 1 sits, and Golden 1 has 36% declared/empty
+    cells.
+
+    REPORTED, NOT ENFORCED, since 2026-09-13. `research_ready` no longer adds
+    this to its blocker list — see the note in ADVISORY_TERMS. Measuring how
+    much the world published about a client and refusing to score them on the
+    answer was never a judgement about the run. The figures stay because they
+    describe a run honestly and someone re-calibrating needs them.
     """
     floors = density_floors()
     rows = wb.scoring_rows()
@@ -118,9 +171,11 @@ def run_density(wb: RunWorkbook) -> dict:
     n = len(rows) or 1
     evidenced = 0
     for r in rows:
+        cell = str(r.get("SubCap_ID") or "").strip()
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
-        if any(e in register for e in eids):
+        # Bidirectional, matching how the reference's own figure was derived.
+        if any(e in register and cell in _named_by(register[e]) for e in eids):
             evidenced += 1
     ev_rows = len(register)
     rps, share = ev_rows / n, evidenced / n
@@ -182,6 +237,12 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # otherwise, because a cell mid-synthesis legitimately has rows it
         # has not yet decided about.
         "absence_over_evidence": [], "evidence_unattached": [],
+        # The two volume terms. Populated near the end of `run` from the
+        # computed coverage, and ADVISORY since 2026-09-13 — declared here so
+        # they appear in `finding_keys` and in `advisory` like every other
+        # computed term, rather than being a pair of bare booleans nobody can
+        # enumerate.
+        "coverage_below_floor": [], "category_items_below_floor": [],
     }
     items = 0
     searched_cells = 0
@@ -195,7 +256,17 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # AUD-0115: a subcap COUNTS toward coverage only if at least one of
         # its cited ids actually resolves in the register — a dead citation is
         # not evidence, and neither is an empty cell.
-        if any(e in register for e in eids):
+        #
+        # 2026-09-13: and the link must run BOTH WAYS. The cell cites the id
+        # AND the register row names the cell back. Measured on Golden 1: 248
+        # of its 690 cells cite an id whose evidence row does not name them,
+        # so a one-way count reported 690 evidenced where the reference's own
+        # figure (`gold_reference.json`, subcaps_with_evidence) is 442 — the
+        # bidirectional count. The floor was derived one way and enforced the
+        # other. These terms no longer block, but the figure they publish is
+        # read by the payload and by anyone calibrating, so it has to be the
+        # honest one.
+        if any(e in register and cell in _named_by(register[e]) for e in eids):
             evidenced_cells += 1
 
         # AUD-0083: the archive's own golden fixture cited an item that did
@@ -434,10 +505,18 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
     ) if findings[k]]
-    if not category_floor_met:
-        blocking.append("category_items_below_floor")
-    if not coverage_floor_met:
-        blocking.append("coverage_below_floor")
+    # `category_items_below_floor` and `coverage_below_floor` are computed
+    # above, reported below, and no longer appended here — they are in
+    # ADVISORY_TERMS. See the note there for why, and for what replaced them.
+    findings["category_items_below_floor"] = (
+        [] if category_floor_met
+        else [{"category": category, "items": items,
+               "floor": FLOOR_CATEGORY_ITEMS}])
+    findings["coverage_below_floor"] = (
+        [] if coverage_floor_met
+        else [{"category": category, "evidenced": evidenced_cells,
+               "subcaps": len(rows), "coverage": coverage,
+               "floor": COVERAGE_FLOOR}])
     # REPORTED 2026-08-30, from a live run in another account: "enrichment
     # connectors not being called by the agents for enrichment purposes
     # before close of a category". They were right, and no gate term could
