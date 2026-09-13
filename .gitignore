@@ -61,3 +61,11 @@ dma-insights-*.zip
 # person it lands on. The routine's headless approvals do not come from here
 # either — they come from the plugin's own PreToolUse hook.
 .claude/settings.local.json
+
+# Per-run DMA output trees written by engine.pipeline / engine.cli at
+# `.runs/<RUN_ID>/`: scoring workbooks, per-category research notebooks,
+# agent-log transcripts, registered client evidence and the rendered
+# deliverables. This is transient, per-run CLIENT data (40MB+ per run), not
+# source — the same reason the workbook and staged-run patterns above are
+# ignored. Client deliverables are preserved in the run's Drive folder, not here.
+.runs/
