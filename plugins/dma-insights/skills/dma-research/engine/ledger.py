@@ -823,9 +823,63 @@ def enrichment_status(wb: RunWorkbook, category: str,
 ABSENCE_RUNGS_REQUIRED = ("direct", "proxy")
 
 
+def enrichment_binding(wb: RunWorkbook) -> dict:
+    """What this run's OWN RECORDED BASELINE says about enrichment connectors.
+
+    Measured, never claimed. `connector_contract.write_baseline` records the
+    tool list the session actually held when its preflight passed; this reads
+    that file and asks the contract whether the enrichment families are among
+    them. An agent cannot assert its way past a refusal through this — the
+    answer comes from what the preflight WROTE, before any cell was worked.
+
+    Three states, and the difference between them is the whole point (owner,
+    2026-08-31: "the connectors may be lost mid session even after being
+    attached"):
+
+      known=False  no baseline on disk. UNVERIFIED IS NOT A DIAGNOSIS: every
+                   caller must treat this as "a connector may well be bound",
+                   never as proof one is not. `watchdog._no_enrichment_connector`
+                   takes the same posture.
+      bound=True   the baseline holds the required families. A cell with no
+                   enrichment search is a cell the lane did not enrich, and
+                   the refusals stand.
+      bound=False  the baseline is short. No search through a connector was
+                   POSSIBLE in this container, and no agent inside it can
+                   attach one — they bind once, at session start. Refusing
+                   here does not produce the enrichment; it produces a run
+                   that can close no cell, pass no gate, and be re-dispatched
+                   until something stops it. That is the $96.65 shape.
+    """
+    out = {"known": False, "bound": False, "missing": [], "reason": ""}
+    try:
+        import sys as _sys
+        from pathlib import Path as _Path
+        plugin = _Path(__file__).resolve().parents[3]
+        _sys.path.insert(0, str(plugin / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        path = _Path(cc.baseline_path(str(wb.path.parent)))
+        if not path.is_file():
+            return out
+        held = json.loads(path.read_text()).get("mcp_tools") or []
+        chk = cc.check(held)
+    except Exception as e:                                    # noqa: BLE001
+        out["reason"] = f"the connector baseline could not be read: {str(e)[:120]}"
+        return out
+    out["known"] = True
+    out["bound"] = bool(chk["ok"])
+    out["missing"] = list(chk["missing"])
+    out["reason"] = (
+        "" if chk["ok"] else
+        f"this run's connector baseline is short of {', '.join(chk['missing'])}; "
+        f"no enrichment connector answered in the container this run was "
+        f"worked in, and a session cannot attach one — they bind at start")
+    return out
+
+
 def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
                     ladder: list[dict], proxy_log: str,
-                    what_was_hunted: str, session: str = "") -> dict:
+                    what_was_hunted: str, session: str = "",
+                    enrichment_unavailable: bool = False) -> dict:
     """Close a subcap as a SEARCHED, DECLARED absence — or refuse.
 
     The only sanctioned way a cell ends a run with NO_EVIDENCE. Before this
@@ -899,15 +953,44 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
             f"--query '<the toolkit's DQ, bound to the entity>'` — the five "
             f"volleys answer the primary question, and without it they answer "
             f"nothing in particular")
+    degraded = ""
     if not vs["enrichment_tools"]:
-        problems.append(
-            f"every search for {subcap} ran through {vs['tools'] or ['nothing']}; "
-            f"an absence is declared only after an enrichment connector has "
-            f"also been asked (one of {list(C.ENRICHMENT_TOOLS)}). Fire "
-            f"`engine.cli search --run <R> --subcap {subcap} --facet <f> --tool "
-            f"exa --query …` (or tavily / clay / drive) and retry — 'no "
-            f"enrichment effort' is the owner's 2026-09-03 finding, and this "
-            f"is the check that stops it")
+        # THE ONE REFUSAL A CONTAINER CAN BE UNABLE TO SATISFY. Every other
+        # check here — the volleys, the primary, both ladder rungs, the proxy
+        # log — a lane can satisfy with the built-in web tools. This one
+        # cannot be satisfied when no enrichment connector is bound, and no
+        # agent can bind one from inside a run. Refusing anyway does not buy
+        # the enrichment; it produces a run that closes no cell, passes no
+        # gate, and is re-dispatched until something stops it.
+        #
+        # So it is skippable, and ONLY on a measurement: the caller must ask
+        # for the degraded path AND the run's own recorded baseline must
+        # prove the connector was never there. A claim is not enough, an
+        # absent baseline is not enough, and a bound connector the lane
+        # simply did not use is not enough.
+        binding = enrichment_binding(wb) if enrichment_unavailable else None
+        if binding and binding["known"] and not binding["bound"]:
+            degraded = binding["reason"]
+        else:
+            why = ""
+            if enrichment_unavailable:
+                why = (
+                    " — and --enrichment-unavailable does not apply: "
+                    + (binding["reason"] or
+                       ("this run's connector baseline holds every required "
+                        "family, so a connector WAS available and was not asked"
+                        if binding and binding["known"] else
+                        "this run has no recorded connector baseline, so "
+                        "nothing here can prove one was unavailable. An "
+                        "unverified claim is not a degradation")))
+            problems.append(
+                f"every search for {subcap} ran through {vs['tools'] or ['nothing']}; "
+                f"an absence is declared only after an enrichment connector has "
+                f"also been asked (one of {list(C.ENRICHMENT_TOOLS)}). Fire "
+                f"`engine.cli search --run <R> --subcap {subcap} --facet <f> --tool "
+                f"exa --query …` (or tavily / clay / drive) and retry — 'no "
+                f"enrichment effort' is the owner's 2026-09-03 finding, and this "
+                f"is the check that stops it" + why)
     rep = Q.ladder_report(ladder or [], searches)
     rungs = set(rep["rungs"])
     owed = [r for r in ABSENCE_RUNGS_REQUIRED if r not in rungs]
@@ -951,7 +1034,11 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
                           + f". Ladder rungs established: {', '.join(sorted(rungs))}."),
         "Triangulation": (f"{n} searches over {len(vs['tools']) or 1} tool(s) "
                           f"({', '.join(vs['tools']) or 'web_search'}) agree that no "
-                          f"public artefact names this capability at the entity."),
+                          f"public artefact names this capability at the entity."
+                          + (f" REDUCED RIGOUR: {degraded}. This absence rests "
+                             f"on the built-in web tools alone; a firing with "
+                             f"the connector attached may still find what this "
+                             f"one could not ask for." if degraded else "")),
         "Ceiling_Reasoning": ("A documented absence supports no maturity ceiling; "
                               "the assessment scores the cell at the no-evidence "
                               "cap and discloses it as an Unknown."),
@@ -964,10 +1051,14 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
     }
     wb.set_scoring(subcap, payload)
     record_provenance(wb, subcap, "absence", actor,
-                      f"{n} searches, rungs {sorted(rungs)}", session=session)
+                      f"{n} searches, rungs {sorted(rungs)}"
+                      + (f"; REDUCED RIGOUR — {degraded}" if degraded else ""),
+                      session=session)
     wb.recompute_coverage()
     return {"subcap": subcap, "searches": n, "volleys": vs["fired"],
-            "rungs": sorted(rungs), "tools": vs["tools"]}
+            "rungs": sorted(rungs), "tools": vs["tools"],
+            "rigour": "REDUCED" if degraded else "FULL",
+            "degraded_reason": degraded}
 
 
 def declared_absences(wb: RunWorkbook) -> set[str]:

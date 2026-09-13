@@ -791,15 +791,43 @@ def categories_needing_dispatch(wb: RunWorkbook) -> dict:
     return out
 
 
+#: Floors-gate terms a bound enrichment connector would have cleared, and
+#: nothing else would. Deliberately ONE term: `absence_single_tool` is the
+#: only blocker no agent can clear from inside a container with no connector
+#: bound. `absence_undeclared_empty` is NOT here — with the degraded path a
+#: lane can declare those cells, so leaving them open is a lane that did not
+#: finish, which is a different problem with a different answer.
+CONNECTOR_DERIVED_TERMS = frozenset({"absence_single_tool"})
+
+
 def enrichment_failing_only(wb: RunWorkbook, categories: list[str]) -> list[str]:
-    """Of `categories`, those the floors gate PASSED and the verifier did not
-    refuse — i.e. held back by the ENRICHMENT gate alone. The driver discloses
-    these at the end of its budget instead of refusing the stage over them."""
+    """Of `categories`, those held back by CONNECTOR-DERIVED reasons alone —
+    the ENRICHMENT gate, or a floors gate whose only blockers are the terms a
+    connector would have cleared. The driver discloses these at the end of its
+    budget instead of refusing the stage over them.
+
+    The `verdict == "PASS"` precondition came off 2026-09-13. It made this
+    unreachable in the case it exists for: with no connector bound, a category
+    cannot enrich, so its floors gate FAILS on the connector-derived terms, so
+    it never qualified as "enrichment-failing only" and was refused as an
+    ordinary failure instead. A category whose ONLY blockers are terms a
+    connector would have cleared is exactly this case, whatever the verdict
+    word says.
+
+    Terms with any other cause still disqualify a category, and the verifier's
+    FAIL still does — a lane that fabricated its work is not an enrichment
+    problem."""
     out = []
     for cat in categories:
         g = last_gate(wb, "FLOORS", cat)
         v = last_gate(wb, "DISPATCH_VERIFY", cat)
-        if g["verdict"] == "PASS" and v["verdict"] != "FAIL":
+        if v["verdict"] == "FAIL":
+            continue
+        if g["verdict"] == "PASS":
+            out.append(cat)
+            continue
+        blockers = set(g.get("blocking") or [])
+        if blockers and blockers <= CONNECTOR_DERIVED_TERMS:
             out.append(cat)
     return out
 

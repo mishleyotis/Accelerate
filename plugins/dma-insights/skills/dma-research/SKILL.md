@@ -443,7 +443,17 @@ measured by `engine.floors_gate` and refused by `engine.cli absence`:
 - at least one search for the cell ran through an ENRICHMENT connector
   (`--tool exa|tavily|clay|explorium|vibe|indeed|quartr|drive`), not only the
   built-in web tools — `absence_single_tool` blocks, and the declaration
-  refuses without it;
+  refuses without it.
+
+  **If no connector is bound at all**, this is the one check you cannot
+  satisfy, and no agent can attach one from inside a run. Pass
+  `--enrichment-unavailable` and the absence is written with REDUCED rigour
+  and the reason on the row. It is VERIFIED, not taken on trust: the run's
+  own `connectors_baseline.json` — written by the preflight before any cell
+  was worked — must show the families missing. A bound connector you simply
+  did not ask, or a run with no baseline at all, is still refused, and says
+  which. Everything else on this list still applies: the degraded path lifts
+  the connector rung and nothing else;
 - the run's own register does not already NAME the cell (`engine.brief
   reuse --subcap <cell>` shows what a sibling lane bought);
 - the ladder names its `direct` and `proxy` rungs with queries the

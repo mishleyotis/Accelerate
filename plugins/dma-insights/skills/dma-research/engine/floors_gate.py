@@ -351,6 +351,15 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             # Enrichment effort, BLOCKING: an empty cell whose searches all
             # ran through the built-in web tools shows no enrichment effort
             # (owner, 2026-09-03). Same predicate `declare_absence` refuses.
+            #
+            # It stops blocking on exactly one measurement, the same one the
+            # writer reads (AUD-0117 — read and write must agree): this run's
+            # OWN RECORDED CONNECTOR BASELINE proves no enrichment connector
+            # was bound in the container it was worked in. Then the finding is
+            # still populated and still disclosed, because "searched with one
+            # hand tied" is a fact about the run a reader must have — it is
+            # only the BLOCK that lifts, because blocking cannot produce the
+            # connector and can only produce re-dispatch.
             if cell_searches and not vs["enrichment_tools"]:
                 findings["absence_single_tool"].append(
                     {"subcap": cell, "tools": vs["tools"]})
@@ -505,6 +514,15 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
     ) if findings[k]]
+    # …unless the run's own recorded baseline proves no enrichment connector
+    # was bound. Then the finding stays populated and reported and leaves the
+    # blocking list: the same measurement `declare_absence` verifies, so the
+    # gate and the writer cannot disagree about the same cell. An absent
+    # baseline does NOT qualify — unverified is not a diagnosis.
+    binding = L.enrichment_binding(wb)
+    degraded_enrichment = bool(binding["known"] and not binding["bound"])
+    if degraded_enrichment and "absence_single_tool" in blocking:
+        blocking.remove("absence_single_tool")
     # `category_items_below_floor` and `coverage_below_floor` are computed
     # above, reported below, and no longer appended here — they are in
     # ADVISORY_TERMS. See the note there for why, and for what replaced them.
@@ -568,7 +586,24 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # looked exactly like an empty one from the verdict's summary. Naming
         # them keeps the choice honest and reviewable: whoever decides one of
         # these should block can see how often it fires first.
-        "advisory": sorted(k for k in ADVISORY_TERMS if findings.get(k)),
+        "advisory": sorted(
+            [k for k in ADVISORY_TERMS if findings.get(k)]
+            # `absence_single_tool` is advisory only in the degraded case, so
+            # it is not in ADVISORY_TERMS (it blocks in every other run). A
+            # finding that stopped blocking and appeared nowhere would be a
+            # relaxation nobody could see, which is the thing this key exists
+            # to prevent.
+            + (["absence_single_tool"]
+               if degraded_enrichment and findings["absence_single_tool"] else [])),
+        # The connector story of the container this category was worked in,
+        # stated whether or not anything turned on it: "no enrichment
+        # connector answered" and "the world holds nothing" are the two
+        # readings of an empty cell, they read identically in a payload, and
+        # they mean opposite things.
+        "enrichment_binding": {
+            "known": binding["known"], "bound": binding["bound"],
+            "missing": binding["missing"], "why": binding["reason"],
+            "absence_rigour": "REDUCED" if degraded_enrichment else "FULL"},
         # The finding lists are spread FLAT, deliberately — `out["dq_gaps"]`,
         # not `out["findings"]["dq_gaps"]`. Callers have guessed the nested
         # shape and hit KeyError (reported 2026-08-30), so the key set is

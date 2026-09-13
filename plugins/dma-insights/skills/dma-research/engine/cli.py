@@ -312,6 +312,14 @@ def main(argv=None) -> int:
                     help="which proxy class was hunted and what came back")
     ab.add_argument("--hunted", required=True,
                     help="what was looked for, where, and what came back instead")
+    ab.add_argument("--enrichment-unavailable", action="store_true",
+                    help="this container had NO enrichment connector bound, so "
+                         "the connector rung could not be climbed. VERIFIED, "
+                         "not taken on trust: the run's own recorded connector "
+                         "baseline must prove it, and the absence is then "
+                         "written with REDUCED rigour and the reason. Without "
+                         "a baseline, or with a connector bound and unused, "
+                         "the refusal stands")
 
     common(sub.add_parser("validate"))
     ch = common(sub.add_parser(
@@ -456,7 +464,8 @@ def main(argv=None) -> int:
             lad = [lad]
         print(json.dumps(ledger.declare_absence(
             wb, a.subcap, actor=a.actor, ladder=lad, proxy_log=a.proxy_log,
-            what_was_hunted=a.hunted), indent=2))
+            what_was_hunted=a.hunted,
+            enrichment_unavailable=a.enrichment_unavailable), indent=2))
         return 0
     if a.cmd == "gate":
         out = floors_gate.run(wb, a.category,
