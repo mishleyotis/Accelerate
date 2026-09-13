@@ -421,6 +421,25 @@ measured by `engine.floors_gate` and refused by `engine.cli absence`:
 - every askable volley (`primary`, `works`, `fails`, `value`, `contradicts`,
   `corroborates`) has a LOGGED `engine.cli search --subcap <cell> --facet <f>`
   — `volleys_incomplete` and `primary_unfired` are blocking gate terms;
+
+  **Search at the capability, log at the cell.** Your packet's *Work next —
+  grouped by capability* section names the group each open cell belongs to
+  and the union of volleys owed across it. One query usually answers the
+  whole group, so fire it once and log it against every cell it bears on:
+  `engine.cli search --subcap P1C1.1.1 --subcap P1C1.1.2 --subcap P1C1.1.3
+  --facet works --tool exa`. Repeating `--subcap` writes one row per cell —
+  which is what `volley_status` reads, so a sibling left off the list is a
+  sibling the gate calls unsearched — and charges the search-op ceiling
+  ONCE, because one tool call was made. Measured on the real catalogue: 686
+  cells under 129 capabilities, and doing this drops a full run from 7,546
+  turns to 3,905.
+
+  It is a discovery pass, not the whole cell. `evidence_smear` blocks a cell
+  whose shared evidence exceeds half its citations, so every cell still
+  needs sources of its own — take the group find, then differentiate. That
+  cap is exactly what keeps this capability-grain searching rather than the
+  category-level mapping `deep_search_protocol.md` calls its #1 failure
+  mode;
 - at least one search for the cell ran through an ENRICHMENT connector
   (`--tool exa|tavily|clay|explorium|vibe|indeed|quartr|drive`), not only the
   built-in web tools — `absence_single_tool` blocks, and the declaration

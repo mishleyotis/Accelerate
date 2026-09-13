@@ -307,7 +307,7 @@ and the doctor both fail loudly until you do, which is the point.
 | `description` | State **when to invoke it**, in one or two sentences — this string is the whole basis on which the router picks the agent, so it names the surfaces, the section paths and the verdict codes that should route here |
 | `model` | `opus` for reasoning tiers, `sonnet` for producers, per the tier sections above |
 | `effort` | Effort level for the tier |
-| `maxTurns` | A real ceiling; producers sit between 60 and 200 |
+| `maxTurns` | A real ceiling, sized to the work the agent is actually given. Producers sit between 60 and 200 — except the sixteen **research** producers, which sit at **340** because that is what a category costs: measured 2026-09-13 on the real catalogue, the largest needs 309 turns at capability grain, and `engine.cost lane-fit` projects it per run. A ceiling below the work is not a saving — the lane runs out, hands back and is re-dispatched, re-paying its context floor cold, which is how one run reached ~18 dispatches. Set it from `gen_research_agents.py`, never by hand |
 | `skills` | Only these six exist: `dma-surface-production`, `dma-research`, `dma-assessment`, `dma-governance`, `dma-rectifier`, `dma-first-call-deck` |
 | `disallowedTools` | The deny list below |
 

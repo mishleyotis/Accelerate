@@ -248,11 +248,20 @@ def _baseline_file(path=None):
     return Path(p) if p else None
 
 
-#: Turns a lane spends per cell under the CURRENT per-subcap design. Measured
-#: 2026-09-12 from the protocol's own demands: one turn per askable facet
-#: (web searches cannot batch — RESEARCH-PROTOCOL "spend your turns there"),
-#: plus one synthesis and one chained logging call per cell.
+#: Turns a lane spends per cell under EITHER design. Measured 2026-09-12 from
+#: the protocol's own demands: one synthesis and one chained logging call per
+#: cell. Searches are counted separately because that is where the two
+#: designs differ.
 TURNS_PER_CELL_OVERHEAD = 2
+
+#: Searches a cell still fires for ITSELF once its capability's discovery pass
+#: has run. This is not a guess and not a tuning knob: `evidence_smear` blocks
+#: a cell whose shared evidence exceeds half its citations (measured
+#: 2026-09-13 — 2 shared + 2 distinct passes, 2 shared + 1 distinct fires), so
+#: a cell taking two items from the group pass must bring two of its own. Two
+#: is the floor of smear-legal differentiation, and therefore the floor of what
+#: capability grain can cost.
+DIFFERENTIATING_SEARCHES_PER_CELL = 2
 
 
 def lane_turn_budget() -> int:
@@ -278,50 +287,91 @@ def lane_fit(wb) -> dict:
     """Can each category's work FIT the turn budget of the lane it gets?
 
     THE QUESTION NOBODY ASKED. Measured 2026-09-12: at T1_CORE scope the
-    per-subcap design needs ~24 lane-equivalents and the driver is given 16;
-    every category was 1.0-2.8x over its lane's 200-turn ceiling. A lane that
-    cannot finish does not fail loudly — it runs out of turns, hands back, and
-    is re-dispatched, re-paying its ~18K-token context floor cold each time.
+    per-subcap design needs 37.7 lane-equivalents and the driver is given 16;
+    every category was over its lane's 200-turn ceiling. A lane that cannot
+    finish does not fail loudly — it runs out of turns, hands back, and is
+    re-dispatched, re-paying its ~18K-token context floor cold each time.
     That is the mechanism behind ~18 dispatches and $96.65.
+
+    TWO designs are projected, because the packet now ships the grouping and
+    the lane chooses:
+
+    * `per_subcap_turns` — a search for every askable facet of every cell.
+      What the lane did before `dispatch` named the capability grouping, and
+      what it still costs if it ignores it.
+    * `projected_turns` — one discovery pass per capability firing the facets
+      owed across the group ONCE, then `DIFFERENTIATING_SEARCHES_PER_CELL` per
+      cell to earn its own bearing sources. Measured on the real catalogue,
+      2026-09-13: 686 T1_CORE cells under 129 capabilities, 7,546 turns
+      against 3,905 — 48% at the nine declared facets, 29% at the five
+      askable ones.
+
+    `fits` judges the capability-grain figure, because that is the design the
+    packet now describes and the manifests are sized for. The per-subcap
+    number stays reported as the price of ignoring the grouping.
 
     Projecting it costs nothing and is knowable before a single lane starts.
     """
+    # The grouping is read from `brief`, never restated: the packet the lane
+    # reads and the projection the driver reports must call the same cells
+    # siblings, or one of them is describing work nobody does. (Imported here
+    # rather than at module scope because `brief` reaches back for
+    # `cost.PARALLEL_LANES`.)
+    from .brief import capability_of
+
     cap = lane_turn_budget()
     # The DECLARED facet set. What is ASKABLE per cell narrows to the five
     # volleys when the toolkits are absent (`askable_facets`), so this is the
     # with-toolkits case — the one production runs in, and the upper bound.
     facets = len(C.DQ_FACETS)
-    per_cat: dict[str, int] = {}
+    per_cat: dict[str, dict] = {}
     for r in wb.scoring_rows():
         cell = str(r.get("SubCap_ID") or "").strip()
         if cell:
             cat = cell.split(".")[0]
-            per_cat[cat] = per_cat.get(cat, 0) + 1
+            slot = per_cat.setdefault(cat, {"cells": 0, "caps": set()})
+            slot["cells"] += 1
+            slot["caps"].add(capability_of(cell))
     out = []
-    for cat, cells in sorted(per_cat.items()):
-        need = cells * (facets + TURNS_PER_CELL_OVERHEAD)
-        out.append({"category": cat, "cells": cells, "projected_turns": need,
+    for cat, slot in sorted(per_cat.items()):
+        cells, caps = slot["cells"], len(slot["caps"])
+        flat = cells * (facets + TURNS_PER_CELL_OVERHEAD)
+        grain = (caps * facets
+                 + cells * (DIFFERENTIATING_SEARCHES_PER_CELL
+                            + TURNS_PER_CELL_OVERHEAD))
+        out.append({"category": cat, "cells": cells, "capabilities": caps,
+                    "per_subcap_turns": flat, "projected_turns": grain,
                     "lane_turns": cap,
-                    "lanes_needed": round(need / cap, 2) if cap else None,
-                    "fits": bool(cap and need <= cap)})
+                    "lanes_needed": round(grain / cap, 2) if cap else None,
+                    "fits": bool(cap and grain <= cap)})
     over = [r for r in out if not r["fits"]]
+    grain_total = sum(r["projected_turns"] for r in out)
+    flat_total = sum(r["per_subcap_turns"] for r in out)
     return {
         "lane_turns": cap, "facets_per_cell": facets,
         "facet_basis": "DQ_FACETS (declared; askable narrows to 5 without toolkits)",
-        "projected_turns": sum(r["projected_turns"] for r in out),
-        "lane_equivalents": (round(sum(r["projected_turns"] for r in out) / cap, 1)
-                             if cap else None),
+        "grain": "capability",
+        "projected_turns": grain_total,
+        "per_subcap_turns": flat_total,
+        "saving_vs_per_subcap": (round(1 - grain_total / flat_total, 3)
+                                 if flat_total else None),
+        "lane_equivalents": (round(grain_total / cap, 1) if cap else None),
+        "per_subcap_lane_equivalents": (round(flat_total / cap, 1)
+                                        if cap else None),
         "categories": out,
         "over": [r["category"] for r in over],
         "ok": not over,
-        "why": ("every category fits its lane" if not over else
+        "why": ("every category fits its lane at capability grain" if not over else
                 f"{len(over)} of {len(out)} categories need more turns than a lane "
-                f"has ({cap}): "
+                f"has ({cap}), even at capability grain: "
                 + ", ".join(f"{r['category']} {r['projected_turns']}t "
                             f"({r['lanes_needed']}x)" for r in over[:6])
                 + ". A lane that cannot finish is re-dispatched and re-pays its "
-                  "context floor cold — reduce cells per lane, coarsen the search "
-                  "grain, or raise maxTurns in the manifests."),
+                  "context floor cold — reduce cells per lane or raise maxTurns "
+                  "in the manifests. Coarsening the grain further is not on the "
+                  "table: evidence_smear caps shared evidence at half a cell's "
+                  "citations, which is what keeps this capability grain rather "
+                  "than category grain."),
     }
 
 
@@ -758,12 +808,18 @@ def main(argv=None) -> int:
             return 0 if fit["ok"] else 1
         print(f"lane turns {fit['lane_turns']} · {fit['facets_per_cell']} facets/cell "
               f"({fit['facet_basis']})\n")
-        print(f"  {'cat':<7}{'cells':>6}{'turns':>8}{'lanes':>7}  fits")
+        print(f"  {'cat':<7}{'cells':>6}{'caps':>6}{'flat':>7}{'grain':>7}"
+              f"{'lanes':>7}  fits")
         for r in fit["categories"]:
-            print(f"  {r['category']:<7}{r['cells']:>6}{r['projected_turns']:>8}"
+            print(f"  {r['category']:<7}{r['cells']:>6}{r['capabilities']:>6}"
+                  f"{r['per_subcap_turns']:>7}{r['projected_turns']:>7}"
                   f"{r['lanes_needed']:>7}  {'yes' if r['fits'] else 'NO'}")
-        print(f"\n  run total {fit['projected_turns']} turns = "
+        print(f"\n  run total at capability grain {fit['projected_turns']} turns = "
               f"{fit['lane_equivalents']} lane-equivalents")
+        print(f"  per-subcap, if the lane ignores the grouping: "
+              f"{fit['per_subcap_turns']} turns = "
+              f"{fit['per_subcap_lane_equivalents']} lane-equivalents "
+              f"({fit['saving_vs_per_subcap']:.0%} saved by the grain)")
         print(f"\n  {fit['why']}")
         return 0 if fit["ok"] else 1
 

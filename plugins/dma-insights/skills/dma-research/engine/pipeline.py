@@ -281,8 +281,11 @@ class Options:
     # and never enforced — `cost.record` raises only on a missing duration and
     # `cost report`'s verdict is a shell exit code no automated path reads
     # ("reported over budget WITH the figure, and still runs",
-    # docs/ROUTINES.md). One research round at the lanes' own 200-turn ceiling
-    # is ~$83 against a $20 four-pillar budget, and ten rounds are allowed.
+    # docs/ROUTINES.md). One research round at the lanes' own turn ceiling was
+    # ~$83 against a $20 four-pillar budget when that ceiling was 200, and ten
+    # rounds are allowed. The ceiling is 340 now, sized so a category finishes
+    # in ONE dispatch rather than being re-dispatched — which is why the
+    # dollar ceiling, not the turn ceiling, is the thing that has to bite.
     # Set 0 to disable the ceiling and keep the old reporting-only behaviour.
     max_usd: float | None = None
     # A CEILING on rounds per looping stage. 3 refused categories that were
@@ -861,7 +864,11 @@ class Pipeline:
         # and is re-dispatched, re-paying its context floor cold each time.
         # Measured 2026-09-12 at T1_CORE: 16 of 16 categories over, 37.7
         # lane-equivalents of work against 16 lanes. Knowable before a single
-        # lane starts, and it was never computed.
+        # lane starts, and it was never computed. It projects capability
+        # grain now (2026-09-13), which with the manifests at 340 turns puts
+        # a full T1_CORE run at 11.5 lane-equivalents and every category
+        # inside its lane — so a FAIL here means a scope this driver really
+        # cannot finish, not the standing state of every run.
         try:
             fit = cost.lane_fit(self.wb)
             if not fit["ok"]:

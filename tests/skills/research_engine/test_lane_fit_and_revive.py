@@ -2,10 +2,16 @@
 
 1. NOBODY ASKED WHETHER THE WORK FITS THE LANE. At T1_CORE scope the
    per-subcap design needs 37.7 lane-equivalents of turns and the driver is
-   given 16 — every category is 1.4-3.1x over its lane's 200-turn ceiling. A
-   lane that cannot finish does not fail loudly: it runs out of turns, hands
-   back, and is re-dispatched, re-paying its ~18K-token context floor cold.
-   That is knowable before a single lane starts and was never computed.
+   given 16 — every category was over its lane's 200-turn ceiling. A lane
+   that cannot finish does not fail loudly: it runs out of turns, hands back,
+   and is re-dispatched, re-paying its ~18K-token context floor cold. That is
+   knowable before a single lane starts and was never computed.
+
+   Two changes closed it together, and neither closes it alone: capability
+   grain (3,905 turns, 48% off) and a ceiling sized to the work (340, because
+   the largest category needs 309). Grain alone is 19.5 lane-equivalents;
+   340 alone is 22.2. These tests pin both halves and the arithmetic between
+   them.
 
 2. THE WATCHDOG SPENT MORE ON A RUN THAT COULD NOT PROGRESS. A run with no
    enrichment connector reads as STALLED, and the hourly `dma-watchdog`
@@ -43,20 +49,79 @@ def test_the_turn_cap_is_read_from_the_manifests_not_restated():
     assert cost.lane_turn_budget() == min(caps)
 
 
-def test_a_full_scope_run_does_not_fit_its_lanes(tmp_path):
-    """THE MEASUREMENT. Pinned so the grain change has a number to beat."""
+def _full_scope(tmp_path):
     tax = C.taxonomy()
-    run = runstate.start(run_id="R-FIT", entity_name="Acme", entity_id="acme",
-                         sub_vertical="CU", scope_mode="T1_CORE",
-                         reference_date="2026-08-29", root=tmp_path / "run",
-                         selected=list(tax.selected(scope="T1_CORE", sv=None)))
+    return runstate.start(
+        run_id="R-FIT", entity_name="Acme", entity_id="acme",
+        sub_vertical="CU", scope_mode="T1_CORE",
+        reference_date="2026-08-29", root=tmp_path / "run",
+        selected=list(tax.selected(scope="T1_CORE", sv=None)))
+
+
+def test_the_per_subcap_design_never_fitted_and_still_would_not(tmp_path):
+    """THE MEASUREMENT the grain change had to beat, kept as the baseline it
+    is measured against. 686 T1_CORE cells x (9 declared facets + 2 overhead)
+    = 7,546 turns. Against a 200-turn lane that was 37.7 lane-equivalents for
+    16 lanes, and every category over — which is not a slow run, it is a run
+    that cannot finish, so it hands back and is re-dispatched, re-paying its
+    ~18K-token context floor cold each time."""
+    fit = cost.lane_fit(_full_scope(tmp_path).open())
+    assert fit["per_subcap_turns"] == 7546, fit["per_subcap_turns"]
+    assert fit["per_subcap_turns"] / 200 > 16, (
+        "more lane-equivalents of work than there are lanes — at the ceiling "
+        "that was in the manifests when this was measured")
+
+
+def test_capability_grain_is_what_makes_a_full_run_fit(tmp_path):
+    """The pairing. Measured 2026-09-13: 686 cells under 129 capabilities;
+    one discovery pass per capability plus two smear-legal differentiating
+    searches per cell costs 3,905 turns — 48% of the per-subcap design. The
+    largest category (P2C2) needs 309, which is why the manifests sit at 340
+    and not at the 260 an aggregate reading would have suggested: 16 x 260 =
+    4,160 clears the TOTAL and leaves six categories individually over, and a
+    category that cannot finish is re-dispatched whatever the total says."""
+    fit = cost.lane_fit(_full_scope(tmp_path).open())
+    assert fit["grain"] == "capability"
+    assert fit["projected_turns"] == 3905, fit["projected_turns"]
+    assert fit["saving_vs_per_subcap"] == 0.483, fit["saving_vs_per_subcap"]
+    worst = max(r["projected_turns"] for r in fit["categories"])
+    assert worst == 309, worst
+    assert fit["lane_turns"] >= worst, (
+        f"the manifests declare {fit['lane_turns']} turns and the largest "
+        f"category needs {worst} — size the lane to the work")
+    assert fit["ok"] is True and fit["over"] == []
+    assert fit["lane_equivalents"] <= cost.PARALLEL_LANES
+
+
+def test_a_run_that_cannot_fit_still_says_so_and_why(tmp_path):
+    """The check must keep being able to say no — and must not offer
+    coarsening the grain as the way out, because `evidence_smear` is what
+    stops capability grain becoming category grain."""
+    run = _full_scope(tmp_path)
     fit = cost.lane_fit(run.open())
-    assert fit["ok"] is False
-    assert len(fit["over"]) == 16, "every category is over today"
-    assert fit["lane_equivalents"] > 16, (
-        "more lane-equivalents of work than there are lanes — the run cannot "
-        "finish, and re-dispatch is the only thing that happens instead")
-    assert "re-dispatched" in fit["why"] and "context floor" in fit["why"]
+    import unittest.mock as mock
+    with mock.patch.object(cost, "lane_turn_budget", lambda: 100):
+        tight = cost.lane_fit(run.open())
+    assert tight["ok"] is False and len(tight["over"]) == 16
+    assert "re-dispatched" in tight["why"] and "context floor" in tight["why"]
+    assert "evidence_smear" in tight["why"]
+    assert fit["projected_turns"] == tight["projected_turns"], (
+        "the projection is a property of the WORK; only the verdict moves "
+        "with the ceiling")
+
+
+def test_the_projection_calls_the_same_cells_siblings_as_the_packet(tmp_path):
+    """A second definition of 'capability' would drift from the first in
+    silence — the packet would group cells one way and the driver would
+    budget for another."""
+    from engine.brief import capability_of
+    tax = C.taxonomy()
+    fit = cost.lane_fit(_full_scope(tmp_path).open())
+    by_cat = {r["category"]: r["capabilities"] for r in fit["categories"]}
+    seen: dict[str, set] = {}
+    for cell in tax.selected(scope="T1_CORE", sv=None):
+        seen.setdefault(cell.split(".")[0], set()).add(capability_of(cell))
+    assert by_cat == {k: len(v) for k, v in seen.items()}
 
 
 def test_a_small_category_does_fit(tmp_path):

@@ -194,22 +194,41 @@ def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
 # ── search ───────────────────────────────────────────────────────────────
 
 def _ops_since_checkpoint(wb: RunWorkbook) -> int:
-    """Searches fired since the last recorded checkpoint.
+    """Searches FIRED since the last recorded checkpoint.
 
     Read from the workbook's own metadata rather than by importing runstate,
-    which imports this module — the count is a plain integer and does not
+    which imports this module — the mark is a plain integer and does not
     justify a cycle. A run that has never checkpointed measures from zero,
     which is correct: its whole history is one conversation.
+
+    Fired, not rows written. One search that bears on a capability's cells
+    lands one row per cell — `volley_status` matches `SubCap_ID` exactly, so
+    a sibling with no row of its own reads as never searched — and counting
+    those rows would charge a lane five ops for one tool call. Measured on
+    the real catalogue at capability grain: a 57-cell category fires 195
+    searches and writes 627 rows; the raw count would wall it at a ceiling
+    of 60 three times more often than the retrieval it actually did.
+
+    This ceiling is a CONTEXT-preservation device — "a conversation that has
+    fired this many searches must checkpoint and stop" — and context is
+    spent by the tool call, not by the ledger write. So the unit is the
+    distinct (query, tool, facet) a conversation put to the world. A lane
+    firing sixty genuinely different searches still hits the wall, which is
+    the half that must not soften (MEM-0338 / R27).
     """
-    done = len(wb.rows("Search_Log"))
+    rows = wb.rows("Search_Log")
     try:
-        mark = json.loads(wb.metadata().get("checkpoint") or "{}")
-        return max(0, done - int(mark.get("search_ops") or 0))
+        mark = int(json.loads(wb.metadata().get("checkpoint") or "{}")
+                   .get("search_ops") or 0)
     except (ValueError, TypeError):
-        return done
+        mark = 0
+    since = rows[max(0, mark):]
+    return len({(str(r.get("Query") or "").strip(),
+                 str(r.get("Tool") or "").strip(),
+                 str(r.get("Facet") or "").strip()) for r in since})
 
 
-def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
+def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
                   outcome: str = "", prelim: bool = False) -> int:
     """Log one search op and return the running count.
@@ -223,7 +242,25 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
     tool="my-made-up-tool")` was accepted — a row that spent the search
     budget and counted toward no volley, with a tool nobody could census.
     The tool vocabulary is closed (contract.SEARCH_TOOLS) so the gate can
-    see WHICH connectors were asked before a cell is declared empty."""
+    see WHICH connectors were asked before a cell is declared empty.
+
+    `subcap` takes a cell or a SEQUENCE of cells, and a sequence writes one
+    row per cell. That is not bookkeeping: `volley_status` matches
+    `SubCap_ID` exactly, so a capability sibling with no row of its own
+    reads as never searched and `absence_unsearched` blocks it — one query
+    that genuinely bears on five cells has to say so five times or four of
+    them are unworked by the only measure the gate can take.
+
+    The ceiling is charged ONCE for the group, because one tool call was
+    made (see `_ops_since_checkpoint`). The facet, tool, query, timestamp
+    and hit counts are the same on every row by construction — they were one
+    search, and `hits`/`kept` describe THAT SEARCH, not a per-cell triage
+    nobody performed. So a fanned-out group repeats them rather than
+    splitting them: `kept_ratio` is a ratio and survives, but the absolute
+    hit census over a fanned run counts the search once per cell it bore on.
+    Which cell each kept source actually grounds is settled where it is
+    settled — `append_evidence(subcaps=[...])` — not here.
+    """
     if facet is not None and facet not in C.DQ_FACETS:
         raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
     tool = str(tool or "").strip().lower()
@@ -233,7 +270,10 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
             f"records WHICH connector ran so the gate can count the "
             f"enrichment effort behind an empty cell; a free-text tool name "
             f"is a tool nobody can count.")
-    if not prelim and (not str(subcap or "").strip() or not str(facet or "").strip()):
+    cells = ([] if subcap is None else
+             [subcap] if isinstance(subcap, str) else list(subcap))
+    cells = [str(c).strip() for c in cells if str(c).strip()]
+    if not prelim and (not cells or not str(facet or "").strip()):
         raise LedgerRefusal(
             "a search that names no --subcap and no --facet counts toward "
             "nothing the gate measures. Pass --subcap <cell> --facet "
@@ -241,7 +281,6 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
             "--prelim for institution-profile retrieval that belongs to no "
             "cell.")
     if prelim:
-        subcap = subcap or None
         facet = facet or None
     # THE CEILING IS A WALL, NOT A NUMBER IN A REPORT.
     #
@@ -277,12 +316,15 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
         raise LedgerRefusal(
             f"query carries an unbound template token: {query!r}. Bind the "
             f"entity before searching; an unbound card is not a card.")
-    seq = len(wb.rows("Search_Log")) + 1
-    wb.append("Search_Log", {
-        "Seq": seq, "Timestamp": _utcnow(), "SubCap_ID": subcap,
-        "Facet": facet, "Query": query, "Tool": tool, "Hits": hits,
-        "Kept": kept, "Outcome": outcome,
-    })
+    seq = len(wb.rows("Search_Log"))
+    stamp = _utcnow()
+    for cell in (cells or [None]):
+        seq += 1
+        wb.append("Search_Log", {
+            "Seq": seq, "Timestamp": stamp, "SubCap_ID": cell,
+            "Facet": facet, "Query": query, "Tool": tool, "Hits": hits,
+            "Kept": kept, "Outcome": outcome,
+        })
     return seq
 
 

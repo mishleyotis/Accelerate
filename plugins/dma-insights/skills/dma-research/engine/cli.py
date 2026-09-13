@@ -249,7 +249,13 @@ def main(argv=None) -> int:
 
     o = common(sub.add_parser("orient")); o.add_argument("--category")
     q = common(sub.add_parser("search"))
-    q.add_argument("--subcap"); q.add_argument("--facet", choices=contract.DQ_FACETS)
+    q.add_argument("--subcap", action="append", default=[],
+                   help="the cell(s) this search bears on. Repeatable: one "
+                        "query for a capability genuinely answers its cells, "
+                        "and `volley_status` matches SubCap_ID exactly — a "
+                        "sibling with no row of its own reads as never "
+                        "searched. The search-op ceiling is charged once")
+    q.add_argument("--facet", choices=contract.DQ_FACETS)
     q.add_argument("--query", required=True)
     q.add_argument("--tool", default="web_search", choices=contract.SEARCH_TOOLS,
                    help="which tool ran — closed vocabulary so the gate can "
@@ -415,7 +421,7 @@ def main(argv=None) -> int:
         print(json.dumps(orient.orient(wb, a.category, qa_dir=run.qa_dir),
                          indent=2, sort_keys=True)); return 0
     if a.cmd == "search":
-        n = ledger.append_search(wb, subcap=a.subcap, facet=a.facet,
+        n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
                                  query=a.query, tool=a.tool, hits=a.hits,
                                  kept=a.kept, outcome=a.outcome,
                                  prelim=a.prelim)
