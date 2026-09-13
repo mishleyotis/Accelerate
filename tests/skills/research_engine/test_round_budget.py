@@ -205,19 +205,20 @@ def test_one_moving_category_no_longer_vouches_for_a_stuck_one(tmp_path):
     p = P.Pipeline(run, _opts(tmp_path, disp, max_rounds=10, stall_rounds=2))
     p.run_all()
 
-    def dispatches(cat):
-        return len([c for c in disp.calls if c["stage"] == "RESEARCH"
-                    and cat.lower() in c["agent"].lower()])
+    # The property, stated directly rather than through a dispatch-count
+    # proxy: the category that moved reached a PASS, and the category that
+    # never moved was stalled out. A dispatch count cannot express this —
+    # once the mover FINISHES it stops being dispatched too, so the two counts
+    # converge even though the outcomes could not be more different.
+    from engine import brief
+    wb = run.open()
+    need = brief.categories_needing_dispatch(wb)
 
-    stuck = sorted({c for c in p._cat_stalled})
-    assert stuck, "the stuck category must be recorded as stalled"
-    # The moving category keeps being worked; the stuck one is dropped after
-    # the window. Both may end stalled once the mover runs out of cells —
-    # what must differ is how long each was worked for.
-    assert dispatches("P1C1") > dispatches("P1C2"), (
-        f"the moving category must be dispatched more than the stuck one; "
-        f"got P1C1={dispatches('P1C1')} P1C2={dispatches('P1C2')}")
-    assert "P1C2" in stuck, "the category that never moved must be stalled"
+    assert "P1C1" in need["passed"], (
+        f"the moving category must reach PASS: {need['reasons'].get('P1C1')}")
+    assert "P1C2" in p._cat_stalled, "the category that never moved must be stalled"
+    assert "P1C1" not in p._cat_stalled, (
+        "a category that was closing cells every round must never be called stalled")
 
 
 def test_every_looping_stage_checks_for_a_stall():
