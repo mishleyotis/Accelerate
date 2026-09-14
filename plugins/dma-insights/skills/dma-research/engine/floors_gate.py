@@ -102,6 +102,20 @@ ADVISORY_TERMS = (
     # still reach the payload. Disclosed, not enforced.
     "coverage_below_floor",
     "category_items_below_floor",
+    # CROSS-CATEGORY REUSE, and it is advisory for the same reason the
+    # matcher is not wired into the write path. A proposal is a BM25 ranking
+    # of another lane's excerpt against this cell's question text, and
+    # automatic assignment at that grain was measured at 57.7% precision
+    # (see the matcher-boundary test). A gate that BLOCKED on unattached
+    # proposals would be paying a lane to agree with a ranker it is right to
+    # overrule — the exact misattribution the boundary exists to refuse.
+    #
+    # So this term says one thing and blocks nothing: proposals were offered
+    # to this category and it neither attached one nor declined one, which
+    # means nobody read them. A lane that declined all of them
+    # (`engine.cli attach --decline --why`) does NOT fire this term, because
+    # judging a proposal irrelevant is the lane doing its job.
+    "reuse_ignored",
 )
 # `absence_single_tool` left this set 2026-09-03: an empty cell whose only
 # searches ran through the built-in web tools shows no enrichment effort,
@@ -272,6 +286,9 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # computed term, rather than being a pair of bare booleans nobody can
         # enumerate.
         "coverage_below_floor": [], "category_items_below_floor": [],
+        # Populated near the end of `run`, like the two volume terms, and
+        # advisory for the reason recorded beside it in ADVISORY_TERMS.
+        "reuse_ignored": [],
     }
     items = 0
     searched_cells = 0
@@ -573,6 +590,43 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         else [{"category": category, "evidenced": evidenced_cells,
                "subcaps": len(rows), "coverage": coverage,
                "floor": COVERAGE_FLOOR}])
+    # THE REUSE TERM, ADVISORY. Offered and untouched, measured the same way
+    # the packet computes the offer, so the gate and the brief cannot
+    # disagree about what a lane was shown. Never appended to `blocking`.
+    try:
+        from . import brief as _brief
+        _offered, _dq = 0, _brief.dq_texts(wb)
+        for r in rows:
+            _cell = str(r.get("SubCap_ID") or "").strip()
+            # OPEN cells only — the same set the dispatch packet detailed and
+            # `brief.correlate` follows up on. A proposal against a cell that
+            # is already synthesised or declared absent is not an offer the
+            # lane can still take, and counting it would make the term fire
+            # on categories that have finished.
+            if str(r.get("Dominant_Claim") or "").strip() \
+                    or L.is_declared_absent(r, wb):
+                continue
+            _offered += len(_brief.reusable(
+                wb, _cell, register=register, dq_index=_dq
+            )["proposed_from_other_categories"])
+        _dec = L.reuse_decisions(wb, category)
+        _acted = len(_dec["attached"]) + len(_dec["declined"])
+        if _offered and not _acted:
+            findings["reuse_ignored"] = [{
+                "category": category, "proposals_offered": _offered,
+                "attached": 0, "declined": 0,
+                "how": (f"`engine.brief correlate --category {category}` "
+                        f"lists them with the command that cites each; "
+                        f"`engine.cli attach --e-id <E> --subcap <cell>` "
+                        f"cites one, `--decline --why '<reason>'` records "
+                        f"that you read it and it does not bear. ADVISORY: "
+                        f"this never blocks, and declining every one of them "
+                        f"clears it.")}]
+    except Exception:                                # noqa: BLE001
+        # A reuse measurement that could not be taken must not fail a gate
+        # about research effort. It is advisory; an absent advisory is an
+        # absent advisory.
+        pass
     # REPORTED 2026-08-30, from a live run in another account: "enrichment
     # connectors not being called by the agents for enrichment purposes
     # before close of a category". They were right, and no gate term could

@@ -467,7 +467,14 @@ measured by `engine.floors_gate` and refused by `engine.cli absence`:
   reachable and your searches should go through the relay, not that you may
   reach for the escape;
 - the run's own register does not already NAME the cell (`engine.brief
-  reuse --subcap <cell>` shows what a sibling lane bought);
+  reuse --subcap <cell>` shows what a sibling lane bought — same-cell rows,
+  same-capability rows, and up to two `proposed_from_other_categories`
+  suggestions scored against the whole register). A proposal is a
+  SUGGESTION: cite it with `engine.cli attach --e-id <E> --subcap <your own
+  cell>`, which names an existing row without minting a duplicate, or
+  dismiss it with `--decline --why '<reason>'`. Nothing is ever attached on
+  your behalf — the semantic matcher was measured at 57.7% precision and
+  that is the lesson the propose-never-attach rule carries;
 - the ladder names its `direct` and `proxy` rungs with queries the
   Search_Log carries, and the proxy log says which proxy class was hunted.
 

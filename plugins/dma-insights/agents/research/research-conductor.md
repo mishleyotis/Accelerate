@@ -306,12 +306,13 @@ tool call is the cost this removes.
       requests, stalled rounds, deferred challenges, unattached proposals.
    3. **Close the gap classes that are yours.** Unattached cross-category
       proposals get a targeted correlation pass: `engine.brief correlate
-      --category <C>` emits a short prompt listing only that category's
-      proposals and their `attach` commands, and you dispatch a fresh
-      `research-p<x>c<y>-producer` with that prompt ALONE. Empty output means
-      dispatch nothing. Undeclared-empty cells under a proven-unbound
-      baseline are the driver's — the next `--step` re-dispatches them with
-      the handback.
+      --category <C> --json` returns a prompt of at most 2,000 characters
+      listing only that category's standing proposals with their `attach`
+      commands, and you dispatch a fresh `research-p<x>c<y>-producer` with
+      that prompt ALONE. It returns nothing when there is nothing to
+      correlate, and nothing means dispatch nothing. Undeclared-empty cells
+      under a proven-unbound baseline are the driver's — the next `--step`
+      re-dispatches them with the handback.
    4. **`--step` again.** The loop ends when `plan` says RESEARCH is done, or
       when `budget_remaining_usd` reaches 0 or `rounds_remaining` reaches 0 —
       and then it is `STOPPED_BUDGET`, which is a person's decision.
@@ -329,13 +330,27 @@ tool call is the cost this removes.
    a run of hundreds of queries. Never ask a subagent to report its results
    back to you for you to write down.
 
-   **Evidence correlation is targeted, never broadcast.** A correlation map
-   reaches a subagent in exactly two ways: BEFORE it reaches the subcap, as
-   `leads_in` and proposals inside that category's own packet, which the
-   driver puts there; or AFTER it responds, as the `brief correlate` prompt
-   above. A packet for one category names another category's cells only
-   inside `leads_in[].also_names`. Handing every lane a run-wide map is how
-   input context bloats and how one lane starts writing another's rows.
+   **Evidence correlation is ROUTED, and it is targeted.** It used to be a
+   sentence: `handback.leads_for_other_categories` was computed correctly
+   and handed to the category that PRODUCED the lead, where it is useless.
+   Now each lane's own packet carries `leads_in` — registered rows another
+   lane opened whose `SubCap_IDs` already name one of THIS lane's cells —
+   plus up to two BM25-scored `proposed_from_other_categories` suggestions
+   per open cell. A lane turns a proposal into a citation with `engine.cli
+   attach --e-id <E> --subcap <its own cell>`, which names the existing row
+   rather than minting a duplicate, or dismisses it with `--decline --why`.
+   Nothing is ever attached on its behalf: the semantic matcher was measured
+   at 57.7% precision, and propose-never-attach is what that measurement
+   bought. `handback` reports `proposals_offered` and `proposals_attached`,
+   so whether reuse earns its complexity is a number rather than a belief.
+
+   A correlation map therefore reaches a subagent in exactly two ways:
+   BEFORE it reaches the subcap, inside that category's own packet; or AFTER
+   it responds, as the `brief correlate` prompt above. A packet for one
+   category names another category's cells ONLY inside
+   `leads_in[].also_names`; a proposal names the source categories and no
+   foreign cell id at all. Handing every lane a run-wide map is how input
+   context bloats and how one lane starts writing another's rows.
 
    **Across sessions.** Everything is on disk: the workbook, `07_qa/
    pipeline_state.json`, `07_qa/search_relay.jsonl`, `briefs/relay_r*/`, and

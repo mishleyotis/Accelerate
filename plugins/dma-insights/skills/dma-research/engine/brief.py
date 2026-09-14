@@ -7,6 +7,8 @@ already knows.
     python3 -m engine.brief shared    --run R [--json]
     python3 -m engine.brief reuse     --run R --subcap P1C1.1.1
     python3 -m engine.brief handback  --run R --category P1C1 [--json]
+    python3 -m engine.brief gaps      --run R [--json]
+    python3 -m engine.brief correlate --run R --category P1C1 [--json]
 
 REPORTED 2026-09-03 by the engagement owner: "There is no orchestration
 existing between the subagents and main agents. Ensure efficient context
@@ -63,6 +65,22 @@ writes a sheet.
               instead of re-reading the workbook, and it is the same shape
               whether the lane succeeded, died or lied.
 
+AND THREE MORE, added 2026-09-14 to close the cross-category half (see the
+block above `LEADS_IN_PER_PACKET` for the measurement and the boundary):
+
+  `leads_index`  registered rows whose cells span categories, indexed by each
+              category they touch. Computed ONCE per batch and delivered into
+              the CONSUMING lane's packet as `leads_in` — which is where
+              `handback.leads_for_other_categories` was computing the right
+              fact and handing it to the one lane that could not use it.
+  `gaps`      what is still missing per category, read from the workbook, the
+              relay queue and pipeline_state.json. The conductor's instrument,
+              and deliberately never a lane's self-report.
+  `correlate` the ≤2000-character follow-up for ONE category: the proposals
+              standing against its open cells, each with the command that
+              would cite it. Empty when there is nothing to correlate, and
+              empty means dispatch nothing.
+
 THE ENFORCEMENT IS NOT HERE. A view nobody must read is a view nobody
 reads, so the refusals live where the work lands: `ledger.declare_absence`
 refuses a cell the register already names, and the floors gate carries
@@ -82,6 +100,7 @@ import argparse
 import json
 import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 from . import contract as C
@@ -121,6 +140,45 @@ CELLS_PER_CHALLENGE_LANE = 12
 #: Cited rows shipped per cell, highest ERS first, and how much of each.
 CHALLENGE_EVIDENCE_PER_CELL = 4
 CHALLENGE_EXCERPT_WINDOW = 240
+
+# ── CROSS-CATEGORY REUSE, and the boundary it is built inside ────────────
+#
+# Sixteen category lanes re-search one entity. The ledger has always
+# SUPPORTED reuse — `append_evidence(subcaps=[...])` may span categories —
+# and nothing routed it: `reusable` showed only same-cell and
+# same-capability rows, and `handback.leads_for_other_categories` was
+# computed correctly and then delivered to the PRODUCING category's own
+# re-dispatch packet, where it is useless.
+#
+# THE GOVERNING LESSON IS THE MATCHER BOUNDARY (the test of that name under
+# tests/skills/research_engine/, which refuses any engine module that reaches
+# for the semantic matcher in plugins/dma-insights/scripts/). Automatic
+# semantic assignment of an excerpt to a cell was measured at 57.7%
+# precision at its best scope, against a random baseline of 17.7%, and a
+# wrong cell assignment passes every gate this system has. So everything
+# below PROPOSES and nothing attaches: a
+# lead is a row another lane opened that ALREADY NAMES one of your cells
+# (no inference at all — the register says so), and a proposal is a ranked
+# suggestion carrying its score and its matched terms, which a lane may take
+# with `engine.cli attach` or ignore. Nothing here writes a sheet.
+
+#: Leads shipped per packet — rows another lane opened that name this
+#: category's cells AND another category's. Eight, because the point is to
+#: make the lane's first move free, not to ship the register.
+LEADS_IN_PER_PACKET = 8
+
+#: BM25 floor a cross-category row must clear to be PROPOSED to a cell whose
+#: register does not name it. Three times `retrieval.ABSTAIN_FLOOR`, and
+#: deliberately so: abstaining is cheap here (the lane searches, which it was
+#: going to do anyway) and a wrong proposal costs a lane's attention and
+#: invites exactly the misattribution the matcher boundary refuses. Measured
+#: on the fixture battery: an unrelated row scores 0.0 against a cell's
+#: question text, a genuinely bearing one clears 2.
+REUSE_PROPOSE_FLOOR = 1.5
+
+#: How many proposals a cell gets. Two. A ranked list nobody reads is a
+#: ranked list that gets attached wholesale.
+PROPOSALS_PER_CELL = 2
 
 
 def _clean(v) -> str:
@@ -221,7 +279,66 @@ def shared(wb: RunWorkbook) -> dict:
 
 # ── the evidence the run already holds for a cell ────────────────────────
 
-def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None) -> dict:
+def question_text(wb: RunWorkbook, subcap: str, *,
+                  dq_index: dict | None = None) -> str:
+    """What this cell is ASKING, as text a ranker can score against.
+
+    The DQ bank when the run has one (`engine.cli kg build` fills it from the
+    toolkits); the catalogue's own words — the cell's name, the proxy class
+    the template names for it, the internal artefact that would settle it —
+    when it does not. Both are catalogue text. Nothing here is invented, and
+    a cell with neither returns "" so the proposer scores nothing rather
+    than ranking against noise.
+    """
+    subcap = _clean(subcap)
+    if dq_index is None:
+        dq_index = dq_texts(wb)
+    got = _clean(dq_index.get(subcap))
+    if got:
+        return got
+    return _catalogue_text().get(subcap, "")
+
+
+@lru_cache(maxsize=1)
+def _catalogue_text() -> dict[str, str]:
+    """cell -> the catalogue's own words for it, built once.
+
+    Read through an `lru_cache` because the fallback is asked per cell and
+    the gate asks it for every open cell in a category: without this, closing
+    one category re-parsed the catalogue names file fifty times for a
+    dictionary that cannot change inside a process.
+    """
+    try:
+        names = C.subcap_names()
+        proxy = C.proxy_classes()
+        raw = json.loads(Path(C.names_path()).read_text(encoding="utf-8"))
+        artefact = raw.get("internal_artefact_that_settles_it") or {}
+    except Exception:                                # noqa: BLE001
+        return {}
+    return {cid: _clean(" ".join(x for x in (
+        name, str(proxy.get(cid, "")).replace("_", " "),
+        artefact.get(cid)) if x))
+        for cid, name in names.items()}
+
+
+def dq_texts(wb: RunWorkbook) -> dict[str, str]:
+    """cell -> its diagnostic questions joined, built ONCE.
+
+    `wb.rows("DQ_Bank")` walks the sheet; asking it per cell made a
+    category-wide proposal pass quadratic in the bank for no reason — the
+    same defect `register` already fixes for the evidence index.
+    """
+    out: dict[str, list[str]] = {}
+    for r in wb.rows("DQ_Bank"):
+        cell = _clean(r.get("SubCap_ID"))
+        q = _clean(r.get("Question"))
+        if cell and q:
+            out.setdefault(cell, []).append(q)
+    return {k: " ".join(v) for k, v in out.items()}
+
+
+def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None,
+             propose: bool = True, dq_index: dict | None = None) -> dict:
     """Registered rows this cell could cite and does not.
 
     `names_this_cell` is the strong case and the one the gate enforces: the
@@ -234,12 +351,46 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None) -> d
     a producer should READ before searching. Offered, never asserted — the
     producer decides whether the excerpt answers its own question, and the
     ledger's excerpt rules apply either way.
+
+    `proposed_from_other_categories` is the third and weakest case, and the
+    one that carries the whole cross-category reuse mechanism: rows in
+    NEITHER bucket — a source another lane opened against a cell under
+    another capability, usually another category — BM25-ranked against this
+    cell's own question text, above `REUSE_PROPOSE_FLOOR`, top
+    `PROPOSALS_PER_CELL`.
+
+    IT IS A SUGGESTION AND THE WORD IS ON EVERY ROW (`proposed: true`).
+    Automatic semantic assignment was measured at 57.7% precision at its
+    best scope and a wrong cell assignment passes every gate this system has
+    (the matcher-boundary test), so each proposal ships the score that
+    ranked it and the query terms that matched, and NOTHING here writes. A
+    lane that agrees runs `engine.cli attach`; a lane that does not, ignores
+    it, and the floors gate says `reuse_ignored` advisory and blocks nothing.
+
+    `propose=False` skips the ranking — `unattached` reads only
+    `names_this_cell` and pays the BM25 pass once per cell for nothing.
     """
     subcap = _clean(subcap)
     row = wb.scoring_row(subcap)
     cited = set(_ids(row.get("Evidence_IDs")) if row else [])
     cap = capability_of(subcap)
-    mine, sibs = [], []
+    mine, sibs, others = [], [], []
+    # THE BM25 CORPUS IS THE WHOLE REGISTER, not the candidate bucket.
+    # Okapi's IDF is log(1 + (N - df + 0.5)/(df + 0.5)): over a bucket of one
+    # or two rows every term is in every document, df == N, and EVERY score
+    # collapses toward zero — so a floor set against real numbers would
+    # abstain on everything and a floor set against collapsed ones would
+    # accept anything. Scoring over the run's whole register also makes the
+    # score a property of (question, row, run) rather than of which bucket
+    # the row happened to fall into: the same row must not score differently
+    # for two cells because one of them already cites its neighbour.
+    #
+    # COST, measured 2026-09-14: 50 cells scored against a 700-row register
+    # (the production shape of a worked category) is 0.89s, so the corpus is
+    # re-tokenised per cell rather than prepared once. If that stops being
+    # true — a bigger register, or a caller scoring every cell in the run —
+    # the fix is a prepared index in `retrieval`, not a cache here.
+    corpus: list[str] = []
     # `register` is passed in by the callers that ask about many cells
     # (`unattached`, the gate, a dispatch packet): `evidence_index` walks
     # every row to build its dict, and rebuilding it per cell made a
@@ -247,6 +398,8 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None) -> d
     for eid, ev in sorted((register if register is not None
                            else wb.evidence_index()).items()):
         named = [_clean(s) for s in _ids(ev.get("SubCap_IDs"))]
+        corpus.append(" ".join((_clean(ev.get("Source_Name")),
+                                _clean(ev.get("Excerpt")))))
         item = {
             "e_id": eid,
             "source": _clean(ev.get("Source_Name")),
@@ -261,14 +414,101 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None) -> d
             item["registered_against"] = ", ".join(
                 n for n in named if capability_of(n) == cap)[:60]
             sibs.append(item)
+        elif eid not in cited and named:
+            # THE CATEGORIES IT CAME FROM, NEVER THEIR CELLS. A packet for
+            # category X may name a cell outside X in exactly one place —
+            # `leads_in[].also_names`, where the register itself already
+            # links the row to a cell of X. A proposal carries no such link
+            # (that is what makes it a proposal), so naming another lane's
+            # cell here would put an unearned cell id in front of a lane that
+            # may not write it and might cite it anyway.
+            item["from_categories"] = sorted({category_of(n) for n in named})
+            item["_at"] = len(corpus) - 1        # its place in the corpus
+            others.append(item)
+
+    proposals = []
+    if propose and others:
+        from . import retrieval as R
+        # The run id, so `how_to_use` is a command a lane can RUN rather than
+        # a template it has to complete. A placeholder in an instruction is
+        # the AUD-0015 shape (fifteen literal `{entity}` tokens went out in
+        # work cards and an unattended agent searched for the string).
+        rid = _clean(wb.metadata().get("run_id")) or "<RUN>"
+        q = question_text(wb, subcap, dq_index=dq_index)
+        if q:
+            scores = R.bm25_scores(q, corpus)
+            ranked = sorted(((o, scores[o["_at"]]) for o in others),
+                            key=lambda t: (-t[1], t[0]["e_id"]))
+            for o, sc in ranked:
+                if sc < REUSE_PROPOSE_FLOOR:
+                    break                    # the floor bites; abstain
+                doc = corpus[o["_at"]]
+                proposals.append({**{k: v for k, v in o.items() if k != "_at"},
+                                  "proposed": True,
+                                  "bm25_vs_question": sc,
+                                  "matched_terms": R.matched_terms(q, doc),
+                                  "how_to_use": (
+                                      f"read it; if it bears on {subcap}, "
+                                      f"`engine.cli attach --run {rid} --e-id "
+                                      f"{o['e_id']} --subcap {subcap}` cites "
+                                      f"it without minting a duplicate")})
+                if len(proposals) >= PROPOSALS_PER_CELL:
+                    break
+    for o in others:
+        o.pop("_at", None)
     return {
         "subcap": subcap,
         "name": C.subcap_names().get(subcap) or None,
         "cites_now": sorted(cited),
         "names_this_cell": mine,
         "capability_siblings": sibs[:REUSE_PER_CELL],
-        "read_before_searching": bool(mine or sibs),
+        "proposed_from_other_categories": proposals,
+        "proposal_floor": REUSE_PROPOSE_FLOOR,
+        "read_before_searching": bool(mine or sibs or proposals),
     }
+
+
+# ── leads: rows one lane opened that name ANOTHER lane's cells ───────────
+
+def leads_index(wb: RunWorkbook, register: dict | None = None) -> dict:
+    """Every registered row whose cells span MORE THAN ONE category, indexed
+    by each category the row touches.
+
+    `handback.leads_for_other_categories` computed exactly this and handed it
+    to the lane that PRODUCED it, which is the one lane it cannot help. This
+    is the same fact, routed to the CONSUMER: for category X, the rows that
+    name one of X's cells and at least one cell outside X.
+
+    No inference. The register itself says which cells each row is about —
+    whoever registered it said so — so a lead is a fact the run already
+    holds, not a ranking. `also_names` is the only key in a packet for
+    category X that may name a cell of another category, and it exists so the
+    lane can see WHY another lane opened the source; `my_cells` is what it
+    may act on.
+
+    Computed ONCE per batch and passed down (`dispatch(..., leads_in=…)`) —
+    it describes the RUN, and rebuilding it per lane walked the register
+    sixteen times for one answer.
+    """
+    register = wb.evidence_index() if register is None else register
+    out: dict[str, list[dict]] = {}
+    for eid, ev in sorted(register.items()):
+        named = [n for n in (_clean(s) for s in _ids(ev.get("SubCap_IDs"))) if n]
+        cats = {category_of(n) for n in named}
+        if len(cats) < 2:
+            continue
+        for cat in sorted(cats):
+            out.setdefault(cat, []).append({
+                "e_id": eid,
+                "url": _clean(ev.get("Source_URL")) or None,
+                "source_name": _clean(ev.get("Source_Name")),
+                "tier": _clean(ev.get("Tier")),
+                "recency": _clean(ev.get("Recency")) or None,
+                "excerpt": _clean(ev.get("Excerpt"))[:240],
+                "my_cells": [n for n in named if category_of(n) == cat],
+                "also_names": [n for n in named if category_of(n) != cat],
+            })
+    return out
 
 
 def unattached(wb: RunWorkbook, category: str | None = None) -> list[dict]:
@@ -283,7 +523,10 @@ def unattached(wb: RunWorkbook, category: str | None = None) -> list[dict]:
         cell = _clean(r.get("SubCap_ID"))
         if not cell or (category and not cell.startswith(category)):
             continue
-        got = reusable(wb, cell, register=register)
+        # `propose=False`: this reads `names_this_cell` only, and the BM25
+        # pass over the register would run once per cell in the category for
+        # an answer nobody here looks at.
+        got = reusable(wb, cell, register=register, propose=False)
         if got["names_this_cell"]:
             out.append({
                 "subcap": cell,
@@ -355,7 +598,8 @@ def notebook_digest(run: runstate.Run, category: str, *,
 def dispatch(wb: RunWorkbook, category: str, *,
              run: runstate.Run | None = None,
              with_handback: bool = False,
-             shared_block: dict | None = None) -> dict:
+             shared_block: dict | None = None,
+             leads_in: dict | None = None) -> dict:
     """The bounded packet one category producer starts from.
 
     `with_handback` is the RE-DISPATCH shape (owner issue 8, 2026-09-03: the
@@ -384,9 +628,10 @@ def dispatch(wb: RunWorkbook, category: str, *,
 
     detail = []
     register = wb.evidence_index()
+    dq_index = dq_texts(wb)
     for cell in open_cells[:CELLS_DETAILED]:
         vs = L.volley_status(wb, cell, searches)
-        got = reusable(wb, cell, register=register)
+        got = reusable(wb, cell, register=register, dq_index=dq_index)
         detail.append({
             "subcap": cell,
             "name": C.subcap_names().get(cell) or None,
@@ -401,6 +646,12 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 {"e_id": i["e_id"], "source": i["source"],
                  "registered_against": i.get("registered_against")}
                 for i in got["capability_siblings"]],
+            # PROPOSED, never attached. Each row carries the score that
+            # ranked it and the query terms behind the score, because a
+            # suggestion a lane cannot audit is a suggestion it either takes
+            # on faith or ignores — and taking it on faith is the 57.7%.
+            "proposed_from_other_categories":
+                got["proposed_from_other_categories"],
         })
 
     # E2: the same open cells, grouped by the capability they answer under.
@@ -455,6 +706,11 @@ def dispatch(wb: RunWorkbook, category: str, *,
                      "got to>')` then continue — the wall is per conversation"),
         },
         "unattached_evidence": unattached(wb, category),
+        # SOURCES ANOTHER LANE OPENED THAT NAME YOUR CELLS. `leads_index` is
+        # computed once per batch and passed in; `dispatch` called alone
+        # computes its own, the way it already does for `shared`.
+        "leads_in": (leads_index(wb, register) if leads_in is None
+                     else leads_in).get(category, [])[:LEADS_IN_PER_PACKET],
         "rules": [
             "read `already_registered_for_this_cell` BEFORE searching: the "
             "run has already paid for those rows and the cell does not cite "
@@ -465,6 +721,19 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "is refused while the register names the cell",
             "note as you go (`engine.memory note`); the notebook is what "
             "survives a compaction",
+            "`leads_in` are sources ANOTHER lane opened that already name "
+            "your cells (`my_cells`) — cite one with `engine.cli attach "
+            f"--run {_clean(wb.metadata().get('run_id'))} "
+            "--e-id <E> --subcap <your cell>`, which reuses the registered "
+            "row instead of minting a duplicate. `also_names` is there to "
+            "show you why the other lane opened it; it is the only thing in "
+            "this packet that names a cell outside your category and you "
+            "may not write those cells",
+            "`proposed_from_other_categories` are SUGGESTIONS, ranked and "
+            "scored, never attached for you. Read the excerpt; attach it if "
+            "it answers your cell's question, ignore it if it does not. "
+            "Nothing measures you on taking them — a machine that files one "
+            "category's evidence under another's cell is worse than no reuse",
         ],
     }
     # THE ONE REFUSAL THIS CONTAINER MAY BE UNABLE TO SATISFY, named only
@@ -555,6 +824,20 @@ def dispatch(wb: RunWorkbook, category: str, *,
         for k, v in list(hb.items()):
             if isinstance(v, list) and len(v) > 6:
                 hb[k] = v[:6] + [f"… and {len(v) - 6} more"]
+        packet["packet_chars"] = len(json.dumps(packet, default=str))
+    if packet["packet_chars"] > BRIEF_CHAR_CEILING and packet["leads_in"]:
+        # Leads go BEFORE the work. A lead is an offer; `work_next` is the
+        # lane's actual assignment, and trimming the assignment to make room
+        # for offers inverts what the packet is for. The count stays so the
+        # lane knows what it is not being shown, and `engine.brief correlate
+        # --category <C>` serves the rest.
+        n = len(packet["leads_in"])
+        keep_leads = max(2, LEADS_IN_PER_PACKET // 4)
+        if n > keep_leads:
+            packet["leads_in"] = packet["leads_in"][:keep_leads]
+            packet["leads_trimmed"] = (
+                f"{n - keep_leads} more lead(s) not shown — "
+                f"`engine.brief correlate --category {category}` lists them")
         packet["packet_chars"] = len(json.dumps(packet, default=str))
     if packet["packet_chars"] > BRIEF_CHAR_CEILING:
         # Trim the detailed cells rather than a field: a half-written field
@@ -647,6 +930,38 @@ def as_markdown(packet: dict) -> str:
             lines.append(f"  - sibling source worth reading: {i['e_id']} "
                          f"({i['source']}, registered against "
                          f"{i['registered_against']})")
+        for i in d.get("proposed_from_other_categories") or []:
+            lines.append(
+                f"  - PROPOSED (a suggestion, not an assignment): "
+                f"{i['e_id']} ({i['source']}) scored "
+                f"{i['bm25_vs_question']} on "
+                f"{', '.join(i['matched_terms']) or 'no shared terms'} — "
+                f"{i['excerpt'][:160]}")
+            lines.append(f"    attach it only if it answers this cell: "
+                         f"`engine.cli attach --run {s['run_id']} "
+                         f"--e-id {i['e_id']} --subcap {d['subcap']}`")
+        lines.append("")
+    if packet.get("leads_in"):
+        lines += ["### Sources other lanes opened that name your cells", "",
+                  "These are REGISTERED rows whose own `SubCap_IDs` already "
+                  "name a cell of yours — no inference, the lane that "
+                  "registered them said so. Cite one with `engine.cli attach "
+                  f"--run {s['run_id']} --e-id <E> --subcap <your cell>`; "
+                  "it reuses the row "
+                  "instead of minting a duplicate. The cells listed under "
+                  "\"also names\" belong to other lanes and are shown only "
+                  "so you can see why the source was opened — you may not "
+                  "write them.", ""]
+        for i in packet["leads_in"]:
+            lines.append(
+                f"- **{i['e_id']}** · {i['source_name']} "
+                f"({i['tier']}, {i['recency'] or 'undated'}) — "
+                f"YOUR cells: {', '.join(i['my_cells'])}"
+                + (f" · also names: {', '.join(i['also_names'])}"
+                   if i["also_names"] else ""))
+            lines.append(f"  - {i['excerpt']}")
+        if packet.get("leads_trimmed"):
+            lines.append(f"- _{packet['leads_trimmed']}_")
         lines.append("")
     if packet["unattached_evidence"]:
         lines += ["### Evidence this run bought and never consolidated", ""]
@@ -776,9 +1091,14 @@ def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
     # category. Every other batch builder already does this; `batch` was the
     # one that did not.
     sh = shared(wb) if cats else None
+    # And ONE leads index. Like `shared` it describes the RUN — the rows
+    # whose cells span categories are the same rows for every lane — and
+    # rebuilding it per lane walked the whole register sixteen times to hand
+    # each lane one slice of the same answer.
+    li = leads_index(wb) if cats else {}
     for cat in cats:
         packet = dispatch(wb, cat, run=run, with_handback=with_handback,
-                          shared_block=sh)
+                          shared_block=sh, leads_in=li)
         path = out_dir / f"{cat}.md"
         path.write_text(as_markdown(packet), encoding="utf-8")
         (out_dir / f"{cat}.json").write_text(
@@ -1572,6 +1892,23 @@ def handback(wb: RunWorkbook, category: str) -> dict:
                 if _clean(s.get("SubCap_ID")).startswith(category)]
     tools = sorted({_clean(s.get("Tool")) for s in searches
                     if _clean(s.get("Tool"))})
+
+    # WAS THE REUSE LOOP WORTH ITS COMPLEXITY? These two numbers are how the
+    # next person answers that with a measurement instead of an opinion.
+    # `proposals_offered` is what the lane's packet showed it (recomputed
+    # from the same substrate, so it cannot drift from what `dispatch`
+    # renders); `proposals_attached` and `proposals_declined` are what it did
+    # about them, read from Provenance.
+    # Scoped to the STILL-OPEN cells, which is exactly the set the lane's
+    # packet detailed and `correlate` follows up on — an offer against a cell
+    # that is already synthesised or declared is not an offer anyone can take.
+    dq_index = dq_texts(wb)
+    offered = 0
+    for cell in open_cells:
+        offered += len(reusable(wb, cell, register=register,
+                                dq_index=dq_index
+                                )["proposed_from_other_categories"])
+    decisions = L.reuse_decisions(wb, category)
     return {
         "category": category,
         "cells_in_scope": len(cells),
@@ -1582,12 +1919,269 @@ def handback(wb: RunWorkbook, category: str) -> dict:
         "searches": len(searches),
         "tools_used": tools,
         "unattached_evidence": unattached(wb, category),
+        # STILL COMPUTED, AND NO LONGER THE ROUTE. This says what THIS lane
+        # opened for others; the lane that needs it reads it as `leads_in` in
+        # its OWN packet (`brief.leads_index`), which is where it can act on
+        # it. Kept here because the conductor reads a handback when a stage
+        # FAILs and "who opened what for whom" is the question it answers.
         "leads_for_other_categories": {k: v[:8] for k, v in
                                        sorted(leads.items())},
+        "proposals_offered": offered,
+        "proposals_attached": len(decisions["attached"]),
+        "proposals_declined": len(decisions["declined"]),
         "done": not open_cells,
         "note": ("`done` means every cell is synthesised or declared absent. "
                  "It is NOT the gate: run `engine.cli gate --category "
                  f"{category} --require-synthesis` for the verdict."),
+    }
+
+
+# ── the conductor's gap instrument ───────────────────────────────────────
+
+#: The prompt ceiling for a correlation follow-up. A quarter of a dispatch
+#: packet, because a follow-up arrives INSIDE a lane that already has its
+#: packet, its notes and its transcript in context — the budget it is
+#: spending is what is left, not what it started with.
+CORRELATE_CHAR_CEILING = 2000
+
+
+def _stalled_rounds(wb: RunWorkbook, category: str) -> int:
+    """Consecutive trailing FLOORS verdicts on this category that said the
+    SAME thing.
+
+    A round that re-dispatched a category and produced the identical blocking
+    detail advanced nothing. Measured from the Gate_Log rather than from the
+    driver's in-memory counters, because those die with the process and the
+    conductor asking "which lanes are stuck" is usually asking after one.
+    """
+    rows = [g for g in wb.rows("Gate_Log")
+            if _clean(g.get("Gate")) == "FLOORS"
+            and _clean(g.get("Scope")) == _clean(category).upper()]
+    n = 0
+    for g in reversed(rows):
+        if _clean(g.get("Verdict")) == "PASS":
+            break
+        if n and _clean(g.get("Detail")) != _clean(rows[-1].get("Detail")):
+            break
+        n += 1
+    return max(0, n - 1)
+
+
+def gaps(wb: RunWorkbook, run: runstate.Run | None = None,
+         state: dict | None = None) -> dict:
+    """WHAT IS STILL MISSING, computed from the substrate — never from a
+    lane's self-report.
+
+    A lane reports what it believes it did. The workbook, the relay queue and
+    the pipeline state record what it actually left behind, and those are
+    three different documents only when something went wrong — which is
+    exactly when the conductor needs the answer. So every number here is
+    read, and none is taken:
+
+      `open_cells`            neither synthesised nor declared absent
+      `undeclared_empty`      no evidence AND no declared absence — the cells
+                              that will block the floors gate
+      `unserviced_requests`   relay requests this category raised that no
+                              servicing pass has answered
+      `stalled_rounds`        consecutive re-dispatches that changed nothing
+      `challenge_deferred`    synthesised and not yet challenged
+      `proposals_unattached`  cross-category rows PROPOSED to this category's
+                              open cells that it has neither attached nor
+                              declined — advisory, and `reuse_ignored` in the
+                              floors gate says the same thing
+
+    `run` unlocks the relay queue (a file under the run, not a sheet);
+    without it `unserviced_requests` is None, which is "not measured" rather
+    than "none". `state` is the pipeline's `pipeline_state.json` if the
+    caller already has it — `gaps` reads it from the run otherwise.
+    """
+    md = wb.metadata()
+    cells_by_cat: dict[str, list[str]] = {}
+    for c in wb.selected_subcaps():
+        cells_by_cat.setdefault(category_of(c), []).append(c)
+
+    if state is None and run is not None:
+        try:
+            sp = run.qa_dir / "pipeline_state.json"
+            state = json.loads(sp.read_text()) if sp.is_file() else None
+        except (OSError, ValueError):
+            state = None
+    state = state or {}
+
+    register = wb.evidence_index()
+    dq_index = dq_texts(wb)
+    decisions_all = L.reuse_decisions(wb)
+    decided = {(d["e_id"], d["subcap"]) for d in
+               (decisions_all["attached"] + decisions_all["declined"])}
+
+    out_cats: dict[str, dict] = {}
+    for cat, cells in sorted(cells_by_cat.items()):
+        open_cells, undeclared, challenge_deferred, unattached_props = [], [], [], 0
+        for cell in cells:
+            r = wb.scoring_row(cell) or {}
+            eids = [i for i in _ids(r.get("Evidence_IDs")) if i]
+            absent = L.is_declared_absent(r, wb)
+            synthesised = bool(_clean(r.get("Dominant_Claim")))
+            if not synthesised and not absent:
+                open_cells.append(cell)
+            if not eids and not absent:
+                undeclared.append(cell)
+            # `declare_absence` writes a Dominant_Claim too — the absence IS
+            # the claim — so "synthesised" alone would put every declared
+            # absence in the challenge queue, and the challenge stage does
+            # not judge absences.
+            if synthesised and not absent and L.challenge_for(wb, cell) is None:
+                challenge_deferred.append(cell)
+            if not synthesised and not absent:
+                for pr in reusable(wb, cell, register=register,
+                                   dq_index=dq_index
+                                   )["proposed_from_other_categories"]:
+                    if (pr["e_id"], cell) not in decided:
+                        unattached_props += 1
+        reqs = None
+        if run is not None:
+            try:
+                from . import relay
+                reqs = len(relay.open_requests(run, cat))
+            except Exception:                        # noqa: BLE001
+                reqs = None
+        out_cats[cat] = {
+            "open_cells": open_cells,
+            "undeclared_empty": undeclared,
+            "unserviced_requests": reqs,
+            "stalled_rounds": _stalled_rounds(wb, cat),
+            "challenge_deferred": challenge_deferred,
+            "proposals_unattached": unattached_props,
+        }
+
+    spent = state.get("spent_usd")
+    cap = state.get("budget_usd")
+    if cap is None:
+        try:
+            from . import cost
+            cap = cost.BUDGET_PER_PILLAR * max(
+                1, len({c[:2] for c in wb.selected_subcaps()}))
+        except Exception:                            # noqa: BLE001
+            cap = None
+    if spent is None and run is not None:
+        try:
+            from . import cost
+            spent = round(sum(float(r["usd"]) for r in cost.ledger(run)
+                              if r.get("usd") is not None), 4)
+        except Exception:                            # noqa: BLE001
+            spent = None
+    remaining = (round(float(cap) - float(spent), 2)
+                 if cap is not None and spent is not None else None)
+
+    stages = state.get("stages") or {}
+    stage = C.stage_of(md)
+    # `stage_of` names the workbook's stage in lower case ("research"); the
+    # pipeline keys its state by the driver's uppercase stage ("RESEARCH").
+    # Looking the one up under the other reads as "no rounds spent" on every
+    # run that has spent some, which is the opposite of what this reports.
+    rounds_done = int((stages.get(str(stage).upper()) or {}).get("rounds") or 0)
+    try:
+        from . import pipeline as _pl
+        max_rounds = int(_pl.Options().max_rounds)
+    except Exception:                                # noqa: BLE001
+        max_rounds = 10
+    return {
+        "run_id": md.get("run_id"),
+        "stage": stage,
+        "categories": out_cats,
+        "budget_remaining_usd": remaining,
+        "budget_usd": cap,
+        "spent_usd": spent,
+        "rounds_remaining": max(0, max_rounds - rounds_done),
+        "rounds_done_this_stage": rounds_done,
+        "note": ("every figure is read from the workbook, the relay queue and "
+                 "pipeline_state.json — none of it is a lane's report of "
+                 "itself. `proposals_unattached` is ADVISORY: a lane that "
+                 "read a proposal and judged it irrelevant is doing its job."),
+    }
+
+
+# ── the correlation follow-up, scoped to ONE category ────────────────────
+
+def correlate(wb: RunWorkbook, category: str, *,
+              register: dict | None = None) -> dict:
+    """The follow-up prompt for ONE category: the proposals standing against
+    its still-open cells, each with the command that would cite it.
+
+    EVIDENCE CORRELATION IS TARGETED, NEVER BROADCAST. A lane meets it in
+    exactly two places — inside its own packet, before it starts (`leads_in`
+    and `proposed_from_other_categories`), and here, after it has responded.
+    Handing every lane a run-wide correlation map would put fifteen other
+    categories' evidence in sixteen contexts to save a handful of searches,
+    which is the bloat this whole mechanism is supposed to avoid.
+
+    EMPTY MEANS DISPATCH NOTHING. `{}` when there is nothing to correlate —
+    not a prompt that says "nothing to do", because a conductor that sends
+    one has spent a turn to say so and a lane that receives one has to read
+    it to find out.
+    """
+    category = _clean(category).upper()
+    cells = [c for c in wb.selected_subcaps() if c.startswith(category)]
+    if not cells:
+        return {}
+    register = wb.evidence_index() if register is None else register
+    dq_index = dq_texts(wb)
+    decisions = L.reuse_decisions(wb, category)
+    decided = {(d["e_id"], d["subcap"]) for d in
+               (decisions["attached"] + decisions["declined"])}
+    items = []
+    for cell in cells:
+        r = wb.scoring_row(cell) or {}
+        if _clean(r.get("Dominant_Claim")) or L.is_declared_absent(r, wb):
+            continue                       # closed: nothing to correlate
+        for pr in reusable(wb, cell, register=register, dq_index=dq_index
+                           )["proposed_from_other_categories"]:
+            if (pr["e_id"], cell) in decided:
+                continue
+            items.append({"subcap": cell, **pr})
+    if not items:
+        return {}
+    items.sort(key=lambda i: (-i["bm25_vs_question"], i["subcap"], i["e_id"]))
+    rid = _clean(wb.metadata().get("run_id")) or "<RUN>"
+
+    head = [
+        f"# {category} — evidence another lane already registered",
+        "",
+        "These rows are in the run's register and your cells do not cite "
+        "them. They are PROPOSALS: ranked against your cell's own question "
+        "text, never assigned. Read the excerpt. If it answers the cell, "
+        "attach it — that cites the existing row instead of minting a "
+        "duplicate. If it does not, decline it with the reason, so the run "
+        "records that you judged rather than that you ignored.",
+        "",
+    ]
+    body, kept = [], 0
+    for i in items:
+        block = [
+            f"**{i['subcap']}** ← `{i['e_id']}` · {i['source']} "
+            f"(score {i['bm25_vs_question']} on "
+            f"{', '.join(i['matched_terms']) or 'no shared terms'}; "
+            f"opened by {', '.join(i.get('from_categories') or []) or 'another lane'})",
+            f"  > {i['excerpt'][:200]}",
+            f"  - `engine.cli attach --run {rid} --e-id {i['e_id']} "
+            f"--subcap {i['subcap']}`",
+            "",
+        ]
+        if len("\n".join(head + body + block)) > CORRELATE_CHAR_CEILING:
+            break
+        body += block
+        kept += 1
+    if not kept:
+        return {}
+    prompt = "\n".join(head + body)
+    return {
+        "category": category,
+        "proposals": items[:kept],
+        "offered": len(items),
+        "shown": kept,
+        "prompt": prompt,
+        "prompt_chars": len(prompt),
+        "prompt_ceiling": CORRELATE_CHAR_CEILING,
     }
 
 
@@ -1647,6 +2241,17 @@ def main(argv=None) -> int:
     h = common(sub.add_parser("handback"))
     h.add_argument("--category", required=True)
 
+    common(sub.add_parser(
+        "gaps", help="what is still missing per category, computed from the "
+                     "workbook, the relay queue and pipeline_state.json — "
+                     "never from a lane's report of itself"))
+    co = common(sub.add_parser(
+        "correlate", help="the follow-up prompt for ONE category: the "
+                          "cross-category rows proposed to its still-open "
+                          "cells, each with its attach command. Empty when "
+                          "there is nothing to correlate"))
+    co.add_argument("--category", required=True)
+
     a = ap.parse_args(argv)
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
     wb = run.open()
@@ -1688,6 +2293,17 @@ def main(argv=None) -> int:
             print(json.dumps(categories_needing_dispatch(wb), indent=2, default=str))
         elif a.cmd == "reuse":
             print(json.dumps(reusable(wb, a.subcap), indent=2, default=str))
+        elif a.cmd == "gaps":
+            print(json.dumps(gaps(wb, run), indent=2, default=str))
+        elif a.cmd == "correlate":
+            got = correlate(wb, a.category)
+            if a.json:
+                print(json.dumps(got, indent=2, default=str))
+            elif got:
+                print(got["prompt"])
+            # NOTHING when there is nothing. An empty correlate prints no
+            # prompt at all, so a conductor piping this into a dispatch
+            # dispatches nothing rather than a turn that says "nothing to do".
         else:
             print(json.dumps(handback(wb, a.category), indent=2, default=str))
     except (ValueError, KeyError) as e:

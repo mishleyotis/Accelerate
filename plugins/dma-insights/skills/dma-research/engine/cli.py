@@ -6,6 +6,7 @@
     python3 -m engine.cli search  --run R --subcap P1C1.1.1 --facet works --query '...'
     python3 -m engine.cli fetch   --run R --url U --query '<the DQ text>'
     python3 -m engine.cli evidence --run R --subcap ... --source ... --url ... --excerpt ...
+    python3 -m engine.cli attach  --run R --e-id E-007 --subcap P1C1.1.1
     python3 -m engine.cli synthesise --run R --subcap ... --json rec.json
     python3 -m engine.cli gate    --run R --category P1C1 [--require-synthesis]
     python3 -m engine.cli validate --run R
@@ -370,6 +371,32 @@ def main(argv=None) -> int:
                         "category's cells (engine/scope.py); the servicing "
                         "tier registers against any cell in the run")
 
+    at = common(sub.add_parser(
+        "attach",
+        help="cite an evidence row the run ALREADY holds from one of your "
+             "own cells, without minting a duplicate. This is how a lead or "
+             "a proposal in your dispatch packet becomes a citation."))
+    at.add_argument("--e-id", required=True,
+                    help="the registered row to cite (E-007). It must already "
+                         "exist — `attach` never creates a row; "
+                         "`engine.cli evidence` does that")
+    at.add_argument("--subcap", action="append", default=[], required=True,
+                    help="the cell(s) of YOUR category this row bears on. "
+                         "Repeatable. A lane may attach only to its own "
+                         "category's cells (engine/scope.py)")
+    at.add_argument("--actor", default=None,
+                    help="the agent attaching. Defaults to $DMA_ACTOR")
+    at.add_argument("--decline", action="store_true",
+                    help="the opposite outcome, recorded: you READ the "
+                         "proposal and it does not bear on this cell. Needs "
+                         "--why. Without this record, 'offered and judged "
+                         "irrelevant' and 'offered and never looked at' are "
+                         "the same state, and the floors gate's advisory "
+                         "`reuse_ignored` cannot tell them apart")
+    at.add_argument("--why", default=None,
+                    help="with --decline: what the row is actually about and "
+                         "why it does not answer this cell")
+
     y = common(sub.add_parser("synthesise"))
     y.add_argument("--subcap", required=True); y.add_argument("--json", required=True)
     y.add_argument("--actor", required=True,
@@ -581,6 +608,31 @@ def main(argv=None) -> int:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
         print(json.dumps({"e_id": eid, "profile": bool(a.profile)}, indent=2))
+        return 0
+    if a.cmd == "attach":
+        cells = [c for c in (a.subcap or []) if str(c).strip()]
+        try:
+            if a.decline:
+                if len(cells) != 1:
+                    print("REFUSED: --decline judges ONE proposal on ONE "
+                          "cell. Pass a single --subcap.", file=sys.stderr)
+                    return 1
+                out = ledger.decline_evidence(wb, a.e_id, cells[0],
+                                              why=a.why or "",
+                                              actor=_actor(a))
+            elif a.why:
+                print("REFUSED: --why belongs to --decline. An attach needs "
+                      "no argument — the citation is the claim, and the "
+                      "reasoning belongs in the synthesis that uses it.",
+                      file=sys.stderr)
+                return 1
+            else:
+                out = ledger.attach_evidence(wb, a.e_id, cells,
+                                             actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
         return 0
     if a.cmd == "synthesise":
         rec = json.loads(Path(a.json).read_text())

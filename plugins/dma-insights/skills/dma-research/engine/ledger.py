@@ -192,6 +192,179 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     return eid
 
 
+# ── citing a row the run already holds ───────────────────────────────────
+
+#: The Provenance steps this module writes for the reuse loop. Deliberately
+#: NOT in `contract.PROVENANCE_STEPS`: that tuple is the set of steps whose
+#: AUTHORSHIP is load-bearing for the independence checks, and an attach is a
+#: citation, not a judgement. It is written straight to the sheet the same
+#: way `append_evidence` writes `ers_supplied_ignored`.
+ATTACH_STEP = "attach"
+DECLINE_STEP = "reuse_declined"
+
+
+def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
+                    actor: str | None = None) -> dict:
+    """Cite an EXISTING register row from another cell, without minting a
+    duplicate.
+
+    THE WRITE THE REUSE LOOP WAS MISSING. `brief.leads_in` and
+    `brief.reusable.proposed_from_other_categories` show a lane rows another
+    lane opened; until this existed the only way to act on one was
+    `append_evidence`, which mints a SECOND row for the same source — a new
+    E-id, a re-scored ERS, and a register where one document is two
+    identities and `single_source_fact` cannot tell.
+
+    It is the ONE cross-category write a category lane may make, and only to
+    its OWN category's cells: `scope.violation(actor, "attach", cells)` is
+    the same table every other writer asks, so `research-p1c1-producer`
+    attaching to a P3 cell is refused in the same words as every other
+    out-of-scope write.
+
+    The link is written BOTH WAYS — the cell cites the id and the row names
+    the cell back — because the floors gate counts a citation only when both
+    are true (`_named_by`, AUD-0115), and a one-way attach would look like
+    consolidation and count as nothing.
+
+    Refuses, each saying what and why: an e_id the register does not hold; a
+    cell the catalogue does not know; a cell outside this run's engagement
+    set; a pair the cell already cites.
+    """
+    eid = str(eid or "").strip()
+    cells = [s.strip() for s in (subcaps if isinstance(subcaps, (list, tuple))
+                                 else _split_ids(subcaps)) if str(s).strip()]
+    if not cells:
+        raise LedgerRefusal(
+            "attach names no cell. Pass the cell(s) of YOUR category this "
+            "registered row bears on; an attach that reaches no cell "
+            "consolidates nothing.")
+    register = wb.evidence_index()
+    if eid not in register:
+        raise LedgerRefusal(
+            f"no evidence row {eid!r} in this run's register "
+            f"({len(register)} row(s)). `attach` CITES a row the run already "
+            f"holds — it does not create one. Register a new source with "
+            f"`engine.cli evidence`.")
+    tax = C.taxonomy()
+    unknown = [c for c in cells if c not in tax.tier]
+    if unknown:
+        raise LedgerRefusal(f"attach names cells not in the catalogue: {unknown}")
+    in_run = set(wb.selected_subcaps())
+    foreign = [c for c in cells if c not in in_run]
+    if foreign:
+        raise LedgerRefusal(
+            f"attach names cells outside this run's engagement set: {foreign}")
+    assert_actor_scope(actor, "attach", cells)
+
+    row = register[eid]
+    fact_id = str(row.get("Fact_ID") or "F1").strip() or "F1"
+    source_url = str(row.get("Source_URL") or "").strip() or None
+    already = []
+    for cell in cells:
+        sr = wb.scoring_row(cell) or {}
+        if eid in [i.split(":")[0] for i in _split_ids(sr.get("Evidence_IDs"))
+                   if i and i != C.NO_EVIDENCE]:
+            already.append(cell)
+    if already:
+        raise LedgerRefusal(
+            f"{eid} is already cited by {', '.join(already)}. An attach that "
+            f"repeats a citation inflates `grounded_on` and the per-cell "
+            f"evidence floor with one source counted twice; the pair "
+            f"(evidence, cell) is the identity, and it exists.")
+
+    with wb.transaction("attach_evidence"):
+        named = [s.split(":")[0].strip()
+                 for s in _split_ids(row.get("SubCap_IDs")) if str(s).strip()]
+        for cell in cells:
+            if cell not in named:
+                named.append(cell)
+        wb.update_row("Evidence_Detail", "E_ID", eid,
+                      {"SubCap_IDs": ", ".join(named)}, save=False)
+        for cell in cells:
+            sr = wb.scoring_row(cell) or {}
+            have = [i for i in _split_ids(sr.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            urls = [u for u in _split_ids(sr.get("Source_URLs")) if u]
+            have.append(f"{eid}:{fact_id}")
+            if source_url and source_url not in urls:
+                urls.append(source_url)
+            wb.set_scoring(cell, {"Evidence_IDs": ", ".join(have),
+                                  "Source_URLs": ", ".join(urls) or None},
+                           save=False)
+            wb.append("Provenance", {
+                "SubCap_ID": cell, "Step": ATTACH_STEP,
+                "Actor": str(actor or "unattributed").strip(),
+                "At": _utcnow(),
+                "Detail": f"cited {eid} ({str(row.get('Source_Name') or '')[:80]}) "
+                          f"registered against {', '.join(named)}",
+                "Session": _agent_session()}, save=False)
+        wb.save()
+        wb.recompute_coverage()
+    return {"e_id": eid, "subcaps": cells, "fact_id": fact_id,
+            "now_names": named, "minted": False}
+
+
+def decline_evidence(wb: RunWorkbook, eid: str, subcap: str, *,
+                     why: str, actor: str | None = None) -> dict:
+    """Record that a lane READ a proposal and it does not bear on the cell.
+
+    The other half of PROPOSE-never-attach. Without it, "offered and not
+    taken" and "offered and never looked at" are the same state, so
+    `floors_gate.reuse_ignored` could not tell a lane that judged from a lane
+    that ignored — and an advisory term that cannot tell those apart teaches
+    nobody anything. Writes Provenance only: a decline changes no citation.
+    """
+    eid = str(eid or "").strip()
+    subcap = str(subcap or "").strip()
+    if not str(why or "").strip():
+        raise LedgerRefusal(
+            "a decline with no reason is indistinguishable from ignoring the "
+            "proposal. Say what the row is about and why it does not answer "
+            "this cell's question.")
+    if eid not in wb.evidence_index():
+        raise LedgerRefusal(f"no evidence row {eid!r} in this run's register")
+    if subcap not in set(wb.selected_subcaps()):
+        raise LedgerRefusal(
+            f"{subcap} is not selected in this run; there is no proposal to "
+            f"decline")
+    assert_actor_scope(actor, "attach", [subcap])
+    wb.append("Provenance", {
+        "SubCap_ID": subcap, "Step": DECLINE_STEP,
+        "Actor": str(actor or "unattributed").strip(), "At": _utcnow(),
+        "Detail": f"declined {eid}: {str(why).strip()[:400]}",
+        "Session": _agent_session()})
+    return {"e_id": eid, "subcap": subcap, "declined": True}
+
+
+def reuse_decisions(wb: RunWorkbook, category: str | None = None) -> dict:
+    """What lanes DID with the proposals they were offered, from Provenance.
+
+    `attached` and `declined` are lists of (e_id, cell) pairs. Computed from
+    the sheet rather than from a lane's report, like everything else the
+    conductor reads.
+    """
+    cat = str(category or "").strip().upper()
+    out = {"attached": [], "declined": []}
+    for r in wb.rows("Provenance"):
+        step = str(r.get("Step") or "").strip()
+        if step not in (ATTACH_STEP, DECLINE_STEP):
+            continue
+        cell = str(r.get("SubCap_ID") or "").strip()
+        if cat and not cell.startswith(cat):
+            continue
+        detail = str(r.get("Detail") or "")
+        eid = ""
+        for word in detail.replace(":", " ").split():
+            if word.upper().startswith("E-"):
+                eid = word.strip(",()")
+                break
+        key = "attached" if step == ATTACH_STEP else "declined"
+        out[key].append({"e_id": eid, "subcap": cell,
+                         "actor": str(r.get("Actor") or ""),
+                         "at": r.get("At")})
+    return out
+
+
 def _run_of(wb: RunWorkbook, run=None):
     """The run this workbook belongs to, for the fetch cache.
 
@@ -772,10 +945,22 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
 
 # ── gate log ─────────────────────────────────────────────────────────────
 
+#: Every verdict a Gate_Log row may carry.
+#:
+#: PENDING_ORCHESTRATOR joined the three originals on 2026-09-14, for the one
+#: state the vocabulary could not say: the work was prepared and handed to the
+#: conductor and has not come back yet. Written as a FAIL it would have been
+#: re-dispatched or disclosed as a gap; written as NOT_RUN it would have read
+#: as "nobody looked". Neither is true of a relay batch sitting on disk with
+#: its requests still OPEN — that is work in flight, and the gate must be able
+#: to say so without spending a heal on it.
+GATE_VERDICTS = ("PASS", "FAIL", "NOT_RUN", "PENDING_ORCHESTRATOR")
+
+
 def append_gate(wb: RunWorkbook, *, gate: str, scope: str, verdict: str,
                 detail: str = "", blocking: bool = True) -> None:
-    if verdict not in ("PASS", "FAIL", "NOT_RUN"):
-        raise LedgerRefusal(f"verdict {verdict!r} must be PASS, FAIL or NOT_RUN")
+    if verdict not in GATE_VERDICTS:
+        raise LedgerRefusal(f"verdict {verdict!r} must be one of {GATE_VERDICTS}")
     if verdict == "NOT_RUN" and not detail.strip():
         # A NOT_RUN with no reason is indistinguishable from a pass that
         # nobody looked at (the SG discipline: explicit NOT_RUN + reason).
