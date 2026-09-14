@@ -450,13 +450,33 @@ jobs:
   # `--dist loadfile` keeps a module's tests on one worker, which is what
   # the module-scoped fixtures (the rendered-report ones) need.
   #
-  # tests/acceptance/ rides here rather than in the unit job because it is
-  # the same substrate and the same cost profile — and because a suite CI
-  # does not collect is not a check. It was written on 2026-09-03 from the
-  # owner's own reported issues; it must run on every push, or it decays
-  # into documentation.
+  # tests/acceptance/ was carved out of this job on 2026-09-14 and given its
+  # own runner, for the same measured reason the pair was carved out of the
+  # unit job eleven days earlier: TOGETHER THEY NO LONGER FIT THE CLOCK.
+  #
+  #   run 34819539760 (29fd001)          24m33s   success, by 27 seconds
+  #   run 34819547411 (29fd001, push)    25m00s   CANCELLED at the timeout
+  #   run 34819551889 (29fd001, PR #23)  25m00s   CANCELLED at the timeout
+  #   run 34846479926 (PR #37)           25m00s   CANCELLED at the timeout
+  #   run 34857231504 (PR #37)           25m00s   CANCELLED at the timeout
+  #   run 34860634063 (9aa1bab)          25m00s   CANCELLED at the timeout
+  #
+  # Six runs of three different trees; one passed, with 27 seconds in hand.
+  # That is not a flaky runner, it is a job over its budget — and it fails as
+  # `cancelled`, which reads like somebody pressed a button rather than like
+  # a red test, so it had been quietly not-checking these 1083 tests for a
+  # week. A suite CI does not finish is not a check, the same way a suite CI
+  # does not collect is not a check.
+  #
+  # Measured 2026-09-14 on a 4-core box, `-n auto --dist loadfile`, the same
+  # shape as a hosted runner: tests/skills 790s (1001 passed, 6 skipped),
+  # tests/acceptance 455s (82 passed). Split, each half runs well inside its
+  # clock and the two run in parallel, so the wall clock falls as well —
+  # which is the argument the previous split made and it still holds. The
+  # answer is not a bigger number: a 40-minute ceiling would hide the next
+  # doubling exactly as this 25-minute one hid the last.
   research-engine-tests:
-    name: Research engine + acceptance suites
+    name: Research engine suite
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -470,16 +490,18 @@ jobs:
       # own deps are here because tests/skills reaches into dma_worker for
       # the parser contracts it asserts against.
       - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx
-      - name: Engine and acceptance, in parallel, and a suite that skips silently fails
+      - name: The engine suite, in parallel, and a suite that skips silently fails
         run: |
           set -o pipefail
-          python -m pytest tests/skills/ tests/acceptance/ \
+          python -m pytest tests/skills/ \
                  -q -rfs -p no:cacheprovider -n auto --dist loadfile \
                  2>&1 | tee /tmp/engine-pytest.txt
           n=$(grep -oE '[0-9]+ skipped' /tmp/engine-pytest.txt | grep -oE '^[0-9]+' | tail -1)
           # Measured 2026-09-03 on this runner's shape: the skips are the
           # Drive-identity and network-gated ones. Same ratchet as the unit
-          # job — the answer to a skip is almost never a bigger number.
+          # job — the answer to a skip is almost never a bigger number. Every
+          # skip the pair reported was in this half (6 of 6, measured
+          # 2026-09-14), so the ceiling comes here unchanged.
           echo "skipped: ${n:-0} (ceiling 8)"
           if [ "${n:-0}" -gt 8 ]; then
             echo "--- the reasons, most common first ---"
@@ -490,10 +512,55 @@ jobs:
         if: always()
         run: |
           {
-            echo '### Research engine + acceptance'
+            echo '### Research engine'
             echo '```'
             grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
                  /tmp/engine-pytest.txt | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # THE ACCEPTANCE SUITE, on its own clock — same substrate, own runner.
+  #
+  # It rode with the engine suite because it is the same cost profile; it
+  # rides alone now because the sum stopped fitting (see above). It must run
+  # on every push or it decays into documentation: it was written 2026-09-03
+  # from the owner's own reported issues, and every one of those issues is
+  # only closed for as long as this suite is actually finishing.
+  acceptance-tests:
+    name: Acceptance suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx
+      - name: Acceptance, in parallel, and a suite that skips silently fails
+        run: |
+          set -o pipefail
+          python -m pytest tests/acceptance/ \
+                 -q -rfs -p no:cacheprovider -n auto --dist loadfile \
+                 2>&1 | tee /tmp/acceptance-pytest.txt
+          n=$(grep -oE '[0-9]+ skipped' /tmp/acceptance-pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          # Zero, and zero is the honest ceiling: this suite contains no
+          # `pytest.skip` and no `skipif` at all, so a skip here is a test
+          # that started declining to run, which is the one thing a ratchet
+          # exists to catch. Measured 2026-09-14: 82 passed, 0 skipped.
+          echo "skipped: ${n:-0} (ceiling 0)"
+          if [ "${n:-0}" -gt 0 ]; then
+            echo "--- the reasons, most common first ---"
+            grep '^SKIPPED' /tmp/acceptance-pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
+            exit 1
+          fi
+      - name: Report the result where the check can show it
+        if: always()
+        run: |
+          {
+            echo '### Acceptance'
+            echo '```'
+            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/acceptance-pytest.txt | tail -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
