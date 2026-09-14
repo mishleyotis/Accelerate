@@ -450,6 +450,35 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "survives a compaction",
         ],
     }
+    # THE ONE REFUSAL THIS CONTAINER MAY BE UNABLE TO SATISFY, named only
+    # where the run's own baseline PROVES it. `declare_absence` wants an
+    # enrichment-connector search behind every empty cell; with no
+    # connector bound that check cannot be met, and the degraded path
+    # (`--enrichment-unavailable`) exists for exactly this. It was built on
+    # 2026-09-13 and never told to the lane: the flag appeared in the CLI
+    # and in SKILL.md, in neither the packet nor the heal instruction, so a
+    # lane following its brief literally could not take it.
+    #
+    # Named ONLY under a short baseline, never under a bound or an absent
+    # one: a lane told about an escape it is not entitled to will reach for
+    # it, and the writer refuses it anyway.
+    try:
+        binding = L.enrichment_binding(wb)
+        if binding["known"] and not binding["bound"]:
+            packet["enrichment_binding"] = {
+                "bound": False, "missing": list(binding["missing"])}
+            packet["rules"].append(
+                "this container PROVABLY has no enrichment connector "
+                f"({', '.join(binding['missing'])}) — do not call one and do "
+                "not wait for one. Work the cell on the built-in web tools, "
+                "emit every connector query you would have run as a "
+                "`search_requests` entry, and close each empty cell with "
+                "`engine.cli absence … --enrichment-unavailable`, which "
+                "writes it at REDUCED rigour with the reason on the row. The "
+                "flag is VERIFIED against this run's own baseline, so it "
+                "works here and is refused anywhere else")
+    except Exception:                                # noqa: BLE001
+        pass
     if run is not None:
         packet["your_notes"] = notebook_digest(run, category)
     if with_handback:

@@ -66,7 +66,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str = "FACT", origin: str = "public",
                     ers: float | None = None, anchor_quote: str | None = None,
-                    run=None,
+                    run=None, actor: str | None = None,
                     access_status: str = "OK", conflict: str | None = None,
                     fact_id: str = "F1") -> str:
     """Register one fact and return its server-shaped id.
@@ -104,6 +104,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         # the halt: there is no route around it.
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
+    assert_actor_scope(actor, "evidence", cells)
     # ONE TRANSACTION FOR THE ID AND THE ROWS IT NAMES.
     #
     # `next_evidence_id` reads the highest E-id in the register and adds
@@ -191,6 +192,20 @@ def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
     return C.RECENCY_ARCHIVAL
 
 
+def assert_actor_scope(actor, op: str, cells=None) -> None:
+    """Refuse a write the actor's tier may not make (`engine/scope.py`).
+
+    Called at the END of each writer's validation, so a more specific
+    refusal — an unresolvable cell, a failed independence check — keeps its
+    own wording. An actor of None is unconstrained: every caller that does
+    not name one is asking the library, not acting as an agent.
+    """
+    from . import scope as _scope
+    why = _scope.violation(actor, op, cells or [])
+    if why:
+        raise LedgerRefusal(why)
+
+
 # ── search ───────────────────────────────────────────────────────────────
 
 def _ops_since_checkpoint(wb: RunWorkbook) -> int:
@@ -230,7 +245,8 @@ def _ops_since_checkpoint(wb: RunWorkbook) -> int:
 
 def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
-                  outcome: str = "", prelim: bool = False) -> int:
+                  outcome: str = "", prelim: bool = False,
+                  actor: str | None = None) -> int:
     """Log one search op and return the running count.
 
     Every search is logged before its results are used, so the budget check
@@ -282,6 +298,7 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
             "cell.")
     if prelim:
         facet = facet or None
+    assert_actor_scope(actor, "search", cells)
     # THE CEILING IS A WALL, NOT A NUMBER IN A REPORT.
     #
     # SEARCH_OP_CEILING has been the rule since R27 — "a conversation that
@@ -490,6 +507,10 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
             f"genuinely separate agent run, or carry a distinct session token "
             f"(both this challenge and the synthesis must record one) to prove "
             f"the runs differ.")
+    # Scope AFTER independence, so those refusals keep their own
+    # wording: "you wrote this" is the more useful sentence when both
+    # are true. This one catches the rest — a tier that does not judge.
+    assert_actor_scope(actor, "challenge", [subcap])
     missing = [d for d in C.CHALLENGE_DIMENSIONS if d not in (dimensions or {})]
     if missing:
         raise LedgerRefusal(
@@ -645,6 +666,7 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     if problems:
         raise LedgerRefusal(
             f"{subcap}: synthesis refused — " + "; ".join(problems))
+    assert_actor_scope(actor, "synthesis", [subcap])
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
     wb.set_scoring(subcap, payload)
@@ -991,6 +1013,7 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
                 f"exa --query …` (or tavily / clay / drive) and retry — 'no "
                 f"enrichment effort' is the owner's 2026-09-03 finding, and this "
                 f"is the check that stops it" + why)
+    assert_actor_scope(actor, "absence", [subcap])
     rep = Q.ladder_report(ladder or [], searches)
     rungs = set(rep["rungs"])
     owed = [r for r in ABSENCE_RUNGS_REQUIRED if r not in rungs]

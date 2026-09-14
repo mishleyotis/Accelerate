@@ -49,6 +49,37 @@ def test_every_required_family_is_one_the_agents_can_actually_call():
             f"{name} is required but no agent is provisioned with it")
 
 
+def test_the_required_set_is_what_the_conductor_holds_and_no_lane_does():
+    """2026-09-14: the caller of this contract is the CONDUCTOR's preflight.
+    So REQUIRED ∪ REQUIRED_ANY must be families the conductor's own manifest
+    holds — it is the session whose tools are checked — and no research lane
+    may hold any of them: a lane emits `search_requests`, it does not call."""
+    import re
+    fam = cc.families()
+    c = cc.contract()
+    named = set(c["required"]) | {n for g in c["required_any"] for n in g}
+    agents = cc._ROOT / "plugins" / "dma-insights" / "agents"
+
+    def held(path):
+        m = re.search(r"^tools:(.*)$", path.read_text()[:8000], re.M)
+        tools = {t.strip() for t in (m.group(1) if m else "").split(",")}
+        return {f for f, ts in fam.items() if any(t in tools for t in ts)}
+
+    conductor = held(agents / "research" / "research-conductor.md")
+    assert set(c["required"]) <= conductor, (
+        f"the conductor lacks {sorted(set(c['required']) - conductor)}; "
+        f"its preflight would stop on a family it does not hold")
+    for group in c["required_any"]:
+        assert conductor & set(group), f"the conductor holds neither of {group}"
+    for lane in sorted((agents / "research" / "categories").glob("*.md")):
+        assert held(lane) & named == set(), (
+            f"{lane.name} holds {sorted(held(lane) & named)} — a lane emits "
+            f"search_requests, it does not call a connector")
+    assert set(c["optional"]) == {"indeed", "quartr"}, (
+        "drive left the contract: Drive reads go through drive_fetch.py over "
+        "Bash and no agent holds the tool")
+
+
 def test_a_required_family_that_left_the_registry_breaks_loudly(monkeypatch):
     """And breaks as a REPO defect (exit 2), never as a session's failure:
     no firing should read 'you are missing firecrawl' when the truth is that

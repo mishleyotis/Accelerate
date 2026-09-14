@@ -113,3 +113,168 @@ def test_the_ledger_gets_the_real_figures_not_an_estimate(tmp_path):
     assert research, "the research stage must appear in the ledger"
     assert sum(float(r.get("usd") or 0) for r in research) > 0, (
         "the ledger must carry the spend the dispatcher reported")
+
+
+# ── the ledger sums to the run, once ───────────────────────────────────
+#
+# Measured 2026-09-14: `agent_run.py` writes its own ledger row per batch
+# (`--record-stage`), and `Pipeline._record` then wrote the same spend again
+# under the stage it was closing. For a research round that stage is
+# RESEARCH — which contains the CHALLENGE and RELAY batches — so the run
+# total roughly doubled AND the challenge lanes' money was reported as
+# research. `_over_budget` reads that total, so the ceiling bit at half the
+# real figure.
+
+
+class SelfRecordingDispatcher(CostlyDispatcher):
+    """A dispatcher that writes its own ledger rows, as `agent_run.py` does."""
+
+    records_cost = True
+
+    def dispatch(self, batch_path, *, stage, lanes, retries, ctx):
+        from engine import cost
+        out = super().dispatch(batch_path, stage=stage, lanes=lanes,
+                               retries=retries, ctx=ctx)
+        cost.record(ctx.run, stage=stage, elapsed_s=1.0, usd=out["usd"],
+                    turns=out["turns"], note="agent_run batch")
+        return out
+
+
+def _lane_synthesises_uncontested(agent, prompt_file, ctx):
+    """Like `_lane_closes_one_cell`, but leaves the challenge to the
+    CHALLENGE stage — `fixtures.synthesise` challenges the cell itself, so a
+    run built with it dispatches no challenge lane and cannot measure one."""
+    from engine import ledger as L
+    F = S.fixtures()
+    wb = ctx.run.open()
+    cat = agent.split("-")[1].upper()
+    for c in [x for x in wb.selected_subcaps() if x.startswith(cat)]:
+        if str((wb.scoring_row(c) or {}).get("Dominant_Claim") or "").strip():
+            continue
+        eids = F.bank_evidence(wb, c, n=5)
+        # `good_synthesis` carries a Challenge_Verdict of its own, which
+        # `challenge_batch` reads as "already challenged".
+        record = {k: v for k, v in F.good_synthesis(c, eids).items()
+                  if k != "Challenge_Verdict"}
+        L.append_synthesis(wb, c, record, actor=agent)
+        break
+
+
+def _drive_self_recording(tmp_path, **over):
+    run = new_run(tmp_path, n=6)
+    preflight.record(run, preflight_doc())
+    disp = SelfRecordingDispatcher(5.0,
+                                   handlers={"research-p": _lane_synthesises_uncontested,
+                                             "finding-challenger": S.lane_noop})
+    kw = dict(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(), push=False,
+              folder_root=tmp_path / "client_out", ingest_poll_s=0, sleep=lambda s: None,
+              log=lambda s: None, until="RESEARCH", max_rounds=2, stall_rounds=0,
+              max_usd=0)
+    kw.update(over)
+    p = P.Pipeline(run, P.Options(**kw))
+    return p, disp, p.run_all()
+
+
+def test_the_ledger_sums_to_the_run_not_twice(tmp_path):
+    from engine import cost
+    p, disp, _ = _drive_self_recording(tmp_path)
+    rows = cost.ledger(p.run)
+    dispatched = 5.0 * len(disp.calls)
+    assert dispatched > 0
+    total = sum(r["usd"] for r in rows if r.get("usd") is not None)
+    assert total == dispatched, (
+        f"ledger says ${total} for ${dispatched} dispatched — the driver "
+        f"re-recorded what the dispatcher already wrote")
+
+
+def test_challenge_spend_is_attributed_to_challenge(tmp_path):
+    from engine import cost
+    p, disp, _ = _drive_self_recording(tmp_path)
+    challenge_calls = [c for c in disp.calls if c["stage"] == "CHALLENGE"]
+    assert challenge_calls, "fixture dispatched no challenge lane"
+    by = {r["stage"]: r for r in cost.report(p.run)["by_stage"]}
+    assert by["CHALLENGE"]["usd"] == 5.0 * len(challenge_calls)
+    assert by["RESEARCH"]["usd"] == 5.0 * len(
+        [c for c in disp.calls if c["stage"] == "RESEARCH"])
+
+
+def test_a_dispatcher_that_does_not_self_record_is_still_recorded(tmp_path):
+    """The stub, and any lane whose status file carried no cost. Removing
+    the driver's record for everyone would leave those runs unpriced."""
+    from engine import cost
+    p, disp, _ = _drive(tmp_path, max_usd=0)
+    total = sum(r["usd"] for r in cost.ledger(p.run) if r.get("usd") is not None)
+    assert total == 5.0 * len(disp.calls) > 0
+
+
+def test_the_real_dispatcher_declares_that_it_records_its_own_cost():
+    assert P.AgentRunDispatcher.records_cost is True
+    assert getattr(S.StubDispatcher, "records_cost", False) is False
+
+
+# ── the ceiling survives the process ───────────────────────────────────
+#
+# `_spent_usd` was a class attribute starting at 0.0 and nothing read the
+# ledger back, so a resume — or the hourly `watchdog --revive`, which is
+# the one that matters — began every run at zero. A budget is not a ceiling
+# if forgetting it costs nothing.
+
+
+def test_a_resumed_run_remembers_what_it_spent(tmp_path):
+    p, disp, out = _drive(tmp_path, max_usd=12.0)
+    assert out["outcome"] == "STOPPED_BUDGET"
+    spent = p._spent_usd
+    p2 = P.Pipeline(p.run, P.Options(
+        dispatcher=CostlyDispatcher(5.0, handlers={"research-p": _lane_closes_one_cell,
+                                                   "finding-challenger": S.lane_noop}),
+        reads=S.StubReads(), shipper=S.StubShipper(), push=False,
+        folder_root=tmp_path / "client_out", ingest_poll_s=0, sleep=lambda s: None,
+        log=lambda s: None, until="RESEARCH", max_usd=12.0))
+    assert p2._spent_usd == spent, "the resume started from zero"
+    out2 = p2.run_all()
+    assert out2["outcome"] == "STOPPED_BUDGET"
+    assert not [c for c in p2.opts.dispatcher.calls if c["stage"] == "RESEARCH"], \
+        "it dispatched again on a budget it had already spent"
+
+
+def test_raising_the_ceiling_is_how_a_resume_continues(tmp_path):
+    p, disp, out = _drive(tmp_path, max_usd=12.0)
+    p2 = P.Pipeline(p.run, P.Options(
+        dispatcher=CostlyDispatcher(5.0, handlers={"research-p": _lane_closes_one_cell,
+                                                   "finding-challenger": S.lane_noop}),
+        reads=S.StubReads(), shipper=S.StubShipper(), push=False,
+        folder_root=tmp_path / "client_out", ingest_poll_s=0, sleep=lambda s: None,
+        log=lambda s: None, until="RESEARCH", max_usd=100.0))
+    p2.run_all()
+    assert [c for c in p2.opts.dispatcher.calls if c["stage"] == "RESEARCH"]
+
+
+def test_the_outcome_is_recorded_where_the_watchdog_can_read_it(tmp_path):
+    import json
+    p, disp, out = _drive(tmp_path, max_usd=12.0)
+    st = json.loads((p.run.qa_dir / "pipeline_state.json").read_text())
+    assert st["last_outcome"] == "STOPPED_BUDGET"
+    assert st["spent_usd"] >= 12.0 and st["budget_usd"] == 12.0
+
+
+# ── the other ceiling, in the same place ───────────────────────────────
+
+def test_the_wall_clock_bites_inside_the_research_stage(tmp_path):
+    """It was checked between stages only, while ten rounds of sixteen
+    lanes happen inside one."""
+    # A clock that advances a minute per reading, against a 5-minute wall.
+    # The stage needs six rounds to close six cells and reads the clock
+    # about twice a round, so a wall that only bit BETWEEN stages would let
+    # all six run — which is what it did.
+    import itertools
+    ticks = itertools.count(0, 60)
+    p, disp, out = _drive(tmp_path, max_usd=0, max_wall_min=5,
+                          clock=lambda: next(ticks))
+    assert out["outcome"] == "STOPPED_WALL_CLOCK", out
+    assert _rounds(disp) < 6, "the wall let the whole stage run"
+
+
+def test_the_default_wall_clock_is_four_hours():
+    """It lived in the conductor's dispatch line and nowhere else, so a
+    driver invoked any other way ran unbounded."""
+    assert P.Options.max_wall_min == 240.0

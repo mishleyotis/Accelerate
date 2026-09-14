@@ -380,7 +380,15 @@ def test_heal_is_instruction_when_no_connector_was_ever_attempted(tmp_path):
     plan = relay.heal_plan(run, run.open(), cat, logs_dir=logs)
     assert plan["heal"] == "instruction" and "no connector call" in plan["reason"]
     assert plan["manifest"]["ok"] and plan["grants"]["ok"] is True
-    assert "mcp__Exa__web_search_exa" in plan["instruction"]
+    # Until 2026-09-14 this asserted the instruction named
+    # `mcp__Exa__web_search_exa` — "your manifest declares Exa and Tavily:
+    # fire them". It no longer does, and that is the roster change rather
+    # than a regression: the connectors bind in the orchestrator's session,
+    # a headless lane is a different session, and telling a lane to fire a
+    # tool it cannot hold is the loop that cost $96.65. What the lane owes
+    # now is the REQUEST.
+    assert "search_requests" in plan["instruction"]
+    assert "mcp__Exa__web_search_exa" not in plan["instruction"]
 
 
 def test_heal_is_grants_when_the_transcript_shows_a_refusal(tmp_path):

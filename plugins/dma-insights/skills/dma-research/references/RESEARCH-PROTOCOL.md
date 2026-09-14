@@ -88,8 +88,13 @@ query seeds. Work it in this order:
    stops fishing.
 2. **Plan queries** — `engine.cli fuse plan --run R --subcap X --facet works`
    gives the three differently-shaped probes per DQ (presence, responsive,
-   toolkit-artefact). Fire them across the search tools you hold (WebSearch;
-   Exa and Tavily where present). **Log every search**:
+   toolkit-artefact). Fire them through the web tools you hold (WebSearch,
+   WebFetch). **You hold no connector**: the Exa, Tavily, Clay and
+   Explorium volleys are EMITTED, not fired — put each in your final
+   output's `search_requests` array (`{"query", "falsifier", "facet",
+   "subcap", "tool": "exa|tavily|clay|vibe", "proves"}`) and the conductor
+   services them per capability batch between rounds, logging each with the
+   tool that ran it. **Log every search you did run**:
    `engine.cli search --run R --subcap X --facet works --query '…' --hits N
    --kept M`. An unlogged search never happened, and the contradicts gate
    reads the log.
@@ -157,9 +162,10 @@ Rules the gates enforce and you must not soften:
   owed for this cell — and `orient`'s work list serves `in_volley` cells
   (some volleys fired) before any new `pending` cell. A cell with one
   shallow `works` query and four unfired volleys is not researched; it is
-  opened. Fire the toolkit's NAMED artefacts and the connectors (Exa,
-  Tavily) on each volley — `absence_single_tool` names the cells whose
-  whole search was one web engine.
+  opened. Fire the toolkit's NAMED artefacts on each volley through the web
+  tools, and emit the connector volleys (Exa, Tavily) as `search_requests`
+  for the conductor to service — `absence_single_tool` names the cells whose
+  whole search was one web engine, and a serviced request is what closes it.
 - **`NOT_RUN` means the volley never fired — nothing else.** A volley that
   RAN and surfaced nothing relevant writes
   `NO_FINDING after <n> logged searches: <what was hunted and what came
@@ -222,11 +228,14 @@ result the run can defend in the room; a `NO_EVIDENCE` left standing is not.
 ## Internal artefacts (HYBRID / INTERNAL runs)
 
 Your card's `internal_sources` name the client documents that answer the
-DQ. In HYBRID/INTERNAL mode those live in the client's Drive folder — use
-your Drive READ tools (`search_files` scoped to the client folder,
-`read_file_content` / `download_file_content`) to fetch the NAMED artefact,
-then register what it says with `--origin internal` and a verbatim excerpt.
-You never write to Drive; the conductor owns backup and shipping.
+DQ. In HYBRID/INTERNAL mode those live in the client's Drive folder, which
+the conductor's `drive_fetch.py pull` has already landed under the run root
+(`01_intake/` — check `run_manifest.json` for the path). You hold no Drive
+tool: read the NAMED artefact from disk (Read, or `grep`/`pdftotext` over
+Bash), then register what it says with `--origin internal` and a verbatim
+excerpt. An artefact the pull did not land is a `search_requests` entry with
+`"tool": "drive"`, never a gap. You never write to Drive; the conductor owns
+the pull, the backup and the shipping.
 
 ## After a compaction, a resume, or any interruption
 

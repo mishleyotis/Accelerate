@@ -12,6 +12,8 @@ engine's own fixtures, a connector that ingests when polled, a shipper that
 passes unless told otherwise). What it proves is the SEQUENCE and the
 refusals a live run meets at the command line:
 
+  0  a run whose connector baseline was never recorded is BLOCKED at
+     PREFLIGHT, before a single lane, and plans again once it is recorded
   1  `env` and `plan` say what is missing before anything is dispatched
   2  a lane that produces nothing twice is retried and the stage still PASSES
   3  an ingest that never arrives is a loud FAIL at INGEST_A, with the
@@ -120,6 +122,31 @@ def main(argv=None) -> int:
         if rrow[0].value == "subcaps_selected":
             rrow[1].value = len(cells)
     x.save(wb.path)
+    # ── 0 · the connector gate, both ways ────────────────────────────────
+    #
+    # The driver refuses to dispatch a run whose connector baseline was
+    # never recorded (2026-09-14): without one, nothing can say whether an
+    # empty cell can be enriched or honestly declared absent, so the run
+    # re-dispatches until its ceiling. The walk asserts the refusal FIRST —
+    # a gate nobody proves refusing is a gate nobody has tested — and then
+    # records the baseline the way a session that holds the tools does.
+    print("STEP 0 · the connector gate")
+    base = [*base]
+    r = run("engine.pipeline", "run", *base, "--dispatcher", "stub", "--json",
+            "--until", "RESEARCH", "--no-push", expect=1, env=env)
+    d = jout(r)
+    check("a run with no connector baseline is BLOCKED before any lane",
+          d.get("outcome") == "BLOCKED" and d.get("stage") == "PREFLIGHT"
+          and "baseline" in (d.get("reason") or ""), json.dumps(d)[:300])
+    check("and it dispatched nothing", not (root / "briefs").exists())
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import connector_contract as cc                              # noqa: E402
+    cc.write_baseline(["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+                       "mcp__Clay__find-and-enrich-company"], str(root))
+    r = run("engine.pipeline", "plan", *base)
+    check("with the baseline recorded it plans again",
+          jout(r).get("next") is not None, r.stdout[-200:])
+
     stub = {"DMA_STUB_STATE": str(work / "stub_connector.json"), **env}
     common = [*base, "--dispatcher", "stub", "--no-push", "--folder-root", str(work / "client_out"),
               "--json", "--ingest-timeout-s", "0"]

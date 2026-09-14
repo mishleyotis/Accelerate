@@ -181,6 +181,19 @@ def refuse_on_stale_install() -> str | None:
             f"--allow-stale-install` to record the waiver on the run).")
 
 
+def _actor(a):
+    """`--actor` if given, else the agent the dispatcher launched.
+
+    A headless lane cannot be identified from inside a hook (the harness
+    carries `agent_type` only within a subagent), so `agent_run.py` puts the
+    name in the child's environment and the write CLIs read it from there.
+    An empty answer is unconstrained, which is what a person at a terminal
+    should be.
+    """
+    from . import scope as _scope
+    return (getattr(a, "actor", None) or _scope.actor_from_env()) or None
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in _FAMILIES:
@@ -257,6 +270,13 @@ def main(argv=None) -> int:
                         "searched. The search-op ceiling is charged once")
     q.add_argument("--facet", choices=contract.DQ_FACETS)
     q.add_argument("--query", required=True)
+    q.add_argument("--actor", default=None,
+                   help="the agent logging this search. Defaults to $DMA_ACTOR, "
+                        "which the dispatcher sets to the agent it launched. "
+                        "A lane may log only its own category's cells "
+                        "(engine/scope.py); the servicing tier logs any cell "
+                        "in the run, which is how one lane's find reaches "
+                        "another lane's")
     q.add_argument("--tool", default="web_search", choices=contract.SEARCH_TOOLS,
                    help="which tool ran — closed vocabulary so the gate can "
                         "count the enrichment effort behind an empty cell")
@@ -283,6 +303,11 @@ def main(argv=None) -> int:
     e.add_argument("--tier", required=True); e.add_argument("--excerpt", required=True)
     e.add_argument("--published"); e.add_argument("--claim-type", default="FACT")
     e.add_argument("--origin", default="public")
+    e.add_argument("--actor", default=None,
+                   help="the agent registering this source. Defaults to "
+                        "$DMA_ACTOR. A lane may register only against its own "
+                        "category's cells (engine/scope.py); the servicing "
+                        "tier registers against any cell in the run")
 
     y = common(sub.add_parser("synthesise"))
     y.add_argument("--subcap", required=True); y.add_argument("--json", required=True)
@@ -432,7 +457,7 @@ def main(argv=None) -> int:
         n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
                                  query=a.query, tool=a.tool, hits=a.hits,
                                  kept=a.kept, outcome=a.outcome,
-                                 prelim=a.prelim)
+                                 prelim=a.prelim, actor=_actor(a))
         print(json.dumps({"seq": n, **ledger.stats(wb)}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
@@ -450,7 +475,7 @@ def main(argv=None) -> int:
         eid = ledger.append_evidence(
             wb, source_name=a.source, source_url=a.url, tier=a.tier,
             excerpt=a.excerpt, subcaps=cells, published=a.published,
-            claim_type=a.claim_type, origin=a.origin)
+            claim_type=a.claim_type, origin=a.origin, actor=_actor(a))
         print(json.dumps({"e_id": eid, "profile": bool(a.profile)}, indent=2))
         return 0
     if a.cmd == "synthesise":

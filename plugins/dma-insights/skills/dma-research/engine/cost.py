@@ -167,7 +167,14 @@ PHASE_MINUTES = {
     "preflight (financials, census, the question)": 10,
     "PRELIM (profile, timeline, peers, tech baseline)": 15,
     "category research (16 lanes, in parallel)": None,   # computed
-    "gates + independent challenge": 10,
+    # CHALLENGE and GATES shared one 10-minute line until 2026-09-14, so
+    # `report` could name neither as the one that was over — and the
+    # challenge stage is sixteen lanes of its own, the second-largest
+    # fan-out in the run. Split at 8/2, which is where the measured
+    # elapsed sat; the schedule total is unchanged and pinned by
+    # test_the_phase_table_still_sums_to_the_same_schedule.
+    "independent challenge (paged lanes, in parallel)": 8,
+    "gates": 2,
     "report sections (2 producers, in parallel) + review": 25,
     "assemble, verify, push": 5,
 }
@@ -240,8 +247,11 @@ STAGE_PHASE = {
     "PRELIM": "PRELIM (profile, timeline, peers, tech baseline)",
     "KG": None,
     "RESEARCH": "category research (16 lanes, in parallel)",
-    "CHALLENGE": "gates + independent challenge",
-    "GATES": "gates + independent challenge",
+    "CHALLENGE": "independent challenge (paged lanes, in parallel)",
+    "GATES": "gates",
+    # The relay's own fan-out. It had no phase at all, so its spend was
+    # reported as part of whatever stage contained it.
+    "RELAY": None,
     "HANDOFF": None,
     "SCORING": None,
     "INGEST_A": None,
@@ -516,7 +526,14 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
         st = r["stage"]
         t = timings.setdefault(st, {"elapsed_s": 0.0, "records": 0, "attempts": 0,
                                     "lanes": 0, "first_started_at": None,
-                                    "last_ended_at": None})
+                                    "last_ended_at": None,
+                                    # Per-stage money, 2026-09-14. The run
+                                    # total could not say which fan-out spent
+                                    # it, so no token change could be judged.
+                                    # `usd` stays None until a row carries
+                                    # one: an unpriced stage and a free stage
+                                    # are different facts.
+                                    "usd": None, "turns": 0, "tokens": {}})
         t["elapsed_s"] = round(t["elapsed_s"] + float(r.get("elapsed_s") or 0), 1)
         t["records"] += 1
         t["attempts"] += int(r.get("attempts") or 0)
@@ -528,7 +545,11 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
         if r.get("usd") is not None:
             usd_total += float(r["usd"])
             usd_known = True
+            t["usd"] = round((t["usd"] or 0.0) + float(r["usd"]), 4)
         turns += int(r.get("turns") or 0)
+        t["turns"] += int(r.get("turns") or 0)
+        for k, v in (r.get("tokens") or {}).items():
+            t["tokens"][k] = t["tokens"].get(k, 0) + int(v or 0)
     summary = {"total_usd": (round(usd_total, 4) if usd_known else None),
                "total_elapsed_s": round(sum(t["elapsed_s"] for t in timings.values()), 1),
                "turns": turns, "stages": len(timings)}
@@ -552,6 +573,8 @@ def report(run, *, wb=None) -> dict:
         actual = round(t["elapsed_s"] / 60.0, 1)
         stages.append({"stage": st, "actual_min": actual,
                        "planned_min": planned,
+                       "usd": t["usd"], "turns": t["turns"],
+                       "tokens": t["tokens"] or None,
                        "over_by_min": (round(actual - planned, 1)
                                        if planned is not None and actual > planned
                                        else 0.0),
@@ -566,6 +589,16 @@ def report(run, *, wb=None) -> dict:
     return {
         "run_id": wb.metadata().get("run_id"), "ledger": str(_ledger_path(run)),
         "records": len(rows), "stages": stages,
+        # The same rows, money first and largest first — what a reader wants
+        # when the question is "where did the run's dollars go".
+        "by_stage": sorted(
+            [{"stage": r["stage"], "usd": r["usd"], "turns": r["turns"],
+              "tokens": r["tokens"], "records": r["records"],
+              "actual_min": r["actual_min"],
+              "share": (round(r["usd"] / summary["total_usd"], 3)
+                        if r["usd"] and summary["total_usd"] else None)}
+             for r in stages],
+            key=lambda d: (-(d["usd"] or 0.0), d["stage"])),
         "total_min": total_min, "target_min": TARGET_WALL_CLOCK_MIN,
         "schedule_total_min": sch["total_min"],
         "total_usd": usd, "budget_usd": budget, "pillars": pillars,

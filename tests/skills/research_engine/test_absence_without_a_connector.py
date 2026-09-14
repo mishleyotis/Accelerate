@@ -46,10 +46,12 @@ def _bound_tools():
 def _run(tmp_path, tools, n=4):
     """A run whose cells are fully worked THROUGH WEB SEARCH ONLY — every
     askable volley, both ladder rungs, nothing else missing."""
-    run = F.new_run(tmp_path, n=n)
+    # `tools=None` is a run that NEVER RECORDED A BASELINE — the unverified
+    # case, which several tests below turn on. `new_run` writes a bound one
+    # by default (since the driver refuses to dispatch without one), so it
+    # is suppressed here rather than overwritten.
+    run = F.new_run(tmp_path, n=n, baseline=(tools if tools is not None else None))
     wb = run.open()
-    if tools is not None:
-        cc.write_baseline(tools, str(run.root))
     for cell in wb.selected_subcaps():
         F.fire_volleys(wb, cell, n=1)
         for rung in ("direct", "proxy"):
@@ -270,3 +272,59 @@ def test_the_flag_exists_and_is_threaded_through():
     text = inspect.getsource(cli.main)
     assert '"--enrichment-unavailable", action="store_true"' in text
     assert "enrichment_unavailable=a.enrichment_unavailable" in text
+
+
+# ── the lane is TOLD about the degraded path ───────────────────────────
+#
+# The flag was built on 2026-09-13 and named in the CLI and SKILL.md only:
+# neither the dispatch packet nor the heal instruction mentioned it, so a
+# lane following its brief literally could not take the path built for it.
+# It is named only where the run's own baseline proves the connector
+# missing — a lane told about an escape it is not entitled to will reach
+# for it, and the writer refuses it anyway.
+
+def _rules_for(tmp_path, tools):
+    from engine import brief
+    from fixtures import new_run
+    run = new_run(tmp_path, n=6, baseline=(tools or None))
+    if tools is None:
+        import contextlib
+        with contextlib.suppress(FileNotFoundError):
+            (run.root / "connectors_baseline.json").unlink()
+    packet = brief.dispatch(run.open(), category="P1C1", run=run)
+    return " | ".join(packet["rules"]), packet
+
+
+def test_the_brief_names_the_flag_under_a_short_baseline(tmp_path):
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    assert "--enrichment-unavailable" in rules
+    assert packet["enrichment_binding"]["bound"] is False
+
+
+def test_a_bound_container_is_not_offered_the_escape(tmp_path):
+    from fixtures import BOUND_CONNECTORS
+    rules, packet = _rules_for(tmp_path, list(BOUND_CONNECTORS))
+    assert "--enrichment-unavailable" not in rules
+    assert "enrichment_binding" not in packet
+
+
+def test_an_unverified_container_is_not_offered_it_either(tmp_path):
+    """Unverified is not a diagnosis: nothing here proves the connector
+    absent, and the writer would refuse the flag anyway."""
+    rules, packet = _rules_for(tmp_path, None)
+    assert "--enrichment-unavailable" not in rules
+
+
+def test_the_unbound_heal_instruction_names_the_flag():
+    from engine import relay
+    text = relay.HEAL_INSTRUCTIONS["unbound"]
+    assert "--enrichment-unavailable" in text
+    assert "DO NOT retry" in text, "it must still not send the lane back"
+
+
+def test_the_rule_survives_the_packet_ceiling(tmp_path):
+    """`as_markdown` trims cell lists, never rules — assert it, because a
+    rule that is trimmed away is a rule nobody reads."""
+    from engine import brief
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    assert "--enrichment-unavailable" in brief.as_markdown(packet)

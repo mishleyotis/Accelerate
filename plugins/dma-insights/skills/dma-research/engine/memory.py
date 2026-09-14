@@ -75,7 +75,7 @@ def memory_path(run: runstate.Run, category: str) -> Path:
 
 
 def note(run: runstate.Run, *, category: str, subcap, facet: str,
-         kind: str = "evidence", **fields) -> Path:
+         kind: str = "evidence", actor: str | None = None, **fields) -> Path:
     """Append one entry. Cheap on purpose: the only validation here is shape
     vocabulary — substance is judged at CONSOLIDATION by the real gates,
     because a notebook that refuses a hunch defeats its reason to exist.
@@ -95,6 +95,23 @@ def note(run: runstate.Run, *, category: str, subcap, facet: str,
     if not cells:
         raise ValueError("note needs at least one subcap")
     subcap = ",".join(cells)
+    # THE CATEGORY IS A DIRECTORY NAME, and until 2026-09-14 it was free
+    # text: `--category P1C1 --subcap P3C2.4.1` wrote a P3 finding into
+    # P1C1's notebook, silently, and `--category P9C9` created a notebook
+    # for a category that does not exist. Both survive consolidation as
+    # findings nobody looks for.
+    cat = str(category or "").strip().upper()
+    stray = sorted({c for c in cells if not c.upper().startswith(cat + ".")})
+    if stray:
+        raise ValueError(
+            f"this note is filed under {cat} but names {', '.join(stray[:6])}. "
+            f"A notebook is read by the lane that owns the category, so a "
+            f"cell filed under another one is a finding nobody will look "
+            f"for. File it under its own category.")
+    from . import scope as _scope
+    why = _scope.violation(actor, "note", cells)
+    if why:
+        raise ValueError(why)
     if facet and facet not in C.DQ_FACETS:
         raise ValueError(f"facet {facet!r} not in {C.DQ_FACETS}")
     p = memory_path(run, category)
@@ -384,6 +401,9 @@ def main(argv=None) -> int:
                                 "all of them is one find, not several")
             s.add_argument("--facet", default="works")
             s.add_argument("--kind", default="evidence", choices=KINDS)
+            s.add_argument("--actor", default=None,
+                           help="the agent noting this. Defaults to $DMA_ACTOR; "
+                                "a lane notes only its own category")
             for f in ("claim", "excerpt", "url", "source-name", "tier",
                       "published", "claim-type", "ladder", "text", "origin"):
                 s.add_argument(f"--{f}")
@@ -394,8 +414,10 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
     if a.cmd == "note":
+        from . import scope as _scope
         p = note(run, category=a.category, subcap=a.subcap, facet=a.facet,
-                 kind=a.kind, claim=a.claim, excerpt=a.excerpt, url=a.url,
+                 kind=a.kind, actor=(a.actor or _scope.actor_from_env() or None),
+                 claim=a.claim, excerpt=a.excerpt, url=a.url,
                  source_name=getattr(a, "source_name", None), tier=a.tier,
                  published=a.published,
                  claim_type=getattr(a, "claim_type", None),

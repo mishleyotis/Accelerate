@@ -109,6 +109,13 @@ STATE_NAME = "pipeline_state.json"
 SECTIONS_DIR = "08_sections"
 BRIEFS_DIR = "briefs"
 
+#: A clean stop (`--until`, the wall clock) is exit 0: the run is resumable
+#: and nothing failed. Everything else is exit 1, and STOPPED_BUDGET is
+#: deliberately among them — `watchdog --revive` records RESOLVED or FAILED
+#: from this code, and a sweep that called a budget stop RESOLVED would be
+#: lying about a run that needs a person to raise the ceiling.
+EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK")
+
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
           "PROMOTE")
@@ -156,6 +163,15 @@ class Shipper(Protocol):
 class AgentRunDispatcher:
     """Real lanes: `agent_run.py --batch` as a child process, with retries,
     timings and the cost record the batch itself writes."""
+
+    #: THE BATCH WRITES ITS OWN LEDGER ROW (`--record-stage`, below), so the
+    #: driver must not write the same spend again. Measured 2026-09-14: it
+    #: did, under the stage it was closing — which for a research round is
+    #: RESEARCH, the stage that CONTAINS the challenge and relay batches. So
+    #: a run's ledger roughly doubled and the challenge lanes' money was
+    #: reported as research, while `_over_budget` read the doubled total and
+    #: bit at half the real ceiling.
+    records_cost = True
 
     def __init__(self, timeout: int = 2400, stream: bool = True):
         self.timeout, self.stream = timeout, stream
@@ -275,7 +291,10 @@ class Options:
     reads: ConnectorReads
     shipper: Shipper
     until: str | None = None
-    max_wall_min: float | None = None
+    # FOUR HOURS, and it is a default rather than prose. It lived only in
+    # the conductor's dispatch line and the command's example, so a driver
+    # invoked any other way ran unbounded in wall clock.
+    max_wall_min: float | None = 240.0
     # A DOLLAR CEILING, enforced. `cost.BUDGET_PER_PILLAR` x pillars in scope
     # when left None. Measured 2026-09-12: the budget was computed, reported
     # and never enforced — `cost.record` raises only on a missing duration and
@@ -288,6 +307,9 @@ class Options:
     # dollar ceiling, not the turn ceiling, is the thing that has to bite.
     # Set 0 to disable the ceiling and keep the old reporting-only behaviour.
     max_usd: float | None = None
+    # Start a run whose connector baseline was never recorded. The default
+    # is to refuse: see `_connector_gate`.
+    allow_unverified_connectors: bool = False
     # A CEILING on rounds per looping stage. 3 refused categories that were
     # still gaining ground each round (owner, 2026-09-07); 10 is what the
     # owner resumed those runs with. `stall_rounds` is what keeps a large
@@ -339,6 +361,21 @@ class Pipeline:
         self.state = _load_state(self.state_path)
         self.t_start = opts.clock()
         self.dispatched: list[dict] = []
+        # THE CEILING MUST SURVIVE THE PROCESS. `_spent_usd` is a class
+        # attribute starting at 0.0, and nothing read the ledger back — so
+        # a resume, or the hourly `watchdog --revive`, began every run at
+        # zero and could spend a full budget again, once an hour, forever.
+        # The ledger is the run's own record of what it has already spent.
+        try:
+            from . import cost
+            rows = cost.ledger(run)
+            self._spent_usd = self._recorded_usd = round(
+                sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 4)
+            self._spent_turns = self._recorded_turns = sum(
+                int(r.get("turns") or 0) for r in rows)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (prior spend not read, starting from zero: "
+                          f"{str(e)[:120]})")
 
     # ── plumbing ───────────────────────────────────────────────────────
     def reopen(self) -> RunWorkbook:
@@ -387,9 +424,16 @@ class Pipeline:
             self.opts.log(f"  (gate log not written: {str(e)[:120]})")
         try:
             from . import cost
+            # The spend rides here only when the dispatcher did not already
+            # write it. A dispatcher that records its own batches (the real
+            # one) is trusted with the money; the stub, and any lane whose
+            # status file carried no cost, are not, and would otherwise
+            # leave the run unpriced.
+            spend = ({} if getattr(self.opts.dispatcher, "records_cost", False)
+                     else self._spend_kw(cost))
             cost.record(self.run, stage=stage, elapsed_s=elapsed, lanes=lanes or None,
                         attempts=attempts or None, note=f"pipeline {verdict}: {detail[:200]}",
-                        wb=self.wb, **self._spend_kw(cost))
+                        wb=self.wb, **spend)
         except Exception as e:                       # noqa: BLE001
             # A swallowed cost failure is how a run spends $96 against a $20
             # budget and leaves a ledger that says nothing. Still non-fatal —
@@ -413,6 +457,11 @@ class Pipeline:
         self.opts.log(f"[{stage}] {verdict} — {detail[:160]} ({elapsed}s)")
 
     def _over_wall(self) -> bool:
+        # `None` disables it; 0 does NOT — a zero wall clock stops at the
+        # next boundary, which is how the walk and an operator ask for
+        # "stop cleanly now, I will resume". Reading 0 as "unbounded" would
+        # turn the one flag that stops a runaway run into the one that
+        # unleashes it.
         if self.opts.max_wall_min is None:
             return False
         return (self.opts.clock() - self.t_start) / 60.0 >= self.opts.max_wall_min
@@ -569,7 +618,111 @@ class Pipeline:
                             f"--root {self.run.root}" if nxt else None)}
 
     # ── RUN ────────────────────────────────────────────────────────────
+    def _connector_gate(self, nxt: str | None) -> dict | None:
+        """Refuse, degrade or proceed, on the run's OWN recorded baseline.
+
+        THE $96.65 SHAPE, measured 2026-09-12: with no enrichment connector
+        bound, `declare_absence` refuses every empty cell, so no floors gate
+        can pass, so the driver re-dispatches sixteen categories until
+        something stops it. The degraded path built on 2026-09-13 makes such
+        a container honest — but it lifts only on a RECORDED baseline, and
+        nothing on the run path wrote or read one.
+
+        Three answers, and the difference between the last two is the whole
+        point:
+
+          bound      proceed, silently.
+          short      proceed DEGRADED: the container provably never had a
+                     connector, so its absences are written at reduced
+                     rigour and the run says so.
+          unknown    REFUSE. Unverified is not a diagnosis: a baseline
+                     nobody wrote cannot prove a connector missing, and
+                     treating it as proof would open the degraded path to
+                     every run that skipped its preflight.
+
+        Only for a run that has not yet passed RESEARCH — the stage that
+        spends the money. A run past it is not re-refused over a file
+        nothing will read again.
+        """
+        if nxt is None or nxt not in STAGES:
+            return None
+        # AFTER the run has legitimately begun, and BEFORE it dispatches.
+        # PREFLIGHT and START carry their own refusals — an unanswered
+        # binding, a missing entity — and those are the more fundamental
+        # facts about a run: a run nobody confirmed the sub-vertical for
+        # should be told THAT, not told about its connectors. PRELIM is the
+        # first stage that dispatches a lane, so it is the first this gate
+        # must stand in front of.
+        if not (STAGES.index("START") < STAGES.index(nxt)
+                <= STAGES.index("RESEARCH")):
+            return None
+        try:
+            binding = L.enrichment_binding(self.wb)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (connector baseline not read: {str(e)[:120]})")
+            return None
+        if binding["known"] and not binding["bound"]:
+            self.state["enrichment_degraded"] = {
+                "missing": list(binding["missing"]), "reason": binding["reason"],
+                "at": _utcnow()}
+            self._save_state()
+            self.opts.log(
+                f"[PREFLIGHT] DEGRADED — no enrichment connector in this "
+                f"container ({', '.join(binding['missing'])}). Empty cells "
+                f"close at REDUCED rigour, with the reason on the row.")
+            return None
+        if binding["known"]:
+            return None
+        if self.opts.allow_unverified_connectors:
+            self.state.setdefault("waivers", []).append(
+                {"at": _utcnow(), "unverified_connectors":
+                    "started with no connector baseline, by --allow-unverified-connectors"})
+            self._save_state()
+            return None
+        import sys as _sys
+        _sys.path.insert(0, str(PLUGIN / "scripts"))
+        try:
+            import connector_contract as cc          # noqa: PLC0415
+            where = cc.baseline_path(str(self.run.root))
+        except Exception:                            # noqa: BLE001
+            where = self.run.root / "connectors_baseline.json"
+        return {"outcome": "BLOCKED", "stage": "PREFLIGHT", "dispatched": [],
+                "stages_run": [],
+                "reason": (
+                    f"this run has no connector baseline at {where}, so nothing "
+                    f"can say whether an enrichment connector is bound — and "
+                    f"UNVERIFIED IS NOT A PASS. Without one, an empty cell can "
+                    f"neither be enriched nor honestly declared absent, no "
+                    f"floors gate can pass, and the driver re-dispatches until "
+                    f"its ceiling: that is the $96.65 run of 2026-09-12. From "
+                    f"the session that HOLDS the tools, before dispatching "
+                    f"anything:\n  python3 $CLAUDE_PLUGIN_ROOT/scripts/"
+                    f"connector_contract.py baseline --tools - --root "
+                    f"{self.run.root}\nA container that genuinely has none "
+                    f"records that too, and the run continues at reduced "
+                    f"rigour. Override with --allow-unverified-connectors.")}
+
     def run_all(self) -> dict:
+        """Drive the run, and RECORD HOW IT ENDED.
+
+        The outcome used to live only in the return value, so the hourly
+        watchdog — which reads the workbook and the qa dir, not this
+        process's memory — could not tell a run the dollar ceiling had
+        stopped from one whose gates had failed. They leave the same rows
+        behind, and one of them must not be re-dispatched.
+        """
+        out = self._run_all()
+        try:
+            self.state["last_outcome"] = out.get("outcome")
+            self.state["spent_usd"] = round(self._spent_usd, 4)
+            cap = self.budget_usd()
+            self.state["budget_usd"] = (round(cap, 2) if cap else None)
+            self._save_state()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (outcome not recorded: {str(e)[:120]})")
+        return out
+
+    def _run_all(self) -> dict:
         from . import cli as _cli
         stale = _cli.refuse_on_stale_install()
         if stale and not self.opts.allow_stale_install:
@@ -577,6 +730,10 @@ class Pipeline:
         if stale:
             self.state.setdefault("waivers", []).append(
                 {"at": _utcnow(), "stale_install": stale[:300]})
+        blocked = self._connector_gate(self.plan()["next"])
+        if blocked is not None:
+            self.opts.log(f"[PREFLIGHT] BLOCKED — {blocked['reason'][:160]}")
+            return blocked
         self._set_md("pipeline_version", PIPELINE_VERSION)
         self.state["invocations"].append({"at": _utcnow(), "until": self.opts.until})
         self._save_state()
@@ -626,6 +783,16 @@ class Pipeline:
                 # never got to finish trying. Reporting "still failing the
                 # floors gate" there sends the reader to repair research that
                 # was simply cut short, which is the wrong repair.
+                if self._wall_stopped:
+                    msg = (f"stopped by the {self.opts.max_wall_min}-minute wall "
+                           f"clock — the stage was cut short, not refused. "
+                           f"Resume with `{self.plan()['command']}`; what it had "
+                           f"reached when it stopped: {msg}")
+                    self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    outcome.update(outcome="STOPPED_WALL_CLOCK", stage=st,
+                                   reason=msg[:800], resume=self.plan()["command"])
+                    return outcome
                 if self._budget_stopped:
                     msg = (f"stopped by the ${self.budget_usd():.2f} budget after "
                            f"spending ${self._spent_usd:.2f} — the stage was cut "
@@ -665,6 +832,7 @@ class Pipeline:
     _recorded_usd = 0.0
     _recorded_turns = 0
     _budget_stopped = False
+    _wall_stopped = False
 
     def _reset_counters(self):
         self._rounds = self._lane_count = self._attempts = 0
@@ -915,6 +1083,16 @@ class Pipeline:
                     self.opts.log(f"  [RESEARCH] {cat}: no outcome moved for "
                                   f"{self.opts.stall_rounds} round(s) — not dispatching it "
                                   f"again; more rounds would not have helped")
+            if self._over_wall():
+                # The same argument as the budget, for the other ceiling:
+                # ten rounds of sixteen lanes happen inside ONE stage, so a
+                # between-stages-only wall clock cannot stop the stage that
+                # spends the hours.
+                self.opts.log(f"  [RESEARCH] wall clock "
+                              f"{self.opts.max_wall_min} min reached — stopping "
+                              f"at round {self._rounds}")
+                self._wall_stopped = True
+                break
             if self._over_budget():
                 # A between-stages-only ceiling cannot stop the stage that
                 # spends the money: ten rounds x 16 lanes all happen inside
@@ -1422,8 +1600,13 @@ def _is_dir(path) -> bool:
         return False
 
 
-def _connector_row() -> tuple:
-    """(name, ok, detail) for the enrichment-connector baseline."""
+def _connector_row(run_root=None) -> tuple:
+    """(name, ok, detail) for the enrichment-connector baseline.
+
+    `run_root` is passed rather than read from the environment: the answer
+    is about a RUN, and reading `$DMA_RUN_ROOT` or the cwd made it about
+    wherever the process happened to be standing.
+    """
     name = "enrichment connectors"
     fix = ("run `python3 $CLAUDE_PLUGIN_ROOT/scripts/connector_contract.py "
            "baseline --tools -` from the session that holds the tools, before "
@@ -1431,7 +1614,7 @@ def _connector_row() -> tuple:
     try:
         sys.path.insert(0, str(PLUGIN / "scripts"))
         import connector_contract as cc                       # noqa: PLC0415
-        path = cc.baseline_path(os.environ.get("DMA_RUN_ROOT"))
+        path = cc.baseline_path(run_root or os.environ.get("DMA_RUN_ROOT"))
         if not _readable(path):
             return (name, False,
                     f"no connector baseline at {path} — UNVERIFIED, not a pass. {fix}")
@@ -1448,7 +1631,7 @@ def _connector_row() -> tuple:
                              f"{str(e)[:160]} — UNVERIFIED, not a pass. {fix}")
 
 
-def env_check() -> dict:
+def env_check(run_root=None) -> dict:
     checks = []
 
     def ck(name, ok, detail):
@@ -1539,6 +1722,8 @@ def _build_opts(a) -> Options:
         disp, reads, shipper = AgentRunDispatcher(timeout=a.lane_timeout), McpReads(), ShipPageShipper()
     return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
                    max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
+                   allow_unverified_connectors=getattr(
+                       a, "allow_unverified_connectors", False),
                    max_rounds=a.max_rounds,
                    stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
                    relay=not a.no_relay,
@@ -1563,7 +1748,17 @@ def main(argv=None) -> int:
     r = common(sub.add_parser("run", help="drive the run to PROMOTE, gate by gate"))
     r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
     r.add_argument("--until", choices=STAGES, help="stop after this stage")
-    r.add_argument("--max-wall-min", type=float)
+    r.add_argument("--max-wall-min", type=float, default=Options.max_wall_min,
+                   help=f"wall-clock ceiling in minutes (default "
+                        f"{Options.max_wall_min:.0f}). 0 stops cleanly at the "
+                        f"next boundary and resumes; there is no 'unbounded'.")
+    r.add_argument("--allow-unverified-connectors", action="store_true",
+                   help="start a run whose connector baseline was never "
+                        "recorded. The default is to refuse: without one, "
+                        "nothing can say whether an empty cell can be "
+                        "enriched or honestly declared absent, and the run "
+                        "re-dispatches until its ceiling. The waiver is "
+                        "recorded on the run.")
     r.add_argument("--max-usd", type=float, default=Options.max_usd,
                    help="dollar ceiling for the run; default is "
                         "cost.BUDGET_PER_PILLAR x pillars in scope. "
@@ -1630,10 +1825,7 @@ def main(argv=None) -> int:
     else:
         print(f"\n{out['outcome']}" + (f" at {out['stage']}" if out.get("stage") else "")
               + (f": {out['reason']}" if out.get("reason") else ""))
-    # A clean stop (--until, --max-wall-min) is exit 0: the run is resumable
-    # and nothing failed. FAILED / BLOCKED / REFUSED are exit 1.
-    return 0 if out["outcome"] in ("COMPLETE", "STOPPED_AT_UNTIL",
-                                   "STOPPED_WALL_CLOCK") else 1
+    return 0 if out["outcome"] in EXIT_ZERO_OUTCOMES else 1
 
 
 if __name__ == "__main__":

@@ -126,13 +126,18 @@ HEAL_INSTRUCTIONS = {
         "`search_requests` and say so in your final output — never log a "
         "connector search you did not run."),
     "instruction": (
-        "your previous instance never ATTEMPTED an enrichment connector — "
-        "every logged search ran through web_search/web_fetch. Your manifest "
-        "declares Exa and Tavily: for each open cell fire at least the primary "
-        "and the contradicts volleys through `mcp__Exa__web_search_exa` or "
-        "`mcp__Tavily__tavily_search` and log each with `--tool exa` / "
-        "`--tool tavily`. If a call is refused, emit it as a `search_requests` "
-        "entry instead."),
+        "your previous instance logged every search through "
+        "web_search/web_fetch and emitted no `search_requests`, so no cell "
+        "of yours carries the enrichment effort the floors gate counts. YOU "
+        "HOLD NO CONNECTOR, and that is the design rather than a fault: they "
+        "bind once at session start, in the orchestrator's session, and a "
+        "headless lane is a different session. So for each open cell emit "
+        "the primary and contradicts volleys you WOULD have fired as "
+        "`search_requests` entries — one JSON object each, with `query`, "
+        "`facet`, `subcap` and a preferred `tool` — and say so in your final "
+        "output. The conductor runs them in one batch per capability through "
+        "the real connectors and logs them against your cells. Never log a "
+        "connector search you did not run."),
     "logging": (
         "your previous instance CALLED a connector (the transcript witnesses "
         "it) but every Search_Log row names `web_search`/`web_fetch`. The gate "
@@ -148,11 +153,17 @@ HEAL_INSTRUCTIONS = {
         "to retry against, and a fresh lane told to 'try harder' spends a full "
         "context floor to discover the same absence. Work the cells through "
         "web_search, emit every enrichment query you would have run as a "
-        "`search_requests` entry, and declare the cells you cannot close as "
-        "honest absences carrying that reason. A human attaches the connector "
-        "on the Routine's own edit screen; no lane can."),
+        "`search_requests` entry, and declare the cells you cannot close "
+        "with `engine.cli absence … --enrichment-unavailable` — the flag "
+        "that writes the absence at REDUCED rigour with this reason on the "
+        "row. It is verified against the run's own connector baseline, "
+        "which is what proves your container never had one. A human "
+        "attaches the connector on the Routine's own edit screen; no lane "
+        "can."),
     "manifest": (
-        "this lane's manifest declares NO enrichment connector tool, so a fresh "
+        "NOBODY in this run can service an enrichment request: neither this "
+        "lane (which is not meant to) nor the connector holder declares a "
+        "connector tool, so a fresh "
         "instance cannot call one either. This is a toolchain defect for the "
         "rectifier (scripts/provision_agent_tools.py), not something a lane can "
         "heal; emit the queries as `search_requests` so the relay's drain lane "
@@ -615,8 +626,25 @@ def grants_check() -> dict:
                 "note": f"could not read {AGENT_RUN.name}: {e.__class__.__name__}"}
 
 
+#: The tier that HOLDS the enrichment connectors. Since the 2026-09-14
+#: roster change they are bound in the orchestrator's session, not in a
+#: headless lane's: a lane emits `search_requests` and the conductor
+#: services them in batches, which is the only arrangement that can work —
+#: connectors bind once, at session start, and a `claude -p` child of the
+#: conductor is a different session with none of them.
+CONNECTOR_HOLDER = "research-conductor"
+
+
 def manifest_check(lane: str) -> dict:
-    """Which connector tools the lane's own manifest declares."""
+    """Which connector tools the lane's own manifest declares.
+
+    `ok` answers "is this manifest as it should be", which since the roster
+    change is NOT "does it declare a connector". A research lane that
+    declares none is correct; what would be broken is the HOLDER declaring
+    none, because then nobody in the run can service what the lane emits.
+    So a lane's `ok` is judged against the holder's manifest, and the
+    `manifest` heal re-targets the human who must fix it.
+    """
     hits = list(AGENTS_DIR.rglob(f"{lane}.md")) if AGENTS_DIR.is_dir() else []
     if not hits:
         return {"path": None, "declares": [], "ok": False,
@@ -625,7 +653,19 @@ def manifest_check(lane: str) -> dict:
     m = re.search(r"^tools:\s*(.+)$", head, re.M)
     tools = [t.strip() for t in (m.group(1) if m else "").split(",") if t.strip()]
     declares = [t for t in tools if any(t.startswith(ns + "__") for ns in CONNECTOR_NAMESPACES)]
-    return {"path": str(hits[0]), "declares": declares, "ok": bool(declares)}
+    if declares or lane == CONNECTOR_HOLDER:
+        return {"path": str(hits[0]), "declares": declares,
+                "ok": bool(declares), "holder": lane}
+    # A lane with no connector is the contract. Whether the RUN can enrich
+    # is then a question about the holder, so ask it there.
+    holder = manifest_check(CONNECTOR_HOLDER)
+    return {"path": str(hits[0]), "declares": declares,
+            "ok": bool(holder["declares"]), "holder": CONNECTOR_HOLDER,
+            "holder_declares": holder["declares"],
+            "note": (None if holder["declares"] else
+                     f"neither {lane}.md nor the holder {CONNECTOR_HOLDER}.md "
+                     f"declares a connector tool, so nothing in this run can "
+                     f"service a search request")}
 
 
 def transcript_connector_witness(transcript: Path) -> dict:

@@ -277,7 +277,7 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
         r = subprocess.run(cmd, cwd=repo_root, timeout=timeout,
                            capture_output=True, text=True,
                            start_new_session=True,
-                           env={**os.environ, "DMA_STAGE_GUARD": "off"})
+                           env=_child_env(name))
     except subprocess.TimeoutExpired:
         return {"agent": name, "code": 124, "stdout": "", "stderr": "",
                 "note": f"DISPATCH TIMEOUT: {name} exceeded {timeout}s — "
@@ -586,6 +586,72 @@ def _summarise(event: dict, st: dict) -> None:
                     "is_error"):
             if key in event:
                 st[key] = event[key]
+        # THE TOKENS, which rode in the same event and were dropped. 76% of
+        # the measured bill is cache reads (cost.MEASURED: 24.45M read
+        # tokens = $4.89 of a $6.45 lane), so a ledger without them can
+        # price a run but cannot say whether the cost is context or search
+        # — and `cost.as_baseline` refused every real run for exactly this,
+        # naming `agent_run.py --record-run` as the thing that supplies
+        # them. Absent usage stays ABSENT: a zero we made up would report a
+        # free lane.
+        tok = _tokens_of(event.get("usage"))
+        if tok:
+            st["tokens"] = tok
+        model = _model_of(event.get("modelUsage"))
+        if model:
+            st["model"] = model
+
+
+#: The CLI's usage keys -> the four the rate card prices (`cost.cost_of`).
+_USAGE_KEYS = {"cache_read_input_tokens": "cache_read",
+               "cache_creation_input_tokens": "cache_write",
+               "input_tokens": "uncached", "output_tokens": "output"}
+
+
+def _tokens_of(usage) -> dict:
+    """The four priced token counts, or {} when the stream carried none."""
+    if not isinstance(usage, dict):
+        return {}
+    out = {v: int(usage.get(k) or 0) for k, v in _USAGE_KEYS.items()}
+    return out if any(out.values()) else {}
+
+
+def _model_of(model_usage) -> str:
+    """The tier that did most of the work, in the rate card's vocabulary.
+
+    `modelUsage` is keyed by full model id and a lane can touch more than
+    one; the dominant one is the one worth pricing against.
+    """
+    if not isinstance(model_usage, dict) or not model_usage:
+        return ""
+    def _weight(v):
+        if not isinstance(v, dict):
+            return 0
+        return sum(int(v.get(k) or 0) for k in
+                   ("inputTokens", "outputTokens", "cacheReadInputTokens",
+                    "cacheCreationInputTokens"))
+    top = max(model_usage, key=lambda k: _weight(model_usage[k]))
+    for tier in ("opus", "sonnet", "haiku"):
+        if tier in str(top).lower():
+            return tier
+    return ""
+
+
+def _child_env(name: str) -> dict:
+    """The environment a lane is launched with.
+
+    DMA_STAGE_GUARD=off: the Stop hook holds a session open while a run has
+    a stage an agent can advance — correct for the driving session, wrong
+    for a lane (see the note at the dispatch site).
+
+    DMA_ACTOR: WHO THIS CHILD IS. A headless lane cannot be identified from
+    inside a hook — the harness carries `agent_type` only within a subagent
+    — and until 2026-09-14 nothing carried the agent's name into the
+    process either, so neither the engine's write paths nor a PreToolUse
+    guard could tell which lane was writing. Every write CLI now defaults
+    its `--actor` to this, and `engine/scope.py` is what reads it.
+    """
+    return {**os.environ, "DMA_STAGE_GUARD": "off", "DMA_ACTOR": name}
 
 
 def _final_text(events: list, raw: str) -> str:
@@ -659,7 +725,7 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
                                 start_new_session=True,
                                 # same reason as `dispatch`: the stage guard
                                 # is the conductor's, never a lane's
-                                env={**os.environ, "DMA_STAGE_GUARD": "off"})
+                                env=_child_env(name))
     except FileNotFoundError:
         st.update(state="failed", doing="claude CLI not on PATH")
         flush_status()
@@ -735,7 +801,8 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
     # ledger (`--record-run`): turns and USD from the CLI's result event.
     return {"agent": name, "label": label, "code": code, "stdout": out, "stderr": err,
             "note": note, "turns": st.get("num_turns"),
-            "usd": st.get("total_cost_usd")}
+            "usd": st.get("total_cost_usd"),
+            "tokens": st.get("tokens"), "model": st.get("model")}
 
 
 def watch(logs: Path, once: bool = False, interval: float = 3.0) -> int:
@@ -893,6 +960,10 @@ def _record_cost(record: dict, summary: dict, repo_root: Path) -> dict:
         cmd += ["--turns", str(summary["turns"])]
     if summary.get("usd") is not None:
         cmd += ["--usd", str(summary["usd"])]
+    if summary.get("tokens"):
+        cmd += ["--tokens", json.dumps(summary["tokens"], sort_keys=True)]
+    if summary.get("model"):
+        cmd += ["--model", str(summary["model"])]
     r = subprocess.run(cmd, cwd=eng, capture_output=True, text=True)
     return {"recorded": r.returncode == 0,
             "detail": (r.stdout if r.returncode == 0 else r.stderr).strip()[-400:]}
@@ -956,6 +1027,11 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
     # sum what is there and say nothing where it is not.
     turns = sum(int(r.get("turns") or 0) for r in results)
     usd_vals = [r.get("usd") for r in results if r.get("usd") is not None]
+    tokens: dict = {}
+    for r in results:
+        for k, v in (r.get("tokens") or {}).items():
+            tokens[k] = tokens.get(k, 0) + int(v or 0)
+    models = [r.get("model") for r in results if r.get("model")]
     summary = {"lanes": lanes, "dispatched": len(rows),
                "ok": len(results) - len(failed),
                "lane_cap": capacity,
@@ -967,6 +1043,10 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
                "retries_allowed": retries,
                "turns": turns or None,
                "usd": round(sum(usd_vals), 4) if usd_vals else None,
+               "tokens": tokens or None,
+               # One batch is one agent tier in practice; where it is not,
+               # the most common one prices the row.
+               "model": (max(set(models), key=models.count) if models else None),
                "lanes_detail": sorted(
                    [{"agent": r["agent"], "label": r.get("label") or r["agent"],
                      "code": r["code"],

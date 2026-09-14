@@ -83,6 +83,22 @@ def _age(ts: str | None) -> float | None:
     return (_dt.datetime.now(_dt.timezone.utc) - t).total_seconds()
 
 
+def _driver_state(run) -> dict:
+    """What `engine.pipeline` recorded about how it last ended.
+
+    Read from the qa dir rather than kept in memory: the watchdog is a
+    different process, usually an hour later, and the question "did the
+    money run out or did the work fail" is not answerable from the
+    workbook's rows — both leave the same ones.
+    """
+    try:
+        import json as _json
+        p = run.qa_dir / "pipeline_state.json"
+        return _json.loads(p.read_text()) if p.is_file() else {}
+    except Exception:                                     # noqa: BLE001
+        return {}
+
+
 def _no_enrichment_connector(run) -> str:
     """The reason a run is STRUCTURALLY blocked, or "" when it is not.
 
@@ -131,6 +147,7 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             failed.append(c)
     drift = wb.verify_handoff_lock()
     budget = L.stats(wb)
+    driver = _driver_state(run)
     pre = prelim.state(wb)
     folder = str(md.get("client_folder") or "").strip()
     post: dict = {}
@@ -147,6 +164,21 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             "PRELIM has not closed: "
             + (", ".join(pre["open"]) or "signed off never recorded")
             + " — no category card will be served until it does")
+    elif open_work and driver.get("last_outcome") == "STOPPED_BUDGET":
+        # THE DOLLAR CEILING, which had no state of its own. A run the
+        # budget stopped leaves FLOORS FAIL rows behind — exactly what a
+        # half-finished research stage leaves — so it read as GATE_FAILED,
+        # which `--revive` advances. Measured 2026-09-14: paired with a
+        # driver that started every process at $0 spent, that is a fresh
+        # budget every hour, forever.
+        state, detail = "AT_USD_CEILING", (
+            f"the driver stopped on its dollar ceiling: spent "
+            f"${float(driver.get('spent_usd') or 0):.2f} of "
+            f"${float(driver.get('budget_usd') or 0):.2f} with "
+            f"{len(open_work)} category(ies) still open "
+            f"({', '.join(open_work[:6])}). A re-run spends the next budget "
+            f"on the same work: a PERSON raises --max-usd or narrows the "
+            f"scope. No revive can close this one")
     elif budget["checkpoint_required"]:
         state, detail = "AT_BUDGET_CEILING", (
             f"{budget['search_ops']} search-ops against a ceiling of "
@@ -235,6 +267,15 @@ COMPLETION_CRITERIA = {
                     "challenged, or DECLARED ABSENT with its volley ladder"),
     "UNGATED": "a recorded floors-gate verdict of PASS for every category",
     "AT_BUDGET_CEILING": "`engine.memory backup` then a checkpoint, before any search",
+    # The OTHER ceiling, and the difference matters: the one above is 60
+    # search ops and an agent clears it by checkpointing. This one is
+    # money, and no agent may clear it.
+    "AT_USD_CEILING": (
+        "a PERSON raises the ceiling (`engine.pipeline run --max-usd <N>`) "
+        "or narrows the scope, and runs the driver again. The driver now "
+        "reads what the run already spent, so a plain re-run stops again "
+        "before it dispatches anything — which is the point: the next "
+        "budget must be a decision, not an hourly sweep"),
     "READY_FOR_HANDOFF": ("`engine.cli validate` FAILS=0, `engine.cli handoff` "
                           "written, `engine.assessment open` flips the stage"),
     "SCORING_OPEN": ("`engine.assessment state` shows scored == subcaps for "
@@ -423,6 +464,14 @@ def resume_plan(row: dict) -> dict:
                 "why": "the catalogue moved under this run; a person decides "
                        "whether to re-pin or retire it",
                 "detail": row.get("catalogue_drift")}
+    if state in ("BLOCKED_NO_CONNECTOR", "AT_USD_CEILING"):
+        # Both END ON A PERSON. Until 2026-09-14 neither had a branch here,
+        # so both fell to the default — "the run is working" — for runs that
+        # structurally cannot advance, while COMPLETION_CRITERIA in this
+        # same module said the opposite.
+        return {"actionable": False, "agent": None, "needs": "person",
+                "why": COMPLETION_CRITERIA[state],
+                "detail": row.get("detail")}
     if state == "NO_CLIENT_FOLDER":
         return {"actionable": True, "agent": None,
                 "command": ["python3", "-m", "engine.assemble", "open",
@@ -712,7 +761,8 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
 #: The states that need someone told. Everything else is the run working.
 ACTIONABLE = ("UNREADABLE", "HALTED", "BLOCKED_NO_CONNECTOR",
               "STALLED", "GATE_FAILED", "UNGATED",
-              "AT_BUDGET_CEILING", "PRELIM_OPEN", "NO_CLIENT_FOLDER",
+              "AT_BUDGET_CEILING", "AT_USD_CEILING",
+              "PRELIM_OPEN", "NO_CLIENT_FOLDER",
               "MISSING_LOCALLY", "READY_FOR_HANDOFF",
               # the assessment-stage machine (2026-09-03)
               "SCORING_OPEN", "CRITIC_PENDING", "SCORING_GATE_OPEN",
@@ -724,7 +774,10 @@ AGENT_ADVANCEABLE = tuple(s for s in ACTIONABLE
                           if s not in ("UNREADABLE", "HALTED", "MISSING_LOCALLY",
                                        # a person must attach the connector;
                                        # a revive here is pure spend
-                                       "BLOCKED_NO_CONNECTOR"))
+                                       "BLOCKED_NO_CONNECTOR",
+                                       # and a person decides whether this
+                                       # run is worth another budget
+                                       "AT_USD_CEILING"))
 
 
 def main(argv=None) -> int:

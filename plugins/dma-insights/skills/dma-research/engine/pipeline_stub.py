@@ -235,6 +235,10 @@ class StubDispatcher:
         broken |= {x.strip() for x in os.environ.get("DMA_STUB_BROKEN", "").split(",") if x.strip()}
         return cls(default_handlers(), fail_first=ff, broken=broken, **kw)
 
+    #: The stub reports its spend in the batch summary and writes no ledger
+    #: row, so the driver must record it (see `AgentRunDispatcher`).
+    records_cost = False
+
     def _handler(self, agent: str):
         for key, fn in self.handlers.items():
             if agent.startswith(key) or (key.startswith("-") and agent.endswith(key)):
