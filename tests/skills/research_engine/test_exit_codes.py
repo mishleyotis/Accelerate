@@ -19,7 +19,13 @@ from engine import pipeline as P
 from fixtures import new_run
 
 
-ZERO = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK")
+#: ROUND_COMPLETE joined them on 2026-09-14 with `--step`: one research
+#: round ran, the relay work it prepared is named in the outcome's `pending`
+#: payload, and the conductor services that work and steps again. Nothing
+#: failed and the run is resumable from the state on disk, so a sweep that
+#: exited non-zero here would re-dispatch a run that is doing exactly what
+#: it was told to do.
+ZERO = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK", "ROUND_COMPLETE")
 ONE = ("STOPPED_BUDGET", "FAILED", "BLOCKED", "REFUSED")
 
 

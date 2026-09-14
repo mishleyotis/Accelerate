@@ -3,7 +3,7 @@ run to a promoted one, gate by gate, dispatching lanes over briefs and
 shipping pages to the connector as the work becomes ready.
 
     python3 -m engine.pipeline run    --run <R> --root <ROOT> [--dispatcher agent_run|stub]
-                                      [--until STAGE] [--max-wall-min N] [--max-rounds N]
+                                      [--until STAGE] [--step] [--max-wall-min N] [--max-rounds N]
                                       [--stall-rounds N] [--enrichment-heals N] [--no-relay]
                                       [--lane-retries N] [--page-retries N]
                                       [--ingest-poll-s S --ingest-timeout-s S]
@@ -114,7 +114,13 @@ BRIEFS_DIR = "briefs"
 #: deliberately among them — `watchdog --revive` records RESOLVED or FAILED
 #: from this code, and a sweep that called a budget stop RESOLVED would be
 #: lying about a run that needs a person to raise the ceiling.
-EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK")
+#: ROUND_COMPLETE is `--step`'s clean stop: one research round ran, the work
+#: it prepared for the conductor is named in `pending`, and the run is
+#: resumable from the state on disk. Nothing failed, so the sweep must not
+#: re-dispatch it as a failure — and a conductor scripting `--step` in a loop
+#: reads the exit code before it reads the JSON.
+EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
+                      "ROUND_COMPLETE")
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
@@ -333,6 +339,15 @@ class Options:
     # change of default is a change of behaviour the log states, not a
     # branch that silently stops being taken.
     relay_mode: str = "orchestrator"
+    # ONE ROUND, THEN HAND BACK. In orchestrator mode the driver prepares
+    # relay work it cannot itself service — the connectors live in the
+    # conductor's session, not in this process — so a driver that keeps
+    # looping is a driver spending lanes on a gap only the conductor can
+    # close. `--step` runs exactly one research round, records what is
+    # pending and returns ROUND_COMPLETE; the conductor services the batch
+    # with its own in-process subagents and steps again. The handover is the
+    # state on disk, never this process.
+    step: bool = False
     lane_retries: int = 1
     page_retries: int = 2
     # SG-V4 (embedding grounding) disclosures the connector promotes anyway
@@ -394,8 +409,12 @@ class Pipeline:
         return self.wb
 
     def _save_state(self):
-        self.state_path.parent.mkdir(parents=True, exist_ok=True)
-        self.state_path.write_text(json.dumps(self.state, indent=2, default=str))
+        # WRITE-THEN-RENAME. The watchdog, the hooks and the next driver all
+        # read this file, and it was written in place — so a reader arriving
+        # mid-write saw half a document and could not tell that from a run
+        # that had recorded nothing.
+        runstate._write_atomic(self.state_path,
+                               json.dumps(self.state, indent=2, default=str))
 
     def _md(self) -> dict:
         return self.wb.metadata()
@@ -508,6 +527,146 @@ class Pipeline:
     def _over_budget(self) -> bool:
         cap = self.budget_usd()
         return cap is not None and self._spent_usd >= cap
+
+    # ── what the conductor must do before the next step ────────────────
+    def _batch_request_ids(self, path) -> set | None:
+        """Every relay request id a written batch carries, or None when the
+        file cannot be read — the batch index is on disk, so a batch whose
+        file went missing is reported as pending rather than quietly dropped."""
+        try:
+            b = json.loads(Path(path).read_text())
+        except Exception:                            # noqa: BLE001
+            return None
+        ids = set()
+        for g in b.get("groups") or []:
+            for q in g.get("queries") or []:
+                ids.update(str(i) for i in (q.get("request_ids") or []))
+        return ids
+
+    def _batch_categories(self, path) -> set:
+        """The categories whose cells a written relay batch names."""
+        try:
+            b = json.loads(Path(path).read_text())
+        except Exception:                            # noqa: BLE001
+            return set()
+        cats = set()
+        for g in b.get("groups") or []:
+            for q in g.get("queries") or []:
+                for cell in q.get("subcaps") or []:
+                    head = str(cell).split(".")[0].strip().upper()
+                    if head:
+                        cats.add(head)
+        return cats
+
+    def _relay_blocked(self, category: str) -> int:
+        """How many of this category's relay requests a connector REFUSED.
+
+        The difference that decides whether a pending batch is work in flight
+        or a measured gap: BLOCKED is recorded only by an actor that tried
+        and was refused, and `relay.record` will not write it without the
+        refusal text."""
+        try:
+            from . import relay
+            by_cat = relay.state(self.run)["by_category"]
+        except Exception:                            # noqa: BLE001
+            return 0
+        return int((by_cat.get(str(category).upper()) or {}).get("BLOCKED") or 0)
+
+    def _pending_relay_batches(self) -> list[str]:
+        """The recorded batches that still have OPEN requests.
+
+        FROM THE QUEUE, NOT FROM THE LIST. `state["relay_batches"]` is
+        append-only — nothing removes a path once written — so a conductor
+        that serviced a batch would read its own finished work back as
+        outstanding for the rest of the run. The queue is what knows: a
+        batch whose every request has been closed is done, whoever closed it.
+        """
+        recorded = [str(p) for p in (self.state.get("relay_batches") or [])]
+        try:
+            from . import relay
+            rows = relay.requests(self.run)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (relay queue not read: {str(e)[:120]})")
+            return recorded
+        still_open = {rid for rid, r in rows.items() if r.get("status") == "OPEN"}
+        out = []
+        for p in recorded:
+            ids = self._batch_request_ids(p)
+            if ids is None or (ids & still_open):
+                out.append(p)
+        return out
+
+    def pending(self) -> dict:
+        """What is outstanding when a step hands back.
+
+        The conductor cannot read this process's memory and the driver cannot
+        reach a connector, so the handover is a payload: which batches still
+        need servicing, which categories are still open, what stalled, what
+        is left of the budget and the rounds, and — when `engine.brief` can
+        say — where the evidence gaps are.
+        """
+        from . import brief
+        out: dict = {"relay_batches": self._pending_relay_batches(),
+                     "open_categories": [], "stalled": list(self._cat_stalled),
+                     "budget": {"spent": 0.0, "ceiling": None, "remaining": None},
+                     "rounds_remaining": max(0, int(self.opts.max_rounds) - self._rounds),
+                     "gaps": None}
+        try:
+            cats = sorted({brief.category_of(c) for c in self.wb.selected_subcaps()})
+            out["open_categories"] = [
+                c for c in cats
+                if brief.last_gate(self.wb, "FLOORS", c)["verdict"] != "PASS"]
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (open categories not read: {str(e)[:120]})")
+        try:
+            from . import cost
+            spent = round(sum(float(r["usd"]) for r in cost.ledger(self.run)
+                              if r.get("usd") is not None), 4)
+            cap = self.budget_usd()
+            out["budget"] = {"spent": spent,
+                             "ceiling": (round(cap, 2) if cap else None),
+                             "remaining": (round(cap - spent, 4) if cap else None)}
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (budget not read: {str(e)[:120]})")
+        # FEATURE-DETECTED. `brief.gaps` is being built alongside this; until
+        # it lands the field is null rather than absent, so a conductor
+        # reading the payload never has to ask which shape it got.
+        gaps = getattr(brief, "gaps", None)
+        if callable(gaps):
+            try:
+                out["gaps"] = gaps(self.wb, self.run)
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gaps not computed: {str(e)[:120]})")
+        return out
+
+    def _backup_memory(self) -> None:
+        """Push the notebooks to Drive once, and NEVER fail the round on it.
+
+        The .md notebooks are the only part of the run tree a dead container
+        loses outright, so the copy is worth a call every round. It is worth
+        no more than that: a backup that cannot run records why and the round
+        carries on, because the whole point of a resumable round is that it
+        ends.
+
+        Gated on `--push` for the same reason every other Drive call is: a
+        run told not to talk to Drive does not talk to Drive.
+        """
+        if not self.opts.push:
+            return
+        try:
+            from . import memory
+            fn = getattr(memory, "backup", None)
+            if not callable(fn):
+                status = "NOT_RUN: engine.memory has no backup entry point"
+            else:
+                r = fn(self.run)
+                status = (str(r.get("outcome") or "RESOLVED")
+                          if isinstance(r, dict) else "RESOLVED")
+        except Exception as e:                       # noqa: BLE001
+            status = f"NOT_RUN: {e.__class__.__name__}: {str(e)[:120]}"
+            self.opts.log(f"  (memory backup skipped: {status})")
+        self.state["memory_backup"] = {"at": _utcnow(), "status": status}
+        self._save_state()
 
     # ── DONE predicates ────────────────────────────────────────────────
     def done(self, stage: str) -> tuple[bool, str]:
@@ -721,7 +880,31 @@ class Pipeline:
         stopped from one whose gates had failed. They leave the same rows
         behind, and one of them must not be re-dispatched.
         """
-        out = self._run_all()
+        # ONE DRIVER PER RUN. Two of them dispatch the same category twice
+        # and spend two budgets against one ceiling, and nothing stopped
+        # that: the only lock in the engine is the per-workbook flock, which
+        # serialises ROWS. A dead pid or a stale heartbeat is reaped rather
+        # than waited on — a run nobody can resume because a gone
+        # container's file is still there is the worse failure.
+        try:
+            runstate.acquire_driver_lock(
+                self.run, command=f"engine.pipeline run (until={self.opts.until})")
+            locked = True
+        except runstate.DriverLocked as e:
+            self.opts.log(f"[DRIVER] REFUSED — {e}")
+            return {"outcome": "REFUSED", "reason": str(e), "stage": None,
+                    "holder": e.holder}
+        except Exception as e:                       # noqa: BLE001
+            # The lock is advisory. Failing to take one must not stop a run
+            # that would otherwise be the only driver.
+            self.opts.log(f"  (driver lock not taken: {e.__class__.__name__}: "
+                          f"{str(e)[:120]})")
+            locked = False
+        try:
+            out = self._run_all()
+        finally:
+            if locked:
+                runstate.release_driver_lock(self.run)
         try:
             self.state["last_outcome"] = out.get("outcome")
             self.state["spent_usd"] = round(self._spent_usd, 4)
@@ -780,6 +963,19 @@ class Pipeline:
             t0 = self.opts.clock()
             try:
                 detail = getattr(self, f"_stage_{st.lower()}")()
+                if self._step_stopped:
+                    # `--step` inside RESEARCH: the stage RAN and is not
+                    # done, which is the normal end of a step rather than a
+                    # refusal. The gate row says PENDING_ORCHESTRATOR for the
+                    # same reason the ENRICHMENT rows do — the work is in
+                    # flight with the only actor that holds a connector.
+                    self._record(st, "PENDING_ORCHESTRATOR", detail, t0,
+                                 rounds=self._rounds, lanes=self._lane_count,
+                                 attempts=self._attempts)
+                    outcome.update(outcome="ROUND_COMPLETE", stage=st,
+                                   reason=detail, pending=self.pending(),
+                                   resume=self.plan()["command"])
+                    return outcome
                 ok2, why2 = self.done(st)
                 if not ok2:
                     raise StageRefused(f"stage ran but is not done: {why2}")
@@ -821,6 +1017,15 @@ class Pipeline:
             if self.opts.until == st:
                 outcome.update(outcome="STOPPED_AT_UNTIL", stage=st)
                 return outcome
+            if self.opts.step:
+                # A stage that FINISHED under `--step` is still one step: the
+                # flag means "advance once and hand back", so a run already
+                # past RESEARCH walks the table one stage per invocation
+                # rather than running to PROMOTE behind the conductor's back.
+                outcome.update(outcome="ROUND_COMPLETE", stage=st,
+                               pending=self.pending(),
+                               resume=self.plan()["command"])
+                return outcome
         return outcome
 
     # per-stage bookkeeping the record reads
@@ -843,6 +1048,8 @@ class Pipeline:
     _recorded_turns = 0
     _budget_stopped = False
     _wall_stopped = False
+    #: set by the RESEARCH round loop when `--step` ended a round cleanly.
+    _step_stopped = False
 
     def _reset_counters(self):
         self._rounds = self._lane_count = self._attempts = 0
@@ -993,6 +1200,32 @@ class Pipeline:
         return (f" — stopped at round {self._stalled_at}: the last {self._stalls} round(s) "
                 f"advanced nothing the stage measures, so more rounds would not have helped")
 
+    def _record_grain(self, categories) -> None:
+        """WHICH GRAIN THE LANE ACTUALLY USED, per category, per round.
+
+        `lane_fit` projects the capability-grain design and says a full run
+        fits. That is a property of the WORK. Whether a lane took the
+        grouping its packet offered is a property of the RUN, and nothing
+        measured it — a lane that fires a query per cell costs 2.1x the
+        projection and looks identical in every report, until the round
+        budget runs out and the category is re-dispatched. Recorded, never
+        enforced: the packet asks, the measurement says whether asking
+        worked, and a term that BLOCKED on it would stop a lane that had
+        good reason."""
+        try:
+            from . import cost
+            seen = self.state.setdefault("grain_observed", {})
+            for cat in categories:
+                g = cost.grain_observed(self.wb, cat)
+                seen[cat] = {k: g[k] for k in ("grain", "ratio", "rows",
+                                               "distinct_searches")}
+                if g["grain"] == "per_subcap":
+                    self.opts.log(f"  [GRAIN] {cat}: {g['why']}")
+            self._save_state()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (grain not measured: {e.__class__.__name__}: "
+                          f"{str(e)[:120]})")
+
     def _count(self, summary: dict):
         self._lane_count += int(summary.get("dispatched") or 0)
         self._attempts += sum(int(l.get("attempts") or 1)
@@ -1106,6 +1339,13 @@ class Pipeline:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
             self._verify_research(work)
             self._enrich_research(work, r)
+            self._record_grain(work)
+            # THE ROUND IS THE UNIT THAT SURVIVES. The notebooks are the one
+            # thing in the run tree that a dead container loses and no gate
+            # can rebuild, so the backup happens at the end of every round
+            # rather than at the end of the stage — a stage that is stopped
+            # by a ceiling, a stall or `--step` has still earned its copy.
+            self._backup_memory()
             self.reopen()
             newly = self._research_stalled(work)
             for cat in newly:
@@ -1134,6 +1374,23 @@ class Pipeline:
                 break
             if self._stalled("RESEARCH"):
                 break
+            if self.opts.step:
+                # ONE ROUND, then hand back — the round loop is not run a
+                # second time here, it is re-entered by the next `--step`
+                # from the state on disk. The stall and ceiling checks come
+                # first on purpose: a round that stopped for one of those
+                # reasons must keep saying so rather than report a clean step.
+                if not brief.categories_needing_dispatch(self.wb)["dispatch"]:
+                    # …unless the round FINISHED the stage. Handing back here
+                    # would cost a whole extra invocation to discover that
+                    # there was nothing left to do.
+                    continue
+                self._step_stopped = True
+                self.opts.log(f"  [RESEARCH] --step: round {self._rounds} complete; "
+                              f"handing back to the conductor")
+                break
+        if self._step_stopped:
+            return f"round {self._rounds} complete (--step); RESEARCH continues"
         need = brief.categories_needing_dispatch(self.wb)
         if need["dispatch"]:
             # A category held back by the ENRICHMENT gate ALONE is disclosed,
@@ -1179,7 +1436,11 @@ class Pipeline:
            `enrichment-web-specialist` lane per category with open requests,
            then a reconcile against the Search_Log those lanes wrote.
         3. GATE: per category, an ENRICHMENT row from the Search_Log's Tool
-           column. Zero connector searches → FAIL, BLOCKING while the heal
+           column. A category whose cells this round's batch names, with
+           requests still OPEN and none of them BLOCKED, is
+           PENDING_ORCHESTRATOR: work in flight with the only actor that
+           holds a connector, so no heal is spent and nothing is disclosed.
+           Otherwise: zero connector searches → FAIL, BLOCKING while the heal
            budget lasts (the category re-enters the round loop as a FRESH lane
            instance carrying the measured reason — grants / instruction /
            logging / manifest — and the open requests), then FAIL
@@ -1193,6 +1454,9 @@ class Pipeline:
             self.opts.log(f"[ENRICH] skipped: relay unavailable ({e.__class__.__name__})")
             return
         logs = self.run.root / "agent_logs"
+        #: categories whose cells are named by a batch this round wrote and
+        #: that nothing in this container can service — see the gate loop.
+        pending_cats: set = set()
         try:
             h = relay.harvest(self.run, list(categories), logs_dir=logs, round_no=round_no)
             if h["harvested"]:
@@ -1209,9 +1473,10 @@ class Pipeline:
                 # means this round's batch carries what is still open, not
                 # what was open when the driver last looked.
                 rc0 = relay.reconcile(self.run, self.wb)
-                if rc0.get("closed"):
-                    self.opts.log(f"[RELAY] reconciled {rc0['closed']} serviced "
-                                  f"request(s); still open {rc0['still_open']}")
+                n0 = sum((rc0.get("closed") or {}).values())
+                if n0:
+                    self.opts.log(f"[RELAY] reconciled {n0} serviced request(s) "
+                                  f"{rc0['closed']}; still open {rc0['still_open']}")
                 d = relay.drain_batch(self.run, self.wb, out_dir=self._briefs(f"relay_r{round_no}"),
                                       categories=list(categories),
                                       mode=self.opts.relay_mode)
@@ -1234,6 +1499,7 @@ class Pipeline:
                     pend = self.state.setdefault("relay_batches", [])
                     if d["batch_file"] not in pend:
                         pend.append(d["batch_file"])
+                    pending_cats = self._batch_categories(d["batch_file"])
             except Exception as e:                              # noqa: BLE001
                 self.opts.log(f"[RELAY] drain skipped ({e.__class__.__name__}: {str(e)[:120]})")
         heals = self.state.setdefault("enrichment_heals", {})
@@ -1245,6 +1511,32 @@ class Pipeline:
                 continue
             st = plan["status"]
             try:
+                # A BATCH IN FLIGHT IS NOT A GAP. In orchestrator mode the
+                # driver writes the relay work and hands it to the conductor,
+                # whose in-process subagents are the only actors here holding
+                # a connector. Until that batch comes back, this category has
+                # no connector search because nobody has run one yet — not
+                # because a connector refused. Spending a heal on it buys a
+                # fresh lane's context floor to rediscover a tool this
+                # container does not have, and disclosing it states a gap
+                # that is merely unfinished work. So: a non-blocking row that
+                # names the state, no heal, no disclosure.
+                #
+                # The exception is the one measurement that changes the
+                # diagnosis: a request the conductor recorded BLOCKED. That
+                # IS a connector refusing, and it falls through to the heal
+                # and disclosure path below like any other measured gap.
+                if (cat in pending_cats and st["enrichment_searches"] == 0
+                        and not self._relay_blocked(cat)):
+                    L.append_gate(
+                        self.wb, gate="ENRICHMENT", scope=cat,
+                        verdict="PENDING_ORCHESTRATOR", blocking=False,
+                        detail=(f"{plan['open_requests']} relay request(s) batched for the "
+                                f"conductor and not yet serviced; {st['searches']} search(es) "
+                                f"so far all through {', '.join(st['tools']) or 'nothing'}"))
+                    self.opts.log(f"[ENRICH] {cat}: PENDING — {plan['open_requests']} "
+                                  f"relay request(s) with the conductor; no heal spent")
+                    continue
                 if st["searches"] == 0:
                     L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="NOT_RUN",
                                   detail=plan["reason"], blocking=False)
@@ -1260,6 +1552,11 @@ class Pipeline:
                          f"through {', '.join(st['tools']) or 'nothing'}",
                          f"heal={plan['heal']}: {plan['reason']}",
                          f"open relay requests {plan['open_requests']}"]
+                blocked = self._relay_blocked(cat)
+                if blocked:
+                    terms.append(f"{blocked} relay request(s) recorded BLOCKED: a "
+                                 f"connector refused them, so this is a measured "
+                                 f"gap and not a batch still in flight")
                 if plan["heal"] == "unbound":
                     # A heal is a FRESH LANE INSTANCE. Spending one on an
                     # unbound connector buys a full context floor to rediscover
@@ -1787,6 +2084,7 @@ def _build_opts(a) -> Options:
                    stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
                    relay=not a.no_relay,
                    relay_mode=getattr(a, "relay_mode", Options.relay_mode),
+                   step=getattr(a, "step", Options.step),
                    lane_retries=a.lane_retries, page_retries=a.page_retries,
                    ingest_poll_s=(0 if a.dispatcher == "stub" else a.ingest_poll_s),
                    ingest_timeout_s=a.ingest_timeout_s,
@@ -1843,6 +2141,13 @@ def main(argv=None) -> int:
                         f"connectors; 'lane' dispatches headless "
                         f"enrichment-web-specialist lanes, which hold none "
                         f"unless the container itself is bound")
+    r.add_argument("--step", action="store_true",
+                   help="run exactly ONE research round and return "
+                        "ROUND_COMPLETE (exit 0), with what is outstanding in "
+                        "the `pending` payload. The conductor services the "
+                        "relay batch with its own in-process subagents — the "
+                        "only actors that hold a connector — and steps again. "
+                        "Past RESEARCH it advances exactly one stage.")
     r.add_argument("--lane-retries", type=int, default=1)
     r.add_argument("--page-retries", type=int, default=2)
     r.add_argument("--lane-timeout", type=int, default=2400)

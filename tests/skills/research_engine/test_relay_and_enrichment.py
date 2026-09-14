@@ -625,36 +625,57 @@ def test_the_default_relay_writes_a_batch_for_the_conductor_and_stops_nothing(tm
     assert relay.state(run)["by_status"]["OPEN"] == 1
 
 
-def test_a_batch_the_conductor_serviced_is_reconciled_at_the_next_round(tmp_path):
-    """The conductor's subagents write to the workbook, never back to the
+def test_a_batch_the_conductor_serviced_is_reconciled_at_the_start_of_the_next_round(tmp_path):
+    """The conductor's subagents write to the workbook and never back to the
     driver, so the Search_Log is the only report that a batch landed. The
-    driver reconciles at the START of a round: a request closed between
-    rounds must not be re-batched, and the ENRICHMENT gate must read the row
-    the subagent wrote."""
+    driver therefore reconciles at the START of a round, before it batches
+    again: a request closed between rounds must not be re-batched, and the
+    ENRICHMENT gate must read the row the subagent wrote rather than the
+    queue's stale OPEN.
+
+    The lane here closes ONE cell per dispatch, which is how a second round
+    is reached at all — a category that finishes in one round has no next
+    round for anything to be reconciled at."""
     run = _fresh(tmp_path)
-    seen: list[int] = []
+    dispatches = {"n": 0}
 
     def lane(agent, prompt_file, ctx):
-        _lane_web_only(emit_requests=True)(agent, prompt_file, ctx)
-        seen.append(len(seen))
-        if len(seen) == 1:
-            return                      # round 1: the request goes unserviced
-        # Between round 1 and round 2 the conductor serviced the batch: its
-        # subagent logged the connector search against the requested cell.
+        dispatches["n"] += 1
+        F = S.fixtures()
         wb = ctx.run.open()
-        req = (relay.open_requests(ctx.run) or [None])[0]
-        if req:
-            L.append_search(wb, subcap=req["subcap"], facet=req["facet"],
-                            query=req["query"], tool="exa", hits=3, kept=2,
-                            outcome="kept 2")
+        cat = agent.split("-")[1].upper()
+        if dispatches["n"] > 1:
+            # BETWEEN THE ROUNDS the conductor serviced the batch: its
+            # in-process subagent ran the query through the connector and
+            # logged it against the cell the request named.
+            req = (relay.open_requests(ctx.run) or [None])[0]
+            if req is not None:
+                L.append_search(wb, subcap=req["subcap"], facet=req["facet"],
+                                query=req["query"], tool="exa", hits=3, kept=2,
+                                outcome="kept 2")
+        for c in [c for c in wb.selected_subcaps() if c.startswith(cat)]:
+            if str((wb.scoring_row(c) or {}).get("Dominant_Claim") or "").strip():
+                continue
+            eids = F.bank_evidence(wb, c, n=5)
+            F.synthesise(wb, c, F.good_synthesis(c, eids), author=agent)
+            break                                   # one cell, then hand back
+        F.client_facts(wb, wb.selected_subcaps(), S._evidence_by_cell(wb))
+        if dispatches["n"] == 1:
+            _transcript(ctx.run.root / "agent_logs", agent,
+                        [_result(json.dumps({"search_requests": [REQ]}))])
 
     disp = S.StubDispatcher({"research-p": lane, "finding-challenger": S.lane_noop})
-    out = P.Pipeline(run, _opts(tmp_path, disp, enrichment_heals=1)).run_all()
+    logged: list[str] = []
+    out = P.Pipeline(run, _opts(tmp_path, disp, log=logged.append)).run_all()
     assert out["outcome"] == "STOPPED_AT_UNTIL", out
+    assert dispatches["n"] >= 2, "the lane must have been dispatched twice"
     st = relay.state(run)
-    assert st["by_status"]["SERVED"] == 1 and st["by_status"].get("OPEN", 0) == 0, st
+    assert st["by_status"]["SERVED"] == 1, st["by_status"]
+    assert st["by_status"]["OPEN"] == 0, "a serviced request must not stay open"
+    assert any("reconciled 1 serviced" in line for line in logged), logged
+    # And the gate reads the connector row the subagent wrote, not the queue.
     rows = [g for g in run.open().rows("Gate_Log") if g.get("Gate") == "ENRICHMENT"]
-    assert rows[-1]["Verdict"] == "PASS", [r["Verdict"] for r in rows]
+    assert rows[-1]["Verdict"] == "PASS", [g["Verdict"] for g in rows]
 
 
 def test_no_relay_harvests_and_discloses_but_dispatches_no_specialist(tmp_path):
@@ -698,3 +719,83 @@ def test_the_relay_cli_is_a_registered_engine_family():
     from engine import cli
     assert "relay" in cli._FAMILIES
     assert cli._family_main("relay") is relay.main
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# the heal BUDGET, and the two ways the disclosure could have gone missing
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# The disclosure is the whole point of the ENRICHMENT gate: a category that
+# could not reach a connector must say so on the run rather than pass
+# quietly or loop forever. It has two failure modes, and the round loop is
+# the only place either shows up: the budget could be spent without ever
+# reaching the disclosure, or the disclosure could be skipped because the
+# thing that computes the REASON raised.
+
+def test_the_heal_budget_is_spent_before_the_gap_is_disclosed(tmp_path):
+    """`--enrichment-heals 2` means TWO fresh lane instances, then disclose.
+    A budget that discloses after one is not a budget; one that never
+    discloses is the $96.65 loop. Both edges are one arithmetic."""
+    run = _fresh(tmp_path)
+    disp = S.StubDispatcher({"research-p": _lane_web_only(),
+                             "finding-challenger": S.lane_noop})
+    out = P.Pipeline(run, _opts(tmp_path, disp, enrichment_heals=2)).run_all()
+    assert out["outcome"] == "STOPPED_AT_UNTIL", out
+    rows = [g for g in run.open().rows("Gate_Log") if g.get("Gate") == "ENRICHMENT"]
+    verdicts = [g["Verdict"] for g in rows]
+    assert verdicts.count("FAIL") >= 3, verdicts
+    blocking = [str(g.get("Blocking")).lower() in ("true", "1", "yes") for g in rows]
+    assert blocking[:2] == [True, True], (
+        "the first two FAILs are blocking — each buys a fresh lane instance")
+    assert blocking[-1] is False, "the last one discloses instead of dispatching"
+    assert rows[-1]["Detail"].startswith("DISCLOSED")
+    state = json.loads((run.qa_dir / P.STATE_NAME).read_text())
+    assert state["enrichment_heals"].get("P1C1") == 2, state.get("enrichment_heals")
+
+
+def test_the_disclosure_survives_a_heal_plan_that_raises(tmp_path, monkeypatch):
+    """`heal_plan` computes the REASON, not the verdict. When it raises after
+    the budget is spent the category must still be disclosed — a silent pass
+    is the one outcome that is worse than either a loop or a refusal, because
+    nothing downstream can tell it from a category that was enriched."""
+    run = _fresh(tmp_path)
+    real = relay.heal_plan
+    calls = {"n": 0}
+
+    def flaky(*a, **k):
+        calls["n"] += 1
+        if calls["n"] > 1:
+            raise RuntimeError("heal_plan exploded on the second round")
+        return real(*a, **k)
+
+    monkeypatch.setattr(relay, "heal_plan", flaky)
+    disp = S.StubDispatcher({"research-p": _lane_web_only(),
+                             "finding-challenger": S.lane_noop})
+    out = P.Pipeline(run, _opts(tmp_path, disp, enrichment_heals=1)).run_all()
+    assert out["outcome"] in ("STOPPED_AT_UNTIL", "FAILED"), out
+    rows = [g for g in run.open().rows("Gate_Log") if g.get("Gate") == "ENRICHMENT"]
+    assert rows, "a raising heal_plan must not erase the gate's own record"
+    assert any(str(g["Verdict"]) == "FAIL" for g in rows), [g["Verdict"] for g in rows]
+
+
+def test_a_cost_ledger_failure_is_loud_and_lands_on_the_run(tmp_path, monkeypatch):
+    """A swallowed cost failure is how a run spends $96 against a $20 budget
+    and leaves a ledger that says nothing. Non-fatal — accounting must not
+    kill a good stage — but never silent, and never absent from the state a
+    person reads afterwards."""
+    from engine import cost
+    logged: list[str] = []
+
+    def boom(*a, **k):
+        raise RuntimeError("ledger is read-only")
+    monkeypatch.setattr(cost, "record", boom)
+    run = _fresh(tmp_path)
+    disp = S.StubDispatcher({"research-p": _lane_web_only(with_exa=True),
+                             "finding-challenger": S.lane_noop})
+    P.Pipeline(run, _opts(tmp_path, disp, log=logged.append)).run_all()
+    state = json.loads((run.qa_dir / P.STATE_NAME).read_text())
+    errs = state.get("cost_errors") or []
+    assert errs, "the failure must be recorded on the run, not only printed"
+    assert "ledger is read-only" in errs[0]["error"]
+    assert any("COST NOT RECORDED" in line for line in logged), (
+        "and it must be loud where a person is watching")
