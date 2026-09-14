@@ -353,7 +353,11 @@ def _plugin_const(module: str, name: str) -> str:
 
 @pytest.mark.parametrize("module,const", [
     ("subcap_match", "FEEDBACK"),
-    ("source_yield", "LEDGER"),
+    # DEFAULT_LEDGER, not LEDGER: `LEDGER` follows `DMA_SOURCE_YIELD` so a
+    # test run cannot write into the checkout, and a prompt's path must be
+    # checked against the constant the script OWNS rather than against
+    # wherever the process reading it happens to be pointed.
+    ("source_yield", "DEFAULT_LEDGER"),
 ])
 def test_a_ledger_path_a_prompt_pushes_is_the_path_the_script_writes(
         module, const):
