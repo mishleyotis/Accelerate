@@ -770,6 +770,10 @@ def main(argv=None) -> int:
     rp.add_argument("--json", action="store_true")
     rp.add_argument("--as-baseline", action="store_true",
                     help="also write cost_baseline.json from this run's ledger")
+    rp.add_argument("--by-stage", action="store_true",
+                    help="where the run's DOLLARS went, largest first — the "
+                         "question the wall-clock table cannot answer, and the "
+                         "one a $96.65 run needed")
     rp.add_argument("--label")
 
     a = ap.parse_args(argv)
@@ -815,6 +819,19 @@ def main(argv=None) -> int:
             print(f"  cost       {('$%.2f' % usd) if usd is not None else 'not priced'} "
                   f"(budget ${rep['budget_usd']:.2f} for {len(rep['pillars'])} pillar(s))"
                   + ("  OVER" if rep["over_budget"] else ""))
+            if a.by_stage:
+                print(f"\n  {'stage':<12}{'usd':>9}{'share':>8}{'turns':>8}"
+                      f"{'cache rd':>11}")
+                for r in rep["by_stage"]:
+                    tok = (r.get("tokens") or {}).get("cache_read")
+                    print(f"  {r['stage']:<12}"
+                          f"{('$%.2f' % r['usd']) if r['usd'] is not None else '—':>9}"
+                          f"{('%.0f%%' % (100 * r['share'])) if r['share'] else '—':>8}"
+                          f"{r['turns'] if r['turns'] is not None else '—':>8}"
+                          f"{f'{tok:,}' if tok else '—':>11}")
+                if all(r["usd"] is None for r in rep["by_stage"]):
+                    print("  (no stage carried a price — the dispatcher "
+                          "recorded none, which is not the same as zero)")
             if rep["unrecorded"]:
                 print(f"  unrecorded stages: {', '.join(rep['unrecorded'])}")
             if rep.get("baseline"):

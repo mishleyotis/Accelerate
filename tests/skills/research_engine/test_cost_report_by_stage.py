@@ -96,3 +96,66 @@ def test_as_baseline_accepts_a_ledger_that_carries_tokens(tmp_path):
                 tokens=TOK, model="sonnet")
     out = cost.as_baseline(run, label="test")
     assert out["written_to"]
+
+
+# ── the money table is REACHABLE, not merely computed ────────────────────
+#
+# `report()` has carried `by_stage` since the accounting was fixed, and the
+# printed report showed wall clock only. "Where did the run's dollars go" is
+# the question a $96.65 run needed and the one a reader could not ask
+# without writing their own JSON parser.
+
+def _run_with_ledger(tmp_path):
+    from fixtures import new_run
+    run = new_run(tmp_path, n=4)
+    cost.record(run, stage="RESEARCH", elapsed_s=60.0, usd=9.0, turns=40,
+                tokens=TOK, model="sonnet")
+    cost.record(run, stage="CHALLENGE", elapsed_s=30.0, usd=3.0, turns=12,
+                tokens=TOK, model="sonnet")
+    cost.record(run, stage="KG", elapsed_s=5.0)
+    return run
+
+
+def test_by_stage_prints_the_money_largest_first(tmp_path, capsys):
+    run = _run_with_ledger(tmp_path)
+    # $12 against a $5 budget, so the command's own verdict is 1. That is the
+    # report's contract and not the flag's — the table prints either way, and
+    # a flag that suppressed an over-budget verdict would be worse than none.
+    assert cost.main(["report", "--run", run.run_id, "--root", str(run.root),
+                      "--by-stage"]) == 1
+    out = capsys.readouterr().out
+    assert "OVER" in out
+    body = out[out.index("usd"):]
+    assert body.index("RESEARCH") < body.index("CHALLENGE"), (
+        "largest first — a table ordered by stage name buries the answer")
+    assert "$9.00" in out and "$3.00" in out
+    assert "75%" in out and "25%" in out, "the share is what makes it readable"
+
+
+def test_a_stage_with_no_money_is_a_dash_and_never_a_zero(tmp_path, capsys):
+    """Invariant 9: a derived value is computed or null, never a default that
+    looks like data. A KG row with no price is not a free stage."""
+    run = _run_with_ledger(tmp_path)
+    cost.main(["report", "--run", run.run_id, "--root", str(run.root),
+               "--by-stage"])
+    line = next(l for l in capsys.readouterr().out.splitlines()
+                if l.strip().startswith("KG"))
+    assert "—" in line and "$0" not in line
+
+
+def test_an_unpriced_run_says_so_rather_than_printing_an_empty_table(tmp_path, capsys):
+    """A dispatcher that recorded no spend is not a run that cost nothing,
+    and a table of dashes reads like one."""
+    from fixtures import new_run
+    run = new_run(tmp_path, n=4)
+    cost.record(run, stage="RESEARCH", elapsed_s=60.0)
+    cost.main(["report", "--run", run.run_id, "--root", str(run.root),
+               "--by-stage"])
+    assert "recorded none" in capsys.readouterr().out
+
+
+def test_the_flag_is_opt_in_so_the_old_report_is_unchanged(tmp_path, capsys):
+    run = _run_with_ledger(tmp_path)
+    cost.main(["report", "--run", run.run_id, "--root", str(run.root)])
+    out = capsys.readouterr().out
+    assert "wall clock" in out and "share" not in out
