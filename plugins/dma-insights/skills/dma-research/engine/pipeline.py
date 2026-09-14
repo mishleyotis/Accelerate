@@ -1072,10 +1072,26 @@ class Pipeline:
             b = brief.batch(self.wb, run=self.run, out_dir=self._briefs(f"research_r{r}"),
                             only=work, with_handback=(r > 0))
             self._count(self._dispatch(b, stage="RESEARCH"))
-            cb = brief.challenge_batch(self.wb, run=self.run,
-                                       out_dir=self._briefs(f"challenge_r{r}"))
+            # CHALLENGE ONLY WHAT HAS CONVERGED. The stage used to run for
+            # every category every round, on one opus lane per category —
+            # judging syntheses the next round would rewrite. The probe is
+            # the floors gate with its challenge terms deferred, asked
+            # WITHOUT recording: a PASS written here would read as "this
+            # category is done" and the challenge it asks about would never
+            # be dispatched.
+            converged = [c for c in work
+                         if floors_gate.run(self.wb, c, require_synthesis=True,
+                                            require_challenge=False,
+                                            persist=False)["gate"] == "PASS"]
+            cb = brief.challenge_batch(self.wb, run=self.run, categories=converged,
+                                       out_dir=self._briefs(f"challenge_r{r}")) \
+                if converged else {"lanes": 0}
             if cb.get("lanes"):
                 self._count(self._dispatch(cb, stage="CHALLENGE"))
+            if cb.get("deferred_cells"):
+                self.opts.log(f"  [CHALLENGE] {len(cb['deferred_cells'])} cell(s) "
+                              f"did not fit their page and stay unchallenged: "
+                              f"{', '.join(cb['deferred_cells'][:6])}")
             for cat in work:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
             self._verify_research(work)

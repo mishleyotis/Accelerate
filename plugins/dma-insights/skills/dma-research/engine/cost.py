@@ -286,7 +286,15 @@ TURNS_PER_CELL_OVERHEAD = 2
 DIFFERENTIATING_SEARCHES_PER_CELL = 2
 
 
-def lane_turn_budget() -> int:
+#: Turns a challenge lane spends: a fixed cost to read its packet, then one
+#: chained `engine.cli challenge` per cell. The packet carries the evidence,
+#: so there is nothing to fetch per cell — which is the whole reason the
+#: figure is one rather than the four the old design paid.
+CHALLENGE_TURNS_FIXED = 3
+CHALLENGE_TURNS_PER_CELL = 1
+
+
+def lane_turn_budget(kind: str = "research") -> int:
     """`maxTurns` as the agent manifests actually declare it.
 
     Read, never assumed: there is no `--max-turns` on the claude CLI, so the
@@ -295,8 +303,18 @@ def lane_turn_budget() -> int:
     """
     import re
     seen = set()
-    d = PLUGIN / "agents" / "research" / "categories"
-    for f in sorted(d.glob("research-p*-producer.md")):
+    # The CHALLENGE lane was outside this projection entirely: it globbed
+    # the category researchers only, so the stage that dispatches one lane
+    # per category on the most expensive tier was invisible to the
+    # measurement that exists to say what a run costs before it spends it.
+    if str(kind).lower().startswith("chall"):
+        files = [PLUGIN / "agents" / "research" / "research-challenger.md"]
+    else:
+        files = sorted((PLUGIN / "agents" / "research" / "categories")
+                       .glob("research-p*-producer.md"))
+    for f in files:
+        if not f.is_file():
+            continue
         m = re.search(r"^maxTurns:\s*(\d+)", f.read_text(), re.M)
         if m:
             seen.add(int(m.group(1)))
@@ -366,6 +384,22 @@ def lane_fit(wb) -> dict:
                     "lane_turns": cap,
                     "lanes_needed": round(grain / cap, 2) if cap else None,
                     "fits": bool(cap and grain <= cap)})
+    # THE CHALLENGE STAGE, which this projection did not model at all. Its
+    # unit is the cell, not the capability: every synthesised cell is
+    # challenged, paged across lanes.
+    from .brief import CELLS_PER_CHALLENGE_LANE
+    ch_cells = sum(r["cells"] for r in out)
+    ch_cap = lane_turn_budget(kind="challenge")
+    ch_per_lane = (CHALLENGE_TURNS_FIXED
+                   + CELLS_PER_CHALLENGE_LANE * CHALLENGE_TURNS_PER_CELL)
+    challenge = {
+        "cells": ch_cells,
+        "cells_per_lane": CELLS_PER_CHALLENGE_LANE,
+        "lanes": -(-ch_cells // CELLS_PER_CHALLENGE_LANE) if ch_cells else 0,
+        "turns_per_lane": ch_per_lane,
+        "lane_turns": ch_cap,
+        "fits": bool(ch_cap and ch_per_lane <= ch_cap),
+    }
     over = [r for r in out if not r["fits"]]
     grain_total = sum(r["projected_turns"] for r in out)
     flat_total = sum(r["per_subcap_turns"] for r in out)
@@ -381,8 +415,9 @@ def lane_fit(wb) -> dict:
         "per_subcap_lane_equivalents": (round(flat_total / cap, 1)
                                         if cap else None),
         "categories": out,
+        "challenge": challenge,
         "over": [r["category"] for r in over],
-        "ok": not over,
+        "ok": not over and challenge["fits"],
         "why": ("every category fits its lane at capability grain" if not over else
                 f"{len(over)} of {len(out)} categories need more turns than a lane "
                 f"has ({cap}), even at capability grain: "

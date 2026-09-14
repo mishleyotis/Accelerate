@@ -219,8 +219,18 @@ def run_density(wb: RunWorkbook) -> dict:
 
 
 def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
+        require_challenge: bool = True, persist: bool = True,
         qa_dir: Path | None = None) -> dict:
-    """Evaluate one category and RECORD the verdict in both places."""
+    """Evaluate one category and RECORD the verdict in both places.
+
+    `persist=False` evaluates WITHOUT recording, for a caller asking a
+    question rather than rendering a judgement — the driver's "has this
+    category's research converged, so is it worth challenging" probe. A
+    probe that wrote its answer would be worse than no probe: a PASS
+    recorded with the challenge terms deferred is a PASS
+    `categories_needing_dispatch` reads as "this category is done", and the
+    challenge it was asking about would never be dispatched.
+    """
     tax = C.taxonomy()
     if category not in tax.categories:
         raise ValueError(f"{category} is not one of the {tax.n_categories} "
@@ -533,6 +543,15 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
     ) if findings[k]]
+    # A category whose research has not converged is not challenged yet: the
+    # challenge stage runs after the floors gate says the work is done, so
+    # asking for the verdict in the same breath as the work is asking the
+    # driver to dispatch a pass over cells that are still moving. The terms
+    # are still COMPUTED and still reported — a deferral that stopped
+    # measuring would be a relaxation nobody could see.
+    if not require_challenge:
+        blocking = [k for k in blocking
+                    if k not in ("challenge_missing", "challenge_not_independent")]
     # …unless the run's own recorded baseline proves no enrichment connector
     # was bound. Then the finding stays populated and reported and leaves the
     # blocking list: the same measurement `declare_absence` verifies, so the
@@ -632,6 +651,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     }
 
     # ── the half that did not exist: recording it ────────────────────────
+    if not persist:
+        return out
     qa = Path(qa_dir) if qa_dir else None
     if qa is not None:
         qa.mkdir(parents=True, exist_ok=True)

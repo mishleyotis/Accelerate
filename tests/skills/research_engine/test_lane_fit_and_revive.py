@@ -100,7 +100,9 @@ def test_a_run_that_cannot_fit_still_says_so_and_why(tmp_path):
     run = _full_scope(tmp_path)
     fit = cost.lane_fit(run.open())
     import unittest.mock as mock
-    with mock.patch.object(cost, "lane_turn_budget", lambda: 100):
+    # `kind=` arrived when the projection learned to model the challenge
+    # lane as well as the category lanes.
+    with mock.patch.object(cost, "lane_turn_budget", lambda kind="research": 100):
         tight = cost.lane_fit(run.open())
     assert tight["ok"] is False and len(tight["over"]) == 16
     assert "re-dispatched" in tight["why"] and "context floor" in tight["why"]

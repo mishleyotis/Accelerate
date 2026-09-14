@@ -141,9 +141,15 @@ class SelfRecordingDispatcher(CostlyDispatcher):
 
 
 def _lane_synthesises_uncontested(agent, prompt_file, ctx):
-    """Like `_lane_closes_one_cell`, but leaves the challenge to the
-    CHALLENGE stage — `fixtures.synthesise` challenges the cell itself, so a
-    run built with it dispatches no challenge lane and cannot measure one."""
+    """A lane that FINISHES its category and leaves the challenge to the
+    challenge stage.
+
+    Both halves matter for measuring that stage. `fixtures.synthesise`
+    challenges the cell itself, so a run built with it dispatches no
+    challenge lane at all; and since 2026-09-14 the driver challenges only
+    categories whose research has CONVERGED, so a lane that closes one cell
+    a round never earns one either.
+    """
     from engine import ledger as L
     F = S.fixtures()
     wb = ctx.run.open()
@@ -157,7 +163,6 @@ def _lane_synthesises_uncontested(agent, prompt_file, ctx):
         record = {k: v for k, v in F.good_synthesis(c, eids).items()
                   if k != "Challenge_Verdict"}
         L.append_synthesis(wb, c, record, actor=agent)
-        break
 
 
 def _drive_self_recording(tmp_path, **over):

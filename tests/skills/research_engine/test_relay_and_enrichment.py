@@ -305,13 +305,18 @@ def test_reconcile_respects_the_cell_a_request_names(tmp_path):
 # ═══════════════════════════════════════════════════════════════════════════
 
 def test_drain_batch_writes_one_specialist_lane_per_category_with_a_label(tmp_path):
+    """LANE MODE, now the explicit fallback. Since 2026-09-14 `drain_batch`
+    defaults to `mode="orchestrator"` (the connectors are held by the
+    conductor's session, so there is no headless lane to dispatch); this
+    pins the dispatch that is still right where the container itself holds
+    them. The orchestrator default is pinned in test_relay_batch.py."""
     run = new_run(tmp_path, n=4, prelim=False)
     logs = run.root / "agent_logs"
     _transcript(logs, "research-p1c1-producer", [_result(json.dumps({"search_requests": [REQ]}))])
     _transcript(logs, "research-p2c3-producer", [_result(json.dumps({"search_requests": [
         {"query": "Acme Credit Union chat servicing vendor", "subcap": "P2C3.1.1", "facet": "primary"}]}))])
     relay.harvest(run, None, logs_dir=logs)
-    out = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay")
+    out = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay", mode="lane")
     assert out["lanes"] == 2 and out["requests"] == 2
     rows = json.loads(Path(out["batch"]).read_text())
     assert {r["agent"] for r in rows} == {relay.DRAIN_AGENT}
@@ -324,13 +329,14 @@ def test_drain_batch_writes_one_specialist_lane_per_category_with_a_label(tmp_pa
         assert must in text, must
     assert "WebSearch instead" in text, "the brief forbids the silent fallback"
     # restricted to one category when asked
-    only = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay2", categories=["P2C3"])
+    only = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay2",
+                             categories=["P2C3"], mode="lane")
     assert only["lanes"] == 1 and only["briefs"][0]["category"] == "P2C3"
 
 
 def test_drain_batch_with_nothing_open_dispatches_nothing(tmp_path):
     run = new_run(tmp_path, n=4, prelim=False)
-    out = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay")
+    out = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay", mode="lane")
     assert out == {"batch": None, "lanes": 0, "requests": 0, "briefs": []}
     assert not (tmp_path / "relay").exists()
 
@@ -546,11 +552,21 @@ def test_zero_heals_discloses_immediately_and_still_records_the_gap(tmp_path):
     assert len(rows) == 1 and rows[0]["Verdict"] == "FAIL" and rows[0]["Detail"].startswith("DISCLOSED")
 
 
-def test_harvested_requests_are_drained_by_a_specialist_lane_and_reconciled(tmp_path):
+def test_harvested_requests_are_drained_by_a_specialist_lane_and_reconciled(
+        tmp_path, monkeypatch):
     """The relay end to end inside one research round: the lane emits a
     request it could not run, the driver dispatches the specialist over it,
     the specialist logs the connector search, the Search_Log closes the
-    request, and the ENRICHMENT gate passes on the row the specialist wrote."""
+    request, and the ENRICHMENT gate passes on the row the specialist wrote.
+
+    LANE MODE. `drain_batch` now defaults to `mode="orchestrator"`, which
+    writes the batch and dispatches nothing; the driver passes the mode it
+    was configured with, so this pins the lane path by forcing it here.
+    (`Options.relay_mode` is the pipeline stream's; until it lands, the
+    partial below is what the driver's call would carry.)"""
+    import functools
+    monkeypatch.setattr(relay, "drain_batch",
+                        functools.partial(relay.drain_batch, mode="lane"))
     run = _fresh(tmp_path)
     drained = []
 

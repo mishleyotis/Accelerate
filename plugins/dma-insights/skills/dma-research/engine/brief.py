@@ -105,6 +105,23 @@ REUSE_PER_CELL = 3
 #: reader that already exists.
 CELLS_DETAILED = 8
 
+#: THE CHALLENGE PACKET'S OWN BUDGET. A dispatch packet describes work to be
+#: done; a challenge packet carries the EVIDENCE to be judged, because the
+#: alternative measured worse: the lane was shipped an evidence COUNT and
+#: had to re-read every row to answer `evidence_sufficiency`, once per cell,
+#: inside one long context. Three 240-character windows of what a row
+#: actually says cost less than the read they replace, but they are not
+#: free, so the packet gets a larger ceiling rather than no ceiling.
+CHALLENGE_CHAR_CEILING = 16000
+#: Cells per challenge lane. The stage is PAGED rather than trimmed: the
+#: floors gate demands every synthesised cell challenged, so a packet that
+#: silently kept three of forty could not converge in one round and said so
+#: nowhere (measured 2026-09-14 — `_bound` halved to a floor of 3).
+CELLS_PER_CHALLENGE_LANE = 12
+#: Cited rows shipped per cell, highest ERS first, and how much of each.
+CHALLENGE_EVIDENCE_PER_CELL = 4
+CHALLENGE_EXCERPT_WINDOW = 240
+
 
 def _clean(v) -> str:
     return " ".join(str(v or "").split())
@@ -885,17 +902,27 @@ def _dispatch_line(batch_path: Path, run, stage: str) -> str:
 # lanes below get the same treatment: what the run knows, what is owed, the
 # exact commands, the refusals they will meet, bounded by the same ceiling.
 
-def _bound(packet: dict, *lists: str) -> dict:
-    packet["packet_ceiling"] = BRIEF_CHAR_CEILING
+def _bound(packet: dict, *lists: str, ceiling: int | None = None,
+           floor: int = 3) -> dict:
+    """Drop rows until the packet fits, and SAY which rows were dropped.
+
+    `ceiling` defaults to the dispatch packet's; the challenge packet passes
+    its own. What a caller must not do is treat the trim as harmless: where
+    a gate demands every row, the dropped ones are the reason the stage will
+    not converge, and `trimmed` is what says so.
+    """
+    cap = ceiling or BRIEF_CHAR_CEILING
+    packet["packet_ceiling"] = cap
     packet["packet_chars"] = len(json.dumps(packet, default=str))
     for key in lists:
-        while packet["packet_chars"] > BRIEF_CHAR_CEILING and \
-                isinstance(packet.get(key), list) and len(packet[key]) > 3:
-            keep = max(3, len(packet[key]) // 2)
-            dropped = len(packet[key]) - keep
+        while packet["packet_chars"] > cap and \
+                isinstance(packet.get(key), list) and len(packet[key]) > floor:
+            keep = max(floor, len(packet[key]) // 2)
+            dropped = packet[key][keep:]
             packet[key] = packet[key][:keep]
+            packet.setdefault("dropped", []).extend(dropped)
             packet["trimmed"] = (packet.get("trimmed") or "") + \
-                f"{key}: {dropped} item(s) trimmed to stay under the ceiling; "
+                f"{key}: {len(dropped)} item(s) trimmed to stay under the ceiling; "
             packet["packet_chars"] = len(json.dumps(packet, default=str))
     return packet
 
@@ -1026,12 +1053,77 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     ], run=run, stage="PRELIM")
 
 
-def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
-    """One `finding-challenger` lane per category with unchallenged
-    syntheses: the cells, their claims, and the `engine.cli challenge`
-    command — the actor is the challenger, never the author."""
+def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
+    """One cell, carrying what the SEVEN DIMENSIONS actually need.
+
+    It used to carry the claim and an evidence COUNT, which answers none of
+    them: `evidence_sufficiency` cannot be judged from an integer, so the
+    lane re-read every cited row from the workbook — once per cell, inside
+    one long context, on the most expensive model tier in the run. The rows
+    are cheaper shipped than fetched, at a window each.
+    """
+    eids = [i.split(":")[0] for i in _ids(r.get("Evidence_IDs"))
+            if i and i != C.NO_EVIDENCE]
+    rows = [register[e] for e in eids if e in register]
+    rows.sort(key=lambda x: float(x.get("ERS") or 0), reverse=True)
+    return {
+        "subcap": sub, "name": C.subcap_names().get(sub),
+        "claim": _clean(r.get("Dominant_Claim"))[:200],
+        "label": _clean(r.get("Claim_Label")),
+        "author": L.actor_for(wb, sub, "synthesis"),
+        # evidence_sufficiency, and the recency dimension
+        "evidence": [{"e_id": _clean(x.get("E_ID")),
+                      "source": _clean(x.get("Source_Name")),
+                      "url": _clean(x.get("Source_URL")),
+                      "tier": _clean(x.get("Tier")),
+                      "recency": _clean(x.get("Recency_Band")),
+                      "excerpt": _clean(x.get("Excerpt"))[:CHALLENGE_EXCERPT_WINDOW]}
+                     for x in rows[:CHALLENGE_EVIDENCE_PER_CELL]],
+        "evidence_total": len(eids),
+        # facet_coverage
+        "facets_answered": sorted(f for f in C.DQ_FACETS
+                                  if _clean(r.get(f"DQ_{f.title()}"))),
+        # contradiction_handling
+        "contradiction": {"text": _clean(r.get("DQ_Contradicts"))[:160],
+                          "disposition": _clean(r.get("Contradiction_Disposition"))},
+        # ceiling_reasoning
+        "ceiling": _clean(r.get("Ceiling_Reasoning"))[:160],
+        "recency_bands": sorted({_clean(x.get("Recency_Band")) for x in rows
+                                 if _clean(x.get("Recency_Band"))}),
+    }
+
+
+def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
+                    categories: list[str] | None = None) -> dict:
+    """The independent challenge over synthesised cells, PAGED.
+
+    THREE THINGS THIS STAGE GOT WRONG, measured 2026-09-14 (MEM-0515):
+
+    It dispatched `finding-challenger` — opus, effort high — whose own body
+    is written about challenging surface JSON before page consolidation, and
+    never mentions `engine.cli challenge`, `Challenge_Log` or the seven
+    dimensions it must record. An agent handed a job its instructions do not
+    describe explores, and it explored on the most expensive tier in the run,
+    once per category, every round. `research-challenger` is the sonnet agent
+    written for this job.
+
+    It shipped an evidence COUNT and sent the lane to `orient` — the
+    research next-card view — so the lane paid to rediscover what the packet
+    could have carried. `_challenge_cell` carries it.
+
+    And `_bound` halved the cell list to a floor of three while the floors
+    gate demands every synthesised cell challenged: a stage that cannot
+    converge in one round by construction, reporting nothing. It PAGES now,
+    and a cell that still could not be shipped comes back in
+    `deferred_cells` rather than disappearing.
+
+    `categories` restricts the pass to the categories whose research has
+    converged — challenging a category still moving is work thrown away.
+    """
     e = _engine(run)
     sh = shared(wb)
+    register = wb.evidence_index()
+    only = {str(c).strip().upper() for c in (categories or [])}
     challenged = {_clean(r.get("SubCap_ID")) for r in wb.rows("Challenge_Log")
                   if _clean(r.get("Verdict"))}
     by_cat: dict[str, list] = {}
@@ -1040,46 +1132,67 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
             sub = _clean(r.get("SubCap_ID"))
             if not sub or sub not in wb.selected_subcaps():
                 continue
+            if only and category_of(sub) not in only:
+                continue
             if not _clean(r.get("Dominant_Claim")):
                 continue
             if sub in challenged or _clean(r.get("Challenge_Verdict")):
                 continue
             if L.is_declared_absent(r, wb):
                 continue          # an absence is gated by its ladder, not a challenge
-            by_cat.setdefault(category_of(sub), []).append({
-                "subcap": sub, "name": C.subcap_names().get(sub),
-                "claim": _clean(r.get("Dominant_Claim"))[:200],
-                "label": _clean(r.get("Claim_Label")),
-                "author": L.actor_for(wb, sub, "synthesis"),
-                "evidence": len(_ids(r.get("Evidence_IDs"))),
-            })
-    lanes = []
+            by_cat.setdefault(category_of(sub), []).append(
+                _challenge_cell(wb, r, sub, register))
+    lanes, packets, deferred = [], [], []
     dims = " ".join(f"--dimension {d}=PASS|FAIL|NOT_RUN" for d in C.CHALLENGE_DIMENSIONS)
     for cat in sorted(by_cat):
-        packet = _bound({
-            "agent": "finding-challenger", "shared": sh,
-            "first_commands": [
-                f"python3 -m engine.cli orient {e} --category {cat}",
-                f"python3 -m engine.cli challenge {e} --subcap <CELL> --verdict PASS|FAIL "
-                f"--actor finding-challenger --rationale '…' {dims}"],
-            "category": cat,
-            "cells_to_challenge": by_cat[cat],
-            "rules": [
-                "steelman, then falsify: read the row's evidence and the claim, "
-                "and record every one of the seven dimensions by name",
-                "any FAIL is FAIL — the engine refuses a PASS over a failed dimension",
-                "you did not write these syntheses; the engine refuses a verdict "
-                "from the synthesis's author or its session",
-                "repair nothing — a FAIL goes back to the category lane through "
-                "the floors gate",
-            ],
-        }, "cells_to_challenge")
-        lanes.append((f"challenge-{cat}", packet, f"Challenge — {cat}"))
+        cells = by_cat[cat]
+        pages = [cells[i:i + CELLS_PER_CHALLENGE_LANE]
+                 for i in range(0, len(cells), CELLS_PER_CHALLENGE_LANE)] or [[]]
+        for n, page in enumerate(pages):
+            packet = _bound({
+                "agent": "research-challenger", "shared": sh,
+                "first_commands": [
+                    f"python3 -m engine.cli challenge {e} --subcap <CELL> "
+                    f"--verdict PASS|FAIL --actor research-challenger "
+                    f"--rationale '…' {dims}"],
+                "category": cat, "page": n + 1, "pages": len(pages),
+                "cells_to_challenge": page,
+                "rules": [
+                    "judge from THIS packet: the claim, the evidence rows and "
+                    "the facet fields are what the seven dimensions ask about",
+                    "record every one of the seven dimensions by name; any "
+                    "FAIL is FAIL — the engine refuses a PASS over a failed one",
+                    "chain every cell's `challenge` call in ONE Bash "
+                    "invocation; a turn per cell is the cost this stage was "
+                    "rebuilt to remove",
+                    "NOT FOUND IS NOT DISPROVED: a dimension you cannot judge "
+                    "from the packet is NOT_RUN, never a PASS",
+                    "you did not write these syntheses; the engine refuses a "
+                    "verdict from the synthesis's author or its session",
+                    "repair nothing — a FAIL goes back to the category lane "
+                    "through the floors gate",
+                ],
+            }, "cells_to_challenge", ceiling=CHALLENGE_CHAR_CEILING, floor=1)
+            deferred += [c["subcap"] for c in packet.pop("dropped", [])]
+            name = f"challenge-{cat}" + (f"-{n + 1}" if len(pages) > 1 else "")
+            lanes.append((name, packet, f"Challenge — {cat}"
+                          + (f" ({n + 1}/{len(pages)})" if len(pages) > 1 else "")))
+            packets.append(packet)
     if not lanes:
         return {"batch": None, "lanes": 0, "briefs": [], "dispatch": None,
+                "packets": [], "lane_names": [], "deferred_cells": [],
                 "note": "every synthesis in scope already carries a challenge verdict"}
-    return _write_lanes(out_dir, lanes, run=run, stage="CHALLENGE",
-                        batch_name="batch_challenge.json")
+    out = _write_lanes(out_dir, lanes, run=run, stage="CHALLENGE",
+                       batch_name="batch_challenge.json")
+    out.update(packets=packets, lane_names=[n for n, _, _ in lanes],
+               deferred_cells=sorted(set(deferred)))
+    if deferred:
+        out["note"] = (
+            f"{len(out['deferred_cells'])} cell(s) did not fit their page and "
+            f"are NOT challenged this round: {', '.join(out['deferred_cells'][:6])}"
+            f". The floors gate demands every synthesised cell challenged, so "
+            f"this is why the category will not close yet — not a silent trim.")
+    return out
 
 
 def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,

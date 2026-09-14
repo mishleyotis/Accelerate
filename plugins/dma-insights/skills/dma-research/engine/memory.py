@@ -1,11 +1,27 @@
 #!/usr/bin/env python3
 """Deep memory: per-category .md files, consolidated into the workbook.
 
-    python3 -m engine.memory note        --run R --category P1C1 --subcap ... --facet ... [--stdin | fields]
+    python3 -m engine.memory note        --run R --category P1C1 --subcap CELL [--subcap CELL ...]
+                                         [--facet F] [--kind evidence|lead|absence|contradiction|note]
+                                         [--actor NAME] [--claim ...] [--excerpt ...] [--url ...]
+                                         [--source-name ...] [--tier ...] [--published ...]
+                                         [--claim-type ...] [--ladder ...] [--text ...] [--origin ...]
+    python3 -m engine.memory note        --run R --category P1C1 --entries-file FILE|-
     python3 -m engine.memory status      --run R [--category P1C1]
     python3 -m engine.memory consolidate --run R --category P1C1 [--actor NAME]
     python3 -m engine.memory backup      --run R
+    python3 -m engine.memory restore     --run R
     python3 -m engine.memory cleanup     --run R [--apply]
+
+THE USAGE BLOCK ABOVE IS THE REAL ONE — every flag in it is a flag the
+parser has, which a test pins. From the day this module was written until
+2026-09-14 it advertised a `stdin` flag that never existed in the parser: a
+usage line nobody can run, costing a turn to discover and teaching nothing.
+Entries now arrive through `--entries-file` (a JSON list of objects carrying
+the same fields the flags take; `-` reads stdin), which is what that phantom
+flag was reaching for: a lane writing forty notes paid forty Bash
+round-trips, forty turns on the layer whose whole reason to exist is that it
+is cheap.
 
 WHY .MD FILES AT ALL. A category researcher works in a session that can
 compact, die mid-turn or lose its context. The workbook write path is
@@ -27,8 +43,11 @@ reports, gates and the handoff read sheets.
 
 LIFECYCLE, as the owner specified it: the .md files are LOCAL, they get a
 DRIVE BACKUP while the run is in flight (a dead container must not cost the
-notebook), and the backup is CLEANED UP once its content is consolidated
-into the workbook and the workbook itself is safely off the container.
+notebook), the backup can be RESTORED into a fresh container, and it is
+CLEANED UP once its content is consolidated into the workbook and the
+workbook itself is safely off the container. The restore half landed
+2026-09-14: until then the lifecycle was push-only, so the backup a dead
+container's successor needed was a file nothing could fetch.
 `cleanup` REFUSES until both facts are verified — deleting the only copy of
 unconsolidated notes is the one unrecoverable mistake this module can make,
 so it is the one it structurally cannot.
@@ -46,6 +65,7 @@ import argparse
 import datetime as _dt
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -74,9 +94,17 @@ def memory_path(run: runstate.Run, category: str) -> Path:
     return run.root / MEMORY_DIR / f"{category}.md"
 
 
-def note(run: runstate.Run, *, category: str, subcap, facet: str,
-         kind: str = "evidence", actor: str | None = None, **fields) -> Path:
-    """Append one entry. Cheap on purpose: the only validation here is shape
+def note(run: runstate.Run, *, category: str, subcap=None, facet: str = "",
+         kind: str = "evidence", actor: str | None = None,
+         entries_file=None, **fields):
+    """Append one entry — or, with `entries_file`, MANY in one call.
+
+    `entries_file` is a path (or `-` for stdin, or an already-parsed list) to
+    a JSON list of objects carrying the same fields the flags take. It
+    returns the batch report `{"noted", "failed", "paths", "entries"}`
+    instead of a Path; the single-entry call still returns the notebook Path.
+
+    Cheap on purpose: the only validation here is shape
     vocabulary — substance is judged at CONSOLIDATION by the real gates,
     because a notebook that refuses a hunch defeats its reason to exist.
 
@@ -88,8 +116,13 @@ def note(run: runstate.Run, *, category: str, subcap, facet: str,
     others. The entry head stores them comma-joined, which the parser's
     `(\\S+)` already accepts.
     """
+    if entries_file is not None:
+        return note_entries(run, _read_entries(entries_file),
+                            category=category, actor=actor)
     if kind not in KINDS:
         raise ValueError(f"kind {kind!r} not in {KINDS}")
+    if subcap is None:
+        raise ValueError("note needs at least one subcap")
     cells = ([subcap] if isinstance(subcap, str)
              else [str(s).strip() for s in subcap if str(s).strip()])
     if not cells:
@@ -133,6 +166,64 @@ def note(run: runstate.Run, *, category: str, subcap, facet: str,
     with p.open("a") as fh:
         fh.write("\n".join(lines) + "\n")
     return p
+
+
+#: What an entry object may say instead of `subcap`, and the flag spelling
+#: that maps onto each field name. Hyphens become underscores so a JSON
+#: entry can be copied straight off a command line.
+_SUBCAP_KEYS = ("subcap", "subcaps", "cell", "cells", "subcap_id")
+
+
+def _read_entries(src) -> list[dict]:
+    """The entry list, from a path, from stdin (`-`), or already parsed."""
+    if isinstance(src, (list, tuple)):
+        raw = list(src)
+    else:
+        text = (sys.stdin.read() if str(src) == "-"
+                else Path(src).read_text(encoding="utf-8"))
+        try:
+            raw = json.loads(text)
+        except ValueError as e:
+            raise ValueError(f"--entries-file is not JSON: {e}") from None
+    if not isinstance(raw, list):
+        raise ValueError(
+            "--entries-file carries a JSON LIST of entry objects, one per "
+            "note: [{\"subcap\": \"P1C1.1.1\", \"facet\": \"works\", "
+            "\"kind\": \"evidence\", ...}, ...]")
+    return raw
+
+
+def note_entries(run: runstate.Run, entries, *, category: str | None = None,
+                 actor: str | None = None) -> dict:
+    """Many entries, ONE call, in file order.
+
+    ONE BAD ENTRY MUST NOT COST THE OTHER THIRTY-NINE. Each entry is
+    validated by `note` itself — same vocabulary, same category-scope and
+    actor-scope refusals — and a failure is reported with its INDEX so the
+    researcher can find the one line to repair rather than re-deriving which
+    of forty notes the refusal was about. Nothing is rolled back: a notebook
+    is append-only, and an entry that landed is a finding that survived.
+    """
+    noted, failed, paths = 0, [], []
+    for i, e in enumerate(entries):
+        try:
+            if not isinstance(e, dict):
+                raise ValueError(f"an entry must be a JSON object, not a "
+                                 f"{type(e).__name__}")
+            f = {str(k).replace("-", "_"): v for k, v in e.items()}
+            cat = str(f.pop("category", None) or category or "").strip()
+            sub = next((f.pop(k) for k in _SUBCAP_KEYS if k in f), None)
+            p = note(run, category=cat, subcap=sub,
+                     facet=str(f.pop("facet", "") or ""),
+                     kind=str(f.pop("kind", "evidence") or "evidence"),
+                     actor=(f.pop("actor", None) or actor), **f)
+            noted += 1
+            if str(p) not in paths:
+                paths.append(str(p))
+        except (ValueError, TypeError, OSError) as err:
+            failed.append({"index": i, "error": str(err)})
+    return {"noted": noted, "failed": failed, "paths": paths,
+            "entries": len(entries)}
 
 
 def parse(path: Path) -> list[dict]:
@@ -336,6 +427,11 @@ def backup(run: runstate.Run) -> dict:
     pushed, failed = [], []
     files = sorted((run.root / MEMORY_DIR).glob("*.md")) + \
         ([run.workbook_path] if run.workbook_path.exists() else [])
+    # ONE CALL PER FILE, deliberately. `drive_fetch.py push-backup` takes a
+    # single `--file` and no list form (read 2026-09-14: `p_bk` declares
+    # `--client`, `--file`, `--name`, and `push_backup` uploads exactly one
+    # path), so batching here would mean inventing a flag the script does
+    # not have. The loop stays until push-backup grows one.
     for f in files:
         r = subprocess.run(
             [sys.executable, str(df), "push-backup", "--client", client,
@@ -345,6 +441,75 @@ def backup(run: runstate.Run) -> dict:
             {"file": f.name, "detail": (r.stdout or r.stderr).strip()[-160:]})
     return {"outcome": "RESOLVED" if not failed else "PARTIAL",
             "pushed": pushed, "failed": failed}
+
+
+#: The drive_fetch verb `restore` needs. It is the mirror of `push-backup`:
+#: same client, same `memory-backup` folder, downloading instead of
+#: uploading, into `--dest`.
+PULL_VERB = "pull-backup"
+
+
+def restore(run: runstate.Run) -> dict:
+    """Pull the Drive backup of the notebooks back into `03_memory/`.
+
+    The mirror of `backup`, and the half the lifecycle was missing: pushing
+    a safety copy that nothing can fetch means a dead container still takes
+    the notebooks with it. Reports as honestly as `backup` does — a restore
+    that did not run says NOT_RUN and why, because a fabricated RESOLVED
+    over an empty directory is how a researcher concludes the notes were
+    never written.
+
+    A LOCAL NOTEBOOK IS NEVER OVERWRITTEN. The local copy is the live one
+    and the backup is older by construction, so a file already on disk is
+    reported `kept` and left exactly as it is. Restoring into a running
+    container is therefore safe, which is what makes it usable as a repair
+    rather than a ceremony.
+    """
+    df = _drive_fetch()
+    if df is None:
+        return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                "reason": "drive_fetch.py is not in this install; there is no "
+                          "Drive copy to restore from"}
+    wb = run.open()
+    client = str(wb.metadata().get("entity_name") or run.run_id)
+    stage = run.qa_dir / "restore_staging"
+    shutil.rmtree(stage, ignore_errors=True)
+    stage.mkdir(parents=True, exist_ok=True)
+    try:
+        r = subprocess.run(
+            [sys.executable, str(df), PULL_VERB, "--client", client,
+             "--dest", str(stage)],
+            capture_output=True, text=True, timeout=300)
+        detail = (r.stdout or r.stderr or "").strip()[-400:]
+        if r.returncode != 0:
+            if PULL_VERB in (r.stderr or "") and "invalid choice" in (r.stderr or ""):
+                return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                        "reason": f"this install's drive_fetch.py has no "
+                                  f"`{PULL_VERB}` verb, so the Drive lifecycle "
+                                  f"is push-only here and there is nothing to "
+                                  f"restore FROM — it is the mirror of "
+                                  f"push-backup and has to be added beside it",
+                        "detail": detail}
+            return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                    "reason": f"drive_fetch.py {PULL_VERB} failed: {detail}"}
+        mem = run.root / MEMORY_DIR
+        mem.mkdir(parents=True, exist_ok=True)
+        restored, kept = [], []
+        for f in sorted(stage.glob("*.md")):
+            target = mem / f.name
+            if target.exists():
+                kept.append(f.name)
+            else:
+                target.write_bytes(f.read_bytes())
+                restored.append(f.name)
+        if not restored and not kept:
+            return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                    "reason": "the Drive backup holds no notebook for this "
+                              "client yet", "detail": detail}
+        return {"outcome": "RESOLVED", "restored": restored, "kept": kept,
+                "detail": detail}
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
 
 
 def cleanup(run: runstate.Run, *, apply: bool = False) -> dict:
@@ -400,7 +565,8 @@ def cleanup(run: runstate.Run, *, apply: bool = False) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("note", "status", "consolidate", "backup", "cleanup"):
+    for name in ("note", "status", "consolidate", "backup", "restore",
+                 "cleanup"):
         s = sub.add_parser(name)
         s.add_argument("--run", required=True)
         s.add_argument("--root")
@@ -409,11 +575,17 @@ def main(argv=None) -> int:
         elif name == "status":
             s.add_argument("--category")
         if name == "note":
-            s.add_argument("--subcap", required=True, action="append",
+            s.add_argument("--subcap", action="append",
                            help="the cell this entry bears on. Repeatable: one "
                                 "source often bears on several cells of a "
                                 "capability, and registering it once against "
-                                "all of them is one find, not several")
+                                "all of them is one find, not several. "
+                                "Required unless --entries-file is given")
+            s.add_argument("--entries-file",
+                           help="a JSON LIST of entry objects carrying the same "
+                                "fields these flags take — many notes in ONE "
+                                "call, validated one by one, each failure "
+                                "reported with its index. `-` reads stdin")
             s.add_argument("--facet", default="works")
             s.add_argument("--kind", default="evidence", choices=KINDS)
             s.add_argument("--actor", default=None,
@@ -430,6 +602,14 @@ def main(argv=None) -> int:
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
     if a.cmd == "note":
         from . import scope as _scope
+        if a.entries_file:
+            out = note(run, category=a.category,
+                       entries_file=a.entries_file,
+                       actor=(a.actor or _scope.actor_from_env() or None))
+            print(json.dumps(out, indent=2))
+            return 1 if out["failed"] else 0
+        if not a.subcap:
+            ap.error("note needs --subcap (repeatable) or --entries-file")
         p = note(run, category=a.category, subcap=a.subcap, facet=a.facet,
                  kind=a.kind, actor=(a.actor or _scope.actor_from_env() or None),
                  claim=a.claim, excerpt=a.excerpt, url=a.url,
@@ -449,6 +629,10 @@ def main(argv=None) -> int:
     if a.cmd == "backup":
         print(json.dumps(backup(run), indent=2))
         return 0
+    if a.cmd == "restore":
+        out = restore(run)
+        print(json.dumps(out, indent=2))
+        return 0 if out["outcome"] == "RESOLVED" else 1
     if a.cmd == "cleanup":
         out = cleanup(run, apply=a.apply)
         print(json.dumps(out, indent=2))

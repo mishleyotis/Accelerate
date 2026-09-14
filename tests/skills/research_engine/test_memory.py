@@ -425,4 +425,224 @@ def test_the_cli_takes_the_group_as_repeated_subcaps(tmp_path):
     was the asymmetry. Read the parser rather than driving a run."""
     import inspect
     text = inspect.getsource(M.main)
-    assert '"--subcap", required=True, action="append"' in text
+    assert '"--subcap", action="append"' in text
+    assert "--entries-file" in text, "the batch path is on the same verb"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# many entries, ONE call (C3-4)
+#
+# A lane writing forty notes paid forty Bash round-trips — forty turns, forty
+# context re-reads, on a layer whose whole reason to exist is that it is
+# cheap. `--entries-file` is the same validation, once.
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _entries_file(tmp_path, entries, name="entries.json"):
+    p = tmp_path / name
+    p.write_text(json.dumps(entries))
+    return p
+
+
+def test_many_entries_land_in_one_call_in_file_order(tmp_path):
+    run, wb, cells = _noted_run(tmp_path)
+    entries = [{"subcap": cells[0], "facet": "works", "kind": "note",
+                "claim": f"finding {i}"} for i in range(5)]
+    out = M.note(run, category=CAT,
+                 entries_file=_entries_file(tmp_path, entries))
+    assert out["noted"] == 5 and out["failed"] == []
+    got = M.parse(M.memory_path(run, CAT))
+    assert [e["fields"]["claim"] for e in got] == [f"finding {i}" for i in range(5)]
+
+
+def test_an_entry_may_name_several_cells_like_the_flag_does(tmp_path):
+    run, wb, cells = _noted_run(tmp_path)
+    out = M.note(run, category=CAT, entries_file=_entries_file(tmp_path, [
+        {"subcap": [cells[0], cells[1]], "facet": "works", "kind": "note",
+         "claim": "one source, two cells"}]))
+    assert out["noted"] == 1
+    assert M.parse(M.memory_path(run, CAT))[0]["subcap"] == f"{cells[0]},{cells[1]}"
+
+
+def test_a_bad_entry_names_its_index_and_the_others_still_land(tmp_path):
+    """One malformed entry in forty must not cost the other thirty-nine —
+    and the researcher has to be able to find WHICH one to repair."""
+    run, wb, cells = _noted_run(tmp_path)
+    out = M.note(run, category=CAT, entries_file=_entries_file(tmp_path, [
+        {"subcap": cells[0], "facet": "works", "kind": "note", "claim": "a"},
+        {"subcap": "P9C9.1.1", "facet": "works", "kind": "note", "claim": "b"},
+        {"subcap": cells[0], "facet": "nonsense", "kind": "note", "claim": "c"},
+        {"subcap": cells[0], "facet": "works", "kind": "note", "claim": "d"},
+    ]))
+    assert out["noted"] == 2
+    assert [f["index"] for f in out["failed"]] == [1, 2]
+    assert "P9C9.1.1" in out["failed"][0]["error"]
+    assert "nonsense" in out["failed"][1]["error"]
+    assert [e["fields"]["claim"] for e in M.parse(M.memory_path(run, CAT))] == ["a", "d"]
+
+
+def test_an_entries_file_that_is_not_a_list_is_refused(tmp_path):
+    run, wb, cells = _noted_run(tmp_path)
+    with pytest.raises(ValueError):
+        M.note(run, category=CAT,
+               entries_file=_entries_file(tmp_path, {"subcap": cells[0]}))
+
+
+def test_the_cli_takes_an_entries_file(tmp_path, capsys):
+    run, wb, cells = _noted_run(tmp_path)
+    p = _entries_file(tmp_path, [
+        {"subcap": cells[0], "facet": "works", "kind": "note", "claim": "cli one"},
+        {"subcap": cells[0], "facet": "works", "kind": "note", "claim": "cli two"}])
+    rc = M.main(["note", "--run", run.run_id, "--root", str(run.root),
+                 "--category", CAT, "--entries-file", str(p)])
+    assert rc == 0
+    assert json.loads(capsys.readouterr().out)["noted"] == 2
+    assert len(M.parse(M.memory_path(run, CAT))) == 2
+
+
+def test_the_cli_reads_entries_from_stdin(tmp_path, capsys, monkeypatch):
+    import io
+    run, wb, cells = _noted_run(tmp_path)
+    monkeypatch.setattr(M.sys, "stdin", io.StringIO(json.dumps(
+        [{"subcap": cells[0], "facet": "works", "kind": "note", "claim": "piped"}])))
+    rc = M.main(["note", "--run", run.run_id, "--root", str(run.root),
+                 "--category", CAT, "--entries-file", "-"])
+    assert rc == 0 and json.loads(capsys.readouterr().out)["noted"] == 1
+
+
+def test_the_cli_exits_nonzero_when_an_entry_failed(tmp_path, capsys):
+    run, wb, cells = _noted_run(tmp_path)
+    p = _entries_file(tmp_path, [{"subcap": "P9C9.1.1", "facet": "works",
+                                  "kind": "note", "claim": "stray"}])
+    rc = M.main(["note", "--run", run.run_id, "--root", str(run.root),
+                 "--category", CAT, "--entries-file", str(p)])
+    assert rc == 1
+    assert json.loads(capsys.readouterr().out)["failed"][0]["index"] == 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# restore: the lifecycle stops being push-only
+# ═══════════════════════════════════════════════════════════════════════════
+
+_FAKE_DRIVE = '''\
+import argparse, os, shutil, sys
+from pathlib import Path
+d = Path(os.environ["FAKE_DRIVE_DIR"]); d.mkdir(parents=True, exist_ok=True)
+ap = argparse.ArgumentParser(); sub = ap.add_subparsers(dest="cmd", required=True)
+b = sub.add_parser("push-backup"); b.add_argument("--client"); b.add_argument("--file"); b.add_argument("--name")
+{pull}
+a = ap.parse_args()
+if a.cmd == "push-backup":
+    shutil.copy2(a.file, d / Path(a.file).name); print("backup created")
+else:
+    dest = Path(a.dest); dest.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for f in sorted(d.glob("*.md")):
+        shutil.copy2(f, dest / f.name); n += 1
+    print(f"pulled {{n}}")
+'''
+_PULL = ('p = sub.add_parser("pull-backup"); p.add_argument("--client"); '
+         'p.add_argument("--dest")')
+
+
+def _fake_drive(tmp_path, monkeypatch, *, with_pull=True):
+    script = tmp_path / "fake_drive_fetch.py"
+    script.write_text(_FAKE_DRIVE.format(pull=_PULL if with_pull else ""))
+    monkeypatch.setenv("FAKE_DRIVE_DIR", str(tmp_path / "drive"))
+    monkeypatch.setattr(M, "_drive_fetch", lambda: script)
+    return script
+
+
+def test_a_notebook_survives_a_dead_container(tmp_path, monkeypatch):
+    """Push, lose the container, pull back: the round trip the lifecycle
+    advertised and only had one half of."""
+    run, wb, cells = _noted_run(tmp_path)
+    M.note(run, category=CAT, subcap=cells[0], facet="works", kind="note",
+           claim="the reasoning trail nobody wants to pay for twice")
+    before = M.memory_path(run, CAT).read_text()
+    _fake_drive(tmp_path, monkeypatch)
+    assert M.backup(run)["outcome"] == "RESOLVED"
+
+    import shutil
+    shutil.rmtree(run.root / M.MEMORY_DIR)
+    out = M.restore(run)
+    assert out["outcome"] == "RESOLVED", out
+    assert f"{CAT}.md" in out["restored"]
+    assert M.memory_path(run, CAT).read_text() == before
+
+
+def test_restore_never_overwrites_a_local_notebook(tmp_path, monkeypatch):
+    """The local copy is the live one; the backup is older by construction."""
+    run, wb, cells = _noted_run(tmp_path)
+    M.note(run, category=CAT, subcap=cells[0], facet="works", kind="note",
+           claim="backed up")
+    _fake_drive(tmp_path, monkeypatch)
+    M.backup(run)
+    M.note(run, category=CAT, subcap=cells[0], facet="works", kind="note",
+           claim="written after the backup")
+    out = M.restore(run)
+    assert out["kept"] == [f"{CAT}.md"] and out["restored"] == []
+    assert "written after the backup" in M.memory_path(run, CAT).read_text()
+
+
+def test_restore_reports_honestly_when_drive_is_absent(tmp_path, monkeypatch):
+    run, wb, cells = _noted_run(tmp_path)
+    monkeypatch.setattr(M, "_drive_fetch", lambda: None)
+    out = M.restore(run)
+    assert out["outcome"] == "NOT_RUN" and "drive_fetch.py" in out["reason"]
+
+
+def test_restore_says_so_when_this_install_cannot_pull(tmp_path, monkeypatch):
+    """An install whose drive_fetch.py has no `pull-backup` verb cannot
+    restore. That is a NOT_RUN naming the missing verb, never a silent
+    RESOLVED over an empty directory."""
+    run, wb, cells = _noted_run(tmp_path)
+    _fake_drive(tmp_path, monkeypatch, with_pull=False)
+    out = M.restore(run)
+    assert out["outcome"] == "NOT_RUN" and "pull-backup" in out["reason"]
+
+
+def test_the_cli_restores(tmp_path, monkeypatch, capsys):
+    run, wb, cells = _noted_run(tmp_path)
+    M.note(run, category=CAT, subcap=cells[0], facet="works", kind="note",
+           claim="x")
+    _fake_drive(tmp_path, monkeypatch)
+    M.backup(run)
+    import shutil
+    shutil.rmtree(run.root / M.MEMORY_DIR)
+    rc = M.main(["restore", "--run", run.run_id, "--root", str(run.root)])
+    assert rc == 0
+    assert json.loads(capsys.readouterr().out)["outcome"] == "RESOLVED"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# the docstring is a contract too
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _cli_flags():
+    import contextlib
+    import io
+    import re
+    flags = set()
+    for cmd in ("note", "status", "consolidate", "backup", "cleanup", "restore"):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf), pytest.raises(SystemExit):
+            M.main([cmd, "--help"])
+        flags |= set(re.findall(r"--[a-z][a-z0-9-]*", buf.getvalue()))
+    return flags
+
+
+def test_the_docstring_names_only_flags_that_exist():
+    """It advertised `--stdin` from the day it was written and no such flag
+    ever existed. A usage block nobody can run is worse than none: it costs
+    a turn to discover."""
+    import re
+    have = _cli_flags()
+    doc = set(re.findall(r"--[a-z][a-z0-9-]*", M.__doc__))
+    assert doc, "the module docstring still carries a usage block"
+    assert doc <= have, f"the docstring names flags that do not exist: {sorted(doc - have)}"
+
+
+def test_the_docstring_names_every_verb():
+    for verb in ("note", "status", "consolidate", "backup", "restore", "cleanup"):
+        assert f"engine.memory {verb}" in M.__doc__, verb
+    assert "--entries-file" in M.__doc__
