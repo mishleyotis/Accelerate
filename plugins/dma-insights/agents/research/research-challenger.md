@@ -59,7 +59,7 @@ different reports, and only the second is a defect in the synthesis.
 
 ## Your one permitted look-up
 
-`engine.cli fetch --url <U> --query <Q>` over Bash is the ONLY look-up you
+`engine.cli fetch --run <R> --url <U> --query <Q>` over Bash is the ONLY look-up you
 may make, and only when an excerpt in `evidence[]` looks non-verbatim — a
 paraphrase, a figure that does not match its own sentence, a quote with no
 source shape. It returns short windows of the cached page around the query

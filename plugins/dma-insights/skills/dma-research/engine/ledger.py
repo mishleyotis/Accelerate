@@ -68,12 +68,37 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
                     ers: float | None = None, anchor_quote: str | None = None,
                     run=None, actor: str | None = None,
                     access_status: str = "OK", conflict: str | None = None,
-                    fact_id: str = "F1") -> str:
+                    fact_id: str = "F1", verify_excerpts: bool = False,
+                    unverified_reason: str | None = None) -> str:
     """Register one fact and return its server-shaped id.
 
     Fail-closed evidence (invariant 4): a cited id must resolve, belong to
     this run, and carry a verbatim excerpt of 50-500 characters. Enforced at
     the WRITE, so an unresolvable citation cannot exist to be found later.
+
+    VERBATIM USED TO BE A WORD IN AN ERROR MESSAGE. Until 2026-09-14 this
+    checked the excerpt's LENGTH and nothing else; "verbatim" appeared only
+    in the refusal text for a span of the wrong size. The only real check in
+    the system was the app connector's `register_evidence`, a tool every
+    research agent's manifest denies. Now `engine.cli fetch` leaves the
+    page's extracted text under the run, and three outcomes follow:
+
+      cached, span present   registers.
+      cached, span absent    `excerpt_not_verbatim` — WHATEVER
+                             `verify_excerpts` says. The page is in hand;
+                             not looking at it because a flag is off would
+                             make the check an opinion.
+      not cached             `excerpt_unverified` when `verify_excerpts`,
+                             unless `unverified_reason` says what stopped
+                             the fetch — then the row carries
+                             `Access_Status = "UNVERIFIED: <reason>"`.
+                             Recorded, never silent.
+
+    `verify_excerpts` DEFAULTS OFF because every in-process caller — the
+    fixtures, the stub, the handoff — registers against URLs nothing
+    fetched; flipping the default would rewrite what those mean rather than
+    add a check. `engine.cli evidence` and `memory.consolidate` pass True,
+    which is where a lane's writes actually go.
 
     `published` may be None. It is not defaulted to today — undated evidence
     is UNVERIFIED, never current (invariant 9), and AUD-0020 measured
@@ -105,6 +130,9 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
     assert_actor_scope(actor, "evidence", cells)
+    access_status = _verified_access_status(
+        wb, run, source_url, text, verify_excerpts, unverified_reason,
+        access_status)
     # ONE TRANSACTION FOR THE ID AND THE ROWS IT NAMES.
     #
     # `next_evidence_id` reads the highest E-id in the register and adds
@@ -162,6 +190,64 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         wb.save()
         wb.recompute_coverage()
     return eid
+
+
+def _run_of(wb: RunWorkbook, run=None):
+    """The run this workbook belongs to, for the fetch cache.
+
+    Derived from the workbook's own path (`runstate.locate` globs the run
+    root for the .xlsx) rather than required from the caller, so a caller
+    that forgets to thread `run=` cannot silently turn the verification off.
+    An explicit `run` wins."""
+    if run is not None:
+        return run
+    from . import runstate as _runstate
+    return _runstate.Run(run_id=wb.path.stem, root=wb.path.parent,
+                         workbook_path=wb.path)
+
+
+def _verified_access_status(wb, run, source_url, text, verify_excerpts,
+                            unverified_reason, access_status) -> str:
+    """The row's Access_Status after the excerpt has been checked, or a
+    LedgerRefusal. See `append_evidence` for the three outcomes."""
+    if not source_url:
+        # Verification is about a URL. An internal document has none, is
+        # labelled origin='internal', and is refused or not on its own terms.
+        return access_status
+    from . import fetch as _fetch
+    _run = _run_of(wb, run)
+    # The refusals below print a command the reader can paste; `fetch` is
+    # per-run (its cache is), so the run id has to be in it.
+    _where = f"--run {getattr(_run, 'run_id', '<R>')}"
+    page = _fetch.cached_text(_run, source_url)
+    if page is not None:
+        if _fetch.normalise(text) not in _fetch.normalise(page):
+            raise LedgerRefusal(
+                f"excerpt_not_verbatim: this span is not in the text "
+                f"`engine.cli fetch` read from {source_url} (whitespace and "
+                f"case are normalised; nothing else is). Re-extract it from "
+                f"the source — `engine.cli fetch {_where} --url {source_url} "
+                f"--query '<what you are quoting>'` prints the spans that are "
+                f"there. "
+                f"Never repair a quote by hand.")
+        return access_status
+    if not verify_excerpts:
+        return access_status
+    reason = str(unverified_reason or "").strip()
+    if not reason:
+        raise LedgerRefusal(
+            f"excerpt_unverified: nothing in this run has read {source_url}, "
+            f"so there is nothing to check this span against. Run "
+            f"`engine.cli fetch {_where} --url {source_url} --query "
+            f"'<the DQ text>'` "
+            f"and register from a window it prints — it costs three windows "
+            f"of context, not the page. If the page genuinely cannot be "
+            f"fetched (a 403 WAF, a paywall, a connector's own extract), say "
+            f"so with `--unverified '<what stopped it>'` and the row is "
+            f"recorded UNVERIFIED rather than passed off as checked. "
+            f"(`engine.cli fetch --via-text -` caches a connector's extract "
+            f"under the URL, which verifies it properly.)")
+    return f"UNVERIFIED: {reason}"
 
 
 def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:

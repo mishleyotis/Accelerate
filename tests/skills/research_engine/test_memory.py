@@ -16,12 +16,36 @@ from fixtures import CAT, new_run
 EXCERPT = ("Alkami digital banking went live in Q3 2024 and reached 47 "
            "percent member adoption within ninety days of launch.")
 
+#: The page every evidence note below quotes.
+PAGE = ("Acme Credit Union annual report 2025.\n"
+        + EXCERPT +
+        "\nThe board approved a three-year core conversion programme.")
+
+#: The URLs those notes carry. Since 2026-09-14 consolidation verifies every
+#: excerpt against the text `engine.cli fetch` cached for its URL, so a note
+#: quoting a page nothing in the run has read is BLOCKED with
+#: `excerpt_unverified` — correct, and NOT what these tests are about: the
+#: subject here is the notebook -> ledger hop. `_read` puts the page where a
+#: lane's `engine.cli fetch` would have left it. The two deliberately-thin
+#: notes below keep their own URLs out of this list, and are refused on
+#: length before verification is reached anyway.
+_PAGES_READ = ("https://acme.example/ar25", "https://acme.example/pr",
+               "https://a.example/x", "https://acme.example/0",
+               "https://acme.example/1", "https://acme.example/2")
+
+
+def _read(run, url, text=PAGE):
+    from engine import fetch as F
+    F.store_text(run, url, text, content_type="test-fixture")
+
 
 def _noted_run(tmp_path):
     # prelim=False: these tests count the evidence register that
     # consolidation fills, and PRELIM banks the institution profile of its
     # own. The subject here is the notebook -> ledger hop, not the run.
     run = new_run(tmp_path, n=3, prelim=False)
+    for url in _PAGES_READ:
+        _read(run, url)
     wb = run.open()
     cells = wb.selected_subcaps()
     return run, wb, cells

@@ -192,3 +192,38 @@ def test_the_research_stage_calls_the_verifier():
         "the verifier is defined but never called by the research stage"
     vsrc = inspect.getsource(pipeline.Pipeline._verify_research)
     assert "DISPATCH_VERIFY" in vsrc and "research_lane_fabrication" in vsrc
+
+
+# ── `engine.cli fetch` IS the retrieval, and must witness as one ───────
+
+def test_engine_cli_fetch_counts_as_a_witnessed_retrieval(tmp_path):
+    """The protocol now tells a lane to read a page with `engine.cli fetch`
+    rather than WebFetch it into context — 76% of a measured lane bill was
+    re-reading fetched pages. That must not make the honest lane look
+    fabricated: it is a shell that reaches the network, and the only reason
+    the generic shell branch misses it is the deliberate exclusion of
+    `engine.` calls (a URL inside `--query` is the engine talking to
+    itself)."""
+    logs = tmp_path / "agent_logs"
+    _write(logs, "P2C3", [
+        _bash("python3 -m engine.cli fetch --run R "
+              "--url https://acme.example/ar --query 'digital adoption'"),
+        _log_search("P2C3.1.1", "primary", "digital adoption"),
+        _log_search("P2C3.1.2", "works", "channel migration"),
+    ])
+    assert verify.research_lane_fabrication("P2C3", logs) == []
+    w = verify.witness(logs / "research-p2c3-producer.jsonl")
+    assert w == {"ran": 3, "logged_searches": 2, "retrievals": 1}
+
+
+def test_a_fetch_and_a_search_in_one_shell_call_are_both_counted(tmp_path):
+    logs = tmp_path / "agent_logs"
+    _write(logs, "P2C4", [
+        _bash("python3 -m engine.cli fetch --run R --url https://acme.example/x "
+              "--query 'core' && python3 -m engine.cli search --run R "
+              "--subcap P2C4.1.1 --facet works --query 'core'"),
+        _log_search("P2C4.1.2", "works", "core conversion"),
+    ])
+    w = verify.witness(logs / "research-p2c4-producer.jsonl")
+    assert w["logged_searches"] == 2 and w["retrievals"] == 1
+    assert verify.research_lane_fabrication("P2C4", logs) == []

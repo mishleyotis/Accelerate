@@ -46,13 +46,15 @@ def check(name: str, ok: bool, detail: str = "") -> bool:
     return bool(ok)
 
 
-def run(*args, expect: int | None = 0, env: dict | None = None):
+def run(*args, expect: int | None = 0, env: dict | None = None,
+        stdin: str | None = None):
     """One engine command, as the conductor issues it."""
     import os
     e = dict(os.environ)
     e.update(env or {})
     r = subprocess.run([sys.executable, "-m", *args], cwd=str(SKILL),
-                       capture_output=True, text=True, timeout=900, env=e)
+                       capture_output=True, text=True, timeout=900, env=e,
+                       input=stdin)
     if expect is not None and r.returncode != expect:
         print(f"    ! {' '.join(args)} -> {r.returncode} (wanted {expect})")
         print("    " + (r.stderr or r.stdout).strip()[-600:].replace(
@@ -238,16 +240,42 @@ def main(argv=None) -> int:
     check("evidence that reaches no cell is refused unless declared profile",
           r.returncode == 1 and "--profile" in r.stderr, r.stderr[-200:])
 
+    # READ THE PAGE BEFORE QUOTING IT. `engine.cli evidence` verifies every
+    # public URL against the text `engine.cli fetch` cached under the run
+    # (2026-09-14) — a span nothing read is refused `excerpt_unverified`.
+    # This walk has no network, so `--via-text -` stands in for the fetch:
+    # it is the same seam a servicing actor uses for a connector's own
+    # extract, and it means the walk exercises fetch -> evidence end to end.
+    url = "https://mapping.ncua.gov/ResearchCreditUnion"
+    excerpt = ("Stress Credit Union reports 412,000 members, 38 branches and "
+               "1,240 full-time employees as at 31 December 2025, with a "
+               "named Chief Digital Officer on the officer schedule.")
+    r = run("engine.cli", "fetch", "--run", run_id, "--root", str(root),
+            "--url", url, "--query", "members branches employees",
+            "--via-text", "-", "--json",
+            stdin=f"NCUA research a credit union.\n{excerpt}\n",
+            expect=0)
+    fetched = json.loads(r.stdout or "{}")
+    check("engine.cli fetch caches the page and prints windows, not the page",
+          bool(fetched.get("sha256")) and bool(fetched.get("windows"))
+          and "text" not in fetched, r.stdout[-200:])
+
+    rb = run("engine.cli", "evidence", "--run", run_id, "--root", str(root),
+             "--profile", "--source", "NCUA Call Report", "--url", url,
+             "--tier", "T1", "--excerpt",
+             "Stress Credit Union operates a fully cloud-native core banking "
+             "platform migrated from its legacy system during 2024.",
+             expect=1)
+    check("an excerpt the fetched page does not carry is refused",
+          rb.returncode == 1 and "excerpt_not_verbatim" in rb.stderr,
+          rb.stderr[-200:])
+
     ev = json.loads(run("engine.cli", "evidence", "--run", run_id, "--root",
                         str(root), "--profile", "--source",
                         "NCUA Call Report — 2025 Q4 officer schedule",
-                        "--url", "https://mapping.ncua.gov/ResearchCreditUnion",
+                        "--url", url,
                         "--tier", "T1", "--published", "2025-12-31",
-                        "--excerpt",
-                        "Stress Credit Union reports 412,000 members, 38 "
-                        "branches and 1,240 full-time employees as at 31 "
-                        "December 2025, with a named Chief Digital Officer "
-                        "on the officer schedule.").stdout or "{}")
+                        "--excerpt", excerpt).stdout or "{}")
     eid2 = ev.get("e_id", "E-002")
 
     ok = True

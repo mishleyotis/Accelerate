@@ -55,6 +55,14 @@ _RETRIEVAL_NAME = re.compile(
 #: query it carries happens to hold a URL.
 _SHELL_FETCH = re.compile(r"\bcurl\b|\bwget\b|https?://")
 
+#: The ONE `engine.` call that does reach the world. Since 2026-09-14 the
+#: protocol tells a lane to read a page with `engine.cli fetch` rather than
+#: WebFetch it into context — a fetched page is re-read on every later turn
+#: and was 76% of a measured lane's bill. That must not make the honest lane
+#: look fabricated: without this the `engine.` exclusion above swallows it and
+#: a lane that retrieved correctly witnesses as a lane that retrieved nothing.
+_ENGINE_FETCH = re.compile(r"engine\.cli\s+fetch\b|(?:^|\s)cli\s+fetch\b")
+
 
 def _tool_uses(transcript: Path):
     """Yield (name, input_dict) for every tool_use block in a lane transcript,
@@ -93,6 +101,8 @@ def witness(transcript: Path) -> dict:
         if _LOGGED_SEARCH.search(blob):
             logged += 1
         if _RETRIEVAL_NAME.search(name):
+            retrievals += 1
+        elif _ENGINE_FETCH.search(blob):
             retrievals += 1
         elif not is_engine_shell and _SHELL_FETCH.search(blob):
             retrievals += 1

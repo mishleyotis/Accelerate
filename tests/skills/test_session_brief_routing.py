@@ -89,3 +89,43 @@ def test_the_top_session_brief_carries_the_install_verdict():
     sb = _sb()
     top = sb.brief({"source": "startup"})
     assert "research-conductor" in top
+
+
+# ── the scope the brief now states as a fact ───────────────────────────
+#
+# "Work only your own category" was advice until 2026-09-14: no write path
+# checked it (MEM-0514). The engine refuses it now, so the brief names the
+# boundary the lane will actually meet — and names the route a genuine
+# cross-category find takes, because a lane that has been refused needs
+# somewhere to put the finding.
+
+def test_a_category_lane_is_told_which_category_is_its_own():
+    text = _brief("research-p3c2-producer")
+    assert "YOUR SCOPE IS P3C2" in text
+    assert "handback" in text, "a refusal with no route is a dead end"
+
+
+def test_a_pillar_scorer_is_told_its_pillar():
+    text = _brief("scoring-p4-producer")
+    assert "YOUR SCOPE IS P4" in text and "pillar" in text
+
+
+def test_an_agent_whose_name_declares_no_scope_is_not_given_one():
+    """The conductor and the specialists write across the run by design."""
+    for agent in ("research-conductor", "technographic-scanner",
+                  "enrichment-web-specialist"):
+        assert "YOUR SCOPE IS" not in _brief(agent), agent
+
+
+def test_the_scope_sentence_agrees_with_the_engine_that_enforces_it():
+    """Two statements of one rule drift. This asserts they agree today, and
+    fails the day the engine's table and the brief disagree."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]
+                           / "plugins" / "dma-insights" / "skills" / "dma-research"))
+    from engine import scope as engine_scope
+    for agent, expected in (("research-p3c2-producer", "P3C2"),
+                            ("scoring-p4-producer", "P4")):
+        assert engine_scope.classify(agent)["scope"] == expected
+        assert f"YOUR SCOPE IS {expected}" in _brief(agent)

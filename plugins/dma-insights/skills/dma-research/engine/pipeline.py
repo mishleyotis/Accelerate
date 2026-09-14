@@ -867,7 +867,7 @@ class Pipeline:
           * the counters are PER CATEGORY, so one moving category can no
             longer vouch for fifteen stuck ones.
         """
-        from . import brief
+        from . import brief, floors_gate
         from .workbook import _split_ids
         wb = self.wb
         register = wb.evidence_index()
@@ -885,7 +885,12 @@ class Pipeline:
             s = slot(cell.split(".")[0])
             eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                     if i and i != C.NO_EVIDENCE]
-            if any(e in register for e in eids):
+            # THE SAME PREDICATE THE GATE USES, deliberately imported rather
+            # than restated: this counted a one-way citation as progress
+            # while the gate demanded the link run both ways, so a lane that
+            # cited ids the register did not name back kept the stall
+            # counter moving through rounds the gate could never pass.
+            if floors_gate.cell_evidenced(cell, eids, register):
                 s[0] += 1                                    # evidenced cells
             if str(r.get("Dominant_Claim") or "").strip():
                 s[1] += 1                                    # syntheses

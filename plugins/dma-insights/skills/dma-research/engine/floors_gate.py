@@ -130,6 +130,25 @@ def _named_by(evidence_row: dict) -> set:
             for s in _split_ids(evidence_row.get("SubCap_IDs")) if str(s).strip()}
 
 
+def cell_evidenced(cell: str, eids, register: dict) -> bool:
+    """Does this cell's citation link run BOTH WAYS?
+
+    The cell cites the id AND the register row names the cell back. Measured
+    on Golden 1: 248 of 690 cells cite an id whose evidence row does not
+    name them, so a one-way count reported 690 evidenced where the
+    reference's own figure is 442.
+
+    It is a function rather than an expression because it had two
+    implementations. The gate counted bidirectionally here; the driver's
+    stall signature counted one-way (pipeline._research_progress), so a lane
+    that cited ids the register did not name back kept the driver's progress
+    counter moving while the gate never passed — activity read as progress,
+    which is the defect the 2026-09-12 stall work set out to remove, one
+    layer up from where it was removed.
+    """
+    return any(e in register and cell in _named_by(register[e]) for e in eids)
+
+
 def density_floors() -> dict:
     """The run-level evidence floors, READ from the Golden 1 measurement so
     they move with the reference rather than with anyone's memory."""
@@ -175,7 +194,7 @@ def run_density(wb: RunWorkbook) -> dict:
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         # Bidirectional, matching how the reference's own figure was derived.
-        if any(e in register and cell in _named_by(register[e]) for e in eids):
+        if cell_evidenced(cell, eids, register):
             evidenced += 1
     ev_rows = len(register)
     rps, share = ev_rows / n, evidenced / n
@@ -266,7 +285,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # other. These terms no longer block, but the figure they publish is
         # read by the payload and by anyone calibrating, so it has to be the
         # honest one.
-        if any(e in register and cell in _named_by(register[e]) for e in eids):
+        if cell_evidenced(cell, eids, register):
             evidenced_cells += 1
 
         # AUD-0083: the archive's own golden fixture cited an item that did

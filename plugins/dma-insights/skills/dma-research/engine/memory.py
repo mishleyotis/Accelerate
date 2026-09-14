@@ -189,7 +189,21 @@ def consolidate(run: runstate.Run, category: str, *,
 
     An entry the ledger refuses is rewritten in place as [BLOCKED] with the
     refusal text — the researcher sees exactly what is missing (usually the
-    verbatim excerpt or the URL) and can repair the NOTE, not guess."""
+    verbatim excerpt or the URL) and can repair the NOTE, not guess.
+
+    EXCERPTS ARE VERIFIED HERE (2026-09-14). Consolidation passes
+    `verify_excerpts=True`, so a note whose page nothing in this run fetched
+    is BLOCKED in place with the ledger's own `excerpt_unverified` — the
+    notebook is the route a WebFetch-and-quote lane takes, and it was the
+    route around the check. The repair is the one the refusal names: run
+    `engine.cli fetch --run <R> --url … --query …` and re-note from a window, or, when
+    the page genuinely cannot be fetched, register it directly with
+    `engine.cli evidence --unverified '<what stopped it>'`, which records the
+    reason on the row. There is deliberately no `--unverified` on a NOTE: an
+    unverifiable source is a decision, and a decision belongs on the command
+    a person or an agent types once, not in a field a batch consolidation
+    reads silently.
+    """
     p = memory_path(run, category)
     entries = parse(p)
     wb = run.open()
@@ -201,7 +215,7 @@ def consolidate(run: runstate.Run, category: str, *,
         if e["status"] != "NOTED":
             continue
         try:
-            outcome = _consolidate_one(wb, e, actor)
+            outcome = _consolidate_one(wb, e, actor, run=run)
             _mark(text, e, offset, "CONSOLIDATED", outcome)
             done += 1
             results.append({"subcap": e["subcap"], "outcome": outcome})
@@ -216,7 +230,7 @@ def consolidate(run: runstate.Run, category: str, *,
             "results": results}
 
 
-def _consolidate_one(wb: RunWorkbook, e: dict, actor: str) -> str:
+def _consolidate_one(wb: RunWorkbook, e: dict, actor: str, run=None) -> str:
     f = e["fields"]
     kind = f.get("kind") or "note"
     # An entry may name several cells (comma-joined by `note`). `sub` stays
@@ -237,7 +251,8 @@ def _consolidate_one(wb: RunWorkbook, e: dict, actor: str) -> str:
             claim_type=str(f.get("claim_type") or
                            ("INFERENCE" if kind == "contradiction"
                             else "FACT")).upper(),
-            origin=f.get("origin") or "public")
+            origin=f.get("origin") or "public",
+            run=run, verify_excerpts=True)
         if kind == "contradiction":
             for cell in cells:
                 row = wb.scoring_row(cell) or {}

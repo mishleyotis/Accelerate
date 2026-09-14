@@ -135,7 +135,7 @@ PASS-over-FAIL refusal) and re-opens the cell through the floors gate; the
 disagreement is recorded on the gate detail as `sample_disagreement` so the
 owner can widen or retire the sample on a measurement. You never challenge a
 cell you authored (you author none), never score, never repair a synthesis,
-and never fetch a page: `engine.cli fetch --url … --query …` is the only
+and never fetch a page: `engine.cli fetch --run <R> --url … --query …` is the only
 look-up, and only when an excerpt looks non-verbatim.
 
 ## Your output — a challenge report, nothing else

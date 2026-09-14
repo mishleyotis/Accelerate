@@ -22,6 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
+import connector_contract  # noqa: E402
 import doctor  # noqa: E402
 
 PLUGIN = HERE.parent.parent
@@ -505,3 +506,60 @@ class ConcurrentWriters(unittest.TestCase):
                     doctor.plugin_version, "compare",
                     return_value={"installed": {"install_path": str(root)}}):
                 self.assertTrue(doctor.concurrent_writers_check()["ok"])
+
+
+# ── the row that answers the $96.65 question, tested directly ──────────
+#
+# `connector contract` is in ENVIRONMENT_DEPENDENT_ROWS above, and rightly:
+# it reads a baseline file on THIS machine, so the generic "no row outside
+# this set may fail" assertion cannot cover it. But an exemption is not a
+# test, and this is the row that decides whether a run may start at all —
+# the one whose green-while-absent answer cost a live run $96.65. So it gets
+# its own, driven through all three of its states.
+
+def _row_for(monkeypatch, root):
+    monkeypatch.setenv("DMA_RUN_ROOT", str(root))
+    return doctor.connector_contract_check()
+
+
+def test_no_baseline_is_unverified_and_red(monkeypatch, tmp_path):
+    row = _row_for(monkeypatch, tmp_path / "empty")
+    assert row["check"] == "connector contract"
+    assert row["ok"] is False
+    assert "UNVERIFIED" in row["detail"].upper(), row["detail"]
+    assert "baseline" in row["fix"], row["fix"]
+
+
+def test_a_short_baseline_names_what_is_missing(monkeypatch, tmp_path):
+    root = tmp_path / "short"
+    root.mkdir()
+    connector_contract.write_baseline(["mcp__Clay__find-and-enrich-company"],
+                                      str(root))
+    row = _row_for(monkeypatch, root)
+    assert row["ok"] is False
+    d = row["detail"].lower()
+    assert "exa" in d and "tavily" in d, row["detail"]
+
+
+def test_a_held_baseline_is_green(monkeypatch, tmp_path):
+    root = tmp_path / "bound"
+    root.mkdir()
+    connector_contract.write_baseline(
+        ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+         "mcp__Clay__find-and-enrich-company"], str(root))
+    row = _row_for(monkeypatch, root)
+    assert row["ok"] is True, row["detail"]
+
+
+def test_the_row_is_about_the_machine_not_the_repository(monkeypatch, tmp_path):
+    """It returned True whenever the families appeared in the REGISTRY, so
+    it went green on a session holding no connectors at all. The registry
+    has not changed between these two calls; the answer must."""
+    empty = _row_for(monkeypatch, tmp_path / "a")["ok"]
+    root = tmp_path / "b"
+    root.mkdir()
+    connector_contract.write_baseline(
+        ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+         "mcp__Clay__find-and-enrich-company"], str(root))
+    held = _row_for(monkeypatch, root)["ok"]
+    assert empty is False and held is True
