@@ -21,7 +21,9 @@ Entries now arrive through `--entries-file` (a JSON list of objects carrying
 the same fields the flags take; `-` reads stdin), which is what that phantom
 flag was reaching for: a lane writing forty notes paid forty Bash
 round-trips, forty turns on the layer whose whole reason to exist is that it
-is cheap.
+is cheap. A batch is ALL-OR-NOTHING — a bad entry names its index and
+nothing is written, because the notebook is append-only and a half-written
+batch cannot be resubmitted without duplicating what landed.
 
 WHY .MD FILES AT ALL. A category researcher works in a session that can
 compact, die mid-turn or lose its context. The workbook write path is
@@ -63,6 +65,7 @@ if __package__ in (None, ""):  # noqa: E402
 
 import argparse
 import datetime as _dt
+import hashlib
 import json
 import re
 import shutil
@@ -101,8 +104,9 @@ def note(run: runstate.Run, *, category: str, subcap=None, facet: str = "",
 
     `entries_file` is a path (or `-` for stdin, or an already-parsed list) to
     a JSON list of objects carrying the same fields the flags take. It
-    returns the batch report `{"noted", "failed", "paths", "entries"}`
-    instead of a Path; the single-entry call still returns the notebook Path.
+    returns the batch report `{"noted", "failed", "paths", "entries",
+    "written"}` instead of a Path; the single-entry call still returns the
+    notebook Path. A batch is ALL-OR-NOTHING — see `note_entries`.
 
     Cheap on purpose: the only validation here is shape
     vocabulary — substance is judged at CONSOLIDATION by the real gates,
@@ -119,6 +123,21 @@ def note(run: runstate.Run, *, category: str, subcap=None, facet: str = "",
     if entries_file is not None:
         return note_entries(run, _read_entries(entries_file),
                             category=category, actor=actor)
+    p, block = _prepare(run, category=category, subcap=subcap, facet=facet,
+                        kind=kind, actor=actor, **fields)
+    _append(p, block)
+    return p
+
+
+def _prepare(run: runstate.Run, *, category: str, subcap=None,
+             facet: str = "", kind: str = "evidence",
+             actor: str | None = None, **fields) -> tuple:
+    """Validate ONE entry and render its block — writing nothing.
+
+    Split out of `note` so a BATCH can be judged before a byte of it lands:
+    every refusal a single note can raise is raised here, on the same
+    inputs, so the batch path and the flag path cannot drift into two
+    different vocabularies."""
     if kind not in KINDS:
         raise ValueError(f"kind {kind!r} not in {KINDS}")
     if subcap is None:
@@ -147,15 +166,6 @@ def note(run: runstate.Run, *, category: str, subcap=None, facet: str = "",
         raise ValueError(why)
     if facet and facet not in C.DQ_FACETS:
         raise ValueError(f"facet {facet!r} not in {C.DQ_FACETS}")
-    p = memory_path(run, category)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    if not p.exists():
-        p.write_text(
-            f"# {category} — research notebook\n\n"
-            f"Append-only. A NOTEBOOK, never a record: nothing downstream\n"
-            f"reads this file — `engine.memory consolidate` pushes every\n"
-            f"entry through the workbook's own refusals, and an entry that\n"
-            f"cannot register is marked BLOCKED with the reason, in place.\n")
     lines = [f"\n## [NOTED] {subcap} · {facet or '-'} · {_utcnow()}",
              f"kind:: {kind}"]
     for k, v in fields.items():
@@ -163,8 +173,21 @@ def note(run: runstate.Run, *, category: str, subcap=None, facet: str = "",
             continue
         v = str(v).replace("\n", " ⏎ ")
         lines.append(f"{k}:: {v}")
+    return memory_path(run, category), "\n".join(lines) + "\n"
+
+
+def _append(p: Path, block: str) -> Path:
+    """The only writer. Creates the notebook with its own header first."""
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if not p.exists():
+        p.write_text(
+            f"# {p.stem} — research notebook\n\n"
+            f"Append-only. A NOTEBOOK, never a record: nothing downstream\n"
+            f"reads this file — `engine.memory consolidate` pushes every\n"
+            f"entry through the workbook's own refusals, and an entry that\n"
+            f"cannot register is marked BLOCKED with the reason, in place.\n")
     with p.open("a") as fh:
-        fh.write("\n".join(lines) + "\n")
+        fh.write(block)
     return p
 
 
@@ -195,16 +218,26 @@ def _read_entries(src) -> list[dict]:
 
 def note_entries(run: runstate.Run, entries, *, category: str | None = None,
                  actor: str | None = None) -> dict:
-    """Many entries, ONE call, in file order.
+    """Many entries, ONE call, in file order — ALL of them or NONE.
 
-    ONE BAD ENTRY MUST NOT COST THE OTHER THIRTY-NINE. Each entry is
-    validated by `note` itself — same vocabulary, same category-scope and
-    actor-scope refusals — and a failure is reported with its INDEX so the
-    researcher can find the one line to repair rather than re-deriving which
-    of forty notes the refusal was about. Nothing is rolled back: a notebook
-    is append-only, and an entry that landed is a finding that survived.
+    Validated first, written second. Every entry goes through `_prepare`,
+    which raises exactly what a single `note` raises; only when the whole
+    batch is clean does anything reach a notebook, and a failure is reported
+    with its INDEX so the researcher repairs one line rather than
+    re-deriving which of forty notes the refusal was about.
+
+    WHY ALL-OR-NOTHING, against the earlier partial-write. A notebook is
+    APPEND-ONLY: a batch that wrote thirty-nine and refused one leaves the
+    lane holding a file it cannot resubmit — re-running the repaired forty
+    appends the thirty-nine a second time, and the duplicates consolidate
+    into the workbook as separate findings with no way to take them back.
+    Hand-filtering the file down to the one entry is the turn the batch flag
+    exists to save. Refusing whole makes the repair loop `fix the line,
+    re-run the same file`, which is the cheap one and the only one that
+    cannot duplicate. Nothing is lost by refusing: the entries file is still
+    the entries file.
     """
-    noted, failed, paths = 0, [], []
+    prepared, failed = [], []
     for i, e in enumerate(entries):
         try:
             if not isinstance(e, dict):
@@ -213,17 +246,26 @@ def note_entries(run: runstate.Run, entries, *, category: str | None = None,
             f = {str(k).replace("-", "_"): v for k, v in e.items()}
             cat = str(f.pop("category", None) or category or "").strip()
             sub = next((f.pop(k) for k in _SUBCAP_KEYS if k in f), None)
-            p = note(run, category=cat, subcap=sub,
-                     facet=str(f.pop("facet", "") or ""),
-                     kind=str(f.pop("kind", "evidence") or "evidence"),
-                     actor=(f.pop("actor", None) or actor), **f)
-            noted += 1
-            if str(p) not in paths:
-                paths.append(str(p))
+            prepared.append(_prepare(
+                run, category=cat, subcap=sub,
+                facet=str(f.pop("facet", "") or ""),
+                kind=str(f.pop("kind", "evidence") or "evidence"),
+                actor=(f.pop("actor", None) or actor), **f))
         except (ValueError, TypeError, OSError) as err:
             failed.append({"index": i, "error": str(err)})
-    return {"noted": noted, "failed": failed, "paths": paths,
-            "entries": len(entries)}
+    if failed:
+        return {"noted": 0, "failed": failed, "paths": [],
+                "entries": len(entries), "written": False,
+                "refusal": f"{len(failed)} of {len(entries)} entr(ies) "
+                           f"refused; NOTHING was written. Repair the index"
+                           f"(es) named and re-run the same file."}
+    paths = []
+    for path, block in prepared:
+        _append(path, block)
+        if str(path) not in paths:
+            paths.append(str(path))
+    return {"noted": len(prepared), "failed": [], "paths": paths,
+            "entries": len(entries), "written": True}
 
 
 def parse(path: Path) -> list[dict]:
@@ -413,34 +455,115 @@ def _drive_fetch() -> Path | None:
     return p if p.exists() else None
 
 
+#: Where `backup` remembers what it last put on Drive: content digests per
+#: file name, plus the client name it resolved. The driver calls `backup` at
+#: EVERY round end for the life of a run; without this the sixteenth round
+#: re-uploads sixteen unchanged notebooks it uploaded fifteen times already.
+BACKUP_STATE = "memory_backup.json"
+
+
+def _backup_files(run: runstate.Run) -> list[Path]:
+    """Every notebook, plus the workbook — the whole durable set.
+
+    A category's reasoning trail is durable only once it is off-container,
+    so a backup that carried one notebook would leave the other fifteen
+    categories with no copy at all."""
+    files = sorted((run.root / MEMORY_DIR).glob("*.md"))
+    if run.workbook_path.exists():
+        files.append(run.workbook_path)
+    return files
+
+
+def _digest(p: Path) -> str:
+    h = hashlib.sha256()
+    with p.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def backup(run: runstate.Run) -> dict:
     """Push the notebooks (and the workbook) to Drive. Honest outcomes only:
     a backup that did not run says NOT_RUN and why — a fabricated success
-    here costs the notebook on the next dead container."""
+    here costs the notebook on the next dead container.
+
+    CALLED ONCE PER ROUND, SO IT HAS TO BE CHEAP AND IT HAS TO BE SAFE.
+    Three properties the round driver depends on:
+
+    * IDEMPOTENT. Only files whose CONTENT changed since the last recorded
+      push are sent; a second call with nothing changed makes no
+      subprocess at all and reports NOT_RUN naming the files it skipped.
+    * ONE CALL. The changed files go in a single `drive_fetch.py
+      push-backup --many`, one token exchange and one client-folder lookup
+      for the round, not one process per notebook.
+    * IT NEVER RAISES. Every failure — a missing workbook, a Drive outage,
+      a timeout, a broken drive_fetch — comes back as PARTIAL or FAILED
+      with the reason. A failed backup must not fail a research round: the
+      notes are still on disk, and the next round tries again because
+      nothing was recorded as pushed.
+    """
+    try:
+        return _backup(run)
+    except Exception as err:                                   # noqa: BLE001
+        # The one place a bare except is right: this is called for its
+        # SIDE EFFECT at the end of a round that has already succeeded.
+        return {"outcome": "FAILED", "pushed": [], "failed": [],
+                "unchanged": [],
+                "reason": f"{type(err).__name__}: {err}"}
+
+
+def _backup(run: runstate.Run) -> dict:
     df = _drive_fetch()
     if df is None:
-        return {"outcome": "NOT_RUN",
+        return {"outcome": "NOT_RUN", "pushed": [], "failed": [],
+                "unchanged": [],
                 "reason": "drive_fetch.py is not in this install; the "
                           "notebooks exist only in this container"}
-    wb = run.open()
-    client = str(wb.metadata().get("entity_name") or run.run_id)
-    pushed, failed = [], []
-    files = sorted((run.root / MEMORY_DIR).glob("*.md")) + \
-        ([run.workbook_path] if run.workbook_path.exists() else [])
-    # ONE CALL PER FILE, deliberately. `drive_fetch.py push-backup` takes a
-    # single `--file` and no list form (read 2026-09-14: `p_bk` declares
-    # `--client`, `--file`, `--name`, and `push_backup` uploads exactly one
-    # path), so batching here would mean inventing a flag the script does
-    # not have. The loop stays until push-backup grows one.
-    for f in files:
-        r = subprocess.run(
-            [sys.executable, str(df), "push-backup", "--client", client,
-             "--file", str(f)],
-            capture_output=True, text=True, timeout=300)
-        (pushed if r.returncode == 0 else failed).append(
-            {"file": f.name, "detail": (r.stdout or r.stderr).strip()[-160:]})
-    return {"outcome": "RESOLVED" if not failed else "PARTIAL",
-            "pushed": pushed, "failed": failed}
+    files = _backup_files(run)
+    if not files:
+        return {"outcome": "NOT_RUN", "pushed": [], "failed": [],
+                "unchanged": [],
+                "reason": "nothing to back up yet — no notebook and no "
+                          "workbook on disk"}
+    state_path = run.qa_dir / BACKUP_STATE
+    try:
+        state = json.loads(state_path.read_text())
+    except (OSError, ValueError):
+        state = {}
+    seen = dict(state.get("digests") or {})
+    now = {f.name: _digest(f) for f in files}
+    changed = [f for f in files if seen.get(f.name) != now[f.name]]
+    unchanged = sorted(n for n in now
+                       if n not in {f.name for f in changed})
+    if not changed:
+        return {"outcome": "NOT_RUN", "pushed": [], "failed": [],
+                "unchanged": unchanged,
+                "reason": f"nothing changed since the last backup; "
+                          f"{len(unchanged)} file(s) already on Drive"}
+    # The client name does not change inside a run, and `run.open()` reads
+    # the whole workbook. Resolve it once and keep it beside the digests.
+    client = str(state.get("client") or "")
+    if not client:
+        client = str(run.open().metadata().get("entity_name") or run.run_id)
+    r = subprocess.run(
+        [sys.executable, str(df), "push-backup", "--client", client,
+         "--many", *[str(f) for f in changed]],
+        capture_output=True, text=True, timeout=600)
+    detail = (r.stdout or r.stderr or "").strip()[-400:]
+    names = [f.name for f in changed]
+    if r.returncode != 0:
+        # Nothing is recorded as pushed, so the next round retries all of
+        # it — the safe direction when the outcome is ambiguous.
+        return {"outcome": "PARTIAL", "pushed": [], "failed": names,
+                "unchanged": unchanged,
+                "reason": f"drive_fetch.py push-backup exited "
+                          f"{r.returncode}: {detail}"}
+    seen.update(now)
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(
+        {"client": client, "at": _utcnow(), "digests": seen}, indent=1))
+    return {"outcome": "RESOLVED", "pushed": names, "failed": [],
+            "unchanged": unchanged, "detail": detail}
 
 
 #: The drive_fetch verb `restore` needs. It is the mirror of `push-backup`:
@@ -558,6 +681,10 @@ def cleanup(run: runstate.Run, *, apply: bool = False) -> dict:
     d = subprocess.run(
         [sys.executable, str(df), "cleanup-backup", "--client", client],
         capture_output=True, text=True, timeout=300)
+    if d.returncode == 0:
+        # The folder those digests describe no longer exists, so a later
+        # `backup` must not read "already pushed" off a deleted copy.
+        (run.qa_dir / BACKUP_STATE).unlink(missing_ok=True)
     return {"outcome": "RESOLVED" if d.returncode == 0 else "PARTIAL",
             "detail": (d.stdout or d.stderr).strip()[-400:]}
 
