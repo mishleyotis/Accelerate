@@ -552,21 +552,16 @@ def test_zero_heals_discloses_immediately_and_still_records_the_gap(tmp_path):
     assert len(rows) == 1 and rows[0]["Verdict"] == "FAIL" and rows[0]["Detail"].startswith("DISCLOSED")
 
 
-def test_harvested_requests_are_drained_by_a_specialist_lane_and_reconciled(
-        tmp_path, monkeypatch):
+def test_harvested_requests_are_drained_by_a_specialist_lane_and_reconciled(tmp_path):
     """The relay end to end inside one research round: the lane emits a
     request it could not run, the driver dispatches the specialist over it,
     the specialist logs the connector search, the Search_Log closes the
     request, and the ENRICHMENT gate passes on the row the specialist wrote.
 
-    LANE MODE. `drain_batch` now defaults to `mode="orchestrator"`, which
-    writes the batch and dispatches nothing; the driver passes the mode it
-    was configured with, so this pins the lane path by forcing it here.
-    (`Options.relay_mode` is the pipeline stream's; until it lands, the
-    partial below is what the driver's call would carry.)"""
-    import functools
-    monkeypatch.setattr(relay, "drain_batch",
-                        functools.partial(relay.drain_batch, mode="lane"))
+    LANE MODE, asked for the way a run asks for it. `drain_batch` defaults
+    to `mode="orchestrator"`, which writes the batch and dispatches nothing;
+    the driver passes `Options.relay_mode`, so the lane path is reached by
+    configuring the run, not by patching the module."""
     run = _fresh(tmp_path)
     drained = []
 
@@ -580,7 +575,7 @@ def test_harvested_requests_are_drained_by_a_specialist_lane_and_reconciled(
     disp = S.StubDispatcher({"research-p": _lane_web_only(emit_requests=True),
                              "finding-challenger": S.lane_noop,
                              relay.DRAIN_AGENT: specialist})
-    out = P.Pipeline(run, _opts(tmp_path, disp)).run_all()
+    out = P.Pipeline(run, _opts(tmp_path, disp, relay_mode="lane")).run_all()
     assert out["outcome"] == "STOPPED_AT_UNTIL", out
     stages = [(c["stage"], c["agent"]) for c in disp.calls]
     assert ("RELAY", relay.DRAIN_AGENT) in stages
@@ -590,6 +585,76 @@ def test_harvested_requests_are_drained_by_a_specialist_lane_and_reconciled(
     assert st["by_status"]["SERVED"] == 1 and st["by_status"]["OPEN"] == 0
     rows = [g for g in run.open().rows("Gate_Log") if g.get("Gate") == "ENRICHMENT"]
     assert [g["Verdict"] for g in rows] == ["PASS"]
+
+
+def test_the_default_relay_writes_a_batch_for_the_conductor_and_stops_nothing(tmp_path):
+    """ORCHESTRATOR MODE, which is the default: the driver harvests the
+    request, writes ONE batch file plus a prompt per capability, dispatches
+    no lane, records where the work is, and keeps going. A pending batch is
+    not a halt — the conductor services it between rounds with its own
+    in-process subagents, which are the only actors in the arrangement that
+    hold a connector at all.
+
+    This is the regression the flip of `drain_batch`'s default nearly made
+    silent (MEM-0519): with the driver taking that default and testing only
+    `if d.get("lanes")`, the whole stage did nothing and said nothing."""
+    run = _fresh(tmp_path)
+    disp = S.StubDispatcher({"research-p": _lane_web_only(emit_requests=True),
+                             "finding-challenger": S.lane_noop})
+    logged: list[str] = []
+    opts = _opts(tmp_path, disp, enrichment_heals=0, log=logged.append)
+    assert opts.relay_mode == "orchestrator", "the default is what is under test"
+    out = P.Pipeline(run, opts).run_all()
+    assert out["outcome"] == "STOPPED_AT_UNTIL", out
+    assert not [c for c in disp.calls if c["stage"] == "RELAY"], (
+        "orchestrator mode dispatches nothing — the connectors are not here")
+    state = json.loads((run.qa_dir / P.STATE_NAME).read_text())
+    pend = state.get("relay_batches") or []
+    assert len(pend) == 1, pend
+    bf = Path(pend[0])
+    assert bf.exists(), "the driver must record a batch that was actually written"
+    b = json.loads(bf.read_text())
+    assert b["requests"] == 1 and b["prompts"], b
+    prompt = Path(b["prompts"][0]["prompt_file"]).read_text()
+    assert REQ["query"] in prompt and "engine.relay record" in prompt, (
+        "the prompt must be self-contained: the query and how to close it")
+    assert any("for the conductor" in line for line in logged), (
+        "a pending batch is announced, not silent — that silence is the bug")
+    # The request is still OPEN, and that is the honest state: nothing in
+    # this container serviced it. The run did not stop on it.
+    assert relay.state(run)["by_status"]["OPEN"] == 1
+
+
+def test_a_batch_the_conductor_serviced_is_reconciled_at_the_next_round(tmp_path):
+    """The conductor's subagents write to the workbook, never back to the
+    driver, so the Search_Log is the only report that a batch landed. The
+    driver reconciles at the START of a round: a request closed between
+    rounds must not be re-batched, and the ENRICHMENT gate must read the row
+    the subagent wrote."""
+    run = _fresh(tmp_path)
+    seen: list[int] = []
+
+    def lane(agent, prompt_file, ctx):
+        _lane_web_only(emit_requests=True)(agent, prompt_file, ctx)
+        seen.append(len(seen))
+        if len(seen) == 1:
+            return                      # round 1: the request goes unserviced
+        # Between round 1 and round 2 the conductor serviced the batch: its
+        # subagent logged the connector search against the requested cell.
+        wb = ctx.run.open()
+        req = (relay.open_requests(ctx.run) or [None])[0]
+        if req:
+            L.append_search(wb, subcap=req["subcap"], facet=req["facet"],
+                            query=req["query"], tool="exa", hits=3, kept=2,
+                            outcome="kept 2")
+
+    disp = S.StubDispatcher({"research-p": lane, "finding-challenger": S.lane_noop})
+    out = P.Pipeline(run, _opts(tmp_path, disp, enrichment_heals=1)).run_all()
+    assert out["outcome"] == "STOPPED_AT_UNTIL", out
+    st = relay.state(run)
+    assert st["by_status"]["SERVED"] == 1 and st["by_status"].get("OPEN", 0) == 0, st
+    rows = [g for g in run.open().rows("Gate_Log") if g.get("Gate") == "ENRICHMENT"]
+    assert rows[-1]["Verdict"] == "PASS", [r["Verdict"] for r in rows]
 
 
 def test_no_relay_harvests_and_discloses_but_dispatches_no_specialist(tmp_path):

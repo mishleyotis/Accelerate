@@ -710,6 +710,7 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
     queries and its own record commands, and no other batch's."""
     e = _entity(wb)
     cells = sorted({c for q in queries for c in q["subcaps"]})
+    tools = sorted({q["tool"] for q in queries})
     lines = [
         f"# Search relay — batch `{key}` — run `{run.run_id}`",
         "",
@@ -722,7 +723,9 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         f"Work THIS batch and nothing else: no new research, no synthesis, "
         f"no score, no other cells.",
         "",
-        f"**Connector for this batch: `{tool}`.** "
+        (f"**Connector for this batch: `{tool}`.** " if len(tools) == 1 else
+         f"**Connectors for this batch: {', '.join(f'`{t}`' for t in tools)}** — "
+         f"each query names the one to use; do not substitute another. "),
         f"Cells it bears on: {', '.join(f'`{c}`' for c in cells) or '(run-level, no cell)'}.",
         "",
         f"## The {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}",
@@ -749,7 +752,9 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
     lines += [
         "## For each query, in this order",
         "",
-        f"1. Run it through `{tool}`. If the call is refused or the tool is "
+        (f"1. Run it through `{tool}`." if len(tools) == 1 else
+         "1. Run it through the connector its own `tool:` line names.") +
+        " If the call is refused or the tool is "
         "not present, do NOT retry another way and do NOT run it through "
         "WebSearch instead: record it BLOCKED with the refusal text verbatim "
         "and move on. Never log a connector search you did not run.",
@@ -785,14 +790,20 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
     return "\n".join(lines) + "\n"
 
 
+def _qs(n: int) -> str:
+    return f"{n} quer{'y' if n == 1 else 'ies'}"
+
+
 def _batch_md(run: runstate.Run, out: dict) -> str:
+    n_g = len(out["groups"])
     lines = [f"# Relay batch r{out['round']} — run `{run.run_id}`", "",
-             f"{out['requests']} open request(s) → {out['queries']} "
-             f"deduplicated quer(y|ies) over {len(out['groups'])} batch(es), "
-             f"grouped by {out['group_by']}.", ""]
+             f"{out['requests']} open request(s) → {_qs(out['queries'])} "
+             f"after dedupe, over {n_g} batch{'' if n_g == 1 else 'es'}, "
+             f"grouped by {out['group_by']}. One fresh subagent per batch; "
+             f"nothing here is dispatched by the engine.", ""]
     for g in out["groups"]:
         lines.append(f"## `{g['key']}` · tool `{g['tool']}` · "
-                     f"{len(g['queries'])} quer(y|ies)")
+                     f"{_qs(len(g['queries']))}")
         lines.append("")
         lines.append(f"Prompt: `{g['prompt_file']}`")
         lines.append("")

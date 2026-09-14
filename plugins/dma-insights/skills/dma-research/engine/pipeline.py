@@ -320,9 +320,19 @@ class Options:
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
     enrichment_heals: int = 1
-    # Dispatch `enrichment-web-specialist` lanes over the harvested
-    # `search_requests` each round. Off = harvest and disclose, never drain.
+    # Service the harvested `search_requests` each round. Off = harvest and
+    # disclose, never drain.
     relay: bool = True
+    # HOW they are serviced. "orchestrator" (the default) writes one batch
+    # file plus a self-contained prompt per capability and dispatches
+    # nothing: the conductor spins a fresh in-process subagent per prompt,
+    # which inherits the session's connectors. "lane" is the pre-2026-09-14
+    # headless `enrichment-web-specialist` dispatch, right only where the
+    # container itself holds the connectors. This field is why the relay
+    # stage cannot go quiet: the driver reads the mode it asked for, so a
+    # change of default is a change of behaviour the log states, not a
+    # branch that silently stops being taken.
+    relay_mode: str = "orchestrator"
     lane_retries: int = 1
     page_retries: int = 2
     # SG-V4 (embedding grounding) disclosures the connector promotes anyway
@@ -1159,10 +1169,15 @@ class Pipeline:
         1. HARVEST the `search_requests` this round's lanes emitted into the
            relay queue — a lane that could not run a connector said so; the
            saying must land somewhere.
-        2. DRAIN: one `enrichment-web-specialist` lane per category with open
-           requests, dispatched with the exact commands that turn a connector
-           result into Search_Log and Evidence rows; then RECONCILE the queue
-           against the Search_Log the lanes wrote.
+        2. RECONCILE what the previous round's batches closed, then DRAIN
+           the rest. In the default `orchestrator` mode that means writing
+           one batch file and one self-contained prompt per capability and
+           dispatching NOTHING: the conductor spins a fresh in-process
+           subagent per prompt, which inherits the session's connectors,
+           and the driver records the batch path and carries on rather than
+           stopping on it. In `lane` mode it is the old dispatch: one
+           `enrichment-web-specialist` lane per category with open requests,
+           then a reconcile against the Search_Log those lanes wrote.
         3. GATE: per category, an ENRICHMENT row from the Search_Log's Tool
            column. Zero connector searches → FAIL, BLOCKING while the heal
            budget lasts (the category re-enters the round loop as a FRESH lane
@@ -1187,8 +1202,19 @@ class Pipeline:
             self.opts.log(f"[RELAY] harvest skipped ({e.__class__.__name__}: {str(e)[:120]})")
         if self.opts.relay:
             try:
+                # RECONCILE FIRST, every round: in orchestrator mode the
+                # batches of the previous round were serviced by subagents
+                # the driver never saw, so their Search_Log rows are the
+                # only report that they landed. Reconciling before draining
+                # means this round's batch carries what is still open, not
+                # what was open when the driver last looked.
+                rc0 = relay.reconcile(self.run, self.wb)
+                if rc0.get("closed"):
+                    self.opts.log(f"[RELAY] reconciled {rc0['closed']} serviced "
+                                  f"request(s); still open {rc0['still_open']}")
                 d = relay.drain_batch(self.run, self.wb, out_dir=self._briefs(f"relay_r{round_no}"),
-                                      categories=list(categories))
+                                      categories=list(categories),
+                                      mode=self.opts.relay_mode)
                 if d.get("lanes"):
                     self.opts.log(f"[RELAY] draining {d['requests']} request(s) over "
                                   f"{d['lanes']} specialist lane(s)")
@@ -1196,6 +1222,18 @@ class Pipeline:
                     rc = relay.reconcile(self.run, self.wb)
                     self.opts.log(f"[RELAY] reconciled: {rc['closed']}; "
                                   f"still open {rc['still_open']}")
+                elif d.get("batch_file"):
+                    # ORCHESTRATOR MODE. The driver does not stop on a
+                    # pending batch and does not pretend it was serviced:
+                    # it records where the work is and carries on, and the
+                    # conductor services it between rounds.
+                    self.opts.log(
+                        f"[RELAY] {d['pending']} request(s) → "
+                        f"{len(d['prompts'])} batch(es) for the conductor: "
+                        f"{d['batch_file']}")
+                    pend = self.state.setdefault("relay_batches", [])
+                    if d["batch_file"] not in pend:
+                        pend.append(d["batch_file"])
             except Exception as e:                              # noqa: BLE001
                 self.opts.log(f"[RELAY] drain skipped ({e.__class__.__name__}: {str(e)[:120]})")
         heals = self.state.setdefault("enrichment_heals", {})
@@ -1748,6 +1786,7 @@ def _build_opts(a) -> Options:
                    max_rounds=a.max_rounds,
                    stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
                    relay=not a.no_relay,
+                   relay_mode=getattr(a, "relay_mode", Options.relay_mode),
                    lane_retries=a.lane_retries, page_retries=a.page_retries,
                    ingest_poll_s=(0 if a.dispatcher == "stub" else a.ingest_poll_s),
                    ingest_timeout_s=a.ingest_timeout_s,
@@ -1794,7 +1833,16 @@ def main(argv=None) -> int:
                    help=f"fresh lane instances spent on a category with no connector search "
                         f"before the gap is disclosed instead (default {Options.enrichment_heals})")
     r.add_argument("--no-relay", action="store_true",
-                   help="harvest search_requests but do not dispatch specialist lanes over them")
+                   help="harvest search_requests but do not service them at all")
+    r.add_argument("--relay-mode", choices=("orchestrator", "lane"),
+                   default=Options.relay_mode,
+                   help=f"how harvested search_requests are serviced "
+                        f"(default {Options.relay_mode}): 'orchestrator' "
+                        f"writes one batch file plus a prompt per capability "
+                        f"for the conductor's own subagents, which hold the "
+                        f"connectors; 'lane' dispatches headless "
+                        f"enrichment-web-specialist lanes, which hold none "
+                        f"unless the container itself is bound")
     r.add_argument("--lane-retries", type=int, default=1)
     r.add_argument("--page-retries", type=int, default=2)
     r.add_argument("--lane-timeout", type=int, default=2400)
