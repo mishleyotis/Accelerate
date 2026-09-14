@@ -478,15 +478,29 @@ jobs:
   #
   # Measured 2026-09-14 on a 4-core box, `-n auto --dist loadfile`, the same
   # shape as a hosted runner: tests/skills 790s (1001 passed, 6 skipped),
-  # tests/acceptance 455s (82 passed). Split, each half runs well inside its
-  # clock and the two run in parallel, so the wall clock falls as well —
-  # which is the argument the previous split made and it still holds. The
-  # answer is not a bigger number: a 40-minute ceiling would hide the next
-  # doubling exactly as this 25-minute one hid the last.
+  # tests/acceptance 455s (82 passed). Split, the two run in parallel, so the
+  # wall clock falls as well — which is the argument the previous split made
+  # and it still holds. The split is the fix; a bigger ceiling on the pair
+  # would have hidden the next doubling exactly as this one hid the last.
+  #
+  # THEN MEASURED AGAIN, ON THE RUNNER, because the box above under-predicted
+  # it by half: this half alone took 20m58s in run 34867836045 and about the
+  # same in 34867830632 — green, with four minutes in hand. Four minutes is
+  # not margin on a job whose own history includes a 24m33s pass and a 25m00s
+  # timeout of the same tree: that spread is bigger than what is left.
+  #
+  # So this clock is 35, and that is NOT the bigger number this comment warns
+  # against. `timeout-minutes` is a hang detector — Gate L exists because a
+  # step once sat for 33 minutes against GitHub's six-HOUR default — and a
+  # hang detector set to the honest runtime does not detect hangs, it reports
+  # slow runners as failures. Sized at 1.7x measured, still 10 under Gate L's
+  # 45-minute ceiling, and a real hang is still red within the hour. What
+  # must never happen again is the SUM outgrowing a clock unnoticed; that is
+  # what the split and the measurements above are for.
   research-engine-tests:
     name: Research engine suite
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
