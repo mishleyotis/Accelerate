@@ -334,9 +334,10 @@ inside every research round of `engine.pipeline`:
 | verb | what it does | where it lands |
 |---|---|---|
 | `harvest` | reads each lane's transcript (`agent_logs/<lane>.jsonl` + `.out`) for `search_requests` — whole-JSON, fenced JSON or the key in prose — and queues each once | `07_qa/search_relay.jsonl` (append-only; id = hash of normalised query + cell) |
-| `drain-brief` | one `enrichment-web-specialist` lane per category with OPEN requests, briefed with the exact `engine.cli search --tool exa`, `engine.cli evidence` and `engine.relay record` commands | `briefs/relay_r<N>/`; dispatched as stage `RELAY` |
-| `reconcile` | closes OPEN requests SERVED/EMPTY from the Search_Log itself (an enrichment-tool row whose query matches) | the queue |
-| `heal` | for a category with NO connector search: which half is broken, measured — `grants` (a connector call refused in the transcript), `instruction` (never attempted), `logging` (called, logged as web_search), `manifest` (the lane declares none) | the ENRICHMENT gate row and the fresh lane's brief |
+| `batch` | **the default since 2026-09-14.** Deduplicates the OPEN requests by normalised query, groups them by capability, proposes the connector per query, and writes ONE index plus a self-contained prompt per group — each carrying only its own queries, their cells, the connector to use and the exact `engine.cli search` / `engine.relay record` commands. Dispatches nothing: the conductor spins one fresh in-process subagent per prompt, and only those inherit its connectors | `07_qa/relay_batch_r<N>.json` (+ `.md`) and `briefs/relay_r<N>/<capability>.md` |
+| `drain-brief` | the FALLBACK (`--relay-mode lane`): one `enrichment-web-specialist` lane per category with OPEN requests, briefed with the exact `engine.cli search --tool exa`, `engine.cli evidence` and `engine.relay record` commands. Right only where the CONTAINER itself holds the connectors | `briefs/relay_r<N>/`; dispatched as stage `RELAY` |
+| `reconcile` | closes OPEN requests SERVED/EMPTY from the Search_Log itself (an enrichment-tool row whose query matches). Runs at the START of every round, because in batch mode the previous round's work was done by subagents the driver never saw and the Search_Log is their only report | the queue |
+| `heal` | for a category with NO connector search: which half is broken, measured — `grants` (a connector call refused in the transcript), `instruction` (never attempted), `logging` (called, logged as web_search), `manifest` (the lane declares none), `unbound` (the run's own baseline proves no enrichment connector was ever bound — a fresh lane cannot reach what is not in the container, so this one is disclosed at once and spends no heal) | the ENRICHMENT gate row and the fresh lane's brief |
 
 The **ENRICHMENT gate** (per category, from the Search_Log's `Tool` column) is
 the third gate beside FLOORS and DISPATCH_VERIFY. Zero connector searches →
@@ -347,6 +348,12 @@ Gate_Log and `07_qa/pipeline_state.json` (`enrichment_disclosed`), never a
 silent pass and never a wall when the harness bound no connector to a child.
 `python3 -m engine.relay enrichment --run R` prints the per-category counts;
 `python3 -m engine.relay state --run R` the queue.
+
+A batch the conductor has not yet serviced is **`PENDING_ORCHESTRATOR`** on
+the gate — non-blocking, and it spends none of the heal budget. Work not yet
+done is not a gap, and a run that halted on one would be waiting on itself.
+It becomes a blocking FAIL only when a servicing subagent recorded the
+request `BLOCKED`, which means a connector refused it and said so verbatim.
 
 Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's

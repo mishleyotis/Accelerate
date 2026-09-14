@@ -415,3 +415,91 @@ def test_the_relay_and_the_brief_agree_on_what_a_capability_is():
     from engine import brief
     for cell in ("P1C1.1.1", "P1C1.1.CU2", "P2C3.4.10", "P4C2.11.3"):
         assert relay.capability_of(cell) == brief.capability_of(cell)
+
+
+# ── the yield ledger the docs promised for months ────────────────────────
+#
+# `routing.md` said the relay hop "logs the source outcomes in the yield
+# ledger". Nothing did, and `fixtures/source_yield.json` did not exist. The
+# instrument that was supposed to tell the next run which pathway pays had
+# never been written to once.
+#
+# It is wired at RECONCILE, not in the batch prompt, and that is the whole
+# design decision: the Search_Log row already states the tool, the facet and
+# what was kept, so making a servicing subagent run a third command per query
+# would buy a measurement the substrate already holds, at a command per query
+# across hundreds of them.
+
+def _run_with_requests(tmp_path):
+    """One OPEN request that names a cell and a facet — the shape a reconcile
+    can turn into a yield entry."""
+    return _run_with(tmp_path, {"research-p1c1-producer": [
+        {"query": "acme credit union core platform vendor",
+         "subcap": "P1C1.1.1", "facet": "works"}]})
+
+
+def test_reconciling_a_request_records_what_the_pathway_yielded(tmp_path, monkeypatch):
+    ledger = tmp_path / "yield.json"
+    monkeypatch.setenv("DMA_SOURCE_YIELD", str(ledger))
+    run = _run_with_requests(tmp_path)
+    wb = run.open()
+    req = relay.open_requests(run)[0]
+    L.append_search(wb, subcap=req["subcap"], facet=req["facet"],
+                    query=req["query"], tool="exa", hits=4, kept=3,
+                    outcome="kept 3")
+    out = relay.reconcile(run, wb)
+    assert out["closed"]["SERVED"] == 1
+    assert out["source_yield_logged"] == 1, out
+    entries = json.loads(ledger.read_text())["entries"]
+    assert len(entries) == 1
+    e = entries[0]
+    assert e["source"] == "exa" and e["outcome"] == "rich"
+    assert e["facet"] == req["facet"]
+    assert e["family"] == relay.capability_of(req["subcap"])
+
+
+def test_a_clean_negative_is_recorded_too_and_is_not_a_rich_one(tmp_path, monkeypatch):
+    """An empty is worth ranking on: a pathway reliably empty for a facet
+    should be opened LAST, and a recorded empty stops the next run repeating
+    it. Recording only successes would rank the untried above the tried."""
+    ledger = tmp_path / "yield.json"
+    monkeypatch.setenv("DMA_SOURCE_YIELD", str(ledger))
+    run = _run_with_requests(tmp_path)
+    wb = run.open()
+    req = relay.open_requests(run)[0]
+    L.append_search(wb, subcap=req["subcap"], facet=req["facet"],
+                    query=req["query"], tool="tavily", hits=0, kept=0,
+                    outcome="nothing")
+    out = relay.reconcile(run, wb)
+    assert out["closed"]["EMPTY"] == 1
+    assert json.loads(ledger.read_text())["entries"][0]["outcome"] == "empty"
+    assert relay._yield_outcome(0) == "empty"
+    assert relay._yield_outcome(1) == "thin"
+    assert relay._yield_outcome(2) == "rich"
+
+
+def test_a_ledger_that_cannot_be_written_never_fails_a_reconcile(tmp_path, monkeypatch):
+    """FAIL-OPEN, and the direction matters: reconcile is what CLOSES
+    requests, so a measurement instrument breaking must not leave a serviced
+    batch looking unserviced and re-batched next round."""
+    monkeypatch.setenv("DMA_SOURCE_YIELD", str(tmp_path / "no" / "such" / "dir" / "y.json"))
+    run = _run_with_requests(tmp_path)
+    wb = run.open()
+    req = relay.open_requests(run)[0]
+    L.append_search(wb, subcap=req["subcap"], facet=req["facet"],
+                    query=req["query"], tool="exa", hits=2, kept=1)
+    out = relay.reconcile(run, wb)
+    assert out["closed"]["SERVED"] == 1, "the request still closed"
+    assert out["source_yield_logged"] == 0
+
+
+def test_the_relay_never_writes_into_the_checked_in_ledger_during_a_test(tmp_path, monkeypatch):
+    """The ledger lives with the PLUGIN because it is cross-client, which
+    means an unguarded call writes into the repository. The override exists
+    so a test cannot; this asserts the override is what the subprocess reads."""
+    ledger = tmp_path / "yield.json"
+    monkeypatch.setenv("DMA_SOURCE_YIELD", str(ledger))
+    assert relay.log_yield("exa", "works", "P1C1.1", 3)["logged"] is True
+    assert ledger.exists()
+    assert not (relay.SOURCE_YIELD.parent / "source_yield.json").exists(), (
+        "the plugin's own ledger must be untouched by a test run")

@@ -30,6 +30,7 @@ if __package__ in (None, ""):  # noqa: E402
 
 import importlib.util
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -85,16 +86,57 @@ def lane_noop(agent, prompt_file, ctx):
     return None
 
 
+def _env_int(name: str) -> int:
+    try:
+        return int(os.environ.get(name) or 0)
+    except ValueError:
+        return 0
+
+
+def _open_cells_owed(agent: str) -> int:
+    """`DMA_STUB_OPEN_CELLS="research-p1c1-producer:2"` — how many of this
+    lane's cells it hands back WITHOUT closing. The shape the walk could not
+    reproduce: a lane that returns 0 and leaves work behind, which is what a
+    lane out of turns actually does."""
+    for part in filter(None, os.environ.get("DMA_STUB_OPEN_CELLS", "").split(",")):
+        name, _, n = part.partition(":")
+        if name.strip() == agent:
+            return int(n or 1)
+    return 0
+
+
 def lane_research(agent, prompt_file, ctx):
     """research-pXcY-producer: work every open cell of the category — five
     evidence rows and a challenged synthesis each; the run's LAST selected
-    cell is closed as a declared absence, so the absence path is walked."""
+    cell is closed as a declared absence, so the absence path is walked.
+
+    Two environment modes let the stress walk reproduce the failures that
+    cost the 2026-09-12 run, through the real command line:
+
+      DMA_STUB_WEB_ONLY=1
+        every search goes through the built-in web tools and the cell is
+        closed with `enrichment_unavailable=True` — the DEGRADED path, which
+        the engine refuses unless the run's own baseline proves the
+        connectors are missing. So this mode only completes against a short
+        baseline, which is exactly the assertion worth making.
+
+      DMA_STUB_OPEN_CELLS="research-p1c1-producer:2"
+        the lane hands back with that many cells untouched. Nothing else in
+        the stub could produce an open cell without also producing a lane
+        FAILURE, and those are different states: one is re-dispatched with a
+        handback, the other is a defect.
+    """
     F = fixtures()
     cat = agent.split("-")[1].upper()          # research-p1c1-producer → P1C1
     wb = ctx.run.open()
     cells = [c for c in wb.selected_subcaps() if c.startswith(cat)]
     last = wb.selected_subcaps()[-1]
     ev = _evidence_by_cell(wb)
+    leave = _open_cells_owed(agent)
+    if leave:
+        cells = cells[:max(0, len(cells) - leave)]
+    if os.environ.get("DMA_STUB_WEB_ONLY", "") not in ("", "0"):
+        return _lane_web_only(agent, wb, cells)
     for c in cells:
         row = next((r for r in wb.rows(f"{c[:2]}_Subcap_Scoring") if r.get("SubCap_ID") == c), {})
         if str(row.get("Dominant_Claim") or "").strip() or L.is_declared_absent(row, wb):
@@ -104,6 +146,43 @@ def lane_research(agent, prompt_file, ctx):
             continue
         eids = ev.get(c) or F.bank_evidence(wb, c, n=5)
         F.synthesise(wb, c, F.good_synthesis(c, eids), author=agent)
+    F.client_facts(wb, wb.selected_subcaps(), _evidence_by_cell(wb))
+    F.make_shippable(wb)
+
+
+def _lane_web_only(agent, wb, cells):
+    """Every volley through `web_search`, then a declared absence taking the
+    degraded path. The engine VERIFIES the degradation against the run's
+    baseline, so this walks the refusal as readily as the success."""
+    F = fixtures()
+    ent = wb.metadata().get("entity_name") or "the entity"
+    for c in cells:
+        row = next((r for r in wb.rows(f"{c[:2]}_Subcap_Scoring")
+                    if r.get("SubCap_ID") == c), {})
+        if str(row.get("Dominant_Claim") or "").strip() or L.is_declared_absent(row, wb):
+            continue
+        # Every askable volley, both ladder rungs, through the BUILT-IN tools
+        # only. `declare_absence` is called directly rather than through the
+        # fixture's helper, because that helper fires one exa search to clear
+        # the connector rung — which is the rung this mode exists to leave
+        # uncleared.
+        F.fire_volleys(wb, c, n=0)
+        direct = f'"{ent}" {c} rollout OR "went live"'
+        proxy = f'"{ent}" {c} proxy: "chief digital officer" OR "head of digital"'
+        for q in (direct, proxy):
+            L.append_search(wb, subcap=c, facet="works", query=q,
+                            tool="web_search", hits=0, kept=0, outcome="no hits")
+        L.declare_absence(
+            wb, c, actor=agent,
+            ladder=[{"rung": "direct", "query": direct},
+                    {"rung": "proxy", "query": proxy}],
+            proxy_log=("hunted the leadership_title proxy class — a named owner "
+                       "for the capability — across the site, LinkedIn and the "
+                       "annual report; nothing names one"),
+            what_was_hunted=(f"a public artefact naming {c} at {ent} across "
+                             f"every askable volley and two ladder rungs; the "
+                             f"searches returned generic vendor pages only"),
+            enrichment_unavailable=True)
     F.client_facts(wb, wb.selected_subcaps(), _evidence_by_cell(wb))
     F.make_shippable(wb)
 
@@ -226,7 +305,6 @@ class StubDispatcher:
           DMA_STUB_FAIL_FIRST="research-p1c1-producer:2,scoring-p1-producer:1"
           DMA_STUB_BROKEN="report-validator"
         """
-        import os
         ff = dict(kw.pop("fail_first", None) or {})
         for part in filter(None, os.environ.get("DMA_STUB_FAIL_FIRST", "").split(",")):
             name, _, n = part.partition(":")
@@ -277,10 +355,25 @@ class StubDispatcher:
             detail.append({"agent": agent, "code": code, "attempts": attempts,
                            "attempt_codes": codes, "elapsed_s": 0.0,
                            "started_at": _utcnow(), "ended_at": _utcnow()})
-        return {"lanes": lanes, "dispatched": len(rows), "ok": len(rows) - len(failed),
-                "failed": failed, "lanes_detail": [d for d in detail if "code" in d],
-                "errors": [d for d in detail if "error" in d],
-                "elapsed_s": round(time.monotonic() - t0, 3), "retries_allowed": retries}
+        out = {"lanes": lanes, "dispatched": len(rows), "ok": len(rows) - len(failed),
+               "failed": failed, "lanes_detail": [d for d in detail if "code" in d],
+               "errors": [d for d in detail if "error" in d],
+               "elapsed_s": round(time.monotonic() - t0, 3), "retries_allowed": retries}
+        # THE FIGURE THAT STOPS A RUNAWAY RUN, priced. `agent_run.py` sums each
+        # lane's real `total_cost_usd` into its batch summary and the driver
+        # adds it to the ceiling; the stub reported none, so no walk through
+        # the real command line could reach the dollar stop — the one behaviour
+        # the 2026-09-12 run needed and did not have.
+        #
+        # `DMA_STUB_NO_USD=1` keeps the old shape on purpose: a dispatcher that
+        # reports NO spend must leave the driver unpriced rather than assume
+        # zero, and that is its own thing to assert.
+        if os.environ.get("DMA_STUB_NO_USD", "") in ("", "0"):
+            per = float(os.environ.get("DMA_STUB_USD_PER_LANE") or 0.0)
+            if per:
+                out["usd"] = round(per * len(rows), 4)
+                out["turns"] = _env_int("DMA_STUB_TURNS_PER_LANE") * len(rows) or None
+        return out
 
 
 class StubReads:
@@ -292,7 +385,6 @@ class StubReads:
     def __init__(self, *, entity_id="acme-cu", entity_name="Acme Credit Union",
                  never: bool | None = None, contract: dict | None = None,
                  polls_before_ingest: int = 0):
-        import os
         if never is None:
             never = os.environ.get("DMA_STUB_NEVER_INGEST", "") not in ("", "0")
         self.entity_id, self.entity_name, self.never = entity_id, entity_name, never
@@ -343,7 +435,6 @@ class StubShipper:
 
     def __init__(self, *, verdicts: dict | None = None, refuse_claim: set | None = None,
                  refuse_promote: bool | None = None, sg_v4: dict | None = None):
-        import os
         self.verdicts = dict(verdicts or {})
         # {("overview", 1): [{"path": "...", "similarity": 0.39, "threshold": 0.5}, ...]}
         # — the SG-V4 grounding FAILs a page's submission discloses on an attempt.

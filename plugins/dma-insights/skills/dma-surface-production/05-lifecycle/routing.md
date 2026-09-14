@@ -99,17 +99,37 @@ could not dispatch the sanctioned re-vet). Two rules follow:
    session — never by a producer's own re-analysis, however correct it
    reads.
 
-Division of labour is unchanged: headless children and subagents reach the
-DMA connector natively but carry NO claude.ai enrichment connectors — those
-exist only in the top session, attached to the Routine. Connector-bound
-searches (Clay, Exa, Tavily, Vibe-Prospecting, Indeed) run only in the top
-session: a dispatched producer that needs one emits it in a
-`search_requests` array (query + falsifier pairing + facet) instead of
-fabricating or skipping; the top session executes the requests through its
-real connectors, registers the evidence, logs the source outcomes in the
-yield ledger, and re-invokes the producer with the evidence ids. Enrichment
-honesty survives the hop: a search the top session refused or could not run
-is recorded not-run, never invented.
+Division of labour is unchanged: headless children reach the DMA connector
+natively but carry NO claude.ai enrichment connectors — those bind once, at
+session start, in the top session attached to the Routine, and a subagent
+inherits them only when it runs IN PROCESS through the Agent tool.
+Connector-bound searches (Clay, Exa, Tavily, Vibe-Prospecting, Indeed)
+therefore run only in the top session or one of its in-process subagents: a
+dispatched producer that needs one emits it in a `search_requests` array
+(query + falsifier pairing + facet) instead of fabricating or skipping.
+
+The hop is code, not etiquette — `engine.relay`, run inside every research
+round. `harvest` reads the requests out of the lane's own transcript and
+queues each once; `batch` deduplicates them by normalised query, groups them
+by capability, proposes the connector per query, and writes one index
+(`07_qa/relay_batch_r<N>.json`) plus a self-contained prompt per group under
+`briefs/relay_r<N>/`. The top session spins ONE fresh in-process subagent per
+prompt — Exa/Tavily batches to `enrichment-web-specialist`, Clay/Vibe to
+`enrichment-connector-specialist`. Those subagents write their findings
+straight to the workbook through `engine.cli search` and `engine.cli
+evidence` and close their requests with `engine.relay record`; the results
+never pass back through the top session's context, which is what keeps it
+flat across hundreds of queries. `reconcile` then closes the queue from the
+Search_Log itself, which is the only report those subagents file — and logs
+each closure to the cross-client source-yield ledger
+(`scripts/source_yield.py`), so which pathway actually pays accumulates run
+over run without one extra token being spent to say it.
+
+Enrichment honesty survives the hop: a search a subagent refused or could not
+run is recorded BLOCKED with the refusal text verbatim, never invented and
+never quietly re-run through WebSearch. A batch nobody has serviced yet is
+`PENDING_ORCHESTRATOR` on the ENRICHMENT gate — non-blocking, and it never
+halts the run.
 
 ## Two tiers of producer, and which tier a request reaches
 
@@ -534,7 +554,7 @@ tokens of the search, the risk of a second answer that now needs
 reconciling, and a fresh chance to cite a worse source than the one the
 run's RRF consensus already ranked. New searching belongs only to gaps the
 enrichment planner names — and a dispatched producer emits those as
-`search_requests` for the top session (see Dispatch mode above), never
+`search_requests` for the relay to batch (see Dispatch mode above), never
 fires them itself.
 
 ## Memory duties per stage

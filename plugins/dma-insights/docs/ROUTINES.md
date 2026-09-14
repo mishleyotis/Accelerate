@@ -176,11 +176,14 @@ change nothing without being asked.
 >
 > **What HAS changed (2026-09-13): this is no longer the run-ender it was,
 > and the line that used to sit here — "no code change closes it" — is now
-> false.** Two changes closed the half that code owns. The preflight is
-> wired into the run path (`engine.pipeline env` hard-fails, `doctor.py`
-> reports UNVERIFIED rather than a green row), so a firing that never had a
-> connector STOPS at the start instead of discovering it sixteen lanes and
-> ~$96 later. And a container that PROVABLY never had one now degrades
+> false.** Two changes closed the half that code owns. The preflight is on
+> the run path itself, not beside it: `engine.pipeline run` REFUSES to
+> dispatch a single lane when no connector baseline was recorded (`doctor.py`
+> reports UNVERIFIED rather than a green row, and `engine.pipeline env` hard-
+> fails), so a firing that never had a connector stops at the start instead
+> of discovering it sixteen lanes and ~$96 later. A baseline that was
+> recorded and is SHORT is the other branch and not a stop: the run proceeds
+> DEGRADED and says so. And a container that PROVABLY never had one now degrades
 > honestly rather than looping: `engine.cli absence --enrichment-unavailable`
 > declares the cell at REDUCED rigour with the reason on the row, the floors
 > gate moves `absence_single_tool` to advisory and discloses

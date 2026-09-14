@@ -81,6 +81,7 @@ import hashlib
 import importlib.util
 import json
 import re
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -417,18 +418,43 @@ def lane_output(transcript: Path) -> str:
     return "\n".join(blocks)
 
 
+#: Lanes that emit `search_requests` without owning a category. They are read
+#: on EVERY harvest, including one restricted to this round's categories.
+#:
+#: Measured 2026-09-14: `enrichment-web-specialist` — the relay's own drain
+#: lane — was absent from this list, so a request the servicing lane itself
+#: emitted (it could not reach a connector either, which is the whole reason
+#: the relay exists) was queued by nothing and lost. And because the driver
+#: always passes `categories`, the early return skipped the run-level lanes
+#: altogether: the technographic scanner's and the conductor's requests were
+#: read only by a harvest nobody ran.
+RUN_LEVEL_LANES = (DRAIN_AGENT, "enrichment-connector-specialist",
+                   "technographic-scanner", "research-conductor")
+
+
 def _lanes(logs: Path, categories: list[str] | None) -> list[tuple[str, str | None]]:
-    """(lane name, category) pairs whose transcripts to read."""
+    """(lane name, category) pairs whose transcripts to read.
+
+    `categories` narrows the per-category lanes to this round's; it never
+    narrows away the run-level lanes, which belong to no category and would
+    otherwise be read on no round at all."""
+    out: list[tuple[str, str | None]] = []
+    seen: set[str] = set()
+
+    def add(name: str, cat: str | None) -> None:
+        if name not in seen:
+            seen.add(name)
+            out.append((name, cat))
+
     if categories:
-        return [(f"research-{str(c).lower()}-producer", str(c).upper()) for c in categories]
-    out = []
+        for c in categories:
+            add(f"research-{str(c).lower()}-producer", str(c).upper())
     for p in sorted(logs.glob("*.jsonl")) if logs.is_dir() else []:
         m = _LANE_RE.match(p.stem)
-        if m:
-            out.append((p.stem, m.group(1).upper()))
-        elif p.stem in ("technographic-scanner", "enrichment-connector-specialist",
-                        "research-conductor"):
-            out.append((p.stem, None))
+        if m and not categories:
+            add(p.stem, m.group(1).upper())
+        elif p.stem in RUN_LEVEL_LANES:
+            add(p.stem, None)
     return out
 
 
@@ -521,11 +547,52 @@ def _matches(req: dict, row: dict) -> bool:
     return True
 
 
-def reconcile(run: runstate.Run, wb) -> dict:
+#: `scripts/source_yield.py` — the cross-client record of which enrichment
+#: pathways actually produce. `routing.md` promised for months that the
+#: relay hop logged to it and nothing did; the ledger file did not exist.
+SOURCE_YIELD = PLUGIN / "scripts" / "source_yield.py"
+
+#: kept-rows → the ledger's three outcomes. A search that kept two or more
+#: rows paid for itself; one is thin; none is a clean negative, which is
+#: still worth recording because a pathway reliably empty for a facet should
+#: be opened LAST.
+def _yield_outcome(kept: int) -> str:
+    return "rich" if kept >= 2 else ("thin" if kept == 1 else "empty")
+
+
+def log_yield(tool: str, facet: str, family: str, kept: int) -> dict:
+    """One measured search into the yield ledger. FAIL-OPEN and silent about
+    its own failure in the caller's result: a ledger that cannot be written
+    must never fail a reconcile, and the reconcile is what closes requests.
+
+    Called from `reconcile` rather than from a batch prompt on purpose — the
+    subagent would pay a command per query to say what the Search_Log row
+    already states, and the whole point of the batch is that it does not."""
+    if not SOURCE_YIELD.exists():
+        return {"logged": False, "why": "source_yield.py absent"}
+    cmd = [sys.executable, str(SOURCE_YIELD), "log",
+           "--source", str(tool or "?"), "--facet", str(facet or "?"),
+           "--outcome", _yield_outcome(int(kept or 0)),
+           "--raised-by", "engine.relay reconcile"]
+    if family:
+        cmd += ["--family", str(family)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return {"logged": r.returncode == 0, "why": (r.stderr or "").strip()[:160]}
+    except Exception as e:                                   # noqa: BLE001
+        return {"logged": False, "why": f"{e.__class__.__name__}: {str(e)[:120]}"}
+
+
+def reconcile(run: runstate.Run, wb, *, log_source_yield: bool = True) -> dict:
     """Close OPEN requests from the Search_Log: a row through an enrichment
     tool whose query matches is SERVED when it kept anything, EMPTY when it
-    returned nothing. The substrate decides, not the lane's report."""
+    returned nothing. The substrate decides, not the lane's report.
+
+    Each closure also lands one entry in the source-yield ledger, so the
+    measurement of which pathway pays accumulates across clients without a
+    single extra token being spent to make it."""
     closed = {"SERVED": 0, "EMPTY": 0}
+    yielded = 0
     rows = [r for r in wb.rows("Search_Log")
             if str(r.get("Tool") or "").strip().lower() in C.ENRICHMENT_TOOLS]
     for req in open_requests(run):
@@ -534,11 +601,18 @@ def reconcile(run: runstate.Run, wb) -> dict:
             continue
         kept = int(hit.get("Kept") or 0) or int(hit.get("Hits") or 0)
         status = "SERVED" if kept else "EMPTY"
+        tool = str(hit.get("Tool") or "")
         record(run, req["id"], status,
                note=f"reconciled from Search_Log seq {hit.get('Seq')} ({hit.get('Tool')})",
-               actor="engine.relay reconcile", tool=str(hit.get("Tool") or ""))
+               actor="engine.relay reconcile", tool=tool)
         closed[status] += 1
-    return {"closed": closed, "still_open": len(open_requests(run))}
+        if log_source_yield:
+            cell = str(hit.get("SubCap_ID") or req.get("subcap") or "")
+            if log_yield(tool, str(hit.get("Facet") or req.get("facet") or ""),
+                         capability_of(cell) if cell else "", kept)["logged"]:
+                yielded += 1
+    return {"closed": closed, "still_open": len(open_requests(run)),
+            "source_yield_logged": yielded}
 
 
 # ── the batch: what the connector holder runs, grouped ────────────────────

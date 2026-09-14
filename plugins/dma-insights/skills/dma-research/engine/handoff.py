@@ -139,6 +139,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
     # Category ceilings stay BAND WORDS. AUD-0078 measured v1_compat turning
     # them into floats — a numeric maturity score in the artefact R1 forbids
     # scores in.
+    absence_share = _absence_share(wb, by_cat)
     ceilings = {}
     for cat, rows in sorted(by_cat.items()):
         bands = [r["ceiling_band"] for r in rows if r["ceiling_band"]]
@@ -186,6 +187,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         "counts": C.counts(),
         "coverage": wb.coverage(),
         "gates": gates,
+        "absence_share": absence_share,
         "capability_ceilings": ceilings,
         "subcap_records": records,
         "evidence_register": [
@@ -309,3 +311,58 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ── how much of this run is absence, said out loud ───────────────────────
+#
+# A category where every cell was declared absent now PASSES its floors
+# gate with `blocking: []` — correctly, because the cells were honestly
+# worked and honestly closed. But "passed" and "we found nothing about this
+# institution" look identical downstream, and the only thing standing
+# between them was the M2 scoring ceiling, which is a cap on the number and
+# says nothing to the person reading the run. So the handoff states the
+# share, and states how much of it was declared at REDUCED rigour — the
+# degraded path, where no enrichment connector could be asked at all.
+#
+# ADVISORY, never blocking (owner, 2026-09-13). A run that found nothing is
+# a real answer about a real institution; refusing to hand it off would
+# throw away the work that established the absence. Disclosure is the fix,
+# not refusal.
+
+def _absence_share(wb: RunWorkbook, by_cat: dict) -> dict:
+    """Per category and for the run: how many cells closed as declared
+    absences, and how many of those rest on the built-in web tools alone."""
+    reduced = {str(r.get("SubCap_ID") or "").strip()
+               for r in wb.rows("Provenance")
+               if str(r.get("Step") or "").strip() == "absence"
+               and "REDUCED RIGOUR" in str(r.get("Detail") or "").upper()}
+    out, tot, dec, red = {}, 0, 0, 0
+    for cat, rows in sorted(by_cat.items()):
+        absent = [r for r in rows if r["state"] == "declared_absent"]
+        n_red = sum(1 for r in absent if r["subcap_id"] in reduced)
+        tot += len(rows)
+        dec += len(absent)
+        red += n_red
+        out[cat] = {
+            "cells": len(rows),
+            "declared_absent": len(absent),
+            "reduced_rigour": n_red,
+            "share": round(len(absent) / len(rows), 3) if rows else None,
+            # ADVISORY. Named so a reader of the handoff, a report section or
+            # a surface can say it rather than discover it from a low score.
+            "scored_on_absences_only": bool(rows) and len(absent) == len(rows),
+        }
+    out["_run"] = {
+        "cells": tot,
+        "declared_absent": dec,
+        "reduced_rigour": red,
+        "share": round(dec / tot, 3) if tot else None,
+        "categories_on_absences_only": sorted(
+            c for c, v in out.items() if c != "_run" and v["scored_on_absences_only"]),
+        "statement": (
+            f"{dec} of {tot} cells closed as declared absences"
+            + (f" ({red} at REDUCED rigour — no enrichment connector could be "
+               f"asked)" if red else "")
+            + "." if tot else "no cells in scope"),
+    }
+    return out

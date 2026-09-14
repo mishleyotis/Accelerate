@@ -305,6 +305,48 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0512",
+   "title": "A budget-stopped run is indistinguishable from a failed gate, so the hourly watchdog re-dispatches it",
+   "flagged_by": "mishley.otiende@zennify.com",
+   "what_must_never_recur": "A stop that only a person can lift, classified as work an agent may resume. Measured 2026-09-14 against HEAD 29fd001: `watchdog.inspect` never read `07_qa/pipeline_state.json`, so a run the dollar ceiling stopped left FLOORS FAIL rows behind — exactly what a half-finished research stage leaves — and classified as GATE_FAILED, which is in AGENT_ADVANCEABLE, which the hourly `--revive` dispatches. With the ceiling also starting at zero in every process (MEM-0511), that is one full budget per sweep with no upper bound. Separately `resume_plan` had no branch for BLOCKED_NO_CONNECTOR and fell through to a default whose `why` reads 'the run is working' — about a run that structurally cannot advance, while COMPLETION_CRITERIA in the same module already named the human who must act. A signal meaning 'stop' must never be wired to a process authorised to spend.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_watchdog_stops_that_need_a_person.py::test_a_budget_stopped_run_has_its_own_state"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_watchdog_stops_that_need_a_person.py::test_those_states_are_actionable_but_never_auto_revived"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_watchdog_stops_that_need_a_person.py::test_no_actionable_state_reports_the_run_as_working"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_watchdog_stops_that_need_a_person.py::test_inspect_reads_the_budget_stop_from_the_pipeline_state"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0519",
+   "title": "A default changed in the callee silently changed the driver, because the driver branched on a field the new default returns as zero",
+   "flagged_by": "claude-code stress test, session_01GPFsnW5KLHC9rYMy4YZtXY",
+   "what_must_never_recur": "A stage that stops happening with no error, no log line and no failing test. Measured 2026-09-14 on branch claude/gifted-maxwell-xn3357 at commit 4012a80: `relay.drain_batch` gained `mode=` defaulting to \"orchestrator\" (which returns lanes=0 and dispatches nothing, by design), while `pipeline._enrich_research` still called it with no `mode=` and tested only `if d.get(\"lanes\")`. Under that pairing the RELAY stage writes nothing, logs nothing, dispatches nothing AND never calls `relay.reconcile`, so served requests stop closing and every round re-batches work that was already done. Caught before it shipped only because the two halves were written in parallel streams of one PR. The rule: a caller passes the mode it was configured with rather than inheriting a callee's default, and a falsy return gets its own branch — otherwise a change of default is a change of behaviour that nothing announces.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_round_budget.py::test_the_relay_mode_the_driver_asks_for_is_the_one_the_relay_runs"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_relay_and_enrichment.py::test_the_default_relay_writes_a_batch_for_the_conductor_and_stops_nothing"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

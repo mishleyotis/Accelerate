@@ -214,6 +214,64 @@ if __name__ == "__main__":
 # for the code — and a test that cries wolf is the one people delete. What
 # stays asserted is the part that IS environment-independent: no row outside
 # this set may fail, and the offline run must make no network call.
+class ConnectorContractRow(unittest.TestCase):
+    """THE ROW THAT USED TO CHECK THE WRONG THING, now driven at three roots.
+
+    It returned True whenever the required families appeared in the REGISTRY,
+    which is a statement about the repository — so it went green on a session
+    holding no enrichment connector at all, which is the state that cost a
+    live run $96.65 on 2026-09-12 while closing nothing.
+
+    It reads the session-written baseline now, and that makes its verdict
+    depend on the machine, which is why it stays in
+    ENVIRONMENT_DEPENDENT_ROWS for the blanket "no row outside this set may
+    fail" assertion: on a CI runner no baseline has been written and red is
+    the correct answer. Environment-dependent is not the same as untested.
+    These three cases drive the row's own logic at controlled roots, so the
+    row is pinned even though its verdict on any given machine is not.
+    """
+
+    def _row(self, root):
+        with mock.patch.dict("os.environ", {"DMA_RUN_ROOT": str(root)}):
+            return doctor.connector_contract_check()
+
+    def test_no_baseline_is_unverified_and_unverified_is_not_a_pass(self):
+        with tempfile.TemporaryDirectory() as td:
+            row = self._row(Path(td))
+        self.assertFalse(row["ok"])
+        self.assertIn("UNVERIFIED", row["detail"])
+        self.assertIn("baseline --tools -", row["fix"])
+
+    def test_a_short_baseline_says_which_families_are_missing(self):
+        fam = connector_contract.families()
+        with tempfile.TemporaryDirectory() as td:
+            connector_contract.write_baseline([fam["exa"][0]], td)
+            row = self._row(Path(td))
+        self.assertFalse(row["ok"])
+        self.assertIn("BASELINE IS SHORT", row["detail"])
+        self.assertIn("tavily", row["detail"])
+        self.assertIn("no floors gate can pass", row["detail"])
+
+    def test_a_baseline_that_holds_is_the_only_green(self):
+        fam = connector_contract.families()
+        tools = [fam[f][0] for f in ("exa", "tavily", "clay")]
+        with tempfile.TemporaryDirectory() as td:
+            connector_contract.write_baseline(tools, td)
+            row = self._row(Path(td))
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertIn("Baseline holds", row["detail"])
+
+    def test_the_row_reads_the_root_it_is_given_not_the_working_directory(self):
+        """Two runs on one machine have two baselines. A row that read the
+        cwd would report whichever run happened to be checked out."""
+        fam = connector_contract.families()
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            connector_contract.write_baseline(
+                [fam[f][0] for f in ("exa", "tavily", "clay")], a)
+            self.assertTrue(self._row(Path(a))["ok"])
+            self.assertFalse(self._row(Path(b))["ok"], "b has no baseline")
+
+
 ENVIRONMENT_DEPENDENT_ROWS = {
     "skill script dependencies",
     "active google account",

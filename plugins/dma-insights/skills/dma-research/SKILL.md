@@ -461,7 +461,11 @@ measured by `engine.floors_gate` and refused by `engine.cli absence`:
   was worked — must show the families missing. A bound connector you simply
   did not ask, or a run with no baseline at all, is still refused, and says
   which. Everything else on this list still applies: the degraded path lifts
-  the connector rung and nothing else;
+  the connector rung and nothing else. **Your brief names this flag when the
+  baseline proves it, and only then** — a dispatch packet that does not
+  mention `--enrichment-unavailable` is telling you the connectors are
+  reachable and your searches should go through the relay, not that you may
+  reach for the escape;
 - the run's own register does not already NAME the cell (`engine.brief
   reuse --subcap <cell>` shows what a sibling lane bought);
 - the ladder names its `direct` and `proxy` rungs with queries the
