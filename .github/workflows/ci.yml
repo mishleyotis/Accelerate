@@ -392,7 +392,15 @@ jobs:
                  packages/shared/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
                  infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
-          n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          # `|| true` is load-bearing. This step runs under `bash -e`
+          # with pipefail, and pytest prints NO "N skipped" when nothing
+          # skipped — so grep exits 1, the pipeline exits 1, and the shell
+          # dies ON THE ASSIGNMENT, before the ceiling is ever compared.
+          # Measured 2026-09-14 in run 34866563499: "82 passed in 528.40s"
+          # immediately followed by "Process completed with exit code 1",
+          # a green suite reported as a failed check. A clean result must
+          # not be the input this cannot survive.
+          n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1 || true)
           # Ceiling raised 11 -> 12 on 2026-08-22 for exactly one test:
           # test_evidence_verbatim.py::test_the_real_package_yields_real_excerpts,
           # which runs end to end against a client package pulled from Drive
@@ -496,7 +504,15 @@ jobs:
           python -m pytest tests/skills/ \
                  -q -rfs -p no:cacheprovider -n auto --dist loadfile \
                  2>&1 | tee /tmp/engine-pytest.txt
-          n=$(grep -oE '[0-9]+ skipped' /tmp/engine-pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          # `|| true` is load-bearing. This step runs under `bash -e`
+          # with pipefail, and pytest prints NO "N skipped" when nothing
+          # skipped — so grep exits 1, the pipeline exits 1, and the shell
+          # dies ON THE ASSIGNMENT, before the ceiling is ever compared.
+          # Measured 2026-09-14 in run 34866563499: "82 passed in 528.40s"
+          # immediately followed by "Process completed with exit code 1",
+          # a green suite reported as a failed check. A clean result must
+          # not be the input this cannot survive.
+          n=$(grep -oE '[0-9]+ skipped' /tmp/engine-pytest.txt | grep -oE '^[0-9]+' | tail -1 || true)
           # Measured 2026-09-03 on this runner's shape: the skips are the
           # Drive-identity and network-gated ones. Same ratchet as the unit
           # job — the answer to a skip is almost never a bigger number. Every
@@ -542,7 +558,15 @@ jobs:
           python -m pytest tests/acceptance/ \
                  -q -rfs -p no:cacheprovider -n auto --dist loadfile \
                  2>&1 | tee /tmp/acceptance-pytest.txt
-          n=$(grep -oE '[0-9]+ skipped' /tmp/acceptance-pytest.txt | grep -oE '^[0-9]+' | tail -1)
+          # `|| true` is load-bearing. This step runs under `bash -e`
+          # with pipefail, and pytest prints NO "N skipped" when nothing
+          # skipped — so grep exits 1, the pipeline exits 1, and the shell
+          # dies ON THE ASSIGNMENT, before the ceiling is ever compared.
+          # Measured 2026-09-14 in run 34866563499: "82 passed in 528.40s"
+          # immediately followed by "Process completed with exit code 1",
+          # a green suite reported as a failed check. A clean result must
+          # not be the input this cannot survive.
+          n=$(grep -oE '[0-9]+ skipped' /tmp/acceptance-pytest.txt | grep -oE '^[0-9]+' | tail -1 || true)
           # Zero, and zero is the honest ceiling: this suite contains no
           # `pytest.skip` and no `skipif` at all, so a skip here is a test
           # that started declining to run, which is the one thing a ratchet
