@@ -185,7 +185,13 @@ BY_SOURCE = {
     "compact": (" This session was COMPACTED: the routing rule, the memory "
                 f"rule and the submit boundary are NOT guaranteed to have "
                 f"survived the summary. Re-read {ROUTING} § After a "
-                f"compaction before your next tool call."),
+                f"compaction before your next tool call, and recover WHERE "
+                f"YOU WERE from the run rather than from the summary: "
+                f"`python3 -m engine.cli resume --run <RUN> --root <ROOT>` "
+                f"(the run's own state), then `engine.brief dispatch "
+                f"--category <YOURS>` or `engine.pipeline plan` for the next "
+                f"step. What the summary kept is not evidence of what the "
+                f"run holds."),
     "fork": (" This session is a FORK: it inherits a transcript it did not "
              "write. Confirm which run and which surface you own before "
              "producing anything."),
@@ -286,6 +292,13 @@ def brief(event: dict) -> str:
         if name.startswith("research-") or name == "technographic-scanner":
             return RESEARCH_BRIEF + scope_rule(name)
         return CORE + SUBAGENT
+    # PostCompact is the compaction event itself — it carries the summary and
+    # a "manual"/"auto" trigger, not a SessionStart `source`. It was the
+    # binding that was missing rather than the handling: `BY_SOURCE["compact"]`
+    # already existed and only SessionStart could reach it, so a compaction
+    # that did NOT restart the session re-entered with no brief at all.
+    if hook == "PostCompact":
+        return CORE + BY_SOURCE["compact"] + install_warning()
     source = str(event.get("source") or "startup")
     # Top-level sessions only. A subagent runs inside a parent that already
     # saw this and cannot act on it — its parent is mid-flight — so telling
@@ -305,12 +318,22 @@ def main() -> int:
     # stdout. Emitting the JSON form for a subagent is what actually puts the
     # brief in the child's context — printing to stdout there would be
     # swallowed, which is the AUD-0004 failure wearing a fix.
-    if event.get("hook_event_name") == "SubagentStart" or \
-            event.get("hookEventName") == "SubagentStart":
+    hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    if hook == "SubagentStart":
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "SubagentStart",
                 "additionalContexts": [text],
+            }
+        }))
+    elif hook == "PostCompact":
+        # PostCompact takes the same `additionalContext` shape every
+        # non-SessionStart hook does. Printing to stdout here would be
+        # swallowed — which is the AUD-0054 failure wearing a fix.
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PostCompact",
+                "additionalContext": text,
             }
         }))
     else:

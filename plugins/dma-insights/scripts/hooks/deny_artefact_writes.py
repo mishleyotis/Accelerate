@@ -22,10 +22,20 @@ WHAT IT ALLOWS, deliberately. Anything that runs the engine (`-m engine.` or
 Fail-open on malformed input, like its siblings: a guard that bricks every
 call when the harness changes its stdin shape is worse than the gap it closes.
 Allow = exit 0 with no output.
+
+THE ONE ENGINE COMMAND IT STILL DENIES: `engine.memory cleanup --apply`.
+That call DELETES the Drive backup of the notebooks, and the notebooks are
+the only part of the run tree a dead container loses outright. The engine
+refuses it too — `memory.cleanup` checks that nothing is still NOTED and
+nothing is BLOCKED — so this is not a second rule but the same one, asked
+before the turn is spent rather than after. `cleanup` WITHOUT `--apply`
+reports what it would do and is always allowed; so is `engine.memory status`,
+which is how a session finds out whether the conditions are met.
 """
 import json
 import re
 import sys
+from pathlib import Path
 
 REASON = (
     "dma-insights: the scoring workbook and the two reports have ONE writer — "
@@ -69,6 +79,60 @@ RETIRED = re.compile(
 FILE_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 FILE_EXT = re.compile(r"\.(xlsx|xlsm|docx)$", re.I)
 
+#: `engine.memory cleanup --apply` — the one engine call that destroys
+#: something. `--apply` must be present: the dry run is the safe default and
+#: is how a session learns whether the conditions are met.
+MEMORY_CLEANUP = re.compile(r"engine\.memory\s+cleanup\b")
+APPLY = re.compile(r"(^|\s)--apply(\s|=|$)")
+
+MEMORY_REASON = (
+    "dma-insights: `engine.memory cleanup --apply` deletes the Drive backup "
+    "of the run's notebooks, and {why}\n\n"
+    "The notebooks are the only part of the run tree a dead container loses "
+    "outright, so the backup is deleted only once it cannot cost anything: "
+    "every entry CONSOLIDATED into the workbook, none BLOCKED, and the "
+    "workbook itself pushed outside the folder about to be removed. Run "
+    "`python3 -m engine.memory status --run <RUN> --root <ROOT>` to see which "
+    "entries are outstanding, `engine.memory consolidate --category <C>` to "
+    "close them, and `engine.memory cleanup` WITHOUT --apply for the dry run. "
+    "The engine refuses this too; the hook saves you the turn."
+)
+
+
+def _memory_cleanup_refusal(cmd: str) -> str | None:
+    """The reason `cleanup --apply` must not run yet, or None.
+
+    Reads the ENGINE's own status rather than restating its conditions: one
+    rule, two enforcers. If the status cannot be read the call is ALLOWED —
+    the engine will refuse it on its own, and a guard that denies because it
+    could not measure is a guard that stops the work.
+    """
+    if not MEMORY_CLEANUP.search(cmd) or not APPLY.search(cmd):
+        return None
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import _runctx as ctx                                  # noqa: PLC0415
+        run = ctx.locate()
+        if run is None:
+            return None
+        (memory,) = ctx.engine("memory")
+        st = memory.status(run)
+    except Exception:                  # noqa: BLE001 — cannot measure: allow
+        return None
+    if not isinstance(st, dict):
+        return None
+    unconsolidated = int(st.get("unconsolidated") or 0)
+    blocked = int(st.get("blocked") or 0)
+    if not unconsolidated and not blocked:
+        return None                    # consolidated and backed up: allow
+    bits = []
+    if unconsolidated:
+        bits.append(f"{unconsolidated} notebook entr(ies) are still NOTED — "
+                    f"their only durable copy may be that backup")
+    if blocked:
+        bits.append(f"{blocked} entr(ies) are BLOCKED")
+    return MEMORY_REASON.format(why="; ".join(bits) + ".")
+
 
 def decide(payload: dict) -> str | None:
     """The denial reason, or None to allow."""
@@ -86,6 +150,9 @@ def decide(payload: dict) -> str | None:
     cmd = ti.get("command") or ""
     if not isinstance(cmd, str) or not cmd.strip():
         return None
+    why = _memory_cleanup_refusal(cmd)
+    if why:
+        return why
     if ALLOW.search(cmd):
         return None
     if CONSTRUCT.search(cmd) and DELIVERABLE.search(cmd):

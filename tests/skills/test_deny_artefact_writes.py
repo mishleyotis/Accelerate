@@ -113,3 +113,61 @@ def test_the_hook_is_registered_for_both_tool_families():
     assert "Write|Edit|MultiEdit|NotebookEdit" in matchers
     m = _mod()
     assert m.decide({"tool_name": "Bash", "tool_input": {"command": "cat x"}}) is None
+
+
+# ── the one engine command that destroys something ───────────────────────
+
+def _memory_cleanup(cmd: str, status: dict, monkeypatch, tmp_path) -> str | None:
+    """`decide` on a cleanup command, with the engine's status stubbed."""
+    m = _mod()
+    run = tmp_path / "run-memory"
+    (run / "07_qa").mkdir(parents=True, exist_ok=True)
+    (run / f"DMA_Scoring_Workbook_{run.name}.xlsx").write_bytes(b"stub")
+    monkeypatch.setenv("DMA_RUN_ID", run.name)
+    monkeypatch.setenv("DMA_RUN_ROOT", str(run))
+    import sys as _sys
+    _sys.path.insert(0, str(PLUGIN / "scripts" / "hooks"))
+    import _runctx as ctx
+    memory, = ctx.engine("memory")
+    monkeypatch.setattr(memory, "status", lambda r, c=None: status)
+    return m.decide({"tool_name": "Bash", "tool_input": {"command": cmd}})
+
+
+CLEANUP = ("python3 -m engine.memory cleanup --run R --root /runs/R --apply")
+
+
+def test_cleanup_apply_is_denied_while_a_note_is_unconsolidated(monkeypatch, tmp_path):
+    why = _memory_cleanup(CLEANUP, {"unconsolidated": 3, "blocked": 0},
+                          monkeypatch, tmp_path)
+    assert why and "deletes the Drive backup" in why
+    assert "still NOTED" in why
+    assert "engine.memory consolidate" in why
+
+
+def test_cleanup_apply_is_denied_while_an_entry_is_blocked(monkeypatch, tmp_path):
+    why = _memory_cleanup(CLEANUP, {"unconsolidated": 0, "blocked": 2},
+                          monkeypatch, tmp_path)
+    assert why and "BLOCKED" in why
+
+
+def test_cleanup_apply_is_allowed_once_everything_is_consolidated(monkeypatch, tmp_path):
+    assert _memory_cleanup(CLEANUP, {"unconsolidated": 0, "blocked": 0},
+                           monkeypatch, tmp_path) is None
+
+
+def test_the_dry_run_and_the_status_are_never_denied(monkeypatch, tmp_path):
+    """`cleanup` without --apply is how a session learns whether the
+    conditions are met; denying it would deny the diagnosis."""
+    for cmd in ("python3 -m engine.memory cleanup --run R --root /runs/R",
+                "python3 -m engine.memory status --run R --root /runs/R"):
+        assert _memory_cleanup(cmd, {"unconsolidated": 9, "blocked": 9},
+                               monkeypatch, tmp_path) is None, cmd
+
+
+def test_a_status_that_cannot_be_read_allows_the_call(monkeypatch, tmp_path):
+    """Fail OPEN: the engine refuses this on its own, and a guard that denies
+    because it could not measure is a guard that stops the work."""
+    m = _mod()
+    monkeypatch.setenv("DMA_RUN_ROOT", str(tmp_path / "no-run-here"))
+    monkeypatch.delenv("DMA_RUN_ID", raising=False)
+    assert m.decide({"tool_name": "Bash", "tool_input": {"command": CLEANUP}}) is None
