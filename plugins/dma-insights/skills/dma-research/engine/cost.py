@@ -943,3 +943,79 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ── which grain a lane ACTUALLY used ─────────────────────────────────────
+#
+# `lane_fit` projects the capability-grain design and says a full run fits.
+# The projection is a property of the WORK; whether a lane took the grain it
+# was offered is a property of the RUN, and nothing measured it. A lane that
+# reads its packet's `capabilities[]` and fires one query across a
+# capability's sibling cells costs what the projection says; one that
+# ignores it and fires a separate query per cell costs 2.1x that and looks
+# identical in every report — until the round budget runs out and the
+# category is re-dispatched, which is the 2026-09-12 shape.
+#
+# THE MEASUREMENT IS FANOUT, not cells-per-capability. `append_search`
+# writes one ROW PER CELL and charges the ceiling once per distinct (query,
+# tool, facet): so rows-per-distinct-query is exactly "how many cells did
+# one search serve", and it is 1.0 for a lane that searched per cell however
+# its cells happen to be grouped. Counting distinct capabilities instead
+# would score the CATALOGUE's shape and call a per-cell lane disciplined.
+#
+# Measured from the Search_Log the lane itself wrote, never from what it
+# said it did.
+
+#: Below this many rows the ratio is noise, and calling it a design is the
+#: kind of measurement that gets quoted back as fact.
+MIN_SEARCHES_FOR_GRAIN = 6
+
+#: A capability holds 5.3 cells on average (686/129), so a lane using the
+#: grouping fans each query across several. 1.5 is deliberately short of
+#: that: the question is whether the lane used the grouping AT ALL.
+GRAIN_FANOUT_FLOOR = 1.5
+
+
+def grain_observed(wb, category: str | None = None) -> dict:
+    """How many cells one search served, measured from the Search_Log.
+
+    `ratio` is rows per distinct (query, tool, facet): 1.0 is a query per
+    cell — the design `lane_fit` projects at 7,546 turns — and anything
+    above it is the fanout the capability packet asks for. Abstains below
+    `MIN_SEARCHES_FOR_GRAIN` rather than calling two rows a design.
+    """
+    from .brief import capability_of
+    from .relay import normalize
+    want = str(category).upper() if category else None
+    triples: dict[tuple, set[str]] = {}
+    caps: set[str] = set()
+    rows = 0
+    for r in wb.rows("Search_Log"):
+        cell = str(r.get("SubCap_ID") or "").strip().upper()
+        if not cell or (want and not cell.startswith(want)):
+            continue
+        key = (normalize(r.get("Query")),
+               str(r.get("Tool") or "").strip().lower(),
+               str(r.get("Facet") or "").strip().lower())
+        triples.setdefault(key, set()).add(cell)
+        caps.add(capability_of(cell))
+        rows += 1
+    ratio = round(rows / len(triples), 3) if triples else None
+    thin = rows < MIN_SEARCHES_FOR_GRAIN or ratio is None
+    return {
+        "category": want,
+        "rows": rows,
+        "distinct_searches": len(triples),
+        "capabilities_touched": len(caps),
+        "ratio": ratio,
+        "grain": ("not_measured" if thin
+                  else "capability" if ratio >= GRAIN_FANOUT_FLOOR
+                  else "per_subcap"),
+        "why": (f"{rows} Search_Log row(s) — fewer than "
+                f"{MIN_SEARCHES_FOR_GRAIN}, too few to call a design"
+                if thin else
+                f"{rows} row(s) from {len(triples)} distinct search(es) across "
+                f"{len(caps)} capabilit{'y' if len(caps) == 1 else 'ies'} — "
+                f"{ratio} cell(s) per search against a floor of "
+                f"{GRAIN_FANOUT_FLOOR}"),
+    }

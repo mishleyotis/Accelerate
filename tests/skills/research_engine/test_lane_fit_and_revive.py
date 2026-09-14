@@ -197,3 +197,86 @@ def test_the_lanes_share_no_prompt_prefix_to_warm():
     assert difflib.SequenceMatcher(None, a, b).ratio() > 0.9, (
         "the manifests are nearly identical in content — which buys nothing, "
         "and that gap between similarity and shared PREFIX is the whole point")
+
+
+# ── the grain a lane ACTUALLY used ───────────────────────────────────────
+#
+# `lane_fit` says a full run fits AT CAPABILITY GRAIN. That projection is a
+# property of the WORK; whether the lane took the grouping it was offered is
+# a property of the RUN, and nothing measured it. A lane that ignores
+# `capabilities[]` and searches per cell costs 2.1x the projection and looks
+# identical in every report — until the round budget runs out and the
+# category is re-dispatched, which is the shape this whole change is about.
+
+def _searched(wb, pairs):
+    from engine import ledger as L
+    for cell, facet, query in pairs:
+        L.append_search(wb, subcap=cell, facet=facet, query=query,
+                        tool="web_search", hits=2, kept=1)
+
+
+def test_a_lane_that_fanned_its_searches_reads_as_capability_grain(tmp_path):
+    run = F.new_run(tmp_path, n=8)
+    wb = run.open()
+    cells = [c for c in wb.selected_subcaps()][:8]
+    from engine import ledger as L
+    for facet in ("works", "fails", "value"):
+        for q in ("vendor", "rollout"):
+            # ONE query, fanned across the capability's sibling cells — the
+            # shape `append_search(subcap=<sequence>)` exists for, charged
+            # once at the ceiling and written as a row per cell.
+            L.append_search(wb, subcap=cells, facet=facet,
+                            query=f'"Acme Credit Union" {facet} {q}',
+                            tool="web_search", hits=3, kept=2)
+    g = cost.grain_observed(wb)
+    assert g["grain"] == "capability", g
+    assert g["ratio"] == float(len(cells)), g
+    assert g["distinct_searches"] == 6 and g["rows"] == 6 * len(cells)
+
+
+def test_a_lane_that_searched_per_cell_says_so_rather_than_passing(tmp_path):
+    run = F.new_run(tmp_path, n=8)
+    wb = run.open()
+    _searched(wb, [(c, f, f'"Acme Credit Union" {c} {f}')
+                   for c in wb.selected_subcaps()[:4]
+                   for f in ("works", "fails")])
+    g = cost.grain_observed(wb)
+    assert g["grain"] == "per_subcap", g
+    assert g["ratio"] == 1.0, (
+        "one row per query is a query per cell, however the catalogue "
+        "happens to group those cells")
+    assert "per search" in g["why"]
+
+
+def test_too_few_searches_abstains_rather_than_calling_it_a_design(tmp_path):
+    """A ratio over two searches is noise, and a measurement that gets
+    quoted back as fact has to be able to say it does not know."""
+    run = F.new_run(tmp_path, n=4)
+    wb = run.open()
+    _searched(wb, [(wb.selected_subcaps()[0], "works", "one query")])
+    g = cost.grain_observed(wb)
+    assert g["grain"] == "not_measured" and "too few" in g["why"]
+
+
+def test_the_measurement_is_per_category_when_asked(tmp_path):
+    """Sixteen lanes make sixteen choices; a run-level average would let one
+    disciplined category vouch for fifteen that ignored the grouping — the
+    same mistake the stall counter made."""
+    run = F.new_run(tmp_path, n=8)
+    wb = run.open()
+    cells = wb.selected_subcaps()
+    cat = cells[0].split(".")[0]
+    _searched(wb, [(c, f, f'"Acme" {c} {f}') for c in cells[:4]
+                   for f in ("works", "fails", "value")])
+    g = cost.grain_observed(wb, cat)
+    assert g["category"] == cat and g["rows"] > 0
+    other = cost.grain_observed(wb, "P4C4")
+    assert other["rows"] == 0 and other["grain"] == "not_measured"
+
+
+def test_the_measurement_and_the_projection_group_cells_the_same_way(tmp_path):
+    """Two definitions of 'capability' drift in silence — the projection
+    would budget for one grouping and the measurement would score another."""
+    import inspect
+    assert "from .brief import capability_of" in inspect.getsource(cost.grain_observed)
+    assert "from .brief import capability_of" in inspect.getsource(cost.lane_fit)
