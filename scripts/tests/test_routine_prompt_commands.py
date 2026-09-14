@@ -186,16 +186,6 @@ def test_every_subcommand_a_routine_prompt_names_exists(section, script, sub,
         f"calls that an invalid choice: {combined.strip()[:300]}")
 
 
-def live_prompts() -> dict:
-    """The prompts a firing will actually execute.
-
-    § 2a-ii is a deleted routine's archived record. It was pinned to one
-    client and carried a version floor, and both are part of why it is
-    deleted — rewriting it would erase the lesson it exists to carry.
-    """
-    return {k: v for k, v in prompts().items() if not k.startswith("2a-ii")}
-
-
 def test_no_prompt_carries_a_version_literal():
     """Owner, 2026-08-23. A floor written as prose is never evaluated: the
     prompts said ">= 0.6.0" and ">= 0.8.0" while a container ran 0.2.0 with
@@ -463,7 +453,7 @@ if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
 
 
-# ── a live prompt may not check out a branch that is not the default ─────
+# ── no prompt may check out a branch that is not the default ─────────────
 #
 # Every routine prompt named `claude/dma-insights-onboarding-0ryrd0` until
 # 2026-08-30, which was correct while the build lived there and silently
@@ -474,6 +464,37 @@ if __name__ == "__main__":
 #
 # The branch a routine checks out is not a detail of its prompt. It decides
 # which code the firing IS.
+
+#: Every shape a branch pin is actually written in, in one place.
+#:
+#: It was two — `origin/<ref>` and `--branch <ref>` — and on 2026-09-14 a pin
+#: written as PROSE sat in ROUTINES.md saying "clone it to /home/user/
+#: Accelerate at branch main", against a repository whose default branch is
+#: not main. 478 tests read that file and all of them passed, because the
+#: sentence names no flag: `add_repo` takes its branch in English, so the
+#: instruction that provisions a container is the one form this guard could
+#: not see. Replaying the pre-fix file through the old pattern reproduces
+#: that green exactly.
+#:
+#: `checkout -B <ref>` was covered only by accident — the idiom is `git
+#: checkout -B x origin/x`, so the `origin/` half caught it, and a checkout
+#: without a remote half was invisible too.
+#:
+#: `branch: <ref>` is DELIBERATELY absent. It was tried, and it reads
+#: `branch: str` in a Python annotation and the `-` of a markdown bullet
+#: after "…on the default branch:" as branch names. No doc or script in this
+#: repository pins a branch that way, so it buys nothing and spends the only
+#: currency a guard has: a guard that cries wolf gets switched off.
+BRANCH_PIN = re.compile(
+    r"(?:--branch|checkout\s+-B|\bat branch|\bon branch)"
+    r"\s+([A-Za-z0-9][A-Za-z0-9._/-]*)"
+    r"|origin/([A-Za-z0-9][A-Za-z0-9._/-]*)")
+
+
+def branch_pins(text: str) -> set:
+    """Every branch this text tells a session to check out."""
+    return {m.group(1) or m.group(2) for m in BRANCH_PIN.finditer(text)}
+
 
 def default_branch() -> str:
     """The default branch, READ rather than asserted.
@@ -497,21 +518,33 @@ def default_branch() -> str:
     return m.group(1)
 
 
-def test_no_live_prompt_checks_out_a_branch_other_than_the_default():
+def test_no_prompt_checks_out_a_branch_other_than_the_default():
+    """EVERY prompt, not only the ones that still fire.
+
+    The other rules here are scoped to `live_prompts()` on purpose: holding a
+    retired routine to today's client rules or path names would force edits
+    to a historical record. A branch pin is not that kind of detail. § 2a-ii
+    is deleted from the routines UI and nothing fires it, and it is still the
+    text the next person writing a self-provisioning step copies from — which
+    is exactly how it carried `main` into 2026-09-14 unchallenged. A wrong
+    branch in a dead prompt is a live defect the moment anybody reuses it.
+    """
     want = default_branch()
-    bad = {}
-    for name, body in live_prompts().items():
-        for ref in re.findall(r"origin/([A-Za-z0-9._/-]+)", body):
-            if ref != want:
-                bad.setdefault(name, set()).add(ref)
-        for ref in re.findall(r"--branch\s+([A-Za-z0-9._/-]+)", body):
+    bad, checked = {}, 0
+    for name, body in prompts().items():
+        for ref in branch_pins(body):
+            checked += 1
             if ref != want:
                 bad.setdefault(name, set()).add(ref)
     assert not bad, (
-        f"live routine prompt(s) check out a branch that is not "
+        f"routine prompt(s) check out a branch that is not "
         f"{want!r} (bootstrap_session.sh's BRANCH default): { {k: sorted(v) for k, v in bad.items()} }. A "
         f"branch that is not the default stops moving the moment its work "
         f"merges, and the firing runs older code every day without failing")
+    assert checked, (
+        "this walk found no branch pin in any prompt at all — either the "
+        "prompts stopped naming one or BRANCH_PIN stopped matching; either "
+        "way this test is no longer guarding anything")
 
 
 def test_no_doc_fetches_a_script_from_a_branch_other_than_the_default():
@@ -550,3 +583,114 @@ def test_no_doc_fetches_a_script_from_a_branch_other_than_the_default():
         "this walk found no raw-content URL to check at all — either the docs "
         "stopped naming one or the pattern stopped matching; either way this "
         "test is no longer guarding anything")
+
+
+def test_no_doc_checks_out_a_branch_other_than_the_default():
+    """The same rule, one level out: every doc, not only the prompt fences.
+
+    `routines-archive/` holds a standalone copy of each routine's record, and
+    the environment-setup prose in ROUTINES.md sits outside every fence. Both
+    carry clone instructions, neither is a prompt, and the walk above cannot
+    see either. The raw-URL guard beside this one proves the shape of that
+    gap: it exists because a branch pin outside a fence went unread for weeks.
+    """
+    want = default_branch()
+    checked, bad = 0, {}
+    for doc in sorted((ROOT / "plugins" / "dma-insights" / "docs").rglob("*.md")):
+        for ref in branch_pins(doc.read_text(encoding="utf-8")):
+            checked += 1
+            if ref != want:
+                bad.setdefault(doc.relative_to(ROOT).as_posix(), set()).add(ref)
+    assert not bad, (
+        f"a doc tells a session to check out a branch that is not {want!r} "
+        f"(bootstrap_session.sh's BRANCH default): "
+        f"{ {k: sorted(v) for k, v in bad.items()} }. A stale checkout does "
+        f"not error — it runs, and it produces yesterday's answer")
+    assert checked, (
+        "this walk found no branch pin in any doc at all — either the docs "
+        "stopped naming one or BRANCH_PIN stopped matching; either way this "
+        "test is no longer guarding anything")
+
+
+#: The forms the guard above must be able to see, each written the way a
+#: prompt actually writes it. This list is the negative control: a pattern
+#: that quietly narrows passes every other test in this file, because a
+#: detector that finds nothing reports the same green as a clean tree.
+#: `at branch` is first because that is the one that was missing, measured.
+PIN_FORMS = [
+    "clone it to /home/user/Accelerate at branch {ref} as the tool instructs",
+    "the checkout is on branch {ref} before anything else runs",
+    "`git clone --branch {ref} https://github.com/mishleyotis/Accelerate`",
+    "`git fetch origin {ref} && git checkout -B {ref} origin/{ref}`",
+    "`git checkout -B {ref}` once the fetch lands",
+]
+
+
+@pytest.mark.parametrize("form", PIN_FORMS)
+def test_the_branch_guard_sees_every_form_a_pin_is_written_in(form):
+    """Plant a wrong branch in each form and require the detector to find it.
+
+    Proven against the real defect: replaying ROUTINES.md as it stood before
+    2026-09-14 — "…at branch main…" — through the old two-pattern guard
+    returns green, which is why the pin survived. This fails on any pattern
+    that cannot see one of these.
+    """
+    assert branch_pins(form.format(ref="main")) == {"main"}, (
+        f"BRANCH_PIN does not see a branch pinned like this: {form!r}. A form "
+        f"the guard cannot read is a branch nobody is checking")
+
+
+def test_the_branch_guard_does_not_fire_on_prose_about_a_code_branch():
+    """…and the floor on the other side: a guard that flags every sentence
+    with the word "branch" in it gets switched off. These three are real
+    text from the docs this walks."""
+    for benign in ("So that branch never ran, every stall fell through",
+                   "verified on the default branch:\n\n- `hooks.json`",
+                   "def contained(branch: str, target: str) -> bool:",
+                   "the current resolver tests cover that branch by mocking"):
+        assert not branch_pins(benign), (
+            f"BRANCH_PIN reads a branch pin into ordinary prose: {benign!r}")
+
+
+def test_no_script_fetches_the_repository_from_a_branch_other_than_the_default():
+    """The raw-URL rule, applied where it bites hardest: the scripts.
+
+    The walk above reads `.md` under `plugins/dma-insights/docs`. Two pins
+    live outside it and neither was ever checked: bootstrap_session.sh's own
+    header carries the copy-paste `curl` a fresh container runs BEFORE the
+    repository exists, and plugin_version.py holds the same URL as a constant.
+
+    That header is the worst place for a stale branch in this repository. It
+    fetches `bootstrap_session.sh`, and that copy pins its own BRANCH default
+    — so a wrong branch here checks out the wrong lineage AND re-supplies the
+    wrong instruction to the next container, with no step failing. The doc
+    guard beside this one exists because exactly that cascade ran for weeks.
+    """
+    want = default_branch()
+    raw = re.compile(
+        r"raw\.githubusercontent\.com/[^/\s]+/[^/\s]+/([A-Za-z0-9._/-]+?)/"
+        r"(?:plugins|scripts|apps|infra|packages)/")
+    roots = [ROOT / "plugins/dma-insights/scripts", ROOT / "scripts",
+             ROOT / "infra"]
+    checked, bad = 0, {}
+    for root in roots:
+        for f in sorted(list(root.rglob("*.py")) + list(root.rglob("*.sh"))):
+            if "/tests/" in f.as_posix():
+                continue
+            text = f.read_text(encoding="utf-8", errors="ignore")
+            for ref in set(raw.findall(text)) | branch_pins(text):
+                checked += 1
+                if ref != want:
+                    bad.setdefault(f.relative_to(ROOT).as_posix(),
+                                   set()).add(ref)
+    assert not bad, (
+        f"a script names a branch that is not {want!r} "
+        f"(bootstrap_session.sh's BRANCH default): "
+        f"{ {k: sorted(v) for k, v in bad.items()} }. A provisioning script "
+        f"that fetches from the wrong branch hands the wrong branch to every "
+        f"container it sets up")
+    assert checked, (
+        "this walk found no branch reference in any script at all — the "
+        "bootstrap header and plugin_version's setup URL both carry one, so "
+        "either they stopped or the patterns did; either way this test is no "
+        "longer guarding anything")
