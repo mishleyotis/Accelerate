@@ -51,13 +51,27 @@ python3 -m engine.pipeline run    --run $RUN --root $ROOT --max-wall-min 240 --l
 python3 -m engine.pipeline status --run $RUN --root $ROOT --watch
 ```
 
+**`run --step` is the conductor's mode, and it is the same run.** One
+research round, then `ROUND_COMPLETE` at exit 0, resumable, carrying
+`pending`: the relay batch files, the open categories, the stalled ones, the
+budget and rounds remaining, and `engine.brief gaps`. The conductor services
+each batch with one fresh in-process subagent — the only actor that inherits
+its connectors, because they bind once at session start and a headless child
+is a different session — and steps again. Plain `run` keeps looping by
+itself and is unchanged; Routines and the stress walk use it.
+
+A pending relay batch never stops the run. The ENRICHMENT gate records
+`PENDING_ORCHESTRATOR`, non-blocking, and spends none of the heal budget on
+it; it becomes a blocking FAIL only when a servicing subagent recorded the
+request BLOCKED, which means a connector refused it.
+
 | stage | done when | the driver runs |
 |---|---|---|
 | PREFLIGHT | the binding preflight is recorded on the run | (checked; `engine.cli start` does it, with a person) |
 | START | the workbook exists and is bound to the pinned templates | (checked) |
 | PRELIM | `engine.prelim state` reads COMPLETE | three lanes over `brief prelim` — conductor (PRELIM-only), technographic-scanner, enrichment-connector-specialist — then `prelim complete` |
 | KG | DQ_Bank carries rows (or a declared reason) | `engine.kg build` (fallback stated when no toolkits) |
-| RESEARCH | every category's last FLOORS gate is PASS | rounds: `brief batch` (`--with-handback` after round 1; a PASSED category is never re-dispatched) → sixteen researcher lanes → `challenge-batch` lanes → `floors_gate.run --require-synthesis` |
+| RESEARCH | every category's last FLOORS gate is PASS | rounds: `relay reconcile` → `brief batch` (`--with-handback` after round 1; a PASSED category is never re-dispatched) → sixteen researcher lanes → the floors gate with its challenge terms deferred → `challenge-batch` for the categories that CONVERGED → `floors_gate.run --require-synthesis` → harvest, `relay batch`, `memory backup` |
 | HANDOFF | `research_handoff.json` written; `assessment.research_ready` empty | `engine.handoff` (strict) |
 | SCORING | the SCORING gate is PASS | `assessment open` → rounds: four scorer lanes (`scoring-batch`), the solutions lane (`--solutions`), the critic (`--critic`, who also records the rollup headline) → `assessment rollup` → `assessment gate` |
 | INGEST_A | `Run_Metadata.connector_run_id` set | `assemble checkpoint --stage SCORING_PASS --push`, then poll `list_pending_runs` until the scan ingests version A |

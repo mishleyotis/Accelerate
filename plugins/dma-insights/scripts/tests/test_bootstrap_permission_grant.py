@@ -323,6 +323,25 @@ def _servers(grants) -> set:
     return {g[len("mcp__"):g.rindex("__")] for g in grants}
 
 
+def _contract_servers() -> list:
+    """The enrichment set, DERIVED from `connector_contract.contract()` rather
+    than typed here (2026-09-14 — a second copy of the list is a second
+    answer). REQUIRED and REQUIRED_ANY families always; an OPTIONAL family
+    only when some agent manifest still holds it (Quartr is declared and not
+    wired, so no grant is owed for it)."""
+    import sys as _sys
+    _sys.path.insert(0, str(HERE.parent))
+    import connector_contract as cc
+    c = cc.contract()
+    agents_text = "\n".join(
+        p.read_text(encoding="utf-8")[:8000]
+        for p in (HERE.parent.parent / "agents").rglob("*.md"))
+    fams = list(c["required"]) + [n for g in c["required_any"] for n in g]
+    fams += [f for f in c["optional"]
+             if any(t in agents_text for t in c["tools"][f])]
+    return sorted({c["tools"][f][0].split("__")[1] for f in fams})
+
+
 def test_every_enrichment_connector_the_docs_require_is_granted():
     """CONNECTORS.md is the authority on which connectors the routines need;
     a grant list that does not cover it is a firing that stops on a prompt.
@@ -331,7 +350,8 @@ def test_every_enrichment_connector_the_docs_require_is_granted():
     granted by exact read tool name instead, which is a narrower grant and a
     better one."""
     grants = derived_grants()
-    required = ["Clay", "Exa", "Tavily", "Vibe_Prospecting", "Indeed"]
+    required = _contract_servers()
+    assert {"Exa", "Tavily"} <= set(required), "floor: the contract still names the web pair"
     missing = [n for n in required if n not in _servers(grants)]
     assert not missing, (
         f"CONNECTORS.md names these as the enrichment set and they are not "

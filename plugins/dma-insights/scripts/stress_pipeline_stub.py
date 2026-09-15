@@ -12,12 +12,20 @@ engine's own fixtures, a connector that ingests when polled, a shipper that
 passes unless told otherwise). What it proves is the SEQUENCE and the
 refusals a live run meets at the command line:
 
+  0  a run whose connector baseline was never recorded is BLOCKED at
+     PREFLIGHT, before a single lane, and plans again once it is recorded
   1  `env` and `plan` say what is missing before anything is dispatched
+  0b a run whose baseline is SHORT is not blocked: it runs DEGRADED, its
+     cells close at REDUCED rigour, and the ENRICHMENT gate discloses
   2  a lane that produces nothing twice is retried and the stage still PASSES
+  2b the DOLLAR ceiling stops a run; a re-run is refused before it dispatches
+     again, the watchdog will not revive it, and raising --max-usd continues
+  2c a category that advances nothing for two rounds stops being dispatched
   3  an ingest that never arrives is a loud FAIL at INGEST_A, with the
      checkpoint already pushed — and the run resumes THERE, not at PRELIM
   4  a page verdict FAIL re-dispatches only that page, with the reasons
-  5  `--max-wall-min` stops cleanly between stages (exit 0) and resumes
+  5  `--max-wall-min` stops cleanly between stages (exit 0) and resumes,
+     and its DEFAULT is the four hours the prose has always claimed
   6  a refused promote is a FAIL at PROMOTE; the next run promotes
   7  a second run redoes nothing; `cost report` reads every stage's clock
   8  a v6 workbook in flight opens under the v7 engine and continues
@@ -78,6 +86,56 @@ def jout(r):
         return {}
 
 
+def side_run(work: Path, name: str, env: dict, *, baseline: list[str] | None,
+             cells: int = 4) -> tuple[str, Path, list[str]]:
+    """A second run of its own, started through the real `engine.cli start`
+    and narrowed to `cells` P1C1 cells.
+
+    Steps 0b, 2b and 2c each need a run in a state the main walk's run has
+    already left behind — a short baseline, an exhausted budget, a stalled
+    category. Reusing the main run would make the walk's order load-bearing
+    in a way that hides which step actually failed.
+    """
+    from stress_run_lifecycle import preflight_doc                # noqa: E402
+    from engine import runstate                                   # noqa: E402
+    import connector_contract as cc                               # noqa: E402
+    import openpyxl                                               # noqa: E402
+    # TWO capitalised words on purpose: `quality.is_fluent_but_empty` counts a
+    # proper noun as `[A-Z][a-z]+(\s+[A-Z][a-z]+)+`, and the absence prose the
+    # engine composes quotes the entity name. "Stress degraded CU" carries no
+    # anchor the checker can see, so every declared absence would fail the
+    # `boilerplate` term — a property of the fixture's NAME, which is the
+    # least interesting reason for a walk to go red.
+    entity = f"Stress {name.title()} Credit Union"
+    eid, run_id = f"stress-{name}", f"R-STRESS-{name.upper()}"
+    pf = work / f"preflight_{name}.json"
+    pf.write_text(json.dumps(preflight_doc(entity, eid)))
+    root = work / f"run_{name}"
+    base = ["--run", run_id, "--root", str(root)]
+    r = run("engine.cli", "start", *base, "--entity", entity, "--entity-id", eid,
+            "--reference-date", "2026-08-29", "--preflight", str(pf), "--no-push",
+            "--folder-root", str(work / f"client_{name}"), env=env)
+    if r.returncode != 0:
+        check(f"[{name}] engine.cli start", False, (r.stderr or r.stdout)[-300:])
+        return run_id, root, base
+    wb = runstate.locate(run_id, root).open()
+    keep = [c for c in wb.selected_subcaps() if c.startswith("P1C1")][:cells]
+    x = openpyxl.load_workbook(wb.path)
+    for sheet in ("P1_Subcap_Scoring", "P2_Subcap_Scoring",
+                  "P3_Subcap_Scoring", "P4_Subcap_Scoring"):
+        ws = x[sheet]
+        for row in range(ws.max_row, 1, -1):
+            if str(ws.cell(row=row, column=1).value or "") not in keep:
+                ws.delete_rows(row)
+    for rrow in x["Run_Metadata"].iter_rows(min_row=2):
+        if rrow[0].value == "subcaps_selected":
+            rrow[1].value = len(keep)
+    x.save(wb.path)
+    if baseline is not None:
+        cc.write_baseline(baseline, str(root))
+    return run_id, root, base
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--workdir")
@@ -120,6 +178,68 @@ def main(argv=None) -> int:
         if rrow[0].value == "subcaps_selected":
             rrow[1].value = len(cells)
     x.save(wb.path)
+    # ── 0 · the connector gate, both ways ────────────────────────────────
+    #
+    # The driver refuses to dispatch a run whose connector baseline was
+    # never recorded (2026-09-14): without one, nothing can say whether an
+    # empty cell can be enriched or honestly declared absent, so the run
+    # re-dispatches until its ceiling. The walk asserts the refusal FIRST —
+    # a gate nobody proves refusing is a gate nobody has tested — and then
+    # records the baseline the way a session that holds the tools does.
+    print("STEP 0 · the connector gate")
+    base = [*base]
+    r = run("engine.pipeline", "run", *base, "--dispatcher", "stub", "--json",
+            "--until", "RESEARCH", "--no-push", expect=1, env=env)
+    d = jout(r)
+    check("a run with no connector baseline is BLOCKED before any lane",
+          d.get("outcome") == "BLOCKED" and d.get("stage") == "PREFLIGHT"
+          and "baseline" in (d.get("reason") or ""), json.dumps(d)[:300])
+    check("and it dispatched nothing", not (root / "briefs").exists())
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import connector_contract as cc                              # noqa: E402
+    cc.write_baseline(["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+                       "mcp__Clay__find-and-enrich-company"], str(root))
+    r = run("engine.pipeline", "plan", *base)
+    check("with the baseline recorded it plans again",
+          jout(r).get("next") is not None, r.stdout[-200:])
+
+    # ── 0b · a SHORT baseline is a degraded run, not a stop ──────────────
+    #
+    # The other half of the gate, and the half the 2026-09-12 run needed. A
+    # container that PROVABLY holds no enrichment connector must still be
+    # able to close a cell — otherwise no floors gate can pass and the run
+    # re-dispatches until its ceiling. The escape is verified against the
+    # run's own baseline, so it cannot be reached by a lane that simply did
+    # not ask.
+    print("STEP 0b · a short baseline runs DEGRADED")
+    _, droot, dbase = side_run(work, "degraded", env,
+                               baseline=["mcp__Google_Drive__search_files"])
+    r = run("engine.pipeline", "run", *dbase, "--dispatcher", "stub", "--json",
+            "--until", "RESEARCH", "--no-push", "--ingest-timeout-s", "0",
+            "--folder-root", str(work / "client_degraded"),
+            env={**env, "DMA_STUB_WEB_ONLY": "1"})
+    d = jout(r)
+    dst = json.loads((droot / "07_qa" / "pipeline_state.json").read_text()) \
+        if (droot / "07_qa" / "pipeline_state.json").exists() else {}
+    check("a short baseline does not block the run",
+          r.returncode == 0 and d.get("outcome") == "STOPPED_AT_UNTIL"
+          and dst.get("stages", {}).get("RESEARCH", {}).get("verdict") == "PASS",
+          json.dumps(d)[:400])
+    check("and the degradation is RECORDED, not merely survived",
+          bool(dst.get("enrichment_degraded")), json.dumps(dst.get("enrichment_degraded"))[:200])
+    from engine import runstate as _rs                            # noqa: E402
+    dwb = _rs.locate("R-STRESS-DEGRADED", droot).open()
+    prov = [x for x in dwb.rows("Provenance") if str(x.get("Step") or "") == "absence"]
+    check("every cell closed at REDUCED rigour, with the reason on the row",
+          bool(prov) and all("REDUCED RIGOUR" in str(x.get("Detail") or "").upper()
+                             for x in prov),
+          f"{len(prov)} absence row(s)")
+    erows = [g for g in dwb.rows("Gate_Log") if str(g.get("Gate")) == "ENRICHMENT"]
+    check("the ENRICHMENT gate discloses rather than blocks",
+          bool(erows) and not any(str(g.get("Blocking")).lower() in ("true", "1", "yes")
+                                  for g in erows),
+          str([(g.get("Verdict"), g.get("Blocking")) for g in erows])[:200])
+
     stub = {"DMA_STUB_STATE": str(work / "stub_connector.json"), **env}
     common = [*base, "--dispatcher", "stub", "--no-push", "--folder-root", str(work / "client_out"),
               "--json", "--ingest-timeout-s", "0"]
@@ -152,6 +272,73 @@ def main(argv=None) -> int:
     check("the stage rows carry wall clock in Gate_Log",
           any(str(g["Gate"]) == "STAGE_RESEARCH" and "elapsed" in str(g["Detail"])
               for g in wb.rows("Gate_Log")))
+
+    # ── 2b · the DOLLAR ceiling, and what a re-run is allowed to do ──────
+    #
+    # The 2026-09-12 run spent $96.65 against a $20 budget. Three things had
+    # to be true for that, and this step asserts all three are now false: the
+    # ceiling is read from real spend, the spend is REMEMBERED across
+    # processes, and the watchdog does not treat a money stop as work it may
+    # resume.
+    print("STEP 2b · the dollar ceiling")
+    _, broot, bbase = side_run(work, "budget", env,
+                               baseline=["mcp__Exa__web_search_exa",
+                                         "mcp__Tavily__tavily_search",
+                                         "mcp__Clay__find-and-enrich-company"])
+    bcommon = [*bbase, "--dispatcher", "stub", "--no-push", "--json",
+               "--folder-root", str(work / "client_budget"), "--ingest-timeout-s", "0"]
+    benv = {**env, "DMA_STUB_USD_PER_LANE": "9.00", "DMA_STUB_TURNS_PER_LANE": "40",
+            "DMA_STUB_STATE": str(work / "stub_budget.json")}
+    r = run("engine.pipeline", "run", *bcommon, "--max-usd", "5", env=benv, expect=1)
+    d = jout(r)
+    check("the run STOPS on the dollar ceiling, exit 1",
+          r.returncode == 1 and d.get("outcome") == "STOPPED_BUDGET", json.dumps(d)[:400])
+    briefs_before = len(list((broot / "briefs").rglob("*.md"))) if (broot / "briefs").exists() else 0
+    r = run("engine.pipeline", "run", *bcommon, "--max-usd", "5", env=benv, expect=1)
+    d2 = jout(r)
+    briefs_after = len(list((broot / "briefs").rglob("*.md"))) if (broot / "briefs").exists() else 0
+    check("a re-run is refused BEFORE it dispatches again — no second budget",
+          d2.get("outcome") == "STOPPED_BUDGET" and briefs_after == briefs_before,
+          f"{briefs_before} -> {briefs_after} briefs; {json.dumps(d2)[:250]}")
+    r = run("engine.watchdog", "--root", str(broot), "--revive", "--dry-run", "--json",
+            env=env, expect=None)
+    w = jout(r)
+    # The sweep walks every run under the root, so the assertion has to be
+    # about THIS run's row rather than about the sweep being empty.
+    mine = [x for x in (w.get("revived") or [])
+            if isinstance(x, dict) and x.get("run_id") == "R-STRESS-BUDGET"]
+    check("the watchdog calls it AT_USD_CEILING and will not revive it",
+          len(mine) == 1 and mine[0].get("state") == "AT_USD_CEILING"
+          and mine[0].get("revived") is False and not mine[0].get("would_run"),
+          json.dumps(mine)[:400])
+    check("and it names the person's decision rather than a next dispatch",
+          bool(mine) and "--max-usd" in str(mine[0].get("detail") or ""),
+          str(mine[0].get("detail"))[:200] if mine else "no row")
+    r = run("engine.pipeline", "run", *bcommon, "--max-usd", "100",
+            "--until", "RESEARCH", env=benv)
+    d3 = jout(r)
+    check("raising the ceiling is how it continues, and that is a person's call",
+          r.returncode == 0 and d3.get("outcome") in ("STOPPED_AT_UNTIL", "COMPLETE"),
+          json.dumps(d3)[:300])
+
+    # ── 2c · a category that advances nothing stops being dispatched ─────
+    print("STEP 2c · the per-category stall")
+    _, sroot, sbase = side_run(work, "stall", env,
+                               baseline=["mcp__Exa__web_search_exa",
+                                         "mcp__Tavily__tavily_search",
+                                         "mcp__Clay__find-and-enrich-company"])
+    r = run("engine.pipeline", "run", *sbase, "--dispatcher", "stub", "--no-push",
+            "--json", "--until", "RESEARCH", "--stall-rounds", "2",
+            "--folder-root", str(work / "client_stall"), "--ingest-timeout-s", "0",
+            env={**env, "DMA_STUB_OPEN_CELLS": "research-p1c1-producer:4",
+                 "DMA_STUB_STATE": str(work / "stub_stall.json")}, expect=1)
+    d = jout(r)
+    check("a lane that advances nothing ends the stage rather than looping",
+          d.get("outcome") == "FAILED" and "advanc" in (d.get("reason") or "").lower(),
+          json.dumps(d)[:400])
+    sbriefs = sorted((sroot / "briefs").glob("research_r*")) if (sroot / "briefs").exists() else []
+    check("and it was dispatched three times at most, not ten",
+          len(sbriefs) <= 3, f"{len(sbriefs)} research round(s) of briefs")
 
     # ── 3 · an ingest that never arrives ─────────────────────────────────
     print("STEP 3 · ingest timeout, resume at INGEST_A")
@@ -189,6 +376,17 @@ def main(argv=None) -> int:
     check("a zero wall clock stops cleanly (exit 0) before the next stage",
           r.returncode == 0 and d.get("outcome") == "STOPPED_WALL_CLOCK" and d.get("stage") == "PACKAGE",
           json.dumps(d)[:300])
+
+    # ── 5b · the four-hour cap is a DEFAULT, not a flag to remember ──────
+    #
+    # It lived in prose only. A cap nobody passes is a cap nobody has.
+    print("STEP 5b · the wall clock default")
+    from engine import pipeline as _P                             # noqa: E402
+    check("--max-wall-min defaults to 240 minutes",
+          _P.Options.max_wall_min == 240.0, str(_P.Options.max_wall_min))
+    r = run("engine.pipeline", "run", "--help", expect=None)
+    check("and the command line says so",
+          "240" in r.stdout and "--max-wall-min" in r.stdout, r.stdout[-200:])
 
     # ── 6 · a refused promote ────────────────────────────────────────────
     print("STEP 6 · promote refused, then promoted")

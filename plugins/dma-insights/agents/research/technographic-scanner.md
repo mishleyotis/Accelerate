@@ -6,7 +6,7 @@ effort: medium
 maxTurns: 200
 skills:
   - dma-research
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Indeed__search_jobs, mcp__Indeed__get_job_details, mcp__Indeed__get_company_data, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-company-data-points, mcp__Indeed__search_jobs, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -110,9 +110,12 @@ its reason — which is a finding, and a good one.
 
 ### Everything else corroborates
 
-Indeed (`mcp__Indeed__search_jobs`, `get_job_details`, `get_company_data`),
-Exa, Tavily and the web tools are how a broker row becomes something
-stronger than a broker row. That is their job here; they are not the spine.
+Indeed (`mcp__Indeed__search_jobs` — the postings themselves are the
+signal; you hold no details or company call) and the web tools (WebSearch,
+WebFetch) are how a broker row becomes something stronger than a broker row.
+Exa and Tavily you do not hold: emit those corroboration queries as
+`search_requests` and the conductor services them. That is their job here;
+they are not the spine.
 
 ## Every row says WHO saw it
 
@@ -165,8 +168,11 @@ the 2025 annual report", not "detected".
 ## When a gap needs something you cannot reach
 
 **A grant is not availability.** Your frontmatter allows Vibe Prospecting,
-Clay, Indeed, Exa, Tavily, Drive and the web tools; which of them actually
-answer depends on what the session attached. Establish your reachable set at
+Clay's company pass (`find-and-enrich-company`, `get-task-context`,
+`add-company-data-points`), Indeed `search_jobs` and the web tools; Exa,
+Tavily and Drive are the conductor's, reached through `search_requests` and
+`drive_fetch.py`. Which of your own actually answer depends on what the
+session attached. Establish your reachable set at
 the start of the run — try each contracted source once — and record every
 unreachable one as NOT_RUN **with the reason**, exactly as the worker's own
 enrichment module does for Clay and Explorium. A charter that assumes a

@@ -306,6 +306,94 @@ def test_writing_every_section_of_both_reports_through_the_writer_renders(tmp_pa
         assert Path(out["path"] if isinstance(out, dict) else out).exists()
 
 
+# ── the packet is a CONTRACT, and a contract does not move with the checkout ──
+#
+# `brief.report_batch` ended `_bound(packet, "sections")`, which halves the
+# named list to a floor of 3 whenever the packet crosses the dispatch
+# ceiling. What decided the crossing was PATH LENGTH: the packet carries six
+# absolute template paths and four absolute run-root paths, so one packet
+# measured 6,081 characters at `/home/user/Accelerate` and 6,413 at
+# `/home/runner/work/Accelerate/Accelerate`, against a ceiling of 6,400.
+#
+# Thirteen characters of checkout path decided whether the assessment
+# producer was told its report has a pillar section — it sits at index 4 and
+# does not survive the second halving. Measured 2026-09-14: green on a
+# developer's machine, red in CI, same commit, same code.
+
+def _assessment_packet(tmp_path):
+    import json
+    from engine import brief
+    from fixtures import researched_run
+    run, wb, cells, ev = researched_run(tmp_path)
+    out = brief.report_batch(wb, run=run, out_dir=tmp_path / "rp")
+    pk = next(json.loads(Path(b["prompt_file"]).with_suffix(".json").read_text())
+              for b in out["briefs"]
+              if json.loads(Path(b["prompt_file"]).with_suffix(".json")
+                            .read_text())["agent"] == "report-assessment-producer")
+    return pk
+
+
+def test_every_section_of_the_spec_reaches_the_producer(tmp_path):
+    """The producer writes every section or the narrative gate refuses the
+    report. A packet that ships some of them is not a smaller brief, it is a
+    report that cannot pass."""
+    pk = _assessment_packet(tmp_path)
+    spec = RS.SPECS["assessment"]
+    assert [s["id"] for s in pk["sections"]] == [s.id for s in spec.sections]
+    kinds = [s["kind"] for s in pk["sections"]]
+    assert "pillar" in kinds and "recommendation" in kinds, kinds
+    pillar = next(s for s in pk["sections"] if s["kind"] == "pillar")
+    assert pillar["cards_min"] >= 1
+
+
+def test_what_the_producer_is_told_does_not_move_with_the_checkout_path(tmp_path):
+    """THE CI REPRODUCTION, as a test. The packet grows with the length of
+    the paths it carries — that is honest — but what it CONTAINS must not,
+    or the same commit briefs two different reports on two machines."""
+    import json
+    from engine import brief
+    from fixtures import researched_run
+
+    def sections_at(root: Path):
+        root.mkdir(parents=True, exist_ok=True)
+        run, wb, cells, ev = researched_run(root)
+        out = brief.report_batch(wb, run=run, out_dir=root / "rp")
+        pk = json.loads(Path(out["briefs"][1]["prompt_file"])
+                        .with_suffix(".json").read_text())
+        return [(s["id"], s["kind"]) for s in pk["sections"]], pk["packet_chars"]
+
+    short, n_short = sections_at(tmp_path / "s")
+    # ~90 characters of extra path, more than the 18 a CI checkout adds.
+    deep, n_deep = sections_at(tmp_path / ("d" * 45) / ("e" * 45))
+    assert short == deep, (
+        "the section list changed with the run root — a packet whose content "
+        "depends on where the repository sits is not a contract")
+    assert n_deep > n_short, "the measure is still honest about the paths"
+
+
+def test_the_report_packet_has_headroom_for_a_longer_checkout(tmp_path):
+    """The ceiling is sized to hold the whole spec, not to sit 13 characters
+    from halving it."""
+    from engine import brief
+    pk = _assessment_packet(tmp_path)
+    assert pk["packet_ceiling"] == brief.REPORT_CHAR_CEILING
+    assert pk["packet_chars"] < pk["packet_ceiling"], pk["packet_chars"]
+    assert pk["packet_ceiling"] - pk["packet_chars"] > 500, (
+        "less than 500 characters of margin is the state that made CI and a "
+        "laptop disagree; the elastic list is `rules`, never `sections`")
+    assert not pk.get("trimmed"), pk.get("trimmed")
+
+
+def test_sections_are_not_the_list_the_bounder_may_drop():
+    """Stated at the call site, so nobody restores the old argument."""
+    import inspect
+    from engine import brief
+    src = inspect.getsource(brief.report_batch)
+    assert '"rules", ceiling=REPORT_CHAR_CEILING' in src
+    assert '}, "sections")' not in src, (
+        "sections are the report's contract — trim advice, never the contract")
+
+
 if __name__ == "__main__":
     import sys
     sys.exit(pytest.main([__file__, "-q"]))

@@ -316,14 +316,30 @@ def test_every_registered_hook_script_exists():
     assert seen >= 8, f"only {seen} hook commands checked — extraction broke"
 
 
+def _bash_wrapper(script: str) -> str:
+    """The PreToolUse `Bash` wrapper that runs a NAMED handler.
+
+    These two tests used `bash[0]["hooks"][0]`, which made them assert the
+    ORDER of the chain as a side effect of asserting the wrapper's shape. A
+    hook added ahead of the credential guard (2026-09-14: guard_driver_lock)
+    then failed them for a reason neither test is about. The handler is
+    chosen by name now; the order is somebody else's assertion to make.
+    """
+    cfg = json.loads(HOOKS_JSON.read_text())
+    for g in cfg["hooks"]["PreToolUse"]:
+        if g.get("matcher") != "Bash":
+            continue
+        for h in g["hooks"]:
+            if script in h["command"]:
+                return h["command"]
+    raise AssertionError(f"{script} is not registered on PreToolUse/Bash")
+
+
 def test_a_missing_handler_allows_rather_than_blocking():
     """The other half of the same lesson. Shipping is enforced above; this
     pins what happens if it ever fails anyway — the session must keep its
     Bash tool and be TOLD, not silently lose every command."""
-    cfg = json.loads(HOOKS_JSON.read_text())
-    bash = [g for g in cfg["hooks"]["PreToolUse"] if g.get("matcher") == "Bash"]
-    assert bash, "no Bash PreToolUse hook registered"
-    cmd = bash[0]["hooks"][0]["command"]
+    cmd = _bash_wrapper("deny_credential_ops.py")
     r = subprocess.run(["sh", "-c", cmd], input=b'{"tool_name":"Bash"}',
                        capture_output=True,
                        env={**os.environ,
@@ -337,9 +353,7 @@ def test_a_present_handler_can_still_deny():
     """The guard must keep guarding. `a && b || c` would have swallowed a
     real deny, because a deny exits non-zero; the wrapper uses an explicit
     if and passes the handler's exit through with exec."""
-    cfg = json.loads(HOOKS_JSON.read_text())
-    bash = [g for g in cfg["hooks"]["PreToolUse"] if g.get("matcher") == "Bash"]
-    cmd = bash[0]["hooks"][0]["command"]
+    cmd = _bash_wrapper("deny_credential_ops.py")
     payload = json.dumps({"tool_name": "Bash", "tool_input": {"command":
         "git push https://x:ghp_" + "A" * 36 + "@github.com/a/b"}}).encode()
     r = subprocess.run(["sh", "-c", cmd], input=payload, capture_output=True,

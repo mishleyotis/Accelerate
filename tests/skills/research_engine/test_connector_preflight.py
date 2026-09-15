@@ -110,3 +110,43 @@ def test_the_run_path_actually_calls_the_preflight():
         assert "connector_contract.py" in text, f"{name} must invoke the preflight"
         assert "--strict" in text, f"{name} must pass --strict or the gate is not a gate"
         assert "baseline --tools -" in text, f"{name} must record the baseline"
+
+
+def test_the_command_writes_the_baseline_before_it_heals():
+    """ORDER, not merely presence. `doctor.py --heal` runs a `connector
+    contract` row that READS the baseline, and the command's own rule is
+    "anything red after the heal is a provisioning defect: stop". With the
+    heal first, that row is UNVERIFIED for a reason the operator created two
+    paragraphs later, and the instruction stops a run that had nothing wrong
+    with it. The baseline is the first thing written because everything after
+    it reads it."""
+    cmd = (PLUGIN / "commands" / "run-assessment.md").read_text()
+    assert cmd.index("baseline --tools -") < cmd.index("doctor.py"), (
+        "write the baseline before the check that reads it")
+
+
+def test_the_command_states_the_ceilings_the_driver_now_enforces():
+    """The dispatch line passed none of them and the prose named none, so an
+    operator reading this file could not have known a run had a dollar
+    ceiling at all — which is how one reached $96.65 against $20."""
+    cmd = (PLUGIN / "commands" / "run-assessment.md").read_text()
+    for flag in ("--max-usd", "--max-rounds", "--stall-rounds",
+                 "--max-wall-min", "--enrichment-heals"):
+        assert flag in cmd, f"{flag} is enforced now; the command must name it"
+    assert "STOPPED_BUDGET" in cmd, (
+        "the one outcome a person must act on by name")
+    assert "REFUSES" in cmd and "second budget" in cmd, (
+        "a re-run must not read as the way to continue past the ceiling")
+
+
+def test_a_short_baseline_reads_as_degraded_rather_than_a_stop():
+    """The command told the operator to stop on a red connector row. The
+    engine's policy is the opposite and always was the better one: a short
+    baseline is a measured, disclosed limit the run proceeds under, because
+    refusing to start closes nothing either. Two statements of one policy
+    drift; this pins the prose to the engine's actual branch."""
+    cmd = (PLUGIN / "commands" / "run-assessment.md").read_text()
+    assert "DEGRADED" in cmd and "--enrichment-unavailable" in cmd
+    assert "This is not a stop." in cmd
+    assert "REFUSES** at PREFLIGHT" in cmd, (
+        "and the case that IS a refusal must be named as the other one")

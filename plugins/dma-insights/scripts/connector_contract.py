@@ -18,6 +18,15 @@ module reads THAT, refuses to require a family it does not define, and
 hands every caller the same answer: the doctor, `bootstrap_session.sh`, the
 Routine prompts and the tests.
 
+WHOSE TOOLS ARE CHECKED (2026-09-14). The caller is the CONDUCTOR's
+preflight. Connectors are held and called by the orchestrator tier —
+`research-conductor` and the two enrichment specialists — which services
+the `search_requests` the research lanes and producers emit; a lane holds
+no connector at all. So the tool names this contract judges are the
+conductor's session's, written once to the run's baseline before the first
+dispatch, and `REQUIRED` here must be a subset of what the conductor's own
+manifest grants (a test pins that).
+
 WHAT A SCRIPT CANNOT DO, and why the verdict is split. A session's bound
 MCP tools live in the model's context, not on this disk. No subprocess can
 enumerate them — `claude plugin list` proves the INSTALL, the doctor's
@@ -72,8 +81,10 @@ REQUIRED_ANY: tuple[tuple[str, ...], ...] = (("explorium", "clay"),)
 
 #: Present-if-attached. Their absence is recorded per facet as NOT_RUN with
 #: the reason (the enrichment ledger's own vocabulary) and never silently
-#: becomes a thin result.
-OPTIONAL: tuple[str, ...] = ("indeed", "quartr", "drive")
+#: becomes a thin result. `drive` left 2026-09-14: the client folder lands
+#: through `drive_fetch.py` over Bash and no agent holds a Drive tool, so a
+#: session's Drive binding is not a fact this contract can act on.
+OPTIONAL: tuple[str, ...] = ("indeed", "quartr")
 
 
 class ContractBroken(RuntimeError):

@@ -78,6 +78,16 @@ STAGE_COMMANDS = re.compile(
 
 MARKER = "stage_advance.json"
 
+#: `engine.pipeline run --step` finishing a research round. It is matched
+#: SEPARATELY from STAGE_COMMANDS because a ROUND_COMPLETE carries a `pending`
+#: payload nothing else does, and a checklist is the only form a conductor can
+#: act on: a round hands back a relay batch nobody dispatched, gap classes
+#: nobody correlated, and a budget nobody counted.
+ROUND_COMMAND = re.compile(r"engine\.pipeline\s+run\b")
+
+#: Who drains a relay batch. The lanes hold no connector; this actor does.
+DRAIN_AGENT = "enrichment-web-specialist"
+
 
 def _engine():
     """Import the research engine from the plugin this hook ships in."""
@@ -245,12 +255,218 @@ def _record_announcement(row: dict) -> None:
         pass
 
 
+def _response_text(event: dict) -> str:
+    """Whatever text the tool_response carries, flattened."""
+    def flat(v):
+        if isinstance(v, str):
+            return v
+        if isinstance(v, dict):
+            for k in ("content", "text", "result", "output", "stdout"):
+                if k in v:
+                    return flat(v[k])
+            return json.dumps(v, default=str)
+        if isinstance(v, list):
+            return "\n".join(flat(i) for i in v if i is not None)
+        return "" if v is None else str(v)
+    return flat(event.get("tool_response"))
+
+
+def _pending_from(text: str) -> dict | None:
+    """The `pending` payload a `--json` round printed, if it printed one.
+
+    WITHOUT `--json` the driver prints one line and the payload never reaches
+    the transcript, so this returns None and the caller RECOMPUTES from the
+    substrate. Both paths must work: the conductor's own command is the one
+    thing this hook cannot choose.
+    """
+    if not text or '"pending"' not in text:
+        return None
+    start = text.find("{")
+    while start >= 0:
+        try:
+            doc = json.loads(text[start:])
+        except ValueError:
+            start = text.find("{", start + 1)
+            continue
+        if isinstance(doc, dict) and isinstance(doc.get("pending"), dict):
+            return doc["pending"]
+        return None
+    return None
+
+
+def _ctx():
+    here = str(HERE)
+    if here not in sys.path:
+        sys.path.insert(0, here)
+    import _runctx                                       # noqa: PLC0415
+    return _runctx
+
+
+def _recomputed_pending() -> dict:
+    """`pending`, read from the run when the driver did not print it."""
+    out = {"relay_batches": [], "open_categories": [], "stalled": [],
+           "budget": {}, "rounds_remaining": None, "gaps": None}
+    try:
+        ctx = _ctx()
+        run = ctx.locate()
+    except Exception:                                      # noqa: BLE001
+        return out
+    if run is None:
+        return out
+    state = ctx.pipeline_state(run)
+    out["relay_batches"] = [str(p) for p in (state.get("relay_batches") or [])]
+    b = ctx.budget(run, state)
+    out["budget"] = {"spent": b["spent"], "ceiling": b["ceiling"],
+                     "remaining": b["remaining"]}
+    out["rounds_remaining"] = ctx.rounds(run, state)["remaining"]
+    try:
+        brief, = ctx.engine("brief")
+        out["gaps"] = brief.gaps(run.open(), run)
+    except Exception:                                      # noqa: BLE001
+        out["gaps"] = None
+    return out
+
+
+def _gap_lines(gaps: dict) -> list[str]:
+    """One line per gap class per category, each with the command that
+    closes it. A gap named without its command is a gap nobody acts on."""
+    lines = []
+    cats = (gaps or {}).get("categories") or {}
+    for cat, row in sorted(cats.items()):
+        if not isinstance(row, dict):
+            continue
+        if row.get("undeclared_empty"):
+            n = len(row["undeclared_empty"])
+            lines.append(
+                f"  [ ] {cat}: {n} cell(s) EMPTY AND UNDECLARED — these are "
+                f"what the floors gate refuses. Close each with evidence or "
+                f"`engine.cli absence --subcap <CELL>`; re-dispatch with "
+                f"`engine.brief dispatch --category {cat}`.")
+        if row.get("proposals_unattached"):
+            lines.append(
+                f"  [ ] {cat}: {row['proposals_unattached']} cross-category "
+                f"row(s) proposed and neither attached nor declined — "
+                f"`engine.brief correlate --category {cat}` prints them with "
+                f"their attach commands.")
+        if row.get("unserviced_requests"):
+            lines.append(
+                f"  [ ] {cat}: {row['unserviced_requests']} relay request(s) "
+                f"unserviced — they need the actor that holds the connectors, "
+                f"not another research lane.")
+        if row.get("challenge_deferred"):
+            lines.append(
+                f"  [ ] {cat}: {len(row['challenge_deferred'])} synthesis(es) "
+                f"unchallenged — dispatch `research-challenger`.")
+        if row.get("stalled_rounds"):
+            lines.append(
+                f"  [ ] {cat}: {row['stalled_rounds']} round(s) changed "
+                f"nothing. A third attempt at the same prompt buys the same "
+                f"nothing — read the handback before re-dispatching.")
+    return lines
+
+
+def _memory_backup_line(run, state: dict) -> str:
+    """What the round's memory backup actually did.
+
+    The notebooks are the only part of the run tree a dead container loses
+    outright, and `_backup_memory` NEVER fails a round — which is right, and
+    is exactly why a backup that did not run has to be said out loud rather
+    than inferred from a round that looks clean.
+    """
+    rec = state.get("memory_backup")
+    if not isinstance(rec, dict):
+        return ("MEMORY BACKUP — NOT_RUN: this round recorded no backup at "
+                "all. The notebooks under 03_memory/ are the only part of the "
+                "run a dead container loses outright. Run `python3 -m "
+                "engine.memory backup --run <RUN> --root <ROOT>`, or say why "
+                "it cannot run (a run started --no-push does not talk to "
+                "Drive).")
+    status = str(rec.get("status") or "")
+    head = status.split(":", 1)[0].strip().upper()
+    if head in ("RESOLVED", "SKIPPED_UNCHANGED", "UNCHANGED"):
+        return ""
+    if head == "PARTIAL":
+        return (f"MEMORY BACKUP — PARTIAL at {rec.get('at')}: {status}. Some "
+                f"notebooks reached Drive and some did not; re-run `engine."
+                f"memory backup` and read which.")
+    return (f"MEMORY BACKUP — {head or 'NOT_RUN'} at {rec.get('at')}: "
+            f"{status}. The round carried on, by design — a failed backup "
+            f"must not fail a round — so nothing else will tell you.")
+
+
+def round_complete(event: dict) -> dict | None:
+    """The checklist a ROUND_COMPLETE earns: every outstanding thing with the
+    command that closes it, and the budget that limits how many more there
+    can be."""
+    text = _response_text(event)
+    if "ROUND_COMPLETE" not in text:
+        return None
+    pending = _pending_from(text)
+    recomputed = False
+    if pending is None:
+        pending = _recomputed_pending()
+        recomputed = True
+
+    lines = ["ROUND COMPLETE — what the round handed back, and what closes "
+             "each of it:"]
+    batches = [str(b) for b in (pending.get("relay_batches") or [])]
+    for b in batches:
+        lines.append(
+            f"  [ ] RELAY BATCH {b} — serviced by `{DRAIN_AGENT}`, the actor "
+            f"that holds the connectors:\n"
+            f"        python3 {AGENT_RUN} --agent {DRAIN_AGENT} "
+            f"--prompt-file {b} --stream")
+    lines += _gap_lines(pending.get("gaps") or {})
+    for cat in (pending.get("open_categories") or []):
+        lines.append(
+            f"  [ ] {cat}: floors gate is not PASS — `engine.cli gate "
+            f"--category {cat} --require-synthesis` says what it refuses.")
+    for cat in (pending.get("stalled") or []):
+        lines.append(f"  [ ] {cat}: STALLED — the last round changed nothing.")
+
+    b = pending.get("budget") or {}
+    if b.get("ceiling") is not None:
+        lines.append(
+            f"  BUDGET: ${b.get('spent') or 0:.2f} spent of "
+            f"${b['ceiling']:.2f}; ${b.get('remaining') or 0:.2f} remains.")
+    rr = pending.get("rounds_remaining")
+    if rr is not None:
+        lines.append(f"  ROUNDS: {rr} remaining at this stage.")
+    if len(lines) == 1:
+        lines.append("  nothing outstanding in the pending payload.")
+
+    try:
+        ctx = _ctx()
+        run = ctx.locate()
+        note = _memory_backup_line(run, ctx.pipeline_state(run)) if run else ""
+    except Exception:                                      # noqa: BLE001
+        note = ""
+    if note:
+        lines += ["", note]
+    if recomputed:
+        lines += ["", "(The driver did not print its `pending` payload — add "
+                      "`--json` to `engine.pipeline run` for it. The list "
+                      "above was recomputed from the run's own substrate: the "
+                      "relay queue, pipeline_state.json and `engine.brief "
+                      "gaps`.)"]
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
+                                   "additionalContext": "\n".join(lines)}}
+
+
 def on_post_tool_use(event: dict) -> dict | None:
     tool = str(event.get("tool_name") or "")
     ti = event.get("tool_input") or {}
     if tool == "Bash":
         cmd = ti.get("command") if isinstance(ti, dict) else ""
-        if not isinstance(cmd, str) or not STAGE_COMMANDS.search(cmd):
+        if not isinstance(cmd, str):
+            return None
+        if ROUND_COMMAND.search(cmd):
+            # A round that handed back is a DIFFERENT announcement from a
+            # stage that flipped: it carries a checklist, not a state.
+            out = round_complete(event)
+            if out:
+                return out
+        if not STAGE_COMMANDS.search(cmd):
             return None
     elif tool not in ("Agent", "Task"):
         return None
@@ -302,7 +518,99 @@ def on_stop(event: dict) -> dict | None:
                            "next step above, or state in one line why it "
                            "cannot run here (no connector, no budget, a "
                            "person's decision) and then stop.")}
+    # The watchdog says every run is between states. `engine.brief gaps` reads
+    # a finer grain: a relay batch nobody serviced, or a category whose cells
+    # are open, are work an agent can still do — and a session that stops on
+    # them leaves the run looking finished.
+    for row in rows:
+        why = _gaps_blocker(row)
+        if not why:
+            continue
+        if _blocked_before(row):
+            continue
+        _record_block(row)
+        return {"decision": "block", "reason": why}
     return None
+
+
+def _gaps_blocker(row: dict) -> str:
+    """The next concrete dispatch, when `engine.brief gaps` says one is owed
+    and the run can still afford it. "" in every other case.
+
+    THE THREE WAYS A STOP IS ALLOWED, and they are the point of this function:
+      * the blocker is a PERSON's — BLOCKED_NO_CONNECTOR (somebody must
+        attach it) or AT_USD_CEILING (somebody must decide this run is worth
+        another budget). Neither is advanced by another lane, and the
+        watchdog already keeps both out of AGENT_ADVANCEABLE.
+      * the budget is spent, or the rounds are. A stage that did not close in
+        its rounds needs a reader.
+      * there is simply nothing open.
+    """
+    if row.get("state") in ("BLOCKED_NO_CONNECTOR", "AT_USD_CEILING",
+                            "HALTED", "UNREADABLE", "MISSING_LOCALLY"):
+        return ""
+    try:
+        ctx = _ctx()
+        run = ctx.locate()
+    except Exception:                                      # noqa: BLE001
+        return ""
+    if run is None or str(getattr(run, "run_id", "")) != str(row.get("run_id")):
+        return ""
+    state = ctx.pipeline_state(run)
+    budget = ctx.budget(run, state)
+    rounds_ = ctx.rounds(run, state)
+    if budget["exhausted"] or rounds_["exhausted"]:
+        return ""                          # a person's call, not a lane's
+    try:
+        brief, = ctx.engine("brief")
+        gaps = brief.gaps(run.open(), run)
+    except Exception:                                      # noqa: BLE001
+        return ""
+    batches = [str(b) for b in (state.get("relay_batches") or [])]
+    unserviced = []
+    try:
+        relay, = ctx.engine("relay")
+        unserviced = [r for r in relay.requests(run).values()
+                      if r.get("status") == "OPEN"]
+    except Exception:                                      # noqa: BLE001
+        unserviced = []
+
+    if unserviced and batches:
+        return (
+            f"STOP HELD — run {run.run_id} has {len(unserviced)} relay "
+            f"request(s) nobody has serviced, and the batch that carries them "
+            f"is written. They are queries the lanes could not answer with "
+            f"the tools they hold; only the actor holding the connectors can. "
+            f"The next dispatch:\n\n"
+            f"  python3 {AGENT_RUN} --agent {DRAIN_AGENT} --prompt-file "
+            f"{batches[-1]} --stream\n\n"
+            f"${budget['remaining'] if budget['remaining'] is not None else '?'} "
+            f"of budget and {rounds_['remaining']} round(s) remain, so this is "
+            f"affordable. If it is not work this session should do, say in one "
+            f"line why and stop.")
+
+    lines = _gap_lines(gaps)
+    if not lines:
+        return ""
+    cats = [c for c, rowg in sorted((gaps.get("categories") or {}).items())
+            if isinstance(rowg, dict) and (rowg.get("open_cells")
+                                           or rowg.get("undeclared_empty"))]
+    if not cats:
+        return ""
+    return (
+        f"STOP HELD — run {run.run_id} still has categories an agent can "
+        f"advance: {', '.join(cats[:8])}"
+        + (f" and {len(cats) - 8} more" if len(cats) > 8 else "")
+        + f". ${budget['remaining'] if budget['remaining'] is not None else '?'} "
+          f"of budget and {rounds_['remaining']} round(s) remain.\n\n"
+        + "\n".join(lines[:8])
+        + f"\n\nThe next dispatch:\n  python3 -m engine.brief dispatch --run "
+          f"{run.run_id} --root {run.root} --category {cats[0]}\n"
+          f"then `python3 {AGENT_RUN} --agent research-{cats[0].lower()}"
+          f"-producer --prompt-file <that packet> --stream`.\n\n"
+          f"If this is not work this session should do — a person must attach "
+          f"a connector, a person must raise the budget — say so in one line "
+          f"and stop.")
 
 
 def main() -> int:

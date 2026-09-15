@@ -15,13 +15,11 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 
 ## 1 · Tooling first, measured, never assumed
 
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
-```
-
-**Then record the connectors YOU hold, before anything is dispatched.** No
-subprocess can enumerate a session's bound MCP tools (MEM-0112) — only you can.
-Write the list, one tool name per line, and hand it to the contract:
+**Record the connectors YOU hold before anything else runs.** No subprocess
+can enumerate a session's bound MCP tools (MEM-0112) — only you can, and
+every check below reads what you write here, so writing it second makes the
+first one lie. Write the list, one tool name per line, and hand it to the
+contract:
 
 ```bash
 printf '%s\n' <every mcp__ tool name you hold> \
@@ -32,24 +30,46 @@ printf '%s\n' <the same list> \
 
 `--strict` is not optional. Without it a STOP still exits 0 and the gate you
 just built passes a session with no connectors at all — which is the exact
-condition it exists to catch. A STOP is a **stop**: report which families are
-missing and that a human attaches them on the Routine's own edit screen, and
-do not start the run. Measured 2026-09-12: a run started without Exa or Tavily
-could not declare a single cell absent, so no floors gate could pass, and it
-re-dispatched sixteen categories ~18 times for $96.65 and closed nothing.
+condition it exists to catch.
+
+**You are the connector tier.** Since 2026-09-14 the enrichment connectors
+are held by this session and by no lane: they bind once, at session start,
+and every category lane is a separate `claude -p` child that holds none of
+them. A lane emits `search_requests`; the driver batches them; you service
+each batch with one fresh in-process subagent, which inherits your
+connectors. So the baseline you just wrote is not paperwork — it is the run's
+only statement of what enrichment is reachable at all.
+
+What the verdicts mean for the run, which is not what they meant before:
+
+| Verdict | What it is | What to do |
+|---|---|---|
+| No baseline written | Nothing knows whether a cell can be enriched or honestly declared absent | `engine.pipeline run` **REFUSES** at PREFLIGHT before a single lane is dispatched. Write the baseline. |
+| Baseline short — families missing | A measured, disclosed limit | The run proceeds **DEGRADED**: it records `enrichment_degraded`, its lanes are told to close cells with `engine.cli absence … --enrichment-unavailable`, and the ENRICHMENT gate discloses the gap per category rather than re-dispatching against it. This is not a stop. |
+| Baseline complete | Enrichment is reachable through you | Ordinary run. |
+
+Report which families are missing and that a human attaches them on the
+Routine's own edit screen — then start the run anyway and say it is degraded.
+Measured 2026-09-12: a run started without Exa or Tavily could not declare a
+single cell absent, so no floors gate could pass, and it re-dispatched sixteen
+categories ~18 times for $96.65 and closed nothing. The degraded path exists
+so that never repeats; refusing to start is not the remedy, and neither is
+starting silently.
 
 ```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
 cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
 ```
-
-`env` now reads that baseline as a hard dependency: no baseline is UNVERIFIED,
-never a pass.
 
 `doctor.py --heal` repairs a STALE / MISSING / DIVERGED install and re-checks
 once; `UPDATED_MID_SESSION` means the disk is fixed and THIS session still
 holds the old roster — carry on, because the driver dispatches every lane as
-a fresh child process that binds the repaired install. Anything else red
-after the heal is a provisioning defect: report the row and stop.
+a fresh child process that binds the repaired install. Its `connector
+contract` row now reads the baseline you wrote: UNVERIFIED means you skipped
+the step above, and a short baseline is the DEGRADED row of the table, not a
+provisioning defect. Any OTHER row red after the heal is a provisioning
+defect: report the row and stop.
+
 `engine.pipeline env` names every hard dependency (the claude CLI, a
 connector identity rung, the **enrichment-connector baseline** you just wrote,
 `agent_run.py`, `ship_page.py`, `mcp_raw.py`, `drive_fetch.py`, the pinned
@@ -122,6 +142,24 @@ over budget, with the figure) before the next command.
 ```bash
 python3 -m engine.pipeline run --run <RUN_ID> --root <ROOT> --max-wall-min 240 --lane-retries 1 --page-retries 2
 ```
+
+**The ceilings are enforced now, and they are the defaults** — name them only
+to change them. `--max-usd` defaults to $5 per pillar in scope and STOPS the
+run when the cost ledger crosses it; `--max-rounds 10` caps the rounds of any
+looping stage; `--stall-rounds 2` ends a stage after two consecutive rounds
+that advance nothing; `--max-wall-min 240` is a clean stop, not a failure;
+`--enrichment-heals 1` is how many fresh lane instances a category with no
+connector search gets before the gap is disclosed instead of worked again.
+None of these was enforced before 2026-09-12, which is how one run reached
+$96.65 against a $20 budget while closing nothing.
+
+**`STOPPED_BUDGET` is a decision, not an error to retry.** The run exits 1,
+the spend is remembered on disk, and a re-run REFUSES before dispatching
+anything — a second process does not get a second budget. The hourly watchdog
+reports it as `AT_USD_CEILING` and will not revive it. Read
+`engine.cost report --by-stage`, decide whether the remaining work is worth
+it, and continue with a higher `--max-usd` — that raise is the decision, and
+it is a person's.
 
 Run it in the background and watch with
 `python3 -m engine.pipeline status --run <RUN_ID> --root <ROOT> --watch` and

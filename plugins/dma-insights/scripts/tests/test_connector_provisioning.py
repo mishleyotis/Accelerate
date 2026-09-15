@@ -27,6 +27,15 @@ THE JOIN IS DERIVED. CONNECTORS.md gives section -> families; each
 producer's `description` names the sections it owns. Nothing here is typed
 by hand, so a section that moves between producers fails here rather than
 going quiet.
+
+2026-09-14: connectors moved to the orchestrator tier (owner decision — the
+harness binds none of them into a headless child, so a producer holding Exa
+held a refusal). A family in the table is now satisfied when the OWNER holds
+it OR a SERVICING agent does — the conductor and the two enrichment
+specialists, which service the `search_requests` a producer emits. A `‡`
+suffix on a family in the table means the owner must hold it ITSELF: the
+surface is written FROM the connector's answer (Clay contacts, the Explorium
+register), not corroborated by it.
 """
 import re
 from collections import defaultdict
@@ -55,6 +64,13 @@ FAMILY_OF = {
 #: surface to satisfy a mapping is how a safeguard becomes a participant.
 RESEARCHING_TIERS = ("production", "research")
 
+#: The agents that CALL a connector on a producer's behalf. A family the
+#: table assigns to a section without ‡ is satisfied when one of these holds
+#: it, because the producer emits the query and one of these services it.
+SERVICING = ("research/research-conductor.md",
+             "enrichment/enrichment-connector-specialist.md",
+             "enrichment/enrichment-web-specialist.md")
+
 
 def manifests():
     return [p for p in sorted(AGENTS.rglob("*.md")) if p.name != "README.md"]
@@ -67,16 +83,33 @@ def tools_line(path: Path) -> str:
 
 def section_families() -> dict:
     """payload section -> {family}, from the CONNECTORS.md per-surface table."""
+    return {k: set(v) for k, v in section_requirements().items()}
+
+
+def section_requirements() -> dict:
+    """payload section -> {family: owner_must_hold}. `‡` after a family name
+    in the table means the owner itself must hold it; without it a servicing
+    agent may."""
     out = {}
     for line in CONNECTORS_DOC.read_text(encoding="utf-8").splitlines():
         m = re.match(r"^\|\s*([a-z_]+\.[a-z_]+)\s*\|([^|]*)\|", line)
         if not m:
             continue
-        fams = {FAMILY_OF[w.lower()]
-                for w in re.findall(r"[A-Za-z-]+", m.group(2))
-                if w.lower() in FAMILY_OF}
+        fams = {}
+        for w, mark in re.findall(r"([A-Za-z-]+)(‡?)", m.group(2)):
+            if w.lower() in FAMILY_OF:
+                fam = FAMILY_OF[w.lower()]
+                fams[fam] = fams.get(fam, False) or bool(mark)
         if fams:
             out[m.group(1)] = fams
+    return out
+
+
+def servicing_families() -> set:
+    out = set()
+    for rel in SERVICING:
+        line = tools_line(AGENTS / rel)
+        out |= set(re.findall(r"mcp__([A-Za-z0-9_-]+)__", line))
     return out
 
 
@@ -112,19 +145,49 @@ def test_the_surface_map_is_still_parseable():
 
 
 def test_every_producer_declares_the_connectors_its_section_needs():
-    """The defect itself, re-derived from both halves on every run."""
+    """The defect itself, re-derived from both halves on every run: a family
+    the table assigns is held by the owner, or (without ‡) by a servicing
+    agent that calls it on the owner's behalf."""
+    served = servicing_families()
     missing = defaultdict(set)
-    for section, fams in section_families().items():
+    for section, fams in section_requirements().items():
         for p in owners(section):
             line = tools_line(p)
-            for fam in fams:
-                if f"mcp__{fam}__" not in line:
-                    missing[p.name].add(f"{fam} (for {section})")
+            for fam, owner_must_hold in fams.items():
+                if f"mcp__{fam}__" in line:
+                    continue
+                if not owner_must_hold and fam in served:
+                    continue
+                missing[p.name].add(
+                    f"{fam} (for {section}{', ‡ owner must hold it' if owner_must_hold else ''})")
     assert not missing, (
-        "producers own a section whose connector they cannot call — fix the "
-        "ROLE TABLE in scripts/provision_agent_tools.py and re-run it with "
-        f"--write, never the manifest by hand: "
+        "producers own a section whose connector nobody can call for them — "
+        "fix the ROLE TABLE in scripts/provision_agent_tools.py and re-run it "
+        f"with --write, never the manifest by hand: "
         f"{ {k: sorted(v) for k, v in missing.items()} }")
+
+
+def test_the_servicing_tier_holds_every_family_it_is_relied_on_for():
+    """A family without ‡ anywhere in the table is one a servicing agent must
+    hold — otherwise the table promises a source nobody in the pipeline can
+    reach for that surface."""
+    needed = set()
+    for fams in section_requirements().values():
+        needed |= {f for f, must in fams.items() if not must}
+    assert needed <= servicing_families(), (
+        f"no servicing agent holds {sorted(needed - servicing_families())}")
+
+
+def test_the_dagger_marks_are_parsed_and_mean_the_owner():
+    """Floor: the ‡ grammar is read. techstack and leadership are the two
+    surfaces WRITTEN from a connector's answer, so they carry it."""
+    req = section_requirements()
+    assert req["techstack.techstack"].get("Vibe_Prospecting") is True
+    assert req["overview.leadership"].get("Clay") is True
+    assert req["insights.landscape"].get("Vibe_Prospecting") is True
+    assert req["heatmap.cell_evidence"].get("Exa") is False, (
+        "cell_evidence is corroborated through the orchestrator tier, not "
+        "written from a connector")
 
 
 def test_read_only_checkers_are_never_granted_enrichment():

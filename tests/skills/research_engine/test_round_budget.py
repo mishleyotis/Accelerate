@@ -33,6 +33,32 @@ def test_the_default_ceiling_is_ten_and_the_stall_window_two():
     assert P.Options.max_rounds == 10
     assert P.Options.stall_rounds == 2
     assert P.Options.enrichment_heals == 1 and P.Options.relay is True
+    # The relay SERVICES requests by default, and services them the only way
+    # that can reach a connector: the conductor's own in-process subagents.
+    # A headless lane holds no connector (they bind once, at session start),
+    # which is what "lane" mode was and why it is no longer the default.
+    assert P.Options.relay_mode == "orchestrator"
+
+
+def test_the_relay_mode_the_driver_asks_for_is_the_one_the_relay_runs():
+    """MEM-0519. `drain_batch`'s own default flipped to "orchestrator" while
+    the driver still called it with no `mode=`, and the driver's only test of
+    the result was `if d.get("lanes")` — which orchestrator mode returns as 0.
+    The RELAY stage would have vanished with no error and no log line, and
+    taken the round-start reconcile with it. The driver must PASS the mode it
+    was configured with, so the branch it takes is the one it asked for."""
+    import inspect
+    text = inspect.getsource(P.Pipeline._enrich_research)
+    assert "mode=self.opts.relay_mode" in text, (
+        "the driver must pass its own mode; taking drain_batch's default "
+        "means a change of that default silently changes the driver")
+    assert 'elif d.get("batch_file")' in text, (
+        "orchestrator mode returns lanes=0 — without this branch the stage "
+        "does nothing and says nothing")
+    assert "relay.reconcile" in text.split("drain_batch")[0], (
+        "reconcile at the START of the round: in orchestrator mode the "
+        "previous round's batches were serviced by subagents the driver "
+        "never saw, so nothing else closes them")
 
 
 def test_the_cli_defaults_match_the_options():
@@ -44,6 +70,9 @@ def test_the_cli_defaults_match_the_options():
     assert '"--stall-rounds", type=int, default=Options.stall_rounds' in text
     assert '"--enrichment-heals", type=int, default=Options.enrichment_heals' in text
     assert '"--no-relay"' in text
+    assert '"--relay-mode", choices=("orchestrator", "lane")' in text
+    assert 'default=Options.relay_mode' in text
+    assert '"--max-wall-min", type=float, default=Options.max_wall_min' in text
 
 
 def _incremental_lane(exa_once: bool = True):

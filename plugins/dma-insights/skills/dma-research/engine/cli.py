@@ -4,7 +4,9 @@
     python3 -m engine.cli start   --run R --entity "Acme CU" --sv CU --scope FULL
     python3 -m engine.cli orient  --run R [--category P1C1]
     python3 -m engine.cli search  --run R --subcap P1C1.1.1 --facet works --query '...'
+    python3 -m engine.cli fetch   --run R --url U --query '<the DQ text>'
     python3 -m engine.cli evidence --run R --subcap ... --source ... --url ... --excerpt ...
+    python3 -m engine.cli attach  --run R --e-id E-007 --subcap P1C1.1.1
     python3 -m engine.cli synthesise --run R --subcap ... --json rec.json
     python3 -m engine.cli gate    --run R --category P1C1 [--require-synthesis]
     python3 -m engine.cli validate --run R
@@ -65,8 +67,8 @@ import json
 import sys
 from pathlib import Path
 
-from . import (assemble, contract, floors_gate, handoff, ledger, orient,
-               preflight, registry, report_spec, reports, runstate,
+from . import (assemble, contract, fetch, floors_gate, handoff, ledger,
+               orient, preflight, registry, report_spec, reports, runstate,
                strip_working_area, validator, watchdog)
 
 
@@ -181,6 +183,69 @@ def refuse_on_stale_install() -> str | None:
             f"--allow-stale-install` to record the waiver on the run).")
 
 
+def _actor(a):
+    """`--actor` if given, else the agent the dispatcher launched.
+
+    A headless lane cannot be identified from inside a hook (the harness
+    carries `agent_type` only within a subagent), so `agent_run.py` puts the
+    name in the child's environment and the write CLIs read it from there.
+    An empty answer is unconstrained, which is what a person at a terminal
+    should be.
+    """
+    from . import scope as _scope
+    return (getattr(a, "actor", None) or _scope.actor_from_env()) or None
+
+
+def _fetch_cmd(run, a) -> int:
+    """`engine.cli fetch` — windows and a hash, never the page.
+
+    WHAT THIS PRINTS IS THE WHOLE POINT. A WebFetched page enters the lane's
+    context and is re-read on every later turn: 76% of the measured six-cell
+    lane bill was cache reads (24.45M tokens, $4.89 of $6.45). So the page
+    is read in THIS process, cached on disk under the run, and what crosses
+    back into the agent's context is three ~240-character windows and the
+    sha256 that ties them to the document. The full text stays on disk,
+    where `engine.cli evidence` checks the excerpt against it.
+    """
+    if a.via_text is not None:
+        text = (sys.stdin.read() if a.via_text == "-"
+                else Path(a.via_text).read_text(encoding="utf-8",
+                                                errors="replace"))
+        if not text.strip():
+            print("REFUSED: --via-text got no text. Nothing was cached and "
+                  "nothing can be verified against it.", file=sys.stderr)
+            return 1
+        meta = fetch.store_text(run, a.url, text, content_type="via-text")
+        got = {"text": text, "sha256": meta["sha256"], "from_cache": False,
+               "error": None}
+    else:
+        got = fetch.fetch_text(run, a.url)
+    if got["error"]:
+        # WHY it failed, not merely THAT it failed: a 403 means find another
+        # source, an NXDOMAIN means the URL is wrong, a timeout means retry.
+        print(f"REFUSED: could not read {a.url} — {got['error']}",
+              file=sys.stderr)
+        return 1
+    wins = fetch.windows(got["text"], a.query, window=a.window,
+                         max_windows=a.max_windows)
+    out = {"url": a.url, "sha256": got["sha256"], "chars": len(got["text"]),
+           "from_cache": got["from_cache"], "query": a.query,
+           "windows": wins}
+    if a.json:
+        print(json.dumps(out, indent=2))
+        return 0
+    print(f"{a.url}\n  sha256 {got['sha256']}  chars {out['chars']}  "
+          f"cached {str(got['from_cache']).lower()}")
+    if not wins:
+        print(f"  NO WINDOW: nothing in this document carries the terms of "
+              f"{a.query!r}. That is an answer — do not quote it anyway.")
+        return 0
+    for i, w in enumerate(wins, 1):
+        print(f"  [{i}] chars {w['start']}-{w['end']} · {w['hits']} term(s)")
+        print(f"      {w['text']}")
+    return 0
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in _FAMILIES:
@@ -257,6 +322,13 @@ def main(argv=None) -> int:
                         "searched. The search-op ceiling is charged once")
     q.add_argument("--facet", choices=contract.DQ_FACETS)
     q.add_argument("--query", required=True)
+    q.add_argument("--actor", default=None,
+                   help="the agent logging this search. Defaults to $DMA_ACTOR, "
+                        "which the dispatcher sets to the agent it launched. "
+                        "A lane may log only its own category's cells "
+                        "(engine/scope.py); the servicing tier logs any cell "
+                        "in the run, which is how one lane's find reaches "
+                        "another lane's")
     q.add_argument("--tool", default="web_search", choices=contract.SEARCH_TOOLS,
                    help="which tool ran — closed vocabulary so the gate can "
                         "count the enrichment effort behind an empty cell")
@@ -283,6 +355,47 @@ def main(argv=None) -> int:
     e.add_argument("--tier", required=True); e.add_argument("--excerpt", required=True)
     e.add_argument("--published"); e.add_argument("--claim-type", default="FACT")
     e.add_argument("--origin", default="public")
+    e.add_argument("--unverified", default=None, metavar="REASON",
+                   help="register this span WITHOUT a fetched copy of the "
+                        "page to check it against, and record why. The CLI "
+                        "verifies every public URL against the run's fetch "
+                        "cache (`engine.cli fetch`); a URL nothing could "
+                        "fetch is refused unless this says what stopped it "
+                        "(a 403 WAF, a paywall, a connector's own extract). "
+                        "The reason lands on the row's Access_Status as "
+                        "`UNVERIFIED: <reason>` — recorded, never silent. It "
+                        "does NOT excuse a span a fetched page contradicts")
+    e.add_argument("--actor", default=None,
+                   help="the agent registering this source. Defaults to "
+                        "$DMA_ACTOR. A lane may register only against its own "
+                        "category's cells (engine/scope.py); the servicing "
+                        "tier registers against any cell in the run")
+
+    at = common(sub.add_parser(
+        "attach",
+        help="cite an evidence row the run ALREADY holds from one of your "
+             "own cells, without minting a duplicate. This is how a lead or "
+             "a proposal in your dispatch packet becomes a citation."))
+    at.add_argument("--e-id", required=True,
+                    help="the registered row to cite (E-007). It must already "
+                         "exist — `attach` never creates a row; "
+                         "`engine.cli evidence` does that")
+    at.add_argument("--subcap", action="append", default=[], required=True,
+                    help="the cell(s) of YOUR category this row bears on. "
+                         "Repeatable. A lane may attach only to its own "
+                         "category's cells (engine/scope.py)")
+    at.add_argument("--actor", default=None,
+                    help="the agent attaching. Defaults to $DMA_ACTOR")
+    at.add_argument("--decline", action="store_true",
+                    help="the opposite outcome, recorded: you READ the "
+                         "proposal and it does not bear on this cell. Needs "
+                         "--why. Without this record, 'offered and judged "
+                         "irrelevant' and 'offered and never looked at' are "
+                         "the same state, and the floors gate's advisory "
+                         "`reuse_ignored` cannot tell them apart")
+    at.add_argument("--why", default=None,
+                    help="with --decline: what the row is actually about and "
+                         "why it does not answer this cell")
 
     y = common(sub.add_parser("synthesise"))
     y.add_argument("--subcap", required=True); y.add_argument("--json", required=True)
@@ -320,6 +433,36 @@ def main(argv=None) -> int:
                          "written with REDUCED rigour and the reason. Without "
                          "a baseline, or with a connector bound and unused, "
                          "the refusal stands")
+
+    fe = common(sub.add_parser(
+        "fetch",
+        help="read a page and print only the spans that answer the query — "
+             "never the page. A WebFetched page sits in the lane's context "
+             # `%%` because argparse %-expands help strings and a bare
+             # `%` reads as a format spec — `76% o` died as `%o`, which
+             # took `engine/cli.py --help` down entirely (audit_skills).
+             "and is re-read on every later turn (76%% of a measured lane's "
+             "bill was cache reads); three windows are read once. The "
+             "extracted text is cached under the run, which is what lets "
+             "`engine.cli evidence` check the excerpt is verbatim"))
+    fe.add_argument("--url", required=True)
+    fe.add_argument("--query", required=True,
+                    help="what you are looking for — the diagnostic "
+                         "question's own text works best; the windows are "
+                         "ranked on its distinct terms")
+    fe.add_argument("--window", type=int, default=fetch.DEFAULT_WINDOW,
+                    help=f"characters per window (default "
+                         f"{fetch.DEFAULT_WINDOW}: twice the 50-character "
+                         f"excerpt floor, half the 500 ceiling)")
+    fe.add_argument("--max", type=int, default=fetch.DEFAULT_MAX_WINDOWS,
+                    dest="max_windows", help="how many windows")
+    fe.add_argument("--via-text", default=None, metavar="PATH",
+                    help="do not fetch: read ALREADY-EXTRACTED text from this "
+                         "file ('-' for stdin) and cache it under --url. The "
+                         "seam for a connector's own extract (Tavily), so a "
+                         "span taken from it verifies exactly as a fetched "
+                         "one does and no second fetch is bought")
+    fe.add_argument("--json", action="store_true")
 
     common(sub.add_parser("validate"))
     ch = common(sub.add_parser(
@@ -423,6 +566,8 @@ def main(argv=None) -> int:
         print(json.dumps(state, indent=2)); return 0
     if a.cmd == "persist":
         print(json.dumps(runstate.persist(run, a.dest), indent=2)); return 0
+    if a.cmd == "fetch":
+        return _fetch_cmd(run, a)
 
     wb = run.open()
     if a.cmd == "orient":
@@ -432,7 +577,7 @@ def main(argv=None) -> int:
         n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
                                  query=a.query, tool=a.tool, hits=a.hits,
                                  kept=a.kept, outcome=a.outcome,
-                                 prelim=a.prelim)
+                                 prelim=a.prelim, actor=_actor(a))
         print(json.dumps({"seq": n, **ledger.stats(wb)}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
@@ -447,11 +592,47 @@ def main(argv=None) -> int:
                   "supports the institution; cell evidence supports a "
                   "capability. A row cannot be filed as both.", file=sys.stderr)
             return 1
-        eid = ledger.append_evidence(
-            wb, source_name=a.source, source_url=a.url, tier=a.tier,
-            excerpt=a.excerpt, subcaps=cells, published=a.published,
-            claim_type=a.claim_type, origin=a.origin)
+        try:
+            eid = ledger.append_evidence(
+                wb, source_name=a.source, source_url=a.url, tier=a.tier,
+                excerpt=a.excerpt, subcaps=cells, published=a.published,
+                claim_type=a.claim_type, origin=a.origin, actor=_actor(a),
+                run=run,
+                # ON at the CLI and OFF in the library: this is the path a
+                # lane's writes actually take, and every in-process caller
+                # (fixtures, stub, handoff) registers against URLs nothing
+                # fetched. Flipping the default would rewrite what those
+                # mean rather than add a check where it bites.
+                verify_excerpts=True, unverified_reason=a.unverified)
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
         print(json.dumps({"e_id": eid, "profile": bool(a.profile)}, indent=2))
+        return 0
+    if a.cmd == "attach":
+        cells = [c for c in (a.subcap or []) if str(c).strip()]
+        try:
+            if a.decline:
+                if len(cells) != 1:
+                    print("REFUSED: --decline judges ONE proposal on ONE "
+                          "cell. Pass a single --subcap.", file=sys.stderr)
+                    return 1
+                out = ledger.decline_evidence(wb, a.e_id, cells[0],
+                                              why=a.why or "",
+                                              actor=_actor(a))
+            elif a.why:
+                print("REFUSED: --why belongs to --decline. An attach needs "
+                      "no argument — the citation is the claim, and the "
+                      "reasoning belongs in the synthesis that uses it.",
+                      file=sys.stderr)
+                return 1
+            else:
+                out = ledger.attach_evidence(wb, a.e_id, cells,
+                                             actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
         return 0
     if a.cmd == "synthesise":
         rec = json.loads(Path(a.json).read_text())

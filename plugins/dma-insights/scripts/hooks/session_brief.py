@@ -32,6 +32,7 @@ network, no state, fails OPEN — a brief that cannot decide prints, because
 failing closed costs the brief on exactly the session that needed it.
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -86,6 +87,34 @@ RESEARCH_BRIEF = (
     "the phase gate is holding. "
     "Work only your own category; never score, never submit, never promote."
 )
+
+#: Appended to a tier brief when the agent's own name says which slice of
+#: the workbook is its own. Until 2026-09-14 "work only your own category"
+#: was advice: no write path checked it (MEM-0514), sixteen lanes wrote one
+#: workbook in parallel, and the lock that serialised the rows said nothing
+#: about which rows. The engine refuses it now, so the brief states the
+#: boundary as a fact the lane will meet rather than a request it may
+#: forget — and names the one way a cross-category find is meant to travel,
+#: because a lane that has been refused needs somewhere to put the finding.
+SCOPE_RULE = (
+    " YOUR SCOPE IS {scope}, and it is enforced, not requested: the ledger "
+    "refuses a search, an evidence row, a synthesis or an absence you write "
+    "against any other {kind}, and so does the guard in front of it. A "
+    "source that genuinely bears on another {kind}'s cell travels through "
+    "your handback, which the run carries to the lane that owns it — never "
+    "by writing that lane's row yourself."
+)
+
+
+def scope_rule(name: str) -> str:
+    """The scope sentence for an agent whose name declares one."""
+    m = re.match(r"^research-(p\d+c\d+)-producer$", name or "", re.I)
+    if m:
+        return SCOPE_RULE.format(scope=m.group(1).upper(), kind="category")
+    m = re.match(r"^scoring-(p\d+)-producer$", name or "", re.I)
+    if m:
+        return SCOPE_RULE.format(scope=m.group(1).upper(), kind="pillar")
+    return ""
 
 #: The SCORING tier (scoring-p1..p4-producer, scoring-critic). Measured
 #: 2026-09-03: these agents received CORE + SUBAGENT — the production
@@ -156,7 +185,13 @@ BY_SOURCE = {
     "compact": (" This session was COMPACTED: the routing rule, the memory "
                 f"rule and the submit boundary are NOT guaranteed to have "
                 f"survived the summary. Re-read {ROUTING} § After a "
-                f"compaction before your next tool call."),
+                f"compaction before your next tool call, and recover WHERE "
+                f"YOU WERE from the run rather than from the summary: "
+                f"`python3 -m engine.cli resume --run <RUN> --root <ROOT>` "
+                f"(the run's own state), then `engine.brief dispatch "
+                f"--category <YOURS>` or `engine.pipeline plan` for the next "
+                f"step. What the summary kept is not evidence of what the "
+                f"run holds."),
     "fork": (" This session is a FORK: it inherits a transcript it did not "
              "write. Confirm which run and which surface you own before "
              "producing anything."),
@@ -253,10 +288,17 @@ def brief(event: dict) -> str:
         if name.startswith("report-"):
             return REPORT_BRIEF
         if name.startswith("scoring-"):
-            return SCORING_BRIEF
+            return SCORING_BRIEF + scope_rule(name)
         if name.startswith("research-") or name == "technographic-scanner":
-            return RESEARCH_BRIEF
+            return RESEARCH_BRIEF + scope_rule(name)
         return CORE + SUBAGENT
+    # PostCompact is the compaction event itself — it carries the summary and
+    # a "manual"/"auto" trigger, not a SessionStart `source`. It was the
+    # binding that was missing rather than the handling: `BY_SOURCE["compact"]`
+    # already existed and only SessionStart could reach it, so a compaction
+    # that did NOT restart the session re-entered with no brief at all.
+    if hook == "PostCompact":
+        return CORE + BY_SOURCE["compact"] + install_warning()
     source = str(event.get("source") or "startup")
     # Top-level sessions only. A subagent runs inside a parent that already
     # saw this and cannot act on it — its parent is mid-flight — so telling
@@ -276,12 +318,22 @@ def main() -> int:
     # stdout. Emitting the JSON form for a subagent is what actually puts the
     # brief in the child's context — printing to stdout there would be
     # swallowed, which is the AUD-0004 failure wearing a fix.
-    if event.get("hook_event_name") == "SubagentStart" or \
-            event.get("hookEventName") == "SubagentStart":
+    hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    if hook == "SubagentStart":
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "SubagentStart",
                 "additionalContexts": [text],
+            }
+        }))
+    elif hook == "PostCompact":
+        # PostCompact takes the same `additionalContext` shape every
+        # non-SessionStart hook does. Printing to stdout here would be
+        # swallowed — which is the AUD-0054 failure wearing a fix.
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PostCompact",
+                "additionalContext": text,
             }
         }))
     else:

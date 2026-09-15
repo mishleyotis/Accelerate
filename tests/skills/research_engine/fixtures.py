@@ -30,19 +30,47 @@ def two_category_selection(n: int = 4) -> list[str]:
     return out
 
 
+#: What a session that holds the connectors reports to
+#: `connector_contract.write_baseline`. One tool per required family is
+#: enough — `_present` asks whether the family answers at all.
+BOUND_CONNECTORS = ("mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+                    "mcp__Clay__find-and-enrich-company")
+
+
+def write_baseline(run, tools=BOUND_CONNECTORS):
+    """Record what this 'session' held, the way the preflight does."""
+    import sys
+    from pathlib import Path as _Path
+    sys.path.insert(0, str(_Path(__file__).resolve().parents[3]
+                           / "plugins" / "dma-insights" / "scripts"))
+    import connector_contract as cc                            # noqa: PLC0415
+    return cc.write_baseline(list(tools), str(run.root))
+
+
 def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1",
-            prelim: bool = True, folder: bool = True, selected=None):
+            prelim: bool = True, folder: bool = True, selected=None,
+            baseline="bound"):
     """A started run with its PRELIM phase closed and its client folder open.
 
     Both default ON because both are what a real run has: `orient` withholds
     every category card while PRELIM is open, and a run with no client
     folder is one nobody can find. Pass `prelim=False` / `folder=False` to
-    test those gates themselves."""
+    test those gates themselves.
+
+    `baseline` is the connector roster the run records at its preflight, and
+    it defaults to a BOUND one for the same reason: since 2026-09-14 the
+    driver refuses to dispatch a run whose baseline was never written (an
+    unverified container is the $96.65 shape), so a fixture without one
+    would be testing a refusal rather than the thing under test. Pass
+    `baseline=None` for a run that never recorded one, or a tool list for a
+    short roster."""
     run = runstate.start(
         run_id=run_id, entity_name="Acme Credit Union", entity_id="acme-cu",
         sub_vertical="CU", scope_mode="T1_CORE", reference_date="2026-08-29",
         root=tmp_path / "run",
         selected=list(selected) if selected else small_selection(n))
+    if baseline is not None:
+        write_baseline(run, BOUND_CONNECTORS if baseline == "bound" else baseline)
     if folder:
         from engine import assemble
         assemble.open_folder(run, tmp_path / "client", push=False)

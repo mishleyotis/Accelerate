@@ -3,7 +3,8 @@
 
     python3 -m engine.relay harvest     --run R [--root ROOT] [--category P1C1,P2C3]
     python3 -m engine.relay list        --run R [--root ROOT] [--status OPEN] [--category C] [--json]
-    python3 -m engine.relay record      --run R [--root ROOT] --id SR-… --status SERVED|EMPTY|BLOCKED [--note …]
+    python3 -m engine.relay batch       --run R [--root ROOT] [--group-by capability|tool] [--category C] [--out-dir DIR] [--json]
+    python3 -m engine.relay record      --run R [--root ROOT] (--id SR-… | --ids SR-a,SR-b) --status SERVED|EMPTY|BLOCKED [--note …] [--tool X]
     python3 -m engine.relay reconcile   --run R [--root ROOT]
     python3 -m engine.relay state       --run R [--root ROOT] [--json]
     python3 -m engine.relay drain-brief --run R [--root ROOT] --out-dir DIR [--category C]
@@ -21,7 +22,7 @@ session's unenforced diligence, and the owner's live runs (2026-09-07) showed
 the shape that produces: categories passing their floors gate on bare
 WebSearch, and the connector work "aspirational".
 
-THE MECHANISM, in four verbs, all reading and writing the run tree:
+THE MECHANISM, in five verbs, all reading and writing the run tree:
 
   harvest     read each lane's transcript (`agent_logs/<lane>.jsonl`, and the
               `.out` beside it when a batch wrote one), find the
@@ -29,13 +30,25 @@ THE MECHANISM, in four verbs, all reading and writing the run tree:
               block, or the key embedded in prose — and queue each one ONCE
               (the id is a hash of the normalised query and the cell) in
               `07_qa/search_relay.jsonl`, append-only, as an OPEN request.
-  drain       write one brief per category for `enrichment-web-specialist` —
-              the agent whose manifest declares Exa and Tavily — carrying the
-              open requests and the exact `engine.cli search / evidence` and
-              `engine.relay record` commands that turn a connector result into
-              rows the floors gate can read. The driver dispatches the batch;
-              a lane whose connector is refused records BLOCKED with the
-              refusal text, never a result it did not get.
+  batch       (the servicing path since 2026-09-14) group the OPEN requests
+              for the SESSION THAT HOLDS THE CONNECTORS. Queries are
+              deduplicated by their normalised form across the whole run —
+              two categories asking the same thing owe one search — grouped
+              by capability, and written as one batch file plus ONE
+              self-contained prompt per group under `briefs/relay_r<n>/`.
+              Each query carries the single `engine.cli search` call whose
+              repeated `--subcap` writes a row per cell and charges the
+              search-op ceiling once, and the single `engine.relay record
+              --ids a,b` that closes every request behind it. Nothing is
+              dispatched: the conductor spins one fresh in-process subagent
+              per prompt, which inherits its connectors, and the results
+              land in the workbook rather than in anybody's context.
+  drain       (the fallback, `mode="lane"`) one brief per category for
+              `enrichment-web-specialist` — carrying the open requests and
+              the same commands — as an `agent_run.py --batch` array. Kept
+              explicit because a container that DOES hold the connectors can
+              still use it; the default is `batch`, because a headless child
+              holds none.
   reconcile   mark OPEN requests SERVED or EMPTY from the Search_Log itself —
               a row through an enrichment tool whose query matches — so a lane
               that did the work and forgot the `record` still closes its
@@ -68,6 +81,7 @@ import hashlib
 import importlib.util
 import json
 import re
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -126,13 +140,18 @@ HEAL_INSTRUCTIONS = {
         "`search_requests` and say so in your final output — never log a "
         "connector search you did not run."),
     "instruction": (
-        "your previous instance never ATTEMPTED an enrichment connector — "
-        "every logged search ran through web_search/web_fetch. Your manifest "
-        "declares Exa and Tavily: for each open cell fire at least the primary "
-        "and the contradicts volleys through `mcp__Exa__web_search_exa` or "
-        "`mcp__Tavily__tavily_search` and log each with `--tool exa` / "
-        "`--tool tavily`. If a call is refused, emit it as a `search_requests` "
-        "entry instead."),
+        "your previous instance logged every search through "
+        "web_search/web_fetch and emitted no `search_requests`, so no cell "
+        "of yours carries the enrichment effort the floors gate counts. YOU "
+        "HOLD NO CONNECTOR, and that is the design rather than a fault: they "
+        "bind once at session start, in the orchestrator's session, and a "
+        "headless lane is a different session. So for each open cell emit "
+        "the primary and contradicts volleys you WOULD have fired as "
+        "`search_requests` entries — one JSON object each, with `query`, "
+        "`facet`, `subcap` and a preferred `tool` — and say so in your final "
+        "output. The conductor runs them in one batch per capability through "
+        "the real connectors and logs them against your cells. Never log a "
+        "connector search you did not run."),
     "logging": (
         "your previous instance CALLED a connector (the transcript witnesses "
         "it) but every Search_Log row names `web_search`/`web_fetch`. The gate "
@@ -148,11 +167,17 @@ HEAL_INSTRUCTIONS = {
         "to retry against, and a fresh lane told to 'try harder' spends a full "
         "context floor to discover the same absence. Work the cells through "
         "web_search, emit every enrichment query you would have run as a "
-        "`search_requests` entry, and declare the cells you cannot close as "
-        "honest absences carrying that reason. A human attaches the connector "
-        "on the Routine's own edit screen; no lane can."),
+        "`search_requests` entry, and declare the cells you cannot close "
+        "with `engine.cli absence … --enrichment-unavailable` — the flag "
+        "that writes the absence at REDUCED rigour with this reason on the "
+        "row. It is verified against the run's own connector baseline, "
+        "which is what proves your container never had one. A human "
+        "attaches the connector on the Routine's own edit screen; no lane "
+        "can."),
     "manifest": (
-        "this lane's manifest declares NO enrichment connector tool, so a fresh "
+        "NOBODY in this run can service an enrichment request: neither this "
+        "lane (which is not meant to) nor the connector holder declares a "
+        "connector tool, so a fresh "
         "instance cannot call one either. This is a toolchain defect for the "
         "rectifier (scripts/provision_agent_tools.py), not something a lane can "
         "heal; emit the queries as `search_requests` so the relay's drain lane "
@@ -393,18 +418,43 @@ def lane_output(transcript: Path) -> str:
     return "\n".join(blocks)
 
 
+#: Lanes that emit `search_requests` without owning a category. They are read
+#: on EVERY harvest, including one restricted to this round's categories.
+#:
+#: Measured 2026-09-14: `enrichment-web-specialist` — the relay's own drain
+#: lane — was absent from this list, so a request the servicing lane itself
+#: emitted (it could not reach a connector either, which is the whole reason
+#: the relay exists) was queued by nothing and lost. And because the driver
+#: always passes `categories`, the early return skipped the run-level lanes
+#: altogether: the technographic scanner's and the conductor's requests were
+#: read only by a harvest nobody ran.
+RUN_LEVEL_LANES = (DRAIN_AGENT, "enrichment-connector-specialist",
+                   "technographic-scanner", "research-conductor")
+
+
 def _lanes(logs: Path, categories: list[str] | None) -> list[tuple[str, str | None]]:
-    """(lane name, category) pairs whose transcripts to read."""
+    """(lane name, category) pairs whose transcripts to read.
+
+    `categories` narrows the per-category lanes to this round's; it never
+    narrows away the run-level lanes, which belong to no category and would
+    otherwise be read on no round at all."""
+    out: list[tuple[str, str | None]] = []
+    seen: set[str] = set()
+
+    def add(name: str, cat: str | None) -> None:
+        if name not in seen:
+            seen.add(name)
+            out.append((name, cat))
+
     if categories:
-        return [(f"research-{str(c).lower()}-producer", str(c).upper()) for c in categories]
-    out = []
+        for c in categories:
+            add(f"research-{str(c).lower()}-producer", str(c).upper())
     for p in sorted(logs.glob("*.jsonl")) if logs.is_dir() else []:
         m = _LANE_RE.match(p.stem)
-        if m:
-            out.append((p.stem, m.group(1).upper()))
-        elif p.stem in ("technographic-scanner", "enrichment-connector-specialist",
-                        "research-conductor"):
-            out.append((p.stem, None))
+        if m and not categories:
+            add(p.stem, m.group(1).upper())
+        elif p.stem in RUN_LEVEL_LANES:
+            add(p.stem, None)
     return out
 
 
@@ -439,21 +489,49 @@ def harvest(run: runstate.Run, categories: list[str] | None = None, *,
 
 # ── record / reconcile ────────────────────────────────────────────────────
 
-def record(run: runstate.Run, req_id: str, status: str, *, note: str = "",
+def record(run: runstate.Run, req_ids, status: str, *, note: str = "",
            actor: str = "", tool: str | None = None) -> dict:
+    """Close one request or MANY.
+
+    One search now closes several requests: `batch` deduplicates by the
+    normalised query, so a single connector call answers every category that
+    asked for it, and closing them one at a time would put the round-trip
+    back that the batching removed.
+
+    A PARTIAL FAILURE RECORDS THE REST. An id the queue does not know is a
+    refusal that NAMES it — and the ids that were good are already written,
+    because the alternative is a conductor re-running every query in the
+    batch to close the one request a typo lost.
+    """
     status = str(status or "").strip().upper()
     if status not in CLOSING_STATUSES:
         raise L.LedgerRefusal(f"status {status!r} must be one of {CLOSING_STATUSES}")
-    rows = requests(run)
-    if req_id not in rows:
-        raise L.LedgerRefusal(f"{req_id} is not a queued request in {queue_path(run)}")
+    ids = ([req_ids] if isinstance(req_ids, str)
+           else [str(i).strip() for i in (req_ids or []) if str(i).strip()])
+    if not ids:
+        raise L.LedgerRefusal("record needs at least one request id")
     if status == "BLOCKED" and not str(note or "").strip():
         raise L.LedgerRefusal(
             "BLOCKED must carry the refusal text as --note — a blocked request "
             "with no reason is indistinguishable from one nobody tried")
-    _append(run, {"event": status.lower(), "id": req_id, "note": str(note or "")[:600],
-                  "actor": actor, "tool": tool, "at": _utcnow()})
-    return {"id": req_id, "status": status}
+    rows = requests(run)
+    done, missing = [], []
+    for rid in ids:
+        if rid not in rows:
+            missing.append(rid)
+            continue
+        _append(run, {"event": status.lower(), "id": rid, "note": str(note or "")[:600],
+                      "actor": actor, "tool": tool, "at": _utcnow()})
+        done.append(rid)
+    if missing:
+        raise L.LedgerRefusal(
+            f"{', '.join(missing)} {'is' if len(missing) == 1 else 'are'} not "
+            f"queued request(s) in {queue_path(run)}; recorded "
+            f"{', '.join(done) if done else 'nothing'}")
+    out = {"ids": done, "status": status, "recorded": len(done)}
+    if len(done) == 1:
+        out["id"] = done[0]
+    return out
 
 
 def _matches(req: dict, row: dict) -> bool:
@@ -469,11 +547,52 @@ def _matches(req: dict, row: dict) -> bool:
     return True
 
 
-def reconcile(run: runstate.Run, wb) -> dict:
+#: `scripts/source_yield.py` — the cross-client record of which enrichment
+#: pathways actually produce. `routing.md` promised for months that the
+#: relay hop logged to it and nothing did; the ledger file did not exist.
+SOURCE_YIELD = PLUGIN / "scripts" / "source_yield.py"
+
+#: kept-rows → the ledger's three outcomes. A search that kept two or more
+#: rows paid for itself; one is thin; none is a clean negative, which is
+#: still worth recording because a pathway reliably empty for a facet should
+#: be opened LAST.
+def _yield_outcome(kept: int) -> str:
+    return "rich" if kept >= 2 else ("thin" if kept == 1 else "empty")
+
+
+def log_yield(tool: str, facet: str, family: str, kept: int) -> dict:
+    """One measured search into the yield ledger. FAIL-OPEN and silent about
+    its own failure in the caller's result: a ledger that cannot be written
+    must never fail a reconcile, and the reconcile is what closes requests.
+
+    Called from `reconcile` rather than from a batch prompt on purpose — the
+    subagent would pay a command per query to say what the Search_Log row
+    already states, and the whole point of the batch is that it does not."""
+    if not SOURCE_YIELD.exists():
+        return {"logged": False, "why": "source_yield.py absent"}
+    cmd = [sys.executable, str(SOURCE_YIELD), "log",
+           "--source", str(tool or "?"), "--facet", str(facet or "?"),
+           "--outcome", _yield_outcome(int(kept or 0)),
+           "--raised-by", "engine.relay reconcile"]
+    if family:
+        cmd += ["--family", str(family)]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return {"logged": r.returncode == 0, "why": (r.stderr or "").strip()[:160]}
+    except Exception as e:                                   # noqa: BLE001
+        return {"logged": False, "why": f"{e.__class__.__name__}: {str(e)[:120]}"}
+
+
+def reconcile(run: runstate.Run, wb, *, log_source_yield: bool = True) -> dict:
     """Close OPEN requests from the Search_Log: a row through an enrichment
     tool whose query matches is SERVED when it kept anything, EMPTY when it
-    returned nothing. The substrate decides, not the lane's report."""
+    returned nothing. The substrate decides, not the lane's report.
+
+    Each closure also lands one entry in the source-yield ledger, so the
+    measurement of which pathway pays accumulates across clients without a
+    single extra token being spent to make it."""
     closed = {"SERVED": 0, "EMPTY": 0}
+    yielded = 0
     rows = [r for r in wb.rows("Search_Log")
             if str(r.get("Tool") or "").strip().lower() in C.ENRICHMENT_TOOLS]
     for req in open_requests(run):
@@ -482,11 +601,353 @@ def reconcile(run: runstate.Run, wb) -> dict:
             continue
         kept = int(hit.get("Kept") or 0) or int(hit.get("Hits") or 0)
         status = "SERVED" if kept else "EMPTY"
+        tool = str(hit.get("Tool") or "")
         record(run, req["id"], status,
                note=f"reconciled from Search_Log seq {hit.get('Seq')} ({hit.get('Tool')})",
-               actor="engine.relay reconcile", tool=str(hit.get("Tool") or ""))
+               actor="engine.relay reconcile", tool=tool)
         closed[status] += 1
-    return {"closed": closed, "still_open": len(open_requests(run))}
+        if log_source_yield:
+            cell = str(hit.get("SubCap_ID") or req.get("subcap") or "")
+            if log_yield(tool, str(hit.get("Facet") or req.get("facet") or ""),
+                         capability_of(cell) if cell else "", kept)["logged"]:
+                yielded += 1
+    return {"closed": closed, "still_open": len(open_requests(run)),
+            "source_yield_logged": yielded}
+
+
+# ── the batch: what the connector holder runs, grouped ────────────────────
+
+#: The two ways a batch can be grouped. `capability` is the default because
+#: it is the grain a single subagent can hold: sibling cells under one
+#: capability answer neighbouring diagnostic questions, so one prompt's
+#: queries reinforce each other. `tool` is for a conductor that would rather
+#: spin one subagent per connector.
+GROUP_BYS = ("capability", "tool")
+
+#: The relay's two servicing modes. See `drain_batch`.
+RELAY_MODES = ("orchestrator", "lane")
+DEFAULT_RELAY_MODE = "orchestrator"
+
+#: WHICH CONNECTOR ANSWERS THIS QUERY — a deliberately tiny table.
+#:
+#: It exists to save the conductor a judgement call on a few hundred queries
+#: a run, not to classify language. KEEP IT SMALL: a table that grows by
+#: habit is one nobody can satisfy — every addition is a rule a lane must
+#: now predict to get the connector it wanted, and the escape hatch already
+#: exists, because a request that names its own `tool` wins outright. When a
+#: proposal is wrong, the fix is the request's `tool` field, not a new word
+#: here.
+_PEOPLE_WORDS = ("cio", "cto", "chief", "head of", "leadership", "headcount",
+                 "employees", "revenue", "founded")
+_TECHNO_WORDS = ("uses", "platform", "vendor", "stack", "core banking", "crm",
+                 "technograph")
+DEFAULT_TOOL = "exa"
+
+
+def _hits(query: str, words) -> bool:
+    # Anchored at a word boundary and open at the end, so `technograph`
+    # catches `technographic` and `stack` catches `stacks` without a second
+    # entry in the table.
+    q = " ".join(str(query or "").lower().split())
+    return any(re.search(r"\b" + re.escape(w), q) for w in words)
+
+
+def propose_tool(req) -> str:
+    """The connector this request should be run through.
+
+    A request that names an enrichment tool is honoured — the lane that
+    wrote the query knows what it was reaching for, and the keyword table is
+    a fallback, never an override. A tool outside `contract.ENRICHMENT_TOOLS`
+    (`web_search`, a typo, a namespace) is ignored rather than refused: the
+    relay exists BECAUSE the lane could not reach a connector, so a bare-web
+    preference is not a preference the servicing tier can act on.
+    """
+    if isinstance(req, str):
+        req = {"query": req}
+    req = req or {}
+    named = str(req.get("tool") or "").strip().lower()
+    if named in C.ENRICHMENT_TOOLS:
+        return named
+    q = req.get("query") or ""
+    if _hits(q, _PEOPLE_WORDS):
+        return "clay"
+    if _hits(q, _TECHNO_WORDS):
+        return "vibe"
+    return DEFAULT_TOOL
+
+
+def capability_of(subcap: str) -> str:
+    """`P1C1.1.1` and `P1C1.1.CU2` both belong to capability `P1C1.1`.
+
+    Derived here rather than imported from `engine.brief`: the relay is the
+    one module a conductor runs on its own, and a batch that cannot be
+    written because the brief builder failed to import is a batch nobody
+    services. `brief.capability_of` is the same two components; a test pins
+    the two in agreement.
+    """
+    parts = [p for p in str(subcap or "").strip().upper().split(".") if p]
+    return ".".join(parts[:2]) if len(parts) >= 2 else (parts[0] if parts else "")
+
+
+def _shq(s: str) -> str:
+    """Single-quote for a shell. These commands get pasted; a query carrying
+    an apostrophe that ends its own quote is a command that does something
+    else."""
+    return "'" + str(s).replace("'", "'\\''") + "'"
+
+
+def _merge_queries(reqs: list[dict]) -> list[dict]:
+    """One entry per normalised query, carrying every request behind it.
+
+    THE CROSS-CATEGORY DEDUPE. Two lanes that asked the same thing about two
+    cells owe ONE connector call, one Search_Log row naming both cells and
+    one record closing both requests. The rows already carry `norm`, so the
+    identity is the queue's, not a second opinion."""
+    out: dict[str, dict] = {}
+    for r in reqs:
+        key = r.get("norm") or normalize(r.get("query"))
+        q = out.get(key)
+        if q is None:
+            q = {"query": r.get("query") or "", "norm": key, "request_ids": [],
+                 "subcaps": [], "categories": [], "facet": None, "tool": None,
+                 "falsifiers": [], "proves": [], "_named": None}
+            out[key] = q
+        q["request_ids"].append(r["id"])
+        cell = str(r.get("subcap") or "").strip().upper()
+        if cell and cell not in q["subcaps"]:
+            q["subcaps"].append(cell)
+        cat = str(r.get("category") or "").strip().upper()
+        if cat and cat not in q["categories"]:
+            q["categories"].append(cat)
+        if not q["facet"] and r.get("facet"):
+            q["facet"] = r["facet"]
+        if r.get("falsifier") and r["falsifier"] not in q["falsifiers"]:
+            q["falsifiers"].append(r["falsifier"])
+        if r.get("proves") and r["proves"] not in q["proves"]:
+            q["proves"].append(r["proves"])
+        if q["_named"] is None and r.get("tool") in C.ENRICHMENT_TOOLS:
+            q["_named"] = r["tool"]
+    for q in out.values():
+        q["tool"] = propose_tool({"query": q["query"], "tool": q.pop("_named")})
+    return list(out.values())
+
+
+def _commands(run: runstate.Run, q: dict) -> dict:
+    rr = f"--run {run.run_id} --root {run.root}"
+    parts = ["python3 -m engine.cli search", rr]
+    if q["subcaps"]:
+        # ONE call, one `--subcap` per cell: `append_search` writes a row per
+        # cell (so `volley_status` sees each of them searched) and charges
+        # the search-op ceiling once. One call per cell would charge it once
+        # per cell for the same query.
+        parts += [f"--subcap {c}" for c in q["subcaps"]]
+        parts.append(f"--facet {q['facet'] or C.PRIMARY_FACET}")
+    else:
+        parts.append("--prelim")
+    parts += [f"--tool {q['tool']}", f"--query {_shq(q['query'])}",
+              "--hits N", "--kept K"]
+    return {
+        "command_search": " ".join(parts),
+        "command_record": (f"python3 -m engine.relay record {rr} "
+                           f"--ids {','.join(q['request_ids'])} "
+                           f"--status SERVED|EMPTY|BLOCKED "
+                           f"--tool {q['tool']} --note '…'"),
+    }
+
+
+def _group_key(q: dict, group_by: str) -> str:
+    if group_by == "tool":
+        return q["tool"]
+    if q["subcaps"]:
+        return capability_of(q["subcaps"][0])
+    return (q["categories"] or ["RUN"])[0]
+
+
+def _round_no(run: runstate.Run, out_dir: Path | None) -> int:
+    if out_dir is not None:
+        m = re.search(r"relay_r(\d+)$", Path(out_dir).name)
+        if m:
+            return int(m.group(1))
+    n = 0
+    while (run.qa_dir / f"relay_batch_r{n}.json").is_file():
+        n += 1
+    return n
+
+
+def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
+                 queries: list[dict]) -> str:
+    """ONE batch's prompt, self-contained and carrying nothing else.
+
+    The conductor dispatches a FRESH in-process subagent per batch. Whatever
+    else sits in this file is context that subagent pays for on every turn,
+    and work it may do twice — so a batch names its own cells, its own
+    queries and its own record commands, and no other batch's."""
+    e = _entity(wb)
+    cells = sorted({c for q in queries for c in q["subcaps"]})
+    tools = sorted({q["tool"] for q in queries})
+    lines = [
+        f"# Search relay — batch `{key}` — run `{run.run_id}`",
+        "",
+        f"Entity **{e['entity']}** ({e['sub_vertical'] or 'sub-vertical not set'}). "
+        f"Run root `{run.root}`. Run every command below from `{SKILL_REL}`.",
+        "",
+        f"You hold the enrichment connectors. A research lane does not — they "
+        f"bind once, at session start, in this session — so it emitted these "
+        f"queries as `search_requests` rather than fabricating a result. "
+        f"Work THIS batch and nothing else: no new research, no synthesis, "
+        f"no score, no other cells.",
+        "",
+        (f"**Connector for this batch: `{tool}`.** " if len(tools) == 1 else
+         f"**Connectors for this batch: {', '.join(f'`{t}`' for t in tools)}** — "
+         f"each query names the one to use; do not substitute another. "),
+        f"Cells it bears on: {', '.join(f'`{c}`' for c in cells) or '(run-level, no cell)'}.",
+        "",
+        f"## The {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}",
+        "",
+    ]
+    for i, q in enumerate(queries, 1):
+        lines.append(f"### {i}. {q['query']}")
+        lines.append("")
+        lines.append(f"- cells: {', '.join(f'`{c}`' for c in q['subcaps']) or '(none — run-level)'}")
+        lines.append(f"- facet: `{q['facet'] or C.PRIMARY_FACET}` · tool: `{q['tool']}` "
+                     f"· requests: {', '.join(q['request_ids'])}")
+        for f in q["falsifiers"]:
+            lines.append(f"- falsifier (fire it when the query hits): {f}")
+        for p in q["proves"]:
+            lines.append(f"- what a hit would prove: {p}")
+        lines += [
+            "- log the search the moment it returns:",
+            f"  ```\n  {q['command_search']}\n  ```",
+            "- close the request(s):",
+            f"  ```\n  {q['command_record']}\n  ```",
+            "",
+        ]
+    rr = f"--run {run.run_id} --root {run.root}"
+    lines += [
+        "## For each query, in this order",
+        "",
+        (f"1. Run it through `{tool}`." if len(tools) == 1 else
+         "1. Run it through the connector its own `tool:` line names.") +
+        " If the call is refused or the tool is "
+        "not present, do NOT retry another way and do NOT run it through "
+        "WebSearch instead: record it BLOCKED with the refusal text verbatim "
+        "and move on. Never log a connector search you did not run.",
+        "2. Run the `engine.cli search` line above, with `N`/`K` replaced by "
+        "the real hit and kept counts (`--outcome '<one line>'` is welcome).",
+        "3. Register every source you keep: "
+        f"`python3 -m engine.cli evidence {rr} --subcap <cell> --source "
+        "'<name>' --url <url> --tier <T1|T2|T3|T4> --excerpt '<50–500 "
+        "verbatim characters>' [--published YYYY-MM-DD]`. Pass `--published` "
+        "only when the source states a date — undated evidence is "
+        "UNVERIFIED, never current.",
+        "4. Run the `engine.relay record` line, with the status you actually "
+        "got. EMPTY is an honest outcome (the connector ran and returned "
+        "nothing usable); BLOCKED is a measured one and needs the refusal "
+        "text; SERVED means at least one row was registered.",
+        "",
+        "## Refusals you will meet",
+        "",
+        f"- `engine.cli search` refuses a tool outside {list(C.SEARCH_TOOLS)} and a "
+        "query carrying an unbound `{token}`.",
+        "- `engine.cli evidence` refuses an excerpt outside 50–500 characters and "
+        "a row that names no cell.",
+        "- `engine.relay record` refuses BLOCKED without a note, and names any "
+        "id it does not know while recording the rest.",
+        "",
+        "## Report",
+        "",
+        "Return ONLY this JSON: "
+        '`{"served": n, "empty": n, "blocked": n, "blocked_reasons": ["…"]}`. '
+        "Never invent a result; a request you did not reach stays OPEN and the "
+        "driver will say so.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def _qs(n: int) -> str:
+    return f"{n} quer{'y' if n == 1 else 'ies'}"
+
+
+def _batch_md(run: runstate.Run, out: dict) -> str:
+    n_g = len(out["groups"])
+    lines = [f"# Relay batch r{out['round']} — run `{run.run_id}`", "",
+             f"{out['requests']} open request(s) → {_qs(out['queries'])} "
+             f"after dedupe, over {n_g} batch{'' if n_g == 1 else 'es'}, "
+             f"grouped by {out['group_by']}. One fresh subagent per batch; "
+             f"nothing here is dispatched by the engine.", ""]
+    for g in out["groups"]:
+        lines.append(f"## `{g['key']}` · tool `{g['tool']}` · "
+                     f"{_qs(len(g['queries']))}")
+        lines.append("")
+        lines.append(f"Prompt: `{g['prompt_file']}`")
+        lines.append("")
+        for q in g["queries"]:
+            lines.append(f"- {q['query']}  \n  cells "
+                         f"{', '.join(q['subcaps']) or '(run-level)'} · "
+                         f"ids {', '.join(q['request_ids'])}")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def batch(run: runstate.Run, wb, *, group_by: str = "capability",
+          categories: list[str] | None = None, out_dir: Path | None = None,
+          round_no: int | None = None) -> dict:
+    """The OPEN requests, deduplicated and grouped, written for the holder.
+
+    Writes `07_qa/relay_batch_r<n>.json` (the index the conductor reads),
+    a `.md` beside it (the same thing for a person), and one self-contained
+    prompt per group under `briefs/relay_r<n>/<key>.md`. Dispatches nothing:
+    the conductor spins one fresh in-process subagent per prompt, because
+    those inherit its connectors and a headless child does not.
+    """
+    group_by = str(group_by or "capability").strip().lower()
+    if group_by not in GROUP_BYS:
+        raise ValueError(f"group_by {group_by!r} must be one of {GROUP_BYS}")
+    want = {str(c).strip().upper() for c in categories} if categories else None
+    reqs = [r for r in open_requests(run)
+            if want is None or not r.get("category")
+            or str(r["category"]).upper() in want]
+    n = _round_no(run, out_dir) if round_no is None else int(round_no)
+    out_dir = Path(out_dir) if out_dir is not None else (
+        run.root / "briefs" / f"relay_r{n}")
+    out: dict = {"round": n, "group_by": group_by, "run_id": run.run_id,
+                 "root": str(run.root), "requests": len(reqs), "queries": 0,
+                 "groups": [], "prompts": [], "batch_file": None,
+                 "md_file": None, "out_dir": str(out_dir)}
+    if not reqs:
+        return out
+    merged = _merge_queries(reqs)
+    for q in merged:
+        q.update(_commands(run, q))
+    groups: dict[str, list[dict]] = {}
+    for q in merged:
+        groups.setdefault(_group_key(q, group_by), []).append(q)
+    out["queries"] = len(merged)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for key in sorted(groups):
+        qs = groups[key]
+        tool = (key if group_by == "tool"
+                else max({t: sum(1 for q in qs if q["tool"] == t) for t in
+                          {q["tool"] for q in qs}}.items(),
+                         key=lambda kv: (kv[1], kv[0]))[0])
+        prompt = out_dir / f"{key}.md"
+        prompt.write_text(batch_prompt(run, wb, key, tool, qs), encoding="utf-8")
+        g = {"key": key, "tool": tool, "prompt_file": str(prompt),
+             "requests": sum(len(q["request_ids"]) for q in qs),
+             "queries": [{k: q[k] for k in
+                          ("query", "request_ids", "subcaps", "facet", "tool",
+                           "command_search", "command_record")} for q in qs]}
+        out["groups"].append(g)
+        out["prompts"].append({"key": key, "tool": tool,
+                               "prompt_file": str(prompt),
+                               "queries": len(qs), "requests": g["requests"]})
+    bf = run.qa_dir / f"relay_batch_r{n}.json"
+    bf.parent.mkdir(parents=True, exist_ok=True)
+    out["batch_file"] = str(bf)
+    out["md_file"] = str(bf.with_suffix(".md"))
+    bf.write_text(json.dumps(out, indent=2, default=str), encoding="utf-8")
+    bf.with_suffix(".md").write_text(_batch_md(run, out), encoding="utf-8")
+    return out
 
 
 # ── the drain brief ───────────────────────────────────────────────────────
@@ -569,11 +1030,38 @@ def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -
 
 
 def drain_batch(run: runstate.Run, wb, *, out_dir: Path,
-                categories: list[str] | None = None) -> dict:
-    """One `enrichment-web-specialist` lane per category with OPEN requests,
-    as an `agent_run.py --batch` array. Rows carry a `label` so sixteen lanes
-    of one agent keep sixteen transcripts."""
+                categories: list[str] | None = None,
+                mode: str = DEFAULT_RELAY_MODE,
+                group_by: str = "capability") -> dict:
+    """Service the open requests — in one of two modes.
+
+    `"orchestrator"` (the DEFAULT) writes the batch and its per-capability
+    prompts and dispatches NOTHING, returning `{"lanes": 0, "pending": n,
+    "batch_file": …}`. The conductor reads that index and spins one fresh
+    in-process subagent per prompt, which inherits the session's connectors.
+    This is the only arrangement that can work: connectors bind once, at
+    session start, and a `claude -p` child is a different session with none
+    of them — the measured cost of pretending otherwise was sixteen lane
+    context floors a round (~290K tokens) to discover an absent tool.
+
+    `"lane"` is the pre-2026-09-14 dispatch, kept as an explicit fallback:
+    one `enrichment-web-specialist` lane per category with OPEN requests, as
+    an `agent_run.py --batch` array whose rows carry a `label` so sixteen
+    lanes of one agent keep sixteen transcripts. It is right only where the
+    container itself holds the connectors.
+    """
+    mode = str(mode or "").strip().lower()
+    if mode not in RELAY_MODES:
+        raise ValueError(f"relay mode {mode!r} must be one of {RELAY_MODES}")
     out_dir = Path(out_dir)
+    if mode == "orchestrator":
+        b = batch(run, wb, group_by=group_by, categories=categories,
+                  out_dir=out_dir)
+        return {"mode": mode, "lanes": 0, "batch": None,
+                "pending": b["requests"], "requests": b["requests"],
+                "queries": b["queries"], "batch_file": b["batch_file"],
+                "md_file": b["md_file"], "prompts": b["prompts"],
+                "briefs": b["prompts"]}
     want = {str(c).upper() for c in categories} if categories else None
     groups: dict[str, list[dict]] = {}
     for r in open_requests(run):
@@ -615,8 +1103,25 @@ def grants_check() -> dict:
                 "note": f"could not read {AGENT_RUN.name}: {e.__class__.__name__}"}
 
 
+#: The tier that HOLDS the enrichment connectors. Since the 2026-09-14
+#: roster change they are bound in the orchestrator's session, not in a
+#: headless lane's: a lane emits `search_requests` and the conductor
+#: services them in batches, which is the only arrangement that can work —
+#: connectors bind once, at session start, and a `claude -p` child of the
+#: conductor is a different session with none of them.
+CONNECTOR_HOLDER = "research-conductor"
+
+
 def manifest_check(lane: str) -> dict:
-    """Which connector tools the lane's own manifest declares."""
+    """Which connector tools the lane's own manifest declares.
+
+    `ok` answers "is this manifest as it should be", which since the roster
+    change is NOT "does it declare a connector". A research lane that
+    declares none is correct; what would be broken is the HOLDER declaring
+    none, because then nobody in the run can service what the lane emits.
+    So a lane's `ok` is judged against the holder's manifest, and the
+    `manifest` heal re-targets the human who must fix it.
+    """
     hits = list(AGENTS_DIR.rglob(f"{lane}.md")) if AGENTS_DIR.is_dir() else []
     if not hits:
         return {"path": None, "declares": [], "ok": False,
@@ -625,7 +1130,19 @@ def manifest_check(lane: str) -> dict:
     m = re.search(r"^tools:\s*(.+)$", head, re.M)
     tools = [t.strip() for t in (m.group(1) if m else "").split(",") if t.strip()]
     declares = [t for t in tools if any(t.startswith(ns + "__") for ns in CONNECTOR_NAMESPACES)]
-    return {"path": str(hits[0]), "declares": declares, "ok": bool(declares)}
+    if declares or lane == CONNECTOR_HOLDER:
+        return {"path": str(hits[0]), "declares": declares,
+                "ok": bool(declares), "holder": lane}
+    # A lane with no connector is the contract. Whether the RUN can enrich
+    # is then a question about the holder, so ask it there.
+    holder = manifest_check(CONNECTOR_HOLDER)
+    return {"path": str(hits[0]), "declares": declares,
+            "ok": bool(holder["declares"]), "holder": CONNECTOR_HOLDER,
+            "holder_declares": holder["declares"],
+            "note": (None if holder["declares"] else
+                     f"neither {lane}.md nor the holder {CONNECTOR_HOLDER}.md "
+                     f"declares a connector tool, so nothing in this run can "
+                     f"service a search request")}
 
 
 def transcript_connector_witness(transcript: Path) -> dict:
@@ -765,8 +1282,16 @@ def main(argv=None) -> int:
     ls = common(sub.add_parser("list"))
     ls.add_argument("--status", choices=REQUEST_STATUSES)
     ls.add_argument("--category")
-    rc = common(sub.add_parser("record", help="close one request"))
-    rc.add_argument("--id", required=True)
+    bt = common(sub.add_parser(
+        "batch", help="group the open requests for the session that holds the "
+                      "connectors: one prompt per capability, dispatched by nobody"))
+    bt.add_argument("--group-by", choices=GROUP_BYS, default="capability")
+    bt.add_argument("--category", help="comma-separated; default: every open request")
+    bt.add_argument("--out-dir", help="default: <run>/briefs/relay_r<n>")
+    rc = common(sub.add_parser("record", help="close one request, or many"))
+    rc.add_argument("--id", help="one request id")
+    rc.add_argument("--ids", help="comma-separated request ids — one search "
+                                  "closes every request that asked for it")
     rc.add_argument("--status", required=True, choices=CLOSING_STATUSES)
     rc.add_argument("--note", default="")
     rc.add_argument("--actor", default="")
@@ -803,8 +1328,19 @@ def main(argv=None) -> int:
         return emit(rows, "\n".join(f"{r['id']}  {r['status']:<7} {r.get('category') or '-':<5} "
                                     f"{r.get('subcap') or '-':<12} {r['query'][:90]}" for r in rows)
                     or "no requests queued")
+    if a.cmd == "batch":
+        out = batch(run, run.open(), group_by=a.group_by, categories=cats,
+                    out_dir=Path(a.out_dir) if a.out_dir else None)
+        return emit(out, f"{out['requests']} open request(s) → {out['queries']} "
+                         f"query(ies) over {len(out['groups'])} batch(es) → "
+                         f"{out['batch_file'] or 'nothing to write'}")
     if a.cmd == "record":
-        return emit(record(run, a.id, a.status, note=a.note, actor=a.actor, tool=a.tool))
+        ids = ([i.strip() for i in (a.ids or "").split(",") if i.strip()]
+               + ([a.id] if a.id else []))
+        if not ids:
+            ap.error("record needs --id or --ids")
+        return emit(record(run, ids, a.status, note=a.note, actor=a.actor,
+                           tool=a.tool))
     if a.cmd == "reconcile":
         return emit(reconcile(run, run.open()))
     if a.cmd == "state":

@@ -6,7 +6,7 @@ effort: high
 maxTurns: 200
 skills:
   - dma-research
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, Agent, AskUserQuestion, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, Agent, AskUserQuestion, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -126,14 +126,26 @@ tool call is the cost this removes.
    ```
 
    **`--strict` or the gate is not a gate** — without it a STOP still exits 0.
-   A STOP means STOP: name the missing families, say a human attaches them on
-   the Routine's own edit screen, and do not dispatch. Measured 2026-09-12: a
-   run began with no enrichment connector bound, so `declare_absence` refused
-   every empty cell (it requires one of `C.ENRICHMENT_TOOLS`; web_search is
-   not one), so no floors gate could pass, so sixteen categories were
-   re-dispatched ~18 times for $96.65 and closed nothing. Sixteen lanes
-   against a session that cannot close a cell is the most expensive way to
-   discover the connectors were missing.
+   What the verdict means for the run, which is not what it used to mean:
+
+   - **No baseline written at all** — `engine.pipeline run` REFUSES at
+     PREFLIGHT, before one lane is dispatched. Nothing can say whether a cell
+     is enrichable or honestly absent, and a run that cannot tell those apart
+     spends its ceiling discovering it. Write the baseline; unverified is not
+     a diagnosis.
+   - **STOP, families missing** — a measured limit, not a stop. Name the
+     missing families and say a human attaches them on the Routine's own edit
+     screen, then RUN THE RUN: it proceeds DEGRADED, its lanes are told to
+     close cells with `engine.cli absence … --enrichment-unavailable`, and
+     the ENRICHMENT gate discloses the gap per category instead of
+     re-dispatching against it.
+
+   Measured 2026-09-12, which is why both branches exist: a run began with no
+   enrichment connector bound, so `declare_absence` refused every empty cell
+   (it requires one of `C.ENRICHMENT_TOOLS`; web_search is not one), so no
+   floors gate could pass, so sixteen categories were re-dispatched ~18 times
+   for $96.65 and closed nothing. Refusing to start would not have closed a
+   cell either. The degraded path closes them and says how.
 
    The baseline is also what tells a LATER loss apart from never having had
    it: work done while a connector was bound stays valid, and work after it
@@ -201,6 +213,16 @@ tool call is the cost this removes.
        python3 -m engine.pipeline run  --run <RUN_ID> --root <ROOT> \
                --max-wall-min 240 --lane-retries 1 --page-retries 2
 
+   **The ceilings are defaults now, and they bite.** `--max-usd` is $5 per
+   pillar in scope and STOPS the run; `--max-rounds 10`; `--stall-rounds 2`
+   ends a stage after two rounds that advance nothing; `--max-wall-min 240`;
+   `--enrichment-heals 1`. Name one only to change it. `STOPPED_BUDGET` exits
+   1, the spend is remembered on disk, and a re-run REFUSES before dispatch —
+   a second process does not get a second budget. Raising `--max-usd` is how
+   a run continues past it, and that raise is a person's decision, not yours.
+   Two watchdog states end on a person and never on an agent:
+   `BLOCKED_NO_CONNECTOR` and `AT_USD_CEILING`.
+
    `engine.pipeline run` walks the stage table in order — PRELIM → KG →
    RESEARCH → HANDOFF → SCORING → INGEST_A → REPORTS → PAGES_A → PACKAGE →
    INGEST_B → PAGES_B → PROMOTE — and at every stage it (a) reads a DONE
@@ -250,6 +272,95 @@ tool call is the cost this removes.
    when the driver dispatches you in PRELIM-ONLY mode — the seven sections
    below, through `engine.prelim`, and nothing past `engine.prelim complete`.
 
+2b. **You are the connector tier, and RESEARCH is a loop you drive.**
+
+   The enrichment connectors — Exa, Tavily, Clay, Vibe — are bound in YOUR
+   session and in no lane's. They bind once, at session start, and every
+   category lane is a separate `claude -p` child that holds none of them.
+   Only a subagent you dispatch **in process**, through the Agent tool,
+   inherits them. This is not a preference; it is the measured shape of the
+   thing, and pretending otherwise is what cost a run $96.65 to close
+   nothing: sixteen headless lanes were dispatched ~18 times each to
+   rediscover that a tool they could never bind was still absent.
+
+   So a lane never calls a connector. It emits `search_requests`, the driver
+   harvests them, and the driver hands you batches to service:
+
+       python3 -m engine.pipeline run --step --run <RUN_ID> --root <ROOT> --json
+
+   One research round, then it returns `ROUND_COMPLETE` (exit 0, resumable)
+   with a `pending` block: the relay batch files, the still-open categories,
+   the stalled ones, the budget remaining and the rounds remaining. Then:
+
+   1. **Service every relay batch — one fresh subagent per batch.** Each
+      batch is a self-contained prompt file under `briefs/relay_r<n>/` that
+      carries only its own queries, the cells they bear on, the connector to
+      use and the exact `engine.cli search` and `engine.relay record`
+      commands. Dispatch it with the Agent tool: Exa and Tavily batches to
+      `enrichment-web-specialist`, Clay and Vibe batches to
+      `enrichment-connector-specialist`. One batch, one subagent, one prompt
+      — never a standing worker you keep feeding.
+   2. **Read the gaps from the substrate, never from a lane's report.**
+      `python3 -m engine.brief gaps --run <RUN_ID> --root <ROOT> --json`
+      names, per category: open cells, undeclared-empty cells, unserviced
+      requests, stalled rounds, deferred challenges, unattached proposals.
+   3. **Close the gap classes that are yours.** Unattached cross-category
+      proposals get a targeted correlation pass: `engine.brief correlate
+      --category <C> --json` returns a prompt of at most 2,000 characters
+      listing only that category's standing proposals with their `attach`
+      commands, and you dispatch a fresh `research-p<x>c<y>-producer` with
+      that prompt ALONE. It returns nothing when there is nothing to
+      correlate, and nothing means dispatch nothing. Undeclared-empty cells
+      under a proven-unbound baseline are the driver's — the next `--step`
+      re-dispatches them with the handback.
+   4. **`--step` again.** The loop ends when `plan` says RESEARCH is done, or
+      when `budget_remaining_usd` reaches 0 or `rounds_remaining` reaches 0 —
+      and then it is `STOPPED_BUDGET`, which is a person's decision.
+
+   **A pending batch never stops the run.** The ENRICHMENT gate records
+   `PENDING_ORCHESTRATOR` — non-blocking — while a batch is unserviced, and
+   spends none of the heal budget on it. Work not yet done is not a gap. It
+   becomes a blocking FAIL only when a subagent recorded a request `BLOCKED`,
+   which means a connector refused it and said so.
+
+   **Results never pass through your context.** A subagent writes its
+   findings to the workbook through `engine.cli search` and `engine.cli
+   evidence` and closes its requests with `engine.relay record`. You hold the
+   batch index and nothing else — which is why your context stays flat across
+   a run of hundreds of queries. Never ask a subagent to report its results
+   back to you for you to write down.
+
+   **Evidence correlation is ROUTED, and it is targeted.** It used to be a
+   sentence: `handback.leads_for_other_categories` was computed correctly
+   and handed to the category that PRODUCED the lead, where it is useless.
+   Now each lane's own packet carries `leads_in` — registered rows another
+   lane opened whose `SubCap_IDs` already name one of THIS lane's cells —
+   plus up to two BM25-scored `proposed_from_other_categories` suggestions
+   per open cell. A lane turns a proposal into a citation with `engine.cli
+   attach --e-id <E> --subcap <its own cell>`, which names the existing row
+   rather than minting a duplicate, or dismisses it with `--decline --why`.
+   Nothing is ever attached on its behalf: the semantic matcher was measured
+   at 57.7% precision, and propose-never-attach is what that measurement
+   bought. `handback` reports `proposals_offered` and `proposals_attached`,
+   so whether reuse earns its complexity is a number rather than a belief.
+
+   A correlation map therefore reaches a subagent in exactly two ways:
+   BEFORE it reaches the subcap, inside that category's own packet; or AFTER
+   it responds, as the `brief correlate` prompt above. A packet for one
+   category names another category's cells ONLY inside
+   `leads_in[].also_names`; a proposal names the source categories and no
+   foreign cell id at all. Handing every lane a run-wide map is how input
+   context bloats and how one lane starts writing another's rows.
+
+   **Across sessions.** Everything is on disk: the workbook, `07_qa/
+   pipeline_state.json`, `07_qa/search_relay.jsonl`, `briefs/relay_r*/`, and
+   the memory backup the driver takes at every round end. A fresh container
+   runs `engine.pipeline plan` and `engine.brief gaps` and continues the loop
+   — restoring the notebooks first with `engine.memory restore` if `03_memory/`
+   is empty. Your `maxTurns: 200` is not the run's ceiling: the lanes are
+   separate processes with their own, and a step that exhausts your turns is
+   resumed by the next session from the same files.
+
 3. **When a stage FAILs, read the refusal, not your memory.** The stage's
    Gate_Log detail and `07_qa/pipeline_state.json` name the blocker: a
    category's blocking terms (`engine.brief needs`), the SCORING gate's list,
@@ -262,9 +373,13 @@ tool call is the cost this removes.
 
 4. **Read what a lane established from the substrate.** `engine.brief
    handback --category <C>` is computed from the sheets and has the same
-   shape whether the lane finished or died; its `leads_for_other_categories`
-   names sources one lane opened that another lane's cells need. The driver
-   feeds it back on re-dispatch; you read it when a stage FAIL asks you why.
+   shape whether the lane finished or died. It reports what the category
+   still owes, and — since the reuse pass — how many cross-category
+   proposals were offered to it and how many it attached, which is the
+   measurement that says whether reuse is earning its complexity. Sources
+   one lane opened that ANOTHER lane's cells need travel as `leads_in` in
+   that other category's packet, not as a line in this one's handback; the
+   driver routes them. You read the handback when a stage FAIL asks you why.
 
 5–8. *(the stages the driver runs — challenge, gate, validate, hand off, the
    client's own tabs through `engine.profile`, SCORE with four pillar lanes

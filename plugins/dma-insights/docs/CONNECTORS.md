@@ -259,14 +259,14 @@ The table lists what each surface uses BEYOND the package, and why.
 | overview.exec_summary | — | synthesis over other surfaces; no direct enrichment |
 | overview.why_now | Exa · Tavily | dated external signals: announcements, filings, leadership statements — each registered with excerpt + URL |
 | overview.thought_leadership | Exa | the entity's own publications, talks, bylines |
-| overview.leadership | Explorium · Tavily · (Clay) | roster verification, arrivals/departures, profile facts; Clay contact enrichment via its connector |
+| overview.leadership | Exa · Tavily · Clay‡ | roster verification, arrivals/departures, profile facts through the orchestrator tier; the contacts pass itself is Clay, run and polled by the producer |
 | overview.financial_series | Tavily | regulator series (call reports, 10-K figures) corroboration |
 | overview.sentiment | Tavily | app-store / review aggregate figures with n, scale, as_of |
 | overview.findings | — | package + cross-surface reconciliation |
 | overview.opportunity | (engine) + the platform set below | tiles mirror platform.platform_story — same factors, same validations |
 | heatmap.workbook_scores | — | package only — scores are never enriched (invariant: no fabricated scores) |
 | heatmap.focus_areas | Exa · Tavily | corroborate/falsify the named gap per the H3 ladder |
-| heatmap.cell_evidence | Exa · Tavily · Indeed* | subcap-specific evidence: artefact vocabulary searches, job postings as demand signals |
+| heatmap.cell_evidence | Exa · Tavily | subcap-specific evidence: artefact vocabulary searches; job-posting demand signals arrive through the technographic scan's Indeed rows, never a second Indeed call |
 | heatmap.evidence | — | the register itself; new rows only via register_evidence |
 | heatmap.evidence_age | — | computed from the register |
 | heatmap.alerts | — | the ladder's honest residue; queries logged, no new sources |
@@ -274,36 +274,56 @@ The table lists what each surface uses BEYOND the package, and why.
 | heatmap.cohort_patterns | — | cross-entity, server-side |
 | heatmap.value_chain | — | server-derived (H9 envelope) |
 | insights.insights | Exa · Tavily | each card's external claims verified corroborate+falsify before challenge |
-| insights.landscape | Explorium · Tavily | peer set facts; T2 recomputes from T1 register |
-| platform.platform_story | Clay† · Explorium · Exa · Tavily · Indeed* | greenfield deep-search ladder (family truly absent?); peer deployments; demand signals; alignment quotes from the entity's own words |
+| insights.landscape | Explorium‡ · Tavily | peer set facts from the register the producer reads out of Explorium itself; T2 recomputes from T1 register |
+| platform.platform_story | Exa · Tavily | greenfield deep-search ladder (family truly absent?); peer deployments; alignment quotes from the entity's own words — serviced as search_requests; the estate's own rows come from the technographic scan |
 | platform.recommendations | Exa · Tavily | feasibility corroboration for each recommendation's premise |
 | platform.roadmap | — | sequenced from fit engine + register |
 | platform.stairstep | — | engine + package |
 | platform.starters | Exa · Tavily | each starter's named gap re-verified before it ships |
-| techstack.techstack | Clay† · Explorium | technographic register verification: CONFIRMED needs a source row; ABSENT needs the absence ladder |
+| techstack.techstack | Explorium‡ | technographic register verification from Explorium's own answer: CONFIRMED needs a source row; ABSENT needs the absence ladder. Clay's company pass reaches this surface through the technographic scanner's rows |
 | context.timeline | Exa · Tavily | dated events with verbatim excerpts |
 | context.issue_register | Tavily | regulator/issue corroboration |
 | context.regulatory_standing | Tavily | regulator records (NCUA, SEC, FINRA) |
 | context.context_sentiment | Tavily | rated-source aggregates |
 | context.acquisitions | Exa · Tavily | deal records, integration statements |
 
-\* Indeed via its claude.ai connector where attached; job-posting demand
-signals fall back to Tavily/Exa site-scoped searches where it is not.
-† Clay via its claude.ai connector in the correct workspace; a refused
+**Who calls what (2026-09-14, owner decision).** Connectors are held and
+CALLED by the orchestrator tier. A service in the table **without ‡** is
+called by that tier — `research-conductor` batches the `search_requests`
+the lanes and producers emit by capability and hands each batch to
+`enrichment-web-specialist` (Exa search, Tavily fallback and extract) or
+`enrichment-connector-specialist` (Clay, Explorium); the producer that owns
+the surface holds no connector and emits its queries. A service marked
+**‡** is one the owning producer must hold ITSELF, because the surface is
+written FROM that connector's answer rather than corroborated by it: the
+leadership roster from Clay's contacts pass, the technographic register and
+its landscape rollup from Explorium. `scripts/tests/test_connector_provisioning.py`
+re-derives both rules from this table on every run.
+
+Indeed is held by the `technographic-scanner` alone (`search_jobs` — job
+postings as the DATA/INFRA demand signal); every other surface reads those
+rows out of the scan rather than calling Indeed again. Quartr is declared in
+the registry and granted to no agent (not wired). Drive is granted to no
+agent: the client folder and the toolkits land under the run root through
+`drive_fetch.py` over Bash. Clay runs in the correct workspace; a refused
 grant records as not-run — never invented technographics (MEM-0082).
 
 ## Dispatch mode and where the connectors actually live
 
 The claude.ai connector tools are attached to the top session. A headless
-child dispatched via `scripts/agent_run.py` is pre-approved for every
-connector namespace (`agent_run.ALLOWED`) and the agent manifests declare the
-tools, but binding is the harness's and a child can still find them absent —
-which is why the rule that keeps enrichment honest across that boundary
-(`skills/dma-surface-production/05-lifecycle/routing.md` § Dispatch mode) is:
-try the connector first, log it with the tool that ran it, and where it is
-refused emit `search_requests` rather than fabricating or falling back to
-WebSearch. The dma-insights connector itself reaches every layer (static /mcp
-+ header token), children included.
+child dispatched via `scripts/agent_run.py` is pre-approved for the connector
+namespaces (`agent_run.ALLOWED`), but binding is the harness's and a child
+finds them absent — measured on every headless audit — which is why, since
+2026-09-14, no research lane and no section producer declares a connector at
+all: a lane emits `search_requests`, the conductor batches them by
+capability, and the servicing tier (`research-conductor`,
+`enrichment-web-specialist`, `enrichment-connector-specialist`) calls the
+connector it holds and logs the search with the tool that ran it. The rule
+that keeps enrichment honest (`skills/dma-surface-production/05-lifecycle/routing.md`
+§ Dispatch mode) is unchanged in spirit: never log a connector search you
+did not run, never fall back to WebSearch and call it the connector. The
+dma-insights connector itself reaches every layer (static /mcp + header
+token), children included.
 
 **The relay is code, not prose (MEM-0333, closed 2026-09-07).** The 2026-08-28
 headless audit measured that nothing read a lane's `search_requests`; the
@@ -314,9 +334,10 @@ inside every research round of `engine.pipeline`:
 | verb | what it does | where it lands |
 |---|---|---|
 | `harvest` | reads each lane's transcript (`agent_logs/<lane>.jsonl` + `.out`) for `search_requests` — whole-JSON, fenced JSON or the key in prose — and queues each once | `07_qa/search_relay.jsonl` (append-only; id = hash of normalised query + cell) |
-| `drain-brief` | one `enrichment-web-specialist` lane per category with OPEN requests, briefed with the exact `engine.cli search --tool exa`, `engine.cli evidence` and `engine.relay record` commands | `briefs/relay_r<N>/`; dispatched as stage `RELAY` |
-| `reconcile` | closes OPEN requests SERVED/EMPTY from the Search_Log itself (an enrichment-tool row whose query matches) | the queue |
-| `heal` | for a category with NO connector search: which half is broken, measured — `grants` (a connector call refused in the transcript), `instruction` (never attempted), `logging` (called, logged as web_search), `manifest` (the lane declares none) | the ENRICHMENT gate row and the fresh lane's brief |
+| `batch` | **the default since 2026-09-14.** Deduplicates the OPEN requests by normalised query, groups them by capability, proposes the connector per query, and writes ONE index plus a self-contained prompt per group — each carrying only its own queries, their cells, the connector to use and the exact `engine.cli search` / `engine.relay record` commands. Dispatches nothing: the conductor spins one fresh in-process subagent per prompt, and only those inherit its connectors | `07_qa/relay_batch_r<N>.json` (+ `.md`) and `briefs/relay_r<N>/<capability>.md` |
+| `drain-brief` | the FALLBACK (`--relay-mode lane`): one `enrichment-web-specialist` lane per category with OPEN requests, briefed with the exact `engine.cli search --tool exa`, `engine.cli evidence` and `engine.relay record` commands. Right only where the CONTAINER itself holds the connectors | `briefs/relay_r<N>/`; dispatched as stage `RELAY` |
+| `reconcile` | closes OPEN requests SERVED/EMPTY from the Search_Log itself (an enrichment-tool row whose query matches). Runs at the START of every round, because in batch mode the previous round's work was done by subagents the driver never saw and the Search_Log is their only report | the queue |
+| `heal` | for a category with NO connector search: which half is broken, measured — `grants` (a connector call refused in the transcript), `instruction` (never attempted), `logging` (called, logged as web_search), `manifest` (the lane declares none), `unbound` (the run's own baseline proves no enrichment connector was ever bound — a fresh lane cannot reach what is not in the container, so this one is disclosed at once and spends no heal) | the ENRICHMENT gate row and the fresh lane's brief |
 
 The **ENRICHMENT gate** (per category, from the Search_Log's `Tool` column) is
 the third gate beside FLOORS and DISPATCH_VERIFY. Zero connector searches →
@@ -327,6 +348,12 @@ Gate_Log and `07_qa/pipeline_state.json` (`enrichment_disclosed`), never a
 silent pass and never a wall when the harness bound no connector to a child.
 `python3 -m engine.relay enrichment --run R` prints the per-category counts;
 `python3 -m engine.relay state --run R` the queue.
+
+A batch the conductor has not yet serviced is **`PENDING_ORCHESTRATOR`** on
+the gate — non-blocking, and it spends none of the heal budget. Work not yet
+done is not a gap, and a run that halted on one would be waiting on itself.
+It becomes a blocking FAIL only when a servicing subagent recorded the
+request `BLOCKED`, which means a connector refused it and said so verbatim.
 
 Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's

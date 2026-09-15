@@ -37,10 +37,11 @@ CAT = "P2C3"
 RESULTS = []
 
 
-def cli(*args, family=None, expect=0, quiet=True):
+def cli(*args, family=None, expect=0, quiet=True, stdin=None):
     cmd = [sys.executable, "-m",
            f"engine.{family}" if family else "engine.cli", *args]
-    r = subprocess.run(cmd, cwd=ENGINE, capture_output=True, text=True)
+    r = subprocess.run(cmd, cwd=ENGINE, capture_output=True, text=True,
+                       input=stdin)
     return r
 
 
@@ -180,6 +181,33 @@ def main():
                    "--category", CAT, "--subcap", subcap, *args, family="memory")
     good = ("Stress Credit Union launched digital account opening in Q2 2025 "
             "and reports members completing new accounts online in under ten minutes.")
+    # THE PAGES ARE READ BEFORE THEY ARE QUOTED. Since 2026-09-14
+    # consolidation verifies every excerpt against the text `engine.cli
+    # fetch` cached for its URL, so a walk that notes an excerpt for a page
+    # nothing read is BLOCKED with `excerpt_unverified` — which is the
+    # refusal working, not the walk failing. `--via-text -` is the seam a
+    # servicing actor uses for a connector's own extract, and it is what
+    # stands in here for the fetch a lane would make.
+    # ONE PAGE FOR THE THREE `#pN` URLs: the cache keys on the NORMALISED
+    # url and a fragment does not make a second document — the three notes
+    # quote three passages of one annual report, which is what the page
+    # below carries.
+    pages = {
+        "https://stress.example/ar25": "\n".join(
+            good + f" Restated at figure {i} in the annual report."
+            for i in range(3)),
+        "https://stress.example/handbook": (
+            "Business membership accounts must be opened at a branch with "
+            "two forms of identification, per the 2025 member handbook."),
+    }
+    for url, text in pages.items():
+        r = cli("fetch", "--run", RUN, "--root", str(ROOT), "--url", url,
+                "--via-text", "-", "--query", "digital account opening",
+                stdin=text)
+        if r.returncode != 0:
+            stage("engine.cli fetch --via-text caches the page", False,
+                  r.stderr[-200:])
+            break
     for i in range(3):
         r = note("--facet", "works", "--kind", "evidence",
                  "--claim", "digital onboarding live with measured completion",

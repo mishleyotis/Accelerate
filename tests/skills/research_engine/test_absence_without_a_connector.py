@@ -46,10 +46,12 @@ def _bound_tools():
 def _run(tmp_path, tools, n=4):
     """A run whose cells are fully worked THROUGH WEB SEARCH ONLY — every
     askable volley, both ladder rungs, nothing else missing."""
-    run = F.new_run(tmp_path, n=n)
+    # `tools=None` is a run that NEVER RECORDED A BASELINE — the unverified
+    # case, which several tests below turn on. `new_run` writes a bound one
+    # by default (since the driver refuses to dispatch without one), so it
+    # is suppressed here rather than overwritten.
+    run = F.new_run(tmp_path, n=n, baseline=(tools if tools is not None else None))
     wb = run.open()
-    if tools is not None:
-        cc.write_baseline(tools, str(run.root))
     for cell in wb.selected_subcaps():
         F.fire_volleys(wb, cell, n=1)
         for rung in ("direct", "proxy"):
@@ -270,3 +272,137 @@ def test_the_flag_exists_and_is_threaded_through():
     text = inspect.getsource(cli.main)
     assert '"--enrichment-unavailable", action="store_true"' in text
     assert "enrichment_unavailable=a.enrichment_unavailable" in text
+
+
+# ── the lane is TOLD about the degraded path ───────────────────────────
+#
+# The flag was built on 2026-09-13 and named in the CLI and SKILL.md only:
+# neither the dispatch packet nor the heal instruction mentioned it, so a
+# lane following its brief literally could not take the path built for it.
+# It is named only where the run's own baseline proves the connector
+# missing — a lane told about an escape it is not entitled to will reach
+# for it, and the writer refuses it anyway.
+
+def _rules_for(tmp_path, tools):
+    from engine import brief
+    from fixtures import new_run
+    run = new_run(tmp_path, n=6, baseline=(tools or None))
+    if tools is None:
+        import contextlib
+        with contextlib.suppress(FileNotFoundError):
+            (run.root / "connectors_baseline.json").unlink()
+    packet = brief.dispatch(run.open(), category="P1C1", run=run)
+    return " | ".join(packet["rules"]), packet
+
+
+def test_the_brief_names_the_flag_under_a_short_baseline(tmp_path):
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    assert "--enrichment-unavailable" in rules
+    assert packet["enrichment_binding"]["bound"] is False
+
+
+def test_a_bound_container_is_not_offered_the_escape(tmp_path):
+    from fixtures import BOUND_CONNECTORS
+    rules, packet = _rules_for(tmp_path, list(BOUND_CONNECTORS))
+    assert "--enrichment-unavailable" not in rules
+    assert "enrichment_binding" not in packet
+
+
+def test_an_unverified_container_is_not_offered_it_either(tmp_path):
+    """Unverified is not a diagnosis: nothing here proves the connector
+    absent, and the writer would refuse the flag anyway."""
+    rules, packet = _rules_for(tmp_path, None)
+    assert "--enrichment-unavailable" not in rules
+
+
+def test_the_unbound_heal_instruction_names_the_flag():
+    from engine import relay
+    text = relay.HEAL_INSTRUCTIONS["unbound"]
+    assert "--enrichment-unavailable" in text
+    assert "DO NOT retry" in text, "it must still not send the lane back"
+
+
+def test_the_rule_survives_the_packet_ceiling(tmp_path):
+    """`as_markdown` trims cell lists, never rules — assert it, because a
+    rule that is trimmed away is a rule nobody reads."""
+    from engine import brief
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    assert "--enrichment-unavailable" in brief.as_markdown(packet)
+
+
+# ── the run says how much of itself is absence ───────────────────────────
+#
+# A category where every cell was declared absent PASSES its floors gate
+# with `blocking: []`, and correctly so: the cells were honestly worked and
+# honestly closed. But "passed" and "we found nothing about this
+# institution" then look identical downstream, and the only thing standing
+# between them was the M2 scoring ceiling — a cap on a number, which says
+# nothing to the person reading the run. The handoff states the share.
+
+def _asked_the_connector(wb, cell):
+    """The rung an ordinary absence must clear: a connector was actually
+    asked and came back with nothing."""
+    L.append_search(wb, subcap=cell, facet="works",
+                    query=f'"Acme Credit Union" {cell} connector probe',
+                    tool="exa", hits=0, kept=0, outcome="no hits")
+
+
+def test_the_handoff_states_what_share_of_a_category_is_absence(tmp_path):
+    from engine import handoff
+    run, wb = _run(tmp_path, _bound_tools(), n=4)
+    cells = sorted(wb.selected_subcaps())
+    for cell in cells[:2]:
+        _asked_the_connector(wb, cell)
+        _declare(wb, cell, opt_in=False)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    cat = cells[0].split(".")[0]
+    row = doc["absence_share"][cat]
+    assert row["declared_absent"] == 2 and row["cells"] == 4
+    assert row["share"] == 0.5
+    assert row["scored_on_absences_only"] is False
+
+
+def test_a_category_scored_entirely_on_absences_says_so_and_is_not_refused(tmp_path):
+    """ADVISORY, never blocking (owner, 2026-09-13). A run that found nothing
+    is a real answer about a real institution, and refusing the handoff would
+    throw away the work that established the absence. Disclosure is the fix."""
+    from engine import handoff
+    run, wb = _run(tmp_path, _bound_tools(), n=4)
+    for cell in sorted(wb.selected_subcaps()):
+        _asked_the_connector(wb, cell)
+        _declare(wb, cell, opt_in=False)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    cat = sorted(wb.selected_subcaps())[0].split(".")[0]
+    assert doc["absence_share"][cat]["scored_on_absences_only"] is True
+    assert doc["absence_share"]["_run"]["categories_on_absences_only"] == [cat]
+    assert doc["absence_share"]["_run"]["share"] == 1.0
+
+
+def test_reduced_rigour_is_counted_apart_from_ordinary_absence(tmp_path):
+    """The two are not the same claim. An ordinary absence says the public
+    record is silent; a REDUCED one says nobody could ask the connectors at
+    all, and a later firing with them attached may find what this one could
+    not ask for. Collapsing them loses exactly the thing a re-run turns on."""
+    from engine import handoff
+    fam = cc.families()
+    run, wb = _run(tmp_path, [fam["exa"][0]], n=4)      # short baseline
+    cells = sorted(wb.selected_subcaps())
+    for cell in cells[:3]:
+        _declare(wb, cell, opt_in=True)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    cat = cells[0].split(".")[0]
+    row = doc["absence_share"][cat]
+    assert row["declared_absent"] == 3 and row["reduced_rigour"] == 3
+    assert "REDUCED rigour" in doc["absence_share"]["_run"]["statement"]
+    assert "3 of 4 cells" in doc["absence_share"]["_run"]["statement"]
+
+
+def test_a_run_with_no_absences_says_zero_rather_than_nothing(tmp_path):
+    """A derived value is computed or null, never absent and never a
+    sentinel — a reader must be able to tell 'none' from 'not measured'."""
+    from engine import handoff
+    run, wb = _run(tmp_path, _bound_tools(), n=4)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    assert doc["absence_share"]["_run"]["declared_absent"] == 0
+    assert doc["absence_share"]["_run"]["share"] == 0.0
+    assert doc["absence_share"]["_run"]["categories_on_absences_only"] == []

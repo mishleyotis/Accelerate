@@ -11,7 +11,7 @@ exactly that shape).
 
 `scripts/provision_agent_tools.py` generates every `tools:` line from one
 role table, so the GRANTS cannot drift from each other. Nothing checked that
-the PROSE agrees with the grants. This does, for all 73 manifests, and it
+the PROSE agrees with the grants. This does, for all 74 manifests, and it
 also pins the headless dispatch path: every built-in an agent's grants name
 is in `agent_run.ALLOWED`, because `--permission-mode dontAsk` DENIES what is
 not pre-approved rather than asking (MEM-0111).
@@ -30,6 +30,16 @@ import agent_run  # noqa: E402
 
 FM = re.compile(r"^---\n(.*?)\n---\n", re.S)
 MCP_NAME = re.compile(r"mcp__[A-Za-z0-9_-]+__[A-Za-z0-9_-]+")
+CONNECTOR = "mcp__plugin_dma-insights_connector__"
+sys.path.insert(0, str(PLUGIN.parents[1] / "scripts"))
+import provision_agent_tools as prov  # noqa: E402
+#: The connector's READ tools, as a body names them bare: `get_evidence`.
+#: 2026-09-14: since the reads are trimmed per role bundle, a body that says
+#: "resolve every id with `get_evidence`" must be granted it, exactly as a
+#: body naming the full mcp__ name must be.
+BARE_READ = re.compile(
+    "`(" + "|".join(sorted(t for t in prov.connector_tools()
+                           if t not in prov.WRITE_TOOLS)) + ")`")
 #: Built-ins whose mention in prose is an INSTRUCTION to use them, as opposed
 #: to the verbs "write" and "edit" which appear in every manifest as English.
 BUILTIN_INSTRUCTION = {
@@ -57,7 +67,7 @@ ALL = list(manifests())
 
 
 def test_the_roster_is_the_size_the_manifest_promises():
-    assert len(ALL) == 73
+    assert len(ALL) == 74
 
 
 @pytest.mark.parametrize("path,tools,dis,body", ALL,
@@ -71,6 +81,10 @@ def test_every_mcp_tool_a_body_names_is_granted(path, tools, dis, body):
     assert not missing, (
         f"{path.name} tells the agent to call {missing} and does not grant it — "
         f"the Agent tool hands a subagent only its tools: line")
+    bare = sorted({CONNECTOR + n for n in BARE_READ.findall(body)} - tools)
+    assert not bare, (
+        f"{path.name} names connector read(s) {bare} in backticks and is not "
+        f"granted them — add them to the role's reads bundle or reads_extra")
     assert families <= granted_families, (
         f"{path.name} names family {sorted(families - granted_families)} it is "
         f"not granted")

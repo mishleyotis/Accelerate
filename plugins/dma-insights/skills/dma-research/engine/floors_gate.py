@@ -102,6 +102,20 @@ ADVISORY_TERMS = (
     # still reach the payload. Disclosed, not enforced.
     "coverage_below_floor",
     "category_items_below_floor",
+    # CROSS-CATEGORY REUSE, and it is advisory for the same reason the
+    # matcher is not wired into the write path. A proposal is a BM25 ranking
+    # of another lane's excerpt against this cell's question text, and
+    # automatic assignment at that grain was measured at 57.7% precision
+    # (see the matcher-boundary test). A gate that BLOCKED on unattached
+    # proposals would be paying a lane to agree with a ranker it is right to
+    # overrule — the exact misattribution the boundary exists to refuse.
+    #
+    # So this term says one thing and blocks nothing: proposals were offered
+    # to this category and it neither attached one nor declined one, which
+    # means nobody read them. A lane that declined all of them
+    # (`engine.cli attach --decline --why`) does NOT fire this term, because
+    # judging a proposal irrelevant is the lane doing its job.
+    "reuse_ignored",
 )
 # `absence_single_tool` left this set 2026-09-03: an empty cell whose only
 # searches ran through the built-in web tools shows no enrichment effort,
@@ -128,6 +142,25 @@ def _named_by(evidence_row: dict) -> set:
     """
     return {s.split(":")[0].strip()
             for s in _split_ids(evidence_row.get("SubCap_IDs")) if str(s).strip()}
+
+
+def cell_evidenced(cell: str, eids, register: dict) -> bool:
+    """Does this cell's citation link run BOTH WAYS?
+
+    The cell cites the id AND the register row names the cell back. Measured
+    on Golden 1: 248 of 690 cells cite an id whose evidence row does not
+    name them, so a one-way count reported 690 evidenced where the
+    reference's own figure is 442.
+
+    It is a function rather than an expression because it had two
+    implementations. The gate counted bidirectionally here; the driver's
+    stall signature counted one-way (pipeline._research_progress), so a lane
+    that cited ids the register did not name back kept the driver's progress
+    counter moving while the gate never passed — activity read as progress,
+    which is the defect the 2026-09-12 stall work set out to remove, one
+    layer up from where it was removed.
+    """
+    return any(e in register and cell in _named_by(register[e]) for e in eids)
 
 
 def density_floors() -> dict:
@@ -175,7 +208,7 @@ def run_density(wb: RunWorkbook) -> dict:
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         # Bidirectional, matching how the reference's own figure was derived.
-        if any(e in register and cell in _named_by(register[e]) for e in eids):
+        if cell_evidenced(cell, eids, register):
             evidenced += 1
     ev_rows = len(register)
     rps, share = ev_rows / n, evidenced / n
@@ -200,8 +233,18 @@ def run_density(wb: RunWorkbook) -> dict:
 
 
 def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
+        require_challenge: bool = True, persist: bool = True,
         qa_dir: Path | None = None) -> dict:
-    """Evaluate one category and RECORD the verdict in both places."""
+    """Evaluate one category and RECORD the verdict in both places.
+
+    `persist=False` evaluates WITHOUT recording, for a caller asking a
+    question rather than rendering a judgement — the driver's "has this
+    category's research converged, so is it worth challenging" probe. A
+    probe that wrote its answer would be worse than no probe: a PASS
+    recorded with the challenge terms deferred is a PASS
+    `categories_needing_dispatch` reads as "this category is done", and the
+    challenge it was asking about would never be dispatched.
+    """
     tax = C.taxonomy()
     if category not in tax.categories:
         raise ValueError(f"{category} is not one of the {tax.n_categories} "
@@ -243,6 +286,9 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # computed term, rather than being a pair of bare booleans nobody can
         # enumerate.
         "coverage_below_floor": [], "category_items_below_floor": [],
+        # Populated near the end of `run`, like the two volume terms, and
+        # advisory for the reason recorded beside it in ADVISORY_TERMS.
+        "reuse_ignored": [],
     }
     items = 0
     searched_cells = 0
@@ -266,7 +312,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # other. These terms no longer block, but the figure they publish is
         # read by the payload and by anyone calibrating, so it has to be the
         # honest one.
-        if any(e in register and cell in _named_by(register[e]) for e in eids):
+        if cell_evidenced(cell, eids, register):
             evidenced_cells += 1
 
         # AUD-0083: the archive's own golden fixture cited an item that did
@@ -514,6 +560,15 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
     ) if findings[k]]
+    # A category whose research has not converged is not challenged yet: the
+    # challenge stage runs after the floors gate says the work is done, so
+    # asking for the verdict in the same breath as the work is asking the
+    # driver to dispatch a pass over cells that are still moving. The terms
+    # are still COMPUTED and still reported — a deferral that stopped
+    # measuring would be a relaxation nobody could see.
+    if not require_challenge:
+        blocking = [k for k in blocking
+                    if k not in ("challenge_missing", "challenge_not_independent")]
     # …unless the run's own recorded baseline proves no enrichment connector
     # was bound. Then the finding stays populated and reported and leaves the
     # blocking list: the same measurement `declare_absence` verifies, so the
@@ -535,6 +590,43 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         else [{"category": category, "evidenced": evidenced_cells,
                "subcaps": len(rows), "coverage": coverage,
                "floor": COVERAGE_FLOOR}])
+    # THE REUSE TERM, ADVISORY. Offered and untouched, measured the same way
+    # the packet computes the offer, so the gate and the brief cannot
+    # disagree about what a lane was shown. Never appended to `blocking`.
+    try:
+        from . import brief as _brief
+        _offered, _dq = 0, _brief.dq_texts(wb)
+        for r in rows:
+            _cell = str(r.get("SubCap_ID") or "").strip()
+            # OPEN cells only — the same set the dispatch packet detailed and
+            # `brief.correlate` follows up on. A proposal against a cell that
+            # is already synthesised or declared absent is not an offer the
+            # lane can still take, and counting it would make the term fire
+            # on categories that have finished.
+            if str(r.get("Dominant_Claim") or "").strip() \
+                    or L.is_declared_absent(r, wb):
+                continue
+            _offered += len(_brief.reusable(
+                wb, _cell, register=register, dq_index=_dq
+            )["proposed_from_other_categories"])
+        _dec = L.reuse_decisions(wb, category)
+        _acted = len(_dec["attached"]) + len(_dec["declined"])
+        if _offered and not _acted:
+            findings["reuse_ignored"] = [{
+                "category": category, "proposals_offered": _offered,
+                "attached": 0, "declined": 0,
+                "how": (f"`engine.brief correlate --category {category}` "
+                        f"lists them with the command that cites each; "
+                        f"`engine.cli attach --e-id <E> --subcap <cell>` "
+                        f"cites one, `--decline --why '<reason>'` records "
+                        f"that you read it and it does not bear. ADVISORY: "
+                        f"this never blocks, and declining every one of them "
+                        f"clears it.")}]
+    except Exception:                                # noqa: BLE001
+        # A reuse measurement that could not be taken must not fail a gate
+        # about research effort. It is advisory; an absent advisory is an
+        # absent advisory.
+        pass
     # REPORTED 2026-08-30, from a live run in another account: "enrichment
     # connectors not being called by the agents for enrichment purposes
     # before close of a category". They were right, and no gate term could
@@ -613,6 +705,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     }
 
     # ── the half that did not exist: recording it ────────────────────────
+    if not persist:
+        return out
     qa = Path(qa_dir) if qa_dir else None
     if qa is not None:
         qa.mkdir(parents=True, exist_ok=True)

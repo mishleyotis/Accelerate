@@ -89,3 +89,103 @@ def test_the_top_session_brief_carries_the_install_verdict():
     sb = _sb()
     top = sb.brief({"source": "startup"})
     assert "research-conductor" in top
+
+
+# ── the scope the brief now states as a fact ───────────────────────────
+#
+# "Work only your own category" was advice until 2026-09-14: no write path
+# checked it (MEM-0514). The engine refuses it now, so the brief names the
+# boundary the lane will actually meet — and names the route a genuine
+# cross-category find takes, because a lane that has been refused needs
+# somewhere to put the finding.
+
+def test_a_category_lane_is_told_which_category_is_its_own():
+    text = _brief("research-p3c2-producer")
+    assert "YOUR SCOPE IS P3C2" in text
+    assert "handback" in text, "a refusal with no route is a dead end"
+
+
+def test_a_pillar_scorer_is_told_its_pillar():
+    text = _brief("scoring-p4-producer")
+    assert "YOUR SCOPE IS P4" in text and "pillar" in text
+
+
+def test_an_agent_whose_name_declares_no_scope_is_not_given_one():
+    """The conductor and the specialists write across the run by design."""
+    for agent in ("research-conductor", "technographic-scanner",
+                  "enrichment-web-specialist"):
+        assert "YOUR SCOPE IS" not in _brief(agent), agent
+
+
+def test_the_scope_sentence_agrees_with_the_engine_that_enforces_it():
+    """Two statements of one rule drift. This asserts they agree today, and
+    fails the day the engine's table and the brief disagree."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]
+                           / "plugins" / "dma-insights" / "skills" / "dma-research"))
+    from engine import scope as engine_scope
+    for agent, expected in (("research-p3c2-producer", "P3C2"),
+                            ("scoring-p4-producer", "P4")):
+        assert engine_scope.classify(agent)["scope"] == expected
+        assert f"YOUR SCOPE IS {expected}" in _brief(agent)
+
+
+# ── the compaction case: the brief existed, the BINDING did not ──────────
+
+def _sb_mod():
+    return _sb()
+
+
+def test_the_compact_brief_carries_the_resume_pointer():
+    """A compacted session has to recover WHERE IT WAS from the run, not
+    from the summary — the summariser chose what to keep, and what it kept
+    is not evidence of what the run holds."""
+    t = _sb().brief({"hook_event_name": "SessionStart", "source": "compact"})
+    assert "COMPACTED" in t
+    assert "engine.cli resume" in t
+    assert ROUTING_IN(t)
+
+
+def ROUTING_IN(t: str) -> bool:
+    return "routing.md" in t
+
+
+def test_post_compact_gets_the_same_brief_as_a_compact_session_start():
+    """The binding was what was missing: `BY_SOURCE["compact"]` existed and
+    only SessionStart could reach it, so a compaction that did NOT restart
+    the session re-entered with no brief at all."""
+    post = _sb().brief({"hook_event_name": "PostCompact", "trigger": "auto"})
+    start = _sb().brief({"hook_event_name": "SessionStart", "source": "compact"})
+    assert post == start
+    assert "COMPACTED" in post
+
+
+def test_post_compact_emits_the_json_shape_not_bare_stdout():
+    """Only SessionStart takes plain stdout. Printing prose on PostCompact
+    would be swallowed — the AUD-0004 failure wearing a fix."""
+    import json as _json
+    import subprocess as _sp
+    import sys as _sys
+    hook = PLUGIN / "scripts" / "hooks" / "session_brief.py"
+    p = _sp.run([_sys.executable, str(hook)],
+                input=_json.dumps({"hook_event_name": "PostCompact",
+                                   "trigger": "manual"}),
+                capture_output=True, text=True, timeout=120)
+    assert p.returncode == 0, p.stderr
+    doc = _json.loads(p.stdout)
+    assert doc["hookSpecificOutput"]["hookEventName"] == "PostCompact"
+    assert "COMPACTED" in doc["hookSpecificOutput"]["additionalContext"]
+
+
+def test_a_session_start_still_prints_prose():
+    import json as _json
+    import subprocess as _sp
+    import sys as _sys
+    hook = PLUGIN / "scripts" / "hooks" / "session_brief.py"
+    p = _sp.run([_sys.executable, str(hook)],
+                input=_json.dumps({"hook_event_name": "SessionStart",
+                                   "source": "startup"}),
+                capture_output=True, text=True, timeout=120)
+    assert p.returncode == 0, p.stderr
+    assert p.stdout.strip().startswith("dma-insights: route before you produce")

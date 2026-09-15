@@ -1,11 +1,29 @@
 #!/usr/bin/env python3
 """Deep memory: per-category .md files, consolidated into the workbook.
 
-    python3 -m engine.memory note        --run R --category P1C1 --subcap ... --facet ... [--stdin | fields]
+    python3 -m engine.memory note        --run R --category P1C1 --subcap CELL [--subcap CELL ...]
+                                         [--facet F] [--kind evidence|lead|absence|contradiction|note]
+                                         [--actor NAME] [--claim ...] [--excerpt ...] [--url ...]
+                                         [--source-name ...] [--tier ...] [--published ...]
+                                         [--claim-type ...] [--ladder ...] [--text ...] [--origin ...]
+    python3 -m engine.memory note        --run R --category P1C1 --entries-file FILE|-
     python3 -m engine.memory status      --run R [--category P1C1]
     python3 -m engine.memory consolidate --run R --category P1C1 [--actor NAME]
     python3 -m engine.memory backup      --run R
+    python3 -m engine.memory restore     --run R
     python3 -m engine.memory cleanup     --run R [--apply]
+
+THE USAGE BLOCK ABOVE IS THE REAL ONE — every flag in it is a flag the
+parser has, which a test pins. From the day this module was written until
+2026-09-14 it advertised a `stdin` flag that never existed in the parser: a
+usage line nobody can run, costing a turn to discover and teaching nothing.
+Entries now arrive through `--entries-file` (a JSON list of objects carrying
+the same fields the flags take; `-` reads stdin), which is what that phantom
+flag was reaching for: a lane writing forty notes paid forty Bash
+round-trips, forty turns on the layer whose whole reason to exist is that it
+is cheap. A batch is ALL-OR-NOTHING — a bad entry names its index and
+nothing is written, because the notebook is append-only and a half-written
+batch cannot be resubmitted without duplicating what landed.
 
 WHY .MD FILES AT ALL. A category researcher works in a session that can
 compact, die mid-turn or lose its context. The workbook write path is
@@ -27,8 +45,11 @@ reports, gates and the handoff read sheets.
 
 LIFECYCLE, as the owner specified it: the .md files are LOCAL, they get a
 DRIVE BACKUP while the run is in flight (a dead container must not cost the
-notebook), and the backup is CLEANED UP once its content is consolidated
-into the workbook and the workbook itself is safely off the container.
+notebook), the backup can be RESTORED into a fresh container, and it is
+CLEANED UP once its content is consolidated into the workbook and the
+workbook itself is safely off the container. The restore half landed
+2026-09-14: until then the lifecycle was push-only, so the backup a dead
+container's successor needed was a file nothing could fetch.
 `cleanup` REFUSES until both facts are verified — deleting the only copy of
 unconsolidated notes is the one unrecoverable mistake this module can make,
 so it is the one it structurally cannot.
@@ -44,8 +65,10 @@ if __package__ in (None, ""):  # noqa: E402
 
 import argparse
 import datetime as _dt
+import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -74,9 +97,18 @@ def memory_path(run: runstate.Run, category: str) -> Path:
     return run.root / MEMORY_DIR / f"{category}.md"
 
 
-def note(run: runstate.Run, *, category: str, subcap, facet: str,
-         kind: str = "evidence", **fields) -> Path:
-    """Append one entry. Cheap on purpose: the only validation here is shape
+def note(run: runstate.Run, *, category: str, subcap=None, facet: str = "",
+         kind: str = "evidence", actor: str | None = None,
+         entries_file=None, **fields):
+    """Append one entry — or, with `entries_file`, MANY in one call.
+
+    `entries_file` is a path (or `-` for stdin, or an already-parsed list) to
+    a JSON list of objects carrying the same fields the flags take. It
+    returns the batch report `{"noted", "failed", "paths", "entries",
+    "written"}` instead of a Path; the single-entry call still returns the
+    notebook Path. A batch is ALL-OR-NOTHING — see `note_entries`.
+
+    Cheap on purpose: the only validation here is shape
     vocabulary — substance is judged at CONSOLIDATION by the real gates,
     because a notebook that refuses a hunch defeats its reason to exist.
 
@@ -88,24 +120,52 @@ def note(run: runstate.Run, *, category: str, subcap, facet: str,
     others. The entry head stores them comma-joined, which the parser's
     `(\\S+)` already accepts.
     """
+    if entries_file is not None:
+        return note_entries(run, _read_entries(entries_file),
+                            category=category, actor=actor)
+    p, block = _prepare(run, category=category, subcap=subcap, facet=facet,
+                        kind=kind, actor=actor, **fields)
+    _append(p, block)
+    return p
+
+
+def _prepare(run: runstate.Run, *, category: str, subcap=None,
+             facet: str = "", kind: str = "evidence",
+             actor: str | None = None, **fields) -> tuple:
+    """Validate ONE entry and render its block — writing nothing.
+
+    Split out of `note` so a BATCH can be judged before a byte of it lands:
+    every refusal a single note can raise is raised here, on the same
+    inputs, so the batch path and the flag path cannot drift into two
+    different vocabularies."""
     if kind not in KINDS:
         raise ValueError(f"kind {kind!r} not in {KINDS}")
+    if subcap is None:
+        raise ValueError("note needs at least one subcap")
     cells = ([subcap] if isinstance(subcap, str)
              else [str(s).strip() for s in subcap if str(s).strip()])
     if not cells:
         raise ValueError("note needs at least one subcap")
     subcap = ",".join(cells)
+    # THE CATEGORY IS A DIRECTORY NAME, and until 2026-09-14 it was free
+    # text: `--category P1C1 --subcap P3C2.4.1` wrote a P3 finding into
+    # P1C1's notebook, silently, and `--category P9C9` created a notebook
+    # for a category that does not exist. Both survive consolidation as
+    # findings nobody looks for.
+    cat = str(category or "").strip().upper()
+    stray = sorted({c for c in cells if not c.upper().startswith(cat + ".")})
+    if stray:
+        raise ValueError(
+            f"this note is filed under {cat} but names {', '.join(stray[:6])}. "
+            f"A notebook is read by the lane that owns the category, so a "
+            f"cell filed under another one is a finding nobody will look "
+            f"for. File it under its own category.")
+    from . import scope as _scope
+    why = _scope.violation(actor, "note", cells)
+    if why:
+        raise ValueError(why)
     if facet and facet not in C.DQ_FACETS:
         raise ValueError(f"facet {facet!r} not in {C.DQ_FACETS}")
-    p = memory_path(run, category)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    if not p.exists():
-        p.write_text(
-            f"# {category} — research notebook\n\n"
-            f"Append-only. A NOTEBOOK, never a record: nothing downstream\n"
-            f"reads this file — `engine.memory consolidate` pushes every\n"
-            f"entry through the workbook's own refusals, and an entry that\n"
-            f"cannot register is marked BLOCKED with the reason, in place.\n")
     lines = [f"\n## [NOTED] {subcap} · {facet or '-'} · {_utcnow()}",
              f"kind:: {kind}"]
     for k, v in fields.items():
@@ -113,9 +173,99 @@ def note(run: runstate.Run, *, category: str, subcap, facet: str,
             continue
         v = str(v).replace("\n", " ⏎ ")
         lines.append(f"{k}:: {v}")
+    return memory_path(run, category), "\n".join(lines) + "\n"
+
+
+def _append(p: Path, block: str) -> Path:
+    """The only writer. Creates the notebook with its own header first."""
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if not p.exists():
+        p.write_text(
+            f"# {p.stem} — research notebook\n\n"
+            f"Append-only. A NOTEBOOK, never a record: nothing downstream\n"
+            f"reads this file — `engine.memory consolidate` pushes every\n"
+            f"entry through the workbook's own refusals, and an entry that\n"
+            f"cannot register is marked BLOCKED with the reason, in place.\n")
     with p.open("a") as fh:
-        fh.write("\n".join(lines) + "\n")
+        fh.write(block)
     return p
+
+
+#: What an entry object may say instead of `subcap`, and the flag spelling
+#: that maps onto each field name. Hyphens become underscores so a JSON
+#: entry can be copied straight off a command line.
+_SUBCAP_KEYS = ("subcap", "subcaps", "cell", "cells", "subcap_id")
+
+
+def _read_entries(src) -> list[dict]:
+    """The entry list, from a path, from stdin (`-`), or already parsed."""
+    if isinstance(src, (list, tuple)):
+        raw = list(src)
+    else:
+        text = (sys.stdin.read() if str(src) == "-"
+                else Path(src).read_text(encoding="utf-8"))
+        try:
+            raw = json.loads(text)
+        except ValueError as e:
+            raise ValueError(f"--entries-file is not JSON: {e}") from None
+    if not isinstance(raw, list):
+        raise ValueError(
+            "--entries-file carries a JSON LIST of entry objects, one per "
+            "note: [{\"subcap\": \"P1C1.1.1\", \"facet\": \"works\", "
+            "\"kind\": \"evidence\", ...}, ...]")
+    return raw
+
+
+def note_entries(run: runstate.Run, entries, *, category: str | None = None,
+                 actor: str | None = None) -> dict:
+    """Many entries, ONE call, in file order — ALL of them or NONE.
+
+    Validated first, written second. Every entry goes through `_prepare`,
+    which raises exactly what a single `note` raises; only when the whole
+    batch is clean does anything reach a notebook, and a failure is reported
+    with its INDEX so the researcher repairs one line rather than
+    re-deriving which of forty notes the refusal was about.
+
+    WHY ALL-OR-NOTHING, against the earlier partial-write. A notebook is
+    APPEND-ONLY: a batch that wrote thirty-nine and refused one leaves the
+    lane holding a file it cannot resubmit — re-running the repaired forty
+    appends the thirty-nine a second time, and the duplicates consolidate
+    into the workbook as separate findings with no way to take them back.
+    Hand-filtering the file down to the one entry is the turn the batch flag
+    exists to save. Refusing whole makes the repair loop `fix the line,
+    re-run the same file`, which is the cheap one and the only one that
+    cannot duplicate. Nothing is lost by refusing: the entries file is still
+    the entries file.
+    """
+    prepared, failed = [], []
+    for i, e in enumerate(entries):
+        try:
+            if not isinstance(e, dict):
+                raise ValueError(f"an entry must be a JSON object, not a "
+                                 f"{type(e).__name__}")
+            f = {str(k).replace("-", "_"): v for k, v in e.items()}
+            cat = str(f.pop("category", None) or category or "").strip()
+            sub = next((f.pop(k) for k in _SUBCAP_KEYS if k in f), None)
+            prepared.append(_prepare(
+                run, category=cat, subcap=sub,
+                facet=str(f.pop("facet", "") or ""),
+                kind=str(f.pop("kind", "evidence") or "evidence"),
+                actor=(f.pop("actor", None) or actor), **f))
+        except (ValueError, TypeError, OSError) as err:
+            failed.append({"index": i, "error": str(err)})
+    if failed:
+        return {"noted": 0, "failed": failed, "paths": [],
+                "entries": len(entries), "written": False,
+                "refusal": f"{len(failed)} of {len(entries)} entr(ies) "
+                           f"refused; NOTHING was written. Repair the index"
+                           f"(es) named and re-run the same file."}
+    paths = []
+    for path, block in prepared:
+        _append(path, block)
+        if str(path) not in paths:
+            paths.append(str(path))
+    return {"noted": len(prepared), "failed": [], "paths": paths,
+            "entries": len(entries), "written": True}
 
 
 def parse(path: Path) -> list[dict]:
@@ -172,7 +322,21 @@ def consolidate(run: runstate.Run, category: str, *,
 
     An entry the ledger refuses is rewritten in place as [BLOCKED] with the
     refusal text — the researcher sees exactly what is missing (usually the
-    verbatim excerpt or the URL) and can repair the NOTE, not guess."""
+    verbatim excerpt or the URL) and can repair the NOTE, not guess.
+
+    EXCERPTS ARE VERIFIED HERE (2026-09-14). Consolidation passes
+    `verify_excerpts=True`, so a note whose page nothing in this run fetched
+    is BLOCKED in place with the ledger's own `excerpt_unverified` — the
+    notebook is the route a WebFetch-and-quote lane takes, and it was the
+    route around the check. The repair is the one the refusal names: run
+    `engine.cli fetch --run <R> --url … --query …` and re-note from a window, or, when
+    the page genuinely cannot be fetched, register it directly with
+    `engine.cli evidence --unverified '<what stopped it>'`, which records the
+    reason on the row. There is deliberately no `--unverified` on a NOTE: an
+    unverifiable source is a decision, and a decision belongs on the command
+    a person or an agent types once, not in a field a batch consolidation
+    reads silently.
+    """
     p = memory_path(run, category)
     entries = parse(p)
     wb = run.open()
@@ -184,7 +348,7 @@ def consolidate(run: runstate.Run, category: str, *,
         if e["status"] != "NOTED":
             continue
         try:
-            outcome = _consolidate_one(wb, e, actor)
+            outcome = _consolidate_one(wb, e, actor, run=run)
             _mark(text, e, offset, "CONSOLIDATED", outcome)
             done += 1
             results.append({"subcap": e["subcap"], "outcome": outcome})
@@ -199,7 +363,7 @@ def consolidate(run: runstate.Run, category: str, *,
             "results": results}
 
 
-def _consolidate_one(wb: RunWorkbook, e: dict, actor: str) -> str:
+def _consolidate_one(wb: RunWorkbook, e: dict, actor: str, run=None) -> str:
     f = e["fields"]
     kind = f.get("kind") or "note"
     # An entry may name several cells (comma-joined by `note`). `sub` stays
@@ -220,7 +384,8 @@ def _consolidate_one(wb: RunWorkbook, e: dict, actor: str) -> str:
             claim_type=str(f.get("claim_type") or
                            ("INFERENCE" if kind == "contradiction"
                             else "FACT")).upper(),
-            origin=f.get("origin") or "public")
+            origin=f.get("origin") or "public",
+            run=run, verify_excerpts=True)
         if kind == "contradiction":
             for cell in cells:
                 row = wb.scoring_row(cell) or {}
@@ -290,29 +455,184 @@ def _drive_fetch() -> Path | None:
     return p if p.exists() else None
 
 
+#: Where `backup` remembers what it last put on Drive: content digests per
+#: file name, plus the client name it resolved. The driver calls `backup` at
+#: EVERY round end for the life of a run; without this the sixteenth round
+#: re-uploads sixteen unchanged notebooks it uploaded fifteen times already.
+BACKUP_STATE = "memory_backup.json"
+
+
+def _backup_files(run: runstate.Run) -> list[Path]:
+    """Every notebook, plus the workbook — the whole durable set.
+
+    A category's reasoning trail is durable only once it is off-container,
+    so a backup that carried one notebook would leave the other fifteen
+    categories with no copy at all."""
+    files = sorted((run.root / MEMORY_DIR).glob("*.md"))
+    if run.workbook_path.exists():
+        files.append(run.workbook_path)
+    return files
+
+
+def _digest(p: Path) -> str:
+    h = hashlib.sha256()
+    with p.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def backup(run: runstate.Run) -> dict:
     """Push the notebooks (and the workbook) to Drive. Honest outcomes only:
     a backup that did not run says NOT_RUN and why — a fabricated success
-    here costs the notebook on the next dead container."""
+    here costs the notebook on the next dead container.
+
+    CALLED ONCE PER ROUND, SO IT HAS TO BE CHEAP AND IT HAS TO BE SAFE.
+    Three properties the round driver depends on:
+
+    * IDEMPOTENT. Only files whose CONTENT changed since the last recorded
+      push are sent; a second call with nothing changed makes no
+      subprocess at all and reports NOT_RUN naming the files it skipped.
+    * ONE CALL. The changed files go in a single `drive_fetch.py
+      push-backup --many`, one token exchange and one client-folder lookup
+      for the round, not one process per notebook.
+    * IT NEVER RAISES. Every failure — a missing workbook, a Drive outage,
+      a timeout, a broken drive_fetch — comes back as PARTIAL or FAILED
+      with the reason. A failed backup must not fail a research round: the
+      notes are still on disk, and the next round tries again because
+      nothing was recorded as pushed.
+    """
+    try:
+        return _backup(run)
+    except Exception as err:                                   # noqa: BLE001
+        # The one place a bare except is right: this is called for its
+        # SIDE EFFECT at the end of a round that has already succeeded.
+        return {"outcome": "FAILED", "pushed": [], "failed": [],
+                "unchanged": [],
+                "reason": f"{type(err).__name__}: {err}"}
+
+
+def _backup(run: runstate.Run) -> dict:
     df = _drive_fetch()
     if df is None:
-        return {"outcome": "NOT_RUN",
+        return {"outcome": "NOT_RUN", "pushed": [], "failed": [],
+                "unchanged": [],
                 "reason": "drive_fetch.py is not in this install; the "
                           "notebooks exist only in this container"}
+    files = _backup_files(run)
+    if not files:
+        return {"outcome": "NOT_RUN", "pushed": [], "failed": [],
+                "unchanged": [],
+                "reason": "nothing to back up yet — no notebook and no "
+                          "workbook on disk"}
+    state_path = run.qa_dir / BACKUP_STATE
+    try:
+        state = json.loads(state_path.read_text())
+    except (OSError, ValueError):
+        state = {}
+    seen = dict(state.get("digests") or {})
+    now = {f.name: _digest(f) for f in files}
+    changed = [f for f in files if seen.get(f.name) != now[f.name]]
+    unchanged = sorted(n for n in now
+                       if n not in {f.name for f in changed})
+    if not changed:
+        return {"outcome": "NOT_RUN", "pushed": [], "failed": [],
+                "unchanged": unchanged,
+                "reason": f"nothing changed since the last backup; "
+                          f"{len(unchanged)} file(s) already on Drive"}
+    # The client name does not change inside a run, and `run.open()` reads
+    # the whole workbook. Resolve it once and keep it beside the digests.
+    client = str(state.get("client") or "")
+    if not client:
+        client = str(run.open().metadata().get("entity_name") or run.run_id)
+    r = subprocess.run(
+        [sys.executable, str(df), "push-backup", "--client", client,
+         "--many", *[str(f) for f in changed]],
+        capture_output=True, text=True, timeout=600)
+    detail = (r.stdout or r.stderr or "").strip()[-400:]
+    names = [f.name for f in changed]
+    if r.returncode != 0:
+        # Nothing is recorded as pushed, so the next round retries all of
+        # it — the safe direction when the outcome is ambiguous.
+        return {"outcome": "PARTIAL", "pushed": [], "failed": names,
+                "unchanged": unchanged,
+                "reason": f"drive_fetch.py push-backup exited "
+                          f"{r.returncode}: {detail}"}
+    seen.update(now)
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(
+        {"client": client, "at": _utcnow(), "digests": seen}, indent=1))
+    return {"outcome": "RESOLVED", "pushed": names, "failed": [],
+            "unchanged": unchanged, "detail": detail}
+
+
+#: The drive_fetch verb `restore` needs. It is the mirror of `push-backup`:
+#: same client, same `memory-backup` folder, downloading instead of
+#: uploading, into `--dest`.
+PULL_VERB = "pull-backup"
+
+
+def restore(run: runstate.Run) -> dict:
+    """Pull the Drive backup of the notebooks back into `03_memory/`.
+
+    The mirror of `backup`, and the half the lifecycle was missing: pushing
+    a safety copy that nothing can fetch means a dead container still takes
+    the notebooks with it. Reports as honestly as `backup` does — a restore
+    that did not run says NOT_RUN and why, because a fabricated RESOLVED
+    over an empty directory is how a researcher concludes the notes were
+    never written.
+
+    A LOCAL NOTEBOOK IS NEVER OVERWRITTEN. The local copy is the live one
+    and the backup is older by construction, so a file already on disk is
+    reported `kept` and left exactly as it is. Restoring into a running
+    container is therefore safe, which is what makes it usable as a repair
+    rather than a ceremony.
+    """
+    df = _drive_fetch()
+    if df is None:
+        return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                "reason": "drive_fetch.py is not in this install; there is no "
+                          "Drive copy to restore from"}
     wb = run.open()
     client = str(wb.metadata().get("entity_name") or run.run_id)
-    pushed, failed = [], []
-    files = sorted((run.root / MEMORY_DIR).glob("*.md")) + \
-        ([run.workbook_path] if run.workbook_path.exists() else [])
-    for f in files:
+    stage = run.qa_dir / "restore_staging"
+    shutil.rmtree(stage, ignore_errors=True)
+    stage.mkdir(parents=True, exist_ok=True)
+    try:
         r = subprocess.run(
-            [sys.executable, str(df), "push-backup", "--client", client,
-             "--file", str(f)],
+            [sys.executable, str(df), PULL_VERB, "--client", client,
+             "--dest", str(stage)],
             capture_output=True, text=True, timeout=300)
-        (pushed if r.returncode == 0 else failed).append(
-            {"file": f.name, "detail": (r.stdout or r.stderr).strip()[-160:]})
-    return {"outcome": "RESOLVED" if not failed else "PARTIAL",
-            "pushed": pushed, "failed": failed}
+        detail = (r.stdout or r.stderr or "").strip()[-400:]
+        if r.returncode != 0:
+            if PULL_VERB in (r.stderr or "") and "invalid choice" in (r.stderr or ""):
+                return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                        "reason": f"this install's drive_fetch.py has no "
+                                  f"`{PULL_VERB}` verb, so the Drive lifecycle "
+                                  f"is push-only here and there is nothing to "
+                                  f"restore FROM — it is the mirror of "
+                                  f"push-backup and has to be added beside it",
+                        "detail": detail}
+            return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                    "reason": f"drive_fetch.py {PULL_VERB} failed: {detail}"}
+        mem = run.root / MEMORY_DIR
+        mem.mkdir(parents=True, exist_ok=True)
+        restored, kept = [], []
+        for f in sorted(stage.glob("*.md")):
+            target = mem / f.name
+            if target.exists():
+                kept.append(f.name)
+            else:
+                target.write_bytes(f.read_bytes())
+                restored.append(f.name)
+        if not restored and not kept:
+            return {"outcome": "NOT_RUN", "restored": [], "kept": [],
+                    "reason": "the Drive backup holds no notebook for this "
+                              "client yet", "detail": detail}
+        return {"outcome": "RESOLVED", "restored": restored, "kept": kept,
+                "detail": detail}
+    finally:
+        shutil.rmtree(stage, ignore_errors=True)
 
 
 def cleanup(run: runstate.Run, *, apply: bool = False) -> dict:
@@ -361,6 +681,10 @@ def cleanup(run: runstate.Run, *, apply: bool = False) -> dict:
     d = subprocess.run(
         [sys.executable, str(df), "cleanup-backup", "--client", client],
         capture_output=True, text=True, timeout=300)
+    if d.returncode == 0:
+        # The folder those digests describe no longer exists, so a later
+        # `backup` must not read "already pushed" off a deleted copy.
+        (run.qa_dir / BACKUP_STATE).unlink(missing_ok=True)
     return {"outcome": "RESOLVED" if d.returncode == 0 else "PARTIAL",
             "detail": (d.stdout or d.stderr).strip()[-400:]}
 
@@ -368,7 +692,8 @@ def cleanup(run: runstate.Run, *, apply: bool = False) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("note", "status", "consolidate", "backup", "cleanup"):
+    for name in ("note", "status", "consolidate", "backup", "restore",
+                 "cleanup"):
         s = sub.add_parser(name)
         s.add_argument("--run", required=True)
         s.add_argument("--root")
@@ -377,13 +702,22 @@ def main(argv=None) -> int:
         elif name == "status":
             s.add_argument("--category")
         if name == "note":
-            s.add_argument("--subcap", required=True, action="append",
+            s.add_argument("--subcap", action="append",
                            help="the cell this entry bears on. Repeatable: one "
                                 "source often bears on several cells of a "
                                 "capability, and registering it once against "
-                                "all of them is one find, not several")
+                                "all of them is one find, not several. "
+                                "Required unless --entries-file is given")
+            s.add_argument("--entries-file",
+                           help="a JSON LIST of entry objects carrying the same "
+                                "fields these flags take — many notes in ONE "
+                                "call, validated one by one, each failure "
+                                "reported with its index. `-` reads stdin")
             s.add_argument("--facet", default="works")
             s.add_argument("--kind", default="evidence", choices=KINDS)
+            s.add_argument("--actor", default=None,
+                           help="the agent noting this. Defaults to $DMA_ACTOR; "
+                                "a lane notes only its own category")
             for f in ("claim", "excerpt", "url", "source-name", "tier",
                       "published", "claim-type", "ladder", "text", "origin"):
                 s.add_argument(f"--{f}")
@@ -394,8 +728,18 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
     if a.cmd == "note":
+        from . import scope as _scope
+        if a.entries_file:
+            out = note(run, category=a.category,
+                       entries_file=a.entries_file,
+                       actor=(a.actor or _scope.actor_from_env() or None))
+            print(json.dumps(out, indent=2))
+            return 1 if out["failed"] else 0
+        if not a.subcap:
+            ap.error("note needs --subcap (repeatable) or --entries-file")
         p = note(run, category=a.category, subcap=a.subcap, facet=a.facet,
-                 kind=a.kind, claim=a.claim, excerpt=a.excerpt, url=a.url,
+                 kind=a.kind, actor=(a.actor or _scope.actor_from_env() or None),
+                 claim=a.claim, excerpt=a.excerpt, url=a.url,
                  source_name=getattr(a, "source_name", None), tier=a.tier,
                  published=a.published,
                  claim_type=getattr(a, "claim_type", None),
@@ -412,6 +756,10 @@ def main(argv=None) -> int:
     if a.cmd == "backup":
         print(json.dumps(backup(run), indent=2))
         return 0
+    if a.cmd == "restore":
+        out = restore(run)
+        print(json.dumps(out, indent=2))
+        return 0 if out["outcome"] == "RESOLVED" else 1
     if a.cmd == "cleanup":
         out = cleanup(run, apply=a.apply)
         print(json.dumps(out, indent=2))

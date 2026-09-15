@@ -406,7 +406,15 @@ you are searching at the WRONG level. Each subcap's diagnostic question asks som
 DIFFERENT — your queries must reflect that difference.
 
 **Rules:** Include institution name in every query. 4-8 words. Don't repeat diagnostic Q
-verbatim. Include "2024 2025" in 2+ queries. Use `web_fetch` on rich documents.
+verbatim. Include "2024 2025" in 2+ queries.
+
+**Never WebFetch a page to get an excerpt.** Read a rich document with
+`engine.cli fetch --run R --url <U> --query '<the DQ text>'`, which prints
+at most three ~240-character windows and the page's sha256 and never the
+page. MEASURED on the six-cell calibration: a fetched page sits in context
+and is re-read on **every later turn** — 76% of the bill was cache reads
+(24.45M cache-read tokens, $4.89 of $6.45). One fetch is 5-40K tokens re-read
+every turn; three windows are ~200 tokens, read once.
 
 ### Step 3: Execute & Extract
 Per subcap: search → fact-level extraction `[E-xxx:Fy]` → tier classify → recency tag →
@@ -453,9 +461,20 @@ measured by `engine.floors_gate` and refused by `engine.cli absence`:
   was worked — must show the families missing. A bound connector you simply
   did not ask, or a run with no baseline at all, is still refused, and says
   which. Everything else on this list still applies: the degraded path lifts
-  the connector rung and nothing else;
+  the connector rung and nothing else. **Your brief names this flag when the
+  baseline proves it, and only then** — a dispatch packet that does not
+  mention `--enrichment-unavailable` is telling you the connectors are
+  reachable and your searches should go through the relay, not that you may
+  reach for the escape;
 - the run's own register does not already NAME the cell (`engine.brief
-  reuse --subcap <cell>` shows what a sibling lane bought);
+  reuse --subcap <cell>` shows what a sibling lane bought — same-cell rows,
+  same-capability rows, and up to two `proposed_from_other_categories`
+  suggestions scored against the whole register). A proposal is a
+  SUGGESTION: cite it with `engine.cli attach --e-id <E> --subcap <your own
+  cell>`, which names an existing row without minting a duplicate, or
+  dismiss it with `--decline --why '<reason>'`. Nothing is ever attached on
+  your behalf — the semantic matcher was measured at 57.7% precision and
+  that is the lesson the propose-never-attach rule carries;
 - the ladder names its `direct` and `proxy` rungs with queries the
   Search_Log carries, and the proxy log says which proxy class was hunted.
 
@@ -468,6 +487,14 @@ refuses a public row without one.
 ### Step 4: Register into the workbook — through the engine only
 There is ONE workbook and ONE writer. `engine.cli evidence` registers a
 source (excerpt 50–500 verbatim chars, tier, date, the cells it supports);
+**verbatim is checked, not asserted**: the span is compared against the text
+`engine.cli fetch` cached for that URL, and a span the page does not carry is
+refused `excerpt_not_verbatim` (whitespace and case are normalised, nothing
+else). A URL nothing in this run has read is refused `excerpt_unverified`;
+when the page genuinely cannot be fetched — a 403 WAF, a paywall, a
+connector's own extract — `--unverified '<what stopped it>'` registers it and
+records `UNVERIFIED: <reason>` on the row's Access_Status. Recorded, never
+silent — and it never excuses a span a fetched page contradicts.
 `engine.cli synthesise` closes an evidenced cell; `engine.cli absence`
 closes an empty one. Column D (Score) is the assessment stage's, struck by
 `engine.assessment score` and never here. The workbook's shape is

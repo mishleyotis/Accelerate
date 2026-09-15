@@ -167,7 +167,14 @@ PHASE_MINUTES = {
     "preflight (financials, census, the question)": 10,
     "PRELIM (profile, timeline, peers, tech baseline)": 15,
     "category research (16 lanes, in parallel)": None,   # computed
-    "gates + independent challenge": 10,
+    # CHALLENGE and GATES shared one 10-minute line until 2026-09-14, so
+    # `report` could name neither as the one that was over — and the
+    # challenge stage is sixteen lanes of its own, the second-largest
+    # fan-out in the run. Split at 8/2, which is where the measured
+    # elapsed sat; the schedule total is unchanged and pinned by
+    # test_the_phase_table_still_sums_to_the_same_schedule.
+    "independent challenge (paged lanes, in parallel)": 8,
+    "gates": 2,
     "report sections (2 producers, in parallel) + review": 25,
     "assemble, verify, push": 5,
 }
@@ -240,8 +247,11 @@ STAGE_PHASE = {
     "PRELIM": "PRELIM (profile, timeline, peers, tech baseline)",
     "KG": None,
     "RESEARCH": "category research (16 lanes, in parallel)",
-    "CHALLENGE": "gates + independent challenge",
-    "GATES": "gates + independent challenge",
+    "CHALLENGE": "independent challenge (paged lanes, in parallel)",
+    "GATES": "gates",
+    # The relay's own fan-out. It had no phase at all, so its spend was
+    # reported as part of whatever stage contained it.
+    "RELAY": None,
     "HANDOFF": None,
     "SCORING": None,
     "INGEST_A": None,
@@ -276,7 +286,15 @@ TURNS_PER_CELL_OVERHEAD = 2
 DIFFERENTIATING_SEARCHES_PER_CELL = 2
 
 
-def lane_turn_budget() -> int:
+#: Turns a challenge lane spends: a fixed cost to read its packet, then one
+#: chained `engine.cli challenge` per cell. The packet carries the evidence,
+#: so there is nothing to fetch per cell — which is the whole reason the
+#: figure is one rather than the four the old design paid.
+CHALLENGE_TURNS_FIXED = 3
+CHALLENGE_TURNS_PER_CELL = 1
+
+
+def lane_turn_budget(kind: str = "research") -> int:
     """`maxTurns` as the agent manifests actually declare it.
 
     Read, never assumed: there is no `--max-turns` on the claude CLI, so the
@@ -285,8 +303,18 @@ def lane_turn_budget() -> int:
     """
     import re
     seen = set()
-    d = PLUGIN / "agents" / "research" / "categories"
-    for f in sorted(d.glob("research-p*-producer.md")):
+    # The CHALLENGE lane was outside this projection entirely: it globbed
+    # the category researchers only, so the stage that dispatches one lane
+    # per category on the most expensive tier was invisible to the
+    # measurement that exists to say what a run costs before it spends it.
+    if str(kind).lower().startswith("chall"):
+        files = [PLUGIN / "agents" / "research" / "research-challenger.md"]
+    else:
+        files = sorted((PLUGIN / "agents" / "research" / "categories")
+                       .glob("research-p*-producer.md"))
+    for f in files:
+        if not f.is_file():
+            continue
         m = re.search(r"^maxTurns:\s*(\d+)", f.read_text(), re.M)
         if m:
             seen.add(int(m.group(1)))
@@ -356,6 +384,22 @@ def lane_fit(wb) -> dict:
                     "lane_turns": cap,
                     "lanes_needed": round(grain / cap, 2) if cap else None,
                     "fits": bool(cap and grain <= cap)})
+    # THE CHALLENGE STAGE, which this projection did not model at all. Its
+    # unit is the cell, not the capability: every synthesised cell is
+    # challenged, paged across lanes.
+    from .brief import CELLS_PER_CHALLENGE_LANE
+    ch_cells = sum(r["cells"] for r in out)
+    ch_cap = lane_turn_budget(kind="challenge")
+    ch_per_lane = (CHALLENGE_TURNS_FIXED
+                   + CELLS_PER_CHALLENGE_LANE * CHALLENGE_TURNS_PER_CELL)
+    challenge = {
+        "cells": ch_cells,
+        "cells_per_lane": CELLS_PER_CHALLENGE_LANE,
+        "lanes": -(-ch_cells // CELLS_PER_CHALLENGE_LANE) if ch_cells else 0,
+        "turns_per_lane": ch_per_lane,
+        "lane_turns": ch_cap,
+        "fits": bool(ch_cap and ch_per_lane <= ch_cap),
+    }
     over = [r for r in out if not r["fits"]]
     grain_total = sum(r["projected_turns"] for r in out)
     flat_total = sum(r["per_subcap_turns"] for r in out)
@@ -371,8 +415,9 @@ def lane_fit(wb) -> dict:
         "per_subcap_lane_equivalents": (round(flat_total / cap, 1)
                                         if cap else None),
         "categories": out,
+        "challenge": challenge,
         "over": [r["category"] for r in over],
-        "ok": not over,
+        "ok": not over and challenge["fits"],
         "why": ("every category fits its lane at capability grain" if not over else
                 f"{len(over)} of {len(out)} categories need more turns than a lane "
                 f"has ({cap}), even at capability grain: "
@@ -516,7 +561,14 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
         st = r["stage"]
         t = timings.setdefault(st, {"elapsed_s": 0.0, "records": 0, "attempts": 0,
                                     "lanes": 0, "first_started_at": None,
-                                    "last_ended_at": None})
+                                    "last_ended_at": None,
+                                    # Per-stage money, 2026-09-14. The run
+                                    # total could not say which fan-out spent
+                                    # it, so no token change could be judged.
+                                    # `usd` stays None until a row carries
+                                    # one: an unpriced stage and a free stage
+                                    # are different facts.
+                                    "usd": None, "turns": 0, "tokens": {}})
         t["elapsed_s"] = round(t["elapsed_s"] + float(r.get("elapsed_s") or 0), 1)
         t["records"] += 1
         t["attempts"] += int(r.get("attempts") or 0)
@@ -528,7 +580,11 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
         if r.get("usd") is not None:
             usd_total += float(r["usd"])
             usd_known = True
+            t["usd"] = round((t["usd"] or 0.0) + float(r["usd"]), 4)
         turns += int(r.get("turns") or 0)
+        t["turns"] += int(r.get("turns") or 0)
+        for k, v in (r.get("tokens") or {}).items():
+            t["tokens"][k] = t["tokens"].get(k, 0) + int(v or 0)
     summary = {"total_usd": (round(usd_total, 4) if usd_known else None),
                "total_elapsed_s": round(sum(t["elapsed_s"] for t in timings.values()), 1),
                "turns": turns, "stages": len(timings)}
@@ -552,6 +608,8 @@ def report(run, *, wb=None) -> dict:
         actual = round(t["elapsed_s"] / 60.0, 1)
         stages.append({"stage": st, "actual_min": actual,
                        "planned_min": planned,
+                       "usd": t["usd"], "turns": t["turns"],
+                       "tokens": t["tokens"] or None,
                        "over_by_min": (round(actual - planned, 1)
                                        if planned is not None and actual > planned
                                        else 0.0),
@@ -566,6 +624,16 @@ def report(run, *, wb=None) -> dict:
     return {
         "run_id": wb.metadata().get("run_id"), "ledger": str(_ledger_path(run)),
         "records": len(rows), "stages": stages,
+        # The same rows, money first and largest first — what a reader wants
+        # when the question is "where did the run's dollars go".
+        "by_stage": sorted(
+            [{"stage": r["stage"], "usd": r["usd"], "turns": r["turns"],
+              "tokens": r["tokens"], "records": r["records"],
+              "actual_min": r["actual_min"],
+              "share": (round(r["usd"] / summary["total_usd"], 3)
+                        if r["usd"] and summary["total_usd"] else None)}
+             for r in stages],
+            key=lambda d: (-(d["usd"] or 0.0), d["stage"])),
         "total_min": total_min, "target_min": TARGET_WALL_CLOCK_MIN,
         "schedule_total_min": sch["total_min"],
         "total_usd": usd, "budget_usd": budget, "pillars": pillars,
@@ -702,6 +770,10 @@ def main(argv=None) -> int:
     rp.add_argument("--json", action="store_true")
     rp.add_argument("--as-baseline", action="store_true",
                     help="also write cost_baseline.json from this run's ledger")
+    rp.add_argument("--by-stage", action="store_true",
+                    help="where the run's DOLLARS went, largest first — the "
+                         "question the wall-clock table cannot answer, and the "
+                         "one a $96.65 run needed")
     rp.add_argument("--label")
 
     a = ap.parse_args(argv)
@@ -747,6 +819,19 @@ def main(argv=None) -> int:
             print(f"  cost       {('$%.2f' % usd) if usd is not None else 'not priced'} "
                   f"(budget ${rep['budget_usd']:.2f} for {len(rep['pillars'])} pillar(s))"
                   + ("  OVER" if rep["over_budget"] else ""))
+            if a.by_stage:
+                print(f"\n  {'stage':<12}{'usd':>9}{'share':>8}{'turns':>8}"
+                      f"{'cache rd':>11}")
+                for r in rep["by_stage"]:
+                    tok = (r.get("tokens") or {}).get("cache_read")
+                    print(f"  {r['stage']:<12}"
+                          f"{('$%.2f' % r['usd']) if r['usd'] is not None else '—':>9}"
+                          f"{('%.0f%%' % (100 * r['share'])) if r['share'] else '—':>8}"
+                          f"{r['turns'] if r['turns'] is not None else '—':>8}"
+                          f"{f'{tok:,}' if tok else '—':>11}")
+                if all(r["usd"] is None for r in rep["by_stage"]):
+                    print("  (no stage carried a price — the dispatcher "
+                          "recorded none, which is not the same as zero)")
             if rep["unrecorded"]:
                 print(f"  unrecorded stages: {', '.join(rep['unrecorded'])}")
             if rep.get("baseline"):
@@ -875,3 +960,79 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ── which grain a lane ACTUALLY used ─────────────────────────────────────
+#
+# `lane_fit` projects the capability-grain design and says a full run fits.
+# The projection is a property of the WORK; whether a lane took the grain it
+# was offered is a property of the RUN, and nothing measured it. A lane that
+# reads its packet's `capabilities[]` and fires one query across a
+# capability's sibling cells costs what the projection says; one that
+# ignores it and fires a separate query per cell costs 2.1x that and looks
+# identical in every report — until the round budget runs out and the
+# category is re-dispatched, which is the 2026-09-12 shape.
+#
+# THE MEASUREMENT IS FANOUT, not cells-per-capability. `append_search`
+# writes one ROW PER CELL and charges the ceiling once per distinct (query,
+# tool, facet): so rows-per-distinct-query is exactly "how many cells did
+# one search serve", and it is 1.0 for a lane that searched per cell however
+# its cells happen to be grouped. Counting distinct capabilities instead
+# would score the CATALOGUE's shape and call a per-cell lane disciplined.
+#
+# Measured from the Search_Log the lane itself wrote, never from what it
+# said it did.
+
+#: Below this many rows the ratio is noise, and calling it a design is the
+#: kind of measurement that gets quoted back as fact.
+MIN_SEARCHES_FOR_GRAIN = 6
+
+#: A capability holds 5.3 cells on average (686/129), so a lane using the
+#: grouping fans each query across several. 1.5 is deliberately short of
+#: that: the question is whether the lane used the grouping AT ALL.
+GRAIN_FANOUT_FLOOR = 1.5
+
+
+def grain_observed(wb, category: str | None = None) -> dict:
+    """How many cells one search served, measured from the Search_Log.
+
+    `ratio` is rows per distinct (query, tool, facet): 1.0 is a query per
+    cell — the design `lane_fit` projects at 7,546 turns — and anything
+    above it is the fanout the capability packet asks for. Abstains below
+    `MIN_SEARCHES_FOR_GRAIN` rather than calling two rows a design.
+    """
+    from .brief import capability_of
+    from .relay import normalize
+    want = str(category).upper() if category else None
+    triples: dict[tuple, set[str]] = {}
+    caps: set[str] = set()
+    rows = 0
+    for r in wb.rows("Search_Log"):
+        cell = str(r.get("SubCap_ID") or "").strip().upper()
+        if not cell or (want and not cell.startswith(want)):
+            continue
+        key = (normalize(r.get("Query")),
+               str(r.get("Tool") or "").strip().lower(),
+               str(r.get("Facet") or "").strip().lower())
+        triples.setdefault(key, set()).add(cell)
+        caps.add(capability_of(cell))
+        rows += 1
+    ratio = round(rows / len(triples), 3) if triples else None
+    thin = rows < MIN_SEARCHES_FOR_GRAIN or ratio is None
+    return {
+        "category": want,
+        "rows": rows,
+        "distinct_searches": len(triples),
+        "capabilities_touched": len(caps),
+        "ratio": ratio,
+        "grain": ("not_measured" if thin
+                  else "capability" if ratio >= GRAIN_FANOUT_FLOOR
+                  else "per_subcap"),
+        "why": (f"{rows} Search_Log row(s) — fewer than "
+                f"{MIN_SEARCHES_FOR_GRAIN}, too few to call a design"
+                if thin else
+                f"{rows} row(s) from {len(triples)} distinct search(es) across "
+                f"{len(caps)} capabilit{'y' if len(caps) == 1 else 'ies'} — "
+                f"{ratio} cell(s) per search against a floor of "
+                f"{GRAIN_FANOUT_FLOOR}"),
+    }

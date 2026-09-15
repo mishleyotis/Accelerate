@@ -145,3 +145,82 @@ def test_streaming_is_opt_in_so_the_default_path_is_untouched():
     src = inspect.getsource(ar.dispatch)
     assert "subprocess.run" in src and "capture_output=True" in src
     assert "stream-json" not in src
+
+
+# ── the usage the result event already carried ──────────────────────────
+#
+# Measured 2026-09-14: `_summarise` captured `total_cost_usd` and `num_turns`
+# from the CLI's result event and dropped `usage`, so no ledger row ever
+# carried a token field and `cost.as_baseline` refused every real run with
+# "record stages with --turns and --tokens (agent_run.py --record-run does)"
+# — which it did not. 76% of the measured bill is cache reads, and nothing
+# downstream could see them.
+
+USAGE = {"cache_read_input_tokens": 24_454_213,
+         "cache_creation_input_tokens": 441_293,
+         "input_tokens": 211_703, "output_tokens": 2_935}
+
+
+def test_the_result_events_usage_reaches_the_status_file():
+    st = _st()
+    ar._summarise({"type": "result", "subtype": "success", "num_turns": 42,
+                   "total_cost_usd": 1.23, "usage": USAGE,
+                   "modelUsage": {"claude-sonnet-4-5": {"inputTokens": 10}},
+                   "is_error": False}, st)
+    assert st["tokens"] == {"cache_read": 24_454_213, "cache_write": 441_293,
+                            "uncached": 211_703, "output": 2_935}
+    assert st["model"] == "sonnet"
+
+
+def test_a_result_event_without_usage_says_nothing_rather_than_zero():
+    """A lane whose stream carried no usage must not report a free lane."""
+    st = _st()
+    ar._summarise({"type": "result", "subtype": "success", "num_turns": 42,
+                   "is_error": False}, st)
+    assert "tokens" not in st and "model" not in st
+
+
+def test_the_model_is_read_from_the_dominant_model_usage():
+    st = _st()
+    ar._summarise({"type": "result", "usage": USAGE, "modelUsage": {
+        "claude-haiku-4-5": {"inputTokens": 10},
+        "claude-opus-4-6": {"inputTokens": 900}}}, st)
+    assert st["model"] == "opus"
+
+
+def test_the_cost_record_passes_the_tokens_it_has(monkeypatch, tmp_path):
+    """The half that makes the ledger measurable: the batch summary's
+    tokens reach `engine.cost record --tokens`."""
+    seen = {}
+
+    def fake_run(cmd, **kw):
+        seen["cmd"] = cmd
+        class R:
+            returncode, stdout, stderr = 0, "ok", ""
+        return R()
+
+    monkeypatch.setattr(ar.subprocess, "run", fake_run)
+    summary = {"elapsed_s": 1.0, "started_at": "2026-09-14T00:00:00Z",
+               "ended_at": "2026-09-14T00:01:00Z", "lanes": 2, "ok": 2,
+               "dispatched": 2, "lanes_detail": [{"attempts": 1}],
+               "turns": 42, "usd": 1.23,
+               "tokens": {"cache_read": 5, "cache_write": 1, "uncached": 2,
+                          "output": 3},
+               "model": "sonnet"}
+    ar._record_cost({"run": "R-1", "stage": "CHALLENGE", "root": str(tmp_path)},
+                    summary, tmp_path)
+    cmd = seen["cmd"]
+    assert "--tokens" in cmd and "--model" in cmd
+    import json as _json
+    assert _json.loads(cmd[cmd.index("--tokens") + 1])["cache_read"] == 5
+    assert cmd[cmd.index("--model") + 1] == "sonnet"
+    assert cmd[cmd.index("--stage") + 1] == "CHALLENGE"
+
+
+def test_the_child_is_told_which_agent_it_is():
+    """A headless lane cannot be identified from inside a hook, and until
+    2026-09-14 nothing carried the name into the process either — so no
+    write path and no guard could tell which lane was writing."""
+    env = ar._child_env("research-p1c1-producer")
+    assert env["DMA_ACTOR"] == "research-p1c1-producer"
+    assert env["DMA_STAGE_GUARD"] == "off", "the stage guard is the conductor's"

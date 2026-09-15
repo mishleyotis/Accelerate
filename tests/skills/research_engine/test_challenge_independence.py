@@ -96,13 +96,17 @@ def _synthesised_cell(tmp_path, author, session=""):
 
 def test_the_gate_flags_a_relabel_challenge_already_on_the_workbook(tmp_path):
     from engine import floors_gate
-    run, wb, cell = _synthesised_cell(tmp_path, "research-p2c4-producer")
+    # The author's label names the category it writes: since 2026-09-14 the
+    # ledger scopes a lane to its own cells (engine/scope.py), and the run
+    # this fixture builds is P1C1. The identity that matters here is the
+    # BASE — producer vs challenger — which is unchanged.
+    run, wb, cell = _synthesised_cell(tmp_path, "research-p1c1-producer")
     # A pre-existing RELABEL challenge, written straight to the log as a
     # pre-rule session did — record_challenge would now refuse it, so we bypass
     # it to reproduce what is already sitting on real workbooks.
     wb.append("Challenge_Log", {
         "SubCap_ID": cell, "Verdict": "PASS",
-        "Actor": "research-p2c4-challenger", "Dimensions": dict(DIMS),
+        "Actor": "research-p1c1-challenger", "Dimensions": dict(DIMS),
         "Rationale": RAT, "Ceiling_Band_Delta": "", "At": L._utcnow(),
         "Session": ""})
     wb.set_scoring(cell, {"Challenge_Verdict": "PASS"})
@@ -115,7 +119,7 @@ def test_the_gate_flags_a_relabel_challenge_already_on_the_workbook(tmp_path):
 
 def test_the_gate_accepts_a_genuinely_independent_challenge(tmp_path):
     from engine import floors_gate
-    run, wb, cell = _synthesised_cell(tmp_path, "research-p2c4-producer")
+    run, wb, cell = _synthesised_cell(tmp_path, "research-p1c1-producer")
     # A real independent challenger, recorded the proper way.
     L.record_challenge(wb, cell, verdict="PASS", actor="finding-challenger",
                        dimensions=dict(DIMS), rationale=RAT)

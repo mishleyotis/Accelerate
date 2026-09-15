@@ -88,8 +88,13 @@ query seeds. Work it in this order:
    stops fishing.
 2. **Plan queries** — `engine.cli fuse plan --run R --subcap X --facet works`
    gives the three differently-shaped probes per DQ (presence, responsive,
-   toolkit-artefact). Fire them across the search tools you hold (WebSearch;
-   Exa and Tavily where present). **Log every search**:
+   toolkit-artefact). Fire them through the web tools you hold (WebSearch,
+   WebFetch). **You hold no connector**: the Exa, Tavily, Clay and
+   Explorium volleys are EMITTED, not fired — put each in your final
+   output's `search_requests` array (`{"query", "falsifier", "facet",
+   "subcap", "tool": "exa|tavily|clay|vibe", "proves"}`) and the conductor
+   services them per capability batch between rounds, logging each with the
+   tool that ran it. **Log every search you did run**:
    `engine.cli search --run R --subcap X --facet works --query '…' --hits N
    --kept M`. An unlogged search never happened, and the contradicts gate
    reads the log.
@@ -98,22 +103,54 @@ query seeds. Work it in this order:
    `engine.cli fuse --in results.json --query '…' --top 8`. Reciprocal rank
    fusion (k=60) prefers CONSENSUS — a source three probes agree on beats a
    source one probe loved — and the BM25 rerank ABSTAINS on noise instead of
-   ranking it. Fetch the ranked list top-down; `below_floor` is yours to
-   judge, not silently dropped.
-4. **Note as you go.** The moment you have something real — a quote, a lead,
+   ranking it. `below_floor` is yours to judge, not silently dropped.
+4. **NEVER WebFetch a page to find an excerpt.** Read the ranked list
+   top-down with
+
+       engine.cli fetch --run R --url <U> --query '<the DQ text>'
+
+   which prints at most three ~240-character windows and the page's sha256,
+   and **never the page**. MEASURED: a WebFetched page enters your context
+   and is re-read on **every later turn** — 76% of the six-cell calibration
+   bill was cache reads (24.45M cache-read tokens, $4.89 of $6.45). One
+   fetch is 5–40K tokens re-read every turn after it; three windows are
+   ~200 tokens, read once. Widen with `--window`/`--max` when a window cuts
+   the sentence you need; `--json` when you want to parse it.
+
+   It is also the only way your excerpt can be **checked**. `engine.cli
+   fetch` leaves the extracted text under the run, and `engine.cli evidence`
+   compares your span against it: a span the page does not carry is refused
+   `excerpt_not_verbatim` (whitespace and case are normalised, nothing
+   else), and a URL nothing in this run has read is refused
+   `excerpt_unverified`. If the page genuinely cannot be fetched — a 403
+   WAF, a paywall, a servicing actor's connector extract — register it with
+   `--unverified '<what stopped it>'`: the reason lands on the row's
+   `Access_Status` as `UNVERIFIED: <reason>`, so it is **recorded, never
+   silent**, and it never excuses a span a fetched page contradicts. A
+   connector extract you already hold goes into the same cache with
+   `<extract> | engine.cli fetch --run R --url <U> --via-text - --query '…'`,
+   and then it verifies properly.
+5. **Note as you go.** The moment you have something real — a quote, a lead,
    a contradiction, an absence taking shape — write it to your category
    notebook: `engine.memory note --run R --category <YOURS> --subcap X
    --facet works --kind evidence --claim '…' --excerpt '<VERBATIM 50-500
-   chars>' --url … --source-name … --tier T2 --published YYYY-MM-DD`. The
+   chars, copied from a window `engine.cli fetch` printed>' --url …
+   --source-name … --tier T2 --published YYYY-MM-DD`. The
    notebook survives your context; your context does not. Kinds: `evidence`
    (registrable), `lead` (worth chasing, not yet evidence), `absence` (with
    `--ladder`, rung by rung), `contradiction`, `note`.
-5. **Consolidate before you synthesise**: `engine.memory consolidate --run R
+6. **Consolidate before you synthesise**: `engine.memory consolidate --run R
    --category <YOURS>`. Every note goes through the workbook's own refusals
    — an entry that cannot register is marked BLOCKED in the notebook with
    the ledger's reason. Repair the NOTE (usually the verbatim excerpt or the
-   URL), never work around the gate.
-6. **Synthesise** the subcap (`engine.cli synthesise --run R --subcap X
+   URL), never work around the gate. Consolidation verifies excerpts, so a
+   note quoting a page you never read through `engine.cli fetch` is BLOCKED
+   with `excerpt_unverified`: fetch it and re-note from a window, or — when
+   the page truly cannot be fetched — register that one row directly with
+   `engine.cli evidence --unverified '<what stopped it>'`. There is no
+   `--unverified` on a note: an unverifiable source is a decision, and a
+   decision belongs on a command you type, not in a field a batch reads.
+7. **Synthesise** the subcap (`engine.cli synthesise --run R --subcap X
    --json rec.json`, with `--actor <your-agent-name>` recorded). Write the
    prose to `references/functional_language.md` — impact as consequence,
    gaps as the opportunity they open, never a verdict on people, every
@@ -124,7 +161,7 @@ query seeds. Work it in this order:
    Deferred questions on your card (mode-filtered out) go into
    `Discovery_Questions` as the card gives them (`INT-Q:` / `PUB-Q:`),
    never silently skipped.
-7. **The challenge is not yours to write.** Your synthesis author name is
+8. **The challenge is not yours to write.** Your synthesis author name is
    recorded; a DIFFERENT actor (the conductor routes to `finding-challenger`
    discipline) records the challenge verdict, all seven dimensions by name.
    `record_challenge` refuses a self-challenge — do not try.
@@ -157,9 +194,10 @@ Rules the gates enforce and you must not soften:
   owed for this cell — and `orient`'s work list serves `in_volley` cells
   (some volleys fired) before any new `pending` cell. A cell with one
   shallow `works` query and four unfired volleys is not researched; it is
-  opened. Fire the toolkit's NAMED artefacts and the connectors (Exa,
-  Tavily) on each volley — `absence_single_tool` names the cells whose
-  whole search was one web engine.
+  opened. Fire the toolkit's NAMED artefacts on each volley through the web
+  tools, and emit the connector volleys (Exa, Tavily) as `search_requests`
+  for the conductor to service — `absence_single_tool` names the cells whose
+  whole search was one web engine, and a serviced request is what closes it.
 - **`NOT_RUN` means the volley never fired — nothing else.** A volley that
   RAN and surfaced nothing relevant writes
   `NO_FINDING after <n> logged searches: <what was hunted and what came
@@ -222,11 +260,14 @@ result the run can defend in the room; a `NO_EVIDENCE` left standing is not.
 ## Internal artefacts (HYBRID / INTERNAL runs)
 
 Your card's `internal_sources` name the client documents that answer the
-DQ. In HYBRID/INTERNAL mode those live in the client's Drive folder — use
-your Drive READ tools (`search_files` scoped to the client folder,
-`read_file_content` / `download_file_content`) to fetch the NAMED artefact,
-then register what it says with `--origin internal` and a verbatim excerpt.
-You never write to Drive; the conductor owns backup and shipping.
+DQ. In HYBRID/INTERNAL mode those live in the client's Drive folder, which
+the conductor's `drive_fetch.py pull` has already landed under the run root
+(`01_intake/` — check `run_manifest.json` for the path). You hold no Drive
+tool: read the NAMED artefact from disk (Read, or `grep`/`pdftotext` over
+Bash), then register what it says with `--origin internal` and a verbatim
+excerpt. An artefact the pull did not land is a `search_requests` entry with
+`"tool": "drive"`, never a gap. You never write to Drive; the conductor owns
+the pull, the backup and the shipping.
 
 ## After a compaction, a resume, or any interruption
 
@@ -295,8 +336,11 @@ Bash invocations**: (1) chain ALL of the card's `engine.cli search` logging
 in one call (`cmd && cmd && …`); (2) chain the card's `engine.memory note`
 calls in one; (3) `engine.memory consolidate` once per card or batch it per
 2–3 cards; (4) write the synthesis JSON and `engine.cli synthesise` in one.
-Web searches and fetches cannot batch — spend your turns there, where they
-buy evidence, not on one-liner bookkeeping.
+Web searches cannot batch — spend your turns there, where they buy
+evidence, not on one-liner bookkeeping. Reading a source DOES batch: chain
+several `engine.cli fetch` calls in one Bash invocation, and each brings
+back windows rather than a page, so ten sources read this way cost less
+context than one WebFetch.
 
 ## Refusals you must respect rather than route around
 

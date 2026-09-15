@@ -1,6 +1,6 @@
 # Agents — the index
 
-Forty-seven agent files live in taxonomy folders under
+Seventy-four agent files live in taxonomy folders under
 `plugins/dma-insights/agents/` (owner, 2026-08-20: "every agent and subagent
 organized well into folders and subfolders so it is easy to follow"); this
 file says what each one owns, which tier it belongs to, and who is allowed
@@ -64,7 +64,8 @@ unambiguous identifier when a routing ticket gets an id wrong.
 | `techstack-surface-producer` | per-surface producer | Router for D6 Tech stack — T1 and the T3 per-row detail fields | `surface-producer` |
 | `techstack-register-producer` | per-surface producer | T1 rows — `items[]`, `dropped[]`, `compliance_attestations` in `techstack.techstack` | `surface-producer` / `techstack-surface-producer` — **before the layers rollup** |
 | `techstack-layers-producer` | per-surface producer | T1 shape — `layers[]`, `enrichment_status`, section `narrative_thread` in `techstack.techstack` | `surface-producer` / `techstack-surface-producer` |
-| `finding-challenger` | challenge and consolidation | Per-claim adversarial verdicts on freshly produced section JSON; repairs nothing | `surface-producer`, after produce and **before** consolidation |
+| `finding-challenger` | challenge and consolidation | Per-claim adversarial verdicts on freshly produced section JSON; repairs nothing. Second duty: the Opus 10% sample of the research challenger's PASSes (`challenge-<CAT>-sample`) | `surface-producer`, after produce and **before** consolidation; the driver, for the research sample |
+| `research-challenger` | research | The Sonnet challenge pass over a converged category's syntheses — seven dimensions from the brief packet alone, one chained `engine.cli challenge` per cell; no web, no `get_evidence`, `engine.cli fetch --run <R>` only for a non-verbatim excerpt | the driver (`engine.pipeline`), over `engine.brief challenge-batch`, after a category's floors gate converges and before it demands a challenge |
 | `page-consolidator` | challenge and consolidation | One coherent page from challenged sections: cross-surface reconciliation, thread alignment, orphan evidence, the storyline challenge | `surface-producer`; refuses unchallenged input |
 | `package-vetter` | QA and audit | ACCEPT / ACCEPT WITH FINDINGS / REFUSE on an assessment package before anything is parsed; also checks each new Surface Specification version against `surface-map.md` | An operator or the intake scheduler when a client folder arrives |
 | `adversarial-verifier` | QA and audit | Attacks a payload, run or verdict that has already passed — grain, identity, arithmetic, absence, narrative | `surface-producer` or an operator, before a passing run is believed |
@@ -296,10 +297,15 @@ above assigns (a new family means a new folder AND a new tree entry here).
 The `name` in front matter must equal the filename without `.md` and stay
 unique across ALL folders; a mismatch is how an agent becomes unroutable
 while looking present on disk. Then declare the file in `plugin.json`'s
-`agents` array and bump `scripts/doctor.py` EXPECTED_AGENTS — the packager
-and the doctor both fail loudly until you do, which is the point.
+`agents` array — the agent count is DERIVED from that array
+(`scripts/doctor.py expected_agents()` reads the manifest; there is no
+constant to bump) and `scripts/package_plugin.py` fails the build when the
+manifest and the tree disagree in either direction. Give it a row in
+`scripts/provision_agent_tools.py` (or let its folder default apply) and run
+the provisioner with `--write`; `scripts/tests/test_agent_tools_match_bodies.py`
+pins the roster size, so bump the number there.
 
-**Front matter may contain only these seven keys**, and nothing else:
+**Front matter may contain only these eight keys**, and nothing else:
 
 | Key | What it must do |
 |---|---|
@@ -309,7 +315,8 @@ and the doctor both fail loudly until you do, which is the point.
 | `effort` | Effort level for the tier |
 | `maxTurns` | A real ceiling, sized to the work the agent is actually given. Producers sit between 60 and 200 — except the sixteen **research** producers, which sit at **340** because that is what a category costs: measured 2026-09-13 on the real catalogue, the largest needs 309 turns at capability grain, and `engine.cost lane-fit` projects it per run. A ceiling below the work is not a saving — the lane runs out, hands back and is re-dispatched, re-paying its context floor cold, which is how one run reached ~18 dispatches. Set it from `gen_research_agents.py`, never by hand |
 | `skills` | Only these six exist: `dma-surface-production`, `dma-research`, `dma-assessment`, `dma-governance`, `dma-rectifier`, `dma-first-call-deck` |
-| `disallowedTools` | The deny list below |
+| `tools` | **GENERATED** — never hand-edited. `scripts/provision_agent_tools.py --write` writes it from the role table (`CORE` + web pair + capability built-ins + the role's connector families + its connector read bundle + its connector writes); `python3 scripts/provision_agent_tools.py` must print `0 would change` before a commit, and `tests/skills/test_agent_tool_provisioning.py` fails on drift |
+| `disallowedTools` | **GENERATED** with `tools`, from the same row — the deny list below |
 
 **The forbidden three: `mcpServers`, `hooks` and `permissionMode`.** These are
 not permitted in plugin-provided agents at all. They were stripped from all
@@ -338,19 +345,31 @@ they still deny every connector write tool.
 `plugins/dma-insights/skills/dma-surface-production/02-inputs/3-mcp-tools.md`. A
 deny list naming a tool that does not exist denies nothing.
 
-**Then update the doctor count, or the install reports broken.**
+**The doctor's agent count is derived, not typed.**
 `plugins/dma-insights/scripts/doctor.py` checks component inventory by
 **equality, not a floor** — a floor of `agents >= 5` once reported a clean
-install while seven agent files were missing. Line 60:
+install while seven agent files were missing — and the expected number is
+`len(plugin.json["agents"])`, read at check time. A file on disk that the
+manifest does not list, or a manifest entry with no file, is what fails.
 
-```python
-EXPECTED_AGENTS = 16   # 14 + insights-surface-producer + techstack-surface-producer, split out of context (2026-08-19)
-```
+**Connector tier.** Since 2026-09-14 the external connectors are held by
+nine agents and called by the orchestrator tier; every other agent emits
+`search_requests` and holds the web pair at most. The holders, by family
+(pinned exactly by `tests/skills/test_agent_tool_provisioning.py`):
 
-This constant is **currently wrong**: the directory holds **40** agent files, so
-`/dma-insights:doctor` fails its agents-inventory row today and will keep failing
-until the constant and the comment are brought up to date. Whoever next adds or
-removes an agent owns that correction along with their own increment.
+| family | held by |
+|---|---|
+| Exa · Tavily (search + extract) | `research-conductor`, `enrichment-web-specialist` |
+| Clay | `research-conductor` (people slice), `enrichment-connector-specialist` (all five), `technographic-scanner` (company slice), `overview-people-producer` (people slice — leadership is written from it, ‡) |
+| Explorium (Vibe Prospecting) | `technographic-scanner`, `enrichment-connector-specialist`, `techstack-register-producer`, `techstack-layers-producer`, `insights-landscape-producer` (the register is written from it, ‡) |
+| Indeed (`search_jobs`) | `technographic-scanner` |
+| Quartr · Google Drive | nobody — Quartr is declared and not wired; the client folder lands through `drive_fetch.py` over Bash |
+
+Capability tools (web pair, Write/Edit/Agent/AskUserQuestion, connector
+tools) are at most five on every lane, producer and checker; the five that
+exceed it carry their own ceiling in `provision_agent_tools.CONNECTOR_TIER`
+(conductor 11 · technographic-scanner 9 · connector-specialist 8 ·
+web-specialist 6 · surface-producer 3).
 
 **Finally, close the loop.** Add the agent's row to the table in this file; add
 or reassign its rows in `05-lifecycle/surface-map.md` if it produces a surface;
