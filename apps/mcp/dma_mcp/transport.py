@@ -231,7 +231,7 @@ def open_payload(conn, run_id, page: str, producer_version: str = "",
 
 def append_payload_part(conn, upload_id, part: int, parts_total: int,
                         path: str = "", items=None, fields=None,
-                        item_count: int = 0) -> dict:
+                        item_count: int = 0, repartition: bool = False) -> dict:
     cur = conn.cursor()
     cur.execute("""SELECT run_id, enum_label(page), parts_total, state
                      FROM payload_uploads WHERE id = %s""", (upload_id,))
@@ -259,12 +259,50 @@ def append_payload_part(conn, upload_id, part: int, parts_total: int,
         return {"ok": False, "error": "part_out_of_range",
                 "message": f"part {part} is above the declared parts_total "
                            f"{parts_total}"}
+    # A CHANGED PLAN IS NOT A DEAD END, but it is not a silent merge either.
+    #
+    # The first part to arrive freezes `parts_total` for the upload's life,
+    # which is what makes an incomplete transmission detectable — that
+    # property stays. What was missing is a way THROUGH it. The refusal used
+    # to say "Open a new upload if the plan changed", and a producer that
+    # took that advice abandoned every part it had already sent along with
+    # the upload_id it had been reporting against. Measured 2026-08-31: two
+    # attempts on one heatmap re-opened from part 1 for exactly this reason.
+    #
+    # `repartition` is the way through. It is explicit, it is destructive by
+    # design, and it says what it destroyed: the old parts belonged to a
+    # different cut of the same payload, so keeping any of them would make
+    # the new declared length a lie. Mixing two plans is the one thing this
+    # must never do quietly.
+    repartitioned = 0
     if declared is not None and declared != parts_total:
-        return {"ok": False, "error": "parts_total_disagreement",
-                "message": f"this upload was opened declaring "
-                           f"{declared} parts and part {part} declares "
-                           f"{parts_total} — one transmission, one declared "
-                           "length. Open a new upload if the plan changed"}
+        if not repartition:
+            return {"ok": False, "error": "parts_total_disagreement",
+                    "message": f"this upload was opened declaring "
+                               f"{declared} parts and part {part} declares "
+                               f"{parts_total} — one transmission, one "
+                               "declared length. To CONTINUE the existing "
+                               "transmission, call get_upload_status("
+                               f"upload_id) and resend only its "
+                               "missing_parts with parts_total="
+                               f"{declared}. To START OVER under a new plan "
+                               "without abandoning this upload, resend part 1 "
+                               "with repartition=true — that discards the "
+                               f"{declared}-part plan's parts, which is what "
+                               "makes the new length honest"}
+        if part != 1:
+            return {"ok": False, "error": "repartition_not_at_start",
+                    "message": f"repartition discards every part already "
+                               f"received, so it belongs on part 1 of the new "
+                               f"plan — this is part {part}. Sending it later "
+                               "would delete the parts of the new plan that "
+                               "had already arrived"}
+        cur.execute("DELETE FROM payload_upload_parts WHERE upload_id = %s",
+                    (upload_id,))
+        repartitioned = cur.rowcount or 0
+        cur.execute("UPDATE payload_uploads SET parts_total = NULL "
+                    "WHERE id = %s", (upload_id,))
+        declared = None
 
     if (items is None) == (fields is None):
         return {"ok": False, "error": "one_body",
@@ -325,10 +363,97 @@ def append_payload_part(conn, upload_id, part: int, parts_total: int,
     return {"ok": True, "upload_id": str(upload_id), "run_id": str(run_id),
             "page": page, "part": part, "op": op, "path": path or "",
             "replaced": replaced, "part_bytes": len(raw),
+            # Said out loud, because a discard nobody is told about is
+            # indistinguishable from parts that never arrived.
+            "repartitioned_away": repartitioned,
             "parts_received": received, "parts_total": parts_total,
             "missing_parts": missing, "bytes_received": int(total_bytes),
             "items_received": int(total_items),
             "complete": not missing}
+
+
+def upload_status(conn, upload_id=None, run_id=None, page: str = "") -> dict:
+    """What has actually arrived — WITHOUT writing anything.
+
+    THE GAP THIS FILLS. Until now the only way to learn an upload's state was
+    to append another part to it and read the counters off the reply. So a
+    producer whose run was interrupted was blind: it could not see which of
+    its parts had landed, could not find the upload it had opened, and its
+    only safe move was to open a NEW one and resend everything. Measured
+    2026-08-31 on a 1.5 MB heatmap: two attempts abandoned mid-transmission
+    and re-opened from part 1.
+
+    The index this needs — `payload_uploads_run_page (run_id, page,
+    opened_at DESC)` — has existed since the table was created and nothing
+    queried it. Finding your own interrupted upload was already cheap; there
+    was simply no tool that asked.
+
+    Called with `upload_id` it reports one upload. Called with `run_id` and
+    `page` it lists the OPEN ones newest first, so a resumed session can
+    recognise its own work instead of starting again. Read-only by
+    construction: no INSERT, no UPDATE, no commit.
+    """
+    cur = conn.cursor()
+    if upload_id:
+        cur.execute("""SELECT id, run_id, enum_label(page), parts_total, state,
+                              opened_at, producer_version, submission_id
+                         FROM payload_uploads WHERE id = %s""", (upload_id,))
+        rows = cur.fetchall()
+        if not rows:
+            return {"ok": False, "error": "unknown_upload",
+                    "message": f"no payload upload {upload_id}"}
+    else:
+        if not run_id:
+            return {"ok": False, "error": "no_selector",
+                    "message": "pass upload_id, or run_id (and optionally "
+                               "page) to list this run's open uploads"}
+        from .contracts import PAGES
+        if page and page not in PAGES:
+            return {"ok": False, "error": "unknown_page",
+                    "message": f"unknown page {page!r}; pages are {list(PAGES)}"}
+        cur.execute(f"""SELECT id, run_id, enum_label(page), parts_total, state,
+                               opened_at, producer_version, submission_id
+                          FROM payload_uploads
+                         WHERE run_id = %s AND state = 'OPEN'
+                           {"AND page = %s" if page else ""}
+                         ORDER BY opened_at DESC""",
+                    (run_id, page) if page else (run_id,))
+        rows = cur.fetchall()
+
+    out = []
+    for (uid, rid, pg, declared, state, opened_at, pver, sub) in rows:
+        cur.execute("""SELECT part, op, path, bytes, item_count, received_at
+                         FROM payload_upload_parts WHERE upload_id = %s
+                        ORDER BY part""", (uid,))
+        parts = [{"part": r[0], "op": r[1], "path": r[2], "bytes": r[3],
+                  "item_count": r[4],
+                  "received_at": r[5].isoformat() if r[5] else None}
+                 for r in cur.fetchall()]
+        missing = [i for i in range(1, (declared or 0) + 1)
+                   if i not in {p["part"] for p in parts}]
+        out.append({
+            "upload_id": str(uid), "run_id": str(rid), "page": pg,
+            "state": state, "parts_total": declared,
+            "parts_received": len(parts), "missing_parts": missing,
+            "bytes_received": sum(p["bytes"] or 0 for p in parts),
+            "items_received": sum(p["item_count"] or 0 for p in parts),
+            "complete": bool(declared) and not missing,
+            "opened_at": opened_at.isoformat() if opened_at else None,
+            "producer_version": pver,
+            "submission_id": str(sub) if sub else None,
+            "parts": parts,
+        })
+
+    return {"ok": True, "uploads": out, "count": len(out),
+            "limits": limits(),
+            "how": ("Resume rather than restart: send only `missing_parts` "
+                    "against this same upload_id, with the SAME parts_total, "
+                    "then submit. A part index is replaced, never duplicated, "
+                    "so re-sending one that already arrived is safe. If the "
+                    "chunking plan has genuinely changed, pass "
+                    "repartition=true on the first part of the new plan — "
+                    "that discards the parts of the old one, which is what "
+                    "makes the new declared length honest.")}
 
 
 def _missing_parts(cur, upload_id, parts_total: int) -> list:

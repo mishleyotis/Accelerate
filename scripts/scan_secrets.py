@@ -19,6 +19,14 @@ PATTERNS = [
     (re.compile(r"\bsk-ant-[0-9A-Za-z_-]{20,}\b"), "Anthropic API key"),
     (re.compile(r"\bsk-[0-9A-Za-z]{40,}\b"), "secret key token"),
     (re.compile(r"\bghp_[0-9A-Za-z]{36}\b"), "GitHub token"),
+    # Added 2026-08-30, both after a live one was handed to a session in a
+    # Drive doc. `ghp_` is the CLASSIC PAT shape and matches neither of
+    # these: a fine-grained PAT is `github_pat_` + ~82 chars, and Google's
+    # OAuth client secret is `GOCSPX-` + ~28. The length floors are what keep
+    # the legacy snapshot's placeholder "GOCSPX-real-secret" out of the
+    # results — a scanner that cries wolf on fixtures gets switched off.
+    (re.compile(r"\bgithub_pat_[0-9A-Za-z_]{50,}\b"), "GitHub fine-grained PAT"),
+    (re.compile(r"\bGOCSPX-[0-9A-Za-z_-]{25,}\b"), "Google OAuth client secret"),
     (re.compile(r"\bxox[bapors]-[0-9A-Za-z-]{10,}\b"), "Slack token"),
     (re.compile(r"(?i)\b(password|passwd|secret|token)\s*[:=]\s*['\"][^'\"\s]{8,}['\"]"), "hardcoded credential assignment"),
 ]
@@ -26,7 +34,7 @@ SKIP_SUFFIX = {".png", ".jpg", ".jpeg", ".woff", ".woff2", ".ico", ".gif", ".pdf
 # The prototype and docs contain the words 'token'/'secret' in prose and
 # mock data; only the high-confidence patterns apply there.
 PROSE_DIRS = ("docs/", "prototype/")
-HIGH_CONFIDENCE = {0, 1, 2, 3, 4, 5, 6}
+HIGH_CONFIDENCE = {0, 1, 2, 3, 4, 5, 6, 7, 8}
 # The legacy snapshot is frozen reference material, sanitised before import
 # (see SNAPSHOT_README.md) — its tests carry deliberate FAKE key fixtures.
 # Nothing new is ever added there, so it is excluded rather than allowlisted

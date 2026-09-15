@@ -763,8 +763,20 @@ def main(argv=None) -> int:
              "memory-backup folder (the in-flight safety copy "
              "engine/memory.py maintains)")
     p_bk.add_argument("--client", required=True)
-    p_bk.add_argument("--file", required=True)
-    p_bk.add_argument("--name", default=None)
+    p_bk.add_argument("--file", default=None)
+    p_bk.add_argument("--many", nargs="+", default=None,
+                      help="several paths in ONE call — one token exchange "
+                           "and one folder lookup for the whole round's "
+                           "notebooks instead of one process per file")
+    p_bk.add_argument("--name", default=None,
+                      help="remote name for a single --file")
+    p_pb = sub.add_parser(
+        "pull-backup",
+        help="download the client's memory-backup folder into --dest — the "
+             "mirror of push-backup, what engine/memory.py restore calls "
+             "on a fresh container")
+    p_pb.add_argument("--client", required=True)
+    p_pb.add_argument("--dest", required=True)
     p_fn = sub.add_parser(
         "push-final",
         help="push one finished deliverable to the ROOT of the client's "
@@ -815,7 +827,9 @@ def main(argv=None) -> int:
     if a.cmd == "pull-toolkits":
         return pull_toolkits(a.dest)
     if a.cmd == "push-backup":
-        return push_backup(a.client, a.file, a.name)
+        return push_backup(a.client, a.file, a.name, a.many)
+    if a.cmd == "pull-backup":
+        return pull_backup(a.client, a.dest)
     if a.cmd == "push-final":
         return push_final(a.client, a.file)
     if a.cmd == "cleanup-backup":
@@ -895,22 +909,87 @@ def push_package(client: str, file_path: str, name: str | None) -> int:
     return 0
 
 
-def push_backup(client: str, file_path: str, name: str | None) -> int:
-    """One research-notebook or workbook file into the client's
+def push_backup(client: str, file_path: str | None, name: str | None,
+                many: list | None = None) -> int:
+    """Research-notebook and workbook files into the client's
     'memory-backup' folder — the IN-FLIGHT safety copy of the .md memory
     layer, so a dead container does not cost the notebook. This is the
     folder `cleanup-backup` later removes, once engine/memory.py has
-    verified every entry is consolidated into the workbook."""
-    local = Path(file_path)
-    if not local.is_file():
-        raise SystemExit(f"no such file: {local}")
+    verified every entry is consolidated into the workbook.
+
+    `--many` takes a LIST of paths and pushes them under ONE token exchange
+    and ONE folder resolution. A sixteen-lane run backs up sixteen notebooks
+    plus the workbook at every round end; one call per file meant seventeen
+    processes, seventeen SA assertions and seventeen client-folder lookups
+    for a job whose whole point is to be cheap enough to do every round.
+    `--name` renames a single `--file` only — a rename cannot be meaningful
+    for a batch, so asking for both is refused rather than half-applied.
+    """
+    paths = [Path(f) for f in (many or [])] or ([Path(file_path)]
+                                                if file_path else [])
+    if not paths:
+        raise SystemExit("push-backup needs --file or --many")
+    if many and name:
+        raise SystemExit("--name renames one --file; it cannot name a batch")
+    missing = [str(p) for p in paths if not p.is_file()]
+    if missing:
+        # Validated BEFORE the first upload: a batch that pushes four files
+        # and then dies on a typo leaves a half-done backup whose caller was
+        # told nothing succeeded.
+        raise SystemExit(f"no such file: {', '.join(missing)}")
     tok = _token()
     folder, chosen = _insights_root(tok, client)
-    ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
-                                "application/octet-stream")
-    remote = f"{BACKUP_FOLDER}/{name or local.name}"
-    verb = _upload_bytes(tok, chosen["id"], remote, local.read_bytes(), ctype)
-    print(f"backup {verb}: {chosen['name']}/{remote} in {folder['name']!r}")
+    failed = 0
+    for local in paths:
+        ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
+                                    "application/octet-stream")
+        remote = f"{BACKUP_FOLDER}/{name or local.name}"
+        try:
+            verb = _upload_bytes(tok, chosen["id"], remote,
+                                 local.read_bytes(), ctype)
+        except (urllib.error.URLError, OSError) as e:
+            failed += 1
+            print(f"backup FAILED: {chosen['name']}/{remote}: {e}")
+            continue
+        print(f"backup {verb}: {chosen['name']}/{remote} "
+              f"in {folder['name']!r}")
+    return 1 if failed else 0
+
+
+def pull_backup(client: str, dest: str) -> int:
+    """The client's 'memory-backup' folder, back down into `dest` — the
+    mirror of push-backup and the half the lifecycle was missing.
+
+    A safety copy nothing can fetch is not a safety copy: until this verb
+    existed the notebooks were pushed every round and a fresh container
+    still had no way to get them, so `engine.memory restore` had nothing to
+    call. Same client, same folder, same identity (the service account, not
+    a connector); downloading instead of uploading.
+
+    NO BACKUP IS NOT AN ERROR. A client with nothing pushed yet prints what
+    it looked at and returns 0 with `dest` empty — engine/memory.py reads
+    the empty directory as its own NOT_RUN, which is the honest outcome,
+    where a nonzero exit here would read as a broken Drive."""
+    tok = _token()
+    folder, chosen = _insights_root(tok, client)
+    out = Path(dest)
+    out.mkdir(parents=True, exist_ok=True)
+    hits = [f for f in _list_children(tok, chosen["id"])
+            if f["mimeType"] == FOLDER_MIME and f["name"] == BACKUP_FOLDER]
+    if not hits:
+        print(f"pull-backup: no {BACKUP_FOLDER!r} folder under "
+              f"{chosen['name']} in {folder['name']!r} — nothing backed up "
+              f"for this client yet")
+        return 0
+    n = 0
+    for h in hits:
+        for f in _list_children(tok, h["id"]):
+            if f["mimeType"] == FOLDER_MIME:
+                continue
+            _download(tok, f, out)
+            n += 1
+    print(f"pull-backup: {n} file(s) <- {chosen['name']}/{BACKUP_FOLDER} "
+          f"in {folder['name']!r} -> {out}")
     return 0
 
 

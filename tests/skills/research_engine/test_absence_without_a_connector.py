@@ -1,0 +1,408 @@
+"""The one refusal a container can be unable to satisfy.
+
+Measured 2026-09-12 on a live run: no enrichment connector was bound, so no
+cell could be declared absent, so no floors gate could pass, so the driver
+re-dispatched sixteen lanes until it had spent $96.65 against a $20 budget.
+Every OTHER check on an absence — the five volleys, the primary question,
+both ladder rungs, the proxy log — a lane satisfies with the built-in web
+tools. `absence_single_tool` it cannot, and no agent can bind a connector
+from inside a run: they bind once, at session start.
+
+Refusing anyway does not buy the enrichment. It buys re-dispatch.
+
+So the refusal lifts on a MEASUREMENT and never on a claim: the caller asks
+for the degraded path AND the run's own recorded connector baseline — written
+by the preflight, before any cell was worked — must prove the connector was
+never there. The absence is then written with its rigour reduced and the
+reason on the row, because "no connector answered" and "the world holds
+nothing" read identically in a payload and mean opposite things.
+
+The gate reads the same measurement (AUD-0117: read and write must agree), so
+the writer and the gate cannot disagree about the same cell.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import pytest
+
+from engine import brief, floors_gate, ledger as L
+import fixtures as F
+
+PLUGIN = Path(__file__).resolve().parents[3] / "plugins" / "dma-insights"
+sys.path.insert(0, str(PLUGIN / "scripts"))
+import connector_contract as cc  # noqa: E402
+
+LADDER_PROXY = ("hunted the leadership_title proxy class across the site, "
+                "LinkedIn and the annual report; nothing names one")
+
+
+def _bound_tools():
+    fam = cc.families()
+    return [fam["exa"][0], fam["tavily"][0], fam["clay"][0]]
+
+
+def _run(tmp_path, tools, n=4):
+    """A run whose cells are fully worked THROUGH WEB SEARCH ONLY — every
+    askable volley, both ladder rungs, nothing else missing."""
+    # `tools=None` is a run that NEVER RECORDED A BASELINE — the unverified
+    # case, which several tests below turn on. `new_run` writes a bound one
+    # by default (since the driver refuses to dispatch without one), so it
+    # is suppressed here rather than overwritten.
+    run = F.new_run(tmp_path, n=n, baseline=(tools if tools is not None else None))
+    wb = run.open()
+    for cell in wb.selected_subcaps():
+        F.fire_volleys(wb, cell, n=1)
+        for rung in ("direct", "proxy"):
+            L.append_search(wb, subcap=cell, facet="works",
+                            query=f'"Acme Credit Union" {cell} {rung} probe',
+                            tool="web_search", hits=0, kept=0, outcome="no hits")
+    return run, wb
+
+
+def _declare(wb, cell, *, opt_in):
+    return L.declare_absence(
+        wb, cell, actor="research-p1c1-producer",
+        ladder=[{"rung": "direct",
+                 "query": f'"Acme Credit Union" {cell} direct probe'},
+                {"rung": "proxy",
+                 "query": f'"Acme Credit Union" {cell} proxy probe'}],
+        proxy_log=LADDER_PROXY,
+        what_was_hunted=(f"a public artefact naming {cell} at Acme Credit Union "
+                         f"across five volleys and two ladder rungs since 2024; "
+                         f"nothing bears on the cell"),
+        enrichment_unavailable=opt_in)
+
+
+# ── what the baseline says, and only the baseline ───────────────────────
+
+def test_no_baseline_means_unverified_not_unavailable(tmp_path):
+    run, wb = _run(tmp_path, None, n=1)
+    b = L.enrichment_binding(wb)
+    assert b["known"] is False and b["bound"] is False, (
+        "an absent baseline proves nothing — and every caller must read "
+        "`known` before `bound`")
+
+
+def test_the_baseline_says_bound_when_the_connectors_are_there(tmp_path):
+    run, wb = _run(tmp_path, _bound_tools(), n=1)
+    b = L.enrichment_binding(wb)
+    assert b["known"] and b["bound"] and b["missing"] == []
+
+
+def test_the_baseline_names_what_is_missing(tmp_path):
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    b = L.enrichment_binding(wb)
+    assert b["known"] and not b["bound"]
+    assert b["missing"] and "exa" in b["missing"]
+    assert "bind at start" in b["reason"], (
+        "the reason must say why no agent can fix this from inside the run")
+
+
+# ── the writer ──────────────────────────────────────────────────────────
+
+def test_the_deadlock_still_reproduces_without_the_opt_in(tmp_path):
+    """THE REPRODUCTION. Unchanged behaviour is the default: a lane that does
+    not ask for the degraded path meets the refusal it always met."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    with pytest.raises(L.LedgerRefusal) as e:
+        _declare(wb, wb.selected_subcaps()[0], opt_in=False)
+    assert "an absence is declared only after an enrichment connector" in str(e.value)
+
+
+def test_a_measured_unavailability_lets_the_absence_through(tmp_path):
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    cell = wb.selected_subcaps()[0]
+    out = _declare(wb, cell, opt_in=True)
+    assert out["rigour"] == "REDUCED"
+    assert "short of" in out["degraded_reason"]
+
+
+def test_the_row_says_the_absence_was_worked_with_one_hand_tied(tmp_path):
+    """A degradation nobody can read from the workbook is a silent thinning.
+    It lands on the row AND on the provenance record."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    cell = wb.selected_subcaps()[0]
+    _declare(wb, cell, opt_in=True)
+    fresh = run.open()
+    assert "REDUCED RIGOUR" in str(fresh.scoring_row(cell)["Triangulation"])
+    prov = [r for r in fresh.rows("Provenance")
+            if str(r.get("SubCap_ID")) == cell
+            and str(r.get("Step")) == "absence"]
+    assert prov and "REDUCED RIGOUR" in str(prov[0]["Detail"])
+
+
+def test_a_bound_connector_that_was_never_asked_is_still_refused(tmp_path):
+    """THE ANTI-HOLLOWING PROPERTY. The lane cannot claim a degradation it
+    does not have — the baseline, not the lane, is the witness."""
+    run, wb = _run(tmp_path, _bound_tools(), n=1)
+    with pytest.raises(L.LedgerRefusal) as e:
+        _declare(wb, wb.selected_subcaps()[0], opt_in=True)
+    msg = str(e.value)
+    assert "does not apply" in msg
+    assert "WAS available and was not asked" in msg
+
+
+def test_an_unverifiable_claim_is_refused(tmp_path):
+    """No baseline, so nothing here can prove the connector was absent. A run
+    that skipped its preflight does not get the degraded path by default."""
+    run, wb = _run(tmp_path, None, n=1)
+    with pytest.raises(L.LedgerRefusal) as e:
+        _declare(wb, wb.selected_subcaps()[0], opt_in=True)
+    assert "An unverified claim is not a degradation" in str(e.value)
+
+
+def test_every_other_refusal_survives_the_degraded_path(tmp_path):
+    """Only the connector rung lifts. Unfired volleys, a missing ladder rung
+    and a thin proxy log are all still refused with --enrichment-unavailable,
+    because a lane can satisfy every one of them with the web tools alone."""
+    run = F.new_run(tmp_path, n=1)
+    wb = run.open()
+    cc.write_baseline(["Read", "Bash", "WebSearch"], str(run.root))
+    cell = wb.selected_subcaps()[0]
+    with pytest.raises(L.LedgerRefusal) as e:          # nothing fired at all
+        _declare(wb, cell, opt_in=True)
+    assert "volley(s) never fired" in str(e.value)
+
+    F.fire_volleys(wb, cell, n=1)                      # volleys, but no ladder
+    with pytest.raises(L.LedgerRefusal) as e:
+        _declare(wb, cell, opt_in=True)
+    assert "are owed on every absence" in str(e.value)
+
+
+# ── the gate, reading the same measurement ──────────────────────────────
+
+def test_a_degraded_category_reaches_a_passing_gate(tmp_path):
+    """THE POINT. Four cells, honestly worked and honestly declared, in a
+    container with no connector: the gate passes, so the category is scored
+    rather than re-dispatched forever."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"])
+    for cell in wb.selected_subcaps():
+        _declare(wb, cell, opt_in=True)
+    g = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert g["gate"] == "PASS", g["blocking"]
+    assert "absence_single_tool" not in g["blocking"]
+
+
+def test_the_lifted_term_is_still_computed_and_still_disclosed(tmp_path):
+    """It stops BLOCKING; it does not stop being true. A finding that
+    vanished when it stopped blocking would be a relaxation nobody can see."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"])
+    cells = wb.selected_subcaps()
+    for cell in cells:
+        _declare(wb, cell, opt_in=True)
+    g = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert len(g["absence_single_tool"]) == len(cells)
+    assert "absence_single_tool" in g["advisory"]
+    eb = g["enrichment_binding"]
+    assert eb["known"] and not eb["bound"] and eb["absence_rigour"] == "REDUCED"
+    assert "exa" in eb["missing"]
+
+
+def test_the_term_still_blocks_where_a_connector_was_available(tmp_path):
+    """The gate reads the run's baseline, exactly as the writer does, so the
+    two cannot disagree about the same cell."""
+    run, wb = _run(tmp_path, _bound_tools())
+    g = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert "absence_single_tool" in g["blocking"]
+    assert g["enrichment_binding"]["absence_rigour"] == "FULL"
+
+
+def test_an_unverified_run_keeps_the_term_blocking(tmp_path):
+    run, wb = _run(tmp_path, None)
+    g = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert "absence_single_tool" in g["blocking"]
+    assert g["enrichment_binding"]["known"] is False
+
+
+def test_the_degraded_category_reaches_the_scoring_stage(tmp_path):
+    """"What matters is that all categories are scored" (owner, 2026-09-13).
+    A passing gate is only half of it — `research_ready` is what opens
+    scoring, and it must not refuse over this either."""
+    from engine import assessment
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"])
+    for cell in wb.selected_subcaps():
+        _declare(wb, cell, opt_in=True)
+    floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert assessment.research_ready(wb, run.qa_dir) == []
+
+
+# ── the driver's disclosure path ────────────────────────────────────────
+
+def test_a_category_blocked_only_by_connector_terms_is_disclosable(tmp_path):
+    """`enrichment_failing_only` required a PASSING gate, which made it
+    unreachable in the case it exists for: with no connector the gate FAILS
+    on the connector-derived terms, so the category was refused as an
+    ordinary failure instead of disclosed."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    L.append_gate(wb, gate="FLOORS", scope="P1C1", verdict="FAIL",
+                  detail="absence_single_tool", blocking=True)
+    assert brief.enrichment_failing_only(wb, ["P1C1"]) == ["P1C1"]
+
+
+def test_a_category_blocked_by_anything_else_is_not(tmp_path):
+    """Terms with any other cause still disqualify it — a lane that left
+    cells undeclared is not an enrichment problem, and the degraded path is
+    exactly what lets it declare them."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    L.append_gate(wb, gate="FLOORS", scope="P1C1", verdict="FAIL",
+                  detail="absence_single_tool; absence_undeclared_empty",
+                  blocking=True)
+    assert brief.enrichment_failing_only(wb, ["P1C1"]) == []
+    assert brief.CONNECTOR_DERIVED_TERMS == {"absence_single_tool"}
+
+
+def test_a_verifier_refusal_still_disqualifies(tmp_path):
+    """A lane that fabricated its work is not an enrichment problem."""
+    run, wb = _run(tmp_path, ["Read", "Bash", "WebSearch"], n=1)
+    L.append_gate(wb, gate="FLOORS", scope="P1C1", verdict="PASS",
+                  detail="all terms met", blocking=False)
+    L.append_gate(wb, gate="DISPATCH_VERIFY", scope="P1C1", verdict="FAIL",
+                  detail="the lane reported work the ledger does not carry",
+                  blocking=True)
+    assert brief.enrichment_failing_only(wb, ["P1C1"]) == []
+
+
+# ── the CLI ─────────────────────────────────────────────────────────────
+
+def test_the_flag_exists_and_is_threaded_through():
+    import inspect
+    from engine import cli
+    text = inspect.getsource(cli.main)
+    assert '"--enrichment-unavailable", action="store_true"' in text
+    assert "enrichment_unavailable=a.enrichment_unavailable" in text
+
+
+# ── the lane is TOLD about the degraded path ───────────────────────────
+#
+# The flag was built on 2026-09-13 and named in the CLI and SKILL.md only:
+# neither the dispatch packet nor the heal instruction mentioned it, so a
+# lane following its brief literally could not take the path built for it.
+# It is named only where the run's own baseline proves the connector
+# missing — a lane told about an escape it is not entitled to will reach
+# for it, and the writer refuses it anyway.
+
+def _rules_for(tmp_path, tools):
+    from engine import brief
+    from fixtures import new_run
+    run = new_run(tmp_path, n=6, baseline=(tools or None))
+    if tools is None:
+        import contextlib
+        with contextlib.suppress(FileNotFoundError):
+            (run.root / "connectors_baseline.json").unlink()
+    packet = brief.dispatch(run.open(), category="P1C1", run=run)
+    return " | ".join(packet["rules"]), packet
+
+
+def test_the_brief_names_the_flag_under_a_short_baseline(tmp_path):
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    assert "--enrichment-unavailable" in rules
+    assert packet["enrichment_binding"]["bound"] is False
+
+
+def test_a_bound_container_is_not_offered_the_escape(tmp_path):
+    from fixtures import BOUND_CONNECTORS
+    rules, packet = _rules_for(tmp_path, list(BOUND_CONNECTORS))
+    assert "--enrichment-unavailable" not in rules
+    assert "enrichment_binding" not in packet
+
+
+def test_an_unverified_container_is_not_offered_it_either(tmp_path):
+    """Unverified is not a diagnosis: nothing here proves the connector
+    absent, and the writer would refuse the flag anyway."""
+    rules, packet = _rules_for(tmp_path, None)
+    assert "--enrichment-unavailable" not in rules
+
+
+def test_the_unbound_heal_instruction_names_the_flag():
+    from engine import relay
+    text = relay.HEAL_INSTRUCTIONS["unbound"]
+    assert "--enrichment-unavailable" in text
+    assert "DO NOT retry" in text, "it must still not send the lane back"
+
+
+def test_the_rule_survives_the_packet_ceiling(tmp_path):
+    """`as_markdown` trims cell lists, never rules — assert it, because a
+    rule that is trimmed away is a rule nobody reads."""
+    from engine import brief
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    assert "--enrichment-unavailable" in brief.as_markdown(packet)
+
+
+# ── the run says how much of itself is absence ───────────────────────────
+#
+# A category where every cell was declared absent PASSES its floors gate
+# with `blocking: []`, and correctly so: the cells were honestly worked and
+# honestly closed. But "passed" and "we found nothing about this
+# institution" then look identical downstream, and the only thing standing
+# between them was the M2 scoring ceiling — a cap on a number, which says
+# nothing to the person reading the run. The handoff states the share.
+
+def _asked_the_connector(wb, cell):
+    """The rung an ordinary absence must clear: a connector was actually
+    asked and came back with nothing."""
+    L.append_search(wb, subcap=cell, facet="works",
+                    query=f'"Acme Credit Union" {cell} connector probe',
+                    tool="exa", hits=0, kept=0, outcome="no hits")
+
+
+def test_the_handoff_states_what_share_of_a_category_is_absence(tmp_path):
+    from engine import handoff
+    run, wb = _run(tmp_path, _bound_tools(), n=4)
+    cells = sorted(wb.selected_subcaps())
+    for cell in cells[:2]:
+        _asked_the_connector(wb, cell)
+        _declare(wb, cell, opt_in=False)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    cat = cells[0].split(".")[0]
+    row = doc["absence_share"][cat]
+    assert row["declared_absent"] == 2 and row["cells"] == 4
+    assert row["share"] == 0.5
+    assert row["scored_on_absences_only"] is False
+
+
+def test_a_category_scored_entirely_on_absences_says_so_and_is_not_refused(tmp_path):
+    """ADVISORY, never blocking (owner, 2026-09-13). A run that found nothing
+    is a real answer about a real institution, and refusing the handoff would
+    throw away the work that established the absence. Disclosure is the fix."""
+    from engine import handoff
+    run, wb = _run(tmp_path, _bound_tools(), n=4)
+    for cell in sorted(wb.selected_subcaps()):
+        _asked_the_connector(wb, cell)
+        _declare(wb, cell, opt_in=False)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    cat = sorted(wb.selected_subcaps())[0].split(".")[0]
+    assert doc["absence_share"][cat]["scored_on_absences_only"] is True
+    assert doc["absence_share"]["_run"]["categories_on_absences_only"] == [cat]
+    assert doc["absence_share"]["_run"]["share"] == 1.0
+
+
+def test_reduced_rigour_is_counted_apart_from_ordinary_absence(tmp_path):
+    """The two are not the same claim. An ordinary absence says the public
+    record is silent; a REDUCED one says nobody could ask the connectors at
+    all, and a later firing with them attached may find what this one could
+    not ask for. Collapsing them loses exactly the thing a re-run turns on."""
+    from engine import handoff
+    fam = cc.families()
+    run, wb = _run(tmp_path, [fam["exa"][0]], n=4)      # short baseline
+    cells = sorted(wb.selected_subcaps())
+    for cell in cells[:3]:
+        _declare(wb, cell, opt_in=True)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    cat = cells[0].split(".")[0]
+    row = doc["absence_share"][cat]
+    assert row["declared_absent"] == 3 and row["reduced_rigour"] == 3
+    assert "REDUCED rigour" in doc["absence_share"]["_run"]["statement"]
+    assert "3 of 4 cells" in doc["absence_share"]["_run"]["statement"]
+
+
+def test_a_run_with_no_absences_says_zero_rather_than_nothing(tmp_path):
+    """A derived value is computed or null, never absent and never a
+    sentinel — a reader must be able to tell 'none' from 'not measured'."""
+    from engine import handoff
+    run, wb = _run(tmp_path, _bound_tools(), n=4)
+    doc = handoff.build(wb, qa_dir=run.qa_dir, strict=False)
+    assert doc["absence_share"]["_run"]["declared_absent"] == 0
+    assert doc["absence_share"]["_run"]["share"] == 0.0
+    assert doc["absence_share"]["_run"]["categories_on_absences_only"] == []

@@ -62,6 +62,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+#: the plugin root, for `scripts/connector_contract.py`
+PLUGIN = Path(__file__).resolve().parents[3]
+
 from . import contract as C
 from . import floors_gate, ledger as L, prelim, registry, runstate
 from .workbook import RunWorkbook
@@ -78,6 +81,48 @@ def _age(ts: str | None) -> float | None:
     except ValueError:
         return None
     return (_dt.datetime.now(_dt.timezone.utc) - t).total_seconds()
+
+
+def _driver_state(run) -> dict:
+    """What `engine.pipeline` recorded about how it last ended.
+
+    Read from the qa dir rather than kept in memory: the watchdog is a
+    different process, usually an hour later, and the question "did the
+    money run out or did the work fail" is not answerable from the
+    workbook's rows — both leave the same ones.
+    """
+    try:
+        import json as _json
+        p = run.qa_dir / "pipeline_state.json"
+        return _json.loads(p.read_text()) if p.is_file() else {}
+    except Exception:                                     # noqa: BLE001
+        return {}
+
+
+def _no_enrichment_connector(run) -> str:
+    """The reason a run is STRUCTURALLY blocked, or "" when it is not.
+
+    Measured 2026-09-12: a run with no enrichment connector bound could close
+    no cell, so it read as STALLED — and the hourly `dma-watchdog` Routine is
+    told to `--revive` a STALLED run. A signal meaning "burning time, writing
+    nothing" was wired to a process authorised to spend more on it. This is
+    the one shape revive must never touch: nothing an agent does from inside
+    the container can bind a connector.
+    """
+    try:
+        import sys
+        sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        path = cc.baseline_path(str(run.root))
+        if not Path(path).is_file():
+            return ""                       # unverified is not a diagnosis
+        held = json.loads(Path(path).read_text()).get("mcp_tools") or []
+        out = cc.check(held)
+        if out["ok"]:
+            return ""
+        return f"the connector baseline is short of {', '.join(out['missing'])}"
+    except Exception:                                         # noqa: BLE001
+        return ""
 
 
 def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
@@ -102,8 +147,10 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             failed.append(c)
     drift = wb.verify_handoff_lock()
     budget = L.stats(wb)
+    driver = _driver_state(run)
     pre = prelim.state(wb)
     folder = str(md.get("client_folder") or "").strip()
+    post: dict = {}
 
     if drift:
         state, detail = "HALTED", "; ".join(drift)
@@ -117,10 +164,32 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             "PRELIM has not closed: "
             + (", ".join(pre["open"]) or "signed off never recorded")
             + " — no category card will be served until it does")
+    elif open_work and driver.get("last_outcome") == "STOPPED_BUDGET":
+        # THE DOLLAR CEILING, which had no state of its own. A run the
+        # budget stopped leaves FLOORS FAIL rows behind — exactly what a
+        # half-finished research stage leaves — so it read as GATE_FAILED,
+        # which `--revive` advances. Measured 2026-09-14: paired with a
+        # driver that started every process at $0 spent, that is a fresh
+        # budget every hour, forever.
+        state, detail = "AT_USD_CEILING", (
+            f"the driver stopped on its dollar ceiling: spent "
+            f"${float(driver.get('spent_usd') or 0):.2f} of "
+            f"${float(driver.get('budget_usd') or 0):.2f} with "
+            f"{len(open_work)} category(ies) still open "
+            f"({', '.join(open_work[:6])}). A re-run spends the next budget "
+            f"on the same work: a PERSON raises --max-usd or narrows the "
+            f"scope. No revive can close this one")
     elif budget["checkpoint_required"]:
         state, detail = "AT_BUDGET_CEILING", (
             f"{budget['search_ops']} search-ops against a ceiling of "
             f"{budget['search_op_ceiling']}; the run must checkpoint")
+    elif open_work and _no_enrichment_connector(run):
+        state, detail = "BLOCKED_NO_CONNECTOR", (
+            f"{_no_enrichment_connector(run)} — no cell can be declared absent "
+            f"without one, so no floors gate can pass and re-dispatching only "
+            f"spends money. {len(open_work)} category(ies) still open: "
+            f"{', '.join(open_work[:6])}. A HUMAN attaches the connector on the "
+            f"Routine's own edit screen; no agent can fix this from inside a run")
     elif idle is not None and idle > stall_seconds and open_work:
         state, detail = "STALLED", (
             f"no write for {int(idle)}s with {len(open_work)} category(ies) "
@@ -128,7 +197,7 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
     elif failed:
         state, detail = "GATE_FAILED", f"floors gate FAILED on {', '.join(failed)}"
     elif not open_work and not ungated:
-        state, detail = "READY_FOR_HANDOFF", "every category closed and gated"
+        state, detail, post = post_research_state(wb, run, md)
     elif not open_work and ungated:
         state, detail = "UNGATED", (
             f"no open work and no recorded gate verdict for "
@@ -151,9 +220,218 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         "prelim_open": pre["open"],
         "search_ops": budget["search_ops"],
         "catalogue_drift": drift,
+        "stage": C.stage_of(md),
     }
+    row.update(post)
+    row["criterion"] = COMPLETION_CRITERIA.get(state, "")
     row["resume"] = resume_plan(row)
     return row
+
+
+# ── after research: the stage machine the conductor's manifest describes ──
+#
+# WHY (owner, 2026-09-03, the headless-workflow audit): the states above end
+# at READY_FOR_HANDOFF — "every category closed and gated" — and stayed there
+# through scoring, the reports and the package. A run that died with three
+# pillars scored, or with both reports written and nothing reviewed, read as
+# the same resting state as one that had never opened the assessment stage,
+# and the only revive plan was "render the four deliverables", which is the
+# conductor's whole step list compressed into a sentence.
+#
+# So the machine continues, computed from the SAME substrate the gates read:
+# the workbook's stage, column D, the Gate_Log, Report_Narrative, and the
+# client folder's manifest. Each state names the agent that owns the next
+# unit of work and the criterion that closes it — which is what turns "the
+# scoring agents fire once research is done, the report writers once scoring
+# is done" from prose in a manifest into something a hook and the hourly
+# watchdog can act on.
+
+#: What "done" means for each state — the gate that closes it, in one line,
+#: so a session or a hook reports a criterion rather than an impression.
+COMPLETION_CRITERIA = {
+    "PRELIM_OPEN": ("`engine.prelim complete` succeeds: all seven sections "
+                    "narrated with cited evidence or declared with a ladder"),
+    # The one criterion no agent can satisfy. Stated anyway, because a state
+    # with no criterion is a state nobody can tell is finished — and this one
+    # closes on a PERSON, not on a command.
+    "BLOCKED_NO_CONNECTOR": (
+        "a human attaches the missing connector on the Routine's own edit "
+        "screen, and `connector_contract.py check --tools - --strict` then "
+        "exits 0 from a session that holds it — re-record the baseline with "
+        "`connector_contract.py baseline --tools - --root <ROOT>` and the "
+        "state clears. No lane and no revive can close this one"),
+    "STALLED": ("`engine.cli gate --category <C> --require-synthesis` "
+                "returns PASS for every open category"),
+    "GATE_FAILED": ("`engine.cli gate --category <C> --require-synthesis` "
+                    "returns PASS — every cell SYNTHESISED and independently "
+                    "challenged, or DECLARED ABSENT with its volley ladder"),
+    "UNGATED": "a recorded floors-gate verdict of PASS for every category",
+    "AT_BUDGET_CEILING": "`engine.memory backup` then a checkpoint, before any search",
+    # The OTHER ceiling, and the difference matters: the one above is 60
+    # search ops and an agent clears it by checkpointing. This one is
+    # money, and no agent may clear it.
+    "AT_USD_CEILING": (
+        "a PERSON raises the ceiling (`engine.pipeline run --max-usd <N>`) "
+        "or narrows the scope, and runs the driver again. The driver now "
+        "reads what the run already spent, so a plain re-run stops again "
+        "before it dispatches anything — which is the point: the next "
+        "budget must be a decision, not an hourly sweep"),
+    "READY_FOR_HANDOFF": ("`engine.cli validate` FAILS=0, `engine.cli handoff` "
+                          "written, `engine.assessment open` flips the stage"),
+    "SCORING_OPEN": ("`engine.assessment state` shows scored == subcaps for "
+                     "every pillar in scope"),
+    "CRITIC_PENDING": ("a SCORING_CRITIC PASS row in Gate_Log for every pillar "
+                       "in scope, recorded by scoring-critic"),
+    "SCORING_GATE_OPEN": ("`engine.assessment gate` returns PASS and writes "
+                          "07_qa/scoring.json; then `engine.assemble "
+                          "checkpoint --stage SCORING_PASS --push`"),
+    "REPORT_PRECONDITIONS_OPEN": (
+        "`engine.narrative preconditions --report assessment` lists nothing: "
+        "every stage tab filled (`engine.assessment solution`, `peer-adoption`) "
+        "or declared with a real reason (`engine.completeness declare`)"),
+    "REPORTS_OPEN": ("`engine.narrative state` reads READY for both reports: "
+                     "every section written to its control block AND reviewed "
+                     "PASS by an actor that did not write it"),
+    "PACKAGE_UNSHIPPED": ("`engine.assemble package --push` verifies and pushes "
+                          "the folder; run_manifest.json reads status COMPLETE"),
+    "SHIPPED": ("done here — the package scan ingests the folder on its "
+                "half-hour cadence and the synthesis lanes produce the pages"),
+}
+
+
+def _manifest(md: dict) -> dict:
+    folder = str(md.get("client_folder") or "").strip()
+    if not folder:
+        return {}
+    p = Path(folder) / "run_manifest.json"
+    if not p.is_file():
+        return {}
+    try:
+        doc = json.loads(p.read_text())
+        return doc if isinstance(doc, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _unscored_by_pillar(wb: RunWorkbook) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for r in wb.scoring_rows():
+        cell = str(r.get("SubCap_ID") or "").strip()
+        if not cell:
+            continue
+        sc = str(r.get("Score") or "").strip()
+        if not sc:
+            out[cell[:2]] = out.get(cell[:2], 0) + 1
+    return out
+
+
+def post_research_state(wb: RunWorkbook, run: runstate.Run, md: dict) -> tuple:
+    """(state, detail, extras) for a run whose categories are all gated."""
+    from . import assessment as A
+    extras: dict = {}
+    if C.stage_of(md) != "assessment":
+        return ("READY_FOR_HANDOFF",
+                "every category closed and gated; the assessment stage is not "
+                "open — validate, hand off, then `engine.assessment open`",
+                extras)
+    unscored = _unscored_by_pillar(wb)
+    extras["unscored_by_pillar"] = unscored
+    if unscored:
+        return ("SCORING_OPEN",
+                "assessment stage open; unscored rows by pillar: "
+                + ", ".join(f"{p}={n}" for p, n in sorted(unscored.items())),
+                extras)
+    pillars = sorted({c[:2] for c in wb.selected_subcaps()})
+    critics = {}
+    for g in wb.rows("Gate_Log"):
+        if str(g.get("Gate") or "").strip() == "SCORING_CRITIC":
+            critics[str(g.get("Scope") or "").strip()] = \
+                str(g.get("Verdict") or "").strip().upper()
+    missing = [p for p in pillars if p not in critics]
+    failed_c = [p for p in pillars if critics.get(p) not in (None, "PASS")]
+    extras["critic_missing"], extras["critic_failed"] = missing, failed_c
+    if missing or failed_c:
+        return ("CRITIC_PENDING",
+                ("no critic verdict on " + ", ".join(missing) if missing else "")
+                + ("; critic FAIL on " + ", ".join(failed_c) if failed_c else ""),
+                extras)
+    last = None
+    for g in wb.rows("Gate_Log"):
+        if str(g.get("Gate") or "").strip() == "SCORING":
+            last = g
+    if last is None or str(last.get("Verdict") or "").strip().upper() != "PASS":
+        detail = ("the SCORING gate has never been run" if last is None else
+                  f"last SCORING gate verdict {last.get('Verdict')}: "
+                  f"{str(last.get('Detail') or '')[:200]}")
+        return "SCORING_GATE_OPEN", detail, extras
+    manifest = _manifest(md)
+    extras["checkpoint_due"] = manifest.get("stage_reached") not in (
+        "SCORING_PASS", "REPORTS_READY") and manifest.get("status") != "COMPLETE"
+    # The report tier's own door. `engine.narrative write` refuses a section
+    # while a stage precondition fails — the SCORING gate can PASS with the
+    # Solution_Catalogue and Platform_Peer_Adoption tabs still empty, and a
+    # run in that shape used to read REPORTS_OPEN here, which sent two report
+    # producers to a writer that turned them both away (found by the walk
+    # test, 2026-09-04). Ask the door first; while it is shut, the work is
+    # the conductor's, not the producers'.
+    try:
+        from . import narrative as N
+        pre = N.stage_preconditions(wb, "assessment", run.qa_dir)
+    except Exception as e:                                # noqa: BLE001
+        pre = [f"preconditions unreadable: {str(e)[:200]}"]
+    if pre:
+        extras["preconditions"] = pre
+        return ("REPORT_PRECONDITIONS_OPEN",
+                "SCORING gate PASS; the report tier's preconditions fail: "
+                + "; ".join(p.split("\n")[0][:120] for p in pre[:4])
+                + (f"; +{len(pre) - 4} more" if len(pre) > 4 else ""),
+                extras)
+    try:
+        ns = N.state(wb)
+        reports = {k: {"open": v["open"], "ready": v["ready"],
+                       "sections": [{"section": s["section"],
+                                     "status": s["status"], "fix": s["fix"]}
+                                    for s in v["sections"]
+                                    if s["status"] != "READY"]}
+                   for k, v in ns["reports"].items()}
+    except Exception as e:                                # noqa: BLE001
+        reports = {"_error": str(e)[:200]}
+    extras["reports"] = reports
+    open_reports = [k for k, v in reports.items()
+                    if k != "_error" and not v.get("ready")]
+    if "_error" in reports or open_reports:
+        return ("REPORTS_OPEN",
+                "SCORING gate PASS; reports not READY: "
+                + ", ".join(f"{k} ({len(reports[k]['open'])} open)"
+                            for k in open_reports)
+                + (f"; narrative state unreadable: {reports['_error']}"
+                   if "_error" in reports else ""),
+                extras)
+    if manifest.get("status") == "COMPLETE":
+        return ("SHIPPED",
+                f"package complete in {md.get('client_folder')}; the package "
+                f"scan ingests it", extras)
+    return ("PACKAGE_UNSHIPPED",
+            "both reports READY and the client folder's manifest is not "
+            "COMPLETE — assemble, verify and push the package", extras)
+
+
+def _report_agents(row: dict) -> list[str]:
+    """Which report-tier agents the open sections call for, producers first."""
+    agents: list[str] = []
+    for key, v in (row.get("reports") or {}).items():
+        if key == "_error" or v.get("ready"):
+            continue
+        statuses = {s["status"] for s in v.get("sections", [])}
+        producer = ("report-assessment-producer" if key == "assessment"
+                    else "report-research-producer")
+        if statuses & {"OPEN", "SHORT", "REVISE"} and producer not in agents:
+            agents.append(producer)
+        if "UNREVIEWED" in statuses and "report-validator" not in agents:
+            agents.append("report-validator")
+    if not agents:
+        agents.append("report-validator")
+    return agents
 
 
 #: What each stopped state needs done, and who does it. `agent` is the plugin
@@ -171,12 +449,29 @@ def resume_plan(row: dict) -> dict:
     base = (f"Resume DMA research run {run_id} for {row.get('entity')}. "
             f"The run root is {root}. Read `engine.cli orient {where}` FIRST "
             f"and work its do_first list in order. ")
+    #: THE DRIVER is how a resumable run continues (2026-09-04, issues 6-9):
+    #: `engine.pipeline run` reads the workbook, finds the first stage whose
+    #: done-predicate is false, and dispatches THAT stage's lanes over a brief
+    #: it writes — rather than one hand-written prompt to one agent. Every
+    #: actionable state carries it; `agent`, `parallel` and `prompt` stay for a
+    #: container without the driver, and `revive` prefers the driver when both
+    #: are present because it closes the whole stage rather than one lane.
+    pipeline_cmd = ["python3", "-m", "engine.pipeline", "run",
+                    "--run", str(run_id)] + (["--root", root] if root else [])
 
     if state == "HALTED":
         return {"actionable": False, "agent": None,
                 "why": "the catalogue moved under this run; a person decides "
                        "whether to re-pin or retire it",
                 "detail": row.get("catalogue_drift")}
+    if state in ("BLOCKED_NO_CONNECTOR", "AT_USD_CEILING"):
+        # Both END ON A PERSON. Until 2026-09-14 neither had a branch here,
+        # so both fell to the default — "the run is working" — for runs that
+        # structurally cannot advance, while COMPLETION_CRITERIA in this
+        # same module said the opposite.
+        return {"actionable": False, "agent": None, "needs": "person",
+                "why": COMPLETION_CRITERIA[state],
+                "detail": row.get("detail")}
     if state == "NO_CLIENT_FOLDER":
         return {"actionable": True, "agent": None,
                 "command": ["python3", "-m", "engine.assemble", "open",
@@ -185,6 +480,7 @@ def resume_plan(row: dict) -> dict:
                 "why": "the folder is opened by a command, not an agent"}
     if state == "PRELIM_OPEN":
         return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
                 "prompt": base + (
                     f"PRELIM is open: {', '.join(row.get('prelim_open') or [])}. "
                     f"Close every open PRELIM section — the conductor owns "
@@ -209,14 +505,116 @@ def resume_plan(row: dict) -> dict:
                                  "checkpoint before any further search.",
         }[state]
         return {"actionable": True, "agent": agent,
+                "pipeline": pipeline_cmd,
                 "prompt": base + what + " Take it from where it stopped.",
                 "why": f"{cat or 'the conductor'} owns the open work"}
     if state == "READY_FOR_HANDOFF":
         return {"actionable": True, "agent": "research-conductor",
-                "prompt": base + ("Every category is closed and gated. Render "
-                                  "the four deliverables, assemble and verify "
-                                  "the client folder, and push it to intake."),
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    "Every category is closed and gated. Run `engine.cli "
+                    "validate` (FAILS=0) and `engine.cli handoff`, write the "
+                    "client tabs through `engine.profile`, then OPEN THE "
+                    "SCORING STAGE with `engine.assessment open` and dispatch "
+                    "the four pillar scorers in parallel. Render the four "
+                    "deliverables only after the SCORING gate PASSes."),
+                "why": "research is finished; the scoring stage has not opened"}
+    if state == "SCORING_OPEN":
+        unscored = row.get("unscored_by_pillar") or {}
+        pillars = sorted(unscored) or ["P1"]
+        agents = [f"scoring-{p.lower()}-producer" for p in pillars]
+        return {"actionable": True, "agent": agents[0], "parallel": agents,
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    f"The assessment stage is open and column D is not "
+                    f"struck: unscored rows by pillar "
+                    f"{json.dumps(unscored, sort_keys=True)}. Score every "
+                    f"row of your pillar through `engine.assessment score` — "
+                    f"one command per subcap, rationale over 150 characters "
+                    f"citing the row's own E-ids, the six overlay columns "
+                    f"filled. Done when `engine.assessment state` shows "
+                    f"scored == subcaps for your pillar."),
+                "why": "column D belongs to the pillar scorers"}
+    if state == "CRITIC_PENDING":
+        return {"actionable": True, "agent": "scoring-critic",
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    f"Every row is scored and the critic pass is owed on "
+                    f"{', '.join(row.get('critic_missing') or [])}"
+                    + (f"; the critic FAILED {', '.join(row.get('critic_failed') or [])}"
+                       " and those pillars must be re-scored then re-critiqued"
+                       if row.get("critic_failed") else "")
+                    + ". Re-derive a sample per capability and record "
+                    "`engine.assessment critique` per pillar; never change a "
+                    "score."),
+                "why": "the gate will not pass without an independent critic"}
+    if state == "SCORING_GATE_OPEN":
+        return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    f"Scores and critic verdicts are in; the SCORING gate is "
+                    f"not PASS ({row.get('detail')}). Run `engine.assessment "
+                    f"rollup --headline …`, `engine.assessment solution` and "
+                    f"`peer-adoption`, then `engine.assessment gate`. Re-"
+                    f"dispatch the pillar scorer the gate names for any "
+                    f"blocking term, then `engine.assemble checkpoint --stage "
+                    f"SCORING_PASS --push` so the scan ingests a scored run."),
+                "why": "the rollup and the gate are the conductor's"}
+    if state == "REPORT_PRECONDITIONS_OPEN":
+        pre = row.get("preconditions") or []
+        return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    "The SCORING gate has PASSED but `engine.narrative write` "
+                    "will refuse every section until these hold: "
+                    + " | ".join(p.replace("\n", " ")[:300] for p in pre)
+                    + ". Fill each stage tab that has content to carry "
+                    "(`engine.assessment solution --id … --name … --platform "
+                    "…`, `engine.assessment peer-adoption …`) and declare each "
+                    "that legitimately has none (`engine.completeness declare "
+                    "--sheet <Sheet> --reason '…'`, a real reason — filler is "
+                    "refused). Then `engine.assemble checkpoint --stage "
+                    "SCORING_PASS --push` if not yet pushed. Done when "
+                    "`engine.narrative preconditions --report assessment` "
+                    "lists nothing; the report producers are dispatched next."),
+                "why": ("the stage tabs are the conductor's to close; a report "
+                        "producer sent now is refused at the door")}
+    if state == "REPORTS_OPEN":
+        agents = _report_agents(row)
+        due = row.get("checkpoint_due")
+        return {"actionable": True, "agent": agents[0], "parallel": agents,
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    "The SCORING gate has PASSED"
+                    + (" and the SCORING_PASS checkpoint has NOT been pushed "
+                       "— run `engine.assemble checkpoint --stage SCORING_PASS "
+                       "--push` first" if due else "")
+                    + ". Reports open: "
+                    + json.dumps({k: v.get("open") for k, v in
+                                  (row.get("reports") or {}).items()
+                                  if k != "_error"}, sort_keys=True)
+                    + ". Producers write each OPEN/SHORT/REVISE section "
+                    "through `engine.narrative write`; the validator "
+                    "reviews every UNREVIEWED one through `engine.narrative "
+                    "review`. Done when `engine.narrative state` reads READY "
+                    "for both."),
+                "why": "the report tier owns the sections; the validator the verdicts"}
+    if state == "PACKAGE_UNSHIPPED":
+        return {"actionable": True, "agent": "research-conductor",
+                "pipeline": pipeline_cmd,
+                "prompt": base + (
+                    "Both reports read READY. `engine.completeness check`, "
+                    "`engine.cli report` (both .docx, gold_standard PASS), "
+                    "`engine.techscan render`, `engine.grains "
+                    "recommendations`, `engine.assemble checkpoint --stage "
+                    "REPORTS_READY --push`, then `engine.assemble package "
+                    "--push` and `engine.memory cleanup --apply`. Done when "
+                    "run_manifest.json reads status COMPLETE."),
                 "why": "the run is finished and nothing has shipped it"}
+    if state == "SHIPPED":
+        return {"actionable": False, "agent": None,
+                "why": "the package is complete; the package scan and the "
+                       "synthesis lanes take it from here"}
     if state == "MISSING_LOCALLY":
         return {"actionable": True, "agent": None,
                 "command": ["python3", "-m", "engine.registry", "pull"],
@@ -303,33 +701,83 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
                 "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
                 "state": row.get("state"),
                 "detail": (r.stdout or r.stderr).strip()[-400:]}
+    if plan.get("pipeline"):
+        # THE DRIVER FIRST. `engine.pipeline run` continues the run from its
+        # first undone stage, dispatching that stage's lanes over briefs it
+        # writes — so one revive closes a stage rather than one lane of it,
+        # and the stage's gate decides when it is done. The agent dispatch
+        # below stays for a container without the driver.
+        cmd = list(plan["pipeline"])
+        if dry_run:
+            return {"run_id": row.get("run_id"), "outcome": "DRY_RUN",
+                    "state": row.get("state"), "agent": plan.get("agent"),
+                    "via": "engine.pipeline run",
+                    "would_run": " ".join(cmd),
+                    "resume_prompt": plan.get("prompt")}
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                           cwd=str(Path(__file__).resolve().parents[1]))
+        return {"run_id": row.get("run_id"),
+                "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
+                "state": row.get("state"), "agent": plan.get("agent"),
+                "via": "engine.pipeline run",
+                "detail": (r.stdout or r.stderr).strip()[-400:]}
     runner = _agent_run()
     if runner is None:
         return {"run_id": row.get("run_id"), "outcome": "NOT_RUN",
                 "reason": "scripts/agent_run.py is not in this install, so "
                           "no agent can be dispatched from here",
                 "state": row.get("state"), "resume_prompt": plan.get("prompt")}
+    # THE WHOLE PLAN, not its first name. `parallel` carries the four pillar
+    # scorers, or a report producer AND the validator; reviving only
+    # `plan["agent"]` did one per hourly firing, so a state the plan asked
+    # to close in one pass took four cycles and REPORTS_OPEN never reached
+    # the validator at all (review, 2026-09-04).
+    agents = [a for a in (plan.get("parallel") or [plan["agent"]]) if a]
     if dry_run:
         return {"run_id": row.get("run_id"), "outcome": "DRY_RUN",
                 "state": row.get("state"), "agent": plan["agent"],
-                "would_run": f"agent_run.py --agent {plan['agent']}",
+                "agents": agents,
+                "would_run": "agent_run.py --batch "
+                             + ",".join(f"--agent {a}" for a in agents),
                 "resume_prompt": plan.get("prompt")}
     pf = Path(tempfile.gettempdir()) / f"revive_{row.get('run_id')}.md"
     pf.write_text(plan.get("prompt") or "")
-    r = subprocess.run(
-        [sys.executable, str(runner), "--agent", plan["agent"],
-         "--prompt-file", str(pf)],
-        capture_output=True, text=True, timeout=timeout)
+    if len(agents) > 1:
+        batch = Path(tempfile.gettempdir()) / f"revive_{row.get('run_id')}.json"
+        batch.write_text(json.dumps([{"agent": a, "prompt_file": str(pf)}
+                                     for a in agents]))
+        argv = ["--batch", str(batch), "--lanes", str(min(len(agents), 4))]
+    else:
+        argv = ["--agent", agents[0], "--prompt-file", str(pf)]
+    r = subprocess.run([sys.executable, str(runner), *argv],
+                       capture_output=True, text=True, timeout=timeout)
     return {"run_id": row.get("run_id"),
             "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
             "state": row.get("state"), "agent": plan["agent"],
+            "agents": agents,
             "detail": (r.stdout or r.stderr).strip()[-400:]}
 
 
 #: The states that need someone told. Everything else is the run working.
-ACTIONABLE = ("UNREADABLE", "HALTED", "STALLED", "GATE_FAILED", "UNGATED",
-              "AT_BUDGET_CEILING", "PRELIM_OPEN", "NO_CLIENT_FOLDER",
-              "MISSING_LOCALLY", "READY_FOR_HANDOFF")
+ACTIONABLE = ("UNREADABLE", "HALTED", "BLOCKED_NO_CONNECTOR",
+              "STALLED", "GATE_FAILED", "UNGATED",
+              "AT_BUDGET_CEILING", "AT_USD_CEILING",
+              "PRELIM_OPEN", "NO_CLIENT_FOLDER",
+              "MISSING_LOCALLY", "READY_FOR_HANDOFF",
+              # the assessment-stage machine (2026-09-03)
+              "SCORING_OPEN", "CRITIC_PENDING", "SCORING_GATE_OPEN",
+              "REPORT_PRECONDITIONS_OPEN", "REPORTS_OPEN", "PACKAGE_UNSHIPPED")
+
+#: States an AGENT can advance without a person: the ones a stage-advance
+#: hook may keep a session working on, and the watchdog may revive.
+AGENT_ADVANCEABLE = tuple(s for s in ACTIONABLE
+                          if s not in ("UNREADABLE", "HALTED", "MISSING_LOCALLY",
+                                       # a person must attach the connector;
+                                       # a revive here is pure spend
+                                       "BLOCKED_NO_CONNECTOR",
+                                       # and a person decides whether this
+                                       # run is worth another budget
+                                       "AT_USD_CEILING"))
 
 
 def main(argv=None) -> int:
@@ -355,8 +803,16 @@ def main(argv=None) -> int:
     revived = []
     if a.revive:
         for r in rows:
-            if r["state"] in ACTIONABLE:
+            if r["state"] in AGENT_ADVANCEABLE:
                 revived.append(revive(r, dry_run=a.dry_run))
+            elif r["state"] in ACTIONABLE:
+                # ACTIONABLE means "tell someone", not "an agent can fix it".
+                # `--revive` walked the wrong list and re-dispatched states
+                # AGENT_ADVANCEABLE already excluded.
+                revived.append({"run_id": r.get("run_id"), "state": r["state"],
+                                "revived": False,
+                                "detail": "needs a person, not a re-dispatch: "
+                                          + str(r.get("detail"))[:200]})
     if a.json:
         print(json.dumps({"runs": rows, "revived": revived} if a.revive
                          else rows, indent=2))

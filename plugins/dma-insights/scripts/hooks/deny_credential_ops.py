@@ -67,9 +67,16 @@ def main() -> int:
         payload = json.load(sys.stdin)
     except Exception:
         return 0  # fail-open: the harness classifier remains the backstop
+    if not isinstance(payload, dict):
+        # NOT-A-DICT IS UNPARSED INPUT, NOT A VIOLATION. Measured 2026-09-14:
+        # a JSON list, string or null on stdin raised AttributeError here and
+        # the hook exited NON-ZERO with a traceback — a hook failing CLOSED on
+        # its own bug, which is the one failure a guard may never have.
+        return 0
     if payload.get("tool_name") != "Bash":
         return 0
-    command = (payload.get("tool_input") or {}).get("command") or ""
+    ti = payload.get("tool_input")
+    command = (ti.get("command") or "") if isinstance(ti, dict) else ""
     if not isinstance(command, str):
         return 0
     for rx, what in DENIALS:

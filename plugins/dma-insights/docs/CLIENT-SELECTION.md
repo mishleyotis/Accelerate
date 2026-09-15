@@ -253,7 +253,47 @@ blanket-approved, and not denied either — an out-of-scope send draws no
 decision, so a person in an interactive session can still send wherever they
 meant to. See `docs/CONNECTORS.md § Approval`.
 
-### 3.6 The one manual step that is still outstanding
+### 3.6 Binding without a human, where there is nothing to decide
+
+**Status: LIVE 2026-08-30** (owner: *"the run should bind to unambiguous
+subvertical"*).
+
+The binding question exists because a run bound to the wrong sub-vertical
+researches the wrong 851 cells to completion. Where the LOB census leaves
+exactly ONE reading there is no judgment left to make, and the question was
+ceremony that cost every scheduled firing its purpose — the intake could
+prepare a binding and never start one.
+
+`engine.preflight autobind --file <preflight.json>` binds it and says so on
+the record. **Unambiguous** is narrow, and every clause is load-bearing:
+
+| clause | why it is there |
+|---|---|
+| exactly one `ACCEPT` | the thing being decided has one answer |
+| at least one `REJECT` | the census actually **considered** alternatives. One candidate, accepted, nothing else weighed is not unanimity — it is a census that never looked, which is what a thin research pass emits |
+| at most one MATERIAL line of business | scope across two is the owner's call whatever the candidate list says |
+
+**The flag is never the authority.** `preflight check` recomputes
+unambiguity from the census on every call, so `auto_bound: true` written by
+hand over a multi-LOB entity is refused with *"the flag is not the authority
+— this check recomputes it."* That is the test that matters
+(`test_the_flag_is_not_the_authority`).
+
+**Evidence mode auto-binds only to PUBLIC.** A request arriving in a Slack
+channel carries no engagement letter, so public-only is what it actually
+has. Auto-binding the most restrictive mode can only ever *under*-claim —
+it withholds evidence the run might have been entitled to, costing depth.
+Auto-binding INTERNAL would claim access nobody granted, which is the harm
+the gate exists to prevent, so that direction is refused no matter what the
+document says.
+
+The record stays auditable either way: `asked: false` with `auto_bound:
+true`, the answer reading `AUTO-BOUND: one ACCEPT (CU) against 2 REJECT(s)`,
+and `answered_by: "lob_census (no human asked — census unambiguous)"`. You
+can always tell an auto-bind from a human answer, which is the property that
+makes this safe to have at all.
+
+### 3.7 The one manual step that is still outstanding
 
 **`dma-assessment-intake` carries no MCP connectors at all** — measured
 2026-08-30 from its `job_config`, which has no connector grant of any kind.

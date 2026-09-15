@@ -23,6 +23,18 @@ DIRECTION: a tool added to the connector tomorrow is granted to all 47 until
 someone edits 47 files. So both lists are now generated from one role table
 (`scripts/provision_agent_tools.py`) and this suite asserts the boundaries
 that table exists to hold.
+
+2026-09-14, the second measurement. The table had grown by default in the
+other direction: every research lane held Exa, Tavily and Drive (39 tools),
+every section producer held five connector families (50-53), and the fleet
+carried ~3,300 grants of which ~1,000 were external connectors — while the
+harness bound none of them into a headless child, so the lanes spent their
+turns on refusals. The owner's decision: connectors are held and CALLED by
+the orchestrator tier, which batches queries by capability and assigns the
+connector per batch; lanes and producers emit `search_requests`. The tests
+below pin the holder set per family, a capability ceiling per role, and the
+reverse direction — nothing is granted that neither the body nor the role
+justifies.
 """
 import re
 import subprocess
@@ -141,13 +153,36 @@ def test_every_agent_can_still_read_the_contract_and_the_catalogue():
             assert P + tool in tools_of(p), f"{rel(p)} cannot {tool}"
 
 
+#: The four section producers whose SURFACE is sourced from a connector the
+#: producer must hold itself (CONNECTORS.md marks those rows with ‡).
+PRODUCERS_WITH_A_CONNECTOR = {
+    "production/overview/overview-people-producer.md",       # leadership: Clay
+    "production/techstack/techstack-register-producer.md",   # techstack: Explorium
+    "production/techstack/techstack-layers-producer.md",     # techstack: Explorium
+    "production/insights/insights-landscape-producer.md",    # landscape: Explorium
+}
+CONNECTOR_PREFIXES = ("mcp__Exa__", "mcp__Tavily__", "mcp__Clay__",
+                      "mcp__Vibe_Prospecting__", "mcp__Indeed__",
+                      "mcp__Quartr__", "mcp__Google_Drive__")
+
+
+def _connector_tools(t: set) -> set:
+    return {x for x in t if x.startswith(CONNECTOR_PREFIXES)}
+
+
 def test_producers_keep_the_research_tools_they_are_told_to_use():
+    """The web pair stays on every producer; the CONNECTORS leave all but the
+    four whose surface names one with ‡. A producer that needs Exa emits a
+    `search_requests` entry and the orchestrator tier services it."""
     for p in AGENT_FILES:
         if not rel(p).startswith("production/"):
             continue
         t = tools_of(p)
         assert "WebSearch" in t and "WebFetch" in t, rel(p)
-        assert "mcp__Exa__web_search_exa" in t, rel(p)
+        if rel(p) not in PRODUCERS_WITH_A_CONNECTOR:
+            assert _connector_tools(t) == set(), (
+                f"{rel(p)} holds {sorted(_connector_tools(t))}; connectors "
+                f"are the orchestrator tier's — a producer emits search_requests")
 
 
 def test_the_people_producer_can_still_reach_clay():
@@ -188,3 +223,174 @@ def test_the_files_match_the_role_table():
     assert r.returncode == 0, (
         f"agent frontmatter has drifted from the role table:\n{r.stdout}\n"
         f"run: python3 scripts/provision_agent_tools.py --write")
+
+
+# ── 2026-09-14: connectors live on the orchestrator tier ──
+
+
+def _holders(prefix: str) -> set:
+    return {Path(rel(p)).stem for p in AGENT_FILES
+            if any(t.startswith(prefix) for t in tools_of(p))}
+
+
+@pytest.mark.parametrize("prefix,expected", [
+    ("mcp__Exa__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__Tavily__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__Clay__", {"research-conductor", "enrichment-connector-specialist",
+                     "technographic-scanner", "overview-people-producer"}),
+    ("mcp__Vibe_Prospecting__", {"technographic-scanner",
+                                 "techstack-register-producer",
+                                 "techstack-layers-producer",
+                                 "insights-landscape-producer",
+                                 "enrichment-connector-specialist"}),
+    ("mcp__Indeed__", {"technographic-scanner"}),
+    ("mcp__Quartr__", set()),
+    ("mcp__Google_Drive__", set()),
+])
+def test_only_the_connector_tier_holds_a_connector(prefix, expected):
+    """Exact holder sets, by family. Quartr is declared and not wired (every
+    body that names it says so); Drive reads go through `drive_fetch.py`
+    over Bash, so no agent needs the tool and none holds it."""
+    assert _holders(prefix) == expected, (
+        f"{prefix} holders drifted: {sorted(_holders(prefix))}")
+
+
+#: The capability tools — what "4-5 tools per agent" counts. CORE
+#: (Read/Grep/Glob/Bash/Skill) and the plugin's own connector reads are
+#: not capabilities; they are how an agent reads its run.
+CAPABILITY_BUILTINS = {"WebSearch", "WebFetch", "Write", "Edit", "Agent",
+                       "AskUserQuestion"}
+
+
+def K(t: set) -> int:
+    return len((t & CAPABILITY_BUILTINS) | _connector_tools(t))
+
+
+#: The five agents that exceed the ceiling, by design, each with its own.
+CONNECTOR_TIER = {
+    "research-conductor": 11,                # web 2 + Agent/Ask 2 + exa 2 + tavily 2 + clay/people 3
+    "surface-producer": 3,                   # Agent, Write, Edit — no web, no connector
+    "technographic-scanner": 9,              # web 2 + explorium 3 + clay/company 3 + indeed 1
+    "enrichment-connector-specialist": 8,    # clay 5 + explorium 3
+    "enrichment-web-specialist": 6,          # web 2 + exa 2 + tavily 2
+}
+
+
+@pytest.mark.parametrize("path", AGENT_FILES, ids=rel)
+def test_no_lane_producer_or_checker_exceeds_five_capability_tools(path):
+    name = Path(rel(path)).stem
+    k = K(tools_of(path))
+    ceiling = CONNECTOR_TIER.get(name, 5)
+    assert k <= ceiling, (
+        f"{rel(path)} holds {k} capability tools (ceiling {ceiling}): "
+        f"{sorted((tools_of(path) & CAPABILITY_BUILTINS) | _connector_tools(tools_of(path)))}")
+
+
+def test_the_connector_tier_is_exactly_the_agents_the_table_names():
+    """An agent over 5 that is not in CONNECTOR_TIER is a drift; an agent in
+    CONNECTOR_TIER that no longer needs its ceiling should lose the entry."""
+    over = {Path(rel(p)).stem for p in AGENT_FILES if K(tools_of(p)) > 5}
+    assert over <= set(CONNECTOR_TIER), f"over the ceiling and not in the tier: {sorted(over - set(CONNECTOR_TIER))}"
+    assert prov.CONNECTOR_TIER == CONNECTOR_TIER, (
+        "the ceilings live in the provisioner and here; they must agree")
+
+
+def test_the_fleet_tripwire():
+    """Measured 2026-09-14 before the change: ~3,314 grants. The role table
+    should land near 1,100; anything past 1,300 means a default grew again."""
+    total = sum(len(tools_of(p)) for p in AGENT_FILES)
+    assert total <= 1300, f"{total} grants across the fleet"
+
+
+def test_exactly_one_search_connector_per_batch_role():
+    """Tavily is the fallback and the extract path; Exa is the search. A
+    role holding Tavily search without Exa search would search on the
+    fallback, and a role holding either without the other cannot fall back."""
+    for p in AGENT_FILES:
+        t = tools_of(p)
+        if "mcp__Tavily__tavily_search" in t:
+            assert "mcp__Exa__web_search_exa" in t, rel(p)
+        if "mcp__Exa__web_search_exa" in t:
+            assert "mcp__Tavily__tavily_search" in t, rel(p)
+
+
+# ── the reverse direction: nothing granted without a reason ──
+
+
+def _body(path: Path) -> str:
+    text = path.read_text(encoding="utf-8")
+    m = FM.match(text)
+    return text[m.end():]
+
+
+FAMILY_WORD = {
+    "exa": r"\bExa\b", "tavily": r"\bTavily\b", "clay": r"\bClay\b",
+    "explorium": r"\bExplorium\b|Vibe.Prospecting", "indeed": r"\bIndeed\b",
+    "quartr": r"\bQuartr\b", "drive": r"\bDrive\b",
+}
+INSTRUCTED = {
+    "Agent": re.compile(r"\bAgent tool\b|\bvia the Agent\b|\bsubagent|\bdispatch", re.I),
+    "AskUserQuestion": re.compile(r"AskUserQuestion"),
+}
+
+
+@pytest.mark.parametrize("path", AGENT_FILES, ids=rel)
+def test_no_agent_holds_what_neither_its_body_nor_its_role_floor_justifies(path):
+    """The reverse of the body-names-it test. Every granted external family
+    must be in the role row AND be named by the body or by the row's
+    mandatory `why`; every connector read outside the role's bundle must be
+    named by the body; Agent/AskUserQuestion must be instructed, not just
+    held."""
+    row = prov.role_for(rel(path))
+    t = tools_of(path)
+    body = _body(path)
+    assert row.get("why"), f"{rel(path)}: the role row has no `why`"
+    granted_families = {fam for fam, tools in prov.EXTERNAL.items()
+                        if any(x in t for x in tools)}
+    row_families = {prov.family_of(x) for x in row["external"]}
+    assert granted_families <= row_families, (
+        f"{rel(path)} holds {sorted(granted_families - row_families)} "
+        f"outside its role row")
+    for fam in granted_families:
+        rx = FAMILY_WORD[fam]
+        assert re.search(rx, body) or re.search(rx, row["why"]), (
+            f"{rel(path)} holds {fam}; neither its body nor the row's why names it")
+    bundle = set(prov.READS[row["reads"]])
+    extra_reads = {x[len(P):] for x in t if x.startswith(P)} - bundle \
+        - set(prov.WRITE_TOOLS)
+    for name in extra_reads:
+        assert re.search(rf"\b{name}\b", body), (
+            f"{rel(path)} is granted {name} outside the {row['reads']!r} "
+            f"bundle and its body never names it")
+    for tool, rx in INSTRUCTED.items():
+        if tool in t:
+            assert rx.search(body), f"{rel(path)} holds {tool} and never instructs it"
+
+
+def test_the_core_is_the_five_and_todowrite_is_gone():
+    """No body names TodoWrite; a tool nobody is told to use is a grant by
+    habit. The five core tools are how an agent reads its run and drives
+    the engine over Bash."""
+    assert prov.CORE == ["Read", "Grep", "Glob", "Bash", "Skill"]
+    for p in AGENT_FILES:
+        assert "TodoWrite" not in tools_of(p), rel(p)
+
+
+def test_the_research_challenger_is_engine_only():
+    """C3-1: sonnet, medium, Read/Bash/Skill + the two floor reads, no web,
+    no connector, no `get_evidence` — it reads nothing but its brief."""
+    path = AGENTS / "research" / "research-challenger.md"
+    fm = front(path)
+    assert fm["model"] == "sonnet" and fm["effort"] == "medium"
+    assert fm["maxTurns"] == "60"
+    t = tools_of(path)
+    assert t == {"Read", "Bash", "Skill", P + "get_page_contract",
+                 P + "get_staged_payload"}, sorted(t)
+    body = _body(path)
+    for dim in ("evidence_sufficiency", "claim_label_fit", "facet_coverage",
+                "contradiction_handling", "ceiling_reasoning", "recency",
+                "synthesis_quality"):
+        assert dim in body, f"the body does not name dimension {dim}"
+    assert "engine.cli challenge" in body and "--actor research-challenger" in body
+    assert "engine.cli fetch" in body
+    assert "NOT FOUND IS NOT DISPROVED" in body

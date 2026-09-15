@@ -35,15 +35,12 @@ from .test_report_structure import _rec
 def _scored(tmp_path, n=6):
     """A workbook whose column D carries scores — an assessment, not a run
     that has merely finished researching."""
-    run = new_run(tmp_path, n=n)
-    wb = run.open()
-    cells = wb.selected_subcaps()
-    for cell in cells:
-        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
-    # score them the way the assessment stage does: column D, one per subcap
-    for i, cell in enumerate(cells):
-        wb.update_row(cells and "P1_Subcap_Scoring", "SubCap_ID", cell,
-                      {"Score": 2 + (i % 3)})
+    # THROUGH the assessment stage — `engine.assessment open/score/rollup/
+    # gate` — not column D written by hand: the report writer now checks the
+    # SCORING gate before it lands a section (2026-09-03), and a workbook
+    # scored out-of-band has no gate to show.
+    from fixtures import scored_run
+    run, wb, cells, ev = scored_run(tmp_path, n=n)
     return run, wb, cells
 
 
@@ -63,8 +60,11 @@ def test_an_older_workbook_with_no_stage_key_reads_as_research(tmp_path):
 
 
 def test_the_three_grains_belong_to_the_assessment_stage():
-    assert set(C.SHEET_STAGE) == {"Pillar_Summary", "Category_Detail",
-                                  "Recommendations"}
+    """The three grains, and (2026-09-03) every scoring-stage tab the
+    template workbook carries — all of them assessment-stage, none of them
+    producible while column D is empty."""
+    assert {"Pillar_Summary", "Category_Detail", "Recommendations",
+            "Subcap_Scores", "Pillar_Rollup", "Executive_Summary"} <= set(C.SHEET_STAGE)
     assert set(C.SHEET_STAGE.values()) == {"assessment"}
 
 
@@ -107,7 +107,9 @@ def test_the_stage_cannot_be_set_to_assessment_with_no_scores(tmp_path):
 # ── the grains themselves ────────────────────────────────────────────────
 
 def test_recompute_refuses_at_the_research_stage(tmp_path):
-    run, wb, cells = _scored(tmp_path)
+    # a RESEARCHED run — still at the research stage; `scored_run` is past it
+    from fixtures import researched_run
+    run, wb, cells, ev = researched_run(tmp_path)
     with pytest.raises(GrainRefused, match="research stage"):
         G.recompute(wb)
 
@@ -117,11 +119,17 @@ def test_the_stated_grains_land_in_the_columns_the_app_reads(tmp_path):
     G.set_stage(wb, "assessment")
     out = G.recompute(wb)
     assert out["subcaps_scored"] == len(cells)
-    assert out["pillars"] == 1 and out["categories"] >= 1
+    # ONE writer: the assessment stage's rollup states all four pillars and
+    # OVERALL (unassessed pillars with a blank score, which the gold gate
+    # accepts), so a focused run still ships the shape the app and the
+    # reference carry.
+    assert out["pillars"] == 5 and out["categories"] >= 1
+    assert out["writer"] == "engine.assessment rollup"
 
     pillars = [r for r in wb.rows("Pillar_Summary") if r.get("Pillar")]
-    assert [r["Pillar"] for r in pillars] == ["P1"]
+    assert [r["Pillar"] for r in pillars] == ["P1", "P2", "P3", "P4", "OVERALL"]
     assert pillars[0]["Score"] is not None
+    assert all(r["Score"] in (None, "") for r in pillars[1:4])
 
     cats = [r for r in wb.rows("Category_Detail") if r.get("Category_ID")]
     assert all(str(r["Category_ID"]).startswith("P1C") for r in cats)
@@ -165,12 +173,12 @@ def test_recommendations_project_the_reports_own_rows(tmp_path):
     for i in range(3):
         N.write(wb, "assessment", sec.id,
                 _rec(sec.id, eids, report="assessment"),
-                actor="report-assessment-producer", card=f"R-{i + 1}")
+                actor="report-assessment-producer", card=f"REC-{i + 1:02d}")
     G.set_stage(wb, "assessment")
     out = G.recommendations(wb)
     assert out["rows"] == 3
     rows = [r for r in wb.rows("Recommendations") if r.get("Rec_ID")]
-    assert [r["Rec_ID"] for r in rows] == ["REC-R-1", "REC-R-2", "REC-R-3"]
+    assert [r["Rec_ID"] for r in rows] == ["REC-01", "REC-02", "REC-03"]
     assert all(r["Rationale"] for r in rows), "the argument travels with it"
 
 
@@ -191,14 +199,14 @@ def test_the_app_parser_reads_the_recommendations_this_engine_writes(
     sec = next(s for s in RS.SPECS["assessment"].sections
                if s.kind == "recommendation")
     N.write(wb, "assessment", sec.id, _rec(sec.id, eids, report="assessment"),
-            actor="report-assessment-producer", card="R-1")
+            actor="report-assessment-producer", card="REC-01")
     G.set_stage(wb, "assessment")
     G.recommendations(wb)
 
     obs: list = []
     got = parse_recommendations(str(run.workbook_path), obs)
     assert got, f"the parser read no recommendation: {[o.kind for o in obs]}"
-    assert got[0]["rec_id"] == "REC-R-1", got[0]
+    assert got[0]["rec_id"] == "REC-01", got[0]
     assert got[0]["payload"].get("rationale"), got[0]["payload"].keys()
 
 
@@ -208,10 +216,37 @@ def test_the_assessment_report_names_the_grains_it_reads():
     """H4's grain lock forbids re-deriving a pillar figure by averaging its
     subcaps, so §3 must read what was STATED, not only the subcap sheets."""
     spec = RS.SPECS["assessment"]
-    assert "Pillar_Summary" in spec.section("3").inputs
-    assert "Category_Detail" in spec.section("3").inputs
-    assert "Recommendations" in spec.section("7").inputs
+    # The pinned Doc: §4 Assessment Results reads the STATED rollups, and
+    # the roadmap (§9) reads the Recommendations tab the REC cards project.
+    assert "Pillar_Rollup" in spec.section("4").inputs
+    assert "Category_Rollup" in spec.section("4").inputs
+    assert "Recommendations" in spec.section("9").inputs
+    rec = next(s for s in spec.sections if s.kind == "recommendation")
+    assert "Recommendations" in rec.inputs
 
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+def test_recompute_replaces_rather_than_appends_across_processes(tmp_path):
+    """Measured 2026-09-04: `grains recompute` from a fresh process after
+    `assessment.rollup` left ['P1','P2','P3','P4','OVERALL','P1'] — the
+    delete ran in memory and the first append reloaded from disk. The
+    replacement is one transaction now, so a second writer states the grain
+    once."""
+    import subprocess
+    import sys
+    from pathlib import Path
+    from fixtures import scored_run
+    run, wb, cells, ev = scored_run(tmp_path)
+    skill = Path(__file__).resolve().parents[2].parent / "plugins/dma-insights/skills/dma-research"
+    for _ in range(2):
+        r = subprocess.run([sys.executable, "-m", "engine.grains", "recompute",
+                            "--run", run.run_id, "--root", str(run.root)],
+                           capture_output=True, text=True, cwd=str(skill))
+        assert r.returncode == 0, r.stderr
+    pillars = [r["Pillar"] for r in run.open().rows("Pillar_Summary")]
+    assert pillars == ["P1", "P2", "P3", "P4", "OVERALL"], pillars
+    cats = [r["Category_ID"] for r in run.open().rows("Category_Detail")]
+    assert len(cats) == len(set(cats))

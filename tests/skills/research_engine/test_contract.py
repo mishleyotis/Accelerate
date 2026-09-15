@@ -174,3 +174,47 @@ def test_its_own_sub_verticals_variants_are_accepted(tmp_path):
                             scope_mode="FULL", reference_date="2026-08-29",
                             selected=cu_var)
     assert sorted(wb.selected_subcaps()) == sorted(cu_var)
+
+
+# ── the preflight and the gate must measure the same set ───────────────
+#
+# Measured 2026-09-14: `connector_contract.REQUIRED` is what the preflight
+# stops a run over, and `contract.ENRICHMENT_TOOLS` is what the floors gate
+# and `declare_absence` count as enrichment effort behind an empty cell. If
+# a family could be required by one and not counted by the other, a run
+# could pass its preflight and still be unable to close a cell — or close
+# cells on a family the preflight never checked.
+
+def _cc():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]
+                           / "plugins" / "dma-insights" / "scripts"))
+    import connector_contract as cc
+    return cc
+
+
+def test_every_required_connector_family_counts_as_enrichment():
+    cc = _cc()
+    required = set(cc.REQUIRED) | {f for g in cc.REQUIRED_ANY for f in g}
+    assert required <= set(C.ENRICHMENT_TOOLS), (
+        f"the preflight stops a run over {sorted(required - set(C.ENRICHMENT_TOOLS))}, "
+        f"which no cell can log as enrichment effort")
+
+
+def test_every_optional_family_is_a_tool_the_ledger_accepts():
+    cc = _cc()
+    assert set(cc.OPTIONAL) <= set(C.SEARCH_TOOLS), (
+        "a family the contract calls optional must still be loggable, or a "
+        "session that holds it cannot record what it found")
+
+
+def test_the_gate_counts_more_than_the_preflight_requires():
+    """`internal` and `drive` are enrichment for an INTERNAL or HYBRID run
+    whose evidence is the client's own package — the preflight cannot
+    require them of a PUBLIC run, and the gate must still count them."""
+    cc = _cc()
+    required = set(cc.REQUIRED) | {f for g in cc.REQUIRED_ANY for f in g}
+    assert set(C.ENRICHMENT_TOOLS) - required, (
+        "the two sets are identical; one of them has stopped being about "
+        "its own question")

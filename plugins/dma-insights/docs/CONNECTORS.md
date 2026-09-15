@@ -40,6 +40,32 @@ Two mechanisms decide, and they must agree.
 The rule is one line: **a read is auto-approved; a write, a publication, a
 deletion, a spend, or code somebody else authored still asks.**
 
+**The MCP surface is only half of it (measured 2026-09-03).** With every
+connector tool ruled on, the owner was still approving tool calls — because
+the prompts were `Bash`, `Write` and `Edit`. Every agent writes through
+`python3 -m engine.…`, every producer writes section JSON to disk, and
+neither tool had a decision anywhere. `hooks/autoapprove_builtins.py` rules
+on them by GRAMMAR rather than by list: a command is approved when every
+segment is the research engine, a plugin or repo script, pytest, a local git
+operation or a read-only shell verb, and every redirection lands inside a
+run root; a `Write`/`Edit` is approved when its target is under a run root
+or the plugin's own writer scope. A push, a credential path, `printenv`, a
+pipe into an interpreter, anything the grammar cannot parse, and every write
+into the deployables or a settings file draw NO decision — they fall through
+exactly as before. The two deny guards are asked first, so the hook never
+holds the opposite opinion to a refusal. `bootstrap_session.sh` writes the
+same shapes as narrower `Bash(prefix *)` / `Edit(path/**)` grants in user
+settings, the belt for a session whose hooks bound from a stale install.
+
+```
+python3 plugins/dma-insights/scripts/audit_builtin_approvals.py --strict
+```
+
+harvests every command the agent manifests, skill files and Routine prompts
+tell a session to run, feeds each to the real hook, and fails on any that
+would prompt. Measured 2026-09-03: 124 commands, 124 approved, 0 prompting.
+`readiness.py`'s `approvals` lane runs both audits.
+
 - Servers with a **stable segment** (Slack, Salesforce, Google Admin, Auctor,
   GitHub, Google Drive, Quartr, Indeed, Grace) are split tool by tool in
   `SERVER_SURFACES` — `read` is approved, `withheld` is refused **on the
@@ -72,6 +98,142 @@ already knows that nobody ever ruled on, prompting on every call forever.
 Measured 2026-08-30 before the split existed: **16 of 86 approved.** After:
 124 of 184, 58 refused on the record, 2 guarded, **0 unclassified**.
 
+## When a connector still prompts — the five layers, by surface
+
+Owner, 2026-09-04: *"the mcp tools eg tavily, exa etc are what I get prompts
+of to approve"* — on claude.ai/code, the terminal, Cowork and claude.ai chat
+alike — and *"when I place allow for all sessions, it prompts again."* Both
+plugin hooks approve every Tavily and Exa spelling (measured, table below),
+and the user-scope grant carries `mcp__Tavily__*` and `mcp__Exa__*`. So the
+prompt is coming from a layer neither governs. Ask the question with the
+exact name the prompt showed:
+
+```
+python3 plugins/dma-insights/scripts/why_did_it_prompt.py mcp__Tavily__tavily_search
+```
+
+Four layers can remove a prompt and one control puts one back over all four:
+
+| layer | what it does | where it fails |
+|---|---|---|
+| plugin hooks | `autoapprove_connector` (MCP) and `autoapprove_builtins` (Bash/Write/Edit, Cowork's `mcp__workspace__bash`) decide at call time | only where the plugin is installed AND enabled when the session binds; a snapshot container binds the old hook |
+| `permissions.allow` | user scope (bootstrap), project scope (`.claude/settings.json`), project-local | a rule matches ONE spelling. A connector a host delivers is `mcp__Tavily__…`; one Claude Code fetches itself is `mcp__claude_ai_Tavily__…` (permissions reference). Both are granted now. "Allow for all sessions" writes to `.claude/settings.local.json`, which a cloud container discards |
+| permission mode | `dontAsk` denies instead of prompting | the harness chooses the mode for a cloud session (`auto`), not the settings file |
+| install | hooks bind once, at session start | a restored snapshot boots the old plugin every time until `bootstrap_session.sh` runs before the session |
+| **organisation per-tool control = `ask`** | prompts on EVERY call, in EVERY mode, with the reason *"Your organization requires approval for this tool"*, **never offers to remember the choice, and no allow rule skips it** (permissions reference § MCP; `mcp` § Organization controls on connector tools). In `dontAsk` it becomes a silent denial | this is the only layer that matches "prompts on every surface, allow-for-all-sessions does nothing"; the user's own "allow unsupervised" connector setting does not override it. `/mcp` in the prompting session shows the setting per tool; the org's claude.ai admin changes it |
+
+Per surface: **claude.ai/code web** — hooks + user/project settings + the
+auto classifier; only the bootstrap's writes survive to the next session.
+**Claude Code CLI** — the same on your machine; a saved rule persists for the
+spelling it was saved under. **Cowork desktop** — hooks run; shell is
+`mcp__workspace__bash` and a `Bash` rule never carries over (the builtins hook
+matches it since 1.17.0); the org `ask` does NOT reach these sessions.
+**claude.ai chat** — no Claude Code hooks or settings at all; only the
+connector's permission setting and any org control apply, and nothing in
+this repository can change what it asks.
+
+## Slack — a bot token, not a connector (PORTABLE, 2026-08-30)
+
+**Status: code LIVE; the secret is the owner's to provision.**
+
+Until 2026-08-30 the only route to `#deal-desk` was the claude.ai Slack
+**connector**, attached per Routine on its own edit screen. That is not
+portable in three measured ways:
+
+1. `dma-assessment-intake` carries no connector of any kind, so the queue
+   that decides which client to assess could not read its own channel
+   (AUD-0190). `update_trigger` cannot attach one; only a human can.
+2. **A script can never call a connector tool.** So the triage rule could be
+   tested over recorded fixtures and never over the live channel — the read
+   half and the decide half could drift with nothing to catch it.
+3. Every new Routine, every fresh container, every teammate's session starts
+   with no Slack until somebody clicks through a UI.
+
+A bot token in Secret Manager has none of those properties.
+`scripts/slack_client.py` reads it by the same three-rung ladder as the
+connector path token, works in any process carrying the service-account key,
+and is rotated without touching code.
+
+### There is no redirect URL, and that is a design decision
+
+The intake **polls**. It calls `conversations.history`, `conversations.replies`
+and `chat.postMessage` outbound, on a schedule. It subscribes to no Slack
+events, so there is:
+
+- no request URL for Slack to call,
+- no **OAuth redirect URL** — the app is installed once, to one workspace,
+  from its own **Install to Workspace** button, which uses Slack's own
+  `https://slack.com/oauth/v2/authorize` flow and hands back a bot token;
+- no **signing secret** to store, because nothing inbound needs verifying.
+
+If Slack's app-config screen insists on a redirect URL before it will let you
+install (it does on some workspace policies), use
+
+```
+https://slack.com/oauth/v2/authorize
+```
+
+as the OAuth entry and leave **Redirect URLs empty**; only a *distributed*
+app (one installable by other workspaces) needs its own callback endpoint,
+and this app is internal to one workspace. Do not invent a callback on the
+MCP service: there is no handler there, so a redirect pointed at it would
+fail closed at install time and read as a Slack problem.
+
+### Scopes the bot needs
+
+Two of the four are load-bearing and two are cosmetic. The distinction is
+not editorial: measured 2026-08-30 on a live `dma-assessment-intake` firing,
+a token holding `channels:history` but not `channels:read` read **nothing**,
+because the transcript's header name was fetched before the messages were.
+A cosmetic lookup must never decide whether the substantive one runs, so
+both cosmetic scopes now degrade in place and the read proceeds.
+
+| scope | what stops working without it | required? |
+|---|---|---|
+| `channels:history` | `conversations.history` — the queue cannot be read | **yes** |
+| `chat:write` | the completion reply | **yes** |
+| `channels:read` | `conversations.info` — the channel NAME in the header line; nothing parses it, so it degrades to the channel id and a note goes to stderr | no |
+| `users:read` | display names on replies; degrades to bare ids, which is what the parser reads anyway | no |
+
+Private channel instead of public → `groups:history` + `groups:read`.
+**The bot must also be in the channel**: `/invite @<app>` in `#deal-desk`.
+`not_in_channel` is the error that says you skipped this, and
+`slack_client.py` names the remedy in the message.
+
+### Provisioning (owner, once)
+
+```bash
+printf %s "$SLACK_BOT_TOKEN" | gcloud secrets create dmai-slack-bot-token \
+    --project=digital-maturity-assessor --data-file=- --replication-policy=automatic
+gcloud secrets add-iam-policy-binding dmai-slack-bot-token \
+    --project=digital-maturity-assessor \
+    --member="serviceAccount:<the routine service account>" \
+    --role=roles/secretmanager.secretAccessor
+```
+
+Rotation is `gcloud secrets versions add dmai-slack-bot-token --data-file=-`
+and nothing else — the ladder always reads `latest`.
+
+Verify without printing the secret:
+
+```bash
+python3 plugins/dma-insights/scripts/slack_client.py whoami
+python3 plugins/dma-insights/scripts/slack_intake.py fetch      # channel + threads
+python3 plugins/dma-insights/scripts/slack_intake.py triage --transcript /tmp/deal_desk.txt --threads /tmp/threads
+```
+
+`whoami` prints team, user and bot id — never the token. No code path in this
+repository prints it, and `test_no_source_file_carries_a_literal_bot_token`
+fails the build if one is ever committed.
+
+### The connector route still works
+
+Nothing was removed. A session that HAS the Slack connector may still read
+the channel with it and save the transcript; `slack_client.py` renders the
+API's JSON into that same text shape, so one parser and one set of fixtures
+serve both. `test_slack_client.py` proves it by running the real parser over
+rendered output and asserting the same verdicts the recordings assert.
+
 ## Preflight (STEP 0 of every synthesis firing)
 
 1. `drive_fetch.py check` — REQUIRED: the intake folder answers the SA.
@@ -97,14 +259,14 @@ The table lists what each surface uses BEYOND the package, and why.
 | overview.exec_summary | — | synthesis over other surfaces; no direct enrichment |
 | overview.why_now | Exa · Tavily | dated external signals: announcements, filings, leadership statements — each registered with excerpt + URL |
 | overview.thought_leadership | Exa | the entity's own publications, talks, bylines |
-| overview.leadership | Explorium · Tavily · (Clay) | roster verification, arrivals/departures, profile facts; Clay contact enrichment via its connector |
+| overview.leadership | Exa · Tavily · Clay‡ | roster verification, arrivals/departures, profile facts through the orchestrator tier; the contacts pass itself is Clay, run and polled by the producer |
 | overview.financial_series | Tavily | regulator series (call reports, 10-K figures) corroboration |
 | overview.sentiment | Tavily | app-store / review aggregate figures with n, scale, as_of |
 | overview.findings | — | package + cross-surface reconciliation |
 | overview.opportunity | (engine) + the platform set below | tiles mirror platform.platform_story — same factors, same validations |
 | heatmap.workbook_scores | — | package only — scores are never enriched (invariant: no fabricated scores) |
 | heatmap.focus_areas | Exa · Tavily | corroborate/falsify the named gap per the H3 ladder |
-| heatmap.cell_evidence | Exa · Tavily · Indeed* | subcap-specific evidence: artefact vocabulary searches, job postings as demand signals |
+| heatmap.cell_evidence | Exa · Tavily | subcap-specific evidence: artefact vocabulary searches; job-posting demand signals arrive through the technographic scan's Indeed rows, never a second Indeed call |
 | heatmap.evidence | — | the register itself; new rows only via register_evidence |
 | heatmap.evidence_age | — | computed from the register |
 | heatmap.alerts | — | the ladder's honest residue; queries logged, no new sources |
@@ -112,34 +274,86 @@ The table lists what each surface uses BEYOND the package, and why.
 | heatmap.cohort_patterns | — | cross-entity, server-side |
 | heatmap.value_chain | — | server-derived (H9 envelope) |
 | insights.insights | Exa · Tavily | each card's external claims verified corroborate+falsify before challenge |
-| insights.landscape | Explorium · Tavily | peer set facts; T2 recomputes from T1 register |
-| platform.platform_story | Clay† · Explorium · Exa · Tavily · Indeed* | greenfield deep-search ladder (family truly absent?); peer deployments; demand signals; alignment quotes from the entity's own words |
+| insights.landscape | Explorium‡ · Tavily | peer set facts from the register the producer reads out of Explorium itself; T2 recomputes from T1 register |
+| platform.platform_story | Exa · Tavily | greenfield deep-search ladder (family truly absent?); peer deployments; alignment quotes from the entity's own words — serviced as search_requests; the estate's own rows come from the technographic scan |
 | platform.recommendations | Exa · Tavily | feasibility corroboration for each recommendation's premise |
 | platform.roadmap | — | sequenced from fit engine + register |
 | platform.stairstep | — | engine + package |
 | platform.starters | Exa · Tavily | each starter's named gap re-verified before it ships |
-| techstack.techstack | Clay† · Explorium | technographic register verification: CONFIRMED needs a source row; ABSENT needs the absence ladder |
+| techstack.techstack | Explorium‡ | technographic register verification from Explorium's own answer: CONFIRMED needs a source row; ABSENT needs the absence ladder. Clay's company pass reaches this surface through the technographic scanner's rows |
 | context.timeline | Exa · Tavily | dated events with verbatim excerpts |
 | context.issue_register | Tavily | regulator/issue corroboration |
 | context.regulatory_standing | Tavily | regulator records (NCUA, SEC, FINRA) |
 | context.context_sentiment | Tavily | rated-source aggregates |
 | context.acquisitions | Exa · Tavily | deal records, integration statements |
 
-\* Indeed via its claude.ai connector where attached; job-posting demand
-signals fall back to Tavily/Exa site-scoped searches where it is not.
-† Clay via its claude.ai connector in the correct workspace; a refused
+**Who calls what (2026-09-14, owner decision).** Connectors are held and
+CALLED by the orchestrator tier. A service in the table **without ‡** is
+called by that tier — `research-conductor` batches the `search_requests`
+the lanes and producers emit by capability and hands each batch to
+`enrichment-web-specialist` (Exa search, Tavily fallback and extract) or
+`enrichment-connector-specialist` (Clay, Explorium); the producer that owns
+the surface holds no connector and emits its queries. A service marked
+**‡** is one the owning producer must hold ITSELF, because the surface is
+written FROM that connector's answer rather than corroborated by it: the
+leadership roster from Clay's contacts pass, the technographic register and
+its landscape rollup from Explorium. `scripts/tests/test_connector_provisioning.py`
+re-derives both rules from this table on every run.
+
+Indeed is held by the `technographic-scanner` alone (`search_jobs` — job
+postings as the DATA/INFRA demand signal); every other surface reads those
+rows out of the scan rather than calling Indeed again. Quartr is declared in
+the registry and granted to no agent (not wired). Drive is granted to no
+agent: the client folder and the toolkits land under the run root through
+`drive_fetch.py` over Bash. Clay runs in the correct workspace; a refused
 grant records as not-run — never invented technographics (MEM-0082).
 
 ## Dispatch mode and where the connectors actually live
 
-The claude.ai connector tools exist ONLY in the top trigger-fired session —
-headless children dispatched via `scripts/agent_run.py` (the fallback for
-sessions without an Agent tool) do not inherit them. The rule that keeps
-enrichment honest across that boundary lives in
-`skills/dma-surface-production/05-lifecycle/routing.md` § Dispatch mode:
-children emit `search_requests`, the top session runs them through the real
-connectors and re-invokes. The dma-insights connector itself reaches every
-layer (static /mcp + header token), children included.
+The claude.ai connector tools are attached to the top session. A headless
+child dispatched via `scripts/agent_run.py` is pre-approved for the connector
+namespaces (`agent_run.ALLOWED`), but binding is the harness's and a child
+finds them absent — measured on every headless audit — which is why, since
+2026-09-14, no research lane and no section producer declares a connector at
+all: a lane emits `search_requests`, the conductor batches them by
+capability, and the servicing tier (`research-conductor`,
+`enrichment-web-specialist`, `enrichment-connector-specialist`) calls the
+connector it holds and logs the search with the tool that ran it. The rule
+that keeps enrichment honest (`skills/dma-surface-production/05-lifecycle/routing.md`
+§ Dispatch mode) is unchanged in spirit: never log a connector search you
+did not run, never fall back to WebSearch and call it the connector. The
+dma-insights connector itself reaches every layer (static /mcp + header
+token), children included.
+
+**The relay is code, not prose (MEM-0333, closed 2026-09-07).** The 2026-08-28
+headless audit measured that nothing read a lane's `search_requests`; the
+owner's live runs then showed categories passing their floors gate on bare
+WebSearch. `engine.relay` (`skills/dma-research/engine/relay.py`) now runs
+inside every research round of `engine.pipeline`:
+
+| verb | what it does | where it lands |
+|---|---|---|
+| `harvest` | reads each lane's transcript (`agent_logs/<lane>.jsonl` + `.out`) for `search_requests` — whole-JSON, fenced JSON or the key in prose — and queues each once | `07_qa/search_relay.jsonl` (append-only; id = hash of normalised query + cell) |
+| `batch` | **the default since 2026-09-14.** Deduplicates the OPEN requests by normalised query, groups them by capability, proposes the connector per query, and writes ONE index plus a self-contained prompt per group — each carrying only its own queries, their cells, the connector to use and the exact `engine.cli search` / `engine.relay record` commands. Dispatches nothing: the conductor spins one fresh in-process subagent per prompt, and only those inherit its connectors | `07_qa/relay_batch_r<N>.json` (+ `.md`) and `briefs/relay_r<N>/<capability>.md` |
+| `drain-brief` | the FALLBACK (`--relay-mode lane`): one `enrichment-web-specialist` lane per category with OPEN requests, briefed with the exact `engine.cli search --tool exa`, `engine.cli evidence` and `engine.relay record` commands. Right only where the CONTAINER itself holds the connectors | `briefs/relay_r<N>/`; dispatched as stage `RELAY` |
+| `reconcile` | closes OPEN requests SERVED/EMPTY from the Search_Log itself (an enrichment-tool row whose query matches). Runs at the START of every round, because in batch mode the previous round's work was done by subagents the driver never saw and the Search_Log is their only report | the queue |
+| `heal` | for a category with NO connector search: which half is broken, measured — `grants` (a connector call refused in the transcript), `instruction` (never attempted), `logging` (called, logged as web_search), `manifest` (the lane declares none), `unbound` (the run's own baseline proves no enrichment connector was ever bound — a fresh lane cannot reach what is not in the container, so this one is disclosed at once and spends no heal) | the ENRICHMENT gate row and the fresh lane's brief |
+
+The **ENRICHMENT gate** (per category, from the Search_Log's `Tool` column) is
+the third gate beside FLOORS and DISPATCH_VERIFY. Zero connector searches →
+FAIL, blocking while the driver's heal budget lasts (`--enrichment-heals`,
+default 1: one FRESH lane instance carrying the measured reason and the open
+requests), then the same FAIL written **non-blocking** — disclosed in
+Gate_Log and `07_qa/pipeline_state.json` (`enrichment_disclosed`), never a
+silent pass and never a wall when the harness bound no connector to a child.
+`python3 -m engine.relay enrichment --run R` prints the per-category counts;
+`python3 -m engine.relay state --run R` the queue.
+
+A batch the conductor has not yet serviced is **`PENDING_ORCHESTRATOR`** on
+the gate — non-blocking, and it spends none of the heal budget. Work not yet
+done is not a gap, and a run that halted on one would be waiting on itself.
+It becomes a blocking FAIL only when a servicing subagent recorded the
+request `BLOCKED`, which means a connector refused it and said so verbatim.
 
 Per-facet source detail (tiers, ceilings, query shapes) stays where it
 lives: `02-inputs/enrichment_sources.json` and each page rulebook's

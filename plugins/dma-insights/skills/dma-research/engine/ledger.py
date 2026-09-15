@@ -30,6 +30,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
     __package__ = "engine"
 
 import datetime as _dt
+import json
 import re
 
 from . import contract as C
@@ -39,7 +40,14 @@ from .workbook import RunWorkbook, FLOOR_ITEMS, _split_ids
 #: R27's wall. A conversation that has fired this many searches must
 #: checkpoint and stop; `stats()` returns the decision, and orient.py leads
 #: `do_first` with it so it cannot be walked past (AUD-0037).
-SEARCH_OP_CEILING = 40
+#:
+#: 40 → 60 on 2026-09-03, with the five-volley rule: forty was set when a
+#: subcap took one or two searches. Under `volleys_incomplete` every cell
+#: costs at least five, and forty stopped a conversation at its eighth cell
+#: in the middle of a volley. Sixty is twelve fully volleyed cells between
+#: checkpoints — still a wall, still per conversation, still resumed from
+#: the position the checkpoint recorded.
+SEARCH_OP_CEILING = 60
 
 EXCERPT_MIN, EXCERPT_MAX = 50, 500
 
@@ -58,14 +66,39 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str = "FACT", origin: str = "public",
                     ers: float | None = None, anchor_quote: str | None = None,
-                    run=None,
+                    run=None, actor: str | None = None,
                     access_status: str = "OK", conflict: str | None = None,
-                    fact_id: str = "F1") -> str:
+                    fact_id: str = "F1", verify_excerpts: bool = False,
+                    unverified_reason: str | None = None) -> str:
     """Register one fact and return its server-shaped id.
 
     Fail-closed evidence (invariant 4): a cited id must resolve, belong to
     this run, and carry a verbatim excerpt of 50-500 characters. Enforced at
     the WRITE, so an unresolvable citation cannot exist to be found later.
+
+    VERBATIM USED TO BE A WORD IN AN ERROR MESSAGE. Until 2026-09-14 this
+    checked the excerpt's LENGTH and nothing else; "verbatim" appeared only
+    in the refusal text for a span of the wrong size. The only real check in
+    the system was the app connector's `register_evidence`, a tool every
+    research agent's manifest denies. Now `engine.cli fetch` leaves the
+    page's extracted text under the run, and three outcomes follow:
+
+      cached, span present   registers.
+      cached, span absent    `excerpt_not_verbatim` — WHATEVER
+                             `verify_excerpts` says. The page is in hand;
+                             not looking at it because a flag is off would
+                             make the check an opinion.
+      not cached             `excerpt_unverified` when `verify_excerpts`,
+                             unless `unverified_reason` says what stopped
+                             the fetch — then the row carries
+                             `Access_Status = "UNVERIFIED: <reason>"`.
+                             Recorded, never silent.
+
+    `verify_excerpts` DEFAULTS OFF because every in-process caller — the
+    fixtures, the stub, the handoff — registers against URLs nothing
+    fetched; flipping the default would rewrite what those mean rather than
+    add a check. `engine.cli evidence` and `memory.consolidate` pass True,
+    which is where a lane's writes actually go.
 
     `published` may be None. It is not defaulted to today — undated evidence
     is UNVERIFIED, never current (invariant 9), and AUD-0020 measured
@@ -96,49 +129,298 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         # the halt: there is no route around it.
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
-    eid = wb.next_evidence_id()
-    # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
-    # calculator existed, and nothing joined them — twenty rows, twenty
-    # empty cells, in every run ever produced). Scored INLINE here so the
-    # append pays no second save; the cross-register pass that updates
-    # everyone else's corroboration runs at synthesis, where a second
-    # source actually changes a judgement.
-    from . import ers as _ers
-    _existing = [r for r in wb.rows("Evidence_Detail") if r.get("E_ID")]
-    _new = {"E_ID": eid, "Source_Name": source_name, "Source_URL": source_url,
-            "Tier": tier, "Recency": recency_band(published, wb),
-            "SubCap_IDs": ", ".join(cells), "Excerpt": text}
-    _score = _ers.score_row(_new, _existing + [_new])["ers"]
-    if ers is not None:
-        wb.append("Provenance", {
-            "SubCap_ID": "", "Step": "ers_supplied_ignored",
-            "Actor": "ledger", "At": _utcnow(),
-            "Detail": f"{eid}: caller passed ERS={ers}; the score is computed "
-                      f"server-side from tier, recency, specificity and "
-                      f"corroboration"}, save=False)
-    wb.append("Evidence_Detail", {
-        "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
-        "Source_URL": source_url, "Tier": tier, "ERS": _score,
-        "Date_Published": published, "Recency": recency_band(published, wb),
-        "Claim_Type": claim_type, "Fact_Count": 1,
-        "SubCap_IDs": ", ".join(cells), "Excerpt": text,
-        "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
-        "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
-    })
-    for cell in cells:
-        row = wb.scoring_row(cell) or {}
-        have = [i for i in _split_ids(row.get("Evidence_IDs"))
-                if i and i != C.NO_EVIDENCE]
-        urls = [u for u in _split_ids(row.get("Source_URLs")) if u]
-        have.append(f"{eid}:{fact_id}")
-        if source_url and source_url not in urls:
-            urls.append(source_url)
-        wb.set_scoring(cell, {"Evidence_IDs": ", ".join(have),
-                              "Source_URLs": ", ".join(urls) or None},
-                       save=False)
-    wb.save()
-    wb.recompute_coverage()
+    assert_actor_scope(actor, "evidence", cells)
+    access_status = _verified_access_status(
+        wb, run, source_url, text, verify_excerpts, unverified_reason,
+        access_status)
+    # ONE TRANSACTION FOR THE ID AND THE ROWS IT NAMES.
+    #
+    # `next_evidence_id` reads the highest E-id in the register and adds
+    # one. Outside a lock that is a read-modify-write across processes: two
+    # writers both see E-006 and both mint E-007, and the second append
+    # overwrites the first's row in every surface that later resolves that
+    # id. Measured 2026-08-31 alongside the PRELIM section a concurrent
+    # scanner erased. Minting and appending inside ONE `transaction()`
+    # closes both: the lock is held from the read of the maximum through the
+    # save of the rows that use it.
+    with wb.transaction("append_evidence"):
+        eid = wb.next_evidence_id()
+        # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
+        # calculator existed, and nothing joined them — twenty rows, twenty
+        # empty cells, in every run ever produced). Scored INLINE here so the
+        # append pays no second save; the cross-register pass that updates
+        # everyone else's corroboration runs at synthesis, where a second
+        # source actually changes a judgement.
+        from . import ers as _ers
+        _existing = [r for r in wb.rows("Evidence_Detail") if r.get("E_ID")]
+        _new = {"E_ID": eid, "Source_Name": source_name, "Source_URL": source_url,
+                "Tier": tier, "Recency": recency_band(published, wb),
+                "SubCap_IDs": ", ".join(cells), "Excerpt": text}
+        _score = _ers.score_row(_new, _existing + [_new])["ers"]
+        if ers is not None:
+            wb.append("Provenance", {
+                "SubCap_ID": "", "Step": "ers_supplied_ignored",
+                "Actor": "ledger", "At": _utcnow(),
+                "Detail": f"{eid}: caller passed ERS={ers}; the score is computed "
+                          f"server-side from tier, recency, specificity and "
+                          f"corroboration"}, save=False)
+        wb.append("Evidence_Detail", {
+            "E_ID": eid, "Fact_ID": fact_id, "Source_Name": source_name,
+            "Source_URL": source_url, "Tier": tier, "ERS": _score,
+            "Date_Published": published, "Recency": recency_band(published, wb),
+            "Claim_Type": claim_type, "Fact_Count": 1,
+            "SubCap_IDs": ", ".join(cells), "Excerpt": text,
+            "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
+            "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
+        })
+        for cell in cells:
+            row = wb.scoring_row(cell) or {}
+            have = [i for i in _split_ids(row.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            urls = [u for u in _split_ids(row.get("Source_URLs")) if u]
+            have.append(f"{eid}:{fact_id}")
+            if source_url and source_url not in urls:
+                urls.append(source_url)
+            wb.set_scoring(cell, {"Evidence_IDs": ", ".join(have),
+                                  "Source_URLs": ", ".join(urls) or None},
+                           save=False)
+        # INSIDE the transaction. Both of these WRITE, and a write that
+        # lands after the lock is released is a write another process can
+        # interleave with — the whole defect, moved four lines down.
+        wb.save()
+        wb.recompute_coverage()
     return eid
+
+
+# ── citing a row the run already holds ───────────────────────────────────
+
+#: The Provenance steps this module writes for the reuse loop. Deliberately
+#: NOT in `contract.PROVENANCE_STEPS`: that tuple is the set of steps whose
+#: AUTHORSHIP is load-bearing for the independence checks, and an attach is a
+#: citation, not a judgement. It is written straight to the sheet the same
+#: way `append_evidence` writes `ers_supplied_ignored`.
+ATTACH_STEP = "attach"
+DECLINE_STEP = "reuse_declined"
+
+
+def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
+                    actor: str | None = None) -> dict:
+    """Cite an EXISTING register row from another cell, without minting a
+    duplicate.
+
+    THE WRITE THE REUSE LOOP WAS MISSING. `brief.leads_in` and
+    `brief.reusable.proposed_from_other_categories` show a lane rows another
+    lane opened; until this existed the only way to act on one was
+    `append_evidence`, which mints a SECOND row for the same source — a new
+    E-id, a re-scored ERS, and a register where one document is two
+    identities and `single_source_fact` cannot tell.
+
+    It is the ONE cross-category write a category lane may make, and only to
+    its OWN category's cells: `scope.violation(actor, "attach", cells)` is
+    the same table every other writer asks, so `research-p1c1-producer`
+    attaching to a P3 cell is refused in the same words as every other
+    out-of-scope write.
+
+    The link is written BOTH WAYS — the cell cites the id and the row names
+    the cell back — because the floors gate counts a citation only when both
+    are true (`_named_by`, AUD-0115), and a one-way attach would look like
+    consolidation and count as nothing.
+
+    Refuses, each saying what and why: an e_id the register does not hold; a
+    cell the catalogue does not know; a cell outside this run's engagement
+    set; a pair the cell already cites.
+    """
+    eid = str(eid or "").strip()
+    cells = [s.strip() for s in (subcaps if isinstance(subcaps, (list, tuple))
+                                 else _split_ids(subcaps)) if str(s).strip()]
+    if not cells:
+        raise LedgerRefusal(
+            "attach names no cell. Pass the cell(s) of YOUR category this "
+            "registered row bears on; an attach that reaches no cell "
+            "consolidates nothing.")
+    register = wb.evidence_index()
+    if eid not in register:
+        raise LedgerRefusal(
+            f"no evidence row {eid!r} in this run's register "
+            f"({len(register)} row(s)). `attach` CITES a row the run already "
+            f"holds — it does not create one. Register a new source with "
+            f"`engine.cli evidence`.")
+    tax = C.taxonomy()
+    unknown = [c for c in cells if c not in tax.tier]
+    if unknown:
+        raise LedgerRefusal(f"attach names cells not in the catalogue: {unknown}")
+    in_run = set(wb.selected_subcaps())
+    foreign = [c for c in cells if c not in in_run]
+    if foreign:
+        raise LedgerRefusal(
+            f"attach names cells outside this run's engagement set: {foreign}")
+    assert_actor_scope(actor, "attach", cells)
+
+    row = register[eid]
+    fact_id = str(row.get("Fact_ID") or "F1").strip() or "F1"
+    source_url = str(row.get("Source_URL") or "").strip() or None
+    already = []
+    for cell in cells:
+        sr = wb.scoring_row(cell) or {}
+        if eid in [i.split(":")[0] for i in _split_ids(sr.get("Evidence_IDs"))
+                   if i and i != C.NO_EVIDENCE]:
+            already.append(cell)
+    if already:
+        raise LedgerRefusal(
+            f"{eid} is already cited by {', '.join(already)}. An attach that "
+            f"repeats a citation inflates `grounded_on` and the per-cell "
+            f"evidence floor with one source counted twice; the pair "
+            f"(evidence, cell) is the identity, and it exists.")
+
+    with wb.transaction("attach_evidence"):
+        named = [s.split(":")[0].strip()
+                 for s in _split_ids(row.get("SubCap_IDs")) if str(s).strip()]
+        for cell in cells:
+            if cell not in named:
+                named.append(cell)
+        wb.update_row("Evidence_Detail", "E_ID", eid,
+                      {"SubCap_IDs": ", ".join(named)}, save=False)
+        for cell in cells:
+            sr = wb.scoring_row(cell) or {}
+            have = [i for i in _split_ids(sr.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            urls = [u for u in _split_ids(sr.get("Source_URLs")) if u]
+            have.append(f"{eid}:{fact_id}")
+            if source_url and source_url not in urls:
+                urls.append(source_url)
+            wb.set_scoring(cell, {"Evidence_IDs": ", ".join(have),
+                                  "Source_URLs": ", ".join(urls) or None},
+                           save=False)
+            wb.append("Provenance", {
+                "SubCap_ID": cell, "Step": ATTACH_STEP,
+                "Actor": str(actor or "unattributed").strip(),
+                "At": _utcnow(),
+                "Detail": f"cited {eid} ({str(row.get('Source_Name') or '')[:80]}) "
+                          f"registered against {', '.join(named)}",
+                "Session": _agent_session()}, save=False)
+        wb.save()
+        wb.recompute_coverage()
+    return {"e_id": eid, "subcaps": cells, "fact_id": fact_id,
+            "now_names": named, "minted": False}
+
+
+def decline_evidence(wb: RunWorkbook, eid: str, subcap: str, *,
+                     why: str, actor: str | None = None) -> dict:
+    """Record that a lane READ a proposal and it does not bear on the cell.
+
+    The other half of PROPOSE-never-attach. Without it, "offered and not
+    taken" and "offered and never looked at" are the same state, so
+    `floors_gate.reuse_ignored` could not tell a lane that judged from a lane
+    that ignored — and an advisory term that cannot tell those apart teaches
+    nobody anything. Writes Provenance only: a decline changes no citation.
+    """
+    eid = str(eid or "").strip()
+    subcap = str(subcap or "").strip()
+    if not str(why or "").strip():
+        raise LedgerRefusal(
+            "a decline with no reason is indistinguishable from ignoring the "
+            "proposal. Say what the row is about and why it does not answer "
+            "this cell's question.")
+    if eid not in wb.evidence_index():
+        raise LedgerRefusal(f"no evidence row {eid!r} in this run's register")
+    if subcap not in set(wb.selected_subcaps()):
+        raise LedgerRefusal(
+            f"{subcap} is not selected in this run; there is no proposal to "
+            f"decline")
+    assert_actor_scope(actor, "attach", [subcap])
+    wb.append("Provenance", {
+        "SubCap_ID": subcap, "Step": DECLINE_STEP,
+        "Actor": str(actor or "unattributed").strip(), "At": _utcnow(),
+        "Detail": f"declined {eid}: {str(why).strip()[:400]}",
+        "Session": _agent_session()})
+    return {"e_id": eid, "subcap": subcap, "declined": True}
+
+
+def reuse_decisions(wb: RunWorkbook, category: str | None = None) -> dict:
+    """What lanes DID with the proposals they were offered, from Provenance.
+
+    `attached` and `declined` are lists of (e_id, cell) pairs. Computed from
+    the sheet rather than from a lane's report, like everything else the
+    conductor reads.
+    """
+    cat = str(category or "").strip().upper()
+    out = {"attached": [], "declined": []}
+    for r in wb.rows("Provenance"):
+        step = str(r.get("Step") or "").strip()
+        if step not in (ATTACH_STEP, DECLINE_STEP):
+            continue
+        cell = str(r.get("SubCap_ID") or "").strip()
+        if cat and not cell.startswith(cat):
+            continue
+        detail = str(r.get("Detail") or "")
+        eid = ""
+        for word in detail.replace(":", " ").split():
+            if word.upper().startswith("E-"):
+                eid = word.strip(",()")
+                break
+        key = "attached" if step == ATTACH_STEP else "declined"
+        out[key].append({"e_id": eid, "subcap": cell,
+                         "actor": str(r.get("Actor") or ""),
+                         "at": r.get("At")})
+    return out
+
+
+def _run_of(wb: RunWorkbook, run=None):
+    """The run this workbook belongs to, for the fetch cache.
+
+    Derived from the workbook's own path (`runstate.locate` globs the run
+    root for the .xlsx) rather than required from the caller, so a caller
+    that forgets to thread `run=` cannot silently turn the verification off.
+    An explicit `run` wins."""
+    if run is not None:
+        return run
+    from . import runstate as _runstate
+    return _runstate.Run(run_id=wb.path.stem, root=wb.path.parent,
+                         workbook_path=wb.path)
+
+
+def _verified_access_status(wb, run, source_url, text, verify_excerpts,
+                            unverified_reason, access_status) -> str:
+    """The row's Access_Status after the excerpt has been checked, or a
+    LedgerRefusal. See `append_evidence` for the three outcomes."""
+    if not source_url:
+        # Verification is about a URL. An internal document has none, is
+        # labelled origin='internal', and is refused or not on its own terms.
+        return access_status
+    from . import fetch as _fetch
+    _run = _run_of(wb, run)
+    # The refusals below print a command the reader can paste; `fetch` is
+    # per-run (its cache is), so the run id has to be in it.
+    _where = f"--run {getattr(_run, 'run_id', '<R>')}"
+    page = _fetch.cached_text(_run, source_url)
+    if page is not None:
+        if _fetch.normalise(text) not in _fetch.normalise(page):
+            raise LedgerRefusal(
+                f"excerpt_not_verbatim: this span is not in the text "
+                f"`engine.cli fetch` read from {source_url} (whitespace and "
+                f"case are normalised; nothing else is). Re-extract it from "
+                f"the source — `engine.cli fetch {_where} --url {source_url} "
+                f"--query '<what you are quoting>'` prints the spans that are "
+                f"there. "
+                f"Never repair a quote by hand.")
+        return access_status
+    if not verify_excerpts:
+        return access_status
+    reason = str(unverified_reason or "").strip()
+    if not reason:
+        raise LedgerRefusal(
+            f"excerpt_unverified: nothing in this run has read {source_url}, "
+            f"so there is nothing to check this span against. Run "
+            f"`engine.cli fetch {_where} --url {source_url} --query "
+            f"'<the DQ text>'` "
+            f"and register from a window it prints — it costs three windows "
+            f"of context, not the page. If the page genuinely cannot be "
+            f"fetched (a 403 WAF, a paywall, a connector's own extract), say "
+            f"so with `--unverified '<what stopped it>'` and the row is "
+            f"recorded UNVERIFIED rather than passed off as checked. "
+            f"(`engine.cli fetch --via-text -` caches a connector's extract "
+            f"under the URL, which verifies it properly.)")
+    return f"UNVERIFIED: {reason}"
 
 
 def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
@@ -169,17 +451,139 @@ def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
     return C.RECENCY_ARCHIVAL
 
 
+def assert_actor_scope(actor, op: str, cells=None) -> None:
+    """Refuse a write the actor's tier may not make (`engine/scope.py`).
+
+    Called at the END of each writer's validation, so a more specific
+    refusal — an unresolvable cell, a failed independence check — keeps its
+    own wording. An actor of None is unconstrained: every caller that does
+    not name one is asking the library, not acting as an agent.
+    """
+    from . import scope as _scope
+    why = _scope.violation(actor, op, cells or [])
+    if why:
+        raise LedgerRefusal(why)
+
+
 # ── search ───────────────────────────────────────────────────────────────
 
-def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
+def _ops_since_checkpoint(wb: RunWorkbook) -> int:
+    """Searches FIRED since the last recorded checkpoint.
+
+    Read from the workbook's own metadata rather than by importing runstate,
+    which imports this module — the mark is a plain integer and does not
+    justify a cycle. A run that has never checkpointed measures from zero,
+    which is correct: its whole history is one conversation.
+
+    Fired, not rows written. One search that bears on a capability's cells
+    lands one row per cell — `volley_status` matches `SubCap_ID` exactly, so
+    a sibling with no row of its own reads as never searched — and counting
+    those rows would charge a lane five ops for one tool call. Measured on
+    the real catalogue at capability grain: a 57-cell category fires 195
+    searches and writes 627 rows; the raw count would wall it at a ceiling
+    of 60 three times more often than the retrieval it actually did.
+
+    This ceiling is a CONTEXT-preservation device — "a conversation that has
+    fired this many searches must checkpoint and stop" — and context is
+    spent by the tool call, not by the ledger write. So the unit is the
+    distinct (query, tool, facet) a conversation put to the world. A lane
+    firing sixty genuinely different searches still hits the wall, which is
+    the half that must not soften (MEM-0338 / R27).
+    """
+    rows = wb.rows("Search_Log")
+    try:
+        mark = int(json.loads(wb.metadata().get("checkpoint") or "{}")
+                   .get("search_ops") or 0)
+    except (ValueError, TypeError):
+        mark = 0
+    since = rows[max(0, mark):]
+    return len({(str(r.get("Query") or "").strip(),
+                 str(r.get("Tool") or "").strip(),
+                 str(r.get("Facet") or "").strip()) for r in since})
+
+
+def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
-                  outcome: str = "") -> int:
+                  outcome: str = "", prelim: bool = False,
+                  actor: str | None = None) -> int:
     """Log one search op and return the running count.
 
     Every search is logged before its results are used, so the budget check
-    reads a real number rather than an agent's recollection of one."""
+    reads a real number rather than an agent's recollection of one.
+
+    A search names its CELL and its FACET, or it is a PRELIM search
+    (`prelim=True`: institution-profile retrieval that belongs to no cell).
+    Measured 2026-09-03: `append_search(subcap=None, facet=None,
+    tool="my-made-up-tool")` was accepted — a row that spent the search
+    budget and counted toward no volley, with a tool nobody could census.
+    The tool vocabulary is closed (contract.SEARCH_TOOLS) so the gate can
+    see WHICH connectors were asked before a cell is declared empty.
+
+    `subcap` takes a cell or a SEQUENCE of cells, and a sequence writes one
+    row per cell. That is not bookkeeping: `volley_status` matches
+    `SubCap_ID` exactly, so a capability sibling with no row of its own
+    reads as never searched and `absence_unsearched` blocks it — one query
+    that genuinely bears on five cells has to say so five times or four of
+    them are unworked by the only measure the gate can take.
+
+    The ceiling is charged ONCE for the group, because one tool call was
+    made (see `_ops_since_checkpoint`). The facet, tool, query, timestamp
+    and hit counts are the same on every row by construction — they were one
+    search, and `hits`/`kept` describe THAT SEARCH, not a per-cell triage
+    nobody performed. So a fanned-out group repeats them rather than
+    splitting them: `kept_ratio` is a ratio and survives, but the absolute
+    hit census over a fanned run counts the search once per cell it bore on.
+    Which cell each kept source actually grounds is settled where it is
+    settled — `append_evidence(subcaps=[...])` — not here.
+    """
     if facet is not None and facet not in C.DQ_FACETS:
         raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
+    tool = str(tool or "").strip().lower()
+    if tool not in C.SEARCH_TOOLS:
+        raise LedgerRefusal(
+            f"tool {tool!r} is not one of {C.SEARCH_TOOLS}. The Search_Log "
+            f"records WHICH connector ran so the gate can count the "
+            f"enrichment effort behind an empty cell; a free-text tool name "
+            f"is a tool nobody can count.")
+    cells = ([] if subcap is None else
+             [subcap] if isinstance(subcap, str) else list(subcap))
+    cells = [str(c).strip() for c in cells if str(c).strip()]
+    if not prelim and (not cells or not str(facet or "").strip()):
+        raise LedgerRefusal(
+            "a search that names no --subcap and no --facet counts toward "
+            "nothing the gate measures. Pass --subcap <cell> --facet "
+            "<primary|works|fails|value|contradicts|corroborates|ai_*>, or "
+            "--prelim for institution-profile retrieval that belongs to no "
+            "cell.")
+    if prelim:
+        facet = facet or None
+    assert_actor_scope(actor, "search", cells)
+    # THE CEILING IS A WALL, NOT A NUMBER IN A REPORT.
+    #
+    # SEARCH_OP_CEILING has been the rule since R27 — "a conversation that
+    # has fired this many searches must checkpoint and stop" — and it was
+    # enforced by `stats()` returning `checkpoint_required` and orient.py
+    # printing it first. AUD-0037 already recorded that shape once: the
+    # count was reported and walked past. On 2026-08-30 a live run was
+    # measured at 73 ops against the cap of 40, which is the same finding
+    # recurring at 183% of the limit.
+    #
+    # Reported and ignored is the failure mode; refusing is the fix. The
+    # window is measured from the last checkpoint rather than from run
+    # start, because the ceiling is per CONVERSATION — a long run must be
+    # able to checkpoint and legitimately continue, which is exactly the
+    # context-preserving behaviour the ceiling exists to force.
+    since = _ops_since_checkpoint(wb)
+    if since >= SEARCH_OP_CEILING:
+        raise LedgerRefusal(
+            f"search-op ceiling reached: {since} since the last checkpoint, "
+            f"cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
+            f"`runstate.checkpoint(wb, '<where you got to>')` records the "
+            f"position in the workbook and resets the window, and a fresh "
+            f"conversation resumes from it. This is the wall that keeps a "
+            f"run from spending its context on searches it will not "
+            f"remember; walking past it is how a run loses the reasoning "
+            f"the searches were for.")
     if "{entity}" in (query or "") or "{" in (query or "") and "}" in (query or ""):
         # AUD-0015: orient issued work cards containing 15 literal {entity}
         # placeholders and nothing warned, so an unattended agent fired
@@ -188,12 +592,15 @@ def append_search(wb: RunWorkbook, *, subcap: str | None, facet: str | None,
         raise LedgerRefusal(
             f"query carries an unbound template token: {query!r}. Bind the "
             f"entity before searching; an unbound card is not a card.")
-    seq = len(wb.rows("Search_Log")) + 1
-    wb.append("Search_Log", {
-        "Seq": seq, "Timestamp": _utcnow(), "SubCap_ID": subcap,
-        "Facet": facet, "Query": query, "Tool": tool, "Hits": hits,
-        "Kept": kept, "Outcome": outcome,
-    })
+    seq = len(wb.rows("Search_Log"))
+    stamp = _utcnow()
+    for cell in (cells or [None]):
+        seq += 1
+        wb.append("Search_Log", {
+            "Seq": seq, "Timestamp": stamp, "SubCap_ID": cell,
+            "Facet": facet, "Query": query, "Tool": tool, "Hits": hits,
+            "Kept": kept, "Outcome": outcome,
+        })
     return seq
 
 
@@ -209,8 +616,68 @@ DQ_FIELDS = ("DQ_Works", "DQ_Fails", "DQ_Value", "DQ_Corroborates",
              "DQ_Contradicts")
 
 
+def _agent_session() -> str:
+    """A token stable across ONE agent run and distinct between runs, so
+    independence can be checked by SESSION rather than by a free-text label a
+    single agent can relabel. The harness sets it per dispatched agent; a
+    subprocess the agent spawns inherits it. Empty when unset (older records)."""
+    import os
+    for k in ("DMA_AGENT_SESSION", "CLAUDE_AGENT_ID", "CLAUDE_SESSION_ID"):
+        v = os.environ.get(k)
+        if v and str(v).strip():
+            return str(v).strip()
+    return ""
+
+
+#: Role/function suffix tokens that name what an actor DID, not WHO it is.
+#: Stripping them leaves the base identity, so `x-producer` and `x-challenger`
+#: collapse to the same `x` — a relabel of one agent, not two agents.
+_ROLE_TOKENS = frozenset({
+    "producer", "challenger", "reviewer", "review", "challenge", "synthesis",
+    "synthesist", "synthesiser", "synthesizer", "synth", "author", "verifier",
+    "grader", "critic", "adjudicator", "independent", "self", "actor", "agent"})
+
+
+def _base_identity(name: str) -> str:
+    toks = [t for t in re.split(r"[^a-z0-9]+", str(name or "").lower()) if t]
+    core = [t for t in toks if t not in _ROLE_TOKENS]
+    return " ".join(core)
+
+
+def challenge_independence(author: str, author_session: str,
+                           challenger: str, challenger_session: str
+                           ) -> tuple[bool, str]:
+    """Is a challenge INDEPENDENT of the synthesis it reviews? (AUD-0113/0117)
+
+    ONE rule, used by BOTH the write path (`record_challenge`, which refuses a
+    dependent challenge) and the READ path (the floors gate, which flags one
+    already on the workbook — a challenge written before this rule existed, or
+    by a tool that bypassed the ledger). Two answers to one question must not
+    drift: the gate used to catch only an EXACT actor match, so a relabel
+    (`x-producer` synthesises, `x-challenger` challenges, no session tokens)
+    passed the gate though the write path would now refuse it.
+
+    Session proof wins: two present, distinct sessions are two runs, and the
+    labels may then legitimately share a base. Absent that proof, a shared base
+    identity is a relabel of one run. Returns (independent, reason) where reason
+    is '' when independent, else 'same_actor' / 'same_session' / 'relabel'."""
+    a = str(author or "").strip()
+    c = str(challenger or "").strip()
+    asess = str(author_session or "").strip()
+    csess = str(challenger_session or "").strip()
+    if a and c and a == c:
+        return (False, "same_actor")
+    if asess and csess and asess == csess:
+        return (False, "same_session")
+    if asess and csess and asess != csess:
+        return (True, "")            # distinct sessions prove two runs
+    if _base_identity(c) and _base_identity(c) == _base_identity(a):
+        return (False, "relabel")    # shared base, no session proof
+    return (True, "")
+
+
 def record_provenance(wb: RunWorkbook, subcap: str, step: str, actor: str,
-                      detail: str = "") -> None:
+                      detail: str = "", session: str = "") -> None:
     """Who did this step. Authorship is what makes independence checkable."""
     if step not in C.PROVENANCE_STEPS:
         raise LedgerRefusal(f"step {step!r} not in {C.PROVENANCE_STEPS}")
@@ -220,7 +687,8 @@ def record_provenance(wb: RunWorkbook, subcap: str, step: str, actor: str,
             "the actor (an agent name, a session id, a person)")
     wb.append("Provenance", {"SubCap_ID": subcap, "Step": step,
                              "Actor": str(actor).strip(), "At": _utcnow(),
-                             "Detail": detail})
+                             "Detail": detail,
+                             "Session": str(session or _agent_session()).strip()})
 
 
 def actor_for(wb: RunWorkbook, subcap: str, step: str) -> str | None:
@@ -231,9 +699,17 @@ def actor_for(wb: RunWorkbook, subcap: str, step: str) -> str | None:
     return str(hits[-1]["Actor"]) if hits else None
 
 
+def session_for(wb: RunWorkbook, subcap: str, step: str) -> str:
+    """The most recent session token for one step of one subcap ('' if none)."""
+    hits = [r for r in wb.rows("Provenance")
+            if str(r.get("SubCap_ID") or "") == subcap
+            and str(r.get("Step") or "") == step]
+    return str(hits[-1].get("Session") or "").strip() if hits else ""
+
+
 def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
                      dimensions: dict, rationale: str,
-                     ceiling_band_delta: str = "") -> dict:
+                     ceiling_band_delta: str = "", session: str = "") -> dict:
     """Record a challenge — and refuse one the synthesis's own author wrote.
 
     AUD-0018 / AUD-0024: this repository already solves reviewer independence
@@ -261,12 +737,39 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
             f"{subcap} has no recorded synthesis author, so a challenge on it "
             f"cannot be shown to be independent. Write the synthesis with an "
             f"actor first.")
-    if str(actor).strip() == author:
+    # ONE independence rule, shared with the floors gate (challenge_independence).
+    # A distinct SESSION token (set by the harness per agent, inherited by the
+    # subprocesses it spawns) proves a different run; absent it, a shared base
+    # identity is a relabel of one run (AUD-0113) and refused.
+    ch_session = str(session or _agent_session()).strip()
+    syn_session = session_for(wb, subcap, "synthesis")
+    independent, why = challenge_independence(
+        author, syn_session, str(actor).strip(), ch_session)
+    if not independent:
+        if why == "same_actor":
+            raise LedgerRefusal(
+                f"{actor!r} wrote this synthesis and cannot also be its "
+                f"challenger. A verdict on your own work is a feeling; the "
+                f"learning loop's grader is independent BY CONSTRUCTION and the "
+                f"research challenge has to be independent by record.")
+        if why == "same_session":
+            raise LedgerRefusal(
+                f"the challenge was recorded in the SAME session "
+                f"({ch_session!r}) as the synthesis it reviews. One agent run "
+                f"cannot be its own independent challenger, whatever actor "
+                f"label it uses. Record the challenge from a genuinely separate "
+                f"agent run.")
         raise LedgerRefusal(
-            f"{actor!r} wrote this synthesis and cannot also be its "
-            f"challenger. A verdict on your own work is a feeling; the "
-            f"learning loop's grader is independent BY CONSTRUCTION and the "
-            f"research challenge has to be independent by record.")
+            f"{actor!r} and the synthesis author {author!r} are the same "
+            f"identity under a different role label ('{_base_identity(actor)}') "
+            f"— a relabel is not independence. Record the challenge from a "
+            f"genuinely separate agent run, or carry a distinct session token "
+            f"(both this challenge and the synthesis must record one) to prove "
+            f"the runs differ.")
+    # Scope AFTER independence, so those refusals keep their own
+    # wording: "you wrote this" is the more useful sentence when both
+    # are true. This one catches the rest — a tier that does not judge.
+    assert_actor_scope(actor, "challenge", [subcap])
     missing = [d for d in C.CHALLENGE_DIMENSIONS if d not in (dimensions or {})]
     if missing:
         raise LedgerRefusal(
@@ -288,9 +791,11 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
     wb.append("Challenge_Log", {
         "SubCap_ID": subcap, "Verdict": verdict, "Actor": str(actor).strip(),
         "Dimensions": dimensions, "Rationale": rationale,
-        "Ceiling_Band_Delta": ceiling_band_delta, "At": _utcnow()})
+        "Ceiling_Band_Delta": ceiling_band_delta, "At": _utcnow(),
+        "Session": ch_session})
     record_provenance(wb, subcap, "challenge", actor,
-                      f"{verdict}; {len(dimensions)} dimensions")
+                      f"{verdict}; {len(dimensions)} dimensions",
+                      session=ch_session)
     wb.set_scoring(subcap, {"Challenge_Verdict": verdict})
     return {"subcap": subcap, "verdict": verdict, "challenger": actor,
             "author": author, "failed_dimensions": failed}
@@ -303,7 +808,7 @@ def challenge_for(wb: RunWorkbook, subcap: str) -> dict | None:
 
 
 def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
-                     actor: str | None = None) -> dict:
+                     actor: str | None = None, session: str = "") -> dict:
     """Write one subcap's synthesis onto its scoring row, or refuse.
 
     This is the write AUD-0009 measured accepting an unmodified skeleton.
@@ -341,6 +846,26 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
                 problems.append(f"{f}: NOT_RUN with no reason worth reading")
         elif Q.is_boilerplate(v):
             problems.append(f"{f}: {Q.is_boilerplate(v)}")
+    # THE ABSENCE FLAG HAS ONE WRITER. A synthesis record on an EMPTY row
+    # that carries Absence_Claimed is trying to close the cell as an absence
+    # without the volleys, the ladder and the register check that
+    # `declare_absence` proves — refused, naming the sanctioned command. On
+    # an evidenced row the flag is a label on the claim (the source itself
+    # documents an absence) and `is_declared_absent` never reads it as a
+    # closed cell, because the row carries evidence.
+    row_eids = [i for i in _split_ids(row.get("Evidence_IDs"))
+                if i and i != C.NO_EVIDENCE]
+    if (not row_eids
+            and str(record.get("Absence_Claimed") or "").strip().upper()
+            in ("YES", "TRUE", "1")
+            and subcap not in declared_absences(wb)):
+        problems.append(
+            "Absence_Claimed is not a synthesis field on an empty cell. A "
+            "cell with no evidence closes ONLY through `engine.cli absence "
+            f"--run <R> --subcap {subcap} --actor <you> --ladder '<json>' "
+            "--proxy-log '…' --hunted '…'`, which proves the five volleys, "
+            "the primary question, an enrichment connector and the ladder "
+            "before it writes the flag")
     # A claim of absence carries obligations (AUD-0079).
     if Q.claims_absence(claim):
         if str(record.get("Absence_Claimed") or "").strip().upper() not in \
@@ -400,11 +925,12 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     if problems:
         raise LedgerRefusal(
             f"{subcap}: synthesis refused — " + "; ".join(problems))
+    assert_actor_scope(actor, "synthesis", [subcap])
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
     wb.set_scoring(subcap, payload)
     if actor:
-        record_provenance(wb, subcap, "synthesis", actor)
+        record_provenance(wb, subcap, "synthesis", actor, session=session)
     wb.recompute_coverage()
     # The cross-register ERS pass lands HERE rather than at every append.
     # Corroboration is a property of the whole register — a row banked first
@@ -419,10 +945,22 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
 
 # ── gate log ─────────────────────────────────────────────────────────────
 
+#: Every verdict a Gate_Log row may carry.
+#:
+#: PENDING_ORCHESTRATOR joined the three originals on 2026-09-14, for the one
+#: state the vocabulary could not say: the work was prepared and handed to the
+#: conductor and has not come back yet. Written as a FAIL it would have been
+#: re-dispatched or disclosed as a gap; written as NOT_RUN it would have read
+#: as "nobody looked". Neither is true of a relay batch sitting on disk with
+#: its requests still OPEN — that is work in flight, and the gate must be able
+#: to say so without spending a heal on it.
+GATE_VERDICTS = ("PASS", "FAIL", "NOT_RUN", "PENDING_ORCHESTRATOR")
+
+
 def append_gate(wb: RunWorkbook, *, gate: str, scope: str, verdict: str,
                 detail: str = "", blocking: bool = True) -> None:
-    if verdict not in ("PASS", "FAIL", "NOT_RUN"):
-        raise LedgerRefusal(f"verdict {verdict!r} must be PASS, FAIL or NOT_RUN")
+    if verdict not in GATE_VERDICTS:
+        raise LedgerRefusal(f"verdict {verdict!r} must be one of {GATE_VERDICTS}")
     if verdict == "NOT_RUN" and not detail.strip():
         # A NOT_RUN with no reason is indistinguishable from a pass that
         # nobody looked at (the SG discipline: explicit NOT_RUN + reason).
@@ -452,10 +990,29 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
                 if str(r.get("SubCap_ID") or "").startswith(category + ".")]
     synthesised = sum(1 for r in rows if str(r.get("Dominant_Claim") or "").strip())
     n = len(searches)
+    # THE DECISION MUST MEASURE WHAT THE WALL MEASURES (MEM-0436).
+    #
+    # `append_search` refuses on `_ops_since_checkpoint` — a window that a
+    # checkpoint resets, because the ceiling is per CONVERSATION and a long
+    # run must be able to checkpoint and legitimately continue. This
+    # function computed the same decision from the LIFETIME count, so once a
+    # run passed 40 searches ever, `checkpoint_required` was true forever and
+    # no checkpoint could clear it. orient prints this first, so every
+    # conductor obediently stopped and re-stopped: three runs walled on
+    # 2026-08-31 at 141, ~180 and 567 ops, the last of them still being told
+    # to checkpoint after a revival had already reset its window.
+    #
+    # Two measurements of one rule is the defect; the fix is to keep one.
+    # The LIFETIME count stays reported, because spend is worth seeing — it
+    # just no longer decides. The gate itself is unchanged in strength: over
+    # the cap since the last checkpoint still stops, which is the half a
+    # loosened ceiling would have silently lost (MEM-0338 / R27).
+    since = _ops_since_checkpoint(wb)
     return {
         "search_ops": n,
+        "search_ops_since_checkpoint": since,
         "search_op_ceiling": SEARCH_OP_CEILING,
-        "checkpoint_required": n >= SEARCH_OP_CEILING,
+        "checkpoint_required": since >= SEARCH_OP_CEILING,
         "evidence_items": len(ev),
         "subcaps_selected": len(rows),
         "subcaps_synthesised": synthesised,
@@ -466,14 +1023,385 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     }
 
 
-def worklist(wb: RunWorkbook, category: str) -> dict:
-    """closed / volleyed / pending for one category, from the workbook.
+# ── the five volleys, measured per subcap ────────────────────────────────
 
-    The three states AUD-0006 turned on. `volleyed` — evidence banked, no
-    synthesis — is the state the archive served past and then declared
-    clean; here it is first-class and `pending` is not the only servable
-    thing."""
-    closed, volleyed, pending = [], [], []
+def askable_facets(wb: RunWorkbook, subcap: str) -> list[str]:
+    """The volley facets this run's evidence mode can fire for one subcap.
+
+    From the DQ bank when the KG was built (a facet whose DQ is deferred in
+    this mode — `contradicts` in an INTERNAL run — is not owed a search);
+    the five catalogue facets when it was not."""
+    from . import kg as _kg
+    split = _kg.dqs_for(wb, subcap)
+    if split["ask"] or split["deferred"]:
+        return [str(d["facet"]) for d in split["ask"]
+                if str(d["facet"]) in C.FACETS]
+    return list(C.FACETS)
+
+
+def volley_status(wb: RunWorkbook, subcap: str,
+                  searches: list[dict] | None = None) -> dict:
+    """Which of the subcap's askable volleys have a LOGGED search behind them.
+
+    Owner, 2026-09-03: "some subcaps are marked as no evidence without any
+    enrichment efforts … not even looking at the 5 volley structure and
+    related DQ set." The protocol has said 'every volley fires or is NOT_RUN
+    with a reason' since AUD-0017, and nothing measured it for a subcap that
+    never reached synthesis: one logged query cleared `absence_unsearched`
+    and the other four volleys were never asked about. Measured on the
+    Golden 1 reference: 307 searches for 690 subcaps, `fails` fired 3 times.
+    This is the measurement, per subcap and per facet, that the gate, the
+    card and the absence declaration all read."""
+    rows = searches if searches is not None else wb.rows("Search_Log")
+    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip() == subcap]
+    want = askable_facets(wb, subcap)
+    fired = {}
+    tools = set()
+    for r in mine:
+        f = str(r.get("Facet") or "").strip()
+        fired[f] = fired.get(f, 0) + 1
+        t = str(r.get("Tool") or "").strip()
+        if t:
+            tools.add(t)
+    missing = [f for f in want if not fired.get(f)]
+    return {"subcap": subcap, "askable": want,
+            "fired": {f: fired.get(f, 0) for f in want},
+            "missing": missing, "complete": not missing,
+            # The toolkit's own diagnostic question (DQ order 0) and the
+            # three AI-overlay probes (orders 6-8) were on every card and in
+            # no count — a cell could close with its primary question never
+            # asked. Counted here; the gate blocks on the primary.
+            "primary_fired": fired.get(C.PRIMARY_FACET, 0),
+            "ai_fired": {f: fired.get(f, 0) for f in C.AI_FACETS},
+            "searches": len(mine), "tools": sorted(tools),
+            "enrichment_tools": sorted(t for t in tools
+                                       if t in C.ENRICHMENT_TOOLS)}
+
+
+def enrichment_status(wb: RunWorkbook, category: str,
+                      searches: list | None = None) -> dict:
+    """Connector usage for ONE category, read from the Search_Log's Tool
+    column — the only place the run records WHICH tool ran a search.
+
+    Owner, 2026-09-07: categories were passing their floors gate with every
+    search through bare web_search, the connector work left "aspirational".
+    `declare_absence` already refuses an empty cell no enrichment connector
+    was asked about; nothing measured the same thing for a category that
+    found evidence. This is that measurement — a count, not a verdict; the
+    driver's ENRICHMENT gate decides what a zero means and says so."""
+    cat = str(category or "").strip().upper()
+    rows = searches if searches is not None else wb.rows("Search_Log")
+    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip().upper().startswith(cat)]
+    tools: dict[str, int] = {}
+    cells_enriched: set[str] = set()
+    for r in mine:
+        t = str(r.get("Tool") or "").strip().lower()
+        if not t:
+            continue
+        tools[t] = tools.get(t, 0) + 1
+        if t in C.ENRICHMENT_TOOLS:
+            cells_enriched.add(str(r.get("SubCap_ID") or "").strip().upper())
+    enriched = sum(n for t, n in tools.items() if t in C.ENRICHMENT_TOOLS)
+    cells = [c for c in wb.selected_subcaps() if str(c).upper().startswith(cat)]
+    return {"category": cat, "searches": len(mine), "enrichment_searches": enriched,
+            "tools": sorted(tools), "tool_counts": tools,
+            "enrichment_tools": sorted(t for t in tools if t in C.ENRICHMENT_TOOLS),
+            "cells": len(cells), "cells_with_enrichment": len(cells_enriched & set(cells)),
+            "share": (round(enriched / len(mine), 3) if mine else None)}
+
+
+#: The rungs an absence ladder is climbed in, and the two that are always
+#: owed. `direct` is the entity itself; `proxy` is the template's own proxy
+#: class for the cell (leadership_title, regulator_filing, org_talent …).
+ABSENCE_RUNGS_REQUIRED = ("direct", "proxy")
+
+
+def enrichment_binding(wb: RunWorkbook) -> dict:
+    """What this run's OWN RECORDED BASELINE says about enrichment connectors.
+
+    Measured, never claimed. `connector_contract.write_baseline` records the
+    tool list the session actually held when its preflight passed; this reads
+    that file and asks the contract whether the enrichment families are among
+    them. An agent cannot assert its way past a refusal through this — the
+    answer comes from what the preflight WROTE, before any cell was worked.
+
+    Three states, and the difference between them is the whole point (owner,
+    2026-08-31: "the connectors may be lost mid session even after being
+    attached"):
+
+      known=False  no baseline on disk. UNVERIFIED IS NOT A DIAGNOSIS: every
+                   caller must treat this as "a connector may well be bound",
+                   never as proof one is not. `watchdog._no_enrichment_connector`
+                   takes the same posture.
+      bound=True   the baseline holds the required families. A cell with no
+                   enrichment search is a cell the lane did not enrich, and
+                   the refusals stand.
+      bound=False  the baseline is short. No search through a connector was
+                   POSSIBLE in this container, and no agent inside it can
+                   attach one — they bind once, at session start. Refusing
+                   here does not produce the enrichment; it produces a run
+                   that can close no cell, pass no gate, and be re-dispatched
+                   until something stops it. That is the $96.65 shape.
+    """
+    out = {"known": False, "bound": False, "missing": [], "reason": ""}
+    try:
+        import sys as _sys
+        from pathlib import Path as _Path
+        plugin = _Path(__file__).resolve().parents[3]
+        _sys.path.insert(0, str(plugin / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        path = _Path(cc.baseline_path(str(wb.path.parent)))
+        if not path.is_file():
+            return out
+        held = json.loads(path.read_text()).get("mcp_tools") or []
+        chk = cc.check(held)
+    except Exception as e:                                    # noqa: BLE001
+        out["reason"] = f"the connector baseline could not be read: {str(e)[:120]}"
+        return out
+    out["known"] = True
+    out["bound"] = bool(chk["ok"])
+    out["missing"] = list(chk["missing"])
+    out["reason"] = (
+        "" if chk["ok"] else
+        f"this run's connector baseline is short of {', '.join(chk['missing'])}; "
+        f"no enrichment connector answered in the container this run was "
+        f"worked in, and a session cannot attach one — they bind at start")
+    return out
+
+
+def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
+                    ladder: list[dict], proxy_log: str,
+                    what_was_hunted: str, session: str = "",
+                    enrichment_unavailable: bool = False) -> dict:
+    """Close a subcap as a SEARCHED, DECLARED absence — or refuse.
+
+    The only sanctioned way a cell ends a run with NO_EVIDENCE. Before this
+    existed a researcher who found nothing had nothing to write, so the row
+    stayed seeded (NO_EVIDENCE / NOT_RUN) and read exactly like a cell nobody
+    had opened. Refused unless:
+
+      * every askable volley has a logged search for THIS subcap (the five
+        facets, in this run's mode) — a volley you did not fire is not a
+        volley that found nothing;
+      * the ladder names its rungs (direct, proxy, then peer / regulatory as
+        reached), each with the query that was fired, and every query is in
+        the Search_Log (quality.ladder_report counts the rungs it can prove);
+      * the proxy log says what proxy class was hunted (the template names
+        one per cell) and what came back instead;
+      * the row carries no evidence — a row with evidence is synthesised,
+        not declared.
+
+    Writes Absence_Claimed=YES, Proxy_Log, Negative_Ladder, Dominant_Claim
+    (the honest sentence), the five DQ_* fields as NO_FINDING lines, and a
+    Provenance row naming who declared it. The floors gate then reads the
+    row as CLOSED-BY-ABSENCE rather than PENDING."""
+    row = wb.scoring_row(subcap)
+    if row is None:
+        raise LedgerRefusal(f"{subcap} is not in this run's engagement set")
+    if not str(actor or "").strip():
+        raise LedgerRefusal("an absence records who declared it (--actor)")
+    eids = [i for i in _split_ids(row.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+    if eids:
+        raise LedgerRefusal(
+            f"{subcap} carries evidence ({', '.join(eids[:4])}); a cell with "
+            f"evidence is SYNTHESISED, not declared absent")
+    # THE RUN'S OWN REGISTER IS EVIDENCE (2026-09-03, owner: "limited
+    # evidence is consolidated in most runs making the entire assessment
+    # very evidence deficient"). A row above is refused when the CELL cites
+    # evidence; this refuses the case that actually happens with sixteen
+    # parallel lanes — a sibling registered a source that NAMES this cell,
+    # the cell never cited it, and this lane is about to declare the cell
+    # empty. The run bought that source. Consolidating it is not optional,
+    # and `engine.brief reuse --subcap <cell>` is the read that finds it.
+    named_by_register = []
+    for eid, ev in sorted(wb.evidence_index().items()):
+        named = [i.strip().split(":")[0]
+                 for i in _split_ids(ev.get("SubCap_IDs"))]
+        if subcap in named:
+            named_by_register.append(eid)
+    if named_by_register:
+        raise LedgerRefusal(
+            f"{subcap} cannot be declared empty: this run's evidence "
+            f"register already names it — {', '.join(named_by_register[:5])}"
+            + (f" (+{len(named_by_register) - 5} more)"
+               if len(named_by_register) > 5 else "")
+            + f". Read them (`engine.brief reuse --subcap {subcap}`) and "
+            f"either synthesise the cell on them or re-register the row "
+            f"against the cell it is really about. A declared absence over "
+            f"the run's own evidence is the under-consolidation defect, not "
+            f"an absence.")
+    searches = wb.rows("Search_Log")
+    vs = volley_status(wb, subcap, searches)
+    problems = []
+    if vs["missing"]:
+        problems.append(
+            f"volley(s) never fired for {subcap}: {', '.join(vs['missing'])}. "
+            f"Every askable facet needs a logged `engine.cli search --subcap "
+            f"{subcap} --facet <f>` before the cell may be declared empty — "
+            f"'we looked and found nothing' has to be true of ALL five angles")
+    if not vs["primary_fired"]:
+        problems.append(
+            f"the primary diagnostic question was never searched for {subcap}: "
+            f"`engine.cli search --run <R> --subcap {subcap} --facet primary "
+            f"--query '<the toolkit's DQ, bound to the entity>'` — the five "
+            f"volleys answer the primary question, and without it they answer "
+            f"nothing in particular")
+    degraded = ""
+    if not vs["enrichment_tools"]:
+        # THE ONE REFUSAL A CONTAINER CAN BE UNABLE TO SATISFY. Every other
+        # check here — the volleys, the primary, both ladder rungs, the proxy
+        # log — a lane can satisfy with the built-in web tools. This one
+        # cannot be satisfied when no enrichment connector is bound, and no
+        # agent can bind one from inside a run. Refusing anyway does not buy
+        # the enrichment; it produces a run that closes no cell, passes no
+        # gate, and is re-dispatched until something stops it.
+        #
+        # So it is skippable, and ONLY on a measurement: the caller must ask
+        # for the degraded path AND the run's own recorded baseline must
+        # prove the connector was never there. A claim is not enough, an
+        # absent baseline is not enough, and a bound connector the lane
+        # simply did not use is not enough.
+        binding = enrichment_binding(wb) if enrichment_unavailable else None
+        if binding and binding["known"] and not binding["bound"]:
+            degraded = binding["reason"]
+        else:
+            why = ""
+            if enrichment_unavailable:
+                why = (
+                    " — and --enrichment-unavailable does not apply: "
+                    + (binding["reason"] or
+                       ("this run's connector baseline holds every required "
+                        "family, so a connector WAS available and was not asked"
+                        if binding and binding["known"] else
+                        "this run has no recorded connector baseline, so "
+                        "nothing here can prove one was unavailable. An "
+                        "unverified claim is not a degradation")))
+            problems.append(
+                f"every search for {subcap} ran through {vs['tools'] or ['nothing']}; "
+                f"an absence is declared only after an enrichment connector has "
+                f"also been asked (one of {list(C.ENRICHMENT_TOOLS)}). Fire "
+                f"`engine.cli search --run <R> --subcap {subcap} --facet <f> --tool "
+                f"exa --query …` (or tavily / clay / drive) and retry — 'no "
+                f"enrichment effort' is the owner's 2026-09-03 finding, and this "
+                f"is the check that stops it" + why)
+    assert_actor_scope(actor, "absence", [subcap])
+    rep = Q.ladder_report(ladder or [], searches)
+    rungs = set(rep["rungs"])
+    owed = [r for r in ABSENCE_RUNGS_REQUIRED if r not in rungs]
+    if owed:
+        problems.append(
+            f"the ladder establishes rungs {sorted(rungs) or 'none'}; "
+            f"{', '.join(owed)} are owed on every absence (each rung = the "
+            f"rung name plus the query that was FIRED and is in the Search_Log)")
+    if rep["claimed_not_fired"]:
+        problems.append(
+            f"ladder rung(s) claim a query the Search_Log never saw: "
+            f"{rep['claimed_not_fired'][:3]}")
+    if len(str(proxy_log or "").strip()) < 40:
+        proxy_class = C.proxy_classes().get(subcap, "")
+        problems.append(
+            f"the proxy log is {len(str(proxy_log or '').strip())} chars; say "
+            f"which proxy class was hunted"
+            + (f" (the template names {proxy_class!r} for this cell)" if proxy_class else "")
+            + " and what came back instead (>= 40 chars)")
+    if len(str(what_was_hunted or "").strip()) < 40:
+        problems.append("--hunted: name what was looked for, where, and what "
+                        "came back instead (>= 40 chars)")
+    if problems:
+        raise LedgerRefusal(f"{subcap}: absence refused — " + "; ".join(problems))
+    hunted = str(what_was_hunted).strip()
+    n = vs["searches"]
+    claim = (f"No evidence located for this capability after {n} logged "
+             f"searches across {len(vs['askable'])} volleys and a "
+             f"{len(rungs)}-rung ladder ({', '.join(sorted(rungs))}); "
+             f"{hunted}")
+    dq = {f"DQ_{f.capitalize()}": f"NO_FINDING after {vs['fired'].get(f, 0)} logged "
+                                  f"search(es): {hunted[:160]}"
+          for f in C.FACETS}
+    payload = {
+        "Absence_Claimed": "YES", "Proxy_Log": str(proxy_log).strip(),
+        "Negative_Ladder": json.dumps(ladder, separators=(",", ":")),
+        "Dominant_Claim": claim, "Claim_Label": "HYPOTHESIS",
+        "Proxy_Searched": "Yes", "Facet_Coverage": ", ".join(vs["askable"]),
+        "What_We_Found": (f"Searched and not found: {hunted}. Volleys fired: "
+                          + ", ".join(f"{f} x{vs['fired'].get(f, 0)}" for f in vs["askable"])
+                          + f". Ladder rungs established: {', '.join(sorted(rungs))}."),
+        "Triangulation": (f"{n} searches over {len(vs['tools']) or 1} tool(s) "
+                          f"({', '.join(vs['tools']) or 'web_search'}) agree that no "
+                          f"public artefact names this capability at the entity."
+                          + (f" REDUCED RIGOUR: {degraded}. This absence rests "
+                             f"on the built-in web tools alone; a firing with "
+                             f"the connector attached may still find what this "
+                             f"one could not ask for." if degraded else "")),
+        "Ceiling_Reasoning": ("A documented absence supports no maturity ceiling; "
+                              "the assessment scores the cell at the no-evidence "
+                              "cap and discloses it as an Unknown."),
+        "Why_It_Matters": ("An unevidenced cell is a discovery question for the "
+                           "client conversation, not a verdict on the institution."),
+        "DMA_Impact": ("Scored at the no-evidence cap and disclosed in Coverage as "
+                       "an evidence gap; lifts when an internal artefact is supplied."),
+        "Ceiling_Band": "", "Uncertainty": 1.0,
+        **dq,
+    }
+    wb.set_scoring(subcap, payload)
+    record_provenance(wb, subcap, "absence", actor,
+                      f"{n} searches, rungs {sorted(rungs)}"
+                      + (f"; REDUCED RIGOUR — {degraded}" if degraded else ""),
+                      session=session)
+    wb.recompute_coverage()
+    return {"subcap": subcap, "searches": n, "volleys": vs["fired"],
+            "rungs": sorted(rungs), "tools": vs["tools"],
+            "rigour": "REDUCED" if degraded else "FULL",
+            "degraded_reason": degraded}
+
+
+def declared_absences(wb: RunWorkbook) -> set[str]:
+    """Cells with a Provenance row Step == 'absence' — the record only
+    `declare_absence` writes, after its volley, ladder and register checks."""
+    return {str(r.get("SubCap_ID") or "").strip()
+            for r in wb.rows("Provenance")
+            if str(r.get("Step") or "").strip() == "absence"}
+
+
+def is_declared_absent(row: dict, wb: RunWorkbook | None = None, *,
+                       declared: set[str] | None = None) -> bool:
+    """True only for a cell CLOSED BY `declare_absence`.
+
+    Measured 2026-09-03: this read two cells — the flag and an empty
+    Evidence_IDs — so anything that could set `Absence_Claimed` (a notebook
+    consolidation, a synthesis record, a hand edit) produced a row the
+    worklist, the handoff and the scorer all treated as a searched, declared
+    absence, with zero Search_Log rows behind it. Now the flag is necessary
+    and not sufficient: the cell must also carry the Provenance row that
+    only `declare_absence` writes. Callers that hold the workbook pass it
+    (or a precomputed `declared` set inside a loop); a bare `row` call keeps
+    the two-cell answer for legacy readers and is the weaker check."""
+    flagged = (str(row.get("Absence_Claimed") or "").strip().upper()
+               in ("YES", "TRUE", "1")
+               and not [i for i in _split_ids(row.get("Evidence_IDs"))
+                        if i and i != C.NO_EVIDENCE])
+    if not flagged:
+        return False
+    if declared is None and wb is not None:
+        declared = declared_absences(wb)
+    if declared is None:
+        return True
+    return str(row.get("SubCap_ID") or "").strip() in declared
+
+
+def worklist(wb: RunWorkbook, category: str) -> dict:
+    """closed / volleyed / in_volley / pending for one category.
+
+    The three states AUD-0006 turned on, plus the one 2026-09-03 added:
+    `in_volley` — some but not all askable volleys fired and no evidence yet.
+    Before it, a cell with one shallow query looked exactly like an untouched
+    one, and orient served the next untouched card instead of finishing the
+    volley. A DECLARED absence (Absence_Claimed=YES, no evidence, all volleys
+    fired) is CLOSED — searched and honestly empty."""
+    closed, volleyed, in_volley, pending, declared = [], [], [], [], []
+    searched_empty = []
+    searches = wb.rows("Search_Log")
+    declared_set = declared_absences(wb)
     for r in wb.scoring_rows():
         cell = str(r.get("SubCap_ID") or "").strip()
         if not cell.startswith(category + "."):
@@ -481,14 +1409,28 @@ def worklist(wb: RunWorkbook, category: str) -> dict:
         has_ev = bool([i for i in _split_ids(r.get("Evidence_IDs"))
                        if i and i != C.NO_EVIDENCE])
         has_syn = bool(str(r.get("Dominant_Claim") or "").strip())
-        if has_syn:
+        if is_declared_absent(r, declared=declared_set):
+            declared.append(cell)
+            closed.append(cell)
+        elif has_syn:
             closed.append(cell)
         elif has_ev:
             volleyed.append(cell)
         else:
-            pending.append(cell)
+            vs = volley_status(wb, cell, searches)
+            if vs["searches"] and vs["missing"]:
+                in_volley.append(cell)
+            elif vs["searches"] and vs["complete"]:
+                # every volley fired, nothing registered, not yet declared:
+                # the card mode is DECLARE (or register what was found)
+                searched_empty.append(cell)
+            else:
+                pending.append(cell)
     return {"category": category, "closed": sorted(closed),
-            "volleyed": sorted(volleyed), "pending": sorted(pending)}
+            "declared_absent": sorted(declared),
+            "volleyed": sorted(volleyed), "in_volley": sorted(in_volley),
+            "searched_empty": sorted(searched_empty),
+            "pending": sorted(pending)}
 
 
 if __name__ == "__main__":  # a library, but it must answer --help

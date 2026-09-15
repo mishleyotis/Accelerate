@@ -76,6 +76,43 @@ def catalogue_path() -> Path:
     )
 
 
+#: The subcapability DISPLAY NAMES, one per catalogue cell, extracted from
+#: the owner's workbook template (DQ_Bank.SubCap_Name, 851 rows). Owner,
+#: 2026-09-03: "the workbook always defaults to the wrong structure each
+#: time; missing fields … missing subcaps names". The engine seeded column B
+#: empty because the tier catalogue carries no names and the toolkits (which
+#: do) are pulled from Drive after the run starts — so every run began with
+#: 690 blank names and nothing downstream filled them (goeasy GSY-03: 656
+#: blank SubCap_Name rows shipped). Names travel WITH the catalogue now.
+_NAMES_NAME = "catalogue_v70_names.json"
+
+
+def names_path() -> Path:
+    for p in _candidate_catalogue_paths():
+        q = p.with_name(_NAMES_NAME)
+        if q.is_file():
+            return q
+    raise CatalogueUnavailable(
+        f"{_NAMES_NAME} not found beside the tier catalogue. Looked in: "
+        + ", ".join(str(p.with_name(_NAMES_NAME))
+                    for p in _candidate_catalogue_paths()))
+
+
+def subcap_names() -> dict[str, str]:
+    """cell id -> display name, for every cell in the catalogue."""
+    raw = json.loads(names_path().read_text(encoding="utf-8"))
+    return {str(k): str(v).strip() for k, v in (raw.get("names") or {}).items()}
+
+
+def proxy_classes() -> dict[str, str]:
+    """cell id -> the proxy class the template names for an absent cell
+    (leadership_title, regulator_filing, org_talent, …). The ladder a
+    declared absence must climb starts on this rung."""
+    raw = json.loads(names_path().read_text(encoding="utf-8"))
+    return {str(k): str(v).strip()
+            for k, v in (raw.get("proxy_class_if_absent") or {}).items()}
+
+
 _CELL_RE = re.compile(r"^(P\d)C(\d+)\.(\d+)(?:\.(.+))?$")
 
 
@@ -110,6 +147,14 @@ class Taxonomy:
 
     @property
     def n_variants(self) -> int: return len(self.variants)
+
+    def name_of(self, cell: str) -> str:
+        """The catalogue's display name for a cell, or '' when it has none.
+
+        Never invents one: an id rendered where a name belongs is jargon, an
+        invented name is worse, and '' is a state the seeder and the gates
+        can see (the scoring gate refuses an unnamed row)."""
+        return subcap_names().get(cell, "")
 
     def cells_in(self, grain: str) -> tuple[str, ...]:
         """Every cell under a pillar (P1), category (P1C1) or capability
@@ -387,6 +432,19 @@ TECH_PROVIDERS = ("clay", "explorium", "indeed", "exa", "tavily", "web",
 #: agree, because two brokers reselling one crawl is one observation.
 TECH_BROKERS = ("clay", "explorium")
 
+#: The tools a Search_Log row may name. Owner, 2026-09-03: cells were closed
+#: "no evidence" with no enrichment effort — and the log could not show it,
+#: because `--tool` was free text (measured: "my-made-up-tool" accepted). A
+#: closed vocabulary is what lets the floors gate COUNT which connectors were
+#: asked before a cell is declared absent. `web_search`/`web_fetch` are the
+#: built-in tools; everything after them is an enrichment connector.
+SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
+                "explorium", "vibe", "indeed", "quartr", "drive", "internal")
+#: The connectors whose absence from a cell's searches means "no enrichment
+#: was attempted" — a declared absence must show at least one of these.
+ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS
+                         if t not in ("web_search", "web_fetch"))
+
 #: T3, the drilldown. A register row answers "what do they run"; the detail
 #: page a click opens answers "so what" — and it has three content cards, two
 #: of which render from nothing the research run used to capture. The
@@ -422,6 +480,12 @@ TECH_PEER_COLUMNS = (
 #: grain level: a grain whose score column is missing is dropped wholesale.
 PILLAR_SUMMARY_COLUMNS = (
     "Pillar", "Pillar_Name", "Score", "Weight_Pct", "Peer_Median",
+    # Added 2026-09-03 (contract v6): the gold-standard workbook states the
+    # gap and the M-band beside the score (Golden 1: Weighted_Score /
+    # Maturity / Peer_Median / Gap_to_Peer) and the app's `_STAT_ALIASES`
+    # already reads `gap_to_peer` as the delta. Additive; `_upgrade_shape`
+    # migrates a v5 sheet on open.
+    "Gap_to_Peer", "Maturity",
 )
 
 #: `Category_ID` is the anchor; `Pillar` lets the parser skip deriving it
@@ -430,7 +494,127 @@ PILLAR_SUMMARY_COLUMNS = (
 CATEGORY_DETAIL_COLUMNS = (
     "Category_ID", "Category_Name", "Pillar", "Score", "Peer_Median",
     "Priority_Score", "Priority_Tier",
+    # v6: the gap, the M-band and the coverage disclosure per category
+    # (Golden 1's Category_Detail carries Maturity / Coverage / Peer_Median_Est).
+    "Gap_to_Peer", "Maturity", "Coverage",
 )
+
+# ── THE ASSESSMENT-STAGE SHEETS (contract v6, 2026-09-03) ────────────────
+#
+# Owner: "the workbook always defaults to the wrong structure each time;
+# missing fields etc." The gold-standard workbook (Golden 1, 43 sheets) is the
+# research substrate PLUS the tabs the scoring stage and the client profile
+# fill — and the app READS them (`workbook_parser._TAB_TARGET`, 29 tabs each
+# bound to the surface it feeds). None of them had a writer in this engine, so
+# the assessment skill built a SEPARATE 11-sheet workbook from a scratchpad
+# and a package shipped two half-workbooks (Bank of Travelers Rest: 20 + 23
+# tabs, 11 and 13 read-tabs, eighteen of nineteen runs with zero scored cells).
+#
+# Every sheet below is written by `engine.profile` (research stage: the
+# client's own facts) or `engine.assessment` (scoring stage), through
+# refusals, into the ONE workbook. Column names are the app parser's own
+# where it has one (Recommendations, the grains, Caps_Applied_Log) and the
+# template's where the report reads it (Subcap_Scores' six AI-overlay
+# columns are the Doc's §5 contract, verbatim).
+
+#: The dashboard an executive reads first (gold gate GS-WB-DASHBOARD).
+EXECUTIVE_SUMMARY_COLUMNS = ("Field", "Value")
+EXECUTIVE_SUMMARY_FIELDS = (
+    "Institution", "Sub-Vertical", "Evidence Mode", "Overall Maturity",
+    "Peer Median (est.)", "Gap to Peer", "Subcaps Scored",
+    "Evidence Gaps (Unknown)", "P1", "P2", "P3", "P4", "Headline",
+)
+#: One row per scored subcap, with the AI-and-data overlay the assessment
+#: report's §5 renders from ("These six columns are the contract between the
+#: workbook and this section. A pillar cannot render its overlay if they are
+#: absent."). `source_cell` is the pillar-sheet row the score was struck on.
+SUBCAP_SCORES_COLUMNS = (
+    "subcap_id", "subcap_name", "category", "source_cell", "score",
+    "confidence", "evidence_ids", "source_urls", "evidence_ceiling",
+    "caps_applied", "rationale",
+    "ai_applicability", "data_dependency", "data_readiness",
+    "ai_evidence_ids", "ai_blocker", "peer_ai_signal",
+)
+AI_APPLICABILITY = ("NONE", "ASSISTIVE", "AUGMENTED", "AUTONOMOUS")
+DATA_READINESS = ("RED", "AMBER", "GREEN", "UNKNOWN")
+PILLAR_ROLLUP_COLUMNS = (
+    "pillar_id", "pillar_name", "score", "weight", "weighted_contribution",
+    "peer_median", "gap", "level",
+)
+CATEGORY_ROLLUP_COLUMNS = (
+    "category_id", "category_name", "pillar_id", "score", "peer_median",
+    "gap", "level", "coverage",
+)
+PILLAR_WEIGHTS_COLUMNS = ("weight_set_id", "pillar_id", "pillar_name", "weight")
+#: The maturity SCORE scale's rubric tab (level / name / range / meaning).
+#: The levels themselves live in engine/rubric.py, built without a literal
+#: top-level token so this file keeps the four-band invariant test honest:
+#: the four display BANDS are the only band words prose may carry.
+MATURITY_RUBRIC_COLUMNS = ("level", "name", "range", "meaning")
+CATALOGUE_META_COLUMNS = ("key", "value")
+CAP_TRIGGERS_COLUMNS = ("rule_id", "severity", "max_score", "effect", "horizon")
+CAP_TRIGGERS = (
+    ("CAP-S3", "CRITICAL (active enforcement <12mo)", 2.0,
+     "Caps affected capabilities at M2", "while active; lifts on remediation"),
+    ("CAP-S2", "MATERIAL (issue active/terminated <24mo)", 3.0,
+     "Caps affected capabilities at M3",
+     "lifts when the issue closes or ages past 24 months"),
+    ("CAP-S1", "MINOR (resolved)", 4.0, "Caps affected capabilities at M4",
+     "lifted on resolution"),
+    ("CAP-T5", "T5-only evidence", 2.0,
+     "Marketing or claims alone cannot exceed M2", "lifts on corroborating evidence"),
+    ("CAP-T45", "T4/T5-only evidence", 2.5,
+     "Unvalidated internal narrative plus claims cannot exceed M2.5",
+     "lifts on a T1-T3 source"),
+    ("CAP-SS", "Single-source", 3.0, "A single source cannot exceed M3",
+     "lifts on triangulation"),
+)
+CAPS_APPLIED_LOG_COLUMNS = (
+    "subcap_id", "category", "final_score", "evidence_ceiling", "caps_applied",
+)
+ISSUE_REGISTER_COLUMNS = (
+    "ID", "Type", "Severity", "Status", "Description", "Capability impact",
+    "Cap", "Evidence_IDs", "As_Of",
+)
+ISSUE_SEVERITIES = ("CRITICAL", "MATERIAL", "MINOR")
+ISSUE_STATUSES = ("Active", "Resolved", "Terminated", "Monitoring")
+FIRMOGRAPHICS_COLUMNS = ("Field", "Value", "Unit", "As at", "Evidence",
+                         "Conf.", "State", "Reason", "Route")
+FIRMOGRAPHIC_STATES = ("STATED", "ABSENT", "QUARANTINED")
+#: The Client Profile §1.1 must-present set. `website` is load-bearing in the
+#: app and required on every sub-vertical; the rest are stated or carry a
+#: reason, never blank.
+FIRMOGRAPHIC_MUST_PRESENT = (
+    "website", "employees", "assets_or_aum_or_revenue", "cagr", "branches",
+    "headquarters", "founded", "primary_regulator", "charter", "ownership",
+)
+FOCUS_AREAS_COLUMNS = ("ID", "Priority in the client's words", "Verbatim quote",
+                       "Document", "Page", "Cells", "Evidence_IDs",
+                       "Currency_Status", "Currency_Note")
+CURRENCY_STATUSES = ("CONFIRMED_CURRENT", "AGING", "SUPERSEDED", "UNCONFIRMED")
+SOLUTION_CATALOGUE_COLUMNS = ("solution_id", "solution_name", "platform",
+                              "categories", "rec_id")
+PLATFORM_PEER_ADOPTION_COLUMNS = ("Product / Layer", "Peer", "Verdict", "Basis",
+                                  "Source", "As at")
+CAPABILITY_DEFINITIONS_COLUMNS = ("category_id", "category_name", "pillar",
+                                  "assessed_through")
+#: The gold coverage DISCLOSURE (GS-WB-COVERAGE): scored, unknown, percent.
+COVERAGE_MAP_COLUMNS = ("category_id", "category_name", "subcaps", "evidenced",
+                        "evidence_gap", "coverage_pct", "confidence_posture")
+ENRICHMENT_NEEDED_COLUMNS = ("Area", "Field / cell", "Status", "What would close it")
+
+#: The multi-year financial trajectory (research stage; Client Profile §3/§4,
+#: assessment §1/§6; gold gate GS-WB-FINANCIALS / GSY-18). LONG format — one
+#: row per (metric, fiscal year) — because a fixed-width contract cannot carry
+#: a variable number of year columns; the report renderer pivots it wide and
+#: computes the CAGR at render time. Golden 1 carries a five-year series; the
+#: floor is FINANCIAL_YEARS_FLOOR fiscal years across FINANCIAL_METRICS_FLOOR
+#: metrics, declarable away only through `engine.completeness declare` with a
+#: reason (an institution that publishes fewer years).
+FINANCIAL_TRENDS_COLUMNS = ("Metric", "Fiscal_Year", "Value", "Unit",
+                            "Evidence_IDs", "Source_URL", "Basis")
+FINANCIAL_YEARS_FLOOR = 5
+FINANCIAL_METRICS_FLOOR = 3
 
 #: The Recommendations tab. Its header row is recognised when at least TWO
 #: of its cells are in the parser's 29-token vocabulary — these are seven of
@@ -464,16 +648,18 @@ GATE_LOG_COLUMNS = (
 #:
 #: Independence is only checkable if authorship is RECORDED, so every write
 #: names its actor here and the gate compares them.
-PROVENANCE_COLUMNS = ("SubCap_ID", "Step", "Actor", "At", "Detail")
+PROVENANCE_COLUMNS = ("SubCap_ID", "Step", "Actor", "At", "Detail", "Session")
 
 #: The steps whose authorship is load-bearing.
-PROVENANCE_STEPS = ("synthesis", "challenge", "repair", "enrichment")
+PROVENANCE_STEPS = ("synthesis", "challenge", "repair", "enrichment",
+                    # v6: who struck each score and who declared each absence
+                    "score", "absence")
 
 #: The challenge, in full — the verdict on the scoring row is a
 #: denormalised copy of the latest row here, and the gate reconciles them.
 CHALLENGE_LOG_COLUMNS = (
     "SubCap_ID", "Verdict", "Actor", "Dimensions", "Rationale",
-    "Ceiling_Band_Delta", "At",
+    "Ceiling_Band_Delta", "At", "Session",
 )
 
 #: A challenge verdict says one of these. AUD-0102: the schema required a
@@ -622,6 +808,27 @@ RUN_METADATA_KEYS = (
     # Sheets that are legitimately empty for THIS run, each with the reason.
     # The completeness gate reads this; an unlisted empty sheet blocks.
     "empty_sheet_reasons",
+    # The templates this run is BOUND to: the sha256 of
+    # references/templates/report_templates.json + workbook_template.json +
+    # gold_reference.json at `start`. `engine.template bind` writes it;
+    # orient refuses to serve a card while it is blank, so no run can begin
+    # without the shape of its own deliverables pinned in the workbook.
+    "template_binding",
+    # THE RUN'S OWN CLOCK AND BILL (2026-09-03, owner issue 9: "the assessment
+    # takes more than 6 hours" — and nothing recorded how long any stage took,
+    # so the claim could be neither measured nor regressed). `engine.pipeline`
+    # writes stage_timings at every stage boundary; `engine.cost record`
+    # folds each dispatched lane into cost_summary. Both are JSON objects.
+    "stage_timings", "cost_summary",
+    # THE CONNECTOR SIDE OF SHIP-AS-YOU-GO (owner issue 7). The pipeline
+    # ingests exactly twice — the SCORING_PASS checkpoint and the package —
+    # and each ingest is a connector run version; these anchor which version
+    # the staged pages belong to, and `promoted_at` is the run's end.
+    "connector_run_id", "connector_run_id_prev", "connector_ingest_after_seq",
+    "promoted_at",
+    # Which engine.pipeline drove the run (blank for a hand-narrated one), so
+    # a resumed run knows whether the STAGE_* gates in Gate_Log are its own.
+    "pipeline_version",
 )
 
 # ── THE STAGE, which nothing recorded ────────────────────────────────────
@@ -653,6 +860,19 @@ SHEET_STAGE = {
     "Pillar_Summary": "assessment",
     "Category_Detail": "assessment",
     "Recommendations": "assessment",
+    "Executive_Summary": "assessment",
+    "Subcap_Scores": "assessment",
+    "Pillar_Rollup": "assessment",
+    "Category_Rollup": "assessment",
+    "Pillar_Weights": "assessment",
+    "Maturity_Rubric": "assessment",
+    "Catalogue_Meta": "assessment",
+    "Cap_Triggers": "assessment",
+    "Caps_Applied_Log": "assessment",
+    "Coverage_Map": "assessment",
+    "Capability_Definitions": "assessment",
+    "Solution_Catalogue": "assessment",
+    "Platform_Peer_Adoption": "assessment",
 }
 
 
@@ -666,17 +886,39 @@ def stage_of(metadata: dict) -> str:
     got = str((metadata or {}).get("stage") or "").strip().lower()
     return got if got in STAGES else "research"
 
+#: Sub-vertical pillar weights (dma-assessment SKILL.md § Sub-Vertical Pillar
+#: Weights), the weight set the rollup states. Percent, summing to 100.
+PILLAR_WEIGHTS = {
+    "CU":  {"P1": 25, "P2": 30, "P3": 20, "P4": 25},
+    "RB":  {"P1": 25, "P2": 30, "P3": 20, "P4": 25},
+    "CL":  {"P1": 20, "P2": 20, "P3": 35, "P4": 25},
+    "CIB": {"P1": 20, "P2": 20, "P3": 35, "P4": 25},
+    "IC":  {"P1": 20, "P2": 20, "P3": 30, "P4": 30},
+    "IB":  {"P1": 20, "P2": 35, "P3": 20, "P4": 25},
+    "WM":  {"P1": 25, "P2": 30, "P3": 20, "P4": 25},
+    "RIA": {"P1": 25, "P2": 30, "P3": 20, "P4": 25},
+    "AM":  {"P1": 20, "P2": 30, "P3": 25, "P4": 25},
+    "FC":  {"P1": 25, "P2": 30, "P3": 20, "P4": 25},
+}
+DEFAULT_PILLAR_WEIGHTS = {"P1": 25, "P2": 25, "P3": 25, "P4": 25}
 
-#: v5 (2026-08-30) is v4 plus the assessment stage's three scored tabs
-#: (Pillar_Summary, Category_Detail, Recommendations) and the `stage` key
-#: that says which of them apply. v4 (2026-08-30) is v3 plus the two things
-#: the techstack drilldown renders
-#: from: `Tech_Register.Providers` / `.DMA_Impact` and the
-#: `Tech_Peer_Deployments` sheet. Additive, and `RunWorkbook` upgrades a v3
-#: workbook in place on open rather than refusing it — expand, migrate,
-#: contract, the same discipline the database side uses.
-WORKBOOK_CONTRACT = "v5"
-ENGINE_VERSION = "5.0.0"
+#: Pillar display names, as the catalogue and the reports name them.
+PILLAR_NAMES = {
+    "P1": "Strategy, Governance & Culture",
+    "P2": "Member/Customer Experience & Engagement",
+    "P3": "Operations, Risk & Compliance",
+    "P4": "Data, Analytics & Technology",
+}
+
+
+#: v6 (2026-09-03) is v5 plus the sheets the gold-standard workbook carries
+#: and the app reads — the client's own facts (Firmographics, Focus_Areas,
+#: Issue_Register, Enrichment_Needed) at the research stage and the scoring
+#: stage's dashboard, rollups, weights, rubric, caps, overlay and catalogue
+#: (Executive_Summary … Platform_Peer_Adoption) — plus Gap_to_Peer / Maturity
+#: on the two stated grains. Additive; a v5 workbook upgrades in place.
+WORKBOOK_CONTRACT = "v7"
+ENGINE_VERSION = "7.0.0"
 
 SHEETS = {
     "00_README": ("Key", "Value"),
@@ -702,6 +944,29 @@ SHEETS = {
     "Peer_Benchmarks": PEER_BENCHMARK_COLUMNS,
     "Run_Metadata": RUN_METADATA_COLUMNS,
     "REF_Method": ("Key", "Value"),
+    # ── the client's own facts (research stage; Client Profile §1, §6, §7) ──
+    "Firmographics": FIRMOGRAPHICS_COLUMNS,
+    "Focus_Areas": FOCUS_AREAS_COLUMNS,
+    "Issue_Register": ISSUE_REGISTER_COLUMNS,
+    "Enrichment_Needed": ENRICHMENT_NEEDED_COLUMNS,
+    # Added 2026-09-03 (contract v7). The five-year trajectory the gold
+    # standard carries had no sheet and no writer; `engine.profile financial`
+    # fills it in PRELIM and both reports render it.
+    "Financial_Trends": FINANCIAL_TRENDS_COLUMNS,
+    # ── the scoring stage (assessment; the report's §1-§5, §8) ────────────
+    "Executive_Summary": EXECUTIVE_SUMMARY_COLUMNS,
+    "Subcap_Scores": SUBCAP_SCORES_COLUMNS,
+    "Pillar_Rollup": PILLAR_ROLLUP_COLUMNS,
+    "Category_Rollup": CATEGORY_ROLLUP_COLUMNS,
+    "Pillar_Weights": PILLAR_WEIGHTS_COLUMNS,
+    "Maturity_Rubric": MATURITY_RUBRIC_COLUMNS,
+    "Catalogue_Meta": CATALOGUE_META_COLUMNS,
+    "Cap_Triggers": CAP_TRIGGERS_COLUMNS,
+    "Caps_Applied_Log": CAPS_APPLIED_LOG_COLUMNS,
+    "Coverage_Map": COVERAGE_MAP_COLUMNS,
+    "Capability_Definitions": CAPABILITY_DEFINITIONS_COLUMNS,
+    "Solution_Catalogue": SOLUTION_CATALOGUE_COLUMNS,
+    "Platform_Peer_Adoption": PLATFORM_PEER_ADOPTION_COLUMNS,
 }
 
 PILLAR_SHEETS = tuple(f"{p}_Subcap_Scoring" for p in ("P1", "P2", "P3", "P4"))
@@ -711,6 +976,46 @@ PILLAR_SHEETS = tuple(f"{p}_Subcap_Scoring" for p in ("P1", "P2", "P3", "P4"))
 #: retired (AUD-0012, AUD-0061), so the required set and the generated set
 #: are now the same object and cannot disagree.
 REQUIRED_SHEETS = tuple(SHEETS)
+
+#: Tabs the app READS as one of the canonical SHEETS when a package carries
+#: them, without the engine ever WRITING them. This is the reconciliation of
+#: the three tab universes the 2026-09-05 audit surfaced: the gold-standard
+#: workbook (`gold_reference.json`, 43 sheets) carries three tabs the engine
+#: contract (41 sheets) does not — `Technographic_Scan` (also shipped as its
+#: own .docx deliverable) and two evidence copies `Evidence_Master` /
+#: `Evidence_Register` — while the contract carries `Financial_Trends`, added
+#: in v7, that the older gold measurement predates. Declaring the aliases here
+#: (rather than forcing the engine to write three more sheets, which would
+#: fail `engine.template check` on every run) gives the web app ONE
+#: authoritative read universe and defaults it to the gold-standard tabs,
+#: while staying tolerant of a package whose exporter names them differently.
+#: `parse_evidence_master` in the worker already folds the evidence family;
+#: this is the single authoritative statement of that tolerance, which
+#: `engine.template drift` and `scripts/gen_recording_map.py` both read.
+INGEST_ALIASES = {
+    "Evidence_Master": "Evidence_Detail",
+    "Evidence_Register": "Evidence_Detail",
+    "Evidence_Index": "Evidence_Detail",
+    "Evidence_Ledger": "Evidence_Detail",
+    "Evidence_Linkage": "Evidence_Detail",
+    "Evidence_Linkage_Matrix": "Evidence_Detail",
+    "Evidence_Inventory": "Evidence_Detail",
+    "Technographic_Scan": "Tech_Register",
+}
+
+#: The full set of tab names the app RECOGNISES on ingest: the sheets the
+#: engine writes plus the aliases above. A package tab outside this set is a
+#: genuinely unmapped tab (`workbook_tab_coverage.unread_unmapped`), not a
+#: naming variant. The gold-standard workbook's 43 sheets are all in here.
+READ_SHEETS = tuple(SHEETS) + tuple(INGEST_ALIASES)
+
+
+def canonical_sheet(tab: str) -> str | None:
+    """The SHEETS name a tab resolves to (itself, or the sheet it aliases),
+    or None for a tab the contract does not recognise at all."""
+    if tab in SHEETS:
+        return tab
+    return INGEST_ALIASES.get(tab)
 
 #: The literal the contract forbids in Source_URLs, in any casing (rule 6).
 BANNED_URL_PLACEHOLDERS = ("multiple searches", "see report", "various",

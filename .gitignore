@@ -61,3 +61,10 @@ dma-insights-*.zip
 # person it lands on. The routine's headless approvals do not come from here
 # either — they come from the plugin's own PreToolUse hook.
 .claude/settings.local.json
+
+# The source-yield ledger is written at RUNTIME by the installed plugin
+# (engine.relay reconcile, one entry per closed request). In a checkout the
+# plugin path resolves here, so a local run or a stray test would otherwise
+# offer real-looking measurements for commit. Set DMA_SOURCE_YIELD to put it
+# somewhere deliberate.
+plugins/dma-insights/fixtures/source_yield.json

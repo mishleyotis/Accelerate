@@ -1760,7 +1760,8 @@ function ClientPlatform({
         className: "row",
         style: {
           gap: 6,
-          marginBottom: 3
+          marginBottom: 3,
+          flexWrap: "wrap"
         }
       }, /*#__PURE__*/React.createElement("span", {
         style: {
@@ -1773,10 +1774,7 @@ function ClientPlatform({
       }, "Condition"), /*#__PURE__*/React.createElement("span", {
         className: "spacer"
       }), p.basis ? /*#__PURE__*/React.createElement("span", {
-        className: "b b-above",
-        style: {
-          flexShrink: 0
-        }
+        className: "b b-above"
       }, pfText(p.basis)) : null, /*#__PURE__*/React.createElement(Icon, {
         name: isOpen ? "chevron-u" : "chevron-d",
         size: 13,

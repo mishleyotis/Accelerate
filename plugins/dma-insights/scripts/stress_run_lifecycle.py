@@ -46,13 +46,15 @@ def check(name: str, ok: bool, detail: str = "") -> bool:
     return bool(ok)
 
 
-def run(*args, expect: int | None = 0, env: dict | None = None):
+def run(*args, expect: int | None = 0, env: dict | None = None,
+        stdin: str | None = None):
     """One engine command, as the conductor issues it."""
     import os
     e = dict(os.environ)
     e.update(env or {})
     r = subprocess.run([sys.executable, "-m", *args], cwd=str(SKILL),
-                       capture_output=True, text=True, timeout=900, env=e)
+                       capture_output=True, text=True, timeout=900, env=e,
+                       input=stdin)
     if expect is not None and r.returncode != expect:
         print(f"    ! {' '.join(args)} -> {r.returncode} (wanted {expect})")
         print("    " + (r.stderr or r.stdout).strip()[-600:].replace(
@@ -238,16 +240,42 @@ def main(argv=None) -> int:
     check("evidence that reaches no cell is refused unless declared profile",
           r.returncode == 1 and "--profile" in r.stderr, r.stderr[-200:])
 
+    # READ THE PAGE BEFORE QUOTING IT. `engine.cli evidence` verifies every
+    # public URL against the text `engine.cli fetch` cached under the run
+    # (2026-09-14) — a span nothing read is refused `excerpt_unverified`.
+    # This walk has no network, so `--via-text -` stands in for the fetch:
+    # it is the same seam a servicing actor uses for a connector's own
+    # extract, and it means the walk exercises fetch -> evidence end to end.
+    url = "https://mapping.ncua.gov/ResearchCreditUnion"
+    excerpt = ("Stress Credit Union reports 412,000 members, 38 branches and "
+               "1,240 full-time employees as at 31 December 2025, with a "
+               "named Chief Digital Officer on the officer schedule.")
+    r = run("engine.cli", "fetch", "--run", run_id, "--root", str(root),
+            "--url", url, "--query", "members branches employees",
+            "--via-text", "-", "--json",
+            stdin=f"NCUA research a credit union.\n{excerpt}\n",
+            expect=0)
+    fetched = json.loads(r.stdout or "{}")
+    check("engine.cli fetch caches the page and prints windows, not the page",
+          bool(fetched.get("sha256")) and bool(fetched.get("windows"))
+          and "text" not in fetched, r.stdout[-200:])
+
+    rb = run("engine.cli", "evidence", "--run", run_id, "--root", str(root),
+             "--profile", "--source", "NCUA Call Report", "--url", url,
+             "--tier", "T1", "--excerpt",
+             "Stress Credit Union operates a fully cloud-native core banking "
+             "platform migrated from its legacy system during 2024.",
+             expect=1)
+    check("an excerpt the fetched page does not carry is refused",
+          rb.returncode == 1 and "excerpt_not_verbatim" in rb.stderr,
+          rb.stderr[-200:])
+
     ev = json.loads(run("engine.cli", "evidence", "--run", run_id, "--root",
                         str(root), "--profile", "--source",
                         "NCUA Call Report — 2025 Q4 officer schedule",
-                        "--url", "https://mapping.ncua.gov/ResearchCreditUnion",
+                        "--url", url,
                         "--tier", "T1", "--published", "2025-12-31",
-                        "--excerpt",
-                        "Stress Credit Union reports 412,000 members, 38 "
-                        "branches and 1,240 full-time employees as at 31 "
-                        "December 2025, with a named Chief Digital Officer "
-                        "on the officer schedule.").stdout or "{}")
+                        "--excerpt", excerpt).stdout or "{}")
     eid2 = ev.get("e_id", "E-002")
 
     ok = True
@@ -259,13 +287,46 @@ def main(argv=None) -> int:
                         "field of membership is geographic, and its balance "
                         "sheet is dominated by consumer lending."
               ).returncode == 0
+    # The section closes on NAMED people (min_named=2), not on a structure —
+    # the 2026-08-31 rule; and the Firmographics TAB must carry every
+    # must-present field STATED or ABSENT with a route (contract v6).
     ok &= run("engine.prelim", "narrate", "--run", run_id, "--root", str(root),
               "--section", "leadership", "--evidence", eid2,
-              "--body", "Digital ownership sits with a named Chief Digital "
-                        "Officer on the 2025 officer schedule, alongside a "
-                        "CIO who owns the core platform. Both roles predate "
-                        "the current programme, so the institution is not "
+              "--body", "Maria Alvarez has been Chief Digital Officer since "
+                        "2022 on the 2025 officer schedule, reporting to "
+                        "chief executive Devon Whitfield, alongside a CIO who "
+                        "owns the core platform. Both roles predate the "
+                        "current programme, so the institution is not "
                         "standing up digital ownership for the first time."
+              ).returncode == 0
+    for field, value, unit in (("website", "stress.example", "n/a"),
+                               ("employees", "1240", "headcount"),
+                               ("assets_or_aum_or_revenue", "9.1bn", "USD assets"),
+                               ("branches", "38", "count"),
+                               ("headquarters", "Reno, NV", "n/a"),
+                               ("founded", "1951", "year"),
+                               ("primary_regulator", "NCUA", "n/a"),
+                               ("charter", "state-chartered credit union", "n/a"),
+                               ("ownership", "member-owned cooperative", "n/a")):
+        ok &= run("engine.profile", "firmographic", "--run", run_id, "--root",
+                  str(root), "--field", field, "--value", value, "--unit", unit,
+                  "--as-of", "2025-12-31", "--evidence", eid2,
+                  "--confidence", "High").returncode == 0
+    ok &= run("engine.profile", "firmographic", "--run", run_id, "--root",
+              str(root), "--field", "cagr", "--state", "ABSENT",
+              "--reason", "a credit union publishes no revenue CAGR; the call "
+                          "report carries assets and shares by quarter, not a "
+                          "growth series",
+              "--route", "NCUA 5300 call reports FY2021-FY2025, searched "
+                         "2026-08-29").returncode == 0
+    ok &= run("engine.prelim", "narrate", "--run", run_id, "--root", str(root),
+              "--section", "thought_leadership", "--evidence", eid2,
+              "--body", "Maria Alvarez has spoken twice at industry "
+                        "conferences on moving decisioning off the core, and "
+                        "the institution's own 2025 report repeats that "
+                        "framing. The stated direction is consistent across "
+                        "both, so a category finding that contradicts it is "
+                        "worth a second source rather than a restatement."
               ).returncode == 0
     # `--signal` is the event's DIRECTION and `--kind` its CLASS: the served
     # C1 surface clusters on one and filters on the other, and the tab used
@@ -297,6 +358,24 @@ def main(argv=None) -> int:
               "--provider", "clay", "--provider", "web",
               "--basis", "named as the digital banking platform in the 2025 "
                          "call report").returncode == 0
+    # ALL FOUR LAYERS: tech_baseline will not close with one row. A layer
+    # searched and found empty closes as an ABSENT row carrying the ladder;
+    # a layer left out reads to every later surface as a clean estate.
+    for product, vendor, layer, status, basis in (
+            ("Fiserv DNA", "Fiserv", "OPS", "CONFIRMED",
+             "named as the core processor in the 2025 call report"),
+            ("Snowflake", "Snowflake", "DATA", "INFERRED",
+             "two 2025 engineering postings require production Snowflake"),
+            ("public cloud hosting", "none named", "INFRA", "ABSENT",
+             "searched the call report, the careers site and three vendor "
+             "case-study indexes for a named hosting or datacentre platform; "
+             "none is stated anywhere public")):
+        ok &= run("engine.cli", "techscan", "record", "--run", run_id,
+                  "--root", str(root), "--product", product, "--vendor",
+                  vendor, "--layer", layer, "--status", status,
+                  "--method", "public_document", "--evidence", eid2,
+                  "--provider", "clay", "--provider", "web",
+                  "--basis", basis).returncode == 0
     check("every PRELIM section closes through the real commands", ok)
 
     r = run("engine.prelim", "complete", "--run", run_id, "--root", str(root))

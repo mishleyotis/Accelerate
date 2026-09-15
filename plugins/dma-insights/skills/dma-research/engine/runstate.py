@@ -168,6 +168,11 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
                        evidence_mode=evidence_mode, sv_basis=sv_basis,
                        mode_basis=mode_basis, lob_census=lob_census)
     run = Run(run_id=run_id, root=base, workbook_path=path)
+    # BIND THE TEMPLATES BEFORE ANYTHING IS RESEARCHED. The pinned report
+    # Docs, workbook shape and gold reference are hashed into the workbook
+    # and written beside the run; orient will not serve a card without it.
+    from . import template as _template
+    _template.bind(run)
     (base / "00_entity_profile" / "context.json").write_text(json.dumps({
         "entity": entity_name, "entity_id": entity_id,
         "sub_vertical": sub_vertical, "scope_mode": scope_mode,
@@ -210,10 +215,19 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
 
 
 def checkpoint(wb: RunWorkbook, position: str) -> None:
-    """Record where the run got to, in the artefact that survives."""
+    """Record where the run got to, in the artefact that survives.
+
+    The search-op count is recorded WITH the position because the ceiling is
+    per conversation, not per run: `ledger.append_search` refuses once this
+    many searches have been fired since the last checkpoint, and needs a
+    mark to measure from. Without it the ceiling would be a lifetime budget
+    and a long run could never legitimately continue past it.
+    """
     wb.set_metadata("checkpoint", json.dumps(
         {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-         "position": position}, separators=(",", ":")))
+         "position": position,
+         "search_ops": len(wb.rows("Search_Log"))},
+        separators=(",", ":")))
 
 
 # ── getting the workbook out of an ephemeral container ───────────────────
@@ -261,3 +275,145 @@ if __name__ == "__main__":  # a library, but it must answer --help
                "a command line (cli, orient, floors_gate, validator, handoff, "
                "reports, strip_working_area, patch_validator, watchdog).",
     ).parse_args()
+
+
+# ── one driver per run ───────────────────────────────────────────────────
+#
+# Measured 2026-09-14: nothing stopped two drivers walking one run at the
+# same time. The only lock in the engine is the per-workbook `.xlsx.lock`
+# flock, which serialises ROWS — it makes each write safe and says nothing
+# about two processes dispatching the same category, spending two budgets
+# against one ceiling, and writing `pipeline_state.json` over each other.
+# That state file was also written non-atomically, so a reader could see
+# half a document.
+#
+# This is a cooperative advisory lock, and it says so: a pid on THIS host
+# with a fresh heartbeat holds the run; anything else is stale and reaped.
+# It cannot stop a driver that ignores it, which is why the PreToolUse hook
+# `guard_driver_lock.py` reads the same file at the command seam.
+
+DRIVER_LOCK_NAME = "driver.lock"
+
+#: A heartbeat older than this is stale. Half an hour is long on purpose: a
+#: stage can legitimately run for twenty minutes without the driver touching
+#: the file, and reaping a LIVE driver's lock is worse than waiting.
+DRIVER_LOCK_STALE_S = float(os.environ.get("DMA_DRIVER_LOCK_STALE_S") or 1800)
+
+
+def driver_lock_path(run: "Run") -> Path:
+    return run.qa_dir / DRIVER_LOCK_NAME
+
+
+class DriverLocked(RuntimeError):
+    """Another driver holds this run. Carries the holder for the message."""
+
+    def __init__(self, message: str, holder: dict):
+        super().__init__(message)
+        self.holder = holder
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(int(pid), 0)
+    except (OSError, ValueError, TypeError):
+        return False
+    return True
+
+
+def read_driver_lock(run: "Run") -> dict | None:
+    """The lock as it stands, with `live` decided here so the engine and the
+    hook cannot disagree about what 'held' means. None when there is none."""
+    p = driver_lock_path(run)
+    if not p.is_file():
+        return None
+    try:
+        rec = json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(rec, dict):
+            return None
+    except Exception:                                    # noqa: BLE001
+        return None                                      # unreadable is not held
+    same_host = str(rec.get("host") or "") in ("", _hostname())
+    beat = rec.get("heartbeat") or rec.get("at")
+    try:
+        age = (_dt.datetime.now(_dt.timezone.utc)
+               - _dt.datetime.fromisoformat(str(beat).replace("Z", "+00:00"))
+               ).total_seconds()
+    except Exception:                                    # noqa: BLE001
+        age = None
+    rec["age_s"] = None if age is None else round(age, 1)
+    rec["live"] = bool(
+        same_host and _pid_alive(rec.get("pid"))
+        and (age is None or age <= DRIVER_LOCK_STALE_S))
+    rec["stale_reason"] = (
+        None if rec["live"]
+        else "another host" if not same_host
+        else "the pid is gone" if not _pid_alive(rec.get("pid"))
+        else f"the heartbeat is {rec['age_s']}s old (stale past "
+             f"{DRIVER_LOCK_STALE_S:.0f}s)")
+    return rec
+
+
+def _hostname() -> str:
+    try:
+        import socket
+        return socket.gethostname()
+    except Exception:                                    # noqa: BLE001
+        return ""
+
+
+def acquire_driver_lock(run: "Run", *, command: str = "", force: bool = False) -> dict:
+    """Claim this run for this process, or refuse with who holds it.
+
+    A stale lock is REAPED rather than waited on: the container it named is
+    gone, and a run nobody can resume because a dead process's file is still
+    there is the worse failure."""
+    held = read_driver_lock(run)
+    if held and held["live"] and not force and int(held.get("pid") or -1) != os.getpid():
+        raise DriverLocked(
+            f"run {run.run_id} is held by pid {held.get('pid')} on "
+            f"{held.get('host') or 'this host'} since {held.get('at')} "
+            f"(heartbeat {held.get('age_s')}s ago). Two drivers on one run "
+            f"dispatch the same category twice and spend two budgets against "
+            f"one ceiling. Wait for it, or stop that process.", held)
+    rec = {"pid": os.getpid(), "host": _hostname(), "run_id": run.run_id,
+           "at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+           "command": command or ""}
+    rec["heartbeat"] = rec["at"]
+    rec["reaped"] = (held or {}).get("stale_reason") if held else None
+    _write_atomic(driver_lock_path(run), json.dumps(rec, indent=1))
+    return rec
+
+
+def heartbeat_driver_lock(run: "Run") -> bool:
+    """Refresh the beat. False when this process no longer holds the lock —
+    the caller decides what that means; this function never steals it back."""
+    held = read_driver_lock(run)
+    if not held or int(held.get("pid") or -1) != os.getpid():
+        return False
+    held["heartbeat"] = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    for k in ("age_s", "live", "stale_reason"):
+        held.pop(k, None)
+    _write_atomic(driver_lock_path(run), json.dumps(held, indent=1))
+    return True
+
+
+def release_driver_lock(run: "Run") -> bool:
+    """Drop the lock if this process holds it. Idempotent; never raises."""
+    held = read_driver_lock(run)
+    if not held or int(held.get("pid") or -1) != os.getpid():
+        return False
+    try:
+        driver_lock_path(run).unlink()
+    except OSError:
+        return False
+    return True
+
+
+def _write_atomic(path: Path, text: str) -> None:
+    """Write-then-rename. A reader must never see half a document, and
+    `pipeline_state.json` — read by the watchdog, the hooks and the next
+    driver — was written in place."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + f".{os.getpid()}.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)

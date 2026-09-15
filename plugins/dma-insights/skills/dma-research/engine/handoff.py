@@ -51,6 +51,7 @@ import sys
 from pathlib import Path
 
 from . import contract as C
+from . import ledger as L
 from . import completeness, floors_gate, quality as Q, runstate, validator
 from .workbook import RunWorkbook, FLOOR_ITEMS, _split_ids
 
@@ -77,6 +78,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
     md = wb.metadata()
     register = wb.evidence_index()
     tax = C.taxonomy()
+    declared_set = L.declared_absences(wb)
 
     records, by_cat = [], {}
     for r in wb.scoring_rows():
@@ -100,8 +102,19 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
             # AUD-0078: null, not a default that looks like data.
             "ceiling_band": band if synth else None,
             "uncertainty": _num(r.get("Uncertainty")) if synth else None,
-            "state": ("closed" if synth else
+            "state": ("declared_absent"
+                      if (not eids and L.is_declared_absent(r, declared=declared_set))
+                      else "closed" if synth else
                       "volleyed" if eids else "not_researched"),
+            # The ladder behind a declared absence outlives the strip only
+            # here (AUD-0065's family: the strip deletes Z/AA/AB, and a
+            # declared absence and an untouched seeded row then read alike).
+            "absence": (None if not (not eids and L.is_declared_absent(
+                            r, declared=declared_set)) else {
+                "proxy_log": r.get("Proxy_Log"),
+                "negative_ladder": r.get("Negative_Ladder"),
+                "declared_by": L.actor_for(wb, cell, "absence"),
+            }),
             "research_synthesis": None if not synth else {
                 "dominant_claim": r.get("Dominant_Claim"),
                 "claim_label": r.get("Claim_Label"),
@@ -126,6 +139,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
     # Category ceilings stay BAND WORDS. AUD-0078 measured v1_compat turning
     # them into floats — a numeric maturity score in the artefact R1 forbids
     # scores in.
+    absence_share = _absence_share(wb, by_cat)
     ceilings = {}
     for cat, rows in sorted(by_cat.items()):
         bands = [r["ceiling_band"] for r in rows if r["ceiling_band"]]
@@ -145,7 +159,15 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         gates[cat] = ({"verdict": "NOT_RUN",
                        "reason": "the floors gate has no recorded verdict for "
                                  "this category"} if v is None
-                      else {"verdict": v["gate"], "blocking": v["blocking"]})
+                      else {"verdict": v["gate"], "blocking": v["blocking"],
+                            "require_synthesis": bool(v.get("require_synthesis"))})
+
+    # AUD-0116: THE SYNTHESIS-AND-CHALLENGE CHAIN IS SEQUENCED HERE, not left to
+    # whoever runs the assessment stage to remember. (Extracted to
+    # `_assert_scoreable` so it is unit-testable without first satisfying the
+    # validator and completeness gates above.)
+    if strict:
+        _assert_scoreable(gates)
 
     return {
         "_contract": {
@@ -165,6 +187,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         "counts": C.counts(),
         "coverage": wb.coverage(),
         "gates": gates,
+        "absence_share": absence_share,
         "capability_ceilings": ceilings,
         "subcap_records": records,
         "evidence_register": [
@@ -179,6 +202,46 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         # AUD-0138: measured, or NOT_RUN with a reason. Never `[]`.
         **_facets(wb, records),
     }
+
+
+def _assert_scoreable(gates: dict) -> None:
+    """Refuse a handoff whose categories are not ready to be SCORED (AUD-0116).
+
+    ROOT CAUSE this fixes: `--require-synthesis` was opt-in on the floors gate,
+    and handoff — the one boundary between research and scoring — only REPORTED
+    whatever verdict happened to be recorded. So a category could reach scoring
+    "volleyed" (evidence gathered, never synthesised, never challenged), and the
+    score would be struck on raw evidence rather than on a challenged claim. The
+    independent challenge existed as a gate TERM but nothing forced the mode
+    that runs it before the score.
+
+    A handoff feeds the assessment/scoring stage. So it is refused unless every
+    category cleared the gate in the mode that REQUIRES every evidenced subcap
+    to be synthesised AND independently challenged (the synthesis_missing,
+    challenge_missing and challenge_not_independent terms all live behind
+    require_synthesis / the synthesised-row checks). That makes "synthesise and
+    independently challenge before you score" structural: a run cannot skip it
+    and reach a handoff, whoever is driving."""
+    not_ready = {}
+    for cat in sorted(gates):
+        g = gates[cat]
+        if g.get("verdict") != "PASS":
+            not_ready[cat] = (f"floors gate is {g.get('verdict')}"
+                              + (f" (blocking: {g.get('blocking')})"
+                                 if g.get("blocking") else ""))
+        elif not g.get("require_synthesis"):
+            not_ready[cat] = (
+                "floors gate passed WITHOUT --require-synthesis, so its "
+                "evidenced subcaps were never required to be synthesised and "
+                "independently challenged")
+    if not_ready:
+        lines = "\n  ".join(f"{c}: {why}" for c, why in not_ready.items())
+        raise SystemExit(
+            "REFUSED: a handoff feeds the scoring stage, and these categories "
+            "are not ready to be scored — every evidenced subcap must be "
+            "synthesised and then independently challenged (run the floors gate "
+            "with --require-synthesis and clear it) BEFORE a handoff, so the "
+            f"score reflects a challenged claim and not raw evidence:\n  {lines}")
 
 
 def _facets(wb: RunWorkbook, records: list[dict]) -> dict:
@@ -248,3 +311,58 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ── how much of this run is absence, said out loud ───────────────────────
+#
+# A category where every cell was declared absent now PASSES its floors
+# gate with `blocking: []` — correctly, because the cells were honestly
+# worked and honestly closed. But "passed" and "we found nothing about this
+# institution" look identical downstream, and the only thing standing
+# between them was the M2 scoring ceiling, which is a cap on the number and
+# says nothing to the person reading the run. So the handoff states the
+# share, and states how much of it was declared at REDUCED rigour — the
+# degraded path, where no enrichment connector could be asked at all.
+#
+# ADVISORY, never blocking (owner, 2026-09-13). A run that found nothing is
+# a real answer about a real institution; refusing to hand it off would
+# throw away the work that established the absence. Disclosure is the fix,
+# not refusal.
+
+def _absence_share(wb: RunWorkbook, by_cat: dict) -> dict:
+    """Per category and for the run: how many cells closed as declared
+    absences, and how many of those rest on the built-in web tools alone."""
+    reduced = {str(r.get("SubCap_ID") or "").strip()
+               for r in wb.rows("Provenance")
+               if str(r.get("Step") or "").strip() == "absence"
+               and "REDUCED RIGOUR" in str(r.get("Detail") or "").upper()}
+    out, tot, dec, red = {}, 0, 0, 0
+    for cat, rows in sorted(by_cat.items()):
+        absent = [r for r in rows if r["state"] == "declared_absent"]
+        n_red = sum(1 for r in absent if r["subcap_id"] in reduced)
+        tot += len(rows)
+        dec += len(absent)
+        red += n_red
+        out[cat] = {
+            "cells": len(rows),
+            "declared_absent": len(absent),
+            "reduced_rigour": n_red,
+            "share": round(len(absent) / len(rows), 3) if rows else None,
+            # ADVISORY. Named so a reader of the handoff, a report section or
+            # a surface can say it rather than discover it from a low score.
+            "scored_on_absences_only": bool(rows) and len(absent) == len(rows),
+        }
+    out["_run"] = {
+        "cells": tot,
+        "declared_absent": dec,
+        "reduced_rigour": red,
+        "share": round(dec / tot, 3) if tot else None,
+        "categories_on_absences_only": sorted(
+            c for c, v in out.items() if c != "_run" and v["scored_on_absences_only"]),
+        "statement": (
+            f"{dec} of {tot} cells closed as declared absences"
+            + (f" ({red} at REDUCED rigour — no enrichment connector could be "
+               f"asked)" if red else "")
+            + "." if tot else "no cells in scope"),
+    }
+    return out
