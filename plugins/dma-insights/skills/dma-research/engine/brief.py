@@ -141,6 +141,27 @@ CELLS_PER_CHALLENGE_LANE = 12
 CHALLENGE_EVIDENCE_PER_CELL = 4
 CHALLENGE_EXCERPT_WINDOW = 240
 
+#: THE REPORT PACKET'S OWN BUDGET, and why its sections are never trimmed.
+#:
+#: A report spec's sections are the CONTRACT — 8 for client_research, 11 for
+#: assessment — and the producer writes every one of them or the narrative
+#: gate refuses the report. `_bound(packet, "sections")` halved that list to
+#: a floor of 3 whenever the packet crossed the dispatch ceiling, and what
+#: decided the crossing was PATH LENGTH: the packet carries six absolute
+#: template paths and four absolute run-root paths, so a checkout at
+#: `/home/runner/work/Accelerate/Accelerate` measured 6,413 characters where
+#: the same packet at `/home/user/Accelerate` measured 6,081, against a
+#: ceiling of 6,400. Thirteen characters of checkout path decided whether
+#: the assessment producer was told its report has a pillar section (the
+#: `pillar` row sits at index 4 and does not survive the second halving).
+#: Measured 2026-09-14, green locally and red in CI for that reason alone.
+#:
+#: So the elastic list is `rules` — advice, where dropping the last one
+#: costs a reminder — and the ceiling is sized to hold the whole spec with
+#: room for a longer checkout. A packet whose CONTENT depends on where the
+#: repository happens to sit is not a contract.
+REPORT_CHAR_CEILING = 9000
+
 # ── CROSS-CATEGORY REUSE, and the boundary it is built inside ────────────
 #
 # Sixteen category lanes re-search one entity. The ledger has always
@@ -1678,7 +1699,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "write it so surface production can FORMAT it into the payload — "
                 "it is not re-synthesised or re-challenged downstream",
             ],
-        }, "sections")
+        }, "rules", ceiling=REPORT_CHAR_CEILING)
         lanes.append((f"report-{key}", packet, f"Report — {spec.title}"))
     if validator:
         st = N.state(wb)

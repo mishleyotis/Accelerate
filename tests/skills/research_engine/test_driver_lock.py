@@ -34,6 +34,24 @@ def _run(tmp_path):
     return F.new_run(tmp_path, n=2)
 
 
+#: A pid that is ALIVE and is NOT this process. It used to be 1, on the
+#: reasoning that pid 1 exists in every container — true here, and false
+#: where it matters: on a GitHub runner `os.kill(1, 0)` raises, so the lock
+#: read as dead and three of these tests failed in CI while passing locally
+#: (measured 2026-09-14). The parent of this process is alive by
+#: construction, is never this process, and is signalable wherever the tests
+#: run. Do not reinstate 1.
+OTHER_PID = os.getppid()
+
+
+def _take_over(run, pid: int) -> None:
+    """Rewrite the lock as though another process holds it."""
+    p = runstate.driver_lock_path(run)
+    rec = json.loads(p.read_text())
+    rec["pid"] = pid
+    p.write_text(json.dumps(rec))
+
+
 # ── the engine's own answer ──────────────────────────────────────────────
 
 def test_an_unlocked_run_is_claimed_and_says_who_holds_it(tmp_path):
@@ -51,16 +69,12 @@ def test_a_second_driver_is_refused_and_told_what_it_costs(tmp_path):
     against one ceiling."""
     run = _run(tmp_path)
     runstate.acquire_driver_lock(run)
-    # Someone else's live pid: pid 1 exists in every container and is not us.
-    p = runstate.driver_lock_path(run)
-    rec = json.loads(p.read_text())
-    rec["pid"] = 1
-    p.write_text(json.dumps(rec))
+    _take_over(run, OTHER_PID)
     with pytest.raises(runstate.DriverLocked) as e:
         runstate.acquire_driver_lock(run)
-    assert "held by pid 1" in str(e.value)
+    assert f"held by pid {OTHER_PID}" in str(e.value)
     assert "two budgets against one ceiling" in str(e.value)
-    assert e.value.holder["pid"] == 1
+    assert e.value.holder["pid"] == OTHER_PID
 
 
 def test_the_same_process_may_reclaim_its_own_run(tmp_path):
@@ -91,7 +105,7 @@ def test_a_stale_heartbeat_is_reaped_even_when_the_pid_is_alive(tmp_path):
     run = _run(tmp_path)
     p = runstate.driver_lock_path(run)
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps({"pid": 1, "host": runstate._hostname(),
+    p.write_text(json.dumps({"pid": OTHER_PID, "host": runstate._hostname(),
                              "at": "2020-01-01T00:00:00Z",
                              "heartbeat": "2020-01-01T00:00:00Z"}))
     held = runstate.read_driver_lock(run)
@@ -104,7 +118,7 @@ def test_a_lock_from_another_host_never_blocks_this_one(tmp_path):
     run = _run(tmp_path)
     p = runstate.driver_lock_path(run)
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps({"pid": 1, "host": "some-other-box",
+    p.write_text(json.dumps({"pid": OTHER_PID, "host": "some-other-box",
                              "at": "2026-09-14T10:00:00Z",
                              "heartbeat": "2026-09-14T10:00:00Z"}))
     assert runstate.read_driver_lock(run)["live"] is False
@@ -127,10 +141,7 @@ def test_the_heartbeat_moves_and_only_the_holder_may_move_it(tmp_path):
     runstate.acquire_driver_lock(run)
     before = runstate.read_driver_lock(run)["heartbeat"]
     assert runstate.heartbeat_driver_lock(run) is True
-    p = runstate.driver_lock_path(run)
-    rec = json.loads(p.read_text())
-    rec["pid"] = 1
-    p.write_text(json.dumps(rec))
+    _take_over(run, OTHER_PID)
     assert runstate.heartbeat_driver_lock(run) is False, (
         "a process that no longer holds the lock must not steal it back")
     assert before                                       # the field exists
@@ -182,10 +193,7 @@ def test_the_hook_denies_the_second_driver_the_engine_would_refuse(tmp_path):
     cmd = f"python3 -m engine.pipeline run --run {run.run_id} --root {run.root}"
     assert _decision(_hook(cmd, run)) != "deny", "an unlocked run is not held"
     runstate.acquire_driver_lock(run)
-    p = runstate.driver_lock_path(run)
-    rec = json.loads(p.read_text())
-    rec["pid"] = 1                                       # someone else, alive
-    p.write_text(json.dumps(rec))
+    _take_over(run, OTHER_PID)                           # someone else, alive
     assert runstate.read_driver_lock(run)["live"] is True
     assert _decision(_hook(cmd, run)) == "deny"
 
