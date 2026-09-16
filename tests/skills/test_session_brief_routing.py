@@ -189,3 +189,75 @@ def test_a_session_start_still_prints_prose():
                 capture_output=True, text=True, timeout=120)
     assert p.returncode == 0, p.stderr
     assert p.stdout.strip().startswith("dma-insights: route before you produce")
+
+
+# ── the hook states the bind as a fact, for the checks that run later ─────
+#
+# Measured 2026-09-16: `doctor.py`, run from the Bash tool, has no
+# CLAUDE_PLUGIN_ROOT and read the install record — 1.19.0, a cache copy the
+# session was not running. The hook has the variable and IS a file in the
+# bound tree; it writes the fact down where `plugin_version.bound_root` reads
+# it back.
+
+def test_the_session_start_hook_records_the_tree_it_ran_from(tmp_path, monkeypatch):
+    import json
+    import os
+    import subprocess
+    import sys
+    env = dict(os.environ)
+    env["CLAUDE_PLUGIN_ROOT"] = str(PLUGIN)
+    env["CLAUDE_PID"] = str(os.getpid())
+    env["DMA_BOUND_PLUGIN_DIR"] = str(tmp_path)
+    env["CLAUDE_CODE_SESSION_ID"] = "sess-test"
+    proc = subprocess.run(
+        [sys.executable, str(PLUGIN / "scripts" / "hooks" / "session_brief.py")],
+        input=json.dumps({"session_id": "sess-test",
+                          "hook_event_name": "SessionStart", "source": "startup"}),
+        capture_output=True, text=True, env=env, timeout=60)
+    assert proc.returncode == 0, proc.stderr
+    rec = json.loads((tmp_path / f"bound_plugin-{os.getpid()}.json").read_text())
+    assert rec["pid"] == os.getpid()
+    assert rec["session_id"] == "sess-test"
+    assert rec["plugin_root"] == str(PLUGIN.resolve())
+    assert rec["recorded_at"] > 0
+
+
+def test_the_hook_survives_an_unwritable_record_dir(tmp_path, monkeypatch):
+    """Fail OPEN: a breadcrumb that cannot be written must not cost the brief."""
+    import json
+    import os
+    import subprocess
+    import sys
+    env = dict(os.environ)
+    env["CLAUDE_PLUGIN_ROOT"] = str(PLUGIN)
+    env["CLAUDE_PID"] = str(os.getpid())
+    blocker = tmp_path / "a-file-not-a-dir"
+    blocker.write_text("x")
+    env["DMA_BOUND_PLUGIN_DIR"] = str(blocker / "under-a-file")
+    proc = subprocess.run(
+        [sys.executable, str(PLUGIN / "scripts" / "hooks" / "session_brief.py")],
+        input=json.dumps({"hook_event_name": "SessionStart", "source": "startup"}),
+        capture_output=True, text=True, env=env, timeout=60)
+    assert proc.returncode == 0
+    assert "route before you produce" in proc.stdout
+
+
+def test_a_hook_run_from_the_bound_checkout_reports_no_stale_install(tmp_path):
+    """The live false alarm, end to end: a hook whose CLAUDE_PLUGIN_ROOT is
+    this checkout must not tell the session it is NOT running the checkout,
+    whatever a five-day-old install record says about a cache copy."""
+    import json
+    import os
+    import subprocess
+    import sys
+    env = dict(os.environ)
+    env["CLAUDE_PLUGIN_ROOT"] = str(PLUGIN)
+    env["CLAUDE_PID"] = str(os.getpid())
+    env["DMA_BOUND_PLUGIN_DIR"] = str(tmp_path)
+    proc = subprocess.run(
+        [sys.executable, str(PLUGIN / "scripts" / "hooks" / "session_brief.py")],
+        input=json.dumps({"hook_event_name": "SessionStart", "source": "startup"}),
+        capture_output=True, text=True, env=env, timeout=120)
+    assert proc.returncode == 0, proc.stderr
+    assert "NOT running what the checkout publishes" not in proc.stdout, proc.stdout
+    assert "IS REFUSED" not in proc.stdout

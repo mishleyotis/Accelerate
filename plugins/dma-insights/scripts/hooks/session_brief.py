@@ -32,6 +32,7 @@ network, no state, fails OPEN — a brief that cannot decide prints, because
 failing closed costs the brief on exactly the session that needed it.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -306,6 +307,31 @@ def brief(event: dict) -> str:
     return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"]) + install_warning()
 
 
+def record_bind(event: dict) -> None:
+    """Write down which plugin tree THIS session bound, for the checks that
+    run later in the session without the hook's environment.
+
+    This hook runs from inside the bound tree — its own path is
+    `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py` — with
+    CLAUDE_PLUGIN_ROOT and CLAUDE_PID in its environment, so it is the one
+    place in the session that can state the bind as a fact rather than read
+    it off the install record. `doctor.py` and `plugin_version.py`, run
+    from the Bash tool, have neither variable and read this record instead
+    (`plugin_version.bound_root`, rung "record"). Measured 2026-09-16: the
+    record said 1.19.0, the session had bound the 1.20.0 checkout in place,
+    and every check that read the record said STALE. Fails open.
+    """
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        sys.path.insert(0, str(here))
+        import plugin_version                                  # noqa: PLC0415
+        root = os.environ.get("CLAUDE_PLUGIN_ROOT") or str(here.parent)
+        plugin_version.record_bound_root(
+            root, session_id=str(event.get("session_id") or "") or None)
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        pass
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -313,6 +339,7 @@ def main() -> int:
             event = {}
     except Exception:            # noqa: BLE001 — fail OPEN, on purpose
         event = {}
+    record_bind(event)
     text = brief(event)
     # SubagentStart takes `additionalContexts`; SessionStart takes plain
     # stdout. Emitting the JSON form for a subagent is what actually puts the

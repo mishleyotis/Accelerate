@@ -311,6 +311,15 @@ elif command -v claude >/dev/null 2>&1; then
   # install for a diverged tree; enable for a disabled one). It is the same
   # command the intake Routine's preflight runs, so what the firing checks is
   # what provisioning already tried.
+  #
+  # WHAT THIS CACHE COPY IS, measured 2026-09-16 (Claude Code 2.1.273): on a
+  # DIRECTORY marketplace the session binds the plugin from the checkout IN
+  # PLACE (CLAUDE_PLUGIN_ROOT=$REPO_DIR/plugins/dma-insights on the session's
+  # own connector process), not from this versioned cache copy. The copy and
+  # its record are what `claude plugin list` reports and what an older CLI
+  # loads; the session that matters reads the checkout section 1 just reset.
+  # So a snapshot that carries an old copy and record carries an old RECORD,
+  # and plugin_version.py judges the tree the session actually bound.
   HEAL_OUT="$(timeout 420 python3 "$REPO_DIR/plugins/dma-insights/scripts/plugin_version.py" --heal 2>&1 | head -1)"     || HEAL_OUT="${HEAL_OUT:-plugin_version.py --heal did not complete}"
   log "tree check: ${HEAL_OUT:-no verdict}"
   case "$HEAL_OUT" in

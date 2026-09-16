@@ -507,7 +507,11 @@ def concurrent_writers_check() -> dict:
     name = "concurrent workbook writers"
     try:
         v = plugin_version.compare()
-        root = (v.get("installed") or {}).get("install_path")
+        inst = v.get("installed") or {}
+        # The tree the SESSION binds (measured) over the record's cache
+        # copy: on a directory marketplace they differ, and the session's
+        # agents execute the former (2026-09-16).
+        root = inst.get("bound_path") or inst.get("install_path")
         eng = (Path(root) / "skills" / "dma-research" / "engine" /
                "workbook.py") if root else None
         if not eng or not eng.is_file():

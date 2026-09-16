@@ -553,6 +553,23 @@ class ConcurrentWriters(unittest.TestCase):
         src = inspect.getsource(doctor.concurrent_writers_check)
         self.assertIn("install_path", src)
 
+    def test_the_bound_tree_outranks_the_record_s_copy(self):
+        """On a directory marketplace the session binds the checkout in
+        place and the record names a cache copy (measured 2026-09-16); the
+        engine the session's agents execute is the bound one."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            bound, cache = pathlib.Path(d) / "bound", pathlib.Path(d) / "cache"
+            self._write(bound, "import fcntl\ndef transaction(self):\n"
+                               "    fcntl.flock(fh, fcntl.LOCK_EX)\n")
+            self._write(cache, "# not a supported topology and never was\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(cache),
+                                                "bound_path": str(bound)}}):
+                row = doctor.concurrent_writers_check()
+            self.assertTrue(row["detail"].startswith("SAFE:"), row["detail"])
+
     def test_it_never_fails_the_doctor(self):
         """Informational: an unlocked engine is a fact to act on, not a
         reason to refuse to report the other fifteen rows."""

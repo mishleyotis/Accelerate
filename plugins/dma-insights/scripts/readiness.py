@@ -79,9 +79,13 @@ STANDING_OPEN = [
      "dma-refresh-drift-daily reaches a permission prompt the plugin's "
      "autoapprove hook allows, which means the hook did not run — a stale "
      "install. plugin_version.py --heal fixes the DISK; hooks bind once at "
-     "session start, so the firing that found it cannot heal itself.",
-     "the environment owner: bootstrap_session.sh must run before the "
-     "session starts (claude.ai/code environment settings)",
+     "session start, so the firing that found it cannot heal itself. "
+     "Judge it by the MEASURED bind the verdict names: on a directory "
+     "marketplace the session binds the checkout in place and a stale "
+     "install record is cosmetic (2026-09-16).",
+     "the environment owner: the setup script runs once per environment "
+     "snapshot (claude.ai/code environment settings); rebuild the snapshot "
+     "or keep the marketplace a directory source at the checkout",
      "docs/ROUTINES.md"),
     # Was "owner-names-the-client channel … NOT BUILT" until 2026-08-30. It
     # is built: the requests were already arriving in #deal-desk from a

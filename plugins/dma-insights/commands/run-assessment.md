@@ -62,9 +62,13 @@ cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m
 ```
 
 `doctor.py --heal` repairs a STALE / MISSING / DIVERGED install and re-checks
-once; `UPDATED_MID_SESSION` means the disk is fixed and THIS session still
-holds the old roster — carry on, because the driver dispatches every lane as
-a fresh child process that binds the repaired install. Its `connector
+once. Its `installed plugin` row judges the tree this session actually BOUND
+(measured; on a directory marketplace that is the checkout in place, and a
+lagging install record is cosmetic), so a session that binds the checkout
+reads OK through a heal. `UPDATED_MID_SESSION` means the bound tree moved
+under this session and THIS session still holds the old roster — carry on,
+because the driver dispatches every lane as a fresh child process that binds
+the current tree. Its `connector
 contract` row now reads the baseline you wrote: UNVERIFIED means you skipped
 the step above, and a short baseline is the DEGRADED row of the table, not a
 provisioning defect. Any OTHER row red after the heal is a provisioning
