@@ -252,9 +252,11 @@ def install_warning() -> str:
             return zip_text
         status = str(v.get("status") or "")
         refusing = status in REFUSING_INSTALL_STATES
+        loaded_from = (v.get("installed") or {}).get("load_source") or "the install record"
         return (f" INSTALL CHECK, from this container rather than from "
-                f"expectation: {plugin_version.summary(v)}. This session is "
-                f"NOT running what the checkout publishes."
+                f"expectation: {plugin_version.summary(v)} (loaded root "
+                f"measured from {loaded_from}). This session is NOT running "
+                f"what the checkout publishes."
                 + (f" RESEARCH, SCORING AND REPORT WORK IS REFUSED ON THIS "
                    f"INSTALL: do not run /dma-insights:run-assessment, "
                    f"`engine.pipeline run` or `engine.cli start`, and do not "
@@ -306,6 +308,30 @@ def brief(event: dict) -> str:
     return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"]) + install_warning()
 
 
+def record_loaded_root(event: dict) -> None:
+    """Leave the one fact only a hook can measure where the rest of the
+    plugin can read it: the root the CLI loaded THIS session's plugin from.
+
+    The CLI sets CLAUDE_PLUGIN_ROOT on every hook and on the connector it
+    starts; a Bash tool call sees neither. Until 2026-09-16 every version
+    check in a Bash-run script therefore read installed_plugins.json — the
+    snapshot's record of what was once installed — and on a cloud container
+    called a session STALE while its hooks, connector and roster were all
+    running the checkout in place (see plugin_version.loaded_root). This
+    record is how `doctor.py`, `engine.cli start` and `guard_dispatch`
+    measure the same root the hook did. Fails open: a record that cannot be
+    written costs nothing but this rung of the measurement.
+    """
+    try:
+        here = Path(__file__).resolve().parent.parent              # scripts/
+        if str(here) not in sys.path:
+            sys.path.insert(0, str(here))
+        import plugin_version                                      # noqa: PLC0415
+        plugin_version.record_loaded_root(event)
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        pass
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -313,6 +339,7 @@ def main() -> int:
             event = {}
     except Exception:            # noqa: BLE001 — fail OPEN, on purpose
         event = {}
+    record_loaded_root(event)
     text = brief(event)
     # SubagentStart takes `additionalContexts`; SessionStart takes plain
     # stdout. Emitting the JSON form for a subagent is what actually puts the

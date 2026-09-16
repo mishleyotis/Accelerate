@@ -31,6 +31,15 @@ def _no_provisioning_record(tmp_path, monkeypatch):
     different code paths depending on where they ran.
     """
     monkeypatch.setattr(pv, "PROV_FILE", tmp_path / "no-provisioning.json")
+    # THE LOADED ROOT IS PINNED TO "NO MEASUREMENT" for the same reason
+    # again. `loaded_root()` reads this machine — CLAUDE_PLUGIN_ROOT, the
+    # hook's record, the live connector process — and on the very container
+    # that motivated it those rungs answer, so every fixture below would be
+    # judged against the real checkout instead of its own tree. The tests
+    # that are ABOUT the measurement point the rungs at fixtures of their own.
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT", raising=False)
+    monkeypatch.setattr(pv, "LOADED_ROOT_FILE", tmp_path / "no-loaded-root.json")
+    monkeypatch.setattr(pv, "_connector_process_root", lambda: None)
     # ENABLEMENT IS PINNED FOR THE SAME REASON. `enabled_state()` reads the
     # real settings.json, so without this a suite about installs would answer
     # DISABLED or not depending on whether the machine running it happens to
@@ -761,26 +770,34 @@ def test_a_freshly_provisioned_container_is_still_ok(tmp_path):
     assert out["state"] == "ok" and out["recurs"] is False
 
 
-def test_the_fix_names_session_start_not_another_heal(tmp_path):
-    """--heal repairs the DISK and the session has already bound its roster,
-    so prescribing it again would prescribe paying the same cost forever."""
+def test_the_fix_names_the_cache_rebuild_not_another_heal(tmp_path):
+    """--heal repairs a disk the next session does not keep, so prescribing
+    it again would prescribe paying the same cost forever. Until 2026-09-16
+    this fix said "run the setup script at SESSION START" — which the cloud
+    environment cannot do: setup runs once and is snapshotted, by design. A
+    prescription that cannot be followed is the livelock in another form.
+    The one that can: rebuild the cache, and ask why the CLI is loading the
+    copy at all when it loads the checkout in place."""
     import datetime as _d
     old = (_d.datetime.now(_d.timezone.utc)
            - _d.timedelta(days=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
     fix = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old))["fix"]
-    assert "SESSION START" in fix
-    assert "not once when the image is baked" in fix
+    assert "rebuild the environment cache" in fix
+    assert "in place" in fix
+    assert "SESSION START" not in fix, "an instruction the environment cannot follow"
 
 
 def test_a_stale_snapshot_says_a_fresh_session_will_not_fix_it(tmp_path):
     """The correction that matters operationally: the staleness is in the
     IMAGE, not the session, so a new session on the same image binds the
-    same short roster."""
+    same short roster — and only when the session loads the image's COPY."""
     import datetime as _d
     old = (_d.datetime.now(_d.timezone.utc)
            - _d.timedelta(hours=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
     why = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old))["reason"]
-    assert "fresh session" in why and "does not fix it" in why
+    assert "fresh session does not fix it" in why
+    assert "neither does a heal" in why
+    assert "COPY" in why and "in place" in why
 
 
 def test_an_unreadable_timestamp_does_not_manufacture_a_verdict(tmp_path):
@@ -788,3 +805,225 @@ def test_an_unreadable_timestamp_does_not_manufacture_a_verdict(tmp_path):
     assert pv.provisioning_age_h({"bootstrap_ran_at": "not a date"}) is None
     out = pv.provisioning(_prov(tmp_path, bootstrap_ran_at="not a date"))
     assert out["state"] == "ok", "no timestamp is not evidence of staleness"
+
+
+# ── the loaded root: measured, not read from the record ──────────────────
+#
+# MEASURED 2026-09-16 on a cloud container: installed_plugins.json said
+# 1.19.0 at a cache path with 73 agents; the connector process, every
+# PreToolUse hook and the Agent roster ran from the CHECKOUT at 1.20.0 with
+# 74 (CLAUDE_PLUGIN_ROOT=<repo>/plugins/dma-insights). The record is written
+# once when the environment snapshot is built and restored every session;
+# the checkout is refreshed every session before the CLI starts. Reading the
+# record therefore called every session STALE for as long as the snapshot
+# outlived a bump, and every --heal rewrote a copy nothing loads from. These
+# tests pin the correction: the verdict follows the tree the session RUNS.
+
+def _stale_record_current_checkout(tmp_path):
+    """The exact shape: a current checkout and a record one version behind
+    pointing at a cache copy one agent short."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    state = _state(tmp_path, "1.19.0", agents=73)
+    return repo, state
+
+
+def test_a_session_running_the_checkout_in_place_is_ok_whatever_the_record_says(
+        tmp_path, monkeypatch):
+    repo, state = _stale_record_current_checkout(tmp_path)
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT",
+                       str(repo / "plugins" / "dma-insights"))
+    v = pv.compare(repo, state)
+    assert v["status"] == "OK" and v["ok"], v["reasons"]
+    inst = v["installed"]
+    assert inst["in_place"] is True
+    assert inst["version"] == "1.20.0" and inst["agents"] == 74, (
+        "the roster is counted where the session dispatches from")
+    assert inst["record_version"] == "1.19.0", (
+        "the record is reported beside the measurement, not believed over it")
+    assert "CLAUDE_PLUGIN_ROOT" in inst["load_source"]
+    joined = " ".join(v["reasons"])
+    assert "IN PLACE" in joined and "bookkeeping" in joined
+    assert "nothing to heal" in joined
+    assert "cause:" not in joined, "an OK verdict is not narrated"
+    assert v["fix"] == ""
+
+
+def test_the_in_place_summary_says_so_in_one_line(tmp_path, monkeypatch):
+    repo, state = _stale_record_current_checkout(tmp_path)
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT",
+                       str(repo / "plugins" / "dma-insights"))
+    line = pv.summary(pv.compare(repo, state))
+    assert "\n" not in line
+    assert line.startswith("OK:") and "in place" in line
+
+
+def test_heal_does_nothing_to_a_session_running_the_checkout(tmp_path,
+                                                             monkeypatch):
+    """The loop this closes: --heal every session, changing nothing the
+    session runs, on a disk the next session does not keep."""
+    repo, state = _stale_record_current_checkout(tmp_path)
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT",
+                       str(repo / "plugins" / "dma-insights"))
+    v = pv.compare(repo, state)
+    healed, log = pv.heal(v)
+    assert healed is v and log == [], "nothing ran"
+
+
+def test_the_root_cause_line_is_not_printed_on_an_ok_verdict(tmp_path,
+                                                             monkeypatch,
+                                                             capsys):
+    """The provisioning record on that container was 119 hours old — the
+    snapshot working as designed. Printing 'RECURS EVERY FIRING' under an OK
+    verdict is how a healthy session is told to go and fix something."""
+    import datetime as _d
+    repo, state = _stale_record_current_checkout(tmp_path)
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT",
+                       str(repo / "plugins" / "dma-insights"))
+    old = (_d.datetime.now(_d.timezone.utc)
+           - _d.timedelta(hours=119)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    code = pv.main(["--repo-root", str(repo), "--state", str(state),
+                    "--provisioning", str(_prov(tmp_path, bootstrap_ran_at=old))])
+    out = capsys.readouterr().out
+    assert code == 0
+    assert out.startswith("OK:")
+    assert "ROOT CAUSE" not in out
+
+
+def test_a_session_running_a_stale_cache_copy_is_still_stale(tmp_path,
+                                                             monkeypatch):
+    """The measurement is not a blanket pardon. When the CLI really does
+    load the snapshot's copy — an older CLI, a non-directory marketplace —
+    the loaded root IS that copy and the verdict is the honest STALE, judged
+    against the tree the session runs."""
+    repo, state = _stale_record_current_checkout(tmp_path)
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(tmp_path / "cache" / "1.19.0"))
+    v = pv.compare(repo, state)
+    assert v["status"] == "STALE" and not v["ok"]
+    assert v["installed"]["in_place"] is False
+    assert v["installed"]["agents"] == 73
+    assert "claude plugin update" in v["fix"]
+
+
+def test_the_measurement_outranks_the_record_when_they_name_different_trees(
+        tmp_path, monkeypatch):
+    """A record pointing at a tree that is short and a session running a
+    tree that is whole: the session is right by definition — it is the one
+    dispatching."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    state = _state(tmp_path, "1.20.0", agents=5)       # a short copy
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT",
+                       str(repo / "plugins" / "dma-insights"))
+    v = pv.compare(repo, state)
+    assert v["status"] == "OK", v["reasons"]
+
+
+def test_no_record_at_all_but_a_running_session_reports_the_tree_it_runs(
+        tmp_path, monkeypatch):
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT",
+                       str(repo / "plugins" / "dma-insights"))
+    v = pv.compare(repo, tmp_path / "absent-installed_plugins.json")
+    assert v["status"] == "OK"
+    assert v["installed"]["source"] == "loaded root"
+
+
+# ── the record the SessionStart hook leaves for Bash-run scripts ─────────
+
+def _record(tmp_path, monkeypatch, root, session_id="sess-1", cli_pid=None,
+            recorded_at="2026-09-16T02:34:50Z"):
+    """One hook record, written the way the hook writes it."""
+    import os
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(root))
+    monkeypatch.setattr(os, "getppid", lambda: cli_pid if cli_pid is not None else os.getpid())
+    rec = pv.record_loaded_root({"session_id": session_id,
+                                 "hook_event_name": "SessionStart"},
+                                tmp_path / "loaded_root.json")
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT")
+    rec["recorded_at"] = recorded_at
+    return rec
+
+
+def test_the_hook_record_is_read_back_for_the_same_session(tmp_path, monkeypatch):
+    repo, state = _stale_record_current_checkout(tmp_path)
+    tree = repo / "plugins" / "dma-insights"
+    _record(tmp_path, monkeypatch, tree, session_id="sess-1")
+    monkeypatch.setattr(pv, "LOADED_ROOT_FILE", tmp_path / "loaded_root.json")
+    monkeypatch.setenv("CLAUDE_CODE_SESSION_ID", "sess-1")
+    monkeypatch.delenv("CLAUDE_PID", raising=False)
+    hit = pv.loaded_root()
+    assert hit and hit["root"] == str(tree)
+    assert "this session" in hit["source"]
+    v = pv.compare(repo, state)
+    assert v["status"] == "OK" and v["installed"]["in_place"] is True
+
+
+def test_a_record_of_a_session_that_is_over_is_not_trusted(tmp_path,
+                                                           monkeypatch):
+    """The CLI pid in the record is gone: that session ended and its tree
+    may have moved. Rung 2 answers nothing; the next rung decides."""
+    repo, _ = _stale_record_current_checkout(tmp_path)
+    tree = repo / "plugins" / "dma-insights"
+    path = tmp_path / "loaded_root.json"
+    path.write_text(json.dumps({"records": [{
+        "session_id": "gone", "cli_pid": 2 ** 22 - 1, "root": str(tree),
+        "recorded_at": "2026-09-16T02:34:50Z"}]}))
+    monkeypatch.setattr(pv, "LOADED_ROOT_FILE", path)
+    monkeypatch.setenv("CLAUDE_CODE_SESSION_ID", "another-session")
+    monkeypatch.delenv("CLAUDE_PID", raising=False)
+    assert pv.loaded_root() is None
+
+
+def test_a_record_naming_a_tree_that_is_gone_answers_nothing(tmp_path,
+                                                             monkeypatch):
+    path = tmp_path / "loaded_root.json"
+    path.write_text(json.dumps({"records": [{
+        "session_id": "sess-1", "cli_pid": 1, "root": str(tmp_path / "vanished"),
+        "recorded_at": "2026-09-16T02:34:50Z"}]}))
+    monkeypatch.setattr(pv, "LOADED_ROOT_FILE", path)
+    monkeypatch.setenv("CLAUDE_CODE_SESSION_ID", "sess-1")
+    assert pv.loaded_root() is None
+
+
+def test_the_record_keeps_one_entry_per_session_and_the_newest_eight(
+        tmp_path, monkeypatch):
+    repo, _ = _stale_record_current_checkout(tmp_path)
+    tree = repo / "plugins" / "dma-insights"
+    for i in range(12):
+        _record(tmp_path, monkeypatch, tree, session_id=f"s{i}")
+    _record(tmp_path, monkeypatch, tree, session_id="s11")      # again
+    recs = json.loads((tmp_path / "loaded_root.json").read_text())["records"]
+    assert len(recs) == 8
+    assert [r["session_id"] for r in recs].count("s11") == 1
+    assert recs[-1]["session_id"] == "s11"
+    assert recs[-1]["realpath"] == str(tree.resolve())
+
+
+def test_the_hook_writes_nothing_without_a_plugin_root(tmp_path, monkeypatch):
+    """A test run, a CI job: no CLI started this process, so there is no
+    fact to record — and no file appears to be mistaken for one."""
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT", raising=False)
+    assert pv.record_loaded_root({"session_id": "x"},
+                                 tmp_path / "loaded_root.json") is None
+    assert not (tmp_path / "loaded_root.json").exists()
+
+
+def test_the_connector_process_is_the_last_rung(tmp_path, monkeypatch):
+    """No CLAUDE_PLUGIN_ROOT, no record — the connector the CLI started is
+    alive for the whole session and carries the root in its environment."""
+    repo, state = _stale_record_current_checkout(tmp_path)
+    tree = repo / "plugins" / "dma-insights"
+    monkeypatch.setattr(pv, "_connector_process_root",
+                        lambda: {"root": str(tree),
+                                 "source": "the running connector process (pid 1)"})
+    hit = pv.loaded_root()
+    assert hit and hit["root"] == str(tree)
+    assert pv.compare(repo, state)["status"] == "OK"
+
+
+def test_no_measurement_falls_back_to_the_record(tmp_path):
+    """A CI runner or a laptop with no session up: the record is all there
+    is, and the old arithmetic still applies to it."""
+    repo, state = _stale_record_current_checkout(tmp_path)
+    v = pv.compare(repo, state)
+    assert v["status"] == "STALE"
+    assert "installed_plugins.json" in v["installed"]["load_source"]

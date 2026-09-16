@@ -78,10 +78,17 @@ STANDING_OPEN = [
     ("stale install on a trigger-fired container",
      "dma-refresh-drift-daily reaches a permission prompt the plugin's "
      "autoapprove hook allows, which means the hook did not run — a stale "
-     "install. plugin_version.py --heal fixes the DISK; hooks bind once at "
-     "session start, so the firing that found it cannot heal itself.",
-     "the environment owner: bootstrap_session.sh must run before the "
-     "session starts (claude.ai/code environment settings)",
+     "install. Measured 2026-09-16: on a cloud container the CLI loads the "
+     "plugin IN PLACE from the checkout, which the harness refreshes before "
+     "the CLI starts, and installed_plugins.json is the environment "
+     "snapshot's bookkeeping; plugin_version.py now measures the loaded "
+     "root (CLAUDE_PLUGIN_ROOT, the SessionStart hook's record, the "
+     "connector process) instead of the record. A firing that still binds "
+     "the cache copy is loading from the snapshot, and no in-session heal "
+     "survives to the next session.",
+     "the environment owner, only if a firing's loaded root is the cache "
+     "copy: rebuild the environment cache (edit the Setup script text) — "
+     "setup scripts run once and are snapshotted, never per session",
      "docs/ROUTINES.md"),
     # Was "owner-names-the-client channel … NOT BUILT" until 2026-08-30. It
     # is built: the requests were already arriving in #deal-desk from a

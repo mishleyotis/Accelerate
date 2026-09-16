@@ -189,3 +189,56 @@ def test_a_session_start_still_prints_prose():
                 capture_output=True, text=True, timeout=120)
     assert p.returncode == 0, p.stderr
     assert p.stdout.strip().startswith("dma-insights: route before you produce")
+
+
+# ── the hook leaves the loaded root where Bash-run scripts can read it ───
+#
+# MEASURED 2026-09-16: the CLI sets CLAUDE_PLUGIN_ROOT on every hook and on
+# the connector it starts; a Bash tool call sees neither. The version check
+# in doctor.py / engine.cli therefore read installed_plugins.json — the
+# environment snapshot's record — and called a session STALE while its hooks
+# and roster ran the checkout in place. The SessionStart hook is the one
+# process that knows the root for certain, so it writes it down.
+
+def test_the_session_hook_records_the_root_it_ran_from(tmp_path, monkeypatch):
+    import json
+    import sys
+    sb = _sb()
+    sys.path.insert(0, str(PLUGIN / "scripts"))
+    import plugin_version as pv
+    monkeypatch.setattr(pv, "LOADED_ROOT_FILE", tmp_path / "loaded_root.json")
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(PLUGIN))
+    sb.record_loaded_root({"session_id": "sess-42",
+                           "hook_event_name": "SessionStart"})
+    recs = json.loads((tmp_path / "loaded_root.json").read_text())["records"]
+    assert recs[-1]["session_id"] == "sess-42"
+    assert recs[-1]["root"] == str(PLUGIN)
+    assert recs[-1]["hook"] == "SessionStart"
+
+
+def test_the_hook_survives_a_root_it_cannot_record(tmp_path, monkeypatch):
+    """Fail open: the brief is the hook's job, the record is a bonus."""
+    import sys
+    sb = _sb()
+    sys.path.insert(0, str(PLUGIN / "scripts"))
+    import plugin_version as pv
+    monkeypatch.setattr(pv, "LOADED_ROOT_FILE",
+                        tmp_path / "not-a-dir.json" / "loaded_root.json")
+    (tmp_path / "not-a-dir.json").write_text("a file, not a directory")
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(PLUGIN))
+    sb.record_loaded_root({"session_id": "sess-43"})      # must not raise
+    assert "research-conductor" in sb.brief({"source": "startup"})
+
+
+def test_an_in_place_load_is_not_warned_about(monkeypatch):
+    """The false alarm itself: the record says one version, the session runs
+    the checkout. The brief says nothing, because nothing is wrong."""
+    import sys
+    import types
+    sb = _sb()
+    fake = types.SimpleNamespace(
+        compare=lambda: {"ok": True, "status": "OK",
+                         "installed": {"in_place": True}},
+        summary=lambda v: "OK: … — loaded in place from the checkout")
+    monkeypatch.setitem(sys.modules, "plugin_version", fake)
+    assert sb.install_warning() == ""

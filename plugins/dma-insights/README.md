@@ -158,8 +158,8 @@ stand up another deployment, run the doctor against it before trusting it.
 ## Install
 
 **By upload (Claude Desktop · Cowork · claude.ai)** — one archive carries all
-six skills, all 73 agents, both commands and the connector declaration, so
-nothing is installed piecemeal. Package it so that `.claude-plugin/plugin.json`
+six skills, every agent the manifest declares, the commands and the connector
+declaration, so nothing is installed piecemeal. Package it so that `.claude-plugin/plugin.json`
 sits at the **root of the zip** (do not wrap the contents in a folder):
 
 ```bash
@@ -201,6 +201,25 @@ Then, in a session, prove it rather than assuming it:
 
 The plugin ships disabled (`defaultEnabled: false`): nothing loads until it is
 enabled after install. `/dma-insights:doctor` reports the enabled state.
+
+**What a session actually loads, and how that is checked.** When the
+marketplace is a checkout (`marketplace add ./`, or the cloud environment's
+`.claude/settings.json` registering the repo as a `directory` source), the CLI
+loads the plugin **in place from the checkout** — every hook and the connector
+run with `CLAUDE_PLUGIN_ROOT=<repo>/plugins/dma-insights`. The install record
+in `~/.claude/plugins/installed_plugins.json` and the copy under
+`~/.claude/plugins/cache/` are the CLI's bookkeeping of the install, not what
+it runs. On Claude Code on the web that record is written once, when the
+environment's setup script runs and the filesystem is snapshotted, and the
+snapshot is restored for every later session while the checkout is refreshed
+to the branch tip before the CLI starts — so the record lags every version
+bump by up to a week, by design, and nothing needs healing.
+`scripts/plugin_version.py` therefore measures the **loaded root** —
+`CLAUDE_PLUGIN_ROOT` when set, else the root the SessionStart hook recorded
+for this session, else the running connector process — compares that tree to
+the checkout, and reports the record beside it. A `STALE` verdict now means
+the session really is running an older tree; `doctor.py --heal` is for that
+case, and only that case.
 
 ## Requirements on the machine
 

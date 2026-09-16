@@ -24,6 +24,28 @@
 # secretAccessor on dmai-mcp-path-token, nothing else. It must NEVER be
 # committed — this repository is public.
 #
+# WHEN IT ACTUALLY RUNS (from the cloud-environment documentation, read
+# 2026-09-16 after weeks of inferring it): ONCE. A setup script runs the
+# first time a session starts in an environment; the filesystem is then
+# snapshotted and every later session starts from that snapshot with the
+# setup step SKIPPED — until the script text or the network settings
+# change, or the cache expires after roughly seven days. There is no
+# per-session mode. So everything this script writes — the key file, the
+# path-token cache, the plugin registration, the install record under
+# ~/.claude/plugins and the provisioning.json breadcrumb — is the
+# snapshot's, days old by design, on every session that follows.
+#
+# WHY THAT IS FINE FOR THE PLUGIN: section 4 registers the checkout as a
+# DIRECTORY marketplace with a relative plugin path, and the CLI loads such
+# a plugin IN PLACE from the checkout (measured 2026-09-16:
+# CLAUDE_PLUGIN_ROOT on the connector process and on every hook was
+# $REPO_DIR/plugins/dma-insights, not the plugins/cache copy). The harness
+# refreshes the checkout to the branch tip before the CLI starts, so each
+# session binds the plugin its branch publishes. The installed_plugins.json
+# record and the cache copy are the CLI's bookkeeping of the install, not
+# what it runs; plugin_version.py measures the loaded root and reports the
+# record beside it. Nothing in a session needs to heal or reinstall.
+#
 # Fail-open by design: a session that starts without the plugin is caught
 # by every routine's STEP 0 and stops honestly; a setup script that blocks
 # session start entirely is a worse failure mode. Every problem is logged
@@ -59,13 +81,15 @@ KEY_FILE="${DMA_SA_KEY_FILE:-/root/.dma/sa.json}"
 PROJECT="digital-maturity-assessor"
 
 # ---- 1 · the repository (public — anonymous clone works) ----------------
-# THE CHECKOUT IS THE MARKETPLACE, so this step decides which plugin version
-# the session binds. `.claude/settings.json` registers zennify-dma as a
-# DIRECTORY source pointing at $REPO_DIR, and Claude Code installs enabled
-# plugins from it at session start — before any prompt runs. So a checkout
-# that is behind at this moment is a session that binds a plugin that is
-# behind, and no STEP 0 inside the session can undo it: agents, skills and
-# hooks load once.
+# THE CHECKOUT IS THE MARKETPLACE, and the CLI loads the plugin from it in
+# place, so what the checkout holds when a SESSION starts is what that
+# session binds. `.claude/settings.json` registers zennify-dma as a
+# DIRECTORY source pointing at $REPO_DIR. This script runs once, at snapshot
+# build (see the header); the harness then refreshes the checkout before
+# every session's CLI starts. Bringing the checkout to the tip here still
+# matters — it is the tree the install is REGISTERED from, and it is what a
+# session sees if the harness ever leaves the checkout alone — but it is
+# not the last word on which version a session runs.
 #
 # That is the whole shape of the livelock measured 2026-08-23/24 and reported
 # by two synthesis firings: container arrives with a stale checkout (136
@@ -281,13 +305,15 @@ elif command -v claude >/dev/null 2>&1; then
   fi
 
   if [ -n "$WANT" ] && [ "$HAVE" != "$WANT" ]; then
-    log "PLUGIN VERSION MISMATCH AFTER RETRY: installed ${HAVE:-none}, "
-    log "$BRANCH ships $WANT — this session will bind ${HAVE:-nothing}. The"
-    log "provisioning record carries both numbers; plugin_version.py reads it"
-    log "and reports this as a recurring provisioning defect rather than as a"
-    log "transient the next firing will clear."
+    log "PLUGIN VERSION MISMATCH AFTER RETRY: install record says ${HAVE:-none},"
+    log "$BRANCH ships $WANT. The record is the CLI's bookkeeping; a session"
+    log "loads the plugin in place from $REPO_DIR and plugin_version.py"
+    log "measures that root — this mismatch is a defect only if a session's"
+    log "loaded root turns out to be the cache copy. Both numbers go in the"
+    log "provisioning record."
   else
-    log "plugin at ${HAVE:-unknown} (origin/$BRANCH ships ${WANT:-unknown})"
+    log "install record at ${HAVE:-unknown} (origin/$BRANCH ships ${WANT:-unknown});"
+    log "sessions load in place from $REPO_DIR/plugins/dma-insights"
   fi
 
   # ---- 4a · the check the version NUMBER cannot make ---------------------
@@ -372,7 +398,9 @@ STAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo unknown)"
   "checkout_state": "$CHECKOUT_STATE",
   "checkout_note": "$CHECKOUT_NOTE",
   "plugin_installed": "$HAVE",
-  "plugin_expected": "$WANT"
+  "plugin_expected": "$WANT",
+  "marketplace_source": "directory:$REPO_DIR",
+  "plugin_load": "in place from $REPO_DIR/plugins/dma-insights; plugin_installed is the install record, not the loaded root"
 }
 JSON
 ) && log "provisioning record written to $PROV_FILE" \
