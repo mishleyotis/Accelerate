@@ -2143,6 +2143,21 @@ _FACE_BUDGETS = {
          {"max_chars": 80}, "the addressable-cell chip",
          "the feature's name, not its case"),
     ),
+    # Measured on Golden 1, 2026-09-02. Eleven of twelve prerequisites put a
+    # 206-291 character paragraph in this chip; the twelfth read "Evidenced"
+    # and rendered correctly, which is the whole shape of the slot stated by
+    # the payload itself. The long ones overflowed the pill, clipped
+    # mid-sentence, and collided with the row beneath — the same failure the
+    # why-now window clause and the 150-character detection_basis produced,
+    # on a third surface that had no budget registered.
+    "platform.recommendations": (
+        ("recommendations[*].prerequisites[*].basis",
+         {"max_chars": 60, "max_sentences": 1},
+         "the prerequisite's status chip, beside the condition sentence",
+         "a SHORT STATUS LABEL for how the condition stands ('Evidenced'); "
+         "the record that settles it, and what would settle it, belong in "
+         "`note`, which renders in the drawer beneath"),
+    ),
 }
 
 

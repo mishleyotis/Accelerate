@@ -12,6 +12,8 @@ writes serving content (invariant 2).
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
@@ -33,8 +35,65 @@ from .subverticals import SCOPE_TAG, scope_to_entity
 _connect = db_connect
 
 
+#: How long startup will wait for the first connection before giving up and
+#: serving anyway. Bounded because Cloud Run reads a container that never
+#: reports ready as a failed revision — a slow first request is a bad minute,
+#: a revision that never goes live is an outage.
+WARMUP_TIMEOUT_S = 120
+
+
 @asynccontextmanager
 async def _lifespan(app):
+    """Open one connection BEFORE the first request, and say how long it took.
+
+    MEASURED 2026-09-01, on the revision that fixed the connector's refresh
+    strategy: the first requests to a new instance took 150s, 140s, 128s and
+    99s and then settled to 0.4s. All returned 200. A user reloading the app
+    in that window saw a browser that simply span. The database was idle
+    throughout — the time is the FIRST CONNECTION: constructing the
+    Connector, fetching instance metadata and minting the ephemeral
+    certificate, on a Cloud Run instance whose CPU is throttled outside a
+    request.
+
+    `run.googleapis.com/startup-cpu-boost` is already true on this service,
+    and it was no help, because boost covers container STARTUP and the first
+    connection happened on the first REQUEST. Opening it here moves that cost
+    inside the boosted window, before uvicorn accepts anything.
+
+    NEVER FATAL. A warm-up that raises must not stop the service from
+    starting — the routes still work, they just pay the cost once, which is
+    exactly today's behaviour and no worse. And it is BOUNDED: an unbounded
+    warm-up would trade a slow first request for a container that never
+    reports ready, which Cloud Run reads as a failed revision.
+
+    The print is the other half. Through the whole of today's outage this
+    service emitted no application log at all: uvicorn's access lines and
+    nothing else. One line naming the connection cost would have identified
+    it in seconds rather than from request latencies read backwards.
+    """
+    import asyncio
+    import time
+    t0 = time.monotonic()
+    try:
+        def _warm():
+            c = _connect()
+            try:
+                cur = c.cursor()
+                cur.execute("SELECT 1")
+                cur.fetchone()
+            finally:
+                c.close()
+        await asyncio.wait_for(asyncio.to_thread(_warm),
+                               timeout=WARMUP_TIMEOUT_S)
+        print(f"db: warm connection ready in {time.monotonic() - t0:.1f}s",
+              flush=True)
+    except asyncio.TimeoutError:
+        print(f"db: warm-up did not finish in {WARMUP_TIMEOUT_S}s "
+              f"({time.monotonic() - t0:.1f}s) — serving anyway, the first "
+              f"request will pay it", flush=True)
+    except Exception as exc:                      # noqa: BLE001 — see above
+        print(f"db: warm-up failed after {time.monotonic() - t0:.1f}s: "
+              f"{type(exc).__name__}: {exc} — serving anyway", flush=True)
     yield
     db_close()
 
@@ -644,7 +703,19 @@ def entity_evidence(display_id: str, request: Request, response: Response,
         res = ev_fetch(cur, entity_id, wanted or None,
                        run_id=run_meta["run_id"])
         res["items"] = ev_redact(res["items"], audience)
-        tag = etag_for(run_meta, f"{audience}.evidence")
+        # THE DRAWER IS A LIVE READ, so its tag cannot be pinned to the
+        # promotion. `evidence_index` changes outside promotion — the worker's
+        # repair pass fills a null `source_url` from the package's own
+        # workbook without touching `promoted_at` — and a tag that ignores
+        # that answers 304 and keeps serving the URL-less copy the browser
+        # already has. MEASURED 2026-09-04: Golden 1's 497 blank drawers were
+        # filled by the pass and every cached client would have gone on
+        # seeing them blank. The content digest is a FOURTH component beside
+        # `SERVE_RULES`, which exists for the same reason one layer up.
+        digest = hashlib.sha256(
+            json.dumps(res, sort_keys=True, default=str).encode()
+        ).hexdigest()[:12]
+        tag = etag_for(run_meta, f"{audience}.evidence.{digest}")
         if request.headers.get("if-none-match") == tag:
             return Response(status_code=304, headers={"ETag": tag,
                                                       "Cache-Control": "private, max-age=0"})

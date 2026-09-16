@@ -10,6 +10,7 @@ real tree is never mutated.
     python3 -m pytest tests/
 """
 import json
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -21,6 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
+import connector_contract  # noqa: E402
 import doctor  # noqa: E402
 
 PLUGIN = HERE.parent.parent
@@ -41,10 +43,26 @@ class HooksWired(unittest.TestCase):
 
     def test_real_tree_matchers_stay_fully_scoped(self):
         matchers = doctor.hook_matchers()
-        self.assertIn(
-            "mcp__plugin_dma-insights_connector__submit_page_payload", matchers)
-        self.assertIn(
-            "mcp__plugin_dma-insights_connector__promote_run", matchers)
+        # MATCHES, not CONTAINS. On 2026-08-31 these matchers became
+        # regexes so the prechecks also fire when the SAME connector is
+        # attached under its claude.ai server name (`mcp__DMA-Insights__…`),
+        # which is what a Routine sees. `mcp__.*__submit_page_payload` no
+        # longer contains the literal tool name; it still matches it, and
+        # that is the property worth pinning — the fully-scoped-ness this
+        # test guards is that the matcher ends in a specific TOOL, never a
+        # bare `mcp__.*` that would claim every connector call.
+        import re as _re
+        for tool in (
+                "mcp__plugin_dma-insights_connector__submit_page_payload",
+                "mcp__DMA-Insights__submit_page_payload"):
+            self.assertTrue(
+                any(_re.fullmatch(m, tool) for m in matchers
+                    if m.endswith("submit_page_payload")),
+                f"no precheck matcher fires for {tool}")
+        for m in matchers:
+            if m.startswith("mcp__") and m != "mcp__.*":
+                self.assertRegex(m, r"__[a-z_]+$",
+                                 f"{m} is not scoped to a named tool")
 
     def test_unparseable_hooks_json_fails(self):
         with tempfile.TemporaryDirectory() as td:
@@ -196,10 +214,77 @@ if __name__ == "__main__":
 # for the code — and a test that cries wolf is the one people delete. What
 # stays asserted is the part that IS environment-independent: no row outside
 # this set may fail, and the offline run must make no network call.
+class ConnectorContractRow(unittest.TestCase):
+    """THE ROW THAT USED TO CHECK THE WRONG THING, now driven at three roots.
+
+    It returned True whenever the required families appeared in the REGISTRY,
+    which is a statement about the repository — so it went green on a session
+    holding no enrichment connector at all, which is the state that cost a
+    live run $96.65 on 2026-09-12 while closing nothing.
+
+    It reads the session-written baseline now, and that makes its verdict
+    depend on the machine, which is why it stays in
+    ENVIRONMENT_DEPENDENT_ROWS for the blanket "no row outside this set may
+    fail" assertion: on a CI runner no baseline has been written and red is
+    the correct answer. Environment-dependent is not the same as untested.
+    These three cases drive the row's own logic at controlled roots, so the
+    row is pinned even though its verdict on any given machine is not.
+    """
+
+    def _row(self, root):
+        with mock.patch.dict("os.environ", {"DMA_RUN_ROOT": str(root)}):
+            return doctor.connector_contract_check()
+
+    def test_no_baseline_is_unverified_and_unverified_is_not_a_pass(self):
+        with tempfile.TemporaryDirectory() as td:
+            row = self._row(Path(td))
+        self.assertFalse(row["ok"])
+        self.assertIn("UNVERIFIED", row["detail"])
+        self.assertIn("baseline --tools -", row["fix"])
+
+    def test_a_short_baseline_says_which_families_are_missing(self):
+        fam = connector_contract.families()
+        with tempfile.TemporaryDirectory() as td:
+            connector_contract.write_baseline([fam["exa"][0]], td)
+            row = self._row(Path(td))
+        self.assertFalse(row["ok"])
+        self.assertIn("BASELINE IS SHORT", row["detail"])
+        self.assertIn("tavily", row["detail"])
+        self.assertIn("no floors gate can pass", row["detail"])
+
+    def test_a_baseline_that_holds_is_the_only_green(self):
+        fam = connector_contract.families()
+        tools = [fam[f][0] for f in ("exa", "tavily", "clay")]
+        with tempfile.TemporaryDirectory() as td:
+            connector_contract.write_baseline(tools, td)
+            row = self._row(Path(td))
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertIn("Baseline holds", row["detail"])
+
+    def test_the_row_reads_the_root_it_is_given_not_the_working_directory(self):
+        """Two runs on one machine have two baselines. A row that read the
+        cwd would report whichever run happened to be checked out."""
+        fam = connector_contract.families()
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            connector_contract.write_baseline(
+                [fam[f][0] for f in ("exa", "tavily", "clay")], a)
+            self.assertTrue(self._row(Path(a))["ok"])
+            self.assertFalse(self._row(Path(b))["ok"], "b has no baseline")
+
+
 ENVIRONMENT_DEPENDENT_ROWS = {
     "skill script dependencies",
     "active google account",
     "identity source",
+    # `connector contract` was a statement about the REPO — it returned True
+    # whenever the required families appeared in the registry, and so went
+    # green on a session holding no enrichment connectors at all. That is the
+    # state that cost a live run $96.65 (2026-09-12), and commands/doctor.md
+    # had already named the failure: "A doctor that passes while the tools are
+    # absent has checked the wrong thing." It now reads the connector BASELINE
+    # the session writes, which makes it a statement about the machine: red
+    # wherever no baseline has been written, green where one has and it holds.
+    "connector contract",
     # `installed plugin` compares the CHECKOUT to whatever this machine has
     # installed, so it is a statement about the machine by construction: red
     # on a CI runner with no install (NOT_INSTALLED is green, but a stale one
@@ -401,3 +486,155 @@ class AutoApproverIsWired(unittest.TestCase):
             row = doctor.hooks_wired_check(root)
         self.assertFalse(row["ok"], row["detail"])
         self.assertIn("no PreToolUse entry runs it", row["detail"])
+
+
+class ConcurrentWriters(unittest.TestCase):
+    """Whether two writers on one workbook are safe must be CHECKABLE.
+
+    Until 2026-08-31 `next_evidence_id` ended "two writers to one workbook
+    is not a supported topology and never was". That was scope, read as a
+    guarantee — and read again AFTER the lock landed: a session on a stale
+    install quoted the deleted sentence as authority and began building a
+    shard-and-merge harness with disjoint evidence-id ranges, to route
+    around a defect that no longer existed. Prose in a file cannot tell you
+    which version of that file you are running.
+    """
+
+    def _write(self, root, body):
+        eng = root / "skills" / "dma-research" / "engine"
+        eng.mkdir(parents=True, exist_ok=True)
+        (eng / "workbook.py").write_text(body)
+
+    def test_a_locked_engine_reports_safe(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "import fcntl\n"
+                              "def transaction(self):\n"
+                              "    fcntl.flock(fh, fcntl.LOCK_EX)\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                row = doctor.concurrent_writers_check()
+            # startswith, not `in`: "SAFE" is a substring of "UNSAFE",
+            # so `assertIn("SAFE", ...)` passes on the failing case too —
+            # an assertion that cannot fail in the direction it cares about.
+            self.assertTrue(row["detail"].startswith("SAFE:"), row["detail"])
+
+    def test_an_unlocked_engine_says_so_and_names_the_workaround(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "def next_evidence_id(self): ...\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                row = doctor.concurrent_writers_check()
+            self.assertTrue(row["detail"].startswith("UNSAFE:"),
+                            row["detail"])
+            self.assertIn("separate workbooks", row["detail"])
+
+    def test_the_deleted_docstring_is_reported_as_a_stale_install(self):
+        """The exact misread: quoting the old sentence off a stale tree."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "# not a supported topology and never was\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                row = doctor.concurrent_writers_check()
+            self.assertIn("STALE install", row["detail"])
+
+    def test_it_reads_the_INSTALLED_tree_not_the_checkout(self):
+        """The checkout is current by definition here; the question is what
+        the session's agents actually execute."""
+        import inspect
+        src = inspect.getsource(doctor.concurrent_writers_check)
+        self.assertIn("install_path", src)
+
+    def test_the_bound_tree_outranks_the_record_s_copy(self):
+        """On a directory marketplace the session binds the checkout in
+        place and the record names a cache copy (measured 2026-09-16); the
+        engine the session's agents execute is the bound one."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            bound, cache = pathlib.Path(d) / "bound", pathlib.Path(d) / "cache"
+            self._write(bound, "import fcntl\ndef transaction(self):\n"
+                               "    fcntl.flock(fh, fcntl.LOCK_EX)\n")
+            self._write(cache, "# not a supported topology and never was\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(cache),
+                                                "bound_path": str(bound)}}):
+                row = doctor.concurrent_writers_check()
+            self.assertTrue(row["detail"].startswith("SAFE:"), row["detail"])
+
+    def test_it_never_fails_the_doctor(self):
+        """Informational: an unlocked engine is a fact to act on, not a
+        reason to refuse to report the other fifteen rows."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            self._write(root, "nothing here\n")
+            with mock.patch.object(
+                    doctor.plugin_version, "compare",
+                    return_value={"installed": {"install_path": str(root)}}):
+                self.assertTrue(doctor.concurrent_writers_check()["ok"])
+
+
+# ── the row that answers the $96.65 question, tested directly ──────────
+#
+# `connector contract` is in ENVIRONMENT_DEPENDENT_ROWS above, and rightly:
+# it reads a baseline file on THIS machine, so the generic "no row outside
+# this set may fail" assertion cannot cover it. But an exemption is not a
+# test, and this is the row that decides whether a run may start at all —
+# the one whose green-while-absent answer cost a live run $96.65. So it gets
+# its own, driven through all three of its states.
+
+def _row_for(monkeypatch, root):
+    monkeypatch.setenv("DMA_RUN_ROOT", str(root))
+    return doctor.connector_contract_check()
+
+
+def test_no_baseline_is_unverified_and_red(monkeypatch, tmp_path):
+    row = _row_for(monkeypatch, tmp_path / "empty")
+    assert row["check"] == "connector contract"
+    assert row["ok"] is False
+    assert "UNVERIFIED" in row["detail"].upper(), row["detail"]
+    assert "baseline" in row["fix"], row["fix"]
+
+
+def test_a_short_baseline_names_what_is_missing(monkeypatch, tmp_path):
+    root = tmp_path / "short"
+    root.mkdir()
+    connector_contract.write_baseline(["mcp__Clay__find-and-enrich-company"],
+                                      str(root))
+    row = _row_for(monkeypatch, root)
+    assert row["ok"] is False
+    d = row["detail"].lower()
+    assert "exa" in d and "tavily" in d, row["detail"]
+
+
+def test_a_held_baseline_is_green(monkeypatch, tmp_path):
+    root = tmp_path / "bound"
+    root.mkdir()
+    connector_contract.write_baseline(
+        ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+         "mcp__Clay__find-and-enrich-company"], str(root))
+    row = _row_for(monkeypatch, root)
+    assert row["ok"] is True, row["detail"]
+
+
+def test_the_row_is_about_the_machine_not_the_repository(monkeypatch, tmp_path):
+    """It returned True whenever the families appeared in the REGISTRY, so
+    it went green on a session holding no connectors at all. The registry
+    has not changed between these two calls; the answer must."""
+    empty = _row_for(monkeypatch, tmp_path / "a")["ok"]
+    root = tmp_path / "b"
+    root.mkdir()
+    connector_contract.write_baseline(
+        ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+         "mcp__Clay__find-and-enrich-company"], str(root))
+    held = _row_for(monkeypatch, root)["ok"]
+    assert empty is False and held is True

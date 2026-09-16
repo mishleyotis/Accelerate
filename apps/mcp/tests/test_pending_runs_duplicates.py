@@ -73,3 +73,56 @@ def test_the_counts_are_computed_from_the_rows_returned():
     assert "SELECT count" not in b.upper().replace("SELECT COUNT", "SELECT count"), \
         "the duplicate count is queried separately from the rows it describes, " \
         "so the two can disagree"
+
+
+# ── and whether the run can be synthesised AT ALL ────────────────────────
+#
+# MEASURED 2026-08-30 on goeasy-ltd: four INGESTED runs, `scored_cells` 0 on
+# every one, request id DMA-RES-GSY-… against the corpus convention of
+# DMA-ASM-… for an assessment. The workbook parser had already identified it
+# at ingest — a `workbook_stage` observation reading "research — column D is
+# empty by contract", 679 of 696 rows in scope and unscored.
+#
+# The row above tells a caller how to choose BETWEEN runs. It said nothing
+# about whether any of them had anything in it, so a producer session was
+# spent opening one whose only available outcome was "nothing to serve":
+# synthesis reads scores from the workbook and may not derive them.
+#
+# `runs.scored_cells` was already a column. It simply was not selected.
+
+def test_the_row_says_whether_there_is_anything_to_synthesise():
+    b = _block()
+    assert "r.scored_cells" in b, (
+        "the query does not select the column that says whether this run "
+        "scored anything — runs.scored_cells has existed since 0005")
+    assert '"scored_cells"' in b and '"synthesisable"' in b, (
+        "the count is fetched and not returned, which is the same as not "
+        "fetching it")
+
+
+def test_unknown_is_reported_as_unknown_and_not_as_zero():
+    """A run whose ingest recorded no count is a different claim from one
+    measured at zero: the first is a gap in the record, the second is a
+    research package. A caller that could not tell them apart would either
+    spend on emptiness or refuse real work."""
+    b = _block()
+    assert 'None if r[9] is None else r[9] > 0' in b, (
+        "`synthesisable` collapses an unrecorded count into False (or True); "
+        "unknown has to survive as None all the way to the queue")
+
+
+def test_the_corpus_level_unscored_counts_are_returned():
+    """Same discipline as `duplicate_requests` above: a scheduler about to
+    fan out over 287 runs should know what share of them is research-stage
+    before it starts, not one wasted session at a time."""
+    b = _block()
+    for key in ('"unscored_runs"', '"unknown_score_runs"'):
+        assert key in b, f"{key} is not returned"
+
+
+def test_the_docstring_says_what_zero_means():
+    """The next reader of this tool has to know that 0 is a STAGE and not a
+    thin assessment, or they will read it as a quality signal and work it."""
+    i = SERVER.index("def list_pending_runs")
+    doc = SERVER[i:SERVER.index('"""', SERVER.index('"""', i) + 3)]
+    assert "research" in doc.lower() and "empty by contract" in doc.lower()

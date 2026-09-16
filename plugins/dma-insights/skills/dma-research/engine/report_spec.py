@@ -1,40 +1,89 @@
 #!/usr/bin/env python3
-"""What each report must contain, as data a renderer can enforce.
+"""What each report must contain — READ FROM THE PINNED TEMPLATES, never typed here.
 
-WHY THIS EXISTS.
+WHY THIS FILE CHANGED (owner, 2026-09-03: "the reports do not follow the
+required format. Can these templates be retrieved from the repo?").
 
-  AUD-0105  every section of both v8 templates opens with a LENGTH band whose
-      lower bound is "a blocking gate, so a section under its minimum is
-      treated as incomplete" — and "no line of code anywhere measures a word
-      count". The minimums are here, in a number a renderer compares against.
-  AUD-0107  thirteen workbook sheets named as INPUTS by the two templates are
-      absent from the workbook, "leaving §3.2 and §3.3 with no source at all".
-      Every section below names the sheets it reads, and a section whose input
-      is empty renders an explicit NO SOURCE block rather than nothing.
-  AUD-0145  the archive's renderer enforced an insight-card floor of 3 where
-      the template's blocking minimum is 8. One number, here.
+Until now this module DECLARED the two reports' sections itself — eight per
+report, with headings such as "Entity and scope" and "What would change this
+assessment" — because AUD-0069 recorded that the pinned templates were Drive
+documents no code path could resolve. They can be, and they were: the Client
+Profile Research Report is eight sections (1 Firmographics … 8 Workbook
+References) and the Digital Maturity Assessment Report is eleven (1 Executive
+Summary … 11 Workbook Traceability), each opening with a control block that
+names its LENGTH band, INPUTS, FEEDS, MINIMUM DATA, MUST INCLUDE, MUST NOT and
+FAIL IF. None of that matched what this file said, so every report the engine
+ever rendered followed a format nobody had asked for, and the gold-standard
+gate could only check section numbers against a docx the caller happened to
+have.
 
-PROVENANCE. The pinned v8 templates are Drive documents that no code path can
-resolve (AUD-0069), so this spec is the repository's declaration of their
-control blocks — section ids, headings, minimums and inputs — not a copy of
-them. `--spec` on the renderer takes a JSON override, so when the real
-template is exported, the divergence is a diff rather than a silent
-substitution.
+So the spec is DATA: `references/templates/report_templates.json`, pinned from
+the two owner Docs (markdown exports beside it), with the countable half of
+each control block as `checks` and `forbid` regexes. This module loads it and
+exposes the same `Section` / `ReportSpec` objects the writer, the renderer, the
+gold gate and the agent generator already consume. A section added to the
+JSON grows a writer table, a renderer heading, a gate row and an agent
+paragraph at once; a heading changed in the Doc and re-pinned fails
+`engine.template report-drift` until this file's data is reconciled.
+
+  AUD-0105  every section's lower LENGTH bound is a blocking gate — `words_min`.
+  AUD-0107  every section names the sheets it reads — `inputs`, mapped to the
+            engine's own sheet names.
+  AUD-0145  the insight-card floor is the template's 8, kept as INSIGHT_CARD_MIN
+            and enforced as §5's `IC-NNN` check on the research profile.
 """
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
-#: The template's own blocking minimum for insight cards. AUD-0145.
+#: The template's own blocking minimum for insight cards (Client Profile §5.1).
 INSIGHT_CARD_MIN = 8
 
-
-#: Card sections are a LIST, not a passage. Their `min_words` is the floor
-#: for the whole section — every card concatenated, which is what the
-#: renderer assembles and what a reader meets — while `card_min_words` is
-#: the floor for one card.
-CARD_KINDS = ("insight_card", "finding", "recommendation")
+#: Card sections are a LIST, not a passage: one row per card, each with its
+#: own id. `pillar` is the assessment's §5 (exactly one card per pillar);
+#: `recommendation` its §8 (five to eight REC-NN cards). `finding` and
+#: `insight_card` are retained as vocabulary the workbook's `Kind` column has
+#: carried, so an older row still reads.
+CARD_KINDS = ("pillar", "recommendation", "finding", "insight_card")
+#: Default per-card floor where the template states none.
 CARD_MIN_WORDS = 60
+
+_HERE = Path(__file__).resolve().parent
+#: Inside the plugin: skills/dma-research/engine -> plugins/dma-insights.
+TEMPLATES_DIR = _HERE.parents[2] / "references" / "templates"
+TEMPLATES_JSON = TEMPLATES_DIR / "report_templates.json"
+
+
+class TemplateUnavailable(RuntimeError):
+    """The pinned template spec is not where the plugin ships it."""
+
+
+@dataclass(frozen=True)
+class Check:
+    """One countable MINIMUM DATA rule: `pattern` must match at least `min`
+    times (distinct matches when `distinct`), at most `max` when given;
+    `per_card` applies it to each card of a list section."""
+    pattern: str
+    min: int = 1
+    max: int | None = None
+    distinct: bool = False
+    label: str = ""
+    per_card: bool = False
+
+    def count(self, text: str) -> int:
+        hits = re.findall(self.pattern, text or "")
+        hits = [h if isinstance(h, str) else h[0] for h in hits]
+        return len(set(hits)) if self.distinct else len(hits)
+
+
+@dataclass(frozen=True)
+class Forbid:
+    """One countable MUST NOT rule: a match refuses the section."""
+    pattern: str
+    label: str = ""
 
 
 @dataclass(frozen=True)
@@ -46,33 +95,47 @@ class Section:
     requires_citation: bool = True
     kind: str = "section"
     note: str = ""
-    #: The section's INTERNAL ANATOMY — the subheadings it must carry, in
-    #: order. Until 2026-08-30 nothing anywhere said what a section
-    #: CONTAINS: the generated agent tables printed the heading under a
-    #: column headed "what it must argue", and the seven apparatus bullets
-    #: below were byte-identical for all sixteen. The measurable
-    #: consequence was in the artefact — the renderer emitted body
-    #: paragraphs with no Heading2 of their own, so the app's
-    #: Heading2-grained parser stored each section as one undifferentiated
-    #: preamble row, and `embed.py` could scope none of it to a pillar.
-    #:
-    #: Written into Body as `## <block>` lines, in this order.
-    #: `narrative.write` refuses a body missing one or carrying them out of
-    #: order; `reports.render` promotes each to a real Heading2. The
-    #: parenthesised pillar form in §3/§4 is deliberate: it is the token
-    #: `embed._PILLAR_TOKEN` already looks for.
+    #: The section's anatomy — the Doc's numbered subsections, in order.
+    #: Written into Body as `## <block>` lines; `narrative.write` refuses a
+    #: body missing one or carrying them out of order; `reports.render`
+    #: promotes each to a real heading, which is the grain the app parses.
     blocks: tuple = ()
-    #: The payload sections this report section feeds. The legacy app had
-    #: an explicit section→surface table; the current build lost it, and
-    #: what replaced it was prose in the page packs naming sections by
-    #: description ("the per-pillar deep dives") — several of which name
-    #: sections that no longer exist. This is that map, in the one place
-    #: both the agents and the surface census can read it.
+    #: The payload sections this report section feeds (the Doc's own Surface
+    #: Alignment table, in payload-path vocabulary).
     surfaces: tuple = ()
+    max_words: int | None = None          # advisory upper LENGTH bound
+    purpose: str = ""
+    minimum_data: str = ""
+    must_include: str = ""
+    must_not: str = ""
+    fail_if: str = ""
+    checks: tuple = ()
+    forbid: tuple = ()
+    card_prefix: str | None = None
+    cards_min: int | None = None
+    cards_max: int | None = None
+    card_words_min: int | None = None
+    card_words_max: int | None = None
+    card_heading: str | None = None
+
+    @property
+    def is_card(self) -> bool:
+        return self.kind in CARD_KINDS
 
     @property
     def card_min_words(self) -> int:
-        return CARD_MIN_WORDS if self.kind in CARD_KINDS else 0
+        if not self.is_card:
+            return 0
+        return int(self.card_words_min or CARD_MIN_WORDS)
+
+    @property
+    def card_floor(self) -> int:
+        """How many cards the section needs before it is complete."""
+        if not self.is_card:
+            return 0
+        if self.cards_min:
+            return int(self.cards_min)
+        return INSIGHT_CARD_MIN if self.kind == "insight_card" else 1
 
 
 @dataclass(frozen=True)
@@ -83,174 +146,94 @@ class ReportSpec:
     min_words: int
     sections: tuple
     extra: dict = field(default_factory=dict)
+    short_title: str = ""
+    drive_doc_id: str = ""
+    markdown: str = ""
+    front_matter: tuple = ()
 
     def section(self, sid: str) -> Section | None:
         for s in self.sections:
-            if s.id == sid:
+            if s.id == str(sid):
                 return s
         return None
 
 
-CLIENT_RESEARCH = ReportSpec(
-    key="client_research",
-    title="Client Research Profile",
-    # `client_profile` is the app's registry name for this artefact
-    # (classification.py priority 3) and `.docx` is the only extension it
-    # matches — AUD-0003 measured the produced `client_profile.md` returning
-    # None from classify(), so the report was uningestable.
-    filename="Client_Profile_Research_{entity}_{date}.docx",
-    min_words=2500,
-    sections=(
-        Section("1", "Entity and scope", 150,
-                ("Run_Metadata", "Handoff_Lock"), requires_citation=False,
-                blocks=("Who this is",
-                        "What was in scope",
-                        "What was out of scope, and what that bounds"),
-                surfaces=("overview.firmographics",)),
-        Section("2", "What we searched, and what we did not", 200,
-                ("Search_Log", "Coverage"), requires_citation=False,
-                blocks=("How the search was built",
-                        "What was searched",
-                        "What was not searched, and what that bounds"),
-                surfaces=("overview.evidence_coverage",)),
-        Section("3", "Evidence base", 250, ("Evidence_Detail", "Coverage"),
-                blocks=("What the register holds",
-                        "Tier and recency profile",
-                        "Concentration, and what a retraction would cost"),
-                surfaces=("overview.evidence_coverage", "heatmap.evidence",
-                          "heatmap.evidence_age")),
-        Section("4", "Capability picture by pillar", 600,
-                ("P1_Subcap_Scoring", "P2_Subcap_Scoring",
-                 "P3_Subcap_Scoring", "P4_Subcap_Scoring"),
-                blocks=("Strategy and governance (P1)",
-                        "Customer experience (P2)",
-                        "Operations (P3)",
-                        "Data and technology (P4)"),
-                surfaces=("heatmap.focus_areas", "heatmap.cell_evidence")),
-        Section("5", "Insight cards", 400, ("Report_Narrative",),
-                kind="insight_card",
-                note=f"blocking minimum {INSIGHT_CARD_MIN} cards",
-                blocks=("Claim", "Mechanism",
-                        "What would change this"),
-                surfaces=("insights.insights",)),
-        Section("6", "Technology and utilisation", 300,
-                ("Evidence_Detail", "Report_Narrative", "Tech_Register",
-                 "Tech_Peer_Deployments"),
-                blocks=("What is confirmed",
-                        "What is inferred or only claimed",
-                        "Where the estate does not yet reach"),
-                surfaces=("techstack.techstack", "insights.landscape")),
-        Section("7", "Negative findings and what they bound", 250,
-                ("P1_Subcap_Scoring", "Search_Log"),
-                blocks=("What was looked for and not found",
-                        "The ladder behind each absence",
-                        "What these absences cap"),
-                surfaces=("heatmap.alerts", "overview.ceilings")),
-        Section("8", "Where each artefact lives", 120,
-                ("Run_Metadata", "Handoff_Lock"), requires_citation=False,
-                blocks=("The artefacts", "How to re-run this"),
-                surfaces=()),
-    ),
-)
-
-ASSESSMENT = ReportSpec(
-    key="assessment",
-    # `assessment_report` is the highest-ranked report name the classifier
-    # knows (priority 2, rank 0).
-    title="Digital Maturity Assessment Report",
-    filename="DMA_Assessment_Report_{entity}_{date}.docx",
-    min_words=3500,
-    sections=(
-        Section("1", "Executive summary", 350,
-                ("Report_Narrative", "Coverage"),
-                # SCQA, because the overview page pack names `scqa_md` as
-                # this section's shape and nothing was making it true.
-                blocks=("Situation", "Complication", "Question", "Answer"),
-                surfaces=("overview.exec_summary",)),
-        Section("2", "Method, scope and limits", 250,
-                ("Run_Metadata", "Coverage", "Gate_Log"),
-                requires_citation=False,
-                blocks=("How this was assessed",
-                        "What was in scope",
-                        "What the method cannot see"),
-                surfaces=("heatmap.safeguard_gates",)),
-        Section("3", "Maturity by pillar", 700,
-                # The STATED grains, not the subcap sheets alone: H4's grain
-                # lock forbids re-deriving a pillar or category figure by
-                # averaging its subcaps, because cap logic, weighting and
-                # analyst override are applied when the figure is struck.
-                # The section reads what was stated and the 0.05 tolerance
-                # catches the two drifting apart.
-                ("Pillar_Summary", "Category_Detail",
-                 "P1_Subcap_Scoring", "P2_Subcap_Scoring",
-                 "P3_Subcap_Scoring", "P4_Subcap_Scoring"),
-                blocks=("Strategy and governance (P1)",
-                        "Customer experience (P2)",
-                        "Operations (P3)",
-                        "Data and technology (P4)"),
-                surfaces=("heatmap.workbook_scores", "overview.scores")),
-        Section("4", "Evidence and its limits", 300,
-                ("Evidence_Detail", "Coverage"),
-                blocks=("What the assessment rests on",
-                        "Tier and recency profile",
-                        "What the evidence cannot settle"),
-                surfaces=("overview.evidence_coverage", "heatmap.evidence")),
-        Section("5", "Findings", 500, ("Report_Narrative",), kind="finding",
-                blocks=("Finding", "Consequence",
-                        "What would change this"),
-                surfaces=("overview.findings", "insights.insights")),
-        Section("6", "Peer position", 250, ("Report_Narrative",
-                                            "Peer_Benchmarks",
-                                            "Category_Detail"),
-                blocks=("The peer set, and how it was chosen",
-                        "Where the client leads",
-                        "Where the client trails"),
-                surfaces=("overview.scores", "heatmap.workbook_scores")),
-        Section("7", "Recommendations", 500,
-                # Report_Narrative is where they are WRITTEN; Recommendations
-                # is the tab they are projected into for the app, and naming
-                # both keeps the section's inputs honest about the round trip.
-                ("Report_Narrative", "Recommendations"),
-                kind="recommendation",
-                blocks=("Recommendation", "Root cause", "Prerequisites",
-                        "How we would know it worked"),
-                surfaces=("platform.recommendations", "platform.roadmap",
-                          "overview.opportunity")),
-        Section("8", "What would change this assessment", 200,
-                ("Gate_Log", "Coverage"), requires_citation=False,
-                blocks=("What would move a score",
-                        "What could not be verified",
-                        "How to refresh this"),
-                surfaces=("heatmap.evidence_age", "overview.ceilings")),
-    ),
-)
-
-SPECS = {s.key: s for s in (CLIENT_RESEARCH, ASSESSMENT)}
+def _section_from(doc: dict) -> Section:
+    return Section(
+        id=str(doc["id"]), heading=doc["heading"],
+        min_words=int(doc.get("words_min", doc.get("min_words", 0))),
+        inputs=tuple(doc.get("inputs", ())),
+        requires_citation=bool(doc.get("requires_citation", True)),
+        kind=doc.get("kind", "section"), note=doc.get("note", ""),
+        blocks=tuple(doc.get("blocks", ())),
+        surfaces=tuple(doc.get("feeds", doc.get("surfaces", ()))),
+        max_words=doc.get("words_max"),
+        purpose=doc.get("purpose", ""), minimum_data=doc.get("minimum_data", ""),
+        must_include=doc.get("must_include", ""), must_not=doc.get("must_not", ""),
+        fail_if=doc.get("fail_if", ""),
+        checks=tuple(Check(**c) for c in doc.get("checks", ())),
+        forbid=tuple(Forbid(**f) for f in doc.get("forbid", ())),
+        card_prefix=doc.get("card_prefix"), cards_min=doc.get("cards_min"),
+        cards_max=doc.get("cards_max"), card_words_min=doc.get("card_words_min"),
+        card_words_max=doc.get("card_words_max"), card_heading=doc.get("card_heading"),
+    )
 
 
 def from_json(doc: dict) -> ReportSpec:
-    """Build a spec from an exported template's control blocks."""
+    """Build a spec from one report's pinned control blocks."""
+    sections = tuple(_section_from(s) for s in doc["sections"])
     return ReportSpec(
         key=doc["key"], title=doc["title"], filename=doc["filename"],
-        min_words=int(doc["min_words"]),
-        sections=tuple(Section(
-            id=str(s["id"]), heading=s["heading"],
-            min_words=int(s["min_words"]), inputs=tuple(s.get("inputs", ())),
-            requires_citation=bool(s.get("requires_citation", True)),
-            kind=s.get("kind", "section"), note=s.get("note", ""),
-            blocks=tuple(s.get("blocks", ())),
-            surfaces=tuple(s.get("surfaces", ())))
-            for s in doc["sections"]),
-        extra=doc.get("extra", {}),
+        min_words=int(doc.get("min_words") or sum(s.min_words for s in sections)),
+        sections=sections, extra=doc.get("extra", {}),
+        short_title=doc.get("short_title", ""),
+        drive_doc_id=doc.get("drive_doc_id", ""),
+        markdown=doc.get("markdown", ""),
+        front_matter=tuple(doc.get("front_matter", ())),
     )
+
+
+def load(path: Path | None = None) -> dict[str, ReportSpec]:
+    p = Path(path) if path else TEMPLATES_JSON
+    if not p.is_file():
+        raise TemplateUnavailable(
+            f"the pinned report templates are not at {p}. The plugin ships "
+            f"them under references/templates/; a checkout without them "
+            f"cannot say what a report must contain, and guessing is the "
+            f"defect this file exists to end.")
+    raw = json.loads(p.read_text(encoding="utf-8"))
+    out = {}
+    for key, doc in raw["reports"].items():
+        spec = from_json(doc)
+        if spec.key != key:
+            raise TemplateUnavailable(
+                f"report_templates.json keys {key!r} but the spec inside "
+                f"says {spec.key!r}")
+        out[key] = spec
+    return out
+
+
+SPECS: dict[str, ReportSpec] = load()
+CLIENT_RESEARCH = SPECS["client_research"]
+ASSESSMENT = SPECS["assessment"]
+
+#: The template's own pinned metadata, for the gates and the drift check.
+PINNED = json.loads(TEMPLATES_JSON.read_text(encoding="utf-8"))
+
+
+def numbered_headings(key: str) -> list[str]:
+    """`N. Heading` for every section, the form the rendered Heading1 takes."""
+    return [f"{s.id}. {s.heading}" for s in SPECS[key].sections]
 
 
 if __name__ == "__main__":  # a library, but it must answer --help
     import argparse as _ap
-    _ap.ArgumentParser(
+    ap = _ap.ArgumentParser(
         prog=__file__.rsplit("/", 1)[-1],
         description=__doc__.split("\n")[0],
-        epilog="A library module: import it, or run the modules that do have "
-               "a command line (cli, orient, floors_gate, validator, handoff, "
-               "reports, strip_working_area, patch_validator, watchdog).",
-    ).parse_args()
+        epilog="A library module: import it, or run `engine.narrative contract` "
+               "to print every section's blocks, inputs and feeds.")
+    ap.parse_args()
+    for k, spec in SPECS.items():
+        print(f"{k}: {spec.title} — {len(spec.sections)} sections, "
+              f"{spec.min_words}+ words (pinned from Doc {spec.drive_doc_id})")

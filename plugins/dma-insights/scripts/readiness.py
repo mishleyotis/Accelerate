@@ -79,9 +79,13 @@ STANDING_OPEN = [
      "dma-refresh-drift-daily reaches a permission prompt the plugin's "
      "autoapprove hook allows, which means the hook did not run — a stale "
      "install. plugin_version.py --heal fixes the DISK; hooks bind once at "
-     "session start, so the firing that found it cannot heal itself.",
-     "the environment owner: bootstrap_session.sh must run before the "
-     "session starts (claude.ai/code environment settings)",
+     "session start, so the firing that found it cannot heal itself. "
+     "Judge it by the MEASURED bind the verdict names: on a directory "
+     "marketplace the session binds the checkout in place and a stale "
+     "install record is cosmetic (2026-09-16).",
+     "the environment owner: the setup script runs once per environment "
+     "snapshot (claude.ai/code environment settings); rebuild the snapshot "
+     "or keep the marketplace a directory source at the checkout",
      "docs/ROUTINES.md"),
     # Was "owner-names-the-client channel … NOT BUILT" until 2026-08-30. It
     # is built: the requests were already arriving in #deal-desk from a
@@ -101,7 +105,7 @@ STANDING_OPEN = [
      "routines UI — update_trigger cannot add connectors, and a "
      "delete-and-recreate would change the trigger id and discard its run "
      "history",
-     "docs/CLIENT-SELECTION.md § 3.6"),
+     "docs/CLIENT-SELECTION.md § 3.7"),
     ("connector authorisation",
      "Atlassian, Zapier and Zennify_Brains require OAuth, and lane B "
      "(trig_01NXSfaTVuWEubFAcA4mbbeL) carries no claude.ai connectors. A "
@@ -257,16 +261,25 @@ def check_schema():
 
 
 def check_approvals():
+    """Both halves of the prompt surface. The MCP half was measured green on
+    2026-09-03 while the owner was still approving Bash, Write and Edit —
+    a lane that reads only one half reports the other as ready."""
     code, out = _run([sys.executable,
                       f"{PLUGIN}/scripts/audit_autoapprove.py", "--strict"])
+    code2, out2 = _run([sys.executable,
+                        f"{PLUGIN}/scripts/audit_builtin_approvals.py",
+                        "--strict"])
     return lane("approvals",
-                "every MCP tool a session attaches is either auto-approved or "
-                "refused on the record — nothing prompts by omission",
-                code, out,
-                "audit_autoapprove.py names each UNCLASSIFIED tool; rule on "
-                "it in SERVER_SURFACES, read or withheld. A scheduled firing "
-                "has nobody to answer a prompt, so a tool nobody ruled on is "
-                "a firing that stops")
+                "every MCP tool a session attaches is auto-approved or refused "
+                "on the record, AND every command the agents and Routines are "
+                "told to run passes the built-in hook — nothing prompts by "
+                "omission",
+                code or code2, out + "\n" + out2,
+                "audit_autoapprove.py names each UNCLASSIFIED MCP tool; rule on "
+                "it in SERVER_SURFACES. audit_builtin_approvals.py names each "
+                "command that would PROMPT; teach hooks/autoapprove_builtins.py "
+                "its shape, or fix the manifest that asks for it. A scheduled "
+                "firing has nobody to answer a prompt")
 
 
 def check_install():

@@ -284,3 +284,624 @@ def test_backfill_returns_before_the_scan_consumes_the_diff():
     be ingested — the backfill branch must precede the scan call."""
     src = (Path(__file__).resolve().parents[1] / "job_main.py").read_text()
     assert src.index("BACKFILL_SECTIONS") < src.index("summary = run_scan(")
+
+
+class _GrainCursor:
+    """Enough of a cursor for backfill_grains: one SELECT of runs holding no
+    stated pillar grain, then UPDATEs of run_manifest."""
+
+    def __init__(self, runs):
+        self._runs, self.updated = runs, []
+        self._rows = []
+
+    def execute(self, sql, params=None):
+        if "FROM runs r" in sql:
+            assert "workbook_grains" in sql and "jsonb_array_length" in sql, \
+                "must only pick runs whose stated pillar grain is empty"
+            self._rows = list(self._runs)
+        elif "UPDATE run_manifest" in sql:
+            assert "jsonb_set" in sql and "'{workbook_grains}'" in sql, \
+                "only the workbook_grains key may be written"
+            self.updated.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self._rows
+
+
+class _GrainConn:
+    def __init__(self, runs):
+        self.cur = _GrainCursor(runs)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):                          # pragma: no cover
+        pass
+
+
+def test_backfill_grains_fills_the_run_that_lost_its_stated_pillars(monkeypatch):
+    """Golden 1's own case. The workbook states 2.40/2.11/2.25/2.25; the run
+    stored none because its reader wanted a column named `score` in a tab
+    that names it `Weighted_Score`. The recovery updates the EXISTING run."""
+    import json as _json
+
+    import job_main
+
+    tree = [_f("Golden 1 Credit Union - DMA", "DMA_Scoring_Workbook_G1.xlsx"),
+            _f("No Workbook - DMA", "DMA_Assessment_Report_X.docx")]
+    groups = job_main._package_groups(tree)
+
+    stated = {"pillars": [{"pillar_id": "P1", "score": 2.4,
+                           "peer_median": 3.1, "source_cell": "Pillar_Summary!C2"},
+                          {"pillar_id": "P2", "score": 2.11,
+                           "peer_median": 3.0, "source_cell": "Pillar_Summary!C3"},
+                          {"pillar_id": "P3", "score": 2.25,
+                           "peer_median": 3.0, "source_cell": "Pillar_Summary!C4"},
+                          {"pillar_id": "P4", "score": 2.25,
+                           "peer_median": 3.1, "source_cell": "Pillar_Summary!C5"}],
+              "categories": [{"category_id": "P1C1", "score": 2.9}]}
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_grain_summaries",
+                        lambda p, obs=None: stated)
+
+    conn = _GrainConn([("run-g1", "Golden 1 Credit Union - DMA"),
+                       ("run-x", "No Workbook - DMA")])
+    rc = job_main.backfill_grains(conn, "token", groups)
+
+    assert rc == 0
+    assert len(conn.cur.updated) == 1, "only the folder shipping a workbook"
+    payload, run_id = conn.cur.updated[0]
+    assert run_id == "run-g1"
+    got = _json.loads(payload)
+    assert [p["score"] for p in got["pillars"]] == [2.4, 2.11, 2.25, 2.25]
+    assert conn.commits == 1
+
+
+def test_backfill_grains_writes_nothing_when_the_workbook_states_none(monkeypatch):
+    """A workbook that genuinely states no grain is reported, not written —
+    an empty grain object must never overwrite the manifest."""
+    import job_main
+
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_grain_summaries",
+                        lambda p, obs=None: {"pillars": [], "categories": []})
+
+    conn = _GrainConn([("run-s", "Silent - DMA")])
+    assert job_main.backfill_grains(conn, "token", groups) == 0
+    assert conn.cur.updated == [], "no UPDATE for a workbook stating nothing"
+    assert conn.commits == 0
+
+
+def test_backfill_grains_survives_one_unreadable_workbook(monkeypatch):
+    """One bad workbook must not sink the pass, and must be reported."""
+    import job_main
+
+    tree = [_f("Bad - DMA", "DMA_Scoring_Workbook_B.xlsx"),
+            _f("Good - DMA", "DMA_Scoring_Workbook_G.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+
+    def _parse(p, obs=None):
+        _parse.n += 1
+        if _parse.n == 1:
+            raise ValueError("not a zip file")
+        return {"pillars": [{"pillar_id": "P1", "score": 2.4}], "categories": []}
+    _parse.n = 0
+    monkeypatch.setattr(job_main, "parse_grain_summaries", _parse)
+
+    conn = _GrainConn([("run-bad", "Bad - DMA"), ("run-good", "Good - DMA")])
+    rc = job_main.backfill_grains(conn, "token", groups)
+
+    assert rc == 1, "a failure is reported in the exit code"
+    assert len(conn.cur.updated) == 1, "the good run still lands"
+    assert conn.cur.updated[0][1] == "run-good"
+
+
+class _CompositeCursor:
+    """Enough of a cursor for backfill_composite: one SELECT of runs holding
+    no composite, then UPDATEs of runs."""
+
+    def __init__(self, runs):
+        self._runs, self.updated = runs, []
+        self._rows = []
+        self.observed, self.refreshed = [], 0
+
+    def execute(self, sql, params=None):
+        if "refresh_serving_directory" in sql:
+            # `serving_directory` is materialised: a filled composite that is
+            # never published leaves the client card blank anyway.
+            self.refreshed += 1
+        elif "FROM runs r" in sql:
+            assert "r.composite IS NULL" in sql, \
+                "must only pick runs whose composite is unset"
+            self._rows = list(self._runs)
+        elif "UPDATE runs" in sql:
+            assert "SET composite" in sql, "only the composite may be written"
+            self.updated.append(params)
+        elif "parser_observations" in sql:
+            # The reader's "this workbook states none" verdict, recorded so
+            # the scheduled pass does not download it again every firing.
+            self.observed.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        # (run_id, folder, request_id): a run carrying no folder of its
+        # own is reached through a sibling under the same request id.
+        return [(r[0], r[1], r[2] if len(r) > 2 else "REQ-1")
+                for r in self._rows]
+
+
+class _CompositeConn:
+    def __init__(self, runs):
+        self.cur = _CompositeCursor(runs)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        pass
+
+
+def _stub_overall(monkeypatch, value, cell="Pillar_Summary!C6"):
+    """The reader and the workbook load are both stubbed: these tests are
+    about the backfill's own decisions, and the reader has its own suite."""
+    import job_main
+
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main.openpyxl, "load_workbook",
+                        lambda p, **kw: type("W", (), {"close": lambda s: None})())
+    monkeypatch.setattr(job_main, "_stated_overall_grain",
+                        lambda wb: (value, cell))
+
+
+def test_backfill_composite_fills_the_run_whose_card_showed_no_maturity(monkeypatch):
+    """Golden 1's own case. The workbook states 2.25 at Pillar_Summary!C6;
+    the run stored NULL because its generation has no 2_Scorecard tab, and
+    the directory card rendered the word "maturity" over an empty slot."""
+    from decimal import Decimal
+
+    import job_main
+
+    tree = [_f("Golden 1 Credit Union - DMA", "DMA_Scoring_Workbook_G1.xlsx"),
+            _f("No Workbook - DMA", "DMA_Assessment_Report_X.docx")]
+    groups = job_main._package_groups(tree)
+    _stub_overall(monkeypatch, Decimal("2.25"))
+
+    conn = _CompositeConn([("run-g1", "Golden 1 Credit Union - DMA"),
+                           ("run-x", "No Workbook - DMA")])
+    rc = job_main.backfill_composite(conn, "token", groups)
+
+    assert rc == 0
+    assert len(conn.cur.updated) == 1, "only the folder shipping a workbook"
+    value, run_id = conn.cur.updated[0]
+    assert run_id == "run-g1"
+    assert value == Decimal("2.25")
+    # Two commits: the repaired value, then the view rebuild that publishes
+    # it. `serving_directory` is materialised, so without the second one the
+    # card this test is named after stays blank with the right value in the
+    # table behind it.
+    assert conn.commits == 2
+    assert conn.cur.refreshed == 1, "the repaired figure was never published"
+
+
+def test_backfill_composite_writes_nothing_when_the_workbook_states_none(monkeypatch):
+    """Absent beats invented: a workbook stating no OVERALL leaves the column
+    NULL rather than acquiring a mean of the pillars."""
+    import job_main
+
+    tree = [_f("Silent - DMA", "DMA_Scoring_Workbook_S.xlsx")]
+    groups = job_main._package_groups(tree)
+    _stub_overall(monkeypatch, None, None)
+
+    conn = _CompositeConn([("run-s", "Silent - DMA")])
+    assert job_main.backfill_composite(conn, "token", groups) == 0
+    assert conn.cur.updated == [], "no UPDATE for a workbook stating nothing"
+    assert conn.cur.refreshed == 0, "nothing to publish, so no view rebuild"
+    # The verdict IS recorded now (and committed), so the scheduled pass does
+    # not pay for this download again on every firing. That record is what
+    # makes running the repair on the schedule affordable at all.
+    assert len(conn.cur.observed) == 1, "the determination was not recorded"
+
+
+def test_backfill_composite_survives_one_unreadable_workbook(monkeypatch):
+    """One bad workbook must not sink the pass, and must be reported."""
+    from decimal import Decimal
+
+    import job_main
+
+    tree = [_f("Bad - DMA", "DMA_Scoring_Workbook_B.xlsx"),
+            _f("Good - DMA", "DMA_Scoring_Workbook_G.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main.openpyxl, "load_workbook",
+                        lambda p, **kw: type("W", (), {"close": lambda s: None})())
+
+    def _read(wb):
+        _read.n += 1
+        if _read.n == 1:
+            raise ValueError("not a zip file")
+        return Decimal("3.10"), "Pillar_Rollup!C6"
+    _read.n = 0
+    monkeypatch.setattr(job_main, "_stated_overall_grain", _read)
+
+    conn = _CompositeConn([("bad", "Bad - DMA"), ("good", "Good - DMA")])
+    rc = job_main.backfill_composite(conn, "token", groups)
+
+    assert rc == 1, "a failure must be reported in the exit code"
+    assert len(conn.cur.updated) == 1, "the good workbook still lands"
+    assert conn.cur.updated[0][1] == "good"
+
+
+class _MetaCursor:
+    """Enough of a cursor for backfill_workbook_metadata: one SELECT of runs
+    holding no workbook metadata, then UPDATEs of run_manifest and runs."""
+
+    def __init__(self, runs, completed_at_rowcount=1):
+        self._runs = runs
+        self.meta_updates, self.date_updates = [], []
+        self._rows = []
+        self.rowcount = completed_at_rowcount
+
+    def execute(self, sql, params=None):
+        if "FROM runs r" in sql and "SELECT" in sql:
+            assert "'workbook_metadata' IS NULL" in sql, \
+                "must only pick runs whose workbook metadata is unset"
+            self._rows = list(self._runs)
+        elif "UPDATE run_manifest" in sql:
+            assert "'{workbook_metadata}'" in sql, \
+                "only the workbook_metadata key may be written"
+            assert "manifest" not in sql.split("jsonb_set")[1][:60], \
+                "the package's own manifest must never be edited"
+            self.meta_updates.append(params)
+        elif "UPDATE runs" in sql:
+            assert "completed_at IS NULL" in sql, \
+                "a stated completion date must never be overwritten"
+            self.date_updates.append(params)
+        else:                                    # pragma: no cover
+            raise AssertionError(f"unexpected sql: {sql[:60]}")
+
+    def fetchall(self):
+        return self._rows
+
+
+class _MetaConn:
+    def __init__(self, runs, **kw):
+        self.cur = _MetaCursor(runs, **kw)
+        self.commits = 0
+
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.commits += 1
+
+    def rollback(self):
+        pass
+
+
+def test_backfill_wbmeta_fills_the_run_that_served_no_date(monkeypatch):
+    """Golden 1's own case: no manifest date key, no YYYYMMDD token in
+    `DMA-2026-GOLDEN1-001`, and `last_written_at` sitting unread on the
+    workbook's own Run_Metadata tab."""
+    import json as _json
+
+    import job_main
+
+    tree = [_f("Golden 1 Credit Union - DMA HYBRID", "DMA_Scoring_Workbook_G1.xlsx"),
+            _f("No Workbook - DMA", "DMA_Assessment_Report_X.docx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_run_metadata",
+                        lambda p: {"run_id": "DMA-2026-GOLDEN1-001",
+                                   "last_written_at": "2026-08-31T09:33:59Z"})
+
+    conn = _MetaConn([("run-g1", "Golden 1 Credit Union - DMA HYBRID"),
+                      ("run-x", "No Workbook - DMA")])
+    assert job_main.backfill_workbook_metadata(conn, "token", groups) == 0
+
+    assert len(conn.cur.meta_updates) == 1, "only the folder shipping a workbook"
+    payload, run_id = conn.cur.meta_updates[0]
+    assert run_id == "run-g1"
+    assert _json.loads(payload)["last_written_at"] == "2026-08-31T09:33:59Z"
+
+    assert len(conn.cur.date_updates) == 1, (
+        "the date the evidence bands hang off must be filled in the same pass")
+    stamp, dated_run = conn.cur.date_updates[0]
+    assert dated_run == "run-g1"
+    assert stamp.startswith("2026-08-31")
+
+
+def test_backfill_wbmeta_writes_no_date_when_the_tab_states_none(monkeypatch):
+    """A Run_Metadata tab without any date key still lands as metadata, but
+    must not invent a completion date."""
+    import job_main
+
+    tree = [_f("Undated - DMA", "DMA_Scoring_Workbook_U.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_run_metadata",
+                        lambda p: {"scope_mode": "FULL"})
+
+    conn = _MetaConn([("run-u", "Undated - DMA")])
+    assert job_main.backfill_workbook_metadata(conn, "token", groups) == 0
+    assert len(conn.cur.meta_updates) == 1
+    assert conn.cur.date_updates == [], "no date key means no completed_at"
+
+
+def test_backfill_wbmeta_writes_nothing_for_a_workbook_with_no_tab(monkeypatch):
+    """An empty read is a fact about the workbook, not something to store."""
+    import job_main
+
+    tree = [_f("Bare - DMA", "DMA_Scoring_Workbook_B.xlsx")]
+    groups = job_main._package_groups(tree)
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx-bytes")
+    monkeypatch.setattr(job_main, "parse_run_metadata", lambda p: {})
+
+    conn = _MetaConn([("run-b", "Bare - DMA")])
+    assert job_main.backfill_workbook_metadata(conn, "token", groups) == 0
+    assert conn.cur.meta_updates == [] and conn.cur.date_updates == []
+    assert conn.commits == 0
+
+
+def test_the_worker_and_the_sql_walk_the_same_date_candidates():
+    """0031's rule, pinned. `_stated_completed_at` and the probe array in
+    `run_assessment_date` must name the same fields in the same order, or a
+    run's `completed_at` and its served `assessment_date` disagree — the same
+    date resolved twice, differently, from one document.
+
+    Both sides are read from what actually RUNS: the worker's own source, and
+    the SQL the migration emits (not its source, which also mentions the field
+    in the template that inserts it).
+    """
+    import importlib.util as _u
+    import inspect
+    import os as _os
+    import re
+    import sys as _sys
+    import types as _types
+
+    from dma_worker import persist
+
+    src = inspect.getsource(persist._stated_completed_at)
+    # `a.get("date")` is the nested `assessment.date`; the flat keys follow.
+    worker = ["assessment.date"] + re.findall(r'manifest\.get\("([a-z_]+)"\)', src)
+    worker = [k for k in worker if k != "assessment"]
+
+    mig = _os.path.join(_os.path.dirname(__file__), "..", "..", "..",
+                        "migrations", "versions",
+                        "0058_workbook_metadata_dates.py")
+    _sys.modules.setdefault("alembic", _types.SimpleNamespace(
+        op=_types.SimpleNamespace(execute=lambda *a: None)))
+    spec = _u.spec_from_file_location("_m0058", mig)
+    mod = _u.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    probe = re.findall(r"\['([a-z_.]+)',\s+'[A-Z_]+'\]", mod._fn(True))
+
+    assert worker == probe, (
+        f"the worker walks {worker} and the SQL walks {probe}; 0031 requires "
+        "one candidate list in one order")
+
+
+def test_the_runner_up_workbook_is_kept_not_discarded():
+    """`_package_groups` used to keep only the best-ranked file per kind, so
+    a package shipping two workbooks lost one irrecoverably."""
+    import job_main
+
+    tree = [_f("BOTR - DMA", "DMA_Scoring_Workbook_botr_2026-08-28.xlsx"),
+            _f("BOTR - DMA", "DMA_Assessment_Workbook_botr_2026-08-28.xlsx")]
+    parts = job_main._package_groups(tree)["BOTR - DMA"]
+
+    assert "scoring" in parts["workbook"].name.lower(), "rank 0 still wins first"
+    alts = parts.get("workbook__alt") or []
+    assert [a.name for a in alts] == \
+        ["DMA_Assessment_Workbook_botr_2026-08-28.xlsx"], \
+        "the runner-up must survive grouping or the fall-through has nothing"
+
+
+def test_a_workbook_with_no_scores_falls_through_to_the_one_that_has_them(monkeypatch, tmp_path):
+    """Bank of Travelers Rest, verbatim. `DMA_Scoring_Workbook_*` is a
+    RESEARCH-stage v5 file — 688 rows seen, column D empty by contract, 0
+    scored — and `DMA_Assessment_Workbook_*` carries all 688 and a composite
+    of 1.71. The filename ranked the empty one first and eighteen of that
+    entity's nineteen runs landed with `scored_cells = 0`."""
+    import job_main
+
+    tree = [_f("BOTR - DMA", "DMA_Scoring_Workbook_botr.xlsx"),
+            _f("BOTR - DMA", "DMA_Assessment_Workbook_botr.xlsx")]
+    parts = job_main._package_groups(tree)["BOTR - DMA"]
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx")
+
+    class _P:
+        def __init__(self, n):
+            self.scores = [type("S", (), {"subcap_id": f"P1C1.1.{i}"})()
+                           for i in range(n)]
+
+    seen = []
+
+    def _parse(path):
+        seen.append(path)
+        return _P(0 if path.endswith("wb.xlsx") else 688)
+    monkeypatch.setattr(job_main, "parse_scoring_workbook", _parse)
+
+    path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
+
+    assert path.endswith("wb_alt0.xlsx"), "the scored workbook must be read"
+    assert note and note["kind"] == "workbook_substituted"
+    assert note["detail"]["scored"] == 688
+    assert note["detail"]["chosen_scored"] == 0
+    assert "Assessment" in note["detail"]["read_instead"]
+
+
+def test_a_scored_first_choice_is_never_second_guessed(monkeypatch, tmp_path):
+    """The fall-through must not run when the ranked workbook has scores —
+    and must not download an alternate it does not need."""
+    import job_main
+
+    tree = [_f("Good - DMA", "DMA_Scoring_Workbook_g.xlsx"),
+            _f("Good - DMA", "DMA_Assessment_Workbook_g.xlsx")]
+    parts = job_main._package_groups(tree)["Good - DMA"]
+    downloads = []
+    monkeypatch.setattr(job_main.drive, "download",
+                        lambda t, fid: downloads.append(fid) or b"xlsx")
+    monkeypatch.setattr(job_main, "parse_scoring_workbook",
+                        lambda p: type("P", (), {"scores": [
+                            type("S", (), {"subcap_id": "P1C1.1.1"})()]})())
+
+    path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
+    assert path.endswith("wb.xlsx") and note is None
+    assert len(downloads) == 1, "no alternate should be fetched"
+
+
+def test_a_package_with_one_workbook_is_unchanged(monkeypatch, tmp_path):
+    """A research-stage package genuinely has no scores yet; an empty
+    workbook with no sibling is a legitimate answer, not a failure."""
+    import job_main
+
+    tree = [_f("Solo - DMA", "DMA_Scoring_Workbook_s.xlsx")]
+    parts = job_main._package_groups(tree)["Solo - DMA"]
+    monkeypatch.setattr(job_main.drive, "download", lambda t, fid: b"xlsx")
+    called = []
+    monkeypatch.setattr(job_main, "parse_scoring_workbook",
+                        lambda p: called.append(p) or type(
+                            "P", (), {"scores": []})())
+
+    path, note = job_main._pick_workbook("tok", str(tmp_path), parts)
+    assert path.endswith("wb.xlsx") and note is None
+    assert called == [], "with no alternate there is nothing to compare against"
+
+
+def test_a_backfill_does_not_contend_with_the_scan_for_a_lock(monkeypatch):
+    """A diagnostic pass takes 815003; a scan takes 815002.
+
+    They shared 815002 until 2026-09-03, which made every manual backfill a
+    coin toss against a job that fires every thirty minutes. `BACKFILL_WBMETA`
+    lost twice in a row and printed "another execution holds the scan lock;
+    exiting" — a CLEAN EXIT that reads exactly like a completed pass and
+    wrote nothing. On a repair someone is watching, that is the difference
+    between "done" and "silently did nothing".
+
+    Read from the source, because the branch sits between a database
+    connection and a Drive walk that a unit test cannot reach."""
+    import inspect
+    import re
+
+    import job_main
+
+    src = inspect.getsource(job_main.main)
+    assert "815003 if diagnostic else 815002" in src, (
+        "a diagnostic pass must not take the scan's lock")
+
+    # and the flag must be settled BEFORE the lock, or it is a NameError
+    at_flag = src.index("diagnostic = bool(")
+    at_lock = src.index("pg_try_advisory_lock")
+    assert at_flag < at_lock, (
+        "`diagnostic` is read by the lock line; defining it later raises "
+        "NameError on every firing")
+
+    # every backfill mode must set the flag, or it silently takes 815002
+    modes = set(re.findall(r'os\.environ\.get\("(BACKFILL_[A-Z]+)"\)', src))
+    # the flag's own expression: from `diagnostic = bool(` to its closing
+    # paren. Anchoring on the first "EVIDENCE_NAMESPACE" in the whole
+    # function found an earlier one and sliced an EMPTY block, which made
+    # this loop assert nothing at all.
+    flag_block = src[at_flag:src.index("\n", src.index('== "repair")', at_flag))]
+    for m in modes:
+        assert m in flag_block, (
+            f"{m} runs a backfill but is not in the `diagnostic` flag, so it "
+            "would contend with the scan and open a scan row")
+
+
+def _fm(folder, name, mtime, sub=None, fid=None):
+    """A FileStat with a modified time, optionally inside a subfolder."""
+    segs = (folder,) + ((sub,) if sub else ()) + (name,)
+    return FileStat(file_id=fid or "/".join(segs), path_segments=segs,
+                    name=name, checksum=fid or name, size_bytes=10,
+                    mime_type="", modified_time=mtime)
+
+
+def test_a_copy_directory_is_not_a_package():
+    """Bank of Travelers Rest, measured 2026-09-03: ONE client folder held
+    four workbooks at three depths — root, `DMAI - <client>/`, and
+    `DMAI - <client>/memory-backup/` — three byte-identical. The scan reads
+    the whole tree at any depth and keeps one artefact per kind, so every
+    copy competed with the current one on equal terms."""
+    import job_main
+
+    tree = [_fm("BOTR - DMA", "DMA_Scoring_Workbook_b.xlsx", "2026-09-02T15:35:02Z"),
+            _fm("BOTR - DMA", "DMA_Scoring_Workbook_b.xlsx", "2026-09-02T15:36:46Z",
+                sub="memory-backup", fid="backup-copy")]
+    parts = job_main._package_groups(tree)["BOTR - DMA"]
+    assert parts["workbook"].file_id != "backup-copy", (
+        "a workbook under memory-backup/ must not be a candidate, however "
+        "recently it was written")
+
+
+def test_a_client_named_backup_is_not_excluded():
+    """The exclusion matches a whole path SEGMENT, so an institution whose
+    name contains the word is untouched."""
+    import job_main
+
+    tree = [_fm("Backup Bancorp - DMA", "DMA_Scoring_Workbook_b.xlsx",
+                "2026-09-01T00:00:00Z")]
+    parts = job_main._package_groups(tree)["Backup Bancorp - DMA"]
+    assert "workbook" in parts, "a client folder is not a copy directory"
+
+
+def test_the_newest_copy_of_equal_rank_wins():
+    """The reported defect: an agent rewrites the workbook and the scan reads
+    an older sibling, so the scores read as missing and the work is redone.
+
+    Both files rank 0 (`scoring`), so rank cannot separate them; the tie used
+    to fall to whichever the walk met first — stable, arbitrary, unrelated to
+    which copy is current."""
+    import job_main
+
+    older = _fm("C - DMA", "DMA_Scoring_Workbook_c.xlsx", "2026-09-01T10:00:00Z",
+                fid="older")
+    newer = _fm("C - DMA", "DMA_Scoring_Workbook_c.xlsx", "2026-09-02T10:00:00Z",
+                sub="DMAI - C", fid="newer")
+    for order in ([older, newer], [newer, older]):
+        parts = job_main._package_groups(order)["C - DMA"]
+        assert parts["workbook"].file_id == "newer", (
+            "the most recently modified copy of equal rank must win, "
+            "whichever order the walk met them in")
+
+
+def test_rank_still_beats_recency():
+    """Recency breaks a tie WITHIN a rank; it does not overturn precedence.
+    A newer `assessment` workbook must not displace a `scoring` one — the
+    content fall-through (`_pick_workbook`) is what handles an empty
+    scoring workbook, and it needs the ranked choice to be the ranked one."""
+    import job_main
+
+    tree = [_fm("D - DMA", "DMA_Scoring_Workbook_d.xlsx", "2026-09-01T00:00:00Z",
+                fid="scoring"),
+            _fm("D - DMA", "DMA_Assessment_Workbook_d.xlsx", "2026-09-09T00:00:00Z",
+                fid="assessment")]
+    parts = job_main._package_groups(tree)["D - DMA"]
+    assert parts["workbook"].file_id == "scoring"
+    assert [a.file_id for a in parts["workbook__alt"]] == ["assessment"]
+
+
+def test_an_undated_candidate_never_displaces_a_dated_one():
+    import job_main
+
+    tree = [_fm("E - DMA", "DMA_Scoring_Workbook_e.xlsx", "2026-09-01T00:00:00Z",
+                fid="dated"),
+            _fm("E - DMA", "DMA_Scoring_Workbook_e.xlsx", "", sub="DMAI - E",
+                fid="undated")]
+    parts = job_main._package_groups(tree)["E - DMA"]
+    assert parts["workbook"].file_id == "dated"

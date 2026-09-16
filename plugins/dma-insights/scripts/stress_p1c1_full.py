@@ -160,15 +160,24 @@ def main():
     # an agent works; the remaining 46 write through the ledger directly.
     first = cells[0]
     for i in range(3):
+        excerpt = (f"The {first.replace('.', ' ')} programme at "
+                   f"Stress Credit Union was stood up in Q2 2024; "
+                   f"coverage was measured at 40 percent in the "
+                   f"2025 board review and restated at 41 percent "
+                   f"later in 2025, item {i}.")
+        url = f"https://stress.example/{first.lower()}/doc{i}"
+        # THE PAGE IS READ BEFORE IT IS QUOTED. Consolidation verifies every
+        # excerpt against the text cached for its URL (2026-09-14), so a note
+        # quoting a page nothing read is BLOCKED with `excerpt_unverified` —
+        # the refusal working. `store_text` is what `engine.cli fetch` leaves
+        # behind; this walk has no network, so it puts the page there itself.
+        from engine import fetch as _F
+        _F.store_text(run, url, f"2025 board review.\n{excerpt}\n",
+                      content_type="stress-walk")
         M.note(run, category=CAT, subcap=first, facet="works",
                kind="evidence",
                claim=f"{first} live with measured coverage, item {i}",
-               excerpt=(f"The {first.replace('.', ' ')} programme at "
-                        f"Stress Credit Union was stood up in Q2 2024; "
-                        f"coverage was measured at 40 percent in the "
-                        f"2025 board review and restated at 41 percent "
-                        f"later in 2025, item {i}."),
-               url=f"https://stress.example/{first.lower()}/doc{i}",
+               excerpt=excerpt, url=url,
                source_name=f"{first} source {i} — 2025 board review",
                tier="T2", published="2025-06-01")
     mem = M.consolidate(run, CAT)

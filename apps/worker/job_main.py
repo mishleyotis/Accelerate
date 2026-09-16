@@ -18,6 +18,8 @@ import re
 import sys
 import tempfile
 import traceback
+
+import openpyxl
 from datetime import datetime, timezone
 
 from dma_worker import drive, intake_status, persist
@@ -26,30 +28,48 @@ from dma_worker.persist import _institution, persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
                                     open_scan, run_scan)
-from dma_worker.workbook_parser import (mine_evidence_from_rationales,
+from dma_worker.workbook_parser import (Observation,
+                                        _stated_overall_grain,
+                                        mine_evidence_from_rationales,
                                         parse_evidence_master,
                                         parse_grain_summaries,
+                                        parse_run_metadata,
                                         parse_peer_benchmarks,
                                         parse_evidence_index,
                                         parse_recommendations,
                                         parse_research_workbook,
                                         parse_scoring_workbook,
                                         parse_technographic_scan,
+                                        parse_tech_register,
+                                        workbook_tab_coverage,
                                         merge_evidence_sources)
 
 
+# ── ONE Cloud SQL Connector, imported ────────────────────────────────
+# Per-connection `Connector()` is one Cloud SQL ADMIN API call per
+# connection; under NullPool that is one per checkout, and it produced a
+# 429 on sqladmin.googleapis.com/.../connectSettings on 2026-08-31.
+import sys as _sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in _sys.path:
+        _sys.path.insert(0, str(_cand))
+
+from cloudsql import connect as _cloudsql_connect  # noqa: E402
+
 def _connect():
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        host = os.environ["LOCAL_DATABASE_URL"].split("@")[1].split(":")[0]
-        return pg8000.dbapi.connect(
-            user="dmai-worker@digital-maturity-assessor.iam",
-            password="local", host=host, port=5432, database="dma_insights")
-    from google.cloud.sql.connector import Connector
-    return Connector().connect(
-        os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-        user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-        enable_iam_auth=True, ip_type="PRIVATE")
+    return _cloudsql_connect(
+        local_user="dmai-worker@digital-maturity-assessor.iam")
 
 
 # Artefact naming across the shipped corpus is not standardised — every
@@ -64,6 +84,24 @@ _RPT_DECOYS = ("template",)
 #: folder. Kept in sync with `assemble.ARCHIVE_DIR` on the engine side; the
 #: two are one name and this comment is the only place that says so.
 ARCHIVE_SEGMENT = "_superseded"
+
+#: Directories inside a client folder that hold COPIES, not the package.
+#:
+#: `_superseded` is the engine's own archive and was always excluded. These
+#: are the ones agents create while working, and nothing excluded them:
+#: measured 2026-09-03 on Bank of Travelers Rest, one client folder held four
+#: workbooks at three depths — root, `DMAI - <client>/`, and
+#: `DMAI - <client>/memory-backup/` — three of them byte-identical. The scan
+#: reads the whole tree at any depth and keeps ONE artefact per kind, so
+#: every copy was a candidate to be chosen over the current one, and the copy
+#: it chose was a research-stage workbook with zero scored cells while the
+#: assessment workbook holding all 688 sat in `memory-backup`.
+#:
+#: Matched on a whole path SEGMENT, case-insensitively, so a client legitimately
+#: named "Backup Bancorp" is untouched.
+COPY_SEGMENTS = ("memory-backup", "memory_backup", "backup", "backups",
+                 "archive", "archived", "old", "_old", "superseded",
+                 "previous", "versions", ".trash")
 
 #: The Client Research Profile, in the spelling `classification.py` already
 #: uses for it (priority 3). One artefact, one pattern, two classifiers that
@@ -91,6 +129,11 @@ def _classify_artefact(f):
     # is a candidate to be chosen over the current one — the retention would
     # have created the very ambiguity it exists to remove.
     if any(seg.strip().lower() == ARCHIVE_SEGMENT for seg in f.path_segments):
+        return None
+    # The same rule for the directories AGENTS leave copies in. Without it a
+    # backup of last week's workbook competes with this week's on equal
+    # terms, and filename order decides which the client sees.
+    if any(seg.strip().lower() in COPY_SEGMENTS for seg in f.path_segments[:-1]):
         return None
     if name.endswith(".json") and "manifest" in name:
         # run_manifest.json canonical; L1_run_manifest.json / MANIFEST.json seen.
@@ -194,6 +237,14 @@ def package_key(tree):
     return key
 
 
+
+def _mtime(f) -> str:
+    """A file's modified time as a sortable string, "" when the source gives
+    none. RFC-3339 from Drive sorts lexicographically, so no parsing is
+    needed and a missing value loses every comparison — which is right: an
+    undated candidate should never displace a dated one."""
+    return getattr(f, "modified_time", "") or ""
+
 def _package_groups(to_process, key=None):
     """Group changed files by client folder and keep the best candidate per
     artefact kind. Returns ALL groups — the caller splits ingestable packages
@@ -210,8 +261,36 @@ def _package_groups(to_process, key=None):
         if not c:
             continue
         kind, rank = c
-        if kind not in g or rank < r[kind]:
+        # Lowest rank wins; among EQUAL ranks the most recently modified
+        # does. The tie used to fall to whichever file the walk met first —
+        # stable, arbitrary, and unrelated to which copy is current. That is
+        # the "agents using old cached reports" report of 2026-09-03: an
+        # agent rewrites the workbook, an older sibling of the same rank is
+        # still met first, and the run reads the stale one while the scores
+        # look missing.
+        prev = g.get(kind)
+        if prev is None or rank < r[kind] or (
+                rank == r[kind] and _mtime(f) > _mtime(prev)):
             g[kind], r[kind] = f, rank
+        # The runners-up are KEPT, under `<kind>__alt`, in rank order.
+        #
+        # Precedence here is decided by FILENAME, and a filename is not a
+        # claim about content. Bank of Travelers Rest ships both
+        # `DMA_Scoring_Workbook_*` (rank 0 — and a RESEARCH-stage v5 file:
+        # 688 rows seen, column D empty by contract, 0 scored) and
+        # `DMA_Assessment_Workbook_*` (rank 1, 688 scored, composite 1.71 at
+        # Pillar_Summary!C6). The name won, the scores lost, and eighteen of
+        # that entity's nineteen runs landed with `scored_cells = 0`.
+        #
+        # Discarding the runner-up made that unrecoverable without a human
+        # renaming files in Drive. Kept, the ingest can fall through to it
+        # when the chosen workbook states no scores — see `_pick_workbook`.
+        g.setdefault(f"{kind}__alt", []).append((rank, f))
+    for gk in groups.values():
+        for k in [k for k in gk if k.endswith("__alt")]:
+            gk[k] = [f for _, f in sorted(gk[k], key=lambda t: t[0])][1:]
+            if not gk[k]:
+                del gk[k]
     return groups
 
 
@@ -292,6 +371,72 @@ def _record_package_failure(conn, parts, folder, exc) -> bool:
     return True
 
 
+
+def _pick_workbook(token, td, parts):
+    """The workbook that actually CARRIES SCORES, not the one whose filename
+    ranked first.
+
+    `_classify_artefact` ranks `scoring` above `assessment` above `workbook`,
+    on the filename alone. That is a reasonable default and it is not a claim
+    about content. Bank of Travelers Rest ships both:
+
+        DMA_Scoring_Workbook_...xlsx      rank 0   research-stage v5:
+                                                   688 rows seen, column D
+                                                   empty BY CONTRACT, 0 scored
+        DMA_Assessment_Workbook_...xlsx   rank 1   688 scored, composite 1.71
+                                                   at Pillar_Summary!C6
+
+    The name won and the scores lost: eighteen of that entity's nineteen runs
+    landed with `scored_cells = 0`, each one a promoted-looking package with
+    nothing in it. Nothing in the pipeline could recover from it, because the
+    runner-up was discarded at grouping time.
+
+    So: parse the chosen file, and if it yields NO scored cell while an
+    alternate exists, parse the alternate. Take the first one that states
+    scores. An empty workbook is still a legitimate answer (a research-stage
+    package genuinely has no scores yet) — this only prefers a sibling that
+    HAS them, and never prefers a smaller score set over a larger one.
+
+    Returns `(path, note)`; `note` is None when the first choice stood, and
+    otherwise an Observation-shaped dict recording which file was read
+    instead and why, so the substitution is never silent.
+    """
+    def _fetch(stat, name):
+        path = os.path.join(td, name)
+        with open(path, "wb") as fh:
+            fh.write(drive.download(token, stat.file_id))
+        return path
+
+    chosen = parts["workbook"]
+    path = _fetch(chosen, "wb.xlsx")
+    alts = parts.get("workbook__alt") or []
+    if not alts:
+        return path, None
+    try:
+        scored = len({s.subcap_id for s in parse_scoring_workbook(path).scores})
+    except Exception:                      # noqa: BLE001 — a bad parse is the caller's to report
+        return path, None
+    if scored:
+        return path, None
+
+    for i, alt in enumerate(alts):
+        try:
+            apath = _fetch(alt, f"wb_alt{i}.xlsx")
+            n = len({s.subcap_id for s in parse_scoring_workbook(apath).scores})
+        except Exception:                  # noqa: BLE001
+            continue
+        if n:
+            note = {"kind": "workbook_substituted",
+                    "detail": {"chosen_by_name": chosen.name, "chosen_scored": 0,
+                               "read_instead": alt.name, "scored": n,
+                               "why": ("the filename-ranked workbook states no "
+                                       "scored cell and a sibling does; the "
+                                       "name is not a claim about content")}}
+            print(f"workbook: {chosen.name} states 0 scored cells — "
+                  f"reading {alt.name} instead ({n} cells)")
+            return apath, note
+    return path, None
+
 def _ingest_one(conn, token, folder, parts, remint=False):
     """Download, parse and persist one package. Atomic: persist_package
     commits once at the end, so an exception anywhere leaves nothing."""
@@ -305,11 +450,13 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                 drive.download(token, parts["manifest"].file_id).decode("utf-8-sig"))
         else:
             manifest = {}
-        wb_path = os.path.join(td, "wb.xlsx")
-        with open(wb_path, "wb") as fh:
-            fh.write(drive.download(token, parts["workbook"].file_id))
+        wb_path, wb_note = _pick_workbook(token, td, parts)
         # Declared BEFORE the report parse, which appends to it.
         companion: list = []
+        if wb_note:
+            # A substitution the run must be able to explain later: which
+            # file was read, which was ranked first, and why.
+            companion.append(Observation(wb_note["kind"], None, wb_note["detail"]))
         sections = []
         if "report" in parts:
             rp = os.path.join(td, "report.docx")
@@ -379,6 +526,26 @@ def _ingest_one(conn, token, folder, parts, remint=False):
                   f"{len(research.get('absent') or [])} recorded absences")
 
         wb = parse_scoring_workbook(wb_path)
+
+        # WHICH TABS DOES ANYTHING READ? Recorded on every ingest, before the
+        # readers run, because the answer changed under us: the Golden 1
+        # workbook ships 43 tabs against readers that claimed 12, and the
+        # gap was invisible. A surface written from a tab in this census's
+        # worklist renders empty because nothing read it, and a producer who
+        # cannot tell that apart from a client with nothing to say will write
+        # the absence.
+        workbook_tab_coverage(wb_path, companion)
+
+        # The technology register at the grain the techstack contract wants.
+        # Run for its OBSERVATIONS as well as its rows: CG-20 (product and
+        # vendor stating one string) and CG-12 (a detection_basis over the
+        # face-slot budget) are properties of the workbook, and naming them
+        # here reports them against the run instead of surfacing them as a
+        # producer defect at validation time.
+        tech_register = parse_tech_register(wb_path, companion)
+        if tech_register:
+            print(f"ingest: tech register {len(tech_register)} product row(s)")
+
         # Every companion tab appends what it could not read to one list; the
         # persist writes them as parser_observations against the run, so a tab
         # the parser did not recognise leaves a record naming the tab, the
@@ -419,10 +586,545 @@ def _ingest_one(conn, token, folder, parts, remint=False):
             report_artefact_id=(parts["report"].file_id
                                 if "report" in parts else None),
             grains=parse_grain_summaries(wb_path, companion),
+            # The workbook's Run_Metadata tab, stored beside the
+            # manifest so `last_written_at` can resolve a date the
+            # package's own manifest never stated.
+            wb_metadata=parse_run_metadata(wb_path),
             research=research,
         )
         rationales = {s.subcap_id: s.rationale for s in wb.scores if s.rationale}
         return res, rationales
+
+
+
+
+def backfill_workbook_metadata(conn, token, groups) -> int:
+    """Fill `run_manifest.payload.workbook_metadata` for runs ingested before
+    anything read the workbook's own `Run_Metadata` tab.
+
+    THE DEFECT. `run_assessment_date` walks six manifest keys and then the
+    YYYYMMDD token in the request id. Golden 1 carries none of the six, and
+    `DMA-2026-GOLDEN1-001` has no eight-digit token, so the run resolved
+    UNKNOWN and served no assessment date — while its own workbook states
+    `last_written_at = 2026-08-31T09:33:59Z` on a tab nothing read for a date.
+
+    WHAT THAT COSTS. Not one header line: the freshness dot has nothing to
+    draw, and the same candidate list feeds `runs.completed_at`, which is
+    every evidence row's `reference_date`. With it null the generated
+    `age_months` is null and `recency_band` falls to UNVERIFIED for EVERY
+    item — 537 rows on this run, each rendering "unverified" beside evidence
+    the package dated.
+
+    Migration 0058 is the read half (the probe row, and the view handing the
+    resolver `workbook_metadata || manifest`). This is the other half: a run
+    ingested before it cannot benefit without re-reading its own workbook,
+    and the package scan is idempotent, so an unchanged tree re-ingests
+    nothing.
+
+    Writes ONLY the `workbook_metadata` key — `payload["manifest"]` is never
+    touched, because a key written into the package's own artefact after the
+    fact is indistinguishable from one the package shipped.
+
+    `completed_at` is filled in the same pass and only where it is NULL: it
+    is the column the evidence bands hang off, and leaving it behind would
+    fix the dot while every row still read UNVERIFIED.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                     JOIN run_manifest m ON m.run_id = r.id
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND m.payload -> 'workbook_metadata' IS NULL
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-wbmeta: {len(todo)} run(s) hold no workbook metadata")
+    filled = skipped = empty = dated = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                md = parse_run_metadata(wp)
+            if not md:
+                empty += 1
+                print(f"backfill-wbmeta: {folder}: workbook states no Run_Metadata")
+                continue
+            cur.execute(
+                """UPDATE run_manifest
+                      SET payload = jsonb_set(payload, '{workbook_metadata}',
+                                              %s::jsonb, true)
+                    WHERE run_id = %s""",
+                (json.dumps(md), run_id))
+            # The date the bands hang off, only where nothing stated one.
+            stamp = persist._stated_completed_at(md)
+            if stamp:
+                cur.execute(
+                    "UPDATE runs SET completed_at = %s "
+                    " WHERE id = %s AND completed_at IS NULL",
+                    (stamp, run_id))
+                dated += cur.rowcount or 0
+            conn.commit()
+            print(f"backfill-wbmeta: {folder} -> {len(md)} key(s)"
+                  + (f", completed_at {stamp}" if stamp else ""))
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-wbmeta FAILED: {folder}: {exc!r}")
+    print(f"backfill-wbmeta: {filled} filled ({dated} gained a completed_at), "
+          f"{skipped} have no workbook artefact, {empty} state none, "
+          f"{failed} failed")
+    return 1 if failed else 0
+
+#: How many null-composite runs one scheduled firing will re-read. The pass
+#: downloads a workbook per run, and the Job's task timeout is 3600s; a
+#: backlog must not be able to spend the whole firing here and starve the
+#: scan that is this Job's actual purpose. What is left over is NAMED in the
+#: log rather than dropped silently — a cap nobody can see is a cap that
+#: reads as "there was nothing else".
+COMPOSITE_REPAIR_PER_FIRING = 25
+
+
+def composite_reader_fingerprint() -> str:
+    """A hash of the composite reader itself.
+
+    WHY A HASH AND NOT A VERSION NUMBER. The repair below records
+    `composite_absent` for a run whose workbook states no overall, so the
+    next firing does not download it again. That record is only safe while
+    the reader is unchanged: improve the reader and every one of those runs
+    must be looked at again, or the improvement reaches new packages only
+    and every existing one stays silently empty — which is precisely the
+    failure this whole change exists to end, reintroduced by the fix for it.
+
+    A hand-maintained `READER_VERSION = 3` would work exactly as long as
+    everyone remembers to bump it. Hashing the reader's own source and the
+    constants it reads cannot be forgotten. A comment-only edit re-opens the
+    work list too; re-reading is cheap and correct, being silently stale is
+    neither.
+    """
+    import hashlib
+    import inspect
+    from dma_worker import workbook_parser as _wp
+    src = inspect.getsource(_wp._stated_overall_grain)
+    consts = repr((_wp._GRAIN_TABS["pillars"], _wp._GRAIN_ANCHORS["pillars"],
+                   _wp._GRAIN_SCORE_KEYS, _wp._OVERALL_LABELS))
+    return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
+
+
+#: Workbook downloads are ~1.5 MB each and this pass re-parses whole
+#: workbooks, so the per-firing cap is small. What is left over is NAMED.
+EVIDENCE_REPAIR_PER_FIRING = 5
+
+
+#: An evidence row the CONNECTOR minted carries its own `E-CC-nnn` id, so the
+#: numeric-suffix join below cannot reach it — `E-CC-569` is the 569th id the
+#: connector allocated, not the 569th row of anyone's workbook. Those rows do
+#: say which workbook row they came from, in words, inside `source_name`:
+#:     "DFPI Regulated Entity Record … [package evidence id E-5123]"
+#:     "Banking Dive — How Golden 1 used AI … — package id E-055;"
+#: MEASURED 2026-09-04 on Golden 1 Credit Union: 223 served rows had no URL
+#: after the suffix pass, 222 of them named a workbook row this way, and every
+#: one of those 222 resolved to a ledger row that states a URL. That marker is
+#: the package's own statement of provenance — the honest join key — and it is
+#: the difference between a drawer with a source and a drawer without one.
+_PACKAGE_ID_MARKER = re.compile(
+    r"package\s+(?:evidence\s+)?id[:\s]\s*([A-Za-z0-9][A-Za-z0-9._-]*)",
+    re.IGNORECASE)
+
+
+def stated_package_id(source_name: str | None) -> str | None:
+    """The workbook evidence id a served row names in its own source_name."""
+    m = _PACKAGE_ID_MARKER.search(source_name or "")
+    return m.group(1).rstrip(".-_") if m else None
+
+
+#: How much of the shorter quote has to lead the longer one for the two to be
+#: the same passage. The ingest clips an excerpt into the 50-500 character
+#: window (invariant 4), so the served row routinely holds a PREFIX of what
+#: the Evidence_Master tab states — same passage, fewer characters.
+_EXCERPT_HEAD = 60
+
+
+def excerpt_agrees(served: str | None, stated: str | None) -> bool | None:
+    """Do the served row and the workbook row quote the same passage?
+
+    THE MARKER IS TEXT A PRODUCER WROTE. `[package evidence id E-5123]` is a
+    claim about provenance, and a claim can be wrong — a mistyped digit would
+    hang a real, checkable URL under somebody else's quote, which is worse
+    than the blank drawer it replaced. The excerpt is the independent check:
+    both rows carry the VERBATIM passage, so if they agree, the marker points
+    where it says it does.
+
+    MEASURED 2026-09-04 on Golden 1 Credit Union: 258 served rows name a
+    workbook row, and under this rule all 258 agree with the row they name
+    and none disagree. So the guard costs nothing on good data and is the
+    only thing standing between a typo and a mis-sourced citation.
+
+    True agrees, False contradicts, None when one side has no quote to
+    compare — never guessed either way."""
+    a = " ".join((served or "").split()).lower()
+    b = " ".join((stated or "").split()).lower()
+    if not a or not b:
+        return None
+    if a == b:
+        return True
+    return a.startswith(b[:_EXCERPT_HEAD]) or b.startswith(a[:_EXCERPT_HEAD])
+
+
+def evidence_reader_fingerprint() -> str:
+    """A hash of the evidence reader, on `composite_reader_fingerprint`'s
+    reasoning: a run this reader has already been through is not work until
+    the reader itself changes, and nobody should have to remember to say so.
+
+    It covers the MATCHERS as well as the parser: teaching the pass a second
+    way to reach a row is an improvement to the reader, and every run that
+    was given up on under the old one has to re-open by itself."""
+    import hashlib
+    import inspect
+    from dma_worker import workbook_parser as _wp
+    src = inspect.getsource(_wp.parse_evidence_master)
+    src += inspect.getsource(stated_package_id)
+    src += inspect.getsource(excerpt_agrees)
+    # AND HOW THE ROWS ARE CHOSEN AND WRITTEN, not only how they are read.
+    # Changing the fill from one entity-wide statement to one row at a time
+    # changed WHICH rows end up with a URL — 214 of Golden 1's on
+    # 2026-09-04 — and the fingerprint did not move, so every run stayed
+    # stamped "already read" and the fix would have reached none of them.
+    # A pass whose behaviour changed is a different reader.
+    src += inspect.getsource(backfill_evidence)
+    consts = repr((_wp._EV_TABS, _wp._EV_ID_ANCHORS, _wp._FILLABLE,
+                   _PACKAGE_ID_MARKER.pattern, _EXCERPT_HEAD))
+    return hashlib.sha256((src + consts).encode()).hexdigest()[:16]
+
+
+def adopt_orphan_runs(conn, token, groups) -> int:
+    """Give a run with no `source_folder_id` its package back, by IDENTITY.
+
+    MEASURED 2026-09-04. goeasy Ltd. carries eighteen runs under request id
+    `DMA-RES-GSY-20260830-0002`, and NONE of them — including the promoted
+    one the client directory reads — records a source folder. Every repair
+    pass in this file finds a run's package through
+    `runs.source_folder_id`, so all of them are blind to that client
+    entirely: the composite repair reported one candidate run in the whole
+    database and it was a different institution. The card renders the word
+    "maturity" over an empty slot and no amount of folder fallback reaches
+    it, because there is no folder to fall back to.
+
+    A NAME IS NOT AN IDENTITY, and this deliberately does not use one. The
+    package's own `run_manifest.json` states `run_id`, and that is the same
+    string the ingest stored as `runs.request_id`. Matching those two is the
+    package saying which run it produced, not this code guessing from a
+    folder title — the distinction that `repair_evidence_namespace` was
+    written about after a name-derived token was found owned by fourteen
+    different entities.
+
+    REFUSES AMBIGUITY. If two packages state the same run id, neither is
+    adopted and both are named: one of them is wrong and picking either
+    would attach a client's scores to another client's workbook.
+
+    Writes only `source_folder_id`, only where it is NULL, and only from a
+    manifest that names the run. Every other repair works afterwards because
+    the run is finally traceable to the package it came from.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.request_id
+                     FROM runs r
+                    WHERE r.source_folder_id IS NULL
+                      AND r.request_id IS NOT NULL
+                    ORDER BY r.id""")
+    orphans = cur.fetchall()
+    if not orphans:
+        return 0
+    wanted = {req for _rid, req in orphans}
+    print(f"adopt: {len(orphans)} run(s) carry no source folder "
+          f"({len(wanted)} distinct request id(s))")
+
+    # One manifest read per folder, and only folders that ship one.
+    stated: dict = {}
+    clashes: dict = {}
+    for folder, parts in sorted(groups.items()):
+        if "manifest" not in parts:
+            continue
+        try:
+            raw = drive.download(token, parts["manifest"].file_id)
+            run_id = (json.loads(raw.decode("utf-8-sig")) or {}).get("run_id")
+        except Exception as exc:      # noqa: BLE001 — one manifest, not the pass
+            print(f"adopt: {folder}: manifest unreadable ({exc!r})")
+            continue
+        if not run_id or run_id not in wanted:
+            continue
+        if run_id in stated and stated[run_id] != folder:
+            clashes.setdefault(run_id, {stated[run_id]}).add(folder)
+            continue
+        stated[run_id] = folder
+
+    for run_id, folders in clashes.items():
+        stated.pop(run_id, None)
+        print(f"adopt: REFUSED {run_id} — stated by {len(folders)} packages "
+              f"({', '.join(sorted(folders))}); adopting either would attach "
+              f"one client's run to another's workbook")
+
+    adopted = 0
+    for rid, req in orphans:
+        folder = stated.get(req)
+        if not folder:
+            continue
+        cur.execute("UPDATE runs SET source_folder_id = %s "
+                    " WHERE id = %s AND source_folder_id IS NULL", (folder, rid))
+        adopted += cur.rowcount or 0
+    conn.commit()
+    unplaced = len(orphans) - adopted
+    print(f"adopt: {adopted} run(s) adopted by the package that names them, "
+          f"{unplaced} still unplaced (no manifest states their request id)")
+    return 0
+
+
+def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
+    """Fill `runs.composite` for a run whose workbook states it and whose
+    ingest had nowhere to read it.
+
+    THE DEFECT. `composite` is written once, at INSERT, from
+    `WorkbookParse.composite` — and that field was set in exactly one place,
+    `_parse_scorecard`, off the `2_Scorecard` tab. Only the claude_dma
+    generation ships that tab. Every general_dma workbook (`P{n}_Subcap_Scoring`)
+    and every rollup-only one took a different branch of
+    `parse_scoring_workbook`, so the field came back None for the whole
+    generation and `runs.composite` was written NULL.
+
+    WHAT THAT COSTS, seen on Golden 1 (run 40971653) 2026-09-02. The
+    directory card reads `serving_directory.composite` for its header
+    figure. Golden 1's read NULL, so the card rendered the word "maturity"
+    over an empty slot — beside its own four pillar bars, which resolve, and
+    beside Axos Bank, which ships the other generation and shows 1.9. The
+    workbook states the figure FOUR times: `Pillar_Summary!C6`,
+    `Pillar_Rollup!C6`, `Executive_Summary` "Overall Maturity", and the
+    OVERALL row's weighted contribution. No reader claimed any of them.
+
+    `_stated_overall_grain` is the reader half and is already fixed. This is
+    the other half: a run ingested before that fix cannot benefit from it
+    without re-reading its own workbook, and the package scan is idempotent
+    — an unchanged tree creates nothing to re-ingest.
+
+    READ, never derived. The value written is the one on the row the
+    workbook labels OVERALL. A run whose workbook states no overall is left
+    NULL and says so; a mean of the pillars would be a derived figure in a
+    column whose contract is that it was read, and indistinguishable from
+    one afterwards.
+
+    Additive and idempotent, on `backfill_grains`' pattern: a run already
+    holding a composite is not in the work list, a folder shipping no
+    workbook is skipped, and no run is created, deleted or re-scored.
+    """
+    cur = conn.cursor()
+    reader = composite_reader_fingerprint()
+    # A run whose workbook THIS reader already found nothing in is not work.
+    # Without that exclusion the scheduled pass re-downloads every genuinely
+    # composite-less workbook every thirty minutes, for ever; with it the
+    # steady state is zero downloads and a reader change re-opens the lot.
+    # `forced` (the BACKFILL_COMPOSITE mode) ignores the record and re-reads
+    # everything, which is what a human reaching for the manual pass wants.
+    #
+    # THE RUN THAT SERVES IS THE ONE THAT MATTERS, and it is not always the
+    # one holding the folder. MEASURED 2026-09-04: goeasy Ltd. carries
+    # EIGHTEEN runs under one request id (`DMA-RES-GSY-20260830-0002`), every
+    # one with a null composite, and this query — which required the run's own
+    # `source_folder_id` — matched exactly ONE of them across the whole
+    # database. A run re-ingested from the same package does not always carry
+    # the folder forward, so the promoted run, the only one the directory
+    # reads, was invisible to its own repair.
+    #
+    # A sibling under the SAME request id and the same entity is the same
+    # package by definition — that is what a request id identifies — so its
+    # folder is the right place to look, and the newest one wins. Not the
+    # entity alone: two assessments of one client are two packages, and
+    # reading one's composite out of the other's workbook would be a figure
+    # from the wrong run wearing the right name.
+    cur.execute("""SELECT r.id,
+                          COALESCE(r.source_folder_id, sib.source_folder_id),
+                          r.request_id
+                     FROM runs r
+                     LEFT JOIN LATERAL (
+                           SELECT s.source_folder_id
+                             FROM runs s
+                            WHERE s.request_id = r.request_id
+                              AND s.entity_id = r.entity_id
+                              AND s.source_folder_id IS NOT NULL
+                            ORDER BY s.run_seq DESC
+                            LIMIT 1) sib ON TRUE
+                    WHERE r.composite IS NULL
+                      AND COALESCE(r.source_folder_id,
+                                   sib.source_folder_id) IS NOT NULL
+                      AND (%s OR NOT EXISTS (
+                            SELECT 1 FROM parser_observations o
+                             WHERE o.run_id = r.id
+                               AND o.kind = 'composite_absent'
+                               AND o.detail->>'reader' = %s))
+                    ORDER BY 2, r.id""", (forced, reader))
+    todo = [(rid, folder) for rid, folder, _req in cur.fetchall()]
+    deferred = 0
+    if not forced and len(todo) > COMPOSITE_REPAIR_PER_FIRING:
+        deferred = len(todo) - COMPOSITE_REPAIR_PER_FIRING
+        todo = todo[:COMPOSITE_REPAIR_PER_FIRING]
+    print(f"backfill-composite: {len(todo)} run(s) hold no composite "
+          f"(reader {reader}"
+          + (f", {deferred} deferred to the next firing)" if deferred else ")"))
+    filled = skipped = empty = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            # NAMED, not tallied. The first production firing reported
+            # "1 have no workbook artefact" and stopped there: which run,
+            # and under what key, went unsaid — and the key is exactly what
+            # goes wrong when a folder is renamed or a package moves.
+            skipped += 1
+            why = ("no folder by that key in this scan" if folder not in groups
+                   else "folder is in the scan but ships no workbook")
+            print(f"backfill-composite: run {run_id} skipped — {why} "
+                  f"(key {folder!r})")
+            continue
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                wb = openpyxl.load_workbook(wp, read_only=True, data_only=True)
+                try:
+                    value, cell = _stated_overall_grain(wb)
+                finally:
+                    wb.close()
+            if value is None:
+                # A workbook that states no overall is a fact about the
+                # workbook. Absent beats a number nobody wrote down.
+                #
+                # RECORDED, so the next firing does not pay for the same
+                # download to learn the same thing. Stamped with the reader
+                # that concluded it: a better reader has a different
+                # fingerprint and the run returns to the work list on its own.
+                cur.execute(
+                    """INSERT INTO parser_observations
+                           (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'composite_absent',%s, now())""",
+                    (run_id, json.dumps({"reader": reader,
+                                         "reason": "workbook states no overall"})))
+                conn.commit()
+                empty += 1
+                print(f"backfill-composite: {folder}: workbook states none")
+                continue
+            cur.execute("UPDATE runs SET composite = %s WHERE id = %s",
+                        (value, run_id))
+            conn.commit()
+            print(f"backfill-composite: {folder} -> {value} (from {cell})")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-composite FAILED: {folder}: {exc!r}")
+    # PUBLISH IT. `serving_directory` is materialised: a repaired
+    # `runs.composite` is invisible to every client until the view is
+    # rebuilt, and until 0059 the worker's role could not ask for that — so
+    # the repair committed a correct value that nothing could show. Once per
+    # pass, and only when something actually changed; a refresh costs a full
+    # rebuild and a pass that filled nothing has nothing to publish.
+    if filled:
+        try:
+            cur.execute("SELECT refresh_serving_directory()")
+            conn.commit()
+            print("backfill-composite: directory refreshed")
+        except Exception as exc:  # noqa: BLE001 — the values are committed
+            conn.rollback()
+            print(f"backfill-composite: filled {filled} but could NOT refresh "
+                  f"the directory ({exc!r}) — the figures are in `runs` and "
+                  f"will surface on the next refresh")
+    print(f"backfill-composite: {filled} filled, {skipped} have no workbook "
+          f"artefact, {empty} state none, {failed} failed")
+    return 1 if failed else 0
+
+def backfill_grains(conn, token, groups) -> int:
+    """Fill the STATED pillar/category grains a run was ingested without.
+
+    `run_manifest.workbook_grains` is written once, at ingest, and there is
+    no update path — so a run ingested while the grain reader could not find
+    its Score column keeps `pillars: 0, categories: 0` for ever, and
+    re-scanning cannot repair it: the diff is idempotent, so an unchanged
+    tree creates nothing to re-ingest.
+
+    WHAT THAT COSTS, measured on Golden 1 (run 40971653) 2026-09-02. The
+    workbook states 2.40 / 2.11 / 2.25 / 2.25 in Pillar_Summary and again in
+    Pillar_Rollup. The reader looked for a column literally named `score` in
+    a tab that names it `Weighted_Score`, so the run stored no grain. With no
+    STATED grain, CG-07 resolves a quoted pillar figure against the mean of
+    the run's own cells (2.1115 / 2.0345 / 2.0920 / 2.0585) and refuses the
+    workbook's weighted figure at 0.05 — so the overview hero rendered four
+    EMPTY BARS beside a peer tick, and the client directory card with them,
+    on a run whose own report states all four scores.
+
+    The aliases are already fixed in `parse_grain_summaries`. This is the
+    other half: a run ingested before that fix cannot benefit from it without
+    re-reading its own workbook.
+
+    Additive and idempotent, on the pattern `backfill_sections` set. It
+    re-parses the workbook and UPDATES the existing run's manifest in place:
+    a run already holding grains is left alone, a folder shipping no workbook
+    is skipped, and no run is created, deleted or re-scored. Only the
+    `workbook_grains` key is written — `payload["manifest"]` is untouched.
+    """
+    cur = conn.cursor()
+    cur.execute("""SELECT r.id, r.source_folder_id
+                     FROM runs r
+                     JOIN run_manifest m ON m.run_id = r.id
+                    WHERE r.source_folder_id IS NOT NULL
+                      AND COALESCE(
+                            jsonb_array_length(
+                              COALESCE(m.payload->'workbook_grains'->'pillars',
+                                       '[]'::jsonb)), 0) = 0
+                    ORDER BY r.source_folder_id""")
+    todo = cur.fetchall()
+    print(f"backfill-grains: {len(todo)} run(s) hold no stated pillar grain")
+    filled = skipped = empty = failed = 0
+    for run_id, folder in todo:
+        parts = groups.get(folder) or {}
+        if "workbook" not in parts:
+            skipped += 1
+            continue
+        try:
+            obs: list = []
+            with tempfile.TemporaryDirectory() as td:
+                wp = os.path.join(td, "wb.xlsx")
+                with open(wp, "wb") as fh:
+                    fh.write(drive.download(token, parts["workbook"].file_id))
+                grains = parse_grain_summaries(wp, obs)
+            n_p = len(grains.get("pillars") or [])
+            n_c = len(grains.get("categories") or [])
+            if not n_p and not n_c:
+                # The reader still finds nothing. That is a real answer about
+                # this workbook rather than a failure to record — the
+                # observations say which of the three ways it came back empty.
+                empty += 1
+                for o in obs:
+                    print(f"backfill-grains: {folder}: {o.kind} {o.detail}")
+                continue
+            cur.execute(
+                """UPDATE run_manifest
+                      SET payload = jsonb_set(payload, '{workbook_grains}',
+                                              %s::jsonb, true)
+                    WHERE run_id = %s""",
+                (json.dumps(grains), run_id))
+            conn.commit()
+            print(f"backfill-grains: {folder} -> {n_p} pillar(s), "
+                  f"{n_c} categor(ies)")
+            filled += 1
+        except Exception as exc:  # noqa: BLE001 — one bad workbook must not sink the pass
+            conn.rollback()
+            failed += 1
+            print(f"backfill-grains FAILED: {folder}: {exc!r}")
+    print(f"backfill-grains: {filled} filled, {skipped} have no workbook "
+          f"artefact, {empty} state none, {failed} failed")
+    return 1 if failed else 0
 
 
 def backfill_sections(conn, token, groups) -> int:
@@ -480,7 +1182,8 @@ def backfill_sections(conn, token, groups) -> int:
     return 1 if failed else 0
 
 
-def backfill_evidence(conn, token, groups) -> int:
+def backfill_evidence(conn, token, groups, *, forced: bool = True,
+                      only: str = "") -> int:
     """Fill in the evidence text that already-ingested rows never got.
 
     Evidence rows insert with ON CONFLICT DO NOTHING, so re-ingesting a
@@ -493,14 +1196,65 @@ def backfill_evidence(conn, token, groups) -> int:
     Matched on runs.source_folder_id, which stores the client folder's name.
     """
     cur = conn.cursor()
+    reader = evidence_reader_fingerprint()
+    # THE SCHEDULED PASS IS INCREMENTAL. Unbounded, this re-downloads and
+    # re-parses every run's workbook every thirty minutes for ever. A run
+    # with no unlinked citation left is not work, and a run THIS reader has
+    # already been through is not work until the reader changes.
+    # `forced` (BACKFILL_EVIDENCE) re-reads everything, which is what a
+    # human reaching for the manual pass is asking for.
     cur.execute("""SELECT r.id, r.entity_id, r.source_folder_id, r.run_seq
                      FROM runs r
                     WHERE r.source_folder_id IS NOT NULL
-                    ORDER BY r.source_folder_id""")
+                      AND (%s OR (
+                            -- BY ENTITY, not by run: `evidence_index` is
+                            -- keyed (e_id) and scoped (entity_id) — it has
+                            -- NO run_id, and asking for one aborted the
+                            -- whole transaction in production on
+                            -- 2026-09-04T12:13:20Z, taking the scan that
+                            -- runs after it down with a 25P02. The UPDATE
+                            -- below is entity-scoped for the same reason.
+                            EXISTS (SELECT 1 FROM evidence_index i
+                                     WHERE i.entity_id = r.entity_id
+                                       AND i.source_url IS NULL)
+                        AND NOT EXISTS (SELECT 1 FROM parser_observations o
+                                         WHERE o.run_id = r.id
+                                           AND o.kind = 'evidence_reader_pass'
+                                           AND o.detail->>'reader' = %s)))
+                      AND (%s = '' OR r.source_folder_id ILIKE %s)
+                    ORDER BY r.source_folder_id""",
+                (forced, reader, only or '', f"%{only}%"))
     todo = cur.fetchall()
-    print(f"backfill-evidence: {len(todo)} run(s)")
-    filled = skipped = failed = 0
+
+    # ONE WORKBOOK PER CLIENT, NOT PER RUN. The fill is entity-scoped —
+    # every UPDATE below keys on `entity_id`, because `evidence_index` has
+    # no run column — so a client's second run has nothing left to give and
+    # downloading its 1.5 MB workbook again to discover that is pure waste.
+    # MEASURED in the first production firing, 2026-09-04T13:13:20Z:
+    #   backfill-evidence: Amalgamated Bank - DMA -> 34 row(s) filled
+    #   backfill-evidence: Amalgamated Bank - DMA -> 34 row(s) filled
+    #   backfill-evidence: ATB - DMA -> 352 row(s) filled
+    #   backfill-evidence: ATB - DMA -> 352 row(s) filled
+    # two downloads and two parses each, for one client's worth of work, out
+    # of a per-firing budget of five. The cap now counts DOWNLOADS, which is
+    # what actually costs, and the pass is recorded against every run the
+    # client has so none of them comes back asking again.
+    by_client: dict = {}
     for run_id, entity_id, folder, run_seq in todo:
+        by_client.setdefault((folder, entity_id), []).append(run_id)
+    clients = list(by_client.items())
+    deferred = 0
+    if not forced and len(clients) > EVIDENCE_REPAIR_PER_FIRING:
+        deferred = len(clients) - EVIDENCE_REPAIR_PER_FIRING
+        clients = clients[:EVIDENCE_REPAIR_PER_FIRING]
+    print(f"backfill-evidence: {len(clients)} client(s), "
+          f"{sum(len(v) for _k, v in clients)} run(s) (reader {reader}"
+          + (f", {only!r} only" if only else "")
+          + (f", {deferred} client(s) deferred to the next firing)"
+             if deferred else ")"))
+    filled = skipped = failed = 0
+    for (folder, entity_id), run_ids in clients:
+        run_id = run_ids[0]
         parts = groups.get(folder) or {}
         if "workbook" not in parts:
             skipped += 1
@@ -514,6 +1268,12 @@ def backfill_evidence(conn, token, groups) -> int:
                 wb = parse_scoring_workbook(p)
             mined = mine_evidence_from_rationales(wb.scores)
             n = clashes = 0
+            # WHAT ACTUALLY WENT WRONG, not what we assume went wrong. This
+            # used to record a fixed sentence blaming the dedup index for
+            # every refused row, which is a claim the code never checked —
+            # the same defect as "117 row(s) filled" for a client that was
+            # already complete. The message PostgreSQL returned goes in.
+            why: dict = {}
             for ev in ledger:
                 m = mined.get(ev["e_id"]) or {}
                 excerpt = ev.get("excerpt") or m.get("excerpt")
@@ -524,39 +1284,172 @@ def backfill_evidence(conn, token, groups) -> int:
                 # connector's own E-CC-nnn namespace instead. origin='package'
                 # is exactly the set the ingest created from this ledger.
                 suffix = ev["e_id"].split("-")[-1]
-                # A savepoint per row: filling in an excerpt can collide with
-                # the (entity_id, content_hash) dedup index when two ledger
-                # rows cite the same url and fact. That is a real duplicate,
-                # recorded and skipped — it must not sink the whole run.
-                cur.execute("SAVEPOINT ev_row")
+                # ONE ROW AT A TIME, NOT ONE STATEMENT PER LEDGER ROW.
+                #
+                # `split_part(e_id,'-',3) = suffix` with only `entity_id` to
+                # narrow it matches EVERY row this client has with that
+                # number — across all of its runs. Golden 1 has nine.
+                # Setting them all to the same (url, claim_type, excerpt)
+                # makes them byte-identical, the `(entity_id, content_hash)`
+                # dedup index refuses the duplicate, and because it was ONE
+                # statement the savepoint rolled back ALL of them — including
+                # the row that could have been filled.
+                #
+                # MEASURED 2026-09-04T14:05:55Z:
+                #   Golden 1 … HYBRID -> 540 row(s) filled … 604 dedup clash(es)
+                # and 214 rows whose suffix matched a ledger row perfectly
+                # were still serving no URL afterwards. Resolving the ids
+                # first and updating each in its own savepoint costs more
+                # statements and loses only the row that genuinely collides.
+                cur.execute(
+                    """SELECT e_id FROM evidence_index
+                        WHERE entity_id = %s AND origin = 'package'
+                          AND split_part(e_id, '-', 3) = %s
+                          AND (source_name IS NULL OR source_url IS NULL
+                            OR excerpt IS NULL OR claim_type IS NULL)""",
+                    (entity_id, suffix))
+                targets = [row[0] for row in cur.fetchall()]
+                for _target in targets:
+                    cur.execute("SAVEPOINT ev_row")
+                    try:
+                        cur.execute(
+                            """UPDATE evidence_index
+                                  SET source_name = COALESCE(source_name, %s),
+                                      source_url  = COALESCE(source_url, %s),
+                                      excerpt     = COALESCE(excerpt, %s),
+                                      claim_type  = COALESCE(claim_type, %s)
+                                WHERE entity_id = %s AND e_id = %s
+                                  AND ((%s::text IS NOT NULL AND source_name IS NULL)
+                                    OR (%s::text IS NOT NULL AND source_url  IS NULL)
+                                    OR (%s::text IS NOT NULL AND excerpt     IS NULL)
+                                    OR (%s::text IS NOT NULL AND claim_type  IS NULL))""",
+                            (ev.get("source_name"), ev.get("source_url"),
+                             excerpt, ev.get("claim_type"), entity_id, _target,
+                             ev.get("source_name"), ev.get("source_url"),
+                             excerpt, ev.get("claim_type")))
+                        n += cur.rowcount or 0
+                        cur.execute("RELEASE SAVEPOINT ev_row")
+                    except Exception as exc:  # noqa: BLE001 — one row, not the run
+                        cur.execute("ROLLBACK TO SAVEPOINT ev_row")
+                        clashes += 1
+                        why[str(exc)[:120]] = why.get(str(exc)[:120], 0) + 1
+            # SECOND PASS, by the id the row itself names. The suffix join
+            # above reaches only the rows the INGEST minted from this ledger;
+            # a row the connector registered wears `E-CC-nnn` and states its
+            # workbook origin in `source_name` instead. Read what it says.
+            by_ledger_id = {ev["e_id"]: ev for ev in ledger}
+            cur.execute("""SELECT e_id, source_name, excerpt
+                             FROM evidence_index
+                            WHERE entity_id = %s AND origin = 'package'
+                              AND source_url IS NULL
+                              AND source_name IS NOT NULL""", (entity_id,))
+            stated = named = conflicts = uncorroborated = 0
+            for e_id, source_name, served_excerpt in cur.fetchall():
+                pid = stated_package_id(source_name)
+                if pid is None:
+                    continue
+                named += 1
+                ev = by_ledger_id.get(pid)
+                if ev is None or not (ev.get("source_url") or "").strip():
+                    continue
+                # THE QUOTE HAS TO AGREE. Both rows carry the verbatim
+                # passage, so the Evidence_Master excerpt is what confirms
+                # the marker points where it claims. A contradiction is a
+                # mis-aimed marker, and hanging a real URL under the wrong
+                # quote is worse than the blank drawer it would replace.
+                verdict = excerpt_agrees(served_excerpt, ev.get("excerpt"))
+                if verdict is False:
+                    conflicts += 1
+                    continue
+                if verdict is None:
+                    uncorroborated += 1
+                m = mined.get(pid) or {}
+                cur.execute("SAVEPOINT ev_named")
                 try:
+                    _exc = ev.get("excerpt") or m.get("excerpt")
                     cur.execute(
                         """UPDATE evidence_index
-                              SET source_name = COALESCE(source_name, %s),
-                                  source_url  = COALESCE(source_url, %s),
-                                  excerpt     = COALESCE(excerpt, %s),
-                                  claim_type  = COALESCE(claim_type, %s)
-                            WHERE entity_id = %s
-                              AND origin = 'package'
-                              AND split_part(e_id, '-', 3) = %s""",
-                        (ev.get("source_name"), ev.get("source_url"), excerpt,
-                         ev.get("claim_type"), entity_id, suffix))
-                    n += cur.rowcount or 0
-                    cur.execute("RELEASE SAVEPOINT ev_row")
+                              SET source_url = COALESCE(source_url, %s),
+                                  excerpt    = COALESCE(excerpt, %s),
+                                  claim_type = COALESCE(claim_type, %s)
+                            WHERE entity_id = %s AND e_id = %s
+                              AND ((%s::text IS NOT NULL AND source_url IS NULL)
+                                OR (%s::text IS NOT NULL AND excerpt    IS NULL)
+                                OR (%s::text IS NOT NULL AND claim_type IS NULL))""",
+                        (ev.get("source_url"), _exc, ev.get("claim_type"),
+                         entity_id, e_id,
+                         ev.get("source_url"), _exc, ev.get("claim_type")))
+                    stated += cur.rowcount or 0
+                    cur.execute("RELEASE SAVEPOINT ev_named")
                 except Exception:       # noqa: BLE001 — one row, not the run
-                    cur.execute("ROLLBACK TO SAVEPOINT ev_row")
+                    cur.execute("ROLLBACK TO SAVEPOINT ev_named")
                     clashes += 1
+            n += stated
+            if conflicts:
+                # THE MARKER AND THE QUOTE DISAGREE. Recorded, never
+                # resolved: whichever is wrong, a person has to look.
+                cur.execute(
+                    """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_stated_id_excerpt_conflict',%s, now())""",
+                    (run_id, json.dumps({"rows": str(conflicts),
+                                         "reason": "source_name names a package "
+                                                   "evidence id whose Evidence_Master "
+                                                   "excerpt is a different passage; "
+                                                   "no url was attached"})))
+            if named and stated < named:
+                # NAMED A ROW WE COULD NOT FIND. Say so rather than leaving a
+                # blank drawer with no account of why it is blank.
+                cur.execute(
+                    """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_stated_id_unresolved',%s, now())""",
+                    (run_id, json.dumps({"named": str(named),
+                                         "filled": str(stated),
+                                         "conflicts": str(conflicts),
+                                         "uncorroborated": str(uncorroborated),
+                                         "reason": "source_name names a package "
+                                                   "evidence id the workbook "
+                                                   "ledger does not carry"})))
             if clashes:
                 cur.execute(
                     """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
-                       VALUES (%s,'evidence_backfill_dedup_clash',%s, now())""",
-                    (run_id, json.dumps({"rows_skipped": clashes,
-                                         "reason": "filling the excerpt would "
-                                                   "duplicate (entity, content_hash)"})))
+                       VALUES (%s,'evidence_backfill_row_refused',%s, now())""",
+                    (run_id, json.dumps(
+                        {"rows_skipped": str(clashes),
+                         "errors": {k: str(v) for k, v in
+                                    sorted(why.items(), key=lambda kv: -kv[1])[:5]}})))
+            conn.commit()
+            # RECORDED, stamped with the reader that did it, ON EVERY RUN
+            # THIS CLIENT HAS. Without this the scheduled pass re-downloads a
+            # 1.5 MB workbook every thirty minutes to re-learn that it has
+            # nothing left to give; with it the steady state is one query,
+            # and improving the reader re-opens every run by itself.
+            #
+            # Every run, not just the one that did the download: the fill is
+            # entity-scoped, so a sibling run genuinely has nothing left to
+            # give — and stamping only the first leaves the siblings in the
+            # work list, asking for the same download again next firing.
+            for _rid in run_ids:
+                cur.execute(
+                    """INSERT INTO parser_observations
+                           (run_id, kind, detail, occurred_at)
+                       VALUES (%s,'evidence_reader_pass',%s, now())""",
+                    (_rid, json.dumps({"reader": reader, "filled": str(n),
+                                       "by_run": str(run_id)})))
             conn.commit()
             print(f"backfill-evidence: {folder} -> {n} row(s) filled "
-                  f"({sum(1 for v in mined.values() if v.get('excerpt'))} mined "
-                  f"excerpts{f', {clashes} dedup clash(es)' if clashes else ''})")
+                  f"({stated} by a stated package id"
+                  + (f", {conflicts} refused on an excerpt conflict"
+                     if conflicts else "") + ", "
+                  f"{sum(1 for v in mined.values() if v.get('excerpt'))} mined "
+                  f"excerpts{f', {clashes} row(s) refused' if clashes else ''})")
+            # AND WHY THEY WERE REFUSED, in the log, not only in a row of
+            # `parser_observations` nothing can read from outside the
+            # database. A count without a cause is what sent this pass round
+            # three times: "604 dedup clash(es)" was a guess about the cause
+            # and the guess was wrong. The top few distinct messages are
+            # enough to tell a duplicate from a bug.
+            for _msg, _hits in sorted(why.items(), key=lambda kv: -kv[1])[:3]:
+                print(f"backfill-evidence:   x{_hits} {_msg}")
             filled += 1
         except Exception as exc:  # noqa: BLE001 — one bad workbook sinks nothing
             conn.rollback()
@@ -984,10 +1877,38 @@ def main() -> int:
     # executions overlap it. The session-level lock releases when this
     # connection closes (or the container dies) — a second execution
     # exits clean instead of racing the diff into duplicate runs.
+    #
+    # Which kind of pass this is decides which lock it takes, so it is
+    # settled BEFORE the lock rather than beside the scan row below.
+    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
+                      or os.environ.get("BACKFILL_GRAINS")
+                      or os.environ.get("BACKFILL_COMPOSITE")
+                      or os.environ.get("BACKFILL_WBMETA")
+                      or os.environ.get("BACKFILL_EVIDENCE")
+                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
+
+    # A DIAGNOSTIC pass takes a DIFFERENT lock (815003).
+    #
+    # It used to take 815002, the scan's own, which made every manual
+    # backfill a coin toss against a job that fires every thirty minutes:
+    # measured 2026-09-03, `BACKFILL_WBMETA` lost twice in a row and printed
+    # "another execution holds the scan lock; exiting" — a clean exit that
+    # reads exactly like a completed pass and wrote nothing. On a repair the
+    # operator is watching, that is the difference between "done" and
+    # "silently did nothing".
+    #
+    # Sharing the lock was never necessary. A backfill updates columns of
+    # runs that already exist and are already NULL there; the scan creates
+    # new runs from changed artefacts and writes the checksums. They do not
+    # contend for a row. What DOES need serialising is two diagnostics
+    # against each other — both re-read workbooks and update the same
+    # manifests — and 815003 gives them exactly that.
+    lock_id = 815003 if diagnostic else 815002
+    what = "backfill" if diagnostic else "scan"
     cur = conn.cursor()
-    cur.execute("SELECT pg_try_advisory_lock(815002)")
+    cur.execute("SELECT pg_try_advisory_lock(%s)", (lock_id,))
     if not cur.fetchone()[0]:
-        print("scan: another execution holds the scan lock; exiting")
+        print(f"{what}: another execution holds the {what} lock; exiting")
         conn.close()
         return 0
 
@@ -1027,9 +1948,6 @@ def main() -> int:
     # else from here on is one, and gets its row BEFORE the walk so a walk
     # that dies is recorded rather than invisible (the 403 that killed the
     # tree recursion left no import_scans row at all).
-    diagnostic = bool(os.environ.get("BACKFILL_SECTIONS")
-                      or os.environ.get("BACKFILL_EVIDENCE")
-                      or os.environ.get("EVIDENCE_NAMESPACE") == "repair")
     started_at = datetime.now(timezone.utc)
     scan_id = None if diagnostic else open_scan(conn, started_at)
     tally = {"ingested": 0, "failed": 0, "deferred": 0, "quarantined": []}
@@ -1059,8 +1977,34 @@ def main() -> int:
             conn.close()
             return rc
 
+        if os.environ.get("BACKFILL_GRAINS"):
+            rc = backfill_grains(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_WBMETA"):
+            rc = backfill_workbook_metadata(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
+        if os.environ.get("BACKFILL_COMPOSITE"):
+            # The MANUAL pass: re-read every null-composite run, including the
+            # ones already recorded as stating none. A human reaching for this
+            # is asking for a full re-read, not the incremental one.
+            rc = backfill_composite(conn, drive.metadata_token(), groups)
+            conn.close()
+            return rc
+
         if os.environ.get("BACKFILL_EVIDENCE"):
-            rc = backfill_evidence(conn, drive.metadata_token(), groups)
+            # The manual pass is unbounded by design, so it takes the same
+            # client filter: `BACKFILL_EVIDENCE="Golden 1"` repairs that
+            # client and reads no other workbook. A bare truthy value still
+            # means the whole corpus — 99 runs and as many downloads — which
+            # is a thing to ask for on purpose, not by default.
+            want = os.environ["BACKFILL_EVIDENCE"].strip()
+            only = "" if want.lower() in ("1", "true", "yes", "all") else want
+            rc = backfill_evidence(conn, drive.metadata_token(), groups,
+                                   only=only)
             conn.close()
             return rc
 
@@ -1078,6 +2022,78 @@ def main() -> int:
                 limit=int(os.environ.get("EVIDENCE_NAMESPACE_LIMIT", "0")))
             conn.close()
             return rc
+
+        # ── THE REPAIR RUNS ON THE SCHEDULE, NOT ON SOMEONE REMEMBERING ──
+        #
+        # `runs.composite` is written exactly once, at INSERT. Every path that
+        # could repair a NULL was behind an env var no schedule sets, so a run
+        # ingested under an older reader kept its null for ever: the package
+        # scan is idempotent, so an unchanged tree re-reads nothing.
+        #
+        # MEASURED 2026-09-04. goeasy Ltd. (`DMA-RES-GSY-20260830-0002`) served
+        # `overall: null` in the client directory beside its own four pillar
+        # bars — 2.09 / 2.19 / 2.01 / 2.16 — all of which resolved. Its
+        # workbook was last read by this Job at 04:14:58 on 2026-09-03; the
+        # reader that can find its composite merged at 06:08 the same day. The
+        # run was ingested under the older reader and nothing ever looked
+        # again. `backfill_composite` had three tests proving it works and not
+        # one proving it runs, and no worker firing has ever logged a line
+        # from it.
+        #
+        # So it runs here, incrementally: null composites only, minus the ones
+        # this reader has already found nothing in, capped per firing. The
+        # steady state is one query and no downloads. It is deliberately NOT
+        # fatal to the scan — a repair that cannot reach Drive must not stop
+        # this Job doing the thing it exists to do.
+        # "NON-FATAL" HAS TO MEAN IT. Catching the exception is only half:
+        # a failed statement leaves PostgreSQL's transaction aborted, and
+        # every command after it dies `25P02 current transaction is aborted`
+        # — including the scan this Job exists to run. MEASURED
+        # 2026-09-04T12:13:20Z: one bad column name in the evidence work
+        # list, and `_scan_and_ingest` fell over on its first SELECT. Roll
+        # back, then carry on.
+        def _repair(label, fn):
+            try:
+                fn()
+            except Exception as exc:        # noqa: BLE001 — see above
+                print(f"{label} skipped this firing: {exc!r}")
+                try:
+                    conn.rollback()
+                except Exception:           # noqa: BLE001 — nothing left to do
+                    pass
+
+        # FIRST: a run that does not know its own package cannot be repaired
+        # by anything below. goeasy's eighteen runs had no source folder at
+        # all, which is why two rounds of fixing the folder LOOKUP moved
+        # nothing.
+        _repair("orphan adoption",
+                lambda: adopt_orphan_runs(conn, drive.metadata_token(), groups))
+        _repair("composite repair",
+                lambda: backfill_composite(conn, drive.metadata_token(),
+                                           groups, forced=False))
+        # THE EVIDENCE DRAWER'S LINKS — FOR THE CLIENT NAMED, AND NO OTHER.
+        #
+        # Golden 1 Credit Union served 728 citations with 193 URLs while
+        # Baxter served 154 of 154; the missing ones were in the package's
+        # own `Evidence_Detail` tab. The first firing that could run this
+        # pass reported the true size of that: `99 run(s)` across the whole
+        # corpus, and went off repairing 1st Security Bank, Amalgamated and
+        # ATB — none of which anybody had asked about. Owner's instruction,
+        # 2026-09-04: strictly Golden 1, do not add clients.
+        #
+        # So the pass does NOTHING unless `EVIDENCE_REPAIR_ONLY` names a
+        # client. Unset is off — not "on for everyone" — because the corpus
+        # is 99 runs and a repair nobody asked for is still work nobody
+        # asked for. `infra/deploy.sh` sets it; emptying it turns the pass
+        # off, it does not widen it.
+        only = (os.environ.get("EVIDENCE_REPAIR_ONLY") or "").strip()
+        if only:
+            _repair("evidence repair",
+                    lambda: backfill_evidence(conn, drive.metadata_token(),
+                                              groups, forced=False, only=only))
+        else:
+            print("evidence repair: EVIDENCE_REPAIR_ONLY names no client, "
+                  "so nothing is repaired this firing")
 
         _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
                          key)

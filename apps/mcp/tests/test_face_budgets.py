@@ -114,3 +114,77 @@ def test_a_nested_chip_is_reachable_at_two_star_levels():
 def test_a_section_with_no_registered_face_field_is_untouched():
     assert _check_face_budgets("context", "timeline",
                                {"events": [{"body": "x" * 900}]}) == []
+
+
+# ── the prerequisite status chip ─────────────────────────────────────────
+#
+# Measured on Golden 1, run 40971653, promoted 2026-09-02T14:35:12Z. The
+# recommendation panel renders `prerequisites[*].basis` as a pill beside the
+# condition sentence. Eleven of the run's twelve prerequisites carried a
+# 206-291 character paragraph there; it overflowed the pill, clipped
+# mid-sentence, and overlapped the row beneath. The twelfth read "Evidenced"
+# and rendered correctly — the payload stated the slot's real shape itself.
+#
+# `platform.recommendations` had no budget registered at all, which is why
+# CG-12 was silent on a defect it was built for. Both values below are
+# verbatim from that promoted payload.
+
+REC_01_BASIS = (
+    "Golden 1's own July 2024 enterprise discovery is the record here, and "
+    "it registers no future-state data architecture; what would settle it is "
+    "an authored target-state architecture with a named owner, which the "
+    "served Enterprise Data Architecture figure of 3.0 against a 3.5 minimum "
+    "reflects.")
+
+
+def _prereq(basis):
+    return {"recommendations": [{
+        "rec_id": "REC-01",
+        "prerequisites": [
+            {"condition": "A future-state enterprise reference architecture "
+                          "is authored and owned.",
+             "basis": basis,
+             "note": "What is already true is the substrate."},
+        ]}]}
+
+
+def test_the_promoted_291_character_prerequisite_basis_is_refused():
+    out = _check_face_budgets("platform", "recommendations",
+                              _prereq(REC_01_BASIS))
+    assert len(out) == 1
+    r = out[0]
+    assert r["gate_id"] == "CG-12" and r["severity"] == "block"
+    assert r["path"] == \
+        "recommendations.recommendations[0].prerequisites[0].basis"
+    assert "291 characters" in r["message"]
+    # the verdict names the slot and where the displaced prose belongs
+    assert "status chip" in r["message"] and "`note`" in r["message"]
+
+
+def test_the_short_status_label_that_already_rendered_passes():
+    """The twelfth prerequisite. It was always correct and must stay so."""
+    assert _check_face_budgets("platform", "recommendations",
+                               _prereq("Evidenced")) == []
+
+
+def test_a_two_sentence_label_is_refused_inside_the_character_budget():
+    """A label is one clause. Two short sentences fit 60 characters and are
+    still a paragraph in a pill."""
+    out = _check_face_budgets("platform", "recommendations",
+                              _prereq("Not evidenced. An audit would settle."))
+    assert len(out) == 1 and "2 sentences" in out[0]["message"]
+
+
+def test_every_prerequisite_in_the_promoted_run_is_swept():
+    """Item grain, not section grain: the defect hid in an array inside an
+    array, which is where CG-13's own history says these things hide."""
+    body = {"recommendations": [
+        {"rec_id": "REC-01", "prerequisites": [
+            {"basis": "Evidenced"}, {"basis": REC_01_BASIS}]},
+        {"rec_id": "REC-02", "prerequisites": [{"basis": REC_01_BASIS}]},
+    ]}
+    out = _check_face_budgets("platform", "recommendations", body)
+    assert len(out) == 2
+    assert [r["path"] for r in out] == [
+        "recommendations.recommendations[0].prerequisites[1].basis",
+        "recommendations.recommendations[1].prerequisites[0].basis"]

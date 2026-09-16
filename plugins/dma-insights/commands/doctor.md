@@ -17,6 +17,23 @@ Then, whatever it printed:
    token audience, or path token — and give the one command that fixes it. Do
    not guess past the first failure: they cascade, and the second message is
    usually a consequence of the first.
+3. If the failing row is **installed plugin** — STALE, DIVERGED, INCOMPLETE,
+   MISSING or DISABLED — offer to re-run it as `doctor.py --heal`, which
+   applies the repair that status needs (update; uninstall-then-install for a
+   tree that diverged without a version bump; enable for one that installed
+   switched off) and re-checks once. Offer rather than run: `--heal`
+   uninstalls and reinstalls this container's plugin cache, and a human at a
+   terminal should say yes to that. A trigger-fired Routine has nobody to ask
+   and runs `--heal` in its own preflight for that reason.
+   The row names the tree this session actually BOUND (measured from the
+   session's own plugin processes, never assumed from the install record):
+   on a directory marketplace that is the checkout, in place, and a lagging
+   install record is reported as cosmetic — OK, nothing to heal.
+   `UPDATED_MID_SESSION` after a heal is the expected result only where the
+   session binds the cache copy the heal rewrote: the disk is now correct
+   and this session bound the old roster at its start. Restart the session
+   to pick it up, or dispatch through `scripts/agent_run.py`, whose child
+   processes bind the repaired install.
 
 Never print, echo or paste a token, header value or secret. Report only whether
 a credential could be obtained.

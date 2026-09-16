@@ -25,11 +25,20 @@ research, sonnet): effort stays MEDIUM — the run's quality gates all held
 everything consolidated), so thoroughness is enforced structurally by the
 refusals and the floors gate, not bought with thinking tokens; the depth
 work (challenge, consolidation, verification) belongs to the opus tier by
-design. maxTurns is 200 because one dispatch covers one search-op-ceiling
-window (~7 subcaps at ~31 measured turns/subcap ≈ 217 before the batching
-guidance in RESEARCH-PROTOCOL.md § Budget, which exists because turn count
-— not search count — was the measured cost driver: 24.5M cached-input
-tokens over 188 turns for six subcaps).
+design.
+
+maxTurns is 340, and it is sized to the work rather than chosen as a cap.
+It was 200 on the reasoning that one dispatch covers one search-op-ceiling
+window (~7 subcaps at ~31 measured turns/subcap ≈ 217) — but nobody
+measured what a CATEGORY costs. Measured 2026-09-13 on the real catalogue
+(`engine.cost lane-fit`): 686 T1_CORE cells under 129 capabilities; at
+capability grain the largest category needs 309 turns and the whole run
+3,905. A ceiling below the work is not a saving — the lane runs out, hands
+back and is re-dispatched, re-paying its ~18K-token context floor cold,
+which is the mechanism behind one run's ~18 dispatches and $96.65. 340
+clears the largest category with headroom for the turns a projection cannot
+model. Turn count — not search count — remains the measured cost driver:
+24.5M cached-input tokens over 188 turns for six subcaps.
 """
 from __future__ import annotations
 
@@ -91,7 +100,7 @@ category; it never scores, never challenges its own synthesis, never \
 submits and never promotes.
 model: sonnet
 effort: medium
-maxTurns: 200
+maxTurns: 340
 skills:
   - dma-research
 tools: {tools}
@@ -107,11 +116,35 @@ notebook, the budget, every refusal — is
 Read it before your first tool call. This manifest only binds you to your
 category.
 
+## Open with the brief — what the run already knows
+
+`engine.brief dispatch --run <R> --root <ROOT> --category {cat}` is your
+FIRST command, before `orient` and before any search. It is one bounded
+packet and it carries what fifteen other lanes are finding at the same time
+as you:
+
+- the run's shared state — the estate by layer (a row marked ABSENT means
+  that layer WAS searched and found empty: a result, not a gap), the peer
+  set, the register's reach, the open contradictions;
+- per open cell, the volleys still owed AND **the evidence this run has
+  already registered for that cell**, plus the sources registered against a
+  capability sibling. Read those before you search: the run has paid for
+  them, and a cell that ignores them is the under-consolidation defect;
+- `your_notes` — your OWN notebook, compacted. If your context was lost,
+  this is what you already know; do not re-find it;
+- your search budget before the checkpoint wall.
+
+Then `engine.cli orient --run <R> --root <ROOT> --category {cat}` for the
+work card. When you finish, `engine.brief handback --run <R> --root <ROOT>
+--category {cat}` is what you report — computed from the sheets, so the
+conductor does not have to trust your prose, and it names the leads your
+sources open for OTHER categories.
+
 ## Your category
 
 - Your grain is `{cat}` and nothing else. `engine.cli orient --run <R>
-  --root <ROOT> --category {cat}` is your first command; its `do_first`
-  list is your instruction, and its work card is your unit of work.
+  --root <ROOT> --category {cat}` serves your work card; its `do_first`
+  list is your instruction, and its card is your unit of work.
 - Your worklist, question counts and deferred questions come from
   `engine.kg route --run <R> --root <ROOT> --category {cat}` — computed
   from the workbook's DQ bank at call time, never assumed.

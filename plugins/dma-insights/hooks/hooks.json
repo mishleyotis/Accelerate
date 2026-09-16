@@ -9,9 +9,48 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/ensure_headless.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: ensure_headless.py is MISSING from the installed plugin, so a new session is NOT auto-provisioned headless (defaultMode/workspace-trust). Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a SessionStart hook must never block a session from starting.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "WebFetch|mcp__Exa__web_fetch_exa",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_whole_page_fetch.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: deny_whole_page_fetch.py is MISSING from the installed plugin, so a research lane can fetch a whole page instead of the 240-character windows that engine.cli fetch returns \\u2014 the largest single line on the bill (76% of one measured run was cache reads), and the only form the ledger can verify an excerpt against. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/guard_dispatch.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: guard_dispatch.py is MISSING from the installed plugin, so a research, enrichment or challenge subagent can be dispatched with no connector baseline, on a refusing install, past the budget or rounds ceiling, or with another category cells in its prompt \\u2014 each of which spends a lane to produce work a gate will refuse. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/guard_driver_lock.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: guard_driver_lock.py is MISSING from the installed plugin, so a second engine.pipeline run can drive a run that already has a live driver \\u2014 two lane fleets on one workbook and two budgets counted as one. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
       {
         "matcher": "Bash",
         "hooks": [
@@ -33,6 +72,46 @@
         "matcher": "Bash"
       },
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_artefact_writes.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: deny_artefact_writes.py is MISSING from the installed plugin, so out-of-engine workbook and report writes are NOT denied. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_artefact_writes.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: deny_artefact_writes.py is MISSING from the installed plugin, so direct .xlsx/.docx writes are NOT denied. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/guard_actor_scope.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: guard_actor_scope.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit|mcp__workspace__bash|mcp__workspace__web_fetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_builtins.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: autoapprove_builtins.py is MISSING from the installed plugin, so Bash, Write and Edit are NOT auto-approved and a headless session prompts on every engine command. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a PreToolUse hook that blocks every Bash invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "mcp__.*",
         "hooks": [
           {
@@ -43,7 +122,17 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__submit_page_payload",
+        "matcher": "WebSearch|WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: autoapprove_connector.py is MISSING from the installed plugin, so the built-in web tools are NOT auto-approved. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__submit_page_payload",
         "hooks": [
           {
             "type": "command",
@@ -53,7 +142,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__promote_run",
+        "matcher": "mcp__.*__promote_run",
         "hooks": [
           {
             "type": "command",
@@ -65,7 +154,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__plugin_dma-insights_connector__submit_page_payload",
+        "matcher": "mcp__.*__submit_page_payload",
         "hooks": [
           {
             "type": "command",
@@ -75,7 +164,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_dma-insights_connector__promote_run",
+        "matcher": "mcp__.*__promote_run",
         "hooks": [
           {
             "type": "command",
@@ -93,6 +182,47 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/stage_advance.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: stage_advance.py is MISSING from the installed plugin, so the run stage machine (research -> scoring -> reports -> package) is NOT announced after a dispatched agent returns. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 90
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/stage_advance.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: stage_advance.py is MISSING from the installed plugin, so a headless dispatch or an engine gate finishing does NOT announce the next stage. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose.\"}'; exit 0; fi",
+            "timeout": 90
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/harvest_on_return.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: harvest_on_return.py is MISSING from the installed plugin, so the search_requests a returning lane emitted are never queued, engine.relay reconcile never runs, and the conductor gets no handback \\u2014 the next dispatch re-searches what the last lane already asked for. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The tool result is ALLOWED on purpose: a PostToolUse hook must never throw away a lane output that has already been paid for.\"}'; exit 0; fi",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/stage_advance.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: stage_advance.py is MISSING from the installed plugin, so a session may stop with a run stage still runnable by an agent. Stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. Stopping is ALLOWED on purpose: a Stop hook must never trap a session.\"}'; exit 0; fi",
+            "timeout": 90
+          }
+        ]
       }
     ],
     "SubagentStart": [
@@ -101,6 +231,29 @@
           {
             "type": "command",
             "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: session_brief.py is MISSING from the installed plugin, so this hook is NOT enforcing. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/plugin_version.py and reinstall. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "^(dma-insights:)?research-.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/record_handback.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: record_handback.py is MISSING from the installed plugin, so a research lane that stops writes no handback, and a re-dispatch starts from the category rather than from what the last attempt established. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The stop is ALLOWED on purpose: a SubagentStop hook must never trap a lane.\"}'; exit 0; fi",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: session_brief.py is MISSING from the installed plugin, so a COMPACTED session re-enters with whatever the summariser chose to keep \\u2014 no routing rule, no actor scope, no engine.cli resume pointer. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The session continues on purpose: a PostCompact hook must never end one.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]

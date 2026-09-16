@@ -52,6 +52,24 @@ SKIP_ABSORBED = ("a different request for the same entity is already in the "
                  "plan — this one is DEFERRED, not obsolete; re-queue it "
                  "once the entity's current run is promoted")
 SKIP_NO_DATE = "no assessment date; ordering it against the others would guess"
+#: NOTHING TO SERVE. A research-stage package's score column is empty BY
+#: CONTRACT (rule 4) and synthesis may not derive one, so a producer handed
+#: such a run has no outcome available to it other than reporting emptiness.
+#: Measured 2026-08-30 on goeasy-ltd: four INGESTED runs, `scored_cells` 0 on
+#: every one, request id DMA-RES-GSY-… against the corpus convention of
+#: DMA-ASM-… for assessments. A session was spent finding that out.
+SKIP_UNSCORED = ("this run scored no cells — a research-stage package, whose "
+                 "score column is empty by contract. Synthesis has nothing to "
+                 "read and may not derive a score; the missing step is "
+                 "SCORING (dma-assessment), not synthesis")
+#: UNKNOWN is not zero. A run whose ingest recorded no count may be perfectly
+#: good work or may be another research package; offering it is the gamble
+#: this filter exists to stop, and silently dropping it would hide a real
+#: assessment. So it is skipped, named, and openable with --allow-unknown-
+#: scores by an operator who has decided to take the gamble deliberately.
+SKIP_SCORE_UNKNOWN = ("this run's scored-cell count was never recorded, so "
+                      "whether it can be synthesised is unknown. Re-ingest it, "
+                      "or pass --allow-unknown-scores to work it anyway")
 
 
 def _seq(run: dict) -> int:
@@ -84,7 +102,27 @@ def _key(run: dict):
     return run.get("display_id") or run.get("run_id")
 
 
-def select(pending: list, limit: int | None = None) -> dict:
+def _scorable(run: dict, allow_unknown: bool) -> bool:
+    """Can a producer get pages out of this run at all?
+
+    Reads `synthesisable` where the connector supplies it and falls back to
+    `scored_cells`, so an older captured queue without the field still works
+    — a missing field is UNKNOWN, and unknown is governed by `allow_unknown`
+    rather than being quietly treated as fine.
+    """
+    flag = run.get("synthesisable")
+    if flag is None:
+        n = run.get("scored_cells")
+        flag = None if n is None else int(n) > 0
+    return allow_unknown if flag is None else bool(flag)
+
+
+def _unknown_score(run: dict) -> bool:
+    return run.get("synthesisable") is None and run.get("scored_cells") is None
+
+
+def select(pending: list, limit: int | None = None,
+           allow_unknown_scores: bool = False) -> dict:
     """Split the pending queue into what to work and what to skip, with why.
 
     THE CLAIM IS AN ENTITY-LEVEL FACT, NOT A RUN-LEVEL ONE, and the ordering of
@@ -104,6 +142,25 @@ def select(pending: list, limit: int | None = None) -> dict:
     in an entity's runs holds the WHOLE entity, and every one of its runs is
     skipped naming that claim.
     """
+    # NOTHING TO SERVE IS NOT WORK, and it is filtered BEFORE the dedupe —
+    # which is the opposite of the claim handling below, deliberately.
+    #
+    # A claim is a fact about the ENTITY: somebody is working it, so none of
+    # its runs may be handed out, and the claim check therefore has to see
+    # every run. Scorability is a fact about the RUN: this particular
+    # package has no scores in it. Those are different shapes and want
+    # opposite orderings.
+    #
+    # Concretely: an entity holding seq 3 (an assessment, scored) and seq 4
+    # (a research package, unscored) should be offered seq 3. Deduping first
+    # would pick seq 4 as "newest", find it unscorable, and drop the entity
+    # entirely — losing a real assessment behind a research package that was
+    # never synthesis work in the first place.
+    unscored = [r for r in pending
+                if not _scorable(r, allow_unknown_scores)]
+    unscored_ids = {id(r) for r in unscored}
+    pending = [r for r in pending if id(r) not in unscored_ids]
+
     # One run per entity: the newest, chosen over ALL pending runs including
     # claimed ones. Deduping first is what makes the claim check meaningful.
     best: dict = {}
@@ -151,8 +208,12 @@ def select(pending: list, limit: int | None = None) -> dict:
 
     return {
         "counts": {
-            "pending": len(pending),
-            "entities": len({r.get("display_id") for r in pending}),
+            # `pending` is the QUEUE AS GIVEN, not what survived the filter —
+            # a count that shrank silently would make the queue look shorter
+            # rather than make the waste visible.
+            "pending": len(pending) + len(unscored),
+            "entities": len({r.get("display_id")
+                             for r in pending + unscored}),
             # Runs held back because their ENTITY carries a live claim — which
             # is more runs than carry the claim themselves, and deliberately so.
             "claimed": len(claimed),
@@ -162,6 +223,12 @@ def select(pending: list, limit: int | None = None) -> dict:
             # obsolete re-ingest — a second asker, whose request is being
             # deferred rather than served.
             "absorbed_requests": len(absorbed),
+            # Runs with no scores at all: research-stage packages that were
+            # never synthesis work. Split from `unknown` because they are
+            # different findings — one names a pipeline stage that has not
+            # happened, the other names an ingest that recorded nothing.
+            "unscored": sum(1 for r in unscored if not _unknown_score(r)),
+            "score_unknown": sum(1 for r in unscored if _unknown_score(r)),
             "ready": len(ready),
             "undated": len(undated),
             "selected": len(plan),
@@ -179,7 +246,12 @@ def select(pending: list, limit: int | None = None) -> dict:
                 "absorbed_into": (best.get(_key(r)) or {}).get("run_id"),
                 "absorbed_into_request": (best.get(_key(r)) or {}
                                           ).get("request_id"),
-                "why": SKIP_ABSORBED} for r in absorbed]),
+                "why": SKIP_ABSORBED} for r in absorbed]
+            + [{"run_id": r["run_id"], "display_id": r.get("display_id"),
+                "request_id": r.get("request_id"),
+                "scored_cells": r.get("scored_cells"),
+                "why": (SKIP_SCORE_UNKNOWN if _unknown_score(r)
+                        else SKIP_UNSCORED)} for r in unscored]),
     }
 
 
@@ -188,12 +260,18 @@ def main() -> int:
     ap.add_argument("--pending", required=True,
                     help="raw list_pending_runs JSON")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--allow-unknown-scores", action="store_true",
+                    help="also offer runs whose scored-cell count the ingest "
+                         "never recorded. Off by default: an unknown count is "
+                         "a gamble on whether the run can be synthesised at "
+                         "all, and this makes taking it deliberate")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
     doc = json.loads(open(args.pending).read())
     pending = doc.get("pending") if isinstance(doc, dict) else doc
-    out = select(pending or [], args.limit)
+    out = select(pending or [], args.limit,
+                 allow_unknown_scores=args.allow_unknown_scores)
 
     if args.json:
         print(json.dumps(out, indent=1))
@@ -204,11 +282,26 @@ def main() -> int:
     print(f"  claimed        {c['claimed']} run(s) across {c['held_entities']} "
           f"entity(ies)  ({SKIP_CLAIMED})")
     print(f"  superseded     {c['superseded']}  ({SKIP_SUPERSEDED})")
+    if c["unscored"]:
+        print(f"  UNSCORED       {c['unscored']}  research-stage packages — "
+              f"scoring has not happened, so synthesis cannot")
+    if c["score_unknown"]:
+        print(f"  score unknown  {c['score_unknown']}  ingest recorded no "
+              f"count ({'offered' if args.allow_unknown_scores else 'held back'})")
     print(f"  ready          {c['ready']}   of which undated {c['undated']}")
     print(f"  SELECTED       {c['selected']}\n")
     for r in out["selected"]:
         print(f"  {(r['completed_at'] or 'undated')[:10]}  {r['run_id']}  "
               f"{r['display_id']}")
+    if c["unscored"]:
+        print(f"\n{c['unscored']} run(s) scored NO cells. These are not "
+              "synthesis work and never were: a research package leaves the "
+              "score column empty by contract, and a producer may not derive "
+              "one. What they need is the SCORING pass (dma-assessment); "
+              "handing one to a producer spends a session to be told so.")
+        for r in out["skipped"]:
+            if r["why"] is SKIP_UNSCORED:
+                print(f"    {r['display_id']}  {r.get('request_id') or ''}")
     if c["superseded"]:
         print(f"\n{c['superseded']} superseded run(s) are NOT work: they are the "
               "duplicate ingests of an assessment already selected above. "

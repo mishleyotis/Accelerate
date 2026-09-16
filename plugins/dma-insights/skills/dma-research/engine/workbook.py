@@ -37,13 +37,22 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
         _os.path.abspath(__file__))))
     __package__ = "engine"
 
+import contextlib
 import datetime as _dt
 import os
 import tempfile
+import time
 from pathlib import Path
 
+try:
+    import fcntl                       # POSIX only; see `transaction`
+except ImportError:                    # pragma: no cover
+    fcntl = None
+
 import openpyxl
+from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.datavalidation import DataValidation
 
 from . import contract as C
 
@@ -77,6 +86,12 @@ class RunWorkbook:
                 f"{self.path} is not a contract-{C.WORKBOOK_CONTRACT} workbook; "
                 f"missing sheets: {', '.join(missing)}")
         if notes:
+            # Land the upgraded shape BEFORE recording it: `_record_upgrade`
+            # appends through `transaction()`, whose first act is to reload a
+            # file this object has not yet seen — which threw the in-memory
+            # upgrade away and wrote the note into the OLD shape (measured
+            # 2026-09-03: a v6 workbook opened under v7 kept 40 sheets).
+            _atomic_save(self._wb, self.path)
             self._record_upgrade(notes)
 
     # ── shape upgrade: expand, migrate, contract ─────────────────────────
@@ -100,7 +115,9 @@ class RunWorkbook:
         notes = []
         for name, cols in C.SHEETS.items():
             if name not in self._wb.sheetnames:
-                self._wb.create_sheet(name).append(list(cols))
+                ws_new = self._wb.create_sheet(name)
+                ws_new.append(list(cols))
+                _format_sheet(ws_new, cols)
                 notes.append(f"added sheet {name}")
                 continue
             ws = self._wb[name]
@@ -119,6 +136,7 @@ class RunWorkbook:
             new.append(list(cols))
             for row in body:
                 new.append([row.get(c) for c in cols])
+            _format_sheet(new, cols)
             notes.append(
                 f"{name}: " + ", ".join(
                     ([f"added {', '.join(added)}"] if added else [])
@@ -175,10 +193,7 @@ class RunWorkbook:
         for name, cols in C.SHEETS.items():
             ws = wb.create_sheet(name)
             ws.append(list(cols))
-            ws.freeze_panes = "A2"
-            for i, col in enumerate(cols, start=1):
-                ws.column_dimensions[get_column_letter(i)].width = \
-                    max(12, min(40, len(col) + 4))
+            _format_sheet(ws, cols)
         path.parent.mkdir(parents=True, exist_ok=True)
         _atomic_save(wb, path)
         self = cls(path)
@@ -202,8 +217,122 @@ class RunWorkbook:
             raise WorkbookError(f"no sheet {name!r}")
         return self._wb[name]
 
+    # ── CONCURRENT WRITERS ───────────────────────────────────────────
+    #
+    # THE INCIDENT, 2026-08-31: REV Federal Credit Union's
+    # `thought_leadership` PRELIM row was silently overwritten by a
+    # concurrent write from the technographic scanner. Real work, really
+    # lost, with nothing raised — which for a client deliverable is worse
+    # than running slower.
+    #
+    # WHY A LOCK ON `save()` WOULD NOT HAVE FIXED IT, and this is the part
+    # that matters. `__init__` loads the ENTIRE workbook into `self._wb`,
+    # and `save()` writes that whole in-memory copy back. So the lost-update
+    # window is not inside `save()` — it opens at LOAD and stays open for
+    # the life of the object. A process that opened the workbook at t=0 and
+    # appends one row at t=30min writes back a t=0 snapshot plus its row,
+    # erasing everything every other process wrote in between. Serialising
+    # the writes alone would have produced a fix that passes a smoke test
+    # and still loses data.
+    #
+    # So the critical section spans RELOAD -> MUTATE -> SAVE:
+    #
+    #   with wb.transaction():        # exclusive flock on <path>.lock
+    #       ...                       # re-read from disk if it moved
+    #       wb.append(...)            # mutate the fresh copy
+    #                                 # saved once, on exit
+    #
+    # Every mutator wraps itself in one, so existing call sites became safe
+    # without being edited. It is REENTRANT: a nested `transaction` joins
+    # the outer one, which is what lets `ledger.append_evidence` mint an id
+    # and append the row under a single lock — the other half of the bug,
+    # where two processes both read `E-006` and both minted `E-007`.
+
+    #: How long a writer waits for the lock before giving up. Generous
+    #: because a legitimate holder is doing a whole-file xlsx write, and a
+    #: spurious timeout under load would be indistinguishable from the
+    #: corruption this prevents.
+    LOCK_TIMEOUT_S = 120.0
+
+    def _lock_path(self) -> Path:
+        return self.path.with_name(self.path.name + ".lock")
+
+    def _stamp(self):
+        """(mtime_ns, size) — cheap identity for 'has the file moved'."""
+        try:
+            st = self.path.stat()
+            return (st.st_mtime_ns, st.st_size)
+        except OSError:
+            return None
+
+    def _reload_if_changed(self) -> bool:
+        """Re-read the file when another process has written it.
+
+        Refuses rather than reloads when this object holds unsaved edits:
+        discarding them silently would be the same data loss wearing a fix.
+        """
+        now = self._stamp()
+        if now == getattr(self, "_seen", None):
+            return False
+        if getattr(self, "_dirty", False):
+            raise WorkbookError(
+                f"{self.path.name} changed on disk while this process held "
+                f"unsaved edits. Reloading would discard them and keeping "
+                f"them would discard the other writer's. Save before "
+                f"mutating, or do the whole read-modify-write inside one "
+                f"`transaction()`.")
+        self._wb = openpyxl.load_workbook(self.path)
+        self._seen = now
+        return True
+
+    @contextlib.contextmanager
+    def transaction(self, why: str = ""):
+        """Exclusive, cross-process, reentrant. Reloads on entry, saves on exit."""
+        if getattr(self, "_depth", 0):
+            yield self                       # already inside one
+            return
+        self._depth = 1
+        fh = None
+        try:
+            if fcntl is None:                # pragma: no cover
+                # Non-POSIX: say so rather than pretend. A silent no-op lock
+                # is how this class of bug survives a fix.
+                raise WorkbookError(
+                    "fcntl is unavailable, so concurrent writers to one "
+                    "workbook cannot be made safe on this platform. Run "
+                    "writers sequentially.")
+            self._lock_path().parent.mkdir(parents=True, exist_ok=True)
+            fh = open(self._lock_path(), "a+")
+            deadline = time.monotonic() + self.LOCK_TIMEOUT_S
+            while True:
+                try:
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except OSError:
+                    if time.monotonic() > deadline:
+                        raise WorkbookError(
+                            f"waited {self.LOCK_TIMEOUT_S:.0f}s for "
+                            f"{self._lock_path().name}{(' — ' + why) if why else ''}. "
+                            f"Another writer is holding it; this is a stall, "
+                            f"never a reason to write without the lock.")
+                    time.sleep(0.05)
+            self._reload_if_changed()
+            yield self
+            if getattr(self, "_dirty", False):
+                self.save()
+        finally:
+            self._depth = 0
+            if fh is not None:
+                with contextlib.suppress(OSError):
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+                fh.close()
+
     def save(self) -> None:
+        for ws in self._wb.worksheets:
+            _refresh_filter(ws)
         _atomic_save(self._wb, self.path)
+        self._dirty = False
+        self._seen = self._stamp()
 
     def _touch(self) -> None:
         self.set_metadata("last_written_at", _utcnow(), save=False)
@@ -219,12 +348,15 @@ class RunWorkbook:
         if unknown:
             raise WorkbookError(
                 f"{sheet}: no such column(s) {unknown}; contract is {list(cols)}")
-        ws = self._sheet(sheet)
-        ws.append([_cell(row.get(c)) for c in cols])
-        self._touch()
-        if save if save is not None else self.autosave:
-            self.save()
-        return ws.max_row
+        with self.transaction(f"append {sheet}"):
+            ws = self._sheet(sheet)
+            ws.append([_cell(row.get(c)) for c in cols])
+            _apply_cell_format(ws, sheet, cols, ws.max_row)
+            self._dirty = True
+            self._touch()
+            if save if save is not None else self.autosave:
+                self.save()
+            return ws.max_row
 
     def rows(self, sheet: str) -> list[dict]:
         """Every data row of `sheet` as a dict keyed by the contract."""
@@ -245,16 +377,19 @@ class RunWorkbook:
         unknown = [k for k in values if k not in cols]
         if unknown:
             raise WorkbookError(f"{sheet}: no such column(s) {unknown}")
-        ws = self._sheet(sheet)
-        kidx = cols.index(key_col) + 1
-        for r in range(2, ws.max_row + 1):
-            if str(ws.cell(row=r, column=kidx).value or "").strip() == key:
-                for k, v in values.items():
-                    ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
-                self._touch()
-                if save if save is not None else self.autosave:
-                    self.save()
-                return r
+        with self.transaction(f"update {sheet}"):
+            ws = self._sheet(sheet)
+            kidx = cols.index(key_col) + 1
+            for r in range(2, ws.max_row + 1):
+                if str(ws.cell(row=r, column=kidx).value or "").strip() == key:
+                    for k, v in values.items():
+                        ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                    _apply_cell_format(ws, sheet, cols, r)
+                    self._dirty = True
+                    self._touch()
+                    if save if save is not None else self.autosave:
+                        self.save()
+                    return r
         raise WorkbookError(f"{sheet}: no row where {key_col} == {key!r}")
 
     def update_row_where(self, sheet: str, match: dict, values: dict,
@@ -273,17 +408,20 @@ class RunWorkbook:
         unknown = [k for k in list(values) + list(match) if k not in cols]
         if unknown:
             raise WorkbookError(f"{sheet}: no such column(s) {unknown}")
-        ws = self._sheet(sheet)
-        idx = {k: cols.index(k) + 1 for k in match}
-        for r in range(2, ws.max_row + 1):
-            if all(str(ws.cell(row=r, column=i).value or "").strip()
-                   == str(match[k] or "").strip() for k, i in idx.items()):
-                for k, v in values.items():
-                    ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
-                self._touch()
-                if save if save is not None else self.autosave:
-                    self.save()
-                return r
+        with self.transaction(f"update {sheet}"):
+            ws = self._sheet(sheet)
+            idx = {k: cols.index(k) + 1 for k in match}
+            for r in range(2, ws.max_row + 1):
+                if all(str(ws.cell(row=r, column=i).value or "").strip()
+                       == str(match[k] or "").strip() for k, i in idx.items()):
+                    for k, v in values.items():
+                        ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                    _apply_cell_format(ws, sheet, cols, r)
+                    self._dirty = True
+                    self._touch()
+                    if save if save is not None else self.autosave:
+                        self.save()
+                    return r
         raise WorkbookError(f"{sheet}: no row where {match!r}")
 
     # ── metadata, and the two anti-drift anchors ─────────────────────────
@@ -365,6 +503,19 @@ class RunWorkbook:
             "slack_channel": "",
             "slack_thread_ts": "",
             "requested_by": "",
+            # Written by `engine.template bind` (runstate.start calls it);
+            # blank means unbound, and orient serves no card while it is.
+            "template_binding": "",
+            # The run's clock, bill and connector anchors — written by
+            # engine.pipeline / engine.cost as the run proceeds. Blank on a
+            # hand-narrated run, which is a readable state.
+            "stage_timings": "",
+            "cost_summary": "",
+            "connector_run_id": "",
+            "connector_run_id_prev": "",
+            "connector_ingest_after_seq": "",
+            "promoted_at": "",
+            "pipeline_version": "",
         }
         for k in ("run_id", "entity_name", "entity_id", "reference_date"):
             v = str(vals[k])
@@ -555,11 +706,29 @@ class RunWorkbook:
                 f"{foreign[:6]}. Select with Taxonomy.selected(sv, scope), "
                 f"which resolves the overlay for THIS sub-vertical and "
                 f"withdraws the base cells it supersedes.")
+        # SubCap_Name from the catalogue, at seed time. Owner, 2026-09-03:
+        # "missing subcaps names" — column B was empty on every run this
+        # engine ever built (goeasy GSY-03: 656 blank names shipped), because
+        # the tier catalogue carried no names and the toolkits that do are
+        # pulled after start. The names ship with the catalogue now
+        # (data/catalogue_v70_names.json, from the template's own DQ_Bank),
+        # and a cell the file does not name is refused rather than seeded
+        # blank: an unnamed row reads as jargon to a client and as a hole to
+        # the gold gate.
+        names = C.subcap_names()
+        unnamed = [c for c in selected if not names.get(c)]
+        if unnamed:
+            raise WorkbookError(
+                f"{len(unnamed)} selected cell(s) have no display name in "
+                f"{C._NAMES_NAME}: {unnamed[:6]}. Every seeded row carries "
+                f"its SubCap_Name from the catalogue; re-pin the names file "
+                f"from the template's DQ_Bank rather than seeding blanks.")
         for sheet, cells in by_sheet.items():
             ws = self._sheet(sheet)
             for cell in sorted(cells):
                 row = {c: None for c in C.PILLAR_COLUMNS}
                 row["SubCap_ID"] = cell
+                row["SubCap_Name"] = names[cell]
                 row["Category"] = cell.split(".")[0]
                 row["Evidence_IDs"] = C.NO_EVIDENCE
                 row["Proxy_Searched"] = "NOT_RUN"
@@ -656,9 +825,23 @@ class RunWorkbook:
         AUD-0133: the archive minted ids under an fcntl lock on a local
         counter file — safe only among processes on one host sharing one
         filesystem, and $RUN could not be shared at all. The workbook is the
-        shared object, so the id comes from it. Two writers to one workbook
-        is not a supported topology and never was; one writer reading its own
-        maximum is correct and needs no lock."""
+        shared object, so the id comes from it.
+
+        THIS DOCSTRING USED TO END "two writers to one workbook is not a
+        supported topology and never was; one writer reading its own maximum
+        is correct and needs no lock." That was a statement of scope, and it
+        was read as a guarantee. On 2026-08-31 two writers happened anyway —
+        a technographic scanner and a conductor on one run — and the missing
+        lock cost a PRELIM section. Reading the maximum is only correct while
+        nobody else is appending: two processes both see E-006 and both mint
+        E-007.
+
+        So the id must be allocated INSIDE the same `transaction()` as the
+        append that uses it, which is what `ledger.append_evidence` now does.
+        Called outside one it still returns the right answer for a single
+        writer, and says so rather than pretending otherwise."""
+        if not getattr(self, "_depth", 0):
+            self._reload_if_changed()
         n = 0
         for r in self.rows("Evidence_Detail"):
             eid = str(r.get("E_ID") or "")
@@ -673,6 +856,26 @@ class RunWorkbook:
 
 FLOOR_ITEMS = 3          # the per-subcap evidence floor
 FLOOR_CATEGORY_ITEMS = 20  # the per-category minimum (AUD-0022)
+
+# THE PER-CATEGORY EVIDENCE-COVERAGE FLOOR (AUD-0115).
+#
+# Reported 2026-09-01 against a live run whose sixteen categories all passed
+# the floors gate at 35% coverage — 241 of 688 subcaps carrying any evidence
+# at all, the rest closed as "no evidence" without the proxy and
+# diagnostic-question discovery that would have found it. The item floors
+# above (>=3 per subcap, >=20 per category) let a category pass on a handful
+# of worked subcaps while the majority sat empty, and `absence_unsearched`
+# only caught a subcap searched ZERO times — one shallow query per empty cell
+# slipped straight through.
+#
+# COVERAGE is the fraction of a category's selected subcaps that carry at
+# least one resolvable evidence id. The floor forces the DQ-driven deep search
+# the failure was skipping: to clear 70% you must actually work the long tail
+# of subcaps, not stop at the first twenty items. It is deliberately a
+# fraction of SUBCAPS (breadth), where FLOOR_CATEGORY_ITEMS is a count of
+# ITEMS (depth) — the two together stop both "few subcaps, many citations" and
+# "many subcaps, one citation each" from passing.
+COVERAGE_FLOOR = 0.70
 
 
 def _coverage_verdict(d: dict, pct) -> str:
@@ -707,6 +910,150 @@ def _cell(v):
         import json
         return json.dumps(v, separators=(",", ":"), sort_keys=True)
     return str(v)
+
+
+#: Columns that carry prose and render better wrapped and wide. Everything
+#: else is sized to its header. Formatting is presentation only — no reader
+#: in the pipeline depends on it — but a client opens this file, and a sheet
+#: of unbolded headers with every column 12 wide is the "missing formatting"
+#: the owner named (2026-09-03).
+_WIDE_COLUMNS = frozenset({
+    "Rationale", "Dominant_Claim", "What_We_Found", "Triangulation",
+    "Ceiling_Reasoning", "Why_It_Matters", "DMA_Impact", "Excerpt",
+    "Anchor_Quote", "Body", "Question", "Query", "Detail", "Verbatim quote",
+    "Description", "Reason", "What would close it", "Weighing",
+    "Absence_Basis", "Assumptions", "Bias_Notes", "Value", "value",
+    "rationale", "Detection_Basis", "Basis", "Headline",
+})
+_HEADER_FILL = PatternFill("solid", start_color="1F3A5F", end_color="1F3A5F")
+_HEADER_FONT = Font(bold=True, color="FFFFFF")
+
+#: Number formats BY COLUMN NAME, applied to every data cell at write time
+#: (Excel honours a number format on the cell, not on the column dimension —
+#: which is why the previous docstring promised "a two-decimal number format
+#: on score columns" and nothing in the file did it; measured 2026-09-03:
+#: D2 read `General` on a fresh workbook). Scores, medians and gaps read to
+#: two decimals; percentages to one; counts as integers.
+_NUMBER_FORMATS: dict[str, str] = {}
+for _n in ("Score", "Peer_Median", "Gap", "Gap_to_Peer", "Weight",
+           "Weighted_Contribution", "Evidence_Ceiling", "Final_Score", "ERS",
+           "Overall_Score_Est", "Uncertainty", "Entity_Score", "Peer_P25",
+           "Peer_P75", "Priority_Score", "Ceiling_Band_Delta", "max_score",
+           "score", "peer_median", "gap", "weight", "weighted_contribution",
+           "evidence_ceiling", "final_score", "Value"):
+    _NUMBER_FORMATS[_n] = "0.00"
+for _n in ("coverage_pct", "Coverage_Pct", "Floor_Pass_Pct", "Weight_Pct"):
+    _NUMBER_FORMATS[_n] = "0.0"
+for _n in ("Selected", "Researched", "Items", "Floor_Pass", "Synthesised",
+           "Hits", "Kept", "Seq", "Fact_Count", "subcaps", "evidenced",
+           "evidence_gap", "Peer_N", "Order", "Page"):
+    _NUMBER_FORMATS[_n] = "0"
+#: `Value` is prose on Firmographics / Executive_Summary / Run_Metadata /
+#: Catalogue_Meta and numeric on Financial_Trends; only the numeric one gets
+#: the format (see `_number_format`).
+_NUMERIC_VALUE_SHEETS = frozenset({"Financial_Trends"})
+
+
+def _number_format(sheet: str, col: str) -> str | None:
+    if col == "Value" and sheet not in _NUMERIC_VALUE_SHEETS:
+        return None
+    return _NUMBER_FORMATS.get(col)
+
+
+def _validation_lists() -> dict[str, tuple]:
+    """Column → the closed vocabulary a dropdown offers, from the contract
+    (so the sheet cannot offer a value the engine would refuse)."""
+    return {
+        "Confidence": ("HIGH", "MEDIUM", "LOW", "High", "Medium", "Low"),
+        "Claim_Label": C.CLAIM_LABELS,
+        "Claim_Type": C.CLAIM_LABELS,
+        "Ceiling_Band": C.BANDS,
+        "Tier": C.TIERS,
+        "Recency": tuple(n for n, _ in C.RECENCY_LADDER)
+                   + (C.RECENCY_ARCHIVAL, C.RECENCY_UNVERIFIED),
+        "Challenge_Verdict": C.CHALLENGE_VERDICTS,
+        "Absence_Claimed": ("YES", "NO"),
+        "Verdict": ("PASS", "FAIL", "NOT_RUN"),
+        "Facet": C.DQ_FACETS,
+        "Layer": C.TECH_LAYERS,
+        "Signal": C.TIMELINE_SIGNALS,
+        "Kind": C.TIMELINE_KINDS,
+        "Severity": C.ISSUE_SEVERITIES,
+        "State": C.FIRMOGRAPHIC_STATES,
+        "Currency_Status": C.CURRENCY_STATUSES,
+        "Tool": C.SEARCH_TOOLS,
+        "Mode_Fit": C.DQ_MODE_FIT,
+        "ai_applicability": C.AI_APPLICABILITY,
+        "data_readiness": C.DATA_READINESS,
+        "Peer_Basis": C.PEER_BASIS,
+        "Origin": ("public", "internal"),
+        "Evidence_Level": ("L1", "L2", "L3", "L4"),
+    }
+
+
+#: `Status` means different things on different tabs; the dropdown follows
+#: the tab.
+_STATUS_BY_SHEET = {
+    "Tech_Register": C.TECH_STATUS,
+    "Issue_Register": C.ISSUE_STATUSES,
+}
+
+
+def _format_sheet(ws, cols, sheet_name: str | None = None) -> None:
+    """Bold, filled, frozen header row; widths by content class; wrapped
+    prose columns; a dropdown on every closed-vocabulary column. Number
+    formats are set per CELL at write time (`_apply_cell_format`) and the
+    autofilter is refreshed on every save (`_refresh_filters`), because
+    neither survives being set once on an empty sheet."""
+    ws.freeze_panes = "A2"
+    lists = _validation_lists()
+    name = sheet_name or ws.title
+    for i, col in enumerate(cols, start=1):
+        c = ws.cell(row=1, column=i)
+        c.font = _HEADER_FONT
+        c.fill = _HEADER_FILL
+        c.alignment = Alignment(vertical="center", wrap_text=True)
+        letter = get_column_letter(i)
+        if col in _WIDE_COLUMNS:
+            ws.column_dimensions[letter].width = 60
+        elif col.lower() in ("score", "peer_median", "gap", "gap_to_peer",
+                             "weight", "weighted_contribution",
+                             "evidence_ceiling", "final_score", "ers",
+                             "overall_score_est", "coverage_pct"):
+            ws.column_dimensions[letter].width = 12
+        else:
+            ws.column_dimensions[letter].width = max(12, min(40, len(col) + 4))
+        vocab = (_STATUS_BY_SHEET.get(name) if col == "Status"
+                 else lists.get(col))
+        if vocab:
+            formula = '"' + ",".join(str(v) for v in vocab) + '"'
+            if len(formula) <= 255:            # Excel's inline-list limit
+                dv = DataValidation(type="list", formula1=formula,
+                                    allow_blank=True, showDropDown=False)
+                dv.error = f"{col} must be one of the contract's values"
+                dv.errorTitle = "DMA contract"
+                ws.add_data_validation(dv)
+                dv.add(f"{letter}2:{letter}1048576")
+    ws.row_dimensions[1].height = 30
+    _refresh_filter(ws)
+
+
+def _refresh_filter(ws) -> None:
+    """Autofilter over the rows the sheet HAS. At `create` a sheet holds one
+    row, so a filter set then covered nothing (measured 2026-09-03)."""
+    if ws.max_row > 1 and ws.max_column:
+        ws.auto_filter.ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+
+
+def _apply_cell_format(ws, sheet: str, cols, row_idx: int) -> None:
+    """Per-cell number formats for one data row, by column name."""
+    for i, col in enumerate(cols, start=1):
+        fmt = _number_format(sheet, col)
+        if fmt:
+            cell = ws.cell(row=row_idx, column=i)
+            if isinstance(cell.value, (int, float)) and not isinstance(cell.value, bool):
+                cell.number_format = fmt
+                cell.alignment = Alignment(horizontal="right")
 
 
 def _atomic_save(wb, path: Path) -> None:

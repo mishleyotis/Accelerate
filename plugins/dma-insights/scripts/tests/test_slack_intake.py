@@ -478,3 +478,83 @@ def test_thread_of_never_invents_a_channel(tmp_path):
                  slack_thread_ts="1756400000.999999")
     got = SI.thread_of("R-THREAD-3", str(tmp_path / "runs"))
     assert got["slack_channel"] == "C0OTHER"
+
+
+# ── two boundaries the queue was crossing wrong ─────────────────────────
+
+def test_the_submitter_is_read_and_not_eaten_by_the_footer():
+    """MEASURED 2026-08-30, on the RECORDED fixtures — so this was wrong on
+    the connector route too, for as long as the route has existed.
+
+    `*Submitter*`'s value is a line-initial @-mention. So is the workflow's
+    assignee footer, and `_FOOTER` was searched from position 0 — so it
+    matched the VALUE, ended the field before it began, and `submitter` came
+    back "" on every request ever parsed. STEP 6 of the intake Routine hands
+    that straight to `engine.cli start --requested-by`, so every run that
+    ever started from this queue lost the person who asked for it.
+    """
+    got = SI.triage((FIX / "channel.txt").read_text(),
+                    SI._load_threads(str(FIX)), since_days=99999,
+                    now=SI.datetime(2026, 8, 30, tzinfo=SI.timezone.utc))
+    subs = [r["submitter"] for r in got["requests"]]
+    assert all(subs), (
+        f"a request parsed with no submitter: {subs} — the footer boundary "
+        f"is eating the field's own value again")
+    assert any("Kevin Murray" in s for s in subs), subs
+
+
+def test_the_footer_still_bounds_priority_after_that():
+    """The other half. Widening the boundary to find the submitter must not
+    let the assignee sentence leak into the last field."""
+    got = SI.triage((FIX / "channel.txt").read_text(),
+                    SI._load_threads(str(FIX)), since_days=99999,
+                    now=SI.datetime(2026, 8, 30, tzinfo=SI.timezone.utc))
+    for r in got["requests"]:
+        assert "Please run the maturity" not in r["priority"], r["priority"]
+        assert len(r["priority"]) < 60, r["priority"]
+
+
+def test_a_bare_mention_footer_also_bounds_the_field():
+    """The API route renders `<@Uxxx>` when the display name cannot be
+    resolved — `users:read` is a degradable scope. The boundary must hold
+    without the `|Name` half, or a token missing one optional scope puts the
+    assignee sentence in the priority field."""
+    body = ("*Account Full Name*\nAcme Bank\n*Priority*\nHigh (48 hours)\n\n"
+            "<@U09TL2S4LLS> Please run the maturity assessment and reply")
+    assert SI._field(body, "Priority") == "High (48 hours)"
+    assert SI._field(body, "Account Full Name") == "Acme Bank"
+
+
+def test_fetch_asks_for_the_thread_key_that_threads_to_read_emits(tmp_path,
+                                                                  monkeypatch):
+    """`threads_to_read` emits `message_ts`; the `fetch` subcommand read
+    `ts`. So the bot-token route died with KeyError on the FIRST request
+    carrying a reply — which is to say on every real channel. Nothing caught
+    it because the connector route reads that JSON itself and the token
+    route had never got this far: `fetch_channel` was failing above it on a
+    missing scope.
+
+    This drives the REAL subcommand, so the two halves are joined by the
+    code path rather than by a list of key names typed here.
+    """
+    import types
+    chan = (FIX / "channel.txt").read_text()
+    fake = types.SimpleNamespace(
+        SlackError=RuntimeError,
+        bot_token=lambda *a, **k: "xoxb-test",
+        fetch_channel=lambda *a, **k: chan,
+        fetch_thread=lambda c, ts, **k: f"=== THREAD PARENT MESSAGE ===\n"
+                                        f"Message TS: {ts}\n",
+    )
+    monkeypatch.setitem(sys.modules, "slack_client", fake)
+    out = tmp_path / "deal_desk.txt"
+    threads = tmp_path / "threads"
+    rc = SI.main(["fetch", "--transcript", str(out), "--threads",
+                  str(threads), "--since-days", "99999"])
+    assert rc == 0, rc
+    named = SI.threads_to_read(chan, since_days=99999)
+    assert named, "the fixture channel names no threads — nothing was proved"
+    for row in named:
+        assert (threads / f"thread_{row['message_ts']}.txt").exists(), (
+            f"no file for {row['message_ts']}; fetch and threads_to_read "
+            f"disagree about the key that names a thread")
