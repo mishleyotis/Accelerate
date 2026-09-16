@@ -126,14 +126,61 @@ def test_a_big_category_is_paged_rather_than_truncated(tmp_path):
     assert len(labels) == len(set(labels)), "two lanes share a label"
 
 
-def test_a_shortfall_is_recorded_not_swallowed(tmp_path, monkeypatch):
+def test_a_trim_makes_another_page_not_a_shortfall(tmp_path, monkeypatch):
+    """The treadmill, pinned (measured 2026-09-16).
+
+    Pages were cut by CELL COUNT and then trimmed by CHARACTERS, and the
+    trimmed cells were DEFERRED — handed to a later round that would page
+    them the same way and trim them again. So the round's capacity was
+    never "every synthesised cell", it was "whatever fits", while the floors
+    gate demands the first: four hand-driven rounds moved `challenge_missing`
+    by 2-5 cells a category and reported 184 cells that "did not fit this
+    round's chunking".
+
+    At a ceiling this tight EVERY page overflows, which is the worst case
+    the old code had: it shipped one cell and deferred the rest. Every cell
+    ships now, because a trim re-queues.
+    """
     monkeypatch.setattr(brief, "CHALLENGE_CHAR_CEILING", 1200)
     run, wb, cells = _synthesised(tmp_path)
     out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
     shipped = {c["subcap"] for p in out["packets"]
                for c in p["cells_to_challenge"]}
-    assert out["deferred_cells"], "a trim happened and nothing recorded it"
-    assert set(out["deferred_cells"]) == set(cells) - shipped
+    assert shipped == set(cells), f"not shipped: {sorted(set(cells) - shipped)}"
+    assert out["deferred_cells"] == [], out["deferred_cells"]
+
+
+def test_a_cell_too_big_for_a_lane_is_abridged_and_says_so(tmp_path, monkeypatch):
+    """Re-paging answers a page that is too big, not a cell that is. The
+    evidence gives way — lowest ERS first — because the gate demands the
+    cell challenged and the packet has a budget; what may not give way is
+    the challenger knowing it saw an abridged base, or it reads a budget
+    decision as a thin one and FAILs a synthesis that never earned it."""
+    monkeypatch.setattr(brief, "CHALLENGE_CHAR_CEILING", 1200)
+    run, wb, cells = _synthesised(tmp_path)
+    out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
+    assert out["abridged_cells"], "nothing fit, and nothing said it was cut"
+    for p in out["packets"]:
+        for c in p["cells_to_challenge"]:
+            if c["subcap"] not in out["abridged_cells"]:
+                continue
+            assert c["evidence"], "abridged to nothing"
+            assert len(c["evidence"]) < c["evidence_total"]
+            assert "NOT_RUN" in c["evidence_abridged"]
+    assert "held back" in out["note"]
+
+
+def test_every_synthesised_cell_ships_in_one_round(tmp_path):
+    """The invariant the whole stage exists for, at the real ceiling: the
+    floors gate demands a challenge verdict on every synthesised cell, so a
+    batch that ships fewer cannot close the category however often it runs."""
+    run, wb, cells = _synthesised(tmp_path, selected=two_category_selection(n=8))
+    out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
+    shipped = [c["subcap"] for p in out["packets"]
+               for c in p["cells_to_challenge"]]
+    assert sorted(shipped) == sorted(cells)
+    assert len(shipped) == len(set(shipped)), "a cell is challenged twice"
+    assert out["deferred_cells"] == []
 
 
 def test_the_challenge_packet_has_its_own_ceiling(tmp_path):

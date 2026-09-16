@@ -1434,6 +1434,34 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
     }
 
 
+def _abridge(packet: dict) -> dict:
+    """A LONE cell whose own evidence overflows the lane budget.
+
+    Re-paging answers a page that is too big; it cannot answer one cell that
+    is. Two rules meet here and both are real: the floors gate demands every
+    synthesised cell challenged, so shipping nothing is not available, and
+    the packet has a budget, so shipping everything is not either. The
+    EVIDENCE gives way, because it is the only part of the cell that is
+    already ranked — `_challenge_cell` sorts by ERS, so the rows that fall
+    are the weakest ones. What must not give way is the cell knowing it was
+    abridged: a challenger that thinks it saw the whole evidence base would
+    read a budget decision as a thin one and record a FAIL the synthesis
+    never earned.
+    """
+    cell = packet["cells_to_challenge"][0]
+    while packet["packet_chars"] > packet["packet_ceiling"] and \
+            len(cell.get("evidence") or []) > 1:
+        cell["evidence"] = cell["evidence"][:-1]
+        cell["evidence_abridged"] = (
+            f"{cell['evidence_total'] - len(cell['evidence'])} of "
+            f"{cell['evidence_total']} cited rows held back to fit the lane "
+            f"budget — the lowest-ERS ones. Judge evidence_sufficiency on "
+            f"what is here; if it is not enough to judge, that is NOT_RUN, "
+            f"not a FAIL.")
+        packet["packet_chars"] = len(json.dumps(packet, default=str))
+    return packet
+
+
 def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
                     categories: list[str] | None = None) -> dict:
     """The independent challenge over synthesised cells, PAGED.
@@ -1454,9 +1482,18 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
 
     And `_bound` halved the cell list to a floor of three while the floors
     gate demands every synthesised cell challenged: a stage that cannot
-    converge in one round by construction, reporting nothing. It PAGES now,
-    and a cell that still could not be shipped comes back in
-    `deferred_cells` rather than disappearing.
+    converge in one round by construction, reporting nothing.
+
+    Paging fixed the first half of that and left the second (measured
+    2026-09-16): pages were cut by CELL COUNT and then trimmed by
+    CHARACTERS, and the trimmed cells were deferred to a later round that
+    would trim them again. The stage still could not converge — four
+    hand-driven rounds moved `challenge_missing` by 2-5 cells a category.
+    A trim now RE-PAGES: the cells that do not fit become the next lane in
+    this same batch, so one round covers every synthesised cell in scope.
+    `deferred_cells` survives as a contract key and is empty by
+    construction; a lone cell too large for a lane is `_abridge`d and
+    shipped, never dropped.
 
     `categories` restricts the pass to the categories whose research has
     converged — challenging a category still moving is work thrown away.
@@ -1486,18 +1523,40 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
     lanes, packets, deferred = [], [], []
     dims = " ".join(f"--dimension {d}=PASS|FAIL|NOT_RUN" for d in C.CHALLENGE_DIMENSIONS)
     for cat in sorted(by_cat):
-        cells = by_cat[cat]
-        pages = [cells[i:i + CELLS_PER_CHALLENGE_LANE]
-                 for i in range(0, len(cells), CELLS_PER_CHALLENGE_LANE)] or [[]]
-        for n, page in enumerate(pages):
+        # THE TRIM MAKES ANOTHER PAGE; IT DOES NOT MAKE A SHORTFALL.
+        #
+        # Measured 2026-09-16, against four hand-driven rounds that moved
+        # `challenge_missing` by 2-5 cells a category and reported 184 cells
+        # "did not fit this round's chunking". Paging by COUNT and then
+        # trimming by CHARACTERS is why. `CELLS_PER_CHALLENGE_LANE` cut the
+        # category into 12-cell pages; `_bound` then halved each page until
+        # it fit `CHALLENGE_CHAR_CEILING` — and a cell a rich packet pushed
+        # over the line was DROPPED, not re-paged. So the round's capacity
+        # was never "every synthesised cell", it was "whatever fits", and
+        # the floors gate demands the first. Each round cleared the fitting
+        # remainder and left the rest to a round that would trim it again:
+        # the stage could not converge however many times it was run, which
+        # is the treadmill the rounds were climbing.
+        #
+        # The cells the trim removes go back on the QUEUE, so they get a
+        # lane of their own in THIS batch. Pages are therefore discovered
+        # rather than computed up front, which is why the loop drains a
+        # queue and numbers the pages afterwards.
+        queue = list(by_cat[cat])
+        cat_packets: list[dict] = []
+        while queue:
+            head, rest = (queue[:CELLS_PER_CHALLENGE_LANE],
+                          queue[CELLS_PER_CHALLENGE_LANE:])
             packet = _bound({
                 "agent": "research-challenger", "shared": sh,
                 "first_commands": [
                     f"python3 -m engine.cli challenge {e} --subcap <CELL> "
                     f"--verdict PASS|FAIL --actor research-challenger "
                     f"--rationale '…' {dims}"],
-                "category": cat, "page": n + 1, "pages": len(pages),
-                "cells_to_challenge": page,
+                # Placeholders so the page numbering is inside the measured
+                # packet; the real values are written once the queue drains.
+                "category": cat, "page": 0, "pages": 0,
+                "cells_to_challenge": head,
                 "rules": [
                     "judge from THIS packet: the claim, the evidence rows and "
                     "the facet fields are what the seven dimensions ask about",
@@ -1514,25 +1573,58 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
                     "through the floors gate",
                 ],
             }, "cells_to_challenge", ceiling=CHALLENGE_CHAR_CEILING, floor=1)
-            deferred += [c["subcap"] for c in packet.pop("dropped", [])]
-            name = f"challenge-{cat}" + (f"-{n + 1}" if len(pages) > 1 else "")
+            dropped = {c["subcap"] for c in packet.pop("dropped", [])}
+            if dropped:
+                # Back on the front of the queue: these are the next page,
+                # not this round's shortfall. `trimmed` said "items trimmed
+                # to stay under the ceiling", which is no longer what
+                # happened, so it does not ride along to the lane.
+                queue = [c for c in head if c["subcap"] in dropped] + rest
+                packet.pop("trimmed", None)
+            else:
+                queue = rest
+            if len(packet["cells_to_challenge"]) == 1 and \
+                    packet["packet_chars"] > CHALLENGE_CHAR_CEILING:
+                _abridge(packet)
+            cat_packets.append(packet)
+        for n, packet in enumerate(cat_packets):
+            packet["page"], packet["pages"] = n + 1, len(cat_packets)
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
+            name = f"challenge-{cat}" + (f"-{n + 1}" if len(cat_packets) > 1 else "")
             lanes.append((name, packet, f"Challenge — {cat}"
-                          + (f" ({n + 1}/{len(pages)})" if len(pages) > 1 else "")))
+                          + (f" ({n + 1}/{len(cat_packets)})"
+                             if len(cat_packets) > 1 else "")))
             packets.append(packet)
     if not lanes:
         return {"batch": None, "lanes": 0, "briefs": [], "dispatch": None,
                 "packets": [], "lane_names": [], "deferred_cells": [],
+                "abridged_cells": [],
                 "note": "every synthesis in scope already carries a challenge verdict"}
     out = _write_lanes(out_dir, lanes, run=run, stage="CHALLENGE",
                        batch_name="batch_challenge.json")
+    abridged = sorted({c["subcap"] for p in packets
+                       for c in p["cells_to_challenge"]
+                       if c.get("evidence_abridged")})
     out.update(packets=packets, lane_names=[n for n, _, _ in lanes],
-               deferred_cells=sorted(set(deferred)))
-    if deferred:
-        out["note"] = (
-            f"{len(out['deferred_cells'])} cell(s) did not fit their page and "
-            f"are NOT challenged this round: {', '.join(out['deferred_cells'][:6])}"
-            f". The floors gate demands every synthesised cell challenged, so "
-            f"this is why the category will not close yet — not a silent trim.")
+               deferred_cells=sorted(set(deferred)), abridged_cells=abridged)
+    # EVERY SYNTHESISED CELL IN SCOPE SHIPS IN THIS BATCH. That is the whole
+    # point of re-paging, so it is asserted here rather than hoped for: a
+    # regression that reintroduces silent dropping fails at the batch, not
+    # four rounds later when a category will not close.
+    shipped = {c["subcap"] for p in packets for c in p["cells_to_challenge"]}
+    owed = {c["subcap"] for cells in by_cat.values() for c in cells}
+    missing = sorted(owed - shipped)
+    if missing:                                    # pragma: no cover - guard
+        raise AssertionError(
+            f"challenge_batch dropped {len(missing)} cell(s) the floors gate "
+            f"will demand: {', '.join(missing[:6])}")
+    out["note"] = (f"{len(shipped)} cell(s) across {len(lanes)} lane(s) — every "
+                   f"synthesised cell in scope, in one round.")
+    if abridged:
+        out["note"] += (
+            f" {len(abridged)} cell(s) ship with their lowest-ERS evidence "
+            f"rows held back to fit the lane budget: {', '.join(abridged[:6])}"
+            f". They are challenged, and each says so in its own packet.")
     return out
 
 

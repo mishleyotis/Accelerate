@@ -159,3 +159,80 @@ def test_the_flag_is_opt_in_so_the_old_report_is_unchanged(tmp_path, capsys):
     cost.main(["report", "--run", run.run_id, "--root", str(run.root)])
     out = capsys.readouterr().out
     assert "wall clock" in out and "share" not in out
+
+
+# ── a batch nobody told which run it belongs to ────────────────────────────
+#
+# Measured 2026-09-16. `--record-run` is opt-in and `brief._dispatch_line` is
+# the only thing that supplies it, so a batch built and dispatched by hand
+# appended NOTHING to the ledger — not dollars, not the tokens `cost.record`
+# prices when the CLI omits a dollar figure, not the elapsed seconds. Four
+# hand-driven rounds ran against a $120 ceiling that could not see them, and
+# the reported total stayed at the last pipeline-driven figure while the real
+# spend walked away from it. `_over_budget` reads that total.
+
+import importlib.util
+import json
+from pathlib import Path
+
+_AGENT_RUN = (Path(__file__).resolve().parents[3] / "plugins" / "dma-insights"
+              / "scripts" / "agent_run.py")
+
+
+def _agent_run_mod():
+    spec = importlib.util.spec_from_file_location("agent_run_for_cost_test",
+                                                  _AGENT_RUN)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _lane(tmp_path, name, agent, run_id):
+    """A lane on disk in the shape `brief._write_lanes` leaves it."""
+    md = tmp_path / f"{name}.md"
+    md.write_text("brief", encoding="utf-8")
+    (tmp_path / f"{name}.json").write_text(
+        json.dumps({"agent": agent, "shared": {"run_id": run_id}}),
+        encoding="utf-8")
+    return {"agent": agent, "prompt_file": str(md)}
+
+
+def test_a_batch_recovers_the_run_from_its_own_lane_packets(tmp_path):
+    m = _agent_run_mod()
+    rows = [_lane(tmp_path, "challenge-P3C1", "research-challenger", "R_2026_X"),
+            _lane(tmp_path, "challenge-P3C2", "research-challenger", "R_2026_X")]
+    rec = m._recover_record(rows, None)
+    assert rec["run"] == "R_2026_X"
+    # And it names the stage from the agent, so the spend lands on CHALLENGE
+    # rather than on whatever stage happened to be closing.
+    assert rec["stage"] == "CHALLENGE"
+    # No root is guessed: `runstate.locate` finds it from the id alone, and a
+    # guessed root is worse than none.
+    assert rec["root"] is None
+
+
+def test_research_lanes_recover_as_research(tmp_path):
+    m = _agent_run_mod()
+    rows = [_lane(tmp_path, "P1C1", "research-p1c1-producer", "R_2026_X")]
+    assert m._recover_record(rows, None)["stage"] == "RESEARCH"
+
+
+def test_an_explicit_stage_is_never_overridden(tmp_path):
+    m = _agent_run_mod()
+    rows = [_lane(tmp_path, "P1C1", "research-p1c1-producer", "R_2026_X")]
+    assert m._recover_record(rows, "RELAY")["stage"] == "RELAY"
+
+
+def test_lanes_that_disagree_about_the_run_record_nothing(tmp_path):
+    """Recording against the wrong run is a wrong total nobody can tell from
+    a right one. Unrecorded-and-loud beats recorded-and-wrong."""
+    m = _agent_run_mod()
+    rows = [_lane(tmp_path, "a", "research-challenger", "R_2026_X"),
+            _lane(tmp_path, "b", "research-challenger", "R_2026_Y")]
+    assert m._recover_record(rows, None) is None
+
+
+def test_a_batch_with_no_packets_records_nothing(tmp_path):
+    m = _agent_run_mod()
+    assert m._recover_record([{"agent": "research-challenger",
+                              "prompt": "inline"}], None) is None
