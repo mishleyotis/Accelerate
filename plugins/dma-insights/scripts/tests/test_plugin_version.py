@@ -9,6 +9,7 @@ container carried dma-insights 0.2.0 (5 agents) while the checkout published
 ">= 0.8.0", and every one of them was satisfied by nothing and said nothing.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -31,6 +32,16 @@ def _no_provisioning_record(tmp_path, monkeypatch):
     different code paths depending on where they ran.
     """
     monkeypatch.setattr(pv, "PROV_FILE", tmp_path / "no-provisioning.json")
+    # THE BIND IS PINNED UNMEASURED, and this pin is the one that bit first.
+    # `bound_root()` reads the REAL session this suite runs in — the
+    # connector process spawned by the session's own pid — so, run from
+    # inside a Claude Code session, every fixture below was overridden by
+    # the live checkout the session had actually bound (26 failures,
+    # 2026-09-16). The tests that are ABOUT measuring the bind unpin it.
+    monkeypatch.setattr(pv, "bound_root", lambda session_pid=None: {
+        "path": None, "source": None,
+        "reason": "pinned unmeasured by the test fixture"})
+    monkeypatch.setattr(pv, "BOUND_DIR", tmp_path / "bound")
     # ENABLEMENT IS PINNED FOR THE SAME REASON. `enabled_state()` reads the
     # real settings.json, so without this a suite about installs would answer
     # DISABLED or not depending on whether the machine running it happens to
@@ -761,15 +772,25 @@ def test_a_freshly_provisioned_container_is_still_ok(tmp_path):
     assert out["state"] == "ok" and out["recurs"] is False
 
 
-def test_the_fix_names_session_start_not_another_heal(tmp_path):
+def test_the_fix_names_a_setting_that_exists(tmp_path):
     """--heal repairs the DISK and the session has already bound its roster,
-    so prescribing it again would prescribe paying the same cost forever."""
+    so prescribing it again would prescribe paying the same cost forever.
+
+    And the fix must be REACHABLE. For two weeks this line said "run the
+    setup script at SESSION START ... the setup script must execute on each
+    session" — a setting Claude Code on the web does not offer: the setup
+    script runs once, the filesystem is snapshotted, and the snapshot is
+    reused until the script or the allowed hosts change or about seven days
+    pass (docs, cloud-environments § Environment caching). Whoever owned the
+    environment was sent to change a setting that does not exist."""
     import datetime as _d
     old = (_d.datetime.now(_d.timezone.utc)
            - _d.timedelta(days=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
     fix = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old))["fix"]
-    assert "SESSION START" in fix
-    assert "not once when the image is baked" in fix
+    assert "ONCE per environment snapshot" in fix
+    assert "DIRECTORY source" in fix and "rebuild the snapshot" in fix
+    assert "must execute on each session" not in fix
+    assert "SESSION START" not in fix
 
 
 def test_a_stale_snapshot_says_a_fresh_session_will_not_fix_it(tmp_path):
@@ -788,3 +809,384 @@ def test_an_unreadable_timestamp_does_not_manufacture_a_verdict(tmp_path):
     assert pv.provisioning_age_h({"bootstrap_ran_at": "not a date"}) is None
     out = pv.provisioning(_prov(tmp_path, bootstrap_ran_at="not a date"))
     assert out["state"] == "ok", "no timestamp is not evidence of staleness"
+
+
+# ── the bind is MEASURED, never read off the install record ───────────────
+#
+# THE DEFECT THAT REWROTE `installed()`, measured 2026-09-16 on a cloud
+# container (Claude Code 2.1.273). `installed_plugins.json`, restored from a
+# five-day-old snapshot, recorded 1.19.0 at the cache path (73 agents); the
+# checkout published 1.20.0 (74). Everything read the record: STALE at the
+# SessionStart hook, research and scoring REFUSED, `--heal` run, then
+# UPDATED_MID_SESSION and a firing in RECOVERY MODE. The session's own
+# connector process carried CLAUDE_PLUGIN_ROOT=<checkout>/plugins/dma-insights
+# — it had bound the checkout in place, all 74 agents, from its first turn.
+# Every verdict was about a tree the session was not running.
+
+#: Captured at import, before any test's autouse pin replaces it.
+_real_bound_root = pv.bound_root
+
+
+def _unpin_bind(monkeypatch):
+    monkeypatch.setattr(pv, "bound_root", _real_bound_root)
+
+
+def _measured(path, source="process"):
+    return lambda session_pid=None: {"path": str(path), "source": source,
+                                     "reason": "test"}
+
+
+def test_a_session_that_binds_the_checkout_in_place_is_ok_despite_a_stale_record(
+        tmp_path, monkeypatch):
+    """The live incident, reproduced: record 1.19.0, checkout 1.20.0, and the
+    session binds the checkout. OK — and the record's lag is named as
+    cosmetic, so nobody heals what nothing runs."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    state = _state(tmp_path, "1.19.0", agents=73)
+    # the fixture tree was written a moment ago; the session under test
+    # starts after it, as a real session starts after its clone
+    import time as _t
+    monkeypatch.setattr(pv, "session_started_at", lambda: _t.time() + 10)
+    monkeypatch.setattr(pv, "bound_root",
+                        _measured(repo / "plugins" / "dma-insights"))
+    v = pv.compare(repo, state)
+    assert v["status"] == "OK" and v["ok"], v["reasons"]
+    inst = v["installed"]
+    assert inst["in_place"] is True
+    assert inst["version"] == "1.20.0" and inst["agents"] == 74
+    assert inst["record_version"] == "1.19.0"
+    joined = " ".join(v["reasons"])
+    assert "MEASURED BIND" in joined and "cosmetic" in joined
+    assert "1.19.0" in joined, "the lagging record is named, not hidden"
+    assert v["fix"] == "", "nothing to heal: the record's copy is not run"
+    assert pv.heal(v) == (v, []), "--heal must not touch an OK verdict"
+    line = pv.summary(v)
+    assert line.startswith("OK: installed 1.20.0 (74 agents)")
+    assert "bound in place" in line and "1.19.0 (cosmetic)" in line
+
+
+def test_a_record_that_lags_is_never_called_updated_mid_session(tmp_path,
+                                                                 monkeypatch):
+    """The heal's own aftermath. `claude plugin update` rewrites the record
+    AFTER the session started; the old code compared that timestamp to the
+    session start and said UPDATED_MID_SESSION — RECOVERY MODE — for a
+    session whose bound tree had not moved at all."""
+    import datetime as dt
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    began = dt.datetime.fromisoformat("2026-09-16T02:36:50+00:00").timestamp()
+    monkeypatch.setattr(pv, "session_started_at", lambda: began)
+    tree = repo / "plugins" / "dma-insights"
+    # the checkout was cloned just BEFORE the session existed
+    for f in tree.rglob("*"):
+        os.utime(f, (began - 0.05, began - 0.05))
+    state = _state(tmp_path, "1.20.0", agents=74,
+                   updated_at="2026-09-16T02:41:00Z")     # the heal, later
+    monkeypatch.setattr(pv, "bound_root", _measured(tree))
+    v = pv.compare(repo, state)
+    assert v["status"] == "OK", v["reasons"]
+    assert v["installed"]["loaded_by_this_session"] is True
+
+
+def test_a_bound_checkout_that_moved_under_the_session_is_caught(tmp_path,
+                                                                  monkeypatch):
+    """The genuine mid-session case for an in-place bind: a pull rewrites an
+    agent file minutes after the session began. Agents bind once, so this
+    IS recovery mode — named for the tree it is about."""
+    import datetime as dt
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    began = dt.datetime.fromisoformat("2026-09-16T02:36:50+00:00").timestamp()
+    monkeypatch.setattr(pv, "session_started_at", lambda: began)
+    tree = repo / "plugins" / "dma-insights"
+    for f in tree.rglob("*"):
+        os.utime(f, (began - 1, began - 1))
+    os.utime(tree / "agents" / "a3.md", (began + 300, began + 300))
+    monkeypatch.setattr(pv, "bound_root", _measured(tree))
+    v = pv.compare(repo, _state(tmp_path, "1.20.0", agents=74))
+    assert v["status"] == "UPDATED_MID_SESSION" and not v["ok"]
+    joined = " ".join(v["reasons"])
+    assert "in place" in joined and str(tree) in joined
+    assert "RECOVERY MODE" in v["fix"]
+
+
+def test_a_write_to_a_script_is_not_a_mid_session_rebind(tmp_path, monkeypatch):
+    """Scripts are read when invoked; only the components read ONCE count.
+    A checkout is written to constantly (`__pycache__`, a run log, a test
+    fixture) and none of that moves the roster."""
+    import datetime as dt
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    began = dt.datetime.fromisoformat("2026-09-16T02:36:50+00:00").timestamp()
+    monkeypatch.setattr(pv, "session_started_at", lambda: began)
+    tree = repo / "plugins" / "dma-insights"
+    for f in tree.rglob("*"):
+        os.utime(f, (began - 1, began - 1))
+    (tree / "scripts").mkdir(exist_ok=True)
+    (tree / "scripts" / "doctor.py").write_text("# edited mid-session\n")
+    (tree / "scripts" / "__pycache__").mkdir(exist_ok=True)
+    (tree / "scripts" / "__pycache__" / "x.pyc").write_bytes(b"\0")
+    (tree / "skills" / "s0" / "notes.md").write_text("a skill's own notes\n")
+    monkeypatch.setattr(pv, "bound_root", _measured(tree))
+    v = pv.compare(repo, _state(tmp_path, "1.20.0", agents=74))
+    assert v["status"] == "OK", v["reasons"]
+
+
+def test_the_grace_covers_the_clone_that_precedes_the_launch(tmp_path,
+                                                             monkeypatch):
+    """Measured margin on the live container: HEAD written 34 ms before the
+    session process existed. A write inside the grace is provisioning."""
+    import datetime as dt
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    began = dt.datetime.fromisoformat("2026-09-16T02:36:50+00:00").timestamp()
+    monkeypatch.setattr(pv, "session_started_at", lambda: began)
+    tree = repo / "plugins" / "dma-insights"
+    for f in tree.rglob("*"):
+        os.utime(f, (began + pv.MID_SESSION_GRACE_S - 0.5,
+                     began + pv.MID_SESSION_GRACE_S - 0.5))
+    monkeypatch.setattr(pv, "bound_root", _measured(tree))
+    assert pv.compare(repo, _state(tmp_path, "1.20.0", agents=74))["status"] == "OK"
+    for f in tree.rglob("*"):
+        os.utime(f, (began + pv.MID_SESSION_GRACE_S + 0.5,
+                     began + pv.MID_SESSION_GRACE_S + 0.5))
+    assert pv.compare(repo, _state(tmp_path, "1.20.0", agents=74)
+                      )["status"] == "UPDATED_MID_SESSION"
+
+
+def test_a_stale_tree_bound_in_place_is_stale_and_an_update_is_not_the_fix(
+        tmp_path, monkeypatch):
+    """The bind outranks the record in BOTH directions. A session binding an
+    old checkout in place is stale however current the cache copy is — and
+    `claude plugin update` would refresh the copy it does not run."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    old_tree = _plugin_tree(tmp_path / "other-checkout" / "plugins" /
+                            "dma-insights", "1.18.0", agents=70)
+    monkeypatch.setattr(pv, "bound_root", _measured(old_tree))
+    v = pv.compare(repo, _state(tmp_path, "1.20.0", agents=74))
+    assert v["status"] == "STALE" and not v["ok"]
+    assert v["installed"]["version"] == "1.18.0"
+    assert "70 agents" in " ".join(v["reasons"])
+    assert "claude plugin update" not in v["fix"].split("`claude plugin update` refreshes")[0]
+    assert "IN PLACE" in v["fix"] and str(old_tree) in v["fix"]
+
+
+def test_a_stale_cache_copy_that_is_actually_bound_still_takes_the_update(
+        tmp_path, monkeypatch):
+    """A CLI that loads the cache copy (the record's own path) is the case
+    the old code assumed everywhere. Measured as such, the old verdict and
+    the old fix are exactly right."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    state = _state(tmp_path, "1.19.0", agents=73)
+    cache = tmp_path / "cache" / "1.19.0"
+    monkeypatch.setattr(pv, "bound_root", _measured(cache))
+    v = pv.compare(repo, state)
+    assert v["status"] == "STALE"
+    assert v["installed"]["in_place"] is False
+    assert v["installed"]["bound_source"] == "process"
+    assert "claude plugin update" in v["fix"]
+    assert "MEASURED BIND: this session loads the install record's tree" in \
+        " ".join(v["reasons"])
+
+
+def test_an_unmeasured_bind_inside_a_session_says_the_verdict_is_about_the_record(
+        tmp_path, monkeypatch):
+    """No process, no record, but a session (CLAUDE_PID set): the record is
+    what there is, and the output must not dress it up as the session."""
+    monkeypatch.setenv("CLAUDE_PID", "1")
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, "0.2.0", agents=5))
+    assert v["status"] == "STALE"
+    assert "BIND NOT MEASURED" in " ".join(v["reasons"])
+    monkeypatch.delenv("CLAUDE_PID")
+    v = pv.compare(_repo(tmp_path), _state(tmp_path, "0.2.0", agents=5))
+    assert "BIND NOT MEASURED" not in " ".join(v["reasons"]), (
+        "outside a session there is no bind to have measured")
+
+
+def test_a_bound_tree_with_no_install_record_is_still_compared(tmp_path,
+                                                                monkeypatch):
+    """`--plugin-dir` and skills-dir loads have no record at all. A measured
+    bind is a tree to compare; the missing record is not NOT_INSTALLED."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    tree = repo / "plugins" / "dma-insights"
+    import time as _t
+    monkeypatch.setattr(pv, "session_started_at", lambda: _t.time() + 10)
+    monkeypatch.setattr(pv, "bound_root", _measured(tree, "env"))
+    v = pv.compare(repo, tmp_path / "no-state.json")
+    assert v["status"] == "OK", v["reasons"]
+    assert v["installed"]["in_place"] is True
+    assert v["installed"]["record_version"] is None
+
+
+# ── the three rungs of `bound_root`, each measured, each filtered by name ─
+
+def test_env_rung_reads_claude_plugin_root_for_this_plugin_only(tmp_path,
+                                                                 monkeypatch):
+    _unpin_bind(monkeypatch)
+    ours = _plugin_tree(tmp_path / "ours", "1.0.0", agents=1)
+    theirs = tmp_path / "theirs"
+    (theirs / ".claude-plugin").mkdir(parents=True)
+    (theirs / ".claude-plugin" / "plugin.json").write_text(
+        json.dumps({"name": "probe-plugin", "version": "0.0.1"}))
+    monkeypatch.setattr(pv, "_proc_candidates", lambda: [])
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(theirs))
+    monkeypatch.delenv("CLAUDE_PID", raising=False)
+    out = pv.bound_root()
+    assert out["path"] is None, "another plugin's root is not our bind"
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(ours))
+    out = pv.bound_root()
+    assert out["source"] == "env" and out["path"] == str(ours.resolve())
+
+
+def test_process_rung_takes_only_a_direct_child_of_the_session(tmp_path,
+                                                               monkeypatch):
+    """A `claude -p` child session started after a heal binds a DIFFERENT
+    tree; its MCP server is a grandchild and must not answer for the parent."""
+    _unpin_bind(monkeypatch)
+    old = _plugin_tree(tmp_path / "old", "1.19.0", agents=73)
+    new = _plugin_tree(tmp_path / "new", "1.20.0", agents=74)
+    other = tmp_path / "other"
+    (other / ".claude-plugin").mkdir(parents=True)
+    (other / ".claude-plugin" / "plugin.json").write_text(
+        json.dumps({"name": "something-else"}))
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT", raising=False)
+    monkeypatch.setenv("CLAUDE_PID", "122")
+    monkeypatch.setattr(pv, "_proc_candidates", lambda: [
+        (900, 122, str(other)),      # another plugin's server, direct child
+        (1236, 122, str(old)),       # OUR connector, spawned by the session
+        (3001, 2612, str(new)),      # a child session's connector (grandchild)
+    ])
+    out = pv.bound_root()
+    assert out["source"] == "process" and out["path"] == str(old.resolve())
+    monkeypatch.setattr(pv, "_proc_candidates", lambda: [(3001, 2612, str(new))])
+    out = pv.bound_root()
+    assert out["path"] is None and "no plugin subprocess" in out["reason"]
+
+
+def test_record_rung_accepts_only_this_process_s_fresh_record(tmp_path,
+                                                                monkeypatch):
+    """Pids repeat across containers and /root/.dma survives in a snapshot,
+    so a record for pid 122 from last week must not describe today's 122."""
+    _unpin_bind(monkeypatch)
+    tree = _plugin_tree(tmp_path / "tree", "1.20.0", agents=74)
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT", raising=False)
+    monkeypatch.setenv("CLAUDE_PID", "122")
+    monkeypatch.setattr(pv, "_proc_candidates", lambda: [])
+    began = 1_789_526_210.0
+    monkeypatch.setattr(pv, "session_started_at", lambda: began)
+    import time as _t
+    monkeypatch.setattr(_t, "time", lambda: began + 60)
+    assert pv.record_bound_root(str(tree), pid="122") is not None
+    out = pv.bound_root()
+    assert out["source"] == "record" and out["path"] == str(tree.resolve())
+    # the same file, stamped before this process existed: a snapshot's
+    rec = json.loads(pv._bound_record_path(122).read_text())
+    rec["recorded_at"] = began - 5 * 86400
+    pv._bound_record_path(122).write_text(json.dumps(rec))
+    out = pv.bound_root()
+    assert out["path"] is None and "predates this process" in out["reason"]
+    # a record for some other pid says nothing about this one
+    pv._bound_record_path(122).unlink()
+    pv.record_bound_root(str(tree), pid="999")
+    out = pv.bound_root()
+    assert out["path"] is None and "no SessionStart record" in out["reason"]
+
+
+def test_recording_refuses_a_root_that_is_not_this_plugin(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLAUDE_PID", "122")
+    assert pv.record_bound_root(str(tmp_path / "nowhere"), pid="122") is None
+    assert pv.record_bound_root(str(tmp_path), pid="not-a-pid") is None
+    assert not list((tmp_path / "bound").glob("*")) if (tmp_path / "bound").exists() else True
+
+
+def test_outside_a_session_the_bind_is_unmeasured_and_says_why(monkeypatch):
+    _unpin_bind(monkeypatch)
+    monkeypatch.delenv("CLAUDE_PLUGIN_ROOT", raising=False)
+    monkeypatch.delenv("CLAUDE_PID", raising=False)
+    out = pv.bound_root()
+    assert out["path"] is None and out["source"] is None
+    assert "CLAUDE_PID is unset" in out["reason"]
+
+
+def test_bound_components_ignore_pycache_and_scripts(tmp_path):
+    tree = _plugin_tree(tmp_path / "t", "1.0.0", agents=2)
+    for f in tree.rglob("*"):
+        os.utime(f, (1000, 1000))
+    (tree / "scripts").mkdir()
+    (tree / "scripts" / "x.py").write_text("x")
+    (tree / "agents" / "__pycache__").mkdir()
+    (tree / "agents" / "__pycache__" / "a.pyc").write_bytes(b"\0")
+    assert pv.bound_components_changed_at(tree) == 1000
+    os.utime(tree / "hooks" if (tree / "hooks").exists() else tree / "agents" / "a0.md",
+             (2000, 2000))
+    assert pv.bound_components_changed_at(tree) == 2000
+    assert pv.bound_components_changed_at(tmp_path / "absent") is None
+
+
+def test_a_snapshot_with_an_in_place_bind_does_not_claim_a_short_roster(tmp_path):
+    """The false diagnosis, banned: an old record on a session that binds
+    the fresh checkout is a fact about the record, not a defect that recurs."""
+    import datetime as _d
+    old = (_d.datetime.now(_d.timezone.utc)
+           - _d.timedelta(hours=119)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old), in_place=True)
+    assert out["state"] == "snapshot_record_only"
+    assert out["recurs"] is False and out["fix"] == ""
+    assert "binds short" not in out["reason"]
+    assert "binds the checkout in place" in out["reason"]
+    # and the cache-bound reading is unchanged
+    out = pv.provisioning(_prov(tmp_path, bootstrap_ran_at=old), in_place=False)
+    assert out["state"] == "stale_snapshot" and out["recurs"] is True
+
+
+def test_the_live_session_if_any_binds_what_the_checkout_publishes(monkeypatch):
+    """Run INSIDE a Claude Code session on this checkout, this is the
+    end-to-end proof; anywhere else it is skipped rather than faked."""
+    _unpin_bind(monkeypatch)
+    monkeypatch.setattr(pv, "BOUND_DIR", pv.PROV_FILE.parent)
+    if not os.environ.get("CLAUDE_PID"):
+        pytest.skip("not inside a Claude Code session")
+    out = pv.bound_root()
+    if out["path"] is None:
+        pytest.skip(f"bind not measurable here: {out['reason']}")
+    assert out["source"] in ("env", "process", "record")
+    v = pv.compare()
+    assert v["installed"]["bound_path"] == out["path"]
+    if Path(out["path"]).resolve() == Path(v["published"]["tree"]).resolve():
+        assert v["status"] in ("OK", "UPDATED_MID_SESSION"), v["reasons"]
+
+
+def test_heal_declines_to_rewrite_a_cache_copy_the_session_does_not_load(
+        tmp_path, monkeypatch):
+    """Four exit-0 commands that change nothing the session runs is the shape
+    of success with none of it. The heal says so instead."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    old_tree = _plugin_tree(tmp_path / "other-checkout" / "plugins" /
+                            "dma-insights", "1.18.0", agents=70)
+    monkeypatch.setattr(pv, "bound_root", _measured(old_tree))
+    v = pv.compare(repo, _state(tmp_path, "1.20.0", agents=74))
+    assert v["status"] == "STALE"
+    ran = []
+    import subprocess as _sp
+    monkeypatch.setattr(_sp, "run", lambda *a, **k: ran.append(a) or None)
+    out, log = pv.heal(v)
+    assert out == v and ran == []
+    assert log and "declined" in log[0] and str(old_tree) in log[0]
+    assert "RESTORED SNAPSHOT" in v["fix"] and "attach the repository" in v["fix"]
+
+
+def test_heal_still_updates_a_cache_copy_that_is_bound(tmp_path, monkeypatch):
+    """The measured cache-bound case keeps its heal: there the update IS
+    what the next session loads."""
+    repo = _repo(tmp_path, "1.20.0", agents=74)
+    state = _state(tmp_path, "1.19.0", agents=73)
+    monkeypatch.setattr(pv, "bound_root", _measured(tmp_path / "cache" / "1.19.0"))
+    monkeypatch.setattr(pv, "_under_plugin_cache", lambda p: True)
+    v = pv.compare(repo, state)
+    assert v["status"] == "STALE"
+    ran = []
+    import subprocess as _sp
+
+    class _R:
+        returncode = 0
+    monkeypatch.setattr(_sp, "run", lambda argv, **k: ran.append(argv) or _R())
+    out, log = pv.heal(v)
+    assert out is None, "something ran: the caller re-measures"
+    assert [a[1:3] for a in ran] == [["plugin", "marketplace"], ["plugin", "update"],
+                                     ["plugin", "install"], ["plugin", "enable"]]

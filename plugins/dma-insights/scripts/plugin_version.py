@@ -19,9 +19,19 @@ measured on this container on 2026-08-23:
      re-types it can disagree with it.
 
 So nothing here is hardcoded. The repo is the source of truth for what
-SHOULD be loaded, `~/.claude/plugins/installed_plugins.json` plus the cache
-directory are the truth about what IS, and every number is read from one of
-those two at call time.
+SHOULD be loaded; what IS loaded is MEASURED from the session itself
+(`bound_root`: CLAUDE_PLUGIN_ROOT in a hook, the session's own connector
+process, the SessionStart record), with `~/.claude/plugins/installed_plugins.json`
+plus the cache directory as the fallback and the record of what the CLI
+installed; every number is read from one of those at call time.
+
+  4. (2026-09-16) The record is not the session. On a `directory`
+     marketplace the CLI loads the plugin from the checkout IN PLACE, and
+     the versioned cache copy the record names is not what runs. A record
+     restored from a five-day-old snapshot said 1.19.0/73 while the
+     session had bound 1.20.0/74 — and every caller of `compare()`,
+     reading the record, refused work and went into recovery mode against
+     a stale roster the session did not have.
 
     python3 plugin_version.py            # one line per fact, exit 0 only when OK
     python3 plugin_version.py --json
@@ -74,6 +84,29 @@ PROV_FILE = Path(os.environ.get(
     "DMA_PROVISIONING_FILE",
     Path(os.environ.get("DMA_SA_KEY_FILE", "/root/.dma/sa.json")).parent
     / "provisioning.json"))
+
+#: Where the SessionStart hook records the tree THIS session bound — one
+#: file per session process, beside the provisioning record. See
+#: `bound_root` for why a record is needed at all and why it is keyed by pid.
+BOUND_DIR = Path(os.environ.get("DMA_BOUND_PLUGIN_DIR", str(PROV_FILE.parent)))
+
+#: The components a session reads ONCE, at start, and never reloads: agents,
+#: hooks, commands, the manifest, the MCP definition and the skill entry
+#: files. Scripts under `scripts/` and the rest of a skill are read when they
+#: are invoked, so a change to them reaches a running session and is not a
+#: mid-session bind problem. `bound_components_changed_at` reads exactly this
+#: set, which is what keeps a `__pycache__` write or a test fixture from
+#: reading as "the roster moved under the session".
+BOUND_AT_START = ("agents", "hooks", "commands", ".claude-plugin", ".mcp.json")
+
+#: How long after the session process is created a component write still
+#: counts as provisioning rather than a mid-session change. Measured
+#: 2026-09-16 on a cloud container: the checkout's HEAD was written 34 ms
+#: BEFORE the session process existed (the harness clones, then launches), so
+#: the true margin is tens of milliseconds and positive; a `git pull` inside a
+#: session cannot land before the model's first turn, seconds later at the
+#: earliest. Two seconds separates the two by two orders of magnitude.
+MID_SESSION_GRACE_S = 2.0
 
 _SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
@@ -271,11 +304,259 @@ def enabled_state(paths=None) -> bool | None:
     return seen
 
 
+def _plugin_root_of(path) -> Path | None:
+    """`path` as a root of THIS plugin, or None.
+
+    A root is a directory holding `.claude-plugin/plugin.json` whose `name`
+    is PLUGIN_NAME. The name check is not pedantry: CLAUDE_PLUGIN_ROOT is per
+    plugin — another plugin's hook or MCP server carries ITS root, not ours
+    (measured 2026-09-16 with a probe plugin whose SessionStart hook printed
+    its own directory).
+    """
+    if not path:
+        return None
+    try:
+        p = Path(str(path)).resolve()
+    except (OSError, RuntimeError):
+        return None
+    manifest = _load(p / ".claude-plugin" / "plugin.json")
+    return p if manifest.get("name") == PLUGIN_NAME else None
+
+
+def _environ_of(pid) -> dict:
+    """Another process's environment, from /proc — {} when unreadable."""
+    try:
+        raw = Path("/proc", str(pid), "environ").read_bytes()
+    except OSError:
+        return {}
+    out = {}
+    for item in raw.split(b"\0"):
+        key, sep, val = item.partition(b"=")
+        if sep:
+            out[key.decode("utf-8", "replace")] = val.decode("utf-8", "replace")
+    return out
+
+
+def _ppid_of(pid) -> int | None:
+    try:
+        for line in Path("/proc", str(pid), "status").read_text().splitlines():
+            if line.startswith("PPid:"):
+                return int(line.split()[1])
+    except (OSError, ValueError, IndexError):
+        return None
+    return None
+
+
+def _proc_candidates() -> list:
+    """(pid, ppid, CLAUDE_PLUGIN_ROOT) for every readable process carrying
+    the variable. Overridable in tests; reads /proc for real."""
+    try:
+        names = os.listdir("/proc")
+    except OSError:
+        return []
+    out = []
+    for name in names:
+        if not name.isdigit():
+            continue
+        root = _environ_of(name).get("CLAUDE_PLUGIN_ROOT")
+        if root:
+            out.append((int(name), _ppid_of(name), root))
+    return out
+
+
+def _bound_record_path(pid) -> Path:
+    return BOUND_DIR / f"bound_plugin-{pid}.json"
+
+
+def record_bound_root(plugin_root, pid: str | None = None,
+                      session_id: str | None = None) -> Path | None:
+    """Write, from inside a plugin hook, which tree THIS session bound.
+
+    Called by the SessionStart hook, which runs with CLAUDE_PLUGIN_ROOT in its
+    environment and is itself a file inside the bound tree. Keyed by the
+    session's process id and stamped, so a record left in a restored
+    snapshot by an earlier container's session — pids repeat across
+    containers — is rejected by `bound_root`, which requires the record to
+    postdate this process. Returns the path written, or None (fail open:
+    a hook that cannot write a breadcrumb must not cost the session).
+    """
+    pid = pid if pid is not None else os.environ.get("CLAUDE_PID")
+    if not pid or not str(pid).isdigit():
+        return None
+    root = _plugin_root_of(plugin_root)
+    if root is None:
+        return None
+    import time                                             # noqa: PLC0415
+    rec = {"pid": int(pid),
+           "session_id": session_id or os.environ.get("CLAUDE_CODE_SESSION_ID"),
+           "plugin_root": str(root),
+           "recorded_at": time.time(),
+           "process_started_at": session_started_at()}
+    path = _bound_record_path(pid)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(rec))
+        tmp.replace(path)
+    except OSError:
+        return None
+    return path
+
+
+def bound_root(session_pid: str | None = None) -> dict:
+    """The plugin tree THIS session actually loaded — MEASURED, never read off
+    the install record.
+
+    WHY THE RECORD IS NOT THE ANSWER, measured 2026-09-16 on a cloud
+    container (Claude Code 2.1.273): `installed_plugins.json` recorded 1.19.0
+    at `~/.claude/plugins/cache/.../1.19.0` (73 agents), restored from a
+    five-day-old snapshot, while the checkout published 1.20.0 (74). Every
+    caller of `compare()` said STALE, the SessionStart hook told the session
+    it was "NOT running what the checkout publishes", research and scoring
+    work was refused, and the firing went into RECOVERY MODE — dispatching
+    every stage through child processes to escape a stale roster. The
+    session's own connector process carried
+    `CLAUDE_PLUGIN_ROOT=/home/user/Accelerate/plugins/dma-insights`: it had
+    bound the CHECKOUT, in place, all 74 agents. For a marketplace registered
+    as a `directory` source the CLI loads the plugin from that directory and
+    the versioned cache copy the record names is not what runs. The record
+    was five days behind; the session was not. Everything downstream — the
+    refusals, the heal, the recovery mode, the "restored snapshot"
+    diagnosis — was built on reading the wrong tree, which is the same
+    mistake this file was written to remove from the doctor in August.
+
+    So the bind is measured, from evidence the CLI itself produces:
+
+      env       CLAUDE_PLUGIN_ROOT in THIS process's environment. The CLI
+                exports it to hook, MCP and LSP subprocesses, so a hook
+                (session_brief.py) measures its own session directly.
+      process   a plugin subprocess the session process spawned directly —
+                the connector's mcp_proxy.py runs for the session's whole
+                life with the variable in its environment, and its parent is
+                CLAUDE_PID. Direct children only: a child `claude -p` session
+                started after a heal binds a different tree, and its MCP
+                server must not answer for the parent.
+      record    what the SessionStart hook wrote for this pid, if it
+                postdates this process (snapshots carry old records).
+
+    Filtered to THIS plugin by manifest name at every rung. Unmeasured is
+    reported as unmeasured — with the reason — never manufactured from the
+    record: {"path": None, "source": None, "reason": ...}.
+    """
+    pid = session_pid if session_pid is not None else os.environ.get("CLAUDE_PID")
+    env_root = _plugin_root_of(os.environ.get("CLAUDE_PLUGIN_ROOT"))
+    if env_root is not None:
+        return {"path": str(env_root), "source": "env",
+                "reason": "CLAUDE_PLUGIN_ROOT in this process's environment "
+                          "(the CLI exports it to plugin hooks and servers)"}
+    why = ["CLAUDE_PLUGIN_ROOT is not in this process's environment (only "
+           "a plugin's hook and MCP subprocesses carry it)"]
+    if not pid or not str(pid).isdigit():
+        why.append("CLAUDE_PID is unset — not inside a Claude Code session, "
+                   "so there is no bind to measure")
+        return {"path": None, "source": None, "reason": "; ".join(why)}
+    pid_i = int(pid)
+    direct = []
+    for cpid, ppid, root in _proc_candidates():
+        r = _plugin_root_of(root)
+        if r is not None and ppid == pid_i:
+            direct.append(str(r))
+    if direct:
+        out = {"path": direct[0], "source": "process",
+               "reason": f"CLAUDE_PLUGIN_ROOT of a plugin subprocess that "
+                         f"session process {pid_i} spawned"}
+        if len(set(direct)) > 1:
+            out["reason"] += (f"; NOTE: {len(set(direct))} different roots "
+                              f"among them: {sorted(set(direct))}")
+        return out
+    why.append(f"no plugin subprocess of session process {pid_i} is readable "
+               f"in /proc (the connector's mcp_proxy.py did not start, or "
+               f"/proc is not this user's to read)")
+    rec = _load(_bound_record_path(pid_i))
+    began = session_started_at()
+    if rec.get("pid") == pid_i and rec.get("plugin_root"):
+        stamp = rec.get("recorded_at")
+        fresh = (isinstance(stamp, (int, float)) and began is not None
+                 and stamp >= began - MID_SESSION_GRACE_S)
+        r = _plugin_root_of(rec.get("plugin_root")) if fresh else None
+        if r is not None:
+            return {"path": str(r), "source": "record",
+                    "reason": f"the SessionStart hook's record for pid {pid_i} "
+                              f"({_bound_record_path(pid_i)})"}
+        why.append(f"a record for pid {pid_i} exists but "
+                   + ("predates this process — left by an earlier container "
+                      "that reused the pid (a restored snapshot carries "
+                      "old records), so it is not this session's"
+                      if not fresh else
+                      "names a tree that is not this plugin's root any more"))
+    else:
+        why.append(f"no SessionStart record at {_bound_record_path(pid_i)} — "
+                   f"the plugin's hook did not run, or ran from a revision "
+                   f"before it wrote one")
+    return {"path": None, "source": None, "reason": "; ".join(why)}
+
+
+def bound_components_changed_at(root: Path) -> float | None:
+    """When the parts a session binds at start last changed, or None.
+
+    Reads only BOUND_AT_START plus each skill's SKILL.md — the files the CLI
+    reads once. A tree loaded in place (a checkout) is written to constantly
+    by things that do not change the roster: `__pycache__`, run logs, a test
+    fixture. Measuring the whole tree would call each of those a mid-session
+    rebind; measuring these files measures the claim actually being made.
+    """
+    root = Path(root)
+    latest = None
+    candidates = [root / part for part in BOUND_AT_START]
+    skills = root / "skills"
+    if skills.is_dir():
+        candidates += [p / "SKILL.md" for p in skills.iterdir() if p.is_dir()]
+    for c in candidates:
+        if not c.exists():
+            continue
+        files = [c] if c.is_file() else [p for p in c.rglob("*") if p.is_file()]
+        for f in files:
+            rel = f.as_posix()
+            if any(sk in rel for sk in _SKIP):
+                continue
+            try:
+                m = f.stat().st_mtime
+            except OSError:
+                continue
+            latest = m if latest is None else max(latest, m)
+    return latest
+
+
+def _under_plugin_cache(path) -> bool:
+    """Whether `path` is a copy in the CLI's versioned plugin cache — the
+    tree `claude plugin update` rewrites — as opposed to a tree loaded in
+    place, which an update does not touch."""
+    cache = Path(os.environ.get("CLAUDE_CODE_PLUGIN_CACHE_DIR")
+                 or (Path(os.environ.get("CLAUDE_CONFIG_DIR",
+                                         Path.home() / ".claude")) / "plugins"))
+    try:
+        Path(str(path)).resolve().relative_to(cache.resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
 def installed(state_path: Path | None = None) -> dict:
     """What the running session loads — version, install path, and the
     components actually present in that path.
 
-    The count is taken from the INSTALLED tree, never from the repo. A
+    THE TREE IS THE ONE THE SESSION BOUND, measured by `bound_root`, and the
+    install record is consulted for what it is: a record. Until 2026-09-16
+    this read the record's `installPath` and counted THAT tree, which is the
+    cache copy — and on a `directory` marketplace the CLI does not load the
+    cache copy, it loads the checkout in place. The record was five days
+    stale, the session was current, and every verdict built here said the
+    opposite (see `bound_root`). Where the bind cannot be measured — a CI
+    runner, a workstation shell — the record is what there is, and the
+    result says so in `bound_reason` rather than dressing the record up as
+    the session.
+
+    The count is taken from the tree that runs, never from the repo. A
     version number can match while the packaged tree is short (a partial
     unpack, an interrupted update), and the roster is what the session
     dispatches against, so it is measured where the session reads it.
@@ -284,7 +565,9 @@ def installed(state_path: Path | None = None) -> dict:
     state = _load(path)
     records = (state.get("plugins") or {}).get(
         f"{PLUGIN_NAME}@{MARKETPLACE_NAME}") or []
-    if not records:
+    bound = bound_root()
+    bound_path = Path(bound["path"]) if bound.get("path") else None
+    if not records and bound_path is None:
         exists = path.exists()
         # "No install state on this machine" and "installed, but not this
         # plugin" are different facts and must not collapse. A CI runner and
@@ -295,50 +578,82 @@ def installed(state_path: Path | None = None) -> dict:
         # fallback that overrides it would paper over exactly that defect.
         fallback = {} if exists else _from_cli()
         return {"version": None, **fallback, "state_file": str(path),
-                "state_file_exists": exists}
+                "state_file_exists": exists,
+                "bound_path": None, "bound_source": None,
+                "bound_reason": bound.get("reason"), "in_place": False}
     # SEVERAL SCOPES CAN CARRY THE SAME PLUGIN, and a routine session hit
     # exactly that on 2026-08-23: user scope at 0.8.1, project scope still at
     # 0.6.2. It had to reason its way to "the project entry is probably a
     # stale duplicate, not what's loaded" — a guess, in the one place the
     # routine is supposed to be certain. So the extras are RETURNED, named
     # and counted, rather than quietly dropped by the max().
-    best = max(records, key=lambda r: (_tuple(r.get("version")) or (0, 0, 0)))
+    best = max(records, key=lambda r: (_tuple(r.get("version")) or (0, 0, 0))) \
+        if records else {}
     shadowed = [{"scope": r.get("scope"), "version": r.get("version")}
                 for r in records if r is not best]
     install_path = Path(best.get("installPath") or "")
-    agents = (len(list((install_path / "agents").rglob("*.md")))
-              if (install_path / "agents").is_dir() else 0)
-    skills = (len([p for p in (install_path / "skills").glob("*") if p.is_dir()])
-              if (install_path / "skills").is_dir() else 0)
-    declared = _load(install_path / ".claude-plugin" / "plugin.json")
-    # `lastUpdated` moves on every update; `installedAt` is the first install
-    # and stays put. The question here is "did the tree change under a running
-    # session", so the later of the two is the one that answers it.
-    changed_at = _epoch(best.get("lastUpdated")) or _epoch(best.get("installedAt"))
+    try:
+        record_tree = install_path.resolve() if install_path.name else None
+    except (OSError, RuntimeError):
+        record_tree = None
+    # IN PLACE: the session binds a tree that is not the record's copy (or
+    # there is no record at all). Then the record's version, timestamps and
+    # cache tree describe something this session does not run.
+    in_place = bound_path is not None and bound_path != record_tree
+    tree = bound_path if bound_path is not None else install_path
+    agents = (len(list((tree / "agents").rglob("*.md")))
+              if (tree / "agents").is_dir() else 0)
+    skills = (len([p for p in (tree / "skills").glob("*") if p.is_dir()])
+              if (tree / "skills").is_dir() else 0)
+    declared = _load(tree / ".claude-plugin" / "plugin.json")
     began = session_started_at()
-    loaded_this = None if (began is None or changed_at is None) \
-        else changed_at <= began
+    if in_place:
+        version = declared.get("version")
+        # The question "did the tree change under a running session" is
+        # asked of the components the session reads once, not of a record
+        # that describes a copy it does not load.
+        changed_at = bound_components_changed_at(tree)
+        loaded_this = None if (began is None or changed_at is None) \
+            else changed_at <= began + MID_SESSION_GRACE_S
+        updated_at = _stamp(changed_at) if changed_at is not None else None
+    else:
+        version = best.get("version")
+        # `lastUpdated` moves on every update; `installedAt` is the first
+        # install and stays put. The question here is "did the tree change
+        # under a running session", so the later of the two is the one that
+        # answers it.
+        changed_at = _epoch(best.get("lastUpdated")) or _epoch(best.get("installedAt"))
+        loaded_this = None if (began is None or changed_at is None) \
+            else changed_at <= began
+        updated_at = best.get("lastUpdated") or best.get("installedAt")
     return {
-        "version": best.get("version"),
-        "state_file_exists": True,
+        "version": version,
+        "state_file_exists": path.exists(),
         "scope": best.get("scope"),
         "install_path": str(install_path) if install_path.name else None,
         "commit": best.get("gitCommitSha"),
         "installed_at": best.get("installedAt"),
-        "updated_at": best.get("lastUpdated") or best.get("installedAt"),
+        "updated_at": updated_at,
+        "tree_changed_at": changed_at,
         "session_started_at": began,
-        # True: the install predates this session, so this session loaded it.
-        # False: the tree changed after this session bound its agents.
+        # True: the bound tree predates this session, so this session loaded
+        # it. False: it changed after this session bound its agents.
         # None: no measurable session start — do not judge either way.
         "loaded_by_this_session": loaded_this,
         "agents": agents,
         "skills": skills,
         "declared_agents": len(declared.get("agents") or []),
-        "digest": digest(install_path),
+        "digest": digest(tree),
         "enabled": enabled_state(),
         "shadowed": shadowed,
         "state_file": str(path),
-        "source": "installed_plugins.json",
+        "source": ("bound tree" if in_place else "installed_plugins.json"),
+        # The bind, and how it was measured — or why it was not.
+        "bound_path": str(bound_path) if bound_path is not None else None,
+        "bound_source": bound.get("source"),
+        "bound_reason": bound.get("reason"),
+        "in_place": in_place,
+        "record_version": best.get("version"),
     }
 
 
@@ -350,7 +665,8 @@ SETUP_CURL = (
     "bootstrap_session.sh | bash")
 
 
-def provisioning(prov_path: Path | None = None) -> dict:
+def provisioning(prov_path: Path | None = None,
+                 in_place: bool | None = None) -> dict:
     """What happened BEFORE this session started, and whether the next
     session will differ.
 
@@ -478,6 +794,31 @@ def provisioning(prov_path: Path | None = None) -> dict:
     # the staleness is in the image, not the session, so a new session on
     # the same image binds the same old roster.
     age = provisioning_age_h(rec)
+    if age is not None and age > SNAPSHOT_AGE_H and in_place:
+        # THE SNAPSHOT IS REAL AND THE ROSTER IS NOT SHORT. Measured
+        # 2026-09-16: a record 119 hours old, the cache copy at 1.19.0, and
+        # the session bound the checkout — cloned fresh for this session —
+        # in place, at 1.20.0. The snapshot's age describes the install
+        # RECORD and the credentials the setup script landed (which the
+        # connector's own auth helper re-lands at session start). It does
+        # not describe what this session runs. Saying "the roster binds
+        # short" here was the false diagnosis every firing acted on.
+        return {
+            "state": "snapshot_record_only",
+            "recurs": False,
+            "record": str(path),
+            "age_hours": round(age, 1),
+            "reason": (
+                f"the setup script ran {age:.0f} hours ago "
+                f"({rec.get('bootstrap_ran_at')}) — this container is a "
+                f"RESTORED SNAPSHOT (Claude Code on the web runs the setup "
+                f"script once, snapshots the filesystem, and reuses the "
+                f"snapshot until the script or the allowed hosts change or "
+                f"about seven days pass). The install RECORD is that old; "
+                f"the session is not: it binds the checkout in place, and "
+                f"the checkout is cloned fresh for every session"),
+            "fix": "",
+        }
     if age is not None and age > SNAPSHOT_AGE_H:
         return {
             "state": "stale_snapshot",
@@ -494,13 +835,23 @@ def provisioning(prov_path: Path | None = None) -> dict:
                 f"begins on the plugin that was current {age:.0f} hours ago. "
                 f"That is why the roster binds short and why a fresh session "
                 f"on the same image does not fix it"),
-            "fix": ("run bootstrap_session.sh at SESSION START rather than "
-                    "only at snapshot build — in the claude.ai/code "
-                    "environment settings, the setup script must execute on "
-                    "each session, not once when the image is baked. Until "
-                    "then `doctor.py --heal` repairs the DISK every firing "
-                    "and the session still binds the roster it started with, "
-                    f"so every firing pays it: {SETUP_CURL}"),
+            # NOT "run the setup script at session start": Claude Code on the
+            # web does not offer that — the setup script runs once, the
+            # filesystem is snapshotted, and the snapshot is reused (rebuilt
+            # when the script or the allowed hosts change, or after about
+            # seven days). This line prescribed an impossible setting for
+            # two weeks. The reachable fixes are the two below.
+            "fix": ("the setup script runs ONCE per environment snapshot, so "
+                    "it cannot refresh the cache copy per session. Either "
+                    "(a) register the marketplace as a DIRECTORY source at the "
+                    "checkout — the CLI then binds the checkout in place "
+                    "(measured 2026-09-16, Claude Code 2.1.273) and the "
+                    "checkout is cloned fresh per session, so the snapshot's "
+                    "age stops mattering; or (b) rebuild the snapshot (any "
+                    "edit to the environment's setup script rebuilds it) so "
+                    "the cache copy is current. Until one lands, `doctor.py "
+                    "--heal` repairs the DISK every firing and the session "
+                    f"still binds the roster it started with: {SETUP_CURL}"),
         }
 
     return {
@@ -700,29 +1051,88 @@ def compare(repo_root: Path | None = None,
         # is only reached once the disk is right, which is exactly when the
         # remaining question is whether this session is running it.
         status = "UPDATED_MID_SESSION"
-        reasons.append(
-            f"{inst['version']} on disk matches the checkout, but the install "
-            f"was last written {inst.get('updated_at')} and this session's "
-            f"process started {_stamp(inst.get('session_started_at'))} — the "
-            f"tree changed under a running session, which loaded its agents, "
-            f"skills and hooks before that and does not reload them")
+        if inst.get("in_place"):
+            reasons.append(
+                f"{inst['version']} at {inst.get('bound_path')} matches the "
+                f"checkout, and this session binds that tree in place — but "
+                f"its agents, hooks, commands or manifest were written "
+                f"{inst.get('updated_at')} and this session's process started "
+                f"{_stamp(inst.get('session_started_at'))} (a pull or checkout "
+                f"moved the tree under a running session, which read those "
+                f"once at start and does not reload them)")
+        else:
+            reasons.append(
+                f"{inst['version']} on disk matches the checkout, but the install "
+                f"was last written {inst.get('updated_at')} and this session's "
+                f"process started {_stamp(inst.get('session_started_at'))} — the "
+                f"tree changed under a running session, which loaded its agents, "
+                f"skills and hooks before that and does not reload them")
     else:
         status = "OK"
 
     if status == "STALE" and inst.get("agents") and pub.get("agents"):
         reasons.append(f"the session dispatches against {inst['agents']} "
                        f"agents; {pub['version']} carries {pub['agents']}")
+    # WHICH TREE THIS VERDICT IS ABOUT. The bind is measured (`bound_root`)
+    # and named at every status, because the one time it was assumed — the
+    # record's cache path taken for the session's tree — every verdict here
+    # was wrong for five days of sessions and nothing in the output could
+    # have shown it (2026-09-16).
+    if inst.get("in_place"):
+        reasons.append(
+            f"MEASURED BIND: this session loads {inst.get('bound_path')} in "
+            f"place (via {inst.get('bound_source')}), not the cache copy the "
+            f"install record names"
+            + (f"; the record still says {inst.get('record_version')} — a "
+               f"cosmetic lag: it describes a copy this session does not "
+               f"run, so no heal is needed for it and `claude plugin update` "
+               f"would change nothing this session executes"
+               if inst.get("record_version")
+               and inst.get("record_version") != inst.get("version") else ""))
+    elif inst.get("bound_source"):
+        reasons.append(f"MEASURED BIND: this session loads the install "
+                       f"record's tree {inst.get('bound_path')} "
+                       f"(via {inst.get('bound_source')})")
+    elif os.environ.get("CLAUDE_PID") and status not in ("OK", "NOT_INSTALLED"):
+        reasons.append(
+            f"BIND NOT MEASURED — this verdict is about the install RECORD, "
+            f"not proven about this session: {inst.get('bound_reason')}")
     # Reported at every status, including OK: a shadowed record is not a
     # failure — the highest version is what loads — but leaving it unnamed is
     # what made a session spend a paragraph guessing about it.
     for extra in inst.get("shadowed") or []:
-        reasons.append(f"also recorded: {extra['version']} at "
-                       f"{extra['scope']} scope — shadowed by the "
-                       f"{inst.get('scope')}-scope {inst['version']} that "
-                       f"loads, and safe to ignore")
+        if inst.get("in_place"):
+            reasons.append(f"also recorded: {extra['version']} at "
+                           f"{extra['scope']} scope — a second install "
+                           f"record; neither record's copy is what this "
+                           f"session loads (it binds in place), safe to ignore")
+        else:
+            reasons.append(f"also recorded: {extra['version']} at "
+                           f"{extra['scope']} scope — shadowed by the "
+                           f"{inst.get('scope')}-scope {inst['version']} that "
+                           f"loads, and safe to ignore")
 
     fix = ""
-    if status in ("STALE", "MISSING", "INCOMPLETE"):
+    if (status in ("STALE", "INCOMPLETE", "DIVERGED") and inst.get("in_place")
+            and not _under_plugin_cache(inst.get("bound_path"))):
+        # `claude plugin update` rewrites the CACHE copy. A session that binds
+        # a tree outside the cache — a marketplace directory, a --plugin-dir
+        # — is not running that copy, so the update would report success and
+        # change nothing the session executes. The tree itself has to move.
+        fix = (f"this session binds {inst.get('bound_path')} IN PLACE, and "
+               f"that tree is behind this checkout ({pub.get('tree')}). "
+               f"`claude plugin update` refreshes only the cache copy, which "
+               f"this session does not load — bring the bound tree to the "
+               f"branch tip instead (it is a checkout: fetch and reset it, or "
+               f"register the marketplace at THIS checkout), then start a "
+               f"fresh session. If the bound tree is the checkout a RESTORED "
+               f"SNAPSHOT carries (a trigger-fired container with no "
+               f"repository attached), a fresh session inherits the same old "
+               f"checkout: rebuild the snapshot (any edit to the environment's "
+               f"setup script rebuilds it) or attach the repository to the "
+               f"Routine so it is cloned fresh per session. Until then "
+               f"{SESSION_NOTE}")
+    elif status in ("STALE", "MISSING", "INCOMPLETE"):
         fix = f"{UPDATE}  ({UPDATE_NOTE})"
     elif status == "UPDATED_MID_SESSION":
         fix = f"nothing to install — {SESSION_NOTE}"
@@ -744,7 +1154,7 @@ def compare(repo_root: Path | None = None,
     # WHY THE DRIFT HAPPENED, not just that it did. Only asked when there IS
     # drift: on a healthy container the provisioning record is noise, and a
     # check that narrates a working machine trains people to skim it.
-    prov = provisioning(prov_path)
+    prov = provisioning(prov_path, in_place=inst.get("in_place"))
     if status in ("STALE", "MISSING", "INCOMPLETE", "UPDATED_MID_SESSION",
                   "DIVERGED", "DISABLED"):
         reasons.append(f"cause: {prov['reason']}")
@@ -771,9 +1181,15 @@ def compare(repo_root: Path | None = None,
 def summary(verdict: dict) -> str:
     """One line, quotable into a routine report."""
     pub, inst = verdict["published"], verdict["installed"]
-    return (f"{verdict['status']}: installed {inst.get('version') or 'none'} "
+    line = (f"{verdict['status']}: installed {inst.get('version') or 'none'} "
             f"({inst.get('agents', 0)} agents) vs published "
             f"{pub.get('version') or 'unreadable'} ({pub.get('agents', 0)} agents)")
+    if inst.get("in_place"):
+        line += (f" — bound in place at {inst.get('bound_path')} "
+                 f"[{inst.get('bound_source')}]")
+        if inst.get("record_version") and inst.get("record_version") != inst.get("version"):
+            line += f"; install record says {inst.get('record_version')} (cosmetic)"
+    return line
 
 
 #: What each healable status actually needs run, as data. Split because the
@@ -873,6 +1289,17 @@ def heal(verdict: dict) -> tuple:
     plan = _plan_for(verdict)
     if not plan:
         return verdict, []
+    inst = verdict.get("installed") or {}
+    if inst.get("in_place") and not _under_plugin_cache(inst.get("bound_path")):
+        # EVERY COMMAND IN THE PLAN REWRITES THE CACHE COPY, and this session
+        # does not load the cache copy. Running them would print four exit-0
+        # lines and change nothing the session executes — the shape of
+        # success with none of it — so the heal declines and says what would
+        # actually move the bound tree.
+        return verdict, [
+            f"heal: declined — this session binds {inst.get('bound_path')} in "
+            f"place, and the plugin update rewrites only the cache copy it "
+            f"does not load; bring that checkout to the branch tip instead"]
     log = []
     for argv_ in plan:
         try:
