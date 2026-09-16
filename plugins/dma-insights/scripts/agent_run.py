@@ -941,6 +941,61 @@ def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
     return res
 
 
+#: An agent name -> the cost ledger's stage, for a batch that was dispatched
+#: without being told which stage it is. Longest prefix wins.
+_STAGE_OF_AGENT = (
+    ("research-challenger", "CHALLENGE"),
+    ("research-conductor", "PRELIM"),
+    ("research-p", "RESEARCH"),
+    ("scoring-critic", "SCORING"),
+    ("scoring-p", "SCORING"),
+    ("report-", "REPORTS"),
+    ("technographic-scanner", "PRELIM"),
+    ("enrichment-", "PRELIM"),
+)
+
+
+def _recover_record(rows: list, stage: str | None) -> dict | None:
+    """The run a batch belongs to, recovered from its own lane packets.
+
+    `brief.shared()` puts `run_id` at the top of every packet and
+    `_write_lanes` writes it beside the prompt as `<lane>.json`, so a batch
+    that was never told its run is still carrying it. `runstate.locate`
+    finds the root from the id alone, which is why no root is recovered
+    here: passing one it had to guess would be worse than passing none.
+
+    Returns None rather than guessing when the lanes disagree about the run
+    or carry no packet at all — an unrecorded batch that SAYS SO beats a
+    batch recorded against the wrong run, which is a wrong total nobody can
+    tell from a right one.
+    """
+    run_ids, agents = set(), []
+    for r in rows:
+        agents.append(str(r.get("agent") or ""))
+        pf = r.get("prompt_file")
+        if not pf:
+            continue
+        side = Path(pf).with_suffix(".json")
+        try:
+            packet = json.loads(side.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        rid = ((packet.get("shared") or {}).get("run_id") or "").strip()
+        if rid:
+            run_ids.add(rid)
+    if len(run_ids) != 1:
+        return None
+    if not stage:
+        for agent in agents:
+            for prefix, st in _STAGE_OF_AGENT:
+                if agent.startswith(prefix):
+                    stage = st
+                    break
+            if stage:
+                break
+    return {"run": run_ids.pop(), "root": None, "stage": stage or "DISPATCH"}
+
+
 def _record_cost(record: dict, summary: dict, repo_root: Path) -> dict:
     """Shell `engine.cost record` for the batch, so the run's own ledger
     carries the stage's wall clock, lane count and attempts. Separate from
@@ -1170,6 +1225,40 @@ def main(argv=None) -> int:
             cap["overridden"] = True
         if a.record_run and not a.record_stage:
             ap.error("--record-run needs --record-stage")
+        # A BATCH THAT RECORDS NOTHING IS A BATCH NOBODY CAN PRICE.
+        #
+        # `--record-run` was opt-in, and `brief._dispatch_line` is the only
+        # thing that supplies it. A batch dispatched by hand therefore spent
+        # real money and real wall clock and appended NOTHING to the run's
+        # cost ledger — not the dollars, not the tokens `cost.record` prices
+        # when the CLI omits a dollar figure, not even the elapsed seconds.
+        # Measured 2026-09-16: four hand-driven rounds against a $120
+        # ceiling, every one of them invisible, and a ledger still reporting
+        # the last pipeline-driven figure as though it were the total. The
+        # ceiling cannot bite what it cannot see.
+        #
+        # The lane packets already carry the run: `brief.shared()` puts
+        # `run_id` in every one, and `runstate.locate` finds the root from
+        # the id alone. So the batch recovers what it was not told, and when
+        # it genuinely cannot, it says so where the operator is looking
+        # instead of leaving a stale total to be read as a real one.
+        rec = ({"run": a.record_run, "root": a.record_root,
+                "stage": a.record_stage} if a.record_run else None)
+        if rec is None:
+            rec = _recover_record(rows, a.record_stage)
+            if rec:
+                print(f"recording this batch against run {rec['run']} "
+                      f"(stage {rec['stage']}), recovered from the lane "
+                      f"packets — pass --record-run to set it explicitly",
+                      file=sys.stderr, flush=True)
+            else:
+                print("WARNING: this batch is NOT being recorded. Its dollars, "
+                      "tokens and wall clock will not reach any run's cost "
+                      "ledger, and any total you read there will understate "
+                      "the run by this batch. Pass --record-run <RUN_ID> "
+                      "--record-stage <STAGE>, or dispatch the line "
+                      "`engine.brief` prints, which already carries both.",
+                      file=sys.stderr, flush=True)
         print(f"dispatching {len(rows)} agent(s), {lanes} at a time"
               + (f", up to {a.retries} retr{'y' if a.retries == 1 else 'ies'} "
                  f"per lane" if a.retries else ""),
@@ -1179,10 +1268,7 @@ def main(argv=None) -> int:
                          log_dir_for(a.log_dir) if a.stream else None,
                          retries=a.retries, backoff_s=a.retry_backoff_s,
                          timing_out=Path(a.timing_out) if a.timing_out else None,
-                         record=({"run": a.record_run, "root": a.record_root,
-                                  "stage": a.record_stage}
-                                 if a.record_run else None),
-                         capacity=cap)
+                         record=rec, capacity=cap)
 
     name = a.agent.removeprefix(f"{PLUGIN_PREFIX}:")
     if name not in names:

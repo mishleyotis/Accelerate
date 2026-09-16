@@ -1332,9 +1332,19 @@ class Pipeline:
             if cb.get("lanes"):
                 self._count(self._dispatch(cb, stage="CHALLENGE"))
             if cb.get("deferred_cells"):
+                # Empty by construction since 2026-09-16 — a trim re-pages
+                # rather than deferring. Kept as a loud alarm: if this ever
+                # fires again the stage has stopped converging and the
+                # category cannot close, which is worth a line in the log
+                # rather than a silent four-round grind.
                 self.opts.log(f"  [CHALLENGE] {len(cb['deferred_cells'])} cell(s) "
                               f"did not fit their page and stay unchallenged: "
                               f"{', '.join(cb['deferred_cells'][:6])}")
+            if cb.get("abridged_cells"):
+                self.opts.log(f"  [CHALLENGE] {len(cb['abridged_cells'])} cell(s) "
+                              f"ship with their weakest evidence rows held back "
+                              f"to fit the lane budget: "
+                              f"{', '.join(cb['abridged_cells'][:6])}")
             for cat in work:
                 floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
             self._verify_research(work)
