@@ -115,6 +115,14 @@ def test_a_builtin_a_body_instructs_is_granted(path, tools, dis, body):
             if tool == "AskUserQuestion" and not re.search(
                     r"(with|use|call)\s+\*{0,2}AskUserQuestion", body):
                 continue
+            # The six page producers say "you hold no Agent tool" (W2-9,
+            # F-C01-021): a statement of what they cannot do. Only an
+            # imperative — use/call/via/through the Agent tool, or a
+            # Dispatch sentence — counts as instructing it.
+            if tool == "Agent" and not re.search(
+                    r"(with|use|call|via|through)\s+(the\s+)?Agent tool"
+                    r"|\bDispatch .{0,40}\bAgent\b", body):
+                continue
             pytest.fail(f"{path.name} instructs {tool} and does not grant it")
 
 

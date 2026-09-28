@@ -1674,8 +1674,12 @@ class Pipeline:
             raise StageRefused("research is not ready to score:\n  - " + "\n  - ".join(pre))
         doc = handoff.build(self.wb, qa_dir=self.run.qa_dir, strict=True)
         out = self.run.deliverables / handoff.HANDOFF_NAME
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(doc, indent=2, default=str))
+        # Through the packet writer, never bare json: the stage's own
+        # verification reads the sha256 sidecar write_packet leaves, and a
+        # packet written without it is "not written by engine.handoff"
+        # (measured 28-09-2026 on the CI pipeline walk, after the packet
+        # gained its hash).
+        handoff.write_packet(doc, out)
         self.reopen()
         return f"handoff written: {len(doc.get('subcap_records') or [])} records"
 

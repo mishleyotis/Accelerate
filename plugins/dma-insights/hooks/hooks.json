@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/bash_guard.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: bash_guard.py is MISSING from the installed plugin, so NO Bash guard runs (driver lock, credential guard, never-cat rule, artefact-write guard, actor scope, deliverable gate) and nothing auto-approves pipeline commands. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/bash_guard.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: bash_guard.py is MISSING from the installed plugin, so NO Bash guard runs (driver lock, credential guard, never-cat rule, artefact-write guard, actor scope, deliverable gate) and nothing auto-approves pipeline commands. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal (plugin_version.py shows the drift). The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 60
           }
         ]

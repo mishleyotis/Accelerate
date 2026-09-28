@@ -281,7 +281,12 @@ def test_the_credential_guard_is_still_registered():
     cfg = json.loads(HOOKS_JSON.read_text())
     cmds = " ".join(h["command"] for e in cfg["hooks"]["PreToolUse"]
                     for h in e["hooks"])
-    assert "deny_credential_ops.py" in cmds
+    # Since W2-7 (F-H01-023) the credential guard is one of the guards
+    # bash_guard.py runs in ONE process; the manifest binds bash_guard and
+    # bash_guard's ORDER names the guard.
+    assert "bash_guard.py" in cmds
+    order = (HOOKS / "bash_guard.py").read_text()
+    assert "deny_credential_ops.py" in order[order.index("ORDER = ("):order.index("APPROVER =")]
     assert "precheck_submit.py" in cmds
     assert "precheck_promote.py" in cmds
 
@@ -327,7 +332,7 @@ def _bash_wrapper(script: str) -> str:
     """
     cfg = json.loads(HOOKS_JSON.read_text())
     for g in cfg["hooks"]["PreToolUse"]:
-        if g.get("matcher") != "Bash":
+        if "Bash" not in str(g.get("matcher") or "").split("|"):
             continue
         for h in g["hooks"]:
             if script in h["command"]:
@@ -339,7 +344,7 @@ def test_a_missing_handler_allows_rather_than_blocking():
     """The other half of the same lesson. Shipping is enforced above; this
     pins what happens if it ever fails anyway — the session must keep its
     Bash tool and be TOLD, not silently lose every command."""
-    cmd = _bash_wrapper("deny_credential_ops.py")
+    cmd = _bash_wrapper("bash_guard.py")
     r = subprocess.run(["sh", "-c", cmd], input=b'{"tool_name":"Bash"}',
                        capture_output=True,
                        env={**os.environ,
@@ -353,7 +358,7 @@ def test_a_present_handler_can_still_deny():
     """The guard must keep guarding. `a && b || c` would have swallowed a
     real deny, because a deny exits non-zero; the wrapper uses an explicit
     if and passes the handler's exit through with exec."""
-    cmd = _bash_wrapper("deny_credential_ops.py")
+    cmd = _bash_wrapper("bash_guard.py")
     payload = json.dumps({"tool_name": "Bash", "tool_input": {"command":
         "git push https://x:ghp_" + "A" * 36 + "@github.com/a/b"}}).encode()
     r = subprocess.run(["sh", "-c", cmd], input=payload, capture_output=True,
