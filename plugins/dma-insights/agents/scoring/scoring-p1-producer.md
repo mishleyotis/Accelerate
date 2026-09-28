@@ -47,16 +47,21 @@ score, and flags one where more than 60% do. For each subcap row on
 
 1. Read `Dominant_Claim`, `Claim_Label`, `What_We_Found`, `Ceiling_Band`,
    `Challenge_Verdict`, `Evidence_IDs` and, for an absence, `Negative_Ladder`.
-2. Decide the raw M-level from the rubric descriptor the claim matches; apply
-   the evidence ceiling (`engine.assessment` computes it from the tiers and
-   refuses a score above it), then the caps the Issue_Register implies.
+2. Decide the raw M-level from the rubric descriptor the claim matches, and
+   name the ADJ_ deltas (staleness −0.3, complaints −0.3, incident −0.5) and
+   the caps the Issue_Register implies (CAP_S2 3.0, CAP_S3 2.0, …). You
+   supply INPUTS, never the result: `engine.assessment apply` (or `score
+   --raw`) does raw − adjustments, the evidence ceiling it computes from the
+   tiers, the caps, and the quarter-point (down, never up), and returns the
+   final, the band and the arithmetic as one string. Three scorers of one
+   cell once wrote 2.5, 2.7 and 2.7 for the same inputs (QA audit
+   F-F14-029); the engine writes one number.
 3. Strike it — ONE command per subcap, chaining several in one Bash call:
 
 ```
 python3 -m engine.assessment score --run <R> --root <ROOT> --subcap P1C1.1.1 \
-    --score 2.5 --confidence MEDIUM --actor scoring-p1-producer \
-    --rationale "[EVIDENCE] E-012 shows …; E-041 confirms …. [MATURITY MATCH] M2 … because …. [GAP TO NEXT] …. [COUNTER] …. [CEILING] …. [SO WHAT] For <entity> …" \
-    --caps "none applied" \
+    --raw 3.0 --adj ADJ_STALE:-0.3 --confidence MEDIUM --actor scoring-p1-producer \
+    --rationale "[EVIDENCE] E-012 shows …; E-041 confirms …. [MATURITY MATCH] M3 … because …. [GAP TO NEXT] …. [COUNTER] …. [CEILING] …. [SO WHAT] For <entity> …" \
     --ai-applicability ASSISTIVE --data-dependency "member master, transactions" \
     --data-readiness AMBER --ai-evidence NONE_FOUND --ai-blocker "no governed catalogue" \
     --peer-ai-signal UNVERIFIED

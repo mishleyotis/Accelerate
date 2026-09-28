@@ -61,7 +61,7 @@ fails the workbook on any deviation and the app's parser will not read it.**
 | A | SubCap_ID | Unique subcap identifier (e.g., P1C1.1.1, P2C3.2.4). One row per subcap. |
 | B | SubCap_Name | Subcapability name from Pillar XLSX toolkit |
 | C | Category | Parent category ID (e.g., P1C1, P2C3) |
-| D | Score | Final maturity score (1.0-5.0, default 0.5 precision) |
+| D | Score | Final maturity score (1.0-5.0, quarter points x.00/x.25/x.50/x.75 — `engine.assessment` refuses any other) |
 | E | Confidence | HIGH / MEDIUM / LOW based on evidence coverage and tier diversity |
 | F | Evidence_IDs | Comma-separated evidence IDs (E-001, E-015, INT-BOARD-003) or NO_EVIDENCE |
 | G | Source_URLs | Hyperlinks to evidence sources (specific URLs, not "multiple searches") |
@@ -225,7 +225,7 @@ Factor scores 1.0-5.0. See `references/evidence_ranking.md`.
 final_score = min(raw_score, evidence_ceiling, all_caps, all_adjustment_ceilings)
 ```
 
-Adjustments computed as `adjustment_ceiling = min(raw, other_ceilings) − X`, logged with `ADJ_` prefix.
+Adjustments are `ADJ_` deltas that lower the raw score. **The arithmetic has one owner:** `python3 -m engine.assessment apply --run <R> --subcap <cell> --raw <M> --adj ADJ_…:-0.3 --cap CAP_…:3.0` computes `min(raw + Σadj, evidence ceiling, caps)`, takes it to the quarter-point (down, never up) and returns the final, the band and the arithmetic string; `score --raw --adj --cap` does the same and records the working in `Caps_Applied`. A scorer supplies inputs, never the result (QA audit F-F14-029: three scorers, one cell, 2.5 / 2.7 / 2.7).
 
 **Severity:** S3 (active enforcement <12mo)→2.0 | S2 (terminated <24mo)→3.0 (`contract.CAP_TRIGGERS`)
 **Evidence:** T5-only→2.0 | T4/T5-only→2.5 | Single source→3.0 | Single tier-type→2.5 (EXCEPTION: internal T1/T2 + public T3 = two tier types, ceiling removed) | >24mo→ADJ −0.3
