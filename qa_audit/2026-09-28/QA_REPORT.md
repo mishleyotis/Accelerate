@@ -2,6 +2,30 @@
 
 Auditor: independent QA lead (Claude, session 01SqSjYiyecAiKJfb6zyxQn9). Scope: `plugins/dma-insights` at commit d661bd8, the account-level synced skills, the live DMA Insights connector (free reads only), and a synthetic run built by the plugin's own lifecycle suite. Nothing in the plugin was changed; fault injection ran on a scratchpad copy. No credits were spent.
 
+## Branch state — W3 economy landed (28-09-2026, branch `claude/dma-qa-w3-economy`, stacked on W2)
+
+The W3 tier — the five MEDIUM findings on economy — has landed on this
+branch in five commits. Each names what the audit measured, what landed,
+and the proof. The verdict stays **DO-NOT-SHIP** until W4 lands, the
+connector is deployed and the sixteen deliverables are regenerated.
+
+### Fixes landed (W3)
+| finding | commit | what landed | proof |
+|---|---|---|---|
+| F-O13-030 — 18 goeasy runs under one request id, 12 with 0 scored cells | 5b51fc8 | `persist.EmptyIngest` refuses a workbook with no scored cell before any write, whatever `remint` says; the scan records the refusal as a decided outcome (no run, no retry budget, no quarantine) and keeps the bytes so the same research-stage workbook is not re-detected until it changes; `PersistResult.created` is False on the byte-identical guard, so a resolved retry is neither counted as created nor re-embedded | `test_empty_ingest_refused` 5; worker suite 420 pass / 49 skip (DB-backed). The 12 goeasy empties would never have existed; the scored versions differ in bytes and stay one run each |
+| F-F14-029 — three scorers, one rule, three numbers (2.5 / 2.7 / 2.7) | e85a4fb | `engine.assessment.apply` is the arithmetic's one owner: adjusted = raw + Σ adjustments; bounded = min(adjusted, evidence ceiling, caps); final = the largest quarter-point ≤ bounded, ≥ 1.0; returns band (`contract.band_of`), level (`rubric`), what bounded it and the arithmetic string; `engine.assessment apply` and `score --raw --adj --cap` on the CLI, `--score` beside `--raw` refused; the scorer template, the Cap System, column D and Step 8 name the engine | `test_score_apply` 9: the audit's three inputs → 2.5 Building M3 three times, one arithmetic string; `test_scoring_stage` + `test_assessment_grains` 48; `gen_scoring_agents --check` current |
+| F-E10-034 — PostCompact re-injected 911 bytes of routing and no run state | 700ccc9 | `scripts/hooks/param_echo.py` on PreCompact writes `<run>/07_qa/param_echo.json` from what the run records (stage, pipeline position, budget, rounds, search ops, resume command), fail-open; `session_brief` prints it back as PARAMETER ECHO on PostCompact and a compact SessionStart; another run's echo is not read; `routing.md` § After a compaction names it first | `test_param_echo` 6 (echo diff across a compaction = 0); 264 across the brief, wiring and routing suites |
+| F-E01-026 — 47k tokens (23 %) before the first tool call on heatmap, 56k (28 %) on overview; 41–55 % on the full reading orders | 6e5805d | 32 gate deep dives → `05-lifecycle/gates/<ID>.md`; every surface block → `03-pages/<page>/<ID>.md`; every rulebook block → `rulebooks/<page>/<ID>.md`; the books and packs are indexes; the 24 per-surface producers read their own pack, rulebook and gate files; 49 surface-map anchors resolve to files | `scripts/tests/test_reading_load.py`: audit basis ≤ 15 % per producer (all 24 ≤ 30,000 tokens), no whole book or pack up front, full order ≤ 32 % (platform-fit 30.9 %, from 43.4 %), every surface has both files, every index lists every file; 361 location-pinning tests |
+| F-B04-027 — 5/6 SKILL.md over 500 lines (766–915 for the four big ones), 12 paths not where stated, 42 deck references never named | b7079a1 | four SKILL.md trimmed to 375–492 lines by moving H2 sections verbatim into references (assessment: workbook columns, operating procedure, score states, phases 4/7/8; research: changelog, context window, core engine, batch protocol; surface: recording, template binding, shipping, scripts, colour and absence pointing at the doctrine files that already own them; deck: the slide plan), each with a "Reading manifest — by phase" and its reference table listing the new files; the 12 paths qualified with `${CLAUDE_PLUGIN_ROOT}/` (a repo-root path is written `path (repo root)`); `audit_skills.py` no longer resolves a bare `scripts/` or `references/` at the plugin root, gains `--max-lines` (500, exit 1) and scans every skill `.md` for a retired writer named as live; the legacy scripts README marks `assessment_runner.py` retired | `audit_skills` rc 0 (0 broken, 0 oversized, 0 retired-writer lines); every moved section proven byte-identical to the pre-move SKILL.md (1,616 lines + the 79-line changelog); `test_audit_skills` +5; `dma-surface-production/SKILL.md` 11,085 → 7,472 tokens |
+
+### Suites on the W3 head
+Plugin scripts suite: **2,264 passed, 1 skipped, 1 failed** (5 min 12 s) — the failure is `test_audit_builtin_approvals`'s `agent_run.py watch` probe, which names a repo-relative path and passes from the repository root where CI runs it (it was run from the plugin directory here). Repo skills suite: **587 passed, 6 skipped** (one install-status probe failed only while the plugin suite ran beside it rewriting manifests; it passes alone). Location-pinning suites (reading load 51, audit_skills, skill anti-patterns, routing reaches producers): 130 passed. Worker suite (W3-1): 420 pass / 49 skip. Research-engine neighbourhoods (W3-2, W3-3): 57 + 264; CI runs the whole engine suite on the head. The three CI walks: lifecycle 34/34, stage-and-supersede 20/20, pipeline 34/34. `audit_skills` rc 0 (0 broken, 0 oversized, 0 retired-writer lines); `check_taxonomy_drift` 0; `gen_gates_md`, `gen_scoring_agents`, `gen_research_agents` `--check` current; `audit_dead_contracts`, `audit_chain`, `audit_coverage` `--strict` clean; provisioner 0 would change.
+
+### Still open after W3
+- Everything open after W2 (owner skill deletion, the W2 server deploy, the D-04 / O-07 re-samples on a produced page).
+- `routing.md` (9.6k tokens) is now the largest always-loaded file; trimming it is W4 prompt-craft work.
+- W4: F-L11-042's remaining pairs, F-L11-031, the scorecard rewrites, F-C06-037, glossary, stale tokens.
+
 ## Branch state — W2 structure landed (28-09-2026, branch `claude/dma-qa-w2-structure`, stacked on W1)
 
 The W2 tier — the sixteen HIGHs and the hook and contract MEDIUMs — has
@@ -94,7 +118,7 @@ What held: the research engine's write path is fail-closed (unverified excerpts 
 | 1 narrated searches | not measurable (no transcripts); the engine only accepts searches through `engine.cli search`, which logs; **W2** (5d77d03) removed search from every synthesis and verification role | D-01, F-D05-033 |
 | 2 FACT default / FACT on T3 | **FIXED in W1** (717710d): label derived from tier, ledger refuses FACT on T3/T4, ET-10 at submit | F-J04-004 |
 | 3 connectors unused, web primary | contradiction still in prose (dma-research SKILL.md "web_search PRIMARY" vs "connector required"); relay exists | F-L11-042 |
-| 4 subcaps scored on no capability evidence | not measurable on a scored run; scoring refuses uncited rationale (engine.assessment) | F-14 |
+| 4 subcaps scored on no capability evidence | not measurable on a scored run; scoring refuses uncited rationale (engine.assessment); **W3** (e85a4fb) gave the arithmetic one owner, so three scorers of one row now return one number | F-14, F-F14-029 |
 | 5 dead values | **FIXED in W2** (0119cb9, 70f7eb0): `audit_dead_contracts --strict` in CI, 0 orphans; the evidence index exports populated on a v7 workbook | F-J02-011, F-J01-006 |
 | 6 green suite over a minority of modules | **FIXED in W1** (91884e5): rubric.py tested; meta-test keeps 42/42 covered | J-3 |
 | 7 gate-id collisions | not found; `gen_gates_md --check` green | J-2 |
