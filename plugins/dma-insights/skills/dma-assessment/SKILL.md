@@ -13,7 +13,7 @@ description: >
   score, or benchmark any financial services institution's digital capabilities.
 ---
 
-# DMA Assessment Skill v5.5
+# DMA Assessment Skill v5.6
 
 **v5.6 Changes (2026-09-03):** the workbook is `skills/dma-research/engine/contract.py`'s and this skill
 BUILDS NO WORKBOOK. The scoring stage writes column D of the run's existing workbook through
@@ -166,10 +166,10 @@ Pillar (4) → Category (16) → Capability (136) → Subcapability (851)
 
 | Pillar | Name | Subcaps |
 |--------|------|---------|
-| P1 | Strategy, Governance & Culture | ~199 |
-| P2 | Member/Customer Experience | ~288 |
-| P3 | Operations, Risk & Compliance | ~162 |
-| P4 | Data, Analytics & Technology | ~187 |
+| P1 | Strategy, Governance & Culture | 205 |
+| P2 | Member/Customer Experience | 292 |
+| P3 | Operations, Risk & Compliance | 164 |
+| P4 | Data, Analytics & Technology | 190 |
 
 **Note:** Taxonomy counts (851 = 205 P1 + 292 P2 + 164 P3 + 190 P4) are
 COUNTED FROM THE CATALOGUE, never asserted: run
@@ -185,7 +185,12 @@ all applicable subcaps for the specific institution's sub-vertical.
 | M2 | Developing | 1.5–2.4 | Basic, inconsistent |
 | M3 | Established | 2.5–3.4 | Standardized, documented |
 | M4 | Advanced | 3.5–4.4 | Optimized, data-driven |
-| M5 | Transformational | 4.5–5.0 | Industry-leading |
+| M5 | Leading | 4.5–5.0 | Industry-leading |
+
+This is the 1–5 **score** scale (`skills/dma-research/engine/rubric.py`, the one owner of
+these rows). It is not the four display **bands** the app renders — `<2 Activating · <3
+Building · <4 Competing · ≥4 Differentiating`, strict less-than on the raw score
+(`engine.contract.band_of`, `apps/web/lib/bands.js`). A fifth band word appears nowhere.
 
 Maturity descriptors: Pillar XLSX files → Maturity Descriptors sheet.
 
@@ -195,8 +200,8 @@ Maturity descriptors: Pillar XLSX files → Maturity Descriptors sheet.
 
 | Tier | Type | ERS Score | Max Alone |
 |------|------|-----------|-----------|
-| T1 | Regulatory/Audited + Verified Tech Scans | 5.0 | M5 |
-| T2 | Official Disclosures + Structured Internal | 4.0 | M5 |
+| T1 | Regulatory/Audited + Verified Tech Scans | 5.0 | none (5.0) |
+| T2 | Official Disclosures + Structured Internal | 4.0 | none (5.0) |
 | T3 | Third-Party Analysis | 3.0 | M4 |
 | T4 | Internal (Unvalidated Narrative) | 2.0 | M2.5 |
 | T5 | Marketing/Claims | 1.0 | M2 |
@@ -222,9 +227,9 @@ final_score = min(raw_score, evidence_ceiling, all_caps, all_adjustment_ceilings
 
 Adjustments computed as `adjustment_ceiling = min(raw, other_ceilings) − X`, logged with `ADJ_` prefix.
 
-**Severity:** S3 (active enforcement <12mo)→1.5 | S2 (terminated <24mo)→3.0
+**Severity:** S3 (active enforcement <12mo)→2.0 | S2 (terminated <24mo)→3.0 (`contract.CAP_TRIGGERS`)
 **Evidence:** T5-only→2.0 | T4/T5-only→2.5 | Single source→3.0 | Single tier-type→2.5 (EXCEPTION: internal T1/T2 + public T3 = two tier types, ceiling removed) | >24mo→ADJ −0.3
-**Internal Evidence Override:** Internal T1/T2 evidence removes the single-tier-type cap (2.5). A subcap supported by both internal T2 and public T3 has effective ceiling M5, not M2.5.
+**Internal Evidence Override:** Internal T1/T2 evidence removes the single-tier-type cap (2.5). A subcap supported by both internal T2 and public T3 has no ceiling (5.0), not M2.5.
 **Sentiment (P2):** Rating <3.0→2.0 | 3.0-3.5→2.5 | 3.5-4.0→3.5 | Complaints +20% YoY→ADJ −0.3
 
 **Cross-Pillar (applied Pass 2 AFTER all pillars scored):**
@@ -258,7 +263,7 @@ raw_score column in the workbook. The raw-to-final pathway is documented in the 
 ```
 $DMA_ROOT/04_scoring/exports/
 ├── export_scoring_detail.csv      # All subcaps: ID, Score, Evidence_Ceiling, Caps_Applied, Confidence
-├── export_category_summary.csv    # 17 rollups with weighted scores
+├── export_category_summary.csv    # one rollup per catalogue category (16 in v7.0 — contract.counts())
 ├── export_pillar_summary.csv      # 4 rollups with weighted scores
 ├── export_evidence_inventory.csv  # All evidence with ERS
 ├── export_issue_register.csv      # Issues with dates
@@ -549,7 +554,7 @@ Execute Phase Gate Protocol. Apply ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, 
 Each row = one subcap ID (e.g., P1C1.1.1). Column D = final score. Column J = rationale.
 If your sheet has <50 rows, you are scoring at the WRONG LEVEL — STOP.
 
-### Capability Micro-Loop (repeat for each ~72 capabilities)
+### Capability Micro-Loop (repeat for each capability — 136 in v7.0, `contract.counts()`)
 
 **3a. RETRIEVE** subcap list + diagnostic Qs from Pillar XLSX Column H.
 List every subcap ID under this capability (e.g., P1C1.1.1, P1C1.1.2, P1C1.1.3...).
@@ -892,8 +897,12 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 
 ## Pillar XLSX Files
 
-Search `/mnt/user-data/uploads/` and `/mnt/project/` for:
-Pillar 1-4 Scoring Toolkit (or v5.0 equivalent). Key sheets: Capability Map, Maturity Descriptors, Sub-Vertical Matrix.
+The engine reads the catalogue, never the XLSX: `packages/shared/catalogue_v70_tier.json`
+(+ `catalogue_v70_names.json`) resolved by `engine.contract.catalogue_path()` (env
+`DMA_CATALOGUE` → the checkout → the packaged copy). The Pillar 1-4 Scoring Toolkit XLSX
+files are the v7.0 source of record at `gs://digital-maturity-assessor-catalogue-staging/v7.0/`
+and are pulled by the research-conductor at run start. Key sheets: Capability Map, Maturity
+Descriptors, Sub-Vertical Matrix. Nothing is searched for under `/mnt/`.
 
 ---
 

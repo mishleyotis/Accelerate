@@ -237,7 +237,7 @@ explicit `<a:srgbClr>` when editing. Use `slide13_editor.py --apply-indicators` 
 - **Sh21/25/29/33 (Number):** REPLACE text with level number ("1"-"5"). Text color: #FFFFFF for Level 5, #1C4A4D for 1-4.
 - **Sh22/26/30/34 (Label):** REPLACE text with level label. Text color: #FFFFFF for Level 5, #1C4A4D for 1-4.
 
-**5-Level Color System (DIFFERENT fills for bg rect vs circle — from Level_Color_Code.pptx):**
+**Maturity-level Color System — the 1–5 SCORE scale from `skills/dma-research/engine/rubric.py` (cuts 1.5 / 2.5 / 3.5 / 4.5), not the four display bands (DIFFERENT fills for bg rect vs circle — from Level_Color_Code.pptx):**
 
 | Level | Label Text | BG Rect Fill | Circle Fill | Number Text Color | Label Text Color |
 |---|---|---|---|---|---|
@@ -245,7 +245,7 @@ explicit `<a:srgbClr>` when editing. Use `slide13_editor.py --apply-indicators` 
 | 2 | Developing | #C7D3EC | #8094C0 | #F2F4F9 | #1C4A4D |
 | 3 | Established | #E6F3FA | #3D81F6 | #F2F4F9 | #1C4A4D |
 | 4 | Advanced | #E8F7F6 | #62D7B8 | #F2F4F9 | #1C4A4D |
-| 5 | Transformational | #B0EED3 | #27BBAF | #FFFFFF | #1C4A4D |
+| 5 | Leading | #B0EED3 | #27BBAF | #FFFFFF | #1C4A4D |
 
 **Industry comparison bars (Sh46-59):** 8 pairs of number + label shapes. REPLACE scores. COLOR bar fills per 5-level system above.
 
@@ -344,27 +344,27 @@ If ANY of these shapes are accidentally modified, the slide layout breaks. Pre-e
 | Score < peer − 0.2 | Light orange | #FFCB99 |
 | Score < peer − 0.5 | Blue | #058DC7 |
 
-**Score → Level mapping (explicit ranges):**
+**Score → Band mapping (strict less-than on the raw score — `apps/web/lib/bands.js` == `engine.contract.band_of`; no fifth band):**
 
-| Score Range | Level | Fill Color (accent/bar) | Label Text Color |
+| Score | Band | Fill Color (accent/bar) | Label Text Color |
 |---|---|---|---|
-| 0.00 – 1.49 | Activating | #F97316 | #F97316 |
-| 1.50 – 2.49 | Building | #8094C0 | #4E5E8A |
-| 2.50 – 3.49 | Competing | #27BBAF | #198478 |
-| 3.50 – 5.00 | Differentiating | #185F60 | #185F60 |
+| < 2.00 | Activating | #FFCB99 | #F97316 |
+| 2.00 – 2.99 | Building | #62D7B8 | #4E5E8A |
+| 3.00 – 3.99 | Competing | #27BBAF | #198478 |
+| ≥ 4.00 | Differentiating | #139F94 | #139F94 |
 
 **158-shape per-capability block (8 shapes each, 17 blocks):**
 
 | Offset | Shape | Edit | Fill Color | Border Color | Text Color |
 |--------|-------|------|-----------|-------------|-----------|
 | +0 | Background card | CHANGE FILL to level card_bg + border to MATCH fill | Activating=#FFF3E8, Building=#F2F4F9, Competing=#E6F5F3, Differentiating=#E8F7F6 | **MUST EQUAL FILL** (same hex) | — |
-| +1 | Accent strip | CHANGE FILL per level + border to MATCH fill | Activating=#F97316, Building=#8094C0, Competing=#27BBAF, Differentiating=#185F60 | **MUST EQUAL FILL** (same hex) | — |
+| +1 | Accent strip | CHANGE FILL per level + border to MATCH fill | Activating=#FFCB99, Building=#62D7B8, Competing=#27BBAF, Differentiating=#139F94 | **MUST EQUAL FILL** (same hex) | — |
 | +2 | Capability name | Replace if differs | — | noFill (preserved) | — |
 | +3 | Score | REPLACE text only. **NO FILL** in 158-shape (level shown by accent/bar/label) | — | noFill (preserved) | — |
 | +4 | Track bar | DO NOT CHANGE fill or border | #E5E7EB | #E5E7EB (fixed) | — |
 | +5 | Progress bar | CHANGE WIDTH `round((score/5)×1883700)` + FILL per level + border to MATCH fill | Same as accent strip | **MUST EQUAL FILL** (same hex) | — |
 | +6 | Median marker (`cxnSp`) | CHANGE X = `track_x + round((median/5)×1883700)`. **cxnSp connector — never set shape fill, never change width/height/y.** | Line stroke #3D81F6 (preserved) | #3D81F6 (fixed on `<a:ln>`) | — |
-| +7 | Level label | REPLACE text (e.g., "BUILDING") + CHANGE FONT COLOR per level | — | noFill (preserved) | Activating=#F97316, Building=#4E5E8A, Competing=#198478, Differentiating=#185F60 |
+| +7 | Level label | REPLACE text (e.g., "BUILDING") + CHANGE FONT COLOR per level | — | noFill (preserved) | Activating=#F97316, Building=#4E5E8A, Competing=#198478, Differentiating=#139F94 |
 
 **⚠️ BORDER INVARIANT (fill-border rule):** Offsets **+0, +1, +5** must have `<a:ln>` stroke equal to their `<a:solidFill>`. Any mismatch = visible visual bug (teal-filled card with purple border). `heatmap_editor.py` enforces this automatically via `set_shape_border()`. Post-edit QA: `cross_slide_checker.py --check-borders` flags any drift as CRITICAL.
 
@@ -561,12 +561,12 @@ Each pillar has 3 shapes: name header, insight sentence, colored accent strip. T
 
 **4-Tier Pillar Accent Color System (matches Slide 14 heatmap levels):**
 
-| Level | Score Range | Accent Fill Hex |
+| Band | Score (strict less-than, raw) | Accent Fill Hex |
 |---|---|---|
-| Activating | 0.00–1.49 | #F97316 |
-| Building | 1.50–2.49 | #8094C0 |
-| Competing | 2.50–3.49 | #27BBAF |
-| Differentiating | 3.50–5.00 | #185F60 |
+| Activating | < 2.00 | #FFCB99 |
+| Building | 2.00 – 2.99 | #62D7B8 |
+| Competing | 3.00 – 3.99 | #27BBAF |
+| Differentiating | ≥ 4.00 | #139F94 |
 
 **Competitive Strengths panel — REPLACE bullet text:**
 
@@ -598,10 +598,10 @@ Each card has: background rect (light tint), accent strip (bold), level label (u
 
 | Level | Card BG | Accent Strip | Label Text Color |
 |---|---|---|---|
-| Activating | #FFF3E8 | #F97316 | #C25008 |
-| Building | #F2F4F9 | #8094C0 | #4E5E8A |
+| Activating | #FFF3E8 | #FFCB99 | #C25008 |
+| Building | #F2F4F9 | #62D7B8 | #4E5E8A |
 | Competing | #E6F5F3 | #27BBAF | #198478 |
-| Differentiating | #E8F7F6 | #185F60 | #185F60 |
+| Differentiating | #E8F7F6 | #139F94 | #139F94 |
 
 **Rec sourcing:** Pull top 3 opportunities from Slide 16 by gap magnitude (peer median − client score, descending). Rec names, current scores, and target scores MUST match Slide 16 capability cards exactly — run `cross_slide_checker.py`.
 

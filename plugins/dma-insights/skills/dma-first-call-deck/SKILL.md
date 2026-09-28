@@ -64,7 +64,7 @@ dma-first-call-deck/
     ├── 03_editing/                       ← Complex slide editors (color + size changes)
     │   ├── _editor_common.py                Shared: config-driven dispatcher + utilities
     │   ├── heatmap_editor.py                Run: Turn 6 (158-shape Slide 14, fill+border, 4-tier)
-    │   ├── slide13_editor.py                Run: Turn 5 (46-shape Slide 13, 5-tier indicators)
+    │   ├── slide13_editor.py                Run: Turn 5 (46-shape Slide 13, maturity-level 1–5 indicators)
     │   ├── slide10_editor.py                Run: Turn 5 (44-shape Slide 10, 4-tier pillar + rec)
     │   ├── slide16_editor.py                Run: Turn 5 (14-shape Slide 16, opportunity cards)
     │   ├── slide20_editor.py                Run: Turn 5 (21-shape Slide 20, mobilization)
@@ -403,9 +403,9 @@ python3 scripts/03_editing/slide6_editor.py \
 | P3 | [X.XX] | [N] [Label] | Sh27 | #[read] | #[...] | Sh28 | #[read] | #[...] |
 | P4 | [X.XX] | [N] [Label] | Sh31 | #[read] | #[...] | Sh32 | #[read] | #[...] |
 
-> 5-Level reference (bg ≠ circle):
-> L1: bg=#FFCB99, circle=#FE9732 | L2: bg=#C7D3EC, circle=#8094C0 | L3: bg=#E6F3FA, circle=#3D81F6
-> L4: bg=#E8F7F6, circle=#62D7B8 | L5: bg=#B0EED3, circle=#27BBAF
+> Maturity-level reference — the 1–5 SCORE scale from `skills/dma-research/engine/rubric.py` (cuts 1.5 / 2.5 / 3.5 / 4.5), not the four display bands (bg ≠ circle):
+> L1 Foundational: bg=#FFCB99, circle=#FE9732 | L2 Developing: bg=#C7D3EC, circle=#8094C0 | L3 Established: bg=#E6F3FA, circle=#3D81F6
+> L4 Advanced: bg=#E8F7F6, circle=#62D7B8 | L5 Leading: bg=#B0EED3, circle=#27BBAF
 > Mark rows where BOTH fills are UNCHANGED.
 
 **⛔ SLIDE 13 — Level indicator text changes (MANDATORY: show current → new for every cell):**
@@ -450,37 +450,39 @@ python3 scripts/03_editing/slide6_editor.py \
 **⛔ MANDATORY: Fill ALL 17 rows with ALL columns. No "..." shortcuts. Every color, every EMU value, every level.**
 **The reviewer uses this table to verify the heatmap script output. Missing values = rejected plan.**
 
-**Heatmap capability changes (all 17 — full names, NO P#C# codes):**
+**Heatmap capability changes (all 17 template blocks — full names, NO P#C# codes; row 5 is the retired P1C5 block, see the note below the column definitions):**
 
 | # | Capability | Tmpl Score | New Score | Peer | Δ | Tmpl Level | New Level | Bar Fill / Bench Color | Label Text Color | Bar Width (EMU) | Median X (EMU) | Card BG |
 |---|-----------|-----------|-----------|------|---|-----------|-----------|----------------------|-----------------|----------------|----------------|---------|
-| 1 | Digital Strategy & Vision | 3.1 | [X.XX] | [X.XX] | [±X.XX] | Competing | [Level] | [#F97316/#8094C0/#27BBAF/#185F60] | [#F97316/#4E5E8A/#198478/#185F60] | [round((score/5)×1883700)] | [track_left+round((peer/5)×1883700)] | [#FFF3E8/#F2F4F9/#E6F5F3/#E8F7F6] |
-| 2 | Governance & Risk Appetite | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
+| 1 | Digital Strategy & Vision | 3.1 | [X.XX] | [X.XX] | [±X.XX] | Competing | [Band] | [#FFCB99/#62D7B8/#27BBAF/#139F94] | [#F97316/#4E5E8A/#198478/#139F94] | [round((score/5)×1883700)] | [track_left+round((peer/5)×1883700)] | [#FFF3E8/#F2F4F9/#E6F5F3/#E8F7F6] |
+| 2 | Governance & Risk Appetite | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 | 3 | Innovation Management | 3.2 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
-| 4 | Culture & Change Enablement | 2.9 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
-| 5 | Sustainable Finance & ESG | 2.7 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
+| 4 | Culture & Change Enablement | 2.9 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
+| 5 | Sustainable Finance & ESG | 2.7 | null | null | — | Building | NOT ASSESSED | #E5E7EB | #6B7280 | 0 | track_left | #FFFFFF |
 | 6 | Digital Mktg & Acquisition | 2.6 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 | 7 | Onboarding & Fulfillment | 2.5 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 | 8 | Omnichannel Servicing | 2.7 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
-| 9 | Personalization & Engagement | 2.3 | [X.XX] | [X.XX] | [±X.XX] | Activating | [...] | [...] | [...] | [...] | [...] | [...] |
-| 10 | Process Automation | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
+| 9 | Personalization & Engagement | 2.3 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
+| 10 | Process Automation | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 | 11 | Operational Risk & Fraud | 2.5 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 | 12 | Compliance & Surveillance | 3.2 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
 | 13 | Business Resilience & TPRM | 2.5 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 | 14 | Data Governance | 1.7 | [X.XX] | [X.XX] | [±X.XX] | Activating | [...] | [...] | [...] | [...] | [...] | [...] |
 | 15 | Analytics & AI Enablement | 2.3 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
-| 16 | Architecture & Integration | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
-| 17 | Platform Enablement | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Competing | [...] | [...] | [...] | [...] | [...] | [...] |
+| 16 | Architecture & Integration | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
+| 17 | Platform Enablement | 2.8 | [X.XX] | [X.XX] | [±X.XX] | Building | [...] | [...] | [...] | [...] | [...] | [...] |
 
 > **Column definitions (every [...] MUST be replaced with an actual value):**
 >
 > - **Tmpl Score / New Score:** The template's placeholder score → the actual DMA score from the report.
-> - **Tmpl Level / New Level:** Score→Level: 0.00–1.49=Activating, 1.50–2.49=Building, 2.50–3.49=Competing, 3.50–5.00=Differentiating.
-> - **Bar Fill / Bench Color:** UNIFIED level-based color for accent strip (+1), progress bar (+5), AND benchmark reference: Activating=`#F97316`, Building=`#8094C0`, Competing=`#27BBAF`, Differentiating=`#185F60`. There is NO separate peer-relative color system — the level determines the color, period. Benchmark line stroke: `#3D81F6` (on `<a:ln>`, NOT shape fill).
-> - **Label Text Color:** The two-tier TEXT color for the level label (+7): Activating=#F97316, Building=#4E5E8A, Competing=#198478, Differentiating=#185F60.
+> - **Tmpl Level / New Level:** Score→Band is strict less-than on the RAW score, the app's own rule (`apps/web/lib/bands.js` == `engine.contract.band_of`): <2.00=Activating, <3.00=Building, <4.00=Competing, ≥4.00=Differentiating. There is no fifth band. (Tmpl Level is the template's placeholder score under this rule.)
+> - **Bar Fill / Bench Color:** UNIFIED band color for accent strip (+1), progress bar (+5), AND benchmark reference — the app's fills: Activating=`#FFCB99`, Building=`#62D7B8`, Competing=`#27BBAF`, Differentiating=`#139F94`. There is NO separate peer-relative color system — the band determines the color, period. Benchmark line stroke: `#3D81F6` (on `<a:ln>`, NOT shape fill).
+> - **Label Text Color:** The TEXT color for the band label (+7), a legibility choice on the card tint: Activating=#F97316, Building=#4E5E8A, Competing=#198478, Differentiating=#139F94.
 > - **Bar Width (EMU):** `round((new_score / 5.0) × 1,883,700)`. Track width is 1,883,700 EMU for all templates.
 > - **Median X (EMU):** `track_left + round((peer / 5.0) × 1,883,700)`. Track left varies per pillar column (P1=484632, P2=2606040, P3=4727448, P4=6848856). **Show the actual computed integer.**
 > - **Card BG:** The card background color for the level: Activating=#FFF3E8, Building=#F2F4F9, Competing=#E6F5F3, Differentiating=#E8F7F6. *Not changed by script — already in template. Shown to verify visual consistency.*
+>
+> **Row 5 — Sustainable Finance & ESG is the retired P1C5 category.** Catalogue v7.0 has 16 categories (`engine.contract.counts()`); the nine templates are v5.0-shaped and still carry the block. A v7.0 run has no score for it: pass `null` for its score and median and `heatmap_editor.py` renders the block NOT ASSESSED (card #FFFFFF, bar #E5E7EB at zero width, label #6B7280, score "—"). **Never invent a score for it.** Row 17 is the template's label; v7.0's fourth P4 category is Information Security & Cybersecurity. Re-authoring the templates to 16 blocks is an open owner decision.
 >
 > **Median marker properties (unchanged by script — verify only):**
 > - Shape type: `<p:cxnSp>` connector (NOT `<p:sp>`)
@@ -699,7 +701,7 @@ Replace the radar + legend images via python-pptx rId swap.
 - Headline is data-centric with business outcome, not DMA jargon
 
 **After editing:** Repack → convert Slide 14 to image → present in chat.
-**Per-batch QA:** Run Check #13 protocol on Slide 14 (render → view → autofix → re-render). Extra checks: all 17 bars visible with correct level-derived colors (see `references/_generated/color_authority.md` — Activating=#F97316, Building=#8094C0, Competing=#27BBAF, Differentiating=#185F60). Median connectors (#3D81F6) correctly positioned, labels readable. Score text verification (from script audit). Run `cross_slide_checker.py` which auto-verifies Slide 14 ↔ Slide 13 ↔ Slide 10 level consistency via config-derived expectations. ⛔ STOP.
+**Per-batch QA:** Run Check #13 protocol on Slide 14 (render → view → autofix → re-render). Extra checks: all 16 scored bars visible with the app's band colors (see `references/_generated/color_authority.md` — Activating=#FFCB99, Building=#62D7B8, Competing=#27BBAF, Differentiating=#139F94) and the retired P1C5 block rendered NOT ASSESSED. Median connectors (#3D81F6) correctly positioned, labels readable. Score text verification (from script audit). Run `cross_slide_checker.py` which auto-verifies Slide 14 ↔ Slide 13 ↔ Slide 10 level consistency via config-derived expectations. ⛔ STOP.
 
 ### Turn 6: Batch 5 — Opportunities (Slide 16) | 4 tool calls MAX
 

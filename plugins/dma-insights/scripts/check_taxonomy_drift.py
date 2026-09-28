@@ -23,6 +23,17 @@ v5.0-shaped workbook — the vetting rule, the rulebook lineage notes, the grid
 producer's version check. Those lines carry a lineage marker and are allowed.
 The distinction is the whole value of this check: a blanket search-and-replace
 would delete the mechanism that spots a v5.0 package.
+
+WIDENED 28-09-2026 (QA audit F-L14-041). The shipped prose carried a band rule
+the app does not have — "0.00–1.49 Activating, 1.50–2.49 Building, 2.50–3.49
+Competing, 3.50–5.00 Differentiating" (the app cuts strictly at 2 / 3 / 4 on
+the raw score), the retired fifth-band hex #185F60 on Differentiating, an
+"M5 | Transformational" rubric row, "17 rollups" and "~72 capabilities" — and
+this check passed with 0 findings because its M5/Transformational rules wanted
+a band word on the same line. `Transformational` is now flagged wherever it
+appears (a line that states the prohibition, or a lineage line, stays exempt);
+the deck cut-offs, the retired hex and the two counts have rules of their own;
+`deprecated/` directories are not scanned.
 """
 from __future__ import annotations
 
@@ -38,7 +49,7 @@ sys.path.insert(0, str(PLUGIN / "skills" / "dma-research"))
 
 SCAN_DIRS = ("skills", "agents", "docs", "commands")
 SCAN_EXT = (".md", ".py", ".json")
-SKIP_PARTS = {"__pycache__", "engine"}   # the engine COMPUTES these counts
+SKIP_PARTS = {"__pycache__", "engine", "deprecated"}   # the engine COMPUTES these counts; deprecated/ is not shipped prose
 
 #: Lines mentioning the retired taxonomy on purpose. One of these words on
 #: the line makes the literal a lineage statement rather than a claim about
@@ -54,7 +65,7 @@ FORBIDDING = re.compile(
     r"must not|never|forbid|prohibit|no fifth|unreachable|does not exist|"
     r"do not write|refus|reject|invariant 6|appear nowhere|is not a band|"
     r"there is no|there are no|no longer|not a band|has four|four bands|"
-    r"nowhere|removed|banned|illegal|violation",
+    r"nowhere|removed|banned|illegal|violation|do not exist|any occurrence",
     re.I)
 
 #: The evidence-CEILING scale, which is a different vocabulary from the
@@ -108,10 +119,9 @@ EXEMPT = {
      "maturity_keywords"): "matches SCORE tokens in prose, including a "
                            "fifth level written by mistake — the detector "
                            "needs the token it detects",
-    ("skills/dma-first-call-deck/references/_generated/brand_level_tables.md",
-     "Transformational"): "the mapping table FROM the retired level name TO "
-                          "the band it renders as; deleting it removes the "
-                          "translation",
+    ("agents/checkers/exclusion-boundary-auditor.md",
+     "`entity_ids`, `Transformational`"): "the excluded-vocabulary net names "
+                                          "the token it excludes",
     ("skills/dma-surface-production/01-start-here/5-colour-and-bands.md",
      "maturity scale defines"): "the file that teaches the distinction",
     ("skills/dma-surface-production/01-start-here/5-colour-and-bands.md",
@@ -169,7 +179,21 @@ def rules(c: dict):
          "Activating / Building / Competing / Differentiating", BAND_CONTEXT),
         (re.compile(r"\bTransformational\b"), "Transformational",
          "the fifth band's name; invariant 6 forbids it in code, enum or "
-         "prose", BAND_CONTEXT),
+         "prose — the fifth SCORE level is 'Leading' (engine/rubric.py)", None),
+        (re.compile(r"0\.00\s*[–-]\s*1\.49|1\.50\s*[–-]\s*2\.49|"
+                    r"2\.50\s*[–-]\s*3\.49|3\.50\s*[–-]\s*5\.00"),
+         "1.50 / 2.50 / 3.50 band cut-offs",
+         "bands are strict less-than on the raw score: <2 Activating · "
+         "<3 Building · <4 Competing · ≥4 Differentiating "
+         "(apps/web/lib/bands.js ≡ engine.contract.band_of)", BAND_CONTEXT),
+        (re.compile(r"185F60", re.I), "#185F60",
+         "the retired fifth-band hex; Differentiating renders #139F94 and "
+         "only apps/web/lib/bands.js maps a band to a colour", None),
+        (re.compile(r"\b17\s+rollups\b", re.I), "17 rollups",
+         f"one rollup per category: {c['categories']} in "
+         f"{c['catalogue_version']}", None),
+        (re.compile(r"~\s*72\s+capabilit", re.I), "~72 capabilities",
+         f"the catalogue holds {c['capabilities']} capabilities", None),
     )
 
 
