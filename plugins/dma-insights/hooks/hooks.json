@@ -22,6 +22,16 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_retired_skills.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: deny_retired_skills.py is MISSING from the installed plugin, so a retired skill (dma-p1, dma-orchestrator, dma-core) or a drifted account copy of a plugin skill can still be loaded on a legacy phrase, and every later gate then runs against the wrong contract. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every Skill invocation leaves a session unable to load the very skill that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "WebFetch|mcp__Exa__web_fetch_exa",
         "hooks": [
           {

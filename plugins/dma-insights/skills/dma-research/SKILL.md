@@ -9,6 +9,9 @@ description: >
   estimates with uncertainty bands ONLY. ALWAYS use when the user mentions: DMA research,
   evidence collection, pre-assessment research, tech stack discovery, entity profiling,
   subvertical classification, or any request to gather evidence before DMA scoring.
+  Also covers what the retired dma-p1, dma-orchestrator and dma-core skills did: P1 or
+  Pillar 1 research, research handoff, CCG/RSG inspection, SIB assembly, ESG research
+  (P1C5 lineage), public-only, internal-only or hybrid DMA research engagements.
 ---
 
 # DMA Research Skill v2.5
