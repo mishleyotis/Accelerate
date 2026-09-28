@@ -586,7 +586,14 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     out = {"folder": str(dest), "entity": entity,
            "deliverables": {k: str(v.name) for k, v in found.items()},
            "verified": report["complete"], "verification": report}
-    if push:
+    if push and not report["complete"]:
+        # The verify step ran and said no; the folder is built and stays on
+        # disk for repair, and it does not leave the machine (QA audit
+        # F-M08-013, 28-09-2026: the push used to happen regardless).
+        out["pushed"] = {"refused": True,
+                         "why": "the package did not verify — repair the checks "
+                                "named in `verification`, re-package, then push"}
+    elif push:
         out["pushed"] = _push(dest, entity)
     return out
 

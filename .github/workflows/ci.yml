@@ -61,6 +61,11 @@ jobs:
           python3 scripts/gen_proto_bands.py --check
           python3 plugins/dma-insights/scripts/check_taxonomy_drift.py
 
+      - name: The deck skill's generated docs are in sync with its colour owner
+        # QA audit F-M08-013 (28-09-2026): a generated doc nobody regenerates
+        # is a rule held in two places; this fails the push that lets them drift.
+        run: cd plugins/dma-insights/skills/dma-first-call-deck && python3 scripts/utils/check_docs_in_sync.py
+
       - name: Every artefact the plugin writes has a reader
         # QA audit F-J02-011 (28-09-2026): six artefacts had a writer and no
         # reader. A file with a writer, a gate and no reader is the most
