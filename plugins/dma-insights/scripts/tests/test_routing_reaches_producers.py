@@ -265,3 +265,34 @@ def test_the_handoff_json_is_described_as_an_index_not_an_interface():
     assert "read-only index over those same sheets" in text
     assert "It is not the interface." in text
     assert "If the two ever disagree, the workbook is right." in text
+
+
+# ── F-H01-043 · a WRITE that mentions a bulk file by name is not a read ──
+
+def _handoff_name():
+    return "research_" + "handoff.json"
+
+
+@pytest.mark.parametrize("cmd", [
+    "cat > /tmp/notes.md <<'EOF'\nThe packet is {name}; read the workbook instead.\nEOF",
+    "python3 - <<'PY'\nimport json\nprint('{name}')\nPY",
+    "cat > {name} <<'EOF'\n{{}}\nEOF",                     # a write, not a read
+    "grep -c cells {name} && cat README.md",
+])
+def test_a_heredoc_or_a_write_that_names_a_bulk_file_is_allowed(cmd):
+    cmd = cmd.format(name=_handoff_name())
+    out = _run(HOOKS / "deny_bulk_read.py",
+               {"tool_name": "Bash", "tool_input": {"command": cmd}}).stdout
+    assert out.strip() == "", f"wrongly denied: {cmd!r}"
+
+
+@pytest.mark.parametrize("cmd", [
+    "cat {name}",
+    "grep x README.md | cat {name}",
+    "ls; cat {name} | head",
+])
+def test_a_whole_read_in_any_segment_is_still_denied(cmd):
+    cmd = cmd.format(name=_handoff_name())
+    out = _run(HOOKS / "deny_bulk_read.py",
+               {"tool_name": "Bash", "tool_input": {"command": cmd}}).stdout
+    assert out.strip(), f"not denied: {cmd!r}"

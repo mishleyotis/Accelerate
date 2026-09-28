@@ -46,7 +46,7 @@ DELIVERABLE_WRITE = re.compile(
     r"|engine\.techscan\s+render\b|engine\.reports\b")
 #: Commands that carry a deliverable off the machine.
 PUSH = re.compile(
-    r"drive_fetch\.py\s+push-(?:package|final|artifact)\b"
+    r"drive_fetch\.py[\"']?\s+push-(?:package|final|artifact)\b"
     r"|engine\.assemble\s+package\b[^\n]*--push\b")
 RUN_FLAG = re.compile(r"--run[ =]([\w.:-]+)")
 ROOT_FLAG = re.compile(r"--root[ =](\S+)")
@@ -137,34 +137,51 @@ def failing(verdicts: dict) -> list[str]:
             for k, v in sorted(verdicts.items()) if v["verdict"] != "PASS"]
 
 
-def decide_push(cmd: str) -> str | None:
-    """The denial reason for a push, or None."""
+def push_verdict(cmd: str) -> tuple[str, str | None]:
+    """("pass" | "deny" | "not_a_push", reason). The gate fails CLOSED: a
+    push with no run in hand, an unreadable workbook or no recorded verdict
+    is a deny with the way out, never a silent allow."""
     if not PUSH.search(cmd or ""):
-        return None
+        return "not_a_push", None
     run = _run_from(cmd)
     if run is None:
-        return None                          # no run in hand: nothing to judge
+        return "deny", (
+            "dma-insights deliverable gate: no run is in hand to judge this push by "
+            "— name it (`--run <R> --root <ROOT>` in the command, or DMA_RUN_ID / "
+            "DMA_RUN_ROOT in the session) so the recorded gold-standard verdicts can "
+            "be read. A package nothing has judged does not leave the machine. "
+            "(QA audit F-M08-013 / F-K02-024, 28-09-2026)")
     try:
         wb = run.open()
         verdicts = gate_verdicts(wb)
-    except Exception:                                          # noqa: BLE001
-        return None
+    except Exception as exc:                                   # noqa: BLE001
+        return "deny", (f"dma-insights deliverable gate: run {run.run_id}'s workbook "
+                        f"could not be read ({type(exc).__name__}), so no verdict can "
+                        f"be established; NOT RUN is not a pass.")
     gs = {k: v for k, v in verdicts.items() if k.startswith(GATE_GS + ":")}
     if not gs:
-        return (f"dma-insights deliverable gate: no gold-standard verdict is recorded "
-                f"for run {run.run_id}, so nothing has established that this package "
-                f"meets the Golden 1 gate. The gate runs when a deliverable is written "
-                f"(engine.cli report / engine.assemble package); run "
-                f"`python3 -m engine.gold_standard package <folder>` and repair each "
-                f"finding at its source, then push. (QA audit F-M08-013, 28-09-2026)")
+        return "deny", (
+            f"dma-insights deliverable gate: no gold-standard verdict is recorded "
+            f"for run {run.run_id}, so nothing has established that this package "
+            f"meets the Golden 1 gate. The gate runs when a deliverable is written "
+            f"(engine.cli report / engine.assemble package); run "
+            f"`python3 -m engine.gold_standard package <folder>` and repair each "
+            f"finding at its source, then push. (QA audit F-M08-013, 28-09-2026)")
     bad = failing(verdicts)
     if bad:
-        return (f"dma-insights deliverable gate: run {run.run_id} carries a verdict that "
-                f"is not PASS — " + " | ".join(bad[:4])
-                + ". A package with a recorded failure does not leave the machine; "
-                  "repair at the source, re-render, and the gate re-runs on the write. "
-                  "(QA audit F-M08-013, 28-09-2026)")
-    return None
+        return "deny", (
+            f"dma-insights deliverable gate: run {run.run_id} carries a verdict that "
+            f"is not PASS — " + " | ".join(bad[:4])
+            + ". A package with a recorded failure does not leave the machine; "
+              "repair at the source, re-render, and the gate re-runs on the write. "
+              "(QA audit F-M08-013, 28-09-2026)")
+    return "pass", None
+
+
+def decide_push(cmd: str) -> str | None:
+    """The denial reason for a push, or None."""
+    state, why = push_verdict(cmd)
+    return why if state == "deny" else None
 
 
 def on_post_tool_use(event: dict) -> dict | None:

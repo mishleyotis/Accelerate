@@ -243,24 +243,34 @@ def test_the_hook_never_denies():
 
 # ── the wiring ────────────────────────────────────────────────────────────
 
+def _bash_guard_src():
+    return (HOOKS_JSON.parent.parent / "scripts" / "hooks" / "bash_guard.py").read_text()
+
+
 def test_the_hook_is_registered_for_bash_and_the_edit_tools():
+    """Bash reaches this approver through bash_guard.py (one process for
+    every Bash guard, F-H01-023); the edit tools reach it directly."""
     cfg = json.loads(HOOKS_JSON.read_text())
     entries = [e for e in cfg["hooks"]["PreToolUse"]
                if "autoapprove_builtins.py" in " ".join(h["command"]
                                                         for h in e["hooks"])]
     assert entries, "autoapprove_builtins.py is not registered in hooks.json"
     matcher = entries[0]["matcher"]
-    for tool in ("Bash", "Write", "Edit", "MultiEdit", "NotebookEdit"):
+    for tool in ("Write", "Edit", "MultiEdit", "NotebookEdit"):
         assert tool in matcher.split("|"), f"{tool} not in matcher {matcher!r}"
+    bash = [e for e in cfg["hooks"]["PreToolUse"]
+            if "bash_guard.py" in " ".join(h["command"] for h in e["hooks"])]
+    assert bash and "Bash" in bash[0]["matcher"].split("|")
+    assert 'APPROVER = "autoapprove_builtins.py"' in _bash_guard_src()
 
 
 def test_the_deny_guards_still_stand_beside_it():
-    """Landing the allow must never drop a guard."""
-    cfg = json.loads(HOOKS_JSON.read_text())
-    cmds = " ".join(h["command"] for e in cfg["hooks"]["PreToolUse"]
-                    for h in e["hooks"])
-    assert "deny_credential_ops.py" in cmds
-    assert "deny_bulk_read.py" in cmds
+    """Landing the allow must never drop a guard: every denier runs ahead of
+    the approver inside bash_guard.py."""
+    src = _bash_guard_src()
+    order = src[src.index("ORDER = ("):src.index("APPROVER =")]
+    assert "deny_credential_ops.py" in order
+    assert "deny_bulk_read.py" in order
 
 
 def test_a_missing_handler_allows_loudly_rather_than_blocking():
@@ -314,5 +324,31 @@ def test_the_hook_is_registered_for_the_cowork_workspace_tools():
     cfg = json.loads(HOOKS_JSON.read_text())
     entry = next(e for e in cfg["hooks"]["PreToolUse"]
                  if "autoapprove_builtins.py" in e["hooks"][0]["command"])
-    for tool in ("mcp__workspace__bash", "mcp__workspace__web_fetch"):
-        assert tool in entry["matcher"].split("|"), entry["matcher"]
+    assert "mcp__workspace__web_fetch" in entry["matcher"].split("|"), entry["matcher"]
+    bash = next(e for e in cfg["hooks"]["PreToolUse"]
+                if "bash_guard.py" in e["hooks"][0]["command"])
+    assert "mcp__workspace__bash" in bash["matcher"].split("|"), bash["matcher"]
+
+
+# ── F-K02-024 · destructive and outward actions are a person's decision ──
+
+@pytest.mark.parametrize("cmd", [
+    "rm -rf /tmp/run/04_scoring",
+    "rm -r /root/.dma/packages/acme",
+    "rm -fr /root/.dma/x",
+    "rm --recursive /root/.dma/x",
+    "python3 plugins/dma-insights/scripts/drive_fetch.py push-package --client Acme --file 'Acme - DMA'",
+    "python3 plugins/dma-insights/scripts/drive_fetch.py push-final --client Acme --file x.docx",
+    "python3 plugins/dma-insights/scripts/drive_fetch.py push-artifact --client Acme --file x.xlsx",
+])
+def test_a_tree_delete_or_a_deliverable_push_draws_no_approval(cmd):
+    assert decision("Bash", command=cmd) != "allow", cmd
+
+
+@pytest.mark.parametrize("cmd", [
+    "rm -f /root/.dma/packages/acme/stage.md",
+    "python3 plugins/dma-insights/scripts/drive_fetch.py push-memory --client Acme",
+    "python3 plugins/dma-insights/scripts/drive_fetch.py push-bundle --client Acme --file b.json",
+])
+def test_a_single_file_delete_and_a_persistence_push_stay_approved(cmd):
+    assert decision("Bash", command=cmd) == "allow", cmd

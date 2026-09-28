@@ -122,9 +122,13 @@ def test_the_hook_is_wired_on_all_three_events():
     def bound(ev):
         return [e for e in hooks[ev] if any("deliverable_gate" in h["command"] for h in e["hooks"])]
     assert bound("PostToolUse")[0]["matcher"] == "Bash"
-    assert bound("PreToolUse")[0]["matcher"] == "Bash"
     assert bound("Stop")
+    # PreToolUse on Bash runs through bash_guard.py (one process for every
+    # Bash guard, F-H01-023), ahead of the approver it names last.
+    src = (PLUGIN / "scripts" / "hooks" / "bash_guard.py").read_text()
+    order = src[src.index("ORDER = ("):src.index("APPROVER =")]
+    assert "deliverable_gate.py" in order
     pre = hooks["PreToolUse"]
-    gate = next(i for i, e in enumerate(pre) if any("deliverable_gate" in h["command"] for h in e["hooks"]))
+    gate = next(i for i, e in enumerate(pre) if any("bash_guard" in h["command"] for h in e["hooks"]))
     approve = next(i for i, e in enumerate(pre) if any("autoapprove_builtins" in h["command"] for h in e["hooks"]))
     assert gate < approve, "a denial is decided before anything can approve"

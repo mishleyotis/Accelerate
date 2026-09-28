@@ -144,9 +144,31 @@ def test_the_hook_is_registered_before_anything_can_approve():
     def idx(name):
         return next(i for i, e in enumerate(pre)
                     for h in e["hooks"] if name in h.get("command", ""))
-    assert idx("guard_actor_scope.py") < idx("autoapprove_builtins.py")
-    entry = pre[idx("guard_actor_scope.py")]
-    assert entry["matcher"] == "Bash"
+    # The guard runs inside bash_guard.py, ahead of the approver it names
+    # last (F-H01-023: one process for every Bash guard).
+    src = (PLUGIN / "scripts" / "hooks" / "bash_guard.py").read_text()
+    order = src[src.index("ORDER = ("):src.index("APPROVER =")]
+    assert "guard_actor_scope.py" in order
+    assert idx("bash_guard.py") < idx("autoapprove_builtins.py")
+    entry = pre[idx("bash_guard.py")]
+    assert "Bash" in entry["matcher"].split("|")
     assert "if [ -f" in entry["hooks"][0]["command"], (
         "every hook command carries its own existence check, so a partial "
         "install degrades to a message rather than a broken session")
+
+
+# ── F-K02-024 · the assessment writes are scoped too ──────────────────────
+
+SCORE = ("python3 -m engine.assessment score --run R --subcap {cell} --score 2.5 "
+         "--actor {actor} --rationale 'x'")
+
+
+def _is_deny(out):
+    return bool(out) and out["hookSpecificOutput"]["permissionDecision"] == "deny"
+
+
+def test_a_research_actor_may_not_score_and_a_pillar_scorer_may():
+    assert _is_deny(run_hook(bash(SCORE.format(cell="P1C1.1.1", actor="research-p1c1-producer"))))
+    assert not _is_deny(run_hook(bash(SCORE.format(cell="P1C1.1.1", actor="scoring-p1-producer"))))
+    assert _is_deny(run_hook(bash(SCORE.format(cell="P2C1.1.1", actor="scoring-p1-producer")))), (
+        "a pillar scorer writes only its own pillar")
