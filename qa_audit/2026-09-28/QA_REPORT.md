@@ -2,6 +2,39 @@
 
 Auditor: independent QA lead (Claude, session 01SqSjYiyecAiKJfb6zyxQn9). Scope: `plugins/dma-insights` at commit d661bd8, the account-level synced skills, the live DMA Insights connector (free reads only), and a synthetic run built by the plugin's own lifecycle suite. Nothing in the plugin was changed; fault injection ran on a scratchpad copy. No credits were spent.
 
+## Branch state — W1 blockers landed (28-09-2026, branch `claude/dma-qa-w1-blockers`, stacked on PR #40)
+
+The audit above measured the plugin at d661bd8 and changed nothing. The W1 tier
+of the remediation programme has since landed on this branch: the five BLOCKERs
+and the four findings that share their root cause. The verdict stays
+**DO-NOT-SHIP** until W2–W4 land and the deliverables are regenerated; what
+changed is recorded here so the register and this report agree.
+
+### Fixes landed
+
+| finding | commit | what landed | proof |
+|---|---|---|---|
+| seed 6 / J-3 — `rubric.py` untested | 91884e5 | `tests/skills/research_engine/test_rubric.py`; meta-test `test_every_engine_module_is_tested.py` (every `engine/*.py` bar `__init__`, `pipeline_stub` imported by a test) | both pass; 42/42 modules covered |
+| F-J04-004 BLOCKER — FACT on T3/T4 | 717710d | `contract.claim_label_for(tier)`: label derived from provenance; `ledger.append_evidence` refuses an explicit FACT on T3/T4; `--claim-type` optional (89 call sites kept); server gate **ET-10** (`gates.py`, `validation2._check_fact_tier`); `1-gates.md` regenerated (71 gates) | `test_claim_tier.py` 14 pass; `apps/mcp/tests/test_fact_tier.py` pass; replay of the 368 goeasy rows → 77 ET-10 reasons (= the audit's count); `gen_gates_md --check` current |
+| F-J04-015 HIGH — FACT-on-tier / scan rows at T3 | 717710d (partial) | the FACT-on-tier half closes under ET-10; the scan-tier half (5 provider rows at T3) has no engine registration path to fix in W1 → **W2** | as above |
+| F-A05-001 / F-B03-002 BLOCKER — retired skills routable | 168ed3d | `scripts/hooks/deny_retired_skills.py` (PreToolUse on `Skill`): `dma-p1`, `dma-orchestrator`, `dma-core` and the `anthropic-skills:` copies of the four plugin skills are refused and the owner named; `dma-research` description claims the six legacy phrases the router sent astray | `test_deny_retired_skills.py` 17 pass; probes deny the three, allow `dma-insights:*`. **Owner precondition open:** delete the account-level skills on claude.ai, then re-run `routing_eval.jsonl` (bar ≥95 % top-1, 0 retired routes) |
+| F-A04-012 HIGH — diverged account copies | 168ed3d | same hook redirects `anthropic-skills:dma-{assessment,research,governance,first-call-deck}` to the plugin copy | same tests |
+| F-K01-003 BLOCKER — spend auto-approved | bf330bc, fb4d862 | `SPEND_SUFFIXES` (tavily_research, tavily_crawl, enrich-business, enrich-prospects, match-business, match-prospects) removed from the read list and withheld; the one way through is an unexpired record with a quoted cost in `<run>/07_qa/approvals.json` (`engine.cli approve --tool --cost --approved-by`); the two prose sites that promised auto-approval now name the record; the audit roster gains Tavily research and the Vibe server | `audit_autoapprove.py --strict` rc 0: 133/199 approved, **62 withheld** (was 55/184), 3 guarded, 0 UNCLASSIFIED; probes: all six spend tools → no decision (prompt), `fetch-entities`/`tavily_search`/`tavily_extract` → allow; 539 hook tests + `test_approve.py` 7 pass |
+| F-K03-025 MEDIUM — `withdraw_run` auto-approved | bf330bc | `withdraw_run` joins `GUARDED_SUFFIXES`: no hook, prompts on every connector prefix | `test_withdraw_run_prompts_on_every_prefix` |
+| F-L14-041 BLOCKER — band rule, retired hex, M5 in shipped prose | 7fda49e | deck `color_level_system.py` = `bands.js` fills (`#FFCB99/#62D7B8/#27BBAF/#139F94`) and strict `<2/<3/<4`; Slide 13 = `engine/rubric.py` levels (L5 **Leading**, cuts 1.5/2.5/3.5/4.5); the retired hex removed from 22 files incl. the two template palette lists; `check_taxonomy_drift.py` widened (ungated `Transformational`, the 1.50/2.50/3.50 cut-offs, `#185F60`, `17 rollups`, `~72 capabilit`; `deprecated/` skipped); assessment `SKILL.md` → v5.6, 205/292/164/190, S3 cap 2.0, no ceiling at 5.0, one rollup per category (16), 136 capabilities, catalogue path instead of `/mnt`; `report_template.md` M5 → Leading; `heatmap_editor.py` accepts `null` for the retired P1C5 block and renders it NOT ASSESSED instead of refusing a v7.0 run | `check_taxonomy_drift.py` → 0 (and `test_check_taxonomy_drift.py` plants each of the five defects and expects the rule to fire); `test_deck_bands_match_app.py` pins accents, cut-offs, legends, levels and the editor to `bands.js` / `contract.band_of` / `rubric.py` (39 tests between the two files, incl. a python-pptx render of one block); `check_docs_in_sync` rc 0; `sync_config_yaml` OK; `verify_config_vs_template` 0/0; `audit_skills` 0 broken refs |
+
+### Suites on the W1 head
+
+`apps/mcp/tests` (with `pg8000` installed, as CI does): 1410 passed, 94 skipped. `plugins/dma-insights/scripts/tests`: 2146 passed, 1 skipped, 3 failed on a first run taken from a mid-edit tree (stale drift hits and five path references); the three tests pass on the final tree (32/32 in `test_audit_skills.py` + `test_check_taxonomy_drift.py`) and the full suite is being re-run on the final head. `tests/skills/research_engine`: the 196-test subset touching B3 passed (22 min); the full suite is running on the final head and CI runs it on the PR. `stress_run_lifecycle.py` exit 0, `stress_pipeline_stub.py` 34/34; `gen_gates_md --check`, `audit_coverage --strict`, `audit_chain --strict`, `audit_autoapprove --strict`, `audit_skills`, `check_taxonomy_drift` all rc 0. Counts are in the W1 PR body.
+
+### Still open after W1
+
+- Owner: delete `dma-p1`, `dma-orchestrator`, `dma-core` and the four `anthropic-skills:` duplicates on claude.ai; then the routing eval is re-run.
+- Owner decision: the nine deck templates are v5.0-shaped (17 heatmap blocks); the catalogue has 16 categories. The editor now renders the P1C5 block NOT ASSESSED; re-authoring the templates to 16 blocks is not resolved here.
+- ET-10 will refuse already-staged pages carrying FACT rows on T3/T4 (goeasy: 77 rows). Re-registration with the derived label is the repair.
+- No deck was rendered end to end: no PPTX template exists in this container (they are fetched from Drive at run time). The editor's scored and unscored paths are exercised on a synthetic 8-shape block.
+- F-J04-015's scan-tier half, and everything in W2–W4.
+
 ## Executive summary
 
 **Verdict: DO-NOT-SHIP** (as installed on this account). 43 findings: 5 BLOCKER, 16 HIGH, 18 MEDIUM, 4 LOW; 37 reproduced, 6 inferred and capped at HIGH. Full table: `findings_register.csv`.
@@ -18,15 +51,15 @@ What held: the research engine's write path is fail-closed (unverified excerpts 
 | seed | present now? | check |
 |---|---|---|
 | 1 narrated searches | not measurable (no transcripts); the engine only accepts searches through `engine.cli search`, which logs | D-01, F-D05-033 |
-| 2 FACT default / FACT on T3 | **YES** — cli.py:356 default FACT; 77 FACT rows on T3/T4 | F-J04-004 |
+| 2 FACT default / FACT on T3 | **FIXED in W1** (717710d): label derived from tier, ledger refuses FACT on T3/T4, ET-10 at submit | F-J04-004 |
 | 3 connectors unused, web primary | contradiction still in prose (dma-research SKILL.md "web_search PRIMARY" vs "connector required"); relay exists | F-L11-042 |
 | 4 subcaps scored on no capability evidence | not measurable on a scored run; scoring refuses uncited rationale (engine.assessment) | F-14 |
 | 5 dead values | **YES** — 6 orphans, 3 dead schemas, 124 dead candidates, empty evidence_index.csv | F-J02-011, F-J01-006 |
-| 6 green suite over a minority of modules | 41 of 42 modules have test rows; rubric.py has none | J-3 |
+| 6 green suite over a minority of modules | **FIXED in W1** (91884e5): rubric.py tested; meta-test keeps 42/42 covered | J-3 |
 | 7 gate-id collisions | not found; `gen_gates_md --check` green | J-2 |
 | 8 substring classifier | not found in techscan.py | J-4 |
 | 9 dropped adversarial volleys | floors gate counts five volleys per cell | D |
-| 10 retired skills routed to | **YES** | F-A05-001 |
+| 10 retired skills routed to | **plugin guard landed in W1** (168ed3d); account-level skills still installed until the owner deletes them | F-A05-001 |
 | 11 memory registry near cap | not measurable here (file absent); no caps exist in code | F-G05-017 |
 | 12 connector filters ignored | Indeed company filter unguarded; CG-32 guards Clay handles | F-03 |
 | 13 synthesis re-searching | allow-lists permit it (31 agents); not observed in this run's rows (368/368 package-discovered) | F-D02-008 |
