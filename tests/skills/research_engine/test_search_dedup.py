@@ -45,11 +45,19 @@ def test_the_identity_ignores_case_whitespace_and_outer_quotes(tmp_path):
     assert Q.norm_query(' "A  b" ') == "a b"
 
 
-def test_a_different_facet_is_still_the_same_search(tmp_path):
+def test_a_different_facet_is_a_different_question_and_the_same_one_is_refused(tmp_path):
+    """The facet is part of the op (test_search_fanout: the same text asked
+    of `works` and of `fails` is two questions, and the ceiling counts
+    questions). The identity the log refuses on is (query, tool, facet)."""
     wb = new_run(tmp_path).open()
     _one(wb, '"Acme Credit Union" P1C1.1.1 roadmap', facet="works")
+    _one(wb, '"Acme Credit Union" P1C1.1.1 roadmap', facet="value")
     with pytest.raises(L.LedgerRefusal):
         _one(wb, '"Acme Credit Union" P1C1.1.1 roadmap', facet="value")
+    # the facet-blind reading still sees both
+    assert len(L.prior_searches(wb, '"Acme Credit Union" P1C1.1.1 roadmap', "web_search")) == 2
+    assert len(L.prior_searches(wb, '"Acme Credit Union" P1C1.1.1 roadmap', "web_search",
+                                facet="works")) == 1
 
 
 def test_a_different_tool_is_a_different_search(tmp_path):

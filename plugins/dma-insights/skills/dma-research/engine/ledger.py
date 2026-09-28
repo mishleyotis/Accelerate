@@ -646,10 +646,14 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     # Search_Log (rows 1 and 2 identical), and the only dedupe in the system
     # was the relay's, over relay requests. A repeat asks the world the same
     # question and pays for the same answer; the log is the record, and a
-    # query it already holds — same identity, same tool — is refused unless
-    # it is being extended to a cell the search was not logged against (one
-    # call, one row per cell it bears on, exactly as the fan-out rule says).
-    prior = prior_searches(wb, query, tool)
+    # query it already holds — same identity, same tool, same facet — is
+    # refused unless it is being extended to a cell the search was not logged
+    # against (one call, one row per cell it bears on, exactly as the fan-out
+    # rule says). The facet is part of the question: the same text asked of
+    # `works` and of `fails` is two questions, and the ceiling counts
+    # questions (test_search_fanout pins that; a facet-blind identity
+    # refused the second and contradicted it).
+    prior = prior_searches(wb, query, tool, facet=facet)
     if prior:
         logged_cells = {str(r.get("SubCap_ID") or "").strip() for r in prior}
         new_cells = [c for c in cells if c not in logged_cells]
@@ -678,15 +682,21 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     return seq
 
 
-def prior_searches(wb: RunWorkbook, query: str, tool: str) -> list[dict]:
-    """Search_Log rows carrying this query's identity through this tool."""
+def prior_searches(wb: RunWorkbook, query: str, tool: str,
+                   facet: str | None = None) -> list[dict]:
+    """Search_Log rows carrying this query's identity through this tool —
+    at this facet when one is given, at any facet when `facet` is None (the
+    "was this ever fired" reading the stub, the relay and the fixtures
+    take)."""
     key = Q.norm_query(query)
     tool = str(tool or "").strip().lower()
+    want = str(facet or "").strip().lower()
     if not key:
         return []
     return [r for r in wb.rows("Search_Log")
             if Q.norm_query(r.get("Query")) == key
-            and str(r.get("Tool") or "").strip().lower() == tool]
+            and str(r.get("Tool") or "").strip().lower() == tool
+            and (not want or str(r.get("Facet") or "").strip().lower() == want)]
 
 
 def prior_queries(wb: RunWorkbook, cells=None, *, prelim: bool = False) -> list[dict]:
@@ -713,9 +723,13 @@ def prior_queries(wb: RunWorkbook, cells=None, *, prelim: bool = False) -> list[
         if row is None:
             row = {"seq": r.get("Seq"), "query": q, "tool": key[1],
                    "facet": str(r.get("Facet") or "").strip(),
+                   "facets": [],
                    "cells": [], "hits": r.get("Hits"), "kept": r.get("Kept"),
                    "outcome": str(r.get("Outcome") or "").strip()}
             out[key] = row
+        fc = str(r.get("Facet") or "").strip()
+        if fc and fc not in row["facets"]:
+            row["facets"].append(fc)
         if cell and cell not in row["cells"]:
             row["cells"].append(cell)
     return sorted(out.values(), key=lambda r: (int(r["seq"] or 0), r["tool"]))
