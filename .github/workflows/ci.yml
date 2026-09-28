@@ -274,7 +274,14 @@ jobs:
       # constraints-py311.txt pins 1.2.0, which is what a dev box already
       # has); only this runner did not, which is exactly why the suite was
       # green locally and red here.
-      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx -r apps/api/requirements.txt
+      # python-pptx, the fourth repetition: W1 of the QA remediation
+      # (28-09-2026) landed three tests that render one heatmap block through
+      # the deck skill's editor to prove its fills equal apps/web/lib/bands.js,
+      # and heatmap_editor.py imports pptx at module load. Green locally (a
+      # dev box has it; the deck skill declares it), red here on
+      # ModuleNotFoundError — the runner was testing a program that cannot
+      # render a deck.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which
