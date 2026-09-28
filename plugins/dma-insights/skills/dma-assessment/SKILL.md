@@ -739,8 +739,8 @@ follow the Analyze→Synthesize→Write protocol above.
 - Structure: per `DMA_Assessment_Report_Template.docx` from project knowledge base.
 
 ### Run Manifest (`run_manifest.json`)
-Schema: `run_manifest_v2`. See `references/workbook_specification.md` for full spec.
-**Key validation rules:** $schema="run_manifest_v2" | overall=weighted avg pillars ±0.02 | total_items=sum tier_distribution | confidence sum=subcap count | verdict ∈ {PASS,PASS_WITH_NOTES} for delivery.
+Schema: `run_manifest_v3`, owned by the engine (`skills/dma-research/engine/schemas/run_manifest.schema.json`) and written only through `engine.assemble.write_manifest`, which validates first; `scripts/generate_governance_outputs.py` calls the engine and types nothing.
+**Key validation rules:** schema_version="run_manifest_v3" | scores null until scored | scores.overall = mean of pillars ±0.02 | evidence_metrics.total_items = sum of tier_distribution | every catalogue category scored once scored.
 
 ### Governance Logs (CSV exports for Layer 2)
 

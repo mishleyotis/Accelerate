@@ -183,6 +183,20 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
     return run
 
 
+class RunDrift(RuntimeError):
+    """The run's lock no longer matches the engine; nothing about it can be
+    resumed as if it did. `.divergences` names each one."""
+
+    def __init__(self, run_id: str, divergences: list[str]):
+        self.run_id = run_id
+        self.divergences = list(divergences)
+        super().__init__(
+            f"run {run_id} cannot be resumed against this engine: "
+            + "; ".join(divergences)
+            + ". Pin the catalogue the run was locked to (DMA_CATALOGUE) or "
+              "the engine version; the run is untouched (F-F06-009 / F-F10-032).")
+
+
 def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
     """Reopen a run and say honestly what was recovered.
 
@@ -199,6 +213,8 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
     wb = run.open()
     md = wb.metadata()
     drift = wb.verify_handoff_lock()
+    if drift:
+        raise RunDrift(run_id, drift)
     return run, {
         "run_id": md.get("run_id"), "entity": md.get("entity_name"),
         "evidence_mode": md.get("evidence_mode"),

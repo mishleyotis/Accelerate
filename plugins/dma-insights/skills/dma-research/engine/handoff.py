@@ -46,6 +46,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
     __package__ = "engine"
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -56,6 +57,13 @@ from . import completeness, floors_gate, quality as Q, runstate, validator
 from .workbook import RunWorkbook, FLOOR_ITEMS, _split_ids
 
 HANDOFF_NAME = "research_handoff.json"
+#: The packet's own version, carried in `_contract.schema_version`, and the
+#: sidecar that holds the sha256 of the written bytes. Measured 28-09-2026
+#: (QA audit F-J01-018): the packet had no version field, and the skill
+#: promised fields it never emitted, so a consumer could not tell a packet
+#: from this engine apart from an older or hand-edited one.
+HANDOFF_SCHEMA_VERSION = "research_handoff_v2"
+SIDECAR_SUFFIX = ".sha256"
 
 
 def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
@@ -70,11 +78,13 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
     # The validator checks SHAPE; a sheet with correct headers and no rows
     # passes it. Golden 1 shipped six empty tabs that way, so the handoff
     # also asks whether there is anything IN the workbook.
-    if strict:
-        try:
-            completeness.require(wb)
-        except completeness.CompletenessRefusal as e:
+    try:
+        completeness.require(wb)
+        completeness_verdict = {"verdict": "PASS", "reason": None}
+    except completeness.CompletenessRefusal as e:
+        if strict:
             raise SystemExit(f"REFUSED: {e}") from None
+        completeness_verdict = {"verdict": "FAIL", "reason": str(e)[:600]}
     md = wb.metadata()
     register = wb.evidence_index()
     tax = C.taxonomy()
@@ -171,6 +181,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
 
     return {
         "_contract": {
+            "schema_version": HANDOFF_SCHEMA_VERSION,
             "authority": "the scoring workbook",
             "this_file": ("a read-only index over the workbook's sheets. It is "
                           "NOT the interface: the assessment stage reads the "
@@ -187,6 +198,7 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
         "counts": C.counts(),
         "coverage": wb.coverage(),
         "gates": gates,
+        "completeness": completeness_verdict,
         "absence_share": absence_share,
         "capability_ceilings": ceilings,
         "subcap_records": records,
@@ -301,12 +313,50 @@ def main(argv=None) -> int:
     wb = r.open()
     doc = build(wb, qa_dir=r.qa_dir, strict=not a.no_strict)
     out = Path(a.out) if a.out else r.deliverables / HANDOFF_NAME
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(doc, indent=2, default=str))
-    print(json.dumps({"written": str(out),
+    written = write_packet(doc, out)
+    print(json.dumps({**written,
                       "subcap_records": len(doc["subcap_records"]),
                       "evidence": len(doc["evidence_register"])}, indent=2))
     return 0
+
+
+def write_packet(doc: dict, out: Path) -> dict:
+    """Write the packet and, beside it, the sha256 of the bytes written."""
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, indent=2, default=str), encoding="utf-8")
+    sha = hashlib.sha256(out.read_bytes()).hexdigest()
+    side = out.with_name(out.name + SIDECAR_SUFFIX)
+    side.write_text(f"{sha}  {out.name}\n", encoding="utf-8")
+    return {"written": str(out), "sha256": sha, "sidecar": str(side),
+            "schema_version": doc.get("_contract", {}).get("schema_version")}
+
+
+def verify_packet(path) -> list[str]:
+    """Every way the packet at `path` is not one this engine wrote and
+    vouches for: absent, unhashed, edited since it was hashed, or of another
+    version. [] means it is."""
+    p = Path(path)
+    if not p.is_file():
+        return [f"{p.name} missing"]
+    side = p.with_name(p.name + SIDECAR_SUFFIX)
+    if not side.is_file():
+        return [f"{p.name} has no {SIDECAR_SUFFIX} sidecar: not written by "
+                f"engine.handoff (or the sidecar was removed)"]
+    recorded = side.read_text(encoding="utf-8").split()
+    want = recorded[0] if recorded else ""
+    have = hashlib.sha256(p.read_bytes()).hexdigest()
+    out = []
+    if want != have:
+        out.append(f"{p.name} was changed after it was written "
+                   f"(sha256 {have[:12]}... != recorded {want[:12]}...)")
+    try:
+        sv = (json.loads(p.read_text(encoding="utf-8")).get("_contract") or {}).get("schema_version")
+    except (ValueError, AttributeError):
+        sv = None
+    if sv != HANDOFF_SCHEMA_VERSION:
+        out.append(f"{p.name} is {sv!r}, this engine reads {HANDOFF_SCHEMA_VERSION!r}")
+    return out
 
 
 if __name__ == "__main__":

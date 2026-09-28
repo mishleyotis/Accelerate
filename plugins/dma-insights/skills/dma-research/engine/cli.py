@@ -641,7 +641,10 @@ def main(argv=None) -> int:
     if a.cmd == "approve":
         print(json.dumps(_approve_cmd(run, a), indent=2)); return 0
     if a.cmd == "resume":
-        _, state = runstate.resume(a.run, root)
+        try:
+            _, state = runstate.resume(a.run, root)
+        except runstate.RunDrift as e:
+            print(f"REFUSED: {e}", file=sys.stderr); return 1
         print(json.dumps(state, indent=2)); return 0
     if a.cmd == "persist":
         print(json.dumps(runstate.persist(run, a.dest), indent=2)); return 0

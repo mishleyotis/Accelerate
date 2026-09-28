@@ -7,3 +7,4 @@ pandas==2.2.3
 numpy==2.1.0
 pyarrow==18.0.0
 matplotlib==3.9.2
+jsonschema==4.26.0

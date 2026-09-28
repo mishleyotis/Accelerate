@@ -42,11 +42,13 @@ if __package__ in (None, ""):  # noqa: E402
 
 import argparse
 import datetime as _dt
+import hashlib
 import json
 import re
 import shutil
 import subprocess
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 from . import contract as C
@@ -159,25 +161,215 @@ def evidence_index_doc(wb: RunWorkbook) -> dict:
             "generated_at": _utcnow(), "items": items}
 
 
+#: The manifest's ONE shape. The schema beside this module is the contract
+#: every reader keys on; `write_manifest` refuses a document that fails it.
+#: Measured 28-09-2026 (QA audit F-N01-019): three incompatible manifests —
+#: this module's, a "run_manifest_v2" the assessment skill's governance
+#: exporter built from CLI flags, and a flat shape the governance auditor
+#: demanded that nothing wrote — so the auditor's IV-02 was CRITICAL on
+#: every real run and calibration read "unknown" for every institution.
+MANIFEST_SCHEMA_VERSION = "run_manifest_v3"
+SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "run_manifest.schema.json"
+
+
+class ManifestInvalid(ValueError):
+    """run_manifest.json would not satisfy its schema; nothing was written."""
+
+
+@lru_cache(maxsize=1)
+def manifest_schema() -> dict:
+    return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+
+def validate_manifest(doc) -> list[str]:
+    """Every way `doc` departs from the schema, or [].
+
+    With `jsonschema` installed (plugins/dma-insights/requirements.txt) the
+    whole schema is checked. Without it the required keys, the closed key
+    set and the schema_version constant are checked — a container that lacks
+    the library still cannot write a manifest with a key nobody reads."""
+    schema = manifest_schema()
+    try:
+        import jsonschema                                        # noqa: PLC0415
+    except ImportError:
+        jsonschema = None
+    if jsonschema is not None:
+        v = jsonschema.Draft7Validator(schema)
+        errs = sorted(v.iter_errors(doc),
+                      key=lambda e: [str(p) for p in e.absolute_path])
+        return [f"{'/'.join(str(p) for p in e.absolute_path) or '<root>'}: "
+                f"{e.message}" for e in errs]
+    if not isinstance(doc, dict):
+        return ["<root>: not an object"]
+    out = [f"<root>: '{k}' is a required property"
+           for k in schema["required"] if k not in doc]
+    if doc.get("schema_version") != MANIFEST_SCHEMA_VERSION:
+        out.append(f"schema_version: {doc.get('schema_version')!r} is not "
+                   f"{MANIFEST_SCHEMA_VERSION!r}")
+    extra = sorted(set(doc) - set(schema["properties"]))
+    if extra:
+        out.append(f"<root>: unexpected keys {extra}")
+    return out
+
+
+def write_manifest(path, doc: dict) -> Path:
+    """The ONE writer of run_manifest.json: validated first, then written.
+
+    A manifest that fails its schema is not written at all — every reader
+    (the app's package scan, the watchdog, gold_standard, the governance
+    auditor, calibration) keys on this file being what it says it is, and a
+    half-right manifest is the F-N01-019 shape."""
+    problems = validate_manifest(doc)
+    if problems:
+        raise ManifestInvalid("run_manifest.json refused by its schema:\n  "
+                              + "\n  ".join(problems))
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, default=str), encoding="utf-8")
+    return path
+
+
+def _manifest_num(v):
+    try:
+        return None if v is None or str(v).strip() == "" else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _manifest_str(v):
+    return None if v is None or str(v).strip() == "" else str(v)
+
+
+def _scores(wb: RunWorkbook):
+    """The scoring stage's own roll-ups, or None before it has written them."""
+    pillars = {str(r.get("pillar_id")): _manifest_num(r.get("score"))
+               for r in wb.rows("Pillar_Rollup") if r.get("pillar_id")}
+    cats = {str(r.get("category_id")): _manifest_num(r.get("score"))
+            for r in wb.rows("Category_Rollup") if r.get("category_id")}
+    overall = None
+    for r in wb.rows("Executive_Summary"):
+        if str(r.get("Field") or "").strip() == "Overall Maturity":
+            overall = _manifest_num(r.get("Value"))
+    if not pillars and not cats and overall is None:
+        return None
+    return {"overall": overall, "pillars": pillars, "categories": cats}
+
+
+def _evidence_metrics(wb: RunWorkbook) -> dict:
+    dist: dict[str, int] = {t: 0 for t in C.TIERS}
+    n = 0
+    for r in wb.rows("Evidence_Detail"):
+        n += 1
+        t = str(r.get("Tier") or "").strip() or "UNTIERED"
+        dist[t] = dist.get(t, 0) + 1
+    return {"total_items": n, "tier_distribution": dist}
+
+
+def _gates(wb: RunWorkbook) -> dict:
+    out: dict = {}
+    for r in wb.rows("Gate_Log"):
+        g = str(r.get("Gate") or "").strip()
+        if not g:
+            continue
+        key = g if not r.get("Scope") else f"{g}:{r.get('Scope')}"
+        out[key] = {"verdict": str(r.get("Verdict") or ""),
+                    "scope": _manifest_str(r.get("Scope")),
+                    "at": _manifest_str(r.get("Timestamp")),
+                    "detail": _manifest_str(r.get("Detail"))}
+    return out
+
+
+def _approvals(qa_dir) -> list[dict]:
+    if not qa_dir:
+        return []
+    p = Path(qa_dir) / "approvals.json"
+    if not p.is_file():
+        return []
+    try:
+        doc = json.loads(p.read_text(encoding="utf-8"))
+    except ValueError:
+        return []
+    recs = doc.get("approvals") if isinstance(doc, dict) else doc
+    out = []
+    for r in recs or []:
+        if not isinstance(r, dict) or not r.get("tool"):
+            continue
+        out.append({"tool": str(r.get("tool")),
+                    "cost_line": str(r.get("cost_line") or ""),
+                    "approved_by": str(r.get("approved_by") or ""),
+                    "at": _manifest_str(r.get("at")),
+                    "expires": _manifest_str(r.get("expires"))})
+    return out
+
+
+def _packets(run) -> dict:
+    """Every machine packet the run has written, hashed, so a consumer can
+    tell the packet this manifest vouches for from a stale or edited one."""
+    if run is None:
+        return {}
+    from . import handoff                                        # noqa: PLC0415
+    out: dict = {}
+    hp = Path(run.deliverables) / handoff.HANDOFF_NAME
+    if hp.is_file():
+        try:
+            doc = json.loads(hp.read_text(encoding="utf-8"))
+            sv = (doc.get("_contract") or {}).get("schema_version")
+        except (ValueError, AttributeError):
+            sv = None
+        out["research_handoff"] = {
+            "path": hp.name,
+            "sha256": hashlib.sha256(hp.read_bytes()).hexdigest(),
+            "schema_version": _manifest_str(sv),
+            "verified": not handoff.verify_packet(hp),
+        }
+    return out
+
+
+def _decision_log_ref(run) -> str | None:
+    from . import registry                                       # noqa: PLC0415
+    try:
+        p = registry.registry_path(Path(run.root).parent if run is not None else None)
+    except Exception:                                            # noqa: BLE001
+        return None
+    return str(p) if p.is_file() else None
+
+
 def manifest_doc(wb: RunWorkbook, *, status: str = "COMPLETE",
-                 opened_at: str | None = None) -> dict:
+                 opened_at: str | None = None, stage: str = "PACKAGE",
+                 run: runstate.Run | None = None) -> dict:
+    """The run's identity anchor in its ONE shape (run_manifest_v3).
+
+    Everything here is read from the workbook or computed from the run —
+    never typed on a command line. `scores` is None until the scoring stage
+    has written its roll-ups; `decision_log_ref` is None unless the registry
+    file exists; an approval appears only when the owner wrote one."""
     md = wb.metadata()
+    qa_dir = run.qa_dir if run is not None else None
     return {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
         "status": status,
-        "opened_at": opened_at or md.get("client_folder_opened_at"),
-        "run_id": md.get("run_id"),
-        "institution": {"name": md.get("entity_name"),
-                        "entity_id": md.get("entity_id"),
-                        "sub_vertical": md.get("sub_vertical")},
-        "evidence_mode": md.get("evidence_mode"),
-        "scope_mode": md.get("scope_mode"),
-        "reference_date": md.get("reference_date"),
-        "catalogue_version": md.get("catalogue_version"),
-        "catalogue_hash": md.get("catalogue_hash"),
-        "workbook_contract": md.get("workbook_contract"),
-        "engine_version": md.get("engine_version"),
+        "stage": stage,
+        "opened_at": _manifest_str(opened_at or md.get("client_folder_opened_at")),
+        "checkpointed_at": None,
+        "run_id": str(md.get("run_id") or ""),
+        "institution": {"name": str(md.get("entity_name") or ""),
+                        "entity_id": _manifest_str(md.get("entity_id")),
+                        "sub_vertical": _manifest_str(md.get("sub_vertical"))},
+        "evidence_mode": _manifest_str(md.get("evidence_mode")),
+        "scope_mode": _manifest_str(md.get("scope_mode")),
+        "reference_date": _manifest_str(md.get("reference_date")),
+        "catalogue_version": _manifest_str(md.get("catalogue_version")),
+        "catalogue_hash": _manifest_str(md.get("catalogue_hash")),
+        "workbook_contract": _manifest_str(md.get("workbook_contract")),
+        "engine_version": _manifest_str(md.get("engine_version")),
         "assembled_at": _utcnow(),
         "deliverables": [d[1] for d in DELIVERABLES],
+        "packets": _packets(run),
+        "gates": _gates(wb),
+        "approvals": _approvals(qa_dir),
+        "decision_log_ref": _decision_log_ref(run),
+        "scores": _scores(wb),
+        "evidence_metrics": _evidence_metrics(wb),
     }
 
 
@@ -317,11 +509,11 @@ def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
     (dest / "01_evidence").mkdir(exist_ok=True)
 
     opened = str(md.get("client_folder_opened_at") or "").strip() or _utcnow()
-    manifest = manifest_doc(wb, status="IN_PROGRESS", opened_at=opened)
+    manifest = manifest_doc(wb, status="IN_PROGRESS", opened_at=opened,
+                            stage="OPENED", run=run)
     manifest["deliverables_expected"] = [d[1] for d in DELIVERABLES]
     manifest["deliverables_present"] = []
-    mpath = dest / "run_manifest.json"
-    mpath.write_text(json.dumps(manifest, indent=2, default=str))
+    mpath = write_manifest(dest / "run_manifest.json", manifest)
 
     wb.set_metadata("client_folder", str(dest))
     wb.set_metadata("client_folder_opened_at", opened)
@@ -404,8 +596,8 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
     (dest / "01_evidence").mkdir(exist_ok=True)
     for key, p in found.items():
         shutil.copy2(p, dest / p.name)
-    (dest / "run_manifest.json").write_text(
-        json.dumps(manifest_doc(wb, status="COMPLETE"), indent=2, default=str))
+    write_manifest(dest / "run_manifest.json",
+                   manifest_doc(wb, status="COMPLETE", stage="PACKAGE", run=run))
     (dest / "01_evidence" / "evidence_index.json").write_text(
         json.dumps(evidence_index_doc(wb), indent=2, default=str))
     (dest / "01_evidence" / "entity_timeline.json").write_text(
@@ -451,11 +643,11 @@ def checkpoint(run: runstate.Run, out_root, *, push: bool = False,
     dest = _dest_folder(run, md, entity, out_root)
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy2(run.workbook_path, dest / run.workbook_path.name)
-    doc = manifest_doc(wb, status="IN_PROGRESS")
-    doc["stage_reached"] = stage_reached or "SCORING_PASS"
+    doc = manifest_doc(wb, status="IN_PROGRESS",
+                       stage=stage_reached or "SCORING_PASS", run=run)
     doc["checkpointed_at"] = _utcnow()
-    (dest / "run_manifest.json").write_text(json.dumps(doc, indent=2, default=str))
-    out = {"folder": str(dest), "entity": entity, "stage_reached": doc["stage_reached"],
+    write_manifest(dest / "run_manifest.json", doc)
+    out = {"folder": str(dest), "entity": entity, "stage_reached": doc["stage"],
            "files": [run.workbook_path.name, "run_manifest.json"]}
     if push:
         out["pushed"] = _push(dest, entity)

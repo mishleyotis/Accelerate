@@ -1010,6 +1010,36 @@ INGEST_ALIASES = {
 READ_SHEETS = tuple(SHEETS) + tuple(INGEST_ALIASES)
 
 
+#: Legacy names the dma-governance and dma-assessment governance scripts
+#: were written against (a v3-era workbook) -> the canonical v7 sheet each
+#: one means. NOT part of READ_SHEETS: the app's ingest tolerance is
+#: unchanged; this is only how a governance reader finds the v7 tab.
+#: Measured 28-09-2026 (QA audit F-J01-006): the readers required these
+#: literal names, so on every v7 workbook evidence_index.csv came out empty
+#: with a warning.
+GOVERNANCE_TAB_ALIASES = {
+    "P1_Scoring_Detail": "P1_Subcap_Scoring",
+    "P2_Scoring_Detail": "P2_Subcap_Scoring",
+    "P3_Scoring_Detail": "P3_Subcap_Scoring",
+    "P4_Scoring_Detail": "P4_Subcap_Scoring",
+    "Evidence_Index": "Evidence_Detail",
+    "QA_Validation_Log": "Gate_Log",
+    "Summary": "Pillar_Summary",
+}
+
+
+def resolve_tab(names, wanted: str) -> str | None:
+    """The tab among `names` that IS the sheet `wanted` names, where `wanted`
+    may be a canonical sheet, an ingest alias or a legacy governance name;
+    None when the workbook has no such tab."""
+    canon = canonical_sheet(wanted) or GOVERNANCE_TAB_ALIASES.get(wanted) or wanted
+    for n in names:
+        if n == canon or canonical_sheet(n) == canon \
+                or GOVERNANCE_TAB_ALIASES.get(n) == canon:
+            return n
+    return None
+
+
 def canonical_sheet(tab: str) -> str | None:
     """The SHEETS name a tab resolves to (itself, or the sheet it aliases),
     or None for a tab the contract does not recognise at all."""

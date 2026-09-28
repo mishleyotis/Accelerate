@@ -25,6 +25,21 @@ import logging
 import sys
 from pathlib import Path
 
+# The workbook's sheet contract and the manifest schema are the engine's
+# (skills/dma-research/engine): one owner for both. Measured 28-09-2026
+# (QA audit F-J01-006 / F-N01-019): this script required v3-era tab names
+# and a manifest shape no writer produced, so every v7 run failed it.
+_ENGINE_ROOT = Path(__file__).resolve().parents[2] / "dma-research"
+if str(_ENGINE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ENGINE_ROOT))
+try:
+    from engine import assemble as _assemble
+    from engine import contract as _contract
+except Exception as _e:                                          # noqa: BLE001
+    sys.exit(f"{Path(__file__).name}: the engine (skills/dma-research/engine) "
+             f"is not importable, so neither the sheet contract nor the manifest "
+             f"schema can be read: {_e}")
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -75,146 +90,52 @@ class ContractValidator:
     # === Contract 1: run_manifest.json ===
 
     def validate_manifest(self) -> dict | None:
+        """Contract 1 IS the engine's schema
+        (skills/dma-research/engine/schemas/run_manifest.schema.json): one
+        shape, one writer, validated here the way the writer validates."""
         path = self.dir / "run_manifest.json"
         if not path.exists():
             self.fail("C1", "existence", "run_manifest.json not found")
             return None
-
         try:
-            with open(path) as f:
-                m = json.load(f)
+            m = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as e:
             self.fail("C1", "parse", f"Invalid JSON: {e}")
             return None
 
-        # Required nested keys (hybrid v2.0)
-        required_paths = [
-            ("$schema",),
-            ("run_id",),
-            ("institution", "name"), ("institution", "id"),
-            ("institution", "sub_vertical"), ("institution", "size_tier"),
-            ("institution", "primary_regulator"), ("institution", "geography"),
-            ("assessment", "date"), ("assessment", "evidence_mode"),
-            ("assessment", "assessor"), ("assessment", "tool_version"),
-            ("assessment", "status"),
-            ("versions", "rubric"), ("versions", "taxonomy"),
-            ("scores", "overall"), ("scores", "pillars"),
-            ("scores", "categories"),
-            ("evidence_metrics", "total_items"),
-            ("evidence_metrics", "tier_distribution"),
-            ("evidence_metrics", "avg_ers"),
-            ("evidence_metrics", "median_ers"),
-            ("evidence_metrics", "sources_per_subcap_avg"),
-            ("evidence_metrics", "single_source_subcap_count"),
-            ("evidence_metrics", "no_evidence_subcap_count"),
-            ("evidence_metrics", "document_count"),
-            ("scoring_metrics", "caps_applied_count"),
-            ("scoring_metrics", "adjustments_applied_count"),
-            ("scoring_metrics", "dependency_caps_triggered"),
-            ("scoring_metrics", "contradictions_found"),
-            ("scoring_metrics", "contradictions_unresolved"),
-            ("scoring_metrics", "na_capabilities"),
-            ("scoring_metrics", "peer_count"),
-            ("confidence_distribution",),
-            ("qa", "verdict"), ("qa", "regression_tests"),
-            ("qa", "issues_found"), ("qa", "critical_issues"),
-            ("files_generated",),
-        ]
+        for problem in _assemble.validate_manifest(m):
+            self.fail("C1", "schema", problem)
 
-        for path_parts in required_paths:
-            obj = m
-            for part in path_parts:
-                if not isinstance(obj, dict) or part not in obj:
-                    self.fail("C1", "schema", f"Missing field: {'.'.join(path_parts)}")
-                    obj = None
-                    break
-                obj = obj[part]
-
+        scores = m.get("scores") or {}
+        pillars = scores.get("pillars") or {}
+        overall = scores.get("overall")
         # Validation rule 1: overall = weighted avg of pillars
-        scores = m.get("scores", {})
-        pillars = scores.get("pillars", {})
-        if pillars and all(isinstance(v, (int, float)) for v in pillars.values()):
+        if pillars and all(isinstance(v, (int, float)) for v in pillars.values()) \
+                and isinstance(overall, (int, float)):
             weights = {"P1": 0.25, "P2": 0.25, "P3": 0.25, "P4": 0.25}
-            weighted_avg = sum(pillars.get(p, 0) * weights.get(p, 0.25) for p in weights)
-            overall = scores.get("overall", 0)
-            if isinstance(overall, (int, float)) and abs(weighted_avg - overall) > 0.02:
+            weighted_avg = sum(pillars.get(p, 0) * w for p, w in weights.items())
+            if abs(weighted_avg - overall) > 0.02:
                 self.fail("C1", "VR1",
                           f"overall ({overall}) != weighted pillar avg ({weighted_avg:.2f})")
 
         # Validation rule 2: total_items = sum of tier_distribution
-        em = m.get("evidence_metrics", {})
-        td = em.get("tier_distribution", {})
+        em = m.get("evidence_metrics") or {}
+        td = em.get("tier_distribution") or {}
         if td and isinstance(em.get("total_items"), int):
             tier_sum = sum(v for v in td.values() if isinstance(v, (int, float)))
             if tier_sum != em["total_items"]:
                 self.fail("C1", "VR2",
                           f"total_items ({em['total_items']}) != tier sum ({tier_sum})")
 
-        # Validation rule 3: confidence_distribution sum = total subcap count (soft check)
-        cd = m.get("confidence_distribution", {})
-        if cd:
-            conf_sum = sum(v for v in cd.values() if isinstance(v, (int, float)))
-            if conf_sum == 0:
-                self.note("C1", "VR3", "confidence_distribution sums to 0 — may be unpopulated")
-
-        # Every category the CATALOGUE holds — counted, not listed.
-        #
-        # AUD-0051: this was a hand-kept set of 17 including P1C5, the
-        # category v7.0 retired and every one of whose cells resolves
-        # NOT_COMPARABLE. A complete v7.0 run was reported as missing a
-        # category it correctly does not have, and the count fed coverage
-        # maths that then read over 100%.
-        expected_cats = set(_catalogue_categories())
-        missing_cats = expected_cats - set(cats.keys())
-        if missing_cats:
-            self.warn("C1", "categories", f"Missing category scores: {sorted(missing_cats)}")
-
-        # Enum checks
-        em_mode = m.get("assessment", {}).get("evidence_mode", "")
-        if em_mode not in ("PUBLIC", "INTERNAL", "HYBRID"):
-            self.fail("C1", "enum", f"Invalid evidence_mode: {em_mode}")
-
-        size = m.get("institution", {}).get("size_tier", "")
-        if size not in ("Mega", "Large", "Medium", "Small", "Micro", "Nano"):
-            self.fail("C1", "enum", f"Invalid size_tier: {size}")
-
-        sub_vert = m.get("institution", {}).get("sub_vertical", "")
-        valid_sub_verts = {
-            "Credit Unions", "Regional Banks", "Commercial Lending", "CIB",
-            "Insurance Carriers", "Insurance Brokerages",
-            "Wealth Managers / RIAs", "Asset Management",
-        }
-        if sub_vert and sub_vert not in valid_sub_verts:
-            self.warn("C1", "enum", f"sub_vertical '{sub_vert}' not in canonical enum: {sorted(valid_sub_verts)}")
-
-        status = m.get("assessment", {}).get("status", "")
-        valid_statuses = {"IN_PROGRESS", "SCORING_COMPLETE", "REPORT_DRAFT", "AWAITING_REVIEW", "DELIVERED"}
-        if status and status not in valid_statuses:
-            self.fail("C1", "enum", f"Invalid assessment.status: {status}")
-
-        # v2 schema check
-        schema_val = m.get("$schema", "")
-        if schema_val != "run_manifest_v2":
-            self.warn("C1", "schema_version",
-                      f"$schema is '{schema_val}', expected 'run_manifest_v2' — may be v1 format")
-
-        # run_id format check
-        import re
-        run_id = m.get("run_id", "")
-        if run_id and not re.match(r"^DMA-[A-Z0-9]{2,6}-[0-9]{8}-[0-9]{4}$", run_id):
-            self.warn("C1", "run_id", f"run_id '{run_id}' does not match expected pattern")
-
-        # qa.issues_found type check (must be object in v2)
-        qa = m.get("qa", {})
-        issues_found = qa.get("issues_found")
-        if isinstance(issues_found, int):
-            self.warn("C1", "issues_found",
-                      "qa.issues_found is integer — v2 requires object {CRITICAL, HIGH, MEDIUM, LOW}")
-        elif isinstance(issues_found, dict):
-            if qa.get("critical_issues", 0) != issues_found.get("CRITICAL", 0):
-                self.fail("C1", "VR4",
-                          f"qa.critical_issues ({qa.get('critical_issues')}) != "
-                          f"qa.issues_found.CRITICAL ({issues_found.get('CRITICAL')})")
+        # Every category the CATALOGUE holds — counted, not listed (AUD-0051).
+        if scores:
+            cats = scores.get("categories") or {}
+            missing_cats = set(_catalogue_categories()) - set(cats.keys())
+            if missing_cats:
+                self.warn("C1", "categories",
+                          f"Missing category scores: {sorted(missing_cats)}")
+        else:
+            self.note("C1", "scores", "scores is null: the run is not scored")
 
         return m
 

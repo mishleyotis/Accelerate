@@ -365,7 +365,7 @@ def post_research_state(wb: RunWorkbook, run: runstate.Run, md: dict) -> tuple:
                   f"{str(last.get('Detail') or '')[:200]}")
         return "SCORING_GATE_OPEN", detail, extras
     manifest = _manifest(md)
-    extras["checkpoint_due"] = manifest.get("stage_reached") not in (
+    extras["checkpoint_due"] = manifest.get("stage") not in (
         "SCORING_PASS", "REPORTS_READY") and manifest.get("status") != "COMPLETE"
     # The report tier's own door. `engine.narrative write` refuses a section
     # while a stage precondition fails — the SCORING gate can PASS with the

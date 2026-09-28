@@ -62,6 +62,20 @@ def _utcnow() -> str:
 
 # ── evidence ─────────────────────────────────────────────────────────────
 
+def _refuse_on_drift(wb: RunWorkbook) -> None:
+    """No row is written into a run whose lock no longer matches the engine.
+
+    Measured 28-09-2026 (QA audit F-F06-009): with the catalogue tier of one
+    cell mutated, `resume` reported the drift and `search` still wrote a row.
+    A write is the one place a refusal is cheap and final."""
+    drift = wb.verify_handoff_lock()
+    if drift:
+        raise LedgerRefusal(
+            "the run's lock no longer matches the engine: " + "; ".join(drift)
+            + ". Nothing is written into a run the engine cannot vouch for; "
+              "pin the catalogue (DMA_CATALOGUE) or the engine version first.")
+
+
 def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None,
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str | None = None, origin: str = "public",
@@ -103,6 +117,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     `published` may be None. It is not defaulted to today — undated evidence
     is UNVERIFIED, never current (invariant 9), and AUD-0020 measured
     aspiration laundering staleness the other way round."""
+    _refuse_on_drift(wb)
     if tier not in C.TIERS:
         raise LedgerRefusal(f"tier {tier!r} is not in {C.TIERS}")
     # THE LABEL IS DERIVED FROM PROVENANCE, NOT TYPED. Until 28-09-2026 this
@@ -555,6 +570,7 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     Which cell each kept source actually grounds is settled where it is
     settled — `append_evidence(subcaps=[...])` — not here.
     """
+    _refuse_on_drift(wb)
     if facet is not None and facet not in C.DQ_FACETS:
         raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
     tool = str(tool or "").strip().lower()

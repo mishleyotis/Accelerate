@@ -60,7 +60,7 @@ pip install openpyxl python-docx --break-system-packages
 **Inputs from Layer 1** (all required):
 - Scoring workbook (.xlsx) with Columns S/T proof structure
 - Report (.docx)
-- `run_manifest.json` (run_manifest_v2 schema)
+- `run_manifest.json` (the engine's `run_manifest_v3` — `skills/dma-research/engine/schemas/run_manifest.schema.json`)
 - `caps_applied_log.csv` (including CRITIC_CHALLENGE type)
 - `contradiction_log.csv` (including contradiction_type: HARD/SOFT)
 - `evidence_index.csv` (full inventory with ERS)

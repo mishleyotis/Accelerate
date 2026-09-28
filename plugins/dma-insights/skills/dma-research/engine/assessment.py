@@ -132,6 +132,11 @@ def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
     """What must hold before a single score is struck."""
     from . import floors_gate, handoff, prelim
     out = []
+    # The lock the run was struck under must still be the engine's. Measured
+    # 28-09-2026 (QA audit F-F10-032): the contract was set to v8 and the
+    # engine validated, handed off and would have scored against it.
+    for d in wb.verify_handoff_lock():
+        out.append(f"the run's lock no longer matches the engine: {d}")
     try:
         prelim.require_complete(wb)
     except prelim.PrelimRefusal as e:

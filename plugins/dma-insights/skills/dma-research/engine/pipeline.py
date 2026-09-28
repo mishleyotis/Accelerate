@@ -709,10 +709,11 @@ class Pipeline:
             from . import handoff
             hp = self.run.deliverables / handoff.HANDOFF_NAME
             pre = A.research_ready(wb, self.run.qa_dir)
-            ok = hp.is_file() and not pre
-            return ok, ("handoff written; research ready" if ok else
+            packet = handoff.verify_packet(hp)
+            ok = not pre and not packet
+            return ok, ("handoff written and verified; research ready" if ok else
                         (f"{len(pre)} research-ready blocker(s): {pre[0][:160]}" if pre
-                         else "research_handoff.json missing"))
+                         else f"handoff packet: {packet[0][:160]}"))
         if stage == "SCORING":
             from . import assessment as A
             last = (A.state(wb).get("last_scoring_gate") or {})

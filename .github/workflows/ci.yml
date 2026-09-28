@@ -511,7 +511,7 @@ jobs:
       # aborts the run rather than skipping a test; `pypdf` and the worker's
       # own deps are here because tests/skills reaches into dma_worker for
       # the parser contracts it asserts against.
-      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx
+      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx jsonschema
       - name: The engine suite, in parallel, and a suite that skips silently fails
         run: |
           set -o pipefail
@@ -565,7 +565,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx
+      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx jsonschema
       - name: Acceptance, in parallel, and a suite that skips silently fails
         run: |
           set -o pipefail
@@ -620,7 +620,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -q openpyxl python-docx pypdf httpx pg8000
+      - run: pip install -q openpyxl python-docx pypdf httpx pg8000 jsonschema
       - name: Lifecycle walk
         run: python plugins/dma-insights/scripts/stress_run_lifecycle.py
       - name: Stage and supersede walk

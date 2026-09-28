@@ -37,15 +37,35 @@ DRIFT_THRESHOLDS = {
 }
 
 
+MANIFEST_SCHEMA_VERSION = "run_manifest_v3"
+
+
 def load_manifests(paths):
-    """Load and validate multiple run manifests."""
+    """Load the run manifests that are the engine's (run_manifest_v3).
+
+    Any other shape is skipped and named on stderr rather than read as
+    zeros: a manifest this engine did not write carries no facts this
+    engine can vouch for (QA audit F-N01-019, 28-09-2026)."""
     manifests = []
     for p in paths:
         with open(p) as f:
             m = json.load(f)
+        if not isinstance(m, dict) or m.get("schema_version") != MANIFEST_SCHEMA_VERSION:
+            print(f"calibration: skipping {p}: not a {MANIFEST_SCHEMA_VERSION} manifest "
+                  f"(schema_version={m.get('schema_version') if isinstance(m, dict) else None!r})",
+                  file=sys.stderr)
+            continue
         m["_source_path"] = str(p)
         manifests.append(m)
     return manifests
+
+
+def _inst(m):
+    return (m.get("institution") or {}).get("name") or "unknown"
+
+
+def _scores(m):
+    return m.get("scores") or {}
 
 
 def discover_manifests(directory):
@@ -73,18 +93,18 @@ def compute_score_metrics(manifests):
     metrics = {"overall": [], "pillars": defaultdict(list), "categories": defaultdict(list)}
 
     for m in manifests:
-        inst = m.get("institution_name", "unknown")
-        overall = safe_float(m.get("overall_score"))
+        inst = _inst(m)
+        if not _scores(m):
+            continue                       # unscored: nothing to compare, no zeros
+        overall = safe_float(_scores(m).get("overall"))
         metrics["overall"].append({"institution": inst, "score": overall})
 
-        pillars = m.get("pillar_scores", {})
+        pillars = _scores(m).get("pillars") or {}
         for p in PILLAR_NAMES:
             val = safe_float(pillars.get(p))
             metrics["pillars"][p].append({"institution": inst, "score": val})
 
-        categories = m.get("scores", {}).get("categories", {})
-        if not categories:
-            categories = m.get("category_scores", {})
+        categories = _scores(m).get("categories") or {}
         for cat, val in categories.items():
             metrics["categories"][cat].append({"institution": inst, "score": safe_float(val)})
 
@@ -121,13 +141,18 @@ def compute_evidence_metrics(manifests):
     }
 
     for m in manifests:
-        inst = m.get("institution_name", "unknown")
+        inst = _inst(m)
         em = m.get("evidence_metrics", {})
 
         if em:
-            metrics["avg_ers"].append(safe_float(em.get("avg_ers")))
-            metrics["total_evidence"].append(safe_int(em.get("total_items", m.get("evidence_count", 0))))
-            metrics["sources_per_subcap"].append(safe_float(em.get("sources_per_subcap_avg")))
+            # The v3 manifest carries counts, not ERS statistics; a metric the
+            # manifest does not carry is not appended (no zero that looks
+            # like a measurement).
+            if em.get("avg_ers") is not None:
+                metrics["avg_ers"].append(safe_float(em.get("avg_ers")))
+            metrics["total_evidence"].append(safe_int(em.get("total_items", 0)))
+            if em.get("sources_per_subcap_avg") is not None:
+                metrics["sources_per_subcap"].append(safe_float(em.get("sources_per_subcap_avg")))
 
             tier_dist = em.get("tier_distribution", {})
             total = sum(safe_int(v) for v in tier_dist.values()) or 1
@@ -136,12 +161,11 @@ def compute_evidence_metrics(manifests):
                 for t in ["T1", "T2", "T3", "T4", "T5"]
             })
 
-            ss_count = safe_int(em.get("single_source_subcap_count", 0))
-            total_subcaps = safe_int(em.get("total_items", 1))
-            metrics["single_source_rate"].append(
-                round(ss_count / max(total_subcaps, 1) * 100, 1))
-        else:
-            metrics["total_evidence"].append(safe_int(m.get("evidence_count", 0)))
+            if em.get("single_source_subcap_count") is not None:
+                ss_count = safe_int(em.get("single_source_subcap_count", 0))
+                total_subcaps = safe_int(em.get("total_items", 1))
+                metrics["single_source_rate"].append(
+                    round(ss_count / max(total_subcaps, 1) * 100, 1))
 
     def safe_stats(values):
         vals = [v for v in values if v > 0]
@@ -166,7 +190,9 @@ def compute_scoring_behavior(manifests):
     contradiction_rates = []
 
     for m in manifests:
-        sm = m.get("scoring_metrics", m.get("caps_applied", {}))
+        sm = m.get("scoring_metrics") or {}
+        if not sm:
+            continue                       # the v3 manifest carries no scoring metrics
         total_caps = safe_int(sm.get("caps_applied_count", sm.get("total", 0)))
         contradictions = safe_int(sm.get("contradictions_found", 0))
 
@@ -203,8 +229,10 @@ def compute_assessor_metrics(manifests, score_metrics):
 
     assessor_profiles = []
     for m in manifests:
-        inst = m.get("institution_name", "unknown")
-        overall = safe_float(m.get("overall_score"))
+        inst = _inst(m)
+        if not _scores(m):
+            continue
+        overall = safe_float(_scores(m).get("overall"))
 
         # Harshness index: deviation from cohort mean (negative = harsher)
         harshness = round(overall - cohort_overall_mean, 3) if cohort_overall_mean else 0
