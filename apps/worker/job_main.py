@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 
 from dma_worker import drive, intake_status, persist
 from dma_worker.counts import recount_run, recount_where
-from dma_worker.persist import _institution, persist_package
+from dma_worker.persist import EmptyIngest, _institution, persist_package
 from dma_worker.report_parser import parse_report
 from dma_worker.scan_runner import (SCAN_FAILED, SCAN_SUCCEEDED, finish_scan,
                                     open_scan, run_scan)
@@ -1950,7 +1950,8 @@ def main() -> int:
     # tree recursion left no import_scans row at all).
     started_at = datetime.now(timezone.utc)
     scan_id = None if diagnostic else open_scan(conn, started_at)
-    tally = {"ingested": 0, "failed": 0, "deferred": 0, "quarantined": []}
+    tally = {"ingested": 0, "resolved": 0, "empty": 0, "failed": 0,
+             "deferred": 0, "quarantined": []}
     try:
         print(f"scan: walking intake tree {intake}")
         tree = drive.walk_tree(intake)
@@ -2121,12 +2122,15 @@ def main() -> int:
         reasons.append(f"{tally['failed']} package(s) failed to ingest")
     if tally["quarantined"]:
         reasons.append("quarantined: " + ", ".join(sorted(tally["quarantined"])))
+    if tally["empty"]:
+        reasons.append(f"{tally['empty']} package(s) refused: no scored cell")
     finish_scan(conn, scan_id,
                 status=SCAN_FAILED if tally["failed"] else SCAN_SUCCEEDED,
                 error="; ".join(reasons)[:2000] or None,
                 runs_created=tally["ingested"])
     conn.close()
-    print(f"done: {tally['ingested']} ingested, {tally['failed']} failed, "
+    print(f"done: {tally['ingested']} ingested, {tally['resolved']} resolved to an "
+          f"existing run, {tally['empty']} refused empty, {tally['failed']} failed, "
           f"{tally['deferred']} deferred, {len(tally['quarantined'])} quarantined")
     return 1 if tally["failed"] else 0
 
@@ -2180,6 +2184,15 @@ def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
             # produced rather than duplicate it.
             res, rationales = _ingest_one(conn, token, folder, parts,
                                           remint=folder in forced)
+        except EmptyIngest as exc:
+            # A decided outcome, not a failure: no run, no retry, no
+            # quarantine. The diff already recorded these bytes, so the
+            # same research-stage workbook is not re-detected until it
+            # changes — and when it changes with scores it ingests.
+            conn.rollback()
+            tally["empty"] += 1
+            print(f"ingest: {folder} REFUSED (empty): {exc}")
+            continue
         except Exception as exc:  # noqa: BLE001 — one bad package must not sink the batch
             conn.rollback()
             tally["failed"] += 1
@@ -2187,9 +2200,18 @@ def _scan_and_ingest(conn, scan_id, tree, groups, started_at, limit, tally,
             if not _record_package_failure(conn, parts, folder, exc):
                 tally["quarantined"].append(folder)
             continue
-        print(f"ingest: {folder} -> run {res.run_id} "
-              f"({res.scored_cells} cells, {res.observations} observations)")
-        tally["ingested"] += 1
+        if getattr(res, "created", True):
+            print(f"ingest: {folder} -> run {res.run_id} "
+                  f"({res.scored_cells} cells, {res.observations} observations)")
+            tally["ingested"] += 1
+        else:
+            # The byte-identical guard: the package resolved to the run it
+            # already produced. Counting it as created is how `runs_created`
+            # over-reported and a run was re-embedded on every retry.
+            print(f"ingest: {folder} -> run {res.run_id} already held these "
+                  f"bytes (run_seq {res.run_seq}); nothing minted")
+            tally["resolved"] += 1
+            continue
 
         # Embedding failures never requeue: the run is persisted, and V4
         # abstains (recorded NOT_RUN) where centroids are thin. Requeueing
