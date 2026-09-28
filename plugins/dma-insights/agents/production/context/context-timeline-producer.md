@@ -107,14 +107,14 @@ cannot see where it sits.
 1. `get_page_contract("context")` — the item-key contract for `timeline` and
    `acquisitions` plus the `doc` text on every field you are about to write. A
    remembered shape is a refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context/C1.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context/C5.md`
    — **§ C1** (heading `## C1 · Digital evolution timeline`), **§ DD-7**, **§ C5**
    (heading `## C5 · Acquisition history`) and **§ DD-14**: the Baxter positive
    patterns, the learned anti-patterns, the customer exclusion sets and the
    enrichment pathways. Applied by default, not by memory. **The rulebook is the
    authority on anti-patterns; the Surface Specification is the authority on
    payload shape**, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/5-context.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/context/C1.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/context/C5.md`
    — **§ C1** and **§ C5**: the pack's contract, and in particular § C1's
    `signal` treatment, which is the longest single explanation in the pack and
    the one this agent exists to apply — the three value definitions, the
@@ -132,7 +132,7 @@ cannot see where it sits.
    gate families `SG:S34 · CG (G6 arc ≥ 3 points; G9 dated; CG-09 signal) · AG`,
    drilldown DD-7; C5 → `context.acquisitions`, no facet, gate families
    `CG (dated; status enum; consistent with C1, O3) · AG`, drilldown DD-14.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`
    — what the most-blocking gates test, and `explain_gate` for the one that
    fired. **CG-09** (a closed vocabulary takes one of its values) is the
    most-hit vocabulary failure in the corpus and it lives on this page;

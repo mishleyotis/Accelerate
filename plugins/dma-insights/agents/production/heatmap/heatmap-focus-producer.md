@@ -120,12 +120,12 @@ Read in this order. Each path has been verified to exist.
    about to write, including the `currency_status` enum casing. A remembered
    shape is a refusal, and the enum comes from the doc, never from copying a
    neighbouring run.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H1.md`
    §§ H1 and DD-10 — the Baxter positive pattern, five learned anti-patterns
    (quote hygiene under S9/S29, CG-19's never-a-bare-`[]`, CG-27's verbatim-span
    rule, the grain rule, the provenance triple) and this section's exclusion set.
    It is applied by default, not by memory, and the rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H1.md`
    § H1 — the packaged contract: *Must present*, the information-source table and
    the full five-step synthesis prompt. The repo-side source of the same text is
    `docs/text/DMA Insights - Surface Specification.txt`
@@ -153,7 +153,7 @@ Read in this order. Each path has been verified to exist.
     — to confirm what you already suspect: **this surface has no facet of its
     own.** Its enrichment travels the evidence ladder and exists only as
     registered evidence.
-12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
     — AG-03 (an inference cites the source it was drawn from) and CG-15 (template
     prose across items of one field, which is exactly what five areas written from
     one document look like).

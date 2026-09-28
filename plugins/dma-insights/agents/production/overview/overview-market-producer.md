@@ -99,7 +99,7 @@ average.
    and `sentiment`, and the `doc` on every field you are about to write. Read it
    before you assume a key exists: three columns on O8 and two on O9 are unbound or
    renderer-only, and filling one is this pair's most common defect.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O8.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O9.md`
    **§ O8 and § O9** (real path:
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
    the blocks begin at `## O8 · Financial trajectory` and `## O9 · Sentiment`, and
@@ -108,7 +108,7 @@ average.
    sets and the enrichment pathways. Applied by default, not by memory. **The
    rulebook is the authority on anti-patterns; the Surface Specification is the
    authority on payload shape**, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O8.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/C6.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O9.md`
    **§ O8, § C6 and § O9** — the pack's contract, including the three unbound
    columns on O8, the fact that C6 has nothing to produce, and the note that
    `themes` and `gap_analysis` **are now writable** (they were discarded at
@@ -124,7 +124,7 @@ average.
    `firmographics`, gates `SG:S6,S24,S27 · ET · CG (cross-surface)`; O9 anchors
    `overview.sentiment`, facet `sentiment`, gates `SG:S8 · CG (n·scale·as_of) · AG`.
    The rows for C6 and C4 name you as the upstream.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/SG-S8.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-10.md`
    — **SG-S8** in full (it **discloses and still promotes**; the count is computed
    at submit from the rating rows and **never** read from `displayed_lines`), the
    **Cross-surface reconciliation** table (O8 ↔ C6 identical), **CG-10**,

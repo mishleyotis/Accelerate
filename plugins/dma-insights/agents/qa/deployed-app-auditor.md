@@ -102,7 +102,7 @@ empty in production and no page-level check noticed.
 Each row is audited against five references:
 
 1. **The rulebook's positive pattern.** The map names each surface's anchor
-   (`03-pages/rulebooks/<page>.md § <ID>`, under the same skill). The anchor
+   (`03-pages/rulebooks/<page>/<ID>.md`, under the same skill). The anchor
    says what the surface looks like when it is right; the served surface
    either looks like that or the difference is a finding.
 2. **The customer exclusion boundary.** Fetch the customer-audience body and

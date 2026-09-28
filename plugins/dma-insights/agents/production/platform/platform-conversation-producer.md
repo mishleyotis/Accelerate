@@ -93,14 +93,14 @@ having none.
 
 1. `get_page_contract("platform")` — the item-key contract for `starters` and the
    `doc` text on every field. A remembered shape is a refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P2b.md`
    — **§ P2b** (heading `## P2b · Conversation starters`): the Baxter positive
    pattern with its measured shape notes, the seven learned anti-patterns, the
    customer exclusion set and the enrichment pathways. Applied by default, not by
    memory. **The rulebook is the authority on anti-patterns; the Surface
    Specification is the authority on payload shape**, and where they differ that
    is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/4-platform.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/platform/P2b.md`
    — **§ P2b**: the pack's contract and the synthesis prompt verbatim.
 4. `docs/text/DMA Insights - Surface Specification.txt`
    — **§ P2b · Conversation starters**: the contract line ("45–90 word
@@ -119,7 +119,7 @@ having none.
 7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
    — the house voice, which for this surface is stricter than elsewhere: it must
    survive being read aloud.
-8. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+8. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
    — what the most-blocking gates test, and `explain_gate` for the one that
    fired. AG-03 (every claim-bearing item cites) and CG-15 (a payload that says
    nothing) both sweep this surface.

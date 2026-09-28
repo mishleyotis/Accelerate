@@ -124,7 +124,7 @@ Every path below has been verified to exist.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
    — how an absence is stated so that it is legible: the artefact this
    capability would have left, where it was looked for, what would close it.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/` (one file per gate; read the ids named here up front, any other when a verdict names it)
    — the absence rungs (`UNWORKED`, `WORKED_ABSENT`, `NOT_RUN`,
    `verified_absent`, `verified_sparse`) and § *Safeguard gates render to the
    client*, whose second consequence is this agent's north star: *a third state —
@@ -135,7 +135,7 @@ Every path below has been verified to exist.
    (MEM-0082, MEM-0062, MEM-0087 and the T1 pathway list),
    `.../03-pages/rulebooks/overview.md` (the per-surface connector and web-search
    pathways and the gap-to-pathway mapping), `.../03-pages/rulebooks/platform.md` and
-   `.../03-pages/rulebooks/heatmap.md` § H5 (which has *none*, deliberately — a gate
+   `.../03-pages/rulebooks/heatmap/H5.md` (which has *none*, deliberately — a gate
    result cannot be searched into being).
 7. `docs/text/DMA Insights - Surface Specification.txt`
    §§ **O7** (line 304), **O2** (line 86), **O9** (line 379), **O12** (line 462),

@@ -115,7 +115,7 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
 1. `get_page_contract("techstack")` — the item-key contract for `techstack` plus
    the `doc` text on every field you are about to write. A remembered shape is a
    refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack/T1.md`
    — **§ T1** (heading `## T1 · Technology stack register`): the D4 serve rules that
    open it, the Baxter positive patterns, the learned anti-patterns, the exclusion
    set and the enrichment pathways. Read **§ T3** too, so you know what you are
@@ -123,7 +123,7 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
    memory. **The rulebook is the authority on anti-patterns; the Surface
    Specification is the authority on payload shape**, and where they differ that is
    the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/6-techstack.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/techstack/T1.md`
    — **§ T1**, and in particular the **REISSUED** prompt: the original prompt in the
    design specification omits the `status` field the landscape strip recomputes
    from, and the specification carries two conflicting layer lists while the
@@ -148,7 +148,7 @@ Refuse to register, or to rely on, a machine technographic scan at any tier belo
    → the same payload section, `AG (AG-04 peer technographics) · CG`. The Surface
    Specification's T-family stops at T3 — there are no T4–T8, and T2 renders on the
    Insights page.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`
    — **CG-09** (a closed vocabulary takes one of its values — the most-hit
    vocabulary failure in the corpus), **CG-12** (`detection_basis` is ONE clause,
    ≤160 chars, and the repair is to **move** the prose to `dma_impact`, not to trim

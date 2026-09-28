@@ -137,13 +137,13 @@ Read in this order. Each path has been verified to exist.
 1. `get_page_contract("heatmap")` — and read the `doc` of every field you are
    about to write across all three sections, including the `state`, `severity`,
    `kind` and `result` enum casings. A remembered enum is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H3.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H5.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H8.md`
    §§ H3, H5 and H8 — the Baxter positive patterns, the learned anti-patterns
    (MEM-0063's uncounted queue, MEM-0074 + MEM-0072 on a refused retrieval,
    MEM-0038's single ladder, MEM-0083 / CG-22's fabricated gate ids, the
    threshold and confidentiality rules) and each section's exclusion set. It is
    applied by default, not by memory, and the rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H3.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H5.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H8.md`
    §§ H3, H5 and H8 — the packaged contracts, the information-source tables and
    the three full synthesis prompts, including H5's REISSUED prompt with its four
    steps. The repo-side source of the same text is
@@ -160,7 +160,7 @@ Read in this order. Each path has been verified to exist.
 6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/3-language.md`
    — the house voice: third person, British spelling, acronyms expanded on first
    use in your own prose, mechanism rather than measurement.
-7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-14.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`
    — CG-12's field budgets (`safeguard_gates.gates[*].plain_label`), CG-14 (a
    linked cell exists on this run), CG-15's template rule, and the CG-04 / AG-03
    **per-item absence route**, which matters here more than anywhere: of the

@@ -96,7 +96,7 @@ And when you *do* write a per-item absence, **name what you looked for, not that
 you looked.** The protocol above is identical on every cell; the artefact each
 capability would have left is not, and that difference is the whole of what makes
 four hundred honest absences four hundred sentences rather than one. See
-`05-lifecycle/1-gates.md` for the worked examples and the arithmetic.
+`05-lifecycle/gates/CG-06.md` for the worked examples and the arithmetic.
 
 ## SCOPING DECISION — a subcapability with no evidence is out of scope
 
@@ -112,7 +112,7 @@ Concretely, for a cell with no linked evidence carrying a citable excerpt:
 - Do **not** write a recorded-absence ladder for it. The ladder is how you earn a
   *stated* absence; here you are not stating one, so there is nothing to earn.
 - Do **not** chase evidence to fill it. Enrichment effort goes to the cells in
-  `03-pages/1-heatmap.md`'s tiers 1 and 2 — the cells another surface cites, and
+  `03-pages/heatmap/H2.md`'s tiers 1 and 2 — the cells another surface cites, and
   the cells below threshold — and stops there.
 - **Leave the item out of the array.** The section's reach counters already carry
   the shortfall honestly: `linking_stats` reports cells served against cells

@@ -146,12 +146,12 @@ Read in this order. Each path has been verified to exist.
    get wrong from memory live only there: `ceiling` is `M1-M5 or null`, and
    `self_sourced_basis` is marked `not_producer_authored` — it is computed at
    read, so a value you send lands nowhere.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O1b.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O10.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O11.md`
    §§ O1b, DD-15, O10 and O11 — the Baxter positive patterns, the four
    anti-patterns above with their measurements, the exclusion sets and the
    enrichment pathways. It is applied by default, not by memory, and the
    rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O1b.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O10.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O11.md`
    §§ O1b, O10 and O11 — the packaged contract with the full synthesis prompts.
    The repo-side source of the same text is
    `docs/text/DMA Insights - Surface Specification.txt`

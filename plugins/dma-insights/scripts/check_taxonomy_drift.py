@@ -134,7 +134,7 @@ EXEMPT = {
      "Differentiating`."): "states the prohibition",
     ("agents/production/heatmap/heatmap-grid-producer.md",
      "band anywhere"): "states the prohibition",
-    ("skills/dma-surface-production/03-pages/rulebooks/heatmap.md",
+    ("skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md",
      "Shape notes, measured"): "the measured shape of a v5.0-pinned client",
     ("skills/dma-surface-production/scripts/check_payload.py",
      "MEM-0022"): "a recorded historical defect, not a current claim",

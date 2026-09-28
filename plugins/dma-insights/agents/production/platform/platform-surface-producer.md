@@ -87,6 +87,7 @@ prose, never left for the reader to notice.
    row shapes. Pass the relevant docs down with each delegation.
 2. First read
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+   (the index — you assemble the whole page, so read every `rulebooks/platform/<ID>.md` it lists)
    — the Baxter positive pattern, the learned anti-patterns and this page's
    exclusion set; it is applied by default, not by memory. Then
    `get_memory_digest` scoped to this client; each producer runs its own

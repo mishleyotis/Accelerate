@@ -94,7 +94,7 @@ the three unresolved dependencies it exists to resolve).
    `platform_roadmap` twice among eighteen item-grain keys that validated at
    submit and were dropped at promotion, every gate green, surfaces empty under a
    real client's name.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P3.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P4.md`
    — **§ P3** (heading `## P3 · Transformation roadmap`) and **§ P4** (heading
    `## P4 · Stair-step curve`): the Baxter positive pattern, the learned
    anti-patterns, the customer exclusion set and the enrichment pathways for each.
@@ -102,7 +102,7 @@ the three unresolved dependencies it exists to resolve).
    anti-patterns; the Surface Specification is the authority on payload shape**,
    and where they differ that is the split — one place it comes up is named under
    "the contract" below.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/4-platform.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/platform/P3.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/platform/P4.md`
    — **§ P3** and **§ P4**: the pack's contract, including the reissued P3 prompt
    with its six steps (retrieve-or-derive, emit, referential integrity, acyclicity,
    metrics, absence) and the rule that `phases[].rationale` **renders** and was
@@ -116,7 +116,7 @@ the three unresolved dependencies it exists to resolve).
    — the census rows: P3 → `platform.roadmap`, no enrichment facet, gate family
    `CG (P3 ↔ P2 rec ids reconcile)`; P4 → `platform.stairstep`, no enrichment
    facet, gate families `SG:S33 · CG (step order = roadmap = sequencing)`.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-13.md`
    — what the most-blocking gates test, and `explain_gate` for the one that fired.
    CG-09 (a closed vocabulary takes one of its values) governs `horizon`; CG-13
    (every required field has somewhere to live) is the promotion-drop class above.

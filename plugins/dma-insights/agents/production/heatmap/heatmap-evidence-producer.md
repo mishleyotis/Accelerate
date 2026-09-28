@@ -108,13 +108,13 @@ Read in this order. Each path has been verified to exist.
    `sources_searched` and `closure_condition` their own columns), so a remembered
    shape is a refusal. Read the `transport` envelope in the same call — it carries
    `inline_max_bytes` and the chunking steps this section will need.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H2.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H6.md`
    §§ H2, DD-1, H6 and DD-2 — the Baxter positive pattern, the learned
    anti-patterns (MEM-0031, MEM-0038, MEM-0041, MEM-0036, MEM-0080, MEM-0032 on H2;
    MEM-0011, MEM-0087, MEM-0020, MEM-0070 + MEM-0074, MEM-0079, MEM-0094 on H6) and
    both exclusion sets. It is applied by default, not by memory, and the rectifier is
    its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H2.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H6.md`
    §§ H2 and H6 — the packaged contract: *The per-cell `synthesis` is what the
    drawer renders*, *Write about the capability, not about the evidence pile*, the
    three-grade table, *The inherited and declared grades are where CG-15 kills a
@@ -131,7 +131,7 @@ Read in this order. Each path has been verified to exist.
    `FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE` in the skill's reissued prompt.
    The specification wins on the enum per authority order; say in your report which
    vocabulary the contract you were served actually declared.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
    § CG-15 — read it **before** you write prose, not after a verdict. It states the
    two-term arithmetic, the exemptions, and the one thing that trips producers: of
    nineteen item shapes carrying a prose budget, exactly one (`heatmap.alerts.alerts`)

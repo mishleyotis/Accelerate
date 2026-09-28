@@ -115,14 +115,14 @@ searched — not the ones you meant to.
    which per-item keys **persist**: `capped_subcap_ids` does (migration
    `0027_promotion_field_gaps`, JSONB, writer bound), and `opened_on_basis` and any
    per-row `sources_searched` do not.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context/C2.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context/C3.md`
    — **§ C2** (heading `## C2 · Issue register &amp; Gantt`), **§ DD-8** and
    **§ C3** (heading `## C3 · Regulatory standing`): the Baxter positive patterns,
    the learned anti-patterns, the customer exclusion sets and the enrichment
    pathways. Applied by default, not by memory. **The rulebook is the authority on
    anti-patterns; the Surface Specification is the authority on payload shape**,
    and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/5-context.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/context/C2.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/context/C3.md`
    — **§ C2** and **§ C3**: the pack's contract, and in particular § C2's *"What a
    cap is, and where it comes from"* (the four things a caps-log row puts on a
    register row), *"An issue that caps nothing still says so"* (the three drilldown
@@ -142,7 +142,7 @@ searched — not the ones you meant to.
    registered, gate family `CG (one row per matter; status never NULL)`, drilldown
    DD-8; C3 → `context.regulatory_standing`, no facet, gate families
    `ET (G1 identity, G2 anchor) · CG · AG`, no drilldown.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-14.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-10.md`
    — what the most-blocking gates test, and `explain_gate` for the one that fired.
    **CG-14** (a linked cell exists on this run) governs every id in
    `linked_subcap_ids` and `capped_subcap_ids`; **CG-10** (a date that could not be

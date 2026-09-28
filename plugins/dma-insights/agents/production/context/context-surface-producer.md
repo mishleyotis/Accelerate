@@ -92,6 +92,7 @@ They bind the producers you delegate to, and they bind your assembly.
    ones down with each delegation.
 2. First read
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
+   (the index — you assemble the whole page, so read every `rulebooks/context/<ID>.md` it lists)
    — the Baxter positive pattern, the learned anti-patterns and this page's
    exclusion set; it is applied by default, not by memory. Then
    `get_memory_digest` scoped to this client; each producer runs its own

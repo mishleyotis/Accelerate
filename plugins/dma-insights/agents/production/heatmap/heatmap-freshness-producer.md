@@ -102,12 +102,12 @@ Read in this order. Each path has been verified to exist.
 1. `get_page_contract("heatmap")` — the `doc` for `rows`, `undated_pct` and
    `stale_pct`. It carries the band boundaries, the band→status mapping and the
    quarter-precision rule verbatim; a remembered vocabulary is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H7.md`
    § H7 — the Baxter positive pattern, the four learned anti-patterns (the NaN
    status, the third vocabulary, the unchecked domain, the row that cannot open) and
    the exclusion set. It is applied by default, not by memory, and the rectifier is
    its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H7.md`
    § H7 — the packaged contract and the full synthesis prompt. The repo-side source
    of the same prompt is
    `docs/text/DMA Insights - Surface Specification.txt`
@@ -130,7 +130,7 @@ Read in this order. Each path has been verified to exist.
    — the house voice for the `narrative_thread` and the `empty_state` prose: third
    person, British spelling, acronyms expanded on first use, mechanism rather than
    measurement.
-7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
    — the contract and evidence passes that run on every section, and CG-15's rule that
    an honest absence carrying its ladder passes while a shell does not.
 8. `get_memory_digest` scoped to this client, then `search_findings` for

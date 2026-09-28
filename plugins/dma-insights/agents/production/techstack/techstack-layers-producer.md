@@ -111,7 +111,7 @@ costume of a measurement.
    rows and for `enrichment_status`, plus the `doc` text on every field you are
    about to write. Both `detected_basis` and `expected_basis` are **in the served
    contract**; write them. A remembered shape is a refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack/T1.md`
    — **§ T1**: the Baxter shape notes on the rollup (*"the layer rollup puts
    `is_primary_gap: true` on DATA (detected 6, expected 8) — exactly the layer whose
    two ABSENT rows carry the argument"*), the anti-patterns — **MEM-0084**,
@@ -120,7 +120,7 @@ costume of a measurement.
    and the enrichment pathways. Applied by default, not by memory. **The rulebook is
    the authority on anti-patterns; the Surface Specification is the authority on
    payload shape**, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/6-techstack.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/techstack/T1.md`
    — **§ T1**, step 3 of the REISSUED prompt: *"Per layer: `{layer, pillar_id,
    detected, expected, is_primary_gap}`"*, and the four-layer vocabulary with its
    pillar tags.
@@ -140,7 +140,7 @@ costume of a measurement.
    T2 → `insights.landscape`, facet `— (techstack, via T1)`, gate family
    `CG (T2 ↔ T1 reconcile; CG-12 detail ≤ 90 chars)`, produced by the
    `insights-landscape-producer` with *"counts recomputed from T1, never stored"*.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
    — **CG-09** (the register's status vocabulary, without which nothing here is
    computable), **CG-15** (a payload that says nothing — which is what four counts
    with no basis and no gap flag amount to), and the cross-surface reconciliation

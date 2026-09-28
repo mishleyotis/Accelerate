@@ -107,24 +107,24 @@ were served** rather than remembered. Read it from
 
 Every path below has been verified to exist.
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-13.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-14.md`
    § **Cross-surface reconciliation** — the seven enforced pairs, quoted in full
    under *The contract* below. This is the shortest and most load-bearing thing
    you will read. Read § **AG-02**, § **CG-13** and § **CG-14** in the same pass.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P1.md`
    § **P1 · Composite factors** and its anti-pattern list — MEM-0095 / CG-31,
    CG-30, MEM-0003 (five tiles promoted as one), ET-06. This is where the fit
    arithmetic and its refusals are stated.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O5.md`
    § **O5 · Opportunity surface tiles** — which binds P1's factor rules here
    unchanged: *the tile EXPLAINS the composite from those validated inputs,
    never recomputes or re-ranks it*.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H7.md`
    §§ H4 and H7 — the grain rule and the freshness roll-ups. Note that H7's
    Baxter positive pattern records `stale_pct: 0.0`, which the promoted run does
    not serve; that divergence is the contrasting failure below and it is yours to
    report, not to resolve.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md` (the index; every surface's rules are in `rulebooks/techstack/<ID>.md` — read the ones you own)
    and `.../03-pages/rulebooks/insights.md` — the register-to-landscape recomputation and
    the `reconciles_to_register` flag.
 6. `docs/text/DMA Insights - Surface Specification.txt`

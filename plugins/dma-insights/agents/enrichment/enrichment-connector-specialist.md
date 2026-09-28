@@ -142,7 +142,7 @@ pointed at it.
    **Enrichment pathways** subsection names the facet, the sources in precedence
    order and the gap-to-pathway mapping), and `.../rulebooks/platform.md` (§ P1
    — facet `platform_readiness`, whose `serving_surface` *is* that section).
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`
    — **AG-04** in full (it fires on any list item anywhere in a payload carrying
    `peer_coverage` or `peer_deployments`, not only on the register), **CG-09** on
    closed vocabularies, **CG-12** on face fields, and **ET-04**.

@@ -169,6 +169,9 @@ Work in this order and read the page pack before starting each one:
 03-pages/4-platform.md
 03-pages/5-context.md
 03-pages/6-techstack.md
+
+(Each of those is the page's INDEX — its sections table and page-wide rules. The
+surface you produce is `03-pages/<page>/<ID>.md`; read that, not the whole page.)
 ```
 
 Each pack carries, per surface: the contract, what must be presented, the
@@ -203,7 +206,7 @@ achievement: a cell with its own evidence gets a cited synthesis, a cell whose p
 capability carries evidence gets an inherited one labelled as the inference it is, and a
 cell with nothing gets the ladder that established that. Work outward from the cells other
 surfaces cite — those must be cited grade, because a reader was sent there. Method and
-`linking_stats` shape: `03-pages/1-heatmap.md`.
+`linking_stats` shape: `03-pages/heatmap/H2.md`.
 
 **Write the run thesis after the heatmap, and each page's thread before you submit it.** One
 constraint, stated once, instantiated at five anchors — the hero framing, the top finding,
@@ -490,7 +493,8 @@ assets/          payload skeletons per section
 | `01-start-here/2-evidence.md` | Always — tiers, recency, rank score, peer ladder, citation, and why the excerpt and the `source_url` are one claim |
 | `02-inputs/1-package.md` | Orienting in the assessment folder; deciding which artefact wins |
 | `02-inputs/3-mcp-tools.md` | Any tool call whose exchange you are unsure of |
-| `05-lifecycle/1-gates.md` | Reading a verdict; understanding what will be asserted |
+| `05-lifecycle/1-gates.md` | Reading a verdict; the families and the census |
+| `05-lifecycle/gates/<ID>.md` | One gate's deep dive — read when a verdict or your reading order names it, never the whole set up front |
 | `05-lifecycle/2-versioning.md` | Reruns, catalogue bumps, fixing one page |
 | `04-craft/5-prompt-standard.md` | Producing a surface that has no prompt, or improving one |
 | `02-inputs/2-clay-enrichment.md` | Running enrichment; deciding what tier a Clay output is |
@@ -503,7 +507,8 @@ assets/          payload skeletons per section
 | `04-craft/7-storyline-challenge.md` | After the six pages pass, before you promote — five volleys against the run's whole story |
 | `04-craft/8-answered-questions.md` | Before you promote — the fifteen questions the intelligence panel asks of the run |
 | `01-start-here/5-colour-and-bands.md` | Writing a band word, or describing the heatmap |
-| `03-pages/<n>-<page>.md` | Before producing that page |
+| `03-pages/<n>-<page>.md` | Before producing that page — the index: sections table and page-wide rules |
+| `03-pages/<page>/<ID>.md` | Before producing that surface — its contract, must-present list and prompt; the only pack file a per-surface producer reads |
 | `03-pages/rulebooks/<page>.md` | With the page pack — the rulebook every page is produced against, applied by default |
 
 ## Where you record, and when your page can ship
@@ -744,7 +749,7 @@ property of the ARRAY and invisible inside any single item — on 2026-08-08 two
 met it at submit, one of them having already built all 708 heatmap cells. Twenty drafts
 are enough to see it. The promoted Baxter run's 706 cell syntheses score 0.179 against a
 line of 0.40, so a 700-cell page is demonstrably writable; if yours is refused, the shape
-is the problem and not the scale. `03-pages/1-heatmap.md` says what to change.
+is the problem and not the scale. `03-pages/heatmap/H2.md` says what to change.
 
 `precheck_gates.py` sits between the two, and it exists because a submission is not
 free. Submitting supersedes the staged row, so a FAIL on a page that was passing costs

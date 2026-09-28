@@ -120,12 +120,12 @@ Read in this order. Each path has been verified to exist.
    are about to write. This section's contract is short, which is precisely why a
    remembered shape is a refusal: what is *absent* from the contract is the whole
    instruction.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H9.md`
    § H9 — the Baxter positive pattern, the two learned anti-patterns (CG-04's
    contract fork, the rewritten stage id measured on Logix `d7ed1d90`) and this
    section's exclusion set. It is applied by default, not by memory, and the
    rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H9.md`
    § H9 — the packaged contract, the two causes of an empty chain, the per-stage
    `chain_id` flaw, and the explicit statement that there is no prompt and that
    this is not an omission. The repo-side source of the same text is
@@ -152,7 +152,7 @@ Read in this order. Each path has been verified to exist.
     alongside the scores and raw tables, and `get_capability_catalogue` resolves
     the run's cell ids and the alias bridge. These two are how you reconcile the
     served cell set against the arrangement's membership without authoring either.
-11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
     — CG-04 (keys outside the section contract) and CG-15 (a payload that says
     nothing), which is the gate a lazy one-line thread meets.
 

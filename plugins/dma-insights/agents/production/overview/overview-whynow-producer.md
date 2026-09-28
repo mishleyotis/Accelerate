@@ -65,7 +65,7 @@ cannot see from inside your own prose.
 1. `get_page_contract("overview")` — the item-key contract for `why_now` and the
    `doc` text on every field you are about to write. A remembered shape is a
    refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O3.md`
    **§ O3 and § "O3 drilldown · Why-now signal row (inline)"** (real path:
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
    the O3 block begins at the heading `## O3 · Why-now signals`) — the Baxter
@@ -73,7 +73,7 @@ cannot see from inside your own prose.
    and the enrichment pathways. Applied by default, not by memory. The rulebook
    is the authority on anti-patterns; the Surface Specification is the authority
    on payload shape, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O3.md`
    **§ O3** — the pack's contract for this card, including the two rules the
    spec states less sharply: `synthesis` is a **required field, not a closing
    flourish**, and `cost_of_acting_now` is **required per signal** and is the
@@ -85,7 +85,7 @@ cannot see from inside your own prose.
 5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row for O3: payload anchor `overview.why_now`, enrichment facet
    `why_now`, gate families `SG:S25 · CG · AG`.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/` (one file per gate; read the ids named here up front, any other when a verdict names it)
    — what the gates test, and `explain_gate` for the one that fired.
 7. `get_memory_digest` scoped to this client, then `search_findings` for
    `why_now`, `S25`, `AG-11`. What memory holds about this surface binds you: a

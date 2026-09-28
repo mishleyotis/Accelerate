@@ -107,12 +107,12 @@ Read in this order. Each path has been verified to exist.
    about to write. The doc text is the item-key contract; a remembered shape is a
    refusal, and it is the doc, not a neighbouring run, that tells you which keys
    this section carries (see the note on `band` and `delta` below).
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md`
    § H4 — the Baxter positive pattern, five learned anti-patterns (MEM-0088,
    MEM-0028, MEM-0086, MEM-0085, and the one-cohort-one-pass rule) and this
    section's exclusion set. It is applied by default, not by memory, and the
    rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H4.md`
    § H4 — the packaged contract: *Must present*, *Peer figures exist at two
    grains and nowhere else*, *Cell NAMES come from the catalogue, never from
    prose*, *The workbook scores more cells than this run may serve*, and the
@@ -145,7 +145,7 @@ Read in this order. Each path has been verified to exist.
 11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
     — the `peer_scores` facet, whose `serving_surface` is literally this section
     and which exists to record that **no external connector serves a peer score**.
-12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`
     — AG-03 (why a null row asserts nothing and therefore cites nothing) and the
     CG grain family, including the 0.05 tolerance.
 

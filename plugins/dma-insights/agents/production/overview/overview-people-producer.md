@@ -85,7 +85,7 @@ what produces a card of press releases with no people in it.
 1. `get_page_contract("overview")` — the item-key contract for `leadership` and
    `thought_leadership`, and the `doc` text on every field you are about to write.
    Read the `doc` for `alignment` in particular; a remembered shape is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O7.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O12.md`
    **§ O7 and § O12** (real path:
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
    the blocks begin at the headings `## O7 · Leadership panel` and
@@ -94,7 +94,7 @@ what produces a card of press releases with no people in it.
    pathways. Applied by default, not by memory. **The rulebook is the authority on
    anti-patterns; the Surface Specification is the authority on payload shape**,
    and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O7.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O12.md`
    **§ O7 and § O12** — the pack's contract, and the two things it says more
    sharply than the spec: the contact route is established at synthesis **or it
    does not exist** (invariant 1 — the app makes no third-party call while
@@ -109,7 +109,7 @@ what produces a card of press releases with no people in it.
    — the census rows: O7 anchors `overview.leadership`, facet `leadership`, gates
    `ET (identity) · CG (dated) · AG`; O12 anchors `overview.thought_leadership`,
    facet `thought_leadership`, gates `ET (identity) · CG (dated, verbatim) · AG`.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-10.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-05.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-14.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`
    — **CG-10** (a date that could not be established says so), **ET-04** (a cited
    id resolves to a row carrying its excerpt), **ET-05**, **CG-14** (a linked cell
    exists on this run), **AG-03**; and `explain_gate` for whichever one fired.

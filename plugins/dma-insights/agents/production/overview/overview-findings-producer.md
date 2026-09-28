@@ -107,12 +107,12 @@ Read in this order. Each path has been verified to exist.
    item-key contract; a remembered shape is a refusal. The `findings` doc is the
    longest on the page and it carries the per-item key list, the title rule, the
    theme enum, the four-heading expansion and the `r_layer` obligation.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O6.md`
    §§ O6 and DD-9 — the Baxter positive pattern, the three anti-patterns above
    with their measurements, this surface's exclusion set and its enrichment
    pathways. It is applied by default, not by memory, and the rectifier is its
    only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O6.md`
    § O6 — the packaged contract with the full synthesis prompt and its seven
    numbered steps. The repo-side source of the same text is
    `docs/text/DMA Insights - Surface Specification.txt`

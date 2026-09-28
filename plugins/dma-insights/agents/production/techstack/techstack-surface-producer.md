@@ -124,6 +124,7 @@ score.
    since that pass is yours — and pass the relevant ones down.
 2. First read
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+   (the index — you assemble the whole page, so read every `rulebooks/techstack/<ID>.md` it lists)
    — the Baxter positive pattern, the learned anti-patterns and this page's
    exclusion set; it is applied by default, not by memory. Then
    `get_memory_digest` scoped to this client; each producer runs its own

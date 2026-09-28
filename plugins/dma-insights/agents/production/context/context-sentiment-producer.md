@@ -112,13 +112,13 @@ entity's **own** domain: MEM-0089 measured 11 of 26 uncitable Logix rows on
 1. `get_page_contract("context")` — the item-key contract for `context_sentiment`
    plus the `doc` text on every field you are about to write. A remembered shape is
    a refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/context/C4.md`
    — **§ C4** (heading `## C4 · Sentiment overview`) and **§ DD-12**: the Baxter
    positive pattern, the learned anti-patterns, the customer exclusion set and the
    enrichment pathways. Applied by default, not by memory. **The rulebook is the
    authority on anti-patterns; the Surface Specification is the authority on payload
    shape**, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/5-context.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/context/C4.md`
    — **§ C4**, and in particular *"It is a re-projection of O9. It is not a second
    measurement."*, the `n`/`scale`/`as_of` consequence table, *"SG-S8 discloses, and
    thinness is not a defect to hide"*, *"An unmeasured audience still fills its
@@ -138,7 +138,7 @@ entity's **own** domain: MEM-0089 measured 11 of 26 uncitable Logix rows on
    `sentiment`, gate families `SG:S8 · CG (reconciles to O9 by e_id)`, drilldown
    DD-12, and the note that this surface *"projects O9's bars under the O9 prompt at
    Context depth — produce O9 first"*.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/SG-S8.md`
    — **§ SG-S8** in full. It **discloses and still promotes**, with the plain label
    *"Sentiment rests on a single source, so treat it as indicative only"*; it counts
    `overview.sentiment.bars[]` and `context.context_sentiment.context_tiles[].rows[]`

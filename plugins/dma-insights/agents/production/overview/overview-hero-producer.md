@@ -83,11 +83,11 @@ Read in this order. Each path has been verified to exist.
    about to write. The doc text is the item-key contract; a remembered shape is
    a refusal, and the enum casing (`direction`, `posture`, `recency_band`) comes
    from the doc, never from copying a neighbouring run.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O1.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O2.md`
    §§ O1 and O2 — the Baxter positive pattern, the learned anti-patterns and
    this page's exclusion set. It is applied by default, not by memory, and the
    rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O1.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O2.md`
    §§ O1 and O2 — the packaged contract: **Must present**, *Read the cohort
    before you serve its median*, *The registry that has the figure depends on
    who files*, and the full synthesis prompt with its numbered steps. The
