@@ -581,7 +581,10 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
                 tier=_clean(s.get("tier")) or "T2", excerpt=excerpt,
                 subcaps=[], published=_clean(s.get("period_end"))
                 or _clean(s.get("retrieved_at"))[:10] or None,
-                claim_type="FACT", origin="public")
+                # A filed statement is T1/T2 and a FACT; a statement the
+                # preflight could only reach at T3 (a news summary of the
+                # figures) is what its tier licenses, not a FACT by fiat.
+                claim_type=None, origin="public")
             banked.append(eid)
         except Exception as e:                              # noqa: BLE001
             banked.append(f"NOT_BANKED: {e}")

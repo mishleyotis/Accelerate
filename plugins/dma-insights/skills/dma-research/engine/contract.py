@@ -1025,6 +1025,20 @@ NO_EVIDENCE = "NO_EVIDENCE"
 
 TIERS = ("T1", "T2", "T3", "T4", "T5", NO_EVIDENCE)
 CLAIM_LABELS = ("FACT", "INFERENCE", "HYPOTHESIS", "CEILING_ESTIMATE")
+#: The tiers a FACT may rest on. A label is derived from provenance, not
+#: typed: T3 reportage and weaker can support an INFERENCE, never a FACT.
+#: Measured 28-09-2026 (QA audit F-J04-004): 77 of 285 FACT rows on one
+#: staged heatmap sat on T3/T4 because the evidence CLI defaulted the label
+#: to FACT and nothing compared it with the tier. `ledger.append_evidence`
+#: refuses an explicit FACT outside this set and derives the label from
+#: the tier when none is given; the connector's ET-10 refuses the same
+#: shape at submit.
+FACT_TIERS = ("T1", "T2")
+
+
+def claim_label_for(tier: str) -> str:
+    """The label provenance licenses when the writer states none."""
+    return "FACT" if tier in FACT_TIERS else "INFERENCE"
 FACETS = ("works", "fails", "value", "contradicts", "corroborates")
 
 #: The AI overlay, measured from the pinned workbook's own DQ_Bank: its

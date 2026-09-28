@@ -381,9 +381,14 @@ def _consolidate_one(wb: RunWorkbook, e: dict, actor: str, run=None) -> str:
             excerpt=f.get("excerpt") or "",
             subcaps=cells,
             published=f.get("published"),
-            claim_type=str(f.get("claim_type") or
-                           ("INFERENCE" if kind == "contradiction"
-                            else "FACT")).upper(),
+            # A note that states no label gets the one its tier licenses
+            # (contract.FACT_TIERS): a T3 note lands as INFERENCE, not as
+            # the FACT the old default typed for it. A note that STATES
+            # FACT on T3 is refused by the ledger and stays [BLOCKED] in
+            # the notebook with the reason — visible, never laundered.
+            claim_type=(str(f.get("claim_type")).upper() if f.get("claim_type")
+                        else "INFERENCE" if kind == "contradiction"
+                        else None),
             origin=f.get("origin") or "public",
             run=run, verify_excerpts=True)
         if kind == "contradiction":

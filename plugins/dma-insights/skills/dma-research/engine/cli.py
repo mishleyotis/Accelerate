@@ -353,7 +353,12 @@ def main(argv=None) -> int:
                         "the default must stay 'evidence reaches a cell'")
     e.add_argument("--source", required=True); e.add_argument("--url")
     e.add_argument("--tier", required=True); e.add_argument("--excerpt", required=True)
-    e.add_argument("--published"); e.add_argument("--claim-type", default="FACT")
+    e.add_argument("--published")
+    e.add_argument("--claim-type", default=None, choices=contract.CLAIM_LABELS,
+                   help="FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE. "
+                        "Omitted, the ledger derives it from --tier (T1/T2 "
+                        "-> FACT, weaker -> INFERENCE); a stated FACT on "
+                        "T3 or weaker is refused (contract.FACT_TIERS)")
     e.add_argument("--origin", default="public")
     e.add_argument("--unverified", default=None, metavar="REASON",
                    help="register this span WITHOUT a fetched copy of the "

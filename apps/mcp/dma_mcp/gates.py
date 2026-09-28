@@ -880,6 +880,16 @@ GATES = {
               "content: a chip a reader can open onto nothing claims a "
               "source it does not have.",
               "block"),
+    "ET-10": ("A FACT rests on a T1 or T2 source", None,
+              "Every cited evidence row labelled FACT carries tier T1 or T2. "
+              "A T3-T5 row may be INFERENCE, HYPOTHESIS or CEILING_ESTIMATE; "
+              "the label is derived from provenance, never typed.",
+              "Measured 28-09-2026 (QA audit F-J04-004, regression seed 2): "
+              "77 of 285 FACT rows on one staged heatmap rested on T3/T4 "
+              "reportage because the research CLI defaulted the label to "
+              "FACT and nothing compared it with the tier. A client reads "
+              "FACT as established; a trade-press paraphrase is not.",
+              "block"),
     "ET-05": ("A run cites only its own sub-vertical's cells", None,
               "No section cites a variant cell whose terminal segment names "
               "a sub-vertical other than the entity's. Base cells and "

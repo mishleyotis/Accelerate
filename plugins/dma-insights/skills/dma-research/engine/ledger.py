@@ -64,7 +64,7 @@ def _utcnow() -> str:
 
 def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None,
                     tier: str, excerpt: str, subcaps, published: str | None = None,
-                    claim_type: str = "FACT", origin: str = "public",
+                    claim_type: str | None = None, origin: str = "public",
                     ers: float | None = None, anchor_quote: str | None = None,
                     run=None, actor: str | None = None,
                     access_status: str = "OK", conflict: str | None = None,
@@ -105,6 +105,16 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     aspiration laundering staleness the other way round."""
     if tier not in C.TIERS:
         raise LedgerRefusal(f"tier {tier!r} is not in {C.TIERS}")
+    # THE LABEL IS DERIVED FROM PROVENANCE, NOT TYPED. Until 28-09-2026 this
+    # parameter defaulted to "FACT" and nothing compared it with the tier,
+    # so 77 of 285 FACT rows on one staged heatmap rested on T3/T4
+    # reportage (QA audit F-J04-004, regression seed 2). A writer that
+    # states no label gets the one its tier licenses; a writer that states
+    # FACT on a tier that cannot carry it is refused, not corrected —
+    # silently downgrading a stated claim would hide the mistake the
+    # refusal exists to surface.
+    if claim_type is None:
+        claim_type = C.claim_label_for(tier)
     if claim_type not in C.CLAIM_LABELS:
         raise LedgerRefusal(f"claim_type {claim_type!r} is not in {C.CLAIM_LABELS}")
     text = (excerpt or "").strip()
@@ -116,6 +126,15 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             "a public source with no URL cannot be cited; register it with "
             "origin='internal' and it will be labelled, not laundered")
+    # After the excerpt and URL checks on purpose: a thin note is refused
+    # on its length first (the message the notebook tests read back), and
+    # only a citable span is then judged on what its tier can carry.
+    if claim_type == "FACT" and tier not in C.FACT_TIERS:
+        raise LedgerRefusal(
+            f"claim_type 'FACT' requires tier in {C.FACT_TIERS}; got {tier!r}. "
+            f"A {tier} source supports an INFERENCE (label it so, with the "
+            f"question that would confirm it) or a corroborated FACT from a "
+            f"T1/T2 source — never a FACT on its own")
     cells = [s.strip() for s in (subcaps if isinstance(subcaps, (list, tuple))
                                  else _split_ids(subcaps))]
     tax = C.taxonomy()

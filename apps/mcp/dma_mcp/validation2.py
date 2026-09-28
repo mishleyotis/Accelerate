@@ -829,6 +829,37 @@ def _check_evidence_dating(found, cited_by) -> list:
     return out
 
 
+# ── ET-10 · a FACT rests on a T1 or T2 source ─────────────────────────
+#
+# The label is derived from provenance, never typed. Measured 28-09-2026
+# (QA audit F-J04-004, regression seed 2): 77 of 285 FACT rows on one
+# staged heatmap sat on T3/T4 because the research CLI defaulted the label
+# to FACT and nothing compared it with the tier. The engine's ledger now
+# refuses the same shape at the write (`contract.FACT_TIERS`); this is the
+# submit-time twin, over the rows `get_evidence` resolved, so a package
+# ingested from an older engine cannot promote the shape either.
+FACT_TIERS = ("T1", "T2")
+
+
+def _check_fact_tier(found, cited_by) -> list:
+    out = []
+    for row in found:
+        if str(row.get("claim_type") or "").upper() != "FACT":
+            continue
+        tier = str(row.get("tier") or "").upper()
+        if tier in FACT_TIERS:
+            continue
+        e_id = row.get("e_id")
+        section = cited_by.get(e_id) or cited_by.get(row.get("stored_id"))
+        out.append(_reason(
+            "ET-10", section, f"{section}.e_ids",
+            f"{e_id} is labelled FACT on a {tier or 'untiered'} source — a "
+            f"FACT rests on T1 or T2 (contract.FACT_TIERS). Re-register the "
+            f"row as INFERENCE with the question that would confirm it, or "
+            f"cite the T1/T2 source that states it"))
+    return out
+
+
 # ── ET-05 · a run cites only its own sub-vertical's variant cells ─────
 #
 # The derivation lives in apps/api/dma_api/subverticals.py and is mirrored
@@ -3525,6 +3556,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         split = get_evidence(conn, run_id, sorted(cited))
         reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
         reasons.extend(_check_evidence_dating(split.get("found", []), cited))
+        reasons.extend(_check_fact_tier(split.get("found", []), cited))
         reasons.extend(_check_financial_figures_are_quoted(
             split.get("found", []), cited, payload))
         reasons.extend(_check_cited_linkage(page, payload,
