@@ -515,10 +515,24 @@ jobs:
   # 45-minute ceiling, and a real hang is still red within the hour. What
   # must never happen again is the SUM outgrowing a clock unnoticed; that is
   # what the split and the measurements above are for.
+  # MEASURED AGAIN, 28-09-2026: the W1 and W2 QA-remediation tiers added
+  # about 190 tests to this suite, and the pull_request run on dc7c123
+  # finished in 33m06s while its push twin on the same commit hit this clock
+  # at 35m00s. Four minutes of margin was already the warning above; two is
+  # none. The split is the fix, as the comment above says: two shards over
+  # the research-engine files (odd and even in `ls` order — deterministic,
+  # every file in exactly one shard) each on its own runner and clock, and
+  # the hooks-and-routing half of tests/skills rides with shard 0. Each shard
+  # is expected to halve the 33 minutes; the first shard runs record the
+  # figure, and the clock stays at 35 until they do.
   research-engine-tests:
     name: Research engine suite
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -533,7 +547,13 @@ jobs:
       - name: The engine suite, in parallel, and a suite that skips silently fails
         run: |
           set -o pipefail
-          python -m pytest tests/skills/ \
+          # every research_engine file lands in exactly one shard; shard 0
+          # also carries the top-level tests/skills files (hooks, routing)
+          files=$(ls tests/skills/research_engine/test_*.py | awk -v s="${{ matrix.shard }}" 'NR%2==s')
+          if [ "${{ matrix.shard }}" = "0" ]; then files="$files $(ls tests/skills/test_*.py)"; fi
+          echo "shard ${{ matrix.shard }}: $(echo $files | wc -w) files"
+          # shellcheck disable=SC2086
+          python -m pytest $files \
                  -q -rfs -p no:cacheprovider -n auto --dist loadfile \
                  2>&1 | tee /tmp/engine-pytest.txt
           # `|| true` is load-bearing. This step runs under `bash -e`
@@ -560,7 +580,7 @@ jobs:
         if: always()
         run: |
           {
-            echo '### Research engine'
+            echo '### Research engine (shard ${{ matrix.shard }})'
             echo '```'
             grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
                  /tmp/engine-pytest.txt | tail -40
