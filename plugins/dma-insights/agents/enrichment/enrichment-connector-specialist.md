@@ -587,9 +587,12 @@ distinct refusals in this environment and they are recorded differently:
   cost every run its technographics. The INGEST scan has no API key in Secret
   Manager and records `NOT_RUN` with that reason. The PRODUCER SESSION uses no
   key at all: Vibe Prospecting is an MCP connector authenticated at the
-  session, it is in the auto-approve list (`match-business`,
-  `enrich-business`, `fetch-entities`), and it answers — measured across three
-  promoted clients at 392, 357 and 147 named technologies. **Try it before
+  session; its read (`fetch-entities`) is auto-approved and its billed calls
+  (`match-business`, `enrich-business`) open on the run's owner-written
+  approval record — `engine.cli approve --tool <name> --cost "<quoted>"
+  --approved-by <who>` writes `07_qa/approvals.json`; without it the call
+  prompts (QA audit F-K01-003, 28-09-2026) — and it answers, measured across
+  three promoted clients at 392, 357 and 147 named technologies. **Try it before
   recording NOT_RUN.** Recording NOT_RUN for a source you can reach is the
   defect this bullet used to cause. What stays true either way: `NOT_RUN`
   **with the reason** is the recorded state, and you never substitute a

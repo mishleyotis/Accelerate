@@ -61,7 +61,7 @@ def decision(script: Path, event: dict):
     "get_run_progress", "claim_run", "register_evidence", "get_evidence",
     "get_report_bundle", "get_page_contract", "open_payload",
     "append_payload_part", "get_validation_verdict", "record_finding",
-    "get_platform_fit", "get_staged_payload", "withdraw_run",
+    "get_platform_fit", "get_staged_payload",
 ])
 def test_a_connector_tool_is_approved_without_a_human(tool):
     assert decision(AUTO, {"tool_name": PREFIX + tool}) == "allow"
@@ -228,7 +228,7 @@ def test_the_hook_is_registered_for_every_mcp_tool():
     "mcp__Tavily__tavily_search",
     "mcp__Tavily__tavily_extract",
     "mcp__Clay__find-and-enrich-company",
-    "mcp__Vibe_Prospecting__enrich-business",
+    "mcp__Vibe_Prospecting__fetch-entities",
     "mcp__Indeed__get_company_data",
 ])
 def test_a_read_only_enrichment_lookup_is_approved(tool):
@@ -413,6 +413,16 @@ _DELIBERATELY_PROMPTING = {
     # writes that STAY refused are run_subroutine / run_subroutine_direct, a
     # user-authored subroutine that can do anything.
     "run_subroutine": "a user-authored workspace subroutine can do anything",
+    # Credit-billed calls (QA audit F-K01-003, 28-09-2026): approved only
+    # through the run's 07_qa/approvals.json record with the quoted cost
+    # (test_a_spend_tool_opens_on_the_runs_approval_record); with no record
+    # a scheduled firing prompts and stops, which is the safe direction.
+    "tavily_research": "billed agentic research; per-run approval record",
+    "tavily_crawl": "billed crawl; per-run approval record",
+    "enrich-business": "2 credits per row; per-run approval record",
+    "enrich-prospects": "billed enrichment; per-run approval record",
+    "match-business": "Explorium matching is metered; per-run approval record",
+    "match-prospects": "Explorium matching is metered; per-run approval record",
     "run_subroutine_direct": "a user-authored workspace subroutine can do anything",
     # `slack_send_message` was here until 2026-08-30 with the reason "the
     # channel that would use it is specified and not built". The channel IS
@@ -880,8 +890,8 @@ def test_classified_writes_still_prompt_under_both_server_spellings(server):
     "mcp__Exa__web_search_exa", "mcp__Exa__web_fetch_exa",
     "mcp__Clay__find-and-enrich-company", "mcp__Clay__get-task-context",
     "mcp__Indeed__search_jobs", "mcp__Indeed__get_company_data",
-    "mcp__Vibe-Prospecting__enrich-business",
-    "mcp__Vibe_Prospecting__enrich-business",
+    "mcp__Vibe-Prospecting__fetch-entities",
+    "mcp__Vibe_Prospecting__fetch-entities",
     "mcp__Google-Drive__search_files", "mcp__Google_Drive__search_files",
     "mcp__Google-Drive__get_file_permissions",
     "mcp__DMA-Insights__get_client_state",
@@ -990,3 +1000,90 @@ def test_the_canonical_form_strips_the_claude_ai_prefix_only_on_the_server():
         "mcp__Google_Drive__search_files"
     # a TOOL id that happens to contain the prefix is left alone
     assert aac._canonical("mcp__X__claude_ai_thing") == "mcp__X__claude_ai_thing"
+
+
+# ── credit-spending calls open only on the run's approval record ──
+#
+# Measured 28-09-2026 (QA audit F-K01-003): the hook approved
+# tavily_research, tavily_crawl, enrich-business and enrich-prospects with
+# the reason "none writes, spends or sends". Every one is billed. The fix is
+# not a longer withheld list alone: a scheduled run still needs the
+# technographic scan, so the owner pre-approves the spend PER RUN with the
+# quoted cost and the hook reads that record. No record, no spend.
+
+_SPEND = ["tavily_research", "tavily_crawl", "enrich-business",
+          "enrich-prospects", "match-business", "match-prospects"]
+_SEGMENTS = ["mcp__Tavily__", "mcp__Vibe_Prospecting__", "mcp__Vibe-Prospecting__",
+             "mcp__5e0fe4f4-8fd9-448d-a1b5-fafc63f9aa67__"]
+
+
+@pytest.mark.parametrize("suffix", _SPEND)
+@pytest.mark.parametrize("segment", _SEGMENTS)
+def test_a_spend_tool_prompts_with_no_approval_record(monkeypatch, tmp_path, suffix, segment):
+    monkeypatch.setenv(aac.APPROVALS_FILE_ENV, str(tmp_path / "none.json"))
+    assert decision(AUTO, {"tool_name": segment + suffix, "tool_input": {}}) is None
+
+
+def _approvals(tmp_path, monkeypatch, records):
+    p = tmp_path / "approvals.json"
+    p.write_text(json.dumps({"approvals": records}))
+    monkeypatch.setenv(aac.APPROVALS_FILE_ENV, str(p))
+    return p
+
+
+@pytest.mark.parametrize("suffix", _SPEND)
+def test_a_spend_tool_opens_on_the_runs_approval_record(monkeypatch, tmp_path, suffix):
+    _approvals(tmp_path, monkeypatch, [{
+        "tool": suffix, "cost_line": "2 credits/row x 400 rows",
+        "approved_by": "owner@example.com", "at": "2026-09-28T09:00:00Z",
+        "expires": "2999-01-01T00:00:00Z"}])
+    r = run(AUTO, {"tool_name": "mcp__Vibe_Prospecting__" + suffix, "tool_input": {}})
+    out = json.loads(r.stdout)["hookSpecificOutput"]
+    assert out["permissionDecision"] == "allow"
+    assert "2 credits/row x 400 rows" in out["permissionDecisionReason"]
+    assert "owner@example.com" in out["permissionDecisionReason"]
+
+
+def test_an_expired_or_costless_or_foreign_record_does_not_open_a_spend_tool(monkeypatch, tmp_path):
+    _approvals(tmp_path, monkeypatch, [
+        {"tool": "enrich-business", "cost_line": "2 credits/row",
+         "approved_by": "owner@example.com", "expires": "2020-01-01T00:00:00Z"},
+        {"tool": "tavily_research", "approved_by": "owner@example.com"},
+        {"tool": "tavily_crawl", "cost_line": "x", "approved_by": "o",
+         "expires": "not a date"},
+        {"tool": "enrich-prospects", "cost_line": "x", "approved_by": "o"},
+    ])
+    for suffix in ("enrich-business", "tavily_research", "tavily_crawl"):
+        assert decision(AUTO, {"tool_name": "mcp__Tavily__" + suffix,
+                               "tool_input": {}}) is None, suffix
+    # the one honest record in the file still works
+    assert decision(AUTO, {"tool_name": "mcp__Vibe_Prospecting__enrich-prospects",
+                           "tool_input": {}}) == "allow"
+
+
+def test_an_approval_record_opens_only_the_tool_it_names(monkeypatch, tmp_path):
+    _approvals(tmp_path, monkeypatch, [{
+        "tool": "enrich-business", "cost_line": "2 credits/row",
+        "approved_by": "owner@example.com"}])
+    assert decision(AUTO, {"tool_name": "mcp__Vibe_Prospecting__enrich-prospects",
+                           "tool_input": {}}) is None
+    assert decision(AUTO, {"tool_name": "mcp__Vibe_Prospecting__export-to-csv",
+                           "tool_input": {}}) is None      # never approvable here
+
+
+@pytest.mark.parametrize("tool", [
+    PREFIX + "withdraw_run", "mcp__DMA-Insights__withdraw_run",
+    "mcp__claude_ai_DMA_Insights__withdraw_run",
+])
+def test_withdraw_run_prompts_on_every_prefix(tool):
+    """Outward and irreversible from the client's side (QA audit
+    F-K03-025): a person withdraws a served run, never a scheduled session."""
+    assert decision(AUTO, {"tool_name": tool, "tool_input": {"run_id": "x"}}) is None
+
+
+def test_the_spend_suffixes_are_withheld_and_the_reads_stay_approved():
+    assert set(_SPEND) <= aac.WITHHELD_SUFFIXES
+    assert not set(_SPEND) & aac.ENRICHMENT_TOOLS
+    for read in ("fetch-entities", "tavily_search", "tavily_extract",
+                 "estimate-cost", "show-pricing-plans"):
+        assert read in aac.ENRICHMENT_TOOLS

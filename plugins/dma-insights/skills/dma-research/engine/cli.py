@@ -246,6 +246,57 @@ def _fetch_cmd(run, a) -> int:
     return 0
 
 
+#: The credit-spending connector calls the autoapprove hook withholds unless
+#: the run carries an approval record. ONE owner: scripts/hooks/
+#: autoapprove_connector.py SPEND_SUFFIXES; test_claim_tier-style pinning in
+#: scripts/tests/test_autoapprove_connector.py keeps the two equal.
+SPEND_TOOLS = frozenset({
+    "tavily_research", "tavily_crawl",
+    "enrich-business", "enrich-prospects", "match-business", "match-prospects",
+})
+
+
+def _approve_cmd(run, a) -> dict:
+    """Append one approval record to <run>/07_qa/approvals.json.
+
+    The record is the owner's decision, so nothing is inferred: the cost
+    line is what they typed. A blank cost line is refused because the
+    quoted cost is the whole point of the record."""
+    from datetime import datetime, timedelta, timezone   # noqa: PLC0415
+    cost = str(a.cost or "").strip()
+    who = str(a.approved_by or "").strip()
+    if not cost or not who:
+        raise SystemExit("REFUSED: --cost and --approved-by must both be "
+                         "non-empty. An approval without the quoted cost or "
+                         "the approver is not an approval.")
+    if a.expires_hours <= 0:
+        raise SystemExit("REFUSED: --expires-hours must be positive.")
+    path = run.qa_dir / "approvals.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    doc = {"approvals": []}
+    if path.is_file():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict) and isinstance(loaded.get("approvals"), list):
+                doc = loaded
+        except ValueError:
+            pass
+    now = datetime.now(timezone.utc)
+    rec = {
+        "tool": a.tool,
+        "cost_line": cost,
+        "approved_by": who,
+        "at": now.isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "expires": (now + timedelta(hours=a.expires_hours)
+                    ).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "max_calls": a.max_calls,
+        "run_id": run.run_id,
+    }
+    doc["approvals"].append(rec)
+    path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    return {"path": str(path), "record": rec, "count": len(doc["approvals"])}
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in _FAMILIES:
@@ -495,6 +546,27 @@ def main(argv=None) -> int:
     p = common(sub.add_parser("persist")); p.add_argument("--dest")
     st = sub.add_parser("status"); st.add_argument("--root")
     sub.add_parser("counts")
+    apv = common(sub.add_parser(
+        "approve",
+        help="record the owner's approval of ONE credit-spending connector "
+             "call for this run, with the cost the owner quoted. The "
+             "autoapprove hook opens tavily_research, tavily_crawl and the "
+             "Explorium enrich-*/match-* calls only against this record "
+             "(07_qa/approvals.json); without it a scheduled firing prompts "
+             "and stops (QA audit F-K01-003, 28-09-2026)"))
+    apv.add_argument("--tool", required=True, choices=sorted(SPEND_TOOLS),
+                     help="the connector tool suffix being approved")
+    apv.add_argument("--cost", required=True, metavar="LINE",
+                     help="the cost line the owner is approving, verbatim "
+                          "(e.g. '2 credits/row x 400 rows = 800 credits'). "
+                          "Stated by the owner, never priced here")
+    apv.add_argument("--approved-by", required=True,
+                     help="who approved it (an email or a name)")
+    apv.add_argument("--expires-hours", type=float, default=24.0,
+                     help="how long the record stays valid (default 24h)")
+    apv.add_argument("--max-calls", type=int, default=None,
+                     help="an optional call ceiling, recorded for the audit "
+                          "trail; the hook does not count calls")
 
     a = ap.parse_args(argv)
     if a.cmd == "counts":
@@ -566,6 +638,8 @@ def main(argv=None) -> int:
         return 0
 
     run = runstate.locate(a.run, root)
+    if a.cmd == "approve":
+        print(json.dumps(_approve_cmd(run, a), indent=2)); return 0
     if a.cmd == "resume":
         _, state = runstate.resume(a.run, root)
         print(json.dumps(state, indent=2)); return 0
