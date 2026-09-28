@@ -129,6 +129,12 @@ def fire_volleys(wb, subcap, *, n=3, tool="web_search"):
     }
     for facet, q in queries.items():
         hits = n + 1 if facet in ("works", "value", "corroborates") else 0
+        if L.prior_searches(wb, q, tool):
+            # Already in the log for this cell: the ledger refuses a repeat
+            # (F-D05-033), and a fixture called twice on one cell — bank
+            # more evidence, then declare — is the shape a real lane meets
+            # when it re-reads its card. Idempotent, like the lane should be.
+            continue
         if L._ops_since_checkpoint(wb) >= L.SEARCH_OP_CEILING:
             # The wall is per CONVERSATION and the fixture is one long one:
             # checkpoint and continue, which is exactly what the ceiling

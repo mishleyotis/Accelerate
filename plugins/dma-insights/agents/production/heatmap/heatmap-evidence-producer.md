@@ -493,6 +493,12 @@ feeling. Answer them out loud in your self-report.
 8. Ran on your first twenty drafts, what did `check_repetition.py --page heatmap
    --at-scale <N>` report? Report the number, not the intention. Twenty is where the
    shape is already visible; 708 is where it is expensive.
+8a. Ran on the final array, what did `verify_claims.py` report? A cited synthesis
+   with a `not_supported` sentence is a drawer quoting a source that does not say
+   it (F-D04-005: 12 of 67 claims on a promoted run). Zero, or the sentence goes.
+8b. Did every declared-grade row come from `engine.surface_export absence`, and
+   how many did it omit as identical? A declared row you wrote yourself is the
+   61-times-one-sentence shape CG-15 refused (F-CG15-016).
 
 **Scope.**
 9. Is every `subcap_id` a cell **this run serves**, resolved through
@@ -608,7 +614,10 @@ Then the self-report, in prose: the cell count and the grade split (cited /
 inherited / declared / omitted); `cells_cited_elsewhere_not_cited_here` with the
 cell ids behind it; the evidence ids you resolved and any that came back `not_found`
 or `foreign`; the `check_repetition.py` result on your first twenty and on the final
-array; what you changed and what you kept byte-identical from `get_staged_payload`;
+array; the `verify_claims.py` counts on the final array (`not_supported` must be 0 —
+a sentence its own excerpts do not carry is rewritten or moved to `search_requests`);
+the `engine.surface_export absence` result (projected / omitted counts) for the
+declared grade; what you changed and what you kept byte-identical from `get_staged_payload`;
 which memory findings you checked against; the `thin`-definition divergence if the
 contract you were served still says below-three; and **the registration worklist** —
 every source you used that is not yet in the store, each with its URL, its verbatim
@@ -630,6 +639,24 @@ your served cell set — one served cell set for every count on every page.
 `page-consolidator` refuses input that has not been challenged; `finding-challenger`
 runs against your inherited-grade inferences first, because those are the claims
 with the longest reasoning span.
+
+**On ambiguity, return `blocked` and nothing else.** When the inputs admit two
+readings that would produce materially different section JSON — a cell id that
+could be two catalogue cells, a score whose grain the table cannot settle, an
+evidence id that resolves to another entity, a staged value that contradicts
+the report bundle, an instruction that contradicts the contract you were served
+— do not pick one. Return
+
+```
+{"blocked": {"reason": "<what is ambiguous, the two readings, what would settle it>"}}
+```
+
+in place of the section, with no section beside it, and stop. A section built
+on a guess passes every gate that checks shape and fails the reader; the
+research lanes have their stated paths (a declared absence, `search_requests`,
+a deferred question) and this is this role's. Measured 28-09-2026 (QA audit
+F-C03-040): the per-surface producers had no stated action for ambiguity
+beyond "return section JSON".
 
 ## Searching is not this role's
 

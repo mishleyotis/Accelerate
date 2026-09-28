@@ -68,8 +68,8 @@ import sys
 from pathlib import Path
 
 from . import (assemble, contract, fetch, floors_gate, handoff, ledger,
-               orient, preflight, registry, report_spec, reports, runstate,
-               strip_working_area, validator, watchdog)
+               orient, preflight, quality, registry, report_spec, reports,
+               runstate, strip_working_area, validator, watchdog)
 
 
 #: family name -> the module whose main() owns it. Dispatched BEFORE
@@ -481,6 +481,17 @@ def main(argv=None) -> int:
                     help="which proxy class was hunted and what came back")
     ab.add_argument("--hunted", required=True,
                     help="what was looked for, where, and what came back instead")
+    ab.add_argument("--inferable", default=None,
+                    help="what the absence still lets you INFER (>= 30 chars); "
+                         "comes with --validation-question, labelled INFERENCE "
+                         "on the surface and routed to the client conversation")
+    ab.add_argument("--validation-question", default=None,
+                    help="the question a client answer would settle the "
+                         "inference with (>= 15 chars, ends in ?)")
+    ab.add_argument("--not-determinable", default=None,
+                    help="why no public source can decide this cell (>= 30 "
+                         "chars): the triage routes it internal_only instead "
+                         "of to another proxy round")
     ab.add_argument("--enrichment-unavailable", action="store_true",
                     help="this container had NO enrichment connector bound, so "
                          "the connector rung could not be climbed. VERIFIED, "
@@ -489,6 +500,21 @@ def main(argv=None) -> int:
                          "written with REDUCED rigour and the reason. Without "
                          "a baseline, or with a connector bound and unused, "
                          "the refusal stands")
+
+    vc = common(sub.add_parser(
+        "verify-claim",
+        help="is this sentence IN the excerpts it cites? Lexical, offline, "
+             "deterministic: every figure, name and quoted phrase must be in "
+             "the cited excerpts, and the content words mostly so. "
+             "entailed / partial / not_supported / frame, with the span and "
+             "the missing words. Run it before a synthesis is written "
+             "(QA audit F-D04-005, 28-09-2026)"))
+    vc.add_argument("--claim", required=True, help="the sentence(s) to verify")
+    vc.add_argument("--e-id", action="append", default=[],
+                    help="evidence id(s) whose excerpts ground the claim; "
+                         "repeatable. Default: every row on --subcap")
+    vc.add_argument("--subcap", default=None,
+                    help="the cell whose registered rows ground the claim")
 
     fe = common(sub.add_parser(
         "fetch",
@@ -656,10 +682,14 @@ def main(argv=None) -> int:
         print(json.dumps(orient.orient(wb, a.category, qa_dir=run.qa_dir),
                          indent=2, sort_keys=True)); return 0
     if a.cmd == "search":
-        n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
-                                 query=a.query, tool=a.tool, hits=a.hits,
-                                 kept=a.kept, outcome=a.outcome,
-                                 prelim=a.prelim, actor=_actor(a))
+        try:
+            n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
+                                     query=a.query, tool=a.tool, hits=a.hits,
+                                     kept=a.kept, outcome=a.outcome,
+                                     prelim=a.prelim, actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
         print(json.dumps({"seq": n, **ledger.stats(wb)}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
@@ -728,8 +758,42 @@ def main(argv=None) -> int:
         print(json.dumps(ledger.declare_absence(
             wb, a.subcap, actor=a.actor, ladder=lad, proxy_log=a.proxy_log,
             what_was_hunted=a.hunted,
-            enrichment_unavailable=a.enrichment_unavailable), indent=2))
+            enrichment_unavailable=a.enrichment_unavailable,
+            inferable=a.inferable, validation_question=a.validation_question,
+            not_determinable=a.not_determinable, run=run), indent=2))
         return 0
+    if a.cmd == "verify-claim":
+        index = wb.evidence_index()
+        # Rows cite fact-level ids (E-003:F1); the register is keyed by row.
+        ids = [str(i).strip().split(":")[0] for i in (a.e_id or []) if str(i).strip()]
+        if not ids and a.subcap:
+            row = wb.scoring_row(a.subcap) or {}
+            ids = [i.split(":")[0] for i in ledger._split_ids(row.get("Evidence_IDs"))
+                   if i and i != contract.NO_EVIDENCE]
+            ids += [e for e, r in index.items()
+                    if a.subcap in str(r.get("SubCap_IDs") or "") and e not in ids]
+        ids = list(dict.fromkeys(ids))
+        if not ids:
+            print("REFUSED: name the evidence the claim rests on (--e-id, "
+                  "repeatable) or a --subcap with registered rows. A claim "
+                  "verified against nothing is not verified.", file=sys.stderr)
+            return 1
+        unknown = [i for i in ids if i not in index]
+        if unknown:
+            print(f"REFUSED: evidence id(s) not in this run's register: "
+                  f"{unknown}", file=sys.stderr)
+            return 1
+        excerpts = []
+        for i in ids:
+            r = index[i]
+            excerpts.append(str(r.get("Excerpt") or ""))
+            if r.get("Anchor_Quote"):
+                excerpts.append(str(r.get("Anchor_Quote") or ""))
+        out = quality.verify_claim(a.claim, excerpts,
+                                   entity=wb.metadata().get("entity_name"))
+        out["e_ids"] = ids
+        print(json.dumps(out, indent=2))
+        return 1 if out["verdict"] == "not_supported" else 0
     if a.cmd == "gate":
         out = floors_gate.run(wb, a.category,
                               require_synthesis=a.require_synthesis,

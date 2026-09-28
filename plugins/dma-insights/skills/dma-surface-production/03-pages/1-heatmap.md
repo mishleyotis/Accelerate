@@ -246,6 +246,48 @@ be seen while writing one cell, and it is not survivable by rewording.
 python scripts/check_repetition.py drafts.json --page heatmap --at-scale 708
 ```
 
+**Declared cells are projected from the run's record, never written by hand.**
+Measured 28-09-2026 (QA audit F-CG15-016): 61 of a staged page's first 102 cells
+were absences written by a producer, with 34 distinct ladders for 61 cells and
+119 eight-word spans shared by three or more syntheses. The record of each absence
+already exists per cell — the Search_Log rows, the ladder the lane established,
+what it hunted, the proxy rung it climbed, the artefact the catalogue says would
+settle it — and the projector renders exactly that:
+
+```
+python3 -m engine.surface_export absence --run <RUN> --root <ROOT> --out drafts/
+```
+
+It writes `heatmap.cell_evidence.absences.json`, one `cells[]` row per declared
+cell with the trio (`thin`, `sources_searched[]`, `closure_condition`) and a
+synthesis that names what was hunted and what would settle it. It runs the
+template check over its own output and **omits** every cell whose record is one
+sentence with the cell name substituted (exit 3, `omitted_identical[]` names
+them): the rulebook's preference order puts *omitted* above
+*declared-and-identical*, and CG-15 would refuse them anyway. The repair for an
+omitted cell is in the research run — re-declare it with what *this* cell's
+artefact is — not in the drawer. Merge the projected rows into your `cells[]`;
+do not edit their prose.
+
+**Verify every cited sentence against its own excerpts before you return.**
+Measured 28-09-2026 (QA audit F-D04-005): 12 of 67 claims in a promoted run's
+drawers had no excerpt behind them — a named CEO attribution, a committee
+structure, an after-state ("hours to minutes"). Each was the drawer's most
+quotable sentence.
+
+```
+python scripts/verify_claims.py drafts.json --entity "<client name>"
+```
+
+Every figure, name and quoted phrase in a sentence must be in the cell's own
+`items[].excerpt`, and most of its content words (`entailed`); a faithful
+paraphrase grades `partial`; a sentence whose name, figure or substance the
+excerpts do not carry is `not_supported` and **is not returned as cited** —
+rewrite it from the excerpt, or move the claim to `search_requests`. The judge
+is lexical and offline (it reads words, not relations; the challenger reads
+relations), so a clean result is necessary, not sufficient. Report its counts
+in your self-report beside the repetition result.
+
 **What makes an inherited or declared synthesis per-cell.** Both grades report
 the same *outcome* on every cell they apply to — that is fine and unavoidable.
 What must differ is the **subject**:

@@ -113,6 +113,16 @@ def proxy_classes() -> dict[str, str]:
             for k, v in (raw.get("proxy_class_if_absent") or {}).items()}
 
 
+def settling_artefacts() -> dict[str, str]:
+    """cell id -> the internal artefact the template says would settle the
+    cell ("Org chart, committee charter, terms of reference"). What a
+    declared absence names as its closure condition and what a gap triaged
+    internal_only turns into a discovery question."""
+    raw = json.loads(names_path().read_text(encoding="utf-8"))
+    return {str(k): str(v).strip()
+            for k, v in (raw.get("internal_artefact_that_settles_it") or {}).items()}
+
+
 _CELL_RE = re.compile(r"^(P\d)C(\d+)\.(\d+)(?:\.(.+))?$")
 
 

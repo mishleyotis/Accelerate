@@ -87,6 +87,7 @@ import time
 from pathlib import Path
 
 from . import contract as C
+from . import quality as Q
 from . import ledger as L
 from . import runstate
 
@@ -196,10 +197,10 @@ def queue_path(run: runstate.Run) -> Path:
 
 
 def normalize(query: str) -> str:
-    """The identity of a query: case, whitespace and outer quoting removed.
-    Two lanes asking the same thing in different casing owe one search."""
-    q = " ".join(str(query or "").split()).strip().strip("\"'`“”‘’").strip()
-    return q.lower()
+    """The identity of a query — `quality.norm_query`, the one owner. Two
+    lanes asking the same thing in different casing owe one search, and the
+    Search_Log refuses the same identity twice (F-D05-033)."""
+    return Q.norm_query(query)
 
 
 def request_id(norm: str, subcap: str | None, category: str | None) -> str:
@@ -814,12 +815,27 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         f"## The {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}",
         "",
     ]
+    triage = (L.read_gap_triage(run) or {}).get("gaps") or []
+    by_cell = {str(g.get("subcap")): g for g in triage if g.get("subcap")}
     for i, q in enumerate(queries, 1):
         lines.append(f"### {i}. {q['query']}")
         lines.append("")
+        if q.get("already_fired"):
+            af = q["already_fired"]
+            lines.append(f"- **ALREADY FIRED** at seq {af['seq']} through `{af['tool']}` "
+                         f"(hits {af['hits']}, kept {af['kept']}). Do NOT run it again: "
+                         f"`engine.cli search` refuses the same query twice. Close the "
+                         f"request from the log with `engine.relay reconcile`, or "
+                         f"rephrase from a different angle and log THAT.")
         lines.append(f"- cells: {', '.join(f'`{c}`' for c in q['subcaps']) or '(none — run-level)'}")
         lines.append(f"- facet: `{q['facet'] or C.PRIMARY_FACET}` · tool: `{q['tool']}` "
                      f"· requests: {', '.join(q['request_ids'])}")
+        for c in q["subcaps"]:
+            g = by_cell.get(c)
+            if g:
+                lines.append(f"- triage `{c}`: **{g['disposition']}** — {g.get('why', '')}"
+                             + (f" Discovery question instead: {g['discovery_question']}"
+                                if g.get("discovery_question") else ""))
         for f in q["falsifiers"]:
             lines.append(f"- falsifier (fire it when the query hits): {f}")
         for p in q["proves"]:
@@ -832,7 +848,29 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
             "",
         ]
     rr = f"--run {run.run_id} --root {run.root}"
+    # THE EXCLUSION LIST (QA audit D-16, 28-09-2026): the relay deduped
+    # requests against each other and told the specialist nothing about
+    # what the run had ALREADY asked — so a rephrased repeat of a failed
+    # query was not a choice anyone made. The Search_Log is the record;
+    # every prompt now states it for the cells the batch bears on.
+    prior = L.prior_queries(wb, cells) if cells else L.prior_queries(wb, prelim=True)
+    lines += ["## Already asked for these cells — do not re-fire, rephrase", ""]
+    if prior:
+        for p in prior[:60]:
+            lines.append(f"- seq {p['seq']} · `{p['tool']}` · {p['facet'] or 'run-level'} · "
+                         f"hits {p['hits']} kept {p['kept']} · cells "
+                         f"{', '.join(p['cells']) or '(run-level)'}: {p['query']}")
+        if len(prior) > 60:
+            lines.append(f"- … and {len(prior) - 60} more in the Search_Log")
+    else:
+        lines.append("- (nothing logged yet for these cells)")
     lines += [
+        "",
+        "A query on this list, through the same tool, is refused by "
+        "`engine.cli search` (F-D05-033). A different angle — another facet's "
+        "operators, the proxy class the triage names, a named artefact — is "
+        "a new search; the same words in a new order are not.",
+        "",
         "## For each query, in this order",
         "",
         (f"1. Run it through `{tool}`." if len(tools) == 1 else
@@ -928,6 +966,13 @@ def batch(run: runstate.Run, wb, *, group_by: str = "capability",
     merged = _merge_queries(reqs)
     for q in merged:
         q.update(_commands(run, q))
+        # A request whose query the run already fired through the proposed
+        # tool is flagged in the prompt rather than re-fired (D-16).
+        fired = L.prior_searches(wb, q["query"], q["tool"]) if wb is not None else []
+        if fired:
+            f0 = fired[0]
+            q["already_fired"] = {"seq": f0.get("Seq"), "tool": q["tool"],
+                                  "hits": f0.get("Hits"), "kept": f0.get("Kept")}
     groups: dict[str, list[dict]] = {}
     for q in merged:
         groups.setdefault(_group_key(q, group_by), []).append(q)
@@ -943,9 +988,11 @@ def batch(run: runstate.Run, wb, *, group_by: str = "capability",
         prompt.write_text(batch_prompt(run, wb, key, tool, qs), encoding="utf-8")
         g = {"key": key, "tool": tool, "prompt_file": str(prompt),
              "requests": sum(len(q["request_ids"]) for q in qs),
-             "queries": [{k: q[k] for k in
+             "already_fired": sum(1 for q in qs if q.get("already_fired")),
+             "queries": [{k: q.get(k) for k in
                           ("query", "request_ids", "subcaps", "facet", "tool",
-                           "command_search", "command_record")} for q in qs]}
+                           "command_search", "command_record", "already_fired")}
+                         for q in qs]}
         out["groups"].append(g)
         out["prompts"].append({"key": key, "tool": tool,
                                "prompt_file": str(prompt),

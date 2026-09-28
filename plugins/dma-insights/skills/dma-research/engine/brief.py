@@ -2108,6 +2108,163 @@ def handback(wb: RunWorkbook, category: str) -> dict:
 CORRELATE_CHAR_CEILING = 2000
 
 
+def triage(wb: RunWorkbook, run: runstate.Run) -> dict:
+    """ONE DISPOSITION PER GAP, written down.
+
+    QA audit D-14 (28-09-2026): `gaps` listed open, undeclared-empty,
+    unserviced and stalled cells per category, and no per-gap disposition
+    was recorded anywhere — so a coordinator re-dispatched the same proxy
+    round, a specialist rephrased a failed query, and a cell no public
+    source can settle was hunted again instead of asked. Every gap now gets
+    one of four dispositions, decided from the substrate (the scoring row,
+    the Search_Log, the dossier, the register) and never from a lane's
+    report of itself:
+
+      cross_card_remap   the register already holds a row that names this
+                         cell, a capability sibling's row, or a row another
+                         category opened that ranks against this cell's
+                         question — attach or decline it before searching
+      internal_only      the cell's dossier says no public source can
+                         decide it, or every public rung (the volleys, both
+                         ladder rungs, an enrichment connector) has been
+                         climbed at FULL rigour — it becomes a discovery
+                         question for the client conversation
+      proxy              a volley, a ladder rung or the connector rung is
+                         still unclimbed — one more round is owed, and the
+                         brief for it carries the exclusion list
+      unknown            none of the above can be established: the cell has
+                         no dossier and nothing in the substrate decides it
+
+    Writes `07_qa/gap_triage.json`; `engine.relay batch` reads it so every
+    relay prompt states the disposition and the queries already fired."""
+    md = wb.metadata()
+    entity = md.get("entity_name") or "the entity"
+    g = gaps(wb, run)
+    dossiers = L.read_gap_dossiers(run)
+    declared = L.declared_absences(wb)
+    register = wb.evidence_index()
+    dq_index = dq_texts(wb)
+    names = C.subcap_names()
+    settles = C.settling_artefacts()
+    proxies = C.proxy_classes()
+    rr = f"--run {run.run_id} --root {run.root}"
+    rows = []
+    for cat, gc in sorted(g["categories"].items()):
+        cells = sorted(set(gc["open_cells"]) | set(gc["undeclared_empty"])
+                       | {c for c in declared if category_of(c) == cat})
+        for cell in cells:
+            row = wb.scoring_row(cell) or {}
+            vs = L.volley_status(wb, cell)
+            d = dossiers.get(cell)
+            prior = L.prior_queries(wb, [cell])
+            name = names.get(cell) or cell
+            artefact = settles.get(cell)
+            proxy_class = proxies.get(cell)
+            is_declared = cell in declared
+            rigour_full = bool(d) and d.get("rigour") == "FULL"
+            ladder_rungs = set((d or {}).get("ladder", {}).get("rungs") or [])
+            question = ((d or {}).get("inferable") or {}).get("validation_question")
+            if not question and artefact:
+                question = f"Does {entity} hold {artefact.rstrip('.').lower()} for {name}?"
+            entry = {
+                "subcap": cell, "name": name, "category": cat,
+                "declared": is_declared, "dossier": bool(d),
+                "queries_already_run": [
+                    {"seq": p["seq"], "tool": p["tool"], "facet": p["facet"],
+                     "query": p["query"], "hits": p["hits"], "kept": p["kept"]}
+                    for p in prior],
+                "volleys_missing": vs["missing"],
+                "enrichment_tools": vs["enrichment_tools"],
+            }
+            reuse = {"names_this_cell": [], "capability_siblings": [],
+                     "proposed_from_other_categories": []}
+            if not str(_clean(row.get("Dominant_Claim"))) or is_declared:
+                try:
+                    reuse = reusable(wb, cell, register=register, dq_index=dq_index)
+                except Exception:                    # noqa: BLE001
+                    pass
+            cands = (reuse["names_this_cell"] + reuse["capability_siblings"]
+                     + reuse["proposed_from_other_categories"])
+            if cands:
+                first = cands[0]
+                eid = first.get("e_id") or first.get("E_ID")
+                entry.update({
+                    "disposition": "cross_card_remap",
+                    "why": (f"{len(reuse['names_this_cell'])} registered row(s) name "
+                            f"this cell, {len(reuse['capability_siblings'])} sit on a "
+                            f"capability sibling, {len(reuse['proposed_from_other_categories'])} "
+                            f"proposed from other categories — read before searching"),
+                    "next": (f"python3 -m engine.cli attach {rr} --e-id {eid} "
+                             f"--subcap {cell}  (or --decline --why '…')"),
+                    "candidates": [c.get("e_id") or c.get("E_ID") for c in cands[:5]],
+                })
+            elif d and d.get("not_determinable"):
+                entry.update({
+                    "disposition": "internal_only",
+                    "why": f"the dossier says: {d['not_determinable']}",
+                    "next": "ask it: the discovery question below rides into the client conversation",
+                    "discovery_question": question,
+                })
+            elif (is_declared and rigour_full and vs["enrichment_tools"]
+                  and not vs["missing"] and {"direct", "proxy"} <= ladder_rungs):
+                entry.update({
+                    "disposition": "internal_only",
+                    "why": (f"every public rung climbed at FULL rigour: {vs['searches']} "
+                            f"searches, volleys complete, ladder {sorted(ladder_rungs)}, "
+                            f"connector(s) {vs['enrichment_tools']} asked"),
+                    "next": "ask it: the discovery question below rides into the client conversation",
+                    "discovery_question": question,
+                })
+            elif vs["missing"] or not vs["enrichment_tools"] or (
+                    is_declared and not rigour_full) or not vs["primary_fired"]:
+                owed = []
+                if not vs["primary_fired"]:
+                    owed.append("the primary diagnostic question")
+                owed += [f"volley {f}" for f in vs["missing"]]
+                if not vs["enrichment_tools"]:
+                    owed.append(f"an enrichment connector ({', '.join(C.ENRICHMENT_TOOLS[:3])} …)")
+                if is_declared and not rigour_full:
+                    owed.append("a FULL-rigour re-declaration once a connector is bound")
+                tool = next((t for t in C.ENRICHMENT_TOOLS
+                             if t not in vs["tools"]), C.ENRICHMENT_TOOLS[0])
+                entry.update({
+                    "disposition": "proxy",
+                    "why": "still owed: " + "; ".join(owed),
+                    "next": (f"one relay round through `{tool}` on the "
+                             f"{proxy_class or 'catalogue'} proxy class, rephrased "
+                             f"against the exclusion list — `engine.relay batch` "
+                             f"states it"),
+                    "proxy_class": proxy_class,
+                    "est_cost_usd": (d or {}).get("est_cost_usd", L._est_round_cost()),
+                })
+            else:
+                entry.update({
+                    "disposition": "unknown",
+                    "why": ("nothing in the substrate decides it: "
+                            + ("no dossier — the cell was never declared; "
+                               if not d else "")
+                            + "volleys complete, no reusable row, connector asked"),
+                    "next": (f"declare it — `engine.cli absence {rr} --subcap {cell} "
+                             f"…` with --not-determinable or --inferable/"
+                             f"--validation-question — so the next triage can route it"),
+                })
+            rows.append(entry)
+    counts = {d: sum(1 for r in rows if r["disposition"] == d) for d in L.DISPOSITIONS}
+    doc = {"schema_version": L.GAP_TRIAGE_SCHEMA, "run_id": run.run_id,
+           "at": _utcnow_iso(), "entity": entity, "counts": counts,
+           "discovery_questions": [
+               {"subcap": r["subcap"], "question": r["discovery_question"]}
+               for r in rows if r.get("discovery_question")],
+           "gaps": rows}
+    doc["path"] = L.write_gap_triage(run, doc)
+    return doc
+
+
+def _utcnow_iso() -> str:
+    import datetime as _dt
+    return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def _stalled_rounds(wb: RunWorkbook, category: str) -> int:
     """Consecutive trailing FLOORS verdicts on this category that said the
     SAME thing.
@@ -2408,6 +2565,11 @@ def main(argv=None) -> int:
         "gaps", help="what is still missing per category, computed from the "
                      "workbook, the relay queue and pipeline_state.json — "
                      "never from a lane's report of itself"))
+    common(sub.add_parser(
+        "triage", help="one disposition per gap (proxy | internal_only | "
+                       "cross_card_remap | unknown), decided from the workbook, "
+                       "the Search_Log, the dossiers and the register; written "
+                       "to 07_qa/gap_triage.json for the relay to state"))
     co = common(sub.add_parser(
         "correlate", help="the follow-up prompt for ONE category: the "
                           "cross-category rows proposed to its still-open "
@@ -2458,6 +2620,8 @@ def main(argv=None) -> int:
             print(json.dumps(reusable(wb, a.subcap), indent=2, default=str))
         elif a.cmd == "gaps":
             print(json.dumps(gaps(wb, run), indent=2, default=str))
+        elif a.cmd == "triage":
+            print(json.dumps(triage(wb, run), indent=2, default=str))
         elif a.cmd == "correlate":
             got = correlate(wb, a.category)
             if a.json:
