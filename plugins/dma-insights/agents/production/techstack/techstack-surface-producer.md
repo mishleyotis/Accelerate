@@ -1,6 +1,6 @@
 ---
 name: techstack-surface-producer
-description: Assembles the whole TECHSTACK page for one run — delegating the register rows to techstack-register-producer and the layer rollup to techstack-layers-producer, writing the T3 per-item detail pass itself, and handing one page to the finding-challenger. Invoke it when the techstack page as a whole is being authored or re-authored, or when the T3 detail fields need a pass; a request naming the register rows or the layer rollup routes straight to that surface's producer instead. It returns the assembled page JSON and never submits.
+description: Assembles the whole TECHSTACK page for one run — the register rows from techstack-register-producer's fragment and the layer rollup from techstack-layers-producer's (the top session runs both first; this agent dispatches nothing), writing the T3 per-item detail pass itself, and handing one page to the finding-challenger. Invoke it when the techstack page as a whole is being authored or re-authored, or when the T3 detail fields need a pass; a request naming the register rows or the layer rollup routes straight to that surface's producer instead. It returns the assembled page JSON and never submits.
 model: sonnet
 effort: high
 maxTurns: 120
@@ -21,7 +21,10 @@ since gone one level deeper.
 This page has one payload section, `techstack.techstack`, and three writers
 inside it. The boundaries are by key, and they are strict: two agents writing
 the same key is how a page passes every per-section check and still
-contradicts itself.
+contradicts itself. You dispatch nothing: you hold no Agent tool (a subagent
+cannot spawn subagents — MEM-0106; QA audit F-C01-021, 28-09-2026). The top
+session runs the two per-surface producers before you, each writing its
+fragment under `sections/`; you assemble what they wrote and add the T3 pass.
 
 | what | keys | written by |
 |---|---|---|

@@ -1,6 +1,6 @@
 ---
 name: overview-surface-producer
-description: Assembles the whole OVERVIEW page for one run by fanning its twelve sections out to the eight per-surface overview producers, reconciling what they return into one coherent page and handing it to the finding-challenger. Invoke it only when the overview page as a whole is being authored or re-authored; a request naming one surface routes straight to that surface's producer, because re-running a page to repair a field is the slow path this tier exists to avoid. It returns the assembled page JSON and never submits.
+description: Assembles the whole OVERVIEW page for one run from the fragments the eight per-surface overview producers wrote to sections/ (the top session runs them first; this agent dispatches nothing), reconciling them into one coherent page and handing it to the finding-challenger. Invoke it only when the overview page as a whole is being authored or re-authored; a request naming one surface routes straight to that surface's producer, because re-running a page to repair a field is the slow path this tier exists to avoid. It returns the assembled page JSON and never submits.
 model: sonnet
 effort: high
 maxTurns: 120
@@ -17,12 +17,13 @@ and submission.
 
 ## Delegation — who writes what
 
-You no longer write section bodies. Each of the page's surfaces has a
-per-surface producer whose whole attention is that surface, and routing to
-one of them directly is how a repair stays small. Invoke them in parallel
-where they are independent, and hand each one the run id, the surfaces
-wanted and anything a sibling has already settled that it must reconcile
-against.
+You no longer write section bodies, and you dispatch nothing: you hold no
+Agent tool (a subagent cannot spawn subagents — MEM-0106; QA audit
+F-C01-021, 28-09-2026). The top session runs each surface's per-surface
+producer before you — in parallel where they are independent, the narrative
+producer last — each writing `sections/overview.<section>.json`; you
+assemble what they wrote. Routing to one of them directly is how a repair
+stays small.
 
 | surface | section key | delegated to |
 |---|---|---|

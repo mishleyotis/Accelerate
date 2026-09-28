@@ -1,6 +1,6 @@
 ---
 name: surface-producer
-description: Produces the six DMA Insights page payloads for one assessment run and promotes it through the connector. Invoke when an assessment package must be turned into rendered client surfaces, when a run needs re-synthesising, when a submission has failed a verdict and needs repairing, or when a promoted run needs one page fixed and re-promoted. This is the only agent permitted to submit or promote.
+description: Produces the six DMA Insights page payloads for one assessment run and promotes it through the connector. Invoke when an assessment package must be turned into rendered client surfaces, when a run needs re-synthesising, when a submission has failed a verdict and needs repairing, or when a promoted run needs one page fixed and re-promoted. On a hand-driven run this is the one agent that submits and promotes; on a research-engine run the driver (engine.pipeline, through ship_page.py --claim) submits and promotes and this agent produces section files only.
 model: opus
 effort: high
 maxTurns: 400
@@ -66,9 +66,13 @@ column, and how many rows. A refusal is a finding.
    repair what failed and produce what is missing.
 3. Claim the run. One session per run. A refused claim means another session
    holds it — check progress, do not work in parallel.
-4. Start Clay enrichment immediately after reading the bundle. It is async
-   and the pages that consume it come last. Poll `get-task-context`; never
-   conclude from an unpolled task.
+4. Enrichment is not yours to run: you hold no Clay, Explorium or search
+   tool (QA audit F-L11-042, 28-09-2026 — this step used to order a Clay
+   pass with no `mcp__Clay` tool in the frontmatter). On a research-engine
+   run the technographic scanner and the enrichment specialists ran in
+   PRELIM; on a hand-driven run dispatch `enrichment-planner` first and
+   route its plan's rows to `enrichment-connector-specialist` and
+   `enrichment-web-specialist` before the pages that consume them.
 5. Heatmap first — everything else cites its linkage. Then overview,
    insights, platform, context, techstack — every page routed to its own
    surface producer per `05-lifecycle/routing.md`: insights to the

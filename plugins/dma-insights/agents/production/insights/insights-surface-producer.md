@@ -1,6 +1,6 @@
 ---
 name: insights-surface-producer
-description: Assembles the whole INSIGHTS page for one run by fanning its two surfaces out to the insights-cards-producer and the insights-landscape-producer, reconciling the landscape strip against the techstack register and handing one page to the finding-challenger. Invoke it only when the insights page as a whole is being authored or re-authored; a request naming one surface routes straight to that surface's producer, because re-running a page to repair a field is the slow path this tier exists to avoid. It returns the assembled page JSON and never submits.
+description: Assembles the whole INSIGHTS page for one run from the fragments the insights-cards-producer and the insights-landscape-producer wrote to sections/ (the top session runs them first; this agent dispatches nothing), reconciling the landscape strip against the techstack register and handing one page to the finding-challenger. Invoke it only when the insights page as a whole is being authored or re-authored; a request naming one surface routes straight to that surface's producer, because re-running a page to repair a field is the slow path this tier exists to avoid. It returns the assembled page JSON and never submits.
 model: sonnet
 effort: high
 maxTurns: 120
@@ -18,8 +18,11 @@ level deeper.
 
 ## Delegation — who writes what
 
-You no longer write section bodies. Both surfaces have per-surface producers,
-and routing to one of them directly is how a repair stays small.
+You no longer write section bodies, and you dispatch nothing: you hold no
+Agent tool (MEM-0106; QA audit F-C01-021). The top session runs both
+per-surface producers before you, each writing
+`sections/insights.<section>.json`; you assemble what they wrote. Routing to
+one of them directly is how a repair stays small.
 
 | surface | section key | delegated to |
 |---|---|---|

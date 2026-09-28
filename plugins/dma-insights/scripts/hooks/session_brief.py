@@ -50,8 +50,10 @@ CORE = (
     "A finished '<Client> - DMA' folder goes to package-vetter, then "
     "production; a repair naming a surface or page routes by the table. In "
     "production: one surface -> that page's per-surface producer, then "
-    "finding-challenger, then page-consolidator; only the surface-producer "
-    "submits or promotes. Read get_memory_digest before authoring anything, "
+    "finding-challenger, then page-consolidator; submission and promotion "
+    "belong to the surface-producer on a hand-driven run and to the driver "
+    "(engine.pipeline through ship_page.py) on a research-engine run — "
+    "nobody else submits. Read get_memory_digest before authoring anything, "
     "and end every production with the qa-overseer so the findings memory "
     f"learns. Routing table: {ROUTING}"
 )
@@ -292,6 +294,11 @@ def brief(event: dict) -> str:
             return SCORING_BRIEF + scope_rule(name)
         if name.startswith("research-") or name == "technographic-scanner":
             return RESEARCH_BRIEF + scope_rule(name)
+        if name == "surface-producer":
+            # The one agent allowed to submit was being told "do not submit
+            # or promote" (QA audit F-L11-042, pair 23): SUBAGENT is for the
+            # producers under it, not for it.
+            return CORE
         return CORE + SUBAGENT
     # PostCompact is the compaction event itself — it carries the summary and
     # a "manual"/"auto" trigger, not a SessionStart `source`. It was the

@@ -33,7 +33,7 @@ unambiguous identifier when a routing ticket gets an id wrong.
 
 | Agent | Tier | Surfaces or duties it owns | Invoked by |
 |---|---|---|---|
-| `surface-producer` | orchestrator | The whole run: claiming, assembly order, cross-page reconciliation, submission, promotion. **The only agent permitted to submit or promote.** | The `dma-surface-production` skill, the scheduled Cowork session, or an operator handing over a package |
+| `surface-producer` | orchestrator | The whole run: claiming, assembly order, cross-page reconciliation, submission, promotion. **Submits and promotes on a hand-driven run; on a research-engine run the driver (`engine.pipeline` through `ship_page.py --claim`) does, and this agent produces section files only.** | The `dma-surface-production` skill, the scheduled Cowork session, or an operator handing over a package |
 | `overview-surface-producer` | per-surface producer | Router for D1 Overview — all thirteen surfaces when a whole page is in play | `surface-producer` |
 | `overview-hero-producer` | per-surface producer | O1 `overview.scores` · O2 `overview.firmographics` — one card on the render | `surface-producer`, or `overview-surface-producer` while routing the page |
 | `overview-whynow-producer` | per-surface producer | O3 `overview.why_now` and its inline signal expansion | `surface-producer` / `overview-surface-producer` |
