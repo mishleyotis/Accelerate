@@ -431,6 +431,15 @@ def lane_output(transcript: Path) -> str:
 RUN_LEVEL_LANES = (DRAIN_AGENT, "enrichment-connector-specialist",
                    "technographic-scanner", "research-conductor")
 
+#: Synthesis and verification lanes (F-D02-008): they hold no web tool, so
+#: what they cannot support from the run they emit as `search_requests`,
+#: each entry naming its `subcap` (from which `_one` derives the category).
+_SYNTHESIS_RE = re.compile(
+    r"^(overview|heatmap|insights|platform|techstack|context)-[a-z-]+-producer$|"
+    r"^(finding-challenger|adversarial-verifier|evidence-integrity-checker|"
+    r"exclusion-boundary-auditor|numeric-reconciliation-checker|"
+    r"enrichment-ledger-auditor|enrichment-planner)$", re.I)
+
 
 def _lanes(logs: Path, categories: list[str] | None) -> list[tuple[str, str | None]]:
     """(lane name, category) pairs whose transcripts to read.
@@ -453,7 +462,7 @@ def _lanes(logs: Path, categories: list[str] | None) -> list[tuple[str, str | No
         m = _LANE_RE.match(p.stem)
         if m and not categories:
             add(p.stem, m.group(1).upper())
-        elif p.stem in RUN_LEVEL_LANES:
+        elif p.stem in RUN_LEVEL_LANES or _SYNTHESIS_RE.match(p.stem):
             add(p.stem, None)
     return out
 

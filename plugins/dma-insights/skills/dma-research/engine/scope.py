@@ -52,6 +52,22 @@ _SERVICING = frozenset({"research-conductor", "enrichment-web-specialist",
 
 _CRITICS = frozenset({"scoring-critic"})
 
+#: Actors that SYNTHESISE a client surface from the run's registered
+#: evidence. They search nothing and write no research row: a claim the run
+#: cannot support is returned as a `search_requests` entry (QA audit
+#: F-D02-008, 28-09-2026).
+_SURFACE_PRODUCER = re.compile(
+    r"^(overview|heatmap|insights|platform|techstack|context)-[a-z-]+-producer$", re.I)
+
+#: Actors that VERIFY a result and repair nothing; they search nothing.
+_VERIFIERS = frozenset({"evidence-integrity-checker", "exclusion-boundary-auditor",
+                        "numeric-reconciliation-checker", "adversarial-verifier",
+                        "enrichment-ledger-auditor", "enrichment-planner",
+                        "page-consolidator"})
+
+#: Reads what production serves — WebFetch is its instrument, not a search.
+_APP_AUDITOR = frozenset({"deployed-app-auditor"})
+
 #: Every op a write path can name. `note` is the memory notebook's entry.
 OPS = ("search", "evidence", "attach", "synthesis", "absence", "challenge",
        "note", "score", "critique")
@@ -107,6 +123,12 @@ def classify(actor: str | None) -> dict:
         out["class"] = "critic"
     elif name == "technographic-scanner":
         out["class"] = "technographic-scanner"
+    elif _SURFACE_PRODUCER.match(name):
+        out["class"] = "surface-producer"
+    elif name in _VERIFIERS:
+        out["class"] = "verifier"
+    elif name in _APP_AUDITOR:
+        out["class"] = "app-auditor"
     return out
 
 

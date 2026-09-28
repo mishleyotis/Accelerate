@@ -115,9 +115,10 @@ def test_exactly_one_agent_may_put_content_into_the_product(tool):
 @pytest.mark.parametrize("tool", MEMORY)
 def test_only_the_learning_agents_may_write_the_findings_memory(tool):
     holders = {rel(p) for p in AGENT_FILES if tool in tools_of(p)}
-    assert holders <= {"qa/qa-overseer.md", "learning/rectifier.md",
-                       "learning/learning-grader.md",
-                       "orchestration/surface-producer.md"}, (
+    # F-G01-035 (28-09-2026): the surface producer and the grader held these
+    # too; the memory has one owner (the overseer) and one closer (the
+    # rectifier, which records what it changed against what it closed).
+    assert holders <= {"qa/qa-overseer.md", "learning/rectifier.md"}, (
         f"{tool} is reachable by {sorted(holders)}")
 
 
@@ -170,15 +171,24 @@ def _connector_tools(t: set) -> set:
     return {x for x in t if x.startswith(CONNECTOR_PREFIXES)}
 
 
-def test_producers_keep_the_research_tools_they_are_told_to_use():
-    """The web pair stays on every producer; the CONNECTORS leave all but the
-    four whose surface names one with ‡. A producer that needs Exa emits a
-    `search_requests` entry and the orchestrator tier services it."""
+def test_producers_hold_no_web_tool_and_emit_search_requests():
+    """No producer, page router, checker or verifier searches or fetches
+    (QA audit F-D02-008, 28-09-2026: 31 of them could, so a claim could be
+    written from a page nobody registered). A producer that needs evidence
+    the run does not hold emits a `search_requests` entry and the research
+    tier services it. The connectors leave all but the four whose surface
+    names one with ‡. The one WebFetch left outside research and
+    enrichment is the deployed-app-auditor's read of production."""
     for p in AGENT_FILES:
-        if not rel(p).startswith("production/"):
+        r = rel(p)
+        if r.startswith(("production/", "checkers/", "qa/")):
+            t = tools_of(p)
+            assert "WebSearch" not in t, r
+            if r != "qa/deployed-app-auditor.md":
+                assert "WebFetch" not in t, r
+        if not r.startswith("production/"):
             continue
         t = tools_of(p)
-        assert "WebSearch" in t and "WebFetch" in t, rel(p)
         if rel(p) not in PRODUCERS_WITH_A_CONNECTOR:
             assert _connector_tools(t) == set(), (
                 f"{rel(p)} holds {sorted(_connector_tools(t))}; connectors "

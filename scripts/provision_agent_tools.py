@@ -230,19 +230,24 @@ RESEARCH_LANE = row(
     why="a lane searches the open web and emits every connector query as a "
         "search_requests entry; the orchestrator tier holds the connectors")
 
-#: A per-surface producer: researches on the web, reads the run, records
-#: that an enrichment ran, and touches nothing else. Connector corroboration
-#: for its surface is serviced by the enrichment specialists.
+#: A per-surface producer: writes one surface from the run's REGISTERED
+#: evidence, records that an enrichment ran, and touches nothing else. It
+#: holds no web tool. Measured 28-09-2026 (QA audit F-D02-008): 31
+#: synthesis and verification agents could search, so a claim could be
+#: written from a page nobody registered — unlogged, unbudgeted, uncitable.
+#: A claim the run cannot support is returned as a `search_requests` entry
+#: and the research tier services it inside the run's budget and ledger.
 SECTION_PRODUCER = row(
-    web=WEB, reads="producer", writes=LEDGER_TOOLS,
-    why="writes one surface from the run and the open web; connector "
-        "corroboration is emitted as search_requests and serviced")
+    reads="producer", writes=LEDGER_TOOLS,
+    why="writes one surface from the run's registered evidence; a claim the "
+        "run cannot support is returned as search_requests and serviced by "
+        "the research tier — it searches nothing")
 
 #: overview.leadership is WRITTEN from Clay's contacts answer (CONNECTORS.md
 #: marks the row ‡): find the contacts, poll the task, attach the data
 #: points. The 20-contact loss was the poll being skipped.
 PEOPLE_PRODUCER = row(
-    web=WEB, external=["clay/people"], reads="producer",
+    external=["clay/people"], reads="producer",
     reads_extra=["list_enrichment_gaps"], writes=LEDGER_TOOLS,
     why="overview.leadership is written from Clay's contacts pass, which "
         "the producer must run and poll itself")
@@ -252,16 +257,17 @@ PEOPLE_PRODUCER = row(
 #: {explorium, clay} (apps/api computed.py), so an estate assembled from web
 #: search cannot be reconciled against the app's own contract.
 TECHNOGRAPHIC_PRODUCER = row(
-    web=WEB, external=["explorium"], reads="producer", writes=LEDGER_TOOLS,
+    external=["explorium"], reads="producer", writes=LEDGER_TOOLS,
     why="the technographic register and its landscape rollup are written "
         "from Explorium's answer, which this producer must call itself")
 
 #: The six page routers. They assemble their producers' fragments and hand
 #: the page back; explicitly not a door.
 PAGE_ASSEMBLER = row(
-    web=WEB, reads="assembler",
+    reads="assembler",
     why="routes one page: reads its producers' fragments from disk, the "
-        "digest and the run's progress; searches only to settle a conflict")
+        "digest and the run's progress; a conflict it cannot settle from "
+        "the run is returned as search_requests, never searched")
 
 #: Owns the technographic scan as a deliverable. Writes only Tech_Register,
 #: through the engine CLI. It carries EXPLORIUM, CLAY (company slice) and
@@ -293,9 +299,11 @@ RESEARCH_CONDUCTOR = row(
 
 #: The only agent that puts content into the product. Invariant 2 in one row.
 #: No web and no connector: it assembles, reconciles and submits what its
-#: producers wrote; a question about the world goes to a producer.
+#: producers wrote; a question about the world goes to a producer. No
+#: memory writes either (F-G01-035, 28-09-2026): the findings memory has
+#: one owner, the qa-overseer, which every production ends with.
 SURFACE_PRODUCER = row(
-    reads="orchestrator", writes=CONTENT_TOOLS + LEDGER_TOOLS + MEMORY_TOOLS,
+    reads="orchestrator", writes=CONTENT_TOOLS + LEDGER_TOOLS,
     extra=["Agent", "Write", "Edit"],
     why="claims, assembles, submits and promotes; dispatches producers and "
         "writes their fragments to disk")
@@ -317,19 +325,22 @@ WEB_SPECIALIST = row(
         "Tavily extract is its verbatim-excerpt read")
 
 #: Read-only auditors. They exist to disbelieve a result, and an adversary
-#: that can repair what it found is not an adversary. WebFetch only: a
-#: checker asked whether an evidence row's URL is real may open it; it may
-#: not go looking for new evidence.
+#: that can repair what it found is not an adversary. No web at all: a
+#: checker that fetches can be shown a page nobody registered, and the
+#: engine's fetch cache under the run is where a cited URL's text lives
+#: (F-D02-008, 28-09-2026).
 AUDITOR = row(
-    web=FETCH_ONLY, reads="checker",
-    why="re-derives a verdict from the run and may open a cited URL to "
-        "confirm it; searches for nothing")
+    reads="checker",
+    why="re-derives a verdict from the run's registered evidence; opens "
+        "nothing on the web and searches for nothing")
 
-#: Verifiers attack a passing result and may search for the falsifier.
+#: Verifiers attack a passing result from the run's own evidence. A
+#: falsifier the run does not hold is returned as search_requests.
 VERIFIER = row(
-    web=WEB, reads="checker",
-    why="attacks a result that already passed and may search the open web "
-        "for the falsifier; repairs nothing")
+    reads="checker",
+    why="attacks a result that already passed, from the run's evidence; a "
+        "falsifier it cannot find there is returned as search_requests; "
+        "repairs nothing")
 
 #: Engine-only agents: every write goes through the engine CLI over Bash
 #: and the ledger's refusals are the write control. No web: the research
@@ -402,6 +413,12 @@ ROLES = {
                               "list_open_findings", "list_open_rejections"]),
     # verifiers
     "qa/adversarial-verifier": VERIFIER,
+    # Reads what production actually serves: WebFetch is its instrument,
+    # not a search. It searches nothing.
+    "qa/deployed-app-auditor": dict(
+        AUDITOR, web=FETCH_ONLY,
+        why="reads the deployed web and API through WebFetch and compares "
+            "them with the invariants; searches for nothing"),
     "checkers/finding-challenger": VERIFIER,
     # the learning loop
     "qa/qa-overseer": MEMORY_WRITER,
@@ -414,7 +431,11 @@ ROLES = {
                                why="edits the toolchain — skills, agents, "
                                    "gates — and records the refinement; "
                                    "produces no client content"),
-    "learning/learning-grader": dict(MEMORY_WRITER, writes=MEMORY_TOOLS),
+    # Independent of the fixer BY CONSTRUCTION (its own description): it
+    # reads the memory and scores a change; it writes nothing.
+    "learning/learning-grader": dict(MEMORY_WRITER, writes=(),
+                                    why="grades a change against the memory "
+                                        "it reads; writes nothing"),
     "learning/learning-testgen": dict(MEMORY_WRITER, writes=(),
                                       extra=["Write", "Edit"],
                                       why="writes test cases as files; "

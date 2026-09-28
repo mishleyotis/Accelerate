@@ -32,7 +32,7 @@
         ]
       },
       {
-        "matcher": "WebFetch|mcp__Exa__web_fetch_exa",
+        "matcher": "WebFetch|mcp__Exa__web_fetch_exa|WebSearch|mcp__Exa__web_search_exa|mcp__Tavily__tavily_search|mcp__Tavily__tavily_extract",
         "hooks": [
           {
             "type": "command",
