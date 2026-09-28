@@ -138,7 +138,6 @@ def test_the_stated_grains_land_in_the_columns_the_app_reads(tmp_path):
 
 def test_the_app_parser_reads_the_grains_this_engine_writes(tmp_path):
     """The whole point of using the app's own header spellings."""
-    sys.path.insert(0, "/home/user/Accelerate/apps/worker")
     from dma_worker.workbook_parser import parse_grain_summaries
 
     run, wb, cells = _scored(tmp_path)
@@ -191,7 +190,6 @@ def test_recommendations_refuse_when_the_section_is_unwritten(tmp_path):
 
 def test_the_app_parser_reads_the_recommendations_this_engine_writes(
         tmp_path):
-    sys.path.insert(0, "/home/user/Accelerate/apps/worker")
     from dma_worker.workbook_parser import parse_recommendations
 
     run, wb, cells = _scored(tmp_path)

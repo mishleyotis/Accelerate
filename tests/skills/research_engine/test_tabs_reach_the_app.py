@@ -39,7 +39,6 @@ from engine import techscan
 
 from .fixtures import bank_evidence, new_run
 
-sys.path.insert(0, "/home/user/Accelerate/apps/worker")
 
 
 # ── Peer_Benchmarks reaches the parser ───────────────────────────────────
