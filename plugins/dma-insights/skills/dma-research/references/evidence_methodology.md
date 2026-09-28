@@ -31,7 +31,7 @@ ERS ranges from 1.0 (lowest quality) to 5.0 (highest quality).
 | T5 — Marketing/Claims | 1.0 | Explicitly promotional, no accountability |
 
 **Critical Tier Classification Rules:**
-- **Hubbl scans, BuiltWith, Wappalyzer = T1** (machine-generated, timestamped, objective)
+- **Hubbl scans, BuiltWith, Wappalyzer = T1** (machine-generated, timestamped, objective) — the ledger refuses a scan source at any other tier (`contract.SCAN_TIER`) and the connector's ET-11 refuses it at submit
 - **Structured discovery notes with specific tech/metrics = T2** (formal engagement outputs)
 - **NEVER classify Hubbl as T4.** This is the most common misclassification — it suppresses
   scores via T4 ceilings when the data is actually machine-verified deployment evidence.

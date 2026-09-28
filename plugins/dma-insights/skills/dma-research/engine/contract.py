@@ -1098,6 +1098,32 @@ FACT_TIERS = ("T1", "T2")
 def claim_label_for(tier: str) -> str:
     """The label provenance licenses when the writer states none."""
     return "FACT" if tier in FACT_TIERS else "INFERENCE"
+
+
+#: A machine technographic scan is T1: machine-generated, timestamped,
+#: objective deployment data (the tier ladder in SKILL.md and
+#: references/evidence_methodology.md). Filing one lower is the corpus's
+#: most common misclassification — it caps the ceiling the cells it
+#: supports can reach (T3 → L4, T4 → L2.5) and understates T1 in the
+#: evidence census. Measured 28-09-2026 (QA audit F-J04-015): 5 of 6
+#: technographic rows on one staged heatmap sat at T3. `scan_source` names
+#: the provider token a source carries; `ledger.append_evidence` refuses a
+#: named scan at any other tier (refused, not corrected, like the label
+#: above); the connector's ET-11 refuses the same shape at submit from its
+#: own copy of these tokens, which apps/mcp/tests/test_scan_tier.py holds
+#: equal to this one.
+SCAN_TIER = "T1"
+SCAN_SOURCE_TOKENS = ("hubbl", "builtwith", "wappalyzer", "similartech",
+                      "datanyze", "appsruntheworld", "explorium",
+                      "technographic", "technographics")
+_SCAN_RE = re.compile(r"(?<![a-z0-9])(" + "|".join(
+    re.escape(t) for t in SCAN_SOURCE_TOKENS) + r")(?![a-z0-9])")
+
+
+def scan_source(source_name: str | None, source_url: str | None = None) -> str | None:
+    """The scan-provider token a source's name or URL carries, or None."""
+    m = _SCAN_RE.search(f"{source_name or ''} {source_url or ''}".lower())
+    return m.group(1) if m else None
 FACETS = ("works", "fails", "value", "contradicts", "corroborates")
 
 #: The AI overlay, measured from the pinned workbook's own DQ_Bank: its

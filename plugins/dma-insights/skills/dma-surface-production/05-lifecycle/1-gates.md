@@ -770,7 +770,7 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **71** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **72** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
@@ -850,7 +850,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `SG-S8` | **Sentiment rests on more than one line.** The count of rating rows across all audiences, computed at submit and never read from a declared displayed_lines, is greater than one; a self-published NPS (T4/T5) standing alone is thin whatever the count. *(registry-only: no module emits this id today)* | disclose |
 | `SG-V4` | **Grounding against the run corpus.** Prose similarity against the narrowest applicable centroid (cell .62 / category .58 / pillar .55 / run .50); abstains to a recorded NOT_RUN below five members or without an embedding tier. *(registry-only: no module emits this id today)* | disclose |
 
-### ET · Enrichment trigger (10)
+### ET · Enrichment trigger (11)
 
 | Gate | What it asserts | On failure |
 |---|---|---|
@@ -864,6 +864,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `ET-08` | **A cell-link field carries a cell id.** Every field this connector treats as a cell link — anything ending subcap_id / subcap_ids, plus capability_ids and subcaps — holds a catalogue cell id or nothing. A non-empty value that is not an id is refused. | block |
 | `ET-09` | **No other client named in this client's prose.** No payload string names another client in the corpus, unless that name is a peer recorded server-side for this run. | block |
 | `ET-10` | **A FACT rests on a T1 or T2 source.** Every cited evidence row labelled FACT carries tier T1 or T2. A T3-T5 row may be INFERENCE, HYPOTHESIS or CEILING_ESTIMATE; the label is derived from provenance, never typed. | block |
+| `ET-11` | **A machine technographic scan is a T1 source.** Every cited evidence row whose source names a technographic scan provider (Hubbl, BuiltWith, Wappalyzer, Explorium and their kind) carries tier T1. Machine-generated, timestamped deployment data is the strongest tier the ladder has;… | block |
 
 > **Emitted but not in the registry:** `SG-01`, `SG-06`. A verdict can name these and `explain_gate` cannot answer for them.
 

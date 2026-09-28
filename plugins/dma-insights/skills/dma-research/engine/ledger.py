@@ -141,6 +141,20 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             "a public source with no URL cannot be cited; register it with "
             "origin='internal' and it will be labelled, not laundered")
+    # A machine technographic scan is T1 (contract.SCAN_TIER). Measured
+    # 28-09-2026 (QA audit F-J04-015): 5 technographic rows on one staged
+    # heatmap sat at T3, capping the ceilings their cells could reach.
+    # Refused, not corrected, for the reason the label rule gives: a
+    # silent re-tier would hide the mistake. Before the FACT rule so the
+    # writer is told the tier to fix rather than the label that follows it.
+    scan = C.scan_source(source_name, source_url)
+    if scan and tier != C.SCAN_TIER:
+        raise LedgerRefusal(
+            f"source names the technographic scan provider {scan!r} and is "
+            f"filed at {tier}; a machine technographic scan is "
+            f"{C.SCAN_TIER} (contract.SCAN_TIER). Re-register it at "
+            f"{C.SCAN_TIER}, or under the source that actually states the "
+            f"claim if this is reportage about a scan rather than the scan")
     # After the excerpt and URL checks on purpose: a thin note is refused
     # on its length first (the message the notebook tests read back), and
     # only a citable span is then judged on what its tier can carry.
