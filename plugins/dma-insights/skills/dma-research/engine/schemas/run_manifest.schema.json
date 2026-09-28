@@ -9,7 +9,7 @@
     "evidence_mode", "scope_mode", "reference_date", "catalogue_version",
     "catalogue_hash", "workbook_contract", "engine_version", "assembled_at",
     "deliverables", "packets", "gates", "approvals", "decision_log_ref",
-    "scores", "evidence_metrics"
+    "scores", "evidence_metrics", "enrichment"
   ],
   "properties": {
     "schema_version": {"const": "run_manifest_v3"},
@@ -105,6 +105,17 @@
       "properties": {
         "total_items": {"type": "integer", "minimum": 0},
         "tier_distribution": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}}
+      },
+      "additionalProperties": false
+    },
+    "enrichment": {
+      "type": "object",
+      "required": ["facets", "gaps_open", "seeded"],
+      "properties": {
+        "facets": {"type": "object",
+                   "additionalProperties": {"type": "string", "enum": ["OPEN", "PARTIAL", "AGING", "ESTIMATE", "RESOLVED"]}},
+        "gaps_open": {"type": "integer", "minimum": 0},
+        "seeded": {"type": "boolean"}
       },
       "additionalProperties": false
     }

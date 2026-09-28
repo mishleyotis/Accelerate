@@ -307,6 +307,67 @@ def brief(event: dict) -> str:
     return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"]) + install_warning()
 
 
+#: Set to skip the connector read at session start (a test harness, an
+#: offline session). The brief then SAYS the queue was not read.
+NO_CONNECTOR_ENV = "DMA_BRIEF_NO_CONNECTOR"
+
+
+def connector_outstanding(*, rpc=None, has_identity=None,
+                          timeout: float = 8.0) -> str:
+    """What the connector says is outstanding, stated in the brief.
+
+    Measured 28-09-2026 (QA audit F-O04-007, regression seed 16): 200 open
+    rejections, one at five attempts and eleven days, and nothing in the
+    plugin read `list_open_rejections` at session start — the instruction
+    existed as prose, and verdicts were found by a person. This reads the
+    queue once, with a short timeout, and puts the answer in front of the
+    session before it chooses a run. Never fatal, never fabricated: with no
+    identity it says nothing (there is nothing to ask with), and a read
+    that fails says so and names the command, because an unread queue is
+    not an empty one.
+    """
+    if os.environ.get(NO_CONNECTOR_ENV):
+        return ""
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        if str(here) not in sys.path:
+            sys.path.insert(0, str(here))
+        if has_identity is None:
+            import gcp_token                                    # noqa: PLC0415
+            key, _src = gcp_token.load_key("/root/.dma/sa.json")
+            has_identity = key is not None
+        if not has_identity:
+            return ""
+        if rpc is None:
+            import mcp_raw                                      # noqa: PLC0415
+            rpc = mcp_raw.rpc
+        d = rpc("tools/call", {"name": "list_open_rejections",
+                               "arguments": {"limit": 50}}, timeout=timeout)
+        content = (d.get("result") or {}).get("content") or []
+        text = (content[0].get("text") if content and content[0].get("type") == "text"
+                else json.dumps(d.get("result", d)))
+        doc = json.loads(text)
+        if not isinstance(doc, dict):
+            raise ValueError("unexpected reply shape")
+    except Exception as exc:                 # noqa: BLE001 — reported, not silent
+        return (f" CONNECTOR QUEUE NOT READ ({type(exc).__name__}): before choosing "
+                f"a run, run `python3 scripts/mcp_raw.py call list_open_rejections "
+                f"--args '{{}}'` — an unread queue is not an empty one.")
+    rows = doc.get("rejections") or []
+    if not rows:
+        return " CONNECTOR QUEUE: 0 open rejections."
+    top = "; ".join(
+        f"{r.get('display_id')} {r.get('page')} {r.get('gate_id')} x{r.get('attempts')}"
+        + (f" (run seq {r.get('run_seq')})" if r.get("run_seq") is not None else "")
+        for r in rows[:5])
+    return (f" CONNECTOR QUEUE (read this first): {doc.get('open', len(rows))} open "
+            f"rejection(s), {doc.get('looping', 0)} past two attempts, pages "
+            f"{', '.join(doc.get('pages') or [])}; worst first: {top}. Repair or "
+            f"withdraw before producing anything new; past two attempts CHANGE "
+            f"APPROACH. `get_run_progress <run>` names the PASS pages you must "
+            f"not re-synthesise; `list_submissions <run>` is the attempt history.")
+
+
 def record_bind(event: dict) -> None:
     """Write down which plugin tree THIS session bound, for the checks that
     run later in the session without the hook's environment.
@@ -341,6 +402,11 @@ def main() -> int:
         event = {}
     record_bind(event)
     text = brief(event)
+    hook_name = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    if hook_name in ("", "SessionStart", "PostCompact") and not (
+            event.get("agent_type") or event.get("agentType")):
+        # Top-level sessions only: a subagent's parent already saw it.
+        text += connector_outstanding()
     # SubagentStart takes `additionalContexts`; SessionStart takes plain
     # stdout. Emitting the JSON form for a subagent is what actually puts the
     # brief in the child's context — printing to stdout there would be

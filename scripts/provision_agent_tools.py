@@ -195,14 +195,15 @@ READS = {
     "memory": FLOOR + ["search_findings", "get_finding", "list_defect_classes",
                        "get_memory_digest", "list_open_findings",
                        "list_open_rejections", "list_reviewer_feedback",
-                       "get_validation_verdict"],
+                       "get_validation_verdict", "list_submissions"],
     # The one agent that claims, submits and promotes: the queue, the
     # upload state, the verdicts, and the evidence it reconciles across pages.
     "orchestrator": FLOOR + ["get_client_state", "get_evidence",
                              "get_report_bundle", "get_run_progress",
                              "get_validation_verdict", "list_pending_runs",
                              "get_upload_status", "list_withdrawn_runs",
-                             "list_open_rejections", "get_memory_digest"],
+                             "list_open_rejections", "list_submissions",
+                             "get_memory_digest"],
 }
 
 

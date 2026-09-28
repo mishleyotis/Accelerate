@@ -221,6 +221,12 @@ def _evidence_metrics(wb: RunWorkbook) -> dict:
     return {"total_items": n, "tier_distribution": dist}
 
 
+def _enrichment(wb: RunWorkbook) -> dict:
+    """The connector's enrichment state as PRELIM seeded it (F-N06-014)."""
+    from . import prelim                                         # noqa: PLC0415
+    return prelim.enrichment_state(wb)
+
+
 def _gates(wb: RunWorkbook) -> dict:
     out: dict = {}
     for r in wb.rows("Gate_Log"):
@@ -341,6 +347,7 @@ def manifest_doc(wb: RunWorkbook, *, status: str = "COMPLETE",
         "decision_log_ref": _decision_log_ref(run),
         "scores": _scores(wb),
         "evidence_metrics": _evidence_metrics(wb),
+        "enrichment": _enrichment(wb),
     }
 
 

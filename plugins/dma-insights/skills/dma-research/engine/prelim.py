@@ -622,6 +622,103 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
 
 
+# ── the client's SERVER-SIDE state, seeded before any category work ──────
+#
+# Measured 28-09-2026 (QA audit F-N06-014): a promoted run showed 4 of 7
+# enrichment facets never_enriched, blocking = 4, done = false — the
+# connector HELD the state and nothing on the research side read it, so
+# the produced pages served the empty state for facets the last run had
+# already established were missing. `get_client_state` and
+# `list_enrichment_gaps` are read at step 1a and written HERE, into the
+# Enrichment_Needed tab, one row per facet and one per must-present gap, so
+# PRELIM, the category lanes and the manifest all see what the server
+# already knows the run owes.
+
+ENRICHMENT_AREA = "connector facet"
+GAP_AREA = "staged gap"
+#: The server's facet states (dma_mcp.ledger.STATES) → the tab's statuses
+#: (engine.profile.ENRICHMENT_STATUSES). One owner each side; the mapping
+#: is the only bridge.
+FACET_STATE_STATUS = {"never_enriched": "OPEN", "enriched_not_promoted": "PARTIAL",
+                      "current": "RESOLVED"}
+
+
+def seed_enrichment(wb: RunWorkbook, client_state: dict,
+                    gaps: dict | None = None) -> dict:
+    """Write the connector's enrichment facets (and the staged gaps of the
+    latest run) into Enrichment_Needed. Idempotent on (area, field, status):
+    a re-seed adds nothing that is already there."""
+    from . import profile as _profile                              # noqa: PLC0415
+    have = {(str(r.get("Area") or ""), str(r.get("Field / cell") or ""),
+             str(r.get("Status") or "").upper())
+            for r in wb.rows("Enrichment_Needed")}
+    added, facets = [], {}
+    enrichment = (client_state or {}).get("enrichment") or {}
+    for row in enrichment.get("facets") or []:
+        facet = str(row.get("facet") or "").strip()
+        state = str(row.get("state") or "").strip()
+        status = FACET_STATE_STATUS.get(state)
+        if not facet or status is None:
+            continue
+        facets[facet] = status
+        closes = (f"record_enrichment('{facet}') after the section that carries it "
+                  f"is produced and promoted; server state at seed: {state}"
+                  + (f", last {row.get('enriched_at') or row.get('last_enriched_at')}"
+                     if row.get("enriched_at") or row.get("last_enriched_at") else ""))
+        key = (ENRICHMENT_AREA, facet, status)
+        if key in have:
+            continue
+        _profile.enrichment_needed(wb, area=ENRICHMENT_AREA, field=facet,
+                                   status=status, closes=closes)
+        have.add(key)
+        added.append({"area": ENRICHMENT_AREA, "field": facet, "status": status})
+    n_gaps = 0
+    for g in (gaps or {}).get("gaps") or []:
+        kind = str(g.get("kind") or "")
+        if kind not in ("must_present_member", "empty_required"):
+            continue
+        field = ".".join(str(g.get(k) or "") for k in ("page", "section", "field")
+                         if g.get(k)) or str(g.get("path") or "")
+        if not field:
+            continue
+        n_gaps += 1
+        key = (GAP_AREA, field, "OPEN")
+        if key in have:
+            continue
+        closes = str(g.get("closes_with") or g.get("doc") or
+                     f"the {kind} the contract names on every sub-vertical")[:400]
+        if len(closes) < 20:
+            closes = f"{closes} — a stated value or a declared empty_state with its ladder"
+        _profile.enrichment_needed(wb, area=GAP_AREA, field=field, status="OPEN",
+                                   closes=closes)
+        have.add(key)
+        added.append({"area": GAP_AREA, "field": field, "status": "OPEN"})
+    md = wb.metadata()
+    return {"run_id": md.get("run_id"), "entity": md.get("entity_name"),
+            "facets": facets, "facets_blocking": sorted(
+                f for f, s in facets.items() if s != "RESOLVED"),
+            "staged_gaps": n_gaps, "rows_added": added,
+            "rows_total": len(wb.rows("Enrichment_Needed")),
+            "served_pages": (client_state or {}).get("served_pages") or [],
+            "prior_runs": len((client_state or {}).get("runs") or [])}
+
+
+def enrichment_state(wb: RunWorkbook) -> dict:
+    """What the tab holds, in the manifest's shape: the connector facets by
+    status, the open staged gaps, and whether anything was seeded at all."""
+    facets: dict[str, str] = {}
+    gaps_open = 0
+    for r in wb.rows("Enrichment_Needed"):
+        area = str(r.get("Area") or "")
+        field = str(r.get("Field / cell") or "")
+        status = str(r.get("Status") or "").upper()
+        if area == ENRICHMENT_AREA and field:
+            facets[field] = status          # the latest row per facet wins
+        elif area == GAP_AREA and status == "OPEN":
+            gaps_open += 1
+    return {"facets": facets, "gaps_open": gaps_open, "seeded": bool(facets)}
+
+
 def complete(wb: RunWorkbook) -> dict:
     """Sign PRELIM off — refusing while anything is open."""
     st = state(wb)
@@ -692,6 +789,16 @@ def main(argv=None) -> int:
                         "recomputation, the inference")
     m.add_argument("--peer-scores", default="")
 
+    se = common(sub.add_parser(
+        "seed-enrichment",
+        help="write the connector's enrichment facets (get_client_state) and "
+             "the latest run's staged gaps (list_enrichment_gaps) into "
+             "Enrichment_Needed — step 1a, before PRELIM"))
+    se.add_argument("--client-state", required=True,
+                    help="the get_client_state reply, as a JSON file")
+    se.add_argument("--gaps", default=None,
+                    help="the list_enrichment_gaps reply for the latest run, as JSON")
+
     common(sub.add_parser("complete"))
 
     a = ap.parse_args(argv)
@@ -718,6 +825,11 @@ def main(argv=None) -> int:
                                      author=a.author), indent=2))
         elif a.cmd == "declare":
             print(json.dumps(declare(wb, a.section, a.ladder), indent=2))
+        elif a.cmd == "seed-enrichment":
+            cs = json.loads(Path(a.client_state).read_text(encoding="utf-8"))
+            gp = (json.loads(Path(a.gaps).read_text(encoding="utf-8"))
+                  if a.gaps else None)
+            print(json.dumps(seed_enrichment(wb, cs, gp), indent=2))
         elif a.cmd == "timeline":
             print(json.dumps(timeline(wb, date=a.date, event=a.event,
                                       signal=a.signal, kind=a.kind,

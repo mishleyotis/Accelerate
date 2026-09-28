@@ -164,6 +164,34 @@ tool call is the cost this removes.
    run this — the engine cannot read a session's bound tools, so a probe it
    ran for itself could only ever compare the baseline to itself.
 
+1a. **Read what the connector already knows about this client, before
+   PRELIM.** Measured 28-09-2026 (QA audit F-N06-014): a promoted run
+   showed four of seven enrichment facets `never_enriched` — the server
+   held that state and the research side never read it, so the pages
+   served empty states the previous run had already established. Two
+   reads, over the raw bridge (this role holds no connector tool for
+   them), then one engine write:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_raw.py" call get_client_state \
+           --args '{"display_id": "<entity-id slug>"}' > <ROOT>/07_qa/client_state.json
+   # when runs[] is non-empty, the latest run's staged gaps as well:
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_raw.py" call list_enrichment_gaps \
+           --args '{"run_id": "<runs[0].run_id>"}' > <ROOT>/07_qa/enrichment_gaps.json
+   python3 -m engine.prelim seed-enrichment --run <RUN_ID> --root <ROOT> \
+           --client-state <ROOT>/07_qa/client_state.json \
+           [--gaps <ROOT>/07_qa/enrichment_gaps.json]
+   ```
+
+   `seed-enrichment` writes one `Enrichment_Needed` row per connector facet
+   (OPEN for `never_enriched`, PARTIAL for `enriched_not_promoted`,
+   RESOLVED for `current`) and one per must-present gap on the latest
+   staged run, and the run manifest carries the same facets under
+   `enrichment` from then on — so PRELIM's connector work, the category
+   lanes and the page producers start from what the server already owes
+   rather than rediscovering it. An `unknown_entity` reply with no
+   `did_you_mean` is the one honest "new client": seed nothing and say so.
+
 1b. **PRELIM — buy the deep background ONCE, before any capability work.**
    `engine.prelim state --run <RUN_ID> --root <ROOT>` lists seven sections
    and the fix line for each. `orient` serves NO category card until they

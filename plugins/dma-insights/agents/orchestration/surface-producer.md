@@ -6,7 +6,7 @@ effort: high
 maxTurns: 400
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, Skill, Agent, Write, Edit, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, Agent, Write, Edit, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__list_submissions, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -180,9 +180,34 @@ modules, it checked nothing. Do not read that as clean. Give it a repo
 checkout or accept that ET-01, ET-04, ET-05, ET-06, CG-10 and CG-14 will
 first be answered by the server.
 
-CG-15 is not in any local checker. It runs at submit only and it is the one
-gate that reads prose for content — a payload can satisfy every structural
-gate while asserting nothing. Read its section before you write prose.
+**CG-15 runs locally, and `ship_page.py` runs the server's whole first
+pass before it spends a submission.** Measured 28-09-2026 (QA audit
+F-O07-010): this file used to say CG-15 was in no local checker, producers
+believed it, and 199 rejections sat at attempts = 2 on one page — while
+`precheck_gates.py` (the server's pass-1 gates, imported) caught 45 of
+those 46 refusals when replayed over the same cells (98%). So
+`self_heal.py` now runs CG-15 through the connector's own module (NOT RUN,
+stated, when the module is unreachable — and NOT RUN is not a pass), and
+`ship_page.py` refuses to submit a page that fails the pass-1 gates
+locally (`--no-precheck` to override, never in a scheduled run). A local
+verdict is the same verdict for free; spend the submission on what only
+the server holds — the evidence store, the grain lock, the run's history.
+
+**Register evidence once, through the id map.** Measured 28-09-2026 (QA
+audit F-O11-036): nothing on this side remembered which `e_id` the server
+minted for which span, so re-runs re-registered and only the server's
+content-hash dedup stood between them and duplicates. Write the
+registration worklist your producers return to `items.json` and run
+
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/evidence_idmap.py" \
+       register <run_id> items.json --map <rundir>/07_qa/evidence_id_map.json
+```
+
+It computes the server's own content hash per item, sends only the items
+the map does not hold, records every `e_id` the server returned (minted or
+deduped), and prints the ids to cite. Never call `register_evidence` by
+hand for a span the map already holds; never mint an id.
 
 ## Reading a verdict
 
