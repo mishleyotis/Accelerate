@@ -46,7 +46,7 @@ def test_no_page_producer_claims_to_dispatch():
         for phrase in ("fanning", "fans the page out", "fan out to", "invoke them in parallel",
                        "the page producer invokes"):
             assert phrase not in low, f"{rel} still claims to {phrase!r}"
-        assert "you dispatch nothing" in body or "dispatches nothing" in body, rel
+        assert "you dispatch nothing" in low or "dispatches nothing" in low, rel
 
 
 def test_routing_states_one_topology_and_names_both_submitters():
