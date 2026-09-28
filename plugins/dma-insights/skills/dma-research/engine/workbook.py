@@ -65,6 +65,45 @@ class WorkbookError(RuntimeError):
     pass
 
 
+@contextlib.contextmanager
+def file_lock(lock_path: Path, *, timeout: float = 120.0, why: str = ""):
+    """Exclusive, cross-process flock on `lock_path`, polled until `timeout`.
+
+    ONE lock for every file the plugin's writers share. Until 28-09-2026
+    (QA audit F-G05-017) only the workbook had it: the memory notebooks
+    appended and consolidated unlocked, the client memory did a bare
+    read-modify-write, and last writer won across sessions. The workbook's
+    `transaction` now takes this same lock, and so do they."""
+    if fcntl is None:                    # pragma: no cover
+        # Non-POSIX: say so rather than pretend. A silent no-op lock is how
+        # this class of bug survives a fix.
+        raise WorkbookError(
+            "fcntl is unavailable, so concurrent writers to one file cannot "
+            "be made safe on this platform. Run writers sequentially.")
+    lock_path = Path(lock_path)
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    fh = open(lock_path, "a+")
+    try:
+        deadline = time.monotonic() + timeout
+        while True:
+            try:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.monotonic() > deadline:
+                    raise WorkbookError(
+                        f"waited {timeout:.0f}s for {lock_path.name}"
+                        f"{(' — ' + why) if why else ''}. Another writer is "
+                        f"holding it; this is a stall, never a reason to write "
+                        f"without the lock.")
+                time.sleep(0.05)
+        yield
+    finally:
+        with contextlib.suppress(OSError):
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        fh.close()
+
+
 class RunWorkbook:
     """One run's scoring workbook, held open for append.
 
@@ -292,40 +331,14 @@ class RunWorkbook:
             yield self                       # already inside one
             return
         self._depth = 1
-        fh = None
         try:
-            if fcntl is None:                # pragma: no cover
-                # Non-POSIX: say so rather than pretend. A silent no-op lock
-                # is how this class of bug survives a fix.
-                raise WorkbookError(
-                    "fcntl is unavailable, so concurrent writers to one "
-                    "workbook cannot be made safe on this platform. Run "
-                    "writers sequentially.")
-            self._lock_path().parent.mkdir(parents=True, exist_ok=True)
-            fh = open(self._lock_path(), "a+")
-            deadline = time.monotonic() + self.LOCK_TIMEOUT_S
-            while True:
-                try:
-                    fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    break
-                except OSError:
-                    if time.monotonic() > deadline:
-                        raise WorkbookError(
-                            f"waited {self.LOCK_TIMEOUT_S:.0f}s for "
-                            f"{self._lock_path().name}{(' — ' + why) if why else ''}. "
-                            f"Another writer is holding it; this is a stall, "
-                            f"never a reason to write without the lock.")
-                    time.sleep(0.05)
-            self._reload_if_changed()
-            yield self
-            if getattr(self, "_dirty", False):
-                self.save()
+            with file_lock(self._lock_path(), timeout=self.LOCK_TIMEOUT_S, why=why):
+                self._reload_if_changed()
+                yield self
+                if getattr(self, "_dirty", False):
+                    self.save()
         finally:
             self._depth = 0
-            if fh is not None:
-                with contextlib.suppress(OSError):
-                    fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-                fh.close()
 
     def save(self) -> None:
         for ws in self._wb.worksheets:

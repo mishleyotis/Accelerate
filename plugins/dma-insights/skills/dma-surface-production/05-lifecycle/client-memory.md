@@ -52,6 +52,27 @@ file is that somewhere.
   writer is the only gate — write accordingly.
 - No hashtag numbering; natural numbering only (owner, 2026-08-20).
 
+## The cap, the lock and the version token
+
+Measured 28-09-2026 (QA audit F-G05-017): no memory file had a cap, a version
+token or a read-before-write, so last writer won across sessions and across
+Drive. Three rules now hold, and each is code rather than advice:
+
+- **Cap: 49,152 bytes** (`client_memory.py CAP_BYTES`; the research notebooks
+  carry the same figure in `engine.memory.NOTEBOOK_CAP_BYTES`). At 80% the
+  `note` output says CONSOLIDATE DUE; at the cap the write is refused until
+  resolved entries are pruned. A memory a session cannot afford to read at
+  start is a memory nobody reads.
+- **Every write is locked** (`engine.workbook.file_lock`, the same lock the
+  workbook and the notebooks take) and is a read-modify-write of the whole
+  file, never an append to a file another session may be rewriting.
+- **A version token travels with every read.** `client_memory.py version`
+  prints the file's token; `note --expect-version <token>` refuses when the
+  file has moved on. On Drive, `drive_fetch.py pull` records the copy's
+  version and `push-memory` refuses when the Drive copy changed since the
+  pull (or was never pulled): pull again, merge, push. `--force` overrides
+  and is recorded in the pulled record.
+
 ## What each working section is for
 
 - **research log** — every enrichment search: facet, query, date, tier of
