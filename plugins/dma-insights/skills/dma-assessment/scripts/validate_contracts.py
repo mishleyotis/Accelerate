@@ -71,6 +71,21 @@ def _catalogue_categories():
         "hardcoded on purpose — see AUD-0051.")
 
 
+GOV_SCHEMAS = Path(__file__).resolve().parents[2] / "dma-governance" / "schemas"
+
+
+def _schema_problems(doc, schema_name: str) -> list[str]:
+    """Every way `doc` departs from dma-governance/schemas/<schema_name>."""
+    try:
+        import jsonschema                                        # noqa: PLC0415
+    except ImportError:
+        return [f"NOT_RUN: jsonschema is not installed, {schema_name} was not applied"]
+    schema = json.loads((GOV_SCHEMAS / schema_name).read_text(encoding="utf-8"))
+    v = jsonschema.Draft7Validator(schema)
+    return [f"{'/'.join(str(p) for p in e.absolute_path) or '<root>'}: {e.message}"
+            for e in sorted(v.iter_errors(doc), key=lambda e: [str(p) for p in e.absolute_path])]
+
+
 class ContractValidator:
     """Validates governance output files against Layer 2 interface contracts."""
 
@@ -320,6 +335,32 @@ class ContractValidator:
                     self.note("XREF", "contradiction_evidence",
                               f"Contradiction {rec.get('contradiction_id')} references unknown evidence: {eid}")
 
+    # === Contracts 5 and 6: the governance skill's outputs, when present ===
+    # Their schemas (dma-governance/schemas/issue_register.schema.json,
+    # qa_verdict.schema.json) had no loader until 28-09-2026 (F-J02-011).
+
+    def validate_issue_register(self):
+        path = self.dir / "issue_register.csv"
+        if not path.exists():
+            self.note("C5", "existence", "issue_register.csv not present (Workflow A step 6 not run here)")
+            return
+        rows = self._read_csv(path, "C5")
+        for problem in _schema_problems(rows, "issue_register.schema.json"):
+            (self.note if problem.startswith("NOT_RUN") else self.fail)("C5", "schema", problem)
+
+    def validate_qa_verdict(self):
+        path = self.dir / "qa_verdict.json"
+        if not path.exists():
+            self.note("C6", "existence", "qa_verdict.json not present (gov_auditor not run here)")
+            return
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as e:
+            self.fail("C6", "parse", f"Invalid JSON: {e}")
+            return
+        for problem in _schema_problems(doc, "qa_verdict.schema.json"):
+            (self.note if problem.startswith("NOT_RUN") else self.fail)("C6", "schema", problem)
+
     # === Helpers ===
 
     def _read_csv(self, path: Path, contract: str) -> list[dict]:
@@ -340,6 +381,8 @@ class ContractValidator:
         contradictions = self.validate_contradiction_log()
         evidence = self.validate_evidence_index()
         self.validate_cross_references(manifest, caps, contradictions, evidence)
+        self.validate_issue_register()
+        self.validate_qa_verdict()
 
         # === Contract 8: reasoning_chain_log.json ===
         rcl_path = self.dir / "reasoning_chain_log.json"

@@ -61,6 +61,12 @@ jobs:
           python3 scripts/gen_proto_bands.py --check
           python3 plugins/dma-insights/scripts/check_taxonomy_drift.py
 
+      - name: Every artefact the plugin writes has a reader
+        # QA audit F-J02-011 (28-09-2026): six artefacts had a writer and no
+        # reader. A file with a writer, a gate and no reader is the most
+        # expensive shape there is; this fails the push that adds one.
+        run: python3 plugins/dma-insights/scripts/audit_dead_contracts.py --strict
+
       - name: Gate C — no render dead ends
         run: python3 scripts/gate_c_no_render_dead_ends.py
       # A shared contract the serving code READS must be in the image that

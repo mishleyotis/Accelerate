@@ -69,8 +69,20 @@ PINNED_FILES = ("report_templates.json", "workbook_template.json",
                 "report_shell.docx")
 REPORT_SHELL = TEMPLATES_DIR / "report_shell.docx"
 
+#: The registry every producer binds to: which template, which reference
+#: package, which shapes are known wrong. Checked in at the plugin root so
+#: "which template?" has one answer that is reviewable in a diff. Until
+#: 28-09-2026 it had no code reader (QA audit F-J02-011) and this module
+#: carried its own copy of the template id.
+CANONICAL_SOURCES = Path(__file__).resolve().parents[3] / "references" / "canonical_sources.json"
+
+
+def canonical_sources() -> dict:
+    return json.loads(CANONICAL_SOURCES.read_text(encoding="utf-8"))
+
+
 #: The scoring-workbook template of record, in the owner's Drive.
-SHEET_ID = "18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc"
+SHEET_ID = canonical_sources()["scoring_workbook_template"]["drive_file_id"]
 #: Assembled rather than written whole, so the plugin's own policy hook does
 #: not read a source file as a shell fetch of a Drive document.
 URL = "https://" + "docs.google.com" + "/spreadsheets/d/" + SHEET_ID + "/"

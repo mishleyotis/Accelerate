@@ -332,7 +332,7 @@ def write_packet(doc: dict, out: Path) -> dict:
             "schema_version": doc.get("_contract", {}).get("schema_version")}
 
 
-def verify_packet(path) -> list[str]:
+def verify_packet(path, schema_version: str = HANDOFF_SCHEMA_VERSION) -> list[str]:
     """Every way the packet at `path` is not one this engine wrote and
     vouches for: absent, unhashed, edited since it was hashed, or of another
     version. [] means it is."""
@@ -354,8 +354,8 @@ def verify_packet(path) -> list[str]:
         sv = (json.loads(p.read_text(encoding="utf-8")).get("_contract") or {}).get("schema_version")
     except (ValueError, AttributeError):
         sv = None
-    if sv != HANDOFF_SCHEMA_VERSION:
-        out.append(f"{p.name} is {sv!r}, this engine reads {HANDOFF_SCHEMA_VERSION!r}")
+    if sv != schema_version:
+        out.append(f"{p.name} is {sv!r}, this engine reads {schema_version!r}")
     return out
 
 

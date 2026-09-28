@@ -85,6 +85,21 @@ REQUIRED_WORKBOOK_TABS = [
 
 PILLAR_NAMES = ["P1", "P2", "P3", "P4"]
 
+#: This skill's own output schemas, loaded and applied rather than cited.
+SCHEMA_DIR = Path(__file__).resolve().parents[1] / "schemas"
+
+
+def schema_problems(doc, schema_name: str) -> list[str]:
+    """Every way `doc` departs from schemas/<schema_name>, or []. Without
+    jsonschema the one entry says the check did not run."""
+    if jsonschema is None:
+        return [f"NOT_RUN: jsonschema is not installed, {schema_name} was not applied"]
+    schema = json.loads((SCHEMA_DIR / schema_name).read_text(encoding="utf-8"))
+    v = jsonschema.Draft7Validator(schema)
+    return [f"{'/'.join(str(p) for p in e.absolute_path) or '<root>'}: {e.message}"
+            for e in sorted(v.iter_errors(doc), key=lambda e: [str(p) for p in e.absolute_path])]
+
+
 SCORING_DETAIL_SHEETS = [f"{p}_Subcap_Scoring" for p in PILLAR_NAMES]
 
 
@@ -2037,7 +2052,7 @@ def generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendati
                              if isinstance(manifest.get("institution"), dict)
                              else None) or "Unknown",
         "audit_date": datetime.utcnow().isoformat() + "Z",
-        "governance_skill_version": "2.1",
+        "governance_skill_version": _contract.plugin_version() or "unknown",
         "verdict": verdict,
         "recommendation": recommendation,
         "issue_count_by_severity": {
@@ -2062,19 +2077,19 @@ def generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendati
         },
         "distributional_flags": dist_flags,
         "proof_verification": {
-            "PV01_structure_complete": "PENDING_LLM_PASS2",
-            "PV02_rule_links_valid": "PENDING_LLM_PASS2",
-            "PV03_counterclaim_documented": "PENDING_LLM_PASS2",
+            "PV01_structure_complete": NOT_RUN,
+            "PV02_rule_links_valid": NOT_RUN,
+            "PV03_counterclaim_documented": NOT_RUN,
             "proof_issues": [],
         },
         "critic_resolution": {
-            "CR01_findings_addressed": "PENDING_LLM_PASS2",
+            "CR01_findings_addressed": NOT_RUN,
             "critic_issues": [],
         },
         "narrative_audit_result": narrative_result,
         "narrative_issues": narrative_issues,
         "sign_off": {
-            "auditor_id": "gov_auditor_v2.1_automated",
+            "auditor_id": f"gov_auditor_v{_contract.plugin_version() or 'unknown'}_automated",
             "auditor_name": "DMA Governance Auditor (Pass 1 — Automated)",
             "organization": "DMA Program",
             "verdict_date": datetime.utcnow().isoformat() + "Z",
@@ -2206,11 +2221,17 @@ def run_audit(assessment_dir, output_dir=None):
             writer.writerow(issue.to_csv_row())
     print(f"📄 {issues_path}")
 
-    # 3. audit_summary.json
+    # 3. audit_summary.json — after the verdict has been built and checked
+    # against its schema, so the summary can say whether it conforms.
+    qa_verdict = generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendation)
+    # Conformance to schemas/qa_verdict.schema.json is CHECKED, not asserted
+    # in a docstring: until 28-09-2026 the schema had no loader (F-J02-011).
+    violations = schema_problems(qa_verdict, "qa_verdict.schema.json")
     summary = {
         "audit_date": datetime.utcnow().isoformat() + "Z",
+        "qa_verdict_schema_violations": violations,
         "assessment_dir": str(assessment_dir),
-        "governance_skill_version": "2.1",
+        "governance_skill_version": _contract.plugin_version() or "unknown",
         "checks_run": len(all_results) - len(not_ran),
         "checks_declared": len(all_results),
         "checks_passed": total_pass,
@@ -2240,12 +2261,16 @@ def run_audit(assessment_dir, output_dir=None):
         json.dump(summary, f, indent=2)
     print(f"📄 {summary_path}")
 
-    # 4. qa_verdict.json (schema-compliant — Pass 1 fields populated, Pass 2 fields pending)
-    qa_verdict = generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendation)
+    # 4. qa_verdict.json (Pass 1 fields populated; Pass 2 fields NOT_RUN until the LLM pass)
     verdict_path = output_dir / "qa_verdict.json"
     with open(verdict_path, "w") as f:
         json.dump(qa_verdict, f, indent=2)
     print(f"📄 {verdict_path}")
+    if violations:
+        print("gov_auditor: qa_verdict.json departs from schemas/qa_verdict.schema.json:",
+              file=sys.stderr)
+        for v in violations:
+            print(f"  {v}", file=sys.stderr)
 
     return summary
 

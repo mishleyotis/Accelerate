@@ -173,13 +173,10 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
     # and written beside the run; orient will not serve a card without it.
     from . import template as _template
     _template.bind(run)
-    (base / "00_entity_profile" / "context.json").write_text(json.dumps({
-        "entity": entity_name, "entity_id": entity_id,
-        "sub_vertical": sub_vertical, "scope_mode": scope_mode,
-        "reference_date": reference_date, "run_id": run_id,
-        "sv_basis": sv_basis, "mode_basis": mode_basis,
-        "lob_census": lob_census,
-    }, indent=2))
+    # No `00_entity_profile/context.json` beside the run: every value it
+    # carried is in Run_Metadata, which is what orient, resume and the hooks
+    # read. Measured 28-09-2026 (QA audit F-J02-011): the file had a writer
+    # and no reader, and a second copy of the binding is where drift starts.
     return run
 
 

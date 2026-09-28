@@ -283,6 +283,7 @@ def refs_audit():
 #: refuses — is an instruction to go around the pipeline, and the "workbook
 #: defaults to the wrong structure every run" defect in prose form.
 RETIRED_WRITERS = ("populate_workbook.py", "validate_workbook.py",
+                   "generate_query_plan.py",   # retired 2026-09-28 (F-J02-011)
                    "assessment_runner.py")
 
 

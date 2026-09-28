@@ -251,6 +251,8 @@ Run when ≥2 assessments available. See `references/calibration_framework.md`.
 python scripts/calibration_engine.py <manifest1.json> <manifest2.json> --output-dir "$GOV_OUTPUT/calibration"
 ```
 
+Produces: `calibration_metrics.json` (the cohort statistics) and `drift_flags.json` (each flag with its threshold), both read by the LLM interpretation step below. Manifests must be the engine's `run_manifest_v3`; any other shape is skipped and named.
+
 LLM interpretation: contextualize drift flags (institution differences vs. genuine drift) → assess comparability → generate recommendations.
 
 Output: structured calibration report per `templates/calibration_report_template.md`.
@@ -264,6 +266,8 @@ Run when rubric/template/taxonomy change proposed.
 ```bash
 python scripts/regression_runner.py <assessment_dir> --all-cases --output-dir "$GOV_OUTPUT/regression"
 ```
+
+Produces: `regression_results.json` (per golden case: expected, observed, verdict), read by the LLM interpretation step below.
 
 LLM interpretation: analyze failures (expected vs. regression) → assess comparability impact → verdict PASS/PARTIAL/FAIL.
 

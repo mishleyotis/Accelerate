@@ -421,4 +421,4 @@ After completing all Pass 2 checks, update `qa_verdict.json` with:
 }
 ```
 
-Replace the `PENDING_LLM_PASS2` placeholders with actual results.
+Replace the `NOT_RUN` placeholders with actual results.

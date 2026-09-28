@@ -31,6 +31,17 @@ def test_populate_workbook_refuses_and_names_the_engine(tmp_path):
     assert not list(tmp_path.glob("*.xlsx"))
 
 
+def test_generate_query_plan_refuses_and_names_the_engine(tmp_path):
+    """Retired 2026-09-28 (QA audit F-J02-011): its query_plan.json had no
+    reader; the work card from `engine.cli orient` is the plan."""
+    r = _run(PLUGIN / "skills" / "dma-research" / "scripts" / "generate_query_plan.py",
+             str(tmp_path / "dq.json"), "--entity", "X", "--subvertical", "CU",
+             "--output", str(tmp_path / "query_plan.json"))
+    assert r.returncode == 1
+    assert "REFUSED" in r.stderr and "engine.cli orient" in r.stderr
+    assert not (tmp_path / "query_plan.json").exists()
+
+
 def test_assessment_runner_refuses_and_names_the_engine(tmp_path):
     r = _run(PLUGIN / "skills" / "dma-assessment" / "scripts" / "assessment_runner.py",
              "--corpus", "c", "--index-dir", "i", "--pillar-dir", "p",
@@ -107,7 +118,7 @@ def test_no_skill_tells_an_agent_to_run_a_retired_writer():
         text = skill.read_text()
         for line in text.splitlines():
             if any(w in line for w in ("populate_workbook.py", "validate_workbook.py",
-                                       "assessment_runner.py")) \
+                                       "assessment_runner.py", "generate_query_plan.py")) \
                     and "retired" not in line.lower() and "refuse" not in line.lower():
                 offenders.append(f"{skill.parent.name}: {line.strip()[:100]}")
     assert offenders == [], offenders

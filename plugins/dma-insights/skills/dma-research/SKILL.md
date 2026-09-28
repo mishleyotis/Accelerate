@@ -751,7 +751,7 @@ CONTINUE to resume from [subcap ID]. ---
 | Script | Batch | Purpose |
 |--------|-------|---------|
 | `scripts/extract_diagnostic_questions.py` | 2 | Parse Pillar XLSX → subcap IDs, names, diagnostic Qs |
-| `scripts/generate_query_plan.py` | 2-3 | Diagnostic Qs + entity → 10-tier query plan |
+| `scripts/generate_query_plan.py` | — | **RETIRED** (refuses): the work card from `engine.cli orient` is the query plan; a JSON plan beside the run had no reader (F-J02-011) |
 | `scripts/calculate_ers.py` | All | Calculate ERS scores, optionally write back |
 | `scripts/merge_evidence.py` | 4 | Deduplicate, link corroborations, coverage stats |
 | `scripts/populate_workbook.py` | — | **RETIRED** (refuses): it built a second, 10-sheet workbook beside the run. The run's one workbook is created by `engine.cli start` and written only through `engine.cli evidence / search / synthesise / absence` |

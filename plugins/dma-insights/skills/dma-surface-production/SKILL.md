@@ -562,7 +562,7 @@ the assessment ends, not as a separate exercise afterwards.
 
 ## Bind to the template, and to the copy the agent wrote last
 
-`references/canonical_sources.json` names the scoring-workbook template, the
+`references/canonical_sources.json` (at the plugin root; `engine.template` reads the template id from it) names the scoring-workbook template, the
 Golden 1 CU package as the measured reference, and the shapes known to be
 wrong. It is checked in so the answer to "which template?" survives between
 sessions and is reviewable in a diff rather than remembered.

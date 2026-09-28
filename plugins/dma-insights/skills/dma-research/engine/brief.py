@@ -792,6 +792,12 @@ def dispatch(wb: RunWorkbook, category: str, *,
         hb = handback(wb, category)
         packet["handback"] = {k: hb[k] for k in hb
                               if k not in ("category",)}
+        # What the last LANE left, from the file the SubagentStop hook wrote
+        # (07_qa/handbacks). Until 28-09-2026 that file had no reader (QA
+        # audit F-J02-011) while its own docstring said the re-dispatch reads
+        # it; the sheets say what the category holds, the handback file says
+        # what the lane was doing when it stopped.
+        packet["handback"]["last_lane"] = last_handback(run, category)
         packet["last_gate"] = last_gate(wb, "FLOORS", category)
         packet["rules"].append(
             "this is a RE-DISPATCH: `handback` is what your previous run "
@@ -1018,12 +1024,27 @@ def as_markdown(packet: dict) -> str:
         hb = packet["handback"]
         lines += ["", "### What your previous run established (the handback)", ""]
         for k, v in hb.items():
+            if k == "last_lane":
+                continue
             if isinstance(v, (list, tuple)):
                 lines.append(f"- {k}: " + (", ".join(str(x) for x in v[:8]) if v else "none"))
             elif isinstance(v, dict):
                 lines.append(f"- {k}: " + ", ".join(f"{a} {b}" for a, b in list(v.items())[:8]))
             else:
                 lines.append(f"- {k}: {v}")
+        ll = hb.get("last_lane")
+        if ll:
+            lines += ["", "### What the last lane left when it stopped (its handback file)", ""]
+            lines.append(f"- stopped at: {ll.get('at')} (agent {ll.get('agent')})")
+            so = ll.get("still_open")
+            lines.append("- still open: " + (", ".join(str(x) for x in so[:8])
+                                             if isinstance(so, (list, tuple)) and so
+                                             else str(so)))
+            lines.append(f"- wrote to the substrate: {ll.get('substrate_writes')}; "
+                         f"notes: {ll.get('notes_written')}; evidence items: "
+                         f"{ll.get('evidence_items')}; searches: {ll.get('searches')}")
+            if ll.get("last_assistant_message"):
+                lines.append(f"- its last words: {ll['last_assistant_message'][:300]}")
     if packet.get("dispatch_verify"):
         dv = packet["dispatch_verify"]
         lines += ["", "### The dispatch verifier refused your last run", ""]
@@ -1054,6 +1075,35 @@ def as_markdown(packet: dict) -> str:
     if packet.get("trimmed"):
         lines += ["", f"_{packet['trimmed']}_"]
     return "\n".join(lines) + "\n"
+
+
+def last_handback(run: runstate.Run | None, category: str) -> dict | None:
+    """The newest handback the SubagentStop hook wrote for this category
+    (`07_qa/handbacks/<agent>-<ts>.json`), reduced to what a re-dispatch can
+    act on; None when no lane has returned yet or the run is not known."""
+    if run is None:
+        return None
+    d = Path(run.qa_dir) / "handbacks"
+    if not d.is_dir():
+        return None
+    best = None
+    for p in d.glob("*.json"):
+        try:
+            doc = json.loads(p.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            continue
+        if not isinstance(doc, dict) or \
+                str(doc.get("category") or "").upper() != category:
+            continue
+        if best is None or str(doc.get("at") or "") > str(best.get("at") or ""):
+            best = doc
+    if best is None:
+        return None
+    keep = ("agent", "at", "still_open", "notes_written", "substrate_writes",
+            "evidence_items", "searches", "search_requests")
+    out = {k: best.get(k) for k in keep}
+    out["last_assistant_message"] = str(best.get("last_assistant_message") or "")[:600]
+    return out
 
 
 def last_gate(wb: RunWorkbook, gate: str, scope: str | None = None) -> dict:

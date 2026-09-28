@@ -72,14 +72,12 @@ MACHINE_EXTRAS = (
     ("run_manifest", "run_manifest.json"),
     ("evidence_index", "01_evidence/evidence_index.json"),
     ("techscan_json", "technographic_scan.json"),
-    # The run's own dated events, for the served C1 timeline. Until
-    # 2026-08-30 Entity_Timeline had a writer, a completeness gate and NO
-    # READER anywhere in the shipped system — no report section named it, no
-    # package extra carried it, the app had zero references to it — while
-    # the surface it was gathered for was produced entirely by re-searching
-    # in the synthesis session. A tab with a writer, a gate and no reader is
-    # the most expensive shape there is.
-    ("entity_timeline", "01_evidence/entity_timeline.json"),
+    # No JSON copy of Entity_Timeline. Until 2026-08-30 the tab had a writer,
+    # a gate and no reader, and a package extra was added to carry it; the
+    # app's parser now reads the TAB itself (workbook_parser maps
+    # Entity_Timeline to context.timeline / context.acquisitions) and never
+    # read the copy, so the copy was the F-J02-011 shape: written, read by
+    # nothing, one more place for the same rows to drift.
 )
 
 
@@ -94,48 +92,6 @@ def folder_name(entity_name: str) -> str:
 
 
 # ── the timeline the served C1 surface reads ─────────────────────────────
-
-def timeline_doc(wb: RunWorkbook) -> dict:
-    """The run's dated events, in the vocabulary `context.timeline` filters on.
-
-    The run's own events are stronger ground for C1 than a re-search: they
-    were gathered under PRELIM against this register, every one carries a
-    citation the gate refused it without, and they are dated. This is the
-    file that makes them reachable.
-    """
-    md = wb.metadata()
-    events = []
-    for r in wb.rows("Entity_Timeline"):
-        if not str(r.get("Event_Date") or "").strip():
-            continue
-        events.append({
-            "date": str(r.get("Event_Date"))[:10],
-            "title": r.get("Title"),
-            "body": r.get("Body") or None,
-            "kind": r.get("Kind"),
-            "signal": r.get("Signal"),
-            "maturity_effect": r.get("Maturity_Effect") or None,
-            "claim_label": r.get("Claim_Label") or None,
-            "subcap_ids": _split_ids(r.get("SubCap_IDs")),
-            "e_ids": _split_ids(r.get("Evidence_IDs")),
-        })
-    events.sort(key=lambda e: e["date"])
-    return {"artefact": "entity_timeline", "run_id": md.get("run_id"),
-            "entity_id": md.get("entity_id"),
-            "entity_name": md.get("entity_name"),
-            "generated_at": _utcnow(),
-            "vocabulary": {"signal": list(C.TIMELINE_SIGNALS),
-                           "kind": list(C.TIMELINE_KINDS)},
-            "events": events,
-            # An empty timeline is a STATE, and C1 must be able to tell it
-            # from a timeline nobody gathered.
-            "not_run": (None if events else
-                        "PRELIM recorded no dated event for this entity; see "
-                        "the run's empty_sheet_reasons for the ladder behind "
-                        "that")}
-
-
-# ── the evidence index the app reads (AUD-0091's other half) ─────────────
 
 def evidence_index_doc(wb: RunWorkbook) -> dict:
     """The package's evidence_index.json, in the field spellings the app's
@@ -321,6 +277,21 @@ def _packets(run) -> dict:
             "sha256": hashlib.sha256(hp.read_bytes()).hexdigest(),
             "schema_version": _manifest_str(sv),
             "verified": not handoff.verify_packet(hp),
+        }
+    from . import assessment as _A                               # noqa: PLC0415
+    sp = Path(run.qa_dir) / _A.SCORING_NAME
+    if sp.is_file():
+        try:
+            sdoc = json.loads(sp.read_text(encoding="utf-8"))
+            ssv = (sdoc.get("_contract") or {}).get("schema_version")
+        except (ValueError, AttributeError):
+            ssv = None
+        out["scoring"] = {
+            "path": f"07_qa/{sp.name}",
+            "sha256": hashlib.sha256(sp.read_bytes()).hexdigest(),
+            "schema_version": _manifest_str(ssv),
+            "verified": not handoff.verify_packet(
+                sp, schema_version=_A.SCORING_SCHEMA_VERSION),
         }
     return out
 
@@ -600,8 +571,6 @@ def package(run: runstate.Run, out_root, *, push: bool = False) -> dict:
                    manifest_doc(wb, status="COMPLETE", stage="PACKAGE", run=run))
     (dest / "01_evidence" / "evidence_index.json").write_text(
         json.dumps(evidence_index_doc(wb), indent=2, default=str))
-    (dest / "01_evidence" / "entity_timeline.json").write_text(
-        json.dumps(timeline_doc(wb), indent=2, default=str))
     ts_json = run.deliverables / techscan.JSON_NAME
     if ts_json.exists():
         shutil.copy2(ts_json, dest / techscan.JSON_NAME)

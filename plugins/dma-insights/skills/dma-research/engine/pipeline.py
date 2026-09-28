@@ -716,10 +716,15 @@ class Pipeline:
                          else f"handoff packet: {packet[0][:160]}"))
         if stage == "SCORING":
             from . import assessment as A
+            from . import handoff
             last = (A.state(wb).get("last_scoring_gate") or {})
-            ok = str(last.get("verdict") or "") == "PASS"
-            return ok, ("SCORING gate PASS" if ok else
-                        f"SCORING gate {last.get('verdict') or 'NOT_RUN'}")
+            passed = str(last.get("verdict") or "") == "PASS"
+            packet = handoff.verify_packet(self.run.qa_dir / A.SCORING_NAME,
+                                           schema_version=A.SCORING_SCHEMA_VERSION)
+            ok = passed and not packet
+            return ok, ("SCORING gate PASS; findings packet verified" if ok else
+                        (f"SCORING gate {last.get('verdict') or 'NOT_RUN'}" if not passed
+                         else f"scoring packet: {packet[0][:160]}"))
         if stage == "INGEST_A":
             ok = bool(str(md.get("connector_run_id") or "").strip())
             return ok, (f"connector run {md.get('connector_run_id')}" if ok

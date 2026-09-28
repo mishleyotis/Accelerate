@@ -920,6 +920,25 @@ PILLAR_NAMES = {
 WORKBOOK_CONTRACT = "v7"
 ENGINE_VERSION = "7.0.0"
 
+
+def plugin_version() -> str | None:
+    """The plugin's published version, read from the `.claude-plugin/
+    plugin.json` above this engine — the ONE place it is stated — or None
+    when the engine runs outside a plugin tree. Measured 28-09-2026 (QA
+    audit F-A03-020): the governance scripts each carried their own
+    "governance_skill_version" literal (2.1, 2.2) beside a SKILL.md that
+    said v2.4, and the exporter wrote rubric/taxonomy versions of "5.0"."""
+    import json as _json                                        # noqa: PLC0415
+    for anc in Path(__file__).resolve().parents:
+        p = anc / ".claude-plugin" / "plugin.json"
+        if p.is_file():
+            try:
+                v = _json.loads(p.read_text(encoding="utf-8")).get("version")
+            except ValueError:
+                return None
+            return str(v) if v else None
+    return None
+
 SHEETS = {
     "00_README": ("Key", "Value"),
     "DQ_Bank": DQ_BANK_COLUMNS,

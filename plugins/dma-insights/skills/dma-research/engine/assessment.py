@@ -128,6 +128,12 @@ GENERIC_RATIONALE = re.compile(
 
 # ── stage ────────────────────────────────────────────────────────────────
 
+#: The scoring gate's findings packet (07_qa/scoring.json): its version, and
+#: the sidecar-verified shape assemble._packets and the pipeline read.
+SCORING_NAME = "scoring.json"
+SCORING_SCHEMA_VERSION = "scoring_v1"
+
+
 def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
     """What must hold before a single score is struck."""
     from . import floors_gate, handoff, prelim
@@ -855,9 +861,13 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
            "advisory": [k for k in ("low_differentiation",) if f[k]],
            "finding_keys": sorted(f), **f}
     if qa_dir is not None:
-        Path(qa_dir).mkdir(parents=True, exist_ok=True)
-        (Path(qa_dir) / "scoring.json").write_text(json.dumps(out, indent=2, sort_keys=True))
-        out["written_to"] = str(Path(qa_dir) / "scoring.json")
+        # A hashed, versioned packet: the run manifest vouches for it
+        # (assemble._packets) and the pipeline's SCORING check verifies it.
+        # Until 28-09-2026 it was written and read by nothing (F-J02-011).
+        from . import handoff as _handoff                       # noqa: PLC0415
+        doc = dict(out, _contract={"schema_version": SCORING_SCHEMA_VERSION})
+        written = _handoff.write_packet(doc, Path(qa_dir) / SCORING_NAME)
+        out["written_to"] = written["written"]
     L.append_gate(wb, gate="SCORING", scope="run", verdict=verdict,
                   detail=("; ".join(f"{k}={len(f[k])}" for k in sorted(blocking))
                           or f"all terms met; {got['scored']} scored, overall {got['overall']}"),
