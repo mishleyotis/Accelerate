@@ -200,3 +200,17 @@ absence of a documented alternative is not evidence of a bad undocumented one. O
 Search first, write second. The ladder is not paperwork after the fact — running it is how
 you find the thing that turns an empty card into a cited one. Most ladders hit. The ones that
 do not produce a finding you can defend.
+
+## Representing absence (carried from SKILL.md, 28-09-2026)
+
+An empty surface is a value, not an omission. A missing required field fails the contract;
+an explicit empty state passes and renders correctly.
+
+| Situation | Emit |
+|---|---|
+| No leadership found after a full search | empty roster, `verified_absent`, `sources_searched` |
+| Fewer than three dated financial points | the points, `verified_sparse`, no trend |
+| No stair-step derivable | null ladder, `empty_state` with the reason |
+| A figure failed the identity gate | null value, `quarantined`, `quarantine_reason` |
+| A cell's evidence is genuinely thin | `thin`, `sources_searched`, `closure_condition` |
+| No peer figure available | `peer_basis=cannot_estimate`, median stays null |

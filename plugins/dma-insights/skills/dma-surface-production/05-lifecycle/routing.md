@@ -43,7 +43,7 @@ The qa-overseer runs at the END of every production or repair, green or not
 ## Not every section is synthesised — check its disposition first
 
 `produce → challenge → consolidate` is the path for a section that is
-genuinely SYNTHESISED. Most sections are not. `references/section_sources.json`
+genuinely SYNTHESISED. Most sections are not. `${CLAUDE_PLUGIN_ROOT}/references/section_sources.json`
 (read it, or run `python3 -m engine.surface_export plan --page <page>`) gives
 every section a disposition, and the page brief carries the same split:
 
@@ -91,7 +91,7 @@ could not dispatch the sanctioned re-vet). Two rules follow:
    consolidator, the vetter — via the Agent tool, in this file's order.
    Never delegate the pipeline to one enclosing orchestrator subagent: it
    cannot fan out, and an orchestrator that cannot dispatch improvises.
-   Where the Agent tool is genuinely absent, `scripts/agent_run.py` runs a
+   Where the Agent tool is genuinely absent, `${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py` runs a
    stage as a headless CLI session — same agents, same order, same
    refusals.
 2. **Verdict integrity survives dispatch.** A package-vetter REFUSE is
@@ -122,7 +122,7 @@ never pass back through the top session's context, which is what keeps it
 flat across hundreds of queries. `reconcile` then closes the queue from the
 Search_Log itself, which is the only report those subagents file — and logs
 each closure to the cross-client source-yield ledger
-(`scripts/source_yield.py`), so which pathway actually pays accumulates run
+(`${CLAUDE_PLUGIN_ROOT}/scripts/source_yield.py`), so which pathway actually pays accumulates run
 over run without one extra token being spent to say it.
 
 Enrichment honesty survives the hop: a search a subagent refused or could not
@@ -148,7 +148,7 @@ what the request *names*, not by how large the repair feels.
   reconciliation and the hand-off to `finding-challenger`. Measured
   28-09-2026 (QA audit F-C01-021): this file used to give the page producer
   the dispatch itself while no page producer could — one topology now, and
-  `scripts/tests/test_topology.py` holds the documented one to the actual.
+  `${CLAUDE_PLUGIN_ROOT}/scripts/tests/test_topology.py` holds the documented one to the actual.
 - **Twenty-four per-surface producers** — one agent per surface, or per
   tightly-coupled pair of surfaces that would contradict each other if two
   agents wrote them. A request that names a **surface** reaches exactly one
@@ -309,7 +309,7 @@ sub-vertical, an evidence mode) routes to **`research-conductor`**, which
 binds the run against a PREFLIGHT the engagement owner answered, opens the
 client folder, closes the PRELIM phase, builds the knowledge graph from the
 pillar toolkits, and dispatches one researcher per catalogue category —
-sixteen, generated from one template by `scripts/gen_research_agents.py`,
+sixteen, generated from one template by `${CLAUDE_PLUGIN_ROOT}/scripts/gen_research_agents.py`,
 each bound to its grain and nothing else. A repair that names a category
 (a FAILED floors gate, a challenged subcap) routes to that category's
 researcher directly, never through a full re-run — the same
@@ -486,7 +486,7 @@ a note naming one is a bug report about the id allocator, not a surface repair.
 
 ### After a compaction, a resume or a fork
 
-**The parameters survive the compaction.** `scripts/hooks/param_echo.py` runs at
+**The parameters survive the compaction.** `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/param_echo.py` runs at
 PreCompact and writes the run's id, root, workbook stage, pipeline position,
 budget and search-op count to `<run>/07_qa/param_echo.json`; the PostCompact
 brief prints that file back as `PARAMETER ECHO` before anything else. Read it

@@ -48,7 +48,7 @@ Reading the columns:
   repeated per row.
 
 Where a surface's content COMES FROM, and whether it is formatted or
-synthesised, is not in this census — it is in `references/section_sources.json`
+synthesised, is not in this census — it is in `${CLAUDE_PLUGIN_ROOT}/references/section_sources.json`
 (generated; `python3 -m engine.surface_export plan`), which joins each payload
 section to its workbook tab(s), its report section(s), its enrichment source
 and a disposition (`workbook` / `report` / `enrichment` / `synthesis` /

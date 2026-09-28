@@ -75,6 +75,21 @@ SKILLS: list = []
 # report breakage; the anchors are fixed, so the ceiling is 0 and the next
 # broken reference fails the build.
 MAX_BROKEN = 0
+#: A SKILL.md over this many lines is not read in one sitting. Measured
+#: 28-09-2026 (QA audit F-B04-027): four of six were 766-915 lines and 11-16k
+#: tokens; the procedure moved into references/ behind a per-phase reading
+#: manifest, and this ceiling keeps it there.
+MAX_LINES = 500
+#: The prefixes a skill doc may name AT THE PLUGIN ROOT without qualifying
+#: them. `scripts/` and `references/` are deliberately absent: both exist at
+#: the skill level and at the plugin level, and a bare `scripts/x.py` that
+#: only resolves at the plugin root is the ambiguity the audit counted twelve
+#: of — a reader in the skill directory follows it to nothing. Qualify with
+#: `${CLAUDE_PLUGIN_ROOT}/` or `plugins/dma-insights/`.
+PLUGIN_ROOT_PREFIXES = ("skills/", "agents/", "hooks/", "commands/", ".claude-plugin/")
+#: And at the repository root: a doc pointing a developer at the plugin by its
+#: repo path, or at a repo-level test (apps/, docs/, fixtures/ are SKIP_PREFIX).
+REPO_ROOT_PREFIXES = ("plugins/", "scripts/tests/", "tests/")
 def _discover_skills(root):
     """Every skill directory under `root` that carries a SKILL.md, sorted.
 
@@ -257,13 +272,17 @@ def refs_audit():
                         os.path.join(base, tok),
                         os.path.join(base, "scripts", tok),
                         os.path.join(ROOT, tok),
-                        # the plugin's own scripts/ and skills/ — what a bare
-                        # `scripts/x.py` in a skill doc means at runtime
-                        os.path.join(PLUGIN_ROOT, tok),
+                        # the plugin root, for the directories that exist
+                        # only there; NOT for a bare scripts/ or references/
+                        # (see PLUGIN_ROOT_PREFIXES — the twelve of F-B04-027)
+                        *([os.path.join(PLUGIN_ROOT, tok)] if tok.startswith(PLUGIN_ROOT_PREFIXES) else []),
                         # the repository, for a doc pointing a DEVELOPER at a
-                        # test or a design note rather than the reader at a
-                        # runtime file
-                        os.path.join(REPO_ROOT, tok),
+                        # test or an app file (REPO_ROOT_PREFIXES), or at any
+                        # repo-level file the doc marks as such: the convention
+                        # is the path followed by "(repo root)"
+                        *([os.path.join(REPO_ROOT, tok)]
+                          if tok.startswith(REPO_ROOT_PREFIXES)
+                          or f"`{tok}` (repo root)" in text else []),
                         # the section directory: `rulebooks/heatmap.md` written
                         # from inside 03-pages/rulebooks/ means its sibling
                         os.path.join(os.path.dirname(os.path.dirname(fp)), tok),
@@ -288,12 +307,16 @@ RETIRED_WRITERS = ("populate_workbook.py", "validate_workbook.py",
 
 
 def retired_writers_audit(skills_root=None):
-    """Every SKILL.md line that names a retired writer as if it were live."""
+    """Every line of every skill document (SKILL.md and the references it
+    points at — the procedure moved there under F-B04-027, and a retired
+    writer named as live in a reference file routes an agent exactly as one
+    named in SKILL.md did) that names a retired writer as if it were live."""
     root = skills_root or ROOT
     out = []
-    for dirpath, _dirs, files in os.walk(root):
+    for dirpath, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in ("__pycache__", "deprecated")]
         for f in files:
-            if f != "SKILL.md":
+            if not f.endswith(".md"):
                 continue
             path = os.path.join(dirpath, f)
             with open(path, encoding="utf-8") as fh:
@@ -317,6 +340,9 @@ def main(argv=None) -> int:
     ap.add_argument("--max-broken", type=int, default=MAX_BROKEN,
                     help=f"fail above this many broken references "
                          f"(default: {MAX_BROKEN}, the pinned backlog)")
+    ap.add_argument("--max-lines", type=int, default=MAX_LINES,
+                    help=f"fail when a SKILL.md exceeds this many lines "
+                         f"(default: {MAX_LINES})")
     args = ap.parse_args(argv)
     ROOT = args.root
     PLUGIN_ROOT = _plugin_root(ROOT)
@@ -325,6 +351,9 @@ def main(argv=None) -> int:
     h = help_audit()
     broken, runtime = refs_audit()
     retired = retired_writers_audit()
+    lines = {s: sum(1 for _ in open(os.path.join(ROOT, s, "SKILL.md"), encoding="utf-8"))
+             for s in SKILLS}
+    oversized = {s: n for s, n in lines.items() if n > args.max_lines}
     fails = [x for x in h if x["kind"] == "fail"]
     env = [x for x in h if x["kind"] == "env"]
     retired_scripts = [x["path"] for x in h if x["kind"] == "retired"]
@@ -341,6 +370,8 @@ def main(argv=None) -> int:
         "runtime_by_skill": {s: sum(1 for x in runtime if x["skill"] == s)
                              for s in SKILLS},
         "retired_writer_refs": retired,
+        "skill_lines": lines, "skill_lines_ceiling": args.max_lines,
+        "oversized": oversized,
     }, indent=1))
 
     # THE EXIT CODE. Without it this script printed a defect list forever and
@@ -355,12 +386,18 @@ def main(argv=None) -> int:
               f"{', '.join(x['path'] for x in fails[:5])}", file=sys.stderr)
         return 1
     if retired:
-        print(f"audit_skills: {len(retired)} SKILL.md line(s) route an agent to a "
+        print(f"audit_skills: {len(retired)} skill-document line(s) route an agent to a "
               f"retired writer as if it were live: "
               + "; ".join(f"{x['path']}:{x['line']}" for x in retired[:5])
               + " — the workbook has ONE writer (the engine); say 'retired' "
                 "and name the engine command, or delete the line.",
               file=sys.stderr)
+        return 1
+    if oversized:
+        print(f"audit_skills: SKILL.md over {args.max_lines} lines: "
+              + ", ".join(f"{s} ({n})" for s, n in sorted(oversized.items()))
+              + " — move the procedure into references/ behind the reading "
+                "manifest (QA audit F-B04-027).", file=sys.stderr)
         return 1
     if len(broken) > args.max_broken:
         print(f"audit_skills: {len(broken)} broken references, ceiling "
