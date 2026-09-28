@@ -400,6 +400,19 @@ def record_bind(event: dict) -> None:
         pass
 
 
+def param_echo_text() -> str:
+    """The PreCompact echo for the located run, rendered; never fatal."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import _runctx                                        # noqa: PLC0415
+        import param_echo                                     # noqa: PLC0415
+        run = _runctx.locate()
+        return param_echo.render(param_echo.read_echo(run) if run else None)
+    except Exception:            # noqa: BLE001 — the brief never fails on the echo
+        return (" PARAMETER ECHO: unreadable — recover the run with "
+                "`python3 -m engine.cli resume` before anything else.")
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -414,6 +427,13 @@ def main() -> int:
             event.get("agent_type") or event.get("agentType")):
         # Top-level sessions only: a subagent's parent already saw it.
         text += connector_outstanding()
+    if hook_name == "PostCompact" or (
+            hook_name == "SessionStart" and str(event.get("source") or "") == "compact"):
+        # The parameters the summary may have dropped, written by
+        # param_echo.py at PreCompact (F-E10-034); read back here, so a
+        # compacted session knows its run, root, stage and budget before
+        # its first tool call rather than after `engine.cli resume`.
+        text += param_echo_text()
     # SubagentStart takes `additionalContexts`; SessionStart takes plain
     # stdout. Emitting the JSON form for a subagent is what actually puts the
     # brief in the child's context — printing to stdout there would be

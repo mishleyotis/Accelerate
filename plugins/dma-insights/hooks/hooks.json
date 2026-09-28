@@ -247,6 +247,17 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/param_echo.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: param_echo.py is MISSING from the installed plugin, so the run id, root, stage and budget are NOT written before this compaction and the session re-enters with only what the summariser kept. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal (plugin_version.py shows the drift). The compaction continues on purpose: a PreCompact hook must never stop one.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }

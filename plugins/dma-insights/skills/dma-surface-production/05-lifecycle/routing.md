@@ -486,6 +486,14 @@ a note naming one is a bug report about the id allocator, not a surface repair.
 
 ### After a compaction, a resume or a fork
 
+**The parameters survive the compaction.** `scripts/hooks/param_echo.py` runs at
+PreCompact and writes the run's id, root, workbook stage, pipeline position,
+budget and search-op count to `<run>/07_qa/param_echo.json`; the PostCompact
+brief prints that file back as `PARAMETER ECHO` before anything else. Read it
+first — it is the run's own record from before the summary, not the summary —
+and only then `engine.cli resume` for the rest (QA audit F-E10-034).
+
+
 A synthesis firing that produces six pages **will** compact. When it does, the
 routing rule, the memory rule and the submit boundary are whatever the
 summariser chose to keep — and there was no file that said what to do about

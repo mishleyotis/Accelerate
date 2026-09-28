@@ -71,6 +71,7 @@ BINDINGS = [
     ("SubagentStop", "record_handback.py", r"research-"),
     ("SessionStart", "session_brief.py", None),
     ("PostCompact", "session_brief.py", None),
+    ("PreCompact", "param_echo.py", None),
 ]
 
 
