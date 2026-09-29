@@ -17,373 +17,284 @@ description: >
 # DMA Research Skill v2.5
 
 This skill produces the **evidence foundation** for a Digital Maturity Assessment. It does
-NOT score — it researches. Output: a partially-filled scoring workbook with evidence columns
-populated and scoring columns empty for `dma-assessment`.
+NOT score — it researches. Its output is the run's ONE scoring workbook with the evidence
+columns populated and column D (Score) empty for `dma-assessment`.
 
-Version history: `references/CHANGELOG.md`.
+Version history: `references/CHANGELOG.md`. Terms: `${CLAUDE_PLUGIN_ROOT}/docs/GLOSSARY.md`.
 
 ## Reading manifest — by phase
 
-The engine (`engine.cli`, `engine.brief`, `engine.pipeline`) is the run's authority; the
-prose below is what a person or a lane reads to work it. By phase:
+The engine (`engine.cli`, `engine.brief`, `engine.pipeline`, under `engine/`) is the run's
+authority: it creates the workbook, serves the work, refuses what does not belong, and
+computes every count. The prose below is what a person or a lane reads to work it.
 
 | Phase | Read | Why |
 |---|---|---|
-| Session start | this file's ABSOLUTE RULES, `references/context_window.md`, `references/RESEARCH-PROTOCOL.md` | the rules and the protocol |
-| PRELIM | `references/subvertical_profiles.md`, `references/tech_discovery.md` | the binding and the estate |
-| A category lane | `engine.brief dispatch` (the card), `references/core_engine.md`, `references/deep_search_protocol.md`, `references/evidence_methodology.md` | the loop, the search ladder, the tiers |
-| Declaring an absence | `references/org_capability_proxies.md`, `references/uncertainty_framework.md` | the ladder and the ceiling estimate |
-| A batch boundary | `references/batch_execution_protocol.md` § the batch you are in | its checks |
-| Handoff | `references/deliverables_spec.md`, `references/research_workbook_spec.md` | what ships |
+| Session start | this file's *How a research run is worked* and *Rules*, `references/RESEARCH-PROTOCOL.md` | who you are in the run, and the loop |
+| PRELIM | `references/subvertical_profiles.md`, `references/tech_discovery.md`, `references/source_catalogue.md` | the binding, the estate, the T1 sources |
+| A category lane | `engine.brief dispatch` (the packet), `references/core_engine.md`, `references/deep_search_protocol.md`, `references/evidence_methodology.md` | the loop, the query ladder, the tiers |
+| Declaring an absence | `references/org_capability_proxies.md`, `references/uncertainty_framework.md` | the proxy ladder and the ceiling estimate |
+| Closing a category, closing the run | this file's *Closing*, `references/research_workbook_spec.md` | the gates in order, and what the sheets must carry |
+| The client research profile | the report tier's brief (`report-research-producer`), `references/document_formatting.md` | written INTO the pinned template through `engine.cli narrative`, never from a remembered shape |
 
-## ⛔ ABSOLUTE RULES
+## How a research run is worked
 
-| # | Rule | Prevents |
-|---|------|----------|
-| 1 | **NO SCORING** — Ceiling estimates with uncertainty bands ONLY. Never assign M1-M5. | Premature scoring |
-| 2 | **EVERY claim labeled** — FACT / INFERENCE / HYPOTHESIS / CEILING_ESTIMATE. | Unlabeled assertions |
-| 3 | **EVERY claim cited** — Evidence ID `[E-xxx]` + KB Source ID `[KB-XX-xxx]`. | Ungrounded prose |
-| 4 | **Compact output** — One line per finding. No narrating, no previewing. | Token waste |
-| 5 | **Presence ≠ Utilization** — Tech findings are ceiling estimates. Flag utilization uncertainty. | Over-estimation |
-| 6 | **`web_search` at SUBCAPABILITY level** — 3-5 queries per subcap via `references/deep_search_protocol.md`. Execute Tiers 1-6. If signals remain unknown or <3 evidence items after Tiers 1-6, proxy searches (Tiers 7-10) are MANDATORY — do not skip. This is the PRIMARY research mechanism — no shortcuts. | Thin evidence, shallow single-search-per-category |
-| 6b | **Dual-source: `web_search` FIRST, then Moody's connector** — web_search is PRIMARY (≥70% of queries). Moody's SUPPLEMENTS with structured credit/financial data. web_search MUST precede Moody's in every batch. Moody's does NOT replace subcap-level web searches. | Single-source dependency |
-| 7 | **Batch execution** — 6 batches. Stop after each. Wait for "continue". Checkpoint after each batch. | Context overflow |
-| 8 | **Fill the workbook** — Columns A-I, K, L, M, U, V. Leave J, N-T EMPTY. Every row: specific URL in L, ERS in M, excerpt ≥50 chars in U. | Evidence trapped in chat / truncated evidence |
-| 9 | **Read diagnostic Qs FIRST** — Column H drives the search. | Generic searches |
-| 10 | **Calculate ERS** — 0.35×Tier + 0.25×Recency + 0.20×Specificity + 0.20×Corroboration. | Undifferentiated evidence |
-| 11 | **Extract at FACT level** — `[E-xxx:Fy]` notation. One `web_fetch` → 20+ subcap facts. | Single-fact extraction |
-| 12 | **5-Layer Analysis** (HYBRID/INTERNAL) — Explicit → Implicit → Absence → Contradiction → Strategic. | Surface-level extraction |
-| 13 | **Use project knowledge base templates** — Client Profile report MUST use the `DMA_Client_Profile_Research_Template.docx` from the project knowledge base. Retrieve it, fill it. NO deviation, NO ad hoc structures. | Inconsistent report formats |
-| 14 | **Peer set locked in Batch 1** — Select 3-5 peers during entity profiling. Peers are IMMUTABLE after Batch 1. Saved to peer_set.json and carried into handoff. | Assessment delays from deferred peer selection |
-| 15 | **Canonical evidence schema** — Every evidence item uses identical field names across all batches. See Evidence Item Schema below. | Schema inconsistency across batches (QA-010) |
-| 16 | **70% evidence-coverage floor PER CATEGORY** — at least 70% of a category's subcaps must carry ≥1 resolvable evidence item. The floors gate BLOCKS on `coverage_below_floor` (AUD-0115). Work the long tail with the DQ facets as discovery probes + the negative ladder; declare honest absences only AFTER a deep search. | Shallow categories where most subcaps are marked no-evidence without deep/proxy searches |
-| 17 | **Synthesise + INDEPENDENTLY challenge every evidenced subcap BEFORE scoring** — a subcap with evidence is not done until it carries a synthesis AND a challenge recorded by a *different agent run* (distinct session; a relabel of the same run is refused). The research → **synthesis → independent challenge** → handoff → scoring order is enforced: `handoff.build` REFUSES any category that did not clear the floors gate with `--require-synthesis` (AUD-0116), so a coverage-only pass can never reach the scoring stage. The score must reflect a challenged claim, never raw evidence. | Volleyed subcaps scored on unchallenged evidence; challenge treated as an optional afterthought |
+You are one of three actors, and your dispatch brief says which:
 
----
+- the **`research-conductor`** — drives `engine.pipeline`: PRELIM, the sixteen category
+  lanes, the challenge pass, the floors gates, the handoff. It holds the connectors (Exa,
+  Tavily, Clay) and services every lane's `search_requests` per capability batch;
+- a **`research-pXcY-producer`** — one category of one run, under
+  `references/RESEARCH-PROTOCOL.md`. It searches the open web, logs every search, notes as it
+  goes, consolidates through the ledger's refusals, synthesises, and hands back. It holds no
+  connector: a connector volley is EMITTED as a `search_requests` entry, never fired;
+- a **relay subagent** (`enrichment-web-specialist`, `enrichment-connector-specialist`) —
+  services one `briefs/relay_r<n>/` batch through the connector it holds and records each
+  result with the tool that produced it.
 
-## Context Window Management (CRITICAL)
+**The workbook is the only record.** `engine.cli start` created it from `engine/contract.py`
+(41 sheets, 33 columns per pillar sheet, every scoring row seeded with its `SubCap_Name`).
+Evidence enters through `engine.cli evidence` (a verbatim 50–500-character excerpt, checked
+against the text `engine.cli fetch` cached — because a span the run never read cannot be
+audited); searches through `engine.cli search --subcap … --facet … --tool …`; syntheses
+through `engine.cli synthesise`; absences through `engine.cli absence`. ERS and every count
+are computed by the engine — never type one. Never write a JSON or XLSX beside the run:
+the seven batch-era scripts are retired and refuse, each naming the engine command that
+replaced it (the *Scripts* table below lists them).
 
-Read `references/context_window.md` — the context-window rules for a research session. Read at session start and after a compaction.
+**Search shape.** Five volleys per cell (`works`, `fails`, `value`, `contradicts`,
+`corroborates`) plus the toolkit's `primary` question, fired at capability grain and logged
+per cell — the floors gate counts them. Read pages as windows (`engine.cli fetch`), never
+whole: a whole page is re-read on every later turn and was 76 % of one run's bill. The tool
+precedence — which engine first, which connector when, what is emitted rather than fired — is
+stated ONCE, in `references/RESEARCH-PROTOCOL.md` § *Tools: first choice, fallback, and what
+you emit*; nothing in this skill restates it.
 
-## Output Directory Taxonomy (MANDATORY)
+**Done** = `engine.cli gate --run <R> --category <C> --require-synthesis` prints PASS, then
+`engine.brief handback --category <C>`. Nothing pauses for a person's go-ahead between
+categories: the driver re-dispatches, and a lane that ran out of budget checkpoints and ends
+its turn.
 
-```
-/home/claude/dma_output/{RUN_ID}/
-├── run_manifest.json
-├── 00_entity_profile/         # Batch 1
-│   ├── entity_profile.json
-│   ├── subvertical_classification.json
-│   ├── financial_baseline.json
-│   └── peer_set.json          # LOCKED peer set (3-5 peers, immutable after Batch 1)
-├── 01_evidence/               # Batches 2-3
-│   ├── evidence_index.json
-│   ├── evidence_index.csv
-│   ├── search_log.json
-│   └── rich_documents/
-├── 02_workbook/               # Batch 4
-│   ├── DMA_Research_Workbook_{INST}_{DATE}.xlsx
-│   └── workbook_validation.json
-├── 03_appendices/             # Batches 4+6 (A1-A9 CSVs)
-├── 04_visualizations/         # Batch 6 (VIZ-01 to VIZ-05 PNGs)
-├── 05_report/                 # Batch 5
-├── 06_handoff/                # Batch 6 (research_handoff.json)
-├── 07_qa/                     # QA artifacts
-└── checkpoints/               # Batch checkpoints
-```
+## Rules
 
-**Run ID:** `DMA-RES-{INST_CODE}-{YYYYMMDD}-{SEQ}` (e.g., DMA-RES-GESA-20260304-0001)
+Each rule names the failure it prevents; the engine refuses most of them outright.
 
-**At Batch 1 start:** Generate RUN_ID → create full tree → create `run_manifest.json` →
-all subsequent file writes use these paths — no exceptions.
+| # | Rule | Why |
+|---|---|---|
+| 1 | **No scoring.** Ceiling estimates with uncertainty bands only; never a score. | Column D is struck by `engine.assessment score` from a challenged synthesis; a score written here is a score nobody challenged. |
+| 2 | **Every claim labelled** `FACT` / `INFERENCE` / `HYPOTHESIS` / `CEILING_ESTIMATE` (`contract.CLAIM_LABELS`). The ledger derives the label from the tier when you omit it and refuses a FACT on T3 or weaker (`contract.FACT_TIERS`). | The scorer reads the label to decide what the evidence can carry; 77 FACT rows on T3/T4 in one staged run were the audit's blocker. |
+| 3 | **Every claim cited** by evidence id, every evidence row by a specific URL (or `--origin internal`). | A claim with no row behind it cannot open a drawer, so the app renders it as nothing. |
+| 4 | **Compact output** — one line per finding, no narration, no preview. | Your context is re-read on every turn; prose in chat is paid for on every turn after it. |
+| 5 | **Presence ≠ utilization.** A product found is a ceiling estimate until utilization is evidenced. | "Uses Salesforce" and "uses Salesforce effectively" score two levels apart. |
+| 6 | **Search at capability grain, log at the cell** — five volleys plus `primary` per cell, one query fired once for the group and logged against every cell it bears on. | `volleys_incomplete` and `primary_unfired` block the floors gate; `evidence_smear` blocks a cell whose citations are more than half shared. |
+| 7 | **One workbook, one writer.** Nothing beside the run. | A second workbook is the "wrong structure every run" defect the retired writers produced. |
+| 8 | **ERS and counts are computed.** `engine.cli ers recompute`; never a typed score. | A typed ERS is a number nobody can recompute (invariant 10). |
+| 9 | **Read the card's questions first** — the toolkit's diagnostic questions drive the search. | A query the DQ did not shape is a generic search that answers a different question. |
+| 10 | **Extract at fact level** `[E-xxx:Fy]` — one rich document read as windows yields facts for many cells. | Single-fact extraction pays for the same document once per cell. |
+| 11 | **HYBRID / INTERNAL: five-layer analysis** — explicit, implicit, absence, contradiction, strategic — on every internal document. | Internal evidence read only for what it states misses what it omits. |
+| 12 | **Peer set locked at PRELIM** (`engine.prelim peers`, 3–5 peers) and carried unchanged into scoring. | Peers chosen after the evidence is in are peers chosen to flatter it. |
+| 13 | **70 % evidence-coverage floor per category** — the floors gate blocks on `coverage_below_floor`; the long tail is worked with the DQ facets as probes and the absence ladder, and honest absences are declared only AFTER a deep search. | Shallow categories where most cells are marked no-evidence without a proxy search (AUD-0115). |
+| 14 | **Synthesise, then an INDEPENDENT challenge, before scoring.** A different actor records the challenge; `handoff.build` refuses a category that did not clear the gate with `--require-synthesis`. | A score should reflect a challenged claim, never raw evidence (AUD-0116). |
 
-**Provenance:** Every file references `run_id`. CSVs: header comment `# run_id: {RUN_ID}`.
-Workbook: `Run_Metadata` sheet. VIZ: footer text. Hard gate: mismatched `run_id` = build fails.
+## Evidence tiers
 
-**Clean build:** Never reuse artifacts from different RUN_ID. Final package = manifest list only.
+| Tier | Type | ERS weight | Score ceiling (`engine.assessment.TIER_CEILING`) | Examples |
+|---|---|---|---|---|
+| T1 | Regulatory / audited + verified machine scans (`contract.SCAN_TIER`) | 1.0 | 5.0 | Call reports, enforcement orders, Hubbl, BuiltWith, Wappalyzer, Explorium |
+| T2 | Official disclosures + structured internal | 0.85 | 5.0 | Annual reports, 10-K, investor decks, discovery notes with specific tech or metrics |
+| T3 | Third-party analysis | 0.7 | 4.0 | J.D. Power, Forrester, app ratings |
+| T4 | Internal, unvalidated narrative | 0.55 | 2.5 | Unstructured memos, anecdotal claims |
+| T5 | Marketing / claims | 0.3 | 2.0 | Website claims, brochures — requires corroboration |
 
----
+A single source, whatever its tier, caps at 3.0; a FACT needs two source identities.
 
-## Evidence Tier System
-
-| Tier | Type | Weight | Max Ceiling | Examples |
-|------|------|--------|-------------|---------|
-| T1 | Regulatory/Audited + Verified Tech Scans | 1.0 | L5 | Call reports, enforcement orders, **Hubbl scans**, BuiltWith, Wappalyzer |
-| T2 | Official Disclosures + Structured Internal | 0.85 | L5 | Annual reports, 10-K, investor decks, **discovery notes** with specific tech/metrics |
-| T3 | Third-Party Analysis | 0.7 | L4 | J.D. Power, Forrester, app ratings |
-| T4 | Internal (Unvalidated Narrative) | 0.55 | L2.5 | Unstructured memos, anecdotal claims |
-| T5 | Marketing/Claims | 0.3 | L2 | Website claims, brochures — REQUIRES corroboration |
-
-### ⚠️ Hubbl & Discovery Notes — CRITICAL Tier Rules
-
-**Hubbl scans = T1.** Machine-generated, timestamped, objective deployment data.
-**Structured discovery notes = T2.** Formal engagement outputs with specific tech/metrics.
-**NEVER classify Hubbl as T4.** Most common misclassification — suppresses scores via T4 ceilings.
+**Classifying an internal artefact** (one tree; `references/evidence_methodology.md` points here):
 
 ```
-Classification decision tree:
-  Machine-generated scan (Hubbl, BuiltWith)? → T1
-  Structured engagement notes with metrics?  → T2
-  Formal internal doc (policy, board deck)?  → T3 (use with corroboration)
-  Informal memo, email, anecdotal claim?     → T4
+Machine-generated scan (Hubbl, BuiltWith, Wappalyzer, Explorium)?      → T1
+Structured engagement notes, policy docs, board decks, roadmaps with
+  specific tech or metrics?                                             → T2
+Formal internal document, general, without specific metrics?            → T3
+Informal memo, email, anecdotal claim?                                  → T4
 ```
 
-**Recency tags:** CURRENT (<18mo), RECENT (18-36mo), LEGACY (>36mo), UNVERIFIED (undated)
+Never file a machine scan as T4 — it silently suppresses the score through the T4 ceiling,
+and the ledger refuses a named scan at any tier but T1.
 
----
+**Recency** (`contract.RECENCY_LADDER`, months before the run's pinned reference date):
+CURRENT (<12) · RECENT (<24) · DATED (<36) · STALE (<48) · ARCHIVAL (≥48) · UNVERIFIED
+(undated, or dated in the future). Undated is a band, never current; a quarter or a month is
+a date (`2025-Q4` resolves to the quarter's end).
 
-## Canonical Evidence Item Schema (MANDATORY — all batches)
+## Claim labels
 
-Every evidence item across ALL batches MUST use this exact schema. No field name variations.
-This prevents the schema inconsistencies documented in QA-010.
+| Label | Citation rule | Shape |
+|---|---|---|
+| FACT | evidence ids on T1/T2, two source identities | `[E-003] NCUA Q4 2024 (T1, CURRENT): assets $4.2B. (FACT)` |
+| INFERENCE | 2+ evidence ids + the logic | `[E-012, E-015] AppExchange listing + a "Salesforce Admin" posting: likely FSC. (INFERENCE)` |
+| HYPOTHESIS | evidence ids + the proxy attempts | `[E-030] no digital officer title in leadership; board bios searched, no tech background [E-031]. (HYPOTHESIS — validate against the org chart)` |
+| CEILING_ESTIMATE | evidence ids + the uncertainty | `P4C3 ceiling 3.5 (±0.5): presence confirmed [E-018], utilization unknown. (CEILING_ESTIMATE)` |
 
-```json
-{
-  "evidence_id": "E-xxx",
-  "source_name": "string",
-  "url": "string (specific URL — NEVER 'multiple searches' or blank)",
-  "tier": "T1|T2|T3|T4|T5",
-  "ers_score": 0.0,
-  "recency_tag": "CURRENT|RECENT|LEGACY|UNVERIFIED",
-  "subcap_mappings": ["P1C1.1.1", "P1C1.1.2"],
-  "facts": [{"fact_id": "F1", "text": "string", "claim_label": "FACT|INFERENCE|HYPOTHESIS|CEILING_ESTIMATE"}],
-  "publish_date": "YYYY-MM",
-  "signal_direction": "POSITIVE|NEGATIVE|NEUTRAL|CONTRADICTORY"
-}
-```
+A "not found" is a HYPOTHESIS only with the proxy searches listed; without them it is a
+research failure, and `engine.cli absence` refuses it because the Search_Log will not show
+the searches. The payload's H6 `claim_type` is a different field with its own enum, owned by
+the page contract (`get_page_contract heatmap`); the surface producers read that contract,
+never this table.
 
-**Hard enforcement:** `engine.cli evidence` refuses an item not conforming to this
-schema (an excerpt outside 50–500 verbatim characters, an off-vocabulary tier, a cell the run
-did not select), and `engine.cli validate` fails the workbook on any row that got in around it.
-Field aliases (e.g., `id` instead of `evidence_id`, `finding` instead of `facts`) are NOT
-accepted. (`scripts/validate_workbook.py` is retired — it validated the 22-column layout the
-engine replaced, and it refuses, naming `engine.cli validate`.)
+## Research checks (RS-01 … RS-06)
 
----
+Checks on THIS SKILL's own search behaviour, computed by the floors gate and the handback.
+They are not connector gates, never appear in a payload, and `explain_gate` does not know
+them — which is why they carry the `RS-` prefix and not `SG-`: they were `SG-01…SG-06` until
+2026-08-23, and the collision cost a production session a contradiction it could not settle.
+The `SG-` namespace belongs to `apps/mcp/dma_mcp/gates.py` alone.
 
-## Dual-Source Research Protocol (web_search + Moody's Connector)
+- RS-01: at least one search per cell ran through an enrichment connector, logged with the
+  tool that ran it (`absence_single_tool`); a lane emits it, the conductor services it
+- RS-02: every askable volley of every cell has a logged `engine.cli search` row
+  (`volleys_incomplete`, `primary_unfired`)
+- RS-03: the entity's primary site and its filings were read through `engine.cli fetch`, so
+  their excerpts verify
+- RS-04: connector results are layered onto the web search results, never replacing them
+- RS-05: negative results are recorded — every empty cell is DECLARED through
+  `engine.cli absence` with its ladder (`absence_undeclared_empty`)
+- RS-06: the financial trajectory covers five years (PRELIM's banked series; the scoring
+  stage refuses to open without it)
 
-**web_search is the PRIMARY evidence tool.** Moody's connectors SUPPLEMENT but never replace
-targeted web searches. This is enforced per-batch.
+## Internal evidence (HYBRID / INTERNAL runs)
 
-### Invocation Order (MANDATORY per batch)
+1. **Load internal evidence first** — the conductor's `drive_fetch.py pull` lands the client's
+   documents under the run root (`01_intake/`; `run_manifest.json` names the path). Read the
+   NAMED artefact your card lists; an artefact the pull did not land is a `search_requests`
+   entry with `"tool": "drive"`, never a gap.
+2. **Classify with the one tree above** — never default internal evidence to T4.
+3. **Cross-reference** against public evidence; note agreements and contradictions
+   (`engine.memory note --kind contradiction`).
+4. **Weight correctly:** internal T2 outweighs public T3–T5 for the same cell.
+5. **Register with `--origin internal`** and a verbatim excerpt.
+6. **Gate:** in HYBRID / INTERNAL mode, more than half the cells with no internal citation
+   means the documents were not read — stop and say so.
 
-```
-STEP 1: Targeted web searches (≥10 per batch, ≥70% of total queries)
-  → web_search for institution-specific evidence
-  → web_fetch on discovered pages (vendor case studies, press releases, tech blogs)
-  → Fetch institution's primary website for first-party source data
+## Diagnostic question patterns
 
-STEP 2: Moody's connector calls (structured credit/financial data)
-  → Moody's scorecard data (financial ratios, credit metrics)
-  → Moody's sector outlook (industry context)
-  → Moody's document search (analyst reports, research notes)
+| Pattern | Evidence needed | Query strategy |
+|---|---|---|
+| "Does [entity] have…" | existence proof | search for the thing |
+| "Is [thing] documented…" | T2+ documentation | annual reports, filings |
+| "Is there a defined process…" | process maturity T2/T3 | process descriptions, job posts |
+| "Are metrics tracked…" | measurement T1/T2 | reported metrics, KPIs |
+| "Is [thing] automated…" | technology T3/T4 | platform, vendor, case study |
+| "Is there board oversight…" | governance T1/T2 | proxy statements, charters |
+| "Are results used to improve…" | optimization T2/T3 | iteration evidence, A/B testing |
+| "Is [capability] integrated across…" | enterprise adoption T2/T3 | cross-department mentions, unified platform |
 
-STEP 3: Regulatory database deep dive
-  → Regulator-specific searches (FDIC, NCUA, OCC, FCA, state regulators)
-  → Enforcement action searches
-  → Call report / financial filing retrieval
+### Evidence sufficiency by question type
 
-STEP 4: Proxy signal searches (Tiers 7-10)
-  → Industry associations mentioning entity
-  → Vendor case studies, partner press releases
-  → Job postings (LinkedIn, Indeed) for capability indicators
-  → Glassdoor reviews, community forums
-```
+| Question type | Minimum evidence | Below minimum |
+|---|---|---|
+| Existence | 1 confirming, OR the declared absence with its ladder | `engine.cli absence` only after the proxy rungs are fired |
+| Process maturity | 2 sources | thin — flag for internal validation |
+| Measurement | 1 T1/T2 with actual values | T3+ only → INFERENCE, no hard data |
+| Technology | 1 presence + 1 utilization | presence alone → CEILING_ESTIMATE |
+| Governance | 1 T1/T2 governance item + a proxy search | board composition only → HYPOTHESIS with the proxy log |
+| Optimization | 2 improvement-cycle references | single mention → HYPOTHESIS, low confidence |
+| Enterprise adoption | 2+ cross-department references | single department → ceiling 3.0 |
 
-**Research batch checks (verified after each batch).** These are checks on
-THIS SKILL's own search behaviour. They are not connector gates, they never
-appear in a payload, and `explain_gate` does not know them — which is why they
-carry the `RS-` prefix and not `SG-`. They were `SG-01…SG-06` until
-2026-08-23, and the collision cost a production session a contradiction it
-could not settle: one challenger called `explain_gate` on a payload's `SG-01`,
-got `unknown_gate`, and reported the id fabricated (correctly — CG-22 refuses
-exactly that); a second challenger found these definitions and argued the same
-ids were legitimate disclosures to preserve. Both read a real document. The
-`SG-` namespace belongs to `apps/mcp/dma_mcp/gates.py` alone.
-- RS-01: web_search invoked BEFORE Moody's in this batch
-- RS-02: ≥10 targeted web searches executed this batch
-- RS-03: Entity primary website fetched for first-party data
-- RS-04: Moody's data layered on top of (not replacing) web search results
-- RS-05: Negative results documented (absence = evidence)
-- RS-06: Financial data covers ≥3 years for trend analysis
+**Proxy rule for the governance and strategy categories (P1C1–P1C4).** Governance evidence
+is indirect, so a "not found" there is usually a search that stopped early. For every such
+cell, before declaring: board bios for tech or digital background; C-suite digital
+appointments (CDO, CTO, CIO); leadership with digital titles; conference presentations by
+leadership; strategic-plan filings or investor-deck mentions. Each is a logged
+`engine.cli search --subcap <cell> --facet <f>` and a rung named in `--ladder` /
+`--proxy-log` when you declare.
 
-**Search log (A2 CSV) must show web_search as dominant query type (≥70% of total).**
+## Workbook columns
 
----
+The shape is `engine/contract.py: PILLAR_COLUMNS` — 33 columns per pillar sheet, printed by
+`python3 -m engine.cli columns`. Columns A–K are the app-facing set; `Score` (column D) is the
+assessment stage's and is struck only by `engine.assessment score`. The research tier writes
+through the four commands above and never by column letter. `references/research_workbook_spec.md`
+holds the write-up protocol for `What_We_Found` and the source-format rules, and a test pins
+its column list to the contract.
 
-## Internal Evidence Integration Protocol (HYBRID/INTERNAL mode)
+## Closing
 
-**MANDATORY for every capability when internal evidence exists.**
+**A category** (`references/RESEARCH-PROTOCOL.md` § *Closing your category*):
+`engine.cli gate --category <C> --require-synthesis` → PASS; `engine.memory status` shows
+nothing NOTED or BLOCKED; `engine.memory backup`; `engine.brief handback`.
 
-1. **LOAD internal evidence FIRST** — before web search. Read all uploaded client documents,
-   discovery notes, Hubbl scans, and internal files at batch start.
-2. **CLASSIFY using decision tree** — NEVER default internal evidence to T4:
-   ```
-   Machine-generated scan (Hubbl, BuiltWith, Wappalyzer)?  → T1
-   Structured engagement notes with specific tech/metrics?  → T2
-   Client-provided policy docs, board decks, roadmaps?      → T2
-   Formal internal doc (general, no specific metrics)?       → T3
-   Informal memo, email, anecdotal claim?                    → T4
-   ```
-3. **CROSS-REFERENCE** against public evidence — note agreements and contradictions
-4. **WEIGHT CORRECTLY:** Internal T2 evidence OUTWEIGHS public T3-T5 evidence for the same subcap
-5. **Flag in workbook Column U** when internal evidence contradicts public evidence
-6. **HARD GATE:** If HYBRID/INTERNAL mode and >50% of subcaps have zero internal evidence
-   cited → STOP and verify internal docs were actually loaded and analyzed
+**The run** (the conductor, through `engine.pipeline`), every command refusing on its own
+terms:
 
----
+1. `engine.cli gate … --require-synthesis` for every category in scope.
+2. `engine.cli validate --run <R> --root <ROOT>` — shape, vocabularies, cross-references,
+   rule 8 (no absence flag without its Provenance row).
+3. `engine.cli ers recompute` — ERS is computed, never typed.
+4. `engine.cli complete check` — every tab filled or its emptiness declared with a reason.
+5. `engine.cli handoff` — the versioned packet (`research_handoff_v2`, sha256 sidecar) the
+   scoring stage verifies before it opens; it carries the run id, evidence mode, the locked
+   peer set and the completeness verdict.
 
-## Claim Labels (MANDATORY — every finding)
+The client research profile is the report tier's: `report-research-producer` writes it
+section by section through `engine.cli narrative write` into the pinned template
+(`${CLAUDE_PLUGIN_ROOT}/references/templates/client_profile_template.md`), and `report-validator` passes no section
+whose citations it did not open.
 
-| Label | Citation Rule | Format |
-|-------|--------------|--------|
-| FACT | E-ID + KB-ID | `[E-003] NCUA Q4 2024 (T1, CURRENT): Assets $4.2B. [KB-US-001] (FACT)` |
-| INFERENCE | 2+ E-IDs + logic | `[E-012, E-015] AppExchange listing + job posting for "Salesforce Admin": Likely uses FSC. (INFERENCE)` |
-| HYPOTHESIS | E-IDs + proxy attempts | `[E-030] LinkedIn shows no digital officer titles in leadership. Proxy: board bios searched, no tech background found [E-031]. Org chart suggests digital reports to CIO. (HYPOTHESIS — validate via internal org chart)` |
-| CEILING_ESTIMATE | E-IDs + uncertainty | `P4C3 ceiling: L3.5 (±0.5). Tech presence confirmed [E-018] but utilization unknown. (CEILING_ESTIMATE)` |
+## Domain-specific rules
 
-**FORBIDDEN HYPOTHESIS PATTERNS (these indicate skipped proxy searches):**
-- "No CDO found" — Did you search board bios, LinkedIn, press releases, job postings?
-- "No governance strategy" — Did you search annual reports, investor decks, proxy statements?
-- "No digital strategy" — Did you search strategic plan filings, CDO/CTO appointments, conference talks?
-If your hypothesis is "not found", you MUST list the proxy searches attempted and their results.
+**P4 stricter thresholds:** HIGH = T1/T2 + corroboration + utilization; MEDIUM = T3 + stack
+confirmed; LOW = T4/T5 or any red flag. Inferred technology caps at 3.0. Tenure over ten
+years on a basic tier → internal validation.
 
----
+**Floors the gate holds a category to:** one T1 regulatory anchor; two T1/T2 financial
+sources; the five-year trend; the issue search across every regulator; sentiment attempted;
+every technographic layer carrying a `Tech_Register` row; the org proxies; the diagnostic
+questions loaded; coverage at or above the floor.
 
-## Core Engine: Diagnostic Q → Search → Evidence → Subcap Row
+**Tech utilization:** `references/tech_discovery.md` (evidence levels 1–4, utilization
+levels, URF-01–06 red flags, vendor tenure, recency protocol).
 
-Read `references/core_engine.md` — diagnostic question → search → evidence → subcap row, in full. Read before the first batch.
+**Uncertainty:** `references/uncertainty_framework.md` (base ±0.3–0.5, red flags +0.1–0.2,
+evidence gaps +0.1–0.2, capped at ±0.8).
 
-## Diagnostic Question Patterns
+**Org proxies:** `references/org_capability_proxies.md` (LinkedIn density, job seniority,
+Glassdoor culture, their effect on P1C4 / P4 ceilings).
 
-| Pattern | Evidence Needed | Query Strategy |
-|---------|----------------|----------------|
-| "Does [entity] have..." | Existence proof | Search for the thing |
-| "Is [thing] documented..." | T2+ documentation | Annual reports, filings |
-| "Is there a defined process..." | Process maturity T2/T3 | Process descriptions, job posts |
-| "Are metrics tracked..." | Measurement T1/T2 | Reported metrics, KPIs |
-| "Is [thing] automated..." | Technology T3/T4 | Platform, vendor, case study |
-| "Is there board oversight..." | Governance T1/T2 | Proxy statements, charters |
-| "Are results used to improve..." | Optimization T2/T3 | Iteration evidence, A/B testing, CI |
-| "Is [capability] integrated across..." | Enterprise adoption T2/T3 | Cross-dept mentions, unified platform |
+## Reference files
 
-### Evidence Sufficiency by Question Type
+| File | Read when | Contents |
+|---|---|---|
+| `references/RESEARCH-PROTOCOL.md` | every lane, first | the loop, the volleys, the tools rule, the absence ladder, the budget |
+| `references/core_engine.md` | before the first card | diagnostic question → search → evidence → row, through the engine |
+| `references/deep_search_protocol.md` | before the first card | the ten-tier query ladder, proxy signals |
+| `references/evidence_methodology.md` | before the first card | ERS factors, fact-level extraction, five-layer analysis, red flags |
+| `references/research_workbook_spec.md` | closing | the `What_We_Found` write-up protocol, source format, and the contract's columns |
+| `references/source_catalogue.md` | PRELIM | KB source ids, URLs, query templates |
+| `references/subvertical_profiles.md` | PRELIM | decision tree, T1 sources, financial metrics per sub-vertical |
+| `references/tech_discovery.md` | PRELIM and P4 | tech categories, utilization, URF-01–06, vendor tenure |
+| `references/org_capability_proxies.md` | declaring an absence | LinkedIn density, job seniority, Glassdoor |
+| `references/uncertainty_framework.md` | declaring an absence | base uncertainty, red-flag modifiers, the ±0.8 cap |
+| `references/document_formatting.md` | the report tier | Zennify branding, DM Sans, python-docx |
+| `references/CHANGELOG.md` | never in a run | version history |
+| `references/diagnostic_questions.md` | fallback only | ONE question per category, not per subcapability — 71 in all. Not a substitute for the toolkits; a run that falls back to it runs on 8 % of the coverage the name implies, and must say so. |
 
-| Question Type | Minimum Evidence | Below Minimum Action |
-|---------------|-----------------|---------------------|
-| Existence | 1 confirming OR 3 non-findings + proxy attempts | NO_EVIDENCE only after proxy searches (Tiers 7-10) also fail |
-| Process maturity | 2 sources | EVIDENCE_THIN, flag for internal validation |
-| Measurement | 1 T1/T2 with actual values | T3+ only → label INFERRED, note no hard data |
-| Technology | 1 tech evidence + 1 utilization | Presence alone → CEILING_ESTIMATE |
-| Governance | 1 T1/T2 governance evidence + proxy search | Proxy/board composition only → HYPOTHESIS with proxy log |
-| Optimization | 2 improvement cycle references | Single mention → HYPOTHESIS, low confidence |
-| Enterprise adoption | 2+ cross-department references | Single dept → cap at L3.0 |
-
-**MANDATORY PROXY RULE for Governance & Strategy subcaps (P1C1-P1C5):**
-These subcaps are the most likely to produce false "not found" conclusions because
-governance evidence is often indirect. For EVERY governance/strategy subcap:
-1. Search board bios for tech/digital background (Tier 7)
-2. Search for C-suite digital hires — CDO, CTO, CIO appointments (Tier 7)
-3. Search LinkedIn for leadership with digital titles (Tier 7)
-4. Search conference presentations by entity leadership (Tier 8)
-5. Search for strategic plan filings or investor deck mentions (Tier 2)
-These five are the `proxy` rung of the absence ladder for P1: log each as an
-`engine.cli search --subcap <cell> --facet <f> --tool <connector>` and name
-them in `--ladder` / `--proxy-log` when you declare. "No CDO found" without
-them is a research failure, not a finding — and `engine.cli absence` refuses
-it, because the Search_Log will not show the searches.
-
----
-
-## Batch Execution Protocol
-
-Read `references/batch_execution_protocol.md` — the six batches, B1–B6, and their checks. Read the batch you are in.
-
-## Workbook Columns (Research Responsibility)
-
-| Cols | Research Fills | Cols | Assessment Fills |
-|------|---------------|------|-----------------|
-| A-I | Taxonomy + diagnostic Q + weights | J | Score |
-| K,L,M | Evidence IDs, URLs, Tier | N-T | Confidence, caps, rationale, proof |
-| U,V | Evidence excerpt + source doc | — | May enrich U,V |
-
----
-
-## Reference Files
-
-| File | Read When | Key Contents |
-|------|-----------|-------------|
-| `references/evidence_methodology.md` | Batch 1 start | ERS formula, fact-level extraction, 5-Layer analysis, red flags |
-| `references/deep_search_protocol.md` | Batch 2 start | 10-tier query system, proxy signals, smart batching |
-| `references/research_workbook_spec.md` | Batch 4 | Column specs, Column U protocol, sheet structure |
-| `references/source_catalogue.md` | Batch 1 | KB Source IDs, URLs, query templates |
-| `references/subvertical_profiles.md` | Batch 1 | Decision tree, T1 sources, financial metrics |
-| `references/tech_discovery.md` | Batch 3 | Tech categories, utilization, URF-01-06, vendor tenure |
-| `references/org_capability_proxies.md` | Batch 3 | LinkedIn density, job seniority, Glassdoor |
-| `references/uncertainty_framework.md` | Batch 4 | Base uncertainty, red flag modifiers, ±0.8 cap |
-| `references/safeguard_gates.md` | Batch 4 | 16 safeguard gates |
-| `references/deliverables_spec.md` | Batch 5 | D0-D6 structure, appendix specs |
-| `references/document_formatting.md` | Batch 5 | Zennify branding, DM Sans, python-docx |
-| `references/context_window.md` | Session start | Context-window rules (moved from this file, F-B04-027) |
-| `references/core_engine.md` | Before the first batch | Diagnostic Q → search → evidence → subcap row |
-| `references/batch_execution_protocol.md` | Each batch boundary | The six batches and their checks |
-| `references/CHANGELOG.md` | Never in a run | Version history |
-| `references/diagnostic_questions.md` | Fallback | ONE question per category, not per subcapability — 71 in all. It is NOT a substitute for the toolkits; a run that falls back to it is running on 8% of the coverage the name implies, and must say so. |
+Retired on 29-09-2026 (QA audit F-L11-042, the batch era): `batch_execution_protocol.md`
+and `context_window.md` (retired: the six-batch, wait-for-continue procedure);
+`safeguard_gates.md` (retired: the 16 research-era gates — the live SG family is the
+connector's); `deliverables_spec.md` (retired: the D0–D6 / A1–A9 set — the package's four
+deliverables are the workbook, the two reports and the technographic scan).
 
 ## Scripts
 
-| Script | Batch | Purpose |
-|--------|-------|---------|
-| `scripts/extract_diagnostic_questions.py` | 2 | Parse Pillar XLSX → subcap IDs, names, diagnostic Qs |
-| `scripts/generate_query_plan.py` | — | **RETIRED** (refuses): the work card from `engine.cli orient` is the query plan; a JSON plan beside the run had no reader (F-J02-011) |
-| `scripts/calculate_ers.py` | All | Calculate ERS scores, optionally write back |
-| `scripts/merge_evidence.py` | 4 | Deduplicate, link corroborations, coverage stats |
-| `scripts/populate_workbook.py` | — | **RETIRED** (refuses): it built a second, 10-sheet workbook beside the run. The run's one workbook is created by `engine.cli start` and written only through `engine.cli evidence / search / synthesise / absence` |
-| `scripts/validate_coverage.py` | 4 | Coverage thresholds, tier distribution, hard gates |
-| `scripts/validate_workbook.py` | — | **RETIRED** (refuses): it validated the 22-column layout the engine replaced. Use `engine.cli validate` |
+| Script | Status |
+|---|---|
+| `scripts/extract_diagnostic_questions.py` | **RETIRED** (refuses): the engine reads the toolkits at `engine.cli start`; `engine.cli orient` serves the questions per cell |
+| `scripts/generate_query_plan.py` | **RETIRED** (refuses): the work card from `engine.cli orient` is the plan (F-J02-011) |
+| `scripts/calculate_ers.py` | **RETIRED** (refuses): `engine.cli ers recompute` computes ERS where the evidence is banked |
+| `scripts/merge_evidence.py` | **RETIRED** (refuses): `engine.cli attach` reuses a registered row; `engine.cli validate` checks cross-references |
+| `scripts/populate_workbook.py` | **RETIRED** (refuses): it built a second workbook beside the run; `engine.cli start` creates the one workbook |
+| `scripts/validate_coverage.py` | **RETIRED** (refuses): `engine.cli gate` is the coverage gate |
+| `scripts/validate_workbook.py` | **RETIRED** (refuses): it validated the 22-column layout the engine replaced; `engine.cli validate` |
 
----
-
-## Domain-Specific Rules
-
-**P4 Stricter Thresholds:** HIGH=T1/T2+corroboration+UTILIZATION. MEDIUM=T3+stack confirmed.
-LOW=T4-T5 or any red flag. Inferred tech→cap L3.0. Tenure >10yr basic→internal validation.
-
-**Minimum Coverage (HARD GATE — blocks Batch 4):**
-1+ T1 regulatory anchor | 2+ T1/T2 financials | 2+ operating model sources |
-5-year trend data | Issue search all regulators | Sentiment attempted |
-Tech stack all categories | Org proxies | Diagnostic Qs loaded | ≥80% subcaps with evidence
-
-**Tech Utilization:** See `references/tech_discovery.md` (evidence levels 1-4, utilization
-levels, URF-01-06 red flags, vendor tenure, Zennify-priority, recency protocol).
-
-**Uncertainty:** See `references/uncertainty_framework.md` (base ±0.3-0.5, red flags +0.1-0.2,
-evidence gaps +0.1-0.2, formula capped ±0.8).
-
-**Org Proxies:** See `references/org_capability_proxies.md` (LinkedIn density, job seniority,
-Glassdoor culture, impact on P1C4/P4 ceilings).
-
----
-
-## PARAMETER LOCK Block (Final Output)
-
-```
-════════════════════════════════════════════════════════
-ASSESSMENT ID: [RUN_ID]
-EVIDENCE MODE: [PUBLIC/INTERNAL/HYBRID]
-PARAMETER LOCK: [Subvertical] toolkit bound
-SUBCAPS: [N]/[SELECTED] ([X]%) | COVERAGE: [N]≥3, [M] thin, [P] none
-CEILINGS: [X] caps, avg ±[Y] | TECH: [N] total, [M] Zennify-priority
-CLAIMS: [F/I/H/CE] | GATES: [N] PASS, [M] FAIL
-PEERS (LOCKED): [Peer1 (SizeTier), Peer2 (SizeTier), ...]
-WORKBOOK: Evidence populated, scores empty
-REPORT: Client Profile generated from project KB template
-STOP: NO SCORING. Run dma-assessment.
-════════════════════════════════════════════════════════
-```
-
-**research_handoff.json must include:**
-- `assessment_id`: RUN_ID (top-level, IMMUTABLE)
-- `evidence_mode`: PUBLIC/INTERNAL/HYBRID (top-level, IMMUTABLE)
-- `locked_peer_set[]`: Array of {peer_name, size_tier, key_metric, geography, overlap_pct, selection_rationale}
-- All other existing handoff fields
+Every retired script refuses with `REFUSED` and names its engine command; a reference that
+runs one fails loud rather than silently building the wrong artefact.

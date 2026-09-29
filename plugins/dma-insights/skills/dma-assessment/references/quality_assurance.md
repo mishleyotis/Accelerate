@@ -68,7 +68,7 @@ Read this file during Phase 8, before any deliverable is shared. Run EVERY check
 
 ### Section E.2: Checkpoint Integrity
 
-- [ ] All checkpoint files present in `/home/claude/dma_checkpoints/`
+- [ ] All checkpoint files present under the run root (`$DMA_ROOT/checkpoints/`)
 - [ ] Scores in `04_scores.json` match workbook scores
 - [ ] Peer benchmarks in `02_peer_benchmarks.json` match all benchmark references
 - [ ] Priority scores in `05_priorities.json` match Section 8 of report

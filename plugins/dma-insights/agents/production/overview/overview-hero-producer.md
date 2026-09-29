@@ -217,8 +217,9 @@ Read in this order. Each path has been verified to exist.
   contradiction to resolve, not two data points to render. Any failure
   quarantines the field with a `quarantine_reason` — emitted as absent, never as
   a value.
-- **Recency gate, blocking**: no `as_of`, no render. `CURRENT` <18mo · `RECENT`
-  18–36mo · `LEGACY` >36mo · `UNVERIFIED` undated. A LEGACY figure renders only
+- **Recency gate, blocking**: no `as_of`, no render. `CURRENT` <12mo · `RECENT`
+  <24mo · `DATED` <36mo · `STALE` <48mo · `ARCHIVAL` · `UNVERIFIED` undated
+  (`contract.RECENCY_LADDER`). A STALE or ARCHIVAL figure renders only
   with its date visible; an UNVERIFIED figure never renders as current.
 - **Magnitude sanity**: quarantine, never clamp. A regional bank at $2.70T is
   not a large regional bank, it is a parse error, and one client shipped exactly

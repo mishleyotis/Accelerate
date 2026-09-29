@@ -1,7 +1,7 @@
 # Critical Unknowns & Uncertainty Framework
 
-Read this file during Batch 2 Step 4 (uncertainty band calculation) and when writing
-D4 (Critical Unknowns & Discovery Questions) in Batch 3.
+Read this file when you estimate a ceiling's uncertainty band, and when you write
+discovery questions for a declared absence.
 
 ---
 

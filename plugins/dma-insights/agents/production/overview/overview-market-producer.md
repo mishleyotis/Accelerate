@@ -468,8 +468,9 @@ Each is phrased so a wrong answer is visible rather than arguable.
   and name the owning agent.
 - **Recency.** Did you run the mandatory newer-figure search, and if a newer figure
   exists, is it the headline with the older ones as the series? Is any sentiment
-  older than 18 months labelled `RECENT` rather than current, and anything older
-  than 36 months labelled `LEGACY` and kept out of the present-tense picture? Is an
+  older than 12 months labelled `RECENT` rather than current, and anything older
+  than 36 months labelled `STALE` and kept out of the present-tense picture
+  (`contract.RECENCY_LADDER`)? Is an
   app not updated in over six months flagged as the signal it is?
 - **Narrative.** Does the O8 `narrative_thread` say what trajectory **adds** to the
   argument the rest of the page makes — that growth funds a foundation build without

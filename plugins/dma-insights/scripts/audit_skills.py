@@ -303,6 +303,9 @@ def refs_audit():
 #: defaults to the wrong structure every run" defect in prose form.
 RETIRED_WRITERS = ("populate_workbook.py", "validate_workbook.py",
                    "generate_query_plan.py",   # retired 2026-09-28 (F-J02-011)
+                   # retired 2026-09-29 (F-L11-042): the batch era's JSON plane
+                   "calculate_ers.py", "merge_evidence.py",
+                   "validate_coverage.py", "extract_diagnostic_questions.py",
                    "assessment_runner.py")
 
 

@@ -265,8 +265,10 @@ Read `references/operating_procedure.md` — the output directory taxonomy (same
      reasoning (columns L..AG), the search log, the gate log and the
      uncertainty band — all of it beside the rows it bears on. Read the
      sheets; do not re-derive from a JSON copy of them.
-   - PUBLIC: ~2,500-4,200 web searches + Moody's connector enrichment. HYBRID: internal docs + full web search + Moody's (highest quality).
-   - **Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors SUPPLEMENT with structured credit/financial data. web_search MUST precede Moody's in every phase.
+   - PUBLIC: the research tier's public evidence, five volleys per cell. HYBRID: internal
+     documents beside it (highest quality). Which tool, in which order, is the research
+     tier's rule, stated once (`${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md`
+     § *Tools*); this skill restates none of it.
 
 3. **Parameter Lock:** Institution, sub-vertical, size tier, regulator, geography
    Size: Mega(>$50B) | Large($10-50B) | Medium($2-10B) | Small($500M-2B) | Micro($100-500M) | Nano(<$100M)
@@ -290,10 +292,14 @@ Read `references/operating_procedure.md` — the output directory taxonomy (same
 
 Execute Phase Gate Protocol. Apply ERR-003, ERR-008, ERR-009.
 
-**Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors supplement
-with structured credit/financial data. web_search MUST precede Moody's for each capability.
+**Which tools the evidence came through** is
+the research tier's rule, stated once in `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md`
+§ *Tools: first choice, fallback, and what you emit* — this skill restates none of it.
 
-**For every subcap (851 at full scope):** 3-5 `web_search` queries → Moody's enrichment → `web_fetch` rich docs → fact-level extraction [E-xxx:Fy] → tier classify → map to specific subcap IDs.
+**For every subcap (851 at full scope):** the research lane fired the five volleys and the
+primary question, read rich documents as windows through `engine.cli fetch`, extracted at
+fact level `[E-xxx:Fy]`, tiered and mapped each fact to the cells it bears on — and the
+floors gate holds the category to it before this skill opens.
 
 **For HYBRID/INTERNAL mode:** Load internal evidence FIRST per Internal Evidence Integration Protocol (see below). Internal T1/T2 evidence takes priority over public T3-T5.
 

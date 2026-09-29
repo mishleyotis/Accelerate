@@ -572,6 +572,8 @@ def main(argv=None) -> int:
     p = common(sub.add_parser("persist")); p.add_argument("--dest")
     st = sub.add_parser("status"); st.add_argument("--root")
     sub.add_parser("counts")
+    sub.add_parser("columns", help="the pillar sheets' columns, from the contract "
+                                    "(the one owner of the workbook's shape)")
     apv = common(sub.add_parser(
         "approve",
         help="record the owner's approval of ONE credit-spending connector "
@@ -597,6 +599,13 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.cmd == "counts":
         print(json.dumps(contract.counts(), indent=2)); return 0
+    if a.cmd == "columns":
+        for i, col in enumerate(contract.PILLAR_COLUMNS):
+            n, letters = i + 1, ""
+            while n:
+                n, r = divmod(n - 1, 26); letters = chr(65 + r) + letters
+            print(f"{letters}\t{col}")
+        return 0
     if a.cmd == "status":
         return watchdog.main(["--root", a.root or str(runstate.RUN_ROOT), "--json"])
 

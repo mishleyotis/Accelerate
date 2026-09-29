@@ -22,7 +22,7 @@
         "score": "[1.0–5.0]",
         "maturity_level": "[M1–M5]",
         "confidence": "[HIGH / MEDIUM / LOW]",
-        "calculation_source": "Weighted average of P1C1–P1C5 category scores"
+        "calculation_source": "Weighted average of P1C1–P1C4 category scores"
       },
       "P2_Customer_Experience": {
         "score": "[1.0–5.0]",

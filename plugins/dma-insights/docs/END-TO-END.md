@@ -564,7 +564,7 @@ package is a refusal with a named reason. 20/20 measured 2026-08-29.
 
 ```
 python3 -m engine.registry pull            # Drive's copy of the population
-python3 -m engine.cli status --root /home/claude/dma_output
+python3 -m engine.cli status --root <ROOT>
 python3 -m engine.watchdog --revive        # act, don't just report
 ```
 

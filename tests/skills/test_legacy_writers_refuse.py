@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import subprocess
 import sys
+
+import pytest
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2] / "plugins" / "dma-insights"
@@ -122,3 +124,19 @@ def test_no_skill_tells_an_agent_to_run_a_retired_writer():
                     and "retired" not in line.lower() and "refuse" not in line.lower():
                 offenders.append(f"{skill.parent.name}: {line.strip()[:100]}")
     assert offenders == [], offenders
+
+
+@pytest.mark.parametrize("script, engine_cmd, args", [
+    ("calculate_ers.py", "engine.cli ers recompute", ["idx.json", "--update"]),
+    ("merge_evidence.py", "engine.cli attach", ["ckpt", "--output", "merged.json"]),
+    ("validate_coverage.py", "engine.cli gate", ["idx.json", "--strict"]),
+    ("extract_diagnostic_questions.py", "engine.cli orient", ["toolkit.xlsx"]),
+])
+def test_the_batch_era_scripts_refuse_and_name_the_engine(tmp_path, script, engine_cmd, args):
+    """Retired 2026-09-29 (QA audit F-L11-042): each worked an evidence_index.json
+    or a parsed toolkit that no stage writes or reads; the engine owns the job."""
+    r = _run(PLUGIN / "skills" / "dma-research" / "scripts" / script,
+             *[str(tmp_path / a) if "." in a or a == "ckpt" else a for a in args])
+    assert r.returncode == 1
+    assert "REFUSED" in r.stderr and engine_cmd in r.stderr and "retired" in r.stderr
+    assert not list(tmp_path.glob("*.json"))

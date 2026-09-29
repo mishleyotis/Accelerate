@@ -308,10 +308,9 @@ non-substantive counterclaim are defects in proof that EXISTS.
 ## Workspace
 
 ```
-$DMA_GOV_ROOT = /home/claude/dma_governance/
-  audits/[institution]_[date]/    # Per-assessment outputs
-  calibration/                     # Cross-assessment data
-  golden_cases/                    # Test case evidence packs
+<assessment_dir>/governance_output/   # gov_auditor.py's default; --output-dir overrides
+  calibration_output/                  # calibration_engine.py's default; --output-dir overrides
+  templates/golden_cases/              # regression_runner.py's GOLDEN_CASES_DIR, in this skill
 ```
 
 ---

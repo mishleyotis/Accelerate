@@ -99,7 +99,7 @@
     ]
   },
   "entity_folder_structure": {
-    "entity_folder_path": "/home/claude/dma_assessments/[ENTITY_NAME]_DMA/",
+    "entity_folder_path": "<ROOT>/<RUN_ID>/",
     "subfolders_created": {
       "checkpoints": true,
       "evidence": true,
