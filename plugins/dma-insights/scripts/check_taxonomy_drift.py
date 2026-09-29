@@ -143,10 +143,6 @@ EXEMPT = {
      "the workbook's"): "names both scales and teaches the difference",
     ("skills/dma-assessment/references/workbook_specification.md",
      "Maturity level text"): "the 1-5 SCORE scale, a workbook column",
-    ("skills/dma-assessment/templates/04_scores_template.json",
-     "maturity_level"): "the 1-5 SCORE the assessment writes",
-    ("skills/dma-assessment/templates/evidence_index.md",
-     "Level_Indicated"): "the SCORE level a piece of evidence indicates",
     ("skills/dma-governance/scripts/gov_auditor.py",
      "maturity_keywords"): "matches SCORE tokens in prose, including a "
                            "fifth level written by mistake — the detector "
@@ -250,9 +246,8 @@ def rules(c: dict):
         (re.compile(r"safeguard_gates\.md"), "safeguard_gates.md",
          "retired: the 16 research-era gates; the SG family lives in "
          "apps/mcp/dma_mcp/gates.py alone", None),
-        # the research plane's bare file; the assessment's checkpoint
-        # `01_evidence_index.json` is that skill's own procedure to settle
-        (re.compile(r"(?<!\w)evidence_index\.json"), "evidence_index.json",
+        # the research plane's file and the assessment's checkpoint copy alike
+        (re.compile(r"evidence_index\.json"), "evidence_index.json",
          "no JSON plane beside the run; evidence enters through "
          "`engine.cli evidence` and lives in the workbook", None),
         # the research tier's batch stop — the deck skill's "wait for

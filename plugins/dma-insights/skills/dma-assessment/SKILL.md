@@ -62,7 +62,7 @@ Read `references/workbook_columns.md` — the eleven app-facing columns A–K an
 
 ## Context Window Management (CRITICAL)
 
-Read `references/operating_procedure.md` — context-window, memory/batching and output-directory rules. Read in Phase 0 and again when a batch closes.
+Read `references/operating_procedure.md` — context discipline, the state is the workbook, the run tree. Read in Phase 0 and again on resume.
 
 ## Core Analytical Principles
 
@@ -166,10 +166,10 @@ Read `references/score_states.md` — the score states and the raw-to-final path
 
 Maintains a living error log across assessments. See `references/qa_error_log.md` (master template).
 
-**Phase 0:** Copy to `$DMA_ROOT/checkpoints/qa_error_log.md` (writable). If already exists (session resume), load without overwriting.
+**Phase 0:** Copy to `<run root>/07_qa/qa_error_log.md` (writable). If it already exists (session resume), load without overwriting.
 
 **Phase Gate Protocol (EVERY phase, no exceptions):**
-1. LOAD `$DMA_ROOT/checkpoints/qa_error_log.md`
+1. LOAD `<run root>/07_qa/qa_error_log.md`
 2. FILTER to current phase tag `[PHASE:N]`
 3. ACKNOWLEDGE: `⚠️ PHASE GATE [N] — [X] prevention rules: [list]. Proceeding.`
 4. APPLY each as hard constraint
@@ -204,7 +204,7 @@ These fire at their tagged phase. All are hard constraints.
 
 ## Memory, Batching & Caching
 
-Read `references/operating_procedure.md` — memory, batching and caching (same file as the context-window rules).
+Read `references/operating_procedure.md` — memory (same file as the context rules).
 
 ## Proof-Carrying Scoring
 
@@ -224,7 +224,7 @@ for any capped score. Confidence (Col E) reflects evidence depth.
 
 ## Output Directory Taxonomy (MANDATORY)
 
-Read `references/operating_procedure.md` — the output directory taxonomy (same file).
+Read `references/operating_procedure.md` — the run tree (same file).
 
 ## Phase 0: Engagement Setup
 
@@ -275,8 +275,11 @@ Read `references/operating_procedure.md` — the output directory taxonomy (same
 
 4. **Toolkit Binding:** Verify ALL 4 Pillar XLSX files accessible. HARD STOP if any missing.
 
-5. **Workspace:** Generate RUN_ID → create full directory tree → create run_manifest.json → copy qa_error_log.md to checkpoints/
-   **Write RUN_ID and EVIDENCE_MODE to `00_parameters.json`. These are IMMUTABLE for the entire assessment. Every artifact must reference them. Mismatch = build fails.**
+5. **Workspace:** the run already exists — `engine.cli start` created the tree
+   (`engine.runstate.SUBDIRS`) and the manifest (`run_manifest_v3`) with RUN_ID and
+   EVIDENCE_MODE pinned and IMMUTABLE; `engine.assessment open` opens the stage. Copy
+   `qa_error_log.md` to `07_qa/`. Every artefact carries the run id; `engine.cli validate`
+   refuses a mismatch.
 
 6. **Peer Set Selection & Lock** (SKIP if imported from research handoff):
    - Select 3-5 peers: sub-vertical match, size tier proximity, geographic overlap, competitive relevance
@@ -454,7 +457,7 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `references/qa_error_log.md` | 0 | Master error log (copy to writable) |
 | `references/reasoning_chain_schema.md` | 4,7 | reasoning_chain_log.json schema |
 | `references/workbook_columns.md` | 0 | Columns A–K of P#_Subcap_Scoring (moved from this file, F-B04-027) |
-| `references/operating_procedure.md` | 0 | Context window, memory/batching/caching, output directory taxonomy |
+| `references/operating_procedure.md` | 0 | Context discipline, the state is the workbook, the run tree |
 | `references/score_states.md` | 4 | Deterministic score states; `engine.assessment apply` does the arithmetic |
 | `references/phase_4_scoring.md` | 4 | The scoring loop and the capability micro-loop |
 | `references/phase_7_deliverables.md` | 7 | Report generation protocol |
@@ -487,7 +490,7 @@ Descriptors, Sub-Vertical Matrix. Nothing is searched for under `/mnt/`.
 ## Error Handling
 
 - Document unreadable → UNAVAILABLE, continue
-- Context overflow → checkpoint, batch, resume (new conversation if needed)
+- Context overflow → finish the capability, end the turn; `engine.assessment state` is the resume (new conversation if needed)
 - Contradiction unresolvable → conservative, LOW confidence
 - >30% no evidence → capability N/A, exclude from weighted avg
 - Score >1.5 from peers → investigate evidence quality

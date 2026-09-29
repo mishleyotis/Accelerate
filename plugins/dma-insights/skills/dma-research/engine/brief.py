@@ -756,6 +756,22 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "Nothing measures you on taking them — a machine that files one "
             "category's evidence under another's cell is worse than no reuse",
         ],
+        # THE RETURN CONTRACT AND THE AMBIGUITY RULE, IN THE PACKET (QA audit,
+        # prompt-craft scorecard rewrite 2, 29-09-2026): a headless lane reads
+        # this file and the session hook, not RESEARCH-PROTOCOL.md, and until
+        # now nothing in the packet said what to hand back or what to do when a
+        # question cannot be answered — NOT_RUN appeared only as a gate default.
+        "done_and_ambiguity": [
+            f"DONE: `engine.cli gate --category {category} --require-synthesis` "
+            "PASS, then `engine.brief handback`; return it plus the gate verdict, "
+            "deferred count, techscan rows, UNTESTED, `search_requests` (no "
+            "connector: the relay fires them)",
+            "`NOT_RUN: <reason>` = never fired; `NO_FINDING after <n> searches: "
+            "<what instead>` = fired, empty. A row you cannot judge: leave it, say so",
+            "Trimmed packet or a missing cell: trust `orient`, say which you missed. "
+            "≤4 Bash calls per card: chain searches and notes, consolidate per "
+            "2–3 cards",
+        ],
     }
     # THE ONE REFUSAL THIS CONTAINER MAY BE UNABLE TO SATISFY, named only
     # where the run's own baseline PROVES it. `declare_absence` wants an
@@ -1011,6 +1027,9 @@ def as_markdown(packet: dict) -> str:
         "",
     ]
     lines += [f"{i + 1}. {r}" for i, r in enumerate(packet["rules"])]
+    if packet.get("done_and_ambiguity"):
+        lines += ["", "### When you are done, and when you cannot decide", ""]
+        lines += [f"- {r}" for r in packet["done_and_ambiguity"]]
     if packet.get("last_gate"):
         g = packet["last_gate"]
         lines += ["", "### The last floors gate on this category", "",
