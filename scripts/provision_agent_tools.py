@@ -226,9 +226,15 @@ def row(*, web=(), external=(), reads="floor", reads_extra=(), writes=(),
 #: NO connector: a lane emits `search_requests` and the conductor services
 #: them per capability batch. Internal artefacts reach them through the
 #: conductor's `drive_fetch.py pull`, on disk under the run root.
+#: WebSearch ALONE (QA audit F-L11-042 pair 8, 29-09-2026): the protocol
+#: says "never fetch a page whole" and the guard denies WebFetch to this
+#: class, so a WebFetch grant was a trap for a lane that reads its tool
+#: list — every page read is `engine.cli fetch`, windows the ledger can
+#: verify an excerpt against.
 RESEARCH_LANE = row(
-    web=WEB, reads="floor",
-    why="a lane searches the open web and emits every connector query as a "
+    web=["WebSearch"], reads="floor",
+    why="a lane searches the open web with WebSearch, reads pages only as "
+        "engine.cli fetch windows, and emits every connector query as a "
         "search_requests entry; the orchestrator tier holds the connectors")
 
 #: A per-surface producer: writes one surface from the run's REGISTERED

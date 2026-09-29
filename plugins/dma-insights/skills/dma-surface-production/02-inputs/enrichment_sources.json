@@ -26,7 +26,14 @@
     "inference at any tier.",
     "",
     "Sources are ordered: the first entry is the one to try first, and a",
-    "later entry supplements rather than replaces an earlier one."
+    "later entry supplements rather than replaces an earlier one.",
+    "",
+    "`search_connectors` are the two SEARCH connectors the research tier",
+    "runs on. They serve no facet of their own — they find the SOURCE a",
+    "facet then cites — which is why they were missing from the facet table",
+    "(QA audit F-L11-042 pair 4) although the tier uses them most. Who holds",
+    "them is `scripts/provision_agent_tools.py` (repo root); the order is",
+    "RESEARCH-PROTOCOL.md § Tools."
   ],
   "facets": {
     "firmographics": {
@@ -256,5 +263,26 @@
         }
       ]
     }
+  },
+  "search_connectors": {
+    "exa": {
+      "serves": "the first search connector: a lane's emitted search_requests, fired by the conductor and the enrichment-web-specialist per capability batch",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['exa']; `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/relay.py` services the batch; brief.py defaults a request's tool to exa"
+    },
+    "tavily": {
+      "serves": "the fallback search and the verbatim-extract path (tavily_extract goes into the run's fetch cache with `engine.cli fetch --via-text -`, so the excerpt verifies)",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['tavily']; `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_whole_page_fetch.py` lists tavily_extract as a fetcher a lane may not call"
+    },
+    "_rule": "A category lane holds neither: it EMITS a connector volley as a search_requests entry and the servicing tier fires it, logging the search with the tool that ran it (RESEARCH-PROTOCOL.md § Tools)."
   }
 }

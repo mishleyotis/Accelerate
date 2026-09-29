@@ -52,7 +52,10 @@ from pathlib import Path
 
 #: The tools that return a whole page. `WebSearch` is NOT here: a result list
 #: is small and is how a lane finds the URL it then windows.
-FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa")
+#: Tavily extract too (QA audit F-L11-042 pair 7): the hook was registered
+#: on it in hooks.json and the docstring called it a fetcher, but this list
+#: did not, so a lane holding it could read a page whole unhindered.
+FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa", "mcp__Tavily__tavily_extract")
 
 #: Actor classes whose reading is citation, so must go through the cache —
 #: and the synthesis and verification classes, which read nothing on the
@@ -65,8 +68,7 @@ DENIED_CLASSES = ("category-researcher", "challenger", "surface-producer", "veri
 #: WebSearch and WebFetch, so a claim could be written from a page nobody
 #: registered. The grants are gone from their manifests; this is the
 #: belt-and-braces for a headless child identified by $DMA_ACTOR.
-SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa",
-             "mcp__Tavily__tavily_search", "mcp__Tavily__tavily_extract")
+SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search")
 DENIED_SEARCH_CLASSES = ("surface-producer", "verifier", "app-auditor", "challenger")
 
 SEARCH_REASON = (

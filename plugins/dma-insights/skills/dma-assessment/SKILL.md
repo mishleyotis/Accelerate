@@ -419,7 +419,7 @@ Read `references/phase_8_qa.md` — the 14-check suite. Read when Phase 8 opens.
 
 **Evidence Item:** Single time-bound fact from a source, with Tier, Date, Source, Fact ID.
 **Unique Source:** A document/database producing evidence. Multiple facts from same source = 1 source for corroboration.
-**Corroboration:** 2+ different sources AND 2+ different tier types. Exception: single T1 ≤24mo = HIGH alone.
+**Corroboration:** 2+ different sources AND 2+ different tier types. Exception: a single T1 source within the RECENT band (≤24 months on `contract.RECENCY_LADDER`) = HIGH alone.
 **Hard Contradiction:** Direct factual conflict (can't both be true) → resolution protocol → Contradiction_Log. **Soft:** Interpretive divergence → prefer authoritative, no forced resolution.
 **Trend:** ≥2 dated points, ≥6 months apart. Single snapshot ≠ trend.
 **Score Precision:** Default 0.5 grid. 0.1 only with quantitative evidence + explicit mapping + max 1 decimal. 2+ decimals = QA failure.

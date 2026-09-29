@@ -839,10 +839,11 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 "for this category ran through bare web_search/web_fetch. "
                 "`enrichment.instruction` says which half was broken and what "
                 "to do; `enrichment.open_search_requests` are queries a previous "
-                "instance could not run — run them through the connector and "
-                "log them with the tool that ran them (`--tool exa|tavily`), or "
-                "emit them again as `search_requests` if the connector is "
-                "refused. Never log a connector search you did not run.")
+                "instance could not run — EMIT them again as `search_requests` "
+                "(a lane holds no connector: the relay fires them and logs each "
+                "with the tool that ran it, `--tool exa|tavily`). Only a "
+                "servicing actor that holds the connector runs them itself. "
+                "Never log a connector search you did not run.")
     packet["packet_chars"] = len(json.dumps(packet, default=str))
     packet["packet_ceiling"] = BRIEF_CHAR_CEILING
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and with_handback:

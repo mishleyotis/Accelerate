@@ -60,6 +60,7 @@ BINDINGS = [
     # (event, script, a regex the matcher must satisfy)
     ("PreToolUse", "deny_whole_page_fetch.py", r"WebFetch"),
     ("PreToolUse", "deny_whole_page_fetch.py", r"web_fetch_exa"),
+    ("PreToolUse", "deny_whole_page_fetch.py", r"tavily_extract"),
     ("PreToolUse", "guard_dispatch.py", r"Agent"),
     # guard_driver_lock and deny_artefact_writes run inside bash_guard
     # since W2-7 (F-H01-023); test_bash_guard_carries_the_guards below
