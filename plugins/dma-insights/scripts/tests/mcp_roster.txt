@@ -1,4 +1,6 @@
-# The MCP tool surface a DMA session actually attaches, measured 2026-08-30.
+# The MCP tool surface a DMA session actually attaches, measured 2026-08-30;
+# Tavily research and the Vibe Prospecting (Explorium) server added 2026-09-28
+# from the session's own connector list (QA audit F-K01-003).
 #
 # WHY THIS FILE EXISTS. `test_every_mcp_tool_the_plugin_names_is_allowed_or
 # _deliberately_not` scans the PLUGIN's own markdown, so it can only ever see
@@ -110,7 +112,22 @@ mcp__Slack__slack_update_canvas
 mcp__Tavily__tavily_crawl
 mcp__Tavily__tavily_extract
 mcp__Tavily__tavily_map
+mcp__Tavily__tavily_research
 mcp__Tavily__tavily_search
+mcp__Vibe_Prospecting__autocomplete
+mcp__Vibe_Prospecting__enrich-business
+mcp__Vibe_Prospecting__enrich-prospects
+mcp__Vibe_Prospecting__estimate-cost
+mcp__Vibe_Prospecting__export-to-csv
+mcp__Vibe_Prospecting__fetch-businesses-events
+mcp__Vibe_Prospecting__fetch-entities
+mcp__Vibe_Prospecting__fetch-entities-statistics
+mcp__Vibe_Prospecting__fetch-prospects-events
+mcp__Vibe_Prospecting__get-dataset
+mcp__Vibe_Prospecting__match-business
+mcp__Vibe_Prospecting__match-prospects
+mcp__Vibe_Prospecting__show-pricing-plans
+mcp__Vibe_Prospecting__show-sample
 mcp__github__actions_get
 mcp__github__actions_list
 mcp__github__actions_run_trigger

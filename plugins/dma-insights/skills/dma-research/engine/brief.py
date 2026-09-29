@@ -756,6 +756,22 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "Nothing measures you on taking them — a machine that files one "
             "category's evidence under another's cell is worse than no reuse",
         ],
+        # THE RETURN CONTRACT AND THE AMBIGUITY RULE, IN THE PACKET (QA audit,
+        # prompt-craft scorecard rewrite 2, 29-09-2026): a headless lane reads
+        # this file and the session hook, not RESEARCH-PROTOCOL.md, and until
+        # now nothing in the packet said what to hand back or what to do when a
+        # question cannot be answered — NOT_RUN appeared only as a gate default.
+        "done_and_ambiguity": [
+            f"DONE: `engine.cli gate --category {category} --require-synthesis` "
+            "PASS, then `engine.brief handback`; return it plus the gate verdict, "
+            "deferred count, techscan rows, UNTESTED, `search_requests` (no "
+            "connector: the relay fires them)",
+            "`NOT_RUN: <reason>` = never fired; `NO_FINDING after <n> searches: "
+            "<what instead>` = fired, empty. A row you cannot judge: leave it, say so",
+            "Trimmed packet or a missing cell: trust `orient`, say which you missed. "
+            "≤4 Bash calls per card: chain searches and notes, consolidate per "
+            "2–3 cards",
+        ],
     }
     # THE ONE REFUSAL THIS CONTAINER MAY BE UNABLE TO SATISFY, named only
     # where the run's own baseline PROVES it. `declare_absence` wants an
@@ -792,6 +808,12 @@ def dispatch(wb: RunWorkbook, category: str, *,
         hb = handback(wb, category)
         packet["handback"] = {k: hb[k] for k in hb
                               if k not in ("category",)}
+        # What the last LANE left, from the file the SubagentStop hook wrote
+        # (07_qa/handbacks). Until 28-09-2026 that file had no reader (QA
+        # audit F-J02-011) while its own docstring said the re-dispatch reads
+        # it; the sheets say what the category holds, the handback file says
+        # what the lane was doing when it stopped.
+        packet["handback"]["last_lane"] = last_handback(run, category)
         packet["last_gate"] = last_gate(wb, "FLOORS", category)
         packet["rules"].append(
             "this is a RE-DISPATCH: `handback` is what your previous run "
@@ -833,10 +855,11 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 "for this category ran through bare web_search/web_fetch. "
                 "`enrichment.instruction` says which half was broken and what "
                 "to do; `enrichment.open_search_requests` are queries a previous "
-                "instance could not run — run them through the connector and "
-                "log them with the tool that ran them (`--tool exa|tavily`), or "
-                "emit them again as `search_requests` if the connector is "
-                "refused. Never log a connector search you did not run.")
+                "instance could not run — EMIT them again as `search_requests` "
+                "(a lane holds no connector: the relay fires them and logs each "
+                "with the tool that ran it, `--tool exa|tavily`). Only a "
+                "servicing actor that holds the connector runs them itself. "
+                "Never log a connector search you did not run.")
     packet["packet_chars"] = len(json.dumps(packet, default=str))
     packet["packet_ceiling"] = BRIEF_CHAR_CEILING
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and with_handback:
@@ -863,14 +886,22 @@ def dispatch(wb: RunWorkbook, category: str, *,
     if packet["packet_chars"] > BRIEF_CHAR_CEILING:
         # Trim the detailed cells rather than a field: a half-written field
         # reads as a complete one, and `orient` is the paged reader for the
-        # cells this drops.
+        # cells this drops. Halve UNTIL the packet fits, down to one cell:
+        # one halving stopped at four cells whatever the ceiling said, and a
+        # re-dispatch packet (handback + gate terms + the return contract)
+        # left CI at 7,018 chars against 6,400 (2026-09-29) — a ceiling the
+        # trim could not reach is a ceiling in name only.
         keep = max(1, CELLS_DETAILED // 2)
-        packet["work_next"] = packet["work_next"][:keep]
-        packet["trimmed"] = (
-            f"detail trimmed to {keep} cell(s) to stay under the packet "
-            f"ceiling; `engine.cli orient --category {category}` serves the "
-            f"rest one card at a time")
-        packet["packet_chars"] = len(json.dumps(packet, default=str))
+        while True:
+            packet["work_next"] = packet["work_next"][:keep]
+            packet["trimmed"] = (
+                f"detail trimmed to {keep} cell(s) to stay under the packet "
+                f"ceiling; `engine.cli orient --category {category}` serves the "
+                f"rest one card at a time")
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
+            if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
+                break
+            keep = max(1, keep // 2)
     return packet
 
 
@@ -1004,6 +1035,9 @@ def as_markdown(packet: dict) -> str:
         "",
     ]
     lines += [f"{i + 1}. {r}" for i, r in enumerate(packet["rules"])]
+    if packet.get("done_and_ambiguity"):
+        lines += ["", "### When you are done, and when you cannot decide", ""]
+        lines += [f"- {r}" for r in packet["done_and_ambiguity"]]
     if packet.get("last_gate"):
         g = packet["last_gate"]
         lines += ["", "### The last floors gate on this category", "",
@@ -1018,12 +1052,27 @@ def as_markdown(packet: dict) -> str:
         hb = packet["handback"]
         lines += ["", "### What your previous run established (the handback)", ""]
         for k, v in hb.items():
+            if k == "last_lane":
+                continue
             if isinstance(v, (list, tuple)):
                 lines.append(f"- {k}: " + (", ".join(str(x) for x in v[:8]) if v else "none"))
             elif isinstance(v, dict):
                 lines.append(f"- {k}: " + ", ".join(f"{a} {b}" for a, b in list(v.items())[:8]))
             else:
                 lines.append(f"- {k}: {v}")
+        ll = hb.get("last_lane")
+        if ll:
+            lines += ["", "### What the last lane left when it stopped (its handback file)", ""]
+            lines.append(f"- stopped at: {ll.get('at')} (agent {ll.get('agent')})")
+            so = ll.get("still_open")
+            lines.append("- still open: " + (", ".join(str(x) for x in so[:8])
+                                             if isinstance(so, (list, tuple)) and so
+                                             else str(so)))
+            lines.append(f"- wrote to the substrate: {ll.get('substrate_writes')}; "
+                         f"notes: {ll.get('notes_written')}; evidence items: "
+                         f"{ll.get('evidence_items')}; searches: {ll.get('searches')}")
+            if ll.get("last_assistant_message"):
+                lines.append(f"- its last words: {ll['last_assistant_message'][:300]}")
     if packet.get("dispatch_verify"):
         dv = packet["dispatch_verify"]
         lines += ["", "### The dispatch verifier refused your last run", ""]
@@ -1054,6 +1103,35 @@ def as_markdown(packet: dict) -> str:
     if packet.get("trimmed"):
         lines += ["", f"_{packet['trimmed']}_"]
     return "\n".join(lines) + "\n"
+
+
+def last_handback(run: runstate.Run | None, category: str) -> dict | None:
+    """The newest handback the SubagentStop hook wrote for this category
+    (`07_qa/handbacks/<agent>-<ts>.json`), reduced to what a re-dispatch can
+    act on; None when no lane has returned yet or the run is not known."""
+    if run is None:
+        return None
+    d = Path(run.qa_dir) / "handbacks"
+    if not d.is_dir():
+        return None
+    best = None
+    for p in d.glob("*.json"):
+        try:
+            doc = json.loads(p.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            continue
+        if not isinstance(doc, dict) or \
+                str(doc.get("category") or "").upper() != category:
+            continue
+        if best is None or str(doc.get("at") or "") > str(best.get("at") or ""):
+            best = doc
+    if best is None:
+        return None
+    keep = ("agent", "at", "still_open", "notes_written", "substrate_writes",
+            "evidence_items", "searches", "search_requests")
+    out = {k: best.get(k) for k in keep}
+    out["last_assistant_message"] = str(best.get("last_assistant_message") or "")[:600]
+    return out
 
 
 def last_gate(wb: RunWorkbook, gate: str, scope: str | None = None) -> dict:
@@ -2058,6 +2136,163 @@ def handback(wb: RunWorkbook, category: str) -> dict:
 CORRELATE_CHAR_CEILING = 2000
 
 
+def triage(wb: RunWorkbook, run: runstate.Run) -> dict:
+    """ONE DISPOSITION PER GAP, written down.
+
+    QA audit D-14 (28-09-2026): `gaps` listed open, undeclared-empty,
+    unserviced and stalled cells per category, and no per-gap disposition
+    was recorded anywhere — so a coordinator re-dispatched the same proxy
+    round, a specialist rephrased a failed query, and a cell no public
+    source can settle was hunted again instead of asked. Every gap now gets
+    one of four dispositions, decided from the substrate (the scoring row,
+    the Search_Log, the dossier, the register) and never from a lane's
+    report of itself:
+
+      cross_card_remap   the register already holds a row that names this
+                         cell, a capability sibling's row, or a row another
+                         category opened that ranks against this cell's
+                         question — attach or decline it before searching
+      internal_only      the cell's dossier says no public source can
+                         decide it, or every public rung (the volleys, both
+                         ladder rungs, an enrichment connector) has been
+                         climbed at FULL rigour — it becomes a discovery
+                         question for the client conversation
+      proxy              a volley, a ladder rung or the connector rung is
+                         still unclimbed — one more round is owed, and the
+                         brief for it carries the exclusion list
+      unknown            none of the above can be established: the cell has
+                         no dossier and nothing in the substrate decides it
+
+    Writes `07_qa/gap_triage.json`; `engine.relay batch` reads it so every
+    relay prompt states the disposition and the queries already fired."""
+    md = wb.metadata()
+    entity = md.get("entity_name") or "the entity"
+    g = gaps(wb, run)
+    dossiers = L.read_gap_dossiers(run)
+    declared = L.declared_absences(wb)
+    register = wb.evidence_index()
+    dq_index = dq_texts(wb)
+    names = C.subcap_names()
+    settles = C.settling_artefacts()
+    proxies = C.proxy_classes()
+    rr = f"--run {run.run_id} --root {run.root}"
+    rows = []
+    for cat, gc in sorted(g["categories"].items()):
+        cells = sorted(set(gc["open_cells"]) | set(gc["undeclared_empty"])
+                       | {c for c in declared if category_of(c) == cat})
+        for cell in cells:
+            row = wb.scoring_row(cell) or {}
+            vs = L.volley_status(wb, cell)
+            d = dossiers.get(cell)
+            prior = L.prior_queries(wb, [cell])
+            name = names.get(cell) or cell
+            artefact = settles.get(cell)
+            proxy_class = proxies.get(cell)
+            is_declared = cell in declared
+            rigour_full = bool(d) and d.get("rigour") == "FULL"
+            ladder_rungs = set((d or {}).get("ladder", {}).get("rungs") or [])
+            question = ((d or {}).get("inferable") or {}).get("validation_question")
+            if not question and artefact:
+                question = f"Does {entity} hold {artefact.rstrip('.').lower()} for {name}?"
+            entry = {
+                "subcap": cell, "name": name, "category": cat,
+                "declared": is_declared, "dossier": bool(d),
+                "queries_already_run": [
+                    {"seq": p["seq"], "tool": p["tool"], "facet": p["facet"],
+                     "query": p["query"], "hits": p["hits"], "kept": p["kept"]}
+                    for p in prior],
+                "volleys_missing": vs["missing"],
+                "enrichment_tools": vs["enrichment_tools"],
+            }
+            reuse = {"names_this_cell": [], "capability_siblings": [],
+                     "proposed_from_other_categories": []}
+            if not str(_clean(row.get("Dominant_Claim"))) or is_declared:
+                try:
+                    reuse = reusable(wb, cell, register=register, dq_index=dq_index)
+                except Exception:                    # noqa: BLE001
+                    pass
+            cands = (reuse["names_this_cell"] + reuse["capability_siblings"]
+                     + reuse["proposed_from_other_categories"])
+            if cands:
+                first = cands[0]
+                eid = first.get("e_id") or first.get("E_ID")
+                entry.update({
+                    "disposition": "cross_card_remap",
+                    "why": (f"{len(reuse['names_this_cell'])} registered row(s) name "
+                            f"this cell, {len(reuse['capability_siblings'])} sit on a "
+                            f"capability sibling, {len(reuse['proposed_from_other_categories'])} "
+                            f"proposed from other categories — read before searching"),
+                    "next": (f"python3 -m engine.cli attach {rr} --e-id {eid} "
+                             f"--subcap {cell}  (or --decline --why '…')"),
+                    "candidates": [c.get("e_id") or c.get("E_ID") for c in cands[:5]],
+                })
+            elif d and d.get("not_determinable"):
+                entry.update({
+                    "disposition": "internal_only",
+                    "why": f"the dossier says: {d['not_determinable']}",
+                    "next": "ask it: the discovery question below rides into the client conversation",
+                    "discovery_question": question,
+                })
+            elif (is_declared and rigour_full and vs["enrichment_tools"]
+                  and not vs["missing"] and {"direct", "proxy"} <= ladder_rungs):
+                entry.update({
+                    "disposition": "internal_only",
+                    "why": (f"every public rung climbed at FULL rigour: {vs['searches']} "
+                            f"searches, volleys complete, ladder {sorted(ladder_rungs)}, "
+                            f"connector(s) {vs['enrichment_tools']} asked"),
+                    "next": "ask it: the discovery question below rides into the client conversation",
+                    "discovery_question": question,
+                })
+            elif vs["missing"] or not vs["enrichment_tools"] or (
+                    is_declared and not rigour_full) or not vs["primary_fired"]:
+                owed = []
+                if not vs["primary_fired"]:
+                    owed.append("the primary diagnostic question")
+                owed += [f"volley {f}" for f in vs["missing"]]
+                if not vs["enrichment_tools"]:
+                    owed.append(f"an enrichment connector ({', '.join(C.ENRICHMENT_TOOLS[:3])} …)")
+                if is_declared and not rigour_full:
+                    owed.append("a FULL-rigour re-declaration once a connector is bound")
+                tool = next((t for t in C.ENRICHMENT_TOOLS
+                             if t not in vs["tools"]), C.ENRICHMENT_TOOLS[0])
+                entry.update({
+                    "disposition": "proxy",
+                    "why": "still owed: " + "; ".join(owed),
+                    "next": (f"one relay round through `{tool}` on the "
+                             f"{proxy_class or 'catalogue'} proxy class, rephrased "
+                             f"against the exclusion list — `engine.relay batch` "
+                             f"states it"),
+                    "proxy_class": proxy_class,
+                    "est_cost_usd": (d or {}).get("est_cost_usd", L._est_round_cost()),
+                })
+            else:
+                entry.update({
+                    "disposition": "unknown",
+                    "why": ("nothing in the substrate decides it: "
+                            + ("no dossier — the cell was never declared; "
+                               if not d else "")
+                            + "volleys complete, no reusable row, connector asked"),
+                    "next": (f"declare it — `engine.cli absence {rr} --subcap {cell} "
+                             f"…` with --not-determinable or --inferable/"
+                             f"--validation-question — so the next triage can route it"),
+                })
+            rows.append(entry)
+    counts = {d: sum(1 for r in rows if r["disposition"] == d) for d in L.DISPOSITIONS}
+    doc = {"schema_version": L.GAP_TRIAGE_SCHEMA, "run_id": run.run_id,
+           "at": _utcnow_iso(), "entity": entity, "counts": counts,
+           "discovery_questions": [
+               {"subcap": r["subcap"], "question": r["discovery_question"]}
+               for r in rows if r.get("discovery_question")],
+           "gaps": rows}
+    doc["path"] = L.write_gap_triage(run, doc)
+    return doc
+
+
+def _utcnow_iso() -> str:
+    import datetime as _dt
+    return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def _stalled_rounds(wb: RunWorkbook, category: str) -> int:
     """Consecutive trailing FLOORS verdicts on this category that said the
     SAME thing.
@@ -2358,6 +2593,11 @@ def main(argv=None) -> int:
         "gaps", help="what is still missing per category, computed from the "
                      "workbook, the relay queue and pipeline_state.json — "
                      "never from a lane's report of itself"))
+    common(sub.add_parser(
+        "triage", help="one disposition per gap (proxy | internal_only | "
+                       "cross_card_remap | unknown), decided from the workbook, "
+                       "the Search_Log, the dossiers and the register; written "
+                       "to 07_qa/gap_triage.json for the relay to state"))
     co = common(sub.add_parser(
         "correlate", help="the follow-up prompt for ONE category: the "
                           "cross-category rows proposed to its still-open "
@@ -2408,6 +2648,8 @@ def main(argv=None) -> int:
             print(json.dumps(reusable(wb, a.subcap), indent=2, default=str))
         elif a.cmd == "gaps":
             print(json.dumps(gaps(wb, run), indent=2, default=str))
+        elif a.cmd == "triage":
+            print(json.dumps(triage(wb, run), indent=2, default=str))
         elif a.cmd == "correlate":
             got = correlate(wb, a.category)
             if a.json:

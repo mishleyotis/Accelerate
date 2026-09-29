@@ -61,8 +61,11 @@ def test_a_granted_claim_precedes_the_submit_and_the_verdict_lands_on_disk(tmp_p
         return {"verdict": {"status": "fail", "reasons": ["CG-09 techstack.items[0].status"]}}
     monkeypatch.setattr(m, "mcp", fake_mcp)
     out = tmp_path / "v.json"
+    # --no-precheck: the synthetic page would be refused by the local
+    # pass-1 gates (W2-5) before the submit these tests are about.
     rc = m.main(["RUN-1", "techstack", "--sections", str(_sections(tmp_path)),
-                 "--claim", "--verdicts-out", str(out), "--producer", "engine.pipeline"])
+                 "--claim", "--verdicts-out", str(out), "--producer", "engine.pipeline",
+                 "--no-precheck"])
     assert rc == 1                                            # a FAIL verdict is still exit 1
     assert [c[0] for c in calls] == ["claim_run", "submit_page_payload"]
     assert calls[0][1:] == ("RUN-1", "engine.pipeline")
@@ -78,7 +81,8 @@ def test_without_claim_the_behaviour_is_unchanged(tmp_path, monkeypatch):
         calls.append(tool)
         return {"verdict": {"status": "pass", "reasons": []}}
     monkeypatch.setattr(m, "mcp", fake_mcp)
-    rc = m.main(["RUN-1", "techstack", "--sections", str(_sections(tmp_path))])
+    rc = m.main(["RUN-1", "techstack", "--sections", str(_sections(tmp_path)),
+                 "--no-precheck"])
     assert rc == 0 and calls == ["submit_page_payload"]
 
 

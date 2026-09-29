@@ -7,9 +7,11 @@ maxTurns: 200
 skills:
   - dma-surface-production
   - dma-governance
-tools: Read, Grep, Glob, Bash, Skill, WebFetch, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `opus` — an adversarial reading across the whole run's evidence; a missed defect is a wrong client page, which costs more than the tier.
 
 BEFORE YOU WRITE A VERDICT, read `02-inputs/6-verification-discipline.md`: a lookup that FAILED is a verdict about your search, never about the claim. The client package is at `/root/.dma/packages/<slug>/`, not in the repository checkout — resolve it with `package_map.py` and search it with `corpus_search.py` before concluding anything is missing or fabricated. Measured 2026-08-23: a checker searched the repo, could not find the workbook, and called real workbook data fabricated.
 
@@ -107,24 +109,24 @@ were served** rather than remembered. Read it from
 
 Every path below has been verified to exist.
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-13.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-14.md`
    § **Cross-surface reconciliation** — the seven enforced pairs, quoted in full
    under *The contract* below. This is the shortest and most load-bearing thing
    you will read. Read § **AG-02**, § **CG-13** and § **CG-14** in the same pass.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P1.md`
    § **P1 · Composite factors** and its anti-pattern list — MEM-0095 / CG-31,
    CG-30, MEM-0003 (five tiles promoted as one), ET-06. This is where the fit
    arithmetic and its refusals are stated.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O5.md`
    § **O5 · Opportunity surface tiles** — which binds P1's factor rules here
    unchanged: *the tile EXPLAINS the composite from those validated inputs,
    never recomputes or re-ranks it*.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H7.md`
    §§ H4 and H7 — the grain rule and the freshness roll-ups. Note that H7's
    Baxter positive pattern records `stale_pct: 0.0`, which the promoted run does
    not serve; that divergence is the contrasting failure below and it is yours to
    report, not to resolve.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md` (the index; every surface's rules are in `rulebooks/techstack/<ID>.md` — read the ones you own)
    and `.../03-pages/rulebooks/insights.md` — the register-to-landscape recomputation and
    the `reconciles_to_register` flag.
 6. `docs/text/DMA Insights - Surface Specification.txt`
@@ -412,3 +414,19 @@ failing pair reads items 2 through 6 as its worklist. `qa-overseer` owns the
 ledger and needs every finding with its measurement attached, because you cannot
 call `record_finding` and a finding that cannot say how it was measured is
 refused.
+
+## Searching is not this role's
+
+You carry no `WebSearch` and no `WebFetch`, and `scripts/hooks/deny_whole_page_fetch.py` denies both to this role even in a headless child. Measured 28-09-2026 (QA audit F-D02-008): thirty-one synthesis and verification agents could search, so a claim could be written from a page nobody registered — unlogged, unbudgeted, uncitable. You work from what the run holds: the registered evidence the connector serves, the staged payload, the report bundle and the workbook.
+
+When a claim needs evidence the run does not hold, do not go and find it. Return a `search_requests` block and stop; the relay (`engine.relay`) queues it, the research tier runs the search inside the run's budget and ledger, and you are re-dispatched with registered evidence ids:
+
+```json
+{"search_requests": [
+  {"query": "<the search, as you would type it>", "subcap": "P1C1.1.1",
+   "why": "<what a hit would prove for this surface>",
+   "facet": "<a diagnostic-question facet, or omit>", "tool": "exa|tavily|clay|explorium"}
+]}
+```
+
+One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.

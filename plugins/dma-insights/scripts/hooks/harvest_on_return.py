@@ -53,10 +53,14 @@ import _runctx as ctx                                          # noqa: E402
 
 SKILL = ctx.SKILL
 
-#: Lanes whose return is worth draining. A general-purpose subagent and a
-#: production producer emit no `search_requests` and own no category.
+#: Lanes whose return is worth draining. A general-purpose subagent emits
+#: no `search_requests`. Since 28-09-2026 a production producer, a checker
+#: or a verifier holds no web tool and DOES emit them (F-D02-008), so their
+#: returns are drained too; the request's `subcap` names its category.
 GOVERNED = re.compile(
-    r"^(research-|enrichment-|technographic-scanner$)|(-challenger)$", re.I)
+    r"^(research-|enrichment-|technographic-scanner$)|(-challenger)$|"
+    r"^(overview|heatmap|insights|platform|techstack|context)-[a-z-]+-producer$|"
+    r"(-checker|-auditor|-verifier|-planner)$", re.I)
 
 LANE = re.compile(r"^research-(p\d+c\d+)-producer$", re.I)
 

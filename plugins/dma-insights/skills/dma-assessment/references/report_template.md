@@ -443,7 +443,7 @@ governance and review cycles.
 Advanced analytics and automation. Strong governance with clear accountability. Innovation
 embedded in culture.
 
-**M5 — Transformational**: Industry-leading capabilities. Continuous innovation. Real-time,
+**M5 — Leading**: Industry-leading capabilities. Continuous innovation. Real-time,
 predictive operations. Seamless customer experiences. Ecosystem orchestration. Serves as
 benchmark for peers.
 

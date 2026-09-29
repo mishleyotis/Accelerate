@@ -234,6 +234,44 @@ def sg_v4_grounding_fails(res: dict) -> list:
 EXIT_CLAIM_REFUSED = 3
 
 
+def local_precheck(page: str, payload: dict, *, repo: str | None = None) -> dict:
+    """The server's first validation pass, run here before a submission is
+    spent on it.
+
+    Measured 28-09-2026 (QA audit F-O07-010): 199 rejections on one page at
+    attempts = 2 — two full-page submissions (≈3 MB) for refusals the
+    connector's own pass-1 gates would have named locally; replayed over the
+    same 102 cells, pass 1 catches 45 of the 46 server refusals (98%),
+    CG-15 included. So the pass runs here, through `precheck_gates.py`'s
+    loader (the gates are imported, never restated), and a page with a
+    blocking reason is not submitted. When the connector package is not
+    reachable the result is `not_run`, and the page ships — a check that
+    could not run is disclosed, not a refusal to work.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("precheck_gates", HERE / "precheck_gates.py")
+    pg = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(pg)
+        validation, _v2, _rs, where = pg._load_connector(repo)
+    except SystemExit as exc:
+        return {"status": "not_run", "why": str(exc)[:200], "reasons": []}
+    except Exception as exc:                                     # noqa: BLE001
+        return {"status": "not_run", "why": f"{type(exc).__name__}: {exc}"[:200], "reasons": []}
+    try:
+        reasons = [r for r in validation.validate_pass1(page, payload)
+                   if str(r.get("severity", "block")) == "block"
+                   and not str(r.get("gate_id", "")).startswith("SG")]
+    except Exception as exc:                                     # noqa: BLE001
+        return {"status": "not_run", "why": f"validate_pass1 raised {type(exc).__name__}: {exc}"[:200],
+                "reasons": []}
+    by_gate: dict[str, int] = {}
+    for r in reasons:
+        by_gate[str(r.get("gate_id") or "?")] = by_gate.get(str(r.get("gate_id") or "?"), 0) + 1
+    return {"status": "fail" if reasons else "pass", "gates_from": where,
+            "reasons": reasons, "by_gate": by_gate}
+
+
 def session_id() -> str:
     """The session token the claim is made under — the harness's when it
     exports one, otherwise a fresh one for this process."""
@@ -366,6 +404,13 @@ def main(argv=None) -> int:
     ap.add_argument("--verdicts-out", type=Path,
                     help="write {page: {status, reasons}} JSON here — the "
                          "driver reads this rather than the transcript")
+    ap.add_argument("--no-precheck", action="store_true",
+                    help="submit without running the server's pass-1 gates "
+                         "locally first (they catch 98%% of refusals; a page "
+                         "with a local blocking reason is otherwise not sent)")
+    ap.add_argument("--repo", default=None,
+                    help="checkout of the DMA Insights repository for the local "
+                         "precheck; falls back to $DMA_INSIGHTS_REPO and the cwd")
     a = ap.parse_args(argv)
     verdicts: dict = {}
 
@@ -410,6 +455,25 @@ def main(argv=None) -> int:
                 print(f"  part {i:2d} {p['kind']:6s} {p['path'] or '(root)':28s}"
                       f" {size(p['body']):,}b")
             continue
+        if not a.no_precheck:
+            pre = local_precheck(page, payload, repo=a.repo)
+            if pre["status"] == "not_run":
+                print(f"{page}: local precheck NOT RUN — {pre['why']}")
+            elif pre["status"] == "fail":
+                print(f"{page}: NOT SUBMITTED — {len(pre['reasons'])} blocking "
+                      f"reason(s) from the server's own pass-1 gates, run locally "
+                      f"({pre['gates_from']}): "
+                      + ", ".join(f"{g} x{n}" for g, n in sorted(pre["by_gate"].items())))
+                for r in pre["reasons"][:12]:
+                    print("   ", r.get("gate_id"), r.get("path"), "|",
+                          str(r.get("message"))[:140])
+                verdicts[page] = {"status": "local_precheck_fail",
+                                  "reasons": pre["reasons"][:40], "sg_v4_fails": []}
+                _write_verdicts()
+                failed.append(page)
+                continue
+            else:
+                print(f"{page}: local precheck clean ({pre['gates_from']})")
         res = submit(a.run_id, page, payload, a.producer)
         status, reasons = verdict_line(res)
         verdicts[page] = {"status": status, "reasons": reasons[:40],

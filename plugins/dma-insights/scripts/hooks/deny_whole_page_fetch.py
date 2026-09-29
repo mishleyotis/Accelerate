@@ -52,10 +52,36 @@ from pathlib import Path
 
 #: The tools that return a whole page. `WebSearch` is NOT here: a result list
 #: is small and is how a lane finds the URL it then windows.
-FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa")
+#: Tavily extract too (QA audit F-L11-042 pair 7): the hook was registered
+#: on it in hooks.json and the docstring called it a fetcher, but this list
+#: did not, so a lane holding it could read a page whole unhindered.
+FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa", "mcp__Tavily__tavily_extract")
 
-#: Actor classes whose reading is citation, so must go through the cache.
-DENIED_CLASSES = ("category-researcher", "challenger")
+#: Actor classes whose reading is citation, so must go through the cache —
+#: and the synthesis and verification classes, which read nothing on the
+#: web at all (the deployed-app-auditor's fetch of production is the one
+#: exception and is its own class).
+DENIED_CLASSES = ("category-researcher", "challenger", "surface-producer", "verifier")
+
+#: Search tools, and the classes that never search. Measured 28-09-2026
+#: (QA audit F-D02-008): 31 synthesis and verification agents carried
+#: WebSearch and WebFetch, so a claim could be written from a page nobody
+#: registered. The grants are gone from their manifests; this is the
+#: belt-and-braces for a headless child identified by $DMA_ACTOR.
+SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search")
+DENIED_SEARCH_CLASSES = ("surface-producer", "verifier", "app-auditor", "challenger")
+
+SEARCH_REASON = (
+    "dma-insights: {actor} does not search. A synthesis or verification role "
+    "works from the run's registered evidence; a search from here would be "
+    "unlogged, unbudgeted and uncitable (QA audit F-D02-008, 28-09-2026: 31 "
+    "such agents could search).\n\n"
+    "Return a `search_requests` block and stop — one JSON object per search, "
+    "with `query`, `subcap`, `why` and optionally `facet` and `tool` — and the "
+    "relay (engine.relay) queues it for the research tier, which runs it "
+    "inside the run's budget and ledger and re-dispatches you with registered "
+    "evidence ids. Never paraphrase a page you found yourself into a citation."
+)
 
 REASON = (
     "dma-insights: {actor} reads pages through the engine, not whole.\n\n"
@@ -96,7 +122,7 @@ def actor_of(payload: dict) -> str:
 def decide(payload: dict) -> str:
     """The reason to deny, or "" to allow."""
     tool = str(payload.get("tool_name") or "")
-    if tool not in FETCHERS:
+    if tool not in FETCHERS and tool not in SEARCHERS:
         return ""
     actor = actor_of(payload)
     if not actor:
@@ -109,6 +135,8 @@ def decide(payload: dict) -> str:
         klass = scope.classify(actor).get("class") or ""
     except Exception:                                           # noqa: BLE001
         return ""
+    if tool in SEARCHERS:
+        return SEARCH_REASON.format(actor=actor) if klass in DENIED_SEARCH_CLASSES else ""
     if klass not in DENIED_CLASSES:
         return ""
     ti = payload.get("tool_input") or {}

@@ -709,16 +709,22 @@ class Pipeline:
             from . import handoff
             hp = self.run.deliverables / handoff.HANDOFF_NAME
             pre = A.research_ready(wb, self.run.qa_dir)
-            ok = hp.is_file() and not pre
-            return ok, ("handoff written; research ready" if ok else
+            packet = handoff.verify_packet(hp)
+            ok = not pre and not packet
+            return ok, ("handoff written and verified; research ready" if ok else
                         (f"{len(pre)} research-ready blocker(s): {pre[0][:160]}" if pre
-                         else "research_handoff.json missing"))
+                         else f"handoff packet: {packet[0][:160]}"))
         if stage == "SCORING":
             from . import assessment as A
+            from . import handoff
             last = (A.state(wb).get("last_scoring_gate") or {})
-            ok = str(last.get("verdict") or "") == "PASS"
-            return ok, ("SCORING gate PASS" if ok else
-                        f"SCORING gate {last.get('verdict') or 'NOT_RUN'}")
+            passed = str(last.get("verdict") or "") == "PASS"
+            packet = handoff.verify_packet(self.run.qa_dir / A.SCORING_NAME,
+                                           schema_version=A.SCORING_SCHEMA_VERSION)
+            ok = passed and not packet
+            return ok, ("SCORING gate PASS; findings packet verified" if ok else
+                        (f"SCORING gate {last.get('verdict') or 'NOT_RUN'}" if not passed
+                         else f"scoring packet: {packet[0][:160]}"))
         if stage == "INGEST_A":
             ok = bool(str(md.get("connector_run_id") or "").strip())
             return ok, (f"connector run {md.get('connector_run_id')}" if ok
@@ -1668,8 +1674,12 @@ class Pipeline:
             raise StageRefused("research is not ready to score:\n  - " + "\n  - ".join(pre))
         doc = handoff.build(self.wb, qa_dir=self.run.qa_dir, strict=True)
         out = self.run.deliverables / handoff.HANDOFF_NAME
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps(doc, indent=2, default=str))
+        # Through the packet writer, never bare json: the stage's own
+        # verification reads the sha256 sidecar write_packet leaves, and a
+        # packet written without it is "not written by engine.handoff"
+        # (measured 28-09-2026 on the CI pipeline walk, after the packet
+        # gained its hash).
+        handoff.write_packet(doc, out)
         self.reopen()
         return f"handoff written: {len(doc.get('subcap_records') or [])} records"
 

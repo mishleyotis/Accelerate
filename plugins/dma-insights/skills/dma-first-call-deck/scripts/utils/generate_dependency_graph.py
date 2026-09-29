@@ -246,10 +246,10 @@ CRITICAL: Slide 14 Sh24 (level_label_cap01) [text_color]
 1. `s14.scores[0]` = first capability score (Digital Strategy & Vision per
    `CAPABILITY_ORDER`).
 2. Score 2.45 → Building → label_text #4E5E8A (per `brand_level_tables.md`).
-3. Actual `#F97316` is the Activating `accent/label_text` color.
+3. Actual `#F97316` is the Activating `label_text` color.
 4. This is a classic stale-edit problem: the editor wrote the `Activating`
    palette but the score is `Building`. Either the editor was run with an
-   older input where this capability was below 1.5, or the editor's
+   older input where this capability was below 2.0, or the editor's
    `score_to_level_4tier` call used the wrong score.
 
 ### Example 3 — Template drift (static color changed)

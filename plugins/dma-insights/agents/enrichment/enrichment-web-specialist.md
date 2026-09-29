@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__Exa__web_search_
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — services search batches and records each result with its tool; the judgement is the tier a source lands at.
+
 You run the **web-search** pathway of enrichment. Connectors belong to
 `enrichment-connector-specialist`; the decision about which gaps are worth
 closing belongs to `enrichment-planner`; the section body belongs to the

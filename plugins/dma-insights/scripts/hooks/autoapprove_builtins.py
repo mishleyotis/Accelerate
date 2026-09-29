@@ -341,6 +341,10 @@ PLUGIN_PATH = re.compile(
     r"/(scripts/[A-Za-z0-9_.-]+\.(?:py|sh)|"
     r"skills/[A-Za-z0-9_-]+/(?:scripts|engine)/[A-Za-z0-9_./-]+\.py)$")
 REPO_SCRIPT = re.compile(r"^(?:\./|/[^\s]*/)?scripts/[A-Za-z0-9_.-]+\.py$")
+#: The pushes that carry a client deliverable off the machine. Memory,
+#: bundle, ledger and backup pushes are the sanctioned persistence path and
+#: stay approved; these three are gated (deliverable_gate.py).
+DELIVERABLE_PUSH = re.compile(r"drive_fetch\.py[\"']?\s+push-(?:package|final|artifact)\b")
 ENGINE_MOD = re.compile(r"^engine(\.[A-Za-z_][A-Za-z0-9_]*)+$")
 
 
@@ -829,6 +833,11 @@ def _segment_ok(segment: str, bodies: list[str], ctx: dict) -> bool:
             cwd, os.path.expanduser(target)))
         return True
     if verb in ("python3", "python"):
+        # A deliverable leaving the machine is decided by the deliverable
+        # gate (deny while a verdict is not PASS) or by a person — never
+        # here. QA audit F-K02-024: `drive_fetch.py push` was auto-approved.
+        if DELIVERABLE_PUSH.search(" ".join(tokens)):
+            return _deliverable_push_passes(line) and _python_ok(tokens, heredoc)
         return _python_ok(tokens, heredoc)
     if verb in ("bash", "sh"):
         rest = [a for a in args if not a.startswith("-")]
@@ -869,7 +878,15 @@ def _segment_ok(segment: str, bodies: list[str], ctx: dict) -> bool:
         return bool(args) and all(re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", a)
                                   for a in args)
     if verb == "rm":
-        # only strictly inside a write root, never a root itself
+        # only strictly inside a write root, never a root itself — and never
+        # recursively. QA audit F-K02-024 (28-09-2026): `rm -rf <run
+        # root>/04_scoring` was approved because the path lay inside a write
+        # root; a tree delete is a destructive action a person decides,
+        # whatever root it sits under. A single-file `rm -f` stays approved.
+        flags = [a for a in args if a.startswith("-")]
+        if any(a in ("--recursive",) or ("r" in a.lstrip("-").lower() and not a.startswith("--"))
+               for a in flags):
+            return False
         paths = [a for a in args if not a.startswith("-")]
         return bool(paths) and all(path_is_writable(p, strict=True, cwd=cwd) and
                                    Path(p).name not in ("", ".", "..", "*")
@@ -915,11 +932,34 @@ def bash_ok(command: str) -> bool:
 
 # ── the two guards, asked first ──────────────────────────────────────────
 
+def _deliverable_gate():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "deliverable_gate", Path(__file__).resolve().parent / "deliverable_gate.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def _deliverable_push_passes(line: str) -> bool:
+    """A deliverable push is approved only when the deliverable gate has a
+    recorded PASS for the run in hand (QA audit F-K02-024 / F-M08-013).
+    Anything else — no run, no verdict, a FAIL — is the gate's denial, and
+    never an approval here."""
+    try:
+        state, _why = _deliverable_gate().push_verdict(line)
+    except Exception:                               # noqa: BLE001
+        return False
+    return state == "pass"
+
+
 def guards_would_deny(command: str) -> bool:
     try:
         if _cred is not None and any(rx.search(command) for rx, _ in _cred.DENIALS):
             return True
         if _bulk is not None and _bulk.decide(command):
+            return True
+        if DELIVERABLE_PUSH.search(command) and _deliverable_gate().decide_push(command):
             return True
     except Exception:                               # noqa: BLE001
         return True                                 # unsure → say nothing

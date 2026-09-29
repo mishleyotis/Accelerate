@@ -46,9 +46,13 @@ from pathlib import Path
 #: and `challenge` are the two whose CLI verb differs from the ledger op.
 _VERB_OP = {"search": "search", "evidence": "evidence", "attach": "attach",
             "synthesise": "synthesis", "absence": "absence",
-            "challenge": "challenge", "note": "note"}
+            "challenge": "challenge", "note": "note",
+            # QA audit F-K02-024 (28-09-2026): `engine.assessment score` by a
+            # research actor passed this hook, because the regex below named
+            # cli and memory only. The ledger refused it; the hook did not.
+            "score": "score", "critique": "critique"}
 
-_CMD = re.compile(r"(?:python3?|py)\s+-m\s+engine\.(cli|memory)\s+(\w[\w-]*)")
+_CMD = re.compile(r"(?:python3?|py)\s+-m\s+engine\.(cli|memory|assessment)\s+(\w[\w-]*)")
 
 
 def _engine_scope():
@@ -90,11 +94,37 @@ def decide(command: str, actor_hint: str = "") -> str:
         # The notebook's own category is the scope; the cells are checked
         # against it by the writer.
         cells = cells or _flags(argv, "category")
+    if op == "critique":
+        cells = cells or _flags(argv, "pillar")
     try:
         scope = _engine_scope()
     except Exception:                                           # noqa: BLE001
         return ""                      # the ledger still refuses
     return scope.violation(actor, op, cells)
+
+
+def decide_payload(payload: dict) -> dict | None:
+    """The hookSpecificOutput for a whole event, or None (bash_guard's entry)."""
+    if payload.get("tool_name") != "Bash":
+        return None
+    ti = payload.get("tool_input")
+    command = (ti.get("command") or "") if isinstance(ti, dict) else ""
+    if not isinstance(command, str):
+        return None
+    try:
+        why = decide(command, str(payload.get("agent_type") or "").split(":")[-1])
+    except Exception:                                           # noqa: BLE001
+        return None
+    if not why:
+        return None
+    return {"hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "permissionDecision": "deny",
+        "permissionDecisionReason": (
+            f"{why}\n\nThe engine refuses this write too — this is the same "
+            f"rule (engine/scope.py), stopped at the call so the refusal "
+            f"does not cost you a turn."),
+    }}
 
 
 def main() -> int:
@@ -108,26 +138,9 @@ def main() -> int:
         # the hook exited NON-ZERO with a traceback — a hook failing CLOSED on
         # its own bug, which is the one failure a guard may never have.
         return 0
-    if payload.get("tool_name") != "Bash":
-        return 0
-    ti = payload.get("tool_input")
-    command = (ti.get("command") or "") if isinstance(ti, dict) else ""
-    if not isinstance(command, str):
-        return 0
-    try:
-        why = decide(command, str(payload.get("agent_type") or "").split(":")[-1])
-    except Exception:                                           # noqa: BLE001
-        return 0
-    if not why:
-        return 0
-    print(json.dumps({"hookSpecificOutput": {
-        "hookEventName": "PreToolUse",
-        "permissionDecision": "deny",
-        "permissionDecisionReason": (
-            f"{why}\n\nThe engine refuses this write too — this is the same "
-            f"rule (engine/scope.py), stopped at the call so the refusal "
-            f"does not cost you a turn."),
-    }}))
+    out = decide_payload(payload)
+    if out:
+        print(json.dumps(out))
     return 0
 
 

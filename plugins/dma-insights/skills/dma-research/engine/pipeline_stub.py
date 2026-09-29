@@ -170,6 +170,12 @@ def _lane_web_only(agent, wb, cells):
         direct = f'"{ent}" {c} rollout OR "went live"'
         proxy = f'"{ent}" {c} proxy: "chief digital officer" OR "head of digital"'
         for q in (direct, proxy):
+            # The works volley above already fired `direct` when the entity
+            # is the fixture's; logging it again is the duplicate the ledger
+            # refuses (F-D05-033). The ladder needs the query IN the log,
+            # not logged twice.
+            if L.prior_searches(wb, q, "web_search"):
+                continue
             L.append_search(wb, subcap=c, facet="works", query=q,
                             tool="web_search", hits=0, kept=0, outcome="no hits")
         L.declare_absence(

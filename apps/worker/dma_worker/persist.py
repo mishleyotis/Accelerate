@@ -239,6 +239,25 @@ class PersistResult:
     run_seq: int
     scored_cells: int
     observations: int
+    #: False when the package resolved to the run it already produced (the
+    #: byte-identical guard below) rather than minting one. The scan counts
+    #: `runs_created` from this, not from "persist returned".
+    created: bool = True
+
+
+class EmptyIngest(ValueError):
+    """A package whose workbook carries no scored cell mints no run.
+
+    Measured 28-09-2026 (QA audit F-O13-030): goeasy-ltd held 18 runs under
+    one request id, 12 of them with `scored_cells = 0` and no catalogue
+    version — every rewrite of a research-stage workbook in the intake tree
+    (column D empty by contract) had new bytes, passed the byte-identical
+    guard and landed as a run the app then listed as pending and could not
+    synthesise. Bank of Travelers Rest, 18 of 19 runs, was the same shape.
+    A run is a scored assessment; a workbook with nothing in column D is
+    research in progress, and the scan records the refusal and moves on
+    without spending a retry.
+    """
 
 
 def _slug(name: str) -> str:
@@ -262,6 +281,17 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
                     companion_observations: list | None = None,
                     artefact_checksum: str | None = None,
                     remint: bool = False) -> PersistResult:
+    # Before any write, and before the entity is even resolved: a package with
+    # no scored cell is not an assessment (see EmptyIngest). `remint` does not
+    # override it — a forced re-read of nothing is still nothing.
+    if not workbook.scores:
+        raise EmptyIngest(
+            f"{source_folder_id or '<no folder>'}: the workbook carries 0 scored "
+            f"cells (request id {manifest.get('run_id') or 'none'}); a run is a "
+            f"scored assessment, and a research-stage workbook (column D empty "
+            f"by contract) mints none. The scan records this and does not "
+            f"retry; the next scored version of the package ingests as usual "
+            f"(QA audit F-O13-030, 28-09-2026).")
     cur = conn.cursor()
     inst = _institution(manifest)
     # Signal 4 of the cascade: the client folder's display name (its
@@ -396,7 +426,7 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
         if prior:
             conn.commit()
             return PersistResult(str(entity_id), str(prior[0]), prior[1],
-                                 prior[2] or 0, 0)
+                                 prior[2] or 0, 0, created=False)
 
     # AUD-0089: this was an unguarded read-modify-write. The only
     # serialisation was `pg_try_advisory_lock(815002)` in job_main.main(),

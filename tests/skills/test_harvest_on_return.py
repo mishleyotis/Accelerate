@@ -192,3 +192,23 @@ def test_it_fails_open_on_input_it_did_not_parse():
         p = _cli(payload)
         assert p.returncode == 0
         assert not p.stdout.strip()
+
+
+# ── 2026-09-28 (F-D02-008): a producer holds no web tool and asks instead ──
+
+def test_a_producers_requests_are_drained_too(hook, run):
+    """A per-surface producer, a page router, a checker or a verifier holds
+    no WebSearch or WebFetch since the QA audit of 28-09-2026; what it cannot
+    support from the run it emits as `search_requests`, and the harvest
+    drains those exactly as it drains a research lane's. The request's
+    `subcap` names the category, since the producer owns none."""
+    got = hook.harvest(_located(hook), "heatmap-focus-producer", RETURN_WITH_REQUESTS)
+    assert got["harvested"] == 2 and got["unqueued"] == 0, got
+    rows = [json.loads(line) for line in
+            (run / "07_qa" / "search_relay.jsonl").read_text().splitlines() if line.strip()]
+    assert {r["subcap"] for r in rows} == {"P1C1.3", "P1C1.4"}
+    assert all(r["lane"] == "heatmap-focus-producer" for r in rows)
+    assert all(str(r.get("category") or "").upper() == "P1C1" for r in rows)
+    assert hook.GOVERNED.search("heatmap-focus-producer")
+    assert hook.GOVERNED.search("evidence-integrity-checker")
+    assert not hook.GOVERNED.search("general-purpose")
