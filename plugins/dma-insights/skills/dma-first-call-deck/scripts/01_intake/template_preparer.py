@@ -7,7 +7,7 @@ Usage:
         --template assets/templates/credit_unions.pptx \
         --client "Pacific Coast CU" \
         --date "2026-04-09" \
-        --out-dir /home/claude/working/
+        --out-dir <working-dir>/
 
 Produces: unpacked/, palette.json, placeholder_manifest.json, shape_inventory.json
 

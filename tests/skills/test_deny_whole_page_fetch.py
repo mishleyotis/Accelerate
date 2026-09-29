@@ -63,6 +63,14 @@ def test_the_exa_fetcher_is_denied_on_the_same_rule():
     assert _decision(out) == "deny"
 
 
+def test_tavily_extract_is_a_fetcher_too():
+    """QA audit F-L11-042 pair 7 (29-09-2026): hooks.json registered the guard
+    on tavily_extract and its docstring called it a fetcher, but FETCHERS did
+    not list it, so a lane holding it read pages whole unhindered."""
+    assert _decision(_fetch("research-p2c3-producer", tool="mcp__Tavily__tavily_extract")) == "deny"
+    assert _fetch("enrichment-web-specialist", tool="mcp__Tavily__tavily_extract") == {}
+
+
 def test_a_servicing_actor_is_allowed_verbatim_reading_is_its_path():
     for agent in ("research-conductor", "enrichment-web-specialist",
                   "enrichment-connector-specialist", "technographic-scanner"):

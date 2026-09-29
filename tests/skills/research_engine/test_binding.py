@@ -59,8 +59,9 @@ def test_start_stores_the_binding_record(tmp_path):
     assert md["sv_basis"] == BASIS_SV
     assert md["mode_basis"] == BASIS_MODE
     assert "RB rejected" in md["lob_census"]
-    ctx = json.loads((tmp_path / "00_entity_profile" / "context.json").read_text())
-    assert ctx["sv_basis"] == BASIS_SV
+    assert md["sv_basis"] == BASIS_SV
+    # the binding lives in Run_Metadata only: no context.json beside the run
+    assert not (tmp_path / "00_entity_profile" / "context.json").exists()
 
 
 def test_an_api_start_without_a_basis_is_unstated_not_invented(tmp_path):

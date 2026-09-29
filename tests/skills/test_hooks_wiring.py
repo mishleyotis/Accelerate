@@ -60,9 +60,11 @@ BINDINGS = [
     # (event, script, a regex the matcher must satisfy)
     ("PreToolUse", "deny_whole_page_fetch.py", r"WebFetch"),
     ("PreToolUse", "deny_whole_page_fetch.py", r"web_fetch_exa"),
+    ("PreToolUse", "deny_whole_page_fetch.py", r"tavily_extract"),
     ("PreToolUse", "guard_dispatch.py", r"Agent"),
-    ("PreToolUse", "guard_driver_lock.py", r"Bash"),
-    ("PreToolUse", "deny_artefact_writes.py", r"Bash"),
+    # guard_driver_lock and deny_artefact_writes run inside bash_guard
+    # since W2-7 (F-H01-023); test_bash_guard_carries_the_guards below
+    ("PreToolUse", "bash_guard.py", r"Bash"),
     ("PostToolUse", "harvest_on_return.py", r"Agent"),
     ("PostToolUse", "stage_advance.py", r"Bash"),
     ("Stop", "stage_advance.py", None),
@@ -70,6 +72,7 @@ BINDINGS = [
     ("SubagentStop", "record_handback.py", r"research-"),
     ("SessionStart", "session_brief.py", None),
     ("PostCompact", "session_brief.py", None),
+    ("PreCompact", "param_echo.py", None),
 ]
 
 
@@ -81,6 +84,14 @@ def test_the_seam_is_bound(event, script, matcher_re):
     if matcher_re:
         assert any(re.search(matcher_re, m) for m in found), \
             f"{script} on {event} has matchers {found}, none matching {matcher_re}"
+
+
+def test_bash_guard_carries_the_guards_that_used_to_be_bound_alone():
+    order = (HOOK_DIR / "bash_guard.py").read_text()
+    order = order[order.index("ORDER = ("):order.index("APPROVER =")]
+    for s in ("guard_driver_lock.py", "deny_artefact_writes.py",
+              "deny_credential_ops.py", "guard_actor_scope.py"):
+        assert s in order, s
 
 
 def test_the_events_that_were_not_bound_before_are_bound_now():
@@ -117,10 +128,15 @@ def test_a_missing_script_still_prints_valid_json_and_exits_zero():
     """The branch that runs on a partial install. It has to be JSON: a
     wrapper that printed a bare sentence would be read as a malformed hook
     result, and the systemMessage naming the repair would never be seen."""
+    # stdin names an engine command: the stage_advance wrapper reads its
+    # input first and execs only for a dispatch, an engine command or a
+    # ship (W2-7); every other wrapper ignores it.
+    stdin = json.dumps({"tool_name": "Bash",
+                        "tool_input": {"command": "python3 -m engine.cli status"}})
     for event, _, script, cmd, _ in _commands():
         r = subprocess.run(
             ["bash", "-c", cmd.replace("${CLAUDE_PLUGIN_ROOT}", "/nonexistent")],
-            capture_output=True, text=True, timeout=30)
+            input=stdin, capture_output=True, text=True, timeout=30)
         assert r.returncode == 0, (event, script, r.stderr[:200])
         doc = json.loads(r.stdout)
         assert doc.get("systemMessage"), (event, script)
@@ -132,7 +148,9 @@ def test_no_wrapper_lets_the_shell_expand_its_own_message():
     inside the prose run as a command on the exact install that is already
     broken."""
     for event, _, script, cmd, _ in _commands():
-        payload = cmd.split("printf ", 1)[1]
+        # the LAST printf is the message; the stage_advance wrapper's
+        # first printf relays the stdin it read to the handler
+        payload = cmd.rsplit("printf ", 1)[1]
         assert payload.startswith("'%s' '"), (event, script, payload[:40])
 
 

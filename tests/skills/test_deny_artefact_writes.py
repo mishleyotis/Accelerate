@@ -109,8 +109,14 @@ def test_the_hook_is_registered_for_both_tool_families():
     pre = hooks["hooks"]["PreToolUse"]
     matchers = {spec.get("matcher") for spec in pre
                 if any("deny_artefact_writes.py" in h["command"] for h in spec["hooks"])}
-    assert "Bash" in matchers
     assert "Write|Edit|MultiEdit|NotebookEdit" in matchers
+    # The Bash half runs inside bash_guard.py since W2-7 (F-H01-023): the
+    # manifest binds bash_guard to Bash and bash_guard's ORDER names it.
+    bash_matchers = {spec.get("matcher") for spec in pre
+                     if any("bash_guard.py" in h["command"] for h in spec["hooks"])}
+    assert any("Bash" in str(m).split("|") for m in bash_matchers), bash_matchers
+    order = (PLUGIN / "scripts" / "hooks" / "bash_guard.py").read_text()
+    assert "deny_artefact_writes.py" in order[order.index("ORDER = ("):order.index("APPROVER =")]
     m = _mod()
     assert m.decide({"tool_name": "Bash", "tool_input": {"command": "cat x"}}) is None
 

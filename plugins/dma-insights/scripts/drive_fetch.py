@@ -257,13 +257,46 @@ def pull(client: str) -> int:
                 _download(tok, mem, MEMORY_DIR)
                 (MEMORY_DIR / mem["name"]).rename(local)
             print(f"memory: landed {mem['name']!r} -> {local}")
+        # the version this session pulled — what `push-memory` checks against
+        try:
+            _record_pulled(_slug(client), _file_version(tok, mem["id"]))
+        except Exception as exc:                              # noqa: BLE001
+            print(f"memory: version not recorded ({type(exc).__name__}); "
+                  f"push-memory will refuse until it is — pull again or --force")
     else:
         print("memory: none in the client folder yet — "
               "client_memory.py init creates the skeleton")
     return 0 if got else 1
 
 
-def push_memory(client: str) -> int:
+def _file_version(tok: str, file_id: str) -> dict:
+    """The remote's version token: Drive's own md5 and modifiedTime."""
+    q = urllib.parse.urlencode({"fields": "id,name,md5Checksum,modifiedTime",
+                                "supportsAllDrives": "true"})
+    with _req(tok, f"{API}/files/{file_id}?{q}") as resp:
+        d = json.load(resp)
+    return {"id": d.get("id", file_id), "md5Checksum": d.get("md5Checksum"),
+            "modifiedTime": d.get("modifiedTime")}
+
+
+def _pulled_path(slug: str) -> Path:
+    return MEMORY_DIR / f"{slug}.pulled.json"
+
+
+def _record_pulled(slug: str, version: dict) -> None:
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    _pulled_path(slug).write_text(json.dumps(version, indent=2), encoding="utf-8")
+
+
+def _pulled_version(slug: str) -> dict | None:
+    p = _pulled_path(slug)
+    try:
+        return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else None
+    except (OSError, ValueError):
+        return None
+
+
+def push_memory(client: str, *, force: bool = False) -> int:
     slug = _slug(client)
     local = MEMORY_DIR / f"{slug}.md"
     if not local.is_file():
@@ -276,11 +309,37 @@ def push_memory(client: str) -> int:
     existing = _find_memory_file(tok, folder["id"], client)
     body = local.read_bytes()
     if existing:
+        # THE VERSION TOKEN (QA audit F-G05-017, 28-09-2026): this PATCH
+        # replaced the Drive copy whatever it held, so two sessions on one
+        # client were last-writer-wins across Drive. The push now carries
+        # the version the session PULLED and refuses when the remote has
+        # moved since: pull again, merge, push. `--force` is the recorded
+        # override, never the default.
+        remote = _file_version(tok, existing["id"])
+        pulled = _pulled_version(slug)
+        if not force:
+            if pulled is None:
+                raise SystemExit(
+                    f"memory push refused: {remote_name!r} exists in Drive and this "
+                    f"session never pulled it (no {_pulled_path(slug).name}), so the "
+                    f"push would overwrite a version nobody here has read. Run "
+                    f"`drive_fetch.py pull --client {client}` first, merge, then push; "
+                    f"`--force` overrides and is recorded. (QA audit F-G05-017)")
+            if pulled.get("md5Checksum") != remote.get("md5Checksum"):
+                raise SystemExit(
+                    f"memory push refused: {remote_name!r} changed in Drive since it "
+                    f"was pulled (pulled {pulled.get('modifiedTime')}, remote now "
+                    f"{remote.get('modifiedTime')}). Another session wrote it. Pull "
+                    f"again, merge your entries into the current file, then push; "
+                    f"`--force` overrides and is recorded. (QA audit F-G05-017)")
         url = (f"{UPLOAD}/files/{existing['id']}?uploadType=media"
                f"&supportsAllDrives=true")
         with _req(tok, url, data=body, method="PATCH",
                   ctype="text/markdown") as resp:
             json.load(resp)
+        _record_pulled(slug, {**_file_version(tok, existing["id"]),
+                              "forced": bool(force and (pulled is None or
+                                             pulled.get("md5Checksum") != remote.get("md5Checksum")))})
         if existing["name"] != remote_name:
             # heal a file pushed under a variant slug: one client, one
             # memory file, canonical name = the display_id's slug
@@ -305,7 +364,12 @@ def push_memory(client: str) -> int:
         url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
         with _req(tok, url, data=payload.getvalue(), method="POST",
                   ctype=f"multipart/related; boundary={boundary}") as resp:
-            json.load(resp)
+            created = json.load(resp)
+        if isinstance(created, dict) and created.get("id"):
+            try:
+                _record_pulled(slug, _file_version(tok, created["id"]))
+            except Exception:                                 # noqa: BLE001
+                pass                                          # the push stands
         print(f"memory created in Drive: {remote_name!r} in {folder['name']!r}")
     return 0
 
@@ -713,6 +777,9 @@ def main(argv=None) -> int:
     p_pull.add_argument("--client", required=True)
     p_push = sub.add_parser("push-memory")
     p_push.add_argument("--client", required=True)
+    p_push.add_argument("--force", action="store_true",
+                        help="push even if the Drive copy moved since the pull "
+                             "(recorded); the default refuses (F-G05-017)")
     p_b = sub.add_parser("push-bundle")
     p_b.add_argument("--client", required=True)
     p_b.add_argument("--file", required=True)
@@ -813,7 +880,7 @@ def main(argv=None) -> int:
     if a.cmd == "pull":
         return pull(a.client)
     if a.cmd == "push-memory":
-        return push_memory(a.client)
+        return push_memory(a.client, force=a.force)
     if a.cmd == "push-bundle":
         return push_bundle(a.client, a.file, a.name)
     if a.cmd == "push-ledger":

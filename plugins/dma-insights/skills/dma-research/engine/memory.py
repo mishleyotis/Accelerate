@@ -176,18 +176,52 @@ def _prepare(run: runstate.Run, *, category: str, subcap=None,
     return memory_path(run, category), "\n".join(lines) + "\n"
 
 
+#: THE CAP, STATED (QA audit F-G05-017, 28-09-2026: no memory file had
+#: one). A notebook is a staging area, not a store: past 80% of the cap
+#: `status` says consolidate; at the cap `note` refuses until it is
+#: consolidated, because a notebook a session cannot afford to read is a
+#: notebook it will not consolidate either.
+NOTEBOOK_CAP_BYTES = 49_152
+CONSOLIDATE_AT = 0.80
+
+
+def _lock(p: Path):
+    from .workbook import file_lock                                # noqa: PLC0415
+    return file_lock(p.with_name(p.name + ".lock"), why=f"notebook {p.name}")
+
+
+def notebook_size(p: Path) -> dict:
+    n = p.stat().st_size if p.exists() else 0
+    return {"bytes": n, "cap": NOTEBOOK_CAP_BYTES,
+            "pct": round(100.0 * n / NOTEBOOK_CAP_BYTES, 1),
+            "consolidate_due": n >= NOTEBOOK_CAP_BYTES * CONSOLIDATE_AT,
+            "over_cap": n >= NOTEBOOK_CAP_BYTES}
+
+
 def _append(p: Path, block: str) -> Path:
-    """The only writer. Creates the notebook with its own header first."""
+    """The only writer. Creates the notebook with its own header first.
+    Under the file lock: two lanes noting into one category at once used to
+    interleave, and a note landing during a consolidation's rewrite was
+    lost (F-G05-017)."""
     p.parent.mkdir(parents=True, exist_ok=True)
-    if not p.exists():
-        p.write_text(
-            f"# {p.stem} — research notebook\n\n"
-            f"Append-only. A NOTEBOOK, never a record: nothing downstream\n"
-            f"reads this file — `engine.memory consolidate` pushes every\n"
-            f"entry through the workbook's own refusals, and an entry that\n"
-            f"cannot register is marked BLOCKED with the reason, in place.\n")
-    with p.open("a") as fh:
-        fh.write(block)
+    with _lock(p):
+        if not p.exists():
+            p.write_text(
+                f"# {p.stem} — research notebook\n\n"
+                f"Append-only. A NOTEBOOK, never a record: nothing downstream\n"
+                f"reads this file — `engine.memory consolidate` pushes every\n"
+                f"entry through the workbook's own refusals, and an entry that\n"
+                f"cannot register is marked BLOCKED with the reason, in place.\n")
+        size = notebook_size(p)
+        if size["bytes"] + len(block.encode("utf-8")) > NOTEBOOK_CAP_BYTES:
+            raise ValueError(
+                f"{p.name} is {size['bytes']:,} bytes against a cap of "
+                f"{NOTEBOOK_CAP_BYTES:,}: consolidate it first "
+                f"(`python3 -m engine.memory consolidate --run <R> --category "
+                f"{p.stem}`) — a notebook a session cannot afford to read is one "
+                f"it will not consolidate either.")
+        with p.open("a") as fh:
+            fh.write(block)
     return p
 
 
@@ -298,6 +332,7 @@ def status(run: runstate.Run, category: str | None = None) -> dict:
         per[c] = {s: sum(1 for e in entries if e["status"] == s)
                   for s in ("NOTED", "CONSOLIDATED", "BLOCKED")}
         per[c]["entries"] = len(entries)
+        per[c].update(notebook_size(memory_path(run, c)))
     return {"run_id": run.run_id, "categories": per,
             "unconsolidated": sum(p["NOTED"] for p in per.values()),
             "blocked": sum(p["BLOCKED"] for p in per.values())}
@@ -338,29 +373,34 @@ def consolidate(run: runstate.Run, category: str, *,
     reads silently.
     """
     p = memory_path(run, category)
-    entries = parse(p)
-    wb = run.open()
-    text = p.read_text().splitlines() if p.exists() else []
-    done = blocked = 0
-    offset = 0            # each _mark inserts one line above later entries
-    results = []
-    for e in entries:
-        if e["status"] != "NOTED":
-            continue
-        try:
-            outcome = _consolidate_one(wb, e, actor, run=run)
-            _mark(text, e, offset, "CONSOLIDATED", outcome)
-            done += 1
-            results.append({"subcap": e["subcap"], "outcome": outcome})
-        except (L.LedgerRefusal, ValueError) as err:
-            _mark(text, e, offset, "BLOCKED", str(err))
-            blocked += 1
-            results.append({"subcap": e["subcap"], "blocked": str(err)[:200]})
-        offset += 1
-    if text:
-        p.write_text("\n".join(text) + "\n")
+    # The whole read → mark → rewrite under the notebook's lock, so a lane's
+    # note that lands mid-consolidation is not overwritten by the rewrite
+    # (F-G05-017: consolidate read at one line and wrote at another, with
+    # no lock between them).
+    with _lock(p):
+        entries = parse(p)
+        wb = run.open()
+        text = p.read_text().splitlines() if p.exists() else []
+        done = blocked = 0
+        offset = 0            # each _mark inserts one line above later entries
+        results = []
+        for e in entries:
+            if e["status"] != "NOTED":
+                continue
+            try:
+                outcome = _consolidate_one(wb, e, actor, run=run)
+                _mark(text, e, offset, "CONSOLIDATED", outcome)
+                done += 1
+                results.append({"subcap": e["subcap"], "outcome": outcome})
+            except (L.LedgerRefusal, ValueError) as err:
+                _mark(text, e, offset, "BLOCKED", str(err))
+                blocked += 1
+                results.append({"subcap": e["subcap"], "blocked": str(err)[:200]})
+            offset += 1
+        if text:
+            p.write_text("\n".join(text) + "\n")
     return {"category": category, "consolidated": done, "blocked": blocked,
-            "results": results}
+            "results": results, **notebook_size(p)}
 
 
 def _consolidate_one(wb: RunWorkbook, e: dict, actor: str, run=None) -> str:

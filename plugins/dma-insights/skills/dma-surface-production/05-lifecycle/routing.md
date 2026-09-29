@@ -32,7 +32,7 @@ route → produce → challenge → consolidate → submit → learn
 | produce | the per-surface producer that owns the named surface, or the page producer when a whole page is in scope | no |
 | challenge | `finding-challenger` (dma-research discipline) | no |
 | consolidate | `page-consolidator` (refuses unchallenged input) | no |
-| submit + promote | `surface-producer` only | **yes** |
+| submit + promote | `surface-producer` on a hand-driven run; on a research-engine run the driver (`engine.pipeline`, through `ship_page.py --claim`) — nobody else | **yes** |
 | learn | `qa-overseer` (writes the findings memory) | memory only |
 
 The challenger runs BEFORE the consolidator, always: the consolidator's
@@ -43,7 +43,7 @@ The qa-overseer runs at the END of every production or repair, green or not
 ## Not every section is synthesised — check its disposition first
 
 `produce → challenge → consolidate` is the path for a section that is
-genuinely SYNTHESISED. Most sections are not. `references/section_sources.json`
+genuinely SYNTHESISED. Most sections are not. `${CLAUDE_PLUGIN_ROOT}/references/section_sources.json`
 (read it, or run `python3 -m engine.surface_export plan --page <page>`) gives
 every section a disposition, and the page brief carries the same split:
 
@@ -91,7 +91,7 @@ could not dispatch the sanctioned re-vet). Two rules follow:
    consolidator, the vetter — via the Agent tool, in this file's order.
    Never delegate the pipeline to one enclosing orchestrator subagent: it
    cannot fan out, and an orchestrator that cannot dispatch improvises.
-   Where the Agent tool is genuinely absent, `scripts/agent_run.py` runs a
+   Where the Agent tool is genuinely absent, `${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py` runs a
    stage as a headless CLI session — same agents, same order, same
    refusals.
 2. **Verdict integrity survives dispatch.** A package-vetter REFUSE is
@@ -122,7 +122,7 @@ never pass back through the top session's context, which is what keeps it
 flat across hundreds of queries. `reconcile` then closes the queue from the
 Search_Log itself, which is the only report those subagents file — and logs
 each closure to the cross-client source-yield ledger
-(`scripts/source_yield.py`), so which pathway actually pays accumulates run
+(`${CLAUDE_PLUGIN_ROOT}/scripts/source_yield.py`), so which pathway actually pays accumulates run
 over run without one extra token being spent to say it.
 
 Enrichment honesty survives the hop: a search a subagent refused or could not
@@ -138,10 +138,17 @@ what the request *names*, not by how large the repair feels.
 
 - **Six page producers** — `overview-`, `insights-`, `heatmap-`,
   `platform-`, `context-` and `techstack-surface-producer`. A request that
-  names a **page** reaches one of these. A page producer no longer writes
-  section bodies itself: it fans the page out to the per-surface producers
-  below, and keeps page assembly, the page's narrative thread, the
-  cross-surface reconciliation and the hand-off to `finding-challenger`.
+  names a **page** reaches one of these. A page producer writes no section
+  bodies and DISPATCHES NOTHING — it holds no Agent tool, because a subagent
+  cannot spawn subagents (MEM-0106, rule 1 above). The TOP session runs the
+  page's per-surface producers first, in parallel where the ordered pairs
+  below allow, each writing its fragment to `sections/<page>.<section>.json`;
+  then it runs the page producer as the ASSEMBLER over those fragments:
+  page assembly, the page's narrative thread, the cross-surface
+  reconciliation and the hand-off to `finding-challenger`. Measured
+  28-09-2026 (QA audit F-C01-021): this file used to give the page producer
+  the dispatch itself while no page producer could — one topology now, and
+  `${CLAUDE_PLUGIN_ROOT}/scripts/tests/test_topology.py` holds the documented one to the actual.
 - **Twenty-four per-surface producers** — one agent per surface, or per
   tightly-coupled pair of surfaces that would contradict each other if two
   agents wrote them. A request that names a **surface** reaches exactly one
@@ -199,7 +206,7 @@ the outside world's two measurements of the same client; P3 and P4 are one
 order argued twice; C2 and C3 are the two halves of one risk claim; H2 and
 H6 are the same evidence seen per-cell and per-run.
 
-### Four ordered pairs the fan-out must respect
+### Four ordered pairs the dispatch order must respect
 
 Most surfaces on a page are independent and go out in parallel. Four are
 not, and a router that parallelises them will produce a page that
@@ -219,15 +226,16 @@ contradicts itself:
   the argument last, because a thread written over claims that later change
   is a thread that describes a page that no longer exists.
 
-## The page routing table — a page fans out
+## The page routing table — which producers a page assembles
 
-A request that names a page routes here. The page producer invokes the
-surface producers listed, then assembles.
+A request that names a page routes here. The top session invokes the
+surface producers listed, then the page producer, which assembles what they
+wrote.
 
 Agent names are written out in full here on purpose: a router that expands an
 abbreviation guesses, and a guessed agent name is a route to nothing.
 
-| page named | page producer | fans out to |
+| page named | page producer (assembles) | per-surface producers the top session runs first |
 |---|---|---|
 | overview / D1 | `overview-surface-producer` | `overview-hero-producer`, `overview-whynow-producer`, `overview-opportunity-producer`, `overview-findings-producer`, `overview-people-producer`, `overview-market-producer`, `overview-governance-producer`, then `overview-narrative-producer` last |
 | insights / D2 | `insights-surface-producer` | `insights-cards-producer`, and `insights-landscape-producer` once T1 is settled |
@@ -301,7 +309,7 @@ sub-vertical, an evidence mode) routes to **`research-conductor`**, which
 binds the run against a PREFLIGHT the engagement owner answered, opens the
 client folder, closes the PRELIM phase, builds the knowledge graph from the
 pillar toolkits, and dispatches one researcher per catalogue category —
-sixteen, generated from one template by `scripts/gen_research_agents.py`,
+sixteen, generated from one template by `${CLAUDE_PLUGIN_ROOT}/scripts/gen_research_agents.py`,
 each bound to its grain and nothing else. A repair that names a category
 (a FAILED floors gate, a challenged subcap) routes to that category's
 researcher directly, never through a full re-run — the same
@@ -478,6 +486,14 @@ a note naming one is a bug report about the id allocator, not a surface repair.
 
 ### After a compaction, a resume or a fork
 
+**The parameters survive the compaction.** `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/param_echo.py` runs at
+PreCompact and writes the run's id, root, workbook stage, pipeline position,
+budget and search-op count to `<run>/07_qa/param_echo.json`; the PostCompact
+brief prints that file back as `PARAMETER ECHO` before anything else. Read it
+first — it is the run's own record from before the summary, not the summary —
+and only then `engine.cli resume` for the rest (QA audit F-E10-034).
+
+
 A synthesis firing that produces six pages **will** compact. When it does, the
 routing rule, the memory rule and the submit boundary are whatever the
 summariser chose to keep — and there was no file that said what to do about
@@ -528,10 +544,10 @@ guessed against and fails the next one.
   consolidation, one submit. Still no page producer — it earns its place
   only when the page as a whole is being authored.
 - **One page wrong as a page** (the storyline is incoherent, the thread
-  contradicts the sections, most surfaces need rewriting): the page producer,
-  which fans out to all its surface producers, assembles, and hands one page
-  to the challenger.
-- **A fresh run**: pages fan out in parallel — each page's produce →
+  contradicts the sections, most surfaces need rewriting): the top session
+  runs all of that page's surface producers, then the page producer, which
+  assembles and hands one page to the challenger.
+- **A fresh run**: pages proceed in parallel — each page's produce →
   challenge → consolidate chain is independent of the others until the
   cross-page reconciliation, which the surface-producer runs before
   submitting the set. Promotion stays atomic across all six.

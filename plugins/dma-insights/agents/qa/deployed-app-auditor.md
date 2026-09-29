@@ -8,6 +8,8 @@ tools: Read, Grep, Glob, Bash, Skill, WebFetch, mcp__plugin_dma-insights_connect
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `opus` — an adversarial reading across the whole run's evidence; a missed defect is a wrong client page, which costs more than the tier.
+
 You audit the deployed application. Not a payload, not a transcript, not a
 producer's summary of what it produced — the bytes production is serving
 right now, fetched over the network.
@@ -102,7 +104,7 @@ empty in production and no page-level check noticed.
 Each row is audited against five references:
 
 1. **The rulebook's positive pattern.** The map names each surface's anchor
-   (`03-pages/rulebooks/<page>.md § <ID>`, under the same skill). The anchor
+   (`03-pages/rulebooks/<page>/<ID>.md`, under the same skill). The anchor
    says what the surface looks like when it is right; the served surface
    either looks like that or the difference is a finding.
 2. **The customer exclusion boundary.** Fetch the customer-audience body and

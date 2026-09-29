@@ -472,7 +472,8 @@ def test_issue7_the_checkpoint_refuses_before_the_scoring_gate(tmp_path):
     assert folder.is_dir()
     manifest = json.loads((folder / "run_manifest.json").read_text())
     assert manifest["status"] == "IN_PROGRESS"
-    assert manifest["stage_reached"] == "SCORED"
+    assert manifest["stage"] == "SCORED"                 # run_manifest_v3 (W2-1)
+    assert manifest["schema_version"] == "run_manifest_v3"
 
 
 def test_issue7_the_producer_is_told_to_read_the_readiness_reader():

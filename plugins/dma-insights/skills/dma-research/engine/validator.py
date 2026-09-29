@@ -449,6 +449,12 @@ def _rule7_run_id(wb, run_id: str | None) -> list[Failure]:
             out.append(Failure(7, "handoff_lock",
                                "Handoff_Lock.run_id disagrees with "
                                "Run_Metadata.run_id"))
+        if str(lock.get("workbook_contract") or "") != C.WORKBOOK_CONTRACT:
+            out.append(Failure(
+                7, "handoff_lock",
+                f"workbook contract {lock.get('workbook_contract')!r} != the "
+                f"engine's {C.WORKBOOK_CONTRACT!r}: the engine moved since this "
+                f"run was locked (F-F10-032)"))
     return out
 
 

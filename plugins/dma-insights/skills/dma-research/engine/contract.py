@@ -113,6 +113,16 @@ def proxy_classes() -> dict[str, str]:
             for k, v in (raw.get("proxy_class_if_absent") or {}).items()}
 
 
+def settling_artefacts() -> dict[str, str]:
+    """cell id -> the internal artefact the template says would settle the
+    cell ("Org chart, committee charter, terms of reference"). What a
+    declared absence names as its closure condition and what a gap triaged
+    internal_only turns into a discovery question."""
+    raw = json.loads(names_path().read_text(encoding="utf-8"))
+    return {str(k): str(v).strip()
+            for k, v in (raw.get("internal_artefact_that_settles_it") or {}).items()}
+
+
 _CELL_RE = re.compile(r"^(P\d)C(\d+)\.(\d+)(?:\.(.+))?$")
 
 
@@ -920,6 +930,25 @@ PILLAR_NAMES = {
 WORKBOOK_CONTRACT = "v7"
 ENGINE_VERSION = "7.0.0"
 
+
+def plugin_version() -> str | None:
+    """The plugin's published version, read from the `.claude-plugin/
+    plugin.json` above this engine — the ONE place it is stated — or None
+    when the engine runs outside a plugin tree. Measured 28-09-2026 (QA
+    audit F-A03-020): the governance scripts each carried their own
+    "governance_skill_version" literal (2.1, 2.2) beside a SKILL.md that
+    said v2.4, and the exporter wrote rubric/taxonomy versions of "5.0"."""
+    import json as _json                                        # noqa: PLC0415
+    for anc in Path(__file__).resolve().parents:
+        p = anc / ".claude-plugin" / "plugin.json"
+        if p.is_file():
+            try:
+                v = _json.loads(p.read_text(encoding="utf-8")).get("version")
+            except ValueError:
+                return None
+            return str(v) if v else None
+    return None
+
 SHEETS = {
     "00_README": ("Key", "Value"),
     "DQ_Bank": DQ_BANK_COLUMNS,
@@ -1010,6 +1039,36 @@ INGEST_ALIASES = {
 READ_SHEETS = tuple(SHEETS) + tuple(INGEST_ALIASES)
 
 
+#: Legacy names the dma-governance and dma-assessment governance scripts
+#: were written against (a v3-era workbook) -> the canonical v7 sheet each
+#: one means. NOT part of READ_SHEETS: the app's ingest tolerance is
+#: unchanged; this is only how a governance reader finds the v7 tab.
+#: Measured 28-09-2026 (QA audit F-J01-006): the readers required these
+#: literal names, so on every v7 workbook evidence_index.csv came out empty
+#: with a warning.
+GOVERNANCE_TAB_ALIASES = {
+    "P1_Scoring_Detail": "P1_Subcap_Scoring",
+    "P2_Scoring_Detail": "P2_Subcap_Scoring",
+    "P3_Scoring_Detail": "P3_Subcap_Scoring",
+    "P4_Scoring_Detail": "P4_Subcap_Scoring",
+    "Evidence_Index": "Evidence_Detail",
+    "QA_Validation_Log": "Gate_Log",
+    "Summary": "Pillar_Summary",
+}
+
+
+def resolve_tab(names, wanted: str) -> str | None:
+    """The tab among `names` that IS the sheet `wanted` names, where `wanted`
+    may be a canonical sheet, an ingest alias or a legacy governance name;
+    None when the workbook has no such tab."""
+    canon = canonical_sheet(wanted) or GOVERNANCE_TAB_ALIASES.get(wanted) or wanted
+    for n in names:
+        if n == canon or canonical_sheet(n) == canon \
+                or GOVERNANCE_TAB_ALIASES.get(n) == canon:
+            return n
+    return None
+
+
 def canonical_sheet(tab: str) -> str | None:
     """The SHEETS name a tab resolves to (itself, or the sheet it aliases),
     or None for a tab the contract does not recognise at all."""
@@ -1039,6 +1098,32 @@ FACT_TIERS = ("T1", "T2")
 def claim_label_for(tier: str) -> str:
     """The label provenance licenses when the writer states none."""
     return "FACT" if tier in FACT_TIERS else "INFERENCE"
+
+
+#: A machine technographic scan is T1: machine-generated, timestamped,
+#: objective deployment data (the tier ladder in SKILL.md and
+#: references/evidence_methodology.md). Filing one lower is the corpus's
+#: most common misclassification — it caps the ceiling the cells it
+#: supports can reach (T3 → L4, T4 → L2.5) and understates T1 in the
+#: evidence census. Measured 28-09-2026 (QA audit F-J04-015): 5 of 6
+#: technographic rows on one staged heatmap sat at T3. `scan_source` names
+#: the provider token a source carries; `ledger.append_evidence` refuses a
+#: named scan at any other tier (refused, not corrected, like the label
+#: above); the connector's ET-11 refuses the same shape at submit from its
+#: own copy of these tokens, which apps/mcp/tests/test_scan_tier.py holds
+#: equal to this one.
+SCAN_TIER = "T1"
+SCAN_SOURCE_TOKENS = ("hubbl", "builtwith", "wappalyzer", "similartech",
+                      "datanyze", "appsruntheworld", "explorium",
+                      "technographic", "technographics")
+_SCAN_RE = re.compile(r"(?<![a-z0-9])(" + "|".join(
+    re.escape(t) for t in SCAN_SOURCE_TOKENS) + r")(?![a-z0-9])")
+
+
+def scan_source(source_name: str | None, source_url: str | None = None) -> str | None:
+    """The scan-provider token a source's name or URL carries, or None."""
+    m = _SCAN_RE.search(f"{source_name or ''} {source_url or ''}".lower())
+    return m.group(1) if m else None
 FACETS = ("works", "fails", "value", "contradicts", "corroborates")
 
 #: The AI overlay, measured from the pinned workbook's own DQ_Bank: its
@@ -1077,7 +1162,10 @@ MODE_ANSWERABLE = {
 #: The evidence-recency ladder. Undated evidence is UNVERIFIED, never
 #: current (invariant 9) — so UNVERIFIED is a member here, not an absence.
 RECENCY_LADDER = (
-    ("CURRENT", 12), ("RECENT", 24), ("DATED", 36), ("LEGACY", 48),
+    # STALE, not LEGACY: the QA Report's resolution B-09 names the ladder
+    # CURRENT · RECENT · DATED · STALE · ARCHIVAL at 12/24/36/48, and the
+    # page contract (H7) reads the same words (QA audit F-L11-042 pair 14).
+    ("CURRENT", 12), ("RECENT", 24), ("DATED", 36), ("STALE", 48),
 )
 RECENCY_ARCHIVAL = "ARCHIVAL"
 RECENCY_UNVERIFIED = "UNVERIFIED"

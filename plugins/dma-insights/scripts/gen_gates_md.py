@@ -77,7 +77,7 @@ def render() -> str:
         if not ids:
             continue
         lines += [f"### {fam} · {FAMILY[fam]} ({len(ids)})", "",
-                  "| Gate | What it asserts | On failure |", "|---|---|---|"]
+                  "| Gate | What it asserts | On failure | Deep dive |", "|---|---|---|---|"]
         for gid in ids:
             name, plain, what, _why, on_fail = gates[gid]
             what = " ".join(str(what).split())
@@ -85,7 +85,10 @@ def render() -> str:
                 what = what[:237].rsplit(" ", 1)[0] + "…"
             note = "" if gid in emitted else " *(registry-only: no module "\
                                              "emits this id today)*"
-            lines.append(f"| `{gid}` | **{name}.** {what}{note} | {on_fail} |")
+            # one file per gate under 05-lifecycle/gates/ (W3-4, F-E01-026):
+            # the census links it so a verdict's id routes to its own page
+            dive = f"`gates/{gid}.md`" if (TARGET.parent / "gates" / f"{gid}.md").is_file() else "—"
+            lines.append(f"| `{gid}` | **{name}.** {what}{note} | {on_fail} | {dive} |")
         lines.append("")
     missing = sorted(emitted - set(gates))
     if missing:

@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash, Skill, Write, mcp__plugin_dma-insights_connector_
 disallowedTools: mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `opus` — decides whether a package may enter the system at all; a wrong accept seeds a run.
+
 You are the gate on the way in. Your output is a decision — ACCEPT, ACCEPT
 WITH FINDINGS, or REFUSE — and the evidence for it.
 

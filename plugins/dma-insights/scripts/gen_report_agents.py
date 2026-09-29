@@ -348,7 +348,13 @@ def render(name: str, description: str, rel: str, model: str, effort: str,
     return (f"---\nname: {name}\ndescription: {safe}\n"
             f"model: {model}\neffort: {effort}\nmaxTurns: {turns}\n"
             f"skills:\n  - dma-research\n"
-            f"tools: {allow}\ndisallowedTools: {deny}\n---\n{body.strip()}\n")
+            f"tools: {allow}\ndisallowedTools: {deny}\n---\n\n"
+            f"{_prov().model_line(name)}\n\n{body.strip()}\n")
+
+
+def _prov():
+    import provision_agent_tools as prov  # noqa: PLC0415
+    return prov
 
 
 GOLD_BLOCK = """

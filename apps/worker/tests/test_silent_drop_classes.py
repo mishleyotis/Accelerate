@@ -844,11 +844,19 @@ class _ScriptedConn:
 
 
 def _persist(conn, **kw):
+    from decimal import Decimal
     from dma_worker.persist import persist_package
-    from dma_worker.workbook_parser import WorkbookParse
+    from dma_worker.workbook_parser import ParsedScore, WorkbookParse
+    # One scored cell: these tests are about the byte-identical guard, and a
+    # workbook with NO scored cell is refused before the guard is reached
+    # (F-O13-030, test_empty_ingest_refused.py).
+    one = ParsedScore(subcap_id="P1C1.1.1", pillar_id="P1", category_id="P1C1",
+                      capability_id="P1C1.1", name="x", tier="T2",
+                      score=Decimal("2.5"), source_cell="D2", evidence_quality=None)
     return persist_package(
         conn, manifest={"institution": {"name": "Fake Bank"}},
-        workbook=WorkbookParse(scores=[], observations=[], toggled_out=[]),
+        workbook=WorkbookParse(scores=[one], observations=[], toggled_out=[],
+                               scored_cells=1),
         source_folder_id="Fake Bank - DMA", artefact_id="wb-artefact-1",
         artefact_checksum="md5-aaaa", **kw)
 

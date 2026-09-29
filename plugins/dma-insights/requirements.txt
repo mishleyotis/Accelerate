@@ -50,6 +50,13 @@ Pillow>=9.0
 # Measured working set on 3.11: 6.16.1, pinned in constraints-py311.txt.
 pypdf>=3.9
 
+# dma-research/engine — run_manifest.json is validated against
+# engine/schemas/run_manifest.schema.json before it is written
+# (engine.assemble.write_manifest); the governance auditor's IV-02 and
+# validate_contracts.py check the same schema. Without the library the
+# engine falls back to a required-keys check and says so.
+jsonschema>=4.0
+
 # shared across dma-research, dma-assessment, dma-governance,
 # dma-surface-production — workbook and document readers
 openpyxl>=3.1.0

@@ -289,9 +289,67 @@ def check_quoted_figures(payload, grains, findings):
             break
 
 
+def check_cg15(page, payload, findings, *, repo=None):
+    """CG-15 — template repetition — through the connector's own module.
+
+    Measured 28-09-2026 (QA audit F-O07-010): the local catch rate on 46
+    server refusals was 28% when measured on THIS script, because CG-15 had
+    no implementation here, while `precheck_gates.py` (which runs the
+    server's first validation pass) already carried it: replayed over the
+    same 102 cells, pass 1 catches 45 of the 46 (98%). The gate is
+    imported, never re-implemented; when the module is unreachable the
+    result is NOT RUN, stated as such, and NOT RUN is not a pass.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "check_repetition", Path(__file__).resolve().parent / "check_repetition.py")
+    cr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cr)
+    try:
+        _contracts, vacuity, _where = cr._load_connector(repo)
+    except SystemExit as exc:
+        findings.append(("*", "ADVISORY CG-15 NOT RUN",
+                         f"the connector's gate module is not reachable ({str(exc)[:120]}); "
+                         f"give it a checkout (--repo / $DMA_INSIGHTS_REPO). NOT RUN is "
+                         f"not a pass"))
+        return
+    pages: dict[str, dict] = {}
+    for name, body in payload.items():
+        parts = name[:-len(".json")].split(".") if name.endswith(".json") else name.split(".")
+        if len(parts) < 2:
+            continue
+        pg, section = parts[0], parts[1]
+        if page and pg != page:
+            continue
+        sec = pages.setdefault(pg, {}).setdefault(section, {})
+        if isinstance(body, dict):
+            sec.update(body)
+        else:
+            pages[pg][section] = body
+    for pg, sections in pages.items():
+        try:
+            reasons = vacuity.check_vacuity(pg, sections)
+        except Exception as exc:                              # noqa: BLE001
+            findings.append(("*", "ADVISORY CG-15 NOT RUN",
+                             f"check_vacuity raised {type(exc).__name__}: {str(exc)[:120]}"))
+            continue
+        for r in reasons:
+            if str(r.get("severity", "block")) != "block":
+                continue
+            findings.append((f"{pg}.{r.get('path')}", f"CG-15: {str(r.get('message'))[:200]}",
+                             "write the per-item argument the contract asked for — what is "
+                             "true of THIS item — or omit the item; the server refuses the "
+                             "group as one argument rendered N times"))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--sections", required=True, type=Path)
+    ap.add_argument("--repo", default=None,
+                    help="checkout of the DMA Insights repository whose apps/mcp "
+                         "holds CG-15; falls back to $DMA_INSIGHTS_REPO and the cwd")
+    ap.add_argument("--no-cg15", action="store_true",
+                    help="skip the CG-15 pass (stated in the output as NOT RUN)")
     ap.add_argument("--page", default=None)
     ap.add_argument("--grains", type=Path, default=None)
     ap.add_argument("--entity", action="append", default=[],
@@ -319,6 +377,10 @@ def main(argv=None) -> int:
     for name, body in payload.items():
         check_internal_marking({name.split(".")[1]: body}
                                if name.count(".") >= 2 else {}, findings)
+    if a.no_cg15:
+        findings.append(("*", "ADVISORY CG-15 NOT RUN", "--no-cg15 was passed; NOT RUN is not a pass"))
+    else:
+        check_cg15(a.page, payload, findings, repo=a.repo)
 
     # Two severities, and only one of them blocks.
     #

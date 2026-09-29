@@ -76,6 +76,9 @@ LANE = re.compile(r"^research-(p\d+c\d+)-producer$", re.I)
 #: A cell id anywhere in a prompt: P1C1.3, P1C1.3.CU1, P2C4.11.
 CELL = re.compile(r"\bP(\d+)C(\d+)(?:\.[0-9A-Z]+)+\b")
 
+#: A run the prompt names, in the engine's own flag form.
+RUN_NAMED = re.compile(r"--run[ =]([A-Za-z0-9][\w.:-]*)")
+
 #: The two places a prompt is ALLOWED to name another category's cell: the
 #: leads this lane was handed, and the cells a source it holds also names.
 CARVE_OUT = re.compile(r"(leads[_ -]?in|also[_ -]?names)", re.I)
@@ -151,6 +154,64 @@ def install_refusal() -> str:
             f"a 0.9.12 install ran none of them). Run `python3 "
             f"plugins/dma-insights/scripts/doctor.py --heal` first — the "
             f"engine's own `start` refuses this state too.")
+
+
+def stale_run(run, prompt: str) -> str:
+    """The reason a prompt's `--run <id>` cannot be dispatched, or "".
+
+    QA audit F-C08-022 (28-09-2026): a brief naming run R-DOES-NOT-EXIST
+    passed this hook, because the run came from the session's environment
+    and the prompt's own `--run` was never read. A lane dispatched against
+    a run that is not on disk spends its turns discovering that; a lane
+    dispatched against a run OTHER than the one the driver holds writes
+    the wrong workbook. Every id the prompt names must be a run that
+    exists under the session's root; the session's own run always does."""
+    named = []
+    for m in RUN_NAMED.finditer(prompt or ""):
+        rid = m.group(1).rstrip(".,;:")
+        if rid and rid not in named and "<" not in rid and "{" not in rid:
+            named.append(rid)
+    if not named:
+        return ""
+    try:
+        (runstate,) = ctx.engine("runstate")
+    except Exception:                                          # noqa: BLE001
+        return ""                         # cannot look: do not refuse
+    own = getattr(run, "run_id", None)
+    roots = []
+    if run is not None:
+        roots += [Path(run.root).parent, Path(run.root)]
+    base = ctx.run_root()
+    if base is not None:
+        roots += [Path(base), Path(base).parent]
+    missing = []
+    for rid in named:
+        if rid == own:
+            continue
+        found = False
+        for root in roots:
+            for cand in (root / rid, root):
+                try:
+                    r = runstate.locate(rid, cand)
+                except (ValueError, OSError):
+                    continue
+                # `locate` returns the first workbook under `cand`, whatever
+                # run it belongs to; the run is found only when that
+                # workbook is ITS workbook.
+                if r.workbook_path.exists() and rid in r.workbook_path.stem:
+                    found = True
+                    break
+            if found:
+                break
+        if not found:
+            missing.append(rid)
+    if not missing:
+        return ""
+    return (f"its prompt names run {', '.join(missing[:3])}, which is not a run "
+            f"on this machine" + (f" (the session's run is {own})" if own else "")
+            + ". A lane dispatched against a run that does not exist spends its "
+              "turns discovering that; rewrite the brief with the run the driver "
+              "holds, or start that run first.")
 
 
 def stray_cells(agent: str, prompt: str) -> list[str]:
@@ -301,6 +362,9 @@ def decide(payload: dict) -> dict | None:
         return _deny(f"dma-insights: {agent} was not dispatched — {why}")
 
     run = ctx.locate()
+    stale = stale_run(run, prompt)
+    if stale:
+        return _deny(f"dma-insights: {agent} was not dispatched — {stale}")
     known = baseline_known(run) if SEARCHING.search(agent) else None
     if known is False:
         return _deny(

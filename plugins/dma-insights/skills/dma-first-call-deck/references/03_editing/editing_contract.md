@@ -370,6 +370,8 @@ If ANY of these shapes are accidentally modified, the slide layout breaks. Pre-e
 
 **Known template bugs (fixed on first editor run):** Template ships with 3 fill-border mismatches — Sh82 (bg_card #FFF3E8 / border #F2F4F9), Sh87 (progress #F97316 / border #FF9900 unauthorized), Sh124 (bg_card #FFF3E8 / border #F2F4F9). These are corrected the first time `heatmap_editor.py` runs on the template.
 
+`scripts/01_intake/template_preparer.py` records the mismatches it found in `template_bugs.json` (key `slide14_border_mismatches`) beside `placeholder_manifest.json` in the intake output directory, so template drift is tracked across refreshes; `cross_slide_checker.py --check-borders` is what verifies the rendered deck. Read `template_bugs.json` when a heatmap border is wrong after a run: a mismatch listed there is a template defect, not an editor one.
+
 **Block base indices (158-shape):**
 P1: 17, 25, 33, 41, 49 (5 caps) | P2: 58, 66, 74, 82 (4 caps) | P3: 91, 99, 107, 115 (4 caps) | P4: 124, 132, 140, 148 (4 caps)
 

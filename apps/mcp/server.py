@@ -242,6 +242,26 @@ def get_run_progress(run_id: str) -> dict:
 
 @mcp.tool()
 @_traced
+def list_submissions(run_id: str, page: str = "") -> dict:
+    """Every submission this run has had, per page, oldest first — with
+    each verdict's status, blocking-reason count and gates, which row is
+    live and which promoted.
+
+    `get_run_progress` shows the LIVE row per page and nothing behind it.
+    This is the history: attempts per page, the attempt on which a page
+    first passed, and the gate families each refusal named. Read it when a
+    page has been resubmitted more than twice — a repair that keeps landing
+    on the same gate is a repair to change, not to repeat — and when a
+    verdict refers to a submission id you no longer hold.
+
+    Pass `page` to narrow to one page. Read-only.
+    """
+    with _conn() as c:
+        return claims_mod.list_submissions(c, run_id, page)
+
+
+@mcp.tool()
+@_traced
 def get_staged_payload(run_id: str, page: str, section: str = "",
                        submission_id: str = "", part: int = 0) -> dict:
     """What you last submitted for a page — STAGED, verbatim, unredacted.

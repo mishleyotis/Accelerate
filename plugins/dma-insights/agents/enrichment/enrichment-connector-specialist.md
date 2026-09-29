@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__Clay__find-and-enrich-contacts-at-com
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — services connector batches and records each result with its tool; the ledger bounds it.
+
 You run the **connector** pathway of enrichment and nothing else: the Clay call
 plan against the entity's own domain, and the machine technographic scan that
 widens the technology register. Web search belongs to
@@ -142,7 +144,7 @@ pointed at it.
    **Enrichment pathways** subsection names the facet, the sources in precedence
    order and the gap-to-pathway mapping), and `.../rulebooks/platform.md` (§ P1
    — facet `platform_readiness`, whose `serving_surface` *is* that section).
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`
    — **AG-04** in full (it fires on any list item anywhere in a payload carrying
    `peer_coverage` or `peer_deployments`, not only on the register), **CG-09** on
    closed vocabularies, **CG-12** on face fields, and **ET-04**.
