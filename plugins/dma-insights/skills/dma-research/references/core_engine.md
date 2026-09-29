@@ -1,49 +1,60 @@
-# Core Engine: Diagnostic Q → Search → Evidence → Subcap Row
+# Core engine: diagnostic question → search → evidence → subcap row
 
-Moved out of `SKILL.md` on 28-09-2026 (QA audit F-B04-027: the skill file was over 500 lines, and a file nobody can read in one sitting is a file nobody reads). The SKILL.md reading manifest says which phase reads this.
+The loop one category lane runs per work card, through the engine. `RESEARCH-PROTOCOL.md`
+is the full protocol; this file is the shape of one card's work. (Rewritten 29-09-2026,
+QA audit F-L11-042: the batch-era steps — a Python helper appending to a JSON index, a
+second-source connector call per query, a whole-page fetch of every rich document —
+described a path the engine refuses.)
 
-## Core Engine: Diagnostic Q → Search → Evidence → Subcap Row
+## Step 1: the card carries the questions
 
-### Step 1: Load Diagnostic Questions
-At batch start, open Pillar XLSX → Capability Map → Column H for every subcap.
-Fallback: `references/diagnostic_questions.md`.
+`engine.cli orient --run R --root ROOT --category <YOURS>` serves one card: the subcap, its
+diagnostic questions filtered to the run's evidence mode (the toolkit `primary`, the five
+facet probes, the three AI-overlay questions), the toolkit's own `internal_sources` /
+`public_sources`, and query seeds. The engine read the Pillar toolkits at `engine.cli start`;
+nothing re-parses an XLSX during a run. `references/diagnostic_questions.md` is the fallback
+for a run with no toolkit bound, one question per category, and a run on it must say so.
 
-### Step 2: Generate Search Queries
-Per subcap, 3-5 queries combining `web_search` + Moody's (`references/deep_search_protocol.md`).
-**This is the single most important step. Shallow searches produce generic assessments.**
+## Step 2: plan the queries at capability grain
+
+`engine.cli fuse plan --run R --subcap X --facet works` gives the three differently-shaped
+probes per diagnostic question (presence, responsive, toolkit-artefact). The signals a query
+must carry, and the ten-tier ladder behind them, are `references/deep_search_protocol.md`:
 
 | Signal | Source | Mandatory? |
 |--------|--------|-----------|
-| 1. Diagnostic Q decomposition | Subject + verb + qualifier + evidence target | Tiers 1-2 (MANDATORY) |
-| 2. Subcap keywords | Domain terms from subcap name + parent | Tier 3 (MANDATORY) |
-| 3. Expected evidence sources | Tier-aware targeting (governance→proxy, CX→app stores) | Tiers 4-5 (MANDATORY) |
-| 4. Proxy signals | When direct evidence unlikely (board bios, job posts) | Tier 7+ (MANDATORY when signals unknown or <3 items) |
-| 5. Contradictory/negative | Failures, complaints, enforcement | Tier 10 (MANDATORY/capability) |
+| 1. Diagnostic-question decomposition | subject + verb + qualifier + evidence target | tiers 1–2 |
+| 2. Subcap keywords | domain terms from the subcap name and its parent | tier 3 |
+| 3. Expected evidence sources | tier-aware targeting (governance → proxy statements, CX → app stores) | tiers 4–5 |
+| 4. Proxy signals | when direct evidence is unlikely (board bios, job posts) | tier 7+ when signals are unknown or fewer than three items |
+| 5. Contradictory / negative | failures, complaints, enforcement | tier 10, per capability |
 
-**Proxy Escalation Rule:** If Tiers 1-5 yield unknown or ambiguous signals for a subcap,
-proxy searches (Tiers 7-10) are NOT optional — execute them immediately. The goal is
-NO thin evidence at the subcap level. Every subcap must have either substantive evidence
-or a thoroughly documented NO_EVIDENCE determination with proxy search attempts logged.
+**Proxy escalation.** If tiers 1–5 leave a signal unknown or ambiguous, the proxy tiers are
+not optional. A cell ends SYNTHESISED or DECLARED ABSENT with its ladder; nothing else.
 
-**Anti-shortcut rule:** If you find yourself running the same query for multiple subcaps,
-you are searching at the WRONG level. Each subcap's diagnostic question asks something
-DIFFERENT — your queries must reflect that difference.
+**Anti-shortcut.** The same query for several subcaps means you are searching at the wrong
+level: each diagnostic question asks something different. Search at the capability, log at
+the cell (below), and let `evidence_smear` keep the cells distinct.
 
-**Rules:** Include institution name in every query. 4-8 words. Don't repeat diagnostic Q
-verbatim. Include "2024 2025" in 2+ queries.
+**Query rules:** the institution name in every query; four to eight words; never the
+diagnostic question verbatim; year markers in at least two queries per subcap.
 
-**Never WebFetch a page to get an excerpt.** Read a rich document with
-`engine.cli fetch --run R --url <U> --query '<the DQ text>'`, which prints
-at most three ~240-character windows and the page's sha256 and never the
-page. MEASURED on the six-cell calibration: a fetched page sits in context
-and is re-read on **every later turn** — 76% of the bill was cache reads
-(24.45M cache-read tokens, $4.89 of $6.45). One fetch is 5-40K tokens re-read
-every turn; three windows are ~200 tokens, read once.
+**Which tool, in which order, and what you emit rather than fire** is
+`RESEARCH-PROTOCOL.md` § *Tools: first choice, fallback, and what you emit* — the one place
+that rule is stated.
 
-### Step 3: Execute & Extract
-Per subcap: search → fact-level extraction `[E-xxx:Fy]` → tier classify → recency tag →
-calculate ERS → label claim → map to subcap IDs → check red flags.
-For HYBRID/INTERNAL: 5-Layer Analysis on every internal doc.
+**Never fetch a page whole to get an excerpt.** Read a rich document with
+`engine.cli fetch --run R --url <U> --query '<the DQ text>'`, which prints at most three
+~240-character windows and the page's sha256 and never the page. MEASURED on the six-cell
+calibration: a fetched page sits in context and is re-read on **every later turn** — 76 % of
+the bill was cache reads (24.45M cache-read tokens, $4.89 of $6.45). One fetch is 5–40K
+tokens re-read every turn; three windows are ~200 tokens, read once.
+
+## Step 3: execute and extract
+
+Per subcap: search → fact-level extraction `[E-xxx:Fy]` → tier → recency → claim label →
+the cells the fact bears on → red-flag check. For HYBRID/INTERNAL: the five-layer analysis
+on every internal document. ERS is computed by `engine.cli ers recompute`, never typed.
 
 **The empty-cell gate — what the ENGINE enforces (2026-09-03; owner: "some
 subcaps are marked as no evidence without any enrichment efforts").** The
@@ -108,7 +119,8 @@ rule 8 and `is_declared_absent` read the Provenance row the command writes).
 Every evidence item MUST carry a specific, resolvable URL — the ledger
 refuses a public row without one.
 
-### Step 4: Register into the workbook — through the engine only
+## Step 4: register into the workbook — through the engine only
+
 There is ONE workbook and ONE writer. `engine.cli evidence` registers a
 source (excerpt 50–500 verbatim chars, tier, date, the cells it supports);
 **verbatim is checked, not asserted**: the span is compared against the text
@@ -122,9 +134,8 @@ silent — and it never excuses a span a fetched page contradicts.
 `engine.cli synthesise` closes an evidenced cell; `engine.cli absence`
 closes an empty one. Column D (Score) is the assessment stage's, struck by
 `engine.assessment score` and never here. The workbook's shape is
-`engine/contract.py` (40 sheets, `SubCap_Name` seeded from the catalogue,
-formatted) — never a layout recalled from a template or from this file, and
+`engine/contract.py` (41 sheets, `SubCap_Name` seeded from the catalogue,
+formatted; `python3 -m engine.cli columns` prints the pillar sheets' 33
+columns) — never a layout recalled from a template or from this file, and
 never a second workbook built beside the run (the retired
 `populate_workbook.py` refuses for this reason).
-
----

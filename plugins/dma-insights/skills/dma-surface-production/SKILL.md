@@ -139,6 +139,14 @@ For what the package folder contains and which artefact is authoritative for wha
 Enrichment is async and the pages that consume it come last. Start it immediately after
 reading the bundle so results are waiting when you reach them.
 
+**Which session runs it.** Clay is session-bound (`02-inputs/enrichment_sources.json`:
+a scheduled run cannot hold the grant), so these calls run in a hand-driven session —
+yours, or the `enrichment-connector-specialist` you dispatch. A scheduled run does not
+pretend: `engine.prelim seed-enrichment` has already written the facets
+`get_client_state` reports into `Enrichment_Needed`, and a facet no session could reach
+is recorded `NOT_RUN` with that reason (`record_enrichment`), never left blank and never
+written as an absence.
+
 ```
 find-and-enrich-company(domain from 01_evidence/entity_profile/)   → taskId
 add-company-data-points(taskId, [Tech Stack, Annual Revenue, Headcount Growth,

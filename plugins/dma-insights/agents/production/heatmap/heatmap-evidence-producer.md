@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce the HEATMAP evidence pair — `heatmap.cell_evidence` (H2, and the
 DD-1 synthesis drawer it renders into) and `heatmap.evidence` (H6, and the DD-2
 evidence drawer every page shares) — and hand the JSON back to whoever invoked
@@ -536,23 +538,30 @@ feeling. Answer them out loud in your self-report.
 ## Enrichment checks
 
 **Which pathway applies.** The facets that close cells wholesale are `techstack` —
-the `explorium` ingest scan (T1, wired but not live: no key in Secret Manager, so
-the routine records `NOT_RUN` with that reason) and the Clay `Tech Stack` data point
-(T1, wired) — and the entity's own first-party documents (T1–T2), where one annual
+the Explorium connector (T1, wired: the Vibe Prospecting connector is authenticated
+at the session and returned 392 / 357 / 147 named technologies on three promoted
+clients; the INGEST scan is a separate path whose darkness says nothing about the
+connector) and the Clay `Tech Stack` data point (T1, wired) — and the entity's own
+first-party documents (T1–T2), where one annual
 report or 10-K populates twenty to fifty cells through fact-level ids `E-xxx:Fy`
 mapped to every cell a fact truly bears on. The `leadership`, `sentiment` and
 `why_now` facets close the cells their own surfaces cite, which are tier 1 of the
 coverage order.
 
-**Per-cell web search** follows the dma-research five-signal decomposition: the
-diagnostic question decomposed; the sub-capability's own keywords; the expected
-evidence source for the question type (governance → proxy statements, T1–T2;
-customer experience → app stores, T3); proxy signals at ladder tiers 7–10 when
-fewer than three items exist; and the mandatory contradictory query
+**Per-cell search requests.** You search nothing: a cell the run cannot cite
+is returned as `search_requests` entries and the research tier fires them
+(`05-lifecycle/routing.md`; the tools rule is
+`${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md` § *Tools*).
+Shape each request by the dma-research five-signal decomposition: the diagnostic
+question decomposed; the sub-capability's own keywords; the expected evidence source
+for the question type (governance → proxy statements, T1–T2; customer experience →
+app stores, T3); proxy signals at ladder tiers 7–10 when fewer than three items
+exist; and the mandatory contradictory query
 (`"[Entity] [capability area] failure complaint outage criticism"`). Rules that
 hold: the entity name in every query, four to eight words, no duplicate framings,
-year markers in two or more queries, and a web fetch of every rich document. A cell
-upgraded from thin to cited is the highest-value work on this surface.
+year markers in two or more queries; the research tier reads every rich document
+as `engine.cli fetch` windows and registers what it finds. A cell upgraded from
+thin to cited is the highest-value work on this surface.
 
 **What a legitimate not-run looks like.** Record it through `record_enrichment` with
 a facet from the fixed seven (`leadership · firmographics · techstack · sentiment ·

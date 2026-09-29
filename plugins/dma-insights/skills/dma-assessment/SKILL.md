@@ -17,7 +17,8 @@ description: >
 
 **v5.6 Changes (2026-09-03):** the workbook is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/contract.py`'s and this skill
 BUILDS NO WORKBOOK. The scoring stage writes column D of the run's existing workbook through
-`engine.assessment open / score / critique / rollup / gate`. The retired `scripts/assessment_runner.py`
+`engine.assessment score / critique / rollup / gate`, after the DRIVER has opened the stage
+(`engine.assessment open` is the research-conductor's — routing.md's stage table). The retired `scripts/assessment_runner.py`
 (it built a fresh 11-sheet openpyxl workbook) refuses and names those commands. The eleven app-facing
 columns A–K below are unchanged — they are the first eleven of the contract's 33 (L–AG are the
 research working area, stripped after the handoff). Category count is 16 (v7.0), not 17.
@@ -62,7 +63,7 @@ Read `references/workbook_columns.md` — the eleven app-facing columns A–K an
 
 ## Context Window Management (CRITICAL)
 
-Read `references/operating_procedure.md` — context-window, memory/batching and output-directory rules. Read in Phase 0 and again when a batch closes.
+Read `references/operating_procedure.md` — context discipline, the state is the workbook, the run tree. Read in Phase 0 and again on resume.
 
 ## Core Analytical Principles
 
@@ -166,10 +167,10 @@ Read `references/score_states.md` — the score states and the raw-to-final path
 
 Maintains a living error log across assessments. See `references/qa_error_log.md` (master template).
 
-**Phase 0:** Copy to `$DMA_ROOT/checkpoints/qa_error_log.md` (writable). If already exists (session resume), load without overwriting.
+**Phase 0:** Copy to `<run root>/07_qa/qa_error_log.md` (writable). If it already exists (session resume), load without overwriting.
 
 **Phase Gate Protocol (EVERY phase, no exceptions):**
-1. LOAD `$DMA_ROOT/checkpoints/qa_error_log.md`
+1. LOAD `<run root>/07_qa/qa_error_log.md`
 2. FILTER to current phase tag `[PHASE:N]`
 3. ACKNOWLEDGE: `⚠️ PHASE GATE [N] — [X] prevention rules: [list]. Proceeding.`
 4. APPLY each as hard constraint
@@ -204,7 +205,7 @@ These fire at their tagged phase. All are hard constraints.
 
 ## Memory, Batching & Caching
 
-Read `references/operating_procedure.md` — memory, batching and caching (same file as the context-window rules).
+Read `references/operating_procedure.md` — memory (same file as the context rules).
 
 ## Proof-Carrying Scoring
 
@@ -224,7 +225,7 @@ for any capped score. Confidence (Col E) reflects evidence depth.
 
 ## Output Directory Taxonomy (MANDATORY)
 
-Read `references/operating_procedure.md` — the output directory taxonomy (same file).
+Read `references/operating_procedure.md` — the run tree (same file).
 
 ## Phase 0: Engagement Setup
 
@@ -265,16 +266,21 @@ Read `references/operating_procedure.md` — the output directory taxonomy (same
      reasoning (columns L..AG), the search log, the gate log and the
      uncertainty band — all of it beside the rows it bears on. Read the
      sheets; do not re-derive from a JSON copy of them.
-   - PUBLIC: ~2,500-4,200 web searches + Moody's connector enrichment. HYBRID: internal docs + full web search + Moody's (highest quality).
-   - **Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors SUPPLEMENT with structured credit/financial data. web_search MUST precede Moody's in every phase.
+   - PUBLIC: the research tier's public evidence, five volleys per cell. HYBRID: internal
+     documents beside it (highest quality). Which tool, in which order, is the research
+     tier's rule, stated once (`${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md`
+     § *Tools*); this skill restates none of it.
 
 3. **Parameter Lock:** Institution, sub-vertical, size tier, regulator, geography
    Size: Mega(>$50B) | Large($10-50B) | Medium($2-10B) | Small($500M-2B) | Micro($100-500M) | Nano(<$100M)
 
 4. **Toolkit Binding:** Verify ALL 4 Pillar XLSX files accessible. HARD STOP if any missing.
 
-5. **Workspace:** Generate RUN_ID → create full directory tree → create run_manifest.json → copy qa_error_log.md to checkpoints/
-   **Write RUN_ID and EVIDENCE_MODE to `00_parameters.json`. These are IMMUTABLE for the entire assessment. Every artifact must reference them. Mismatch = build fails.**
+5. **Workspace:** the run already exists — `engine.cli start` created the tree
+   (`engine.runstate.SUBDIRS`) and the manifest (`run_manifest_v3`) with RUN_ID and
+   EVIDENCE_MODE pinned and IMMUTABLE; `engine.assessment open` opens the stage. Copy
+   `qa_error_log.md` to `07_qa/`. Every artefact carries the run id; `engine.cli validate`
+   refuses a mismatch.
 
 6. **Peer Set Selection & Lock** (SKIP if imported from research handoff):
    - Select 3-5 peers: sub-vertical match, size tier proximity, geographic overlap, competitive relevance
@@ -290,10 +296,14 @@ Read `references/operating_procedure.md` — the output directory taxonomy (same
 
 Execute Phase Gate Protocol. Apply ERR-003, ERR-008, ERR-009.
 
-**Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors supplement
-with structured credit/financial data. web_search MUST precede Moody's for each capability.
+**Which tools the evidence came through** is
+the research tier's rule, stated once in `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md`
+§ *Tools: first choice, fallback, and what you emit* — this skill restates none of it.
 
-**For every subcap (851 at full scope):** 3-5 `web_search` queries → Moody's enrichment → `web_fetch` rich docs → fact-level extraction [E-xxx:Fy] → tier classify → map to specific subcap IDs.
+**For every subcap (851 at full scope):** the research lane fired the five volleys and the
+primary question, read rich documents as windows through `engine.cli fetch`, extracted at
+fact level `[E-xxx:Fy]`, tiered and mapped each fact to the cells it bears on — and the
+floors gate holds the category to it before this skill opens.
 
 **For HYBRID/INTERNAL mode:** Load internal evidence FIRST per Internal Evidence Integration Protocol (see below). Internal T1/T2 evidence takes priority over public T3-T5.
 
@@ -392,9 +402,10 @@ Read `references/phase_8_qa.md` — the 14-check suite. Read when Phase 8 opens.
 - Heading text: Dark Teal `#1F9A90`
 - Table header bg: Primary Teal `#27BBAF` (white text)
 - Body: Charcoal `#333333` | Alt rows: Light Teal `#E8F8F6`
-- Maturity BANDS (four, and only four — charter invariant 6):
-  Activating=`#D32F2F` Building=`#62D7B8` Competing=`#FBC02D`
-  Differentiating=`#388E3C`. A null score gets NO swatch. There is no
+- Maturity BANDS (four, and only four — charter invariant 6), the fills
+  `apps/web/lib/bands.js` owns (repo root; a test holds this line equal to it):
+  Activating=`#FFCB99` Building=`#62D7B8` Competing=`#27BBAF`
+  Differentiating=`#139F94`. A null score gets NO swatch. There is no
   fifth band and no hex for one; the score levels 1-5 are a different
   scale from the four display bands and never carry a colour.
 
@@ -413,7 +424,7 @@ Read `references/phase_8_qa.md` — the 14-check suite. Read when Phase 8 opens.
 
 **Evidence Item:** Single time-bound fact from a source, with Tier, Date, Source, Fact ID.
 **Unique Source:** A document/database producing evidence. Multiple facts from same source = 1 source for corroboration.
-**Corroboration:** 2+ different sources AND 2+ different tier types. Exception: single T1 ≤24mo = HIGH alone.
+**Corroboration:** 2+ different sources AND 2+ different tier types. Exception: a single T1 source within the RECENT band (≤24 months on `contract.RECENCY_LADDER`) = HIGH alone.
 **Hard Contradiction:** Direct factual conflict (can't both be true) → resolution protocol → Contradiction_Log. **Soft:** Interpretive divergence → prefer authoritative, no forced resolution.
 **Trend:** ≥2 dated points, ≥6 months apart. Single snapshot ≠ trend.
 **Score Precision:** Default 0.5 grid. 0.1 only with quantitative evidence + explicit mapping + max 1 decimal. 2+ decimals = QA failure.
@@ -448,7 +459,7 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `references/qa_error_log.md` | 0 | Master error log (copy to writable) |
 | `references/reasoning_chain_schema.md` | 4,7 | reasoning_chain_log.json schema |
 | `references/workbook_columns.md` | 0 | Columns A–K of P#_Subcap_Scoring (moved from this file, F-B04-027) |
-| `references/operating_procedure.md` | 0 | Context window, memory/batching/caching, output directory taxonomy |
+| `references/operating_procedure.md` | 0 | Context discipline, the state is the workbook, the run tree |
 | `references/score_states.md` | 4 | Deterministic score states; `engine.assessment apply` does the arithmetic |
 | `references/phase_4_scoring.md` | 4 | The scoring loop and the capability micro-loop |
 | `references/phase_7_deliverables.md` | 7 | Report generation protocol |
@@ -461,7 +472,7 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `scripts/ingest_evidence.py` | 1 | Pre-process documents |
 | `scripts/build_index.py` | 1 | BM25 retrieval index |
 | `scripts/retrieve.py` | 1 | Evidence retrieval per subcap |
-| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment open / score / critique / rollup / gate` on the run's one workbook |
+| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment score / critique / rollup / gate` (the driver opens the stage) on the run's one workbook |
 | `scripts/validate_scoring_quality.py` | 4 | **MANDATORY** 8-gate validator |
 | `scripts/qa_auditor.py` | 8 | Automated QA checks |
 | `scripts/generate_governance_outputs.py` | 7 | CSVs + manifest from workbook |
@@ -481,7 +492,7 @@ Descriptors, Sub-Vertical Matrix. Nothing is searched for under `/mnt/`.
 ## Error Handling
 
 - Document unreadable → UNAVAILABLE, continue
-- Context overflow → checkpoint, batch, resume (new conversation if needed)
+- Context overflow → finish the capability, end the turn; `engine.assessment state` is the resume (new conversation if needed)
 - Contradiction unresolvable → conservative, LOW confidence
 - >30% no evidence → capability N/A, exclude from weighted avg
 - Score >1.5 from peers → investigate evidence quality

@@ -38,6 +38,17 @@ def _literals(root):
     ("| Differentiating | 3.50–5.00 | #139F94 |", "1.50 / 2.50 / 3.50 band cut-offs"),
     ("Score→Level: 2.50–3.49=Competing", "1.50 / 2.50 / 3.50 band cut-offs"),
     ("Differentiating renders as #185F60 on the strip", "#185F60"),
+    # the batch era (QA audit F-L11-042, 29-09-2026)
+    ("├── 06_handoff/                # Batch 6 (research_handoff.json)", "06_handoff"),
+    ("/home/claude/dma_output/{RUN_ID}/", "/home/claude/"),
+    ("web_search FIRST, then Moody's connector — web_search is PRIMARY", "Moody's"),
+    ("MANDATORY PROXY RULE for Governance & Strategy subcaps (P1C1-P1C5):", "P1C1-P1C5"),
+    ("| `references/safeguard_gates.md` | Batch 4 | 16 safeguard gates |", "safeguard_gates.md"),
+    ("append to `evidence_index.json` on disk using this pattern", "evidence_index.json"),
+    ("6 batches. Stop after each. Wait for \"continue\". Checkpoint after each batch.", "wait for continue"),
+    ("Recency tags: CURRENT (<18mo), RECENT (18-36mo)", "18-month recency"),
+    ("recency_tag: CURRENT|RECENT|LEGACY|UNVERIFIED", "LEGACY (recency)"),
+    ("One `web_fetch` → 20+ subcap facts.", "web_fetch"),
     ('    "accent":     "185F60",', "#185F60"),
     ("export_category_summary.csv    # 17 rollups with weighted scores", "17 rollups"),
     ("### Capability Micro-Loop (repeat for each ~72 capabilities)", "~72 capabilities"),
@@ -57,6 +68,17 @@ def test_a_lineage_line_a_prohibition_and_deprecated_code_are_not_drift(tmp_path
            "Any occurrence of `M5` or `Transformational` is a defect")
     _plant(tmp_path, "skills/x/scripts/deprecated/old.py",
            "LEVEL = 'Transformational'  # 185F60")
+    assert ctd.scan(tmp_path) == []
+
+
+def test_the_batch_era_rules_spare_the_legitimate_lines(tmp_path):
+    """A retired script's legacy body, a line saying Moody's is NOT wired, the
+    LEGACY_ANCHORED arc shape and a legacy core system are not drift."""
+    _plant(tmp_path, "skills/x/scripts/calculate_ers.py",
+           "parser.add_argument('evidence_index', help='Path to evidence_index.json')")
+    _plant(tmp_path, "skills/x/a.json", '"connector": "moodys", "status": "declared, not wired"')
+    _plant(tmp_path, "skills/x/b.md", "arc_shape: STEADY_INVESTMENT | LEGACY_ANCHORED | RECENT_ACCELERATION")
+    _plant(tmp_path, "skills/x/c.md", "a legacy core system the estate still runs on")
     assert ctd.scan(tmp_path) == []
 
 

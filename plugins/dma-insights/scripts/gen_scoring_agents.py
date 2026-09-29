@@ -56,6 +56,8 @@ tools: {tools}
 disallowedTools: {denied}
 ---
 
+{model_line}
+
 You strike the scores for ONE pillar of one Digital Maturity Assessment run:
 **{pid} — {name}**.
 
@@ -143,6 +145,8 @@ tools: {tools}
 disallowedTools: {denied}
 ---
 
+{model_line}
+
 You are the critic the scoring gate requires, and you struck none of the scores
 you are reading.
 
@@ -168,10 +172,12 @@ python3 -m engine.assessment critique --run <R> --root <ROOT> --pillar P1 \\
 A FAIL names the rows and the direction they should move; the driver
 (`engine.pipeline`) re-dispatches that pillar's scorer with your note in the
 next scoring round, and you critique again. Once every pillar carries your
-PASS, record the rollup's headline — the one line an executive reads first —
-`engine.assessment rollup --run <R> --root <ROOT> --headline "<40+ chars,
-institution-specific>"`; the driver runs the rollup and the SCORING gate
-after your lane returns, and a rollup with no headline refuses.
+PASS, supply the rollup's headline — the one line an executive reads first —
+through `engine.assessment rollup --run <R> --root <ROOT> --headline "<40+
+chars, institution-specific>"`. The rollup and the SCORING gate are the
+DRIVER's (`engine.pipeline`, routing.md's stage table): it re-runs both after
+your lane returns, and a rollup with no headline refuses — so your call
+records the headline; it does not close the stage.
 
 **Your first command is the brief the driver handed you** (`engine.brief
 scoring-batch --critic`): the pillars in scope, what is scored, the verdicts
@@ -184,15 +190,22 @@ FAIL into a PASS because the run is late.
 """
 
 
+def _prov():
+    import provision_agent_tools as prov  # noqa: PLC0415
+    return prov
+
+
 def build() -> dict[str, str]:
     out = {}
     for pid, name in PILLAR_NAMES.items():
         rel = f"scoring/scoring-{pid.lower()}-producer.md"
         tools, denied = _tool_lines(rel)
         out[f"scoring-{pid.lower()}-producer.md"] = SCORER.format(
-            pid=pid, lower=pid.lower(), name=name, n=pid[1], tools=tools, denied=denied)
+            pid=pid, lower=pid.lower(), name=name, n=pid[1], tools=tools, denied=denied,
+            model_line=_prov().model_line(f"scoring-{pid.lower()}-producer"))
     tools, denied = _tool_lines("scoring/scoring-critic.md")
-    out["scoring-critic.md"] = CRITIC.format(tools=tools, denied=denied)
+    out["scoring-critic.md"] = CRITIC.format(tools=tools, denied=denied,
+                                             model_line=_prov().model_line("scoring-critic"))
     return out
 
 

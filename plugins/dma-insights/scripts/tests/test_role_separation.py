@@ -54,6 +54,17 @@ def test_no_synthesis_or_verification_agent_can_search_or_fetch():
     assert offenders == [], offenders
 
 
+def test_a_category_lane_holds_websearch_and_never_webfetch():
+    """QA audit F-L11-042 pair 8 (29-09-2026): the protocol forbids a lane a
+    whole-page fetch and the guard denies it, so a WebFetch grant on the
+    sixteen lanes was a tool list that contradicted the rule it sat under."""
+    lanes = [(rel, t) for rel, t, _ in _manifests() if rel.startswith("research/categories/")]
+    assert len(lanes) == 16
+    for rel, tools in lanes:
+        assert "WebSearch" in tools and "WebFetch" not in tools, rel
+        assert not any(t.startswith(("mcp__Exa__", "mcp__Tavily__")) for t in tools), rel
+
+
 def test_the_app_auditor_keeps_its_read_of_production_and_nothing_else():
     tools = next(t for rel, t, _ in _manifests() if rel == "qa/deployed-app-auditor.md")
     assert "WebFetch" in tools and "WebSearch" not in tools
@@ -112,13 +123,17 @@ def _hook(tool, agent, env=None):
 
 
 def test_the_hook_denies_a_search_to_a_synthesis_role_and_names_the_relay():
-    for tool in ("WebSearch", "mcp__Exa__web_search_exa",
-                 "mcp__Tavily__tavily_search", "mcp__Tavily__tavily_extract"):
+    for tool in ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search"):
         for agent in ("heatmap-focus-producer", "finding-challenger",
                       "adversarial-verifier", "deployed-app-auditor"):
             decision, why = _hook(tool, agent)
             assert decision == "deny", (tool, agent)
             assert "search_requests" in why and "F-D02-008" in why
+    # Tavily extract is a FETCHER (QA audit F-L11-042 pair 7, 29-09-2026):
+    # denied to the same roles, with the fetch reason
+    for agent in ("heatmap-focus-producer", "finding-challenger", "adversarial-verifier"):
+        decision, why = _hook("mcp__Tavily__tavily_extract", agent)
+        assert decision == "deny" and "engine.cli fetch" in why, (agent, why)
     # and a fetch, for the roles that read nothing on the web
     assert _hook("WebFetch", "heatmap-focus-producer")[0] == "deny"
     assert _hook("WebFetch", "evidence-integrity-checker")[0] == "deny"

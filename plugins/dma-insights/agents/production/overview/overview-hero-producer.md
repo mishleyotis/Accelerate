@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce the OVERVIEW hero — `overview.scores` (O1) and
 `overview.firmographics` (O2) — and hand the JSON back to whoever invoked you.
 You do not submit, promote, or touch any other surface. The invoker owns
@@ -217,8 +219,9 @@ Read in this order. Each path has been verified to exist.
   contradiction to resolve, not two data points to render. Any failure
   quarantines the field with a `quarantine_reason` — emitted as absent, never as
   a value.
-- **Recency gate, blocking**: no `as_of`, no render. `CURRENT` <18mo · `RECENT`
-  18–36mo · `LEGACY` >36mo · `UNVERIFIED` undated. A LEGACY figure renders only
+- **Recency gate, blocking**: no `as_of`, no render. `CURRENT` <12mo · `RECENT`
+  <24mo · `DATED` <36mo · `STALE` <48mo · `ARCHIVAL` · `UNVERIFIED` undated
+  (`contract.RECENCY_LADDER`). A STALE or ARCHIVAL figure renders only
   with its date visible; an UNVERIFIED figure never renders as current.
 - **Magnitude sanity**: quarantine, never clamp. A regional bank at $2.70T is
   not a large regional bank, it is a parse error, and one client shipped exactly
