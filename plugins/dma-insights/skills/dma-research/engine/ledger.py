@@ -477,19 +477,21 @@ def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
     AUD-0020: a future-dated 'planned' fact made 2019 evidence CURRENT,
     because the ladder was fed the best date in the record rather than the
     date the source was published. A date in the future is not a publication
-    date; it is a plan, and it bands UNVERIFIED."""
-    if not published:
-        return C.RECENCY_UNVERIFIED
-    try:
-        d = _dt.date.fromisoformat(str(published)[:10])
-    except ValueError:
+    date; it is a plan, and it bands UNVERIFIED.
+
+    A month, a quarter or a bare year IS a date (QA audit F-L11-031,
+    29-09-2026): `engine/dates.py` resolves them the way the app does — a
+    quarter to its end — so `2025-Q4` bands like the app bands it, not as
+    undated."""
+    from . import dates as _dates
+    d = _dates.resolve(published)
+    if not d:
         return C.RECENCY_UNVERIFIED
     ref = _dt.date.today()
     if wb is not None:
-        try:
-            ref = _dt.date.fromisoformat(str(wb.metadata().get("reference_date"))[:10])
-        except (ValueError, TypeError):
-            pass
+        r = _dates.resolve(wb.metadata().get("reference_date"))
+        if r:
+            ref = r
     if d > ref:
         return C.RECENCY_UNVERIFIED
     months = (ref.year - d.year) * 12 + (ref.month - d.month)

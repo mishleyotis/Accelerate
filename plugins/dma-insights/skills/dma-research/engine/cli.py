@@ -404,7 +404,11 @@ def main(argv=None) -> int:
                         "the default must stay 'evidence reaches a cell'")
     e.add_argument("--source", required=True); e.add_argument("--url")
     e.add_argument("--tier", required=True); e.add_argument("--excerpt", required=True)
-    e.add_argument("--published")
+    e.add_argument("--published",
+                   help="when the source was published: YYYY-MM-DD, YYYY-MM, "
+                        "YYYY-Qn or YYYY (a quarter IS a date and bands from its "
+                        "end — engine/dates.py, the app's own rule). Omitted, the "
+                        "row bands UNVERIFIED, never current")
     e.add_argument("--claim-type", default=None, choices=contract.CLAIM_LABELS,
                    help="FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE. "
                         "Omitted, the ledger derives it from --tier (T1/T2 "
