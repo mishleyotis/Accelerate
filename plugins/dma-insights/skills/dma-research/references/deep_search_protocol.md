@@ -225,7 +225,7 @@ Search explicitly for evidence AGAINST the entity's capability.
 4. **No duplicate framings** — each query must try a genuinely different angle
 5. **Do NOT repeat the diagnostic question verbatim** — decompose it
 6. **Include year markers** for recency: add "2024 2025" to at least 2 queries per subcap
-7. **Use `web_fetch`** on EVERY rich document found (annual reports, filings, vendor case studies)
+7. **Read every rich document found** (annual reports, filings, vendor case studies) as windows through `engine.cli fetch` — never whole
 8. **At least 1 contradictory search per capability group** (Tier 10)
 9. **Track ALL queries in the search log** (for A2 appendix and reproducibility)
 10. **If Tiers 1-6 yield 0 results**: Execute Tiers 7-10 immediately. If still 0 after all
@@ -323,7 +323,7 @@ After executing Tiers 1-6 for a subcapability with <3 evidence items:
 **High-value sources**: Annual reports, proxy statements, board committee charters,
 press releases, ESG reports, investor presentations, Glassdoor
 
-**Rich document priority**: ALWAYS `web_fetch` annual reports and proxy statements
+**Rich document priority**: ALWAYS read annual reports and proxy statements (`engine.cli fetch`)
 when found. They contain evidence for 50%+ of P1 subcaps.
 
 **P1-specific proxy searches**:
@@ -338,7 +338,7 @@ when found. They contain evidence for 50%+ of P1 subcaps.
 **High-value sources**: App stores, CFPB complaints, J.D. Power, company website
 (test digital account opening), customer testimonials, industry awards
 
-**Rich document priority**: ALWAYS `web_fetch` CFPB complaint narratives (themes reveal
+**Rich document priority**: ALWAYS read CFPB complaint narratives (`engine.cli fetch`) (themes reveal
 service gaps). ALWAYS check both iOS App Store AND Google Play.
 
 **P2-specific proxy searches**:
@@ -418,7 +418,7 @@ category's tail empty without having actually looked.
 
 ### Expected Volume
 up to 851 subcaps × 3-5 queries = **2,500-4,200 web searches** per assessment.
-Plus ~100-200 `web_fetch` calls on rich documents.
+Plus ~100-200 rich-document reads (`engine.cli fetch`, windows only).
 
 ### Batching Strategy
 - **Per-capability batches**: Process all subcaps in one capability before moving to next

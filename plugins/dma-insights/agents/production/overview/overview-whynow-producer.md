@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: **O3 · Why-now signals**, the payload section
 `overview.why_now`, and its inline drilldown (the signal row that expands into
 the five headers — it renders the same `signals[*]` and holds no payload of its
@@ -65,7 +67,7 @@ cannot see from inside your own prose.
 1. `get_page_contract("overview")` — the item-key contract for `why_now` and the
    `doc` text on every field you are about to write. A remembered shape is a
    refusal; read the doc.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O3.md`
    **§ O3 and § "O3 drilldown · Why-now signal row (inline)"** (real path:
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
    the O3 block begins at the heading `## O3 · Why-now signals`) — the Baxter
@@ -73,7 +75,7 @@ cannot see from inside your own prose.
    and the enrichment pathways. Applied by default, not by memory. The rulebook
    is the authority on anti-patterns; the Surface Specification is the authority
    on payload shape, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O3.md`
    **§ O3** — the pack's contract for this card, including the two rules the
    spec states less sharply: `synthesis` is a **required field, not a closing
    flourish**, and `cost_of_acting_now` is **required per signal** and is the
@@ -85,7 +87,7 @@ cannot see from inside your own prose.
 5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row for O3: payload anchor `overview.why_now`, enrichment facet
    `why_now`, gate families `SG:S25 · CG · AG`.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/` (one file per gate; read the ids named here up front, any other when a verdict names it)
    — what the gates test, and `explain_gate` for the one that fired.
 7. `get_memory_digest` scoped to this client, then `search_findings` for
    `why_now`, `S25`, `AG-11`. What memory holds about this surface binds you: a

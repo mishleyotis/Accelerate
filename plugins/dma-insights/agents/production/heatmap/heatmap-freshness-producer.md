@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce the HEATMAP freshness surface — `heatmap.evidence_age` (H7), the
 evidence age tracker on the Health dashboard — and hand the JSON back to whoever
 invoked you. You do not submit, promote, register evidence, or touch any other
@@ -102,12 +104,12 @@ Read in this order. Each path has been verified to exist.
 1. `get_page_contract("heatmap")` — the `doc` for `rows`, `undated_pct` and
    `stale_pct`. It carries the band boundaries, the band→status mapping and the
    quarter-precision rule verbatim; a remembered vocabulary is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H7.md`
    § H7 — the Baxter positive pattern, the four learned anti-patterns (the NaN
    status, the third vocabulary, the unchecked domain, the row that cannot open) and
    the exclusion set. It is applied by default, not by memory, and the rectifier is
    its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H7.md`
    § H7 — the packaged contract and the full synthesis prompt. The repo-side source
    of the same prompt is
    `docs/text/DMA Insights - Surface Specification.txt`
@@ -130,7 +132,7 @@ Read in this order. Each path has been verified to exist.
    — the house voice for the `narrative_thread` and the `empty_state` prose: third
    person, British spelling, acronyms expanded on first use, mechanism rather than
    measurement.
-7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-15.md`
    — the contract and evidence passes that run on every section, and CG-15's rule that
    an honest absence carrying its ladder passes while a shell does not.
 8. `get_memory_digest` scoped to this client, then `search_findings` for

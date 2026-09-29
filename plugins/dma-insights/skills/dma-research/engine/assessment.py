@@ -329,11 +329,98 @@ def ceiling_for(wb: RunWorkbook, row: dict) -> tuple[float, str]:
     return ceil, why
 
 
-def score(wb: RunWorkbook, subcap: str, *, score, confidence: str, rationale: str,
+def _parse_pairs(items, *, what: str) -> list[tuple[str, float]]:
+    """`LABEL:VALUE` pairs from the CLI, or (label, value) tuples in code."""
+    out = []
+    for it in (items or []):
+        if isinstance(it, (tuple, list)) and len(it) == 2:
+            label, val = it
+        else:
+            txt = str(it).strip()
+            if ":" not in txt:
+                raise ScoringRefusal(f"{what} {txt!r} is not LABEL:VALUE")
+            label, val = txt.rsplit(":", 1)
+        v = _num(val)
+        if v is None:
+            raise ScoringRefusal(f"{what} {label!r} carries no number ({val!r})")
+        label = str(label).strip()
+        if not label:
+            raise ScoringRefusal(f"{what} {val!r} carries no label")
+        out.append((label, float(v)))
+    return out
+
+
+def _quarter_down(x: float) -> float:
+    """The largest quarter-point not above x. An adjustment never rounds a
+    score UP past what the evidence gave; 2.7 lands on 2.5, never 2.75."""
+    import math
+    return math.floor(x * 4 + 1e-9) / 4
+
+
+def apply(raw, *, ceiling, adjustments=None, caps=None) -> dict:
+    """THE ONE ARITHMETIC: raw → adjusted → bounded → quarter → final.
+
+    Measured 28-09-2026 (QA audit F-F14-029): three independent scorers of
+    P1C1.1.1 agreed on the rule, the band and the label and disagreed on the
+    number — 2.5 / 2.7 / 2.7 — because each did `raw − adjustments`, then
+    the caps, then the quarter-point, by hand and in prose; one wrote
+    "3.0 − 0.3 = 2.5". The methodology's Step 8 says
+    `FINAL = min(Raw, Evidence_Ceiling, All_Applicable_Caps)` and the skill
+    says adjustments are `ADJ_` lines; neither says how 2.7 becomes a legal
+    quarter-point, which is where the drift entered. Now:
+
+        adjusted = raw + Σ adjustments            (ADJ_* are negative deltas)
+        bounded  = min(adjusted, evidence ceiling, every cap value)
+        final    = the largest quarter-point ≤ bounded, and ≥ 1.0
+
+    returned with the band (`contract.band_of`), the level
+    (`rubric.maturity_level`) and the arithmetic as one string the
+    rationale can carry verbatim. `score()` takes the same inputs and calls
+    this, so a scorer supplies raw, adjustments and caps and never the
+    result."""
+    r = _num(raw)
+    if r is None or not (1.0 <= r <= 5.0):
+        raise ScoringRefusal(f"raw score {raw!r} is not on the 1.0-5.0 scale")
+    c = _num(ceiling)
+    if c is None or not (1.0 <= c <= 5.0):
+        raise ScoringRefusal(f"evidence ceiling {ceiling!r} is not on the 1.0-5.0 scale")
+    adj = _parse_pairs(adjustments, what="adjustment")
+    cap = _parse_pairs(caps, what="cap")
+    for label, v in adj:
+        if v > 0:
+            raise ScoringRefusal(f"adjustment {label} is +{v}: an adjustment only "
+                                 f"lowers a score; a higher raw is a rubric decision")
+    for label, v in cap:
+        if not (1.0 <= v <= 5.0):
+            raise ScoringRefusal(f"cap {label} = {v} is not on the 1.0-5.0 scale")
+    adjusted = r + sum(v for _, v in adj)
+    bounds = [("adjusted", adjusted), ("evidence ceiling", c)] + [(f"cap {l}", v) for l, v in cap]
+    bound_label, bounded = min(bounds, key=lambda b: (b[1], bounds.index(b)))
+    final = max(1.0, _quarter_down(bounded))
+    parts = [f"raw {r:g}"]
+    if adj:
+        parts.append(" ".join(f"{v:+g} ({l})" for l, v in adj) + f" = {adjusted:g}")
+    parts.append("min(" + ", ".join(f"{l} {v:g}" for l, v in bounds) + f") = {bounded:g}"
+                 + (f" [{bound_label}]" if bound_label != "adjusted" else ""))
+    if abs(final - bounded) > 1e-9:
+        parts.append(f"to the quarter, down: {final:g}")
+    applied = [l for l, v in cap if abs(v - bounded) < 1e-9 and v < adjusted + 1e-9]
+    if abs(c - bounded) < 1e-9 and c < adjusted + 1e-9:
+        applied.append("evidence ceiling")
+    return {"raw": r, "adjusted": round(adjusted, 4), "ceiling": c,
+            "bounded": round(bounded, 4), "final": final,
+            "band": C.band_of(final), "level": rubric.maturity_level(final),
+            "bounded_by": bound_label,
+            "caps_applied": ", ".join(applied) if applied else "none applied",
+            "arithmetic": "; ".join(parts) + f"; final {final:g} ({C.band_of(final)})"}
+
+
+def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rationale: str,
           actor: str, evidence_ceiling=None, caps: str = "",
           ai_applicability: str, data_dependency: str, data_readiness: str,
           ai_evidence: str = "NONE_FOUND", ai_blocker: str = "NONE",
-          peer_ai_signal: str = "UNVERIFIED") -> dict:
+          peer_ai_signal: str = "UNVERIFIED",
+          raw=None, adjustments=None, cap_values=None) -> dict:
     require_stage(wb)
     row = wb.scoring_row(subcap)
     if row is None:
@@ -341,6 +428,26 @@ def score(wb: RunWorkbook, subcap: str, *, score, confidence: str, rationale: st
     problems: list[str] = []
     if not _clean(actor):
         raise ScoringRefusal("a score records who struck it (--actor)")
+    # THE ARITHMETIC IS THE ENGINE'S (F-F14-029). A scorer states the raw
+    # M-level, the ADJ_ deltas and the caps it found; `apply` derives the
+    # final and the record carries the working. A hand-computed `score` is
+    # still accepted (89 call sites, the fixtures, a repair by hand), but
+    # never beside the inputs — one or the other, so the two cannot disagree.
+    applied = None
+    if raw is not None:
+        if score is not None:
+            raise ScoringRefusal("give --raw (with --adj / --cap) OR --score, not both: "
+                                 "the engine derives the final from the inputs, and "
+                                 "a stated final beside them is the arithmetic done twice")
+        ceil0, _why0 = ceiling_for(wb, row)
+        ec0 = _num(evidence_ceiling)
+        applied = apply(raw, ceiling=ec0 if ec0 is not None else ceil0,
+                        adjustments=adjustments, caps=cap_values)
+        score = applied["final"]
+        if not _clean(caps):
+            caps = applied["arithmetic"]
+    elif score is None:
+        raise ScoringRefusal("a score needs --score, or --raw with its --adj / --cap inputs")
 
     synthesised = bool(_clean(row.get("Dominant_Claim")))
     eids = [i.split(":")[0] for i in _split_ids(row.get("Evidence_IDs"))
@@ -474,8 +581,13 @@ def score(wb: RunWorkbook, subcap: str, *, score, confidence: str, rationale: st
             wb.append("Caps_Applied_Log", crow, save=False)
         wb.save()
     L.record_provenance(wb, subcap, "score", actor, f"{sc} {conf} ceiling {ec}")
-    return {"subcap": subcap, "score": sc, "confidence": conf,
-            "evidence_ceiling": ec, "caps_applied": caps_txt, "level": rubric.maturity_level(sc)}
+    out = {"subcap": subcap, "score": sc, "confidence": conf,
+           "evidence_ceiling": ec, "caps_applied": caps_txt,
+           "level": rubric.maturity_level(sc), "band": C.band_of(sc)}
+    if applied is not None:
+        out["arithmetic"] = applied["arithmetic"]
+        out["raw"] = applied["raw"]
+    return out
 
 
 # ── the critic ───────────────────────────────────────────────────────────
@@ -902,7 +1014,19 @@ def main(argv=None) -> int:
 
     common(sub.add_parser("open"))          # no --force: the gates are the gate
     sc = common(sub.add_parser("score"))
-    sc.add_argument("--subcap", required=True); sc.add_argument("--score", required=True)
+    sc.add_argument("--subcap", required=True)
+    sc.add_argument("--score", help="a final struck by hand (not beside --raw)")
+    sc.add_argument("--raw", help="the raw M-level; the engine derives the final")
+    sc.add_argument("--adj", action="append", default=[],
+                    help="LABEL:-DELTA, repeatable (e.g. ADJ_STALE:-0.3)")
+    sc.add_argument("--cap", action="append", default=[],
+                    help="LABEL:VALUE, repeatable (e.g. CAP_S2:3.0)")
+    ap_ = common(sub.add_parser("apply", help="the scoring arithmetic, stated once"))
+    ap_.add_argument("--subcap", required=True)
+    ap_.add_argument("--raw", required=True)
+    ap_.add_argument("--adj", action="append", default=[])
+    ap_.add_argument("--cap", action="append", default=[])
+    ap_.add_argument("--evidence-ceiling", help="stated only to lower the computed one")
     sc.add_argument("--confidence", required=True); sc.add_argument("--rationale", required=True)
     sc.add_argument("--actor", required=True)
     sc.add_argument("--evidence-ceiling"); sc.add_argument("--caps", default="")
@@ -932,10 +1056,24 @@ def main(argv=None) -> int:
     try:
         if a.cmd == "open":
             out = open_stage(wb, run.qa_dir)
+        elif a.cmd == "apply":
+            row = wb.scoring_row(a.subcap)
+            if row is None:
+                raise ScoringRefusal(f"{a.subcap} is not in this run's engagement set")
+            ceil, why = ceiling_for(wb, row)
+            ec = _num(a.evidence_ceiling)
+            if ec is not None and ec > ceil + 1e-9:
+                raise ScoringRefusal(f"--evidence-ceiling {ec} exceeds what the row's "
+                                     f"evidence allows ({ceil}: {why})")
+            out = apply(a.raw, ceiling=ec if ec is not None else ceil,
+                        adjustments=a.adj, caps=a.cap)
+            out["subcap"] = a.subcap
+            out["ceiling_why"] = why
         elif a.cmd == "score":
             out = score(wb, a.subcap, score=a.score, confidence=a.confidence,
                         rationale=a.rationale, actor=a.actor,
                         evidence_ceiling=a.evidence_ceiling, caps=a.caps,
+                        raw=a.raw, adjustments=a.adj, cap_values=a.cap,
                         ai_applicability=a.ai_applicability,
                         data_dependency=a.data_dependency,
                         data_readiness=a.data_readiness, ai_evidence=a.ai_evidence,

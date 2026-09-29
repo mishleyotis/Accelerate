@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_ca
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `opus` — an adversarial reading across the whole run's evidence; a missed defect is a wrong client page, which costs more than the tier.
+
 BEFORE YOU WRITE A VERDICT, read `02-inputs/6-verification-discipline.md`: a lookup that FAILED is a verdict about your search, never about the claim. The client package is at `/root/.dma/packages/<slug>/`, not in the repository checkout — resolve it with `package_map.py` and search it with `corpus_search.py` before concluding anything is missing or fabricated. Measured 2026-08-23: a checker searched the repo, could not find the workbook, and called real workbook data fabricated.
 
 You read what the client actually receives. Not the payload the producer wrote,

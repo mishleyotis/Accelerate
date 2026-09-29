@@ -107,6 +107,8 @@ tools: {tools}
 disallowedTools: {denied}
 ---
 
+{model_line}
+
 You research ONE category of one Digital Maturity Assessment run:
 **{cat} — {name}**.
 
@@ -167,9 +169,11 @@ deferred-question count, your techscan rows and anything UNTESTED.
 
 def render(cat: str) -> str:
     tools, denied = _tool_lines()
+    import provision_agent_tools as prov  # noqa: PLC0415
     return TEMPLATE.format(cat=cat, lower=cat.lower(),
                            name=CATEGORY_NAMES[cat], tools=tools,
-                           denied=denied)
+                           denied=denied,
+                           model_line=prov.model_line(f"research-{cat.lower()}-producer"))
 
 
 def agent_paths() -> list[str]:

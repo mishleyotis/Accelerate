@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce two surfaces that are one argument: **P1 · Platform fit & story**
 (`platform.platform_story`) and **P2 · Recommendations**
 (`platform.recommendations`). Three drilldowns render from them and fetch
@@ -133,7 +135,7 @@ by writing a quote.
    the `doc` on every field. Read the doc; a remembered shape is a refusal. Gap
    rows need `catalogue_path` per row, `current_score` within 0.05 of the
    heatmap, and `e_ids` per row.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P1.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P2.md`
    **§ P1** (`## P1 · Platform fit &amp; story`), its **Composite factors**
    subsection, **§ P2** (`## P2 · Recommendations`), and the three drilldown
    blocks **§ DD-11**, **§ DD-13**, **§ DD-4**. In the plugin this path is
@@ -153,7 +155,7 @@ by writing a quote.
    profile; the 90–150 word story; the R-Layer; reconcile with the analyst) and
    P2's per-field contract with its five grounding classes for
    `cost_of_inaction`.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/4-platform.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/platform/P1.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/platform/P2.md`
    **§ P1** and **§ P2** — the pack's copy with five things the spec does not
    carry: the you-send/engine-reads table, *One tile per promoted L3 area, or the
    area renders empty*, *Peer deployment is research, not flavour*, *Estate reach
@@ -180,7 +182,7 @@ by writing a quote.
    catalogue_path) · AG`; P2 anchored at `platform.recommendations`, no facet,
    gates `SG:S32 · CG · AG`; plus the DD-11, DD-13 and DD-4 rows confirming all
    three render your payload and fetch nothing.
-8. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+8. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-11.md`
    — **§ AG-03** (every claim-bearing item cites), **§ AG-04** (a named peer's
    technographics carry their source), **§ ET-04** (a cited id resolves to a row
    that carries its excerpt), **§ CG-11** (prose begins as a sentence).

@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__Vibe_Prospecting__match-business, mcp
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: the **technology landscape strip**, payload
 section `insights.landscape`. You hand the section JSON back to whoever invoked
 you. You do not submit, you do not promote, and you do not touch
@@ -112,7 +114,7 @@ evidence.
 
 1. `get_page_contract("insights")` — the item-key contract for `landscape` and
    the `doc` on every field. Read the doc; a remembered shape is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights/T2.md`
    **§ T2** (the block begins at the heading `## T2 · Technology landscape
    strip`) — the Baxter positive pattern, MEM-0046, the counts-are-computed
    entry, MEM-0010/CG-09, the `landscape.summary` discard, the exclusion set and
@@ -131,10 +133,10 @@ evidence.
    DATA · INFRA`: the prototype's `L2–L5` collided with the **L1–L4 evidence
    levels rendered on this same card**. Read that paragraph before you write a
    single `basis` string.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/3-insights.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/insights/T2.md`
    **§ T2** — the pack's Must-present block, the information-source table naming
    `tiles[].count` as **computed**, and the section prompt.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`
    **§ CG-12 · a face field is a label, not a paragraph** — the budget table,
    where `landscape.tiles[*].detail` is capped at **≤90 characters**; and
    **§ CG-09 · a closed vocabulary takes one of its values**.

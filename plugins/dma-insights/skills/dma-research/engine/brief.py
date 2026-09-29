@@ -756,6 +756,22 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "Nothing measures you on taking them — a machine that files one "
             "category's evidence under another's cell is worse than no reuse",
         ],
+        # THE RETURN CONTRACT AND THE AMBIGUITY RULE, IN THE PACKET (QA audit,
+        # prompt-craft scorecard rewrite 2, 29-09-2026): a headless lane reads
+        # this file and the session hook, not RESEARCH-PROTOCOL.md, and until
+        # now nothing in the packet said what to hand back or what to do when a
+        # question cannot be answered — NOT_RUN appeared only as a gate default.
+        "done_and_ambiguity": [
+            f"DONE: `engine.cli gate --category {category} --require-synthesis` "
+            "PASS, then `engine.brief handback`; return it plus the gate verdict, "
+            "deferred count, techscan rows, UNTESTED, `search_requests` (no "
+            "connector: the relay fires them)",
+            "`NOT_RUN: <reason>` = never fired; `NO_FINDING after <n> searches: "
+            "<what instead>` = fired, empty. A row you cannot judge: leave it, say so",
+            "Trimmed packet or a missing cell: trust `orient`, say which you missed. "
+            "≤4 Bash calls per card: chain searches and notes, consolidate per "
+            "2–3 cards",
+        ],
     }
     # THE ONE REFUSAL THIS CONTAINER MAY BE UNABLE TO SATISFY, named only
     # where the run's own baseline PROVES it. `declare_absence` wants an
@@ -839,10 +855,11 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 "for this category ran through bare web_search/web_fetch. "
                 "`enrichment.instruction` says which half was broken and what "
                 "to do; `enrichment.open_search_requests` are queries a previous "
-                "instance could not run — run them through the connector and "
-                "log them with the tool that ran them (`--tool exa|tavily`), or "
-                "emit them again as `search_requests` if the connector is "
-                "refused. Never log a connector search you did not run.")
+                "instance could not run — EMIT them again as `search_requests` "
+                "(a lane holds no connector: the relay fires them and logs each "
+                "with the tool that ran it, `--tool exa|tavily`). Only a "
+                "servicing actor that holds the connector runs them itself. "
+                "Never log a connector search you did not run.")
     packet["packet_chars"] = len(json.dumps(packet, default=str))
     packet["packet_ceiling"] = BRIEF_CHAR_CEILING
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and with_handback:
@@ -869,14 +886,22 @@ def dispatch(wb: RunWorkbook, category: str, *,
     if packet["packet_chars"] > BRIEF_CHAR_CEILING:
         # Trim the detailed cells rather than a field: a half-written field
         # reads as a complete one, and `orient` is the paged reader for the
-        # cells this drops.
+        # cells this drops. Halve UNTIL the packet fits, down to one cell:
+        # one halving stopped at four cells whatever the ceiling said, and a
+        # re-dispatch packet (handback + gate terms + the return contract)
+        # left CI at 7,018 chars against 6,400 (2026-09-29) — a ceiling the
+        # trim could not reach is a ceiling in name only.
         keep = max(1, CELLS_DETAILED // 2)
-        packet["work_next"] = packet["work_next"][:keep]
-        packet["trimmed"] = (
-            f"detail trimmed to {keep} cell(s) to stay under the packet "
-            f"ceiling; `engine.cli orient --category {category}` serves the "
-            f"rest one card at a time")
-        packet["packet_chars"] = len(json.dumps(packet, default=str))
+        while True:
+            packet["work_next"] = packet["work_next"][:keep]
+            packet["trimmed"] = (
+                f"detail trimmed to {keep} cell(s) to stay under the packet "
+                f"ceiling; `engine.cli orient --category {category}` serves the "
+                f"rest one card at a time")
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
+            if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
+                break
+            keep = max(1, keep // 2)
     return packet
 
 
@@ -1010,6 +1035,9 @@ def as_markdown(packet: dict) -> str:
         "",
     ]
     lines += [f"{i + 1}. {r}" for i, r in enumerate(packet["rules"])]
+    if packet.get("done_and_ambiguity"):
+        lines += ["", "### When you are done, and when you cannot decide", ""]
+        lines += [f"- {r}" for r in packet["done_and_ambiguity"]]
     if packet.get("last_gate"):
         g = packet["last_gate"]
         lines += ["", "### The last floors gate on this category", "",

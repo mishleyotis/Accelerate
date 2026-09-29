@@ -29,7 +29,7 @@ def _run(script, payload):
 
 def test_every_rulebook_anchor_in_the_surface_map_resolves():
     text = (LIFECYCLE / "surface-map.md").read_text()
-    refs = set(re.findall(r"`?((?:\.\./)?[\w./-]*rulebooks/[a-z]+\.md)", text))
+    refs = set(re.findall(r"`?((?:\.\./)?[\w./-]*rulebooks/[\w/]+\.md)", text))
     assert refs, "the map must carry rulebook anchors at all"
     missing = [r for r in refs if not (LIFECYCLE / r).resolve().is_file()]
     assert missing == [], missing
@@ -37,7 +37,7 @@ def test_every_rulebook_anchor_in_the_surface_map_resolves():
 
 def test_the_client_memory_anchor_resolves_too():
     text = (LIFECYCLE / "client-memory.md").read_text()
-    for r in set(re.findall(r"((?:\.\./)?[\w./-]*rulebooks/[a-z]+\.md)", text)):
+    for r in set(re.findall(r"((?:\.\./)?[\w./-]*rulebooks/[\w/]+\.md)", text)):
         assert (LIFECYCLE / r).resolve().is_file(), r
 
 

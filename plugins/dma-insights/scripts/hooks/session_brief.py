@@ -39,23 +39,41 @@ from pathlib import Path
 
 ROUTING = "skills/dma-surface-production/05-lifecycle/routing.md"
 
+def _produce_sections() -> str:
+    """The sections that go producer → challenger → consolidator, read from
+    their one owner (references/section_sources.json: disposition
+    `enrichment` or `synthesis`) so the brief cannot drift from the map."""
+    try:
+        here = Path(__file__).resolve().parent.parent.parent
+        d = json.loads((here / "references" / "section_sources.json").read_text(encoding="utf-8"))
+        names = sorted(k for k, v in d["sections"].items()
+                       if v.get("disposition") in ("enrichment", "synthesis"))
+        return ", ".join(names) if names else "the sections section_sources.json marks produce"
+    except Exception:  # noqa: BLE001 — the brief must print whatever the file holds
+        return "the sections references/section_sources.json marks produce"
+
+
 CORE = (
-    "dma-insights: route before you produce. Entry fork first — an entity + "
-    "evidence mode with NO package yet is a RESEARCH engagement "
-    "(research-conductor produces the package; it is not Drive ingestion) "
-    "and it opens with the binding preflight — a financial-statement review, "
-    "an LOB census and an AskUserQuestion the engagement owner ANSWERED, "
-    "never a sub-vertical you inferred; then PRELIM, which gates every "
-    "category card. "
-    "A finished '<Client> - DMA' folder goes to package-vetter, then "
-    "production; a repair naming a surface or page routes by the table. In "
-    "production: one surface -> that page's per-surface producer, then "
-    "finding-challenger, then page-consolidator; submission and promotion "
-    "belong to the surface-producer on a hand-driven run and to the driver "
-    "(engine.pipeline through ship_page.py) on a research-engine run — "
-    "nobody else submits. Read get_memory_digest before authoring anything, "
-    "and end every production with the qa-overseer so the findings memory "
-    f"learns. Routing table: {ROUTING}"
+    "dma-insights: route before you produce.\n"
+    "1. Entry fork: an entity + evidence mode with NO package yet is a RESEARCH "
+    "engagement (research-conductor produces the package; it is not Drive "
+    "ingestion). It opens with the binding preflight — a financial-statement "
+    "review, an LOB census and an AskUserQuestion the engagement owner ANSWERED, "
+    "never a sub-vertical you inferred — then PRELIM, which gates every category "
+    "card.\n"
+    "2. A finished '<Client> - DMA' folder goes to package-vetter, then production; "
+    "a repair naming a surface or page routes by the table.\n"
+    "3. Production: check the section's disposition first (`python3 -m "
+    "engine.surface_export plan --page <page>`). `convert` sections are formatted "
+    "from the workbook and NOT re-challenged; only `produce` sections ("
+    f"{_produce_sections()}) go per-surface producer -> finding-challenger -> "
+    "page-consolidator.\n"
+    "4. Submit and promote: the surface-producer on a hand-driven run, the driver "
+    "(engine.pipeline through ship_page.py) on a research-engine run — nobody "
+    "else submits.\n"
+    "5. Read get_memory_digest before authoring anything; end every production "
+    "with the qa-overseer so the findings memory learns.\n"
+    f"Routing table: {ROUTING}"
 )
 
 #: The research children work a different substrate (the scoring workbook,
@@ -65,30 +83,31 @@ CORE = (
 #: a mess. They get their own.
 RESEARCH_BRIEF = (
     "dma-insights research tier: the workbook is the substrate — what you do "
-    "not write there did not happen. First command (and after ANY "
-    "interruption or compaction): engine.brief dispatch --run <R> --root "
-    "<ROOT> --category <YOURS> — one bounded packet carrying what the run "
-    "already knows, the evidence ALREADY registered for your open cells "
-    "(read it before searching; the run paid for it), the volleys each "
-    "cell still owes, and your own notebook compacted, so a lost context "
-    "costs a read and not a re-search. Then engine.cli orient --run <R> "
-    "--root <ROOT> --category <YOURS> for the work card; obey its do_first "
-    "literally. Report with engine.brief handback --category <YOURS>. "
-    "Protocol: "
-    "skills/dma-research/references/RESEARCH-PROTOCOL.md — the five volleys "
-    "in order (works, fails, value, contradicts, corroborates; every one "
-    "FIRED and logged per cell — the floors gate counts them, and an empty "
-    "cell closes only as a declared absence via `engine.cli absence`), the "
-    "memory notebook, the refusals. The templates are pinned in "
-    "references/templates/ and bound into the run at start; read "
-    "gold_reference.json before you author anything. "
-    "PRELIM ran before you: the institution profile, timeline, peer set and "
-    "technology baseline are already in the workbook (Report_Narrative "
-    "PRELIM-* rows, Entity_Timeline, Peer_Benchmarks, Tech_Register) — read "
-    "them before your first search rather than re-researching them, and if "
-    "orient says PRELIM is open, say so and stop instead of working a card "
-    "the phase gate is holding. "
-    "Work only your own category; never score, never submit, never promote."
+    "not write there did not happen.\n"
+    "1. First command (and after ANY interruption or compaction): engine.brief "
+    "dispatch --run <R> --root <ROOT> --category <YOURS> — one bounded packet: "
+    "what the run already knows, the evidence ALREADY registered for your open "
+    "cells (read it before searching; the run paid for it), the volleys each cell "
+    "still owes, your own notebook compacted — so a lost context costs a read "
+    "and not a re-search.\n"
+    "2. Then engine.cli orient --run <R> --root <ROOT> --category <YOURS> for the "
+    "work card; obey its do_first literally.\n"
+    "3. Protocol: skills/dma-research/references/RESEARCH-PROTOCOL.md — the five "
+    "volleys in order (works, fails, value, contradicts, corroborates; every one "
+    "FIRED and logged per cell — the floors gate counts them, and an empty cell "
+    "closes only as a declared absence via `engine.cli absence`), the tools rule "
+    "(§ Tools: WebSearch, engine.cli fetch windows, connector volleys EMITTED as "
+    "search_requests), the memory notebook, the refusals.\n"
+    "4. PRELIM ran before you: the institution profile, timeline, peer set and "
+    "technology baseline are already in the workbook (Report_Narrative PRELIM-* "
+    "rows, Entity_Timeline, Peer_Benchmarks, Tech_Register) — read them before "
+    "your first search; if orient says PRELIM is open, say so and stop.\n"
+    "5. The templates are pinned in references/templates/ and bound into the run "
+    "at start; read gold_reference.json before you author anything.\n"
+    "6. Report with engine.brief handback --category <YOURS>: the gate verdict, "
+    "the deferred-question count, the techscan rows, anything UNTESTED, and "
+    "search_requests for every connector query you could not fire.\n"
+    "7. Work only your own category; never score, never submit, never promote."
 )
 
 #: Appended to a tier brief when the agent's own name says which slice of
@@ -100,7 +119,7 @@ RESEARCH_BRIEF = (
 #: forget — and names the one way a cross-category find is meant to travel,
 #: because a lane that has been refused needs somewhere to put the finding.
 SCOPE_RULE = (
-    " YOUR SCOPE IS {scope}, and it is enforced, not requested: the ledger "
+    "\nYOUR SCOPE IS {scope}, and it is enforced, not requested: the ledger "
     "refuses a search, an evidence row, a synthesis or an absence you write "
     "against any other {kind}, and so does the guard in front of it. A "
     "source that genuinely bears on another {kind}'s cell travels through "
@@ -124,22 +143,29 @@ def scope_rule(name: str) -> str:
 #: submit-boundary rule — and no word about the assessment stage they run.
 SCORING_BRIEF = (
     "dma-insights scoring tier: the workbook is the substrate and column D is "
-    "yours alone. First command (and after ANY interruption or compaction): "
-    "engine.assessment state --run <R> --root <ROOT>. `engine.assessment "
-    "open` has NO --force: it refuses until every category's floors gate is a "
-    "PASS recorded with --require-synthesis, PRELIM is closed, the five-year "
-    "financial trajectory is banked and the run's evidence density meets the "
-    "Golden 1 floors — if it refuses, the research is not finished and you "
-    "say so rather than scoring around it. Score only through "
-    "`engine.assessment score` (it refuses an unsynthesised or unchallenged "
-    "row, a score above its evidence ceiling, a rationale under 150 chars or "
-    "one citing nothing the row carries, a blank AI-and-data overlay); the "
-    "critic is a DIFFERENT actor from every scorer; `engine.assessment gate` "
-    "must record PASS before any report section may be written. Read "
-    "references/templates/gold_reference.json (the Golden 1 shape) and "
-    "skills/dma-assessment/references/scoring_methodology.md before the "
-    "first score. Score only your own pillar; never write a report section, "
-    "never submit, never promote."
+    "yours alone.\n"
+    "1. First command (and after ANY interruption or compaction): "
+    "engine.assessment state --run <R> --root <ROOT>. The driver hands you a "
+    "packet from engine.brief scoring-batch — the rows still unscored, their "
+    "labels, ceilings and challenge verdicts, the exact score command; read it "
+    "before re-deriving anything from the workbook.\n"
+    "2. `engine.assessment open` has NO --force: it refuses until every "
+    "category's floors gate is a PASS recorded with --require-synthesis, PRELIM "
+    "is closed, the five-year financial trajectory is banked and the run's "
+    "evidence density meets the Golden 1 floors — if it refuses, the research "
+    "is not finished and you say so rather than scoring around it.\n"
+    "3. Score only through `engine.assessment score` (--raw, the adjustments and "
+    "the caps; the engine does the arithmetic and the quarter-point). It "
+    "refuses an unsynthesised or unchallenged row, a score above its evidence "
+    "ceiling, a rationale under 150 chars or one citing nothing the row "
+    "carries, a blank AI-and-data overlay.\n"
+    "4. The critic is a DIFFERENT actor from every scorer; `engine.assessment "
+    "gate` must record PASS before any report section may be written.\n"
+    "5. Read references/templates/gold_reference.json (the Golden 1 shape) and "
+    "skills/dma-assessment/references/scoring_methodology.md before the first "
+    "score.\n"
+    "6. Score only your own pillar; never write a report section, never submit, "
+    "never promote."
 )
 
 #: The REPORT tier (report-research-producer, report-assessment-producer,
@@ -149,26 +175,26 @@ SCORING_BRIEF = (
 #: other two received no template or precondition pointer at all.
 REPORT_BRIEF = (
     "dma-insights report tier: the run is finished before you start, and the "
-    "report is written INTO a pinned Doc, not a remembered shape. First "
-    "command (and after ANY interruption or compaction): engine.cli "
+    "report is written INTO a pinned Doc, not a remembered shape.\n"
+    "1. First command (and after ANY interruption or compaction): engine.cli "
     "narrative preconditions --run <R> --root <ROOT> --report "
     "<client_research|assessment> — it must print ready; if it does not, STOP "
     "and report what it names (PRELIM open, a category gate not PASS, the "
-    "templates unbound, the SCORING gate not PASS, the workbook incomplete, "
-    "the five-year financial trajectory missing). Owner, 2026-09-03: 'report "
-    "writing starts without scoring happening' — this is the check that stops "
-    "it, and `engine.cli narrative write` runs it again on every write. Then "
-    "engine.template binding --run <R> --root <ROOT>, and read the Doc you "
-    "write to — references/templates/client_profile_template.md or "
-    "assessment_report_template.md — and references/templates/"
-    "gold_reference.json (the Golden 1 depth) before you open a section. "
-    "Write only through `engine.cli narrative write` (blocks in the Doc's "
+    "templates unbound, the SCORING gate not PASS, the workbook incomplete, the "
+    "five-year financial trajectory missing). Owner, 2026-09-03: 'report writing "
+    "starts without scoring happening' — this is the check that stops it, and "
+    "`engine.cli narrative write` runs it again on every write.\n"
+    "2. Then engine.template binding --run <R> --root <ROOT>, and read the Doc "
+    "you write to — references/templates/client_profile_template.md or "
+    "assessment_report_template.md — and references/templates/gold_reference.json "
+    "(the Golden 1 depth) before you open a section.\n"
+    "3. Write only through `engine.cli narrative write` (blocks in the Doc's "
     "order, the card floors, the countable minimum data); render only through "
-    "`engine.cli report`, which authors into the branded shell; run `python3 "
-    "-m engine.gold_standard report <docx> --kind <k>` on your own output "
-    "before you hand back. The validator writes no section and passes none "
-    "whose citations it did not open. Never score, never submit, never "
-    "promote."
+    "`engine.cli report`, which authors into the branded shell.\n"
+    "4. Run `python3 -m engine.gold_standard report <docx> --kind <k>` on your "
+    "own output before you hand back. The validator writes no section and "
+    "passes none whose citations it did not open.\n"
+    "5. Never score, never submit, never promote."
 )
 
 #: The install states on which research, scoring and report work is REFUSED
@@ -182,10 +208,10 @@ REFUSING_INSTALL_STATES = ("STALE", "MISSING", "INCOMPLETE", "DIVERGED",
 BY_SOURCE = {
     "startup": "",
     "clear": "",
-    "resume": (" This session RESUMED: re-read the routing table before "
+    "resume": ("\nThis session RESUMED: re-read the routing table before "
                "acting — a resumed turn carries whatever context survived, "
                "not necessarily this rule."),
-    "compact": (" This session was COMPACTED: the routing rule, the memory "
+    "compact": ("\nThis session was COMPACTED: the routing rule, the memory "
                 f"rule and the submit boundary are NOT guaranteed to have "
                 f"survived the summary. Re-read {ROUTING} § After a "
                 f"compaction before your next tool call, and recover WHERE "
@@ -195,16 +221,17 @@ BY_SOURCE = {
                 f"--category <YOURS>` or `engine.pipeline plan` for the next "
                 f"step. What the summary kept is not evidence of what the "
                 f"run holds."),
-    "fork": (" This session is a FORK: it inherits a transcript it did not "
+    "fork": ("\nThis session is a FORK: it inherits a transcript it did not "
              "write. Confirm which run and which surface you own before "
              "producing anything."),
 }
 
 SUBAGENT = (
-    " You are a SUBAGENT. You do not inherit the parent's brief — this is it. "
-    "Produce only the surface you were dispatched for; do not re-produce a "
-    "page to repair a field, and do not submit or promote: that boundary "
-    "belongs to the surface-producer alone."
+    "\nYou are a SUBAGENT. You do not inherit the parent's brief — this is it. "
+    "Produce only the surface you were dispatched for and return it to your "
+    "invoker; do not re-produce a page to repair a field. Submission and "
+    "promotion belong to the surface-producer (hand-driven) or the driver "
+    "(engine run): you do not submit or promote."
 )
 
 
@@ -400,6 +427,19 @@ def record_bind(event: dict) -> None:
         pass
 
 
+def param_echo_text() -> str:
+    """The PreCompact echo for the located run, rendered; never fatal."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import _runctx                                        # noqa: PLC0415
+        import param_echo                                     # noqa: PLC0415
+        run = _runctx.locate()
+        return param_echo.render(param_echo.read_echo(run) if run else None)
+    except Exception:            # noqa: BLE001 — the brief never fails on the echo
+        return (" PARAMETER ECHO: unreadable — recover the run with "
+                "`python3 -m engine.cli resume` before anything else.")
+
+
 def main() -> int:
     try:
         event = json.load(sys.stdin)
@@ -414,6 +454,13 @@ def main() -> int:
             event.get("agent_type") or event.get("agentType")):
         # Top-level sessions only: a subagent's parent already saw it.
         text += connector_outstanding()
+    if hook_name == "PostCompact" or (
+            hook_name == "SessionStart" and str(event.get("source") or "") == "compact"):
+        # The parameters the summary may have dropped, written by
+        # param_echo.py at PreCompact (F-E10-034); read back here, so a
+        # compacted session knows its run, root, stage and budget before
+        # its first tool call rather than after `engine.cli resume`.
+        text += param_echo_text()
     # SubagentStart takes `additionalContexts`; SessionStart takes plain
     # stdout. Emitting the JSON form for a subagent is what actually puts the
     # brief in the child's context — printing to stdout there would be

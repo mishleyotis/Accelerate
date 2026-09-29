@@ -61,13 +61,13 @@ from . import contract as C
 def C_COLS():
     return C.SHEETS["Evidence_Detail"]
 
-#: The archive's weights (scripts/calculate_ers.py), kept verbatim so a
-#: score computed here is comparable with one computed there.
+#: The archive's weights (the retired scripts/calculate_ers.py), kept
+#: verbatim so a score computed here is comparable with one computed there.
 W_TIER, W_RECENCY, W_SPECIFICITY, W_CORROBORATION = 0.35, 0.25, 0.20, 0.20
 
 TIER_SCORE = {"T1": 5.0, "T2": 4.0, "T3": 3.0, "T4": 2.0, "T5": 1.0}
 RECENCY_SCORE = {"CURRENT": 5.0, "RECENT": 4.0, "DATED": 3.0,
-                 "LEGACY": 1.5, "ARCHIVAL": 1.0,
+                 "STALE": 1.5, "ARCHIVAL": 1.0,
                  # Undated is NOT treated as middling-recent. Invariant 9:
                  # undated evidence is UNVERIFIED, never current, and a
                  # score that flatters it is the AUD-0020 shape.

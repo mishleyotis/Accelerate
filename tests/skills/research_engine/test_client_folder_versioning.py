@@ -35,7 +35,6 @@ from engine import assemble, runstate
 
 from .fixtures import small_selection
 
-sys.path.insert(0, "/home/user/Accelerate/apps/worker")
 
 
 def _run(tmp_path, run_id, date):

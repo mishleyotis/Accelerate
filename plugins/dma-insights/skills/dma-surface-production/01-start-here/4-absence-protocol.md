@@ -96,7 +96,7 @@ And when you *do* write a per-item absence, **name what you looked for, not that
 you looked.** The protocol above is identical on every cell; the artefact each
 capability would have left is not, and that difference is the whole of what makes
 four hundred honest absences four hundred sentences rather than one. See
-`05-lifecycle/1-gates.md` for the worked examples and the arithmetic.
+`05-lifecycle/gates/CG-06.md` for the worked examples and the arithmetic.
 
 ## SCOPING DECISION — a subcapability with no evidence is out of scope
 
@@ -112,7 +112,7 @@ Concretely, for a cell with no linked evidence carrying a citable excerpt:
 - Do **not** write a recorded-absence ladder for it. The ladder is how you earn a
   *stated* absence; here you are not stating one, so there is nothing to earn.
 - Do **not** chase evidence to fill it. Enrichment effort goes to the cells in
-  `03-pages/1-heatmap.md`'s tiers 1 and 2 — the cells another surface cites, and
+  `03-pages/heatmap/H2.md`'s tiers 1 and 2 — the cells another surface cites, and
   the cells below threshold — and stops there.
 - **Leave the item out of the array.** The section's reach counters already carry
   the shortfall honestly: `linking_stats` reports cells served against cells
@@ -200,3 +200,17 @@ absence of a documented alternative is not evidence of a bad undocumented one. O
 Search first, write second. The ladder is not paperwork after the fact — running it is how
 you find the thing that turns an empty card into a cited one. Most ladders hit. The ones that
 do not produce a finding you can defend.
+
+## Representing absence (carried from SKILL.md, 28-09-2026)
+
+An empty surface is a value, not an omission. A missing required field fails the contract;
+an explicit empty state passes and renders correctly.
+
+| Situation | Emit |
+|---|---|
+| No leadership found after a full search | empty roster, `verified_absent`, `sources_searched` |
+| Fewer than three dated financial points | the points, `verified_sparse`, no trend |
+| No stair-step derivable | null ladder, `empty_state` with the reason |
+| A figure failed the identity gate | null value, `quarantined`, `quarantine_reason` |
+| A cell's evidence is genuinely thin | `thin`, `sources_searched`, `closure_condition` |
+| No peer figure available | `peer_basis=cannot_estimate`, median stays null |

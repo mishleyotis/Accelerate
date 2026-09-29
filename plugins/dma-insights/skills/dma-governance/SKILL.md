@@ -58,13 +58,13 @@ pip install openpyxl python-docx --break-system-packages
 ## Interface Contracts
 
 **Inputs from Layer 1** (all required):
-- Scoring workbook (.xlsx) with Columns S/T proof structure
+- Scoring workbook (.xlsx) — the engine's contract (`${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/contract.py`: 41 sheets, 33 pillar columns; `python3 -m engine.cli columns` prints them)
 - Report (.docx)
 - `run_manifest.json` (the engine's `run_manifest_v3` — `skills/dma-research/engine/schemas/run_manifest.schema.json`)
 - `caps_applied_log.csv` (including CRITIC_CHALLENGE type)
 - `contradiction_log.csv` (including contradiction_type: HARD/SOFT)
 - `evidence_index.csv` (full inventory with ERS)
-- `reasoning_chain_log.json` (Contract 8 — decision trail per subcap)
+- `07_qa/scoring.json` (the scoring packet `engine.assessment gate` writes — every scored row with its arithmetic)
 - Critic_Log (worksheet or sheet)
 - `02_peers/` directory: peer_scores, peer_synthesis.md, peer_comparison_table.csv (v5.4+)
 - `04_scoring/exports/` directory: 6 canonical export CSVs (v5.4+)
@@ -131,11 +131,11 @@ Extract EVIDENCE_MODE from: run_manifest.json, workbook Run_Metadata, report cov
 
 ### Step 1.6: Evidence Completeness Audit (NEW)
 
-**EC-01: URL Validity** — Every evidence item in workbook Column L has a specific URL. Blank or "multiple searches" = FAIL.
-**EC-02: ERS Population** — Every evidence item in Column M has an ERS score in range [1.0, 5.0].
-**EC-03: Excerpt Length** — Column U ≥ 50 characters for every scored subcap.
-**EC-04: Source Attribution** — Column V non-empty for every scored subcap.
-**EC-05: Tier Classification** — Column M contains valid T1-T5 designation for every evidence item.
+**EC-01: URL Validity** — Every `Evidence_Detail` row has a specific URL (`Source_URLs` on the scoring row). Blank or "multiple searches" = FAIL.
+**EC-02: ERS Population** — Every `Evidence_Detail` row carries an ERS in [1.0, 5.0] (`engine.cli ers recompute` computes it; a blank is a row nothing recomputed).
+**EC-03: Excerpt Length** — every `Evidence_Detail` excerpt is 50–500 verbatim characters, and `What_We_Found` is filled for every scored subcap.
+**EC-04: Source Attribution** — every `Evidence_Detail` row names its source; every scored subcap's `Evidence_IDs` resolve to rows.
+**EC-05: Tier Classification** — every `Evidence_Detail` row carries a valid T1–T5 tier (`contract.TIERS`), and no machine scan sits below T1 (`contract.SCAN_TIER`).
 **FAIL if:** >5% of scored subcaps fail any EC check. Severity: CRITICAL.
 
 ### Step 1.7: Output Artifact Existence Check (NEW)
@@ -150,7 +150,7 @@ Extract EVIDENCE_MODE from: run_manifest.json, workbook Run_Metadata, report cov
 - `caps_applied_log.csv` — HIGH
 - `contradiction_log.csv` — HIGH
 - `evidence_index.csv` — HIGH
-- `reasoning_chain_log.json` — HIGH
+- `07_qa/scoring.json` — HIGH
 **FAIL if:** Any CRITICAL file missing. PASS_WITH_NOTES if HIGH file missing.
 
 ### Step 2: Pass 2 — LLM Deep Reasoning
@@ -158,31 +158,28 @@ Extract EVIDENCE_MODE from: run_manifest.json, workbook Run_Metadata, report cov
 Read `audit_summary.json`, then perform judgment checks per `scripts/llm_reasoning_prompts.md`:
 
 **PV-01: Proof Structure Completeness**
-Verify across Columns R, S, T and reasoning_chain_log.json: Claims (C1-C3), Evidence Links (E#:F#), Rule Links (RuleID), Counterclaim, Constraint Satisfaction.
-Cross-validate: R score matches T JSON final_score. S claim count matches T claims[] length. Reasoning chain final_score matches workbook.
-PASS: ≥95% complete | WARNINGS: 80-94% | FAIL: <80%
+Verify, per scored subcap, across the contract's proof columns and the scoring packet:
+- `Rationale` carries the six headings the scorer writes — `[EVIDENCE]` (the claims, each
+  citing an `E-xxx` the row's `Evidence_IDs` resolve), `[MATURITY MATCH]` (the rubric
+  descriptor the score matches — the rule link), `[GAP TO NEXT]`, `[COUNTER]` (a specific
+  opposing reading and its rebuttal), `[CEILING]` (the evidence ceiling, the caps and the
+  arithmetic — cross-check `Caps_Applied`, which `engine.assessment score` writes as one
+  string), `[SO WHAT]`;
+- `Challenge_Verdict` is present (the independent challenge the score rests on);
+- `07_qa/scoring.json` carries the row with the same final score and arithmetic.
+PASS: ≥95% of rows complete | WARNINGS: 80–94% | FAIL: <80%.
 
-**BEFORE scoring PV-01, establish whether its INPUTS EXIST — and never
-accept their absence as drift.** Measured on a promoted assessment: 0 of
-709 rows carried columns R/S/T, `reasoning_chain_log.json` did not exist,
-PV-01 computed 0% against an 80% floor, and the verdict recorded the
-finding under `schema_drift_accepted` and returned PASS_WITH_NOTES. That
-run reached a regulated client's dashboard asserting Differentiating
-trade surveillance on a subsidiary's officer list. A check that is always
-skipped is not a check, and `schema_drift_accepted` is the mechanism that
-skipped it.
+**BEFORE scoring PV-01, establish whether its INPUTS EXIST — and never accept their
+absence as drift.** Measured on a promoted assessment (2026-08): the check then read
+columns R/S/T of a 22-column layout the engine had replaced, found 0 of 709 rows, recorded
+the finding under `schema_drift_accepted` and returned PASS_WITH_NOTES — and that run
+reached a regulated client's dashboard asserting Differentiating trade surveillance on a
+subsidiary's officer list. The columns this check reads are now the contract's (resolved
+29-09-2026, QA audit F-L11-042 pair 35; `GOV-FORMAT-01` is retired). So:
 
-So:
-
-* If columns R/S/T are absent on **every** row, this is NOT a PV-01
-  score of 0%. It is a **FORMAT CONTRADICTION**, and it is the audit's
-  headline finding: `dma-assessment` declares an 11-column layout
-  canonical and the 22-column R/S/T layout legacy and forbidden, while
-  this check audits R/S/T. Emit issue `GOV-FORMAT-01` at **CRITICAL**,
-  naming both skills, and set the verdict to **FAIL** — not
-  PASS_WITH_NOTES. The two skills must be reconciled by their owner; an
-  auditor that scores 0% and passes is an auditor reporting that it did
-  not run.
+* If `Rationale` is blank on **every** scored row, or `07_qa/scoring.json` is absent, the
+  scoring stage did not run through the engine: the verdict is **FAIL**, naming the
+  missing input — not a PV-01 score of 0% and never PASS_WITH_NOTES.
 * If the columns are PRESENT and incomplete, score PV-01 normally.
 * `schema_drift_accepted` may never be used to dispose of a proof check.
   Recording that a check's inputs are out of scope is recording that the
@@ -275,7 +272,7 @@ LLM interpretation: analyze failures (expected vs. regression) → assess compar
 
 ## Proof-Carrying Score Verification
 
-Every subcap must contain across R, S, T: Claims, Evidence Links, Rule Links, Counterclaim, Constraint Satisfaction. Plus reasoning_chain_log.json (Contract 8) for programmatic verification.
+Every scored subcap must carry, in the contract's columns: the six-heading `Rationale` (claims, rubric match, gap, counter, ceiling, so-what), resolving `Evidence_IDs`, a `Challenge_Verdict`, and its `Caps_Applied` arithmetic — with `07_qa/scoring.json` carrying the same row for programmatic verification.
 
 PV-01/02/03 checks validate completeness, rule validity, and counterclaim quality.
 
@@ -308,10 +305,9 @@ non-substantive counterclaim are defects in proof that EXISTS.
 ## Workspace
 
 ```
-$DMA_GOV_ROOT = /home/claude/dma_governance/
-  audits/[institution]_[date]/    # Per-assessment outputs
-  calibration/                     # Cross-assessment data
-  golden_cases/                    # Test case evidence packs
+<assessment_dir>/governance_output/   # gov_auditor.py's default; --output-dir overrides
+  calibration_output/                  # calibration_engine.py's default; --output-dir overrides
+  templates/golden_cases/              # regression_runner.py's GOLDEN_CASES_DIR, in this skill
 ```
 
 ---

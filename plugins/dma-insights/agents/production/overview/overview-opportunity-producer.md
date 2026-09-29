@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: **O5 · Opportunity surface tiles**, the payload
 section `overview.opportunity`. A tile click navigates cross-page into D4 · P1
 scoped to that platform, so the numbers you write here are read again on the
@@ -74,7 +76,7 @@ is against the report, not just the score matrix.
 
 1. `get_page_contract("overview")` — the item-key contract for `opportunity` and
    the `doc` on every field. Read the doc; a remembered shape is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O5.md`
    **§ O5** (real path:
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`,
    the block begins at the heading `## O5 · Opportunity surface tiles`) — the
@@ -96,7 +98,7 @@ is against the report, not just the score matrix.
    **§ O5 · Opportunity surface tiles** — "What must be presented", the
    decomposable/validated rationale, the information-source table and the
    six-step synthesis prompt.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O5.md`
    **§ O5** — the pack's copy of the same contract, next to the rest of the page.
 6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/surface-map.md`
    — the census row for O5: payload anchor `overview.opportunity`, no enrichment
@@ -135,7 +137,7 @@ anchor_subcap_id, relevance, their_stack_context, rank, rank_rationale}`.
   `feature_that_addresses_it` names the platform capability that closes it, in
   words the client would recognise — and it is a **face field capped at 80
   characters** by CG-12 in
-  `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`.
+  `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`.
   Both reference runs hold to it (Baxter's longest is 70 characters, Logix's 78).
   When it runs long, move the reasoning into `rank_rationale`; do not trim the
   argument down to a fragment.

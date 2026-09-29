@@ -404,7 +404,11 @@ def main(argv=None) -> int:
                         "the default must stay 'evidence reaches a cell'")
     e.add_argument("--source", required=True); e.add_argument("--url")
     e.add_argument("--tier", required=True); e.add_argument("--excerpt", required=True)
-    e.add_argument("--published")
+    e.add_argument("--published",
+                   help="when the source was published: YYYY-MM-DD, YYYY-MM, "
+                        "YYYY-Qn or YYYY (a quarter IS a date and bands from its "
+                        "end — engine/dates.py, the app's own rule). Omitted, the "
+                        "row bands UNVERIFIED, never current")
     e.add_argument("--claim-type", default=None, choices=contract.CLAIM_LABELS,
                    help="FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE. "
                         "Omitted, the ledger derives it from --tier (T1/T2 "
@@ -572,6 +576,8 @@ def main(argv=None) -> int:
     p = common(sub.add_parser("persist")); p.add_argument("--dest")
     st = sub.add_parser("status"); st.add_argument("--root")
     sub.add_parser("counts")
+    sub.add_parser("columns", help="the pillar sheets' columns, from the contract "
+                                    "(the one owner of the workbook's shape)")
     apv = common(sub.add_parser(
         "approve",
         help="record the owner's approval of ONE credit-spending connector "
@@ -597,6 +603,13 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.cmd == "counts":
         print(json.dumps(contract.counts(), indent=2)); return 0
+    if a.cmd == "columns":
+        for i, col in enumerate(contract.PILLAR_COLUMNS):
+            n, letters = i + 1, ""
+            while n:
+                n, r = divmod(n - 1, 26); letters = chr(65 + r) + letters
+            print(f"{letters}\t{col}")
+        return 0
     if a.cmd == "status":
         return watchdog.main(["--root", a.root or str(runstate.RUN_ROOT), "--json"])
 

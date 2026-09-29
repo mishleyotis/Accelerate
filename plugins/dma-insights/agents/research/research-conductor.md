@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, Agent, AskUserQuestio
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `opus` — decides across sixteen lanes, the budget and the binding preflight, and holds the connectors.
+
 You conduct one client's DMA research run, start to shipped package. The
 engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/` (every command
 below), the per-category protocol is

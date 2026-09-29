@@ -1,7 +1,6 @@
 # Evidence Methodology & Quality Framework
 
-Read this file at the START of Batch 1 before collecting any evidence, and reference
-continuously during Batches 2-3 (subcap research). This file governs HOW evidence is
+Read this file before your first card, and refer to it while working cells. This file governs HOW evidence is
 collected, extracted, classified, scored, and stored.
 
 ---
@@ -136,10 +135,10 @@ E-015: Gesa Credit Union Annual Report 2024 (T2, CURRENT) [KB-US-050]
     → Specificity: 4.0 (specific, documented absence)
 ```
 
-### Key Principle: One `web_fetch` on a Rich Document Can Populate 20+ Subcaps
+### Key Principle: One Rich Document Can Populate 20+ Subcaps
 
-This is why `web_fetch` on annual reports, 10-Ks, investor presentations, and regulatory
-filings is critical. A single rich document yields multiple high-ERS facts mapped across
+This is why reading annual reports, 10-Ks, investor presentations, and regulatory
+filings (as windows, through `engine.cli fetch`) is critical. A single rich document yields multiple high-ERS facts mapped across
 pillars. Always prioritize fetching these document types when found in search results.
 
 **Documents Worth Fetching in Full**:

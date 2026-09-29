@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce two surfaces and no others: **O8 · Financial trajectory**, the payload
 section `overview.financial_series`, and **O9 · Sentiment**, the payload section
 `overview.sentiment`. You hand the section JSON back to whoever invoked you. You do
@@ -99,7 +101,7 @@ average.
    and `sentiment`, and the `doc` on every field you are about to write. Read it
    before you assume a key exists: three columns on O8 and two on O9 are unbound or
    renderer-only, and filling one is this pair's most common defect.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O8.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O9.md`
    **§ O8 and § O9** (real path:
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`;
    the blocks begin at `## O8 · Financial trajectory` and `## O9 · Sentiment`, and
@@ -108,7 +110,7 @@ average.
    sets and the enrichment pathways. Applied by default, not by memory. **The
    rulebook is the authority on anti-patterns; the Surface Specification is the
    authority on payload shape**, and where they differ that is the split.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O8.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/C6.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O9.md`
    **§ O8, § C6 and § O9** — the pack's contract, including the three unbound
    columns on O8, the fact that C6 has nothing to produce, and the note that
    `themes` and `gap_analysis` **are now writable** (they were discarded at
@@ -124,7 +126,7 @@ average.
    `firmographics`, gates `SG:S6,S24,S27 · ET · CG (cross-surface)`; O9 anchors
    `overview.sentiment`, facet `sentiment`, gates `SG:S8 · CG (n·scale·as_of) · AG`.
    The rows for C6 and C4 name you as the upstream.
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/SG-S8.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-10.md`
    — **SG-S8** in full (it **discloses and still promotes**; the count is computed
    at submit from the rating rows and **never** read from `displayed_lines`), the
    **Cross-surface reconciliation** table (O8 ↔ C6 identical), **CG-10**,
@@ -468,8 +470,9 @@ Each is phrased so a wrong answer is visible rather than arguable.
   and name the owning agent.
 - **Recency.** Did you run the mandatory newer-figure search, and if a newer figure
   exists, is it the headline with the older ones as the series? Is any sentiment
-  older than 18 months labelled `RECENT` rather than current, and anything older
-  than 36 months labelled `LEGACY` and kept out of the present-tense picture? Is an
+  older than 12 months labelled `RECENT` rather than current, and anything older
+  than 36 months labelled `STALE` and kept out of the present-tense picture
+  (`contract.RECENCY_LADDER`)? Is an
   app not updated in over six months flagged as the signal it is?
 - **Narrative.** Does the O8 `narrative_thread` say what trajectory **adds** to the
   argument the rest of the page makes — that growth funds a foundation build without

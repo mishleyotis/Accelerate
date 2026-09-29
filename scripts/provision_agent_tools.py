@@ -226,9 +226,15 @@ def row(*, web=(), external=(), reads="floor", reads_extra=(), writes=(),
 #: NO connector: a lane emits `search_requests` and the conductor services
 #: them per capability batch. Internal artefacts reach them through the
 #: conductor's `drive_fetch.py pull`, on disk under the run root.
+#: WebSearch ALONE (QA audit F-L11-042 pair 8, 29-09-2026): the protocol
+#: says "never fetch a page whole" and the guard denies WebFetch to this
+#: class, so a WebFetch grant was a trap for a lane that reads its tool
+#: list — every page read is `engine.cli fetch`, windows the ledger can
+#: verify an excerpt against.
 RESEARCH_LANE = row(
-    web=WEB, reads="floor",
-    why="a lane searches the open web and emits every connector query as a "
+    web=["WebSearch"], reads="floor",
+    why="a lane searches the open web with WebSearch, reads pages only as "
+        "engine.cli fetch windows, and emits every connector query as a "
         "search_requests entry; the orchestrator tier holds the connectors")
 
 #: A per-surface producer: writes one surface from the run's REGISTERED
@@ -501,6 +507,114 @@ def lists_for(rel: str, conn: list[str]) -> tuple[list[str], list[str]]:
 
 FM = re.compile(r"^---\n(.*?)\n---\n", re.S)
 
+# ── which model, and why ─────────────────────────────────────────────────
+#
+# Measured 28-09-2026 (QA audit F-C06-037): 58 sonnet / 15 opus / 1 haiku
+# and no agent stated why, so a reader could not tell a deliberate tier
+# from a default. The reason lives here, beside the grants, and the
+# manifest's first body line states it. `--write` writes both the
+# frontmatter `model:` and the line; a generator renders the same line.
+# Moving an agent to a cheaper tier is a change to THIS table with its
+# reason, never a frontmatter edit.
+MODEL_REASONS: dict[str, tuple[str, str]] = {}
+_LANE = ("sonnet", "one category from a bounded packet through a fixed loop; the "
+                   "ledger refuses what a cell cannot carry, so the judgement is small "
+                   "and frequent — sixteen parallel lanes on the price tier")
+for _c in ("p1c1", "p1c2", "p1c3", "p1c4", "p2c1", "p2c2", "p2c3", "p2c4",
+           "p3c1", "p3c2", "p3c3", "p3c4", "p4c1", "p4c2", "p4c3", "p4c4"):
+    MODEL_REASONS[f"research-{_c}-producer"] = _LANE
+for _p in ("p1", "p2", "p3", "p4"):
+    MODEL_REASONS[f"scoring-{_p}-producer"] = (
+        "sonnet", "supplies inputs to an engine that does the arithmetic and refuses "
+                  "the rest; the critic on the strong tier re-derives a sample")
+_SURFACE = ("sonnet", "one surface from registered evidence against a contract the "
+                      "connector validates; the challenger and the consolidator catch "
+                      "what it misses")
+for _n in ("context-risk", "context-sentiment", "context-timeline", "heatmap-evidence",
+           "heatmap-focus", "heatmap-freshness", "heatmap-grid", "heatmap-signals",
+           "heatmap-valuechain", "insights-cards", "insights-landscape",
+           "overview-findings", "overview-governance", "overview-hero", "overview-market",
+           "overview-narrative", "overview-opportunity", "overview-people",
+           "overview-whynow", "platform-conversation", "platform-fit", "platform-roadmap",
+           "techstack-layers", "techstack-register"):
+    MODEL_REASONS[f"{_n}-producer"] = _SURFACE
+_PAGE = ("sonnet", "assembles fragments the challenger already read and the page brief "
+                   "already routed; it makes no new claim about the world")
+for _pg in ("context", "heatmap", "insights", "overview", "platform", "techstack"):
+    MODEL_REASONS[f"{_pg}-surface-producer"] = _PAGE
+_CHECKER = ("opus", "an adversarial reading across the whole run's evidence; a missed "
+                    "defect is a wrong client page, which costs more than the tier")
+for _k in ("evidence-integrity-checker", "exclusion-boundary-auditor",
+           "numeric-reconciliation-checker", "adversarial-verifier",
+           "deployed-app-auditor", "enrichment-ledger-auditor"):
+    MODEL_REASONS[_k] = _CHECKER
+MODEL_REASONS.update({
+    "scoring-critic": ("opus", "re-derives scores against the rubric across a whole "
+                               "pillar hunting the one that flatters; a flatterer it "
+                               "misses ships"),
+    "page-consolidator": ("opus", "reconciles every cross-surface figure and the "
+                                  "storyline of a whole page — the last judgement "
+                                  "before submission"),
+    "finding-challenger": ("opus", "the strong-tier sample that calibrates the sonnet "
+                                   "research-challenger, and the attack on every produced "
+                                   "surface before consolidation"),
+    "research-challenger": ("sonnet", "a full pass per category over a bounded packet, "
+                                      "seven named dimensions; finding-challenger re-judges "
+                                      "a 10 % sample on the strong tier"),
+    "research-conductor": ("opus", "decides across sixteen lanes, the budget and the "
+                                   "binding preflight, and holds the connectors"),
+    "surface-producer": ("opus", "the only writer into the product: claims, assembles, "
+                                 "submits and promotes"),
+    "package-vetter": ("opus", "decides whether a package may enter the system at all; "
+                               "a wrong accept seeds a run"),
+    "report-research-producer": ("sonnet", "one section at a time into a pinned template "
+                                           "through a narrative gate that refuses prose "
+                                           "without an argument; the validator on the "
+                                           "strong tier passes none it did not check"),
+    "report-assessment-producer": ("sonnet", "one section at a time into a pinned template "
+                                             "through a narrative gate that refuses prose "
+                                             "without an argument; the validator on the "
+                                             "strong tier passes none it did not check"),
+    "report-validator": ("opus", "an independent verdict across six dimensions and the "
+                                 "whole-report adversarial pass"),
+    "qa-overseer": ("opus", "owns the findings memory; what it records steers every "
+                            "later run"),
+    "rectifier": ("opus", "edits the toolchain itself; a wrong refinement propagates "
+                          "to every run"),
+    "learning-grader": ("sonnet", "scores a change against a rubric it reads — bounded "
+                                  "and repeatable"),
+    "learning-testgen": ("haiku", "writes case files from a stated refinement — format "
+                                  "work, no judgement about the world"),
+    "enrichment-planner": ("sonnet", "ranks listed gaps by a closure test; no claim "
+                                     "about the world"),
+    "enrichment-web-specialist": ("sonnet", "services search batches and records each "
+                                            "result with its tool; the judgement is the "
+                                            "tier a source lands at"),
+    "enrichment-connector-specialist": ("sonnet", "services connector batches and records "
+                                                  "each result with its tool; the ledger "
+                                                  "bounds it"),
+    "technographic-scanner": ("sonnet", "works four layers by method and records each "
+                                        "status; the register's refusals bound it"),
+})
+
+
+def model_for(name: str) -> tuple[str, str]:
+    key = name.split(":", 1)[-1]
+    if key.endswith(".md"):
+        key = key.rsplit("/", 1)[-1][:-3]
+    if key not in MODEL_REASONS:
+        raise SystemExit(f"{name}: no model reason in provision_agent_tools.MODEL_REASONS")
+    return MODEL_REASONS[key]
+
+
+def model_line(name: str) -> str:
+    """The manifest's first body line: the tier and the reason, from the table."""
+    model, why = model_for(name)
+    return f"**Model:** `{model}` — {why}."
+
+
+MODEL_LINE = re.compile(r"^\*\*Model:\*\* `\w+` — .*$", re.M)
+
 
 def apply(path: Path, conn: list[str], write: bool) -> bool:
     rel = str(path.relative_to(AGENTS))
@@ -515,7 +629,15 @@ def apply(path: Path, conn: list[str], write: bool) -> bool:
     body = body.rstrip() + f"\ntools: {', '.join(allowed)}"
     if denied:
         body += f"\ndisallowedTools: {', '.join(denied)}"
-    new = f"---\n{body}\n---\n" + text[m.end():]
+    model, _why = model_for(rel)
+    body = re.sub(r"^model:.*$", f"model: {model}", body, count=1, flags=re.M)
+    rest = text[m.end():]
+    line = model_line(rel)
+    if MODEL_LINE.search(rest):
+        rest = MODEL_LINE.sub(lambda _m: line, rest, count=1)
+    else:
+        rest = "\n" + line + "\n" + rest
+    new = f"---\n{body}\n---\n" + rest
     if new == text:
         return False
     if write:

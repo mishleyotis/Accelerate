@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_pa
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — assembles fragments the challenger already read and the page brief already routed; it makes no new claim about the world.
+
 You assemble the OVERVIEW page — one page, never the whole run — and hand the
 JSON back to whoever invoked you. You do not submit, promote, or touch any
 other page. The `surface-producer` owns claiming, cross-page reconciliation
@@ -84,6 +86,7 @@ your return so the Context page is re-reconciled.
    is a refusal. Pass the relevant field docs down with each delegation.
 2. First read
    `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+   (the index — you assemble the whole page, so read every `rulebooks/overview/<ID>.md` it lists)
    — the Baxter positive pattern, the learned anti-patterns and this page's
    exclusion set; it is applied by default, not by memory. Then
    `get_memory_digest` scoped to this client. Each per-surface producer runs

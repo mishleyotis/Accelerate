@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_ca
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `opus` — an adversarial reading across the whole run's evidence; a missed defect is a wrong client page, which costs more than the tier.
+
 BEFORE YOU WRITE A VERDICT, read `02-inputs/6-verification-discipline.md`: a lookup that FAILED is a verdict about your search, never about the claim. The client package is at `/root/.dma/packages/<slug>/`, not in the repository checkout — resolve it with `package_map.py` and search it with `corpus_search.py` before concluding anything is missing or fabricated. Measured 2026-08-23: a checker searched the repo, could not find the workbook, and called real workbook data fabricated.
 
 You check that the run's citations are true citations. Not that they are
@@ -114,18 +116,18 @@ Every path below has been verified to exist.
    refusal classes (blocked / gone / reachable-but-span-absent) and the linking
    rules. This is the file the whole check is written out of. Read it before you
    form an opinion about any single row.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-05.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-10.md`
    §§ **ET-04**, **ET-05**, **AG-03**, **CG-10**, and *The citation stack*.
    ET-04 states the three parts of invariant 4 and which two used to be enforced;
    CG-10 states how a date that could not be established says so. Read the gate
    text rather than remembering the threshold.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H2.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H6.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H7.md`
    §§ H2, DD-1, H6, DD-2, H7 — the Baxter positive pattern per surface, the
    learned anti-patterns (MEM-0087 tier misclassification, MEM-0020 foreign ids,
    MEM-0070 + MEM-0074 the three error states, MEM-0079 registration-with-links,
    MEM-0041 the unresolved chip) and each surface's exclusion set. The rectifier
    is the only writer of this file; treat it as applied by default.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H2.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H6.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H7.md`
    §§ H2, H6 and H7 — the packaged contracts and the reissued synthesis prompts,
    including the claim-label enum the producer was actually served.
 5. `docs/text/DMA Insights - Surface Specification.txt`

@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce the HEATMAP grid — `heatmap.workbook_scores` (H4) — and hand the JSON
 back to whoever invoked you. You do not submit, promote, or touch any other
 surface. The invoker owns assembly, QA routing and submission.
@@ -107,12 +109,12 @@ Read in this order. Each path has been verified to exist.
    about to write. The doc text is the item-key contract; a remembered shape is a
    refusal, and it is the doc, not a neighbouring run, that tells you which keys
    this section carries (see the note on `band` and `delta` below).
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md`
    § H4 — the Baxter positive pattern, five learned anti-patterns (MEM-0088,
    MEM-0028, MEM-0086, MEM-0085, and the one-cohort-one-pass rule) and this
    section's exclusion set. It is applied by default, not by memory, and the
    rectifier is its only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/1-heatmap.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/heatmap/H4.md`
    § H4 — the packaged contract: *Must present*, *Peer figures exist at two
    grains and nowhere else*, *Cell NAMES come from the catalogue, never from
    prose*, *The workbook scores more cells than this run may serve*, and the
@@ -145,7 +147,7 @@ Read in this order. Each path has been verified to exist.
 11. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`
     — the `peer_scores` facet, whose `serving_surface` is literally this section
     and which exists to record that **no external connector serves a peer score**.
-12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-03.md`
     — AG-03 (why a null row asserts nothing and therefore cites nothing) and the
     CG grain family, including the 0.05 tolerance.
 

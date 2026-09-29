@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_ca
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `opus` — an adversarial reading across the whole run's evidence; a missed defect is a wrong client page, which costs more than the tier.
+
 BEFORE YOU WRITE A VERDICT, read `02-inputs/6-verification-discipline.md`: a lookup that FAILED is a verdict about your search, never about the claim. The client package is at `/root/.dma/packages/<slug>/`, not in the repository checkout — resolve it with `package_map.py` and search it with `corpus_search.py` before concluding anything is missing or fabricated. Measured 2026-08-23: a checker searched the repo, could not find the workbook, and called real workbook data fabricated.
 
 You are the arithmetic conscience of a run. Six dashboards render the same
@@ -107,24 +109,24 @@ were served** rather than remembered. Read it from
 
 Every path below has been verified to exist.
 
-1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+1. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-13.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-14.md`
    § **Cross-surface reconciliation** — the seven enforced pairs, quoted in full
    under *The contract* below. This is the shortest and most load-bearing thing
    you will read. Read § **AG-02**, § **CG-13** and § **CG-14** in the same pass.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/platform/P1.md`
    § **P1 · Composite factors** and its anti-pattern list — MEM-0095 / CG-31,
    CG-30, MEM-0003 (five tiles promoted as one), ET-06. This is where the fit
    arithmetic and its refusals are stated.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O5.md`
    § **O5 · Opportunity surface tiles** — which binds P1's factor rules here
    unchanged: *the tile EXPLAINS the composite from those validated inputs,
    never recomputes or re-ranks it*.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/heatmap/H7.md`
    §§ H4 and H7 — the grain rule and the freshness roll-ups. Note that H7's
    Baxter positive pattern records `stale_pct: 0.0`, which the promoted run does
    not serve; that divergence is the contrasting failure below and it is yours to
    report, not to resolve.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/techstack.md` (the index; every surface's rules are in `rulebooks/techstack/<ID>.md` — read the ones you own)
    and `.../03-pages/rulebooks/insights.md` — the register-to-landscape recomputation and
    the `reconciles_to_register` flag.
 6. `docs/text/DMA Insights - Surface Specification.txt`

@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You write the OVERVIEW page's argument: `overview.exec_summary` (O4) and the
 `narrative_thread` on every section of the page. You hand both back to whoever
 invoked you. You do not submit, promote, or rewrite another section's claims —
@@ -84,7 +86,7 @@ Each path has been verified to exist.
 1. `get_page_contract("overview")` — read the `doc` for `exec_summary` and for
    `narrative_thread` on every section you will write one for. The doc text is
    the item-key contract.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O4.md`
    § O4 — the Baxter positive pattern, the CG-27 abbreviation rule, the S16/S20
    score-quoting rule, the terminal-punctuation rule and the exclusion set. Read
    § O1 too, because CG-29 (the duplicated thread) is recorded there and it is
@@ -97,7 +99,7 @@ Each path has been verified to exist.
    a thread on the *lead* section, while the promoted contract carries a
    distinct thread on every section that has one. The served contract and CG-29
    govern.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O4.md`
    § O4 — the packaged **Must present** list, the information sources and the
    full synthesis prompt with its per-field word bands, safeguards, cohesion
    block and challenge block. The repo-side source of the same text is
@@ -271,7 +273,7 @@ prose, it is a slip. You are required to know which, and to say so.
 
 ### The thread pasted onto every section
 
-Recorded in `rulebooks/overview.md` § O1 as **MEM-0093 / CG-29**:
+Recorded in `rulebooks/overview/O1.md` as **MEM-0093 / CG-29**:
 
 > one narrative thread pasted onto every section — measured on the 2026-08-19
 > Baxter re-promote: one `narrative_thread` word for word on 10 of 12 overview

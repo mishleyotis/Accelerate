@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: **O6 · Top findings**, the payload section
 `overview.findings`, together with the inline expansion **DD-9** that renders
 from the same rows. You hand the JSON back to whoever invoked you. You do not
@@ -107,12 +109,12 @@ Read in this order. Each path has been verified to exist.
    item-key contract; a remembered shape is a refusal. The `findings` doc is the
    longest on the page and it carries the per-item key list, the title rule, the
    theme enum, the four-heading expansion and the `r_layer` obligation.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O6.md`
    §§ O6 and DD-9 — the Baxter positive pattern, the three anti-patterns above
    with their measurements, this surface's exclusion set and its enrichment
    pathways. It is applied by default, not by memory, and the rectifier is its
    only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O6.md`
    § O6 — the packaged contract with the full synthesis prompt and its seven
    numbered steps. The repo-side source of the same text is
    `docs/text/DMA Insights - Surface Specification.txt`

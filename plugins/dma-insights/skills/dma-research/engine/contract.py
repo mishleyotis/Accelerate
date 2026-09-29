@@ -1162,7 +1162,10 @@ MODE_ANSWERABLE = {
 #: The evidence-recency ladder. Undated evidence is UNVERIFIED, never
 #: current (invariant 9) — so UNVERIFIED is a member here, not an absence.
 RECENCY_LADDER = (
-    ("CURRENT", 12), ("RECENT", 24), ("DATED", 36), ("LEGACY", 48),
+    # STALE, not LEGACY: the QA Report's resolution B-09 names the ladder
+    # CURRENT · RECENT · DATED · STALE · ARCHIVAL at 12/24/36/48, and the
+    # page contract (H7) reads the same words (QA audit F-L11-042 pair 14).
+    ("CURRENT", 12), ("RECENT", 24), ("DATED", 36), ("STALE", 48),
 )
 RECENCY_ARCHIVAL = "ARCHIVAL"
 RECENCY_UNVERIFIED = "UNVERIFIED"

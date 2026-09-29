@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: **I1 · Insight cards**, the payload section
 `insights.insights`, together with **DD-3**, the four-tab modal a card opens,
 which renders from the same rows and is not a separate submission unit. You hand
@@ -116,7 +118,7 @@ sends `null` on 8 of 8. Sending it creates two answers to one question.
 
 1. `get_page_contract("insights")` — the item-key contract for `insights` and the
    `doc` on every field. Read the doc. A remembered shape is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights/I1.md`
    **§ I1** (the block begins at the heading `## I1 · Insight cards`) and
    **§ DD-3** (`## DD-3 · Insight modal (drilldown from I1)`) — the Baxter
    positive pattern, MEM-0017, MEM-0013, MEM-0093/CG-27, the `theme`/`pillar_id`
@@ -131,7 +133,7 @@ sends `null` on 8 of 8. Sending it creates two answers to one question.
    insight card" passage that defines the object, the information-source table,
    the DD-3 note and the full synthesis prompt with its per-field word budgets
    and its seven named probes.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/3-insights.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/insights/I1.md`
    **§ I1** — the pack's copy of the same contract with three things the spec
    does not carry: the claim-versus-topic table, the theme lens and where its
    data actually comes from, and the three gates this page dies on.

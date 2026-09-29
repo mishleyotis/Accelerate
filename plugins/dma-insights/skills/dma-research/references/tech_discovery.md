@@ -1,6 +1,6 @@
 # Technology Stack Discovery & Utilization Framework
 
-Read this file during Batch 1 Step 6 (tech stack discovery) and Batch 2 Step 3
+Read this file during PRELIM's technographic scan and when working P4 cells
 (tech evidence consolidation).
 
 ---
@@ -196,12 +196,12 @@ For EVERY technology platform identified:
 | GOOD | Job posting mentioning the tool | Within 12 months |
 | ACCEPTABLE | Conference/webinar mention | Within 18 months |
 | WEAK | Website mention only, no date | Flag as UNVERIFIED |
-| STALE | Only evidence >36 months old | Flag as LEGACY/Unconfirmed |
+| STALE | Only evidence >36 months old | Flag as STALE/Unconfirmed |
 
 **Output format per platform:**
 ```
 [Platform] — Evidence Level [1-4], Utilization [High/Med/Low/Unknown],
-Recency [CURRENT/RECENT/LEGACY/UNVERIFIED], Last confirmed: [date or Unknown],
+Recency [CURRENT/RECENT/DATED/STALE/ARCHIVAL/UNVERIFIED], Last confirmed: [date or Unknown],
 Zennify Priority: [Yes/No], Red Flags: [list or None]
 ```
 
@@ -214,5 +214,5 @@ Zennify Priority: [Yes/No], Red Flags: [list or None]
 3. Analyze job postings for role seniority (Admin vs Architect)
 4. Check for utilization red flags (URF-01 through URF-06)
 5. Assign utilization level (High/Medium/Low/Unknown)
-6. Assign recency tag (CURRENT/RECENT/LEGACY/UNVERIFIED)
+6. Assign the recency band (`contract.RECENCY_LADDER`: CURRENT/RECENT/DATED/STALE/ARCHIVAL, UNVERIFIED undated)
 7. Generate discovery questions referencing internal document IDs
