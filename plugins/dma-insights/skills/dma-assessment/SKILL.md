@@ -17,7 +17,8 @@ description: >
 
 **v5.6 Changes (2026-09-03):** the workbook is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/contract.py`'s and this skill
 BUILDS NO WORKBOOK. The scoring stage writes column D of the run's existing workbook through
-`engine.assessment open / score / critique / rollup / gate`. The retired `scripts/assessment_runner.py`
+`engine.assessment score / critique / rollup / gate`, after the DRIVER has opened the stage
+(`engine.assessment open` is the research-conductor's — routing.md's stage table). The retired `scripts/assessment_runner.py`
 (it built a fresh 11-sheet openpyxl workbook) refuses and names those commands. The eleven app-facing
 columns A–K below are unchanged — they are the first eleven of the contract's 33 (L–AG are the
 research working area, stripped after the handoff). Category count is 16 (v7.0), not 17.
@@ -401,9 +402,10 @@ Read `references/phase_8_qa.md` — the 14-check suite. Read when Phase 8 opens.
 - Heading text: Dark Teal `#1F9A90`
 - Table header bg: Primary Teal `#27BBAF` (white text)
 - Body: Charcoal `#333333` | Alt rows: Light Teal `#E8F8F6`
-- Maturity BANDS (four, and only four — charter invariant 6):
-  Activating=`#D32F2F` Building=`#62D7B8` Competing=`#FBC02D`
-  Differentiating=`#388E3C`. A null score gets NO swatch. There is no
+- Maturity BANDS (four, and only four — charter invariant 6), the fills
+  `apps/web/lib/bands.js` owns (repo root; a test holds this line equal to it):
+  Activating=`#FFCB99` Building=`#62D7B8` Competing=`#27BBAF`
+  Differentiating=`#139F94`. A null score gets NO swatch. There is no
   fifth band and no hex for one; the score levels 1-5 are a different
   scale from the four display bands and never carry a colour.
 
@@ -470,7 +472,7 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `scripts/ingest_evidence.py` | 1 | Pre-process documents |
 | `scripts/build_index.py` | 1 | BM25 retrieval index |
 | `scripts/retrieve.py` | 1 | Evidence retrieval per subcap |
-| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment open / score / critique / rollup / gate` on the run's one workbook |
+| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment score / critique / rollup / gate` (the driver opens the stage) on the run's one workbook |
 | `scripts/validate_scoring_quality.py` | 4 | **MANDATORY** 8-gate validator |
 | `scripts/qa_auditor.py` | 8 | Automated QA checks |
 | `scripts/generate_governance_outputs.py` | 7 | CSVs + manifest from workbook |

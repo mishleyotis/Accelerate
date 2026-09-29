@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: **O6 · Top findings**, the payload section
 `overview.findings`, together with the inline expansion **DD-9** that renders
 from the same rows. You hand the JSON back to whoever invoked you. You do not

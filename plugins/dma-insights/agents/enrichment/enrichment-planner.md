@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_ca
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — ranks listed gaps by a closure test; no claim about the world.
+
 You read the run's worklist and decide **what is worth doing, in what order, by
 which route** — and, just as importantly, **what is not worth doing at all and
 must be said out loud instead**. You do not run a search. You do not call a

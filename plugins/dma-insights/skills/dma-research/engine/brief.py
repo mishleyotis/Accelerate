@@ -886,14 +886,22 @@ def dispatch(wb: RunWorkbook, category: str, *,
     if packet["packet_chars"] > BRIEF_CHAR_CEILING:
         # Trim the detailed cells rather than a field: a half-written field
         # reads as a complete one, and `orient` is the paged reader for the
-        # cells this drops.
+        # cells this drops. Halve UNTIL the packet fits, down to one cell:
+        # one halving stopped at four cells whatever the ceiling said, and a
+        # re-dispatch packet (handback + gate terms + the return contract)
+        # left CI at 7,018 chars against 6,400 (2026-09-29) — a ceiling the
+        # trim could not reach is a ceiling in name only.
         keep = max(1, CELLS_DETAILED // 2)
-        packet["work_next"] = packet["work_next"][:keep]
-        packet["trimmed"] = (
-            f"detail trimmed to {keep} cell(s) to stay under the packet "
-            f"ceiling; `engine.cli orient --category {category}` serves the "
-            f"rest one card at a time")
-        packet["packet_chars"] = len(json.dumps(packet, default=str))
+        while True:
+            packet["work_next"] = packet["work_next"][:keep]
+            packet["trimmed"] = (
+                f"detail trimmed to {keep} cell(s) to stay under the packet "
+                f"ceiling; `engine.cli orient --category {category}` serves the "
+                f"rest one card at a time")
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
+            if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
+                break
+            keep = max(1, keep // 2)
     return packet
 
 

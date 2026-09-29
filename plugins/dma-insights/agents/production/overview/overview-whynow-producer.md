@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_re
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
+
 You produce exactly one surface: **O3 · Why-now signals**, the payload section
 `overview.why_now`, and its inline drilldown (the signal row that expands into
 the five headers — it renders the same `signals[*]` and holds no payload of its

@@ -6,8 +6,8 @@ Moved out of `SKILL.md` on 28-09-2026 (QA audit F-B04-027: the skill file was ov
 
 **On a research-engine run (a `DMA_Scoring_Workbook_*.xlsx` with a
 `Run_Metadata.stage` key), this phase IS the engine's SCORING stage — do not
-build a second workbook.** `python3 -m engine.assessment open --run <R>`
-refuses until every category's floors gate is PASS; each score goes in
+build a second workbook.** The driver's `python3 -m engine.assessment open --run <R>`
+refuses until every category's floors gate is PASS (the conductor runs it, not the scorer); each score goes in
 through `engine.assessment score` (refuses an unchallenged row, a score
 above its evidence ceiling, a rationale that cites none of the row's E-ids,
 a blank AI/data overlay); the four `scoring-p<N>-producer` agents run one

@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_pa
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — supplies inputs to an engine that does the arithmetic and refuses the rest; the critic on the strong tier re-derives a sample.
+
 You strike the scores for ONE pillar of one Digital Maturity Assessment run:
 **P1 — Strategy, Governance & Culture**.
 

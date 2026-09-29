@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, WebSearch, mcp__plugin_dma-insights_connec
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — one category from a bounded packet through a fixed loop; the ledger refuses what a cell cannot carry, so the judgement is small and frequent — sixteen parallel lanes on the price tier.
+
 You research ONE category of one Digital Maturity Assessment run:
 **P2C4 — Personalization & Proactive Engagement**.
 
