@@ -20,6 +20,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import ledger
+from . import rejections
 from .contracts import PAGES, SERVING_TABLES
 from .validation import validate_pass1
 
@@ -370,6 +371,16 @@ def promote_run(conn, run_id) -> dict:
         cur.execute("""UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
                         WHERE entity_id = %s AND is_active AND id <> %s""",
                     (entity_id, run_id))
+        # Their open rejections are no longer work (QA audit F-O04-007,
+        # 28-09-2026: 199 tickets on a superseded run led every producer
+        # session's "read this first" list for 25 days). Inside the
+        # transaction, so a rolled-back promote closes nothing; never fatal,
+        # so a bookkeeping failure cannot un-promote — it is reported.
+        closed_superseded, closed_error = [], None
+        try:
+            closed_superseded = rejections.close_superseded(cur, entity_id, run_id)
+        except Exception as e:            # noqa: BLE001 — reported, not silent
+            closed_error = str(e)[:200]
         # A successful promote is the ONLY way back from withdrawal (0042).
         # Clearing the three columns here rather than in a restore tool is
         # deliberate: a run was withdrawn because what it served was wrong,
@@ -452,6 +463,9 @@ def promote_run(conn, run_id) -> dict:
             out["enrichment_error"] = str(e)[:200]
         if ledger_error:
             out["enrichment_ledger_error"] = ledger_error
+        out["rejections_closed_as_superseded"] = closed_superseded
+        if closed_error:
+            out["rejections_close_error"] = closed_error
         if refresh_error:
             out["directory_refresh_error"] = refresh_error
         if stale_verdicts:

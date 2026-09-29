@@ -1,8 +1,8 @@
 # DMA Insights MCP connector — tool reference
 
-Generated from `apps/mcp/server.py` at commit `3e2d5e3bf9` (2026-08-24) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
+Generated from `apps/mcp/server.py` at commit `0119cb9828` (2026-09-28) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
 
-**33 tools.** Python MCP SDK over streamable HTTP, deployed as the `mcp` Cloud Run service on session-mode pooling (promotion holds locks).
+**35 tools.** Python MCP SDK over streamable HTTP, deployed as the `mcp` Cloud Run service on session-mode pooling (promotion holds locks).
 
 ## What constrains every tool here
 
@@ -26,34 +26,36 @@ These are properties of the connector, not advice — a tool that appears to off
 | 3 | [`get_page_contract`](#get-page-contract) | Read the assessment | Field tuples AND per-field doc text, verbatim |
 | 4 | [`get_evidence`](#get-evidence) | Read the assessment | The three-way split: found / not_found / foreign |
 | 5 | [`get_platform_fit`](#get-platform-fit) | Read the assessment | The fit score for each candidate platform, computed here and READ by you — never recomputed,… |
-| 6 | [`list_pending_runs`](#list-pending-runs) | Run and session state | Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest first, with their claim state |
+| 6 | [`list_pending_runs`](#list-pending-runs) | Run and session state | Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest first, with their claim state… |
 | 7 | [`claim_run`](#claim-run) | Run and session state | Exclusive expiring lease — one session per run |
 | 8 | [`get_run_progress`](#get-run-progress) | Run and session state | Per-page status, what is blocking, and the current claim — so a resuming session sees where i… |
-| 9 | [`get_client_state`](#get-client-state) | Run and session state | What is currently served and every prior run — a rerun produced as though it were a first run… |
-| 10 | [`list_open_rejections`](#list-open-rejections) | Run and session state | Every payload this connector has REFUSED and nobody has repaired |
-| 11 | [`register_evidence`](#register-evidence) | Author and submit | Mint before you cite |
-| 12 | [`open_payload`](#open-payload) | Author and submit | Open a CHUNKED upload for a page too large to emit in one call, and get back the connector-al… |
-| 13 | [`append_payload_part`](#append-payload-part) | Author and submit | Send one part of a chunked payload |
-| 14 | [`submit_page_payload`](#submit-page-payload) | Author and submit | Validate (both passes), supersede the live row, stage, return the verdict |
-| 15 | [`get_staged_payload`](#get-staged-payload) | Author and submit | What you last submitted for a page — STAGED, verbatim, unredacted |
-| 16 | [`get_validation_verdict`](#get-validation-verdict) | Verdicts and promotion | A prior submission's verdict, with superseded state |
-| 17 | [`explain_gate`](#explain-gate) | Verdicts and promotion | A gate's definition and threshold history — direction of movement visible |
-| 18 | [`promote_run`](#promote-run) | Verdicts and promotion | All six pages, one transaction, all or nothing |
-| 19 | [`withdraw_run`](#withdraw-run) | Verdicts and promotion | Take a promoted run off the client surface, with a recorded reason |
-| 20 | [`list_withdrawn_runs`](#list-withdrawn-runs) | Verdicts and promotion | Every currently withdrawn run with its reason and who withdrew it |
-| 21 | [`record_enrichment`](#record-enrichment) | Enrichment ledger | Record that one FACET of a client was enriched |
-| 22 | [`list_enrichment_gaps`](#list-enrichment-gaps) | Enrichment ledger | Every empty field on this run's live submissions — your worklist |
-| 23 | [`record_finding`](#record-finding) | Findings memory | Record a defect in the findings memory |
-| 24 | [`search_findings`](#search-findings) | Findings memory | "Have we seen this before?" — asked both ways, because it is asked both ways |
-| 25 | [`list_open_findings`](#list-open-findings) | Findings memory | Everything not closed — OPEN, INVESTIGATING and RECURRED — worst first |
-| 26 | [`get_finding`](#get-finding) | Findings memory | One finding in full: every sighting in order, and every refinement made against it with its r… |
-| 27 | [`list_defect_classes`](#list-defect-classes) | Findings memory | The shared vocabulary, with each class's TELL (how it presents) and PROBE (the command or que… |
-| 28 | [`record_refinement`](#record-refinement) | Findings memory | What you CHANGED, in response to which findings |
-| 29 | [`resolve_finding`](#resolve-finding) | Findings memory | Close a finding by naming the refinement that closed it |
-| 30 | [`report_recurrence`](#report-recurrence) | Findings memory | A finding that was resolved and came back |
-| 31 | [`get_memory_digest`](#get-memory-digest) | Findings memory | Everything a weekly refinement pass needs, in one call: what came back, what is new, which re… |
-| 32 | [`list_reviewer_feedback`](#list-reviewer-feedback) | Reviewer feedback | Read reviewer verdicts on insight cards straight from `annotations`, with the actor and wheth… |
-| 33 | [`ingest_reviewer_feedback`](#ingest-reviewer-feedback) | Reviewer feedback | Turn every un-ingested Accept/Reject into memory |
+| 9 | [`list_submissions`](#list-submissions) | Run and session state | Every submission this run has had, per page, oldest first — with each verdict's status, block… |
+| 10 | [`get_client_state`](#get-client-state) | Run and session state | What is currently served and every prior run — a rerun produced as though it were a first run… |
+| 11 | [`list_open_rejections`](#list-open-rejections) | Run and session state | Every payload this connector has REFUSED and nobody has repaired |
+| 12 | [`register_evidence`](#register-evidence) | Author and submit | Mint before you cite |
+| 13 | [`open_payload`](#open-payload) | Author and submit | Open a CHUNKED upload for a page too large to emit in one call, and get back the connector-al… |
+| 14 | [`append_payload_part`](#append-payload-part) | Author and submit | Send one part of a chunked payload |
+| 15 | [`get_upload_status`](#get-upload-status) | Author and submit | What has already arrived on a chunked upload — read-only |
+| 16 | [`submit_page_payload`](#submit-page-payload) | Author and submit | Validate (both passes), supersede the live row, stage, return the verdict |
+| 17 | [`get_staged_payload`](#get-staged-payload) | Author and submit | What you last submitted for a page — STAGED, verbatim, unredacted |
+| 18 | [`get_validation_verdict`](#get-validation-verdict) | Verdicts and promotion | A prior submission's verdict, with superseded state |
+| 19 | [`explain_gate`](#explain-gate) | Verdicts and promotion | A gate's definition and threshold history — direction of movement visible |
+| 20 | [`promote_run`](#promote-run) | Verdicts and promotion | All six pages, one transaction, all or nothing |
+| 21 | [`withdraw_run`](#withdraw-run) | Verdicts and promotion | Take a promoted run off the client surface, with a recorded reason |
+| 22 | [`list_withdrawn_runs`](#list-withdrawn-runs) | Verdicts and promotion | Every currently withdrawn run with its reason and who withdrew it |
+| 23 | [`record_enrichment`](#record-enrichment) | Enrichment ledger | Record that one FACET of a client was enriched |
+| 24 | [`list_enrichment_gaps`](#list-enrichment-gaps) | Enrichment ledger | Every empty field on this run's live submissions — your worklist |
+| 25 | [`record_finding`](#record-finding) | Findings memory | Record a defect in the findings memory |
+| 26 | [`search_findings`](#search-findings) | Findings memory | "Have we seen this before?" — asked both ways, because it is asked both ways |
+| 27 | [`list_open_findings`](#list-open-findings) | Findings memory | Everything not closed — OPEN, INVESTIGATING and RECURRED — worst first |
+| 28 | [`get_finding`](#get-finding) | Findings memory | One finding in full: every sighting in order, and every refinement made against it with its r… |
+| 29 | [`list_defect_classes`](#list-defect-classes) | Findings memory | The shared vocabulary, with each class's TELL (how it presents) and PROBE (the command or que… |
+| 30 | [`record_refinement`](#record-refinement) | Findings memory | What you CHANGED, in response to which findings |
+| 31 | [`resolve_finding`](#resolve-finding) | Findings memory | Close a finding by naming the refinement that closed it |
+| 32 | [`report_recurrence`](#report-recurrence) | Findings memory | A finding that was resolved and came back |
+| 33 | [`get_memory_digest`](#get-memory-digest) | Findings memory | Everything a weekly refinement pass needs, in one call: what came back, what is new, which re… |
+| 34 | [`list_reviewer_feedback`](#list-reviewer-feedback) | Reviewer feedback | Read reviewer verdicts on insight cards straight from `annotations`, with the actor and wheth… |
+| 35 | [`ingest_reviewer_feedback`](#ingest-reviewer-feedback) | Reviewer feedback | Turn every un-ingested Accept/Reject into memory |
 
 ## Read the assessment
 
@@ -184,7 +186,12 @@ list_pending_runs() -> dict
 *No parameters.*
 
 Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest
-first, with their claim state.
+first, with their claim state and whether they can be synthesised at all.
+
+`scored_cells` 0 means a RESEARCH-stage package: its score column is
+empty by contract, so there is nothing for a producer to serve and
+nothing it is permitted to derive. `synthesisable` is None where the
+ingest recorded no count — unknown, which is not the same claim as zero.
 
 ### `claim_run`
 
@@ -214,6 +221,30 @@ get_run_progress(run_id: str) -> dict
 Per-page status, what is blocking, and the current claim — so a
 resuming session sees where it left off. Pages already passing must
 not be re-synthesised.
+
+### `list_submissions`
+
+```python
+list_submissions(run_id: str, page: str = '') -> dict
+```
+
+| Parameter | Type | Default |
+|---|---|---|
+| `run_id` | `str` | **required** |
+| `page` | `str` | `''` |
+
+Every submission this run has had, per page, oldest first — with
+each verdict's status, blocking-reason count and gates, which row is
+live and which promoted.
+
+`get_run_progress` shows the LIVE row per page and nothing behind it.
+This is the history: attempts per page, the attempt on which a page
+first passed, and the gate families each refusal named. Read it when a
+page has been resubmitted more than twice — a repair that keeps landing
+on the same gate is a repair to change, not to repeat — and when a
+verdict refers to a submission id you no longer hold.
+
+Pass `page` to narrow to one page. Read-only.
 
 ### `get_client_state`
 
@@ -316,7 +347,8 @@ misrouted into another page's payload later, and the id is server-allocated
 
 ```python
 append_payload_part(upload_id: str, part: int, parts_total: int, path: str = '', items:
-    list = None, fields: dict = None, item_count: int = 0) -> dict
+    list = None, fields: dict = None, item_count: int = 0, repartition: bool = False) ->
+    dict
 ```
 
 | Parameter | Type | Default |
@@ -328,6 +360,7 @@ append_payload_part(upload_id: str, part: int, parts_total: int, path: str = '',
 | `items` | `list` | `None` |
 | `fields` | `dict` | `None` |
 | `item_count` | `int` | `0` |
+| `repartition` | `bool` | `False` |
 
 Send one part of a chunked payload. Returns a receipt, never a verdict —
 nothing is validated until the whole assembles.
@@ -347,6 +380,37 @@ than assembling into a quietly shorter payload.
 Parts are applied in ascending index at assembly, so the same set of parts
 always assembles to the same bytes. Resending an index REPLACES it: a
 dropped connection costs one part, not the transmission.
+
+`parts_total` is fixed by the first part that arrives — that is what makes
+an incomplete transmission detectable. If the chunking plan genuinely
+changes, send part 1 of the NEW plan with `repartition=true`: it discards
+the old plan's parts and adopts the new length, and the receipt says how
+many it discarded. Resuming an interrupted transmission needs none of
+that — call `get_upload_status(upload_id)` and resend only its
+`missing_parts` with the parts_total already declared.
+
+### `get_upload_status`
+
+```python
+get_upload_status(upload_id: str = '', run_id: str = '', page: str = '') -> dict
+```
+
+| Parameter | Type | Default |
+|---|---|---|
+| `upload_id` | `str` | `''` |
+| `run_id` | `str` | `''` |
+| `page` | `str` | `''` |
+
+What has already arrived on a chunked upload — read-only.
+
+Answers the question a producer resuming after an interruption could not
+previously ask: which parts landed, which are missing, how many bytes and
+items are held, and whether the set is complete. Nothing is written.
+
+Pass `upload_id` for one upload, or `run_id` (optionally with `page`) to
+list that run's OPEN uploads newest first — so a session that lost its
+place finds the upload it already opened instead of starting a new one and
+resending everything.
 
 ### `submit_page_payload`
 
@@ -911,4 +975,4 @@ unreadable verdict is left un-ingested and named, not counted as nothing.
 
 ---
 
-_33 tools · generated from `apps/mcp/server.py` @ `3e2d5e3bf9`._
+_35 tools · generated from `apps/mcp/server.py` @ `0119cb9828`._

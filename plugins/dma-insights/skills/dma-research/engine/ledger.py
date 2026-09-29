@@ -62,9 +62,23 @@ def _utcnow() -> str:
 
 # ── evidence ─────────────────────────────────────────────────────────────
 
+def _refuse_on_drift(wb: RunWorkbook) -> None:
+    """No row is written into a run whose lock no longer matches the engine.
+
+    Measured 28-09-2026 (QA audit F-F06-009): with the catalogue tier of one
+    cell mutated, `resume` reported the drift and `search` still wrote a row.
+    A write is the one place a refusal is cheap and final."""
+    drift = wb.verify_handoff_lock()
+    if drift:
+        raise LedgerRefusal(
+            "the run's lock no longer matches the engine: " + "; ".join(drift)
+            + ". Nothing is written into a run the engine cannot vouch for; "
+              "pin the catalogue (DMA_CATALOGUE) or the engine version first.")
+
+
 def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None,
                     tier: str, excerpt: str, subcaps, published: str | None = None,
-                    claim_type: str = "FACT", origin: str = "public",
+                    claim_type: str | None = None, origin: str = "public",
                     ers: float | None = None, anchor_quote: str | None = None,
                     run=None, actor: str | None = None,
                     access_status: str = "OK", conflict: str | None = None,
@@ -103,8 +117,19 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     `published` may be None. It is not defaulted to today — undated evidence
     is UNVERIFIED, never current (invariant 9), and AUD-0020 measured
     aspiration laundering staleness the other way round."""
+    _refuse_on_drift(wb)
     if tier not in C.TIERS:
         raise LedgerRefusal(f"tier {tier!r} is not in {C.TIERS}")
+    # THE LABEL IS DERIVED FROM PROVENANCE, NOT TYPED. Until 28-09-2026 this
+    # parameter defaulted to "FACT" and nothing compared it with the tier,
+    # so 77 of 285 FACT rows on one staged heatmap rested on T3/T4
+    # reportage (QA audit F-J04-004, regression seed 2). A writer that
+    # states no label gets the one its tier licenses; a writer that states
+    # FACT on a tier that cannot carry it is refused, not corrected —
+    # silently downgrading a stated claim would hide the mistake the
+    # refusal exists to surface.
+    if claim_type is None:
+        claim_type = C.claim_label_for(tier)
     if claim_type not in C.CLAIM_LABELS:
         raise LedgerRefusal(f"claim_type {claim_type!r} is not in {C.CLAIM_LABELS}")
     text = (excerpt or "").strip()
@@ -116,6 +141,29 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             "a public source with no URL cannot be cited; register it with "
             "origin='internal' and it will be labelled, not laundered")
+    # A machine technographic scan is T1 (contract.SCAN_TIER). Measured
+    # 28-09-2026 (QA audit F-J04-015): 5 technographic rows on one staged
+    # heatmap sat at T3, capping the ceilings their cells could reach.
+    # Refused, not corrected, for the reason the label rule gives: a
+    # silent re-tier would hide the mistake. Before the FACT rule so the
+    # writer is told the tier to fix rather than the label that follows it.
+    scan = C.scan_source(source_name, source_url)
+    if scan and tier != C.SCAN_TIER:
+        raise LedgerRefusal(
+            f"source names the technographic scan provider {scan!r} and is "
+            f"filed at {tier}; a machine technographic scan is "
+            f"{C.SCAN_TIER} (contract.SCAN_TIER). Re-register it at "
+            f"{C.SCAN_TIER}, or under the source that actually states the "
+            f"claim if this is reportage about a scan rather than the scan")
+    # After the excerpt and URL checks on purpose: a thin note is refused
+    # on its length first (the message the notebook tests read back), and
+    # only a citable span is then judged on what its tier can carry.
+    if claim_type == "FACT" and tier not in C.FACT_TIERS:
+        raise LedgerRefusal(
+            f"claim_type 'FACT' requires tier in {C.FACT_TIERS}; got {tier!r}. "
+            f"A {tier} source supports an INFERENCE (label it so, with the "
+            f"question that would confirm it) or a corroborated FACT from a "
+            f"T1/T2 source — never a FACT on its own")
     cells = [s.strip() for s in (subcaps if isinstance(subcaps, (list, tuple))
                                  else _split_ids(subcaps))]
     tax = C.taxonomy()
@@ -429,19 +477,21 @@ def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
     AUD-0020: a future-dated 'planned' fact made 2019 evidence CURRENT,
     because the ladder was fed the best date in the record rather than the
     date the source was published. A date in the future is not a publication
-    date; it is a plan, and it bands UNVERIFIED."""
-    if not published:
-        return C.RECENCY_UNVERIFIED
-    try:
-        d = _dt.date.fromisoformat(str(published)[:10])
-    except ValueError:
+    date; it is a plan, and it bands UNVERIFIED.
+
+    A month, a quarter or a bare year IS a date (QA audit F-L11-031,
+    29-09-2026): `engine/dates.py` resolves them the way the app does — a
+    quarter to its end — so `2025-Q4` bands like the app bands it, not as
+    undated."""
+    from . import dates as _dates
+    d = _dates.resolve(published)
+    if not d:
         return C.RECENCY_UNVERIFIED
     ref = _dt.date.today()
     if wb is not None:
-        try:
-            ref = _dt.date.fromisoformat(str(wb.metadata().get("reference_date"))[:10])
-        except (ValueError, TypeError):
-            pass
+        r = _dates.resolve(wb.metadata().get("reference_date"))
+        if r:
+            ref = r
     if d > ref:
         return C.RECENCY_UNVERIFIED
     months = (ref.year - d.year) * 12 + (ref.month - d.month)
@@ -536,6 +586,7 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     Which cell each kept source actually grounds is settled where it is
     settled — `append_evidence(subcaps=[...])` — not here.
     """
+    _refuse_on_drift(wb)
     if facet is not None and facet not in C.DQ_FACETS:
         raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
     tool = str(tool or "").strip().lower()
@@ -592,6 +643,35 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
         raise LedgerRefusal(
             f"query carries an unbound template token: {query!r}. Bind the "
             f"entity before searching; an unbound card is not a card.")
+    # THE SAME QUESTION IS NOT ASKED TWICE. Measured 28-09-2026 (QA audit
+    # F-D05-033): `engine.cli search` accepted the same query twice into the
+    # Search_Log (rows 1 and 2 identical), and the only dedupe in the system
+    # was the relay's, over relay requests. A repeat asks the world the same
+    # question and pays for the same answer; the log is the record, and a
+    # query it already holds — same identity, same tool, same facet — is
+    # refused unless it is being extended to a cell the search was not logged
+    # against (one call, one row per cell it bears on, exactly as the fan-out
+    # rule says). The facet is part of the question: the same text asked of
+    # `works` and of `fails` is two questions, and the ceiling counts
+    # questions (test_search_fanout pins that; a facet-blind identity
+    # refused the second and contradicted it).
+    prior = prior_searches(wb, query, tool, facet=facet)
+    if prior:
+        logged_cells = {str(r.get("SubCap_ID") or "").strip() for r in prior}
+        new_cells = [c for c in cells if c not in logged_cells]
+        if not new_cells:
+            first = prior[0]
+            raise LedgerRefusal(
+                f"query already logged for this run at seq {first.get('Seq')} "
+                f"through {tool} (hits {first.get('Hits')}, kept "
+                f"{first.get('Kept')}, outcome {str(first.get('Outcome') or '')[:60]!r}): "
+                f"{query!r}. A repeated search pays for the answer the log "
+                f"already holds. Work from that row, rephrase from a different "
+                f"angle (another facet's operators, a proxy class, a named "
+                f"artefact), or fire a different tool — `prior_queries` on the "
+                f"card and the relay brief list what has been asked "
+                f"(QA audit F-D05-033, 28-09-2026).")
+        cells = new_cells
     seq = len(wb.rows("Search_Log"))
     stamp = _utcnow()
     for cell in (cells or [None]):
@@ -602,6 +682,59 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
             "Kept": kept, "Outcome": outcome,
         })
     return seq
+
+
+def prior_searches(wb: RunWorkbook, query: str, tool: str,
+                   facet: str | None = None) -> list[dict]:
+    """Search_Log rows carrying this query's identity through this tool —
+    at this facet when one is given, at any facet when `facet` is None (the
+    "was this ever fired" reading the stub, the relay and the fixtures
+    take)."""
+    key = Q.norm_query(query)
+    tool = str(tool or "").strip().lower()
+    want = str(facet or "").strip().lower()
+    if not key:
+        return []
+    return [r for r in wb.rows("Search_Log")
+            if Q.norm_query(r.get("Query")) == key
+            and str(r.get("Tool") or "").strip().lower() == tool
+            and (not want or str(r.get("Facet") or "").strip().lower() == want)]
+
+
+def prior_queries(wb: RunWorkbook, cells=None, *, prelim: bool = False) -> list[dict]:
+    """The exclusion list: every distinct (query, tool) already fired for
+    these cells (or run-level rows when `prelim`), with what it returned.
+    This is what a relay brief states to the specialist and what a card can
+    print, so a rephrased repeat is a choice rather than an accident
+    (QA audit D-16, 28-09-2026)."""
+    want = {str(c).strip() for c in (cells or []) if str(c).strip()}
+    out: dict[tuple, dict] = {}
+    for r in wb.rows("Search_Log"):
+        q = str(r.get("Query") or "").strip()
+        if not q:
+            continue
+        cell = str(r.get("SubCap_ID") or "").strip()
+        if want and cell not in want:
+            continue
+        if not want and not prelim and cell:
+            continue
+        if prelim and cell:
+            continue
+        key = (Q.norm_query(q), str(r.get("Tool") or "").strip().lower())
+        row = out.get(key)
+        if row is None:
+            row = {"seq": r.get("Seq"), "query": q, "tool": key[1],
+                   "facet": str(r.get("Facet") or "").strip(),
+                   "facets": [],
+                   "cells": [], "hits": r.get("Hits"), "kept": r.get("Kept"),
+                   "outcome": str(r.get("Outcome") or "").strip()}
+            out[key] = row
+        fc = str(r.get("Facet") or "").strip()
+        if fc and fc not in row["facets"]:
+            row["facets"].append(fc)
+        if cell and cell not in row["cells"]:
+            row["cells"].append(cell)
+    return sorted(out.values(), key=lambda r: (int(r["seq"] or 0), r["tool"]))
 
 
 # ── synthesis ────────────────────────────────────────────────────────────
@@ -1172,7 +1305,11 @@ def enrichment_binding(wb: RunWorkbook) -> dict:
 def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
                     ladder: list[dict], proxy_log: str,
                     what_was_hunted: str, session: str = "",
-                    enrichment_unavailable: bool = False) -> dict:
+                    enrichment_unavailable: bool = False,
+                    inferable: str | None = None,
+                    validation_question: str | None = None,
+                    not_determinable: str | None = None,
+                    run=None) -> dict:
     """Close a subcap as a SEARCHED, DECLARED absence — or refuse.
 
     The only sanctioned way a cell ends a run with NO_EVIDENCE. Before this
@@ -1307,6 +1444,28 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
     if len(str(what_was_hunted or "").strip()) < 40:
         problems.append("--hunted: name what was looked for, where, and what "
                         "came back instead (>= 40 chars)")
+    # THE DOSSIER FIELDS (QA audit D-12, 28-09-2026): an absence that still
+    # permits an inference carries the inference AND the question that would
+    # validate it — one without the other is a guess or a homework list; a
+    # cell that cannot be determined from public sources says why, so the
+    # triage can route it to the client conversation instead of to another
+    # proxy round.
+    inferable = str(inferable or "").strip() or None
+    validation_question = str(validation_question or "").strip() or None
+    not_determinable = str(not_determinable or "").strip() or None
+    if bool(inferable) != bool(validation_question):
+        problems.append("--inferable and --validation-question come together: "
+                        "an inference states what it infers AND the question "
+                        "a client answer would settle it with")
+    if inferable and len(inferable) < 30:
+        problems.append("--inferable: state the inference in >= 30 chars")
+    if validation_question and (len(validation_question) < 15
+                                or "?" not in validation_question):
+        problems.append("--validation-question: a question (>= 15 chars, "
+                        "ending in ?) the client can answer")
+    if not_determinable and len(not_determinable) < 30:
+        problems.append("--not-determinable: say why no public source can "
+                        "settle this cell (>= 30 chars)")
     if problems:
         raise LedgerRefusal(f"{subcap}: absence refused — " + "; ".join(problems))
     hunted = str(what_was_hunted).strip()
@@ -1349,10 +1508,143 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
                       + (f"; REDUCED RIGOUR — {degraded}" if degraded else ""),
                       session=session)
     wb.recompute_coverage()
-    return {"subcap": subcap, "searches": n, "volleys": vs["fired"],
-            "rungs": sorted(rungs), "tools": vs["tools"],
-            "rigour": "REDUCED" if degraded else "FULL",
-            "degraded_reason": degraded}
+    out = {"subcap": subcap, "searches": n, "volleys": vs["fired"],
+           "rungs": sorted(rungs), "tools": vs["tools"],
+           "rigour": "REDUCED" if degraded else "FULL",
+           "degraded_reason": degraded}
+    dossier = gap_dossier_doc(
+        wb, subcap, vs=vs, rep=rep, hunted=hunted,
+        proxy_log=str(proxy_log).strip(), actor=actor,
+        rigour=out["rigour"], inferable=inferable,
+        validation_question=validation_question,
+        not_determinable=not_determinable)
+    out["dossier"] = write_gap_dossier(_run_of(wb, run), dossier)
+    out["facets_status"] = dossier["facets_status"]
+    out["proxy_candidates"] = dossier["proxy_candidates"]
+    out["est_cost_usd"] = dossier["est_cost_usd"]
+    return out
+
+
+# ── the gap dossier: what a declared absence knows about itself ──────────
+#
+# QA audit D-12..D-16 (28-09-2026): the declared absence was the nearest
+# thing to a gap dossier and carried 4 of its 11 fields. The dossier is the
+# record the coordinator triages from (`engine.brief triage`) and the
+# projector renders from (`engine.surface_export absence`): per-facet status
+# COMPUTED from the Search_Log, the searches themselves, the ladder as
+# established, the proxy class the catalogue names and the rungs not yet
+# climbed, the internal artefact that would settle the cell, the inference
+# (with its validation question) or the reason nothing public can decide
+# it, and what one more round costs. Append-only, latest record per cell
+# wins; `read_gap_dossiers` is the one reader.
+
+GAP_DOSSIERS_NAME = "gap_dossiers.jsonl"
+GAP_DOSSIER_SCHEMA = "gap_dossier_v1"
+GAP_TRIAGE_NAME = "gap_triage.json"
+GAP_TRIAGE_SCHEMA = "gap_triage_v1"
+DISPOSITIONS = ("proxy", "internal_only", "cross_card_remap", "unknown")
+
+
+def _est_round_cost() -> float | None:
+    """What one more proxy round on one cell costs, from the measured
+    baseline — or None when no baseline can be read (never a guess)."""
+    try:
+        from . import cost
+        return float(cost.measured_baseline()["usd_per_subcap"])
+    except Exception:                                # noqa: BLE001
+        return None
+
+
+def gap_dossier_doc(wb: RunWorkbook, subcap: str, *, vs: dict, rep: dict,
+                    hunted: str, proxy_log: str, actor: str, rigour: str,
+                    inferable: str | None, validation_question: str | None,
+                    not_determinable: str | None) -> dict:
+    md = wb.metadata()
+    proxy_class = C.proxy_classes().get(subcap) or None
+    settles = C.settling_artefacts().get(subcap) or None
+    climbed = set(rep.get("rungs") or [])
+    searches = [{"seq": r.get("Seq"), "facet": str(r.get("Facet") or ""),
+                 "tool": str(r.get("Tool") or ""), "query": str(r.get("Query") or ""),
+                 "hits": r.get("Hits"), "kept": r.get("Kept"),
+                 "outcome": str(r.get("Outcome") or "")}
+                for r in wb.rows("Search_Log")
+                if str(r.get("SubCap_ID") or "").strip() == subcap]
+    return {
+        "schema_version": GAP_DOSSIER_SCHEMA,
+        "run_id": md.get("run_id"), "subcap": subcap,
+        "name": C.subcap_names().get(subcap),
+        "category": subcap.split(".")[0],
+        "declared_at": _utcnow(), "actor": actor, "rigour": rigour,
+        "facets_status": {f: {"fired": vs["fired"].get(f, 0),
+                              "status": "SEARCHED" if vs["fired"].get(f) else "NOT_RUN"}
+                          for f in vs["askable"]},
+        "primary_fired": vs["primary_fired"],
+        "searches": searches,
+        "tools": vs["tools"], "enrichment_tools": vs["enrichment_tools"],
+        "ladder": {"rungs": sorted(climbed),
+                   "claimed_not_fired": rep.get("claimed_not_fired") or []},
+        "hunted": hunted, "proxy_log": proxy_log,
+        "proxy_class": proxy_class,
+        "proxy_candidates": ([proxy_class] if proxy_class else [])
+                            + [r for r in Q.LADDER_RUNGS if r not in climbed],
+        "settling_artefact": settles,
+        "inferable": ({"claim": inferable, "validation_question": validation_question}
+                      if inferable else None),
+        "not_determinable": not_determinable,
+        "est_cost_usd": _est_round_cost(),
+    }
+
+
+def write_gap_dossier(run, doc: dict) -> str | None:
+    if run is None:
+        return None
+    p = run.qa_dir / GAP_DOSSIERS_NAME
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(doc, separators=(",", ":"), default=str) + "\n")
+    return str(p)
+
+
+def read_gap_dossiers(run) -> dict[str, dict]:
+    """subcap -> its latest dossier. A torn line is skipped, never fatal."""
+    out: dict[str, dict] = {}
+    if run is None:
+        return out
+    if not (run.qa_dir / GAP_DOSSIERS_NAME).is_file():
+        return out
+    for line in (run.qa_dir / GAP_DOSSIERS_NAME).read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            doc = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(doc, dict) and doc.get("subcap"):
+            out[str(doc["subcap"])] = doc
+    return out
+
+
+def write_gap_triage(run, doc: dict) -> str:
+    p = run.qa_dir / GAP_TRIAGE_NAME
+    p.parent.mkdir(parents=True, exist_ok=True)
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(doc, indent=2, default=str), encoding="utf-8")
+    tmp.replace(p)
+    return str(p)
+
+
+def read_gap_triage(run) -> dict | None:
+    """The coordinator's latest triage, or None when none was written."""
+    if run is None:
+        return None
+    if not (run.qa_dir / GAP_TRIAGE_NAME).is_file():
+        return None
+    try:
+        doc = json.loads((run.qa_dir / GAP_TRIAGE_NAME).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return doc if isinstance(doc, dict) else None
 
 
 def declared_absences(wb: RunWorkbook) -> set[str]:

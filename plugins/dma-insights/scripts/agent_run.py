@@ -118,7 +118,7 @@ in-process subagent. Two things differ from your usual footing:
    handing what happened to the qa-overseer, which is the only agent that
    writes to the findings memory.
 5. A VERDICT NAMES A GATE AND A PATH. The path routes (table above); the
-   gate id is explained by 05-lifecycle/1-gates.md and, live, by
+   gate id is explained by 05-lifecycle/gates/<ID>.md and, live, by
    explain_gate(gate_id). Do not repair a gate you have not read.
 
 --- TASK ---

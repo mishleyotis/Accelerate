@@ -1,0 +1,9 @@
+phase,files_loaded,tokens_before_first_tool_call,tool_calls_expected,sub_agents,forecast,actual
+research: lane dispatch (per category),engine.brief dispatch packet + session_brief RESEARCH_BRIEF + RESEARCH-PROTOCOL.md (if read),"749 + 228 + 5,265 = 6,242",≈40 per cell (5 volleys) — 60-op checkpoint ceiling,0 (lane) — headless claude -p,"cost.schedule(subcaps,caps,16 lanes)",not measurable (no run ledger on disk)
+research: conductor session,research-conductor.md 467 lines ≈6.9k + dma-research SKILL.md 11.7k + routing brief 0.2k,"≈18,800 (9.4% of 200k)",preflight+start+prelim ≈30,16 researchers + scanner + enrichment specialists + challenger + relay specialists,"$5/pillar default, 10 rounds",—
+assessment: pillar scorer,scoring-batch packet (bounded) + rubric,not measured (packet needs a scored run),1 engine.assessment score per row,4 scorers + critic,—,—
+reports,report-batch packet + report_templates.json (controls),not measured,engine.narrative per section,2 producers + validator,—,—
+production: heatmap page,"dma-surface-production SKILL.md 11,085 + 03-pages/1-heatmap.md 11,435 + 05-lifecycle/1-gates.md 15,134 + routing.md 9,276","46,930 (23.5% of 200k) — FAIL >15%","get_page_contract, get_report_bundle, get_evidence, ship_page",6 per-surface producers + challenger + consolidator,—,—
+production: overview page,"SKILL.md 11,085 + 03-pages/2-overview.md 20,296 + 1-gates.md 15,134 + routing.md 9,276","55,791 (27.9%) — FAIL",same,8 producers + narrative last,—,—
+promotion,"surface-producer.md 249 lines ≈3.7k + SKILL.md 11,085","≈14,800 (7.4%)","claim, submit ×6, promote",0,—,—
+session start (any),"session_brief hook 911 B + connector schema ≈6,667 tok","≈6,900",0,0,—,—

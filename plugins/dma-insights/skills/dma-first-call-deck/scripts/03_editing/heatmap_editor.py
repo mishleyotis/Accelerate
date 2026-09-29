@@ -9,8 +9,11 @@ Completely config-driven via color_level_system:
   - Progress bar width and cxnSp median x-position handled as block-specific special cases
 
 Inputs:
-  --scores      JSON: {capability_name: score} — must cover all 17 capabilities
-  --medians     JSON: {capability_name: peer_median} — all 17
+  --scores      JSON: {capability_name: score} — one entry per template block
+                (17). A RETIRED capability (cls.RETIRED_CAPABILITIES, e.g. the
+                v5.0-only "Sustainable Finance & ESG") may be null or absent
+                and renders NOT ASSESSED; every other block needs a score.
+  --medians     JSON: {capability_name: peer_median} — same rule
   --terminology Optional JSON: text replacements applied across pillar headers
                 (e.g., {"CUSTOMER EXPERIENCE": "MEMBER EXPERIENCE"} for credit_unions)
   --headline    Headline text for Sh1 (passed as text, not derived from data)
@@ -19,7 +22,7 @@ Outputs:
   Edited PPTX (in-place or via --out) + audit JSON.
 
 Architecture:
-  1. Validate inputs (all 17 capabilities present, scores in [0,5]).
+  1. Validate inputs (every non-retired capability present, scores in [0,5]).
   2. Verify shape count == 158.
   3. Apply SLIDE_14_SHARED_ROLES via common dispatcher.
   4. For each of 17 capability blocks (offset 0..7):
@@ -59,28 +62,44 @@ TRACK_WIDTH_EMU = 1883700
 
 
 def validate_inputs(scores_dict, medians_dict):
+    """A retired capability (cls.RETIRED_CAPABILITIES) may be null or absent
+    — the run never assessed it and the block renders NOT ASSESSED. Any
+    other null is refused: a v7.0 category always carries a score, and a
+    block painted from an invented one would read as a measurement."""
     errors = []
-    missing_s = [c for c in cls.CAPABILITY_ORDER if c not in scores_dict]
+    retired = cls.RETIRED_CAPABILITIES
+    missing_s = [c for c in cls.CAPABILITY_ORDER
+                 if c not in scores_dict and c not in retired]
     if missing_s:
         errors.append(f"Missing scores for: {missing_s}")
-    missing_m = [c for c in cls.CAPABILITY_ORDER if c not in medians_dict]
+    missing_m = [c for c in cls.CAPABILITY_ORDER
+                 if c not in medians_dict and c not in retired]
     if missing_m:
         errors.append(f"Missing medians for: {missing_m}")
-    for c, s in scores_dict.items():
-        if not isinstance(s, (int, float)) or not (0.0 <= s <= 5.0):
-            errors.append(f"{c}: score {s} not in [0.0, 5.0]")
-    for c, m in medians_dict.items():
-        if not isinstance(m, (int, float)) or not (0.0 <= m <= 5.0):
-            errors.append(f"{c}: peer_median {m} not in [0.0, 5.0]")
+    for label, d in (("score", scores_dict), ("peer_median", medians_dict)):
+        for c, v in d.items():
+            if v is None:
+                if c in retired:
+                    continue
+                errors.append(f"{c}: {label} is null but the capability is not "
+                              f"retired; only {sorted(retired)} may be null")
+                continue
+            if isinstance(v, bool) or not isinstance(v, (int, float)) \
+                    or not (0.0 <= v <= 5.0):
+                errors.append(f"{c}: {label} {v} not in [0.0, 5.0]")
     return errors
 
 
 def compute_bar_width_emu(score):
+    if score is None:                    # unscored block: an empty bar
+        return 0
     w = round((score / 5.0) * TRACK_WIDTH_EMU)
     return min(max(w, 0), TRACK_WIDTH_EMU)
 
 
 def compute_median_x_emu(track_left_emu, peer_median):
+    if peer_median is None:              # unscored block: marker parked at 0
+        return track_left_emu
     offset = round((peer_median / 5.0) * TRACK_WIDTH_EMU)
     return track_left_emu + min(max(offset, 0), TRACK_WIDTH_EMU)
 
@@ -122,10 +141,13 @@ def edit_block(shapes, block_num, base, cap_name, score, peer_median, input_data
     audit.record(base + 2, f"cap_name_cap{block_num+1:02d}", [],
                  details="preserved (template name; terminology already applied)")
 
-    # +3 score text (bold in template)
-    score_str = f"{score:.1f}"
+    # +3 score text (bold in template). A retired capability has no score:
+    # the block says NOT ASSESSED rather than carrying an invented number.
+    unscored = score is None
+    score_str = cls.UNSCORED["score_text"] if unscored else f"{score:.1f}"
     ec.set_shape_text(shapes[base + 3], score_str, preserve_bold=True)
-    audit.record(base + 3, f"score_cap{block_num+1:02d}", ["text(bold)"], text=score_str)
+    audit.record(base + 3, f"score_cap{block_num+1:02d}", ["text(bold)"], text=score_str,
+                 details=(cls.RETIRED_CAPABILITIES.get(cap_name) if unscored else None))
 
     # +4 track bar (static, auto-corrects drift)
     role_spec = expanded_roles[base + 4]
@@ -151,7 +173,7 @@ def edit_block(shapes, block_num, base, cap_name, score, peer_median, input_data
     # +7 level label: text + text_color (bold in template)
     role_spec = expanded_roles[base + 7]
     level = cls.score_to_level_4tier(score)
-    level_upper = level.upper()
+    level_upper = cls.UNSCORED["label"] if unscored else level.upper()
     ec.set_shape_text(shapes[base + 7], level_upper, preserve_bold=True)
     ops = ec.apply_color_role(shapes[base + 7], role_spec, input_data, slide_num=14)
     ops.insert(0, "text(bold)")
@@ -171,8 +193,8 @@ def edit_slide14(pptx_path, out_path, scores_dict, medians_dict, headline,
 
     audit = ec.EditorAudit(slide_num=14, editor_name="heatmap_editor")
 
-    scores_ordered = [scores_dict[c] for c in cls.CAPABILITY_ORDER]
-    medians_ordered = [medians_dict[c] for c in cls.CAPABILITY_ORDER]
+    scores_ordered = [scores_dict.get(c) for c in cls.CAPABILITY_ORDER]      # None = retired
+    medians_ordered = [medians_dict.get(c) for c in cls.CAPABILITY_ORDER]
     input_data = {
         "s14": {"scores": scores_ordered, "medians": medians_ordered},
         "input": {"headline": headline},

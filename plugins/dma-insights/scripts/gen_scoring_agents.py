@@ -56,6 +56,8 @@ tools: {tools}
 disallowedTools: {denied}
 ---
 
+{model_line}
+
 You strike the scores for ONE pillar of one Digital Maturity Assessment run:
 **{pid} — {name}**.
 
@@ -92,16 +94,21 @@ score, and flags one where more than 60% do. For each subcap row on
 
 1. Read `Dominant_Claim`, `Claim_Label`, `What_We_Found`, `Ceiling_Band`,
    `Challenge_Verdict`, `Evidence_IDs` and, for an absence, `Negative_Ladder`.
-2. Decide the raw M-level from the rubric descriptor the claim matches; apply
-   the evidence ceiling (`engine.assessment` computes it from the tiers and
-   refuses a score above it), then the caps the Issue_Register implies.
+2. Decide the raw M-level from the rubric descriptor the claim matches, and
+   name the ADJ_ deltas (staleness −0.3, complaints −0.3, incident −0.5) and
+   the caps the Issue_Register implies (CAP_S2 3.0, CAP_S3 2.0, …). You
+   supply INPUTS, never the result: `engine.assessment apply` (or `score
+   --raw`) does raw − adjustments, the evidence ceiling it computes from the
+   tiers, the caps, and the quarter-point (down, never up), and returns the
+   final, the band and the arithmetic as one string. Three scorers of one
+   cell once wrote 2.5, 2.7 and 2.7 for the same inputs (QA audit
+   F-F14-029); the engine writes one number.
 3. Strike it — ONE command per subcap, chaining several in one Bash call:
 
 ```
 python3 -m engine.assessment score --run <R> --root <ROOT> --subcap {pid}C1.1.1 \\
-    --score 2.5 --confidence MEDIUM --actor scoring-{lower}-producer \\
-    --rationale "[EVIDENCE] E-012 shows …; E-041 confirms …. [MATURITY MATCH] M2 … because …. [GAP TO NEXT] …. [COUNTER] …. [CEILING] …. [SO WHAT] For <entity> …" \\
-    --caps "none applied" \\
+    --raw 3.0 --adj ADJ_STALE:-0.3 --confidence MEDIUM --actor scoring-{lower}-producer \\
+    --rationale "[EVIDENCE] E-012 shows …; E-041 confirms …. [MATURITY MATCH] M3 … because …. [GAP TO NEXT] …. [COUNTER] …. [CEILING] …. [SO WHAT] For <entity> …" \\
     --ai-applicability ASSISTIVE --data-dependency "member master, transactions" \\
     --data-readiness AMBER --ai-evidence NONE_FOUND --ai-blocker "no governed catalogue" \\
     --peer-ai-signal UNVERIFIED
@@ -138,6 +145,8 @@ tools: {tools}
 disallowedTools: {denied}
 ---
 
+{model_line}
+
 You are the critic the scoring gate requires, and you struck none of the scores
 you are reading.
 
@@ -163,10 +172,12 @@ python3 -m engine.assessment critique --run <R> --root <ROOT> --pillar P1 \\
 A FAIL names the rows and the direction they should move; the driver
 (`engine.pipeline`) re-dispatches that pillar's scorer with your note in the
 next scoring round, and you critique again. Once every pillar carries your
-PASS, record the rollup's headline — the one line an executive reads first —
-`engine.assessment rollup --run <R> --root <ROOT> --headline "<40+ chars,
-institution-specific>"`; the driver runs the rollup and the SCORING gate
-after your lane returns, and a rollup with no headline refuses.
+PASS, supply the rollup's headline — the one line an executive reads first —
+through `engine.assessment rollup --run <R> --root <ROOT> --headline "<40+
+chars, institution-specific>"`. The rollup and the SCORING gate are the
+DRIVER's (`engine.pipeline`, routing.md's stage table): it re-runs both after
+your lane returns, and a rollup with no headline refuses — so your call
+records the headline; it does not close the stage.
 
 **Your first command is the brief the driver handed you** (`engine.brief
 scoring-batch --critic`): the pillars in scope, what is scored, the verdicts
@@ -179,15 +190,22 @@ FAIL into a PASS because the run is late.
 """
 
 
+def _prov():
+    import provision_agent_tools as prov  # noqa: PLC0415
+    return prov
+
+
 def build() -> dict[str, str]:
     out = {}
     for pid, name in PILLAR_NAMES.items():
         rel = f"scoring/scoring-{pid.lower()}-producer.md"
         tools, denied = _tool_lines(rel)
         out[f"scoring-{pid.lower()}-producer.md"] = SCORER.format(
-            pid=pid, lower=pid.lower(), name=name, n=pid[1], tools=tools, denied=denied)
+            pid=pid, lower=pid.lower(), name=name, n=pid[1], tools=tools, denied=denied,
+            model_line=_prov().model_line(f"scoring-{pid.lower()}-producer"))
     tools, denied = _tool_lines("scoring/scoring-critic.md")
-    out["scoring-critic.md"] = CRITIC.format(tools=tools, denied=denied)
+    out["scoring-critic.md"] = CRITIC.format(tools=tools, denied=denied,
+                                             model_line=_prov().model_line("scoring-critic"))
     return out
 
 

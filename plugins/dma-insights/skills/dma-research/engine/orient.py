@@ -61,6 +61,16 @@ def orient(wb: RunWorkbook, category: str | None, *,
             f"Run_Metadata.entity_name is {entity!r}. Every question this "
             f"command issues names the entity; an unbound card produces "
             f"searches for a literal placeholder.")
+    drift = wb.verify_handoff_lock()
+    if drift:
+        # F-F06-009 (28-09-2026): a mutated catalogue was reported by resume
+        # and the card was served anyway. A card names cells; against a
+        # catalogue the run was not locked to, those cells may not exist.
+        raise ValueError(
+            "REFUSED: the run's lock no longer matches the engine: "
+            + "; ".join(drift)
+            + ". Pin the catalogue this run was locked to (DMA_CATALOGUE) or "
+              "the engine version before asking for a card.")
     tax = C.taxonomy()
     cats = [category] if category else list(tax.categories)
     budget = L.stats(wb, category)

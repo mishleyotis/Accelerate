@@ -141,23 +141,25 @@ def check_score_to_level_boundaries():
     """Boundary conditions for score_to_level_4tier and score_to_level_5tier."""
     issues = []
     # 4-tier boundaries
+    # The app's bands: strict less-than at 2 / 3 / 4 (apps/web/lib/bands.js)
     pairs_4 = [
-        (0.00, "Activating"), (1.49, "Activating"),
-        (1.50, "Building"),   (2.49, "Building"),
-        (2.50, "Competing"),  (3.49, "Competing"),
-        (3.50, "Differentiating"), (5.00, "Differentiating"),
+        (0.00, "Activating"), (1.99, "Activating"),
+        (2.00, "Building"),   (2.99, "Building"),
+        (3.00, "Competing"),  (3.99, "Competing"),
+        (4.00, "Differentiating"), (5.00, "Differentiating"),
     ]
     for score, expected in pairs_4:
         actual = cls.score_to_level_4tier(score)
         if actual != expected:
             issues.append(f"score_to_level_4tier({score}) returned {actual!r}, expected {expected!r}")
     # 5-tier boundaries
+    # The maturity score scale: engine/rubric.py cuts 1.5 / 2.5 / 3.5 / 4.5
     pairs_5 = [
-        (0.00, 1), (0.99, 1),
-        (1.00, 2), (1.99, 2),
-        (2.00, 3), (2.99, 3),
-        (3.00, 4), (3.99, 4),
-        (4.00, 5), (5.00, 5),
+        (0.00, 1), (1.49, 1),
+        (1.50, 2), (2.49, 2),
+        (2.50, 3), (3.49, 3),
+        (3.50, 4), (4.49, 4),
+        (4.50, 5), (5.00, 5),
     ]
     for score, expected in pairs_5:
         actual = cls.score_to_level_5tier(score)
@@ -169,7 +171,7 @@ def check_score_to_level_boundaries():
 def check_score_ranges_cover():
     """Score ranges in both palettes must cover [0, 5] without gaps or overlaps."""
     issues = []
-    # 4-tier: expect (0,1.49), (1.5,2.49), (2.5,3.49), (3.5,5.0)
+    # 4-tier: expect (0,1.99), (2,2.99), (3,3.99), (4,5.0)
     ranges = [cls.LEVEL_4TIER[l]["score_range"] for l in
               ("Activating", "Building", "Competing", "Differentiating")]
     for i in range(len(ranges) - 1):
@@ -177,7 +179,7 @@ def check_score_ranges_cover():
         nlo, nhi = ranges[i + 1]
         if abs(nlo - (hi + 0.01)) > 0.001:
             issues.append(f"4-tier range gap/overlap: {ranges[i]} → {ranges[i+1]}")
-    # 5-tier: expect (0,0.99), (1,1.99), ..., (4,5)
+    # 5-tier: expect (0,1.49), (1.5,2.49), ..., (4.5,5)
     ranges5 = [cls.LEVEL_5TIER[i]["score_range"] for i in (1, 2, 3, 4, 5)]
     for i in range(len(ranges5) - 1):
         lo, hi = ranges5[i]

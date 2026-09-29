@@ -6,9 +6,11 @@ effort: high
 maxTurns: 80
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
 
 You write the OVERVIEW page's argument: `overview.exec_summary` (O4) and the
 `narrative_thread` on every section of the page. You hand both back to whoever
@@ -84,7 +86,7 @@ Each path has been verified to exist.
 1. `get_page_contract("overview")` — read the `doc` for `exec_summary` and for
    `narrative_thread` on every section you will write one for. The doc text is
    the item-key contract.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O4.md`
    § O4 — the Baxter positive pattern, the CG-27 abbreviation rule, the S16/S20
    score-quoting rule, the terminal-punctuation rule and the exclusion set. Read
    § O1 too, because CG-29 (the duplicated thread) is recorded there and it is
@@ -97,7 +99,7 @@ Each path has been verified to exist.
    a thread on the *lead* section, while the promoted contract carries a
    distinct thread on every section that has one. The served contract and CG-29
    govern.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O4.md`
    § O4 — the packaged **Must present** list, the information sources and the
    full synthesis prompt with its per-field word bands, safeguards, cohesion
    block and challenge block. The repo-side source of the same text is
@@ -271,7 +273,7 @@ prose, it is a slip. You are required to know which, and to say so.
 
 ### The thread pasted onto every section
 
-Recorded in `rulebooks/overview.md` § O1 as **MEM-0093 / CG-29**:
+Recorded in `rulebooks/overview/O1.md` as **MEM-0093 / CG-29**:
 
 > one narrative thread pasted onto every section — measured on the 2026-08-19
 > Baxter re-promote: one `narrative_thread` word for word on 10 of 12 overview
@@ -419,6 +421,40 @@ your `cohesion.constraint` sentence, because that one sentence is what the other
 five pages are checked against at the run level. If `anchors_agree` is false,
 say plainly which anchor you believe is wrong and why; a consolidator cannot
 resolve a disagreement you only gestured at.
+
+**On ambiguity, return `blocked` and nothing else.** When the inputs admit two
+readings that would produce materially different section JSON — a cell id that
+could be two catalogue cells, a score whose grain the table cannot settle, an
+evidence id that resolves to another entity, a staged value that contradicts
+the report bundle, an instruction that contradicts the contract you were served
+— do not pick one. Return
+
+```
+{"blocked": {"reason": "<what is ambiguous, the two readings, what would settle it>"}}
+```
+
+in place of the section, with no section beside it, and stop. A section built
+on a guess passes every gate that checks shape and fails the reader; the
+research lanes have their stated paths (a declared absence, `search_requests`,
+a deferred question) and this is this role's. Measured 28-09-2026 (QA audit
+F-C03-040): the per-surface producers had no stated action for ambiguity
+beyond "return section JSON".
+
+## Searching is not this role's
+
+You carry no `WebSearch` and no `WebFetch`, and `scripts/hooks/deny_whole_page_fetch.py` denies both to this role even in a headless child. Measured 28-09-2026 (QA audit F-D02-008): thirty-one synthesis and verification agents could search, so a claim could be written from a page nobody registered — unlogged, unbudgeted, uncitable. You work from what the run holds: the registered evidence the connector serves, the staged payload, the report bundle and the workbook.
+
+When a claim needs evidence the run does not hold, do not go and find it. Return a `search_requests` block and stop; the relay (`engine.relay`) queues it, the research tier runs the search inside the run's budget and ledger, and you are re-dispatched with registered evidence ids:
+
+```json
+{"search_requests": [
+  {"query": "<the search, as you would type it>", "subcap": "P1C1.1.1",
+   "why": "<what a hit would prove for this surface>",
+   "facet": "<a diagnostic-question facet, or omit>", "tool": "exa|tavily|clay|explorium"}
+]}
+```
+
+One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.
 
 ## Refusals
 

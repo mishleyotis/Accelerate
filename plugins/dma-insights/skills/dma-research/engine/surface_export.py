@@ -282,6 +282,215 @@ def server_section(page: str, section: str, *, producer_version: str,
                     narrative_thread=narrative_thread)
 
 
+# ── declared absences, projected — never written by hand ─────────────────
+#
+# Measured 28-09-2026 (QA audit F-CG15-016) on a staged heatmap: 61 of the
+# first 102 cells were absences, carrying 34 distinct ladders (the largest
+# shared by 5 cells) and 119 eight-word spans shared by three or more
+# syntheses — "Within Governance & Risk Appetite, the evidenced cells" 22
+# times. The 65 CG-15 refusals were earned: a producer writing 61 absences
+# by hand wrote one absence 61 times. The record of each absence already
+# exists, per cell, in the run — the Search_Log rows, the ladder the lane
+# established, what it hunted, the proxy class it climbed, the artefact the
+# catalogue says would settle it — and a deterministic projection of that
+# record is per-cell exactly as far as the record is. Where two records are
+# the same sentence with the cell id swapped, the projector OMITS both and
+# says so, because the rulebook's own preference order puts "omitted" above
+# "declared-and-identical" and the gate would refuse them anyway.
+
+ABSENCES_NAME = "heatmap.cell_evidence.absences.json"
+
+
+def _hunted_of(row: dict, dossier: dict | None) -> str:
+    if dossier and dossier.get("hunted"):
+        return str(dossier["hunted"]).strip()
+    import re as _re
+    m = _re.search(r"Searched and not found: (.*?)\. Volleys fired:",
+                   str(row.get("What_We_Found") or ""), _re.S)
+    return (m.group(1).strip() if m else
+            str(row.get("Dominant_Claim") or "").split(";", 1)[-1].strip())
+
+
+def _rung_lines(row: dict, searches: list[dict]) -> list[str]:
+    """The ladder rungs first (rung name, tool, quoted query), then every
+    other logged volley for the cell. Each line names a tool and quotes the
+    query, which is what a reader could re-run."""
+    try:
+        ladder = json.loads(str(row.get("Negative_Ladder") or "[]"))
+    except ValueError:
+        ladder = []
+    by_q = {}
+    for s in searches:
+        by_q.setdefault(" ".join(str(s.get("Query") or "").split()).lower(), s)
+    out, seen = [], set()
+    for r in ladder if isinstance(ladder, list) else []:
+        q = str((r or {}).get("query") or "").strip()
+        rung = str((r or {}).get("rung") or "").strip()
+        if not q:
+            continue
+        s = by_q.get(" ".join(q.split()).lower(), {})
+        tool = str(s.get("Tool") or "").strip() or "web_search"
+        out.append(f"{rung} rung via {tool}, searched for: \"{q}\" — "
+                   f"{s.get('Hits', 0) or 0} hits, {s.get('Kept', 0) or 0} kept")
+        seen.add(" ".join(q.split()).lower())
+    for s in searches:
+        q = str(s.get("Query") or "").strip()
+        key = " ".join(q.split()).lower()
+        if not q or key in seen:
+            continue
+        seen.add(key)
+        out.append(f"{s.get('Facet') or 'volley'} via {s.get('Tool') or 'web_search'}, "
+                   f"searched for: \"{q}\" — {s.get('Hits', 0) or 0} hits, "
+                   f"{s.get('Kept', 0) or 0} kept")
+    return out
+
+
+def _template_groups(texts: dict[str, str]) -> tuple[list[list[str]], str]:
+    """Cells whose projected syntheses would be refused together as a
+    template. The connector's own CG-15 when it is on the path (one
+    owner); a local mirror of its two-term rule when it is not — and the
+    answer says which."""
+    keys = sorted(texts)
+    try:
+        p = str(REPO / "apps" / "mcp")
+        if p not in sys.path:
+            sys.path.insert(0, p)
+        from dma_mcp import vacuity as V
+        groups = V._check_templates("cell_evidence", {("synthesis", 0): [
+            (k, texts[k]) for k in keys]}, declared=None)
+        comps: dict[str, set] = {}
+        import re as _re
+        for r in groups:
+            m = _re.search(r"The group is (.+?)(?:, …)?\. A per-item", r["message"])
+            if not m:
+                continue
+            members = tuple(sorted(x.strip() for x in m.group(1).split(",")))
+            comps.setdefault(members, set()).add(r["path"])
+        out = sorted({tuple(sorted(v)) for v in comps.values()})
+        return [list(g) for g in out], "dma_mcp.vacuity"
+    except Exception:                                # noqa: BLE001
+        pass
+    import re as _re
+    word = _re.compile(r"[a-z0-9$£€%./-]+")
+    stop = set("a an and are as at be by for from has have in is it its of on or that the this to was with".split())
+
+    def toks(t):
+        return [w.strip(".-/") for w in word.findall(t.lower()) if w.strip(".-/")]
+
+    def shingles(t, n=8):
+        tk = toks(t)
+        return {tuple(tk[i:i + n]) for i in range(len(tk) - n + 1)}
+
+    def claim(t):
+        return {w for w in toks(t) if w not in stop and not _re.match(r"^p\dc\d", w)
+                and not _re.match(r"^\d", w)}
+
+    def ov(a, b):
+        return len(a & b) / min(len(a), len(b)) if a and b else 0.0
+    sh = {k: shingles(texts[k]) for k in keys}
+    cw = {k: claim(texts[k]) for k in keys}
+    adj = {k: set() for k in keys}
+    for i, a in enumerate(keys):
+        for b in keys[i + 1:]:
+            c = ov(cw[a], cw[b])
+            measurable = min(len(cw[a]), len(cw[b])) >= 6
+            if (measurable and c >= 0.50) or (ov(sh[a], sh[b]) >= 0.40
+                                              and (not measurable or c >= 0.40)):
+                adj[a].add(b)
+                adj[b].add(a)
+    seen, groups = set(), []
+    for k in keys:
+        if k in seen or not adj[k]:
+            continue
+        stack, comp = [k], []
+        while stack:
+            x = stack.pop()
+            if x in seen:
+                continue
+            seen.add(x)
+            comp.append(x)
+            stack.extend(adj[x] - seen)
+        if len(comp) >= 3:
+            groups.append(sorted(comp))
+    return groups, "local mirror of CG-15 (8-gram 0.40 ∧ claim 0.40, or claim 0.50)"
+
+
+def absence_rows(wb, *, run=None) -> dict:
+    """Every DECLARED absence in the run, as an H2 `cells[]` row."""
+    from . import contract as C
+    from . import ledger as L
+    declared = sorted(L.declared_absences(wb))
+    dossiers = L.read_gap_dossiers(run) if run is not None else {}
+    names = C.subcap_names()
+    settles = C.settling_artefacts()
+    proxies = C.proxy_classes()
+    searches = wb.rows("Search_Log")
+    prov = {}
+    for r in wb.rows("Provenance"):
+        if str(r.get("Step") or "") == "absence":
+            prov[str(r.get("SubCap_ID") or "").strip()] = r
+    cells, texts = {}, {}
+    for cell in declared:
+        row = wb.scoring_row(cell) or {}
+        mine = [s for s in searches if str(s.get("SubCap_ID") or "").strip() == cell]
+        d = dossiers.get(cell)
+        name = names.get(cell) or cell
+        hunted = _hunted_of(row, d)
+        proxy_log = str(row.get("Proxy_Log") or "").strip()
+        artefact = settles.get(cell)
+        inferable = (d or {}).get("inferable") or None
+        rigour = (d or {}).get("rigour") or ("REDUCED" if "REDUCED RIGOUR" in
+                                              str(row.get("Triangulation") or "") else "FULL")
+        parts = [f"{name}: {hunted.rstrip('.')}."]
+        if proxy_log:
+            parts.append(f"On the {proxies.get(cell) or 'proxy'} rung, {proxy_log.rstrip('.')}.")
+        if inferable:
+            parts.append(f"INFERENCE — {str(inferable['claim']).rstrip('.')}; "
+                         f"to validate: {inferable['validation_question']}")
+        elif (d or {}).get("not_determinable"):
+            parts.append(f"Not determinable from public sources: "
+                         f"{str(d['not_determinable']).rstrip('.')}.")
+        synthesis = " ".join(parts)
+        closure = (inferable["validation_question"] if inferable else
+                   (f"An internal artefact would settle it: {artefact.rstrip('.')}."
+                    if artefact else "An internal artefact from the client would settle it."))
+        p = prov.get(cell, {})
+        cells[cell] = {
+            "subcap_id": cell, "e_ids": [], "items": [],
+            "reach_note": (f"declared absence at {rigour} rigour — {len(mine)} logged "
+                           f"searches, volleys "
+                           + ", ".join(f"{f} x{n}" for f, n in
+                                       ((d or {}).get("facets_status") and
+                                        [(f, v['fired']) for f, v in d['facets_status'].items()]
+                                        or [])) if d else
+                           f"declared absence at {rigour} rigour — {len(mine)} logged searches"),
+            "synthesis": synthesis, "grounded_on": 0,
+            "provenance": {"grade": "declared", "actor": str(p.get("Actor") or ""),
+                           "at": str(p.get("At") or ""), "projected_by":
+                           "engine.surface_export absence"},
+            "thin": True,
+            "sources_searched": _rung_lines(row, mine),
+            "closure_condition": closure,
+        }
+        texts[cell] = synthesis
+    groups, checker = _template_groups(texts)
+    omitted = []
+    for g in groups:
+        for cell in g:
+            cells.pop(cell, None)
+            omitted.append({"subcap_id": cell, "group": g,
+                            "reason": ("the lane's hunted/proxy text for these cells "
+                                       "is one sentence with the cell name substituted; "
+                                       "a projection of it would be refused by CG-15 and "
+                                       "the rulebook ranks omitted above declared-and-"
+                                       "identical. Re-declare each with what THIS cell's "
+                                       "artefact is and where it was looked for")})
+    return {"cells": [cells[c] for c in sorted(cells)],
+            "declared": len(declared), "projected": len(cells),
+            "omitted_identical": omitted, "checker": checker,
+            "produced_at": _utcnow(), "producer": "engine.surface_export absence"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="engine.surface_export",
                                  description=__doc__.split("\n")[0])
@@ -294,7 +503,30 @@ def main(argv=None) -> int:
     cd.add_argument("--json", action="store_true")
     dr = sub.add_parser("drawers", help="the 15-panel drilldown atlas")
     dr.add_argument("--json", action="store_true")
+    ab = sub.add_parser("absence", help="project every DECLARED absence into "
+                                        "H2 cells[] rows from the run's own record")
+    ab.add_argument("--run", required=True)
+    ab.add_argument("--root")
+    ab.add_argument("--out", help=f"write {ABSENCES_NAME} into this directory")
+    ab.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.cmd == "absence":
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
+        out = absence_rows(run.open(), run=run)
+        if a.out:
+            p = Path(a.out) / ABSENCES_NAME
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps(out, indent=2), encoding="utf-8")
+            out["path"] = str(p)
+        if a.json or not a.out:
+            print(json.dumps(out, indent=2))
+        else:
+            print(f"{out['path']}: {out['projected']} of {out['declared']} declared "
+                  f"absences projected, {len(out['omitted_identical'])} omitted as "
+                  f"identical ({out['checker']})")
+        return 0 if not out["omitted_identical"] else 3
 
     if a.cmd == "cards":
         c = cards(a.section)

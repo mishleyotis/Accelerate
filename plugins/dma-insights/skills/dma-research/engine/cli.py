@@ -68,8 +68,8 @@ import sys
 from pathlib import Path
 
 from . import (assemble, contract, fetch, floors_gate, handoff, ledger,
-               orient, preflight, registry, report_spec, reports, runstate,
-               strip_working_area, validator, watchdog)
+               orient, preflight, quality, registry, report_spec, reports,
+               runstate, strip_working_area, validator, watchdog)
 
 
 #: family name -> the module whose main() owns it. Dispatched BEFORE
@@ -246,6 +246,57 @@ def _fetch_cmd(run, a) -> int:
     return 0
 
 
+#: The credit-spending connector calls the autoapprove hook withholds unless
+#: the run carries an approval record. ONE owner: scripts/hooks/
+#: autoapprove_connector.py SPEND_SUFFIXES; test_claim_tier-style pinning in
+#: scripts/tests/test_autoapprove_connector.py keeps the two equal.
+SPEND_TOOLS = frozenset({
+    "tavily_research", "tavily_crawl",
+    "enrich-business", "enrich-prospects", "match-business", "match-prospects",
+})
+
+
+def _approve_cmd(run, a) -> dict:
+    """Append one approval record to <run>/07_qa/approvals.json.
+
+    The record is the owner's decision, so nothing is inferred: the cost
+    line is what they typed. A blank cost line is refused because the
+    quoted cost is the whole point of the record."""
+    from datetime import datetime, timedelta, timezone   # noqa: PLC0415
+    cost = str(a.cost or "").strip()
+    who = str(a.approved_by or "").strip()
+    if not cost or not who:
+        raise SystemExit("REFUSED: --cost and --approved-by must both be "
+                         "non-empty. An approval without the quoted cost or "
+                         "the approver is not an approval.")
+    if a.expires_hours <= 0:
+        raise SystemExit("REFUSED: --expires-hours must be positive.")
+    path = run.qa_dir / "approvals.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    doc = {"approvals": []}
+    if path.is_file():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict) and isinstance(loaded.get("approvals"), list):
+                doc = loaded
+        except ValueError:
+            pass
+    now = datetime.now(timezone.utc)
+    rec = {
+        "tool": a.tool,
+        "cost_line": cost,
+        "approved_by": who,
+        "at": now.isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "expires": (now + timedelta(hours=a.expires_hours)
+                    ).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "max_calls": a.max_calls,
+        "run_id": run.run_id,
+    }
+    doc["approvals"].append(rec)
+    path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+    return {"path": str(path), "record": rec, "count": len(doc["approvals"])}
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in _FAMILIES:
@@ -353,7 +404,16 @@ def main(argv=None) -> int:
                         "the default must stay 'evidence reaches a cell'")
     e.add_argument("--source", required=True); e.add_argument("--url")
     e.add_argument("--tier", required=True); e.add_argument("--excerpt", required=True)
-    e.add_argument("--published"); e.add_argument("--claim-type", default="FACT")
+    e.add_argument("--published",
+                   help="when the source was published: YYYY-MM-DD, YYYY-MM, "
+                        "YYYY-Qn or YYYY (a quarter IS a date and bands from its "
+                        "end — engine/dates.py, the app's own rule). Omitted, the "
+                        "row bands UNVERIFIED, never current")
+    e.add_argument("--claim-type", default=None, choices=contract.CLAIM_LABELS,
+                   help="FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE. "
+                        "Omitted, the ledger derives it from --tier (T1/T2 "
+                        "-> FACT, weaker -> INFERENCE); a stated FACT on "
+                        "T3 or weaker is refused (contract.FACT_TIERS)")
     e.add_argument("--origin", default="public")
     e.add_argument("--unverified", default=None, metavar="REASON",
                    help="register this span WITHOUT a fetched copy of the "
@@ -425,6 +485,17 @@ def main(argv=None) -> int:
                     help="which proxy class was hunted and what came back")
     ab.add_argument("--hunted", required=True,
                     help="what was looked for, where, and what came back instead")
+    ab.add_argument("--inferable", default=None,
+                    help="what the absence still lets you INFER (>= 30 chars); "
+                         "comes with --validation-question, labelled INFERENCE "
+                         "on the surface and routed to the client conversation")
+    ab.add_argument("--validation-question", default=None,
+                    help="the question a client answer would settle the "
+                         "inference with (>= 15 chars, ends in ?)")
+    ab.add_argument("--not-determinable", default=None,
+                    help="why no public source can decide this cell (>= 30 "
+                         "chars): the triage routes it internal_only instead "
+                         "of to another proxy round")
     ab.add_argument("--enrichment-unavailable", action="store_true",
                     help="this container had NO enrichment connector bound, so "
                          "the connector rung could not be climbed. VERIFIED, "
@@ -433,6 +504,21 @@ def main(argv=None) -> int:
                          "written with REDUCED rigour and the reason. Without "
                          "a baseline, or with a connector bound and unused, "
                          "the refusal stands")
+
+    vc = common(sub.add_parser(
+        "verify-claim",
+        help="is this sentence IN the excerpts it cites? Lexical, offline, "
+             "deterministic: every figure, name and quoted phrase must be in "
+             "the cited excerpts, and the content words mostly so. "
+             "entailed / partial / not_supported / frame, with the span and "
+             "the missing words. Run it before a synthesis is written "
+             "(QA audit F-D04-005, 28-09-2026)"))
+    vc.add_argument("--claim", required=True, help="the sentence(s) to verify")
+    vc.add_argument("--e-id", action="append", default=[],
+                    help="evidence id(s) whose excerpts ground the claim; "
+                         "repeatable. Default: every row on --subcap")
+    vc.add_argument("--subcap", default=None,
+                    help="the cell whose registered rows ground the claim")
 
     fe = common(sub.add_parser(
         "fetch",
@@ -490,10 +576,40 @@ def main(argv=None) -> int:
     p = common(sub.add_parser("persist")); p.add_argument("--dest")
     st = sub.add_parser("status"); st.add_argument("--root")
     sub.add_parser("counts")
+    sub.add_parser("columns", help="the pillar sheets' columns, from the contract "
+                                    "(the one owner of the workbook's shape)")
+    apv = common(sub.add_parser(
+        "approve",
+        help="record the owner's approval of ONE credit-spending connector "
+             "call for this run, with the cost the owner quoted. The "
+             "autoapprove hook opens tavily_research, tavily_crawl and the "
+             "Explorium enrich-*/match-* calls only against this record "
+             "(07_qa/approvals.json); without it a scheduled firing prompts "
+             "and stops (QA audit F-K01-003, 28-09-2026)"))
+    apv.add_argument("--tool", required=True, choices=sorted(SPEND_TOOLS),
+                     help="the connector tool suffix being approved")
+    apv.add_argument("--cost", required=True, metavar="LINE",
+                     help="the cost line the owner is approving, verbatim "
+                          "(e.g. '2 credits/row x 400 rows = 800 credits'). "
+                          "Stated by the owner, never priced here")
+    apv.add_argument("--approved-by", required=True,
+                     help="who approved it (an email or a name)")
+    apv.add_argument("--expires-hours", type=float, default=24.0,
+                     help="how long the record stays valid (default 24h)")
+    apv.add_argument("--max-calls", type=int, default=None,
+                     help="an optional call ceiling, recorded for the audit "
+                          "trail; the hook does not count calls")
 
     a = ap.parse_args(argv)
     if a.cmd == "counts":
         print(json.dumps(contract.counts(), indent=2)); return 0
+    if a.cmd == "columns":
+        for i, col in enumerate(contract.PILLAR_COLUMNS):
+            n, letters = i + 1, ""
+            while n:
+                n, r = divmod(n - 1, 26); letters = chr(65 + r) + letters
+            print(f"{letters}\t{col}")
+        return 0
     if a.cmd == "status":
         return watchdog.main(["--root", a.root or str(runstate.RUN_ROOT), "--json"])
 
@@ -561,8 +677,13 @@ def main(argv=None) -> int:
         return 0
 
     run = runstate.locate(a.run, root)
+    if a.cmd == "approve":
+        print(json.dumps(_approve_cmd(run, a), indent=2)); return 0
     if a.cmd == "resume":
-        _, state = runstate.resume(a.run, root)
+        try:
+            _, state = runstate.resume(a.run, root)
+        except runstate.RunDrift as e:
+            print(f"REFUSED: {e}", file=sys.stderr); return 1
         print(json.dumps(state, indent=2)); return 0
     if a.cmd == "persist":
         print(json.dumps(runstate.persist(run, a.dest), indent=2)); return 0
@@ -574,10 +695,14 @@ def main(argv=None) -> int:
         print(json.dumps(orient.orient(wb, a.category, qa_dir=run.qa_dir),
                          indent=2, sort_keys=True)); return 0
     if a.cmd == "search":
-        n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
-                                 query=a.query, tool=a.tool, hits=a.hits,
-                                 kept=a.kept, outcome=a.outcome,
-                                 prelim=a.prelim, actor=_actor(a))
+        try:
+            n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
+                                     query=a.query, tool=a.tool, hits=a.hits,
+                                     kept=a.kept, outcome=a.outcome,
+                                     prelim=a.prelim, actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
         print(json.dumps({"seq": n, **ledger.stats(wb)}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
@@ -646,8 +771,42 @@ def main(argv=None) -> int:
         print(json.dumps(ledger.declare_absence(
             wb, a.subcap, actor=a.actor, ladder=lad, proxy_log=a.proxy_log,
             what_was_hunted=a.hunted,
-            enrichment_unavailable=a.enrichment_unavailable), indent=2))
+            enrichment_unavailable=a.enrichment_unavailable,
+            inferable=a.inferable, validation_question=a.validation_question,
+            not_determinable=a.not_determinable, run=run), indent=2))
         return 0
+    if a.cmd == "verify-claim":
+        index = wb.evidence_index()
+        # Rows cite fact-level ids (E-003:F1); the register is keyed by row.
+        ids = [str(i).strip().split(":")[0] for i in (a.e_id or []) if str(i).strip()]
+        if not ids and a.subcap:
+            row = wb.scoring_row(a.subcap) or {}
+            ids = [i.split(":")[0] for i in ledger._split_ids(row.get("Evidence_IDs"))
+                   if i and i != contract.NO_EVIDENCE]
+            ids += [e for e, r in index.items()
+                    if a.subcap in str(r.get("SubCap_IDs") or "") and e not in ids]
+        ids = list(dict.fromkeys(ids))
+        if not ids:
+            print("REFUSED: name the evidence the claim rests on (--e-id, "
+                  "repeatable) or a --subcap with registered rows. A claim "
+                  "verified against nothing is not verified.", file=sys.stderr)
+            return 1
+        unknown = [i for i in ids if i not in index]
+        if unknown:
+            print(f"REFUSED: evidence id(s) not in this run's register: "
+                  f"{unknown}", file=sys.stderr)
+            return 1
+        excerpts = []
+        for i in ids:
+            r = index[i]
+            excerpts.append(str(r.get("Excerpt") or ""))
+            if r.get("Anchor_Quote"):
+                excerpts.append(str(r.get("Anchor_Quote") or ""))
+        out = quality.verify_claim(a.claim, excerpts,
+                                   entity=wb.metadata().get("entity_name"))
+        out["e_ids"] = ids
+        print(json.dumps(out, indent=2))
+        return 1 if out["verdict"] == "not_supported" else 0
     if a.cmd == "gate":
         out = floors_gate.run(wb, a.category,
                               require_synthesis=a.require_synthesis,

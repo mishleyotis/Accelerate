@@ -71,12 +71,49 @@ REASON = (
 )
 
 
+_HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[ \t]*\n")
+_SEGMENT_READER = re.compile(r"^\s*(?:sudo\s+)?(?:cat|bat|less|more|xxd|od|base64)\b")
+_REDIRECT = re.compile(r"[12]?>{1,2}\s*\S+")
+
+
+def _strip_heredocs(command: str) -> str:
+    """The command with every `<<TAG … TAG` body removed. A body is data the
+    command WRITES; the rule is about what it reads."""
+    out, i = [], 0
+    while True:
+        m = _HEREDOC.search(command, i)
+        if not m:
+            out.append(command[i:])
+            break
+        end = re.compile(rf"^[ \t]*{re.escape(m.group(2))}[ \t]*$", re.M)
+        e = end.search(command, m.end())
+        if not e:
+            out.append(command[i:m.start()])
+            break
+        out.append(command[i:m.start()] + " __HEREDOC__")
+        i = e.end()
+    return "".join(out)
+
+
 def decide(command: str):
-    if not READERS.search(command or ""):
-        return None
-    for rx, what, instead in BULK:
-        if rx.search(command):
-            return REASON.format(what=what, instead=instead)
+    """A denial only for a segment whose VERB reads a file whole and whose
+    ARGUMENTS name one of the bulk files.
+
+    QA audit F-H01-043 (28-09-2026): the filename was matched anywhere in
+    the command text, so a heredoc WRITE of a markdown file that mentioned
+    the handoff packet by name was denied twice during the audit — the
+    command read nothing. Now the heredoc bodies are stripped, the command
+    is split into its pipeline segments, and only a segment that starts
+    with a whole-file reader and names a bulk file as an argument (not as
+    a redirect target) is refused."""
+    text = _strip_heredocs(command or "")
+    for seg in re.split(r"\|\||&&|[|;\n]", text):
+        if not _SEGMENT_READER.match(seg):
+            continue
+        args = _REDIRECT.sub(" ", seg)
+        for rx, what, instead in BULK:
+            if rx.search(args):
+                return REASON.format(what=what, instead=instead)
     return None
 
 

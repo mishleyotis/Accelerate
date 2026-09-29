@@ -29,6 +29,30 @@ def _brief(agent: str) -> str:
                         "agent_type": f"dma-insights:{agent}"})
 
 
+def test_every_brief_is_numbered_lines_not_one_paragraph():
+    """Prompt-craft scorecard rewrite 3 (29-09-2026): each brief was one
+    unbroken string a model skims as a single instruction."""
+    sb = _sb()
+    for name in ("CORE", "RESEARCH_BRIEF", "SCORING_BRIEF", "REPORT_BRIEF"):
+        text = getattr(sb, name)
+        lines = text.split("\n")
+        assert len(lines) >= 5, name
+        assert sum(1 for l in lines if l[:2] in ("1.", "2.", "3.", "4.", "5.")) >= 4, name
+
+
+def test_the_core_brief_names_the_produce_set_from_its_owner():
+    import json as _json
+    sb = _sb()
+    d = _json.loads((PLUGIN / "references" / "section_sources.json").read_text(encoding="utf-8"))
+    produce = sorted(k for k, v in d["sections"].items()
+                     if v.get("disposition") in ("enrichment", "synthesis"))
+    assert produce, "the map marks no section produce"
+    for name in produce:
+        assert name in sb.CORE, name
+    assert "engine.surface_export plan" in sb.CORE
+    assert "NOT re-challenged" in sb.CORE
+
+
 def test_report_producers_get_the_report_brief_not_the_research_one():
     for agent in ("report-research-producer", "report-assessment-producer",
                   "report-validator"):

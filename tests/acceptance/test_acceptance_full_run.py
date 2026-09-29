@@ -97,7 +97,10 @@ def test_one_run_walks_the_whole_path_and_every_stage_gates_its_predecessor(tmp_
     ck = assemble.checkpoint(run, tmp_path / "ship", push=False,
                              stage_reached="SCORED")
     man = json.loads((Path(ck["folder"]) / "run_manifest.json").read_text())
-    assert man["status"] == "IN_PROGRESS" and man["stage_reached"] == "SCORED"
+    # run_manifest_v3 (W2-1): the manifest's one shape names the stage as
+    # `stage`; the checkpoint's return value keeps `stage_reached` for callers.
+    assert man["status"] == "IN_PROGRESS" and man["stage"] == "SCORED"
+    assert ck["stage_reached"] == "SCORED"
 
     # ── STAGE 5 · the reports, under their own preconditions ───────────
     make_shippable(wb)

@@ -41,8 +41,11 @@ them from here as well would put two hooks on one tool with opposite
 opinions, and the resolution order is not something to bet a promote on.
 """
 import json
+import os
 import re
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 PREFIX = "mcp__plugin_dma-insights_connector__"
 
@@ -52,6 +55,11 @@ PREFIX = "mcp__plugin_dma-insights_connector__"
 GUARDED_SUFFIXES = {
     "submit_page_payload",            # precheck_submit.py
     "promote_run",                    # precheck_promote.py
+    # withdraw_run has NO precheck hook and prompts on purpose: it removes a
+    # served run from the app, which is outward-facing and irreversible from
+    # the client's side (QA audit F-K03-025, 28-09-2026). A scheduled session
+    # never withdraws; a person does, and answers the prompt.
+    "withdraw_run",
 }
 GUARDED = {PREFIX + t for t in GUARDED_SUFFIXES}
 
@@ -103,6 +111,8 @@ DMA_TOOLS = {
     # tool itself — a connector tool missing from this set does not fail
     # closed, it PROMPTS, and a scheduled session has nobody to answer.
     "get_upload_status",
+    # Read-only: a run's submission history (QA audit F-I01-028, 28-09-2026).
+    "list_submissions",
     "list_pending_runs", "claim_run", "register_evidence", "open_payload",
     "append_payload_part", "submit_page_payload", "promote_run",
     "withdraw_run", "list_withdrawn_runs", "get_validation_verdict",
@@ -145,9 +155,11 @@ REASON = (
 ENRICHMENT_TOOLS = frozenset({
     # Exa
     "web_search_exa", "web_fetch_exa",
-    # Tavily
-    "tavily_search", "tavily_extract", "tavily_crawl", "tavily_map",
-    "tavily_research",
+    # Tavily. `tavily_research` and `tavily_crawl` are NOT here: both are
+    # credit-billed agentic calls, not reads (QA audit F-K01-003,
+    # 28-09-2026 — the hook was approving them as "none spends"). They
+    # sit in SPEND_SUFFIXES and open only on a per-run approval record.
+    "tavily_search", "tavily_extract", "tavily_map",
     # Firecrawl
     "firecrawl_search",
     # Indeed — the one that stopped the run
@@ -156,10 +168,10 @@ ENRICHMENT_TOOLS = frozenset({
     "find-and-enrich-company", "find-and-enrich-contacts-at-company",
     "find-and-enrich-list-of-contacts", "ask-question-about-accounts",
     "query-objects", "get-current-workspace",
-    # Vibe Prospecting / Explorium
-    "enrich-business", "match-business", "fetch-entities",
-    "fetch-businesses-events", "enrich-prospects", "match-prospects",
-    "autocomplete", "show-sample",
+    # Vibe Prospecting / Explorium — the READ half. `enrich-*` and `match-*`
+    # are credit-billed (2 credits per enrichment per row, per the
+    # enrichment rulebook) and live in SPEND_SUFFIXES.
+    "fetch-entities", "fetch-businesses-events", "autocomplete", "show-sample",
 
     # ── added 2026-08-23, owner: "each time I have to approve MCP tool calls
     # in the routine eg Tavily, Clay etc. Ensure this runs headless." Every
@@ -474,6 +486,21 @@ CONDITIONAL_TOOLS = {
 #: merely absent, and absent does not distinguish "we decided against it" from
 #: "nobody looked". Each of these was already argued for in the comments above
 #: — this is where the argument becomes checkable.
+#: Credit-spending calls. Measured 28-09-2026 (QA audit F-K01-003): the hook
+#: returned `allow` with the reason "none writes, spends or sends" for
+#: tavily_research, tavily_crawl, enrich-business and enrich-prospects — all
+#: billed. They are withheld like any other spend, with ONE way through: a
+#: per-run approval record the owner writes with the quoted cost
+#: (`engine.cli approve`, landing in `<run>/07_qa/approvals.json`), which
+#: `_approval_for` reads. A scheduled firing that finds no record prompts
+#: and stops, which is the safe direction for money. The verb fallback would
+#: otherwise re-approve enrich/match/crawl as reads, so these MUST also be
+#: withheld by suffix — the tables win over the verbs.
+SPEND_SUFFIXES = frozenset({
+    "tavily_research", "tavily_crawl",
+    "enrich-business", "enrich-prospects", "match-business", "match-prospects",
+})
+
 WITHHELD_SUFFIXES = frozenset({
     # Clay — a workspace subroutine is user-authored and can do anything.
     # (add-company-data-points / add-contact-data-points moved to
@@ -485,7 +512,67 @@ WITHHELD_SUFFIXES = frozenset({
     "export-to-csv",
     # Quartr, under an opaque segment: the writes its named entry withholds.
     "save_item", "write_workspace", "move_saved_items", "remove_saved_item",
-})
+}) | SPEND_SUFFIXES
+
+#: Where a run's spend approvals live, and the env override the tests and a
+#: conductor session use to point the hook at one file.
+APPROVALS_FILE_ENV = "DMA_APPROVALS_FILE"
+APPROVALS_REL = ("07_qa", "approvals.json")
+
+APPROVED_SPEND_REASON = (
+    "credit spend pre-approved for this run by its owner, auto-approved by the "
+    "dma-insights hook against the run's approvals record: {cost_line} "
+    "(approved by {approved_by}, {at}; 07_qa/approvals.json). Without that "
+    "record this call prompts."
+)
+
+
+def _approvals_path():
+    p = os.environ.get(APPROVALS_FILE_ENV)
+    if p:
+        return Path(p)
+    try:
+        here = str(Path(__file__).resolve().parent)
+        if here not in sys.path:
+            sys.path.insert(0, here)
+        import _runctx                                          # noqa: PLC0415
+        run = _runctx.locate()
+    except Exception:                                           # noqa: BLE001
+        return None
+    root = getattr(run, "root", None) if run is not None else None
+    return Path(root, *APPROVALS_REL) if root else None
+
+
+def _approval_for(suffix: str):
+    """The unexpired approval record naming this tool for the run this
+    session drives, or None. A record with no cost line or no approver is
+    not an approval — the quoted cost is the point."""
+    path = _approvals_path()
+    if not path or not path.is_file():
+        return None
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:                                           # noqa: BLE001
+        return None
+    recs = doc.get("approvals") if isinstance(doc, dict) else doc
+    now = datetime.now(timezone.utc)
+    for r in recs or []:
+        if not isinstance(r, dict) or str(r.get("tool") or "") != suffix:
+            continue
+        if not r.get("cost_line") or not r.get("approved_by"):
+            continue
+        exp = r.get("expires")
+        if exp:
+            try:
+                when = datetime.fromisoformat(str(exp).replace("Z", "+00:00"))
+                if when.tzinfo is None:
+                    when = when.replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+            if when <= now:
+                continue
+        return r
+    return None
 
 ENRICHMENT_REASON = (
     "read-only enrichment lookup, auto-approved by the dma-insights hook: the "
@@ -676,6 +763,14 @@ def main() -> int:
     # (github `resolve_review_thread`) still prompts.
     if tool.startswith("mcp__") and tool.count("__") >= 2:
         suffix = tool.rsplit("__", 1)[1]
+        if suffix in SPEND_SUFFIXES:
+            rec = _approval_for(suffix)
+            if rec:
+                return _allow(APPROVED_SPEND_REASON.format(
+                    cost_line=rec.get("cost_line"),
+                    approved_by=rec.get("approved_by"),
+                    at=rec.get("at") or "undated"))
+            return 0                   # spend with no approval record prompts
         if (tool in WITHHELD_TOOLS or _canonical(tool) in WITHHELD_TOOLS
                 or suffix in WITHHELD_SUFFIXES):
             return 0

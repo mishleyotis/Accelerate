@@ -7,7 +7,7 @@ Usage:
         --template assets/templates/credit_unions.pptx \
         --client "Pacific Coast CU" \
         --date "2026-04-09" \
-        --out-dir /home/claude/working/
+        --out-dir <working-dir>/
 
 Produces: unpacked/, palette.json, placeholder_manifest.json, shape_inventory.json
 
@@ -20,8 +20,10 @@ Safeguards:
 """
 import argparse, json, os, re, shutil, subprocess, sys, zipfile, glob
 
+# The retired fifth-band dark teal is deliberately absent: a template that
+# still carries it is reported as unauthorized (apps/web/lib/bands.js).
 BRAND_PALETTE = {
-    "000000","FFFFFF","1C4A4D","185F60","27BBAF","62D7B8","B0EED3","E8F7F6",
+    "000000","FFFFFF","1C4A4D","27BBAF","62D7B8","B0EED3","E8F7F6",
     "F2F4F9","A5C6FF","3D81F6","C7D3EC","B19CD8","8094C0","FFCB99","FE9732",
     "FFF3E8","E6F5F3","E5E7EB","6B7280","2D3748","555555","718096",
     "058DC7","139F94","1A535C","1A5C52","059669","065F46","4A5568","333333",

@@ -418,9 +418,21 @@ PIPELINE_SHAPES_THAT_MUST_STILL_PASS = [
     "command -v claude",
     "date -u +%Y-%m-%dT%H:%M:%SZ",
     "rm /root/.dma/probe/run/note.json",
+]
+
+#: Measured 28-09-2026 (QA audit F-K02-024): `rm -rf <run root>/04_scoring`
+#: was auto-approved. A recursive delete is never approved now, whatever the
+#: path — a person answers the prompt. These two used to be in the list
+#: above.
+RECURSIVE_DELETES_THAT_NOW_PROMPT = [
     "rm -rf /root/.dma/probe/run",
     "rm -rf /tmp/dma-lifecycle-abc",
 ]
+
+
+@pytest.mark.parametrize("cmd", RECURSIVE_DELETES_THAT_NOW_PROMPT)
+def test_a_recursive_delete_prompts_even_inside_a_run_root(cmd):
+    assert decision("Bash", command=cmd) is None, cmd
 
 
 @pytest.mark.parametrize("cmd", PIPELINE_SHAPES_THAT_MUST_STILL_PASS)

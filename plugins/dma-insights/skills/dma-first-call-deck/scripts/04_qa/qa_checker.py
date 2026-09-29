@@ -137,14 +137,17 @@ def check_placeholders(unpacked_dir):
 # ============================================================
 # CHECK 5b: COLOR VALIDATION
 # ============================================================
+# The retired fifth-band dark teal is NOT approved: a template still carrying
+# it is reported here, which is the signal that it needs re-authoring
+# (apps/web/lib/bands.js: the hex must not appear anywhere).
 APPROVED_COLORS = {
-    "000000", "FFFFFF", "1C4A4D", "185F60", "27BBAF", "62D7B8",
+    "000000", "FFFFFF", "1C4A4D", "27BBAF", "62D7B8",
     "B0EED3", "E8F7F6", "F2F4F9", "A5C6FF", "3D81F6", "C7D3EC",
     "B19CD8", "8094C0", "FFCB99", "FE9732", "FFF3E8", "E6F5F3",
     "E5E7EB", "6B7280", "2D3748", "555555", "718096",
     "058DC7", "139F94", "1A535C", "1A5C52",
     "059669", "065F46", "4A5568", "333333",  # From methodology slides
-    "198478", "4E5E8A", "C25008", "F97316",  # Heatmap levels (may still be in template)
+    "198478", "4E5E8A", "C25008", "F97316",  # band label text (F97316 is no longer a band fill)
     "003366",  # From appendix slides
 }
 

@@ -12,6 +12,37 @@ reads and writes the SAME scoring workbook. The workbook is the substrate —
 not an export, not a mirror of some JSON plane. What you do not write there
 did not happen.
 
+## Tools: first choice, fallback, and what you emit
+
+This is the ONE statement of which tool a lane reaches for, in which order; every
+other file points here. (Measured 28-09-2026, QA audit F-L11-042: nine contradictory
+pairs on this one question — "web_search PRIMARY (≥70 %)" beside "an enrichment
+connector is required", "never fetch a page" beside "fetch every rich document whole".)
+
+1. **What the run already holds.** `engine.brief dispatch` and `engine.brief reuse`:
+   the register, PRELIM's profile, the estate, the peer set. The first rung is never
+   the web — the run paid for these rows already.
+2. **The toolkit's named artefacts**, read through `engine.cli fetch` on the URL the
+   card or the source catalogue gives. A researcher told what to look for stops fishing.
+3. **`WebSearch`** for discovery — the one web tool a lane holds. Its result list is
+   small; it finds the URL you then window.
+4. **Connector volleys** — `exa` first for search, `tavily` as the fallback and the
+   verbatim-extract path, `clay` for people, `explorium` for the estate. A lane EMITS
+   these as `search_requests`; the conductor and the relay lanes fire them, and log
+   each with the tool that ran it. The floors gate wants one connector search per
+   cell (`absence_single_tool`); an emitted-then-serviced request is what satisfies
+   it. `moodys`, `harmonic` and `cb_insights` are declared, not wired
+   (`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`):
+   never a rung, never a NOT_RUN.
+5. **Reading a page** is `engine.cli fetch` — windows, sha256, the cache the ledger
+   verifies excerpts against. `WebFetch`, Exa's fetch and Tavily's extract are the
+   servicing tier's tools; a servicing actor puts what it extracted into the same
+   cache with `--via-text -` so the excerpt verifies like any other. A lane never
+   fetches a page whole: the guard denies it, and the reason is on the bill.
+
+There is no percentage split between web and connector: the gate counts logged
+searches per cell and per tool, not a ratio.
+
 ## Your standing
 
 - You research **one category** of one run. You never write another
@@ -88,8 +119,8 @@ query seeds. Work it in this order:
    stops fishing.
 2. **Plan queries** — `engine.cli fuse plan --run R --subcap X --facet works`
    gives the three differently-shaped probes per DQ (presence, responsive,
-   toolkit-artefact). Fire them through the web tools you hold (WebSearch,
-   WebFetch). **You hold no connector**: the Exa, Tavily, Clay and
+   toolkit-artefact). Fire them through `WebSearch`, the one web tool you
+   hold (§ *Tools* above). **You hold no connector**: the Exa, Tavily, Clay and
    Explorium volleys are EMITTED, not fired — put each in your final
    output's `search_requests` array (`{"query", "falsifier", "facet",
    "subcap", "tool": "exa|tavily|clay|vibe", "proves"}`) and the conductor
@@ -162,8 +193,9 @@ query seeds. Work it in this order:
    `Discovery_Questions` as the card gives them (`INT-Q:` / `PUB-Q:`),
    never silently skipped.
 8. **The challenge is not yours to write.** Your synthesis author name is
-   recorded; a DIFFERENT actor (the conductor routes to `finding-challenger`
-   discipline) records the challenge verdict, all seven dimensions by name.
+   recorded; a DIFFERENT actor — `research-challenger`, the full pass, with a
+   10 % Opus sample re-judged by `finding-challenger` — records the challenge
+   verdict, all seven dimensions by name.
    `record_challenge` refuses a self-challenge — do not try.
 
 ## The five volleys — the order that keeps you honest

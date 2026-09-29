@@ -179,10 +179,11 @@ def test_the_gates_this_test_was_written_for_are_documented(gate):
 def test_the_producer_rulebook_is_where_they_live():
     """Not merely 'mentioned somewhere' for the six added on 2026-08-24: the
     gates file is what a producer reads before submitting."""
-    book = (PLUGIN / "skills" / "dma-surface-production" / "05-lifecycle"
-            / "1-gates.md").read_text()
+    gates = PLUGIN / "skills" / "dma-surface-production" / "05-lifecycle" / "gates"
     for gate in ("CG-44", "CG-45", "CG-46", "CG-47", "CG-48", "CG-49"):
-        assert f"### {gate}" in book, f"{gate} has no section of its own"
+        # one file per gate since W3-4 (F-E01-026); the book keeps the index
+        assert (gates / f"{gate}.md").is_file(), f"{gate} has no file of its own"
+        assert f"### {gate}" in (gates / f"{gate}.md").read_text()
 
 
 def test_the_reach_gate_does_not_teach_inventing_utilization():
@@ -191,7 +192,7 @@ def test_the_reach_gate_does_not_teach_inventing_utilization():
     to say so where the producer reads it — this is the standing instruction
     'no utilization inference', enforced against the documentation itself."""
     book = (PLUGIN / "skills" / "dma-surface-production" / "05-lifecycle"
-            / "1-gates.md").read_text()
+            / "gates" / "CG-45.md").read_text()
     body = book.split("### CG-45")[1].split("### ")[0]
     assert "never push you into inventing utilization" in body
     assert "nothing observed says how much of it is switched on" in body

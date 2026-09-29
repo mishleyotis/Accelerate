@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import subprocess
 import sys
+
+import pytest
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2] / "plugins" / "dma-insights"
@@ -29,6 +31,17 @@ def test_populate_workbook_refuses_and_names_the_engine(tmp_path):
     assert "REFUSED" in r.stderr and "engine.cli start" in r.stderr
     assert "ONE writer" in r.stderr
     assert not list(tmp_path.glob("*.xlsx"))
+
+
+def test_generate_query_plan_refuses_and_names_the_engine(tmp_path):
+    """Retired 2026-09-28 (QA audit F-J02-011): its query_plan.json had no
+    reader; the work card from `engine.cli orient` is the plan."""
+    r = _run(PLUGIN / "skills" / "dma-research" / "scripts" / "generate_query_plan.py",
+             str(tmp_path / "dq.json"), "--entity", "X", "--subvertical", "CU",
+             "--output", str(tmp_path / "query_plan.json"))
+    assert r.returncode == 1
+    assert "REFUSED" in r.stderr and "engine.cli orient" in r.stderr
+    assert not (tmp_path / "query_plan.json").exists()
 
 
 def test_assessment_runner_refuses_and_names_the_engine(tmp_path):
@@ -107,7 +120,23 @@ def test_no_skill_tells_an_agent_to_run_a_retired_writer():
         text = skill.read_text()
         for line in text.splitlines():
             if any(w in line for w in ("populate_workbook.py", "validate_workbook.py",
-                                       "assessment_runner.py")) \
+                                       "assessment_runner.py", "generate_query_plan.py")) \
                     and "retired" not in line.lower() and "refuse" not in line.lower():
                 offenders.append(f"{skill.parent.name}: {line.strip()[:100]}")
     assert offenders == [], offenders
+
+
+@pytest.mark.parametrize("script, engine_cmd, args", [
+    ("calculate_ers.py", "engine.cli ers recompute", ["idx.json", "--update"]),
+    ("merge_evidence.py", "engine.cli attach", ["ckpt", "--output", "merged.json"]),
+    ("validate_coverage.py", "engine.cli gate", ["idx.json", "--strict"]),
+    ("extract_diagnostic_questions.py", "engine.cli orient", ["toolkit.xlsx"]),
+])
+def test_the_batch_era_scripts_refuse_and_name_the_engine(tmp_path, script, engine_cmd, args):
+    """Retired 2026-09-29 (QA audit F-L11-042): each worked an evidence_index.json
+    or a parsed toolkit that no stage writes or reads; the engine owns the job."""
+    r = _run(PLUGIN / "skills" / "dma-research" / "scripts" / script,
+             *[str(tmp_path / a) if "." in a or a == "ckpt" else a for a in args])
+    assert r.returncode == 1
+    assert "REFUSED" in r.stderr and engine_cmd in r.stderr and "retired" in r.stderr
+    assert not list(tmp_path.glob("*.json"))

@@ -318,3 +318,27 @@ def test_the_budget_ceiling_stops_every_governed_lane(guard, run):
     for agent in ("research-p1c1-producer", "scoring-p1-producer",
                   "report-validator", "enrichment-web-specialist"):
         assert _decision(guard.decide(_dispatch(agent))) == "deny", agent
+
+
+# ── F-C08-022 · a run the prompt names must exist ─────────────────────────
+
+def test_a_brief_naming_a_run_that_does_not_exist_is_refused(guard, run):
+    out = guard.decide(_dispatch(prompt=f"Work your category. --run R-DOES-NOT-EXIST --root {run}"))
+    assert _decision(out) == "deny"
+    why = out["hookSpecificOutput"]["permissionDecisionReason"]
+    assert "R-DOES-NOT-EXIST" in why and "not a run on this machine" in why
+    assert run.name in why, "the session's own run is named as the alternative"
+
+
+def test_a_brief_naming_the_sessions_run_or_another_real_run_is_allowed(guard, run, tmp_path):
+    assert _decision(guard.decide(_dispatch(
+        prompt=f"python3 -m engine.brief dispatch --run {run.name} --root {run}"))) != "deny"
+    other = tmp_path / "run-other"
+    other.mkdir()
+    (other / f"DMA_Scoring_Workbook_{other.name}.xlsx").write_bytes(b"not a workbook")
+    assert _decision(guard.decide(_dispatch(
+        prompt=f"Service --run {other.name} --root {other} as well."))) != "deny"
+
+
+def test_a_placeholder_run_token_is_not_a_run_id(guard):
+    assert _decision(guard.decide(_dispatch(prompt="engine.cli orient --run <RUN> --root <ROOT>"))) != "deny"

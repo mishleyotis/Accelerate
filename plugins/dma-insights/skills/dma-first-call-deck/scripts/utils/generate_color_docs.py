@@ -65,7 +65,9 @@ def gen_color_authority():
     # ── 4-tier levels ─────────────────────────────────────────────────
     lines.append("## 4-Tier Maturity Levels (Slides 10 + 14)")
     lines.append("")
-    lines.append("Score ranges map to level names; each level has three palette slots:")
+    lines.append("The four display BANDS. Boundaries and accents are the app's own")
+    lines.append("(`apps/web/lib/bands.js` == `engine.contract.band_of`): strict less-than")
+    lines.append("at 2 / 3 / 4 on the raw score, no fifth band. Each band has three palette slots:")
     lines.append("- **accent**: bar fill / pillar-strip / rec-card-strip")
     lines.append("- **card_bg**: rec-card background / heatmap capability-block bg")
     lines.append("- **label_text**: color of the level label text (BUILDING, COMPETING, …)")
@@ -83,13 +85,14 @@ def gen_color_authority():
     lines.append("")
 
     # ── 5-tier levels ─────────────────────────────────────────────────
-    lines.append("## 5-Tier Maturity Levels (Slide 13 pillar indicators)")
+    lines.append("## Maturity Levels 1–5 (Slide 13 pillar indicators)")
     lines.append("")
-    lines.append("Score ranges map to level numbers 1–5; each level has four palette slots:")
+    lines.append("The 1–5 maturity SCORE scale from `skills/dma-research/engine/rubric.py` (cuts 1.5 / 2.5 / 3.5 / 4.5),")
+    lines.append("not the four display bands. Each level has four palette slots:")
     lines.append("- **bg_rect**: pillar-row background rectangle")
     lines.append("- **circle**: the numbered circle")
     lines.append("- **num_text**: color of the number inside the circle")
-    lines.append("- **label_text**: color of the level label (Emerging, Developing, …)")
+    lines.append("- **label_text**: color of the level label (Foundational, Developing, …)")
     lines.append("")
     lines.append("| # | Label | Score Range | Bg Rect | Circle | Num Text | Label Text |")
     lines.append("|---|---|---|---|---|---|---|")
@@ -224,19 +227,25 @@ def gen_brand_level_tables():
     lines.append("")
     lines.append("Used by Slides 10 and 14.")
     lines.append("")
+    lines.append("Strict less-than on the raw score: the app's resolver (`apps/web/lib/bands.js`,")
+    lines.append("`engine.contract.band_of`). There is no fifth band.")
+    lines.append("")
     lines.append("```python")
-    lines.append("if score < 1.50:  return 'Activating'")
-    lines.append("if score < 2.50:  return 'Building'")
-    lines.append("if score < 3.50:  return 'Competing'")
-    lines.append("return 'Differentiating'")
+    names4 = list(cls.LEVEL_4TIER.keys())
+    for i, name in enumerate(names4[:-1]):
+        nxt = cls.LEVEL_4TIER[names4[i + 1]]["score_range"][0]
+        lines.append(f"if score < {nxt:.2f}:  return '{name}'")
+    lines.append(f"return '{names4[-1]}'")
     lines.append("```")
     lines.append("")
     lines.append("| Score Range | Level | Notes |")
     lines.append("|---|---|---|")
-    for name, data in cls.LEVEL_4TIER.items():
-        lo, hi = data["score_range"]
-        range_str = f"[{lo:.2f}, {hi:.2f}"
-        range_str += "]" if name == "Differentiating" else ")"
+    for i, name in enumerate(names4):
+        lo = cls.LEVEL_4TIER[name]["score_range"][0]
+        if i + 1 < len(names4):
+            range_str = f"[{lo:.2f}, {cls.LEVEL_4TIER[names4[i + 1]]['score_range'][0]:.2f})"
+        else:
+            range_str = f"[{lo:.2f}, 5.00]"
         lines.append(f"| {range_str} | **{name}** | — |")
     lines.append("")
 
@@ -245,38 +254,45 @@ def gen_brand_level_tables():
     lines.append("")
     lines.append("Used by Slide 13 pillar indicators.")
     lines.append("")
+    lines.append("The maturity SCORE scale (`skills/dma-research/engine/rubric.py` `maturity_level`), not the display bands.")
+    lines.append("")
     lines.append("```python")
-    lines.append("if score < 1.00:  return 1  # " + cls.LEVEL_5TIER[1]["label"])
-    lines.append("if score < 2.00:  return 2  # " + cls.LEVEL_5TIER[2]["label"])
-    lines.append("if score < 3.00:  return 3  # " + cls.LEVEL_5TIER[3]["label"])
-    lines.append("if score < 4.00:  return 4  # " + cls.LEVEL_5TIER[4]["label"])
-    lines.append("return 5                    # " + cls.LEVEL_5TIER[5]["label"])
+    nums = sorted(cls.LEVEL_5TIER)
+    for n in nums[:-1]:
+        nxt = cls.LEVEL_5TIER[n + 1]["score_range"][0]
+        lines.append(f"if score < {nxt:.2f}:  return {n}  # " + cls.LEVEL_5TIER[n]["label"])
+    lines.append(f"return {nums[-1]}                    # " + cls.LEVEL_5TIER[nums[-1]]["label"])
     lines.append("```")
     lines.append("")
     lines.append("| Score Range | # | Label |")
     lines.append("|---|---|---|")
-    for num, data in cls.LEVEL_5TIER.items():
-        lo, hi = data["score_range"]
-        range_str = f"[{lo:.2f}, {hi:.2f}"
-        range_str += "]" if num == 5 else ")"
-        lines.append(f"| {range_str} | {num} | **{data['label']}** |")
+    for n in nums:
+        lo = cls.LEVEL_5TIER[n]["score_range"][0]
+        if n + 1 in cls.LEVEL_5TIER:
+            range_str = f"[{lo:.2f}, {cls.LEVEL_5TIER[n + 1]['score_range'][0]:.2f})"
+        else:
+            range_str = f"[{lo:.2f}, 5.00]"
+        lines.append(f"| {range_str} | {n} | **{cls.LEVEL_5TIER[n]['label']}** |")
     lines.append("")
 
     # Loose 5-to-4 mapping for cross-slide consistency
-    lines.append("## 5-Tier ↔ 4-Tier Loose Mapping")
+    lines.append("## Maturity Level ↔ Display Band Loose Mapping")
     lines.append("")
     lines.append("Used by `cross_slide_checker.verify_cross_slide` to check Slide 13's")
-    lines.append("5-tier indicator is consistent with Slide 10's 4-tier strips for the")
+    lines.append("maturity-level indicator is consistent with Slide 10's band strips for the")
     lines.append("same pillar. Input scores should be identical; if they differ by more")
     lines.append("than 0.1, it's a warning (likely data pipeline inconsistency).")
     lines.append("")
-    lines.append("| 5-Tier | Approx Score | 4-Tier Equivalent |")
+    lines.append("| Maturity level | Score range | Band(s) it can render as |")
     lines.append("|---|---|---|")
-    lines.append(f"| 1 {cls.LEVEL_5TIER[1]['label']} | < 1.00 | Activating |")
-    lines.append(f"| 2 {cls.LEVEL_5TIER[2]['label']} | 1.00–1.99 | Activating / Building |")
-    lines.append(f"| 3 {cls.LEVEL_5TIER[3]['label']} | 2.00–2.99 | Building / Competing |")
-    lines.append(f"| 4 {cls.LEVEL_5TIER[4]['label']} | 3.00–3.99 | Competing / Differentiating |")
-    lines.append(f"| 5 {cls.LEVEL_5TIER[5]['label']} | ≥ 4.00 | Differentiating |")
+    order4 = list(cls.LEVEL_4TIER.keys())
+    for n in sorted(cls.LEVEL_5TIER):
+        lo, hi = cls.LEVEL_5TIER[n]["score_range"]
+        bands = sorted({cls.score_to_level_4tier(lo), cls.score_to_level_4tier(hi)},
+                       key=order4.index)
+        rng = (f"[{lo:.2f}, {cls.LEVEL_5TIER[n + 1]['score_range'][0]:.2f})"
+               if n + 1 in cls.LEVEL_5TIER else f"[{lo:.2f}, 5.00]")
+        lines.append(f"| {n} {cls.LEVEL_5TIER[n]['label']} | {rng} | {' / '.join(bands)} |")
     lines.append("")
 
     return "\n".join(lines)

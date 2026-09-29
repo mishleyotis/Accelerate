@@ -47,6 +47,17 @@ DENIALS = (
         r"\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b",
         re.I),
      "a shell fetch of a Google Docs URL"),
+    # QA audit F-K04-039 (28-09-2026): the service-account key on disk
+    # (/root/.dma/sa.json) and the path token were readable by any Bash and
+    # named by no guard; autoapprove_builtins merely declined to approve the
+    # read, which left it a prompt. The key is read only by the plugin's own
+    # scripts inside a process (gcp_token) and never printed, copied,
+    # exported or piped.
+    (re.compile(r"\.dma/(?:sa\.json|pathtok|path_token|routine_sa[\w.-]*)\b|"
+                r"\bsa\.json\b"),
+     "the service-account key file or path token by name"),
+    (re.compile(r"\bDMA_ROUTINE_SA_KEY_B64\b|\bDMA_PATH_TOKEN\b"),
+     "the credential environment variable by name"),
 )
 
 REASON = (
@@ -60,6 +71,14 @@ REASON = (
     "harness's own credentials, and Google Docs are read via drive_fetch.py "
     "under the service-account identity, never fetched from a shell."
 )
+
+
+def decide(command: str) -> str | None:
+    """The denial reason for a Bash command, or None."""
+    for rx, what in DENIALS:
+        if rx.search(command or ""):
+            return REASON.format(what=what)
+    return None
 
 
 def main() -> int:
@@ -79,14 +98,14 @@ def main() -> int:
     command = (ti.get("command") or "") if isinstance(ti, dict) else ""
     if not isinstance(command, str):
         return 0
-    for rx, what in DENIALS:
-        if rx.search(command):
-            print(json.dumps({"hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": REASON.format(what=what),
-            }}))
-            return 0
+    reason = decide(command)
+    if reason:
+        print(json.dumps({"hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        }}))
+    return 0
     return 0
 
 

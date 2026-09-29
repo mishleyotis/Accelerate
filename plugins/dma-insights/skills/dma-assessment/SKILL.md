@@ -13,11 +13,12 @@ description: >
   score, or benchmark any financial services institution's digital capabilities.
 ---
 
-# DMA Assessment Skill v5.5
+# DMA Assessment Skill v5.6
 
-**v5.6 Changes (2026-09-03):** the workbook is `skills/dma-research/engine/contract.py`'s and this skill
+**v5.6 Changes (2026-09-03):** the workbook is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/contract.py`'s and this skill
 BUILDS NO WORKBOOK. The scoring stage writes column D of the run's existing workbook through
-`engine.assessment open / score / critique / rollup / gate`. The retired `scripts/assessment_runner.py`
+`engine.assessment score / critique / rollup / gate`, after the DRIVER has opened the stage
+(`engine.assessment open` is the research-conductor's — routing.md's stage table). The retired `scripts/assessment_runner.py`
 (it built a fresh 11-sheet openpyxl workbook) refuses and names those commands. The eleven app-facing
 columns A–K below are unchanged — they are the first eleven of the contract's 33 (L–AG are the
 research working area, stripped after the handoff). Category count is 16 (v7.0), not 17.
@@ -28,6 +29,17 @@ Rationale, Proxy_Searched). Subcap-level scoring reinforced with row count check
 calculation chain rollup instructions. Taxonomy vs workbook row count clarified. QA checks
 aligned with the A–K columns. URL enforcement. Cross-skill consistency (3-5 queries/subcap).
 
+## Reading manifest — by phase
+
+| Phase | Read | Why |
+|---|---|---|
+| Phase 0 (setup) | this file's rules, `references/workbook_columns.md`, `references/operating_procedure.md` | the contract and the working rules |
+| Phases 1–3 | `references/evidence_ranking.md`, `references/peer_benchmarking.md`, this file's Cap System | tiers, peers, caps |
+| Phase 4 (scoring) | `references/scoring_methodology.md`, `references/score_states.md`, `references/phase_4_scoring.md` | the eight steps, the arithmetic (`engine.assessment apply`), the loop |
+| Phases 5–6 | `references/analytical_framework.md`, `references/priority_framework.md`, `references/zennify_solutions.md` | synthesis and recommendations |
+| Phase 7 | `references/phase_7_deliverables.md`, `references/report_template.md`, `references/communication_standards.md` | the deliverables |
+| Phase 8 | `references/phase_8_qa.md`, `references/quality_assurance.md`, `references/regression_tests.md` | QA |
+
 ## ⛔ NON-NEGOTIABLE RULES
 
 | # | Rule | Failure It Prevents |
@@ -36,7 +48,7 @@ aligned with the A–K columns. URL enforcement. Cross-skill consistency (3-5 qu
 | 2 | **Differentiate scores** — ≥2 unique scores per capability. Each subcap's diagnostic question asks something DIFFERENT — scores should reflect that. | Identical scores (2.5, 2.5, 2.5...) across all subcaps |
 | 3 | **Map evidence to INDIVIDUAL subcaps** — cite E-xxx:Fy fact-level refs. Different subcaps within the same capability must cite DIFFERENT evidence facts. | Same evidence cited for every subcap |
 | 4 | **≥150-char rationales per subcap** — institution-specific, cite E-IDs, reference M-level descriptor, explain gap to next level. | Generic "demonstrates capability" text |
-| 5 | **Never build a workbook** — the run's ONE workbook already exists (`engine.cli start` created it from `skills/dma-research/engine/contract.py`: 41 sheets, P#_Subcap_Scoring seeded with every selected subcap and its `SubCap_Name`). Scores go into ITS column D through `engine.assessment score`; a fresh `openpyxl.Workbook()`, a "single Python script that generates the XLSX" or the retired `scripts/assessment_runner.py` is REFUSED by the PreToolUse hook. See "Workbook Column Structure" below for the A–K columns you write. | A second workbook with the wrong shape, missing fields, formatting and subcap names — the "workbook defaults to the wrong structure every run" defect |
+| 5 | **Never build a workbook** — the run's ONE workbook already exists (`engine.cli start` created it from `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/contract.py`: 41 sheets, P#_Subcap_Scoring seeded with every selected subcap and its `SubCap_Name`). Scores go into ITS column D through `engine.assessment score`; a fresh `openpyxl.Workbook()`, a "single Python script that generates the XLSX" or the retired `scripts/assessment_runner.py` is REFUSED by the PreToolUse hook. See "Workbook Column Structure" below for the A–K columns you write. | A second workbook with the wrong shape, missing fields, formatting and subcap names — the "workbook defaults to the wrong structure every run" defect |
 | 6 | **Cite evidence inline in report** — (E-xxx, Source, Tier, Date) | Generic consulting prose |
 | 7 | **Run `scripts/validate_scoring_quality.py` after Phase 4** | Undetected quality failures |
 | 8 | **Web searches at SUBCAPABILITY level** — 3-5 per subcap via `web_search`. Each subcap's diagnostic question drives DIFFERENT queries. | Thin single-source assessments |
@@ -47,104 +59,11 @@ aligned with the A–K columns. URL enforcement. Cross-skill consistency (3-5 qu
 
 ## Workbook Column Structure (the contract's P#_Subcap_Scoring sheet — columns A–K are yours)
 
-The layout is `skills/dma-research/engine/contract.py: PILLAR_COLUMNS` (33 columns) and nothing else — not this
-table, not a template recalled from memory, not the CFC workbook it descends from. Columns
-A–K below are the eleven the app ingests and the ones the scoring stage writes (D, E, H, I, J
-through `engine.assessment score`; A, B, C, F, G, K were filled at the research stage).
-Columns L–AG are the research working area (synthesis, volleys, triangulation, absence proof);
-`engine.cli strip` removes them AFTER the handoff carries them, so the shipped workbook reads
-as A–K. **Do NOT create a sheet, add a column, or rename a header; `engine.cli validate`
-fails the workbook on any deviation and the app's parser will not read it.**
-
-| Col | Header | Description |
-|-----|--------|-------------|
-| A | SubCap_ID | Unique subcap identifier (e.g., P1C1.1.1, P2C3.2.4). One row per subcap. |
-| B | SubCap_Name | Subcapability name from Pillar XLSX toolkit |
-| C | Category | Parent category ID (e.g., P1C1, P2C3) |
-| D | Score | Final maturity score (1.0-5.0, default 0.5 precision) |
-| E | Confidence | HIGH / MEDIUM / LOW based on evidence coverage and tier diversity |
-| F | Evidence_IDs | Comma-separated evidence IDs (E-001, E-015, INT-BOARD-003) or NO_EVIDENCE |
-| G | Source_URLs | Hyperlinks to evidence sources (specific URLs, not "multiple searches") |
-| H | Evidence_Ceiling | Maximum score supported by evidence tier (e.g., T5-only → 2.0) |
-| I | Caps_Applied | Cap description if applied (e.g., "T5-only cap 2.0") or empty if none |
-| J | Rationale | ≥150 chars. Must cite E-IDs, reference M-level descriptor, explain gap, institution-specific "so what" |
-| K | Proxy_Searched | "Yes" or "No" — whether proxy searches (Tiers 7-10) were attempted |
-
-**Expected row counts per sheet:**
-- P1_Subcap_Scoring: ~186 rows (range 170-200)
-- P2_Subcap_Scoring: ~232 rows (range 210-250)
-- P3_Subcap_Scoring: ~118 rows (range 105-135)
-- P4_Subcap_Scoring: ~172 rows (range 155-190)
-- **TOTAL: ~708 subcap rows across all 4 pillar sheets**
-
-**The other sheets** are the contract's (`skills/dma-research/engine/contract.py: SHEETS`, 41 in all — among them
-Executive_Summary, Pillar_Summary, Category_Detail (16 rows), Evidence_Detail, Peer_Benchmarks,
-Recommendations, Run_Metadata, and the scoring-stage tabs Subcap_Scores, Pillar_Rollup,
-Category_Rollup, Pillar_Weights, Maturity_Rubric, Cap_Triggers, Caps_Applied_Log, Coverage_Map).
-They exist from `engine.cli start`; `engine.assessment rollup` and `engine.grains recompute`
-fill the rollups; `engine.cli complete check` refuses an empty tab with no reason recorded.
-
-**Self-check:** If any P#_Subcap_Scoring sheet has <50 rows → you scored at CATEGORY level.
-STOP. Delete the sheet. Redo with one row per subcap ID.
-
----
+Read `references/workbook_columns.md` — the eleven app-facing columns A–K and what each holds. Read once, in Phase 0.
 
 ## Context Window Management (CRITICAL)
 
-| Phase | Max Tokens | Focus |
-|-------|-----------|-------|
-| 0 | ~2,000 | Setup, parameter lock |
-| 1 | ~20,000 | Evidence collection |
-| 2 | ~8,000 | Peer scoring — batch by peer |
-| 3 | ~3,000 | Issue register |
-| 4 | ~25,000 | Scoring — code-heavy |
-| 4.5 | ~8,000 | Critic pass — table format |
-| 5 | ~4,000 | Analysis — computed output |
-| 6 | ~6,000 | Recommendations — structured |
-| 7 | ~15,000 | Deliverables — code-heavy |
-| 8 | ~4,000 | QA — script + computed verdict |
-
-**Anti-Bloat Rules:**
-1. Go straight to code/action — no "Let me now..." or "I'll proceed to..."
-2. Phase gate acknowledgments: MAX 5 lines
-3. Scoring rationales go in workbook, NOT in chat — chat gets summary stats only
-4. Workbook/report generation: output code blocks only — no explanatory prose
-5. Checkpoint BEFORE context limit — don't try to squeeze more in
-
-**Scratchpad-First Scoring (CRITICAL for Phase 4):**
-Do NOT score subcaps in chat prose. Instead:
-1. Load evidence for ONE capability at a time (see Evidence Loading below)
-2. Score all subcaps in that capability → write rows directly to a JSON scratchpad file
-   on disk: `$DMA_ROOT/checkpoints/scoring_scratchpad.json`
-3. Chat output: ONLY print capability summary (e.g., "P1C1: 8 subcaps scored, range 1.5-3.0, 3 caps applied")
-4. After each PILLAR: save checkpoint, print pillar stats (5 lines max)
-5. After ALL pillars: run a Python script to convert scratchpad JSON → XLSX workbook with
-   ALL 11 sheets (P1-P4_Subcap_Scoring, Executive_Summary, Pillar_Summary, Category_Detail,
-   Evidence_Master, Peer_Benchmarks, Recommendations, Run_Metadata)
-
-**Why this matters:** If you try to score 700+ subcaps in chat, you WILL exhaust context.
-The scratchpad pattern keeps context for the CURRENT capability only (~5-12 subcaps), while
-all previous scores are safely on disk. The final workbook is built from the scratchpad
-in one code block — guaranteeing all tabs exist and all data is included.
-
-**If chat stalls or requires "continue":** You are printing too much in chat. Write to disk,
-summarize in chat. The user should not need to press "continue" during normal scoring.
-
-### Cross-Conversation Execution (SUPPORTED)
-
-Each phase can run in a separate conversation. All state lives in checkpoint files — prior
-conversation context is NOT required. On new conversation start:
-
-1. Read this SKILL.md
-2. Load the most recent checkpoint from `$DMA_ROOT/checkpoints/`
-3. Confirm parameters and current phase with user
-4. Proceed from the checkpoint — do NOT re-derive prior phases' output from conversation
-
-This is the primary mechanism for managing long assessments without context overflow. When
-approaching context limits mid-phase, save a checkpoint at the nearest category boundary
-and instruct the user to continue in a new conversation.
-
----
+Read `references/operating_procedure.md` — context discipline, the state is the workbook, the run tree. Read in Phase 0 and again on resume.
 
 ## Core Analytical Principles
 
@@ -166,10 +85,10 @@ Pillar (4) → Category (16) → Capability (136) → Subcapability (851)
 
 | Pillar | Name | Subcaps |
 |--------|------|---------|
-| P1 | Strategy, Governance & Culture | ~199 |
-| P2 | Member/Customer Experience | ~288 |
-| P3 | Operations, Risk & Compliance | ~162 |
-| P4 | Data, Analytics & Technology | ~187 |
+| P1 | Strategy, Governance & Culture | 205 |
+| P2 | Member/Customer Experience | 292 |
+| P3 | Operations, Risk & Compliance | 164 |
+| P4 | Data, Analytics & Technology | 190 |
 
 **Note:** Taxonomy counts (851 = 205 P1 + 292 P2 + 164 P3 + 190 P4) are
 COUNTED FROM THE CATALOGUE, never asserted: run
@@ -185,7 +104,12 @@ all applicable subcaps for the specific institution's sub-vertical.
 | M2 | Developing | 1.5–2.4 | Basic, inconsistent |
 | M3 | Established | 2.5–3.4 | Standardized, documented |
 | M4 | Advanced | 3.5–4.4 | Optimized, data-driven |
-| M5 | Transformational | 4.5–5.0 | Industry-leading |
+| M5 | Leading | 4.5–5.0 | Industry-leading |
+
+This is the 1–5 **score** scale (`skills/dma-research/engine/rubric.py`, the one owner of
+these rows). It is not the four display **bands** the app renders — `<2 Activating · <3
+Building · <4 Competing · ≥4 Differentiating`, strict less-than on the raw score
+(`engine.contract.band_of`, `apps/web/lib/bands.js`). A fifth band word appears nowhere.
 
 Maturity descriptors: Pillar XLSX files → Maturity Descriptors sheet.
 
@@ -195,8 +119,8 @@ Maturity descriptors: Pillar XLSX files → Maturity Descriptors sheet.
 
 | Tier | Type | ERS Score | Max Alone |
 |------|------|-----------|-----------|
-| T1 | Regulatory/Audited + Verified Tech Scans | 5.0 | M5 |
-| T2 | Official Disclosures + Structured Internal | 4.0 | M5 |
+| T1 | Regulatory/Audited + Verified Tech Scans | 5.0 | none (5.0) |
+| T2 | Official Disclosures + Structured Internal | 4.0 | none (5.0) |
 | T3 | Third-Party Analysis | 3.0 | M4 |
 | T4 | Internal (Unvalidated Narrative) | 2.0 | M2.5 |
 | T5 | Marketing/Claims | 1.0 | M2 |
@@ -220,11 +144,11 @@ Factor scores 1.0-5.0. See `references/evidence_ranking.md`.
 final_score = min(raw_score, evidence_ceiling, all_caps, all_adjustment_ceilings)
 ```
 
-Adjustments computed as `adjustment_ceiling = min(raw, other_ceilings) − X`, logged with `ADJ_` prefix.
+Adjustments are `ADJ_` deltas that lower the raw score. **The arithmetic has one owner:** `python3 -m engine.assessment apply --run <R> --subcap <cell> --raw <M> --adj ADJ_…:-0.3 --cap CAP_…:3.0` computes `min(raw + Σadj, evidence ceiling, caps)`, takes it to the quarter-point (down, never up) and returns the final, the band and the arithmetic string; `score --raw --adj --cap` does the same and records the working in `Caps_Applied`. A scorer supplies inputs, never the result (QA audit F-F14-029: three scorers, one cell, 2.5 / 2.7 / 2.7).
 
-**Severity:** S3 (active enforcement <12mo)→1.5 | S2 (terminated <24mo)→3.0
+**Severity:** S3 (active enforcement <12mo)→2.0 | S2 (terminated <24mo)→3.0 (`contract.CAP_TRIGGERS`)
 **Evidence:** T5-only→2.0 | T4/T5-only→2.5 | Single source→3.0 | Single tier-type→2.5 (EXCEPTION: internal T1/T2 + public T3 = two tier types, ceiling removed) | >24mo→ADJ −0.3
-**Internal Evidence Override:** Internal T1/T2 evidence removes the single-tier-type cap (2.5). A subcap supported by both internal T2 and public T3 has effective ceiling M5, not M2.5.
+**Internal Evidence Override:** Internal T1/T2 evidence removes the single-tier-type cap (2.5). A subcap supported by both internal T2 and public T3 has no ceiling (5.0), not M2.5.
 **Sentiment (P2):** Rating <3.0→2.0 | 3.0-3.5→2.5 | 3.5-4.0→3.5 | Complaints +20% YoY→ADJ −0.3
 
 **Cross-Pillar (applied Pass 2 AFTER all pillars scored):**
@@ -237,59 +161,16 @@ Authoritative: `references/scoring_methodology.md` Step 3, Step 7.
 
 ## Deterministic Score States (MANDATORY)
 
-In the P#_Subcap_Scoring sheet (columns A–K), scoring flows through these states:
-
-| State | Where | Description |
-|-------|-------|-------------|
-| `raw_score` | Internal (not in workbook) | From M-level matching (before caps) |
-| `evidence_ceiling` | Column H | Maximum score supported by evidence tier |
-| `caps_applied` | Column I | Description of any caps that reduced the score |
-| `final_score` | **Column D (Score)** | min(raw, evidence_ceiling, severity_caps, cross_pillar) — **ONLY value in rollups** |
-
-**Column D is the FINAL score** — it already incorporates all caps. There is no separate
-raw_score column in the workbook. The raw-to-final pathway is documented in the Rationale
-(Column J) and Caps_Applied (Column I).
-
-**Rollup:** subcap final_score (Col D) → capability → category → pillar → overall (weighted avg)
-**Reconciliation:** Recompute pillar from categories — must match ±0.01. Fix before proceeding.
-
-### Canonical Export Layer (MANDATORY after Phase 4)
-
-```
-$DMA_ROOT/04_scoring/exports/
-├── export_scoring_detail.csv      # All subcaps: ID, Score, Evidence_Ceiling, Caps_Applied, Confidence
-├── export_category_summary.csv    # 17 rollups with weighted scores
-├── export_pillar_summary.csv      # 4 rollups with weighted scores
-├── export_evidence_inventory.csv  # All evidence with ERS
-├── export_issue_register.csv      # Issues with dates
-└── export_coverage_stats.csv      # Subcap counts, coverage %
-```
-
-**Phase 7 report reads ONLY from exports. No ad hoc data.**
-
-### Sub-Vertical Pillar Weights
-
-| Sub-Vertical | P1 | P2 | P3 | P4 |
-|-------------|----|----|----|----|
-| Credit Unions | 25 | 30 | 20 | 25 |
-| Regional Banks | 25 | 30 | 20 | 25 |
-| Commercial Lending | 20 | 20 | 35 | 25 |
-| CIB | 20 | 20 | 35 | 25 |
-| Insurance Carriers | 20 | 20 | 30 | 30 |
-| Insurance Brokerages | 20 | 35 | 20 | 25 |
-| Wealth / RIAs | 25 | 30 | 20 | 25 |
-| Asset Management | 20 | 30 | 25 | 25 |
-
----
+Read `references/score_states.md` — the score states and the raw-to-final pathway. Read before Phase 4; `engine.assessment apply` does the arithmetic.
 
 ## Persistent QA Memory System
 
 Maintains a living error log across assessments. See `references/qa_error_log.md` (master template).
 
-**Phase 0:** Copy to `$DMA_ROOT/checkpoints/qa_error_log.md` (writable). If already exists (session resume), load without overwriting.
+**Phase 0:** Copy to `<run root>/07_qa/qa_error_log.md` (writable). If it already exists (session resume), load without overwriting.
 
 **Phase Gate Protocol (EVERY phase, no exceptions):**
-1. LOAD `$DMA_ROOT/checkpoints/qa_error_log.md`
+1. LOAD `<run root>/07_qa/qa_error_log.md`
 2. FILTER to current phase tag `[PHASE:N]`
 3. ACKNOWLEDGE: `⚠️ PHASE GATE [N] — [X] prevention rules: [list]. Proceeding.`
 4. APPLY each as hard constraint
@@ -324,43 +205,7 @@ These fire at their tagged phase. All are hard constraints.
 
 ## Memory, Batching & Caching
 
-**Checkpoint files** saved to `$DMA_ROOT/checkpoints/` after each phase:
-
-| Phase | File | Contents |
-|-------|------|----------|
-| 0 | `00_parameters.json` | Institution, SV, size, mode, docs |
-| 1 | `01_evidence_index.json` | All evidence with IDs, tiers, facts |
-| 2 | `02_peer_benchmarks.json` | Peers, scores, benchmarks |
-| 3 | `03_issue_register.json` | Issues, severity, caps |
-| 4 | `04_scores.json` + Workbook XLSX | All subcap scores + rationales |
-| 5 | `05_priorities.json` | Priority scores, ranked |
-| 6 | `06_recommendations.json` | Full argument structures |
-
-**On resume:** Check checkpoints/ first. Confirm resume vs. fresh start.
-
-**Batching:** Evidence by pillar→save. Peers one at a time→save. Scoring by pillar (Pass 1)→save→Pass 2 cross-pillar. Report section by section.
-
-**Caching:** Evidence=immutable once collected. Peers=immutable. Scores=mutable (cap changes invalidate downstream). Internal docs=read-once→index. Calculation traces=cacheable, trace forward on change.
-
-**Evidence Loading During Scoring (CRITICAL for context management):**
-
-During Phase 4, NEVER load the full evidence index into context. Instead, load evidence
-one CAPABILITY at a time using a targeted extraction:
-
-```python
-import json
-data = json.load(open(f'{DMA_ROOT}/checkpoints/01_evidence_index.json'))
-cap_evidence = [e for e in data['items'] if any(
-    s.startswith('P1C1.1') for s in e.get('subcap_mappings', [])
-)]
-```
-
-Score all subcaps in that capability, write results to the workbook, then discard the
-evidence slice and load the next capability. A capability typically contains 5-12 subcaps
-worth of evidence (~2-5K tokens), which is manageable. This preserves the ability to see
-all evidence for related subcaps together while keeping the context footprint bounded.
-
----
+Read `references/operating_procedure.md` — memory (same file as the context rules).
 
 ## Proof-Carrying Scoring
 
@@ -380,36 +225,7 @@ for any capped score. Confidence (Col E) reflects evidence depth.
 
 ## Output Directory Taxonomy (MANDATORY)
 
-```
-{DMA_ROOT}/                         # DMA-ASM-{INST}-{DATE}-{SEQ}
-├── run_manifest.json
-├── 00_setup/
-├── 01_evidence/
-├── 02_peers/
-├── 03_issues/
-├── 04_scoring/
-│   ├── Workbook.xlsx
-│   ├── caps_applied_log.csv
-│   ├── contradiction_log.csv
-│   ├── reasoning_chain_log.json
-│   └── exports/                    # Canonical export layer
-├── 05_analysis/
-├── 06_recommendations/
-├── 07_deliverables/
-│   ├── Report.docx
-│   └── charts/
-├── 08_qa/
-│   ├── qa_verdict.json
-│   └── qa_findings_register.csv
-├── governance/                     # Layer 2 handoff
-└── checkpoints/
-```
-
-**Run ID:** `DMA-ASM-{INST_CODE}-{YYYYMMDD}-{SEQ}`
-**Provenance:** Every artifact references run_id. CSVs: header comment. Workbook: Run_Metadata sheet. Charts: footer. Mismatch = build fails.
-**Clean build:** Never reuse from different RUN_ID.
-
----
+Read `references/operating_procedure.md` — the run tree (same file).
 
 ## Phase 0: Engagement Setup
 
@@ -450,16 +266,21 @@ for any capped score. Confidence (Col E) reflects evidence depth.
      reasoning (columns L..AG), the search log, the gate log and the
      uncertainty band — all of it beside the rows it bears on. Read the
      sheets; do not re-derive from a JSON copy of them.
-   - PUBLIC: ~2,500-4,200 web searches + Moody's connector enrichment. HYBRID: internal docs + full web search + Moody's (highest quality).
-   - **Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors SUPPLEMENT with structured credit/financial data. web_search MUST precede Moody's in every phase.
+   - PUBLIC: the research tier's public evidence, five volleys per cell. HYBRID: internal
+     documents beside it (highest quality). Which tool, in which order, is the research
+     tier's rule, stated once (`${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md`
+     § *Tools*); this skill restates none of it.
 
 3. **Parameter Lock:** Institution, sub-vertical, size tier, regulator, geography
    Size: Mega(>$50B) | Large($10-50B) | Medium($2-10B) | Small($500M-2B) | Micro($100-500M) | Nano(<$100M)
 
 4. **Toolkit Binding:** Verify ALL 4 Pillar XLSX files accessible. HARD STOP if any missing.
 
-5. **Workspace:** Generate RUN_ID → create full directory tree → create run_manifest.json → copy qa_error_log.md to checkpoints/
-   **Write RUN_ID and EVIDENCE_MODE to `00_parameters.json`. These are IMMUTABLE for the entire assessment. Every artifact must reference them. Mismatch = build fails.**
+5. **Workspace:** the run already exists — `engine.cli start` created the tree
+   (`engine.runstate.SUBDIRS`) and the manifest (`run_manifest_v3`) with RUN_ID and
+   EVIDENCE_MODE pinned and IMMUTABLE; `engine.assessment open` opens the stage. Copy
+   `qa_error_log.md` to `07_qa/`. Every artefact carries the run id; `engine.cli validate`
+   refuses a mismatch.
 
 6. **Peer Set Selection & Lock** (SKIP if imported from research handoff):
    - Select 3-5 peers: sub-vertical match, size tier proximity, geographic overlap, competitive relevance
@@ -475,10 +296,14 @@ for any capped score. Confidence (Col E) reflects evidence depth.
 
 Execute Phase Gate Protocol. Apply ERR-003, ERR-008, ERR-009.
 
-**Dual-Source Mandate:** web_search is PRIMARY (≥70% of queries). Moody's connectors supplement
-with structured credit/financial data. web_search MUST precede Moody's for each capability.
+**Which tools the evidence came through** is
+the research tier's rule, stated once in `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/references/RESEARCH-PROTOCOL.md`
+§ *Tools: first choice, fallback, and what you emit* — this skill restates none of it.
 
-**For every subcap (851 at full scope):** 3-5 `web_search` queries → Moody's enrichment → `web_fetch` rich docs → fact-level extraction [E-xxx:Fy] → tier classify → map to specific subcap IDs.
+**For every subcap (851 at full scope):** the research lane fired the five volleys and the
+primary question, read rich documents as windows through `engine.cli fetch`, extracted at
+fact level `[E-xxx:Fy]`, tiered and mapped each fact to the cells it bears on — and the
+floors gate holds the category to it before this skill opens.
 
 **For HYBRID/INTERNAL mode:** Load internal evidence FIRST per Internal Evidence Integration Protocol (see below). Internal T1/T2 evidence takes priority over public T3-T5.
 
@@ -527,92 +352,7 @@ Search enforcement databases → Issue Time Map → severity S1/S2/S3 → determ
 
 ## Phase 4: Scoring & Workbook Production
 
-**On a research-engine run (a `DMA_Scoring_Workbook_*.xlsx` with a
-`Run_Metadata.stage` key), this phase IS the engine's SCORING stage — do not
-build a second workbook.** `python3 -m engine.assessment open --run <R>`
-refuses until every category's floors gate is PASS; each score goes in
-through `engine.assessment score` (refuses an unchallenged row, a score
-above its evidence ceiling, a rationale that cites none of the row's E-ids,
-a blank AI/data overlay); the four `scoring-p<N>-producer` agents run one
-pillar each in parallel and `scoring-critic` records the SCORING_CRITIC
-verdict per pillar; `engine.assessment rollup` then `engine.assessment gate`
-must record PASS before Phase 7 may start. The A–K columns below are the same
-sheet — column D is what the stage writes.
-
-Execute Phase Gate Protocol. Apply ERR-001, ERR-002, ERR-003, ERR-004, ERR-005, ERR-008, ERR-009.
-
-**Read first:** `references/scoring_methodology.md`, `references/workbook_specification.md`.
-
-**Load evidence per-capability** (see "Evidence Loading During Scoring" in Memory section).
-
-**OUTPUT FORMAT: the run's existing P#_Subcap_Scoring sheets, columns A–K (see "Workbook Column Structure" above).**
-Each row = one subcap ID (e.g., P1C1.1.1). Column D = final score. Column J = rationale.
-If your sheet has <50 rows, you are scoring at the WRONG LEVEL — STOP.
-
-### Capability Micro-Loop (repeat for each ~72 capabilities)
-
-**3a. RETRIEVE** subcap list + diagnostic Qs from Pillar XLSX Column H.
-List every subcap ID under this capability (e.g., P1C1.1.1, P1C1.1.2, P1C1.1.3...).
-Each subcap becomes ONE ROW in the workbook.
-
-**3b. MAP EVIDENCE** to each subcap individually. Different diagnostic Qs → different facts from same source. Evidence minimum check: ≥3 items or BLOCKED.
-
-**INTERNAL EVIDENCE PRIORITY CHECK (HYBRID/INTERNAL mode — fires before public evidence mapping):**
-1. Check: does internal evidence exist for this subcap? (Hubbl scans, discovery notes, client docs)
-2. If YES: classify using decision tree — NEVER default to T4:
-   - Hubbl/BuiltWith/Wappalyzer scan → T1 (machine-verified)
-   - Structured discovery notes with specific tech/metrics → T2
-   - Client-provided policy docs, board decks, roadmaps → T2
-   - General internal doc without specific metrics → T3
-   - Informal memo, anecdotal claim → T4
-3. Internal T1/T2 evidence RAISES the evidence ceiling (not constrained by public T3-T5 caps)
-4. When internal contradicts public: internal T1/T2 wins unless public T1 disagrees
-5. Log in rationale: "Internal evidence [INT-xxx] classified as T2, overrides public T5 ceiling"
-
-**3c. SCORE EACH SUBCAP** using 8-step decision tree: Collect evidence → Tier classify → Evidence ceiling (Col H) → M-level match → Negative adjustments → Resolve contradictions → Apply caps (Col I) → Final score (Col D) + rationale (Col J).
-
-**3d. WRITE RATIONALE (Column J)** — ≥150 chars, using this template:
-```
-[EVIDENCE]: [E-xxx:Fy] shows [fact]. [SECOND SOURCE]: [E-yyy:Fz] confirms/contradicts.
-[MATURITY MATCH]: Maps to M[N] "[descriptor]" because [why]. [GAP TO NEXT]: Missing [element].
-[COUNTER]: [opposing evidence or "None identified"]. [CEILING]: [cap check].
-[SO WHAT]: For [Institution], this means [specific impact].
-```
-FORBIDDEN: "Category-based scoring", "Based on public evidence analysis", anything generic.
-
-**3e. DIFFERENTIATION CHECK:** >60% same score within a capability = STOP. 100% identical = HARD BLOCK.
-
-**3f. CONFIDENCE-ERS CROSS-VALIDATION:** HIGH requires ERS≥2.5. Single-source caps at MEDIUM.
-
-**3g. LOG REASONING CHAIN** to `reasoning_chain_log.json`.
-
-### Post-Scoring Steps
-
-5. **THERE IS NO WORKBOOK GENERATION STEP.** The workbook exists since `engine.cli start`;
-   every score you struck is already in its column D. A "single Python script" that reads a
-   scratchpad and generates an XLSX is the retired `scripts/assessment_runner.py`'s defect
-   (a fresh `openpyxl.Workbook()`, 11 sheets, no `SubCap_Name`s, no formatting, the retired 17-category count)
-   and the `deny_artefact_writes` PreToolUse hook refuses it. If a sheet is missing, the
-   workbook is not the run's — stop and find the run's (`engine.cli status --run <R>`).
-
-5.5. **EVIDENCE COMPLETENESS GATE (blocks Phase 5):** `engine.assessment score` already
-   refused a score with no E-ids, a rationale under 150 characters, a rationale citing nothing
-   the row carries, or a score above the row's evidence ceiling — so a row that carries a
-   score carries its proof. Confirm with `engine.assessment state --run <R> --root <ROOT>`
-   (unscored rows, ceilings, critic verdicts) and `engine.cli validate --run <R> --root <ROOT>`.
-6. **Calculation chain — `engine.assessment rollup --run <R> --root <ROOT> --headline "…"`:**
-   capability → category → pillar → overall, weights from the run's `Pillar_Weights` (the
-   sub-vertical's), written to Pillar_Summary, Category_Detail (16 rows), Pillar_Rollup,
-   Category_Rollup and Executive_Summary in one call; `engine.grains recompute` re-derives the
-   stated grains and refuses a copy that drifts past the 0.05 tolerance. Then
-   `engine.assessment gate --run <R> --root <ROOT>` must record PASS (every selected row
-   scored, a SCORING_CRITIC verdict per pillar from an actor that struck none of them,
-   differentiation, ceilings) before Phase 5.
-7. Run Workbook QA (G.1-G.9 from `references/quality_assurance.md`).
-8. **RUN `scripts/validate_scoring_quality.py`** — exit code 1 = BLOCK Phase 5.
-9. Generate canonical export CSVs to `$DMA_ROOT/04_scoring/exports/`.
-
----
+Read `references/phase_4_scoring.md` — the scoring loop, the capability micro-loop and the post-scoring steps. Read when Phase 4 opens.
 
 ## Phase 4.5: Adversarial Critic Pass
 
@@ -649,170 +389,11 @@ Execute Phase Gate Protocol.
 
 ## Phase 7: Deliverable Generation
 
-Execute Phase Gate Protocol. Apply ERR-006.
-
-Generate in order: **1. Workbook** → **2. Report** (.docx) → **3. Charts** → **4. Peer Analysis** → **5. Run Manifest** → **6. Governance Logs** → **7. Validate** → **8. Citation validation**
-
-### Report Generation Protocol (MANDATORY)
-
-**Template is MANDATORY — NO deviation.**
-
-**STEP 0:** The template is PINNED in the repo —
-`plugins/dma-insights/references/templates/assessment_report_template.md` with
-its section spec in `report_templates.json` — and every run is bound to it at
-`engine.cli start`. Read the pinned export (and `gold_reference.json`, the
-Golden 1 depth) before writing; `python3 -m engine.cli narrative preconditions
---run <R> --report assessment` must print nothing (SCORING gate PASS, workbook
-complete, PRELIM closed, binding recorded) or no section may be written.
-This is the ONLY acceptable report structure. Do NOT create ad hoc layouts. Do NOT invent
-sections. Fill the template exactly as structured.
-
-**STEP 1 — ANALYZE (before writing ANYTHING — save analysis to disk):**
-  Create `$DMA_ROOT/07_deliverables/report_analysis.json` containing:
-  ```python
-  analysis = {
-    "total_evidence_items": N,
-    "unique_e_ids": [list],
-    "items_per_pillar": {"P1": N, "P2": N, "P3": N, "P4": N},
-    "top_5_strongest": [{"subcap_id": "P1C1.1.1", "score": 3.5, "evidence": "E-xxx", "why": "..."}],
-    "top_5_weakest": [{"subcap_id": "P2C3.2.1", "score": 1.5, "evidence": "none", "why": "..."}],
-    "top_3_patterns": ["pattern description with E-IDs"],
-    "cross_pillar_links": ["P4C1 low → caps P2C4 because..."],
-    "peer_gaps": [{"category": "P2C1", "entity_score": 2.5, "peer_median": 3.2, "gap": -0.7}]
-  }
-  ```
-  **This file is the ONLY input to Step 2. If it doesn't exist, Steps 2-3 cannot proceed.**
-
-**STEP 2 — SYNTHESIZE (write synthesis to disk — do NOT skip):**
-  Create `$DMA_ROOT/07_deliverables/report_synthesis.md` answering:
-  a. What story does the DATA tell? (cite specific E-IDs and scores)
-  b. Where vs peers — and WHY? (cite peer_gaps from analysis)
-  c. What should Zennify prioritize? (map to specific Zennify solutions with evidence)
-  d. Cross-pillar unlocks? (cite cross_pillar_links from analysis)
-  **Each answer must reference specific E-IDs, scores, and peer data. Generic answers = redo.**
-
-**STEP 3 — WRITE (following template structure, reading from synthesis):**
-  Read `report_synthesis.md` → write each report section using ONLY data from synthesis.
-  a. SCQA Executive Summary with ≥7 unique E-ID citations
-  b. Pillar Deep Dives using "What We See / Why It Matters" structure per pillar
-  c. Recommendations with ROOT CAUSE (E-IDs) + SOLUTION (Zennify offering) + EXPECTED OUTCOMES
-  d. NO investment amounts, cost estimates, or ROI projections anywhere in the report
-
-**STEP 4 — VALIDATE (before declaring Phase 7 complete):**
-  a. Count E-xxx citations in report. <30 = FAIL, rewrite.
-  b. Specificity test: could any paragraph apply to a different institution? If YES = rewrite.
-  c. Verify Assessment ID and Evidence Mode on cover page, header, Appendix C match run_manifest.json.
-  d. Verify every recommendation cites specific E-IDs and maps to a named Zennify solution.
-  e. Verify peer data appears ≥10 times with specific peer names and scores.
-
-**ANTI-GENERIC CHECK (fires before EVERY section):**
-FORBIDDEN without proxy evidence confirming the gap exists: "Appoint a CDO", "No CDO found",
-"no digital strategy", "Create a Center of Excellence", "Establish a data governance committee",
-"Hire a CISO", "Form an innovation lab". Before concluding "no evidence" for any capability →
-exhaust proxy searches (Tiers 7-10: industry associations, vendor case studies, job postings,
-Glassdoor, community forums).
-
-### Data Borrowing from Research Report (MANDATORY)
-
-The following sections are COPY operations from the Client Profile / Research Report.
-Do NOT rewrite them. Load the research report, extract relevant sections, and transplant
-with assessment-layer annotations:
-
-1. Section 3 (Trend Analysis & Digital Evolution Timeline) ← Research Report Section 3.3
-2. Section 4 (Issue Register & Issue Timeline) ← Research Report Section 5.1
-3. Section 2 (Assessment Methodology, entity context) ← Research Report Section 2
-
-For sections requiring NEW analysis (Pillar Deep Dives, Recommendations, Gap Prioritization),
-follow the Analyze→Synthesize→Write protocol above.
-
-### Report Rules
-- **Scoring-related claims** (pillar deep dives, capability analysis, recommendations): Synthesize FROM workbook rationales ONLY. No scoring facts not in workbook.
-- **Contextual sections** (trend analysis, issue timeline, entity profile): BORROW from research report per Data Borrowing protocol above. These sections provide context, not scoring assertions.
-- Read scoring data ONLY from canonical export CSVs in `$DMA_ROOT/04_scoring/exports/`. No ad hoc data sources.
-- Inline citations: ≥5 in Executive Summary, ≥2/capability in Pillar Deep Dives, ≥1/recommendation. Total ≥30.
-- Post-generation: count E-xxx citations. <10 = FAIL, rewrite.
-- Structure: per `DMA_Assessment_Report_Template.docx` from project knowledge base.
-
-### Run Manifest (`run_manifest.json`)
-Schema: `run_manifest_v2`. See `references/workbook_specification.md` for full spec.
-**Key validation rules:** $schema="run_manifest_v2" | overall=weighted avg pillars ±0.02 | total_items=sum tier_distribution | confidence sum=subcap count | verdict ∈ {PASS,PASS_WITH_NOTES} for delivery.
-
-### Governance Logs (CSV exports for Layer 2)
-
-**`caps_applied_log.csv`** — Contract 2. Columns: cap_id, cap_type (EVIDENCE_CEILING/SENTIMENT/REGULATORY/CROSS_PILLAR/ADJ_*/CRITIC_CHALLENGE), trigger_reason, trigger_evidence, affected_id, raw_score, cap_ceiling, final_score, score_delta.
-
-**`contradiction_log.csv`** — Contract 3. Columns: contradiction_id, subcap_id, evidence_a_id, evidence_a_ers, evidence_a_claim, evidence_b_id, evidence_b_ers, evidence_b_claim, resolution_rule, winner, justification, confidence_impact, flagged_in_report, contradiction_type (HARD/SOFT).
-
-**`evidence_index.csv`** — Contract 4. Columns: evidence_id, source_name, url, tier, ers_score, publish_date, subcaps_supported, key_facts_count.
-
-**`reasoning_chain_log.json`** — Contract 8. Per-subcap: decision_path, evidence_considered, ceiling_calc, m_level_match, caps_applied, contradictions, confidence, critic_result, final_score. See `references/reasoning_chain_schema.md`.
-
-### Post-Delivery Evidence Validation
-Before declaring Phase 7 complete, verify all evidence IDs referenced in the workbook and report exist in `evidence_index.csv`. Any broken reference = fix before proceeding to Phase 8.
-
----
+Read `references/phase_7_deliverables.md` — the report generation protocol. Read when Phase 7 opens.
 
 ## Phase 8: Quality Assurance (14-Check Suite)
 
-Execute Phase Gate Protocol.
-
-Run full validation per `references/quality_assurance.md`. Workbook wins on mismatch.
-
-**`scripts/qa_auditor.py` now runs 14 checks (expanded from 6). ALL must pass.**
-
-| # | Check | Severity | What It Catches |
-|---|-------|----------|----------------|
-| 1 | Row counts per pillar (≥50 rows) | CRITICAL | Category-level scoring |
-| 2 | Score bounds (1.0-5.0, max 1 decimal) | CRITICAL | Out-of-range scores |
-| 3 | Evidence linkage (score → evidence exists) | HIGH | Ungrounded scores |
-| 4 | Caps log consistency (Caps_Applied non-empty → Score ≤ Evidence_Ceiling) | MEDIUM | Undocumented caps |
-| 5 | Rationale quality (≥150 chars, E-ID cited) | MEDIUM | Generic rationales |
-| 6 | Weight sums (~1.0 per capability) | MEDIUM | Broken aggregation |
-| 7 | **Evidence field completeness** | **CRITICAL** | Truncated evidence: missing URLs, no ERS, no excerpts |
-| 8 | **Report citation density** (≥30 unique E-IDs, ≥5 in exec summary) | **CRITICAL** | Reports with zero or thin citations |
-| 9 | **Output artifact existence** (all mandatory files present) | **CRITICAL** | Missing deliverables (peer files, exports, report) |
-| 10 | **Assessment ID consistency** (same RUN_ID across all artifacts) | **CRITICAL** | Mixed-run output |
-| 11 | **Evidence mode consistency** (same mode across all artifacts) | **HIGH** | Conflicting evidence mode claims |
-| 12 | **Peer data in report** (≥10 peer references, ≥1 per pillar) | **HIGH** | Peer data not flowing into report |
-| 13 | **Anti-generic rationale check** (scan for forbidden patterns) | **HIGH** | Generic consulting prose |
-| 14 | **Score differentiation + distribution** (no pillar >70% same score) | **MEDIUM** | Uniform scoring |
-
-**Checks 7-14 are NEW. They catch the real issues that the previous 6-check suite missed.**
-
-**Run:** `python scripts/qa_auditor.py --workbook <path> --report <path> --assessment-dir <path>`
-Exit code 1 = FAIL. Do NOT manually override verdicts. Fix issues and re-run.
-
-### Computed QA Verdict (`$DMA_ROOT/08_qa/qa_verdict.json`)
-
-Generated programmatically — never from manual/stale templates:
-```python
-qa_verdict = {
-    "run_id": RUN_ID,
-    "generated_at": ISO_TIMESTAMP,
-    "verdict": "PASS|PASS_WITH_NOTES|FAIL",
-    "checks_executed": {"total": N, "passed": P, "failed": F, "warnings": W},
-    "reconciliation": {
-        "subcap_count_match": bool, "pillar_rollup_reconciled": bool,
-        "evidence_ids_all_valid": bool, "broken_evidence_refs": 0
-    },
-    "score_state_propagation": {
-        "raw_to_final_consistent": bool, "category_uses_final_score": bool,
-        "pillar_uses_final_score": bool
-    },
-    "artifact_provenance": {"run_id_consistent_across_all": bool, "mismatched_artifacts": []},
-    "regression_tests": "8/8 PASS",
-    "blocker_issues": [],
-    "timestamp_validation": {"all_artifacts_after_run_start": bool, "stale_artifacts_found": []}
-}
-```
-
-**Verdict:** FAIL = any blocker/reconciliation failure/regression fail. PASS_WITH_NOTES = warnings only. PASS = all green. Timestamp MUST be newer than all other artifacts.
-
-**Regression Tests:** Run all 8 suites per `references/regression_tests.md`. X/8 PASS. CRITICAL fail = fix before delivery.
-
-**Error Log Patch:** Output in chat for human to append to master qa_error_log.md.
-
----
+Read `references/phase_8_qa.md` — the 14-check suite. Read when Phase 8 opens.
 
 ## Report Formatting & Branding
 
@@ -821,9 +402,10 @@ qa_verdict = {
 - Heading text: Dark Teal `#1F9A90`
 - Table header bg: Primary Teal `#27BBAF` (white text)
 - Body: Charcoal `#333333` | Alt rows: Light Teal `#E8F8F6`
-- Maturity BANDS (four, and only four — charter invariant 6):
-  Activating=`#D32F2F` Building=`#62D7B8` Competing=`#FBC02D`
-  Differentiating=`#388E3C`. A null score gets NO swatch. There is no
+- Maturity BANDS (four, and only four — charter invariant 6), the fills
+  `apps/web/lib/bands.js` owns (repo root; a test holds this line equal to it):
+  Activating=`#FFCB99` Building=`#62D7B8` Competing=`#27BBAF`
+  Differentiating=`#139F94`. A null score gets NO swatch. There is no
   fifth band and no hex for one; the score levels 1-5 are a different
   scale from the four display bands and never carry a colour.
 
@@ -842,7 +424,7 @@ qa_verdict = {
 
 **Evidence Item:** Single time-bound fact from a source, with Tier, Date, Source, Fact ID.
 **Unique Source:** A document/database producing evidence. Multiple facts from same source = 1 source for corroboration.
-**Corroboration:** 2+ different sources AND 2+ different tier types. Exception: single T1 ≤24mo = HIGH alone.
+**Corroboration:** 2+ different sources AND 2+ different tier types. Exception: a single T1 source within the RECENT band (≤24 months on `contract.RECENCY_LADDER`) = HIGH alone.
 **Hard Contradiction:** Direct factual conflict (can't both be true) → resolution protocol → Contradiction_Log. **Soft:** Interpretive divergence → prefer authoritative, no forced resolution.
 **Trend:** ≥2 dated points, ≥6 months apart. Single snapshot ≠ trend.
 **Score Precision:** Default 0.5 grid. 0.1 only with quantitative evidence + explicit mapping + max 1 decimal. 2+ decimals = QA failure.
@@ -876,6 +458,12 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `references/workbook_specification.md` | 4,7 | Sheet specs, column defs, rationale template |
 | `references/qa_error_log.md` | 0 | Master error log (copy to writable) |
 | `references/reasoning_chain_schema.md` | 4,7 | reasoning_chain_log.json schema |
+| `references/workbook_columns.md` | 0 | Columns A–K of P#_Subcap_Scoring (moved from this file, F-B04-027) |
+| `references/operating_procedure.md` | 0 | Context discipline, the state is the workbook, the run tree |
+| `references/score_states.md` | 4 | Deterministic score states; `engine.assessment apply` does the arithmetic |
+| `references/phase_4_scoring.md` | 4 | The scoring loop and the capability micro-loop |
+| `references/phase_7_deliverables.md` | 7 | Report generation protocol |
+| `references/phase_8_qa.md` | 8 | The 14-check suite |
 
 ## Scripts
 
@@ -884,7 +472,7 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 | `scripts/ingest_evidence.py` | 1 | Pre-process documents |
 | `scripts/build_index.py` | 1 | BM25 retrieval index |
 | `scripts/retrieve.py` | 1 | Evidence retrieval per subcap |
-| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment open / score / critique / rollup / gate` on the run's one workbook |
+| `scripts/assessment_runner.py` | — | **RETIRED** (refuses): it built a fresh 11-sheet workbook. Scoring runs through `engine.assessment score / critique / rollup / gate` (the driver opens the stage) on the run's one workbook |
 | `scripts/validate_scoring_quality.py` | 4 | **MANDATORY** 8-gate validator |
 | `scripts/qa_auditor.py` | 8 | Automated QA checks |
 | `scripts/generate_governance_outputs.py` | 7 | CSVs + manifest from workbook |
@@ -892,15 +480,19 @@ Never fabricate. "I don't know" builds credibility. Feed gaps into Missing Evide
 
 ## Pillar XLSX Files
 
-Search `/mnt/user-data/uploads/` and `/mnt/project/` for:
-Pillar 1-4 Scoring Toolkit (or v5.0 equivalent). Key sheets: Capability Map, Maturity Descriptors, Sub-Vertical Matrix.
+The engine reads the catalogue, never the XLSX: `packages/shared/catalogue_v70_tier.json`
+(+ `catalogue_v70_names.json`) resolved by `engine.contract.catalogue_path()` (env
+`DMA_CATALOGUE` → the checkout → the packaged copy). The Pillar 1-4 Scoring Toolkit XLSX
+files are the v7.0 source of record at `gs://digital-maturity-assessor-catalogue-staging/v7.0/`
+and are pulled by the research-conductor at run start. Key sheets: Capability Map, Maturity
+Descriptors, Sub-Vertical Matrix. Nothing is searched for under `/mnt/`.
 
 ---
 
 ## Error Handling
 
 - Document unreadable → UNAVAILABLE, continue
-- Context overflow → checkpoint, batch, resume (new conversation if needed)
+- Context overflow → finish the capability, end the turn; `engine.assessment state` is the resume (new conversation if needed)
 - Contradiction unresolvable → conservative, LOW confidence
 - >30% no evidence → capability N/A, exclude from weighted avg
 - Score >1.5 from peers → investigate evidence quality

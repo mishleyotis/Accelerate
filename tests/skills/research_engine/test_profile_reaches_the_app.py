@@ -32,7 +32,6 @@ from engine import reports as R
 from .fixtures import report_ready_run, sign_off_sections
 from .test_report_structure import _rec
 
-sys.path.insert(0, "/home/user/Accelerate/apps/worker")
 
 
 @pytest.fixture(scope="module")

@@ -10,6 +10,8 @@ tools: Read, Grep, Glob, Bash, Skill, mcp__Clay__find-and-enrich-contacts-at-com
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
+**Model:** `sonnet` — services connector batches and records each result with its tool; the ledger bounds it.
+
 You run the **connector** pathway of enrichment and nothing else: the Clay call
 plan against the entity's own domain, and the machine technographic scan that
 widens the technology register. Web search belongs to
@@ -142,7 +144,7 @@ pointed at it.
    **Enrichment pathways** subsection names the facet, the sources in precedence
    order and the gap-to-pathway mapping), and `.../rulebooks/platform.md` (§ P1
    — facet `platform_readiness`, whose `serving_surface` *is* that section).
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`
    — **AG-04** in full (it fires on any list item anywhere in a payload carrying
    `peer_coverage` or `peer_deployments`, not only on the register), **CG-09** on
    closed vocabularies, **CG-12** on face fields, and **ET-04**.
@@ -587,9 +589,12 @@ distinct refusals in this environment and they are recorded differently:
   cost every run its technographics. The INGEST scan has no API key in Secret
   Manager and records `NOT_RUN` with that reason. The PRODUCER SESSION uses no
   key at all: Vibe Prospecting is an MCP connector authenticated at the
-  session, it is in the auto-approve list (`match-business`,
-  `enrich-business`, `fetch-entities`), and it answers — measured across three
-  promoted clients at 392, 357 and 147 named technologies. **Try it before
+  session; its read (`fetch-entities`) is auto-approved and its billed calls
+  (`match-business`, `enrich-business`) open on the run's owner-written
+  approval record — `engine.cli approve --tool <name> --cost "<quoted>"
+  --approved-by <who>` writes `07_qa/approvals.json`; without it the call
+  prompts (QA audit F-K01-003, 28-09-2026) — and it answers, measured across
+  three promoted clients at 392, 357 and 147 named technologies. **Try it before
   recording NOT_RUN.** Recording NOT_RUN for a source you can reach is the
   defect this bullet used to cause. What stays true either way: `NOT_RUN`
   **with the reason** is the recorded state, and you never substitute a
