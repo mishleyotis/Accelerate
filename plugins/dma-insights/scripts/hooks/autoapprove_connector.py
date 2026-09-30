@@ -165,6 +165,10 @@ ENRICHMENT_TOOLS = frozenset({
     # Indeed — the one that stopped the run
     "search_jobs", "get_job_details", "get_company_data",
     # Clay
+    # the live connector's names (2026-09-30), then the retired ones, kept so
+    # a stale install is still approved rather than prompting mid-lane
+    "search-companies", "search-contacts", "search-contacts-by-name",
+    "load-more-search-results", "get-task",
     "find-and-enrich-company", "find-and-enrich-contacts-at-company",
     "find-and-enrich-list-of-contacts", "ask-question-about-accounts",
     "query-objects", "get-current-workspace",

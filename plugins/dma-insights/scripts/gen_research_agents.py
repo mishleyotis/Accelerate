@@ -27,7 +27,7 @@ refusals and the floors gate, not bought with thinking tokens; the depth
 work (challenge, consolidation, verification) belongs to the opus tier by
 design.
 
-maxTurns is 340, and it is sized to the work rather than chosen as a cap.
+maxTurns is 400, and it is sized to the work rather than chosen as a cap.
 It was 200 on the reasoning that one dispatch covers one search-op-ceiling
 window (~7 subcaps at ~31 measured turns/subcap ≈ 217) — but nobody
 measured what a CATEGORY costs. Measured 2026-09-13 on the real catalogue
@@ -39,6 +39,13 @@ which is the mechanism behind one run's ~18 dispatches and $96.65. 340
 clears the largest category with headroom for the turns a projection cannot
 model. Turn count — not search count — remains the measured cost driver:
 24.5M cached-input tokens over 188 turns for six subcaps.
+
+Raised to 400 on 2026-09-30. 340 was sized to T1_CORE; a FULL run takes the
+sub-vertical overlay, and a multi-LOB run adds its supplementary variants —
+measured on SWBC (IB + IC/CL/RIA, 760 cells): P2C2 353 turns and P2C3 345 at
+capability grain, both over 340, so both were certain to be cut off and
+re-dispatched cold. An unused turn costs nothing; a lane that runs out pays
+its context floor again.
 """
 from __future__ import annotations
 
@@ -100,7 +107,7 @@ category; it never scores, never challenges its own synthesis, never \
 submits and never promotes.
 model: sonnet
 effort: medium
-maxTurns: 340
+maxTurns: 400
 skills:
   - dma-research
 tools: {tools}

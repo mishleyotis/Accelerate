@@ -1468,16 +1468,35 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "rules": common_rules + [
             "the contact pass names the leaders `leadership` needs (min two "
             "named people); the machine technographic scan is registered at "
-            "the tier it earns, never T1",
+            "T1, never T4 (the connector's ET-11; clay_taxonomy.json)",
             "record every attempt with the outcome it had (RESOLVED, NOT_RUN, "
             "NO_SOURCE, FAILED) — a refused connector is stated, not dressed "
             "as a result"],
     })
-    return _write_lanes(out_dir, [
+    # THE CONNECTOR PASS IS NOT A LANE. Measured 2026-09-30 (SWBC): it was
+    # dispatched as a `claude -p` child like the other two, and a child holds
+    # no enrichment connector by design (they bind once, to the conducting
+    # session — run-assessment step 1). It spent its turns establishing that
+    # Clay was absent, wrote nothing, and asked to be "re-dispatched with a
+    # connector-bearing lane"; leadership and firmographics stayed OPEN and
+    # the stage stalled out. So it is written as an ORCHESTRATOR brief — the
+    # research relay's own pattern — for the session to service with one
+    # in-process subagent, which inherits the connectors.
+    owed_connector = connector["owed"]
+    out = _write_lanes(out_dir, [
         ("prelim-conductor", conductor, "PRELIM — the institution, before its capabilities"),
         ("prelim-techscan", scanner, "PRELIM — technology baseline"),
-        ("prelim-connectors", connector, "PRELIM — connector enrichment"),
     ], run=run, stage="PRELIM")
+    if owed_connector:
+        path = Path(out_dir) / "prelim-connectors.orchestrator.md"
+        connector["serviced_by"] = ("the conducting session: spawn ONE in-process "
+                                    "`enrichment-connector-specialist` subagent with "
+                                    "this file as its prompt")
+        path.write_text(_md("PRELIM — connector enrichment (ORCHESTRATOR)", connector),
+                        encoding="utf-8")
+        out["orchestrator"] = {"prompt_file": str(path), "owed": owed_connector,
+                               "agent": "enrichment-connector-specialist"}
+    return out
 
 
 def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:

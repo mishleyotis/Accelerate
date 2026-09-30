@@ -296,8 +296,11 @@ def test_the_bootstrap_grants_the_same_builtin_prefixes():
     # `//` — a single leading slash is anchored at the settings source, not
     # at the filesystem root, so `Write(/root/.dma/**)` matches nothing.
     for grant in ("Bash(python3 -m engine.", "Bash(python3 plugins/dma-insights/",
-                  "Write(//root/.dma/**)", "Edit(//root/.dma/**)"):
+                  "Edit(//root/.dma/**)"):
         assert grant in src, f"bootstrap does not grant {grant!r}"
+    # Write(path) is ignored by file permission checks (Edit covers writes)
+    # and printed three warnings into every headless lane — never granted.
+    assert '"Write(//' not in src
     for too_wide in ('"Bash"', '"Write"', '"Edit"', "Bash(*)", "Write(**)"):
         assert too_wide not in src, f"bootstrap grants {too_wide!r} — too wide"
 

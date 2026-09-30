@@ -52,6 +52,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -658,6 +659,25 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
         except Exception as e:                              # noqa: BLE001
             banked.append(f"NOT_BANKED: {e}")
 
+    # THE DOMAIN, from the preflight that already names it. Measured
+    # 2026-09-30 (SWBC): `entity.website` was filled and read by nothing, so
+    # the PRELIM connector lane refused to enrich ("no entity_profile domain
+    # yet ... I did not guess swbc.com") on a run whose binding file named it.
+    site = re.sub(r"^(?:https?://)?(?:www\.)?", "",
+                  _clean((doc.get("entity") or {}).get("website")).lower()).split("/")[0]
+    cited = [e for e in banked if not str(e).startswith("NOT_")]
+    website = "NOT_RUN: no website in the preflight"
+    if site and cited:
+        try:
+            from . import profile
+            profile.firmographic(
+                wb, field="website", value=site,
+                as_of=_clean((doc.get("entity") or {}).get("as_of"))
+                or _utcnow()[:10], evidence=cited[0], confidence="High")
+            website = site
+        except Exception as e:                              # noqa: BLE001
+            website = f"NOT_RECORDED: {e}"
+
     lines = (doc.get("financials") or {}).get("revenue_lines") or []
     body = _render_review(doc, report, b)
     wb.append("Report_Narrative", {
@@ -668,7 +688,7 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
         "Kind": "section", "Author": "preflight", "Written_At": _utcnow(),
     })
     return {"preflight_sha": b["preflight_sha"], "evidence_banked": banked,
-            "revenue_lines": len(lines), "bases": b}
+            "revenue_lines": len(lines), "bases": b, "website": website}
 
 
 def _render_review(doc: dict, report: dict, b: dict) -> str:

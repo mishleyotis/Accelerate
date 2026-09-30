@@ -50,7 +50,10 @@ DENIALS = (
     # denied as "a shell fetch" although nothing was fetched. The URL now
     # denies only beside something that retrieves it.
     (re.compile(
-        r"(?=[\s\S]*\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b)"
+        # \A: evaluated once, from the start. Unanchored, re.search retried
+        # both [\s\S]* scans at every offset — cubic on a long command, which
+        # timed the adversarial garbage test out at 60 s.
+        r"\A(?=[\s\S]*\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b)"
         r"[\s\S]*(?:\b(?:curl|wget|http|https|httpie|aria2c|lynx|w3m|links|"
         r"xh|gsutil)\b(?!\s*[:=])|urlopen|urllib|requests\.(?:get|post)|"
         r"httpx|fetch\s*\()",

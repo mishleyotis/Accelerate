@@ -243,8 +243,17 @@ class McpReads:
         except ValueError:
             return {"_error": raw[:300]}
 
-    def pending_runs(self) -> list[dict]:
-        out = self._call("list_pending_runs")
+    def pending_runs(self, display_id: str | None = None) -> list[dict]:
+        # Narrowed server-side when the connector supports it (it returned
+        # 157 KB unfiltered, measured 2026-09-30); an older connector refuses
+        # the argument, and then the full list is filtered by the caller.
+        out = self._call("list_pending_runs",
+                         {"display_id": display_id, "latest_only": False}) \
+            if display_id else {"_error": "no filter"}
+        if isinstance(out, dict) and (out.get("_error") or not out.get("pending")):
+            # refused by an older connector, or nothing under that id (the
+            # caller also matches on entity_name): read the whole queue.
+            out = self._call("list_pending_runs")
         if isinstance(out, dict):
             return list(out.get("pending") or out.get("runs") or [])
         return list(out or [])
@@ -1258,8 +1267,19 @@ class Pipeline:
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
             b = brief.prelim_brief(self.wb, run=self.run, out_dir=self._briefs(f"prelim_r{r}"))
+            orch = b.get("orchestrator")
+            if orch:
+                self.opts.log(f"[RELAY] PRELIM connector brief for the conducting session "
+                              f"(owed {', '.join(orch['owed'])}): {orch['prompt_file']}")
+                self.state["prelim_orchestrator"] = orch
+                self._save_state()
             self._count(self._dispatch(b, stage="PRELIM"))
             st = prelim.state(self.wb)
+            if orch and st["open"] and set(st["open"]) <= set(orch["owed"]):
+                # Only the connector-owed sections remain, and only the session
+                # can close them: wait for it rather than re-dispatching lanes
+                # that cannot (which is what used to stall the stage).
+                st = self._await_prelim(set(orch["owed"]))
             if not st["open"]:
                 if st["recorded_status"] != "COMPLETE":
                     prelim.complete(self.wb)
@@ -1269,17 +1289,52 @@ class Pipeline:
         raise StageRefused(f"PRELIM still open after {self._rounds} round(s): "
                            f"{', '.join(prelim.state(self.wb)['open'])}{self._stall_note()}")
 
+    def _await_prelim(self, owed: set) -> dict:
+        from . import prelim
+        limit = float(os.environ.get("DMA_ORCHESTRATOR_WAIT_S", "2700"))
+        t0 = self.opts.clock()
+        while True:
+            self.reopen()
+            st = prelim.state(self.wb)
+            if not (set(st["open"]) & owed) or self.opts.clock() - t0 >= limit:
+                return st
+            time.sleep(30)
+
     def _stage_kg(self) -> str:
         from . import kg
         self._reset_counters()
         tk = self.opts.toolkit_dir or (Path(os.environ["DMA_TOOLKITS_DIR"])
                                        if os.environ.get("DMA_TOOLKITS_DIR") else None)
+        if tk is None:
+            tk = self._pull_toolkits()
         out = kg.build(self.wb, toolkit_dir=tk)
         self.reopen()
         n = len([r for r in self.wb.rows("DQ_Bank") if any(r.values())])
         probs = out.get("problems") if isinstance(out, dict) else None
         return (f"DQ_Bank seeded: {n} rows" + (f"; {len(probs)} problem(s) stated: "
                                                   f"{probs[0][:120]}" if probs else ""))
+
+    def _pull_toolkits(self) -> Path | None:
+        """The four pillar toolkits, fetched into the run when none is named.
+
+        Measured 2026-09-30 (SWBC): no instruction anywhere told a session to
+        set DMA_TOOLKITS_DIR or run `drive_fetch.py pull-toolkits`, so KG fell
+        back to the 71 category questions on every run whose operator did not
+        already know — per-subcap diagnostics lost silently, with `env`
+        listing it as a soft row. The toolkits are on the intake Drive and
+        the service account can read them; fetching them is the default now,
+        and a fetch that fails is logged and degrades exactly as before."""
+        dest = self.run.root / "toolkits"
+        have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
+        if len(have) == 4:
+            return dest
+        r = subprocess.run([sys.executable, str(PLUGIN / "scripts" / "drive_fetch.py"),
+                            "pull-toolkits", "--dest", str(dest)],
+                           capture_output=True, text=True, timeout=600)
+        have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
+        self.opts.log(f"  [KG] pull-toolkits rc={r.returncode}: {len(have)} of 4 "
+                      f"toolkits in {dest}")
+        return dest if have else None
 
     def _stage_research(self) -> str:
         from . import brief, cost, floors_gate
@@ -1742,7 +1797,10 @@ class Pipeline:
         polls = 0
         while True:
             polls += 1
-            rows = self.opts.reads.pending_runs()
+            try:
+                rows = self.opts.reads.pending_runs(display_id=ent_id or None)
+            except TypeError:                     # a reader without the filter
+                rows = self.opts.reads.pending_runs()
             mine = [r for r in rows
                     if str(r.get("display_id") or "").strip().lower() == ent_id
                     or str(r.get("entity_name") or "").strip().lower() == ent_name]
@@ -2057,7 +2115,7 @@ def env_check(run_root=None) -> dict:
     ck(*_connector_row())
     tk = os.environ.get("DMA_TOOLKITS_DIR")
     ck("toolkits", bool(tk and _is_dir(tk)),
-       tk or "DMA_TOOLKITS_DIR unset — kg build falls back to the 71 category questions and says so")
+       tk or "DMA_TOOLKITS_DIR unset — the KG stage pulls the four toolkits from the intake Drive into <run>/toolkits; if that fails it falls back to the 71 category questions and says so")
     from . import template as T
     g = T.zip_guard()
     ck("templates vs manifest", g["ok"], g.get("fix") or f"{g['status']} ({g.get('installed')})")

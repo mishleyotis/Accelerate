@@ -3,7 +3,7 @@ name: research-p2c2-producer
 description: Researches the P2C2 category — Onboarding & Fulfillment — for one DMA run. It works the worklist the knowledge graph routes to P2C2, answers each subcap's diagnostic questions in the run's declared evidence mode (deferred questions ride as discovery, never as silent gaps), notes findings to its category memory file as it goes, consolidates them into the scoring workbook through the ledger's own refusals, records technographic detections, and closes the category against the floors gate. Invoke it with a run id and root when P2C2's worklist is open, when its floors gate FAILED, or when a repair names one of its subcaps. It writes only its own category; it never scores, never challenges its own synthesis, never submits and never promotes.
 model: sonnet
 effort: medium
-maxTurns: 340
+maxTurns: 400
 skills:
   - dma-research
 tools: Read, Grep, Glob, Bash, Skill, WebSearch, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload

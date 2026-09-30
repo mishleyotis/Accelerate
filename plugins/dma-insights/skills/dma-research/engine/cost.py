@@ -180,6 +180,25 @@ PHASE_MINUTES = {
 }
 
 
+def host_lanes(requested: int = PARALLEL_LANES) -> int:
+    """The lanes this host will actually run — `agent_run.py capacity`.
+
+    Measured 2026-09-30: the schedule printed "16 lanes, 34 min" while
+    agent_run capped the same batch at 8 (4 CPUs x 2 lanes/CPU), so research
+    ran in two waves and the wall-clock promise was off by half. The cap is
+    agent_run's policy; the schedule only reports it."""
+    try:
+        import importlib.util
+        path = Path(__file__).resolve().parents[3] / "scripts" / "agent_run.py"
+        spec = importlib.util.spec_from_file_location("_agent_run_cap", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)                       # type: ignore[union-attr]
+        cap = mod.host_capacity(requested)
+        return int(cap.get("lanes") or requested) if isinstance(cap, dict) else requested
+    except Exception:                                      # noqa: BLE001
+        return requested
+
+
 def schedule(subcaps: int, capabilities: int | None = None,
              lanes: int = PARALLEL_LANES) -> dict:
     """Wall clock, given the fan-out. Parallelism is a property of the
@@ -190,7 +209,10 @@ def schedule(subcaps: int, capabilities: int | None = None,
     research_serial = caps * MIN_PER_CAPABILITY_PASS
     research_parallel = research_serial / max(1, lanes)
     phases = dict(PHASE_MINUTES)
-    phases["category research (16 lanes, in parallel)"] = round(
+    phases.pop("category research (16 lanes, in parallel)", None)
+    waves = -(-PARALLEL_LANES // max(1, lanes))
+    phases[f"category research ({min(lanes, PARALLEL_LANES)} lanes"
+           + (f", {waves} waves" if waves > 1 else ", in parallel") + ")"] = round(
         research_parallel, 1)
     total = sum(v for v in phases.values() if v)
     return {
@@ -883,7 +905,7 @@ def main(argv=None) -> int:
             tax = C.taxonomy()
             cells = tax.selected(a.sv, a.scope)
         caps = len({".".join(str(c).split(".")[:2]) for c in cells})
-        sch = schedule(len(cells), caps, a.lanes)
+        sch = schedule(len(cells), caps, host_lanes(a.lanes))
         if a.json:
             print(json.dumps(sch, indent=2))
             return 0 if sch["within_target"] else 1

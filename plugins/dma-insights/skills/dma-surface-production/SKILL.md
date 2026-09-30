@@ -148,10 +148,10 @@ is recorded `NOT_RUN` with that reason (`record_enrichment`), never left blank a
 written as an absence.
 
 ```
-find-and-enrich-company(domain from 01_evidence/entity_profile/)   → taskId
+search-companies + add-company-data-points(domain from 01_evidence/entity_profile/)   → taskId
 add-company-data-points(taskId, [Tech Stack, Annual Revenue, Headcount Growth,
                                  Recent News, Open Jobs, Latest Funding])
-find-and-enrich-contacts-at-company(domain, contactFilters={C-suite titles})  → taskId2
+search-contacts + add-contact-data-points(domain, contactFilters={C-suite titles})  → taskId2
 add-contact-data-points(taskId2, [Find Thought Leadership, Summarize Work History])
 get-task-context(taskId) ; get-task-context(taskId2)     ← POLL. Do not conclude.
 ```
