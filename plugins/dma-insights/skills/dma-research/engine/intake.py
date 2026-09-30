@@ -118,7 +118,7 @@ def for_brief(root, mode: str | None) -> dict | None:
 
 
 def internal_rows(wb) -> int:
-    return sum(1 for r in wb.rows("Evidence_Register")
+    return sum(1 for r in wb.rows("Evidence_Detail")
                if str(r.get("Origin") or "").strip().lower() == "internal")
 
 
@@ -130,7 +130,7 @@ def handoff_blocker(wb, root) -> str | None:
         return None
     n = len(docs(root))
     return (f"evidence_mode is {mode}, {n} internal document(s) landed, and "
-            f"not one Evidence_Register row has Origin=internal — the "
+            f"not one Evidence_Detail row has Origin=internal — the "
             f"documents were not read. Re-dispatch the categories they bear "
             f"on; do not score a hybrid run as if it were public.")
 
