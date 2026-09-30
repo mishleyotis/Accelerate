@@ -7,6 +7,7 @@ the dispatch-mode preamble keeps enrichment honest in children that carry
 no claude.ai connectors.
 """
 import sys
+import json
 from pathlib import Path
 
 import pytest
@@ -185,3 +186,83 @@ def test_a_nonzero_child_keeps_its_own_exit_code(monkeypatch, tmp_path):
     """A stage that failed for its own reasons reports that reason, not 125."""
     rc, _ = _dispatch(monkeypatch, tmp_path, _Proc(returncode=3, stdout=""))
     assert rc == 3
+
+
+# ── a headless lane is started with the connector servers it may call ─────
+#
+# Measured 2026-09-09 (SWBC): a `claude -p` child with no `--mcp-config`
+# cannot see mcp__Exa / mcp__Tavily / mcp__Clay at all — absent from its
+# registry, whatever `--allowedTools` says — so 16 lanes ran 0 enrichment
+# searches and the relay absorbed total absence. The parent's config names
+# every server the session holds; the lane gets only the connector ones.
+
+def _parent_config(tmp_path, servers):
+    cfg = tmp_path / "mcp-config-cse_TEST.json"
+    cfg.write_text(json.dumps({"mcpServers": {
+        name: {"type": "http", "url": f"https://{name}.example/mcp",
+               "headers": {"Authorization": "Bearer x"}}
+        for name in servers}}))
+    return cfg
+
+
+def test_the_lane_config_holds_only_the_connector_namespaces(tmp_path):
+    cfg = _parent_config(tmp_path, ["Exa", "Tavily", "Clay", "Figma", "Gamma",
+                                    "Gmail", "DMA_Insights", "Google_Cloud_BigQuery",
+                                    "Vibe_Prospecting"])
+    out = agent_run.lane_mcp_config(str(tmp_path / "mcp-config-*.json"))
+    assert out and out != str(cfg)
+    kept = json.loads(Path(out).read_text())["mcpServers"]
+    assert set(kept) == {"Exa", "Tavily", "Clay", "Vibe_Prospecting"}
+    assert "DMA_Insights" not in kept, "the plugin's own .mcp.json binds the connector"
+    assert kept["Exa"]["headers"] == {"Authorization": "Bearer x"}, "auth travels with the server"
+    assert (Path(out).stat().st_mode & 0o777) == 0o600
+    assert set(kept) <= {ns[len("mcp__"):] for ns in agent_run.CONNECTOR_NAMESPACES}
+
+
+def test_no_parent_config_means_no_lane_config(tmp_path):
+    assert agent_run.lane_mcp_config(str(tmp_path / "mcp-config-*.json")) is None
+    only_others = _parent_config(tmp_path, ["Figma", "Gamma"])
+    assert only_others.is_file()
+    assert agent_run.lane_mcp_config(str(tmp_path / "mcp-config-*.json")) is None
+
+
+def test_dispatch_passes_the_lane_config_when_one_exists(monkeypatch, tmp_path):
+    _parent_config(tmp_path, ["Exa", "Figma"])
+    monkeypatch.setattr(agent_run, "MCP_CONFIG_GLOB", str(tmp_path / "mcp-config-*.json"))
+    captured = {}
+
+    def fake_run(cmd, **kw):
+        captured["cmd"] = cmd
+
+        class R:
+            returncode = 0
+            stdout = "verdict: " + "x" * 400
+            stderr = ""
+        return R()
+
+    monkeypatch.setattr(agent_run.subprocess, "run", fake_run)
+    agent_run.main(["--agent", "package-vetter", "--prompt-file", __file__])
+    cmd = captured["cmd"]
+    assert "--mcp-config" in cmd
+    lane_cfg = cmd[cmd.index("--mcp-config") + 1]
+    assert set(json.loads(Path(lane_cfg).read_text())["mcpServers"]) == {"Exa"}
+    # the config precedes the allowed-tools list and the prompt stays last
+    assert cmd.index("--mcp-config") < cmd.index(next(c for c in cmd if c.startswith("--allowedTools=")))
+
+
+def test_dispatch_passes_no_config_when_none_exists(monkeypatch, tmp_path):
+    monkeypatch.setattr(agent_run, "MCP_CONFIG_GLOB", str(tmp_path / "mcp-config-*.json"))
+    captured = {}
+
+    def fake_run(cmd, **kw):
+        captured["cmd"] = cmd
+
+        class R:
+            returncode = 0
+            stdout = "verdict: " + "x" * 400
+            stderr = ""
+        return R()
+
+    monkeypatch.setattr(agent_run.subprocess, "run", fake_run)
+    agent_run.main(["--agent", "package-vetter", "--prompt-file", __file__])
+    assert "--mcp-config" not in captured["cmd"]
