@@ -36,7 +36,12 @@ def _repo_root(plugin_root: str) -> str:
     d = os.path.abspath(plugin_root)
     for _ in range(4):
         d = os.path.dirname(d)
-        if os.path.isdir(os.path.join(d, ".git")):
+        # `.git` is a directory in a primary checkout and a FILE in a linked
+        # worktree (`git worktree add`) or a submodule; both mark the root.
+        # Measured 2026-09-30: in a linked worktree the walk missed the root
+        # and every repo-relative reference (`plugins/dma-insights/...`) read
+        # as broken — nine of them, none broken.
+        if os.path.exists(os.path.join(d, ".git")):
             return d
     return plugin_root
 

@@ -11,7 +11,12 @@
   "contradicts 183 / corroborates 14) does not follow the five-volley discipline, and its",
   "Recommendations tab is empty (the recs live in the report §8 and Solution_Catalogue).",
   "The volley gate and the scoring gate are therefore STRICTER than the reference on",
-  "exactly those two points, by the owner's instruction (2026-09-03, issues 1 and 6)."
+  "exactly those two points, by the owner's instruction (2026-09-03, issues 1 and 6).",
+  "Per-section table anatomy (reports.*.section_tables / cover_labels / front_matter_h1 /",
+  "front_matter_tables) measured 2026-09-07 from the same two .docx: each numbered",
+  "section's authored+data tables, and the front matter (title box, metadata grid,",
+  "Document Control) counted apart. Drives GS-RPT-COVER / GS-RPT-FRONTMATTER /",
+  "GS-RPT-SECTION-DISTRIBUTION (gold_standard.section_floors)."
  ],
  "entity": "Golden 1 Credit Union",
  "run_id": "DMA-2026-GOLDEN1-001",
@@ -700,6 +705,31 @@
    "tables_per_pillar_card": 2,
    "tables_per_rec_card": 9,
    "repeated_paragraphs_25w": 0,
+   "front_matter_tables": 3,
+   "front_matter_h1": [
+    "Contents",
+    "Document Control and Catalogue Binding"
+   ],
+   "cover_labels": [
+    "OVERALL MATURITY",
+    "ASSESSMENT ID",
+    "ASSESSMENT DATE",
+    "EVIDENCE MODE",
+    "PREPARED BY"
+   ],
+   "section_tables": {
+    "1": 3,
+    "2": 1,
+    "3": 3,
+    "4": 2,
+    "5": 8,
+    "6": 7,
+    "7": 3,
+    "8": 54,
+    "9": 4,
+    "10": 1,
+    "11": 1
+   },
    "_shape_note": "Measured 2026-09-08 from the Drive copy: every REC card carries nine Doc tables (provenance, readiness, conditions met, conditions not met, open questions, rebuttal A-E, impact, measure of success, why this phase) and every pillar deep dive two (capability scorecard, six-row overlay); no paragraph of 25+ words appears twice. gold_standard.REC_TABLES_MIN / PILLAR_TABLES_MIN / REPEAT_MAX_TIMES sit at or below these.",
    "block_words_min_measured": {
     "_note": "The smallest prose word count any card of the reference carries per Doc block (2026-09-08); `Why this phase` is a one-cell table in the reference (36-48 words), so its count includes the table. Every block floor in report_templates.json is at or below these.",
@@ -728,7 +758,28 @@
     "7. Risk and Issues",
     "8. Workbook References"
    ],
-   "repeated_paragraphs_25w": 0
+   "repeated_paragraphs_25w": 0,
+   "front_matter_tables": 3,
+   "front_matter_h1": [
+    "Contents",
+    "Document Control and Catalogue Binding"
+   ],
+   "cover_labels": [
+    "ASSESSMENT ID",
+    "ASSESSMENT DATE",
+    "EVIDENCE MODE",
+    "PREPARED BY"
+   ],
+   "section_tables": {
+    "1": 3,
+    "2": 5,
+    "3": 4,
+    "4": 4,
+    "5": 10,
+    "6": 4,
+    "7": 4,
+    "8": 2
+   }
   }
  }
 }

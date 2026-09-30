@@ -74,6 +74,12 @@ def _words(text: str) -> int:
     return len(re.findall(r"[A-Za-z0-9][A-Za-z0-9'’\-]*", text or ""))
 
 
+def _gs_words(text: str) -> int:
+    """The gold gate's own token count (`gold_standard._docx_shape`, `\\w+`),
+    used wherever this module predicts a number that gate will measure."""
+    return len(re.findall(r"\w+", text or ""))
+
+
 def _slug(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", (s or "")).strip("_") or "client"
 
@@ -163,7 +169,16 @@ _TABLE_TITLES: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "Maturity_Rubric": ("Maturity rubric", None),
     "Catalogue_Meta": ("Catalogue binding", None),
     "Solution_Catalogue": ("Solution catalogue", None),
-    "Recommendations": ("Recommendations (projected from §8)", None),
+    # The projected tab's `Rationale` is each REC card's whole argument
+    # (`grains.recommendations`); printed here it re-emitted §8's prose as
+    # one table of ~1,800 words — 40% of the report's table content, the
+    # GS-RPT-TABLE-DUMP shape (measured 30-09-2026 on the stage-and-supersede
+    # walk, which projects the tab before rendering as the pipeline does).
+    # §9's roadmap table is the register: id, title, category, priority,
+    # horizon, owner. The argument is one heading above, in the card.
+    "Recommendations": ("Recommendations (projected from §8)",
+                        ("Rec_ID", "Title", "Category_ID", "Priority",
+                         "Horizon", "Owner")),
     "Enrichment_Needed": ("Enrichment still needed", None),
     "Entity_Timeline": ("Digital evolution timeline",
                         ("Event_Date", "Title", "Kind", "Signal",
@@ -198,6 +213,19 @@ def _prose_only(body: str) -> str:
     return "\n".join(keep)
 
 
+def _peer_benchmarks_scored(rows: list[dict]) -> bool:
+    """True when the peer sheet carries at least one real per-category score —
+    an Entity_Score or a Peer_Median. When it does not (peer NAMES and a basis
+    were captured but the per-category scoring never ran), rendering the sheet
+    whole is a degenerate table, so the caller skips it."""
+    for r in rows:
+        for k in ("Entity_Score", "Peer_Median", "Peer_P25", "Peer_P75"):
+            v = r.get(k)
+            if v not in (None, "") and str(v).strip():
+                return True
+    return False
+
+
 def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None,
                 *, skip: set | None = None) -> list[dict]:
     """The workbook-derived tables a section carries.
@@ -217,6 +245,16 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None,
         else:
             rows = wb.rows(name)
         if not rows:
+            continue
+        if name == "Peer_Benchmarks" and not _peer_benchmarks_scored(rows):
+            # The per-category Peer_Benchmarks sheet with every Entity_Score
+            # and Peer_Median empty is a strip of rows that varies only in
+            # its category id — a table carrying nothing a reader can
+            # compare (measured on the REV run: 16 such rows, rendered on
+            # every section that declares the sheet). When the run carries
+            # no per-category peer SCORES, the peer comparison belongs in
+            # the section's authored per-peer table (the golden's §4.1 / §6
+            # shape), not in this empty dump. Skip it here.
             continue
         if name == "Financial_Trends":
             ft = _financial_table(rows); ft["sheet"] = name
@@ -337,6 +375,45 @@ def _emit_lines(doc, body: str, *, block_level: int) -> None:
     flush_text(); flush_table()
 
 
+def _predicted_shape(body: str) -> tuple[int, int, list[int]]:
+    """(tables, prose_words, table_sizes) this body WILL render as, before a
+    paragraph is written — by `_emit_lines`' own grammar, step for step: a
+    `## ` line is a heading (a paragraph, to python-docx and to the gate's
+    `_docx_shape`, which counts `d.paragraphs` without filtering by style);
+    a run of `| … |` rows is one table, separator rows dropped; a blank line
+    or a prose line ends the run; a pipe INSIDE a sentence is prose. Word
+    counts use the gate's `\\w+` token. The pre-render half of the structure
+    gate: what `reports.check` refuses on and what `gold_standard` measures
+    from the rendered file are the same numbers (tests/skills/research_engine/
+    test_report_table_floor.py proves it on the engine's own render)."""
+    tables = prose = 0
+    sizes: list[int] = []
+    rows: list[str] = []
+
+    def flush_table():
+        nonlocal tables
+        if rows:
+            tables += 1
+            sizes.append(sum(_gs_words(" ".join(_split_pipe_row(r))) for r in rows))
+            rows.clear()
+
+    for line in (body or "").splitlines():
+        m = _BLOCK_LINE.match(line)
+        if m:
+            flush_table()
+            prose += _gs_words(m.group(1))
+        elif _PIPE_ROW.match(line):
+            if not _PIPE_SEP.match(line):
+                rows.append(line)
+        elif not line.strip():
+            flush_table()
+        else:
+            flush_table()
+            prose += _gs_words(line)
+    flush_table()
+    return tables, prose, sizes
+
+
 def _emit_body(doc, body: str) -> None:
     """Write a section body, promoting its `## ` block lines to Heading2.
 
@@ -359,6 +436,47 @@ def _table(title, cols, rows) -> dict:
 
 
 # ── the checks that refuse ───────────────────────────────────────────────
+
+def _predicted_report_shape(wb: RunWorkbook, curated: dict) -> dict:
+    """The whole report's structure, predicted from `curated` — BEFORE a
+    paragraph is rendered: tables (the cover and front matter, each
+    declared-sheet extract, every authored pipe table), their sizes, and the
+    sections' paragraph words. The pre-render counterpart to
+    `gold_standard._docx_shape`, which measures the same numbers from the
+    rendered .docx; the two agree on tables and table words exactly because
+    both walk the body by `_emit_lines`' grammar (`_predicted_shape`) and the
+    cover from the same resolved values (`_cover_pairs`, `_binding_rows`).
+    Paragraph words count the bodies, their block headings, the section and
+    card headings and the sheet-table titles — not the cover note, the scope
+    lines or the sources list, so the prediction never overstates the prose
+    the gate will read."""
+    spec = curated["spec"]
+    md = curated["meta"]
+    entity = str(md.get("entity_name") or "client")
+    sizes: list[int] = list(_front_matter_table_sizes(wb, spec, entity, md))
+    paragraph_words = 0
+    for b in curated["blocks"]:
+        sec = b["section"]
+        paragraph_words += _gs_words(f"{sec.id}. {sec.heading}")
+        for t in b["tables"]:                              # declared-sheet extracts
+            sizes.append(_gs_words(" ".join(str(c) for c in t["cols"]))
+                         + sum(_gs_words(" ".join("" if v is None else str(v) for v in r))
+                               for r in t["rows"]))
+            paragraph_words += _gs_words(t["title"])
+        if sec.kind in RS.CARD_KINDS and b["rows"]:
+            for r in b["rows"]:
+                paragraph_words += _gs_words(_card_heading(wb, sec, r))
+                _, words, tsz = _predicted_shape(str(r.get("Body") or ""))
+                sizes.extend(tsz)
+                paragraph_words += words
+        else:
+            _, words, tsz = _predicted_shape(b["body"])
+            sizes.extend(tsz)
+            paragraph_words += words
+    return {"tables": len(sizes), "table_words": sum(sizes),
+            "table_sizes": sizes, "paragraph_words": paragraph_words,
+            "largest_table": max(sizes) if sizes else 0}
+
 
 def check(wb: RunWorkbook, curated: dict) -> list[str]:
     spec = curated["spec"]
@@ -441,6 +559,56 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
             f"whole report: {len(distinct)} distinct citations against a floor "
             f"of {floor} (Golden 1 density × {len(wb.selected_subcaps())} "
             f"subcaps). Cite the evidence base, do not summarise it.")
+
+    # STRUCTURE, before a single paragraph is rendered (GSY-31). A report can
+    # pass every check above and still be the wrong SHAPE: prose written
+    # where the template declares a table. Measured 2026-09-06: a delivered
+    # pair carried 50/92 and 26/39 tables against the Golden 1 reference while
+    # paragraph words ran 1.3-1.4x above it — and every check above passed,
+    # because more prose raises a word count, which is exactly backwards.
+    # references/templates/report_antipatterns.json names this for a writer
+    # BEFORE it authors (engine.authoring); this is the same rule enforced
+    # after, on the numbers the gold gate will measure from the file.
+    from . import gold_standard as GS
+    shape = _predicted_report_shape(wb, curated)
+    floors = GS.depth_floors(spec.key, subcaps=len(wb.selected_subcaps()))
+    if shape["tables"] < floors["tables"]:
+        problems.append(
+            f"whole report: {shape['tables']} tables against a floor of "
+            f"{floors['tables']} (Golden 1 density, GS-RPT-TABLE-FLOOR). The "
+            f"pinned Doc states registers, rollups, caps and peer sets as "
+            f"tables — author one with a markdown pipe-table in the "
+            f"section's Body (`engine.authoring brief` names which sheet "
+            f"each section owes), or populate the declared sheet input that "
+            f"would render it.")
+        ref_prose = floors["reference_paragraph_words"]
+        if shape["paragraph_words"] > ref_prose * GS.PROSE_INFLATION_LIMIT:
+            problems.append(
+                f"whole report: {shape['paragraph_words']} paragraph words "
+                f"against the reference's {ref_prose} "
+                f"({shape['paragraph_words'] / max(ref_prose, 1):.2f}x) "
+                f"while carrying {shape['tables']} of {floors['tables']} "
+                f"tables (GS-RPT-PROSE-FOR-STRUCTURE) — prose is standing "
+                f"in for structure. Move the content into the table its "
+                f"section declares; do not cut it.")
+    if shape["tables"] and shape["table_words"]:
+        avg = shape["table_words"] / shape["tables"]
+        gold_avg = GS._gold_avg_table_words(spec.key)
+        if avg > gold_avg * GS.TABLE_DUMP_FACTOR:
+            problems.append(
+                f"whole report: tables average {avg:,.0f} words against the "
+                f"reference's {gold_avg} ({avg / gold_avg:.0f}x, "
+                f"GS-RPT-TABLE-DUMP) — a whole sheet is being emitted where "
+                f"a curated extract belongs. Filter the table to the rows "
+                f"the section argues from.")
+        elif shape["largest_table"] > shape["table_words"] * GS.TABLE_DUMP_SHARE:
+            share = shape["largest_table"] / shape["table_words"]
+            problems.append(
+                f"whole report: one table holds {share:.0%} of all table "
+                f"content ({shape['largest_table']:,} of "
+                f"{shape['table_words']:,} words, GS-RPT-TABLE-DUMP) — a "
+                f"sheet emitted whole, not a curated table. Curate the "
+                f"extract the section argues from.")
     return problems
 
 
@@ -521,18 +689,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
         L.append_gate(wb, gate="REPORT_RENDER", scope=spec.key, verdict="FAIL",
                       detail=("forced draft: " + "; ".join(problems))[:900],
                       blocking=False)
-    doc.add_heading(spec.title, level=0)
-    p = doc.add_paragraph(entity)
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    _title_block(doc, wb, spec, entity, md)
-    doc.add_paragraph(
-        f"Run {md.get('run_id')} · catalogue {md.get('catalogue_version')} "
-        f"({str(md.get('catalogue_hash'))[:12]}) · reference date "
-        f"{md.get('reference_date')} · engine {md.get('engine_version')}")
-    doc.add_paragraph(
-        "Every figure and every citation in this document is read from the "
-        "assessment workbook at render time. The report and the workbook "
-        "cannot disagree, because there is only one of them.")
+    _cover_page(doc, wb, spec, entity, md)
     _front_matter(doc, wb, spec, md)
 
     for b in curated["blocks"]:
@@ -642,76 +799,204 @@ def _brand(doc, spec, entity: str, md: dict) -> None:
         f.text = "Zennify" + tail
 
 
-def _title_block(doc, wb, spec, entity: str, md: dict) -> None:
-    """The Doc's cover table — OVERALL MATURITY / SUB-VERTICAL / ASSESSMENT
-    ID / DATE / EVIDENCE MODE / CATALOGUE / PREPARED BY on the assessment;
-    SUB-VERTICAL / SIZE TIER / ASSESSMENT ID / DATE / EVIDENCE MODE / WEBSITE
-    / CATALOGUE / PREPARED BY on the profile — every value from the run."""
-    rows = []
-    if spec.key == "assessment":
-        overall = level = None
-        for r in wb.rows("Pillar_Summary"):
-            if str(r.get("Pillar") or "").strip().upper() == "OVERALL":
-                overall, level = r.get("Score"), r.get("Maturity")
-        rows.append(["OVERALL MATURITY",
-                     (f"{overall} of 5.0 ({level})" if overall is not None
-                      else "not scored")])
-    rows.append(["SUB-VERTICAL", str(md.get("sub_vertical") or "")])
-    if spec.key != "assessment":
-        size = website = ""
-        for r in wb.rows("Firmographics"):
-            f = str(r.get("Field") or "").strip().lower()
-            if f == "website":
-                website = str(r.get("Value") or "")
-            if f in ("size_tier", "assets_or_aum_or_revenue", "assets_and_members"):
-                size = size or str(r.get("Value") or "")
-        rows.append(["SIZE TIER", size or "see §1"])
-        rows.append(["WEBSITE", website or "see §1"])
-    rows += [["ASSESSMENT ID", str(md.get("run_id") or "")],
-             ["ASSESSMENT DATE", str(md.get("reference_date") or "")[:10]],
-             ["EVIDENCE MODE", str(md.get("evidence_mode") or "")],
-             ["CATALOGUE", f"{md.get('catalogue_version')} "
-                           f"({str(md.get('catalogue_hash'))[:8]})"],
-             ["PREPARED BY", "Zennify Digital Maturity Assessment"]]
-    _write_table(doc, {"cols": ["", entity], "rows": rows})
+#: The sub-vertical code -> the label the cover page prints (the pinned Docs
+#: name the vertical in words, not the two-letter code the workbook carries).
+_SUBVERTICAL_LABEL = {
+    "CU": "Credit Union (CU)", "RB": "Regional Bank (RB)",
+    "CL": "Commercial Lending (CL)", "CIB": "Corporate & Investment Bank (CIB)",
+    "AM": "Asset Management (AM)", "RIA": "Wealth / RIA (RIA)",
+    "WM": "Wealth Management (WM)", "IC": "Insurance Carrier (IC)",
+    "IB": "Insurance Brokerage (IB)", "FC": "Farm Credit (FC)",
+}
+
+#: The tables the cover and the front matter always carry — the title box,
+#: the metadata grid and the Document Control binding — counted apart from
+#: the sections' own (gold_reference.json `front_matter_tables`).
+FRONT_MATTER_TABLES = 3
+
+
+def _overall_maturity(wb) -> tuple[str, str]:
+    """(score, level) for the whole run, read from the Pillar_Summary OVERALL
+    row — the stated grain the package gate reconciles the report to
+    (`gold_standard._workbook_scores`) — or empty when the run is not scored
+    (a research-stage report carries no overall). The level is the sheet's
+    own `Maturity` label; when the sheet carries the score without it, the
+    rubric names it (`rubric.maturity_level`) — never a literal typed here."""
+    from . import rubric
+    for r in wb.rows("Pillar_Summary"):
+        if str(r.get("Pillar") or "").strip().upper() == "OVERALL":
+            s = r.get("Score")
+            if s in (None, ""):
+                return "", ""
+            lvl = str(r.get("Maturity") or "").strip() or rubric.maturity_level(s)
+            return f"{s}", lvl
+    return "", ""
+
+
+def _firm_value(wb, field: str) -> str:
+    for r in wb.rows("Firmographics"):
+        if str(r.get("Field") or "").strip().lower() == field.lower():
+            return str(r.get("Value") or "").strip()
+    return ""
+
+
+def _size_tier(wb) -> str:
+    """A one-line scale read for the cover, from Firmographics — assets and
+    the branch reach, in the entity's own vocabulary. Empty when the
+    firmographics are not populated."""
+    assets = _firm_value(wb, "assets_or_aum_or_revenue")
+    if assets and assets.replace(".", "").isdigit():
+        n = float(assets)
+        assets = (f"${n / 1e9:.2f}B" if n >= 1e9
+                  else f"${n / 1e6:.0f}M" if n >= 1e6 else f"${n:,.0f}")
+    branches = _firm_value(wb, "branches")
+    parts = [p for p in (f"~{assets} assets" if assets else "",
+                         f"{branches} branches" if branches else "") if p]
+    return ", ".join(parts)
+
+
+def _fmt_date(v) -> str:
+    s = str(v or "").strip()
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", s)
+    if not m:
+        return s
+    months = ["", "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"]
+    y, mo, d = m.groups()
+    return f"{int(d)} {months[int(mo)]} {y}"
+
+
+def _assessment_id(wb, md) -> str:
+    """The clean DMA-… run id the folder carries, preferred over the workbook's
+    long internal token for the client-facing cover; falls back to run_id."""
+    for anc in (Path(wb.path).parent, Path(wb.path).parent.parent):
+        if re.match(r"^DMA-", anc.name):
+            return anc.name
+    return str(md.get("run_id") or "")
+
+
+def _cover_grid(doc, pairs: list[tuple[str, str]]) -> None:
+    """The cover metadata grid: two label/value cells per row, the label in
+    small caps bold above its value, as the pinned Docs render it."""
+    n = len(pairs)
+    rows = (n + 1) // 2
+    table = doc.add_table(rows=rows, cols=2)
+    st = _style_named(doc, "Light Grid Accent 1", "Table Grid")
+    if st is not None:
+        table.style = st
+    for i, (label, value) in enumerate(pairs):
+        cell = table.rows[i // 2].cells[i % 2]
+        p = cell.paragraphs[0]
+        r = p.add_run(label.upper())
+        r.bold = True
+        r.font.size = Pt(8)
+        vp = cell.add_paragraph()
+        vr = vp.add_run(str(value) if value else "—")
+        vr.font.size = Pt(11)
+    if n % 2:                                   # blank the trailing odd cell
+        table.rows[-1].cells[1].text = ""
+
+
+def _cover_page(doc, wb, spec, entity: str, md: dict) -> None:
+    """The pinned Doc's cover: a boxed title with the entity, then the
+    metadata grid (the O2 identity strip, in the Doc's own labels —
+    OVERALL MATURITY / SUB-VERTICAL / ASSESSMENT ID / ASSESSMENT DATE /
+    EVIDENCE MODE / CATALOGUE / PREPARED BY on the assessment; SUB-VERTICAL /
+    SIZE TIER / ASSESSMENT ID / ASSESSMENT DATE / EVIDENCE MODE / WEBSITE /
+    CATALOGUE / PREPARED BY on the profile), every value resolved from the
+    run. Measured 2026-09-07 against the Golden 1 reference, whose cover is
+    a 1-cell title box over a two-column grid; the old render emitted a bare
+    Title heading and three loose paragraphs, and the owner flagged the
+    cover as off (gold gate GS-RPT-COVER)."""
+    subtitle, pairs = _cover_pairs(wb, spec, entity, md)
+    box = doc.add_table(rows=1, cols=1)
+    st = _style_named(doc, "Light Grid Accent 1", "Table Grid")
+    if st is not None:
+        box.style = st
+    cell = box.rows[0].cells[0]
+    tp = cell.paragraphs[0]
+    tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    tr = tp.add_run(entity)
+    tr.bold = True
+    tr.font.size = Pt(20)
+    sp = cell.add_paragraph()
+    sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    sr = sp.add_run(subtitle)
+    sr.font.size = Pt(12)
+    doc.add_paragraph()
+    _cover_grid(doc, pairs)
+    doc.add_paragraph()
+
+
+def _cover_pairs(wb, spec, entity: str, md: dict) -> tuple[str, list[tuple[str, str]]]:
+    """(subtitle, label/value pairs) of the cover — resolved once, here, so
+    the render (`_cover_page`) and the pre-render prediction
+    (`_front_matter_table_sizes`) read the same values."""
+    subtitle = ("Client Profile — Background Research Report"
+                if spec.key == "client_research"
+                else "Digital Maturity Assessment Report")
+    sub = _SUBVERTICAL_LABEL.get(str(md.get("sub_vertical") or "").strip().upper(),
+                                 str(md.get("sub_vertical") or ""))
+    cat = (f"{md.get('catalogue_version')} "
+           f"({str(md.get('catalogue_hash'))[:8]})")
+    aid = _assessment_id(wb, md)
+    date = _fmt_date(md.get("reference_date"))
+    mode = str(md.get("evidence_mode") or "")
+    if spec.key == "client_research":
+        pairs = [("Sub-vertical", sub), ("Size tier", _size_tier(wb)),
+                 ("Assessment ID", aid), ("Assessment date", date),
+                 ("Evidence mode", mode),
+                 ("Website", _firm_value(wb, "website")),
+                 ("Catalogue", cat),
+                 ("Prepared by", "Zennify Digital Maturity Assessment")]
+    else:
+        score, level = _overall_maturity(wb)
+        overall = f"{score} of 5.0 ({level})" if score else "not scored"
+        pairs = [("Overall maturity", overall), ("Sub-vertical", sub),
+                 ("Assessment ID", aid), ("Assessment date", date),
+                 ("Evidence mode", mode), ("Catalogue", cat),
+                 ("Prepared by", "Zennify Digital Maturity Assessment")]
+    return subtitle, pairs
+
+
+def _front_matter_table_sizes(wb, spec, entity: str, md: dict) -> list[int]:
+    """The gate's word count of each table the cover and the front matter
+    will carry — the title box, the metadata grid (each cell its label in
+    capitals over its value, `—` for none) and the binding table — from the
+    same resolved values the render writes."""
+    subtitle, pairs = _cover_pairs(wb, spec, entity, md)
+    grid = sum(_gs_words(label.upper()) + _gs_words(str(value) if value else "—")
+               for label, value in pairs)
+    cols, rows = _binding_rows(wb, md)
+    binding = _gs_words(" ".join(cols)) + sum(_gs_words(" ".join(r)) for r in rows)
+    return [_gs_words(entity) + _gs_words(subtitle), grid, binding]
 
 
 def _front_matter(doc, wb, spec, md: dict) -> None:
-    """The Doc's two unnumbered front sections, filled from the run.
+    """The pinned Doc's two unnumbered front sections, in the Golden 1 order:
+    'Contents' (a Word TOC the reader refreshes with F9), then 'Document
+    Control and Catalogue Binding' — every value resolved from the run's own
+    workbook and the active catalogue, nothing typed, each row naming where
+    it was resolved from. The reference carries no 'Surface Alignment' H1
+    (gold_reference.json heading1, measured 2026-09-03), so it is not
+    emitted: the surface map is the app's (`report_spec` surfaces), not the
+    client's page. Unnumbered Heading1s are front matter to the app's parser
+    and are never stored as sections."""
+    doc.add_heading("Contents", level=1)
+    note = doc.add_paragraph(
+        "Select all (Ctrl+A) then press F9 in Word to populate the contents "
+        "and page numbers.")
+    note.runs[0].italic = True
 
-    'Document Control and Catalogue Binding' resolves every value from the
-    workbook — nothing typed — and 'Surface Alignment' is the Doc's own
-    section -> app-surface table, rendered from the pinned spec so it cannot
-    drift from what the sections declare they feed. Unnumbered Heading1s are
-    front matter to the app's parser and are never stored as sections."""
     doc.add_heading("Document Control and Catalogue Binding", level=1)
     doc.add_paragraph(
         "Every value below is resolved at render time from the run's own "
-        "workbook and the active catalogue. Nothing here is typed by hand.")
-    tax = C.taxonomy()
-    lock = wb.handoff_lock()
-    rows = [
-        ["Catalogue version", str(md.get("catalogue_version"))],
-        ["Catalogue content hash", str(md.get("catalogue_hash"))],
-        ["Structure counts", f"{tax.n_pillars} pillars / {tax.n_categories} "
-                             f"categories / {tax.n_capabilities} capabilities / "
-                             f"{tax.n_cells} subcapabilities"],
-        ["Sub-vertical", str(md.get("sub_vertical") or "")],
-        ["Evidence mode", str(md.get("evidence_mode") or "")],
-        ["Scope", f"{md.get('scope_mode')} — {md.get('subcaps_selected')} "
-                  f"subcapabilities selected"],
-        ["Reference date", str(md.get("reference_date"))],
-        ["Workbook contract", f"{md.get('workbook_contract')} · engine "
-                              f"{md.get('engine_version')}"],
-        ["Scoring workbook", wb.path.name],
-        ["Template binding", str(md.get("template_binding") or "UNBOUND")],
-        ["Peer set", str(lock.get("locked_peer_set") or "not locked")],
-        ["Stage", str(md.get("stage") or "research")],
-    ]
+        "workbook and the active catalogue. Structure counts are counted from "
+        "the catalogue, not asserted. Nothing here is typed by hand.")
+    cols, rows = _binding_rows(wb, md)
+    _write_table(doc, {"cols": cols, "rows": rows})
     in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
     out_of_scope = [p for p in ("P1", "P2", "P3", "P4") if p not in in_scope]
-    rows.append(["Pillars in scope", ", ".join(in_scope) or "none"])
-    _write_table(doc, {"cols": ["Field", "Value"], "rows": rows})
     if out_of_scope:
         # A focused engagement STATES its scope rather than refusing: the
         # sheets it leaves empty are named here, once, so a reader does not
@@ -720,17 +1005,43 @@ def _front_matter(doc, wb, spec, md: dict) -> None:
             "Pillars assessed in this engagement: " + ", ".join(in_scope)
             + ". Not in this engagement's scope, and therefore not reported on: "
             + ", ".join(f"{p}_Subcap_Scoring" for p in out_of_scope) + ".")
-    doc.add_heading("Surface Alignment", level=1)
-    doc.add_paragraph(
-        "This report is one input to the DMA Insights app. Each section "
-        "feeds the named app surfaces; producing a section without knowing "
-        "what it feeds is how a report and a dashboard end up disagreeing "
-        "under the same client name.")
-    _write_table(doc, {
-        "cols": ["Section", "Feeds app surface"],
-        "rows": [[f"{s.id}. {s.heading}",
-                  ", ".join(s.surfaces) or "No served surface; internal"]
-                 for s in spec.sections]})
+
+
+def _binding_rows(wb, md: dict) -> tuple[list[str], list[list[str]]]:
+    """The Document Control table — (columns, rows), every value resolved
+    from the run and naming its resolution source. Shared by the render and
+    the pre-render prediction."""
+    tax = C.taxonomy()
+    lock = wb.handoff_lock()
+    in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
+    rows = [
+        ["Catalogue version", str(md.get("catalogue_version")),
+         "Catalogue_Meta!version"],
+        ["Catalogue content hash", str(md.get("catalogue_hash")),
+         "SHA-256 over the catalogue rows, computed at load"],
+        ["Structure counts", f"{tax.n_pillars} pillars / {tax.n_categories} "
+                             f"categories / {tax.n_capabilities} capabilities / "
+                             f"{tax.n_cells} subcapabilities",
+         "Counted from Catalogue_Meta, never asserted"],
+        ["Sub-vertical", str(md.get("sub_vertical") or ""),
+         "Handoff_Lock / classification step"],
+        ["Evidence mode", str(md.get("evidence_mode") or ""),
+         "Run parameters"],
+        ["Scope", f"{md.get('scope_mode')} — {md.get('subcaps_selected')} "
+                  f"subcapabilities selected", "Engagement scope"],
+        ["Pillars in scope", ", ".join(in_scope) or "none",
+         "Selected subcapabilities"],
+        ["Reference date", str(md.get("reference_date")), "Run parameters"],
+        ["Peer set", str(lock.get("locked_peer_set") or "not locked"),
+         "Handoff_Lock!locked_peer_set"],
+        ["Scoring workbook", wb.path.name, "File metadata"],
+        ["Workbook contract", f"{md.get('workbook_contract')} · engine "
+                              f"{md.get('engine_version')}", "File metadata"],
+        ["Template binding", str(md.get("template_binding") or "UNBOUND"),
+         "engine.template bind"],
+        ["Stage", str(md.get("stage") or "research"), "Workbook stage"],
+    ]
+    return ["Field", "Value", "Resolution source"], rows
 
 
 def _card_heading(wb, sec, row) -> str:

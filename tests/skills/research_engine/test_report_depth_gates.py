@@ -139,12 +139,23 @@ def test_a_paragraph_pasted_into_a_second_section_is_refused(ready):
 # ── the renderer keeps the Doc's shape ─────────────────────────────────────
 
 def test_pipe_tables_in_a_body_render_as_word_tables_and_sheets_dump_once(tmp_path):
+    from engine import prelim
     run, wb, cells, ev = scored_run(tmp_path)
     eids = bank_evidence(wb, cells[0], n=7)
     for key in RS.SPECS:
         write_report(wb, key, eids, run=run)
     sign_off_sections(wb)
     spec = RS.SPECS["assessment"]
+    # PRELIM's peer grid carries names and a basis and no per-category
+    # figure; rendered whole it is a strip varying only in its category id,
+    # so the renderer skips it until a score is struck (a48e80a). Strike one
+    # per category, each its own figure, and the sheet renders — once.
+    assert not R._peer_benchmarks_scored(wb.rows("Peer_Benchmarks"))
+    for i, cid in enumerate(sorted({c.split(".")[0] for c in cells})):
+        prelim.peer_median(wb, category=cid, median=2.9 + 0.1 * i, p25=2.4 + 0.1 * i,
+                           p75=3.4 + 0.1 * i, basis="table",
+                           source="peer scores read from the published peer table",
+                           peer_scores="2.8, 3.0, 3.3")
     out = R.render(wb, spec, tmp_path / "out")
     doc = Document(out["path"])
     # no paragraph is a pipe row
