@@ -26,7 +26,14 @@
     "inference at any tier.",
     "",
     "Sources are ordered: the first entry is the one to try first, and a",
-    "later entry supplements rather than replaces an earlier one."
+    "later entry supplements rather than replaces an earlier one.",
+    "",
+    "`search_connectors` are the two SEARCH connectors the research tier",
+    "runs on. They serve no facet of their own — they find the SOURCE a",
+    "facet then cites — which is why they were missing from the facet table",
+    "(QA audit F-L11-042 pair 4) although the tier uses them most. Who holds",
+    "them is `scripts/provision_agent_tools.py` (repo root); the order is",
+    "RESEARCH-PROTOCOL.md § Tools."
   ],
   "facets": {
     "firmographics": {
@@ -75,7 +82,7 @@
       "sources": [
         {
           "connector": "clay",
-          "serves": "the leadership roster's contact routes — email, linkedin_url, phone, enrichment_basis — via find-and-enrich-contacts-at-company and Summarize Work History",
+          "serves": "the leadership roster's contact routes — email, linkedin_url, phone, enrichment_basis — via search-contacts + add-contact-data-points and Summarize Work History",
           "tier_band": "T2-T3",
           "status": "wired",
           "grounding": "producer-session MCP connector; packages/shared/enrichment_register.json (overview.leadership: basis_key enrichment_basis, contact_keys email/linkedin_url/phone)",
@@ -164,7 +171,7 @@
           "tier_band": "T1",
           "status": "wired; live in a producer session, not live at ingest",
           "grounding": "producer-session MCP connector (match-business, enrich-business); the ingest path is packages/shared/enrichment_register.json; apps/worker/dma_worker/enrichment.py",
-          "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, it is in the routine's auto-approve list (scripts/hooks/autoapprove_connector.py: match-business, enrich-business, fetch-entities), and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly."
+          "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, its read-only calls (fetch-entities) are auto-approved by ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py, and its billed calls (match-business, enrich-business, 2 credits per enrichment per row) open only on the run's owner-written approval record, `engine.cli approve` -> 07_qa/approvals.json with the quoted cost (QA audit F-K01-003, 28-09-2026) — and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly."
         },
         {
           "connector": "clay",
@@ -256,5 +263,26 @@
         }
       ]
     }
+  },
+  "search_connectors": {
+    "exa": {
+      "serves": "the first search connector: a lane's emitted search_requests, fired by the conductor and the enrichment-web-specialist per capability batch",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['exa']; `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/relay.py` services the batch; brief.py defaults a request's tool to exa"
+    },
+    "tavily": {
+      "serves": "the fallback search and the verbatim-extract path (tavily_extract goes into the run's fetch cache with `engine.cli fetch --via-text -`, so the excerpt verifies)",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['tavily']; `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_whole_page_fetch.py` lists tavily_extract as a fetcher a lane may not call"
+    },
+    "_rule": "A category lane holds neither: it EMITS a connector volley as a search_requests entry and the servicing tier fires it, logging the search with the tool that ran it (RESEARCH-PROTOCOL.md § Tools)."
   }
 }

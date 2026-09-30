@@ -1,0 +1,221 @@
+{
+ "_readme": [
+  "CURATED per-card source bindings — the ONLY hand-maintained input to the",
+  "card-level half of the resource map. `scripts/gen_recording_map.py` reads",
+  "this, enumerates each card's item keys FROM the contract (the authoritative",
+  "list of which card fields exist), expands `columns_tuple` from",
+  "engine.contract, and emits the `cards` block of references/section_sources.json.",
+  "",
+  "A card here refines the SECTION's source with card-grain detail; anything",
+  "omitted inherits the section (disposition, report_sections, enrichment).",
+  "  tab            the primary workbook tab a workbook-fed card is read from",
+  "  also_tabs      secondary workbook tabs feeding the same card",
+  "  columns_tuple  the engine.contract COLUMN tuple naming that tab's columns",
+  "  report_sections  the report section(s) that shape an authored card",
+  "  enrichment_facet the enrichment_register facet, for enriched cards",
+  "  disposition    override the section's disposition for this card",
+  "  floor          the rulebook's count/floor for the card array",
+  "  r_layer_per_item  the card requires an r_layer on every item",
+  "  connector_authored the connector writes this card at submit (NOT the agent)",
+  "  computed_never_sent  item keys the app computes; a producer must not send",
+  "  nested         per nested sub-card overrides, when its source differs",
+  "",
+  "The generator ASSERTS the bound card set equals the contract's list-of-object",
+  "fields (grids and object_nested named explicitly), so a card added to the",
+  "contract fails the build until it is bound here."
+ ],
+ "grids": {
+  "heatmap.workbook_scores": {
+   "pillars": {"tab": "Pillar_Rollup", "columns_tuple": "PILLAR_ROLLUP_COLUMNS",
+               "also_tabs": ["Pillar_Summary", "Peer_Benchmarks"],
+               "computed_never_sent": ["rollup_score", "score_source"],
+               "floor": "4 pillars"},
+   "categories": {"tab": "Category_Rollup", "columns_tuple": "CATEGORY_ROLLUP_COLUMNS",
+                  "also_tabs": ["Category_Detail", "Peer_Benchmarks"],
+                  "floor": "16 categories (v7.0)"}
+  }
+ },
+ "object_nested": {
+  "platform.stairstep": {
+   "ladder.steps": {"tab": "Issue_Register", "columns_tuple": "ISSUE_REGISTER_COLUMNS",
+                    "also_tabs": ["Subcap_Scores"], "report_sections": ["assessment.9"],
+                    "computed_never_sent": ["current_position"],
+                    "floor": "current_position true on exactly one step"}
+  },
+  "overview.exec_summary": {
+   "storyline_challenge.volleys": {"disposition": "report",
+                                   "report_sections": ["assessment.1", "client_research.2"],
+                                   "floor": "5 volleys", "internal_only": true}
+  }
+ },
+ "cards": {
+  "heatmap.focus_areas": {
+   "focus_areas": {"tab": "Focus_Areas", "columns_tuple": "FOCUS_AREAS_COLUMNS",
+                   "report_sections": ["client_research.6", "assessment.7"],
+                   "floor": "3-5", "r_layer_per_item": true}
+  },
+  "heatmap.cell_evidence": {
+   "cells": {"tab": "Subcap_Scores", "columns_tuple": "SUBCAP_SCORES_COLUMNS",
+             "report_sections": ["assessment.11", "assessment.5"],
+             "floor": "one per served cell",
+             "computed_never_sent": ["grounded_on"],
+             "nested": {"items": {"tab": "Evidence_Detail",
+                                  "columns_tuple": "EVIDENCE_COLUMNS"}}}
+  },
+  "heatmap.evidence": {
+   "evidence": {"tab": "Evidence_Detail", "columns_tuple": "EVIDENCE_COLUMNS",
+                "report_sections": ["assessment.11"],
+                "computed_never_sent": ["content_hash", "freshness_band"]}
+  },
+  "heatmap.alerts": {
+   "alerts": {"tab": "Coverage_Map", "columns_tuple": "COVERAGE_MAP_COLUMNS",
+              "also_tabs": ["Subcap_Scores"], "report_sections": ["assessment.10"],
+              "computed_never_sent": ["evidence_count"]}
+  },
+  "heatmap.safeguard_gates": {
+   "caps": {"tab": "Caps_Applied_Log", "columns_tuple": "CAPS_APPLIED_LOG_COLUMNS",
+            "also_tabs": ["Cap_Triggers", "Issue_Register"],
+            "report_sections": ["assessment.3"]},
+   "gates": {"connector_authored": true,
+             "note": "SG results the connector writes at submit; not agent-authored"}
+  },
+  "heatmap.evidence_age": {
+   "rows": {"tab": "Evidence_Detail", "columns_tuple": "EVIDENCE_COLUMNS",
+            "also_tabs": ["Coverage_Map"], "report_sections": ["assessment.10"],
+            "computed_never_sent": ["age_months", "band", "status"]}
+  },
+  "heatmap.cohort_patterns": {
+   "patterns": {"disposition": "synthesis", "floor": "cohort_size >= 5",
+                "r_layer_per_item": true},
+   "insufficient_cohorts": {"disposition": "synthesis"}
+  },
+  "overview.scores": {
+   "pillars": {"tab": "Pillar_Rollup", "columns_tuple": "PILLAR_ROLLUP_COLUMNS",
+               "also_tabs": ["Pillar_Summary", "Peer_Benchmarks"],
+               "report_sections": ["assessment.4", "assessment.6"],
+               "computed_never_sent": ["delta", "direction"], "floor": "4"}
+  },
+  "overview.firmographics": {
+   "fields": {"tab": "Firmographics", "columns_tuple": "FIRMOGRAPHICS_COLUMNS",
+              "enrichment_facet": "firmographics",
+              "report_sections": ["client_research.1", "client_research.3"],
+              "floor": "must-present 8"}
+  },
+  "overview.why_now": {
+   "signals": {"report_sections": ["client_research.2"], "floor": "2-4"}
+  },
+  "overview.opportunity": {
+   "tiles": {"tab": "Solution_Catalogue", "columns_tuple": "SOLUTION_CATALOGUE_COLUMNS",
+             "also_tabs": ["Subcap_Scores", "Peer_Benchmarks"],
+             "report_sections": ["assessment.7", "assessment.8"], "floor": "5 tiles",
+             "computed_never_sent": ["composite"],
+             "nested": {"factors": {"note": "computed by the fit engine"},
+                        "addressable_cells": {"tab": "Subcap_Scores",
+                                              "columns_tuple": "SUBCAP_SCORES_COLUMNS"}}},
+   "discarded": {"report_sections": ["assessment.7"]}
+  },
+  "overview.findings": {
+   "findings": {"report_sections": ["assessment.1", "assessment.7"],
+                "also_tabs": ["Subcap_Scores", "Peer_Benchmarks"],
+                "floor": "5 (4-6)", "r_layer_per_item": true}
+  },
+  "overview.leadership": {
+   "roster": {"enrichment_facet": "leadership", "report_sections": ["client_research.5"],
+              "floor": "no empty roster on a completed run"}
+  },
+  "overview.financial_series": {
+   "series": {"tab": "Financial_Trends", "columns_tuple": "FINANCIAL_TRENDS_COLUMNS",
+              "report_sections": ["client_research.4"], "floor": ">=3 dated points",
+              "computed_never_sent": ["trend"]}
+  },
+  "overview.sentiment": {
+   "bars": {"enrichment_facet": "sentiment", "report_sections": ["client_research.4"]},
+   "themes": {"enrichment_facet": "sentiment", "floor": "2-4 themes per audience"}
+  },
+  "overview.ceilings": {
+   "rows": {"report_sections": ["assessment.3"], "also_tabs": ["Evidence_Detail"]}
+  },
+  "overview.evidence_coverage": {
+   "per_pillar": {"tab": "Coverage", "columns_tuple": "COVERAGE_COLUMNS",
+                  "also_tabs": ["Coverage_Map"], "computed_never_sent": ["pct"]},
+   "tiers": {"tab": "Coverage", "columns_tuple": "COVERAGE_COLUMNS",
+             "computed_never_sent": ["pct"]},
+   "claim_classes": {"tab": "Coverage", "columns_tuple": "COVERAGE_COLUMNS",
+                     "computed_never_sent": ["pct"]}
+  },
+  "overview.thought_leadership": {
+   "entries": {"enrichment_facet": "thought_leadership",
+               "report_sections": ["client_research.5"], "floor": "3"}
+  },
+  "insights.insights": {
+   "cards": {"report_sections": ["client_research.5"], "also_tabs": ["Subcap_Scores"],
+             "floor": "6-10", "r_layer_per_item": true}
+  },
+  "insights.landscape": {
+   "tiles": {"report_sections": ["assessment.5", "assessment.6"], "floor": "exactly 4",
+             "computed_never_sent": ["count"],
+             "note": "count recounted from techstack.techstack items[].status; never stored"}
+  },
+  "platform.platform_story": {
+   "platforms": {"tab": "Solution_Catalogue", "columns_tuple": "SOLUTION_CATALOGUE_COLUMNS",
+                 "also_tabs": ["Subcap_Scores", "Peer_Benchmarks", "Platform_Peer_Adoption"],
+                 "report_sections": ["assessment.5", "assessment.8"], "floor": "5 tiles",
+                 "computed_never_sent": ["fit_score"],
+                 "note": "fit_score comes from get_platform_fit; the agent explains, never recomputes",
+                 "nested": {"gaps": {"tab": "Subcap_Scores",
+                                     "columns_tuple": "SUBCAP_SCORES_COLUMNS"},
+                            "peer_deployments": {"tab": "Platform_Peer_Adoption",
+                                                 "columns_tuple": "PLATFORM_PEER_ADOPTION_COLUMNS"}}},
+   "discarded": {"report_sections": ["assessment.8"]}
+  },
+  "platform.recommendations": {
+   "recommendations": {"tab": "Recommendations", "columns_tuple": "RECOMMENDATIONS_COLUMNS",
+                       "also_tabs": ["Solution_Catalogue"],
+                       "report_sections": ["assessment.8"], "r_layer_per_item": true,
+                       "nested": {"dma_impact": {"tab": "Subcap_Scores",
+                                                 "columns_tuple": "SUBCAP_SCORES_COLUMNS"},
+                                  "validation_gate": {"tab": "Subcap_Scores",
+                                                      "columns_tuple": "SUBCAP_SCORES_COLUMNS"}}}
+  },
+  "platform.starters": {
+   "starters": {"report_sections": ["client_research.6"],
+                "also_tabs": ["Subcap_Scores", "Tech_Register"],
+                "floor": "5, each a distinct opens_on shape"}
+  },
+  "platform.roadmap": {
+   "phases": {"report_sections": ["assessment.8", "assessment.9"], "floor": "3 phases",
+              "note": "rec_ids resolve to Recommendations rows this payload carries"}
+  },
+  "context.timeline": {
+   "events": {"tab": "Entity_Timeline", "columns_tuple": "TIMELINE_COLUMNS",
+              "report_sections": ["client_research.4"], "floor": ">=3 dated for an arc"}
+  },
+  "context.issue_register": {
+   "issues": {"tab": "Issue_Register", "columns_tuple": "ISSUE_REGISTER_COLUMNS",
+              "report_sections": ["client_research.7"]}
+  },
+  "context.regulatory_standing": {
+   "enforcement_actions": {"report_sections": ["client_research.3", "client_research.7"],
+                           "note": "authored from the regulator's own registry"}
+  },
+  "context.context_sentiment": {
+   "context_tiles": {"enrichment_facet": "sentiment", "report_sections": ["client_research.4"],
+                     "floor": "3 tiles", "note": "re-projection of overview.sentiment (O9) by e_id+rating"}
+  },
+  "context.acquisitions": {
+   "rows": {"tab": "Entity_Timeline", "columns_tuple": "TIMELINE_COLUMNS",
+            "report_sections": ["client_research.5"],
+            "note": "Entity_Timeline rows where Kind=M&A; each also a C1 event"}
+  },
+  "techstack.techstack": {
+   "items": {"tab": "Tech_Register", "columns_tuple": "TECH_REGISTER_COLUMNS",
+             "also_tabs": ["Technographic_Scan"], "enrichment_facet": "techstack",
+             "report_sections": ["assessment.5", "assessment.6", "client_research.5"],
+             "nested": {"peer_deployments": {"tab": "Tech_Peer_Deployments",
+                                             "columns_tuple": "TECH_PEER_COLUMNS"}}},
+   "layers": {"computed_never_sent": ["detected"],
+              "note": "recounted from items[]; 4 cards OPS/CUST/DATA/INFRA", "floor": "4"},
+   "dropped": {"note": "may be empty (the only such list in the contract)"}
+  }
+ }
+}

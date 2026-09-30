@@ -234,7 +234,6 @@ def test_the_rendered_scan_states_ran_or_not_run_per_contracted_source(
 def test_the_app_side_parser_still_reads_the_machine_copy(tmp_path):
     """The providers column is additive: the app's parser must not care."""
     import sys
-    sys.path.insert(0, "/home/user/Accelerate/apps/worker")
     from dma_worker.workbook_parser import parse_technographic_scan
 
     run, wb, cells = _run(tmp_path)

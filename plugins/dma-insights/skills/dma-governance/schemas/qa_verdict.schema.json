@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "QA Verdict Schema",
-  "description": "Formal governance audit conclusion for a completed DMA assessment. Produced by Layer 2 (DMA Governance) to communicate pass/fail status and recommendations.",
+  "description": "Formal governance audit conclusion for a completed DMA assessment. Produced by Layer 2 (DMA Governance) to communicate pass/fail status and recommendations. Revised 2026-09-28 (QA audit F-J02-011): the schema gained a loader (gov_auditor validates the verdict it writes; validate_contracts applies Contract 6), which found the automated pass writing a state the schema had no room for.",
   "type": "object",
   "required": [
     "run_id",
@@ -21,9 +21,13 @@
   "properties": {
     "run_id": {
       "type": "string",
-      "description": "References the assessed DMA run",
-      "pattern": "^DMA-[A-Z0-9]{4}-[0-9]{8}-[0-9]{4}$",
-      "examples": ["DMA-OZK1-20240115-0001"]
+      "minLength": 1,
+      "pattern": "^[^{}]+$",
+      "description": "The engine's run id, as the run manifest states it (any non-placeholder string; the DMA-XXXX-date-seq form was the retired v2 exporter's invention)",
+      "examples": [
+        "c1351d25-a612-4dbe-b498-12ab34cd56ef",
+        "R-2026-09-28-ACME"
+      ]
     },
     "institution_name": {
       "type": "string",
@@ -38,9 +42,11 @@
     },
     "governance_skill_version": {
       "type": "string",
-      "description": "Version of dma-governance skill that performed audit",
-      "pattern": "^[0-9]+\\.[0-9]+$",
-      "examples": ["2.0", "2.1"]
+      "description": "The plugin version that performed the audit (.claude-plugin/plugin.json, read through engine.contract.plugin_version)",
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$",
+      "examples": [
+        "1.20.0"
+      ]
     },
     "verdict": {
       "type": "string",
@@ -64,7 +70,12 @@
     "issue_count_by_severity": {
       "type": "object",
       "description": "Count of issues found in this assessment, by severity",
-      "required": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+      "required": [
+        "CRITICAL",
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ],
       "properties": {
         "CRITICAL": {
           "type": "object",
@@ -82,7 +93,11 @@
               "minimum": 0
             }
           },
-          "required": ["count", "open", "fixed"]
+          "required": [
+            "count",
+            "open",
+            "fixed"
+          ]
         },
         "HIGH": {
           "type": "object",
@@ -100,7 +115,11 @@
               "minimum": 0
             }
           },
-          "required": ["count", "open", "fixed"]
+          "required": [
+            "count",
+            "open",
+            "fixed"
+          ]
         },
         "MEDIUM": {
           "type": "object",
@@ -118,7 +137,11 @@
               "minimum": 0
             }
           },
-          "required": ["count", "open", "fixed"]
+          "required": [
+            "count",
+            "open",
+            "fixed"
+          ]
         },
         "LOW": {
           "type": "object",
@@ -136,7 +159,11 @@
               "minimum": 0
             }
           },
-          "required": ["count", "open", "fixed"]
+          "required": [
+            "count",
+            "open",
+            "fixed"
+          ]
         }
       }
     },
@@ -146,42 +173,66 @@
       "properties": {
         "G1_row_counts": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Verify subcap counts match taxonomy"
         },
         "G2_rationale_quality": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Check rationale length, structure, forbidden patterns"
         },
         "G3_evidence_traceability": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Every score has evidence; every evidence used"
         },
         "G4_score_integrity": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Bounds, precision, ceiling compliance, cap logging"
         },
         "G5_aggregation": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Weight sums, calculation chain reconciliation"
         },
         "G6_cross_pillar_caps": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Dependency cap triggering and application"
         },
         "G7_confidence_ers": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "Confidence vs. ERS alignment"
         },
         "G8_contradiction_log": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
           "description": "All contradictions logged with resolutions"
         }
       },
@@ -201,12 +252,20 @@
       "description": "Pattern-based anomalies detected (may not be failures, but flagged for attention)",
       "items": {
         "type": "object",
-        "required": ["flag_id", "description", "severity", "affected_pillar_or_metric"],
+        "required": [
+          "flag_id",
+          "description",
+          "severity",
+          "affected_pillar_or_metric"
+        ],
         "properties": {
           "flag_id": {
             "type": "string",
             "pattern": "^[A-Z0-9]{3}-[0-9]{3}$",
-            "examples": ["DIST-001", "DIST-002"]
+            "examples": [
+              "DIST-001",
+              "DIST-002"
+            ]
           },
           "description": {
             "type": "string",
@@ -218,12 +277,20 @@
           },
           "severity": {
             "type": "string",
-            "enum": ["INFO", "CAUTION", "ALERT"],
+            "enum": [
+              "INFO",
+              "CAUTION",
+              "ALERT"
+            ],
             "description": "Whether flag requires action"
           },
           "affected_pillar_or_metric": {
             "type": "string",
-            "examples": ["P2", "EvidenceTier_Distribution", "CapApplication_Rate"]
+            "examples": [
+              "P2",
+              "EvidenceTier_Distribution",
+              "CapApplication_Rate"
+            ]
           },
           "recommended_action": {
             "type": "string",
@@ -235,22 +302,40 @@
     "proof_verification": {
       "type": "object",
       "description": "Results of proof-carrying structure checks (PV-01, PV-02, PV-03)",
-      "required": ["PV01_structure_complete", "PV02_rule_links_valid", "PV03_counterclaim_documented"],
+      "required": [
+        "PV01_structure_complete",
+        "PV02_rule_links_valid",
+        "PV03_counterclaim_documented"
+      ],
       "properties": {
         "PV01_structure_complete": {
           "type": "string",
-          "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"],
-          "description": "All rationales contain Claims, Evidence links, Rule links, Counterclaim, Constraints"
+          "enum": [
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "FAIL",
+            "NOT_RUN"
+          ],
+          "description": "All rationales contain Claims, Evidence links, Rule links, Counterclaim, Constraints NOT_RUN: the automated Pass 1 cannot decide this; the LLM Pass 2 replaces it."
         },
         "PV02_rule_links_valid": {
           "type": "string",
-          "enum": ["PASS", "FAIL"],
-          "description": "All RuleIDs exist and rules correctly applied"
+          "enum": [
+            "PASS",
+            "FAIL",
+            "NOT_RUN"
+          ],
+          "description": "All RuleIDs exist and rules correctly applied NOT_RUN: the automated Pass 1 cannot decide this; the LLM Pass 2 replaces it."
         },
         "PV03_counterclaim_documented": {
           "type": "string",
-          "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"],
-          "description": "All scores include documented counterargument anticipation"
+          "enum": [
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "FAIL",
+            "NOT_RUN"
+          ],
+          "description": "All scores include documented counterargument anticipation NOT_RUN: the automated Pass 1 cannot decide this; the LLM Pass 2 replaces it."
         },
         "proof_issues": {
           "type": "array",
@@ -284,12 +369,19 @@
     "critic_resolution": {
       "type": "object",
       "description": "Results of Critic Log consumption (CR-01)",
-      "required": ["CR01_findings_addressed"],
+      "required": [
+        "CR01_findings_addressed"
+      ],
       "properties": {
         "CR01_findings_addressed": {
           "type": "string",
-          "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL"],
-          "description": "All critic-flagged items addressed or accepted with rationale"
+          "enum": [
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "FAIL",
+            "NOT_RUN"
+          ],
+          "description": "All critic-flagged items addressed or accepted with rationale NOT_RUN: the automated Pass 1 cannot decide this; the LLM Pass 2 replaces it."
         },
         "critic_issues": {
           "type": "array",
@@ -299,14 +391,20 @@
             "properties": {
               "critic_finding_id": {
                 "type": "string",
-                "examples": ["CRI-P2C1-001"]
+                "examples": [
+                  "CRI-P2C1-001"
+                ]
               },
               "finding_text": {
                 "type": "string"
               },
               "status": {
                 "type": "string",
-                "enum": ["ADDRESSED", "ACCEPTED_WITH_RATIONALE", "UNADDRESSED"]
+                "enum": [
+                  "ADDRESSED",
+                  "ACCEPTED_WITH_RATIONALE",
+                  "UNADDRESSED"
+                ]
               },
               "resolution": {
                 "type": "string",
@@ -319,7 +417,11 @@
     },
     "narrative_audit_result": {
       "type": "string",
-      "enum": ["PASS", "PASS_WITH_NOTES", "FAIL"],
+      "enum": [
+        "PASS",
+        "PASS_WITH_NOTES",
+        "FAIL"
+      ],
       "description": "Result of narrative & report audit (Step 3 of Workflow A)"
     },
     "narrative_issues": {
@@ -345,7 +447,11 @@
           },
           "section": {
             "type": "string",
-            "examples": ["Section 2", "Section 6B", "Roadmap"]
+            "examples": [
+              "Section 2",
+              "Section 6B",
+              "Roadmap"
+            ]
           }
         }
       }
@@ -353,7 +459,13 @@
     "sign_off": {
       "type": "object",
       "description": "Audit sign-off and authorization",
-      "required": ["auditor_id", "auditor_name", "organization", "verdict_date", "is_approved"],
+      "required": [
+        "auditor_id",
+        "auditor_name",
+        "organization",
+        "verdict_date",
+        "is_approved"
+      ],
       "properties": {
         "auditor_id": {
           "type": "string",

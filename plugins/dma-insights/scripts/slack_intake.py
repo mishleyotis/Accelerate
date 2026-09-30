@@ -103,19 +103,30 @@ _FROM = re.compile(r"^From: (?P<name>.*?)\s*\((?P<uid>[A-Z0-9]+)\)\s*$", re.M)
 #: without it `*Priority*` swallowed the footer and the priority read
 #: "High (need in 48 hours)\n\n<@U09TL2S4LLS|…> Please run the maturity…",
 #: which sorts and prints as nonsense.
-_FOOTER = re.compile(r"^<@U[A-Z0-9]+\|", re.M)
+_FOOTER = re.compile(r"^<@U[A-Z0-9]+[|>]", re.M)
 
 
 def _field(body: str, label: str) -> str:
     """A `*Label*` block: the lines under it, up to the next `*Label*` — or
-    the assignee footer, whichever comes first."""
+    the assignee footer, whichever comes first.
+
+    THE FOOTER IS LOOKED FOR ONLY AFTER THE FIELD'S FIRST NON-EMPTY LINE.
+    `*Submitter*`'s own VALUE is a line-initial @-mention, which is the same
+    shape as the footer, so searching from position 0 matched the value and
+    ended the field before it began: `submitter` came back "" on every
+    request ever parsed — the recorded fixtures included — and STEP 6's
+    `engine.cli start --requested-by` therefore had nothing to carry.
+    Measured 2026-08-30 on both routes. A mention that IS the value cannot
+    also be the boundary that ends it.
+    """
     m = re.search(rf"^\*{re.escape(label)}\*\s*$", body, re.M)
     if not m:
         return ""
     rest = body[m.end():]
+    lead = re.match(r"\s*\S[^\n]*\n?", rest)
     ends = [x.start() for x in
             (re.search(r"^\*[A-Z][^*\n]*\*\s*$", rest, re.M),
-             _FOOTER.search(rest)) if x]
+             _FOOTER.search(rest, lead.end() if lead else 0)) if x]
     chunk = rest[:min(ends)] if ends else rest
     return "\n".join(ln.strip() for ln in chunk.strip().splitlines()).strip()
 
@@ -503,6 +514,16 @@ def main(argv=None) -> int:
                         "marks the request delivered")
     y.add_argument("--json", action="store_true")
 
+    fch = sub.add_parser(
+        "fetch",
+        help="pull the channel and every thread it names STRAIGHT FROM "
+             "SLACK, with no connector — needs a bot token (slack_client.py)")
+    fch.add_argument("--channel", default=DEAL_DESK_CHANNEL_ID)
+    fch.add_argument("--limit", type=int, default=50)
+    fch.add_argument("--transcript", default="/tmp/deal_desk.txt")
+    fch.add_argument("--threads", default="/tmp/threads")
+    fch.add_argument("--since-days", type=int, default=5)
+
     w = sub.add_parser("thread-of",
                        help="the Slack thread a run is answering, read out "
                             "of its own workbook")
@@ -524,6 +545,43 @@ def main(argv=None) -> int:
               else f"INTAKE: PENDING {one['entity_id']} "
                    f"run={one['run_id']} \"{one['account']}\" (manual)")
         return 0
+
+    if a.cmd == "fetch":
+        import slack_client as SC                             # noqa: PLC0415
+        tok = SC.bot_token()
+        chan = SC.fetch_channel(a.channel, a.limit, token=tok)
+        Path(a.transcript).parent.mkdir(parents=True, exist_ok=True)
+        Path(a.transcript).write_text(chan, encoding="utf-8")
+        rows = threads_to_read(chan, a.since_days, now)
+        Path(a.threads).mkdir(parents=True, exist_ok=True)
+        got, failed = [], []
+        # `message_ts`, not `ts`. `threads_to_read` has always emitted
+        # `message_ts` — the connector route reads it out of the `threads`
+        # subcommand's JSON and passes it to mcp__Slack__slack_read_thread,
+        # so that name is the contract. This loop asked for `ts` and died
+        # with KeyError on the FIRST request carrying a reply, which is to
+        # say on every real channel: measured 2026-08-30 against #deal-desk,
+        # immediately after the scope fix let the read get this far. The
+        # bot-token route had never reached this line before, because
+        # `fetch_channel` was failing above it.
+        for r in rows:
+            ts = r["message_ts"]
+            try:
+                body = SC.fetch_thread(r["channel_id"], ts, token=tok)
+            except SC.SlackError as e:
+                failed.append({"message_ts": ts, "error": str(e)})
+                continue
+            dest = Path(a.threads) / f"thread_{ts}.txt"
+            dest.write_text(body, encoding="utf-8")
+            got.append(str(dest))
+        print(json.dumps({"transcript": a.transcript,
+                          "threads_named": len(rows),
+                          "threads_fetched": len(got),
+                          "failed": failed}, indent=1))
+        # A thread we could not fetch stays UNDECIDABLE downstream, which is
+        # the safe reading; a non-zero exit says the fetch was incomplete so
+        # a caller does not treat this as a full picture.
+        return 0 if not failed else 3
 
     if a.cmd == "thread-of":
         print(json.dumps(thread_of(a.run, a.root), indent=1))

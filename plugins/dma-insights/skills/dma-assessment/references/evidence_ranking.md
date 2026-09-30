@@ -196,5 +196,5 @@ When building the evidence index (Phase 1), add these columns for ERS:
 | ers_total | Calculated composite |
 | corroborating_ids | List of other evidence IDs that confirm this item |
 
-Save ERS scores in the `01_evidence_index.json` checkpoint. They are used throughout
-scoring, narrative writing, and report generation.
+ERS is computed by `engine.cli ers recompute` and lives on the row (`Evidence_Detail.ERS`);
+nothing types it. Scoring, narrative writing and report generation read it from there.

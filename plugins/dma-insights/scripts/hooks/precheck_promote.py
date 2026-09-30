@@ -21,7 +21,14 @@ def main() -> int:
         event = json.load(sys.stdin)
     except Exception:
         return 0
-    run_id = (event.get("tool_input") or {}).get("run_id") or "this run"
+    if not isinstance(event, dict):
+        # NOT-A-DICT IS UNPARSED INPUT, NOT A VIOLATION. Measured 2026-09-14:
+        # a JSON list, string or null on stdin raised AttributeError here and
+        # the hook exited NON-ZERO with a traceback — a hook failing CLOSED on
+        # its own bug, which is the one failure a guard may never have.
+        return 0
+    ti = event.get("tool_input")
+    run_id = (ti.get("run_id") if isinstance(ti, dict) else None) or "this run"
     advisory = (
         f"dma-insights: promoting {run_id} republishes ALL SIX pages "
         "atomically and re-runs today's format gates over every retained "

@@ -70,7 +70,9 @@ def main():
     print("Enrichment is async; the pages that consume it come later.\n")
 
     print("STEP 1 — resolve the company")
-    print(f'  find-and-enrich-company(companyIdentifier="{d}")  -> taskId\n')
+    # The live connector (2026-09-30) finds with search-* and enriches with
+    # add-*-data-points; find-and-enrich-* no longer exists.
+    print(f'  search-companies(dslQuery=\'select from companies where domain = "{d}" limit 1\')  -> taskId, entityId\n')
     print("  The domain comes from 01_evidence/entity_profile/, never a guess. A wrong")
     print("  domain attaches a real company's data to the wrong entity.\n")
 
@@ -80,11 +82,13 @@ def main():
     print("  ])\n")
 
     print("STEP 3 — leadership contacts")
-    print(f'  find-and-enrich-contacts-at-company(companyIdentifier="{d}",')
-    print( "    contactFilters={ job_title_keywords: [")
+    print(f'  search-contacts(companyIdentifiers=["{d}"],')
+    print( "    dslQuery='select from people where <the DSL's job-title field> in/is_similar_to (")
     for t in TITLES: print(f'      "{t}",')
-    print( "    ], job_title_exclude_keywords: " + str(EXCLUDE) + " })  -> taskId2\n")
-    print("  Compound titles stay ONE string. \"VP Finance\" is one keyword, not two.\n")
+    print( "    ) limit 50')  -> taskId2   (exclude: " + str(EXCLUDE) + ")\n")
+    print("  Take the job-title field name from the tool's own DSL field list; an")
+    print("  unfiltered `select from people limit 50` + load-more-search-results is the")
+    print("  fallback, filtered by title before recording. Compound titles stay ONE string.\n")
 
     print("STEP 4 — contact data points")
     print("  add-contact-data-points(taskId2, dataPoints=[")

@@ -192,5 +192,5 @@ and lands on a home page. Say so in the source name ("Vibe Prospecting
 enrich-business technographic scan"), never dress it as a document, and
 never go looking for a deeper URL that does not exist.
 
-`scripts/gate_m_evidence_url_and_span.py` measures all of this over the
+`scripts/gate_m_evidence_url_and_span.py` (repo root) measures all of this over the
 complete set and fails the run rather than sampling it.
