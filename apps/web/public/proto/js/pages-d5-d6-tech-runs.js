@@ -1354,10 +1354,8 @@ function InteractiveGantt({
       return /*#__PURE__*/React.createElement("button", {
         key: iss.id,
         onClick: () => setIssueOpen(isOpen ? null : iss.id),
+        className: "issue-row",
         style: {
-          display: "grid",
-          gridTemplateColumns: "minmax(90px, 200px) minmax(0, 1fr)",
-          gap: 12,
           padding: "8px 0",
           borderTop: "1px solid var(--z-sep)",
           textAlign: "left",
@@ -1396,7 +1394,7 @@ function InteractiveGantt({
           fontSize: 12,
           marginTop: 4
         },
-        className: "txt-fit-1",
+        className: "txt-fit-3",
         title: iss.title || iss.type || ""
       }, iss.title || iss.type || /*#__PURE__*/React.createElement(EnrichmentGap, {
         what: "Issue title",
@@ -1439,11 +1437,17 @@ function InteractiveGantt({
       const cap = capStateOf(iss);
       return /*#__PURE__*/React.createElement("button", {
         key: iss.id,
-        onClick: () => setIssueOpen(issueOpen === iss.id ? null : iss.id),
+        onClick: () => setIssueOpen(issueOpen === iss.id ? null : iss.id)
+        /* wraps: the title shares this row with a chip, a severity
+           badge and a cap summary, and at a narrow width there is no
+           arrangement of those on one line that also shows an 8-16
+           word title. It takes its own line before it takes a
+           truncation. */,
         style: {
           display: "flex",
           gap: 8,
           alignItems: "center",
+          flexWrap: "wrap",
           width: "100%",
           textAlign: "left",
           background: issueOpen === iss.id ? "var(--z-lav)" : "transparent",
@@ -1466,10 +1470,10 @@ function InteractiveGantt({
       }) : null, /*#__PURE__*/React.createElement("span", {
         style: {
           flex: 1,
-          minWidth: 0,
+          minWidth: 160,
           fontSize: 12
         },
-        className: "txt-fit-1",
+        className: "txt-fit-2",
         title: iss.title || ""
       }, iss.title || iss.type || /*#__PURE__*/React.createElement(EnrichmentGap, {
         what: "Issue title",

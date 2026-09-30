@@ -189,3 +189,69 @@ def test_the_scorecard_generation_is_unchanged(tmp_path):
     assert float(out.composite) == pytest.approx(3.40), (
         "2_Scorecard's own cell still wins where that tab exists")
     assert out.composite_source_cell.startswith("2_Scorecard!")
+
+
+def test_every_candidate_tab_is_tried_not_just_the_first_that_exists(tmp_path):
+    """goEasy Ltd., measured 2026-09-03.
+
+    That workbook ships BOTH `Pillar_Summary` and `Pillar_Rollup`, and only
+    the second carries an OVERALL row — the first stops at P4. Taking the
+    first tab that merely EXISTS and giving up when it stated no overall
+    returned None for a workbook that states 2.11 plainly, on a tab this
+    reader already knew about.
+
+    Golden 1's `Pillar_Summary` happens to carry the row, which is why the
+    shape held until a client shipped the other arrangement. Every
+    `return None, None` inside a tab means "not on THIS tab", never a
+    statement about the workbook.
+    """
+    from dma_worker.workbook_parser import parse_scoring_workbook
+
+    wb = openpyxl.Workbook()
+    ps = wb.active
+    ps.title = "Pillar_Summary"
+    for i, h in enumerate(["Pillar", "Pillar_Name", "Score", "Peer_Median"], 1):
+        ps.cell(row=1, column=i, value=h)
+    for pid, sc in (("P1", 2.09), ("P2", 2.19), ("P3", 2.00), ("P4", 2.16)):
+        ps.append([pid, f"Pillar {pid}", sc, 2.5])
+    # no OVERALL row here — the whole point
+
+    pr = wb.create_sheet("Pillar_Rollup")
+    for i, h in enumerate(["pillar_id", "pillar_name", "score", "weight",
+                           "weighted_contribution", "peer_median"], 1):
+        pr.cell(row=1, column=i, value=h)
+    for pid, sc in (("P1", 2.09), ("P2", 2.19), ("P3", 2.00), ("P4", 2.16)):
+        pr.append([pid, f"Pillar {pid}", sc, 0.25, sc * 0.25, 2.5])
+    pr.append(["OVERALL", "Overall (equal-weighted)", 2.11, 1.0, 2.11, 2.5])
+
+    _subcap_tab(wb)
+    path = tmp_path / "two_tabs.xlsx"
+    wb.save(path)
+
+    out = parse_scoring_workbook(str(path))
+    assert float(out.composite) == pytest.approx(2.11), (
+        "the reader stopped at Pillar_Summary and never looked at "
+        "Pillar_Rollup, which is where this generation states its overall")
+    assert out.composite_source_cell.startswith("Pillar_Rollup!"), \
+        out.composite_source_cell
+
+
+def test_the_first_tab_still_wins_when_it_does_carry_an_overall(tmp_path):
+    """Precedence is unchanged: falling through is for a tab that states
+    NOTHING, not a licence to prefer a later tab's figure."""
+    from dma_worker.workbook_parser import parse_scoring_workbook
+
+    wb = openpyxl.Workbook()
+    _pillar_tab(wb, overall_score=2.25)              # Pillar_Summary, has OVERALL
+    pr = wb.create_sheet("Pillar_Rollup")
+    for i, h in enumerate(["pillar_id", "pillar_name", "score"], 1):
+        pr.cell(row=1, column=i, value=h)
+    pr.append(["P1", "Strategy", 2.40])
+    pr.append(["OVERALL", "Overall", 9.99])          # must NOT be preferred
+    _subcap_tab(wb)
+    path = tmp_path / "both.xlsx"
+    wb.save(path)
+
+    out = parse_scoring_workbook(str(path))
+    assert float(out.composite) == pytest.approx(2.25)
+    assert out.composite_source_cell.startswith("Pillar_Summary!")

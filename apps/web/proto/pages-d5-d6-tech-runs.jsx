@@ -948,7 +948,8 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
         const cap = capStateOf(iss);
         return (
           <button key={iss.id} onClick={() => setIssueOpen(isOpen ? null : iss.id)}
-            style={{ display: "grid", gridTemplateColumns: "minmax(90px, 200px) minmax(0, 1fr)", gap: 12, padding: "8px 0", borderTop: "1px solid var(--z-sep)", textAlign: "left", width: "100%", background: isOpen ? "var(--z-lav)" : "transparent", border: "0", borderRadius: 6 }}>
+            className="issue-row"
+            style={{ padding: "8px 0", borderTop: "1px solid var(--z-sep)", textAlign: "left", width: "100%", background: isOpen ? "var(--z-lav)" : "transparent", border: "0", borderRadius: 6 }}>
             <div style={{ padding: "0 8px", minWidth: 0 }}>
               <div className="row">
                 <span className="chip">{iss.id}</span>
@@ -956,10 +957,12 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
                 {cap.kind === "ceiling" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held at M${cap.ceiling}`} />
                   : cap.kind === "held_unleveled" ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={`${cap.entries.length} cell${cap.entries.length === 1 ? "" : "s"} held — level on the assessment caps`} /> : null}
               </div>
-              {/* compact: this label column clamps to one line inside a
-                  90-200px track, and the queue badge would push the bar
-                  lane off the row. */}
-              <div style={{ fontSize: 12, marginTop: 4 }} className="txt-fit-1" title={iss.title || iss.type || ""}>{iss.title || iss.type
+              {/* Three lines, not one. An issue title is 8-16 words by
+                  contract and one line in a 200px track shows about four of
+                  them — the row's own identity, truncated, with the rest in
+                  a tooltip the reader has to find. The track widened with
+                  it; see `.issue-row` in app.css. */}
+              <div style={{ fontSize: 12, marginTop: 4 }} className="txt-fit-3" title={iss.title || iss.type || ""}>{iss.title || iss.type
                 || <EnrichmentGap what="Issue title" audience={audience} compact />}</div>
               {/* The prototype's row footer, made honest. It printed
                   "OPEN · cap 3" from a `cap_value` the contract does not
@@ -1006,11 +1009,16 @@ function InteractiveGantt({ issues, issueOpen, setIssueOpen, audience }) {
             const cap = capStateOf(iss);
             return (
               <button key={iss.id} onClick={() => setIssueOpen(issueOpen === iss.id ? null : iss.id)}
-                style={{ display: "flex", gap: 8, alignItems: "center", width: "100%", textAlign: "left", background: issueOpen === iss.id ? "var(--z-lav)" : "transparent", border: 0, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>
+                /* wraps: the title shares this row with a chip, a severity
+                   badge and a cap summary, and at a narrow width there is no
+                   arrangement of those on one line that also shows an 8-16
+                   word title. It takes its own line before it takes a
+                   truncation. */
+                style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", width: "100%", textAlign: "left", background: issueOpen === iss.id ? "var(--z-lav)" : "transparent", border: 0, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>
                 <span className="chip">{iss.id}</span>
                 {iss.severity ? <span className={`b ${severityTone(iss.severity)}`}>{iss.severity}</span> : null}
                 {(cap.kind === "ceiling" || cap.kind === "held_unleveled") ? <Icon name="lock" size={11} style={{ color: "var(--z-org)" }} title={cap.ceiling != null ? `${cap.entries.length} cells held at M${cap.ceiling}` : `${cap.entries.length} cells held — level on the assessment caps`} /> : null}
-                <span style={{ flex: 1, minWidth: 0, fontSize: 12 }} className="txt-fit-1" title={iss.title || ""}>{iss.title || iss.type
+                <span style={{ flex: 1, minWidth: 160, fontSize: 12 }} className="txt-fit-2" title={iss.title || ""}>{iss.title || iss.type
                   || <EnrichmentGap what="Issue title" audience={audience} compact />}</span>
                 {/* An undated row opens the same panel as a dated bar, so it
                     carries the same cap summary — without it the group read

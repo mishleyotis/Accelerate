@@ -79,6 +79,20 @@ MIN_LADDER = 60
 #: The inline mark for a claim the evidence does not carry on its own.
 INF = "[INF]"
 
+#: A block with no LENGTH of its own in the Doc still owes a body. Measured
+#: 2026-09-08: a REC card carrying all its prose under `## Root cause` and
+#: seven bare block headings cleared `write`, `review`, `render` and the
+#: gold gate — the Doc's shape with none of its content. Twenty words is the
+#: floor that separates a table-plus-sentence block from an empty heading.
+BLOCK_MIN_WORDS = 20
+#: A paragraph this long that appears twice in a report is form-filling,
+#: whatever each copy says. The same measured session shipped one paragraph
+#: 73 times across 15 distinct texts and passed every gate.
+REPEAT_MIN_WORDS = 25
+#: A card of the recommendations section is headed `REC-NN: Title` in the
+#: Doc; a title under this many words is the section heading wearing an id.
+CARD_TITLE_MIN_WORDS = 3
+
 #: Phrases that assert an absence. A body carrying one must also carry the
 #: ladder that establishes it — otherwise it is reporting on the search.
 _ABSENCE = re.compile(
@@ -132,6 +146,17 @@ def _clean_body(v) -> str:
 
 def _words(text: str) -> int:
     return len([w for w in re.split(r"\s+", _clean(text)) if w])
+
+
+def _prose_words(body: str) -> int:
+    """Words of narrative only — no `## ` block headings, no `| … |` table
+    rows. The Doc's LENGTH band is "the narrative in that section, excluding
+    table content", and it is what every section and card floor measures;
+    a block's OWN floor (`_check_block_bodies`) counts its table too, because
+    a scorecard block IS its table."""
+    keep = [ln for ln in str(body or "").splitlines()
+            if not BLOCK_RE.match(ln) and not ln.strip().startswith("|")]
+    return _words("\n".join(keep))
 
 
 # ── the contract, per section ────────────────────────────────────────────
@@ -264,6 +289,56 @@ def blocks_in(body: str) -> list[str]:
     return [m.strip() for m in BLOCK_RE.findall(body or "")]
 
 
+def blocks_split(body: str) -> list[tuple[str, str]]:
+    """`[(block heading, the text under it)]`, in body order. Text before the
+    first heading rides under the empty block name."""
+    out: list[tuple[str, list[str]]] = [("", [])]
+    for line in (body or "").splitlines():
+        m = BLOCK_RE.match(line)
+        if m:
+            out.append((m.group(1).strip(), []))
+        else:
+            out[-1][1].append(line)
+    return [(b, "\n".join(ls).strip()) for b, ls in out if b or "".join(ls).strip()]
+
+
+def paragraphs_in(body: str) -> list[str]:
+    """Prose paragraphs of a body: blank-line separated runs that are not
+    block headings and not table rows."""
+    out, buf = [], []
+    for line in (body or "").splitlines():
+        s = line.strip()
+        if not s or BLOCK_RE.match(line) or s.startswith("|"):
+            if buf:
+                out.append(" ".join(buf)); buf = []
+            continue
+        buf.append(s)
+    if buf:
+        out.append(" ".join(buf))
+    return out
+
+
+def repeated_paragraphs(bodies: list[str], *, min_words: int = REPEAT_MIN_WORDS,
+                        of: str | None = None) -> list[str]:
+    """Paragraphs of `min_words`+ that occur more than once across `bodies`
+    (the Doc's sections read as one document, so a paragraph pasted into two
+    sections is the same defect as one pasted twice into one). With `of`,
+    only paragraphs OF that body are reported — the write being judged is
+    refused for what it pastes, never for a repeat already sitting between
+    two other rows (measured 2026-09-08: two PRELIM rows sharing a
+    paragraph refused every section of the profile)."""
+    seen: dict[str, int] = {}
+    for body in bodies:
+        for para in paragraphs_in(body):
+            key = _clean(para).lower()
+            if _words(key) >= min_words:
+                seen[key] = seen.get(key, 0) + 1
+    mine = None
+    if of is not None:
+        mine = {_clean(p).lower() for p in paragraphs_in(of)}
+    return [k for k, n in seen.items() if n > 1 and (mine is None or k in mine)]
+
+
 def _check_blocks(sec, body: str) -> list[str]:
     """The section's declared anatomy, present and in order.
 
@@ -274,7 +349,7 @@ def _check_blocks(sec, body: str) -> list[str]:
     existed.
     """
     if not sec.blocks:
-        return []
+        return _check_block_bodies(sec, body)
     got = blocks_in(body)
     lower = [g.lower() for g in got]
     missing = [b for b in sec.blocks if b.lower() not in lower]
@@ -289,7 +364,67 @@ def _check_blocks(sec, body: str) -> list[str]:
         return [f"the block headings are out of order. §{sec.id} runs "
                 + " → ".join(sec.blocks)
                 + f", and this body runs " + " → ".join(got)]
-    return []
+    return _check_block_bodies(sec, body)
+
+
+def _prose_of(text: str) -> str:
+    return "\n".join(ln for ln in str(text or "").splitlines()
+                     if not ln.strip().startswith("|") and not BLOCK_RE.match(ln))
+
+
+#: Something a reader can check: a figure, a year, a cited id, a cell id
+#: or a proper noun. A table-only block (the scorecard, the overlay) is
+#: judged on this rather than on prose heuristics.
+_ANCHOR = re.compile(r"\d|\[E-\d+|\bP[1-4]C\d|\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b")
+
+
+def _block_quality(text: str) -> str | None:
+    """Why this block's content is form-filling, or None.
+
+    The prose is judged by `quality.is_boilerplate` (placeholder markers, one
+    phrase repeated to a length, a filler phrase carrying a short field) and
+    `is_fluent_but_empty` (names nothing checkable). Table rows are judged
+    only for an anchor: the Doc's own overlay writes `n/a` in an evidence
+    cell where a dimension has no citation, and Golden 1 does the same, so
+    the marker scan must not read a table (measured 2026-09-08 on the first
+    fixture written to the Doc's shape)."""
+    prose = _prose_of(text)
+    if _words(prose) >= 6:
+        return Q.is_boilerplate(prose) or Q.is_fluent_but_empty(prose)
+    if not _ANCHOR.search(text or ""):
+        return "names no figure, date, proper noun or cited id — nothing in it can be checked"
+    return None
+
+
+def _check_block_bodies(sec, body: str) -> list[str]:
+    """Every declared block carries its own content, at the Doc's floor for
+    that block where it states one (`Section.block_words`) and at
+    BLOCK_MIN_WORDS otherwise, and names something checkable (a figure, a
+    date, a proper noun or a cited id). Table cells count toward the block's
+    floor: the capability scorecard IS its table. A section that declares
+    no blocks is judged as one block."""
+    out = []
+    parts = blocks_split(body) if sec.blocks else [(sec.heading, body)]
+    for block, text in parts:
+        if not block:
+            continue
+        floor = sec.block_floor(block, BLOCK_MIN_WORDS)
+        n = _words(text)
+        if n < floor:
+            band = (sec.block_words or {}).get(block)
+            out.append(
+                f"block `## {block}` carries {n} word(s) against its floor of "
+                f"{floor}"
+                + (f" (the Doc's LENGTH for this block is {band[0]}"
+                   + (f" to {band[1]}" if len(band) > 1 and band[1] else "")
+                   + " words)" if band else "")
+                + ". A block heading with nothing under it is the Doc's "
+                  "shape without its content.")
+            continue
+        why = _block_quality(text)
+        if why:
+            out.append(f"block `## {block}` reads as form-filling: {why}.")
+    return out
 
 
 #: The card-id shape each list section accepts. The Doc names them: §5 is one
@@ -479,9 +614,10 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
                 f"than adding a {len(have_cards) + 1}th.")
 
     floor = sec.card_min_words if is_card else sec.min_words
-    if _words(body) < floor:
+    if _prose_words(body) < floor:
         problems.append(
-            f"Body is {_words(body)} words; "
+            f"Body is {_prose_words(body)} prose words (table rows and block "
+            f"headings do not count); "
             + (f"each {sec.kind.replace('_', ' ')} of §{sec.id} requires "
                f"{floor}, and the section as a whole requires "
                f"{sec.min_words} across its cards"
@@ -490,6 +626,34 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
             + ". The floor is the section's job description, not a style "
               "preference.")
     problems += _check_blocks(sec, body)
+    # Form-filling, whatever its length: a phrase repeated to reach the
+    # floor, a placeholder marker, or a paragraph pasted more than once in
+    # this body or anywhere else in this report. Measured 2026-09-08: one
+    # paragraph repeated 73 times across both reports cleared every gate,
+    # because the writer measured words and counted ids and read nothing.
+    others = [str(r.get("Body") or "")
+              for sid, rows in all_rows_for(wb, report).items()
+              for r in rows
+              if not (sid == str(sec.id) and _clean(r.get("Card_ID")) == card_id)]
+    dup = repeated_paragraphs([body] + others, of=body)
+    if dup:
+        problems.append(
+            f"{len(dup)} paragraph(s) of {REPEAT_MIN_WORDS}+ words appear more "
+            f"than once in this report (first: {dup[0][:90]!r}…). Each block "
+            f"argues its own question from its own evidence; a pasted paragraph "
+            f"is a length, not an argument.")
+    if is_card and sec.kind == "recommendation":
+        # The Doc heads each card `REC-NN: Title`; the title is what the
+        # roadmap, the app's P2 rows and the Recommendations tab display.
+        # Without one the renderer printed the SECTION heading on every
+        # card and the tab carried five rows titled "Recommendations".
+        title = re.sub(r"^\s*REC-\d{2}\s*[:—-]\s*", "", _clean(record.get("Heading")))
+        if not title or title.lower() == sec.heading.lower() \
+                or _words(title) < CARD_TITLE_MIN_WORDS:
+            problems.append(
+                f"Heading must carry the recommendation's own title "
+                f"(`{card_id}: <what to do>`, {CARD_TITLE_MIN_WORDS}+ words); "
+                f"got {_clean(record.get('Heading'))!r}.")
     # The countable MINIMUM DATA / MUST NOT rules. Per-card rules run on this
     # body; section-wide rules on a card section are measured across the
     # cards by `state()`, because a single card cannot know its siblings.
@@ -594,7 +758,9 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
     acc = accuracy(wb, body, eids)
     row = {
         "Report": report, "Section_ID": str(sec.id),
-        "Heading": _clean(record.get("Heading")) or sec.heading,
+        "Heading": (re.sub(r"^\s*" + re.escape(card_id) + r"\s*[:—-]\s*", "",
+                           _clean(record.get("Heading"))) if card_id else
+                    _clean(record.get("Heading"))) or sec.heading,
         "Body": body, "Evidence_IDs": ", ".join(eids),
         "Kind": sec.kind, "Author": _clean(actor), "Written_At": _utcnow(),
         "Weighing": weighing, "Absence_Basis": ladder,
@@ -621,7 +787,7 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
             "words": acc["words"], "accuracy": acc, "inferences": len(tags),
             "absence_claimed": absence_claimed,
             "cards_in_section": n if is_card else None,
-            "section_words": sum(_words(_clean(r.get("Body")))
+            "section_words": sum(_prose_words(r.get("Body"))
                                  for r in all_rows_for(wb, report)
                                  .get(str(sec.id), []))}
 
@@ -712,7 +878,7 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
             # for the whole list (what a reader meets, and what the renderer
             # concatenates), and its card count is a floor of its own.
             body = _clean(r.get("Body")) if r else ""
-            sec_words = sum(_words(_clean(x.get("Body"))) for x in rows)
+            sec_words = sum(_prose_words(x.get("Body")) for x in rows)
             cards = len(rows) if sec.kind in RS.CARD_KINDS else None
             card_floor = card_floor_for(wb, sec)
             whole = "\n".join(_clean_body(x.get("Body")) for x in rows)
@@ -845,6 +1011,14 @@ def main(argv=None) -> int:
                 if sec.blocks:
                     print(f"        blocks   : "
                           + "  ##  ".join(sec.blocks))
+                    floors = [f"{b} {sec.block_floor(b, BLOCK_MIN_WORDS)}w"
+                              + (f"-{sec.block_words[b][1]}w"
+                                 if sec.block_words.get(b) and len(sec.block_words[b]) > 1
+                                 and sec.block_words[b][1] else "")
+                              for b in sec.blocks]
+                    print(f"        per block: " + " · ".join(floors)
+                          + "  (a block's tables are written as markdown "
+                            "`| a | b |` rows and render as Word tables)")
                 print(f"        reads    : {', '.join(sec.inputs)}")
                 print(f"        feeds    : "
                       + (", ".join(sec.surfaces) or "no app surface"))

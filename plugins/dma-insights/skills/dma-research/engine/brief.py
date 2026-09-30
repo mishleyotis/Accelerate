@@ -1205,6 +1205,7 @@ def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
         rows.append({"agent": packet["agent"], "prompt_file": str(path)})
         wrote.append({"category": cat, "prompt_file": str(path),
                       "chars": packet["packet_chars"],
+                      "ceiling": packet["packet_ceiling"],
                       "open_cells": packet["open_cells"]})
     batch_path = out_dir / "batch.json"
     batch_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
@@ -1393,8 +1394,12 @@ def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
         (out_dir / f"{name}.json").write_text(
             json.dumps(packet, indent=2, default=str), encoding="utf-8")
         rows.append({"agent": packet["agent"], "prompt_file": str(path)})
+        # `ceiling` is the packet's OWN budget (dispatch 6,400; report 9,000;
+        # challenge 16,000) so a reader holds each lane to the contract it
+        # was sized against, not to the dispatch packet's number.
         wrote.append({"lane": name, "agent": packet["agent"],
-                      "prompt_file": str(path), "chars": packet["packet_chars"]})
+                      "prompt_file": str(path), "chars": packet["packet_chars"],
+                      "ceiling": packet["packet_ceiling"]})
     batch_path = out_dir / batch_name
     batch_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     return {"batch": str(batch_path), "lanes": len(rows), "briefs": wrote,
@@ -1838,7 +1843,14 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 row["cards_min"] = N.card_floor_for(wb, sec)
                 row["card_prefix"] = sec.card_prefix
             if sec.blocks:
-                row["blocks"] = [b[:60] for b in sec.blocks]
+                # Every block with the floor IT owes (the Doc's LENGTH band
+                # where it states one, BLOCK_MIN_WORDS otherwise) — the
+                # writer refuses a block under it, so the brief says so.
+                row["blocks"] = [
+                    f"{b[:60]} ({sec.block_floor(b, N.BLOCK_MIN_WORDS)}w+)"
+                    for b in sec.blocks]
+            if sec.checks:
+                row["counts"] = [f">={c.min} {c.label}" for c in sec.checks][:8]
             sections.append(row)
         agent = ("report-research-producer" if key == "client_research"
                  else "report-assessment-producer")
@@ -1848,7 +1860,8 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 f"python3 -m engine.cli narrative preconditions {e} --report {key}",
                 f"python3 -m engine.cli narrative state {e} --report {key}",
                 f"python3 -m engine.cli narrative write {e} --report {key} --section <ID> "
-                f"--actor {agent} --body-file <path> [--card <PREFIX>NN]",
+                f"--actor {agent} --json <section.json> [--card <PREFIX>NN]",
+                f"python3 -m engine.cli narrative contract --report {key}",
                 f"python3 -m engine.cli report {e} --report {key}"],
             "report": key, "title": spec.title,
             "templates_read_before_authoring": templates,
@@ -1858,7 +1871,13 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "report_min_words": N.report_min_words_for(wb, spec),
             "rules": [
                 "every section goes through `engine.narrative write`, which refuses "
-                "prose that is not an argument and a body missing a block",
+                "prose that is not an argument, a body missing a block, a block "
+                "under its own word floor or naming nothing checkable, a paragraph "
+                "repeated anywhere in the report, and a REC card with no title",
+                "the Doc's tables are written INTO the body as markdown pipe rows "
+                "(`| Capability | Score | … |`) under the block they belong to — "
+                "they render as real Word tables; table words do not count toward "
+                "the block's or the section's LENGTH floor, which is prose",
                 "a failing precondition means STOP and report — no --force writes a "
                 "section; --force on `report` yields a DRAFT_ no package accepts",
                 "the report's numbers are the sheets' numbers; cite only E-ids the "
@@ -1878,7 +1897,8 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "first_commands": [
                 f"python3 -m engine.cli narrative state {e}",
                 f"python3 -m engine.cli narrative review {e} --report <KEY> --section <ID> "
-                f"--verdict READY|REVISE --actor report-validator --note '…'",
+                f"--verdict PASS|REVISE|FAIL --actor report-validator "
+                f"--dimensions '{{\"evidence_support\":\"PASS\",…}}' --note '…'",
                 f"python3 -m engine.gold_standard report <docx> --workbook <xlsx>"],
             "reports_state": {k: {"ready": v.get("ready"),
                                   "sections": [f"{x.get('id') or x.get('section')}:"

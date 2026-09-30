@@ -93,15 +93,22 @@ def curate(wb: RunWorkbook, spec: RS.ReportSpec) -> dict:
         by_section.setdefault(str(r.get("Section_ID") or ""), []).append(r)
 
     blocks = []
+    # Each workbook sheet renders ONCE per report, in the first section that
+    # declares it. Measured 2026-09-08 on an engine-rendered assessment:
+    # `Subcap_Scores` was dumped six times, `Peer_Benchmarks` seven, the
+    # cited-evidence table seven — a report that was mostly the workbook
+    # pasted back, which is not the Golden 1 shape (92 curated Doc tables,
+    # none over 22 rows, every one inside the block that argues it). The
+    # Doc's own tables are written into the body as pipe tables (see
+    # `_emit_lines`); the sheet extracts are the reader's cross-check and
+    # need appear once.
+    dumped: set[str] = set()
     for sec in spec.sections:
         rows = by_section.get(sec.id, [])
         body = "\n\n".join(str(r.get("Body") or "").strip() for r in rows
                            if str(r.get("Body") or "").strip())
-        tables = _tables_for(wb, sec)
-        if "Evidence_Detail" in sec.inputs:
-            cited = _evidence_cited_table(wb, sorted(set(CITE_RE.findall(body))))
-            if cited:
-                tables.append(cited)
+        tables = _tables_for(wb, sec, skip=dumped)
+        dumped.update(t["sheet"] for t in tables if t.get("sheet"))
         declared = [s for s in sec.inputs if s in C.SHEETS]
         empty_inputs = [s for s in declared if not wb.rows(s)]
         # A section has NO SOURCE only when EVERY declared input is empty.
@@ -112,7 +119,13 @@ def curate(wb: RunWorkbook, spec: RS.ReportSpec) -> dict:
         no_source = bool(declared) and len(empty_inputs) == len(declared)
         blocks.append({
             "section": sec, "rows": rows, "body": body, "tables": tables,
-            "words": _words(body) + sum(t["words"] for t in tables),
+            # The Doc: "LENGTH gives a word band for the narrative in that
+            # section, excluding table content." Until 2026-09-08 the sheet
+            # dumps below counted toward the floor, so a 690-row score table
+            # pasted six times could carry a report past 8,400 words with
+            # almost no prose.
+            "words": _words(_prose_only(body)),
+            "table_words": sum(t["words"] for t in tables),
             "citations": sorted(set(CITE_RE.findall(body))
                                 | {c for t in tables for c in t["citations"]}),
             "empty_inputs": empty_inputs, "no_source": no_source,
@@ -165,11 +178,28 @@ _TABLE_TITLES: dict[str, tuple[str, tuple[str, ...] | None]] = {
                        "ai_applicability", "data_readiness")),
 }
 #: Sheets a section may declare as an INPUT without rendering as a table —
-#: they are the section's own prose source or a per-cell working area.
-_NO_TABLE = frozenset({"Report_Narrative", "Search_Log"})
+#: they are the section's own prose source, a per-cell working area, or a
+#: register the Doc forbids reproducing (§11 MUST NOT: "Reproduce the
+#: evidence register"; §5's scorecard is at CAPABILITY grain and the
+#: per-subcap rows live in the workbook a reader is pointed at).
+_NO_TABLE = frozenset({"Report_Narrative", "Search_Log", "Subcap_Scores",
+                       "Evidence_Detail"})
 
 
-def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> list[dict]:
+def _prose_only(body: str) -> str:
+    """A body without its pipe-table rows and block headings — the text the
+    Doc's LENGTH band measures."""
+    keep = []
+    for line in (body or "").splitlines():
+        s = line.strip()
+        if s.startswith("|") or _BLOCK_LINE.match(line):
+            continue
+        keep.append(line)
+    return "\n".join(keep)
+
+
+def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None,
+                *, skip: set | None = None) -> list[dict]:
     """The workbook-derived tables a section carries.
 
     These are the CURATION: the numbers in the report are the numbers in the
@@ -180,7 +210,7 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
     its pillar; the financial trajectory is pivoted wide with its CAGR."""
     out = []
     for name in sec.inputs:
-        if name in _NO_TABLE or name == "Evidence_Detail" or name not in C.SHEETS:
+        if name in _NO_TABLE or name not in C.SHEETS or name in (skip or ()):
             continue
         if name == "Coverage":
             rows = wb.coverage()
@@ -189,7 +219,8 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
         if not rows:
             continue
         if name == "Financial_Trends":
-            out.append(_financial_table(rows))
+            ft = _financial_table(rows); ft["sheet"] = name
+            out.append(ft)
             continue
         title, cols = _TABLE_TITLES.get(name, (name.replace("_", " "), None))
         cols = list(cols or C.SHEETS[name])
@@ -197,9 +228,9 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
             rows = [r for r in rows
                     if str(r.get("subcap_id") or "").startswith(card)]
             title = f"{title} — {card}"
-        if name == "Search_Log":
-            title = f"Searches run ({len(rows)})"
-        out.append(_table(title, cols, [[r.get(c) for c in cols] for r in rows]))
+        tbl = _table(title, cols, [[r.get(c) for c in cols] for r in rows])
+        tbl["sheet"] = name
+        out.append(tbl)
     return out
 
 
@@ -252,6 +283,60 @@ def _financial_table(rows: list[dict]) -> dict:
 _BLOCK_LINE = re.compile(r"^\s*##\s+(.+?)\s*$")
 
 
+#: A markdown table row as the producer writes it: `| a | b | c |`.
+_PIPE_ROW = re.compile(r"^\s*\|.*\|\s*$")
+_PIPE_SEP = re.compile(r"^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$")
+
+
+def _split_pipe_row(line: str) -> list[str]:
+    s = line.strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|"):
+        s = s[:-1]
+    return [c.strip() for c in s.split("|")]
+
+
+def _emit_lines(doc, body: str, *, block_level: int) -> None:
+    """Write a body: `## ` lines become headings at `block_level`, runs of
+    `| … |` lines become real Word tables (the Doc's tables — the capability
+    scorecard, the overlay's six rows, the readiness contract, the rebuttal
+    steps — are written into the body that way), everything else is a
+    paragraph. Until 2026-09-08 a pipe table landed as one paragraph of
+    pipe characters, so the Doc's tables could not be authored at all and
+    the only tables a report carried were whole-sheet dumps."""
+    buf: list[str] = []
+    rows: list[list[str]] = []
+
+    def flush_text():
+        if buf:
+            doc.add_paragraph("\n".join(buf).strip())
+            buf.clear()
+
+    def flush_table():
+        if rows:
+            width = max(len(r) for r in rows)
+            cells = [r + [""] * (width - len(r)) for r in rows]
+            _write_table(doc, {"cols": cells[0], "rows": cells[1:]})
+            rows.clear()
+
+    for line in (body or "").splitlines():
+        m = _BLOCK_LINE.match(line)
+        if m:
+            flush_text(); flush_table()
+            doc.add_heading(m.group(1), level=block_level)
+        elif _PIPE_ROW.match(line):
+            flush_text()
+            if not _PIPE_SEP.match(line):
+                rows.append(_split_pipe_row(line))
+        elif not line.strip():
+            flush_text(); flush_table()
+        else:
+            flush_table()
+            buf.append(line)
+    flush_text(); flush_table()
+
+
 def _emit_body(doc, body: str) -> None:
     """Write a section body, promoting its `## ` block lines to Heading2.
 
@@ -263,23 +348,7 @@ def _emit_body(doc, body: str) -> None:
     existed. Promoting them here is what makes the declared anatomy real in
     the artefact rather than only in the workbook.
     """
-    buf: list[str] = []
-
-    def flush():
-        if buf:
-            doc.add_paragraph("\n".join(buf).strip())
-            buf.clear()
-
-    for line in (body or "").splitlines():
-        m = _BLOCK_LINE.match(line)
-        if m:
-            flush()
-            doc.add_heading(m.group(1), level=2)
-        elif not line.strip():
-            flush()
-        else:
-            buf.append(line)
-    flush()
+    _emit_lines(doc, body, block_level=2)
 
 
 def _table(title, cols, rows) -> dict:
@@ -455,6 +524,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
     doc.add_heading(spec.title, level=0)
     p = doc.add_paragraph(entity)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    _title_block(doc, wb, spec, entity, md)
     doc.add_paragraph(
         f"Run {md.get('run_id')} · catalogue {md.get('catalogue_version')} "
         f"({str(md.get('catalogue_hash'))[:12]}) · reference date "
@@ -510,6 +580,7 @@ def render(wb: RunWorkbook, spec: RS.ReportSpec, out_dir: Path,
     return {
         "report": spec.key, "path": str(out), "sections": len(curated["blocks"]),
         "words": sum(b["words"] for b in curated["blocks"]),
+        "table_words": sum(b.get("table_words", 0) for b in curated["blocks"]),
         "citations": len(used), "unresolved": [c for c in used
                                                if c not in register],
         "forced": draft, "draft": draft, "problems": problems,
@@ -569,6 +640,40 @@ def _brand(doc, spec, entity: str, md: dict) -> None:
         f.add_run(tail).font.size = Pt(8)
     else:
         f.text = "Zennify" + tail
+
+
+def _title_block(doc, wb, spec, entity: str, md: dict) -> None:
+    """The Doc's cover table — OVERALL MATURITY / SUB-VERTICAL / ASSESSMENT
+    ID / DATE / EVIDENCE MODE / CATALOGUE / PREPARED BY on the assessment;
+    SUB-VERTICAL / SIZE TIER / ASSESSMENT ID / DATE / EVIDENCE MODE / WEBSITE
+    / CATALOGUE / PREPARED BY on the profile — every value from the run."""
+    rows = []
+    if spec.key == "assessment":
+        overall = level = None
+        for r in wb.rows("Pillar_Summary"):
+            if str(r.get("Pillar") or "").strip().upper() == "OVERALL":
+                overall, level = r.get("Score"), r.get("Maturity")
+        rows.append(["OVERALL MATURITY",
+                     (f"{overall} of 5.0 ({level})" if overall is not None
+                      else "not scored")])
+    rows.append(["SUB-VERTICAL", str(md.get("sub_vertical") or "")])
+    if spec.key != "assessment":
+        size = website = ""
+        for r in wb.rows("Firmographics"):
+            f = str(r.get("Field") or "").strip().lower()
+            if f == "website":
+                website = str(r.get("Value") or "")
+            if f in ("size_tier", "assets_or_aum_or_revenue", "assets_and_members"):
+                size = size or str(r.get("Value") or "")
+        rows.append(["SIZE TIER", size or "see §1"])
+        rows.append(["WEBSITE", website or "see §1"])
+    rows += [["ASSESSMENT ID", str(md.get("run_id") or "")],
+             ["ASSESSMENT DATE", str(md.get("reference_date") or "")[:10]],
+             ["EVIDENCE MODE", str(md.get("evidence_mode") or "")],
+             ["CATALOGUE", f"{md.get('catalogue_version')} "
+                           f"({str(md.get('catalogue_hash'))[:8]})"],
+             ["PREPARED BY", "Zennify Digital Maturity Assessment"]]
+    _write_table(doc, {"cols": ["", entity], "rows": rows})
 
 
 def _front_matter(doc, wb, spec, md: dict) -> None:
@@ -646,9 +751,14 @@ def _card_heading(wb, sec, row) -> str:
         # embedder (_PILLAR_TOKEN) scope on; it stays in the heading.
         return (f"{sec.id}.{n} Pillar deep dive ({card}): {name} — score "
                 f"{score} against median {median} ({gap})")
-    if title and title != sec.heading and not title.startswith(card):
+    if title.startswith(card):
+        return title
+    if title and title != sec.heading:
         return f"{card}: {title}"
-    return title or card
+    # A card with no title of its own is still THIS card, never the section
+    # heading repeated once per card (measured 2026-09-08: five cards all
+    # headed "Recommendations"; the writer now refuses the shape).
+    return card
 
 
 def _emit_cards(doc, wb, sec, rows) -> None:
@@ -664,22 +774,7 @@ def _emit_cards(doc, wb, sec, rows) -> None:
         return (0, int(m.group(1))) if m else (1, c)
     for r in sorted(rows, key=key):
         doc.add_heading(_card_heading(wb, sec, r), level=2)
-        buf: list[str] = []
-
-        def flush():
-            if buf:
-                doc.add_paragraph("\n".join(buf).strip())
-                buf.clear()
-        for line in str(r.get("Body") or "").splitlines():
-            m = _BLOCK_LINE.match(line)
-            if m:
-                flush()
-                doc.add_heading(m.group(1), level=3)
-            elif not line.strip():
-                flush()
-            else:
-                buf.append(line)
-        flush()
+        _emit_lines(doc, str(r.get("Body") or ""), block_level=3)
 
 
 def _warn(doc, text: str) -> None:

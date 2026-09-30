@@ -117,6 +117,20 @@ class Section:
     card_words_min: int | None = None
     card_words_max: int | None = None
     card_heading: str | None = None
+    #: The Doc's own LENGTH band per block, where it states one:
+    #: {block: (min_words, max_words|None)}. The floor is blocking in
+    #: `narrative.write`; the ceiling is advisory, as the Doc says.
+    block_words: dict = field(default_factory=dict)
+
+    def block_floor(self, block: str, default: int) -> int:
+        """The word floor one block owes: the Doc's, else `default`."""
+        for name, band in (self.block_words or {}).items():
+            if name.strip().lower() == str(block).strip().lower():
+                try:
+                    return int(band[0] or default)
+                except (TypeError, ValueError, IndexError):
+                    return default
+        return default
 
     @property
     def is_card(self) -> bool:
@@ -176,6 +190,7 @@ def _section_from(doc: dict) -> Section:
         card_prefix=doc.get("card_prefix"), cards_min=doc.get("cards_min"),
         cards_max=doc.get("cards_max"), card_words_min=doc.get("card_words_min"),
         card_words_max=doc.get("card_words_max"), card_heading=doc.get("card_heading"),
+        block_words={str(k): tuple(v) for k, v in (doc.get("block_words") or {}).items()},
     )
 
 
