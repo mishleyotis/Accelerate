@@ -297,6 +297,82 @@ def _approve_cmd(run, a) -> dict:
     return {"path": str(path), "record": rec, "count": len(doc["approvals"])}
 
 
+BATCH_OPS = ("search", "evidence", "attach", "synthesise", "absence",
+             "challenge", "fetch")
+
+
+def _batch(a) -> int:
+    """Many writes, one workbook transaction.
+
+    Measured 2026-09-30 (a multi-LOB live run): one `engine.cli` write took
+    ~10 s — interpreter start, a 740 KB workbook load, the exclusive lock,
+    a full save — and every writer in the run shares that one lock. A batch
+    agent made 27 writes (4.5 of its 12 minutes); 76 batches would have held
+    the lock ~5.7 hours end to end, so concurrency past a few agents only
+    queued them. Here every command runs against ONE loaded workbook inside
+    ONE transaction: one load, one lock acquisition, one save. Each command
+    still goes through its own parser and the ledger's refusals; a refused
+    command is reported and the rest still apply."""
+    import contextlib
+    import io
+    import shlex
+    root = Path(a.root) if a.root else None
+    run = runstate.locate(a.run, root)
+    wb = run.open()
+    wb.autosave = False
+    lines = [l.strip() for l in Path(a.file).read_text().splitlines()]
+    ops = [l for l in lines if l and not l.startswith("#")]
+    results, ok = [], 0
+    real_open = runstate.Run.open
+    runstate.Run.open = lambda self: wb if self.run_id == run.run_id else real_open(self)
+    try:
+        with wb.transaction(why=f"engine.cli batch ({len(ops)} ops)"):
+            for i, line in enumerate(ops, 1):
+                argv = shlex.split(line)
+                if argv[:3] == ["python3", "-m", "engine.cli"]:
+                    argv = argv[3:]
+                if not argv or argv[0] not in BATCH_OPS:
+                    results.append({"op": i, "ok": False,
+                                    "error": f"not a batchable write: {argv[:1]} "
+                                             f"(allowed: {', '.join(BATCH_OPS)})"})
+                    continue
+                # --run/--root copied from a command sheet are fine when they
+                # name THIS run; another run's write in this batch is refused.
+                named, clean, j = {}, [], 0
+                while j < len(argv):
+                    if argv[j] in ("--run", "--root") and j + 1 < len(argv):
+                        named[argv[j]] = argv[j + 1]; j += 2; continue
+                    clean.append(argv[j]); j += 1
+                if (named.get("--run", a.run) != a.run or
+                        ("--root" in named and a.root and
+                         Path(named["--root"]).resolve() != Path(a.root).resolve())):
+                    results.append({"op": i, "ok": False,
+                                    "error": f"names another run ({named}); a batch "
+                                             f"writes only {a.run}"})
+                    continue
+                argv = clean
+                out = io.StringIO()
+                try:
+                    with contextlib.redirect_stdout(out):
+                        rc = main(argv + ["--run", a.run] +
+                                  (["--root", a.root] if a.root else []))
+                    good = rc in (0, None)
+                    results.append({"op": i, "cmd": argv[0], "ok": good,
+                                    "out": out.getvalue().strip()[-300:]})
+                    ok += good
+                except BaseException as e:          # a refusal is data, not a crash
+                    if isinstance(e, KeyboardInterrupt):
+                        raise
+                    results.append({"op": i, "cmd": argv[0], "ok": False,
+                                    "error": (str(e) or e.__class__.__name__)[:600]})
+            wb._dirty = True
+    finally:
+        runstate.Run.open = real_open
+    print(json.dumps({"applied": ok, "refused": len(ops) - ok, "results": results},
+                     indent=1))
+    return 0 if ok == len(ops) else 1
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in _FAMILIES:
@@ -612,7 +688,18 @@ def main(argv=None) -> int:
                          "capability, the volleys each owes, and batched log lines")
     cd_.add_argument("--run", required=True); cd_.add_argument("--root")
     cd_.add_argument("--capability", required=True)
+    bt = common(sub.add_parser(
+        "batch", help="apply many write commands (search, evidence, attach, "
+                      "synthesise, absence, challenge, fetch) in ONE process, "
+                      "ONE workbook load, ONE lock and ONE save"))
+    bt.add_argument("--file", required=True,
+                    help="one command per line, shell-quoted; the `python3 -m "
+                         "engine.cli` prefix and --run/--root are optional (the "
+                         "batch supplies them, and refuses another run's); '#' "
+                         "lines are skipped")
     a = ap.parse_args(argv)
+    if a.cmd == "batch":
+        return _batch(a)
     if a.cmd == "synthesis-template":
         # Measured 2026-09-30 (SWBC, P2C3): a lane spent ~20 turns grepping the
         # ledger to learn what this record needs. It is printed from the same

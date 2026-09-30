@@ -58,6 +58,42 @@ STALE_AFTER_S = float(os.environ.get("DMA_DRIVER_LOCK_STALE_S", "1800"))
 #: The command this guards. `plan`, `status`, `env` and `stages` read and
 #: dispatch nothing, so they are not driving anything and are not matched.
 DRIVER_CMD = re.compile(r"engine\.pipeline\s+run\b")
+_QUOTED = re.compile(r"'[^']*'|\"(?:\\.|[^\"\\])*\"")
+_SEGMENT = re.compile(r"&&|\|\||[;&|\n()]")
+_PREFIX = {"nohup", "setsid", "env", "exec", "time", "nice"}
+
+
+def invokes_driver(command: str) -> bool:
+    """True only when a shell segment RUNS `python -m engine.pipeline run`.
+
+    I-38 (2026-09-30): the bare regex matched the text anywhere, so a
+    `pgrep -f "engine.pipeline run"` or an `echo` naming the command was
+    refused as a second driver — the mention-versus-execution class of I-05.
+    Quoted strings are blanked first (a mention inside quotes is data), then
+    each segment's leading env assignments and wrappers (timeout N, nohup,
+    setsid, env, cd …) are skipped before the executable is read."""
+    if not DRIVER_CMD.search(command or ""):
+        return False
+    bare = _QUOTED.sub("''", command)
+    for seg in _SEGMENT.split(bare):
+        toks = seg.split()
+        i = 0
+        while i < len(toks):
+            t = toks[i]
+            if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=\S*", t) or t in _PREFIX:
+                i += 1
+            elif t == "timeout":
+                i += 1
+                while i < len(toks) and toks[i].startswith("-"):
+                    i += 1
+                i += 1                                  # the duration
+            else:
+                break
+        rest = toks[i:]
+        if (len(rest) >= 4 and re.search(r"python[0-9.]*$", rest[0])
+                and rest[1] == "-m" and rest[2] == "engine.pipeline" and rest[3] == "run"):
+            return True
+    return False
 
 
 def _alive(pid: int) -> bool:
@@ -161,7 +197,7 @@ def decide(payload: dict) -> str:
     if not isinstance(ti, dict):
         return ""
     command = ti.get("command")
-    if not isinstance(command, str) or not DRIVER_CMD.search(command):
+    if not isinstance(command, str) or not invokes_driver(command):
         return ""
     path, run_id = lock_path(command)
     if path is None:

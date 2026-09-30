@@ -124,8 +124,8 @@ EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
                       "ROUND_COMPLETE", "AWAITING_WORKFLOW")
 
 #: The persisted workflow the RESEARCH stage hands to the conducting session
-#: in `research_mode="workflow"` — one invocation per pillar, four category
-#: pipelines each (research -> independent challenge -> floors gate).
+#: in `research_mode="workflow"` — one invocation per category, its
+#: capability batches in parallel, then independent challenge -> floors gate.
 RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
 RESEARCH_HANDOFF = "research_workflow.json"
 
@@ -424,6 +424,13 @@ def _load_state(path: Path) -> dict:
 
 
 
+RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
+#: I-16: the estimate is the MEASURED workflow rate, not the levered lane
+#: model (which said $13.80 for a run whose research alone cost $21+). Pilot
+#: 2026-09-30: one batch agent closed 12 cells for ~$2.25; its category's
+#: challenge ~$0.44. Re-measure with `engine.cost report` after each run.
+WORKFLOW_USD_PER_CELL = 0.19
+CHALLENGE_USD_PER_CATEGORY = 0.44
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
 
 
@@ -472,6 +479,13 @@ class Pipeline:
         # The ledger is the run's own record of what it has already spent.
         try:
             from . import cost
+            # Workflow agents run in the session, not under this process:
+            # price the finished ones first so the ceiling sees them (I-37).
+            if opts.push:
+                cap = cost.capture_workflows(run)
+                if cap["captured"]:
+                    opts.log(f"  (workflow spend captured: {cap['captured']} agent(s), "
+                             f"${cap['usd']:.2f})")
             rows = cost.ledger(run)
             self._spent_usd = self._recorded_usd = round(
                 sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 4)
@@ -518,6 +532,24 @@ class Pipeline:
         return summary
 
     def _briefs(self, name: str) -> Path:
+        """`<prefix>_r<N>` numbers rounds across driver PROCESSES (I-44): a
+        resumed driver used to restart at r0 and overwrite the previous
+        process's briefs and relay batches. The first use of a prefix in a
+        process reads how many rounds are already on disk and continues."""
+        m = re.fullmatch(r"(.+)_r(\d+)", name)
+        if m:
+            prefix, r = m.group(1), int(m.group(2))
+            base = getattr(self, "_round_base", None)
+            if base is None:
+                base = self._round_base = {}
+            if prefix not in base:
+                d = self.run.root / BRIEFS_DIR
+                done = [int(x.name.rsplit("_r", 1)[1]) for x in
+                        (d.glob(f"{prefix}_r*") if d.is_dir() else [])
+                        if x.name.rsplit("_r", 1)[1].isdigit()
+                        and x.name.rsplit("_r", 1)[0] == prefix]
+                base[prefix] = (max(done) + 1) if done else 0
+            name = f"{prefix}_r{base[prefix] + r}"
         return self.run.root / BRIEFS_DIR / name
 
     def _record(self, stage: str, verdict: str, detail: str, t0: float,
@@ -1052,6 +1084,7 @@ class Pipeline:
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
                 self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
                 self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
                               f"{h['summary']} — {h['file']}")
                 outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
@@ -1080,6 +1113,7 @@ class Pipeline:
                 self._record(st, "PASS", detail, t0, rounds=self._rounds,
                              lanes=self._lane_count, attempts=self._attempts)
                 outcome["stages_run"].append(st)
+                self._snapshot(st)
             except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
                     KeyError, RuntimeError) as e:
                 msg = str(e).strip() or e.__class__.__name__
@@ -1394,6 +1428,19 @@ class Pipeline:
         return (f"DQ_Bank seeded: {n} rows" + (f"; {len(probs)} problem(s) stated: "
                                                   f"{probs[0][:120]}" if probs else ""))
 
+    def _snapshot(self, stage: str) -> None:
+        """A durable copy at every stage boundary (engine.snapshot): the run
+        otherwise lives only in this container until PACKAGE. Off when the
+        run does not push (stub / CI); a failed backup is logged, never
+        fatal — the next boundary tries again."""
+        if not self.opts.push:
+            return
+        from . import snapshot
+        r = snapshot.push(self.run)
+        self.opts.log(f"[SNAPSHOT] {stage}: {r['outcome']}"
+                      + (f" ({r.get('bytes', 0) // 1024} KB)" if r.get("bytes") else "")
+                      + (f" — {r['reason']}" if r.get("reason") else ""))
+
     def _research_handoff(self) -> dict:
         """Write the per-pillar workflow invocations the session runs."""
         from . import brief
@@ -1411,26 +1458,65 @@ class Pipeline:
         # ended with 0 of 43-68 cells synthesised. A batch of open cells small
         # enough to finish inside one fresh context is what the workflow fans
         # out; the category's challenge + gate still run once, after it.
+        #
+        # ONE INVOCATION PER CATEGORY, not per pillar (owner's spec: "each
+        # pillar has a separate workflow for each of its 4 categories"). The
+        # workflow runtime caps concurrency PER WORKFLOW (min(16, CPUs-2): 2
+        # on a 4-CPU host), so four pillar workflows ran 8 agents; sixteen
+        # category workflows run 32, and a pillar's slow category no longer
+        # holds its other three in a queue. Affordable only because writes
+        # are batched (engine.cli batch): the run-wide workbook lock is held
+        # once per capability instead of once per command.
         open_caps = _open_capabilities(self.wb)
-        inv = [{"pillar": p, "cats": cats, "run": self.run.run_id,
+        by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
+                   else by_pillar)
+        inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
                 "batches": {c: _batches(open_caps.get(c, {}))
                             for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
                 "entity": md.get("entity_name") or "", "domain": site}
-               for p, cats in sorted(by_pillar.items())]
+               for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
-                       "<workflow>, args: <invocation>}) per pillar — wait for all, "
+                       "<workflow>, args: <invocation>}) per category — wait for all, "
                        "then run `then`; the driver verifies the floors gates")}
         path = self.run.qa_dir / RESEARCH_HANDOFF
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(doc, indent=1))
+        # ENFORCEMENT (I-54): a handoff re-issued with the SAME open cells
+        # means the last one was never worked — the session lost Workflow or
+        # its connectors (a resume can drop both), or started no workflow.
+        # Say so in the handoff instead of re-issuing it silently forever.
+        try:
+            prev = json.loads(path.read_text()).get("estimate") or {}
+        except (OSError, ValueError):
+            prev = {}
         n = sum(len(i["cats"]) for i in inv)
+        nb = sum(len(b) for i in inv for b in i["batches"].values())
+        cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
+        est = round(cells * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY, 2)
+        doc["estimate"] = {"open_cells": cells, "batches": nb, "usd": est,
+                           "basis": f"measured pilot: ${WORKFLOW_USD_PER_CELL}/cell "
+                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge"}
+        if prev.get("open_cells") == cells and cells:
+            doc["not_worked"] = (
+                f"the previous handoff named the same {cells} open cells: its "
+                "workflows never ran or closed nothing. Check this session has the "
+                "Workflow tool and Exa/Tavily/Clay (a resumed session can lose "
+                "them; a restart rebinds) — do NOT fall back to lanes, which hold "
+                "no connector.")
+            self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
+        cap = self.budget_usd()
+        if cap is not None:
+            doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
+                                   fits_budget=self._spent_usd + est <= cap)
+        path.write_text(json.dumps(doc, indent=1))
         return {"file": str(path), "invocations": inv,
-                "summary": f"{n} categor{'y' if n == 1 else 'ies'} over "
-                           f"{len(inv)} pillar workflow(s)"}
+                "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
+                "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
+                           f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
+                           f"est ${est:.2f} for {cells} open cells"}
 
     def _pull_toolkits(self) -> Path | None:
         """The four pillar toolkits, fetched into the run when none is named.
@@ -2303,8 +2389,22 @@ def _build_opts(a) -> Options:
                    push=(not a.no_push) and a.dispatcher != "stub",
                    allow_stale_install=a.allow_stale_install, lanes=a.lanes,
                    toolkit_dir=Path(a.toolkits) if a.toolkits else None,
-                   research_mode=(a.research_mode or
-                                  ("lanes" if a.dispatcher == "stub" else "workflow")))
+                   research_mode=_research_mode(a))
+
+
+def _research_mode(a) -> str:
+    """Workflow is the enforced default. Lanes run only on the stub (CI) or
+    when the waiver is stated, because a lane holds no enrichment connector
+    and cannot pass a floors gate on a real run."""
+    mode = a.research_mode or ("lanes" if a.dispatcher == "stub" else "workflow")
+    if mode == "lanes" and a.dispatcher != "stub" and not getattr(a, "allow_lanes", False):
+        raise SystemExit(
+            "REFUSED: --research-mode lanes with the real dispatcher runs research "
+            "as headless `claude -p` children — invisible to /workflows, not "
+            "resumable, holding no Exa/Tavily/Clay — so no floors gate can pass. "
+            "Drop the flag (RESEARCH is handed to the session as one workflow per "
+            "category), or pass --allow-lanes to waive it deliberately.")
+    return mode
 
 
 def main(argv=None) -> int:
@@ -2321,7 +2421,14 @@ def main(argv=None) -> int:
     r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
                    help="who runs RESEARCH: 'workflow' (default with the real "
                         "dispatcher) hands it to the session as one persisted "
-                        "workflow per pillar; 'lanes' dispatches headless lanes")
+                        "workflow per category; 'lanes' dispatches headless "
+                        "`claude -p` lanes, which hold NO enrichment connector "
+                        "and never show in /workflows — with the real "
+                        "dispatcher it needs --allow-lanes")
+    r.add_argument("--allow-lanes", action="store_true",
+                   help="waive the workflow requirement and run RESEARCH as "
+                        "headless lanes with the real dispatcher (the path the "
+                        "owner rejected on 2026-09-30); recorded in the gate log")
     r.add_argument("--until", choices=STAGES, help="stop after this stage")
     r.add_argument("--max-wall-min", type=float, default=Options.max_wall_min,
                    help=f"wall-clock ceiling in minutes (default "

@@ -95,3 +95,48 @@ def test_batches_pack_whole_capabilities_in_order():
     got = P._batches({"P1C1.10": 2, "P1C1.2": 7, "P1C1.1": 6, "P1C1.3": 20})
     assert got == [["P1C1.1"], ["P1C1.2"], ["P1C1.3"], ["P1C1.10"]]
     assert P._batches({"X.1": 4, "X.2": 4, "X.3": 4}) == [["X.1", "X.2", "X.3"]]
+
+
+def test_one_workflow_per_category(tmp_path):
+    # Concurrency is capped PER WORKFLOW; one per category is what parallelises.
+    p, disp, out = _drive(tmp_path, "workflow")
+    assert all(len(inv["cats"]) == 1 for inv in out["invocations"])
+    assert len(out["invocations"]) == len({c for inv in out["invocations"] for c in inv["cats"]})
+
+
+def test_lanes_need_a_stated_waiver_with_the_real_dispatcher():
+    import argparse
+    a = argparse.Namespace(research_mode="lanes", dispatcher="agent_run", allow_lanes=False)
+    try:
+        P._research_mode(a)
+    except SystemExit as e:
+        assert "--allow-lanes" in str(e)
+    else:
+        raise AssertionError("lanes ran on the real dispatcher without a waiver")
+    a.allow_lanes = True
+    assert P._research_mode(a) == "lanes"
+    assert P._research_mode(argparse.Namespace(research_mode=None, dispatcher="agent_run",
+                                               allow_lanes=False)) == "workflow"
+    assert P._research_mode(argparse.Namespace(research_mode=None, dispatcher="stub",
+                                               allow_lanes=False)) == "lanes"
+
+
+def test_a_resumed_driver_continues_round_numbering(tmp_path):
+    # I-44: round dirs were overwritten by the next driver process.
+    p, disp, out = _drive(tmp_path, "workflow")
+    d = p.run.root / P.BRIEFS_DIR
+    (d / "research_r0").mkdir(parents=True, exist_ok=True)
+    (d / "research_r1").mkdir(exist_ok=True)
+    fresh = P.Pipeline(p.run, p.opts)
+    assert fresh._briefs("research_r0").name == "research_r2"
+    assert fresh._briefs("research_r1").name == "research_r3"
+    assert fresh._briefs("scoring_r0").name == "scoring_r0"
+
+
+def test_a_handoff_nobody_worked_is_called_out(tmp_path):
+    # I-54: a resumed session lost Workflow + connectors; the re-run driver
+    # re-issued the same handoff with no sign that nothing had happened.
+    p, disp, out = _drive(tmp_path, "workflow")
+    assert not out.get("not_worked") if "not_worked" in out else True
+    again = P.Pipeline(p.run, p.opts)._research_handoff()
+    assert again["not_worked"] and "lanes" in again["not_worked"]

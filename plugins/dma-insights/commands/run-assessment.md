@@ -176,17 +176,31 @@ python3 -m engine.pipeline run --run <RUN_ID> --root <ROOT> --max-wall-min 240 -
 Python process and cannot start a Workflow, so at RESEARCH it stops with
 outcome `AWAITING_WORKFLOW` (exit 0) and writes
 `<ROOT>/07_qa/research_workflow.json`: the workflow
-(`${CLAUDE_PLUGIN_ROOT}/workflows/dma-pillar-research.js`) and one `args`
-object per pillar with categories still to pass. In ONE message, start every
-invocation — `Workflow({scriptPath: <workflow>, args: <invocation>})` per
-pillar — so the four pillars run side by side, each running its categories as
-parallel pipelines (research → independent challenge → floors gate, up to two
-rounds). They are visible and resumable in `/workflows` by run id. When they
-have all returned, run the file's `then` command: the driver re-reads the
-floors gates, re-hands only categories still failing, and carries on to
-HANDOFF. The workflow agents run in THIS session, so they hold Exa, Tavily and
-Clay themselves — there is no relay to service for them. `--research-mode
-lanes` restores the headless-lane dispatch (the stub dispatcher uses it).
+(`${CLAUDE_PLUGIN_ROOT}/workflows/dma-pillar-research.js`), one `args` object
+PER CATEGORY still to pass, and a measured `estimate` (open cells, batches,
+USD, and whether it fits `--max-usd`). In ONE message, start every invocation
+— `Workflow({scriptPath: <workflow>, args: <invocation>})` per category.
+Concurrency is capped per workflow (min(16, CPUs−2)), so sixteen category
+workflows are what makes research parallel; inside each, the category's open
+cells run as capability batches of ≤ 12 cells (a fresh context each), then an
+independent challenge and the floors gate, up to two rounds. Every batch
+writes through ONE `engine.cli batch` per capability (one workbook load, lock
+and save instead of ~10 s per command under the run-wide lock). The agents
+run in THIS session and hold Exa, Tavily and Clay themselves; one that finds
+none stops and returns `NO_CONNECTORS`. When all have returned, run the
+file's `then` command: the driver prices the workflow agents into the cost
+ledger (so the ceiling sees them), re-reads the floors gates, re-hands only
+categories still failing — and says so if the last handoff was never worked.
+If this session has no Workflow tool (a resumed session can lose it and the
+connectors), restart the session; `--research-mode lanes` is refused with the
+real dispatcher unless `--allow-lanes` waives it, because lanes hold no
+connector and cannot pass a gate.
+
+**The run survives a fresh container.** The driver snapshots the run
+(workbook, evidence, QA, briefs; not transcripts) to the client's Drive
+`memory-backup` folder at every stage boundary. On a new container, restore
+before resuming: `python3 -m engine.snapshot restore --run <R> --root <ROOT>
+--client "<Entity>"`.
 
 **The ceilings are enforced now, and they are the defaults** — name them only
 to change them. `--max-usd` defaults to $5 per pillar in scope and STOPS the

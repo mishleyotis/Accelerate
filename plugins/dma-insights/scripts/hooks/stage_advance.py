@@ -420,6 +420,21 @@ def awaiting_workflow(event: dict) -> dict | None:
     if not doc:
         lines.append(f"  (handoff file not readable — open "
                      f"{m.group(1) if m else '<ROOT>/07_qa/research_workflow.json'})")
+    est = doc.get("estimate") or {}
+    if est:
+        fit = est.get("fits_budget")
+        lines.append(f"  ESTIMATE: ${est.get('usd')} for {est.get('open_cells')} open cells in "
+                     f"{est.get('batches')} batches ({est.get('basis')})"
+                     + (f"; spent ${est.get('spent_usd')} of ${est.get('budget_usd')}"
+                        if est.get("budget_usd") is not None else "")
+                     + ("" if fit is None else (" — fits" if fit else
+                        " — OVER BUDGET: raise --max-usd before starting, or the "
+                        "driver stops at the ceiling mid-stage")))
+    if doc.get("not_worked"):
+        lines.append(f"  WARNING: {doc['not_worked']}")
+    lines.append("  If Workflow is not available in this session, STOP and restart the "
+                 "session (tools rebind at start). Never substitute Agent calls or "
+                 "`--research-mode lanes`: neither is persisted, and lanes hold no connector.")
     lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'engine.pipeline run'}")
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
                                    "additionalContext": "\n".join(lines)}}

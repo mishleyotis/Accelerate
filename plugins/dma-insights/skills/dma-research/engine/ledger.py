@@ -253,7 +253,8 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         # INSIDE the transaction. Both of these WRITE, and a write that
         # lands after the lock is released is a write another process can
         # interleave with — the whole defect, moved four lines down.
-        wb.save()
+        if wb.autosave:           # a batch (autosave off) saves once at its end
+            wb.save()
         wb.recompute_coverage()
     return eid
 
@@ -364,7 +365,8 @@ def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
                 "Detail": f"cited {eid} ({str(row.get('Source_Name') or '')[:80]}) "
                           f"registered against {', '.join(named)}",
                 "Session": _agent_session()}, save=False)
-        wb.save()
+        if wb.autosave:
+            wb.save()
         wb.recompute_coverage()
     return {"e_id": eid, "subcaps": cells, "fact_id": fact_id,
             "now_names": named, "minted": False}

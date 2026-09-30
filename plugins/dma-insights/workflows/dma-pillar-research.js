@@ -1,7 +1,7 @@
 export const meta = {
   name: 'dma-pillar-research',
-  description: 'One DMA pillar: capability-batch researchers per category in parallel, then an independent challenge and floors gate per category',
-  whenToUse: 'The RESEARCH stage of engine.pipeline in research_mode=workflow: one invocation per pillar, args from <run>/07_qa/research_workflow.json',
+  description: 'DMA research for the categories in args (engine.pipeline hands ONE category per invocation): capability-batch researchers in parallel, then an independent challenge and floors gate',
+  whenToUse: 'The RESEARCH stage of engine.pipeline in research_mode=workflow: one invocation per category, all started in one message, args from <run>/07_qa/research_workflow.json',
   phases: [
     { title: 'Research', detail: 'one agent per batch of capabilities (<= 12 open cells), fresh context each' },
     { title: 'Challenge', detail: 'independent research-challenger + floors gate per category' },
@@ -57,7 +57,7 @@ const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — t
   synthesise:  python3 -m engine.cli synthesis-template   (once), then  python3 -m engine.cli synthesise ${R} --subcap <CELL> --json <file> --actor $ACT
   absent:      python3 -m engine.cli absence ${R} --subcap <CELL> --actor $ACT --hunted '<what, where, what came back>' --ladder '<json>' --validation-question '<q>'   (only after a primary web_search AND one connector volley on the cell)
                --hunted becomes the cell's What_We_Found and the gate refuses boilerplate: name the exact queries, the sites/tools searched and the nearest thing that came back (a proper noun, a date or an E-id).
-TURN ECONOMY: every turn re-reads your whole context, so turns are the cost. Per capability aim for ~4 turns: (1) card, (2) all searches in parallel, (3) ONE Bash call chaining every search log + evidence + attach, (4) ONE Bash call writing every synthesis/absence JSON file and command for that capability.`
+TURN ECONOMY: every turn re-reads your whole context, so turns are the cost. Per capability aim for ~4 turns: (1) card, (2) all searches in parallel, (3) ONE Bash call writing the synthesis/absence JSON files and the ops file, (4) ONE engine.cli batch call.`
 
 const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-token context ends your turn with nothing written):
   - web_search (WebSearch) is the primary volley: compact results. Fire a capability's queries in PARALLEL in one turn.
@@ -78,7 +78,9 @@ ${SHEET}
 
 ${SEARCH_RULES}
 
-LOOP, one capability at a time: card -> parallel searches (primary + the owed facets, one turn) -> log them in ONE chained Bash call -> register evidence (verbatim excerpts from what you actually read; cache connector text first) -> synthesise each answered cell -> declare absent each honestly empty cell. Finish a capability before starting the next.
+LOOP, one capability at a time: card -> parallel searches (primary + the owed facets, one turn) -> cache connector text (fetch --via-text) -> write the synthesis/absence JSON files -> ONE engine.cli batch call for the whole capability. Finish a capability before starting the next.
+WRITES GO THROUGH engine.cli batch (mandatory): put every search log, evidence, attach, synthesise and absence line for the capability in one ops file — one command per line, (the "python3 -m engine.cli" prefix and --run/--root may be omitted) — then run: python3 -m engine.cli batch ${R} --file <ops file>
+One write outside a batch costs ~10 s under the run-wide lock that every researcher shares; a batch is one load, one lock, one save. The batch reports each command's result; fix and re-batch only the refused lines. Order inside the file matters: search logs, then evidence, then attach, then synthesise/absence.
 Never invent a source, a quote, a number or a person. Pass --actor $ACT on every write.
 Return: category ${cat}, cells_synthesised, declared_absent, still_open (your batch), searches_logged, evidence_registered, gate "BATCH_DONE", blocking_terms [] and one-line notes.`
 }
@@ -92,7 +94,7 @@ Return the gate verdict, its blocking terms, and how many cells are still open.`
 }
 
 const BATCHES = A.batches || {}
-log(`Pillar ${A.pillar}: ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
+log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
 
 const results = await pipeline(A.cats, async (cat) => {
   let prev = null
