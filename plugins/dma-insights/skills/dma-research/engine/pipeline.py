@@ -91,6 +91,7 @@ if __package__ in (None, ""):  # noqa: E402
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -421,6 +422,40 @@ def _load_state(path: Path) -> dict:
     return {"pipeline_version": PIPELINE_VERSION, "stages": {}, "pages": {},
             "connector": {}, "package": {}, "invocations": []}
 
+
+
+BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
+
+
+def _open_capabilities(wb) -> dict[str, dict[str, int]]:
+    """{category: {capability: open cells}} — open = no Dominant_Claim yet
+    (a synthesis and a declared absence both write one)."""
+    from .brief import capability_of, category_of
+    out: dict[str, dict[str, int]] = {}
+    for r in wb.scoring_rows():
+        sc = str(r.get("SubCap_ID") or "")
+        if not sc or str(r.get("Dominant_Claim") or "").strip():
+            continue
+        caps = out.setdefault(category_of(sc), {})
+        caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1
+    return out
+
+
+def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
+    """Whole capabilities packed in order into batches of <= `limit` open
+    cells (a capability larger than the limit is a batch of its own)."""
+    out: list[list[str]] = []
+    cur: list[str] = []
+    n = 0
+    for cap in sorted(caps, key=lambda c: [int(x) if x.isdigit() else x
+                                           for x in re.split(r"(\d+)", c)]):
+        k = caps[cap]
+        if cur and n + k > limit:
+            out.append(cur); cur, n = [], 0
+        cur.append(cap); n += k
+    if cur:
+        out.append(cur)
+    return out
 
 class Pipeline:
     def __init__(self, run: runstate.Run, opts: Options):
@@ -1370,7 +1405,16 @@ class Pipeline:
         by_pillar: dict[str, list[str]] = {}
         for c in sorted(need):
             by_pillar.setdefault(c[:2], []).append(c)
+        # The work unit is a BATCH OF CAPABILITIES, not a category (measured
+        # 2026-09-30, SWBC): one agent per category reached 116-200K tokens of
+        # context in 39-71 turns — connector results, not reasoning — and
+        # ended with 0 of 43-68 cells synthesised. A batch of open cells small
+        # enough to finish inside one fresh context is what the workflow fans
+        # out; the category's challenge + gate still run once, after it.
+        open_caps = _open_capabilities(self.wb)
         inv = [{"pillar": p, "cats": cats, "run": self.run.run_id,
+                "batches": {c: _batches(open_caps.get(c, {}))
+                            for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
                 "entity": md.get("entity_name") or "", "domain": site}

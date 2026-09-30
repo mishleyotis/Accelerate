@@ -1,25 +1,30 @@
 export const meta = {
   name: 'dma-pillar-research',
-  description: 'One DMA pillar: its category researchers in parallel, each challenged and floors-gated, looping until the gate passes',
+  description: 'One DMA pillar: capability-batch researchers per category in parallel, then an independent challenge and floors gate per category',
   whenToUse: 'The RESEARCH stage of engine.pipeline in research_mode=workflow: one invocation per pillar, args from <run>/07_qa/research_workflow.json',
   phases: [
-    { title: 'Research', detail: 'category producer works its cells capability by capability, holding the connectors itself' },
+    { title: 'Research', detail: 'one agent per batch of capabilities (<= 12 open cells), fresh context each' },
     { title: 'Challenge', detail: 'independent research-challenger + floors gate per category' },
   ],
 }
 
 // WHY A WORKFLOW (owner, 2026-09-30: "research works as background tasks and
 // not real persisted /workflows"). engine.pipeline is a Python process and
-// cannot start a Workflow, so research used to run as a thread pool of
-// headless `claude -p` lanes: invisible to /workflows, not resumable by run
-// id, and holding no enrichment connector (hence the relay). This workflow is
-// what the driver hands the stage to. Its agents run in the conducting
-// session, so they hold Exa / Tavily / Clay directly; each category is one
-// pipeline, so a pillar's four categories run in parallel and a slow one
-// never holds a fast one back.
+// cannot start a Workflow; it hands the stage to the session, which runs this
+// once per pillar. Its agents run in-session, so they hold Exa / Tavily / Clay
+// directly (no relay).
+//
+// WHY BATCHES, NOT ONE AGENT PER CATEGORY (measured 2026-09-30, a multi-LOB run, round 1): a
+// category agent reached 116-200K tokens of context in 39-71 turns and ended
+// with 0 of 43-68 cells synthesised. 229 Tavily calls at max_results 8
+// returned 1.81M chars (avg 7K, max 22K) — the context was spent on search
+// payloads, plus --help / orient exploration and sleep-polling. So: a batch of
+// <= 12 open cells per agent, compact connector settings, and the exact
+// command sheet in the prompt so nothing is spent discovering the CLI.
 //
 // args (written by engine.pipeline to <root>/07_qa/research_workflow.json):
-//   {pillar, cats, run, root, eng, plugin, rounds, entity, domain}
+//   {pillar, cats, batches: {cat: [[cap, ...], ...]}, run, root, eng, plugin,
+//    rounds, entity, domain}
 
 const A = args
 const ENG = A.eng
@@ -42,24 +47,36 @@ const OUT = {
   required: ['category', 'still_open', 'gate', 'blocking_terms'],
 }
 
-function researchPrompt(cat, round, prev) {
+const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — this is everything):
+  card:        python3 -m engine.cli card ${R} --capability <CAP>            (the cells, their questions and owed facets)
+  log search:  python3 -m engine.cli search ${R} --subcap <CELL> [--subcap <CELL2>] --facet primary|works|fails|value|contradicts|corroborates --tool web_search|exa|tavily|clay|internal --query '<q>' --hits N --kept K --actor $ACT
+  cache text:  python3 -m engine.cli fetch ${R} --url <U> --query '<question>' --via-text <file with the connector's text>
+  evidence:    python3 -m engine.cli evidence ${R} --subcap <CELL> --source '<publisher>' --url <U> --tier T1|T2|T3|T4 --excerpt '<verbatim 50-500 chars>' --published YYYY-MM-DD --claim-type FACT|INFERENCE --origin public|internal --actor $ACT
+  reuse row:   python3 -m engine.cli attach ${R} --e-id E-NNN --subcap <CELL> --actor $ACT
+  synthesise:  python3 -m engine.cli synthesis-template   (once), then  python3 -m engine.cli synthesise ${R} --subcap <CELL> --json <file> --actor $ACT
+  absent:      python3 -m engine.cli absence ${R} --subcap <CELL> --actor $ACT --hunted '<what, where, what came back>' --ladder '<json>' --validation-question '<q>'   (only after a primary web_search AND one connector volley on the cell)`
+
+const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-token context ends your turn with nothing written):
+  - web_search (WebSearch) is the primary volley: compact results. Fire a capability's queries in PARALLEL in one turn.
+  - Tavily: ALWAYS {max_results: 3, search_depth: "basic"} and include_domains when a domain fits; ONE Tavily volley per capability covers all its cells (log it with several --subcap). Never tavily_extract a whole site; extract one URL, then fetch --via-text.
+  - Exa: {numResults: 3}. If Exa answers HTTP 402/429 once, stop using it for this batch and use Tavily for the same query.
+  - Clay: do NOT re-fetch the company record (PRELIM holds firmographics). Use mcp__Clay__search-contacts (companyIdentifiers ["${DOMAIN}"]) only when a cell asks who owns a function, once per batch.
+  - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
+
+function batchPrompt(cat, caps, round, prev) {
   const lc = cat.toLowerCase()
-  return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}; root ${A.root}), round ${round}.
-Work ONLY category ${cat}. Run every command from ${ENG} in the FOREGROUND with a long timeout (600000); never end your turn to wait.
-Your role file is ${A.plugin}/agents/research/categories/research-${lc}-producer.md and the protocol is ${ENG}/references/RESEARCH-PROTOCOL.md — read the role file, and only the protocol sections you need.
+  return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
+YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
+${prev ? `The category's last gate: ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 500)}. Close those for your cells.` : ''}
+Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (HYBRID run).
 
-Start:
-  python3 -m engine.cli checkpoint ${R} --category ${cat} --position "workflow round ${round}"
-  python3 -m engine.brief dispatch ${R} --category ${cat}${round > 1 ? ' --with-handback' : ''}
-${prev ? `Last round ended: gate ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 600)}. Fix those first.` : ''}
+${SHEET}
 
-Work a CAPABILITY at a time: python3 -m engine.cli card ${R} --capability <cap>. Fire every owed facet for it as PARALLEL searches in one turn; log each (python3 -m engine.cli search ${R} --subcap <each answered cell> --facet <f> --tool <tool> --query '...' --hits N --kept K), chained with && in one Bash call.
-YOU HOLD THE ENRICHMENT CONNECTORS (an in-session workflow agent, not a headless lane): Exa (mcp__Exa__web_search_exa / web_fetch_exa), Tavily (mcp__Tavily__tavily_search / tavily_extract), Clay (mcp__Clay__search-companies with dslQuery 'select from companies where domain = "${DOMAIN}" limit 1'; mcp__Clay__search-contacts with companyIdentifiers ["${DOMAIN}"]) — load schemas with ToolSearch. Fire connector volleys yourself (log with --tool exa|tavily|clay) instead of emitting search_requests; if one refuses for quota (HTTP 402/429), use its pair (exa <-> tavily) for the same query. A cell needs at least one connector volley besides web_search before it can be declared absent.
-Internal evidence: your brief's shared.internal_documents lists the run's internal documents (HYBRID / INTERNAL runs) — register what bears on your cells with --origin internal.
-Evidence: cache connector text first (python3 -m engine.cli fetch ${R} --url <U> --via-text <file>), then python3 -m engine.cli evidence ${R} ... --actor research-${lc}-producer; reuse other lanes' rows with engine.cli attach.
-Synthesis: python3 -m engine.cli synthesis-template shows the record; python3 -m engine.cli synthesise ${R} --subcap X --json <file> --actor research-${lc}-producer. A fully searched, honestly empty cell closes with python3 -m engine.cli absence (see --help).
-Pass --actor research-${lc}-producer on every write. Never invent a source, a quote, a number or a person.
-Stop when every cell is synthesised or declared absent, or when the search window reports 0 remaining. Then run python3 -m engine.cli gate ${R} --category ${cat} and return its verdict and blocking terms.`
+${SEARCH_RULES}
+
+LOOP, one capability at a time: card -> parallel searches (primary + the owed facets, one turn) -> log them in ONE chained Bash call -> register evidence (verbatim excerpts from what you actually read; cache connector text first) -> synthesise each answered cell -> declare absent each honestly empty cell. Finish a capability before starting the next.
+Never invent a source, a quote, a number or a person. Pass --actor $ACT on every write.
+Return: category ${cat}, cells_synthesised, declared_absent, still_open (your batch), searches_logged, evidence_registered, gate "BATCH_DONE", blocking_terms [] and one-line notes.`
 }
 
 function challengePrompt(cat, round) {
@@ -70,21 +87,30 @@ function challengePrompt(cat, round) {
 Return the gate verdict, its blocking terms, and how many cells are still open.`
 }
 
-log(`Pillar ${A.pillar}: ${A.cats.join(', ')} · up to ${A.rounds} round(s) each`)
+const BATCHES = A.batches || {}
+log(`Pillar ${A.pillar}: ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
 
 const results = await pipeline(A.cats, async (cat) => {
   let prev = null
+  let batches = BATCHES[cat] && BATCHES[cat].length ? BATCHES[cat] : [[`${cat} (all open capabilities)`]]
   for (let round = 1; round <= A.rounds; round++) {
-    const r = await agent(researchPrompt(cat, round, prev), {
-      label: `${cat} research r${round}`, phase: 'Research', schema: OUT, model: 'sonnet',
-    })
+    const done = await parallel(batches.map((caps, i) => () => agent(batchPrompt(cat, caps, round, prev), {
+      label: `${cat} r${round} b${i + 1} ${caps[0]}${caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
+    })))
+    const got = done.filter(Boolean)
+    log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)
     const c = await agent(challengePrompt(cat, round), {
       label: `${cat} challenge r${round}`, phase: 'Challenge', schema: OUT, model: 'sonnet',
       agentType: 'dma-insights:research-challenger',
     })
-    prev = c || r
+    prev = c
     if (prev) log(`${cat} r${round}: gate ${prev.gate}, ${prev.still_open} open`)
     if (prev && prev.gate === 'PASS') break
+    // Round 2 re-batches only what is still open: batches that finished stay finished.
+    const open = got.filter(r => (r.still_open || 0) > 0).length
+    if (open === 0 && got.length === batches.length) batches = [[`${cat} (cells the gate names)`]]
+    else batches = batches.filter((_, i) => !done[i] || (done[i].still_open || 0) > 0)
+    if (!batches.length) batches = [[`${cat} (cells the gate names)`]]
   }
   if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${A.rounds} round(s) — the driver's floors gate decides what happens next`)
   return prev

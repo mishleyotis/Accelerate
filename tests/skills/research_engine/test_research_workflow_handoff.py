@@ -74,3 +74,24 @@ def test_the_hook_turns_the_handoff_into_workflow_calls(tmp_path):
     ctx = got["hookSpecificOutput"]["additionalContext"]
     assert ctx.count("Workflow({scriptPath:") == len(out["invocations"])
     assert "THEN" in ctx
+
+
+def test_each_category_is_split_into_bounded_capability_batches(tmp_path):
+    # Measured 2026-09-30 (SWBC r1): one agent per category filled 116-200K
+    # tokens of context and closed 0 of 43-68 cells. The unit is now a batch.
+    p, disp, out = _drive(tmp_path, "workflow")
+    open_caps = P._open_capabilities(p.wb)
+    for inv in json.loads(Path(out["handoff"]).read_text())["invocations"]:
+        for cat in inv["cats"]:
+            batches = inv["batches"][cat]
+            flat = [c for b in batches for c in b]
+            assert sorted(flat) == sorted(open_caps[cat]), "a capability was dropped or duplicated"
+            for b in batches:
+                n = sum(open_caps[cat][c] for c in b)
+                assert n <= P.BATCH_CELLS or len(b) == 1, (cat, b, n)
+
+
+def test_batches_pack_whole_capabilities_in_order():
+    got = P._batches({"P1C1.10": 2, "P1C1.2": 7, "P1C1.1": 6, "P1C1.3": 20})
+    assert got == [["P1C1.1"], ["P1C1.2"], ["P1C1.3"], ["P1C1.10"]]
+    assert P._batches({"X.1": 4, "X.2": 4, "X.3": 4}) == [["X.1", "X.2", "X.3"]]
