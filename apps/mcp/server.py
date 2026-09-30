@@ -372,7 +372,6 @@ def list_pending_runs(display_id: str | None = None,
              WHERE r.status IN ('INGESTED','CLAIMED','SYNTHESISING')
              ORDER BY r.completed_at NULLS LAST""")
         rows = cur.fetchall()
-        corpus = rows
         # HOW MANY RUNS THIS REQUEST HAS, said rather than left to be derived.
         #
         # Measured 2026-08-16: 105 of 171 entities carried more than one
@@ -390,12 +389,13 @@ def list_pending_runs(display_id: str | None = None,
         # `runs_for_request` above 1 is a condition to report, not a
         # preference to exercise quietly (MEM-0092).
         per_request: dict = {}
-        for r in corpus:
+        for r in rows:
             per_request.setdefault((r[1], r[3]), []).append(r[8])
+        shown = rows
         if display_id:
-            rows = [r for r in rows if r[1] == display_id]
+            shown = [r for r in shown if r[1] == display_id]
         if latest_only:
-            rows = [r for r in rows if r[8] == max(per_request[(r[1], r[3])])]
+            shown = [r for r in shown if r[8] == max(per_request[(r[1], r[3])])]
         return {"pending": [
             {"run_id": str(r[0]), "display_id": r[1], "entity_name": r[2],
              "request_id": r[3], "status": r[4],
@@ -432,14 +432,14 @@ def list_pending_runs(display_id: str | None = None,
              "synthesisable": None if r[9] is None else r[9] > 0,
              "claim": None if r[6] is None else
                       {"held_by": r[6], "live": bool(r[7])}}
-            for r in rows],
+            for r in shown],
             # The corpus-level shape of the same fact, so a scheduler about
             # to fan out knows before it starts how much of this queue is
             # research-stage rather than assessment work.
-            "unscored_runs": sum(1 for r in corpus if r[9] == 0),
-            "unknown_score_runs": sum(1 for r in corpus if r[9] is None),
+            "unscored_runs": sum(1 for r in rows if r[9] == 0),
+            "unknown_score_runs": sum(1 for r in rows if r[9] is None),
             "filtered": {"display_id": display_id, "latest_only": latest_only,
-                         "corpus_rows": len(corpus)},
+                         "corpus_rows": len(rows)},
             # The corpus-level number, so a scheduler about to fan out over
             # this list knows what share of it is duplicate before it starts.
             "duplicate_requests": sum(1 for v in per_request.values() if len(v) > 1),
