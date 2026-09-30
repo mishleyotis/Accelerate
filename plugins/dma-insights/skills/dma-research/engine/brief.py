@@ -758,12 +758,8 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "(`volleys_owed` is what is still missing)",
             "an empty cell closes ONLY through `engine.cli absence` — and it "
             "is refused while the register names the cell",
-            "work a CAPABILITY at a time: `engine.cli card --capability <cap>`, "
-            "then all its owed facets as parallel WebSearch calls in ONE turn, "
-            "logged in ONE chained Bash call with a --subcap per cell each result "
-            "answers — a turn costs your whole context, so turns are the budget",
-            "every WebSearch you fire is logged (`engine.cli search`); an "
-            "unlogged search is spend the gate never credits",
+            "per capability: `engine.cli card`, parallel WebSearch in one turn, "
+            "log every one (chained, --subcap per answered cell)",
             "note as you go (`engine.memory note`); the notebook is what "
             "survives a compaction",
             "`leads_in` are sources ANOTHER lane opened that already name "
