@@ -1167,8 +1167,12 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # loosened ceiling would have silently lost (MEM-0338 / R27).
     since = _ops_since_checkpoint(wb, category)
     return {
+        # `search_ops` is a LIFETIME count (spend worth seeing); the budget is
+        # `search_ops_since_checkpoint` against the ceiling. A lane that read
+        # the first as usage stopped at "55 of 60" with 1 used (2026-09-30).
         "search_ops": n,
         "search_ops_since_checkpoint": since,
+        "window_remaining": max(0, SEARCH_OP_CEILING - since),
         "search_op_ceiling": SEARCH_OP_CEILING,
         "checkpoint_required": since >= SEARCH_OP_CEILING,
         "evidence_items": len(ev),

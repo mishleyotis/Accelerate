@@ -715,7 +715,9 @@ def dispatch(wb: RunWorkbook, category: str, *,
         "cells_shown": len(ds),
     } for cap, ds in by_cap.items()]
 
-    stats = L.stats(wb)
+    # THIS category's window: lanes quit on a run-wide count (measured
+    # 2026-09-30: "151 searches against a budget of 60") that no longer gated them.
+    stats = L.stats(wb, category)
     packet = {
         "category": category,
         "capabilities": capabilities,
@@ -735,6 +737,8 @@ def dispatch(wb: RunWorkbook, category: str, *,
         "work_next": detail,
         "budget": {
             "searches_since_checkpoint": stats["search_ops_since_checkpoint"],
+            "remaining": max(0, stats["search_op_ceiling"]
+                             - stats["search_ops_since_checkpoint"]),
             "ceiling": stats["search_op_ceiling"],
             "checkpoint_required": stats["checkpoint_required"],
             "note": ("at the ceiling: `runstate.checkpoint(wb, '<where you "

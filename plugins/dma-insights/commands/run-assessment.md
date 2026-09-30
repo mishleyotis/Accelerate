@@ -213,7 +213,10 @@ firmographics, peers) and waits for those sections; each research round
 writes its relay batch under `briefs/relay_r<N>/`. For each, spawn ONE
 in-process subagent (`enrichment-connector-specialist` for PRELIM,
 `enrichment-web-specialist` for relay rows) with the file as its prompt — it
-inherits your connectors. Watch with
+inherits your connectors. Run them on the fast tier (`model: sonnet`) and group
+the batches by pillar — four subagents, not one per file: relay service is
+spend the run's cost ledger never sees (measured 2026-09-30: ~1M subagent
+tokens for 66 requests on the conducting session's own tier). Watch with
 `tail -F <ROOT>/pipeline.log | grep --line-buffered '\[RELAY\]\|FAIL\|STOPPED'`.
 
 **To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
