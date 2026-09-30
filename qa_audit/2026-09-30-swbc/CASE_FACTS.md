@@ -56,3 +56,16 @@ Persistent block. Updated as the run proceeds; every issue gets an ID and a stat
 - PRELIM PASS in 1 round, 614.7 s (connector half serviced in-session; Explorium resolved SWBC, Clay NOT_RUN due to I-20)
 - KG PASS: pulled 4/4 toolkits (I-02 fix live), DQ_Bank 6,747 rows, 9.4 s
 - Data conflict to carry: Clay annual_revenue band 1B-10B vs ~$450M (LinkedIn) vs FIG $250M (company exec summary)
+| I-25 | O1/O2 | HIGH | engine/brief.py (dispatch/batch md); RESEARCH-PROTOCOL | Research briefs named `--run R` but never the run root; protocol also made every lane REGENERATE the brief it was handed. Round 0: lanes ran `find /`, rebuilt briefs past the 120 s Bash default, got backgrounded, and headless lanes that ended their turn to wait simply exited. 16 lanes finished in 8-30 turns with ~1 cell worked. | FIXED (shared.run_root + a root line in every brief header; protocol: prompt IS the packet, never end a turn to wait) |
+| I-26 | O1 | HIGH | engine/kg.py dqs_for | Re-read the whole DQ_Bank per cell: 794 calls x 6,747 rows = 5.4M openpyxl reads, 95-258 s CPU per category brief and per worklist/floors pass. | FIXED (DQ index per workbook state: 4.3 s) |
+| I-27 | O2 | CRITICAL | engine/ledger.py search ceiling; runstate.checkpoint | The 60-search 'per conversation' ceiling was RUN-WIDE (Search_Log has no actor; one global mark) and lanes had no CLI to checkpoint: 16 parallel category lanes shared ONE window of 60 for the whole research stage (2 lanes walled at 60 in round 0). Parallel per-category workflows were structurally starved. | FIXED (window per category / PRELIM; driver checkpoints each category at dispatch; tested) |
+| I-28 | - | - | pipeline log | (Withdrawn: suspected buffered log; opts.log already flushes - driver was busy in slow post-round work.) | WITHDRAWN |
+
+## Parallelism enforcement (O2 answer, measured)
+- One claude -p lane per CATEGORY (16), dispatched by agent_run.py ThreadPoolExecutor, host-capped at 8 concurrent (4 CPU x 2). Pillar is not a scheduling unit: all 16 categories are peers in one batch.
+- Isolation is enforced: assert_actor_scope refuses a lane writing another category's cells; leads_in lets a lane cite (attach) another lane's source without re-searching.
+- Before I-27 the parallelism was nominal: every lane drew on one shared 60-search window.
+- Connector work is NOT parallel in lanes (children hold no connectors); it returns to the session as relay batches (round 0: 61 requests / 20 batches) serviced by in-session subagents (here: 4, one per pillar).
+
+## Round 0 (old code) outcome
+- 16 lanes, 8-30 turns each, ~$0.3-0.8 each; driver stopped and restarted with fixes I-25..I-27.

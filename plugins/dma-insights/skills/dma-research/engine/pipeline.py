@@ -1378,6 +1378,12 @@ class Pipeline:
             self._rounds = r + 1               # a round is counted when it dispatches
             b = brief.batch(self.wb, run=self.run, out_dir=self._briefs(f"research_r{r}"),
                             only=work, with_handback=(r > 0))
+            # Each dispatch is a FRESH conversation per category, so each
+            # category's search window opens here (ledger: the ceiling is per
+            # conversation; it used to be one run-wide window for all lanes).
+            from . import runstate as _rs
+            _rs.checkpoint(self.wb, f"RESEARCH round {r + 1} dispatch", scope=list(work))
+            self.reopen()
             self._count(self._dispatch(b, stage="RESEARCH"))
             # CHALLENGE ONLY WHAT HAS CONVERGED. The stage used to run for
             # every category every round, on one opus lane per category —

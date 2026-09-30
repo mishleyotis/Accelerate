@@ -843,6 +843,15 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         lines += [
             "- log the search the moment it returns:",
             f"  ```\n  {q['command_search']}\n  ```",
+            # Measured 2026-09-30 (SWBC relay): every span from a connector's
+            # own extract was refused `excerpt_unverified` until the text was
+            # cached, and nothing here said how — each subagent learned it by
+            # failing once.
+            "- before registering a span from a connector's own text (an Exa "
+            "fetch, a Tavily extract), cache that text under its URL so the "
+            "excerpt verifies — no second fetch is bought:",
+            f"  ```\n  python3 -m engine.cli fetch --run {run.run_id} --root {run.root} "
+            f"--url <URL> --via-text <file-with-the-text>\n  ```",
             "- close the request(s):",
             f"  ```\n  {q['command_record']}\n  ```",
             "",

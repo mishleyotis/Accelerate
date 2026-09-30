@@ -76,14 +76,24 @@ searches per cell and per tool, not a ratio.
   --category <YOURS>` is your first command and your compass after every
   interruption. **Obey its `do_first` list literally** — it never says
   "clean" while your work is open, and when it says STOP (the search-op
-  ceiling), you checkpoint and end your turn.
+  ceiling — sixty distinct searches for YOUR category in this dispatch),
+  run `engine.brief handback`, report, and end your turn; the driver
+  re-dispatches the category as a fresh conversation with a fresh window.
 
 ## Before the loop: read what the run already knows
 
-    python3 -m engine.brief dispatch --run <R> --root <ROOT> --category <YOURS>
+**Your prompt IS this packet** — the driver rendered it for you, with the
+exact `--run R --root ROOT` every engine command takes. Do not regenerate it
+on arrival (measured 2026-09-30: sixteen lanes rebuilding their own brief at
+once, each past the 120 s Bash default, were backgrounded, and a headless lane
+that ends its turn to "wait" simply exits). Rebuild it only after an
+interruption or a compaction, with a long timeout:
 
-This is your FIRST command — before `orient`, before any search, and again
-after any interruption or compaction. One bounded packet (measured against
+    python3 -m engine.brief dispatch --run <R> --root <ROOT> --category <YOURS>   # timeout 600000
+
+**Never end your turn to wait for a background command** — you are headless;
+ending the turn ends the lane. Run engine commands in the foreground with a
+long `timeout`. One bounded packet (measured against
 `BRIEF_CHAR_CEILING`, derived from the workbook, never a second record):
 
 - **the run's shared state** — the estate by layer, the peer set, how far

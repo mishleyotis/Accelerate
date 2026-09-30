@@ -278,6 +278,12 @@ def shared(wb: RunWorkbook) -> dict:
 
     return {
         "run_id": md.get("run_id"),
+        # THE ROOT, in every packet. Measured 2026-09-30 (SWBC, root outside
+        # the default): research briefs named `--run R` and never the root,
+        # so every lane's first engine call resolved to a directory that did
+        # not exist; lanes ran `find /`, rebuilt their own brief (>120 s each,
+        # eight at once) and slept on it before researching anything.
+        "run_root": str(wb.path.parent),
         "entity": md.get("entity_name"),
         "sub_vertical": md.get("sub_vertical"),
         "evidence_mode": md.get("evidence_mode"),
@@ -752,7 +758,7 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "survives a compaction",
             "`leads_in` are sources ANOTHER lane opened that already name "
             "your cells (`my_cells`) — cite one with `engine.cli attach "
-            f"--run {_clean(wb.metadata().get('run_id'))} "
+            f"--run {_clean(wb.metadata().get('run_id'))} --root {wb.path.parent} "
             "--e-id <E> --subcap <your cell>`, which reuses the registered "
             "row instead of minting a duplicate. `also_names` is there to "
             "show you why the other lane opened it; it is the only thing in "
@@ -928,6 +934,10 @@ def as_markdown(packet: dict) -> str:
         f"({s.get('sub_vertical') or 'sub-vertical not set'}, "
         f"{s.get('evidence_mode') or 'mode not set'} evidence) · "
         f"stage {s['stage']}.",
+        "",
+        f"**Every engine command takes `--run {s['run_id']} --root {s.get('run_root')}`** "
+        f"(from `{Path(__file__).resolve().parents[1]}`). This packet IS your brief: "
+        f"do not regenerate it.",
         "",
         "## What the run already knows",
         "",
@@ -1363,6 +1373,10 @@ def _md(title: str, packet: dict) -> str:
              f"({s.get('sub_vertical') or 'sub-vertical not set'}, "
              f"{s.get('evidence_mode') or 'mode not set'} evidence) · "
              f"stage {s.get('stage')}.", ""]
+    if s.get("run_root"):
+        lines += [f"**Every engine command takes `--run {s.get('run_id')} --root "
+                  f"{s.get('run_root')}`** (from `{Path(__file__).resolve().parents[1]}`). "
+                  f"This packet IS your brief: do not regenerate it.", ""]
     if packet.get("first_commands"):
         lines += ["## Your first commands", ""]
         lines += [f"    {c}" for c in packet["first_commands"]]

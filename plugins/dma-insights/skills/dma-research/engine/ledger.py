@@ -517,7 +517,14 @@ def assert_actor_scope(actor, op: str, cells=None) -> None:
 
 # ── search ───────────────────────────────────────────────────────────────
 
-def _ops_since_checkpoint(wb: RunWorkbook) -> int:
+def _search_scope(row: dict) -> str:
+    """The conversation a Search_Log row belongs to: its cell's category, or
+    PRELIM for institution-profile retrieval that names no cell."""
+    cell = str(row.get("SubCap_ID") or "").strip()
+    return cell.split(".")[0] if cell else "PRELIM"
+
+
+def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     """Searches FIRED since the last recorded checkpoint.
 
     Read from the workbook's own metadata rather than by importing runstate,
@@ -542,11 +549,28 @@ def _ops_since_checkpoint(wb: RunWorkbook) -> int:
     """
     rows = wb.rows("Search_Log")
     try:
-        mark = int(json.loads(wb.metadata().get("checkpoint") or "{}")
-                   .get("search_ops") or 0)
+        cp = json.loads(wb.metadata().get("checkpoint") or "{}")
     except (ValueError, TypeError):
-        mark = 0
-    since = rows[max(0, mark):]
+        cp = {}
+    # PER CONVERSATION MEANS PER LANE. Measured 2026-09-30 (SWBC): the window
+    # was run-wide — Search_Log carries no actor, and one global mark — so
+    # sixteen parallel category lanes shared ONE window of 60. PRELIM had
+    # already spent part of it; two lanes were walled at 60 in round 0, and
+    # no lane could checkpoint (there is no CLI for it). A 760-cell run got
+    # 60 searches. The window is now scoped to the conversation's category
+    # (PRELIM on its own), each with its own mark.
+    marks = cp.get("marks") if isinstance(cp.get("marks"), dict) else {}
+    if scope is not None and scope in marks:
+        mark = int(marks.get(scope) or 0)
+    else:
+        try:
+            mark = int(cp.get("search_ops") or 0)
+        except (ValueError, TypeError):
+            mark = 0
+    since = [(i, r) for i, r in enumerate(rows) if i >= max(0, mark)]
+    if scope is not None:
+        since = [(i, r) for i, r in since if _search_scope(r) == scope]
+    since = [r for _i, r in since]
     return len({(str(r.get("Query") or "").strip(),
                  str(r.get("Tool") or "").strip(),
                  str(r.get("Facet") or "").strip()) for r in since})
@@ -624,11 +648,12 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     # start, because the ceiling is per CONVERSATION — a long run must be
     # able to checkpoint and legitimately continue, which is exactly the
     # context-preserving behaviour the ceiling exists to force.
-    since = _ops_since_checkpoint(wb)
+    scope = "PRELIM" if prelim or not cells else cells[0].split(".")[0]
+    since = _ops_since_checkpoint(wb, scope)
     if since >= SEARCH_OP_CEILING:
         raise LedgerRefusal(
-            f"search-op ceiling reached: {since} since the last checkpoint, "
-            f"cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
+            f"search-op ceiling reached for {scope}: {since} since its last "
+            f"checkpoint, cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
             f"`runstate.checkpoint(wb, '<where you got to>')` records the "
             f"position in the workbook and resets the window, and a fresh "
             f"conversation resumes from it. This is the wall that keeps a "
@@ -1140,7 +1165,7 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # just no longer decides. The gate itself is unchanged in strength: over
     # the cap since the last checkpoint still stops, which is the half a
     # loosened ceiling would have silently lost (MEM-0338 / R27).
-    since = _ops_since_checkpoint(wb)
+    since = _ops_since_checkpoint(wb, category)
     return {
         "search_ops": n,
         "search_ops_since_checkpoint": since,

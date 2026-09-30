@@ -229,7 +229,7 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
     }
 
 
-def checkpoint(wb: RunWorkbook, position: str) -> None:
+def checkpoint(wb: RunWorkbook, position: str, scope=None) -> None:
     """Record where the run got to, in the artefact that survives.
 
     The search-op count is recorded WITH the position because the ceiling is
@@ -238,10 +238,21 @@ def checkpoint(wb: RunWorkbook, position: str) -> None:
     mark to measure from. Without it the ceiling would be a lifetime budget
     and a long run could never legitimately continue past it.
     """
+    n = len(wb.rows("Search_Log"))
+    try:
+        prev = json.loads(wb.metadata().get("checkpoint") or "{}")
+    except (ValueError, TypeError):
+        prev = {}
+    marks = dict(prev.get("marks") or {}) if isinstance(prev.get("marks"), dict) else {}
+    scopes = [scope] if isinstance(scope, str) else list(scope or [])
+    for s in scopes:
+        marks[s] = n
     wb.set_metadata("checkpoint", json.dumps(
         {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
          "position": position,
-         "search_ops": len(wb.rows("Search_Log"))},
+         # the run-wide mark moves only on an unscoped checkpoint
+         "search_ops": n if not scopes else int(prev.get("search_ops") or 0),
+         "marks": marks},
         separators=(",", ":")))
 
 
