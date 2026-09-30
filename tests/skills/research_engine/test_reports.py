@@ -7,8 +7,9 @@ from docx import Document
 from engine import ledger as L, report_spec as RS, reports
 from engine.reports import ReportRefused
 
-from fixtures import (CAT, bank_evidence, good_synthesis, new_run,  # noqa: F401
-                      scored_run, section_record, sign_off_sections, synthesise)
+from fixtures import (CAT, bank_evidence, bank_peer_medians,  # noqa: F401
+                      good_synthesis, new_run, scored_run, section_record,
+                      sign_off_sections, synthesise)
 
 def _narrate(wb, spec, *, words_per_section=None, cite=None, rec_cards=None,
              ic_cards=None):
@@ -189,6 +190,25 @@ def test_changing_the_workbook_changes_the_report(tmp_path):
     assert "Real-time fraud analytics" in text
     assert "NCUA call report 2025" not in text       # not cited → not reproduced
     assert before == r["citations"]  # the narrative's citations, unchanged
+
+
+def test_the_peer_sheet_renders_only_once_it_carries_a_score(tmp_path):
+    """PRELIM freezes the peer SET as one Peer_Benchmarks row per category
+    with every Entity_Score / Peer_Median blank — the grid the medians are
+    later filled into. Rendered whole at that point it is a strip of rows
+    varying only in the category id (measured on the REV run: 16 such rows
+    on every section that declares the sheet). The sheet renders once a
+    per-category figure exists, and not before."""
+    run = new_run(tmp_path, n=2)
+    wb = run.open()
+    sec = RS.SPECS["assessment"].section("4")        # declares Peer_Benchmarks
+    rows = wb.rows("Peer_Benchmarks")
+    assert rows and all(r.get("Category_ID") for r in rows)
+    assert not reports._peer_benchmarks_scored(rows)
+    assert "Peer_Benchmarks" not in {t.get("sheet") for t in reports._tables_for(wb, sec)}
+    bank_peer_medians(wb)
+    assert reports._peer_benchmarks_scored(wb.rows("Peer_Benchmarks"))
+    assert "Peer_Benchmarks" in {t.get("sheet") for t in reports._tables_for(wb, sec)}
 
 
 # ── AUD-0107 · a section with no source says so, it does not render empty ─

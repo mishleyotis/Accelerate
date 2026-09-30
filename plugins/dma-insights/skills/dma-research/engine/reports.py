@@ -198,6 +198,19 @@ def _prose_only(body: str) -> str:
     return "\n".join(keep)
 
 
+def _peer_benchmarks_scored(rows: list[dict]) -> bool:
+    """True when the peer sheet carries at least one real per-category score —
+    an Entity_Score or a Peer_Median. When it does not (peer NAMES and a basis
+    were captured but the per-category scoring never ran), rendering the sheet
+    whole is a degenerate table, so the caller skips it."""
+    for r in rows:
+        for k in ("Entity_Score", "Peer_Median", "Peer_P25", "Peer_P75"):
+            v = r.get(k)
+            if v not in (None, "") and str(v).strip():
+                return True
+    return False
+
+
 def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None,
                 *, skip: set | None = None) -> list[dict]:
     """The workbook-derived tables a section carries.
@@ -217,6 +230,16 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None,
         else:
             rows = wb.rows(name)
         if not rows:
+            continue
+        if name == "Peer_Benchmarks" and not _peer_benchmarks_scored(rows):
+            # The per-category Peer_Benchmarks sheet with every Entity_Score
+            # and Peer_Median empty is a strip of rows that varies only in
+            # its category id — a table carrying nothing a reader can
+            # compare (measured on the REV run: 16 such rows, rendered on
+            # every section that declares the sheet). When the run carries
+            # no per-category peer SCORES, the peer comparison belongs in
+            # the section's authored per-peer table (the golden's §4.1 / §6
+            # shape), not in this empty dump. Skip it here.
             continue
         if name == "Financial_Trends":
             ft = _financial_table(rows); ft["sheet"] = name
