@@ -914,6 +914,23 @@ _EV_ALIASES = {
                 "fact_summary", "summary"),
 }
 
+#: alias-table key -> the key the parsed row actually carries. Two fields are
+#: renamed on the way out: a band word becomes `stated_recency` because the
+#: package only ASSERTS it, and a date becomes `published_date`. The
+#: per-column census reads the parsed rows, so it asks under these names.
+_EV_ROW_KEY = {"published": "published_date", "recency": "stated_recency"}
+
+#: The assessor's own sentence about a source, read as an excerpt of LAST
+#: RESORT. Measured on Golden 1's Evidence_Master, 2026-09-01: `Finding` was
+#: 731 of 731 rows populated at 64-227 characters, entirely inside the 50-500
+#: band, and a register carrying it and nothing else served no excerpt at all.
+#: It is NOT an alias of `excerpt`: as an alias it is picked before the merge
+#: and fills the hole a richer ledger tab beside it would have filled with the
+#: source's own words. So it rides beside the row as `_finding` and lands in
+#: `excerpt` only after every ledger tab has been merged and the row still has
+#: none — a paraphrase beats an empty drawer, and never beats a quotation.
+_EV_FINDING_KEYS = ("finding", "key_finding")
+
 # The excerpt tag the scoring rationales use: "[E-012:F1] Board committees: …"
 # — one fact of one evidence item, verbatim, and the only place in the
 # general_dma workbook the excerpt text exists at all.
@@ -1047,6 +1064,7 @@ def _read_ev_tab(wb, tab: str, observe) -> dict | None:
     # Every excerpt-class column, because a row can carry two and the
     # first alias is not always the verbatim one (MEM-0162).
     excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
+    finding_col = _pick(headers, _EV_FINDING_KEYS)
 
     rows: dict = {}
     order: list = []
@@ -1088,6 +1106,9 @@ def _read_ev_tab(wb, tab: str, observe) -> dict | None:
                         (x.strip() for x in str(v("subcaps") or "").split(","))
                         if SUBCAP_RE.match(s)],
         }
+        if finding_col is not None and finding_col < len(row):
+            f = row[finding_col]
+            rec["_finding"] = str(f).strip() if isinstance(f, str) and f.strip() else None
         if e_id not in rows:
             order.append(e_id)
         rows[e_id] = rec
@@ -1212,6 +1233,24 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
                           "not index. They are carried rather than dropped: a "
                           "row missing from the index is still a row."})
 
+        # THE FINDING FALLBACK, after every tab has had its say: a row no
+        # ledger tab gave a verbatim span takes the assessor's finding rather
+        # than shipping an empty drawer. Counted, because a drawer serving a
+        # paraphrase is a fact about the package the producer must know.
+        from_finding = 0
+        for rec in out:
+            f = rec.pop("_finding", None)
+            if f and rec.get("excerpt") in _EV_EMPTY:
+                rec["excerpt"] = f
+                from_finding += 1
+        if from_finding:
+            observe("excerpt_from_finding", {
+                "tab": tab, "rows": from_finding,
+                "reason": "these rows carry no verbatim span on any ledger "
+                          "tab; the assessor's Finding is served as the "
+                          "excerpt of last resort. It is a paraphrase, not a "
+                          "quotation — a producer citing it names that."})
+
         if merged_from:
             observe("evidence_ledger_merged", {
                 "primary_tab": tab,
@@ -1298,8 +1337,15 @@ def parse_evidence_master(path: str, obs: list | None = None) -> list:
             for field in list(_EV_ALIASES) + ["e_id"]:
                 if cols.get(field) is None:
                     continue            # already reported as not found
+                # The census reads the PARSED rows, which carry the band
+                # under `stated_recency` and the date under `published_date`.
+                # Keyed on the alias name it counted zero every time and
+                # reported a fully populated column as read-but-empty —
+                # Golden 1, 2026-09-01: Evidence_Master.Recency, 731/731
+                # populated, reported `column_mapped_but_empty`.
+                row_key = _EV_ROW_KEY.get(field, field)
                 filled = sum(1 for r in out
-                             if r.get(field) not in (None, "", [], {}))
+                             if r.get(row_key) not in (None, "", [], {}))
                 if filled == 0:
                     observe("column_mapped_but_empty", {
                         "tab": tab, "field": field,

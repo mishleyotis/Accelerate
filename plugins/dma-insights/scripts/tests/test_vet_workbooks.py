@@ -259,3 +259,44 @@ def test_the_truncation_record_resets_between_books(tmp_path, monkeypatch):
     monkeypatch.setattr(V, "MAX_SHEET_ROWS", 50_000)
     V.sheets_of(_book(tmp_path, 30))
     assert V.TRUNCATED_SHEETS == {}
+
+
+# ── V7 classifies a register by SHAPE, not by where it sits ───────────────
+#
+# Golden 1 Credit Union, 2026-09-01: the tree held one .xlsx, so V7 fired
+# and asserted "nothing carries an excerpt" over an Evidence_Detail tab of
+# that very workbook carrying 727 verbatim excerpts. A register carried as a
+# TAB is the same evidence in a different place.
+
+def _scoring_with_register_tab(tmp_path, excerpts):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "P1_Subcap_Scoring"
+    ws.append(["cell_id", "score", "evidence_id"])
+    ws.append(["P1C1.1", 3.2, "E-001"])
+    det = wb.create_sheet("Evidence_Detail")
+    det.append(["E_ID", "Fact_ID", "Source_Name", "Source_URL", "Tier",
+                "Date_Published", "SubCap_IDs", "Excerpt", "Anchor_Quote"])
+    for i, ex in enumerate(excerpts, 1):
+        det.append([f"E-{i:03d}", "F1", "press release", "https://example.org",
+                    "T3", "2023-03-08", "P3C2.5.3", ex, ex])
+    path = tmp_path / "scoring.xlsx"
+    wb.save(path)
+    return path
+
+
+def test_a_register_carried_as_a_tab_is_recognised_by_its_shape(tmp_path):
+    ex = "a verbatim excerpt of more than fifty characters, quoted from the source itself"
+    path = _scoring_with_register_tab(tmp_path, [ex, ex, ""])
+    got = vw.embedded_evidence_register(path)
+    assert got is not None
+    tab, filled, col = got
+    assert tab == "Evidence_Detail" and filled == 2 and col == "Excerpt"
+
+
+def test_a_workbook_with_no_register_shaped_tab_is_not_one(tmp_path):
+    path = _workbook(tmp_path, register_rows=[], reference_rows=[["P1C1.1", 3.2, "E-001"]])
+    # Evidence_Master exists but carries no excerpt text → not a register
+    assert vw.embedded_evidence_register(path) is None
+    empty = _scoring_with_register_tab(tmp_path, ["", ""])
+    assert vw.embedded_evidence_register(empty) is None

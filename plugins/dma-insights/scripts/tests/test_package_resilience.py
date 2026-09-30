@@ -342,3 +342,37 @@ def test_truly_dateless_rows_stay_unverified(tmp_path):
     gaps = evidence_normalize.gaps_out(records, "cl")
     assert records["E-003"]["recency"] == "UNVERIFIED"
     assert "date" in gaps[0]["missing"]
+
+
+# ── INTERIM_RE matches filename TOKENS, not substrings ────────────────────
+#
+# Measured 2026-09-01: `old` matched inside "golden", so Golden 1 Credit
+# Union's only scoring workbook was set aside as a draft. The same bug
+# reaches Goldman, Oldham, Copeland and Drafthouse.
+
+@pytest.mark.parametrize("name", [
+    "DMA_Scoring_Workbook_golden-1-credit-union_2026-08-31.xlsx",
+    "Goldman_Sachs_Scoring.xlsx",
+    "Oldham_County_Bank.xlsx",
+    "Drafthouse_Credit_Union_Research_Workbook.xlsx",
+])
+def test_interim_re_does_not_match_inside_a_client_name(name):
+    assert package_map.INTERIM_RE.search(name) is None, name
+
+
+@pytest.mark.parametrize("name", [
+    "DMA_Scoring_Workbook_old.xlsx",
+    "Copy of DMA_Scoring_Workbook.xlsx",
+    "Scoring_Workbook_INTERIM_v2.xlsx",
+    "draft-scoring.xlsx",
+    "scoring.backup.xlsx",
+])
+def test_interim_re_still_matches_a_real_interim_token(name):
+    assert package_map.INTERIM_RE.search(name) is not None, name
+
+
+def test_a_golden_named_scoring_workbook_is_the_primary_not_a_draft(tmp_path):
+    _mk(tmp_path, "03_scoring_workbook/DMA_Scoring_Workbook_golden-1-credit-union_2026-08-31.xlsx")
+    m = package_map.map_package(tmp_path)
+    assert m["scoring"]["primary"] is not None
+    assert "under protest" not in " ".join(m["ambiguities"])
