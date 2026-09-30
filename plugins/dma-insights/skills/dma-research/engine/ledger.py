@@ -548,10 +548,20 @@ def _search_scope(row: dict) -> str:
     """The conversation a Search_Log row belongs to: its cell's category, or
     PRELIM for institution-profile retrieval that names no cell, or RELAY for
     a connector search the in-session relay fired."""
-    if str(row.get("Tool") or "").strip() not in LANE_SEARCH_TOOLS:
-        return "RELAY"
     cell = str(row.get("SubCap_ID") or "").strip()
+    if (str(row.get("Tool") or "").strip() not in LANE_SEARCH_TOOLS
+            and not _is_category_producer(row.get("Actor"), cell)):
+        return "RELAY"
     return cell.split(".")[0] if cell else "PRELIM"
+
+
+def _is_category_producer(actor, cell: str) -> bool:
+    """A connector search a category researcher fired ITSELF (an in-session
+    workflow agent holds the connectors) is that category's retrieval and
+    counts against its window; only the relay's searches are RELAY's."""
+    a = str(actor or "").strip().lower()
+    cat = (cell.split(".")[0] if cell else "").lower()
+    return bool(cat) and a == f"research-{cat}-producer"
 
 
 def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
@@ -678,9 +688,13 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     # start, because the ceiling is per CONVERSATION — a long run must be
     # able to checkpoint and legitimately continue, which is exactly the
     # context-preserving behaviour the ceiling exists to force.
-    scope = "PRELIM" if prelim or not cells else cells[0].split(".")[0]
-    relay_row = str(tool or "").strip() not in LANE_SEARCH_TOOLS
-    since = 0 if relay_row else _ops_since_checkpoint(wb, scope)
+    # Every search is bounded (the wall test): lane tools and a category
+    # researcher's own connector volleys against the category's window, the
+    # relay's connector volleys against RELAY's. Uncounted relay rows were a
+    # hole once researchers began firing connectors themselves (2026-09-30).
+    scope = _search_scope({"Tool": tool, "Actor": actor,
+                           "SubCap_ID": "" if prelim or not cells else cells[0]})
+    since = _ops_since_checkpoint(wb, scope)
     if since >= SEARCH_OP_CEILING:
         raise LedgerRefusal(
             f"search-op ceiling reached for {scope}: {since} since its last "
