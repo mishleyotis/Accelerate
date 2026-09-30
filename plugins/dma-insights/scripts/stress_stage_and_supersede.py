@@ -355,10 +355,16 @@ def walk(work: Path) -> int:
     eids = ev[cells[0]]
     sec = next(s for s in RS.SPECS["assessment"].sections
                if s.kind == "recommendation")
+    # Each card is salted with its own id: the writer refuses a paragraph
+    # pasted across cards (GSY-30, 2026-09-08), and three cards built from
+    # one unsalted record ARE that paste — the walk stood on it until
+    # 30-09-2026, when the gate landed on the default and refused §8's third
+    # card. The fixture's `salt` is its contract for exactly this.
     for i in range(3):
+        card = f"REC-{i + 1:02d}"
         N.write(wb5, "assessment", sec.id,
-                F.section_record(sec.id, eids, report="assessment"),
-                actor="report-assessment-producer", card=f"REC-{i + 1:02d}", run=run)
+                F.section_record(sec.id, eids, report="assessment", salt=card),
+                actor="report-assessment-producer", card=card, run=run)
     r = cli("grains", "recommendations", "--run", run.run_id, "--root", root)
     proj = json.loads(r.stdout) if r.returncode == 0 else {}
     recs = parse_recommendations(str(run.workbook_path), [])
