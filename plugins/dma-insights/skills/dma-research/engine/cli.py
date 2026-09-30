@@ -600,6 +600,10 @@ def main(argv=None) -> int:
                      help="an optional call ceiling, recorded for the audit "
                           "trail; the hook does not count calls")
 
+    cd_ = sub.add_parser("card", help="the capability card: every open cell of one "
+                         "capability, the volleys each owes, and batched log lines")
+    cd_.add_argument("--run", required=True); cd_.add_argument("--root")
+    cd_.add_argument("--capability", required=True)
     a = ap.parse_args(argv)
     if a.cmd == "counts":
         print(json.dumps(contract.counts(), indent=2)); return 0
@@ -693,6 +697,9 @@ def main(argv=None) -> int:
         return _fetch_cmd(run, a)
 
     wb = run.open()
+    if a.cmd == "card":
+        print(json.dumps(orient.capability_card(wb, a.capability, run=run),
+                         indent=1)); return 0
     if a.cmd == "orient":
         print(json.dumps(orient.orient(wb, a.category, qa_dir=run.qa_dir),
                          indent=2, sort_keys=True)); return 0

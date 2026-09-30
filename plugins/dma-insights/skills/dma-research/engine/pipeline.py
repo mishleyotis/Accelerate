@@ -2254,6 +2254,9 @@ def main(argv=None) -> int:
     st = common(sub.add_parser("status"))
     st.add_argument("--watch", action="store_true")
     st.add_argument("--interval", type=float, default=15.0)
+    sp = common(sub.add_parser("stop", help="SIGTERM the driver that HOLDS this run's "
+                                "lock (its real pid) and wait for it to release"))
+    sp.add_argument("--wait-s", type=float, default=120.0)
     sub.add_parser("env", help="every hard dependency, measured")
     sub.add_parser("stages", help="the stage table")
 
@@ -2266,6 +2269,38 @@ def main(argv=None) -> int:
         print(json.dumps(out, indent=2))
         return 0 if out["ok"] else 1
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
+    if a.cmd == "stop":
+        # Measured 2026-09-30 (SWBC): an operator "stopped" the driver with the
+        # pid a shell captured for `nohup setsid …`; setsid had forked, that pid
+        # was a dead wrapper, and the real driver ran a whole extra research
+        # round on stale code past the budget. The driver lock names the pid
+        # that actually holds the run; this signals that one and waits.
+        held = runstate.read_driver_lock(run)
+        if not held or not held.get("live"):
+            print(json.dumps({"stopped": False, "why": "no live driver holds this run",
+                              "lock": held}, indent=2, default=str))
+            return 0
+        pid = int(held["pid"])
+        import signal as _signal
+        try:
+            os.kill(pid, _signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        t0 = time.time()
+        while time.time() - t0 < a.wait_s:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(1)
+        alive = True
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            alive = False
+        print(json.dumps({"stopped": not alive, "pid": pid,
+                          "waited_s": round(time.time() - t0, 1)}, indent=2))
+        return 0 if not alive else 1
     if a.cmd == "plan":
         opts = Options(dispatcher=None, reads=None, shipper=None)  # type: ignore[arg-type]
         print(json.dumps(Pipeline(run, opts).plan(), indent=2, default=str))

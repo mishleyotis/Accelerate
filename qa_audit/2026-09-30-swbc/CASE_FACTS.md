@@ -79,3 +79,14 @@ Persistent block. Updated as the run proceeds; every issue gets an ID and a stat
 - Wall 88.6 min; $25.79 (PRELIM $4.53, RESEARCH $21.27; 64 lane attempts, 727 turns, 29.5M cache-read tokens)
 - Cells citing evidence 55/760 (7.2%); synthesised 7/760; 0/16 categories pass floors
 - Relay: 66 requests serviced in-session (~44 served, ~20 empty, 2 blocked by Cloudflare) by 4 pillar subagents (~0.99M subagent tokens)
+| I-33 | O1 | MED | scripts/agent_run.py | Each re-dispatch truncated its label's transcript: 64 lane attempts left 16 files; rounds 0-1 unauditable. | FIXED (prior transcript rotated to agent_logs/history/) |
+| I-32 | QA-OPS | HIGH | engine.pipeline | (see above) | FIXED (`engine.pipeline stop` signals the lock-holding pid; run-assessment documents it) |
+| I-34 | O1 | HIGH | orient / protocol / brief | Work was served one CELL per card: 50 orient calls for 82 searches, 1.0 cell/logged search, 70% of searches never logged (no gate credit -> re-dispatch). Engine already accepted multi --subcap; nothing steered lanes to it; no parallel-search or chained-bookkeeping guidance. | FIXED (`engine.cli card --capability`; protocol "work a capability at a time": parallel WebSearch in one turn, chained logging, chained synthesis; brief rules) |
+
+## Cost-driver analysis (user asked, 2026-09-30) — measured on round 1 (16 lanes, 386 turns, $11.82)
+- Price per turn ~$0.031 = whole context re-read each turn (17.1M cache-read tokens / 386 turns ~ 44K/turn) + tool-output cache writes (1.24M) + output (154K).
+- Context floor at turn 1: 26.8K tokens (21.2K cache-write + 5.6K read): Claude Code system prompt, 54 skill listings via the Skill tool, repo CLAUDE.md (11.5 KB build charter, irrelevant to research), SessionStart hook (2.1 KB), agent manifest (4.8 KB), brief (7 KB). Grows ~1.5K/turn (web-search results).
+- Because context grows per turn, lane cost is quadratic in lane length; optimum lane ~20-40 turns. Round-1 lanes were already that short, so per-turn price is near optimal -> TOTAL TURNS is the lever.
+- Turn sinks: ~45% of turns before the first search (root hunt, brief regen: I-25/I-26 fixed); one card per cell (I-34 fixed); 70% unlogged searches (I-34 rule); every bookkeeping write its own turn (chaining).
+- Projection with fixes: ~136 capability passes x ~8 turns + lane setup ~240 = ~1,330 research turns x $0.031 ~ $41; + challenge ~$12, scoring+critic ~$8, reports ~$6, pages ~$10 => ~$77-85 more. Budget set to $110 cumulative ($25.79 already spent).
+- Further levers NOT taken (owner decisions): Haiku for research lanes (~3x cheaper/turn); dropping the Skill tool and repo CLAUDE.md from lane context (~6-8K tokens/turn, ~15-20%).

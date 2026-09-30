@@ -754,6 +754,12 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "(`volleys_owed` is what is still missing)",
             "an empty cell closes ONLY through `engine.cli absence` — and it "
             "is refused while the register names the cell",
+            "work a CAPABILITY at a time: `engine.cli card --capability <cap>`, "
+            "then all its owed facets as parallel WebSearch calls in ONE turn, "
+            "logged in ONE chained Bash call with a --subcap per cell each result "
+            "answers — a turn costs your whole context, so turns are the budget",
+            "every WebSearch you fire is logged (`engine.cli search`); an "
+            "unlogged search is spend the gate never credits",
             "note as you go (`engine.memory note`); the notebook is what "
             "survives a compaction",
             "`leads_in` are sources ANOTHER lane opened that already name "
@@ -910,8 +916,9 @@ def dispatch(wb: RunWorkbook, category: str, *,
             packet["work_next"] = packet["work_next"][:keep]
             packet["trimmed"] = (
                 f"detail trimmed to {keep} cell(s) to stay under the packet "
-                f"ceiling; `engine.cli orient --category {category}` serves the "
-                f"rest one card at a time")
+                f"ceiling; `engine.cli card --capability <cap>` serves the rest a "
+                f"capability at a time (`engine.cli orient --category {category}` "
+                f"owns do_first and the STOP)")
             packet["packet_chars"] = len(json.dumps(packet, default=str))
             if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
                 break

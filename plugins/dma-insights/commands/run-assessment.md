@@ -216,6 +216,16 @@ in-process subagent (`enrichment-connector-specialist` for PRELIM,
 inherits your connectors. Watch with
 `tail -F <ROOT>/pipeline.log | grep --line-buffered '\[RELAY\]\|FAIL\|STOPPED'`.
 
+**To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
+— it signals the pid that holds the run's driver lock. Never kill a pid a shell
+captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
+real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
+
+**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
+It signals the pid that holds the run's driver lock. Never kill a pid a shell
+captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
+real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
+
 When it stops: a stage FAIL names the blocker (read `engine.pipeline plan`
 and the stage's Gate_Log detail, repair at the source it names, run again —
 nothing done is redone); `--max-wall-min` reached is a clean stop, run again;

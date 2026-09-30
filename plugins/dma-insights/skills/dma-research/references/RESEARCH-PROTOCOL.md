@@ -116,6 +116,30 @@ When your category is done, `engine.brief handback --run <R> --root <ROOT>
 whether you finished or stopped, and it names the leads your sources open
 for other categories so nobody searches for them twice.
 
+## Work a CAPABILITY at a time (the budget rule)
+
+A turn costs your whole context re-read (~$0.03 measured); turns are the bill.
+So the unit of work is the capability, not the cell:
+
+    python3 -m engine.cli card --run <R> --root <ROOT> --capability <P1C1.3>
+
+returns its open cells, the volleys each still owes, the questions merged by
+facet, and one `log` line per facet naming every cell. Then:
+
+1. **One turn of searches**: fire every owed facet's query for the capability
+   as PARALLEL WebSearch calls in a single message.
+2. **One turn of logging**: the card's `log` lines, `&&`-chained in ONE Bash
+   call — drop from a line any cell the result is silent on (never credit a
+   cell a query did not answer; give that cell its own query).
+3. **One or two turns of evidence**: `engine.cli fetch`, then `engine.cli
+   evidence` / `attach` per cell, chained.
+4. **One turn of synthesis**: every cell's `engine.cli synthesise`, chained.
+
+Measured before this rule (SWBC round 1): 1.0 cell per logged search, 70% of
+web searches never logged (they earn the gate nothing and the category is
+re-dispatched), ~45% of a lane's turns spent before its first search.
+`orient` still owns `do_first` and the STOP; use the card for the work.
+
 ## The loop, per work card
 
 `orient` hands you one card: a subcap, its diagnostic questions already
