@@ -172,6 +172,22 @@ over budget, with the figure) before the next command.
 python3 -m engine.pipeline run --run <RUN_ID> --root <ROOT> --max-wall-min 240 --lane-retries 1 --page-retries 2
 ```
 
+**RESEARCH runs as persisted workflows — started by you.** The driver is a
+Python process and cannot start a Workflow, so at RESEARCH it stops with
+outcome `AWAITING_WORKFLOW` (exit 0) and writes
+`<ROOT>/07_qa/research_workflow.json`: the workflow
+(`${CLAUDE_PLUGIN_ROOT}/workflows/dma-pillar-research.js`) and one `args`
+object per pillar with categories still to pass. In ONE message, start every
+invocation — `Workflow({scriptPath: <workflow>, args: <invocation>})` per
+pillar — so the four pillars run side by side, each running its categories as
+parallel pipelines (research → independent challenge → floors gate, up to two
+rounds). They are visible and resumable in `/workflows` by run id. When they
+have all returned, run the file's `then` command: the driver re-reads the
+floors gates, re-hands only categories still failing, and carries on to
+HANDOFF. The workflow agents run in THIS session, so they hold Exa, Tavily and
+Clay themselves — there is no relay to service for them. `--research-mode
+lanes` restores the headless-lane dispatch (the stub dispatcher uses it).
+
 **The ceilings are enforced now, and they are the defaults** — name them only
 to change them. `--max-usd` defaults to $5 per pillar in scope and STOPS the
 run when the cost ledger crosses it; `--max-rounds 10` caps the rounds of any

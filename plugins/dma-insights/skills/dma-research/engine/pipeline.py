@@ -120,7 +120,13 @@ BRIEFS_DIR = "briefs"
 #: re-dispatch it as a failure — and a conductor scripting `--step` in a loop
 #: reads the exit code before it reads the JSON.
 EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
-                      "ROUND_COMPLETE")
+                      "ROUND_COMPLETE", "AWAITING_WORKFLOW")
+
+#: The persisted workflow the RESEARCH stage hands to the conducting session
+#: in `research_mode="workflow"` — one invocation per pillar, four category
+#: pipelines each (research -> independent challenge -> floors gate).
+RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
+RESEARCH_HANDOFF = "research_workflow.json"
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
@@ -345,6 +351,21 @@ class Options:
     # ceiling honest: consecutive rounds that advance nothing end the stage.
     max_rounds: int = 10
     stall_rounds: int = 2
+    # WHO RUNS RESEARCH. "lanes" is this driver dispatching headless
+    # `claude -p` category lanes through agent_run.py. "workflow" hands the
+    # stage to the conducting session as one persisted workflow per pillar
+    # (RESEARCH_WORKFLOW), records PENDING_ORCHESTRATOR and exits AWAITING_WORKFLOW; the session runs them
+    # and re-runs the driver, which verifies the floors gates and goes on.
+    #
+    # ROOT CAUSE this closes (owner, 2026-09-30: "research works as background
+    # tasks and not real persisted /workflows"): this driver is a Python
+    # process and only a model session can start a Workflow, so every
+    # research round ran as a thread pool of headless children — invisible
+    # to /workflows, not resumable by run id, and holding no enrichment
+    # connector (which is the whole reason the relay exists). The library
+    # default stays "lanes" so the stub and every test walk are unchanged;
+    # the CLI defaults to "workflow" for the real dispatcher.
+    research_mode: str = "lanes"
     # How many FRESH lane instances the driver spends on a category whose
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
@@ -993,6 +1014,16 @@ class Pipeline:
                                       f"before {st}; resume: {self.plan()['command']}")
                 return outcome
             t0 = self.opts.clock()
+            if st == "RESEARCH" and self.opts.research_mode == "workflow":
+                h = self._research_handoff()
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
+                               reason=h["summary"], handoff=h["file"],
+                               invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
             try:
                 detail = getattr(self, f"_stage_{st.lower()}")()
                 if self._step_stopped:
@@ -1327,6 +1358,35 @@ class Pipeline:
         probs = out.get("problems") if isinstance(out, dict) else None
         return (f"DQ_Bank seeded: {n} rows" + (f"; {len(probs)} problem(s) stated: "
                                                   f"{probs[0][:120]}" if probs else ""))
+
+    def _research_handoff(self) -> dict:
+        """Write the per-pillar workflow invocations the session runs."""
+        from . import brief
+        need = brief.categories_needing_dispatch(self.wb)["dispatch"]
+        md = self._md()
+        site = next((str(r.get("Value") or "") for r in self.wb.rows("Firmographics")
+                     if str(r.get("Field") or "").lower() == "website"
+                     and r.get("Value")), "")
+        by_pillar: dict[str, list[str]] = {}
+        for c in sorted(need):
+            by_pillar.setdefault(c[:2], []).append(c)
+        inv = [{"pillar": p, "cats": cats, "run": self.run.run_id,
+                "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
+                "plugin": str(PLUGIN), "rounds": 2,
+                "entity": md.get("entity_name") or "", "domain": site}
+               for p, cats in sorted(by_pillar.items())]
+        doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per pillar — wait for all, "
+                       "then run `then`; the driver verifies the floors gates")}
+        path = self.run.qa_dir / RESEARCH_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        n = sum(len(i["cats"]) for i in inv)
+        return {"file": str(path), "invocations": inv,
+                "summary": f"{n} categor{'y' if n == 1 else 'ies'} over "
+                           f"{len(inv)} pillar workflow(s)"}
 
     def _pull_toolkits(self) -> Path | None:
         """The four pillar toolkits, fetched into the run when none is named.
@@ -2198,7 +2258,9 @@ def _build_opts(a) -> Options:
                    folder_root=Path(a.folder_root) if a.folder_root else None,
                    push=(not a.no_push) and a.dispatcher != "stub",
                    allow_stale_install=a.allow_stale_install, lanes=a.lanes,
-                   toolkit_dir=Path(a.toolkits) if a.toolkits else None)
+                   toolkit_dir=Path(a.toolkits) if a.toolkits else None,
+                   research_mode=(a.research_mode or
+                                  ("lanes" if a.dispatcher == "stub" else "workflow")))
 
 
 def main(argv=None) -> int:
@@ -2212,6 +2274,10 @@ def main(argv=None) -> int:
 
     r = common(sub.add_parser("run", help="drive the run to PROMOTE, gate by gate"))
     r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
+    r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
+                   help="who runs RESEARCH: 'workflow' (default with the real "
+                        "dispatcher) hands it to the session as one persisted "
+                        "workflow per pillar; 'lanes' dispatches headless lanes")
     r.add_argument("--until", choices=STAGES, help="stop after this stage")
     r.add_argument("--max-wall-min", type=float, default=Options.max_wall_min,
                    help=f"wall-clock ceiling in minutes (default "

@@ -107,12 +107,16 @@ def bank_evidence(wb, subcap, n=3, *, tier="T2", published="2025-06-01"):
             wb,
             source_name=("NCUA Call Report 2025 — digital channel volumes"
                          if second else f"Annual Report 2025 p{i+1}"),
+            # Per-cell spans: identical URL + excerpt across cells is ONE row
+            # to the ledger (and to the server's content hash), which the
+            # `evidence_smear` gate then correctly reads as one source cited
+            # everywhere. The fixture used to rely on minted duplicates.
             source_url=(f"https://ncua.example/callreport/2025#{subcap}"
-                        if second else f"https://acme.example/ar25#p{i+1}"),
+                        if second else f"https://acme.example/ar25#p{i+1}-{subcap}"),
             tier=tier,
             excerpt=("Alkami digital banking went live in Q3 2024 and reached "
                      f"47 percent member adoption within ninety days, restated "
-                     f"at {50+i} percent in the 2025 report."),
+                     f"at {50+i} percent in the 2025 report ({subcap})."),
             subcaps=[subcap], published=published))
     return out
 
