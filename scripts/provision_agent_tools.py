@@ -105,8 +105,12 @@ EXTERNAL = {
     # `find-and-enrich-list-of-contacts` dropped: no body names it, and the
     # contacts pass is one company at a time by design (the poll is the
     # half that was skipped — `get-task-context` is not optional).
-    "clay":    ["mcp__Clay__find-and-enrich-contacts-at-company",
-                "mcp__Clay__find-and-enrich-company",
+    # The live Clay connector (measured 2026-09-30) FINDS with search-* (which
+    # returns the taskId) and ENRICHES with add-*-data-points; the retired
+    # find-and-enrich-* names no longer exist, so an agent granted only them
+    # could never run Clay.
+    "clay":    ["mcp__Clay__search-contacts",
+                "mcp__Clay__search-companies",
                 "mcp__Clay__get-task-context",
                 "mcp__Clay__add-contact-data-points",
                 "mcp__Clay__add-company-data-points"],
@@ -141,10 +145,10 @@ EXTERNAL = {
 #: firmographic-and-technographic pass. Both carry `get-task-context`
 #: because polling is the step that was skipped in the 20-contact loss.
 SLICES = {
-    "clay/people":  ["mcp__Clay__find-and-enrich-contacts-at-company",
+    "clay/people":  ["mcp__Clay__search-contacts",
                      "mcp__Clay__get-task-context",
                      "mcp__Clay__add-contact-data-points"],
-    "clay/company": ["mcp__Clay__find-and-enrich-company",
+    "clay/company": ["mcp__Clay__search-companies",
                      "mcp__Clay__get-task-context",
                      "mcp__Clay__add-company-data-points"],
 }

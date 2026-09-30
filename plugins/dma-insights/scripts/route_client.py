@@ -51,6 +51,18 @@ NEEDS_SCORING = "NEEDS_SCORING"
 READY_TO_SYNTHESISE = "READY_TO_SYNTHESISE"
 ALREADY_SERVED = "ALREADY_SERVED"
 AMBIGUOUS = "AMBIGUOUS"
+#: The owner asked for a new run of a client the corpus already holds
+#: (`--fresh`). Measured 2026-09-30 on SWBC: with one INGESTED run carrying
+#: 418 scored cells, every answer here pointed at that run and the command
+#: said "stop" — there was no way to say "a new versioned run, please",
+#: although versioning inside the existing folder is the documented, LIVE
+#: path (CLIENT-SELECTION.md section 2). It is the intake path, and the
+#: prior package is superseded in place, not merged.
+NEW_VERSION = "NEW_VERSION"
+#: Below this share of the universal cells, a "scored" run is reported as
+#: partial rather than simply synthesis-ready.
+PARTIAL_SHARE = 0.8
+UNIVERSAL_CELLS = 686
 
 
 def _slug(s: str) -> str:
@@ -89,8 +101,21 @@ def _scored(runs: list) -> list:
     return [r for r in runs if int(r.get("scored_cells") or 0) > 0]
 
 
-def decide(state: dict, asked_for: str) -> dict:
+def decide(state: dict, asked_for: str, fresh: bool = False) -> dict:
     """The verdict, from what the connector said and nothing else."""
+    if fresh and state.get("error") != "unknown_entity" and state.get("runs"):
+        runs = state.get("runs") or []
+        return {
+            "verdict": NEW_VERSION,
+            "display_id": state.get("display_id") or asked_for,
+            "runs": len(runs), "scored_runs": len(_scored(runs)),
+            "why": (f"a fresh run was asked for and {len(runs)} run(s) "
+                    f"exist; the new run versions inside the existing "
+                    f"client folder and supersedes its package in place "
+                    f"(archive-remote at engine.cli start)."),
+            "next": ("the assessment intake path: preflight, binding, then "
+                     "`engine.cli start` / `engine.pipeline run`"),
+        }
     if state.get("error") == "unknown_entity":
         near = state.get("did_you_mean") or []
         if near:
@@ -166,11 +191,19 @@ def decide(state: dict, asked_for: str) -> dict:
                      "is unfinished and RESUMES under dma-research — never "
                      "restarts, and never gets scored as it stands"),
         }
+    best = max(int(r.get("scored_cells") or 0) for r in scored)
+    partial = best < PARTIAL_SHARE * UNIVERSAL_CELLS
     return {
         "verdict": READY_TO_SYNTHESISE, "display_id": display_id,
         "runs": len(runs), "scored_runs": len(scored),
+        "max_scored_cells": best, "partial": partial,
         "why": (f"{len(scored)} of {len(runs)} run(s) carry scored cells and "
-                f"no page is promoted yet."),
+                f"no page is promoted yet."
+                + (f" PARTIAL: the best run scored {best} cells, under "
+                   f"{int(PARTIAL_SHARE * 100)}% of the {UNIVERSAL_CELLS} "
+                   f"universal cells — synthesising it serves a half-assessed "
+                   f"client; say so to the owner, or re-run with --fresh."
+                   if partial else "")),
         "next": "`dma-surface-production` on the newest scored run",
     }
 
@@ -180,11 +213,13 @@ def main(argv=None) -> int:
     ap.add_argument("--client", required=True,
                     help="display_id, or the client's name (it is slugged)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--fresh", action="store_true",
+                    help="the owner asked for a NEW run of an existing client")
     a = ap.parse_args(argv)
 
     did = a.client if re.fullmatch(r"[a-z0-9-]+", a.client) else _slug(a.client)
     try:
-        out = decide(client_state(did), did)
+        out = decide(client_state(did), did, fresh=a.fresh)
     except RuntimeError as e:
         print(f"ROUTE: UNKNOWN — {e}", file=sys.stderr)
         return 2
@@ -201,10 +236,10 @@ def main(argv=None) -> int:
                   f"{m.get('legal_name') or ''}")
     # Exit code carries the verdict so a routine can branch without parsing:
     # 0 = synthesise, 3 = score first, 4 = new engagement, 5 = already
-    # served, 6 = ambiguous. Never 1: that is reserved for the script itself
+    # served, 6 = ambiguous, 7 = new version (--fresh). Never 1: that is reserved for the script itself
     # failing, and a routine must not read its own crash as a routing answer.
     return {READY_TO_SYNTHESISE: 0, NEEDS_SCORING: 3, NEW_ENGAGEMENT: 4,
-            ALREADY_SERVED: 5, AMBIGUOUS: 6}[out["verdict"]]
+            ALREADY_SERVED: 5, AMBIGUOUS: 6, NEW_VERSION: 7}[out["verdict"]]
 
 
 if __name__ == "__main__":

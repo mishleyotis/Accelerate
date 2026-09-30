@@ -103,6 +103,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
+from . import intake as _intake
 from . import contract as C
 from . import ledger as L
 from . import runstate
@@ -277,9 +278,22 @@ def shared(wb: RunWorkbook) -> dict:
 
     return {
         "run_id": md.get("run_id"),
+        # THE ROOT, in every packet. Measured 2026-09-30 (SWBC, root outside
+        # the default): research briefs named `--run R` and never the root,
+        # so every lane's first engine call resolved to a directory that did
+        # not exist; lanes ran `find /`, rebuilt their own brief (>120 s each,
+        # eight at once) and slept on it before researching anything.
+        "run_root": str(wb.path.parent),
         "entity": md.get("entity_name"),
         "sub_vertical": md.get("sub_vertical"),
         "evidence_mode": md.get("evidence_mode"),
+        # HYBRID/INTERNAL: where the internal documents are and what to do
+        # with them. The run root is the workbook's directory (runstate).
+        "internal_documents": _intake.for_brief(wb.path.parent,
+                                                md.get("evidence_mode")),
+        "supplementary_sub_verticals": [
+            s for s in str(md.get("supplementary_sub_verticals") or "").split(",")
+            if s.strip()] or None,
         "stage": C.stage_of(md),
         "template_binding": _clean(md.get("template_binding")) or None,
         "estate_by_layer": by_layer,
@@ -701,7 +715,9 @@ def dispatch(wb: RunWorkbook, category: str, *,
         "cells_shown": len(ds),
     } for cap, ds in by_cap.items()]
 
-    stats = L.stats(wb)
+    # THIS category's window: lanes quit on a run-wide count (measured
+    # 2026-09-30: "151 searches against a budget of 60") that no longer gated them.
+    stats = L.stats(wb, category)
     packet = {
         "category": category,
         "capabilities": capabilities,
@@ -721,6 +737,8 @@ def dispatch(wb: RunWorkbook, category: str, *,
         "work_next": detail,
         "budget": {
             "searches_since_checkpoint": stats["search_ops_since_checkpoint"],
+            "remaining": max(0, stats["search_op_ceiling"]
+                             - stats["search_ops_since_checkpoint"]),
             "ceiling": stats["search_op_ceiling"],
             "checkpoint_required": stats["checkpoint_required"],
             "note": ("at the ceiling: `runstate.checkpoint(wb, '<where you "
@@ -740,11 +758,13 @@ def dispatch(wb: RunWorkbook, category: str, *,
             "(`volleys_owed` is what is still missing)",
             "an empty cell closes ONLY through `engine.cli absence` — and it "
             "is refused while the register names the cell",
+            "per capability: `engine.cli card`, parallel WebSearch in one turn, "
+            "log every one (chained, --subcap per answered cell)",
             "note as you go (`engine.memory note`); the notebook is what "
             "survives a compaction",
             "`leads_in` are sources ANOTHER lane opened that already name "
             "your cells (`my_cells`) — cite one with `engine.cli attach "
-            f"--run {_clean(wb.metadata().get('run_id'))} "
+            f"--run {_clean(wb.metadata().get('run_id'))} --root {wb.path.parent} "
             "--e-id <E> --subcap <your cell>`, which reuses the registered "
             "row instead of minting a duplicate. `also_names` is there to "
             "show you why the other lane opened it; it is the only thing in "
@@ -896,8 +916,9 @@ def dispatch(wb: RunWorkbook, category: str, *,
             packet["work_next"] = packet["work_next"][:keep]
             packet["trimmed"] = (
                 f"detail trimmed to {keep} cell(s) to stay under the packet "
-                f"ceiling; `engine.cli orient --category {category}` serves the "
-                f"rest one card at a time")
+                f"ceiling; `engine.cli card --capability <cap>` serves the rest a "
+                f"capability at a time (`engine.cli orient --category {category}` "
+                f"owns do_first and the STOP)")
             packet["packet_chars"] = len(json.dumps(packet, default=str))
             if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
                 break
@@ -920,6 +941,10 @@ def as_markdown(packet: dict) -> str:
         f"({s.get('sub_vertical') or 'sub-vertical not set'}, "
         f"{s.get('evidence_mode') or 'mode not set'} evidence) · "
         f"stage {s['stage']}.",
+        "",
+        f"**Every engine command takes `--run {s['run_id']} --root {s.get('run_root')}`** "
+        f"(from `{Path(__file__).resolve().parents[1]}`). This packet IS your brief: "
+        f"do not regenerate it.",
         "",
         "## What the run already knows",
         "",
@@ -1355,6 +1380,10 @@ def _md(title: str, packet: dict) -> str:
              f"({s.get('sub_vertical') or 'sub-vertical not set'}, "
              f"{s.get('evidence_mode') or 'mode not set'} evidence) · "
              f"stage {s.get('stage')}.", ""]
+    if s.get("run_root"):
+        lines += [f"**Every engine command takes `--run {s.get('run_id')} --root "
+                  f"{s.get('run_root')}`** (from `{Path(__file__).resolve().parents[1]}`). "
+                  f"This packet IS your brief: do not regenerate it.", ""]
     if packet.get("first_commands"):
         lines += ["## Your first commands", ""]
         lines += [f"    {c}" for c in packet["first_commands"]]
@@ -1460,16 +1489,35 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "rules": common_rules + [
             "the contact pass names the leaders `leadership` needs (min two "
             "named people); the machine technographic scan is registered at "
-            "the tier it earns, never T1",
+            "T1, never T4 (the connector's ET-11; clay_taxonomy.json)",
             "record every attempt with the outcome it had (RESOLVED, NOT_RUN, "
             "NO_SOURCE, FAILED) — a refused connector is stated, not dressed "
             "as a result"],
     })
-    return _write_lanes(out_dir, [
+    # THE CONNECTOR PASS IS NOT A LANE. Measured 2026-09-30 (SWBC): it was
+    # dispatched as a `claude -p` child like the other two, and a child holds
+    # no enrichment connector by design (they bind once, to the conducting
+    # session — run-assessment step 1). It spent its turns establishing that
+    # Clay was absent, wrote nothing, and asked to be "re-dispatched with a
+    # connector-bearing lane"; leadership and firmographics stayed OPEN and
+    # the stage stalled out. So it is written as an ORCHESTRATOR brief — the
+    # research relay's own pattern — for the session to service with one
+    # in-process subagent, which inherits the connectors.
+    owed_connector = connector["owed"]
+    out = _write_lanes(out_dir, [
         ("prelim-conductor", conductor, "PRELIM — the institution, before its capabilities"),
         ("prelim-techscan", scanner, "PRELIM — technology baseline"),
-        ("prelim-connectors", connector, "PRELIM — connector enrichment"),
     ], run=run, stage="PRELIM")
+    if owed_connector:
+        path = Path(out_dir) / "prelim-connectors.orchestrator.md"
+        connector["serviced_by"] = ("the conducting session: spawn ONE in-process "
+                                    "`enrichment-connector-specialist` subagent with "
+                                    "this file as its prompt")
+        path.write_text(_md("PRELIM — connector enrichment (ORCHESTRATOR)", connector),
+                        encoding="utf-8")
+        out["orchestrator"] = {"prompt_file": str(path), "owed": owed_connector,
+                               "agent": "enrichment-connector-specialist"}
+    return out
 
 
 def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
@@ -2562,6 +2610,8 @@ def main(argv=None) -> int:
                                help="one finding-challenger lane per category with "
                                     "unchallenged syntheses"))
     cb.add_argument("--out-dir", required=True)
+    cb.add_argument("--only", help="comma-separated categories (one workflow "
+                    "category pipeline challenges its own)")
     sb = common(sub.add_parser("scoring-batch",
                                help="one scoring lane per pillar; --critic or --solutions "
                                     "for those lanes instead"))
@@ -2627,7 +2677,9 @@ def main(argv=None) -> int:
         elif a.cmd == "prelim":
             print(json.dumps(prelim_brief(wb, run=run, out_dir=Path(a.out_dir)), indent=2))
         elif a.cmd == "challenge-batch":
-            print(json.dumps(challenge_batch(wb, run=run, out_dir=Path(a.out_dir)), indent=2))
+            only = [c.strip() for c in (getattr(a, "only", None) or "").split(",") if c.strip()]
+            print(json.dumps(challenge_batch(wb, run=run, out_dir=Path(a.out_dir),
+                                             categories=only or None), indent=2))
         elif a.cmd == "scoring-batch":
             print(json.dumps(scoring_batch(wb, run=run, out_dir=Path(a.out_dir),
                                            critic=a.critic, solutions=a.solutions), indent=2))

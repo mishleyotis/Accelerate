@@ -394,6 +394,52 @@ def _memory_backup_line(run, state: dict) -> str:
             f"must not fail a round — so nothing else will tell you.")
 
 
+def awaiting_workflow(event: dict) -> dict | None:
+    """RESEARCH handed to the session as persisted workflows: say exactly
+    which Workflow calls to start, from the driver's own handoff file.
+
+    The driver cannot start a Workflow (it is a Python process), so the
+    stage stops AWAITING_WORKFLOW. Before this handler the only record of
+    what to do next was prose in the command; a session that had not read
+    it would re-run the driver and get the same handoff forever."""
+    text = _response_text(event)
+    if "AWAITING_WORKFLOW" not in text:
+        return None
+    m = re.search(r"(/\S+?research_workflow\.json)", text)
+    doc = {}
+    if m:
+        try:
+            doc = json.loads(Path(m.group(1)).read_text())
+        except (OSError, ValueError):
+            doc = {}
+    lines = ["RESEARCH IS YOURS, AS PERSISTED WORKFLOWS — start ALL of these in "
+             "ONE message (they run side by side and show in /workflows):"]
+    for inv in doc.get("invocations") or []:
+        lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
+                     f"args: {json.dumps(inv)}}})")
+    if not doc:
+        lines.append(f"  (handoff file not readable — open "
+                     f"{m.group(1) if m else '<ROOT>/07_qa/research_workflow.json'})")
+    est = doc.get("estimate") or {}
+    if est:
+        fit = est.get("fits_budget")
+        lines.append(f"  ESTIMATE: ${est.get('usd')} for {est.get('open_cells')} open cells in "
+                     f"{est.get('batches')} batches ({est.get('basis')})"
+                     + (f"; spent ${est.get('spent_usd')} of ${est.get('budget_usd')}"
+                        if est.get("budget_usd") is not None else "")
+                     + ("" if fit is None else (" — fits" if fit else
+                        " — OVER BUDGET: raise --max-usd before starting, or the "
+                        "driver stops at the ceiling mid-stage")))
+    if doc.get("not_worked"):
+        lines.append(f"  WARNING: {doc['not_worked']}")
+    lines.append("  If Workflow is not available in this session, STOP and restart the "
+                 "session (tools rebind at start). Never substitute Agent calls or "
+                 "`--research-mode lanes`: neither is persisted, and lanes hold no connector.")
+    lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'engine.pipeline run'}")
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
+                                   "additionalContext": "\n".join(lines)}}
+
+
 def round_complete(event: dict) -> dict | None:
     """The checklist a ROUND_COMPLETE earns: every outstanding thing with the
     command that closes it, and the budget that limits how many more there
@@ -463,7 +509,7 @@ def on_post_tool_use(event: dict) -> dict | None:
         if ROUND_COMMAND.search(cmd):
             # A round that handed back is a DIFFERENT announcement from a
             # stage that flipped: it carries a checklist, not a state.
-            out = round_complete(event)
+            out = awaiting_workflow(event) or round_complete(event)
             if out:
                 return out
         if not STAGE_COMMANDS.search(cmd):

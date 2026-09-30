@@ -43,8 +43,20 @@ DENIALS = (
      "an x-access-token credential form"),
     (re.compile(r"\bgit\b[^\n|;&]*\bcredential\.helper\b"),
      "a git credential-helper write"),
+    # A FETCH, not a mention. Measured 2026-09-30 (SWBC, HYBRID): the rule
+    # matched the URL alone, so `engine.intake add --source-url <doc>` and
+    # `engine.cli evidence --origin internal --url <doc>` — recording where
+    # an internal document came from, which the protocol requires — were
+    # denied as "a shell fetch" although nothing was fetched. The URL now
+    # denies only beside something that retrieves it.
     (re.compile(
-        r"\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b",
+        # \A: evaluated once, from the start. Unanchored, re.search retried
+        # both [\s\S]* scans at every offset — cubic on a long command, which
+        # timed the adversarial garbage test out at 60 s.
+        r"\A(?=[\s\S]*\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b)"
+        r"[\s\S]*(?:\b(?:curl|wget|http|https|httpie|aria2c|lynx|w3m|links|"
+        r"xh|gsutil)\b(?!\s*[:=])|urlopen|urllib|requests\.(?:get|post)|"
+        r"httpx|fetch\s*\()",
         re.I),
      "a shell fetch of a Google Docs URL"),
     # QA audit F-K04-039 (28-09-2026): the service-account key on disk
@@ -105,7 +117,6 @@ def main() -> int:
             "permissionDecision": "deny",
             "permissionDecisionReason": reason,
         }}))
-    return 0
     return 0
 
 

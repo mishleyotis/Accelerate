@@ -52,6 +52,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -115,6 +116,30 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
             "3) put the binding to the engagement owner with AskUserQuestion "
             "and record what came back, verbatim, in binding_question. "
             "Then: engine.preflight check --file <this file>."),
+        # The row shapes, IN the file. They used to be Python comments on
+        # this literal, which json.dump drops — measured 2026-09-30 (SWBC):
+        # a first fill guessed `name`/`lob`/`evidence` and check refused 10
+        # rows for keys the skeleton had never shown.
+        "_row_shapes": {
+            "financials.statements[]": {"source_name": "", "url": "",
+                                        "kind": "", "period": "",
+                                        "tier": "", "retrieved_at": ""},
+            "financials.revenue_lines[]": {"line": "", "amount": "",
+                                           "currency": "", "period": "",
+                                           "share_pct": "", "implies_lob": "",
+                                           "source": ""},
+            "lob_census.lines_of_business[]": {"lob": "", "basis": "",
+                                               "revenue_share_pct": "",
+                                               "material": False},
+            "lob_census.candidates[]": {"sub_vertical": "",
+                                        "verdict": "ACCEPT|REJECT",
+                                        "reason": ""},
+            "binding.supplementary_sub_verticals": (
+                "multi-LOB only: ACCEPTed sub-verticals whose variant cells "
+                "ride additively on the primary binding; the owner's answer "
+                "must name them in binding_question."
+                "answer_supplementary_sub_verticals"),
+        },
         "run_id": run_id or "",
         "entity": {"name": entity, "entity_id": entity_id,
                    "website": website or "", "as_of": ""},
@@ -131,6 +156,7 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
         "binding_question": {
             "asked": False, "tool": "AskUserQuestion", "question": "",
             "options": [], "answer": "", "answer_sub_vertical": "",
+            "answer_supplementary_sub_verticals": [],
             "answered_by": "", "answered_at": "",
         },
         "mode_question": {
@@ -139,7 +165,8 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
             "answered_by": "", "answered_at": "",
         },
         "binding": {"sub_vertical": "", "evidence_mode": "",
-                    "scope_mode": "FULL"},
+                    "scope_mode": "FULL",
+                    "supplementary_sub_verticals": []},
     }
 
 
@@ -406,6 +433,43 @@ def _check_question(doc: dict, key: str, field: str, vocabulary: tuple,
     return value
 
 
+def _check_supplementary(doc: dict, sv: str, cen: dict, known: tuple,
+                         problems: list[str]) -> list[str]:
+    """The multi-LOB supplements: each one ACCEPTed by the census, distinct
+    from the primary, and named by the owner's recorded answer. A supplement
+    the owner never named is the agent widening scope on its own."""
+    binding = doc.get("binding") or {}
+    raw = binding.get("supplementary_sub_verticals") or []
+    if isinstance(raw, str):
+        raw = [s for s in raw.split(",")]
+    supp = [_clean(s).upper() for s in raw if _clean(s)]
+    q = doc.get("binding_question") or {}
+    ans = q.get("answer_supplementary_sub_verticals") or []
+    if isinstance(ans, str):
+        ans = ans.split(",")
+    answered = sorted({_clean(s).upper() for s in ans if _clean(s)})
+    for s in supp:
+        if s not in known:
+            problems.append(
+                f"binding.supplementary_sub_verticals names {s!r}, which is "
+                f"not one of {', '.join(known)}")
+        elif s == sv:
+            problems.append(
+                f"binding.supplementary_sub_verticals repeats the primary "
+                f"{sv}; a supplement is a SECOND line of business")
+        elif cen["verdicts"].get(s) != "ACCEPT":
+            problems.append(
+                f"binding.supplementary_sub_verticals names {s}, which "
+                f"lob_census.candidates does not ACCEPT")
+    if sorted(set(supp)) != answered:
+        problems.append(
+            f"binding.supplementary_sub_verticals is {sorted(set(supp))} but "
+            f"the owner's recorded answer names {answered} "
+            f"(binding_question.answer_supplementary_sub_verticals). Scope "
+            f"is the owner's; bind what came back.")
+    return sorted(set(supp))
+
+
 def check(doc: dict) -> dict:
     """Every refusal at once, so a fix pass closes them all in one turn."""
     problems: list[str] = []
@@ -458,11 +522,13 @@ def check(doc: dict) -> dict:
         problems.append(
             f"binding.scope_mode {scope!r} is not one of "
             f"{', '.join(C.SCOPE_MODES)}")
+    supp = _check_supplementary(doc, sv, cen, known_sv, problems)
 
     return {"ok": not problems, "problems": problems,
             "financials": fin, "census": cen,
             "binding": {"sub_vertical": sv, "evidence_mode": mode,
-                        "scope_mode": scope},
+                        "scope_mode": scope,
+                        "supplementary_sub_verticals": supp},
             "sha256": digest(doc)}
 
 
@@ -541,7 +607,11 @@ def bases(doc: dict, report: dict | None = None) -> dict:
     ) or "no line of business stated"
     if rejected:
         census += f" | rejected: {', '.join(sorted(rejected))}"
-    return {"sub_vertical": sv,
+    supp = list(report["binding"].get("supplementary_sub_verticals") or [])
+    if supp:
+        sv_basis += (f"; supplementary variant cells for "
+                     f"{', '.join(supp)} (multi-LOB, owner-confirmed)")
+    return {"sub_vertical": sv, "supplementary": supp,
             "evidence_mode": report["binding"]["evidence_mode"],
             "scope_mode": report["binding"]["scope_mode"],
             "sv_basis": sv_basis, "mode_basis": mode_basis,
@@ -589,6 +659,25 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
         except Exception as e:                              # noqa: BLE001
             banked.append(f"NOT_BANKED: {e}")
 
+    # THE DOMAIN, from the preflight that already names it. Measured
+    # 2026-09-30 (SWBC): `entity.website` was filled and read by nothing, so
+    # the PRELIM connector lane refused to enrich ("no entity_profile domain
+    # yet ... I did not guess swbc.com") on a run whose binding file named it.
+    site = re.sub(r"^(?:https?://)?(?:www\.)?", "",
+                  _clean((doc.get("entity") or {}).get("website")).lower()).split("/")[0]
+    cited = [e for e in banked if not str(e).startswith("NOT_")]
+    website = "NOT_RUN: no website in the preflight"
+    if site and cited:
+        try:
+            from . import profile
+            profile.firmographic(
+                wb, field="website", value=site,
+                as_of=_clean((doc.get("entity") or {}).get("as_of"))
+                or _utcnow()[:10], evidence=cited[0], confidence="High")
+            website = site
+        except Exception as e:                              # noqa: BLE001
+            website = f"NOT_RECORDED: {e}"
+
     lines = (doc.get("financials") or {}).get("revenue_lines") or []
     body = _render_review(doc, report, b)
     wb.append("Report_Narrative", {
@@ -599,7 +688,7 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
         "Kind": "section", "Author": "preflight", "Written_At": _utcnow(),
     })
     return {"preflight_sha": b["preflight_sha"], "evidence_banked": banked,
-            "revenue_lines": len(lines), "bases": b}
+            "revenue_lines": len(lines), "bases": b, "website": website}
 
 
 def _render_review(doc: dict, report: dict, b: dict) -> str:

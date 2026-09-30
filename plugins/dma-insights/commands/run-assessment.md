@@ -74,6 +74,10 @@ the step above, and a short baseline is the DEGRADED row of the table, not a
 provisioning defect. Any OTHER row red after the heal is a provisioning
 defect: report the row and stop.
 
+Pillar toolkits (the per-subcap diagnostic questions) are pulled by the KG
+stage into `<ROOT>/toolkits` when `DMA_TOOLKITS_DIR` is unset; set it only to
+pin a local copy.
+
 `engine.pipeline env` names every hard dependency (the claude CLI, a
 connector identity rung, the **enrichment-connector baseline** you just wrote,
 `agent_run.py`, `ship_page.py`, `mcp_raw.py`, `drive_fetch.py`, the pinned
@@ -86,11 +90,17 @@ check's own fix line.
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/route_client.py" --client "$ARGUMENTS" --json
 ```
 
+When the person asked for a NEW run of a client the corpus already holds,
+add `--fresh`: exit 7 NEW_VERSION is yours, and starting the run supersedes
+the folder's previous package in place (`drive_fetch.py archive-remote`, run
+by `open_folder` before its first push — moves, never deletes).
+
 Obey the exit code: 4 NEW_ENGAGEMENT is yours; 3 NEEDS_SCORING means the
 research package exists and scoring is the missing step (`engine.pipeline
 plan` on that run tells you where it stands — resume it, do not restart);
 0 READY_TO_SYNTHESISE and 5 ALREADY_SERVED are the synthesis lane's, stop and
-name the run; 6 AMBIGUOUS — report the near matches, never guess; 2 is the
+name the run (and when the JSON says `partial: true`, say the run is
+half-assessed and offer `--fresh`); 6 AMBIGUOUS — report the near matches, never guess; 2 is the
 script failing, which is not a routing answer.
 
 Then the three places work already exists, before any research
@@ -117,6 +127,21 @@ in one `AskUserQuestion` and the evidence mode in another, and record the
 answers verbatim with who answered and when. Then
 `python3 -m engine.preflight check --file <ROOT>/preflight.json`
 lists every remaining problem at once.
+**Multi-LOB.** The binding has ONE primary `sub_vertical`, whose variant
+cells replace the universal cells they vary. When the owner wants other
+ACCEPTed lines of business covered too, offer it in the same question: each
+named one goes in `binding.supplementary_sub_verticals` AND, verbatim from the
+answer, in `binding_question.answer_supplementary_sub_verticals`. A
+supplement adds only its own variant (tier-2) cells, additively — nothing
+universal is researched twice. The skeleton's `_row_shapes` shows every
+row's keys.
+
+**HYBRID / INTERNAL.** Land every internal document before starting:
+`python3 -m engine.intake add --root <ROOT> --file <doc> --title '<title>'
+[--source-url <where it lives>]`. PREFLIGHT refuses a HYBRID/INTERNAL run with
+an empty `01_intake/`, every lane's brief lists the documents, and HANDOFF
+refuses a run that registered no `--origin internal` evidence.
+
 Where the census leaves exactly one reading, `engine.preflight autobind`
 may bind PUBLIC mode and record that nobody was asked and why; where it is
 ambiguous it refuses, and that is the answer — never hand-write the binding.
@@ -146,6 +171,36 @@ over budget, with the figure) before the next command.
 ```bash
 python3 -m engine.pipeline run --run <RUN_ID> --root <ROOT> --max-wall-min 240 --lane-retries 1 --page-retries 2
 ```
+
+**RESEARCH runs as persisted workflows — started by you.** The driver is a
+Python process and cannot start a Workflow, so at RESEARCH it stops with
+outcome `AWAITING_WORKFLOW` (exit 0) and writes
+`<ROOT>/07_qa/research_workflow.json`: the workflow
+(`${CLAUDE_PLUGIN_ROOT}/workflows/dma-pillar-research.js`), one `args` object
+PER CATEGORY still to pass, and a measured `estimate` (open cells, batches,
+USD, and whether it fits `--max-usd`). In ONE message, start every invocation
+— `Workflow({scriptPath: <workflow>, args: <invocation>})` per category.
+Concurrency is capped per workflow (min(16, CPUs−2)), so sixteen category
+workflows are what makes research parallel; inside each, the category's open
+cells run as capability batches of ≤ 12 cells (a fresh context each), then an
+independent challenge and the floors gate, up to two rounds. Every batch
+writes through ONE `engine.cli batch` per capability (one workbook load, lock
+and save instead of ~10 s per command under the run-wide lock). The agents
+run in THIS session and hold Exa, Tavily and Clay themselves; one that finds
+none stops and returns `NO_CONNECTORS`. When all have returned, run the
+file's `then` command: the driver prices the workflow agents into the cost
+ledger (so the ceiling sees them), re-reads the floors gates, re-hands only
+categories still failing — and says so if the last handoff was never worked.
+If this session has no Workflow tool (a resumed session can lose it and the
+connectors), restart the session; `--research-mode lanes` is refused with the
+real dispatcher unless `--allow-lanes` waives it, because lanes hold no
+connector and cannot pass a gate.
+
+**The run survives a fresh container.** The driver snapshots the run
+(workbook, evidence, QA, briefs; not transcripts) to the client's Drive
+`memory-backup` folder at every stage boundary. On a new container, restore
+before resuming: `python3 -m engine.snapshot restore --run <R> --root <ROOT>
+--client "<Entity>"`.
 
 **The ceilings are enforced now, and they are the defaults** — name them only
 to change them. `--max-usd` defaults to $5 per pillar in scope and STOPS the
@@ -179,6 +234,30 @@ version A through `ship_page.py --claim`) → PACKAGE (technographic scan,
 `assemble package`, the gold gate) → INGEST_B → PAGES_B (the A pages restaged
 from disk; overview, insights, platform, then context) → PROMOTE. Every stage
 lands `STAGE_<NAME>` in Gate_Log with its wall clock and a cost-ledger line.
+
+**Service the orchestrator briefs — they are yours.** The driver's lanes hold
+no enrichment connector, so connector work comes back to you as prompt files,
+announced in the log with `[RELAY]`: PRELIM writes
+`briefs/prelim_r<N>/prelim-connectors.orchestrator.md` (leadership,
+firmographics, peers) and waits for those sections; each research round
+writes its relay batch under `briefs/relay_r<N>/`. For each, spawn ONE
+in-process subagent (`enrichment-connector-specialist` for PRELIM,
+`enrichment-web-specialist` for relay rows) with the file as its prompt — it
+inherits your connectors. Run them on the fast tier (`model: sonnet`) and group
+the batches by pillar — four subagents, not one per file: relay service is
+spend the run's cost ledger never sees (measured 2026-09-30: ~1M subagent
+tokens for 66 requests on the conducting session's own tier). Watch with
+`tail -F <ROOT>/pipeline.log | grep --line-buffered '\[RELAY\]\|FAIL\|STOPPED'`.
+
+**To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
+— it signals the pid that holds the run's driver lock. Never kill a pid a shell
+captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
+real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
+
+**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
+It signals the pid that holds the run's driver lock. Never kill a pid a shell
+captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
+real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
 
 When it stops: a stage FAIL names the blocker (read `engine.pipeline plan`
 and the stage's Gate_Log detail, repair at the source it names, run again —

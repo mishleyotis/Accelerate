@@ -82,7 +82,7 @@
       "sources": [
         {
           "connector": "clay",
-          "serves": "the leadership roster's contact routes — email, linkedin_url, phone, enrichment_basis — via find-and-enrich-contacts-at-company and Summarize Work History",
+          "serves": "the leadership roster's contact routes — email, linkedin_url, phone, enrichment_basis — via search-contacts + add-contact-data-points and Summarize Work History",
           "tier_band": "T2-T3",
           "status": "wired",
           "grounding": "producer-session MCP connector; packages/shared/enrichment_register.json (overview.leadership: basis_key enrichment_basis, contact_keys email/linkedin_url/phone)",

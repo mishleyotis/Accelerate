@@ -451,3 +451,69 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ── the capability card: one read, one batch of searches ──────────────────
+
+def capability_card(wb, capability: str, *, run=None) -> dict:
+    """Every OPEN cell of one capability, the volleys each still owes, the
+    diagnostic questions merged by facet, and one ready-to-run log line per
+    facet that credits every cell the query answers.
+
+    WHY. Measured 2026-09-30 on the SWBC run (round 1, 16 lanes): 50 `orient`
+    calls for 82 web searches, 25 of those searches logged, 1.0 cell per
+    logged search against the gate's own grain floor of 1.5. A card per CELL
+    makes a lane pay a turn per cell per step, and a lane's per-turn price
+    is its whole context, re-read — so turns, not tokens, are the bill
+    (~$0.03 each). One card per CAPABILITY lets a lane fire a facet's query
+    once for the capability's 4-6 cells (in parallel WebSearch calls, one
+    turn) and log it once with a `--subcap` per cell (one chained Bash
+    turn). Nothing is loosened: each cell still needs its own logged volley
+    per facet, its own evidence, synthesis and challenge — the card only
+    stops a lane paying for them one cell at a time."""
+    from . import contract as C, kg, ledger as L
+    cap = str(capability).strip()
+    md = wb.metadata()
+    rid = md.get("run_id") or "<R>"
+    root = str(run.root) if run is not None else str(wb.path.parent)
+    searches = wb.rows("Search_Log")
+    cells = [c for c in wb.selected_subcaps() if c.rsplit(".", 1)[0] == cap
+             or ".".join(c.split(".")[:2]) == cap]
+    rows = {str(r.get("SubCap_ID")): r for r in wb.scoring_rows()}
+    names = C.subcap_names()
+    open_cells, facets = [], {}
+    for c in cells:
+        r = rows.get(c) or {}
+        if str(r.get("Dominant_Claim") or "").strip() and \
+                str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE":
+            continue                                   # synthesised with evidence
+        vs = L.volley_status(wb, c, searches=searches)
+        dq = kg.dqs_for(wb, c)
+        open_cells.append({"cell": c, "name": names.get(c, ""),
+                           "missing": vs["missing"]})
+        for q in dq["ask"]:
+            f = str(q.get("facet") or "")
+            if f not in vs["missing"]:
+                continue
+            slot = facets.setdefault(f, {"cells": [], "questions": []})
+            if c not in slot["cells"]:
+                slot["cells"].append(c)
+            if q.get("question") and len(slot["questions"]) < 6:
+                slot["questions"].append({"cell": c, "q": str(q["question"]).replace(
+                    "{entity}", str(md.get("entity_name") or "the entity"))[:220]})
+    for f, slot in facets.items():
+        subs = " ".join(f"--subcap {c}" for c in slot["cells"])
+        slot["log"] = (f"python3 -m engine.cli search --run {rid} --root {root} "
+                       f"{subs} --facet {f} --tool web_search --query '<Q>' "
+                       f"--hits N --kept K")
+    return {
+        "capability": cap, "open_cells": open_cells,
+        "facets_owed": facets,
+        "how": ("1) fire every owed facet's query for this capability in ONE "
+                "turn (parallel WebSearch calls); 2) log them all in ONE Bash "
+                "call, the `log` lines &&-chained, each with every cell its "
+                "result genuinely answers; 3) register evidence and attach it "
+                "per cell; 4) synthesise each cell (chain the calls). A cell "
+                "a query does not answer gets its own query — never credit a "
+                "cell a result is silent on."),
+    }

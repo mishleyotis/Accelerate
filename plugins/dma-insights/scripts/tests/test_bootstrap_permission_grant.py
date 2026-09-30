@@ -57,9 +57,11 @@ BUILTIN = [
     # an inert belt for exactly the stale-hook session it exists to cover
     # (permissions reference; the repo's own deny rules already use
     # `Read(//root/.dma/sa.json)`). Found in review, 2026-09-04.
-    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
-    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
-    "Write(//tmp/**)", "Edit(//tmp/**)",
+    # Edit(path) covers every file-editing tool; Write(path) rules are ignored
+    # by file permission checks and only printed warnings (2026-09-30).
+    "Edit(//root/.dma/**)",
+    "Edit(//home/claude/dma_output/**)",
+    "Edit(//tmp/**)",
 ]
 
 

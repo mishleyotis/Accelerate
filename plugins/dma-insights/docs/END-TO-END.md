@@ -640,3 +640,23 @@ exist, one was a person, and one read a checkpoint no script wrote
 worst first, with the file it names. Nine BLOCKERs remain open; none of them
 is in the research→assessment→ingest path this document describes, and each
 is stated rather than absorbed.
+
+
+## RESEARCH as persisted workflows (2026-09-30)
+
+`engine.pipeline run` cannot start a Workflow — it is a Python process — so
+with the real dispatcher it stops at RESEARCH with outcome `AWAITING_WORKFLOW`
+and writes `<ROOT>/07_qa/research_workflow.json`: the plugin's
+`workflows/dma-pillar-research.js`, one `args` object per category (with its
+capability batches of ≤ 12 open cells) and a measured cost estimate. The
+conducting session starts one Workflow per category in one message — the
+runtime caps concurrency per workflow, so per-category workflows are the
+parallelism — and each runs its batches in parallel, then an independent
+challenge and the floors gate, up to two rounds; the agents hold the
+enrichment connectors themselves and write through `engine.cli batch`. The
+session then re-runs the driver, which charges the workflow agents' spend to
+the cost ledger, verifies the gates and goes on to HANDOFF. `--research-mode
+lanes` is the headless-lane path the stub uses; with the real dispatcher it
+needs `--allow-lanes`. The driver snapshots the run to Drive at every stage
+boundary (`engine.snapshot`), and `engine.snapshot restore` brings it back
+on a fresh container.

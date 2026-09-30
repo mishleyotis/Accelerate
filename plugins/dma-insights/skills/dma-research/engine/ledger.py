@@ -191,6 +191,24 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     # scanner erased. Minting and appending inside ONE `transaction()`
     # closes both: the lock is held from the read of the maximum through the
     # save of the rows that use it.
+    # THE SAME SPAN IS THE SAME ROW. Measured 2026-09-30 (SWBC relay): a
+    # registration whose output was lost was re-run and minted E-224..E-226
+    # for one TechFabric span — three identities for one document, which
+    # `single_source_fact` and corroboration both miscount. An identical
+    # URL + excerpt now reuses the existing row and cites it from any new
+    # cell through `attach_evidence`, the reuse loop's own write.
+    _norm = " ".join(text.split())
+    _url = str(source_url or "").strip()
+    dup = next((str(r["E_ID"]) for r in wb.rows("Evidence_Detail")
+                if r.get("E_ID") and str(r.get("Source_URL") or "").strip() == _url
+                and " ".join(str(r.get("Excerpt") or "").split()) == _norm), None)
+    if dup:
+        new_cells = [c for c in cells if dup not in
+                     _split_ids((wb.scoring_row(c) or {}).get("Evidence_IDs"))
+                     and f"{dup}:" not in str((wb.scoring_row(c) or {}).get("Evidence_IDs") or "")]
+        if new_cells:
+            attach_evidence(wb, dup, new_cells, actor=actor)
+        return dup
     with wb.transaction("append_evidence"):
         eid = wb.next_evidence_id()
         # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
@@ -235,7 +253,8 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         # INSIDE the transaction. Both of these WRITE, and a write that
         # lands after the lock is released is a write another process can
         # interleave with — the whole defect, moved four lines down.
-        wb.save()
+        if wb.autosave:           # a batch (autosave off) saves once at its end
+            wb.save()
         wb.recompute_coverage()
     return eid
 
@@ -346,7 +365,8 @@ def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
                 "Detail": f"cited {eid} ({str(row.get('Source_Name') or '')[:80]}) "
                           f"registered against {', '.join(named)}",
                 "Session": _agent_session()}, save=False)
-        wb.save()
+        if wb.autosave:
+            wb.save()
         wb.recompute_coverage()
     return {"e_id": eid, "subcaps": cells, "fact_id": fact_id,
             "now_names": named, "minted": False}
@@ -517,7 +537,36 @@ def assert_actor_scope(actor, op: str, cells=None) -> None:
 
 # ── search ───────────────────────────────────────────────────────────────
 
-def _ops_since_checkpoint(wb: RunWorkbook) -> int:
+#: The tools a category LANE holds. Every other SEARCH_TOOLS entry is a
+#: connector the lane cannot call: its rows come from the conducting
+#: session's relay subagents — a different conversation, bounded by its own
+#: batch file. Measured 2026-09-30 (SWBC): relay rows were charged to the
+#: category window, so a lane was walled at "61/60" after firing five
+#: searches of its own.
+LANE_SEARCH_TOOLS = ("web_search", "web_fetch")
+
+
+def _search_scope(row: dict) -> str:
+    """The conversation a Search_Log row belongs to: its cell's category, or
+    PRELIM for institution-profile retrieval that names no cell, or RELAY for
+    a connector search the in-session relay fired."""
+    cell = str(row.get("SubCap_ID") or "").strip()
+    if (str(row.get("Tool") or "").strip() not in LANE_SEARCH_TOOLS
+            and not _is_category_producer(row.get("Actor"), cell)):
+        return "RELAY"
+    return cell.split(".")[0] if cell else "PRELIM"
+
+
+def _is_category_producer(actor, cell: str) -> bool:
+    """A connector search a category researcher fired ITSELF (an in-session
+    workflow agent holds the connectors) is that category's retrieval and
+    counts against its window; only the relay's searches are RELAY's."""
+    a = str(actor or "").strip().lower()
+    cat = (cell.split(".")[0] if cell else "").lower()
+    return bool(cat) and a == f"research-{cat}-producer"
+
+
+def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     """Searches FIRED since the last recorded checkpoint.
 
     Read from the workbook's own metadata rather than by importing runstate,
@@ -542,11 +591,28 @@ def _ops_since_checkpoint(wb: RunWorkbook) -> int:
     """
     rows = wb.rows("Search_Log")
     try:
-        mark = int(json.loads(wb.metadata().get("checkpoint") or "{}")
-                   .get("search_ops") or 0)
+        cp = json.loads(wb.metadata().get("checkpoint") or "{}")
     except (ValueError, TypeError):
-        mark = 0
-    since = rows[max(0, mark):]
+        cp = {}
+    # PER CONVERSATION MEANS PER LANE. Measured 2026-09-30 (SWBC): the window
+    # was run-wide — Search_Log carries no actor, and one global mark — so
+    # sixteen parallel category lanes shared ONE window of 60. PRELIM had
+    # already spent part of it; two lanes were walled at 60 in round 0, and
+    # no lane could checkpoint (there is no CLI for it). A 760-cell run got
+    # 60 searches. The window is now scoped to the conversation's category
+    # (PRELIM on its own), each with its own mark.
+    marks = cp.get("marks") if isinstance(cp.get("marks"), dict) else {}
+    if scope is not None and scope in marks:
+        mark = int(marks.get(scope) or 0)
+    else:
+        try:
+            mark = int(cp.get("search_ops") or 0)
+        except (ValueError, TypeError):
+            mark = 0
+    since = [(i, r) for i, r in enumerate(rows) if i >= max(0, mark)]
+    if scope is not None:
+        since = [(i, r) for i, r in since if _search_scope(r) == scope]
+    since = [r for _i, r in since]
     return len({(str(r.get("Query") or "").strip(),
                  str(r.get("Tool") or "").strip(),
                  str(r.get("Facet") or "").strip()) for r in since})
@@ -624,11 +690,17 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     # start, because the ceiling is per CONVERSATION — a long run must be
     # able to checkpoint and legitimately continue, which is exactly the
     # context-preserving behaviour the ceiling exists to force.
-    since = _ops_since_checkpoint(wb)
+    # Every search is bounded (the wall test): lane tools and a category
+    # researcher's own connector volleys against the category's window, the
+    # relay's connector volleys against RELAY's. Uncounted relay rows were a
+    # hole once researchers began firing connectors themselves (2026-09-30).
+    scope = _search_scope({"Tool": tool, "Actor": actor,
+                           "SubCap_ID": "" if prelim or not cells else cells[0]})
+    since = _ops_since_checkpoint(wb, scope)
     if since >= SEARCH_OP_CEILING:
         raise LedgerRefusal(
-            f"search-op ceiling reached: {since} since the last checkpoint, "
-            f"cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
+            f"search-op ceiling reached for {scope}: {since} since its last "
+            f"checkpoint, cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
             f"`runstate.checkpoint(wb, '<where you got to>')` records the "
             f"position in the workbook and resets the window, and a fresh "
             f"conversation resumes from it. This is the wall that keeps a "
@@ -1140,10 +1212,14 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # just no longer decides. The gate itself is unchanged in strength: over
     # the cap since the last checkpoint still stops, which is the half a
     # loosened ceiling would have silently lost (MEM-0338 / R27).
-    since = _ops_since_checkpoint(wb)
+    since = _ops_since_checkpoint(wb, category)
     return {
+        # `search_ops` is a LIFETIME count (spend worth seeing); the budget is
+        # `search_ops_since_checkpoint` against the ceiling. A lane that read
+        # the first as usage stopped at "55 of 60" with 1 used (2026-09-30).
         "search_ops": n,
         "search_ops_since_checkpoint": since,
+        "window_remaining": max(0, SEARCH_OP_CEILING - since),
         "search_op_ceiling": SEARCH_OP_CEILING,
         "checkpoint_required": since >= SEARCH_OP_CEILING,
         "evidence_items": len(ev),

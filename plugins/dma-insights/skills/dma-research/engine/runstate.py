@@ -149,7 +149,8 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
           selected: list[str] | None = None,
           evidence_mode: str = "PUBLIC",
           sv_basis: str | None = None, mode_basis: str | None = None,
-          lob_census: str | None = None) -> Run:
+          lob_census: str | None = None,
+          supplementary: list[str] | tuple[str, ...] = ()) -> Run:
     """Create the run tree and its workbook, metadata already resolved."""
     if sv_basis is not None:
         sv_basis = vet_basis("--sv-basis", sv_basis)
@@ -166,7 +167,8 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
                        scope_mode=scope_mode, reference_date=reference_date,
                        overwrite=overwrite, selected=selected,
                        evidence_mode=evidence_mode, sv_basis=sv_basis,
-                       mode_basis=mode_basis, lob_census=lob_census)
+                       mode_basis=mode_basis, lob_census=lob_census,
+                       supplementary=supplementary)
     run = Run(run_id=run_id, root=base, workbook_path=path)
     # BIND THE TEMPLATES BEFORE ANYTHING IS RESEARCHED. The pinned report
     # Docs, workbook shape and gold reference are hashed into the workbook
@@ -227,7 +229,7 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
     }
 
 
-def checkpoint(wb: RunWorkbook, position: str) -> None:
+def checkpoint(wb: RunWorkbook, position: str, scope=None) -> None:
     """Record where the run got to, in the artefact that survives.
 
     The search-op count is recorded WITH the position because the ceiling is
@@ -236,10 +238,21 @@ def checkpoint(wb: RunWorkbook, position: str) -> None:
     mark to measure from. Without it the ceiling would be a lifetime budget
     and a long run could never legitimately continue past it.
     """
+    n = len(wb.rows("Search_Log"))
+    try:
+        prev = json.loads(wb.metadata().get("checkpoint") or "{}")
+    except (ValueError, TypeError):
+        prev = {}
+    marks = dict(prev.get("marks") or {}) if isinstance(prev.get("marks"), dict) else {}
+    scopes = [scope] if isinstance(scope, str) else list(scope or [])
+    for s in scopes:
+        marks[s] = n
     wb.set_metadata("checkpoint", json.dumps(
         {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
          "position": position,
-         "search_ops": len(wb.rows("Search_Log"))},
+         # the run-wide mark moves only on an unscoped checkpoint
+         "search_ops": n if not scopes else int(prev.get("search_ops") or 0),
+         "marks": marks},
         separators=(",", ":")))
 
 
@@ -374,6 +387,19 @@ def _hostname() -> str:
         return ""
 
 
+def _pid_is_driver(held: dict, run: "Run") -> bool:
+    """True when the lock's pid is alive on this host and is an
+    `engine.pipeline` process for this run."""
+    try:
+        pid = int(held.get("pid") or 0)
+        if not pid or pid == os.getpid() or (held.get("host") and held["host"] != _hostname()):
+            return False
+        cmd = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace")
+        return "engine.pipeline" in cmd and run.run_id in cmd
+    except (OSError, ValueError):
+        return False
+
+
 def acquire_driver_lock(run: "Run", *, command: str = "", force: bool = False) -> dict:
     """Claim this run for this process, or refuse with who holds it.
 
@@ -381,6 +407,11 @@ def acquire_driver_lock(run: "Run", *, command: str = "", force: bool = False) -
     gone, and a run nobody can resume because a dead process's file is still
     there is the worse failure."""
     held = read_driver_lock(run)
+    if held and not held["live"] and not force and _pid_is_driver(held, run):
+        # A stale heartbeat on a process that is still a driver of THIS run
+        # is a live lock (measured 2026-09-30: the reap let a second driver
+        # start beside one whose batch had run past the staleness window).
+        held = dict(held, live=True)
     if held and held["live"] and not force and int(held.get("pid") or -1) != os.getpid():
         raise DriverLocked(
             f"run {run.run_id} is held by pid {held.get('pid')} on "

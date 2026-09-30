@@ -200,7 +200,9 @@ def test_the_people_producer_can_still_reach_clay():
     allow-list that quietly removed the tool would look like the same defect
     and be much harder to see."""
     t = tools_of(AGENTS / "production" / "overview" / "overview-people-producer.md")
-    assert "mcp__Clay__find-and-enrich-contacts-at-company" in t
+    # the live connector's names (2026-09-30): find, then enrich
+    assert "mcp__Clay__search-contacts" in t
+    assert "mcp__Clay__add-contact-data-points" in t
     assert "mcp__Clay__get-task-context" in t, (
         "polling is the half that was skipped; without the tool it cannot be done")
 

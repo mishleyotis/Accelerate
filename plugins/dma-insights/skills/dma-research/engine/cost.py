@@ -180,6 +180,25 @@ PHASE_MINUTES = {
 }
 
 
+def host_lanes(requested: int = PARALLEL_LANES) -> int:
+    """The lanes this host will actually run — `agent_run.py capacity`.
+
+    Measured 2026-09-30: the schedule printed "16 lanes, 34 min" while
+    agent_run capped the same batch at 8 (4 CPUs x 2 lanes/CPU), so research
+    ran in two waves and the wall-clock promise was off by half. The cap is
+    agent_run's policy; the schedule only reports it."""
+    try:
+        import importlib.util
+        path = Path(__file__).resolve().parents[3] / "scripts" / "agent_run.py"
+        spec = importlib.util.spec_from_file_location("_agent_run_cap", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)                       # type: ignore[union-attr]
+        cap = mod.host_capacity(requested)
+        return int(cap.get("lanes") or requested) if isinstance(cap, dict) else requested
+    except Exception:                                      # noqa: BLE001
+        return requested
+
+
 def schedule(subcaps: int, capabilities: int | None = None,
              lanes: int = PARALLEL_LANES) -> dict:
     """Wall clock, given the fan-out. Parallelism is a property of the
@@ -190,7 +209,10 @@ def schedule(subcaps: int, capabilities: int | None = None,
     research_serial = caps * MIN_PER_CAPABILITY_PASS
     research_parallel = research_serial / max(1, lanes)
     phases = dict(PHASE_MINUTES)
-    phases["category research (16 lanes, in parallel)"] = round(
+    phases.pop("category research (16 lanes, in parallel)", None)
+    waves = -(-PARALLEL_LANES // max(1, lanes))
+    phases[f"category research ({min(lanes, PARALLEL_LANES)} lanes"
+           + (f", {waves} waves" if waves > 1 else ", in parallel") + ")"] = round(
         research_parallel, 1)
     total = sum(v for v in phases.values() if v)
     return {
@@ -552,6 +574,81 @@ def record(run, *, stage: str, elapsed_s: float | None = None,
     return rec
 
 
+#: Where a session's persisted workflows keep their agent transcripts.
+WORKFLOW_TRANSCRIPTS = Path.home() / ".claude" / "projects"
+_CAPTURED = "workflow_costs_recorded.json"
+
+
+def _model_of(name: str) -> str:
+    n = str(name or "").lower()
+    return next((m for m in RATES if m in n), "sonnet")
+
+
+def capture_workflows(run, *, base: Path | None = None) -> dict:
+    """Charge this run's workflow agents to its ledger — the DELTA since the
+    last capture, for every agent, finished, stopped or still running.
+
+    I-37, measured 2026-09-30: research moved into persisted workflows that
+    run in the conducting session, and their spend reached no ledger — the
+    driver read $38 against a $110 ceiling while the session had spent more,
+    so the ceiling could not stop what it could not see. Each agent's
+    transcript carries its per-turn usage; an agent belongs to this run when
+    its transcript names the run id. What was already charged per agent is
+    kept in the run's QA folder, so a re-run charges only what is new — a
+    stopped workflow's partial spend counts, and nothing counts twice."""
+    base = Path(base or WORKFLOW_TRANSCRIPTS)
+    seen_path = run.qa_dir / _CAPTURED
+    try:
+        charged = json.loads(seen_path.read_text())
+        if not isinstance(charged, dict):
+            charged = {}
+    except (OSError, ValueError):
+        charged = {}
+    usd_total, turns_total, n = 0.0, 0, 0
+    tok_sum = {"cache_read": 0, "cache_write": 0, "uncached": 0, "output": 0}
+    model = "sonnet"
+    for f in sorted(base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")):
+        text = f.read_text(errors="replace")
+        if run.run_id not in text:
+            continue
+        aid = f.stem[len("agent-"):]
+        tok = dict.fromkeys(tok_sum, 0)
+        turns = 0
+        for line in text.splitlines():
+            try:
+                e = json.loads(line)
+            except ValueError:
+                continue
+            if e.get("type") != "assistant":
+                continue
+            m = e.get("message") or {}
+            u = m.get("usage") or {}
+            turns += 1
+            model = _model_of(m.get("model"))
+            tok["cache_read"] += int(u.get("cache_read_input_tokens") or 0)
+            tok["cache_write"] += int(u.get("cache_creation_input_tokens") or 0)
+            tok["uncached"] += int(u.get("input_tokens") or 0)
+            tok["output"] += int(u.get("output_tokens") or 0)
+        usd = cost_of(model=model, **tok)["total_usd"]
+        prev = charged.get(aid) or {"usd": 0.0, "turns": 0}
+        d_usd, d_turns = round(usd - float(prev["usd"]), 4), turns - int(prev["turns"])
+        if d_usd <= 0 and d_turns <= 0:
+            continue
+        usd_total += max(0.0, d_usd)
+        turns_total += max(0, d_turns)
+        n += 1
+        for k in tok_sum:
+            tok_sum[k] += max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
+        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok}
+    if n:
+        record(run, stage="RESEARCH", elapsed_s=0.0, usd=round(usd_total, 4),
+               turns=turns_total, tokens=tok_sum, model=model, lanes=n,
+               note=f"workflow agents: {n} charged (delta since last capture)")
+        seen_path.parent.mkdir(parents=True, exist_ok=True)
+        seen_path.write_text(json.dumps(charged))
+    return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total}
+
+
 def _totals(rows: list[dict]) -> tuple[dict, dict]:
     timings: dict = {}
     usd_total = 0.0
@@ -742,6 +839,10 @@ def main(argv=None) -> int:
     e.add_argument("--sv", default="CU"); e.add_argument("--scope",
                                                          default="T1_CORE")
     e.add_argument("--json", action="store_true")
+    # The run's OWN cell set (run-assessment step 4 documents this form).
+    # Measured 2026-09-30: without it the estimate priced the catalogue's
+    # default selection (IB 694) while the SWBC run held 760 multi-LOB cells.
+    e.add_argument("--run"); e.add_argument("--root")
     lf = sub.add_parser("lane-fit",
                         help="can each category's work fit the turns its lane gets?")
     lf.add_argument("--run"); lf.add_argument("--root")
@@ -880,6 +981,11 @@ def main(argv=None) -> int:
             cells = tax.selected(a.sv, a.scope)
         caps = len({".".join(str(c).split(".")[:2]) for c in cells})
         sch = schedule(len(cells), caps, a.lanes)
+        # The same projection at the lanes THIS host will actually run.
+        cap = host_lanes(a.lanes)
+        sch["on_host"] = schedule(len(cells), caps, cap) if cap != a.lanes else None
+        if sch["on_host"] and not getattr(a, "json", False):
+            sch = dict(sch["on_host"], fan_out=a.lanes)
         if a.json:
             print(json.dumps(sch, indent=2))
             return 0 if sch["within_target"] else 1
@@ -898,7 +1004,7 @@ def main(argv=None) -> int:
 
     if a.cmd == "lane-fit":
         from . import runstate
-        run = runstate.locate(a.run, Path(a.root) / a.run if a.root else None)
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
         fit = lane_fit(run.open())
         if a.json:
             print(json.dumps(fit, indent=2))
@@ -920,7 +1026,11 @@ def main(argv=None) -> int:
         print(f"\n  {fit['why']}")
         return 0 if fit["ok"] else 1
 
-    if a.cmd == "estimate":
+    if a.cmd == "estimate" and a.run:
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
+        est = for_run(run.open())
+    elif a.cmd == "estimate":
         if a.subcaps:
             by = {"P1": a.subcaps}
         else:

@@ -91,6 +91,7 @@ if __package__ in (None, ""):  # noqa: E402
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -120,7 +121,13 @@ BRIEFS_DIR = "briefs"
 #: re-dispatch it as a failure — and a conductor scripting `--step` in a loop
 #: reads the exit code before it reads the JSON.
 EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
-                      "ROUND_COMPLETE")
+                      "ROUND_COMPLETE", "AWAITING_WORKFLOW")
+
+#: The persisted workflow the RESEARCH stage hands to the conducting session
+#: in `research_mode="workflow"` — one invocation per category, its
+#: capability batches in parallel, then independent challenge -> floors gate.
+RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
+RESEARCH_HANDOFF = "research_workflow.json"
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
@@ -200,8 +207,22 @@ class AgentRunDispatcher:
         # 2026-09-07: "50 processes still running, load still climbing").
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 text=True, cwd=str(PLUGIN.parents[1]))
+        # HEARTBEAT WHILE THE BATCH RUNS. Measured 2026-09-30 (SWBC): a
+        # research batch ran 40 min, the lock's heartbeat went stale at 30,
+        # a second driver was started on the "dead" run and `stop` refused
+        # to signal the live one. communicate() with a timeout lets the lock
+        # be refreshed every minute without losing either pipe.
+        err = ""
         try:
-            _out, err = proc.communicate()
+            while True:
+                try:
+                    _out, err = proc.communicate(timeout=60)
+                    break
+                except subprocess.TimeoutExpired:
+                    try:
+                        runstate.heartbeat_driver_lock(ctx.run)
+                    except Exception:                    # noqa: BLE001
+                        pass
         except BaseException:
             _terminate(proc)
             raise
@@ -243,8 +264,17 @@ class McpReads:
         except ValueError:
             return {"_error": raw[:300]}
 
-    def pending_runs(self) -> list[dict]:
-        out = self._call("list_pending_runs")
+    def pending_runs(self, display_id: str | None = None) -> list[dict]:
+        # Narrowed server-side when the connector supports it (it returned
+        # 157 KB unfiltered, measured 2026-09-30); an older connector refuses
+        # the argument, and then the full list is filtered by the caller.
+        out = self._call("list_pending_runs",
+                         {"display_id": display_id, "latest_only": False}) \
+            if display_id else {"_error": "no filter"}
+        if isinstance(out, dict) and (out.get("_error") or not out.get("pending")):
+            # refused by an older connector, or nothing under that id (the
+            # caller also matches on entity_name): read the whole queue.
+            out = self._call("list_pending_runs")
         if isinstance(out, dict):
             return list(out.get("pending") or out.get("runs") or [])
         return list(out or [])
@@ -322,6 +352,21 @@ class Options:
     # ceiling honest: consecutive rounds that advance nothing end the stage.
     max_rounds: int = 10
     stall_rounds: int = 2
+    # WHO RUNS RESEARCH. "lanes" is this driver dispatching headless
+    # `claude -p` category lanes through agent_run.py. "workflow" hands the
+    # stage to the conducting session as one persisted workflow per pillar
+    # (RESEARCH_WORKFLOW), records PENDING_ORCHESTRATOR and exits AWAITING_WORKFLOW; the session runs them
+    # and re-runs the driver, which verifies the floors gates and goes on.
+    #
+    # ROOT CAUSE this closes (owner, 2026-09-30: "research works as background
+    # tasks and not real persisted /workflows"): this driver is a Python
+    # process and only a model session can start a Workflow, so every
+    # research round ran as a thread pool of headless children — invisible
+    # to /workflows, not resumable by run id, and holding no enrichment
+    # connector (which is the whole reason the relay exists). The library
+    # default stays "lanes" so the stub and every test walk are unchanged;
+    # the CLI defaults to "workflow" for the real dispatcher.
+    research_mode: str = "lanes"
     # How many FRESH lane instances the driver spends on a category whose
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
@@ -378,6 +423,47 @@ def _load_state(path: Path) -> dict:
             "connector": {}, "package": {}, "invocations": []}
 
 
+
+RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
+#: I-16: the estimate is the MEASURED workflow rate, not the levered lane
+#: model (which said $13.80 for a run whose research alone cost $21+). Pilot
+#: 2026-09-30: one batch agent closed 12 cells for ~$2.25; its category's
+#: challenge ~$0.44. Re-measure with `engine.cost report` after each run.
+WORKFLOW_USD_PER_CELL = 0.19
+CHALLENGE_USD_PER_CATEGORY = 0.44
+BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
+
+
+def _open_capabilities(wb) -> dict[str, dict[str, int]]:
+    """{category: {capability: open cells}} — open = no Dominant_Claim yet
+    (a synthesis and a declared absence both write one)."""
+    from .brief import capability_of, category_of
+    out: dict[str, dict[str, int]] = {}
+    for r in wb.scoring_rows():
+        sc = str(r.get("SubCap_ID") or "")
+        if not sc or str(r.get("Dominant_Claim") or "").strip():
+            continue
+        caps = out.setdefault(category_of(sc), {})
+        caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1
+    return out
+
+
+def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
+    """Whole capabilities packed in order into batches of <= `limit` open
+    cells (a capability larger than the limit is a batch of its own)."""
+    out: list[list[str]] = []
+    cur: list[str] = []
+    n = 0
+    for cap in sorted(caps, key=lambda c: [int(x) if x.isdigit() else x
+                                           for x in re.split(r"(\d+)", c)]):
+        k = caps[cap]
+        if cur and n + k > limit:
+            out.append(cur); cur, n = [], 0
+        cur.append(cap); n += k
+    if cur:
+        out.append(cur)
+    return out
+
 class Pipeline:
     def __init__(self, run: runstate.Run, opts: Options):
         self.run, self.opts = run, opts
@@ -393,6 +479,13 @@ class Pipeline:
         # The ledger is the run's own record of what it has already spent.
         try:
             from . import cost
+            # Workflow agents run in the session, not under this process:
+            # price the finished ones first so the ceiling sees them (I-37).
+            if opts.push:
+                cap = cost.capture_workflows(run)
+                if cap["captured"]:
+                    opts.log(f"  (workflow spend captured: {cap['captured']} agent(s), "
+                             f"${cap['usd']:.2f})")
             rows = cost.ledger(run)
             self._spent_usd = self._recorded_usd = round(
                 sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 4)
@@ -439,6 +532,24 @@ class Pipeline:
         return summary
 
     def _briefs(self, name: str) -> Path:
+        """`<prefix>_r<N>` numbers rounds across driver PROCESSES (I-44): a
+        resumed driver used to restart at r0 and overwrite the previous
+        process's briefs and relay batches. The first use of a prefix in a
+        process reads how many rounds are already on disk and continues."""
+        m = re.fullmatch(r"(.+)_r(\d+)", name)
+        if m:
+            prefix, r = m.group(1), int(m.group(2))
+            base = getattr(self, "_round_base", None)
+            if base is None:
+                base = self._round_base = {}
+            if prefix not in base:
+                d = self.run.root / BRIEFS_DIR
+                done = [int(x.name.rsplit("_r", 1)[1]) for x in
+                        (d.glob(f"{prefix}_r*") if d.is_dir() else [])
+                        if x.name.rsplit("_r", 1)[1].isdigit()
+                        and x.name.rsplit("_r", 1)[0] == prefix]
+                base[prefix] = (max(done) + 1) if done else 0
+            name = f"{prefix}_r{base[prefix] + r}"
         return self.run.root / BRIEFS_DIR / name
 
     def _record(self, stage: str, verdict: str, detail: str, t0: float,
@@ -680,9 +791,12 @@ class Pipeline:
             sv = str(md.get("sv_basis") or "").strip()
             sha = str(md.get("preflight_sha") or "").strip()
             ok = bool(sha) or (bool(sv) and not sv.upper().startswith("UNSTATED"))
-            return ok, ("binding recorded" if ok else
-                        "no binding basis on the run: start it with `engine.cli start "
-                        "--preflight <answered preflight.json>`")
+            if not ok:
+                return ok, ("no binding basis on the run: start it with `engine.cli start "
+                            "--preflight <answered preflight.json>`")
+            from . import intake
+            miss = intake.missing_for_mode(self.run.root, md.get("evidence_mode"))
+            return (miss is None), (miss or "binding recorded")
         if stage == "START":
             from . import template as T
             b = T.binding_state(wb)
@@ -967,6 +1081,17 @@ class Pipeline:
                                       f"before {st}; resume: {self.plan()['command']}")
                 return outcome
             t0 = self.opts.clock()
+            if st == "RESEARCH" and self.opts.research_mode == "workflow":
+                h = self._research_handoff()
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
+                self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
+                               reason=h["summary"], handoff=h["file"],
+                               invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
             try:
                 detail = getattr(self, f"_stage_{st.lower()}")()
                 if self._step_stopped:
@@ -988,6 +1113,7 @@ class Pipeline:
                 self._record(st, "PASS", detail, t0, rounds=self._rounds,
                              lanes=self._lane_count, attempts=self._attempts)
                 outcome["stages_run"].append(st)
+                self._snapshot(st)
             except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
                     KeyError, RuntimeError) as e:
                 msg = str(e).strip() or e.__class__.__name__
@@ -1255,8 +1381,19 @@ class Pipeline:
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
             b = brief.prelim_brief(self.wb, run=self.run, out_dir=self._briefs(f"prelim_r{r}"))
+            orch = b.get("orchestrator")
+            if orch:
+                self.opts.log(f"[RELAY] PRELIM connector brief for the conducting session "
+                              f"(owed {', '.join(orch['owed'])}): {orch['prompt_file']}")
+                self.state["prelim_orchestrator"] = orch
+                self._save_state()
             self._count(self._dispatch(b, stage="PRELIM"))
             st = prelim.state(self.wb)
+            if orch and st["open"] and set(st["open"]) <= set(orch["owed"]):
+                # Only the connector-owed sections remain, and only the session
+                # can close them: wait for it rather than re-dispatching lanes
+                # that cannot (which is what used to stall the stage).
+                st = self._await_prelim(set(orch["owed"]))
             if not st["open"]:
                 if st["recorded_status"] != "COMPLETE":
                     prelim.complete(self.wb)
@@ -1266,17 +1403,142 @@ class Pipeline:
         raise StageRefused(f"PRELIM still open after {self._rounds} round(s): "
                            f"{', '.join(prelim.state(self.wb)['open'])}{self._stall_note()}")
 
+    def _await_prelim(self, owed: set) -> dict:
+        from . import prelim
+        limit = float(os.environ.get("DMA_ORCHESTRATOR_WAIT_S", "2700"))
+        t0 = self.opts.clock()
+        while True:
+            self.reopen()
+            st = prelim.state(self.wb)
+            if not (set(st["open"]) & owed) or self.opts.clock() - t0 >= limit:
+                return st
+            time.sleep(30)
+
     def _stage_kg(self) -> str:
         from . import kg
         self._reset_counters()
         tk = self.opts.toolkit_dir or (Path(os.environ["DMA_TOOLKITS_DIR"])
                                        if os.environ.get("DMA_TOOLKITS_DIR") else None)
+        if tk is None:
+            tk = self._pull_toolkits()
         out = kg.build(self.wb, toolkit_dir=tk)
         self.reopen()
         n = len([r for r in self.wb.rows("DQ_Bank") if any(r.values())])
         probs = out.get("problems") if isinstance(out, dict) else None
         return (f"DQ_Bank seeded: {n} rows" + (f"; {len(probs)} problem(s) stated: "
                                                   f"{probs[0][:120]}" if probs else ""))
+
+    def _snapshot(self, stage: str) -> None:
+        """A durable copy at every stage boundary (engine.snapshot): the run
+        otherwise lives only in this container until PACKAGE. Off when the
+        run does not push (stub / CI); a failed backup is logged, never
+        fatal — the next boundary tries again."""
+        if not self.opts.push:
+            return
+        from . import snapshot
+        r = snapshot.push(self.run)
+        self.opts.log(f"[SNAPSHOT] {stage}: {r['outcome']}"
+                      + (f" ({r.get('bytes', 0) // 1024} KB)" if r.get("bytes") else "")
+                      + (f" — {r['reason']}" if r.get("reason") else ""))
+
+    def _research_handoff(self) -> dict:
+        """Write the per-pillar workflow invocations the session runs."""
+        from . import brief
+        need = brief.categories_needing_dispatch(self.wb)["dispatch"]
+        md = self._md()
+        site = next((str(r.get("Value") or "") for r in self.wb.rows("Firmographics")
+                     if str(r.get("Field") or "").lower() == "website"
+                     and r.get("Value")), "")
+        by_pillar: dict[str, list[str]] = {}
+        for c in sorted(need):
+            by_pillar.setdefault(c[:2], []).append(c)
+        # The work unit is a BATCH OF CAPABILITIES, not a category (measured
+        # 2026-09-30, SWBC): one agent per category reached 116-200K tokens of
+        # context in 39-71 turns — connector results, not reasoning — and
+        # ended with 0 of 43-68 cells synthesised. A batch of open cells small
+        # enough to finish inside one fresh context is what the workflow fans
+        # out; the category's challenge + gate still run once, after it.
+        #
+        # ONE INVOCATION PER CATEGORY, not per pillar (owner's spec: "each
+        # pillar has a separate workflow for each of its 4 categories"). The
+        # workflow runtime caps concurrency PER WORKFLOW (min(16, CPUs-2): 2
+        # on a 4-CPU host), so four pillar workflows ran 8 agents; sixteen
+        # category workflows run 32, and a pillar's slow category no longer
+        # holds its other three in a queue. Affordable only because writes
+        # are batched (engine.cli batch): the run-wide workbook lock is held
+        # once per capability instead of once per command.
+        open_caps = _open_capabilities(self.wb)
+        by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
+                   else by_pillar)
+        inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
+                "batches": {c: _batches(open_caps.get(c, {}))
+                            for c in cats},
+                "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
+                "plugin": str(PLUGIN), "rounds": 2,
+                "entity": md.get("entity_name") or "", "domain": site}
+               for u, cats in sorted(by_unit.items())]
+        doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per category — wait for all, "
+                       "then run `then`; the driver verifies the floors gates")}
+        path = self.run.qa_dir / RESEARCH_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # ENFORCEMENT (I-54): a handoff re-issued with the SAME open cells
+        # means the last one was never worked — the session lost Workflow or
+        # its connectors (a resume can drop both), or started no workflow.
+        # Say so in the handoff instead of re-issuing it silently forever.
+        try:
+            prev = json.loads(path.read_text()).get("estimate") or {}
+        except (OSError, ValueError):
+            prev = {}
+        n = sum(len(i["cats"]) for i in inv)
+        nb = sum(len(b) for i in inv for b in i["batches"].values())
+        cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
+        est = round(cells * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY, 2)
+        doc["estimate"] = {"open_cells": cells, "batches": nb, "usd": est,
+                           "basis": f"measured pilot: ${WORKFLOW_USD_PER_CELL}/cell "
+                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge"}
+        if prev.get("open_cells") == cells and cells:
+            doc["not_worked"] = (
+                f"the previous handoff named the same {cells} open cells: its "
+                "workflows never ran or closed nothing. Check this session has the "
+                "Workflow tool and Exa/Tavily/Clay (a resumed session can lose "
+                "them; a restart rebinds) — do NOT fall back to lanes, which hold "
+                "no connector.")
+            self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
+        cap = self.budget_usd()
+        if cap is not None:
+            doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
+                                   fits_budget=self._spent_usd + est <= cap)
+        path.write_text(json.dumps(doc, indent=1))
+        return {"file": str(path), "invocations": inv,
+                "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
+                "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
+                           f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
+                           f"est ${est:.2f} for {cells} open cells"}
+
+    def _pull_toolkits(self) -> Path | None:
+        """The four pillar toolkits, fetched into the run when none is named.
+
+        Measured 2026-09-30 (SWBC): no instruction anywhere told a session to
+        set DMA_TOOLKITS_DIR or run `drive_fetch.py pull-toolkits`, so KG fell
+        back to the 71 category questions on every run whose operator did not
+        already know — per-subcap diagnostics lost silently, with `env`
+        listing it as a soft row. The toolkits are on the intake Drive and
+        the service account can read them; fetching them is the default now,
+        and a fetch that fails is logged and degrades exactly as before."""
+        dest = self.run.root / "toolkits"
+        have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
+        if len(have) == 4:
+            return dest
+        r = subprocess.run([sys.executable, str(PLUGIN / "scripts" / "drive_fetch.py"),
+                            "pull-toolkits", "--dest", str(dest)],
+                           capture_output=True, text=True, timeout=600)
+        have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
+        self.opts.log(f"  [KG] pull-toolkits rc={r.returncode}: {len(have)} of 4 "
+                      f"toolkits in {dest}")
+        return dest if have else None
 
     def _stage_research(self) -> str:
         from . import brief, cost, floors_gate
@@ -1318,6 +1580,14 @@ class Pipeline:
                               f"round {self._rounds} of {self.opts.max_rounds}")
                 break
             self._rounds = r + 1               # a round is counted when it dispatches
+            # Each dispatch is a FRESH conversation per category, so each
+            # category's search window opens here (ledger: the ceiling is per
+            # conversation; it used to be one run-wide window for all lanes) —
+            # BEFORE the brief is rendered, so the budget it prints is the one
+            # the lane actually has.
+            from . import runstate as _rs
+            _rs.checkpoint(self.wb, f"RESEARCH round {r + 1} dispatch", scope=list(work))
+            self.reopen()
             b = brief.batch(self.wb, run=self.run, out_dir=self._briefs(f"research_r{r}"),
                             only=work, with_handback=(r > 0))
             self._count(self._dispatch(b, stage="RESEARCH"))
@@ -1669,7 +1939,11 @@ class Pipeline:
         from . import assessment as A
         from . import handoff
         self._reset_counters()
+        from . import intake
         pre = A.research_ready(self.wb, self.run.qa_dir)
+        blk = intake.handoff_blocker(self.wb, self.run.root)
+        if blk:
+            pre = list(pre) + [blk]
         if pre:
             raise StageRefused("research is not ready to score:\n  - " + "\n  - ".join(pre))
         doc = handoff.build(self.wb, qa_dir=self.run.qa_dir, strict=True)
@@ -1735,7 +2009,10 @@ class Pipeline:
         polls = 0
         while True:
             polls += 1
-            rows = self.opts.reads.pending_runs()
+            try:
+                rows = self.opts.reads.pending_runs(display_id=ent_id or None)
+            except TypeError:                     # a reader without the filter
+                rows = self.opts.reads.pending_runs()
             mine = [r for r in rows
                     if str(r.get("display_id") or "").strip().lower() == ent_id
                     or str(r.get("entity_name") or "").strip().lower() == ent_name]
@@ -2050,7 +2327,7 @@ def env_check(run_root=None) -> dict:
     ck(*_connector_row())
     tk = os.environ.get("DMA_TOOLKITS_DIR")
     ck("toolkits", bool(tk and _is_dir(tk)),
-       tk or "DMA_TOOLKITS_DIR unset — kg build falls back to the 71 category questions and says so")
+       tk or "DMA_TOOLKITS_DIR unset — the KG stage pulls the four toolkits from the intake Drive into <run>/toolkits; if that fails it falls back to the 71 category questions and says so")
     from . import template as T
     g = T.zip_guard()
     ck("templates vs manifest", g["ok"], g.get("fix") or f"{g['status']} ({g.get('installed')})")
@@ -2111,7 +2388,23 @@ def _build_opts(a) -> Options:
                    folder_root=Path(a.folder_root) if a.folder_root else None,
                    push=(not a.no_push) and a.dispatcher != "stub",
                    allow_stale_install=a.allow_stale_install, lanes=a.lanes,
-                   toolkit_dir=Path(a.toolkits) if a.toolkits else None)
+                   toolkit_dir=Path(a.toolkits) if a.toolkits else None,
+                   research_mode=_research_mode(a))
+
+
+def _research_mode(a) -> str:
+    """Workflow is the enforced default. Lanes run only on the stub (CI) or
+    when the waiver is stated, because a lane holds no enrichment connector
+    and cannot pass a floors gate on a real run."""
+    mode = a.research_mode or ("lanes" if a.dispatcher == "stub" else "workflow")
+    if mode == "lanes" and a.dispatcher != "stub" and not getattr(a, "allow_lanes", False):
+        raise SystemExit(
+            "REFUSED: --research-mode lanes with the real dispatcher runs research "
+            "as headless `claude -p` children — invisible to /workflows, not "
+            "resumable, holding no Exa/Tavily/Clay — so no floors gate can pass. "
+            "Drop the flag (RESEARCH is handed to the session as one workflow per "
+            "category), or pass --allow-lanes to waive it deliberately.")
+    return mode
 
 
 def main(argv=None) -> int:
@@ -2125,6 +2418,17 @@ def main(argv=None) -> int:
 
     r = common(sub.add_parser("run", help="drive the run to PROMOTE, gate by gate"))
     r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
+    r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
+                   help="who runs RESEARCH: 'workflow' (default with the real "
+                        "dispatcher) hands it to the session as one persisted "
+                        "workflow per category; 'lanes' dispatches headless "
+                        "`claude -p` lanes, which hold NO enrichment connector "
+                        "and never show in /workflows — with the real "
+                        "dispatcher it needs --allow-lanes")
+    r.add_argument("--allow-lanes", action="store_true",
+                   help="waive the workflow requirement and run RESEARCH as "
+                        "headless lanes with the real dispatcher (the path the "
+                        "owner rejected on 2026-09-30); recorded in the gate log")
     r.add_argument("--until", choices=STAGES, help="stop after this stage")
     r.add_argument("--max-wall-min", type=float, default=Options.max_wall_min,
                    help=f"wall-clock ceiling in minutes (default "
@@ -2183,6 +2487,9 @@ def main(argv=None) -> int:
     st = common(sub.add_parser("status"))
     st.add_argument("--watch", action="store_true")
     st.add_argument("--interval", type=float, default=15.0)
+    sp = common(sub.add_parser("stop", help="SIGTERM the driver that HOLDS this run's "
+                                "lock (its real pid) and wait for it to release"))
+    sp.add_argument("--wait-s", type=float, default=120.0)
     sub.add_parser("env", help="every hard dependency, measured")
     sub.add_parser("stages", help="the stage table")
 
@@ -2195,6 +2502,48 @@ def main(argv=None) -> int:
         print(json.dumps(out, indent=2))
         return 0 if out["ok"] else 1
     run = runstate.locate(a.run, Path(a.root) if a.root else None)
+    if a.cmd == "stop":
+        # Measured 2026-09-30 (SWBC): an operator "stopped" the driver with the
+        # pid a shell captured for `nohup setsid …`; setsid had forked, that pid
+        # was a dead wrapper, and the real driver ran a whole extra research
+        # round on stale code past the budget. The driver lock names the pid
+        # that actually holds the run; this signals that one and waits.
+        held = runstate.read_driver_lock(run)
+        pid = int((held or {}).get("pid") or 0)
+        # A stale HEARTBEAT is not a dead PROCESS: trust /proc over the beat
+        # (a live driver with a stale lock is the state that let two drivers
+        # run one research round on 2026-09-30).
+        alive_driver = False
+        if pid:
+            try:
+                cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace")
+                alive_driver = "engine.pipeline" in cmdline and run.run_id in cmdline
+            except OSError:
+                alive_driver = False
+        if not held or not (held.get("live") or alive_driver):
+            print(json.dumps({"stopped": False, "why": "no live driver holds this run",
+                              "lock": held}, indent=2, default=str))
+            return 0
+        import signal as _signal
+        try:
+            os.kill(pid, _signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        t0 = time.time()
+        while time.time() - t0 < a.wait_s:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(1)
+        alive = True
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            alive = False
+        print(json.dumps({"stopped": not alive, "pid": pid,
+                          "waited_s": round(time.time() - t0, 1)}, indent=2))
+        return 0 if not alive else 1
     if a.cmd == "plan":
         opts = Options(dispatcher=None, reads=None, shipper=None)  # type: ignore[arg-type]
         print(json.dumps(Pipeline(run, opts).plan(), indent=2, default=str))

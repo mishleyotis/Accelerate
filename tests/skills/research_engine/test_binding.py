@@ -174,8 +174,11 @@ def test_the_wrong_subverticals_variants_never_enter_the_run(tmp_path):
     from engine import contract
     tax = contract.taxonomy()
     chosen = set(run.open().selected_subcaps())
+    # ownership from sub_vertical_of: 38 variants carry a bare `T2` tier
+    # and are owned by their id suffix (P1C1.3.CU1 is a CU cell).
     foreign = [c for c in tax.variants
-               if c in chosen and not tax.tier[c].endswith("-CU")]
+               if c in chosen and tax.sub_vertical_of(c) != "CU"]
+    assert set(tax.overlay("CU")) <= chosen, "a CU variant was not seeded"
     assert not foreign, f"non-CU variants seeded: {foreign[:5]}"
 
 

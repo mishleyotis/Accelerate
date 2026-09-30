@@ -211,6 +211,7 @@ class RunWorkbook:
                evidence_mode: str = "PUBLIC",
                sv_basis: str | None = None, mode_basis: str | None = None,
                lob_census: str | None = None,
+               supplementary: list[str] | tuple[str, ...] = (),
                overwrite: bool = False) -> "RunWorkbook":
         """Build the workbook once, at the START of the run, with its
         metadata resolved.
@@ -226,7 +227,8 @@ class RunWorkbook:
                                 f"resume path, not creating")
         tax = C.taxonomy()
         if selected is None:
-            selected = list(tax.selected(sub_vertical, scope_mode))
+            selected = list(tax.selected(sub_vertical, scope_mode,
+                                         supplementary))
         wb = openpyxl.Workbook()
         wb.remove(wb.active)
         for name, cols in C.SHEETS.items():
@@ -243,7 +245,8 @@ class RunWorkbook:
                              reference_date=reference_date,
                              selected=selected, evidence_mode=evidence_mode,
                              sv_basis=sv_basis, mode_basis=mode_basis,
-                             lob_census=lob_census)
+                             lob_census=lob_census,
+                             supplementary=supplementary)
         self._seed_scoring_rows(selected)
         self._write_handoff_lock()
         self.recompute_coverage()
@@ -451,7 +454,8 @@ class RunWorkbook:
     def _write_metadata(self, *, run_id, entity_name, entity_id, sub_vertical,
                         scope_mode, reference_date, selected,
                         evidence_mode="PUBLIC", sv_basis=None,
-                        mode_basis=None, lob_census=None) -> None:
+                        mode_basis=None, lob_census=None,
+                        supplementary=()) -> None:
         if evidence_mode not in C.ASSESSMENT_MODES:
             raise WorkbookError(
                 f"evidence_mode {evidence_mode!r} is not one of "
@@ -490,6 +494,7 @@ class RunWorkbook:
             "sv_basis": sv_basis or self._UNSTATED_BASIS,
             "mode_basis": mode_basis or self._UNSTATED_BASIS,
             "lob_census": lob_census or "",
+            "supplementary_sub_verticals": ",".join(supplementary or ()),
             # Written by kg.build once the DQ bank is seeded; empty is the
             # honest value for a run whose KG has not been built, and the
             # resume path REPORTS it rather than treating it as fine.
@@ -694,7 +699,10 @@ class RunWorkbook:
         declaration; `Evidence_IDs` starts at the literal NO_EVIDENCE so
         rule 5 is never vacuous on a blank (AUD-0064)."""
         tax = C.taxonomy()
-        sv = str(self.metadata().get("sub_vertical") or "") or None
+        md = self.metadata()
+        sv = str(md.get("sub_vertical") or "") or None
+        allowed = {sv or ""} | {s.strip() for s in str(
+            md.get("supplementary_sub_verticals") or "").split(",") if s.strip()}
         by_sheet: dict[str, list[str]] = {s: [] for s in C.PILLAR_SHEETS}
         foreign = []
         for cell in selected:
@@ -707,9 +715,12 @@ class RunWorkbook:
             # out, so the run looks 3 cells smaller than it is and nothing
             # says why. AUD-0077's family: the binder validated neither its
             # sub-vertical nor its scope.
-            tier = tax.tier.get(cell, "")
-            if "-" in tier and tier.split("-", 1)[1] != (sv or ""):
-                foreign.append((cell, tier))
+            # The owner id comes from sub_vertical_of, not the tier label:
+            # 38 variants carry a bare `T2` and passed this guard unowned.
+            # A supplementary sub-vertical the preflight bound is allowed.
+            owner = tax.sub_vertical_of(cell)
+            if owner is not None and owner not in allowed:
+                foreign.append((cell, owner))
                 continue
             by_sheet[f"{cell[:2]}_Subcap_Scoring"].append(cell)
         if foreign:

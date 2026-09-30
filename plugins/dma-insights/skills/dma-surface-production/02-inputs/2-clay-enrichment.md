@@ -8,7 +8,7 @@ evidence like any other source.
 
 | Surface | Clay call | Data point |
 |---|---|---|
-| **O7 Leadership** | `find-and-enrich-contacts-at-company` | base contact rows, filtered by title |
+| **O7 Leadership** | `search-contacts` (then `add-contact-data-points`) | base contact rows, filtered by title |
 | **O12 Thought leadership** | `add-contact-data-points` | `Find Thought Leadership` |
 | **O2 Firmographics** | `add-company-data-points` | `Annual Revenue`, `Headcount Growth` |
 | **T1 Tech stack** | `add-company-data-points` | `Tech Stack` — this is the machine technographic scan |
@@ -63,7 +63,7 @@ tool contract warns against, and a DMA needs the leadership tier, not the org ch
 
 ```
 STEP 1 — RESOLVE THE COMPANY
-  find-and-enrich-company(companyIdentifier=<domain from entity_profile>)
+  search-companies + add-company-data-points(companyIdentifier=<domain from entity_profile>)
   → taskId
   The domain comes from 01_evidence/entity_profile/, never from a guess. A wrong domain
   produces a real company's data attached to the wrong entity — the contamination class
@@ -87,7 +87,7 @@ STEP 2 — COMPANY DATA POINTS, ONE CALL
     {type:"Recent News"}, {type:"Open Jobs"}, {type:"Latest Funding"}])
 
 STEP 3 — LEADERSHIP
-  find-and-enrich-contacts-at-company(
+  search-contacts + add-contact-data-points(
     companyIdentifier=<domain>,
     contactFilters={ job_title_keywords:[
         "Chief Executive","Chief Information","Chief Technology","Chief Operating",

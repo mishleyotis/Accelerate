@@ -25,7 +25,11 @@ from fixtures import new_run
 #: failed and the run is resumable from the state on disk, so a sweep that
 #: exited non-zero here would re-dispatch a run that is doing exactly what
 #: it was told to do.
-ZERO = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK", "ROUND_COMPLETE")
+#: AWAITING_WORKFLOW joined them on 2026-09-30: RESEARCH is handed to the
+#: conducting session as persisted pillar workflows (research_workflow.json);
+#: nothing failed and the driver resumes from disk once they return.
+ZERO = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK", "ROUND_COMPLETE",
+        "AWAITING_WORKFLOW")
 ONE = ("STOPPED_BUDGET", "FAILED", "BLOCKED", "REFUSED")
 
 

@@ -6,7 +6,7 @@ effort: high
 maxTurns: 90
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, Skill, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, mcp__Clay__search-contacts, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -537,7 +537,7 @@ for want of one. You are being asked to leave a record of having looked.
 **O7's facet is `leadership`, and both its sources are wired.** Per
 `02-inputs/enrichment_sources.json`: `clay` serves the contact routes — `email`,
 `linkedin_url`, `phone`, `enrichment_basis` — through
-`find-and-enrich-contacts-at-company` plus Summarize Work History (T2–T3), with
+`search-contacts` (companyIdentifiers=[<domain>], dslQuery `select from people …`; page with `load-more-search-results`) plus Summarize Work History (T2–T3), with
 the returned title as the identity test; `first_party` serves named seats and
 tenure from proxy statements, leadership pages and filings (T1–T2). The
 `clay_taxonomy.json` `job_title_keywords` scope the search and its excludes

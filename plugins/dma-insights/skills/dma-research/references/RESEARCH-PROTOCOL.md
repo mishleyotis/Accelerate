@@ -76,14 +76,24 @@ searches per cell and per tool, not a ratio.
   --category <YOURS>` is your first command and your compass after every
   interruption. **Obey its `do_first` list literally** — it never says
   "clean" while your work is open, and when it says STOP (the search-op
-  ceiling), you checkpoint and end your turn.
+  ceiling — sixty distinct searches for YOUR category in this dispatch),
+  run `engine.brief handback`, report, and end your turn; the driver
+  re-dispatches the category as a fresh conversation with a fresh window.
 
 ## Before the loop: read what the run already knows
 
-    python3 -m engine.brief dispatch --run <R> --root <ROOT> --category <YOURS>
+**Your prompt IS this packet** — the driver rendered it for you, with the
+exact `--run R --root ROOT` every engine command takes. Do not regenerate it
+on arrival (measured 2026-09-30: sixteen lanes rebuilding their own brief at
+once, each past the 120 s Bash default, were backgrounded, and a headless lane
+that ends its turn to "wait" simply exits). Rebuild it only after an
+interruption or a compaction, with a long timeout:
 
-This is your FIRST command — before `orient`, before any search, and again
-after any interruption or compaction. One bounded packet (measured against
+    python3 -m engine.brief dispatch --run <R> --root <ROOT> --category <YOURS>   # timeout 600000
+
+**Never end your turn to wait for a background command** — you are headless;
+ending the turn ends the lane. Run engine commands in the foreground with a
+long `timeout`. One bounded packet (measured against
 `BRIEF_CHAR_CEILING`, derived from the workbook, never a second record):
 
 - **the run's shared state** — the estate by layer, the peer set, how far
@@ -105,6 +115,32 @@ When your category is done, `engine.brief handback --run <R> --root <ROOT>
 --category <YOURS>` is your report: computed from the sheets, the same shape
 whether you finished or stopped, and it names the leads your sources open
 for other categories so nobody searches for them twice.
+
+## Work a CAPABILITY at a time (the budget rule)
+
+A turn costs your whole context re-read (~$0.03 measured); turns are the bill.
+So the unit of work is the capability, not the cell:
+
+    python3 -m engine.cli card --run <R> --root <ROOT> --capability <P1C1.3>
+
+returns its open cells, the volleys each still owes, the questions merged by
+facet, and one `log` line per facet naming every cell. Then:
+
+1. **One turn of searches**: fire every owed facet's query for the capability
+   as PARALLEL WebSearch calls in a single message.
+2. **One turn of logging**: the card's `log` lines, `&&`-chained in ONE Bash
+   call — drop from a line any cell the result is silent on (never credit a
+   cell a query did not answer; give that cell its own query).
+3. **One or two turns of evidence**: `engine.cli fetch`, then `engine.cli
+   evidence` / `attach` per cell, chained.
+4. **One turn of synthesis**: every cell's `engine.cli synthesise`, chained.
+   `python3 -m engine.cli synthesis-template` prints the record it takes —
+   never reverse-engineer it from the engine source.
+
+Measured before this rule (SWBC round 1): 1.0 cell per logged search, seven in ten
+web searches never logged (they earn the gate nothing and the category is
+re-dispatched), ~45% of a lane's turns spent before its first search.
+`orient` still owns `do_first` and the STOP; use the card for the work.
 
 ## The loop, per work card
 

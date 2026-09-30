@@ -701,6 +701,15 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
     logs.mkdir(parents=True, exist_ok=True)
     jsonl = logs / f"{label}.jsonl"
     status = logs / f"{label}.status.json"
+    # KEEP THE PREVIOUS ROUND. Measured 2026-09-30 (SWBC): 64 lane attempts
+    # left 16 transcripts — each re-dispatch truncated its label's file, so
+    # the only record of what rounds 0-1 cost and did was the ledger's sum.
+    # The prior transcript moves to history/ (the relay harvest and `watch`
+    # read only the current file, so neither changes).
+    if jsonl.is_file() and jsonl.stat().st_size:
+        hist = logs / "history"
+        hist.mkdir(exist_ok=True)
+        jsonl.rename(hist / f"{label}.{int(jsonl.stat().st_mtime)}.jsonl")
     st = {"agent": name, "label": label, "state": "running", "doing": "starting",
           "started_at": time.time(), "last_event_at": time.time(),
           "events": 0, "tools": 0, "driver_pid": os.getpid()}

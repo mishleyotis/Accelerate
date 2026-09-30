@@ -6,7 +6,7 @@ effort: medium
 maxTurns: 200
 skills:
   - dma-research
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-company-data-points, mcp__Indeed__search_jobs, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Clay__search-companies, mcp__Clay__get-task-context, mcp__Clay__add-company-data-points, mcp__Indeed__search_jobs, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -39,12 +39,14 @@ You carry `mcp__Clay__*`. The plan is fixed, so the sequence is the same
 every run and the credit cost is bounded (`engine.cli techscan clay-plan
 --run <R>` prints it):
 
-1. `mcp__Clay__find-and-enrich-company` — `companyIdentifier` is the
-   **registrable domain**, never a company name (a name alone fails), with
-   `companyDataPoints: [{"type": "Tech Stack"}]`. This is the register's
-   spine.
+1. `mcp__Clay__search-companies` — `dslQuery: 'select from companies where
+   domain = "<registrable domain>" limit 1'`. The **registrable domain**,
+   never a company name. It returns the `taskId` and the company `entityId`
+   every later call needs (there is no one-shot find-and-enrich on the live
+   connector).
 2. `mcp__Clay__add-company-data-points` — same `taskId`, the returned
-   `entityIds`, `[{"type": "Open Jobs"}]`. Job postings are the highest-yield
+   `entityIds`, `[{"type": "Tech Stack"}, {"type": "Open Jobs"}]` — the
+   register's spine and its strongest DATA/INFRA signal. Job postings are the highest-yield
    DATA and INFRA signal there is, and they are **INFERRED** evidence: a role
    requiring Snowflake administration is a strong hint, not a deployment.
 3. `mcp__Clay__get-task-context` — **not optional, and not a formality.**
@@ -170,7 +172,7 @@ the 2025 annual report", not "detected".
 ## When a gap needs something you cannot reach
 
 **A grant is not availability.** Your frontmatter allows Vibe Prospecting,
-Clay's company pass (`find-and-enrich-company`, `get-task-context`,
+Clay's company pass (`search-companies`, `get-task-context`,
 `add-company-data-points`), Indeed `search_jobs` and the web tools; Exa,
 Tavily and Drive are the conductor's, reached through `search_requests` and
 `drive_fetch.py`. Which of your own actually answer depends on what the

@@ -809,7 +809,13 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         "",
         (f"**Connector for this batch: `{tool}`.** " if len(tools) == 1 else
          f"**Connectors for this batch: {', '.join(f'`{t}`' for t in tools)}** — "
-         f"each query names the one to use; do not substitute another. "),
+         f"each query names the one to use; do not substitute another — "
+         f"EXCEPT when that connector refuses for quota (HTTP 402/429, "
+         f"'credits'): then fire the same query once through its pair "
+         f"(exa <-> tavily), log it with the tool you actually used, and "
+         f"record BLOCKED only if both refuse. Measured 2026-09-30: Exa ran "
+         f"out of credits mid-run and 27 requests were BLOCKED while Tavily "
+         f"stood unused. "),
         f"Cells it bears on: {', '.join(f'`{c}`' for c in cells) or '(run-level, no cell)'}.",
         "",
         f"## The {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}",
@@ -843,6 +849,21 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         lines += [
             "- log the search the moment it returns:",
             f"  ```\n  {q['command_search']}\n  ```",
+            # Measured 2026-09-30 (SWBC relay): every span from a connector's
+            # own extract was refused `excerpt_unverified` until the text was
+            # cached, and nothing here said how — each subagent learned it by
+            # failing once.
+            "- before registering a span from a connector's own text (an Exa "
+            "fetch, a Tavily extract), cache that text under its URL so the "
+            "excerpt verifies — no second fetch is bought:",
+            f"  ```\n  python3 -m engine.cli fetch --run {run.run_id} --root {run.root} "
+            f"--url <URL> --via-text <file-with-the-text>\n  ```",
+            ("- a technographic LIST from a connector (Explorium enrich-business, "
+             "Clay Tech Stack) is not one citable page: record each product with "
+             f"`python3 -m engine.techscan record --run {run.run_id} --root {run.root} …` "
+             "(see `--help`) rather than `engine.cli evidence`, which refuses a "
+             "public source with no URL" if str(q.get("tool") or "").lower()
+             in ("clay", "explorium") else ""),
             "- close the request(s):",
             f"  ```\n  {q['command_record']}\n  ```",
             "",

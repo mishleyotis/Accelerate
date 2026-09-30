@@ -608,7 +608,7 @@ def test_no_baseline_is_unverified_and_red(monkeypatch, tmp_path):
 def test_a_short_baseline_names_what_is_missing(monkeypatch, tmp_path):
     root = tmp_path / "short"
     root.mkdir()
-    connector_contract.write_baseline(["mcp__Clay__find-and-enrich-company"],
+    connector_contract.write_baseline(["mcp__Clay__search-companies"],
                                       str(root))
     row = _row_for(monkeypatch, root)
     assert row["ok"] is False
@@ -621,7 +621,7 @@ def test_a_held_baseline_is_green(monkeypatch, tmp_path):
     root.mkdir()
     connector_contract.write_baseline(
         ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
-         "mcp__Clay__find-and-enrich-company"], str(root))
+         "mcp__Clay__search-companies"], str(root))
     row = _row_for(monkeypatch, root)
     assert row["ok"] is True, row["detail"]
 
@@ -635,6 +635,6 @@ def test_the_row_is_about_the_machine_not_the_repository(monkeypatch, tmp_path):
     root.mkdir()
     connector_contract.write_baseline(
         ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
-         "mcp__Clay__find-and-enrich-company"], str(root))
+         "mcp__Clay__search-companies"], str(root))
     held = _row_for(monkeypatch, root)["ok"]
     assert empty is False and held is True

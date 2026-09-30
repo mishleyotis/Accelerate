@@ -156,6 +156,40 @@ def install_refusal() -> str:
             f"engine's own `start` refuses this state too.")
 
 
+def _registered(rid: str, prompt: str, runstate) -> bool:
+    """The run exists if the run registry `engine.cli start` writes maps it
+    to a root that still holds a workbook. (A root merely NAMED in the prompt
+    is not enough: it may hold another run's workbook.)
+
+    Measured 2026-09-30 (SWBC): the check above accepted a workbook only when
+    its FILE NAME carried the run id, but `runstate.start` names workbooks
+    by entity slug and date (`DMA_Scoring_Workbook_swbc_2026-09-30.xlsx`),
+    and it looked only under the session's env root. So every dispatch
+    naming a run started the documented way, at a root the session had not
+    exported, was refused as "not a run on this machine"."""
+    roots: list[Path] = []
+    try:
+        (registry,) = ctx.engine("registry")
+        reg = registry.registry_path()
+        for line in reg.read_text().splitlines() if reg.is_file() else []:
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if row.get("run_id") == rid and row.get("root"):
+                roots.append(Path(row["root"]))
+    except Exception:                                          # noqa: BLE001
+        pass
+    for root in roots:
+        try:
+            r = runstate.locate(rid, root)
+        except (ValueError, OSError):
+            continue
+        if r.workbook_path.exists():
+            return True
+    return False
+
+
 def stale_run(run, prompt: str) -> str:
     """The reason a prompt's `--run <id>` cannot be dispatched, or "".
 
@@ -205,6 +239,8 @@ def stale_run(run, prompt: str) -> str:
                 break
         if not found:
             missing.append(rid)
+    if missing:
+        missing = [rid for rid in missing if not _registered(rid, prompt, runstate)]
     if not missing:
         return ""
     return (f"its prompt names run {', '.join(missing[:3])}, which is not a run "

@@ -163,17 +163,19 @@ The `SG-` namespace belongs to `apps/mcp/dma_mcp/gates.py` alone.
 
 ## Internal evidence (HYBRID / INTERNAL runs)
 
-1. **Load internal evidence first** — the conductor's `drive_fetch.py pull` lands the client's
-   documents under the run root (`01_intake/`; `run_manifest.json` names the path). Read the
-   NAMED artefact your card lists; an artefact the pull did not land is a `search_requests`
-   entry with `"tool": "drive"`, never a gap.
+1. **Load internal evidence first** — `engine.intake add` lands each client document under
+   `<run root>/01_intake/` with a hashed manifest (`01_intake/intake_manifest.json`), and your brief's `shared.internal_documents`
+   lists them. Read the NAMED artefact your card lists; an artefact that did not land is a
+   `search_requests` entry with `"tool": "drive"`, never a gap.
 2. **Classify with the one tree above** — never default internal evidence to T4.
 3. **Cross-reference** against public evidence; note agreements and contradictions
    (`engine.memory note --kind contradiction`).
 4. **Weight correctly:** internal T2 outweighs public T3–T5 for the same cell.
 5. **Register with `--origin internal`** and a verbatim excerpt.
-6. **Gate:** in HYBRID / INTERNAL mode, more than half the cells with no internal citation
-   means the documents were not read — stop and say so.
+6. **Gate:** PREFLIGHT refuses a HYBRID / INTERNAL run with an empty `01_intake/`, and HANDOFF
+   refuses one with no `Origin=internal` evidence row — the documents were not read. (There is
+   no share threshold: one engagement write-up cannot evidence half the cells, and a rule every
+   honest hybrid run fails gets waived.)
 
 ## Diagnostic question patterns
 

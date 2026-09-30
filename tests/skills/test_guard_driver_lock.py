@@ -142,3 +142,22 @@ def test_it_fails_open_on_input_it_did_not_parse():
                            capture_output=True, text=True, timeout=60)
         assert p.returncode == 0
         assert not p.stdout.strip()
+
+
+@pytest.mark.parametrize("command,runs", [
+    ('pgrep -f "engine.pipeline run"', False),
+    ("echo engine.pipeline run", False),
+    ('grep -n "engine.pipeline run" docs.md', False),
+    ("python3 -m engine.pipeline plan --run R", False),
+    ("cd /x && python3 -m engine.pipeline run --run R", True),
+    ("timeout 900 python3 -m engine.pipeline run --run R > log 2>&1", True),
+    ("nohup setsid python3 -m engine.pipeline run --run R &", True),
+    ("DMA_ACTOR=x python -m engine.pipeline run --run R", True),
+])
+def test_a_mention_is_not_an_invocation(command, runs):
+    """I-38: a pgrep pattern naming the driver was refused as a second driver."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("gdl", HOOK)
+    g = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(g)
+    assert g.invokes_driver(command) is runs
