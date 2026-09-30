@@ -78,6 +78,69 @@ DEFAULT_LANES = 16
 #: that behaves like a child (prints, spawns, hangs) without a model.
 CLAUDE_BIN = os.environ.get("DMA_CLAUDE_BIN", "claude")
 
+#: Where the platform writes this session's MCP config, once per container:
+#: `/tmp/mcp-config-<session-id>.json`. Overridable so a test can plant one.
+MCP_CONFIG_GLOB = os.environ.get("DMA_MCP_CONFIG_GLOB", "/tmp/mcp-config-*.json")
+
+
+def lane_mcp_config(pattern: str | None = None) -> str | None:
+    """The MCP config a headless lane is started with, or None.
+
+    Measured 2026-09-09 on a live research run (SWBC): a headless `claude -p`
+    child spawned with no `--mcp-config` cannot see mcp__Exa, mcp__Tavily,
+    mcp__Clay, mcp__Vibe_Prospecting or mcp__Indeed AT ALL — not refused,
+    absent from its tool registry, `--allowedTools` naming them or not. Across
+    16 category lanes and one dedicated enrichment lane that cost the run 0
+    enrichment_searches on every category (`engine.relay enrichment`) despite
+    ~1,900 logged searches: the `search_requests` relay is the fallback for a
+    genuinely absent connector, and it was absorbing total absence. A probe
+    with `--mcp-config` pointing at the parent session's own file connected
+    mcp__Exa on the first call.
+
+    Passing the parent's file WHOLE is not the fix: it names every server the
+    session holds (20 here — Figma, Gamma, Gmail, BigQuery, …) and each lane
+    would spawn all of them, and it names the DMA connector twice (the
+    plugin's own `.mcp.json` already binds it). So the lane gets a derived
+    file holding only the servers in CONNECTOR_NAMESPACES, written 0600
+    beside the parent's (it carries the parent's auth headers). Each agent's
+    own `tools:` / `disallowedTools:` front matter still gates what it may
+    call, exactly as ALLOWED only removes the permission-prompt layer; a lane
+    the roster bars from Clay stays barred. None where no parent config
+    exists (local dev, no platform-injected connectors): same behaviour as
+    before, and the relay stays correct there.
+    """
+    import glob
+    hits = sorted(glob.glob(pattern or MCP_CONFIG_GLOB),
+                  key=lambda p: Path(p).stat().st_mtime, reverse=True)
+    if not hits:
+        return None
+    src = Path(hits[0])
+    try:
+        doc = json.loads(src.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    servers = doc.get("mcpServers") if isinstance(doc, dict) else None
+    if not isinstance(servers, dict):
+        return None
+    wanted = {ns[len("mcp__"):] for ns in CONNECTOR_NAMESPACES}
+    kept = {name: cfg for name, cfg in servers.items() if name in wanted}
+    if not kept:
+        return None
+    out = src.with_name(src.stem + "-lanes.json")
+    try:
+        out.write_text(json.dumps({"mcpServers": kept}, indent=1), encoding="utf-8")
+        os.chmod(out, 0o600)
+    except OSError:
+        return None
+    return str(out)
+
+
+def _mcp_config_args() -> list[str]:
+    """`--mcp-config <file>` for a lane, or nothing — resolved per call so a
+    config that appears after import is still found."""
+    path = lane_mcp_config()
+    return ["--mcp-config", path] if path else []
+
 #: WHAT ONE LANE COSTS THE HOST — an estimate, stated as one. A `claude -p`
 #: child is a Node process holding a model context; measured RSS on the
 #: 2026-09-07 runs sat in the hundreds of MB and climbed with the transcript.
@@ -260,6 +323,7 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
     cmd = [CLAUDE_BIN, "-p", "--agent", f"{PLUGIN_PREFIX}:{name}",
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
+           *_mcp_config_args(),
            f"--allowedTools={allowed}", prompt]
     try:
         # start_new_session: the child leads its own process group, so a
@@ -716,6 +780,7 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
            "--output-format", "stream-json", "--verbose",
+           *_mcp_config_args(),
            f"--allowedTools={allowed}", prompt]
     events, raw, err_parts = [], [], []
     try:

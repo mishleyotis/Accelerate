@@ -239,6 +239,22 @@ last verdict's reasons, never a payload byte. The `research-conductor` owns
 what the driver cannot: the binding preflight with a person, `engine.cli
 start`, and the PRELIM lane's narrative sections.
 
+**What a headless lane can reach.** A `claude -p` child sees no MCP server
+its command line does not name: measured 2026-09-09 (SWBC), sixteen lanes
+granted `mcp__Exa`/`mcp__Tavily`/`mcp__Clay` in `--allowedTools` ran zero
+enrichment searches, because the servers were absent from the child's
+registry, not refused. `agent_run.py` therefore starts every lane with
+`--mcp-config` pointing at a derived file, `/tmp/mcp-config-<session>-lanes.json`
+(`agent_run.lane_mcp_config`): the parent session's config filtered to the
+`CONNECTOR_NAMESPACES` servers, written 0600 beside the parent's, without
+the DMA connector (the plugin's own `.mcp.json` binds it) and without the
+session's other servers (a lane has no business spawning Figma or Gmail).
+Each agent's `tools:` and `disallowedTools:` still decide what it may call;
+the lane config only makes the connector servers present. Where no parent
+config exists (local dev) the lane starts as before and the relay stays the
+route for connector volleys. `-lanes.json` is read by the `claude` binary,
+not by any script in this plugin.
+
 ## The taxonomy on disk
 
 ```
