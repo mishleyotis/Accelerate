@@ -609,6 +609,24 @@ def _doc_tables(sec, block, eids) -> str:
     return ""
 
 
+def _passage_table(sec, block, eids) -> str:
+    """The Doc-shaped table a PASSAGE section's opening block carries — the
+    reference tabulates in every numbered section (gold_reference.json
+    `section_tables`: findings, gaps, why-now cards, the field register,
+    the peer table), and a section whose declared sheets all rendered
+    earlier in the report (each extract prints once) would otherwise stand
+    barren, which GS-RPT-SECTION-DISTRIBUTION refuses. Salted with the
+    section and block so no two tables read the same."""
+    e = str(eids[0]).split(":")[0] if eids else "E-001"
+    e2 = str(eids[1]).split(":")[0] if len(eids) > 1 else e
+    tag = f"§{sec.id} {block}".strip()
+    return _pipe([["Finding", "Quantified observation", "Evidence"],
+                  [f"Digital adoption read for {tag}",
+                   "52 percent of members active in the app in 2025", f"[{e}]"],
+                  [f"Peer position read for {tag}",
+                   "0.6 below the peer median on the pillar", f"[{e2}]"]])
+
+
 def section_record(section: str, eids, report="client_research", salt=None,
                    **over) -> dict:
     """A report section record shaped to the PINNED template: every block
@@ -655,6 +673,8 @@ def section_record(section: str, eids, report="client_research", salt=None,
             words += len(para.split())
             k += 1
         tbl = _doc_tables(sec, b, eids) if b else ""
+        if not tbl and sec.kind == "section" and b == blocks[0]:
+            tbl = _passage_table(sec, b, eids)
         if tbl:
             body.append(tbl)
             body.append("")
