@@ -809,7 +809,13 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         "",
         (f"**Connector for this batch: `{tool}`.** " if len(tools) == 1 else
          f"**Connectors for this batch: {', '.join(f'`{t}`' for t in tools)}** — "
-         f"each query names the one to use; do not substitute another. "),
+         f"each query names the one to use; do not substitute another — "
+         f"EXCEPT when that connector refuses for quota (HTTP 402/429, "
+         f"'credits'): then fire the same query once through its pair "
+         f"(exa <-> tavily), log it with the tool you actually used, and "
+         f"record BLOCKED only if both refuse. Measured 2026-09-30: Exa ran "
+         f"out of credits mid-run and 27 requests were BLOCKED while Tavily "
+         f"stood unused. "),
         f"Cells it bears on: {', '.join(f'`{c}`' for c in cells) or '(run-level, no cell)'}.",
         "",
         f"## The {len(queries)} quer{'y' if len(queries) == 1 else 'ies'}",

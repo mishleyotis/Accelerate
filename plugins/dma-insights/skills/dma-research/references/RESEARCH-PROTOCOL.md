@@ -134,6 +134,8 @@ facet, and one `log` line per facet naming every cell. Then:
 3. **One or two turns of evidence**: `engine.cli fetch`, then `engine.cli
    evidence` / `attach` per cell, chained.
 4. **One turn of synthesis**: every cell's `engine.cli synthesise`, chained.
+   `python3 -m engine.cli synthesis-template` prints the record it takes —
+   never reverse-engineer it from the engine source.
 
 Measured before this rule (SWBC round 1): 1.0 cell per logged search, 70% of
 web searches never logged (they earn the gate nothing and the category is

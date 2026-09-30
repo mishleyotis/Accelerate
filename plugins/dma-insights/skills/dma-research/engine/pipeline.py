@@ -200,8 +200,22 @@ class AgentRunDispatcher:
         # 2026-09-07: "50 processes still running, load still climbing").
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 text=True, cwd=str(PLUGIN.parents[1]))
+        # HEARTBEAT WHILE THE BATCH RUNS. Measured 2026-09-30 (SWBC): a
+        # research batch ran 40 min, the lock's heartbeat went stale at 30,
+        # a second driver was started on the "dead" run and `stop` refused
+        # to signal the live one. communicate() with a timeout lets the lock
+        # be refreshed every minute without losing either pipe.
+        err = ""
         try:
-            _out, err = proc.communicate()
+            while True:
+                try:
+                    _out, err = proc.communicate(timeout=60)
+                    break
+                except subprocess.TimeoutExpired:
+                    try:
+                        runstate.heartbeat_driver_lock(ctx.run)
+                    except Exception:                    # noqa: BLE001
+                        pass
         except BaseException:
             _terminate(proc)
             raise
@@ -2278,11 +2292,21 @@ def main(argv=None) -> int:
         # round on stale code past the budget. The driver lock names the pid
         # that actually holds the run; this signals that one and waits.
         held = runstate.read_driver_lock(run)
-        if not held or not held.get("live"):
+        pid = int((held or {}).get("pid") or 0)
+        # A stale HEARTBEAT is not a dead PROCESS: trust /proc over the beat
+        # (a live driver with a stale lock is the state that let two drivers
+        # run one research round on 2026-09-30).
+        alive_driver = False
+        if pid:
+            try:
+                cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace")
+                alive_driver = "engine.pipeline" in cmdline and run.run_id in cmdline
+            except OSError:
+                alive_driver = False
+        if not held or not (held.get("live") or alive_driver):
             print(json.dumps({"stopped": False, "why": "no live driver holds this run",
                               "lock": held}, indent=2, default=str))
             return 0
-        pid = int(held["pid"])
         import signal as _signal
         try:
             os.kill(pid, _signal.SIGTERM)

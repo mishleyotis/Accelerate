@@ -191,6 +191,24 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     # scanner erased. Minting and appending inside ONE `transaction()`
     # closes both: the lock is held from the read of the maximum through the
     # save of the rows that use it.
+    # THE SAME SPAN IS THE SAME ROW. Measured 2026-09-30 (SWBC relay): a
+    # registration whose output was lost was re-run and minted E-224..E-226
+    # for one TechFabric span — three identities for one document, which
+    # `single_source_fact` and corroboration both miscount. An identical
+    # URL + excerpt now reuses the existing row and cites it from any new
+    # cell through `attach_evidence`, the reuse loop's own write.
+    _norm = " ".join(text.split())
+    _url = str(source_url or "").strip()
+    dup = next((str(r["E_ID"]) for r in wb.rows("Evidence_Detail")
+                if r.get("E_ID") and str(r.get("Source_URL") or "").strip() == _url
+                and " ".join(str(r.get("Excerpt") or "").split()) == _norm), None)
+    if dup:
+        new_cells = [c for c in cells if dup not in
+                     _split_ids((wb.scoring_row(c) or {}).get("Evidence_IDs"))
+                     and f"{dup}:" not in str((wb.scoring_row(c) or {}).get("Evidence_IDs") or "")]
+        if new_cells:
+            attach_evidence(wb, dup, new_cells, actor=actor)
+        return dup
     with wb.transaction("append_evidence"):
         eid = wb.next_evidence_id()
         # ERS is COMPUTED, never supplied (AUD-0152: the column existed, a full
@@ -517,9 +535,21 @@ def assert_actor_scope(actor, op: str, cells=None) -> None:
 
 # ── search ───────────────────────────────────────────────────────────────
 
+#: The tools a category LANE holds. Every other SEARCH_TOOLS entry is a
+#: connector the lane cannot call: its rows come from the conducting
+#: session's relay subagents — a different conversation, bounded by its own
+#: batch file. Measured 2026-09-30 (SWBC): relay rows were charged to the
+#: category window, so a lane was walled at "61/60" after firing five
+#: searches of its own.
+LANE_SEARCH_TOOLS = ("web_search", "web_fetch")
+
+
 def _search_scope(row: dict) -> str:
     """The conversation a Search_Log row belongs to: its cell's category, or
-    PRELIM for institution-profile retrieval that names no cell."""
+    PRELIM for institution-profile retrieval that names no cell, or RELAY for
+    a connector search the in-session relay fired."""
+    if str(row.get("Tool") or "").strip() not in LANE_SEARCH_TOOLS:
+        return "RELAY"
     cell = str(row.get("SubCap_ID") or "").strip()
     return cell.split(".")[0] if cell else "PRELIM"
 
@@ -649,7 +679,8 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     # able to checkpoint and legitimately continue, which is exactly the
     # context-preserving behaviour the ceiling exists to force.
     scope = "PRELIM" if prelim or not cells else cells[0].split(".")[0]
-    since = _ops_since_checkpoint(wb, scope)
+    relay_row = str(tool or "").strip() not in LANE_SEARCH_TOOLS
+    since = 0 if relay_row else _ops_since_checkpoint(wb, scope)
     if since >= SEARCH_OP_CEILING:
         raise LedgerRefusal(
             f"search-op ceiling reached for {scope}: {since} since its last "

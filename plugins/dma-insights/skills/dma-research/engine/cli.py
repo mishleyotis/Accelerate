@@ -457,6 +457,9 @@ def main(argv=None) -> int:
                     help="with --decline: what the row is actually about and "
                          "why it does not answer this cell")
 
+    sub.add_parser("synthesis-template",
+                   help="the synthesis record `synthesise --json` takes: every "
+                        "field, its floor and its vocabulary, from the ledger")
     y = common(sub.add_parser("synthesise"))
     y.add_argument("--subcap", required=True); y.add_argument("--json", required=True)
     y.add_argument("--actor", required=True,
@@ -605,6 +608,20 @@ def main(argv=None) -> int:
     cd_.add_argument("--run", required=True); cd_.add_argument("--root")
     cd_.add_argument("--capability", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "synthesis-template":
+        # Measured 2026-09-30 (SWBC, P2C3): a lane spent ~20 turns grepping the
+        # ledger to learn what this record needs. It is printed from the same
+        # constants the refusals read, so it cannot drift from them.
+        tpl = {f: f"<at least {n} chars, specific to this cell and its evidence>"
+               for f, n in ledger.SYNTHESIS_REQUIRED.items()}
+        tpl.update({f: "<the answer this facet's searches gave, or 'NOT_RUN: <reason>'>"
+                    for f in ledger.DQ_FIELDS})
+        tpl["Claim_Label"] = "|".join(contract.CLAIM_LABELS)
+        tpl["Ceiling_Band"] = "<optional: the band the evidence caps the cell at>"
+        tpl["_notes"] = ("write to a file, then `engine.cli synthesise --run R "
+                         "--root ROOT --subcap X --json <file> --actor <you>`; a "
+                         "cell with NO evidence closes only via `engine.cli absence`")
+        print(json.dumps(tpl, indent=1)); return 0
     if a.cmd == "counts":
         print(json.dumps(contract.counts(), indent=2)); return 0
     if a.cmd == "columns":

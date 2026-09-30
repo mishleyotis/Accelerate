@@ -387,6 +387,19 @@ def _hostname() -> str:
         return ""
 
 
+def _pid_is_driver(held: dict, run: "Run") -> bool:
+    """True when the lock's pid is alive on this host and is an
+    `engine.pipeline` process for this run."""
+    try:
+        pid = int(held.get("pid") or 0)
+        if not pid or pid == os.getpid() or (held.get("host") and held["host"] != _hostname()):
+            return False
+        cmd = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace")
+        return "engine.pipeline" in cmd and run.run_id in cmd
+    except (OSError, ValueError):
+        return False
+
+
 def acquire_driver_lock(run: "Run", *, command: str = "", force: bool = False) -> dict:
     """Claim this run for this process, or refuse with who holds it.
 
@@ -394,6 +407,11 @@ def acquire_driver_lock(run: "Run", *, command: str = "", force: bool = False) -
     gone, and a run nobody can resume because a dead process's file is still
     there is the worse failure."""
     held = read_driver_lock(run)
+    if held and not held["live"] and not force and _pid_is_driver(held, run):
+        # A stale heartbeat on a process that is still a driver of THIS run
+        # is a live lock (measured 2026-09-30: the reap let a second driver
+        # start beside one whose batch had run past the staleness window).
+        held = dict(held, live=True)
     if held and held["live"] and not force and int(held.get("pid") or -1) != os.getpid():
         raise DriverLocked(
             f"run {run.run_id} is held by pid {held.get('pid')} on "
