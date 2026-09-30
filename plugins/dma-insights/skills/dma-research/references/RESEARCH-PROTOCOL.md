@@ -137,7 +137,7 @@ facet, and one `log` line per facet naming every cell. Then:
    `python3 -m engine.cli synthesis-template` prints the record it takes —
    never reverse-engineer it from the engine source.
 
-Measured before this rule (SWBC round 1): 1.0 cell per logged search, 70% of
+Measured before this rule (SWBC round 1): 1.0 cell per logged search, seven in ten
 web searches never logged (they earn the gate nothing and the category is
 re-dispatched), ~45% of a lane's turns spent before its first search.
 `orient` still owns `do_first` and the STOP; use the card for the work.
