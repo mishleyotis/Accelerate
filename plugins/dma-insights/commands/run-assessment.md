@@ -91,7 +91,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/route_client.py" --client "$ARGUMENTS" --
 ```
 
 When the person asked for a NEW run of a client the corpus already holds,
-add `--fresh`: exit 7 NEW_VERSION is yours, and `engine.cli start` supersedes
+add `--fresh`: exit 7 NEW_VERSION is yours, and starting the run supersedes
 the folder's previous package in place (`drive_fetch.py archive-remote`, run
 by `open_folder` before its first push — moves, never deletes).
 

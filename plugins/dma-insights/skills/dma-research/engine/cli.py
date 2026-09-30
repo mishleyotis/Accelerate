@@ -705,7 +705,17 @@ def main(argv=None) -> int:
         except ledger.LedgerRefusal as exc:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
-        print(json.dumps({"seq": n, **ledger.stats(wb)}, indent=2)); return 0
+        # The budget line for THIS conversation's window (its category, or
+        # PRELIM) — the run-wide count read as "checkpoint_required: true"
+        # to every relay subagent once the run passed 60 searches (2026-09-30).
+        cells = list(a.subcap or [])
+        cat = None if a.prelim or not cells else str(cells[0]).split(".")[0]
+        st = ledger.stats(wb, cat)
+        if a.prelim or not cells:
+            since = ledger._ops_since_checkpoint(wb, "PRELIM")
+            st.update(search_ops_since_checkpoint=since,
+                      checkpoint_required=since >= ledger.SEARCH_OP_CEILING)
+        print(json.dumps({"seq": n, "window": cat or "PRELIM", **st}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
         if not cells and not a.profile:

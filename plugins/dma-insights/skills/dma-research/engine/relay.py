@@ -852,6 +852,12 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
             "excerpt verifies — no second fetch is bought:",
             f"  ```\n  python3 -m engine.cli fetch --run {run.run_id} --root {run.root} "
             f"--url <URL> --via-text <file-with-the-text>\n  ```",
+            ("- a technographic LIST from a connector (Explorium enrich-business, "
+             "Clay Tech Stack) is not one citable page: record each product with "
+             f"`python3 -m engine.techscan record --run {run.run_id} --root {run.root} …` "
+             "(see `--help`) rather than `engine.cli evidence`, which refuses a "
+             "public source with no URL" if str(q.get("tool") or "").lower()
+             in ("clay", "explorium") else ""),
             "- close the request(s):",
             f"  ```\n  {q['command_record']}\n  ```",
             "",

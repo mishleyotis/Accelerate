@@ -80,6 +80,24 @@ def test_issue8_every_lane_type_has_a_bounded_brief_and_a_real_agent(tmp_path):
             text = Path(row["prompt_file"]).read_text()
             assert "Your first commands" in text and run.run_id in text or srun.run_id in text
             agents.add(row["agent"])
+        # The PRELIM connector pass is NOT a lane (a child holds no enrichment
+        # connector): it is an orchestrator brief the session services, and it
+        # must still exist, name a real agent and stay under the ceiling.
+        orch = v.get("orchestrator")
+        if orch:
+            assert orch["agent"] in roster, orch["agent"]
+            assert Path(orch["prompt_file"]).is_file()
+            assert len(Path(orch["prompt_file"]).read_text()) <= brief.BRIEF_CHAR_CEILING * 2
+            agents.add(orch["agent"])
+    # With PRELIM open, the connector pass is owed and ships as the
+    # orchestrator brief (never as a connector-less child lane).
+    from fixtures import new_run as _new_run
+    orun = _new_run(tmp_path / "o", prelim=False)
+    ob = brief.prelim_brief(orun.open(), run=orun, out_dir=tmp_path / "po")
+    assert ob.get("orchestrator"), "PRELIM open, yet no connector brief for the session"
+    assert "enrichment-connector-specialist" not in {
+        r["agent"] for r in json.loads(Path(ob["batch"]).read_text())}
+    agents.add(ob["orchestrator"]["agent"])
     for must in ("research-conductor", "technographic-scanner",
                  "enrichment-connector-specialist", "scoring-p1-producer",
                  "scoring-critic", "report-research-producer",

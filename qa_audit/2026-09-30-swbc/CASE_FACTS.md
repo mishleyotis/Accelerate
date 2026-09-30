@@ -69,3 +69,13 @@ Persistent block. Updated as the run proceeds; every issue gets an ID and a stat
 
 ## Round 0 (old code) outcome
 - 16 lanes, 8-30 turns each, ~$0.3-0.8 each; driver stopped and restarted with fixes I-25..I-27.
+| I-29 | O1 | MED | engine/relay.py drain_brief | Relay prompts never named `engine.cli fetch --via-text`, so every connector-sourced span was refused excerpt_unverified once before a subagent found the seam (all 4 relay subagents hit it). | FIXED |
+| I-30 | O1 | LOW | engine/cli.py search output | Printed run-wide stats: every relay subagent saw `checkpoint_required: true` (277 vs 60) after the per-category fix. | FIXED (window-scoped) |
+| I-31 | O2 | MED | relay prompt / techscan | A live Explorium/Clay technographic list has no evidence path (no URL; import-explorium needs a paid xlsx export) - subagent correctly declined. | FIXED (relay prompt points to `engine.techscan record` per product) |
+| I-32 | QA-OPS | HIGH | my operation (and run-assessment s5) | I stopped the driver via the PID `$!` of `nohup setsid ...`; setsid forked, the PID was a dead wrapper, the real driver kept running round 1 on OLD in-memory code and crossed the $20 budget ($25.79). The plugin gives no stop command and writes no driver PID. | OPEN (add `engine.pipeline stop` / pidfile) |
+| I-16 | O1 | HIGH | engine.cost levers | CONFIRMED: levered model said $13.80 for the whole run; measured research alone $21.27 for 727 turns (~$0.029/turn); lane-fit projects ~4,264 research turns => ~$125 research-only. Default $5/pillar budget is structurally unreachable at FULL multi-LOB scope. | OPEN (needs owner decision on budget model) |
+
+## Measured state at STOPPED_BUDGET (06:10Z)
+- Wall 88.6 min; $25.79 (PRELIM $4.53, RESEARCH $21.27; 64 lane attempts, 727 turns, 29.5M cache-read tokens)
+- Cells citing evidence 55/760 (7.2%); synthesised 7/760; 0/16 categories pass floors
+- Relay: 66 requests serviced in-session (~44 served, ~20 empty, 2 blocked by Cloudflare) by 4 pillar subagents (~0.99M subagent tokens)

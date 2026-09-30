@@ -13,9 +13,16 @@ from engine import runstate
 CAT = "P1C1"
 
 
+def _cu_may_hold(tax, cells) -> list[str]:
+    """Universal cells and CU's own variants — never another sub-vertical's
+    (the seed guard refuses those; 38 of them carry a bare `T2` tier and used
+    to slip through it)."""
+    return [c for c in cells if tax.sub_vertical_of(c) in (None, "CU")]
+
+
 def small_selection(n: int = 6) -> list[str]:
     tax = C.taxonomy()
-    return list(tax.cells_in(CAT))[:n]
+    return _cu_may_hold(tax, tax.cells_in(CAT))[:n]
 
 
 def two_category_selection(n: int = 4) -> list[str]:
@@ -26,7 +33,7 @@ def two_category_selection(n: int = 4) -> list[str]:
     cats = list(tax.categories)[:2]
     out = []
     for cat in cats:
-        out += list(tax.cells_in(cat))[:n]
+        out += _cu_may_hold(tax, tax.cells_in(cat))[:n]
     return out
 
 

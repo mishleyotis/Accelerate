@@ -905,7 +905,12 @@ def main(argv=None) -> int:
             tax = C.taxonomy()
             cells = tax.selected(a.sv, a.scope)
         caps = len({".".join(str(c).split(".")[:2]) for c in cells})
-        sch = schedule(len(cells), caps, host_lanes(a.lanes))
+        sch = schedule(len(cells), caps, a.lanes)
+        # The same projection at the lanes THIS host will actually run.
+        cap = host_lanes(a.lanes)
+        sch["on_host"] = schedule(len(cells), caps, cap) if cap != a.lanes else None
+        if sch["on_host"] and not getattr(a, "json", False):
+            sch = dict(sch["on_host"], fan_out=a.lanes)
         if a.json:
             print(json.dumps(sch, indent=2))
             return 0 if sch["within_target"] else 1
