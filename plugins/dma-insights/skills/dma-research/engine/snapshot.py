@@ -26,8 +26,14 @@ import tarfile
 import tempfile
 from pathlib import Path
 
-from . import runstate
-from .workbook import file_lock
+if __package__ in (None, ""):  # noqa: E402 — runnable as a file, too
+    import os as _os
+    _sys_path = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    sys.path.insert(0, _sys_path)
+    __package__ = "engine"
+
+from . import runstate  # noqa: E402
+from .workbook import file_lock  # noqa: E402
 
 EXCLUDE_DIRS = ("agent_logs",)          # transcripts: large and regenerable
 EXCLUDE_SUFFIXES = (".lock",)
