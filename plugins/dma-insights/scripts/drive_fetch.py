@@ -865,6 +865,14 @@ def main(argv=None) -> int:
     p_pk.add_argument("--name", default=None,
                       help="remote path under the client folder "
                            "(default: the file's own name)")
+    p_ar = sub.add_parser(
+        "archive-remote",
+        help="move the intake folder's previous package into "
+             "_superseded/<run>/ before a new run writes (never deletes)")
+    p_ar.add_argument("--client", required=True)
+    p_ar.add_argument("--run-id", required=True)
+    p_ar.add_argument("--opened-at", default=None)
+    p_ar.add_argument("--dry-run", action="store_true")
     p_rv = sub.add_parser(
         "push-review",
         help="one review artefact (e.g. the packaged plugin zip) into the "
@@ -903,6 +911,10 @@ def main(argv=None) -> int:
         return cleanup_backup(a.client)
     if a.cmd == "push-package":
         return push_package(a.client, a.file, a.name)
+    if a.cmd == "archive-remote":
+        r = archive_remote(a.client, a.run_id, a.opened_at, dry_run=a.dry_run)
+        print(json.dumps(r, indent=1))
+        return 1 if r.get("failed") else 0
     if a.cmd == "push-review":
         return push_review(a.file, a.name)
     if a.cmd == "find-artifact":
@@ -974,6 +986,92 @@ def push_package(client: str, file_path: str, name: str | None) -> int:
     print(f"package {verb}: {folder['name']}/{remote}"
           + (" (client folder CREATED)" if made else ""))
     return 0
+
+
+#: Root items a supersede never moves: the archive itself, the synthesis-side
+#: 'DMAI - <Client>' folder (a different tree with its own lifecycle) and
+#: the in-flight memory backup.
+_ARCHIVE_KEEP = ("_superseded", BACKUP_FOLDER)
+
+
+def archive_remote(client: str, run_id: str, opened_at: str | None = None,
+                   *, dry_run: bool = False) -> dict:
+    """Move the intake folder's PREVIOUS package into `_superseded/<label>/`.
+
+    THE DEFECT THIS CLOSES, measured 2026-09-30 on SWBC. `assemble.
+    _archive_existing` supersedes a prior package by reading the LOCAL
+    folder's run_manifest.json. A run on a fresh container has no local
+    folder, so it reported "no previous package here" while the Drive
+    folder held the 2026-09-11 package at its root — and `push-package`
+    then OVERWROTE that run's manifest with the new run's identity. The
+    silent merge CLIENT-SELECTION.md section 2 calls closed was open for
+    every run that did not reuse the container that made the last one.
+
+    Same shape as the local archive: nothing is deleted, the folder keeps its
+    name and id, and every item moves whole. When the remote manifest
+    already names THIS run (a resume, or the partial state the defect left),
+    only items modified before this run's `opened_at` move — so a resume
+    never archives its own deliverables."""
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    q = urllib.parse.urlencode({
+        "q": f"'{folder['id']}' in parents and trashed = false",
+        "fields": "files(id,name,mimeType,modifiedTime)", "pageSize": 200,
+        "supportsAllDrives": "true", "includeItemsFromAllDrives": "true"})
+    with _req(tok, f"{API}/files?{q}") as resp:
+        items = json.load(resp).get("files", [])
+    prior_run, prior_opened = "", ""
+    man = next((f for f in items if f["name"] == "run_manifest.json"), None)
+    if man:
+        try:
+            with _req(tok, f"{API}/files/{man['id']}?alt=media"
+                           f"&supportsAllDrives=true") as resp:
+                was = json.load(resp)
+            prior_run = str(was.get("run_id") or "")
+            prior_opened = str(was.get("opened_at") or "")
+        except Exception:                                   # noqa: BLE001
+            pass
+    same_run = prior_run == run_id
+    cutoff = (opened_at or prior_opened) if same_run else None
+    movable = []
+    for f in items:
+        if f["name"] in _ARCHIVE_KEEP or f["name"].startswith("DMAI - "):
+            continue
+        if same_run and f["name"] == "run_manifest.json":
+            continue
+        if cutoff and str(f.get("modifiedTime") or "") >= cutoff:
+            continue
+        movable.append(f)
+    if not movable:
+        return {"archived": None, "reason": ("same run, nothing older"
+                                             if same_run else
+                                             "no previous package on Drive")}
+    stamp = max(str(f.get("modifiedTime") or "")[:10] for f in movable)
+    label = (f"{prior_run}_{stamp}" if prior_run and not same_run
+             else f"prior-package_{stamp}")
+    out = {"archived": f"{folder['name']}/_superseded/{label}",
+           "prior_run": prior_run or None,
+           "moved": [f["name"] for f in movable], "failed": []}
+    if dry_run:
+        out["dry_run"] = True
+        return out
+    home = _ensure_folder(tok, _ensure_folder(tok, folder["id"], "_superseded"),
+                          label)
+    for f in movable:
+        url = (f"{API}/files/{f['id']}?addParents={home}"
+               f"&removeParents={folder['id']}&supportsAllDrives=true")
+        try:
+            with _req(tok, url, data=b"{}", method="PATCH",
+                      ctype="application/json") as resp:
+                json.load(resp)
+        except urllib.error.HTTPError as e:
+            out["failed"].append({"name": f["name"], "http": e.code})
+    _upload_bytes(tok, home, "SUPERSEDED.json", json.dumps({
+        "run_id": prior_run or None, "superseded_by": run_id,
+        "superseded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "moved": out["moved"], "failed": out["failed"]}, indent=2).encode(),
+        "application/json")
+    return out
 
 
 def push_backup(client: str, file_path: str | None, name: str | None,

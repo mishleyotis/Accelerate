@@ -680,9 +680,12 @@ class Pipeline:
             sv = str(md.get("sv_basis") or "").strip()
             sha = str(md.get("preflight_sha") or "").strip()
             ok = bool(sha) or (bool(sv) and not sv.upper().startswith("UNSTATED"))
-            return ok, ("binding recorded" if ok else
-                        "no binding basis on the run: start it with `engine.cli start "
-                        "--preflight <answered preflight.json>`")
+            if not ok:
+                return ok, ("no binding basis on the run: start it with `engine.cli start "
+                            "--preflight <answered preflight.json>`")
+            from . import intake
+            miss = intake.missing_for_mode(self.run.root, md.get("evidence_mode"))
+            return (miss is None), (miss or "binding recorded")
         if stage == "START":
             from . import template as T
             b = T.binding_state(wb)
@@ -1669,7 +1672,11 @@ class Pipeline:
         from . import assessment as A
         from . import handoff
         self._reset_counters()
+        from . import intake
         pre = A.research_ready(self.wb, self.run.qa_dir)
+        blk = intake.handoff_blocker(self.wb, self.run.root)
+        if blk:
+            pre = list(pre) + [blk]
         if pre:
             raise StageRefused("research is not ready to score:\n  - " + "\n  - ".join(pre))
         doc = handoff.build(self.wb, qa_dir=self.run.qa_dir, strict=True)

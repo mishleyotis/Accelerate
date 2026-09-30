@@ -553,7 +553,7 @@ for _builtin in ("WebSearch", "WebFetch"):
 # the belt for a session whose hooks bound from a stale install. They are
 # deliberately NARROWER than the hook — a settings grant is honoured without
 # the guards being consulted, so nothing here can reach a push, a credential
-# or the deployables: no bare `Bash`, no `Write` without a path.
+# or the deployables: no bare `Bash`, no `Edit` without a path.
 for _builtin in (
     "Bash(python3 -m engine.*)",                 # the research engine
     "Bash(python3 plugins/dma-insights/*)",      # plugin scripts, both spellings
@@ -561,9 +561,12 @@ for _builtin in (
     "Bash(python3 -m pytest *)",
     "Bash(bash plugins/dma-insights/scripts/*)",
     "Bash(bash /home/user/Accelerate/plugins/dma-insights/scripts/*)",
-    "Write(//root/.dma/**)", "Edit(//root/.dma/**)",
-    "Write(//home/claude/dma_output/**)", "Edit(//home/claude/dma_output/**)",
-    "Write(//tmp/**)", "Edit(//tmp/**)",
+    # Edit(path) rules cover every file-editing tool; a Write(path) rule is
+    # ignored by file permission checks and printed three warnings into every
+    # headless lane's log (measured 2026-09-30).
+    "Edit(//root/.dma/**)",
+    "Edit(//home/claude/dma_output/**)",
+    "Edit(//tmp/**)",
 ):
     if _builtin not in wanted:
         wanted.append(_builtin)

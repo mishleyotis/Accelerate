@@ -188,7 +188,38 @@ class Taxonomy:
         codes = {v.split("-", 1)[1] for v in self.tier.values() if "-" in v}
         return tuple(sorted(codes))
 
-    def selected(self, sv: str | None, scope: str) -> tuple[str, ...]:
+    def sub_vertical_of(self, cell: str) -> str | None:
+        """The sub-vertical a variant cell belongs to, or None for a
+        universal cell.
+
+        The tier label names it on 127 of the 165 variants (`T2-CU`). The
+        other 38 carry a bare `T2` while their id still names the
+        sub-vertical (`P1C1.4.IB1`, `P4C3.8.CIB2`). Measured 2026-09-30 on
+        the SWBC run: `selected()` matched on the label alone, so those 38
+        (23% of the overlay: IB 4, IC 7, CL 3, RIA 3, CIB 5, AM 6, FC 4,
+        CU 3, RB 2) could never be chosen for any binding — every run
+        silently researched a smaller overlay than its sub-vertical
+        defines. The label wins where it names one; the id otherwise."""
+        tier = self.tier.get(cell, "")
+        if "-" in tier:
+            return tier.split("-", 1)[1]
+        m = _CELL_RE.match(cell)
+        suffix = (m.group(4) or "") if m else ""
+        if not suffix or suffix.isdigit():
+            return None
+        code = re.match(r"[A-Z]+", suffix)
+        return code.group(0) if code and code.group(0) in \
+            self.sub_vertical_codes() else None
+
+    def overlay(self, sv: str | None) -> tuple[str, ...]:
+        """Every variant cell of one sub-vertical."""
+        if sv is None:
+            return ()
+        return tuple(c for c in self.variants if self.sub_vertical_of(c) == sv)
+
+    def selected(self, sv: str | None, scope: str,
+                 supplementary: tuple[str, ...] | list[str] = ()
+                 ) -> tuple[str, ...]:
         """The engagement set for a sub-vertical and scope mode.
 
         AUD-0077: the archive's binder validated neither argument, so an
@@ -204,22 +235,36 @@ class Taxonomy:
             raise ValueError(
                 f"unknown sub-vertical {sv!r}; the catalogue carries: "
                 f"{', '.join(known)}")
+        supp = [s for s in dict.fromkeys(supplementary or ()) if s != sv]
+        for s in supp:
+            if s not in known:
+                raise ValueError(
+                    f"unknown supplementary sub-vertical {s!r}; the catalogue "
+                    f"carries: {', '.join(known)}")
+        if supp and sv is None:
+            raise ValueError("a supplementary sub-vertical needs a primary one")
         univ = list(self.universal)
-        if sv is None:
-            overlay: list[str] = []
-        else:
-            overlay = [c for c in self.variants
-                       if self.tier.get(c, "").endswith("-" + sv)]
+        overlay = list(self.overlay(sv))
+        # MULTI-LOB (owner, 2026-09-30, SWBC: "do all separately but do not
+        # repeat tier 2 research only for the extra tier 2 subcaps specific
+        # to the related subvert with this supplementing the IB findings").
+        # The primary sub-vertical's overlay supersedes its base cells as
+        # before. A SUPPLEMENTARY sub-vertical contributes only its own
+        # variant cells, ADDITIVELY: the universal cell it varies is already
+        # researched under the primary binding and stays, so nothing is
+        # researched twice and the second line of business still gets the
+        # capabilities defined for it.
+        extra = [c for s in supp for c in self.overlay(s) if c not in overlay]
         if scope == "T1_CORE":
             return tuple(univ)
         if scope == "OVERLAY_ONLY":
-            return tuple(overlay)
+            return tuple(overlay + extra)
         # FULL and OFFERING both take the overlay. AUD-0077 also measured the
         # overlay landing ALONGSIDE its base sibling, so an entity was
         # researched twice on near-identical capabilities. An overlay
         # supersedes the base cell it varies, so the base is withdrawn.
         superseded = {self.base_of(c) for c in overlay}
-        return tuple([c for c in univ if c not in superseded] + overlay)
+        return tuple([c for c in univ if c not in superseded] + overlay + extra)
 
     def base_of(self, variant: str) -> str | None:
         """The universal cell a sub-vertical variant supersedes, or None.
@@ -787,7 +832,10 @@ RUN_METADATA_KEYS = (
     # that is required at one stage and meaningless at the other cannot be
     # gated against a stage nobody wrote down. See STAGES / SHEET_STAGE.
     "stage",
-    "evidence_mode", "sv_basis", "mode_basis", "lob_census", "kg_checksum",
+    "evidence_mode", "sv_basis", "mode_basis", "lob_census",
+    # Multi-LOB: the sub-verticals whose variant cells ride additively on the
+    # primary binding (comma-separated; empty for a single-LOB run).
+    "supplementary_sub_verticals", "kg_checksum",
     "created_at", "last_written_at", "checkpoint",
     # The binding preflight's digest. `sv_basis` and `mode_basis` are
     # RENDERED from the preflight document this hashes, so a basis that

@@ -149,7 +149,8 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
           selected: list[str] | None = None,
           evidence_mode: str = "PUBLIC",
           sv_basis: str | None = None, mode_basis: str | None = None,
-          lob_census: str | None = None) -> Run:
+          lob_census: str | None = None,
+          supplementary: list[str] | tuple[str, ...] = ()) -> Run:
     """Create the run tree and its workbook, metadata already resolved."""
     if sv_basis is not None:
         sv_basis = vet_basis("--sv-basis", sv_basis)
@@ -166,7 +167,8 @@ def start(*, run_id: str, entity_name: str, entity_id: str,
                        scope_mode=scope_mode, reference_date=reference_date,
                        overwrite=overwrite, selected=selected,
                        evidence_mode=evidence_mode, sv_basis=sv_basis,
-                       mode_basis=mode_basis, lob_census=lob_census)
+                       mode_basis=mode_basis, lob_census=lob_census,
+                       supplementary=supplementary)
     run = Run(run_id=run_id, root=base, workbook_path=path)
     # BIND THE TEMPLATES BEFORE ANYTHING IS RESEARCHED. The pinned report
     # Docs, workbook shape and gold reference are hashed into the workbook

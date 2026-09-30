@@ -103,6 +103,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
+from . import intake as _intake
 from . import contract as C
 from . import ledger as L
 from . import runstate
@@ -280,6 +281,13 @@ def shared(wb: RunWorkbook) -> dict:
         "entity": md.get("entity_name"),
         "sub_vertical": md.get("sub_vertical"),
         "evidence_mode": md.get("evidence_mode"),
+        # HYBRID/INTERNAL: where the internal documents are and what to do
+        # with them. The run root is the workbook's directory (runstate).
+        "internal_documents": _intake.for_brief(wb.path.parent,
+                                                md.get("evidence_mode")),
+        "supplementary_sub_verticals": [
+            s for s in str(md.get("supplementary_sub_verticals") or "").split(",")
+            if s.strip()] or None,
         "stage": C.stage_of(md),
         "template_binding": _clean(md.get("template_binding")) or None,
         "estate_by_layer": by_layer,

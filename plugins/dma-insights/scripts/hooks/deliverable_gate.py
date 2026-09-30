@@ -48,6 +48,17 @@ DELIVERABLE_WRITE = re.compile(
 PUSH = re.compile(
     r"drive_fetch\.py[\"']?\s+push-(?:package|final|artifact)\b"
     r"|engine\.assemble\s+package\b[^\n]*--push\b")
+#: Working files that ride push-package but are not client deliverables.
+#: Measured 2026-09-30 (SWBC): run-assessment step 3 says "push the answered
+#: preflight to the client folder" at a point where no gold verdict can exist
+#: yet, so the gate denied the command's own instruction every time.
+#: `run_manifest.json` is written by `assemble.open_folder` at run start for
+#: the same reason: an IN_PROGRESS folder must be findable before anything
+#: has been judged. Every deliverable (workbook, reports, scan, evidence
+#: index) is still gated.
+NON_DELIVERABLE = ("preflight.json", "run_manifest.json")
+_PUSH_NAME = re.compile(r"--name[ =][\"']?([^\s\"']+)")
+_PUSH_FILE = re.compile(r"--file[ =][\"']?([^\s\"']+)")
 RUN_FLAG = re.compile(r"--run[ =]([\w.:-]+)")
 ROOT_FLAG = re.compile(r"--root[ =](\S+)")
 
@@ -143,6 +154,14 @@ def push_verdict(cmd: str) -> tuple[str, str | None]:
     is a deny with the way out, never a silent allow."""
     if not PUSH.search(cmd or ""):
         return "not_a_push", None
+    # Exactly one push, a push-package, and both its --file and --name are
+    # working files. A `cd … &&` prefix is ordinary and changes nothing here.
+    if len(PUSH.findall(cmd)) == 1 and re.search(r"push-package\b", cmd):
+        names = [m.group(1) for m in (_PUSH_FILE.search(cmd),
+                                      _PUSH_NAME.search(cmd)) if m]
+        if _PUSH_FILE.search(cmd) and all(Path(n).name in NON_DELIVERABLE
+                                          for n in names):
+            return "pass", None
     run = _run_from(cmd)
     if run is None:
         return "deny", (

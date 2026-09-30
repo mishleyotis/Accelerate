@@ -742,6 +742,10 @@ def main(argv=None) -> int:
     e.add_argument("--sv", default="CU"); e.add_argument("--scope",
                                                          default="T1_CORE")
     e.add_argument("--json", action="store_true")
+    # The run's OWN cell set (run-assessment step 4 documents this form).
+    # Measured 2026-09-30: without it the estimate priced the catalogue's
+    # default selection (IB 694) while the SWBC run held 760 multi-LOB cells.
+    e.add_argument("--run"); e.add_argument("--root")
     lf = sub.add_parser("lane-fit",
                         help="can each category's work fit the turns its lane gets?")
     lf.add_argument("--run"); lf.add_argument("--root")
@@ -898,7 +902,7 @@ def main(argv=None) -> int:
 
     if a.cmd == "lane-fit":
         from . import runstate
-        run = runstate.locate(a.run, Path(a.root) / a.run if a.root else None)
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
         fit = lane_fit(run.open())
         if a.json:
             print(json.dumps(fit, indent=2))
@@ -920,7 +924,11 @@ def main(argv=None) -> int:
         print(f"\n  {fit['why']}")
         return 0 if fit["ok"] else 1
 
-    if a.cmd == "estimate":
+    if a.cmd == "estimate" and a.run:
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
+        est = for_run(run.open())
+    elif a.cmd == "estimate":
         if a.subcaps:
             by = {"P1": a.subcaps}
         else:

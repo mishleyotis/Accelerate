@@ -639,7 +639,8 @@ def main(argv=None) -> int:
                              root=root, evidence_mode=b["evidence_mode"],
                              sv_basis=b["sv_basis"],
                              mode_basis=b["mode_basis"],
-                             lob_census=b["lob_census"])
+                             lob_census=b["lob_census"],
+                             supplementary=b.get("supplementary", ()))
         # Recorded before anything else touches the workbook: a run that
         # dies in preflight.record still knows which thread was waiting.
         wb = run.open()
@@ -653,6 +654,7 @@ def main(argv=None) -> int:
                "selected": len(run.open().selected_subcaps()),
                "evidence_mode": b["evidence_mode"],
                "binding": {"sv": b["sub_vertical"], "scope": scope,
+                           "supplementary": list(b.get("supplementary", ())),
                            "sv_basis": b["sv_basis"],
                            "mode_basis": b["mode_basis"],
                            "lob_census": b["lob_census"],
