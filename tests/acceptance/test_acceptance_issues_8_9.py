@@ -54,7 +54,7 @@ def _cli(mod: str, *args, run) -> subprocess.CompletedProcess:
 def test_issue8_every_lane_type_has_a_bounded_brief_and_a_real_agent(tmp_path):
     """PRELIM, challenge, scoring (three shapes), reports (two shapes) and
     pages: each view writes one prompt file per lane, names an agent that
-    exists in the roster, and stays under the packet ceiling."""
+    exists in the roster, and stays under its packet family's ceiling."""
     run, wb, cells, ev = researched_run(tmp_path / "r")
     srun, swb, scells, sev = scored_run(tmp_path / "s")
     roster = _roster()
@@ -76,7 +76,15 @@ def test_issue8_every_lane_type_has_a_bounded_brief_and_a_real_agent(tmp_path):
         for row, w in zip(rows, v["briefs"]):
             assert row["agent"] in roster, row["agent"]
             assert Path(row["prompt_file"]).is_file()
-            assert w["chars"] <= brief.BRIEF_CHAR_CEILING, (row["agent"], w["chars"])
+            # Each lane is held to the ceiling ITS packet family documents
+            # (brief.py: dispatch 6,400, report 9,000 — the report packet's
+            # sections are the contract and its budget was sized on
+            # 2026-09-14 to hold the whole spec at any checkout path). The
+            # one dispatch number held every family until the report brief
+            # gained its per-block floors and crossed 6,400 by path length
+            # alone: 6,457 at one checkout, 6,919 at another (2026-09-30).
+            assert w["ceiling"] in (brief.BRIEF_CHAR_CEILING, brief.REPORT_CHAR_CEILING), w
+            assert w["chars"] <= w["ceiling"], (row["agent"], w["chars"], w["ceiling"])
             text = Path(row["prompt_file"]).read_text()
             assert "Your first commands" in text and run.run_id in text or srun.run_id in text
             agents.add(row["agent"])

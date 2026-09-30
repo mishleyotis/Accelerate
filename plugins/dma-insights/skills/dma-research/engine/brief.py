@@ -1205,6 +1205,7 @@ def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
         rows.append({"agent": packet["agent"], "prompt_file": str(path)})
         wrote.append({"category": cat, "prompt_file": str(path),
                       "chars": packet["packet_chars"],
+                      "ceiling": packet["packet_ceiling"],
                       "open_cells": packet["open_cells"]})
     batch_path = out_dir / "batch.json"
     batch_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
@@ -1393,8 +1394,12 @@ def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
         (out_dir / f"{name}.json").write_text(
             json.dumps(packet, indent=2, default=str), encoding="utf-8")
         rows.append({"agent": packet["agent"], "prompt_file": str(path)})
+        # `ceiling` is the packet's OWN budget (dispatch 6,400; report 9,000;
+        # challenge 16,000) so a reader holds each lane to the contract it
+        # was sized against, not to the dispatch packet's number.
         wrote.append({"lane": name, "agent": packet["agent"],
-                      "prompt_file": str(path), "chars": packet["packet_chars"]})
+                      "prompt_file": str(path), "chars": packet["packet_chars"],
+                      "ceiling": packet["packet_ceiling"]})
     batch_path = out_dir / batch_name
     batch_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
     return {"batch": str(batch_path), "lanes": len(rows), "briefs": wrote,
