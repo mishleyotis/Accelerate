@@ -296,7 +296,7 @@ def _rules_for(tmp_path, tools):
 
 
 def test_the_brief_names_the_flag_under_a_short_baseline(tmp_path):
-    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__search-companies"])
     assert "--enrichment-unavailable" in rules
     assert packet["enrichment_binding"]["bound"] is False
 
@@ -326,7 +326,7 @@ def test_the_rule_survives_the_packet_ceiling(tmp_path):
     """`as_markdown` trims cell lists, never rules — assert it, because a
     rule that is trimmed away is a rule nobody reads."""
     from engine import brief
-    rules, packet = _rules_for(tmp_path, ["mcp__Clay__find-and-enrich-company"])
+    rules, packet = _rules_for(tmp_path, ["mcp__Clay__search-companies"])
     assert "--enrichment-unavailable" in brief.as_markdown(packet)
 
 

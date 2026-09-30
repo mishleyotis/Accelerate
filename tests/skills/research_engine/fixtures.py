@@ -41,7 +41,7 @@ def two_category_selection(n: int = 4) -> list[str]:
 #: `connector_contract.write_baseline`. One tool per required family is
 #: enough — `_present` asks whether the family answers at all.
 BOUND_CONNECTORS = ("mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
-                    "mcp__Clay__find-and-enrich-company")
+                    "mcp__Clay__search-companies")
 
 
 def write_baseline(run, tools=BOUND_CONNECTORS):

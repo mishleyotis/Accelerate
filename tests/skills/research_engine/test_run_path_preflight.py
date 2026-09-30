@@ -43,8 +43,8 @@ def _baseline(run, tools):
 
 
 BOUND = ["mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
-         "mcp__Clay__find-and-enrich-company"]
-SHORT = ["mcp__Clay__find-and-enrich-company"]
+         "mcp__Clay__search-companies"]
+SHORT = ["mcp__Clay__search-companies"]
 
 
 def _drive(tmp_path, *, baseline, **over):
