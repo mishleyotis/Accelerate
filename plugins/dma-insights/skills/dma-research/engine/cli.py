@@ -457,6 +457,11 @@ def main(argv=None) -> int:
                     help="with --decline: what the row is actually about and "
                          "why it does not answer this cell")
 
+    ck = sub.add_parser("checkpoint", help="open a fresh search window for one "
+                        "category (a new conversation — a workflow agent starting work)")
+    ck.add_argument("--run", required=True); ck.add_argument("--root")
+    ck.add_argument("--category", required=True)
+    ck.add_argument("--position", default="workflow dispatch")
     sub.add_parser("synthesis-template",
                    help="the synthesis record `synthesise --json` takes: every "
                         "field, its floor and its vocabulary, from the ledger")
@@ -714,6 +719,10 @@ def main(argv=None) -> int:
         return _fetch_cmd(run, a)
 
     wb = run.open()
+    if a.cmd == "checkpoint":
+        runstate.checkpoint(wb, a.position, scope=[a.category])
+        print(json.dumps({"checkpoint": a.category, "window_remaining":
+                          ledger.stats(wb, a.category)["window_remaining"]})); return 0
     if a.cmd == "card":
         print(json.dumps(orient.capability_card(wb, a.capability, run=run),
                          indent=1)); return 0

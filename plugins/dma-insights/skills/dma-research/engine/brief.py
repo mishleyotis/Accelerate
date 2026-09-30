@@ -2610,6 +2610,8 @@ def main(argv=None) -> int:
                                help="one finding-challenger lane per category with "
                                     "unchallenged syntheses"))
     cb.add_argument("--out-dir", required=True)
+    cb.add_argument("--only", help="comma-separated categories (one workflow "
+                    "category pipeline challenges its own)")
     sb = common(sub.add_parser("scoring-batch",
                                help="one scoring lane per pillar; --critic or --solutions "
                                     "for those lanes instead"))
@@ -2675,7 +2677,9 @@ def main(argv=None) -> int:
         elif a.cmd == "prelim":
             print(json.dumps(prelim_brief(wb, run=run, out_dir=Path(a.out_dir)), indent=2))
         elif a.cmd == "challenge-batch":
-            print(json.dumps(challenge_batch(wb, run=run, out_dir=Path(a.out_dir)), indent=2))
+            only = [c.strip() for c in (getattr(a, "only", None) or "").split(",") if c.strip()]
+            print(json.dumps(challenge_batch(wb, run=run, out_dir=Path(a.out_dir),
+                                             categories=only or None), indent=2))
         elif a.cmd == "scoring-batch":
             print(json.dumps(scoring_batch(wb, run=run, out_dir=Path(a.out_dir),
                                            critic=a.critic, solutions=a.solutions), indent=2))
