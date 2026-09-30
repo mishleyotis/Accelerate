@@ -121,6 +121,18 @@ source — the contract forbids a placeholder there and a URL cannot be invented
   — `Field | STATED |` on every row — is refused (GS-RPT-DEGENERATE-TABLE), and so is a
   field register typed as one `;`-separated sentence (GS-RPT-PROSE-DUMP); the fields
   belong in the table that owns them and the prose in what they mean.
+- **Structure is gated, not just volume, and gated before the render.** The whole
+  report owes tables at the reference's density (92 assessment / 39 research over 690
+  cells, scaled to the run — GS-RPT-TABLE-FLOOR; the per-card GS-RPT-TABLES is a
+  different floor); paragraph words running more than 1.25x the reference while the
+  tables are short is prose standing in for structure (GS-RPT-PROSE-FOR-STRUCTURE — the
+  repair moves content into a table, never cuts it); a table averaging 4x the
+  reference's ~126 words, or one table holding over 35% of all table content, is a
+  sheet emitted whole (GS-RPT-TABLE-DUMP). `reports.check` predicts the same four
+  numbers from the renderer's own grammar (`_predicted_report_shape`) and refuses
+  before a paragraph is written; `engine.authoring brief` hands a section's writer the
+  same rules first — the sheets it owes as tables, which are empty, how many tables
+  Golden 1 carries in that section — from `references/templates/report_antipatterns.json`.
 
 ## Templates are pinned, bound and enforced — before the process begins
 

@@ -74,6 +74,12 @@ def _words(text: str) -> int:
     return len(re.findall(r"[A-Za-z0-9][A-Za-z0-9'’\-]*", text or ""))
 
 
+def _gs_words(text: str) -> int:
+    """The gold gate's own token count (`gold_standard._docx_shape`, `\\w+`),
+    used wherever this module predicts a number that gate will measure."""
+    return len(re.findall(r"\w+", text or ""))
+
+
 def _slug(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", (s or "")).strip("_") or "client"
 
@@ -163,7 +169,16 @@ _TABLE_TITLES: dict[str, tuple[str, tuple[str, ...] | None]] = {
     "Maturity_Rubric": ("Maturity rubric", None),
     "Catalogue_Meta": ("Catalogue binding", None),
     "Solution_Catalogue": ("Solution catalogue", None),
-    "Recommendations": ("Recommendations (projected from §8)", None),
+    # The projected tab's `Rationale` is each REC card's whole argument
+    # (`grains.recommendations`); printed here it re-emitted §8's prose as
+    # one table of ~1,800 words — 40% of the report's table content, the
+    # GS-RPT-TABLE-DUMP shape (measured 30-09-2026 on the stage-and-supersede
+    # walk, which projects the tab before rendering as the pipeline does).
+    # §9's roadmap table is the register: id, title, category, priority,
+    # horizon, owner. The argument is one heading above, in the card.
+    "Recommendations": ("Recommendations (projected from §8)",
+                        ("Rec_ID", "Title", "Category_ID", "Priority",
+                         "Horizon", "Owner")),
     "Enrichment_Needed": ("Enrichment still needed", None),
     "Entity_Timeline": ("Digital evolution timeline",
                         ("Event_Date", "Title", "Kind", "Signal",
@@ -360,6 +375,45 @@ def _emit_lines(doc, body: str, *, block_level: int) -> None:
     flush_text(); flush_table()
 
 
+def _predicted_shape(body: str) -> tuple[int, int, list[int]]:
+    """(tables, prose_words, table_sizes) this body WILL render as, before a
+    paragraph is written — by `_emit_lines`' own grammar, step for step: a
+    `## ` line is a heading (a paragraph, to python-docx and to the gate's
+    `_docx_shape`, which counts `d.paragraphs` without filtering by style);
+    a run of `| … |` rows is one table, separator rows dropped; a blank line
+    or a prose line ends the run; a pipe INSIDE a sentence is prose. Word
+    counts use the gate's `\\w+` token. The pre-render half of the structure
+    gate: what `reports.check` refuses on and what `gold_standard` measures
+    from the rendered file are the same numbers (tests/skills/research_engine/
+    test_report_table_floor.py proves it on the engine's own render)."""
+    tables = prose = 0
+    sizes: list[int] = []
+    rows: list[str] = []
+
+    def flush_table():
+        nonlocal tables
+        if rows:
+            tables += 1
+            sizes.append(sum(_gs_words(" ".join(_split_pipe_row(r))) for r in rows))
+            rows.clear()
+
+    for line in (body or "").splitlines():
+        m = _BLOCK_LINE.match(line)
+        if m:
+            flush_table()
+            prose += _gs_words(m.group(1))
+        elif _PIPE_ROW.match(line):
+            if not _PIPE_SEP.match(line):
+                rows.append(line)
+        elif not line.strip():
+            flush_table()
+        else:
+            flush_table()
+            prose += _gs_words(line)
+    flush_table()
+    return tables, prose, sizes
+
+
 def _emit_body(doc, body: str) -> None:
     """Write a section body, promoting its `## ` block lines to Heading2.
 
@@ -382,6 +436,47 @@ def _table(title, cols, rows) -> dict:
 
 
 # ── the checks that refuse ───────────────────────────────────────────────
+
+def _predicted_report_shape(wb: RunWorkbook, curated: dict) -> dict:
+    """The whole report's structure, predicted from `curated` — BEFORE a
+    paragraph is rendered: tables (the cover and front matter, each
+    declared-sheet extract, every authored pipe table), their sizes, and the
+    sections' paragraph words. The pre-render counterpart to
+    `gold_standard._docx_shape`, which measures the same numbers from the
+    rendered .docx; the two agree on tables and table words exactly because
+    both walk the body by `_emit_lines`' grammar (`_predicted_shape`) and the
+    cover from the same resolved values (`_cover_pairs`, `_binding_rows`).
+    Paragraph words count the bodies, their block headings, the section and
+    card headings and the sheet-table titles — not the cover note, the scope
+    lines or the sources list, so the prediction never overstates the prose
+    the gate will read."""
+    spec = curated["spec"]
+    md = curated["meta"]
+    entity = str(md.get("entity_name") or "client")
+    sizes: list[int] = list(_front_matter_table_sizes(wb, spec, entity, md))
+    paragraph_words = 0
+    for b in curated["blocks"]:
+        sec = b["section"]
+        paragraph_words += _gs_words(f"{sec.id}. {sec.heading}")
+        for t in b["tables"]:                              # declared-sheet extracts
+            sizes.append(_gs_words(" ".join(str(c) for c in t["cols"]))
+                         + sum(_gs_words(" ".join("" if v is None else str(v) for v in r))
+                               for r in t["rows"]))
+            paragraph_words += _gs_words(t["title"])
+        if sec.kind in RS.CARD_KINDS and b["rows"]:
+            for r in b["rows"]:
+                paragraph_words += _gs_words(_card_heading(wb, sec, r))
+                _, words, tsz = _predicted_shape(str(r.get("Body") or ""))
+                sizes.extend(tsz)
+                paragraph_words += words
+        else:
+            _, words, tsz = _predicted_shape(b["body"])
+            sizes.extend(tsz)
+            paragraph_words += words
+    return {"tables": len(sizes), "table_words": sum(sizes),
+            "table_sizes": sizes, "paragraph_words": paragraph_words,
+            "largest_table": max(sizes) if sizes else 0}
+
 
 def check(wb: RunWorkbook, curated: dict) -> list[str]:
     spec = curated["spec"]
@@ -464,6 +559,56 @@ def check(wb: RunWorkbook, curated: dict) -> list[str]:
             f"whole report: {len(distinct)} distinct citations against a floor "
             f"of {floor} (Golden 1 density × {len(wb.selected_subcaps())} "
             f"subcaps). Cite the evidence base, do not summarise it.")
+
+    # STRUCTURE, before a single paragraph is rendered (GSY-31). A report can
+    # pass every check above and still be the wrong SHAPE: prose written
+    # where the template declares a table. Measured 2026-09-06: a delivered
+    # pair carried 50/92 and 26/39 tables against the Golden 1 reference while
+    # paragraph words ran 1.3-1.4x above it — and every check above passed,
+    # because more prose raises a word count, which is exactly backwards.
+    # references/templates/report_antipatterns.json names this for a writer
+    # BEFORE it authors (engine.authoring); this is the same rule enforced
+    # after, on the numbers the gold gate will measure from the file.
+    from . import gold_standard as GS
+    shape = _predicted_report_shape(wb, curated)
+    floors = GS.depth_floors(spec.key, subcaps=len(wb.selected_subcaps()))
+    if shape["tables"] < floors["tables"]:
+        problems.append(
+            f"whole report: {shape['tables']} tables against a floor of "
+            f"{floors['tables']} (Golden 1 density, GS-RPT-TABLE-FLOOR). The "
+            f"pinned Doc states registers, rollups, caps and peer sets as "
+            f"tables — author one with a markdown pipe-table in the "
+            f"section's Body (`engine.authoring brief` names which sheet "
+            f"each section owes), or populate the declared sheet input that "
+            f"would render it.")
+        ref_prose = floors["reference_paragraph_words"]
+        if shape["paragraph_words"] > ref_prose * GS.PROSE_INFLATION_LIMIT:
+            problems.append(
+                f"whole report: {shape['paragraph_words']} paragraph words "
+                f"against the reference's {ref_prose} "
+                f"({shape['paragraph_words'] / max(ref_prose, 1):.2f}x) "
+                f"while carrying {shape['tables']} of {floors['tables']} "
+                f"tables (GS-RPT-PROSE-FOR-STRUCTURE) — prose is standing "
+                f"in for structure. Move the content into the table its "
+                f"section declares; do not cut it.")
+    if shape["tables"] and shape["table_words"]:
+        avg = shape["table_words"] / shape["tables"]
+        gold_avg = GS._gold_avg_table_words(spec.key)
+        if avg > gold_avg * GS.TABLE_DUMP_FACTOR:
+            problems.append(
+                f"whole report: tables average {avg:,.0f} words against the "
+                f"reference's {gold_avg} ({avg / gold_avg:.0f}x, "
+                f"GS-RPT-TABLE-DUMP) — a whole sheet is being emitted where "
+                f"a curated extract belongs. Filter the table to the rows "
+                f"the section argues from.")
+        elif shape["largest_table"] > shape["table_words"] * GS.TABLE_DUMP_SHARE:
+            share = shape["largest_table"] / shape["table_words"]
+            problems.append(
+                f"whole report: one table holds {share:.0%} of all table "
+                f"content ({shape['largest_table']:,} of "
+                f"{shape['table_words']:,} words, GS-RPT-TABLE-DUMP) — a "
+                f"sheet emitted whole, not a curated table. Curate the "
+                f"extract the section argues from.")
     return problems
 
 
@@ -763,9 +908,7 @@ def _cover_page(doc, wb, spec, entity: str, md: dict) -> None:
     a 1-cell title box over a two-column grid; the old render emitted a bare
     Title heading and three loose paragraphs, and the owner flagged the
     cover as off (gold gate GS-RPT-COVER)."""
-    subtitle = ("Client Profile — Background Research Report"
-                if spec.key == "client_research"
-                else "Digital Maturity Assessment Report")
+    subtitle, pairs = _cover_pairs(wb, spec, entity, md)
     box = doc.add_table(rows=1, cols=1)
     st = _style_named(doc, "Light Grid Accent 1", "Table Grid")
     if st is not None:
@@ -781,7 +924,17 @@ def _cover_page(doc, wb, spec, entity: str, md: dict) -> None:
     sr = sp.add_run(subtitle)
     sr.font.size = Pt(12)
     doc.add_paragraph()
+    _cover_grid(doc, pairs)
+    doc.add_paragraph()
 
+
+def _cover_pairs(wb, spec, entity: str, md: dict) -> tuple[str, list[tuple[str, str]]]:
+    """(subtitle, label/value pairs) of the cover — resolved once, here, so
+    the render (`_cover_page`) and the pre-render prediction
+    (`_front_matter_table_sizes`) read the same values."""
+    subtitle = ("Client Profile — Background Research Report"
+                if spec.key == "client_research"
+                else "Digital Maturity Assessment Report")
     sub = _SUBVERTICAL_LABEL.get(str(md.get("sub_vertical") or "").strip().upper(),
                                  str(md.get("sub_vertical") or ""))
     cat = (f"{md.get('catalogue_version')} "
@@ -803,8 +956,20 @@ def _cover_page(doc, wb, spec, entity: str, md: dict) -> None:
                  ("Assessment ID", aid), ("Assessment date", date),
                  ("Evidence mode", mode), ("Catalogue", cat),
                  ("Prepared by", "Zennify Digital Maturity Assessment")]
-    _cover_grid(doc, pairs)
-    doc.add_paragraph()
+    return subtitle, pairs
+
+
+def _front_matter_table_sizes(wb, spec, entity: str, md: dict) -> list[int]:
+    """The gate's word count of each table the cover and the front matter
+    will carry — the title box, the metadata grid (each cell its label in
+    capitals over its value, `—` for none) and the binding table — from the
+    same resolved values the render writes."""
+    subtitle, pairs = _cover_pairs(wb, spec, entity, md)
+    grid = sum(_gs_words(label.upper()) + _gs_words(str(value) if value else "—")
+               for label, value in pairs)
+    cols, rows = _binding_rows(wb, md)
+    binding = _gs_words(" ".join(cols)) + sum(_gs_words(" ".join(r)) for r in rows)
+    return [_gs_words(entity) + _gs_words(subtitle), grid, binding]
 
 
 def _front_matter(doc, wb, spec, md: dict) -> None:
@@ -828,10 +993,27 @@ def _front_matter(doc, wb, spec, md: dict) -> None:
         "Every value below is resolved at render time from the run's own "
         "workbook and the active catalogue. Structure counts are counted from "
         "the catalogue, not asserted. Nothing here is typed by hand.")
+    cols, rows = _binding_rows(wb, md)
+    _write_table(doc, {"cols": cols, "rows": rows})
+    in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
+    out_of_scope = [p for p in ("P1", "P2", "P3", "P4") if p not in in_scope]
+    if out_of_scope:
+        # A focused engagement STATES its scope rather than refusing: the
+        # sheets it leaves empty are named here, once, so a reader does not
+        # take an unassessed pillar for a silent one.
+        doc.add_paragraph(
+            "Pillars assessed in this engagement: " + ", ".join(in_scope)
+            + ". Not in this engagement's scope, and therefore not reported on: "
+            + ", ".join(f"{p}_Subcap_Scoring" for p in out_of_scope) + ".")
+
+
+def _binding_rows(wb, md: dict) -> tuple[list[str], list[list[str]]]:
+    """The Document Control table — (columns, rows), every value resolved
+    from the run and naming its resolution source. Shared by the render and
+    the pre-render prediction."""
     tax = C.taxonomy()
     lock = wb.handoff_lock()
     in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
-    out_of_scope = [p for p in ("P1", "P2", "P3", "P4") if p not in in_scope]
     rows = [
         ["Catalogue version", str(md.get("catalogue_version")),
          "Catalogue_Meta!version"],
@@ -859,16 +1041,7 @@ def _front_matter(doc, wb, spec, md: dict) -> None:
          "engine.template bind"],
         ["Stage", str(md.get("stage") or "research"), "Workbook stage"],
     ]
-    _write_table(doc, {"cols": ["Field", "Value", "Resolution source"],
-                       "rows": rows})
-    if out_of_scope:
-        # A focused engagement STATES its scope rather than refusing: the
-        # sheets it leaves empty are named here, once, so a reader does not
-        # take an unassessed pillar for a silent one.
-        doc.add_paragraph(
-            "Pillars assessed in this engagement: " + ", ".join(in_scope)
-            + ". Not in this engagement's scope, and therefore not reported on: "
-            + ", ".join(f"{p}_Subcap_Scoring" for p in out_of_scope) + ".")
+    return ["Field", "Value", "Resolution source"], rows
 
 
 def _card_heading(wb, sec, row) -> str:

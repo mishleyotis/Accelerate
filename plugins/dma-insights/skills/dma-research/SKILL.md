@@ -238,7 +238,12 @@ terms:
 The client research profile is the report tier's: `report-research-producer` writes it
 section by section through `engine.cli narrative write` into the pinned template
 (`${CLAUDE_PLUGIN_ROOT}/references/templates/client_profile_template.md`), and `report-validator` passes no section
-whose citations it did not open.
+whose citations it did not open. Before each section the producer runs
+`python3 -m engine.authoring brief --report client_research --section <N> --run <R> --root <ROOT>`,
+which names the tables that section owes (and which declared sheets are empty), how many
+tables Golden 1 carries there, and the anti-patterns the gold gate refuses
+(`${CLAUDE_PLUGIN_ROOT}/references/templates/report_antipatterns.json`) — prose where the Doc
+declares a table is the measured defect, and more prose never clears it.
 
 ## Domain-specific rules
 

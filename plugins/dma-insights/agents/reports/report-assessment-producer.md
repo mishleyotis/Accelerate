@@ -68,6 +68,29 @@ measurements a finished report meets. `engine.cli narrative contract --report
 assessment` prints the same contract as the engine enforces it, block by block,
 with the countable MINIMUM DATA rules the write refuses on.
 
+**Then, before every section, its authoring brief:**
+
+```
+python3 -m engine.authoring preflight --report assessment --run <R> --root <ROOT>
+python3 -m engine.authoring brief --report assessment --section <N> --run <R> --root <ROOT>
+```
+
+The brief names, for THAT section: the blocks it owes, **the sheets it must
+state as tables** and which of them currently carry no rows (and so would
+render nothing — the defect to fix before writing, never to describe in a
+paragraph), **how many tables Golden 1 carries in this section** and the
+floor this run owes there, and the anti-patterns with the gate that refuses
+each (`references/templates/report_antipatterns.json`). Measured 2026-09-06:
+a delivered pair passed every gate while carrying 50 tables against the
+reference's 92 and 26 against 39, with paragraph words 1.3–1.4x the
+reference — prose written where the template declares a table, and more
+prose RAISES a word count, so the defect was rewarded rather than caught.
+The gold gate now refuses that shape (GS-RPT-TABLE-FLOOR,
+GS-RPT-PROSE-FOR-STRUCTURE, GS-RPT-TABLE-DUMP, GS-RPT-SECTION-DISTRIBUTION,
+GS-RPT-DEGENERATE-TABLE, GS-RPT-PROSE-DUMP) and `engine.cli report` refuses
+it before a paragraph is rendered. **More prose does not clear a structure
+finding** — move the content into the table, do not describe it.
+
 ## The sections you own
 
 | § | heading | floor | reads | cites | feeds |
