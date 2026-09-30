@@ -137,6 +137,48 @@ def test_missing_key_file_exits_2(monkeypatch, capsys, tmp_path):
 def _clear_env(monkeypatch):
     for var in gcp_token.PATHTOK_ENV:
         monkeypatch.delenv(var, raising=False)
+    # No key on this "host": the REST rung stands aside, so the tests below
+    # exercise the rung they name and never reach the network through a
+    # live service-account key on the machine running them.
+    monkeypatch.setattr(gcp_token, "load_key", lambda *a, **k: (None, None))
+
+
+def test_secret_manager_over_rest_answers_before_gcloud(monkeypatch, tmp_path):
+    """The rung that survives a gcloud whose vendored trust store stopped
+    trusting the proxy CA (2026-09-03): the key this module already holds
+    mints an access token and reads the secret over urllib in THIS process;
+    gcloud is never spawned."""
+    import base64
+    import io
+    import json
+    _clear_env(monkeypatch)
+    monkeypatch.setattr(gcp_token, "PATHTOK_FILE", str(tmp_path / "absent"))
+    monkeypatch.setattr(gcp_token, "load_key",
+                        lambda *a, **k: ({"client_email": "sa@x"}, "test"))
+    monkeypatch.setattr(gcp_token, "mint_assertion", lambda key, claims: "jwt")
+    monkeypatch.setattr(gcp_token, "exchange", lambda a: {"access_token": "at"})
+    seen = {}
+
+    class _Resp(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_urlopen(req, timeout=0):
+        seen["url"] = req.full_url
+        seen["auth"] = req.get_header("Authorization")
+        payload = base64.b64encode(b"from-rest\n").decode()
+        return _Resp(json.dumps({"payload": {"data": payload}}).encode())
+
+    monkeypatch.setattr(gcp_token.urllib.request, "urlopen", fake_urlopen)
+
+    def no_gcloud(*a, **k):
+        raise AssertionError("gcloud must not be spawned when REST answers")
+    monkeypatch.setattr(gcp_token.subprocess, "run", no_gcloud)
+    assert gcp_token.path_token() == "from-rest"
+    assert gcp_token.PATHTOK_SECRET in seen["url"] and seen["auth"] == "Bearer at"
 
 
 def test_the_env_var_is_the_first_rung(monkeypatch):
