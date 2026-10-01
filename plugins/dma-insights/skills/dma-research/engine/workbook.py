@@ -600,6 +600,23 @@ class RunWorkbook:
         wanted = sorted({str(p).strip() for p in peers if str(p).strip()})
         lock = self.handoff_lock()
         have = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p]
+        # WIDENING BEFORE ANY FIGURE IS NOT A CHANGE OF COHORT (C-13,
+        # measured 2026-10-01, Cross Insurance): the PRELIM conductor locked
+        # a ONE-firm set while the connector pass was assembling five, and
+        # the five were refused — leaving a set below the contract's N=3
+        # floor, from which no peer median can ever be computed. Adding
+        # peers while no Peer_Median / Peer_Scores / Entity_Score has been
+        # written invalidates nothing; narrowing or swapping still refuses.
+        if have and have != wanted and set(have) < set(wanted) \
+                and not self._peer_figures_written():
+            for key, val in (("locked_peer_set", "|".join(wanted)),
+                             ("peer_basis", basis), ("peer_n", len(wanted))):
+                self.update_row("Handoff_Lock", "Key", key, {"Value": val},
+                                save=False)
+            self.save()
+            return {"locked_peer_set": wanted, "peer_basis": basis,
+                    "peer_n": len(wanted), "already_locked": True,
+                    "widened_from": have}
         if have and have != wanted:
             raise WorkbookError(
                 f"the peer set is already locked to {have} and this call "
@@ -616,6 +633,11 @@ class RunWorkbook:
                         {"Key": "peer_n", "Value": len(wanted)})
         return {"locked_peer_set": wanted, "peer_basis": basis,
                 "peer_n": len(wanted), "already_locked": bool(have)}
+
+    def _peer_figures_written(self) -> bool:
+        return any(str(r.get(k) or "").strip()
+                   for r in self.rows("Peer_Benchmarks")
+                   for k in ("Peer_Median", "Peer_Scores", "Entity_Score"))
 
     def handoff_lock(self) -> dict:
         return {str(r["Key"]): r["Value"] for r in self.rows("Handoff_Lock")}

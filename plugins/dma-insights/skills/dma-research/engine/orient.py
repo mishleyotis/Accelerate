@@ -487,13 +487,20 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
         if str(r.get("Dominant_Claim") or "").strip() and \
                 str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE":
             continue                                   # synthesised with evidence
+        if str(r.get("Absence_Claimed") or "").strip().upper() == "YES":
+            continue                                   # closed by a declared absence (C-25)
         vs = L.volley_status(wb, c, searches=searches)
         dq = kg.dqs_for(wb, c)
+        # THE PRIMARY IS OWED TOO (C-25, measured 2026-10-01, Cross
+        # Insurance pilot): `missing` listed only the five volley facets, so
+        # agents logged those and every absence was refused "the primary
+        # diagnostic question was never searched" — 14 of 14 refusals.
+        missing = ([C.PRIMARY_FACET] if not vs["primary_fired"] else []) + vs["missing"]
         open_cells.append({"cell": c, "name": names.get(c, ""),
-                           "missing": vs["missing"]})
+                           "missing": missing})
         for q in dq["ask"]:
             f = str(q.get("facet") or "")
-            if f not in vs["missing"]:
+            if f not in missing:
                 continue
             slot = facets.setdefault(f, {"cells": [], "questions": []})
             if c not in slot["cells"]:

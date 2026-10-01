@@ -429,8 +429,7 @@ RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
 #: model (which said $13.80 for a run whose research alone cost $21+). Pilot
 #: 2026-09-30: one batch agent closed 12 cells for ~$2.25; its category's
 #: challenge ~$0.44. Re-measure with `engine.cost report` after each run.
-WORKFLOW_USD_PER_CELL = 0.19
-CHALLENGE_USD_PER_CATEGORY = 0.44
+from .cost import WORKFLOW_USD_PER_CELL, CHALLENGE_USD_PER_CATEGORY  # noqa: E402  one source (C-04)
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
 
 
@@ -1384,7 +1383,8 @@ class Pipeline:
             orch = b.get("orchestrator")
             if orch:
                 self.opts.log(f"[RELAY] PRELIM connector brief for the conducting session "
-                              f"(owed {', '.join(orch['owed'])}): {orch['prompt_file']}")
+                              f"(owed {', '.join(orch['owed']) or 'no section'}; "
+                              f"{orch.get('duties', 0)} data dut(ies)): {orch['prompt_file']}")
                 self.state["prelim_orchestrator"] = orch
                 self._save_state()
             self._count(self._dispatch(b, stage="PRELIM"))
@@ -1470,12 +1470,17 @@ class Pipeline:
         open_caps = _open_capabilities(self.wb)
         by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
                    else by_pillar)
+        connectors, background = self._connector_health(), self._background()
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
                 "batches": {c: _batches(open_caps.get(c, {}))
                             for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
-                "entity": md.get("entity_name") or "", "domain": site}
+                "entity": md.get("entity_name") or "", "domain": site,
+                # C-11: the batch prompt asks for internal documents only when
+                # the run has any to read (HYBRID / INTERNAL).
+                "mode": str(md.get("evidence_mode") or "").upper(),
+                "connectors": connectors, "background": background}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
@@ -1517,6 +1522,35 @@ class Pipeline:
                 "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
                            f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
                            f"est ${est:.2f} for {cells} open cells"}
+
+    def _connector_health(self) -> dict:
+        """{family: status} the session measured (connector_contract.py
+        health) — C-17: a family the baseline lists as present can be out of
+        credits or rate-limited, and every agent re-learnt that per call."""
+        try:
+            raw = json.loads((self.run.root / "connector_health.json").read_text())
+            return {k: (v.get("status") + (f" — {v['note']}" if v.get("note") else ""))
+                    for k, v in (raw.get("families") or {}).items()}
+        except (OSError, ValueError, AttributeError, TypeError):
+            return {}
+
+    def _background(self) -> str:
+        """What PRELIM established, compact, for every batch agent: the
+        leaders, the visible estate and the frozen peer set (C-11 removed
+        the 4 KB brief read; this keeps the part a researcher needs)."""
+        from . import brief
+        try:
+            sh = brief.shared(self.wb)
+        except Exception:                                  # noqa: BLE001
+            sh = {}
+        lead = next((str(r.get("Body") or "") for r in self.wb.rows("Report_Narrative")
+                     if str(r.get("Section_ID") or "") == "PRELIM-LEAD"), "")
+        estate = "; ".join(f"{k}: {', '.join(v)}" for k, v in
+                           (sh.get("estate_by_layer") or {}).items())
+        parts = [f"LEADERS (PRELIM): {' '.join(lead.split())[:700]}" if lead else "",
+                 f"ESTATE (Tech_Register): {estate[:500]}" if estate else "",
+                 f"PEERS (frozen): {', '.join(sh.get('peers') or [])}" if sh.get("peers") else ""]
+        return "\n".join(x for x in parts if x)
 
     def _pull_toolkits(self) -> Path | None:
         """The four pillar toolkits, fetched into the run when none is named.

@@ -505,22 +505,25 @@ def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
         # (measured 2026-09-30, SWBC: "no previous package here" while the
         # Drive folder held the 2026-09-11 package, whose manifest the push
         # below then overwrote).
-        out["superseded_remote"] = _archive_remote(entity, str(md.get("run_id") or ""),
-                                                   opened)
+        out["superseded_remote"] = _archive_remote(
+            entity, str(md.get("run_id") or ""), opened,
+            str(md.get("preflight_sha") or ""))
         out["pushed"] = _push_one(mpath, entity, "run_manifest.json")
     else:
         out["pushed"] = {"outcome": "NOT_RUN", "reason": "push disabled by caller"}
     return out
 
 
-def _archive_remote(entity: str, run_id: str, opened_at: str) -> dict:
+def _archive_remote(entity: str, run_id: str, opened_at: str,
+                    preflight_sha: str = "") -> dict:
     df = Path(__file__).resolve().parents[3] / "scripts" / "drive_fetch.py"
     if not df.exists():
         return {"outcome": "NOT_RUN",
                 "reason": "drive_fetch.py is not in this install"}
     r = subprocess.run(
         [sys.executable, str(df), "archive-remote", "--client", entity,
-         "--run-id", run_id, "--opened-at", opened_at],
+         "--run-id", run_id, "--opened-at", opened_at]
+        + (["--keep-preflight-sha", preflight_sha] if preflight_sha else []),
         capture_output=True, text=True, timeout=600)
     try:
         body = json.loads(r.stdout or "{}")

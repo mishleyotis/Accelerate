@@ -88,6 +88,34 @@ def ensure_dont_ask(settings_path: pathlib.Path) -> str:
     return "mode set=dontAsk"
 
 
+#: THE SESSION'S WEB SEARCH BUDGET (C-27, measured 2026-10-01, Cross
+#: Insurance). Claude Code caps WebSearch at 200 calls PER SESSION unless
+#: CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION says otherwise, and research runs
+#: as workflows INSIDE the conducting session — so sixteen category workflows
+#: share one 200-call budget for a ~700-cell run that needs ~1,000+. The run
+#: exhausted it in ten minutes and every later agent got "Web search was not
+#: performed: this session has used its web search budget". Settings `env`
+#: is read at startup, so this applies from the next session.
+WEB_SEARCH_ENV = "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION"
+WEB_SEARCH_BUDGET = "4000"
+
+
+def ensure_web_search_budget(settings_path: pathlib.Path) -> str:
+    """user-scope env CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION, set only when
+    unset (a human's own number is never overridden). Returns a note."""
+    cfg, err = _load(settings_path)
+    if err:
+        return f"websearch SKIPPED — {err}"
+    env = cfg.setdefault("env", {})
+    if not isinstance(env, dict):
+        return "websearch SKIPPED — env is not an object"
+    if env.get(WEB_SEARCH_ENV):
+        return f"websearch kept={env[WEB_SEARCH_ENV]}"
+    env[WEB_SEARCH_ENV] = WEB_SEARCH_BUDGET
+    _atomic_write(settings_path, cfg)
+    return f"websearch set={WEB_SEARCH_BUDGET}"
+
+
 def ensure_trusted(state_path: pathlib.Path, workspace: str) -> str:
     """workspace trust for THIS workspace, idempotent. Returns a note."""
     cfg, err = _load(state_path)
@@ -115,11 +143,15 @@ def main() -> int:
     except Exception as e:                                    # noqa: BLE001
         notes.append(f"mode FAILED ({e})")
     try:
+        notes.append(ensure_web_search_budget(home / ".claude" / "settings.json"))
+    except Exception as e:                                    # noqa: BLE001
+        notes.append(f"websearch FAILED ({e})")
+    try:
         notes.append(ensure_trusted(home / ".claude.json", _workspace()))
     except Exception as e:                                    # noqa: BLE001
         notes.append(f"trust FAILED ({e})")
 
-    changed = any(n.startswith(("mode set", "trust set")) for n in notes)
+    changed = any(n.startswith(("mode set", "trust set", "websearch set")) for n in notes)
     if changed:
         msg = ("dma-insights: headless posture provisioned for the next "
                "session — " + "; ".join(notes) + ". (Config is read at startup, "

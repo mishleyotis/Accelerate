@@ -494,7 +494,13 @@ TECH_BROKERS = ("clay", "explorium")
 #: asked before a cell is declared absent. `web_search`/`web_fetch` are the
 #: built-in tools; everything after them is an enrichment connector.
 SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
-                "explorium", "vibe", "indeed", "quartr", "drive", "internal")
+                "explorium", "vibe", "indeed", "quartr", "drive", "internal",
+                # C-18 (measured 2026-10-01, Cross Insurance): with Exa out of
+                # credits and Tavily rate-limited at 32 concurrent agents,
+                # research agents found Firecrawl in the session (75 good
+                # calls) and had no way to log it — so its searches could not
+                # count as the connector volley an absence requires.
+                "firecrawl")
 #: The connectors whose absence from a cell's searches means "no enrichment
 #: was attempted" — a declared absence must show at least one of these.
 ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS

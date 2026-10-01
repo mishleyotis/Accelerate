@@ -1392,6 +1392,8 @@ def _md(title: str, packet: dict) -> str:
         if k in ("shared", "first_commands", "agent", "packet_chars",
                  "packet_ceiling", "trimmed"):
             continue
+        if v in (None, "", [], {}):
+            continue   # an empty heading reads as a duty with no content
         lines += [f"## {k.replace('_', ' ')}", ""]
         if isinstance(v, list):
             for item in v:
@@ -1434,6 +1436,12 @@ def _engine(run) -> str:
     return f"--run {run.run_id} --root {run.root}" if run is not None else "--run <R> --root <ROOT>"
 
 
+def _display_id(wb: RunWorkbook) -> str:
+    """The connector's client key (the entity id slug the router uses)."""
+    md = wb.metadata()
+    return str(md.get("entity_id") or md.get("display_id") or "<display_id>")
+
+
 def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     """The PRELIM lanes: the institution before its capabilities. Three
     agents, one prompt each — the conductor in PRELIM-ONLY mode for the
@@ -1457,14 +1465,51 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "`engine.prelim complete` refuses while one is OPEN",
         "PRELIM searches are logged `engine.cli search … --prelim` (no cell yet)",
     ]
+    # ONE OWNER PER SECTION (C-06/C-12, measured 2026-10-01, Cross
+    # Insurance). The conductor's `owed` was every OPEN section while the
+    # session's connector pass owed leadership/firmographics/peers too: two
+    # actors per section, and the conductor's one-firm peer lock refused the
+    # connector's five. Handing those narratives to the connector pass
+    # instead fails differently — its manifest holds Clay and Explorium but
+    # no web reader, and the CEO/CIO facts came from press the conductor
+    # read. So: the conductor (WebSearch/WebFetch) writes EVERY narrative but
+    # tech_baseline; the scanner lane writes tech_baseline; the connector
+    # pass writes DATA only — contact rows, firmographic fields, the machine
+    # technographic scan — which the narratives then cite.
+    connector_sections: list[str] = []
+    conductor_owed = [x for x in st["open"] if x != "tech_baseline"]
+    # THE EXACT COMMANDS (C-08). Measured: the conductor lane spent turns 2-8
+    # listing the run tree, reading the other lanes' briefs, running --help on
+    # six subcommands and opening the workbook with openpyxl — the I-25/I-43
+    # pattern the research workflow already fixed with a command sheet.
+    sheet = [
+        f"log a search: python3 -m engine.cli search {e} --prelim --tool web_search|exa|tavily|clay|explorium --query '<q>' --hits N --kept K --actor <you>",
+        f"cache a page: python3 -m engine.cli fetch {e} --url <U> --query '<what you need>'",
+        f"evidence:     python3 -m engine.cli evidence {e} --source '<publisher>' --url <U> --tier T1|T2|T3|T4 --excerpt '<verbatim 50-500 chars>' [--published <date the page states>] --claim-type FACT|INFERENCE --origin public --actor <you>",
+        f"narrate:      python3 -m engine.prelim narrate {e} --section <s> --body '<cited prose>' --evidence E-NNN[,E-NNN]",
+        f"declare:      python3 -m engine.prelim declare {e} --section <s> --ladder '<json: queries, sites, what came back>'",
+    ]
     conductor = _bound({
         "agent": "research-conductor", "shared": sh,
         "first_commands": [f"python3 -m engine.prelim state {e}",
                            f"python3 -m engine.profile state {e}"],
-        "prelim_sections": sections,
+        # Only the sections this lane owns: the others are named in
+        # `not_yours`, and listing them pushed the packet over its ceiling.
+        "prelim_sections": [x for x in sections if x["section"] in conductor_owed],
         "financial_series": {"years": fin.get("years"), "metrics": fin.get("metrics"),
                              "floor_met": fin.get("met"), "fix": fin.get("fix")},
-        "owed": st["open"],
+        "owed": conductor_owed,
+        "not_yours": (["tech_baseline: the technographic-scanner lane"]
+                      if "tech_baseline" in st["open"] else []),
+        "in_parallel": ("the session's connector pass is registering Clay "
+                        "contact rows, firmographic fields and the machine "
+                        "technographic scan into the same workbook: narrate "
+                        "leadership and firmographics LAST and cite those rows "
+                        "where they have landed (engine.profile state shows them)"),
+        "commands": sheet + [
+            f"timeline:     python3 -m engine.prelim timeline {e} --date YYYY-MM[-DD] --event '<what>' --signal POSITIVE|NEUTRAL|NEGATIVE --kind PLATFORM|LEADERSHIP|M&A|REGULATORY|CHANNEL|DATA|SECURITY|STRATEGY --evidence E-NNN",
+            f"financials:   python3 -m engine.profile financial {e} --metric <m> --fy FY20NN --value <v> --unit <u> --evidence E-NNN",
+            f"close:        python3 -m engine.prelim complete {e}   (only when every section is narrated or declared)"],
         "rules": common_rules + [
             "the five-year financial series goes in through `engine.profile "
             "financial --metric … --fy … --value … --unit … --evidence …` — "
@@ -1477,15 +1522,49 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "layers": ["OPS", "CUST", "DATA", "INFRA"],
         "estate_known": sh.get("estate_by_layer") or {},
         "owed": ["tech_baseline"] if "tech_baseline" in st["open"] else [],
+        "commands": sheet + [
+            f"detection:    python3 -m engine.techscan record {e} --product '<P>' --vendor '<V>' --layer OPS|CUST|DATA|INFRA --status CONFIRMED|INFERRED|CLAIMED|ABSENT --method public_document|job_posting|vendor_announcement --provider web --basis '<one clause>' --evidence-id E-NNN [--url U] [--as-of YYYY-MM-DD]",
+            f"status:       python3 -m engine.techscan status {e}"],
         "rules": common_rules + [
             "every layer carries a row (CONFIRMED · INFERRED · CLAIMED · ABSENT) "
             "with the method that found it; a layer never looked at is stated, "
-            "not left blank"],
+            "not left blank",
+            # C-07: measured 2026-10-01 — this lane's first two acts were
+            # Clay and Explorium calls that failed "No such tool available".
+            "you hold NO connector (Clay/Explorium are not in a lane): the "
+            "machine technographic scan is the session's connector pass and "
+            "lands in Tech_Register on its own. Your methods are the public "
+            "ones — vendor case studies, press, job postings (WebSearch), the "
+            "site itself (engine.cli fetch). Narrate tech_baseline from the "
+            "register as it stands when your layers each carry a row."],
     })
     connector = _bound({
         "agent": "enrichment-connector-specialist", "shared": sh,
         "first_commands": [f"python3 -m engine.prelim state {e}"],
-        "owed": [x for x in ("leadership", "firmographics", "peers") if x in st["open"]],
+        "owed": connector_sections,
+        "duties": [
+            "contact pass: mcp__Clay__search-contacts {companyIdentifiers: [<domain>], "
+            "dslQuery: 'select from people where headline contains (\"chief\", "
+            "\"president\", \"vp\", \"director\", \"information\", \"data\", "
+            "\"security\", \"digital\") limit 25'} (the field is headline — "
+            "job_title/title do not exist); register each leader who owns a "
+            "function as evidence (T3 INFERENCE, --unverified with the reason "
+            "when the profile cannot be fetched)",
+            "firmographic data points: engine.profile firmographic --field … "
+            "--value … --as-of … --evidence E-NNN for what Clay/Explorium return "
+            "(employees, revenue band, HQ, founded); a conflict with a sourced "
+            "figure is recorded beside it, never averaged",
+            "machine technographic scan: Clay (search-companies on the domain) "
+            "and Explorium (match-business -> enrich-business technographics); "
+            "one `engine.techscan record --method technographic_scan --provider "
+            "clay|explorium` per product",
+            "record_enrichment for each facet attempted, with display_id "
+            f"{_display_id(wb)} (run_id may be empty before INGEST)",
+            "narrate NOTHING: the conductor lane writes every PRELIM narrative "
+            "and cites your rows"],
+        "commands": sheet + [
+            f"detection:    python3 -m engine.techscan record {e} --product '<P>' --vendor '<V>' --layer OPS|CUST|DATA|INFRA --status CONFIRMED|INFERRED|CLAIMED|ABSENT --method technographic_scan --provider clay|explorium --basis '<one clause>' --evidence-id E-NNN",
+            f"enrichment:   record_enrichment (connector) with display_id; run_id may be empty before INGEST"],
         "rules": common_rules + [
             "the contact pass names the leaders `leadership` needs (min two "
             "named people); the machine technographic scan is registered at "
@@ -1503,7 +1582,7 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     # the stage stalled out. So it is written as an ORCHESTRATOR brief — the
     # research relay's own pattern — for the session to service with one
     # in-process subagent, which inherits the connectors.
-    owed_connector = connector["owed"]
+    owed_connector = connector["owed"] + connector.get("duties", [])
     out = _write_lanes(out_dir, [
         ("prelim-conductor", conductor, "PRELIM — the institution, before its capabilities"),
         ("prelim-techscan", scanner, "PRELIM — technology baseline"),
@@ -1515,7 +1594,8 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
                                     "this file as its prompt")
         path.write_text(_md("PRELIM — connector enrichment (ORCHESTRATOR)", connector),
                         encoding="utf-8")
-        out["orchestrator"] = {"prompt_file": str(path), "owed": owed_connector,
+        out["orchestrator"] = {"prompt_file": str(path), "owed": connector["owed"],
+                               "duties": len(connector.get("duties", [])),
                                "agent": "enrichment-connector-specialist"}
     return out
 

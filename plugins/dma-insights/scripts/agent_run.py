@@ -92,11 +92,13 @@ LANES_PER_CPU = 2      # lanes mostly wait on a model; two per core is generous
 
 PREAMBLE = """DISPATCH MODE — you are running as a headless session, not an
 in-process subagent. Two things differ from your usual footing:
-1. You carry the DMA Insights connector tools and, where your manifest
+1. You MAY carry the DMA Insights connector tools and, where your manifest
    declares them, the claude.ai enrichment connectors (Clay, Exa, Tavily,
    Vibe-Prospecting, Indeed) — but a headless child is NOT guaranteed the
-   binding a top session has. Where your rulebook requires an enrichment
-   search, TRY the connector first and log it with the tool that ran it
+   binding a top session has (measured 2026-10-01: lanes started with ZERO
+   mcp__ tools). Look at your tool list once; never call an mcp__ tool that
+   is not in it. Where one is listed and your rulebook requires an
+   enrichment search, use it and log it with the tool that ran it
    (`--tool exa|tavily|clay`). If the call is refused or the tool is absent,
    do NOT run it through WebSearch instead, do NOT fabricate and do NOT skip
    silently: add it to a `search_requests` array in your final output —
@@ -123,6 +125,53 @@ in-process subagent. Two things differ from your usual footing:
 
 --- TASK ---
 """
+
+#: THE RESEARCH FAMILY GETS ITS OWN PREAMBLE (C-09, measured 2026-10-01 on
+#: Cross Insurance). Points 3-5 above are surface-production rules: a PRELIM
+#: conductor or a category researcher told to "read routing.md before your
+#: first tool call", call get_memory_digest and hand off to the qa-overseer
+#: is told to spend turns on tools it does not hold for a page it does not
+#: write. And point 1's "you carry the connector tools" was false for every
+#: lane that run dispatched: init listed zero mcp__ tools, so the technographic
+#: scanner's first act was two "No such tool available" calls.
+RESEARCH_PREAMBLE = """DISPATCH MODE — you are running as a headless research lane, not an
+in-process subagent.
+1. You hold NO MCP tool unless your tool list shows one (measured
+   2026-10-01: lanes started with zero mcp__ tools — no Clay, Exa, Tavily,
+   Vibe-Prospecting, Indeed, nor the DMA connector). Do not call one that is
+   not listed. WebSearch, WebFetch and Bash (the engine CLI) are yours.
+   Connector work you would have done goes in a `search_requests` array in
+   your final output — JSON objects {"query", "falsifier", "facet",
+   "subcap", "tool", "proves"} — and the driver relays it to the session
+   that holds the connectors. Never run it through WebSearch instead and
+   never fabricate a connector result.
+2. Your final output is read by the orchestrating session, not a human —
+   return the JSON or report your role defines, nothing else.
+3. Your brief IS your task: the run root and every command are in it. Do
+   not explore the run tree, read other lanes' briefs, run --help, or open
+   the workbook directly — the engine CLI is the only writer and reader.
+
+--- TASK ---
+"""
+
+#: Agent folders whose lanes take RESEARCH_PREAMBLE (no surface routing).
+RESEARCH_FAMILY_DIRS = ("research", "scoring", "reports")
+
+
+def preamble_for(agent: str, names: dict | None = None) -> str:
+    """The preamble a lane of `agent` gets: research-family agents never
+    produce a page, so they get the research preamble, everyone else the
+    surface one."""
+    path = (names if names is not None else roster()).get(
+        str(agent or "").split(":")[-1])
+    try:
+        rel = Path(path).resolve().relative_to(AGENTS_DIR.resolve())
+        if rel.parts and rel.parts[0] in RESEARCH_FAMILY_DIRS:
+            return RESEARCH_PREAMBLE
+    except (TypeError, ValueError):
+        pass
+    return PREAMBLE
+
 
 # Points 3-5 are here because the SessionStart hook does NOT reach an
 # in-process subagent, and the live Routine dispatches every routed stage
@@ -1221,7 +1270,7 @@ def main(argv=None) -> int:
         rows = read_batch(Path(a.batch))
         if not a.no_preamble:
             for r in rows:
-                r["prompt"] = PREAMBLE + r["prompt"]
+                r["prompt"] = preamble_for(r.get("agent"), names) + r["prompt"]
         lanes = max(1, min(a.lanes, len(rows)))
         cap = host_capacity(lanes)
         if cap["capped"] and not a.no_lane_cap:
@@ -1295,7 +1344,7 @@ def main(argv=None) -> int:
     if not prompt.strip():
         raise SystemExit("empty prompt — a stage with no task is a no-op")
     if not a.no_preamble:
-        prompt = PREAMBLE + prompt
+        prompt = preamble_for(a.agent, names) + prompt
 
     # THE PACKAGE IS NOT IN THE REPOSITORY. A child's working directory is the
     # checkout, so `/root/.dma/packages/<slug>` is out of scope and every read

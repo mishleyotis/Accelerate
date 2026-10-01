@@ -301,6 +301,27 @@ BATCH_OPS = ("search", "evidence", "attach", "synthesise", "absence",
              "challenge", "fetch")
 
 
+#: What an APPLIED batch line reports back (C-26, measured 2026-10-01,
+#: Cross Insurance pilot): every search line echoed its full window stats
+#: (~400 chars), so one capability's batch returned ~6.6 KB into the
+#: agent's context — re-read on every later turn. An applied line needs its
+#: id and the one number an agent acts on; a refused line keeps its message.
+_COMPACT_KEYS = ("e_id", "E_ID", "eid", "evidence_id", "subcap", "status",
+                 "window_remaining", "checkpoint_required", "closed", "outcome")
+
+
+def _compact_out(text: str) -> str:
+    try:
+        j = json.loads(text)
+    except ValueError:
+        return " ".join(text.split())[:160]
+    if isinstance(j, dict):
+        keep = {k: j[k] for k in _COMPACT_KEYS if k in j}
+        if keep:
+            return json.dumps(keep, separators=(",", ":"))[:200]
+    return " ".join(json.dumps(j).split())[:160]
+
+
 def _batch(a) -> int:
     """Many writes, one workbook transaction.
 
@@ -357,8 +378,9 @@ def _batch(a) -> int:
                         rc = main(argv + ["--run", a.run] +
                                   (["--root", a.root] if a.root else []))
                     good = rc in (0, None)
+                    text = out.getvalue().strip()
                     results.append({"op": i, "cmd": argv[0], "ok": good,
-                                    "out": out.getvalue().strip()[-300:]})
+                                    "out": _compact_out(text) if good else text[-600:]})
                     ok += good
                 except BaseException as e:          # a refusal is data, not a crash
                     if isinstance(e, KeyboardInterrupt):
@@ -369,7 +391,7 @@ def _batch(a) -> int:
     finally:
         runstate.Run.open = real_open
     print(json.dumps({"applied": ok, "refused": len(ops) - ok, "results": results},
-                     indent=1))
+                     separators=(",", ":")))
     return 0 if ok == len(ops) else 1
 
 
@@ -538,6 +560,9 @@ def main(argv=None) -> int:
     ck.add_argument("--run", required=True); ck.add_argument("--root")
     ck.add_argument("--category", required=True)
     ck.add_argument("--position", default="workflow dispatch")
+    sub.add_parser("absence-template",
+                   help="the exact contract an absence must meet, printed from "
+                        "the constants the refusals read")
     sub.add_parser("synthesis-template",
                    help="the synthesis record `synthesise --json` takes: every "
                         "field, its floor and its vocabulary, from the ledger")
@@ -700,6 +725,36 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.cmd == "batch":
         return _batch(a)
+    if a.cmd == "absence-template":
+        # Measured 2026-10-01 (Cross Insurance): 204 of 1,191 calls by 32
+        # research agents were reads of ledger.py / cli.py / quality.py to
+        # learn what `absence` refuses. Printed from the same constants.
+        from . import quality as Q
+        print(json.dumps({
+            "requires": [
+                "every askable facet of the cell has a logged search for THAT cell "
+                f"(facets: {', '.join(contract.FACETS)}; `card` lists which are still missing) "
+                "— one `search` line may name several --subcap",
+                f"the primary facet ({contract.PRIMARY_FACET}) is among them",
+                "at least one of those searches ran through an enrichment connector: "
+                f"--tool one of {list(contract.ENRICHMENT_TOOLS)}",
+                f"--ladder JSON list naming rungs {list(ledger.ABSENCE_RUNGS_REQUIRED)} "
+                f"(optional: {[r for r in Q.LADDER_RUNGS if r not in ledger.ABSENCE_RUNGS_REQUIRED]}); "
+                "each rung's query must be EXACTLY a query already in the Search_Log",
+                "--proxy-log >= 40 chars: the proxy class hunted and what came back",
+                "--hunted >= 40 chars: exact queries, sites/tools, and the nearest thing "
+                "that came back (a proper noun, a date or an E-id) — it becomes What_We_Found",
+                "the cell cites NO evidence and no register row names it (else synthesise it)",
+                "optional pair: --inferable (>= 30 chars) + --validation-question (ends in ?)",
+            ],
+            "ops_lines": [
+                "search --subcap C1 --subcap C2 --facet primary --tool web_search --query 'Q1' --hits 6 --kept 0 --actor $ACT",
+                "search --subcap C1 --subcap C2 --facet fails --tool tavily --query 'Q2' --hits 3 --kept 0 --actor $ACT",
+                "absence --subcap C1 --actor $ACT --ladder '[{\"rung\":\"direct\",\"query\":\"Q1\"},{\"rung\":\"proxy\",\"query\":\"Q2\"}]' "
+                "--proxy-log '<proxy class>: <what was hunted, what came back>' "
+                "--hunted '<queries, sites, nearest hit>' --validation-question '<question for the client?>' "
+                "--inferable '<what the absence still lets you infer>'",
+            ]}, indent=1)); return 0
     if a.cmd == "synthesis-template":
         # Measured 2026-09-30 (SWBC, P2C3): a lane spent ~20 turns grepping the
         # ledger to learn what this record needs. It is printed from the same

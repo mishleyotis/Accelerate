@@ -414,9 +414,20 @@ def awaiting_workflow(event: dict) -> dict | None:
             doc = {}
     lines = ["RESEARCH IS YOURS, AS PERSISTED WORKFLOWS — start ALL of these in "
              "ONE message (they run side by side and show in /workflows):"]
-    for inv in doc.get("invocations") or []:
+    invs = doc.get("invocations") or []
+    # COMMON ARGS ONCE (C-21, measured 2026-10-01, Cross Insurance): every
+    # invocation carries the same run/root/connectors/background, and
+    # printing each in full injected 34.2 KB into the conducting session per
+    # driver exit. The fields identical across invocations print once; each
+    # line carries only what differs.
+    common = ({k: v for k, v in invs[0].items()
+               if all(i.get(k) == v for i in invs)} if len(invs) > 1 else {})
+    if common:
+        lines.append(f"  COMMON args (merge into every call below): {json.dumps(common)}")
+    for inv in invs:
+        own = {k: v for k, v in inv.items() if k not in common}
         lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
-                     f"args: {json.dumps(inv)}}})")
+                     f"args: COMMON + {json.dumps(own)}}})")
     if not doc:
         lines.append(f"  (handoff file not readable — open "
                      f"{m.group(1) if m else '<ROOT>/07_qa/research_workflow.json'})")

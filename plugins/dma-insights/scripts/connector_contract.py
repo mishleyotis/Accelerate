@@ -56,6 +56,8 @@ exists to catch. **Every caller using this to STOP something must pass
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
+import os
 import json
 import sys
 from pathlib import Path
@@ -281,6 +283,50 @@ def probe(tool_names, root=None) -> dict:
     }
 
 
+#: PRESENT IS NOT FUNDED (C-17, measured 2026-10-01, Cross Insurance): the
+#: baseline read exa as present and every one of 32 Exa calls by the research
+#: agents returned HTTP 402 — no credits. Tavily answered 429 to half of 286
+#: calls at 32 concurrent agents. No subprocess can make a session's MCP call,
+#: so the session makes one cheap call per family and records the outcome
+#: here; the research handoff carries it into every agent's prompt so no
+#: agent spends a turn learning it again.
+HEALTH_NAME = "connector_health.json"
+HEALTH_STATES = ("OK", "NO_CREDITS", "RATE_LIMITED", "FAILED", "EXHAUSTED",
+                 "NOT_PROBED")
+
+
+def health_path(root=None) -> Path:
+    return Path(root or os.environ.get("DMA_RUN_ROOT") or ".") / HEALTH_NAME
+
+
+def write_health(pairs: list[str], root=None) -> dict:
+    path = health_path(root)
+    try:
+        fams = json.loads(path.read_text()).get("families", {})
+    except (OSError, ValueError):
+        fams = {}
+    for pair in pairs:
+        fam, _, rest = str(pair).partition("=")
+        status, _, note = rest.partition(":")
+        fam, status = fam.strip().lower(), status.strip().upper()
+        if not fam or status not in HEALTH_STATES:
+            raise SystemExit(f"--set {pair!r}: want FAMILY=STATUS[:note], STATUS "
+                             f"one of {', '.join(HEALTH_STATES)}")
+        fams[fam] = {"status": status, "note": note.strip(),
+                     "at": _dt.datetime.now(_dt.timezone.utc).strftime(
+                         "%Y-%m-%dT%H:%M:%SZ")}
+    rec = {"path": str(path), "families": fams}
+    path.write_text(json.dumps({"families": fams}, indent=2))
+    return rec
+
+
+def read_health(root=None) -> dict:
+    try:
+        return json.loads(health_path(root).read_text()).get("families", {})
+    except (OSError, ValueError):
+        return {}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -308,7 +354,21 @@ def main(argv=None) -> int:
     r.add_argument("--json", action="store_true")
     r.add_argument("--strict", action="store_true",
                    help="exit 1 when a REQUIRED family has been lost")
+    h = sub.add_parser("health",
+                       help="record what ONE live call to each family "
+                            "returned (OK / NO_CREDITS / RATE_LIMITED / "
+                            "FAILED) — present is not funded")
+    h.add_argument("--root", default=None)
+    h.add_argument("--set", action="append", default=[], metavar="FAMILY=STATUS[:note]")
+    h.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+
+    if a.cmd == "health":
+        rec = write_health(a.set, a.root)
+        print(json.dumps(rec, indent=2) if a.json else
+              f"health recorded at {rec['path']}: "
+              + ", ".join(f"{k}={v['status']}" for k, v in rec["families"].items()))
+        return 0
 
     try:
         if a.cmd == "declare":

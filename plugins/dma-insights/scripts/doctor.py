@@ -546,6 +546,30 @@ def concurrent_writers_check() -> dict:
         return _check(name, True, f"SKIPPED: {exc}")
 
 
+def web_search_budget_check() -> dict:
+    """The session's WebSearch cap (C-27, measured 2026-10-01): research runs
+    as workflows INSIDE the session, so every agent shares one budget —
+    Claude Code's default of 200 was spent in ten minutes of a 694-cell run.
+    Never fails the doctor (Tavily can carry research); it says the number."""
+    name = "web search budget"
+    raw = os.environ.get("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION", "")
+    try:
+        cap = int(raw) if raw else 200
+    except ValueError:
+        cap = 200
+    if cap >= 2000:
+        return _check(name, True, f"{cap} WebSearch calls per session "
+                      f"(CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION)")
+    return _check(
+        name, True,
+        f"WARN: {cap} WebSearch calls per session"
+        + (" (default — CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION unset)" if not raw else "")
+        + ". A FULL run's research workflows share it and need ~1,000+; once "
+          "spent, every agent falls back to Tavily alone",
+        "the SessionStart hook sets it to 4000 in ~/.claude/settings.json "
+        "for the NEXT session; restart the session before a FULL run")
+
+
 def connector_contract_check() -> dict:
     """Which connector families a firing REQUIRES, derived not typed.
 
@@ -936,6 +960,7 @@ def run_checks(base_url: str | None, heal: bool = False) -> list:
     out.append(_check("connector definition", mcp_json.exists(),
                       str(mcp_json) if mcp_json.exists() else "not found"))
     out.append(connector_contract_check())
+    out.append(web_search_budget_check())
     out.append(concurrent_writers_check())
     out.append(hooks_wired_check())
     out.extend(inventory_checks())

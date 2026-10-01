@@ -873,6 +873,9 @@ def main(argv=None) -> int:
     p_ar.add_argument("--run-id", required=True)
     p_ar.add_argument("--opened-at", default=None)
     p_ar.add_argument("--dry-run", action="store_true")
+    p_ar.add_argument("--keep-preflight-sha", default=None,
+                      help="the run's recorded preflight_sha: a preflight.json "
+                           "with this digest is this run's binding and stays")
     p_rv = sub.add_parser(
         "push-review",
         help="one review artefact (e.g. the packaged plugin zip) into the "
@@ -912,7 +915,8 @@ def main(argv=None) -> int:
     if a.cmd == "push-package":
         return push_package(a.client, a.file, a.name)
     if a.cmd == "archive-remote":
-        r = archive_remote(a.client, a.run_id, a.opened_at, dry_run=a.dry_run)
+        r = archive_remote(a.client, a.run_id, a.opened_at, dry_run=a.dry_run,
+                           keep_preflight_sha=a.keep_preflight_sha)
         print(json.dumps(r, indent=1))
         return 1 if r.get("failed") else 0
     if a.cmd == "push-review":
@@ -994,8 +998,19 @@ def push_package(client: str, file_path: str, name: str | None) -> int:
 _ARCHIVE_KEEP = ("_superseded", BACKUP_FOLDER)
 
 
+def _preflight_digest(doc: dict) -> str:
+    """engine.preflight.digest, restated: sha256 of the body minus its
+    advisory `_` keys, sort_keys. Kept identical so a Drive copy can be
+    recognised as the run's own binding without importing the engine."""
+    import hashlib
+    body = {k: v for k, v in doc.items() if not str(k).startswith("_")}
+    return hashlib.sha256(
+        json.dumps(body, sort_keys=True, default=str).encode()).hexdigest()
+
+
 def archive_remote(client: str, run_id: str, opened_at: str | None = None,
-                   *, dry_run: bool = False) -> dict:
+                   *, dry_run: bool = False,
+                   keep_preflight_sha: str | None = None) -> dict:
     """Move the intake folder's PREVIOUS package into `_superseded/<label>/`.
 
     THE DEFECT THIS CLOSES, measured 2026-09-30 on SWBC. `assemble.
@@ -1033,25 +1048,40 @@ def archive_remote(client: str, run_id: str, opened_at: str | None = None,
             pass
     same_run = prior_run == run_id
     cutoff = (opened_at or prior_opened) if same_run else None
-    movable = []
+    movable, kept = [], []
     for f in items:
         if f["name"] in _ARCHIVE_KEEP or f["name"].startswith("DMAI - "):
             continue
+        # THIS run's binding is not the previous package (measured
+        # 2026-10-01, Cross Insurance): run-assessment step 3 pushes the
+        # owner-answered preflight.json so a headless firing can reuse it,
+        # and step 4's `start` then archived it with the 2026-09-14 package
+        # (and stamped the archive with today's date, the newest item). A
+        # preflight whose digest is the one this run recorded stays.
+        if f["name"] == "preflight.json" and keep_preflight_sha:
+            try:
+                with _req(tok, f"{API}/files/{f['id']}?alt=media"
+                               f"&supportsAllDrives=true") as resp:
+                    if _preflight_digest(json.load(resp)) == keep_preflight_sha:
+                        kept.append(f["name"])
+                        continue
+            except Exception:                               # noqa: BLE001
+                pass
         if same_run and f["name"] == "run_manifest.json":
             continue
         if cutoff and str(f.get("modifiedTime") or "") >= cutoff:
             continue
         movable.append(f)
     if not movable:
-        return {"archived": None, "reason": ("same run, nothing older"
-                                             if same_run else
-                                             "no previous package on Drive")}
+        return {"archived": None, "kept": kept,
+                "reason": ("same run, nothing older" if same_run else
+                           "no previous package on Drive")}
     stamp = max(str(f.get("modifiedTime") or "")[:10] for f in movable)
     label = (f"{prior_run}_{stamp}" if prior_run and not same_run
              else f"prior-package_{stamp}")
     out = {"archived": f"{folder['name']}/_superseded/{label}",
            "prior_run": prior_run or None,
-           "moved": [f["name"] for f in movable], "failed": []}
+           "moved": [f["name"] for f in movable], "kept": kept, "failed": []}
     if dry_run:
         out["dry_run"] = True
         return out

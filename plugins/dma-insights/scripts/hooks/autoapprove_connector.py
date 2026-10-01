@@ -750,6 +750,17 @@ def main() -> int:
         suffix = tool.rsplit("__", 1)[1]
         if suffix in ENRICHMENT_TOOLS:
             return _allow(ENRICHMENT_REASON)
+        # ONE URL, READ (C-20, measured 2026-10-01, Cross Insurance): the
+        # entity's own site answered 403 (Cloudflare) to WebFetch and
+        # engine.cli fetch, and Firecrawl scrape is the route the research
+        # prompt names for it — but it prompted. A plain scrape is a page
+        # read billed like firecrawl_search; with `alexandria` it executes a
+        # catalogued capability at its listed price, which stays a prompt.
+        if suffix == "firecrawl_scrape":
+            args = event.get("tool_input")
+            if isinstance(args, dict) and "alexandria" not in args and args.get("url"):
+                return _allow(ENRICHMENT_REASON)
+            return 0
         if suffix in SANCTIONED_WORKSPACE_WRITES:
             return _allow(WORKSPACE_WRITE_REASON)
 

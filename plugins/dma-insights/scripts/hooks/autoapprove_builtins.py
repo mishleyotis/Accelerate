@@ -168,6 +168,36 @@ NEVER_WRITE = re.compile(
 _CWD = os.getcwd()
 
 
+def registered_run_roots() -> list[Path]:
+    """Roots of runs `engine.cli start` registered, while their workbook
+    exists (C-10, measured 2026-10-01, Cross Insurance). run-assessment
+    starts a run with `--root <ROOT>` and never exports DMA_RUN_ROOT — each
+    Bash call is a fresh shell — so every Write or heredoc a workflow agent
+    made into its own run root fell through to a permission prompt while the
+    same file under /tmp was approved. guard_dispatch already trusts this
+    registry for the same reason (I-19). A root is only ever a WRITE root
+    here: the secret-level and trust-boundary rules still apply under it."""
+    out: list[Path] = []
+    try:
+        import _runctx as ctx                               # noqa: E402
+        (registry,) = ctx.engine("registry")
+        reg = registry.registry_path()
+        if not reg.is_file():
+            return out
+        for line in reg.read_text().splitlines()[-500:]:
+            try:
+                root = Path(json.loads(line).get("root") or "")
+            except (ValueError, AttributeError):
+                continue
+            if (str(root) not in ("", ".", "/") and len(root.parts) > 2
+                    and root not in out
+                    and any(root.glob("DMA_Scoring_Workbook_*.xlsx"))):
+                out.append(root)
+    except Exception:                                       # noqa: BLE001
+        return out
+    return out
+
+
 def write_roots() -> list[Path]:
     roots = []
     for env in ("DMA_RUN_ROOT", "DMA_ARTIFACT_ROOT", "DMA_BUNDLE_CACHE",
@@ -175,6 +205,7 @@ def write_roots() -> list[Path]:
         v = os.environ.get(env)
         if v:
             roots.append(Path(v))
+    roots += registered_run_roots()
     roots += [Path("/home/claude/dma_output"), Path("/root/.dma"),
               Path.home() / "dma_output", Path("/tmp")]
     repo = _repo_root()

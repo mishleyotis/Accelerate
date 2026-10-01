@@ -172,6 +172,22 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
 
 # ── the checks ───────────────────────────────────────────────────────────
 
+def _pct(v, where: str, problems: list[str] | None):
+    """A share as a float, or None. A share that is not a number is a
+    problem to list with the others, never a traceback: check() promises
+    every refusal at once, and a crash on one field hides all the rest."""
+    if v in (None, ""):
+        return None
+    try:
+        return float(str(v).strip().rstrip("%"))
+    except (TypeError, ValueError):
+        if problems is not None:
+            problems.append(
+                f"{where}: {v!r} is not a number — give a percentage like "
+                f"89.3, or leave it empty and say in basis what it is within")
+        return None
+
+
 def _check_financials(doc: dict, problems: list[str]) -> dict:
     fin = doc.get("financials") or {}
     statements = list(fin.get("statements") or [])
@@ -216,8 +232,9 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
                     f"({_clean(ln.get('line')) or '?'}): implies_lob is empty "
                     f"— a revenue line that names no line of business cannot "
                     f"inform the census, which is the only reason to read it")
-    shares = [float(ln.get("share_pct") or 0) for ln in lines
-              if ln.get("share_pct") not in (None, "")]
+    shares = [x for x in (
+        _pct(ln.get("share_pct"), f"financials.revenue_lines[{i}].share_pct",
+             problems) for i, ln in enumerate(lines)) if x is not None]
     if shares and sum(shares) > 100.5:
         problems.append(
             f"financials.revenue_lines: share_pct sums to {sum(shares):.1f}% "
@@ -249,9 +266,11 @@ def _check_census(doc: dict, problems: list[str]) -> dict:
                 f"lob_census.lines_of_business[{i}] ({name}): basis is empty "
                 f"or filler — name the revenue line, charter or product set "
                 f"this LOB is read from")
-        share = lob.get("revenue_share_pct")
+        share = _pct(lob.get("revenue_share_pct"),
+                     f"lob_census.lines_of_business[{i}].revenue_share_pct",
+                     problems)
         flagged = bool(lob.get("material"))
-        if share not in (None, "") and float(share) >= MATERIAL_SHARE_PCT:
+        if share is not None and share >= MATERIAL_SHARE_PCT:
             flagged = True
         if flagged:
             material.append(name)
@@ -601,8 +620,8 @@ def bases(doc: dict, report: dict | None = None) -> dict:
         f"{_clean(mq.get('answer'))}")
     census = "; ".join(
         f"{_clean(l.get('lob'))}"
-        + (f" {float(l.get('revenue_share_pct')):.1f}%"
-           if l.get("revenue_share_pct") not in (None, "") else "")
+        + (f" {_pct(l.get('revenue_share_pct'), '', None):.1f}%"
+           if _pct(l.get("revenue_share_pct"), "", None) is not None else "")
         for l in (doc.get("lob_census") or {}).get("lines_of_business") or []
     ) or "no line of business stated"
     if rejected:
@@ -706,8 +725,8 @@ def _render_review(doc: dict, report: dict, b: dict) -> str:
             if amt not in (None, ""):
                 bits += f" ({ln.get('currency') or 'USD'} {amt:,})" if \
                     isinstance(amt, (int, float)) else f" ({amt})"
-            if share not in (None, ""):
-                bits += f", {float(share):.1f}% of revenue"
+            if _pct(share, "", None) is not None:
+                bits += f", {_pct(share, '', None):.1f}% of revenue"
             lob = _clean(ln.get("implies_lob"))
             if lob:
                 bits += f" — {lob}"

@@ -48,7 +48,7 @@ from pathlib import Path
 
 from . import contract as C
 from . import runstate
-from .workbook import RunWorkbook
+from .workbook import RunWorkbook, WorkbookError
 
 NOT_AVAILABLE = "NOT_AVAILABLE:"
 _MIN_BODY = 120
@@ -300,6 +300,18 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                            f"{', '.join(missing)}"),
                 "fix": _TECH_FIX,
             }
+    if kind == "peers" and n >= need:
+        lock = wb.handoff_lock()
+        pn = len([x for x in str(lock.get("locked_peer_set") or "").split("|") if x])
+        if str(lock.get("peer_basis") or "") != "cannot_estimate" and pn < PEER_FLOOR:
+            return {"section": key, "status": "OPEN",
+                    "detail": (f"peer set has {pn} firm(s); the peer ladder's "
+                               f"floor is N={PEER_FLOOR} — no median can be "
+                               f"computed from it"),
+                    "fix": ("engine.prelim peers --peer … (at least "
+                            f"{PEER_FLOOR}; a superset of the locked set "
+                            "widens it while no peer figure exists) or "
+                            "--basis cannot_estimate")}
     if n >= need:
         return {"section": key, "status": "RESEARCHED",
                 "detail": (f"{n} row(s) in {sheet}"
@@ -502,6 +514,10 @@ def timeline(wb: RunWorkbook, *, date: str, event: str, signal: str,
 _CATEGORY_RE = re.compile(r"^(P\d+C\d+)")
 
 
+#: overview.scores peer ladder: "RECOMPUTE AT LOWER N — floor N=3".
+PEER_FLOOR = 3
+
+
 def _category_of(subcap: str) -> str | None:
     """`P1C1.3.CU1` -> `P1C1`. The grain the app's peer parser requires."""
     m = _CATEGORY_RE.match(str(subcap or "").strip())
@@ -529,7 +545,21 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "comparison set — asset band, charter, geography, digital "
             "posture — because a peer set with no stated rule is a peer set "
             "chosen to flatter.")
-    locked = wb.lock_peer_set(clean, basis=basis)
+    # THE CONTRACT'S FLOOR (C-13): overview.scores' peer ladder recomputes
+    # at lower N down to N=3 and no further. A set below three can only ever
+    # yield `cannot_estimate`, so it is that basis or it is refused here —
+    # measured 2026-10-01: a one-firm set passed PRELIM and every peer
+    # median downstream would have been a single competitor's number.
+    if basis != "cannot_estimate" and len(set(clean)) < PEER_FLOOR:
+        raise PrelimRefusal(
+            f"{len(set(clean))} peer(s) named; the peer ladder's floor is "
+            f"N={PEER_FLOOR} (overview.scores contract). Name at least "
+            f"{PEER_FLOOR} comparable firms, or freeze with --basis "
+            f"cannot_estimate and say why in --rule.")
+    try:
+        locked = wb.lock_peer_set(clean, basis=basis)
+    except WorkbookError as e:
+        raise PrelimRefusal(str(e)) from e
     # CATEGORY GRAIN, not peer grain. The app's parser reads this tab by
     # matching the first column against a category id and discards every row
     # that does not — so the previous shape (one row per peer, Category_ID
@@ -547,8 +577,14 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
         raise PrelimRefusal(
             "this run has no selected subcapability, so there is no category "
             "for a peer comparison to be at. Select the scope first.")
-    names = ", ".join(clean)
+    names = ", ".join(sorted(set(clean)))
+    have_rows = {_clean(r.get("Category_ID")) for r in wb.rows("Peer_Benchmarks")}
     for cid in cats:
+        if cid in have_rows:      # a widened set re-states the grid, once
+            wb.update_row("Peer_Benchmarks", "Category_ID", cid, {
+                "Peer_N": len(set(clean)), "Peer_Names": names,
+                "Peer_Basis": f"{basis}: {_clean(rule)}"}, save=False)
+            continue
         wb.append("Peer_Benchmarks", {
             # Category_Name is left for the assessment stage, which is where
             # a category acquires a rendered label; the parser stores None
@@ -559,6 +595,7 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "Peer_Basis": f"{basis}: {_clean(rule)}",
             "Source_Cell": "", "Peer_Names": names, "Peer_Scores": "",
             "As_Of": _utcnow()[:10]})
+    wb.save()
     return {"peers": clean, "locked": locked, "rule": _clean(rule),
             "categories": cats}
 
@@ -819,6 +856,11 @@ def main(argv=None) -> int:
                     if sec.get("fix"):
                         print(f"      fix: {sec['fix']}")
             return 0 if st["prelim_status"] == "COMPLETE" else 1
+        # C-14: `--evidence E-008,E-010` read as ONE id and was refused as
+        # "not in this run's register"; split commas and spaces.
+        if hasattr(a, "evidence"):
+            a.evidence = [x for raw in (a.evidence or [])
+                          for x in re.split(r"[,\s]+", str(raw)) if x]
         if a.cmd == "narrate":
             print(json.dumps(narrate(wb, a.section, heading=a.heading,
                                      body=a.body, evidence=a.evidence,

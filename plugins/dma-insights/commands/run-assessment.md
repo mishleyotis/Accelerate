@@ -57,7 +57,7 @@ so that never repeats; refusing to start is not the remedy, and neither is
 starting silently.
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
+DMA_RUN_ROOT=<ROOT> python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
 cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
 ```
 
@@ -238,9 +238,21 @@ lands `STAGE_<NAME>` in Gate_Log with its wall clock and a cost-ledger line.
 **Service the orchestrator briefs — they are yours.** The driver's lanes hold
 no enrichment connector, so connector work comes back to you as prompt files,
 announced in the log with `[RELAY]`: PRELIM writes
-`briefs/prelim_r<N>/prelim-connectors.orchestrator.md` (leadership,
-firmographics, peers) and waits for those sections; each research round
-writes its relay batch under `briefs/relay_r<N>/`. For each, spawn ONE
+`briefs/prelim_r<N>/prelim-connectors.orchestrator.md` — DATA duties only
+(Clay contact rows, firmographic fields, the machine technographic scan,
+`record_enrichment`); the conductor lane writes every PRELIM narrative and cites
+those rows, so let that subagent finish before you start the research
+workflows. (In lane mode each research round also writes a relay batch under
+`briefs/relay_r<N>/`.)
+
+**Probe the connectors before research, and record what they answered.**
+Present is not funded (measured 2026-10-01: Exa 402 on every call, Firecrawl
+402 after an hour, Tavily 429 at 32 concurrent agents). Make one cheap call per
+web/enrichment family, then
+`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" health --root <ROOT>
+--set exa=OK|NO_CREDITS|RATE_LIMITED|FAILED[:note] --set tavily=… --set firecrawl=…`
+— the RESEARCH handoff carries it into every agent's prompt, so no agent spends
+turns learning a dead connector again. For each, spawn ONE
 in-process subagent (`enrichment-connector-specialist` for PRELIM,
 `enrichment-web-specialist` for relay rows) with the file as its prompt — it
 inherits your connectors. Run them on the fast tier (`model: sonnet`) and group
@@ -251,11 +263,6 @@ tokens for 66 requests on the conducting session's own tier). Watch with
 
 **To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
 — it signals the pid that holds the run's driver lock. Never kill a pid a shell
-captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
-real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
-
-**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
-It signals the pid that holds the run's driver lock. Never kill a pid a shell
 captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
 real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
 

@@ -1248,6 +1248,12 @@ def askable_facets(wb: RunWorkbook, subcap: str) -> list[str]:
     return list(C.FACETS)
 
 
+#: Search_Log outcomes that mean the tool never answered the query.
+FAILED_OUTCOME = re.compile(
+    r"^\s*(RATE_LIMITED|NO_CREDITS|FAILED|BLOCKED|ERROR|HTTP\s*(402|403|429|5\d\d))",
+    re.I)
+
+
 def volley_status(wb: RunWorkbook, subcap: str,
                   searches: list[dict] | None = None) -> dict:
     """Which of the subcap's askable volleys have a LOGGED search behind them.
@@ -1270,7 +1276,10 @@ def volley_status(wb: RunWorkbook, subcap: str,
         f = str(r.get("Facet") or "").strip()
         fired[f] = fired.get(f, 0) + 1
         t = str(r.get("Tool") or "").strip()
-        if t:
+        # A connector call that never answered is not a connector volley
+        # (C-24, 2026-10-01: with Exa and Firecrawl out of credits and Tavily
+        # rate-limited, a logged 402/429 must not license an absence).
+        if t and not FAILED_OUTCOME.match(str(r.get("Outcome") or "")):
             tools.add(t)
     missing = [f for f in want if not fired.get(f)]
     return {"subcap": subcap, "askable": want,

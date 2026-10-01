@@ -608,6 +608,17 @@ if not mode:
     _mode_note = " defaultMode=dontAsk (headless never-prompt)"
 else:
     _mode_note = f" defaultMode kept={mode}"
+# THE SESSION'S WEB SEARCH BUDGET (C-27, measured 2026-10-01): research
+# workflows run INSIDE the session and share Claude Code's per-session
+# WebSearch cap (200 by default) — spent in ten minutes of a FULL run. This
+# script runs BEFORE the session starts, so unlike the SessionStart hook its
+# setting applies to the very session it provisions. Set only when unset.
+env = cfg.setdefault("env", {})
+ws_set = False
+if isinstance(env, dict) and not env.get("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION"):
+    env["CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION"] = "4000"
+    ws_set = True
+    _mode_note += " web-search budget=4000/session"
 allow = perms.setdefault("allow", [])
 if not isinstance(allow, list):
     print("permission grant SKIPPED — permissions.allow is not a list")
@@ -617,7 +628,7 @@ allow.extend(added)
 # Write when EITHER the grants OR the mode changed — a settings file that
 # already carries every grant must still be written when this run added the
 # never-prompt mode, or the guarantee is computed and thrown away.
-if added or not mode:
+if added or not mode or ws_set:
     tmp = p.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(cfg, indent=2) + "\n")
     tmp.replace(p)                                           # atomic

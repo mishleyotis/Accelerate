@@ -43,6 +43,7 @@ if __package__ in (None, ""):  # noqa: E402
 import argparse
 import datetime as _dt
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -64,6 +65,85 @@ CACHE_READ_MULT, CACHE_WRITE_MULT = 0.10, 1.25
 
 #: The review's ceiling. Per PILLAR, so a four-pillar engagement is $20.
 BUDGET_PER_PILLAR = 5.00
+
+#: THE RESEARCH MODEL THE DRIVER ACTUALLY RUNS (I-16, C-04). Since
+#: 2026-09-30 RESEARCH is sixteen in-session category workflows of
+#: capability batches, not lanes, and the pilot measured it: one batch agent
+#: closed 12 cells for ~$2.25 in ~12 min; its category's challenge ~$0.44.
+#: `engine.cost estimate --run` printed only the levered LANE model ($12.60
+#: for Cross Insurance's 694 cells) while the driver's own handoff priced the
+#: same cells at ~$139 — the owner was shown the figure nothing spends
+#: against. The pipeline imports these, so the two can no longer disagree.
+WORKFLOW_USD_PER_CELL = 0.19
+CHALLENGE_USD_PER_CATEGORY = 0.44
+WORKFLOW_BATCH_MIN = 12.0        # one <=12-cell batch agent, pilot P3C4
+WORKFLOW_CHALLENGE_MIN = 4.0     # challenger + floors gate, pilot P3C4
+#: The rest of the run. PRELIM is measured (SWBC 2026-09-30, $4.53); the
+#: downstream stages are the SWBC cost-driver PROJECTION, labelled as such
+#: wherever they print, until a run measures them end to end.
+PRELIM_USD = 4.53
+DOWNSTREAM_USD = {"scoring + critic": 8.0, "reports": 6.0, "pages": 10.0}
+BUDGET_HEADROOM = 1.25
+
+
+def workflow_concurrency() -> int:
+    """Agents ONE workflow runs at once: min(16, CPUs-2), at least 1
+    (measured 2026-09-30, I-49 — the runtime caps per workflow, which is why
+    research is one workflow per category)."""
+    return max(1, min(16, (os.cpu_count() or 1) - 2))
+
+
+def workflow_estimate(wb) -> dict:
+    """The run as the driver will run it: per-category open cells and
+    batches, priced at the measured workflow rate, with the wall clock the
+    per-workflow concurrency gives, and the --max-usd that covers it."""
+    import math
+    from .pipeline import _open_capabilities, _batches
+    open_caps = _open_capabilities(wb)
+    cats, pillars = {}, {}
+    for cat, caps in sorted(open_caps.items()):
+        cells = sum(caps.values())
+        if not cells:
+            continue
+        nb = len(_batches(caps))
+        cats[cat] = {"open_cells": cells, "batches": nb}
+        pv = pillars.setdefault(cat[:2], {"open_cells": 0, "categories": 0,
+                                           "batches": 0})
+        pv["open_cells"] += cells
+        pv["categories"] += 1
+        pv["batches"] += nb
+    for pv in pillars.values():
+        pv["research_usd"] = round(pv["open_cells"] * WORKFLOW_USD_PER_CELL
+                                   + pv["categories"] * CHALLENGE_USD_PER_CATEGORY, 2)
+    research = round(sum(p["research_usd"] for p in pillars.values()), 2)
+    downstream = round(sum(DOWNSTREAM_USD.values()), 2)
+    total = round(PRELIM_USD + research + downstream, 2)
+    conc = workflow_concurrency()
+    waves = max((math.ceil(c["batches"] / conc) for c in cats.values()),
+                default=0)
+    selected_pillars = {str(c)[:2] for c in wb.selected_subcaps()}
+    default_budget = round(BUDGET_PER_PILLAR * max(1, len(selected_pillars)), 2)
+    recommended = float(math.ceil(total * BUDGET_HEADROOM / 5.0) * 5)
+    return {
+        "model": "workflow (one per category, capability batches)",
+        "basis": (f"measured: ${WORKFLOW_USD_PER_CELL}/open cell + "
+                  f"${CHALLENGE_USD_PER_CATEGORY}/category challenge; PRELIM "
+                  f"${PRELIM_USD} measured; downstream projected"),
+        "pillars": pillars, "categories": cats,
+        "open_cells": sum(c["open_cells"] for c in cats.values()),
+        "batches": sum(c["batches"] for c in cats.values()),
+        "prelim_usd": PRELIM_USD, "research_usd": research,
+        "downstream_projected_usd": dict(DOWNSTREAM_USD),
+        "run_total_usd": total,
+        "default_budget_usd": default_budget,
+        "within_default_budget": total <= default_budget,
+        "recommended_max_usd": recommended,
+        "concurrency_per_workflow": conc,
+        "research_wall_min": round(waves * WORKFLOW_BATCH_MIN
+                                   + WORKFLOW_CHALLENGE_MIN, 1),
+        "research_waves": waves,
+    }
+
 
 #: Golden 1, measured 2026-08-29. The baseline every projection starts from,
 #: kept as data so a re-measurement replaces it rather than arguing with it.
@@ -225,6 +305,22 @@ def schedule(subcaps: int, capabilities: int | None = None,
         "within_target": total <= TARGET_WALL_CLOCK_MIN,
         "headroom_min": round(TARGET_WALL_CLOCK_MIN - total, 1),
     }
+
+
+def _workflow_schedule(sch: dict, wf: dict) -> dict:
+    """`schedule` with its research line replaced by the workflow fan-out."""
+    phases = {k: v for k, v in sch["phases_min"].items()
+              if not k.startswith("category research")
+              and not k.startswith("independent challenge")}
+    phases[f"category research ({len(wf['categories'])} workflows x "
+           f"{wf['concurrency_per_workflow']} agents, {wf['research_waves']} "
+           f"wave(s), challenge included)"] = wf["research_wall_min"]
+    total = round(sum(v for v in phases.values() if v), 1)
+    return dict(sch, phases_min=phases, total_min=total,
+                research_parallel_min=wf["research_wall_min"],
+                within_target=total <= TARGET_WALL_CLOCK_MIN,
+                headroom_min=round(TARGET_WALL_CLOCK_MIN - total, 1),
+                workflow=wf)
 
 
 def _utcnow() -> str:
@@ -981,25 +1077,42 @@ def main(argv=None) -> int:
             cells = tax.selected(a.sv, a.scope)
         caps = len({".".join(str(c).split(".")[:2]) for c in cells})
         sch = schedule(len(cells), caps, a.lanes)
+        if a.run:
+            # RESEARCH runs as category workflows (C-05): the lane line is
+            # replaced by the batches the handoff will actually fan out.
+            wf = workflow_estimate(run.open())
+            sch = _workflow_schedule(sch, wf)
         # The same projection at the lanes THIS host will actually run.
         cap = host_lanes(a.lanes)
-        sch["on_host"] = schedule(len(cells), caps, cap) if cap != a.lanes else None
+        sch["on_host"] = (schedule(len(cells), caps, cap)
+                          if cap != a.lanes and not a.run else None)
         if sch["on_host"] and not getattr(a, "json", False):
             sch = dict(sch["on_host"], fan_out=a.lanes)
         if a.json:
             print(json.dumps(sch, indent=2))
             return 0 if sch["within_target"] else 1
         print(f"{sch['subcaps']} cells in {sch['capability_passes']} "
-              f"capability passes, {sch['lanes']} parallel lanes\n")
+              f"capability passes, "
+              + (f"{len(sch['workflow']['categories'])} category workflows\n"
+                 if sch.get("workflow") else f"{sch['lanes']} parallel lanes\n"))
         for phase, mins in sch["phases_min"].items():
             print(f"  {mins:>6.1f} min  {phase}")
         print(f"  {'-' * 6}")
         print(f"  {sch['total_min']:>6.1f} min  TOTAL  "
               f"(target {sch['target_min']}, headroom "
               f"{sch['headroom_min']:.0f} min)")
-        print(f"\n  research alone would be {sch['research_serial_min']:.0f} "
-              f"min serial; {sch['lanes']} lanes make it "
-              f"{sch['research_parallel_min']:.0f}.")
+        if sch.get("workflow"):
+            w = sch["workflow"]
+            print(f"\n  research: {w['batches']} batches over "
+                  f"{len(w['categories'])} category workflows x "
+                  f"{w['concurrency_per_workflow']} concurrent = "
+                  f"{len(w['categories']) * w['concurrency_per_workflow']} agents "
+                  f"at once; {w['research_waves']} wave(s) of "
+                  f"{WORKFLOW_BATCH_MIN:.0f}-min batches + challenge.")
+        else:
+            print(f"\n  research alone would be {sch['research_serial_min']:.0f} "
+                  f"min serial; {sch['lanes']} lanes make it "
+                  f"{sch['research_parallel_min']:.0f}.")
         return 0 if sch["within_target"] else 1
 
     if a.cmd == "lane-fit":
@@ -1029,7 +1142,35 @@ def main(argv=None) -> int:
     if a.cmd == "estimate" and a.run:
         from . import runstate
         run = runstate.locate(a.run, Path(a.root) if a.root else None)
-        est = for_run(run.open())
+        wb = run.open()
+        wf = workflow_estimate(wb)
+        if getattr(a, "json", False):
+            print(json.dumps({"workflow": wf, "lane_model": for_run(wb)},
+                             indent=2))
+            return 0 if wf["within_default_budget"] else 1
+        print(f"RESEARCH AS THE DRIVER RUNS IT — {wf['model']}\n"
+              f"  basis: {wf['basis']}\n")
+        print(f"  {'pillar':<8}{'open':>7}{'cats':>6}{'batches':>9}{'research':>11}")
+        for pillar, row in sorted(wf["pillars"].items()):
+            print(f"  {pillar:<8}{row['open_cells']:>7}{row['categories']:>6}"
+                  f"{row['batches']:>9}{row['research_usd']:>10,.2f}$")
+        ds = " + ".join(f"{k} ${v:.0f}" for k, v in wf["downstream_projected_usd"].items())
+        print(f"\n  PRELIM ${wf['prelim_usd']:.2f} + research ${wf['research_usd']:,.2f}"
+              f" + downstream (projected: {ds})\n"
+              f"  run total ≈ ${wf['run_total_usd']:,.2f} · default budget "
+              f"${wf['default_budget_usd']:.2f} (${BUDGET_PER_PILLAR:.0f}/pillar)")
+        if wf["within_default_budget"]:
+            print("  within the default budget")
+        else:
+            print(f"  OVER the default budget: the driver will STOP_BUDGET "
+                  f"mid-research. Raising it is the owner's decision — "
+                  f"`engine.pipeline run … --max-usd {wf['recommended_max_usd']:.0f}` "
+                  f"covers the estimate with {BUDGET_HEADROOM:.0%} headroom.")
+        lv = for_run(wb)
+        print(f"\n  (lane model, not what the driver runs: measured "
+              f"${lv['run_total_measured_usd']:,.0f} · levered "
+              f"${lv['run_total_levered_usd']:,.2f})")
+        return 0 if wf["within_default_budget"] else 1
     elif a.cmd == "estimate":
         if a.subcaps:
             by = {"P1": a.subcaps}
