@@ -448,6 +448,103 @@ def _open_capabilities(wb) -> dict[str, dict[str, int]]:
     return out
 
 
+#: Floors-gate terms the CHALLENGER clears; every other blocking term on a
+#: closed cell is a researcher's repair (J-09).
+CHALLENGER_TERMS = ("challenge_missing", "challenge_not_independent")
+
+
+def _repair_cells(wb, cats, qa_dir=None) -> dict[str, dict[str, list[str]]]:
+    """{category: {cell: [blocking term, ...]}} for cells that are already
+    CLOSED (they carry a Dominant_Claim) and that the floors gate still
+    refuses on a researcher-owned term.
+
+    Measured 2026-10-01 (SWBC resume): 35 closed cells across 8 categories
+    were blocked by primary_unfired, volleys_incomplete, boilerplate or
+    single_source_fact. `_open_capabilities` counts only cells with no claim,
+    and the batch prompt told agents to skip closed cells — so no workflow
+    round could ever pass those 8 categories, and P3C4 (8 boilerplate
+    absences, 0 open cells) was handed an empty batch list."""
+    from . import floors_gate
+    closed = {str(r.get("SubCap_ID") or "") for r in wb.scoring_rows()
+              if str(r.get("Dominant_Claim") or "").strip()}
+    out: dict[str, dict[str, list[str]]] = {}
+    for cat in sorted(cats):
+        g = floors_gate.run(wb, cat, require_synthesis=True, qa_dir=qa_dir)
+        for term in g.get("blocking") or []:
+            items = g.get(term)
+            if term in CHALLENGER_TERMS or not isinstance(items, list):
+                continue
+            for x in items:
+                cell = x.get("subcap") if isinstance(x, dict) else str(x).split(":")[0]
+                if cell not in closed:
+                    continue
+                label = term
+                if isinstance(x, dict) and x.get("missing"):
+                    label = f"{term}:{','.join(x['missing'])}"
+                elif isinstance(x, dict) and x.get("field"):
+                    label = f"{term}:{x['field']}"
+                elif isinstance(x, dict) and x.get("e_id"):
+                    label = f"{term}:{x['e_id']}"
+                terms = out.setdefault(cat, {}).setdefault(cell, [])
+                if label not in terms:
+                    terms.append(label)
+    return out
+
+
+def _with_repairs(open_caps: dict[str, dict[str, int]],
+                  repair: dict[str, dict[str, list[str]]]) -> dict[str, dict[str, int]]:
+    """Open-cell counts per capability plus the closed cells owed a repair,
+    so a capability whose only work is repair still gets a batch."""
+    from .brief import capability_of
+    out = {c: dict(v) for c, v in open_caps.items()}
+    for cat, cells in repair.items():
+        caps = out.setdefault(cat, {})
+        for cell in cells:
+            caps[capability_of(cell)] = caps.get(capability_of(cell), 0) + 1
+    return out
+
+
+#: The built-in WebSearch budget is per SESSION, and every workflow agent of
+#: the run shares the conducting session's (J-22, measured 2026-10-01: "this
+#: session has used its web search budget (200 of 200 WebSearch calls)",
+#: 18 minutes into a 32-agent round). A headless `claude -p` lane is its own
+#: session and brings its own.
+WEBSEARCH_SESSION_CAP = 200
+
+
+def _search_capacity(wb, cats, repair, down: dict, bound: bool) -> dict:
+    """Queries still owed at CAPABILITY grain (one per facet per capability,
+    logged against every cell it answers) against what can answer them."""
+    from .brief import capability_of
+    searches = wb.rows("Search_Log")
+    rows = {str(r.get("SubCap_ID") or ""): r for r in wb.scoring_rows()}
+    rep = {c for v in repair.values() for c in v}
+    owed: dict[str, set] = {}
+    for cell, r in rows.items():
+        if cell[:4] not in cats:
+            continue
+        if str(r.get("Dominant_Claim") or "").strip() and cell not in rep:
+            continue
+        vs = L.volley_status(wb, cell, searches)
+        facets = set(vs["missing"]) | (set() if vs["primary_fired"] else {"primary"})
+        owed.setdefault(capability_of(cell), set()).update(facets)
+    n = sum(len(f) for f in owed.values())
+    if bound:
+        return {"owed_queries": n, "fits": True,
+                "basis": "a web connector answers (Tavily/Exa): paid quota, not the "
+                         f"{WEBSEARCH_SESSION_CAP}-call session WebSearch pool"}
+    return {"owed_queries": n, "available": WEBSEARCH_SESSION_CAP,
+            "fits": n <= WEBSEARCH_SESSION_CAP,
+            "basis": (f"every web connector is measured down ({', '.join(down) or 'none'}); "
+                      f"the only search left is WebSearch, {WEBSEARCH_SESSION_CAP} calls per "
+                      f"SESSION shared by every workflow agent"),
+            "options": ["restore a provider (Exa credits / a Tavily production key), "
+                        "`engine.cli connector-up --tool <t>`, and re-run the driver",
+                        "`--research-mode lanes --allow-lanes`: each headless lane is its own "
+                        f"session with its own {WEBSEARCH_SESSION_CAP} WebSearch calls "
+                        "(absences close at REDUCED rigour, disclosed)"]}
+
+
 def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
     """Whole capabilities packed in order into batches of <= `limit` open
     cells (a capability larger than the limit is a batch of its own)."""
@@ -1084,6 +1181,7 @@ class Pipeline:
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
                 self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._heatmap_live(st)
                 self._snapshot(st)
                 self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
                               f"{h['summary']} — {h['file']}")
@@ -1113,6 +1211,7 @@ class Pipeline:
                 self._record(st, "PASS", detail, t0, rounds=self._rounds,
                              lanes=self._lane_count, attempts=self._attempts)
                 outcome["stages_run"].append(st)
+                self._heatmap_live(st)
                 self._snapshot(st)
             except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
                     KeyError, RuntimeError) as e:
@@ -1428,6 +1527,21 @@ class Pipeline:
         return (f"DQ_Bank seeded: {n} rows" + (f"; {len(probs)} problem(s) stated: "
                                                   f"{probs[0][:120]}" if probs else ""))
 
+    def _heatmap_live(self, stage: str) -> None:
+        """Rebuild the heatmap's evidence surfaces from the workbook (J-14):
+        the index is contract-validated now, not at PAGES_A, and the census
+        says how much of the grid research has linked so far. Never fatal."""
+        if stage not in ("RESEARCH", "HANDOFF", "SCORING"):
+            return
+        from . import heatmap_live
+        try:
+            out = heatmap_live.build(self.run)
+            self.state["heatmap_live"] = out["total"]
+            self._save_state()
+            self.opts.log(f"[HEATMAP] {stage}: {heatmap_live.summary_line(out)}")
+        except Exception as e:                       # noqa: BLE001 — reported
+            self.opts.log(f"[HEATMAP] {stage}: not built ({str(e)[:200]})")
+
     def _snapshot(self, stage: str) -> None:
         """A durable copy at every stage boundary (engine.snapshot): the run
         otherwise lives only in this container until PACKAGE. Off when the
@@ -1468,11 +1582,34 @@ class Pipeline:
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
         open_caps = _open_capabilities(self.wb)
+        repair = _repair_cells(self.wb, need, self.run.qa_dir)
+        from . import intake as _intake
+        docs = _intake.for_brief(self.run.root, self._md().get("evidence_mode")) or {}
+        down = {t: f"HTTP {d.get('status')}: {str(d.get('error') or '')[:120]}"
+                for t, d in sorted((L.connector_health(self.run.root).get("down")
+                                    or {}).items())}
+        if down:
+            self.opts.log(f"[ENRICH] measured down: {', '.join(down)} — "
+                          + ("absences close --enrichment-unavailable (REDUCED rigour, disclosed)"
+                             if not L.enrichment_binding(self.wb)["bound"] else
+                             "the remaining web connector is the fallback"))
+        work_caps = _with_repairs(open_caps, repair)
         by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
                    else by_pillar)
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
-                "batches": {c: _batches(open_caps.get(c, {}))
+                "batches": {c: _batches(work_caps.get(c, {}))
                             for c in cats},
+                "repair": {c: repair.get(c, {}) for c in cats},
+                # J-15: connectors MEASURED down for this run (engine.cli
+                # connector-down). Agents skip them instead of rediscovering
+                # the outage one call at a time.
+                "enrichment_down": down,
+                # J-17: the intake documents themselves. The prompt used to
+                # send every agent to `engine.brief dispatch | head -c 4000`
+                # for shared.internal_documents, which the markdown brief
+                # never renders — a turn spent, then a hunt.
+                "internal_docs": [f"{d['path']} ({d.get('title') or ''})".strip()
+                                  for d in (docs.get("documents") or [])],
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
                 "entity": md.get("entity_name") or "", "domain": site}
@@ -1494,12 +1631,14 @@ class Pipeline:
             prev = {}
         n = sum(len(i["cats"]) for i in inv)
         nb = sum(len(b) for i in inv for b in i["batches"].values())
-        cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
+        cells = sum(sum(work_caps.get(c, {}).values()) for i in inv for c in i["cats"])
+        n_repair = sum(len(repair.get(c, {})) for i in inv for c in i["cats"])
         est = round(cells * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY, 2)
-        doc["estimate"] = {"open_cells": cells, "batches": nb, "usd": est,
+        doc["estimate"] = {"open_cells": cells - n_repair, "repair_cells": n_repair,
+                           "batches": nb, "usd": est,
                            "basis": f"measured pilot: ${WORKFLOW_USD_PER_CELL}/cell "
                                     f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge"}
-        if prev.get("open_cells") == cells and cells:
+        if (prev.get("open_cells") or 0) + (prev.get("repair_cells") or 0) == cells and cells:
             doc["not_worked"] = (
                 f"the previous handoff named the same {cells} open cells: its "
                 "workflows never ran or closed nothing. Check this session has the "
@@ -1511,6 +1650,12 @@ class Pipeline:
         if cap is not None:
             doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
                                    fits_budget=self._spent_usd + est <= cap)
+        sc = _search_capacity(self.wb, set(need), repair, down,
+                              L.enrichment_binding(self.wb)["bound"])
+        doc["estimate"]["search_capacity"] = sc
+        if not sc["fits"]:
+            self.opts.log(f"[WORKFLOW] INSUFFICIENT SEARCH CAPACITY: {sc['owed_queries']} "
+                          f"queries owed, {sc['available']} available — {sc['basis']}")
         path.write_text(json.dumps(doc, indent=1))
         return {"file": str(path), "invocations": inv,
                 "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),

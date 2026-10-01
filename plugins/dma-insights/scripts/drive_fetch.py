@@ -844,6 +844,9 @@ def main(argv=None) -> int:
              "on a fresh container")
     p_pb.add_argument("--client", required=True)
     p_pb.add_argument("--dest", required=True)
+    p_pb.add_argument("--only", default=None,
+                      help="download just this one file (e.g. the run pointer "
+                           "run_snapshot_CURRENT.json) instead of the folder")
     p_fn = sub.add_parser(
         "push-final",
         help="push one finished deliverable to the ROOT of the client's "
@@ -904,7 +907,7 @@ def main(argv=None) -> int:
     if a.cmd == "push-backup":
         return push_backup(a.client, a.file, a.name, a.many)
     if a.cmd == "pull-backup":
-        return pull_backup(a.client, a.dest)
+        return pull_backup(a.client, a.dest, only=a.only)
     if a.cmd == "push-final":
         return push_final(a.client, a.file)
     if a.cmd == "cleanup-backup":
@@ -1121,7 +1124,7 @@ def push_backup(client: str, file_path: str | None, name: str | None,
     return 1 if failed else 0
 
 
-def pull_backup(client: str, dest: str) -> int:
+def pull_backup(client: str, dest: str, only: str | None = None) -> int:
     """The client's 'memory-backup' folder, back down into `dest` — the
     mirror of push-backup and the half the lifecycle was missing.
 
@@ -1149,7 +1152,7 @@ def pull_backup(client: str, dest: str) -> int:
     n = 0
     for h in hits:
         for f in _list_children(tok, h["id"]):
-            if f["mimeType"] == FOLDER_MIME:
+            if f["mimeType"] == FOLDER_MIME or (only and f["name"] != only):
                 continue
             _download(tok, f, out)
             n += 1

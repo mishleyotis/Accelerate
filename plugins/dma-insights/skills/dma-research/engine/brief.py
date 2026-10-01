@@ -1949,6 +1949,26 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
 PAGES = ("techstack", "context", "heatmap", "overview", "insights", "platform")
 
 
+def _prebuilt(run, page: str) -> dict:
+    """The page's engine-formatted sections on disk, and what is left to do."""
+    if run is None or page != "heatmap":
+        return {}
+    d = Path(run.root) / "sections"
+    out = {}
+    if (d / "heatmap.evidence.json").is_file():
+        out["heatmap.evidence"] = ("SHIP AS IS: formatted from Evidence_Detail and "
+                                   "contract-validated by engine.heatmap_live; "
+                                   "re-run `python3 -m engine.heatmap_live build` "
+                                   "after any evidence write, never hand-edit")
+    if (d / "heatmap.cell_evidence.skeleton.json").is_file():
+        out["heatmap.cell_evidence"] = (
+            f"START FROM {d / 'heatmap.cell_evidence.skeleton.json'}: every cell's "
+            "items, e_ids, grounded_on, thin and absence trio are already linked; "
+            "write ONLY each linked cell's `synthesis` (score vs peer median), "
+            "then the envelope")
+    return out
+
+
 def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                contract_file: Path, verdicts_file: Path | None = None,
                pages: list[str] | None = None) -> dict:
@@ -2021,6 +2041,10 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             "format_only_sections": sp["convert"],
             "produce_sections": sp["produce"],
             "server_sections": sp["server"],
+            # J-14: sections the engine already FORMATTED from the workbook
+            # (engine.heatmap_live, rebuilt at every research boundary). Ship
+            # them as they are; never re-transcribe a row research linked.
+            "prebuilt_sections": _prebuilt(run, page),
             # Card-grain, as a SUMMARY: how many cards take each route, and the
             # cards a producer must NOT author (the connector writes them, or
             # the app computes them). The full card map — item keys, tab

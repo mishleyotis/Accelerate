@@ -141,6 +141,13 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             "a public source with no URL cannot be cited; register it with "
             "origin='internal' and it will be labelled, not laundered")
+    if origin == "public" and placeholder_date(published, _utcnow(), text, anchor_quote):
+        raise LedgerRefusal(
+            f"--published {published} is today, the day this page was "
+            f"retrieved, and neither the excerpt nor the anchor quote states "
+            f"that year — the placeholder signature (I-51). Omit --published "
+            f"for an undated page (it bands UNVERIFIED, invariant 9); if the "
+            f"page really is dated today, put its dated words in --anchor-quote")
     # A machine technographic scan is T1 (contract.SCAN_TIER). Measured
     # 28-09-2026 (QA audit F-J04-015): 5 technographic rows on one staged
     # heatmap sat at T3, capping the ceilings their cells could reach.
@@ -489,6 +496,60 @@ def _verified_access_status(wb, run, source_url, text, verify_excerpts,
             f"(`engine.cli fetch --via-text -` caches a connector's extract "
             f"under the URL, which verifies it properly.)")
     return f"UNVERIFIED: {reason}"
+
+
+def placeholder_date(published, retrieved_at, *texts) -> bool:
+    """True when a PUBLIC row's publication date is the day it was retrieved
+    and nothing the row quotes states that year — the signature of a date
+    written as a placeholder for an undated page (I-51 / J-10, measured
+    2026-09-30..10-01 on SWBC: a homepage and five pilot rows dated the run's
+    own day). Invariant 9: undated evidence is UNVERIFIED, never current."""
+    p = str(published or "").strip()[:10]
+    r = str(retrieved_at or "").strip()[:10]
+    if len(p) < 10 or p != r:
+        return False
+    return p[:4] not in " ".join(str(t or "") for t in texts)
+
+
+def redate_evidence(wb: RunWorkbook, eid: str, *, published: str | None,
+                    reason: str, actor: str | None = None) -> dict:
+    """Correct or clear one evidence row's publication date, on the record.
+
+    Before this a wrong date had no writer: I-51 (2026-09-30) said placeholder
+    dates 'must be re-dated or cleared before scoring' and nothing could do
+    either, so they were still in the register a day later. `published=None`
+    clears the date (the row bands UNVERIFIED); a date is accepted only if it
+    is not itself a placeholder. Writes a Provenance row naming who and why."""
+    row = wb.evidence_index().get(eid)
+    if row is None:
+        raise LedgerRefusal(f"{eid} is not in this run's evidence register")
+    if len(str(reason or "").strip()) < 20:
+        raise LedgerRefusal("a re-date says why (>= 20 chars): where the page "
+                            "states its date, or that it states none")
+    cells = [i.strip().split(":")[0] for i in _split_ids(row.get("SubCap_IDs")) if i.strip()]
+    if actor is not None and cells:
+        from . import scope as _scope
+        if all(_scope.violation(actor, "evidence", [c]) for c in cells):
+            assert_actor_scope(actor, "evidence", cells)
+    if published and str(row.get("Origin") or "public") == "public" and placeholder_date(
+            published, row.get("Retrieved_At"), row.get("Excerpt"),
+            row.get("Anchor_Quote"), reason):
+        raise LedgerRefusal(
+            f"{published} is the day {eid} was retrieved and nothing quoted "
+            f"states that year; clear it (--undated) unless the reason quotes "
+            f"the page's own dated words")
+    old = row.get("Date_Published")
+    with wb.transaction("redate_evidence"):
+        wb.update_row("Evidence_Detail", "E_ID", eid,
+                      {"Date_Published": published,
+                       "Recency": recency_band(published, wb)}, save=False)
+        wb.append("Provenance", {
+            "SubCap_ID": ", ".join(cells), "Step": "evidence_redated",
+            "Actor": actor or "ledger", "At": _utcnow(),
+            "Detail": f"{eid}: Date_Published {old!r} -> {published!r}: {reason}"[:500]},
+            save=False)
+    return {"e_id": eid, "from": old, "to": published,
+            "recency": recency_band(published, wb)}
 
 
 def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:
@@ -1375,7 +1436,77 @@ def enrichment_binding(wb: RunWorkbook) -> dict:
         f"this run's connector baseline is short of {', '.join(chk['missing'])}; "
         f"no enrichment connector answered in the container this run was "
         f"worked in, and a session cannot attach one — they bind at start")
+    # BOUND IS NOT WORKING (J-15, measured 2026-10-01). Exa answered 402
+    # (credits) and Tavily 429 ("blocked due to excessive requests") for the
+    # whole session while the baseline said both were present: every empty
+    # cell was unclosable, the degraded path refused because "a connector WAS
+    # available", and 32 research agents found out by spending calls. A
+    # connector MEASURED down — the status and the provider's own words,
+    # recorded by `engine.cli connector-down` — is held out of the baseline.
+    if out["bound"]:
+        down = connector_health(wb.path.parent).get("down") or {}
+        # Degraded only when EVERY required web family is down: while one
+        # answers it is the fallback (Exa <-> Tavily), not a reason to skip.
+        if down and all(f in down for f in cc.REQUIRED):
+            fams = cc.families()
+            dead = {t for f in down for t in fams.get(f, ())}
+            chk2 = cc.check([t for t in held if t not in dead], now_families=fams)
+            if not chk2["ok"]:
+                out["bound"] = False
+                out["missing"] = list(chk2["missing"])
+                out["reason"] = (
+                    "bound but MEASURED DOWN: " + "; ".join(
+                        f"{f} HTTP {d.get('status')} at {d.get('at')} "
+                        f"({str(d.get('error') or '')[:80]})" for f, d in sorted(down.items()))
+                    + " — enrichment is unavailable until the provider is restored "
+                      "(`engine.cli connector-up --tool <t>`)")
     return out
+
+
+#: Statuses that mean a provider will not answer this run: auth, credits,
+#: forbidden, rate-blocked. Anything else (a 5xx, a timeout) is a retry.
+DOWN_STATUSES = (401, 402, 403, 429)
+
+
+def _health_path(root) -> "Path":
+    from pathlib import Path as _Path
+    return _Path(root) / "07_qa" / "connector_health.json"
+
+
+def connector_health(root) -> dict:
+    try:
+        return json.loads(_health_path(root).read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def record_connector_down(root, tool: str, *, status: int, error: str,
+                          actor: str | None = None) -> dict:
+    """Record, from the provider's own response, that a connector is down."""
+    tool = str(tool or "").strip().lower()
+    if tool not in C.ENRICHMENT_TOOLS:
+        raise LedgerRefusal(f"{tool!r} is not an enrichment connector {C.ENRICHMENT_TOOLS}")
+    if int(status) not in DOWN_STATUSES:
+        raise LedgerRefusal(f"HTTP {status} is a retry, not an outage "
+                            f"(down means one of {DOWN_STATUSES})")
+    if len(str(error or "").strip()) < 20:
+        raise LedgerRefusal("--error carries the provider's own words (>= 20 chars)")
+    doc = connector_health(root)
+    doc.setdefault("down", {})[tool] = {"status": int(status), "error": str(error)[:300],
+                                        "at": _utcnow(), "actor": actor or ""}
+    p = _health_path(root)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
+
+
+def record_connector_up(root, tool: str) -> dict:
+    doc = connector_health(root)
+    (doc.get("down") or {}).pop(str(tool or "").strip().lower(), None)
+    p = _health_path(root)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(doc, indent=1) + "\n")
+    return doc
 
 
 def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
@@ -1474,11 +1605,19 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
         # prove the connector was never there. A claim is not enough, an
         # absent baseline is not enough, and a bound connector the lane
         # simply did not use is not enough.
-        binding = enrichment_binding(wb) if enrichment_unavailable else None
-        if binding and binding["known"] and not binding["bound"]:
+        binding = enrichment_binding(wb)
+        if enrichment_unavailable and binding["known"] and not binding["bound"]:
             degraded = binding["reason"]
         else:
             why = ""
+            if not enrichment_unavailable and binding["known"] and not binding["bound"]:
+                # Tell the caller the one flag that applies (J-15): agents
+                # were retrying dead connectors because this refusal only
+                # ever said "fire exa".
+                why = (" — this run's enrichment is MEASURED unavailable ("
+                       + binding["reason"][:240] + "): re-run this absence with "
+                       "--enrichment-unavailable; the gate will disclose REDUCED "
+                       "absence rigour for the category")
             if enrichment_unavailable:
                 why = (
                     " — and --enrichment-unavailable does not apply: "
