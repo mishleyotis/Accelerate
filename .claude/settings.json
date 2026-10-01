@@ -56,5 +56,8 @@
       "Read(//root/.dma/sa.json)",
       "Read(//root/.dma/pathtok)"
     ]
+  },
+  "env": {
+    "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION": "5000"
   }
 }
