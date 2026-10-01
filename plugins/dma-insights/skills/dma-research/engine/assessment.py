@@ -933,7 +933,15 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
             # honest result, and demanding spread would demand invented
             # scores — so it is disclosed as low_differentiation, never
             # blocking. Any capability with an evidenced cell keeps the rule.
-            if top == len(scores) and cap in cap_evidenced:
+            # Likewise a capability held entirely at the scale floor: an
+            # identical 1.0 cannot be inflation (there is nothing below it),
+            # and evidenced cells there — stale, undated or single T4 rows —
+            # are re-derived to the floor by the scoring critic, whose
+            # verdict is what polices them (measured 2026-10-01, Cross
+            # Insurance: the critic itself held P1C1.1 / P2C3.1 / P2C3.5 at
+            # 1.0, and the gate then refused the critic's own result).
+            at_floor = all(abs(x - 1.0) < 1e-9 for x in scores)
+            if top == len(scores) and cap in cap_evidenced and not at_floor:
                 f["no_differentiation"].append(cap)
             elif top == len(scores) or top / len(scores) > 0.6:
                 f["low_differentiation"].append(cap)

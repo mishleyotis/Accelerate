@@ -357,3 +357,17 @@ def test_uniform_scores_on_an_all_absence_capability_are_advisory(tmp_path):
     v = A.gate(wb, run.qa_dir)
     assert "no_differentiation" not in v["blocking"], v["blocking"]
     assert v["low_differentiation"], v
+
+
+def test_an_evidenced_capability_held_at_the_floor_is_advisory(tmp_path):
+    # the critic re-derives stale / single-T4 evidence to 1.0; an identical
+    # floor cannot be inflation, so it is disclosed, not blocked
+    run, wb, cells, ev = _researched(tmp_path, n=6, absent=3)
+    A.open_stage(wb, run.qa_dir)
+    for cell in cells:
+        if ev.get(cell):
+            _score(wb, cell, ev[cell], score=1.0, confidence="LOW")
+        else:
+            _score(wb, cell, [], score=1.0, ai_applicability="NONE", confidence="LOW")
+    v = A.gate(wb, run.qa_dir)
+    assert "no_differentiation" not in v["blocking"], v["blocking"]
