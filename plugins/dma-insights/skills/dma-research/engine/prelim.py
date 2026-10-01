@@ -733,6 +733,47 @@ def complete(wb: RunWorkbook) -> dict:
 
 # ── command line ─────────────────────────────────────────────────────────
 
+
+#: Prose columns a correction may touch. Identity columns (dates, peer names,
+#: scores, ids) are not here: those are frozen by design, and a "typo fix" to
+#: them is a re-bind, not an amendment.
+AMENDABLE = {"Entity_Timeline": ("Title", "Body"),
+             "Peer_Benchmarks": ("Peer_Basis",)}
+
+
+def amend(wb: RunWorkbook, *, sheet: str, column: str, find: str,
+          replace: str, why: str) -> dict:
+    """Correct a phrase in a PRELIM prose column, on every row carrying it.
+
+    `timeline` and `peers` only append, so a validator's correction ("no
+    source says FIRST CIO", "29th, not 27th") had no path but a duplicate
+    row. This rewrites the text in place and records why on the Gate_Log.
+    """
+    if column not in AMENDABLE.get(sheet, ()):
+        raise PrelimRefusal(f"amend touches only {AMENDABLE}; {sheet}.{column} "
+                            f"is not a prose column")
+    if not _clean(find) or len(_clean(why)) < 20:
+        raise PrelimRefusal("amend needs --find and a --why of >= 20 chars")
+    hits = 0
+    for r in wb.rows(sheet):
+        cur = str(r.get(column) or "")
+        if find in cur:
+            match = {k: r.get(k) for k in C.SHEETS[sheet][:2]}
+            match[column] = cur
+            wb.update_row_where(sheet, match, {column: cur.replace(find, replace)},
+                                save=False)
+            hits += 1
+    if not hits:
+        raise PrelimRefusal(f"{find!r} occurs in no {sheet}.{column} row")
+    wb.append("Gate_Log", {"Timestamp": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+                           "Gate": "PRELIM_AMEND", "Scope": f"{sheet}.{column}",
+                           "Verdict": "AMENDED",
+                           "Detail": f"{hits} row(s): {find!r} -> {replace!r}; {_clean(why)}"},
+              save=False)
+    wb._dirty = True
+    wb.save()
+    return {"sheet": sheet, "column": column, "rows_amended": hits}
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="engine.prelim",
                                  description=__doc__.split("\n")[0])
@@ -799,6 +840,13 @@ def main(argv=None) -> int:
     se.add_argument("--gaps", default=None,
                     help="the list_enrichment_gaps reply for the latest run, as JSON")
 
+    am = common(sub.add_parser("amend"))
+    am.add_argument("--sheet", required=True, choices=sorted(AMENDABLE))
+    am.add_argument("--column", required=True)
+    am.add_argument("--find", required=True)
+    am.add_argument("--replace", required=True)
+    am.add_argument("--why", required=True)
+
     common(sub.add_parser("complete"))
 
     a = ap.parse_args(argv)
@@ -838,6 +886,9 @@ def main(argv=None) -> int:
                                       claim_label=a.claim_label,
                                       subcaps=a.subcap,
                                       evidence=a.evidence), indent=2))
+        elif a.cmd == "amend":
+            print(json.dumps(amend(wb, sheet=a.sheet, column=a.column, find=a.find,
+                                   replace=a.replace, why=a.why), indent=2))
         elif a.cmd == "peers":
             print(json.dumps(peers(wb, a.peer, rule=a.rule, basis=a.basis),
                              indent=2, default=str))

@@ -840,10 +840,26 @@ def peer_adoption(wb: RunWorkbook, *, product: str, peer: str, verdict: str,
                              "institution carries a research finding's burden")
     if v == "UNKNOWN" and len(_clean(basis)) < 20:
         raise ScoringRefusal("UNKNOWN carries what was searched and came back empty")
-    wb.append("Platform_Peer_Adoption", {
+    row = {
         "Product / Layer": _clean(product), "Peer": _clean(peer), "Verdict": v,
         "Basis": _clean(basis), "Source": _clean(source) or "not established",
-        "As at": _clean(as_of) or _utcnow()[:10]})
+        "As at": _clean(as_of) or _utcnow()[:10]}
+    # One verdict per (product, peer): a corrected verdict SUPERSEDES the old
+    # row. Appending left Y and UNKNOWN side by side for the same pair
+    # (2026-10-01, Cross Insurance), which no reader can resolve.
+    key = (row["Product / Layer"].lower(), row["Peer"].lower())
+    if any((_clean(r.get("Product / Layer")).lower(), _clean(r.get("Peer")).lower()) == key
+           for r in wb.rows("Platform_Peer_Adoption")):
+        old = next(r for r in wb.rows("Platform_Peer_Adoption")
+                   if (_clean(r.get("Product / Layer")).lower(),
+                       _clean(r.get("Peer")).lower()) == key)
+        m = {"Product / Layer": old.get("Product / Layer"), "Peer": old.get("Peer")}
+        wb.update_row_where("Platform_Peer_Adoption", m, row)
+        wb.delete_rows_where("Platform_Peer_Adoption",
+                             {"Product / Layer": row["Product / Layer"],
+                              "Peer": row["Peer"]}, keep_first=True)
+        return {"rows": len(wb.rows("Platform_Peer_Adoption")), "superseded": True}
+    wb.append("Platform_Peer_Adoption", row)
     return {"rows": len(wb.rows("Platform_Peer_Adoption"))}
 
 
