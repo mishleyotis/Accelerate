@@ -79,6 +79,7 @@ ${DOWN_LINE}  - Exa: {numResults: 3}. If Exa answers HTTP 402/429 once, stop usi
 function batchPrompt(cat, caps, round, prev) {
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
+FIRST COMMAND, before any search: python3 -m engine.cost ceiling ${R} — exit 3 means the run is at its owner's spend ceiling: return at once with gate "OVER_BUDGET", 0 cells, and its output line in notes. Do not search.
 YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
 ${prev ? `The category's last gate: ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 500)}. Close those for your cells.` : ''}
 ${A.mode && A.mode !== 'PUBLIC' ? `Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (${A.mode} run).\n` : 'This is a PUBLIC run: there are no internal documents; do not open a brief.\n'}
@@ -116,6 +117,13 @@ const results = await pipeline(A.cats, async (cat) => {
     })))
     const got = done.filter(Boolean)
     log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)
+    // N-20: the owner's ceiling, checked by every batch before it spends.
+    // At the ceiling nothing more is started here — not the challenge, not a
+    // round 2; the driver's `then` books the spend and stops the run.
+    if (got.some(r => r.gate === 'OVER_BUDGET')) {
+      log(`${cat}: run at its spend ceiling — no challenge, no further round`)
+      return { category: cat, gate: 'OVER_BUDGET', still_open: got.reduce((a, r) => a + (r.still_open || 0), 0), blocking_terms: ['spend ceiling'] }
+    }
     const c = await agent(challengePrompt(cat, round), {
       label: `${cat} challenge r${round}`, phase: 'Challenge', schema: OUT, model: 'sonnet',
       agentType: 'dma-insights:research-challenger',

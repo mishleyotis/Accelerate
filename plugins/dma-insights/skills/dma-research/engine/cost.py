@@ -596,23 +596,53 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
     its transcript names the run id. What was already charged per agent is
     kept in the run's QA folder, so a re-run charges only what is new — a
     stopped workflow's partial spend counts, and nothing counts twice."""
-    base = Path(base or WORKFLOW_TRANSCRIPTS)
     seen_path = run.qa_dir / _CAPTURED
-    try:
-        charged = json.loads(seen_path.read_text())
-        if not isinstance(charged, dict):
-            charged = {}
-    except (OSError, ValueError):
-        charged = {}
+    charged = _charged(run)
     usd_total, turns_total, n = 0.0, 0, 0
     tok_sum = {"cache_read": 0, "cache_write": 0, "uncached": 0, "output": 0}
     model = "sonnet"
+    for aid, cur in workflow_spend(run, base=base).items():
+        usd, turns, tok, model = cur["usd"], cur["turns"], cur["tokens"], cur["model"]
+        prev = charged.get(aid) or {"usd": 0.0, "turns": 0}
+        d_usd, d_turns = round(usd - float(prev["usd"]), 4), turns - int(prev["turns"])
+        if d_usd <= 0 and d_turns <= 0:
+            continue
+        usd_total += max(0.0, d_usd)
+        turns_total += max(0, d_turns)
+        n += 1
+        for k in tok_sum:
+            tok_sum[k] += max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
+        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok}
+    if n:
+        record(run, stage="RESEARCH", elapsed_s=0.0, usd=round(usd_total, 4),
+               turns=turns_total, tokens=tok_sum, model=model, lanes=n,
+               note=f"workflow agents: {n} charged (delta since last capture)")
+        seen_path.parent.mkdir(parents=True, exist_ok=True)
+        seen_path.write_text(json.dumps(charged))
+    return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total}
+
+
+def _charged(run) -> dict:
+    try:
+        got = json.loads((run.qa_dir / _CAPTURED).read_text())
+        return got if isinstance(got, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def workflow_spend(run, *, base: Path | None = None) -> dict[str, dict]:
+    """{agent id: {usd, turns, tokens, model}} for every workflow agent whose
+    transcript names this run — READ-ONLY, so a ceiling check can price the
+    research in flight without booking it."""
+    base = Path(base or WORKFLOW_TRANSCRIPTS)
+    out: dict[str, dict] = {}
     for f in sorted(base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")):
         text = f.read_text(errors="replace")
         if run.run_id not in text:
             continue
         aid = f.stem[len("agent-"):]
-        tok = dict.fromkeys(tok_sum, 0)
+        tok = {"cache_read": 0, "cache_write": 0, "uncached": 0, "output": 0}
+        model = "sonnet"
         # N-25 (2026-10-01, Northwest Bank): a transcript writes ONE ENTRY PER
         # CONTENT BLOCK (thinking, text, each tool call) and every entry of a
         # message repeats that message's input/cache usage; output grows to
@@ -643,24 +673,40 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
             tok["cache_write"] += int(u.get("cache_creation_input_tokens") or 0)
             tok["uncached"] += int(u.get("input_tokens") or 0)
             tok["output"] += int(u.get("output_tokens") or 0)
-        usd = cost_of(model=model, **tok)["total_usd"]
-        prev = charged.get(aid) or {"usd": 0.0, "turns": 0}
-        d_usd, d_turns = round(usd - float(prev["usd"]), 4), turns - int(prev["turns"])
-        if d_usd <= 0 and d_turns <= 0:
-            continue
-        usd_total += max(0.0, d_usd)
-        turns_total += max(0, d_turns)
-        n += 1
-        for k in tok_sum:
-            tok_sum[k] += max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
-        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok}
-    if n:
-        record(run, stage="RESEARCH", elapsed_s=0.0, usd=round(usd_total, 4),
-               turns=turns_total, tokens=tok_sum, model=model, lanes=n,
-               note=f"workflow agents: {n} charged (delta since last capture)")
-        seen_path.parent.mkdir(parents=True, exist_ok=True)
-        seen_path.write_text(json.dumps(charged))
-    return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total}
+        out[aid] = {"usd": cost_of(model=model, **tok)["total_usd"], "turns": turns,
+                    "tokens": tok, "model": model}
+    return out
+
+
+#: Exit code of `engine.cost ceiling` when the run is at or over its budget.
+CEILING_EXIT = 3
+
+
+def ceiling(run, *, budget_usd: float | None = None,
+            base: Path | None = None) -> dict:
+    """N-20 (2026-10-01, Northwest Bank): the driver's --max-usd only sees
+    workflow spend when it next runs, so sixteen research workflows burning
+    ~$4/min had no ceiling at all while they ran. This is the check a
+    workflow agent makes before it starts: what the ledger has booked plus
+    what this run's workflow agents have spent and nobody has booked yet,
+    against the budget the driver recorded. Read-only: it books nothing."""
+    booked = round(sum(float(r.get("usd") or 0) for r in ledger(run)), 4)
+    charged = _charged(run)
+    pending = round(sum(max(0.0, v["usd"] - float((charged.get(a) or {}).get("usd", 0.0)))
+                        for a, v in workflow_spend(run, base=base).items()), 4)
+    if budget_usd is None:
+        try:
+            budget_usd = json.loads((run.qa_dir / "pipeline_state.json").read_text()
+                                    ).get("budget_usd")
+        except (OSError, ValueError):
+            budget_usd = None
+    spent = round(booked + pending, 2)
+    over = budget_usd is not None and spent >= float(budget_usd)
+    return {"spent_usd": spent, "booked_usd": booked, "pending_workflow_usd": pending,
+            "budget_usd": budget_usd, "over": over,
+            "why": (f"${spent:,.2f} spent against a ${float(budget_usd):,.2f} ceiling — "
+                    f"stop: raising --max-usd is a person's decision"
+                    if over else "within the ceiling")}
 
 
 def _totals(rows: list[dict]) -> tuple[dict, dict]:
@@ -962,6 +1008,11 @@ def main(argv=None) -> int:
     b = sub.add_parser("budget")
     b.add_argument("--run", required=True); b.add_argument("--root")
     b.add_argument("--json", action="store_true")
+    cl = sub.add_parser("ceiling", help="is the run at its spend ceiling? read-only; "
+                                        "exit 3 when it is (workflow agents check first)")
+    cl.add_argument("--run", required=True); cl.add_argument("--root")
+    cl.add_argument("--max-usd", type=float, default=None)
+    cl.add_argument("--json", action="store_true")
     t = sub.add_parser("schedule", help="wall clock, given the fan-out")
     t.add_argument("--sv", default="CU"); t.add_argument("--scope",
                                                          default="T1_CORE")
@@ -993,6 +1044,14 @@ def main(argv=None) -> int:
     rp.add_argument("--label")
 
     a = ap.parse_args(argv)
+    if a.cmd == "ceiling":
+        from . import runstate
+        run = runstate.locate(a.run, Path(a.root) if a.root else None)
+        out = ceiling(run, budget_usd=a.max_usd)
+        print(json.dumps(out) if a.json else
+              f"{'OVER' if out['over'] else 'OK'}: {out['why']} (booked "
+              f"${out['booked_usd']:,.2f} + in-flight workflows ${out['pending_workflow_usd']:,.2f})")
+        return CEILING_EXIT if out["over"] else 0
     if a.cmd == "record":
         from . import runstate
         run = runstate.locate(a.run, Path(a.root) if a.root else None)

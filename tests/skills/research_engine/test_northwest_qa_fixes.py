@@ -187,3 +187,29 @@ def test_the_absence_line_names_every_flag_the_cli_requires(tmp_path):
 def test_a_public_run_does_not_send_batches_to_the_internal_documents():
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
     assert "A.mode && A.mode !== 'PUBLIC'" in js
+
+
+# ── N-20 · the workflows stop at the owner's ceiling ────────────────────
+
+def test_the_ceiling_prices_workflow_spend_not_yet_booked(tmp_path):
+    run = _run(tmp_path)
+    wf = tmp_path / "proj" / "sess" / "subagents" / "workflows" / "wf_1"
+    wf.mkdir(parents=True)
+    lines = [json.dumps({"type": "user", "message": {"content": f"run {run.run_id}"}})]
+    lines.append(json.dumps({"type": "assistant", "message": {
+        "id": "m1", "model": "claude-sonnet-x", "usage": {
+            "input_tokens": 0, "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 0, "output_tokens": 1_000_000}}}))
+    (wf / "agent-a1.jsonl").write_text("\n".join(lines))
+    under = cost.ceiling(run, budget_usd=50.0, base=tmp_path)
+    assert not under["over"] and under["pending_workflow_usd"] == 10.0, under
+    over = cost.ceiling(run, budget_usd=5.0, base=tmp_path)
+    assert over["over"] and "person's decision" in over["why"]
+    assert cost.ledger(run) == [] or all("workflow" not in r.get("note", "") for r in cost.ledger(run)), \
+        "a ceiling check books nothing"
+
+
+def test_every_batch_checks_the_ceiling_first_and_the_script_stops_on_it():
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    assert "python3 -m engine.cost ceiling ${R}" in js
+    assert "r.gate === 'OVER_BUDGET'" in js
