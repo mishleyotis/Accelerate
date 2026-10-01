@@ -288,8 +288,15 @@ def test_issue9_the_documented_dispatch_uses_the_lanes_the_schedule_divides_by(t
 
 def test_issue9_the_schedule_can_be_read_from_the_runs_own_selection(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path)
+    # N-10 (2026-10-01): research runs as one workflow per category, so the
+    # run's schedule models the workflows; the lane model stays one flag away.
     out = _cli("engine.cost", "schedule", "--json", run=run)
     assert out.returncode == 0, out.stderr
     sch = json.loads(out.stdout)
-    assert sch["subcaps"] == len(cells) and sch["lanes"] == cost.PARALLEL_LANES
-    assert sch["within_target"]
+    assert sch["mode"] == "workflow" and sch["subcaps"] == len(cells)
+    # a researched run hands out nothing: the research phase costs no time
+    assert sch["open_cells"] == 0 and sch["workflows"] == 0 and sch["within_target"]
+    out = _cli("engine.cost", "schedule", "--json", "--research-mode", "lanes", run=run)
+    assert out.returncode == 0, out.stderr
+    lanes = json.loads(out.stdout)
+    assert lanes["subcaps"] == len(cells) and lanes["lanes"] == cost.PARALLEL_LANES

@@ -19,7 +19,7 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 plugin's own run tree, which is where the auto-approvers and the dispatch
 guard look. A root anywhere else makes every write into it prompt the owner
 (measured 2026-10-01: a root under `/home/user/dma-runs` would have put 45%
-of research Bash calls in front of a person); `engine.cli start` says so.
+of research Bash calls in front of a person); the run's start warns when it would.
 
 **Record the connectors YOU hold before anything else runs.** No subprocess
 can enumerate a session's bound MCP tools (MEM-0112) — only you can, and
