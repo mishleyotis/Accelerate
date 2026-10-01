@@ -775,6 +775,16 @@ def report(run, *, wb=None) -> dict:
                        "retried": t["attempts"] > t["lanes"] > 0})
     total_min = round(summary["total_elapsed_s"] / 60.0, 1)
     budget = round(BUDGET_PER_PILLAR * max(1, len(pillars)), 2)
+    # N-31 (2026-10-01): the report judged a run against the $5/pillar default
+    # ("$76.40, budget $20.00, OVER") while the driver enforced the owner's
+    # --max-usd 200. The ceiling the driver recorded is the run's budget.
+    try:
+        recorded = json.loads((run.qa_dir / "pipeline_state.json").read_text()
+                              ).get("budget_usd")
+        if recorded:
+            budget = round(float(recorded), 2)
+    except (OSError, ValueError, TypeError):
+        pass
     usd = summary["total_usd"]
     over_time = total_min > TARGET_WALL_CLOCK_MIN
     over_budget = usd is not None and usd > budget

@@ -59,6 +59,7 @@ Prior registers: qa_audit/2026-09-28 (structural), qa_audit/2026-09-30-swbc (I-0
 | N-28 | O2/O3 | HIGH | engine/preflight.py record | Financial statements banked as evidence with an ENGINE-WRITTEN "excerpt" ("earnings release for FY2025, reviewed during binding preflight...") and dated by retrieved_at when no period_end: E-001/E-002 read CURRENT on 2026-10-01. Breaks invariant 4 (verbatim excerpt) and 9 (undated is UNVERIFIED). Every run's preflight did this: the skeleton never asked for an excerpt or published date. | FIXED (worktree): row shape asks excerpt+published; check refuses a statement without a 50-500 char excerpt; record never dates by retrieval |
 | N-29 | O3 | LOW | engine/pipeline.py _stage_package | The gold gate runs inside assemble.package (stub package: 0 findings) but its verdict reached only pipeline_state; the deliverable-gate hook reads Gate_Log GS rows, so a manual push of the driver's own verified package would be refused. | FIXED (worktree): PACKAGE appends GS:package to Gate_Log; acceptance test asserts it |
 | N-30 | QA | LOW | scripts/audit_skills.py _repo_root | Repo-root search required `.git` to be a directory; in a git worktree it is a file, so 9 repo-relative references read as broken (0 on the main checkout). | FIXED (worktree) |
+| N-31 | O1 | LOW | engine/cost.py report; hooks/stage_advance.py | `cost report` judged the run against the $5/pillar default ("$76.40, budget $20.00, OVER") while the driver enforced the owner's $200; the AWAITING_WORKFLOW hook relayed the dollar verdict ("fits") but not the WebSearch one. | FIXED: report reads the recorded budget; hook prints WEB SEARCH line when it does not fit |
 | N-07 | O1 | MED | scripts/hooks/deliverable_gate.py _PUSH_NAME/_PUSH_FILE | Working-file exemption (I-11) misses when a shell operator follows the token: `--name preflight.json; echo ...` captures `preflight.json;` -> the step-3 preflight push is DENIED with "no run is in hand". Also fires on any command text that merely contains the push string (a test probe). | FIXED (live, owner-approved 04:2xZ) |
 
 ## Live-run observations
@@ -94,3 +95,9 @@ Prior registers: qa_audit/2026-09-28 (structural), qa_audit/2026-09-30-swbc (I-0
 - Quality census at stop: 690 evidence rows - 358 undated -> UNVERIFIED (honest, invariant 9 held by research agents), tiers T1 251 / T2 224 / T3 100 / T5 96 / T4 19; 215 closed = INFERENCE 125, CEILING_ESTIMATE 33, FACT 30, HYPOTHESIS 27 (absences); 4 challenge verdicts (PASS) before stop; 2 FLOORS FAIL recorded
 - Final linkage audit (stopped run): 215 closed = 188 synth + 27 absent; 614 citations; 0 unresolved, 0 excerpt-length violations, 0 missing back-links; every synthesis cites
 - O3 via the plugin's stub walk on the fixed tree: 34/34 steps PASS (PRELIM..PROMOTE; ceiling stop + person's raise; stall; INGEST_A resume; page FAIL re-dispatch; promote refused then promoted; second run redoes nothing; v6 workbook continues). Gold gate at PACKAGE: 0 findings
+
+## Live verification on the fixed tree (driver `then`, 05:0xZ)
+- N-25 VERIFIED LIVE: capture booked 75 agents, $73.56 (per-message); the old code would have booked ~$237 and stopped the run at the ceiling
+- N-27 VERIFIED LIVE: "[WORKFLOW] WARNING: this session may run 200 WebSearch calls and the research needs ~1434 (514 open cells ...)"
+- N-22 VERIFIED LIVE: every re-handed invocation carries "mode": "PUBLIC"
+- Re-handoff: 16 categories, 60 batches, est $104.70 for 514 open cells; spent $76.40 of $200. NOT started: search capacity is still exhausted in this session

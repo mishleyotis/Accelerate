@@ -430,6 +430,11 @@ def awaiting_workflow(event: dict) -> dict | None:
                      + ("" if fit is None else (" — fits" if fit else
                         " — OVER BUDGET: raise --max-usd before starting, or the "
                         "driver stops at the ceiling mid-stage")))
+    ws = est.get("web_search") or {}
+    if ws and not ws.get("fits", True):
+        # N-27: the dollar verdict alone said "fits" while the session's
+        # WebSearch budget could carry ~10% of the cells handed out.
+        lines.append(f"  WEB SEARCH: {ws.get('why')} Put this to the owner BEFORE starting.")
     if doc.get("not_worked"):
         lines.append(f"  WARNING: {doc['not_worked']}")
     lines.append("  If Workflow is not available in this session, STOP and restart the "

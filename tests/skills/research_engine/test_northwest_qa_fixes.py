@@ -321,3 +321,33 @@ def test_the_sheet_treats_primary_as_a_facet_not_the_websearch_tool():
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
     assert '"primary" is a FACET, not a tool' in js
     assert "primary web_search AND" not in js
+
+
+# ── N-31 · the cost report judges the run against the ceiling it runs under ─
+
+def test_the_report_reads_the_budget_the_driver_recorded(tmp_path):
+    run = _run(tmp_path)
+    (run.qa_dir / "pipeline_state.json").write_text(json.dumps({"budget_usd": 200.0}))
+    cost.record(run, stage="RESEARCH", elapsed_s=60.0, usd=76.4)
+    rep = cost.report(run)
+    assert rep["budget_usd"] == 200.0 and not rep["over_budget"]
+
+
+# ── N-27 · the hook relays the WebSearch verdict, not only the dollars ──
+
+def test_the_stage_hook_says_when_the_web_search_budget_does_not_fit(tmp_path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "stage_advance", PLUGIN / "scripts" / "hooks" / "stage_advance.py")
+    h = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(h)
+    f = tmp_path / "07_qa" / "research_workflow.json"
+    f.parent.mkdir(parents=True)
+    f.write_text(json.dumps({"workflow": "w.js", "invocations": [], "then": "x",
+                             "estimate": {"usd": 1, "open_cells": 514, "batches": 60,
+                                          "basis": "b", "fits_budget": True,
+                                          "web_search": P.web_search_capacity(514)}}))
+    event = {"tool_name": "Bash", "tool_response": {"stdout": f"AWAITING_WORKFLOW at RESEARCH — {f}"}}
+    out = h.awaiting_workflow(event)
+    text = json.dumps(out)
+    assert "WEB SEARCH:" in text and "Put this to the owner BEFORE starting" in text
