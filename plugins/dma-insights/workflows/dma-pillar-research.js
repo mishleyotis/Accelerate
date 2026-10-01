@@ -102,6 +102,20 @@ function challengePrompt(cat, round) {
 Return the gate verdict, its blocking terms, and how many cells are still open.`
 }
 
+// A session that bound the plugin before research-batch-producer existed (an
+// install updated mid-session keeps its old roster) cannot resolve the type:
+// fall back to an untyped agent, once, and say so — research still runs.
+let BATCH_TYPE = 'dma-insights:research-batch-producer'
+async function batchAgent(prompt, opts) {
+  if (BATCH_TYPE) {
+    try { return await agent(prompt, { ...opts, agentType: BATCH_TYPE }) } catch (e) {
+      log(`batch agent type ${BATCH_TYPE} unavailable in this session (${String(e).slice(0, 120)}) — running untyped`)
+      BATCH_TYPE = null
+    }
+  }
+  return agent(prompt, opts)
+}
+
 const BATCHES = A.batches || {}
 log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
 
@@ -109,11 +123,10 @@ const results = await pipeline(A.cats, async (cat) => {
   let prev = null
   let batches = BATCHES[cat] && BATCHES[cat].length ? BATCHES[cat] : [[`${cat} (all open capabilities)`]]
   for (let round = 1; round <= A.rounds; round++) {
-    const done = await parallel(batches.map((caps, i) => () => agent(batchPrompt(cat, caps, round, prev), {
+    // N-19: its own lean type — WebSearch, Exa, Tavily, one Clay read, Read/Bash.
+    // Untyped, every turn carried the session's skill listing and tool roster.
+    const done = await parallel(batches.map((caps, i) => () => batchAgent(batchPrompt(cat, caps, round, prev), {
       label: `${cat} r${round} b${i + 1} ${caps[0]}${caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
-      // N-19: its own lean type — WebSearch, Exa, Tavily, one Clay read, Read/Bash.
-      // Untyped, every turn carried the session's skill listing and tool roster.
-      agentType: 'dma-insights:research-batch-producer',
     })))
     const got = done.filter(Boolean)
     log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)

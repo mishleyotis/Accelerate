@@ -127,8 +127,10 @@ def test_the_batch_agent_holds_no_session_wide_tool():
 
 def test_the_workflow_starts_every_batch_as_that_type():
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
-    batch_call = js[js.index("agent(batchPrompt("):js.index("challengePrompt(cat, round), {")]
-    assert "agentType: 'dma-insights:research-batch-producer'" in batch_call
+    assert "let BATCH_TYPE = 'dma-insights:research-batch-producer'" in js
+    assert "batchAgent(batchPrompt(" in js
+    helper = js[js.index("async function batchAgent"):js.index("const BATCHES")]
+    assert "agentType: BATCH_TYPE" in helper and "return agent(prompt, opts)" in helper
 
 
 def test_the_manifest_lists_the_batch_agent():
