@@ -146,7 +146,7 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
         "entity": {"name": entity, "entity_id": entity_id,
                    "website": website or "", "as_of": ""},
         "financials": {
-            "statements": [],       # {source_name,url,kind,period,tier,retrieved_at}
+            "statements": [],       # {source_name,url,kind,period,tier,retrieved_at,excerpt,published}
             "revenue_lines": [],    # {line,amount,currency,period,share_pct,
                                     #  implies_lob,source}
             "not_run": "",          # the ladder, if nothing is published

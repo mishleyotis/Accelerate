@@ -2245,6 +2245,18 @@ class Pipeline:
                                  "gold_findings": pkg["verification"].get("gold_findings"),
                                  "pushed": pkg.get("pushed"), "at": _utcnow()}
         self._save_state()
+        # N-29 (2026-10-01): the gold gate ran here and its verdict reached only
+        # pipeline_state; the deliverable-gate hook reads Gate_Log, so a manual
+        # push of this very package was refused as "no gold-standard verdict".
+        gold = pkg["verification"].get("gold_findings") or []
+        try:
+            L.append_gate(self.wb, gate="GS", scope="package",
+                          verdict="FAIL" if gold else "PASS",
+                          detail=("PASS — 0 findings" if not gold else
+                                  f"{len(gold)} finding(s): " + "; ".join(map(str, gold[:4]))),
+                          blocking=True)
+        except Exception:                                      # noqa: BLE001
+            pass
         if not pkg["verified"]:
             bad = [c for c in pkg["verification"]["checks"] if not c["ok"]]
             raise StageRefused("package did not verify: " + "; ".join(
