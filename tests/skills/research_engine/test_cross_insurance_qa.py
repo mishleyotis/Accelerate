@@ -17,7 +17,7 @@ import pytest
 from engine import cli, contract as C, cost, ledger as L, orient, pipeline as P
 from engine import pipeline_stub as S, preflight, prelim
 from engine import brief
-from fixtures import (bank_evidence, declare_absent, fire_volleys, new_run,
+from fixtures import (CAT, bank_evidence, declare_absent, fire_volleys, new_run,
                       preflight_doc, two_category_selection)
 
 PLUGIN = Path(__file__).resolve().parents[3] / "plugins" / "dma-insights"
@@ -251,3 +251,90 @@ def test_drive_fetch_digest_is_the_preflight_digest():
     spec.loader.exec_module(df)
     doc = preflight_doc()
     assert df._preflight_digest(doc) == preflight.digest(doc)
+
+
+# ── C-30 · an absence's direct rung must pin the entity ──────────────────
+
+from engine import floors_gate, quality as Q  # noqa: E402
+
+
+@pytest.mark.parametrize("query,pinned", [
+    ('Cross Insurance Agency next best action', False),
+    ('"Cross Insurance Agency" next best action', True),
+    ('"Cross Insurance" crm platform', True),
+    ('"Cross" insurance crm', False),
+    ('site:crossagency.com client portal', True),
+    ('“Cross Insurance Agency” portal', True),
+])
+def test_pins_entity(query, pinned):
+    assert Q.pins_entity(query, "Cross Insurance Agency", "https://www.crossagency.com") is pinned
+
+
+def test_a_connective_prefix_is_not_a_pin():
+    assert "bank of" not in Q.entity_pins("Bank of Maine")["phrases"]
+
+
+def _volleys_with_connector(wb, cell, direct):
+    fire_volleys(wb, cell, n=0)
+    L.append_search(wb, subcap=cell, facet="works", query=direct, tool="exa",
+                    hits=0, kept=0, outcome="no hits")
+
+
+def test_an_unpinned_direct_rung_is_refused_at_the_writer(tmp_path):
+    run = new_run(tmp_path)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    loose = f"Acme Credit Union {cell} rollout unquoted"
+    _volleys_with_connector(wb, cell, loose)
+    proxy_q = f'"Acme Credit Union" {cell} proxy: "head of digital"'
+    L.append_search(wb, subcap=cell, facet="corroborates", query=proxy_q,
+                    tool="web_search", hits=0, kept=0)
+    with pytest.raises(L.LedgerRefusal, match="does not pin the entity"):
+        L.declare_absence(
+            wb, cell, actor="research-p1c1-producer",
+            ladder=[{"rung": "direct", "query": loose},
+                    {"rung": "proxy", "query": proxy_q}],
+            proxy_log="hunted the leadership_title proxy class across the site "
+                      "and LinkedIn; nothing names one",
+            what_was_hunted=f"a public artefact naming {cell} at Acme Credit Union "
+                            f"across every volley; nothing bears on the cell")
+
+
+def test_an_older_unpinned_absence_blocks_the_gate_and_reopens(tmp_path):
+    run = new_run(tmp_path)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    declare_absent(wb, cell)                         # pinned: passes
+    ok = floors_gate.run(wb, CAT, qa_dir=run.qa_dir)
+    assert not ok["absence_unpinned"]
+    # the shape written before C-30: a direct rung with the bare name
+    wb.set_scoring(cell, {"Negative_Ladder": json.dumps(
+        [{"rung": "direct", "query": f"Acme Credit Union {cell} rollout"},
+         {"rung": "proxy", "query": "x"}])})
+    v = floors_gate.run(run.open(), CAT, qa_dir=run.qa_dir)
+    assert any(f["subcap"] == cell for f in v["absence_unpinned"])
+    assert "absence_unpinned" in v["blocking"]
+    assert P._open_capabilities(run.open())[CAT], "an unpinned absence must be re-opened"
+    card = orient.capability_card(run.open(), ".".join(cell.split(".")[:2]), run=run)
+    assert any(c["cell"] == cell and "redo" in c for c in card["open_cells"])
+
+
+# ── C-22 · PRELIM owes the sub-vertical's system of record ───────────────
+
+def test_prelim_tech_baseline_needs_the_system_of_record(tmp_path):
+    run = new_run(tmp_path)                          # CU; fixture records Fiserv DNA
+    wb = run.open()
+    sor = prelim.system_of_record_state(wb)
+    assert sor["class"] == "core processor" and sor["covered"]
+    # drop the core row: the section reopens and names the class
+    rows = [r for r in wb.rows("Tech_Register") if "Fiserv" not in str(r.get("Product"))]
+    assert not prelim.system_of_record_state(wb, rows)["covered"]
+    assert set(C.SYSTEM_OF_RECORD) == set(C.taxonomy().sub_vertical_codes())
+    assert "Applied Epic" in C.SYSTEM_OF_RECORD["IB"]["vendors"]
+
+
+def test_the_scanner_brief_names_the_system_of_record_first(tmp_path):
+    run = new_run(tmp_path, prelim=False)
+    brief.prelim_brief(run.open(), run=run, out_dir=tmp_path / "b")
+    scan = json.loads((tmp_path / "b" / "prelim-techscan.json").read_text())
+    assert "core processor" in scan["system_of_record"]

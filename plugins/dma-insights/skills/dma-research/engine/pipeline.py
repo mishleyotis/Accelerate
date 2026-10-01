@@ -437,10 +437,17 @@ def _open_capabilities(wb) -> dict[str, dict[str, int]]:
     """{category: {capability: open cells}} — open = no Dominant_Claim yet
     (a synthesis and a declared absence both write one)."""
     from .brief import capability_of, category_of
+    from . import ledger as _L
+    identity = _L.entity_identity(wb)
     out: dict[str, dict[str, int]] = {}
     for r in wb.scoring_rows():
         sc = str(r.get("SubCap_ID") or "")
-        if not sc or str(r.get("Dominant_Claim") or "").strip():
+        if not sc:
+            continue
+        # A declared absence whose direct rung never pinned the entity is
+        # re-opened (C-30): the floors gate blocks on it, so it must be worked.
+        if str(r.get("Dominant_Claim") or "").strip() and \
+                not _L.absence_unpinned(r, identity):
             continue
         caps = out.setdefault(category_of(sc), {})
         caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1

@@ -493,6 +493,48 @@ TECH_BROKERS = ("clay", "explorium")
 #: closed vocabulary is what lets the floors gate COUNT which connectors were
 #: asked before a cell is declared absent. `web_search`/`web_fetch` are the
 #: built-in tools; everything after them is an enrichment connector.
+#: THE SYSTEM OF RECORD each sub-vertical runs on (C-22, measured
+#: 2026-10-01, Cross Insurance): the four-layer floor let PRELIM close on
+#: Office 365, Smartsheet and a website builder while the one platform an
+#: insurance broker runs on — its agency management system — went
+#: unsearched (job postings name Applied Epic and AMS360). The class is
+#: owed a Tech_Register row, found or ABSENT, before PRELIM closes.
+SYSTEM_OF_RECORD = {
+    "IB": {"class": "agency management system", "layer": "OPS",
+           "vendors": ("Applied Epic", "Applied TAM", "Vertafore AMS360",
+                       "AMS360", "Vertafore Sagitta", "Sagitta", "HawkSoft",
+                       "EZLynx", "QQCatalyst", "NowCerts", "Jenesis")},
+    "IC": {"class": "policy administration system", "layer": "OPS",
+           "vendors": ("Guidewire", "Duck Creek", "Majesco", "Sapiens",
+                       "EIS", "Insurity", "OneShield", "BriteCore")},
+    "CU": {"class": "core processor", "layer": "OPS",
+           "vendors": ("Symitar", "Episys", "Corelation", "KeyStone",
+                       "Fiserv DNA", "XP2", "Portico", "CU*Answers",
+                       "Jack Henry", "FIS")},
+    "RB": {"class": "core banking platform", "layer": "OPS",
+           "vendors": ("Fiserv", "DNA", "Premier", "Signature", "Precision",
+                       "FIS", "Horizon", "IBS", "Jack Henry", "SilverLake",
+                       "CIF 20/20", "Core Director", "Temenos", "Finxact",
+                       "Thought Machine")},
+    "CL": {"class": "loan origination and servicing system", "layer": "OPS",
+           "vendors": ("nCino", "Abrigo", "Sageworks", "Baker Hill",
+                       "MeridianLink", "Loan IQ", "ACBS", "FIS")},
+    "CIB": {"class": "trading and loan-agency platform", "layer": "OPS",
+            "vendors": ("Murex", "Calypso", "Adenza", "Loan IQ", "Charles River",
+                        "Bloomberg AIM", "FIS")},
+    "AM": {"class": "investment book of record", "layer": "OPS",
+           "vendors": ("Aladdin", "SimCorp", "Charles River", "Geneva",
+                       "Advent", "Bloomberg AIM", "Eagle")},
+    "RIA": {"class": "portfolio management and advisor CRM", "layer": "OPS",
+            "vendors": ("Orion", "Tamarac", "Envestnet", "Black Diamond",
+                        "Addepar", "Advent", "Salesforce Financial Services Cloud",
+                        "Redtail", "Wealthbox")},
+    "FC": {"class": "loan accounting and origination system", "layer": "OPS",
+           "vendors": ("Farm Credit Financial Partners", "AgFirst", "nCino",
+                       "FIS", "Jack Henry")},
+}
+
+
 SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
                 "explorium", "vibe", "indeed", "quartr", "drive", "internal",
                 # C-18 (measured 2026-10-01, Cross Insurance): with Exa out of

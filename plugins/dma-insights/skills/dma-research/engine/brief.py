@@ -1442,6 +1442,24 @@ def _display_id(wb: RunWorkbook) -> str:
     return str(md.get("entity_id") or md.get("display_id") or "<display_id>")
 
 
+def _sor_line(wb: RunWorkbook) -> str:
+    """The sub-vertical's system of record, as the scanner's first hunt
+    (C-22): PRELIM will not close without a row for it."""
+    from . import prelim
+    sor = prelim.system_of_record_state(wb)
+    if not sor:
+        return ""
+    if sor["covered"]:
+        return f"{sor['class']}: recorded ({', '.join(sor['covered'][:3])})"
+    ent = str(wb.metadata().get("entity_name") or "the entity")
+    names = " OR ".join(f'"{v}"' for v in sor["vendors"][:6])
+    return (f"FIRST: the {sor['class']} ({sor['layer']}) — the platform this "
+            f"{sor['sub_vertical']} runs on; PRELIM refuses to close without a "
+            f"row for it. Job postings name it most often: "
+            f"'\"{ent}\" ({names})'. Record what you find, or an ABSENT row "
+            f"naming the class and the searches.")
+
+
 def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     """The PRELIM lanes: the institution before its capabilities. Three
     agents, one prompt each — the conductor in PRELIM-ONLY mode for the
@@ -1522,6 +1540,7 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "layers": ["OPS", "CUST", "DATA", "INFRA"],
         "estate_known": sh.get("estate_by_layer") or {},
         "owed": ["tech_baseline"] if "tech_baseline" in st["open"] else [],
+        "system_of_record": _sor_line(wb),
         "commands": sheet + [
             f"detection:    python3 -m engine.techscan record {e} --product '<P>' --vendor '<V>' --layer OPS|CUST|DATA|INFRA --status CONFIRMED|INFERRED|CLAIMED|ABSENT --method public_document|job_posting|vendor_announcement --provider web --basis '<one clause>' --evidence-id E-NNN [--url U] [--as-of YYYY-MM-DD]",
             f"status:       python3 -m engine.techscan status {e}"],

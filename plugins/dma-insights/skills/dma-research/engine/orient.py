@@ -481,13 +481,15 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
              or ".".join(c.split(".")[:2]) == cap]
     rows = {str(r.get("SubCap_ID")): r for r in wb.scoring_rows()}
     names = C.subcap_names()
+    identity = L.entity_identity(wb)
     open_cells, facets = [], {}
     for c in cells:
         r = rows.get(c) or {}
         if str(r.get("Dominant_Claim") or "").strip() and \
                 str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE":
             continue                                   # synthesised with evidence
-        if str(r.get("Absence_Claimed") or "").strip().upper() == "YES":
+        redo = L.absence_unpinned(r, identity)
+        if str(r.get("Absence_Claimed") or "").strip().upper() == "YES" and not redo:
             continue                                   # closed by a declared absence (C-25)
         vs = L.volley_status(wb, c, searches=searches)
         dq = kg.dqs_for(wb, c)
@@ -497,7 +499,11 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
         # diagnostic question was never searched" — 14 of 14 refusals.
         missing = ([C.PRIMARY_FACET] if not vs["primary_fired"] else []) + vs["missing"]
         open_cells.append({"cell": c, "name": names.get(c, ""),
-                           "missing": missing})
+                           "missing": missing,
+                           **({"redo": "its absence's direct query did not pin "
+                                       "the entity: re-search with the quoted "
+                                       "name or domain, then synthesise or "
+                                       "re-declare"} if redo else {})})
         for q in dq["ask"]:
             f = str(q.get("facet") or "")
             if f not in missing:

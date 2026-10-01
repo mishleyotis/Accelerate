@@ -1254,6 +1254,29 @@ FAILED_OUTCOME = re.compile(
     re.I)
 
 
+def entity_identity(wb: RunWorkbook) -> tuple[str, str]:
+    """(entity name, registrable domain) — what a query must pin (C-30)."""
+    name = str(wb.metadata().get("entity_name") or "").strip()
+    site = next((str(r.get("Value") or "") for r in wb.rows("Firmographics")
+                 if str(r.get("Field") or "").strip().lower() == "website"
+                 and r.get("Value")), "")
+    return name, site
+
+
+def absence_unpinned(row: dict, identity: tuple[str, str]) -> bool:
+    """A declared absence whose direct rung never pinned the entity (C-30):
+    the gate blocks on it, and the handoff and the card treat the cell as
+    OPEN so a batch re-researches it rather than the gate failing forever."""
+    if str(row.get("Absence_Claimed") or "").strip().upper() != "YES":
+        return False
+    try:
+        ladder = json.loads(str(row.get("Negative_Ladder") or "[]"))
+    except ValueError:
+        return False
+    ladder = ladder if isinstance(ladder, list) else [ladder]
+    return bool(Q.unpinned_direct_rungs(ladder, *identity))
+
+
 def volley_status(wb: RunWorkbook, subcap: str,
                   searches: list[dict] | None = None) -> dict:
     """Which of the subcap's askable volleys have a LOGGED search behind them.
@@ -1519,6 +1542,17 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
         problems.append(
             f"ladder rung(s) claim a query the Search_Log never saw: "
             f"{rep['claimed_not_fired'][:3]}")
+    entity, domain = entity_identity(wb)
+    if "direct" in rungs and Q.unpinned_direct_rungs(ladder, entity, domain):
+        pins = Q.entity_pins(entity, domain)
+        problems.append(
+            f"the direct rung's query does not pin the entity: put its name in "
+            f"quotes (one of {pins['phrases'][:3]}) or name its domain "
+            + (f"({pins['domain']}) " if pins["domain"] else "")
+            + "— an unquoted name returns other entities (measured 2026-10-01: "
+              "'Cross Insurance Agency' returned A.T. Cross pens and CBP "
+              "'CROSS' rulings), and an absence over that result set says "
+              "nothing about this one")
     if len(str(proxy_log or "").strip()) < 40:
         proxy_class = C.proxy_classes().get(subcap, "")
         problems.append(

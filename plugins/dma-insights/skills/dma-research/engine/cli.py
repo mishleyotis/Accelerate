@@ -738,6 +738,9 @@ def main(argv=None) -> int:
                 f"the primary facet ({contract.PRIMARY_FACET}) is among them",
                 "at least one of those searches ran through an enrichment connector: "
                 f"--tool one of {list(contract.ENRICHMENT_TOOLS)}",
+                "the DIRECT rung's query pins the entity: its name in quotes "
+                "(full name, or its leading words without Agency/Inc/LLC) or its "
+                "domain / site:domain — an unquoted common-word name is refused",
                 f"--ladder JSON list naming rungs {list(ledger.ABSENCE_RUNGS_REQUIRED)} "
                 f"(optional: {[r for r in Q.LADDER_RUNGS if r not in ledger.ABSENCE_RUNGS_REQUIRED]}); "
                 "each rung's query must be EXACTLY a query already in the Search_Log",
@@ -748,7 +751,7 @@ def main(argv=None) -> int:
                 "optional pair: --inferable (>= 30 chars) + --validation-question (ends in ?)",
             ],
             "ops_lines": [
-                "search --subcap C1 --subcap C2 --facet primary --tool web_search --query 'Q1' --hits 6 --kept 0 --actor $ACT",
+                "search --subcap C1 --subcap C2 --facet primary --tool web_search --query '\"<Entity Name>\" Q1' --hits 6 --kept 0 --actor $ACT",
                 "search --subcap C1 --subcap C2 --facet fails --tool tavily --query 'Q2' --hits 3 --kept 0 --actor $ACT",
                 "absence --subcap C1 --actor $ACT --ladder '[{\"rung\":\"direct\",\"query\":\"Q1\"},{\"rung\":\"proxy\",\"query\":\"Q2\"}]' "
                 "--proxy-log '<proxy class>: <what was hunted, what came back>' "

@@ -703,7 +703,14 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
     usd_total, turns_total, n = 0.0, 0, 0
     tok_sum = {"cache_read": 0, "cache_write": 0, "uncached": 0, "output": 0}
     model = "sonnet"
-    for f in sorted(base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")):
+    # In-session Agent subagents too (C-31, measured 2026-10-01, Cross
+    # Insurance): the PRELIM connector pass the command spawns in-process
+    # (~195K tokens, naming the run id 19 times) sits beside the workflow
+    # transcripts, in subagents/, and was charged nowhere — so the ceiling
+    # could not see the one PRELIM step the driver cannot dispatch itself.
+    files = sorted(set(base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl"))
+                   | set(base.glob("*/*/subagents/agent-*.jsonl")))
+    for f in files:
         text = f.read_text(errors="replace")
         if run.run_id not in text:
             continue
@@ -739,7 +746,8 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
     if n:
         record(run, stage="RESEARCH", elapsed_s=0.0, usd=round(usd_total, 4),
                turns=turns_total, tokens=tok_sum, model=model, lanes=n,
-               note=f"workflow agents: {n} charged (delta since last capture)")
+               note=f"workflow agents and in-session subagents: {n} charged "
+                    f"(delta since last capture)")
         seen_path.parent.mkdir(parents=True, exist_ok=True)
         seen_path.write_text(json.dumps(charged))
     return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total}

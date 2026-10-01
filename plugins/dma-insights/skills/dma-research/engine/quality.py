@@ -228,6 +228,65 @@ def ladder_report(ladder, searches) -> dict:
     }
 
 
+#: Generic words that end a legal name but do not identify the entity.
+_NAME_SUFFIXES = {"agency", "inc", "incorporated", "llc", "ltd", "limited",
+                  "corp", "corporation", "company", "co", "group", "holdings",
+                  "plc", "lp", "llp", "the"}
+_QUOTED = re.compile(r'["\u201c\u201d]([^"\u201c\u201d]{2,120})["\u201c\u201d]')
+
+
+def _name_tokens(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9&']+", str(text or "").lower())
+
+
+def entity_pins(entity: str, domain: str = "") -> dict:
+    """What counts as naming THIS entity in a query (C-30, measured
+    2026-10-01, Cross Insurance): the full name, or its leading tokens with
+    the generic legal suffix dropped (two or more tokens), quoted — and the
+    registrable domain, bare or as `site:`."""
+    toks = _name_tokens(entity)
+    core = list(toks)
+    while core and core[-1] in _NAME_SUFFIXES:
+        core.pop()
+    phrases = {" ".join(toks)} if toks else set()
+    for n in range(2, len(core) + 1):
+        if core[n - 1] not in ("of", "and", "&", "for", "the", "de"):
+            phrases.add(" ".join(core[:n]))       # never "bank of"
+    if len(toks) == 1:
+        phrases.add(toks[0])
+    d = re.sub(r"^(?:https?://)?(?:www\.)?", "", str(domain or "").lower()).split("/")[0]
+    return {"phrases": sorted(p for p in phrases if p), "domain": d}
+
+
+def pins_entity(query: str, entity: str, domain: str = "") -> bool:
+    """Does this query pin the entity, or could it return any 'Cross'?
+
+    A quoted phrase must BE one of the entity's name phrases (not merely
+    contain a word of it), or the query must carry the domain. An unquoted
+    common-word name is what returned A.T. Cross pens and CBP 'CROSS'
+    rulings for 'Cross Insurance Agency', and an absence declared over that
+    result set proves nothing about the entity."""
+    pins = entity_pins(entity, domain)
+    q = str(query or "")
+    if pins["domain"] and pins["domain"] in q.lower():
+        return True
+    quoted = {" ".join(_name_tokens(m)) for m in _QUOTED.findall(q)}
+    return bool(quoted & set(pins["phrases"]))
+
+
+def unpinned_direct_rungs(ladder, entity: str, domain: str = "") -> list[str]:
+    """The ladder's direct-rung queries — empty when ANY direct rung pins
+    the entity, else every direct query (none pins it). No entity name
+    means nothing can be checked, and nothing is reported."""
+    if not str(entity or "").strip():
+        return []
+    direct = [str(r.get("query") or "") for r in (ladder or [])
+              if str(r.get("rung") or r.get("proxy_class") or "").strip().lower() == "direct"]
+    if any(pins_entity(q, entity, domain) for q in direct):
+        return []
+    return direct
+
+
 def norm_query(q) -> str:
     """The identity of a query: case, whitespace and outer quoting removed.
 

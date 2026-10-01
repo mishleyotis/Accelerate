@@ -262,6 +262,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "claim_unsupported": [], "contradicts_unprobed": [],
         "single_source_fact": [],
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
+        "absence_unpinned": [],
         "challenge_not_independent": [],
         "timeline_missing": [], "followups_outstanding": [],
         "absence_unsearched": [],
@@ -294,6 +295,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     searched_cells = 0
     evidenced_cells = 0
     declared_set = L.declared_absences(wb)
+    identity = L.entity_identity(wb)
     for r in rows:
         cell = str(r["SubCap_ID"]).strip()
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
@@ -469,6 +471,14 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             if rep["claimed_not_fired"]:
                 findings["ladder_overstated"].append(
                     {"subcap": cell, **rep})
+            # C-30: an absence whose direct rung never pinned the entity
+            # was declared over whatever the common word returned. The
+            # writer refuses it now; this catches absences written before.
+            if L.is_declared_absent(r, declared=declared_set):
+                loose = Q.unpinned_direct_rungs(lad, *identity)
+                if loose:
+                    findings["absence_unpinned"].append(
+                        {"subcap": cell, "direct": loose[:2]})
 
         # AUD-0025 / AUD-0082: no gate anywhere required a challenge verdict
         # to exist, and a FAILED provisional challenge still reported HIGH
@@ -559,6 +569,9 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # 2026-09-03 (owner issue 1): the primary question is owed on every
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
+        # C-30 (owner, 2026-10-01: "fix all issues"): the direct rung of
+        # every declared absence pins the entity by quoted name or domain.
+        "absence_unpinned",
     ) if findings[k]]
     # A category whose research has not converged is not challenged yet: the
     # challenge stage runs after the floors gate says the work is done, so

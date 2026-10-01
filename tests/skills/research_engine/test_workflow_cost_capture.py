@@ -31,3 +31,16 @@ def test_this_runs_agents_are_charged_by_delta(tmp_path):
     assert more["turns"] == 2 and 0 < more["usd"] < got["usd"], more
     rows = [r for r in cost.ledger(run) if "workflow agents" in r["note"]]
     assert round(sum(r["usd"] for r in rows), 4) == round(got["usd"] + more["usd"], 4)
+
+
+def test_in_session_subagents_are_charged_too(tmp_path):
+    # C-31 (2026-10-01): the PRELIM connector pass runs as an in-process
+    # subagent, whose transcript sits in subagents/, not subagents/workflows/.
+    run = new_run(tmp_path, n=3, prelim=False)
+    sub = tmp_path / "proj" / "sess" / "subagents"
+    sub.mkdir(parents=True)
+    _agent(sub, "s1", run.run_id, turns=4)
+    _agent(sub, "s2", "DMA-RES-OTHER-0001")
+    got = cost.capture_workflows(run, base=tmp_path)
+    assert got["captured"] == 1 and got["turns"] == 4, got
+    assert cost.capture_workflows(run, base=tmp_path)["captured"] == 0

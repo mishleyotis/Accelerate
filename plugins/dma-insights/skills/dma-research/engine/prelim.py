@@ -312,6 +312,18 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                             f"{PEER_FLOOR}; a superset of the locked set "
                             "widens it while no peer figure exists) or "
                             "--basis cannot_estimate")}
+    if kind == "tech" and n >= need:
+        sor = system_of_record_state(wb, rows)
+        if sor and not sor["covered"]:
+            return {"section": key, "status": "OPEN",
+                    "detail": (f"{sheet} has {n} row(s) but none for the "
+                               f"{sor['sub_vertical']} system of record — the "
+                               f"{sor['class']} ({', '.join(sor['vendors'][:5])}…)"),
+                    "fix": (f"engine.techscan record --product '<the {sor['class']}>' "
+                            f"--layer {sor['layer']} --status CONFIRMED|INFERRED|"
+                            f"CLAIMED|ABSENT --method job_posting|vendor_announcement|"
+                            f"public_document … — job postings name it most often; "
+                            f"ABSENT names what was searched for")}
     if n >= need:
         return {"section": key, "status": "RESEARCHED",
                 "detail": (f"{n} row(s) in {sheet}"
@@ -323,6 +335,29 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
             "detail": f"{sheet} has {n} row(s), {need} required",
             "fix": (f"engine.prelim {verb} …" if kind != "tech"
                     else _TECH_FIX)}
+
+
+def system_of_record_state(wb: RunWorkbook, rows: list | None = None) -> dict | None:
+    """Does the Tech_Register carry the sub-vertical's system of record
+    (C-22)? A row counts when its product or vendor names one of the class's
+    vendors, or its product/basis names the class itself (an ABSENT row
+    naming the class is the honest negative). None when the sub-vertical
+    has no declared class."""
+    sv = str(wb.metadata().get("sub_vertical") or "").strip().upper()
+    spec = C.SYSTEM_OF_RECORD.get(sv)
+    if not spec:
+        return None
+    rows = rows if rows is not None else wb.rows("Tech_Register")
+    vendors = [v.lower() for v in spec["vendors"]]
+    klass = spec["class"].lower()
+    covered = []
+    for r in rows:
+        text = " ".join(str(r.get(k) or "") for k in
+                        ("Product", "Vendor", "Detection_Basis")).lower()
+        if klass in text or any(v in text for v in vendors):
+            covered.append(str(r.get("Product") or ""))
+    return {"sub_vertical": sv, "class": spec["class"], "layer": spec["layer"],
+            "vendors": list(spec["vendors"]), "covered": covered}
 
 
 def state(wb: RunWorkbook) -> dict:
