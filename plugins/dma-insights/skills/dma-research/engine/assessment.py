@@ -867,6 +867,9 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     cl = {_clean(r.get("subcap_id")) for r in wb.rows("Caps_Applied_Log")}
     declared_set = L.declared_absences(wb)
     by_cap: dict[str, list[float]] = {}
+    # capabilities with at least one EVIDENCED scored cell — only these can
+    # be held to the differentiation rule (see below)
+    cap_evidenced: set[str] = set()
     for r in wb.scoring_rows():
         cell = _clean(r.get("SubCap_ID"))
         if not cell:
@@ -883,6 +886,8 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         declared = L.is_declared_absent(r, declared=declared_set)
+        if eids or not declared:
+            cap_evidenced.add(cell.rsplit(".", 1)[0])
         if eids and _clean(r.get("Challenge_Verdict")).upper() != "PASS":
             f["unchallenged_scored"].append(cell)
         if not eids and not declared:
@@ -921,9 +926,16 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     for cap, scores in sorted(by_cap.items()):
         if len(scores) >= 3:
             top = Counter(scores).most_common(1)[0][1]
-            if top == len(scores):
+            # A capability whose every scored cell is a DECLARED absence with
+            # no evidence is scored at the same evidence-floor by construction
+            # (measured 2026-10-01, Cross Insurance, degraded run: 38 such
+            # capabilities blocked SCORING). Uniform scores there are the
+            # honest result, and demanding spread would demand invented
+            # scores — so it is disclosed as low_differentiation, never
+            # blocking. Any capability with an evidenced cell keeps the rule.
+            if top == len(scores) and cap in cap_evidenced:
                 f["no_differentiation"].append(cap)
-            elif top / len(scores) > 0.6:
+            elif top == len(scores) or top / len(scores) > 0.6:
                 f["low_differentiation"].append(cap)
     pillars_in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
     critics = {}
