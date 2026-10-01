@@ -1966,6 +1966,17 @@ def _prebuilt(run, page: str) -> dict:
             "items, e_ids, grounded_on, thin and absence trio are already linked; "
             "write ONLY each linked cell's `synthesis` (score vs peer median), "
             "then the envelope")
+    # The linkage census the same build wrote: how many syntheses the page
+    # owes and what the grid's reach is, so the producer sizes the job before
+    # it opens the skeleton.
+    census = Path(run.root) / "07_qa" / "heatmap_live.json"
+    try:
+        c = json.loads(census.read_text())
+        out["census"] = {"linking_stats": c.get("linking_stats"),
+                         "synthesis_owed": c.get("synthesis_owed"),
+                         "total": c.get("total"), "problems": c.get("problems")}
+    except (OSError, ValueError):
+        pass
     return out
 
 

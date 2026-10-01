@@ -308,3 +308,13 @@ def test_the_snapshot_pointer_names_the_run_and_binding(tmp_path):
     ptr = snapshot.pointer(run, "Acme Credit Union")
     assert ptr["run_id"] == run.run_id and ptr["snapshot"] == snapshot.name_for(run.run_id)
     assert ptr["binding"]["sub_vertical"] == "CU"
+
+
+def test_the_heatmap_page_brief_reads_the_prebuilt_sections_and_census(tmp_path):
+    from engine import brief
+    run, wb, cells, ev = researched_run(tmp_path)
+    heatmap_live.build(run)
+    pre = brief._prebuilt(run, "heatmap")
+    assert "heatmap.evidence" in pre and "heatmap.cell_evidence" in pre
+    assert pre["census"]["synthesis_owed"] == len(cells) - 1
+    assert brief._prebuilt(run, "overview") == {}
