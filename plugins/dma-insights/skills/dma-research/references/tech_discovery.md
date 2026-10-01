@@ -1,6 +1,6 @@
 # Technology Stack Discovery & Utilization Framework
 
-Read this file during Batch 1 Step 6 (tech stack discovery) and Batch 2 Step 3
+Read this file during PRELIM's technographic scan and when working P4 cells
 (tech evidence consolidation).
 
 ---
@@ -129,6 +129,30 @@ Power BI, Qlik, Looker, UiPath, Automation Anywhere, Blue Prism, Appian, Microso
 
 ## Comprehensive Technology Categories (ALL must be searched)
 
+### The system of record — searched FIRST, owed a row before PRELIM closes
+
+Every sub-vertical runs on one platform class; `engine.prelim state` keeps
+`tech_baseline` OPEN until the Tech_Register carries a row for it (found, or
+ABSENT naming what was searched). The class and its vendor list are
+`contract.SYSTEM_OF_RECORD` — the engine reads that table, not this one.
+Job postings name the system of record more often than any vendor page.
+
+| Sub-vertical | System of record | Typical vendors |
+|---|---|---|
+| IB  | agency management system | Applied Epic, Applied TAM, Vertafore AMS360, Vertafore Sagitta, HawkSoft, EZLynx |
+| IC  | policy administration system | Guidewire, Duck Creek, Majesco, Sapiens, EIS, Insurity |
+| CU  | core processor | Symitar, Corelation KeyStone, Fiserv DNA / XP2 / Portico, CU*Answers |
+| RB  | core banking platform | Fiserv DNA / Premier / Signature, FIS Horizon / IBS, Jack Henry SilverLake, Temenos |
+| CL  | loan origination and servicing | nCino, Abrigo, Baker Hill, MeridianLink, Loan IQ |
+| CIB | trading and loan-agency platform | Murex, Calypso, Loan IQ, Charles River |
+| AM  | investment book of record | Aladdin, SimCorp, Charles River, Advent Geneva |
+| RIA | portfolio management and advisor CRM | Orion, Tamarac, Black Diamond, Addepar, Redtail, Wealthbox |
+| FC  | loan accounting and origination | Farm Credit Financial Partners, AgFirst, nCino |
+
+Measured 2026-10-01 (Cross Insurance, IB): PRELIM closed on Office 365,
+Smartsheet and a website builder while the agency management system went
+unsearched; job postings name Applied Epic and AMS360.
+
 ### Core Banking/Insurance/Processing
 - Banking: FIS (Horizon, Modern Banking), Fiserv (DNA, XP2, Portico, Premier, Signature),
   Jack Henry (Symitar, SilverLake, CIF 20/20), Temenos, Thought Machine, Mambu, Finxact
@@ -196,12 +220,12 @@ For EVERY technology platform identified:
 | GOOD | Job posting mentioning the tool | Within 12 months |
 | ACCEPTABLE | Conference/webinar mention | Within 18 months |
 | WEAK | Website mention only, no date | Flag as UNVERIFIED |
-| STALE | Only evidence >36 months old | Flag as LEGACY/Unconfirmed |
+| STALE | Only evidence >36 months old | Flag as STALE/Unconfirmed |
 
 **Output format per platform:**
 ```
 [Platform] — Evidence Level [1-4], Utilization [High/Med/Low/Unknown],
-Recency [CURRENT/RECENT/LEGACY/UNVERIFIED], Last confirmed: [date or Unknown],
+Recency [CURRENT/RECENT/DATED/STALE/ARCHIVAL/UNVERIFIED], Last confirmed: [date or Unknown],
 Zennify Priority: [Yes/No], Red Flags: [list or None]
 ```
 
@@ -214,5 +238,5 @@ Zennify Priority: [Yes/No], Red Flags: [list or None]
 3. Analyze job postings for role seniority (Admin vs Architect)
 4. Check for utilization red flags (URF-01 through URF-06)
 5. Assign utilization level (High/Medium/Low/Unknown)
-6. Assign recency tag (CURRENT/RECENT/LEGACY/UNVERIFIED)
+6. Assign the recency band (`contract.RECENCY_LADDER`: CURRENT/RECENT/DATED/STALE/ARCHIVAL, UNVERIFIED undated)
 7. Generate discovery questions referencing internal document IDs

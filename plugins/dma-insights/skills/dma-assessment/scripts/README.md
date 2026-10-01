@@ -158,7 +158,7 @@ python subcap_query_builder.py --pillar-dir /path/to/pillars --out subcap_querie
 }
 ```
 
-### 5. `assessment_runner.py`
+### 5. `assessment_runner.py` (RETIRED — refuses; `engine.assessment score` is the writer)
 
 Batch scoring orchestrator.
 
@@ -193,7 +193,7 @@ runner = AssessmentRunner(..., scoring_function=custom_scorer)
 
 **Usage**:
 ```bash
-python assessment_runner.py \
+python assessment_runner.py \   # retired: the command below is history, it refuses today
     --corpus evidence_corpus.parquet \
     --index-dir ./index \
     --pillar-dir /path/to/pillars \
@@ -498,11 +498,11 @@ Index Directory (bm25.pkl, meta.pkl, texts.parquet)
     ↓
 Evidence Packs (per-subcapability retrieval results)
     ↓
-[assessment_runner.py] (with pluggable scoring function)
+[assessment_runner.py — retired] (with pluggable scoring function)
     ↓
 Scoring Results (checkpoints per pillar)
     ↓
-[assessment_runner.py] (aggregation + caps cascade)
+[assessment_runner.py — retired] (aggregation + caps cascade)
     ↓
 Assessment Workbook (Excel with 8+ sheets)
     ↓
@@ -547,7 +547,7 @@ LOGLEVEL=DEBUG python ingest_evidence.py --root /path/to/docs
 - **Chunking**: Default 1200 chars with 200 overlap. Adjust per document type.
 - **BM25 Index**: Builds from scratch if corpus changes (detected via hash).
 - **Incremental Scoring**: Checkpoints after each pillar; resume with `--resume-from`.
-- **Token Efficiency**: Batching in `assessment_runner.py` prevents context overflow.
+- **Token Efficiency**: Batching in `assessment_runner.py` (retired) prevented context overflow.
 
 ## License & Attribution
 

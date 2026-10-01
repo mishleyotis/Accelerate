@@ -212,7 +212,19 @@ def print_report(subcap_results, total, cap_stats, gates, coverage_pct, ers_stat
     return 0
 
 
+RETIRED = """REFUSED: validate_coverage.py is retired (2026-09-29, QA audit F-L11-042). Coverage is a floors-gate term: `python3 -m engine.cli gate --run R --root ROOT --category C
+--require-synthesis` (coverage_below_floor, volleys_incomplete, absence_undeclared_empty,
+…). This script read an evidence_index.json no stage writes.
+"""
+
+
 def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():
     parser = argparse.ArgumentParser(description='Validate DMA research evidence coverage')
     parser.add_argument('evidence_index', help='Path to evidence_index.json')
     parser.add_argument('--strict', action='store_true', help='Exit code 1 if gates fail')
@@ -233,4 +245,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

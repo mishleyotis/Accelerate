@@ -583,6 +583,35 @@ GATES = {
               "confusing them loses a product the client really runs.",
               "block"),
 
+    "CG-51": ("A run that holds a peer set argues the techstack against it",
+              None,
+              "When this run holds a peer set — a peer with a score recorded "
+              "for it, or a techstack row already carrying peer_deployments — "
+              "the techstack page owes two things: at least one register row "
+              "carries a non-empty peer_deployments[], and the section "
+              "narrative_thread speaks to peers (names one the run holds, or "
+              "uses the word). SILENT unless the run demonstrably holds "
+              "peers — with no recorded peer and none on any row, the estate "
+              "has nothing to compare against and the gate invents nothing. "
+              "The cascade mirrors CG-44; AG-04 is the other half, checking a "
+              "row that already carries peer_coverage rather than its "
+              "presence.",
+              "Reported on a promoted run: 'the tech stack does not enforce "
+              "peer comparison; even the narrative itself does not include "
+              "this.' Golden 1 measured it — 56 register rows, zero carrying "
+              "peer_deployments, and a narrative that never compared the "
+              "estate to a peer, yet the page passed every gate. The T3 peer "
+              "fields (dma_impact, peer_coverage, peer_deployments) are "
+              "declared optional on the row (surface-map.md:86), so an estate "
+              "with a full peer set on the workbook shipped a peer-blind "
+              "techstack page and nothing said a word — present-but-optional-"
+              "and-ungated, the shape CG-44 fixed on the overview strip and "
+              "CG-39/CG-43 elsewhere. Enforcing structured reach AND narrative "
+              "reach answers both halves of the complaint: a register that "
+              "tabulates peer figures under a story that ignores them is still "
+              "the half-told page.",
+              "block"),
+
     "CG-48": ("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "
               "type of the column it lands in, joining writer_spec.json to "
@@ -850,6 +879,28 @@ GATES = {
               "Invariant 4 was fail-closed on resolution and open on "
               "content: a chip a reader can open onto nothing claims a "
               "source it does not have.",
+              "block"),
+    "ET-10": ("A FACT rests on a T1 or T2 source", None,
+              "Every cited evidence row labelled FACT carries tier T1 or T2. "
+              "A T3-T5 row may be INFERENCE, HYPOTHESIS or CEILING_ESTIMATE; "
+              "the label is derived from provenance, never typed.",
+              "Measured 28-09-2026 (QA audit F-J04-004, regression seed 2): "
+              "77 of 285 FACT rows on one staged heatmap rested on T3/T4 "
+              "reportage because the research CLI defaulted the label to "
+              "FACT and nothing compared it with the tier. A client reads "
+              "FACT as established; a trade-press paraphrase is not.",
+              "block"),
+    "ET-11": ("A machine technographic scan is a T1 source", None,
+              "Every cited evidence row whose source names a technographic "
+              "scan provider (Hubbl, BuiltWith, Wappalyzer, Explorium and "
+              "their kind) carries tier T1. Machine-generated, timestamped "
+              "deployment data is the strongest tier the ladder has; filed "
+              "lower it caps the ceilings its cells can reach.",
+              "Measured 28-09-2026 (QA audit F-J04-015): 5 of 6 "
+              "technographic rows on one staged heatmap sat at T3, which "
+              "the overview's ceiling table reads as 'up to L4' and the "
+              "evidence census reads as reportage. The research ladder has "
+              "said 'scans = T1, never T4' since v5; nothing checked it.",
               "block"),
     "ET-05": ("A run cites only its own sub-vertical's cells", None,
               "No section cites a variant cell whose terminal segment names "

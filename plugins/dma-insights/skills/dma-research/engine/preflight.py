@@ -52,6 +52,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -115,6 +116,30 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
             "3) put the binding to the engagement owner with AskUserQuestion "
             "and record what came back, verbatim, in binding_question. "
             "Then: engine.preflight check --file <this file>."),
+        # The row shapes, IN the file. They used to be Python comments on
+        # this literal, which json.dump drops — measured 2026-09-30 (SWBC):
+        # a first fill guessed `name`/`lob`/`evidence` and check refused 10
+        # rows for keys the skeleton had never shown.
+        "_row_shapes": {
+            "financials.statements[]": {"source_name": "", "url": "",
+                                        "kind": "", "period": "",
+                                        "tier": "", "retrieved_at": ""},
+            "financials.revenue_lines[]": {"line": "", "amount": "",
+                                           "currency": "", "period": "",
+                                           "share_pct": "", "implies_lob": "",
+                                           "source": ""},
+            "lob_census.lines_of_business[]": {"lob": "", "basis": "",
+                                               "revenue_share_pct": "",
+                                               "material": False},
+            "lob_census.candidates[]": {"sub_vertical": "",
+                                        "verdict": "ACCEPT|REJECT",
+                                        "reason": ""},
+            "binding.supplementary_sub_verticals": (
+                "multi-LOB only: ACCEPTed sub-verticals whose variant cells "
+                "ride additively on the primary binding; the owner's answer "
+                "must name them in binding_question."
+                "answer_supplementary_sub_verticals"),
+        },
         "run_id": run_id or "",
         "entity": {"name": entity, "entity_id": entity_id,
                    "website": website or "", "as_of": ""},
@@ -131,6 +156,7 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
         "binding_question": {
             "asked": False, "tool": "AskUserQuestion", "question": "",
             "options": [], "answer": "", "answer_sub_vertical": "",
+            "answer_supplementary_sub_verticals": [],
             "answered_by": "", "answered_at": "",
         },
         "mode_question": {
@@ -139,11 +165,28 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
             "answered_by": "", "answered_at": "",
         },
         "binding": {"sub_vertical": "", "evidence_mode": "",
-                    "scope_mode": "FULL"},
+                    "scope_mode": "FULL",
+                    "supplementary_sub_verticals": []},
     }
 
 
 # ── the checks ───────────────────────────────────────────────────────────
+
+def _pct(v, where: str, problems: list[str] | None):
+    """A share as a float, or None. A share that is not a number is a
+    problem to list with the others, never a traceback: check() promises
+    every refusal at once, and a crash on one field hides all the rest."""
+    if v in (None, ""):
+        return None
+    try:
+        return float(str(v).strip().rstrip("%"))
+    except (TypeError, ValueError):
+        if problems is not None:
+            problems.append(
+                f"{where}: {v!r} is not a number — give a percentage like "
+                f"89.3, or leave it empty and say in basis what it is within")
+        return None
+
 
 def _check_financials(doc: dict, problems: list[str]) -> dict:
     fin = doc.get("financials") or {}
@@ -189,8 +232,9 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
                     f"({_clean(ln.get('line')) or '?'}): implies_lob is empty "
                     f"— a revenue line that names no line of business cannot "
                     f"inform the census, which is the only reason to read it")
-    shares = [float(ln.get("share_pct") or 0) for ln in lines
-              if ln.get("share_pct") not in (None, "")]
+    shares = [x for x in (
+        _pct(ln.get("share_pct"), f"financials.revenue_lines[{i}].share_pct",
+             problems) for i, ln in enumerate(lines)) if x is not None]
     if shares and sum(shares) > 100.5:
         problems.append(
             f"financials.revenue_lines: share_pct sums to {sum(shares):.1f}% "
@@ -222,9 +266,11 @@ def _check_census(doc: dict, problems: list[str]) -> dict:
                 f"lob_census.lines_of_business[{i}] ({name}): basis is empty "
                 f"or filler — name the revenue line, charter or product set "
                 f"this LOB is read from")
-        share = lob.get("revenue_share_pct")
+        share = _pct(lob.get("revenue_share_pct"),
+                     f"lob_census.lines_of_business[{i}].revenue_share_pct",
+                     problems)
         flagged = bool(lob.get("material"))
-        if share not in (None, "") and float(share) >= MATERIAL_SHARE_PCT:
+        if share is not None and share >= MATERIAL_SHARE_PCT:
             flagged = True
         if flagged:
             material.append(name)
@@ -272,10 +318,110 @@ def _check_census(doc: dict, problems: list[str]) -> dict:
             "verdicts": verdicts}
 
 
+#: THE ONE CASE THAT NEED NOT BE ASKED (owner, 2026-08-30: "the run should
+#: bind to unambiguous subvertical").
+#:
+#: The question exists because a run bound to the wrong sub-vertical
+#: researches the wrong 851 cells to completion, and a multi-LOB entity is a
+#: judgment nobody should make on the owner's behalf. Where the census leaves
+#: exactly ONE reading, there is no judgment left to make and the question is
+#: ceremony that costs a scheduled firing its whole purpose.
+#:
+#: "Unambiguous" is deliberately narrow, and every clause is load-bearing:
+#:
+#:   one ACCEPT          — the thing being decided has one answer;
+#:   at least one REJECT — the census actually CONSIDERED alternatives. A
+#:                         census listing a single candidate and accepting it
+#:                         is not unanimity, it is a census that never looked,
+#:                         and it is exactly what a thin research pass emits;
+#:   at most one MATERIAL line of business — scope is the owner's call, and
+#:                         two material LOBs is the multi-LOB case whatever
+#:                         the candidate list says.
+#:
+#: check() RE-DERIVES this from the census every time. It never trusts
+#: `auto_bound`, because a flag a caller can write is a flag a caller can
+#: write on an ambiguous entity.
+def unambiguous_binding(doc: dict) -> tuple:
+    """(ok, sub_vertical, why) — the census's own reading, recomputed."""
+    cands = list((doc.get("lob_census") or {}).get("candidates") or [])
+    accepted = [_clean(c.get("sub_vertical")).upper() for c in cands
+                if _clean(c.get("verdict")).upper() == "ACCEPT"]
+    rejected = [c for c in cands
+                if _clean(c.get("verdict")).upper() == "REJECT"]
+    material = [l for l in ((doc.get("lob_census") or {}).get(
+        "lines_of_business") or []) if l.get("material")]
+    if len(accepted) != 1:
+        return False, "", (
+            f"{len(accepted)} sub-verticals are ACCEPTed; exactly one is "
+            f"required to bind without asking")
+    if not rejected:
+        return False, "", (
+            "no candidate was REJECTed, so the census considered no "
+            "alternative — a single accepted candidate is not unanimity "
+            "when nothing else was weighed")
+    if len(material) > 1:
+        return False, "", (
+            f"{len(material)} MATERIAL lines of business — scope across "
+            f"more than one is the owner's decision, not the census's")
+    return True, accepted[0], (
+        f"one ACCEPT ({accepted[0]}) against {len(rejected)} REJECT(s), "
+        f"{len(material)} material line(s) of business")
+
+
+def _auto_bound(doc: dict, key: str, q: dict, problems: list[str]):
+    """An unasked question that the record may nonetheless satisfy.
+
+    Returns the resolved value, or None to mean "still needs a human".
+    Two cases only, and both are re-derived here rather than believed:
+
+    BINDING — the census leaves exactly one reading (unambiguous_binding).
+
+    MODE — and ONLY to PUBLIC. A request that arrives in a Slack channel
+    carries no engagement letter, so public-only is what it actually has.
+    Auto-binding the most RESTRICTIVE mode can only ever under-claim: it
+    withholds evidence the run might have been entitled to, which is a cost
+    in depth. Auto-binding INTERNAL would claim access nobody granted, which
+    is the harm the gate exists to prevent — so that direction is refused
+    here no matter what the document says.
+    """
+    if not q.get("auto_bound"):
+        return None
+    if key == "binding_question":
+        ok, sv, why = unambiguous_binding(doc)
+        if not ok:
+            problems.append(
+                f"binding_question.auto_bound is true and the census is "
+                f"ambiguous: {why}. The flag is not the authority — this "
+                f"check recomputes it. Ask the engagement owner.")
+            return ""
+        claimed = _clean(q.get("answer_sub_vertical")).upper()
+        if claimed and claimed != sv:
+            problems.append(
+                f"binding_question.auto_bound names {claimed} and the census "
+                f"accepts {sv}")
+            return ""
+        return sv
+    if key == "mode_question":
+        mode = _clean(q.get("answer_mode")).upper()
+        if mode != "PUBLIC":
+            problems.append(
+                f"mode_question.auto_bound is true for "
+                f"{mode or 'an empty mode'}. Only PUBLIC may be bound "
+                f"without a human: it is the most restrictive mode and can "
+                f"only under-claim. Anything granting internal access is "
+                f"the engagement owner's to confirm.")
+            return ""
+        return "PUBLIC"
+    return None
+
+
 def _check_question(doc: dict, key: str, field: str, vocabulary: tuple,
                     what: str, problems: list[str]) -> str:
     q = doc.get(key) or {}
     if not q.get("asked"):
+        auto = _auto_bound(doc, key, q, problems)
+        if auto is not None:
+            return auto
         problems.append(
             f"{key}.asked is false. Put {what} to the engagement owner with "
             f"AskUserQuestion, then record the question, the options and the "
@@ -304,6 +450,43 @@ def _check_question(doc: dict, key: str, field: str, vocabulary: tuple,
             f"{key}.{field} = {value!r} is not one of "
             f"{', '.join(vocabulary)}")
     return value
+
+
+def _check_supplementary(doc: dict, sv: str, cen: dict, known: tuple,
+                         problems: list[str]) -> list[str]:
+    """The multi-LOB supplements: each one ACCEPTed by the census, distinct
+    from the primary, and named by the owner's recorded answer. A supplement
+    the owner never named is the agent widening scope on its own."""
+    binding = doc.get("binding") or {}
+    raw = binding.get("supplementary_sub_verticals") or []
+    if isinstance(raw, str):
+        raw = [s for s in raw.split(",")]
+    supp = [_clean(s).upper() for s in raw if _clean(s)]
+    q = doc.get("binding_question") or {}
+    ans = q.get("answer_supplementary_sub_verticals") or []
+    if isinstance(ans, str):
+        ans = ans.split(",")
+    answered = sorted({_clean(s).upper() for s in ans if _clean(s)})
+    for s in supp:
+        if s not in known:
+            problems.append(
+                f"binding.supplementary_sub_verticals names {s!r}, which is "
+                f"not one of {', '.join(known)}")
+        elif s == sv:
+            problems.append(
+                f"binding.supplementary_sub_verticals repeats the primary "
+                f"{sv}; a supplement is a SECOND line of business")
+        elif cen["verdicts"].get(s) != "ACCEPT":
+            problems.append(
+                f"binding.supplementary_sub_verticals names {s}, which "
+                f"lob_census.candidates does not ACCEPT")
+    if sorted(set(supp)) != answered:
+        problems.append(
+            f"binding.supplementary_sub_verticals is {sorted(set(supp))} but "
+            f"the owner's recorded answer names {answered} "
+            f"(binding_question.answer_supplementary_sub_verticals). Scope "
+            f"is the owner's; bind what came back.")
+    return sorted(set(supp))
 
 
 def check(doc: dict) -> dict:
@@ -358,11 +541,13 @@ def check(doc: dict) -> dict:
         problems.append(
             f"binding.scope_mode {scope!r} is not one of "
             f"{', '.join(C.SCOPE_MODES)}")
+    supp = _check_supplementary(doc, sv, cen, known_sv, problems)
 
     return {"ok": not problems, "problems": problems,
             "financials": fin, "census": cen,
             "binding": {"sub_vertical": sv, "evidence_mode": mode,
-                        "scope_mode": scope},
+                        "scope_mode": scope,
+                        "supplementary_sub_verticals": supp},
             "sha256": digest(doc)}
 
 
@@ -435,13 +620,17 @@ def bases(doc: dict, report: dict | None = None) -> dict:
         f"{_clean(mq.get('answer'))}")
     census = "; ".join(
         f"{_clean(l.get('lob'))}"
-        + (f" {float(l.get('revenue_share_pct')):.1f}%"
-           if l.get("revenue_share_pct") not in (None, "") else "")
+        + (f" {_pct(l.get('revenue_share_pct'), '', None):.1f}%"
+           if _pct(l.get("revenue_share_pct"), "", None) is not None else "")
         for l in (doc.get("lob_census") or {}).get("lines_of_business") or []
     ) or "no line of business stated"
     if rejected:
         census += f" | rejected: {', '.join(sorted(rejected))}"
-    return {"sub_vertical": sv,
+    supp = list(report["binding"].get("supplementary_sub_verticals") or [])
+    if supp:
+        sv_basis += (f"; supplementary variant cells for "
+                     f"{', '.join(supp)} (multi-LOB, owner-confirmed)")
+    return {"sub_vertical": sv, "supplementary": supp,
             "evidence_mode": report["binding"]["evidence_mode"],
             "scope_mode": report["binding"]["scope_mode"],
             "sv_basis": sv_basis, "mode_basis": mode_basis,
@@ -481,10 +670,32 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
                 tier=_clean(s.get("tier")) or "T2", excerpt=excerpt,
                 subcaps=[], published=_clean(s.get("period_end"))
                 or _clean(s.get("retrieved_at"))[:10] or None,
-                claim_type="FACT", origin="public")
+                # A filed statement is T1/T2 and a FACT; a statement the
+                # preflight could only reach at T3 (a news summary of the
+                # figures) is what its tier licenses, not a FACT by fiat.
+                claim_type=None, origin="public")
             banked.append(eid)
         except Exception as e:                              # noqa: BLE001
             banked.append(f"NOT_BANKED: {e}")
+
+    # THE DOMAIN, from the preflight that already names it. Measured
+    # 2026-09-30 (SWBC): `entity.website` was filled and read by nothing, so
+    # the PRELIM connector lane refused to enrich ("no entity_profile domain
+    # yet ... I did not guess swbc.com") on a run whose binding file named it.
+    site = re.sub(r"^(?:https?://)?(?:www\.)?", "",
+                  _clean((doc.get("entity") or {}).get("website")).lower()).split("/")[0]
+    cited = [e for e in banked if not str(e).startswith("NOT_")]
+    website = "NOT_RUN: no website in the preflight"
+    if site and cited:
+        try:
+            from . import profile
+            profile.firmographic(
+                wb, field="website", value=site,
+                as_of=_clean((doc.get("entity") or {}).get("as_of"))
+                or _utcnow()[:10], evidence=cited[0], confidence="High")
+            website = site
+        except Exception as e:                              # noqa: BLE001
+            website = f"NOT_RECORDED: {e}"
 
     lines = (doc.get("financials") or {}).get("revenue_lines") or []
     body = _render_review(doc, report, b)
@@ -496,7 +707,7 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
         "Kind": "section", "Author": "preflight", "Written_At": _utcnow(),
     })
     return {"preflight_sha": b["preflight_sha"], "evidence_banked": banked,
-            "revenue_lines": len(lines), "bases": b}
+            "revenue_lines": len(lines), "bases": b, "website": website}
 
 
 def _render_review(doc: dict, report: dict, b: dict) -> str:
@@ -514,8 +725,8 @@ def _render_review(doc: dict, report: dict, b: dict) -> str:
             if amt not in (None, ""):
                 bits += f" ({ln.get('currency') or 'USD'} {amt:,})" if \
                     isinstance(amt, (int, float)) else f" ({amt})"
-            if share not in (None, ""):
-                bits += f", {float(share):.1f}% of revenue"
+            if _pct(share, "", None) is not None:
+                bits += f", {_pct(share, '', None):.1f}% of revenue"
             lob = _clean(ln.get("implies_lob"))
             if lob:
                 bits += f" — {lob}"
@@ -564,6 +775,16 @@ def main(argv=None) -> int:
     c.add_argument("--file", required=True)
     c.add_argument("--json", action="store_true")
 
+    b = sub.add_parser(
+        "autobind",
+        help="bind an UNAMBIGUOUS census without asking, and say so on the "
+             "record")
+    b.add_argument("--file", required=True)
+    b.add_argument("--mode", default="PUBLIC", choices=["PUBLIC"],
+                   help="only PUBLIC may be auto-bound: it is the most "
+                        "restrictive mode, so it can only under-claim")
+    b.add_argument("--json", action="store_true")
+
     r = sub.add_parser("record", help="write it into the run's workbook")
     r.add_argument("--run", required=True)
     r.add_argument("--root")
@@ -577,6 +798,59 @@ def main(argv=None) -> int:
         print(f"preflight skeleton -> {a.out}\n"
               f"Fill it, then: python3 -m engine.preflight check --file {a.out}")
         return 0
+    if a.cmd == "autobind":
+        try:
+            doc = load(a.file)
+        except PreflightRefusal as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 2
+        ok, sv, why = unambiguous_binding(doc)
+        if not ok:
+            print(f"REFUSED: the census is ambiguous — {why}. This is the "
+                  f"case AskUserQuestion exists for; it is not a tie for the "
+                  f"agent to break.", file=sys.stderr)
+            return 2
+        stamp = _utcnow() if "_utcnow" in globals() else ""
+        doc["binding_question"] = {
+            **(doc.get("binding_question") or {}),
+            "asked": False, "auto_bound": True, "tool": "unambiguous_binding",
+            "question": "Which sub-vertical does this entity bind to?",
+            "options": sorted(
+                _clean(c.get("sub_vertical")).upper()
+                for c in (doc.get("lob_census") or {}).get("candidates") or []),
+            "answer": f"AUTO-BOUND: {why}",
+            "answer_sub_vertical": sv,
+            "answered_by": "lob_census (no human asked — census unambiguous)",
+            "answered_at": stamp,
+        }
+        doc["mode_question"] = {
+            **(doc.get("mode_question") or {}),
+            "asked": False, "auto_bound": True, "tool": "intake_default",
+            "question": "Which evidence mode does this engagement grant?",
+            "options": ["PUBLIC"],
+            "answer": "AUTO-BOUND: PUBLIC — a request with no engagement "
+                      "letter grants no internal access",
+            "answer_mode": a.mode,
+            "answered_by": "intake default (most restrictive mode)",
+            "answered_at": stamp,
+        }
+        binding = dict(doc.get("binding") or {})
+        binding["sub_vertical"] = sv
+        binding["evidence_mode"] = a.mode
+        binding.setdefault("scope_mode", "FULL")
+        doc["binding"] = binding
+        Path(a.file).write_text(json.dumps(doc, indent=2))
+        rep = check(doc)
+        out = {"auto_bound": True, "sub_vertical": sv,
+               "evidence_mode": a.mode, "why": why,
+               "check_ok": rep["ok"], "problems": rep["problems"]}
+        print(json.dumps(out, indent=2) if a.json else
+              f"AUTO-BOUND {sv} / {a.mode} — {why}\n"
+              f"  check: {'OK' if rep['ok'] else 'still refused'}"
+              + ("" if rep["ok"] else
+                 "\n  - " + "\n  - ".join(rep["problems"])))
+        return 0 if rep["ok"] else 2
+
     if a.cmd == "check":
         try:
             doc = load(a.file)

@@ -85,7 +85,7 @@ def test_the_preamble_forbids_fabricated_searches(monkeypatch):
     monkeypatch.setattr(agent_run.subprocess, "run", fake_run)
     agent_run.main(["--agent", "package-vetter", "--prompt-file", __file__])
     p = captured["prompt"]
-    assert "search_requests" in p and "NOT the claude.ai" in p
+    assert "search_requests" in p and "NOT guaranteed the" in p
     assert "do NOT fabricate" in p.replace("not fabricate", "NOT fabricate")
 
 
