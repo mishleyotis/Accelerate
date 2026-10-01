@@ -635,7 +635,22 @@ def sweep(root: Path, *, stall_seconds: int = STALL_SECONDS,
     cannot actually see."""
     root = Path(root)
     out, seen = [], set()
-    if root.exists():
+    # The RUN root itself (the layout run-assessment documents: workbook at
+    # <ROOT>/DMA_Scoring_Workbook_*.xlsx) — before 2026-10-01 only its
+    # subdirectories were swept, so `status --root <ROOT>` reported
+    # `toolkits/` as a HALTED run and never the run.
+    own = sorted(root.glob("DMA_Scoring_Workbook_*.xlsx")) if root.exists() else []
+    if own:
+        try:
+            from .workbook import RunWorkbook as _RW
+            rid = str(_RW(own[-1]).metadata().get("run_id") or "")
+            run = runstate.locate(rid, root)
+            row = inspect(run, stall_seconds=stall_seconds)
+            seen.add(row["run_id"])
+            out.append(row)
+        except (ValueError, Exception):                   # noqa: BLE001
+            pass
+    if root.exists() and not own:
         for d in sorted(p for p in root.iterdir() if p.is_dir()):
             try:
                 run = runstate.locate(d.name, d)

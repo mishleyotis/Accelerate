@@ -311,3 +311,23 @@ def test_fy_prefixed_years_count_as_fiscal_years(tmp_path):
     # regression: "FY2020" has no \b before the digits — the year regex must
     # still see it, or a real trends sheet reads as zero year columns.
     assert len(GS.re.findall(r"(?<!\d)20[0-3]\d(?!\d)", "FY2020 FY2021 FY2022")) == 3
+
+
+def test_prelim_decidable_gold_findings_are_forecast_early(tmp_path):
+    """I-83 (SWBC, 2026-10-01): PRELIM closed with two financial metrics; the
+    PACKAGE gold gate needs three. The forecast names it after PRELIM."""
+    from engine import gold_standard as G
+    from openpyxl import Workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Financial_Trends"
+    ws.append(["Metric", "Fiscal_Year", "Value"])
+    for y in range(2020, 2025):
+        for m in ("Mortgage originations", "Mortgage dollar volume"):
+            ws.append([m, f"FY{y}", 1])
+    path = tmp_path / "wb.xlsx"
+    wb.save(path)
+    got = G.prelim_forecast(path)
+    assert {f["code"] for f in got} == {"GS-WB-FINANCIALS"}
+    assert any("only 2 metric(s)" in f["detail"] for f in got)
+    assert all(f["code"] in G.PRELIM_DECIDABLE for f in got)

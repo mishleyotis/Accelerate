@@ -23,3 +23,20 @@ for _p in (str(_WORKER), str(_SKILL), str(_HERE)):
     # putting its directory on sys.path.
     if _p not in sys.path:
         sys.path.insert(0, _p)
+
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _isolated_run_registry(tmp_path, monkeypatch):
+    """Every engine test writes its run registry under its own tmp_path.
+
+    Measured 2026-10-01 (SWBC QA container): with no override, every
+    `runstate.start` in the suite appended to the container's REAL registry
+    (`$DMA_RUN_ROOT/../dma_run_registry.jsonl`) — 33 "Acme Credit Union" rows
+    that `engine.cli status` and the hourly watchdog then read as a live
+    PROGRESSING run beside the client's, and that `registry push` would have
+    published to the shared Drive registry. A test that means the default
+    path sets or deletes the variable itself (monkeypatch wins over this)."""
+    monkeypatch.setenv("DMA_RUN_REGISTRY", str(tmp_path / "_registry" / "dma_run_registry.jsonl"))

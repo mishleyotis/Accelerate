@@ -389,6 +389,24 @@ def workbook_findings(path) -> list[Finding]:
 
 # ── REPORT gate ──────────────────────────────────────────────────────────
 
+#: The gold-gate checks whose inputs are final once PRELIM closes: nothing
+#: research, scoring or reporting does later can change them.
+PRELIM_DECIDABLE = ("GS-WB-FINANCIALS", "GS-WB-PEERS")
+
+
+def prelim_forecast(path) -> list[dict]:
+    """The PACKAGE gold-gate findings already decidable after PRELIM.
+
+    Measured 2026-10-01 (SWBC, a private multi-LOB company): PRELIM passed
+    with Financial_Trends holding two metrics (mortgage HMDA originations
+    and dollar volume) while GSY-18 needs >=3 — a refusal the run would
+    first meet at PACKAGE, after research, scoring, reports and pages were
+    paid for. Reported at PRELIM it is a decision (find a third series, or
+    take the GSY-18 gap to the owner) instead of a late failure."""
+    return [dict(f) for f in workbook_findings(path)
+            if f.get("code") in PRELIM_DECIDABLE]
+
+
 def _docx(path):
     import docx
     d = docx.Document(str(path))

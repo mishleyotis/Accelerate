@@ -83,12 +83,16 @@ def main():
 
     print("STEP 3 — leadership contacts")
     print(f'  search-contacts(companyIdentifiers=["{d}"],')
-    print( "    dslQuery='select from people where <the DSL's job-title field> in/is_similar_to (")
-    for t in TITLES: print(f'      "{t}",')
-    print( "    ) limit 50')  -> taskId2   (exclude: " + str(EXCLUDE) + ")\n")
-    print("  Take the job-title field name from the tool's own DSL field list; an")
+    # The people title field is `headline` (verified live 2026-10-01; 18 of
+    # 18 workflow calls guessing job_title / title / current_title were
+    # refused "Unknown field"). Results carry latest_experience_title.
+    print( "    dslQuery='select from people where " + " or ".join(
+        f'headline contains \"{t}\"' for t in TITLES[:6]) + " limit 50')")
+    print( "    -> taskId2   (exclude: " + str(EXCLUDE) + ")\n")
+    print("  The filter field is `headline` (job_title / title / current_title do not")
+    print("  exist). Read each row's latest_experience_title before recording; an")
     print("  unfiltered `select from people limit 50` + load-more-search-results is the")
-    print("  fallback, filtered by title before recording. Compound titles stay ONE string.\n")
+    print("  fallback. Compound titles stay ONE string.\n")
 
     print("STEP 4 — contact data points")
     print("  add-contact-data-points(taskId2, dataPoints=[")

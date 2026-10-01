@@ -432,6 +432,12 @@ def awaiting_workflow(event: dict) -> dict | None:
                         "driver stops at the ceiling mid-stage")))
     if doc.get("not_worked"):
         lines.append(f"  WARNING: {doc['not_worked']}")
+    cap = doc.get("capacity") or {}
+    if cap and not cap.get("fits", True):
+        # Before the fan-out, not after it: 2026-10-01 (SWBC) sixteen
+        # workflows spent the session's 200 WebSearch calls in ~10 minutes,
+        # then $111 retrying spent channels.
+        lines.insert(1, f"  SEARCH CAPACITY — READ BEFORE STARTING: {cap.get('advice')}")
     lines.append("  If Workflow is not available in this session, STOP and restart the "
                  "session (tools rebind at start). Never substitute Agent calls or "
                  "`--research-mode lanes`: neither is persisted, and lanes hold no connector.")

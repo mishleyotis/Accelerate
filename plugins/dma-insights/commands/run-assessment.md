@@ -57,7 +57,7 @@ so that never repeats; refusing to start is not the remedy, and neither is
 starting silently.
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal --root <ROOT>
 cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
 ```
 
@@ -90,6 +90,11 @@ check's own fix line.
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/route_client.py" --client "$ARGUMENTS" --json
 ```
 
+`$ARGUMENTS` may carry this command's own `--entity-id` / `--website` flags;
+the router parses them off and routes on `--entity-id` when given (before
+2026-10-01 it slugged the whole string and answered NEW_ENGAGEMENT for a
+client the corpus held).
+
 When the person asked for a NEW run of a client the corpus already holds,
 add `--fresh`: exit 7 NEW_VERSION is yours, and starting the run supersedes
 the folder's previous package in place (`drive_fetch.py archive-remote`, run
@@ -103,13 +108,24 @@ name the run (and when the JSON says `partial: true`, say the run is
 half-assessed and offer `--fresh`); 6 AMBIGUOUS — report the near matches, never guess; 2 is the
 script failing, which is not a routing answer.
 
-Then the three places work already exists, before any research
-(`registry.py pull` + `registry.py list --open-only`; `drive_fetch.py
-find-artifact --client "<Entity>"` and its `run_manifest.json`;
-`get_client_state`). An open run or an IN_PROGRESS manifest is a run to
-RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>` says
-where it stopped, and step 5 continues it. With `--resume <RUN_ID>` you skip
-straight to step 5.
+Then the places work already exists, before any research: the client's
+Drive memory-backup (`python3 -m engine.snapshot restore --root <ROOT>
+--client "<Entity>"` — with no `--run` it restores the run the folder's
+`run_snapshot_CURRENT.json` names, and lists any backup-folder file from a
+superseded run under `superseded_in_folder`: history, never instructions);
+`registry.py pull` + `registry.py list --open-only`; the intake folder's
+`run_manifest.json` (`<Entity> - DMA` under General DMAs — `drive_fetch.py
+find-artifact` searches the `DMAI - <Entity>` folder, not this one); and
+`get_client_state`. A restored run, an open run or an IN_PROGRESS manifest is
+a run to RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>`
+says where it stopped, and step 5 continues it. With `--resume <RUN_ID>` you
+skip straight to step 5. Before resuming, list the account's Routines
+(`list_triggers`) and pipe the JSON to `python3
+"${CLAUDE_PLUGIN_ROOT}/scripts/stale_run_routines.py" --root <ROOT> --client
+"<Entity>"`: exit 3 names every enabled Routine still aimed at a superseded
+run — pause each (`update_trigger … enabled=false`, reversible) and say so
+(2026-10-01: an hourly check-in written for a run superseded two weeks
+earlier was still relaunching 8-lane batches against it).
 
 ## 3 · Preflight the binding — with the person
 
@@ -196,6 +212,16 @@ connectors), restart the session; `--research-mode lanes` is refused with the
 real dispatcher unless `--allow-lanes` waives it, because lanes hold no
 connector and cannot pass a gate.
 
+**Search capacity is read before the fan-out, not discovered during it.**
+The handoff's `capacity` block (the hook prints it first) compares the
+searches the open cells still owe with this session's WebSearch budget —
+ONE budget shared by every workflow agent, `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`,
+read when the session starts — and lists the channels already spent
+(`<ROOT>/07_qa/connector_exhausted_<channel>`, touched by the first agent that
+meets a 402 / 432 / spent budget). When it does not fit, say so before
+starting; never launch into a run where every channel is spent. After a
+top-up or a new session, delete the marker for the channel that came back.
+
 **The run survives a fresh container.** The driver snapshots the run
 (workbook, evidence, QA, briefs; not transcripts) to the client's Drive
 `memory-backup` folder at every stage boundary. On a new container, restore
@@ -223,9 +249,10 @@ it is a person's.
 Run it in the background and watch with
 `python3 -m engine.pipeline status --run <RUN_ID> --root <ROOT> --watch` and
 `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py" watch --log-dir <ROOT>/agent_logs`.
-The driver: PRELIM → KG → RESEARCH (sixteen lanes over `engine.brief`
-packets, challenge lanes, the floors gates; a FAILED category is re-dispatched
-with the handback and the gate's blocking terms, a PASSED one never) →
+The driver: PRELIM → KG → RESEARCH (the sixteen category workflows above,
+each ending in an independent challenge and its floors gate; on the driver's
+next run a FAILED category is handed back with what its gate still wants, a
+PASSED one never) →
 HANDOFF → SCORING (four pillar lanes, the solutions duty, the critic, the
 rollup, the SCORING gate) → INGEST_A (the scored checkpoint pushed; the scan
 ingests it) → REPORTS (two producers and the validator into the pinned Docs,
@@ -235,12 +262,14 @@ version A through `ship_page.py --claim`) → PACKAGE (technographic scan,
 from disk; overview, insights, platform, then context) → PROMOTE. Every stage
 lands `STAGE_<NAME>` in Gate_Log with its wall clock and a cost-ledger line.
 
-**Service the orchestrator briefs — they are yours.** The driver's lanes hold
+**Service the orchestrator briefs — they are yours.** Headless lanes hold
 no enrichment connector, so connector work comes back to you as prompt files,
 announced in the log with `[RELAY]`: PRELIM writes
 `briefs/prelim_r<N>/prelim-connectors.orchestrator.md` (leadership,
-firmographics, peers) and waits for those sections; each research round
-writes its relay batch under `briefs/relay_r<N>/`. For each, spawn ONE
+firmographics, peers) and waits for those sections; under `--research-mode
+lanes` only, each research round writes its relay batch under
+`briefs/relay_r<N>/` (workflow research holds the connectors itself and
+writes none). For each, spawn ONE
 in-process subagent (`enrichment-connector-specialist` for PRELIM,
 `enrichment-web-specialist` for relay rows) with the file as its prompt — it
 inherits your connectors. Run them on the fast tier (`model: sonnet`) and group
@@ -251,11 +280,6 @@ tokens for 66 requests on the conducting session's own tier). Watch with
 
 **To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
 — it signals the pid that holds the run's driver lock. Never kill a pid a shell
-captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
-real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
-
-**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
-It signals the pid that holds the run's driver lock. Never kill a pid a shell
 captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
 real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
 

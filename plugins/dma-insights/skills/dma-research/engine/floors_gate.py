@@ -357,7 +357,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # different claim from "we looked and found nothing", and only the
         # second one may close a subcap.
         cell_searches = [s for s in cat_searches
-                         if str(s.get("SubCap_ID") or "").strip() == cell]
+                         if str(s.get("SubCap_ID") or "").strip() == cell
+                         and not C.search_failed(s)]
         if cell_searches:
             searched_cells += 1
         if not eids and not cell_searches:
