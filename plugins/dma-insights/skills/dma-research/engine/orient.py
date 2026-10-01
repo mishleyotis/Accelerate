@@ -455,6 +455,25 @@ if __name__ == "__main__":
 
 # ── the capability card: one read, one batch of searches ──────────────────
 
+def _compact_facets(facets: dict, names: dict, entity: str) -> None:
+    """A facet whose questions are ONE template filled with the entity and
+    each cell's name (fails, value, contradicts, corroborates) states the
+    template once as `ask`, with {entity} and {name} left in; a facet whose
+    questions are the cells' own diagnostic questions keeps them."""
+    for slot in facets.values():
+        qs = slot.get("questions") or []
+        if len(qs) < 2:
+            continue
+        tmpl = set()
+        for q in qs:
+            t = q["q"].replace(entity, "{entity}") if entity else q["q"]
+            n = names.get(q["cell"]) or ""
+            tmpl.add(t.replace(n, "{name}") if n else t)
+        if len(tmpl) == 1:
+            slot["ask"] = tmpl.pop()
+            del slot["questions"]
+
+
 def capability_card(wb, capability: str, *, run=None) -> dict:
     """Every OPEN cell of one capability, the volleys each still owes, the
     diagnostic questions merged by facet, and one ready-to-run log line per
@@ -501,14 +520,19 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
             if q.get("question") and len(slot["questions"]) < 6:
                 slot["questions"].append({"cell": c, "q": str(q["question"]).replace(
                     "{entity}", str(md.get("entity_name") or "the entity"))[:220]})
-    for f, slot in facets.items():
-        subs = " ".join(f"--subcap {c}" for c in slot["cells"])
-        slot["log"] = (f"python3 -m engine.cli search --run {rid} --root {root} "
-                       f"{subs} --facet {f} --tool web_search --query '<Q>' "
-                       f"--hits N --kept K")
+    _compact_facets(facets, names, str(md.get("entity_name") or "the entity"))
     return {
-        "capability": cap, "open_cells": open_cells,
+        "capability": cap, "entity": str(md.get("entity_name") or "the entity"),
+        "open_cells": open_cells,
+        # N-21 (2026-10-01, Northwest Bank): the card restated every cell's
+        # question once per facet (5x, only a short facet angle differing)
+        # and a full log command per facet — 7.0K chars a read, 19% of all
+        # tool output the research agents carried. Each question is stated
+        # once; a templated facet states its template once; one log template.
         "facets_owed": facets,
+        "log": (f"python3 -m engine.cli search --run {rid} --root {root} "
+                f"--subcap <each cell the result answers> --facet <F> "
+                f"--tool web_search --query '<Q>' --hits N --kept K"),
         "how": ("1) fire every owed facet's query for this capability in ONE "
                 "turn (parallel WebSearch calls); 2) log them all in ONE Bash "
                 "call, the `log` lines &&-chained, each with every cell its "

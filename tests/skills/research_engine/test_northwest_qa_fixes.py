@@ -260,3 +260,22 @@ def test_the_clay_plan_names_the_live_people_field():
     assert "<the DSL's job-title field>" not in plan
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
     assert 'headline contains "<word>"' in js
+
+
+# ── N-21 · the capability card states each question once ────────────────
+
+def test_the_card_states_a_templated_facet_once(tmp_path):
+    from engine import orient
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cap = ".".join(wb.selected_subcaps()[0].split(".")[:2])
+    card = orient.capability_card(wb, cap, run=run)
+    assert card["entity"] and "{entity}" not in card["entity"]
+    assert "--facet <F>" in card["log"]
+    for f, slot in card["facets_owed"].items():
+        assert slot["cells"], f
+        assert "log" not in slot, "one log template, not one per facet"
+        if "ask" in slot:
+            assert "questions" not in slot and "{name}" in slot["ask"]
+    # every open cell's name is on the card, so {name} always resolves
+    assert all(c["name"] for c in card["open_cells"])

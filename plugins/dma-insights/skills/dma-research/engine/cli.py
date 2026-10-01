@@ -813,7 +813,7 @@ def main(argv=None) -> int:
                           ledger.stats(wb, a.category)["window_remaining"]})); return 0
     if a.cmd == "card":
         print(json.dumps(orient.capability_card(wb, a.capability, run=run),
-                         indent=1)); return 0
+                         separators=(",", ":"))); return 0
     if a.cmd == "orient":
         print(json.dumps(orient.orient(wb, a.category, qa_dir=run.qa_dir),
                          indent=2, sort_keys=True)); return 0
