@@ -301,6 +301,71 @@ BATCH_OPS = ("search", "evidence", "attach", "synthesise", "absence",
              "challenge", "fetch")
 
 
+def _root_approvable(root) -> dict:
+    """Would the plugin's own approver let a write into this run root through?
+
+    N-26 (2026-10-01, Northwest Bank): the run was started at a root the
+    command left to the operator; the approver allows writes only under its
+    known roots (an exported DMA_RUN_ROOT, ~/dma_output, /tmp, …), so every
+    ops-file write and `cat >` into the run would have prompted the owner."""
+    try:
+        hooks = Path(__file__).resolve().parents[3] / "scripts" / "hooks"
+        sys.path.insert(0, str(hooks))
+        import autoapprove_builtins as ab                     # noqa: PLC0415
+        ok = ab.path_is_writable(str(Path(root) / "07_qa" / "probe"))
+    except Exception as exc:                                 # noqa: BLE001
+        return {"approvable": None, "why": f"not measured: {type(exc).__name__}"}
+    return {"approvable": bool(ok), "why": (
+        "the run root is under a root the auto-approver allows writes in"
+        if ok else
+        f"run root {root} is outside every root the auto-approver allows "
+        f"writes in, so each write into it will PROMPT in a default-permission "
+        f"session. Start the run under ${{DMA_RUN_ROOT:-$HOME/dma_output}}/<entity-id>, "
+        f"or export DMA_RUN_ROOT before the session starts.")}
+
+
+def _json_op(line: str, ops_dir: Path, i: int) -> list[str]:
+    """One JSON-lines batch op -> the argv its shell form would have parsed to.
+
+    N-26 (2026-10-01, Northwest Bank): with shell-form lines a batch agent had
+    to shell-quote every excerpt, so 377 of its Bash calls were python
+    heredocs generating the ops file — arbitrary code no approver may wave
+    through, so in a default-permission session each one prompted the owner.
+    A JSON line needs no quoting and can be written with the Write tool:
+      {"op":"search","subcap":["P1C1.1.1","P1C1.1.2"],"facet":"works",
+       "tool":"web_search","query":"…","hits":5,"kept":2}
+      {"op":"synthesise","subcap":"P1C1.1.1","json":{…the synthesis…}}
+      {"op":"absence","subcap":"…","ladder":[{"rung":"direct","query":"…"}],…}
+    A scalar list repeats its flag; an object or a list of objects is passed
+    as JSON; `true` is a bare flag; a synthesis object is written beside the
+    ops file and passed by path, which is what `synthesise --json` reads."""
+    d = json.loads(line)
+    if not isinstance(d, dict) or not d.get("op"):
+        raise ValueError('a JSON op is an object with "op"')
+    op = str(d.pop("op"))
+    argv = [op]
+    for k, v in d.items():
+        flag = "--" + str(k).replace("_", "-")
+        if op == "synthesise" and k == "json" and isinstance(v, dict):
+            ops_dir.mkdir(parents=True, exist_ok=True)
+            f = ops_dir / f"synth_{i}_{d.get('subcap', 'x')}.json"
+            f.write_text(json.dumps(v))
+            argv += [flag, str(f)]
+        elif v is True:
+            argv.append(flag)
+        elif v is False or v is None:
+            continue
+        elif isinstance(v, dict) or (isinstance(v, list) and v and
+                                     all(isinstance(x, dict) for x in v)):
+            argv += [flag, json.dumps(v)]
+        elif isinstance(v, list):
+            for x in v:
+                argv += [flag, str(x)]
+        else:
+            argv += [flag, str(v)]
+    return argv
+
+
 def _batch(a) -> int:
     """Many writes, one workbook transaction.
 
@@ -328,7 +393,15 @@ def _batch(a) -> int:
     try:
         with wb.transaction(why=f"engine.cli batch ({len(ops)} ops)"):
             for i, line in enumerate(ops, 1):
-                argv = shlex.split(line)
+                if line.startswith("{"):
+                    try:
+                        argv = _json_op(line, Path(a.file).parent, i)
+                    except ValueError as exc:
+                        results.append({"op": i, "ok": False,
+                                        "error": f"not a JSON op: {exc}"})
+                        continue
+                else:
+                    argv = shlex.split(line)
                 if argv[:3] == ["python3", "-m", "engine.cli"]:
                     argv = argv[3:]
                 if not argv or argv[0] not in BATCH_OPS:
@@ -789,6 +862,9 @@ def main(argv=None) -> int:
                 preflight=Path(a.preflight) if a.preflight else None)
         out["registry"] = registry.log(run, event="STARTED",
                                        detail="run started")
+        out["approvals"] = _root_approvable(run.root)
+        if not out["approvals"]["approvable"]:
+            print(f"WARNING: {out['approvals']['why']}", file=sys.stderr)
         print(json.dumps(out, indent=2, default=str))
         return 0
 

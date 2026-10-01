@@ -319,10 +319,12 @@ RESEARCH_CONDUCTOR = row(
 #: Bash only, because the engine CLI is its pen and the prompt its brief.
 RESEARCH_BATCH = row(
     web=["WebSearch"], external=["exa", "tavily", "clay/search"], reads="floor",
-    core=["Read", "Bash"],
+    core=["Read", "Bash"], extra=["Write"],
     why="researches one batch of capabilities inside a category workflow: "
         "WebSearch is the primary volley, Exa the search, Tavily the fallback "
-        "and the verbatim extract, Clay search-contacts the one people lookup")
+        "and the verbatim extract, Clay search-contacts the one people lookup; "
+        "Write puts a capability's JSON-lines ops file under the run root, so "
+        "no python heredoc (which no approver may pass) generates it")
 
 #: The only agent that puts content into the product. Invariant 2 in one row.
 #: No web and no connector: it assembles, reconciles and submits what its
@@ -486,7 +488,7 @@ DEFAULTS = {
 #: pins this dict against its own copy, so a new entry is a visible decision.
 CONNECTOR_TIER = {
     "research-conductor": 11,
-    "research-batch-producer": 6,
+    "research-batch-producer": 7,
     "surface-producer": 3,
     "technographic-scanner": 9,
     "enrichment-connector-specialist": 8,

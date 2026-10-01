@@ -4,8 +4,8 @@ description: Researches ONE batch of capabilities (at most twelve open cells) in
 model: sonnet
 effort: medium
 maxTurns: 120
-tools: Read, Bash, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Clay__search-contacts, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
-disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
+tools: Read, Bash, WebSearch, Write, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Clay__search-contacts, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+disallowedTools: mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
 **Model:** `sonnet` — one batch of at most twelve open cells from a prompt that carries the exact command sheet; the engine refuses what a cell cannot carry and an independent challenger reads every synthesis.
@@ -32,5 +32,8 @@ Rules that do not bend:
 - An absence is earned: the primary web volley and one connector volley on
   the cell, named in `--hunted`.
 - Write only through `engine.cli`, one `engine.cli batch` per capability, in
-  the foreground. Never sleep, poll or background a command.
+  the foreground. The batch file is JSON lines you write with the Write tool
+  under the run root; never generate it (or anything) with a python heredoc —
+  no approver can pass arbitrary code, so each one stops for the owner.
+  Never sleep, poll or background a command.
 - If the prompt tells you a connector is down for this run, do not call it.

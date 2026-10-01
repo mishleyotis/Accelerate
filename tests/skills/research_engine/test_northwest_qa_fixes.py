@@ -120,7 +120,8 @@ def test_the_batch_agent_holds_no_session_wide_tool():
     untyped agent brings the deferred-tool roster and a ToolSearch turn:
     66,178 tokens at turn 1 measured vs 49,261 for a type without them."""
     t = _tools(PLUGIN / "agents" / "research" / "research-batch-producer.md")
-    assert not t & {"Skill", "ToolSearch", "Agent", "Grep", "Glob", "Write", "Edit"}, t
+    assert not t & {"Skill", "ToolSearch", "Agent", "Grep", "Glob", "Edit"}, t
+    assert "Write" in t, "N-26: the ops file is written with Write, never a python heredoc"
     assert {"Bash", "WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
             "mcp__Tavily__tavily_extract", "mcp__Clay__search-contacts"} <= t, t
 
@@ -279,3 +280,14 @@ def test_the_card_states_a_templated_facet_once(tmp_path):
             assert "questions" not in slot and "{name}" in slot["ask"]
     # every open cell's name is on the card, so {name} always resolves
     assert all(c["name"] for c in card["open_cells"])
+
+
+# ── N-26 · a run root the approver cannot see is said at start ───────────
+
+def test_start_says_when_the_run_root_would_prompt(tmp_path, monkeypatch):
+    from engine import cli
+    monkeypatch.delenv("DMA_RUN_ROOT", raising=False)
+    outside = Path("/var/dma-qa-not-approvable") / "acme"
+    got = cli._root_approvable(outside)
+    assert got["approvable"] is False and "PROMPT" in got["why"]
+    assert cli._root_approvable(Path.home() / "dma_output" / "acme")["approvable"] is True

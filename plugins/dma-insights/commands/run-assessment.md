@@ -15,6 +15,12 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 
 ## 1 · Tooling first, measured, never assumed
 
+**`<ROOT>` is `${DMA_RUN_ROOT:-$HOME/dma_output}/<entity-id>`** — under the
+plugin's own run tree, which is where the auto-approvers and the dispatch
+guard look. A root anywhere else makes every write into it prompt the owner
+(measured 2026-10-01: a root under `/home/user/dma-runs` would have put 45%
+of research Bash calls in front of a person); `engine.cli start` says so.
+
 **Record the connectors YOU hold before anything else runs.** No subprocess
 can enumerate a session's bound MCP tools (MEM-0112) — only you can, and
 every check below reads what you write here, so writing it second makes the
