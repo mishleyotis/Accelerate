@@ -342,3 +342,60 @@ def test_a_brief_naming_the_sessions_run_or_another_real_run_is_allowed(guard, r
 
 def test_a_placeholder_run_token_is_not_a_run_id(guard):
     assert _decision(guard.decide(_dispatch(prompt="engine.cli orient --run <RUN> --root <ROOT>"))) != "deny"
+
+
+# ── N-11 (2026-10-01, Northwest Bank) · the registry beside a named root ──
+# A hook never sees the session shell's exports. `engine.cli start --root R`
+# writes its registry row beside R, so a session launched without
+# DMA_RUN_ROOT had EVERY relay subagent refused "not a run on this machine",
+# PRELIM included. The row must still map this run to a root holding a
+# workbook: naming a root is not enough on its own.
+
+@pytest.fixture()
+def unexported(tmp_path, monkeypatch):
+    """A run started the documented way at a root the hook was never told."""
+    for k in ("DMA_RUN_ID", "DMA_RUN_ROOT", "DMA_RUN_REGISTRY"):
+        monkeypatch.delenv(k, raising=False)
+    runs = tmp_path / "dma-runs"
+    rd = runs / "northwest-bank"
+    (rd / "07_qa").mkdir(parents=True)
+    # `runstate.start` names the workbook by entity slug and date, not run id.
+    (rd / "DMA_Scoring_Workbook_northwest-bank_2026-10-01.xlsx").write_bytes(b"x")
+    return runs, rd
+
+
+def _register(runs: Path, rid: str, root: Path) -> None:
+    with (runs / "dma_run_registry.jsonl").open("a") as fh:
+        fh.write(json.dumps({"event": "STARTED", "run_id": rid,
+                             "root": str(root)}) + "\n")
+
+
+def test_a_run_registered_beside_the_named_root_is_allowed(unexported):
+    runs, rd = unexported
+    _register(runs, "nwbi-2026-10-01", rd)
+    m = _mod()
+    assert m.stale_run(None, f"Read the brief. `--run nwbi-2026-10-01 --root {rd}`") == ""
+
+
+def test_a_named_root_with_no_registry_row_is_still_refused(unexported):
+    runs, rd = unexported
+    m = _mod()
+    why = m.stale_run(None, f"--run nwbi-2026-10-01 --root {rd}")
+    assert "not a run on this machine" in why
+
+
+def test_a_registry_row_for_another_run_does_not_vouch_for_this_one(unexported):
+    runs, rd = unexported
+    _register(runs, "nwbi-2026-10-01", rd)
+    m = _mod()
+    assert "nwbi-bogus" in m.stale_run(None, f"--run nwbi-bogus --root {rd}")
+
+
+def test_a_row_mapping_the_run_to_a_root_without_its_workbook_is_refused(unexported, tmp_path):
+    runs, rd = unexported
+    empty = tmp_path / "elsewhere"
+    empty.mkdir()
+    _register(runs, "nwbi-2026-10-01", empty)
+    m = _mod()
+    assert "not a run on this machine" in m.stale_run(
+        None, f"--run nwbi-2026-10-01 --root {rd}")

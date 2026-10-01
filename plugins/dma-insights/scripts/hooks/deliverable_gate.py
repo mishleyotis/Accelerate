@@ -57,8 +57,11 @@ PUSH = re.compile(
 #: has been judged. Every deliverable (workbook, reports, scan, evidence
 #: index) is still gated.
 NON_DELIVERABLE = ("preflight.json", "run_manifest.json")
-_PUSH_NAME = re.compile(r"--name[ =][\"']?([^\s\"']+)")
-_PUSH_FILE = re.compile(r"--file[ =][\"']?([^\s\"']+)")
+# A shell operator glued to the token is not part of the name: measured
+# 2026-10-01 (Northwest Bank) `--name preflight.json; echo …` captured
+# `preflight.json;`, missed the exemption and denied run-assessment step 3.
+_PUSH_NAME = re.compile(r"--name[ =][\"']?([^\s\"';&|)`]+)")
+_PUSH_FILE = re.compile(r"--file[ =][\"']?([^\s\"';&|)`]+)")
 RUN_FLAG = re.compile(r"--run[ =]([\w.:-]+)")
 ROOT_FLAG = re.compile(r"--root[ =](\S+)")
 

@@ -132,3 +132,21 @@ def test_the_hook_is_wired_on_all_three_events():
     gate = next(i for i, e in enumerate(pre) if any("bash_guard" in h["command"] for h in e["hooks"]))
     approve = next(i for i, e in enumerate(pre) if any("autoapprove_builtins" in h["command"] for h in e["hooks"]))
     assert gate < approve, "a denial is decided before anything can approve"
+
+
+def test_a_working_file_push_followed_by_a_shell_operator_is_still_exempt():
+    """N-07 (2026-10-01, Northwest Bank): `--name preflight.json; echo …`
+    captured `preflight.json;` and the step-3 preflight push was denied with
+    'no run is in hand'. The exemption reads the token, not the operator."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("deliverable_gate", HOOK)
+    g = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(g)
+    base = ("python3 scripts/drive_fetch.py push-package --client 'Acme' "
+            "--file /r/acme/preflight.json --name preflight.json")
+    for tail in ("", "; echo \"exit=$?\"", " && echo ok", "&& echo ok", "|| true",
+                 ";echo done"):
+        assert g.push_verdict(base + tail)[0] == "pass", tail
+    # a deliverable riding the same shape is still judged
+    assert g.push_verdict("python3 scripts/drive_fetch.py push-package --client 'Acme' "
+                          "--file /r/wb.xlsx --name wb.xlsx; echo ok")[0] == "deny"
