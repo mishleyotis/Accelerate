@@ -74,7 +74,8 @@ def test_a_frozen_peer_set_reads_as_named_and_unscored(tmp_path):
 
     run = new_run(tmp_path, prelim=False, n=8)
     wb = run.open()
-    prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU"], basis="inferred",
+    # three peers: the contract's N=3 floor (C-13) refuses a smaller set
+    prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU"], basis="inferred",
                  rule=("US credit unions in the 15-25bn asset band with a "
                        "geographic field of membership"))
     rows = parse_peer_benchmarks(str(run.workbook_path),
@@ -88,7 +89,9 @@ def test_the_subject_is_not_stored_as_its_own_peer(tmp_path):
 
     run = new_run(tmp_path, prelim=False, n=8)
     wb = run.open()
-    prelim.peers(wb, ["Peer Alpha CU", "Acme Credit Union"], basis="inferred",
+    # the subject rides in a set that still meets the N=3 floor without it
+    prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU",
+                      "Acme Credit Union"], basis="inferred",
                  rule=("US credit unions in the 15-25bn asset band with a "
                        "geographic field of membership"))
     rows = parse_peer_benchmarks(str(run.workbook_path),

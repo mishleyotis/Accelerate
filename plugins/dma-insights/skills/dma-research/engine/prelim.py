@@ -550,9 +550,12 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
     # yield `cannot_estimate`, so it is that basis or it is refused here —
     # measured 2026-10-01: a one-firm set passed PRELIM and every peer
     # median downstream would have been a single competitor's number.
-    if basis != "cannot_estimate" and len(set(clean)) < PEER_FLOOR:
+    # The subject is never its own peer, so it does not count toward N.
+    subject = _clean(wb.metadata().get("entity_name")).lower()
+    real = {n for n in clean if n.lower() != subject}
+    if basis != "cannot_estimate" and len(real) < PEER_FLOOR:
         raise PrelimRefusal(
-            f"{len(set(clean))} peer(s) named; the peer ladder's floor is "
+            f"{len(real)} peer(s) named besides the subject; the peer ladder's floor is "
             f"N={PEER_FLOOR} (overview.scores contract). Name at least "
             f"{PEER_FLOOR} comparable firms, or freeze with --basis "
             f"cannot_estimate and say why in --rule.")

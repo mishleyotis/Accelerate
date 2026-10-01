@@ -51,6 +51,8 @@ def test_fewer_than_three_peers_is_refused_unless_cannot_estimate(tmp_path):
     wb = run.open()
     with pytest.raises(prelim.PrelimRefusal, match="N=3"):
         prelim.peers(wb, ["Only One"], rule=RULE, basis="table")
+    with pytest.raises(prelim.PrelimRefusal, match="besides the subject"):
+        prelim.peers(wb, ["A Co", "B Co", "Acme Credit Union"], rule=RULE, basis="table")
     out = prelim.peers(wb, ["Only One"], rule=RULE, basis="cannot_estimate")
     assert out["locked"]["peer_n"] == 1
 
