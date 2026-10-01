@@ -24,7 +24,7 @@ export const meta = {
 //
 // args (written by engine.pipeline to <root>/07_qa/research_workflow.json):
 //   {pillar, cats, batches: {cat: [[cap, ...], ...]}, run, root, eng, plugin,
-//    rounds, entity, domain}
+//    rounds, entity, domain, evidence_mode, internal_documents: [{path, title}]}
 
 const A = args
 const ENG = A.eng
@@ -42,14 +42,15 @@ const OUT = {
     evidence_registered: { type: 'number' },
     gate: { type: 'string' },
     blocking_terms: { type: 'array', items: { type: 'string' } },
+    next_batches: { type: 'array', items: { type: 'array', items: { type: 'string' } } },
     notes: { type: 'string' },
   },
   required: ['category', 'still_open', 'gate', 'blocking_terms'],
 }
 
 const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — this is everything):
-  card:        python3 -m engine.cli card ${R} --capability <CAP>            (the cells, their questions and owed facets)
-  log search:  python3 -m engine.cli search ${R} --subcap <CELL> [--subcap <CELL2>] --facet primary|works|fails|value|contradicts|corroborates --tool web_search|exa|tavily|clay|internal --query '<q>' --hits N --kept K --actor $ACT
+  card:        python3 -m engine.cli card ${R} --capability <CAP>            (the cells the floors gate still wants, each with its primary question and the facets it owes — primary first)
+  log search:  python3 -m engine.cli search ${R} --subcap <CELL> [--subcap <CELL2>] --facet primary|works|fails|value|contradicts|corroborates --tool web_search|tavily|exa|firecrawl|clay|internal --query '<q>' --hits N --kept K --actor $ACT
   cache text:  python3 -m engine.cli fetch ${R} --url <U> --query '<question>' --via-text <file with the connector's text>
   evidence:    python3 -m engine.cli evidence ${R} --subcap <CELL> --source '<publisher>' --url <U> --tier T1|T2|T3|T4 --excerpt '<verbatim 50-500 chars>' [--published <the date THE PAGE states>] --claim-type FACT|INFERENCE --origin public|internal --actor $ACT
                --published ONLY when the source itself states a date; an undated page OMITS it (the row bands UNVERIFIED). Never today's date, never a placeholder.
@@ -59,20 +60,25 @@ const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — t
                --hunted becomes the cell's What_We_Found and the gate refuses boilerplate: name the exact queries, the sites/tools searched and the nearest thing that came back (a proper noun, a date or an E-id).
 TURN ECONOMY: every turn re-reads your whole context, so turns are the cost. Per capability aim for ~4 turns: (1) card, (2) all searches in parallel, (3) ONE Bash call writing the synthesis/absence JSON files and the ops file, (4) ONE engine.cli batch call.`
 
+const QA = `${A.root}/07_qa`
 const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-token context ends your turn with nothing written):
-  - web_search (WebSearch) is the primary volley: compact results. Fire a capability's queries in PARALLEL in one turn.
-  - Tavily: ALWAYS {max_results: 3, search_depth: "basic"} and include_domains when a domain fits; ONE Tavily volley per capability covers all its cells (log it with several --subcap). Never tavily_extract a whole site; extract one URL, then fetch --via-text.
-  - Exa: {numResults: 3}. If Exa answers HTTP 402/429 once, stop using it for this batch and use Tavily for the same query.
-  - Clay: do NOT re-fetch the company record (PRELIM holds firmographics). Use mcp__Clay__search-contacts (companyIdentifiers ["${DOMAIN}"]) only when a cell asks who owns a function, once per batch.
-  - CONNECTOR CHECK FIRST: you should hold Exa, Tavily and Clay (mcp__Exa__*, mcp__Tavily__*, mcp__Clay__*). If none of them is callable, stop after your first capability and return gate "NO_CONNECTORS" naming the tools you do have: no cell can be declared absent without one, so continuing only spends budget.
+  - CHANNELS, IN ORDER: WebSearch (primary volley, compact) · Tavily {max_results: 3, search_depth: "basic"} · Exa {numResults: 3} · Firecrawl firecrawl_search {limit: 3, sources: ["web"]} (log it --tool firecrawl) · Clay (ownership questions only). Fire a capability's queries in PARALLEL in one turn; ONE connector volley per capability covers all its cells (log it with several --subcap).
+  - SPENT CHANNELS ARE SHARED FACTS. Before your first search run: ls ${QA}/connector_exhausted_* 2>/dev/null — never call a channel listed there (websearch, tavily, exa, firecrawl, clay). When a call answers a session search budget ("200 of 200"), HTTP 402, HTTP 432 / "usage limit", or 429 twice in a row: touch ${QA}/connector_exhausted_<channel> so every other agent skips it, log that search with --outcome 'FAILED: <code and message>' (it then counts toward nothing, honestly), and move to the next channel. Never retry a spent channel; never use a channel this list does not name.
+  - If WebSearch AND every connector channel are spent, write what you have through ONE batch and return gate "NO_CONNECTORS" at once — continuing only spends budget (measured 2026-10-01: 31 agents spent $111 in 14 minutes retrying exhausted channels).
+  - Tavily: include_domains when a domain fits. Never tavily_extract or firecrawl_scrape a whole site; extract ONE URL, then fetch --via-text.
+  - Clay: do NOT re-fetch the company record (PRELIM holds firmographics). mcp__Clay__search-contacts EXACTLY this shape (the people field is headline; job_title, title and current_title do not exist): {companyIdentifiers: ["${DOMAIN}"], dslQuery: 'select from people where headline contains "compliance" or headline contains "risk" limit 10'}
+  - HARD CEILING: 45 tool calls per batch. At 40, stop searching, write everything through one batch and return with still_open counted honestly.
   - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
 
 function batchPrompt(cat, caps, round, prev) {
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
-YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
+YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — exactly the cells each capability's card lists (the card IS the floors gate's own worklist; a cell it omits is done):
+  - a cell owing facets: fire them (the toolkit's primary question FIRST — the gate blocks any cell that never asked it), then evidence + synthesis, or a declared absence;
+  - a cell marked "synthesised": owes only the listed volleys — log them; re-synthesise only if a result changes the finding;
+  - a cell with "rework": re-declare its absence with a --hunted that names the queries, the tools and the nearest proper noun, date or E-id that came back.
 ${prev ? `The category's last gate: ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 500)}. Close those for your cells.` : ''}
-Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (HYBRID run).
+${DOCS}
 
 ${SHEET}
 
@@ -90,9 +96,13 @@ function challengePrompt(cat, round) {
 1) python3 -m engine.brief challenge-batch ${R} --only ${cat} --out-dir ${A.root}/briefs/wf_challenge_${cat}_r${round} --json
 2) If it lists packets, work each prompt file exactly as research-challenger: judge every cell on the seven dimensions and record each verdict with python3 -m engine.cli challenge ... --actor research-challenger. You never challenge a cell you wrote and never search.
 3) python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis
-Return the gate verdict, its blocking terms, and how many cells are still open.`
+4) python3 -m engine.cli card ${R} --category ${cat}   (what the gate still wants, re-batched)
+Return the gate verdict, its blocking terms, still_open = card's open_cells, and next_batches = card's batches (empty when the card lists none).`
 }
 
+const DOCS = (A.internal_documents || []).length
+  ? `INTERNAL DOCUMENTS (${A.evidence_mode || 'HYBRID'} run — read each once, grep for your cells, register every span you rely on with --origin internal and a verbatim excerpt; internal T2 outweighs public T3-T5 for the same cell):\n${A.internal_documents.map(d => `  - ${d.title || 'untitled'}: ${d.path}`).join('\n')}`
+  : ''
 const BATCHES = A.batches || {}
 log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
 
@@ -112,11 +122,12 @@ const results = await pipeline(A.cats, async (cat) => {
     prev = c
     if (prev) log(`${cat} r${round}: gate ${prev.gate}, ${prev.still_open} open`)
     if (prev && prev.gate === 'PASS') break
-    // Round 2 re-batches only what is still open: batches that finished stay finished.
-    const open = got.filter(r => (r.still_open || 0) > 0).length
-    if (open === 0 && got.length === batches.length) batches = [[`${cat} (cells the gate names)`]]
-    else batches = batches.filter((_, i) => !done[i] || (done[i].still_open || 0) > 0)
-    if (!batches.length) batches = [[`${cat} (cells the gate names)`]]
+    // The next round works exactly what the gate still wants, re-batched by
+    // `engine.cli card --category` (the same predicate the card reads). No
+    // workable cell left means the gate fails on something research cannot
+    // fix here (a challenge verdict, a contradiction) — stop, the driver decides.
+    batches = (prev && Array.isArray(prev.next_batches)) ? prev.next_batches.filter(b => b && b.length) : []
+    if (!batches.length) break
   }
   if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${A.rounds} round(s) — the driver's floors gate decides what happens next`)
   return prev

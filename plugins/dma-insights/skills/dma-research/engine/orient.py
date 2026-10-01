@@ -455,6 +455,41 @@ if __name__ == "__main__":
 
 # ── the capability card: one read, one batch of searches ──────────────────
 
+def cell_work(wb, cell: str, row: dict, *, searches=None, declared=None) -> dict | None:
+    """What the floors gate still wants from ONE cell, or None when it wants
+    nothing a researcher can do. The single definition of "open" the
+    capability card and the driver's batch planner share.
+
+    WHY ONE PREDICATE. Measured 2026-10-01 (SWBC, 760 cells): three readers
+    each had their own "open". The card skipped every synthesised cell and
+    owed only the five catalogue facets; the planner counted any cell with no
+    Dominant_Claim; the gate blocked on the `primary` volley, on volleys
+    still owed by SYNTHESISED cells (26 of 50) and on boilerplate absences.
+    391 cells were blocked on `primary_unfired` while the card showed
+    `missing: []` and no question, and P3C4's only blocker (8 boilerplate
+    absences) appeared on no packet at all.
+
+    Returns {"missing": [facets owed, primary first], "synthesised": bool}
+    or {"rework": why} for a declared absence the gate refuses as boilerplate."""
+    from . import contract as C, kg, ledger as L, quality as Q
+    declared = declared if declared is not None else L.declared_absences(wb)
+    if cell in declared:
+        why = Q.is_boilerplate(row.get("What_We_Found")) or \
+            Q.is_fluent_but_empty(row.get("What_We_Found"))
+        return {"rework": f"re-declare the absence: What_We_Found {why}"} if why else None
+    synthesised = bool(str(row.get("Dominant_Claim") or "").strip()) and \
+        str(row.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE"
+    vs = L.volley_status(wb, cell, searches=searches)
+    owed = list(vs["missing"])
+    if not vs["primary_fired"]:
+        # The gate's own condition (floors_gate: `not vs["primary_fired"]`),
+        # with or without a DQ bank behind the cell.
+        owed.insert(0, C.PRIMARY_FACET)
+    if synthesised and not owed:
+        return None
+    return {"missing": owed, "synthesised": synthesised}
+
+
 def capability_card(wb, capability: str, *, run=None) -> dict:
     """Every OPEN cell of one capability, the volleys each still owes, the
     diagnostic questions merged by facet, and one ready-to-run log line per
@@ -481,26 +516,62 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
              or ".".join(c.split(".")[:2]) == cap]
     rows = {str(r.get("SubCap_ID")): r for r in wb.scoring_rows()}
     names = C.subcap_names()
+    declared = L.declared_absences(wb)
     open_cells, facets = [], {}
-    for c in cells:
-        r = rows.get(c) or {}
-        if str(r.get("Dominant_Claim") or "").strip() and \
-                str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE":
-            continue                                   # synthesised with evidence
-        vs = L.volley_status(wb, c, searches=searches)
-        dq = kg.dqs_for(wb, c)
-        open_cells.append({"cell": c, "name": names.get(c, ""),
-                           "missing": vs["missing"]})
-        for q in dq["ask"]:
-            f = str(q.get("facet") or "")
-            if f not in vs["missing"]:
+    entity = str(md.get("entity_name") or "the entity")
+    # The evidence each cell ALREADY holds, so a researcher can synthesise
+    # it from the card. Measured 2026-10-01 (SWBC, 166 cells evidenced but
+    # unsynthesised): with no read command on the sheet, workflow agents
+    # spent their first ~10 turns opening the workbook with raw openpyxl,
+    # reading floors JSON and notebooks — on a 4-core host already running
+    # 31 agents.
+    from .workbook import _split_ids
+    ev_by_id = {str(e.get("E_ID")): e for e in wb.rows("Evidence_Detail") if e.get("E_ID")}
+
+    def _held(row: dict) -> list[dict]:
+        out = []
+        for i in _split_ids(row.get("Evidence_IDs")):
+            e = ev_by_id.get(str(i).split(":")[0].strip())
+            if not e:
                 continue
+            out.append({"e_id": str(e.get("E_ID")), "source": str(e.get("Source_Name") or "")[:60],
+                        "tier": e.get("Tier"), "published": e.get("Date_Published") or None,
+                        "origin": e.get("Origin") or "public",
+                        "excerpt": str(e.get("Excerpt") or "")[:240]})
+            if len(out) >= 6:
+                break
+        return out
+
+    for c in cells:
+        w = cell_work(wb, c, rows.get(c) or {}, searches=searches, declared=declared)
+        if w is None:
+            continue
+        if w.get("rework"):
+            open_cells.append({"cell": c, "name": names.get(c, ""),
+                               "missing": [], "rework": w["rework"]})
+            continue
+        dq = kg.dqs_for(wb, c)
+        owed = w["missing"]
+        primary_q = next((str(q.get("question") or "") for q in dq["ask"]
+                          if str(q.get("facet") or "") == C.PRIMARY_FACET), "") or \
+            (f"What does {{entity}} have in place for {names.get(c, c)}, who owns "
+             f"it, and what evidence shows it working?")
+        held = _held(rows.get(c) or {})
+        open_cells.append({"cell": c, "name": names.get(c, ""),
+                           "question": primary_q.replace("{entity}", entity)[:300],
+                           "missing": owed,
+                           **({"synthesised": True} if w.get("synthesised") else {}),
+                           **({"evidence": held} if held else {})})
+        asks = {str(q.get("facet") or ""): q for q in dq["ask"]}
+        for f in owed:
             slot = facets.setdefault(f, {"cells": [], "questions": []})
             if c not in slot["cells"]:
                 slot["cells"].append(c)
-            if q.get("question") and len(slot["questions"]) < 6:
-                slot["questions"].append({"cell": c, "q": str(q["question"]).replace(
-                    "{entity}", str(md.get("entity_name") or "the entity"))[:220]})
+            q = str((asks.get(f) or {}).get("question") or "") or (
+                primary_q if f == C.PRIMARY_FACET else "")
+            if q and len(slot["questions"]) < 6:
+                slot["questions"].append({"cell": c, "q": q.replace(
+                    "{entity}", entity)[:220]})
     for f, slot in facets.items():
         subs = " ".join(f"--subcap {c}" for c in slot["cells"])
         slot["log"] = (f"python3 -m engine.cli search --run {rid} --root {root} "

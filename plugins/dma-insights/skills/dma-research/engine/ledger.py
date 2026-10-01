@@ -707,6 +707,9 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
             f"run from spending its context on searches it will not "
             f"remember; walking past it is how a run loses the reasoning "
             f"the searches were for.")
+    if tool != "internal" and C.search_failed({"Outcome": outcome, "Query": query}) \
+            and not str(outcome or "").upper().startswith("FAILED"):
+        outcome = f"FAILED: {outcome or 'the call did not run (see query)'}"
     if "{entity}" in (query or "") or "{" in (query or "") and "}" in (query or ""):
         # AUD-0015: orient issued work cards containing 15 literal {entity}
         # placeholders and nothing warned, so an unattended agent fired
@@ -1262,7 +1265,8 @@ def volley_status(wb: RunWorkbook, subcap: str,
     This is the measurement, per subcap and per facet, that the gate, the
     card and the absence declaration all read."""
     rows = searches if searches is not None else wb.rows("Search_Log")
-    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip() == subcap]
+    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip() == subcap
+            and not C.search_failed(r)]          # a call that never ran fired nothing
     want = askable_facets(wb, subcap)
     fired = {}
     tools = set()
@@ -1300,7 +1304,8 @@ def enrichment_status(wb: RunWorkbook, category: str,
     driver's ENRICHMENT gate decides what a zero means and says so."""
     cat = str(category or "").strip().upper()
     rows = searches if searches is not None else wb.rows("Search_Log")
-    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip().upper().startswith(cat)]
+    mine = [r for r in rows if str(r.get("SubCap_ID") or "").strip().upper().startswith(cat)
+            and not C.search_failed(r)]
     tools: dict[str, int] = {}
     cells_enriched: set[str] = set()
     for r in mine:
@@ -1323,6 +1328,23 @@ def enrichment_status(wb: RunWorkbook, category: str,
 #: owed. `direct` is the entity itself; `proxy` is the template's own proxy
 #: class for the cell (leadership_title, regulator_filing, org_talent …).
 ABSENCE_RUNGS_REQUIRED = ("direct", "proxy")
+
+
+#: One empty marker file per spent search channel, in the run's QA folder:
+#: the first agent that meets a 402 / 432 / exhausted session budget touches
+#: it, and every other agent, the driver and the gate read it.
+EXHAUSTED_MARKER = "connector_exhausted_"
+SEARCH_CHANNELS = ("websearch", "exa", "tavily", "firecrawl", "clay")
+
+
+def exhausted_channels(root) -> set[str]:
+    from pathlib import Path as _P
+    qa = _P(root) / "07_qa"
+    try:
+        return {p.name[len(EXHAUSTED_MARKER):].lower()
+                for p in qa.glob(EXHAUSTED_MARKER + "*")}
+    except OSError:
+        return set()
 
 
 def enrichment_binding(wb: RunWorkbook) -> dict:
@@ -1363,6 +1385,16 @@ def enrichment_binding(wb: RunWorkbook) -> dict:
         if not path.is_file():
             return out
         held = json.loads(path.read_text()).get("mcp_tools") or []
+        # PRESENT BUT SPENT IS ABSENT. A connector that answers 402 / 432 /
+        # a session search budget is bound and useless (SWBC, 2026-10-01:
+        # Exa out of credits, Tavily over its plan, WebSearch at 200/200 —
+        # the baseline still read "complete", so the run never went DEGRADED
+        # and absences kept demanding volleys no channel could fire).
+        spent = exhausted_channels(wb.path.parent)
+        if spent:
+            held = [t for t in held
+                    if not any(f"__{f}" in str(t).lower() for f in spent)]
+            out["exhausted"] = sorted(spent)
         chk = cc.check(held)
     except Exception as e:                                    # noqa: BLE001
         out["reason"] = f"the connector baseline could not be read: {str(e)[:120]}"

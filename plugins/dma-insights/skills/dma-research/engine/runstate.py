@@ -109,9 +109,32 @@ def locate(run_id: str, root: Path | None = None) -> Run:
     if not _RUN_ID_RE.match(run_id or ""):
         raise ValueError(f"run_id {run_id!r} is not a usable identifier")
     base = Path(root) if root else RUN_ROOT / run_id
-    wbs = sorted(base.glob("*.xlsx"))
-    wb = wbs[0] if wbs else base / f"DMA_Scoring_Workbook_{run_id}.xlsx"
-    return Run(run_id=run_id, root=base, workbook_path=wb)
+    return Run(run_id=run_id, root=base, workbook_path=_pick_workbook(base, run_id))
+
+
+def _pick_workbook(base: Path, run_id: str) -> Path:
+    """The run's scoring workbook in `base`.
+
+    Measured 2026-10-01 (SWBC): this took the FIRST `*.xlsx` in sorted order
+    — `toolkits/Pillar1_Scoring_Toolkit.xlsx` became a "run" in the status
+    sweep, and a run root holding a restored older workbook
+    (`…_2026-09-16.xlsx` sorts before `…_2026-09-30.xlsx`) would open the
+    superseded one. Scoring workbooks first; among several, the one whose
+    metadata names this run; else the newest."""
+    scoring = sorted(base.glob("DMA_Scoring_Workbook_*.xlsx"))
+    if len(scoring) > 1:
+        for p in scoring:
+            try:
+                if str(RunWorkbook(p).metadata().get("run_id") or "") == run_id:
+                    return p
+            except Exception:                            # noqa: BLE001
+                continue
+        return max(scoring, key=lambda p: p.stat().st_mtime)
+    if scoring:
+        return scoring[0]
+    other = sorted(p for p in base.glob("*.xlsx")
+                   if not p.name.endswith("_Scoring_Toolkit.xlsx"))
+    return other[0] if other else base / f"DMA_Scoring_Workbook_{run_id}.xlsx"
 
 
 #: Tokens that mark a "rationale" written to satisfy the flag rather than to

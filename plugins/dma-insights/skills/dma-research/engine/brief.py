@@ -961,6 +961,15 @@ def as_markdown(packet: dict) -> str:
                      f"re-run): {', '.join(s['layers_searched_empty'])}")
     if s["peers"]:
         lines.append(f"- Peer set: {', '.join(s['peers'][:8])}")
+    # HYBRID/INTERNAL: the documents were in the JSON packet only, so every
+    # reader of the markdown brief — each lane, and each workflow batch agent
+    # told to read it — never learned they existed (SWBC, 2026-10-01).
+    docs = (s.get("internal_documents") or {}).get("documents") or []
+    if docs:
+        lines.append("- Internal documents (HYBRID — register what bears on "
+                     "your cells with `--origin internal`): "
+                     + "; ".join(f"{d.get('title') or 'untitled'} → `{d['path']}`"
+                                 for d in docs[:6]))
     if s["open_contradictions"]:
         lines.append(f"- Contradictions logged and undisposed: "
                      f"{', '.join(s['open_contradictions'][:6])}")

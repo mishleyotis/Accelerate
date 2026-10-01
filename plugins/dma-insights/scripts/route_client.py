@@ -208,6 +208,40 @@ def decide(state: dict, asked_for: str, fresh: bool = False) -> dict:
     }
 
 
+def split_command_args(raw: str) -> tuple[str, str | None]:
+    """The client's name, and an --entity-id slug, from what /run-assessment
+    passes as `--client "$ARGUMENTS"`.
+
+    Measured 2026-10-01 (SWBC): the command's own argument-hint is
+    `"<Entity name>" [--entity-id <slug>] [--website <url>]`, so `$ARGUMENTS`
+    arrived here as `SWBC --entity-id swbc --website https://www.swbc.com`,
+    slugged to `swbc-entity-id-swbc-website-https-www-swbc-com`, and routed
+    NEW_ENGAGEMENT (exit 4) for a client the corpus holds — a duplicate
+    engagement. The documented flags are parsed off; an explicit
+    --entity-id is the strongest key there is, so it wins."""
+    import shlex
+    try:
+        toks = shlex.split(raw or "")
+    except ValueError:
+        toks = (raw or "").split()
+    if not any(t.startswith("--") for t in toks):
+        return (raw or "").strip(), None
+    name, entity_id, i = [], None, 0
+    while i < len(toks):
+        t = toks[i]
+        if t.startswith("--"):
+            key, _, val = t.partition("=")
+            if not val and i + 1 < len(toks) and not toks[i + 1].startswith("--"):
+                val = toks[i + 1]
+                i += 1
+            if key == "--entity-id" and val:
+                entity_id = val.strip().lower()
+        else:
+            name.append(t)
+        i += 1
+    return " ".join(name).strip(), entity_id
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--client", required=True,
@@ -216,6 +250,11 @@ def main(argv=None) -> int:
     ap.add_argument("--fresh", action="store_true",
                     help="the owner asked for a NEW run of an existing client")
     a = ap.parse_args(argv)
+    client, entity_id = split_command_args(a.client)
+    if entity_id:
+        a.client = entity_id
+    else:
+        a.client = client
 
     did = a.client if re.fullmatch(r"[a-z0-9-]+", a.client) else _slug(a.client)
     try:

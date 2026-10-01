@@ -494,11 +494,41 @@ TECH_BROKERS = ("clay", "explorium")
 #: asked before a cell is declared absent. `web_search`/`web_fetch` are the
 #: built-in tools; everything after them is an enrichment connector.
 SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
-                "explorium", "vibe", "indeed", "quartr", "drive", "internal")
+                "explorium", "vibe", "indeed", "quartr", "drive", "internal",
+                # Firecrawl search: workflow agents fell back to it when Exa,
+                # Tavily and WebSearch were exhausted (SWBC, 2026-10-01: 56
+                # calls) and had no honest label to log it under.
+                "firecrawl")
 #: The connectors whose absence from a cell's searches means "no enrichment
 #: was attempted" — a declared absence must show at least one of these.
 ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS
                          if t not in ("web_search", "web_fetch"))
+
+#: A search row whose outcome (or query) records that the call never ran —
+#: an HTTP 4xx/5xx, a spent credit balance, a plan limit, a session search
+#: budget. Measured 2026-10-01 (SWBC): 79 connector rows were logged with
+#: outcomes like "HTTP 402 credits exhausted" and each counted as a fired
+#: volley AND as enrichment effort, so an absence could pass the "a connector
+#: was asked" check on a connector that never answered. Such a row is kept
+#: (it is what happened) but counts toward nothing.
+import re as _re
+_FAIL_PHRASES = (r"credits?\s+(?:limit|exhausted|exceeded)|quota|rate.?limit|"
+                 r"usage limit|too_many_requests|search budget|"
+                 r"plan'?s? (?:set )?usage|\bHTTP\s?(?:4\d\d|5\d\d)\b")
+#: Outcome: also a bare status code ("402", "429 Too Many Requests").
+FAILED_OUTCOME = _re.compile(r"^\s*FAILED\b|\b(?:40[0-9]|42[0-9]|43[0-9]|5\d\d)\b|"
+                             + _FAIL_PHRASES, _re.I)
+#: Query: only an explicit HTTP code or failure phrase — a bare "429" in a
+#: query is a street number or a "Fortune 500" as often as a status code.
+FAILED_QUERY = _re.compile(
+    r"\bHTTP\s?(?:4\d\d|5\d\d)\b|credits?\s+(?:limit|exhausted|exceeded)|"
+    r"too_many_requests|search budget|plan'?s? (?:set )?usage limit", _re.I)
+
+
+def search_failed(row: dict) -> bool:
+    """True when a Search_Log row records a call that never ran."""
+    return bool(FAILED_OUTCOME.search(str(row.get("Outcome") or "")) or
+                FAILED_QUERY.search(str(row.get("Query") or "")))
 
 #: T3, the drilldown. A register row answers "what do they run"; the detail
 #: page a click opens answers "so what" — and it has three content cards, two

@@ -434,17 +434,80 @@ CHALLENGE_USD_PER_CATEGORY = 0.44
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
 
 
-def _open_capabilities(wb) -> dict[str, dict[str, int]]:
-    """{category: {capability: open cells}} — open = no Dominant_Claim yet
-    (a synthesis and a declared absence both write one)."""
+def _open_capabilities(wb, owed: dict | None = None) -> dict[str, dict[str, int]]:
+    """{category: {capability: open cells}} — open = what `orient.cell_work`
+    says the floors gate still wants (the capability card reads the same
+    predicate, so a batch is never planned for cells its card will not show,
+    nor a gate-blocked cell left out of every batch: measured 2026-10-01,
+    SWBC — 26 synthesised cells owed the primary volley and no batch had
+    them)."""
     from .brief import capability_of, category_of
+    from .ledger import declared_absences
+    from .orient import cell_work
+    searches = wb.rows("Search_Log")
+    declared = declared_absences(wb)
+    selected = set(wb.selected_subcaps())
     out: dict[str, dict[str, int]] = {}
     for r in wb.scoring_rows():
         sc = str(r.get("SubCap_ID") or "")
-        if not sc or str(r.get("Dominant_Claim") or "").strip():
+        if not sc or (selected and sc not in selected):
             continue
+        w = cell_work(wb, sc, r, searches=searches, declared=declared)
+        if w is None:
+            continue
+        if owed is not None:
+            owed.setdefault(capability_of(sc), set()).update(w.get("missing") or [])
         caps = out.setdefault(category_of(sc), {})
         caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1
+    return out
+
+
+#: Claude Code's per-SESSION WebSearch budget (its own default when the
+#: variable is unset). Every workflow agent runs inside the conducting
+#: session, so all of them share this one number; each headless lane is a
+#: session of its own with its own budget.
+WEBSEARCH_BUDGET_ENV = "CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION"
+WEBSEARCH_BUDGET_DEFAULT = 200
+
+
+def search_capacity(root, owed_facets: dict) -> dict:
+    """Searches the research still owes against what can feed them.
+
+    Measured 2026-10-01 (SWBC, sixteen category workflows, 31 agents): the
+    session's 200-call WebSearch budget was spent in ~10 minutes, Tavily hit
+    its plan limit (HTTP 432) and Exa was out of credits (402) — and nothing
+    had compared the ~1,400 searches 703 open cells owe with any of that.
+    Agents then retried spent channels: $111 for 33 cells closed.
+
+    Demand is counted at the capability grain the card works at (one query
+    per owed facet per capability credits every cell it answers), so it is a
+    FLOOR; per-cell differentiation adds to it."""
+    import os
+    from .ledger import exhausted_channels
+    demand = sum(len(f) for f in owed_facets.values())
+    try:
+        budget = int(os.environ.get(WEBSEARCH_BUDGET_ENV) or WEBSEARCH_BUDGET_DEFAULT)
+    except ValueError:
+        budget = WEBSEARCH_BUDGET_DEFAULT
+    spent = sorted(exhausted_channels(root))
+    connectors_live = [c for c in ("tavily", "exa", "firecrawl") if c not in spent]
+    web = 0 if "websearch" in spent else budget
+    out = {"searches_owed_floor": demand, "capabilities_open": len(owed_facets),
+           "websearch_session_budget": web, "websearch_budget_env": WEBSEARCH_BUDGET_ENV,
+           "exhausted_channels": spent, "connector_channels_live": connectors_live,
+           "fits": web >= demand, "advice": ""}
+    if web < demand:
+        out["advice"] = (
+            f"research owes at least {demand} searches at capability grain; every "
+            f"workflow agent shares THIS session's WebSearch budget of {web} "
+            f"({WEBSEARCH_BUDGET_ENV}, read when the session starts — raise it in "
+            f"the settings env and start a new session). "
+            + (f"Beyond it the agents fall back to {', '.join(connectors_live)}, "
+               f"whose own plan limits this check cannot see"
+               if connectors_live else
+               "No connector channel is left to fall back to: a fan-out now "
+               "closes nothing — top up or upgrade one first")
+            + (f"; spent: {', '.join(spent)}." if spent else "."))
     return out
 
 
@@ -486,6 +549,12 @@ class Pipeline:
                 if cap["captured"]:
                     opts.log(f"  (workflow spend captured: {cap['captured']} agent(s), "
                              f"${cap['usd']:.2f})")
+                    # The transcripts it was priced from are container-local;
+                    # the ledger row is the only copy. Measured 2026-10-01
+                    # (SWBC): $48.56 captured on one container never reached
+                    # a snapshot, and the restored ledger read $38.16 against
+                    # a measured $86.73 — the ceiling under-counted for good.
+                    self._snapshot("COST_CAPTURE")
             rows = cost.ledger(run)
             self._spent_usd = self._recorded_usd = round(
                 sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 4)
@@ -899,8 +968,18 @@ class Pipeline:
                          "recorded": (self.state.get("stages") or {}).get(st)})
             if nxt is None and not ok:
                 nxt = st
+        forecast = []
+        if (self.state.get("stages") or {}).get("PRELIM") or any(
+                r["stage"] == "PRELIM" and r["done"] for r in rows):
+            try:
+                from . import gold_standard
+                forecast = gold_standard.prelim_forecast(self.run.workbook_path)
+            except Exception:                        # noqa: BLE001
+                forecast = []
         return {"run_id": self.run.run_id, "root": str(self.run.root),
                 "stages": rows, "next": nxt,
+                # I-83: gold-gate refusals already certain after PRELIM.
+                "gold_forecast": forecast,
                 "complete": nxt is None,
                 "blockers": [r["detail"] for r in rows if not r["done"]][:3],
                 "command": (f"python3 -m engine.pipeline run --run {self.run.run_id} "
@@ -1071,7 +1150,12 @@ class Pipeline:
                 outcome.update(outcome="STOPPED_BUDGET", stage=st,
                                reason=f"spent ${self._spent_usd:.2f} of a "
                                       f"${self.budget_usd():.2f} budget before {st}; "
-                                      f"resume: {self.plan()['command']}")
+                                      # The plain command refuses again: resuming
+                                      # IS raising the ceiling, a person's call
+                                      # (I-73, 2026-10-01).
+                                      f"read `engine.cost report --by-stage`; a person "
+                                      f"who decides the rest is worth it resumes with: "
+                                      f"{self.plan()['command']} --max-usd <new ceiling>")
                 self.opts.log(f"[{st}] STOPPED — budget ${self._spent_usd:.2f} "
                               f"of ${self.budget_usd():.2f}")
                 return outcome
@@ -1397,6 +1481,14 @@ class Pipeline:
             if not st["open"]:
                 if st["recorded_status"] != "COMPLETE":
                     prelim.complete(self.wb)
+                try:                                 # I-83: say it now, not at PACKAGE
+                    from . import gold_standard
+                    for f in gold_standard.prelim_forecast(self.run.workbook_path):
+                        self.opts.log(f"[PRELIM] GOLD FORECAST: {f['code']} — "
+                                      f"{f['detail']} ({f['prevents']}); PACKAGE will "
+                                      f"refuse this unless PRELIM's data changes")
+                except Exception:                    # noqa: BLE001
+                    pass
                 return f"PRELIM closed after {r + 1} round(s)"
             if self._stalled("PRELIM"):
                 break
@@ -1467,15 +1559,25 @@ class Pipeline:
         # holds its other three in a queue. Affordable only because writes
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
-        open_caps = _open_capabilities(self.wb)
+        owed_facets: dict[str, set] = {}
+        open_caps = _open_capabilities(self.wb, owed_facets)
         by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
                    else by_pillar)
+        # HYBRID/INTERNAL documents ride in the args (I-69, 2026-10-01): the
+        # batch prompt used to send every agent to regenerate a markdown brief
+        # (~9 s CPU each) for a list that brief never rendered.
+        from . import intake as _intake
+        docs = [{"path": d["path"], "title": d.get("title") or ""}
+                for d in ((_intake.for_brief(self.run.root, md.get("evidence_mode"))
+                           or {}).get("documents") or [])]
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
                 "batches": {c: _batches(open_caps.get(c, {}))
                             for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
-                "entity": md.get("entity_name") or "", "domain": site}
+                "entity": md.get("entity_name") or "", "domain": site,
+                "evidence_mode": md.get("evidence_mode") or "",
+                "internal_documents": docs}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
@@ -1507,6 +1609,9 @@ class Pipeline:
                 "them; a restart rebinds) — do NOT fall back to lanes, which hold "
                 "no connector.")
             self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
+        doc["capacity"] = search_capacity(self.run.root, owed_facets)
+        if not doc["capacity"]["fits"]:
+            self.opts.log(f"[WORKFLOW] WARNING: {doc['capacity']['advice']}")
         cap = self.budget_usd()
         if cap is not None:
             doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
@@ -1532,6 +1637,15 @@ class Pipeline:
         have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
         if len(have) == 4:
             return dest
+        if not self.opts.push:
+            # A no-push run (stub, CI, tests) reaches no external service —
+            # the flag the snapshot already obeys. Measured 2026-10-01: on a
+            # container holding the service account, every stub test that
+            # reached KG downloaded the four toolkits from the real Drive (and
+            # then built a 6,747-row DQ bank), where CI falls back in a second.
+            self.opts.log("  [KG] no-push run: toolkits not pulled; the KG uses "
+                          "the category questions")
+            return dest if have else None
         r = subprocess.run([sys.executable, str(PLUGIN / "scripts" / "drive_fetch.py"),
                             "pull-toolkits", "--dest", str(dest)],
                            capture_output=True, text=True, timeout=600)

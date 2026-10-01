@@ -687,7 +687,11 @@ def main(argv=None) -> int:
     cd_ = sub.add_parser("card", help="the capability card: every open cell of one "
                          "capability, the volleys each owes, and batched log lines")
     cd_.add_argument("--run", required=True); cd_.add_argument("--root")
-    cd_.add_argument("--capability", required=True)
+    g_ = cd_.add_mutually_exclusive_group(required=True)
+    g_.add_argument("--capability")
+    g_.add_argument("--category", help="list the category's capabilities that "
+                    "still owe the floors gate work, with open-cell counts and "
+                    "the <=12-cell batches the workflow re-plans round 2 from")
     bt = common(sub.add_parser(
         "batch", help="apply many write commands (search, evidence, attach, "
                       "synthesise, absence, challenge, fetch) in ONE process, "
@@ -811,6 +815,13 @@ def main(argv=None) -> int:
         print(json.dumps({"checkpoint": a.category, "window_remaining":
                           ledger.stats(wb, a.category)["window_remaining"]})); return 0
     if a.cmd == "card":
+        if a.category:
+            from . import pipeline as _pl
+            caps = _pl._open_capabilities(wb).get(a.category.upper(), {})
+            print(json.dumps({"category": a.category.upper(),
+                              "open_capabilities": caps,
+                              "open_cells": sum(caps.values()),
+                              "batches": _pl._batches(caps)}, indent=1)); return 0
         print(json.dumps(orient.capability_card(wb, a.capability, run=run),
                          indent=1)); return 0
     if a.cmd == "orient":

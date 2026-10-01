@@ -592,7 +592,8 @@ def connector_contract_check() -> dict:
                 f"any of them.",
                 "from the session that holds the tools: "
                 "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
-                "baseline --tools - --root <RUN_ROOT>`, then re-run the doctor")
+                "baseline --tools - --root <RUN_ROOT>`, then re-run the doctor "
+                "with `--root <RUN_ROOT>`")
         rec = json.loads(Path(path).read_text())
         out = connector_contract.check(rec.get("mcp_tools") or [])
         if not out["ok"]:
@@ -1058,7 +1059,15 @@ def main() -> int:
                     help="on a STALE/MISSING/INCOMPLETE install, run the "
                          "plugin update itself (container-local cache only) "
                          "and re-check, so one command can reach green")
+    ap.add_argument("--root", default=None,
+                    help="the run root the connector baseline was written to "
+                         "(default: $DMA_RUN_ROOT). run-assessment step 1 writes "
+                         "the baseline at <ROOT> and runs the doctor next; "
+                         "without this the contract row read UNVERIFIED seconds "
+                         "after a complete baseline (SWBC, 2026-10-01)")
     args = ap.parse_args()
+    if args.root:
+        os.environ["DMA_RUN_ROOT"] = args.root
 
     # The audience and enforcement rows are the two SECURITY checks, and a
     # default of "not probed" made both pass vacuously on every plain run.
