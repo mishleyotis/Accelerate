@@ -1905,6 +1905,10 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             by_status.setdefault(str(sec_state.get("status")), []).append(
                 str(sec_state.get("id") or sec_state.get("section")))
         state = {"ready": full.get("ready"), "sections_by_status": by_status}
+        if full.get("ready") and not validator:
+            # A READY report has nothing for its producer to do; a lane handed
+            # one anyway rewrote validator-passed sections (2026-10-01).
+            continue
         sections = []
         for sec in spec.sections:
             row = {"id": sec.id, "heading": sec.heading, "kind": sec.kind,
@@ -1932,6 +1936,8 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "sections": sections,
             "report_min_words": N.report_min_words_for(wb, spec),
             "rules": [
+                "write ONLY the sections not READY in sections_state; a READY "
+                "section carries an independent verdict and rewriting it reopens it",
                 "every section goes through `engine.narrative write`, which refuses "
                 "prose that is not an argument and a body missing a block",
                 "a failing precondition means STOP and report — no --force writes a "
@@ -1953,7 +1959,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "first_commands": [
                 f"python3 -m engine.cli narrative state {e}",
                 f"python3 -m engine.cli narrative review {e} --report <KEY> --section <ID> "
-                f"--verdict READY|REVISE --actor report-validator --note '…'",
+                f"--verdict PASS|REVISE|FAIL --actor report-validator --note '…'",
                 f"python3 -m engine.gold_standard report <docx> --workbook <xlsx>"],
             "reports_state": {k: {"ready": v.get("ready"),
                                   "sections": [f"{x.get('id') or x.get('section')}:"

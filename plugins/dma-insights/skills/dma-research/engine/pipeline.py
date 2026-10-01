@@ -2084,6 +2084,11 @@ class Pipeline:
         self._reset_counters()
         self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
+            # READY reports go straight to render. Dispatching the producers
+            # first (2026-10-01, Cross Insurance) had them rewrite sections an
+            # independent validator had just passed, reopening ten of them.
+            if all(x.get("ready") for x in N.state(self.wb)["reports"].values()):
+                break
             self._rounds = r + 1
             b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
             self._count(self._dispatch(b, stage="REPORTS"))
