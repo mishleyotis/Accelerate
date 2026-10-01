@@ -180,7 +180,7 @@ def expect_of(payload: dict, page: str) -> dict:
 
 # ------------------------------------------------------------------- send
 
-def mcp(tool: str, args: dict) -> dict:
+def mcp(tool: str, args: dict, timeout: float | None = None) -> dict:
     """One connector call, arguments read from a temp FILE.
 
     The file is why this pipeline is cheap: `--args-file` means the payload
@@ -192,8 +192,10 @@ def mcp(tool: str, args: dict) -> dict:
         path = fh.name
     try:
         p = subprocess.run(
-            [sys.executable, str(MCP_RAW), "call", tool, "--args-file", path],
-            capture_output=True, text=True, timeout=900)
+            [sys.executable, str(MCP_RAW), "call", tool, "--args-file", path,
+             *(["--timeout", str(timeout)] if timeout else [])],
+            capture_output=True, text=True,
+            timeout=max(900, (timeout or 0) + 60))
         raw = (p.stdout or "").strip()
         if not raw:
             return {"_error": (p.stderr or "no output").strip()[:400]}
@@ -300,6 +302,30 @@ def claim(run_id: str, producer: str) -> dict:
     return {"ok": ok or not res.get("_error"), "detail": res}
 
 
+#: Validating a multi-megabyte page (V4 grounding over every prose path) was
+#: measured outlasting mcp_raw's 180 s default on a 2.5 MB heatmap; the
+#: verdict then had to be recovered by polling.
+SUBMIT_TIMEOUT = 1500
+
+
+def part_args(upload: str, i: int, total: int, part: dict) -> dict:
+    """append_payload_part's arguments for one planned part.
+
+    The connector takes `fields=` for a fields part and `items=` plus
+    `item_count` for an items part (apps/mcp/dma_mcp/transport.py). Sending
+    the plan's own `kind`/`payload` keys was refused ONE_BODY on every
+    chunked submit.
+    """
+    args = {"upload_id": upload, "part": i, "parts_total": total,
+            "path": part["path"]}
+    if part["kind"] == "fields":
+        args["fields"] = part["body"]
+    else:
+        args["items"] = part["body"]
+        args["item_count"] = len(part["body"])
+    return args
+
+
 def submit(run_id: str, page: str, payload: dict, producer: str) -> dict:
     exp = expect_of(payload, page)
     if size(payload) <= INLINE_MAX:
@@ -316,16 +342,15 @@ def submit(run_id: str, page: str, payload: dict, producer: str) -> dict:
     print(f"  {len(parts)} part(s), {size(payload):,} bytes", flush=True)
     for i, part in enumerate(parts, 1):
         ack = mcp("append_payload_part",
-                  {"upload_id": upload, "part": i, "parts_total": len(parts),
-                   "path": part["path"], "kind": part["kind"],
-                   "payload": part["body"]})
+                  part_args(upload, i, len(parts), part))
         if ack.get("_error") or ack.get("ok") is False:
             return {"_error": f"part {i}: {json.dumps(ack)[:300]}"}
         print(f"  part {i}/{len(parts)} ack {ack.get('part_bytes')} bytes",
               flush=True)
     return mcp("submit_page_payload",
                {"run_id": run_id, "page": page, "upload_id": upload,
-                "producer_version": producer, "expect": exp})
+                "producer_version": producer, "expect": exp},
+               timeout=SUBMIT_TIMEOUT)
 
 
 # ------------------------------------------------------------------- main

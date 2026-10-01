@@ -322,3 +322,41 @@ def test_an_unreadable_contract_never_reads_as_ready(monkeypatch, tmp_path):
     (tmp_path / "context.a.json").write_text("{}")
     ready, waiting = ship_page.ready_pages(tmp_path, ["context"])
     assert ready == [] and "contract unreadable" in waiting[0][1]
+
+
+def test_part_args_use_the_connectors_argument_names():
+    """append_payload_part takes fields= or items= + item_count; the plan's
+    own kind/payload keys were refused ONE_BODY on every chunked submit."""
+    f = ship_page.part_args("u1", 1, 2, {"kind": "fields", "path": "",
+                                         "body": {"scores": {"a": 1}}})
+    assert f == {"upload_id": "u1", "part": 1, "parts_total": 2, "path": "",
+                 "fields": {"scores": {"a": 1}}}
+    i = ship_page.part_args("u1", 2, 2, {"kind": "items",
+                                         "path": "findings.findings",
+                                         "body": [{"f_id": "F-1"}, {"f_id": "F-2"}]})
+    assert i["items"] == [{"f_id": "F-1"}, {"f_id": "F-2"}]
+    assert i["item_count"] == 2
+    assert "kind" not in i and "payload" not in i and "fields" not in i
+
+
+def test_submit_sends_planned_parts_with_correct_names(monkeypatch):
+    calls = []
+
+    def fake_mcp(tool, args, timeout=None):
+        calls.append((tool, args, timeout))
+        if tool == "open_payload":
+            return {"upload_id": "u9"}
+        if tool == "append_payload_part":
+            return {"ok": True, "part_bytes": 1}
+        return {"submission_id": "s1", "verdict": {"status": "PASS"}}
+
+    monkeypatch.setattr(ship_page, "mcp", fake_mcp)
+    monkeypatch.setattr(ship_page, "INLINE_MAX", 0)
+    payload = {"findings": {"findings": [{"f_id": f"F-{n}"} for n in range(3)]}}
+    ship_page.submit("r1", "overview", payload, "test")
+    parts = [a for t, a, _ in calls if t == "append_payload_part"]
+    assert parts and all(("fields" in a) ^ ("items" in a) for a in parts)
+    assert all("kind" not in a and "payload" not in a for a in parts)
+    assert all(a["item_count"] == len(a["items"]) for a in parts if "items" in a)
+    sub = [c for c in calls if c[0] == "submit_page_payload"][-1]
+    assert sub[2] == ship_page.SUBMIT_TIMEOUT

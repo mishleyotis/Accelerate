@@ -41,6 +41,21 @@ INTERNAL_ID = re.compile(
     r"|\bCUSTOMER_WITHHELD\b"                    # the redaction constant
     r"|\bno_staged_submission\b"
     r"|\b(?:get|list|submit|promote|register|record|resolve|report)_[a-z_]+\("
+    # Research-ledger annotations stored AS evidence excerpts and source
+    # names. Measured 2026-10-01 on Northwest Bank (run ba6b2090): 20 of 335
+    # stored rows carried them, and the drawer and /evidence endpoint serve
+    # stored rows verbatim, so a page repair could not reach them. Every token
+    # below is identifier-shaped or ladder jargon no source document writes;
+    # calibrated with zero false positives over those 335 rows.
+    r"|(?<=[\s(,;:])(?-i:E-(?:[A-Z]{2,12}-)?\d{2,4})\b"  # an evidence id
+    #                       INSIDE prose ("(Wave 1, E-002)"); a bare id value
+    #                       such as an `e_id` field is not preceded by a space
+    r"|(?-i:\b(?:[A-Z]+ )?PROBE (?:RESOLVED|RESULT|FAILED|OPEN)\b)"
+    r"|(?-i:\bCONTRADICTS\b|\bPROXY RUNG\b)"       # ladder verdicts, caps only
+    r"|\(Wave[ -]\d+\b|\bWave-\d+\b"                 # research-wave labels
+    r"|\bproxy rung\b|\bladder rung\b|\bpeer-reverse\b|\blocked peer\b"
+    r"|\balready banked\b|\bbanked record\b"
+    r"|(?-i:\b(?:FDIC|SEC|FFIEC|NCUA|OCC|FRB) T[1-5]\b)"  # source-tier codes
     , re.I)
 
 

@@ -105,8 +105,8 @@ def rpc(method: str, params: dict | None = None, *, timeout: float = 180) -> dic
     return json.loads(m.group(1) if m else raw)
 
 
-def call(tool: str, args: dict) -> int:
-    d = rpc("tools/call", {"name": tool, "arguments": args})
+def call(tool: str, args: dict, timeout: float = 180) -> int:
+    d = rpc("tools/call", {"name": tool, "arguments": args}, timeout=timeout)
     if "error" in d:
         print(json.dumps(d["error"]), file=sys.stderr)
         return 1
@@ -199,6 +199,9 @@ def main(argv=None) -> int:
     p_c.add_argument("tool")
     p_c.add_argument("--args", default=None)
     p_c.add_argument("--args-file", default=None)
+    p_c.add_argument("--timeout", type=float, default=180,
+                     help="seconds to wait for the reply (a large page's "
+                          "submit validates for minutes)")
     a = ap.parse_args(argv)
     if a.cmd == "probe":
         return probe()
@@ -210,7 +213,7 @@ def main(argv=None) -> int:
         args = json.loads(a.args)
     else:
         args = {}
-    return call(a.tool, args)
+    return call(a.tool, args, timeout=a.timeout)
 
 
 if __name__ == "__main__":
