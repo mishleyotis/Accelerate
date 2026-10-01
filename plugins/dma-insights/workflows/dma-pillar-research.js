@@ -62,7 +62,8 @@ const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — t
                --published ONLY when the source itself states a date; an undated page OMITS it (the row bands UNVERIFIED). Never today's date, never a placeholder.
   reuse row:   python3 -m engine.cli attach ${R} --e-id E-NNN --subcap <CELL> --actor $ACT
   synthesise:  python3 -m engine.cli synthesis-template   (once), then  python3 -m engine.cli synthesise ${R} --subcap <CELL> --json <file> --actor $ACT
-  absent:      python3 -m engine.cli absence ${R} --subcap <CELL> --actor $ACT --hunted '<what, where, what came back>' --ladder '<json>' --validation-question '<q>'   (only after a primary web_search AND one connector volley on the cell)
+  absent:      python3 -m engine.cli absence ${R} --subcap <CELL> --actor $ACT --hunted '<what, where, what came back; >= 40 chars>' --proxy-log '<the proxy class you hunted and what came back; >= 40 chars>' --ladder '[{"rung":"direct","query":"<a query you LOGGED>"},{"rung":"proxy","query":"<another LOGGED query>"}]' [--inferable '<what the absence still lets you infer; >= 30 chars>' --validation-question '<the client question that settles it?>']
+               (only after a primary web_search AND one connector volley on the cell). Rungs direct AND proxy are required, and each rung's query must be EXACTLY a query already in the search log (log it first, same batch file). --inferable and --validation-question come together or not at all.
                --hunted becomes the cell's What_We_Found and the gate refuses boilerplate: name the exact queries, the sites/tools searched and the nearest thing that came back (a proper noun, a date or an E-id).
 TURN ECONOMY: every turn re-reads your whole context, so turns are the cost. Per capability aim for ~4 turns: (1) card, (2) all searches in parallel, (3) ONE Bash call writing the synthesis/absence JSON files and the ops file, (4) ONE engine.cli batch call.`
 
@@ -72,15 +73,15 @@ const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-toke
 ${DOWN_LINE}  - Exa: {numResults: 3}. If Exa answers HTTP 402/429 once, stop using it for this batch and use Tavily for the same query.
   - Clay: do NOT re-fetch the company record (PRELIM holds firmographics). Use mcp__Clay__search-contacts (companyIdentifiers ["${DOMAIN}"]) only when a cell asks who owns a function, once per batch.
   - CONNECTOR CHECK FIRST: you should hold Exa, Tavily and Clay (mcp__Exa__*, mcp__Tavily__*, mcp__Clay__*). If none of them is callable, stop after your first capability and return gate "NO_CONNECTORS" naming the tools you do have: no cell can be declared absent without one, so continuing only spends budget.
-  - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
+  - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.
+  - Never open the workbook, a toolkit or engine source with python/openpyxl/sed/inspect: the card is the cells' state and questions, and this sheet is the whole CLI. A refusal names its own fix — read it, not the source.`
 
 function batchPrompt(cat, caps, round, prev) {
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
 YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
 ${prev ? `The category's last gate: ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 500)}. Close those for your cells.` : ''}
-Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (HYBRID run).
-
+${A.mode && A.mode !== 'PUBLIC' ? `Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (${A.mode} run).\n` : 'This is a PUBLIC run: there are no internal documents; do not open a brief.\n'}
 ${SHEET}
 
 ${SEARCH_RULES}

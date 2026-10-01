@@ -1489,6 +1489,9 @@ class Pipeline:
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
                 "entity": md.get("entity_name") or "", "domain": site,
+                # N-22: the internal-documents step is for HYBRID/INTERNAL runs
+                # only; on PUBLIC it cost every batch agent a brief and a turn.
+                "mode": str(md.get("evidence_mode") or "").upper() or "PUBLIC",
                 **({"down": down} if down else {})}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,

@@ -157,3 +157,33 @@ def test_a_down_family_rides_the_handoff_to_every_workflow(tmp_path):
     assert cc.down_families(str(run.root)) == {}
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
     assert "A.down" in js and "${DOWN_LINE}" in js
+
+
+# ── N-24 · the workflow's absence line is one the CLI accepts ────────────
+
+def _sheet_line(cmd: str) -> str:
+    import re
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    m = re.search(rf"^\s*{cmd}:\s*(python3 -m engine\.cli .*)$", js, re.M)
+    assert m, cmd
+    return m.group(1)
+
+
+def test_the_absence_line_names_every_flag_the_cli_requires(tmp_path):
+    """Measured 2026-10-01: the sheet omitted the required --proxy-log, gave
+    no ladder shape and paired --validation-question without --inferable
+    (which the ledger refuses), so 19 of 40 agents read engine source."""
+    line = _sheet_line("absent")
+    probe = subprocess.run([sys.executable, "-m", "engine.cli", "absence", "--run", "X"],
+                           cwd=ENGINE, capture_output=True, text=True)
+    import re
+    req = re.search(r"required: (.*)", probe.stderr).group(1)
+    for flag in [f.strip() for f in req.split(",")]:
+        assert flag in line, f"the sheet's absence line omits required {flag}"
+    assert '"rung":"direct"' in line and '"rung":"proxy"' in line
+    assert ("--validation-question" in line) == ("--inferable" in line)
+
+
+def test_a_public_run_does_not_send_batches_to_the_internal_documents():
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    assert "A.mode && A.mode !== 'PUBLIC'" in js
