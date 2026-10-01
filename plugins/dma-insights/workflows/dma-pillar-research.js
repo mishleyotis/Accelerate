@@ -50,6 +50,7 @@ const OUT = {
 }
 
 const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — this is everything):
+  checkpoint:  python3 -m engine.cli checkpoint ${R} --category <CAT> --position '<your batch>'   (FIRST, once: you are a new conversation, so open the category's own search window)
   card:        python3 -m engine.cli card ${R} --capability <CAP>            (the cells, their questions and owed facets)
   log search:  python3 -m engine.cli search ${R} --subcap <CELL> [--subcap <CELL2>] --facet primary|works|fails|value|contradicts|corroborates --tool web_search|exa|tavily|clay|internal --query '<q>' --hits N --kept K --actor $ACT
   cache text:  python3 -m engine.cli fetch ${R} --url <U> --query '<question>' --via-text <file with the connector's text>
@@ -92,6 +93,7 @@ ${SHEET}
 
 ${A.degraded ? DEGRADED_RULES : SEARCH_RULES}
 
+START with ONE engine.cli checkpoint for ${cat} (the search-op ceiling is per category per conversation; several batches of one category share it otherwise, and the ceiling then refuses every later batch's searches and absences).
 LOOP, one capability at a time: card -> parallel searches (primary + the owed facets, one turn) -> cache connector text (fetch --via-text) -> write the synthesis/absence JSON files -> ONE engine.cli batch call for the whole capability. Finish a capability before starting the next.
 WRITES GO THROUGH engine.cli batch (mandatory): put every search log, evidence, attach, synthesise and absence line for the capability in one ops file — one command per line, (the "python3 -m engine.cli" prefix and --run/--root may be omitted) — then run: python3 -m engine.cli batch ${R} --file <ops file>
 One write outside a batch costs ~10 s under the run-wide lock that every researcher shares; a batch is one load, one lock, one save. The batch reports each command's result; fix and re-batch only the refused lines. Order inside the file matters: search logs, then evidence, then attach, then synthesise/absence.
