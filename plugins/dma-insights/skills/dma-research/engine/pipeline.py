@@ -448,6 +448,18 @@ def _open_capabilities(wb) -> dict[str, dict[str, int]]:
     return out
 
 
+def _down_families(root) -> dict:
+    """N-18: the families the session measured DOWN for this run
+    (`connector_contract.py down`), carried to every workflow agent so none
+    of them spends a call rediscovering a 402."""
+    try:
+        sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        return cc.down_families(root)
+    except Exception:                                          # noqa: BLE001
+        return {}
+
+
 def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
     """Whole capabilities packed in order into batches of <= `limit` open
     cells (a capability larger than the limit is a batch of its own)."""
@@ -1470,12 +1482,14 @@ class Pipeline:
         open_caps = _open_capabilities(self.wb)
         by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
                    else by_pillar)
+        down = _down_families(self.run.root)
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
                 "batches": {c: _batches(open_caps.get(c, {}))
                             for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
-                "entity": md.get("entity_name") or "", "domain": site}
+                "entity": md.get("entity_name") or "", "domain": site,
+                **({"down": down} if down else {})}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],

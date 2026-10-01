@@ -195,6 +195,42 @@ def baseline_path(root=None) -> Path:
     return base / "connectors_baseline.json"
 
 
+def mark_down(family: str, reason: str, root=None) -> dict:
+    """Record that a family the baseline holds is DOWN for this run.
+
+    N-18, measured 2026-10-01 (Northwest Bank): Exa answered HTTP 402 (credits
+    exhausted) while the baseline said exa was present, and every one of 32
+    research agents spent a call and a turn rediscovering it. A quota or
+    outage is measured once, by the session that holds the tool, and recorded
+    here; the research handoff carries it to every workflow agent. It is not
+    a loss of the tool (the baseline still holds it) and it is not permanent:
+    `--clear` lifts it when the owner tops up or the outage ends."""
+    import datetime as _dt
+    path = baseline_path(root)
+    if not path.is_file():
+        raise ValueError(f"no baseline at {path}: write it first (baseline --tools -)")
+    fam = families()
+    if family not in fam:
+        raise ValueError(f"unknown family {family!r}; one of {', '.join(sorted(fam))}")
+    rec = json.loads(path.read_text())
+    down = dict(rec.get("down") or {})
+    if reason:
+        down[family] = f"{reason} @ {_dt.datetime.now(_dt.timezone.utc):%Y-%m-%dT%H:%MZ}"
+    else:
+        down.pop(family, None)
+    rec["down"] = down
+    path.write_text(json.dumps(rec, indent=2))
+    return {"path": str(path), "down": down}
+
+
+def down_families(root=None) -> dict:
+    """{family: reason} recorded down for this run, {} when none or no baseline."""
+    try:
+        return dict(json.loads(baseline_path(root).read_text()).get("down") or {})
+    except (OSError, ValueError):
+        return {}
+
+
 def write_baseline(tool_names, root=None) -> dict:
     """Record what this session ACTUALLY held when it started producing.
 
@@ -308,7 +344,27 @@ def main(argv=None) -> int:
     r.add_argument("--json", action="store_true")
     r.add_argument("--strict", action="store_true",
                    help="exit 1 when a REQUIRED family has been lost")
+    dn = sub.add_parser("down",
+                        help="record a family measured DOWN for this run (quota, "
+                             "outage) so no research agent rediscovers it")
+    dn.add_argument("family")
+    dn.add_argument("--reason", default="",
+                    help="what was measured, e.g. 'HTTP 402 credits exhausted'")
+    dn.add_argument("--clear", action="store_true", help="lift a recorded outage")
+    dn.add_argument("--root", default=None)
     a = ap.parse_args(argv)
+    if a.cmd == "down":
+        if not a.clear and not a.reason:
+            print("REFUSED: name what was measured with --reason (or --clear)",
+                  file=sys.stderr)
+            return 2
+        try:
+            out = mark_down(a.family, "" if a.clear else a.reason, a.root)
+        except ValueError as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(out, indent=2))
+        return 0
 
     try:
         if a.cmd == "declare":

@@ -32,6 +32,18 @@ printf '%s\n' <the same list> \
 just built passes a session with no connectors at all — which is the exact
 condition it exists to catch.
 
+**Then measure quota, once.** A connector you hold can still be out of
+credit: one cheap search per search family (an Exa search, a Tavily search).
+A 402/429 is recorded for the run, not rediscovered by every agent (measured
+2026-10-01: Exa answered 402 to 32 research agents in turn):
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" down exa --reason 'HTTP 402 credits exhausted' --root <ROOT>
+```
+
+The research handoff carries it to every workflow agent, which then does not
+call that family; `--clear` lifts it once the owner tops up.
+
 **You are the connector tier.** Since 2026-09-14 the enrichment connectors
 are held by this session and by no lane: they bind once, at session start,
 and every category lane is a separate `claude -p` child that holds none of

@@ -30,6 +30,13 @@ const A = args
 const ENG = A.eng
 const R = `--run ${A.run} --root ${A.root}`
 const DOMAIN = A.domain || '<the entity\'s registrable domain, from engine.profile state>'
+// N-18 (2026-10-01, Northwest Bank): Exa answered HTTP 402 to every agent and
+// each of 32 rediscovered it. The session records a family it measured down
+// once (connector_contract.py down) and the handoff carries it here.
+const DOWN = A.down || {}
+const DOWN_LINE = Object.keys(DOWN).length
+  ? `  - DOWN FOR THIS RUN (measured, do not call): ${Object.entries(DOWN).map(([f, why]) => `${f} (${why})`).join('; ')}. ${DOWN.exa ? 'Tavily answers every Exa query. ' : ''}${DOWN.tavily ? 'Exa answers every Tavily query. ' : ''}A down family still counts as the connector volley you attempted: name it in --hunted.\n`
+  : ''
 
 const OUT = {
   type: 'object',
@@ -62,7 +69,7 @@ TURN ECONOMY: every turn re-reads your whole context, so turns are the cost. Per
 const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-token context ends your turn with nothing written):
   - web_search (WebSearch) is the primary volley: compact results. Fire a capability's queries in PARALLEL in one turn.
   - Tavily: ALWAYS {max_results: 3, search_depth: "basic"} and include_domains when a domain fits; ONE Tavily volley per capability covers all its cells (log it with several --subcap). Never tavily_extract a whole site; extract one URL, then fetch --via-text.
-  - Exa: {numResults: 3}. If Exa answers HTTP 402/429 once, stop using it for this batch and use Tavily for the same query.
+${DOWN_LINE}  - Exa: {numResults: 3}. If Exa answers HTTP 402/429 once, stop using it for this batch and use Tavily for the same query.
   - Clay: do NOT re-fetch the company record (PRELIM holds firmographics). Use mcp__Clay__search-contacts (companyIdentifiers ["${DOMAIN}"]) only when a cell asks who owns a function, once per batch.
   - CONNECTOR CHECK FIRST: you should hold Exa, Tavily and Clay (mcp__Exa__*, mcp__Tavily__*, mcp__Clay__*). If none of them is callable, stop after your first capability and return gate "NO_CONNECTORS" naming the tools you do have: no cell can be declared absent without one, so continuing only spends budget.
   - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
@@ -102,6 +109,9 @@ const results = await pipeline(A.cats, async (cat) => {
   for (let round = 1; round <= A.rounds; round++) {
     const done = await parallel(batches.map((caps, i) => () => agent(batchPrompt(cat, caps, round, prev), {
       label: `${cat} r${round} b${i + 1} ${caps[0]}${caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
+      // N-19: its own lean type — WebSearch, Exa, Tavily, one Clay read, Read/Bash.
+      // Untyped, every turn carried the session's skill listing and tool roster.
+      agentType: 'dma-insights:research-batch-producer',
     })))
     const got = done.filter(Boolean)
     log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)

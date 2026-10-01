@@ -246,9 +246,12 @@ def _holders(prefix: str) -> set:
 
 
 @pytest.mark.parametrize("prefix,expected", [
-    ("mcp__Exa__", {"research-conductor", "enrichment-web-specialist"}),
-    ("mcp__Tavily__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__Exa__", {"research-conductor", "enrichment-web-specialist",
+                    "research-batch-producer"}),
+    ("mcp__Tavily__", {"research-conductor", "enrichment-web-specialist",
+                       "research-batch-producer"}),
     ("mcp__Clay__", {"research-conductor", "enrichment-connector-specialist",
+                     "research-batch-producer",
                      "technographic-scanner", "overview-people-producer"}),
     ("mcp__Vibe_Prospecting__", {"technographic-scanner",
                                  "techstack-register-producer",
@@ -281,6 +284,7 @@ def K(t: set) -> int:
 #: The five agents that exceed the ceiling, by design, each with its own.
 CONNECTOR_TIER = {
     "research-conductor": 11,                # web 2 + Agent/Ask 2 + exa 2 + tavily 2 + clay/people 3
+    "research-batch-producer": 6,            # WebSearch 1 + exa 2 + tavily 2 + clay search 1 (N-19)
     "surface-producer": 3,                   # Agent, Write, Edit — no web, no connector
     "technographic-scanner": 9,              # web 2 + explorium 3 + clay/company 3 + indeed 1
     "enrichment-connector-specialist": 8,    # clay 5 + explorium 3

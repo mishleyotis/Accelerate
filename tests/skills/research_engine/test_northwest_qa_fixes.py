@@ -102,3 +102,58 @@ def test_the_driver_log_is_teed_to_the_watched_file(tmp_path):
     log("[RELAY] PRELIM connector brief …")
     assert seen == ["[RELAY] PRELIM connector brief …"]
     assert "[RELAY]" in (tmp_path / "pipeline.log").read_text()
+
+
+# ── N-19 · the batch agent is its own lean type ─────────────────────────
+
+PLUGIN = ENGINE.parents[1]
+
+
+def _tools(md: Path) -> set[str]:
+    import re
+    fm = md.read_text().split("---")[1]
+    return {t.strip() for t in re.search(r"^tools:\s*(.*)$", fm, re.M).group(1).split(",")}
+
+
+def test_the_batch_agent_holds_no_session_wide_tool():
+    """Skill brings every installed skill's listing into every turn, and an
+    untyped agent brings the deferred-tool roster and a ToolSearch turn:
+    66,178 tokens at turn 1 measured vs 49,261 for a type without them."""
+    t = _tools(PLUGIN / "agents" / "research" / "research-batch-producer.md")
+    assert not t & {"Skill", "ToolSearch", "Agent", "Grep", "Glob", "Write", "Edit"}, t
+    assert {"Bash", "WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+            "mcp__Tavily__tavily_extract", "mcp__Clay__search-contacts"} <= t, t
+
+
+def test_the_workflow_starts_every_batch_as_that_type():
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    batch_call = js[js.index("agent(batchPrompt("):js.index("challengePrompt(cat, round), {")]
+    assert "agentType: 'dma-insights:research-batch-producer'" in batch_call
+
+
+def test_the_manifest_lists_the_batch_agent():
+    pj = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
+    assert "./agents/research/research-batch-producer.md" in pj["agents"]
+    assert f"{len(pj['agents'])} DMA agents" in pj["description"]
+
+
+# ── N-18 · a connector measured down is recorded once for the run ───────
+
+def test_a_down_family_rides_the_handoff_to_every_workflow(tmp_path):
+    sys.path.insert(0, str(PLUGIN / "scripts"))
+    import connector_contract as cc
+    run = _run(tmp_path)
+    cc.mark_down("exa", "HTTP 402 credits exhausted", str(run.root))
+    assert "exa" in cc.down_families(str(run.root))
+    opts = P.Options(dispatcher=S.StubDispatcher(handlers={}), reads=S.StubReads(),
+                     shipper=S.StubShipper(), push=False,
+                     folder_root=tmp_path / "out", ingest_poll_s=0,
+                     sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
+                     max_rounds=2, stall_rounds=0, research_mode="workflow")
+    out = P.Pipeline(run, opts).run_all()
+    inv = json.loads(Path(out["handoff"]).read_text())["invocations"]
+    assert inv and all("402" in i["down"]["exa"] for i in inv)
+    cc.mark_down("exa", "", str(run.root))                    # --clear
+    assert cc.down_families(str(run.root)) == {}
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    assert "A.down" in js and "${DOWN_LINE}" in js
