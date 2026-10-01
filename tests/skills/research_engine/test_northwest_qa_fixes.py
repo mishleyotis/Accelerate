@@ -234,3 +234,29 @@ def test_open_folder_repushes_this_runs_preflight_after_archiving(tmp_path, monk
     assert calls[0] == ("archive",)
     assert ("push", "preflight.json") in calls[1:], calls
     assert out["preflight_pushed"]["outcome"] == "RESOLVED"
+
+
+# ── N-12 / N-16 · PRELIM sections go to the agent holding their tools ───
+
+def test_prelim_peers_go_to_the_web_specialist_and_the_brief_names_the_connector_id(tmp_path):
+    from engine import brief
+    run = new_run(tmp_path, prelim=False)
+    b = brief.prelim_brief(run.open(), run=run, out_dir=tmp_path / "pb")
+    orch = b.get("orchestrator")
+    assert orch and "peers" in orch["owed"], b.keys()
+    assert orch["agents"]["peers"] == "enrichment-web-specialist"
+    assert all(v == "enrichment-connector-specialist"
+               for k, v in orch["agents"].items() if k != "peers")
+    text = Path(orch["prompt_file"]).read_text()
+    assert "enrichment-web-specialist" in text and "DEF 14A" in text
+    assert "connector_display_id" in text and "record_enrichment" in text
+
+
+# ── N-13 · the Clay people filter field is the one the connector accepts ─
+
+def test_the_clay_plan_names_the_live_people_field():
+    plan = (PLUGIN / "skills" / "dma-surface-production" / "scripts" / "clay_plan.py").read_text()
+    assert 'headline contains \\"chief\\"' in plan
+    assert "<the DSL's job-title field>" not in plan
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    assert 'headline contains "<word>"' in js

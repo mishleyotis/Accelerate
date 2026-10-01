@@ -1395,8 +1395,11 @@ class Pipeline:
             b = brief.prelim_brief(self.wb, run=self.run, out_dir=self._briefs(f"prelim_r{r}"))
             orch = b.get("orchestrator")
             if orch:
+                who = orch.get("agents") or {}
                 self.opts.log(f"[RELAY] PRELIM connector brief for the conducting session "
-                              f"(owed {', '.join(orch['owed'])}): {orch['prompt_file']}")
+                              f"(owed {', '.join(orch['owed'])}"
+                              + (f"; {', '.join(f'{k}->{v}' for k, v in who.items())}" if who else "")
+                              + f"): {orch['prompt_file']}")
                 self.state["prelim_orchestrator"] = orch
                 self._save_state()
             self._count(self._dispatch(b, stage="PRELIM"))

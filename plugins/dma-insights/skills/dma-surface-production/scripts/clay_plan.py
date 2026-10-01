@@ -83,12 +83,16 @@ def main():
 
     print("STEP 3 — leadership contacts")
     print(f'  search-contacts(companyIdentifiers=["{d}"],')
-    print( "    dslQuery='select from people where <the DSL's job-title field> in/is_similar_to (")
-    for t in TITLES: print(f'      "{t}",')
-    print( "    ) limit 50')  -> taskId2   (exclude: " + str(EXCLUDE) + ")\n")
-    print("  Take the job-title field name from the tool's own DSL field list; an")
-    print("  unfiltered `select from people limit 50` + load-more-search-results is the")
-    print("  fallback, filtered by title before recording. Compound titles stay ONE string.\n")
+    # N-13, measured live 2026-10-01 (Northwest Bank): `job_title` and `title`
+    # are NOT people fields (two failed calls); `headline` is, and strings
+    # are DOUBLE-quoted (a single quote is a parse error). `contains` matches
+    # whole tokens; results carry `latest_experience_title`.
+    print( "    dslQuery='select from people where headline contains \"chief\" or headline contains \"president\"")
+    print( "      or headline contains \"head\" or headline contains \"evp\" limit 50')  -> taskId2")
+    print( "    (titles wanted: " + ", ".join(TITLES[:6]) + ", …; exclude: " + str(EXCLUDE) + ")")
+    print("  The filter field is `headline` (not job_title/title); strings are double-quoted;")
+    print("  read each row's `latest_experience_title`. Unfiltered `select from people limit 50`")
+    print("  + load-more-search-results is the fallback. Compound titles stay ONE string.\n")
 
     print("STEP 4 — contact data points")
     print("  add-contact-data-points(taskId2, dataPoints=[")

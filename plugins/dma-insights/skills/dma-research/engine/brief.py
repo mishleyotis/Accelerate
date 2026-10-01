@@ -1486,13 +1486,29 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "agent": "enrichment-connector-specialist", "shared": sh,
         "first_commands": [f"python3 -m engine.prelim state {e}"],
         "owed": [x for x in ("leadership", "firmographics", "peers") if x in st["open"]],
+        # N-16 (2026-10-01, Northwest Bank): the brief said "record every
+        # attempt" and named no connector id, so the subagent skipped
+        # record_enrichment and the app's facets stayed never_enriched after
+        # the enrichment had run.
+        "connector_display_id": str(wb.metadata().get("entity_id") or ""),
         "rules": common_rules + [
             "the contact pass names the leaders `leadership` needs (min two "
             "named people); the machine technographic scan is registered at "
             "T1, never T4 (the connector's ET-11; clay_taxonomy.json)",
             "record every attempt with the outcome it had (RESOLVED, NOT_RUN, "
             "NO_SOURCE, FAILED) — a refused connector is stated, not dressed "
-            "as a result"],
+            "as a result — in the run AND on the connector: "
+            "record_enrichment(display_id=<connector_display_id>, run_id=\"\", "
+            "facet=leadership|firmographics|peer_scores, …)",
+            # N-12: the connector specialist holds no web tool, so it froze
+            # Northwest's peers from its own judgement ("I did not source
+            # them"), and every peer median and benchmark reads that set.
+            "PEERS ARE SOURCED BEFORE THEY ARE INFERRED: a listed entity's "
+            "proxy statement (DEF 14A) or 10-K names its compensation or "
+            "performance peer group — register that page and freeze the set "
+            "citing it; a regulator's peer group or a published league table "
+            "is next. Basis `inferred` (your own judgement) is the last rung, "
+            "and its rule says which rungs were searched and came back empty"],
     })
     # THE CONNECTOR PASS IS NOT A LANE. Measured 2026-09-30 (SWBC): it was
     # dispatched as a `claude -p` child like the other two, and a child holds
@@ -1510,13 +1526,28 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     ], run=run, stage="PRELIM")
     if owed_connector:
         path = Path(out_dir) / "prelim-connectors.orchestrator.md"
-        connector["serviced_by"] = ("the conducting session: spawn ONE in-process "
-                                    "`enrichment-connector-specialist` subagent with "
-                                    "this file as its prompt")
+        # N-12: one agent cannot service every section — the connector
+        # specialist holds Clay/Explorium and no web search, which is what a
+        # sourced peer group needs. Route each owed section to the agent that
+        # holds its tools; both start in ONE message, on the fast tier.
+        owners = []
+        if set(owed_connector) & {"leadership", "firmographics"}:
+            owners.append("`enrichment-connector-specialist` for "
+                          + ", ".join(x for x in owed_connector if x != "peers"))
+        if "peers" in owed_connector:
+            owners.append("`enrichment-web-specialist` for peers")
+        connector["serviced_by"] = ("the conducting session: spawn, in ONE message, "
+                                    "one in-process subagent per owner — "
+                                    + "; ".join(owners)
+                                    + " — each with this file as its prompt and told "
+                                      "which sections are its own")
         path.write_text(_md("PRELIM — connector enrichment (ORCHESTRATOR)", connector),
                         encoding="utf-8")
         out["orchestrator"] = {"prompt_file": str(path), "owed": owed_connector,
-                               "agent": "enrichment-connector-specialist"}
+                               "agent": "enrichment-connector-specialist",
+                               "agents": {s_: ("enrichment-web-specialist" if s_ == "peers"
+                                               else "enrichment-connector-specialist")
+                                          for s_ in owed_connector}}
     return out
 
 
