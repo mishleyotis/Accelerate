@@ -390,7 +390,11 @@ class StubReads:
 
     def __init__(self, *, entity_id="acme-cu", entity_name="Acme Credit Union",
                  never: bool | None = None, contract: dict | None = None,
-                 polls_before_ingest: int = 0):
+                 polls_before_ingest: int = 0, request_id: str | None = None):
+        # The connector stamps each row with the package's request id; the
+        # stub does not know the run's, so it leaves it unset (legacy shape)
+        # unless a test names one.
+        self.request_id = request_id
         if never is None:
             never = os.environ.get("DMA_STUB_NEVER_INGEST", "") not in ("", "0")
         self.entity_id, self.entity_name, self.never = entity_id, entity_name, never
@@ -424,7 +428,7 @@ class StubReads:
             self._pending_since = 0
             self._persist()
         return ([{"run_id": f"conn-{self.entity_id}-{self.seq}", "display_id": self.entity_id,
-                  "entity_name": self.entity_name, "request_id": "req-1",
+                  "entity_name": self.entity_name, "request_id": self.request_id,
                   "status": "INGESTED", "run_seq": self.seq, "scored_cells": 6,
                   "runs_for_request": self.seq, "is_latest_for_request": True}]
                 if self.seq else [])

@@ -162,6 +162,26 @@ class Dispatcher(Protocol):
                  ctx: "Pipeline") -> dict: ...
 
 
+
+def _this_engagement(rows: list[dict], request_id: str, reference_date: str) -> list[dict]:
+    """The pending rows that can be THIS run's ingest.
+
+    The connector stamps each row with the package's request id. Rows that
+    name ours are the answer; a row naming another request is another
+    engagement's. A row with no request id is legacy: it counts unless it
+    completed before this run's reference date. Without this, INGEST_A took
+    the entity's stale run from an earlier engagement on its first poll
+    (2026-10-01, Cross Insurance: seq 1 from 2026-09-13, not the seq 2 the
+    push created a minute later).
+    """
+    ours = [r for r in rows if request_id and str(r.get("request_id") or "") == request_id]
+    if ours:
+        return ours
+    ref = reference_date[:10]
+    return [r for r in rows if not r.get("request_id")
+            and not (ref and str(r.get("completed_at") or "")[:10]
+                     and str(r.get("completed_at"))[:10] < ref)]
+
 class ConnectorReads(Protocol):
     def pending_runs(self) -> list[dict]: ...
     def page_contract(self, page: str) -> dict: ...
@@ -2050,6 +2070,13 @@ class Pipeline:
             mine = [r for r in rows
                     if str(r.get("display_id") or "").strip().lower() == ent_id
                     or str(r.get("entity_name") or "").strip().lower() == ent_name]
+            # A row that names a request id is THIS run's only if the id is
+            # ours. Without this, INGEST_A (after_seq=None) took the entity's
+            # stale pending run from an earlier engagement on its first poll
+            # (2026-10-01, Cross Insurance: seq 1 from 2026-09-13 instead of
+            # the seq 2 this push created a minute later).
+            mine = _this_engagement(mine, str(getattr(self.run, "run_id", "") or ""),
+                                    str(md.get("reference_date") or ""))
             fresh = [r for r in mine
                      if after_seq is None or int(r.get("run_seq") or 0) > int(after_seq)]
             if fresh:
