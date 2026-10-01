@@ -317,6 +317,14 @@ class ShipPageShipper:
         self.session = session or f"engine-pipeline-{os.getpid()}"
 
     def ship(self, connector_run, page, sections_dir, verdicts_out):
+        # A page with no section files is NOT shipped. ship_page.py prints
+        # "no section files … skipped" and exits 0, which this used to read
+        # as a pass (2026-10-01, Cross Insurance: five pages "PASS" in the
+        # driver's state, "missing" on the server, promote refused).
+        if not list(Path(sections_dir).glob(f"{page}.*.json")):
+            return {"status": "fail", "rc": None, "sg_v4_fails": [],
+                    "reasons": [f"no section files for {page} in {sections_dir}: "
+                                f"the page lane produced nothing to ship"]}
         r = subprocess.run(
             [sys.executable, str(SHIP_PAGE), connector_run, page,
              "--sections", str(sections_dir), "--producer", self.producer,
