@@ -817,7 +817,97 @@ def pillar_estimate(subcaps_by_pillar: dict[str, int],
     return out
 
 
-def for_run(wb) -> dict:
+#: Minutes one capability batch takes in a research workflow (pilot
+#: 2026-09-30: one batch agent closed 12 open cells in ~12 min).
+WORKFLOW_BATCH_MIN = 12.0
+#: Workflow agents per workflow: the runtime caps each at min(16, CPUs - 2).
+WORKFLOW_MAX_AGENTS = 16
+
+
+def workflow_concurrency(cpus: int | None = None) -> int:
+    """Agents ONE workflow runs at once on this host (I-49)."""
+    import os as _os
+    n = cpus if cpus is not None else (_os.cpu_count() or 4)
+    return max(1, min(WORKFLOW_MAX_AGENTS, n - 2))
+
+
+def workflow_plan(wb) -> dict:
+    """The research the workflows will actually be handed: open cells per
+    category, packed into capability batches exactly as the RESEARCH handoff
+    packs them (`pipeline._open_capabilities` / `pipeline._batches`)."""
+    from . import pipeline as P
+    open_caps = P._open_capabilities(wb)
+    cats = {}
+    for cat, caps in sorted(open_caps.items()):
+        cells = sum(caps.values())
+        if cells:
+            cats[cat] = {"open_cells": cells, "batches": len(P._batches(caps))}
+    return {"categories": cats,
+            "usd_per_cell": P.WORKFLOW_USD_PER_CELL,
+            "usd_per_category_challenge": P.CHALLENGE_USD_PER_CATEGORY}
+
+
+def workflow_estimate(wb, budget_usd: float | None = None) -> dict:
+    """N-09 (2026-10-01, Northwest Bank): the step-4 estimate printed the
+    levered LANE model ("$13.24 · within budget" for 729 cells) after I-16
+    had retired it at the research handoff for the MEASURED workflow rate,
+    and SWBC had measured $86.73 before scoring. The owner was told a run
+    fits a budget it cannot fit. This is the same arithmetic the handoff
+    uses, per pillar, against the budget the driver will enforce."""
+    plan = workflow_plan(wb)
+    rate, chal = plan["usd_per_cell"], plan["usd_per_category_challenge"]
+    pillars: dict[str, dict] = {}
+    for cat, row in plan["categories"].items():
+        pl = pillars.setdefault(cat[:2], {"open_cells": 0, "categories": 0,
+                                          "batches": 0, "usd": 0.0})
+        pl["open_cells"] += row["open_cells"]
+        pl["categories"] += 1
+        pl["batches"] += row["batches"]
+        pl["usd"] += row["open_cells"] * rate + chal
+    in_scope = {str(c).split("C")[0] for c in wb.selected_subcaps()}
+    budget = (budget_usd if budget_usd is not None
+              else round(BUDGET_PER_PILLAR * max(1, len(in_scope)), 2))
+    total = round(sum(v["usd"] for v in pillars.values()), 2)
+    for v in pillars.values():
+        v["usd"] = round(v["usd"], 2)
+    return {"basis": (f"measured workflow rate: ${rate}/open cell + ${chal}/category "
+                      f"challenge (pilot 2026-09-30) — RESEARCH only; scoring, "
+                      f"reports and pages are measured in the ledger as they run"),
+            "pillars": pillars, "research_usd": total,
+            "open_cells": sum(v["open_cells"] for v in pillars.values()),
+            "batches": sum(v["batches"] for v in pillars.values()),
+            "budget_usd": budget, "fits_budget": total <= budget,
+            "over_by_usd": round(max(0.0, total - budget), 2)}
+
+
+def workflow_schedule(wb, cpus: int | None = None) -> dict:
+    """N-10: research wall clock as it actually runs — one workflow per
+    category, all started at once, each running `workflow_concurrency()`
+    batch agents. The slowest category sets the research phase."""
+    plan = workflow_plan(wb)
+    conc = workflow_concurrency(cpus)
+    waves = {c: -(-r["batches"] // conc) for c, r in plan["categories"].items()}
+    longest = max(waves.values()) if waves else 0
+    research = round(longest * WORKFLOW_BATCH_MIN, 1)
+    phases = {k: v for k, v in PHASE_MINUTES.items() if v is not None}
+    phases[(f"category research ({len(waves)} workflows x {conc} agents, "
+            f"{longest} wave(s) in the longest category)")] = research
+    total = round(sum(phases.values()), 1)
+    batches = sum(r["batches"] for r in plan["categories"].values())
+    return {"mode": "workflow", "subcaps": len(wb.selected_subcaps()),
+            "open_cells": sum(r["open_cells"] for r in plan["categories"].values()),
+            "workflows": len(waves), "agents_per_workflow": conc,
+            "peak_agents": len(waves) * conc, "batches": batches,
+            "research_serial_min": round(batches * WORKFLOW_BATCH_MIN, 1),
+            "research_parallel_min": research,
+            "slowest_categories": sorted(waves, key=waves.get, reverse=True)[:3],
+            "phases_min": phases, "total_min": total,
+            "target_min": TARGET_WALL_CLOCK_MIN,
+            "within_target": total <= TARGET_WALL_CLOCK_MIN,
+            "headroom_min": round(TARGET_WALL_CLOCK_MIN - total, 1)}
+
+
+def for_run(wb, budget_usd: float | None = None) -> dict:
     """This run's actual selection, priced."""
     by_pillar: dict[str, int] = {}
     for cell in wb.selected_subcaps():
@@ -826,6 +916,11 @@ def for_run(wb) -> dict:
     est = pillar_estimate(by_pillar)
     est["run_id"] = wb.metadata().get("run_id")
     est["entity"] = wb.metadata().get("entity_name")
+    try:
+        est["workflow"] = workflow_estimate(wb, budget_usd)
+        est["within_budget"] = est["workflow"]["fits_budget"]
+    except Exception as exc:                               # noqa: BLE001
+        est["workflow"] = {"error": f"{type(exc).__name__}: {exc}"}
     return est
 
 
@@ -843,6 +938,9 @@ def main(argv=None) -> int:
     # Measured 2026-09-30: without it the estimate priced the catalogue's
     # default selection (IB 694) while the SWBC run held 760 multi-LOB cells.
     e.add_argument("--run"); e.add_argument("--root")
+    e.add_argument("--max-usd", type=float, default=None,
+                   help="the ceiling the driver will enforce (`engine.pipeline run "
+                        "--max-usd`); default $%.0f per pillar in scope" % BUDGET_PER_PILLAR)
     lf = sub.add_parser("lane-fit",
                         help="can each category's work fit the turns its lane gets?")
     lf.add_argument("--run"); lf.add_argument("--root")
@@ -856,6 +954,9 @@ def main(argv=None) -> int:
     t.add_argument("--lanes", type=int, default=PARALLEL_LANES)
     t.add_argument("--run", help="phases from a RUN's own selection, not the taxonomy")
     t.add_argument("--root")
+    t.add_argument("--research-mode", choices=("workflow", "lanes"), default="workflow",
+                   help="workflow (default, how RESEARCH runs since I-46/I-58): one "
+                        "workflow per category; lanes: the retired claude -p lanes")
     t.add_argument("--json", action="store_true")
     rc = sub.add_parser("record", help="append one stage's wall clock / cost to the run")
     rc.add_argument("--run", required=True); rc.add_argument("--root")
@@ -972,6 +1073,26 @@ def main(argv=None) -> int:
         return 0
 
     if a.cmd == "schedule":
+        if a.run and a.research_mode == "workflow":
+            from . import runstate
+            run = runstate.locate(a.run, Path(a.root) if a.root else None)
+            sch = workflow_schedule(run.open())
+            if a.json:
+                print(json.dumps(sch, indent=2))
+                return 0 if sch["within_target"] else 1
+            print(f"{sch['open_cells']} open cells in {sch['batches']} capability "
+                  f"batches · {sch['workflows']} category workflows x "
+                  f"{sch['agents_per_workflow']} agents = {sch['peak_agents']} at "
+                  f"peak\n")
+            for phase, mins in sch["phases_min"].items():
+                print(f"  {mins:>6.1f} min  {phase}")
+            print(f"  {'-' * 6}")
+            print(f"  {sch['total_min']:>6.1f} min  TOTAL  (target "
+                  f"{sch['target_min']}, headroom {sch['headroom_min']:.0f} min)")
+            print(f"\n  research alone would be {sch['research_serial_min']:.0f} min "
+                  f"serial; slowest categories: "
+                  f"{', '.join(sch['slowest_categories'])}")
+            return 0 if sch["within_target"] else 1
         if a.run:
             from . import runstate
             run = runstate.locate(a.run, Path(a.root) if a.root else None)
@@ -1029,7 +1150,7 @@ def main(argv=None) -> int:
     if a.cmd == "estimate" and a.run:
         from . import runstate
         run = runstate.locate(a.run, Path(a.root) if a.root else None)
-        est = for_run(run.open())
+        est = for_run(run.open(), a.max_usd)
     elif a.cmd == "estimate":
         if a.subcaps:
             by = {"P1": a.subcaps}
@@ -1048,6 +1169,20 @@ def main(argv=None) -> int:
     if getattr(a, "json", False):
         print(json.dumps(est, indent=2))
         return 0 if est["within_budget"] else 1
+    wf = est.get("workflow") or {}
+    if "pillars" in wf:
+        print(f"RESEARCH estimate — {wf['basis']}\n")
+        print(f"  {'pillar':<8}{'open':>7}{'cats':>6}{'batches':>9}{'usd':>10}")
+        for pillar, row in sorted(wf["pillars"].items()):
+            print(f"  {pillar:<8}{row['open_cells']:>7}{row['categories']:>6}"
+                  f"{row['batches']:>9}{row['usd']:>10,.2f}")
+        verdict = ("fits" if wf["fits_budget"]
+                   else f"OVER by ${wf['over_by_usd']:,.2f} — raise --max-usd "
+                        f"(a person's decision) or narrow the scope")
+        print(f"\n  research ${wf['research_usd']:,.2f} for {wf['open_cells']} open "
+              f"cells in {wf['batches']} batches · ceiling ${wf['budget_usd']:,.2f} "
+              f"· {verdict}")
+        return 0 if wf["fits_budget"] else 1
     print(f"budget ${est['budget_per_pillar_usd']:.2f}/pillar · levers "
           f"{', '.join(est['levers'])} (x{est['combined_factor']})\n")
     print(f"  {'pillar':<8}{'cells':>7}{'measured':>12}{'levered':>10}  verdict")

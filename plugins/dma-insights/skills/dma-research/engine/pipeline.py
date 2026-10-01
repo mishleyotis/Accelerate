@@ -2367,6 +2367,24 @@ def _install_terminate_handler() -> None:
         pass
 
 
+#: N-17 (2026-10-01, Northwest Bank): run-assessment tells the session to
+#: `tail -F <ROOT>/pipeline.log` for [RELAY] lines, and nothing wrote that
+#: file — the driver logged to stdout only, so a session following the
+#: command saw no relay and PRELIM stalled. Every line now lands there too.
+LOG_NAME = "pipeline.log"
+
+
+def _tee_log(path: Path, echo: Callable[[str], None]) -> Callable[[str], None]:
+    def log(line: str) -> None:
+        echo(line)
+        try:
+            with path.open("a", encoding="utf-8") as fh:
+                fh.write(f"{line}\n")
+        except OSError:
+            pass                      # the stdout copy is still the record
+    return log
+
+
 def _build_opts(a) -> Options:
     if a.dispatcher == "stub":
         from . import pipeline_stub as S
@@ -2561,6 +2579,7 @@ def main(argv=None) -> int:
                 return 0
             time.sleep(a.interval)
     opts = _build_opts(a)
+    opts.log = _tee_log(Path(run.root) / LOG_NAME, opts.log)
     _install_terminate_handler()
     out = Pipeline(run, opts).run_all()
     if a.json:

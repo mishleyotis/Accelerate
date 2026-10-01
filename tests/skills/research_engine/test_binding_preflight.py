@@ -124,6 +124,24 @@ def test_shares_cannot_exceed_one_hundred_percent():
     assert "cannot exceed 100" in " ".join(P.check(doc)["problems"])
 
 
+def test_a_share_that_is_not_a_number_is_a_listed_problem_not_a_crash():
+    """N-06 (2026-10-01, Northwest Bank): `"~55 (estimate)"` raised a
+    ValueError out of `check`; the problems list is the contract."""
+    doc = _good()
+    doc["lob_census"]["lines_of_business"][0]["revenue_share_pct"] = "~55 (estimate)"
+    doc["financials"]["revenue_lines"][1]["share_pct"] = "about a quarter"
+    probs = " ".join(P.check(doc)["problems"])
+    assert "revenue_share_pct '~55 (estimate)' is not a number" in probs
+    assert "share_pct 'about a quarter' is not a number" in probs
+
+
+def test_a_share_written_with_a_percent_sign_reads_as_its_number():
+    doc = _good()
+    doc["lob_census"]["lines_of_business"][0]["revenue_share_pct"] = "74%"
+    doc["financials"]["revenue_lines"][0]["share_pct"] = "74.0"
+    assert P.check(doc)["ok"], P.check(doc)["problems"]
+
+
 def test_an_unasked_binding_question_is_refused():
     doc = _good()
     doc["binding_question"]["asked"] = False

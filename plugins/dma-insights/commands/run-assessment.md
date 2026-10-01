@@ -57,7 +57,7 @@ so that never repeats; refusing to start is not the remedy, and neither is
 starting silently.
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal --root <ROOT>
 cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
 ```
 
@@ -69,7 +69,8 @@ reads OK through a heal. `UPDATED_MID_SESSION` means the bound tree moved
 under this session and THIS session still holds the old roster — carry on,
 because the driver dispatches every lane as a fresh child process that binds
 the current tree. Its `connector
-contract` row now reads the baseline you wrote: UNVERIFIED means you skipped
+contract` row now reads the baseline you wrote (pass the same `--root`: the
+doctor reads no shell export of yours): UNVERIFIED means you skipped
 the step above, and a short baseline is the DEGRADED row of the table, not a
 provisioning defect. Any OTHER row red after the heal is a provisioning
 defect: report the row and stop.
@@ -251,11 +252,6 @@ tokens for 66 requests on the conducting session's own tier). Watch with
 
 **To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
 — it signals the pid that holds the run's driver lock. Never kill a pid a shell
-captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
-real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
-
-**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
-It signals the pid that holds the run's driver lock. Never kill a pid a shell
 captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
 real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
 

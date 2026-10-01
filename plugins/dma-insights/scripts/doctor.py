@@ -592,7 +592,8 @@ def connector_contract_check() -> dict:
                 f"any of them.",
                 "from the session that holds the tools: "
                 "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
-                "baseline --tools - --root <RUN_ROOT>`, then re-run the doctor")
+                "baseline --tools - --root <RUN_ROOT>`, then re-run the doctor "
+                "with `--root <RUN_ROOT>`")
         rec = json.loads(Path(path).read_text())
         out = connector_contract.check(rec.get("mcp_tools") or [])
         if not out["ok"]:
@@ -1054,11 +1055,20 @@ def main() -> int:
                     help="offline run: skip the network rows (audience "
                          "comparison, enforcement probe, tool roster)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--root", default=None,
+                    help="the run root the connector baseline was written to "
+                         "(`connector_contract.py baseline --root`); default "
+                         "$DMA_RUN_ROOT, else cwd. Without it the contract row "
+                         "cannot see a baseline written at a named root and "
+                         "reads UNVERIFIED (N-03, 2026-10-01)")
     ap.add_argument("--heal", action="store_true",
                     help="on a STALE/MISSING/INCOMPLETE install, run the "
                          "plugin update itself (container-local cache only) "
                          "and re-check, so one command can reach green")
     args = ap.parse_args()
+    if args.root:
+        # Process-local: every check that reads a run root reads this one.
+        os.environ["DMA_RUN_ROOT"] = str(Path(args.root).expanduser())
 
     # The audience and enforcement rows are the two SECURITY checks, and a
     # default of "not probed" made both pass vacuously on every plain run.

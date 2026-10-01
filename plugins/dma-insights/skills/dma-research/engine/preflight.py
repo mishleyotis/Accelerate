@@ -216,8 +216,14 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
                     f"({_clean(ln.get('line')) or '?'}): implies_lob is empty "
                     f"— a revenue line that names no line of business cannot "
                     f"inform the census, which is the only reason to read it")
-    shares = [float(ln.get("share_pct") or 0) for ln in lines
-              if ln.get("share_pct") not in (None, "")]
+    for i, ln in enumerate(lines):
+        if _not_a_share(ln.get("share_pct")):
+            problems.append(
+                f"financials.revenue_lines[{i}] ({_clean(ln.get('line')) or '?'}): "
+                f"share_pct {ln.get('share_pct')!r} is not a number — write the "
+                f"percentage alone (e.g. \"55\") and put any caveat in the line")
+    shares = [_pct(ln.get("share_pct")) for ln in lines]
+    shares = [v for v in shares if v is not None]
     if shares and sum(shares) > 100.5:
         problems.append(
             f"financials.revenue_lines: share_pct sums to {sum(shares):.1f}% "
@@ -225,6 +231,25 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
     return {"statements": len(statements), "revenue_lines": len(lines),
             "not_run": not_run or None,
             "share_total_pct": round(sum(shares), 2) if shares else None}
+
+
+def _pct(value) -> float | None:
+    """A share as a number, or None when it is blank or not a number.
+
+    N-06 (2026-10-01, Northwest Bank): `revenue_share_pct: "~55 (estimate)"`
+    crashed `check` with a ValueError traceback instead of being listed with
+    every other problem. A share that is not a number is a problem to report,
+    never a crash; the caller decides how to word it."""
+    if value in (None, ""):
+        return None
+    try:
+        return float(str(value).strip().rstrip("%").replace(",", ""))
+    except ValueError:
+        return None
+
+
+def _not_a_share(value) -> bool:
+    return value not in (None, "") and _pct(value) is None
 
 
 def _check_census(doc: dict, problems: list[str]) -> dict:
@@ -251,7 +276,12 @@ def _check_census(doc: dict, problems: list[str]) -> dict:
                 f"this LOB is read from")
         share = lob.get("revenue_share_pct")
         flagged = bool(lob.get("material"))
-        if share not in (None, "") and float(share) >= MATERIAL_SHARE_PCT:
+        if _not_a_share(share):
+            problems.append(
+                f"lob_census.lines_of_business[{i}] ({name}): revenue_share_pct "
+                f"{share!r} is not a number — write the percentage alone (e.g. "
+                f"\"55\") and say it is an estimate in `basis`")
+        elif share not in (None, "") and _pct(share) >= MATERIAL_SHARE_PCT:
             flagged = True
         if flagged:
             material.append(name)
@@ -601,8 +631,8 @@ def bases(doc: dict, report: dict | None = None) -> dict:
         f"{_clean(mq.get('answer'))}")
     census = "; ".join(
         f"{_clean(l.get('lob'))}"
-        + (f" {float(l.get('revenue_share_pct')):.1f}%"
-           if l.get("revenue_share_pct") not in (None, "") else "")
+        + (f" {_pct(l.get('revenue_share_pct')):.1f}%"
+           if _pct(l.get("revenue_share_pct")) is not None else "")
         for l in (doc.get("lob_census") or {}).get("lines_of_business") or []
     ) or "no line of business stated"
     if rejected:
@@ -706,8 +736,8 @@ def _render_review(doc: dict, report: dict, b: dict) -> str:
             if amt not in (None, ""):
                 bits += f" ({ln.get('currency') or 'USD'} {amt:,})" if \
                     isinstance(amt, (int, float)) else f" ({amt})"
-            if share not in (None, ""):
-                bits += f", {float(share):.1f}% of revenue"
+            if _pct(share) is not None:
+                bits += f", {_pct(share):.1f}% of revenue"
             lob = _clean(ln.get("implies_lob"))
             if lob:
                 bits += f" — {lob}"
