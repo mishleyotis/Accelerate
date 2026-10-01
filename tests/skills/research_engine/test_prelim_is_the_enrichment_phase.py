@@ -72,7 +72,9 @@ def test_all_four_layers_close_it(tmp_path):
     wb = run.open()
     eid = _profile_evidence(wb)
     for layer in C.TECH_LAYERS:
-        techscan.record(wb, product=f"{layer} system", vendor="Vendor",
+        # OPS carries the CU system of record (C-22: PRELIM owes it)
+        techscan.record(wb, product=("Symitar core processor" if layer == "OPS"
+                                     else f"{layer} system"), vendor="Vendor",
                         layer=layer, status="CONFIRMED",
                         method="public_document",
                         basis=f"named in the filing as the {layer} platform",
@@ -93,7 +95,8 @@ def test_a_layer_searched_and_empty_closes_as_absent_not_as_a_gap(tmp_path):
     for layer in C.TECH_LAYERS:
         absent = layer == "INFRA"
         techscan.record(
-            wb, product=f"{layer} platform", vendor="Vendor", layer=layer,
+            wb, product=("Symitar core processor" if layer == "OPS"
+                         else f"{layer} platform"), vendor="Vendor", layer=layer,
             status="ABSENT" if absent else "CONFIRMED",
             method="public_document",
             basis=("searched filings, the careers site and three vendor "
@@ -243,3 +246,19 @@ def test_there_is_no_background_while_prelim_is_open(tmp_path):
     from engine import orient as O
     run = new_run(tmp_path, prelim=False)
     assert O.orient(run.open(), "P1C1")["background"] is None
+
+
+def test_four_layers_without_the_system_of_record_stay_open(tmp_path):
+    """C-22 (2026-10-01, Cross Insurance): four layers of peripheral tools
+    closed PRELIM while the platform the institution runs on went unsearched."""
+    run = new_run(tmp_path, prelim=False)
+    wb = run.open()
+    eid = _profile_evidence(wb)
+    for layer in C.TECH_LAYERS:
+        techscan.record(wb, product=f"{layer} tool", vendor="Vendor",
+                        layer=layer, status="CONFIRMED", method="public_document",
+                        basis=f"named in the filing as a {layer} tool",
+                        providers=["web"], subcaps=[], evidence_ids=[eid],
+                        source_urls=["https://example.test/a"], as_of="2025-12-31")
+    st = _state(wb, "tech_baseline")
+    assert st["status"] == "OPEN" and "core processor" in st["detail"]

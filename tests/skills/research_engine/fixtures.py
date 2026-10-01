@@ -121,22 +121,29 @@ def bank_evidence(wb, subcap, n=3, *, tier="T2", published="2025-06-01"):
     return out
 
 
+def _entity(wb) -> str:
+    return str(wb.metadata().get("entity_name") or "Acme Credit Union")
+
+
 def fire_volleys(wb, subcap, *, n=3, tool="web_search"):
     """Log one search per volley facet for a subcap — the five angles the
     protocol has always required and the floors gate now COUNTS per cell
     (`volleys_incomplete`, 2026-09-03). The `contradicts` query carries two
     adversarial operators so `quality.probes_contradicts` recognises it."""
+    # The RUN's entity, quoted: an absence's direct rung must pin the entity
+    # it is about (C-30), and the stub walks start runs under other names.
+    ent = _entity(wb)
     queries = {
         # The toolkit's own diagnostic question comes first: the five
         # volleys answer it, and `primary_unfired` blocks a category whose
         # cell never asked it (2026-09-03).
-        "primary": f'"Acme Credit Union" {subcap} digital capability statement',
-        "works": f'"Acme Credit Union" {subcap} rollout OR "went live"',
-        "fails": f'"Acme Credit Union" {subcap} delayed OR descoped OR outage',
-        "value": f'"Acme Credit Union" {subcap} adoption OR "reduced by" OR results',
-        "contradicts": (f'"Acme Credit Union" {subcap} enforcement OR lawsuit '
+        "primary": f'"{ent}" {subcap} digital capability statement',
+        "works": f'"{ent}" {subcap} rollout OR "went live"',
+        "fails": f'"{ent}" {subcap} delayed OR descoped OR outage',
+        "value": f'"{ent}" {subcap} adoption OR "reduced by" OR results',
+        "contradicts": (f'"{ent}" {subcap} enforcement OR lawsuit '
                         f'OR criticism OR abandoned'),
-        "corroborates": f'"Acme Credit Union" {subcap} regulator OR analyst OR rating',
+        "corroborates": f'"{ent}" {subcap} regulator OR analyst OR rating',
     }
     for facet, q in queries.items():
         hits = n + 1 if facet in ("works", "value", "corroborates") else 0
@@ -160,19 +167,20 @@ def declare_absent(wb, subcap, *, actor="research-p1c1-producer"):
     """Fire every volley on an EMPTY cell and close it as a declared absence
     — the only honest way a cell ends a run with NO_EVIDENCE."""
     fire_volleys(wb, subcap, n=0)
-    proxy_q = (f'"Acme Credit Union" {subcap} proxy: "chief digital officer" '
+    ent = _entity(wb)
+    proxy_q = (f'"{ent}" {subcap} proxy: "chief digital officer" '
                f'OR "head of digital"')
     L.append_search(wb, subcap=subcap, facet="works", query=proxy_q,
                     tool="exa", hits=0, kept=0, outcome="no hits")
     return L.declare_absence(
         wb, subcap, actor=actor,
         ladder=[{"rung": "direct",
-                 "query": f'"Acme Credit Union" {subcap} rollout OR "went live"'},
+                 "query": f'"{ent}" {subcap} rollout OR "went live"'},
                 {"rung": "proxy", "query": proxy_q}],
         proxy_log=("hunted the leadership_title proxy class — a named owner for "
                    "the capability — across the site, LinkedIn and the annual "
                    "report; nothing names one"),
-        what_was_hunted=(f"a public artefact naming {subcap} at Acme Credit Union "
+        what_was_hunted=(f"a public artefact naming {subcap} at {ent} "
                          f"across five volleys and two ladder rungs; the searches "
                          f"returned generic vendor pages and nothing about Acme"))
 
