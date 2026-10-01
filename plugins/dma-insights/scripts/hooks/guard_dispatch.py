@@ -78,6 +78,7 @@ CELL = re.compile(r"\bP(\d+)C(\d+)(?:\.[0-9A-Z]+)+\b")
 
 #: A run the prompt names, in the engine's own flag form.
 RUN_NAMED = re.compile(r"--run[ =]([A-Za-z0-9][\w.:-]*)")
+ROOT_NAMED = re.compile(r"--root[ =][\"']?(/[^\s\"';&|)`]+)")
 
 #: The two places a prompt is ALLOWED to name another category's cell: the
 #: leads this lane was handed, and the cells a source it holds also names.
@@ -170,14 +171,24 @@ def _registered(rid: str, prompt: str, runstate) -> bool:
     roots: list[Path] = []
     try:
         (registry,) = ctx.engine("registry")
-        reg = registry.registry_path()
-        for line in reg.read_text().splitlines() if reg.is_file() else []:
-            try:
-                row = json.loads(line)
-            except ValueError:
-                continue
-            if row.get("run_id") == rid and row.get("root"):
-                roots.append(Path(row["root"]))
+        # The registry `engine.cli start --root R` wrote sits beside R, and a
+        # hook never sees the session's shell exports, so the env-default
+        # registry alone misses every run started at a root the command named
+        # (measured 2026-10-01, Northwest Bank: the PRELIM relay subagent the
+        # command prescribes was refused as "not a run on this machine").
+        # The registries beside the roots the prompt names are read too; a
+        # row must still map THIS run to a root that holds its workbook.
+        regs = [registry.registry_path()]
+        for m in ROOT_NAMED.finditer(prompt or ""):
+            regs.append(registry.registry_path(Path(m.group(1).rstrip(".,:"))))
+        for reg in dict.fromkeys(regs):
+            for line in reg.read_text().splitlines() if reg.is_file() else []:
+                try:
+                    row = json.loads(line)
+                except ValueError:
+                    continue
+                if row.get("run_id") == rid and row.get("root"):
+                    roots.append(Path(row["root"]))
     except Exception:                                          # noqa: BLE001
         pass
     for root in roots:

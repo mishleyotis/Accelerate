@@ -368,7 +368,10 @@ def narrate(wb: RunWorkbook, section: str, *, heading: str | None,
             f"the {section} body is {len(text)} chars; {_MIN_BODY} is the "
             f"floor. This section is {spec['why']} — a sentence does not "
             f"carry it.")
-    eids = [e for e in (evidence or []) if _clean(e)]
+    # N-15: `--evidence E-003,E-008` is one argument naming two ids; it was
+    # refused as an unknown id and the message blamed the register.
+    eids = [e for raw in (evidence or []) for e in re.split(r"[,\s]+", str(raw))
+            if _clean(e)]
     known = set(wb.evidence_index())
     unknown = [e for e in eids if e not in known]
     if unknown:
@@ -478,7 +481,10 @@ def timeline(wb: RunWorkbook, *, date: str, event: str, signal: str,
             "a timeline row needs a date. An undated event is UNVERIFIED, "
             "never current (invariant 9), and an undated timeline argues "
             "nothing about direction.")
-    eids = [e for e in (evidence or []) if _clean(e)]
+    # N-15: `--evidence E-003,E-008` is one argument naming two ids; it was
+    # refused as an unknown id and the message blamed the register.
+    eids = [e for raw in (evidence or []) for e in re.split(r"[,\s]+", str(raw))
+            if _clean(e)]
     known = set(wb.evidence_index())
     unknown = [e for e in eids if e not in known]
     if unknown:

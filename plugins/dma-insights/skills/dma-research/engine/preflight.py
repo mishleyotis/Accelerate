@@ -123,7 +123,9 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
         "_row_shapes": {
             "financials.statements[]": {"source_name": "", "url": "",
                                         "kind": "", "period": "",
-                                        "tier": "", "retrieved_at": ""},
+                                        "tier": "", "retrieved_at": "",
+                                        "excerpt": "verbatim 50-500 chars from the statement (a revenue line as printed)",
+                                        "published": "the date the statement states (filed/released), never the day you read it"},
             "financials.revenue_lines[]": {"line": "", "amount": "",
                                            "currency": "", "period": "",
                                            "share_pct": "", "implies_lob": "",
@@ -144,7 +146,7 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
         "entity": {"name": entity, "entity_id": entity_id,
                    "website": website or "", "as_of": ""},
         "financials": {
-            "statements": [],       # {source_name,url,kind,period,tier,retrieved_at}
+            "statements": [],       # {source_name,url,kind,period,tier,retrieved_at,excerpt,published}
             "revenue_lines": [],    # {line,amount,currency,period,share_pct,
                                     #  implies_lob,source}
             "not_run": "",          # the ladder, if nothing is published
@@ -201,6 +203,12 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
                     f"financials.statements[{i}] "
                     f"({_clean(s.get('source_name')) or '?'}): no url — a "
                     f"statement nobody can reopen is not a review")
+            if not (50 <= len(_clean(s.get("excerpt"))) <= 500):
+                problems.append(
+                    f"financials.statements[{i}] "
+                    f"({_clean(s.get('source_name')) or '?'}): excerpt must be "
+                    f"50-500 chars copied verbatim from the statement — it is "
+                    f"banked as evidence, and evidence is the source's words")
         if not lines:
             problems.append(
                 "financials.revenue_lines is empty though a statement was "
@@ -216,8 +224,14 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
                     f"({_clean(ln.get('line')) or '?'}): implies_lob is empty "
                     f"— a revenue line that names no line of business cannot "
                     f"inform the census, which is the only reason to read it")
-    shares = [float(ln.get("share_pct") or 0) for ln in lines
-              if ln.get("share_pct") not in (None, "")]
+    for i, ln in enumerate(lines):
+        if _not_a_share(ln.get("share_pct")):
+            problems.append(
+                f"financials.revenue_lines[{i}] ({_clean(ln.get('line')) or '?'}): "
+                f"share_pct {ln.get('share_pct')!r} is not a number — write the "
+                f"percentage alone (e.g. \"55\") and put any caveat in the line")
+    shares = [_pct(ln.get("share_pct")) for ln in lines]
+    shares = [v for v in shares if v is not None]
     if shares and sum(shares) > 100.5:
         problems.append(
             f"financials.revenue_lines: share_pct sums to {sum(shares):.1f}% "
@@ -225,6 +239,25 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
     return {"statements": len(statements), "revenue_lines": len(lines),
             "not_run": not_run or None,
             "share_total_pct": round(sum(shares), 2) if shares else None}
+
+
+def _pct(value) -> float | None:
+    """A share as a number, or None when it is blank or not a number.
+
+    N-06 (2026-10-01, Northwest Bank): `revenue_share_pct: "~55 (estimate)"`
+    crashed `check` with a ValueError traceback instead of being listed with
+    every other problem. A share that is not a number is a problem to report,
+    never a crash; the caller decides how to word it."""
+    if value in (None, ""):
+        return None
+    try:
+        return float(str(value).strip().rstrip("%").replace(",", ""))
+    except ValueError:
+        return None
+
+
+def _not_a_share(value) -> bool:
+    return value not in (None, "") and _pct(value) is None
 
 
 def _check_census(doc: dict, problems: list[str]) -> dict:
@@ -251,7 +284,12 @@ def _check_census(doc: dict, problems: list[str]) -> dict:
                 f"this LOB is read from")
         share = lob.get("revenue_share_pct")
         flagged = bool(lob.get("material"))
-        if share not in (None, "") and float(share) >= MATERIAL_SHARE_PCT:
+        if _not_a_share(share):
+            problems.append(
+                f"lob_census.lines_of_business[{i}] ({name}): revenue_share_pct "
+                f"{share!r} is not a number — write the percentage alone (e.g. "
+                f"\"55\") and say it is an estimate in `basis`")
+        elif share not in (None, "") and _pct(share) >= MATERIAL_SHARE_PCT:
             flagged = True
         if flagged:
             material.append(name)
@@ -601,8 +639,8 @@ def bases(doc: dict, report: dict | None = None) -> dict:
         f"{_clean(mq.get('answer'))}")
     census = "; ".join(
         f"{_clean(l.get('lob'))}"
-        + (f" {float(l.get('revenue_share_pct')):.1f}%"
-           if l.get("revenue_share_pct") not in (None, "") else "")
+        + (f" {_pct(l.get('revenue_share_pct')):.1f}%"
+           if _pct(l.get("revenue_share_pct")) is not None else "")
         for l in (doc.get("lob_census") or {}).get("lines_of_business") or []
     ) or "no line of business stated"
     if rejected:
@@ -640,17 +678,25 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
     banked = []
     for s in (doc.get("financials") or {}).get("statements") or []:
         url = _clean(s.get("url"))
-        excerpt = _clean(s.get("excerpt")) or _clean(
-            f"{s.get('kind') or 'financial statement'} for "
-            f"{s.get('period') or 'the stated period'}, reviewed during "
-            f"binding preflight for revenue lines and lines of business: "
-            f"{_clean(s.get('source_name'))}.")
+        # N-28 (2026-10-01, Northwest Bank): with no excerpt in the row the
+        # engine WROTE one ("earnings release for FY2025, reviewed during
+        # binding preflight …") and banked it as evidence, and with no
+        # period_end it dated the row by retrieved_at — so a description
+        # posed as a verbatim excerpt (invariant 4) and the day it was read
+        # posed as the day it was published, reading CURRENT (invariant 9).
+        # A statement is banked only on the words it prints; an undated one
+        # stays undated.
+        excerpt = _clean(s.get("excerpt"))
+        if not (50 <= len(excerpt) <= 500):
+            banked.append(f"NOT_BANKED: {_clean(s.get('source_name')) or url}: no verbatim "
+                          f"excerpt of 50-500 chars in the statement row")
+            continue
         try:
             eid = L.append_evidence(
                 wb, source_name=_clean(s.get("source_name")), source_url=url,
                 tier=_clean(s.get("tier")) or "T2", excerpt=excerpt,
-                subcaps=[], published=_clean(s.get("period_end"))
-                or _clean(s.get("retrieved_at"))[:10] or None,
+                subcaps=[], published=_clean(s.get("published"))
+                or _clean(s.get("period_end")) or None,
                 # A filed statement is T1/T2 and a FACT; a statement the
                 # preflight could only reach at T3 (a news summary of the
                 # figures) is what its tier licenses, not a FACT by fiat.
@@ -706,8 +752,8 @@ def _render_review(doc: dict, report: dict, b: dict) -> str:
             if amt not in (None, ""):
                 bits += f" ({ln.get('currency') or 'USD'} {amt:,})" if \
                     isinstance(amt, (int, float)) else f" ({amt})"
-            if share not in (None, ""):
-                bits += f", {float(share):.1f}% of revenue"
+            if _pct(share) is not None:
+                bits += f", {_pct(share):.1f}% of revenue"
             lob = _clean(ln.get("implies_lob"))
             if lob:
                 bits += f" — {lob}"

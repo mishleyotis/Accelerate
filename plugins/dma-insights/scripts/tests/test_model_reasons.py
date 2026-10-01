@@ -62,4 +62,6 @@ def test_the_distribution_is_the_audits_with_the_reasons_stated():
     counts = {}
     for model, _ in prov.MODEL_REASONS.values():
         counts[model] = counts.get(model, 0) + 1
-    assert counts == {"sonnet": 58, "opus": 15, "haiku": 1}, counts
+    # +1 sonnet 2026-10-01: research-batch-producer (N-19, Northwest Bank QA),
+    # the workflow's lean batch agent — its reason is in MODEL_REASONS.
+    assert counts == {"sonnet": 59, "opus": 15, "haiku": 1}, counts

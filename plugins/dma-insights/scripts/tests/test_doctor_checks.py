@@ -271,6 +271,24 @@ class ConnectorContractRow(unittest.TestCase):
             self.assertTrue(self._row(Path(a))["ok"])
             self.assertFalse(self._row(Path(b))["ok"], "b has no baseline")
 
+    def test_the_cli_reads_the_root_flag_with_no_export(self):
+        """N-03 (2026-10-01, Northwest Bank): run-assessment writes the
+        baseline with `--root <ROOT>` and then ran the doctor with no root, so
+        the row read cwd and went red on the baseline it had just written."""
+        import os
+        fam = connector_contract.families()
+        env = {k: v for k, v in os.environ.items() if k != "DMA_RUN_ROOT"}
+        with tempfile.TemporaryDirectory() as td:
+            connector_contract.write_baseline(
+                [fam[f][0] for f in ("exa", "tavily", "clay")], td)
+            proc = subprocess.run(
+                [sys.executable, str(HERE.parent / "doctor.py"), "--no-probe",
+                 "--json", "--root", td],
+                capture_output=True, text=True, timeout=300, env=env)
+        rows = {c["check"]: c for c in json.loads(proc.stdout)["checks"]}
+        self.assertTrue(rows["connector contract"]["ok"],
+                        rows["connector contract"]["detail"])
+
 
 ENVIRONMENT_DEPENDENT_ROWS = {
     "skill script dependencies",

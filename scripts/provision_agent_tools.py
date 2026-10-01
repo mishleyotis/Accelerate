@@ -145,6 +145,8 @@ EXTERNAL = {
 #: firmographic-and-technographic pass. Both carry `get-task-context`
 #: because polling is the step that was skipped in the 20-contact loss.
 SLICES = {
+    # the one Clay read a research batch makes: who owns a function
+    "clay/search":  ["mcp__Clay__search-contacts"],
     "clay/people":  ["mcp__Clay__search-contacts",
                      "mcp__Clay__get-task-context",
                      "mcp__Clay__add-contact-data-points"],
@@ -308,6 +310,22 @@ RESEARCH_CONDUCTOR = row(
         "search_requests per capability batch; its preflight is the "
         "connector contract's caller")
 
+#: The research workflow's batch agent (N-19, measured 2026-10-01 on the
+#: Northwest Bank run). Batch agents ran with no agentType and inherited the
+#: whole session — the skill listing (~15K tokens), the deferred-tool roster
+#: (~9K) and a ToolSearch turn to load the connectors — on every turn of
+#: ~100 agents: a 66K-token floor where a role without Skill opens at 49K.
+#: Its own row: the web volley, Exa, Tavily and the one Clay read; Read and
+#: Bash only, because the engine CLI is its pen and the prompt its brief.
+RESEARCH_BATCH = row(
+    web=["WebSearch"], external=["exa", "tavily", "clay/search"], reads="floor",
+    core=["Read", "Bash"], extra=["Write"],
+    why="researches one batch of capabilities inside a category workflow: "
+        "WebSearch is the primary volley, Exa the search, Tavily the fallback "
+        "and the verbatim extract, Clay search-contacts the one people lookup; "
+        "Write puts a capability's JSON-lines ops file under the run root, so "
+        "no python heredoc (which no approver may pass) generates it")
+
 #: The only agent that puts content into the product. Invariant 2 in one row.
 #: No web and no connector: it assembles, reconciles and submits what its
 #: producers wrote; a question about the world goes to a producer. No
@@ -380,6 +398,7 @@ ROLES = {
                                          "; writes its vetting report as a file"),
     "research/research-conductor": RESEARCH_CONDUCTOR,
     "research/technographic-scanner": TECHNOGRAPHIC_SCANNER,
+    "research/research-batch-producer": RESEARCH_BATCH,
     # C3-1: the Sonnet challenge pass over research syntheses. It reads
     # nothing but its brief; `engine.cli fetch` over Bash is its only
     # look-up. Read/Bash/Skill only — it greps nothing and globs nothing.
@@ -469,6 +488,7 @@ DEFAULTS = {
 #: pins this dict against its own copy, so a new entry is a visible decision.
 CONNECTOR_TIER = {
     "research-conductor": 11,
+    "research-batch-producer": 7,
     "surface-producer": 3,
     "technographic-scanner": 9,
     "enrichment-connector-specialist": 8,
@@ -552,6 +572,10 @@ for _k in ("evidence-integrity-checker", "exclusion-boundary-auditor",
            "numeric-reconciliation-checker", "adversarial-verifier",
            "deployed-app-auditor", "enrichment-ledger-auditor"):
     MODEL_REASONS[_k] = _CHECKER
+MODEL_REASONS["research-batch-producer"] = (
+    "sonnet", "one batch of at most twelve open cells from a prompt that carries the "
+              "exact command sheet; the engine refuses what a cell cannot carry and an "
+              "independent challenger reads every synthesis")
 MODEL_REASONS.update({
     "scoring-critic": ("opus", "re-derives scores against the rubric across a whole "
                                "pillar hunting the one that flatters; a flatterer it "

@@ -73,6 +73,11 @@ def test_a_stub_run_walks_every_stage_in_order_to_promote(tmp_path):
     timings = json.loads(md["stage_timings"])
     assert set(timings) == set(P.STAGES[2:])
     assert all("elapsed_s" in t for t in timings.values())
+    # N-29: the gold gate's package verdict is in Gate_Log, where the
+    # deliverable-gate hook reads it before any push of this package
+    gs = [(g["Verdict"], g.get("Detail")) for g in wb.rows("Gate_Log")
+          if g["Gate"] == "GS" and g.get("Scope") == "package"]
+    assert gs and gs[-1][0] == "PASS", gs
     rep = cost.report(run, wb=wb)
     assert rep["records"] >= len(P.STAGES[2:]) and rep["within"]
     # the lanes ran in the gated order: research before scoring before reports before pages

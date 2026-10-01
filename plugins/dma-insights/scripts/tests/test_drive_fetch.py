@@ -543,3 +543,28 @@ def test_pull_records_the_version_it_landed():
     body = src[src.index("def pull("):src.index("def pull_ledgers(")]
     assert "_record_pulled(_slug(client), _file_version(tok, mem[\"id\"]))" in body
     assert "--force" in src and "push_memory(a.client, force=a.force)" in src
+
+
+def test_client_manifest_reads_the_client_folder_not_the_insights_tree(monkeypatch):
+    """N-04 (2026-10-01, Northwest Bank): step 2 looked for run_manifest.json
+    through find-artifact, which walks only 'DMAI - <Client>'; an IN_PROGRESS
+    run in the client folder was invisible."""
+    import contextlib, io, json as _json
+    monkeypatch.setattr(drive_fetch, "_token", lambda: "t")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder",
+                        lambda tok, c: {"id": "F1", "name": "Acme - DMA"})
+    asked = []
+
+    @contextlib.contextmanager
+    def fake_req(tok, url, *a, **k):
+        asked.append(url)
+        body = ({"files": [{"id": "M1", "name": "run_manifest.json",
+                            "modifiedTime": "2026-10-01T03:39:41Z"}]}
+                if "alt=media" not in url else
+                {"run_id": "R-1", "status": "IN_PROGRESS"})
+        yield io.BytesIO(_json.dumps(body).encode())
+
+    monkeypatch.setattr(drive_fetch, "_req", fake_req)
+    got = drive_fetch.client_manifest("Acme")
+    assert got["open"] and got["run_id"] == "R-1"
+    assert "F1" in asked[0] and "run_manifest.json" in asked[0]

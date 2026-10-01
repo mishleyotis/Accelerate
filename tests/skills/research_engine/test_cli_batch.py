@@ -62,3 +62,33 @@ def test_a_refused_command_is_reported_and_the_rest_still_apply(tmp_path, capsys
     assert oks == [True, False, False, False, True], out
     assert "not a batchable write" in out["results"][2]["error"]
     assert "another run" in out["results"][3]["error"]
+
+
+def test_json_lines_need_no_shell_quoting_and_land_like_shell_lines(tmp_path, capsys):
+    """N-26 (2026-10-01, Northwest Bank): shell-form ops made batch agents
+    shell-quote every excerpt, and they generated the file with python
+    heredocs — 377 calls an approver must refuse. A JSON line carries any
+    quote verbatim and can be written with the Write tool."""
+    run, sibs = _run(tmp_path)
+    q = "Northwest's \"digital-first\" plan — what's the arc?"
+    lines = [json.dumps({"op": "search", "subcap": sibs[:2], "facet": "works",
+                         "tool": "web_search", "query": q, "hits": 3, "kept": 1,
+                         "actor": "research-p1c1-producer"}),
+             json.dumps({"op": "search", "subcap": sibs[0], "facet": "fails",
+                         "tool": "web_search", "query": "no op key"})[:-1] + ', "op": ""}',
+             "{not json"]
+    rc, out = _batch(run, tmp_path, lines, capsys)
+    assert out["applied"] == 1 and out["refused"] == 2, out
+    rows = [r for r in run.open().rows("Search_Log") if r.get("Query") == q]
+    assert rows, "the query landed verbatim, quotes and all"
+
+
+def test_a_json_synthesis_object_is_passed_to_synthesise_by_path(tmp_path):
+    from engine.cli import _json_op
+    argv = _json_op(json.dumps({"op": "synthesise", "subcap": "P1C1.1.1",
+                                "json": {"Dominant_Claim": "x"}, "actor": "a"}), tmp_path, 3)
+    i = argv.index("--json")
+    assert json.loads(open(argv[i + 1]).read()) == {"Dominant_Claim": "x"}
+    lad = _json_op(json.dumps({"op": "absence", "subcap": "X",
+                               "ladder": [{"rung": "direct", "query": "q"}]}), tmp_path, 4)
+    assert json.loads(lad[lad.index("--ladder") + 1]) == [{"rung": "direct", "query": "q"}]

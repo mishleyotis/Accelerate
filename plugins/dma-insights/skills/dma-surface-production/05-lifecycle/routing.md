@@ -333,6 +333,7 @@ smallest-true-unit rule as the per-surface producers above.
 | P4C2 Analytics & AI Enablement | `research-p4c2-producer` |
 | P4C3 Technology Architecture & Integration | `research-p4c3-producer` |
 | P4C4 Information Security & Cybersecurity | `research-p4c4-producer` |
+| one capability batch (≤ 12 open cells) inside a category research workflow (`workflows/dma-pillar-research.js`): WebSearch, Exa, Tavily and one Clay read, writes through one JSON-lines `engine.cli batch` per capability; started only by the workflow | `research-batch-producer` (Sonnet) |
 | the challenge pass over a converged category's syntheses — seven dimensions from the brief packet alone, one chained `engine.cli challenge` per cell; no web, no `get_evidence` | `research-challenger` (Sonnet), with a deterministic 10% Opus sample re-judged by `finding-challenger` |
 
 **Three phases run BEFORE any category is dispatched, and each is a gate

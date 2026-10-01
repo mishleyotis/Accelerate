@@ -15,6 +15,12 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 
 ## 1 · Tooling first, measured, never assumed
 
+**`<ROOT>` is `${DMA_RUN_ROOT:-$HOME/dma_output}/<entity-id>`** — under the
+plugin's own run tree, which is where the auto-approvers and the dispatch
+guard look. A root anywhere else makes every write into it prompt the owner
+(measured 2026-10-01: a root under `/home/user/dma-runs` would have put 45%
+of research Bash calls in front of a person); the run's start warns when it would.
+
 **Record the connectors YOU hold before anything else runs.** No subprocess
 can enumerate a session's bound MCP tools (MEM-0112) — only you can, and
 every check below reads what you write here, so writing it second makes the
@@ -31,6 +37,18 @@ printf '%s\n' <the same list> \
 `--strict` is not optional. Without it a STOP still exits 0 and the gate you
 just built passes a session with no connectors at all — which is the exact
 condition it exists to catch.
+
+**Then measure quota, once.** A connector you hold can still be out of
+credit: one cheap search per search family (an Exa search, a Tavily search).
+A 402/429 is recorded for the run, not rediscovered by every agent (measured
+2026-10-01: Exa answered 402 to 32 research agents in turn):
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" down exa --reason 'HTTP 402 credits exhausted' --root <ROOT>
+```
+
+The research handoff carries it to every workflow agent, which then does not
+call that family; `--clear` lifts it once the owner tops up.
 
 **You are the connector tier.** Since 2026-09-14 the enrichment connectors
 are held by this session and by no lane: they bind once, at session start,
@@ -57,7 +75,7 @@ so that never repeats; refusing to start is not the remedy, and neither is
 starting silently.
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal --root <ROOT>
 cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
 ```
 
@@ -69,7 +87,8 @@ reads OK through a heal. `UPDATED_MID_SESSION` means the bound tree moved
 under this session and THIS session still holds the old roster — carry on,
 because the driver dispatches every lane as a fresh child process that binds
 the current tree. Its `connector
-contract` row now reads the baseline you wrote: UNVERIFIED means you skipped
+contract` row now reads the baseline you wrote (pass the same `--root`: the
+doctor reads no shell export of yours): UNVERIFIED means you skipped
 the step above, and a short baseline is the DEGRADED row of the table, not a
 provisioning defect. Any OTHER row red after the heal is a provisioning
 defect: report the row and stop.
@@ -105,8 +124,10 @@ script failing, which is not a routing answer.
 
 Then the three places work already exists, before any research
 (`registry.py pull` + `registry.py list --open-only`; `drive_fetch.py
-find-artifact --client "<Entity>"` and its `run_manifest.json`;
-`get_client_state`). An open run or an IN_PROGRESS manifest is a run to
+client-manifest --client "<Entity>"` — exit 3 means the client folder holds
+an IN_PROGRESS run; `get_client_state`). `find-artifact` answers a different
+question (the synthesis tier's `DMAI - <Client>` artefacts) and never sees
+the client folder's `run_manifest.json`. An open run or an IN_PROGRESS manifest is a run to
 RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>` says
 where it stopped, and step 5 continues it. With `--resume <RUN_ID>` you skip
 straight to step 5.
@@ -178,7 +199,14 @@ outcome `AWAITING_WORKFLOW` (exit 0) and writes
 `<ROOT>/07_qa/research_workflow.json`: the workflow
 (`${CLAUDE_PLUGIN_ROOT}/workflows/dma-pillar-research.js`), one `args` object
 PER CATEGORY still to pass, and a measured `estimate` (open cells, batches,
-USD, and whether it fits `--max-usd`). In ONE message, start every invocation
+USD, and whether it fits `--max-usd`). **Read `estimate.web_search` first:**
+every workflow agent runs in this session, and Claude Code caps WebSearch per
+session (`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`, 200 by default). When it
+says the cap does not fit, the remainder rides on the Exa/Tavily quotas —
+measured 2026-10-01, sixteen workflows spent the 200 in ~20 minutes and
+research stalled at 29% with both connectors also out. Put the figure to the
+owner before starting; raising the variable is set in the environment before
+a session starts, and searches are billed. In ONE message, start every invocation
 — `Workflow({scriptPath: <workflow>, args: <invocation>})` per category.
 Concurrency is capped per workflow (min(16, CPUs−2)), so sixteen category
 workflows are what makes research parallel; inside each, the category's open
@@ -251,11 +279,6 @@ tokens for 66 requests on the conducting session's own tier). Watch with
 
 **To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
 — it signals the pid that holds the run's driver lock. Never kill a pid a shell
-captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
-real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
-
-**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
-It signals the pid that holds the run's driver lock. Never kill a pid a shell
 captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
 real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
 

@@ -432,6 +432,38 @@ RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
 WORKFLOW_USD_PER_CELL = 0.19
 CHALLENGE_USD_PER_CATEGORY = 0.44
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
+#: N-27, measured 2026-10-01 (Northwest Bank): 1,339 search calls for 215
+#: closed cells (6.2 per cell), 45% of them WebSearch. Every workflow agent
+#: runs in the conducting session, and Claude Code caps WebSearch per SESSION
+#: (CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION, default 200): sixteen category
+#: workflows spent it in ~20 minutes, 402 later calls were refused, and
+#: research stalled at 29% with Exa (402) and Tavily (432) also exhausted.
+SEARCH_CALLS_PER_CELL = 6.2
+WEBSEARCH_SHARE = 0.45
+DEFAULT_WEB_SEARCH_CAP = 200
+
+
+def web_search_capacity(open_cells: int) -> dict:
+    """Would this session's WebSearch budget carry the research handed out?"""
+    raw = os.environ.get("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION", "")
+    cap = int(raw) if raw.strip().isdigit() else DEFAULT_WEB_SEARCH_CAP
+    need = int(round(open_cells * SEARCH_CALLS_PER_CELL * WEBSEARCH_SHARE))
+    covers = int(cap / (SEARCH_CALLS_PER_CELL * WEBSEARCH_SHARE))
+    fits = need <= cap
+    return {"web_search_cap": cap, "cap_source": ("env" if raw.strip().isdigit()
+                                                  else "Claude Code default"),
+            "web_searches_needed": need, "cells_the_cap_covers": covers,
+            "fits": fits,
+            "why": ("the session's WebSearch budget covers the research handed out"
+                    if fits else
+                    f"this session may run {cap} WebSearch calls and the research "
+                    f"needs ~{need} ({open_cells} open cells x {SEARCH_CALLS_PER_CELL} "
+                    f"search calls x {WEBSEARCH_SHARE:.0%} WebSearch, measured): the "
+                    f"cap covers ~{covers} cells, and the rest rides entirely on the "
+                    f"Exa/Tavily quotas. Raise CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION "
+                    f"in the environment before the session starts (a person's "
+                    f"decision: searches are billed), or confirm the connector quotas "
+                    f"carry the rest.")}
 
 
 def _open_capabilities(wb) -> dict[str, dict[str, int]]:
@@ -446,6 +478,18 @@ def _open_capabilities(wb) -> dict[str, dict[str, int]]:
         caps = out.setdefault(category_of(sc), {})
         caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1
     return out
+
+
+def _down_families(root) -> dict:
+    """N-18: the families the session measured DOWN for this run
+    (`connector_contract.py down`), carried to every workflow agent so none
+    of them spends a call rediscovering a 402."""
+    try:
+        sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        return cc.down_families(root)
+    except Exception:                                          # noqa: BLE001
+        return {}
 
 
 def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
@@ -1383,8 +1427,11 @@ class Pipeline:
             b = brief.prelim_brief(self.wb, run=self.run, out_dir=self._briefs(f"prelim_r{r}"))
             orch = b.get("orchestrator")
             if orch:
+                who = orch.get("agents") or {}
                 self.opts.log(f"[RELAY] PRELIM connector brief for the conducting session "
-                              f"(owed {', '.join(orch['owed'])}): {orch['prompt_file']}")
+                              f"(owed {', '.join(orch['owed'])}"
+                              + (f"; {', '.join(f'{k}->{v}' for k, v in who.items())}" if who else "")
+                              + f"): {orch['prompt_file']}")
                 self.state["prelim_orchestrator"] = orch
                 self._save_state()
             self._count(self._dispatch(b, stage="PRELIM"))
@@ -1470,12 +1517,17 @@ class Pipeline:
         open_caps = _open_capabilities(self.wb)
         by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
                    else by_pillar)
+        down = _down_families(self.run.root)
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
                 "batches": {c: _batches(open_caps.get(c, {}))
                             for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
-                "entity": md.get("entity_name") or "", "domain": site}
+                "entity": md.get("entity_name") or "", "domain": site,
+                # N-22: the internal-documents step is for HYBRID/INTERNAL runs
+                # only; on PUBLIC it cost every batch agent a brief and a turn.
+                "mode": str(md.get("evidence_mode") or "").upper() or "PUBLIC",
+                **({"down": down} if down else {})}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
@@ -1498,7 +1550,10 @@ class Pipeline:
         est = round(cells * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY, 2)
         doc["estimate"] = {"open_cells": cells, "batches": nb, "usd": est,
                            "basis": f"measured pilot: ${WORKFLOW_USD_PER_CELL}/cell "
-                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge"}
+                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge",
+                           "web_search": web_search_capacity(cells)}
+        if not doc["estimate"]["web_search"]["fits"]:
+            self.opts.log(f"[WORKFLOW] WARNING: {doc['estimate']['web_search']['why']}")
         if prev.get("open_cells") == cells and cells:
             doc["not_worked"] = (
                 f"the previous handoff named the same {cells} open cells: its "
@@ -2190,6 +2245,18 @@ class Pipeline:
                                  "gold_findings": pkg["verification"].get("gold_findings"),
                                  "pushed": pkg.get("pushed"), "at": _utcnow()}
         self._save_state()
+        # N-29 (2026-10-01): the gold gate ran here and its verdict reached only
+        # pipeline_state; the deliverable-gate hook reads Gate_Log, so a manual
+        # push of this very package was refused as "no gold-standard verdict".
+        gold = pkg["verification"].get("gold_findings") or []
+        try:
+            L.append_gate(self.wb, gate="GS", scope="package",
+                          verdict="FAIL" if gold else "PASS",
+                          detail=("PASS — 0 findings" if not gold else
+                                  f"{len(gold)} finding(s): " + "; ".join(map(str, gold[:4]))),
+                          blocking=True)
+        except Exception:                                      # noqa: BLE001
+            pass
         if not pkg["verified"]:
             bad = [c for c in pkg["verification"]["checks"] if not c["ok"]]
             raise StageRefused("package did not verify: " + "; ".join(
@@ -2365,6 +2432,24 @@ def _install_terminate_handler() -> None:
         signal.signal(signal.SIGTERM, _on_term)
     except (ValueError, OSError):          # not the main thread, or no signals here
         pass
+
+
+#: N-17 (2026-10-01, Northwest Bank): run-assessment tells the session to
+#: `tail -F <ROOT>/pipeline.log` for [RELAY] lines, and nothing wrote that
+#: file — the driver logged to stdout only, so a session following the
+#: command saw no relay and PRELIM stalled. Every line now lands there too.
+LOG_NAME = "pipeline.log"
+
+
+def _tee_log(path: Path, echo: Callable[[str], None]) -> Callable[[str], None]:
+    def log(line: str) -> None:
+        echo(line)
+        try:
+            with path.open("a", encoding="utf-8") as fh:
+                fh.write(f"{line}\n")
+        except OSError:
+            pass                      # the stdout copy is still the record
+    return log
 
 
 def _build_opts(a) -> Options:
@@ -2561,6 +2646,7 @@ def main(argv=None) -> int:
                 return 0
             time.sleep(a.interval)
     opts = _build_opts(a)
+    opts.log = _tee_log(Path(run.root) / LOG_NAME, opts.log)
     _install_terminate_handler()
     out = Pipeline(run, opts).run_all()
     if a.json:

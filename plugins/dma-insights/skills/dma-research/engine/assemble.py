@@ -458,7 +458,8 @@ def _dest_folder(run: runstate.Run, md: dict, entity: str, out_root) -> Path:
     return default_folder_root(run) / folder_name(entity)
 
 
-def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
+def open_folder(run: runstate.Run, out_root=None, *, push: bool = True,
+                preflight: Path | None = None) -> dict:
     """Create '<Entity> - DMA' NOW, at run start, and say so in the workbook.
 
     WHY AT START. The Golden 1 calibration finished a category, wrote twenty
@@ -508,6 +509,13 @@ def open_folder(run: runstate.Run, out_root=None, *, push: bool = True) -> dict:
         out["superseded_remote"] = _archive_remote(entity, str(md.get("run_id") or ""),
                                                    opened)
         out["pushed"] = _push_one(mpath, entity, "run_manifest.json")
+        # N-08 (2026-10-01, Northwest Bank): run-assessment step 3 pushes the
+        # answered preflight to the client folder so a headless firing can
+        # reuse it, and the remote supersede above then archived it with the
+        # PRIOR package. This run's own binding goes back in after the move.
+        if preflight is not None and Path(preflight).is_file():
+            out["preflight_pushed"] = _push_one(Path(preflight), entity,
+                                                "preflight.json")
     else:
         out["pushed"] = {"outcome": "NOT_RUN", "reason": "push disabled by caller"}
     return out

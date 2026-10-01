@@ -873,6 +873,11 @@ def main(argv=None) -> int:
     p_ar.add_argument("--run-id", required=True)
     p_ar.add_argument("--opened-at", default=None)
     p_ar.add_argument("--dry-run", action="store_true")
+    p_cm = sub.add_parser(
+        "client-manifest",
+        help="read-only: the client folder's run_manifest.json — status, "
+             "run id; exit 3 when a run is IN_PROGRESS there (resume it)")
+    p_cm.add_argument("--client", required=True)
     p_rv = sub.add_parser(
         "push-review",
         help="one review artefact (e.g. the packaged plugin zip) into the "
@@ -915,6 +920,10 @@ def main(argv=None) -> int:
         r = archive_remote(a.client, a.run_id, a.opened_at, dry_run=a.dry_run)
         print(json.dumps(r, indent=1))
         return 1 if r.get("failed") else 0
+    if a.cmd == "client-manifest":
+        r = client_manifest(a.client)
+        print(json.dumps({k: v for k, v in r.items() if k != "manifest"}, indent=1))
+        return 3 if r["open"] else 0
     if a.cmd == "push-review":
         return push_review(a.file, a.name)
     if a.cmd == "find-artifact":
@@ -992,6 +1001,35 @@ def push_package(client: str, file_path: str, name: str | None) -> int:
 #: 'DMAI - <Client>' folder (a different tree with its own lifecycle) and
 #: the in-flight memory backup.
 _ARCHIVE_KEEP = ("_superseded", BACKUP_FOLDER)
+
+
+def client_manifest(client: str) -> dict:
+    """The client folder's run_manifest.json — read-only.
+
+    N-04 (2026-10-01, Northwest Bank): run-assessment step 2 told the session
+    to find this file through `find-artifact`, which walks only the
+    synthesis tier's 'DMAI - <Client>' subfolder and so can never see it —
+    an IN_PROGRESS run was undetectable and would be started twice. This
+    reads the one file that says whether a run is open in the folder."""
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    q = urllib.parse.urlencode({
+        "q": f"'{folder['id']}' in parents and name = 'run_manifest.json' "
+             f"and trashed = false",
+        "fields": "files(id,name,modifiedTime)", "pageSize": 5,
+        "supportsAllDrives": "true", "includeItemsFromAllDrives": "true"})
+    with _req(tok, f"{API}/files?{q}") as resp:
+        hits = json.load(resp).get("files", [])
+    out = {"client_folder": folder["name"], "manifest": None, "status": None,
+           "run_id": None}
+    if hits:
+        with _req(tok, f"{API}/files/{hits[0]['id']}?alt=media"
+                       f"&supportsAllDrives=true") as resp:
+            man = json.load(resp)
+        out.update(manifest=man, status=man.get("status"), run_id=man.get("run_id"),
+                   modified=hits[0].get("modifiedTime"))
+    out["open"] = str(out["status"] or "").upper() == "IN_PROGRESS"
+    return out
 
 
 def archive_remote(client: str, run_id: str, opened_at: str | None = None,

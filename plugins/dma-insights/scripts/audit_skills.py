@@ -36,7 +36,10 @@ def _repo_root(plugin_root: str) -> str:
     d = os.path.abspath(plugin_root)
     for _ in range(4):
         d = os.path.dirname(d)
-        if os.path.isdir(os.path.join(d, ".git")):
+        # `.git` is a FILE in a git worktree or submodule; a directory test
+        # made every repo-relative reference read as broken there (measured
+        # 2026-10-01: 9 "broken" references, 0 on the main checkout).
+        if os.path.exists(os.path.join(d, ".git")):
             return d
     return plugin_root
 
