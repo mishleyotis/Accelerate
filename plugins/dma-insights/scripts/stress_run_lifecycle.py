@@ -344,6 +344,7 @@ def main(argv=None) -> int:
                   "--kind", kind, "--evidence", eid2).returncode == 0
     ok &= run("engine.prelim", "peers", "--run", run_id, "--root", str(root),
               "--peer", "Peer Alpha CU", "--peer", "Peer Beta CU",
+              "--peer", "Peer Gamma CU",   # the peer ladder's N=3 floor
               "--rule", "US credit unions in the 5-15bn asset band with a "
                         "geographic field of membership and a public core "
                         "platform decision since 2022").returncode == 0
