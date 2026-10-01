@@ -455,7 +455,8 @@ def depth_floors(kind: str, subcaps: int | None = None) -> dict:
 
 
 def report_findings(report_path, template_path=None, scores=None, kind="auto",
-                    subcaps: int | None = None) -> list[Finding]:
+                    subcaps: int | None = None,
+                    evidence_held: int | None = None) -> list[Finding]:
     report_path = Path(report_path)
     out: list[Finding] = []
     whole, h1, fonts, chrome = _docx(report_path)
@@ -509,6 +510,11 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
 
     cites = len(set(re.findall(r"\b(?:E|ENR|PB|TS|INT|US)-\d+", whole)))
     floors = depth_floors(kind, subcaps)
+    if evidence_held:
+        # Same rule as reports.citation_floor: never more than ~all the
+        # evidence the run registered (0.9 x held).
+        floors["citations"] = min(floors["citations"],
+                                  max(1, math.ceil(0.9 * int(evidence_held))))
     if cites < floors["citations"]:
         out.append(Finding("GS-RPT-CITATIONS",
             f"{cites} distinct citations (< {floors['citations']}, the Golden 1 "
@@ -584,6 +590,25 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
         if f"{ov:.2f}" not in whole and f"{ov:.1f}" not in whole:
             out.append(Finding("GS-RPT-RECONCILE", f"overall {ov} not in report", "GSY-13"))
     return out
+
+
+def _evidence_count(workbook_path) -> int | None:
+    """Distinct E_IDs on Evidence_Detail — the most a report can cite."""
+    try:
+        import openpyxl
+        wb = openpyxl.load_workbook(workbook_path, read_only=True, data_only=True)
+        if "Evidence_Detail" not in wb.sheetnames:
+            wb.close()
+            return None
+        rows = wb["Evidence_Detail"].iter_rows(values_only=True)
+        head = [str(h or "") for h in next(rows, [])]
+        i = head.index("E_ID") if "E_ID" in head else 0
+        ids = {str(r[i]).strip() for r in rows
+               if r and r[i] is not None and str(r[i]).strip()}
+        wb.close()
+        return len(ids) or None
+    except Exception:
+        return None
 
 
 def _subcap_count(workbook_path) -> int | None:
@@ -690,6 +715,7 @@ def package_findings(folder) -> list[Finding]:
     else:
         out += workbook_findings(wb[0])
         subcaps = _subcap_count(wb[0])
+    held = _evidence_count(wb[0]) if wb else None
     for pat, k in ((("Client_Profile_Research_*.docx", "*Research_Report*.docx"), "research"),
                    (("DMA_Assessment_Report_*.docx", "*Assessment_Report*.docx"), "assessment")):
         hit = []
@@ -698,7 +724,7 @@ def package_findings(folder) -> list[Finding]:
         if not hit:
             out.append(Finding("GS-ING-DELIVERABLES", f"no {k} report at root", "GSY-14"))
         else:
-            out += report_findings(hit[0], kind=k, subcaps=subcaps)
+            out += report_findings(hit[0], kind=k, subcaps=subcaps, evidence_held=held)
     if not list(folder.glob("Technographic_Scan_*.docx")) and not list(folder.glob("*Tech*Scan*.docx")):
         out.append(Finding("GS-ING-SCAN", "no technographic scan deliverable", "GSY-14"))
     else:
@@ -739,8 +765,9 @@ def main(argv=None):
     if a.cmd == "report":
         scores = json.loads(Path(a.scores).read_text()) if a.scores else None
         subcaps = a.subcaps or (_subcap_count(a.workbook) if a.workbook else None)
+        held = _evidence_count(a.workbook) if a.workbook else None
         return _print(report_findings(a.path, a.template, scores, a.kind,
-                                      subcaps=subcaps), a.json)
+                                      subcaps=subcaps, evidence_held=held), a.json)
     if a.cmd == "package":
         return _print(package_findings(a.folder), a.json)
 

@@ -387,7 +387,23 @@ def citation_floor(wb: RunWorkbook, spec: RS.ReportSpec) -> int:
                       / g["workbook"]["subcaps"])
     except (KeyError, ZeroDivisionError, TypeError):
         per_subcap = (115 if kind == "assessment" else 47) / 690
-    return max(1, math.ceil(per_subcap * len(wb.selected_subcaps())))
+    density = max(1, math.ceil(per_subcap * len(wb.selected_subcaps())))
+    # A report cannot cite evidence the run never found. On a thin evidence
+    # base (2026-10-01, Cross Insurance: a degraded public run with 70 rows
+    # against a density floor of 116) no rewrite can reach the density
+    # floor; it becomes "cite nearly ALL of it", and the thinness is
+    # disclosed by the coverage figure, not hidden by the cap. Owner-approved
+    # 2026-10-01.
+    held = len({str(r.get("E_ID")).strip() for r in wb.rows("Evidence_Detail")
+                if str(r.get("E_ID") or "").strip()})
+    if held:
+        return min(density, max(1, math.ceil(EVIDENCE_BASE_SHARE * held)))
+    return density
+
+
+#: Share of the run's registered evidence a report must cite when the
+#: Golden 1 density floor exceeds the evidence the run holds.
+EVIDENCE_BASE_SHARE = 0.9
 
 
 # ── rendering ────────────────────────────────────────────────────────────
