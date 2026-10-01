@@ -291,3 +291,33 @@ def test_start_says_when_the_run_root_would_prompt(tmp_path, monkeypatch):
     got = cli._root_approvable(outside)
     assert got["approvable"] is False and "PROMPT" in got["why"]
     assert cli._root_approvable(Path.home() / "dma_output" / "acme")["approvable"] is True
+
+
+# ── N-27 · the session's WebSearch budget is measured before research ───
+
+def test_web_search_capacity_reads_the_session_cap(monkeypatch):
+    monkeypatch.delenv("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION", raising=False)
+    short = P.web_search_capacity(729)
+    assert short["web_search_cap"] == 200 and not short["fits"]
+    assert short["web_searches_needed"] > 2000 and "a person's decision" in short["why"]
+    monkeypatch.setenv("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION", "5000")
+    assert P.web_search_capacity(729)["fits"]
+
+
+def test_the_handoff_carries_the_web_search_verdict(tmp_path, monkeypatch):
+    monkeypatch.delenv("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION", raising=False)
+    run = _run(tmp_path)
+    opts = P.Options(dispatcher=S.StubDispatcher(handlers={}), reads=S.StubReads(),
+                     shipper=S.StubShipper(), push=False,
+                     folder_root=tmp_path / "out", ingest_poll_s=0,
+                     sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
+                     max_rounds=2, stall_rounds=0, research_mode="workflow")
+    out = P.Pipeline(run, opts).run_all()
+    ws = json.loads(Path(out["handoff"]).read_text())["estimate"]["web_search"]
+    assert ws["fits"] and ws["web_search_cap"] == 200     # 6 cells fit easily
+
+
+def test_the_sheet_treats_primary_as_a_facet_not_the_websearch_tool():
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    assert '"primary" is a FACET, not a tool' in js
+    assert "primary web_search AND" not in js

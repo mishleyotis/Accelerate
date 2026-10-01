@@ -199,7 +199,14 @@ outcome `AWAITING_WORKFLOW` (exit 0) and writes
 `<ROOT>/07_qa/research_workflow.json`: the workflow
 (`${CLAUDE_PLUGIN_ROOT}/workflows/dma-pillar-research.js`), one `args` object
 PER CATEGORY still to pass, and a measured `estimate` (open cells, batches,
-USD, and whether it fits `--max-usd`). In ONE message, start every invocation
+USD, and whether it fits `--max-usd`). **Read `estimate.web_search` first:**
+every workflow agent runs in this session, and Claude Code caps WebSearch per
+session (`CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`, 200 by default). When it
+says the cap does not fit, the remainder rides on the Exa/Tavily quotas —
+measured 2026-10-01, sixteen workflows spent the 200 in ~20 minutes and
+research stalled at 29% with both connectors also out. Put the figure to the
+owner before starting; raising the variable is set in the environment before
+a session starts, and searches are billed. In ONE message, start every invocation
 — `Workflow({scriptPath: <workflow>, args: <invocation>})` per category.
 Concurrency is capped per workflow (min(16, CPUs−2)), so sixteen category
 workflows are what makes research parallel; inside each, the category's open

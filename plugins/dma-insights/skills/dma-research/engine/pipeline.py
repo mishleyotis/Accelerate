@@ -432,6 +432,38 @@ RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
 WORKFLOW_USD_PER_CELL = 0.19
 CHALLENGE_USD_PER_CATEGORY = 0.44
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
+#: N-27, measured 2026-10-01 (Northwest Bank): 1,339 search calls for 215
+#: closed cells (6.2 per cell), 45% of them WebSearch. Every workflow agent
+#: runs in the conducting session, and Claude Code caps WebSearch per SESSION
+#: (CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION, default 200): sixteen category
+#: workflows spent it in ~20 minutes, 402 later calls were refused, and
+#: research stalled at 29% with Exa (402) and Tavily (432) also exhausted.
+SEARCH_CALLS_PER_CELL = 6.2
+WEBSEARCH_SHARE = 0.45
+DEFAULT_WEB_SEARCH_CAP = 200
+
+
+def web_search_capacity(open_cells: int) -> dict:
+    """Would this session's WebSearch budget carry the research handed out?"""
+    raw = os.environ.get("CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION", "")
+    cap = int(raw) if raw.strip().isdigit() else DEFAULT_WEB_SEARCH_CAP
+    need = int(round(open_cells * SEARCH_CALLS_PER_CELL * WEBSEARCH_SHARE))
+    covers = int(cap / (SEARCH_CALLS_PER_CELL * WEBSEARCH_SHARE))
+    fits = need <= cap
+    return {"web_search_cap": cap, "cap_source": ("env" if raw.strip().isdigit()
+                                                  else "Claude Code default"),
+            "web_searches_needed": need, "cells_the_cap_covers": covers,
+            "fits": fits,
+            "why": ("the session's WebSearch budget covers the research handed out"
+                    if fits else
+                    f"this session may run {cap} WebSearch calls and the research "
+                    f"needs ~{need} ({open_cells} open cells x {SEARCH_CALLS_PER_CELL} "
+                    f"search calls x {WEBSEARCH_SHARE:.0%} WebSearch, measured): the "
+                    f"cap covers ~{covers} cells, and the rest rides entirely on the "
+                    f"Exa/Tavily quotas. Raise CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION "
+                    f"in the environment before the session starts (a person's "
+                    f"decision: searches are billed), or confirm the connector quotas "
+                    f"carry the rest.")}
 
 
 def _open_capabilities(wb) -> dict[str, dict[str, int]]:
@@ -1518,7 +1550,10 @@ class Pipeline:
         est = round(cells * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY, 2)
         doc["estimate"] = {"open_cells": cells, "batches": nb, "usd": est,
                            "basis": f"measured pilot: ${WORKFLOW_USD_PER_CELL}/cell "
-                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge"}
+                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge",
+                           "web_search": web_search_capacity(cells)}
+        if not doc["estimate"]["web_search"]["fits"]:
+            self.opts.log(f"[WORKFLOW] WARNING: {doc['estimate']['web_search']['why']}")
         if prev.get("open_cells") == cells and cells:
             doc["not_worked"] = (
                 f"the previous handoff named the same {cells} open cells: its "

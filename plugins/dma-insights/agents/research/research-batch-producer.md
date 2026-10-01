@@ -29,8 +29,9 @@ Rules that do not bend:
   verbatim from the page (50-500 characters) or it is not evidence.
 - A date is the one the page states; an undated page is registered without
   one and bands UNVERIFIED.
-- An absence is earned: the primary web volley and one connector volley on
-  the cell, named in `--hunted`.
+- An absence is earned: the primary facet and every owed facet logged, at
+  least one by a connector, named in `--hunted`. "Primary" is a facet, not
+  the WebSearch tool — the session's WebSearch budget is shared and finite.
 - Write only through `engine.cli`, one `engine.cli batch` per capability, in
   the foreground. The batch file is JSON lines you write with the Write tool
   under the run root; never generate it (or anything) with a python heredoc —
