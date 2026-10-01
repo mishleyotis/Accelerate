@@ -422,8 +422,12 @@ def main(argv=None) -> int:
         print(f"{'COMPLETE' if out['complete'] else 'INCOMPLETE'} — "
               f"{out['populated']}/{out['total']} tabs populated{note}")
         for r in out["sheets"]:
+            # check() also emits OUT_OF_STAGE / AHEAD_OF_STAGE / ILLEGAL_DECLARATION;
+            # an unmapped verdict crashed the printout after the verdict line.
             mark = {"POPULATED": "✓", "DECLARED_EMPTY": "·",
-                    "OUT_OF_SCOPE": "–", "EMPTY": "✗", "SHORT": "✗"}[r["verdict"]]
+                    "OUT_OF_SCOPE": "–", "OUT_OF_STAGE": "–",
+                    "AHEAD_OF_STAGE": "!", "EMPTY": "✗", "SHORT": "✗",
+                    "ILLEGAL_DECLARATION": "✗"}.get(r["verdict"], "?")
             print(f"  {mark} {r['sheet']:<22} {r['detail']}")
     return 0 if out["complete"] else 1
 
