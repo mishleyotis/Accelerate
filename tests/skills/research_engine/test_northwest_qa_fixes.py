@@ -215,3 +215,22 @@ def test_every_batch_checks_the_ceiling_first_and_the_script_stops_on_it():
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
     assert "python3 -m engine.cost ceiling ${R}" in js
     assert "r.gate === 'OVER_BUDGET'" in js
+
+
+# ── N-08 · the run's own preflight survives the remote supersede ────────
+
+def test_open_folder_repushes_this_runs_preflight_after_archiving(tmp_path, monkeypatch):
+    from engine import assemble
+    run = new_run(tmp_path, folder=False)
+    calls = []
+    monkeypatch.setattr(assemble, "_archive_remote",
+                        lambda *a, **k: calls.append(("archive",)) or {"outcome": "RESOLVED"})
+    monkeypatch.setattr(assemble, "_push_one",
+                        lambda local, entity, remote: calls.append(("push", remote))
+                        or {"outcome": "RESOLVED"})
+    pf = tmp_path / "preflight.json"
+    pf.write_text("{}")
+    out = assemble.open_folder(run, tmp_path / "out", push=True, preflight=pf)
+    assert calls[0] == ("archive",)
+    assert ("push", "preflight.json") in calls[1:], calls
+    assert out["preflight_pushed"]["outcome"] == "RESOLVED"

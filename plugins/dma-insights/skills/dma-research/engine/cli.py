@@ -785,7 +785,8 @@ def main(argv=None) -> int:
                           "engagement"}
         else:
             out["client_folder"] = assemble.open_folder(
-                run, a.folder_root, push=not a.no_push)
+                run, a.folder_root, push=not a.no_push,
+                preflight=Path(a.preflight) if a.preflight else None)
         out["registry"] = registry.log(run, event="STARTED",
                                        detail="run started")
         print(json.dumps(out, indent=2, default=str))

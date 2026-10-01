@@ -118,8 +118,10 @@ script failing, which is not a routing answer.
 
 Then the three places work already exists, before any research
 (`registry.py pull` + `registry.py list --open-only`; `drive_fetch.py
-find-artifact --client "<Entity>"` and its `run_manifest.json`;
-`get_client_state`). An open run or an IN_PROGRESS manifest is a run to
+client-manifest --client "<Entity>"` — exit 3 means the client folder holds
+an IN_PROGRESS run; `get_client_state`). `find-artifact` answers a different
+question (the synthesis tier's `DMAI - <Client>` artefacts) and never sees
+the client folder's `run_manifest.json`. An open run or an IN_PROGRESS manifest is a run to
 RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>` says
 where it stopped, and step 5 continues it. With `--resume <RUN_ID>` you skip
 straight to step 5.
