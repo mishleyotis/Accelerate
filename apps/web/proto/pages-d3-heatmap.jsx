@@ -746,7 +746,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
                 {s.score == null
                   ? <div style={{ fontSize: 10, fontWeight: 600 }}><EnrichmentGap what={`${s.id} score`} audience={audience} compact /></div>
                   : <div style={{ fontSize: 14, fontWeight: 700 }}>{fx(s.score, 1)}</div>}
-                <div style={{ fontSize: 8.5, opacity: .85, fontFamily: "var(--font-mono)" }}>{s.id.split(".").slice(1).join(".")}</div>
+                <div style={{ fontSize: 8.5, opacity: .85, fontFamily: "var(--font-mono)" }}>{String(s.id || "").split(".").slice(1).join(".")}</div>
               </button>
             ))}
           </div>

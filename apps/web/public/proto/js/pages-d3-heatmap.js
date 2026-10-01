@@ -1150,7 +1150,7 @@ function FocusAreaView({
       opacity: .85,
       fontFamily: "var(--font-mono)"
     }
-  }, s.id.split(".").slice(1).join("."))))), /*#__PURE__*/React.createElement(CellTip, {
+  }, String(s.id || "").split(".").slice(1).join("."))))), /*#__PURE__*/React.createElement(CellTip, {
     tip: cellTip.tip
   }))), /*#__PURE__*/React.createElement("div", {
     className: "card flush"

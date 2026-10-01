@@ -467,7 +467,7 @@ function ScorecardPreview({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, DMA.getPlatform(pid).features.split(" · ").slice(0, 2).join(" · "))))));
+  }, String(DMA.getPlatform(pid).features || "").split(" · ").slice(0, 2).join(" · "))))));
 }
 
 /* ── Live import streaming panel (SSE-style progress) ────────────── */

@@ -2262,7 +2262,7 @@ function NewRunModal() {
 
   if (!newRunOpen) return null;
 
-  const valid1 = form.name.trim().length > 1 && form.website.trim().length > 3;
+  const valid1 = String(form.name || "").trim().length > 1 && String(form.website || "").trim().length > 3;
   const onFile = (e) => {
     const fs = Array.from(e.target.files || []);
     setForm(f => ({ ...f, files: [...f.files, ...fs.map(file => ({ name: file.name, size: file.size }))] }));

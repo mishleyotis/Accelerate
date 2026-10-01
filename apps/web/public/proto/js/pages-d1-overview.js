@@ -1206,7 +1206,7 @@ function OpportunitySurfaceStrip({
     const name = cat && cat.name || pid;
     const score = t.composite;
     const cells = (t.addressable_cells || []).filter(c => c && c.subcap_id);
-    const sub = asText(t.headline) || (cat && cat.features ? cat.features.split(" · ").slice(0, 2).join(" · ") : null);
+    const sub = asText(t.headline) || (cat && cat.features ? String(cat.features).split(" · ").slice(0, 2).join(" · ") : null);
     return /*#__PURE__*/React.createElement("div", {
       key: pid,
       className: "card-tile clickable",
@@ -2030,7 +2030,7 @@ function LeadershipPanel({
         fontWeight: 600,
         flexShrink: 0
       }
-    }, ex.gap_flag ? "?" : ex.name.split(" ").map(n => n[0]).join("").slice(0, 2)), /*#__PURE__*/React.createElement("div", {
+    }, ex.gap_flag ? "?" : String(ex.name || "").split(" ").filter(Boolean).map(n => n[0]).join("").slice(0, 2) || "?"), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
         minWidth: 0

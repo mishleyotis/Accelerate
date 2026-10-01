@@ -1519,6 +1519,12 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
   );
 }
 
+/* A promoted event can carry a null title; `.split` on it threw and took the
+   whole Context page down ("Cannot read properties of null (reading 'split')"). */
+function titleWords(t) {
+  return t == null ? [] : String(t).split(" ").filter(Boolean);
+}
+
 function Timeline({ events, hover, setHover, openEvidence }) {
   const minDate = new Date(events[0].date + "-01");
   const maxDate = new Date(events[events.length - 1].date + "-01");
@@ -1542,7 +1548,7 @@ function Timeline({ events, hover, setHover, openEvidence }) {
         {events.map((e, i) => (
           <div key={e.id} style={{ textAlign: "center", lineHeight: 1.4 }}>
             <div className="f-mono">{e.date ? fmtDate(e.date) : ""}</div>
-            <div style={{ color: TONE[e.signal], fontWeight: hover === i ? 600 : 400 }}>{e.title.split(" ").slice(0, 4).join(" ")}{e.title.split(" ").length > 4 ? "…" : ""}</div>
+            <div style={{ color: TONE[e.signal], fontWeight: hover === i ? 600 : 400 }}>{titleWords(e.title).slice(0, 4).join(" ")}{titleWords(e.title).length > 4 ? "…" : ""}</div>
           </div>
         ))}
       </div>

@@ -2205,6 +2205,12 @@ function SentimentGridInteractive({
     }, eid))) : null)), t.absent ? /*#__PURE__*/React.createElement("div", null, t.absent.note || "Searched and not established.", (t.absent.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", t.absent.sources_searched.join(" · "), ".") : null) : null) : null);
   }));
 }
+
+/* A promoted event can carry a null title; `.split` on it threw and took the
+   whole Context page down ("Cannot read properties of null (reading 'split')"). */
+function titleWords(t) {
+  return t == null ? [] : String(t).split(" ").filter(Boolean);
+}
 function Timeline({
   events,
   hover,
@@ -2272,7 +2278,7 @@ function Timeline({
       color: TONE[e.signal],
       fontWeight: hover === i ? 600 : 400
     }
-  }, e.title.split(" ").slice(0, 4).join(" "), e.title.split(" ").length > 4 ? "…" : "")))), hover != null ? /*#__PURE__*/React.createElement("div", {
+  }, titleWords(e.title).slice(0, 4).join(" "), titleWords(e.title).length > 4 ? "…" : "")))), hover != null ? /*#__PURE__*/React.createElement("div", {
     className: "card-tile",
     style: {
       marginTop: 16,
