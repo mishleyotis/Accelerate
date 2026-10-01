@@ -1475,7 +1475,11 @@ class Pipeline:
                             for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
-                "entity": md.get("entity_name") or "", "domain": site}
+                "entity": md.get("entity_name") or "", "domain": site,
+                # The workflow's connector rules stop every batch with
+                # NO_CONNECTORS when Exa/Tavily/Clay are absent — on a run the
+                # driver already proceeded DEGRADED, that closed nothing.
+                "degraded": bool(self.state.get("enrichment_degraded"))}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
@@ -1502,21 +1506,51 @@ class Pipeline:
         if prev.get("open_cells") == cells and cells:
             doc["not_worked"] = (
                 f"the previous handoff named the same {cells} open cells: its "
-                "workflows never ran or closed nothing. Check this session has the "
-                "Workflow tool and Exa/Tavily/Clay (a resumed session can lose "
-                "them; a restart rebinds) — do NOT fall back to lanes, which hold "
-                "no connector.")
+                "workflows never ran or closed nothing. If this session has no "
+                "Workflow tool (a resumed session can lose it), run the rendered "
+                "prompts in `agent_prompts` as in-session agents — no restart is "
+                "needed. Do NOT fall back to headless lanes.")
             self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
         cap = self.budget_usd()
         if cap is not None:
             doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
                                    fits_budget=self._spent_usd + est <= cap)
         path.write_text(json.dumps(doc, indent=1))
+        doc["agent_prompts"] = self._render_agent_prompts(path)
+        path.write_text(json.dumps(doc, indent=1))
         return {"file": str(path), "invocations": inv,
                 "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
                 "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
                            f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
                            f"est ${est:.2f} for {cells} open cells"}
+
+    def _render_agent_prompts(self, handoff: Path) -> dict:
+        """The same batch/challenge prompts the workflow would run, on disk.
+
+        Measured 2026-10-01 (Cross Insurance): a resumed session came back
+        without the Workflow tool, and the handoff's only remedy was "restart
+        the session" — the owner would not, and the run sat at RESEARCH. The
+        prompts are rendered from the workflow's own source (render-prompts.mjs
+        evaluates its PROMPTS region), so a session without Workflow spawns
+        one in-session Agent per batch file, then the challenge file per
+        category, and runs `then` — identical work, no new session. Rendering
+        needs the handoff on disk first, so it is written once before this and
+        again after. A render failure is stated, never fatal."""
+        out = self.run.root / "briefs" / "research_agents"
+        script = PLUGIN / "workflows" / "render-prompts.mjs"
+        info = {"dir": str(out), "manifest": str(out / "manifest.json"),
+                "how": ("no Workflow tool: for each manifest row spawn ONE in-session Agent "
+                        "with the file's text as its prompt (model and subagent_type from "
+                        "the row) — every batch row in parallel, then each category's "
+                        "challenge row once its batches have returned — then run `then`")}
+        try:
+            r = subprocess.run(["node", str(script), str(handoff), str(out)],
+                               capture_output=True, text=True, timeout=120)
+            if r.returncode != 0:
+                info["error"] = (r.stderr or r.stdout).strip()[:300]
+        except (OSError, subprocess.SubprocessError) as exc:
+            info["error"] = f"{type(exc).__name__}: {exc}"[:300]
+        return info
 
     def _pull_toolkits(self) -> Path | None:
         """The four pillar toolkits, fetched into the run when none is named.
