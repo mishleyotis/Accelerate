@@ -208,7 +208,12 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       the page, which is the worst pair: a hand check of the screen agrees
 #       with a green test and neither is looking at the body. A customer who
 #       fetched before this bump holds a body carrying the census.
-SERVE_RULES = "serve-rules@10"
+#   @11 2026-10-01 — internal_ids.INTERNAL_ID learns the research-ledger
+#       annotations stored as evidence excerpts (embedded evidence ids,
+#       PROBE/CONTRADICTS verdicts, wave labels, proxy-rung and tier codes),
+#       and /evidence runs the machinery net it skipped. A customer who
+#       fetched a drawer before this bump holds the annotated excerpt.
+SERVE_RULES = "serve-rules@11"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:

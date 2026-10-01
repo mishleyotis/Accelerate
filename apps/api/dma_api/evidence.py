@@ -82,6 +82,7 @@ _put_shared_on_path()
 # five surfaces served without their status while every test passed.
 from abbreviations import expand as _expand_abbrev  # noqa: E402
 from evidence_merge import merge_same_source  # noqa: E402
+import internal_ids  # noqa: E402
 
 # Ordered so a distribution renders in ladder order rather than hash order.
 TIERS = ("T1", "T2", "T3", "T4", "T5")
@@ -284,5 +285,14 @@ def redact_items(items: list[dict], audience: str) -> list[dict]:
         c = dict(i)
         for k in INTERNAL_FIELDS:
             c.pop(k, None)
+        # The same machinery net the page walker runs (redaction.
+        # _strip_machinery), and by the same rule: the WHOLE field is
+        # withheld, never half a sentence (CG-49). This endpoint skipped it,
+        # so a stored excerpt reading "CURRENCY PROBE RESOLVED" or
+        # "(Wave 1, E-002)" reached the customer's drawer verbatim.
+        for k in [k for k, v in c.items()
+                  if k != "e_id" and isinstance(v, str)
+                  and internal_ids.names_machinery(v)]:
+            del c[k]
         out.append(c)
     return out
