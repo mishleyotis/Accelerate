@@ -613,7 +613,14 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
             continue
         aid = f.stem[len("agent-"):]
         tok = dict.fromkeys(tok_sum, 0)
-        turns = 0
+        # N-25 (2026-10-01, Northwest Bank): a transcript writes ONE ENTRY PER
+        # CONTENT BLOCK (thinking, text, each tool call) and every entry of a
+        # message repeats that message's input/cache usage; output grows to
+        # its final count on the last. Summing entries charged each API call
+        # ~3.2x ($128.05 booked for $39.83 spent, measured over 2,949 entries
+        # / 955 messages) — enough to stop a run at a ceiling it had not
+        # reached. One charge per message id; output from its last entry.
+        msgs: dict[str, dict] = {}
         for line in text.splitlines():
             try:
                 e = json.loads(line)
@@ -623,8 +630,15 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
                 continue
             m = e.get("message") or {}
             u = m.get("usage") or {}
-            turns += 1
-            model = _model_of(m.get("model"))
+            mid = str(m.get("id") or f"_entry{len(msgs)}")
+            prev = msgs.get(mid)
+            if prev is None or int(u.get("output_tokens") or 0) >= int(
+                    prev["u"].get("output_tokens") or 0):
+                msgs[mid] = {"u": u, "model": m.get("model")}
+        turns = len(msgs)
+        for rec_ in msgs.values():
+            u = rec_["u"]
+            model = _model_of(rec_["model"])
             tok["cache_read"] += int(u.get("cache_read_input_tokens") or 0)
             tok["cache_write"] += int(u.get("cache_creation_input_tokens") or 0)
             tok["uncached"] += int(u.get("input_tokens") or 0)
