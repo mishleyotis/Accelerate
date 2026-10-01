@@ -253,7 +253,9 @@ def preflight_doc(*, entity="Acme Credit Union", entity_id="acme-cu") -> dict:
         "url": "https://ncua.example/callreport/2025",
         "kind": "call_report", "period": "FY2025", "tier": "T1",
         "period_end": "2025-12-31",
-        "retrieved_at": "2026-08-29T09:00:00Z"}]
+        "retrieved_at": "2026-08-29T09:00:00Z",
+        "excerpt": "Total interest income on consumer loans 612,000,000; fee and other operating income 103,000,000 for the year ended December 31, 2025.",
+        "published": "2026-01-30"}]
     d["financials"]["revenue_lines"] = [{
         "line": "Interest income — consumer loans", "amount": 612000000,
         "currency": "USD", "period": "FY2025", "share_pct": 100.0,

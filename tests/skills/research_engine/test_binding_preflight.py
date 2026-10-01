@@ -31,7 +31,9 @@ def _good() -> dict:
         "source_name": "NCUA Call Report — Acme CU, 2025 Q4",
         "url": "https://mapping.ncua.gov/ResearchCreditUnion",
         "kind": "call_report", "period": "FY2025", "tier": "T1",
-        "retrieved_at": "2026-08-29T09:00:00Z"}]
+        "retrieved_at": "2026-08-29T09:00:00Z",
+        "excerpt": "Total interest income on consumer loans 612,000,000; fee and other operating income 103,000,000 for the year ended December 31, 2025.",
+        "published": "2026-01-30"}]
     d["financials"]["revenue_lines"] = [
         {"line": "Interest income — consumer loans", "amount": 612000000,
          "currency": "USD", "period": "FY2025", "share_pct": 74.0,
@@ -206,3 +208,25 @@ def test_the_digest_ignores_advisory_prose_but_not_the_binding():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+def test_a_statement_is_banked_only_on_its_own_words_and_its_own_date(tmp_path):
+    """N-28 (2026-10-01, Northwest Bank): with no excerpt the engine wrote a
+    description and banked it as evidence, dated by retrieved_at — a
+    non-verbatim excerpt (invariant 4) reading CURRENT (invariant 9)."""
+    from fixtures import new_run
+    run = new_run(tmp_path, prelim=False)
+    doc = _good()
+    doc["financials"]["statements"].append(dict(doc["financials"]["statements"][0],
+                                                source_name="no excerpt", excerpt="",
+                                                url="https://example.org/x", published=""))
+    out = P.record(run, doc)
+    banked = out["evidence_banked"]
+    assert any(str(b).startswith("NOT_BANKED: no excerpt") for b in banked), banked
+    ev = [r for r in run.open().rows("Evidence_Detail")
+          if "612,000,000" in str(r.get("Excerpt") or "")]
+    assert ev and str(ev[0].get("Date_Published"))[:10] == "2026-01-30"
+    assert not [r for r in run.open().rows("Evidence_Detail")
+                if "reviewed during binding preflight" in str(r.get("Excerpt") or "")]
+    probs = " ".join(P.check(doc)["problems"])
+    assert "excerpt must be 50-500 chars copied verbatim" in probs

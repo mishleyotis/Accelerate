@@ -123,7 +123,9 @@ def skeleton(*, entity: str, entity_id: str, run_id: str | None = None,
         "_row_shapes": {
             "financials.statements[]": {"source_name": "", "url": "",
                                         "kind": "", "period": "",
-                                        "tier": "", "retrieved_at": ""},
+                                        "tier": "", "retrieved_at": "",
+                                        "excerpt": "verbatim 50-500 chars from the statement (a revenue line as printed)",
+                                        "published": "the date the statement states (filed/released), never the day you read it"},
             "financials.revenue_lines[]": {"line": "", "amount": "",
                                            "currency": "", "period": "",
                                            "share_pct": "", "implies_lob": "",
@@ -201,6 +203,12 @@ def _check_financials(doc: dict, problems: list[str]) -> dict:
                     f"financials.statements[{i}] "
                     f"({_clean(s.get('source_name')) or '?'}): no url — a "
                     f"statement nobody can reopen is not a review")
+            if not (50 <= len(_clean(s.get("excerpt"))) <= 500):
+                problems.append(
+                    f"financials.statements[{i}] "
+                    f"({_clean(s.get('source_name')) or '?'}): excerpt must be "
+                    f"50-500 chars copied verbatim from the statement — it is "
+                    f"banked as evidence, and evidence is the source's words")
         if not lines:
             problems.append(
                 "financials.revenue_lines is empty though a statement was "
@@ -670,17 +678,25 @@ def record(run, doc: dict, report: dict | None = None) -> dict:
     banked = []
     for s in (doc.get("financials") or {}).get("statements") or []:
         url = _clean(s.get("url"))
-        excerpt = _clean(s.get("excerpt")) or _clean(
-            f"{s.get('kind') or 'financial statement'} for "
-            f"{s.get('period') or 'the stated period'}, reviewed during "
-            f"binding preflight for revenue lines and lines of business: "
-            f"{_clean(s.get('source_name'))}.")
+        # N-28 (2026-10-01, Northwest Bank): with no excerpt in the row the
+        # engine WROTE one ("earnings release for FY2025, reviewed during
+        # binding preflight …") and banked it as evidence, and with no
+        # period_end it dated the row by retrieved_at — so a description
+        # posed as a verbatim excerpt (invariant 4) and the day it was read
+        # posed as the day it was published, reading CURRENT (invariant 9).
+        # A statement is banked only on the words it prints; an undated one
+        # stays undated.
+        excerpt = _clean(s.get("excerpt"))
+        if not (50 <= len(excerpt) <= 500):
+            banked.append(f"NOT_BANKED: {_clean(s.get('source_name')) or url}: no verbatim "
+                          f"excerpt of 50-500 chars in the statement row")
+            continue
         try:
             eid = L.append_evidence(
                 wb, source_name=_clean(s.get("source_name")), source_url=url,
                 tier=_clean(s.get("tier")) or "T2", excerpt=excerpt,
-                subcaps=[], published=_clean(s.get("period_end"))
-                or _clean(s.get("retrieved_at"))[:10] or None,
+                subcaps=[], published=_clean(s.get("published"))
+                or _clean(s.get("period_end")) or None,
                 # A filed statement is T1/T2 and a FACT; a statement the
                 # preflight could only reach at T3 (a news summary of the
                 # figures) is what its tier licenses, not a FACT by fiat.
