@@ -313,7 +313,7 @@ def scan_state(wb: RunWorkbook) -> dict:
 # those two. They are not symmetric, and pretending they were is how a scan
 # reports detections it never made:
 #
-#   clay       REACHABLE from a session. `find-and-enrich-company` takes a
+#   clay       REACHABLE from a session. `search-companies` (by domain) takes a
 #              `Tech Stack` data point and `Open Jobs`; the scanner carries
 #              those tools. `CLAY_PLAN` fixes the call sequence so it is the
 #              same every run and the credit cost is bounded.
@@ -343,13 +343,15 @@ def scan_state(wb: RunWorkbook) -> dict:
 #: identifying call first (it creates the task), then the second data point
 #: against the entity ids it returned.
 CLAY_PLAN = (
-    ("mcp__Clay__find-and-enrich-company",
-     'companyIdentifier=<registrable domain>, '
-     'companyDataPoints=[{"type": "Tech Stack"}]',
-     "the register's spine: Clay's own technographic rows for this domain"),
+    # The live Clay connector (measured 2026-09-30) has no
+    # `find-and-enrich-company`: a company is FOUND with search-companies,
+    # which returns the taskId, and ENRICHED with add-company-data-points.
+    ("mcp__Clay__search-companies",
+     'dslQuery=\'select from companies where domain = "<registrable domain>" limit 1\'',
+     "identifies the company and creates the task every later call needs"),
     ("mcp__Clay__add-company-data-points",
-     'taskId=<from the call above>, entityIds=[<the company>], '
-     'dataPoints=[{"type": "Open Jobs"}]',
+     'taskId=<from the call above>, entityIds=[<the company entityId>], '
+     'dataPoints=[{"type": "Tech Stack"}, {"type": "Open Jobs"}]',
      "job postings are the highest-yield DATA and INFRA signal, and they "
      "are INFERRED evidence, never CONFIRMED"),
     ("mcp__Clay__get-task-context",
@@ -367,11 +369,11 @@ CLAY_PLAN = (
 #: research peers inside the synthesis session, which is the work a turn
 #: budget drops first.
 CLAY_PEER_PLAN = (
-    ("mcp__Clay__find-and-enrich-company",
-     'companyIdentifier=<the PEER\'s registrable domain>, '
-     'companyDataPoints=[{"type": "Tech Stack"}]',
-     "one call per peer in Peer_Benchmarks; the peer's estate, not the "
-     "client's"),
+    ("mcp__Clay__search-companies",
+     'dslQuery=\'select from companies where domain in ("<peer domain>", …) limit 10\' '
+     'then add-company-data-points taskId=<it>, dataPoints=[{"type": "Tech Stack"}]',
+     "one search for every peer in Peer_Benchmarks; the peers' estates, not "
+     "the client's"),
     ("engine.cli techscan peer-record",
      "--ts <TS-nnn> --peer <name> --deployed|--not-deployed --basis <clause> "
      "[--url <source>]",

@@ -132,3 +132,24 @@ test("the client view defaults to the body a client may read", () => {
   assert.ok(b && b[1] === "internal",
     "the source says internal and the compiled bundle does not — run build:proto");
 });
+
+test("no payload label is split or case-folded without a guard", () => {
+  /* Production rendered "Cannot read properties of null (reading 'split')"
+     in place of a whole page: the C1 timeline called `e.title.split(" ")` on
+     an event promoted with a null title. The same bare call sat on directory
+     names, roster names, heatmap ids, platform features and the global
+     search. A label is nullable like any other payload text, so it goes
+     through String(x || "") or a helper before a string method touches it. */
+  const re = /\.(title|name|label|id|features|headline)\.(split|toLowerCase|toUpperCase|trim|replace|charAt)\(/;
+  const offenders = [];
+  for (const [file, src] of protoSources()) {
+    src.split("\n").forEach((line, i) => {
+      if (re.test(line) && !/^\s*(\/\/|\*)/.test(line)) {
+        offenders.push(`${file}:${i + 1}  ${line.trim().slice(0, 110)}`);
+      }
+    });
+  }
+  assert.deepStrictEqual(offenders, [],
+    "a payload label is dereferenced as a string without a guard; a run that "
+    + "promotes it as null takes the page down:\n" + offenders.join("\n"));
+});

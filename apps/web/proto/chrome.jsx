@@ -94,9 +94,9 @@ function TopBar({ title, crumbs, right }) {
     if (!ql) return null;
     const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4)
       .map(e => ({ kind: "entity", title: e.name, sub: DMA.SUBVERTICAL_LABEL[e.subvertical], route: `/clients/${e.id}/overview`, icon: "users" }));
-    const insights = DMA.INSIGHT_CARDS.filter(c => c.title.toLowerCase().includes(ql) || c.id.toLowerCase().includes(ql)).slice(0, 3)
+    const insights = DMA.INSIGHT_CARDS.filter(c => String(c.title || "").toLowerCase().includes(ql) || String(c.id || "").toLowerCase().includes(ql)).slice(0, 3)
       .map(c => ({ kind: "insight", title: c.title, sub: `${c.id} · ${c.flag}`, route: `/clients/fce-001/insights?card=${c.id}`, icon: "insight" }));
-    const evidence = DMA.EVIDENCE.filter(e => e.title.toLowerCase().includes(ql) || e.id.toLowerCase().includes(ql)).slice(0, 3)
+    const evidence = DMA.EVIDENCE.filter(e => String(e.title || "").toLowerCase().includes(ql) || String(e.id || "").toLowerCase().includes(ql)).slice(0, 3)
       .map(e => ({ kind: "evidence", title: e.title, sub: `${e.id} · ${e.tier}`, route: `/clients/fce-001/insights?evidence=${e.id}`, icon: "evidence" }));
     return [...entities, ...insights, ...evidence];
   }, [ql]);

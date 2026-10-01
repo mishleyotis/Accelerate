@@ -4,9 +4,11 @@ These schemas define the machine-readable formats that the DMA Assessment Skill 
 outputs and the DMA Governance Skill (Layer 2) consumes. Both skills must keep these
 contracts in sync. If a contract changes, both skills must be updated.
 
-**Version**: 2.0
-**Effective Date**: 2026-03-01
-**Change Log**: v2.0 — Unified hybrid run_manifest schema (nested structure + audit fields),
+**Version**: 3.0
+**Effective Date**: 2026-09-28
+**Change Log**: v3.0 — Contract 1 is the engine's `run_manifest_v3` schema
+(one writer, `engine.assemble.write_manifest`); the v2 hybrid schema and its
+copy in this folder are retired. v2.0 — Unified hybrid run_manifest schema (nested structure + audit fields),
 added CRITIC_CHALLENGE cap type, added contradiction_type column, added Contract 8
 (reasoning_chain_log.json). Aligned all enums and pillar names with assessment skill v5.0.
 
@@ -14,103 +16,54 @@ added CRITIC_CHALLENGE cap type, added contradiction_type column, added Contract
 
 ## Contract 1: Run Manifest (`run_manifest.json`)
 
-Every completed assessment produces exactly one run manifest. It is the identity document
-for the assessment and the primary key for the Program Repository.
+Every run produces exactly one run manifest. It is the identity document for
+the run and the primary key for the Program Repository.
 
-**Schema file**: `schemas/run_manifest.schema.json` (HYBRID v2.0 — authoritative source)
+**Schema file**: `skills/dma-research/engine/schemas/run_manifest.schema.json`
+(`run_manifest_v3`). The ENGINE owns it: `engine.assemble.manifest_doc` builds
+the document from the workbook and `engine.assemble.write_manifest` validates
+it against the schema before writing. There is no second copy of the schema
+here and no second writer — the assessment skill's governance exporter
+(`generate_governance_outputs.py`) calls the engine, and this skill's
+`gov_auditor.py` (IV-02) and `calibration_engine.py` read the same shape.
+`validate_contracts.py` checks it the way the writer does.
 
-The run manifest uses a **nested structure** matching the assessment skill's output format,
-enriched with audit-specific fields (`run_id`, `skill_references_read`, `files_generated`,
-`assessment.status`, `evidence_metrics.document_count`, `scoring_metrics.peer_count`).
+Measured 28-09-2026 (QA audit F-N01-019): three shapes coexisted — the
+engine's, a `run_manifest_v2` built from CLI flags with versions defaulting
+to "5.0", and a flat one the auditor demanded that nothing wrote — so IV-02
+was CRITICAL on every real run.
+
+Shape (every value read from the workbook or computed from the run):
 
 ```json
 {
-  "$schema": "run_manifest_v2",
-  "run_id": "DMA-OZK-20250115-0001",
-  "institution": {
-    "name": "string — full legal name",
-    "id": "string — unique identifier (NCUA charter#, OCC charter#, or assigned)",
-    "sub_vertical": "enum: Credit Unions|Regional Banks|Commercial Lending|CIB|Insurance Carriers|Insurance Brokerages|Wealth Managers / RIAs|Asset Management",
-    "size_tier": "enum: Mega|Large|Medium|Small|Micro|Nano",
-    "primary_regulator": "string — e.g., NCUA, OCC, FDIC, Federal Reserve",
-    "geography": "string — HQ state/region"
-  },
-  "assessment": {
-    "date": "ISO-8601 date (YYYY-MM-DD)",
-    "evidence_mode": "enum: PUBLIC|INTERNAL|HYBRID",
-    "assessor": "string — name or ID of the person/agent that ran the assessment",
-    "tool_version": "string — Claude model + skill version (e.g., 'claude-opus-4-20250514 + DMA v5.0')",
-    "status": "enum: IN_PROGRESS|SCORING_COMPLETE|REPORT_DRAFT|AWAITING_REVIEW|DELIVERED"
-  },
-  "versions": {
-    "rubric": "string — scoring methodology version (e.g., '5.0')",
-    "taxonomy": "string — capability taxonomy version (e.g., '5.0')",
-    "template": "string — report template version (e.g., '5.0')",
-    "peer_methodology": "string — peer benchmarking methodology version (e.g., '5.0')",
-    "governance_skill": "string — governance skill version (e.g., '2.1') or null if not yet audited"
-  },
-  "scores": {
-    "overall": "number (2 decimal places)",
-    "pillars": {
-      "P1": "number — Strategy, Governance & Culture",
-      "P2": "number — Member/Customer Experience",
-      "P3": "number — Operations, Risk & Compliance",
-      "P4": "number — Data, Analytics & Technology"
-    },
-    "categories": {
-      "P1C1": "number", "P1C2": "number", "...all 17...": "..."
-    }
-  },
-  "evidence_metrics": {
-    "total_items": "integer",
-    "tier_distribution": {"T1": 0, "T2": 0, "T3": 0, "T4": 0, "T5": 0},
-    "avg_ers": "number (2 decimal places)",
-    "median_ers": "number",
-    "sources_per_subcap_avg": "number",
-    "single_source_subcap_count": "integer",
-    "no_evidence_subcap_count": "integer",
-    "document_count": "integer — number of unique documents processed"
-  },
-  "scoring_metrics": {
-    "caps_applied_count": "integer",
-    "adjustments_applied_count": "integer",
-    "dependency_caps_triggered": "integer",
-    "contradictions_found": "integer",
-    "contradictions_unresolved": "integer",
-    "na_capabilities": ["list of capability IDs marked N/A"],
-    "peer_count": "integer — number of peer institutions used"
-  },
-  "confidence_distribution": {
-    "HIGH": "integer (count of subcaps)",
-    "MEDIUM": "integer",
-    "LOW": "integer"
-  },
-  "qa": {
-    "verdict": "enum: PASS|PASS_WITH_NOTES|FAIL",
-    "regression_tests": "string — e.g., '8/8 PASS'",
-    "issues_found": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0},
-    "critical_issues": "integer — shortcut, must equal issues_found.CRITICAL"
-  },
-  "skill_references_read": ["analytical_framework.md", "scoring_methodology.md", "..."],
-  "files_generated": [
-    {"filename": "string", "file_type": "enum: xlsx|docx|csv|json|png|md", "path": "string"}
-  ],
-  "assessment_notes": "optional string"
+  "schema_version": "run_manifest_v3",
+  "status": "IN_PROGRESS | COMPLETE",
+  "stage": "OPENED | SCORING_PASS | REPORTS_READY | PACKAGE | GOVERNANCE_EXPORT",
+  "opened_at": "ISO-8601 or null",
+  "checkpointed_at": "ISO-8601 or null",
+  "run_id": "the run's own id",
+  "institution": {"name": "...", "entity_id": "... or null", "sub_vertical": "... or null"},
+  "evidence_mode": "PUBLIC | INTERNAL | HYBRID (or null)",
+  "scope_mode": "... or null",
+  "reference_date": "YYYY-MM-DD or null",
+  "catalogue_version": "v7.0", "catalogue_hash": "sha256 of the catalogue",
+  "workbook_contract": "v7", "engine_version": "7.0.0",
+  "assembled_at": "ISO-8601",
+  "deliverables": ["DMA_Scoring_Workbook_*.xlsx", "..."],
+  "packets": {"research_handoff": {"path": "...", "sha256": "...", "schema_version": "research_handoff_v2", "verified": true}},
+  "gates": {"<GATE>[:<scope>]": {"verdict": "PASS | FAIL | ...", "scope": null, "at": null, "detail": null}},
+  "approvals": [{"tool": "enrich-business", "cost_line": "...", "approved_by": "...", "at": null, "expires": null}],
+  "decision_log_ref": "path of dma_run_registry.jsonl, or null",
+  "scores": {"overall": 2.8, "pillars": {"P1": 2.6}, "categories": {"P1C1": 2.4}},
+  "evidence_metrics": {"total_items": 120, "tier_distribution": {"T1": 10, "T2": 40}}
 }
 ```
 
-**Validation rules**:
-- `scores.overall` must equal weighted average of `scores.pillars` (±0.02)
-- `evidence_metrics.total_items` must equal sum of `tier_distribution` values
-- `confidence_distribution` sum must equal total subcapability count
-- `qa.verdict` must be PASS or PASS_WITH_NOTES for delivery-ready assessments
-- `qa.critical_issues` must equal `qa.issues_found.CRITICAL`
-- `$schema` must be `"run_manifest_v2"`
-
-**Migration from v1**: If a v1 manifest (flat structure) is encountered, the governance
-auditor should log IV-02 as HIGH (not CRITICAL) and attempt best-effort field mapping.
-
----
+`scores` is `null` until the scoring stage has written its roll-ups (never
+zeros). Validation rules the readers apply: `scores.overall` is the mean of
+the four pillars within ±0.02; `evidence_metrics.total_items` equals the sum
+of `tier_distribution`; every catalogue category has a score once scored.
 
 ## Contract 2: Caps Applied Log (`caps_applied_log.csv`)
 

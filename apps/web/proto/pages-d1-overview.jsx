@@ -760,7 +760,7 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
           const score = t.composite;
           const cells = (t.addressable_cells || []).filter(c => c && c.subcap_id);
           const sub = asText(t.headline)
-            || ((cat && cat.features) ? cat.features.split(" · ").slice(0, 2).join(" · ") : null);
+            || ((cat && cat.features) ? String(cat.features).split(" · ").slice(0, 2).join(" · ") : null);
           return (
             <div key={pid} className="card-tile clickable" onClick={() => navigate(`/clients/${entity.id}/platform`, { platform: pid, run: run.id })}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
@@ -1242,7 +1242,7 @@ function LeadershipPanel({ audience }) {
           return (
             <div key={ex.id} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
               <div style={{ width: 36, height: 36, borderRadius: 18, background: ex.gap_flag ? "var(--z-sep)" : "linear-gradient(135deg, var(--z-teal), var(--z-mid))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
-                {ex.gap_flag ? "?" : ex.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {ex.gap_flag ? "?" : (String(ex.name || "").split(" ").filter(Boolean).map(n => n[0]).join("").slice(0, 2) || "?")}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>

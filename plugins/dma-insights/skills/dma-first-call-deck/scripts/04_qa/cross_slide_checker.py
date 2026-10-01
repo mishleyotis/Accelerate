@@ -456,7 +456,10 @@ def verify_cross_slide(prs, input_data, report):
             s10_level = cls.score_to_level_4tier(s10_pillars[pkey])
             # Compute avg of S14 scores for this pillar
             indices = pillar_cap_map[pkey]
-            avg_s14 = sum(s14_scores[i] for i in indices) / len(indices)
+            vals = [s14_scores[i] for i in indices if s14_scores[i] is not None]
+            if not vals:                       # every block retired: nothing to compare
+                continue
+            avg_s14 = sum(vals) / len(vals)
             s14_level = cls.score_to_level_4tier(avg_s14)
             # Levels should agree within 1 step
             order = ["Activating", "Building", "Competing", "Differentiating"]
@@ -472,12 +475,13 @@ def verify_cross_slide(prs, input_data, report):
     # ── 3. Slide 13 5-tier vs Slide 10 4-tier loose consistency ────────
     s13_levels_input = (input_data.get("s13") or {}).get("pillar_levels", {})
     if s13_levels_input and s10_pillars:
-        # 5-tier → 4-tier acceptable ranges:
-        # 5t 1 (score <1.0) → Activating
-        # 5t 2 (score 1-2)  → Activating | Building
-        # 5t 3 (score 2-3)  → Building | Competing
-        # 5t 4 (score 3-4)  → Competing | Differentiating
-        # 5t 5 (score 4-5)  → Differentiating
+        # Maturity level (rubric cuts 1.5/2.5/3.5/4.5) vs display band
+        # (app cuts 2/3/4) — the bands a level's score range can land in:
+        # level 1 (score <1.5)      → Activating
+        # level 2 (1.5 – 2.49)      → Activating | Building
+        # level 3 (2.5 – 3.49)      → Building | Competing
+        # level 4 (3.5 – 4.49)      → Competing | Differentiating
+        # level 5 (>= 4.5, Leading) → Differentiating
         for pkey in ("P1", "P2", "P3", "P4"):
             if pkey not in s13_levels_input or pkey not in s10_pillars:
                 continue

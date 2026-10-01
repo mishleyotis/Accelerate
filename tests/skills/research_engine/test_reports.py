@@ -7,44 +7,52 @@ from docx import Document
 from engine import ledger as L, report_spec as RS, reports
 from engine.reports import ReportRefused
 
-from fixtures import sign_off_sections, CAT, bank_evidence, good_synthesis, new_run, synthesise
+from fixtures import (CAT, bank_evidence, good_synthesis, new_run,  # noqa: F401
+                      scored_run, section_record, sign_off_sections, synthesise)
 
-LOREM = ("Acme Credit Union runs member-facing digital banking on Alkami, "
-         "live since Q3 2024, with adoption measured at 47 percent within "
-         "ninety days and restated at 52 percent in the 2025 annual report "
-         "[E-001]. The board reviews the figure quarterly and it is tied to "
-         "the 2025 cost-to-serve target, which makes this the channel the "
-         "programme leans on rather than a pilot. ")
-
-
-def _narrate(wb, spec, *, words_per_section=800, cards=RS.INSIGHT_CARD_MIN,
-             cite="E-001"):
-    body = (LOREM.replace("[E-001]", f"[{cite}]") *
-            max(1, words_per_section // 60))
+def _narrate(wb, spec, *, words_per_section=None, cite=None, rec_cards=None,
+             ic_cards=None):
+    """Rows for every section of `spec`, in the PINNED template's shape —
+    blocks, control-block checks, one card per pillar in scope, the Doc's
+    minimum of REC cards — appended directly so each test can break exactly
+    one thing the renderer must catch (a dead citation, a short section, a
+    card floor). The writer's own path is tested in test_report_structure."""
+    from engine import narrative as N
+    eids = [cite] if cite else list(wb.evidence_index())[:10]
     for sec in spec.sections:
-        n = cards if sec.kind == "insight_card" else 1
-        for i in range(n):
-            wb.append("Report_Narrative", {
-                "Report": spec.key, "Section_ID": sec.id,
-                "Heading": f"{sec.heading} {i+1}" if n > 1 else sec.heading,
-                "Body": body, "Evidence_IDs": cite, "Kind": sec.kind,
-                "Author": "test", "Written_At": "2026-08-29T00:00:00Z",
-            }, save=False)
+        if sec.kind == "pillar":
+            cards = sorted({c[:2] for c in wb.selected_subcaps()})
+        elif sec.is_card:
+            n = rec_cards if rec_cards is not None else N.card_floor_for(wb, sec)
+            cards = [f"{sec.card_prefix}{i + 1:02d}" for i in range(n)]
+        else:
+            cards = [None]
+        for card in cards:
+            rec = section_record(sec.id, eids, report=spec.key)
+            body = rec["Body"]
+            if words_per_section is not None:
+                body = " ".join(body.split()[:words_per_section])
+            if ic_cards is not None and spec.key == "client_research" and sec.id == "5":
+                body = re.sub(r"\bIC-(\d{3})\b",
+                              lambda m: m.group(0) if int(m.group(1)) <= ic_cards else "",
+                              body)
+            row = {"Report": spec.key, "Section_ID": sec.id,
+                   "Heading": (f"{card}: {sec.heading}" if card else sec.heading),
+                   "Body": body, "Evidence_IDs": ", ".join(eids), "Kind": sec.kind,
+                   "Card_ID": card or "", "Author": "test",
+                   "Written_At": "2026-08-29T00:00:00Z"}
+            for k in ("Weighing", "Assumptions", "Bias_Notes", "Inference_Tags",
+                      "Absence_Basis"):
+                row[k] = rec.get(k, "")
+            wb.append("Report_Narrative", row, save=False)
     wb.save()
 
 
-def _run_with_content(tmp_path, n=8):
-    run = new_run(tmp_path, n=n)
-    wb = run.open()
-    for cell in wb.selected_subcaps():
-        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
-    wb.append("Entity_Timeline", {
-        "Event_Date": "2024-09-01", "Title": "Alkami go-live",
-        "Kind": "PLATFORM", "Signal": "POSITIVE",
-        "Signal": "EXPANSION", "SubCap_IDs": wb.selected_subcaps()[0],
-        "Evidence_IDs": "E-001"})
-    from engine import floors_gate
-    floors_gate.run(wb, CAT, qa_dir=run.qa_dir)
+def _run_with_content(tmp_path, n=6):
+    """A researched, gated and SCORED run — the assessment report's §3 reads
+    Cap_Triggers / Subcap_Scores / Caps_Applied_Log, which only exist once
+    the scoring stage has run; a research-only run has no source for it."""
+    run, wb, cells, ev = scored_run(tmp_path, n=n)
     return run, wb
 
 
@@ -112,20 +120,23 @@ def test_a_short_section_refuses_and_says_which(tmp_path):
     assert "Report_Narrative" in str(e.value)
 
 
-# ── AUD-0145 · the insight-card floor is the template's, not 3 ───────────
+# ── AUD-0145 · the card floors are the template's, not 3 ─────────────────
 
-def test_seven_insight_cards_is_not_enough(tmp_path):
+def test_four_recommendation_cards_is_not_enough(tmp_path):
+    """The Doc's §8 carries five to eight REC-NN cards."""
     run, wb = _run_with_content(tmp_path)
-    spec = RS.SPECS["client_research"]
-    _narrate(wb, spec, cards=RS.INSIGHT_CARD_MIN - 1)
-    with pytest.raises(ReportRefused, match="insight cards against the"):
+    spec = RS.SPECS["assessment"]
+    _narrate(wb, spec, rec_cards=4)
+    with pytest.raises(ReportRefused, match=r"recommendation\(s\) against the"):
         reports.render(wb, spec, run.deliverables)
 
 
 def test_three_insight_cards_the_old_floor_is_refused(tmp_path):
+    """The profile's insight cards are IC-NNN ids inside §5, eight or more;
+    the old floor of three is refused by the countable check."""
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["client_research"]
-    _narrate(wb, spec, cards=3)
+    _narrate(wb, spec, ic_cards=3)
     with pytest.raises(ReportRefused, match="insight cards"):
         reports.render(wb, spec, run.deliverables)
 
@@ -139,21 +150,33 @@ def test_the_coverage_table_is_read_from_the_workbook_at_render_time(tmp_path):
     sign_off_sections(wb)
     r = reports.render(wb, spec, run.deliverables)
     doc = Document(r["path"])
-    cov = wb.coverage()[0]
+    cov = wb.rows("Coverage_Map")[0]
+    from engine import contract as C
     seen = [t for t in doc.tables
-            if t.rows[0].cells[0].text == "Category_ID"]
+            if [c.text for c in t.rows[0].cells] == list(C.COVERAGE_MAP_COLUMNS)]
     assert seen, "the coverage table must be in the document"
     body = [c.text for row in seen[0].rows for c in row.cells]
-    assert str(cov["Selected"]) in body and cov["Category_ID"] in body
+    assert str(cov["subcaps"]) in body and cov["category_id"] in body
 
 
 def test_changing_the_workbook_changes_the_report(tmp_path):
-    """The property that makes 'one substrate' true rather than asserted."""
+    """The property that makes 'one substrate' true rather than asserted:
+    a sheet the report CURATES is read at render time, so a row added
+    through the engine after the narrative was written is in the next
+    render. And the register is NOT one of those sheets — the pinned Doc's
+    §11 MUST NOT "reproduce the evidence register" (it lives in the
+    workbook), so an uncited register row stays out of the document while
+    the sections' own citations are unchanged."""
+    from engine import assessment as A
     run, wb = _run_with_content(tmp_path)
     spec = RS.SPECS["assessment"]
     _narrate(wb, spec)
     sign_off_sections(wb)
     before = reports.render(wb, spec, run.deliverables)["citations"]
+    # a sanctioned write to a sheet §8 curates …
+    A.solution(wb, sol_id="SOL-02", name="Real-time fraud analytics",
+               platform="Verafin", categories=[wb.selected_subcaps()[0][:4]])
+    # … and an uncited register row, which the Doc forbids reproducing
     L.append_evidence(wb, source_name="NCUA call report 2025",
                       source_url="https://ncua.example/cr25", tier="T1",
                       excerpt="Digital channel volumes for Acme Credit Union "
@@ -163,7 +186,8 @@ def test_changing_the_workbook_changes_the_report(tmp_path):
     doc = Document(r["path"])
     text = "\n".join(p.text for p in doc.paragraphs) + "".join(
         c.text for t in doc.tables for row in t.rows for c in row.cells)
-    assert "NCUA call report 2025" in text
+    assert "Real-time fraud analytics" in text
+    assert "NCUA call report 2025" not in text       # not cited → not reproduced
     assert before == r["citations"]  # the narrative's citations, unchanged
 
 

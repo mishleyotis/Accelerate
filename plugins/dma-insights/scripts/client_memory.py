@@ -64,6 +64,65 @@ WORKING_SECTIONS = [
 
 _SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,80}$")
 
+#: The cap, stated (QA audit F-G05-017): a memory file is read whole at
+#: every session start, so it is budgeted like a prompt. Past 80% the
+#: `note` output says so; at the cap it refuses until the file is pruned.
+CAP_BYTES = 49_152
+CONSOLIDATE_AT = 0.80
+
+
+def version_of(text_body: str) -> str:
+    """The version token: the content's own digest. A writer that read
+    version X and asks to write on top of version X is writing on what it
+    read; anything else is a lost update waiting to happen."""
+    import hashlib
+    return hashlib.sha256(text_body.encode("utf-8")).hexdigest()[:16]
+
+
+def _file_lock(path: Path):
+    """The engine's one file lock, shared with the workbook and the
+    research notebooks — never a second implementation."""
+    root = PLUGIN / "skills" / "dma-research"
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
+    from engine.workbook import file_lock                          # noqa: PLC0415
+    return file_lock(path.with_name(path.name + ".lock"), why=f"client memory {path.name}")
+
+
+def size_of(path: Path) -> dict:
+    n = path.stat().st_size if path.exists() else 0
+    return {"bytes": n, "cap": CAP_BYTES, "pct": round(100.0 * n / CAP_BYTES, 1),
+            "consolidate_due": n >= CAP_BYTES * CONSOLIDATE_AT, "over_cap": n >= CAP_BYTES}
+
+
+def write_note(path: Path, section: str, note: str, run: str | None, *,
+               expect_version: str | None = None, client: str | None = None) -> dict:
+    """The read-modify-write, under the lock, checked against the version
+    the caller read. Returns the new version and the size report."""
+    with _file_lock(path):
+        if not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(skeleton(client or path.stem), encoding="utf-8")
+        body = path.read_text(encoding="utf-8")
+        have = version_of(body)
+        if expect_version and expect_version != have:
+            raise SystemExit(
+                f"memory version mismatch: you read {expect_version}, the file is "
+                f"now {have} — another session wrote it. Re-read it (client_memory.py "
+                f"version --client …), merge your note into what is there, and write "
+                f"again with the current version. (QA audit F-G05-017)")
+        size = size_of(path)
+        if size["over_cap"]:
+            raise SystemExit(
+                f"{path.name} is {size['bytes']:,} bytes against a cap of {CAP_BYTES:,}: "
+                f"prune resolved entries before noting more — a memory a session "
+                f"cannot afford to read at start is a memory nobody reads.")
+        new = add_note(body, section, note, run)
+        tmp = path.with_name(path.name + ".tmp")
+        tmp.write_text(new, encoding="utf-8")
+        tmp.replace(path)
+        return {"version": version_of(new), "previous": have, **size_of(path)}
+
 
 def census_sections() -> list:
     d = json.loads(CENSUS.read_text())
@@ -152,14 +211,25 @@ def main(argv=None) -> int:
     p_note.add_argument("--run", help="run id, stamped as its first 8 chars")
     p_note.add_argument("--text", required=True)
     p_note.add_argument("--dir")
+    p_note.add_argument("--expect-version", default=None,
+                        help="the version token you read (client_memory.py version); "
+                             "the write is refused if the file has moved on")
     p_path = sub.add_parser("path", help="print the memory file path")
     p_path.add_argument("--client", required=True)
     p_path.add_argument("--dir")
+    p_ver = sub.add_parser("version", help="print the file's version token and size")
+    p_ver.add_argument("--client", required=True)
+    p_ver.add_argument("--dir")
     a = ap.parse_args(argv)
 
     path = memory_path(a.client, getattr(a, "dir", None))
     if a.cmd == "path":
         print(path)
+        return 0
+    if a.cmd == "version":
+        body = path.read_text(encoding="utf-8") if path.exists() else ""
+        print(json.dumps({"path": str(path), "version": version_of(body) if body else None,
+                          **size_of(path)}))
         return 0
     if a.cmd == "init":
         if path.exists():
@@ -170,13 +240,11 @@ def main(argv=None) -> int:
         print(f"created: {path}")
         return 0
     if a.cmd == "note":
-        if not path.exists():
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(skeleton(a.client), encoding="utf-8")
-        body = path.read_text(encoding="utf-8")
-        path.write_text(add_note(body, a.section, a.text, a.run),
-                        encoding="utf-8")
-        print(f"noted under {a.section}: {path}")
+        out = write_note(path, a.section, a.text, a.run,
+                         expect_version=a.expect_version, client=a.client)
+        print(f"noted under {a.section}: {path} · version {out['version']} · "
+              f"{out['bytes']:,} bytes ({out['pct']}% of cap)"
+              + (" · CONSOLIDATE DUE — prune resolved entries" if out["consolidate_due"] else ""))
         return 0
     return 2
 

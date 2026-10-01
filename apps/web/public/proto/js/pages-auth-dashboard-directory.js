@@ -776,7 +776,7 @@ function DashboardEntityCard({
       fontWeight: 700,
       flexShrink: 0
     }
-  }, e.name.split(" ").map(n => n[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", {
+  }, String(e.name || "").split(" ").filter(Boolean).map(n => n[0]).slice(0, 2).join("") || "?"), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0

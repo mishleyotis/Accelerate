@@ -683,7 +683,6 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
   font-size: 10px; font-weight: 700;
   font-family: var(--font-mono);
   letter-spacing: .02em;
-  white-space: nowrap;
   /* NOWRAP WITHOUT THIS IS A BUG GENERATOR, and it produced two of the
      defects reported on 2026-08-22 from different pages.
 
@@ -698,12 +697,38 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
      property belongs to the badge, and every one of the ~40 `.b` sites was one
      narrow viewport away from the same defect.
 
-     What changes when a row really is too narrow: chips now overflow their
-     row (visible, and caught by the overflow assertions in the browser tests)
-     instead of overlapping their neighbours (invisible to those assertions,
-     and unreadable to a client). A row that expects to run out of space wraps
-     — `flex-wrap: wrap` on the row, not shrink on the chip. */
-  flex-shrink: 0;
+     What changed then: chips overflowed their row (visible, and caught by the
+     overflow assertions in the browser tests) instead of overlapping their
+     neighbours (invisible to those assertions, and unreadable to a client).
+
+     THAT WAS ONE STEP, NOT THE DESTINATION, and 2026-09-02 collected the
+     bill on the promoted Golden 1 platform and context pages: readiness
+     chips reading "Governed member domain owed in the cat…" and "Licence and
+     user-seat audit decides a…", clipped mid-word at the card edge. A
+     truncated status label is not a shorter label — it is a claim the reader
+     cannot finish, and the note that would settle it sits in a tooltip they
+     have to discover.
+
+     The cause is this rule plus a call site: `nowrap` + `flex-shrink: 0` is
+     a box that can neither shrink, wrap, nor move to its own line, so it
+     leaves the card and the card's own `overflow` cuts it. Capping the
+     CONTENT was tried first (a 60-char budget on the producer's `basis`) and
+     it is the wrong altitude twice over: the pill holds ~38 characters at
+     this font, so 60 still clips, and a content rule cannot protect the
+     other ~40 `.b` sites at all.
+
+     So the badge takes responsibility for its own text. `white-space:
+     normal` lets a label that cannot fit its line wrap INSIDE its box, and
+     shrinking is safe again precisely because the text reflows rather than
+     spilling — the 2026-08-22 defect was shrink WITH nowrap, which this
+     never reinstates. A short badge is unaffected: it fits, so it does not
+     wrap. `max-width: 100%` keeps a single unbroken token inside its
+     container, and `overflow-wrap: anywhere` breaks one that has no space to
+     break at. Nothing here can clip, at any width, for any content. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  min-width: 0;
 }
 .b-teal   { background: var(--z-ice);     color: var(--z-mid); }
 .b-ph0    { background: var(--ph0-lt);    color: var(--ph0); }

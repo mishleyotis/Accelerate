@@ -60,18 +60,64 @@ for _p in ("/root/google-cloud-sdk/bin", "/usr/lib/google-cloud-sdk/bin"):
 
 import dma_connector as C                                    # noqa: E402
 
-# The connector states its own inline ceiling in get_page_contract(page)
-# ["transport"]["inline_max_bytes"]. Staying meaningfully under it leaves room
+# THE TRANSPORT CEILING, NOT THE MODEL CEILING.
+#
+# The connector publishes three numbers in get_page_contract(page)["transport"]
+# and they answer different questions:
+#
+#   inline_max_bytes       131,072   what a MODEL can emit in one tool call.
+#                                    Derived in transport.py from ~32k tokens
+#                                    of output budget at ~4 bytes a token.
+#   recommended_part_bytes 131,072   the same number, for the same reason.
+#   max_part_bytes       1,048,576   what the CONNECTOR will accept in one
+#                                    part. The only limit that binds a script.
+#
+# This script sized itself against the first one and left the third with zero
+# readers anywhere in the repo. It has no token budget: it reads a file and
+# posts JSON over HTTPS. Sizing a script's parts by what a model can type is
+# the wrong constraint by an order of magnitude, and the cost is not
+# theoretical — measured 2026-08-31 by a producer pushing a 1.5 MB heatmap:
+#
+#   at  96,000 bytes a part   ~53 parts, appended serially over minutes,
+#                             every one a chance to be interrupted and a
+#                             share of the rate-limit budget that returned
+#                             429s when they were sent in parallel
+#   at 900,000 bytes a part   2 parts
+#
+# So the ceiling is read FROM THE CONNECTOR at run time and only falls back to
+# a literal when the contract cannot be reached. `PART_HEADROOM` leaves room
 # for the JSON-RPC envelope around each part, which is not free.
-PART_BYTES = 96_000
+PART_HEADROOM = 148_576          # ~14% of the 1 MiB ceiling
+FALLBACK_MAX_PART_BYTES = 1_048_576
+PART_BYTES = FALLBACK_MAX_PART_BYTES - PART_HEADROOM
+
+
+def part_ceiling(page: str) -> int:
+    """The connector's own max_part_bytes, less envelope headroom.
+
+    Asked rather than assumed: if the connector lowers its ceiling this
+    follows it down, and a script that kept posting 900 KB parts against a
+    reduced limit would fail every part instead of one.
+    """
+    try:
+        c = C.call("get_page_contract", page=page)
+        n = int((c.get("transport") or {}).get("max_part_bytes") or 0)
+    except Exception:
+        n = 0
+    if n <= 0:
+        return PART_BYTES
+    return max(n - PART_HEADROOM, n // 2)
 
 
 def _size(obj) -> int:
     return len(json.dumps(obj, separators=(",", ":")))
 
 
-def _plan(payload: dict) -> list:
+def _plan(payload: dict, limit: int = PART_BYTES) -> list:
     """Split into parts on boundaries the payload already has.
+
+    `limit` is the CONNECTOR's per-part ceiling less envelope headroom, not
+    what a model can type — see `part_ceiling`.
 
     Sections small enough to travel whole do; a section whose item list is too
     large is sent as its envelope followed by runs of items. Nothing is
@@ -82,8 +128,8 @@ def _plan(payload: dict) -> list:
     small: dict = {}
 
     for name, section in payload.items():
-        if _size({name: section}) <= PART_BYTES:
-            if _size(small) + _size({name: section}) > PART_BYTES and small:
+        if _size({name: section}) <= limit:
+            if _size(small) + _size({name: section}) > limit and small:
                 parts.append({"path": "", "fields": dict(small)})
                 small = {}
             small[name] = section
@@ -91,7 +137,7 @@ def _plan(payload: dict) -> list:
 
         # Too big whole. Find its one list-valued key — the item grain.
         lists = [k for k, v in section.items()
-                 if isinstance(v, list) and _size(v) > PART_BYTES // 2]
+                 if isinstance(v, list) and _size(v) > limit // 2]
         if not isinstance(section, dict) or len(lists) != 1:
             raise SystemExit(
                 f"section {name!r} is {_size(section)} bytes and has "
@@ -105,7 +151,7 @@ def _plan(payload: dict) -> list:
         run, run_bytes = [], 0
         for item in section[key]:
             b = _size(item)
-            if run and run_bytes + b > PART_BYTES:
+            if run and run_bytes + b > limit:
                 parts.append({"path": f"{name}.{key}", "items": run})
                 run, run_bytes = [], 0
             run.append(item)
@@ -139,7 +185,11 @@ def main() -> int:
 
     payload = json.load(open(path))
     total_bytes = _size(payload)
-    parts = _plan(payload)
+    # Ask the connector what it will accept before deciding how
+    # finely to cut. The answer is usually 1 MiB, which is an
+    # order of magnitude more than this script used to assume.
+    limit = part_ceiling(page)
+    parts = _plan(payload, limit)
     print(f"payload {total_bytes:,} bytes -> {len(parts)} part(s)")
     for i, p in enumerate(parts, 1):
         n = len(p.get("items") or ()) if "items" in p else None

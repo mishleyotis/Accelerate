@@ -1326,7 +1326,7 @@ function adaptIssues(register) {
    `horizon`, `rec_ids`, `depends_on` and `rationale`. So `background: r.color`
    was undefined under `color: "#fff"` — white text on a white block, 300px of
    apparently blank page with the text present in the DOM — and the "Step curve"
-   toggle threw on `r.label.toUpperCase()`.
+   toggle threw on an unguarded upper-casing of `r.label`.
 
    `label` is the phase's own horizon; `color` is DERIVED from the phase index,
    which asserts nothing about the client (it is presentation, and deterministic

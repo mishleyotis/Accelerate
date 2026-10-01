@@ -271,7 +271,7 @@ Use this table to align headline style with the communication framework you're u
 | **Framework** | **Tone** | **Typical Pattern** | **Verb Style** | **When to Use** | **Example** |
 |---|---|---|---|---|---|
 | **Consultant (SCQA)** | Logical, data-first, comparative | "[Actor] [status] [relative to benchmark]" | Shows, trails, leads, scores, exceeds, ranks | Diagnostic presentations; assessment readouts; when peer comparison is key | "Acme scores 2.4/5 on Digital Capability, trailing peers by 0.6 across all four pillars" |
-| **Storyteller (Sparkline)** | Emotional, tension-release, aspirational | "[Current state] → [Future state]" | Transforms, enables, unlocks, envisions, breaks free, transcends | Transformational initiatives; vision slideshows; when narrative arc matters more than numbers | "12-day onboarding today; 10-minute digital onboarding tomorrow, unlocking $3.2M in captured member value" |
+| **Storyteller (Sparkline)** | Emotional, tension-release, aspirational | "[Current state] → [Future state]" | Transforms, enables, unlocks, envisions, breaks free, transcends | Transformation initiatives; vision slideshows; when narrative arc matters more than numbers | "12-day onboarding today; 10-minute digital onboarding tomorrow, unlocking $3.2M in captured member value" |
 | **Sales (AIDA)** | Urgent, impact-driven, capability-forward | "[Action] [because] [impact]" | Closes, captures, accelerates, protects, secures, unlocks | Closing presentations; when timeline pressure exists; when decision-readiness is the goal | "Closing the digital gap by Q2 protects $12M in member value at risk and positions CU ahead of 70% of competitors" |
 
 **How to choose:**

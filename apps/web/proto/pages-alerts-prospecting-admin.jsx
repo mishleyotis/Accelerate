@@ -226,7 +226,7 @@ function ScorecardPreview({ e }) {
           <div key={pid} className="card-tile">
             <strong>{DMA.getPlatform(pid).name}</strong>
             <div style={{ fontSize: 24, fontWeight: 200, color: "var(--z-teal)", marginTop: 4 }}>{score}<span style={{ fontSize: 11, color: "var(--z-muted)" }}>/100</span></div>
-            <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{DMA.getPlatform(pid).features.split(" · ").slice(0, 2).join(" · ")}</div>
+            <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{String(DMA.getPlatform(pid).features || "").split(" · ").slice(0, 2).join(" · ")}</div>
           </div>
         ))}
       </div>

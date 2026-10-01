@@ -34,12 +34,28 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[1]
-LEDGER = PLUGIN / "fixtures" / "source_yield.json"
+
+#: WHERE THE LEDGER LIVES, and it is two constants on purpose.
+#:
+#: `DEFAULT_LEDGER` is the path this script owns: cross-client by design, so
+#: it sits with the plugin rather than under a run root, and it is what the
+#: weekly rectification Routine's `push-ledger --file` names. It must never
+#: move with an environment variable, or the prompt and the writer drift and
+#: the snapshot the loop merges is a file that was never there.
+#:
+#: `LEDGER` is where THIS process writes: the default, unless
+#: `DMA_SOURCE_YIELD` redirects it — for a test run, whose plugin path
+#: resolves into the checkout, and for any caller that must not write into an
+#: installed plugin's tree. Read once, at import, because every writer here is
+#: a fresh subprocess and that is where its environment is fixed.
+DEFAULT_LEDGER = PLUGIN / "fixtures" / "source_yield.json"
+LEDGER = Path(os.environ.get("DMA_SOURCE_YIELD") or DEFAULT_LEDGER)
 
 OUTCOMES = ("rich", "thin", "empty")
 # Yield weights: a rich result is worth pursuing again; a thin one slightly
@@ -134,6 +150,8 @@ def main(argv=None) -> int:
     p_log.add_argument("--family", help="subcap family, e.g. P4C2.5")
     p_log.add_argument("--raised-by", default="session")
     p_log.add_argument("--note")
+    p_log.add_argument("--path", help="ledger file (default: $DMA_SOURCE_YIELD "
+                                      "or the plugin's fixtures/source_yield.json)")
     p_rank = sub.add_parser("rank", help="best sources for a facet")
     p_rank.add_argument("--facet", required=True)
     p_rank.add_argument("--family")
@@ -142,7 +160,8 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.cmd == "log":
         print(json.dumps(log(a.source, a.facet, a.outcome, a.tier, a.family,
-                             a.raised_by, a.note), indent=1))
+                             a.raised_by, a.note,
+                             Path(a.path) if a.path else LEDGER), indent=1))
         return 0
     if a.cmd == "rank":
         print(json.dumps(rank(a.facet, a.family), indent=1))

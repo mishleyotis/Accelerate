@@ -204,6 +204,12 @@ def main(argv=None) -> int:
     payload = payload.get("payload", payload)
     *mods, gates_from = _load_connector(a.repo)
     print(f"gates imported from: {gates_from}", file=sys.stderr)
+    # Pass 1 carries CG-15 (template repetition). Stated because the skill's
+    # own prose said no local checker had it, and producers believed the
+    # prose: measured 28-09-2026 (QA audit F-O07-010), this pass replayed
+    # over 102 staged cells caught 45 of the 46 server refusals.
+    print("pass 1 includes CG-15 (template repetition) and every other "
+          "shape gate the server runs at submit", file=sys.stderr)
 
     if a.list_cited:
         for e in sorted(cited_ids(payload, mods[1])):
