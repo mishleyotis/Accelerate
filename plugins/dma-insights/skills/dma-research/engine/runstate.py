@@ -238,22 +238,30 @@ def checkpoint(wb: RunWorkbook, position: str, scope=None) -> None:
     mark to measure from. Without it the ceiling would be a lifetime budget
     and a long run could never legitimately continue past it.
     """
-    n = len(wb.rows("Search_Log"))
-    try:
-        prev = json.loads(wb.metadata().get("checkpoint") or "{}")
-    except (ValueError, TypeError):
-        prev = {}
-    marks = dict(prev.get("marks") or {}) if isinstance(prev.get("marks"), dict) else {}
-    scopes = [scope] if isinstance(scope, str) else list(scope or [])
-    for s in scopes:
-        marks[s] = n
-    wb.set_metadata("checkpoint", json.dumps(
-        {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-         "position": position,
-         # the run-wide mark moves only on an unscoped checkpoint
-         "search_ops": n if not scopes else int(prev.get("search_ops") or 0),
-         "marks": marks},
-        separators=(",", ":")))
+    # UNDER THE RUN-WIDE LOCK (measured 2026-10-01, Cross Insurance): the
+    # read of Search_Log and the metadata save ran outside `transaction()`,
+    # so with ~15 researchers writing, a sibling that had loaded the workbook
+    # earlier saved over the checkpoint — `checkpoint` printed a fresh window
+    # while the stored mark stayed old and the ceiling kept refusing — and
+    # this unlocked save could equally drop rows a sibling had just committed.
+    with wb.transaction("checkpoint"):
+        n = len(wb.rows("Search_Log"))
+        try:
+            prev = json.loads(wb.metadata().get("checkpoint") or "{}")
+        except (ValueError, TypeError):
+            prev = {}
+        marks = dict(prev.get("marks") or {}) if isinstance(prev.get("marks"), dict) else {}
+        scopes = [scope] if isinstance(scope, str) else list(scope or [])
+        for s in scopes:
+            marks[s] = n
+        wb.set_metadata("checkpoint", json.dumps(
+            {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+             "position": position,
+             # the run-wide mark moves only on an unscoped checkpoint
+             "search_ops": n if not scopes else int(prev.get("search_ops") or 0),
+             "marks": marks},
+            separators=(",", ":")), save=False)
+        wb._dirty = True
 
 
 # ── getting the workbook out of an ephemeral container ───────────────────
