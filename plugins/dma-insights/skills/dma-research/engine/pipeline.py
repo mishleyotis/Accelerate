@@ -307,15 +307,22 @@ class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
     the final call, promote_run through mcp_raw — the two audited paths."""
 
-    def __init__(self, producer: str = "engine.pipeline"):
+    def __init__(self, producer: str = "engine.pipeline", session: str | None = None):
         self.producer = producer
+        # ONE lease holder for every page this driver ships. ship_page.py
+        # mints a fresh session per process when none is exported, so the
+        # second page's claim was refused by the first page's live lease
+        # (2026-10-01, Cross Insurance: techstack shipped, heatmap refused
+        # "another session holds the lease" — the other session was us).
+        self.session = session or f"engine-pipeline-{os.getpid()}"
 
     def ship(self, connector_run, page, sections_dir, verdicts_out):
         r = subprocess.run(
             [sys.executable, str(SHIP_PAGE), connector_run, page,
              "--sections", str(sections_dir), "--producer", self.producer,
              "--claim", "--verdicts-out", str(verdicts_out)],
-            capture_output=True, text=True, timeout=1800)
+            capture_output=True, text=True, timeout=1800,
+            env={**os.environ, "DMA_AGENT_SESSION": self.session})
         verdict = {}
         if Path(verdicts_out).is_file():
             try:
@@ -2438,7 +2445,9 @@ def _build_opts(a) -> Options:
         from . import pipeline_stub as S
         disp, reads, shipper = S.StubDispatcher.fixture_backed(), S.StubReads(), S.StubShipper()
     else:
-        disp, reads, shipper = AgentRunDispatcher(timeout=a.lane_timeout), McpReads(), ShipPageShipper()
+        disp, reads, shipper = (AgentRunDispatcher(timeout=a.lane_timeout), McpReads(),
+                                ShipPageShipper(session=os.environ.get("DMA_SHIP_SESSION")
+                                                or f"engine-pipeline-{a.run}"))
     return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
                    max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
                    allow_unverified_connectors=getattr(
