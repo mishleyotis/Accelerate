@@ -394,6 +394,11 @@ def _memory_backup_line(run, state: dict) -> str:
             f"must not fail a round — so nothing else will tell you.")
 
 
+#: The inline budget for the Workflow calls in additionalContext. Above ~10 KB
+#: the harness persists hook output to a file and shows only a preview (J-11).
+HOOK_INLINE_CHARS = 8000
+
+
 def awaiting_workflow(event: dict) -> dict | None:
     """RESEARCH handed to the session as persisted workflows: say exactly
     which Workflow calls to start, from the driver's own handoff file.
@@ -412,18 +417,41 @@ def awaiting_workflow(event: dict) -> dict | None:
             doc = json.loads(Path(m.group(1)).read_text())
         except (OSError, ValueError):
             doc = {}
-    lines = ["RESEARCH IS YOURS, AS PERSISTED WORKFLOWS — start ALL of these in "
-             "ONE message (they run side by side and show in /workflows):"]
-    for inv in doc.get("invocations") or []:
-        lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
-                     f"args: {json.dumps(inv)}}})")
+    invs = doc.get("invocations") or []
+    calls = [f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
+             f"args: {json.dumps(inv)}}})" for inv in invs]
+    lines = [f"RESEARCH IS YOURS, AS PERSISTED WORKFLOWS — start ALL {len(invs)} of "
+             f"these in ONE message (they run side by side and show in /workflows):"]
+    if sum(len(c) + 1 for c in calls) <= HOOK_INLINE_CHARS:
+        lines += calls
+    elif calls:
+        # J-11 (measured 2026-10-01, SWBC): sixteen inlined calls were 10.7 KB;
+        # the harness persisted the hook output to a file and showed a 2 KB
+        # preview — two of sixteen calls. A session that started what it saw
+        # would have researched two categories. The calls go to a sidecar
+        # file read verbatim, and the roster below says how many to start.
+        side = Path(m.group(1)).with_name("research_workflow_calls.txt")
+        try:
+            side.write_text("\n".join(c.strip()[4:] for c in calls) + "\n")
+            where = str(side)
+        except OSError:
+            where = m.group(1) + " (one Workflow per entry of `invocations`, args verbatim)"
+        roster = " ".join(f"{i['cats'][0]}x{sum(len(b) for b in i['batches'].values())}"
+                          + (f"+{sum(len(v) for v in (i.get('repair') or {}).values())}r"
+                             if any((i.get('repair') or {}).values()) else "")
+                          for i in invs if i.get("cats"))
+        lines.append(f"  The {len(invs)} calls are too long to inline here; Read {where} "
+                     f"— one call per line, args verbatim — and start EVERY line.")
+        lines.append(f"  roster (category x batches, +r = repair cells): {roster}")
     if not doc:
         lines.append(f"  (handoff file not readable — open "
                      f"{m.group(1) if m else '<ROOT>/07_qa/research_workflow.json'})")
     est = doc.get("estimate") or {}
     if est:
         fit = est.get("fits_budget")
-        lines.append(f"  ESTIMATE: ${est.get('usd')} for {est.get('open_cells')} open cells in "
+        rep = est.get("repair_cells")
+        lines.append(f"  ESTIMATE: ${est.get('usd')} for {est.get('open_cells')} open"
+                     + (f" + {rep} repair" if rep else "") + " cells in "
                      f"{est.get('batches')} batches ({est.get('basis')})"
                      + (f"; spent ${est.get('spent_usd')} of ${est.get('budget_usd')}"
                         if est.get("budget_usd") is not None else "")
@@ -432,9 +460,16 @@ def awaiting_workflow(event: dict) -> dict | None:
                         "driver stops at the ceiling mid-stage")))
     if doc.get("not_worked"):
         lines.append(f"  WARNING: {doc['not_worked']}")
+    sc = est.get("search_capacity") or {}
+    if sc and not sc.get("fits", True):
+        # J-22: starting workflows here spends agents that cannot search.
+        lines.append(f"  INSUFFICIENT SEARCH CAPACITY — DO NOT START THESE: {sc.get('owed_queries')} "
+                     f"queries owed, {sc.get('available')} available ({sc.get('basis')}). "
+                     f"Options: " + " | ".join(sc.get("options") or []))
     lines.append("  If Workflow is not available in this session, STOP and restart the "
-                 "session (tools rebind at start). Never substitute Agent calls or "
-                 "`--research-mode lanes`: neither is persisted, and lanes hold no connector.")
+                 "session (tools rebind at start). Never substitute Agent calls; "
+                 "`--research-mode lanes --allow-lanes` only when the search capacity "
+                 "above says the session cannot search (each lane brings its own WebSearch).")
     lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'engine.pipeline run'}")
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
                                    "additionalContext": "\n".join(lines)}}

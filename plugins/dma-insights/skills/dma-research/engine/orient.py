@@ -484,16 +484,28 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
     open_cells, facets = [], {}
     for c in cells:
         r = rows.get(c) or {}
-        if str(r.get("Dominant_Claim") or "").strip() and \
-                str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE":
-            continue                                   # synthesised with evidence
         vs = L.volley_status(wb, c, searches=searches)
+        # The primary question is owed like a volley (floors gate
+        # `primary_unfired`), and a SYNTHESISED cell that still owes it is a
+        # repair, not done (J-09/J-16, 2026-10-01: the card skipped every
+        # synthesised cell and never listed `primary`, so the 25 repair cells
+        # blocked on it had neither a card row nor their question).
+        owed = list(vs["missing"]) + ([] if vs["primary_fired"] else ["primary"])
+        synthesised = str(r.get("Dominant_Claim") or "").strip() and \
+            str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE"
+        if synthesised and not owed:
+            continue                                   # synthesised, owes nothing
         dq = kg.dqs_for(wb, c)
+        primary_q = next((str(q.get("question") or "") for q in dq["ask"]
+                          if q.get("facet") == "primary"), "")
         open_cells.append({"cell": c, "name": names.get(c, ""),
-                           "missing": vs["missing"]})
+                           "missing": owed,
+                           "repair": bool(synthesised),
+                           "primary_question": primary_q.replace(
+                               "{entity}", str(md.get("entity_name") or "the entity"))[:260]})
         for q in dq["ask"]:
             f = str(q.get("facet") or "")
-            if f not in vs["missing"]:
+            if f not in owed:
                 continue
             slot = facets.setdefault(f, {"cells": [], "questions": []})
             if c not in slot["cells"]:

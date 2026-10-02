@@ -100,6 +100,16 @@ name out of report prose — `get_capability_catalogue` is the only source); and
 run's own evidence store readable through `get_evidence`. If `get_evidence` returns
 `foreign` for any id in scope, you stop, report it, and do not write prose over it.
 
+**On a research-engine run, start from what the engine already formatted.**
+`python3 -m engine.heatmap_live build --run <R> --root <ROOT>` (the driver runs
+it at every research boundary) writes `sections/heatmap.evidence.json` —
+the full index, formatted from `Evidence_Detail` and validated against this
+contract — and `sections/heatmap.cell_evidence.skeleton.json`, where every
+cell's `items[]`, `e_ids`, `grounded_on`, `thin` and absence trio are already
+linked both ways. Ship the index as it is; for `cell_evidence`, write only each
+linked cell's `synthesis` and the envelope. Re-typing a linked row into JSON is
+where a dropped id becomes a broken drawer (J-14, 2026-10-01).
+
 ## Reading order — which file answers which question
 
 Read in this order. Each path has been verified to exist.

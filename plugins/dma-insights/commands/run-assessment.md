@@ -57,7 +57,7 @@ so that never repeats; refusing to start is not the remedy, and neither is
 starting silently.
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
+DMA_RUN_ROOT=<ROOT> python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py" --heal
 cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m engine.pipeline env
 ```
 
@@ -95,7 +95,11 @@ add `--fresh`: exit 7 NEW_VERSION is yours, and starting the run supersedes
 the folder's previous package in place (`drive_fetch.py archive-remote`, run
 by `open_folder` before its first push — moves, never deletes).
 
-Obey the exit code: 4 NEW_ENGAGEMENT is yours; 3 NEEDS_SCORING means the
+Obey the exit code: 8 RESUME means a research run is in flight — its
+CURRENT pointer is on the client's Drive, and it outranks every connector
+answer but ALREADY_SERVED: restore it (`python3 -m engine.snapshot restore
+--client "<Entity>" --root <ROOT>`, run id from the pointer) and continue at
+step 5; 4 NEW_ENGAGEMENT is yours; 3 NEEDS_SCORING means the
 research package exists and scoring is the missing step (`engine.pipeline
 plan` on that run tells you where it stands — resume it, do not restart);
 0 READY_TO_SYNTHESISE and 5 ALREADY_SERVED are the synthesis lane's, stop and
@@ -104,7 +108,7 @@ half-assessed and offer `--fresh`); 6 AMBIGUOUS — report the near matches, nev
 script failing, which is not a routing answer.
 
 Then the three places work already exists, before any research
-(`registry.py pull` + `registry.py list --open-only`; `drive_fetch.py
+(`python3 -m engine.registry pull` + `python3 -m engine.registry list --open-only`; `drive_fetch.py
 find-artifact --client "<Entity>"` and its `run_manifest.json`;
 `get_client_state`). An open run or an IN_PROGRESS manifest is a run to
 RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>` says
@@ -191,6 +195,13 @@ none stops and returns `NO_CONNECTORS`. When all have returned, run the
 file's `then` command: the driver prices the workflow agents into the cost
 ledger (so the ceiling sees them), re-reads the floors gates, re-hands only
 categories still failing — and says so if the last handoff was never worked.
+When the hook's call list is long it is written to
+`<ROOT>/07_qa/research_workflow_calls.txt` (one call per line) with a roster
+and a count — start EVERY line. A connector that answers 401/402/403/429 is
+recorded once with `engine.cli connector-down` and the handoff carries it;
+when every web connector is down, absences close `--enrichment-unavailable`
+and the gate discloses REDUCED rigour — say so in the report, and that an
+owner restores the provider (credits, a production key).
 If this session has no Workflow tool (a resumed session can lose it and the
 connectors), restart the session; `--research-mode lanes` is refused with the
 real dispatcher unless `--allow-lanes` waives it, because lanes hold no
@@ -223,9 +234,10 @@ it is a person's.
 Run it in the background and watch with
 `python3 -m engine.pipeline status --run <RUN_ID> --root <ROOT> --watch` and
 `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py" watch --log-dir <ROOT>/agent_logs`.
-The driver: PRELIM → KG → RESEARCH (sixteen lanes over `engine.brief`
-packets, challenge lanes, the floors gates; a FAILED category is re-dispatched
-with the handback and the gate's blocking terms, a PASSED one never) →
+The driver: PRELIM → KG → RESEARCH (handed to you as sixteen category
+workflows — capability batches, an independent challenge and the floors gate
+each — with the closed cells the gate still refuses handed back as `repair`;
+a PASSED category is never re-handed) →
 HANDOFF → SCORING (four pillar lanes, the solutions duty, the critic, the
 rollup, the SCORING gate) → INGEST_A (the scored checkpoint pushed; the scan
 ingests it) → REPORTS (two producers and the validator into the pinned Docs,
@@ -251,11 +263,6 @@ tokens for 66 requests on the conducting session's own tier). Watch with
 
 **To stop it, use `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`**
 — it signals the pid that holds the run's driver lock. Never kill a pid a shell
-captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
-real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
-
-**To stop it: `python3 -m engine.pipeline stop --run <RUN_ID> --root <ROOT>`.**
-It signals the pid that holds the run's driver lock. Never kill a pid a shell
 captured for `nohup setsid …`: setsid forks, that pid is a dead wrapper, and the
 real driver keeps spending (measured 2026-09-30: a whole extra round, past budget).
 

@@ -399,7 +399,7 @@ class RunWorkbook:
             for r in range(2, ws.max_row + 1):
                 if str(ws.cell(row=r, column=kidx).value or "").strip() == key:
                     for k, v in values.items():
-                        ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                        ws.cell(row=r, column=cols.index(k) + 1).value = _cell(v)  # J-13: value=None is ignored by openpyxl
                     _apply_cell_format(ws, sheet, cols, r)
                     self._dirty = True
                     self._touch()
@@ -431,7 +431,7 @@ class RunWorkbook:
                 if all(str(ws.cell(row=r, column=i).value or "").strip()
                        == str(match[k] or "").strip() for k, i in idx.items()):
                     for k, v in values.items():
-                        ws.cell(row=r, column=cols.index(k) + 1, value=_cell(v))
+                        ws.cell(row=r, column=cols.index(k) + 1).value = _cell(v)  # J-13: value=None is ignored by openpyxl
                     _apply_cell_format(ws, sheet, cols, r)
                     self._dirty = True
                     self._touch()
@@ -556,7 +556,7 @@ class RunWorkbook:
         ws = self._sheet("Run_Metadata")
         for r in range(2, ws.max_row + 1):
             if str(ws.cell(row=r, column=1).value or "") == key:
-                ws.cell(row=r, column=2, value=_cell(value))
+                ws.cell(row=r, column=2).value = _cell(value)
                 break
         else:
             ws.append([key, _cell(value)])

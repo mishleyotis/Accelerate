@@ -298,7 +298,7 @@ def _approve_cmd(run, a) -> dict:
 
 
 BATCH_OPS = ("search", "evidence", "attach", "synthesise", "absence",
-             "challenge", "fetch")
+             "challenge", "fetch", "redate")
 
 
 def _batch(a) -> int:
@@ -351,14 +351,21 @@ def _batch(a) -> int:
                                              f"writes only {a.run}"})
                     continue
                 argv = clean
-                out = io.StringIO()
+                out, err = io.StringIO(), io.StringIO()
                 try:
-                    with contextlib.redirect_stdout(out):
+                    # Refusals print to STDERR. Capturing stdout alone handed a
+                    # batch agent `ok: false, out: ""` — a refusal with no
+                    # reason, so it re-ran the line outside the batch to learn
+                    # why (J-12, measured 2026-10-01).
+                    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                         rc = main(argv + ["--run", a.run] +
                                   (["--root", a.root] if a.root else []))
                     good = rc in (0, None)
-                    results.append({"op": i, "cmd": argv[0], "ok": good,
-                                    "out": out.getvalue().strip()[-300:]})
+                    res = {"op": i, "cmd": argv[0], "ok": good,
+                           "out": out.getvalue().strip()[-300:]}
+                    if err.getvalue().strip():
+                        res["error"] = err.getvalue().strip()[-600:]
+                    results.append(res)
                     ok += good
                 except BaseException as e:          # a refusal is data, not a crash
                     if isinstance(e, KeyboardInterrupt):
@@ -485,6 +492,10 @@ def main(argv=None) -> int:
                         "YYYY-Qn or YYYY (a quarter IS a date and bands from its "
                         "end — engine/dates.py, the app's own rule). Omitted, the "
                         "row bands UNVERIFIED, never current")
+    e.add_argument("--anchor-quote", default=None,
+                   help="the page's own words that carry its date or claim, "
+                        "when they are not inside --excerpt (a page dated the "
+                        "day it was retrieved must quote its dated words here)")
     e.add_argument("--claim-type", default=None, choices=contract.CLAIM_LABELS,
                    help="FACT | INFERENCE | HYPOTHESIS | CEILING_ESTIMATE. "
                         "Omitted, the ledger derives it from --tier (T1/T2 "
@@ -506,6 +517,32 @@ def main(argv=None) -> int:
                         "$DMA_ACTOR. A lane may register only against its own "
                         "category's cells (engine/scope.py); the servicing "
                         "tier registers against any cell in the run")
+
+    cd = common(sub.add_parser(
+        "connector-down",
+        help="record, from the provider's own response, that an enrichment "
+             "connector will not answer this run (401/402/403/429); while every "
+             "required web family is down, absences may be declared "
+             "--enrichment-unavailable and the gate discloses REDUCED rigour"))
+    cd.add_argument("--tool", required=True)
+    cd.add_argument("--status", type=int, required=True)
+    cd.add_argument("--error", required=True, help="the provider's own words")
+    cd.add_argument("--actor", default=None)
+    cu = common(sub.add_parser("connector-up", help="the provider answers again"))
+    cu.add_argument("--tool", required=True)
+
+    rd = common(sub.add_parser(
+        "redate",
+        help="correct or clear one evidence row's publication date, on the "
+             "record (a placeholder date, or a date the page does not state)"))
+    rd.add_argument("--e-id", required=True)
+    g_rd = rd.add_mutually_exclusive_group(required=True)
+    g_rd.add_argument("--published", help="the date the page itself states")
+    g_rd.add_argument("--undated", action="store_true",
+                      help="the page states no date: clear it (bands UNVERIFIED)")
+    rd.add_argument("--reason", required=True,
+                    help="where the page states its date, or that it states none")
+    rd.add_argument("--actor", default=None)
 
     at = common(sub.add_parser(
         "attach",
@@ -854,7 +891,7 @@ def main(argv=None) -> int:
                 wb, source_name=a.source, source_url=a.url, tier=a.tier,
                 excerpt=a.excerpt, subcaps=cells, published=a.published,
                 claim_type=a.claim_type, origin=a.origin, actor=_actor(a),
-                run=run,
+                anchor_quote=a.anchor_quote, run=run,
                 # ON at the CLI and OFF in the library: this is the path a
                 # lane's writes actually take, and every in-process caller
                 # (fixtures, stub, handoff) registers against URLs nothing
@@ -865,6 +902,29 @@ def main(argv=None) -> int:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
         print(json.dumps({"e_id": eid, "profile": bool(a.profile)}, indent=2))
+        return 0
+    if a.cmd in ("connector-down", "connector-up"):
+        try:
+            doc = (ledger.record_connector_down(run.root, a.tool, status=a.status,
+                                                error=a.error, actor=_actor(a))
+                   if a.cmd == "connector-down" else
+                   ledger.record_connector_up(run.root, a.tool))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        b = ledger.enrichment_binding(wb)
+        print(json.dumps({"down": sorted((doc.get("down") or {})),
+                          "enrichment_bound": b["bound"], "why": b["reason"]}, indent=2))
+        return 0
+    if a.cmd == "redate":
+        try:
+            out = ledger.redate_evidence(
+                wb, a.e_id, published=None if a.undated else a.published,
+                reason=a.reason, actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
         return 0
     if a.cmd == "attach":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
