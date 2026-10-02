@@ -29,9 +29,22 @@ COLS = tuple(EXPECTED)
 
 @pytest.fixture(scope="module")
 def m():
-    spec = importlib.util.spec_from_file_location("_m0062", MIG)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    # The revision's `from alembic import op` is replaced per test (_Op
+    # below), so loading it must not depend on whichever `alembic` another
+    # suite left in sys.modules — some stub it without `op`.
+    import sys
+    import types
+    prior = sys.modules.get("alembic")
+    sys.modules["alembic"] = types.SimpleNamespace(op=None)
+    try:
+        spec = importlib.util.spec_from_file_location("_m0062", MIG)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+    finally:
+        if prior is None:
+            sys.modules.pop("alembic", None)
+        else:
+            sys.modules["alembic"] = prior
     return mod
 
 
@@ -88,12 +101,24 @@ def db():
     conn.close()
 
 
+class _Op:
+    """The one `op` call the revision makes, bound to the test's connection.
+
+    Not alembic's MigrationContext: other suites in this run stub `alembic`
+    in sys.modules to load a migration file without the package, so an
+    import of `alembic.migration` here depends on test order. The revision
+    uses exactly `op.get_bind()`, and this is that."""
+
+    def __init__(self, conn):
+        self._conn = conn
+
+    def get_bind(self):
+        return self._conn
+
+
 def _apply(m, conn, fn):
-    from alembic.migration import MigrationContext
-    from alembic.operations import Operations
-    ctx = MigrationContext.configure(conn)
-    with Operations.context(ctx):
-        getattr(m, fn)()
+    m.op = _Op(conn)
+    getattr(m, fn)()
 
 
 def _row(sa, conn):
