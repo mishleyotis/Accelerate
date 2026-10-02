@@ -463,13 +463,13 @@ function ClientHeatmap({
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Maturity heatmap"), /*#__PURE__*/React.createElement("h1", null, "Where ", entity.name, " is today"), /*#__PURE__*/React.createElement("div", {
+  }, "Maturity heatmap"), /*#__PURE__*/React.createElement("h1", null, "Where ", entityName(entity), " is today"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, entity.subcaps.length, " subcaps \xB7 ", entity.subcaps.filter(s => s.thin).length, " thin", overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Exporting ${entity.name} heatmap as PDF…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} heatmap as PDF…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -715,7 +715,7 @@ function FocusAreaView({
         fontSize: 13,
         fontWeight: 600
       }
-    }, "Strategic priorities for ", entity.name), /*#__PURE__*/React.createElement("span", {
+    }, "Strategic priorities for ", entityName(entity)), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -1076,7 +1076,7 @@ function FocusAreaView({
       color: "var(--z-muted)",
       lineHeight: 1.5
     }
-  }, "Share of the ", (fa.subcaps || []).length, " cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for ", entity.name, ".")), /*#__PURE__*/React.createElement("div", {
+  }, "Share of the ", (fa.subcaps || []).length, " cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for ", entityName(entity), ".")), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -2428,7 +2428,7 @@ function ValueChainView({
       style: {
         marginTop: 8
       }
-    }, "Which cells belong to which business process is the producer's claim about ", entity.name, "'s operating model. The cell grain alone cannot stand it up, so nothing is drawn here until the section promotes."));
+    }, "Which cells belong to which business process is the producer's claim about ", entityName(entity), "'s operating model. The cell grain alone cannot stand it up, so nothing is drawn here until the section promotes."));
   }
   const mapped = new Set();
   for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);

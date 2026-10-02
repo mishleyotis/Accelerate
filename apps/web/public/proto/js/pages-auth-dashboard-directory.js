@@ -460,7 +460,7 @@ function DashboardHome() {
       style: {
         fontSize: 14
       }
-    }, e.name), /*#__PURE__*/React.createElement("span", {
+    }, entityName(e)), /*#__PURE__*/React.createElement("span", {
       className: "b b-muted"
     }, DMA.SUBVERTICAL_LABEL[e.subvertical]), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -610,7 +610,7 @@ function DashboardHome() {
       fontWeight: 600
     },
     className: "txt-fit-1"
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
@@ -776,7 +776,7 @@ function DashboardEntityCard({
       fontWeight: 700,
       flexShrink: 0
     }
-  }, initialsOf(e.name)), /*#__PURE__*/React.createElement("div", {
+  }, initialsOf(entityName(e))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
@@ -789,8 +789,8 @@ function DashboardEntityCard({
       lineHeight: 1.3
     },
     className: "txt-fit-2",
-    title: e.name || e.id
-  }, e.name || e.id), /*#__PURE__*/React.createElement("div", {
+    title: entityName(e)
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: "var(--z-muted)",
@@ -1086,7 +1086,7 @@ function EntityDirectoryPage() {
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     className: "f-mono",
     style: {
       fontSize: 10,
@@ -1148,7 +1148,7 @@ function EntityCard({
       color: "var(--z-dark)",
       marginBottom: 2
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"

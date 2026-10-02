@@ -64,3 +64,75 @@ test("dashboard renders when a directory row has a null name",
     server.close();
   }
 });
+
+/* ── every client surface, not just the landing card ──────────────────
+ *
+ * SWBC promoted with an empty entity record. PR #55 fixed the landing card
+ * and nothing else: the heatmap header read "Where  is today", the tech
+ * stack "Technology stack - ", the client bar and breadcrumb were blank and
+ * the export toasts said "Exporting null…". `entityName` is the ONE fallback
+ * (legal name -> trading name -> display id) and every one of those sites
+ * reads it. */
+const SWBC_LIKE = (over = {}) => ({
+  ...entity("swbc", null), trading_name: "SWBC", ...over,
+});
+
+test("entityName falls back legal -> trading -> display id, never blank",
+     { skip, concurrency: false }, async () => {
+  const { server, base } = await startServer({ ...BOOT, entities: [SWBC_LIKE()] });
+  const browser = await pw.chromium.launch({ executablePath: CHROME,
+                                             args: ["--no-sandbox"] });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${base}/`, { waitUntil: "domcontentloaded" });
+    await settle(page);
+    const cases = await page.evaluate(() => [
+      entityName({ name: "Southwest Business Corporation", trading_name: "SWBC", id: "swbc" }),
+      entityName({ name: null, trading_name: "SWBC", id: "swbc" }),
+      entityName({ name: "  ", trading_name: "", id: "swbc", slug: "swbc" }),
+      entityName({ name: null, trading_name: null, slug: "only-slug" }),
+      entityName({ legal_name: "Legal Ltd" }),
+      entityName(null), entityName({}),
+    ]);
+    assert.deepStrictEqual(cases, ["Southwest Business Corporation", "SWBC",
+      "swbc", "only-slug", "Legal Ltd", "this client", "this client"]);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+for (const tab of ["overview", "heatmap", "techstack", "platform", "runs"]) {
+  test(`a null legal name never blanks the ${tab} header, bar or crumbs`,
+       { skip, concurrency: false }, async () => {
+    const { server, base } = await startServer({ ...BOOT, entities: [SWBC_LIKE()] });
+    const browser = await pw.chromium.launch({ executablePath: CHROME,
+                                               args: ["--no-sandbox"] });
+    try {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      const pageErrors = [];
+      page.on("pageerror", (e) => pageErrors.push(String(e)));
+      await page.route("**/api/entity/**", (route) => route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ sections: {} }) }));
+      await page.goto(`${base}/#/clients/swbc/${tab}`, { waitUntil: "domcontentloaded" });
+      await settle(page);
+      const text = await page.evaluate(() => document.body.innerText || "");
+      for (const blank of [/Where\s{2,}is today/, /Where\s+is today/,
+                           /Technology stack -\s*$/m, /Runs -\s*$/m,
+                           /\bnull\b/, /\bundefined\b/]) {
+        assert.ok(!blank.test(text), `${tab}: blank name rendered (${blank})`);
+      }
+      const bar = await page.evaluate(() => {
+        const n = document.querySelector(".client-bar .name");
+        return n ? n.textContent : null;
+      });
+      if (bar !== null) assert.strictEqual(bar.trim(), "SWBC", `${tab}: client bar`);
+      assert.ok(text.includes("SWBC"), `${tab}: the trading name is nowhere on the page`);
+      assert.deepStrictEqual(pageErrors, []);
+    } finally {
+      await browser.close();
+      server.close();
+    }
+  });
+}

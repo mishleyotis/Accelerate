@@ -289,7 +289,7 @@ function ProspectingPage() {
       fontSize: 13,
       fontWeight: 600
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
@@ -346,7 +346,7 @@ function ProspectingPage() {
     size: 13
   }), " Export PDF")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast(`Downloaded standalone HTML scorecard · ${picked.name}`, "success")
+    onClick: () => pushToast(`Downloaded standalone HTML scorecard · ${entityName(picked)}`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -403,7 +403,7 @@ function ScorecardPreview({
       fontWeight: 600,
       marginTop: 4
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-muted)"

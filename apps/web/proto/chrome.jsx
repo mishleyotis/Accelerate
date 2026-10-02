@@ -93,7 +93,7 @@ function TopBar({ title, crumbs, right }) {
   const searchResults = useMemo(() => {
     if (!ql) return null;
     const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4)
-      .map(e => ({ kind: "entity", title: e.name, sub: DMA.SUBVERTICAL_LABEL[e.subvertical], route: `/clients/${e.id}/overview`, icon: "users" }));
+      .map(e => ({ kind: "entity", title: entityName(e), sub: DMA.SUBVERTICAL_LABEL[e.subvertical], route: `/clients/${e.id}/overview`, icon: "users" }));
     const insights = DMA.INSIGHT_CARDS.filter(c => c.title.toLowerCase().includes(ql) || c.id.toLowerCase().includes(ql)).slice(0, 3)
       .map(c => ({ kind: "insight", title: c.title, sub: `${c.id} · ${c.flag}`, route: `/clients/fce-001/insights?card=${c.id}`, icon: "insight" }));
     const evidence = DMA.EVIDENCE.filter(e => e.title.toLowerCase().includes(ql) || e.id.toLowerCase().includes(ql)).slice(0, 3)
@@ -344,7 +344,7 @@ function ClientBar({ entity, run, tab }) {
           <Icon name="chevron-l" size={16} />
         </button>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div className="name">{entity.name}</div>
+          <div className="name">{entityName(entity)}</div>
           {run ? <span className={`pill pill-active`}>{run.status.replace(/_/g, " ")}</span> : null}
           {run ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span> : null}
           {fresh ? <span className={`pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`}>● {fresh.label} · {fresh.months} mo</span> : null}
@@ -451,7 +451,7 @@ function ClientShell({ entity, run, tab, children }) {
         <TopBar
           crumbs={[
             { label: "Clients", href: "/clients" },
-            { label: entity.name },
+            { label: entityName(entity) },
             { label: tab[0].toUpperCase() + tab.slice(1).replace("stack"," stack") },
           ]}
         />

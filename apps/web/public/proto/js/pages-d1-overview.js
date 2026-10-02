@@ -43,13 +43,13 @@ function ClientOverview({
     style: {
       marginBottom: 4
     }
-  }, entity.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(entity)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, [DMA.SUBVERTICAL_LABEL[entity.subvertical], entity.hq, entity.assets != null ? `${fmtAssets(entity.assets, entity.assets_unit)} assets` : null, entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null, entity.members != null ? `${entity.members.toLocaleString()} members` : null].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Customer-safe scorecard generated · ${entity.name}`, "success")
+    onClick: () => pushToast(`Customer-safe scorecard generated · ${entityName(entity)}`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -2664,7 +2664,7 @@ function InProgressBanner({
       marginBottom: 12,
       lineHeight: 1.55
     }
-  }, entity.name, " is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5."), /*#__PURE__*/React.createElement("div", {
+  }, entityName(entity), " is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5."), /*#__PURE__*/React.createElement("div", {
     className: "batch-row",
     style: {
       marginBottom: 16

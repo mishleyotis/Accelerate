@@ -4113,7 +4113,7 @@ function LiveClientPage({
   if (page === "overview") {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
       eyebrow: "Assessment overview",
-      title: entity.name,
+      title: entityName(entity),
       sub: subline
     }), has("scores") || has("firmographics") ? /*#__PURE__*/React.createElement(Sec, {
       name: "scores"
@@ -4219,7 +4219,7 @@ function LiveClientPage({
   if (page === "heatmap") {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
       eyebrow: "Maturity heatmap",
-      title: `Where ${entity.name} is today`,
+      title: `Where ${entityName(entity)} is today`,
       sub: subline
     }), has("workbook_scores") ? /*#__PURE__*/React.createElement(Sec, {
       name: "workbook_scores"
@@ -4275,7 +4275,7 @@ function LiveClientPage({
   if (page === "insights") {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
       eyebrow: "Insights",
-      title: `What the evidence says about ${entity.name}`,
+      title: `What the evidence says about ${entityName(entity)}`,
       sub: subline
     }), has("insights") ? /*#__PURE__*/React.createElement(Sec, {
       name: "insights"
@@ -4292,7 +4292,7 @@ function LiveClientPage({
   if (page === "platform") {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
       eyebrow: "Platform recommendation",
-      title: `What ${entity.name} should build next`,
+      title: `What ${entityName(entity)} should build next`,
       sub: subline
     }), has("platform_story") ? /*#__PURE__*/React.createElement(Sec, {
       name: "platform_story"
@@ -4325,7 +4325,7 @@ function LiveClientPage({
   if (page === "context") {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
       eyebrow: "Context",
-      title: `How ${entity.name} got here`,
+      title: `How ${entityName(entity)} got here`,
       sub: subline
     }), has("timeline") ? /*#__PURE__*/React.createElement(Sec, {
       name: "timeline"
@@ -4360,7 +4360,7 @@ function LiveClientPage({
   if (page === "techstack") {
     return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
       eyebrow: "Technology",
-      title: `${entity.name}'s estate`,
+      title: `${entityName(entity)}'s estate`,
       sub: subline
     }), has("techstack") ? /*#__PURE__*/React.createElement(Sec, {
       name: "techstack"
@@ -4384,7 +4384,7 @@ function LiveRuns({
   const runs = (entity.runs || []).slice();
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(PageHead, {
     eyebrow: "Run history",
-    title: `${entity.name} · runs`,
+    title: `${entityName(entity)} · runs`,
     sub: `${runs.length} promoted run${runs.length === 1 ? "" : "s"}`
   }), runs.length ? /*#__PURE__*/React.createElement("div", {
     className: "card",

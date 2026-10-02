@@ -868,6 +868,26 @@ function initialsOf(name, n = 2) {
   return parts.length ? parts.map(w => w[0]).slice(0, n).join("") : "?";
 }
 
+/* THE name a client is shown by — the one fallback every header, title,
+   breadcrumb, sidebar row, avatar and toast reads.
+
+   legal name -> trading name -> display id. The directory serves
+   `legal_name` as-is and never invents one (invariant 9), so `name: null` is
+   a live shape: SWBC promoted with an empty entity record and every surface
+   that read `entity.name` directly rendered "Where  is today",
+   "Technology stack - ", an avatar of "?" and a toast "Exporting null…".
+   PR #55 fixed the landing card alone; one function is how the rest cannot
+   drift back. `display_id` arrives as `id` and `slug` from /v1/directory.
+   Never null: a client with no name at all is still "this client". */
+function entityName(e) {
+  if (!e || typeof e !== "object") return "this client";
+  for (const v of [e.name, e.legal_name, e.entity_name, e.trading_name,
+                   e.display_id, e.id, e.slug]) {
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return "this client";
+}
+
 /* ── Session identity (production divergence, data-flow only) ────────
    The signed-in user comes from the server-verified session in
    DMA_LIVE; the prototype's fixed persona remains only as the
@@ -1381,7 +1401,8 @@ function fmtPct(n) {
 function entityMatches(e, q) {
   const ql = String(q == null ? "" : q).toLowerCase().trim();
   if (!ql) return true;
-  return [e && e.name, e && e.domain, e && e.id, e && e.slug]
+  return [e && e.name, e && e.trading_name, e && e.domain, e && e.id,
+          e && e.slug]
     .some(v => v != null && String(v).toLowerCase().includes(ql));
 }
 function relTime(s) {
@@ -1532,7 +1553,7 @@ function ConnectionWatcher() {
 
 /* ── Export to window ────────────────────────────────────────────── */
 Object.assign(window, {
-  initialsOf,
+  initialsOf, entityName,
   useState, useEffect, useRef, useMemo, useCallback, createContext, useContext,
   AppCtx, useApp,
   Icon, BrandMark, ZennifyWordmark, PillarBadge, MaturityChip, ToastStack,

@@ -172,7 +172,7 @@ function TopBar({
     if (!ql) return null;
     const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4).map(e => ({
       kind: "entity",
-      title: e.name,
+      title: entityName(e),
       sub: DMA.SUBVERTICAL_LABEL[e.subvertical],
       route: `/clients/${e.id}/overview`,
       icon: "users"
@@ -811,7 +811,7 @@ function ClientBar({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "name"
-  }, entity.name), run ? /*#__PURE__*/React.createElement("span", {
+  }, entityName(entity)), run ? /*#__PURE__*/React.createElement("span", {
     className: `pill pill-active`
   }, run.status.replace(/_/g, " ")) : null, run ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${dsPill}`
@@ -970,7 +970,7 @@ function ClientShell({
       label: "Clients",
       href: "/clients"
     }, {
-      label: entity.name
+      label: entityName(entity)
     }, {
       label: tab[0].toUpperCase() + tab.slice(1).replace("stack", " stack")
     }]
