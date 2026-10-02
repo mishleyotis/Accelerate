@@ -72,11 +72,18 @@ def main():
                     help="the entity's sub-vertical code (RB CU CL CIB FC AM RIA IC IB). "
                          "Given, a cited variant cell belonging to another sub-vertical "
                          "blocks; omitted, a mixture is reported as a warning.")
+    ap.add_argument("--supplementary",metavar="CODES",default="",
+                    help="comma-separated supplementary sub-vertical codes the entity is "
+                         "also bound to (entities.supplementary_sub_verticals): their "
+                         "variant cells are served additively, so citing one is in scope.")
     a=ap.parse_args()
     entity_sv=(a.subvertical or "").strip().upper() or None
     if entity_sv and entity_sv not in SUBVERTICAL_CODES:
         print(f"  unknown sub-vertical code {entity_sv!r} — expected one of "
               f"{' '.join(sorted(SUBVERTICAL_CODES))}"); return 2
+    supp={c.strip().upper() for c in a.supplementary.split(",") if c.strip()}
+    if supp-SUBVERTICAL_CODES:
+        print(f"  unknown supplementary code(s) {sorted(supp-SUBVERTICAL_CODES)!r}"); return 2
     P={}
     for p in PAGES:
         f=os.path.join(a.rundir,f"{p}.json")
@@ -273,11 +280,12 @@ def main():
         shape=", ".join(f"{c}×{len(v)}" for c,v in sorted(cited.items()))
         if entity_sv:
             for code,rows in sorted(cited.items()):
-                if code!=entity_sv:
+                if code!=entity_sv and code not in supp:
                     ex="; ".join(f"{p}:{cid}" for p,_,cid in rows[:3])
                     bad("BLOCK","sub-vertical scope",
                         f"{len(rows)} cited cell(s) are {code} variants on a {entity_sv} run — "
-                        f"they resolve in the workbook and render nowhere ({ex})")
+                        f"they resolve in the workbook and render nowhere ({ex})"
+                        + (f" — bound: {entity_sv}+{','.join(sorted(supp))}" if supp else ""))
         elif len(cited)>1:
             bad("WARN","sub-vertical scope",
                 f"cited variant cells span more than one sub-vertical ({shape}). One of them "
