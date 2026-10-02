@@ -2272,7 +2272,7 @@ function Timeline({
       color: TONE[e.signal],
       fontWeight: hover === i ? 600 : 400
     }
-  }, e.title.split(" ").slice(0, 4).join(" "), e.title.split(" ").length > 4 ? "…" : "")))), hover != null ? /*#__PURE__*/React.createElement("div", {
+  }, String(e.title || "").split(" ").slice(0, 4).join(" "), String(e.title || "").split(" ").length > 4 ? "…" : "")))), hover != null ? /*#__PURE__*/React.createElement("div", {
     className: "card-tile",
     style: {
       marginTop: 16,
