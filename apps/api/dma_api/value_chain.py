@@ -254,7 +254,9 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     # stage renders as an unresolvable tile, and `not_scored` would undercount.
     cur.execute("SELECT subcap_id FROM serving_subcaps WHERE run_id = %s",
                 (run_meta["run_id"],))
-    served_ids = set(scope_to_entity([r[0] for r in cur.fetchall()], raw_sv))
+    served_ids = set(scope_to_entity(
+        [r[0] for r in cur.fetchall()], raw_sv,
+        supplementary=entity.get("supplementary_sub_verticals")))
 
     data = arrange(stage_rows, mapping_rows, served_ids)
     data["sub_vertical"] = code

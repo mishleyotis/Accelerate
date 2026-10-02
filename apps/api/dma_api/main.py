@@ -262,7 +262,8 @@ def directory(audience: str | None = None, role: str | None = None):
                    composite, scored_cells, completed_at, promoted_at,
                    pillars, open_alerts, assessment_date,
                    assessment_date_basis, assessment_date_source,
-                   refresh_due_date
+                   refresh_due_date, trading_name,
+                   supplementary_sub_verticals
               FROM serving_directory
              ORDER BY entity_id, run_seq DESC""")
         by_entity: dict = {}
@@ -271,7 +272,8 @@ def directory(audience: str | None = None, role: str | None = None):
              request_id, run_seq, is_active, run_status, composite,
              scored_cells, completed_at, promoted_at, pillars,
              open_alerts, assessment_date, assessment_date_basis,
-             assessment_date_source, refresh_due_date) in cur.fetchall():
+             assessment_date_source, refresh_due_date, trading_name,
+             supplementary) in cur.fetchall():
             # THE RESOLVER decides both, never `.upper().replace(" ", "_")`.
             # The corpus writes 61 distinct spellings of nine sub-verticals —
             # `CU`, `SV2`, `Credit Unions`, `SV2 — Credit Unions`,
@@ -282,7 +284,17 @@ def directory(audience: str | None = None, role: str | None = None):
             labels[key] = label
             ent = by_entity.setdefault(str(eid), {
                 "id": display_id, "slug": display_id, "name": name,
+                # The name fallback's second rung (legal -> trading ->
+                # display id), so a row whose legal name is NULL still
+                # names the client rather than rendering blank.
+                "trading_name": trading_name,
                 "domain": None, "subvertical": key,
+                # Codes only, never labels: the label is the primary's.
+                "supplementary_subverticals": list(
+                    subverticals.resolve_supplementary(
+                        supplementary,
+                        key if key != subverticals.UNKNOWN_SUBVERTICAL
+                        else None)),
                 "size_tier": (size_tier or "").upper() or None,
                 "hq": None, "status": "ACTIVE",
                 "data_source": "DRIVE_PARSE",
@@ -504,8 +516,10 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
         # derivation and the codes it deliberately does not treat as
         # foreign. Filtering HERE rather than in the SQL means one
         # vocabulary, shared with the value-chain derivation.
-        for r in scope_to_entity(cur.fetchall(), entity.get("sub_vertical"),
-                                 key=_SUBCAP_COLS.index("subcap_id")):
+        for r in scope_to_entity(
+                cur.fetchall(), entity.get("sub_vertical"),
+                key=_SUBCAP_COLS.index("subcap_id"),
+                supplementary=entity.get("supplementary_sub_verticals")):
             d = dict(zip(_SUBCAP_COLS, r))
             for k in ("score", "peer_median", "delta"):
                 d[k] = float(d[k]) if d[k] is not None else None
