@@ -1030,13 +1030,20 @@ def ingest_reviewer_feedback(limit: int = 200) -> dict:
 from dma_mcp import resources as resources_mod
 
 
+def _resource_reader(uri: str):
+    # A closure, not a `_uri=uri` default: mcp 2.0.1 reads every handler
+    # parameter as a URI-template variable and refuses a concrete URI whose
+    # handler declares one — the container then dies before it listens
+    # (deploy of 2026-10-02, revision dmai-mcp-00135).
+    def _reader():
+        return resources_mod.read_resource(uri)["text"]
+    return _reader
+
+
 def _register_resources() -> None:
     for entry in resources_mod.resource_index():
         uri = entry["uri"]
-
-        def _reader(_uri=uri):
-            return resources_mod.read_resource(_uri)["text"]
-
+        _reader = _resource_reader(uri)
         _reader.__name__ = "resource_" + re.sub(r"[^0-9a-zA-Z]+", "_", uri).strip("_")
         mcp.resource(uri, name=entry["name"], description=entry["description"],
                      mime_type=entry["mime_type"])(_reader)
