@@ -355,10 +355,10 @@ function DashboardEntityCard({ e }) {
     <div className="card-tile clickable" onClick={() => navigate(`/clients/${e.id}/overview`)} style={{ padding: 14, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
         <div style={{ width: 36, height: 36, borderRadius: 8, background: `linear-gradient(135deg, ${matHex}, var(--z-mid))`, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
-          {e.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+          {initialsOf(e.name)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }} className="txt-fit-2" title={e.name}>{e.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }} className="txt-fit-2" title={e.name || e.id}>{e.name || e.id}</div>
           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.35 }} className="txt-fit-2" title={[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>

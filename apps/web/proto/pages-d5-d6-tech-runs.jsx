@@ -1542,7 +1542,7 @@ function Timeline({ events, hover, setHover, openEvidence }) {
         {events.map((e, i) => (
           <div key={e.id} style={{ textAlign: "center", lineHeight: 1.4 }}>
             <div className="f-mono">{e.date ? fmtDate(e.date) : ""}</div>
-            <div style={{ color: TONE[e.signal], fontWeight: hover === i ? 600 : 400 }}>{e.title.split(" ").slice(0, 4).join(" ")}{e.title.split(" ").length > 4 ? "…" : ""}</div>
+            <div style={{ color: TONE[e.signal], fontWeight: hover === i ? 600 : 400 }}>{String(e.title || "").split(" ").slice(0, 4).join(" ")}{String(e.title || "").split(" ").length > 4 ? "…" : ""}</div>
           </div>
         ))}
       </div>

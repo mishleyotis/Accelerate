@@ -2030,7 +2030,7 @@ function LeadershipPanel({
         fontWeight: 600,
         flexShrink: 0
       }
-    }, ex.gap_flag ? "?" : ex.name.split(" ").map(n => n[0]).join("").slice(0, 2)), /*#__PURE__*/React.createElement("div", {
+    }, ex.gap_flag ? "?" : initialsOf(ex.name)), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
         minWidth: 0
