@@ -20,7 +20,8 @@ from . import shared_path
 from .contracts import sections
 from .evidence_tools import get_evidence
 from .identifiers import MINT_RE, find_fabricated, find_ids
-from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical, serves,
+from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
+                           resolve_supplementary, serves,
                            variant_subvertical)
 
 shared_path.ensure(__file__)
@@ -1028,25 +1029,73 @@ def check_cell_id_shape(page: str, payload: dict) -> list:
     return out
 
 
-def _entity_subvertical(conn, run_id):
+def _entity_scope(conn, run_id) -> tuple:
+    """(primary code, supplementary codes, raw primary) for the run's entity.
+
+    The supplementary codes are `entities.supplementary_sub_verticals`
+    (0061): the other sub-verticals a multi-line-of-business entity is bound
+    to, whose variant cells are its own too. Resolved through the shared
+    core's `resolve_supplementary`, the same call the API's serve path
+    makes, so the gate and the filter admit the same cells."""
     cur = conn.cursor()
-    cur.execute("""SELECT e.sub_vertical FROM runs r
-                     JOIN entities e ON e.id = r.entity_id
+    cur.execute("""SELECT e.sub_vertical, e.supplementary_sub_verticals
+                     FROM runs r JOIN entities e ON e.id = r.entity_id
                     WHERE r.id = %s""", (run_id,))
     row = cur.fetchone()
-    return resolve_subvertical(row[0]) if row else None
+    if not row:
+        return None, (), None
+    code = resolve_subvertical(row[0])
+    return code, resolve_supplementary(row[1], code), row[0]
 
 
-def _check_subvertical_scope(page, payload, entity_code) -> list:
-    """ET-05. Silent when the entity's sub-vertical is not in the
+def _entity_subvertical(conn, run_id):
+    return _entity_scope(conn, run_id)[0]
+
+
+def _check_subvertical_scope(page, payload, entity_code,
+                             supplementary=(), raw_sub_vertical=None) -> list:
+    """ET-05. Refuses nothing when the entity's sub-vertical is not in the
     vocabulary — not knowing who you are is not grounds for refusing a
-    citation (the API's `serves` makes the same one-sided choice)."""
-    if not entity_code or not isinstance(payload, dict):
+    citation (the API's `serves` makes the same one-sided choice).
+
+    But it is no longer SILENT about it. A run whose sub-vertical does not
+    resolve had every variant citation pass this gate with nothing recorded,
+    which reads exactly like a run whose citations were all checked and all
+    belonged — SWBC promoted with `sub_vertical` NULL and the gate's silence
+    was the only trace. So an unresolved entity whose payload cites variant
+    cells gets ONE recorded warning per page (severity `warn`, never a
+    block) naming what went unchecked.
+
+    A variant of the primary OR of a supplementary sub-vertical the entity
+    is bound to (0061) is the entity's own; any other is refused."""
+    if not isinstance(payload, dict):
         return []
+    if not entity_code:
+        unchecked = sorted({cell for _p, _k, cell in
+                            _iter_cell_citations(payload)
+                            if variant_subvertical(cell)})
+        if not unchecked:
+            return []
+        stated = (f"{raw_sub_vertical!r}" if raw_sub_vertical not in (None, "")
+                  else "not stated")
+        r = _reason(
+            "ET-05", page, page,
+            f"sub-vertical scope NOT CHECKED on {page}: the entity's "
+            f"sub-vertical is {stated} and resolves to no catalogue code, so "
+            f"{len(unchecked)} variant cell citation(s) "
+            f"({', '.join(unchecked[:5])}{'…' if len(unchecked) > 5 else ''}) "
+            "were admitted without knowing whose they are. Nothing is refused "
+            "for this; set the entity's sub-vertical (and any supplementary "
+            "sub-verticals) so the check can run")
+        r["severity"] = "warn"
+        return [r]
     out, seen = [], set()
     mine = SUBVERTICAL_NAMES.get(entity_code, entity_code)
+    if supplementary:
+        mine += " (also bound to " + ", ".join(
+            SUBVERTICAL_NAMES.get(c, c) for c in supplementary) + ")"
     for path, _key, cell in _iter_cell_citations(payload):
-        if serves(cell, entity_code):
+        if serves(cell, entity_code, supplementary):
             continue
         owner = variant_subvertical(cell)
         section = path.split(".")[0]
@@ -1151,7 +1200,8 @@ def _discard_anchor_cells(item):
                         yield key, cell
 
 
-def _check_candidate_vertical(page, payload, entity_code) -> list:
+def _check_candidate_vertical(page, payload, entity_code,
+                              supplementary=()) -> list:
     """ET-06. Silent when the entity's sub-vertical is not in the
     vocabulary — the same one-sided choice ET-05 and the API's `serves`
     make: not knowing who you are is not grounds for refusing anything."""
@@ -1164,7 +1214,7 @@ def _check_candidate_vertical(page, payload, entity_code) -> list:
         prose = " ".join(str(v) for k, v in item.items()
                          if isinstance(v, str) and k != "platform")
         foreign = [(key, cell) for key, cell in _discard_anchor_cells(item)
-                   if not serves(cell, entity_code)]
+                   if not serves(cell, entity_code, supplementary)]
         if foreign:
             key, cell = foreign[0]
             owner = SUBVERTICAL_NAMES.get(variant_subvertical(cell),
@@ -3792,9 +3842,11 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # One read of the entity's sub-vertical, two gates: ET-05 scopes the
     # cells a sentence may cite, ET-06 scopes the candidates a shortlist
     # may contain.
-    entity_code = _entity_subvertical(conn, run_id)
-    reasons.extend(_check_subvertical_scope(page, payload, entity_code))
-    reasons.extend(_check_candidate_vertical(page, payload, entity_code))
+    entity_code, supplementary, raw_sv = _entity_scope(conn, run_id)
+    reasons.extend(_check_subvertical_scope(page, payload, entity_code,
+                                            supplementary, raw_sv))
+    reasons.extend(_check_candidate_vertical(page, payload, entity_code,
+                                             supplementary))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
     reasons.extend(_check_safeguard_gate_ids(conn, page, payload))
     # AG-05 needs the OTHER half of the pair: the timeline lives on context

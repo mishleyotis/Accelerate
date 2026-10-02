@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 
 from . import ledger
+from .subverticals import resolve_subvertical, resolve_supplementary
 
 
 def _rows(cur, sql, args=()):
@@ -41,7 +42,8 @@ def get_report_bundle(conn, run_id) -> dict:
         """SELECT r.id, r.entity_id, r.request_id, r.run_seq,
                   r.ccg_catalog_version, r.scored_cells, r.catalogue_cells,
                   r.composite, r.completed_at,
-                  e.display_id, e.legal_name, e.sub_vertical, e.size_tier
+                  e.display_id, e.legal_name, e.sub_vertical, e.size_tier,
+                  e.trading_name, e.supplementary_sub_verticals
              FROM runs r JOIN entities e ON e.id = r.entity_id
             WHERE r.id = %s""", (run_id,))
     row = cur.fetchone()
@@ -49,7 +51,8 @@ def get_report_bundle(conn, run_id) -> dict:
         return {"error": "unknown_run", "run_id": str(run_id)}
     (rid, entity_id, request_id, run_seq, version, scored_cells,
      catalogue_cells, composite, completed_at,
-     display_id, legal_name, sub_vertical, size_tier) = row
+     display_id, legal_name, sub_vertical, size_tier,
+     trading_name, supplementary) = row
 
     scores = _rows(cur, """
         SELECT subcap_id, capability_id, category_id, pillar_id,
@@ -151,6 +154,12 @@ def get_report_bundle(conn, run_id) -> dict:
         "entity_name": legal_name, "request_id": request_id,
         "run_seq": run_seq, "ccg_catalog_version": version,
         "sub_vertical": sub_vertical, "size_tier": size_tier,
+        # 0061: the other sub-verticals whose variant cells are this
+        # entity's own. ET-05 admits citations of them; any other
+        # sub-vertical's variant is still refused.
+        "supplementary_sub_verticals": list(resolve_supplementary(
+            supplementary, resolve_subvertical(sub_vertical))),
+        "trading_name": trading_name,
         "completed_at": completed_at, "scored_cells": scored_cells,
         "catalogue_cells": catalogue_cells, "composite": composite,
         "scores": scores,
@@ -293,7 +302,8 @@ def get_client_state(conn, display_id: str) -> dict:
     """
     cur = conn.cursor()
     cur.execute("""SELECT id, legal_name, sub_vertical, size_tier,
-                          enum_label(status) FROM entities
+                          enum_label(status), trading_name,
+                          supplementary_sub_verticals FROM entities
                     WHERE display_id = %s""", (display_id,))
     row = cur.fetchone()
     if row is None:
@@ -308,7 +318,8 @@ def get_client_state(conn, display_id: str) -> dict:
                             if near else
                             "Nothing resembles it either, so this client "
                             "genuinely has no package here."))}
-    entity_id, legal_name, sub_vertical, size_tier, status = row
+    (entity_id, legal_name, sub_vertical, size_tier, status,
+     trading_name, supplementary) = row
     runs = _rows(cur, """
         SELECT id AS run_id, request_id, run_seq, enum_label(status) AS status,
                ccg_catalog_version, composite, scored_cells, completed_at
@@ -328,6 +339,9 @@ def get_client_state(conn, display_id: str) -> dict:
     out = {
         "entity_id": entity_id, "display_id": display_id,
         "entity_name": legal_name, "sub_vertical": sub_vertical,
+        "supplementary_sub_verticals": list(resolve_supplementary(
+            supplementary, resolve_subvertical(sub_vertical))),
+        "trading_name": trading_name,
         "size_tier": size_tier, "status": status,
         "runs": runs,
         "served_pages": served,

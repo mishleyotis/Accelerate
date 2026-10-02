@@ -102,11 +102,12 @@ def _areas_of(raw) -> list:
 
 
 def _entity_subvertical(cur, run_id):
-    cur.execute("""SELECT e.sub_vertical FROM runs r
-                     JOIN entities e ON e.id = r.entity_id
+    """(raw primary sub_vertical, raw supplementary list) — 0061."""
+    cur.execute("""SELECT e.sub_vertical, e.supplementary_sub_verticals
+                     FROM runs r JOIN entities e ON e.id = r.entity_id
                     WHERE r.id = %s""", (run_id,))
     row = cur.fetchone()
-    return row[0] if row else None
+    return (row[0], row[1]) if row else (None, None)
 
 
 def _cells_for_run(cur, run_id) -> dict:
@@ -255,8 +256,9 @@ def platform_fit(conn, run_id, candidates) -> dict:
     sev = _severities(cur, run_id)
     absent_areas, held_areas = _register(cur, run_id)
     absent_sids, held_sids = _register_staged(cur, run_id)
-    entity_code = subverticals.resolve_subvertical(
-        _entity_subvertical(cur, run_id))
+    raw_sv, raw_supp = _entity_subvertical(cur, run_id)
+    entity_code = subverticals.resolve_subvertical(raw_sv)
+    entity_supp = subverticals.resolve_supplementary(raw_supp, entity_code)
 
     def _cell(sid, area_held):
         return engine.Cell(
@@ -306,7 +308,8 @@ def platform_fit(conn, run_id, candidates) -> dict:
         # design: not knowing who you are is not grounds for hiding scores).
         if entity_code and sids:
             served = sum(1 for sid in sids
-                         if subverticals.serves(sid, entity_code))
+                         if subverticals.serves(sid, entity_code,
+                                                entity_supp))
             relevance = served / len(sids)
         else:
             relevance = 1.0
