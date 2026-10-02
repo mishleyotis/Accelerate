@@ -155,7 +155,11 @@ def test_empty_state_names_what_was_searched():
     data, empty = read_value_chain(cur, ENTITY, RUN)
     assert data is None
     assert empty["kind"] == "no_value_chain_arrangement"
-    assert "CU" in empty["reason"] and "v7.0" in empty["reason"]
+    # The reason is client prose — the line of business by name, no code,
+    # no version, no table — and the searched keys sit in sources_searched.
+    assert "Credit Unions" in empty["reason"]
+    for machinery in ("CU", "v7.0", "ccg_", "sub-vertical"):
+        assert machinery not in empty["reason"], machinery
     assert empty["sources_searched"] == [
         "ccg_value_chains[version=v7.0 sub_vertical=CU]",
         "ccg_vc_mapping[version=v7.0 subvertical_code=CU]"]
@@ -167,7 +171,10 @@ def test_unknown_subvertical_is_named_never_guessed():
         cur, {"sub_vertical": "Intergalactic Banking"}, RUN)
     assert data is None
     assert empty["kind"] == "no_value_chain_arrangement"
-    assert "Intergalactic Banking" in empty["reason"]
+    # named where the internal reader looks, never printed at the client
+    assert any("Intergalactic Banking" in s for s in empty["sources_searched"])
+    assert "Intergalactic" not in empty["reason"]
+    assert "could not be matched" in empty["reason"]
     # the resolver refused rather than querying with a guess
     assert not any("ccg_value_chains" in sql for sql, _ in cur.queries)
 
@@ -432,3 +439,26 @@ def test_a_curated_arrangement_is_served_whole():
     assert [c["name"] for c in data["chains"]] == names
     assert data["not_applicable_stages"] == 0
     assert all(len(c["subcaps"]) == 1 for c in data["chains"])
+
+
+def test_a_missing_sub_vertical_reads_in_client_terms():
+    """SWBC, measured 2026-10-02: the customer body printed "sub-vertical
+    None" and named two catalogue tables."""
+    cur = _Cur()
+    data, empty = read_value_chain(cur, {"sub_vertical": None}, RUN)
+    assert data is None
+    assert "None" not in empty["reason"]
+    assert "line of business" in empty["reason"]
+
+
+def test_the_customer_empty_state_goes_through_the_walker():
+    cur = _Cur()
+    entry = serve_value_chain(cur, {"sub_vertical": None}, RUN, None,
+                              "customer")
+    es = entry["empty_state"]
+    assert "sources_searched" not in es, "table names never reach a customer"
+    assert es["reason"] and "None" not in es["reason"]
+    internal = serve_value_chain(_Cur(), {"sub_vertical": None}, RUN, None,
+                                 "internal")
+    assert internal["empty_state"]["sources_searched"], \
+        "the internal reader keeps the ladder"
