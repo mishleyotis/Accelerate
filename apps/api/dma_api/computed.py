@@ -489,7 +489,7 @@ def cell_items(cur, data: dict, entity_id) -> None:
     cur.execute(
         """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
                   ei.recency_band::text, ei.source_name, ei.source_domain,
-                  ei.excerpt, ei.source_url
+                  ei.excerpt, ei.source_url, ei.origin::text
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
@@ -508,6 +508,10 @@ def cell_items(cur, data: dict, entity_id) -> None:
                     "source_title": _expand_abbrev(r[5], "label"),
                     "publisher": r[6],
                     "excerpt": r[7], "source_url": r[8],
+                    # Read so the CUSTOMER drawer can withhold an internal
+                    # row whole (redaction.customer_evidence_items); the
+                    # customer body never carries the key itself.
+                    "origin": r[9] if len(r) > 9 else None,
                     **({"cited_as": r[0]} if r[0] != r[1] else {})}
              for r in cur.fetchall()}
 

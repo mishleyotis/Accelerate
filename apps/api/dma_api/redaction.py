@@ -205,6 +205,11 @@ CUSTOMER_ALWAYS = {
 # needed rather than a reading.
 SELLER_VOCABULARY = re.compile(
     r"\bAEs?\b|\baccount executives?\b|\bdiscovery call\b|\bfirst call\b"
+    # "account team" (SWBC, 2026-10-02: "…for the account team to raise") and
+    # the hyphenated / abbreviated spellings of the executive. Bounded on
+    # both words, so "account", "accountable", "take into account" and
+    # "team" alone never match.
+    r"|\baccount[- ]teams?\b|\baccount[- ]exec(?:utive)?s?\b"
     r"|\btalk track\b|\bthe seller\b|\bour offering\b|\bour pathway\b"
     r"|\bsay it aloud\b|\bin the room\b|\bpitch\b",
     re.I)
@@ -216,6 +221,90 @@ SELLER_VOCABULARY = re.compile(
 # fires on so the content defect is visible rather than merely absent.
 VENDOR_NAME = os.environ.get("ASSESSING_VENDOR_NAME", "Zennify")
 _VENDOR_RE = re.compile(re.escape(VENDOR_NAME), re.I) if VENDOR_NAME else None
+
+# Our PIPELINE's vocabulary in a sentence a client reads — a third net beside
+# the vendor and seller nets, and like them a backstop: producers are fixing
+# the prose (SWBC, 2026-10-02, measured on the withdrawn run), and this is
+# what still stands if one does not.
+#
+#   NOT_RUN            a gate status, inside PROSE. A safeguard gate's
+#                      `status: "NOT_RUN"` is designed to render (invariant
+#                      12) — so a value that IS the bare token is never
+#                      matched, and heatmap.safeguard_gates is exempt from
+#                      this one term: its reason text explains a NOT_RUN by
+#                      design.
+#   connector credit   the enrichment budget.
+#   Clay · Explorium · Exa · Tavily · Firecrawl
+#                      the enrichment and search tools. CASE-SENSITIVE and
+#                      bounded, so "clay", "exactly", "example" never match;
+#                      "Clay" followed by a capitalised word ("Clay Thompson,
+#                      CFO") is a person, not the tool, and is left alone.
+#   RRF · k=60 · engine v2 · hot band
+#                      retrieval-fusion and ranking internals.
+#
+# Same convention as the other nets: the FIELD holding the sentence goes
+# (a list element is blanked), never half a sentence, and every path is
+# recorded in the receipt.
+_INTERNAL_VOCAB_TERMS = (
+    ("NOT_RUN", re.compile(r"\bNOT_RUN\b")),
+    ("connector credit", re.compile(r"\bconnector[- ]credits?\b", re.I)),
+    ("Clay", re.compile(r"\bClay(?:\.com|'s)?\b(?!\s+[A-Z][a-z])")),
+    ("Explorium", re.compile(r"\bExplorium\b", re.I)),
+    ("Exa", re.compile(r"\bExa(?:\.ai)?\b")),
+    ("Tavily", re.compile(r"\bTavily\b", re.I)),
+    ("Firecrawl", re.compile(r"\bFire[- ]?crawl\b", re.I)),
+    ("RRF", re.compile(r"\bRRF\b")),
+    ("k=60", re.compile(r"\bk\s*=\s*60\b")),
+    ("engine v2", re.compile(r"\bengine[- ]v2\b", re.I)),
+    ("hot band", re.compile(r"\bhot[- ]bands?\b", re.I)),
+)
+# A value that is nothing but an enum token is a STATUS, not prose.
+_BARE_TOKEN = re.compile(r"^[A-Z][A-Z0-9_]*$")
+# Keys that hold a person's or an organisation's NAME: a client whose CFO is
+# called Clay is not leaking a tool.
+_VOCAB_EXEMPT_KEYS = frozenset({"name", "full_name", "person", "person_name",
+                                "display_name", "e_id", "gate_id", "gate"})
+
+
+def internal_vocabulary(text, exempt=()) -> str | None:
+    """The first pipeline term `text` names, or None."""
+    if not isinstance(text, str) or _BARE_TOKEN.match(text.strip()):
+        return None
+    for term, rx in _INTERNAL_VOCAB_TERMS:
+        if term not in exempt and rx.search(text):
+            return term
+    return None
+
+
+def _strip_internal_vocabulary(node, path="", found=None, exempt=()) -> list:
+    """Delete every field whose string names a pipeline term (list elements
+    are blanked, as the vendor net does, so a ranked list keeps its order)."""
+    found = [] if found is None else found
+    if isinstance(node, dict):
+        for k in list(node):
+            v = node[k]
+            here = f"{path}.{k}" if path else k
+            hit = (internal_vocabulary(v, exempt)
+                   if k not in _VOCAB_EXEMPT_KEYS else None)
+            if hit:
+                node.pop(k, None)
+                found.append(f"{here} ({hit})")
+            else:
+                _strip_internal_vocabulary(v, here, found, exempt)
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            here = f"{path}[{i}]"
+            hit = internal_vocabulary(v, exempt)
+            if hit:
+                node[i] = None
+                found.append(f"{here} ({hit})")
+            else:
+                _strip_internal_vocabulary(v, here, found, exempt)
+    return found
+
+
+#: Terms a section is exempt from, because it renders them by design.
+_VOCAB_SECTION_EXEMPT = {("heatmap", "safeguard_gates"): ("NOT_RUN",)}
 
 # `name`, `name[*]`, `name[0]`, `name[*][2]` — the index forms producers
 # actually write. A segment with no bracket carries an empty index list.
@@ -506,6 +595,135 @@ def _strip_machinery(node, path: str = "", found=None) -> list:
     return found
 
 
+# ── Evidence ITEMS for the customer audience ───────────────────────────
+#
+# THE LEAK THIS CLOSES (CRITICAL), measured on SWBC 2026-10-02:
+# `GET /v1/entities/swbc/evidence?audience=customer` served rows with
+# origin='internal' — the assessing firm's own discovery write-up, its
+# source name naming the person it was prepared for, excerpts about named
+# people and a sales proposal — plus the tier `distribution` census. The
+# route ran ONE redaction (`INTERNAL_FIELDS`, the grading) and none of the
+# nets every page section runs: no excluded key classes, no vendor net, no
+# seller-vocabulary net. The cell drawer resolves the same rows into
+# `cells[].items[]`, so it had the same hole.
+#
+# An evidence item is a SOURCE, not a sentence: a verbatim excerpt cannot be
+# rewritten, and an item with its excerpt or its source name cut out is a
+# citation to nothing. So for the customer audience an item is served whole
+# or not at all — default-deny:
+#
+#   · origin 'internal' never serves (our own documents about the client);
+#   · an item ANY of whose strings names the vendor, speaks to the seller,
+#     names our machinery or our pipeline's vocabulary is withheld whole;
+#   · what survives loses the excluded key classes (tier, recency_band,
+#     ers, link_basis, provenance, …), the grading, the contact routes and
+#     `origin` itself.
+EVIDENCE_WITHHELD_ORIGINS = frozenset({"internal"})
+_EVIDENCE_ID_KEYS = frozenset({"e_id", "cited_as", "also_filed_as",
+                               "linked_subcap_ids"})
+
+
+def _evidence_item_hit(item: dict) -> str | None:
+    """Why this item may not reach a customer, or None."""
+    if str(item.get("origin") or "").strip().lower() in EVIDENCE_WITHHELD_ORIGINS:
+        return "internal_origin"
+
+    def strings(node, key=None):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k not in _EVIDENCE_ID_KEYS:
+                    yield from strings(v, k)
+        elif isinstance(node, list):
+            for v in node:
+                yield from strings(v, key)
+        elif isinstance(node, str):
+            yield key, node
+
+    for key, text in strings(item):
+        if _VENDOR_RE is not None and _VENDOR_RE.search(text):
+            return "vendor_named"
+        if SELLER_VOCABULARY.search(text):
+            return "seller_voice"
+        if internal_ids.names_machinery(text):
+            return "machinery_named"
+        if key not in _VOCAB_EXEMPT_KEYS and internal_vocabulary(text):
+            return "internal_vocabulary"
+    return None
+
+
+def customer_evidence_items(items) -> tuple[list, dict]:
+    """(items a customer may see, {reason: count withheld}). Never mutates
+    the caller's rows — they are shared across readers."""
+    from .evidence import INTERNAL_FIELDS
+    excluded = set(_customer_allowlist()["excluded_key_classes"])
+    strip = (tuple(INTERNAL_FIELDS) + CUSTOMER_STRIP_KEYS
+             + CUSTOMER_STRIP_CONTACT_KEYS + NEVER_SERVED_KEYS
+             + ("origin",))
+    kept, withheld = [], {}
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        hit = _evidence_item_hit(item)
+        if hit:
+            withheld[hit] = withheld.get(hit, 0) + 1
+            continue
+        c = copy.deepcopy(item)
+        _strip_keys(c, tuple(excluded) + strip)
+        kept.append(c)
+    return kept, withheld
+
+
+def redact_evidence_response(res: dict, audience: str) -> dict:
+    """The evidence route's whole body for `audience`. Default-deny: any
+    audience that is not exactly `internal` gets the customer body."""
+    if audience == "internal":
+        return res
+    out = dict(res)
+    items, withheld = customer_evidence_items(res.get("items") or [])
+    out["items"] = items
+    served = {i.get("e_id") for i in items}
+    # A withheld id is not reported as found — the reader is told how many
+    # were withheld, never which, and never shown the row.
+    out["found"] = [e for e in (res.get("found") or []) if e in served]
+    out["withheld"] = sum(withheld.values())
+    # The tier census and the merge receipt are how WE evidenced the run,
+    # the same material O10 is withheld for on the overview page.
+    out.pop("distribution", None)
+    out.pop("merged", None)
+    return out
+
+
+def _customer_cell_items(data: dict) -> int:
+    """Filter every cell's resolved `items[]` to what a customer may see,
+    and drop the withheld items' ids from the cell's `e_ids` so the chips
+    and the drawer agree. Returns how many items were withheld."""
+    n = 0
+    for cell in (data.get("cells") or []) if isinstance(data, dict) else []:
+        if not isinstance(cell, dict) or not isinstance(cell.get("items"), list):
+            continue
+        before = cell["items"]
+        kept, withheld = customer_evidence_items(before)
+        if withheld:
+            gone = ({i.get("e_id") for i in before if isinstance(i, dict)}
+                    | {i.get("cited_as") for i in before if isinstance(i, dict)})
+            gone -= {i.get("e_id") for i in kept} | {i.get("cited_as")
+                                                     for i in kept}
+            gone.discard(None)
+            if isinstance(cell.get("e_ids"), list):
+                cell["e_ids"] = [e for e in cell["e_ids"] if e not in gone]
+            n += sum(withheld.values())
+        cell["items"] = kept
+    return n
+
+
+def _recount_grounded_on(data: dict) -> None:
+    """`grounded_on` = the number of items this body actually serves."""
+    for cell in (data.get("cells") or []) if isinstance(data, dict) else []:
+        if isinstance(cell, dict) and "grounded_on" in cell \
+                and isinstance(cell.get("items"), list):
+            cell["grounded_on"] = len(cell["items"])
+
+
 def redact_empty_state(empty, audience: str) -> tuple[object, list]:
     """(empty_state_or_None, dropped) — the ONE part of a section that never
     went through the walker.
@@ -564,6 +782,7 @@ def redact_empty_state(empty, audience: str) -> tuple[object, list]:
     dropped += [f"{k} (vendor)" for k in _strip_vendor(out)]
     dropped += [f"{k} (seller voice)" for k in
                 _strip_vendor(out, pattern=SELLER_VOCABULARY)]
+    dropped += _strip_internal_vocabulary(out)
     return (out or None), dropped
 
 
@@ -623,8 +842,15 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             # above. Two of them: the vendor's name, and sentences addressed
             # to the seller's own account executive — the measured leak was
             # the second kind and named no vendor at all.
+            # The cell drawer's evidence ITEMS are sources, not prose: an
+            # item the customer may not see goes whole, before the nets
+            # below take single fields out of it.
+            if (page, section) == ("heatmap", "cell_evidence"):
+                report["evidence_items_withheld"] = _customer_cell_items(out)
             report["vendor_named"] = _strip_vendor(out)
             report["seller_voice"] = _strip_vendor(out, pattern=SELLER_VOCABULARY)
+            report["internal_vocabulary"] = _strip_internal_vocabulary(
+                out, exempt=_VOCAB_SECTION_EXEMPT.get((page, section), ()))
 
             # The allowlist runs LAST for the customer audience: whatever
             # survived every deny rule above must also be NAMED to serve.
@@ -654,6 +880,13 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             if out is None:
                 return None, {**report, "withheld": True,
                               "unknown_section": True}
+            # INVARIANT 8 at the very end, over what is actually served:
+            # `grounded_on` is GENERATED as the length of the row's e_ids,
+            # and the customer drawer may now serve fewer items than that.
+            # A count that disagrees with the list printed beside it is a
+            # stored total, which is what the invariant forbids.
+            if (page, section) == ("heatmap", "cell_evidence"):
+                _recount_grounded_on(out)
 
     return out, report
 

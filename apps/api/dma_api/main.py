@@ -25,11 +25,11 @@ from .answers import build_answers, search_answers
 from .cadence import cadence_for, entity_cadence, refresh_queue
 from .db import close as db_close, connect as db_connect
 from .diff import build_diff
-from .evidence import fetch as ev_fetch, redact_items as ev_redact
+from .evidence import fetch as ev_fetch
 from .identity import ActorError, verified_actor
 from . import subverticals
 from .pages import ApiError, build_page, etag_for, resolve_run
-from .redaction import normalise_audience
+from .redaction import normalise_audience, redact_evidence_response
 from .subverticals import SCOPE_TAG, scope_to_entity
 
 _connect = db_connect
@@ -716,7 +716,9 @@ def entity_evidence(display_id: str, request: Request, response: Response,
         wanted = [x.strip() for x in (e_ids or "").split(",") if x.strip()]
         res = ev_fetch(cur, entity_id, wanted or None,
                        run_id=run_meta["run_id"])
-        res["items"] = ev_redact(res["items"], audience)
+        # The whole body, not just the items: for the customer audience the
+        # tier census goes too, and withheld rows leave `found`.
+        res = redact_evidence_response(res, audience)
         # THE DRAWER IS A LIVE READ, so its tag cannot be pinned to the
         # promotion. `evidence_index` changes outside promotion — the worker's
         # repair pass fills a null `source_url` from the package's own
