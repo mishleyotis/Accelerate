@@ -15,7 +15,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 GATE = ROOT / "scripts" / "gate_h_prompt_persistence_claims.py"
 SKILL = ROOT / "plugins" / "dma-insights" / "skills" / "dma-surface-production"
-CONTEXT = SKILL / "03-pages" / "5-context.md"
+CONTEXT = SKILL / "03-pages" / "context" / "C2.md"
 
 
 def _run():

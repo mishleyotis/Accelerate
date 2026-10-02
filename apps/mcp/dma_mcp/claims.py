@@ -130,3 +130,64 @@ def get_run_progress(conn, run_id: str) -> dict:
                   {"held_by": claim[0], "expires_at": claim[1].isoformat(),
                    "live": bool(claim[2])}),
     }
+
+
+def list_submissions(conn, run_id: str, page: str = "") -> dict:
+    """Every submission a run has had, per page, oldest first — the history
+    `get_run_progress` deliberately does not carry (it shows the LIVE row).
+
+    Measured 28-09-2026 (QA audit F-I01-028 / O-03): submissions-per-page
+    was not measurable from the connector, so "was this a first-time pass
+    or a fifth attempt" — the one number that tells a producer whether its
+    repairs are landing — could only be read by a person with database
+    access. This is the read-your-own-writes for `submit_page_payload`.
+    """
+    cur = conn.cursor()
+    sql = ["SELECT s.id, enum_label(s.page), enum_label(s.status), s.producer_version,",
+           "       s.contract_version, s.submitted_at, s.superseded_at, s.superseded_by,",
+           "       s.promoted_at, v.reasons, v.counts",
+           "  FROM submissions s",
+           "  LEFT JOIN LATERAL (SELECT reasons, counts FROM submission_verdicts",
+           "                      WHERE submission_id = s.id",
+           "                      ORDER BY id DESC LIMIT 1) v ON TRUE",
+           " WHERE s.run_id = %s"]
+    args: list = [run_id]
+    if page:
+        sql.append("   AND s.page = %s"); args.append(page)
+    sql.append(" ORDER BY s.page, s.submitted_at, s.id")
+    cur.execute("\n".join(sql), tuple(args))
+    rows = []
+    for (sid, pg, status, pv, cv, sub_at, sup_at, sup_by, prom_at,
+         reasons, counts) in cur.fetchall():
+        blocking = [r for r in (reasons or [])
+                    if isinstance(r, dict) and str(r.get("severity", "block")) == "block"]
+        rows.append({
+            "submission_id": str(sid), "page": pg, "status": status,
+            "producer_version": pv, "contract_version": cv,
+            "submitted_at": sub_at.isoformat() if sub_at else None,
+            "superseded_at": sup_at.isoformat() if sup_at else None,
+            "superseded_by": str(sup_by) if sup_by else None,
+            "promoted_at": prom_at.isoformat() if prom_at else None,
+            "live": sup_at is None,
+            "blocking_reasons": len(blocking),
+            "gates": sorted({str(r.get("gate_id") or "?") for r in blocking}),
+            "counts": counts or {},
+        })
+    per_page: dict = {}
+    for r in rows:
+        p = per_page.setdefault(r["page"], {"attempts": 0, "passes": 0, "fails": 0,
+                                            "live_status": None,
+                                            "first_pass_attempt": None})
+        p["attempts"] += 1
+        p["passes" if r["status"] == "PASS" else "fails"] += 1
+        if r["status"] == "PASS" and p["first_pass_attempt"] is None:
+            p["first_pass_attempt"] = p["attempts"]
+        if r["live"]:
+            p["live_status"] = r["status"]
+    return {"run_id": str(run_id), "page": page or None,
+            "submissions": rows, "per_page": per_page,
+            "total": len(rows),
+            "note": ("Oldest first per page. `first_pass_attempt` is the "
+                     "attempt on which the page first passed (None: never); "
+                     "attempts past two on one page mean the repair is not "
+                     "landing and the approach should change.")}

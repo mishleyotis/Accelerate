@@ -19,33 +19,36 @@ different hex, this document wins.
 
 ## 4-Tier Maturity Levels (Slides 10 + 14)
 
-Score ranges map to level names; each level has three palette slots:
+The four display BANDS. Boundaries and accents are the app's own
+(`apps/web/lib/bands.js` == `engine.contract.band_of`): strict less-than
+at 2 / 3 / 4 on the raw score, no fifth band. Each band has three palette slots:
 - **accent**: bar fill / pillar-strip / rec-card-strip
 - **card_bg**: rec-card background / heatmap capability-block bg
 - **label_text**: color of the level label text (BUILDING, COMPETING, …)
 
 | Level | Score Range | Accent | Card Bg | Label Text | Preview |
 |---|---|---|---|---|---|
-| **Activating** | 0.00 – 1.49 | `#F97316` | `#FFF3E8` | `#F97316` | `ACTIVATING` |
-| **Building** | 1.50 – 2.49 | `#8094C0` | `#F2F4F9` | `#4E5E8A` | `BUILDING` |
-| **Competing** | 2.50 – 3.49 | `#27BBAF` | `#E6F5F3` | `#198478` | `COMPETING` |
-| **Differentiating** | 3.50 – 5.00 | `#185F60` | `#E8F7F6` | `#185F60` | `DIFFERENTIATING` |
+| **Activating** | 0.00 – 1.99 | `#FFCB99` | `#FFF3E8` | `#F97316` | `ACTIVATING` |
+| **Building** | 2.00 – 2.99 | `#62D7B8` | `#F2F4F9` | `#4E5E8A` | `BUILDING` |
+| **Competing** | 3.00 – 3.99 | `#27BBAF` | `#E6F5F3` | `#198478` | `COMPETING` |
+| **Differentiating** | 4.00 – 5.00 | `#139F94` | `#E8F7F6` | `#139F94` | `DIFFERENTIATING` |
 
-## 5-Tier Maturity Levels (Slide 13 pillar indicators)
+## Maturity Levels 1–5 (Slide 13 pillar indicators)
 
-Score ranges map to level numbers 1–5; each level has four palette slots:
+The 1–5 maturity SCORE scale from `skills/dma-research/engine/rubric.py` (cuts 1.5 / 2.5 / 3.5 / 4.5),
+not the four display bands. Each level has four palette slots:
 - **bg_rect**: pillar-row background rectangle
 - **circle**: the numbered circle
 - **num_text**: color of the number inside the circle
-- **label_text**: color of the level label (Emerging, Developing, …)
+- **label_text**: color of the level label (Foundational, Developing, …)
 
 | # | Label | Score Range | Bg Rect | Circle | Num Text | Label Text |
 |---|---|---|---|---|---|---|
-| 1 | **Foundational** | 0.00 – 0.99 | `#FFCB99` | `#FE9732` | `#F2F4F9` | `#1C4A4D` |
-| 2 | **Developing** | 1.00 – 1.99 | `#C7D3EC` | `#8094C0` | `#F2F4F9` | `#1C4A4D` |
-| 3 | **Established** | 2.00 – 2.99 | `#E6F3FA` | `#3D81F6` | `#F2F4F9` | `#1C4A4D` |
-| 4 | **Advanced** | 3.00 – 3.99 | `#E8F7F6` | `#62D7B8` | `#F2F4F9` | `#1C4A4D` |
-| 5 | **Transformational** | 4.00 – 5.00 | `#B0EED3` | `#27BBAF` | `#FFFFFF` | `#1C4A4D` |
+| 1 | **Foundational** | 0.00 – 1.49 | `#FFCB99` | `#FE9732` | `#F2F4F9` | `#1C4A4D` |
+| 2 | **Developing** | 1.50 – 2.49 | `#C7D3EC` | `#8094C0` | `#F2F4F9` | `#1C4A4D` |
+| 3 | **Established** | 2.50 – 3.49 | `#E6F3FA` | `#3D81F6` | `#F2F4F9` | `#1C4A4D` |
+| 4 | **Advanced** | 3.50 – 4.49 | `#E8F7F6` | `#62D7B8` | `#F2F4F9` | `#1C4A4D` |
+| 5 | **Leading** | 4.50 – 5.00 | `#B0EED3` | `#27BBAF` | `#FFFFFF` | `#1C4A4D` |
 
 ## Static Colors
 
@@ -56,21 +59,21 @@ them if the template has drifted.
 | Source Key | Hex | Usage |
 |---|---|---|
 | `median_stroke` | `#3D81F6` | 17 heatmap median connectors + legend (Slide 14) |
-| `s10_legend_act_acc` | `#F97316` |  |
+| `s10_legend_act_acc` | `#FFCB99` |  |
 | `s10_legend_act_bg` | `#FFF3E8` |  |
-| `s10_legend_bld_acc` | `#8094C0` |  |
+| `s10_legend_bld_acc` | `#62D7B8` |  |
 | `s10_legend_bld_bg` | `#F2F4F9` |  |
 | `s10_legend_cmp_acc` | `#27BBAF` |  |
 | `s10_legend_cmp_bg` | `#E6F5F3` |  |
 | `s10_strengths_accent` | `#139F94` | Slide 10 competitive strengths accent strip |
 | `s10_strengths_bg` | `#E8F7F6` | Slide 10 competitive strengths card background |
-| `s14_legend_act_acc` | `#F97316` |  |
+| `s14_legend_act_acc` | `#FFCB99` |  |
 | `s14_legend_act_bg` | `#FFF3E8` |  |
-| `s14_legend_bld_acc` | `#8094C0` |  |
+| `s14_legend_bld_acc` | `#62D7B8` |  |
 | `s14_legend_bld_bg` | `#F2F4F9` |  |
 | `s14_legend_cmp_acc` | `#27BBAF` |  |
 | `s14_legend_cmp_bg` | `#E6F5F3` |  |
-| `s14_legend_dif_acc` | `#185F60` |  |
+| `s14_legend_dif_acc` | `#139F94` |  |
 | `s6_logo_frame` | `#E0EEF0` | Slide 6 client-logo placeholder frame |
 | `track_bar` | `#E5E7EB` | 17 heatmap track bars (Slide 14) |
 | `zennify_dark_teal` | `#1C4A4D` |  |

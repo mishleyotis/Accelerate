@@ -858,6 +858,16 @@ function assetUrl(id, fallback) {
   return (typeof window !== "undefined" && window.__resources && window.__resources[id]) || fallback;
 }
 
+/* Avatar initials from a display name. A served name may be null — the
+   directory carries `legal_name` as-is and never invents one (invariant 9) —
+   and `null.split` on the dashboard unmounted the whole landing page on
+   sign-in. Null, empty or non-string gives "?", never a fabricated letter. */
+function initialsOf(name, n = 2) {
+  if (typeof name !== "string") return "?";
+  const parts = name.split(/\s+/).filter(Boolean);
+  return parts.length ? parts.map(w => w[0]).slice(0, n).join("") : "?";
+}
+
 /* ── Session identity (production divergence, data-flow only) ────────
    The signed-in user comes from the server-verified session in
    DMA_LIVE; the prototype's fixed persona remains only as the
@@ -1522,6 +1532,7 @@ function ConnectionWatcher() {
 
 /* ── Export to window ────────────────────────────────────────────── */
 Object.assign(window, {
+  initialsOf,
   useState, useEffect, useRef, useMemo, useCallback, createContext, useContext,
   AppCtx, useApp,
   Icon, BrandMark, ZennifyWordmark, PillarBadge, MaturityChip, ToastStack,

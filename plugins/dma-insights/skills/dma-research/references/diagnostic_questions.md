@@ -216,5 +216,5 @@ E-015: Annual Report 2024 (T2, CURRENT)
   F5: No mention of data governance or CDO → P4C1 (ABSENCE signal)
 ```
 
-This is why `web_fetch` on annual reports and 10-Ks is critical — one document can
+This is why reading annual reports and 10-Ks (`engine.cli fetch`) is critical — one document can
 populate evidence for 20+ subcapabilities.

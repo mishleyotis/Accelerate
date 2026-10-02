@@ -243,7 +243,7 @@ SOURCES = (ROOT / "plugins" / "dma-insights" / "skills"
            / "dma-surface-production" / "02-inputs" / "enrichment_sources.json")
 TECHSTACK_RULEBOOK = (ROOT / "plugins" / "dma-insights" / "skills"
                       / "dma-surface-production" / "03-pages" / "rulebooks"
-                      / "techstack.md")
+                      / "techstack" / "T1.md")   # one file per surface since W3-4
 
 #: The two phrasings that were wrong. Both said the connector needed a Secret
 #: Manager key that does not exist, so a producer reading either recorded

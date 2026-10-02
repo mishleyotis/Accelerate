@@ -90,7 +90,7 @@ def _pathtok() -> str:
     return gcp_token.path_token()
 
 
-def rpc(method: str, params: dict | None = None) -> dict:
+def rpc(method: str, params: dict | None = None, *, timeout: float = 180) -> dict:
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method,
                        **({"params": params} if params is not None else {})
                        }).encode()
@@ -99,7 +99,7 @@ def rpc(method: str, params: dict | None = None) -> dict:
     req.add_header("X-DMA-Path-Token", _pathtok())
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json, text/event-stream")
-    with urllib.request.urlopen(req, timeout=180) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read().decode()
     m = re.search(r"data: (\{.*\})", raw)
     return json.loads(m.group(1) if m else raw)

@@ -776,7 +776,7 @@ function DashboardEntityCard({
       fontWeight: 700,
       flexShrink: 0
     }
-  }, e.name.split(" ").map(n => n[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", {
+  }, initialsOf(e.name)), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
@@ -789,8 +789,8 @@ function DashboardEntityCard({
       lineHeight: 1.3
     },
     className: "txt-fit-2",
-    title: e.name
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+    title: e.name || e.id
+  }, e.name || e.id), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: "var(--z-muted)",

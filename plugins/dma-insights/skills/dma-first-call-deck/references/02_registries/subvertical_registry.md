@@ -145,7 +145,7 @@ If you prefer GitHub over Google Drive for auto-download:
 
 ### Download Command (used automatically by the skill)
 ```bash
-wget -O /home/claude/working/template.pptx \
+wget -O <working-dir>/template.pptx \
   "https://raw.githubusercontent.com/{OWNER}/{REPO}/main/templates/{sv_id}.pptx"
 ```
 

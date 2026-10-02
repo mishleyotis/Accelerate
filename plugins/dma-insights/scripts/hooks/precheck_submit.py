@@ -29,7 +29,15 @@ def main() -> int:
         event = json.load(sys.stdin)
     except Exception:
         return 0                       # unreadable event: never block blind
-    tool_input = event.get("tool_input") or {}
+    if not isinstance(event, dict):
+        # NOT-A-DICT IS UNPARSED INPUT, NOT A VIOLATION. Measured 2026-09-14:
+        # a JSON list, string or null on stdin raised AttributeError here and
+        # the hook exited NON-ZERO with a traceback — a hook failing CLOSED on
+        # its own bug, which is the one failure a guard may never have.
+        return 0
+    tool_input = event.get("tool_input")
+    if not isinstance(tool_input, dict):
+        return 0
     payload = tool_input.get("payload")
     if not isinstance(payload, dict):
         return 0                       # chunked path: assembled server-side
