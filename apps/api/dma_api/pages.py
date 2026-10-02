@@ -228,7 +228,10 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       vocabulary net (NOT_RUN in prose, tool names, RRF, k=60…) runs over
 #       every section and empty state; the value chain's empty state goes
 #       through the walker. The entity block also gains `trading_name` and
-#       `supplementary_sub_verticals` (0061).
+#       `supplementary_sub_verticals` (0061). Before @11 was deployed it also
+#       took two walker fixes from the re-check: element paths are deleted
+#       highest index first, and an id-keyed map or wrapper dict is filtered
+#       by its values' keys, never its ids — @11 never served without them.
 SERVE_RULES = "serve-rules@11"
 
 

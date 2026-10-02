@@ -410,6 +410,13 @@ def strip_paths(data: dict, paths, section: str | None = None) -> tuple[list, li
     is deliberate, because the contract has never said which one to use.
     """
     stripped, unmatched = [], []
+    # Delete in DESCENDING index order. Producers list element paths in
+    # ascending order (`cells[13].items[0]`, `[1]`, `[2]`); deleting them in
+    # that order shifts the list under every later path, so a later path
+    # deletes the WRONG element or nothing. Measured on SWBC 2026-10-02: of 64
+    # marked internal drawer items, 12 paths matched nothing, 18 internal
+    # items still served and 6 public items were removed instead.
+    parsed = []
     for path in paths or ():
         if not isinstance(path, str) or not path:
             continue
@@ -417,6 +424,11 @@ def strip_paths(data: dict, paths, section: str | None = None) -> tuple[list, li
         if segs is None:
             unmatched.append(path)
             continue
+        parsed.append((path, segs))
+    parsed.sort(key=lambda ps: tuple(
+        (name, tuple(-int(i) if i != "*" else 1 for i in idx))
+        for name, idx in ps[1]))
+    for path, segs in parsed:
         n = _delete(data, segs)
         if not n and section and segs[0][0] == section and len(segs) > 1:
             n = _delete(data, segs[1:])
@@ -543,10 +555,34 @@ def _apply_allowlist(page: str, section: str, body: dict) -> tuple[dict | None, 
         # seven reach counters while the allowlist names three. `empty_state`
         # has its own rule above (`empty_state_keys`) and is not re-filtered.
         if isinstance(rows, dict) and field != "empty_state":
-            for key in list(rows.keys()):
-                if key not in keep:
-                    del rows[key]
-                    dropped.append(f"{field}.{key}")
+            vals = list(rows.values())
+            if vals and all(isinstance(v, dict) for v in vals):
+                # An id-keyed MAP (`pillars`, `categories`): the allowlist
+                # names each VALUE's keys, never the ids. Filtering the ids
+                # emptied the customer grid.
+                for k, v in rows.items():
+                    for key in list(v.keys()):
+                        if key not in keep:
+                            del v[key]
+                            dropped.append(f"{field}.{k}.{key}")
+            elif all(not isinstance(v, (dict, list)) for v in vals):
+                # A FLAT dict of counters (`linking_stats`).
+                for key in list(rows.keys()):
+                    if key not in keep:
+                        del rows[key]
+                        dropped.append(f"{field}.{key}")
+            else:
+                # A wrapper (`ladder` = {steps: [...], theme, ...}): the
+                # allowlist names the row keys of its list-of-objects; its
+                # own scalar keys are left as they were served before.
+                for k, v in rows.items():
+                    if isinstance(v, list):
+                        for i, row in enumerate(v):
+                            if isinstance(row, dict):
+                                for key in list(row.keys()):
+                                    if key not in keep:
+                                        del row[key]
+                                        dropped.append(f"{field}.{k}[{i}].{key}")
             continue
         if not isinstance(rows, list):
             continue
