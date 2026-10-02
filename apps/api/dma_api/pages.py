@@ -219,7 +219,17 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       the page, which is the worst pair: a hand check of the screen agrees
 #       with a green test and neither is looking at the body. A customer who
 #       fetched before this bump holds a body carrying the census.
-SERVE_RULES = "serve-rules@10"
+#   @11 2026-10-02 — the SWBC redaction audit. Customer bodies change under
+#       an unmoved promoted_at in five ways: the cell drawer withholds
+#       internal-origin and vendor/seller/pipeline-vocabulary evidence items
+#       whole and `grounded_on` counts the items served; `platform.starters`
+#       is withheld whole; dict-valued `linking_stats` is held to its
+#       allowlist; "account team" joins the seller net and a pipeline-
+#       vocabulary net (NOT_RUN in prose, tool names, RRF, k=60…) runs over
+#       every section and empty state; the value chain's empty state goes
+#       through the walker. The entity block also gains `trading_name` and
+#       `supplementary_sub_verticals` (0061).
+SERVE_RULES = "serve-rules@11"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
