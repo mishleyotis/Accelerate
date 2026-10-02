@@ -115,3 +115,34 @@ def test_ast_parse_alone_would_not_have_caught_it():
     ast.parse(broken)                      # parses happily
     with pytest.raises(NameError):
         exec(compile(broken, "<broken>", "exec"), {})
+
+
+def test_resource_handlers_take_no_parameters(server):
+    """mcp 2.0.1 reads every handler parameter as a URI-template variable and
+    refuses a concrete URI whose handler declares one. `_reader(_uri=uri)`
+    — the loop-capture idiom — did exactly that, and `dmai-mcp-00135`
+    died at import with "Resource 'contract://page/heatmap' has no URI
+    template variables, but the handler declares parameters {'_uri'}".
+    The stub above accepts anything, so this asserts the shape directly."""
+    import inspect
+    from dma_mcp import resources as resources_mod
+    for entry in resources_mod.resource_index():
+        reader = server._resource_reader(entry["uri"])
+        assert not inspect.signature(reader).parameters, entry["uri"]
+        assert reader() == resources_mod.read_resource(entry["uri"])["text"]
+
+
+def test_resources_register_with_the_real_sdk(monkeypatch):
+    """The same registration against the SDK the image installs, wherever it
+    is installed (CI's runner does not carry it; a dev box with
+    apps/mcp/requirements.txt does). A real MCPServer, a real decorator."""
+    sdk = pytest.importorskip("mcp.server")
+    if not hasattr(sdk, "MCPServer"):
+        pytest.skip("mcp SDK older than 2.0 — not what the image installs")
+    for p in (str(MCP_DIR), str(ROOT / "packages" / "shared")):
+        if p not in sys.path:
+            monkeypatch.syspath_prepend(p)
+    monkeypatch.setenv("MCP_PATH_TOKEN", "test")
+    monkeypatch.delitem(sys.modules, "server", raising=False)
+    import server as S  # module scope runs _register_resources() for real
+    assert S.mcp is not None
