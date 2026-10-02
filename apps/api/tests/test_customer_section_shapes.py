@@ -91,3 +91,44 @@ def test_ascending_element_paths_delete_the_named_items():
         data, ["cells[0].items[0]", "cells[0].items[1]", "cells[0].items[3]"])
     assert [i["e_id"] for i in data["cells"][0]["items"]] == ["C"]
     assert unmatched == [] and len(stripped) == 3
+
+
+# ── f. the producer may make an item's freshness more conservative ────
+class _Cur:
+    def __init__(self, rows): self._rows = rows
+    def execute(self, *a, **k): pass
+    def fetchall(self): return self._rows
+
+
+def test_producer_unverified_recency_survives_the_store_rebuild():
+    from dma_api.computed import cell_items
+    # store row: a fetch-day date stored as published -> CURRENT
+    row = ("E-1", "E-1", "T2", "FACT", "CURRENT", "swbc.com", "swbc.com",
+           "x" * 60, "https://swbc.com", "producer")
+    data = {"cells": [{"subcap_id": "P1C1.1.1", "e_ids": ["E-1"],
+                       "items": [{"e_id": "E-1", "recency": "UNVERIFIED"}]}]}
+    cell_items(_Cur([row]), data, "ent")
+    assert data["cells"][0]["items"][0]["recency"] == "UNVERIFIED"
+
+
+def test_producer_cannot_upgrade_recency():
+    from dma_api.computed import cell_items
+    row = ("E-1", "E-1", "T2", "FACT", "UNVERIFIED", "s", "s",
+           "x" * 60, "https://swbc.com", "producer")
+    data = {"cells": [{"subcap_id": "P1C1.1.1", "e_ids": ["E-1"],
+                       "items": [{"e_id": "E-1", "recency": "CURRENT"}]}]}
+    cell_items(_Cur([row]), data, "ent")
+    assert data["cells"][0]["items"][0]["recency"] == "UNVERIFIED"
+
+
+# ── g. customer chips equal the items served, after element-path strips ──
+def test_customer_e_ids_drop_items_removed_by_internal_only_paths():
+    data = {"cells": [{"subcap_id": "P1C1.1.2", "synthesis": "s",
+                       "e_ids": ["E-INT", "E-PUB"], "grounded_on": 2,
+                       "items": [{"e_id": "E-INT", "excerpt": "x" * 60},
+                                 {"e_id": "E-PUB", "excerpt": "y" * 60}]}]}
+    out, _ = redact_section("heatmap", "cell_evidence", data,
+                            ["cells[0].items[0]"], "customer")
+    cell = out["cells"][0]
+    assert cell["e_ids"] == ["E-PUB"]
+    assert cell["grounded_on"] == 1

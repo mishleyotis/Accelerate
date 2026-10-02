@@ -765,6 +765,15 @@ def _customer_cell_items(data: dict) -> int:
                 cell["e_ids"] = [e for e in cell["e_ids"] if e not in gone]
             n += sum(withheld.values())
         cell["items"] = kept
+        # Chips and drawer must agree even for items an `internal_only`
+        # element path removed BEFORE this filter ran: those ids are no
+        # longer in `before`, so the subtraction above cannot see them, and
+        # the customer was shown chips that open onto nothing (24 drawers on
+        # SWBC 2026-10-02 with a cited synthesis and 0 items).
+        if isinstance(cell.get("e_ids"), list):
+            served = ({i.get("e_id") for i in kept if isinstance(i, dict)}
+                      | {i.get("cited_as") for i in kept if isinstance(i, dict)})
+            cell["e_ids"] = [e for e in cell["e_ids"] if e in served]
     return n
 
 

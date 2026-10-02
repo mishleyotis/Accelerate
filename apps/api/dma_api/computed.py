@@ -520,8 +520,20 @@ def cell_items(cur, data: dict, entity_id) -> None:
         if not isinstance(c, dict):
             continue
         ids = [e for e in (c.get("e_ids") or []) if isinstance(e, str)]
-        items = [by_id[e] for e in ids if e in by_id]
+        items = [dict(by_id[e]) for e in ids if e in by_id]
         unresolved += len(ids) - len(items)
+        # The producer may only make an item's freshness MORE conservative
+        # than the store row: a fetch-day or Jan-1 placeholder date stored as
+        # published reads CURRENT here, and the producer that caught it marks
+        # the item UNVERIFIED (invariant 9: undated is never current). A
+        # registered row cannot be amended, so without this the drawer
+        # re-dates what the payload corrected. Never an upgrade.
+        stated = {i.get("e_id"): i.get("recency")
+                  for i in (c.get("items") or []) if isinstance(i, dict)}
+        for it in items:
+            if stated.get(it["e_id"]) == "UNVERIFIED" \
+                    and it.get("recency") != "UNVERIFIED":
+                it["recency"] = "UNVERIFIED"
         # Order follows e_ids, which the producer ranked. Order is meaning.
         _set(c, "items", items)
         # `thin` is the ABSENCE-ROUTE marker — it travels with
