@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "apps" / "mcp"))
 
 from dma_api.pages import SERVE_RULES, etag_for                 # noqa: E402
 from dma_api.redaction import (CUSTOMER_WITHHELD, normalise_audience,  # noqa: E402
-                               page_forbidden, redact_section)
+                               page_forbidden, redact_section, strip_paths)
 from dma_api.serving_spec import assemble, page_sections, readers  # noqa: E402
 from dma_mcp.promote import _expand_h4_maps, _value               # noqa: E402
 
@@ -265,11 +265,14 @@ def test_a_path_that_matches_nothing_is_never_reported_as_stripped():
     assert set(rep["paths_stripped"]) == set(marked)
 
     # 2. Section-qualified with no index at all — Odlum's `starters.starters`.
+    # Driven through `strip_paths` directly: platform.starters itself is now
+    # withheld WHOLE from the customer (MEM-0081 / T-2), so redact_section
+    # never reaches the path walk for it — but the walker's handling of the
+    # unindexed, section-qualified form is the thing under test.
     st = {"starters": [{"rank": 1, "text": "AE call opener"}]}
-    out, rep = redact_section("platform", "starters", st, ["starters.starters"],
-                              "customer")
-    assert "starters" not in out
-    assert rep["paths_stripped"] == ["starters.starters"]
+    did, missed = strip_paths(st, ["starters.starters"], "starters")
+    assert "starters" not in st
+    assert did == ["starters.starters"] and missed == []
 
     # 3. A marking that names nothing is reported as unmatched, NOT stripped.
     out, rep = redact_section("platform", "platform_story",

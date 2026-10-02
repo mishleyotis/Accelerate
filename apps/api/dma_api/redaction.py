@@ -69,6 +69,12 @@ CUSTOMER_WITHHELD = frozenset((
     ("heatmap", "alerts"),                # D7 Health, operational
     ("heatmap", "evidence_age"),          # D7 Health, operational
     ("heatmap", "cohort_patterns"),       # D7 Health + cross-entity
+    # P-starters: conversation openers WRITTEN FOR THE SELLER ("ask them
+    # which system…", "follow-up question"). MEM-0081 / T-2: key-stripping
+    # it left a customer card list whose every remaining field was a line
+    # of our talk track, so it is withheld whole — a section that is our
+    # preparation for the room has no redacted form.
+    ("platform", "starters"),
 ))
 
 # Whole pages withheld from the customer audience: a locked state, not a
@@ -531,9 +537,19 @@ def _apply_allowlist(page: str, section: str, body: dict) -> tuple[dict | None, 
                 dropped.append(f"empty_state.{key}")
     for field, item_allow in (spec.get("items") or {}).items():
         rows = body.get(field)
+        keep = set(item_allow)
+        # A DICT-valued field (`linking_stats`) is held to its allowlist too.
+        # Only list-valued fields were, so heatmap.cell_evidence served all
+        # seven reach counters while the allowlist names three. `empty_state`
+        # has its own rule above (`empty_state_keys`) and is not re-filtered.
+        if isinstance(rows, dict) and field != "empty_state":
+            for key in list(rows.keys()):
+                if key not in keep:
+                    del rows[key]
+                    dropped.append(f"{field}.{key}")
+            continue
         if not isinstance(rows, list):
             continue
-        keep = set(item_allow)
         for i, row in enumerate(rows):
             if not isinstance(row, dict):
                 continue
