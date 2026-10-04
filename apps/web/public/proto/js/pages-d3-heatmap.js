@@ -170,6 +170,42 @@ function sectionReason(key) {
   };
 }
 
+/* ── A column null in EVERY row is one absence, stated once ─────────────
+   RC-03 (gold audit 2026-10-04): absence was modelled only at SECTION grain,
+   so a populated section with a 100%-null column — peer_median, sixteen
+   categories and four pillars — rendered sixteen silent cells and its reason
+   nowhere. The section's empty_state carries the reason; the sentences of it
+   that are about the PEER column are what the grid states, once. Where the
+   run gave no such sentence the grid says only what the payload shows. */
+function peerColumnReason() {
+  const {
+    es
+  } = sectionReason("heatmap.workbook_scores");
+  const reason = es && typeof es.reason === "string" ? es.reason.trim() : "";
+  const about = reason.split(/(?<=[.!?])\s+/).filter(x => /\bpeers?\b/i.test(x)).join(" ");
+  return about || "No peer median is stated at this grain in this run.";
+}
+function PeerColumnFoot() {
+  return /*#__PURE__*/React.createElement("div", {
+    "data-peer-column-absent": "true",
+    style: {
+      marginTop: 10,
+      borderTop: "1px solid var(--z-sep)",
+      paddingTop: 8,
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.55
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      textTransform: "uppercase",
+      letterSpacing: ".06em",
+      marginRight: 6
+    }
+  }, "Peer column"), peerColumnReason());
+}
+
 /* The contract allows either shape for the workbook tables: an id-keyed object
    ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
    their own id. Both become a list of rows with `id`. */
@@ -1568,7 +1604,7 @@ function PillarHeatmap({
         marginTop: 10
       }
     }, p.cats.length, " categories \xB7 ", p.cellCount, " subcaps \xB7 click to drill"));
-  })), !anyScore ? (() => {
+  })), (pillars || []).length && (pillars || []).every(p => p.peer == null) ? /*#__PURE__*/React.createElement(PeerColumnFoot, null) : null, !anyScore ? (() => {
     const {
       stub
     } = sectionReason("heatmap.workbook_scores");
@@ -1631,6 +1667,9 @@ function CategoryHeatmap({
       if (cap != null) row.capped += 1;
     });
   });
+  // Every category on screen with no peer median: one absence, said once.
+  const shownCats = rows.flatMap(p => p.cats || []);
+  const peerAllNull = showPeers && shownCats.length > 0 && shownCats.every(c => c.peer == null);
   return /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, rows.map(p => {
@@ -1735,7 +1774,13 @@ function CategoryHeatmap({
           fontSize: 13,
           fontWeight: 700
         }
-      }, fx(shown, 1)), c.thin > 0 ? /*#__PURE__*/React.createElement("div", {
+      }, fx(shown, 1)), c.score == null && c.cellMean != null ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 8,
+          fontWeight: 600,
+          lineHeight: 1.15
+        }
+      }, "cell mean \xB7 not a workbook figure") : null, c.thin > 0 ? /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 8,
           fontWeight: 600
@@ -1819,7 +1864,7 @@ function CategoryHeatmap({
         fontStyle: "italic"
       }
     }, c.name || "unnamed in catalogue")))));
-  }), /*#__PURE__*/React.createElement(CellTip, {
+  }), peerAllNull ? /*#__PURE__*/React.createElement(PeerColumnFoot, null) : null, /*#__PURE__*/React.createElement(CellTip, {
     tip: cellTip.tip
   }));
 }
@@ -3600,5 +3645,9 @@ function hashCode(s) {
 window.hashCode = hashCode;
 Object.assign(window, {
   ClientHeatmap,
-  sectionReason
+  sectionReason,
+  runPillarsOf,
+  runCategoriesOf,
+  PillarHeatmap,
+  CategoryHeatmap
 });

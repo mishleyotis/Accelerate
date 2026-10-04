@@ -28,6 +28,7 @@ Two rules hold everywhere in this module:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 # The abbreviation list, from the one copy `evidence.py` also reads. Imported
@@ -62,9 +63,43 @@ TILE_DETAIL = {
     "INFERRED": "Technographic or indirect signal; a vendor statement would "
                 "confirm.",
     "CLAIMED": "Stated but not corroborated; treated as absent for fit.",
-    "GAPS": "Searched and not established in this estate; named, because a "
-            "list of what is absent is the finding.",
+    # The DEFINITION only. The sentence the tile serves is chosen per row by
+    # `_gaps_detail`, because whether an absence was SEARCHED is a fact about
+    # each row, not about the vocabulary (RC-11 / D-15).
+    "GAPS": "Recorded absent from this estate; named, because a list of what "
+            "is absent is the finding.",
 }
+
+# Does a row's detection_basis RECORD a search? Read from the producer's own
+# clause, never assumed. "No public source confirms or contradicts it" is an
+# absence of a source, not a search, and does not match.
+_SEARCH_RECORDED = re.compile(
+    r"\b(searched|search(?:es)?\s+(?:of|for|across|on|in|run)|queried|"
+    r"scanned|looked\s+for)\b", re.I)
+
+_GAPS_TAIL = "named, because a list of what is absent is the finding."
+
+
+def _gaps_detail(bases: list) -> str:
+    """The GAPS tile's sentence, from how each ABSENT row was established.
+
+    RC-11 / D-15, gold audit 2026-10-04: the tile said "Searched and not
+    established" over a register whose one ABSENT row rested on the
+    institution's own statement, and the search had never run. Rows whose
+    basis records a search are "searched and not found"; every other row,
+    including one with no basis at all, is "stated absent, not yet searched".
+    """
+    if not bases:
+        return "No product is recorded absent in this register."
+    searched = sum(1 for b in bases if b and _SEARCH_RECORDED.search(b))
+    stated = len(bases) - searched
+    if stated == 0:
+        return f"Searched and not found in this estate; {_GAPS_TAIL}"
+    if searched == 0:
+        return ("Stated absent by the institution or the assessment, not yet "
+                f"searched; {_GAPS_TAIL}")
+    return (f"{searched} searched and not found; {stated} stated absent, not "
+            f"yet searched. Both {_GAPS_TAIL}")
 
 
 def _product_label(vendor: str | None, name: str | None) -> str:
@@ -271,17 +306,25 @@ def landscape(cur, data: dict, run_id) -> None:
         # ORDER BY id: rule 10, order is meaning. Without it the GAPS tile's
         # named_items came back in heap order and two of three platforms
         # swapped between reads of one promoted run.
-        """SELECT status::text, name, vendor, evidence_level::text
+        """SELECT status::text, name, vendor, evidence_level::text,
+                  detection_basis
              FROM techstack_items WHERE run_id = %s ORDER BY id""",
         (run_id,))
     rows = cur.fetchall()
     if not rows:
         return
     buckets: dict = {k: [] for k in ("CONFIRMED", "INFERRED", "CLAIMED", "GAPS")}
-    for status, name, vendor, level in rows:
+    gap_bases: list = []
+    for row in rows:
+        # Four columns from any caller not yet widened; the fifth, when
+        # present, is the row's own detection_basis.
+        status, name, vendor, level = row[:4]
+        basis = row[4] if len(row) > 4 else None
         tile = TILE_FOR_STATUS.get((status or "").upper())
         if tile:
             buckets[tile].append((_product_label(vendor, name), level))
+            if tile == "GAPS":
+                gap_bases.append(basis)
 
     # THE RECOMPUTE OWNS THE TILE, SO IT OWNS THE TILE'S SENTENCE TOO.
     #
@@ -320,7 +363,10 @@ def landscape(cur, data: dict, run_id) -> None:
                       if len(levels) > 1 else
                       f"{len(members)} · {levels[0]} evidence" if levels else
                       f"{len(members)} · evidence level not recorded"),
-            "detail": TILE_DETAIL.get(kind),
+            # GAPS says how its rows were established; the other three are
+            # the vocabulary's definitions.
+            "detail": (_gaps_detail(gap_bases) if kind == "GAPS"
+                       else TILE_DETAIL.get(kind)),
             # Only the GAPS tile names its members: a list of what is absent
             # is the finding; a list of what is present is the register.
             "named_items": ([n for n, _ in members] if kind == "GAPS" else []),

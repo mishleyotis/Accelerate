@@ -565,10 +565,19 @@ test("the tech layer rollup is computed from the register, not read from it", ()
   assert.deepStrictEqual(rows.map(r => r.layer), ["OPS", "CUST", "DATA"],
                          "only layers the register actually uses");
   const data = rows.find(r => r.layer === "DATA");
-  assert.strictEqual(data.expected, 2, "an ABSENT row is a slot, so it counts");
-  assert.strictEqual(data.detected, 1, "...but it is not detected");
+  // SUPERSEDED 2026-10-04 (RC-11 / D-16). This asserted `expected === 2`,
+  // the register's own row count, as the denominator — the circular rollup
+  // that rendered "5 of 5" on the audited run. No stated expected, no
+  // denominator; which one SHOULD be stated is open adjudication T-03/DNR-6.
+  assert.strictEqual(data.expected, null, "the rows are not their own denominator");
+  assert.strictEqual(data.detected, 1, "an ABSENT row is not detected");
   assert.strictEqual(data.is_primary_gap, true, "fewest confirmed wins");
-  assert.match(data.basis, /0 confirmed of 2/);
+  assert.match(data.basis, /^0 confirmed — fewer than any other layer$/);
+  // A STATED expected is still read and carried.
+  const stated = w.techLayersOf({ ...ts, layers: [{ layer: "DATA", expected: 8,
+    expected_basis: "eight roles" }] }).find(r => r.layer === "DATA");
+  assert.strictEqual(stated.expected, 8);
+  assert.strictEqual(stated.expected_basis, "eight roles");
   assert.strictEqual(rows.find(r => r.layer === "CUST").is_primary_gap, false,
                      "the best-covered layer is never the gap");
   assert.strictEqual(data.pillar_id, "P4", "the pillar comes off the rows");

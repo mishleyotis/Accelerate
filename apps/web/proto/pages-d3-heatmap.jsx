@@ -154,6 +154,32 @@ function sectionReason(key) {
   return { state, es, stub };
 }
 
+/* ── A column null in EVERY row is one absence, stated once ─────────────
+   RC-03 (gold audit 2026-10-04): absence was modelled only at SECTION grain,
+   so a populated section with a 100%-null column — peer_median, sixteen
+   categories and four pillars — rendered sixteen silent cells and its reason
+   nowhere. The section's empty_state carries the reason; the sentences of it
+   that are about the PEER column are what the grid states, once. Where the
+   run gave no such sentence the grid says only what the payload shows. */
+function peerColumnReason() {
+  const { es } = sectionReason("heatmap.workbook_scores");
+  const reason = (es && typeof es.reason === "string") ? es.reason.trim() : "";
+  const about = reason.split(/(?<=[.!?])\s+/).filter(x => /\bpeers?\b/i.test(x)).join(" ");
+  return about || "No peer median is stated at this grain in this run.";
+}
+
+function PeerColumnFoot() {
+  return (
+    <div data-peer-column-absent="true"
+         style={{ marginTop: 10, borderTop: "1px solid var(--z-sep)", paddingTop: 8,
+                  fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+      <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".06em",
+                     marginRight: 6 }}>Peer column</span>
+      {peerColumnReason()}
+    </div>
+  );
+}
+
 /* The contract allows either shape for the workbook tables: an id-keyed object
    ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
    their own id. Both become a list of rows with `id`. */
@@ -961,6 +987,8 @@ function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
           (H-06) and an adjudication about what the grid is allowed to
           publish — not something to settle by quietly starting to publish a
           pillar figure the run does not state. */}
+      {(pillars || []).length && (pillars || []).every(p => p.peer == null)
+        ? <PeerColumnFoot /> : null}
       {!anyScore ? (() => {
         const { stub } = sectionReason("heatmap.workbook_scores");
         return (
@@ -1005,6 +1033,9 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
       if (cap != null) row.capped += 1;
     });
   });
+  // Every category on screen with no peer median: one absence, said once.
+  const shownCats = rows.flatMap(p => p.cats || []);
+  const peerAllNull = showPeers && shownCats.length > 0 && shownCats.every(c => c.peer == null);
   return (
     <div className="card">
       {rows.map(p => {
@@ -1057,6 +1088,12 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                       {shown == null
                         ? <div style={{ fontSize: 10.5, fontWeight: 600 }}><EnrichmentGap what={`${c.id} score`} audience={audience} compact /></div>
                         : <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>}
+                      {/* ON THE FACE, not only in the title (RC-11 / D-32):
+                          the workbook states no figure for this category and
+                          the number above is the mean of its scored cells. */}
+                      {c.score == null && c.cellMean != null
+                        ? <div style={{ fontSize: 8, fontWeight: 600, lineHeight: 1.15 }}>cell mean · not a workbook figure</div>
+                        : null}
                       {c.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{c.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
@@ -1112,6 +1149,7 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
           </div>
         );
       })}
+      {peerAllNull ? <PeerColumnFoot /> : null}
       <CellTip tip={cellTip.tip} />
     </div>
   );
@@ -2159,4 +2197,5 @@ function Legend() {
 function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i); return h; }
 window.hashCode = hashCode;
 
-Object.assign(window, { ClientHeatmap, sectionReason });
+Object.assign(window, { ClientHeatmap, sectionReason, runPillarsOf, runCategoriesOf,
+                        PillarHeatmap, CategoryHeatmap });

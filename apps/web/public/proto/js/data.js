@@ -2266,13 +2266,13 @@
 
   /* ── Financial trajectory ──────────────────────────────────────────
      SOURCE: 00_entity_profile/financial_baseline.json + entity_profile.json
-     FIELDS: total_assets[], net_income[], nim[], employees, branches, fy[] */
+     FIELDS: series_values[] (total assets here), net_income[], nim[], employees, branches, fy[] */
   const FINANCIALS = {
     "fce-001": {
       currency: "USD",
       unit: "B",
       fy: ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025"],
-      total_assets: [9.8, 10.4, 11.1, 11.6, 12.2],
+      series_values: [9.8, 10.4, 11.1, 11.6, 12.2],
       // $B
       net_income_m: [188, 214, 199, 221, 243],
       // $M

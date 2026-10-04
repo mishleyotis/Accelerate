@@ -178,8 +178,22 @@ function peerSetsOf(techstack, subVertical) {
    Uses the FIRST and LAST points that carry both a period year and a positive
    value, and the real number of years between them — not the count of rows,
    which would be wrong for any series with a gap. Returns {} when it cannot be
-   computed, so the caller spreads nothing and the field stays absent. */
+   computed, so the caller spreads nothing and the field stays absent.
+
+   NOR WHEN IT MUST NOT BE (RC-11 / D-05, gold audit 2026-10-04). A series
+   whose points state a SCOPE — a subsidiary, a segment, a division — is not
+   the institution's series, and a compound rate over it is not the
+   institution's growth. The audited run promoted one subsidiary's loan
+   originations, every basis saying "a subsidiary of the group, not the
+   group", and this computed -6.8% that the firmographics strip printed as
+   the firm's CAGR. The basis is read per point: one scoped point makes the
+   series scoped. */
+const SCOPED_BASIS = /\b(subsidiar(?:y|ies)|segment|division|affiliate|business line|line of business|not the (?:group|parent|enterprise|holding company))\b/i;
+function seriesIsScoped(series) {
+  return (series || []).some((s) => s && typeof s.basis === "string" && SCOPED_BASIS.test(s.basis));
+}
 function cagrOf(series) {
+  if (seriesIsScoped(series)) return {};
   const yearOf = (s) => {
     const m = /(\d{4})/.exec(String(s.period || ""));
     return m ? Number(m[1]) : null;
@@ -235,14 +249,22 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
     // than as a dash the reader cannot act on.
     fy: series.map((s) => s.period || "Not stated"),
     // Expressed in `unit` above, which is what every bar label already
-    // assumes when it writes `$${total_assets[i]}${unit}`.
-    total_assets: scaled.values,
+    // assumes when it writes `$${series_values[i]}${unit}`.
+    //
+    // `series_values`, not `total_assets` (RC-11): the series is whatever
+    // metric its `basis` names — assets for a bank, loan originations for a
+    // mortgage subsidiary, premium for a carrier. Calling every one of them
+    // total assets put a label on the chart the payload never stated.
+    series_values: scaled.values,
     // The figure as the run states it, in dollars, untouched — for anything
     // that needs the exact number rather than the chart's magnitude.
-    total_assets_usd: series.map((s) => num(s.value)),
+    series_values_usd: series.map((s) => num(s.value)),
     // Preformatted, for a caller that would rather not interpolate at all.
-    // Identical strings to fmtMoney(total_assets[i], unit) by construction.
-    total_assets_display: series.map((s) => fmtMoney(s.value, s.unit || (first || {}).unit)),
+    // Identical strings to fmtMoney(series_values[i], unit) by construction.
+    series_values_display: series.map((s) => fmtMoney(s.value, s.unit || (first || {}).unit)),
+    // True when any point's basis names a subsidiary or segment: the chart is
+    // then that unit's series, and no enterprise rate is drawn from it.
+    scoped: seriesIsScoped(series),
     // Net income and NIM are not in this section's contract. Null, not zero:
     // a zero-height bar reads as a measured zero.
     net_income_m: series.map(() => null),
@@ -262,13 +284,17 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
       ? `${lastMoney} · ${last.period || ""}`.trim()
       : null,
     basis: (series.find((s) => s.basis) || {}).basis || null,
-    // CAGR is COMPUTED from the dated points, never taken on faith. The card
-    // showed "—" because no contract field carries it and nothing derived it,
-    // while the series states the endpoints it needs. Computed-or-null
-    // (invariant 9): fewer than two dated points, or a non-positive endpoint,
-    // yields null rather than a figure with no basis. `cagr_basis` names the
-    // span so the reader can see what it was computed over.
-    ...cagrOf(series),
+    // CAGR is COMPUTED from the dated points only where the PRODUCER said
+    // nothing about it. Computed-or-null (invariant 9): fewer than two dated
+    // points, or a non-positive endpoint, yields null rather than a figure
+    // with no basis, and `cagr_basis` names the span.
+    //
+    // The producer's word comes first (RC-11 / D-05). A `cagr` firmographic
+    // that is HELD is a finding — "no enterprise series is published" — and a
+    // rate computed over it contradicts the producer on the same strip. One
+    // that is STATED carries its own basis and renders as stated. Either way
+    // the series gets no vote, and a scoped series never does.
+    ...((fields.cagr || fields.growth_rate) ? {} : cagrOf(series)),
     trend: financialSeries.trend || null,
     verified_sparse: !!financialSeries.verified_sparse,
     events: [],
@@ -297,28 +323,68 @@ function moneyOf(s) {
    normalised onto its OWN stated scale only: the card divides score by
    scale, so an NPS on -100..100 must arrive with that scale, never rescaled
    here into something the producer never said. */
+/* THE THEMES ARE THE ANALYSIS (RC-03, D-01, gold audit 2026-10-04).
+ *
+ * This read `bars[]` and returned null without one, and returned nothing
+ * else when it had one. The O9 prompt calls the themes "the analysis":
+ * recurring patterns from the review and complaint TEXT, each mapped to the
+ * cells it bears on and stating what it caps. A run promoted six of them with
+ * one bar, and the card showed the bar, an employee group reading "Not
+ * established for this run." over three employee themes, and a B2B/B2C chip
+ * wired to `industry_avg` / `b2b_b2c_gap` — keys no contract declares, so it
+ * could never light.
+ *
+ * Everything returned here is a declared key of overview.sentiment:
+ * bars[], themes[] {audience, theme, mapped_subcap_ids, cap_statement},
+ * gap_analysis {b2b_b2c, internal_external, e_ids}, narrative_thread. The
+ * gap chip is a PRESENCE flag computed from `gap_analysis.b2b_b2c` being
+ * non-empty — the contract's own words: "never a stored boolean". */
 function adaptSentiment(sentiment) {
-  const bars = (sentiment && sentiment.bars) || [];
-  if (!bars.length) return null;
-  const group = (which) => bars
-    .filter((b) => String(b.audience || "").toLowerCase() === which)
-    .map((b) => ({
-      source: b.source, metric: b.metric || b.scale || null,
-      score: num(b.rating), scale: b.scale || null, scale_max: scaleMaxOf(b.scale), n: num(b.n),
-      as_of: b.as_of, e_id: b.e_id, url: b.url,
-      trend_vs_prior: b.trend_vs_prior,
-    }));
-  const employee = group("employee");
-  const customer = group("customer");
-  const ungrouped = bars.filter((b) => !b.audience).map((b) => ({
+  if (!sentiment || typeof sentiment !== "object") return null;
+  const bars = Array.isArray(sentiment.bars) ? sentiment.bars : [];
+  const text = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
+  const barOf = (b) => ({
     source: b.source, metric: b.metric || b.scale || null,
     score: num(b.rating), scale: b.scale || null, scale_max: scaleMaxOf(b.scale), n: num(b.n),
     as_of: b.as_of, e_id: b.e_id, url: b.url,
-  }));
+    trend_vs_prior: b.trend_vs_prior,
+  });
+  const audOf = (x) => String((x && x.audience) || "").trim().toLowerCase();
+  const group = (which) => bars.filter((b) => b && audOf(b) === which).map(barOf);
+  // A mapped id may arrive as the bare string the contract asks for or, from
+  // an older producer, as a record carrying it; either way it is an id or it
+  // is dropped — never stringified into "[object Object]".
+  const idOf = (v) => (typeof v === "string" ? v.trim()
+    : (v && typeof v === "object" && typeof v.subcap_id === "string") ? v.subcap_id.trim() : "");
+  const themes = (Array.isArray(sentiment.themes) ? sentiment.themes : [])
+    .filter((t) => t && typeof t === "object" && text(t.theme))
+    .map((t) => ({
+      audience: audOf(t) || null,
+      theme: text(t.theme),
+      cap_statement: text(t.cap_statement),
+      mapped_subcap_ids: (Array.isArray(t.mapped_subcap_ids) ? t.mapped_subcap_ids : [])
+        .map(idOf).filter(Boolean),
+      e_ids: (Array.isArray(t.e_ids) ? t.e_ids : []).filter((x) => typeof x === "string"),
+    }));
+  const ga = (sentiment.gap_analysis && typeof sentiment.gap_analysis === "object")
+    ? sentiment.gap_analysis : null;
+  const gap_analysis = ga && (text(ga.b2b_b2c) || text(ga.internal_external))
+    ? { b2b_b2c: text(ga.b2b_b2c), internal_external: text(ga.internal_external),
+        e_ids: (Array.isArray(ga.e_ids) ? ga.e_ids : []).filter((x) => typeof x === "string") }
+    : null;
+  const narrative_thread = text(sentiment.narrative_thread);
+  if (!bars.length && !themes.length && !gap_analysis && !narrative_thread) return null;
+  const KNOWN = ["employee", "customer", "industry"];
   return {
-    employee, customer, ungrouped,
-    industry_avg: num(sentiment.industry_avg),
-    b2b_b2c_gap: !!sentiment.b2b_b2c_gap,
+    employee: group("employee"),
+    customer: group("customer"),
+    industry: group("industry"),
+    ungrouped: bars.filter((b) => b && !KNOWN.includes(audOf(b))).map(barOf),
+    themes,
+    gap_analysis,
+    // Computed at render from the declared key, never read from a stored flag.
+    b2b_b2c_gap: !!(gap_analysis && gap_analysis.b2b_b2c),
+    narrative_thread,
   };
 }
 
@@ -372,15 +438,32 @@ function tileScaleMaxOf(scale) {
 
    Tiles come in two kinds and both are content. A tile with rows becomes
    stat cards — one per measured row, on its own stated scale. A tile with
-   state=WORKED_ABSENT is a finding, not a blank: it carries the ladder of
-   sources that refused, and the card states that rather than showing a
-   number nobody measured. */
+   NO rows is a finding, not a blank, when it carries anything to say: its
+   note, its citations or the ladder of sources it searched. The card states
+   that rather than showing a number nobody measured.
+
+   RC-03 / D-02 (gold audit 2026-10-04): the no-rows branch used to require
+   `state === "WORKED_ABSENT"`, a key the C4 contract does not declare
+   ({audience, rows, e_ids} per tile). A promoted employee tile with
+   `rows: []`, a note naming a 7-rating employer score and three citations
+   simply vanished. A renderer may not depend on an undeclared key; the tile
+   is worked-absent by what it CARRIES. `state` is still honoured when sent.
+
+   The tile-level `note` and `e_ids` travel for EVERY tile (`notes[group]`),
+   because a tile with rows has a note too — on that run it carried the
+   whole complaint-record analysis, and it rendered nowhere. */
 function adaptContextSentiment(section) {
   const tiles = (section && section.context_tiles) || [];
   if (!tiles.length) return null;
   const groups = {};
   const absent = [];
+  const notes = {};
+  const strs = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.trim()) : []);
   for (const t of tiles) {
+    if (!t || typeof t !== "object") continue;
+    const tileNote = (typeof t.note === "string" && t.note.trim()) ? t.note.trim() : null;
+    const tileIds = strs(t.e_ids);
+    const searched = strs(t.sources_searched);
     const g = String(t.audience || "unstated");
     const rows = (t.rows || []).map((r) => ({
       label: r.source || null,
@@ -395,16 +478,18 @@ function adaptContextSentiment(section) {
     })).filter((r) => r.value !== null);
     if (rows.length) {
       groups[g] = (groups[g] || []).concat(rows);
-    } else if (t.state === "WORKED_ABSENT") {
+      if (tileNote || tileIds.length) notes[g] = { note: tileNote, e_ids: tileIds };
+    } else if (t.state === "WORKED_ABSENT" || tileNote || tileIds.length || searched.length) {
       absent.push({
         group: g,
-        note: t.note || null,
-        sources_searched: t.sources_searched || [],
+        note: tileNote,
+        e_ids: tileIds,
+        sources_searched: searched,
       });
     }
   }
   if (!Object.keys(groups).length && !absent.length) return null;
-  return { groups, absent };
+  return { groups, absent, notes };
 }
 
 /* ── coverageFor ─────────────────────────────────────────────────────
@@ -789,10 +874,15 @@ function techLayersOf(techstack) {
       // defect CG-24 exists for, arriving between the payload and the
       // renderer rather than inside either.
       //
-      // The row count remains the fallback, because a run that promoted no
-      // rollup still owes the reader a real ratio rather than a constant.
-      expected: (roll.expected != null && isFinite(Number(roll.expected)))
-        ? Number(roll.expected) : at.length,
+      // NO FALLBACK (RC-11 / D-16, gold audit 2026-10-04). This used to
+      // fall back to the row count, "so the card still states a real ratio"
+      // — and a ratio whose denominator is the numerator's own register is
+      // not one: every layer of the audited run sent `expected: null`, and
+      // the cards read "5 of 5" and "10 of 11". Null stays null and the card
+      // says "expected not stated". Which denominator SHOULD be stated —
+      // product slots or cells — is open adjudication T-03 / DNR-6.
+      expected: (roll.expected != null && roll.expected !== "" && isFinite(Number(roll.expected)))
+        ? Number(roll.expected) : null,
       expected_basis: roll.expected_basis || null,
       confirmed,
       is_primary_gap: false,
@@ -814,14 +904,19 @@ function techLayersOf(techstack) {
   const fewest = Math.min(...rows.map(r => r.confirmed));
   let cands = rows.filter(r => r.confirmed === fewest);
   if (cands.length > 1) {
-    const ratio = r => (r.expected ? r.detected / r.expected : 1);
-    const lowest = Math.min(...cands.map(ratio));
-    cands = cands.filter(r => ratio(r) === lowest);
+    // The ratio tie-break needs a stated denominator on every candidate;
+    // without one there is no ratio, and the tie stands unflagged.
+    if (cands.every(r => r.expected)) {
+      const ratio = r => r.detected / r.expected;
+      const lowest = Math.min(...cands.map(ratio));
+      cands = cands.filter(r => ratio(r) === lowest);
+    }
   }
   if (cands.length === 1) {
     cands[0].is_primary_gap = true;
-    cands[0].basis = `${cands[0].confirmed} confirmed of ${cands[0].expected} `
-      + `— fewer than any other layer`;
+    cands[0].basis = cands[0].expected != null
+      ? `${cands[0].confirmed} confirmed of ${cands[0].expected} — fewer than any other layer`
+      : `${cands[0].confirmed} confirmed — fewer than any other layer`;
   }
   return rows;
 }
@@ -1634,6 +1729,7 @@ function sectionStates(pages) {
 
 Object.assign(window, {
   buildLiveEntity, adaptSubcaps, adaptOss, adaptFinancials, adaptSentiment,
+  adaptContextSentiment,
   adaptCoverage, adaptUncertainty, adaptEvidenceSummary, adaptWhyNow,
   adaptInsights, adaptRecommendations, adaptTechStack, adaptLeadership,
   adaptThoughtLeadership, adaptFocusAreas, adaptTimeline, adaptIssues,
