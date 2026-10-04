@@ -252,6 +252,53 @@ def test_cell_items_resolve_from_the_evidence_store_and_are_entity_scoped(seeded
     conn.commit()
 
 
+def test_split_spans_resolve_through_the_api_role_and_serve_as_decided(seeded):
+    """RC-08 / D-10 against the real schema (0063), read as `svc_api` reads
+    it: the page's evidence scope names the internal span withheld and the
+    shareable span under its customer attribution, and the customer drawer
+    serves exactly the shareable one."""
+    from dma_api import pages
+    from dma_api.redaction import redact_section
+
+    conn, cur, rid, eid = seeded
+    span = "z" * 60
+    cur.execute("""INSERT INTO evidence_index
+                     (e_id, entity_id, origin, source_name, excerpt,
+                      claim_type, tier, customer_attribution)
+                   VALUES ('E-SCU-101', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2', NULL),
+                          ('E-SCU-102', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2',
+                           'Client statement, discovery conversations')""",
+                (eid, span + "a", eid, span + "b"))
+    cur.execute("""UPDATE evidence_index SET split_of = 'E-SCU-101'
+                    WHERE e_id = 'E-SCU-102'""")
+    conn.commit()
+
+    api = _connect("dmai-api@digital-maturity-assessor.iam")
+    try:
+        acur = api.cursor()
+        scope = pages.evidence_scope(
+            acur, eid, {"E-SCU-101", "E-SCU-102", "E-SCU-001"})
+        assert scope == {"withheld": {"E-SCU-101"},
+                         "attribution": {"E-SCU-102": "Client statement, "
+                                                      "discovery conversations"}}
+        data = {"cells": [{"subcap_id": "P1C1.1.1", "synthesis": "s",
+                           "e_ids": ["E-SCU-101", "E-SCU-102"],
+                           "grounded_on": 2}]}
+        computed.apply(acur, "heatmap", "cell_evidence", data,
+                       {"run_id": rid}, eid)
+        assert data.get("computed_error") is None, data.get("computed_error")
+        out, _ = redact_section("heatmap", "cell_evidence", data, [],
+                                "customer", evidence_scope=scope)
+        cell = out["cells"][0]
+        assert [i["e_id"] for i in cell["items"]] == ["E-SCU-102"]
+        assert cell["items"][0]["source_title"].startswith("Client statement")
+        assert cell["e_ids"] == ["E-SCU-102"] and cell["grounded_on"] == 1
+    finally:
+        api.close()
+
+
 def test_a_failed_computation_does_not_poison_the_rest_of_the_request(seeded):
     """PostgreSQL aborts the whole transaction on a failed statement, so
     without a savepoint the first bad query 25P02s every later one — and the

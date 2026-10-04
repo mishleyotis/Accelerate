@@ -489,7 +489,8 @@ def cell_items(cur, data: dict, entity_id) -> None:
     cur.execute(
         """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
                   ei.recency_band::text, ei.source_name, ei.source_domain,
-                  ei.excerpt, ei.source_url, ei.origin::text
+                  ei.excerpt, ei.source_url, ei.origin::text,
+                  ei.customer_attribution
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
@@ -512,6 +513,10 @@ def cell_items(cur, data: dict, entity_id) -> None:
                     # row whole (redaction.customer_evidence_items); the
                     # customer body never carries the key itself.
                     "origin": r[9] if len(r) > 9 else None,
+                    # 0063: a shareable SPLIT span's customer label — with
+                    # it, an internal-origin item serves to the customer
+                    # under that label (RC-08 / D-10); without it, never.
+                    "customer_attribution": r[10] if len(r) > 10 else None,
                     **({"cited_as": r[0]} if r[0] != r[1] else {})}
              for r in cur.fetchall()}
 

@@ -114,7 +114,7 @@ def test_the_serve_rules_tag_moved():
     """The ETag carries the rules version. Changing what is served without
     changing the tag serves the old body from every cache that has one."""
     from dma_api import pages
-    assert pages.SERVE_RULES == "serve-rules@11", (
+    assert pages.SERVE_RULES == "serve-rules@12", (
         "the allowlist changed what is served; bump SERVE_RULES or caches "
         "keep answering with the body that carried the ceilings table")
 

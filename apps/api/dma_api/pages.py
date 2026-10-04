@@ -232,7 +232,77 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       took two walker fixes from the re-check: element paths are deleted
 #       highest index first, and an id-keyed map or wrapper dict is filtered
 #       by its values' keys, never its ids — @11 never served without them.
-SERVE_RULES = "serve-rules@11"
+#   @12 2026-10-04 — the SWBC gold audit (RC-08) and the owner's decisions
+#       of that day. Customer bodies change under an unmoved promoted_at:
+#       `overview.sentiment` serves a REDUCED card instead of nothing
+#       (decision 1); the tech register serves CONFIRMED and ABSENT rows only
+#       and its layer rollup and the insights landscape tiles follow the
+#       filtered register (DECISIONS D4); platform estate_reach and
+#       integration_pathway stop being hidden by an undocumented marking
+#       (over-redaction, D-11); an H5 gate row about a withheld section is
+#       dropped (D-34); and every citation and evidence row on a page is
+#       scoped: internal spans never serve, shareable split spans serve under
+#       their customer attribution (D-10, 0063).
+SERVE_RULES = "serve-rules@12"
+
+
+#: Keys whose value is a list of cited evidence ids (chips), and the one
+#: whose value is a single cited id (a row).
+_CITATION_LISTS = ("e_ids", "supporting_e_ids", "evidence_ids")
+
+
+def cited_ids(data) -> set:
+    """Every evidence id a section body cites, at any depth."""
+    out: set = set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in _CITATION_LISTS and isinstance(v, list):
+                    out.update(e for e in v if isinstance(e, str) and e)
+                elif k == "e_id" and isinstance(v, str) and v:
+                    out.add(v)
+                else:
+                    walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(data)
+    return out
+
+
+def evidence_scope(cur, entity_id, ids) -> dict:
+    """Which of `ids` are INTERNAL SPANS (never served to a customer) and
+    which are shareable SPLIT SPANS (served under their customer
+    attribution). One entity-scoped query; ids are resolved through
+    `resolve_evidence_id` exactly as the drawer resolves them (0046), so a
+    superseded citation is judged by the row a reader would open.
+
+    RC-08 / D-10: the producer's `internal_only` marking was the only thing
+    between an internal-origin row and a customer chip, and on SWBC the
+    whole-row marking of 20 shareable discovery rows emptied 24 drawers. The
+    serve layer now decides from the stored origin and the 0063 split, and
+    the marking is no longer load-bearing for either direction.
+    """
+    scope = {"withheld": set(), "attribution": {}}
+    wanted = sorted(i for i in (ids or ()) if isinstance(i, str) and i)
+    if not wanted:
+        return scope
+    cur.execute(
+        """SELECT w.cited, ei.origin::text, ei.customer_attribution
+             FROM unnest(%s::text[]) AS w(cited)
+             JOIN evidence_index ei
+               ON ei.e_id = resolve_evidence_id(w.cited)
+            WHERE ei.entity_id = %s""", (wanted, entity_id))
+    for cited, origin, attribution in cur.fetchall():
+        if (origin or "").lower() != "internal":
+            continue
+        if isinstance(attribution, str) and attribution.strip():
+            scope["attribution"][cited] = attribution.strip()
+        else:
+            scope["withheld"].add(cited)
+    return scope
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -367,8 +437,13 @@ def build_page(cur, page: str, display_id: str, audience: str,
         # product variants, and an unresolved entity all keep everything.
         scope_sections(entity.get("sub_vertical"), built["data"],
                        entity.get("supplementary_sub_verticals"))
+        scope = None
+        if audience == "customer":
+            ids = cited_ids(built["data"])
+            scope = evidence_scope(cur, entity_id, ids) if ids else None
         data, report = redact_section(page, section, built["data"],
-                                      env.get("internal_only"), audience)
+                                      env.get("internal_only"), audience,
+                                      evidence_scope=scope)
         if data is None:
             entry = withheld_entry(report)
             if entry is None:
@@ -409,7 +484,12 @@ def build_page(cur, page: str, display_id: str, audience: str,
             "empty_state": empty,
         }
         removed = (len(report["paths_stripped"]) + len(report["keys_stripped"])
-                   + len(report["vendor_named"]) + len(empty_dropped))
+                   + len(report["vendor_named"]) + len(empty_dropped)
+                   # Rows a customer rule held back (D4, internal spans,
+                   # gate rows about withheld sections) are removals too.
+                   + report.get("d4_rows_withheld", 0)
+                   + report.get("evidence_scope_withheld", 0)
+                   + len(report.get("gates_withheld_target") or ()))
         if audience == "customer" and removed:
             # A COUNT, not the paths. The receipt exists so a reader can tell
             # blank-because-withheld from blank-because-empty, and for that

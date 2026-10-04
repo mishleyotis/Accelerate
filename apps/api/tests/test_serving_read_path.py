@@ -364,9 +364,14 @@ def test_unmarked_vendor_copy_does_not_reach_the_client():
     ALWAYS_STRIP, and techstack is not a withheld section — so no marking
     rule could have caught it. The safety net is a net, not a substitute for
     the gate that should refuse it at submit."""
+    # `status` CONFIRMED on both: since serve-rules@12 the customer register
+    # carries CONFIRMED and ABSENT rows only (DECISIONS D4), and a row with
+    # no status is withheld rather than guessed at.
     data = {"items": [{"vendor": "Salesforce", "product": "Service Cloud",
+                       "status": "CONFIRMED",
                        "dma_impact": "Zennify's pathway is to consolidate…"},
                       {"vendor": "MuleSoft", "product": "Anypoint",
+                       "status": "CONFIRMED",
                        "dma_impact": "Bears on P4C3.1.2 at 1.95."}]}
     # The SECTION is `techstack`; `items` is the field inside it. This test
     # called it "items" — the same wrong key CUSTOMER_ALWAYS was written
@@ -476,12 +481,15 @@ def test_withheld_sections_and_pages():
     # Withheld from the customer, served to the analyst. Two of the three
     # sections this loop used to cover moved to the allowlist below, where
     # the rule is stronger: nobody gets them.
-    for section in ("sentiment", "thought_leadership"):
+    # `sentiment` left this loop on 2026-10-04: OWNER DECISION 1 serves the
+    # customer a REDUCED card (test_customer_sentiment_projection.py).
+    for section in ("thought_leadership",):
         assert ("overview", section) in CUSTOMER_WITHHELD
         out, rep = redact_section("overview", section, {"rows": [1]}, [], "customer")
         assert out is None and rep["withheld"] is True
         keep, _ = redact_section("overview", section, {"rows": [1]}, [], "internal")
         assert keep == {"rows": [1]}
+    assert ("overview", "sentiment") not in CUSTOMER_WITHHELD
     # The allowlist: no audience, not "not the default audience".
     for section in ("ceilings", "evidence_coverage"):
         for audience in ("customer", "internal"):

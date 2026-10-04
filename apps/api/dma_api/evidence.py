@@ -94,7 +94,14 @@ INTERNAL_FIELDS = ("ers", "specificity", "corroboration", "identity_note")
 _COLUMNS = ("e_id", "origin", "source_name", "source_url", "source_domain",
             "excerpt", "claim_type", "tier", "published_date", "reference_date",
             "age_months", "recency_band", "ers", "specificity", "corroboration",
-            "identity_ok", "identity_note")
+            "identity_ok", "identity_note",
+            # 0063 (RC-08 / D-10, decision 3). `customer_attribution` is what
+            # lets a shareable SPLIT span of internal material reach a
+            # customer (redaction.customer_evidence_items); the connector
+            # trio is the provenance of a connector-origin reading. All five
+            # are stripped from every customer item.
+            "customer_attribution", "split_of", "connector_tool",
+            "connector_query", "connector_retrieved_at")
 
 
 def _row_to_item(row: tuple, columns=_COLUMNS) -> dict:
@@ -110,7 +117,7 @@ def _row_to_item(row: tuple, columns=_COLUMNS) -> dict:
     # the artefact and the verifier compares it against those bytes.
     if item.get("source_name"):
         item["source_name"] = _expand_abbrev(item["source_name"], "label")
-    for k in ("published_date", "reference_date"):
+    for k in ("published_date", "reference_date", "connector_retrieved_at"):
         v = item.get(k)
         item[k] = v.isoformat() if hasattr(v, "isoformat") else v
     for k in ("ers",):
