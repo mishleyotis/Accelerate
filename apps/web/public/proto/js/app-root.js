@@ -373,6 +373,12 @@ const FIRMO_ROWS = [
 const FIRMO_PINNED = new Set(FIRMO_ROWS.flatMap(r => r.keys));
 const FIRMO_SLOT = new Map(FIRMO_ROWS.flatMap(r => r.keys.map(k => [k, r.slot])));
 
+/* A producer's sentence, trimmed, or null — never a non-string coerced. */
+function trimmedOrNull(v) {
+  const t = typeof v === "string" ? v.trim() : "";
+  return t || null;
+}
+
 /* `AUM` and `total_assets` are the same row on this panel: the contract's
    must-present set names them as a disjunction ("AUM or assets"), so a
    sub-vertical states one or the other and the panel has one Assets row. */
@@ -417,7 +423,7 @@ function firmoFields(firmo) {
           // adds the reason only when there is one.
           out.held = out.held || {};
           if (!(slot in out.held) || !out.held[slot]) {
-            out.held[slot] = typeof f.quarantine_reason === "string" && f.quarantine_reason.trim() ? f.quarantine_reason.trim() : null;
+            out.held[slot] = trimmedOrNull(f.quarantine_reason);
           }
         } else {
           out.extra_fields.push({
