@@ -259,6 +259,7 @@
   "content_hash": "TEXT",
   "corroboration": "SMALLINT",
   "customer_attribution": "TEXT",
+  "customer_attribution_at": "TIMESTAMPTZ",
   "e_id": "TEXT",
   "entity_id": "UUID",
   "ers": "NUMERIC(3,2)",

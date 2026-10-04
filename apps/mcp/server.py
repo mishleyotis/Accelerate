@@ -475,7 +475,10 @@ def register_evidence(run_id: str, item: dict) -> dict:
     split_of=<parent e_id>, an excerpt that is a verbatim piece of the
     parent's, and — for the span the client may read —
     customer_attribution ("Client statement, discovery conversations,
-    <month year>"). A span without one never reaches a customer."""
+    <month year>"). A span without one never reaches a customer. A span is
+    strictly shorter than its parent (the whole row is refused), and the
+    attribution is set only on the span this call mints — re-registering
+    existing words under a different label is refused, never written."""
     with _conn() as c:
         return register_mod.register_evidence(c, run_id, item, fetch=_fetch)
 

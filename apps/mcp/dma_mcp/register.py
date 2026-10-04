@@ -19,8 +19,10 @@ Fail-closed rules enforced here:
   retrieval time, computes the tier from the tool (Indeed T3, CFPB T1) and
   verifies the excerpt against the STORED connector response, not a URL;
 - a span SPLIT from an internal row (`split_of`, RC-08 / D-10) is a verbatim
-  piece of the parent's excerpt, and only a span carrying
-  `customer_attribution` may ever reach a customer.
+  piece of the parent's excerpt, STRICTLY SHORTER than it, and only a span
+  carrying `customer_attribution` may ever reach a customer. The attribution
+  is written only by the INSERT that mints the span — never onto an existing
+  row, by any path (0063's trigger refuses it in the database too).
 """
 from __future__ import annotations
 
@@ -200,6 +202,20 @@ def connector_provenance(item: dict, now: datetime | None = None) -> dict:
 # carries `customer_attribution`, the label a client reads it under ("Client
 # statement, discovery conversations, September 2026"). The serve layer
 # withholds every internal-origin row without an attribution.
+#
+# AN ATTRIBUTION IS MINTED, NEVER ADDED (adversarial review, 2026-10-04).
+# The first cut accepted a "span" equal to the whole parent and UPDATEd the
+# attribution onto the PARENT, and filled one in on whatever row a
+# re-registration deduplicated to. `evidence_index` is shared by every run of
+# the entity and read live by the api, so either write changed what customers
+# saw on runs ALREADY PROMOTED — outside promotion (invariant 3), under an
+# unchanged ETag, and irreversibly. So: a split is strictly shorter than its
+# parent; the attribution goes on the row this call mints and nowhere else;
+# a dedup onto a row whose lineage or attribution differs is REFUSED rather
+# than reconciled. The api, for its part, serves the span under its label
+# only on a run promoted at or after the span was minted
+# (apps/api evidence.attribution_bound), so even a new span changes nothing
+# a customer reads until a payload citing it is promoted.
 _ATTRIBUTION_MIN, _ATTRIBUTION_MAX = 12, 200
 #: An attribution is the CLIENT's voice re-attributed to the client; one that
 #: names the assessing firm or our own document is the internal label again.
@@ -240,10 +256,17 @@ def split_problem(parent, entity_id, excerpt: str) -> str | None:
     if str(p_origin or "").lower() != "internal":
         return ("split_of: only an internal-origin row is split; a public row "
                 "is already shareable")
-    if _normalise(excerpt) not in _normalise(p_excerpt or ""):
+    span, whole = _normalise(excerpt), _normalise(p_excerpt or "")
+    if span not in whole:
         return ("split_span_not_verbatim: a span is a verbatim piece of its "
                 "parent's excerpt — re-attribution changes the LABEL, never "
                 "the words")
+    if len(span) >= len(whole):
+        return ("split_span_whole_row: a split span is STRICTLY SHORTER than "
+                "its parent. The whole row is not a span — re-labelling it "
+                "would publish every word of it, the remarks the split exists "
+                "to keep internal included. Register the client's own "
+                "statement as its own, shorter span.")
     return None
 
 
@@ -460,31 +483,6 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
             out["adjustments"] = adjustments
         return out
 
-    # THE WHOLE ROW IS THE SHAREABLE SPAN. Its content hash is the parent's
-    # (same URL, claim and words), so it cannot be a second row: the parent
-    # itself gains the attribution — additive, unknown becoming known — and
-    # an attribution it already carries is never overwritten.
-    if (parent is not None and attribution
-            and _normalise(excerpt) == _normalise(parent[3] or "")):
-        cur.execute("""UPDATE evidence_index SET customer_attribution = %s
-                        WHERE e_id = %s AND customer_attribution IS NULL
-                    RETURNING e_id""", (attribution, parent[0]))
-        filled = cur.fetchone() is not None
-        subcaps = [s for s in (item.get("linked_subcap_ids") or []) if s]
-        for sid in subcaps:
-            cur.execute(
-                """INSERT INTO evidence_subcap_links
-                     (e_id, subcap_id, run_id, link_basis)
-                   VALUES (%s,%s,%s,'registered') ON CONFLICT DO NOTHING""",
-                (parent[0], sid, run_id))
-        conn.commit()
-        adjustments.append(
-            f"the span is the whole of {parent[0]}: no second row; "
-            + ("its customer attribution is now recorded" if filled else
-               "it already carries a customer attribution, which stands"))
-        return {"e_id": parent[0], "deduped": True, "ers": None,
-                "errors": [], "adjustments": adjustments}
-
     # AUD-0029: a URL-less FACT used to be SILENTLY DEMOTED to INFERENCE,
     # whatever it was. That is right for an unsourced public claim and wrong
     # for an internal one: a client's own board pack is not weaker evidence
@@ -653,18 +651,36 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
             (entity_id, source_url, claim, excerpt))
         kept_id = cur.fetchone()[0]
         deduped, ers_out = True, None
+        # NEVER RECONCILED BY A WRITE. The same words are already a row; if
+        # that row's customer label or lineage is not the one asked for, the
+        # call is refused — an attribution is never added to, changed on or
+        # taken from a row that exists, because every run citing the row
+        # would change with it (RC-08 review, 2026-10-04). Identical is the
+        # idempotent retry and returns the row.
+        cur.execute("""SELECT customer_attribution, split_of
+                         FROM evidence_index WHERE e_id = %s""", (kept_id,))
+        have_attr, have_split = cur.fetchone()
+        have_attr = have_attr or None
+        if have_attr != attribution or (
+                split_of is not None and have_split != split_of):
+            conn.rollback()
+            have = (f"under the customer attribution {have_attr!r}"
+                    if have_attr else "with no customer attribution "
+                    "(never served to a customer)")
+            return {"e_id": None, "deduped": False, "ers": None,
+                    "errors": [
+                        f"split_span_exists: these words are already "
+                        f"registered as {kept_id}, {have}"
+                        + (f", split from {have_split}" if have_split else "")
+                        + ". An attribution is set only when a span is "
+                        "minted, and is never added to, changed on or taken "
+                        f"from an existing row. Cite {kept_id} as it stands, "
+                        "or split a different span."]}
         cur.execute(
             f"""INSERT INTO evidence_dedup_audit
                   (e_id, content_hash, branch, matched_e_id, occurred_at)
                 VALUES (NULL, {_HASH_SQL}, 'dedup_same_entity', %s, now())""",
             (source_url, claim, excerpt, kept_id))
-        if attribution:
-            # Additive, like the date fill below: an attribution the row
-            # lacks may arrive later; one it carries is never overwritten.
-            cur.execute("""UPDATE evidence_index SET customer_attribution = %s
-                            WHERE e_id = %s AND customer_attribution IS NULL
-                              AND origin = 'internal'""",
-                        (attribution, kept_id))
 
         # A DATE THE FIRST REGISTRATION LACKED, arriving on a later one.
         #

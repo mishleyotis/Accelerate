@@ -74,9 +74,10 @@ def test_the_contradiction_branch_keeps_the_stored_date():
     src = (ROOT / "apps" / "mcp" / "dma_mcp" / "register.py").read_text()
     fill = src.index('verdict == "fill"')
     contra = src.index('verdict == "contradiction"')
-    # Counted over the UPDATEs that WRITE A DATE. Since 0063 register.py also
-    # fills `customer_attribution` (a split span's customer label, additive
-    # and NULL-guarded, RC-08 / D-10); those updates never touch the date.
+    # Counted over the UPDATEs that WRITE A DATE, so that another UPDATE of
+    # evidence_index elsewhere in the module would not hide a second date
+    # write. (A split span's `customer_attribution` is never UPDATEd — it is
+    # set only by the minting INSERT: test_split_span_attribution.)
     import re
     updates = [(m.start(), m.group(1)) for m in re.finditer(
         r"UPDATE evidence_index(.*?)WHERE", src, re.S)]

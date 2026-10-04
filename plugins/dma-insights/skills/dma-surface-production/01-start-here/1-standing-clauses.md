@@ -140,7 +140,10 @@ O9.)
   write-up) is **split** at `register_evidence`, not withheld whole (D-10): register the
   client's own statement as a verbatim span with `split_of=<parent>` and
   `customer_attribution` ("Client statement, discovery conversations, <month year>"),
-  and the seller or personal remark as a span with `split_of` and no attribution. Cite
+  and the seller or personal remark as a span with `split_of` and no attribution. A span
+  is strictly shorter than its parent (the whole row is refused), and an attribution is
+  set only when the span is minted — never added to an existing row; the client sees
+  the span only once a payload citing it is promoted. Cite
   the shareable span on the client-facing card; a drawer whose only items are internal
   argues over nothing for the customer, and the projection check
   (`packages/shared/customer_projection.py`) names it.

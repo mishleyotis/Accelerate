@@ -215,8 +215,9 @@ def seeded():
                 """DELETE FROM evidence_subcap_links WHERE e_id IN
                      (SELECT e_id FROM evidence_index WHERE entity_id = %s)""",
                 "DELETE FROM runs WHERE entity_id = %s",
-                """UPDATE evidence_index SET split_of = NULL
-                    WHERE entity_id = %s""",
+                # Parent and spans in ONE statement: the self-reference is NO
+                # ACTION (checked at the statement's end), and `split_of` is
+                # fixed at mint, so it cannot be nulled first (0063 trigger).
                 "DELETE FROM evidence_index WHERE entity_id = %s",
                 "DELETE FROM connector_responses WHERE entity_id = %s",
                 "DELETE FROM entities WHERE id = %s",
@@ -334,11 +335,16 @@ def test_a_discovery_row_splits_into_a_shareable_and_an_internal_span(seeded):
     assert got[internal["e_id"]]["customer_attribution"] is None
     assert got[internal["e_id"]]["split_of"] == parent["e_id"]
 
-    # The whole parent as the shareable span: no second row, the parent
-    # gains the attribution.
+    # The whole parent as the "shareable span" is REFUSED, and the parent
+    # never gains an attribution (RC-08 review 2026-10-04: it carries the
+    # seller remark registered above as the internal span).
     whole = register_evidence(mcp, rid, {
         "origin": "internal", "excerpt": PARENT_EXCERPT,
         "split_of": parent["e_id"],
         "customer_attribution": "Client statement, discovery conversations, "
                                 "September 2026"}, fetch=None)
-    assert whole["errors"] == [] and whole["e_id"] == parent["e_id"], whole
+    assert whole["e_id"] is None and any(
+        "whole_row" in e for e in whole["errors"]), whole
+    cur.execute("SELECT customer_attribution FROM evidence_index "
+                "WHERE e_id = %s", (parent["e_id"],))
+    assert cur.fetchone()[0] is None
