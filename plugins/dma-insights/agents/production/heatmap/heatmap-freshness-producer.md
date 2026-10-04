@@ -475,7 +475,7 @@ describes the profile the run wishes it had.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD-APP-PAGES.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD-APP-PAGES.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **Dates that exist are applied** (RC-07(e), D-23). A dating pass that harvests candidate dates (SWBC: 41 in `dating_candidates_undated_rows.json`, never consumed) is applied through `register_evidence` updates once each date is verified against its excerpt; an `undated_pct` above 20% with no dating rung recorded is a defect, not a measurement (SWBC 41.8% against Baxter's 0%).
 

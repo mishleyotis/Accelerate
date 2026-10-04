@@ -102,14 +102,16 @@ def test_the_gold_carries_shape_and_no_values():
 
 
 def test_the_summary_quotes_what_the_doc_quotes():
-    """GOLD-STANDARD.md's App pages section reads its floors from here."""
+    """GOLD-STANDARD-APP-PAGES.md reads its floors from here."""
     s = _gold()["summary"]
     firmo = s["overview.firmographics"]["lists"]["fields"]
     assert firmo["min_n"] >= 15 and firmo["min_stated_share"] >= 0.9
-    doc = (ROOT / "plugins" / "dma-insights" / "docs" /
-           "GOLD-STANDARD.md").read_text()
+    docs = ROOT / "plugins" / "dma-insights" / "docs"
+    doc = (docs / "GOLD-STANDARD-APP-PAGES.md").read_text()
     assert "fixtures/surface_gold.json" in doc
     assert "## App pages" in doc
+    # The workbook/report gold doc still points readers at the split file.
+    assert "GOLD-STANDARD-APP-PAGES.md" in (docs / "GOLD-STANDARD.md").read_text()
 
 
 def test_every_gold_run_records_its_sub_vertical_and_run_prefix():

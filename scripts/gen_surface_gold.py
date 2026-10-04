@@ -21,7 +21,7 @@ be committed). Beside them:
                 the API actually does (a test re-derives and compares);
   summary       per page.section — which gold runs fill it, and per list the
                 min/max row count and min stated-value share across them: the
-                numbers GOLD-STANDARD.md's "App pages" section quotes.
+                numbers GOLD-STANDARD-APP-PAGES.md quotes.
 
 It writes the same bytes to apps/mcp/dma_mcp/surface_gold.json, the copy the
 connector's promote path reads (CG-PAR) — `scripts/` and `fixtures/` are not

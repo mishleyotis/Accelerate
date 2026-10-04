@@ -513,7 +513,7 @@ where one has no dependency argument, every time.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD-APP-PAGES.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD-APP-PAGES.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **Stair-step order is checked against the roadmap and the platform order of work** (RC-12(b), D-20). The earliest phase among the platform recommendations lifting a step's cells is non-decreasing across steps, and no step may deliver a platform that `depends_on` a platform a later step delivers — SWBC put the customer record (Data Cloud, which depends on MuleSoft) before the integration route. `to_level` names a target band, not a condition.
 

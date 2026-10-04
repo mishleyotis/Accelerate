@@ -603,7 +603,7 @@ than what was actually queried and what came back.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD-APP-PAGES.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD-APP-PAGES.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **Counts are audience-neutral; tenure comes from a date** (D-24). A number in the narrative ("thirteen executives") holds for the internal AND the customer roster — SWBC said thirteen over 14 internal rows. `tenure_months` is derived from `appointed_on`; fill the date from the evidence or null the tenure. An assertion that no digital or data owner exists carries its proxy ladder (SWBC ignored E-CC-922, a 2019 CDO posting).
 

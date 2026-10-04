@@ -489,7 +489,7 @@ or an `r_layer` whose probes could not have failed.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD-APP-PAGES.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD-APP-PAGES.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **The ranking basis agrees with the scores** (RC-12(h), D-29). `impact_fallback` means no alignment score drove the order; if any finding carries a non-null `strategic_alignment.score`, rank by the scores and say so, or drop them (SWBC ranked F-5 at 0.8 below findings with no score). A count the narrative states equals the array; every finding names its platform chips or states none; statements keep to their word bands; a recency shown is the store's, copied.
 
