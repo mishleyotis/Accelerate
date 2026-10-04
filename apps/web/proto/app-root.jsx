@@ -299,8 +299,15 @@ function firmoFields(firmo) {
       if (f.quarantined) {
         const slot = FIRMO_SLOT.get(key);
         if (slot) {
+          // The producer's reason, or null — never a stand-in sentence of
+          // ours. "held by the producer" was workflow vocabulary on a
+          // client's strip; the panel states the absence in plain words and
+          // adds the reason only when there is one.
           out.held = out.held || {};
-          out.held[slot] = f.quarantine_reason || "held by the producer";
+          if (!(slot in out.held) || !out.held[slot]) {
+            out.held[slot] = (typeof f.quarantine_reason === "string" && f.quarantine_reason.trim())
+              ? f.quarantine_reason.trim() : null;
+          }
         } else {
           out.extra_fields.push({ field: f.field, value: null, unit: null,
                                   as_of: f.as_of || null, held: true,
@@ -316,6 +323,18 @@ function firmoFields(firmo) {
        from the panel entirely. A figure written in words is a stated figure. */
     const coerced = numOrText(f.value);
     const num = typeof coerced === "number" ? coerced : null;
+    /* SCOPE (owner decision 2, 2026-10-04). A subsidiary's or a segment's
+       figure may stand on the strip when its unit names the unit it is
+       about — "USD billions, Example Mortgage Corporation, HMDA 2024". The
+       money formatter keeps the magnitude and drops the words after it, so
+       "$2.3B" rendered as though it were the group's. Everything after the
+       unit's first comma is the producer's own scope label, and it travels
+       with the figure. */
+    const scopeOf = (u) => {
+      const parts = String(u || "").split(",");
+      const tail = parts.slice(1).join(",").trim();
+      return tail || null;
+    };
     if (!FIRMO_PINNED.has(key)) {
       /* The passthrough rendered `${value} ${unit}`, which printed
          `8051646636 USD` two rows under an Assets row rendering the same
@@ -335,10 +354,16 @@ function firmoFields(firmo) {
                               display: shown,
                               raw_value: f.value, raw_unit: f.unit || null,
                               as_of: f.as_of || null,
+                              scope: shown != null ? scopeOf(f.unit) : null,
                               held: false, reason: null });
       continue;
     }
-    switch (FIRMO_SLOT.get(key)) {
+    const slotKey = FIRMO_SLOT.get(key);
+    if (slotKey && scopeOf(f.unit)) {
+      out.scope = out.scope || {};
+      out.scope[slotKey] = scopeOf(f.unit);
+    }
+    switch (slotKey) {
       // One Assets row, whichever of the disjunction the sub-vertical states.
       case "assets":       out.assets = num; out.assets_unit = f.unit;
                            out.assets_label = key === "aum" ? "AUM" : "Assets";

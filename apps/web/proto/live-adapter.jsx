@@ -178,8 +178,22 @@ function peerSetsOf(techstack, subVertical) {
    Uses the FIRST and LAST points that carry both a period year and a positive
    value, and the real number of years between them — not the count of rows,
    which would be wrong for any series with a gap. Returns {} when it cannot be
-   computed, so the caller spreads nothing and the field stays absent. */
+   computed, so the caller spreads nothing and the field stays absent.
+
+   NOR WHEN IT MUST NOT BE (RC-11 / D-05, gold audit 2026-10-04). A series
+   whose points state a SCOPE — a subsidiary, a segment, a division — is not
+   the institution's series, and a compound rate over it is not the
+   institution's growth. The audited run promoted one subsidiary's loan
+   originations, every basis saying "a subsidiary of the group, not the
+   group", and this computed -6.8% that the firmographics strip printed as
+   the firm's CAGR. The basis is read per point: one scoped point makes the
+   series scoped. */
+const SCOPED_BASIS = /\b(subsidiar(?:y|ies)|segment|division|affiliate|business line|line of business|not the (?:group|parent|enterprise|holding company))\b/i;
+function seriesIsScoped(series) {
+  return (series || []).some((s) => s && typeof s.basis === "string" && SCOPED_BASIS.test(s.basis));
+}
 function cagrOf(series) {
+  if (seriesIsScoped(series)) return {};
   const yearOf = (s) => {
     const m = /(\d{4})/.exec(String(s.period || ""));
     return m ? Number(m[1]) : null;
@@ -235,14 +249,22 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
     // than as a dash the reader cannot act on.
     fy: series.map((s) => s.period || "Not stated"),
     // Expressed in `unit` above, which is what every bar label already
-    // assumes when it writes `$${total_assets[i]}${unit}`.
-    total_assets: scaled.values,
+    // assumes when it writes `$${series_values[i]}${unit}`.
+    //
+    // `series_values`, not `total_assets` (RC-11): the series is whatever
+    // metric its `basis` names — assets for a bank, loan originations for a
+    // mortgage subsidiary, premium for a carrier. Calling every one of them
+    // total assets put a label on the chart the payload never stated.
+    series_values: scaled.values,
     // The figure as the run states it, in dollars, untouched — for anything
     // that needs the exact number rather than the chart's magnitude.
-    total_assets_usd: series.map((s) => num(s.value)),
+    series_values_usd: series.map((s) => num(s.value)),
     // Preformatted, for a caller that would rather not interpolate at all.
-    // Identical strings to fmtMoney(total_assets[i], unit) by construction.
-    total_assets_display: series.map((s) => fmtMoney(s.value, s.unit || (first || {}).unit)),
+    // Identical strings to fmtMoney(series_values[i], unit) by construction.
+    series_values_display: series.map((s) => fmtMoney(s.value, s.unit || (first || {}).unit)),
+    // True when any point's basis names a subsidiary or segment: the chart is
+    // then that unit's series, and no enterprise rate is drawn from it.
+    scoped: seriesIsScoped(series),
     // Net income and NIM are not in this section's contract. Null, not zero:
     // a zero-height bar reads as a measured zero.
     net_income_m: series.map(() => null),
@@ -262,13 +284,17 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
       ? `${lastMoney} · ${last.period || ""}`.trim()
       : null,
     basis: (series.find((s) => s.basis) || {}).basis || null,
-    // CAGR is COMPUTED from the dated points, never taken on faith. The card
-    // showed "—" because no contract field carries it and nothing derived it,
-    // while the series states the endpoints it needs. Computed-or-null
-    // (invariant 9): fewer than two dated points, or a non-positive endpoint,
-    // yields null rather than a figure with no basis. `cagr_basis` names the
-    // span so the reader can see what it was computed over.
-    ...cagrOf(series),
+    // CAGR is COMPUTED from the dated points only where the PRODUCER said
+    // nothing about it. Computed-or-null (invariant 9): fewer than two dated
+    // points, or a non-positive endpoint, yields null rather than a figure
+    // with no basis, and `cagr_basis` names the span.
+    //
+    // The producer's word comes first (RC-11 / D-05). A `cagr` firmographic
+    // that is HELD is a finding — "no enterprise series is published" — and a
+    // rate computed over it contradicts the producer on the same strip. One
+    // that is STATED carries its own basis and renders as stated. Either way
+    // the series gets no vote, and a scoped series never does.
+    ...((fields.cagr || fields.growth_rate) ? {} : cagrOf(series)),
     trend: financialSeries.trend || null,
     verified_sparse: !!financialSeries.verified_sparse,
     events: [],

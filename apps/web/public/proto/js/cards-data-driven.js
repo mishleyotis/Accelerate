@@ -416,7 +416,7 @@ function FinancialTrajectoryCard({
     note: "No financial series promoted for this run.",
     section: "overview.financial_series"
   });
-  const values = (f.total_assets || []).filter(v => v != null);
+  const values = (f.series_values || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
   /* A TRAJECTORY needs at least two points. With one, `value / max * 80px`
      is 80px by construction — a single full-height, full-width bar that reads
@@ -428,7 +428,7 @@ function FinancialTrajectoryCard({
     const only = f.fy[0];
     return /*#__PURE__*/React.createElement("div", {
       className: "card flush",
-      "data-source": "financial_baseline.json :: total_assets[]"
+      "data-source": "overview.financial_series :: series[]"
     }, /*#__PURE__*/React.createElement("div", {
       className: "card-head"
     }, /*#__PURE__*/React.createElement("div", {
@@ -446,7 +446,7 @@ function FinancialTrajectoryCard({
         fontWeight: 700,
         color: "var(--z-dark)"
       }
-    }, fmtAssets(f.total_assets[0], f.unit)), /*#__PURE__*/React.createElement("div", {
+    }, fmtAssets(f.series_values[0], f.unit)), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: "var(--z-muted)",
@@ -476,7 +476,7 @@ function FinancialTrajectoryCard({
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
-    "data-source": "financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]"
+    "data-source": "overview.financial_series :: series[],net_income_m[],nim_pct[]"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
   }, /*#__PURE__*/React.createElement("div", {
@@ -499,7 +499,7 @@ function FinancialTrajectoryCard({
       height: 120
     }
   }, f.fy.map((y, i) => {
-    const money = fmtMoney(f.total_assets[i], f.unit);
+    const money = fmtMoney(f.series_values[i], f.unit);
     return /*#__PURE__*/React.createElement("div", {
       key: y,
       style: {
@@ -519,7 +519,7 @@ function FinancialTrajectoryCard({
     }, money), /*#__PURE__*/React.createElement("div", {
       style: {
         width: "100%",
-        height: `${(f.total_assets[i] || 0) / maxA * 80}px`,
+        height: `${(f.series_values[i] || 0) / maxA * 80}px`,
         background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
         borderRadius: "4px 4px 0 0",
         transition: "height var(--motion-slow) var(--ease)"

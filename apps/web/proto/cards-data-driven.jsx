@@ -244,7 +244,7 @@ function FinancialTrajectoryCard({ entity }) {
   if (!f || !(f.fy || []).length) return <CardAbsent icon="money"
     title="Financial trajectory"
     note="No financial series promoted for this run." section="overview.financial_series" />;
-  const values = (f.total_assets || []).filter(v => v != null);
+  const values = (f.series_values || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
   /* A TRAJECTORY needs at least two points. With one, `value / max * 80px`
      is 80px by construction — a single full-height, full-width bar that reads
@@ -255,14 +255,14 @@ function FinancialTrajectoryCard({ entity }) {
   if (f.fy.length < 2) {
     const only = f.fy[0];
     return (
-      <div className="card flush" data-source="financial_baseline.json :: total_assets[]">
+      <div className="card flush" data-source="overview.financial_series :: series[]">
         <div className="card-head">
           <div className="row"><Icon name="money" size={14} /><h3>Financial trajectory</h3></div>
           <span className="b b-org">Single point</span>
         </div>
         <div className="card-body">
           <div style={{ fontSize: 26, fontWeight: 700, color: "var(--z-dark)" }}>
-            {fmtAssets(f.total_assets[0], f.unit)}
+            {fmtAssets(f.series_values[0], f.unit)}
           </div>
           <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 2 }}>
             {String(only).replace("FY", "")}{f.basis ? ` · ${f.basis}` : ""}
@@ -283,7 +283,7 @@ function FinancialTrajectoryCard({ entity }) {
     );
   }
   return (
-    <div className="card flush" data-source="financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]">
+    <div className="card flush" data-source="overview.financial_series :: series[],net_income_m[],nim_pct[]">
       <div className="card-head">
         <div className="row"><Icon name="money" size={14} /><h3>Financial trajectory</h3></div>
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{f.headline}</span>
@@ -298,12 +298,12 @@ function FinancialTrajectoryCard({ entity }) {
               $9.7B. NIM is not in this section's contract, so the tooltip
               names it only when the run carries it. */}
           {f.fy.map((y, i) => {
-            const money = fmtMoney(f.total_assets[i], f.unit);
+            const money = fmtMoney(f.series_values[i], f.unit);
             return (
             <div key={y} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
                  title={[y, money, f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")}>
               <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{money}</div>
-              <div style={{ width: "100%", height: `${(f.total_assets[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
+              <div style={{ width: "100%", height: `${(f.series_values[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
               <div className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{y.replace("FY", "'")}</div>
             </div>
           );})}

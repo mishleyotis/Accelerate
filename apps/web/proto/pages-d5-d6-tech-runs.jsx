@@ -1225,7 +1225,7 @@ function FinChartInteractive({ entity, hoveredYear, setHoveredYear }) {
   const f = DMA.financialsFor(entity.id);
   const pts = ((f && f.fy) || []).map((label, i) => ({
     label,
-    val: (f.total_assets || [])[i],
+    val: (f.series_values || [])[i],
   })).filter(p => p.val != null);
 
   if (!pts.length) {
