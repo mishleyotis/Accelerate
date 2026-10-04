@@ -113,6 +113,15 @@ GATES = {
                "the strip showed four facts with nothing saying six were "
                "missing. Owner decision 2 set the cap.",
                "block"),
+    "CG-40b": ("A WORKED_ABSENT alert shows the ladder that worked it", None,
+               "An H3 alert in state WORKED_ABSENT logs its queries_run and "
+               "carries no rung left open (NOT_RUN, not fetched, blocked) "
+               "without the failover that ran in its place.",
+               "RC-05, SWBC 2026-10-04: 190 WORKED_ABSENT alerts promoted, "
+               "87 with no query logged and every one with a NOT_RUN "
+               "connector tier. WORKED_ABSENT is a finding about the client; "
+               "with no query behind it, it is an assertion.",
+               "block"),
     "CG-23": ("Every page's own thread is written", None,
               "A section whose writer stores `narrative_thread` carries a "
               "non-empty one. The contract's words: a page is not a "

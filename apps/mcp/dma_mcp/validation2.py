@@ -23,6 +23,9 @@ from .identifiers import MINT_RE, find_fabricated, find_ids
 from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
                            resolve_supplementary, serves,
                            variant_subvertical)
+# The ladder-rung reader (RC-05) lives beside CG-34 in pass 1; every gate that
+# judges a search ladder reads rungs through this one definition.
+from .validation import ladder_of, rung_outcome, rung_text  # noqa: F401
 
 shared_path.ensure(__file__)
 
@@ -1612,6 +1615,18 @@ def _walk_strings(node, path):
             yield from _walk_strings(item, f"{path}[{i}]")
 
 
+# MEM-0541 (GATE_FIRES_ON_VERBATIM_SPAN). In PROSE a token is a citation only
+# in the run's own evidence-id shapes — E-<digits>, E-<TOKEN>-<digits>,
+# E-CC-<digits> (each with an optional -R<n> revision), EV-<scope>-<digits>,
+# INT-<label> — never `E-` + any word. The one recogniser still FINDS the
+# token (identifiers.EID_TOKEN_RE); this narrows which found tokens a
+# sentence is taken to cite. Measured on SWBC: a verbatim BrokerCheck span
+# "NO VALID CONTACT/E-MAIL" was blocked as an unresolvable id while CG-27
+# forbade rewriting it. Keyed citations are untouched.
+_PROSE_CITATION_SHAPE = re.compile(
+    r"^(?:(?:E|EV)-(?:[A-Z][A-Z0-9]*-){0,2}\d+(?:-R\d+)?|INT-.+)$")
+
+
 def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     """Evidence ids cited in PROSE, not under a citation key.
 
@@ -1629,7 +1644,7 @@ def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     claimed: dict = {}
     for path, text in _walk_strings(payload, ""):
         for e in find_ids(text):
-            if e in already:
+            if e in already or not _PROSE_CITATION_SHAPE.match(e):
                 continue
             claimed.setdefault(e, path.lstrip("."))
     if not claimed:
@@ -2084,7 +2099,7 @@ def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
             else None)
         # Silence is only a finding when the run demonstrably HAS peer data.
         # An unstaged sibling proves nothing; promotion re-gates every page.
-        if peers and not _says_it_searched(payload.get("scores")):
+        if peers and not _names_a_reason(payload.get("scores")):
             out.append(_reason(
                 "CG-44", "scores", "overview.scores.pillars[].peer_median",
                 f"the heatmap carries {len(peers)} focus area(s) with a peer "
@@ -3150,13 +3165,64 @@ def _depth_count(page, section, body):
     return 0
 
 
-def _says_it_searched(body) -> bool:
-    """Does this section name the work behind a thin result?
+def _mandatory_families(page, section) -> list:
+    """The source families a section's ladder must work to an outcome —
+    contract data (`mandatory_families` on the section), never code."""
+    try:
+        spec = (sections(page) or {}).get(section) or {}
+    except Exception:
+        return []
+    fams = spec.get("mandatory_families") if isinstance(spec, dict) else None
+    return fams if isinstance(fams, list) else []
 
-    The empty-state discipline the rest of the payload already keeps: an
-    absence names its search and its closure condition. `thin` alone counts
-    only when something travels with it — a bare boolean is an assertion.
+
+def _ladder_gaps(body, families) -> list:
+    """What keeps this section's ladder from being COMPLETE, in words; [] when
+    it is complete.
+
+    RC-05 (SWBC gold audit, 2026-10-04; slices S-05, S-07). This was
+    `_says_it_searched`, which returned True for any empty_state.reason, any
+    40-character empty_state string, or any r_layer.probes_run — and r_layer is
+    mandatory on every section, so the floor never bit. A ladder now means:
+    `sources_searched` rungs, each stating an outcome, at least one terminal,
+    and every mandatory family covered by a terminal rung.
     """
+    rungs = ladder_of(body)
+    if not rungs:
+        return ["no sources_searched ladder (r_layer probes, a reason or a "
+                "thin flag are not a ladder)"]
+    gaps = []
+    outcomes = [(r, rung_outcome(r)) for r in rungs]
+    silent = [rung_text(r)[:60] for r, o in outcomes if o is None]
+    if silent:
+        gaps.append("rungs with no outcome: " + "; ".join(
+            repr(s) for s in silent[:4]))
+    if not any(o == "terminal" for _, o in outcomes):
+        gaps.append("no rung reached a terminal outcome (RESOLVED, "
+                    "VERIFIED_ABSENT, REFUSED + ALTERNATE_TRIED)")
+    for fam in families:
+        rx = re.compile(fam.get("match") or re.escape(fam.get("family", "")),
+                        re.I)
+        if not any(o == "terminal" and rx.search(rung_text(r))
+                   for r, o in outcomes):
+            gaps.append(f"mandatory family {fam.get('family')!r} has no rung "
+                        f"worked to a terminal outcome")
+    return gaps
+
+
+def _says_it_searched(body, page=None, section=None) -> bool:
+    """Predicate over `_ladder_gaps`: the section's ladder is complete."""
+    return isinstance(body, dict) and not _ladder_gaps(
+        body, _mandatory_families(page, section) if page else [])
+
+
+def _names_a_reason(body) -> bool:
+    """The OLD `_says_it_searched`, kept for the one gate whose escape is a
+    stated REASON rather than a search: CG-44's "state on the section why
+    area-level peers do not reach this strip". A peer cascade's absence is
+    explained, not searched for, so the ladder rule does not apply there."""
+    if not isinstance(body, dict):
+        return False
     if body.get("thin") is True and (
             body.get("empty_state") or body.get("searches")
             or body.get("sources_searched") or body.get("r_layer")):
@@ -3169,9 +3235,7 @@ def _says_it_searched(body) -> bool:
     if isinstance(es, str) and len(es.strip()) >= 40:
         return True
     r = body.get("r_layer")
-    if isinstance(r, dict) and (r.get("probes_run") or r.get("searches")):
-        return True
-    return False
+    return isinstance(r, dict) and bool(r.get("probes_run") or r.get("searches"))
 
 
 #: Read in this order, first hit wins. `dated_on` leads because it is the
@@ -3693,16 +3757,63 @@ def _check_depth_floors(page, payload):
             continue
         need, unit, why = floor
         got = _depth_count(page, section, body)
-        if got < need and not _says_it_searched(body):
+        if got >= need:
+            continue
+        gaps = _ladder_gaps(body, _mandatory_families(page, section))
+        if gaps:
             out.append(_reason(
                 "CG-40", section, f"{page}.{section}",
-                f"serves {got} {unit} against a floor of {need}, and names no "
-                f"search. {why}. Either serve the floor — the enrichment "
-                f"connectors are what this depth comes from — or keep what "
-                f"you have and set thin/empty_state naming the queries you "
-                f"ran and what would change the answer. A thin section that "
-                f"says so is fine; a thin section that is silent is "
-                f"indistinguishable from one nobody worked."))
+                f"serves {got} {unit} against a floor of {need}, and its "
+                f"ladder is not complete: {'; '.join(gaps)}. {why}. Either "
+                f"serve the floor — the enrichment connectors are what this "
+                f"depth comes from — or keep what you have and record the "
+                f"ladder in empty_state.sources_searched, one rung per route, "
+                f"each with its outcome. A thin section whose ladder is "
+                f"complete is fine; one that says it searched while its rungs "
+                f"read 'not retrieved' is indistinguishable from one nobody "
+                f"worked."))
+    return out
+
+
+# ── CG-40b · a WORKED_ABSENT alert shows the ladder that worked it ─────
+#
+# RC-05 (SWBC gold audit, 2026-10-04; slice HM-05). The H3 contract: "WORKED_
+# ABSENT (the ladder ran across all mandatory sources and found nothing — a
+# FINDING about the client)" and "LOG EVERY QUERY". SWBC promoted 190
+# WORKED_ABSENT alerts, 87 with queries_run [] and every one with a NOT_RUN
+# connector tier. The tier-10 CONTRADICTORY requirement is NOT enforced here:
+# the Baxter and Logix gold runs log none, so it needs an owner call first.
+def _check_worked_absent_ladder(page, payload) -> list:
+    if page != "heatmap" or not isinstance(payload, dict):
+        return []
+    body = payload.get("alerts")
+    alerts = body.get("alerts") if isinstance(body, dict) else None
+    out = []
+    for i, a in enumerate(alerts if isinstance(alerts, list) else []):
+        if not isinstance(a, dict) or a.get("state") != "WORKED_ABSENT":
+            continue
+        q = a.get("queries_run")
+        if not (isinstance(q, list) and any(
+                isinstance(x, str) and x.strip() for x in q)):
+            out.append(_reason(
+                "CG-40b", "alerts", f"alerts.alerts[{i}].queries_run",
+                f"{a.get('subcap_id') or 'this alert'} is WORKED_ABSENT with "
+                f"no query logged. WORKED_ABSENT is a finding about the "
+                f"client — the ladder ran across the mandatory sources and "
+                f"found nothing — and the contract says LOG EVERY QUERY. "
+                f"Log the queries the ladder ran, or set the state to "
+                f"UNWORKED until it runs."))
+            continue
+        open_rungs = [rung_text(r)[:80] for r in a.get("sources_searched") or []
+                      if rung_outcome(r) == "open"]
+        if open_rungs:
+            out.append(_reason(
+                "CG-40b", "alerts", f"alerts.alerts[{i}].sources_searched",
+                f"{a.get('subcap_id') or 'this alert'} is WORKED_ABSENT while "
+                f"a rung did not complete ({open_rungs[0]!r}: NOT_RUN, not "
+                f"fetched or blocked, with no failover recorded). Run the "
+                f"tier, or record the failover that ran in its place and its "
+                f"outcome, or the alert is UNWORKED."))
     return out
 
 def validate_pass2(conn, run_id, page: str, payload: dict,
@@ -3774,6 +3885,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_recommendations_reach_the_platform_page(
         conn, run_id, page, payload))
     reasons.extend(_check_depth_floors(page, payload))
+    reasons.extend(_check_worked_absent_ladder(page, payload))
     reasons.extend(_check_contact_enrichment_baseline(page, payload))
     reasons.extend(_check_sentiment_projections_agree(
         conn, run_id, page, payload))
@@ -4002,6 +4114,22 @@ def _check_safeguard_gate_ids(conn, page, payload) -> list:
     return out
 
 
+_SELF_PUBLISHED = re.compile(
+    r"\bnps\b|net promoter|\breported by\b|\bsays\b|self[- ]reported|"
+    r"company[- ]reported|self[- ]published|as reported\b", re.I)
+
+
+def _self_published(row) -> bool:
+    """A rating the institution published about itself: a self_reported flag,
+    a T4/T5 tier on the row, or a source that says it is relayed from the
+    company. 'nps' alone was the old test and stays inside this one."""
+    if row.get("self_reported") is True:
+        return True
+    if str(row.get("tier") or "").upper() in ("T4", "T5"):
+        return True
+    return bool(_SELF_PUBLISHED.search(str(row.get("source") or "")))
+
+
 def _run_s8(conn, run_id, page, payload) -> list:
     """SG-S8 — sentiment resting on one line discloses and still promotes.
 
@@ -4034,9 +4162,20 @@ def _run_s8(conn, run_id, page, payload) -> list:
     rated = [r for r in rows if r.get("rating") is not None]
     audiences = sorted({str(r.get("audience") or "").lower() for r in rated} - {""})
     # A self-published figure standing alone is thin whatever the count: it is
-    # one voice about itself.
+    # one voice about itself. RC-05 (SWBC, 2026-10-04; slice S-07): the test
+    # was the substring 'nps', so "Google reviews ... as reported by SWBC" was
+    # an independent line. Classified from the row now (`_self_published`).
+    tiers = {}
+    ids = sorted({r.get("e_id") for r in rated if isinstance(r.get("e_id"), str)})
+    if ids:
+        try:
+            tiers = {row.get("e_id"): row.get("tier") for row in
+                     get_evidence(conn, run_id, ids).get("found", [])}
+        except Exception:
+            tiers = {}             # the row-level reading still stands
     self_published = all(
-        str(r.get("source") or "").lower().find("nps") >= 0 for r in rated) if rated else False
+        _self_published(r) or str(tiers.get(r.get("e_id")) or "").upper()
+        in ("T4", "T5") for r in rated) if rated else False
 
     if not rated:
         result, detail = "NOT_RUN", {"page": page, "reason": "No rated rows"}

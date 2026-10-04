@@ -482,7 +482,34 @@
      "type": "integer",
      "doc": "Producer counter, named by the Surface Spec's O9 Information sources table ('displayed_lines | producer'): the number of rating lines this section will actually render. 'A single displayed line is not a sentiment picture — thin sources declare themselves.' Not persisted and no column exists, deliberately — counts are computed, never stored (invariant 8). SG-S8 recomputes the count from bars[] rather than trusting this field, and discloses; it does not block."
     }
-   }
+   },
+   "mandatory_families": [
+    {
+     "family": "app stores",
+     "match": "App Store|Google Play|app stores?|Play Store"
+    },
+    {
+     "family": "Glassdoor",
+     "match": "Glassdoor"
+    },
+    {
+     "family": "Indeed",
+     "match": "\\bIndeed\\b"
+    },
+    {
+     "family": "CFPB",
+     "match": "\\bCFPB\\b|Consumer Financial Protection Bureau|complaint database"
+    },
+    {
+     "family": "BBB",
+     "match": "\\bBBB\\b|Better Business Bureau"
+    },
+    {
+     "family": "Trustpilot or Google reviews",
+     "match": "Trustpilot|Google (?:reviews|business|rating|listing)"
+    }
+   ],
+   "mandatory_families_why": "RC-05 (SWBC gold audit 2026-10-04): CG-40 reads these. Below the depth floor (2 rated lines) a section passes only when empty_state.sources_searched carries a rung per family worked to a TERMINAL outcome (RESOLVED, VERIFIED_ABSENT, REACHED, or REFUSED + ALTERNATE_TRIED); 'not retrieved', 'neither found nor ruled out', NOT_RUN, NOT FETCHED and BLOCKED are open. A connector reading (Indeed get_company_data, the CFPB complaint API) is a rung like any other (owner decision 3)."
   },
   "ceilings": {
    "surface_id": "O1b",

@@ -186,7 +186,9 @@ def test_submit_supersedes_and_verdicts_are_retrievable(run_row):
     good = {"techstack": _min_section(
         items=[], layers=[], dropped=[], compliance_attestations=[],
         empty_state={"reason": "nothing detected yet",
-                     "sources_searched": ["profile", "research", "scan"]})}
+                     "sources_searched": ["profile — VERIFIED ABSENT",
+                                          "research — VERIFIED ABSENT",
+                                          "scan — VERIFIED ABSENT"]})}
     r2 = submit_page_payload(mcp, rid, "techstack", good,
                              producer_version="test@1")
     assert r2["verdict"]["status"] == "pass", r2["verdict"]["reasons"]
