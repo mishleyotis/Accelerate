@@ -591,6 +591,11 @@ def _declared_stage(wb) -> dict | None:
 
 
 
+#: The Handoff_Lock keys the app reads (the rest — catalogue hash, contract
+#: version — are the engine's own bookkeeping).
+_HANDOFF_PEER_KEYS = ("locked_peer_set", "peer_basis", "peer_n")
+
+
 def parse_run_metadata(path: str) -> dict:
     """The workbook's own `Run_Metadata` key/value tab, whole.
 
@@ -618,14 +623,23 @@ def parse_run_metadata(path: str) -> dict:
     """
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        if "Run_Metadata" not in wb.sheetnames:
-            return {}
         md = {}
-        for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
-            if row and row[0] and len(row) > 1 and row[1] is not None:
-                key = _norm(row[0])
-                if key and key not in md:
-                    md[key] = str(row[1]).strip()
+        if "Run_Metadata" in wb.sheetnames:
+            for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
+                if row and row[0] and len(row) > 1 and row[1] is not None:
+                    key = _norm(row[0])
+                    if key and key not in md:
+                        md[key] = str(row[1]).strip()
+        # The research stage's frozen peer cohort (engine/workbook.py
+        # lock_peer_set). SWBC gold audit RC-10: peers IDENTIFIED but not
+        # SCORED reached the connector as no peer set at all, because nothing
+        # read this tab. Only the peer keys travel; Run_Metadata wins a tie.
+        if "Handoff_Lock" in wb.sheetnames:
+            for row in wb["Handoff_Lock"].iter_rows(min_row=1, values_only=True):
+                if row and row[0] and len(row) > 1 and row[1] is not None:
+                    key = _norm(row[0])
+                    if key in _HANDOFF_PEER_KEYS and key not in md:
+                        md[key] = str(row[1]).strip()
         return md
     finally:
         wb.close()
@@ -3073,6 +3087,8 @@ def _attach_peer_deployments(wb, items: list, observe) -> None:
 # claims, and which carry rows that nothing will ever read.
 _TAB_READERS = {
     "Run_Metadata": "parse_scoring_workbook",
+    # the frozen peer cohort (RC-10) -> run_manifest.payload.workbook_metadata
+    "Handoff_Lock": "parse_run_metadata",
     "Pillar_Summary": "parse_grain_summaries",
     "Category_Detail": "parse_grain_summaries",
     "Pillar_Rollup": "parse_grain_summaries",
@@ -3166,6 +3182,11 @@ _TAB_TARGET = {
     # the one tab carrying the hero composite was not theirs to read.
     "Executive_Summary": (("overview.scores", "overview.exec_summary"),
                           "proposed"),
+    # RC-10: the locked peer set — identified, not necessarily scored. Every
+    # platform tile owes one peer_deployments row per named peer, and O1
+    # names the cohort where no median exists (dma_mcp/peer_set.py).
+    "Handoff_Lock": (("platform.platform_story", "overview.scores"),
+                     "proposed"),
     "Financial_Trends": (("overview.financial_series",), "proposed"),
     "Solution_Catalogue": (("platform.platform_story",
                             "platform.recommendations",
@@ -3181,7 +3202,6 @@ _TAB_TARGET = {
     "Maturity_Rubric": ("run config", "not_client_facing"),
     "Pillar_Weights": ("run config", "not_client_facing"),
     "Catalogue_Meta": ("run config", "not_client_facing"),
-    "Handoff_Lock": ("run config", "not_client_facing"),
     "Cap_Triggers": ("run config", "not_client_facing"),
     "Capability_Definitions": ("run config", "not_client_facing"),
     "REF_Method": ("run config", "not_client_facing"),

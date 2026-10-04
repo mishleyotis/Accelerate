@@ -218,12 +218,15 @@
   },
   {
    "tab": "Handoff_Lock",
-   "records": "run config",
-   "confidence": "not_client_facing",
-   "page": null,
-   "section": null,
-   "sections": [],
-   "required": null
+   "records": "platform.platform_story, overview.scores",
+   "confidence": "proposed",
+   "page": "platform",
+   "section": "platform_story",
+   "sections": [
+    "platform.platform_story",
+    "overview.scores"
+   ],
+   "required": true
   },
   {
    "tab": "Issue_Register",
@@ -535,6 +538,7 @@
    "required": true,
    "fed_by_tabs": [
     "Executive_Summary",
+    "Handoff_Lock",
     "Peer_Benchmarks",
     "Pillar_Rollup",
     "Pillar_Summary"
@@ -606,6 +610,7 @@
   "platform.platform_story": {
    "required": true,
    "fed_by_tabs": [
+    "Handoff_Lock",
     "Solution_Catalogue"
    ]
   },
@@ -670,11 +675,11 @@
  },
  "counts": {
   "tabs_the_app_reads": 42,
-  "tabs_bound_to_a_page": 26,
-  "tabs_bound_to_a_section": 26,
+  "tabs_bound_to_a_page": 27,
+  "tabs_bound_to_a_section": 27,
   "verified_bindings": 5,
-  "proposed_bindings": 27,
-  "not_client_facing": 10,
+  "proposed_bindings": 28,
+  "not_client_facing": 9,
   "page_sections": 34,
   "required_page_sections": 32
  }

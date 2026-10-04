@@ -1482,6 +1482,7 @@
    "disposition": "workbook",
    "workbook_tabs": [
     "Executive_Summary",
+    "Handoff_Lock",
     "Peer_Benchmarks",
     "Pillar_Rollup",
     "Pillar_Summary"
@@ -1691,6 +1692,7 @@
    "served": true,
    "disposition": "report",
    "workbook_tabs": [
+    "Handoff_Lock",
     "Solution_Catalogue"
    ],
    "report_sections": [

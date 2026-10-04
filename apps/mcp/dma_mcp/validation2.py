@@ -3834,6 +3834,9 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
+    # RC-10: AG-04 / CG-44 against the IDENTIFIED peer set, scored or not.
+    from .peer_set import check_named_peer_set
+    reasons.extend(check_named_peer_set(conn, run_id, page, payload))
     reasons.extend(_check_rank_against_score(page, payload))
     # ET-08 runs BEFORE the cell gates below, because those all skip a
     # value they cannot parse as an id: a cell-link field holding a name
