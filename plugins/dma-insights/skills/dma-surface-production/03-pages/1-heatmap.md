@@ -15,10 +15,10 @@ Read `01-start-here/1-standing-clauses.md` before writing any section on this pa
 | `cell_evidence` | yes | H2 | D3 |
 | `evidence` | yes | H6 | D3 |
 | `value_chain` | optional | H9 | D3 |
-| `alerts` | yes | H3 | D7 |
+| `alerts` | yes | H3 | D7 (internal; customer-withheld) |
 | `safeguard_gates` | yes | H5 | D7 |
-| `evidence_age` | yes | H7 | D7 |
-| `cohort_patterns` | optional | H8 | D7 |
+| `evidence_age` | yes | H7 | D7 (internal; customer-withheld) |
+| `cohort_patterns` | optional | H8 | D7 (internal; customer-withheld) |
 
 ## Surfaces on this page — one file each
 

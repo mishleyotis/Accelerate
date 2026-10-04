@@ -1,0 +1,25 @@
+{
+ "_doc": "A synthetic overview shaped like the run the 2026-10-04 gold audit found thin (RC-02): ten firmographic fields with six held, one sentiment bar and no gap_analysis. Placeholder values only — Gate J reads shape. Driven by the CI step 'Gate J — the committed gold shape' against fixtures/surface_gold.json, which must refuse it naming stated_share, key_absent and item_fill.",
+ "firmographics": {
+  "produced_at": "2026-10-04T00:00:00Z", "producer_version": "fixture@1", "e_ids": ["E-1"], "internal_only": [],
+  "narrative_thread": "placeholder",
+  "fields": [
+   {"field": "a", "value": "x", "unit": "u", "as_of": "2025", "confidence": "HIGH", "quarantined": false, "recency_band": "CURRENT", "source_e_id": "E-1"},
+   {"field": "b", "value": "x", "unit": "u", "as_of": null, "confidence": "HIGH", "quarantined": false, "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "c", "value": "x", "unit": null, "as_of": null, "confidence": "HIGH", "quarantined": false, "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "d", "value": "x", "unit": null, "as_of": null, "confidence": "HIGH", "quarantined": false, "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "e", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "f", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "g", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "h", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "i", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
+   {"field": "j", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"}
+  ]
+ },
+ "sentiment": {
+  "produced_at": "2026-10-04T00:00:00Z", "producer_version": "fixture@1", "e_ids": ["E-1"], "internal_only": [],
+  "narrative_thread": "placeholder",
+  "bars": [{"source": "s", "audience": "customer", "rating": 4.9, "scale": "1-5", "n": 10, "as_of": "2025", "e_id": "E-1", "url": "u", "trend_vs_prior": null}],
+  "themes": [{"theme": "t", "audience": "customer", "cap_statement": "c", "mapped_subcap_ids": ["P1C1.1.1"]}]
+ }
+}

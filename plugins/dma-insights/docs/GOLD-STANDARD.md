@@ -8,6 +8,14 @@ the standard in QA has already failed the one-turn test; the point of this file 
 let you understand the deliverable before you start, and to give you a gate
 (`engine/gold_standard.py`) you run on your OWN output before you return.
 
+This file covers three deliverables: the **workbook**, the two **reports**, and the
+six **app pages** (overview, heatmap, insights, platform, context, techstack — see
+*App pages* below, added 2026-10-04 after the SWBC gold audit found the app pages had
+no measurable gold at all: RC-01). Its path from the repository root is
+`plugins/dma-insights/docs/GOLD-STANDARD.md`; inside the plugin,
+`${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md`. A bare `docs/` path from the repository
+root is the read-only design-docs folder, and this file is not in it.
+
 ## The deliverable-first loop (do this in order, every time)
 
 1. **Read the contract** — this file — and open the reference package's workbook and
@@ -40,7 +48,11 @@ engine's. It carries, at minimum:
   **labelled an estimate from public digital-maturity signals, not a formal DMA score**,
   with a locked peer set.
 - `Firmographics` — `Field, Value, Unit, As at, Evidence`. A genuinely-absent field
-  reads `ABSENT (see 1.2)` with a route, never blank and never "quarantined".
+  reads `ABSENT (see 1.2)` with a route, never blank. (That is the WORKBOOK's word. The
+  app payload states the same absence as `quarantined: true` with a
+  `quarantine_reason` naming the route, and renders it as a stated absence — one rule
+  in two vocabularies; see *App pages → Held fields*. An earlier version of this line
+  said "never quarantined", which contradicted the app contract.)
 - `Focus_Areas` — client priorities with a **verbatim quote**, document, page, cells.
 - `Issue_Register` — real matters with `Severity, Status, Capability impact`.
 - `Solution_Catalogue`, `Cap_Triggers`, `Platform_Peer_Adoption`, `Maturity_Rubric`,
@@ -129,10 +141,173 @@ These read as "the work was not finished" and must never ship: "Not established 
 run", "to be established at the surface-production stage", "no score yet", "queued for
 enrichment", "TBD", "N/A" standing in for a value. If a thing is genuinely unknown, it
 is an **Unknown evidence gap disclosed in Coverage** or an **ABSENT firmographic with a
-route** — a stated, structured absence, never a hedge.
+route** — a stated, structured absence, never a hedge. On the app pages the structured
+absence is an `empty_state` (reason, `sources_searched`, closure condition), a held
+field with its `quarantine_reason`, or a null member with its own `<member>_basis`.
 
 ## The gate is the contract, executable
 
-`engine/gold_standard.py` encodes every rule above and maps each to the goeasy finding
-it prevents (`docs/goeasy-findings-register.md`). Run it on your own output. Green is
-the definition of done.
+`engine/gold_standard.py` encodes every rule above for the workbook and the reports and
+maps each to the goeasy finding it prevents
+(`plugins/dma-insights/docs/goeasy-findings-register.md`). Run it on your own output.
+Green is the definition of done. For the app pages the executable contract is CG-PAR
+and Gate J, below.
+
+## App pages
+
+**Why this section exists (RC-01, RC-02, D-35 — SWBC gold audit, 2026-10-04).** For the
+six app pages there was no gold a producer could fall short of: this file covered only
+the workbook and the reports, the rulebook's "positive pattern" was prose, the key list
+in `fixtures/reference_surface_keys.json` held names only, and the structural gate
+(Gate J) compared top-level keys and ran nowhere a real run passed through. A promoted
+run served ten firmographic fields with six held, one sentiment bar, and platform cards
+without peer rows, and every check read that as parity.
+
+**Where the gold is.** `fixtures/surface_gold.json` — shape only, cut by
+`scripts/gen_surface_gold.py` from the staged pages of the three promoted gold runs:
+Golden 1 (`40971653`), Baxter (`c1351d25`), Logix (`d7ed1d90`). It keeps keys, list
+lengths and each row's null pattern; it keeps **no values and no names** (owner
+decision, 2026-10-04). All three gold runs are credit unions: for another sub-vertical
+the page shape is still the floor, and the sub-vertical's own must-present fields come
+from its rulebook, not from this fixture. The connector reads a byte-identical copy
+(`apps/mcp/dma_mcp/surface_gold.json`); a test keeps them equal, and another keeps the
+per-audience dispositions equal to what `apps/api/dma_api/redaction.py` does.
+
+**How it is enforced.**
+
+- **CG-PAR, at promote** — `promote_run` compares every staged page with the gold and
+  refuses on a structural gap (`apps/mcp/dma_mcp/promote_checks.py`). Nothing is
+  written; resubmit the page named, then promote again.
+- **Gate J, before you submit** — the same rules from a repository checkout:
+  `python3 scripts/gate_j_surface_parity.py --gold fixtures/surface_gold.json
+  --target-dir <dir of six page JSON files>` (or `--api URL --target SLUG`).
+- **CI** runs Gate J against the committed gold with a thin target, and asserts that
+  each gold run meets the gold set's own standard.
+
+**What counts as a gap.** A gap counts only when it holds against **every** gold run
+that has the page — the floor every gold run meets by construction, because a floor the
+reference fails is not a standard. Values are never compared: a lower score is an
+assessment result; a thinner shape is a production gap.
+
+| Kind | Rule (floors are the RCA defaults, pending owner adjudication of RC-02's ratios) |
+|---|---|
+| `section_absent` / `section_empty` | the gold fills the section; this run lacks it, or serves it empty without an `empty_state` |
+| `key_absent` / `key_empty` | a key every gold run fills is missing or empty (keys today's contract no longer declares are not owed) |
+| `list_len` | fewer rows than **0.5 ×** the gold's (nested lists: per parent row) |
+| `item_key_missing` | every gold row carries a member; under **60%** of this run's rows do |
+| `item_fill` | a member is filled on under **0.6 ×** the gold's share of rows — a null member is unfilled; a null beside its own `<member>_basis` is a stated absence and counts as filled |
+| `stated_share` | on a fields list (rows with `value` and `quarantined`), the share of rows with a stated, un-held value is under **0.6 ×** the gold's |
+
+Thinness (`list_len`, `stated_share`) is excused only by an `empty_state` whose every
+`sources_searched` rung reached `RESOLVED`, `VERIFIED_ABSENT` or
+`REFUSED+ALTERNATE_TRIED` — "not retrieved", "neither found nor ruled out" and `NOT_RUN`
+are not terminal (RC-05). Sections served to no audience are not compared. When no peer
+is scored anywhere in the run (peers identified, not scored — settled), the peer-
+comparison nulls (`peer_median`, `peer_n`, `peer_score`, `delta`, `direction`) are
+disclosed once rather than refused row by row.
+
+**Held fields — one vocabulary (owner decision 2, 2026-10-04).** On the app pages a
+firmographic the evidence cannot state is `quarantined: true` with a
+`quarantine_reason` naming the route searched. It is not a hedge and it is not a
+completed answer:
+
+- a held field **renders as a stated absence with its reason** — it never disappears;
+- held fields are capped at **2 or 25% of the must-present set, whichever is smaller**;
+- a known registry answer — charter, primary regulator, branches — is **stated**, never
+  held: "None — non-depository; licensed by line" is a value;
+- a subsidiary or segment figure is admissible on the strip when its `unit`/`basis` names
+  the entity it describes (e.g. "SWBC Mortgage Corporation, HMDA 2024").
+
+In the workbook the same absence reads `ABSENT (see 1.2)`. The phrase "Not established
+for this run" is a hedge in both places.
+
+**Who sees what.** Generated from `redaction.py` into the fixture's `dispositions`.
+`never_served` sections are produced and audited but render for no audience: the
+capability ceilings (O1b) and the evidence census (O10) do **not** render on D1, whatever
+an older page index says (D-35). `page_withheld` is the context dashboard, locked for the
+customer audience. **Owner decision 1 (2026-10-04)** gives customers a REDUCED sentiment
+card — ratings bars and themes, without cell codes, internal sources, cap vocabulary or
+`r_layer` — superseding TRD §11's withholding for `overview.sentiment` only
+(`thought_leadership` stays withheld). Until that change lands in `redaction.py` the
+table below reads `withheld`; regenerate the dispositions with
+`python3 scripts/gen_surface_gold.py --dispositions-only` when it does.
+
+CG-PAR compares the INTERNAL record. The customer projection is compared client against
+client with Gate J `--api --audience customer`.
+
+**The gold's shape, per page** (rows per top-level list, min–max across the three gold
+runs; generated from `fixtures/surface_gold.json` → `summary`):
+
+### overview
+
+| Section | Internal | Customer | Gold runs filling it | Rows per list |
+|---|---|---|---|---|
+| `ceilings` | never_served | never_served | 3 of 3 | `rows` 16–17 |
+| `evidence_coverage` | never_served | never_served | 3 of 3 | `claim_classes` 3–4; `per_pillar` 4; `tiers` 4–5 |
+| `exec_summary` | served | served | 3 of 3 | — |
+| `financial_series` | served | served | 3 of 3 | `series` 5–6 |
+| `findings` | served | served | 3 of 3 | `findings` 5 |
+| `firmographics` | served | served | 3 of 3 | `fields` 15–16, stated and un-held ≥ 93% |
+| `leadership` | served | served | 3 of 3 | `roster` 6–10 |
+| `opportunity` | served | served | 3 of 3 | `discarded` 4–8; `tiles` 4–5 |
+| `scores` | served | served | 3 of 3 | `pillars` 4 |
+| `sentiment` | served | withheld (reduced card per owner decision 1) | 3 of 3 | `bars` 2–7; `themes` 2–7 |
+| `thought_leadership` | served | withheld | 3 of 3 | `entries` 4–5 |
+| `why_now` | served | served | 3 of 3 | `signals` 3–4 |
+
+### heatmap
+
+| Section | Internal | Customer | Gold runs filling it | Rows per list |
+|---|---|---|---|---|
+| `alerts` | served | withheld | 3 of 3 | `alerts` 11–116 |
+| `cell_evidence` | served | served | 3 of 3 | `cells` 690–706 |
+| `cohort_patterns` | served | withheld | 3 of 3 | `insufficient_cohorts` 1–11; `patterns` 0 |
+| `evidence` | served | served | 3 of 3 | `evidence` 16–541 |
+| `evidence_age` | served | withheld | 3 of 3 | `rows` 26–537 |
+| `focus_areas` | served | served | 3 of 3 | `focus_areas` 3–5 |
+| `safeguard_gates` | served | served | 3 of 3 | `caps` 1–14; `gates` 0–2 |
+| `value_chain` | served | served | 2 of 3 (optional section; no floor) | — |
+| `workbook_scores` | served | served | 3 of 3 | `categories` 16–17; `pillars` 4 |
+
+### insights
+
+| Section | Internal | Customer | Gold runs filling it | Rows per list |
+|---|---|---|---|---|
+| `insights` | served | served | 3 of 3 | `cards` 6–8 |
+| `landscape` | served | served | 3 of 3 | `tiles` 4 |
+
+### platform
+
+| Section | Internal | Customer | Gold runs filling it | Rows per list |
+|---|---|---|---|---|
+| `platform_story` | served | served | 3 of 3 | `discarded` 7–8; `platforms` 5 |
+| `recommendations` | served | served | 3 of 3 | `recommendations` 5–8 |
+| `roadmap` | served | served | 3 of 3 | `phases` 3–5 |
+| `stairstep` | served | served | 3 of 3 | — |
+| `starters` | served | withheld | 3 of 3 | `starters` 5–6 |
+
+### context
+
+| Section | Internal | Customer | Gold runs filling it | Rows per list |
+|---|---|---|---|---|
+| `acquisitions` | served | page_withheld | 3 of 3 | `rows` 0–1 |
+| `context_sentiment` | served | page_withheld | 3 of 3 | `context_tiles` 3 |
+| `issue_register` | served | page_withheld | 3 of 3 | `issues` 3–5 |
+| `regulatory_standing` | served | page_withheld | 3 of 3 | `additional_regulators` 1–2; `jurisdictions` 1–5 |
+| `timeline` | served | page_withheld | 3 of 3 | `events` 7–14 |
+
+### techstack
+
+| Section | Internal | Customer | Gold runs filling it | Rows per list |
+|---|---|---|---|---|
+| `techstack` | served | served (CONFIRMED/ABSENT rows only, DECISIONS D4) | 3 of 3 | `items` 32–56; `layers` 4; `dropped` 0–7; `compliance_attestations` 0–6 |
+
+Per-member fill ratios and nested lists (cards' `gaps[]`, `peer_deployments[]`,
+`estate_reach[]`, …) are in the fixture, not repeated here; the gate reads them.
+
+**Open adjudications — not resolved here.** The thin-evidence flag (the DB generated
+column, or the H2 contract rule "fewer than three linked items, or inherited/declared
+provenance" — they disagree on 144 SWBC cells) and the techstack layer denominator
+(producer-written product slots, or the server's cell count; T-03/DNR-6) are open. The
+gold records whether `thin` and `expected` are filled, never which rule produced them;
+a null `expected` beside its `expected_basis` is a stated absence and passes.

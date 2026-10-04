@@ -326,6 +326,17 @@ def platform_fit(conn, run_id, candidates) -> dict:
             relevance=relevance))
 
     ranked = engine.rank(built, all_gap_cells=all_gaps)
+    # AN UNRESOLVED SUB-VERTICAL IS AN UNCHECKED GUARD, NOT A PERFECT SCORE.
+    # The engine scores it neutrally (1.0 keeps every cell, by design), but
+    # the row used to SAY 1.0 as well — and a producer copied "relevance 1.0"
+    # onto every tile of a run whose own reasoning trace called relevance
+    # unchecked (RC-13, SWBC gold audit 2026-10-04). Invariant 9: a derived
+    # value is computed or null, never a default that looks like data.
+    relevance_state = "checked" if entity_code else "unchecked"
+    if entity_code is None:
+        for p in ranked:
+            p["relevance"] = None
+            p["relevance_state"] = "unchecked"
     # WHAT THE ENGINE ACTUALLY HAD TO WORK WITH.
     #
     # `issue_register_raw` and `techstack_raw` are both EMPTY for at least one
@@ -344,6 +355,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
         "register_cells_absent": len(absent_sids),
         "register_cells_held": len(held_sids),
         "entity_subvertical_code": entity_code,
+        "relevance_state": relevance_state,
         "notes": [],
     }
     if not sev:

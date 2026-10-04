@@ -148,11 +148,11 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **79** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **81** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
-### CG · Corpus / contract (57)
+### CG · Corpus / contract (59)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -213,6 +213,8 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `CG-18d` | **A scoped figure names the entity it describes.** On O2 (unit) and O8 (basis) alike, a figure scoped to a subsidiary, segment or division names that part of the group. | block | — |
 | `CG-18e` | **The strip and the regulatory card agree.** When context.regulatory_standing states license_type or primary_regulator, overview.firmographics states charter and primary_regulator too, naming the same regulators. | block | — |
 | `CG-40b` | **A WORKED_ABSENT alert shows the ladder that worked it.** An H3 alert in state WORKED_ABSENT logs its queries_run and carries no rung left open (NOT_RUN, not fetched, blocked) without the failover that ran in its place. | block | — |
+| `CG-PAR` | **No page is structurally thinner than every gold run.** At promote, each staged page is compared with the committed shape-only gold (surface_gold.json: keys, list lengths and per-row null patterns of the promoted gold runs, no values). A gap holds only if it holds against EVERY gold run that… *(registry-only: no module emits this id today)* | block | — |
+| `CG-STALE` | **A promoted page does not say its own run is withdrawn.** At promote, no section's empty_state or narrative_thread asserts that the run being promoted is withdrawn or withheld pending repair. *(registry-only: no module emits this id today)* | block | — |
 
 ### AG · Analytical (8)
 

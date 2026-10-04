@@ -65,9 +65,15 @@ def test_an_empty_list_on_a_key_the_reference_fills():
 def test_values_are_never_compared():
     """Two clients are different companies. A thinner number is an assessment
     result; a gate that argued otherwise would push every client toward the
-    reference's answers, which is the one thing this build must not do."""
-    ref = page(scores=sec({"composite": 3.4, "pillars": [1, 2, 3, 4]}))
-    tgt = page(scores=sec({"composite": 1.59, "pillars": [1]}))
+    reference's answers, which is the one thing this build must not do.
+
+    The pillar LIST used to differ in length here too (4 against 1) and the
+    case still passed, because the gate could not see list length at all —
+    which is RC-02 (SWBC gold audit, 2026-10-04): one sentiment bar against
+    seven read as parity. Length is structure, and is now compared
+    (test_gate_j_item_grain.py); what stays uncompared is every VALUE."""
+    ref = page(scores=sec({"composite": 3.4, "pillars": [3.1, 2.9, 3.6, 3.0]}))
+    tgt = page(scores=sec({"composite": 1.59, "pillars": [1.2, 1.9, 1.4, 1.8]}))
     assert compare_page("overview", ref, tgt) == []
 
 

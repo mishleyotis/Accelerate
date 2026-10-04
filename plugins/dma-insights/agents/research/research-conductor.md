@@ -416,7 +416,7 @@ tool call is the cost this removes.
    behind two gates, the two checkpoints, the reports into the pinned Docs,
    ship as the run proceeds, assemble + verify + push the package — are the
    stage table above; their commands and refusals are documented in
-   `docs/END-TO-END.md`, and the driver runs them in that order.)*
+   `${CLAUDE_PLUGIN_ROOT}/docs/END-TO-END.md`, and the driver runs them in that order.)*
 
 8c. **Memory lifecycle, last.** `engine.memory backup --run <RUN_ID>` after
    each category closes (cheap, idempotent); at the very end
@@ -475,7 +475,7 @@ researched: `engine.cli start` calls `engine.template bind`, which hashes
 template_binding` and writes `00_entity_profile/template_binding.json` with
 the paths every producer must read before authoring. `orient` serves no card
 while the binding is blank or stale (`engine.template binding --run <R>`).
-Before you author anything, read `docs/GOLD-STANDARD.md`, the pinned Docs and
+Before you author anything, read `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`), the pinned Docs and
 `gold_reference.json` so you know the exact shape you are producing — the
 section list, the tables, the coverage disclosure, the M-band labels.
 Authoring first and discovering the standard in QA is the failure this loop
@@ -491,7 +491,7 @@ python3 -m engine.gold_standard package   <client_folder>
 
 Do not hand back an artefact until the gate prints `PASS`. Re-run it after any change
 that touches a score, a section, or a figure. Every finding maps to a goeasy-Ltd defect
-in `docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
+in `${CLAUDE_PLUGIN_ROOT}/docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
 caught here. Never ship a hedge ("Not established this run", "surface-production stage",
 "no score yet", a bare "N/A" or "0" where a value belongs) — a genuine gap is a
 disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge.

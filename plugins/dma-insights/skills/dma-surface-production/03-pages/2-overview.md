@@ -18,10 +18,10 @@ Read `01-start-here/1-standing-clauses.md` before writing any section on this pa
 | `findings` | yes | O6 | D1 |
 | `leadership` | yes | O7 | D1 |
 | `financial_series` | yes | O8, C6 | D1, D5 |
-| `sentiment` | yes | O9 | D1 |
-| `ceilings` | yes | O1b | D1 |
-| `evidence_coverage` | yes | O10, O11 | D1 |
-| `thought_leadership` | yes | O12 | D1 |
+| `sentiment` | yes | O9 | D1 (customer: reduced card — bars + themes, owner decision 2026-10-04) |
+| `ceilings` | yes | O1b | nowhere — NEVER_SERVED (produced and audited, served to no audience) |
+| `evidence_coverage` | yes | O10, O11 | nowhere — NEVER_SERVED (produced and audited, served to no audience) |
+| `thought_leadership` | yes | O12 | D1 (internal; customer-withheld) |
 
 ## Surfaces on this page — one file each
 
