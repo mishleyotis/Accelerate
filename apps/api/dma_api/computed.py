@@ -36,6 +36,7 @@ from pathlib import Path
 # modules each finding `packages/shared` their own way is how a build artefact
 # came to shadow its own source.
 from .evidence import _expand_abbrev  # noqa: F401
+from .evidence import attribution_bound  # RC-08: spans bind to the promotion
 
 # Tier -> the highest evidence level that tier can carry, RENDERED beside the
 # count because it is what the mix means (O11 contract). T5 is vendor
@@ -480,7 +481,7 @@ def _expected_per_layer(cur, catalog_version) -> dict:
 
 
 # ── heatmap ────────────────────────────────────────────────────────────────
-def cell_items(cur, data: dict, entity_id) -> None:
+def cell_items(cur, data: dict, entity_id, promoted_at=None) -> None:
     """Resolve every cell's `items[]` from its own `e_ids`.
 
     `items` and `thin` are the two H2 item keys the field census exempts from
@@ -536,7 +537,7 @@ def cell_items(cur, data: dict, entity_id) -> None:
         """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
                   ei.recency_band::text, ei.source_name, ei.source_domain,
                   ei.excerpt, ei.source_url, ei.origin::text,
-                  ei.customer_attribution
+                  ei.customer_attribution, ei.customer_attribution_at
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
@@ -563,6 +564,12 @@ def cell_items(cur, data: dict, entity_id) -> None:
                     # it, an internal-origin item serves to the customer
                     # under that label (RC-08 / D-10); without it, never.
                     "customer_attribution": r[10] if len(r) > 10 else None,
+                    # ...and only on a run promoted at or after the span was
+                    # minted (evidence.attribution_bound; RC-08 review). No
+                    # promotion passed, nothing bound: default-deny.
+                    "attribution_bound": bool(len(r) > 11 and r[10]
+                                              and attribution_bound(
+                                                  r[11], promoted_at)),
                     **({"cited_as": r[0]} if r[0] != r[1] else {})}
              for r in cur.fetchall()}
 
@@ -911,7 +918,8 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
                              run_meta.get("ccg_catalog_version"))
         elif page == "heatmap" and section == "cell_evidence":
             # items[] first: the counters below read what it resolved.
-            cell_items(cur, data, entity_id)
+            cell_items(cur, data, entity_id,
+                       promoted_at=run_meta.get("promoted_at"))
             cell_linking_stats(data)
         elif page == "heatmap" and section == "evidence_age":
             evidence_age_rollups(data)

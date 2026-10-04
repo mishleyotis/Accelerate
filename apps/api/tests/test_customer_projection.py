@@ -33,7 +33,10 @@ EXCERPT = ("The institution describes one customer record per line of "
 def _item(e_id, origin, attribution=None):
     return {"e_id": e_id, "origin": origin, "source_name": "Discovery notes",
             "source_url": None, "excerpt": EXCERPT, "claim_type": "FACT",
-            "tier": "T2", "customer_attribution": attribution}
+            "tier": "T2", "customer_attribution": attribution,
+            # stamped by the reader when the run was promoted after the
+            # span's mint (test_split_span_binding); the bound case here
+            "attribution_bound": bool(attribution)}
 
 
 def _cell(sid, items, thin=False):

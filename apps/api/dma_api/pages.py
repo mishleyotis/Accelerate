@@ -272,7 +272,7 @@ def cited_ids(data) -> set:
     return out
 
 
-def evidence_scope(cur, entity_id, ids) -> dict:
+def evidence_scope(cur, entity_id, ids, *, promoted_at) -> dict:
     """Which of `ids` are INTERNAL SPANS (never served to a customer) and
     which are shareable SPLIT SPANS (served under their customer
     attribution). One entity-scoped query; ids are resolved through
@@ -284,21 +284,31 @@ def evidence_scope(cur, entity_id, ids) -> dict:
     whole-row marking of 20 shareable discovery rows emptied 24 drawers. The
     serve layer now decides from the stored origin and the 0063 split, and
     the marking is no longer load-bearing for either direction.
+
+    `promoted_at` is the served run's, and it is REQUIRED: a span serves
+    under its attribution only on a run promoted at or after the span was
+    minted (evidence.attribution_bound). On a run promoted before, the span
+    is withheld like any internal row, so a span minted for a later run
+    changes nothing on the live one until a payload citing it is promoted
+    (RC-08 review, 2026-10-04).
     """
+    from .evidence import attribution_bound
     scope = {"withheld": set(), "attribution": {}}
     wanted = sorted(i for i in (ids or ()) if isinstance(i, str) and i)
     if not wanted:
         return scope
     cur.execute(
-        """SELECT w.cited, ei.origin::text, ei.customer_attribution
+        """SELECT w.cited, ei.origin::text, ei.customer_attribution,
+                  ei.customer_attribution_at
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
             WHERE ei.entity_id = %s""", (wanted, entity_id))
-    for cited, origin, attribution in cur.fetchall():
+    for cited, origin, attribution, attributed_at in cur.fetchall():
         if (origin or "").lower() != "internal":
             continue
-        if isinstance(attribution, str) and attribution.strip():
+        if (isinstance(attribution, str) and attribution.strip()
+                and attribution_bound(attributed_at, promoted_at)):
             scope["attribution"][cited] = attribution.strip()
         else:
             scope["withheld"].add(cited)
@@ -440,7 +450,9 @@ def build_page(cur, page: str, display_id: str, audience: str,
         scope = None
         if audience == "customer":
             ids = cited_ids(built["data"])
-            scope = evidence_scope(cur, entity_id, ids) if ids else None
+            scope = (evidence_scope(cur, entity_id, ids,
+                                    promoted_at=run_meta.get("promoted_at"))
+                     if ids else None)
         data, report = redact_section(page, section, built["data"],
                                       env.get("internal_only"), audience,
                                       evidence_scope=scope)

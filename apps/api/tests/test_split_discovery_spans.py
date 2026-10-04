@@ -37,11 +37,15 @@ SPAN = ("No single customer profile spans the insurance, mortgage and "
 
 
 def _item(e_id, origin="internal", attribution=None):
+    # `attribution_bound` is what the readers stamp when the served run was
+    # promoted at or after the span's mint (test_split_span_binding); these
+    # fixtures are the bound case.
     return {"e_id": e_id, "origin": origin,
             "source_name": "Internal discovery write-up prepared for a sponsor",
             "source_url": None, "excerpt": SPAN, "claim_type": "FACT",
             "tier": "T2", "linked_subcap_ids": ["P4C1.1.1"],
-            "customer_attribution": attribution, "split_of": "E-CC-1"}
+            "customer_attribution": attribution, "split_of": "E-CC-1",
+            "attribution_bound": bool(attribution)}
 
 
 SHAREABLE = _item("E-CC-2", attribution="Client statement, discovery "
@@ -53,7 +57,8 @@ def test_the_shareable_span_serves_under_its_attribution():
     kept, withheld = customer_evidence_items([SHAREABLE, INTERNAL_SPAN])
     assert [i["e_id"] for i in kept] == ["E-CC-2"]
     assert kept[0]["source_name"].startswith("Client statement")
-    for k in ("customer_attribution", "split_of", "origin"):
+    for k in ("customer_attribution", "split_of", "origin",
+              "attribution_bound"):
         assert k not in kept[0], k
     assert withheld == {"internal_origin": 1}
 
@@ -129,10 +134,12 @@ class _Cur:
 
 
 def test_page_scope_is_one_entity_scoped_query():
-    cur = _Cur([("E-CC-2", "internal", "Client statement, discovery"),
-                ("E-CC-3", "internal", None),
-                ("E-CC-9", "producer", None)])
-    scope = pages.evidence_scope(cur, "ent-1", {"E-CC-2", "E-CC-3", "E-CC-9"})
+    minted = "2026-10-04T15:00:00+00:00"
+    cur = _Cur([("E-CC-2", "internal", "Client statement, discovery", minted),
+                ("E-CC-3", "internal", None, None),
+                ("E-CC-9", "producer", None, None)])
+    scope = pages.evidence_scope(cur, "ent-1", {"E-CC-2", "E-CC-3", "E-CC-9"},
+                                 promoted_at="2026-10-05T09:00:00+00:00")
     assert scope["withheld"] == {"E-CC-3"}
     assert scope["attribution"] == {"E-CC-2": "Client statement, discovery"}
     joined = " ".join(s for s in cur.sql if "evidence_index" in s)
@@ -142,7 +149,8 @@ def test_page_scope_is_one_entity_scoped_query():
 
 def test_no_ids_no_query():
     cur = _Cur([])
-    assert pages.evidence_scope(cur, "ent-1", set()) == {
+    assert pages.evidence_scope(cur, "ent-1", set(),
+                                promoted_at=None) == {
         "withheld": set(), "attribution": {}}
     assert cur.sql == []
 

@@ -735,7 +735,9 @@ _EVIDENCE_ID_KEYS = frozenset({"e_id", "cited_as", "also_filed_as",
                                "linked_subcap_ids", "split_of",
                                "customer_attribution", "connector_tool",
                                "connector_query", "connector_retrieved_at",
-                               "connector_response_sha256"})
+                               "connector_response_sha256",
+                               "customer_attribution_at",
+                               "attribution_bound"})
 #: Provenance a customer item never carries (0063): which span a row was
 #: split from, the internal label it was re-attributed from, and the
 #: connector call that produced it. The CLIENT reads the source; WE keep
@@ -743,7 +745,8 @@ _EVIDENCE_ID_KEYS = frozenset({"e_id", "cited_as", "also_filed_as",
 _EVIDENCE_PROVENANCE_KEYS = ("customer_attribution", "split_of",
                              "connector_tool", "connector_query",
                              "connector_retrieved_at",
-                             "connector_response_sha256")
+                             "connector_response_sha256",
+                             "customer_attribution_at", "attribution_bound")
 
 
 def _shared_attribution(item: dict) -> str | None:
@@ -755,9 +758,17 @@ def _shared_attribution(item: dict) -> str | None:
     and personal remarks). Only the first carries `customer_attribution`.
     An internal row without one is the internal span, or an unsplit row,
     and never serves to a customer.
+
+    And only on a run promoted at or after the span was minted: the reader
+    stamps `attribution_bound` (evidence.attribution_bound) from the run it
+    serves. An item without that stamp is NOT bound — default-deny — so a
+    reader that forgets the run withholds the span rather than publishing it
+    onto a run promoted before it existed (RC-08 review, 2026-10-04).
     """
     if str(item.get("origin") or "").strip().lower() not in \
             EVIDENCE_WITHHELD_ORIGINS:
+        return None
+    if item.get("attribution_bound") is not True:
         return None
     attr = item.get("customer_attribution")
     return attr.strip() if isinstance(attr, str) and attr.strip() else None

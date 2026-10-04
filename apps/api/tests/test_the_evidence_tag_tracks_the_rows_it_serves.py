@@ -59,7 +59,7 @@ def drawer(monkeypatch):
     the worker's repair pass changes it in production."""
     state = {"url": None}
 
-    def _fetch(cur, entity_id, wanted, run_id=None):
+    def _fetch(cur, entity_id, wanted, run_id=None, promoted_at=None):
         return {"items": [_row(state["url"])], "found": [], "not_found": [],
                 "foreign": [], "distribution": {}}
 
