@@ -327,8 +327,9 @@ def promote_run(conn, run_id, expected_revision=None) -> dict:
                 "blocking_total": totals,
                 "blocking_by_gate": families,
                 "truncated": {p: totals[p] > len(refusing[p]) for p in refusing},
-                # CG-PAR's measure of the whole run (gap count, the gold runs
-                # it was held to, the floors, what was disclosed rather than
+                # CG-PAR's measure of the whole run (structural gap count,
+                # the gold runs it was held to and the one left out, the
+                # count/fill WARNINGS, what was disclosed rather than
                 # refused) — so a parity refusal can be scoped in one read.
                 "promote_checks": world_report,
                 **revision_record,

@@ -133,11 +133,17 @@ def test_withheld_by_audience_is_still_reported_separately():
 
 
 def test_the_committed_gold_meets_its_own_standard():
-    """Every gold run, checked against the gold set, is clean — a floor the
-    reference fails is not a standard (GOLD-STANDARD.md)."""
+    """Every gold run, checked against the OTHER gold runs (leave-one-out),
+    has no structural gap — a floor the reference fails is not a standard
+    (GOLD-STANDARD.md). Compared with itself a gold run could show nothing,
+    which is why it is left out (owner decision B, 2026-10-04)."""
     sys.path.insert(0, str(ROOT / "apps" / "mcp"))
     from dma_mcp import parity
     gold = parity.load_gold(ROOT / "fixtures" / "surface_gold.json")
     for label, pages in parity.gold_runs(gold).items():
-        res = parity.check_run(pages, gold)
-        assert res["gaps"] == [], (label, res["gaps"][:3])
+        meta = gold["runs"][label]
+        res = parity.check_run(
+            pages, gold, run_id=meta["run_id_prefix"],
+            sub_vertical=meta["sub_vertical"])
+        assert res["left_out"] == [label], res["left_out"]
+        assert res["blocking"] == [], (label, res["blocking"][:3])

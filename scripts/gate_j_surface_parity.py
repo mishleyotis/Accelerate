@@ -23,19 +23,30 @@ It never compares VALUES. Two clients are different companies; a thinner
 number is an assessment result and not a defect. Only the SHAPE of what is
 served is comparable.
 
+WHAT REFUSES, AND WHAT ONLY WARNS (owner decision B, 2026-10-04). Exit 1
+only on a STRUCTURAL gap: a section or key the gold always serves is
+missing, or a must-present field is null or held beyond the decision-2 cap.
+List-length and fill-ratio differences print as "(warning)" lines and never
+fail the gate: how many rows a client has is an assessment result, and the
+floors that measure it were never adjudicated. Against the gold, a gold run
+is left out of its own reference set (--run-id / --exclude-gold), and gold
+of the target's sub-vertical is preferred (--sub-vertical); with none, the
+other gold is the reference for structure only.
+
 WITHHELD IS NOT MISSING. A section withheld by audience is a served decision,
 reported separately under "withheld by audience" and never as a gap.
 
 usage:
     # against the committed gold shapes (the standard every run is held to)
-    gate_j_surface_parity.py --gold fixtures/surface_gold.json --target-dir DIR
+    gate_j_surface_parity.py --gold fixtures/surface_gold.json --target-dir DIR \
+        [--sub-vertical CU] [--run-id RUN_UUID] [--exclude-gold LABEL]
     gate_j_surface_parity.py --gold fixtures/surface_gold.json --target-file P.json --page overview
     gate_j_surface_parity.py --gold fixtures/surface_gold.json --api URL --target SLUG [--token T]
     # one client against another
     gate_j_surface_parity.py --api URL --reference SLUG --target SLUG [--token T] [--audience A]
     gate_j_surface_parity.py --reference-file a.json --target-file b.json --page overview
 
-Exits 1 on a gap, 0 otherwise. Stdlib only, like every other gate here.
+Exits 1 on a structural gap, 0 otherwise (warnings included). Stdlib only, like every other gate here.
 """
 from __future__ import annotations
 
@@ -74,7 +85,12 @@ def _fetch(base, slug, page, audience, token):
         return None, 0
 
 
-def _report(gaps, withheld, compared, against) -> int:
+def _where(g):
+    return ".".join(str(x) for x in (g["page"], g["section"], g["key"]) if x)
+
+
+def _report(blocking, warnings, withheld, compared, against,
+            preamble=()) -> int:
     # A COMPARISON THAT COMPARED NOTHING IS NOT A CLEAN COMPARISON, and this
     # gate said otherwise on its first live run: a mistyped reference slug
     # 404ed on all six pages and it printed "no structural gap". That is the
@@ -85,19 +101,34 @@ def _report(gaps, withheld, compared, against) -> int:
               "compared, so nothing is clean. Check the reference slug "
               "against /v1/directory and the audience the token can read.")
         return 1
+    for line in preamble:
+        print(line)
     for w in withheld:
         print(f"  [withheld by audience — a decision, not a gap] "
               f"{w['page']}.{w['section']}")
-    if not gaps:
+    for g in warnings:
+        print(f"  (warning) [{g['kind']}] {_where(g)} — {g['detail']}")
+    if not blocking:
         print(f"Gate J: no structural gap against {against} "
-              f"({compared} page(s) compared).")
+              f"({compared} page(s) compared, {len(warnings)} warning(s)).")
         return 0
-    print(f"Gate J: {len(gaps)} structural gap(s) against {against}:")
-    for g in gaps:
-        where = ".".join(str(x) for x in (g["page"], g["section"], g["key"])
-                         if x)
-        print(f"  [{g['kind']}] {where} — {g['detail']}")
+    print(f"Gate J: {len(blocking)} structural gap(s) against {against}:")
+    for g in blocking:
+        print(f"  [{g['kind']}] {_where(g)} — {g['detail']}")
     return 1
+
+
+def _split(page, gaps, tgt):
+    """Classify pairwise gaps by today's contract: (blocking, warnings)."""
+    tsecs = parity.page_shape(tgt).get("sections") or {}
+    blocking, warnings = [], []
+    for g in gaps:
+        sev, _why = parity.classify(page, g, tsecs.get(g["section"]))
+        if sev == "block":
+            blocking.append(g)
+        elif sev == "warn":
+            warnings.append(g)
+    return blocking, warnings
 
 
 def _gold_disposition_withheld(gold, page, audience):
@@ -126,14 +157,20 @@ def main() -> int:
                     help="a directory of <page>.json (staged or served)")
     ap.add_argument("--gold",
                     help="the committed gold shapes, fixtures/surface_gold.json")
+    ap.add_argument("--sub-vertical",
+                    help="the target's sub-vertical code (CU, CL, IB, ...): "
+                         "gold of the same sub-vertical is preferred")
+    ap.add_argument("--run-id",
+                    help="the target's run id: a gold run with this id is "
+                         "left out of the reference set")
+    ap.add_argument("--exclude-gold", action="append", default=[],
+                    help="a gold label to leave out (repeatable)")
     ap.add_argument("--page", default="overview")
     a = ap.parse_args()
 
-    gaps, withheld, compared = [], [], 0
+    blocking, warnings, withheld, compared = [], [], [], 0
     if a.gold:
         gold = parity.load_gold(Path(a.gold))
-        runs = parity.gold_runs(gold)
-        skip = parity.never_served(gold)
         targets = {}
         if a.target_file:
             targets[a.page] = json.loads(Path(a.target_file).read_text())
@@ -149,26 +186,36 @@ def main() -> int:
             for page in PAGES:
                 tgt, ts = _fetch(a.api, a.target, page, "internal", a.token)
                 if tgt is None:
-                    gaps.append({"page": page, "section": None, "key": None,
-                                 "kind": "page_unreadable",
-                                 "detail": f"HTTP {ts} for the target"})
+                    blocking.append({"page": page, "section": None,
+                                     "key": None, "kind": "page_unreadable",
+                                     "detail": f"HTTP {ts} for the target"})
                     continue
                 targets[page] = tgt
         else:
             ap.error("--gold needs --target-file, --target-dir or --api/--target")
-        for page, tgt in sorted(targets.items()):
-            compared += 1
-            gaps.extend(parity.compare_against_gold(
-                page, runs, tgt,
-                skip_sections={s for (p, s) in skip if p == page}))
+        res = parity.check_run(targets, gold, run_id=a.run_id,
+                               sub_vertical=a.sub_vertical,
+                               exclude=a.exclude_gold)
+        blocking += res["blocking"]
+        warnings += res["warnings"]
+        compared = len(targets)
+        for page in sorted(targets):
             withheld.extend(_gold_disposition_withheld(gold, page, a.audience))
-        return _report(gaps, withheld, compared,
-                       f"the gold ({', '.join(sorted(runs))})")
+        tier = ("gold of the same sub-vertical" if res["tier"] == "sub_vertical"
+                else "no gold of this sub-vertical, so the other gold, for "
+                     "structure only")
+        preamble = [f"  reference: {tier}; left out: "
+                    f"{', '.join(res['left_out']) or 'none'}"]
+        preamble += [f"  (disclosed) [{d['kind']}] {_where(d)}"
+                     for d in res["disclosed"]]
+        return _report(blocking, warnings, withheld, compared,
+                       f"the gold ({', '.join(res['compared_against'])})",
+                       preamble)
 
     if a.reference_file and a.target_file:
         ref = json.loads(Path(a.reference_file).read_text())
         tgt = json.loads(Path(a.target_file).read_text())
-        gaps = compare_page(a.page, ref, tgt)
+        blocking, warnings = _split(a.page, compare_page(a.page, ref, tgt), tgt)
         withheld = parity.withheld_sections(a.page, ref, tgt)
         compared = 1
     elif a.api and a.reference and a.target:
@@ -182,17 +229,19 @@ def main() -> int:
             if tgt is None:
                 # A page the target cannot serve at all is the largest gap
                 # there is, and it is not a shape question.
-                gaps.append({"page": page, "section": None, "key": None,
-                             "kind": "page_unreadable",
-                             "detail": f"HTTP {ts} for the target while the "
-                                       f"reference served"})
+                blocking.append({"page": page, "section": None, "key": None,
+                                 "kind": "page_unreadable",
+                                 "detail": f"HTTP {ts} for the target while "
+                                           f"the reference served"})
                 continue
-            gaps.extend(compare_page(page, ref, tgt))
+            b, w = _split(page, compare_page(page, ref, tgt), tgt)
+            blocking += b
+            warnings += w
             withheld.extend(parity.withheld_sections(page, ref, tgt))
     else:
         ap.error("--gold with a target, --api with --reference/--target, "
                  "or both --*-file")
-    return _report(gaps, withheld, compared, "the reference")
+    return _report(blocking, warnings, withheld, compared, "the reference")
 
 
 if __name__ == "__main__":

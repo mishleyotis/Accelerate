@@ -1,25 +1,162 @@
 {
- "_doc": "A synthetic overview shaped like the run the 2026-10-04 gold audit found thin (RC-02): ten firmographic fields with six held, one sentiment bar and no gap_analysis. Placeholder values only — Gate J reads shape. Driven by the CI step 'Gate J — the committed gold shape' against fixtures/surface_gold.json, which must refuse it naming stated_share, key_absent and item_fill.",
+ "_doc": "A synthetic overview shaped like the run the 2026-10-04 gold audit found thin (RC-02): ten firmographic fields with six of the contract's must-present members held, one sentiment bar, customer AND employee themes and no gap_analysis. Placeholder values only - Gate J reads shape and must-present names. Driven by the CI step 'Gate J - the committed gold shape' against fixtures/surface_gold.json: under owner decision B it must exit 1 naming the two STRUCTURAL gaps it exists for (held_beyond_cap, key_absent gap_analysis; the overview sections it does not carry are reported as absent too) and print the stated share and fill ratios as warnings.",
  "firmographics": {
-  "produced_at": "2026-10-04T00:00:00Z", "producer_version": "fixture@1", "e_ids": ["E-1"], "internal_only": [],
+  "produced_at": "2026-10-04T00:00:00Z",
+  "producer_version": "fixture@1",
+  "e_ids": [
+   "E-1"
+  ],
+  "internal_only": [],
   "narrative_thread": "placeholder",
   "fields": [
-   {"field": "a", "value": "x", "unit": "u", "as_of": "2025", "confidence": "HIGH", "quarantined": false, "recency_band": "CURRENT", "source_e_id": "E-1"},
-   {"field": "b", "value": "x", "unit": "u", "as_of": null, "confidence": "HIGH", "quarantined": false, "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "c", "value": "x", "unit": null, "as_of": null, "confidence": "HIGH", "quarantined": false, "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "d", "value": "x", "unit": null, "as_of": null, "confidence": "HIGH", "quarantined": false, "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "e", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "f", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "g", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "h", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "i", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"},
-   {"field": "j", "value": null, "unit": null, "as_of": null, "confidence": "LOW", "quarantined": true, "quarantine_reason": "held", "recency_band": "UNVERIFIED", "source_e_id": "E-1"}
-  ]
+   {
+    "field": "employees",
+    "value": "x",
+    "unit": "u",
+    "as_of": "2025",
+    "confidence": "HIGH",
+    "quarantined": false,
+    "recency_band": "CURRENT",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "HQ",
+    "value": "x",
+    "unit": "u",
+    "as_of": null,
+    "confidence": "HIGH",
+    "quarantined": false,
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "founded",
+    "value": "x",
+    "unit": null,
+    "as_of": null,
+    "confidence": "HIGH",
+    "quarantined": false,
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "website",
+    "value": "x",
+    "unit": null,
+    "as_of": null,
+    "confidence": "HIGH",
+    "quarantined": false,
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "revenue",
+    "value": null,
+    "unit": null,
+    "as_of": null,
+    "confidence": "LOW",
+    "quarantined": true,
+    "quarantine_reason": "held",
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "assets",
+    "value": null,
+    "unit": null,
+    "as_of": null,
+    "confidence": "LOW",
+    "quarantined": true,
+    "quarantine_reason": "held",
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "CAGR",
+    "value": null,
+    "unit": null,
+    "as_of": null,
+    "confidence": "LOW",
+    "quarantined": true,
+    "quarantine_reason": "held",
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "branches",
+    "value": null,
+    "unit": null,
+    "as_of": null,
+    "confidence": "LOW",
+    "quarantined": true,
+    "quarantine_reason": "held",
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "primary_regulator",
+    "value": null,
+    "unit": null,
+    "as_of": null,
+    "confidence": "LOW",
+    "quarantined": true,
+    "quarantine_reason": "held",
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   },
+   {
+    "field": "charter",
+    "value": null,
+    "unit": null,
+    "as_of": null,
+    "confidence": "LOW",
+    "quarantined": true,
+    "quarantine_reason": "held",
+    "recency_band": "UNVERIFIED",
+    "source_e_id": "E-1"
+   }
+  ],
+  "undated_pct": 0.9,
+  "sub_vertical_undefined": false
  },
  "sentiment": {
-  "produced_at": "2026-10-04T00:00:00Z", "producer_version": "fixture@1", "e_ids": ["E-1"], "internal_only": [],
+  "produced_at": "2026-10-04T00:00:00Z",
+  "producer_version": "fixture@1",
+  "e_ids": [
+   "E-1"
+  ],
+  "internal_only": [],
   "narrative_thread": "placeholder",
-  "bars": [{"source": "s", "audience": "customer", "rating": 4.9, "scale": "1-5", "n": 10, "as_of": "2025", "e_id": "E-1", "url": "u", "trend_vs_prior": null}],
-  "themes": [{"theme": "t", "audience": "customer", "cap_statement": "c", "mapped_subcap_ids": ["P1C1.1.1"]}]
+  "bars": [
+   {
+    "source": "s",
+    "audience": "customer",
+    "rating": 4.9,
+    "scale": "1-5",
+    "n": 10,
+    "as_of": "2025",
+    "e_id": "E-1",
+    "url": "u",
+    "trend_vs_prior": null
+   }
+  ],
+  "themes": [
+   {
+    "theme": "t",
+    "audience": "customer",
+    "cap_statement": "c",
+    "mapped_subcap_ids": [
+     "P1C1.1.1"
+    ]
+   },
+   {
+    "theme": "t",
+    "audience": "employee",
+    "cap_statement": "c",
+    "mapped_subcap_ids": [
+     "P1C1.1.1"
+    ]
+   }
+  ]
  }
 }

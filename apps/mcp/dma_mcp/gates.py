@@ -680,31 +680,37 @@ GATES = {
 
     # RC-02 / RC-13 (SWBC gold audit, 2026-10-04). Both run at PROMOTE, over
     # the retained staged rows of the whole run (promote_checks.py).
-    "CG-PAR": ("No page is structurally thinner than every gold run", None,
+    "CG-PAR": ("No page lacks the structure every gold run serves", None,
                "At promote, each staged page is compared with the committed "
                "shape-only gold (surface_gold.json: keys, list lengths and "
                "per-row null patterns of the promoted gold runs, no values). "
-               "A gap holds only if it holds against EVERY gold run that has "
-               "the page: a section or key the gold fills and this run lacks "
-               "or serves empty without saying so; a list under half the "
-               "gold's rows; a member every gold row carries and fewer than "
-               "60% of these rows carry; a member's fill under 60% of the "
-               "gold's (a null member is unfilled; a null with its own "
-               "<member>_basis is a stated absence); a fields-type list whose "
-               "share of stated, un-held values is under 60% of the gold's. "
-               "Thinness is excused only by an empty_state ladder whose every "
-               "rung reached RESOLVED, VERIFIED_ABSENT or "
-               "REFUSED+ALTERNATE_TRIED. Never-served sections are skipped; "
-               "peer-comparison nulls on a run where no peer was scored are "
-               "disclosed once.",
+               "The run's own gold record is left out, and gold of its "
+               "sub-vertical is preferred; with none, the other gold is the "
+               "reference for structure only. A gap holds only if it holds "
+               "against EVERY reference gold run that has the page. BLOCKS "
+               "(owner decision B, 2026-10-04) on structure: a section today's "
+               "contract requires, or a key it requires or allows omitting "
+               "only on a stated condition, that every gold run serves and "
+               "this run lacks or serves empty without an empty_state saying "
+               "so; a row key the contract's item_shape requires and every "
+               "gold row carries; must-present members not stated (held, "
+               "null or absent) beyond 2 or 25% of the set, whichever is "
+               "smaller. WARNS, in promote_checks.parity.warnings and never "
+               "refusing, on counts and fill ratios: a list under half the "
+               "gold's rows, a member filled on under 60% of the gold's share "
+               "(a null with its own <member>_basis is a stated absence), a "
+               "fields list's stated share under 60% of the gold's. "
+               "Never-served sections are skipped; peer-comparison nulls on a "
+               "run where no peer was scored are disclosed once.",
                "Gate J compared top-level keys and called any non-empty list "
-               "filled, and it ran only in CI against a synthetic pair. Ten "
-               "firmographic fields with six held against a gold stating "
-               "fifteen of sixteen, one sentiment bar against seven, two of "
-               "eight platform cards with peer rows — all read as parity, and "
-               "no parity measurement ever touched the run before it was "
-               "promoted. Values are never compared: a thinner number is an "
-               "assessment result, a thinner shape is a production gap.",
+               "filled, and it ran only in CI against a synthetic pair: no "
+               "parity measurement ever touched the run before it was "
+               "promoted. Its first replacement then refused on counts — "
+               "goeasy-ltd's promoted run (CL) drew 16 refusals, among them "
+               "15 tech rows against 56 — compared every gold run with "
+               "itself, and held an insurance broker to three credit unions. "
+               "Values and counts are assessment results; a missing section "
+               "or key is a production gap.",
                "block"),
     "CG-STALE": ("A promoted page does not say its own run is withdrawn",
                  None,
@@ -719,7 +725,7 @@ GATES = {
                  "status changed afterwards and nothing re-read the text.",
                  "block"),
 
-    "CG-48":("A value is refused if its column cannot hold it", None,
+    "CG-48": ("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "
               "type of the column it lands in, joining writer_spec.json to "
               "column_types.json (generated from the migrations). Numeric, "
