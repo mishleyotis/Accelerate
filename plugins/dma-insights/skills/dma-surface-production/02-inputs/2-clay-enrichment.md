@@ -140,10 +140,12 @@ labelled one — it does not become a fact by arriving through an API.
 company, a subsidiary and a same-named institution in another market all have domains. Check
 the legal name, the regulator and the order of magnitude before you use a figure.
 
-A source that blocks automated retrieval cannot be registered at all, whatever Clay returned
-from it — Glassdoor, Indeed and ZipRecruiter all 403, so `register_evidence` gets
-`url_unreachable`. Such a value is an inference with its route named, or it is omitted. See
-`01-start-here/2-evidence.md`.
+A source that blocks automated retrieval cannot be registered by URL, whatever Clay returned
+from it — Glassdoor and ZipRecruiter pages 403, so `register_evidence` gets
+`url_unreachable`. Such a value is an inference with its route named, or it is omitted. An
+employer rating Clay echoes from Indeed is the exception with a door: read it from the Indeed
+connector (`get_company_data`) and register that reading `origin='connector'` (T3; RC-07,
+owner decision 3) rather than the Clay echo. See `01-start-here/2-evidence.md`.
 
 ## The contact route lands in real columns, and it lands NOW
 

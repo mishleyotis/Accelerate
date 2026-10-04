@@ -362,13 +362,13 @@ nine agents and called by the orchestrator tier; every other agent emits
 | Exa · Tavily (search + extract) | `research-conductor`, `enrichment-web-specialist` |
 | Clay | `research-conductor` (people slice), `enrichment-connector-specialist` (all five), `technographic-scanner` (company slice), `overview-people-producer` (people slice — leadership is written from it, ‡) |
 | Explorium (Vibe Prospecting) | `technographic-scanner`, `enrichment-connector-specialist`, `techstack-register-producer`, `techstack-layers-producer`, `insights-landscape-producer` (the register is written from it, ‡) |
-| Indeed (`search_jobs`) | `technographic-scanner` |
+| Indeed | `technographic-scanner` (`search_jobs`); `overview-market-producer` and `enrichment-connector-specialist` (`get_company_data` — employer ratings, RC-07) |
 | Quartr · Google Drive | nobody — Quartr is declared and not wired; the client folder lands through `drive_fetch.py` over Bash |
 
 Capability tools (web pair, Write/Edit/Agent/AskUserQuestion, connector
 tools) are at most five on every lane, producer and checker; the five that
 exceed it carry their own ceiling in `provision_agent_tools.CONNECTOR_TIER`
-(conductor 11 · technographic-scanner 9 · connector-specialist 8 ·
+(conductor 11 · technographic-scanner 9 · connector-specialist 9 ·
 web-specialist 6 · surface-producer 3).
 
 **Finally, close the loop.** Add the agent's row to the table in this file; add
