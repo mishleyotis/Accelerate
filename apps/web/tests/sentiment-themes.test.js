@@ -19,9 +19,9 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 
 const H = require("./ssr-harness");
-const F = require("./fixtures/swbc-shape");
+const F = require("./fixtures/gold-audit-shape");
 
-const ID = "swbc-shape";
+const ID = "gold-audit-shape";
 const CELL = /\bP[1-4]C\d(?:\.\d+){0,2}\b/;
 
 function card(sentiment, audience) {
@@ -43,7 +43,7 @@ test("O9 internal · all six promoted themes render, with their cap statements",
   }
   // The cap statement is the analysis — "sentiment that caps a cell is
   // evidence" — and internal readers get it.
-  assert.ok(text.includes("Complaint Management (2.0)"),
+  assert.ok(text.includes("Complaint Management (2.2)"),
     "the cap statement did not render on the internal card");
   // …with the cells it bears on as chips.
   assert.ok(text.includes("P2C3.7.3") && text.includes("P1C4.8.1"),
@@ -102,7 +102,7 @@ test("O9 customer · the REDUCED card: bars and themes, no cell codes, no cap vo
     assert.ok(!text.includes(F.SENTIMENT.narrative_thread),
       "the internal synthesis reached the reduced customer card");
     if (keep.includes("bars")) {
-      assert.ok(/4\.9/.test(text), "a released bar did not render for the customer");
+      assert.ok(/4\.6/.test(text), "a released bar did not render for the customer");
     }
   }
 });
@@ -110,7 +110,7 @@ test("O9 customer · the REDUCED card: bars and themes, no cell codes, no cap vo
 test("O9 customer · cap statements and chips stay off even if the payload carries them", () => {
   // Default-deny is the server's job; the card does not rely on it alone.
   const { text } = card(F.SENTIMENT, "customer");
-  assert.ok(!text.includes("Complaint Management (2.0)"),
+  assert.ok(!text.includes("Complaint Management (2.2)"),
     "a cap statement rendered on the customer card");
   assert.ok(!CELL.test(text), "a cell chip rendered on the customer card");
 });
