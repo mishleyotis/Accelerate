@@ -243,17 +243,7 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       dropped (D-34); and every citation and evidence row on a page is
 #       scoped: internal spans never serve, shareable split spans serve under
 #       their customer attribution (D-10, 0063).
-#   @13 2026-10-04 — the insights landscape GAPS tile's `detail`, computed
-#       at read for every audience, stops asserting how an absence was
-#       established. Under @12 it classified each ABSENT row's
-#       detection_basis prose with a keyword pattern and served "searched
-#       and not found" or "stated absent, not yet searched", both claims the
-#       register does not record (Baxter's targeted search was served as
-#       "not yet searched"). It now says only whether each row carries its
-#       own basis, which T3 prints. One bump past the integration branch's
-#       @12; if another stream also moved to @13 before this merges, the two
-#       entries share one @13 provided neither has been deployed.
-SERVE_RULES = "serve-rules@13"
+SERVE_RULES = "serve-rules@12"
 
 
 #: Keys whose value is a list of cited evidence ids (chips), and the one

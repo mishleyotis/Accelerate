@@ -24,8 +24,13 @@ The register has no structured field for how an absence was established
 (techstack_items carries status, evidence_level and detection_basis; there
 is no `searched`). So the tile states only what the rows record: how many
 were recorded absent, and whether each row carries its own basis, which T3
-prints for both audiences. It never classifies the producer's prose. The
-detail is served at read time, so the body change rides SERVE_RULES.
+prints for both audiences. It never classifies the producer's prose.
+
+The detail is computed at read time, so it is a body change under an
+unmoved promoted_at. It ships inside serve-rules@12, the single undeployed
+bump for every round-1 body change (main serves @10). Round 1's GAPS detail
+is already one of the changes that bump covers. The tag pin lives in
+test_surface_allowlist, not here.
 """
 import sys
 from pathlib import Path
@@ -153,10 +158,3 @@ def test_no_absent_row_says_so():
     assert tile["count"] == 0
     assert tile["detail"] == "No product is recorded absent in this register."
 
-
-def test_serve_rules_moved_past_12():
-    """The detail is a read-time body change under an unmoved promoted_at:
-    a cached reader must not 304 back onto the round-1 sentence."""
-    from dma_api import pages
-    n = int(pages.SERVE_RULES.rsplit("@", 1)[1])
-    assert n >= 13, pages.SERVE_RULES
