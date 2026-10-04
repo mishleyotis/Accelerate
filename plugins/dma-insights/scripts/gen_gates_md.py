@@ -46,7 +46,9 @@ def _emitted_ids() -> set:
     out = set()
     base = ROOT / "apps" / "mcp" / "dma_mcp"
     for p in list(base.glob("*.py")) + list(base.glob("*.json")):
-        out |= set(re.findall(r"\b(?:CG|AG|SG|ET)-[0-9]+\b", p.read_text(
+        # [a-z]? — letter-suffixed ids (CG-18b, RC-04/06 2026-10-04) are gates
+        # too; without it the census marks them registry-only.
+        out |= set(re.findall(r"\b(?:CG|AG|SG|ET)-[0-9]+[a-z]?\b", p.read_text(
             errors="ignore")))
     return out
 

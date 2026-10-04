@@ -34,17 +34,20 @@ def test_a_silent_field_is_a_gap():
     assert "techstack.compliance_attestations" in paths
 
 
-def test_a_held_field_is_not_a_gap():
-    """Quarantined WITH a reason is the producer's most defensible output: the
-    ladder ran, the figure failed the identity gate, and the reason IS the
-    content. Queueing it would ask for work already done."""
+def test_a_held_field_is_not_a_silent_gap():
+    """Quarantined WITH a reason is not silence — it is never reported as a
+    `must_present_member` gap. It IS still counted (RC-04, 2026-10-04): the
+    renderer hid held rows, so a held must-present member that was also off
+    the worklist was invisible everywhere. It is reported as its own kind,
+    `held_hidden_at_render` (test_enrichment_gaps_held.py)."""
     body = {"fields": [
         {"field": "website", "value": None, "quarantined": True,
          "quarantine_reason": "two domains resolve to this legal name and "
                               "neither could be tied to the filing entity"},
     ]}
     out = gaps.gaps_for_section("overview", "firmographics", body)
-    assert not any("website" in g["path"] for g in out)
+    kinds = {g["kind"] for g in out if "website" in g["path"]}
+    assert kinds == {"held_hidden_at_render"}
 
 
 def test_a_quarantine_with_no_reason_is_still_a_gap():

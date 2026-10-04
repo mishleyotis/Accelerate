@@ -148,11 +148,11 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **72** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **79** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
-### CG · Corpus / contract (51)
+### CG · Corpus / contract (57)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -207,6 +207,12 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `CG-49` | **A client-visible absence does not name this system's machinery.** The four empty_state keys the serve allowlist keeps for a customer - reason, closure_condition, closure, kind - carry no MEM/REF finding id, gate id, CUSTOMER_WITHHELD, or connector tool call. Ordinary words like 'gate', 'connector' and… | block | `gates/CG-49.md` |
 | `CG-50` | **The product a techstack row names appears in the span it cites.** Every non-ABSENT techstack.items[] row is substring-tested against the excerpts of its own cited e_ids. Matching is by DISTINCTIVE TOKEN or MULTI-WORD PHRASE, never by a generic word alone: an excerpt saying 'Financial Services Cloud'… | block | `gates/CG-50.md` |
 | `CG-51` | **A run that holds a peer set argues the techstack against it.** When this run holds a peer set — a peer with a score recorded for it, or a techstack row already carrying peer_deployments — the techstack page owes two things: at least one register row carries a non-empty peer_deployments[], and the… | block | — |
+| `CG-03b` | **A shape the contract states in prose is whole.** Shapes that lived only in the page prose are machine contract (item_shape) and read: platform tiles carry peer_synthesis and an estate_reach with an integer cells_not_yet_reached, peer rows are whole; the C4 grid is three audience tiles… | block | — |
+| `CG-18b` | **A held member is a last resort: capped, routed, never an answer.** At most 2 must-present members are held, or 25% of the set, whichever is smaller; every held reason names the registry route searched; a structural answer (not chartered, regulated by line, no retail branches) is stated as a value. | block | — |
+| `CG-18c` | **The sub-vertical's firmographic set is present.** overview.firmographics carries every member of the run's primary sub-vertical set (must_present_by_subvertical), stated or held within the ceiling; Farm Credit declares sub_vertical_undefined. | block | — |
+| `CG-18d` | **A scoped figure names the entity it describes.** On O2 (unit) and O8 (basis) alike, a figure scoped to a subsidiary, segment or division names that part of the group. | block | — |
+| `CG-18e` | **The strip and the regulatory card agree.** When context.regulatory_standing states license_type or primary_regulator, overview.firmographics states charter and primary_regulator too, naming the same regulators. | block | — |
+| `CG-40b` | **A WORKED_ABSENT alert shows the ladder that worked it.** An H3 alert in state WORKED_ABSENT logs its queries_run and carries no rung left open (NOT_RUN, not fetched, blocked) without the failover that ran in its place. | block | — |
 
 ### AG · Analytical (8)
 
@@ -228,7 +234,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `SG-S8` | **Sentiment rests on more than one line.** The count of rating rows across all audiences, computed at submit and never read from a declared displayed_lines, is greater than one; a self-published NPS (T4/T5) standing alone is thin whatever the count. *(registry-only: no module emits this id today)* | disclose | `gates/SG-S8.md` |
 | `SG-V4` | **Grounding against the run corpus.** Prose similarity against the narrowest applicable centroid (cell .62 / category .58 / pillar .55 / run .50); abstains to a recorded NOT_RUN below five members or without an embedding tier. *(registry-only: no module emits this id today)* | disclose | — |
 
-### ET · Enrichment trigger (11)
+### ET · Enrichment trigger (12)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -243,6 +249,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `ET-09` | **No other client named in this client's prose.** No payload string names another client in the corpus, unless that name is a peer recorded server-side for this run. | block | — |
 | `ET-10` | **A FACT rests on a T1 or T2 source.** Every cited evidence row labelled FACT carries tier T1 or T2. A T3-T5 row may be INFERENCE, HYPOTHESIS or CEILING_ESTIMATE; the label is derived from provenance, never typed. | block | — |
 | `ET-11` | **A machine technographic scan is a T1 source.** Every cited evidence row whose source names a technographic scan provider (Hubbl, BuiltWith, Wappalyzer, Explorium and their kind) carries tier T1. Machine-generated, timestamped deployment data is the strongest tier the ladder has;… | block | — |
+| `ET-05b` | **The regulatory card works its sub-vertical's regulators.** C3's ladder carries a rung naming a regulator of the run's primary sub-vertical family (regulator_family_by_subvertical) whose outcome is not open. | block | — |
 
 > **Emitted but not in the registry:** `SG-01`, `SG-06`. A verdict can name these and `explain_gate` cannot answer for them.
 

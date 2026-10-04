@@ -36,7 +36,7 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Three to five client priorities. Per item: {fa_id, name, verbatim_quote, source_document, source_page, source_filename, involved_subcap_ids[], entity_score, peer_score, delta, currency_status, currency_note, new_evidence_ids[], confidence}. verbatim_quote: THE CLIENT'S OWN WORDS, copied exactly from their document, 50-400 chars; REJECT anything that contains a capability code (PxCy.z), contains 'Score M1..M5', contains the word 'category' followed by a code, is a scoring rationale, or is a [Section] tag. source_page REQUIRED — the provenance triple is document + page + filename; without the page an AE cannot show the client where it came from. involved_subcap_ids: cells THIS run serves; entity_score is COMPUTED as the mean over them and peer_score the same way, at the same grain — a focus-area score built from a different cell set than the peer figure is a grain violation; delta likewise computed. currency_status: CONFIRMED_CURRENT (restated in the last 12 months) | AGING (last stated 12-24 months ago) | SUPERSEDED (they now say something different — state what) | UNCONFIRMED (no recent statement found; say what you searched). currency_note: 20-45 words with the newest supporting statement and its date. new_evidence_ids[]: E-CC ids for every step-2 validation source, registered through the connector (server allocates ids; url + verbatim excerpt 50-500 chars + retrieval date + tier + claim label). fa_id is one of the agent-created id families. Gates: S29_focus_grounding; S9_focus_invalid; S18_focus_title_duplication; provenance triple present; quote is client prose. r_layer REQUIRED per item (AG-01): {hypothesis, counter, domain_test, probes_run[], verdict, confidence} — a ranked or causal claim carries the argument that survived its own counter-case. An item that asserts nothing (a recorded absence with its ladder, a null-valued row) is exempt."
+     "doc": "Three to five client priorities. Per item: {fa_id, name, verbatim_quote, source_document, source_page, source_filename, involved_subcap_ids[], entity_score, peer_score, delta, currency_status, currency_note, new_evidence_ids[], confidence}. verbatim_quote: THE CLIENT'S OWN WORDS, copied exactly from their document, 50-400 chars; REJECT anything that contains a capability code (PxCy.z), contains 'Score M1..M5', contains the word 'category' followed by a code, is a scoring rationale, or is a [Section] tag. source_page — required for a PAGED document (a PDF, a deck, a filed report): the provenance triple is document + page + filename, and without the page an AE cannot show the client where it came from. NULL for an unpaginated artefact (a web page, a newsroom post): a page number on a URL is a default that looks like data (invariant 9; RC-09/D-30, SWBC served source_page 1 on four areas including web pages; CG-03b). involved_subcap_ids: cells THIS run serves; entity_score is COMPUTED as the mean over them and peer_score the same way, at the same grain — a focus-area score built from a different cell set than the peer figure is a grain violation; delta likewise computed. currency_status: CONFIRMED_CURRENT (restated in the last 12 months) | AGING (last stated 12-24 months ago) | SUPERSEDED (they now say something different — state what) | UNCONFIRMED (no recent statement found; say what you searched). currency_note: 20-45 words with the newest supporting statement and its date. new_evidence_ids[]: E-CC ids for every step-2 validation source, registered through the connector (server allocates ids; url + verbatim excerpt 50-500 chars + retrieval date + tier + claim label). fa_id is one of the agent-created id families. Gates: S29_focus_grounding; S9_focus_invalid; S18_focus_title_duplication; provenance triple present; quote is client prose. r_layer REQUIRED per item (AG-01): {hypothesis, counter, domain_test, probes_run[], verdict, confidence} — a ranked or causal claim carries the argument that survived its own counter-case. An item that asserts nothing (a recorded absence with its ladder, a null-valued row) is exempt."
     }
    }
   },
@@ -227,7 +227,7 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Container name assigned (sources say only 'Per field' — see page _notes). Per item: {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason}. Sub-vertical decides WHICH fields, not just what values (SV1: total assets, deposits, loans, NIM, efficiency ratio, NPL ratio; SV2: total assets, SHARES, loans, net worth ratio, ROA, MEMBER COUNT; SV3: loan portfolio, CRE concentration, C&I volume, NPA ratio; SV4: revenue by segment, trading revenue, IB fees, AUM; SV5: AUM, client count, revenue, ADVISOR COUNT; SV6: AUM BY STRATEGY, fund performance, NET FLOWS, expense ratios; SV7: premium placed, commission revenue, PRODUCER COUNT, acquisitions; SV8: DWP, COMBINED RATIO, LOSS RATIO, investment income, surplus; Farm Credit: UNDEFINED — do NOT borrow SV1's metrics). Must-present set: employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter, WEBSITE. `website` is the entity's own primary web domain, bare and lowercased (client.example — never a scheme, www., path or query). It is required on every sub-vertical because it is the one firmographic that is never sub-vertical specific, and because O11's self_sourced_pct is a share OF it: an evidence row published on this domain is the entity speaking about itself rather than a third party doing so. Cite it like any other field — the page it was read from — each as value + provenance. branches must be an integer count, never a serialised list or dict. primary_regulator is stated, not inferred from charter. IDENTITY GATE (blocking, per field): any failure -> QUARANTINE the field; emit it as absent with quarantine_reason, never as a value. RECENCY GATE (blocking): every figure carries {value, as_of, source_e_id, recency_band}; no as_of, no render; bands CURRENT <18mo | RECENT 18-36mo | LEGACY >36mo | UNVERIFIED undated; a LEGACY figure may render ONLY with its date visible; an UNVERIFIED figure never renders as current. MAGNITUDE SANITY: implausible -> quarantine, do not clamp. An unknown field renders an em dash, never a guess and never a dict repr — absent beats wrong.",
+     "doc": "Container name assigned (sources say only 'Per field' — see page _notes). Per item: {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason}. Sub-vertical decides WHICH fields, not just what values (SV1: total assets, deposits, loans, NIM, efficiency ratio, NPL ratio; SV2: total assets, SHARES, loans, net worth ratio, ROA, MEMBER COUNT; SV3: loan portfolio, CRE concentration, C&I volume, NPA ratio; SV4: revenue by segment, trading revenue, IB fees, AUM; SV5: AUM, client count, revenue, ADVISOR COUNT; SV6: AUM BY STRATEGY, fund performance, NET FLOWS, expense ratios; SV7: premium placed, commission revenue, PRODUCER COUNT, acquisitions; SV8: DWP, COMBINED RATIO, LOSS RATIO, investment income, surplus; Farm Credit: UNDEFINED — do NOT borrow SV1's metrics). Must-present set: employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter, WEBSITE. `website` is the entity's own primary web domain, bare and lowercased (client.example — never a scheme, www., path or query). It is required on every sub-vertical because it is the one firmographic that is never sub-vertical specific, and because O11's self_sourced_pct is a share OF it: an evidence row published on this domain is the entity speaking about itself rather than a third party doing so. Cite it like any other field — the page it was read from — each as value + provenance. branches must be an integer count, never a serialised list or dict. primary_regulator is stated, not inferred from charter. IDENTITY GATE (blocking, per field): a figure about a DIFFERENT institution is quarantined, never shown. SCOPED FIGURES (owner decision 2026-10-04, one rule for O2 and O8): a subsidiary or segment figure of THIS group is admissible when its `unit` names the entity or segment it describes (e.g. 'USD billions, SWBC Mortgage Corporation originations, HMDA 2024') — CG-18d refuses a scope word ('subsidiary', 'segment', 'division') with no entity named. HOLDING IS A LAST RESORT (CG-18b): at most 2 held members or 25% of the must-present set, whichever is smaller; every held quarantine_reason names the registry route searched and its outcome; a structural answer is a VALUE, never a hold — charter 'None — non-depository; licensed by line', primary_regulator the regulators by line, branches 'No retail branches (non-depository)'. charter and primary_regulator must agree with context.regulatory_standing (CG-18e). A held field renders as a stated absence with its reason and is listed by list_enrichment_gaps as held_hidden_at_render. RECENCY GATE (blocking): every figure carries {value, as_of, source_e_id, recency_band}; no as_of, no render; bands CURRENT <18mo | RECENT 18-36mo | LEGACY >36mo | UNVERIFIED undated; a LEGACY figure may render ONLY with its date visible; an UNVERIFIED figure never renders as current. MAGNITUDE SANITY: implausible -> quarantine, do not clamp. A field nobody could establish is held with its route, never a guess and never a dict repr — absent beats wrong, and a held field is a stated absence, not a missing row.",
      "must_present_key": "field",
      "must_present": [
       "employees",
@@ -264,7 +264,170 @@
        "net_flows",
        "investment_income"
       ]
-     ]
+     ],
+     "held_ceiling": {
+      "max_count": 2,
+      "max_share": 0.25,
+      "why": "Owner decision 2026-10-04 (RC-04/D-04): at most 2 held members or 25% of the must-present set, whichever is smaller. Read by CG-18b over the generic set (pass 1) and over the generic set plus must_present_by_subvertical (pass 2)."
+     },
+     "stated_not_held": [
+      "charter",
+      "primary_regulator",
+      "branches"
+     ],
+     "held_reason_names_route": true,
+     "must_present_by_subvertical": {
+      "RB": [
+       [
+        "total_assets",
+        "assets"
+       ],
+       [
+        "deposits",
+        "total_deposits"
+       ],
+       [
+        "loans",
+        "total_loans",
+        "loans_and_leases",
+        "loan_portfolio"
+       ],
+       [
+        "NIM",
+        "net_interest_margin"
+       ],
+       "efficiency_ratio",
+       [
+        "NPL_ratio",
+        "nonperforming_loans_ratio",
+        "npl"
+       ]
+      ],
+      "CU": [
+       [
+        "total_assets",
+        "assets"
+       ],
+       [
+        "shares",
+        "member_shares",
+        "shares_and_deposits",
+        "deposits"
+       ],
+       [
+        "loans",
+        "total_loans",
+        "loans_and_leases",
+        "loan_portfolio"
+       ],
+       "net_worth_ratio",
+       [
+        "ROA",
+        "return_on_assets"
+       ],
+       [
+        "member_count",
+        "members"
+       ]
+      ],
+      "CL": [
+       [
+        "loan_portfolio",
+        "loans",
+        "total_loans",
+        "loans_and_leases"
+       ],
+       [
+        "CRE_concentration",
+        "cre_concentration_ratio"
+       ],
+       [
+        "c_i_volume",
+        "ci_volume",
+        "c_and_i_volume",
+        "commercial_and_industrial_loans"
+       ],
+       [
+        "NPA_ratio",
+        "nonperforming_assets_ratio"
+       ]
+      ],
+      "CIB": [
+       [
+        "revenue_by_segment",
+        "segment_revenue"
+       ],
+       "trading_revenue",
+       [
+        "IB_fees",
+        "investment_banking_fees"
+       ],
+       [
+        "AUM",
+        "assets_under_management"
+       ]
+      ],
+      "RIA": [
+       [
+        "AUM",
+        "assets_under_management"
+       ],
+       [
+        "client_count",
+        "clients"
+       ],
+       [
+        "revenue",
+        "total_revenue"
+       ],
+       [
+        "advisor_count",
+        "advisors",
+        "financial_advisors"
+       ]
+      ],
+      "AM": [
+       [
+        "AUM_by_strategy",
+        "aum"
+       ],
+       "fund_performance",
+       "net_flows",
+       [
+        "expense_ratios",
+        "expense_ratio"
+       ]
+      ],
+      "IB": [
+       [
+        "premium_placed",
+        "commission_revenue"
+       ],
+       [
+        "producer_count",
+        "producers"
+       ],
+       [
+        "acquisitions",
+        "acquisition_count"
+       ]
+      ],
+      "IC": [
+       [
+        "DWP",
+        "direct_written_premium"
+       ],
+       "combined_ratio",
+       "loss_ratio",
+       "investment_income",
+       [
+        "surplus",
+        "policyholder_surplus"
+       ]
+      ],
+      "FC": []
+     },
+     "must_present_by_subvertical_why": "RC-06 (SWBC gold audit 2026-10-04, D-04): the sub-vertical sets lived only in this doc string, and must_present_any put generic 'revenue' beside commission_revenue and premium_placed, so a held generic revenue satisfied SV7. CG-18c (pass 2) enforces the run's primary sub-vertical's set; its held members count against held_ceiling together with the generic set. Keys are the sub-vertical codes (RB=SV1, CU=SV2, CL=SV3, CIB=SV4, RIA=SV5, AM=SV6, IB=SV7, IC=SV8, FC=Farm Credit, undefined: declare sub_vertical_undefined=true). Generic 'revenue' is an alias in no SV set except RIA, where revenue IS the metric."
     },
     "undated_pct": {
      "required": true,
@@ -272,14 +435,14 @@
      "doc": "'Report undated_pct for the panel' — COMPUTED share of undated figures."
     },
     "sub_vertical_undefined": {
-     "required": false,
+     "required": true,
      "type": "boolean",
-     "doc": "Farm Credit: UNDEFINED in research. Emit sub_vertical_undefined=true and say so on the surface."
+     "doc": "Required boolean (RC-06, 2026-10-04): false when the run's sub-vertical defines its firmographic set (must_present_by_subvertical); true for Farm Credit, which is UNDEFINED in research — emit true and say so on the surface. A boolean whose absence meant 'false' could not be told from one nobody set."
     },
     "identity_mismatch": {
      "required": false,
      "type": "boolean",
-     "doc": "Producer validator: set when a field's source names a different entity; quarantines the panel. Figures must be about THIS legal entity — a parent, subsidiary or same-name institution is a contamination, and the panel is quarantined rather than shown."
+     "doc": "Producer validator: set when a field's source names a different entity; quarantines the panel. Figures must be about THIS legal entity or a named part of it: a parent's or same-name institution's figure is a contamination and quarantines the panel. A subsidiary or segment figure whose `unit` names that subsidiary or segment is a SCOPED figure, admissible (owner decision 2026-10-04; the same rule as O8's `basis`)."
     }
    }
   },
@@ -400,7 +563,7 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Per item: {name, title, domain, appointed_on, tenure_months, as_of, source_e_id, relevance_note, confidence}. RECENCY VALIDATION (blocking per person): every entry carries as_of and a verification source — a name with no verification date does not render; cross-check against the CURRENT leadership page and remove departed people (a stale executive name is worse than a gap, because the AE will use it). Emit tenure where the source gives a start date. relevance_note: 10-25 words — why this person matters to THIS assessment, which capability they own, what they have said publicly about it; a roster without relevance is an org chart. (Sources table also names roster[].relevance, 'which pillar/capability this person owns' — see page _notes.) The Client Profile renders leaders in paragraphs OR a 5-column table; parse both shapes. Gates: no empty roster on a completed run; every entry dated; identity checks. CLAY CONTACT ROUTE (migration 0018, writer-bound 1:1): {email, linkedin_url, phone, enriched_at, enrichment_basis} are persisted per person and render in the same read as the name - the app makes NO third-party call while serving (invariant 1), so a route not established at synthesis time does not exist for the AE. enrichment_basis is the filing or profile the tool SURFACED, never the tool: 'Clay reports it' is not a source, and without a basis the contact route is the one field on the panel asserting something with no provenance. A name-similar match is an identity FAILURE, not a near-miss - a search for a named SVP Chief Data Officer returned an intern with the same surname at the same employer; the returned TITLE must match the person searched for, or the field is quarantined with its reason."
+     "doc": "Per item: {name, title, domain, appointed_on, tenure_months, as_of, source_e_id, relevance_note, confidence}. RECENCY VALIDATION (blocking per person): every entry carries as_of and a verification source — a name with no verification date does not render; cross-check against the CURRENT leadership page and remove departed people (a stale executive name is worse than a gap, because the AE will use it). Emit tenure where the source gives a start date: tenure_months is DERIVED from appointed_on, so a tenure with appointed_on null is a figure with no basis (invariant 9) and CG-03b refuses it — state appointed_on, or send neither (RC-09, SWBC 2026-10-04: six roster rows carried tenure with no appointment date). relevance_note: 10-25 words — why this person matters to THIS assessment, which capability they own, what they have said publicly about it; a roster without relevance is an org chart. (Sources table also names roster[].relevance, 'which pillar/capability this person owns' — see page _notes.) The Client Profile renders leaders in paragraphs OR a 5-column table; parse both shapes. Gates: no empty roster on a completed run; every entry dated; identity checks. CLAY CONTACT ROUTE (migration 0018, writer-bound 1:1): {email, linkedin_url, phone, enriched_at, enrichment_basis} are persisted per person and render in the same read as the name - the app makes NO third-party call while serving (invariant 1), so a route not established at synthesis time does not exist for the AE. enrichment_basis is the filing or profile the tool SURFACED, never the tool: 'Clay reports it' is not a source, and without a basis the contact route is the one field on the panel asserting something with no provenance. A name-similar match is an identity FAILURE, not a near-miss - a search for a named SVP Chief Data Officer returned an intern with the same surname at the same employer; the returned TITLE must match the person searched for, or the field is quarantined with its reason."
     },
     "verified_absent": {
      "required": false,
@@ -417,7 +580,7 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Per item (per point, oldest first): {period, value, unit, as_of, source_e_id, basis}. basis is the metric definition (total assets / DWP / AUM / premium placed) taken from the sub-vertical — mixing definitions across periods is a silent error that produces a fake trend. Every point renders with its as_of; an undated point does not render. IDENTITY GATE (blocking, per point): legal name, REGULATOR and FOOTPRINT must all match the entity's own; any mismatch -> QUARANTINE the series, render the honest empty state, emit quarantine_reason; never render a quarantined series. CROSS-SURFACE RECONCILIATION GATE (blocking): any two figures for the same metric and period differing by more than 25% is a contradiction — resolve by recent>older, specific>general, T1>T2>T3 and emit the resolution row, or quarantine BOTH. MAGNITUDE SANITY: a single point 7x its neighbours is a parse or identity error, not growth; implausible -> quarantine, never clamp. (Sources-table point shape {year, metric, value, unit, e_id} superseded by this emit shape — see page _notes.) Gates: S6_financials; S27_financial_series; S24_firmo_integrity; cross-surface reconciliation."
+     "doc": "Per item (per point, oldest first): {period, value, unit, as_of, source_e_id, basis}. basis is the metric definition (total assets / DWP / AUM / premium placed) taken from the sub-vertical — mixing definitions across periods is a silent error that produces a fake trend. Every point renders with its as_of; an undated point does not render. SCOPED FIGURES (owner decision 2026-10-04, one rule for O2 and O8): a series about a named subsidiary or segment of THIS group is admissible when its `basis` names the entity it describes (e.g. 'SWBC Mortgage Corporation only, HMDA originations') — CG-18d refuses a scope word ('subsidiary', 'segment', 'division') with no entity named. IDENTITY GATE (blocking, per point): legal name, REGULATOR and FOOTPRINT must all match the entity's own or the named part of it; any mismatch -> QUARANTINE the series, render the honest empty state, emit quarantine_reason; never render a quarantined series. CROSS-SURFACE RECONCILIATION GATE (blocking): any two figures for the same metric and period differing by more than 25% is a contradiction — resolve by recent>older, specific>general, T1>T2>T3 and emit the resolution row, or quarantine BOTH. MAGNITUDE SANITY: a single point 7x its neighbours is a parse or identity error, not growth; implausible -> quarantine, never clamp. (Sources-table point shape {year, metric, value, unit, e_id} superseded by this emit shape — see page _notes.) Gates: S6_financials; S27_financial_series; S24_firmo_integrity; cross-surface reconciliation."
     },
     "trend": {
      "required": true,
@@ -458,7 +621,23 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Two to four recurring themes PER AUDIENCE, extracted from the review and complaint TEXT, not from the star rating — the O9 prompt calls STEP 3 'THEMES, MAPPED TO CAPABILITIES (this is the analysis)'. Per item: {audience, theme, mapped_subcap_ids, cap_statement}. audience — the same customer | employee | industry vocabulary as bars[]. theme — the recurring pattern in the reviewers' own terms. mapped_subcap_ids — the ids the theme bears on. The prompt's own mapping is stated at CATEGORY grain (onboarding/account-opening friction -> P2C3, P2C1 · transfer, payment and processing delays -> P3C2, P2C2 · manual and spreadsheet-heavy internal work -> P3C1, P3C3 · data and personalisation complaints -> P4C1, P4C2 · app stability and release cadence -> P2C1 · advice and service quality -> P2C2), so category ids are legitimate here alongside cell ids; every id must be a catalogue id this run serves. cap_statement — PROSE, never a numeric field: which cell this sentiment caps and at what rubric level, with the cause distinguished. Measured exemplar: 'Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3.' Negative-dominant employee themes cap P1C4 and P4C3 at L3.0; mixed themes add +0.2 uncertainty — record which. Sentiment that does not connect to an assessed capability is decoration; sentiment that caps a cell is evidence. Emit [] together with the section empty_state (reason + sources_searched) when the review text supports no theme; never omit the key. ADJUDICATION 2026-08-05: the Surface Spec specifies this content in prose (O9 prompt STEP 3) and names no payload key; the four item keys are the serving DDL's own (overview_sentiment.themes). Item keys and id resolution are producer discipline — the connector type-checks the item as an object and nothing more."
+     "doc": "Two to four recurring themes PER AUDIENCE, extracted from the review and complaint TEXT, not from the star rating — the O9 prompt calls STEP 3 'THEMES, MAPPED TO CAPABILITIES (this is the analysis)'. Per item: {audience, theme, mapped_subcap_ids, cap_statement}. audience — the same customer | employee | industry vocabulary as bars[]. theme — the recurring pattern in the reviewers' own terms. mapped_subcap_ids — the ids the theme bears on. The prompt's own mapping is stated at CATEGORY grain (onboarding/account-opening friction -> P2C3, P2C1 · transfer, payment and processing delays -> P3C2, P2C2 · manual and spreadsheet-heavy internal work -> P3C1, P3C3 · data and personalisation complaints -> P4C1, P4C2 · app stability and release cadence -> P2C1 · advice and service quality -> P2C2), so category ids are legitimate here alongside cell ids; every id must be a catalogue id this run serves. cap_statement — PROSE, never a numeric field: which cell this sentiment caps and at what rubric level, with the cause distinguished. Measured exemplar: 'Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3.' Negative-dominant employee themes cap P1C4 and P4C3 at L3.0; mixed themes add +0.2 uncertainty — record which. Sentiment that does not connect to an assessed capability is decoration; sentiment that caps a cell is evidence. Emit [] together with the section empty_state (reason + sources_searched) when the review text supports no theme; never omit the key. ADJUDICATION 2026-08-05: the Surface Spec specifies this content in prose (O9 prompt STEP 3) and names no payload key; the four item keys are the serving DDL's own (overview_sentiment.themes). Item keys and id resolution are producer discipline — the connector type-checks the item as an object and nothing more.",
+     "item_shape": {
+      "required_keys": [
+       "audience",
+       "theme"
+      ],
+      "audiences": [
+       "customer",
+       "employee",
+       "industry"
+      ],
+      "customer_projection": [
+       "audience",
+       "theme"
+      ],
+      "customer_projection_why": "Owner decision 1 (2026-10-04): customers get a REDUCED sentiment card — rating bars and themes, without cell codes (mapped_subcap_ids), internal sources, cap vocabulary (cap_statement) or r_layer. Internal keeps the full card. Supersedes TRD §11's customer withholding for overview.sentiment only; thought_leadership stays withheld. This list is the theme keys a customer projection keeps; the serve layer owns the projection."
+     }
     },
     "gap_analysis": {
      "required": false,
@@ -471,7 +650,34 @@
      "type": "integer",
      "doc": "Producer counter, named by the Surface Spec's O9 Information sources table ('displayed_lines | producer'): the number of rating lines this section will actually render. 'A single displayed line is not a sentiment picture — thin sources declare themselves.' Not persisted and no column exists, deliberately — counts are computed, never stored (invariant 8). SG-S8 recomputes the count from bars[] rather than trusting this field, and discloses; it does not block."
     }
-   }
+   },
+   "mandatory_families": [
+    {
+     "family": "app stores",
+     "match": "App Store|Google Play|app stores?|Play Store"
+    },
+    {
+     "family": "Glassdoor",
+     "match": "Glassdoor"
+    },
+    {
+     "family": "Indeed",
+     "match": "\\bIndeed\\b"
+    },
+    {
+     "family": "CFPB",
+     "match": "\\bCFPB\\b|Consumer Financial Protection Bureau|complaint database"
+    },
+    {
+     "family": "BBB",
+     "match": "\\bBBB\\b|Better Business Bureau"
+    },
+    {
+     "family": "Trustpilot or Google reviews",
+     "match": "Trustpilot|Google (?:reviews|business|rating|listing)"
+    }
+   ],
+   "mandatory_families_why": "RC-05 (SWBC gold audit 2026-10-04): CG-40 reads these. Below the depth floor (2 rated lines) a section passes only when empty_state.sources_searched carries a rung per family worked to a TERMINAL outcome (RESOLVED, VERIFIED_ABSENT, REACHED, or REFUSED + ALTERNATE_TRIED); 'not retrieved', 'neither found nor ruled out', NOT_RUN, NOT FETCHED and BLOCKED are open. A connector reading (Indeed get_company_data, the CFPB complaint API) is a rung like any other (owner decision 3)."
   },
   "ceilings": {
    "surface_id": "O1b",
@@ -631,7 +837,63 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Five platform tiles, each with its fit score, the gaps it addresses, and a story that is about THIS client. Per platform: {fit_score, gaps[], story_md}. fit_score from the shared engine via get_platform_fit (CG-30 refuses a card whose score, rank or presence disagrees with it): fit = 100 x (0.528*opportunity + 0.208*interconnect + 0.064*greenfield + 0.20*alignment) x readiness_multiplier, where readiness MULTIPLIES (green 1.00 / amber 0.85 / red 0.62) so a platform whose prerequisites are red cannot reach the hot band of 80. The earlier text here said 0.66*opportunity + 0.34*readiness, which was a mis-transcription of engine v2 -- 0.26 + 0.08 = 0.34 and those are interconnect and greenfield, not readiness (owner adjudication 2026-08-19). Send alignment 0-1 quoting the entity's own stated objective, or OMIT it to renormalise and report impact_fallback; read, never recomputed — the agent EXPLAINS it, never recomputes or re-ranks it; the breakdown modal must agree with the headline fit (570 of 685 cards disagreed). Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's list (vertical guard: subvertical adjacency, platform_fit_data.py). story_md 90-150 words, whole sentences (501 cards shipped head-clipped mid-sentence), grounded in the client's own gaps and stack: what this platform would change for THIS client, which constraint it lifts, what it depends on, and what it does not solve; name the cells; cite; must reconcile to the composite — if the story argues for a platform the arithmetic ranks third, say why. gaps[] per row: {subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature, catalogue_path, e_ids[]} — the unit of recommendation is the L3 PLATFORM AREA and its L4 FEATURES; the path L3 -> L4 -> sub-capability must be renderable for every claim; catalogue_path present per row (gate); current_score MUST equal what the heatmap serves for that id, asserted within +/-0.05 before emitting; every row cites — a gap row with no evidence behind the current score is not addressable, it is a guess. Gates: S31_platform_distinctiveness; S13_platform_score_lead; S17_exec_fit_stale; breakdown-equals-headline."
+     "doc": "Five platform tiles, each with its fit score, the gaps it addresses, and a story that is about THIS client. Per platform: {fit_score, gaps[], story_md}. fit_score from the shared engine via get_platform_fit (CG-30 refuses a card whose score, rank or presence disagrees with it): fit = 100 x (0.528*opportunity + 0.208*interconnect + 0.064*greenfield + 0.20*alignment) x readiness_multiplier, where readiness MULTIPLIES (green 1.00 / amber 0.85 / red 0.62) so a platform whose prerequisites are red cannot reach the hot band of 80. The earlier text here said 0.66*opportunity + 0.34*readiness, which was a mis-transcription of engine v2 -- 0.26 + 0.08 = 0.34 and those are interconnect and greenfield, not readiness (owner adjudication 2026-08-19). Send alignment 0-1 quoting the entity's own stated objective, or OMIT it to renormalise and report impact_fallback; read, never recomputed — the agent EXPLAINS it, never recomputes or re-ranks it; the breakdown modal must agree with the headline fit (570 of 685 cards disagreed). Out-of-vertical rank-1 is a defect: a carrier platform must not top a bank's list (vertical guard: subvertical adjacency, platform_fit_data.py). story_md 90-150 words, whole sentences (501 cards shipped head-clipped mid-sentence), grounded in the client's own gaps and stack: what this platform would change for THIS client, which constraint it lifts, what it depends on, and what it does not solve; name the cells; cite; must reconcile to the composite — if the story argues for a platform the arithmetic ranks third, say why. gaps[] per row: {subcap_id, name, current_score, peer_score, gap, pillar, l3_area, l4_feature, catalogue_path, e_ids[]} — the unit of recommendation is the L3 PLATFORM AREA and its L4 FEATURES; the path L3 -> L4 -> sub-capability must be renderable for every claim; catalogue_path present per row (gate); current_score MUST equal what the heatmap serves for that id, asserted within +/-0.05 before emitting; every row cites — a gap row with no evidence behind the current score is not addressable, it is a guess. Gates: S31_platform_distinctiveness; S13_platform_score_lead; S17_exec_fit_stale; breakdown-equals-headline. TILE SHAPE BEYOND THE GAP ROWS (RC-09, SWBC gold audit 2026-10-04 — these lived only in 03-pages/platform/P1.md and 04-craft, so get_page_contract never stated them and they read as optional; the machine form is this field's item_shape, gated by CG-03b, and the keys are listed there rather than in a brace schema here so that stating them does not widen the customer serve allowlist): peer_synthesis is a REQUIRED string — what the named peers show at this layer, or, where peers are identified and not scored, a sentence naming them as such; peer_deployments is a list or null, one row per named peer INCLUDING the ones not established, each row carrying peer, deployed (true, false or null), basis, as_of and source_url or e_ids; peer_coverage is a number 0-1 or null, the established share; estate_reach is a REQUIRED object computed from the run's own technology register, carrying cells_not_yet_reached as an INTEGER, by_category rows, the derivation and e_ids (item_shape.estate_reach lists the by_category row keys).",
+     "item_shape": {
+      "required_keys": [
+       "peer_synthesis",
+       "estate_reach"
+      ],
+      "peer_synthesis": {
+       "type": "string",
+       "non_empty": true
+      },
+      "peer_deployments": {
+       "type": "list|null",
+       "item_required_keys": [
+        "peer",
+        "deployed",
+        "basis",
+        "as_of"
+       ],
+       "item_one_of": [
+        [
+         "source_url",
+         "e_ids"
+        ]
+       ],
+       "deployed": [
+        true,
+        false,
+        null
+       ]
+      },
+      "peer_coverage": {
+       "type": "number|null",
+       "min": 0,
+       "max": 1
+      },
+      "estate_reach": {
+       "type": "object",
+       "required_keys": [
+        "cells_not_yet_reached",
+        "by_category",
+        "derivation"
+       ],
+       "integer_keys": [
+        "cells_not_yet_reached"
+       ],
+       "by_category_item_keys": [
+        "category_id",
+        "category_name",
+        "cells_this_run_scores",
+        "cells_a_register_product_is_linked_to",
+        "linked_subcap_ids",
+        "ts_ids"
+       ],
+       "by_category_item_keys_enforced": false,
+       "by_category_why": "Stated, not yet enforced: the three gold runs serve three different by_category item shapes (Golden 1 category/cells_reached, Baxter category_name/cells_a_register_product_is_linked_to, Logix category/reached/total). Enforcing one needs the renderer's reader agreed first."
+      }
+     }
     },
     "discarded": {
      "required": true,
@@ -799,7 +1061,19 @@
      "item_type": null,
      "doc": "{verified: bool, sources_searched: [str]} — searched all applicable regulators and found nothing -> RECORD THE SOURCES SEARCHED. Verified absence supports the compliance-posture cell; unverified silence supports nothing."
     }
-   }
+   },
+   "regulator_family_by_subvertical": {
+    "RB": "Comptroller of the Currency|\\bOCC\\b|Federal Deposit Insurance|\\bFDIC\\b|Federal Reserve|(?:Department|Division) of (?:Banking|Financial)",
+    "CU": "National Credit Union Administration|\\bNCUA\\b|(?:Department|Division|Office) of (?:Financial|Credit Union)",
+    "CL": "Comptroller of the Currency|\\bOCC\\b|Federal Deposit Insurance|\\bFDIC\\b|Federal Reserve|(?:Department|Division) of (?:Banking|Financial)",
+    "CIB": "Securities and Exchange Commission|\\bSEC\\b|Financial Industry Regulatory Authority|\\bFINRA\\b|BrokerCheck|Federal Reserve|Commodity Futures|\\bCFTC\\b",
+    "RIA": "Securities and Exchange Commission|\\bSEC\\b|\\bIAPD\\b|Form ADV|Financial Industry Regulatory Authority|\\bFINRA\\b|BrokerCheck|securities (?:division|regulator|commissioner)",
+    "AM": "Securities and Exchange Commission|\\bSEC\\b|Commodity Futures|\\bCFTC\\b",
+    "IB": "(?:Department|Division|Office|Commissioner|Bureau) of Insurance|insurance (?:department|commissioner|division)s?|\\bDOI\\b|\\bTDI\\b|\\bNAIC\\b|\\bNIPR\\b",
+    "IC": "(?:Department|Division|Office|Commissioner|Bureau) of Insurance|insurance (?:department|commissioner|division)s?|\\bDOI\\b|\\bTDI\\b|\\bNAIC\\b|AM Best",
+    "FC": "Farm Credit Administration|\\bFCA\\b|Farm Credit System Insurance|\\bFCSIC\\b"
+   },
+   "regulator_family_why": "RC-06 (SWBC gold audit 2026-10-04, D-26): ET-05b requires the absence_of_enforcement / empty_state ladder to carry a rung naming a regulator of the run's PRIMARY sub-vertical family whose outcome is not open (not NOT_RUN, BLOCKED, not searched). The map restates the primary_regulator doc's 'By sub-vertical' list as data. An IB-primary run whose state insurance departments were 'not searched' is refused."
   },
   "context_sentiment": {
    "surface_id": "C4",
@@ -809,7 +1083,28 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "The sentiment grid at Context depth, each tile expanding inline to the items behind it — 'three tiles: customer, employee, market, each with drilldown rows and evidence chips' (Surface Spec O9 Information sources; the only field any source names for C4). Prototype-only surface; no prompt block of its own exists — produced under the O9 sentiment prompt at Context depth, and a RE-PROJECTION of the same dataset O9 renders as bars, so the two cards cannot disagree. Per tile: {audience, rows, e_ids}. audience — customer | employee | market ('market' at C4 is the same family O9's bars call 'industry'). rows[] — the drilldown source rows, one card each in the rendered grid, per row {source, rating, scale, n, as_of, url, e_id, note}: the first seven are the O9 bar's interpretability fields and carry its rules (no n -> not a signal, do not render a number; no scale -> the rating is meaningless and no bar is drawn; no as_of -> UNVERIFIED recency, never rendered as current; n below 30 -> low-sample warning, not a finding); note is the expansion body, which must END BY NAMING THE CELL IT CAPS — measured: 'Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3.' e_ids[] — the evidence chips on the tile; each must resolve, or the chip is a dead control. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY. SG-S8 flags a single-line render as thin — thin sources declare themselves; do NOT synthesise a second audience to fill the grid. RECONCILIATION: every rows[].e_id and rows[].rating must appear in overview.sentiment.bars. ADJUDICATION 2026-08-05: Backend Schema L504 gives C4 its own section and its own table, so it is not collapsed into O9 the way C6 shares overview.financial_series; but the tile and row item keys are not machine-stated anywhere ('each with drilldown rows and evidence chips' is the whole of it) — they are registry-assigned to match the O9 bar shape. THIS SECTION MUST BE READ BY THE ADAPTER: a column that promotes and is never read is the same defect as a field with no column."
+     "doc": "The sentiment grid at Context depth, each tile expanding inline to the items behind it — 'three tiles: customer, employee, market, each with drilldown rows and evidence chips' (Surface Spec O9 Information sources; the only field any source names for C4). Prototype-only surface; no prompt block of its own exists — produced under the O9 sentiment prompt at Context depth, and a RE-PROJECTION of the same dataset O9 renders as bars, so the two cards cannot disagree. Per tile: {audience, state, rows, e_ids}. EXACTLY THREE TILES, one per audience customer | employee | market (RC-09, SWBC 2026-10-04 served two; 'industry' is accepted as market). state — RATED (the tile carries a rated row) | WORKED_ABSENT (rows: [] and the ladder ran: every rung names its outcome) | UNWORKED (rows: [] and the ladder did not run); required on a tile with no rated row, and where sent it must agree with the rows. CG-03b. audience — customer | employee | market ('market' at C4 is the same family O9's bars call 'industry'). rows[] — the drilldown source rows, one card each in the rendered grid, per row {source, rating, scale, n, as_of, url, e_id, note}: the first seven are the O9 bar's interpretability fields and carry its rules (no n -> not a signal, do not render a number; no scale -> the rating is meaningless and no bar is drawn; no as_of -> UNVERIFIED recency, never rendered as current; n below 30 -> low-sample warning, not a finding); note is the expansion body, which must END BY NAMING THE CELL IT CAPS — measured: 'Below industry median (43). Most complaints relate to ACH processing delays, not service quality. Caps P2C2.1.1 at M3.' e_ids[] — the evidence chips on the tile; each must resolve, or the chip is a dead control. Sentiment older than 18 months is RECENT not CURRENT; older than 36 is LEGACY. SG-S8 flags a single-line render as thin — thin sources declare themselves; do NOT synthesise a second audience to fill the grid. RECONCILIATION: every rows[].e_id and rows[].rating must appear in overview.sentiment.bars. ADJUDICATION 2026-08-05: Backend Schema L504 gives C4 its own section and its own table, so it is not collapsed into O9 the way C6 shares overview.financial_series; but the tile and row item keys are not machine-stated anywhere ('each with drilldown rows and evidence chips' is the whole of it) — they are registry-assigned to match the O9 bar shape. THIS SECTION MUST BE READ BY THE ADAPTER: a column that promotes and is never read is the same defect as a field with no column.",
+     "item_shape": {
+      "audiences": [
+       "customer",
+       "employee",
+       "market"
+      ],
+      "audience_aliases": {
+       "industry": "market"
+      },
+      "required_keys": [
+       "audience",
+       "rows",
+       "e_ids"
+      ],
+      "state": [
+       "RATED",
+       "WORKED_ABSENT",
+       "UNWORKED"
+      ],
+      "state_required_when": "the tile carries no rated row"
+     }
     }
    }
   },

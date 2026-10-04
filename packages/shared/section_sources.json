@@ -109,6 +109,7 @@
      "kind": "card",
      "item_keys": [
       "audience",
+      "state",
       "rows",
       "e_ids"
      ],

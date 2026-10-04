@@ -76,10 +76,18 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
       * a member absent from the list entirely                    -> BLOCKS
       * a member present but null with no quarantine reason       -> BLOCKS
 
-    The second line is what keeps the absence protocol legal: a field the
-    ladder could not close is a finding, and it renders as a documented em
-    dash. The third and fourth are the ones that were invisible — silence,
-    and silence dressed as a value.
+    The second line keeps the absence protocol legal: a field the ladder
+    could not close is a finding. It is NOT free, and the 2026-08-14 premise
+    that it "renders as a documented em dash" was false — the renderer hid
+    held rows from that date. Measured on SWBC (RC-04, 2026-10-04): 6 of 10
+    members held, the strip showed four facts, and nothing said six were
+    missing. So holding is a LAST RESORT and CG-18b (`_check_held_share`)
+    caps it, per owner decision 2 (2026-10-04): at most 2 held or 25% of the
+    must-present set, whichever is smaller; a held reason names the registry
+    route searched; and a structural answer ("not chartered", "regulated line
+    by line", "no retail branches") is a VALUE, never a quarantine. The third
+    and fourth lines are the ones that were invisible — silence, and silence
+    dressed as a value.
 
     The set is read from the contract, so a section that gains a member gains
     its enforcement in the same edit and this function never changes.
@@ -94,20 +102,7 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
         return []
     key = spec.get("must_present_key", "field")
 
-    stated, held, empty = set(), set(), set()
-    for item in val or []:
-        if not isinstance(item, dict):
-            continue
-        member = _norm_member(item.get(key))
-        if not member:
-            continue
-        value = item.get("value")
-        if value not in (None, "", []):
-            stated.add(member)
-        elif item.get("quarantined") and str(item.get("quarantine_reason") or "").strip():
-            held.add(member)
-        else:
-            empty.add(member)
+    stated, held, empty = _member_states(val, key)
 
     out, accounted = [], stated | held
     for want in members:
@@ -150,6 +145,412 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
             "set requires one of them, and a sub-vertical that genuinely "
             "reports none of them still has to say which ladder established "
             "that"))
+    out.extend(_check_held_share(section, fname, spec, val,
+                                 _member_groups(spec)))
+    return out
+
+
+def _member_states(val, key="field"):
+    """(stated, held, empty) normalised member names of a must-present list.
+    Held = null value, `quarantined`, and a non-blank reason."""
+    stated, held, empty = set(), set(), set()
+    for item in val or []:
+        if not isinstance(item, dict):
+            continue
+        member = _norm_member(item.get(key))
+        if not member:
+            continue
+        value = item.get("value")
+        if value not in (None, "", []):
+            stated.add(member)
+        elif item.get("quarantined") and str(item.get("quarantine_reason") or "").strip():
+            held.add(member)
+        else:
+            empty.add(member)
+    return stated, held, empty
+
+
+def _member_groups(spec, extra=()) -> list:
+    """Every must-present requirement as a list of alias groups: each
+    `must_present` member (a name or an alias list), each `must_present_any`
+    group, plus `extra` (the sub-vertical's own set, read in pass 2)."""
+    groups = []
+    for want in list(spec.get("must_present") or []) + list(extra or []):
+        groups.append(list(want) if isinstance(want, (list, tuple)) else [want])
+    for group in spec.get("must_present_any") or []:
+        groups.append(list(group))
+    return groups
+
+
+# ── CG-18b · a held member is a last resort: capped, routed, never an answer ─
+#
+# The registry routes a held reason may name — O2's own "where the firmographic
+# actually lives" table and its STEP 3 enrichment ladder. A reason that names
+# none of them ("no rate is computed", "no count is stated on any page
+# reached") records that nothing was looked up, which is the one thing a
+# quarantine is not allowed to mean. Bare "registry" or "site" are not routes:
+# they name no place a second producer could re-run.
+_HELD_ROUTE = re.compile(
+    r"\b(?:SEC|EDGAR|10-K|10-Q|XBRL|call reports?|5300|FFIEC|UBPR|NPW|FDIC|"
+    r"BankFind|NCUA|OCC|Form 5500|5500|ESOP|NMLS|NIPR|NAIC|DOI|TDI|Form ADV|"
+    r"IAPD|BrokerCheck|FINRA|AM Best|HMDA|CFPB|"
+    r"departments? of insurance|divisions? of insurance|insurance departments?|"
+    r"ranking tables?|rankings?|trade[- ]press|annual reports?|audited|"
+    r"account dictionary|income statement|financial statements|newsroom|"
+    r"investor[- ]relations|press releases?|LinkedIn|acquisition announcements?|"
+    r"licen[cs]e (?:lookup|record|registry|search)|Secretary of State)\b",
+    re.I)
+# A named state or federal office ("Texas Department of Savings and Mortgage
+# Lending", "Indiana Department of Financial Institutions") is a route too.
+_HELD_ROUTE_OFFICE = re.compile(
+    r"\b(?:Department|Division|Office|Commissioner|Bureau) of [A-Z][a-z]+")
+
+# Structural answers. Each is a TRUE STATEMENT about the institution, and a
+# reason that says it has the value in hand and is withholding it. Measured on
+# SWBC: charter held as "not a chartered depository", primary_regulator held as
+# "no single primary regulator", while context.regulatory_standing STATED both.
+_STRUCTURAL_ANSWER = {
+    "charter": re.compile(
+        r"\bnot (?:a )?chartered\b|\bno (?:single |group |bank |depository )?"
+        r"charter\b|\bholds? no (?:group |single )?charter\b|"
+        r"\bnon-?depository\b|\bnot a (?:bank|depository|credit union)\b", re.I),
+    "primary_regulator": re.compile(
+        r"\bno (?:single |one )?(?:primary |prudential |group[- ]level )?"
+        r"(?:regulator|supervisor)\b|\b(?:regulated|supervised|licensed) "
+        r"(?:line[- ]by[- ]line|by line)\b|\bmultiple regulators\b|"
+        r"\beach (?:regulated )?line\b|\bno consolidated supervisor\b", re.I),
+    "branches": re.compile(
+        r"\bno (?:retail |physical )?branches\b|\bdoes not operate "
+        r"(?:retail |physical )?branches\b|\bbranchless\b|"
+        r"\bnon-?depository\b", re.I),
+}
+
+
+def _held_cap(spec, n_groups):
+    hc = spec.get("held_ceiling")
+    if not isinstance(hc, dict) or n_groups <= 0:
+        return None
+    return min(float(hc.get("max_count", n_groups)),
+               float(hc.get("max_share", 1.0)) * n_groups)
+
+
+def _held_groups(val, key, groups):
+    """The requirement groups satisfied ONLY by a held member."""
+    stated, held, _ = _member_states(val, key)
+    out = []
+    for g in groups:
+        norms = [_norm_member(a) for a in g]
+        if any(n in stated for n in norms):
+            continue
+        if any(n in held for n in norms):
+            out.append(g[0])
+    return out
+
+
+def held_share_exceeded(spec, val, groups) -> tuple:
+    """(held names, cap) when the held share is over the ceiling, else None.
+    Shared with pass 2, which adds the sub-vertical's members."""
+    cap = _held_cap(spec, len(groups))
+    if cap is None:
+        return None
+    names = _held_groups(val, spec.get("must_present_key", "field"), groups)
+    if len(names) > cap:
+        return names, cap
+    return None
+
+
+def _held_ceiling_reason(section, fname, names, n_groups, cap):
+    return _reason(
+        "CG-18b", section, f"{section}.{fname}",
+        f"{len(names)} of {n_groups} must-present members are held "
+        f"({', '.join(map(str, names))}) and the ceiling is {int(cap)} — at "
+        f"most 2, or 25% of the set, whichever is smaller (owner decision, "
+        f"2026-10-04). A held field renders as a stated absence; a strip that "
+        f"is mostly absences is not a firmographic profile. State what the "
+        f"registry routes answer — a structural answer ('not chartered', "
+        f"'regulated line by line', 'no retail branches') is a value — add "
+        f"scoped figures whose unit names the entity they describe, and hold "
+        f"only what no route can reach.")
+
+
+def _check_held_share(section, fname, spec, val, groups) -> list:
+    """CG-18b — the held share is capped, every held reason names the route it
+    searched, and a structural answer is stated rather than held."""
+    out = []
+    key = spec.get("must_present_key", "field")
+    over = held_share_exceeded(spec, val, groups)
+    if over:
+        out.append(_held_ceiling_reason(section, fname, over[0], len(groups),
+                                        over[1]))
+    structural = set(_norm_member(m) for m in spec.get("stated_not_held") or [])
+    for item in val or []:
+        if not isinstance(item, dict) or item.get("value") not in (None, "", []):
+            continue
+        reason = str(item.get("quarantine_reason") or "").strip()
+        if not (item.get("quarantined") and reason):
+            continue
+        name = str(item.get(key) or "")
+        norm = _norm_member(name)
+        rx = _STRUCTURAL_ANSWER.get(norm)
+        if norm in structural and rx and rx.search(reason):
+            out.append(_reason(
+                "CG-18b", section, f"{section}.{fname}[{name}]",
+                f"{name!r} is held with a reason that ANSWERS it "
+                f"({rx.search(reason).group(0)!r}). That is the value, not an "
+                f"absence: state it as a compound value (e.g. 'None — "
+                f"non-depository; licensed by line' for charter, the "
+                f"regulators by line for primary_regulator, 'No retail "
+                f"branches' for branches), cite the registry it came from, and "
+                f"make it agree with context.regulatory_standing."))
+            continue
+        if spec.get("held_reason_names_route") and not (
+                _HELD_ROUTE.search(reason) or _HELD_ROUTE_OFFICE.search(reason)):
+            out.append(_reason(
+                "CG-18b", section, f"{section}.{fname}[{name}]",
+                f"{name!r} is held and its reason names no registry route "
+                f"searched. A quarantine records a ladder that ran: name the "
+                f"route and its outcome (SEC EDGAR, the call report, NMLS, "
+                f"the state department of insurance, FINRA BrokerCheck, Form "
+                f"ADV, Form 5500, the trade-press ranking tables, the entity's "
+                f"newsroom), or run it. 'No figure is stated on any page "
+                f"reached' says nothing a second producer could re-run."))
+    return out
+
+
+# ── CG-18d · a scoped figure names the entity it describes (O2 and O8) ─
+#
+# RC-06 (SWBC gold audit, 2026-10-04; D-04, slice OH-02). O2 called every
+# subsidiary figure contamination while O8 on the same run served a
+# subsidiary-scoped HMDA series. Owner decision 2: a subsidiary or segment
+# figure is admissible when its unit (O2) / basis (O8) NAMES the entity it
+# describes. One rule, both surfaces: a scope word with no name beside it is
+# the shape that cannot be told from contamination.
+_SCOPE_WORD = re.compile(
+    r"\b(?:subsidiar(?:y|ies)|segment|division(?:al)?|affiliate|"
+    r"line of business|business line|operating line)\b", re.I)
+# Two consecutive capitalised tokens ("SWBC Mortgage Corporation",
+# "Financial Institution Group"), the shape a proper name takes.
+_ENTITY_NAME = re.compile(
+    r"\b[A-Z][A-Za-z0-9&'.-]*\s+(?:(?:of|and|&)\s+)?[A-Z][A-Za-z0-9&'.-]*")
+_SCOPED_KEYS = {"firmographics": ("fields", "unit"),
+                "financial_series": ("series", "basis")}
+
+
+def _check_scoped_figures(section, body) -> list:
+    entry = _SCOPED_KEYS.get(section)
+    if not entry or not isinstance(body, dict):
+        return []
+    container, key = entry
+    out = []
+    for i, item in enumerate(body.get(container) or []):
+        if not isinstance(item, dict) or item.get("value") in (None, "", []):
+            continue
+        text = str(item.get(key) or "")
+        if _SCOPE_WORD.search(text) and not _ENTITY_NAME.search(text):
+            out.append(_reason(
+                "CG-18d", section, f"{section}.{container}[{i}].{key}",
+                f"{key} {text[:80]!r} scopes this figure to part of the group "
+                f"without naming which part. A scoped figure is admissible "
+                f"only when its {key} names the entity or segment it "
+                f"describes (e.g. 'SWBC Mortgage Corporation, HMDA 2024'); "
+                f"an unnamed 'subsidiary' or 'segment' cannot be told from a "
+                f"different institution's figure."))
+    return out
+
+
+# ── CG-03b · shapes that lived only in prose, now machine contract ─────
+#
+# RC-09 (SWBC gold audit, 2026-10-04; D-30, D-38; slices PL-01/03/10/12,
+# CTX-11, OH-08, HM-04). "Payload shapes are law" — so a shape absent from
+# the machine contract was, in practice, optional. peer_synthesis and
+# estate_reach appeared 0 times in contracts_data.json; the C4 tile `state`
+# and its three-audience set lived in C4.md; tenure_months had no rule tying
+# it to appointed_on; and 'source_page REQUIRED' produced placeholder 1s on
+# web pages. Each now has an `item_shape` (or a doc clause) and this reader.
+_PROSE_SHAPE_TARGETS = {
+    "platform_story": ("platform", "platforms"),
+    "context_sentiment": ("context", "context_tiles"),
+    "sentiment": ("overview", "themes"),
+}
+_PAGED_FILE = re.compile(
+    r"\.pdf\b|\.docx?\b|\.pptx?\b|drive\.google\.com/file|/download\b", re.I)
+
+
+def _item_shape(page, section, field) -> dict:
+    try:
+        spec = sections(page)[section]["fields"].get(field) or {}
+    except KeyError:
+        return {}
+    return spec.get("item_shape") or {}
+
+
+def _is_rated(row) -> bool:
+    return isinstance(row, dict) and row.get("rating") is not None
+
+
+def _check_prose_shapes(page, section, body) -> list:
+    if not isinstance(body, dict):
+        return []
+    out = []
+    target = _PROSE_SHAPE_TARGETS.get(section)
+    if target and target[0] == page:
+        fname = target[1]
+        shape = _item_shape(page, section, fname)
+        items = body.get(fname)
+        items = items if isinstance(items, list) else []
+        if section == "platform_story" and shape:
+            out.extend(_platform_tile_shape(items, shape))
+        elif section == "context_sentiment" and shape and items:
+            out.extend(_context_tile_shape(items, shape))
+        elif section == "sentiment" and shape:
+            aud = set(shape.get("audiences") or [])
+            for i, t in enumerate(items):
+                if not isinstance(t, dict):
+                    continue
+                if not str(t.get("theme") or "").strip() or \
+                        (aud and t.get("audience") not in aud):
+                    out.append(_reason(
+                        "CG-03b", section, f"sentiment.themes[{i}]",
+                        f"a theme carries a non-empty `theme` and an audience "
+                        f"in {sorted(aud)}; this one has theme "
+                        f"{str(t.get('theme'))[:40]!r}, audience "
+                        f"{t.get('audience')!r}."))
+    if page == "heatmap" and section == "focus_areas":
+        for i, fa in enumerate(body.get("focus_areas") or []):
+            if not isinstance(fa, dict) or fa.get("source_page") is None:
+                continue
+            loc = str(fa.get("source_filename") or "")
+            doc = str(fa.get("source_document") or "")
+            web = bool(re.match(r"https?://", loc)) and not _PAGED_FILE.search(loc)
+            if web or re.search(r"unpaginated|\bweb page\b", doc + " " + loc,
+                                re.I):
+                out.append(_reason(
+                    "CG-03b", section,
+                    f"focus_areas.focus_areas[{i}].source_page",
+                    f"source_page {fa.get('source_page')!r} on an unpaginated "
+                    f"source ({loc[:70] or doc[:70]!r}). source_page is required "
+                    f"for a paged document and NULL for a web page — a page "
+                    f"number on a URL is a default that looks like data."))
+    if page == "overview" and section == "leadership":
+        for i, r in enumerate(body.get("roster") or []):
+            if isinstance(r, dict) and r.get("tenure_months") is not None \
+                    and not r.get("appointed_on"):
+                out.append(_reason(
+                    "CG-03b", section, f"leadership.roster[{i}].tenure_months",
+                    f"tenure_months {r.get('tenure_months')!r} with "
+                    f"appointed_on null — tenure is derived from the "
+                    f"appointment date, so a tenure with no date is a figure "
+                    f"with no basis. State appointed_on from the source, or "
+                    f"send neither."))
+    return out
+
+
+def _platform_tile_shape(items, shape) -> list:
+    out = []
+    pd_shape = shape.get("peer_deployments") or {}
+    er_shape = shape.get("estate_reach") or {}
+    allowed_deployed = pd_shape.get("deployed", [True, False, None])
+    for i, t in enumerate(items):
+        if not isinstance(t, dict):
+            continue
+        p = f"platform_story.platforms[{i}]"
+        name = t.get("platform") or t.get("l3_area") or f"tile {i}"
+        if not (isinstance(t.get("peer_synthesis"), str)
+                and t["peer_synthesis"].strip()):
+            out.append(_reason(
+                "CG-03b", "platform_story", f"{p}.peer_synthesis",
+                f"{name!r} carries no peer_synthesis. It is a required string: "
+                f"what the named peers show at this layer, or — where peers "
+                f"are identified and not scored — say so and name them. A tile "
+                f"silent about peers reads as one nobody compared."))
+        er = t.get("estate_reach")
+        if not isinstance(er, dict):
+            out.append(_reason(
+                "CG-03b", "platform_story", f"{p}.estate_reach",
+                f"{name!r} carries no estate_reach object. It is required and "
+                f"computed from the run's own technology register."))
+        else:
+            missing = [k for k in er_shape.get("required_keys") or []
+                       if er.get(k) in (None, "")]
+            bad_int = [k for k in er_shape.get("integer_keys") or []
+                       if k not in missing and (not isinstance(er.get(k), int)
+                                                or isinstance(er.get(k), bool))]
+            if missing or bad_int:
+                out.append(_reason(
+                    "CG-03b", "platform_story", f"{p}.estate_reach",
+                    f"{name!r} estate_reach is incomplete: "
+                    + "; ".join(([f"missing {', '.join(missing)}"] if missing
+                                 else [])
+                                + ([f"{', '.join(bad_int)} must be an integer "
+                                    f"computed from the register, never prose"]
+                                   if bad_int else []))
+                    + "."))
+        rows = t.get("peer_deployments")
+        if rows is None:
+            continue
+        if not isinstance(rows, list):
+            out.append(_reason("CG-03b", "platform_story",
+                               f"{p}.peer_deployments",
+                               "peer_deployments is a list of rows or null."))
+            continue
+        for j, r in enumerate(rows):
+            if not isinstance(r, dict):
+                continue
+            gaps = [k for k in pd_shape.get("item_required_keys") or []
+                    if k not in r]
+            if "deployed" in r and r["deployed"] not in allowed_deployed:
+                gaps.append("deployed must be true | false | null")
+            if not str(r.get("basis") or "").strip() and "basis" not in gaps:
+                gaps.append("basis is empty")
+            for group in pd_shape.get("item_one_of") or []:
+                if not any(k in r for k in group):
+                    gaps.append(" or ".join(group))
+            if gaps:
+                out.append(_reason(
+                    "CG-03b", "platform_story",
+                    f"{p}.peer_deployments[{j}]",
+                    f"peer_deployments row is incomplete ({'; '.join(gaps)}): "
+                    f"one row per named peer, {{peer, deployed, basis, as_of, "
+                    f"source_url or e_ids}}, unestablished ones as "
+                    f"deployed: null with the basis that says why."))
+    return out
+
+
+def _context_tile_shape(items, shape) -> list:
+    out = []
+    alias = shape.get("audience_aliases") or {}
+    want = set(shape.get("audiences") or [])
+    seen = [alias.get(t.get("audience"), t.get("audience"))
+            for t in items if isinstance(t, dict)]
+    if want and (sorted(seen) != sorted(want)):
+        out.append(_reason(
+            "CG-03b", "context_sentiment", "context_sentiment.context_tiles",
+            f"context_tiles carries audiences {seen} and the grid is exactly "
+            f"three tiles, one each for {sorted(want)}. Emit the tile even "
+            f"where its rows are empty, with a state and the ladder: an absent "
+            f"audience is a finding, a missing tile is a hole."))
+    states = set(shape.get("state") or [])
+    for i, t in enumerate(items):
+        if not isinstance(t, dict):
+            continue
+        rated = any(_is_rated(r) for r in t.get("rows") or [])
+        st = t.get("state")
+        if st is None and not rated:
+            msg = "carries no rated row and no state"
+        elif st is not None and st not in states:
+            msg = f"has state {st!r}, outside {sorted(states)}"
+        elif st == "RATED" and not rated:
+            msg = "says RATED and carries no rated row"
+        elif st in ("WORKED_ABSENT", "UNWORKED") and rated:
+            msg = f"says {st} and carries a rated row"
+        else:
+            continue
+        out.append(_reason(
+            "CG-03b", "context_sentiment",
+            f"context_sentiment.context_tiles[{i}].state",
+            f"the {t.get('audience')!r} tile {msg}. state is RATED | "
+            f"WORKED_ABSENT | UNWORKED and must agree with the rows: an empty "
+            f"tile says whether its ladder ran."))
     return out
 
 
@@ -721,6 +1122,97 @@ def _check_thought_leadership_depth(section, body) -> list:
         f"excuse it.")]
 
 
+# ── The ladder rung, read for its OUTCOME ─────────────────────────────
+#
+# RC-05 (SWBC gold audit, 2026-10-04). Every search escape hatch in this
+# connector accepted a ladder by its existence: any probes_run, any reason,
+# any string naming a year. SWBC's ladders carried rungs reading "NOT
+# FETCHED", "not retrieved; neither found nor ruled out" and NOT_RUN, each
+# counted as searched. A rung is complete only when it states a TERMINAL
+# outcome. Terminal tokens are written in capitals, as the corpus writes its
+# status words; open phrases are matched in any case. The earliest outcome in
+# a rung is its outcome ("RESOLVED, three points; 2020 not retrieved" is a
+# resolved rung with a recorded gap), except that a rung recording a failover
+# that then reached a terminal outcome is complete whatever came first
+# (REFUSED + ALTERNATE_TRIED; owner default 2026-10-04: WebSearch/WebFetch is
+# an acceptable failover when Exa/Tavily credit is exhausted).
+_RUNG_TERMINAL = re.compile(
+    r"\b(?:RESOLVED|VERIFIED[ _]ABSENT|REACHED|REJECTED|EXCLUDED|NEGATIVE|"
+    r"REFUSED\s*(?:\+|AND|&)\s*ALTERNATE[ _]TRIED|NOT[ _]APPLICABLE|"
+    r"CONFIRMED)\b"
+    # The registry-rung prose the C3 rulebook gives as its exemplar ("NCUA
+    # administrative orders index, searched by name: no action recorded") and
+    # its counted twin ("two disclosures found").
+    r"|\bno (?:action|order|enforcement action|record|result|match)e?s? "
+    r"(?:recorded|found|returned|listed|on record)\b"
+    r"|\b(?:\d+|one|two|three|four|five|six) (?:disclosures?|actions?|"
+    r"matters?|orders?|records?|results?|complaints?) (?:found|returned|"
+    r"recorded|on record|listed)\b")
+_RUNG_OPEN = re.compile(
+    r"\bNOT[ _]RUN\b|\bnot (?:retrieved|fetched|searched|reached|run|read|"
+    r"swept|completed)\b|\bneither found nor ruled out\b|\bBLOCKED\b|"
+    r"\bUNWORKED\b|\bPENDING\b|\bcould not be (?:read|fetched|reached)\b|"
+    r"\brefused (?:automated )?(?:retrieval|access)\b|\baccess denied\b|"
+    r"\bHTTP 403\b|\bsearch miss\b|\bnot a verified absence\b|\bNOT FETCHED\b",
+    re.I)
+_RUNG_FAILOVER = re.compile(
+    r"ALTERNATE[ _]TRIED|ran in its place|\bfail(?:ed)? ?over\b|"
+    r"\bfell back to\b|\binstead (?:ran|searched|used)\b", re.I)
+
+
+def rung_text(rung) -> str:
+    if isinstance(rung, str):
+        return rung
+    if isinstance(rung, dict):
+        return " ".join(str(v) for v in rung.values() if isinstance(v, str))
+    return ""
+
+
+def rung_outcome(rung):
+    """'terminal' | 'open' | None (the rung states no outcome)."""
+    if isinstance(rung, dict) and isinstance(rung.get("outcome"), str):
+        text = rung["outcome"]
+    else:
+        text = rung_text(rung)
+    if not text.strip():
+        return None
+    t = _RUNG_TERMINAL.search(text)
+    o = _RUNG_OPEN.search(text)
+    if t and _RUNG_FAILOVER.search(text):
+        return "terminal"
+    if t and (not o or t.start() < o.start()):
+        return "terminal"
+    if o:
+        return "open"
+    return None
+
+
+def ladder_of(body) -> list:
+    """The section's search ladder: `sources_searched` on its empty_state or
+    on the section itself. Never r_layer, a reason or a thin flag."""
+    if not isinstance(body, dict):
+        return []
+    es = body.get("empty_state")
+    for src in ((es or {}).get("sources_searched") if isinstance(es, dict)
+                else None, body.get("sources_searched"),
+                body.get("searches")):
+        if isinstance(src, list) and src:
+            return src
+    return []
+
+
+# A rung that disclaims the series it sits under ("a different subsidiary and
+# a different measure, so never joined") reached a DIFFERENT history.
+_RUNG_DISCLAIMS_SERIES = re.compile(
+    r"\bdifferent (?:subsidiary|measure|definition|series|entity|basis)\b|"
+    r"\bnever (?:joined|spliced)\b|\bnot (?:joined|spliced|used)\b|"
+    r"\bkept out of the series\b|\bexcluded from the series\b", re.I)
+# A closure condition that names the same series' earlier years as the fix.
+_BACKFILL = re.compile(
+    r"\b(?:extend|extends|back-?fill|longer|earlier years|prior years|walk "
+    r"back)\b", re.I)
+
+
 def _check_financial_series_reach(section, body) -> list:
     """CG-34 — a trajectory reaches back five years, or the search did.
 
@@ -741,6 +1233,13 @@ def _check_financial_series_reach(section, body) -> list:
     "annual report" — a producer that searched a 2021 filing says 2021, in
     whatever form of words it likes, and an entity with genuinely no published
     history can still satisfy it by showing where it looked.
+
+    TIGHTENED 2026-10-04 (RC-05, SWBC; slices CTX-05/06). The years were read
+    from EVERY empty_state string, so SWBC's four-year series passed on its
+    closure_condition ("HMDA volumes for 2018 to 2021 would extend this card")
+    and on another subsidiary's EDGAR rung. Years now come only from rungs with
+    a terminal outcome that do not disclaim the series, and a closure
+    condition naming the same series' earlier years is itself refused.
     """
     if section != "financial_series" or not isinstance(body, dict):
         return []
@@ -761,17 +1260,40 @@ def _check_financial_series_reach(section, body) -> list:
 
     reach = newest - (FINANCIAL_SERIES_YEARS - 1)
     es = body.get("empty_state")
+    out = []
+    # RC-05 (SWBC, 2026-10-04): naming the back-fill IS knowing the fix. A
+    # closure condition that names earlier years of this series as what would
+    # complete it is refused whatever else reached back — run it.
+    closure = str((es or {}).get("closure_condition") or "") \
+        if isinstance(es, dict) else ""
+    named = sorted(y for y in _years_in(closure)
+                   if y < min(served) and y not in served)
+    if named and _BACKFILL.search(closure):
+        out.append(_reason(
+            "CG-34", "financial_series", "financial_series.empty_state."
+            "closure_condition",
+            f"the closure condition names the back-fill for "
+            f"{', '.join(map(str, named))} as what would extend this series — "
+            f"you named the fix and did not run it. Fetch those years from "
+            f"the same source and basis, or record each one as a rung with "
+            f"its outcome (RESOLVED, or VERIFIED_ABSENT with what the source "
+            f"returned); a closure condition is what nobody can do yet, not a "
+            f"to-do list for this run."))
+    # Years count only from COMPLETED rungs about THIS series: never the
+    # reason, never the closure condition, never a rung that did not finish
+    # ("not retrieved; neither found nor ruled out") or that disclaims the
+    # series ("a different subsidiary and a different measure").
     searched = set()
-    if isinstance(es, dict):
-        for v in es.values():
-            if isinstance(v, str):
-                searched |= _years_in(v)
-            elif isinstance(v, list):
-                searched |= _years_in(*[x for x in v if isinstance(x, str)])
+    for rung in (es or {}).get("sources_searched") or [] \
+            if isinstance(es, dict) else []:
+        text = rung_text(rung)
+        if rung_outcome(rung) != "terminal" or _RUNG_DISCLAIMS_SERIES.search(text):
+            continue
+        searched |= _years_in(text)
     if any(y <= reach for y in searched):
-        return []
+        return out
 
-    return [_reason(
+    return out + [_reason(
         "CG-34", "financial_series", "financial_series.series",
         f"{len(served)} distinct year{'' if len(served) == 1 else 's'} served "
         f"({', '.join(str(y) for y in sorted(served))}) against the "
@@ -1506,6 +2028,8 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_resolved_contacts_are_served(name, body))
         reasons.extend(_check_thought_leadership_depth(name, body))
         reasons.extend(_check_financial_series_reach(name, body))
+        reasons.extend(_check_scoped_figures(name, body))
+        reasons.extend(_check_prose_shapes(page, name, body))
         reasons.extend(_check_no_typesetting_marks(name, body))
         reasons.extend(_check_source_label_is_a_citation(name, body))
         reasons.extend(_check_contact_routes_are_marked(name, body))

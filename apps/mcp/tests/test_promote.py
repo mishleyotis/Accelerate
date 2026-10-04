@@ -37,8 +37,15 @@ STAMPS = {"run_id": "11111111-1111-1111-1111-111111111111",
           "entity_id": "22222222-2222-2222-2222-222222222222",
           "promoted_at": "2026-08-08T00:00:00+00:00",
           "producer_version": "test@1", "provenance": "producer"}
+# Each rung states its outcome, and one rung works every sentiment family
+# (RC-05, 2026-10-04: CG-40 passes a section below its floor only on a
+# completed ladder covering the contract's mandatory_families).
 EMPTY = {"reason": "Walking-skeleton empty state",
-         "sources_searched": ["package", "research", "enrichment"]}
+         "sources_searched": [
+             "package — VERIFIED ABSENT", "research — VERIFIED ABSENT",
+             "enrichment: App Store, Google Play, Glassdoor, Indeed, "
+             "Consumer Financial Protection Bureau, Better Business Bureau, "
+             "Trustpilot — VERIFIED ABSENT"]}
 
 
 def _connect(user):
