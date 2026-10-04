@@ -121,7 +121,7 @@ Each path has been verified to exist.
    byte-identical.
 9. `get_evidence` for every id the summary cites, and `get_report_bundle` for
    the report's own executive summary and per-pillar deep dives.
-10. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py`
+10. `python3 "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>`
     tests the five anchors for shared vocabulary. It warns rather than blocks,
     because two sentences can carry one argument in different words — but a
     warning on all five anchors at once is not a vocabulary artefact.

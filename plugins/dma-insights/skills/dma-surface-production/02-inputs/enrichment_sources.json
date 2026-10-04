@@ -48,11 +48,11 @@
         },
         {
           "connector": "hmda",
-          "serves": "a mortgage-originating subsidiary's origination series — the CFPB/FFIEC HMDA data browser's aggregation filtered to the lender's LEI, by year",
+          "serves": "a mortgage subsidiary's origination series — the HMDA data browser filtered to its LEI, by year",
           "tier_band": "T1",
           "status": "wired",
-          "grounding": "register_evidence (the data-browser aggregation URL is fetchable and dated by its activity year); owner decision 2, 2026-10-04",
-          "notes": "Back-fill route for O8 and the firmographics strip (SWBC gold audit RC-07, D-05/D-23): SWBC Mortgage Corporation's HMDA series was public and never read. A scoped figure is admissible on the strip only when its unit/basis names the entity — 'SWBC Mortgage Corporation, HMDA 2024' — and never as the group's figure; no CAGR is computed over a subsidiary's series as if it were the group's."
+          "grounding": "register_evidence; owner decision 2, 2026-10-04",
+          "notes": "RC-07/D-23: SWBC Mortgage's series was public and never read. On the strip only with unit/basis naming the entity ('SWBC Mortgage Corporation, HMDA 2024'); never a group CAGR."
         },
         {
           "connector": "clay",
@@ -121,7 +121,7 @@
           "tier_band": "T1 per established deployment",
           "status": "wired",
           "grounding": "producer-session MCP connector; AG-04",
-          "notes": "AG-04 blocks a stated share without one row per peer (unknowns as deployed: null), source_url and as_of on every deployed: true row, and share-to-breakdown agreement within one peer. An identified peer set that is not SCORED (owner decision: peers not scored this engagement) is still a peer set — every platform tile carries one peer_deployments row per named peer (deployed:null with its ladder where unestablished), and peer_basis is stamped cannot_estimate rather than null (SWBC gold audit RC-10, D-08, D-17)."
+          "notes": "AG-04 blocks a stated share without one row per peer (unknowns as deployed: null), source_url and as_of on every deployed: true row, and share-to-breakdown agreement within one peer. Identified-not-scored is still a peer set: one row per named peer on every tile, peer_basis cannot_estimate (RC-10)."
         }
       ]
     },
@@ -171,18 +171,18 @@
             "overview-market-producer",
             "enrichment-connector-specialist"
           ],
-          "grounding": "register_evidence(origin='connector', connector={tool, query, retrieved_at, response}) — migration 0063; the server stamps T3 and verifies the excerpt against the stored response; scripts/provision_agent_tools.py SLICES['indeed/ratings']",
-          "notes": "Owner decision 3 (2026-10-04): a connector reading is admissible evidence through the 'connector' origin class, recording the tool, the query and the retrieval date; it is never laundered as a URL-less INFERENCE. The web page 403s; the connector does not. SWBC measured 2026-10-04: 3.1/5, recommend 46 of 97."
+          "grounding": "register_evidence(origin='connector', connector={tool, query, retrieved_at, response}) — 0063; the server stamps T3",
+          "notes": "Owner decision 3 (2026-10-04): connector readings are evidence, never URL-less INFERENCE. SWBC: 3.1/5, 46 of 97 recommend."
         },
         {
           "connector": "cfpb",
           "tool": "CFPB Consumer Complaint Database API (search/api/v1) — company filter with aggs",
           "origin": "connector",
-          "serves": "customer complaint aggregation for the entity — count, product and issue split, timely-response share — filtered by company name; the complaint TEXT stays the analysable part",
+          "serves": "complaint aggregation by company name — count, product split, timely-response share",
           "tier_band": "T1",
           "status": "wired",
-          "grounding": "register_evidence(origin='connector', ...) for the aggregation response, or the dated API URL as a fetchable source; migration 0063 tiers CFPB official data T1",
-          "notes": "SWBC measured 2026-10-04: 213 complaints, 96.2% timely response. An identity-excluded match (a same-named company) is recorded as the exclusion, not silently dropped."
+          "grounding": "register_evidence(origin='connector', ...) — 0063 tiers CFPB T1",
+          "notes": "SWBC 2026-10-04: 213 complaints, 96.2% timely. A same-named company is recorded as an exclusion."
         },
         {
           "connector": "clay",
@@ -190,7 +190,7 @@
           "tier_band": "T3",
           "status": "wired",
           "grounding": "producer-session MCP connector; 02-inputs/2-clay-enrichment.md (What Clay cannot do: sentiment at review-site depth — partial)",
-          "notes": "Glassdoor and ZipRecruiter pages 403, so register_evidence gets url_unreachable for them — a value whose only route is one of those pages is an inference with its route named, or it is omitted. Indeed is NOT in that class: its page 403s but the Indeed connector answers (the indeed row). Corrected 2026-10-04 (SWBC gold audit RC-07): this note used to say 'Glassdoor, Indeed and ZipRecruiter all 403', and the SWBC card shipped one bar while the Indeed connector returned 3.1/5 with 46 of 97 recommending."
+          "notes": "Glassdoor and ZipRecruiter pages 403 (url_unreachable): such a value is an inference with its route named, or omitted. Indeed is NOT a 403 rung — its connector answers (RC-07, 2026-10-04)."
         }
       ]
     },
@@ -203,7 +203,7 @@
           "tier_band": "T1",
           "status": "wired; live in a producer session, not live at ingest",
           "grounding": "producer-session MCP connector (match-business, enrich-business); the ingest path is packages/shared/enrichment_register.json; apps/worker/dma_worker/enrichment.py",
-          "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, its read-only calls (fetch-entities) are auto-approved by ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py, and its billed calls (match-business, enrich-business, 2 credits per enrichment per row) open only on the run's owner-written approval record, `engine.cli approve` -> 07_qa/approvals.json with the quoted cost (QA audit F-K01-003, 28-09-2026) — and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly. 2026-10-04 (SWBC gold audit RC-07): the techstack Clay/Explorium scans were recorded 'NOT_RUN, no binding' and nothing blocked. A connector-bound scan the run could not bind is a blocked PREFLIGHT, named by the session's binding check (plugins/dma-insights/scripts/connector_contract.py check; scripts/preflight.py step Bind), never a silent NOT_RUN on the register."
+          "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, its read-only calls (fetch-entities) are auto-approved by ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py, and its billed calls (match-business, enrich-business, 2 credits per enrichment per row) open only on the run's owner-written approval record, `engine.cli approve` -> 07_qa/approvals.json with the quoted cost (QA audit F-K01-003, 28-09-2026) — and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly. RC-07: an unbound Clay/Explorium scan blocks the preflight (connector_contract.py check), never a silent NOT_RUN."
         },
         {
           "connector": "clay",
@@ -319,16 +319,16 @@
       "serves": "the third search provider: firecrawl_search when Exa and Tavily refuse or are out of credit",
       "status": "wired",
       "held_by": [],
-      "grounding": "scripts/hooks/autoapprove_connector.py ENRICHMENT_TOOLS (firecrawl_search); granted to no agent role, so a session that holds it is the one that calls it"
+      "grounding": "autoapprove_connector.py ENRICHMENT_TOOLS; granted to no role"
     },
     "websearch_webfetch": {
-      "serves": "the last failover: the built-in WebSearch and WebFetch, when every paid provider refused or ran out of credit",
+      "serves": "the last failover: built-in WebSearch/WebFetch when every paid provider refused",
       "status": "wired",
       "held_by": [
         "research-conductor",
         "enrichment-web-specialist"
       ],
-      "grounding": "scripts/provision_agent_tools.py WEB; owner default 2026-10-04 (an acceptable failover when Exa/Tavily credit is exhausted)"
+      "grounding": "provision_agent_tools.py WEB; owner default 2026-10-04"
     },
     "_rule": "A category lane holds neither: it EMITS a connector volley as a search_requests entry and the servicing tier fires it, logging the search with the tool that ran it (RESEARCH-PROTOCOL.md § Tools).",
     "_failover": [
@@ -337,6 +337,6 @@
       "firecrawl",
       "websearch_webfetch"
     ],
-    "_failover_rule": "A refused, rate-limited (402/429) or credit-exhausted provider hands the request to the next one in _failover, in order. A rung is NOT_RUN only when the whole chain failed, and it then names every provider tried with each one's refusal. SWBC gold audit 2026-10-04 (RC-07, D-22): on 2026-10-01 Exa/Tavily/Firecrawl credit ran out and 281 H3 alerts, the I1 contradictory probes and the techstack ABSENT search all recorded NOT_RUN with no failover tried. 01-start-here/4-absence-protocol.md § A refusal hands over."
+    "_failover_rule": "A refused, 402/429 or credit-exhausted provider hands the request to the next in _failover. NOT_RUN only after the whole chain failed, naming every provider tried. RC-07/D-22: on 2026-10-01 credit ran out and 281 H3 alerts, the I1 probes and the techstack ABSENT search recorded NOT_RUN with no failover."
   }
 }

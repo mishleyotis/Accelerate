@@ -601,7 +601,7 @@ silence; and an `as_of` left null because the date is "in the prose anyway".
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **Every row is dated** (RC-12(i), D-23): CG-10 now reaches `techstack.techstack` — `as_of` is the date of the cited evidence (SWBC: TS-011/014/015/029/031 shipped null beside evidence dated 2026-09-01), or the row carries an UNVERIFIED rung saying the date was not established.
 

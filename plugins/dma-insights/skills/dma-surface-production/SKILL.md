@@ -299,22 +299,12 @@ so a contradiction *between* pages survives every per-page gate:
 python scripts/check_consistency.py <rundir>/   # all six + bundle.json, catalogue.json, fit.json
 ```
 
-It reconciles the composite against the pillar means, the hero against the grid, gap rows
-against served scores, roadmap ids against the recommendation set, landscape counts against the
-register, O8 against C6, confidence against evidence count, and the framing sentence against
-the top finding. It also refuses a cited cell belonging to another sub-vertical, a served cell
-whose drawer says nothing, a coverage denominator that is not the served cell set, and a run
-whose five narrative anchors are about different constraints. The binding (primary and
-supplementary sub-verticals) is read from `bundle.json` — never typed (MEM-0559). Since the
-SWBC gold audit (2026-10-04, RC-10 / RC-12) it also executes the cross-section invariants the
-contracts name: factor contributions × readiness × relevance = the composite (O5 and P1), O5 =
-P1 = the engine (`fit.json`), no rank or fit on a non-READY tile, a tile for every
-recommendation area, a cell count in every discard and the top-10 catalogue areas covered
-(`catalogue.json`), stair-step order against the roadmap phases and the platforms' `depends_on`,
-one thin definition per payload (which one is still an open adjudication), every cited e_id in
-H6, audience-neutral O7 counts and tenure from `appointed_on`, the O6 ranking basis against the
-alignment scores, and one `peer_deployments` row per identified peer on every tile with O1
-naming the cohort.
+It reconciles the composite against the pillar means, the hero against the grid, gap rows against
+served scores, roadmap ids against recommendations, landscape counts against the register, O8 against
+C6, confidence against evidence count, and the framing sentence against the top finding. It refuses a
+cell of another sub-vertical (binding read from `bundle.json`, MEM-0559), a silent drawer, a coverage
+denominator that is not the served set, five anchors about different constraints, and every RC-10/RC-12
+cross-section invariant listed in `scripts/README.md`.
 
 ### 7 · Submit and repair
 
