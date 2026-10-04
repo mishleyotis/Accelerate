@@ -102,7 +102,7 @@
    "internal": "served"
   },
   "overview.sentiment": {
-   "customer": "withheld",
+   "customer": "served",
    "internal": "served"
   },
   "overview.thought_leadership": {

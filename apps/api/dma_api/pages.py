@@ -232,17 +232,37 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       took two walker fixes from the re-check: element paths are deleted
 #       highest index first, and an id-keyed map or wrapper dict is filtered
 #       by its values' keys, never its ids — @11 never served without them.
-#   @12 2026-10-04 — the SWBC gold audit (RC-08) and the owner's decisions
-#       of that day. Customer bodies change under an unmoved promoted_at:
-#       `overview.sentiment` serves a REDUCED card instead of nothing
-#       (decision 1); the tech register serves CONFIRMED and ABSENT rows only
-#       and its layer rollup and the insights landscape tiles follow the
-#       filtered register (DECISIONS D4); platform estate_reach and
-#       integration_pathway stop being hidden by an undocumented marking
-#       (over-redaction, D-11); an H5 gate row about a withheld section is
-#       dropped (D-34); and every citation and evidence row on a page is
-#       scoped: internal spans never serve, shareable split spans serve under
-#       their customer attribution (D-10, 0063).
+#   @12 2026-10-04 — the SWBC gold audit and the owner's decisions of that
+#       day: ONE bump for every body change of the round-1 fixes, merged on
+#       one branch and not yet deployed. Bodies change under an unmoved
+#       promoted_at in these ways, each a reason on its own:
+#         · decision 1 / RC-08 — `overview.sentiment` serves customers a
+#           REDUCED card (bars + themes; no cell codes, internal sources,
+#           cap vocabulary or r_layer) instead of nothing;
+#         · DECISIONS D4 / D-12 — the customer tech register serves
+#           CONFIRMED and ABSENT rows only, and its layer rollup
+#           (`layers[].detected`) and the insights landscape tiles are
+#           recomputed from the filtered register;
+#         · D-11 — platform `estate_reach` and `integration_pathway` stop
+#           being hidden by a bare internal_only marking (a {path, why}
+#           marking is honoured), and dict markings are applied instead of
+#           silently skipped;
+#         · D-34 — an H5 safeguard-gate row whose every target section is
+#           withheld for the audience is dropped;
+#         · D-10 / 0063 — every citation and evidence row on a page is
+#           scoped: internal spans never serve; a shareable split span serves
+#           under its customer attribution, and ONLY on a run promoted at or
+#           after the span was minted (evidence.attribution_bound), so a span
+#           minted for a later run never changes a body already promoted;
+#         · RC-11 / D-15 (P3) — the insights landscape GAPS tile's `detail`
+#           is chosen per register from how each ABSENT row was established
+#           (`computed._gaps_detail`), not one fixed sentence;
+#         · RC-04 / RC-05 — `enrichment_status` counts firmographics by
+#           STATED values (a held null is not one) and sentiment is thin
+#           below 2 bars, not 1 (packages/shared/enrichment_register.json);
+#         · RC-09 — `context_tiles[].state` joins the customer allowlist.
+#       Any further change to these before @12 is first deployed rides on
+#       @12; after that, it is @13.
 SERVE_RULES = "serve-rules@12"
 
 
