@@ -545,13 +545,32 @@ def _context_tile_shape(items, shape) -> list:
             msg = f"says {st} and carries a rated row"
         else:
             continue
+        tail = ""
+        if st is None:
+            # A page promoted before `state` existed meets this on a resubmit
+            # nobody intended (fix2/gates): name the migration, and propose
+            # the value from the tile's own ladder.
+            tail = (f" propose state: {_proposed_tile_state(t)} (from this "
+                    f"tile's sources_searched). "
+                    + str(shape.get("state_migration") or ""))
         out.append(_reason(
             "CG-03b", "context_sentiment",
             f"context_sentiment.context_tiles[{i}].state",
             f"the {t.get('audience')!r} tile {msg}. state is RATED | "
             f"WORKED_ABSENT | UNWORKED and must agree with the rows: an empty "
-            f"tile says whether its ladder ran."))
+            f"tile says whether its ladder ran." + tail))
     return out
+
+
+def _proposed_tile_state(tile) -> str:
+    """WORKED_ABSENT when the tile's ladder ran and every rung names its
+    outcome (the contract's definition), else UNWORKED. A proposal for the
+    producer to confirm, never applied by the server."""
+    ladder = tile.get("sources_searched") if isinstance(tile, dict) else None
+    if isinstance(ladder, list) and ladder and all(
+            rung_outcome(r) is not None for r in ladder):
+        return "WORKED_ABSENT"
+    return "UNWORKED"
 
 
 # ── CG-20 · a vendor is a company, not a category ─────────────────────
@@ -2084,10 +2103,16 @@ def validate_pass1(page: str, payload: dict) -> list:
                         f"envelope field {fname!r} is required on every "
                         "section, empty states included"))
                 elif spec["required"] and not empty_declared:
+                    # A field added after a client was promoted carries its
+                    # migration in the contract; the refusal names it, so a
+                    # resubmit (or a re-promote over a RETAINED page) is not
+                    # met by a bare "missing" (fix2/gates).
+                    migration = spec.get("migration")
                     reasons.append(_reason(
                         "CG-02", name, f"{name}.{fname}",
                         f"required field {fname!r} missing and no explicit "
-                        "empty state declared"))
+                        "empty state declared"
+                        + (f". {migration}" if migration else "")))
                 continue
             # CG-19 — `required: true` was satisfied by an EMPTY list.
             #

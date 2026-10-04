@@ -437,7 +437,8 @@
     "sub_vertical_undefined": {
      "required": true,
      "type": "boolean",
-     "doc": "Required boolean (RC-06, 2026-10-04): false when the run's sub-vertical defines its firmographic set (must_present_by_subvertical); true for Farm Credit, which is UNDEFINED in research — emit true and say so on the surface. A boolean whose absence meant 'false' could not be told from one nobody set."
+     "doc": "Required boolean (RC-06, 2026-10-04): false when the run's sub-vertical defines its firmographic set (must_present_by_subvertical); true for Farm Credit, which is UNDEFINED in research — emit true and say so on the surface. A boolean whose absence meant 'false' could not be told from one nobody set.",
+     "migration": "An overview promoted before 2026-10-04 (RC-06) may carry sub_vertical_undefined null or omit it, and CG-02 refuses it on any resubmit, and at promote_run when it is a RETAINED page and another page is being fixed. Migration: set false when the run's primary sub-vertical has a set in must_present_by_subvertical, true only where research leaves it undefined (Farm Credit) and the surface says so; change nothing else. Then resubmit the overview page alone and promote (05-lifecycle/2-versioning.md, 'Fixing one page without a rerun')."
     },
     "identity_mismatch": {
      "required": false,
@@ -1103,7 +1104,8 @@
        "WORKED_ABSENT",
        "UNWORKED"
       ],
-      "state_required_when": "the tile carries no rated row"
+      "state_required_when": "the tile carries no rated row",
+      "state_migration": "A context page promoted before 2026-10-04 (RC-09) predates `state`, and CG-03b refuses it on any resubmit, and at promote_run when it is a RETAINED page and another page is being fixed. Migration: on each tile with no rated row, set state WORKED_ABSENT when the tile's sources_searched ladder ran and every rung names its outcome, UNWORKED when it did not; change nothing else (rated tiles need no edit, rows and notes stay as promoted). Then resubmit the context page alone and promote (05-lifecycle/2-versioning.md, 'Fixing one page without a rerun'); the other five retained pages are untouched."
      }
     }
    }
