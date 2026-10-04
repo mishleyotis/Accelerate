@@ -12,7 +12,7 @@ Read `01-start-here/1-standing-clauses.md` before writing any section on this pa
 |---|---|---|---|
 | `platform_story` | yes | P1 | D4 |
 | `recommendations` | yes | P2 | D4 |
-| `starters` | yes | P2b | D4 |
+| `starters` | yes | P2b | D4 (internal; customer-withheld) |
 | `roadmap` | yes | P3 | D4 |
 | `stairstep` | yes | P4 | D4 |
 

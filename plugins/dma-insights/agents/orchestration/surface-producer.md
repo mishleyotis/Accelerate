@@ -260,10 +260,25 @@ Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_
 
 ## Gold standard — the deliverable-first loop (mandatory)
 
-Before you author anything, read `docs/GOLD-STANDARD.md` and open the reference package
+Before you author anything, read `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) and open the reference package
 (**Golden 1 Credit Union**) so you know the exact shape you are producing — the section
 list, the tables, the coverage disclosure, the M-band labels. Authoring first and
 discovering the standard in QA is the failure this loop exists to prevent.
+
+**The six app pages have a measurable gold too** — the doc's *App pages* section, cut
+from the promoted gold runs into a shape-only fixture (`fixtures/surface_gold.json`;
+the connector holds a byte-identical copy). It states, per section and audience, what
+is served, withheld or never served, and the row floors: e.g. firmographics carries
+15–16 fields with at least 93% stated and un-held in every gold run. `promote_run`
+holds every staged page to it (**CG-PAR**): a list under half the gold's rows, a member
+every gold row carries and most of yours lack, a null member where the gold fills it, a
+fields list whose stated share is under 60% of the gold's — each refuses the promote.
+A null with its own `<member>_basis` is a stated absence and passes; a held firmographic
+renders as a stated absence with its reason, and at most 2 or 25% of must-present may be
+held (owner decision 2, 2026-10-04). From a repository checkout, run the same rules
+before you submit: `python3 scripts/gate_j_surface_parity.py --gold
+fixtures/surface_gold.json --target-dir <dir with your six page JSON files>`.
+(RC-01, RC-02, SWBC gold audit 2026-10-04.)
 
 When you have produced your artefact, run the gate on your OWN output before you return:
 
@@ -275,7 +290,7 @@ python3 -m engine.gold_standard package   <client_folder>
 
 Do not hand back an artefact until the gate prints `PASS`. Re-run it after any change
 that touches a score, a section, or a figure. Every finding maps to a goeasy-Ltd defect
-in `docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
+in `${CLAUDE_PLUGIN_ROOT}/docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
 caught here. Never ship a hedge ("Not established this run", "surface-production stage",
 "no score yet", a bare "N/A" or "0" where a value belongs) — a genuine gap is a
 disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge.

@@ -150,7 +150,23 @@ def web_app_requirements() -> dict:
         "connector_authored_cards": sorted(connector_authored),
         "computed_never_sent": computed_never_sent,
         "coverage": ss.get("coverage", {}),
+        # WHO SEES WHAT (RC-01e / D-35, 2026-10-04). "served" above has no
+        # audience: sentiment read as served while the customer body withheld
+        # it. The per-audience disposition comes from the committed gold,
+        # which is generated from redaction.py and tested equal to it.
+        "audience_disposition": _audience_disposition(),
+        "gold_shape": ("fixtures/surface_gold.json (connector copy "
+                       "dma_mcp/surface_gold.json) — row floors per section; "
+                       "promote_run enforces it as CG-PAR"),
     }
+
+
+def _audience_disposition() -> dict:
+    try:
+        from . import parity
+        return parity.load_gold().get("dispositions", {})
+    except Exception as exc:                      # noqa: BLE001
+        return {"_error": f"gold unreadable: {type(exc).__name__}"}
 
 
 def _index() -> list[dict]:

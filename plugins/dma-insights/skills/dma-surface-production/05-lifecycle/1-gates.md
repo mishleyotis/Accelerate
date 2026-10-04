@@ -148,11 +148,11 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **72** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **74** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
-### CG · Corpus / contract (51)
+### CG · Corpus / contract (53)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -207,6 +207,8 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `CG-49` | **A client-visible absence does not name this system's machinery.** The four empty_state keys the serve allowlist keeps for a customer - reason, closure_condition, closure, kind - carry no MEM/REF finding id, gate id, CUSTOMER_WITHHELD, or connector tool call. Ordinary words like 'gate', 'connector' and… | block | `gates/CG-49.md` |
 | `CG-50` | **The product a techstack row names appears in the span it cites.** Every non-ABSENT techstack.items[] row is substring-tested against the excerpts of its own cited e_ids. Matching is by DISTINCTIVE TOKEN or MULTI-WORD PHRASE, never by a generic word alone: an excerpt saying 'Financial Services Cloud'… | block | `gates/CG-50.md` |
 | `CG-51` | **A run that holds a peer set argues the techstack against it.** When this run holds a peer set — a peer with a score recorded for it, or a techstack row already carrying peer_deployments — the techstack page owes two things: at least one register row carries a non-empty peer_deployments[], and the… | block | — |
+| `CG-PAR` | **No page is structurally thinner than every gold run.** At promote, each staged page is compared with the committed shape-only gold (surface_gold.json: keys, list lengths and per-row null patterns of the promoted gold runs, no values). A gap holds only if it holds against EVERY gold run that… *(registry-only: no module emits this id today)* | block | — |
+| `CG-STALE` | **A promoted page does not say its own run is withdrawn.** At promote, no section's empty_state or narrative_thread asserts that the run being promoted is withdrawn or withheld pending repair. *(registry-only: no module emits this id today)* | block | — |
 
 ### AG · Analytical (8)
 
