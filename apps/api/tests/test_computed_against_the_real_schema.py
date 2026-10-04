@@ -252,6 +252,101 @@ def test_cell_items_resolve_from_the_evidence_store_and_are_entity_scoped(seeded
     conn.commit()
 
 
+def _mint_split(cur, eid):
+    """A parent internal row and two spans split from it, as register_evidence
+    mints them: the shareable span strictly shorter and carrying the label,
+    the internal span none. The database stamps the mint instant."""
+    span = "z" * 60
+    cur.execute("""INSERT INTO evidence_index
+                     (e_id, entity_id, origin, source_name, excerpt,
+                      claim_type, tier)
+                   VALUES ('E-SCU-100', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2')""", (eid, span + " and the rest"))
+    cur.execute("""INSERT INTO evidence_index
+                     (e_id, entity_id, origin, source_name, excerpt,
+                      claim_type, tier, customer_attribution, split_of)
+                   VALUES ('E-SCU-101', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2', NULL, 'E-SCU-100'),
+                          ('E-SCU-102', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2',
+                           'Client statement, discovery conversations',
+                           'E-SCU-100')""",
+                (eid, "and the rest", eid, span))
+
+
+def _drawer(acur, rid, eid, promoted_at, scope=None):
+    from dma_api.redaction import redact_section
+    data = {"cells": [{"subcap_id": "P1C1.1.1", "synthesis": "s",
+                       "e_ids": ["E-SCU-101", "E-SCU-102"],
+                       "grounded_on": 2}]}
+    computed.apply(acur, "heatmap", "cell_evidence", data,
+                   {"run_id": rid, "promoted_at": promoted_at}, eid)
+    assert data.get("computed_error") is None, data.get("computed_error")
+    out, _ = redact_section("heatmap", "cell_evidence", data, [],
+                            "customer", evidence_scope=scope)
+    return out["cells"][0]
+
+
+def _promoted_at(cur, rid):
+    cur.execute("SELECT promoted_at FROM runs WHERE id = %s", (rid,))
+    return cur.fetchone()[0].isoformat()
+
+
+def test_a_span_minted_after_promotion_leaves_the_live_run_unchanged(seeded):
+    """RC-08 review, 2026-10-04, against the real schema and read as svc_api:
+    the run was promoted BEFORE the shareable span was minted (a producer
+    working on a later run), so its customer drawer serves exactly what it
+    served before — the span withheld like any internal row — under the same
+    ETag. It used to read the attribution live and publish the span onto the
+    live run outside promotion."""
+    conn, cur, rid, eid = seeded
+    live = _promoted_at(cur, rid)
+    _mint_split(cur, eid)
+    conn.commit()
+    api = _connect("dmai-api@digital-maturity-assessor.iam")
+    try:
+        cell = _drawer(api.cursor(), rid, eid, live)
+        assert cell["items"] == [] and cell["e_ids"] == []
+    finally:
+        api.close()
+
+
+def test_split_spans_resolve_through_the_api_role_and_serve_as_decided(seeded):
+    """RC-08 / D-10 against the real schema (0063), read as `svc_api` reads
+    it. On the run as promoted, before the spans existed, both are withheld;
+    once the run is RE-PROMOTED (promoted_at moves past the mint, and so does
+    the ETag) the page's evidence scope names the internal span withheld and
+    the shareable span under its customer attribution, and the customer
+    drawer serves exactly the shareable one."""
+    from dma_api import pages
+
+    conn, cur, rid, eid = seeded
+    live = _promoted_at(cur, rid)
+    _mint_split(cur, eid)
+    conn.commit()
+    cur.execute("UPDATE runs SET promoted_at = now() WHERE id = %s", (rid,))
+    conn.commit()
+    again = _promoted_at(cur, rid)
+    assert again > live
+
+    api = _connect("dmai-api@digital-maturity-assessor.iam")
+    try:
+        acur = api.cursor()
+        ids = {"E-SCU-101", "E-SCU-102", "E-SCU-001"}
+        assert pages.evidence_scope(acur, eid, ids, promoted_at=live) == {
+            "withheld": {"E-SCU-101", "E-SCU-102"}, "attribution": {}}
+        scope = pages.evidence_scope(acur, eid, ids, promoted_at=again)
+        assert scope == {"withheld": {"E-SCU-101"},
+                         "attribution": {"E-SCU-102": "Client statement, "
+                                                      "discovery conversations"}}
+        cell = _drawer(acur, rid, eid, again, scope)
+        assert [i["e_id"] for i in cell["items"]] == ["E-SCU-102"]
+        assert cell["items"][0]["source_title"].startswith("Client statement")
+        assert cell["e_ids"] == ["E-SCU-102"] and cell["grounded_on"] == 1
+    finally:
+        api.close()
+
+
 def test_a_failed_computation_does_not_poison_the_rest_of_the_request(seeded):
     """PostgreSQL aborts the whole transaction on a failed statement, so
     without a savepoint the first bad query 25P02s every later one — and the

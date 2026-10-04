@@ -714,8 +714,11 @@ def entity_evidence(display_id: str, request: Request, response: Response,
             return JSONResponse({"error": e.code, "detail": e.detail},
                                 status_code=e.status)
         wanted = [x.strip() for x in (e_ids or "").split(",") if x.strip()]
+        # The run's promotion binds which split spans serve under their
+        # customer attribution (evidence.attribution_bound).
         res = ev_fetch(cur, entity_id, wanted or None,
-                       run_id=run_meta["run_id"])
+                       run_id=run_meta["run_id"],
+                       promoted_at=run_meta.get("promoted_at"))
         # The whole body, not just the items: for the customer audience the
         # tier census goes too, and withheld rows leave `found`.
         res = redact_evidence_response(res, audience)

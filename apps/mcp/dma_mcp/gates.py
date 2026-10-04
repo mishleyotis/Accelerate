@@ -102,6 +102,72 @@ GATES = {
               "so a list with one member passed every gate and which members "
               "it carried was documentation rather than contract.",
               "block"),
+    "CG-18b": ("A held member is a last resort: capped, routed, never an answer",
+               None,
+               "At most 2 must-present members are held, or 25% of the set, "
+               "whichever is smaller; every held reason names the registry "
+               "route searched; a structural answer (not chartered, "
+               "regulated by line, no retail branches) is stated as a value.",
+               "RC-04, SWBC 2026-10-04: CG-18 accepted any non-blank reason "
+               "with no ceiling, so 6 of 10 firmographics promoted held and "
+               "the strip showed four facts with nothing saying six were "
+               "missing. Owner decision 2 set the cap.",
+               "block"),
+    "CG-03b": ("A shape the contract states in prose is whole", None,
+               "Shapes that lived only in the page prose are machine "
+               "contract (item_shape) and read: platform tiles carry "
+               "peer_synthesis and an estate_reach with an integer "
+               "cells_not_yet_reached, peer rows are whole; the C4 grid is "
+               "three audience tiles with a state; a tenure has its "
+               "appointed_on; a web source has no source_page.",
+               "RC-09, SWBC 2026-10-04: peer_synthesis and estate_reach "
+               "appeared 0 times in the machine contract, so the gates read "
+               "them as optional; SWBC served 2 C4 tiles, 6 tenures with no "
+               "appointment date and source_page 1 on web pages.",
+               "block"),
+    "CG-18c": ("The sub-vertical's firmographic set is present", None,
+               "overview.firmographics carries every member of the run's "
+               "primary sub-vertical set (must_present_by_subvertical), "
+               "stated or held within the ceiling; Farm Credit declares "
+               "sub_vertical_undefined.",
+               "RC-06, SWBC 2026-10-04: the SV7 set (premium placed, "
+               "commission revenue, producer count, acquisitions) lived only "
+               "in prose and a held generic revenue satisfied it, so an "
+               "insurance-broker run promoted no insurance-broker figure.",
+               "block"),
+    "CG-18d": ("A scoped figure names the entity it describes", None,
+               "On O2 (unit) and O8 (basis) alike, a figure scoped to a "
+               "subsidiary, segment or division names that part of the "
+               "group.",
+               "RC-06, SWBC 2026-10-04: O2 called subsidiary figures "
+               "contamination while O8 served a subsidiary series; owner "
+               "decision 2 admits scoped figures whose unit names the entity.",
+               "block"),
+    "CG-18e": ("The strip and the regulatory card agree", None,
+               "When context.regulatory_standing states license_type or "
+               "primary_regulator, overview.firmographics states charter and "
+               "primary_regulator too, naming the same regulators.",
+               "RC-06, SWBC 2026-10-04: O2 held charter and regulator while "
+               "C3 stated both, and the two pages named different regulator "
+               "sets; nothing compared them.",
+               "block"),
+    "ET-05b": ("The regulatory card works its sub-vertical's regulators", None,
+               "C3's ladder carries a rung naming a regulator of the run's "
+               "primary sub-vertical family (regulator_family_by_subvertical) "
+               "whose outcome is not open.",
+               "RC-06, SWBC 2026-10-04: an insurance-broker primary run "
+               "recorded the state insurance departments as 'not searched' "
+               "and promoted.",
+               "block"),
+    "CG-40b": ("A WORKED_ABSENT alert shows the ladder that worked it", None,
+               "An H3 alert in state WORKED_ABSENT logs its queries_run and "
+               "carries no rung left open (NOT_RUN, not fetched, blocked) "
+               "without the failover that ran in its place.",
+               "RC-05, SWBC 2026-10-04: 190 WORKED_ABSENT alerts promoted, "
+               "87 with no query logged and every one with a NOT_RUN "
+               "connector tier. WORKED_ABSENT is a finding about the client; "
+               "with no query behind it, it is an assertion.",
+               "block"),
     "CG-23": ("Every page's own thread is written", None,
               "A section whose writer stores `narrative_thread` carries a "
               "non-empty one. The contract's words: a page is not a "
@@ -611,6 +677,53 @@ GATES = {
               "tabulates peer figures under a story that ignores them is still "
               "the half-told page.",
               "block"),
+
+    # RC-02 / RC-13 (SWBC gold audit, 2026-10-04). Both run at PROMOTE, over
+    # the retained staged rows of the whole run (promote_checks.py).
+    "CG-PAR": ("No page lacks the structure every gold run serves", None,
+               "At promote, each staged page is compared with the committed "
+               "shape-only gold (surface_gold.json: keys, list lengths and "
+               "per-row null patterns of the promoted gold runs, no values). "
+               "The run's own gold record is left out, and gold of its "
+               "sub-vertical is preferred; with none, the other gold is the "
+               "reference for structure only. A gap holds only if it holds "
+               "against EVERY reference gold run that has the page. BLOCKS "
+               "(owner decision B, 2026-10-04) on structure: a section today's "
+               "contract requires, or a key it requires or allows omitting "
+               "only on a stated condition, that every gold run serves and "
+               "this run lacks or serves empty without an empty_state saying "
+               "so; a row key the contract's item_shape requires and every "
+               "gold row carries; must-present members not stated (held, "
+               "null or absent) beyond 2 or 25% of the set, whichever is "
+               "smaller. WARNS, in promote_checks.parity.warnings and never "
+               "refusing, on counts and fill ratios: a list under half the "
+               "gold's rows, a member filled on under 60% of the gold's share "
+               "(a null with its own <member>_basis is a stated absence), a "
+               "fields list's stated share under 60% of the gold's. "
+               "Never-served sections are skipped; peer-comparison nulls on a "
+               "run where no peer was scored are disclosed once.",
+               "Gate J compared top-level keys and called any non-empty list "
+               "filled, and it ran only in CI against a synthetic pair: no "
+               "parity measurement ever touched the run before it was "
+               "promoted. Its first replacement then refused on counts — "
+               "goeasy-ltd's promoted run (CL) drew 16 refusals, among them "
+               "15 tech rows against 56 — compared every gold run with "
+               "itself, and held an insurance broker to three credit unions. "
+               "Values and counts are assessment results; a missing section "
+               "or key is a production gap.",
+               "block"),
+    "CG-STALE": ("A promoted page does not say its own run is withdrawn",
+                 None,
+                 "At promote, no section's empty_state or narrative_thread "
+                 "asserts that the run being promoted is withdrawn or "
+                 "withheld pending repair.",
+                 "A section produced while its run was withdrawn was carried "
+                 "forward on a retained staging row and promoted unchanged, "
+                 "so a promoted page told its reader the run was 'withheld "
+                 "pending repair' — a sentence promotion makes false the "
+                 "moment it succeeds. Validation ran at submit; the run's "
+                 "status changed afterwards and nothing re-read the text.",
+                 "block"),
 
     "CG-48": ("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "

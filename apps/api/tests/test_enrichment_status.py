@@ -293,3 +293,16 @@ def test_a_spec_with_no_floor_reads_as_no_floor_not_as_a_floor_of_one(
     s = _status("techstack", "techstack", {"items": []})
     assert s["thin_below"] == 0
     assert s["thin"] is False, "no declared floor cannot make a surface thin"
+
+
+def test_firmographics_counts_stated_values():
+    """RC-04 (SWBC gold audit, 2026-10-04; D-06). Ten firmographic rows with
+    six quarantined nulls served thin=false because the count was rows, not
+    stated values — against the register's own thin_reason, "fewer than nine
+    of the must-present members carry a stated value"."""
+    fields = [{"field": f"f{i}", "value": "x"} for i in range(4)] + [
+        {"field": f"h{i}", "value": None, "quarantined": True,
+         "quarantine_reason": "held"} for i in range(6)]
+    s = _status("overview", "firmographics", {"fields": fields})
+    assert s["count"] == 4
+    assert s["thin"] is True

@@ -21,7 +21,7 @@
   "uncertainty_band",
   "urf_modifiers"
  ],
- "generated_from_sha256": "02dcace3b2e75b81bc8098dedab6fd4bf95fcb05ba6ff182fdd51ee982d22739",
+ "generated_from_sha256": "aab667e0e4b57399dc4acf7ced2382d500517baaa3be448f64dfe835a5350250",
  "sections": {
   "context.acquisitions": {
    "items": {
@@ -67,7 +67,8 @@
      "audience",
      "e_ids",
      "note",
-     "rows"
+     "rows",
+     "state"
     ],
     "empty_state": [
      "closure_condition",

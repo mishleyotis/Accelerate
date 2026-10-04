@@ -216,7 +216,10 @@ def test_the_redaction_receipt_counts_the_empty_state_too():
 
     from dma_api import pages
     src = inspect.getsource(pages)
-    assert "+ len(empty_dropped))" in src
+    # The empty state's removals are in the receipt's sum (since @12 the sum
+    # also counts the rows customer rules held back, so it no longer closes
+    # on this term).
+    assert "+ len(empty_dropped)" in src
 
 
 def test_the_four_keys_are_the_allowlists_own():

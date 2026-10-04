@@ -35,6 +35,7 @@ from pathlib import Path
 # modules each finding `packages/shared` their own way is how a build artefact
 # came to shadow its own source.
 from .evidence import _expand_abbrev  # noqa: F401
+from .evidence import attribution_bound  # RC-08: spans bind to the promotion
 
 # Tier -> the highest evidence level that tier can carry, RENDERED beside the
 # count because it is what the mix means (O11 contract). T5 is vendor
@@ -62,9 +63,54 @@ TILE_DETAIL = {
     "INFERRED": "Technographic or indirect signal; a vendor statement would "
                 "confirm.",
     "CLAIMED": "Stated but not corroborated; treated as absent for fit.",
-    "GAPS": "Searched and not established in this estate; named, because a "
-            "list of what is absent is the finding.",
+    # The DEFINITION only. The sentence the tile serves is `_gaps_detail`'s,
+    # which says whether each row carries its own basis — never how the
+    # absence was established (RC-11 / D-15).
+    "GAPS": "Recorded absent from this estate; named, because a list of what "
+            "is absent is the finding.",
 }
+
+_GAPS_TAIL = "Named, because a list of what is absent is the finding."
+
+
+def _gaps_detail(bases: list) -> str:
+    """The GAPS tile's sentence: what the ABSENT rows RECORD, nothing more.
+
+    RC-11 / D-15, gold audit 2026-10-04. The tile said "Searched and not
+    established" over a register whose one ABSENT row rested on the
+    institution's own statement, and no search had run. Round 1 then chose
+    the sentence by matching search keywords in each row's detection_basis
+    prose, and the inverse false claim followed: Baxter's "a targeted search
+    that returned no BCU deployment" missed the pattern and was served as
+    "stated absent, not yet searched", and a basis reading "Not searched"
+    matched `searched`.
+
+    The register has no structured record of HOW an absence was established
+    (techstack_items carries status, evidence_level and detection_basis; no
+    `searched` flag). So the server asserts no search outcome at all. It
+    reads one fact from each row: whether a basis is recorded. That basis is
+    the producer's own clause, printed on the T3 detail page for both
+    audiences, and the tile points the reader at it. A row without one is
+    counted as having none; the tile never fills it in.
+    """
+    if not bases:
+        return "No product is recorded absent in this register."
+    n = len(bases)
+    with_basis = sum(1 for b in bases if isinstance(b, str) and b.strip())
+    if with_basis == n:
+        how = ("Each row states how its absence was established."
+               if n > 1 else
+               "The row states how its absence was established.")
+    elif with_basis == 0:
+        how = ("No row records how its absence was established."
+               if n > 1 else
+               "No row records how the absence was established.")
+    else:
+        rest = n - with_basis
+        how = (f"{with_basis} of {n} rows state how the absence was "
+               f"established; the other {rest} "
+               f"{'records' if rest == 1 else 'record'} no basis.")
+    return f"Recorded absent from this estate. {how} {_GAPS_TAIL}"
 
 
 def _product_label(vendor: str | None, name: str | None) -> str:
@@ -271,17 +317,25 @@ def landscape(cur, data: dict, run_id) -> None:
         # ORDER BY id: rule 10, order is meaning. Without it the GAPS tile's
         # named_items came back in heap order and two of three platforms
         # swapped between reads of one promoted run.
-        """SELECT status::text, name, vendor, evidence_level::text
+        """SELECT status::text, name, vendor, evidence_level::text,
+                  detection_basis
              FROM techstack_items WHERE run_id = %s ORDER BY id""",
         (run_id,))
     rows = cur.fetchall()
     if not rows:
         return
     buckets: dict = {k: [] for k in ("CONFIRMED", "INFERRED", "CLAIMED", "GAPS")}
-    for status, name, vendor, level in rows:
+    gap_bases: list = []
+    for row in rows:
+        # Four columns from any caller not yet widened; the fifth, when
+        # present, is the row's own detection_basis.
+        status, name, vendor, level = row[:4]
+        basis = row[4] if len(row) > 4 else None
         tile = TILE_FOR_STATUS.get((status or "").upper())
         if tile:
             buckets[tile].append((_product_label(vendor, name), level))
+            if tile == "GAPS":
+                gap_bases.append(basis)
 
     # THE RECOMPUTE OWNS THE TILE, SO IT OWNS THE TILE'S SENTENCE TOO.
     #
@@ -320,7 +374,10 @@ def landscape(cur, data: dict, run_id) -> None:
                       if len(levels) > 1 else
                       f"{len(members)} · {levels[0]} evidence" if levels else
                       f"{len(members)} · evidence level not recorded"),
-            "detail": TILE_DETAIL.get(kind),
+            # GAPS says how its rows were established; the other three are
+            # the vocabulary's definitions.
+            "detail": (_gaps_detail(gap_bases) if kind == "GAPS"
+                       else TILE_DETAIL.get(kind)),
             # Only the GAPS tile names its members: a list of what is absent
             # is the finding; a list of what is present is the register.
             "named_items": ([n for n, _ in members] if kind == "GAPS" else []),
@@ -434,7 +491,7 @@ def _expected_per_layer(cur, catalog_version) -> dict:
 
 
 # ── heatmap ────────────────────────────────────────────────────────────────
-def cell_items(cur, data: dict, entity_id) -> None:
+def cell_items(cur, data: dict, entity_id, promoted_at=None) -> None:
     """Resolve every cell's `items[]` from its own `e_ids`.
 
     `items` and `thin` are the two H2 item keys the field census exempts from
@@ -489,7 +546,8 @@ def cell_items(cur, data: dict, entity_id) -> None:
     cur.execute(
         """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
                   ei.recency_band::text, ei.source_name, ei.source_domain,
-                  ei.excerpt, ei.source_url, ei.origin::text
+                  ei.excerpt, ei.source_url, ei.origin::text,
+                  ei.customer_attribution, ei.customer_attribution_at
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
@@ -512,6 +570,16 @@ def cell_items(cur, data: dict, entity_id) -> None:
                     # row whole (redaction.customer_evidence_items); the
                     # customer body never carries the key itself.
                     "origin": r[9] if len(r) > 9 else None,
+                    # 0063: a shareable SPLIT span's customer label — with
+                    # it, an internal-origin item serves to the customer
+                    # under that label (RC-08 / D-10); without it, never.
+                    "customer_attribution": r[10] if len(r) > 10 else None,
+                    # ...and only on a run promoted at or after the span was
+                    # minted (evidence.attribution_bound; RC-08 review). No
+                    # promotion passed, nothing bound: default-deny.
+                    "attribution_bound": bool(len(r) > 11 and r[10]
+                                              and attribution_bound(
+                                                  r[11], promoted_at)),
                     **({"cited_as": r[0]} if r[0] != r[1] else {})}
              for r in cur.fetchall()}
 
@@ -743,6 +811,10 @@ def enrichment_status(data: dict, page: str, section: str) -> None:
         return
     rows = data.get(spec.get("counts") or "")
     rows = rows if isinstance(rows, list) else []
+    if spec.get("count_rule") == "stated_values":
+        # RC-04: a held (quarantined, null) row is not a stated value.
+        rows = [r for r in rows if isinstance(r, dict)
+                and r.get("value") not in (None, "", [])]
     count = len(rows)
     floor = spec.get("thin_below") or 0
 
@@ -856,7 +928,8 @@ def apply(cur, page: str, section: str, data, run_meta: dict, entity_id) -> None
                              run_meta.get("ccg_catalog_version"))
         elif page == "heatmap" and section == "cell_evidence":
             # items[] first: the counters below read what it resolved.
-            cell_items(cur, data, entity_id)
+            cell_items(cur, data, entity_id,
+                       promoted_at=run_meta.get("promoted_at"))
             cell_linking_stats(data)
         elif page == "heatmap" and section == "evidence_age":
             evidence_age_rollups(data)

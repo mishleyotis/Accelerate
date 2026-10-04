@@ -411,10 +411,12 @@ surfaced, never the tool.
 What the connectors actually feed here is the **joins**:
 
 - Facet **`sentiment`** — `first_party` published ratings carrying n, scale and
-  date (T1–T2) and `clay` news sentiment (T3). Glassdoor, Indeed and ZipRecruiter
-  all return 403, so a value routed through them is an inference with its route
-  named, or it is omitted. This is one half of IC-1's advocacy-against-review-record
-  join.
+  date (T1–T2) and `clay` news sentiment (T3). Glassdoor and ZipRecruiter pages
+  return 403, so a value routed through them is an inference with its route
+  named, or it is omitted. The Indeed connector's `get_company_data` (T3) and the
+  CFPB complaint API's aggregation (T1) are connector routes, registered
+  `origin='connector'` (RC-07; owner decision 3, 2026-10-04) — Indeed is not a
+  403 rung. This is one half of IC-1's advocacy-against-review-record join.
 - Facet **`techstack`** — the `explorium` ingest scan and the `clay` Tech Stack
   data point, both **T1, never T4**; filing a machine technographic scan at T4
   caps the capability at L2.5 and silently suppresses the score, the commonest

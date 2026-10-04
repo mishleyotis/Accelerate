@@ -48,12 +48,21 @@ python scripts/check_evidence.py <get_evidence.json> --review
                                                     # a search page, a tool cited as a source
 python scripts/clay_plan.py --domain <domain>      # the enrichment call sequence and the
                                                     # tier each data point registers at
-python scripts/check_consistency.py <rundir>/ --subvertical <CODE>
+python scripts/check_consistency.py <rundir>/     # <rundir> holds <page>.json plus
+                                                    # bundle.json (get_report_bundle),
+                                                    # catalogue.json, fit.json; the
+                                                    # sub-vertical binding is READ from the
+                                                    # bundle (MEM-0559), never typed.
                                                     # cross-page reconciliation before
                                                     # promotion — the check no per-page
                                                     # gate can make: foreign variant cells,
-                                                    # silent drawers, coverage denominators
-                                                    # and the run's one constraint
+                                                    # silent drawers, coverage denominators,
+                                                    # the run's one constraint, and the
+                                                    # RC-10/RC-12 invariants (factor sums,
+                                                    # O5 = P1 = engine, tile states, area
+                                                    # tabs, candidate set, stair-step order,
+                                                    # one thin definition, H6 completeness,
+                                                    # O6/O7 counts, the identified peer set)
 python scripts/precheck_gates.py <payload.json> --page <page> \
        --evidence <get_evidence.json> --bundle <get_report_bundle.json>
                                                     # the connector's own blocking gates,

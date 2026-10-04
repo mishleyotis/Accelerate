@@ -45,10 +45,13 @@ dashboard.
 It fails as **a missing tile read as nobody looked**. Logix served **1 tile of 3**,
 and what renders for an absent audience is *"EMPLOYEE · Not established for this
 run"*, which a client reads as an unsearched audience. The absence may be real; the
-blankness is a production failure on top of it. The three employee-review sites
-everyone reaches for first — Glassdoor, Indeed, ZipRecruiter — all answer automated
+blankness is a production failure on top of it. Two of the employee-review sites
+everyone reaches for first — Glassdoor and ZipRecruiter — answer automated
 retrieval with HTTP 403, so they are where the search **starts**, not where it
-stops.
+stops. The third, Indeed, has a door the page does not: the **Indeed connector**
+(`get_company_data`) returns the employer rating with its counts, registered
+`origin='connector'` at T3 on O9 and projected here (SWBC gold audit RC-07: two
+auditors read 3.1/5, 46 of 97 recommend, while the card said 403).
 
 And it fails as **a second, unreconciled measurement**. MEM-0071 measured
 `enrichment_status` counting a key (`employee`) no sentiment section has ever had,
@@ -266,7 +269,7 @@ From the promoted Baxter run (`c1351d25-a612-4dbe-b498-127bccaf6810`),
   "sources_searched": [
     "Great Place To Work certified-company profile — RESOLVED: 88% Trust Index, updated March 2026",
     "Glassdoor — HTTP 403 to automated retrieval; a source that cannot be fetched cannot be cited",
-    "Indeed — HTTP 403 to automated retrieval",
+    "Indeed — page HTTP 403; the Indeed connector (get_company_data) is the route, run on O9 (RC-07: since 2026-10-04 this rung is RESOLVED or a recorded connector failure, never the 403)",
     "ZipRecruiter — HTTP 403 to automated retrieval",
     "Comparably and Built In — no profile naming this institution",
     "Apple App Store and Google Play — customer-side only; no employee rating is published"
@@ -276,8 +279,9 @@ From the promoted Baxter run (`c1351d25-a612-4dbe-b498-127bccaf6810`),
 
 Four moves, and they are the whole method of this surface.
 
-**The 403 wall is where the search starts.** Three sites refused, and the tile is
-not empty: a reachable employer-side source was found, with a percentage, a
+**The 403 wall is where the search starts.** Three sites refused (the exemplar
+predates the Indeed connector route — today Indeed is a connector call, not a
+refused page), and the tile is not empty: a reachable employer-side source was found, with a percentage, a
 comparison figure, an instrument description and an "updated" stamp. The ladder
 records the three refusals **with their status code**, and one rung records a
 resolution — *"RESOLVED: 88% Trust Index, updated March 2026"* — so a reader can

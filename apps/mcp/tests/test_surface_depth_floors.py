@@ -118,10 +118,19 @@ def test_a_search_that_reached_back_passes_even_on_two_points():
     """Reach, not luck. An entity with no published history still passes by
     showing where it looked — otherwise the gate would refuse runs that cannot
     possibly comply."""
+    # The rung states its outcome (RC-05, 2026-10-04): years are read only
+    # from completed rungs.
+    body = _fin([2025, 2026], searched=[
+        "Annual reports for 2021 and 2022 — VERIFIED ABSENT: no firm-wide AUM "
+        "total; the figure is first disclosed for year-end 2025."])
+    assert reach("financial_series", body) == []
+
+
+def test_a_reach_back_rung_with_no_outcome_no_longer_counts():
     body = _fin([2025, 2026], searched=[
         "Annual reports for 2021 and 2022 carry no firm-wide AUM total; the "
         "figure is first disclosed for year-end 2025."])
-    assert reach("financial_series", body) == []
+    assert len(reach("financial_series", body)) == 1
 
 
 def test_a_search_naming_only_recent_years_does_not_count():

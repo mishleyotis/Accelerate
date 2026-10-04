@@ -18,7 +18,11 @@ from dma_api.evidence import (INTERNAL_FIELDS, TIERS, distribution,  # noqa: E40
 COLS = ("e_id", "origin", "source_name", "source_url", "source_domain",
         "excerpt", "claim_type", "tier", "published_date", "reference_date",
         "age_months", "recency_band", "ers", "specificity", "corroboration",
-        "identity_ok", "identity_note")
+        "identity_ok", "identity_note",
+        # 0063: the split-span and connector provenance columns.
+        "customer_attribution", "split_of", "connector_tool",
+        "connector_query", "connector_retrieved_at",
+        "customer_attribution_at")
 
 
 def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
@@ -31,6 +35,9 @@ def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
             "reference_date": None, "age_months": 7, "recency_band": "CURRENT",
             "ers": ers, "specificity": 3, "corroboration": 2,
             "identity_ok": identity_ok, "identity_note": None,
+            "customer_attribution": None, "split_of": None,
+            "connector_tool": None, "connector_query": None,
+            "connector_retrieved_at": None, "customer_attribution_at": None,
             # The runs whose evidence_subcap_links carry this row. The read
             # path's LEFT JOIN LATERAL is run-scoped, so a row linked only
             # under ANOTHER run reports no cells here — which is exactly the

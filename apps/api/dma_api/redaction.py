@@ -54,7 +54,11 @@ import re
 # (page, section) withheld entirely from the customer audience.
 CUSTOMER_WITHHELD = frozenset((
     ("overview", "ceilings"),            # O1b — TRD §11 rung table
-    ("overview", "sentiment"),            # O9  — TRD §11 rung table
+    # O9 `overview.sentiment` LEFT this set on 2026-10-04 by OWNER DECISION 1
+    # (SWBC gold audit, D-34): the customer receives a REDUCED card — bars
+    # and themes, without cell codes, internal sources, cap vocabulary or
+    # r_layer — built by `_project_sentiment` below. This supersedes TRD
+    # §11's withholding for that one section; thought_leadership stays.
     ("overview", "thought_leadership"),   # O12 — TRD §11 rung table
     # O10. The evidence CENSUS, not the evidence: tier histogram, item and
     # fact counts, the self-sourced share and the gate line. It is how well
@@ -199,6 +203,54 @@ CUSTOMER_ALWAYS = {
     # All 51 rows were removed anyway — by the vendor safety net, which this
     # module says in as many words is "not a substitute" for the rule.
     ("techstack", "techstack"): ("items[*].dma_impact",),
+}
+
+# ── Over-redaction: what a producer's marking may NOT hide (RC-08 / D-11) ─
+#
+# The opposite of a leak, and just as invisible. Measured 2026-10-04 on SWBC
+# (gold audit, PL-04): the producer marked `platforms[*].estate_reach` and
+# `platforms[*].integration_pathway` internal_only. The rulebook's exclusion
+# set for platform_story is `zennify_pathway` alone (CUSTOMER_ALWAYS above),
+# customer_allowlist.json allows both fields, and the customer DD-11 showed
+# neither on any tile. Every redaction test guards against leaks; none
+# compared a producer's internal_only set with the rulebook's.
+#
+# A path here, marked internal_only as a bare string, is NOT applied for the
+# customer and is named in the receipt (`over_redaction_ignored`). A marking
+# written {"path": ..., "why": "..."} is a DOCUMENTED withholding and is
+# honoured. Every net still runs over the field — vendor name, seller voice,
+# machinery, pipeline vocabulary, the allowlist — so a seller remark in it
+# is stripped as it would be anywhere; seller remarks belong in
+# zennify_pathway, which CUSTOMER_ALWAYS strips unconditionally.
+CUSTOMER_SHAREABLE = {
+    ("platform", "platform_story"): ("platforms[*].estate_reach",
+                                     "platforms[*].integration_pathway"),
+}
+
+# ── DECISIONS D4: the customer tech register (RC-08 / D-12) ──────────────
+#
+# plugins/dma-insights/docs/DECISIONS.md D4: a row surfaces on the customer
+# Tech Stack page only when its status is CONFIRMED or ABSENT; INFERRED and
+# CLAIMED are internal-audience only. Documented as an enforced serve-side
+# filter and never implemented: SWBC's customer register served all 36 rows,
+# 12 INFERRED and 11 CLAIMED (gold audit 2026-10-04, INS-TS-03/04). The owner
+# confirmed D4 stands the same day. D4's corroboration and materiality
+# clauses (2 and 3) need the evidence domains of every row and are NOT
+# enforced here — recorded as a residual, not silently claimed.
+D4_CUSTOMER_STATUSES = frozenset({"CONFIRMED", "ABSENT"})
+_D4_DETECTED_BASIS = ("register rows in this layer confirmed (CONFIRMED); "
+                      "rows not yet corroborated are not shown or counted")
+
+# ── H5 rows about a section the reader is not shown (RC-08 / D-34) ───────
+#
+# The safeguard gate → the sections it is ABOUT. A gate row is dropped for an
+# audience when every one of its targets is withheld from that audience: a
+# disclosure about a card the reader cannot open reads as a defect in a card
+# that does not exist (SWBC: SG-S8 on the customer H5 while sentiment was
+# withheld). A gate absent from this map — SG-V4 checks every page — is
+# always kept: the default is disclosure.
+SG_GATE_TARGETS = {
+    "SG-S8": (("overview", "sentiment"), ("context", "context_sentiment")),
 }
 
 # Seller-role vocabulary: sentences written to the assessing firm's own
@@ -418,6 +470,11 @@ def strip_paths(data: dict, paths, section: str | None = None) -> tuple[list, li
     # items still served and 6 public items were removed instead.
     parsed = []
     for path in paths or ():
+        # {"path": ..., "why": ...} is a documented marking (over-redaction,
+        # below). It used to be SKIPPED here — only strings were walked — so
+        # a producer who documented a withholding got none: fail-open.
+        if isinstance(path, dict):
+            path = path.get("path")
         if not isinstance(path, str) or not path:
             continue
         segs = _parse(path)
@@ -671,8 +728,65 @@ def _strip_machinery(node, path: str = "", found=None) -> list:
 #     ers, link_basis, provenance, …), the grading, the contact routes and
 #     `origin` itself.
 EVIDENCE_WITHHELD_ORIGINS = frozenset({"internal"})
+#: Keys an item carries that are identifiers or our own provenance rather
+#: than text a reader meets: never scanned by the nets (an id or a tool call
+#: is not prose), and the provenance ones are stripped before serving.
 _EVIDENCE_ID_KEYS = frozenset({"e_id", "cited_as", "also_filed_as",
-                               "linked_subcap_ids"})
+                               "linked_subcap_ids", "split_of",
+                               "customer_attribution", "connector_tool",
+                               "connector_query", "connector_retrieved_at",
+                               "connector_response_sha256",
+                               "customer_attribution_at",
+                               "attribution_bound"})
+#: Provenance a customer item never carries (0063): which span a row was
+#: split from, the internal label it was re-attributed from, and the
+#: connector call that produced it. The CLIENT reads the source; WE keep
+#: the method.
+_EVIDENCE_PROVENANCE_KEYS = ("customer_attribution", "split_of",
+                             "connector_tool", "connector_query",
+                             "connector_retrieved_at",
+                             "connector_response_sha256",
+                             "customer_attribution_at", "attribution_bound")
+
+
+def _shared_attribution(item: dict) -> str | None:
+    """The label an internal-origin SPLIT SPAN is shareable under, or None.
+
+    RC-08 / D-10, owner default 2026-10-04: discovery evidence is split at
+    register_evidence (0063) into a shareable span — the client's own
+    statement, re-attributed to the client — and an internal span (seller
+    and personal remarks). Only the first carries `customer_attribution`.
+    An internal row without one is the internal span, or an unsplit row,
+    and never serves to a customer.
+
+    And only on a run promoted at or after the span was minted: the reader
+    stamps `attribution_bound` (evidence.attribution_bound) from the run it
+    serves. An item without that stamp is NOT bound — default-deny — so a
+    reader that forgets the run withholds the span rather than publishing it
+    onto a run promoted before it existed (RC-08 review, 2026-10-04).
+    """
+    if str(item.get("origin") or "").strip().lower() not in \
+            EVIDENCE_WITHHELD_ORIGINS:
+        return None
+    if item.get("attribution_bound") is not True:
+        return None
+    attr = item.get("customer_attribution")
+    return attr.strip() if isinstance(attr, str) and attr.strip() else None
+
+
+def _customer_view(item: dict) -> dict:
+    """The item as a customer would read it: a shared span under its
+    customer attribution, never under the internal source name. The nets
+    run over THIS view, so an attribution naming us still withholds it."""
+    attr = _shared_attribution(item)
+    if attr is None:
+        return item
+    view = dict(item)
+    view["source_name"] = attr
+    if "source_title" in view:              # the drawer's spelling
+        view["source_title"] = attr
+    view["origin"] = "internal_shared_span"
+    return view
 
 
 def _evidence_item_hit(item: dict) -> str | None:
@@ -692,6 +806,8 @@ def _evidence_item_hit(item: dict) -> str | None:
             yield key, node
 
     for key, text in strings(item):
+        if key == "origin":
+            continue
         if _VENDOR_RE is not None and _VENDOR_RE.search(text):
             return "vendor_named"
         if SELLER_VOCABULARY.search(text):
@@ -710,16 +826,17 @@ def customer_evidence_items(items) -> tuple[list, dict]:
     excluded = set(_customer_allowlist()["excluded_key_classes"])
     strip = (tuple(INTERNAL_FIELDS) + CUSTOMER_STRIP_KEYS
              + CUSTOMER_STRIP_CONTACT_KEYS + NEVER_SERVED_KEYS
-             + ("origin",))
+             + _EVIDENCE_PROVENANCE_KEYS + ("origin",))
     kept, withheld = [], {}
     for item in items or []:
         if not isinstance(item, dict):
             continue
-        hit = _evidence_item_hit(item)
+        view = _customer_view(item)
+        hit = _evidence_item_hit(view)
         if hit:
             withheld[hit] = withheld.get(hit, 0) + 1
             continue
-        c = copy.deepcopy(item)
+        c = copy.deepcopy(view)
         _strip_keys(c, tuple(excluded) + strip)
         kept.append(c)
     return kept, withheld
@@ -785,6 +902,244 @@ def _recount_grounded_on(data: dict) -> None:
             cell["grounded_on"] = len(cell["items"])
 
 
+# ── The evidence SCOPE of a customer page (RC-08 / D-10) ────────────────
+#
+# The drawer filter above sees `origin` because the drawer resolves its items
+# from the evidence store. Every OTHER citation on a page — a row of the
+# evidence listing, a sentiment bar, a chip on an insight card, a focus area,
+# a register row — carries only an id, and the producer's `internal_only`
+# marking was the one thing standing between an internal span and the
+# customer. The page builder therefore resolves, once per page, which cited
+# ids are internal spans (withheld) and which are shareable split spans
+# (served under their customer attribution): `pages.evidence_scope`. This
+# applies it.
+#
+#   {"withheld": {e_id, ...}, "attribution": {e_id: label, ...}}
+CITATION_LIST_KEYS = frozenset({"e_ids", "supporting_e_ids", "evidence_ids"})
+
+
+def apply_evidence_scope(node, scope) -> int:
+    """Remove withheld ids from every citation list and every row whose
+    `e_id` is withheld; re-attribute shared spans' `source_name`. In place;
+    returns how many chips and rows were withheld."""
+    if not scope:
+        return 0
+    withheld = scope.get("withheld") or set()
+    attribution = scope.get("attribution") or {}
+    if not withheld and not attribution:
+        return 0
+    n = 0
+    if isinstance(node, dict):
+        eid = node.get("e_id")
+        if isinstance(eid, str) and eid in attribution and "source_name" in node:
+            node["source_name"] = attribution[eid]
+        for key in list(node):
+            v = node[key]
+            if key in CITATION_LIST_KEYS and isinstance(v, list):
+                keep = [e for e in v
+                        if not (isinstance(e, str) and e in withheld)]
+                n += len(v) - len(keep)
+                node[key] = keep
+            else:
+                n += apply_evidence_scope(v, scope)
+    elif isinstance(node, list):
+        keep = []
+        for v in node:
+            if (isinstance(v, dict) and isinstance(v.get("e_id"), str)
+                    and v["e_id"] in withheld):
+                n += 1
+                continue
+            keep.append(v)
+        node[:] = keep
+        for v in node:
+            n += apply_evidence_scope(v, scope)
+    return n
+
+
+# ── Customer PROJECTIONS: a section reshaped, not just stripped ────────────
+#
+# Each runs for the customer audience only, after the deny rules and before
+# the nets and the allowlist, over a body this module already owns (a deep
+# copy). Each returns the receipt entries it adds.
+
+#: A capability cell code in prose (P2C2.1.1, P3C1.8.IC3, P1C1.3.CU1).
+CELL_CODE = re.compile(r"\bP[1-4]C\d+(?:\.[A-Za-z0-9]+)*\b")
+#: Cap vocabulary: the maturity-cap argument ("caps P2C2.1.1 at M3", "L3.0",
+#: "ceiling", "scored 3.0", "subcapability"). It is how WE read the card.
+CAP_VOCABULARY = re.compile(
+    r"\bcaps?\b[^.]{0,60}?\bat\s+[ML]\s?\d|\b[ML][1-5](?:\.\d)?\b"
+    r"|\bceilings?\b|\bscored\s+\d|\bsub-?capabilit(?:y|ies)\b"
+    r"|\buncertainty\b", re.I)
+
+#: The reduced sentiment card's top-level keys (owner decision 1).
+_SENTIMENT_CUSTOMER_KEYS = frozenset({
+    "bars", "themes", "e_ids", "empty_state", "produced_at",
+    "producer_version", "enrichment_status", "internal_only"})
+#: Theme keys that ARE the internal half of the card.
+_SENTIMENT_THEME_INTERNAL = ("cap_statement", "mapped_subcap_ids")
+
+
+def _strip_cap_language(node, path="", found=None) -> list:
+    """Delete every field (blank every list string) naming a cell code or cap
+    vocabulary — the whole field, never half a sentence."""
+    found = [] if found is None else found
+    if isinstance(node, dict):
+        for k in list(node):
+            v = node[k]
+            here = f"{path}.{k}" if path else k
+            if k in CITATION_LIST_KEYS or k == "e_id":
+                continue
+            if isinstance(v, str) and (CELL_CODE.search(v)
+                                       or CAP_VOCABULARY.search(v)):
+                del node[k]
+                found.append(here)
+            else:
+                _strip_cap_language(v, here, found)
+    elif isinstance(node, list):
+        for i, v in enumerate(list(node)):
+            if isinstance(v, str) and (CELL_CODE.search(v)
+                                       or CAP_VOCABULARY.search(v)):
+                node[i] = None
+                found.append(f"{path}[{i}]")
+            else:
+                _strip_cap_language(v, f"{path}[{i}]", found)
+    return found
+
+
+def _project_sentiment(out: dict, scope) -> dict:
+    """OWNER DECISION 1 (2026-10-04): the customer receives ratings bars and
+    themes, without cell codes, internal sources, cap vocabulary or r_layer.
+    The internal audience keeps the full card (this never runs for it).
+
+    gap_analysis, narrative_thread and displayed_lines are not bars or
+    themes: the first two are the analyst's reading of the card, the third a
+    declared count the reduced card no longer matches."""
+    rep = {"sentiment_projection": []}
+    for k in [k for k in out if k not in _SENTIMENT_CUSTOMER_KEYS]:
+        del out[k]
+        rep["sentiment_projection"].append(k)
+    withheld = (scope or {}).get("withheld") or set()
+    themes = out.get("themes")
+    if isinstance(themes, list):
+        kept = []
+        for t in themes:
+            if not isinstance(t, dict):
+                continue
+            for k in _SENTIMENT_THEME_INTERNAL:
+                t.pop(k, None)
+            cited = [e for e in (t.get("e_ids") or []) if isinstance(e, str)]
+            if cited and all(e in withheld for e in cited):
+                rep["sentiment_projection"].append(
+                    "themes[] (internal sources only)")
+                continue
+            rep["sentiment_projection"] += _strip_cap_language(t, "themes[]")
+            if not str(t.get("theme") or "").strip():
+                continue            # a theme without its sentence is no theme
+            kept.append(t)
+        out["themes"] = kept
+    bars = out.get("bars")
+    if isinstance(bars, list):
+        for b in bars:
+            rep["sentiment_projection"] += _strip_cap_language(b, "bars[]")
+    return rep
+
+
+def _project_techstack(out: dict, scope) -> dict:
+    """DECISIONS D4 clause 1, and the layer rollup recomputed over what is
+    served (invariant 8: the count follows the register the reader sees)."""
+    items = out.get("items")
+    if not isinstance(items, list):
+        return {}
+    kept = [r for r in items if isinstance(r, dict)
+            and str(r.get("status") or "").strip().upper()
+            in D4_CUSTOMER_STATUSES]
+    rep = {"d4_rows_withheld": len(items) - len(kept)}
+    out["items"] = kept
+    for layer in out.get("layers") or []:
+        if not isinstance(layer, dict) or "layer" not in layer:
+            continue
+        name = str(layer.get("layer") or "").upper()
+        layer["detected"] = sum(
+            1 for r in kept if str(r.get("layer") or "").upper() == name
+            and str(r.get("status") or "").upper() == "CONFIRMED")
+        layer["detected_basis"] = _D4_DETECTED_BASIS
+    return rep
+
+
+def _project_landscape(out: dict, scope) -> dict:
+    """The T2 tiles of the D4-filtered register: CONFIRMED and GAPS (ABSENT).
+    Their counts are unchanged by the filter, so they still reconcile."""
+    tiles = out.get("tiles")
+    if not isinstance(tiles, list):
+        return {}
+    kept = [t for t in tiles if isinstance(t, dict)
+            and str(t.get("kind") or "").upper() in ("CONFIRMED", "GAPS")]
+    out["tiles"] = kept
+    return {"d4_tiles_withheld": len(tiles) - len(kept)}
+
+
+def _section_withheld_for_customer(page: str, section: str) -> bool:
+    return ((page, section) in CUSTOMER_WITHHELD
+            or (page, section) in NEVER_SERVED
+            or page in CUSTOMER_WITHHELD_PAGES)
+
+
+def _project_safeguard_gates(out: dict, scope) -> dict:
+    gates = out.get("gates")
+    if not isinstance(gates, list):
+        return {"gates_withheld_target": []}
+    kept, gone = [], []
+    for g in gates:
+        gid = (g.get("gate_id") or g.get("gate")) if isinstance(g, dict) else None
+        targets = SG_GATE_TARGETS.get(gid)
+        if targets and all(_section_withheld_for_customer(p, s)
+                           for p, s in targets):
+            gone.append(gid)
+            continue
+        kept.append(g)
+    out["gates"] = kept
+    return {"gates_withheld_target": gone}
+
+
+CUSTOMER_PROJECTIONS = {
+    ("overview", "sentiment"): _project_sentiment,
+    ("techstack", "techstack"): _project_techstack,
+    ("insights", "landscape"): _project_landscape,
+    ("heatmap", "safeguard_gates"): _project_safeguard_gates,
+}
+
+
+def _normalise_marking(path: str, section: str) -> str:
+    """`platform_story.platforms[0].estate_reach` and `platforms.estate_reach`
+    both name `platforms[*].estate_reach`."""
+    segs = path.split(".")
+    if len(segs) > 1 and segs[0] == section:
+        segs = segs[1:]
+    norm = [re.sub(r"\[(?:\*|\d+)\]", "", s) for s in segs]
+    return ".".join(f"{s}[*]" if i < len(norm) - 1 else s
+                    for i, s in enumerate(norm))
+
+
+def over_redaction(page: str, section: str, internal_only) -> tuple[list, list]:
+    """(markings to apply, markings ignored as over-redaction).
+
+    A bare-string marking of a CUSTOMER_SHAREABLE path is ignored; a dict
+    marking with a non-empty `why` is a documented withholding and applies.
+    """
+    shareable = set(CUSTOMER_SHAREABLE.get((page, section), ()))
+    apply, ignored = [], []
+    for m in internal_only or ():
+        path = m.get("path") if isinstance(m, dict) else m
+        why = m.get("why") if isinstance(m, dict) else None
+        if (shareable and isinstance(path, str)
+                and _normalise_marking(path, section) in shareable
+                and not (isinstance(why, str) and why.strip())):
+            ignored.append(path)
+            continue
+        apply.append(m)
+    return apply, ignored
+
+
 def redact_empty_state(empty, audience: str) -> tuple[object, list]:
     """(empty_state_or_None, dropped) — the ONE part of a section that never
     went through the walker.
@@ -848,9 +1203,13 @@ def redact_empty_state(empty, audience: str) -> tuple[object, list]:
 
 
 def redact_section(page: str, section: str, data: dict, internal_only,
-                   audience: str) -> tuple[dict | None, dict]:
+                   audience: str, evidence_scope=None) -> tuple[dict | None, dict]:
     """Return (data_or_None_if_withheld, redaction_report). Never mutates
-    the caller's object: the promoted payload is shared across readers."""
+    the caller's object: the promoted payload is shared across readers.
+
+    `evidence_scope` ({"withheld": ids, "attribution": {id: label}}) is the
+    page's resolution of which cited ids are internal spans and which are
+    shareable split spans (`pages.evidence_scope`); customer audience only."""
     out = copy.deepcopy(data) if isinstance(data, dict) else data
     report = {"withheld": False, "paths_stripped": [], "paths_unmatched": [],
               "keys_stripped": [], "vendor_named": [],
@@ -879,7 +1238,11 @@ def redact_section(page: str, section: str, data: dict, internal_only,
                           "paths_unmatched": [], "keys_stripped": [],
                           "vendor_named": [], "seller_voice": []}
         if isinstance(out, dict):
-            did, missed = strip_paths(out, internal_only, section)
+            # Over-redaction first: a bare marking of a field the rulebook
+            # says the client is owed is not applied, and is named (D-11).
+            marks, report["over_redaction_ignored"] = over_redaction(
+                page, section, internal_only)
+            did, missed = strip_paths(out, marks, section)
             report["paths_stripped"] += did
             report["paths_unmatched"] += missed
 
@@ -898,6 +1261,18 @@ def redact_section(page: str, section: str, data: dict, internal_only,
             # this module was rewritten to end.
             report["keys_stripped"] += _strip_keys(
                 out, CUSTOMER_STRIP_KEYS + CUSTOMER_STRIP_CONTACT_KEYS)
+
+            # The section's customer PROJECTION (reduced sentiment card, D4
+            # register and tiles, H5 rows about withheld sections), then the
+            # page's evidence scope: internal spans out of every row and
+            # chip, shared spans under their customer attribution. The
+            # projection reads the scope too (a theme resting only on
+            # internal sources goes), so it runs first.
+            project = CUSTOMER_PROJECTIONS.get((page, section))
+            if project is not None:
+                report.update(project(out, evidence_scope))
+            report["evidence_scope_withheld"] = apply_evidence_scope(
+                out, evidence_scope)
 
             # The safety nets run LAST, over what survived every rule
             # above. Two of them: the vendor's name, and sentences addressed

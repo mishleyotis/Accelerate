@@ -8,6 +8,14 @@ the standard in QA has already failed the one-turn test; the point of this file 
 let you understand the deliverable before you start, and to give you a gate
 (`engine/gold_standard.py`) you run on your OWN output before you return.
 
+This file covers three deliverables: the **workbook**, the two **reports**, and the
+six **app pages** (overview, heatmap, insights, platform, context, techstack — see
+*App pages* below, added 2026-10-04 after the SWBC gold audit found the app pages had
+no measurable gold at all: RC-01). Its path from the repository root is
+`plugins/dma-insights/docs/GOLD-STANDARD.md`; inside the plugin,
+`${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md`. A bare `docs/` path from the repository
+root is the read-only design-docs folder, and this file is not in it.
+
 ## The deliverable-first loop (do this in order, every time)
 
 1. **Read the contract** — this file — and open the reference package's workbook and
@@ -40,7 +48,11 @@ engine's. It carries, at minimum:
   **labelled an estimate from public digital-maturity signals, not a formal DMA score**,
   with a locked peer set.
 - `Firmographics` — `Field, Value, Unit, As at, Evidence`. A genuinely-absent field
-  reads `ABSENT (see 1.2)` with a route, never blank and never "quarantined".
+  reads `ABSENT (see 1.2)` with a route, never blank. (That is the WORKBOOK's word. The
+  app payload states the same absence as `quarantined: true` with a
+  `quarantine_reason` naming the route, and renders it as a stated absence — one rule
+  in two vocabularies; see *App pages → Held fields*. An earlier version of this line
+  said "never quarantined", which contradicted the app contract.)
 - `Focus_Areas` — client priorities with a **verbatim quote**, document, page, cells.
 - `Issue_Register` — real matters with `Severity, Status, Capability impact`.
 - `Solution_Catalogue`, `Cap_Triggers`, `Platform_Peer_Adoption`, `Maturity_Rubric`,
@@ -129,10 +141,21 @@ These read as "the work was not finished" and must never ship: "Not established 
 run", "to be established at the surface-production stage", "no score yet", "queued for
 enrichment", "TBD", "N/A" standing in for a value. If a thing is genuinely unknown, it
 is an **Unknown evidence gap disclosed in Coverage** or an **ABSENT firmographic with a
-route** — a stated, structured absence, never a hedge.
+route** — a stated, structured absence, never a hedge. On the app pages the structured
+absence is an `empty_state` (reason, `sources_searched`, closure condition), a held
+field with its `quarantine_reason`, or a null member with its own `<member>_basis`.
 
 ## The gate is the contract, executable
 
-`engine/gold_standard.py` encodes every rule above and maps each to the goeasy finding
-it prevents (`docs/goeasy-findings-register.md`). Run it on your own output. Green is
-the definition of done.
+`engine/gold_standard.py` encodes every rule above for the workbook and the reports and
+maps each to the goeasy finding it prevents
+(`plugins/dma-insights/docs/goeasy-findings-register.md`). Run it on your own output.
+Green is the definition of done. For the app pages the executable contract is CG-PAR
+and Gate J, below.
+
+## App pages
+
+The six app pages' gold — `fixtures/surface_gold.json` (shape only, no values), the
+per-audience dispositions, the structural parity gate CG-PAR and its owner decisions —
+lives in [`GOLD-STANDARD-APP-PAGES.md`](GOLD-STANDARD-APP-PAGES.md). Per-surface
+producers read that file, not this one.

@@ -261,7 +261,7 @@ The table lists what each surface uses BEYOND the package, and why.
 | overview.thought_leadership | Exa | the entity's own publications, talks, bylines |
 | overview.leadership | Exa · Tavily · Clay‡ | roster verification, arrivals/departures, profile facts through the orchestrator tier; the contacts pass itself is Clay, run and polled by the producer |
 | overview.financial_series | Tavily | regulator series (call reports, 10-K figures) corroboration |
-| overview.sentiment | Tavily | app-store / review aggregate figures with n, scale, as_of |
+| overview.sentiment | Tavily · Indeed | app-store / review aggregate figures with n, scale, as_of; the employee bar from the Indeed connector's `get_company_data` (origin='connector', T3) — serviced by the connector specialist, and held by `overview-market-producer` too (RC-07) |
 | overview.findings | — | package + cross-surface reconciliation |
 | overview.opportunity | (engine) + the platform set below | tiles mirror platform.platform_story — same factors, same validations |
 | heatmap.workbook_scores | — | package only — scores are never enriched (invariant: no fabricated scores) |
@@ -300,9 +300,13 @@ leadership roster from Clay's contacts pass, the technographic register and
 its landscape rollup from Explorium. `scripts/tests/test_connector_provisioning.py`
 re-derives both rules from this table on every run.
 
-Indeed is held by the `technographic-scanner` alone (`search_jobs` — job
-postings as the DATA/INFRA demand signal); every other surface reads those
-rows out of the scan rather than calling Indeed again. Quartr is declared in
+Indeed is two reads with two holders. `search_jobs` (job postings as the
+DATA/INFRA demand signal) is the `technographic-scanner`'s alone; every other
+surface reads those rows out of the scan rather than calling Indeed again.
+`get_company_data` (employer ratings) is held by `overview-market-producer`
+(the sentiment card's employee bar is read from it) and `enrichment-connector-specialist`
+(SWBC gold audit 2026-10-04, RC-07: the page 403s, the connector answers, and
+the reading registers `origin='connector'` at T3 per owner decision 3). Quartr is declared in
 the registry and granted to no agent (not wired). Drive is granted to no
 agent: the client folder and the toolkits land under the run root through
 `drive_fetch.py` over Bash. Clay runs in the correct workspace; a refused

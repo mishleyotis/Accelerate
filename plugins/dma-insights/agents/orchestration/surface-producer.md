@@ -162,7 +162,7 @@ python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payloa
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_language.py" <payload.json>
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/precheck_gates.py" <payload.json> --page <page> \
        --evidence <get_evidence.json> --bundle <get_report_bundle.json>
-python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/ --subvertical <CODE>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/   # rundir holds bundle.json, catalogue.json, fit.json (MEM-0559, RC-12)
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/self_heal.py" --sections sections/ \
        --page <page> --entity "<the entity's legal name>"
 ```
@@ -260,10 +260,30 @@ Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_
 
 ## Gold standard — the deliverable-first loop (mandatory)
 
-Before you author anything, read `docs/GOLD-STANDARD.md` and open the reference package
+Before you author anything, read `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) and open the reference package
 (**Golden 1 Credit Union**) so you know the exact shape you are producing — the section
 list, the tables, the coverage disclosure, the M-band labels. Authoring first and
 discovering the standard in QA is the failure this loop exists to prevent.
+
+**The six app pages have a measurable gold too** — the doc's *App pages* section, cut
+from the promoted gold runs into a shape-only fixture (`fixtures/surface_gold.json`;
+the connector holds a byte-identical copy). It states, per section and audience, what
+is served, withheld or never served, and the row floors: e.g. firmographics carries
+15–16 fields with at least 93% stated and un-held in every gold run. `promote_run`
+holds every staged page to it (**CG-PAR**). Only STRUCTURE refuses the promote (owner
+decision B, 2026-10-04): a section or key every gold run serves and today's contract
+requires (or allows omitting only on a condition you have not stated, like
+`sentiment.gap_analysis`), a row key the contract's `item_shape` requires, or more than 2
+(or 25%) of the must-present firmographics not stated. Shorter lists, thinner fill and a
+lower stated share come back as WARNINGS in the promote verdict — read them, and never
+pad a list to clear one: a row count is an assessment result. A null with its own
+`<member>_basis` is a stated absence; a held firmographic renders as a stated absence
+with its reason (owner decision 2). Your run is held to gold of its own sub-vertical when
+one exists, otherwise to all gold for structure only. From a repository checkout, run the
+same rules before you submit: `python3 scripts/gate_j_surface_parity.py --gold
+fixtures/surface_gold.json --target-dir <dir with your six page JSON files>
+--sub-vertical <code>` (exit 1 = a structural gap; `(warning)` lines do not fail it).
+(RC-01, RC-02, SWBC gold audit 2026-10-04.)
 
 When you have produced your artefact, run the gate on your OWN output before you return:
 
@@ -275,7 +295,7 @@ python3 -m engine.gold_standard package   <client_folder>
 
 Do not hand back an artefact until the gate prints `PASS`. Re-run it after any change
 that touches a score, a section, or a figure. Every finding maps to a goeasy-Ltd defect
-in `docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
+in `${CLAUDE_PLUGIN_ROOT}/docs/goeasy-findings-register.md`; a finding the gate catches is one you should have
 caught here. Never ship a hedge ("Not established this run", "surface-production stage",
 "no score yet", a bare "N/A" or "0" where a value belongs) — a genuine gap is a
 disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge.

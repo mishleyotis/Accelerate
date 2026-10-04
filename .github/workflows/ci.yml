@@ -120,8 +120,10 @@ jobs:
       # found by a human with two browser tabs. Structure only, never values:
       # a thinner number is an assessment result, and a gate that argued
       # otherwise would push every client toward the reference's answers.
-      # Here it runs its own rules against fixtures; the corpus-gate-scanner
-      # runs it --api against the two promoted clients nightly.
+      # Here it runs its own rules against fixtures. (This comment used to say
+      # the corpus-gate-scanner runs it --api nightly; it never did — RC-02,
+      # 2026-10-04. What does run against real runs is CG-PAR inside
+      # promote_run, the same rules from apps/mcp/dma_mcp/parity.py.)
       # Driven end-to-end against a committed pair carrying three of the four
       # gaps it exists for, plus a WITHHELD section it must stay silent about.
       # `compare_page`'s rules are unit-tested; this asserts the CLI around
@@ -157,8 +159,39 @@ jobs:
           for want in section_empty key_absent key_empty; do
             echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want"; exit 1; }
           done
-          echo "$out" | grep -q ceilings && { echo "Gate J reported a withheld section as a gap"; exit 1; }
-          echo "Gate J: refuses a thinner target, stays silent on a withheld section."
+          # A gap line is "  [kind] page.section…"; the withheld line names the
+          # section on its own line and is not a gap.
+          echo "$out" | grep -qE '^ +\[[a-z_]+\] overview\.ceilings' && { echo "Gate J reported a withheld section as a gap"; exit 1; }
+          echo "$out" | grep -q "withheld by audience.*overview.ceilings" || { echo "Gate J stopped reporting withheld sections separately"; exit 1; }
+          echo "Gate J: refuses a thinner target, reports a withheld section separately."
+      # RC-02 (SWBC gold audit, 2026-10-04): the step above compares top-level
+      # keys of a synthetic pair; it could not see ten firmographic fields
+      # with six held against a gold stating fifteen of sixteen. This one
+      # runs the ROW-grain rules against the committed shape-only gold
+      # (fixtures/surface_gold.json, cut from the promoted gold runs by
+      # scripts/gen_surface_gold.py) with a target shaped like that run.
+      # Owner decision B (2026-10-04): only a STRUCTURAL gap fails the gate
+      # (a section or key the gold always serves is missing; a must-present
+      # field null or held beyond the cap); the stated share and the fill
+      # ratios must still be REPORTED, as warnings. Each gold run meeting the
+      # standard of the others (leave-one-out) is asserted in
+      # scripts/tests/test_gate_j_item_grain.py.
+      - name: Gate J — the committed gold shape refuses a thin target
+        run: |
+          set +e
+          out=$(python3 scripts/gate_j_surface_parity.py \
+                  --gold fixtures/surface_gold.json \
+                  --target-file fixtures/parity/target-thin-overview.json \
+                  --page overview --sub-vertical CU)
+          code=$?
+          echo "$out"
+          test "$code" -eq 1 || { echo "Gate J did not refuse a thin target against the gold"; exit 1; }
+          for want in "^  \[held_beyond_cap\] overview.firmographics.fields" "^  \[key_absent\] overview.sentiment.gap_analysis" "^  (warning) \[stated_share\] overview.firmographics.fields" "^  (warning) \[item_fill\]"; do
+            echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want against the gold"; exit 1; }
+          done
+          # A count is never a structural gap: no blocking line may name one.
+          echo "$out" | grep -qE '^  \[(list_len|item_fill|stated_share)\]' && { echo "Gate J refused on a count or fill ratio"; exit 1; }
+          echo "Gate J: the gold shape refuses a thin target on structure and warns on its counts."
       # The curation covered 115 of the specification's 127 surfaces and walked
       # past twelve — three whole Insights surfaces carrying eighteen P0 checks
       # among them, in neither artefact, not included and not excluded. Nothing

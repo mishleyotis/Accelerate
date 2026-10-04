@@ -4,7 +4,7 @@ One surface of the overview page pack. Read `../2-overview.md` first — the pag
 
 ## O1b · Capability ceiling &amp; uncertainty
 
-- **Section** `overview.ceilings` — **renders on** D1 (Overview)
+- **Section** `overview.ceilings` — **renders nowhere**: NEVER_SERVED (produced, validated and audited; `redaction.py` serves it to no audience — D-35)
 - **Contract** Per category, the highest level the evidence would support under perfect execution, its uncertainty band, and the named absence that set it.
 
 ### Prompt
