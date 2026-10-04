@@ -518,7 +518,7 @@
   "provenance": "PROVENANCE_T",
   "r_layer": "JSONB",
   "run_id": "UUID",
-  "score": "NUMERIC(4,2)",
+  "score": "NUMERIC",
   "source_cell": "TEXT",
   "subcap_id": "TEXT"
  },
@@ -899,7 +899,7 @@
  "overview_scores": {
   "band": "BAND_T",
   "claim_label": "CLAIM_T",
-  "composite": "NUMERIC(4,2)",
+  "composite": "NUMERIC",
   "confidence": "CONFIDENCE_T",
   "e_ids": "TEXT[]",
   "empty_state": "JSONB",
@@ -1180,7 +1180,7 @@
   "catalogue_cells": "INTEGER",
   "ccg_catalog_version": "TEXT",
   "completed_at": "TIMESTAMPTZ",
-  "composite": "NUMERIC(4,2)",
+  "composite": "NUMERIC",
   "entity_id": "UUID",
   "id": "UUID",
   "is_active": "BOOLEAN",

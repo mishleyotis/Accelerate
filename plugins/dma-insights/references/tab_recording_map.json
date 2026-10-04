@@ -164,12 +164,15 @@
   },
   {
    "tab": "Executive_Summary",
-   "records": "run config",
-   "confidence": "not_client_facing",
-   "page": null,
-   "section": null,
-   "sections": [],
-   "required": null
+   "records": "overview.scores, overview.exec_summary",
+   "confidence": "proposed",
+   "page": "overview",
+   "section": "scores",
+   "sections": [
+    "overview.scores",
+    "overview.exec_summary"
+   ],
+   "required": true
   },
   {
    "tab": "Financial_Trends",
@@ -215,12 +218,15 @@
   },
   {
    "tab": "Handoff_Lock",
-   "records": "run config",
-   "confidence": "not_client_facing",
-   "page": null,
-   "section": null,
-   "sections": [],
-   "required": null
+   "records": "platform.platform_story, overview.scores",
+   "confidence": "proposed",
+   "page": "platform",
+   "section": "platform_story",
+   "sections": [
+    "platform.platform_story",
+    "overview.scores"
+   ],
+   "required": true
   },
   {
    "tab": "Issue_Register",
@@ -531,6 +537,8 @@
   "overview.scores": {
    "required": true,
    "fed_by_tabs": [
+    "Executive_Summary",
+    "Handoff_Lock",
     "Peer_Benchmarks",
     "Pillar_Rollup",
     "Pillar_Summary"
@@ -548,7 +556,9 @@
   },
   "overview.exec_summary": {
    "required": true,
-   "fed_by_tabs": []
+   "fed_by_tabs": [
+    "Executive_Summary"
+   ]
   },
   "overview.opportunity": {
    "required": true,
@@ -600,6 +610,7 @@
   "platform.platform_story": {
    "required": true,
    "fed_by_tabs": [
+    "Handoff_Lock",
     "Solution_Catalogue"
    ]
   },
@@ -664,11 +675,11 @@
  },
  "counts": {
   "tabs_the_app_reads": 42,
-  "tabs_bound_to_a_page": 25,
-  "tabs_bound_to_a_section": 25,
+  "tabs_bound_to_a_page": 27,
+  "tabs_bound_to_a_section": 27,
   "verified_bindings": 5,
-  "proposed_bindings": 26,
-  "not_client_facing": 11,
+  "proposed_bindings": 28,
+  "not_client_facing": 9,
   "page_sections": 34,
   "required_page_sections": 32
  }

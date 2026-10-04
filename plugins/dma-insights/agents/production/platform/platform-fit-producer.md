@@ -385,7 +385,7 @@ fix: the mapping is.
   phase. It must agree with the roadmap **and** the stair-step; 17 clients
   shipped a sequence contradicting their own roadmap, and no per-page gate can
   see that —
-  `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py`
+  `python3 "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>`
   runs before submit.
 - **`evidence_ids[]`** — non-empty per row, each id **once**. `grounded_on` is the
   length of the list (invariant 8), so a duplicate inflates the count the reader
@@ -715,6 +715,14 @@ with an empty basis; a discard list of one; a `peer_synthesis` that says "peers
 are investing in data platforms"; a KPI baseline that is a target with the word
 "current" in front of it. The tell is whether an AE could be challenged on the
 row in the room and still have somewhere to stand.
+
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **Identified, not scored, still owes a row per peer on every tile** (RC-10, D-08). Given a named peer set (Handoff_Lock `locked_peer_set`, the peer table, or any `peer_deployments` row), every tile carries exactly one row per named peer — `deployed` true/false with a source and `as_of`, or null with the searches that could not establish it as `basis` — and a `peer_synthesis`. AG-04 now reads the named set (`dma_mcp/peer_set.py`); SWBC had 6 of 8 tiles bare.
+
+- **The cross-section invariants** (RC-12, D-18, D-19): the breakdown equals `fit_score` (carry `readiness_multiplier`); engine fields are copied from `get_platform_fit`; a non-READY tile has `rank: null` and `fit_score: null` or moves to `discarded[]`; every `recommendations[].l3_area` has a tile (an advisory area gets a null-fit tile with its reason); every discard states its integer cell count; the top-10 in-vertical L3 areas by scored-cell count (from `get_capability_catalogue` — the bundle's score rows carry no `l3_platform_areas`) are tiles or discards. `check_consistency.py` runs every one.
 
 ## Output contract
 

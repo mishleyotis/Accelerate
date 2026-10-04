@@ -2467,6 +2467,10 @@ _ITEM_DATING = {
                             "worse than a gap"),
     "heatmap.evidence_age": ("rows[*].published_or_asof", "age_months and band "
                              "are computed from this date"),
+    # SWBC gold audit RC-12(i), D-23: five register rows shipped as_of null
+    # beside cited evidence dated 2026-09-01, and nothing said why.
+    "techstack.techstack": ("items[*].as_of", "the register's recency dot is "
+                            "computed from as_of"),
 }
 
 # Values that RECORD non-establishment rather than assert a date. The

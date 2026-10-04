@@ -597,6 +597,14 @@ reading about the category; or a cell omitted from `cells[]` without
 `linking_stats` reporting the hole. Where a cell defeats even the artefact test,
 **omit it** — declared-and-identical ranks below no row at all.
 
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **The index holds everything the run cites** (RC-12(d), D-27). Every e_id cited on any page and every H7 row is a row in `heatmap.evidence` — SWBC's E-CC-925 was cited on six sections and missing. Back-fill `supports_subcap_ids` from `get_evidence`.
+
+- **One thin definition per payload — which one is OPEN** (RC-12(c), D-21; owner question 9). Derive `thin` from the cell's own items, apply one definition throughout, and carry `thin_override` with a reason on an exception. Do not settle the definition yourself.
+
 ## Output contract
 
 Return **only** JSON plus a short self-report, in this shape:

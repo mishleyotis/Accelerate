@@ -127,11 +127,14 @@ EXTERNAL = {
                   "mcp__Vibe_Prospecting__fetch-entities"],
     # Job postings are the highest-yield public signal for the DATA and
     # INFRA layers — a stack a client never announces is still named in the
-    # roles it hires for. `search_jobs` is the signal; `get_job_details` and
-    # `get_company_data` were never named by a body and are gone.
+    # roles it hires for. `search_jobs` is the signal (the scanner's slice);
+    # `get_company_data` is the employer-ratings read the sentiment card is
+    # written from (SWBC gold audit 2026-10-04, RC-07; owner decision 3:
+    # a connector reading is evidence, origin='connector', T3).
+    # `get_job_details` was never named by a body and is gone.
     # `get_resume` is deliberately absent: a named person's resume is not
     # estate evidence and is not ours to read.
-    "indeed":  ["mcp__Indeed__search_jobs"],
+    "indeed":  ["mcp__Indeed__search_jobs", "mcp__Indeed__get_company_data"],
     "quartr":  ["mcp__Quartr__search", "mcp__Quartr__read_transcript",
                 "mcp__Quartr__list_conferences", "mcp__Quartr__get_conference"],
     "drive":   ["mcp__Google_Drive__search_files",
@@ -151,6 +154,11 @@ SLICES = {
     "clay/company": ["mcp__Clay__search-companies",
                      "mcp__Clay__get-task-context",
                      "mcp__Clay__add-company-data-points"],
+    # Job postings (the technographic scanner's DATA/INFRA demand signal)
+    # and employer ratings (the sentiment card's connector route, RC-07)
+    # are two different reads with two different holders.
+    "indeed/jobs":    ["mcp__Indeed__search_jobs"],
+    "indeed/ratings": ["mcp__Indeed__get_company_data"],
 }
 
 
@@ -290,7 +298,7 @@ PAGE_ASSEMBLER = row(
 #: darkness says nothing about the connector. Exa/Tavily corroboration is
 #: emitted as search_requests; the conductor services it.
 TECHNOGRAPHIC_SCANNER = row(
-    web=WEB, external=["explorium", "clay/company", "indeed"], reads="floor",
+    web=WEB, external=["explorium", "clay/company", "indeed/jobs"], reads="floor",
     why="the scan's spine is Explorium and Clay's company pass; Indeed job "
         "postings are the DATA/INFRA demand signal only this agent reads")
 
@@ -323,9 +331,21 @@ SURFACE_PRODUCER = row(
 #: returned. No web: a connector specialist that could fall back to
 #: WebSearch would log a connector search it did not run.
 CONNECTOR_SPECIALIST = row(
-    external=["clay", "explorium"], reads="enrichment", writes=LEDGER_TOOLS,
-    why="services the Clay and Explorium batches the orchestrator hands it "
-        "and records every result with the tool that produced it")
+    external=["clay", "explorium", "indeed/ratings"], reads="enrichment",
+    writes=LEDGER_TOOLS,
+    why="services the Clay, Explorium and Indeed-ratings batches the "
+        "orchestrator hands it and records every result with the tool that "
+        "produced it")
+
+#: overview.sentiment is written in part FROM the Indeed connector's
+#: employer-ratings answer (‡, RC-07): the page 403s, the connector answers,
+#: and the reading registers origin='connector' at T3 (owner decision 3,
+#: 2026-10-04). Measured on SWBC: 3.1/5, 46 of 97 recommend, read live by two
+#: auditors while the card shipped one company-reported bar.
+MARKET_PRODUCER = row(
+    external=["indeed/ratings"], reads="producer", writes=LEDGER_TOOLS,
+    why="overview.sentiment's employee bar is written from the Indeed "
+        "connector's ratings read, which the producer must call itself")
 
 #: Services Exa/Tavily batches (the relay drain). Exa is the search; Tavily
 #: is the fallback and the verbatim-extract path.
@@ -388,6 +408,7 @@ ROLES = {
                                              "brief alone and records the "
                                              "verdict through engine.cli"),
     "production/overview/overview-people-producer": PEOPLE_PRODUCER,
+    "production/overview/overview-market-producer": MARKET_PRODUCER,
     "production/techstack/techstack-register-producer": TECHNOGRAPHIC_PRODUCER,
     "production/techstack/techstack-layers-producer": TECHNOGRAPHIC_PRODUCER,
     "production/insights/insights-landscape-producer": TECHNOGRAPHIC_PRODUCER,
@@ -471,7 +492,7 @@ CONNECTOR_TIER = {
     "research-conductor": 11,
     "surface-producer": 3,
     "technographic-scanner": 9,
-    "enrichment-connector-specialist": 8,
+    "enrichment-connector-specialist": 9,
     "enrichment-web-specialist": 6,
 }
 

@@ -473,6 +473,14 @@ computed; `identity_ok: true` as a default rather than a verdict; a roll-up carr
 over from the staged copy while the rows changed underneath it; or a thread that
 describes the profile the run wishes it had.
 
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **Dates that exist are applied** (RC-07(e), D-23). A dating pass that harvests candidate dates (SWBC: 41 in `dating_candidates_undated_rows.json`, never consumed) is applied through `register_evidence` updates once each date is verified against its excerpt; an `undated_pct` above 20% with no dating rung recorded is a defect, not a measurement (SWBC 41.8% against Baxter's 0%).
+
+- **A refused search provider hands over** (RC-07): Exa → Tavily → Firecrawl → WebSearch/WebFetch; a rung is NOT_RUN only after the whole chain failed.
+
 ## Output contract
 
 Return **only** JSON plus a short self-report, in this shape:
