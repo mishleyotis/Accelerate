@@ -57,6 +57,15 @@
  "ccg_products": {
   "l3_platform_area": "TEXT"
  },
+ "connector_responses": {
+  "body": "TEXT",
+  "entity_id": "UUID",
+  "query": "TEXT",
+  "retrieved_at": "TIMESTAMPTZ",
+  "sha256": "TEXT",
+  "stored_at": "TIMESTAMPTZ",
+  "tool": "TEXT"
+ },
  "context_acquisitions": {
   "affected_subcap_ids": "TEXT[]",
   "closed_on": "DATE",
@@ -243,8 +252,13 @@
  "evidence_index": {
   "age_months": "INTEGER",
   "claim_type": "CLAIM_T",
+  "connector_query": "TEXT",
+  "connector_response_sha256": "TEXT",
+  "connector_retrieved_at": "TIMESTAMPTZ",
+  "connector_tool": "TEXT",
   "content_hash": "TEXT",
   "corroboration": "SMALLINT",
+  "customer_attribution": "TEXT",
   "e_id": "TEXT",
   "entity_id": "UUID",
   "ers": "NUMERIC(3,2)",
@@ -259,6 +273,7 @@
   "source_name": "TEXT",
   "source_url": "TEXT",
   "specificity": "SMALLINT",
+  "split_of": "TEXT",
   "tier": "TIER_T"
  },
  "evidence_package_ids": {

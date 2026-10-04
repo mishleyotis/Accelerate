@@ -29,6 +29,7 @@
     "ccg_value_chains",
     "ccg_vc_mapping",
     "ccg_versions",
+    "connector_responses",
     "context_acquisitions",
     "context_issue_register",
     "context_regulatory_standing",
