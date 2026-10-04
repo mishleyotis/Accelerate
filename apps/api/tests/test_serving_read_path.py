@@ -584,6 +584,33 @@ def test_generated_columns_are_read_back_read_only():
     assert "age_months" not in built["data"]["rows"][0]
 
 
+def test_the_raw_twin_is_written_and_never_read_back():
+    """0064, owner decision A: `composite_raw` / `score_raw` store the same
+    payload field as `composite` / `score`, unscaled, so the generated band
+    reads the raw value. Bound to the same path, the reader served whichever
+    column came last — the hero's 2dp figure would have become 1.996 under an
+    unmoved promoted_at. The served shape keeps the display value and the
+    DB's band; the raw columns and their backfill marker never serve."""
+    r = readers()[("overview", "scores")]
+    assert "composite_raw" not in r["section_cols"]
+    assert "composite_raw_backfilled" not in r["section_cols"]
+    built = assemble("overview", "scores", [{
+        "composite": 2.00, "composite_raw": 1.996,
+        "composite_raw_backfilled": False, "band": "Activating"}])
+    assert built["data"]["composite"] == 2.00
+    assert built["data"]["band"] == "Activating", "the band the DB generated from raw"
+    assert not {"composite_raw", "composite_raw_backfilled"} & set(built["data"])
+
+    h4 = readers()[("heatmap", "workbook_scores")]
+    assert "score_raw" not in h4["item_cols"]
+    built = assemble("heatmap", "workbook_scores", [{
+        "category_id": "P1C1", "pillar_id": "P1", "score": 3.00,
+        "score_raw": 2.996, "score_raw_backfilled": False, "band": "Building"}])
+    cat = built["data"]["categories"]["P1C1"]
+    assert cat["score"] == 3.00 and cat["band"] == "Building"
+    assert "score_raw" not in cat
+
+
 def test_dotted_item_field_nests_like_the_payload():
     """platform.stairstep's item_field is `ladder.steps`. The payload nests it
     under ladder; assigning the dotted string as a literal key produced a

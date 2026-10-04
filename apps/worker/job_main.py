@@ -1015,8 +1015,11 @@ def backfill_composite(conn, token, groups, *, forced: bool = True) -> int:
                 empty += 1
                 print(f"backfill-composite: {folder}: workbook states none")
                 continue
-            cur.execute("UPDATE runs SET composite = %s WHERE id = %s",
-                        (value, run_id))
+            # The display column rounds to 2dp on assignment; the raw one
+            # keeps what the workbook states (0064, owner decision A).
+            cur.execute("UPDATE runs SET composite = %s, composite_raw = %s, "
+                        "composite_raw_backfilled = FALSE WHERE id = %s",
+                        (value, value, run_id))
             conn.commit()
             print(f"backfill-composite: {folder} -> {value} (from {cell})")
             filled += 1
