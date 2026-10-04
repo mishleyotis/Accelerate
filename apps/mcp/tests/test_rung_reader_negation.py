@@ -214,3 +214,35 @@ def test_cg40b_accepts_a_not_run_tier_whose_websearch_failover_finished():
                  "absent"]}
     assert _check_worked_absent_ladder(
         "heatmap", {"alerts": {"alerts": [alert]}}) == []
+
+
+# ── review of fix2/gates: negators inside the word, and `be` before the
+#    participle, still read TERMINAL ─────────────────────────────────────
+@pytest.mark.parametrize("rung", [
+    "NMLS Consumer Access: cannot be confirmed (Cloudflare challenge)",
+    "BrokerCheck — could not be resolved",
+    "AM Best: can't be verified without a subscription",
+    "Texas DOI orders: couldn't be located behind the search box",
+    "Form ADV: has not been confirmed",
+    "Glassdoor: was not reached",
+    "Indeed — won't be established until the connector is granted",
+])
+def test_negated_participles_are_open_not_terminal(rung):
+    assert rung_outcome(rung) == "open", rung
+
+
+def test_a_ladder_of_only_open_rungs_is_not_proposed_as_worked_absent():
+    """'We did not look' must never be proposed as 'we looked and found
+    nothing'. Before the fix every NOT_RUN rung counted as an outcome."""
+    from dma_mcp.validation import _proposed_tile_state
+    tile = {"sources_searched": ["Exa: NOT_RUN credit exhausted",
+                                 "Glassdoor: NOT RUN",
+                                 "Indeed: cannot be confirmed"]}
+    assert _proposed_tile_state(tile) == "UNWORKED"
+
+
+def test_a_ladder_with_a_terminal_rung_is_proposed_as_worked_absent():
+    from dma_mcp.validation import _proposed_tile_state
+    tile = {"sources_searched": ["Glassdoor: HTTP 403 refused",
+                                 "CareerBliss: REACHED — 4.1 of 5 on 7 ratings"]}
+    assert _proposed_tile_state(tile) == "WORKED_ABSENT"

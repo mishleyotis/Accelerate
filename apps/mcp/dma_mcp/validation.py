@@ -565,10 +565,17 @@ def _context_tile_shape(items, shape) -> list:
 def _proposed_tile_state(tile) -> str:
     """WORKED_ABSENT when the tile's ladder ran and every rung names its
     outcome (the contract's definition), else UNWORKED. A proposal for the
-    producer to confirm, never applied by the server."""
+    producer to confirm, never applied by the server.
+
+    An OPEN rung (NOT_RUN, refused, credit exhausted) names an outcome but
+    is not a worked one: a ladder of nothing but open rungs never ran, and
+    proposing WORKED_ABSENT for it would turn "we did not look" into "we
+    looked and found nothing" (review of fix2/gates). At least one rung must
+    be terminal, and every rung must name its outcome."""
     ladder = tile.get("sources_searched") if isinstance(tile, dict) else None
-    if isinstance(ladder, list) and ladder and all(
-            rung_outcome(r) is not None for r in ladder):
+    outcomes = ([rung_outcome(r) for r in ladder]
+                if isinstance(ladder, list) else [])
+    if outcomes and None not in outcomes and "terminal" in outcomes:
         return "WORKED_ABSENT"
     return "UNWORKED"
 
@@ -1215,7 +1222,13 @@ _RUNG_OPEN = re.compile(
     r"\brefused (?:automated )?(?:retrieval|access)\b|\baccess denied\b|"
     r"\bHTTP 403\b|\bsearch miss\b|\bnot a verified absence\b|\bNOT FETCHED\b"
     # Negated outcomes (fix2/gates).
-    r"|\b(?:not|never)[ _-]+(?:yet[ _-]+|been[ _-]+|fully[ _-]+)?"
+    # `cannot`/`can't`/`couldn't`/`won't` carry the negator inside the word,
+    # and `be`/`be fully` may sit between it and the participle: "cannot be
+    # confirmed" and "could not be resolved" are open rungs (review of
+    # fix2/gates: every such phrasing read TERMINAL).
+    r"|(?:\b(?:not|never)|\bcannot|\bcan[’']t|\b(?:could|would|was|is|"
+    r"were|are|has|have|had|did|does|do)n[’']t|\bwon[’']t)"
+    r"(?:[ _-]+(?:yet|be|been|being|fully|currently|yet\s+been))*[ _-]+"
     r"(?:confirmed|resolved|verified|reached|found|located|established|"
     r"answered|applicable)\b"
     r"|\bun(?:resolved|confirmed|verified|answered)\b"

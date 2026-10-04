@@ -237,3 +237,51 @@ def test_promote_still_refuses_a_structural_gap():
     assert out["promoted"] is False
     assert out["blocking_by_gate"]["overview"].get("CG-PAR"), \
         out["blocking_by_gate"]
+
+
+# ── review of fix2/parity: an unrelated empty_state excused a required key ──
+
+def _contract(required: bool):
+    return lambda page: {"sec": {"required": True, "fields": {
+        "rated_bars": {"required": required}, "themes": {"required": False}}}}
+
+
+def test_an_empty_state_about_something_else_does_not_excuse_a_required_key():
+    """Owner decision B: a key the gold always serves blocks when missing.
+    The section states an empty_state — but about `themes`, not `bars`, and
+    its lists are not all empty. Before the fix any stated empty_state
+    turned this into a warning."""
+    gap = {"kind": "key_absent", "section": "sec", "key": "rated_bars"}
+    t_sec = parity.section_shape(
+        {"empty_state": {"reason": "themes beyond three were not "
+                                   "established this run"}},
+        {"themes": [{"theme": "service speed"}, {"theme": "claims"}]})
+    assert t_sec.get("stated_empty") and "rated_bars" not in (t_sec.get("named") or ())
+    verdict, why = parity.classify("overview", gap, t_sec,
+                                   sections=_contract(required=True))
+    assert verdict == "block", why
+
+
+def test_an_empty_state_that_names_the_required_key_still_excuses_it():
+    gap = {"kind": "key_absent", "section": "sec", "key": "rated_bars"}
+    t_sec = parity.section_shape(
+        {"empty_state": {"reason": "rated_bars is omitted: no rated source with a "
+                                   "sample was reachable"}},
+        {"themes": [{"theme": "service speed"}]})
+    verdict, _ = parity.classify("overview", gap, t_sec,
+                                 sections=_contract(required=True))
+    assert verdict == "warn"
+
+
+def test_a_required_key_in_an_optional_stated_empty_section_only_warns():
+    """The section itself may be omitted (a warning), so a stated-empty
+    partial body is no worse — Baxter's insufficient-cohort H8."""
+    def optional(page):
+        return {"sec": {"required": False, "fields": {
+            "rated_bars": {"required": True}, "themes": {"required": False}}}}
+    gap = {"kind": "key_absent", "section": "sec", "key": "rated_bars"}
+    t_sec = parity.section_shape(
+        {"empty_state": {"reason": "cohort below threshold"}},
+        {"themes": [{"theme": "x"}]})
+    verdict, _ = parity.classify("heatmap", gap, t_sec, sections=optional)
+    assert verdict == "warn"

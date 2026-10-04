@@ -494,9 +494,9 @@ def compare_against_gold(page: str, golds: dict, tgt: dict,
 #     established") blocks unless the section says the condition holds, by
 #     naming the key in its empty_state. The gold always serves it, so an
 #     unexplained omission is the gap;
-#   · a REQUIRED key is excused by an explicit empty state ("an explicit
-#     empty state passes and renders" — the envelope's contract), as is any
-#     key of a section whose lists are all empty and which says why.
+#   · a REQUIRED key is excused only when the section's empty_state names
+#     it, or when every list in the section is empty and it says why — an
+#     empty_state about some other key excuses nothing.
 
 STRUCTURAL = frozenset({"section_absent", "section_empty", "key_absent",
                         "key_empty"})
@@ -587,9 +587,18 @@ def classify(page: str, gap: dict, t_sec: dict | None = None,
                              "stated reason")
         return "warn", "an optional key, served empty"
     if fs.get("required"):
-        if stated:
-            return "warn", ("a required key, absent from a section with an "
-                            "explicit empty state")
+        # An empty_state excuses a missing required key only when it NAMES
+        # that key (handled above) or the whole section is empty and says
+        # why. An empty_state about something else excuses nothing — it was
+        # the hole review found: any stated reason waved every required key
+        # through (owner decision B: a key the gold always serves blocks).
+        # One exception, by construction: inside an OPTIONAL section that
+        # states its emptiness, the whole section could have been omitted
+        # (a warning), so a partial stated-empty body must not block harder
+        # than omitting it would (Baxter's insufficient-cohort H8).
+        if stated and not sec.get("required"):
+            return "warn", ("a required key inside an optional section that "
+                            "states why it is empty")
         return "block", "a required key the gold always serves"
     if cond:
         return "block", (f"the contract allows omitting `{top}` only when "
