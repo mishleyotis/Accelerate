@@ -26,6 +26,7 @@ from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
 # The ladder-rung reader (RC-05) lives beside CG-34 in pass 1; every gate that
 # judges a search ladder reads rungs through this one definition.
 from .validation import ladder_of, rung_outcome, rung_text  # noqa: F401
+from .validation import _RUNG_FAILOVER as _RUNG_FAILOVER_RE  # noqa: E402
 
 shared_path.ensure(__file__)
 
@@ -3783,6 +3784,9 @@ def _check_depth_floors(page, payload):
 # WORKED_ABSENT alerts, 87 with queries_run [] and every one with a NOT_RUN
 # connector tier. The tier-10 CONTRADICTORY requirement is NOT enforced here:
 # the Baxter and Logix gold runs log none, so it needs an owner call first.
+_NOT_RUN_RE = re.compile(r"\bNOT[ _]RUN\b")
+
+
 def _check_worked_absent_ladder(page, payload) -> list:
     if page != "heatmap" or not isinstance(payload, dict):
         return []
@@ -3804,8 +3808,15 @@ def _check_worked_absent_ladder(page, payload) -> list:
                 f"Log the queries the ladder ran, or set the state to "
                 f"UNWORKED until it runs."))
             continue
+        # A NOT_RUN tier with no failover recorded — the RCA's rule, kept
+        # narrow on purpose: a source that REFUSED retrieval (an HTTP 403 on
+        # the entity's own site, recorded as such) is an honest rung and the
+        # Logix gold run carries one on every alert; a NOT_RUN whose failover
+        # ran (WebSearch in place of Exa, owner default 2026-10-04) is worked.
         open_rungs = [rung_text(r)[:80] for r in a.get("sources_searched") or []
-                      if rung_outcome(r) == "open"]
+                      if rung_outcome(r) == "open"
+                      and _NOT_RUN_RE.search(rung_text(r))
+                      and not _RUNG_FAILOVER_RE.search(rung_text(r))]
         if open_rungs:
             out.append(_reason(
                 "CG-40b", "alerts", f"alerts.alerts[{i}].sources_searched",

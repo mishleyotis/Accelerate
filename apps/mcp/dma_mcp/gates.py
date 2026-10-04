@@ -113,6 +113,18 @@ GATES = {
                "the strip showed four facts with nothing saying six were "
                "missing. Owner decision 2 set the cap.",
                "block"),
+    "CG-03b": ("A shape the contract states in prose is whole", None,
+               "Shapes that lived only in the page prose are machine "
+               "contract (item_shape) and read: platform tiles carry "
+               "peer_synthesis and an estate_reach with an integer "
+               "cells_not_yet_reached, peer rows are whole; the C4 grid is "
+               "three audience tiles with a state; a tenure has its "
+               "appointed_on; a web source has no source_page.",
+               "RC-09, SWBC 2026-10-04: peer_synthesis and estate_reach "
+               "appeared 0 times in the machine contract, so the gates read "
+               "them as optional; SWBC served 2 C4 tiles, 6 tenures with no "
+               "appointment date and source_page 1 on web pages.",
+               "block"),
     "CG-18c": ("The sub-vertical's firmographic set is present", None,
                "overview.firmographics carries every member of the run's "
                "primary sub-vertical set (must_present_by_subvertical), "

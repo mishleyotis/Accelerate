@@ -358,6 +358,202 @@ def _check_scoped_figures(section, body) -> list:
     return out
 
 
+# ── CG-03b · shapes that lived only in prose, now machine contract ─────
+#
+# RC-09 (SWBC gold audit, 2026-10-04; D-30, D-38; slices PL-01/03/10/12,
+# CTX-11, OH-08, HM-04). "Payload shapes are law" — so a shape absent from
+# the machine contract was, in practice, optional. peer_synthesis and
+# estate_reach appeared 0 times in contracts_data.json; the C4 tile `state`
+# and its three-audience set lived in C4.md; tenure_months had no rule tying
+# it to appointed_on; and 'source_page REQUIRED' produced placeholder 1s on
+# web pages. Each now has an `item_shape` (or a doc clause) and this reader.
+_PROSE_SHAPE_TARGETS = {
+    "platform_story": ("platform", "platforms"),
+    "context_sentiment": ("context", "context_tiles"),
+    "sentiment": ("overview", "themes"),
+}
+_PAGED_FILE = re.compile(
+    r"\.pdf\b|\.docx?\b|\.pptx?\b|drive\.google\.com/file|/download\b", re.I)
+
+
+def _item_shape(page, section, field) -> dict:
+    try:
+        spec = sections(page)[section]["fields"].get(field) or {}
+    except KeyError:
+        return {}
+    return spec.get("item_shape") or {}
+
+
+def _is_rated(row) -> bool:
+    return isinstance(row, dict) and row.get("rating") is not None
+
+
+def _check_prose_shapes(page, section, body) -> list:
+    if not isinstance(body, dict):
+        return []
+    out = []
+    target = _PROSE_SHAPE_TARGETS.get(section)
+    if target and target[0] == page:
+        fname = target[1]
+        shape = _item_shape(page, section, fname)
+        items = body.get(fname)
+        items = items if isinstance(items, list) else []
+        if section == "platform_story" and shape:
+            out.extend(_platform_tile_shape(items, shape))
+        elif section == "context_sentiment" and shape and items:
+            out.extend(_context_tile_shape(items, shape))
+        elif section == "sentiment" and shape:
+            aud = set(shape.get("audiences") or [])
+            for i, t in enumerate(items):
+                if not isinstance(t, dict):
+                    continue
+                if not str(t.get("theme") or "").strip() or \
+                        (aud and t.get("audience") not in aud):
+                    out.append(_reason(
+                        "CG-03b", section, f"sentiment.themes[{i}]",
+                        f"a theme carries a non-empty `theme` and an audience "
+                        f"in {sorted(aud)}; this one has theme "
+                        f"{str(t.get('theme'))[:40]!r}, audience "
+                        f"{t.get('audience')!r}."))
+    if page == "heatmap" and section == "focus_areas":
+        for i, fa in enumerate(body.get("focus_areas") or []):
+            if not isinstance(fa, dict) or fa.get("source_page") is None:
+                continue
+            loc = str(fa.get("source_filename") or "")
+            doc = str(fa.get("source_document") or "")
+            web = bool(re.match(r"https?://", loc)) and not _PAGED_FILE.search(loc)
+            if web or re.search(r"unpaginated|\bweb page\b", doc + " " + loc,
+                                re.I):
+                out.append(_reason(
+                    "CG-03b", section,
+                    f"focus_areas.focus_areas[{i}].source_page",
+                    f"source_page {fa.get('source_page')!r} on an unpaginated "
+                    f"source ({loc[:70] or doc[:70]!r}). source_page is required "
+                    f"for a paged document and NULL for a web page — a page "
+                    f"number on a URL is a default that looks like data."))
+    if page == "overview" and section == "leadership":
+        for i, r in enumerate(body.get("roster") or []):
+            if isinstance(r, dict) and r.get("tenure_months") is not None \
+                    and not r.get("appointed_on"):
+                out.append(_reason(
+                    "CG-03b", section, f"leadership.roster[{i}].tenure_months",
+                    f"tenure_months {r.get('tenure_months')!r} with "
+                    f"appointed_on null — tenure is derived from the "
+                    f"appointment date, so a tenure with no date is a figure "
+                    f"with no basis. State appointed_on from the source, or "
+                    f"send neither."))
+    return out
+
+
+def _platform_tile_shape(items, shape) -> list:
+    out = []
+    pd_shape = shape.get("peer_deployments") or {}
+    er_shape = shape.get("estate_reach") or {}
+    allowed_deployed = pd_shape.get("deployed", [True, False, None])
+    for i, t in enumerate(items):
+        if not isinstance(t, dict):
+            continue
+        p = f"platform_story.platforms[{i}]"
+        name = t.get("platform") or t.get("l3_area") or f"tile {i}"
+        if not (isinstance(t.get("peer_synthesis"), str)
+                and t["peer_synthesis"].strip()):
+            out.append(_reason(
+                "CG-03b", "platform_story", f"{p}.peer_synthesis",
+                f"{name!r} carries no peer_synthesis. It is a required string: "
+                f"what the named peers show at this layer, or — where peers "
+                f"are identified and not scored — say so and name them. A tile "
+                f"silent about peers reads as one nobody compared."))
+        er = t.get("estate_reach")
+        if not isinstance(er, dict):
+            out.append(_reason(
+                "CG-03b", "platform_story", f"{p}.estate_reach",
+                f"{name!r} carries no estate_reach object. It is required and "
+                f"computed from the run's own technology register."))
+        else:
+            missing = [k for k in er_shape.get("required_keys") or []
+                       if er.get(k) in (None, "")]
+            bad_int = [k for k in er_shape.get("integer_keys") or []
+                       if k not in missing and (not isinstance(er.get(k), int)
+                                                or isinstance(er.get(k), bool))]
+            if missing or bad_int:
+                out.append(_reason(
+                    "CG-03b", "platform_story", f"{p}.estate_reach",
+                    f"{name!r} estate_reach is incomplete: "
+                    + "; ".join(([f"missing {', '.join(missing)}"] if missing
+                                 else [])
+                                + ([f"{', '.join(bad_int)} must be an integer "
+                                    f"computed from the register, never prose"]
+                                   if bad_int else []))
+                    + "."))
+        rows = t.get("peer_deployments")
+        if rows is None:
+            continue
+        if not isinstance(rows, list):
+            out.append(_reason("CG-03b", "platform_story",
+                               f"{p}.peer_deployments",
+                               "peer_deployments is a list of rows or null."))
+            continue
+        for j, r in enumerate(rows):
+            if not isinstance(r, dict):
+                continue
+            gaps = [k for k in pd_shape.get("item_required_keys") or []
+                    if k not in r]
+            if "deployed" in r and r["deployed"] not in allowed_deployed:
+                gaps.append("deployed must be true | false | null")
+            if not str(r.get("basis") or "").strip() and "basis" not in gaps:
+                gaps.append("basis is empty")
+            for group in pd_shape.get("item_one_of") or []:
+                if not any(k in r for k in group):
+                    gaps.append(" or ".join(group))
+            if gaps:
+                out.append(_reason(
+                    "CG-03b", "platform_story",
+                    f"{p}.peer_deployments[{j}]",
+                    f"peer_deployments row is incomplete ({'; '.join(gaps)}): "
+                    f"one row per named peer, {{peer, deployed, basis, as_of, "
+                    f"source_url or e_ids}}, unestablished ones as "
+                    f"deployed: null with the basis that says why."))
+    return out
+
+
+def _context_tile_shape(items, shape) -> list:
+    out = []
+    alias = shape.get("audience_aliases") or {}
+    want = set(shape.get("audiences") or [])
+    seen = [alias.get(t.get("audience"), t.get("audience"))
+            for t in items if isinstance(t, dict)]
+    if want and (sorted(seen) != sorted(want)):
+        out.append(_reason(
+            "CG-03b", "context_sentiment", "context_sentiment.context_tiles",
+            f"context_tiles carries audiences {seen} and the grid is exactly "
+            f"three tiles, one each for {sorted(want)}. Emit the tile even "
+            f"where its rows are empty, with a state and the ladder: an absent "
+            f"audience is a finding, a missing tile is a hole."))
+    states = set(shape.get("state") or [])
+    for i, t in enumerate(items):
+        if not isinstance(t, dict):
+            continue
+        rated = any(_is_rated(r) for r in t.get("rows") or [])
+        st = t.get("state")
+        if st is None and not rated:
+            msg = "carries no rated row and no state"
+        elif st is not None and st not in states:
+            msg = f"has state {st!r}, outside {sorted(states)}"
+        elif st == "RATED" and not rated:
+            msg = "says RATED and carries no rated row"
+        elif st in ("WORKED_ABSENT", "UNWORKED") and rated:
+            msg = f"says {st} and carries a rated row"
+        else:
+            continue
+        out.append(_reason(
+            "CG-03b", "context_sentiment",
+            f"context_sentiment.context_tiles[{i}].state",
+            f"the {t.get('audience')!r} tile {msg}. state is RATED | "
+            f"WORKED_ABSENT | UNWORKED and must agree with the rows: an empty "
+            f"tile says whether its ladder ran."))
+    return out
+
+
 # ── CG-20 · a vendor is a company, not a category ─────────────────────
 #
 # The contract has always said it: "A PRODUCT, not a service and not a
@@ -1833,6 +2029,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_thought_leadership_depth(name, body))
         reasons.extend(_check_financial_series_reach(name, body))
         reasons.extend(_check_scoped_figures(name, body))
+        reasons.extend(_check_prose_shapes(page, name, body))
         reasons.extend(_check_no_typesetting_marks(name, body))
         reasons.extend(_check_source_label_is_a_citation(name, body))
         reasons.extend(_check_contact_routes_are_marked(name, body))
