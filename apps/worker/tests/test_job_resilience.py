@@ -425,6 +425,8 @@ class _CompositeCursor:
             self._rows = list(self._runs)
         elif "UPDATE runs" in sql:
             assert "SET composite" in sql, "only the composite may be written"
+            assert "composite_raw = %s" in sql, \
+                "the raw value is written beside the 2dp one (0064)"
             self.updated.append(params)
         elif "parser_observations" in sql:
             # The reader's "this workbook states none" verdict, recorded so
@@ -486,9 +488,12 @@ def test_backfill_composite_fills_the_run_whose_card_showed_no_maturity(monkeypa
 
     assert rc == 0
     assert len(conn.cur.updated) == 1, "only the folder shipping a workbook"
-    value, run_id = conn.cur.updated[0]
+    value, raw, run_id = conn.cur.updated[0]
     assert run_id == "run-g1"
     assert value == Decimal("2.25")
+    # 0064 (owner decision A): the raw column takes the same stated value,
+    # unrounded, beside the NUMERIC(4,2) display column.
+    assert raw == value
     # Two commits: the repaired value, then the view rebuild that publishes
     # it. `serving_directory` is materialised, so without the second one the
     # card this test is named after stays blank with the right value in the
@@ -542,7 +547,7 @@ def test_backfill_composite_survives_one_unreadable_workbook(monkeypatch):
 
     assert rc == 1, "a failure must be reported in the exit code"
     assert len(conn.cur.updated) == 1, "the good workbook still lands"
-    assert conn.cur.updated[0][1] == "good"
+    assert conn.cur.updated[0][-1] == "good"
 
 
 class _MetaCursor:

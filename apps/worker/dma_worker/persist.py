@@ -565,22 +565,30 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     # `completed_at` and `assessment_date` to resolve from one candidate list
     # over one document. Right-biased, so a real manifest key wins.
     dated_manifest = {**(wb_metadata or {}), **manifest}
-    composite = _round_once(workbook.composite)   # rounded ONCE
+    # The raw figure is kept BESIDE the 2dp one (0064, owner decision A):
+    # `composite` is the display value, rounded once here, and
+    # `composite_raw` is the value the workbook states, unrounded, so a
+    # band read from it is the band of the raw score (invariant 6).
+    composite_raw = workbook.composite
+    composite = _round_once(composite_raw)        # rounded ONCE
     composite_from_manifest = False
     stated_overall = _stated_overall(manifest)
     if composite is None and stated_overall is not None:
         # The workbook generation carries no composite figure; the manifest's
         # stated overall is READ (not derived), with its provenance recorded.
-        composite = _round_once(Decimal(str(stated_overall)))
+        composite_raw = Decimal(str(stated_overall))
+        composite = _round_once(composite_raw)
         composite_from_manifest = True
     cur.execute(
         """INSERT INTO runs (entity_id, request_id, run_seq, ccg_catalog_version,
-                             scored_cells, catalogue_cells, composite, status,
+                             scored_cells, catalogue_cells, composite,
+                             composite_raw, status,
                              completed_at, source_folder_id,
                              source_artefact_id, source_checksum)
-           VALUES (%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s,%s,%s) RETURNING id""",
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s,%s,%s) RETURNING id""",
         (entity_id, manifest.get("run_id"), run_seq, pinned,
          len({s.subcap_id for s in workbook.scores}), catalogue_cells, composite,
+         composite_raw,
          _stated_completed_at(dated_manifest), source_folder_id,
          artefact_id, artefact_checksum),
     )
