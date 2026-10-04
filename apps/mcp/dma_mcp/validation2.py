@@ -25,8 +25,9 @@ from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
                            variant_subvertical)
 # The ladder-rung reader (RC-05) lives beside CG-34 in pass 1; every gate that
 # judges a search ladder reads rungs through this one definition.
-from .validation import ladder_of, rung_outcome, rung_text  # noqa: F401
-from .validation import _RUNG_FAILOVER as _RUNG_FAILOVER_RE  # noqa: E402
+from .validation import (  # noqa: F401
+    failover_delivered, ladder_of, rung_outcome, rung_text,
+)
 
 shared_path.ensure(__file__)
 
@@ -1624,8 +1625,25 @@ def _walk_strings(node, path):
 # sentence is taken to cite. Measured on SWBC: a verbatim BrokerCheck span
 # "NO VALID CONTACT/E-MAIL" was blocked as an unresolvable id while CG-27
 # forbade rewriting it. Keyed citations are untouched.
-_PROSE_CITATION_SHAPE = re.compile(
-    r"^(?:(?:E|EV)-(?:[A-Z][A-Z0-9]*-){0,2}\d+(?:-R\d+)?|INT-.+)$")
+#
+# WIDENED 2026-10-04 (fix2/gates; review of fix/mcp-gates-contract). The
+# first cut enumerated shapes and enumerated too few: the stored package
+# namespace (apps/worker/dma_worker/evidence_ids.py STORED_PACKAGE) carries
+# the cross-entity escape `-{ENT6}` (E-UNK-007-1FCA91, E-BCU-006-R2-1FCA91)
+# and tokens that start with a digit (E-1STNB-012), and those were dropped
+# before get_evidence was asked — an unresolvable or FOREIGN citation of
+# that shape then passed silently, and `foreign` halts production
+# (invariant 4). So the rule is now subtractive, not enumerative: every token
+# the one recogniser finds is a citation EXCEPT an E-/EV- token with no digit
+# anywhere in it. Every id the system mints or stores carries a number (the
+# package's local number, the mint sequence, the connector sequence); the
+# words this exists for (E-MAIL, E-SIGN, E-COMMERCE, EV-CHARGING) carry none.
+# INT-{label} stays a citation whatever its label, as before.
+_PROSE_WORD_NOT_ID = re.compile(r"^(?:E|EV)-[A-Z-]+$")
+
+
+def _is_prose_citation(token: str) -> bool:
+    return not _PROSE_WORD_NOT_ID.match(token)
 
 
 def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
@@ -1645,15 +1663,18 @@ def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     claimed: dict = {}
     for path, text in _walk_strings(payload, ""):
         for e in find_ids(text):
-            if e in already or not _PROSE_CITATION_SHAPE.match(e):
+            if e in already or not _is_prose_citation(e):
                 continue
             claimed.setdefault(e, path.lstrip("."))
     if not claimed:
         return []
     split = get_evidence(conn, run_id, sorted(claimed))
     allowed = {row.get("e_id") for row in split.get("found", [])}
+    # A foreign id is reported once, as the contamination it is (below) —
+    # not also as an unresolvable one, which would read as a typo to fix.
+    foreign = {f.get("e_id") for f in split.get("foreign", [])}
     out = []
-    for e in find_fabricated(sorted(claimed), allowed):
+    for e in find_fabricated(sorted(claimed), allowed | foreign):
         section = claimed[e].split(".")[0] or "payload"
         gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
         out.append(_reason(
@@ -3813,10 +3834,18 @@ def _check_worked_absent_ladder(page, payload) -> list:
         # the entity's own site, recorded as such) is an honest rung and the
         # Logix gold run carries one on every alert; a NOT_RUN whose failover
         # ran (WebSearch in place of Exa, owner default 2026-10-04) is worked.
-        open_rungs = [rung_text(r)[:80] for r in a.get("sources_searched") or []
+        # fix2/gates: rung_outcome now reads a failover's OWN outcome, so a
+        # NOT_RUN tier whose failover finished reads terminal and is not
+        # here, and one whose failover also failed ("fell back to WebSearch:
+        # NOT RUN") reads open and is. A failover rung with no outcome of its
+        # own is complete only when the ladder carries the WebSearch/WebFetch
+        # rung it handed over to, worked to a terminal outcome — merely
+        # naming a failover no longer exempts the rung.
+        ladder = a.get("sources_searched") or []
+        open_rungs = [rung_text(r)[:80] for r in ladder
                       if rung_outcome(r) == "open"
                       and _NOT_RUN_RE.search(rung_text(r))
-                      and not _RUNG_FAILOVER_RE.search(rung_text(r))]
+                      and not failover_delivered(r, ladder)]
         if open_rungs:
             out.append(_reason(
                 "CG-40b", "alerts", f"alerts.alerts[{i}].sources_searched",
