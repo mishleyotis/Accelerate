@@ -270,14 +270,19 @@ from the promoted gold runs into a shape-only fixture (`fixtures/surface_gold.js
 the connector holds a byte-identical copy). It states, per section and audience, what
 is served, withheld or never served, and the row floors: e.g. firmographics carries
 15–16 fields with at least 93% stated and un-held in every gold run. `promote_run`
-holds every staged page to it (**CG-PAR**): a list under half the gold's rows, a member
-every gold row carries and most of yours lack, a null member where the gold fills it, a
-fields list whose stated share is under 60% of the gold's — each refuses the promote.
-A null with its own `<member>_basis` is a stated absence and passes; a held firmographic
-renders as a stated absence with its reason, and at most 2 or 25% of must-present may be
-held (owner decision 2, 2026-10-04). From a repository checkout, run the same rules
-before you submit: `python3 scripts/gate_j_surface_parity.py --gold
-fixtures/surface_gold.json --target-dir <dir with your six page JSON files>`.
+holds every staged page to it (**CG-PAR**). Only STRUCTURE refuses the promote (owner
+decision B, 2026-10-04): a section or key every gold run serves and today's contract
+requires (or allows omitting only on a condition you have not stated, like
+`sentiment.gap_analysis`), a row key the contract's `item_shape` requires, or more than 2
+(or 25%) of the must-present firmographics not stated. Shorter lists, thinner fill and a
+lower stated share come back as WARNINGS in the promote verdict — read them, and never
+pad a list to clear one: a row count is an assessment result. A null with its own
+`<member>_basis` is a stated absence; a held firmographic renders as a stated absence
+with its reason (owner decision 2). Your run is held to gold of its own sub-vertical when
+one exists, otherwise to all gold for structure only. From a repository checkout, run the
+same rules before you submit: `python3 scripts/gate_j_surface_parity.py --gold
+fixtures/surface_gold.json --target-dir <dir with your six page JSON files>
+--sub-vertical <code>` (exit 1 = a structural gap; `(warning)` lines do not fail it).
 (RC-01, RC-02, SWBC gold audit 2026-10-04.)
 
 When you have produced your artefact, run the gate on your OWN output before you return:
