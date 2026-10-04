@@ -1,13 +1,14 @@
-/* SWBC-SHAPED sections, for the render tests that pin the 2026-10-04 gold
- * audit of run 7968492e (display_id swbc).
+/* GOLD-AUDIT-SHAPED sections, for the render tests that pin the 2026-10-04
+ * gold audit of an insurance-brokerage group's promoted run.
  *
  * SHAPE, NOT CONTENT. Every key, list length, null pattern and audience split
- * below is the promoted run's own — that is what the defects were about: a
+ * below follows the promoted run — that is what the defects were about: a
  * renderer that read `bars[]` and not `themes[]`, a tile with `rows: []` and
  * no `state`, a firmographics `cagr` held while a subsidiary series computed
  * one anyway, a heatmap peer column null in every row. The prose and the
- * figures are written for this file and describe no real institution, so the
- * fixture can be committed without carrying a client's content.
+ * figures are written for this file and describe no real institution (the
+ * names, places, ratings, dates, cell scores and series values are invented),
+ * so the fixture can be committed without carrying a client's content.
  *
  * Findings this file serves: RC-03 (D-01, D-02), RC-11 (D-05, D-14, D-15,
  * D-16, D-32, D-37).
@@ -35,44 +36,44 @@ const sec = (data) => {
    gap_analysis (one audience rated, so the contract says omit it). ───── */
 const THEMES = [
   { audience: "customer",
-    theme: "Payment trouble after closing is the largest complaint category",
+    theme: "Billing questions after onboarding are the most common complaint",
     mapped_subcap_ids: ["P2C3.7.3", "P2C3.5.4", "P2C3.2.3", "P2C3.3.1"],
-    cap_statement: "The complaint record concentrates in servicing after "
-      + "closing. It caps nothing further: Complaint Management (2.0) already "
-      + "sits below 3.0 and the record is consistent with that score." },
+    cap_statement: "The complaint record concentrates after onboarding. It "
+      + "caps nothing further: Complaint Management (2.2) already sits below "
+      + "3.0 and the record is consistent with that score." },
   { audience: "customer",
-    theme: "Review sites single out the online application",
+    theme: "Reviewers mention the self-service portal favourably",
     mapped_subcap_ids: ["P2C2.2.1"],
-    cap_statement: "Two undated editorial reviews corroborate that a digital "
-      + "application exists; this supports Digital Application Availability "
-      + "at 3.0 and neither caps nor lifts it." },
+    cap_statement: "Two undated editorial reviews corroborate that a portal "
+      + "exists; this supports Digital Application Availability at 2.7 and "
+      + "neither caps nor lifts it." },
   { audience: "customer",
-    theme: "Borrowers praise loan officers and report trouble reaching the company by phone",
+    theme: "Clients praise their account managers and report long phone queues",
     mapped_subcap_ids: ["P2C3.3.1", "P2C2.2.1"],
     cap_statement: "Mixed reading: adds 0.2 of uncertainty to Contact Center "
-      + "Excellence (2.4) and no cap." },
+      + "Excellence (2.6) and no cap." },
   { audience: "employee",
-    theme: "The few employees who rated the employer rate culture highest",
+    theme: "A handful of employee ratings score teamwork highest",
     mapped_subcap_ids: ["P1C4.8.1"],
     cap_statement: "Undated and under 30 ratings, so UNVERIFIED and low-sample; "
-      + "it neither caps nor lifts Innovation Culture (1.0)." },
+      + "it neither caps nor lifts Innovation Culture (1.3)." },
   { audience: "employee",
-    theme: "A workplace award for the mortgage subsidiary",
+    theme: "A workplace award for one operating subsidiary",
     mapped_subcap_ids: ["P1C4.8.6"],
     cap_statement: "A self-published award announcement with no scale; it "
-      + "neither caps nor lifts DEI Integration (1.5)." },
+      + "neither caps nor lifts DEI Integration (1.8)." },
   { audience: "employee",
-    theme: "Two regional best-employer distinctions claimed on the careers page",
+    theme: "Two local employer distinctions claimed on the careers page",
     mapped_subcap_ids: ["P1C4.7.2"],
-    cap_statement: "Undated self-published claims; Recognition Programs (2.5) "
+    cap_statement: "Undated self-published claims; Recognition Programs (2.1) "
       + "is neither capped nor lifted." },
 ];
 
 const SENTIMENT = ENV({
   bars: [{
     audience: "customer",
-    source: "Review-site rating relayed by a third-party mortgage review page",
-    rating: 4.9, scale: "1-5 stars", n: 1000, as_of: "2025-11-04",
+    source: "Review-site rating relayed by a third-party review page",
+    rating: 4.6, scale: "1-5 stars", n: 640, as_of: "2025-08-12",
     url: "https://reviews.example.test/lender", e_id: "E-CC-9001",
     trend_vs_prior: null,
   }],
@@ -88,7 +89,7 @@ const SENTIMENT = ENV({
   },
   internal_only: ["bars", "empty_state.sources_searched", "r_layer"],
   narrative_thread: "One company-reported rating and a complaint record that "
-    + "sits after closing keep the picture indicative rather than settled.",
+    + "sits after onboarding keep the picture indicative rather than settled.",
 });
 
 /* ── context.context_sentiment — two tiles, the employee one with rows:[]
@@ -99,18 +100,18 @@ const CONTEXT_SENTIMENT = ENV({
     { audience: "customer",
       note: "One rated line is available. The federal complaint record is a "
         + "count with no rate, so it is context and not a rating.",
-      rows: [{ source: "Review-site rating (company-reported)", rating: 4.9,
-               scale: "1-5 stars", n: 1000, as_of: "2025-11-04",
+      rows: [{ source: "Review-site rating (company-reported)", rating: 4.6,
+               scale: "1-5 stars", n: 640, as_of: "2025-08-12",
                url: "https://reviews.example.test/lender", e_id: "E-CC-9001",
                note: "Company-reported; read as context for Complaint Management." }],
       e_ids: ["E-CC-9001", "E-CC-9002"],
       sources_searched: ["App store search — none found"] },
     { audience: "employee",
-      note: "An employer-review site shows 4.1 of 5 on 7 ratings, undated, so "
+      note: "An employer-review site shows 3.9 of 5 on 9 ratings, undated, so "
         + "it draws no bar. Two workplace awards are claims, not ratings.",
       rows: [],
       e_ids: ["E-CC-9003", "E-CC-9004", "E-CC-9005"],
-      sources_searched: ["Employer-review site — reached, 7 ratings, undated",
+      sources_searched: ["Employer-review site — reached, 9 ratings, undated",
                          "Glassdoor — HTTP 403, not reached"] },
   ],
   empty_state: {
@@ -131,16 +132,16 @@ const FINANCIAL_SERIES = ENV({
   e_ids: ["E-CC-9101", "E-CC-9102", "E-CC-9103", "E-CC-9104"],
   trend: "VOLATILE",
   series: [
-    { period: "CY2022", value: 2.8, unit: "USD billions", as_of: "2022-12-31",
+    { period: "CY2022", value: 1.9, unit: "USD billions", as_of: "2022-12-31",
       source_e_id: "E-CC-9101", basis: SUB_BASIS },
-    { period: "CY2023", value: 2.1, unit: "USD billions", as_of: "2023-12-31",
+    { period: "CY2023", value: 1.4, unit: "USD billions", as_of: "2023-12-31",
       source_e_id: "E-CC-9102", basis: SUB_BASIS },
-    { period: "CY2024", value: 2.3, unit: "USD billions", as_of: "2024-12-31",
+    { period: "CY2024", value: 1.6, unit: "USD billions", as_of: "2024-12-31",
       source_e_id: "E-CC-9103", basis: SUB_BASIS },
-    { period: "CY2025", value: 2.3, unit: "USD billions", as_of: "2025-12-31",
+    { period: "CY2025", value: 1.7, unit: "USD billions", as_of: "2025-12-31",
       source_e_id: "E-CC-9104", basis: SUB_BASIS },
   ],
-  reading: "The mortgage line's originations fell and recovered; group "
+  reading: "The lending line's originations fell and recovered; group "
     + "growth is not established.",
   internal_only: ["r_layer"],
   narrative_thread: "A labelled subsidiary series.",
@@ -154,17 +155,17 @@ const held = (field, unit, reason) => ({
 const FIRMOGRAPHICS = ENV({
   e_ids: ["E-CC-9200"],
   fields: [
-    { field: "employees", value: "2300", unit: "employees, self-reported",
+    { field: "employees", value: "1850", unit: "employees, self-reported",
       as_of: "2026-04-06", confidence: "MEDIUM", quarantined: false,
       source_e_id: "E-CC-9200", recency_band: "CURRENT", quarantine_reason: null },
     held("revenue", "USD", "The group is privately held and publishes no consolidated revenue."),
     held("assets", "USD", "No consolidated balance sheet is published."),
     held("cagr", "percent a year", "No enterprise revenue or asset series is published, so no group growth rate can be computed."),
-    { field: "hq", value: "San Antonio, Texas", unit: null, as_of: null,
+    { field: "hq", value: "Riverton, Example State", unit: null, as_of: null,
       confidence: "HIGH", quarantined: false, source_e_id: "E-CC-9200",
       recency_band: "UNVERIFIED", quarantine_reason: null },
     held("branches", "count", "The group states a national footprint and no branch count."),
-    { field: "founded", value: "1976", unit: "year", as_of: null,
+    { field: "founded", value: "1983", unit: "year", as_of: null,
       confidence: "HIGH", quarantined: false, source_e_id: "E-CC-9200",
       recency_band: "UNVERIFIED", quarantine_reason: null },
     held("primary_regulator", null, "Each regulated line holds its own licence; there is no single primary regulator."),

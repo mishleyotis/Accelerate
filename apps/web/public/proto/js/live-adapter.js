@@ -210,6 +210,39 @@ const SCOPED_BASIS = /\b(subsidiar(?:y|ies)|segment|division|affiliate|business 
 function seriesIsScoped(series) {
   return (series || []).some(s => s && typeof s.basis === "string" && SCOPED_BASIS.test(s.basis));
 }
+
+/* A firmographic unit's SCOPE label (owner decision 2, 2026-10-04): the
+   producer's own words after the measure, travelling with the figure so a
+   subsidiary's number never reads as the group's. "USD billions, Example
+   Mortgage Corporation, HMDA 2024" -> "Example Mortgage Corporation, HMDA
+   2024".
+
+   The label starts at the FIRST clause break, comma or semicolon. Splitting
+   on the first comma alone turned a registry answer's unit "deposit-taking
+   branches; <subsidiary> runs local branch offices, whose count … is not
+   published" into the label "whose count … is not published": the clause
+   saying what the figure is about was lost, and a dangling relative clause
+   was printed beside "None". A bare magnitude ("USD, thousands") names no
+   entity, so it is not a scope. Null when there is no label. */
+const MAGNITUDE_ONLY = /^(?:in\s+)?(?:thousands?|millions?|billions?|trillions?|k|m|mm|bn|b)\.?$/i;
+function unitScope(unit) {
+  const u = String(unit == null ? "" : unit);
+  const at = u.search(/[,;]/);
+  if (at < 0) return null;
+  const tail = u.slice(at + 1).trim();
+  if (!tail || MAGNITUDE_ONLY.test(tail)) return null;
+  return tail;
+}
+
+/* Did the producer SAY something about this firmographic: a stated value,
+   or a hold with its reason? A key that carries neither is no word at all,
+   and must not silence what the app would otherwise compute. */
+function firmoSpoken(f) {
+  if (!f) return false;
+  if (f.quarantined) return true;
+  const v = f.value;
+  return !(v == null || typeof v === "string" && !v.trim());
+}
 function cagrOf(series) {
   if (seriesIsScoped(series)) return {};
   const yearOf = s => {
@@ -309,8 +342,10 @@ function adaptFinancials(financialSeries, firmographics, regulatory) {
     // that is HELD is a finding — "no enterprise series is published" — and a
     // rate computed over it contradicts the producer on the same strip. One
     // that is STATED carries its own basis and renders as stated. Either way
-    // the series gets no vote, and a scoped series never does.
-    ...(fields.cagr || fields.growth_rate ? {} : cagrOf(series)),
+    // the series gets no vote, and a scoped series never does. A key that
+    // is neither stated nor held is not the producer's word (`firmoSpoken`):
+    // it silenced the computed rate and left no row in its place.
+    ...(firmoSpoken(fields.cagr) || firmoSpoken(fields.growth_rate) ? {} : cagrOf(series)),
     trend: financialSeries.trend || null,
     verified_sparse: !!financialSeries.verified_sparse,
     events: []
@@ -1780,6 +1815,7 @@ Object.assign(window, {
   techLayersOf,
   adaptOpportunityTiles,
   cagrOf,
+  unitScope,
   peerOfSignal: signalOf,
   splitMaturityEffect,
   MATURITY_EFFECT_LABEL,

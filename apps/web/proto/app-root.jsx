@@ -332,14 +332,11 @@ function firmoFields(firmo) {
        figure may stand on the strip when its unit names the unit it is
        about — "USD billions, Example Mortgage Corporation, HMDA 2024". The
        money formatter keeps the magnitude and drops the words after it, so
-       "$2.3B" rendered as though it were the group's. Everything after the
-       unit's first comma is the producer's own scope label, and it travels
-       with the figure. */
-    const scopeOf = (u) => {
-      const parts = String(u || "").split(",");
-      const tail = parts.slice(1).join(",").trim();
-      return tail || null;
-    };
+       "$2.3B" rendered as though it were the group's. The producer's own
+       scope label travels with the figure: it starts at the unit's first
+       clause break, comma or semicolon, and a bare magnitude is no label
+       (`unitScope`, live-adapter.jsx, where the tests can reach it). */
+    const scopeOf = unitScope;
     if (!FIRMO_PINNED.has(key)) {
       /* The passthrough rendered `${value} ${unit}`, which printed
          `8051646636 USD` two rows under an Assets row rendering the same

@@ -20,9 +20,9 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 
 const H = require("./ssr-harness");
-const F = require("./fixtures/swbc-shape");
+const F = require("./fixtures/gold-audit-shape");
 
-const ID = "swbc-shape";
+const ID = "gold-audit-shape";
 
 function setup() {
   const { win } = H.load();

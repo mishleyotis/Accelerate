@@ -18,11 +18,11 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 
 const H = require("./ssr-harness");
-const F = require("./fixtures/swbc-shape");
+const F = require("./fixtures/gold-audit-shape");
 
-const ID = "swbc-shape";
+const ID = "gold-audit-shape";
 
-test("C4 adapter · the SWBC-shaped tiles yield the customer group AND the employee tile", () => {
+test("C4 adapter · the gold-audit-shaped tiles yield the customer group AND the employee tile", () => {
   const { win } = H.load();
   const out = win.adaptContextSentiment(F.CONTEXT_SENTIMENT);
   assert.ok(out, "the adapter returned null for two promoted tiles");
@@ -69,7 +69,7 @@ test("C4 render · the employee tile is on the face and its note opens", () => {
   const face = grid(null, "internal");
   assert.match(face, /employee/i, "no employee tile on the face of the grid");
   const opened = grid("aud-employee", "internal");
-  assert.ok(opened.includes("4.1 of 5 on 7 ratings"),
+  assert.ok(opened.includes("3.9 of 5 on 9 ratings"),
     "the employee tile's note did not render when opened");
   assert.ok(opened.includes("E-CC-9003"), "the employee tile's citations did not render");
 });

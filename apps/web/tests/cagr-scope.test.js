@@ -21,7 +21,7 @@ const { test } = require("node:test");
 const assert = require("node:assert");
 
 const H = require("./ssr-harness");
-const F = require("./fixtures/swbc-shape");
+const F = require("./fixtures/gold-audit-shape");
 const { resolvePlaywright, startServer, settle, selectAudience,
         resolveChromium, browserSkip } = require("./proto-page-harness");
 
@@ -67,15 +67,15 @@ test("D-05 adapter · the series is called what it is", () => {
 const pw = resolvePlaywright();
 const CHROME = resolveChromium();
 const skip = browserSkip();
-const ENTITY = "swbc-shape";
-const RUN_ID = "DMA-ASM-SWBC-20261002-0001";
+const ENTITY = "gold-audit-shape";
+const RUN_ID = "DMA-ASM-EXMP-20261002-0001";
 const BOOT = {
   authed: true, role: "ADMIN", email: "dma@zennify.com", name: "QA",
   catalogue_version: "v7.0", dev_login: true,
   subvertical_labels: { INSURANCE_BROKERAGE: "Insurance brokerage" },
   entities: [{
     id: ENTITY, slug: ENTITY, name: "Example Group",
-    subvertical: "INSURANCE_BROKERAGE", size_tier: "LARGE", hq: "San Antonio, TX",
+    subvertical: "INSURANCE_BROKERAGE", size_tier: "LARGE", hq: "Riverton, EX",
     status: "ACTIVE", data_source: "PROJECT_API", assessment_date: "2026-10-02",
     overall: 2.0, pillar_scores: {}, oss: {}, footprint: [], runs: [
       { id: RUN_ID, date: "2026-10-02", status: "ACTIVE", overall: 2.0,
@@ -121,7 +121,9 @@ test("D-05 render · the strip prints no subsidiary CAGR as the firm's growth", 
     assert.ok(strip, `no firmographics strip on the ${audience} overview`);
     assert.ok(!/CAGR\s*-?\d/.test(strip),
       `the ${audience} strip printed a computed CAGR over a hold: ${strip.replace(/\s+/g, " ")}`);
-    assert.ok(!/-6\.\d%/.test(body), `a subsidiary-derived growth rate rendered on the ${audience} page`);
+    // The fixture series' own compound rate (1.9 -> 1.7 over three years is
+    // -3.6%): the figure the old code printed as the firm's growth.
+    assert.ok(!/-3\.\d%/.test(body), `a subsidiary-derived growth rate rendered on the ${audience} page`);
   }
 });
 
@@ -135,6 +137,6 @@ test("decision 2 render · every held field renders as a stated absence with its
   }
   assert.match(flat, /CAGR/, "the held CAGR row is not labelled");
   // The stated figures are still there.
-  assert.match(flat, /2,300/, "the stated employee count vanished");
-  assert.match(flat, /1976/, "the stated founding year vanished");
+  assert.match(flat, /1,850/, "the stated employee count vanished");
+  assert.match(flat, /1983/, "the stated founding year vanished");
 });

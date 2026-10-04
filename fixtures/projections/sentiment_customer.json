@@ -1,0 +1,560 @@
+{
+ "_note": "Synthetic overview.sentiment inputs and the customer body apps/api redaction serves for each (owner decision 1, 2026-10-04). Names, ratings, dates and cell scores are invented. `customer` is GENERATED: apps/api tests/test_sentiment_projection_fixture.py --write. The web suite renders it (tests/sentiment-customer-projection.test.js).",
+ "cases": {
+  "decision_1": {
+   "why": "The repaired run's marking: bars served, the analyst's half not.",
+   "input": {
+    "bars": [
+     {
+      "audience": "customer",
+      "source": "Review-site rating relayed by a third-party review page",
+      "rating": 4.6,
+      "scale": "1-5 stars",
+      "n": 640,
+      "as_of": "2025-08-12",
+      "url": "https://reviews.example.test/e-cc-9001",
+      "e_id": "E-CC-9001",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "customer",
+      "source": "Federal complaint database: share answered on time",
+      "rating": 93.5,
+      "scale": "0-100 % of complaints answered on time",
+      "n": 180,
+      "as_of": "2026-09-30",
+      "url": "https://reviews.example.test/e-cc-9002",
+      "e_id": "E-CC-9002",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "employee",
+      "source": "Employer-review site overall rating",
+      "rating": 3.3,
+      "scale": "1-5 stars",
+      "n": 120,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9003",
+      "e_id": "E-CC-9003",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "employee",
+      "source": "Employer-review site: would recommend to a friend",
+      "rating": 51.0,
+      "scale": "0-100 % of respondents who would recommend",
+      "n": 120,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9004",
+      "e_id": "E-CC-9004",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "industry",
+      "source": "Employer-review site: an identified peer, not scored, would recommend",
+      "rating": 58.0,
+      "scale": "0-100 % of respondents who would recommend",
+      "n": 300,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9005",
+      "e_id": "E-CC-9005",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "customer",
+      "source": "Client-supplied satisfaction survey",
+      "rating": 8.1,
+      "scale": "0-10 survey score",
+      "n": 45,
+      "as_of": "2026-06-30",
+      "url": "https://reviews.example.test/e-cc-9909",
+      "e_id": "E-CC-9909",
+      "trend_vs_prior": null
+     }
+    ],
+    "themes": [
+     {
+      "audience": "customer",
+      "theme": "Billing questions after onboarding are the most common complaint",
+      "mapped_subcap_ids": [
+       "P2C3.7.3",
+       "P2C3.5.4"
+      ],
+      "cap_statement": "Complaint Management (2.2) already sits below 3.0; the record is consistent with that score and caps nothing further.",
+      "e_ids": [
+       "E-CC-9002"
+      ]
+     },
+     {
+      "audience": "customer",
+      "theme": "Reviewers mention the self-service portal favourably",
+      "mapped_subcap_ids": [
+       "P2C2.2.1"
+      ],
+      "cap_statement": "Supports Digital Application Availability at 2.7; neither caps nor lifts it."
+     },
+     {
+      "audience": "customer",
+      "theme": "Clients praise their account managers and report long phone queues",
+      "mapped_subcap_ids": [
+       "P2C3.3.1"
+      ],
+      "cap_statement": "Adds 0.2 of uncertainty to Contact Center Excellence (2.6)."
+     },
+     {
+      "audience": "customer",
+      "theme": "Digital onboarding (P2C2.2.1) is praised in reviews",
+      "mapped_subcap_ids": [
+       "P2C2.2.1"
+      ],
+      "cap_statement": "Corroborates the portal reading."
+     },
+     {
+      "audience": "customer",
+      "theme": "The client's own survey rates onboarding highly",
+      "mapped_subcap_ids": [
+       "P2C2.1.1"
+      ],
+      "cap_statement": "Internal survey; neither caps nor lifts.",
+      "e_ids": [
+       "E-CC-9909"
+      ]
+     },
+     {
+      "audience": "employee",
+      "theme": "Employees rate management and advancement lowest",
+      "mapped_subcap_ids": [
+       "P1C4.8.1"
+      ],
+      "cap_statement": "Neither caps nor lifts Innovation Culture (1.3)."
+     },
+     {
+      "audience": "employee",
+      "theme": "A workplace award for one operating subsidiary",
+      "mapped_subcap_ids": [
+       "P1C4.8.6"
+      ],
+      "cap_statement": "Self-published; neither caps nor lifts DEI Integration (1.8)."
+     },
+     {
+      "audience": "industry",
+      "theme": "The identified peers score higher on willingness to recommend",
+      "mapped_subcap_ids": [
+       "P1C4.7.2"
+      ],
+      "cap_statement": "Peer readings are context, not a cap on Recognition Programs (2.1)."
+     }
+    ],
+    "gap_analysis": {
+     "b2b_b2c": "Employees rate the workplace below how customers rate service, which says the constraint is internal.",
+     "internal_external": "The client's survey reads higher than any public line.",
+     "e_ids": [
+      "E-CC-9001",
+      "E-CC-9003"
+     ]
+    },
+    "e_ids": [
+     "E-CC-9001",
+     "E-CC-9002",
+     "E-CC-9003",
+     "E-CC-9004",
+     "E-CC-9005",
+     "E-CC-9909"
+    ],
+    "empty_state": {
+     "reason": "Five rated public lines span customers, employees and one identified peer.",
+     "sources_searched": [
+      "App store search: no consumer app found"
+     ],
+     "closure_condition": "A dated independent customer rating at scale."
+    },
+    "r_layer": {
+     "hypothesis": "h",
+     "counter": "c",
+     "domain_test": "d",
+     "probes_run": [
+      "p"
+     ],
+     "verdict": "ACCEPT",
+     "confidence": "medium"
+    },
+    "narrative_thread": "Customers rate service well where asked while employees rate the workplace lower; the gap points inward.",
+    "internal_only": [
+     "empty_state.sources_searched",
+     "r_layer",
+     "gap_analysis",
+     "narrative_thread",
+     "themes[*].cap_statement",
+     "themes[*].mapped_subcap_ids"
+    ],
+    "produced_at": "2026-10-02T08:00:00Z",
+    "producer_version": "fixture@2026-10-04"
+   },
+   "evidence_scope": {
+    "withheld": [
+     "E-CC-9909"
+    ],
+    "attribution": {}
+   },
+   "customer": {
+    "bars": [
+     {
+      "audience": "customer",
+      "source": "Review-site rating relayed by a third-party review page",
+      "rating": 4.6,
+      "scale": "1-5 stars",
+      "n": 640,
+      "as_of": "2025-08-12",
+      "url": "https://reviews.example.test/e-cc-9001",
+      "e_id": "E-CC-9001",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "customer",
+      "source": "Federal complaint database: share answered on time",
+      "rating": 93.5,
+      "scale": "0-100 % of complaints answered on time",
+      "n": 180,
+      "as_of": "2026-09-30",
+      "url": "https://reviews.example.test/e-cc-9002",
+      "e_id": "E-CC-9002",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "employee",
+      "source": "Employer-review site overall rating",
+      "rating": 3.3,
+      "scale": "1-5 stars",
+      "n": 120,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9003",
+      "e_id": "E-CC-9003",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "employee",
+      "source": "Employer-review site: would recommend to a friend",
+      "rating": 51.0,
+      "scale": "0-100 % of respondents who would recommend",
+      "n": 120,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9004",
+      "e_id": "E-CC-9004",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "industry",
+      "source": "Employer-review site: an identified peer, not scored, would recommend",
+      "rating": 58.0,
+      "scale": "0-100 % of respondents who would recommend",
+      "n": 300,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9005",
+      "e_id": "E-CC-9005",
+      "trend_vs_prior": null
+     }
+    ],
+    "themes": [
+     {
+      "audience": "customer",
+      "theme": "Billing questions after onboarding are the most common complaint",
+      "e_ids": [
+       "E-CC-9002"
+      ]
+     },
+     {
+      "audience": "customer",
+      "theme": "Reviewers mention the self-service portal favourably"
+     },
+     {
+      "audience": "customer",
+      "theme": "Clients praise their account managers and report long phone queues"
+     },
+     {
+      "audience": "employee",
+      "theme": "Employees rate management and advancement lowest"
+     },
+     {
+      "audience": "employee",
+      "theme": "A workplace award for one operating subsidiary"
+     },
+     {
+      "audience": "industry",
+      "theme": "The identified peers score higher on willingness to recommend"
+     }
+    ],
+    "e_ids": [
+     "E-CC-9001",
+     "E-CC-9002",
+     "E-CC-9003",
+     "E-CC-9004",
+     "E-CC-9005"
+    ],
+    "empty_state": {
+     "reason": "Five rated public lines span customers, employees and one identified peer.",
+     "closure_condition": "A dated independent customer rating at scale."
+    },
+    "internal_only": [
+     "empty_state.sources_searched",
+     "r_layer",
+     "gap_analysis",
+     "narrative_thread",
+     "themes[*].cap_statement",
+     "themes[*].mapped_subcap_ids"
+    ],
+    "produced_at": "2026-10-02T08:00:00Z",
+    "producer_version": "fixture@2026-10-04"
+   }
+  },
+  "bars_marked": {
+   "why": "A run that still marks `bars` internal_only (the promoted audit run did): the customer gets themes only, and the card must still render them.",
+   "input": {
+    "bars": [
+     {
+      "audience": "customer",
+      "source": "Review-site rating relayed by a third-party review page",
+      "rating": 4.6,
+      "scale": "1-5 stars",
+      "n": 640,
+      "as_of": "2025-08-12",
+      "url": "https://reviews.example.test/e-cc-9001",
+      "e_id": "E-CC-9001",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "customer",
+      "source": "Federal complaint database: share answered on time",
+      "rating": 93.5,
+      "scale": "0-100 % of complaints answered on time",
+      "n": 180,
+      "as_of": "2026-09-30",
+      "url": "https://reviews.example.test/e-cc-9002",
+      "e_id": "E-CC-9002",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "employee",
+      "source": "Employer-review site overall rating",
+      "rating": 3.3,
+      "scale": "1-5 stars",
+      "n": 120,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9003",
+      "e_id": "E-CC-9003",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "employee",
+      "source": "Employer-review site: would recommend to a friend",
+      "rating": 51.0,
+      "scale": "0-100 % of respondents who would recommend",
+      "n": 120,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9004",
+      "e_id": "E-CC-9004",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "industry",
+      "source": "Employer-review site: an identified peer, not scored, would recommend",
+      "rating": 58.0,
+      "scale": "0-100 % of respondents who would recommend",
+      "n": 300,
+      "as_of": "2026-10-01",
+      "url": "https://reviews.example.test/e-cc-9005",
+      "e_id": "E-CC-9005",
+      "trend_vs_prior": null
+     },
+     {
+      "audience": "customer",
+      "source": "Client-supplied satisfaction survey",
+      "rating": 8.1,
+      "scale": "0-10 survey score",
+      "n": 45,
+      "as_of": "2026-06-30",
+      "url": "https://reviews.example.test/e-cc-9909",
+      "e_id": "E-CC-9909",
+      "trend_vs_prior": null
+     }
+    ],
+    "themes": [
+     {
+      "audience": "customer",
+      "theme": "Billing questions after onboarding are the most common complaint",
+      "mapped_subcap_ids": [
+       "P2C3.7.3",
+       "P2C3.5.4"
+      ],
+      "cap_statement": "Complaint Management (2.2) already sits below 3.0; the record is consistent with that score and caps nothing further.",
+      "e_ids": [
+       "E-CC-9002"
+      ]
+     },
+     {
+      "audience": "customer",
+      "theme": "Reviewers mention the self-service portal favourably",
+      "mapped_subcap_ids": [
+       "P2C2.2.1"
+      ],
+      "cap_statement": "Supports Digital Application Availability at 2.7; neither caps nor lifts it."
+     },
+     {
+      "audience": "customer",
+      "theme": "Clients praise their account managers and report long phone queues",
+      "mapped_subcap_ids": [
+       "P2C3.3.1"
+      ],
+      "cap_statement": "Adds 0.2 of uncertainty to Contact Center Excellence (2.6)."
+     },
+     {
+      "audience": "customer",
+      "theme": "Digital onboarding (P2C2.2.1) is praised in reviews",
+      "mapped_subcap_ids": [
+       "P2C2.2.1"
+      ],
+      "cap_statement": "Corroborates the portal reading."
+     },
+     {
+      "audience": "customer",
+      "theme": "The client's own survey rates onboarding highly",
+      "mapped_subcap_ids": [
+       "P2C2.1.1"
+      ],
+      "cap_statement": "Internal survey; neither caps nor lifts.",
+      "e_ids": [
+       "E-CC-9909"
+      ]
+     },
+     {
+      "audience": "employee",
+      "theme": "Employees rate management and advancement lowest",
+      "mapped_subcap_ids": [
+       "P1C4.8.1"
+      ],
+      "cap_statement": "Neither caps nor lifts Innovation Culture (1.3)."
+     },
+     {
+      "audience": "employee",
+      "theme": "A workplace award for one operating subsidiary",
+      "mapped_subcap_ids": [
+       "P1C4.8.6"
+      ],
+      "cap_statement": "Self-published; neither caps nor lifts DEI Integration (1.8)."
+     },
+     {
+      "audience": "industry",
+      "theme": "The identified peers score higher on willingness to recommend",
+      "mapped_subcap_ids": [
+       "P1C4.7.2"
+      ],
+      "cap_statement": "Peer readings are context, not a cap on Recognition Programs (2.1)."
+     }
+    ],
+    "gap_analysis": {
+     "b2b_b2c": "Employees rate the workplace below how customers rate service, which says the constraint is internal.",
+     "internal_external": "The client's survey reads higher than any public line.",
+     "e_ids": [
+      "E-CC-9001",
+      "E-CC-9003"
+     ]
+    },
+    "e_ids": [
+     "E-CC-9001",
+     "E-CC-9002",
+     "E-CC-9003",
+     "E-CC-9004",
+     "E-CC-9005",
+     "E-CC-9909"
+    ],
+    "empty_state": {
+     "reason": "Five rated public lines span customers, employees and one identified peer.",
+     "sources_searched": [
+      "App store search: no consumer app found"
+     ],
+     "closure_condition": "A dated independent customer rating at scale."
+    },
+    "r_layer": {
+     "hypothesis": "h",
+     "counter": "c",
+     "domain_test": "d",
+     "probes_run": [
+      "p"
+     ],
+     "verdict": "ACCEPT",
+     "confidence": "medium"
+    },
+    "narrative_thread": "Customers rate service well where asked while employees rate the workplace lower; the gap points inward.",
+    "internal_only": [
+     "bars",
+     "empty_state.sources_searched",
+     "r_layer",
+     "gap_analysis",
+     "narrative_thread",
+     "themes[*].cap_statement",
+     "themes[*].mapped_subcap_ids"
+    ],
+    "produced_at": "2026-10-02T08:00:00Z",
+    "producer_version": "fixture@2026-10-04"
+   },
+   "evidence_scope": {
+    "withheld": [
+     "E-CC-9909"
+    ],
+    "attribution": {}
+   },
+   "customer": {
+    "themes": [
+     {
+      "audience": "customer",
+      "theme": "Billing questions after onboarding are the most common complaint",
+      "e_ids": [
+       "E-CC-9002"
+      ]
+     },
+     {
+      "audience": "customer",
+      "theme": "Reviewers mention the self-service portal favourably"
+     },
+     {
+      "audience": "customer",
+      "theme": "Clients praise their account managers and report long phone queues"
+     },
+     {
+      "audience": "employee",
+      "theme": "Employees rate management and advancement lowest"
+     },
+     {
+      "audience": "employee",
+      "theme": "A workplace award for one operating subsidiary"
+     },
+     {
+      "audience": "industry",
+      "theme": "The identified peers score higher on willingness to recommend"
+     }
+    ],
+    "e_ids": [
+     "E-CC-9001",
+     "E-CC-9002",
+     "E-CC-9003",
+     "E-CC-9004",
+     "E-CC-9005"
+    ],
+    "empty_state": {
+     "reason": "Five rated public lines span customers, employees and one identified peer.",
+     "closure_condition": "A dated independent customer rating at scale."
+    },
+    "internal_only": [
+     "bars",
+     "empty_state.sources_searched",
+     "r_layer",
+     "gap_analysis",
+     "narrative_thread",
+     "themes[*].cap_statement",
+     "themes[*].mapped_subcap_ids"
+    ],
+    "produced_at": "2026-10-02T08:00:00Z",
+    "producer_version": "fixture@2026-10-04"
+   }
+  }
+ }
+}
