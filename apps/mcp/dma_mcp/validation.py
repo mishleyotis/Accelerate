@@ -1136,28 +1136,86 @@ def _check_thought_leadership_depth(section, body) -> list:
 # that then reached a terminal outcome is complete whatever came first
 # (REFUSED + ALTERNATE_TRIED; owner default 2026-10-04: WebSearch/WebFetch is
 # an acceptable failover when Exa/Tavily credit is exhausted).
-_RUNG_TERMINAL = re.compile(
-    r"\b(?:RESOLVED|VERIFIED[ _]ABSENT|REACHED|REJECTED|EXCLUDED|NEGATIVE|"
+#
+# HARDENED 2026-10-04 (fix2/gates; review of fix/mcp-gates-contract). The
+# first reader matched terminal tokens case-sensitively and never negated
+# them: 'EDGAR: NOT CONFIRMED' read as terminal (the escape hatch RC-05 set
+# out to close), sentence-case registry rungs ('No enforcement actions
+# found', 'SEC: verified absent') read as having no outcome, and a WebSearch
+# failover written in lower case read as open. Now:
+#   * outcomes are read in ANY case — but a status word in ordinary prose
+#     ('negative news screening', 'confirmed peer list') is an outcome only
+#     where an outcome sits: written in capitals as the corpus writes its
+#     status words, or right after a separator (— : ; → ( ,), or right before
+#     one, or as the whole of a structured `outcome` field;
+#   * negated forms are OPEN, never terminal: not/never + confirmed, resolved,
+#     verified, found, reached…; unresolved / unconfirmed / unverified; no
+#     result(s) / no match(es) / 0 results (a search miss is not a verified
+#     absence — a registry's 'no action recorded' still is); a plain
+#     'refused'; HTTP 4xx/5xx; an exhausted credit balance;
+#   * overlapping readings resolve to the one that starts first (the longer
+#     on a tie), so 'NOT CONFIRMED' is one open outcome and 'REFUSED +
+#     ALTERNATE_TRIED' one terminal one;
+#   * the earliest outcome is the rung's outcome; when it is OPEN and the
+#     rung then records a failover, the failover's own first outcome is the
+#     rung's outcome (no outcome after the failover = still open). The owner
+#     default of 2026-10-04 names WebSearch/WebFetch as the failover when
+#     Exa/Tavily credit is exhausted, so naming WebSearch/WebFetch after a
+#     failed paid provider is itself the failover marker.
+_RUNG_TERMINAL_WORDS = (
+    r"RESOLVED|VERIFIED[ _]ABSENT|REACHED|REJECTED|EXCLUDED|NEGATIVE|"
     r"REFUSED\s*(?:\+|AND|&)\s*ALTERNATE[ _]TRIED|NOT[ _]APPLICABLE|"
-    r"CONFIRMED)\b"
-    # The registry-rung prose the C3 rulebook gives as its exemplar ("NCUA
-    # administrative orders index, searched by name: no action recorded") and
-    # its counted twin ("two disclosures found").
-    r"|\bno (?:action|order|enforcement action|record|result|match)e?s? "
-    r"(?:recorded|found|returned|listed|on record)\b"
-    r"|\b(?:\d+|one|two|three|four|five|six) (?:disclosures?|actions?|"
-    r"matters?|orders?|records?|results?|complaints?) (?:found|returned|"
-    r"recorded|on record|listed)\b")
+    r"CONFIRMED")
+# Status words exactly as the corpus writes them — in capitals, anywhere.
+_RUNG_TERMINAL_CAPS = re.compile(rf"\b(?:{_RUNG_TERMINAL_WORDS})\b")
+# The same words in any case, where an outcome sits: after a separator, or
+# immediately before one.
+_RUNG_SEP_BEFORE = r"(?:[—–:;→>(,|=]|\s-)\s*"
+_RUNG_SEP_AFTER = r"(?=\s*(?:[—–:;,()|.]|\s-\s|$))"
+_RUNG_TERMINAL_ANYCASE = re.compile(
+    rf"{_RUNG_SEP_BEFORE}(?P<tok>{_RUNG_TERMINAL_WORDS})\b"
+    rf"|\b(?P<tok2>{_RUNG_TERMINAL_WORDS})\b{_RUNG_SEP_AFTER}", re.I)
+_RUNG_TERMINAL_FIELD = re.compile(
+    rf"^\s*(?P<tok>{_RUNG_TERMINAL_WORDS})\b", re.I)
+# The registry-rung prose the C3 rulebook gives as its exemplar ("NCUA
+# administrative orders index, searched by name: no action recorded") and its
+# counted twin ("two disclosures found"). A registry answering 'no action
+# recorded' is a verified absence; a search tool answering 'no results' is a
+# search miss, so result/match are not in this list (they are OPEN below),
+# and a count of zero is not a count.
+_RUNG_TERMINAL_PROSE = re.compile(
+    r"\bno (?:enforcement action|action|order|record|complaint|disclosure)"
+    r"e?s? (?:recorded|found|returned|listed|on record)\b"
+    r"|\b(?:[1-9][\d,]*|one|two|three|four|five|six) (?:disclosures?|"
+    r"actions?|matters?|orders?|records?|results?|complaints?) (?:found|"
+    r"returned|recorded|on record|listed)\b", re.I)
 _RUNG_OPEN = re.compile(
     r"\bNOT[ _]RUN\b|\bnot (?:retrieved|fetched|searched|reached|run|read|"
     r"swept|completed)\b|\bneither found nor ruled out\b|\bBLOCKED\b|"
     r"\bUNWORKED\b|\bPENDING\b|\bcould not be (?:read|fetched|reached)\b|"
     r"\brefused (?:automated )?(?:retrieval|access)\b|\baccess denied\b|"
-    r"\bHTTP 403\b|\bsearch miss\b|\bnot a verified absence\b|\bNOT FETCHED\b",
+    r"\bHTTP 403\b|\bsearch miss\b|\bnot a verified absence\b|\bNOT FETCHED\b"
+    # Negated outcomes (fix2/gates).
+    r"|\b(?:not|never)[ _-]+(?:yet[ _-]+|been[ _-]+|fully[ _-]+)?"
+    r"(?:confirmed|resolved|verified|reached|found|located|established|"
+    r"answered|applicable)\b"
+    r"|\bun(?:resolved|confirmed|verified|answered)\b"
+    r"|\bno (?:results?|match(?:es)?|hits?)\b|\b(?:0|zero) (?:results?|"
+    r"match(?:es)?|hits?)\b"
+    r"|\brefused\b|\bHTTP\s*[45]\d\d\b|\b(?:401|402|403|404|429)\s+"
+    r"(?:Unauthorized|Payment|Forbidden|Not Found|Too Many)\b"
+    r"|\b(?:credit|quota)\s+(?:exhausted|ran out|depleted)\b"
+    r"|\bout of (?:credit|quota)\b",
     re.I)
 _RUNG_FAILOVER = re.compile(
     r"ALTERNATE[ _]TRIED|ran in its place|\bfail(?:ed)? ?over\b|"
-    r"\bfell back to\b|\binstead (?:ran|searched|used)\b", re.I)
+    r"\bfell back to\b|\binstead (?:ran|searched|used)\b|"
+    r"\bnext provider\b", re.I)
+# The owner default (2026-10-04): WebSearch/WebFetch after a paid provider
+# failed IS the failover, whatever words join them.
+_RUNG_PAID_PROVIDER = re.compile(r"\b(?:Exa|Tavily|Firecrawl)\b", re.I)
+_RUNG_WEB_FAILOVER = re.compile(
+    r"\b(?:built-in\s+)?Web[ _-]?(?:Search|Fetch)\b", re.I)
 
 
 def rung_text(rung) -> str:
@@ -1176,15 +1234,80 @@ def rung_outcome(rung):
         text = rung_text(rung)
     if not text.strip():
         return None
-    t = _RUNG_TERMINAL.search(text)
-    o = _RUNG_OPEN.search(text)
-    if t and _RUNG_FAILOVER.search(text):
+    is_field = isinstance(rung, dict) and isinstance(rung.get("outcome"), str)
+    found = _rung_readings(text, is_field)
+    if not found:
+        return None
+    first = found[0]
+    if first[2] == "terminal":
         return "terminal"
-    if t and (not o or t.start() < o.start()):
-        return "terminal"
-    if o:
+    marker = _failover_marker(text, after=first[0])
+    if marker is None:
         return "open"
-    return None
+    after = [r for r in found if r[1] > marker]
+    return after[0][2] if after else "open"
+
+
+def _rung_readings(text, is_field=False) -> list:
+    """Every outcome reading in the text as (start, end, kind), earliest
+    first, overlaps resolved to the reading that starts first (longer on a
+    tie)."""
+    cands = []
+    for m in _RUNG_TERMINAL_CAPS.finditer(text):
+        cands.append((m.start(), m.end(), "terminal"))
+    for m in _RUNG_TERMINAL_ANYCASE.finditer(text):
+        g = "tok" if m.group("tok") is not None else "tok2"
+        cands.append((m.start(g), m.end(g), "terminal"))
+    if is_field:
+        m = _RUNG_TERMINAL_FIELD.match(text)
+        if m:
+            cands.append((m.start("tok"), m.end("tok"), "terminal"))
+    for m in _RUNG_TERMINAL_PROSE.finditer(text):
+        cands.append((m.start(), m.end(), "terminal"))
+    for m in _RUNG_OPEN.finditer(text):
+        cands.append((m.start(), m.end(), "open"))
+    cands.sort(key=lambda c: (c[0], -(c[1] - c[0])))
+    kept, reach = [], -1
+    for c in cands:
+        if c[0] < reach:
+            continue                    # overlaps a reading already kept
+        kept.append(c)
+        reach = c[1]
+    return kept
+
+
+_RUNG_WEB_RUNG = re.compile(r"\bWeb[ _-]?(?:Search|Fetch)\b|^\s*Fetch\b",
+                            re.I)
+
+
+def failover_delivered(rung, ladder) -> bool:
+    """A rung that failed over to WebSearch/WebFetch with no outcome of its
+    own is complete when the LADDER carries the failover as its next rung,
+    worked to a terminal outcome (owner default 2026-10-04: WebSearch/WebFetch
+    counts as the valid next rung when Exa/Tavily credit is exhausted). SWBC
+    writes it that way: 'Exa/Tavily/Firecrawl connector rung: NOT_RUN — credit
+    exhausted; built-in web search ran in its place' beside "Web search '…':
+    VERIFIED ABSENT"."""
+    text = rung_text(rung)
+    if not _RUNG_FAILOVER.search(text) and not (
+            _RUNG_PAID_PROVIDER.search(text)
+            and _RUNG_WEB_FAILOVER.search(text)):
+        return False
+    return any(other is not rung
+               and _RUNG_WEB_RUNG.search(rung_text(other))
+               and rung_outcome(other) == "terminal"
+               for other in ladder or [])
+
+
+def _failover_marker(text, after):
+    """Where the rung records a failover, at or after position `after` (the
+    failed outcome), or None."""
+    hits = [m.start() for m in _RUNG_FAILOVER.finditer(text)
+            if m.end() > after]
+    if _RUNG_PAID_PROVIDER.search(text):
+        hits += [m.start() for m in _RUNG_WEB_FAILOVER.finditer(text)
+                 if m.start() >= after]
+    return min(hits) if hits else None
 
 
 def ladder_of(body) -> list:

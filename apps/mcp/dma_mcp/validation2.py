@@ -25,8 +25,9 @@ from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
                            variant_subvertical)
 # The ladder-rung reader (RC-05) lives beside CG-34 in pass 1; every gate that
 # judges a search ladder reads rungs through this one definition.
-from .validation import ladder_of, rung_outcome, rung_text  # noqa: F401
-from .validation import _RUNG_FAILOVER as _RUNG_FAILOVER_RE  # noqa: E402
+from .validation import (  # noqa: F401
+    failover_delivered, ladder_of, rung_outcome, rung_text,
+)
 
 shared_path.ensure(__file__)
 
@@ -3833,10 +3834,18 @@ def _check_worked_absent_ladder(page, payload) -> list:
         # the entity's own site, recorded as such) is an honest rung and the
         # Logix gold run carries one on every alert; a NOT_RUN whose failover
         # ran (WebSearch in place of Exa, owner default 2026-10-04) is worked.
-        open_rungs = [rung_text(r)[:80] for r in a.get("sources_searched") or []
+        # fix2/gates: rung_outcome now reads a failover's OWN outcome, so a
+        # NOT_RUN tier whose failover finished reads terminal and is not
+        # here, and one whose failover also failed ("fell back to WebSearch:
+        # NOT RUN") reads open and is. A failover rung with no outcome of its
+        # own is complete only when the ladder carries the WebSearch/WebFetch
+        # rung it handed over to, worked to a terminal outcome — merely
+        # naming a failover no longer exempts the rung.
+        ladder = a.get("sources_searched") or []
+        open_rungs = [rung_text(r)[:80] for r in ladder
                       if rung_outcome(r) == "open"
                       and _NOT_RUN_RE.search(rung_text(r))
-                      and not _RUNG_FAILOVER_RE.search(rung_text(r))]
+                      and not failover_delivered(r, ladder)]
         if open_rungs:
             out.append(_reason(
                 "CG-40b", "alerts", f"alerts.alerts[{i}].sources_searched",
