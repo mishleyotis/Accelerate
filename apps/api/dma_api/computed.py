@@ -743,6 +743,10 @@ def enrichment_status(data: dict, page: str, section: str) -> None:
         return
     rows = data.get(spec.get("counts") or "")
     rows = rows if isinstance(rows, list) else []
+    if spec.get("count_rule") == "stated_values":
+        # RC-04: a held (quarantined, null) row is not a stated value.
+        rows = [r for r in rows if isinstance(r, dict)
+                and r.get("value") not in (None, "", [])]
     count = len(rows)
     floor = spec.get("thin_below") or 0
 

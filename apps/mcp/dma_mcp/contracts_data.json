@@ -227,7 +227,7 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Container name assigned (sources say only 'Per field' — see page _notes). Per item: {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason}. Sub-vertical decides WHICH fields, not just what values (SV1: total assets, deposits, loans, NIM, efficiency ratio, NPL ratio; SV2: total assets, SHARES, loans, net worth ratio, ROA, MEMBER COUNT; SV3: loan portfolio, CRE concentration, C&I volume, NPA ratio; SV4: revenue by segment, trading revenue, IB fees, AUM; SV5: AUM, client count, revenue, ADVISOR COUNT; SV6: AUM BY STRATEGY, fund performance, NET FLOWS, expense ratios; SV7: premium placed, commission revenue, PRODUCER COUNT, acquisitions; SV8: DWP, COMBINED RATIO, LOSS RATIO, investment income, surplus; Farm Credit: UNDEFINED — do NOT borrow SV1's metrics). Must-present set: employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter, WEBSITE. `website` is the entity's own primary web domain, bare and lowercased (client.example — never a scheme, www., path or query). It is required on every sub-vertical because it is the one firmographic that is never sub-vertical specific, and because O11's self_sourced_pct is a share OF it: an evidence row published on this domain is the entity speaking about itself rather than a third party doing so. Cite it like any other field — the page it was read from — each as value + provenance. branches must be an integer count, never a serialised list or dict. primary_regulator is stated, not inferred from charter. IDENTITY GATE (blocking, per field): any failure -> QUARANTINE the field; emit it as absent with quarantine_reason, never as a value. RECENCY GATE (blocking): every figure carries {value, as_of, source_e_id, recency_band}; no as_of, no render; bands CURRENT <18mo | RECENT 18-36mo | LEGACY >36mo | UNVERIFIED undated; a LEGACY figure may render ONLY with its date visible; an UNVERIFIED figure never renders as current. MAGNITUDE SANITY: implausible -> quarantine, do not clamp. An unknown field renders an em dash, never a guess and never a dict repr — absent beats wrong.",
+     "doc": "Container name assigned (sources say only 'Per field' — see page _notes). Per item: {field, value, unit, as_of, recency_band, source_e_id, confidence, quarantined, quarantine_reason}. Sub-vertical decides WHICH fields, not just what values (SV1: total assets, deposits, loans, NIM, efficiency ratio, NPL ratio; SV2: total assets, SHARES, loans, net worth ratio, ROA, MEMBER COUNT; SV3: loan portfolio, CRE concentration, C&I volume, NPA ratio; SV4: revenue by segment, trading revenue, IB fees, AUM; SV5: AUM, client count, revenue, ADVISOR COUNT; SV6: AUM BY STRATEGY, fund performance, NET FLOWS, expense ratios; SV7: premium placed, commission revenue, PRODUCER COUNT, acquisitions; SV8: DWP, COMBINED RATIO, LOSS RATIO, investment income, surplus; Farm Credit: UNDEFINED — do NOT borrow SV1's metrics). Must-present set: employees, revenue, AUM or assets, CAGR, HQ, branches, founded year, primary regulator, charter, WEBSITE. `website` is the entity's own primary web domain, bare and lowercased (client.example — never a scheme, www., path or query). It is required on every sub-vertical because it is the one firmographic that is never sub-vertical specific, and because O11's self_sourced_pct is a share OF it: an evidence row published on this domain is the entity speaking about itself rather than a third party doing so. Cite it like any other field — the page it was read from — each as value + provenance. branches must be an integer count, never a serialised list or dict. primary_regulator is stated, not inferred from charter. IDENTITY GATE (blocking, per field): a figure about a DIFFERENT institution is quarantined, never shown. SCOPED FIGURES (owner decision 2026-10-04, one rule for O2 and O8): a subsidiary or segment figure of THIS group is admissible when its `unit` names the entity or segment it describes (e.g. 'USD billions, SWBC Mortgage Corporation originations, HMDA 2024') — CG-18d refuses a scope word ('subsidiary', 'segment', 'division') with no entity named. HOLDING IS A LAST RESORT (CG-18b): at most 2 held members or 25% of the must-present set, whichever is smaller; every held quarantine_reason names the registry route searched and its outcome; a structural answer is a VALUE, never a hold — charter 'None — non-depository; licensed by line', primary_regulator the regulators by line, branches 'No retail branches (non-depository)'. charter and primary_regulator must agree with context.regulatory_standing (CG-18e). A held field renders as a stated absence with its reason and is listed by list_enrichment_gaps as held_hidden_at_render. RECENCY GATE (blocking): every figure carries {value, as_of, source_e_id, recency_band}; no as_of, no render; bands CURRENT <18mo | RECENT 18-36mo | LEGACY >36mo | UNVERIFIED undated; a LEGACY figure may render ONLY with its date visible; an UNVERIFIED figure never renders as current. MAGNITUDE SANITY: implausible -> quarantine, do not clamp. A field nobody could establish is held with its route, never a guess and never a dict repr — absent beats wrong, and a held field is a stated absence, not a missing row.",
      "must_present_key": "field",
      "must_present": [
       "employees",
@@ -264,7 +264,18 @@
        "net_flows",
        "investment_income"
       ]
-     ]
+     ],
+     "held_ceiling": {
+      "max_count": 2,
+      "max_share": 0.25,
+      "why": "Owner decision 2026-10-04 (RC-04/D-04): at most 2 held members or 25% of the must-present set, whichever is smaller. Read by CG-18b over the generic set (pass 1) and over the generic set plus must_present_by_subvertical (pass 2)."
+     },
+     "stated_not_held": [
+      "charter",
+      "primary_regulator",
+      "branches"
+     ],
+     "held_reason_names_route": true
     },
     "undated_pct": {
      "required": true,
@@ -279,7 +290,7 @@
     "identity_mismatch": {
      "required": false,
      "type": "boolean",
-     "doc": "Producer validator: set when a field's source names a different entity; quarantines the panel. Figures must be about THIS legal entity — a parent, subsidiary or same-name institution is a contamination, and the panel is quarantined rather than shown."
+     "doc": "Producer validator: set when a field's source names a different entity; quarantines the panel. Figures must be about THIS legal entity or a named part of it: a parent's or same-name institution's figure is a contamination and quarantines the panel. A subsidiary or segment figure whose `unit` names that subsidiary or segment is a SCOPED figure, admissible (owner decision 2026-10-04; the same rule as O8's `basis`)."
     }
    }
   },

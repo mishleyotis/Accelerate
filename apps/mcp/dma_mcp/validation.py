@@ -76,10 +76,18 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
       * a member absent from the list entirely                    -> BLOCKS
       * a member present but null with no quarantine reason       -> BLOCKS
 
-    The second line is what keeps the absence protocol legal: a field the
-    ladder could not close is a finding, and it renders as a documented em
-    dash. The third and fourth are the ones that were invisible — silence,
-    and silence dressed as a value.
+    The second line keeps the absence protocol legal: a field the ladder
+    could not close is a finding. It is NOT free, and the 2026-08-14 premise
+    that it "renders as a documented em dash" was false — the renderer hid
+    held rows from that date. Measured on SWBC (RC-04, 2026-10-04): 6 of 10
+    members held, the strip showed four facts, and nothing said six were
+    missing. So holding is a LAST RESORT and CG-18b (`_check_held_share`)
+    caps it, per owner decision 2 (2026-10-04): at most 2 held or 25% of the
+    must-present set, whichever is smaller; a held reason names the registry
+    route searched; and a structural answer ("not chartered", "regulated line
+    by line", "no retail branches") is a VALUE, never a quarantine. The third
+    and fourth lines are the ones that were invisible — silence, and silence
+    dressed as a value.
 
     The set is read from the contract, so a section that gains a member gains
     its enforcement in the same edit and this function never changes.
@@ -94,20 +102,7 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
         return []
     key = spec.get("must_present_key", "field")
 
-    stated, held, empty = set(), set(), set()
-    for item in val or []:
-        if not isinstance(item, dict):
-            continue
-        member = _norm_member(item.get(key))
-        if not member:
-            continue
-        value = item.get("value")
-        if value not in (None, "", []):
-            stated.add(member)
-        elif item.get("quarantined") and str(item.get("quarantine_reason") or "").strip():
-            held.add(member)
-        else:
-            empty.add(member)
+    stated, held, empty = _member_states(val, key)
 
     out, accounted = [], stated | held
     for want in members:
@@ -150,6 +145,175 @@ def _check_must_present(section, fname, spec, val, empty_declared) -> list:
             "set requires one of them, and a sub-vertical that genuinely "
             "reports none of them still has to say which ladder established "
             "that"))
+    out.extend(_check_held_share(section, fname, spec, val,
+                                 _member_groups(spec)))
+    return out
+
+
+def _member_states(val, key="field"):
+    """(stated, held, empty) normalised member names of a must-present list.
+    Held = null value, `quarantined`, and a non-blank reason."""
+    stated, held, empty = set(), set(), set()
+    for item in val or []:
+        if not isinstance(item, dict):
+            continue
+        member = _norm_member(item.get(key))
+        if not member:
+            continue
+        value = item.get("value")
+        if value not in (None, "", []):
+            stated.add(member)
+        elif item.get("quarantined") and str(item.get("quarantine_reason") or "").strip():
+            held.add(member)
+        else:
+            empty.add(member)
+    return stated, held, empty
+
+
+def _member_groups(spec, extra=()) -> list:
+    """Every must-present requirement as a list of alias groups: each
+    `must_present` member (a name or an alias list), each `must_present_any`
+    group, plus `extra` (the sub-vertical's own set, read in pass 2)."""
+    groups = []
+    for want in list(spec.get("must_present") or []) + list(extra or []):
+        groups.append(list(want) if isinstance(want, (list, tuple)) else [want])
+    for group in spec.get("must_present_any") or []:
+        groups.append(list(group))
+    return groups
+
+
+# ── CG-18b · a held member is a last resort: capped, routed, never an answer ─
+#
+# The registry routes a held reason may name — O2's own "where the firmographic
+# actually lives" table and its STEP 3 enrichment ladder. A reason that names
+# none of them ("no rate is computed", "no count is stated on any page
+# reached") records that nothing was looked up, which is the one thing a
+# quarantine is not allowed to mean. Bare "registry" or "site" are not routes:
+# they name no place a second producer could re-run.
+_HELD_ROUTE = re.compile(
+    r"\b(?:SEC|EDGAR|10-K|10-Q|XBRL|call reports?|5300|FFIEC|UBPR|NPW|FDIC|"
+    r"BankFind|NCUA|OCC|Form 5500|5500|ESOP|NMLS|NIPR|NAIC|DOI|TDI|Form ADV|"
+    r"IAPD|BrokerCheck|FINRA|AM Best|HMDA|CFPB|"
+    r"departments? of insurance|divisions? of insurance|insurance departments?|"
+    r"ranking tables?|rankings?|trade[- ]press|annual reports?|audited|"
+    r"account dictionary|income statement|financial statements|newsroom|"
+    r"investor[- ]relations|press releases?|LinkedIn|acquisition announcements?|"
+    r"licen[cs]e (?:lookup|record|registry|search)|Secretary of State)\b",
+    re.I)
+# A named state or federal office ("Texas Department of Savings and Mortgage
+# Lending", "Indiana Department of Financial Institutions") is a route too.
+_HELD_ROUTE_OFFICE = re.compile(
+    r"\b(?:Department|Division|Office|Commissioner|Bureau) of [A-Z][a-z]+")
+
+# Structural answers. Each is a TRUE STATEMENT about the institution, and a
+# reason that says it has the value in hand and is withholding it. Measured on
+# SWBC: charter held as "not a chartered depository", primary_regulator held as
+# "no single primary regulator", while context.regulatory_standing STATED both.
+_STRUCTURAL_ANSWER = {
+    "charter": re.compile(
+        r"\bnot (?:a )?chartered\b|\bno (?:single |group |bank |depository )?"
+        r"charter\b|\bholds? no (?:group |single )?charter\b|"
+        r"\bnon-?depository\b|\bnot a (?:bank|depository|credit union)\b", re.I),
+    "primary_regulator": re.compile(
+        r"\bno (?:single |one )?(?:primary |prudential |group[- ]level )?"
+        r"(?:regulator|supervisor)\b|\b(?:regulated|supervised|licensed) "
+        r"(?:line[- ]by[- ]line|by line)\b|\bmultiple regulators\b|"
+        r"\beach (?:regulated )?line\b|\bno consolidated supervisor\b", re.I),
+    "branches": re.compile(
+        r"\bno (?:retail |physical )?branches\b|\bdoes not operate "
+        r"(?:retail |physical )?branches\b|\bbranchless\b|"
+        r"\bnon-?depository\b", re.I),
+}
+
+
+def _held_cap(spec, n_groups):
+    hc = spec.get("held_ceiling")
+    if not isinstance(hc, dict) or n_groups <= 0:
+        return None
+    return min(float(hc.get("max_count", n_groups)),
+               float(hc.get("max_share", 1.0)) * n_groups)
+
+
+def _held_groups(val, key, groups):
+    """The requirement groups satisfied ONLY by a held member."""
+    stated, held, _ = _member_states(val, key)
+    out = []
+    for g in groups:
+        norms = [_norm_member(a) for a in g]
+        if any(n in stated for n in norms):
+            continue
+        if any(n in held for n in norms):
+            out.append(g[0])
+    return out
+
+
+def held_share_exceeded(spec, val, groups) -> tuple:
+    """(held names, cap) when the held share is over the ceiling, else None.
+    Shared with pass 2, which adds the sub-vertical's members."""
+    cap = _held_cap(spec, len(groups))
+    if cap is None:
+        return None
+    names = _held_groups(val, spec.get("must_present_key", "field"), groups)
+    if len(names) > cap:
+        return names, cap
+    return None
+
+
+def _held_ceiling_reason(section, fname, names, n_groups, cap):
+    return _reason(
+        "CG-18b", section, f"{section}.{fname}",
+        f"{len(names)} of {n_groups} must-present members are held "
+        f"({', '.join(map(str, names))}) and the ceiling is {int(cap)} — at "
+        f"most 2, or 25% of the set, whichever is smaller (owner decision, "
+        f"2026-10-04). A held field renders as a stated absence; a strip that "
+        f"is mostly absences is not a firmographic profile. State what the "
+        f"registry routes answer — a structural answer ('not chartered', "
+        f"'regulated line by line', 'no retail branches') is a value — add "
+        f"scoped figures whose unit names the entity they describe, and hold "
+        f"only what no route can reach.")
+
+
+def _check_held_share(section, fname, spec, val, groups) -> list:
+    """CG-18b — the held share is capped, every held reason names the route it
+    searched, and a structural answer is stated rather than held."""
+    out = []
+    key = spec.get("must_present_key", "field")
+    over = held_share_exceeded(spec, val, groups)
+    if over:
+        out.append(_held_ceiling_reason(section, fname, over[0], len(groups),
+                                        over[1]))
+    structural = set(_norm_member(m) for m in spec.get("stated_not_held") or [])
+    for item in val or []:
+        if not isinstance(item, dict) or item.get("value") not in (None, "", []):
+            continue
+        reason = str(item.get("quarantine_reason") or "").strip()
+        if not (item.get("quarantined") and reason):
+            continue
+        name = str(item.get(key) or "")
+        norm = _norm_member(name)
+        rx = _STRUCTURAL_ANSWER.get(norm)
+        if norm in structural and rx and rx.search(reason):
+            out.append(_reason(
+                "CG-18b", section, f"{section}.{fname}[{name}]",
+                f"{name!r} is held with a reason that ANSWERS it "
+                f"({rx.search(reason).group(0)!r}). That is the value, not an "
+                f"absence: state it as a compound value (e.g. 'None — "
+                f"non-depository; licensed by line' for charter, the "
+                f"regulators by line for primary_regulator, 'No retail "
+                f"branches' for branches), cite the registry it came from, and "
+                f"make it agree with context.regulatory_standing."))
+            continue
+        if spec.get("held_reason_names_route") and not (
+                _HELD_ROUTE.search(reason) or _HELD_ROUTE_OFFICE.search(reason)):
+            out.append(_reason(
+                "CG-18b", section, f"{section}.{fname}[{name}]",
+                f"{name!r} is held and its reason names no registry route "
+                f"searched. A quarantine records a ladder that ran: name the "
+                f"route and its outcome (SEC EDGAR, the call report, NMLS, "
+                f"the state department of insurance, FINRA BrokerCheck, Form "
+                f"ADV, Form 5500, the trade-press ranking tables, the entity's "
+                f"newsroom), or run it. 'No figure is stated on any page "
+                f"reached' says nothing a second producer could re-run."))
     return out
 
 

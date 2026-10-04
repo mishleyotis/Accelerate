@@ -102,6 +102,17 @@ GATES = {
               "so a list with one member passed every gate and which members "
               "it carried was documentation rather than contract.",
               "block"),
+    "CG-18b": ("A held member is a last resort: capped, routed, never an answer",
+               None,
+               "At most 2 must-present members are held, or 25% of the set, "
+               "whichever is smaller; every held reason names the registry "
+               "route searched; a structural answer (not chartered, "
+               "regulated by line, no retail branches) is stated as a value.",
+               "RC-04, SWBC 2026-10-04: CG-18 accepted any non-blank reason "
+               "with no ceiling, so 6 of 10 firmographics promoted held and "
+               "the strip showed four facts with nothing saying six were "
+               "missing. Owner decision 2 set the cap.",
+               "block"),
     "CG-23": ("Every page's own thread is written", None,
               "A section whose writer stores `narrative_thread` carries a "
               "non-empty one. The contract's words: a page is not a "

@@ -810,6 +810,87 @@ def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
 _DATED_BANDS = ("CURRENT", "RECENT", "DATED", "STALE", "ARCHIVAL")
 
 
+# ── CG-10 · an UNVERIFIED rung is not a date the evidence already holds ──
+#
+# RC-04 (SWBC gold audit 2026-10-04; slices OH-07, XC-02). Pass 1's
+# `_records_absence` accepts `recency_band: "UNVERIFIED"` as a recorded date
+# absence and never looks at what the item cites. SWBC stated `founded: 1976`
+# with as_of null and band UNVERIFIED while its own cited excerpt (E-CC-1283)
+# reads "April 1, 1976". The rung recorded a search that was never needed.
+_MONTH = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|"
+          r"July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|"
+          r"Dec(?:ember)?)")
+_FULL_DATE = re.compile(
+    r"\b(?:(?:19|20)\d{2}-\d{2}-\d{2}"
+    rf"|{_MONTH}\.? \d{{1,2}}(?:st|nd|rd|th)?,? (?:19|20)\d{{2}}"
+    rf"|\d{{1,2}}(?:st|nd|rd|th)? {_MONTH} (?:19|20)\d{{2}}"
+    r"|\d{1,2}/\d{1,2}/(?:19|20)\d{2})\b")
+_UNDATED_RUNGS = frozenset(("UNVERIFIED", "undated"))
+_ITEM_CITE_KEYS = ("source_e_id", "e_id", "e_ids", "supporting_e_ids")
+
+
+def _item_cites(item) -> list:
+    out = []
+    for k in _ITEM_CITE_KEYS:
+        v = item.get(k)
+        out.extend([v] if isinstance(v, str) else
+                   [x for x in (v or []) if isinstance(x, str)]
+                   if isinstance(v, list) else [])
+    return out
+
+
+def _check_undated_rung_against_evidence(page, payload, found) -> list:
+    """CG-10 — a dating field left null on an UNVERIFIED/undated rung is
+    refused when an evidence row the item cites carries a published_date, or
+    an excerpt holding a full calendar date. The message names the date."""
+    from .validation import _ITEM_DATING, _RUNG_KEYS
+    if not isinstance(payload, dict):
+        return []
+    rows = {}
+    for r in found or []:
+        for k in (r.get("e_id"), r.get("stored_id")):
+            if k:
+                rows[k] = r
+    out = []
+    for section, body in payload.items():
+        entry = _ITEM_DATING.get(f"{page}.{section}")
+        if not entry or not isinstance(body, dict):
+            continue
+        container, _, field = entry[0].partition("[*].")
+        items = body.get(container)
+        for i, item in enumerate(items if isinstance(items, list) else []):
+            if not isinstance(item, dict) or item.get(field) is not None:
+                continue
+            if item.get("quarantined") and item.get("quarantine_reason"):
+                continue
+            if not any(isinstance(item.get(k), str)
+                       and item[k].strip() in _UNDATED_RUNGS
+                       for k in _RUNG_KEYS):
+                continue
+            for e in _item_cites(item):
+                row = rows.get(e.split(":")[0]) or rows.get(e)
+                if not row:
+                    continue
+                date = row.get("published_date")
+                where = "its published_date"
+                if not date:
+                    m = _FULL_DATE.search(str(row.get("excerpt") or ""))
+                    date = m.group(0) if m else None
+                    where = "its excerpt"
+                if not date:
+                    continue
+                out.append(_reason(
+                    "CG-10", section, f"{section}.{container}[{i}].{field}",
+                    f"{field} is null on an UNVERIFIED rung, but the evidence "
+                    f"this item cites ({e}) carries a date in {where}: "
+                    f"{date!r}. UNVERIFIED records a date nobody could "
+                    f"establish; this one is on the page already registered. "
+                    f"State {field} from it (the date the figure is true as "
+                    f"of), with the band it computes to."))
+                break
+    return out
+
+
 def _check_evidence_dating(found, cited_by) -> list:
     out = []
     for row in found:
@@ -3651,6 +3732,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         split = get_evidence(conn, run_id, sorted(cited))
         reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
         reasons.extend(_check_evidence_dating(split.get("found", []), cited))
+        reasons.extend(_check_undated_rung_against_evidence(
+            page, payload, split.get("found", [])))
         reasons.extend(_check_fact_tier(split.get("found", []), cited))
         reasons.extend(_check_scan_tier(split.get("found", []), cited))
         reasons.extend(_check_financial_figures_are_quoted(
