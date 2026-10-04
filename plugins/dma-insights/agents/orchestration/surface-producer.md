@@ -162,7 +162,7 @@ python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_payloa
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_language.py" <payload.json>
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/precheck_gates.py" <payload.json> --page <page> \
        --evidence <get_evidence.json> --bundle <get_report_bundle.json>
-python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/ --subvertical <CODE>
+python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/check_consistency.py" <rundir>/   # rundir holds bundle.json, catalogue.json, fit.json (MEM-0559, RC-12)
 python "${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/scripts/self_heal.py" --sections sections/ \
        --page <page> --entity "<the entity's legal name>"
 ```

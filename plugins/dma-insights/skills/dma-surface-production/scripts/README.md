@@ -13,7 +13,7 @@ python scripts/check_language.py payload.json
 python scripts/check_evidence.py get_evidence.json --review
 python scripts/precheck_gates.py payload.json --page overview \
        --evidence get_evidence.json --bundle bundle.json
-python scripts/check_consistency.py rundir/ --subvertical CU
+python scripts/check_consistency.py rundir/     # + rundir/bundle.json, catalogue.json, fit.json
 python scripts/score_prompt.py prompt.txt
 ```
 
@@ -25,9 +25,17 @@ python scripts/score_prompt.py prompt.txt
 
 `check_evidence.py` reads a `get_evidence` snapshot and refuses pairings that cannot both be true — one excerpt registered under two different hosts, a `source_url` that is not a fetchable document, a search-results page, an enrichment tool standing in for the source it found. It cannot tell you whether a single excerpt is on its own page; only fetching it can, which is what `register_evidence` does.
 
-Give `check_consistency.py` the entity's sub-vertical code and it blocks on a cited cell
-belonging to another one — the workbook scores the whole catalogue, so those cells resolve
-in it and render nowhere. Without the flag it reports the mixture as a warning. It also
+`check_consistency.py` reads the entity's binding — primary AND supplementary
+sub-verticals — from `rundir/bundle.json` (`get_report_bundle`'s output; `--bundle` points
+elsewhere) and blocks on a cited cell belonging to a sub-vertical outside it — the workbook
+scores the whole catalogue, so those cells resolve in it and render nowhere. The binding is
+never typed: `--supplementary` is retired (MEM-0559 — a flag a producer could omit reproduced
+the 54-cell SWBC false block), and `--subvertical` is only a cross-check that blocks when it
+disagrees with the bundle. Checks 16-27 run the cross-section invariants the contracts name
+(SWBC gold audit RC-10/RC-12): O5/P1 factor arithmetic and agreement with the engine
+(`fit.json`), tile states, recommendation areas, discard cell counts and the catalogue's top-10
+areas (`catalogue.json`), stair-step vs roadmap and platform order, one thin definition per
+payload, H6 completeness, O6/O7 counts, and the identified peer set. It also
 reads the run as one argument: every served cell must open a drawer that says something,
 coverage must be counted over the cells the grid actually serves, and the constraint in the
 hero framing must be recognisable at the top finding, the act-now set, roadmap phase 1 and
