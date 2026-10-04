@@ -904,9 +904,14 @@ function techLayersOf(techstack) {
       // defect CG-24 exists for, arriving between the payload and the
       // renderer rather than inside either.
       //
-      // The row count remains the fallback, because a run that promoted no
-      // rollup still owes the reader a real ratio rather than a constant.
-      expected: roll.expected != null && isFinite(Number(roll.expected)) ? Number(roll.expected) : at.length,
+      // NO FALLBACK (RC-11 / D-16, gold audit 2026-10-04). This used to
+      // fall back to the row count, "so the card still states a real ratio"
+      // — and a ratio whose denominator is the numerator's own register is
+      // not one: every layer of the audited run sent `expected: null`, and
+      // the cards read "5 of 5" and "10 of 11". Null stays null and the card
+      // says "expected not stated". Which denominator SHOULD be stated —
+      // product slots or cells — is open adjudication T-03 / DNR-6.
+      expected: roll.expected != null && roll.expected !== "" && isFinite(Number(roll.expected)) ? Number(roll.expected) : null,
       expected_basis: roll.expected_basis || null,
       confirmed,
       is_primary_gap: false,
@@ -927,13 +932,17 @@ function techLayersOf(techstack) {
   const fewest = Math.min(...rows.map(r => r.confirmed));
   let cands = rows.filter(r => r.confirmed === fewest);
   if (cands.length > 1) {
-    const ratio = r => r.expected ? r.detected / r.expected : 1;
-    const lowest = Math.min(...cands.map(ratio));
-    cands = cands.filter(r => ratio(r) === lowest);
+    // The ratio tie-break needs a stated denominator on every candidate;
+    // without one there is no ratio, and the tie stands unflagged.
+    if (cands.every(r => r.expected)) {
+      const ratio = r => r.detected / r.expected;
+      const lowest = Math.min(...cands.map(ratio));
+      cands = cands.filter(r => ratio(r) === lowest);
+    }
   }
   if (cands.length === 1) {
     cands[0].is_primary_gap = true;
-    cands[0].basis = `${cands[0].confirmed} confirmed of ${cands[0].expected} ` + `— fewer than any other layer`;
+    cands[0].basis = cands[0].expected != null ? `${cands[0].confirmed} confirmed of ${cands[0].expected} — fewer than any other layer` : `${cands[0].confirmed} confirmed — fewer than any other layer`;
   }
   return rows;
 }

@@ -1537,48 +1537,12 @@ function Gantt({ issues }) {
   );
 }
 
-function FinChart({ entity }) {
-  const years = [2022, 2023, 2024, 2025, 2026];
-  const baseAssets = entity.assets || 11e9;
-  const cagr = entity.cagr || 0.06;
-  const data = years.map((y, i) => ({ year: y, val: baseAssets * Math.pow(1 + cagr, i - 4) }));
-  const max = Math.max(...data.map(d => d.val));
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 140, padding: "0 8px" }}>
-        {data.map(d => (
-          <div key={d.year} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-            <div style={{ fontSize: 10, color: "var(--z-muted)" }}>${fx((d.val / 1e9), 1)}B</div>
-            <div style={{ width: "100%", height: `${(d.val / max) * 120}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0" }} />
-            <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{d.year}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: 10, padding: 8, background: "var(--z-lav)", borderRadius: 6, fontSize: 11, color: "var(--z-body)" }}>
-        Total asset CAGR <strong style={{ color: "var(--z-mid)" }}>{fx((cagr * 100), 1)}%</strong> · trend classified <strong>{entity.trend}</strong>
-      </div>
-    </div>
-  );
-}
-
-function SentimentGrid() {
-  const sentiments = [
-    { label: "Glassdoor",      value: 3.8, max: 5, n: 412, label2: "Employee" },
-    { label: "App Store",      value: 3.4, max: 5, n: 8200, label2: "Mobile" },
-    { label: "CFPB complaints", value: 24,  max: 100, n: 24, label2: "Index (lower better)" },
-  ];
-  return (
-    <div className="g3" style={{ gap: 10 }}>
-      {sentiments.map(s => (
-        <div key={s.label} className="card-tile" style={{ padding: 10, border: "none", background: "var(--z-lav)" }}>
-          <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>{s.label2}</div>
-          <div style={{ fontSize: 18, fontWeight: 600, marginTop: 4 }}>{s.value}<span style={{ fontSize: 11, color: "var(--z-muted)", fontWeight: 400 }}>/{s.max}</span></div>
-          <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{s.label} · n={s.n.toLocaleString()}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
+/* FinChart and SentimentGrid were DELETED 2026-10-04 (RC-11). Neither was
+   mounted anywhere, and both were renderer constants asserting what no
+   payload said: FinChart compounded `entity.assets || 11e9` at
+   `entity.cagr || 0.06` into a five-year "Total asset CAGR 6.0%" trend, and
+   SentimentGrid hard-coded Glassdoor 3.8 (n=412), App Store 3.4 and a CFPB
+   index of 24. Dead code that fabricates is one import away from a page. */
 
 /* ── The evidence-age panel's rows ────────────────────────────────────
    The tracker aged `DMA.EVIDENCE[].recency`, and the adapter sets `recency`
@@ -2232,10 +2196,11 @@ function ClientTechStack({ entity, run }) {
   const byLayer = {};
   LAYERS.forEach(L => byLayer[L] = list.filter(t => t.layer === L));
 
-  // Layer keys are OPS · CUST · DATA · INFRA (charter correction); the
-  // customer-engagement and data layers are the ones whose absence gates
-  // downstream AI/decisioning work.
-  const absentCount = allTech.filter(t => t.status === "ABSENT" && (t.layer === "CUST" || t.layer === "DATA")).length;
+  // The register's own ABSENT rows, every layer. The footer used to count
+  // only CUST and DATA and call the result "the primary Zennify engagement
+  // opportunity" — seller voice on the client's page, asserted by a
+  // constant no payload check could see (RC-11 / D-14).
+  const absentCount = allTech.filter(t => t.status === "ABSENT").length;
 
   /* Narrow to the gap rows, and land on them. Enabling releases every other
      filter — they would otherwise intersect and the register could come out
@@ -2453,14 +2418,16 @@ function ClientTechStack({ entity, run }) {
         const techList = byLayer[L];
         if (!techList || techList.length === 0) return null;
         // The promoted rollup decides this, and it carries its own detected /
-        // expected counts. Fall back to counting the rows on screen so the
-        // card still states a real ratio when the run promoted no rollup —
-        // never to a constant.
+        // expected counts. `detected` may fall back to counting the rows on
+        // screen — that is a count of the register. `expected` may NOT
+        // (RC-11 / D-16): the rows cannot be their own denominator, and
+        // "5 of 5" over `expected: null` is the circular rollup. An unstated
+        // denominator renders as unstated, with the run's own basis on hover.
         const roll = (layerRollup || []).find(x => x && x.layer === L) || null;
         const isPrimaryGap = !!(roll && roll.is_primary_gap);
         const detected = roll && roll.detected != null
           ? roll.detected : techList.filter(t => t.status !== "ABSENT").length;
-        const expected = roll && roll.expected != null ? roll.expected : techList.length;
+        const expected = roll && roll.expected != null ? roll.expected : null;
         return (
           <div key={L} id={`ts-layer-${L}`} className="card"
                style={{ marginBottom: 12, padding: 16,
@@ -2474,7 +2441,11 @@ function ClientTechStack({ entity, run }) {
               {isPrimaryGap ? <span className="b b-ph1" style={{ background: "var(--ph1-lt)" }}>PRIMARY GAP LAYER</span> : null}
               <span className="spacer" />
               <span className="b b-teal">{(roll && roll.pillar_id) || LM.dma}</span>
-              <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{detected} of {expected} detected</span>
+              <span style={{ fontSize: 11, color: "var(--z-muted)" }}
+                    title={(roll && roll.expected_basis) || undefined}>
+                {expected != null ? `${detected} of ${expected} detected`
+                                  : `${detected} detected · expected not stated`}
+              </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {techList.map(t => <TechRow key={t.id} t={t} entity={entity} run={run} />)}
@@ -2489,8 +2460,18 @@ function ClientTechStack({ entity, run }) {
           <Icon name="platform" size={18} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dark)" }}>{absentCount} technologies absent across customer + data layers - the primary Zennify engagement opportunity</div>
-          <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3 }}>All absent-technology rows link directly to platform recommendations.</div>
+          {/* What the register holds, and nothing it does not. The second
+              line used to promise "All absent-technology rows link directly
+              to platform recommendations" — a claim about a link table this
+              page never checked (RC-11 / D-14). */}
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--z-dark)" }}>
+            {absentCount === 0
+              ? "No product is recorded absent in this register"
+              : `${absentCount} product${absentCount === 1 ? "" : "s"} recorded absent in this register`}
+          </div>
+          <div style={{ fontSize: 11.5, color: "var(--z-body)", marginTop: 3 }}>
+            The platform page sets out the recommendations this assessment makes.
+          </div>
         </div>
         <button className="btn btn-primary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>View platform matrix <Icon name="arrow-r" size={11} /></button>
       </div>
@@ -2690,7 +2671,10 @@ function ClientTechStackDetail({ entity, run, techId }) {
     CONFIRMED: { color: "var(--z-mid)",   label: "Confirmed - in production" },
     INFERRED:  { color: "var(--z-dpur)",  label: "Inferred - from dated public signal" },
     CLAIMED:   { color: "#7C3500",        label: "Claimed - stated, not corroborated" },
-    ABSENT:    { color: "var(--z-below)", label: "Absent - searched and not found" },
+    // Not "searched and not found": an ABSENT row may rest on the
+    // institution's own statement with no search run (RC-11 / D-15). How it
+    // was established is the row's detection_basis, printed below.
+    ABSENT:    { color: "var(--z-below)", label: "Absent - not in the estate" },
   };
   // A status is REQUIRED on every register row, so a row without one is a
   // hole in the payload, not a style of row. It renders inside a badge, so
@@ -2843,12 +2827,17 @@ function ClientTechStackDetail({ entity, run, techId }) {
           </div>
         </div>
       ) : (
+        /* AUDIENCE-AWARE (RC-11 / D-13). The server strips items[*].dma_impact
+           from every customer read (redaction CUSTOMER_ALWAYS), so on the
+           customer view an absent field is a WITHHELD field. This said "the
+           reasoning that connects them was not written" to the client over
+           a run where 36 of 36 were written. */
         <div className="card" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>DMA assessment impact</div>
           <div style={{ fontSize: 12, color: "var(--z-muted)", lineHeight: 1.6 }}>
-            The run states no assessment impact for this row. The linked cells and
-            their served scores are below; the reasoning that connects them was
-            not written.
+            {audience === "customer"
+              ? "The reasoning for this row is withheld from this view. The linked cells and their served scores are below."
+              : "The run states no assessment impact for this row. The linked cells and their served scores are below."}
           </div>
         </div>
       )}
@@ -3031,7 +3020,10 @@ function ClientTechStackDetail({ entity, run, techId }) {
               ? <span className="b b-teal">{fmtPct(t.peer_coverage)} adopted</span>
               : ((t.peer_deployments || []).length
                   ? <span className="b b-muted">no share stated</span>
-                  : <span className="b b-muted">not researched</span>)}
+                  /* "not researched" was our workflow word on a client page
+                     (RC-11 / D-37). The payload states no peer row; that is
+                     all the badge may say. */
+                  : <span className="b b-muted">no peer row stated</span>)}
           </div>
           {(t.peer_deployments || []).length ? (
             <>
@@ -3103,13 +3095,13 @@ function ClientTechStackDetail({ entity, run, techId }) {
           ) : (
             <div style={{ fontSize: 12, color: "var(--z-body)", lineHeight: 1.6 }}>
               <p style={{ marginBottom: 8 }}>
-                No peer technographic research is attached to this product for this
-                run, so no adoption figure is shown.
+                This run states no peer deployment of this product, so no
+                adoption figure is shown.
               </p>
               {peers.length ? (
                 <>
                   <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".08em", color: "var(--z-muted)", textTransform: "uppercase", marginBottom: 6 }}>
-                    Peer set that would be searched
+                    Peers identified for this engagement · not scored
                   </div>
                   <div className="row" style={{ gap: 5, flexWrap: "wrap" }}>
                     {peers.slice(0, 8).map(x => <span key={x} className="chip">{x}</span>)}
@@ -3117,8 +3109,7 @@ function ClientTechStackDetail({ entity, run, techId }) {
                 </>
               ) : (
                 <p style={{ color: "var(--z-muted)" }}>
-                  This run states no peer set, so there is no cohort to search
-                  against either.
+                  This run states no peer set either.
                 </p>
               )}
             </div>
@@ -3165,8 +3156,6 @@ function ClientTechStackDetail({ entity, run, techId }) {
             ) : (
               <div style={{ fontSize: 12.5, color: "#3B0764", lineHeight: 1.65 }}>
                 No promoted recommendation names a cell this row is linked to.
-                The pathway stated above is the argument for the work; the
-                roadmap has not yet sequenced it.
               </div>
             )}
           </div>

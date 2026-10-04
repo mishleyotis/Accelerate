@@ -19,10 +19,17 @@ const ENV = (over) => ({
   ...over,
 });
 
-const sec = (data) => ({ data, e_ids: (data && data.e_ids) || [],
-                         produced_at: "2026-10-02T08:00:00Z",
-                         producer_version: "fixture", provenance: "fixture",
-                         empty_state: null });
+/* The wire envelope, as apps/api/dma_api/pages.py serves it: `empty_state`
+   and `e_ids` travel on the ENVELOPE beside `data`, not inside it. */
+const sec = (data) => {
+  if (!data) return { data: null, e_ids: [], empty_state: null };
+  const { empty_state, ...rest } = data;
+  return { data: rest, e_ids: data.e_ids || [],
+           produced_at: "2026-10-02T08:00:00Z",
+           producer_version: "fixture", provenance: "fixture",
+           data_source: empty_state ? "empty" : "producer",
+           empty_state: empty_state || null };
+};
 
 /* ── overview.sentiment — 1 bar, 6 themes (3 customer, 3 employee), no
    gap_analysis (one audience rated, so the contract says omit it). ───── */
