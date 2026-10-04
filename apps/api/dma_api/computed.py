@@ -28,7 +28,6 @@ Two rules hold everywhere in this module:
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 # The abbreviation list, from the one copy `evidence.py` also reads. Imported
@@ -63,43 +62,54 @@ TILE_DETAIL = {
     "INFERRED": "Technographic or indirect signal; a vendor statement would "
                 "confirm.",
     "CLAIMED": "Stated but not corroborated; treated as absent for fit.",
-    # The DEFINITION only. The sentence the tile serves is chosen per row by
-    # `_gaps_detail`, because whether an absence was SEARCHED is a fact about
-    # each row, not about the vocabulary (RC-11 / D-15).
+    # The DEFINITION only. The sentence the tile serves is `_gaps_detail`'s,
+    # which says whether each row carries its own basis — never how the
+    # absence was established (RC-11 / D-15).
     "GAPS": "Recorded absent from this estate; named, because a list of what "
             "is absent is the finding.",
 }
 
-# Does a row's detection_basis RECORD a search? Read from the producer's own
-# clause, never assumed. "No public source confirms or contradicts it" is an
-# absence of a source, not a search, and does not match.
-_SEARCH_RECORDED = re.compile(
-    r"\b(searched|search(?:es)?\s+(?:of|for|across|on|in|run)|queried|"
-    r"scanned|looked\s+for)\b", re.I)
-
-_GAPS_TAIL = "named, because a list of what is absent is the finding."
+_GAPS_TAIL = "Named, because a list of what is absent is the finding."
 
 
 def _gaps_detail(bases: list) -> str:
-    """The GAPS tile's sentence, from how each ABSENT row was established.
+    """The GAPS tile's sentence: what the ABSENT rows RECORD, nothing more.
 
-    RC-11 / D-15, gold audit 2026-10-04: the tile said "Searched and not
+    RC-11 / D-15, gold audit 2026-10-04. The tile said "Searched and not
     established" over a register whose one ABSENT row rested on the
-    institution's own statement, and the search had never run. Rows whose
-    basis records a search are "searched and not found"; every other row,
-    including one with no basis at all, is "stated absent, not yet searched".
+    institution's own statement, and no search had run. Round 1 then chose
+    the sentence by matching search keywords in each row's detection_basis
+    prose, and the inverse false claim followed: Baxter's "a targeted search
+    that returned no BCU deployment" missed the pattern and was served as
+    "stated absent, not yet searched", and a basis reading "Not searched"
+    matched `searched`.
+
+    The register has no structured record of HOW an absence was established
+    (techstack_items carries status, evidence_level and detection_basis; no
+    `searched` flag). So the server asserts no search outcome at all. It
+    reads one fact from each row: whether a basis is recorded. That basis is
+    the producer's own clause, printed on the T3 detail page for both
+    audiences, and the tile points the reader at it. A row without one is
+    counted as having none; the tile never fills it in.
     """
     if not bases:
         return "No product is recorded absent in this register."
-    searched = sum(1 for b in bases if b and _SEARCH_RECORDED.search(b))
-    stated = len(bases) - searched
-    if stated == 0:
-        return f"Searched and not found in this estate; {_GAPS_TAIL}"
-    if searched == 0:
-        return ("Stated absent by the institution or the assessment, not yet "
-                f"searched; {_GAPS_TAIL}")
-    return (f"{searched} searched and not found; {stated} stated absent, not "
-            f"yet searched. Both {_GAPS_TAIL}")
+    n = len(bases)
+    with_basis = sum(1 for b in bases if isinstance(b, str) and b.strip())
+    if with_basis == n:
+        how = ("Each row states how its absence was established."
+               if n > 1 else
+               "The row states how its absence was established.")
+    elif with_basis == 0:
+        how = ("No row records how its absence was established."
+               if n > 1 else
+               "No row records how the absence was established.")
+    else:
+        rest = n - with_basis
+        how = (f"{with_basis} of {n} rows state how the absence was "
+               f"established; the other {rest} "
+               f"{'records' if rest == 1 else 'record'} no basis.")
+    return f"Recorded absent from this estate. {how} {_GAPS_TAIL}"
 
 
 def _product_label(vendor: str | None, name: str | None) -> str:
