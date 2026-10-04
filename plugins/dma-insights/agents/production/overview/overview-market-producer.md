@@ -588,6 +588,12 @@ the gap. Laziness is a bar with no `n`, a theme inferred from an average, a
 came back, or a series declared `verified_sparse` at rung one on an entity whose
 figures are actually public.
 
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **Connector readings are evidence** (RC-07; owner decision 3): the Indeed connector's `get_company_data` (T3) and the CFPB complaint API (T1) register `origin='connector'`; see Enrichment checks above.
+
 ## Output contract
 
 Return to your caller:

@@ -751,6 +751,24 @@ def check_peers(P, bundle):
                 "(D-17); state 'identified, not scored' in the section's empty_state")
 
 
+def check_dating(P):
+    """28 · dates that exist are applied (RC-07(e), D-23): an H7 undated
+    share above 20% with no dating rung recorded is a pass that was skipped,
+    not a measurement (SWBC 41.8% with 41 harvested dates never applied;
+    Baxter 0%)."""
+    age = P.get("heatmap", {}).get("evidence_age", {})
+    pct = num(age.get("undated_pct")) if isinstance(age, dict) else None
+    if pct is None or pct <= 20:
+        return
+    probes = json.dumps((age.get("r_layer") or {}).get("probes_run") or []).lower()
+    if not re.search(r"\bdat(e|ed|ing)\b", probes):
+        bad("WARN", "H7 dating",
+            f"undated_pct is {pct:g}% and r_layer records no dating rung. Harvest the "
+            "dates the evidence carries (datelines, filings, page metadata), verify each "
+            "against its excerpt and apply them through register_evidence before "
+            "reporting the share (RC-07(e))")
+
+
 def main(argv=None):
     del issues[:]
     ap=argparse.ArgumentParser(); ap.add_argument("rundir"); ap.add_argument("--strict",action="store_true")
@@ -1074,6 +1092,7 @@ def main(argv=None):
     check_leadership(P)
     check_findings(P)
     check_peers(P, bundle)
+    check_dating(P)
 
     order={"BLOCK":0,"WARN":1,"INFO":2}
     issues.sort(key=lambda x:(order[x[0]],x[1]))

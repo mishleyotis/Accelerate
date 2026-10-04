@@ -425,6 +425,12 @@ median imputed to fill the axis, a `source_cell` left null on a figure that
 plainly came from somewhere, a recomputed mean presented as a stated figure, or
 an `empty_state` whose counts do not match the object beneath it.
 
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **The peer row is an explicit absence when peers were identified, not scored** (RC-10, D-17): the section's `empty_state` names the cohort and says so — SWBC's grid drew sixteen blank boxes because no reason reached it.
+
 ## Output contract
 
 Return **only** JSON plus a short self-report, in this shape:

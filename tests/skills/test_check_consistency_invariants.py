@@ -222,3 +222,16 @@ def test_a_stated_finding_count_must_match(tmp_path):
            "narrative_thread": "Three findings rank constraints, not work."}
     _, out = cc.run(cc.rundir(tmp_path, {"overview": {"findings": fnd}}))
     assert cc.blocks(out, "O6 counts"), out
+
+
+# ── H7 dating (RC-07(e), D-23) ──────────────────────────────────────────
+
+def test_a_high_undated_share_with_no_dating_rung_is_reported(tmp_path):
+    hm = {"evidence_age": {"undated_pct": 41.8, "rows": [],
+                           "r_layer": {"probes_run": ["tier ladder re-checked"]}}}
+    _, out = cc.run(cc.rundir(tmp_path, {"heatmap": hm}))
+    assert "H7 dating" in out and "41.8" in out
+    hm["evidence_age"]["r_layer"]["probes_run"].append(
+        "dating pass: 41 candidate dates verified against their excerpts and applied")
+    _, out = cc.run(cc.rundir(tmp_path, {"heatmap": hm}, name="run2"))
+    assert "H7 dating" not in out

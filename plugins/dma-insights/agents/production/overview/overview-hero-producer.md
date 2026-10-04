@@ -482,6 +482,16 @@ Lazy: fields present but undated, a `quarantine_reason` that restates the field
 name, a must-present member simply absent, or an `enrichment_status` claiming a
 scan the payload cannot corroborate.
 
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **The stated overall comes from `Executive_Summary`** (MEM-0561). The scoring workbook states "Overall Maturity" and its weighting there (SWBC: 2.0073, pillar-weighted 20/20/30/30); the worker now reads it as one of the composite's stated sources. Open the tab, take the figure the workbook states, and name the tab and cell in `r_layer.probes_run`. Where the bundle and the tab disagree, report it — never average.
+
+- **The raw score is stored since migration 0064** (MEM-0560): the band is generated from the value you send, so a composite in [x.995, x+1) no longer bands one tier high after rounding. The owner's 2026-10-02 decision to send the composite at 2dp stands until the owner revisits it — it is recorded as open in MEM-0560, not overturned here.
+
+- **Name the identified cohort** (RC-10, D-17). Where a pillar has no `peer_median` and the run identified peers (Handoff_Lock `locked_peer_set`, the peer table, or any `peer_deployments` row), `proxy_disclosure` names them as "identified, not scored" and `peer_basis` is `cannot_estimate`, never null. CG-44 refuses the unnamed form.
+
 ## Output contract
 
 Return **only** JSON plus a short self-report, in this shape:
