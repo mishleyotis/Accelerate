@@ -109,3 +109,43 @@ def test_a_run_with_no_peer_set_is_left_alone(tmp_path):
              "overview": _o1("No peer set was identified this engagement.")}
     _, out = cc.run(cc.rundir(tmp_path, pages, bundle={"sub_vertical": "IB"}))
     assert not cc.blocks(out, "P1 peers") and not cc.blocks(out, "O1 peers"), out
+
+
+BAXTER_PEERS = ["Alliant CU", "CEFCU", "Consumers CU", "GreenState CU",
+                "Lake Michigan CU"]
+
+
+def _baxter_bundle(locked=None):
+    """Baxter c1351d25's peer table shape (read-only get_report_bundle):
+    five credit unions plus three STATISTIC rows, one category shown."""
+    b = {"sub_vertical": "CU",
+         "peer_table": [{"peer_name": n, "category_id": "P1C1", "score": 3.0}
+                        for n in BAXTER_PEERS + ["Median", "P25", "P75"]]}
+    if locked is not None:
+        b["locked_peer_set"] = locked
+    return b
+
+
+def test_statistic_rows_in_the_peer_table_are_not_peers(tmp_path):
+    """Baxter's peer table carries Median, P25 and P75 beside its five credit
+    unions; read verbatim, every tile was refused for having no row about
+    three statistics. The connector's rule (dma_mcp/peer_set.py) is the
+    checker's rule."""
+    tiles = [_tile(n, r, rows=[_row(p) for p in BAXTER_PEERS], synth="Compared.")
+             for n, r in (("MuleSoft Anypoint Platform", 1), ("Salesforce Data Cloud", 2))]
+    pages = {"platform": {"platform_story": {"platforms": tiles}}}
+    _, out = cc.run(cc.rundir(tmp_path, pages, bundle=_baxter_bundle()))
+    assert not cc.blocks(out, "P1 peers"), out
+    assert "Median" not in out and "P25" not in out, out
+
+
+def test_the_bundle_locked_set_is_the_set_where_present(tmp_path):
+    """A stated lock wins over the scored table: the peer table's extra name
+    is not asked for when the workbook locked three."""
+    tiles = [_tile("MuleSoft Anypoint Platform", 1,
+                   rows=[_row(p) for p in PEERS], synth="Compared.")]
+    bundle = {"sub_vertical": "IB", "locked_peer_set": PEERS,
+              "peer_table": [{"peer_name": "Unlocked Insurer", "score": 2.0}]}
+    pages = {"platform": {"platform_story": {"platforms": tiles}}}
+    _, out = cc.run(cc.rundir(tmp_path, pages, bundle=bundle))
+    assert not cc.blocks(out, "P1 peers"), out

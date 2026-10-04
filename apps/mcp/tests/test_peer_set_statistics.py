@@ -164,3 +164,49 @@ def test_an_unreadable_connection_still_does_not_block():
         def cursor(self):
             raise RuntimeError("connection gone")
     assert PS.run_peer_set(Broken(), "r", {}) == {}
+
+
+# ── the same reads against the real schema ─────────────────────────────
+def _db():
+    import os
+    pg8000 = pytest.importorskip("pg8000.dbapi")
+    dsn = os.environ.get("LOCAL_DATABASE_URL",
+                         "postgresql://postgres:local@localhost:5432/dma_insights")
+    host = dsn.split("@")[1].split(":")[0] if "@" in dsn else "localhost"
+    try:
+        return pg8000.connect(user="postgres", password="local", host=host,
+                              port=5432, database="dma_insights")
+    except Exception as e:                                     # noqa: BLE001
+        pytest.skip(f"no migrated local database: {e}")
+
+
+def test_the_sql_reads_drop_statistics_and_honour_the_lock_on_the_real_schema():
+    """The fake connection above answers by substring; this one is
+    PostgreSQL, so the three SELECTs run_peer_set issues are proven against
+    the tables they name (peer_scores, run_manifest, submissions)."""
+    import uuid
+    conn = _db()
+    try:
+        cur = conn.cursor()
+        eid = f"probe-{uuid.uuid4().hex[:8]}"
+        cur.execute("INSERT INTO entities (display_id) VALUES (%s) RETURNING id", (eid,))
+        entity = cur.fetchone()[0]
+        cur.execute("""INSERT INTO runs (entity_id, run_seq, status)
+                       VALUES (%s, 1, 'INGESTED') RETURNING id""", (entity,))
+        rid = cur.fetchone()[0]
+        for n in BAXTER_PEERS + BAXTER_STATS:
+            cur.execute("""INSERT INTO peer_scores (run_id, peer_name, category_id, score)
+                           VALUES (%s, %s, 'P1C1', 3.0)""", (rid, n))
+        cur.execute("INSERT INTO run_manifest (run_id, payload) VALUES (%s, %s)",
+                    (rid, json.dumps({"manifest": {}, "workbook_metadata": None})))
+        found = PS.run_peer_set(conn, str(rid), {}, page="platform")
+        assert set(found.values()) == set(BAXTER_PEERS)
+
+        cur.execute("""UPDATE run_manifest SET payload = %s WHERE run_id = %s""",
+                    (json.dumps({"manifest": {}, "workbook_metadata": {
+                        "locked_peer_set": "Alliant CU|CEFCU|Median"}}), rid))
+        found = PS.run_peer_set(conn, str(rid), {}, page="platform")
+        assert list(found.values()) == ["Alliant CU", "CEFCU"]
+    finally:
+        conn.rollback()
+        conn.close()

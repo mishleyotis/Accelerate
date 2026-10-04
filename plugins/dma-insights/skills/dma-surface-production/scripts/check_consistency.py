@@ -105,12 +105,11 @@ def _load_tool_json(explicit, rundir, defaults):
     return {}
 
 
-def _connector_subverticals():
-    """The connector's own sub-vertical module (apps/mcp/dma_mcp/subverticals.py),
-    loaded by path so the checker and ET-05 read one rule (MEM-0559; the
-    fix_hint it shares with MEM-0026/MEM-0032). None when no checkout is
-    reachable — a plugin install without the repository — and the checker
-    falls back to plain VC codes."""
+def _connector_module(name):
+    """One of the connector's own modules (apps/mcp/dma_mcp/<name>.py), loaded
+    by path so the checker and the gate read one rule. None when no checkout
+    is reachable — a plugin install without the repository — and the caller
+    falls back."""
     import importlib.util
     here = os.path.dirname(os.path.abspath(__file__))
     roots = [os.environ.get("DMA_INSIGHTS_REPO"), os.environ.get("DMA_REPO"),
@@ -119,9 +118,9 @@ def _connector_subverticals():
     for root in roots:
         if not root:
             continue
-        path = os.path.join(root, "apps", "mcp", "dma_mcp", "subverticals.py")
+        path = os.path.join(root, "apps", "mcp", "dma_mcp", f"{name}.py")
         if os.path.exists(path):
-            spec = importlib.util.spec_from_file_location("_dma_subverticals", path)
+            spec = importlib.util.spec_from_file_location(f"_dma_{name}", path)
             mod = importlib.util.module_from_spec(spec)
             try:
                 spec.loader.exec_module(mod)
@@ -129,6 +128,13 @@ def _connector_subverticals():
                 return None
             return mod
     return None
+
+
+def _connector_subverticals():
+    """The connector's own sub-vertical module (apps/mcp/dma_mcp/subverticals.py),
+    so the checker and ET-05 read one rule (MEM-0559; the fix_hint it shares
+    with MEM-0026/MEM-0032). None without a checkout: plain VC codes."""
+    return _connector_module("subverticals")
 
 
 def _binding(bundle, typed):
@@ -664,22 +670,60 @@ def _peer_key(name):
     return m.group(1).lower() if m else ""
 
 
+#: The fallback when no checkout is reachable: the statistic rows the corpus
+#: actually carries in a peer table (Baxter c1351d25: Median, P25, P75).
+_STAT_FALLBACK = {"median", "mean", "average", "avg", "p25", "p75", "p10",
+                  "p90", "q1", "q3", "min", "max", "top_quartile",
+                  "bottom_quartile", "peer_median", "peer_average",
+                  "cohort_median", "cohort_average", "peer_group", "benchmark"}
+
+
+def _statistic_rule():
+    """(is_statistic_name, split) — the connector's own (dma_mcp/peer_set.py),
+    so a Median row in a peer table is a statistic here exactly as it is at
+    AG-04; a fallback list without a checkout."""
+    mod = _connector_module("peer_set")
+    if mod is not None and hasattr(mod, "is_statistic_name"):
+        return mod.is_statistic_name, mod.split_locked
+
+    def is_stat(name):
+        return re.sub(r"[^a-z0-9]+", "_", str(name or "").lower()).strip("_") \
+            in _STAT_FALLBACK
+
+    def split(raw):
+        if raw is None:
+            return []
+        items = raw if isinstance(raw, list) else re.split(r"[|;\n]", str(raw))
+        return [str(x).strip() for x in items if x is not None and str(x).strip()]
+    return is_stat, split
+
+
 def identified_peers(P, bundle):
-    """The run's NAMED peer set, scored or not (RC-10(a)): the bundle's peer
-    table or locked set, or any peer_deployments row on any page.
-    {key: display name}, in first-seen order."""
+    """The run's NAMED peer set, scored or not (RC-10(a)). The bundle's locked
+    set, where it states one, IS the set; otherwise the bundle's peer table
+    and any peer_deployments row on any page. Statistic rows (Median, P25,
+    P75, ...) are never peers, and a name joining several with ; or | is
+    split. {key: display name}, in first-seen order."""
+    is_stat, split = _statistic_rule()
     out = {}
 
     def add(name):
-        k = _peer_key(name)
-        if k and k not in out:
-            out[k] = str(name).strip()
+        if isinstance(name, dict):
+            name = name.get("name") or name.get("peer_name") or name.get("peer")
+        for one in split(name if isinstance(name, list) else
+                         (None if name is None else str(name))):
+            if is_stat(one):
+                continue
+            k = _peer_key(one)
+            if k and k not in out:
+                out[k] = one
     if isinstance(bundle, dict):
         for k in ("locked_peer_set", "peer_set", "identified_peers"):
-            for x in bundle.get(k) or []:
-                if isinstance(x, dict):
-                    x = x.get("name") or x.get("peer_name") or x.get("peer")
+            raw = bundle.get(k)
+            for x in (raw if isinstance(raw, list) else split(raw)):
                 add(x)
+        if out:
+            return out
         for r in bundle.get("peer_table") or []:
             if isinstance(r, dict):
                 add(r.get("peer_name") or r.get("peer"))
