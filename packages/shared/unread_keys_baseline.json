@@ -10,9 +10,6 @@
   "below_threshold": [
    "heatmap.cohort_patterns.patterns[].below_threshold"
   ],
-  "cap_statement": [
-   "overview.sentiment.themes[].cap_statement"
-  ],
   "claim_classes": [
    "overview.evidence_coverage.claim_classes"
   ],
@@ -35,9 +32,6 @@
   "fact_count": [
    "overview.evidence_coverage.fact_count"
   ],
-  "gap_analysis": [
-   "overview.sentiment.gap_analysis"
-  ],
   "identity_mismatch": [
    "overview.firmographics.identity_mismatch"
   ],
@@ -50,9 +44,6 @@
   "linking_stats": [
    "heatmap.cell_evidence.linking_stats"
   ],
-  "mapped_subcap_ids": [
-   "overview.sentiment.themes[].mapped_subcap_ids"
-  ],
   "max_evidence_level": [
    "overview.evidence_coverage.tiers[].max_evidence_level"
   ],
@@ -62,18 +53,11 @@
   "named_items": [
    "insights.landscape.tiles[].named_items"
   ],
-  "new_evidence_ids": [
-   "heatmap.alerts.alerts[].new_evidence_ids",
-   "heatmap.focus_areas.focus_areas[].new_evidence_ids"
-  ],
   "pattern_statement": [
    "heatmap.cohort_patterns.patterns[].pattern_statement"
   ],
   "phase_id": [
    "platform.roadmap.phases[].phase_id"
-  ],
-  "reach_note": [
-   "heatmap.cell_evidence.cells[].reach_note"
   ],
   "reconciles_to_register": [
    "insights.landscape.reconciles_to_register"
@@ -93,12 +77,6 @@
   "source_kind": [
    "overview.findings.findings[].source_kind"
   ],
-  "stale_pct": [
-   "heatmap.evidence_age.stale_pct"
-  ],
-  "storyline_challenge": [
-   "overview.exec_summary.storyline_challenge"
-  ],
   "structural_explanation": [
    "heatmap.cohort_patterns.patterns[].structural_explanation"
   ],
@@ -107,10 +85,6 @@
   ],
   "supports_subcap_ids": [
    "heatmap.evidence.evidence[].supports_subcap_ids"
-  ],
-  "undated_pct": [
-   "heatmap.evidence_age.undated_pct",
-   "overview.firmographics.undated_pct"
   ],
   "verified_absent": [
    "context.issue_register.verified_absent",
