@@ -1624,8 +1624,25 @@ def _walk_strings(node, path):
 # sentence is taken to cite. Measured on SWBC: a verbatim BrokerCheck span
 # "NO VALID CONTACT/E-MAIL" was blocked as an unresolvable id while CG-27
 # forbade rewriting it. Keyed citations are untouched.
-_PROSE_CITATION_SHAPE = re.compile(
-    r"^(?:(?:E|EV)-(?:[A-Z][A-Z0-9]*-){0,2}\d+(?:-R\d+)?|INT-.+)$")
+#
+# WIDENED 2026-10-04 (fix2/gates; review of fix/mcp-gates-contract). The
+# first cut enumerated shapes and enumerated too few: the stored package
+# namespace (apps/worker/dma_worker/evidence_ids.py STORED_PACKAGE) carries
+# the cross-entity escape `-{ENT6}` (E-UNK-007-1FCA91, E-BCU-006-R2-1FCA91)
+# and tokens that start with a digit (E-1STNB-012), and those were dropped
+# before get_evidence was asked — an unresolvable or FOREIGN citation of
+# that shape then passed silently, and `foreign` halts production
+# (invariant 4). So the rule is now subtractive, not enumerative: every token
+# the one recogniser finds is a citation EXCEPT an E-/EV- token with no digit
+# anywhere in it. Every id the system mints or stores carries a number (the
+# package's local number, the mint sequence, the connector sequence); the
+# words this exists for (E-MAIL, E-SIGN, E-COMMERCE, EV-CHARGING) carry none.
+# INT-{label} stays a citation whatever its label, as before.
+_PROSE_WORD_NOT_ID = re.compile(r"^(?:E|EV)-[A-Z-]+$")
+
+
+def _is_prose_citation(token: str) -> bool:
+    return not _PROSE_WORD_NOT_ID.match(token)
 
 
 def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
@@ -1645,15 +1662,18 @@ def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     claimed: dict = {}
     for path, text in _walk_strings(payload, ""):
         for e in find_ids(text):
-            if e in already or not _PROSE_CITATION_SHAPE.match(e):
+            if e in already or not _is_prose_citation(e):
                 continue
             claimed.setdefault(e, path.lstrip("."))
     if not claimed:
         return []
     split = get_evidence(conn, run_id, sorted(claimed))
     allowed = {row.get("e_id") for row in split.get("found", [])}
+    # A foreign id is reported once, as the contamination it is (below) —
+    # not also as an unresolvable one, which would read as a typo to fix.
+    foreign = {f.get("e_id") for f in split.get("foreign", [])}
     out = []
-    for e in find_fabricated(sorted(claimed), allowed):
+    for e in find_fabricated(sorted(claimed), allowed | foreign):
         section = claimed[e].split(".")[0] or "payload"
         gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
         out.append(_reason(
