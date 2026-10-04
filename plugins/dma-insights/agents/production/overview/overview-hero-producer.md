@@ -484,7 +484,7 @@ scan the payload cannot corroborate.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **The stated overall comes from `Executive_Summary`** (MEM-0561). The scoring workbook states "Overall Maturity" and its weighting there (SWBC: 2.0073, pillar-weighted 20/20/30/30); the worker now reads it as one of the composite's stated sources. Open the tab, take the figure the workbook states, and name the tab and cell in `r_layer.probes_run`. Where the bundle and the tab disagree, report it — never average.
 

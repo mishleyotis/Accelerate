@@ -400,7 +400,7 @@ yours.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **O5 = P1 = the engine, and the breakdown equals the headline** (RC-12(a), D-18). `sum(factors[].contribution) × 100 × readiness_multiplier × relevance` equals `composite` within 0.05 — carry `readiness_multiplier` and `subtotal` on every tile (SWBC's tiles summed to 69.3 against 58.9 because the multiplier lived only in r_layer). Copy relevance, readiness and state from `get_platform_fit`; never type them (SWBC: 1.0 everywhere against 0.971-0.98). `check_consistency.py` blocks on any of the three disagreeing.
 

@@ -718,7 +718,7 @@ row in the room and still have somewhere to stand.
 
 ## Rules added by the SWBC gold audit (2026-10-04)
 
-**Read the gold page shape first.** `docs/GOLD-STANDARD.md` under the plugin root (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
 
 - **Identified, not scored, still owes a row per peer on every tile** (RC-10, D-08). Given a named peer set (Handoff_Lock `locked_peer_set`, the peer table, or any `peer_deployments` row), every tile carries exactly one row per named peer — `deployed` true/false with a source and `as_of`, or null with the searches that could not establish it as `basis` — and a `peer_synthesis`. AG-04 now reads the named set (`dma_mcp/peer_set.py`); SWBC had 6 of 8 tiles bare.
 
