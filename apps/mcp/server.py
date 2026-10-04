@@ -600,7 +600,9 @@ def promote_run(run_id: str, expected_revision: dict | None = None) -> dict:
 
     Retained pages are re-checked against today's gates, the fit engine
     (CG-30/CG-31), the run's own status (CG-STALE) and the committed gold
-    shape (CG-PAR) before anything is written. `expected_revision` is the
+    shape (CG-PAR: structural gaps refuse; counts and fill ratios come back
+    as `promote_checks.parity.warnings`) before anything is written.
+    `expected_revision` is the
     contract/gold/gate-set fingerprint your checkout's gates assume
     (promote_checks.local_revision): a mismatch refuses as
     deployed_revision_behind; omitted, the result records it unchecked."""

@@ -25,6 +25,13 @@ CELLS = [("P1C1.1.1", 2.0, "P1C1", "integration"),
          ("P1C1.1.2", 1.5, "P1C1", "integration")]
 CARD = {"platform": "MuleSoft", "l3_area": "Integration", "alignment": 0.5,
         "readiness": "green"}
+# CG-03b (fix/mcp-gates-contract, RC-09) made these two required on every
+# platform card at pass 1; the refit tests are about the ENGINE, so the card
+# carries them and nothing else changes.
+STAGED_CARD = {**CARD,
+               "peer_synthesis": "No peer deployment was established.",
+               "estate_reach": {"cells_not_yet_reached": 0, "by_category": [],
+                                "derivation": "from the run's register"}}
 
 
 def _engine_fit(sv="Credit Unions"):
@@ -35,7 +42,7 @@ def _engine_fit(sv="Credit Unions"):
 def _pages(fit_score, rank=1):
     pages = skeleton()
     pages["platform"]["platform_story"]["platforms"] = [
-        {**CARD, "fit_score": fit_score, "rank": rank}]
+        {**STAGED_CARD, "fit_score": fit_score, "rank": rank}]
     return pages
 
 

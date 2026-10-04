@@ -36,6 +36,7 @@ def _gold_parity_stub(request, monkeypatch):
         return
     monkeypatch.setattr(
         promote_checks, "gold_parity",
-        lambda live: ({}, {"gaps": 0, "stubbed": "tests/conftest.py — "
-                                                  "transaction tests only"}))
+        lambda live, *a, **k: ({}, {"gaps": 0, "warnings": [],
+                                    "stubbed": "tests/conftest.py — "
+                                               "transaction tests only"}))
     yield

@@ -62,7 +62,15 @@ accepted in place of a search that was never run.
 
 THE FLOORS ARE DEFAULTS, not adjudicated: LIST_FLOOR 0.5 and ITEM_FLOOR 0.6
 are the ratios the RCA proposed (RC-02 "needs_owner_decision: floor
-ratios"). They live here, named, so changing them is one line and a test.
+ratios"). They live here, named, so changing them is one line and a test —
+and since owner decision B (2026-10-04) they measure WARNINGS only.
+
+WHAT REFUSES. The kinds above are measurements; `classify` decides which of
+them refuse, against today's contract — structural gaps only (a section or
+key the gold always serves is missing; a must-present field null or held
+beyond the cap, `must_present_gaps`). `check_run` picks the gold a run is
+held to: leave-one-out, and the run's own sub-vertical first, with the
+other gold used for structure only. See the block above `classify`.
 """
 from __future__ import annotations
 
@@ -99,6 +107,7 @@ PEER_FAMILY = frozenset({"peer_median", "peer_n", "peer_score", "delta",
 _PEER_REASON_KEYS = ("peer_basis", "proxy_disclosure")
 
 _ID_KEY = re.compile(r"^[a-z][a-z0-9_]*$")
+_NAMED_KEY = re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
 
 STATED_EMPTY = ("empty", "none", "verified_absent")
 AUDIENCE_DECIDED = ("withheld", "never_served", "redacted")
@@ -238,12 +247,19 @@ def section_shape(envelope: dict, body) -> dict:
         if isinstance(src, dict) and isinstance(src.get("empty_state"), dict):
             es = src["empty_state"]
             break
-    return {
+    out = {
         "withheld": any(bool(envelope.get(k)) for k in AUDIENCE_DECIDED),
         "stated_empty": _states_emptiness(envelope, body),
         "ladder_terminal": _ladder_is_terminal(es),
         "data": None if body is None else shape_of(body),
     }
+    # The snake_case identifiers the empty_state names — a key a section
+    # says it omits, and why ("gap_analysis is omitted: only one audience
+    # was established"). Identifiers only, never the sentence around them.
+    named = sorted(set(_NAMED_KEY.findall(json.dumps(es)))) if es else []
+    if named:
+        out["named"] = named
+    return out
 
 
 def page_shape(doc: dict) -> dict:
@@ -422,10 +438,12 @@ def compare_against_gold(page: str, golds: dict, tgt: dict,
                          skip_sections=()) -> list:
     """Gaps the target shows against EVERY gold run that fills the section.
 
-    A floor the reference fails is not a standard (GOLD-STANDARD.md). So a
-    gap counts only when it holds against the thinnest gold that serves the
-    section — the standard every gold meets by construction, which is what
-    lets the gold runs promote against their own fixture.
+    "Every" is what makes a structural gap a statement about the gold rather
+    than about one gold run: a key Golden 1 serves and Baxter does not is not
+    a key "the gold always serves", so nothing is owed (Golden 1 serves no
+    value chain, which the contract makes optional). `golds` is the
+    reference set check_run chose — leave-one-out, sub-vertical first — so
+    the target is never in it.
     """
     tshape = page_shape(tgt)
     per_gold = {}                      # label -> {gap_key: gap}
@@ -435,9 +453,6 @@ def compare_against_gold(page: str, golds: dict, tgt: dict,
             continue
         per_gold[label] = {_gap_key(g): g
                            for g in compare_shapes(page, gshape, tshape)}
-    # EVERY gold that has the page must show the gap. A gold that does not
-    # fill a section (Golden 1 serves no value chain, which the contract
-    # makes optional) has set no floor there, so nothing is owed.
     holders = sorted(per_gold)
     out = {}
     for label, gaps in per_gold.items():
@@ -450,6 +465,249 @@ def compare_against_gold(page: str, golds: dict, tgt: dict,
                                               for lb in holders)}
     return sorted(out.values(),
                   key=lambda g: (g["section"], str(g["key"]), g["kind"]))
+
+
+# ── what blocks, and what only warns — owner decision B, 2026-10-04 ──────
+#
+# THE FIRST CG-PAR BLOCKED ON EVERYTHING ABOVE, and the review measured what
+# that did to a client that is not a gold run: goeasy-ltd's promoted run
+# 02e840d4 (CL) drew 16 refusals, most of them COUNTS — 15 tech rows against
+# 56, 2 cited ids against 12, 2 addressable cells against 5. How many rows a
+# client has is an assessment result; refusing on it pushes producers to pad,
+# and the floors that decided it (LIST_FLOOR, ITEM_FLOOR) were never
+# adjudicated. The owner's rule:
+#
+#   BLOCK  a section or key the gold always serves is missing, or a
+#          must-present field is null or held beyond the decision-2 cap;
+#   WARN   list-length and fill-ratio differences — reported in the
+#          verdict, never a refusal.
+#
+# "Missing" is read against TODAY'S CONTRACT, because the gold runs were cut
+# on the contract of their day and the gold set itself disagrees about keys
+# the contract has since made optional:
+#
+#   · a section or key the contract no longer declares is owed by nobody;
+#   · an OPTIONAL section, or an optional key with no stated condition
+#     (`storyline_challenge`), warns — the contract permits the omission;
+#   · an optional key whose absence the contract makes CONDITIONAL
+#     (`absence_is_correct_when`: `gap_analysis` — "only one audience was
+#     established") blocks unless the section says the condition holds, by
+#     naming the key in its empty_state. The gold always serves it, so an
+#     unexplained omission is the gap;
+#   · a REQUIRED key is excused by an explicit empty state ("an explicit
+#     empty state passes and renders" — the envelope's contract), as is any
+#     key of a section whose lists are all empty and which says why.
+
+STRUCTURAL = frozenset({"section_absent", "section_empty", "key_absent",
+                        "key_empty"})
+COUNTS = frozenset({"list_len", "item_key_missing", "item_fill",
+                    "stated_share"})
+HELD_BEYOND_CAP = "held_beyond_cap"
+# Never owed by a target: stated-absence and reasoning machinery.
+NEVER_OWED = frozenset({"empty_state", "r_layer", "internal_only"})
+# Envelope members that say nothing about whether a section has content.
+_ENVELOPE = frozenset({"e_ids", "internal_only", "empty_state", "r_layer",
+                       "narrative_thread", "produced_at", "producer_version"})
+#: The sub-vertical codes a gold run may be recorded under
+#: (dma_mcp.subverticals.SUBVERTICAL_NAMES; restated so this stays stdlib).
+SUB_VERTICALS = frozenset({"RB", "CU", "CL", "CIB", "FC", "AM", "RIA", "IC",
+                           "IB"})
+
+
+def _contract_sections():
+    from .contracts import sections      # stdlib-only, like this module
+    return sections
+
+
+def _content_empty(t_sec: dict) -> bool:
+    """No list, map or object member of the section carries anything."""
+    data = (t_sec or {}).get("data")
+    if not isinstance(data, dict) or "o" not in data:
+        return True
+    for key, node in data["o"].items():
+        if key in _ENVELOPE or not isinstance(node, dict):
+            continue
+        if node_filled(node):
+            return False
+    return True
+
+
+def classify(page: str, gap: dict, t_sec: dict | None = None,
+             sections=None) -> tuple:
+    """("block" | "warn" | None, why) for one gap. None: nothing is owed."""
+    kind = gap["kind"]
+    if kind == HELD_BEYOND_CAP:
+        return "block", "a must-present field null or held beyond the cap"
+    if kind not in STRUCTURAL | COUNTS:
+        return "block", "unclassified gap kind — fail closed"
+    sections = sections or _contract_sections()
+    try:
+        sec = sections(page).get(gap["section"])
+    except Exception:                                 # noqa: BLE001
+        sec = None
+    if kind == "item_key_missing" and sec is not None \
+            and _row_key_required(sec, str(gap.get("key") or "")):
+        return "block", ("a row key today's contract requires (item_shape) "
+                         "and every gold row carries")
+    if kind in COUNTS:
+        return "warn", ("a count or fill ratio — an assessment result, "
+                        "reported and never refused (owner decision B)")
+    if sec is None:
+        return None, "a section today's contract does not declare"
+    if kind in ("section_absent", "section_empty"):
+        if sec.get("required"):
+            return "block", "a required section the gold always serves"
+        return "warn", "the contract makes this section optional"
+    key = str(gap.get("key") or "")
+    top = re.split(r"[.\[]", key)[0]
+    if top in NEVER_OWED:
+        return None, "stated-absence machinery, never owed"
+    fs = (sec.get("fields") or {}).get(top)
+    if fs is None:
+        return None, "a key today's contract no longer declares"
+    if top != key:
+        return "warn", (f"a member inside `{top}`, which the contract does "
+                        "not enumerate")
+    t_sec = t_sec or {}
+    stated = bool(t_sec.get("stated_empty"))
+    if stated and _content_empty(t_sec):
+        return "warn", "the section's lists are empty and it says why"
+    if top in (t_sec.get("named") or ()):
+        return "warn", "the section's empty_state names this key"
+    cond = fs.get("absence_is_correct_when")
+    if kind == "key_empty":
+        if fs.get("may_be_empty"):
+            return None, "the contract says this list may be empty"
+        if top == "e_ids":
+            return "warn", "a citation count"
+        if cond:
+            return "warn", f"empty is contract-legal when {cond}"
+        if fs.get("required"):
+            return "block", ("a required key, served empty without a "
+                             "stated reason")
+        return "warn", "an optional key, served empty"
+    if fs.get("required"):
+        if stated:
+            return "warn", ("a required key, absent from a section with an "
+                            "explicit empty state")
+        return "block", "a required key the gold always serves"
+    if cond:
+        return "block", (f"the contract allows omitting `{top}` only when "
+                         f"{cond}; every gold run serves it and this section "
+                         f"does not say the condition holds — serve it, or "
+                         f"name `{top}` in empty_state with the reason")
+    return "warn", "the contract makes this key optional"
+
+
+def _row_key_required(sec: dict, path: str) -> bool:
+    """Is `list[].member` (or `list[].object[].member`) a row key the
+    contract's machine-readable item_shape requires? Only those are KEYS the
+    gold always serves in the decision's sense; every other row member is
+    described in prose, and the gold runs — cut on the contracts of their
+    day — disagree about them, so a missing one is reported, not refused."""
+    parts = path.split("[].")
+    if len(parts) not in (2, 3):
+        return False
+    fs = (sec.get("fields") or {}).get(parts[0]) or {}
+    shape = fs.get("item_shape") or {}
+    if len(parts) == 3:
+        shape = shape.get(parts[1])
+        if not isinstance(shape, dict):
+            return False
+        want = (shape.get("required_keys") or shape.get("item_required_keys")
+                or [])
+    else:
+        want = shape.get("required_keys") or []
+    return parts[-1] in want
+
+
+# ── must-present, null or held beyond the cap (CG-18b's rule) ────────────
+def _norm_member(s) -> str:
+    """validation._norm_member, restated (stdlib): case and punctuation fold,
+    so `Primary_regulator`, `primary regulator` and `primary-regulator` are
+    one member."""
+    return re.sub(r"[^a-z0-9]+", "_", str(s or "").lower()).strip("_")
+
+
+def _member_groups(fs: dict) -> list:
+    groups = []
+    for want in fs.get("must_present") or []:
+        groups.append(list(want) if isinstance(want, (list, tuple)) else [want])
+    for group in fs.get("must_present_any") or []:
+        groups.append(list(group))
+    return groups
+
+
+def _held_cap(fs: dict, n: int):
+    hc = fs.get("held_ceiling")
+    if not isinstance(hc, dict) or n <= 0:
+        return None
+    return min(float(hc.get("max_count", n)),
+               float(hc.get("max_share", 1.0)) * n)
+
+
+def _bodies(payload):
+    """{section: raw body} from a staged payload or a served page; a page
+    that is already a shape has no values to read and yields nothing."""
+    payload = payload or {}
+    if "shape_version" in payload:
+        return {}
+    if isinstance(payload.get("sections"), dict):
+        return {n: (e or {}).get("data")
+                for n, e in payload["sections"].items()
+                if isinstance(e, dict)}
+    return {n: b for n, b in payload.items() if not str(n).startswith("_")}
+
+
+def must_present_gaps(page: str, payload, sections=None) -> list:
+    """Must-present members not stated — held, null, or absent — beyond the
+    owner's cap: at most 2, or 25% of the set, whichever is smaller (decision
+    2). The set is the contract's (`must_present`, `must_present_any`), the
+    one CG-18b reads at pass 1; the sub-vertical's own set is CG-18c's, at
+    submit. A list that is empty beside a stated empty_state has said so."""
+    sections = sections or _contract_sections()
+    try:
+        secs = sections(page)
+    except Exception:                                 # noqa: BLE001
+        return []
+    out = []
+    for name, body in sorted(_bodies(payload).items()):
+        if not isinstance(body, dict) or name not in secs:
+            continue
+        for fname, fs in sorted((secs[name].get("fields") or {}).items()):
+            groups = _member_groups(fs)
+            cap = _held_cap(fs, len(groups))
+            val = body.get(fname)
+            if cap is None or not isinstance(val, list):
+                continue
+            if not val and _states_emptiness(body, body):
+                continue
+            key = fs.get("must_present_key", "field")
+            stated, held = set(), set()
+            for item in val:
+                if not isinstance(item, dict):
+                    continue
+                m = _norm_member(item.get(key))
+                if item.get("value") not in (None, "", []):
+                    stated.add(m)
+                elif item.get("quarantined"):
+                    held.add(m)
+            unstated = []
+            for g in groups:
+                norms = [_norm_member(a) for a in g]
+                if any(n in stated for n in norms):
+                    continue
+                state = ("held" if any(n in held for n in norms)
+                         else "null or absent")
+                unstated.append(f"{g[0]} ({state})")
+            if len(unstated) > cap:
+                out.append(_gap(page, name, fname, HELD_BEYOND_CAP,
+                                f"{len(unstated)} of {len(groups)} "
+                                f"must-present members are not stated — "
+                                f"{', '.join(unstated)}; the cap is "
+                                f"{int(cap)} (at most 2, or 25% of the set, "
+                                f"whichever is smaller — owner decision 2)"))
+    return out
 
 
 # ── the committed gold ──────────────────────────────────────────────────
@@ -483,50 +741,99 @@ def never_served(gold: dict) -> set:
             if v.get("internal") == "never_served"}
 
 
-def check_run(pages: dict, gold: dict | None = None, declared=None) -> dict:
-    """CG-PAR over a whole run's staged pages, internal audience.
+def reference_set(gold: dict, run_id=None, sub_vertical=None,
+                  exclude=()) -> dict:
+    """Which gold runs a target is held to, and on what terms.
+
+    LEAVE-ONE-OUT. A gold run in its own reference set can never show a gap
+    against it, which made "the gold runs pass" a statement about nothing
+    (review of fix/gold-parity-promote). The target's own run — matched on
+    the recorded run-id prefix, or named in `exclude` — is left out.
+
+    SUB-VERTICAL FIRST. Gold runs of the target's sub-vertical, when any
+    remain, are the reference for structure AND for the count/fill warnings.
+    When none does, every remaining gold run is the reference for STRUCTURE
+    ONLY: a consumer lender is not thinner than three credit unions in any
+    sense worth reporting, but a section every gold run serves is a section
+    every run serves."""
+    meta = gold.get("runs") or {}
+    prefix = str(run_id or "").strip().lower()[:8]
+    excluded = set(exclude or ())
+    left_out = sorted(
+        lb for lb in meta
+        if lb in excluded
+        or (prefix and str(meta[lb].get("run_id_prefix") or "").lower()
+            == prefix))
+    refs = sorted(lb for lb in meta if lb not in left_out)
+    matched = [lb for lb in refs
+               if sub_vertical and meta[lb].get("sub_vertical") == sub_vertical]
+    return {"left_out": left_out,
+            "compared_against": matched or refs,
+            "tier": "sub_vertical" if matched else "cross_sub_vertical",
+            "sub_vertical": sub_vertical}
+
+
+def check_run(pages: dict, gold: dict | None = None, *, run_id=None,
+              sub_vertical=None, exclude=(), sections=None) -> dict:
+    """CG-PAR over a whole run's pages, internal audience.
+
+    Returns `blocking` (structural gaps, and must-present members null or
+    held beyond the cap) and `warnings` (counts and fill ratios, and the
+    structural differences today's contract makes optional). `gaps` is
+    `blocking`, for readers of the first version.
 
     Sections the app serves to no audience (NEVER_SERVED) are skipped: a
     parity gap on a section no reader sees is not a gap a reader meets.
-
-    `declared(page, section)` -> the field names today's contract declares,
-    or None for a section it does not know. A gold run is cut on the
-    contract of its day; a key the contract has since retired is not a key a
-    new run can owe, so a gap on one is dropped rather than refused.
     """
     gold = gold if gold is not None else load_gold()
     runs = gold_runs(gold)
+    ref = reference_set(gold, run_id, sub_vertical, exclude)
+    if not ref["compared_against"]:
+        # CHECK_NEVER_RAN_READS_AS_UNKNOWN: nothing compared is not clean.
+        raise ValueError("no gold run is left to compare against "
+                         f"(left out: {ref['left_out']})")
+    golds = {lb: runs[lb] for lb in ref["compared_against"]}
+    structure_only = ref["tier"] != "sub_vertical"
     skip = never_served(gold)
-    gaps = []
+    blocking, warnings = [], []
     for page, payload in sorted((pages or {}).items()):
+        tshape = page_shape(payload or {})
+        tsecs = tshape.get("sections") or {}
         skip_here = {s for (p, s) in skip if p == page}
-        for g in compare_against_gold(page, runs, payload or {},
+        for g in compare_against_gold(page, golds, tshape,
                                       skip_sections=skip_here):
-            if declared is not None:
-                fields = declared(page, g["section"])
-                if fields is None:
-                    continue
-                top = str(g.get("key") or "").split(".")[0].split("[")[0]
-                if top and top not in fields:
-                    continue
-            gaps.append(g)
+            sev, why = classify(page, g, tsecs.get(g["section"]), sections)
+            if sev is None:
+                continue
+            if structure_only and sev == "warn" and g["kind"] in COUNTS:
+                continue      # another sub-vertical's counts are not ours
+            (blocking if sev == "block" else warnings).append(
+                {**g, "severity": sev, "why": why})
+        for g in must_present_gaps(page, payload, sections):
+            if g["section"] in skip_here:
+                continue
+            blocking.append({**g, "severity": "block", "against": [],
+                             "why": "a must-present field null or held "
+                                    "beyond the cap"})
     disclosed = []
     if not peers_scored(pages):
         keep = []
-        for g in gaps:
+        for g in warnings:
             leaf = str(g.get("key") or "").split(".")[-1]
             if g["kind"] == "item_fill" and leaf in PEER_FAMILY:
                 disclosed.append({**g, "kind": "peers_not_scored",
                                   "detail": "no peer figure exists anywhere "
                                             "in this run (identified, not "
                                             "scored); disclosed once, not "
-                                            "refused per row"})
+                                            "warned per row"})
             else:
                 keep.append(g)
-        gaps = keep
-    return {"gate_id": GATE_ID, "gaps": gaps, "disclosed": disclosed,
-            "gold_runs": sorted(runs),
-            "floors": {"list": LIST_FLOOR, "item": ITEM_FLOOR}}
+        warnings = keep
+    return {"gate_id": GATE_ID, "blocking": blocking, "gaps": blocking,
+            "warnings": warnings, "disclosed": disclosed,
+            "gold_runs": sorted(runs), **ref,
+            "floors": {"list": LIST_FLOOR, "item": ITEM_FLOOR,
+                       "blocking": False}}
 
 
 def peers_scored(pages: dict) -> bool:

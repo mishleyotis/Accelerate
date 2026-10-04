@@ -31,9 +31,10 @@ Four checks:
                  withdrawn / withheld pending repair is refused — promotion
                  makes that sentence false the moment it succeeds.
   parity         CG-PAR: the staged pages against the committed gold shape
-                 (`parity.py`, `surface_gold.json`); a structural gap
-                 refuses. Peer-comparison nulls on a run where no peer was
-                 scored are disclosed once, not refused per row.
+                 (`parity.py`, `surface_gold.json`), leaving the run's own
+                 gold record out and preferring gold of its sub-vertical. A
+                 STRUCTURAL gap refuses (owner decision B, 2026-10-04);
+                 counts and fill ratios are warnings in the verdict.
   revision       the deployed connector's contract / gold / gate-set
                  fingerprint against what the caller's repo assumes, when the
                  caller says (`expected_revision`); otherwise RECORDED on the
@@ -156,21 +157,23 @@ def _unchecked_context(conn, run_id, plat: dict) -> list:
 
 
 # ── parity ───────────────────────────────────────────────────────────────
-def gold_parity(live: dict) -> tuple[dict, dict]:
+def gold_parity(live: dict, run_id=None, sub_vertical=None) -> tuple[dict, dict]:
     """({page: CG-PAR reasons}, report) — the staged pages against the gold.
+
+    Owner decision B (2026-10-04): only a STRUCTURAL gap refuses — a section
+    or key the gold always serves is missing, or a must-present field is null
+    or held beyond the decision-2 cap. Count and fill-ratio differences come
+    back in `report["warnings"]` (severity "warn"), part of the promote
+    verdict and never a refusal. The run being promoted is left out of its
+    own reference set, and the gold of its sub-vertical is preferred; with
+    none, the other gold is the reference for structure only.
 
     A missing or unreadable gold file REFUSES: a parity check that could not
     run must not read as parity (CHECK_NEVER_RAN_READS_AS_UNKNOWN)."""
     pages = {p: (s.get("payload") or {}) for p, s in live.items()}
     try:
-        from .contracts import sections
-
-        def declared(page, section):
-            try:
-                return set(sections(page)[section]["fields"])
-            except Exception:                         # noqa: BLE001
-                return None
-        res = parity.check_run(pages, declared=declared)
+        res = parity.check_run(pages, run_id=run_id,
+                               sub_vertical=sub_vertical)
     except Exception as exc:                          # noqa: BLE001
         reason = {"gate_id": parity.GATE_ID, "section": None,
                   "path": "surface_gold.json", "severity": "block",
@@ -178,19 +181,37 @@ def gold_parity(live: dict) -> tuple[dict, dict]:
                              f"({type(exc).__name__}: {str(exc)[:120]}); "
                              "unchecked is not parity"}
         return {"overview": [reason]}, {"error": str(exc)[:200]}
-    out: dict = {}
-    for g in res["gaps"]:
+
+    def _reason(g):
         where = ".".join(str(x) for x in (g["page"], g["section"], g["key"])
                          if x)
-        out.setdefault(g["page"], []).append({
-            "gate_id": parity.GATE_ID, "section": g["section"],
-            "path": where, "severity": "block", "kind": g["kind"],
-            "message": (f"[{g['kind']}] thinner than every gold run "
-                        f"({', '.join(g.get('against') or [])}): "
-                        f"{g['detail']}")})
-    report = {"gaps": len(res["gaps"]), "disclosed": res["disclosed"],
-              "gold_runs": res["gold_runs"], "floors": res["floors"]}
+        against = ", ".join(g.get("against") or []) or "the contract"
+        return {"gate_id": parity.GATE_ID, "section": g["section"],
+                "path": where, "severity": g["severity"], "kind": g["kind"],
+                "message": (f"[{g['kind']}] {g['why']} (against {against}): "
+                            f"{g['detail']}")}
+
+    out: dict = {}
+    for g in res["blocking"]:
+        out.setdefault(g["page"], []).append(_reason(g))
+    report = {"gaps": len(res["blocking"]),
+              "warnings": [_reason(g) for g in res["warnings"]],
+              "disclosed": res["disclosed"],
+              "gold_runs": res["gold_runs"],
+              "compared_against": res["compared_against"],
+              "left_out": res["left_out"], "tier": res["tier"],
+              "sub_vertical": res["sub_vertical"], "floors": res["floors"]}
     return out, report
+
+
+def _sub_vertical(conn, run_id):
+    """The entity's primary sub-vertical code, or None — read the way ET-05
+    reads it, so parity and scope agree on who the client is."""
+    try:
+        from .validation2 import _entity_scope
+        return _entity_scope(conn, run_id)[0]
+    except Exception:                                 # noqa: BLE001
+        return None      # unknown: cross-sub-vertical tier, structure only
 
 
 # ── revision ─────────────────────────────────────────────────────────────
@@ -283,7 +304,8 @@ def extra_reasons(conn, run_id, live: dict) -> tuple[dict, dict]:
         rs = stale_run_state(page, sub.get("payload") or {})
         if rs:
             merged.setdefault(page, []).extend(rs)
-    par, report = gold_parity(live)
+    par, report = gold_parity(live, run_id=run_id,
+                              sub_vertical=_sub_vertical(conn, run_id))
     for page, rs in par.items():
         merged.setdefault(page, []).extend(rs)
     return merged, {"parity": report}

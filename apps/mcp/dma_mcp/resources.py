@@ -156,8 +156,10 @@ def web_app_requirements() -> dict:
         # which is generated from redaction.py and tested equal to it.
         "audience_disposition": _audience_disposition(),
         "gold_shape": ("fixtures/surface_gold.json (connector copy "
-                       "dma_mcp/surface_gold.json) — row floors per section; "
-                       "promote_run enforces it as CG-PAR"),
+                       "dma_mcp/surface_gold.json) — the shape every gold "
+                       "run serves; "
+                       "promote_run enforces it as CG-PAR — structural "
+                       "gaps refuse, counts and fill ratios warn"),
     }
 
 

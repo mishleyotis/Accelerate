@@ -76,23 +76,33 @@ def test_promote_of_a_swbc_shaped_run_returns_a_cg_par_refusal():
     assert not wrote_anything(conn), "the refusal precedes every writer"
 
 
-def test_the_refusal_names_the_firmographic_stated_share():
+def test_the_refusal_names_the_structural_gaps_and_warns_on_the_share():
+    """Owner decision B: the held share beyond the cap and the missing
+    gap_analysis refuse; the stated share against the gold is a warning."""
     live = {p: {"payload": b} for p, b in swbc_shaped().items()}
-    reasons, _ = _pc().gold_parity(live)
+    reasons, report = _pc().gold_parity(live, sub_vertical="CU")
     firmo = [r for r in reasons["overview"]
              if r["path"] == "overview.firmographics.fields"]
-    assert firmo and firmo[0]["kind"] == "stated_share", reasons["overview"][:5]
-    assert "gold-40971653" in firmo[0]["message"]
+    assert firmo and firmo[0]["kind"] == "held_beyond_cap", \
+        reasons["overview"][:5]
     gap = [r for r in reasons["overview"]
            if r["path"] == "overview.sentiment.gap_analysis"]
     assert gap and gap[0]["kind"] == "key_absent"
+    assert "gold-40971653" in gap[0]["message"]
+    share = [w for w in report["warnings"]
+             if w["path"] == "overview.firmographics.fields"
+             and w["kind"] == "stated_share"]
+    assert share and share[0]["severity"] == "warn", report["warnings"][:5]
 
 
 def test_a_gold_run_meets_cg_par():
-    """Positive control: the standard is one the gold meets."""
+    """Positive control, leave-one-out: each gold run against the others."""
     gold = _par().load_gold()
     for label, pages in _par().gold_runs(gold).items():
-        assert _par().check_run(pages, gold)["gaps"] == [], label
+        res = _par().check_run(pages, gold, exclude=[label],
+                               sub_vertical=gold["runs"][label]["sub_vertical"])
+        assert label not in res["compared_against"]
+        assert res["blocking"] == [], (label, res["blocking"][:3])
 
 
 def test_a_parity_check_that_cannot_run_refuses(monkeypatch):
@@ -114,8 +124,10 @@ def test_peers_identified_not_scored_are_disclosed_not_refused():
     pillars = pages["overview"]["sections"]["scores"]["data"]["o"]["pillars"]
     i = pillars["keys"].index("peer_median")
     pillars["rows"] = [r[:i] + "0" + r[i + 1:] for r in pillars["rows"]]
-    res = _par().check_run(pages, gold)
-    assert not any(g["key"] == "pillars[].peer_median" for g in res["gaps"])
+    res = _par().check_run(pages, gold, exclude=["gold-40971653"],
+                           sub_vertical="CU")
+    assert not any(g["key"] == "pillars[].peer_median"
+                   for g in res["blocking"] + res["warnings"])
     assert any(d["key"] == "pillars[].peer_median" for d in res["disclosed"])
 
 

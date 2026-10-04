@@ -110,3 +110,28 @@ def test_the_summary_quotes_what_the_doc_quotes():
            "GOLD-STANDARD.md").read_text()
     assert "fixtures/surface_gold.json" in doc
     assert "## App pages" in doc
+
+
+def test_every_gold_run_records_its_sub_vertical_and_run_prefix():
+    """CG-PAR prefers gold of the target's sub-vertical and leaves a gold run
+    out of its own reference set; both read these two fields (owner decision
+    B, 2026-10-04)."""
+    from dma_mcp import parity
+    for label, run in _gold()["runs"].items():
+        assert run.get("sub_vertical") in parity.SUB_VERTICALS, label
+        assert label.endswith(run.get("run_id_prefix") or "?"), label
+
+
+def test_the_generator_refuses_a_gold_run_with_no_sub_vertical():
+    import gen_surface_gold as gen
+    assert gen.check_meta({"gold-x": {}}, {}) == ["gold-x: sub_vertical None"]
+    assert gen.check_meta({"gold-x": {}}, {"gold-x": {"sub_vertical": "IB"}}) \
+        == []
+
+
+def test_a_projected_section_reads_reduced_not_withheld():
+    """Owner decision 1: the customer gets a REDUCED sentiment card. The gold
+    said `withheld` until the redaction change landed; it now says what
+    redaction.py does."""
+    assert _gold()["dispositions"]["overview.sentiment"] == {
+        "internal": "served", "customer": "reduced"}

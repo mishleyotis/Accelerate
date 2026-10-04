@@ -169,8 +169,12 @@ jobs:
       # with six held against a gold stating fifteen of sixteen. This one
       # runs the ROW-grain rules against the committed shape-only gold
       # (fixtures/surface_gold.json, cut from the promoted gold runs by
-      # scripts/gen_surface_gold.py) with a target shaped like that run. The
-      # gold runs meeting their own standard is asserted in
+      # scripts/gen_surface_gold.py) with a target shaped like that run.
+      # Owner decision B (2026-10-04): only a STRUCTURAL gap fails the gate
+      # (a section or key the gold always serves is missing; a must-present
+      # field null or held beyond the cap); the stated share and the fill
+      # ratios must still be REPORTED, as warnings. Each gold run meeting the
+      # standard of the others (leave-one-out) is asserted in
       # scripts/tests/test_gate_j_item_grain.py.
       - name: Gate J — the committed gold shape refuses a thin target
         run: |
@@ -178,14 +182,16 @@ jobs:
           out=$(python3 scripts/gate_j_surface_parity.py \
                   --gold fixtures/surface_gold.json \
                   --target-file fixtures/parity/target-thin-overview.json \
-                  --page overview)
+                  --page overview --sub-vertical CU)
           code=$?
           echo "$out"
           test "$code" -eq 1 || { echo "Gate J did not refuse a thin target against the gold"; exit 1; }
-          for want in stated_share item_fill "key_absent\] overview.sentiment.gap_analysis"; do
+          for want in "^  \[held_beyond_cap\] overview.firmographics.fields" "^  \[key_absent\] overview.sentiment.gap_analysis" "^  (warning) \[stated_share\] overview.firmographics.fields" "^  (warning) \[item_fill\]"; do
             echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want against the gold"; exit 1; }
           done
-          echo "Gate J: the gold shape refuses a thin target at row grain."
+          # A count is never a structural gap: no blocking line may name one.
+          echo "$out" | grep -qE '^  \[(list_len|item_fill|stated_share)\]' && { echo "Gate J refused on a count or fill ratio"; exit 1; }
+          echo "Gate J: the gold shape refuses a thin target on structure and warns on its counts."
       # The curation covered 115 of the specification's 127 surfaces and walked
       # past twelve — three whole Insights surfaces carrying eighteen P0 checks
       # among them, in neither artefact, not included and not excluded. Nothing
