@@ -579,11 +579,18 @@ def submit_page_payload(run_id: str, page: str, payload: dict = None,
 
 @mcp.tool()
 @_traced
-def promote_run(run_id: str) -> dict:
+def promote_run(run_id: str, expected_revision: dict | None = None) -> dict:
     """All six pages, one transaction, all or nothing. incomplete_run
-    names the missing and unpassed pages; re-promotion is idempotent."""
+    names the missing and unpassed pages; re-promotion is idempotent.
+
+    Retained pages are re-checked against today's gates, the fit engine
+    (CG-30/CG-31), the run's own status (CG-STALE) and the committed gold
+    shape (CG-PAR) before anything is written. `expected_revision` is the
+    contract/gold/gate-set fingerprint your checkout's gates assume
+    (promote_checks.local_revision): a mismatch refuses as
+    deployed_revision_behind; omitted, the result records it unchecked."""
     with _conn() as c:
-        return promote_mod.promote_run(c, run_id)
+        return promote_mod.promote_run(c, run_id, expected_revision)
 
 
 @mcp.tool()

@@ -612,7 +612,48 @@ GATES = {
               "the half-told page.",
               "block"),
 
-    "CG-48": ("A value is refused if its column cannot hold it", None,
+    # RC-02 / RC-13 (SWBC gold audit, 2026-10-04). Both run at PROMOTE, over
+    # the retained staged rows of the whole run (promote_checks.py).
+    "CG-PAR": ("No page is structurally thinner than every gold run", None,
+               "At promote, each staged page is compared with the committed "
+               "shape-only gold (surface_gold.json: keys, list lengths and "
+               "per-row null patterns of the promoted gold runs, no values). "
+               "A gap holds only if it holds against EVERY gold run that has "
+               "the page: a section or key the gold fills and this run lacks "
+               "or serves empty without saying so; a list under half the "
+               "gold's rows; a member every gold row carries and fewer than "
+               "60% of these rows carry; a member's fill under 60% of the "
+               "gold's (a null member is unfilled; a null with its own "
+               "<member>_basis is a stated absence); a fields-type list whose "
+               "share of stated, un-held values is under 60% of the gold's. "
+               "Thinness is excused only by an empty_state ladder whose every "
+               "rung reached RESOLVED, VERIFIED_ABSENT or "
+               "REFUSED+ALTERNATE_TRIED. Never-served sections are skipped; "
+               "peer-comparison nulls on a run where no peer was scored are "
+               "disclosed once.",
+               "Gate J compared top-level keys and called any non-empty list "
+               "filled, and it ran only in CI against a synthetic pair. Ten "
+               "firmographic fields with six held against a gold stating "
+               "fifteen of sixteen, one sentiment bar against seven, two of "
+               "eight platform cards with peer rows — all read as parity, and "
+               "no parity measurement ever touched the run before it was "
+               "promoted. Values are never compared: a thinner number is an "
+               "assessment result, a thinner shape is a production gap.",
+               "block"),
+    "CG-STALE": ("A promoted page does not say its own run is withdrawn",
+                 None,
+                 "At promote, no section's empty_state or narrative_thread "
+                 "asserts that the run being promoted is withdrawn or "
+                 "withheld pending repair.",
+                 "A section produced while its run was withdrawn was carried "
+                 "forward on a retained staging row and promoted unchanged, "
+                 "so a promoted page told its reader the run was 'withheld "
+                 "pending repair' — a sentence promotion makes false the "
+                 "moment it succeeds. Validation ran at submit; the run's "
+                 "status changed afterwards and nothing re-read the text.",
+                 "block"),
+
+    "CG-48":("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "
               "type of the column it lands in, joining writer_spec.json to "
               "column_types.json (generated from the migrations). Numeric, "
