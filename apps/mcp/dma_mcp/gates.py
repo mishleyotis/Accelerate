@@ -113,6 +113,40 @@ GATES = {
                "the strip showed four facts with nothing saying six were "
                "missing. Owner decision 2 set the cap.",
                "block"),
+    "CG-18c": ("The sub-vertical's firmographic set is present", None,
+               "overview.firmographics carries every member of the run's "
+               "primary sub-vertical set (must_present_by_subvertical), "
+               "stated or held within the ceiling; Farm Credit declares "
+               "sub_vertical_undefined.",
+               "RC-06, SWBC 2026-10-04: the SV7 set (premium placed, "
+               "commission revenue, producer count, acquisitions) lived only "
+               "in prose and a held generic revenue satisfied it, so an "
+               "insurance-broker run promoted no insurance-broker figure.",
+               "block"),
+    "CG-18d": ("A scoped figure names the entity it describes", None,
+               "On O2 (unit) and O8 (basis) alike, a figure scoped to a "
+               "subsidiary, segment or division names that part of the "
+               "group.",
+               "RC-06, SWBC 2026-10-04: O2 called subsidiary figures "
+               "contamination while O8 served a subsidiary series; owner "
+               "decision 2 admits scoped figures whose unit names the entity.",
+               "block"),
+    "CG-18e": ("The strip and the regulatory card agree", None,
+               "When context.regulatory_standing states license_type or "
+               "primary_regulator, overview.firmographics states charter and "
+               "primary_regulator too, naming the same regulators.",
+               "RC-06, SWBC 2026-10-04: O2 held charter and regulator while "
+               "C3 stated both, and the two pages named different regulator "
+               "sets; nothing compared them.",
+               "block"),
+    "ET-05b": ("The regulatory card works its sub-vertical's regulators", None,
+               "C3's ladder carries a rung naming a regulator of the run's "
+               "primary sub-vertical family (regulator_family_by_subvertical) "
+               "whose outcome is not open.",
+               "RC-06, SWBC 2026-10-04: an insurance-broker primary run "
+               "recorded the state insurance departments as 'not searched' "
+               "and promoted.",
+               "block"),
     "CG-40b": ("A WORKED_ABSENT alert shows the ladder that worked it", None,
                "An H3 alert in state WORKED_ABSENT logs its queries_run and "
                "carries no rung left open (NOT_RUN, not fetched, blocked) "

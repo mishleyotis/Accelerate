@@ -317,6 +317,47 @@ def _check_held_share(section, fname, spec, val, groups) -> list:
     return out
 
 
+# ── CG-18d · a scoped figure names the entity it describes (O2 and O8) ─
+#
+# RC-06 (SWBC gold audit, 2026-10-04; D-04, slice OH-02). O2 called every
+# subsidiary figure contamination while O8 on the same run served a
+# subsidiary-scoped HMDA series. Owner decision 2: a subsidiary or segment
+# figure is admissible when its unit (O2) / basis (O8) NAMES the entity it
+# describes. One rule, both surfaces: a scope word with no name beside it is
+# the shape that cannot be told from contamination.
+_SCOPE_WORD = re.compile(
+    r"\b(?:subsidiar(?:y|ies)|segment|division(?:al)?|affiliate|"
+    r"line of business|business line|operating line)\b", re.I)
+# Two consecutive capitalised tokens ("SWBC Mortgage Corporation",
+# "Financial Institution Group"), the shape a proper name takes.
+_ENTITY_NAME = re.compile(
+    r"\b[A-Z][A-Za-z0-9&'.-]*\s+(?:(?:of|and|&)\s+)?[A-Z][A-Za-z0-9&'.-]*")
+_SCOPED_KEYS = {"firmographics": ("fields", "unit"),
+                "financial_series": ("series", "basis")}
+
+
+def _check_scoped_figures(section, body) -> list:
+    entry = _SCOPED_KEYS.get(section)
+    if not entry or not isinstance(body, dict):
+        return []
+    container, key = entry
+    out = []
+    for i, item in enumerate(body.get(container) or []):
+        if not isinstance(item, dict) or item.get("value") in (None, "", []):
+            continue
+        text = str(item.get(key) or "")
+        if _SCOPE_WORD.search(text) and not _ENTITY_NAME.search(text):
+            out.append(_reason(
+                "CG-18d", section, f"{section}.{container}[{i}].{key}",
+                f"{key} {text[:80]!r} scopes this figure to part of the group "
+                f"without naming which part. A scoped figure is admissible "
+                f"only when its {key} names the entity or segment it "
+                f"describes (e.g. 'SWBC Mortgage Corporation, HMDA 2024'); "
+                f"an unnamed 'subsidiary' or 'segment' cannot be told from a "
+                f"different institution's figure."))
+    return out
+
+
 # ── CG-20 · a vendor is a company, not a category ─────────────────────
 #
 # The contract has always said it: "A PRODUCT, not a service and not a
@@ -1791,6 +1832,7 @@ def validate_pass1(page: str, payload: dict) -> list:
         reasons.extend(_check_resolved_contacts_are_served(name, body))
         reasons.extend(_check_thought_leadership_depth(name, body))
         reasons.extend(_check_financial_series_reach(name, body))
+        reasons.extend(_check_scoped_figures(name, body))
         reasons.extend(_check_no_typesetting_marks(name, body))
         reasons.extend(_check_source_label_is_a_citation(name, body))
         reasons.extend(_check_contact_routes_are_marked(name, body))

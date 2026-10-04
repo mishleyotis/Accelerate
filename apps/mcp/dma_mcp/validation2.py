@@ -4042,6 +4042,10 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                             supplementary, raw_sv))
     reasons.extend(_check_candidate_vertical(page, payload, entity_code,
                                              supplementary))
+    # RC-06: the same primary code decides O2's firmographic set and the C3
+    # regulator family.
+    reasons.extend(_check_subvertical_must_present(page, payload, entity_code))
+    reasons.extend(_check_c3_regulator_family(page, payload, entity_code))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
     reasons.extend(_check_safeguard_gate_ids(conn, page, payload))
     # AG-05 needs the OTHER half of the pair: the timeline lives on context
@@ -4051,10 +4055,230 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         sibling = _live_submission(
             conn, run_id, "overview" if page == "context" else "context")
         reasons.extend(_check_event_direction(page, payload, sibling))
+        reasons.extend(_check_o2_c3_agreement(page, payload, sibling))
 
     sg = _run_s8(conn, run_id, page, payload)
     sg.extend(_run_v4(conn, run_id, page, payload, encoder))
     return reasons, sg
+
+
+# ── RC-06 · sub-vertical and entity shape, as machine contract ─────────
+def _firmographics_spec() -> dict:
+    return sections("overview")["firmographics"]["fields"]["fields"]
+
+
+def _check_subvertical_must_present(page, payload, code) -> list:
+    """CG-18c — the run's primary sub-vertical's firmographic set is present
+    (stated, or held within the ceiling), read from
+    `must_present_by_subvertical`. RC-06 (SWBC, 2026-10-04; D-04): the SV7 set
+    lived only in prose and a held generic `revenue` satisfied it. Held SV
+    members count against CG-18b's ceiling together with the generic set."""
+    from .validation import (_held_ceiling_reason, _member_groups,
+                             _member_states, _norm_member,
+                             held_share_exceeded)
+    if page != "overview" or not isinstance(payload, dict):
+        return []
+    body = payload.get("firmographics")
+    if not isinstance(body, dict) or not code:
+        return []
+    spec = _firmographics_spec()
+    by = spec.get("must_present_by_subvertical") or {}
+    if code not in by:
+        return []
+    out = []
+    want_set = by[code]
+    if not want_set:
+        if body.get("sub_vertical_undefined") is not True:
+            out.append(_reason(
+                "CG-18c", "firmographics", "firmographics.sub_vertical_"
+                "undefined",
+                f"the run's sub-vertical ({code}) has no defined firmographic "
+                f"set in research, and the section does not say so. Emit "
+                f"sub_vertical_undefined: true and say so on the surface — "
+                f"never borrow another sub-vertical's metrics."))
+        return out
+    val = body.get("fields")
+    if not isinstance(val, list) or (not val and body.get("empty_state")):
+        return []
+    key = spec.get("must_present_key", "field")
+    stated, held, _empty = _member_states(val, key)
+    for want in want_set:
+        aliases = want if isinstance(want, (list, tuple)) else [want]
+        if any(_norm_member(a) in stated | held for a in aliases):
+            continue
+        out.append(_reason(
+            "CG-18c", "firmographics", "firmographics.fields",
+            f"the run's primary sub-vertical is {code} "
+            f"({SUBVERTICAL_NAMES.get(code, code)}) and its must-present "
+            f"member {' | '.join(aliases)} is neither stated nor held. The "
+            f"sub-vertical decides WHICH fields: a generic 'revenue' does not "
+            f"stand in for it. State it with its provenance (a scoped figure "
+            f"whose unit names the entity is admissible), or hold it with the "
+            f"registry route searched — within the held ceiling."))
+    union = _member_groups(spec, want_set)
+    over = held_share_exceeded(spec, val, union)
+    if over and not held_share_exceeded(spec, val, _member_groups(spec)):
+        out.append(_held_ceiling_reason("firmographics", "fields", over[0],
+                                        len(union), over[1]))
+    return out
+
+
+# Regulators by canonical key, for the O2 <-> C3 comparison. State offices
+# are matched by full name and by their initials (Illinois Department of
+# Financial and Professional Regulation <-> IDFPR), the way both pages write
+# them.
+_FEDERAL_REGULATORS = (
+    ("Financial Industry Regulatory Authority",
+     r"Financial Industry Regulatory Authority|\bFINRA\b"),
+    ("Securities and Exchange Commission",
+     r"Securities and Exchange Commission|\bSEC\b"),
+    ("National Credit Union Administration",
+     r"National Credit Union Administration|\bNCUA\b"),
+    ("Office of the Comptroller of the Currency",
+     r"Comptroller of the Currency|\bOCC\b"),
+    ("Federal Deposit Insurance Corporation",
+     r"Federal Deposit Insurance Corporation|\bFDIC\b"),
+    ("Federal Reserve", r"Federal Reserve"),
+    ("Consumer Financial Protection Bureau",
+     r"Consumer Financial Protection Bureau|\bCFPB\b"),
+    ("Farm Credit Administration", r"Farm Credit Administration"),
+    ("Commodity Futures Trading Commission",
+     r"Commodity Futures Trading Commission|\bCFTC\b"),
+)
+_STATE_OFFICE = re.compile(
+    r"\b((?:[A-Z][a-z]+ ){1,3}(?:Department|Division|Office) of "
+    r"(?:the )?[A-Z][a-z]+(?: (?:[A-Z][a-z]+|and|&))*)")
+_MINOR = {"of", "and", "&", "the"}
+
+
+def _office_acronyms(name: str) -> set:
+    words = [w for w in name.split() if w.lower() not in _MINOR]
+    full = "".join(w[0] for w in words).upper()
+    return {full, full[1:]} if len(full) > 3 else {full}
+
+
+def _regulators_in(text: str) -> list:
+    """[(display name, matcher)] for every regulator named in the text."""
+    text = str(text or "")
+    out = []
+    for name, rx in _FEDERAL_REGULATORS:
+        if re.search(rx, text):
+            out.append((name, re.compile(rx)))
+    for m in _STATE_OFFICE.finditer(text):
+        name = m.group(1).strip()
+        alts = [re.escape(name)] + [rf"\b{a}\b" for a in _office_acronyms(name)]
+        out.append((name, re.compile("|".join(alts), re.I)))
+    return out
+
+
+def _o2_field(fields, name):
+    for item in fields or []:
+        if isinstance(item, dict) and str(item.get("field") or "").lower() == name:
+            return item
+    return None
+
+
+def _check_o2_c3_agreement(page, payload, sibling) -> list:
+    """CG-18e — O2's charter and primary_regulator agree with C3.
+
+    RC-06 (SWBC gold audit, 2026-10-04; D-04, D-26). SWBC's O2 held both
+    while context.regulatory_standing stated them, and the pages named
+    different regulator sets. Runs on whichever page lands second; with no
+    staged sibling there is nothing to compare (promotion re-gates both)."""
+    if page == "overview":
+        o2, c3 = payload.get("firmographics"), (sibling or {}).get(
+            "regulatory_standing") if isinstance(sibling, dict) else None
+        section = "firmographics"
+    elif page == "context":
+        c3 = payload.get("regulatory_standing")
+        o2 = (sibling or {}).get("firmographics") \
+            if isinstance(sibling, dict) else None
+        section = "regulatory_standing"
+    else:
+        return []
+    if not isinstance(o2, dict) or not isinstance(c3, dict):
+        return []
+    fields = o2.get("fields") if isinstance(o2.get("fields"), list) else []
+    out = []
+    c3_states = {
+        "charter": str(c3.get("license_type") or "").strip(),
+        "primary_regulator": str(c3.get("primary_regulator") or "").strip(),
+    }
+    for fname, c3_value in c3_states.items():
+        item = _o2_field(fields, fname)
+        if not c3_value or not isinstance(item, dict):
+            continue
+        if item.get("value") in (None, "", []):
+            out.append(_reason(
+                "CG-18e", section, f"firmographics.fields[{fname}]",
+                f"overview.firmographics holds {fname!r} while "
+                f"context.regulatory_standing states it ("
+                f"{'license_type' if fname == 'charter' else fname}: "
+                f"{c3_value[:90]!r}). One institution has one answer: state "
+                f"it on the strip as the card states it — a structural "
+                f"answer ('not chartered', 'regulated by line') is a value."))
+    reg = _o2_field(fields, "primary_regulator")
+    if isinstance(reg, dict) and reg.get("value") not in (None, "", []) \
+            and c3_states["primary_regulator"]:
+        o2_text = str(reg.get("value"))
+        c3_text = " ".join([c3_states["primary_regulator"]] + [
+            str(x) for x in (c3.get("additional_regulators") or [])])
+        foreign = [n for n, rx in _regulators_in(o2_text)
+                   if not rx.search(c3_text)]
+        missing = [n for n, rx in _regulators_in(c3_states["primary_regulator"])
+                   if not rx.search(o2_text)]
+        if foreign or missing:
+            out.append(_reason(
+                "CG-18e", section, "firmographics.fields[primary_regulator]",
+                "the strip and the regulatory card name different regulators: "
+                + "; ".join(
+                    ([f"named on O2 and on neither C3 list: "
+                      f"{', '.join(foreign)}"] if foreign else [])
+                    + ([f"C3's primary regulator missing from O2: "
+                        f"{', '.join(missing)}"] if missing else []))
+                + ". A disagreement here is a contradiction, not variation — "
+                  "reconcile both pages to the regulator's own registry."))
+    return out
+
+
+def _check_c3_regulator_family(page, payload, code) -> list:
+    """ET-05b — C3's ladder works the primary sub-vertical's regulator family.
+
+    RC-06 (SWBC gold audit, 2026-10-04; D-26, slices CTX-07/09): an IB-primary
+    run left the state insurance departments 'not searched'. A rung naming a
+    regulator of the family must exist and must not be open."""
+    if page != "context" or not isinstance(payload, dict) or not code:
+        return []
+    body = payload.get("regulatory_standing")
+    if not isinstance(body, dict):
+        return []
+    fam = (sections("context")["regulatory_standing"]
+           .get("regulator_family_by_subvertical") or {}).get(code)
+    if not fam:
+        return []
+    rx = re.compile(fam, re.I)
+    ladder = []
+    ae = body.get("absence_of_enforcement")
+    if isinstance(ae, dict):
+        ladder += list(ae.get("sources_searched") or [])
+    ladder += list(ladder_of(body))
+    named = [r for r in ladder if rx.search(rung_text(r))]
+    if any(rung_outcome(r) != "open" for r in named):
+        return []
+    left_open = rung_text(named[0])[:100] if named else None
+    return [_reason(
+        "ET-05b", "regulatory_standing",
+        "regulatory_standing.absence_of_enforcement.sources_searched",
+        f"the run's primary sub-vertical is {code} "
+        f"({SUBVERTICAL_NAMES.get(code, code)}) and "
+        + (f"its regulator family's only rung was left open ({left_open!r})"
+           if named else "no rung names a regulator of its family")
+        + f". The card's first job is the regulator this sub-vertical answers "
+          f"to (for insurance intermediaries and carriers, the state "
+          f"departments of insurance and the NAIC): search its orders and "
+          f"licence records by every name the entity trades under and record "
+          f"the outcome, or record the refusal and the alternate route "
+          f"tried.")]
 
 
 def _check_safeguard_gate_ids(conn, page, payload) -> list:

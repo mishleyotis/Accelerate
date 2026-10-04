@@ -275,7 +275,159 @@
       "primary_regulator",
       "branches"
      ],
-     "held_reason_names_route": true
+     "held_reason_names_route": true,
+     "must_present_by_subvertical": {
+      "RB": [
+       [
+        "total_assets",
+        "assets"
+       ],
+       [
+        "deposits",
+        "total_deposits"
+       ],
+       [
+        "loans",
+        "total_loans",
+        "loans_and_leases",
+        "loan_portfolio"
+       ],
+       [
+        "NIM",
+        "net_interest_margin"
+       ],
+       "efficiency_ratio",
+       [
+        "NPL_ratio",
+        "nonperforming_loans_ratio",
+        "npl"
+       ]
+      ],
+      "CU": [
+       [
+        "total_assets",
+        "assets"
+       ],
+       [
+        "shares",
+        "member_shares",
+        "shares_and_deposits",
+        "deposits"
+       ],
+       [
+        "loans",
+        "total_loans",
+        "loans_and_leases",
+        "loan_portfolio"
+       ],
+       "net_worth_ratio",
+       [
+        "ROA",
+        "return_on_assets"
+       ],
+       [
+        "member_count",
+        "members"
+       ]
+      ],
+      "CL": [
+       [
+        "loan_portfolio",
+        "loans",
+        "total_loans",
+        "loans_and_leases"
+       ],
+       [
+        "CRE_concentration",
+        "cre_concentration_ratio"
+       ],
+       [
+        "c_i_volume",
+        "ci_volume",
+        "c_and_i_volume",
+        "commercial_and_industrial_loans"
+       ],
+       [
+        "NPA_ratio",
+        "nonperforming_assets_ratio"
+       ]
+      ],
+      "CIB": [
+       [
+        "revenue_by_segment",
+        "segment_revenue"
+       ],
+       "trading_revenue",
+       [
+        "IB_fees",
+        "investment_banking_fees"
+       ],
+       [
+        "AUM",
+        "assets_under_management"
+       ]
+      ],
+      "RIA": [
+       [
+        "AUM",
+        "assets_under_management"
+       ],
+       [
+        "client_count",
+        "clients"
+       ],
+       [
+        "revenue",
+        "total_revenue"
+       ],
+       [
+        "advisor_count",
+        "advisors",
+        "financial_advisors"
+       ]
+      ],
+      "AM": [
+       [
+        "AUM_by_strategy",
+        "aum"
+       ],
+       "fund_performance",
+       "net_flows",
+       [
+        "expense_ratios",
+        "expense_ratio"
+       ]
+      ],
+      "IB": [
+       [
+        "premium_placed",
+        "commission_revenue"
+       ],
+       [
+        "producer_count",
+        "producers"
+       ],
+       [
+        "acquisitions",
+        "acquisition_count"
+       ]
+      ],
+      "IC": [
+       [
+        "DWP",
+        "direct_written_premium"
+       ],
+       "combined_ratio",
+       "loss_ratio",
+       "investment_income",
+       [
+        "surplus",
+        "policyholder_surplus"
+       ]
+      ],
+      "FC": []
+     },
+     "must_present_by_subvertical_why": "RC-06 (SWBC gold audit 2026-10-04, D-04): the sub-vertical sets lived only in this doc string, and must_present_any put generic 'revenue' beside commission_revenue and premium_placed, so a held generic revenue satisfied SV7. CG-18c (pass 2) enforces the run's primary sub-vertical's set; its held members count against held_ceiling together with the generic set. Keys are the sub-vertical codes (RB=SV1, CU=SV2, CL=SV3, CIB=SV4, RIA=SV5, AM=SV6, IB=SV7, IC=SV8, FC=Farm Credit, undefined: declare sub_vertical_undefined=true). Generic 'revenue' is an alias in no SV set except RIA, where revenue IS the metric."
     },
     "undated_pct": {
      "required": true,
@@ -283,9 +435,9 @@
      "doc": "'Report undated_pct for the panel' — COMPUTED share of undated figures."
     },
     "sub_vertical_undefined": {
-     "required": false,
+     "required": true,
      "type": "boolean",
-     "doc": "Farm Credit: UNDEFINED in research. Emit sub_vertical_undefined=true and say so on the surface."
+     "doc": "Required boolean (RC-06, 2026-10-04): false when the run's sub-vertical defines its firmographic set (must_present_by_subvertical); true for Farm Credit, which is UNDEFINED in research — emit true and say so on the surface. A boolean whose absence meant 'false' could not be told from one nobody set."
     },
     "identity_mismatch": {
      "required": false,
@@ -428,7 +580,7 @@
      "required": true,
      "type": "list",
      "item_type": "object",
-     "doc": "Per item (per point, oldest first): {period, value, unit, as_of, source_e_id, basis}. basis is the metric definition (total assets / DWP / AUM / premium placed) taken from the sub-vertical — mixing definitions across periods is a silent error that produces a fake trend. Every point renders with its as_of; an undated point does not render. IDENTITY GATE (blocking, per point): legal name, REGULATOR and FOOTPRINT must all match the entity's own; any mismatch -> QUARANTINE the series, render the honest empty state, emit quarantine_reason; never render a quarantined series. CROSS-SURFACE RECONCILIATION GATE (blocking): any two figures for the same metric and period differing by more than 25% is a contradiction — resolve by recent>older, specific>general, T1>T2>T3 and emit the resolution row, or quarantine BOTH. MAGNITUDE SANITY: a single point 7x its neighbours is a parse or identity error, not growth; implausible -> quarantine, never clamp. (Sources-table point shape {year, metric, value, unit, e_id} superseded by this emit shape — see page _notes.) Gates: S6_financials; S27_financial_series; S24_firmo_integrity; cross-surface reconciliation."
+     "doc": "Per item (per point, oldest first): {period, value, unit, as_of, source_e_id, basis}. basis is the metric definition (total assets / DWP / AUM / premium placed) taken from the sub-vertical — mixing definitions across periods is a silent error that produces a fake trend. Every point renders with its as_of; an undated point does not render. SCOPED FIGURES (owner decision 2026-10-04, one rule for O2 and O8): a series about a named subsidiary or segment of THIS group is admissible when its `basis` names the entity it describes (e.g. 'SWBC Mortgage Corporation only, HMDA originations') — CG-18d refuses a scope word ('subsidiary', 'segment', 'division') with no entity named. IDENTITY GATE (blocking, per point): legal name, REGULATOR and FOOTPRINT must all match the entity's own or the named part of it; any mismatch -> QUARANTINE the series, render the honest empty state, emit quarantine_reason; never render a quarantined series. CROSS-SURFACE RECONCILIATION GATE (blocking): any two figures for the same metric and period differing by more than 25% is a contradiction — resolve by recent>older, specific>general, T1>T2>T3 and emit the resolution row, or quarantine BOTH. MAGNITUDE SANITY: a single point 7x its neighbours is a parse or identity error, not growth; implausible -> quarantine, never clamp. (Sources-table point shape {year, metric, value, unit, e_id} superseded by this emit shape — see page _notes.) Gates: S6_financials; S27_financial_series; S24_firmo_integrity; cross-surface reconciliation."
     },
     "trend": {
      "required": true,
@@ -837,7 +989,19 @@
      "item_type": null,
      "doc": "{verified: bool, sources_searched: [str]} — searched all applicable regulators and found nothing -> RECORD THE SOURCES SEARCHED. Verified absence supports the compliance-posture cell; unverified silence supports nothing."
     }
-   }
+   },
+   "regulator_family_by_subvertical": {
+    "RB": "Comptroller of the Currency|\\bOCC\\b|Federal Deposit Insurance|\\bFDIC\\b|Federal Reserve|(?:Department|Division) of (?:Banking|Financial)",
+    "CU": "National Credit Union Administration|\\bNCUA\\b|(?:Department|Division|Office) of (?:Financial|Credit Union)",
+    "CL": "Comptroller of the Currency|\\bOCC\\b|Federal Deposit Insurance|\\bFDIC\\b|Federal Reserve|(?:Department|Division) of (?:Banking|Financial)",
+    "CIB": "Securities and Exchange Commission|\\bSEC\\b|Financial Industry Regulatory Authority|\\bFINRA\\b|BrokerCheck|Federal Reserve|Commodity Futures|\\bCFTC\\b",
+    "RIA": "Securities and Exchange Commission|\\bSEC\\b|\\bIAPD\\b|Form ADV|Financial Industry Regulatory Authority|\\bFINRA\\b|BrokerCheck|securities (?:division|regulator|commissioner)",
+    "AM": "Securities and Exchange Commission|\\bSEC\\b|Commodity Futures|\\bCFTC\\b",
+    "IB": "(?:Department|Division|Office|Commissioner|Bureau) of Insurance|insurance (?:department|commissioner|division)s?|\\bDOI\\b|\\bTDI\\b|\\bNAIC\\b|\\bNIPR\\b",
+    "IC": "(?:Department|Division|Office|Commissioner|Bureau) of Insurance|insurance (?:department|commissioner|division)s?|\\bDOI\\b|\\bTDI\\b|\\bNAIC\\b|AM Best",
+    "FC": "Farm Credit Administration|\\bFCA\\b|Farm Credit System Insurance|\\bFCSIC\\b"
+   },
+   "regulator_family_why": "RC-06 (SWBC gold audit 2026-10-04, D-26): ET-05b requires the absence_of_enforcement / empty_state ladder to carry a rung naming a regulator of the run's PRIMARY sub-vertical family whose outcome is not open (not NOT_RUN, BLOCKED, not searched). The map restates the primary_regulator doc's 'By sub-vertical' list as data. An IB-primary run whose state insurance departments were 'not searched' is refused."
   },
   "context_sentiment": {
    "surface_id": "C4",
