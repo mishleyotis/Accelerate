@@ -125,8 +125,25 @@ rank scores and tier weights · scoring rationale · synthetic provenance · int
 audience, including internal)
 
 **Withhold entirely from the customer audience:**
-capability ceilings · sentiment · thought leadership · the whole Context dashboard · the
-whole Health dashboard
+capability ceilings · thought leadership · the whole Context dashboard · the whole Health
+dashboard. (Sentiment left this list on 2026-10-04 — owner decision 1, SWBC gold audit
+D-34: the customer gets a reduced card of bars and themes, built by the serve layer; see
+O9.)
+
+**Served by rule, whatever you mark** (serve-rules@12, RC-08):
+- the customer tech register carries CONFIRMED and ABSENT rows only (DECISIONS D4, D-12);
+- `platforms[*].estate_reach` and `integration_pathway` are owed to the client: a bare
+  `internal_only` marking of them is ignored and reported (D-11). Seller remarks go in
+  `zennify_pathway`. To withhold one deliberately, mark it `{"path": ..., "why": ...}`;
+- evidence registered `origin='internal'` never reaches a customer — not as a drawer
+  item, an evidence row or a chip. A partly sensitive internal row (a discovery
+  write-up) is **split** at `register_evidence`, not withheld whole (D-10): register the
+  client's own statement as a verbatim span with `split_of=<parent>` and
+  `customer_attribution` ("Client statement, discovery conversations, <month year>"),
+  and the seller or personal remark as a span with `split_of` and no attribution. Cite
+  the shareable span on the client-facing card; a drawer whose only items are internal
+  argues over nothing for the customer, and the projection check
+  (`packages/shared/customer_projection.py`) names it.
 
 **Do NOT mark internal — honesty renders to the client:**
 thin-evidence markers · quarantine markers and their reasons · failing safeguard gates
