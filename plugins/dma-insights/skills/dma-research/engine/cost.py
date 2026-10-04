@@ -614,6 +614,13 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
         aid = f.stem[len("agent-"):]
         tok = dict.fromkeys(tok_sum, 0)
         turns = 0
+        # ONE ASSISTANT MESSAGE IS SEVERAL LINES. The transcript writes a
+        # line per content block (text, each tool_use), every one carrying
+        # the message's full usage. Counting lines charged each turn ~2.4x
+        # (J-21, measured 2026-10-01: 3,134 lines for 1,307 messages; $139.89
+        # recorded for $83.20 spent), so the USD ceiling stopped runs on
+        # money nobody spent. A message counts once, by its id.
+        seen_ids: set = set()
         for line in text.splitlines():
             try:
                 e = json.loads(line)
@@ -622,6 +629,11 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
             if e.get("type") != "assistant":
                 continue
             m = e.get("message") or {}
+            mid = m.get("id") or e.get("requestId")
+            if mid:
+                if mid in seen_ids:
+                    continue
+                seen_ids.add(mid)
             u = m.get("usage") or {}
             turns += 1
             model = _model_of(m.get("model"))
@@ -632,18 +644,23 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
         usd = cost_of(model=model, **tok)["total_usd"]
         prev = charged.get(aid) or {"usd": 0.0, "turns": 0}
         d_usd, d_turns = round(usd - float(prev["usd"]), 4), turns - int(prev["turns"])
-        if d_usd <= 0 and d_turns <= 0:
+        if d_usd == 0 and d_turns == 0:
             continue
-        usd_total += max(0.0, d_usd)
-        turns_total += max(0, d_turns)
+        # A transcript only grows, so a recount BELOW what was charged can
+        # only be an earlier overcount (J-21): it is booked as a negative
+        # correction, never silently kept.
+        usd_total += d_usd
+        turns_total += d_turns
         n += 1
         for k in tok_sum:
-            tok_sum[k] += max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
+            tok_sum[k] += tok[k] - int((prev.get("tokens") or {}).get(k, 0))
         charged[aid] = {"usd": usd, "turns": turns, "tokens": tok}
     if n:
         record(run, stage="RESEARCH", elapsed_s=0.0, usd=round(usd_total, 4),
                turns=turns_total, tokens=tok_sum, model=model, lanes=n,
-               note=f"workflow agents: {n} charged (delta since last capture)")
+               note=f"workflow agents: {n} charged (delta since last capture"
+                    + ("; includes a correction of an earlier overcount)" if usd_total < 0
+                       else ")"))
         seen_path.parent.mkdir(parents=True, exist_ok=True)
         seen_path.write_text(json.dumps(charged))
     return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total}

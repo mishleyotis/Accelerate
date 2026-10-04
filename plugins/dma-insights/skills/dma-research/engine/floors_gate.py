@@ -261,6 +261,10 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "closed_below_floor": [], "synthesis_missing": [], "boilerplate": [],
         "claim_unsupported": [], "contradicts_unprobed": [],
         "single_source_fact": [],
+        # J-10 (2026-10-01, SWBC): a public row dated the day it was
+        # retrieved, with no quoted words stating that year, is a placeholder
+        # for an undated page — invariant 9. Repair: `engine.cli redate`.
+        "date_placeholder": [],
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
         "challenge_not_independent": [],
         "timeline_missing": [], "followups_outstanding": [],
@@ -337,6 +341,12 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # below, independently challenged) before the category is done.
         if require_synthesis and not synthesised and eids:
             findings["synthesis_missing"].append(cell)
+        for e in eids:
+            ev = register.get(e) or {}
+            if str(ev.get("Origin") or "public") == "public" and L.placeholder_date(
+                    ev.get("Date_Published"), ev.get("Retrieved_At"),
+                    ev.get("Excerpt"), ev.get("Anchor_Quote")):
+                findings["date_placeholder"].append({"subcap": cell, "e_id": e})
 
         # YOU CANNOT REPORT THAT THERE IS NOTHING WITHOUT HAVING LOOKED.
         #
@@ -552,7 +562,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     blocking = [k for k in (
         "unresolved_citations", "boilerplate", "claim_unsupported",
         "absence_undeclared", "evidence_smear", "challenge_missing",
-        "challenge_not_independent", "single_source_fact",
+        "challenge_not_independent", "single_source_fact", "date_placeholder",
         "synthesis_missing", "dq_gaps", "absence_unsearched",
         "volleys_incomplete", "absence_undeclared_empty",
         "absence_over_evidence",

@@ -59,6 +59,13 @@ AMBIGUOUS = "AMBIGUOUS"
 #: path (CLIENT-SELECTION.md section 2). It is the intake path, and the
 #: prior package is superseded in place, not merged.
 NEW_VERSION = "NEW_VERSION"
+#: A research run is IN FLIGHT for this client: its CURRENT pointer is on the
+#: client's Drive (engine.snapshot). Measured 2026-10-01 (SWBC, fresh
+#: container): the connector corpus held only an older 418-cell run, so this
+#: script said READY_TO_SYNTHESISE — synthesise a half-assessed run — while a
+#: $198 760-cell research run sat in the Drive backup, findable by nothing the
+#: command told a session to run.
+RESUME = "RESUME"
 #: Below this share of the universal cells, a "scored" run is reported as
 #: partial rather than simply synthesis-ready.
 PARTIAL_SHARE = 0.8
@@ -208,6 +215,35 @@ def decide(state: dict, asked_for: str, fresh: bool = False) -> dict:
     }
 
 
+ENGINE = os.path.join(os.path.dirname(HERE), "skills", "dma-research")
+
+
+def in_flight(client: str, runner=None) -> dict | None:
+    """The client's CURRENT run pointer from Drive (engine.snapshot current)."""
+    run = runner or (lambda: subprocess.run(
+        [sys.executable, "-m", "engine.snapshot", "current", "--client", client],
+        cwd=ENGINE, capture_output=True, text=True, timeout=300))
+    try:
+        r = run()
+        return json.loads(r.stdout) if r.returncode == 0 else None
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+
+
+def apply_in_flight(out: dict, ptr: dict | None, client: str) -> dict:
+    """An in-flight research run outranks every answer but ALREADY_SERVED."""
+    if not ptr or not ptr.get("run_id") or out["verdict"] in (ALREADY_SERVED, AMBIGUOUS):
+        return out
+    rid = ptr["run_id"]
+    return {**out, "verdict": RESUME, "in_flight": ptr,
+            "superseded_verdict": out["verdict"],
+            "why": (f"research run {rid} is in flight (Drive snapshot pushed "
+                    f"{ptr.get('pushed_at')}); resume it rather than "
+                    f"{out['verdict'].lower().replace('_', ' ')}. --fresh starts a new one."),
+            "next": (f"python3 -m engine.snapshot restore --client \"{client}\" --root <ROOT>"
+                     f" && python3 -m engine.pipeline plan --run {rid} --root <ROOT>")}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--client", required=True,
@@ -215,6 +251,8 @@ def main(argv=None) -> int:
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--fresh", action="store_true",
                     help="the owner asked for a NEW run of an existing client")
+    ap.add_argument("--no-drive", action="store_true",
+                    help="skip the in-flight check against the client's Drive")
     a = ap.parse_args(argv)
 
     did = a.client if re.fullmatch(r"[a-z0-9-]+", a.client) else _slug(a.client)
@@ -223,6 +261,8 @@ def main(argv=None) -> int:
     except RuntimeError as e:
         print(f"ROUTE: UNKNOWN — {e}", file=sys.stderr)
         return 2
+    if not a.fresh and not a.no_drive:
+        out = apply_in_flight(out, in_flight(a.client), a.client)
 
     if a.json:
         print(json.dumps(out, indent=1))
@@ -236,10 +276,11 @@ def main(argv=None) -> int:
                   f"{m.get('legal_name') or ''}")
     # Exit code carries the verdict so a routine can branch without parsing:
     # 0 = synthesise, 3 = score first, 4 = new engagement, 5 = already
-    # served, 6 = ambiguous, 7 = new version (--fresh). Never 1: that is reserved for the script itself
+    # served, 6 = ambiguous, 7 = new version (--fresh), 8 = resume the
+    # in-flight run. Never 1: that is reserved for the script itself
     # failing, and a routine must not read its own crash as a routing answer.
     return {READY_TO_SYNTHESISE: 0, NEEDS_SCORING: 3, NEW_ENGAGEMENT: 4,
-            ALREADY_SERVED: 5, AMBIGUOUS: 6, NEW_VERSION: 7}[out["verdict"]]
+            ALREADY_SERVED: 5, AMBIGUOUS: 6, NEW_VERSION: 7, RESUME: 8}[out["verdict"]]
 
 
 if __name__ == "__main__":
