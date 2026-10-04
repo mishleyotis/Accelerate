@@ -134,6 +134,15 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     (customer techstack rows CONFIRMED/ABSENT only); shape-only gold
     fixtures (no values) may be committed; WebSearch/WebFetch is the
     failover when Exa/Tavily credit runs out.
+  - **Raw band vs Backend Schema** (authority #1 vs invariant 6): keep
+    `composite` NUMERIC(4,2) for display as the schema states; an
+    expand-only `composite_raw` column carries the raw value and the band
+    is generated from it. `composite` is never widened.
+  - **Gold-parity gate (CG-PAR / Gate J)** blocks only on structural gaps
+    (a section or key the gold always serves is missing; a must-present
+    field null or held beyond the cap). List-length and fill-ratio
+    differences are warnings. Leave-one-out against gold; sub-vertical-
+    matched gold preferred, cross-sub-vertical gold for structure only.
 
 ## Open decisions — leave open, do not resolve silently
 
