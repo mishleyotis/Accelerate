@@ -1952,6 +1952,14 @@ function SentimentGridInteractive({
     });
     byAudience.get(k).absent = a;
   }
+  // The tile's OWN note and citations, for a tile that has rows. RC-03/D-02:
+  // on the audited run this note carried the complaint-record analysis and
+  // was read by no renderer, because only row notes were drawn.
+  const notes = sent && sent.notes || {};
+  for (const [g, n] of Object.entries(notes)) {
+    const k = String(g || "unstated").toLowerCase();
+    if (byAudience.has(k)) byAudience.get(k).tileNote = n;
+  }
   const tiles = [...byAudience.values()].sort((x, y) => {
     const i = AUDIENCE_ORDER.indexOf(x.key),
       j = AUDIENCE_ORDER.indexOf(y.key);
@@ -2025,13 +2033,18 @@ function SentimentGridInteractive({
         color: "var(--z-muted)",
         fontWeight: 400
       }
-    }, scaleToken(lead.scale)) : null) : /*#__PURE__*/React.createElement("span", {
+    }, scaleToken(lead.scale)) : null) :
+    /*#__PURE__*/
+    /* What the PAYLOAD says, nothing more: this tile promoted no
+       rated row. "Searched, not established" asserted a search
+       on tiles whose ladder the customer read does not carry. */
+    React.createElement("span", {
       style: {
         fontSize: 12,
         color: "var(--z-muted)",
         fontStyle: "italic"
       }
-    }, "Searched, not established"), /*#__PURE__*/React.createElement("span", {
+    }, "No rated line"), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
@@ -2047,7 +2060,13 @@ function SentimentGridInteractive({
       },
       className: "txt-fit-1",
       title: lead ? `${lead.label}${lead.n != null ? ` · n=${lead.n}` : ""}` : t.absent && t.absent.note || ""
-    }, lead ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}` : `${t.absent && (t.absent.sources_searched || []).length || 0} source${(t.absent && (t.absent.sources_searched || []).length || 0) === 1 ? "" : "s"} searched`)), isOpen ? /*#__PURE__*/React.createElement("div", {
+    }, lead ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}` : (() => {
+      const ns = (t.absent && t.absent.sources_searched || []).length;
+      const ni = (t.absent && t.absent.e_ids || []).length;
+      if (ns) return `${ns} source${ns === 1 ? "" : "s"} searched`;
+      if (ni) return `${ni} cited item${ni === 1 ? "" : "s"} · context, not a rating`;
+      return "context, not a rating";
+    })())), isOpen ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 6,
         padding: "10px 12px",
@@ -2092,7 +2111,41 @@ function SentimentGridInteractive({
         border: 0
       },
       onClick: () => openEvidence(eid)
-    }, eid))) : null)), t.absent ? /*#__PURE__*/React.createElement("div", null, t.absent.note || "Searched and not established.", (t.absent.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", t.absent.sources_searched.join(" · "), ".") : null) : null) : null);
+    }, eid))) : null)), t.tileNote && t.tileNote.note ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: t.rows.length ? 4 : 0
+      }
+    }, t.tileNote.note) : null, t.tileNote && (t.tileNote.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        flexWrap: "wrap",
+        marginTop: 5
+      }
+    }, t.tileNote.e_ids.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
+      className: "chip",
+      style: {
+        cursor: "pointer",
+        border: 0
+      },
+      onClick: () => openEvidence(eid)
+    }, eid))) : null, t.absent ? /*#__PURE__*/React.createElement("div", null, t.absent.note || "This tile promoted no rated line.", (t.absent.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", t.absent.sources_searched.join(" · "), ".") : null, (t.absent.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        flexWrap: "wrap",
+        marginTop: 5
+      }
+    }, t.absent.e_ids.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
+      className: "chip",
+      style: {
+        cursor: "pointer",
+        border: 0
+      },
+      onClick: () => openEvidence(eid)
+    }, eid))) : null) : null) : null);
   }));
 }
 function Timeline({
@@ -4763,5 +4816,7 @@ Object.assign(window, {
   ClientTechStackDetail,
   ClientRuns,
   evidenceAgeRows,
-  calendarValue
+  calendarValue,
+  SentimentGridInteractive,
+  FinChartInteractive
 });

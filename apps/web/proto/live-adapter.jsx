@@ -297,28 +297,68 @@ function moneyOf(s) {
    normalised onto its OWN stated scale only: the card divides score by
    scale, so an NPS on -100..100 must arrive with that scale, never rescaled
    here into something the producer never said. */
+/* THE THEMES ARE THE ANALYSIS (RC-03, D-01, gold audit 2026-10-04).
+ *
+ * This read `bars[]` and returned null without one, and returned nothing
+ * else when it had one. The O9 prompt calls the themes "the analysis":
+ * recurring patterns from the review and complaint TEXT, each mapped to the
+ * cells it bears on and stating what it caps. A run promoted six of them with
+ * one bar, and the card showed the bar, an employee group reading "Not
+ * established for this run." over three employee themes, and a B2B/B2C chip
+ * wired to `industry_avg` / `b2b_b2c_gap` — keys no contract declares, so it
+ * could never light.
+ *
+ * Everything returned here is a declared key of overview.sentiment:
+ * bars[], themes[] {audience, theme, mapped_subcap_ids, cap_statement},
+ * gap_analysis {b2b_b2c, internal_external, e_ids}, narrative_thread. The
+ * gap chip is a PRESENCE flag computed from `gap_analysis.b2b_b2c` being
+ * non-empty — the contract's own words: "never a stored boolean". */
 function adaptSentiment(sentiment) {
-  const bars = (sentiment && sentiment.bars) || [];
-  if (!bars.length) return null;
-  const group = (which) => bars
-    .filter((b) => String(b.audience || "").toLowerCase() === which)
-    .map((b) => ({
-      source: b.source, metric: b.metric || b.scale || null,
-      score: num(b.rating), scale: b.scale || null, scale_max: scaleMaxOf(b.scale), n: num(b.n),
-      as_of: b.as_of, e_id: b.e_id, url: b.url,
-      trend_vs_prior: b.trend_vs_prior,
-    }));
-  const employee = group("employee");
-  const customer = group("customer");
-  const ungrouped = bars.filter((b) => !b.audience).map((b) => ({
+  if (!sentiment || typeof sentiment !== "object") return null;
+  const bars = Array.isArray(sentiment.bars) ? sentiment.bars : [];
+  const text = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
+  const barOf = (b) => ({
     source: b.source, metric: b.metric || b.scale || null,
     score: num(b.rating), scale: b.scale || null, scale_max: scaleMaxOf(b.scale), n: num(b.n),
     as_of: b.as_of, e_id: b.e_id, url: b.url,
-  }));
+    trend_vs_prior: b.trend_vs_prior,
+  });
+  const audOf = (x) => String((x && x.audience) || "").trim().toLowerCase();
+  const group = (which) => bars.filter((b) => b && audOf(b) === which).map(barOf);
+  // A mapped id may arrive as the bare string the contract asks for or, from
+  // an older producer, as a record carrying it; either way it is an id or it
+  // is dropped — never stringified into "[object Object]".
+  const idOf = (v) => (typeof v === "string" ? v.trim()
+    : (v && typeof v === "object" && typeof v.subcap_id === "string") ? v.subcap_id.trim() : "");
+  const themes = (Array.isArray(sentiment.themes) ? sentiment.themes : [])
+    .filter((t) => t && typeof t === "object" && text(t.theme))
+    .map((t) => ({
+      audience: audOf(t) || null,
+      theme: text(t.theme),
+      cap_statement: text(t.cap_statement),
+      mapped_subcap_ids: (Array.isArray(t.mapped_subcap_ids) ? t.mapped_subcap_ids : [])
+        .map(idOf).filter(Boolean),
+      e_ids: (Array.isArray(t.e_ids) ? t.e_ids : []).filter((x) => typeof x === "string"),
+    }));
+  const ga = (sentiment.gap_analysis && typeof sentiment.gap_analysis === "object")
+    ? sentiment.gap_analysis : null;
+  const gap_analysis = ga && (text(ga.b2b_b2c) || text(ga.internal_external))
+    ? { b2b_b2c: text(ga.b2b_b2c), internal_external: text(ga.internal_external),
+        e_ids: (Array.isArray(ga.e_ids) ? ga.e_ids : []).filter((x) => typeof x === "string") }
+    : null;
+  const narrative_thread = text(sentiment.narrative_thread);
+  if (!bars.length && !themes.length && !gap_analysis && !narrative_thread) return null;
+  const KNOWN = ["employee", "customer", "industry"];
   return {
-    employee, customer, ungrouped,
-    industry_avg: num(sentiment.industry_avg),
-    b2b_b2c_gap: !!sentiment.b2b_b2c_gap,
+    employee: group("employee"),
+    customer: group("customer"),
+    industry: group("industry"),
+    ungrouped: bars.filter((b) => b && !KNOWN.includes(audOf(b))).map(barOf),
+    themes,
+    gap_analysis,
+    // Computed at render from the declared key, never read from a stored flag.
+    b2b_b2c_gap: !!(gap_analysis && gap_analysis.b2b_b2c),
+    narrative_thread,
   };
 }
 
@@ -372,15 +412,32 @@ function tileScaleMaxOf(scale) {
 
    Tiles come in two kinds and both are content. A tile with rows becomes
    stat cards — one per measured row, on its own stated scale. A tile with
-   state=WORKED_ABSENT is a finding, not a blank: it carries the ladder of
-   sources that refused, and the card states that rather than showing a
-   number nobody measured. */
+   NO rows is a finding, not a blank, when it carries anything to say: its
+   note, its citations or the ladder of sources it searched. The card states
+   that rather than showing a number nobody measured.
+
+   RC-03 / D-02 (gold audit 2026-10-04): the no-rows branch used to require
+   `state === "WORKED_ABSENT"`, a key the C4 contract does not declare
+   ({audience, rows, e_ids} per tile). A promoted employee tile with
+   `rows: []`, a note naming a 7-rating employer score and three citations
+   simply vanished. A renderer may not depend on an undeclared key; the tile
+   is worked-absent by what it CARRIES. `state` is still honoured when sent.
+
+   The tile-level `note` and `e_ids` travel for EVERY tile (`notes[group]`),
+   because a tile with rows has a note too — on that run it carried the
+   whole complaint-record analysis, and it rendered nowhere. */
 function adaptContextSentiment(section) {
   const tiles = (section && section.context_tiles) || [];
   if (!tiles.length) return null;
   const groups = {};
   const absent = [];
+  const notes = {};
+  const strs = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.trim()) : []);
   for (const t of tiles) {
+    if (!t || typeof t !== "object") continue;
+    const tileNote = (typeof t.note === "string" && t.note.trim()) ? t.note.trim() : null;
+    const tileIds = strs(t.e_ids);
+    const searched = strs(t.sources_searched);
     const g = String(t.audience || "unstated");
     const rows = (t.rows || []).map((r) => ({
       label: r.source || null,
@@ -395,16 +452,18 @@ function adaptContextSentiment(section) {
     })).filter((r) => r.value !== null);
     if (rows.length) {
       groups[g] = (groups[g] || []).concat(rows);
-    } else if (t.state === "WORKED_ABSENT") {
+      if (tileNote || tileIds.length) notes[g] = { note: tileNote, e_ids: tileIds };
+    } else if (t.state === "WORKED_ABSENT" || tileNote || tileIds.length || searched.length) {
       absent.push({
         group: g,
-        note: t.note || null,
-        sources_searched: t.sources_searched || [],
+        note: tileNote,
+        e_ids: tileIds,
+        sources_searched: searched,
       });
     }
   }
   if (!Object.keys(groups).length && !absent.length) return null;
-  return { groups, absent };
+  return { groups, absent, notes };
 }
 
 /* ── coverageFor ─────────────────────────────────────────────────────
@@ -1634,6 +1693,7 @@ function sectionStates(pages) {
 
 Object.assign(window, {
   buildLiveEntity, adaptSubcaps, adaptOss, adaptFinancials, adaptSentiment,
+  adaptContextSentiment,
   adaptCoverage, adaptUncertainty, adaptEvidenceSummary, adaptWhyNow,
   adaptInsights, adaptRecommendations, adaptTechStack, adaptLeadership,
   adaptThoughtLeadership, adaptFocusAreas, adaptTimeline, adaptIssues,

@@ -78,10 +78,29 @@ function EvidenceTierCard({ entity }) {
   );
 }
 
-/* ── Multi-source sentiment scorecard ──────────────────────────────────
-   SOURCE: 08_appendices/A6_sentiment_data.csv  (INTERNAL-only) */
+/* ── Multi-source sentiment scorecard (O9) ─────────────────────────────
+   SOURCE: overview.sentiment :: bars[], themes[], gap_analysis, narrative_thread
+
+   TWO VARIANTS, by owner decision 1 (2026-10-04), which supersedes the
+   "withheld from customer" rule of TRD §11 for this section only:
+
+     internal   bars, themes with their cap statements and the cells they
+                bear on, the B2B/B2C gap and its analysis, the narrative
+     customer   REDUCED — bars and themes. No cell codes, no cap statements
+                (cap vocabulary), no internal sources, no reasoning trace.
+
+   The server's default-deny walker decides what reaches each audience; the
+   card ALSO refuses to draw the internal half for a customer, so a payload
+   that arrived unredacted still cannot put a cell code on a client's page.
+
+   RC-03 / D-01: this card read `bars[]` and nothing else. Six promoted
+   themes, a narrative thread and every cap statement reached no screen, and
+   an employee group with three themes read "Not established for this run."
+   The "Industry avg" header and the gap chip read `industry_avg` and
+   `b2b_b2c_gap`, which no contract declares; the chip is now computed from
+   `gap_analysis.b2b_b2c` and the header figure is gone. */
 function SentimentCard({ entity, audience }) {
-  if (audience === "customer") return null;       // internal-only strip
+  const isCust = audience === "customer";
   const s = DMA.sentimentFor(entity.id);
   if (!s) return <CardAbsent icon="users" title="Sentiment"
     note="No sentiment promoted for this run." section="overview.sentiment" />;
@@ -106,47 +125,92 @@ function SentimentCard({ entity, audience }) {
       : frac >= 0.75 ? "var(--z-teal)" : frac >= 0.5 ? "var(--z-org)" : "var(--z-below)";
     return (
       <div style={{ display: "grid", gridTemplateColumns: "120px 1fr 40px", gap: 8, alignItems: "center", padding: "5px 0" }}>
-        <div style={{ fontSize: 11, color: "var(--z-body)" }}>{r.source}<span style={{ color: "var(--z-muted)" }}> · {r.metric}</span></div>
+        <div style={{ fontSize: 11, color: "var(--z-body)", minWidth: 0, overflowWrap: "anywhere" }}>{r.source}<span style={{ color: "var(--z-muted)" }}> · {r.metric}</span></div>
         <div style={{ height: 7, background: "var(--z-sep)", borderRadius: 4, overflow: "hidden" }}>
           {pct == null ? null : <div style={{ width: `${Math.max(0, Math.min(100, pct))}%`, height: "100%", background: tone, borderRadius: 4, transition: "width var(--motion-slow) var(--ease)" }} />}
         </div>
         {/* A row can arrive with a source, a metric and no rating — the bar
-            was found but the figure was not stated. The dash read the same as
-            a zero-width bar and gave the reader no route to filling it. The
-            payload carries no quarantine marker on these rows (adaptSentiment
-            maps rating straight through), so this is a silent gap, never
-            `held`. `compact` because the cell is 40px of a three-column grid
-            and the badge would break the row. */}
+            was found but the figure was not stated. `compact` because the
+            cell is 40px of a three-column grid. */}
         <div style={{ fontSize: 12, fontWeight: 600, color: tone, textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.score == null ? <EnrichmentGap what={r.metric ? `${r.source} · ${r.metric}` : r.source || "Rating"} audience={audience} compact /> : fx(r.score, 1)}</div>
       </div>
     );
   };
+  /* One theme. The THEME is the reviewers' own recurring pattern and both
+     audiences read it. The cap statement — which cell it caps, at what level
+     and why — and the cell chips are the assessment's working: internal. */
+  const cellName = (id) => {
+    const L = (typeof window !== "undefined" && window.DMA_ENTITY) || entity;
+    const c = DMA.getSubcap(L, id);
+    return c && c.name && c.name !== id ? c.name : null;
+  };
+  const Theme = ({ t }) => (
+    <div data-sentiment-theme={t.audience || "unstated"}
+         style={{ padding: "6px 0", borderTop: "1px solid var(--z-sep)" }}>
+      <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.45 }}>{t.theme}</div>
+      {!isCust && t.cap_statement ? (
+        <div style={{ fontSize: 11, color: "var(--z-body)", lineHeight: 1.55, marginTop: 3 }}>{t.cap_statement}</div>
+      ) : null}
+      {!isCust && t.mapped_subcap_ids.length ? (
+        <div className="row" style={{ gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+          {t.mapped_subcap_ids.map(id => (
+            <span key={id} className="chip f-mono" style={{ fontSize: 10 }}
+                  title={cellName(id) ? `${id} · ${cellName(id)}` : id}>{id}</span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+  const themesFor = (a) => (s.themes || []).filter(t => (t.audience || "unstated") === a);
+  const groups = [
+    { key: "employee", label: "Employee", bars: s.employee || [] },
+    { key: "customer", label: "Customer", bars: s.customer || [] },
+    { key: "industry", label: "Industry", bars: s.industry || [] },
+  ];
+  // Employee and customer always show — the contract's two core audiences —
+  // and an empty one says what the PAYLOAD holds for it, which is the only
+  // thing this card knows. Industry shows only when the run says something.
+  const shown = groups.filter(g => g.key !== "industry" || g.bars.length || themesFor("industry").length);
+  const head = { fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" };
   return (
-    <div className="card flush" data-source="A6_sentiment_data.csv :: employee[],customer[]">
+    <div className="card flush" data-source="overview.sentiment :: bars[],themes[],gap_analysis">
       <div className="card-head">
-        <div className="row"><Icon name="users" size={14} /><h3>Sentiment</h3>{s.b2b_b2c_gap ? <span className="b b-org">B2B/B2C gap</span> : null}</div>
-        <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{s.industry_avg == null ? "" : `Industry avg ${fx(s.industry_avg, 1)}`}</span>
+        <div className="row"><Icon name="users" size={14} /><h3>Sentiment</h3>{!isCust && s.b2b_b2c_gap ? <span className="b b-org">B2B/B2C gap</span> : null}</div>
       </div>
       <div className="card-body">
-        <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 2 }}>Employee</div>
-        {(s.employee || []).length ? s.employee.map((r, i) => <Row key={"e" + i} r={r} />)
-          : <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Not established for this run.</div>}
-        <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Customer</div>
-        {(s.customer || []).length ? s.customer.map((r, i) => <Row key={"c" + i} r={r} />)
-          : <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Not established for this run.</div>}
-        {/* A section can promote rows AND declare what it could not establish —
-            Baxter's does: ratings and scales on two audiences, and no citable
-            review text behind them. "Not established for this run." beside an
-            empty group is true and says nothing; the producer's own account of
-            what was searched and what would close it is the answer, and it was
-            sitting unread in the envelope. */}
-        <SectionEmptyFoot section="overview.sentiment"
-                          title="What this section could not establish" />
-        {(s.ungrouped || []).length ? (
+        {shown.map((g, gi) => {
+          const th = themesFor(g.key);
+          return (
+            <React.Fragment key={g.key}>
+              <div style={{ ...head, marginTop: gi === 0 ? 0 : 10 }}>{g.label}</div>
+              {g.bars.map((r, i) => <Row key={g.key + i} r={r} />)}
+              {th.map((t, i) => <Theme key={`${g.key}-t${i}`} t={t} />)}
+              {!g.bars.length && !th.length ? (
+                <div style={{ fontSize: 11, color: "var(--z-muted)" }}>No rating or theme for this audience in this run.</div>
+              ) : !g.bars.length ? (
+                <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2 }}>No rated line for this audience; the themes above are read from review and complaint text.</div>
+              ) : null}
+            </React.Fragment>
+          );
+        })}
+        {(s.ungrouped || []).length || themesFor("unstated").length ? (
           <React.Fragment>
-            <div style={{ fontSize: 10, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".06em", margin: "10px 0 2px" }}>Audience not stated</div>
-            {s.ungrouped.map((r, i) => <Row key={"u" + i} r={r} />)}
+            <div style={head}>Audience not stated</div>
+            {(s.ungrouped || []).map((r, i) => <Row key={"u" + i} r={r} />)}
+            {themesFor("unstated").map((t, i) => <Theme key={"ut" + i} t={t} />)}
           </React.Fragment>) : null}
+        {!isCust && s.gap_analysis ? (
+          <div style={{ marginTop: 10, padding: "8px 10px", background: "var(--z-lav)", borderRadius: 6, fontSize: 11, lineHeight: 1.55, color: "var(--z-body)" }}>
+            {s.gap_analysis.b2b_b2c ? <div><strong>B2B/B2C gap · </strong>{s.gap_analysis.b2b_b2c}</div> : null}
+            {s.gap_analysis.internal_external ? <div style={{ marginTop: 4 }}><strong>Internal/external gap · </strong>{s.gap_analysis.internal_external}</div> : null}
+          </div>
+        ) : null}
+        {/* The thread is the producer's synthesis across bars, themes and
+            gaps — internal. The customer's reduced card is bars and themes
+            (decision 1), and nothing else is added to it here. */}
+        {!isCust && s.narrative_thread ? (
+          <div style={{ marginTop: 10, fontSize: 11.5, color: "var(--z-body)", lineHeight: 1.55, fontStyle: "italic" }}>{s.narrative_thread}</div>
+        ) : null}
         <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).sentiment} what="rows" audience={audience} />
       </div>
     </div>

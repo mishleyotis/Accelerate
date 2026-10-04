@@ -1315,6 +1315,14 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
     if (!byAudience.has(k)) byAudience.set(k, { key: k, label: a.group, rows: [] });
     byAudience.get(k).absent = a;
   }
+  // The tile's OWN note and citations, for a tile that has rows. RC-03/D-02:
+  // on the audited run this note carried the complaint-record analysis and
+  // was read by no renderer, because only row notes were drawn.
+  const notes = (sent && sent.notes) || {};
+  for (const [g, n] of Object.entries(notes)) {
+    const k = String(g || "unstated").toLowerCase();
+    if (byAudience.has(k)) byAudience.get(k).tileNote = n;
+  }
   const tiles = [...byAudience.values()].sort((x, y) => {
     const i = AUDIENCE_ORDER.indexOf(x.key), j = AUDIENCE_ORDER.indexOf(y.key);
     return (i < 0 ? 99 : i) - (j < 0 ? 99 : j);
@@ -1364,7 +1372,10 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
                     ) : null}
                   </span>
                 ) : (
-                  <span style={{ fontSize: 12, color: "var(--z-muted)", fontStyle: "italic" }}>Searched, not established</span>
+                  /* What the PAYLOAD says, nothing more: this tile promoted no
+                     rated row. "Searched, not established" asserted a search
+                     on tiles whose ladder the customer read does not carry. */
+                  <span style={{ fontSize: 12, color: "var(--z-muted)", fontStyle: "italic" }}>No rated line</span>
                 )}
                 <span className="spacer" />
                 <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={11} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
@@ -1373,7 +1384,13 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
                    title={lead ? `${lead.label}${lead.n != null ? ` · n=${lead.n}` : ""}` : (t.absent && t.absent.note) || ""}>
                 {lead
                   ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}`
-                  : `${(t.absent && (t.absent.sources_searched || []).length) || 0} source${((t.absent && (t.absent.sources_searched || []).length) || 0) === 1 ? "" : "s"} searched`}
+                  : (() => {
+                      const ns = ((t.absent && t.absent.sources_searched) || []).length;
+                      const ni = ((t.absent && t.absent.e_ids) || []).length;
+                      if (ns) return `${ns} source${ns === 1 ? "" : "s"} searched`;
+                      if (ni) return `${ni} cited item${ni === 1 ? "" : "s"} · context, not a rating`;
+                      return "context, not a rating";
+                    })()}
               </div>
             </button>
             {isOpen ? (
@@ -1395,11 +1412,30 @@ function SentimentGridInteractive({ sentOpen, setSentOpen, openEvidence, entity 
                     ) : null}
                   </div>
                 ))}
+                {t.tileNote && t.tileNote.note ? (
+                  <div style={{ marginTop: t.rows.length ? 4 : 0 }}>{t.tileNote.note}</div>
+                ) : null}
+                {t.tileNote && (t.tileNote.e_ids || []).length ? (
+                  <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 5 }}>
+                    {t.tileNote.e_ids.map(eid => (
+                      <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                              onClick={() => openEvidence(eid)}>{eid}</button>
+                    ))}
+                  </div>
+                ) : null}
                 {t.absent ? (
                   <div>
-                    {t.absent.note || "Searched and not established."}
+                    {t.absent.note || "This tile promoted no rated line."}
                     {(t.absent.sources_searched || []).length ? (
                       <> Searched: {t.absent.sources_searched.join(" · ")}.</>
+                    ) : null}
+                    {(t.absent.e_ids || []).length ? (
+                      <div className="row" style={{ gap: 5, flexWrap: "wrap", marginTop: 5 }}>
+                        {t.absent.e_ids.map(eid => (
+                          <button key={eid} className="chip" style={{ cursor: "pointer", border: 0 }}
+                                  onClick={() => openEvidence(eid)}>{eid}</button>
+                        ))}
+                      </div>
                     ) : null}
                   </div>
                 ) : null}
@@ -3197,4 +3233,5 @@ function ClientRuns({ entity }) {
   );
 }
 
-Object.assign(window, { ClientContext, ClientHealth, ClientTechStack, ClientTechStackDetail, ClientRuns, evidenceAgeRows, calendarValue });
+Object.assign(window, { ClientContext, ClientHealth, ClientTechStack, ClientTechStackDetail, ClientRuns, evidenceAgeRows, calendarValue,
+                        SentimentGridInteractive, FinChartInteractive });
