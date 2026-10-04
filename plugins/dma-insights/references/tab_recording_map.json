@@ -164,12 +164,15 @@
   },
   {
    "tab": "Executive_Summary",
-   "records": "run config",
-   "confidence": "not_client_facing",
-   "page": null,
-   "section": null,
-   "sections": [],
-   "required": null
+   "records": "overview.scores, overview.exec_summary",
+   "confidence": "proposed",
+   "page": "overview",
+   "section": "scores",
+   "sections": [
+    "overview.scores",
+    "overview.exec_summary"
+   ],
+   "required": true
   },
   {
    "tab": "Financial_Trends",
@@ -531,6 +534,7 @@
   "overview.scores": {
    "required": true,
    "fed_by_tabs": [
+    "Executive_Summary",
     "Peer_Benchmarks",
     "Pillar_Rollup",
     "Pillar_Summary"
@@ -548,7 +552,9 @@
   },
   "overview.exec_summary": {
    "required": true,
-   "fed_by_tabs": []
+   "fed_by_tabs": [
+    "Executive_Summary"
+   ]
   },
   "overview.opportunity": {
    "required": true,
@@ -664,11 +670,11 @@
  },
  "counts": {
   "tabs_the_app_reads": 42,
-  "tabs_bound_to_a_page": 25,
-  "tabs_bound_to_a_section": 25,
+  "tabs_bound_to_a_page": 26,
+  "tabs_bound_to_a_section": 26,
   "verified_bindings": 5,
-  "proposed_bindings": 26,
-  "not_client_facing": 11,
+  "proposed_bindings": 27,
+  "not_client_facing": 10,
   "page_sections": 34,
   "required_page_sections": 32
  }
