@@ -32,10 +32,22 @@ def _engine_fit(sv="Credit Unions"):
     return fit_mod.platform_fit(conn, RUN, [CARD])["platforms"][0]
 
 
+# The tile shape CG-03b reads (RC-09, merged beside this test on the
+# integration branch): the negative control must be a WHOLE tile, or it
+# measures the shape gate instead of the grain tolerance.
+TILE_SHAPE = {
+    "peer_synthesis": "No named peer is scored at this layer; identified, "
+                      "not scored.",
+    "estate_reach": {"cells_not_yet_reached": 2, "by_category": [],
+                     "derivation": "two integration cells, no register "
+                                   "product linked"},
+}
+
+
 def _pages(fit_score, rank=1):
     pages = skeleton()
     pages["platform"]["platform_story"]["platforms"] = [
-        {**CARD, "fit_score": fit_score, "rank": rank}]
+        {**CARD, **TILE_SHAPE, "fit_score": fit_score, "rank": rank}]
     return pages
 
 
