@@ -83,9 +83,86 @@ def test_every_citation_key_is_reached_not_just_the_named_two():
 def test_an_unknown_sub_vertical_refuses_nothing():
     """Absent beats wrong: not knowing who the entity is, is not grounds
     for refusing a citation. The API's `serves` makes the same one-sided
-    choice."""
-    assert _check_subvertical_scope("heatmap", {"focus_areas": FOCUS},
+    choice. Refusing nothing is not the same as saying nothing, though —
+    see the next test."""
+    out = _check_subvertical_scope("heatmap", {"focus_areas": FOCUS}, None)
+    assert [r for r in out if r["severity"] == "block"] == []
+
+
+def test_an_unknown_sub_vertical_is_a_recorded_warning_not_silence():
+    """SWBC promoted with `sub_vertical` NULL, and ET-05 checked nothing
+    with nothing recorded — indistinguishable from a run whose every
+    variant citation was checked and belonged. One `warn` per page now
+    names what went unchecked; it never blocks."""
+    out = _check_subvertical_scope("heatmap", {"focus_areas": FOCUS}, None,
+                                   raw_sub_vertical=None)
+    assert len(out) == 1
+    (r,) = out
+    assert r["gate_id"] == "ET-05" and r["severity"] == "warn"
+    assert "NOT CHECKED" in r["message"] and "not stated" in r["message"]
+    # six distinct sub-vertical variant ids; BK1 is a family code, not one
+    assert "6 variant cell" in r["message"]
+    stated = _check_subvertical_scope("heatmap", {"focus_areas": FOCUS}, None,
+                                      raw_sub_vertical="Multi-line")
+    assert "'Multi-line'" in stated[0]["message"]
+
+
+def test_an_unknown_sub_vertical_citing_only_base_cells_says_nothing():
+    """Nothing would have been checked either way, so nothing is lost."""
+    base = {"focus_areas": [{"involved_subcap_ids": ["P2C2.1.1",
+                                                     "P1C2.7.BK1"]}]}
+    assert _check_subvertical_scope("heatmap", {"focus_areas": base},
                                     None) == []
+
+
+# ── supplementary sub-verticals (0061) ───────────────────────────────
+#
+# SWBC, owner-confirmed 2026-09-30: primary IB (insurance brokers),
+# supplementary IC, CL and RIA. Their variant cells are SWBC's own; RB's
+# (retail banking) — or any other unbound sub-vertical's — are not.
+SWBC = {"cells": [{"subcap_id": c} for c in (
+    "P1C1.4.IB1", "P1C1.3.IC1", "P1C1.3.CL1", "P2C4.6.RIA1", "P1C1.3.2")]}
+
+
+def test_a_supplementary_sub_verticals_variant_is_accepted():
+    assert _check_subvertical_scope(
+        "heatmap", {"cell_evidence": SWBC}, "IB", ("IC", "CL", "RIA")) == []
+
+
+def test_an_unbound_sub_verticals_variant_is_still_refused():
+    payload = {"cell_evidence": {"cells": SWBC["cells"] + [
+        {"subcap_id": "P1C1.3.RB1"}, {"subcap_id": "P2C2.7.CU1"}]}}
+    out = _check_subvertical_scope("heatmap", payload, "IB",
+                                   ("IC", "CL", "RIA"))
+    assert sorted(r["message"].split()[0] for r in out) == \
+        ["P1C1.3.RB1", "P2C2.7.CU1"]
+    assert all(r["severity"] == "block" for r in out)
+    assert "also bound to" in out[0]["message"]
+
+
+def test_without_the_supplementary_binding_the_same_cells_are_refused():
+    """The binding is what admits them — not a loosened rule."""
+    out = _check_subvertical_scope("heatmap", {"cell_evidence": SWBC}, "IB")
+    assert len(out) == 3
+
+
+def test_the_gate_reads_the_binding_from_the_entity_row():
+    from dma_mcp import validation2
+
+    class _Cur:
+        def execute(self, sql, params=None):
+            assert "supplementary_sub_verticals" in sql
+        def fetchone(self):
+            return ("SV7 — Insurance Brokers", ["IC", "CL", "RIA", "IB", "XX"])
+
+    class _Conn:
+        def cursor(self):
+            return _Cur()
+
+    code, supp, raw = validation2._entity_scope(_Conn(), "run")
+    # the primary and an unreadable entry are dropped, order is kept
+    assert (code, supp) == ("IB", ("IC", "CL", "RIA"))
+    assert raw == "SV7 — Insurance Brokers"
 
 
 def test_the_derivation_reads_the_terminal_segment_only():
@@ -121,6 +198,9 @@ def test_the_mirror_agrees_with_its_source_of_truth():
         assert variant_subvertical(cell) == truth.variant_subvertical(cell), cell
         for code in ("CU", "IC", None):
             assert serves(cell, code) == truth.serves(cell, code), (cell, code)
+            for supp in ((), ("IC", "RIA"), ("IB",)):
+                assert serves(cell, code, supp) == \
+                    truth.serves(cell, code, supp), (cell, code, supp)
     for raw in ("SV2", "Credit Unions", "RIA / Broker-Dealer", "Farm Credit",
                 "", None, "nonsuch"):
         assert resolve_subvertical(raw) == truth.resolve_subvertical(raw), raw

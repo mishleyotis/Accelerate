@@ -413,13 +413,13 @@ function ClientHeatmap({ entity, run }) {
       <div className="page-head">
         <div>
           <div className="eyebrow">Maturity heatmap</div>
-          <h1>Where {entity.name} is today</h1>
+          <h1>Where {entityName(entity)} is today</h1>
           {/* maturityLabel returns null for a null composite, and .toLowerCase()
               on it took the whole page down. No composite, no band word. */}
           <div className="sub">{entity.subcaps.length} subcaps · {entity.subcaps.filter(s => s.thin).length} thin{overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted"}</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entityName(entity)} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
         </div>
       </div>
 
@@ -537,7 +537,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
       <div>
         <div className="row" style={{ marginBottom: 12 }}>
           <Icon name="sparkle" size={15} style={{ color: "var(--z-dpur)" }} />
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Strategic priorities for {entity.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Strategic priorities for {entityName(entity)}</div>
           
           <span className="spacer" />
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Click any focus area to drill in</span>
@@ -716,7 +716,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
               involved_subcap_ids per pillar), not weights in a composite —
               calling them weights implied the focus area score was a weighted
               roll-up of pillars, which nothing in the run says. */}
-          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entity.name}.</div>
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entityName(entity)}.</div>
         </div>
 
         <div className="card">
@@ -1454,7 +1454,7 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
         </p>
         <p style={{ marginTop: 8 }}>
           Which cells belong to which business process is the producer's claim
-          about {entity.name}'s operating model. The cell grain alone cannot
+          about {entityName(entity)}'s operating model. The cell grain alone cannot
           stand it up, so nothing is drawn here until the section promotes.
         </p>
       </div>

@@ -11,9 +11,13 @@ on:
 # commit replaces. Keyed on the ref, so a push run only ever cancels an older
 # push run and a pull_request run an older pull_request run: which of the two
 # survives stays deterministic, and the merge-commit build is still measured.
+#
+# Except on the default branch: a push there runs the `deploy` job, and
+# cancelling a deploy between the migrate Job and the service roll leaves
+# production half-released. Default-branch runs queue instead.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != format('refs/heads/{0}', github.event.repository.default_branch) }}
 
 jobs:
   gates:
@@ -786,3 +790,59 @@ jobs:
   # Per-service lint/type/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
   # the first commit so no code was ever merged without them.
+
+  # Every merge to the default branch ships: infra/deploy.sh runs against
+  # production once every job above has passed on that commit, so nothing
+  # that merged lingers undeployed (SWBC was re-promoted against an API that
+  # did not carry its redaction fixes, because merging and deploying were two
+  # steps and only one was taken).
+  #
+  # Auth is Workload Identity Federation as claude-deployer — no key exists.
+  # The trust is set up once by infra/github-deploy-wif.sh and only honours
+  # this repository on the default branch. Until the owner has run it and set
+  # the two repository variables, this job says so and skips the deploy.
+  deploy:
+    name: Deploy to Cloud Run (default branch)
+    if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: [gates, schema-qa, python-tests, research-engine-tests, acceptance-tests, research-walks, web-tests, promoted-client-audit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    # One release at a time, and never cancelled part-way.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Deploy credentials configured?
+        id: cfg
+        env:
+          WIF: ${{ vars.GCP_WIF_PROVIDER }}
+          SA: ${{ vars.GCP_DEPLOYER_SA }}
+        run: |
+          if [ -n "$WIF" ] && [ -n "$SA" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Deploy skipped::GCP_WIF_PROVIDER / GCP_DEPLOYER_SA are not set. Run infra/github-deploy-wif.sh once as a project owner and set the variables it prints."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          fetch-depth: 0
+      - uses: google-github-actions/auth@v2
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          python-version: '3.12'
+      - name: infra/deploy.sh
+        if: steps.cfg.outputs.ready == 'true'
+        run: bash infra/deploy.sh

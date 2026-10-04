@@ -274,15 +274,18 @@ def distribution(items: list[dict]) -> dict:
 
 
 def redact_items(items: list[dict], audience: str) -> list[dict]:
-    """Strip the internal grading for the customer audience. Server-side and
-    default-deny, like every other redaction in this app: the customer's
-    document never contains the fields, rather than hiding them in the client."""
-    if audience != "customer":
+    """The items `audience` may see. Server-side and default-deny, like every
+    other redaction in this app: any audience that is not exactly `internal`
+    gets the customer rule, and the customer's document never contains what
+    is withheld rather than hiding it in the client.
+
+    The customer rule is `redaction.customer_evidence_items` — the grading,
+    and since 2026-10-02 everything else the page redactor applies: internal
+    -origin rows withheld whole, the vendor / seller / machinery / pipeline
+    vocabulary nets, the excluded key classes. It used to strip only
+    `INTERNAL_FIELDS`, and SWBC's customer drawer served our own discovery
+    write-up."""
+    if audience == "internal":
         return items
-    out = []
-    for i in items:
-        c = dict(i)
-        for k in INTERNAL_FIELDS:
-            c.pop(k, None)
-        out.append(c)
-    return out
+    from .redaction import customer_evidence_items   # redaction imports us
+    return customer_evidence_items(items)[0]

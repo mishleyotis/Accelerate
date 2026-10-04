@@ -315,10 +315,18 @@ def submit(run_id: str, page: str, payload: dict, producer: str) -> dict:
     parts = plan(payload, page)
     print(f"  {len(parts)} part(s), {size(payload):,} bytes", flush=True)
     for i, part in enumerate(parts, 1):
-        ack = mcp("append_payload_part",
-                  {"upload_id": upload, "part": i, "parts_total": len(parts),
-                   "path": part["path"], "kind": part["kind"],
-                   "payload": part["body"]})
+        # The connector takes exactly one body per part: `fields` (merge an
+        # object at `path`) or `items` (append to the list at `path`, with
+        # `item_count` so a short part is refused at receipt). It refused
+        # the older {kind, payload} shape with ONE_BODY.
+        args = {"upload_id": upload, "part": i, "parts_total": len(parts),
+                "path": part["path"]}
+        if part["kind"] == "items":
+            args["items"] = part["body"]
+            args["item_count"] = len(part["body"])
+        else:
+            args["fields"] = part["body"]
+        ack = mcp("append_payload_part", args)
         if ack.get("_error") or ack.get("ok") is False:
             return {"_error": f"part {i}: {json.dumps(ack)[:300]}"}
         print(f"  part {i}/{len(parts)} ack {ack.get('part_bytes')} bytes",

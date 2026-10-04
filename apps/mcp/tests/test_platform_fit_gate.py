@@ -214,7 +214,7 @@ class _CtxCur(_Cur):
 
     def execute(self, sql, args=None):
         if "FROM entities" in sql or "e.sub_vertical" in sql:
-            self._rows = [(self.sub,)]
+            self._rows = [(self.sub, None)]   # + supplementary (0061)
         elif "issue_register_raw" in sql:
             self._rows = [(p,) for p in self.issues]
         elif "techstack_raw" in sql:

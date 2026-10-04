@@ -21,7 +21,7 @@ function ClientOverview({ entity, run }) {
       <div className="page-head" style={{ marginBottom: 18 }}>
         <div>
           <div className="eyebrow">Entity intelligence</div>
-          <h1 style={{ marginBottom: 4 }}>{entity.name}</h1>
+          <h1 style={{ marginBottom: 4 }}>{entityName(entity)}</h1>
           <div className="sub">{[
             DMA.SUBVERTICAL_LABEL[entity.subvertical],
             entity.hq,
@@ -31,7 +31,7 @@ function ClientOverview({ entity, run }) {
           ].filter(Boolean).join(" · ")}</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Customer-safe scorecard generated · ${entity.name}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Customer-safe scorecard generated · ${entityName(entity)}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
           <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued - first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>
           <button className="btn btn-secondary" onClick={() => { setIpSurface("why_now"); setIpContext({ entity }); setIpOpen(true); }}><Icon name="sparkle" size={13} /> Meeting prep</button>
         </div>
@@ -1635,7 +1635,7 @@ function InProgressBanner({ run, entity }) {
           <span className="spacer" />
           <span className="b b-ph1">SSE LIVE</span>
         </div>
-        <p style={{ fontSize: 12, color: "#1E3A8A", marginBottom: 12, lineHeight: 1.55 }}>{entity.name} is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5.</p>
+        <p style={{ fontSize: 12, color: "#1E3A8A", marginBottom: 12, lineHeight: 1.55 }}>{entityName(entity)} is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5.</p>
         <div className="batch-row" style={{ marginBottom: 16 }}>
           {["Setup","Evidence","Peers","Scoring","Analysis","Final"].map((b, i) => (
             <div key={b} className={`batch-pill ${i + 1 < run.current_batch ? "done" : i + 1 === run.current_batch ? "active" : ""}`}>{i+1} {b}</div>

@@ -166,7 +166,8 @@ _DIR_ROW = (ENTITY, "baxter-credit-union-bcu", "Baxter Credit Union (BCU)",
             datetime(2026, 8, 8, 7, 50, tzinfo=timezone.utc),
             date(2026, 3, 30), "DERIVED_REQUEST_ID_TOKEN", "manifest.run_id",
             date(2026, 9, 30),
-            None)                    # entity_domain (0045) — NULL, as in prod
+            None,                    # entity_domain (0045) — NULL, as in prod
+            None, None)              # trading_name, supplementary SVs (0061)
 
 _REQ_ROW = (1, ENTITY, RUN, "human", "ae@zennify.com", "client asked at QBR",
             "REQUESTED", None, datetime(2026, 8, 1, tzinfo=timezone.utc),

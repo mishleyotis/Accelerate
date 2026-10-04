@@ -489,7 +489,7 @@ def cell_items(cur, data: dict, entity_id) -> None:
     cur.execute(
         """SELECT w.cited, ei.e_id, ei.tier::text, ei.claim_type::text,
                   ei.recency_band::text, ei.source_name, ei.source_domain,
-                  ei.excerpt, ei.source_url
+                  ei.excerpt, ei.source_url, ei.origin::text
              FROM unnest(%s::text[]) AS w(cited)
              JOIN evidence_index ei
                ON ei.e_id = resolve_evidence_id(w.cited)
@@ -508,6 +508,10 @@ def cell_items(cur, data: dict, entity_id) -> None:
                     "source_title": _expand_abbrev(r[5], "label"),
                     "publisher": r[6],
                     "excerpt": r[7], "source_url": r[8],
+                    # Read so the CUSTOMER drawer can withhold an internal
+                    # row whole (redaction.customer_evidence_items); the
+                    # customer body never carries the key itself.
+                    "origin": r[9] if len(r) > 9 else None,
                     **({"cited_as": r[0]} if r[0] != r[1] else {})}
              for r in cur.fetchall()}
 
@@ -516,8 +520,20 @@ def cell_items(cur, data: dict, entity_id) -> None:
         if not isinstance(c, dict):
             continue
         ids = [e for e in (c.get("e_ids") or []) if isinstance(e, str)]
-        items = [by_id[e] for e in ids if e in by_id]
+        items = [dict(by_id[e]) for e in ids if e in by_id]
         unresolved += len(ids) - len(items)
+        # The producer may only make an item's freshness MORE conservative
+        # than the store row: a fetch-day or Jan-1 placeholder date stored as
+        # published reads CURRENT here, and the producer that caught it marks
+        # the item UNVERIFIED (invariant 9: undated is never current). A
+        # registered row cannot be amended, so without this the drawer
+        # re-dates what the payload corrected. Never an upgrade.
+        stated = {i.get("e_id"): i.get("recency")
+                  for i in (c.get("items") or []) if isinstance(i, dict)}
+        for it in items:
+            if stated.get(it["e_id"]) == "UNVERIFIED" \
+                    and it.get("recency") != "UNVERIFIED":
+                it["recency"] = "UNVERIFIED"
         # Order follows e_ids, which the producer ranked. Order is meaning.
         _set(c, "items", items)
         # `thin` is the ABSENCE-ROUTE marker — it travels with

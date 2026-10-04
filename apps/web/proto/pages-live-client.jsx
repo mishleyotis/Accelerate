@@ -2417,7 +2417,7 @@ function LiveClientPage({ entity, run, tab, live }) {
   if (page === "overview") {
     return (
       <div>
-        <PageHead eyebrow="Assessment overview" title={entity.name} sub={subline} />
+        <PageHead eyebrow="Assessment overview" title={entityName(entity)} sub={subline} />
         {has("scores") || has("firmographics") ? (
           <Sec name="scores"><LiveSnapshot scores={S("scores")} firmo={S("firmographics")}
                         entity={entity} run={run} state={St("scores")}
@@ -2477,7 +2477,7 @@ function LiveClientPage({ entity, run, tab, live }) {
   if (page === "heatmap") {
     return (
       <div>
-        <PageHead eyebrow="Maturity heatmap" title={`Where ${entity.name} is today`}
+        <PageHead eyebrow="Maturity heatmap" title={`Where ${entityName(entity)} is today`}
                   sub={subline} />
         {has("workbook_scores") ? (
           <Sec name="workbook_scores">
@@ -2516,7 +2516,7 @@ function LiveClientPage({ entity, run, tab, live }) {
   if (page === "insights") {
     return (
       <div>
-        <PageHead eyebrow="Insights" title={`What the evidence says about ${entity.name}`}
+        <PageHead eyebrow="Insights" title={`What the evidence says about ${entityName(entity)}`}
                   sub={subline} />
         {has("insights") ? <Sec name="insights"><LiveInsights data={S("insights")} state={St("insights")} /></Sec>
           : missing("insights")}
@@ -2531,7 +2531,7 @@ function LiveClientPage({ entity, run, tab, live }) {
     return (
       <div>
         <PageHead eyebrow="Platform recommendation"
-                  title={`What ${entity.name} should build next`} sub={subline} />
+                  title={`What ${entityName(entity)} should build next`} sub={subline} />
         {has("platform_story") ? <Sec name="platform_story"><LivePlatformStory data={S("platform_story")}
           state={St("platform_story")} /></Sec>
           : missing("platform_story")}
@@ -2551,7 +2551,7 @@ function LiveClientPage({ entity, run, tab, live }) {
   if (page === "context") {
     return (
       <div>
-        <PageHead eyebrow="Context" title={`How ${entity.name} got here`} sub={subline} />
+        <PageHead eyebrow="Context" title={`How ${entityName(entity)} got here`} sub={subline} />
         {has("timeline") ? <Sec name="timeline"><LiveTimeline data={S("timeline")} state={St("timeline")} /></Sec>
           : missing("timeline")}
         {has("acquisitions") ? <Sec name="acquisitions"><LiveAcquisitions data={S("acquisitions")}
@@ -2573,7 +2573,7 @@ function LiveClientPage({ entity, run, tab, live }) {
   if (page === "techstack") {
     return (
       <div>
-        <PageHead eyebrow="Technology" title={`${entity.name}'s estate`} sub={subline} />
+        <PageHead eyebrow="Technology" title={`${entityName(entity)}'s estate`} sub={subline} />
         {has("techstack") ? <Sec name="techstack"><LiveTechStack data={S("techstack")} state={St("techstack")} /></Sec>
           : missing("techstack")}
       </div>
@@ -2591,7 +2591,7 @@ function LiveRuns({ entity, run }) {
   const runs = (entity.runs || []).slice();
   return (
     <div>
-      <PageHead eyebrow="Run history" title={`${entity.name} · runs`}
+      <PageHead eyebrow="Run history" title={`${entityName(entity)} · runs`}
         sub={`${runs.length} promoted run${runs.length === 1 ? "" : "s"}`} />
       {runs.length ? (
         <div className="card" style={{ padding: "18px 20px" }}>

@@ -2655,7 +2655,7 @@ function ClientHealth({
     size: 13
   }), " Re-run feedback file"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast(`Exporting ${entity.name} health report as CSV…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} health report as CSV…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -3389,7 +3389,7 @@ function ClientTechStack({
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Technology intelligence"), /*#__PURE__*/React.createElement("h1", null, "Technology stack - ", entity.name), /*#__PURE__*/React.createElement("div", {
+  }, "Technology intelligence"), /*#__PURE__*/React.createElement("h1", null, "Technology stack - ", entityName(entity)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, allTech.length, " product", allTech.length === 1 ? "" : "s", " across four layers \xB7 detection level per row, from the run's own evidence"), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).techstack,
@@ -3399,7 +3399,7 @@ function ClientTechStack({
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} tech stack as CSV…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -4793,13 +4793,13 @@ function ClientRuns({
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Run history"), /*#__PURE__*/React.createElement("h1", null, "Runs - ", entity.name), /*#__PURE__*/React.createElement("div", {
+  }, "Run history"), /*#__PURE__*/React.createElement("h1", null, "Runs - ", entityName(entity)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, entity.runs.length, " immutable run records \xB7 sortable by date")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast(`Rerun queued for ${entity.name} — first batch in ~3 min`, "success")
+    onClick: () => pushToast(`Rerun queued for ${entityName(entity)} — first batch in ~3 min`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13

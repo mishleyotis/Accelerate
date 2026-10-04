@@ -1774,7 +1774,7 @@ function ClientHealth({ entity, run }) {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast("Feedback file regenerated - routed to DMA bot", "success")}><Icon name="refresh" size={13} /> Re-run feedback file</button>
-          <button className="btn btn-secondary" onClick={() => pushToast(`Exporting ${entity.name} health report as CSV…`, "success")}><Icon name="download" size={13} /> CSV export</button>
+          <button className="btn btn-secondary" onClick={() => pushToast(`Exporting ${entityName(entity)} health report as CSV…`, "success")}><Icon name="download" size={13} /> CSV export</button>
         </div>
       </div>
 
@@ -2336,7 +2336,7 @@ function ClientTechStack({ entity, run }) {
       <div className="page-head">
         <div>
           <div className="eyebrow">Technology intelligence</div>
-          <h1>Technology stack - {entity.name}</h1>
+          <h1>Technology stack - {entityName(entity)}</h1>
           {/* The register's own facts: how many rows, at what detection level.
               This used to read "Explorium synced <date>" — a vendor this app
               does not call, beside the ASSESSMENT date rather than any sync. */}
@@ -2352,7 +2352,7 @@ function ClientTechStack({ entity, run }) {
           <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).techstack} what="register" audience={audience} />
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")}><Icon name="download" size={13} /> Export</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entityName(entity)} tech stack as CSV…`, "success")}><Icon name="download" size={13} /> Export</button>
         </div>
       </div>
 
@@ -3255,11 +3255,11 @@ function ClientRuns({ entity }) {
       <div className="page-head">
         <div>
           <div className="eyebrow">Run history</div>
-          <h1>Runs - {entity.name}</h1>
+          <h1>Runs - {entityName(entity)}</h1>
           <div className="sub">{entity.runs.length} immutable run records · sortable by date</div>
         </div>
         <div className="actions">
-          <button className="btn btn-secondary" onClick={() => pushToast(`Rerun queued for ${entity.name} — first batch in ~3 min`, "success")}><Icon name="refresh" size={13} /> Trigger rerun</button>
+          <button className="btn btn-secondary" onClick={() => pushToast(`Rerun queued for ${entityName(entity)} — first batch in ~3 min`, "success")}><Icon name="refresh" size={13} /> Trigger rerun</button>
         </div>
       </div>
       {/* `tbl-reflow`: this is an eight-column table, the widest on any client

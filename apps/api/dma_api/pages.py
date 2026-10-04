@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from .computed import apply as computed_apply
 from .redaction import page_forbidden, redact_section, redact_empty_state
-from .subverticals import scope_sections
+from .subverticals import (resolve_subvertical, resolve_supplementary,
+                           scope_sections)
 from .serving_spec import page_sections, readers, assemble
 from .value_chain import serve_value_chain
 
@@ -90,7 +91,8 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                           ccg_catalog_version, completed_at, promoted_at,
                           assessment_date, assessment_date_basis,
                           assessment_date_source, refresh_due_date,
-                          entity_domain
+                          entity_domain, trading_name,
+                          supplementary_sub_verticals
                      FROM serving_directory
                     WHERE display_id = %s
                     -- NULLS LAST is load-bearing: `is_active` is a nullable
@@ -121,8 +123,17 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
             raise ApiError(404, "entity_not_found",
                            f"{display_id} has no active promoted run")
 
+    # `trading_name` travels so a reader whose `entity_name` is NULL still
+    # gets a name (the web's legal -> trading -> display id fallback), and
+    # the supplementary codes so every scope call below admits the variant
+    # cells of each sub-vertical the entity is bound to (0061). The display
+    # label stays the PRIMARY's alone.
     entity = {"display_id": picked[1], "entity_name": picked[2],
-              "sub_vertical": picked[3], "size_tier": picked[4]}
+              "trading_name": picked[21],
+              "sub_vertical": picked[3], "size_tier": picked[4],
+              "supplementary_sub_verticals": list(
+                  resolve_supplementary(picked[22],
+                                        resolve_subvertical(picked[3])))}
     run_meta = {"run_id": str(picked[5]), "request_id": picked[6],
                 "run_seq": picked[7],
                 "completed_at": picked[14].isoformat() if picked[14] else None,
@@ -208,7 +219,20 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       the page, which is the worst pair: a hand check of the screen agrees
 #       with a green test and neither is looking at the body. A customer who
 #       fetched before this bump holds a body carrying the census.
-SERVE_RULES = "serve-rules@10"
+#   @11 2026-10-02 — the SWBC redaction audit. Customer bodies change under
+#       an unmoved promoted_at in five ways: the cell drawer withholds
+#       internal-origin and vendor/seller/pipeline-vocabulary evidence items
+#       whole and `grounded_on` counts the items served; `platform.starters`
+#       is withheld whole; dict-valued `linking_stats` is held to its
+#       allowlist; "account team" joins the seller net and a pipeline-
+#       vocabulary net (NOT_RUN in prose, tool names, RRF, k=60…) runs over
+#       every section and empty state; the value chain's empty state goes
+#       through the walker. The entity block also gains `trading_name` and
+#       `supplementary_sub_verticals` (0061). Before @11 was deployed it also
+#       took two walker fixes from the re-check: element paths are deleted
+#       highest index first, and an id-keyed map or wrapper dict is filtered
+#       by its values' keys, never its ids — @11 never served without them.
+SERVE_RULES = "serve-rules@11"
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -341,7 +365,8 @@ def build_page(cur, page: str, display_id: str, audience: str,
         #
         # Same one-sided rule as everywhere else: base cells, family and
         # product variants, and an unresolved entity all keep everything.
-        scope_sections(entity.get("sub_vertical"), built["data"])
+        scope_sections(entity.get("sub_vertical"), built["data"],
+                       entity.get("supplementary_sub_verticals"))
         data, report = redact_section(page, section, built["data"],
                                       env.get("internal_only"), audience)
         if data is None:
