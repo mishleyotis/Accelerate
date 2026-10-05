@@ -1602,6 +1602,9 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                           "disposition": _clean(r.get("Contradiction_Disposition"))},
         # ceiling_reasoning
         "ceiling": _clean(r.get("Ceiling_Reasoning"))[:160],
+        # claim_label_fit and ceiling_reasoning judge the band the
+        # synthesis stated; the reasoning text alone does not carry it.
+        "ceiling_band": _clean(r.get("Ceiling_Band")),
         # Evidence_Detail.Recency is what ledger.append_evidence writes.
         "recency_bands": sorted({_clean(x.get("Recency")) for x in rows
                                  if _clean(x.get("Recency"))}),

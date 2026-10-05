@@ -109,6 +109,18 @@ def test_the_packet_carries_the_recency_the_ledger_wrote(tmp_path):
     assert all(row["recency"] == expected for row in cell["evidence"])
 
 
+def test_the_packet_carries_the_ceiling_band_the_synthesis_stated(tmp_path):
+    """`claim_label_fit` judges a CEILING_ESTIMATE by its band and
+    `ceiling_reasoning` reads 'the proposed ceiling and band'; the packet
+    shipped only Ceiling_Reasoning[:160], so the challenger recorded both
+    NOT_RUN for want of the band (First Tech run, 2026-10-05: 554 banded
+    syntheses, 0 shipped)."""
+    run, wb, cells = _synthesised(tmp_path)
+    out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
+    cell = out["packets"][0]["cells_to_challenge"][0]
+    assert cell["ceiling_band"] == "Competing"
+
+
 def test_it_is_not_sent_to_the_research_card(tmp_path):
     run, wb, cells = _synthesised(tmp_path)
     out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
