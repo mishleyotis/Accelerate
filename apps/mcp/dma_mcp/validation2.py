@@ -4088,6 +4088,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # RC-06: the same primary code decides O2's firmographic set and the C3
     # regulator family.
     reasons.extend(_check_subvertical_must_present(page, payload, entity_code))
+    reasons.extend(_check_cagr_rule(page, payload))
+    reasons.extend(_check_technographic_scan(conn, run_id, page, payload))
     reasons.extend(_check_c3_regulator_family(page, payload, entity_code))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
     reasons.extend(_check_safeguard_gate_ids(conn, page, payload))
@@ -4164,6 +4166,113 @@ def _check_subvertical_must_present(page, payload, code) -> list:
         out.append(_held_ceiling_reason("firmographics", "fields", over[0],
                                         len(union), over[1]))
     return out
+
+
+# ── CG-18f · CAGR: ranked, and served only when corroborated ──────────
+# Owner decision 2026-10-05 (SWBC): "compute every CAGR candidate, rank them
+# by validity, and serve only the corroborated figure". The field promoted
+# held with "no consolidated financials" while the same page carried eight
+# dated points of a series a CAGR is computed from — nobody had computed it,
+# ranked it or said why it was not served.
+_CORROBORATED = re.compile(r"corroborat", re.I)
+_RATE = re.compile(r"-?\d+(?:\.\d+)?\s*(?:%|percent)", re.I)
+
+
+def _dated_points(series) -> int:
+    pts = series.get("series") if isinstance(series, dict) else None
+    return sum(1 for p in (pts or []) if isinstance(p, dict)
+               and isinstance(p.get("value"), (int, float))
+               and str(p.get("as_of") or p.get("period") or "").strip())
+
+
+def _check_cagr_rule(page, payload) -> list:
+    """CG-18f — a CAGR is served only corroborated, and held only ranked."""
+    if page != "overview" or not isinstance(payload, dict):
+        return []
+    body = payload.get("firmographics")
+    if not isinstance(body, dict):
+        return []
+    item = _o2_field(body.get("fields"), "cagr")
+    if not isinstance(item, dict):
+        return []
+    path = "firmographics.fields[cagr]"
+    held = item.get("value") in (None, "", [])
+    if not held:
+        if not _CORROBORATED.search(str(item.get("unit") or "")):
+            return [_reason(
+                "CG-18f", "firmographics", path,
+                "a CAGR is served only when a second, independent source "
+                "corroborates it (owner decision 2026-10-05). Name it in the "
+                "unit — what grew, over which window, whose scope, and "
+                "'corroborated by <source>' — or hold the field with the "
+                "ranked candidates.")]
+        return []
+    points = _dated_points(payload.get("financial_series"))
+    reason = str(item.get("quarantine_reason") or "")
+    if points >= 2 and not (_CORROBORATED.search(reason)
+                            and _RATE.search(reason)):
+        return [_reason(
+            "CG-18f", "firmographics", path,
+            f"the CAGR is held while overview.financial_series carries "
+            f"{points} dated points a growth rate is computed from. Compute "
+            f"every candidate (that series, a connector headcount or revenue "
+            f"history, any self-stated series), rank them by validity, and "
+            f"serve the corroborated one. Held is admissible only when none "
+            f"is corroborated, and the reason must then state each "
+            f"candidate's rate and why it was not corroborated.")]
+    return []
+
+
+# ── ET-12 · the register is built on a machine technographic scan ─────
+# SWBC 2026-10-05: Clay was called for contacts only and Vibe Prospecting
+# never; the tech register promoted from postings and pages, so a material
+# detection (an integration platform under the run's rank-1 argument) was
+# never weighed. A scan that genuinely could not run is a recorded NOT_RUN
+# naming both tools and why, never silence.
+_SCAN_TOOL = re.compile(r"clay|vibe|explorium", re.I)
+
+
+def _check_technographic_scan(conn, run_id, page, payload) -> list:
+    if page != "techstack" or not isinstance(payload, dict):
+        return []
+    body = payload.get("techstack")
+    if not isinstance(body, dict) or not body.get("items"):
+        return []            # an empty register states its empty_state
+    cited = set()
+    for _path, obj in _walk(body, "techstack"):
+        for key in _EV_KEYS:
+            val = obj.get(key)
+            for e in ([val] if isinstance(val, str) else (val or [])):
+                if isinstance(e, str) and e.strip():
+                    cited.add(e.strip())
+    if cited:
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """SELECT count(*) FROM evidence_index
+                    WHERE e_id = ANY(%s) AND origin::text = 'connector'
+                      AND connector_tool ~* '(clay|vibe|explorium)'""",
+                (sorted(cited),))
+            if (cur.fetchone() or [0])[0]:
+                return []
+        except Exception:                          # noqa: BLE001
+            return []        # no store to read: promotion re-gates
+    probes = (body.get("r_layer") or {}).get("probes_run") \
+        if isinstance(body.get("r_layer"), dict) else None
+    for p in probes or []:
+        t = str(p)
+        if "NOT_RUN" in t and re.search(r"clay", t, re.I) \
+                and re.search(r"vibe|explorium", t, re.I):
+            return []
+    return [_reason(
+        "ET-12", "techstack", "techstack.e_ids",
+        "the register cites no machine technographic scan. Run Clay's "
+        "company Tech Stack and Vibe Prospecting's enrich-business "
+        "technographics, register each reading under origin 'connector' "
+        "with kind 'technographic' (T1; a scan-only row stays INFERRED), "
+        "and cite it on the rows it detects. If a scan genuinely could not "
+        "run, record it in r_layer.probes_run as NOT_RUN naming Clay and "
+        "Vibe Prospecting and the reason.")]
 
 
 # Regulators by canonical key, for the O2 <-> C3 comparison. State offices

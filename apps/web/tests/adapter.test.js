@@ -630,3 +630,26 @@ test("a tech row with no promoted impact says so rather than computing one", () 
                      "0 would read as a researched share of zero");
   assert.deepStrictEqual(out[0].peer_deployments, []);
 });
+
+test("a star rating fills from zero, so the lowest score still draws", () => {
+  /* SWBC, 2026-10-05: a Better Business Bureau rating of 1.0 on "1-5 stars"
+     sat at the floor of its stated range and drew 0% — the same empty rail a
+     missing figure draws, so a real (and damning) rating read as no data.
+     Owner decision: stars are read as a star display reads them, rating
+     over the top star. Other notations keep the range they state. */
+  const w = require("./adapter-window");
+  assert.strictEqual(w.scaleFraction(1.0, "1-5 stars"), 0.2,
+    "one star of five fills a fifth, never nothing");
+  assert.ok(Math.abs(w.scaleFraction(4.9, "1-5 stars") - 0.98) < 1e-9);
+  assert.strictEqual(w.scaleFraction(3, "5 stars"), 0.6);
+  for (const v of [1, 1.5, 2.2, 3.1, 4.1, 5]) {
+    assert.ok(w.scaleFraction(v, "1-5 stars") > 0,
+      `a measured ${v}-star rating must draw a fill`);
+  }
+  assert.strictEqual(w.scaleFraction(4.3, "stars"), null,
+    "a notation stating no bound still draws no bar");
+  assert.strictEqual(w.scaleFraction(79.81, "NPS -100..100"),
+    (79.81 + 100) / 200, "NPS keeps its own range");
+  assert.ok(Math.abs(w.scaleFraction(96.2, "0-100 % of complaints answered on time")
+    - 0.962) < 1e-9);
+});
