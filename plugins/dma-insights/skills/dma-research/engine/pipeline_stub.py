@@ -206,6 +206,13 @@ def lane_scoring(agent, prompt_file, ctx):
             F.score_cell(wb, c, ev[c], score=2.0 + 0.25 * (i % 3), actor=agent)
         else:
             F.score_cell(wb, c, [], score=1.5, confidence="LOW", actor=agent)
+    # The critic's moves are this lane's too: a real scorer is handed them
+    # as `rescore` rows, and re-strikes each at its target.
+    from . import assessment as A
+    for mv in A.pending_moves(wb, pillar)["moves"]:
+        c = mv["subcap"]
+        F.score_cell(wb, c, ev.get(c, []), score=mv["to"],
+                     confidence="LOW" if c not in ev else "MEDIUM", actor=agent)
 
 
 def lane_solutions(agent, prompt_file, ctx):

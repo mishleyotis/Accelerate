@@ -106,7 +106,8 @@ def test_a_failed_critic_is_still_the_critics_state_and_says_so(tmp_path):
     score_all(wb, cells, ev)
     A.critique(wb, pillar="P1", verdict="FAIL", actor="scoring-critic",
                note="Two rows flatter the evidence: P1C1.1.2 reads M3 on a single "
-                    "T3 source; P1C1.1.4 ignores its own counter-evidence.")
+                    "T3 source; P1C1.1.4 ignores its own counter-evidence.",
+               moves=[(cells[0], 1.0, "reads M3 on a single T3 source")])
     row = watchdog.inspect(run)
     assert row["state"] == "CRITIC_PENDING"
     assert row["critic_failed"] == ["P1"]

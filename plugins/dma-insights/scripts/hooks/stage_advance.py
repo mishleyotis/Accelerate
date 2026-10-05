@@ -405,6 +405,9 @@ def awaiting_workflow(event: dict) -> dict | None:
     text = _response_text(event)
     if "AWAITING_WORKFLOW" not in text:
         return None
+    ms = re.search(r"(/\S+?scoring_workflow\.json)", text)
+    if ms:
+        return _scoring_workflow_context(ms.group(1))
     m = re.search(r"(/\S+?research_workflow\.json)", text)
     doc = {}
     if m:
@@ -687,3 +690,29 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception:                                      # noqa: BLE001
         sys.exit(0)                                        # fail open, silent
+
+
+def _scoring_workflow_context(path: str) -> dict:
+    """SCORING handed to the session: one persisted workflow per pillar.
+
+    Measured 2026-10-05 (Susser Bank): scoring as headless lanes took 294 min
+    behind one all-pillar critic and a barrier. Each pillar is now its own
+    workflow, visible in /workflows; this names the exact calls."""
+    try:
+        doc = json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        doc = {}
+    lines = ["SCORING IS YOURS, AS PERSISTED WORKFLOWS — start ALL of these in ONE "
+             "message (one per pillar; each pillar's critic starts when ITS scorers "
+             "finish, and its moves go straight back to its scorer):"]
+    for inv in doc.get("invocations") or []:
+        lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
+                     f"args: {json.dumps(inv)}}})")
+    if not doc:
+        lines.append(f"  (handoff file not readable — open {path})")
+    lines.append("  No Workflow tool in this session? Re-run the driver with "
+                 "--scoring-mode lanes — scoring needs no connector, so headless "
+                 "lanes are sound. Never score rows by hand.")
+    lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'the driver again'}")
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
+                                   "additionalContext": "\n".join(lines)}}

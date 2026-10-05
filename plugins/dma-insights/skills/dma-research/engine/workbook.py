@@ -547,6 +547,7 @@ class RunWorkbook:
             "prelim_status": "OPEN",
             "prelim_completed_at": "",
             "empty_sheet_reasons": "",
+            "critic_moves": "",
             # The Slack request this run answers, when it came from one.
             # `engine.cli start --slack-channel/--slack-thread-ts/
             # --requested-by` fills them; the automated intake always does

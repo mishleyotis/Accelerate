@@ -374,7 +374,79 @@ def ceiling_for(wb: RunWorkbook, row: dict) -> tuple[float, str]:
     why = f"best tier {best} allows {ceil}"
     if len(idents) < 2 and ceil > 3.0:
         ceil, why = 3.0, why + "; single source caps at M3 (CAP-SS)"
+    # THE CRITIC'S MECHANICAL RULES, ENFORCED WHERE THE SCORE IS WRITTEN
+    # (measured 2026-10-05, Susser Bank): every scoring-critic FAIL across
+    # five ~70-minute rounds was one of these, found by re-reading rows the
+    # engine could have refused at write time.
+    for label, cap, reason in mechanical_caps(wb, row, idents=idents):
+        if cap < ceil:
+            ceil, why = cap, why + f"; {reason} ({label})"
     return ceil, why
+
+
+#: The highest legal score inside each band word (strict less-than edges,
+#: invariant 6): a row whose own Ceiling_Band says Activating cannot score 2.0.
+BAND_TOP = {"ACTIVATING": 1.75, "BUILDING": 2.75, "COMPETING": 3.75,
+            "DIFFERENTIATING": 5.0}
+#: Months after which, with no CURRENT/RECENT source on the row, ADJ_STALE
+#: is owed (the evidence ladder: DATED begins at 24).
+STALE_MONTHS = 24
+
+
+def _own_hosts(wb: RunWorkbook) -> set[str]:
+    """The entity's own web identities: the Firmographics website, bare."""
+    out = set()
+    for r in wb.rows("Firmographics"):
+        if _clean(r.get("Field")).lower() == "website" and _clean(r.get("Value")):
+            out.add(_clean(r.get("Value")).lower().removeprefix("www."))
+    return out
+
+
+def _host(url: str) -> str:
+    return url.split("//")[-1].split("/")[0].lower().removeprefix("www.")
+
+
+def mechanical_caps(wb: RunWorkbook, row: dict, *, idents=None) -> list[tuple]:
+    """(label, cap, reason) for every rule-based cap the row's own record
+    imposes. Read by `ceiling_for`, so `score` refuses above it and the gate
+    reports it — the critic no longer has to discover them."""
+    out = []
+    band = _clean(row.get("Ceiling_Band")).upper()
+    if band in BAND_TOP and BAND_TOP[band] < 5.0:
+        out.append(("CAP-BAND", BAND_TOP[band],
+                    f"the row's own Ceiling_Band is {band.title()}, whose top is "
+                    f"{BAND_TOP[band]}"))
+    register = wb.evidence_index()
+    eids = [i.split(":")[0] for i in _split_ids(row.get("Evidence_IDs"))
+            if i and i != C.NO_EVIDENCE]
+    hosts = {_host(str((register.get(e) or {}).get("Source_URL") or "")) for e in eids}
+    hosts.discard("")
+    own = _own_hosts(wb)
+    if hosts and own and all(any(h == o or h.endswith("." + o) for o in own)
+                             for h in hosts):
+        out.append(("CAP-OWN", TIER_CEILING["T5"],
+                    "every source is the entity's own site, which is T5 whatever "
+                    "the register tag (methodology Step 2)"))
+    return out
+
+
+def stale_owed(wb: RunWorkbook, row: dict) -> str | None:
+    """Why ADJ_STALE is owed on this row, or None. Owed when the row has
+    dated evidence, none of it CURRENT or RECENT against the run's pinned
+    reference date (undated rows never count as current, invariant 9)."""
+    register = wb.evidence_index()
+    eids = [i.split(":")[0] for i in _split_ids(row.get("Evidence_IDs"))
+            if i and i != C.NO_EVIDENCE]
+    bands = {}
+    for e in eids:
+        r = register.get(e)
+        if r:
+            bands[e] = L.recency_band(r.get("Date_Published"), wb)
+    dated = {e: b for e, b in bands.items() if b != C.RECENCY_UNVERIFIED}
+    if not dated or any(b in ("CURRENT", "RECENT") for b in dated.values()):
+        return None
+    return ("no cited source is CURRENT or RECENT against the reference date ("
+            + ", ".join(f"{e} {b}" for e, b in sorted(dated.items())[:4]) + ")")
 
 
 def _parse_pairs(items, *, what: str) -> list[tuple[str, float]]:
@@ -517,7 +589,25 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
         problems.append(f"score {sc} is above the evidence ceiling {ec} ({why}); "
                         f"the ceiling is the score's cap, not a note beside it")
 
+    mv = critic_moves(wb).get(subcap)
+    if mv and sc is not None and sc > float(mv["target"]) + 1e-9:
+        problems.append(f"the scoring critic moved {subcap} to {mv['target']} "
+                        f"({mv.get('why') or 'see its Gate_Log note'}); a score above "
+                        f"the critic's target is the move refused, not applied")
+    stale = stale_owed(wb, row)
+    if stale and sc is not None and sc > 1.0:
+        labels = [lab for lab, _v in _parse_pairs(adjustments, what="--adj")] \
+            if adjustments else []
+        if not any(lab.upper().startswith("ADJ_STALE") for lab in labels) and \
+                "ADJ_STALE" not in _clean(rationale).upper():
+            problems.append(f"ADJ_STALE is owed: {stale}. Apply it (--adj "
+                            f"ADJ_STALE:-0.3 with --raw) or state it in the "
+                            f"rationale with the source that keeps the row current")
     conf = _clean(confidence).upper()
+    if stale and conf in ("HIGH", "MEDIUM"):
+        problems.append(f"confidence {conf} on STALE_DATA: {stale}. The methodology's "
+                        f"Recency rule caps a row whose newest evidence is over "
+                        f"{STALE_MONTHS} months old at LOW")
     if conf not in CONFIDENCES:
         problems.append(f"confidence {confidence!r} not in {CONFIDENCES}")
     if not eids and conf != "LOW":
@@ -627,9 +717,49 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
 
 # ── the critic ───────────────────────────────────────────────────────────
 
+def critic_moves(wb: RunWorkbook) -> dict[str, dict]:
+    """{cell: {target, why, pillar, at}} — the critic's named score moves.
+
+    Measured 2026-10-05 (Susser Bank): the critic named the same rows four
+    rounds running ("0 of 8 named rows rescored") because its moves lived
+    only in the prose of a Gate_Log note and no brief read them back. They
+    are structured now: the scoring brief routes each pending move to its
+    pillar's scorer, `score` refuses a re-score above the target, and the
+    gate blocks on `critic_moves_pending` until every one is applied."""
+    try:
+        got = json.loads(_clean(wb.metadata().get("critic_moves")) or "{}")
+    except ValueError:
+        got = {}
+    return got if isinstance(got, dict) else {}
+
+
+def pending_moves(wb: RunWorkbook, pillar: str = "") -> dict:
+    """The critic's moves still unapplied, with what a re-score needs."""
+    ss = {_clean(r.get("subcap_id")): r for r in wb.rows("Subcap_Scores")}
+    rows = []
+    for cell, mv in sorted(critic_moves(wb).items()):
+        if pillar and not cell.startswith(_clean(pillar).upper()):
+            continue
+        row = wb.scoring_row(cell) or {}
+        cur = _num(row.get("Score"))
+        if cur is None or cur <= float(mv["target"]) + 1e-9:
+            continue
+        o = ss.get(cell) or {}
+        rows.append({"subcap": cell, "from": cur, "to": mv["target"], "why": mv.get("why"),
+                     "confidence": row.get("Confidence"),
+                     "overlay": {k: o.get(k) for k in ("ai_applicability", "data_dependency",
+                                                       "data_readiness", "ai_evidence_ids",
+                                                       "ai_blocker", "peer_ai_signal")}})
+    return {"pending": len(rows), "moves": rows}
+
+
 def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
-             note: str) -> dict:
-    """The adversarial critic pass on one pillar's scores, by somebody else."""
+             note: str, moves=None) -> dict:
+    """The adversarial critic pass on one pillar's scores, by somebody else.
+
+    `moves`: [(cell, target, why)] or "CELL:TARGET[:why]" strings — every
+    row the critic would move, structured, so the move is applied rather
+    than re-reported."""
     require_stage(wb)
     pillar = _clean(pillar).upper()
     if pillar not in ("P1", "P2", "P3", "P4"):
@@ -649,10 +779,42 @@ def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
     scored = [r for r in wb.rows(f"{pillar}_Subcap_Scoring") if _num(r.get("Score")) is not None]
     if not scored:
         raise ScoringRefusal(f"{pillar} carries no scores yet; there is nothing to criticise")
+    parsed = []
+    for m in (moves or []):
+        if isinstance(m, (tuple, list)):
+            cell, target, why = (list(m) + [""])[:3]
+        else:
+            parts = str(m).split(":", 2)
+            if len(parts) < 2:
+                raise ScoringRefusal(f"--move {m!r} is not CELL:TARGET[:why]")
+            cell, target, why = (parts + [""])[:3]
+        cell, t = _clean(cell), _num(target)
+        if not cell.startswith(pillar) or wb.scoring_row(cell) is None:
+            raise ScoringRefusal(f"--move {cell!r} is not a {pillar} row of this run")
+        if t is None or not (1.0 <= t <= 5.0) or abs(t * 4 - round(t * 4)) > 1e-9:
+            raise ScoringRefusal(f"--move {cell}: target {target!r} is not a quarter-point 1.0-5.0")
+        parsed.append((cell, t, _clean(why)))
+    if _clean(verdict).upper() == "FAIL" and not parsed:
+        raise ScoringRefusal("a FAIL names the rows it would move (--move CELL:TARGET:why, "
+                             "repeatable); a FAIL with no move cannot be acted on, and the "
+                             "scorers re-read prose for rows they cannot find")
+    book = critic_moves(wb)
+    if _clean(verdict).upper() == "PASS":
+        # A PASS is the critic's re-judgement of the whole pillar: whatever it
+        # named before and no longer names is withdrawn, not left pending.
+        book = {c: m for c, m in book.items() if not c.startswith(pillar)}
+        wb.set_metadata("critic_moves", json.dumps(book, sort_keys=True))
+    for cell, t, why in parsed:
+        book[cell] = {"target": t, "why": why[:300], "pillar": pillar,
+                      "by": _clean(actor), "at": L._utcnow()}
+    if parsed:
+        wb.set_metadata("critic_moves", json.dumps(book, sort_keys=True))
     L.append_gate(wb, gate="SCORING_CRITIC", scope=pillar, verdict=_clean(verdict).upper(),
-                  detail=f"{actor}: {_clean(note)[:400]}", blocking=True)
+                  detail=f"{actor}: {_clean(note)[:400]}"
+                         + (f" | moves: {', '.join(f'{c}->{t}' for c, t, _ in parsed)}"
+                            if parsed else ""), blocking=True)
     return {"pillar": pillar, "verdict": _clean(verdict).upper(), "critic": actor,
-            "scored_rows": len(scored)}
+            "scored_rows": len(scored), "moves": len(parsed)}
 
 
 # ── rollup ───────────────────────────────────────────────────────────────
@@ -910,7 +1072,7 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         "subcap_scores_missing", "overlay_incomplete", "critic_missing",
         "critic_failed", "rollup_missing", "rollup_drift", "weights_sum",
         "dashboard_incomplete", "no_differentiation", "low_differentiation",
-        "stage_not_assessment")}
+        "stage_not_assessment", "stale_unadjusted", "critic_moves_pending")}
     if C.stage_of(md) != "assessment":
         f["stage_not_assessment"].append(C.stage_of(md))
     register = wb.evidence_index()
@@ -949,8 +1111,14 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         if eids and not (set(re.findall(r"\bE-\d+", rat)) & set(eids)):
             f["rationale_uncited"].append(cell)
         ec = _num(r.get("Evidence_Ceiling"))
-        if ec is not None and sc > ec + 1e-9:
+        live_ceiling, _w = ceiling_for(wb, r)
+        if (ec is not None and sc > ec + 1e-9) or sc > live_ceiling + 1e-9:
             f["score_above_ceiling"].append(cell)
+        if stale_owed(wb, r) and _clean(r.get("Confidence")).upper() in ("HIGH", "MEDIUM"):
+            f["stale_unadjusted"].append(f"{cell} (confidence)")
+        if sc > 1.0 and stale_owed(wb, r) and "ADJ_STALE" not in (
+                _clean(r.get("Rationale")) + _clean(r.get("Caps_Applied"))).upper():
+            f["stale_unadjusted"].append(cell)
         if _clean(r.get("Confidence")).upper() not in CONFIDENCES:
             f["confidence_invalid"].append(cell)
         if cell not in cl:
@@ -1001,6 +1169,10 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     for g in wb.rows("Gate_Log"):
         if _clean(g.get("Gate")) == "SCORING_CRITIC":
             critics[_clean(g.get("Scope"))] = _clean(g.get("Verdict")).upper()
+    for cell, mv in critic_moves(wb).items():
+        cur = _num((wb.scoring_row(cell) or {}).get("Score"))
+        if cur is not None and cur > float(mv["target"]) + 1e-9:
+            f["critic_moves_pending"].append(f"{cell} {cur}->{mv['target']}")
     for p in pillars_in_scope:
         if p not in critics:
             f["critic_missing"].append(p)
@@ -1036,7 +1208,8 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         "unchallenged_scored", "unresearched_scored", "confidence_invalid",
         "caps_log_missing", "subcap_scores_missing", "overlay_incomplete",
         "critic_missing", "critic_failed", "rollup_missing", "rollup_drift",
-        "weights_sum", "dashboard_incomplete", "no_differentiation") if f[k]]
+        "weights_sum", "dashboard_incomplete", "no_differentiation",
+        "stale_unadjusted", "critic_moves_pending") if f[k]]
     verdict = "PASS" if not blocking else "FAIL"
     out = {"gate": verdict, "run_id": md.get("run_id"), "stage": C.stage_of(md),
            "subcaps": len(wb.selected_subcaps()), "scored": got["scored"],
@@ -1110,6 +1283,11 @@ def main(argv=None) -> int:
     cr = common(sub.add_parser("critique"))
     cr.add_argument("--pillar", required=True); cr.add_argument("--verdict", required=True)
     cr.add_argument("--actor", required=True); cr.add_argument("--note", required=True)
+    cr.add_argument("--move", action="append", default=[],
+                    help="CELL:TARGET[:why], repeatable — required on a FAIL")
+    mv = common(sub.add_parser("moves", help="the scoring critic's pending moves "
+                                             "(rows still above their target)"))
+    mv.add_argument("--pillar", default="")
     ru = common(sub.add_parser("rollup")); ru.add_argument("--headline")
     so = common(sub.add_parser("solution"))
     so.add_argument("--id", required=True); so.add_argument("--name", required=True)
@@ -1150,7 +1328,10 @@ def main(argv=None) -> int:
                         data_readiness=a.data_readiness, ai_evidence=a.ai_evidence,
                         ai_blocker=a.ai_blocker, peer_ai_signal=a.peer_ai_signal)
         elif a.cmd == "critique":
-            out = critique(wb, pillar=a.pillar, verdict=a.verdict, actor=a.actor, note=a.note)
+            out = critique(wb, pillar=a.pillar, verdict=a.verdict, actor=a.actor,
+                           note=a.note, moves=a.move)
+        elif a.cmd == "moves":
+            out = pending_moves(wb, a.pillar)
         elif a.cmd == "rollup":
             out = rollup(wb, headline=a.headline)
         elif a.cmd == "solution":

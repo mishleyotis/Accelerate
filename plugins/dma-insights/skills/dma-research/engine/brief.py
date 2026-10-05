@@ -1803,6 +1803,13 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
     return out
 
 
+def _float_or_none(v):
+    try:
+        return None if v in (None, "") else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                   solutions: bool = False) -> dict:
     """The scoring lanes: one `scoring-p<N>-producer` per pillar in scope
@@ -1817,26 +1824,67 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                for r in wb.rows("Pillar_Weights") if _clean(r.get("pillar_id"))}
     lanes = []
     if critic:
-        packet = _bound({
-            "agent": "scoring-critic", "shared": sh,
-            "first_commands": [
-                f"python3 -m engine.assessment state {e}",
-                f"python3 -m engine.assessment critique {e} --pillar <P> --verdict PASS|FAIL "
-                f"--actor scoring-critic --note '<80+ chars: what you re-derived and what moved>'"],
-            "pillars_in_scope": pillars,
-            "scored": st.get("scored"), "subcaps": st.get("subcaps"),
-            "critic_verdicts_so_far": st.get("critic_verdicts") or {},
-            "rules": [
-                "re-derive a sample of scores from their rationales and rubric "
-                "descriptors; run the differentiation and ceiling checks; hunt "
-                "the score that flatters",
-                "you struck none of these scores — the engine refuses a critique "
-                "from a pillar's own scorer",
-                "`engine.assessment gate` will not PASS without your verdict on "
-                "every pillar in scope",
-            ],
-        })
-        lanes.append(("scoring-critic", packet, "Scoring critic — every pillar"))
+        # ONE CRITIC LANE PER PILLAR, and only for pillars that are fully
+        # scored and not yet PASSED (measured 2026-10-05, Susser Bank: one
+        # critic lane re-read all four pillars every round, P4's PASS
+        # included, ~70 min a round). The lanes run concurrently.
+        verdicts = st.get("critic_verdicts") or {}
+        unscored_by_p = {}
+        for r in wb.scoring_rows():
+            sub = _clean(r.get("SubCap_ID"))
+            if sub in wb.selected_subcaps() and r.get("Score") in (None, ""):
+                unscored_by_p[sub[:2]] = unscored_by_p.get(sub[:2], 0) + 1
+        pending = A.critic_moves(wb)
+        for pillar in pillars:
+            if unscored_by_p.get(pillar) or verdicts.get(pillar) == "PASS" and not any(
+                    c.startswith(pillar) for c in pending):
+                continue
+            packet = _bound({
+                "agent": "scoring-critic", "shared": {k: sh.get(k) for k in (
+                    "run_id", "entity", "sub_vertical", "evidence_mode", "stage", "run_root")},
+                "first_commands": [
+                    f"python3 -m engine.assessment state {e}",
+                    f"python3 -m engine.assessment critique {e} --pillar {pillar} "
+                    f"--verdict PASS|FAIL --actor scoring-critic --note '<80+ chars: what "
+                    f"you re-derived and what moved>' [--move CELL:TARGET:why …]"],
+                "pillar": pillar,
+                "previous_verdict": verdicts.get(pillar),
+                "rules": [
+                    f"critique pillar {pillar} ONLY; re-derive a sample of its scores "
+                    f"from their rationales and rubric descriptors and hunt the score "
+                    f"that flatters",
+                    "a FAIL must carry one --move CELL:TARGET:why per row you would "
+                    "move (the engine refuses a FAIL without them); the scorer is "
+                    "handed exactly those rows and cannot score above your target",
+                    "the engine already refuses, at write time, a score above the "
+                    "row's own Ceiling_Band, above 2.0 on own-site-only evidence, "
+                    "and a stale row without ADJ_STALE — judge what a rule cannot",
+                    "you struck none of these scores — the engine refuses a critique "
+                    "from a pillar's own scorer",
+                ],
+            })
+            lanes.append((f"scoring-critic-{pillar}", packet, f"Scoring critic — pillar {pillar}"))
+        # THE HEADLINE IS OWED ONCE EVERY PILLAR PASSES. Measured 2026-10-05:
+        # rollup refused for want of a headline round after round, because the
+        # one critic lane that owed it never reached a state where it could.
+        heads = {_clean(r.get("Field")): r.get("Value") for r in wb.rows("Executive_Summary")}
+        all_pass = pillars and all(verdicts.get(p) == "PASS" for p in pillars) and not any(
+            c[:2] in pillars for c in pending
+            if (lambda cur: cur is not None and cur > float(pending[c]["target"]) + 1e-9)(
+                _float_or_none((wb.scoring_row(c) or {}).get("Score"))))
+        if all_pass and len(_clean(heads.get("Headline"))) < 40 and not lanes:
+            packet = _bound({
+                "agent": "scoring-critic", "shared": {k: sh.get(k) for k in (
+                    "run_id", "entity", "sub_vertical", "evidence_mode", "stage", "run_root")},
+                "first_commands": [
+                    f"python3 -m engine.assessment state {e}",
+                    f"python3 -m engine.assessment rollup {e} --headline '<one "
+                    f"institution-specific line, 40+ chars>'"],
+                "rules": ["every pillar's critique is PASS; write the one-line headline an "
+                          "executive reads first, from the scored rollup — specific to "
+                          "this institution, no score recap"],
+            })
+            lanes.append(("scoring-headline", packet, "Scoring — rollup headline"))
     elif solutions:
         packet = _bound({
             "agent": "technographic-scanner", "shared": sh,
@@ -1874,8 +1922,16 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                 sub = _clean(r.get("SubCap_ID"))
                 if not sub or sub not in wb.selected_subcaps():
                     continue
+                move = A.critic_moves(wb).get(sub)
+                rescore = None
                 if r.get("Score") not in (None, ""):
-                    continue
+                    try:
+                        cur = float(r.get("Score"))
+                    except (TypeError, ValueError):
+                        cur = None
+                    if not move or cur is None or cur <= float(move["target"]) + 1e-9:
+                        continue
+                    rescore = {"from": cur, "to": move["target"], "why": move.get("why")}
                 n_ev = len(_ids(r.get("Evidence_IDs")))
                 verdict = _clean(r.get("Challenge_Verdict"))
                 # The scorer's own refusal predicate, read from one place.
@@ -1888,7 +1944,8 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                              "ceiling_band": _clean(r.get("Ceiling_Band")),
                              "challenge": verdict or "none",
                              "evidence": n_ev,
-                             "absent": bool(L.is_declared_absent(r, wb))})
+                             "absent": bool(L.is_declared_absent(r, wb)),
+                             **({"rescore": rescore} if rescore else {})})
             if not rows:
                 continue
             def packet_for(chunk):
@@ -1914,6 +1971,9 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                         "(--ai-evidence NONE_FOUND goes with --ai-applicability NONE)",
                         "a declared absence scores as the rubric's absence, with the "
                         "ladder in the rationale — never as a guess",
+                        "a row carrying `rescore` was moved by the scoring critic: "
+                        "re-strike it at or below `to`, keep its overlay, and put the "
+                        "critic's reason at the head of the rationale",
                     ],
                     **({"held_for_research": blocked[:8],
                         "held_note": f"{len(blocked)} row(s) of this pillar carry "
