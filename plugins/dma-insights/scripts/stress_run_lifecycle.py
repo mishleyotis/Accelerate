@@ -376,6 +376,40 @@ def main(argv=None) -> int:
                   "--method", "public_document", "--evidence", eid2,
                   "--provider", "clay", "--provider", "web",
                   "--basis", basis).returncode == 0
+    # THE THREE CONNECTOR-OWNED TABS (07112e90): focus areas, the issue
+    # register and peer deployments are PRELIM sections now, and one closes
+    # only with a row or a declaration backed by PRELIM searches logged
+    # against its facet, one through an enrichment connector
+    # (prelim.CONNECTOR_FLOOR). Closed here through the same CLI a lane uses.
+    for facet, queries, ladder in (
+            ("focus_areas",
+             (("exa", f'"{entity}" strategic priorities annual report'),
+              ("tavily", f'"{entity}" CEO letter members priorities 2025')),
+             "searched the annual report, the CEO letter and two press "
+             "interviews through Exa and Tavily; no verbatim client-stated "
+             "priority could be quoted with its page"),
+            ("issues",
+             (("tavily", f'"{entity}" consent order OR enforcement action'),
+              ("exa", f"{entity} NCUA enforcement litigation breach")),
+             "searched NCUA enforcement actions, PACER litigation and state "
+             "breach notices through Tavily and Exa; no matter names the "
+             "entity"),
+            ("peer_deployments",
+             (("clay", "Peer Alpha CU Alkami technographics"),
+              ("exa", "Peer Beta CU digital banking platform vendor")),
+             "searched both peers' technographics through Clay and their "
+             "vendor case studies through Exa; no source names either peer's "
+             "digital banking platform")):
+        for tool, q in queries:
+            ok &= run("engine.cli", "search", "--run", run_id, "--root",
+                      str(root), "--prelim", "--facet", facet, "--tool", tool,
+                      "--query", q, "--hits", "3", "--kept", "0",
+                      "--outcome", "nothing naming the entity",
+                      "--actor", "enrichment-connector-specialist"
+                      ).returncode == 0
+        ok &= run("engine.prelim", "declare", "--run", run_id, "--root",
+                  str(root), "--section", facet, "--ladder", ladder
+                  ).returncode == 0
     check("every PRELIM section closes through the real commands", ok)
 
     r = run("engine.prelim", "complete", "--run", run_id, "--root", str(root))
