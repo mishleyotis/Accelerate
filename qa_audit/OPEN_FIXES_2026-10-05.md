@@ -66,3 +66,15 @@ each research repair round ~45-55 min; whole run ~10 h of wall clock.
   (append-only SQLite, xlsx rendered at stage boundaries) remains the fix.
 - 8 PARTIAL: scoring rounds are driver-looped headless (no session needed);
   research rounds still need the session (connectors).
+
+## Test suite is location-sensitive (found merging speed-and-enforcement)
+
+- `plugins/dma-insights/scripts/audit_skills.py` `_repo_root` accepts a root only
+  when `.git` is a directory. In a `git worktree`, `.git` is a file, so every
+  repo-relative reference reads as broken: 5 audit tests fail in a worktree
+  and pass in a normal clone. Fix: accept `os.path.exists(.git)`.
+- `test_autoapprove_adversarial.py` / `test_autoapprove_builtins.py` (48 tests)
+  fail when the checkout lives inside the session scratchpad, which the hook
+  deliberately allows. They pass from a checkout under /home/user. Fix: build
+  the protected-path fixtures from a tmp dir outside the scratchpad, or skip
+  with a reason when the repo root sits inside it.
