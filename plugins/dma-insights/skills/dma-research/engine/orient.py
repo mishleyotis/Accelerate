@@ -117,11 +117,13 @@ def orient(wb: RunWorkbook, category: str | None, *,
 
     # 1. The wall comes first, and it is an instruction, not a number.
     if budget["checkpoint_required"]:
+        walls = budget.get("scopes_at_ceiling") or [budget.get("search_scope")]
         do_first.append(
-            f"STOP: {budget['search_ops']} search-ops this run against a "
-            f"ceiling of {budget['search_op_ceiling']}. Checkpoint the run "
-            f"(runstate.checkpoint) and end the turn. Do not take the next "
-            f"card.")
+            f"STOP: {budget['search_ops_since_checkpoint']} search-ops since the "
+            f"last checkpoint in {', '.join(str(w) for w in walls)} against a "
+            f"ceiling of {budget['search_op_ceiling']}. Checkpoint that scope "
+            f"(`engine.cli checkpoint --category <scope>`) and end the turn. "
+            f"Do not take the next card.")
 
     # 2. A recorded FAIL is work, and it is named.
     for c, g in gates.items():
@@ -476,28 +478,52 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
     md = wb.metadata()
     rid = md.get("run_id") or "<R>"
     root = str(run.root) if run is not None else str(wb.path.parent)
+    from . import floors_gate
     searches = wb.rows("Search_Log")
-    cells = [c for c in wb.selected_subcaps() if c.rsplit(".", 1)[0] == cap
-             or ".".join(c.split(".")[:2]) == cap]
+    # A CATEGORY id is accepted as "every capability in it". The workflow's
+    # fallback batch handed agents a category; matching only capability ids
+    # returned zero cells, and the agent reported "nothing open" on a
+    # category the gate was failing (arbor-bank-2026-10-05).
+    whole_category = cap.count(".") == 0
+    cells = [c for c in wb.selected_subcaps()
+             if (whole_category and c.split(".")[0] == cap)
+             or c.rsplit(".", 1)[0] == cap or ".".join(c.split(".")[:2]) == cap]
     rows = {str(r.get("SubCap_ID")): r for r in wb.scoring_rows()}
     names = C.subcap_names()
+    # The gate's own worklist. A cell holding a claim is done ONLY when the
+    # floors gate does not name it — the card used to skip every claimed
+    # cell, so the cells the gate failed on were never shown to anyone.
+    repair: dict[str, dict] = {}
+    for cat in sorted({c.split(".")[0] for c in cells}):
+        try:
+            repair.update(floors_gate.repair_worklist(wb, cat))
+        except ValueError:
+            pass
     open_cells, facets = [], {}
     for c in cells:
         r = rows.get(c) or {}
-        if str(r.get("Dominant_Claim") or "").strip() and \
-                str(r.get("Evidence_IDs") or "NO_EVIDENCE") != "NO_EVIDENCE":
-            continue                                   # synthesised with evidence
+        rep = repair.get(c)
+        if str(r.get("Dominant_Claim") or "").strip() and not rep:
+            continue                    # synthesised or declared absent, gate content
         vs = L.volley_status(wb, c, searches=searches)
         dq = kg.dqs_for(wb, c)
-        open_cells.append({"cell": c, "name": names.get(c, ""),
-                           "missing": vs["missing"]})
-        for q in dq["ask"]:
-            f = str(q.get("facet") or "")
-            if f not in vs["missing"]:
-                continue
+        missing = list(vs["missing"])
+        for f in (rep or {}).get("missing", []):
+            if f not in missing:
+                missing.append(f)
+        entry = {"cell": c, "name": names.get(c, ""), "missing": missing}
+        if rep:
+            entry["repair"] = rep["do"]
+        open_cells.append(entry)
+        for f in missing:
             slot = facets.setdefault(f, {"cells": [], "questions": []})
             if c not in slot["cells"]:
                 slot["cells"].append(c)
+        for q in dq["ask"]:
+            f = str(q.get("facet") or "")
+            if f not in missing:
+                continue
+            slot = facets[f]
             if q.get("question") and len(slot["questions"]) < 6:
                 slot["questions"].append({"cell": c, "q": str(q["question"]).replace(
                     "{entity}", str(md.get("entity_name") or "the entity"))[:220]})
@@ -515,5 +541,10 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
                 "result genuinely answers; 3) register evidence and attach it "
                 "per cell; 4) synthesise each cell (chain the calls). A cell "
                 "a query does not answer gets its own query — never credit a "
-                "cell a result is silent on."),
+                "cell a result is silent on. A cell carrying `repair` already "
+                "holds a claim and the floors gate is failing on it: do what "
+                "each `repair` line says (it is the gate's own term), then "
+                "re-synthesise or re-declare it — a claimed cell is not done "
+                "while the gate names it."),
+        "repair_cells": sorted(e["cell"] for e in open_cells if e.get("repair")),
     }

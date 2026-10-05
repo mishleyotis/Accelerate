@@ -121,3 +121,31 @@ def test_decide_is_the_one_entry_bash_guard_calls():
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
     assert m.decide("ls") is None and "GitHub" in m.decide(f"curl -H 'token {FAKE_PAT}'")
+
+
+# ── whole-environment dumps (arbor-bank-2026-10-05) ──────────────────────
+# `env | grep -i DMA_`, run to find a run root, printed the service-account
+# key's value into a transcript: the by-name rule never saw a command that
+# names no variable. These fail on the pre-fix hook.
+
+DUMPS = ("env | grep -i DMA_", "env", "printenv", "printenv | sort",
+         "export -p", "declare -px", "set | head", "cat /proc/self/environ",
+         "ls; env | grep x", "x=$(env)", "cd /a && env | grep DMA_ | sed s/x/y/")
+NOT_DUMPS = ("env | cut -d= -f1", "env | sed 's/=.*//'",
+             "env DMA_RUN_ROOT=/x python3 -m engine.pipeline env",
+             "printenv HOME", "python3 -m engine.pipeline env 2>&1 | tail -25",
+             "set -e; ls", "set -euo pipefail", "echo $HOME",
+             "cd /x && DMA_RUN_ROOT=/r python3 -m engine.cli orient",
+             "grep -n env file.py", "export FOO=1")
+
+
+def test_a_whole_environment_dump_is_denied():
+    for cmd in DUMPS:
+        out = _run(_bash(cmd))
+        assert _is_deny(out), cmd
+        assert "cut -d= -f1" in out["hookSpecificOutput"]["permissionDecisionReason"]
+
+
+def test_names_only_listings_and_launchers_are_not_dumps():
+    for cmd in NOT_DUMPS:
+        assert not _is_deny(_run(_bash(cmd))), cmd

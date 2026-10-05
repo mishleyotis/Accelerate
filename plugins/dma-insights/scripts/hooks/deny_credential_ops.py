@@ -70,7 +70,39 @@ DENIALS = (
      "the service-account key file or path token by name"),
     (re.compile(r"\bDMA_ROUTINE_SA_KEY_B64\b|\bDMA_PATH_TOKEN\b"),
      "the credential environment variable by name"),
+    (re.compile(r"/proc/(?:self|\d+|\$\$|\*)/environ"),
+     "a process environment read (list names only with `env | cut -d= -f1`)"),
 )
+
+# A WHOLE-ENVIRONMENT DUMP prints the credential without naming it.
+# Measured 2026-10-05 (arbor-bank-2026-10-05 resume): `env | grep -i DMA_`
+# run to find a run root printed DMA_ROUTINE_SA_KEY_B64's value into the
+# transcript; the by-name rule above never saw it. A segment whose command
+# is bare `env` / `printenv` / `export -p` / `declare -x|-p` / `set` dumps
+# every value; it is denied unless the next pipe stage keeps NAMES only.
+# `env VAR=x cmd` (env as a launcher), `printenv NAME`, `set -e` and
+# `export FOO=1` are untouched.
+_DUMPERS = ("env", "printenv", "set", "export -p", "declare -x", "declare -p",
+            "declare -px", "declare -xp", "typeset -x")
+_NAMES_ONLY = re.compile(
+    r"^\s*(?:cut\s+-d\s*['\"]?=['\"]?\s+-f\s*1\b|cut\s+-f\s*1\s+-d\s*['\"]?=|"
+    r"sed\s+(?:-e\s+)?['\"]s/=\.\*//['\"]|awk\s+-F\s*['\"]?=['\"]?\s+['\"]\{\s*print \$1\s*\}['\"])")
+_SEGMENT = re.compile(r"\$\(|`|&&|\|\||[;&\n(){}]")
+ENV_DUMP = ("a whole-environment dump (it prints every secret value; list "
+            "names only with `env | cut -d= -f1`)")
+
+
+def _env_dump(command: str) -> bool:
+    for seg in _SEGMENT.split(command or ""):
+        stages = seg.split("|")
+        head = stages[0].strip()
+        if head.startswith("sudo "):
+            head = head[5:].strip()
+        if head in _DUMPERS:
+            nxt = stages[1] if len(stages) > 1 else ""
+            if not _NAMES_ONLY.match(nxt):
+                return True
+    return False
 
 REASON = (
     "Denied by dma-insights policy: the command carries {what}. No GitHub "
@@ -90,6 +122,8 @@ def decide(command: str) -> str | None:
     for rx, what in DENIALS:
         if rx.search(command or ""):
             return REASON.format(what=what)
+    if _env_dump(command):
+        return REASON.format(what=ENV_DUMP)
     return None
 
 

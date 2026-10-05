@@ -434,15 +434,37 @@ CHALLENGE_USD_PER_CATEGORY = 0.44
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
 
 
-def _open_capabilities(wb) -> dict[str, dict[str, int]]:
-    """{category: {capability: open cells}} — open = no Dominant_Claim yet
-    (a synthesis and a declared absence both write one)."""
+def _open_capabilities(wb, categories=None) -> dict[str, dict[str, int]]:
+    """{category: {capability: cells with work}} — a cell has work when it
+    has no Dominant_Claim yet (a synthesis and a declared absence both write
+    one) OR the floors gate names it in a blocking term
+    (`floors_gate.repair_worklist`, the same list the card serves).
+
+    Counting only the first kind is how arbor-bank-2026-10-05 handed eleven
+    failing categories to workflows with EMPTY batch lists: every cell the
+    gate named already held a claim, so the planner saw nothing to batch and
+    the workflows spent ~215K agent tokens each to report "nothing open".
+    `categories` limits the gate evaluation to the categories being handed
+    out; None evaluates every category the run selects."""
+    from . import floors_gate
     from .brief import capability_of, category_of
     out: dict[str, dict[str, int]] = {}
+    work: set[str] = set()
+    selected = set(wb.selected_subcaps())
     for r in wb.scoring_rows():
         sc = str(r.get("SubCap_ID") or "")
-        if not sc or str(r.get("Dominant_Claim") or "").strip():
+        if sc and (not selected or sc in selected) \
+                and not str(r.get("Dominant_Claim") or "").strip():
+            work.add(sc)
+    cats = sorted(categories) if categories is not None else \
+        sorted({category_of(c) for c in selected})
+    for cat in cats:
+        try:
+            work.update(c for c in floors_gate.repair_worklist(wb, cat)
+                        if not selected or c in selected)
+        except ValueError:
             continue
+    for sc in sorted(work):
         caps = out.setdefault(category_of(sc), {})
         caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1
     return out
@@ -483,6 +505,7 @@ class Pipeline:
             # price the finished ones first so the ceiling sees them (I-37).
             if opts.push:
                 cap = cost.capture_workflows(run)
+                self._workflow_agents_captured = int(cap["captured"] or 0)
                 if cap["captured"]:
                     opts.log(f"  (workflow spend captured: {cap['captured']} agent(s), "
                              f"${cap['usd']:.2f})")
@@ -1027,6 +1050,7 @@ class Pipeline:
                 runstate.release_driver_lock(self.run)
         try:
             self.state["last_outcome"] = out.get("outcome")
+            self.state["last_reason"] = str(out.get("reason") or "")[:1000]
             self.state["spent_usd"] = round(self._spent_usd, 4)
             cap = self.budget_usd()
             self.state["budget_usd"] = (round(cap, 2) if cap else None)
@@ -1083,6 +1107,17 @@ class Pipeline:
             t0 = self.opts.clock()
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
+                if not h["invocations"] and h.get("withheld"):
+                    # Nothing left that a workflow could advance. Handing out
+                    # an empty (or no-op) workflow file is how a stuck run
+                    # used to keep spending; this stops it and names why.
+                    why = "; ".join(f"{c} {w}" for c, w in sorted(h["withheld"].items()))
+                    self._record(st, "FAIL", "research withheld: " + why, t0)
+                    self.opts.log(f"[{st}] STALLED — every failing category withheld")
+                    outcome.update(outcome="STALLED", stage=st, reason=why,
+                                   withheld=h["withheld"], handoff=h["file"],
+                                   needs="person")
+                    return outcome
                 self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
                 self._snapshot(st)
                 self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
@@ -1171,6 +1206,9 @@ class Pipeline:
     _cat_sig: dict = {}
     _cat_stalls: dict = {}
     _cat_stalled: list = []
+    #: workflow agents priced when this process started — non-zero means the
+    #: previous research handoff was actually worked (see `_research_handoff`)
+    _workflow_agents_captured = 0
 
     #: run-scoped spend — deliberately NOT cleared by `_reset_counters`,
     #: because a ceiling that forgets the previous stage is not a ceiling.
@@ -1441,6 +1479,64 @@ class Pipeline:
                       + (f" ({r.get('bytes', 0) // 1024} KB)" if r.get("bytes") else "")
                       + (f" — {r['reason']}" if r.get("reason") else ""))
 
+    def _withhold_unworkable(self, need: list[str], open_caps: dict,
+                             prev_doc: dict) -> tuple[list, dict, dict, dict]:
+        """Split the categories the gates want re-dispatched into those worth
+        a workflow and those that are not, BEFORE any agent is paid for.
+
+        Two reasons to withhold, both measured on arbor-bank-2026-10-05,
+        where eleven categories were handed to workflows that could do
+        nothing (~215K agent tokens each, every round):
+
+          * UNSERVABLE — the floors gate is failing but no cell carries work
+            (`_open_capabilities`, which already includes the gate's repair
+            list) and nothing is owed to the challenge stage. A workflow for
+            it can only report "nothing open"; the gap is in the toolchain,
+            not the research, and a person has to see it.
+          * STALLED — the category's outcome signature has not moved across
+            `stall_rounds` consecutive WORKED handoffs. The in-process stall
+            counter (`_research_stalled`) never saw these: every driver
+            invocation in workflow mode is a fresh process and the counter
+            lived in memory, so a workflow loop could never stall out. The
+            signature is persisted in the handoff file instead. A handoff
+            nobody worked (no workflow agent priced since — the session lost
+            its tools) neither advances nor resets the count.
+        """
+        from . import brief, floors_gate
+        reasons = brief.categories_needing_dispatch(self.wb)["reasons"]
+        now = self._research_progress()
+        worked = self._workflow_agents_captured > 0
+        prev_prog = prev_doc.get("progress") or {}
+        prev_stalls = prev_doc.get("stalls") or {}
+        keep, withheld, progress, stalls = [], {}, {}, {}
+        for cat in sorted(need):
+            work = sum((open_caps.get(cat) or {}).values())
+            sig = list(now.get(cat, ())) + [-work]
+            progress[cat] = sig
+            n = int(prev_stalls.get(cat, 0))
+            before = prev_prog.get(cat)
+            if worked and before is not None:
+                n = 0 if any(c > p for c, p in zip(sig, before)) else n + 1
+            stalls[cat] = n
+            why = [str(r) for r in reasons.get(cat, [])]
+            floors_only = [r for r in why
+                           if not r.startswith(("dispatch verifier:", "enrichment:"))]
+            challenge_owed = any(r in floors_gate.CHALLENGE_TERMS for r in why)
+            if work == 0 and floors_only and not challenge_owed \
+                    and len(floors_only) == len(why):
+                withheld[cat] = ("UNSERVABLE: the floors gate fails on "
+                                 f"{', '.join(floors_only)} but no cell carries work a "
+                                 "researcher can be shown — a toolchain gap, not research; "
+                                 "not dispatching a workflow that can only report nothing")
+            elif self.opts.stall_rounds and n >= self.opts.stall_rounds:
+                withheld[cat] = (f"STALLED: no outcome moved across {n} worked "
+                                 f"handoff(s) (--stall-rounds {self.opts.stall_rounds}); "
+                                 f"{work} cell(s) still carry work — a person decides "
+                                 "whether to repair at the source or accept the gap")
+            else:
+                keep.append(cat)
+        return keep, withheld, progress, stalls
+
     def _research_handoff(self) -> dict:
         """Write the per-pillar workflow invocations the session runs."""
         from . import brief
@@ -1449,9 +1545,6 @@ class Pipeline:
         site = next((str(r.get("Value") or "") for r in self.wb.rows("Firmographics")
                      if str(r.get("Field") or "").lower() == "website"
                      and r.get("Value")), "")
-        by_pillar: dict[str, list[str]] = {}
-        for c in sorted(need):
-            by_pillar.setdefault(c[:2], []).append(c)
         # The work unit is a BATCH OF CAPABILITIES, not a category (measured
         # 2026-09-30, SWBC): one agent per category reached 116-200K tokens of
         # context in 39-71 turns — connector results, not reasoning — and
@@ -1467,7 +1560,17 @@ class Pipeline:
         # holds its other three in a queue. Affordable only because writes
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
-        open_caps = _open_capabilities(self.wb)
+        open_caps = _open_capabilities(self.wb, categories=need)
+        path = self.run.qa_dir / RESEARCH_HANDOFF
+        try:
+            prev_doc = json.loads(path.read_text())
+        except (OSError, ValueError):
+            prev_doc = {}
+        need, withheld, progress, stalls = self._withhold_unworkable(
+            need, open_caps, prev_doc)
+        by_pillar: dict[str, list[str]] = {}
+        for c in sorted(need):
+            by_pillar.setdefault(c[:2], []).append(c)
         by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
                    else by_pillar)
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
@@ -1482,16 +1585,17 @@ class Pipeline:
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per category — wait for all, "
                        "then run `then`; the driver verifies the floors gates")}
-        path = self.run.qa_dir / RESEARCH_HANDOFF
+        doc["progress"], doc["stalls"] = progress, stalls
+        if withheld:
+            doc["withheld"] = withheld
+            for c, why in sorted(withheld.items()):
+                self.opts.log(f"[WORKFLOW] WITHHELD {c}: {why}")
         path.parent.mkdir(parents=True, exist_ok=True)
         # ENFORCEMENT (I-54): a handoff re-issued with the SAME open cells
         # means the last one was never worked — the session lost Workflow or
         # its connectors (a resume can drop both), or started no workflow.
         # Say so in the handoff instead of re-issuing it silently forever.
-        try:
-            prev = json.loads(path.read_text()).get("estimate") or {}
-        except (OSError, ValueError):
-            prev = {}
+        prev = prev_doc.get("estimate") or {}
         n = sum(len(i["cats"]) for i in inv)
         nb = sum(len(b) for i in inv for b in i["batches"].values())
         cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
@@ -1513,6 +1617,7 @@ class Pipeline:
                                    fits_budget=self._spent_usd + est <= cap)
         path.write_text(json.dumps(doc, indent=1))
         return {"file": str(path), "invocations": inv,
+                "withheld": withheld,
                 "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
                 "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
                            f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "

@@ -58,6 +58,23 @@ from .workbook import (RunWorkbook, FLOOR_ITEMS, FLOOR_CATEGORY_ITEMS,
 #: the choice is reviewable: `advisory` in each verdict says which of these
 #: actually fired, so anyone arguing one should be promoted to blocking can
 #: see its real hit rate first instead of guessing.
+#: The per-cell terms that block. Every one except the two challenge terms
+#: (served by the challenge stage) must have a REPAIR_ACTIONS entry, so a
+#: blocking term can never name cells no researcher is shown — a test holds
+#: the two lists together.
+BLOCKING_TERMS = (
+    "unresolved_citations", "boilerplate", "claim_unsupported",
+    "absence_undeclared", "evidence_smear", "challenge_missing",
+    "challenge_not_independent", "single_source_fact",
+    "synthesis_missing", "dq_gaps", "absence_unsearched",
+    "volleys_incomplete", "absence_undeclared_empty",
+    "absence_over_evidence",
+    # 2026-09-03 (owner issue 1): the primary question is owed on every
+    # searched cell, and an empty cell must show an enrichment connector.
+    "primary_unfired", "absence_single_tool",
+)
+CHALLENGE_TERMS = ("challenge_missing", "challenge_not_independent")
+
 ADVISORY_TERMS = (
     "closed_below_floor",
     "contradicts_unprobed",
@@ -549,17 +566,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     tools_used = sorted({str(s.get("Tool") or "").strip()
                          for s in cat_searches if str(s.get("Tool") or "").strip()})
 
-    blocking = [k for k in (
-        "unresolved_citations", "boilerplate", "claim_unsupported",
-        "absence_undeclared", "evidence_smear", "challenge_missing",
-        "challenge_not_independent", "single_source_fact",
-        "synthesis_missing", "dq_gaps", "absence_unsearched",
-        "volleys_incomplete", "absence_undeclared_empty",
-        "absence_over_evidence",
-        # 2026-09-03 (owner issue 1): the primary question is owed on every
-        # searched cell, and an empty cell must show an enrichment connector.
-        "primary_unfired", "absence_single_tool",
-    ) if findings[k]]
+    blocking = [k for k in BLOCKING_TERMS if findings[k]]
     # A category whose research has not converged is not challenged yet: the
     # challenge stage runs after the floors gate says the work is done, so
     # asking for the verdict in the same breath as the work is asking the
@@ -717,6 +724,82 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
                   detail=("; ".join(sorted(blocking)) or "all terms met"),
                   blocking=True)
     return out
+
+
+# ── the repair worklist: the cells a FAIL names, as work a researcher can take ──
+
+#: What a researcher does about each blocking term on a cell it names. The
+#: challenge terms are absent on purpose: the challenge stage serves those
+#: cells through `brief challenge-batch`, not through a research card.
+REPAIR_ACTIONS = {
+    "primary_unfired": "fire and log the cell's primary-facet query",
+    "volleys_incomplete": "fire and log the missing facets listed",
+    "single_source_fact": ("register a second, independent source, or relabel "
+                           "the claim INFERENCE and re-synthesise"),
+    "absence_undeclared_empty": ("search it (primary + one connector volley), then "
+                                 "register evidence or declare the absence"),
+    "absence_undeclared": "declare the absence with its ladder, or register evidence",
+    "absence_unsearched": "fire the primary web_search and a connector volley",
+    "absence_single_tool": "add a volley through an enrichment connector",
+    "absence_over_evidence": "withdraw the absence or detach the evidence it contradicts",
+    "synthesis_missing": "synthesise the cell from the evidence it already holds",
+    "unresolved_citations": "repoint the cited ids to registered evidence rows",
+    "claim_unsupported": "re-synthesise so the claim follows from its evidence",
+    "boilerplate": "rewrite the named field with a checkable figure, date, name or E-id",
+    "evidence_smear": "attach each evidence row only to the cells it actually answers",
+    "dq_gaps": "answer the diagnostic questions listed for the cell",
+}
+
+
+def _cell_of(item) -> str:
+    if isinstance(item, str):
+        return item.strip()
+    if isinstance(item, dict):
+        return str(item.get("subcap") or item.get("cell") or "").strip()
+    return ""
+
+
+def repair_cells(out: dict) -> dict[str, dict]:
+    """{cell: {"terms": [...], "missing": [facets], "do": [...]}} for every
+    cell a gate result's BLOCKING terms name.
+
+    WHY (arbor-bank-2026-10-05): the gate failed thirteen categories on
+    cells that already held a claim — a primary query never fired, a FACT
+    on one source, volleys short — while the card, the driver's batch
+    planner and the workflow prompt all defined work as "a cell with no
+    claim". The gate's worklist was invisible to every actor that could do
+    it: research agents were dispatched, read an empty card and returned,
+    round after round (~215K agent tokens per category for zero progress).
+    This is the ONE definition of "work the gate is asking for"; the card,
+    the planner and the driver's stall check all call it, so the rule
+    cannot drift between them again (RULE_HELD_IN_TWO_PLACES_DRIFTS).
+    """
+    blocking = set(out.get("blocking") or [])
+    cells: dict[str, dict] = {}
+    for term in sorted(blocking & set(REPAIR_ACTIONS)):
+        for item in out.get(term) or []:
+            c = _cell_of(item)
+            if not c:
+                continue
+            slot = cells.setdefault(c, {"terms": [], "missing": [], "do": []})
+            if term not in slot["terms"]:
+                slot["terms"].append(term)
+                slot["do"].append(f"{term}: {REPAIR_ACTIONS[term]}")
+            want = []
+            if term == "primary_unfired":
+                want = [C.PRIMARY_FACET]
+            elif isinstance(item, dict):
+                want = list(item.get("missing") or [])
+            for f in want:
+                if f not in slot["missing"]:
+                    slot["missing"].append(f)
+    return cells
+
+
+def repair_worklist(wb: RunWorkbook, category: str) -> dict[str, dict]:
+    """The live repair worklist for one category — evaluated, never recorded
+    (`persist=False`), so asking the question cannot change the verdict."""
+    return repair_cells(run(wb, category, require_synthesis=True, persist=False))
 
 
 def read_verdict(qa_dir: Path, category: str) -> dict | None:

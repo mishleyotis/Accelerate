@@ -1212,8 +1212,29 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # just no longer decides. The gate itself is unchanged in strength: over
     # the cap since the last checkpoint still stops, which is the half a
     # loosened ceiling would have silently lost (MEM-0338 / R27).
-    since = _ops_since_checkpoint(wb, category)
+    #
+    # AND IT MUST MEASURE IT AT THE SAME SCOPE (arbor-bank-2026-10-05).
+    # The wall is per conversation: `append_search` measures the window of
+    # the row's own scope (its category, PRELIM or RELAY). Called with no
+    # category, this function measured a RUN-WIDE window that nothing
+    # enforces — so after thirteen category workflows each fired a few
+    # searches, the watchdog and the stop hook reported "5750 search-ops
+    # against a ceiling of 60, the run must checkpoint" while every
+    # category had 42-60 searches left. The unscoped answer is now the
+    # enforced scope nearest its wall, named.
+    if category:
+        scope = category
+        since = _ops_since_checkpoint(wb, category)
+        at_wall = [category] if since >= SEARCH_OP_CEILING else []
+    else:
+        scopes = sorted({_search_scope(r) for r in wb.rows("Search_Log")})
+        windows = {s: _ops_since_checkpoint(wb, s) for s in scopes}
+        at_wall = sorted(s for s, v in windows.items() if v >= SEARCH_OP_CEILING)
+        scope = max(windows, key=windows.get) if windows else None
+        since = windows.get(scope, 0) if scope else 0
     return {
+        "search_scope": scope,
+        "scopes_at_ceiling": at_wall,
         # `search_ops` is a LIFETIME count (spend worth seeing); the budget is
         # `search_ops_since_checkpoint` against the ceiling. A lane that read
         # the first as usage stopped at "55 of 60" with 1 used (2026-09-30).

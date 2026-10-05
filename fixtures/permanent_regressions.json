@@ -347,6 +347,128 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0570",
+   "title": "The floors gate's worklist was invisible to every actor that could do it",
+   "flagged_by": "mishley.otiende (user), session_01CfmTkXcLc1STn5gc6TtDjt, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A floors gate FAIL on cells that already hold a claim, with no researcher ever shown those cells. Measured on engine run arbor-bank-2026-10-05: 11 of 13 categories failed on primary_unfired / single_source_fact / volleys_incomplete on claimed cells; the card returned 0 of 14 gate-named P1C1 cells, the planner batched 1 of 11 failing categories, and workflows spent ~215K agent tokens each reporting 'nothing open'. The rule: floors_gate.repair_worklist is the one definition of work the gate asks for, and the card, the planner and the workflow prompt all read it.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_card_serves_a_gate_named_claimed_cell"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_card_accepts_a_category_id"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_planner_batches_a_gate_named_claimed_cell"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_every_cell_level_blocking_term_has_a_repair_action"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_workflow_has_no_label_only_batches"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0571",
+   "title": "Workflow-mode handoffs re-issued categories that could not advance, forever",
+   "flagged_by": "mishley.otiende (user), session_01CfmTkXcLc1STn5gc6TtDjt, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A research handoff that pays agents for categories with no servable work, or that never stalls out because the stall counter lives in one process. The rule: unservable categories are withheld before dispatch, the stall signature persists in research_workflow.json across driver processes, and an all-withheld handoff stops the driver as STALLED for a person.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_failing_category_with_no_work_is_withheld"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_stall_count_survives_the_process"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_everything_withheld_stops_the_driver_for_a_person"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_challenge_only_work_is_still_handed"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0572",
+   "title": "The search ceiling was advised at a scope nothing enforces",
+   "flagged_by": "mishley.otiende (user), session_01CfmTkXcLc1STn5gc6TtDjt, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A STOP from orient, the watchdog or the stop hook for a search ceiling no enforced scope is at ('5750 search-ops against a ceiling of 60' with every category 42-60 searches clear). The rule: the unscoped ledger.stats answer is the enforced scope nearest its wall, and it is named.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_two_categories_under_their_walls_are_not_at_the_ceiling"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_category_at_its_wall_is_named"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0573",
+   "title": "A duplicated Run_Metadata key froze last_written_at",
+   "flagged_by": "mishley.otiende (user), session_01CfmTkXcLc1STn5gc6TtDjt, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A metadata reader and writer addressing different rows of one key, so a live run reads as idle ('no write for 7843s' one second after a save). The rule: one key, one row; set_metadata writes every copy and metadata() reads the first.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_duplicated_metadata_key_cannot_read_stale"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0574",
+   "title": "The stop hook advised a research lane while research ran as workflows",
+   "flagged_by": "mishley.otiende (user), session_01CfmTkXcLc1STn5gc6TtDjt, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A stop-hook or watchdog next step naming a single research lane while the driver's last outcome is AWAITING_WORKFLOW — a second writer with no connector on a category its workflow owns. The rule: AWAITING_WORKFLOW maps to the handoff file and the driver's then-command; RESEARCH_WITHHELD ends on a person.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_awaiting_workflow_points_at_the_handoff"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_withheld_research_ends_on_a_person"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/test_stage_advance_round_complete.py::test_a_workflow_handoff_is_never_answered_with_a_lane"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0575",
+   "title": "A whole-environment dump printed the service-account key",
+   "flagged_by": "mishley.otiende (user), session_01CfmTkXcLc1STn5gc6TtDjt, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "Any Bash command that prints every environment value (env, printenv, export -p, declare -px, set, /proc/*/environ, and their piped forms) passing the credential guard because it names no secret. The rule: a whole-environment dump is denied unless its next pipe stage keeps names only.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "plugins/dma-insights/scripts/tests/test_deny_credential_ops.py::test_a_whole_environment_dump_is_denied"
+    },
+    {
+     "kind": "test",
+     "ref": "plugins/dma-insights/scripts/tests/test_deny_credential_ops.py::test_names_only_listings_and_launchers_are_not_dumps"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

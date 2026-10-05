@@ -194,3 +194,19 @@ def test_an_unserviced_relay_batch_holds_the_stop_with_the_next_dispatch(sa, run
     assert "STOP HELD" in why
     assert "enrichment-web-specialist" in why
     assert "relay_r1" in why
+
+
+def test_a_workflow_handoff_is_never_answered_with_a_lane():
+    """arbor-bank-2026-10-05: with thirteen category workflows running, the
+    Stop hook told the session to dispatch research-p1c2-producer as a lane —
+    a second writer with no connector on a category its workflow owned."""
+    m = _mod()
+    row = {"run_id": "R", "entity": "E", "state": "AWAITING_WORKFLOW",
+           "detail": "research is handed to the session as workflows",
+           "resume": {"actionable": True, "agent": None,
+                      "workflow": "/r/07_qa/research_workflow.json",
+                      "pipeline": ["python3", "-m", "engine.pipeline", "run",
+                                   "--run", "R"]}}
+    text = m.next_step(row)
+    assert "research_workflow.json" in text and "Do not dispatch a research lane" in text
+    assert "agent_run.py" not in text and "--agent" not in text
