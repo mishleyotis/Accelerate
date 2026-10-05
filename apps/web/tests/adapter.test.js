@@ -653,3 +653,21 @@ test("a star rating fills from zero, so the lowest score still draws", () => {
   assert.ok(Math.abs(w.scaleFraction(96.2, "0-100 % of complaints answered on time")
     - 0.962) < 1e-9);
 });
+
+// Cross Insurance, 2026-10-05: promoted pages cite the workbook's own
+// evidence numbers ('E-001') while the store keys the row 'E-CROSSINS-001'.
+// The drawer looked the chip's id up by `e.id` alone, so 956 citations
+// opened onto nothing. The API now names each row's workbook-local ids.
+test("a chip citing a workbook-local id opens its stored row", () => {
+  const w = load(LIVE);
+  const items = w.adaptEvidence({ items: [{
+    e_id: "E-CROSSINS-001", source_name: "Cross Insurance history",
+    excerpt: "Founded in 1954 at the kitchen table of Woodrow Cross, the agency…",
+    package_local_ids: ["E-001"], also_filed_as: ["E-CROSSINS-001-R2"] }] });
+  assert.deepStrictEqual(items[0].aliases, ["E-001", "E-CROSSINS-001-R2"]);
+  w.DMA_ENTITY = { id: "cross-insurance-agency", evidence: items };
+  assert.strictEqual(w.DMA.getEvidence("E-001").id, "E-CROSSINS-001");
+  assert.strictEqual(w.DMA.getEvidence("E-CROSSINS-001").id, "E-CROSSINS-001");
+  assert.strictEqual(w.DMA.getEvidence("E-002"), undefined,
+                     "an unmapped number still resolves to nothing");
+});

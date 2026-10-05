@@ -732,6 +732,7 @@ EVIDENCE_WITHHELD_ORIGINS = frozenset({"internal"})
 #: than text a reader meets: never scanned by the nets (an id or a tool call
 #: is not prose), and the provenance ones are stripped before serving.
 _EVIDENCE_ID_KEYS = frozenset({"e_id", "cited_as", "also_filed_as",
+                               "package_local_ids",
                                "linked_subcap_ids", "split_of",
                                "customer_attribution", "connector_tool",
                                "connector_query", "connector_retrieved_at",

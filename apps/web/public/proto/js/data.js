@@ -2981,7 +2981,7 @@
     /* In LIVE these resolve against the viewed entity's promoted payload, so
        an id from one client can never resolve to another's row. */
     getInsight: id => (LIVE ? liveField(null, "insightCards") || [] : INSIGHT_CARDS).find(c => c.id === id),
-    getEvidence: id => (LIVE ? liveField(null, "evidence") || [] : EVIDENCE).find(e => e.id === id),
+    getEvidence: id => (LIVE ? liveField(null, "evidence") || [] : EVIDENCE).find(e => e.id === id || (e.aliases || []).includes(id)),
     getSubcap: (entity, id) => entity && entity.subcaps ? entity.subcaps.find(s => s.id === id) : null,
     getCategory: id => CATEGORIES.find(c => c.id === id),
     getPlatform: id => PLATFORMS.find(p => p.id === id),

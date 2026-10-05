@@ -251,6 +251,7 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
            + ("    AND k.run_id = %s" if run_id else "")
            + ") l ON TRUE WHERE e.entity_id = %s")
     params: list = ([run_id] if run_id else []) + [entity_id]
+    base_sql, base_params = sql, list(params)
     if e_ids:
         sql += " AND e.e_id = ANY(%s)"
         params.append(list(e_ids))
@@ -264,6 +265,21 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
     sql += " ORDER BY e.tier, e.e_id"
     cur.execute(sql, params)
     items = [_row_to_item(r, columns) for r in cur.fetchall()]
+    # A workbook-local id ('E-047') is a label scoped to ONE client (0036):
+    # pages cite it verbatim and the connector resolves it through
+    # `evidence_package_ids`. Resolve the ones the direct match missed the
+    # same way, entity-scoped by construction, so a cited local id opens its
+    # stored row instead of answering not_found and an empty drawer.
+    local_to_stored: dict = {}
+    if e_ids:
+        direct = {i["e_id"] for i in items}
+        local_to_stored = _local_ids(
+            cur, entity_id, [x for x in e_ids if x not in direct])
+        extra = sorted(set(local_to_stored.values()) - direct)
+        if extra:
+            cur.execute(base_sql + " AND e.e_id = ANY(%s) ORDER BY e.tier, e.e_id",
+                        base_params + [extra])
+            items += [_row_to_item(r, columns) for r in cur.fetchall()]
     for item in items:
         item["attribution_bound"] = bool(item.get("customer_attribution")) \
             and attribution_bound(item.get("customer_attribution_at"),
@@ -284,11 +300,14 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
     if not e_ids:
         items, merge_report = merge_same_source(items)
 
+    _attach_package_local_ids(cur, entity_id, items)
     found = [i["e_id"] for i in items]
     not_found: list[str] = []
     foreign: list[str] = []
     if e_ids:
-        missing = [x for x in e_ids if x not in set(found)]
+        have = set(found)
+        missing = [x for x in e_ids
+                   if x not in have and local_to_stored.get(x) not in have]
         if missing:
             # An id absent from THIS entity is either unknown or another
             # entity's. The distinction is the whole point of the gate, so it
@@ -305,6 +324,45 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
             # indistinguishable from a query that lost rows.
             "merged": merge_report}
 
+
+
+def _local_ids(cur, entity_id, e_ids) -> dict:
+    """{package_local_id: stored e_id} for the requested ids THIS entity's
+    packages numbered. Entity in the WHERE, so another client's 'E-047'
+    can never answer for this one."""
+    wanted = [x for x in (e_ids or []) if x]
+    if not wanted:
+        return {}
+    cur.execute("SELECT package_local_id, e_id FROM evidence_package_ids "
+                "WHERE entity_id = %s AND package_local_id = ANY(%s)",
+                (entity_id, wanted))
+    return {r[0]: r[1] for r in cur.fetchall()}
+
+
+def _attach_package_local_ids(cur, entity_id, items) -> None:
+    """Name, on each item, the workbook-local ids that resolve to it.
+
+    The drawer indexes the listing by id, and promoted pages cite the
+    workbook's own numbers ('E-001') while the store keys the row as
+    'E-CROSSINS-001'. Without these aliases every such chip opened an empty
+    drawer (Cross Insurance, 2026-10-05: 956 citations, 70 ids)."""
+    for item in items:
+        item["package_local_ids"] = []
+    if not items:
+        return
+    # A merged listing row answers for the ids it absorbed (also_filed_as),
+    # so their local numbers are its aliases too.
+    owners = {i["e_id"]: [i["e_id"], *(i.get("also_filed_as") or [])]
+              for i in items}
+    cur.execute("SELECT e_id, array_agg(package_local_id ORDER BY "
+                "package_local_id) FROM evidence_package_ids "
+                "WHERE entity_id = %s AND e_id = ANY(%s) GROUP BY e_id",
+                (entity_id, sorted({x for ids in owners.values() for x in ids})))
+    by_stored = {r[0]: list(r[1] or []) for r in cur.fetchall()}
+    for item in items:
+        mine = owners[item["e_id"]]
+        item["package_local_ids"] = sorted(
+            {a for x in mine for a in by_stored.get(x, []) if a not in mine})
 
 def distribution(items: list[dict]) -> dict:
     """Tier and claim-class counts over the rows just read.
