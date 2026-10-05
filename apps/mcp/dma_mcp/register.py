@@ -11,6 +11,9 @@ Fail-closed rules enforced here:
   artefact at registration (rejected here, not at promotion);
 - an item with no traceable source URL is accepted as INFERENCE, never
   FACT (the coercion is reported, never silent);
+- a FACT on a T3-T5 source is REFUSED (`fact_tier`), every origin: it is
+  ET-10's rule, run at the door instead of at the submit of every page that
+  cites the row — and the claim type is never rewritten to pass it;
 - ERS = 0.35·Tier + 0.25·Recency + 0.20·Specificity + 0.20·Corroboration,
   every factor 1.0-5.0 (PRD "The evidence rank score"), bounded by CHECK;
 - identity_ok is asserted only when a domain check actually ran —
@@ -494,6 +497,8 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     # that internal registration was the alternative it did not take.
     if not source_url and claim == "FACT":
         if origin == "connector":
+            # Reached only by a T1/T2 family (CFPB): a T3 reading's FACT is
+            # refused below, by ET-10's own rule.
             adjustments.append(
                 "connector reading with no public URL: claim_type FACT KEPT — "
                 f"its trace is the stored {prov['family']} response "
@@ -513,6 +518,37 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
                 "origin='internal' and it keeps its claim type and is "
                 "labelled, rather than being laundered into a weak public "
                 "claim.")
+
+    # ET-10 AT THE DOOR — a FACT rests on a T1 or T2 source.
+    #
+    # The submit gate (validation2._check_fact_tier, gate code "ET-10")
+    # refuses every cited row labelled FACT whose tier is outside FACT_TIERS,
+    # whatever its origin. Registration used to keep FACT on a connector
+    # reading unconditionally ("claim_type FACT KEPT" above), so every Indeed
+    # reading — T3, computed from the tool — minted cleanly and then failed
+    # the submit of every page that cited it: a row that can never be cited
+    # is not evidence, it is a trap. So the same rule runs here, on the
+    # claim and tier as they would be STORED (after the tier is computed for
+    # a connector, inherited for a split span, and after the reported
+    # URL-less demotion above), for EVERY origin — ET-10 reads no origin, so
+    # a connector-only check would leave the same trap open for an internal
+    # or producer row. The claim type is never rewritten to pass: the
+    # producer decides between INFERENCE and a T1/T2 source.
+    from .validation2 import FACT_TIERS
+    if claim == "FACT" and tier not in FACT_TIERS:
+        out = {"e_id": None, "deduped": False, "ers": None, "errors": [
+            f"fact_tier: claim_type FACT on a {tier} source — ET-10 (a FACT "
+            f"rests on a {' or '.join(FACT_TIERS)} source) refuses every "
+            "cited FACT row on T3-T5 at submit, so it is refused here rather "
+            "than minted uncitable. Register it as INFERENCE (or HYPOTHESIS "
+            "/ CEILING_ESTIMATE)"
+            + (f"; a {prov['family']} connector reading is {tier} by the "
+               "tool, so it is never a FACT" if prov and prov.get("family")
+               else ", or cite the T1/T2 source that states it")
+            + ". The claim type is not rewritten for you."]}
+        if adjustments:
+            out["adjustments"] = adjustments
+        return out
 
     # Verbatim verification — fail closed. A connector reading is verified
     # against its STORED response, never a URL fetch (decision 3): the tool

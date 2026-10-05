@@ -133,7 +133,7 @@ class _Conn:
 
 def test_a_paraphrase_of_the_response_is_refused_without_a_fetch():
     called = []
-    item = _indeed()
+    item = {**_indeed(), "claim_type": "INFERENCE"}   # T3: never a FACT (ET-10)
     item["excerpt"] = ("About half of the reviewers say they would recommend "
                        "the employer to a friend.")
     r = register_evidence(_Conn(), "run-1", item,
@@ -146,6 +146,62 @@ def test_connector_provenance_on_another_origin_is_refused():
     item = {**_indeed(), "origin": "producer", "tier": "T3"}
     r = register_evidence(_Conn(), "run-1", item, fetch=lambda u: None)
     assert any("origin='connector'" in e for e in r["errors"])
+
+
+# ── ET-10 at the door: a FACT rests on a T1 or T2 source ─────────────────
+#
+# register_evidence used to KEEP claim_type FACT on every connector reading
+# ("claim_type FACT KEPT"), while ET-10 (validation2._check_fact_tier, gate
+# code "ET-10") refuses FACT on any T3+ row a payload cites — so every
+# Indeed reading (T3, computed) registered cleanly and then failed the
+# submit of whatever page cited it. Registration now refuses what ET-10
+# would refuse, for every origin, naming the gate, and never rewrites the
+# claim type to make it pass.
+def test_an_indeed_fact_is_refused_at_registration_naming_et10():
+    r = register_evidence(_Conn(), "run-1", _indeed(),
+                          fetch=lambda u: pytest.fail("no fetch"))
+    assert r["e_id"] is None, r
+    assert any(e.startswith("fact_tier") and "ET-10" in e and "T3" in e
+               for e in r["errors"]), r["errors"]
+    # refused, not rewritten: nothing says the claim was changed
+    assert not any("INFERENCE" in a and "downgraded" in a
+                   for a in r.get("adjustments", [])), r
+
+
+def test_an_indeed_inference_is_not_refused_by_et10():
+    item = {**_indeed(), "claim_type": "INFERENCE"}
+    try:
+        r = register_evidence(_Conn(), "run-1", item,
+                              fetch=lambda u: pytest.fail("no fetch"))
+    except TypeError:
+        return      # got past every refusal to the mint, which _Conn cannot do
+    assert not any("ET-10" in e for e in r["errors"]), r
+
+
+@pytest.mark.parametrize("origin,url", [
+    ("producer", "https://example-group.com/annual-report"),
+    ("internal", None),
+    ("package", "https://example-group.com/annual-report"),
+])
+def test_et10_is_enforced_for_every_origin(origin, url):
+    item = {"origin": origin, "claim_type": "FACT", "tier": "T3",
+            "excerpt": EXCERPT, "source_name": "A third-party account",
+            "source_url": url}
+    r = register_evidence(_Conn(), "run-1", item,
+                          fetch=lambda u: pytest.fail("refused before fetch"))
+    assert r["e_id"] is None and any("ET-10" in e for e in r["errors"]), r
+
+
+def test_a_urlless_producer_fact_is_still_demoted_not_refused():
+    """AUD-0029's reported demotion is unchanged: the claim that would be
+    STORED is INFERENCE, which ET-10 does not refuse."""
+    item = {"origin": "producer", "claim_type": "FACT", "tier": "T3",
+            "excerpt": EXCERPT, "source_name": "A third-party account"}
+    try:
+        r = register_evidence(_Conn(), "run-1", item, fetch=None)
+    except TypeError:
+        return      # reached the mint
+    assert not any("ET-10" in e for e in r["errors"]), r
 
 
 # ── split spans: pure rules ────────────────────────────────────────────────
@@ -243,9 +299,16 @@ def seeded():
     admin.close()
 
 
-def test_an_indeed_reading_mints_as_t3_fact_with_its_provenance(seeded):
+def test_an_indeed_reading_mints_as_t3_inference_with_its_provenance(seeded):
+    """T3, computed — so it registers as INFERENCE; FACT is refused (ET-10,
+    test_an_indeed_fact_is_refused_at_registration_naming_et10)."""
     mcp, rid = seeded
+    refused = register_evidence(mcp, rid, {**_indeed(), "tier": "T1"},
+                                fetch=lambda u: pytest.fail("no fetch"))
+    assert refused["e_id"] is None and any(
+        "ET-10" in e for e in refused["errors"]), refused
     r = register_evidence(mcp, rid, {**_indeed(), "tier": "T1",
+                                     "claim_type": "INFERENCE",
                                      "linked_subcap_ids": ["P1C4.1.1"]},
                           fetch=lambda u: pytest.fail("no fetch"))
     assert r["errors"] == [] and r["e_id"].startswith("E-CC-"), r
@@ -257,7 +320,7 @@ def test_an_indeed_reading_mints_as_t3_fact_with_its_provenance(seeded):
                      FROM evidence_index WHERE e_id = %s""", (r["e_id"],))
     (origin, tier, claim, tool, query, retrieved, sha,
      published) = cur.fetchone()
-    assert (origin, tier, claim) == ("connector", "T3", "FACT")
+    assert (origin, tier, claim) == ("connector", "T3", "INFERENCE")
     assert tool == "mcp__Indeed__get_company_data"
     assert json.loads(query) == {"company": "Example Group"}
     assert retrieved.isoformat().startswith("2026-10-01T14:03")
@@ -275,7 +338,8 @@ def test_an_indeed_reading_mints_as_t3_fact_with_its_provenance(seeded):
 
     # A second span of the SAME stored response, referenced by hash.
     second = _indeed(response=None, response_sha256=sha)
-    second_item = {**second, "excerpt": INDEED[:80]}
+    second_item = {**second, "excerpt": INDEED[:80],
+                   "claim_type": "INFERENCE"}
     r2 = register_evidence(mcp, rid, second_item, fetch=None)
     assert r2["errors"] == [], r2
 

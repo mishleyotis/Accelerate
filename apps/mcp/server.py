@@ -471,6 +471,10 @@ def register_evidence(run_id: str, item: dict) -> dict:
     from the tool (Indeed T3, CFPB T1) and the excerpt is verified against
     the stored response, never by a fetch.
 
+    FACT is refused on a T3-T5 source, every origin (`fact_tier`): ET-10
+    refuses a cited FACT row there at submit, so an Indeed reading
+    registers as INFERENCE. The claim type is never rewritten for you.
+
     A SPLIT of a partly sensitive internal row: origin='internal',
     split_of=<parent e_id>, an excerpt that is a verbatim piece of the
     parent's, and — for the span the client may read —
