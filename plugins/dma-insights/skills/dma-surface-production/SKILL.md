@@ -159,14 +159,6 @@ get-task-context(taskId) ; get-task-context(taskId2)     ← POLL. Do not conclu
 `scripts/clay_plan.py --domain <domain>` prints the exact sequence with title filters and
 the tier each returned data point registers at.
 
-**The company call is not optional, and neither is Vibe Prospecting.** Run Clay's
-company points (Tech Stack, Annual Revenue, Headcount Growth) and Vibe Prospecting
-`match-business` → `enrich-business` (firmographics, technographics, financial
-metrics). Register each reading under origin `connector` with `kind` —
-`technographic` (T1; a scan-only row stays INFERRED) or `firmographic` (T3) — owner
-decision 2026-10-05. The techstack page is refused without one (ET-12): SWBC
-promoted a register that had never seen a scan.
-
 Clay closes the gaps public search cannot: **O7 leadership**, **O12 thought leadership**,
 **T1 tech stack** — its technographic scan is the machine scan, and machine scans are T1,
 never T4 — plus firmographics, why-now signals and the hiring evidence behind platform
@@ -183,7 +175,7 @@ Three rules that matter more than the call sequence:
   two targeted custom points.** Enrichments cost credits and a DMA needs the leadership tier,
   not the org chart. Outside that, ask.
 
-Full playbook and tier map: `02-inputs/2-clay-enrichment.md`.
+Full playbook, tier map and the **mandatory** company call plus Vibe Prospecting scan (ET-12): `02-inputs/2-clay-enrichment.md`.
 
 ### 5 · Produce, page by page
 
