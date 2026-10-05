@@ -236,3 +236,28 @@ page** — enrichment is slow and async, and the pages that consume it come late
 
 `scripts/clay_plan.py` prints the exact call sequence for a domain, including the title
 filters and the tier each returned data point should be registered at.
+
+## The company call and the Vibe Prospecting scan are mandatory (owner decision 2026-10-05)
+
+SWBC promoted a tech register that had never seen a machine scan: Clay was
+called for contacts only and Vibe Prospecting never, so an integration
+platform both scans would have surfaced was never weighed against the run's
+rank-1 integration argument. On every hand-driven run:
+
+1. Clay `search-companies` on the domain, then `add-company-data-points`
+   with **Tech Stack, Annual Revenue, Headcount Growth**; poll
+   `get-task-context` until each is `completed`.
+2. Vibe Prospecting `match-business` → `enrich-business` with
+   **firmographics, technographics, financial-metrics**; `show-sample` for
+   the unmasked row (exploration is free; export only with the owner's
+   approval of the quoted cost).
+3. Register each reading under origin `connector` with `connector.kind`:
+   `technographic` → T1 (a row resting on a scan alone stays INFERRED;
+   CONFIRMED still needs SWBC's own posting or release beside it), or
+   `firmographic` → T3 (revenue band, LinkedIn headcount and its growth).
+   The response is stored and the excerpt verified against it.
+4. Cite the scan on every register row it detects. ET-12 refuses a
+   non-empty register that cites none, unless `r_layer.probes_run` records
+   the scan NOT_RUN naming Clay and Vibe Prospecting and why.
+5. Headcount Growth and any revenue history are CAGR candidates under
+   CG-18f: rank them, serve only a corroborated one.

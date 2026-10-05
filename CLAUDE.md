@@ -144,6 +144,19 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     differences are warnings. Leave-one-out against gold; sub-vertical-
     matched gold preferred, cross-sub-vertical gold for structure only.
 
+- **Enrichment and CAGR decisions** (user, 2026-10-05, after SWBC served
+  a held CAGR, an empty sentiment bar and a register no scan had touched):
+  - **Clay and Vibe Prospecting are admitted connector origins, tier by
+    kind** (`connector.kind`): `technographic` readings T1 (a scan-only
+    row stays INFERRED), `firmographic` readings (revenue band, LinkedIn
+    headcount and growth) T3. Both scans are mandatory on a hand-driven
+    run; ET-12 refuses a register that cites none and records no NOT_RUN.
+  - **CAGR**: compute every candidate, rank by validity, serve only a
+    figure an independent source corroborates; otherwise hold it with
+    each candidate's rate and why (CG-18f).
+  - **Star ratings fill from zero** (rating ÷ top star); other scales keep
+    the range they state.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

@@ -175,7 +175,7 @@ Three rules that matter more than the call sequence:
   two targeted custom points.** Enrichments cost credits and a DMA needs the leadership tier,
   not the org chart. Outside that, ask.
 
-Full playbook and tier map: `02-inputs/2-clay-enrichment.md`.
+Full playbook, tier map and the **mandatory** company call plus Vibe Prospecting scan (ET-12): `02-inputs/2-clay-enrichment.md`.
 
 ### 5 · Produce, page by page
 

@@ -151,6 +151,17 @@ GATES = {
                "C3 stated both, and the two pages named different regulator "
                "sets; nothing compared them.",
                "block"),
+    "CG-18f": ("A CAGR is ranked, and served only corroborated", None,
+               "A served CAGR's unit names what grew, the window, the scope "
+               "and the independent source that corroborates it. A held "
+               "CAGR beside a financial series of two or more dated points "
+               "states each computed candidate's rate and why none was "
+               "corroborated.",
+               "Owner decision 2026-10-05 (SWBC): CAGR promoted held as 'no "
+               "consolidated financials' while the page carried eight dated "
+               "points of a series and a connector headcount history existed; "
+               "no candidate had been computed or ranked.",
+               "block"),
     "ET-05b": ("The regulatory card works its sub-vertical's regulators", None,
                "C3's ladder carries a rung naming a regulator of the run's "
                "primary sub-vertical family (regulator_family_by_subvertical) "
@@ -1014,6 +1025,18 @@ GATES = {
               "the overview's ceiling table reads as 'up to L4' and the "
               "evidence census reads as reportage. The research ladder has "
               "said 'scans = T1, never T4' since v5; nothing checked it.",
+              "block"),
+    "ET-12": ("The tech register is built on a machine scan", None,
+              "The techstack page cites at least one connector-origin "
+              "technographic reading (Clay Tech Stack or Vibe Prospecting "
+              "technographics, registered with kind 'technographic', T1), "
+              "or its r_layer records the scan as NOT_RUN naming both tools "
+              "and the reason.",
+              "SWBC 2026-10-05: Clay was called for contacts only and Vibe "
+              "Prospecting never; the register promoted from postings and "
+              "pages, and an integration platform the scans name (Dell "
+              "Boomi) was never weighed against the rank-1 integration "
+              "argument.",
               "block"),
     "ET-05": ("A run cites only its own sub-vertical's cells", None,
               "No section cites a variant cell whose terminal segment names "

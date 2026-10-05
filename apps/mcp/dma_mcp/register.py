@@ -89,7 +89,19 @@ CONNECTOR_SOURCES = (
     ("indeed", ("indeed",), "T3"),
     ("cfpb", ("cfpb", "consumerfinance", "consumer_complaint",
               "consumer-complaint"), "T1"),
+    # Owner decision 2026-10-05 ("split by data type"): one Clay or Vibe
+    # Prospecting call returns two kinds of reading, so the tier follows the
+    # KIND the producer declares in `connector.kind`, never the tool alone.
+    # A technographic detection is a machine scan (T1 — and a row resting on
+    # a scan alone is still INFERRED, never CONFIRMED); a modelled
+    # firmographic (revenue band, LinkedIn-observed headcount and its growth)
+    # is aggregated third-party data (T3, like Indeed).
+    ("clay", ("clay",), {"technographic": "T1", "firmographic": "T3"}),
+    ("vibe_prospecting", ("vibe_prospecting", "vibe-prospecting",
+                          "vibe prospecting", "explorium"),
+     {"technographic": "T1", "firmographic": "T3"}),
 )
+CONNECTOR_KINDS = ("technographic", "firmographic")
 #: A stored response larger than this is refused: a connector result is a
 #: record or an aggregate, not a corpus.
 CONNECTOR_RESPONSE_MAX = 2_000_000
@@ -97,11 +109,16 @@ CONNECTOR_RESPONSE_MAX = 2_000_000
 _RETRIEVED_SKEW = timedelta(days=1)
 
 
-def connector_family(tool) -> tuple[str, str] | None:
-    """(family, computed tier) for a connector tool name, or None."""
+def connector_family(tool, kind=None) -> tuple[str, str | None] | None:
+    """(family, computed tier) for a connector tool name, or None.
+
+    For a family whose tier depends on the kind of reading, the tier is None
+    until `kind` names one of CONNECTOR_KINDS."""
     name = re.sub(r"^mcp__", "", str(tool or "").strip().lower())
     for family, needles, tier in CONNECTOR_SOURCES:
         if any(n in name for n in needles):
+            if isinstance(tier, dict):
+                return family, tier.get(str(kind or "").strip().lower())
             return family, tier
     return None
 
@@ -146,7 +163,15 @@ def connector_provenance(item: dict, now: datetime | None = None) -> dict:
     query = c.get("query")
     query = (json.dumps(query, sort_keys=True, ensure_ascii=False)
              if isinstance(query, (dict, list)) else str(query or "").strip())
-    fam = connector_family(tool) if tool else None
+    kind = str(c.get("kind") or "").strip().lower() or None
+    fam = connector_family(tool, kind) if tool else None
+    if fam is not None and fam[1] is None:
+        errors.append(
+            f"connector.kind: a {fam[0]} reading's tier follows what it "
+            f"measured — send kind one of {', '.join(CONNECTOR_KINDS)} "
+            "(technographic: a machine-scan detection, T1; firmographic: a "
+            "modelled revenue, headcount or growth figure, T3 — owner "
+            "decision 2026-10-05)")
     if not tool:
         errors.append("connector.tool: required — name the tool that was "
                       "called (e.g. Indeed get_company_data)")
@@ -154,7 +179,8 @@ def connector_provenance(item: dict, now: datetime | None = None) -> dict:
         errors.append(
             f"connector_tool_unregistered: {tool!r} has no tier rule. The "
             "owner admitted Indeed (T3) and the CFPB complaint API (T1) on "
-            "2026-10-04; another connector needs its own decision before "
+            "2026-10-04 and Clay and Vibe Prospecting by kind on 2026-10-05; "
+            "another connector needs its own decision before "
             "it can be evidence. Register the underlying public page "
             "instead, if one exists.")
     if not query:
@@ -189,10 +215,11 @@ def connector_provenance(item: dict, now: datetime | None = None) -> dict:
                       "already stored) to verify the excerpt against — an "
                       "unverified excerpt is not evidence")
     sent = str(item.get("tier") or "").upper() or None
-    if fam and sent and sent != fam[1]:
+    if fam and fam[1] and sent and sent != fam[1]:
         adjustments.append(
             f"tier {sent} ignored: the tier of a {fam[0]} connector reading "
-            f"is computed, and it is {fam[1]} (owner decision 2026-10-04)")
+            f"is computed, and it is {fam[1]} (owner decision "
+            f"{'2026-10-05' if fam[0] in ('clay', 'vibe_prospecting') else '2026-10-04'})")
     return {"errors": errors, "adjustments": adjustments, "tool": tool,
             "query": query, "retrieved_at": retrieved, "body": body,
             "sha256": sha, "family": fam[0] if fam else None,

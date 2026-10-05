@@ -268,6 +268,19 @@ function scaleBounds(scale) {
       max: hi
     } : null;
   };
+  // A STAR RATING FILLS FROM ZERO, whatever range it states (owner decision
+  // 2026-10-05). Read as "1-5" a one-star rating sat at the floor and drew
+  // 0% — a real Better Business Bureau 1.0 rendered as the same empty rail a
+  // missing figure does. Stars are read the way a star display reads them:
+  // rating over the top star, so one star of five fills a fifth.
+  if (/\bstars?\b/i.test(s)) {
+    const tops = s.match(/\d+(?:\.\d+)?/g);
+    const hi = tops ? Number(tops[tops.length - 1]) : NaN;
+    return isFinite(hi) && hi > 0 ? {
+      min: 0,
+      max: hi
+    } : null;
+  }
   // "a..b" first: it is the only notation that can carry a negative low
   // bound without the hyphen being ambiguous.
   let m = s.match(/(-?\d+(?:\.\d+)?)\s*\.\.\s*(-?\d+(?:\.\d+)?)/);
@@ -276,13 +289,11 @@ function scaleBounds(scale) {
   // is the separator.
   m = s.match(/(-?\d+(?:\.\d+)?)\s*(?:to|[-–—])\s*(-?\d+(?:\.\d+)?)/i);
   if (m) return num2(m[1], m[2]);
-  // A bare percentage or star rating states its bounds by convention.
+  // A bare percentage states its bounds by convention.
   if (/%/.test(s)) return {
     min: 0,
     max: 100
   };
-  m = s.match(/(\d+(?:\.\d+)?)\s*stars?/i);
-  if (m) return num2(1, m[1]);
   // "out of 10", "5-point" — the upper bound stated in words.
   m = s.match(/(?:out of|scale of)\s*(\d+(?:\.\d+)?)/i) || s.match(/^(\d+(?:\.\d+)?)[- ]point\b/i);
   if (m) return num2(0, m[1]);
