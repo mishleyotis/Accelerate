@@ -1578,8 +1578,12 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
         # contradiction_handling
         "contradiction": {"text": _clean(r.get("DQ_Contradicts"))[:160],
                           "disposition": _clean(r.get("Contradiction_Disposition"))},
-        # ceiling_reasoning
+        # ceiling_reasoning, and claim_label_fit for a CEILING_ESTIMATE (which
+        # passes only with its band and uncertainty — without them the
+        # challenger records NOT_RUN and a relabelled cell PASSes unjudged)
         "ceiling": _clean(r.get("Ceiling_Reasoning"))[:160],
+        "ceiling_band": _clean(r.get("Ceiling_Band")) or None,
+        "uncertainty": _clean(r.get("Uncertainty")) or None,
         "recency_bands": sorted({_clean(x.get("Recency_Band")) for x in rows
                                  if _clean(x.get("Recency_Band"))}),
     }

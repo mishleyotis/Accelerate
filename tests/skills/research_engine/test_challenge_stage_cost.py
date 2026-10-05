@@ -92,8 +92,20 @@ def test_the_packet_carries_the_fields_the_other_dimensions_read(tmp_path):
     run, wb, cells = _synthesised(tmp_path)
     out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
     cell = out["packets"][0]["cells_to_challenge"][0]
-    for key in ("facets_answered", "contradiction", "ceiling", "recency_bands"):
+    for key in ("facets_answered", "contradiction", "ceiling", "recency_bands",
+                "ceiling_band", "uncertainty"):
         assert key in cell, key
+
+
+def test_the_packet_carries_the_band_a_ceiling_estimate_is_judged_on(tmp_path):
+    """arbor-bank: claim_label_fit on a CEILING_ESTIMATE went NOT_RUN because
+    the packet shipped Ceiling_Reasoning cut at 160 chars and no band."""
+    run, wb, cells = _synthesised(tmp_path)
+    wb.set_scoring(cells[0], {"Ceiling_Band": "Building", "Uncertainty": "±0.5"})
+    out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
+    got = {c["subcap"]: c for p in out["packets"] for c in p["cells_to_challenge"]}
+    assert got[cells[0]]["ceiling_band"] == "Building"
+    assert got[cells[0]]["uncertainty"] == "±0.5"
 
 
 def test_it_is_not_sent_to_the_research_card(tmp_path):
