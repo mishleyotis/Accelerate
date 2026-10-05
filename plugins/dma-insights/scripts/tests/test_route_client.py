@@ -131,6 +131,7 @@ def test_every_verdict_has_a_distinct_exit_code(monkeypatch):
     """A routine branches on these without parsing prose, so two verdicts
     sharing a code would silently merge two different next steps."""
     seen = {}
+    monkeypatch.setattr(RC, "in_flight", lambda c: [])
     for verdict, state in (
             (RC.READY_TO_SYNTHESISE, _state([_run(1, 5)])),
             (RC.NEEDS_SCORING, _state([_run(1, 0)])),
@@ -158,3 +159,34 @@ def test_an_unreachable_connector_is_not_a_routing_answer(monkeypatch):
         raise RuntimeError("connector unreachable")
     monkeypatch.setattr(RC, "client_state", _boom)
     assert RC.main(["--client", "acme"]) == 2
+
+
+# ── Susser Bank, 2026-10-05: a run in flight the connector cannot see ─────
+
+def test_a_snapshotted_run_routes_to_resume_not_to_near_matches(monkeypatch):
+    """A run still in RESEARCH has no ingested package, so the connector
+    answered unknown_entity with five unrelated banks as near matches — while
+    the client's intake folder held a snapshot from an hour before."""
+    monkeypatch.setattr(RC, "client_state", lambda d: {
+        "error": "unknown_entity",
+        "did_you_mean": [{"display_id": "sunflower-bank-n-a", "similarity": 0.35}]})
+    monkeypatch.setattr(RC, "in_flight", lambda c: [
+        {"name": "run_snapshot_susser-bank-2026-10-05.tar.gz",
+         "run_id": "susser-bank-2026-10-05"}])
+    assert RC.main(["--client", "Susser Bank", "--json"]) == 8
+
+
+def test_a_resume_code_is_distinct_and_fresh_still_wins(monkeypatch):
+    monkeypatch.setattr(RC, "client_state", lambda d: {"error": "unknown_entity",
+                                                       "did_you_mean": []})
+    monkeypatch.setattr(RC, "in_flight", lambda c: [{"run_id": "r1"}])
+    assert RC.main(["--client", "acme"]) == 8
+    assert RC.main(["--client", "acme", "--fresh"]) == 4   # a new run was asked for
+    monkeypatch.setattr(RC, "in_flight", lambda c: [])
+    assert RC.main(["--client", "acme"]) == 4
+
+
+def test_an_unreadable_drive_adds_nothing():
+    def boom(_c):
+        raise RuntimeError("drive down")
+    assert RC.in_flight("acme", runner=boom) == []

@@ -294,7 +294,14 @@ class RunWorkbook:
     #: because a legitimate holder is doing a whole-file xlsx write, and a
     #: spurious timeout under load would be indistinguishable from the
     #: corruption this prevents.
-    LOCK_TIMEOUT_S = 120.0
+    #:
+    #: 120 s was too short once research ran as sixteen category workflows
+    #: (measured 2026-10-05, Susser Bank): up to ~30 agents queue whole-file
+    #: writes of ~10 s each, and a floors gate timed out twice on the lock
+    #: and recorded no verdict, which cost its category a round. 420 s stays
+    #: inside the agents' 600 s foreground command timeout.
+    #: `DMA_LOCK_TIMEOUT_S` overrides it.
+    LOCK_TIMEOUT_S = float(os.environ.get("DMA_LOCK_TIMEOUT_S") or 420.0)
 
     def _lock_path(self) -> Path:
         return self.path.with_name(self.path.name + ".lock")

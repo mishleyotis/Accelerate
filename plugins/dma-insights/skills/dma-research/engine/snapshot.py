@@ -13,7 +13,16 @@ already uses). `restore` pulls it back and unpacks it where the run belongs.
 The driver pushes one at every stage boundary; ~2.4 MB for a 760-cell run.
 
     python3 -m engine.snapshot push    --run R --root ROOT
-    python3 -m engine.snapshot restore --run R --root ROOT --client "<Entity>"
+    python3 -m engine.snapshot restore --run R --client "<Entity>" [--root ROOT]
+
+`restore` puts the run back at the root it was snapshotted from. Briefs, the
+research handoff and the workflow invocations all carry that root as an
+absolute path, so a run unpacked anywhere else resumes with every brief
+pointing at a directory that does not exist (measured 2026-10-05, Susser
+Bank: restored to the default root, then had to be restored again). The root
+is recorded in the snapshot (`_snapshot.json`); an older snapshot without it
+is read from its research handoff. A different `--root` is refused unless
+`--relocate` says the absolute paths may go stale.
 """
 from __future__ import annotations
 
@@ -37,6 +46,7 @@ from .workbook import file_lock  # noqa: E402
 
 EXCLUDE_DIRS = ("agent_logs",)          # transcripts: large and regenerable
 EXCLUDE_SUFFIXES = (".lock",)
+MANIFEST = "_snapshot.json"
 DRIVE_FETCH = Path(__file__).resolve().parents[3] / "scripts" / "drive_fetch.py"
 
 
@@ -56,8 +66,34 @@ def build(root: Path) -> bytes:
         return ti
     with tarfile.open(fileobj=buf, mode="w:gz") as tf:
         for p in sorted(root.iterdir()):
+            if p.name == MANIFEST:
+                continue
             tf.add(str(p), arcname=p.name, filter=keep)
+        meta = json.dumps({"root": str(root.resolve())}).encode()
+        ti = tarfile.TarInfo(MANIFEST)
+        ti.size = len(meta)
+        tf.addfile(ti, io.BytesIO(meta))
     return buf.getvalue()
+
+
+def recorded_root(blob: bytes) -> str | None:
+    """The root a snapshot was taken from: its manifest, else (a snapshot
+    from before the manifest) the root its research handoff names."""
+    with tarfile.open(fileobj=io.BytesIO(blob), mode="r:gz") as tf:
+        names = tf.getnames()
+        for name, key in ((MANIFEST, None), ("07_qa/research_workflow.json", "invocations")):
+            if name not in names:
+                continue
+            try:
+                doc = json.loads(tf.extractfile(name).read())
+            except (ValueError, AttributeError):
+                continue
+            if key is None and doc.get("root"):
+                return str(doc["root"])
+            for inv in doc.get(key) or []:
+                if inv.get("root"):
+                    return str(inv["root"])
+    return None
 
 
 def unpack(blob: bytes, root: Path) -> int:
@@ -109,7 +145,8 @@ def push(run, *, client: str | None = None) -> dict:
     return out
 
 
-def restore(run_id: str, root: Path, client: str) -> dict:
+def restore(run_id: str, root: Path | None, client: str, *,
+            relocate: bool = False) -> dict:
     with tempfile.TemporaryDirectory() as td:
         r = subprocess.run([sys.executable, str(DRIVE_FETCH), "pull-backup",
                             "--client", client, "--dest", td],
@@ -120,8 +157,21 @@ def restore(run_id: str, root: Path, client: str) -> dict:
         if not f.is_file():
             return {"outcome": "NOT_FOUND",
                     "reason": f"no {f.name} in the client's backup folder"}
-        n = unpack(f.read_bytes(), root)
-    return {"outcome": "RESOLVED", "members": n, "root": str(root)}
+        blob = f.read_bytes()
+        was = recorded_root(blob)
+        if root is None:
+            if not was:
+                return {"outcome": "REFUSED",
+                        "reason": "the snapshot records no root; pass --root"}
+            root = Path(was)
+        elif was and Path(root).resolve() != Path(was).resolve() and not relocate:
+            return {"outcome": "REFUSED", "recorded_root": was,
+                    "reason": (f"this run was snapshotted from {was}; its briefs and "
+                               f"handoff name that path. Restore there (omit --root), "
+                               f"or pass --relocate to accept stale absolute paths")}
+        n = unpack(blob, root)
+    return {"outcome": "RESOLVED", "members": n, "root": str(root),
+            **({"recorded_root": was} if was else {})}
 
 
 def main(argv=None) -> int:
@@ -130,13 +180,19 @@ def main(argv=None) -> int:
     for c in ("push", "restore"):
         p = sub.add_parser(c)
         p.add_argument("--run", required=True)
-        p.add_argument("--root", required=True)
+        p.add_argument("--root", required=(c == "push"),
+                       help=None if c == "push" else
+                       "default: the root the snapshot was taken from")
         p.add_argument("--client", required=(c == "restore"))
+        if c == "restore":
+            p.add_argument("--relocate", action="store_true",
+                           help="unpack at a --root other than the recorded one")
     a = ap.parse_args(argv)
     if a.cmd == "push":
         out = push(runstate.locate(a.run, Path(a.root)), client=a.client)
     else:
-        out = restore(a.run, Path(a.root), a.client)
+        out = restore(a.run, Path(a.root) if a.root else None, a.client,
+                      relocate=a.relocate)
     print(json.dumps(out, indent=1))
     return 0 if out["outcome"] == "RESOLVED" else 1
 

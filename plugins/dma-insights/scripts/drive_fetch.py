@@ -844,6 +844,11 @@ def main(argv=None) -> int:
              "on a fresh container")
     p_pb.add_argument("--client", required=True)
     p_pb.add_argument("--dest", required=True)
+    p_lb = sub.add_parser(
+        "list-backup",
+        help="list the run snapshots in the client's memory-backup folder "
+             "(JSON, read-only) — how route_client sees a run in flight")
+    p_lb.add_argument("--client", required=True)
     p_fn = sub.add_parser(
         "push-final",
         help="push one finished deliverable to the ROOT of the client's "
@@ -905,6 +910,8 @@ def main(argv=None) -> int:
         return push_backup(a.client, a.file, a.name, a.many)
     if a.cmd == "pull-backup":
         return pull_backup(a.client, a.dest)
+    if a.cmd == "list-backup":
+        return list_backup(a.client)
     if a.cmd == "push-final":
         return push_final(a.client, a.file)
     if a.cmd == "cleanup-backup":
@@ -1155,6 +1162,38 @@ def pull_backup(client: str, dest: str) -> int:
             n += 1
     print(f"pull-backup: {n} file(s) <- {chosen['name']}/{BACKUP_FOLDER} "
           f"in {folder['name']!r} -> {out}")
+    return 0
+
+
+def list_backup(client: str) -> int:
+    """The run snapshots in the client's memory-backup folder, as JSON —
+    read-only: it creates no folder (unlike `_insights_root`).
+
+    route_client used to consult the connector alone, and a run still in
+    RESEARCH is not in the connector yet: Susser Bank (2026-10-05) routed
+    AMBIGUOUS against five unrelated banks while its intake folder held a
+    snapshot from an hour before. This is what lets it see that run."""
+    tok = _token()
+    out = {"client": client, "snapshots": []}
+    try:
+        folder = _find_client_folder(tok, client)
+    except SystemExit as e:
+        out["reason"] = str(e)[:300]
+        print(json.dumps(out))
+        return 0
+    out["client_folder"] = folder["name"]
+    want = _insights_name(folder["name"])
+    kids = [f for f in _list_children(tok, folder["id"]) if f["mimeType"] == FOLDER_MIME]
+    dmai = (next((f for f in kids if f["name"] == want), None)
+            or next((f for f in kids if f["name"].startswith("DMAI - ")), None))
+    for h in ([f for f in _list_children(tok, dmai["id"])
+               if f["mimeType"] == FOLDER_MIME and f["name"] == BACKUP_FOLDER]
+              if dmai else []):
+        for f in _list_children(tok, h["id"]):
+            m = re.fullmatch(r"run_snapshot_(.+)\.tar\.gz", f["name"])
+            if m:
+                out["snapshots"].append({"name": f["name"], "run_id": m.group(1)})
+    print(json.dumps(out))
     return 0
 
 

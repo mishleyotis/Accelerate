@@ -423,7 +423,8 @@ def awaiting_workflow(event: dict) -> dict | None:
     est = doc.get("estimate") or {}
     if est:
         fit = est.get("fits_budget")
-        lines.append(f"  ESTIMATE: ${est.get('usd')} for {est.get('open_cells')} open cells in "
+        lines.append(f"  ESTIMATE: ${est.get('usd')} for {est.get('open_cells')} open + "
+                     f"{est.get('repair_cells', 0)} repair cells in "
                      f"{est.get('batches')} batches ({est.get('basis')})"
                      + (f"; spent ${est.get('spent_usd')} of ${est.get('budget_usd')}"
                         if est.get("budget_usd") is not None else "")
@@ -432,6 +433,10 @@ def awaiting_workflow(event: dict) -> dict | None:
                         "driver stops at the ceiling mid-stage")))
     if doc.get("not_worked"):
         lines.append(f"  WARNING: {doc['not_worked']}")
+    if doc.get("stalled"):
+        lines.append(f"  NOT RE-HANDED (no progress across worked rounds): "
+                     f"{', '.join(doc['stalled'])} — their blockers need a repair at "
+                     f"source, not another round")
     lines.append("  If Workflow is not available in this session, STOP and restart the "
                  "session (tools rebind at start). Never substitute Agent calls or "
                  "`--research-mode lanes`: neither is persisted, and lanes hold no connector.")

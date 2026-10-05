@@ -140,3 +140,108 @@ def test_a_handoff_nobody_worked_is_called_out(tmp_path):
     assert not out.get("not_worked") if "not_worked" in out else True
     again = P.Pipeline(p.run, p.opts)._research_handoff()
     assert again["not_worked"] and "lanes" in again["not_worked"]
+
+
+# ── Susser Bank, 2026-10-05: rounds that closed nothing ───────────────────
+# Round 2 handed 15 categories; 13 had every blocker on an already-closed
+# cell, which the open-cells-only handoff never routed. Round 3 was handed
+# with 0 batches, a $6.16 estimate (it cost ~$21) and no stall detection,
+# because each workflow round is a fresh driver process.
+
+def _fail_gate(p, cat, cell, term="single_source_fact"):
+    doc = {"category": cat, "gate": "FAIL", "blocking": [term],
+           "advisory": ["coverage_below_floor"],
+           term: [{"subcap": cell, "distinct_sources": ["example.com"]}],
+           "coverage_below_floor": [{"subcap": cell}]}
+    (p.run.qa_dir / f"floors_{cat}.json").write_text(json.dumps(doc))
+    return doc
+
+
+def test_gate_summary_names_cells_and_keeps_advisory_out():
+    from engine import floors_gate as F
+    doc = {"category": "P1C1", "gate": "FAIL",
+           "blocking": ["evidence_smear", "volleys_incomplete"],
+           "advisory": ["coverage_below_floor"],
+           "evidence_smear": [{"subcaps": ["P1C1.1.3", "P1C1.1.4"]}],
+           "volleys_incomplete": [{"subcap": "P1C1.3.5", "missing": ["fails"]}],
+           "coverage_below_floor": [{"subcap": "P1C1.9.9"}]}
+    cells = F.blocking_cells(doc)
+    assert cells == {"P1C1.1.3": ["evidence_smear"], "P1C1.1.4": ["evidence_smear"],
+                     "P1C1.3.5": ["volleys_incomplete"]}
+    s = F.summary(doc)
+    assert s["repair_cells"] == 3 and "coverage_below_floor" not in s["blocking"]
+    assert s["advisory"] == ["coverage_below_floor"]
+    assert F.blocking_cells({**doc, "gate": "PASS"}) == {}
+    assert F.summary(None)["gate"] == "NOT_RUN"
+
+
+def test_handoff_routes_the_gates_cells_even_when_closed(tmp_path):
+    p, disp, out = _drive(tmp_path, "workflow")
+    cat = out["invocations"][0]["cats"][0]
+    cell = f"{cat}.1.1"
+    _fail_gate(p, cat, cell)
+    h = P.Pipeline(p.run, p.opts)._research_handoff()
+    inv = next(i for i in h["invocations"] if cat in i["cats"])
+    assert inv["repairs"][cat] == {cell: ["single_source_fact"]}
+    assert inv["repair_batches"][cat] == [[cell]]
+    assert h["estimate"]["repair_cells"] >= 1
+    assert "repair" in h["summary"]
+
+
+def test_a_category_that_does_not_move_stops_being_handed(tmp_path):
+    p, disp, out = _drive(tmp_path, "workflow")
+    p.opts.stall_rounds = 2
+    cat = out["invocations"][0]["cats"][0]
+    _fail_gate(p, cat, f"{cat}.1.1")
+    q = P.Pipeline(p.run, p.opts)
+    first = q._research_handoff()                  # seeds the book
+    assert cat in [c for i in first["invocations"] for c in i["cats"]]
+    for spent in (5.0, 10.0):                      # two worked rounds, nothing moved
+        q = P.Pipeline(p.run, p.opts)              # a fresh driver process each round
+        q._spent_usd = spent                       # what the ledger reads back
+        h = q._research_handoff()
+    assert cat in h["stalled"]
+    assert cat not in [c for i in h["invocations"] for c in i["cats"]]
+
+
+def test_an_unworked_handoff_is_not_counted_as_a_stall(tmp_path):
+    p, disp, out = _drive(tmp_path, "workflow")
+    p.opts.stall_rounds = 1
+    cat = out["invocations"][0]["cats"][0]
+    _fail_gate(p, cat, f"{cat}.1.1")
+    for _ in range(3):                             # no spend lands: never worked
+        h = P.Pipeline(p.run, p.opts)._research_handoff()
+    assert not h["stalled"] and h["not_worked"]
+
+
+def test_a_repair_at_source_unstalls_the_category(tmp_path):
+    p, disp, out = _drive(tmp_path, "workflow")
+    p.opts.stall_rounds = 1
+    cat = out["invocations"][0]["cats"][0]
+    doc = _fail_gate(p, cat, f"{cat}.1.1")
+    doc["single_source_fact"].append({"subcap": f"{cat}.1.2"})
+    (p.run.qa_dir / f"floors_{cat}.json").write_text(json.dumps(doc))
+    q = P.Pipeline(p.run, p.opts); q._research_handoff()
+    q = P.Pipeline(p.run, p.opts); q._spent_usd += 3; h = q._research_handoff()
+    assert cat in h["stalled"]
+    _fail_gate(p, cat, f"{cat}.1.1")               # a person closed one blocker
+    h = P.Pipeline(p.run, p.opts)._research_handoff()
+    assert cat not in h["stalled"]
+
+
+def test_the_estimate_is_calibrated_by_the_last_round(tmp_path):
+    p, disp, out = _drive(tmp_path, "workflow")
+    q = P.Pipeline(p.run, p.opts)
+    pilot = q._research_handoff()["estimate"]
+    q = P.Pipeline(p.run, p.opts)
+    q._spent_usd += pilot["usd"] * 3               # the round cost 3x its estimate
+    est = q._research_handoff()["estimate"]
+    assert est["usd"] >= round(pilot["usd"] * 3, 2) - 0.01, (pilot, est)
+    assert "calibrated" in est["basis"]
+
+
+def test_the_workflow_stops_on_agent_errors_and_reads_the_summary():
+    src = (PLUGIN / P.RESEARCH_WORKFLOW).read_text()
+    assert "AGENT_ERROR" in src and "if (!got.length)" in src and "if (!c)" in src
+    assert "--require-synthesis --summary" in src
+    assert "REPAIR_BATCHES" in src and "A.repairs" in src

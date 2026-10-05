@@ -464,6 +464,26 @@ def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
         out.append(cur)
     return out
 
+def _repair_batches(repairs: dict[str, list[str]],
+                    limit: int = BATCH_CELLS) -> list[list[str]]:
+    """The gate's repair cells, kept together by capability and packed into
+    batches of <= `limit` cells — the same unit `_batches` uses for open work."""
+    from .brief import capability_of
+    caps: dict[str, list[str]] = {}
+    for cell in sorted(repairs):
+        caps.setdefault(capability_of(cell) if "." in cell else cell, []).append(cell)
+    out: list[list[str]] = []
+    cur: list[str] = []
+    for cap in sorted(caps, key=lambda c: [int(x) if x.isdigit() else x
+                                           for x in re.split(r"(\d+)", c)]):
+        if cur and len(cur) + len(caps[cap]) > limit:
+            out.append(cur); cur = []
+        cur.extend(caps[cap])
+    if cur:
+        out.append(cur)
+    return out
+
+
 class Pipeline:
     def __init__(self, run: runstate.Run, opts: Options):
         self.run, self.opts = run, opts
@@ -1083,6 +1103,23 @@ class Pipeline:
             t0 = self.opts.clock()
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
+                if not h["invocations"]:
+                    # Every category still failing has stopped moving: a
+                    # handoff now would only buy agents that close nothing.
+                    # The blockers are named so a person can repair at source.
+                    from . import brief
+                    reasons = brief.categories_needing_dispatch(self.wb)["reasons"]
+                    msg = (f"{len(h['stalled'])} category(ies) still failing the floors "
+                           f"gate made no progress across {self.opts.stall_rounds} worked "
+                           f"workflow round(s), so none was handed again: "
+                           + "; ".join(f"{c}: {', '.join((reasons.get(c) or [])[:4])}"
+                                       for c in h["stalled"][:6])
+                           + f". Repair at source, then resume: {self.plan()['command']}")
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.opts.log(f"[{st}] STALLED — {msg[:300]}")
+                    outcome.update(outcome="FAILED", stage=st, reason=msg[:800],
+                                   stalled=h["stalled"], resume=self.plan()["command"])
+                    return outcome
                 self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
                 self._snapshot(st)
                 self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
@@ -1442,8 +1479,23 @@ class Pipeline:
                       + (f" — {r['reason']}" if r.get("reason") else ""))
 
     def _research_handoff(self) -> dict:
-        """Write the per-pillar workflow invocations the session runs."""
-        from . import brief
+        """Write the per-category workflow invocations the session runs.
+
+        Three things this must do that it did not (measured 2026-10-05,
+        Susser Bank, rounds 2-3):
+          * ROUTE THE GATE'S CELLS. A category's blockers sit on cells that
+            are already synthesised or declared absent; routing only open
+            cells handed 13 categories a round with nothing to work.
+            `repairs` carries the cells and terms from floors_<cat>.json.
+          * STOP A CATEGORY THAT DID NOT MOVE. Each workflow round is a new
+            driver process, so the in-memory per-category stall counter was
+            reset every round and never fired. Progress is kept in the
+            state file instead (`workflow_progress`).
+          * PRICE WHAT WAS MEASURED. The pilot constant priced a round that
+            routed only repairs at $6.16; it cost ~$21. The run's own last
+            round calibrates the next estimate.
+        """
+        from . import brief, floors_gate
         need = brief.categories_needing_dispatch(self.wb)["dispatch"]
         md = self._md()
         site = next((str(r.get("Value") or "") for r in self.wb.rows("Firmographics")
@@ -1468,11 +1520,20 @@ class Pipeline:
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
         open_caps = _open_capabilities(self.wb)
-        by_unit = ({c: [c] for c in sorted(need)} if RESEARCH_UNIT == "category"
-                   else by_pillar)
+        repairs = {c: floors_gate.blocking_cells(
+                       floors_gate.read_verdict(self.run.qa_dir, c))
+                   for c in need}
+        stalled = self._workflow_stalled(need, repairs)
+        work = [c for c in sorted(need) if c not in stalled]
+        by_unit = ({c: [c] for c in work} if RESEARCH_UNIT == "category"
+                   else {u: [c for c in cs if c in work]
+                         for u, cs in by_pillar.items() if any(c in work for c in cs)})
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
                 "batches": {c: _batches(open_caps.get(c, {}))
                             for c in cats},
+                "repairs": {c: repairs.get(c) or {} for c in cats},
+                "repair_batches": {c: _repair_batches(repairs.get(c) or {})
+                                   for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
                 "entity": md.get("entity_name") or "", "domain": site}
@@ -1482,41 +1543,126 @@ class Pipeline:
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per category — wait for all, "
                        "then run `then`; the driver verifies the floors gates")}
+        if stalled:
+            doc["stalled"] = stalled
         path = self.run.qa_dir / RESEARCH_HANDOFF
         path.parent.mkdir(parents=True, exist_ok=True)
-        # ENFORCEMENT (I-54): a handoff re-issued with the SAME open cells
-        # means the last one was never worked — the session lost Workflow or
-        # its connectors (a resume can drop both), or started no workflow.
+        # ENFORCEMENT (I-54): a handoff re-issued with the SAME work means
+        # the last one was never worked — the session lost Workflow or its
+        # connectors (a resume can drop both), or started no workflow.
         # Say so in the handoff instead of re-issuing it silently forever.
         try:
             prev = json.loads(path.read_text()).get("estimate") or {}
         except (OSError, ValueError):
             prev = {}
         n = sum(len(i["cats"]) for i in inv)
-        nb = sum(len(b) for i in inv for b in i["batches"].values())
+        nb = sum(len(b) for i in inv for b in i["batches"].values()) + sum(
+            len(b) for i in inv for b in i["repair_batches"].values())
         cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
-        est = round(cells * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY, 2)
-        doc["estimate"] = {"open_cells": cells, "batches": nb, "usd": est,
-                           "basis": f"measured pilot: ${WORKFLOW_USD_PER_CELL}/cell "
-                                    f"+ ${CHALLENGE_USD_PER_CATEGORY}/category challenge"}
-        if prev.get("open_cells") == cells and cells:
+        rcells = sum(len(i["repairs"][c]) for i in inv for c in i["cats"])
+        est, basis = self._workflow_estimate(cells, rcells, n, prev)
+        doc["estimate"] = {"open_cells": cells, "repair_cells": rcells, "batches": nb,
+                           "categories": n, "usd": est, "basis": basis,
+                           "spent_at_handoff": round(self._spent_usd, 2)}
+        same = (prev.get("open_cells") == cells
+                and prev.get("repair_cells", 0) == rcells and (cells or rcells))
+        then = prev.get("spent_at_handoff")
+        # No spend recorded on the old handoff (one written before this field
+        # existed) keeps the old rule: same work named again means not worked.
+        if same and (then is None or round(self._spent_usd, 2) <= float(then)):
             doc["not_worked"] = (
-                f"the previous handoff named the same {cells} open cells: its "
-                "workflows never ran or closed nothing. Check this session has the "
-                "Workflow tool and Exa/Tavily/Clay (a resumed session can lose "
-                "them; a restart rebinds) — do NOT fall back to lanes, which hold "
-                "no connector.")
+                f"the previous handoff named the same {cells} open and {rcells} "
+                "repair cells and no workflow spend has landed since: its "
+                "workflows never ran. Check this session has the Workflow tool "
+                "and Exa/Tavily/Clay (a resumed session can lose them; a restart "
+                "rebinds) — do NOT fall back to lanes, which hold no connector.")
             self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
         cap = self.budget_usd()
         if cap is not None:
             doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
                                    fits_budget=self._spent_usd + est <= cap)
         path.write_text(json.dumps(doc, indent=1))
-        return {"file": str(path), "invocations": inv,
+        return {"file": str(path), "invocations": inv, "stalled": stalled,
                 "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
                 "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
                            f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
-                           f"est ${est:.2f} for {cells} open cells"}
+                           f"est ${est:.2f} for {cells} open + {rcells} repair cells"
+                           + (f"; {len(stalled)} stalled, not re-handed: "
+                              f"{', '.join(stalled)}" if stalled else "")}
+
+    def _workflow_stalled(self, need: list[str], repairs: dict) -> list[str]:
+        """Categories whose outcomes AND blockers did not move across
+        `stall_rounds` worked workflow rounds. Persisted in the state file,
+        because every workflow round is a fresh driver process.
+
+        Progress is any outcome counter rising (`_research_progress`) OR the
+        set of (cell, term) blockers shrinking — a repair round closes
+        blockers without adding a synthesis. A round only counts when spend
+        landed since the last handoff: an unworked handoff is the
+        `not_worked` warning, not a stall."""
+        if not self.opts.stall_rounds:
+            return []
+        book = self.state.setdefault("workflow_progress", {})
+        last_spent = float(self.state.get("workflow_spent_at_handoff", -1.0))
+        worked = round(self._spent_usd, 2) > round(last_spent, 2)
+        now = self._research_progress()
+        out = []
+        for cat in need:
+            sig = list(now.get(cat, ()))
+            blockers = sorted(f"{cell}:{t}" for cell, ts in (repairs.get(cat) or {}).items()
+                              for t in ts)
+            prev = book.get(cat)
+            stalls = int((prev or {}).get("stalls") or 0)
+            if prev is not None:
+                # Movement resets the count whoever caused it — a person who
+                # repaired at source un-stalls the category with no spend.
+                moved = (any(a > b for a, b in zip(sig, prev.get("sig") or []))
+                         or len(blockers) < len(prev.get("blockers") or []))
+                if moved:
+                    stalls = 0
+                elif worked:
+                    stalls += 1
+            book[cat] = {"sig": sig, "blockers": blockers, "stalls": stalls}
+            if stalls >= self.opts.stall_rounds:
+                out.append(cat)
+                self.opts.log(f"  [RESEARCH] {cat}: no outcome moved and no blocker "
+                              f"closed for {stalls} worked round(s) — not handing it "
+                              f"again; {len(blockers)} blocker(s) remain")
+        for cat in list(book):
+            if cat not in need:
+                book.pop(cat)
+        self.state["workflow_spent_at_handoff"] = round(self._spent_usd, 2)
+        self._save_state()
+        return out
+
+    def _workflow_estimate(self, cells: int, rcells: int, n: int,
+                           prev: dict) -> tuple[float, str]:
+        """Pilot constants, corrected by the run's own last round: the ratio
+        of what it cost to what it was estimated at (never below 1), and a
+        floor of the measured cost per category handed (agents cost money
+        even when a category has nothing routed)."""
+        pilot = (cells + rcells) * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY
+        basis = (f"pilot ${WORKFLOW_USD_PER_CELL}/cell + "
+                 f"${CHALLENGE_USD_PER_CATEGORY}/category challenge")
+        cal = self.state.get("workflow_calibration") or {}
+        try:
+            spent_then = float(prev.get("spent_at_handoff"))
+            actual = round(self._spent_usd - spent_then, 2)
+            if actual > 0 and float(prev.get("usd") or 0) > 0:
+                cal = {"ratio": round(max(1.0, actual / float(prev["usd"])), 3),
+                       "per_category": round(actual / max(1, int(prev.get("categories")
+                                                                or prev.get("cats") or 1)), 3),
+                       "measured_usd": actual}
+                self.state["workflow_calibration"] = cal
+        except (TypeError, ValueError):
+            pass
+        if cal:
+            est = max(pilot * float(cal["ratio"]), n * float(cal["per_category"]))
+            basis += (f", calibrated by this run's last round (${cal['measured_usd']} "
+                      f"measured: x{cal['ratio']}, floor ${cal['per_category']}/category)")
+        else:
+            est = pilot
+        return round(est, 2), basis
 
     def _pull_toolkits(self) -> Path | None:
         """The four pillar toolkits, fetched into the run when none is named.

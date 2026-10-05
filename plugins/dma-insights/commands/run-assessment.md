@@ -100,7 +100,7 @@ research package exists and scoring is the missing step (`engine.pipeline
 plan` on that run tells you where it stands — resume it, do not restart);
 0 READY_TO_SYNTHESISE and 5 ALREADY_SERVED are the synthesis lane's, stop and
 name the run (and when the JSON says `partial: true`, say the run is
-half-assessed and offer `--fresh`); 6 AMBIGUOUS — report the near matches, never guess; 2 is the
+half-assessed and offer `--fresh`); 6 AMBIGUOUS — report the near matches, never guess; 8 RESUME_IN_FLIGHT — the intake folder holds a run snapshot the connector cannot see yet: restore it (the command it prints) and continue at step 5, never start a new run; 2 is the
 script failing, which is not a routing answer.
 
 Then the three places work already exists, before any research
@@ -199,7 +199,7 @@ connector and cannot pass a gate.
 **The run survives a fresh container.** The driver snapshots the run
 (workbook, evidence, QA, briefs; not transcripts) to the client's Drive
 `memory-backup` folder at every stage boundary. On a new container, restore
-before resuming: `python3 -m engine.snapshot restore --run <R> --root <ROOT>
+before resuming: `python3 -m engine.snapshot restore --run <R>
 --client "<Entity>"`.
 
 **The ceilings are enforced now, and they are the defaults** — name them only

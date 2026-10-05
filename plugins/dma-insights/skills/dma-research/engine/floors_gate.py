@@ -730,6 +730,56 @@ def read_verdict(qa_dir: Path, category: str) -> dict | None:
         return None
 
 
+def blocking_cells(doc: dict | None) -> dict[str, list[str]]:
+    """{cell: [blocking terms]}: the cells a FAILED gate names, by term.
+
+    Measured 2026-10-05 (Susser Bank, research round 2): every blocker of 13
+    failing categories sat on a cell that was already synthesised or declared
+    absent. The handoff routed only open cells, and the lane prompt said to
+    skip closed ones, so each category spent a round writing nothing. The
+    gate's own findings name the cells; this is the map that routes them.
+    A finding that names no cell is listed under its category id."""
+    out: dict[str, list[str]] = {}
+    if not doc or doc.get("gate") == "PASS":
+        return out
+    cat = str(doc.get("category") or "")
+    for term in doc.get("blocking") or []:
+        entries = doc.get(term)
+        if not isinstance(entries, list) or not entries:
+            entries = [{}]
+        for e in entries:
+            cells: list[str] = []
+            if isinstance(e, dict):
+                if e.get("subcap"):
+                    cells.append(str(e["subcap"]))
+                cells.extend(str(c) for c in (e.get("subcaps") or []))
+            elif isinstance(e, str) and e.startswith(cat + "."):
+                cells.append(e)
+            for cell in cells or [cat]:
+                terms = out.setdefault(cell, [])
+                if term not in terms:
+                    terms.append(term)
+    return out
+
+
+def summary(doc: dict | None) -> dict:
+    """The gate as an agent should read it: verdict, blocking term → cells,
+    advisory term names. The full document runs to tens of KB (one row per
+    cell for every advisory term), and agents reading it truncated misfiled
+    advisory terms as blocking and reported coverage shortfalls as open
+    cells (Susser Bank, 2026-10-05)."""
+    if not doc:
+        return {"gate": "NOT_RUN", "blocking": {}, "advisory": [], "repair_cells": 0}
+    by_term: dict[str, list[str]] = {}
+    for cell, terms in blocking_cells(doc).items():
+        for t in terms:
+            by_term.setdefault(t, []).append(cell)
+    return {"category": doc.get("category"), "gate": doc.get("gate"),
+            "blocking": {t: sorted(c) for t, c in sorted(by_term.items())},
+            "advisory": sorted(doc.get("advisory") or []),
+            "repair_cells": len({c for cs in by_term.values() for c in cs})}
+
+
 def _parse_ladder(v):
     if not v:
         return []

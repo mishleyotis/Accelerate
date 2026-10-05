@@ -23,8 +23,9 @@ export const meta = {
 // command sheet in the prompt so nothing is spent discovering the CLI.
 //
 // args (written by engine.pipeline to <root>/07_qa/research_workflow.json):
-//   {pillar, cats, batches: {cat: [[cap, ...], ...]}, run, root, eng, plugin,
-//    rounds, entity, domain}
+//   {pillar, cats, batches: {cat: [[cap, ...], ...]},
+//    repairs: {cat: {cell: [term, ...]}}, repair_batches: {cat: [[cell, ...], ...]},
+//    run, root, eng, plugin, rounds, entity, domain}
 
 const A = args
 const ENG = A.eng
@@ -67,40 +68,45 @@ const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-toke
   - CONNECTOR CHECK FIRST: you should hold Exa, Tavily and Clay (mcp__Exa__*, mcp__Tavily__*, mcp__Clay__*). If none of them is callable, stop after your first capability and return gate "NO_CONNECTORS" naming the tools you do have: no cell can be declared absent without one, so continuing only spends budget.
   - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
 
-// A placeholder batch ("P3C3 (all open capabilities)" / "(cells the gate
-// names)") means the driver routed no open cell. The open-cells prompt then
-// tells the agent to skip every closed cell — and the gate's blockers are ON
-// closed cells (measured 2026-10-05, Susser Bank round 2: 13 of 14 categories
-// spent a round each writing nothing; the one that passed did so only because
-// its challenger happened to put cell ids in blocking_terms). So a placeholder
-// batch works the gate's own per-cell findings from floors_<cat>.json instead.
+// REPAIR WORK IS ROUTED, NOT INFERRED (measured 2026-10-05, Susser Bank
+// round 2): every blocker of 13 failing categories sat on a cell already
+// synthesised or declared absent, while the batch prompt said to skip closed
+// cells — so each category spent a round writing nothing. The driver now
+// hands `repairs: {cat: {cell: [terms]}}` and `repair_batches` from the
+// gate's own findings; a later round re-reads them from floors_<cat>.json.
+const REPAIRS = A.repairs || {}
+const REPAIR_BATCHES = A.repair_batches || {}
 const isRepair = (cat, caps) => caps.length === 1 && String(caps[0]).startsWith(`${cat} (`)
+const READ_BLOCKERS = (cat) => `python3 -c "import json;from engine import floors_gate as F;print(json.dumps(F.blocking_cells(F.read_verdict('${A.root}/07_qa','${cat}'))))"`
 
-function repairPrompt(cat, round) {
+function repairPrompt(cat, cells, round) {
   const lc = cat.toLowerCase()
-  return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}, in REPAIR MODE. Work from ${ENG}; set ACT=research-${lc}-producer.
-Category ${cat} has NO open cells. Its floors gate FAILS on cells that are already synthesised or declared absent. Those cells are your batch: repair them in place. Do NOT skip a cell because it is closed.
-FIRST, once: python3 -c "import json;d=json.load(open('${A.root}/07_qa/floors_${cat}.json'));[print(k, json.dumps(d[k])) for k in d['blocking']]"
-That prints every BLOCKING term with the exact cells. Advisory terms (coverage, ai_overlay, timeline) are not yours.
+  const named = cells && cells.length
+    ? `YOUR CELLS and the gate terms each one fails:\n${cells.map(c => `  ${c}: ${((REPAIRS[cat] || {})[c] || []).join(', ')}`).join('\n')}\nFor the detail of each finding (missing facets, the single source), run once: ${READ_BLOCKERS(cat)} and read ${A.root}/07_qa/floors_${cat}.json only for these cells.`
+    : `YOUR CELLS: every cell the gate names. Print them once (from ${ENG}): ${READ_BLOCKERS(cat)}\nThat is {cell: [blocking terms]}; read ${A.root}/07_qa/floors_${cat}.json for each finding's detail.`
+  return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}, REPAIR batch. Work from ${ENG}; set ACT=research-${lc}-producer.
+These cells are ALREADY synthesised or declared absent, and the category's floors gate FAILS on them. Repair them in place. Do NOT skip a cell because it is closed. Touch no other cell.
+${named}
 Per blocking term:
   - primary_unfired: fire a primary web_search on the cell and log it (--facet primary).
-  - volleys_incomplete: fire and log each facet listed under "missing" for that cell. Register evidence for anything a search returns.
+  - volleys_incomplete: fire and log each facet listed under "missing" for that cell; register evidence for anything a search returns.
   - single_source_fact: look for a second independent source (not the same domain). If you find one, register it. If you don't, re-synthesise the cell with Claim_Label INFERENCE. Never keep FACT on one domain.
-  - absence_undeclared_empty: the cell has no evidence and no absence. Fire primary plus one connector volley, then declare the absence with the hunted/ladder you actually ran.
-  - evidence_smear: give each named sibling subcap its own evidence, or re-synthesise so each states only what the shared item supports for that cell.
-  - boilerplate / synthesis_missing / absence_unsearched: rewrite the named field with a checkable figure, date, proper noun or E-id, or run the missing searches first.
+  - absence_undeclared_empty / absence_unsearched: fire primary plus one connector volley, then declare the absence with the hunted/ladder you actually ran.
+  - evidence_smear: give each named sibling its own evidence, or re-synthesise so each states only what the shared item supports for that cell.
+  - boilerplate / synthesis_missing: rewrite the named field with a checkable figure, date, proper noun or E-id.
+  - a cell id equal to the category (${cat}) is a category-level finding: read its detail and act on the cells it names.
 Re-synthesise with synthesise --json (the same command replaces the cell's synthesis). Every change goes through ONE engine.cli batch per capability, as below.
 
 ${SHEET}
 
 ${SEARCH_RULES}
 
-Never invent a source, a quote, a number or a person. Pass --actor $ACT on every write. Do not run the gate, because the challenge step runs it.
-Return: category ${cat}, cells_synthesised (cells re-synthesised), declared_absent, still_open 0, searches_logged, evidence_registered, gate "BATCH_DONE", blocking_terms (any you could not repair, each with its cell), and one-line notes.`
+Never invent a source, a quote, a number or a person. Pass --actor $ACT on every write. Do not run the gate: the challenge step runs it.
+Return: category ${cat}, cells_synthesised (cells re-synthesised), declared_absent, still_open 0, searches_logged, evidence_registered, gate "BATCH_DONE", blocking_terms (each one you could NOT repair, as "term: cell"), and one-line notes.`
 }
 
 function batchPrompt(cat, caps, round, prev) {
-  if (isRepair(cat, caps)) return repairPrompt(cat, round)
+  if (isRepair(cat, caps)) return repairPrompt(cat, null, round)
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
 YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
@@ -122,8 +128,9 @@ function challengePrompt(cat, round) {
   return `Independent challenge for category ${cat} of DMA run ${A.run} (root ${A.root}), round ${round}. Run commands from ${ENG}, foreground, long timeouts.
 1) python3 -m engine.brief challenge-batch ${R} --only ${cat} --out-dir ${A.root}/briefs/wf_challenge_${cat}_r${round} --json
 2) If it lists packets, work each prompt file exactly as research-challenger: judge every cell on the seven dimensions and record each verdict with python3 -m engine.cli challenge ... --actor research-challenger. You never challenge a cell you wrote and never search.
-3) python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis
-Return the gate verdict, its blocking terms, and how many cells are still open.`
+3) python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis --summary
+   It prints {gate, blocking: {term: [cells]}, advisory: [terms], repair_cells}. Read it exactly: advisory terms do not block.
+Return gate (as printed), blocking_terms as "term: cell, cell" strings copied from \`blocking\` (never an advisory term), still_open = repair_cells, and one-line notes. Do not compute any other count.`
 }
 
 const BATCHES = A.batches || {}
@@ -131,25 +138,52 @@ log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).jo
 
 const results = await pipeline(A.cats, async (cat) => {
   let prev = null
-  let batches = BATCHES[cat] && BATCHES[cat].length ? BATCHES[cat] : [[`${cat} (all open capabilities)`]]
+  // Round 1: the open-cell batches plus the gate's repair batches, side by
+  // side. No routed work at all falls back to a repair agent that reads the
+  // gate's cells itself (a hand-started invocation, or an older handoff).
+  let jobs = [
+    ...(BATCHES[cat] || []).map(caps => ({ caps, prompt: (r, p) => batchPrompt(cat, caps, r, p) })),
+    ...(REPAIR_BATCHES[cat] || []).map(cells => ({ caps: cells, prompt: (r) => repairPrompt(cat, cells, r) })),
+  ]
+  if (!jobs.length) jobs = [{ caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r) }]
   for (let round = 1; round <= A.rounds; round++) {
-    const done = await parallel(batches.map((caps, i) => () => agent(batchPrompt(cat, caps, round, prev), {
-      label: `${cat} r${round} b${i + 1} ${caps[0]}${caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
+    const done = await parallel(jobs.map((j, i) => () => agent(j.prompt(round, prev), {
+      label: `${cat} r${round} b${i + 1} ${j.caps[0]}${j.caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
     })))
     const got = done.filter(Boolean)
-    log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)
+    log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${jobs.length} batch(es)`)
+    // AN AGENT ERROR IS NOT A ROUND (measured 2026-10-05: a spend limit failed
+    // every agent, and each workflow still launched its challenge, round 2
+    // and a second challenge — ~80K tokens apiece for nothing). Nothing ran,
+    // so nothing is challenged or retried; the driver re-hands the category.
+    if (!got.length) {
+      log(`${cat} r${round}: every research agent failed — stopping; the driver re-hands it`)
+      return { category: cat, still_open: -1, gate: 'AGENT_ERROR', blocking_terms: ['agent_error: no research agent returned'] }
+    }
     const c = await agent(challengePrompt(cat, round), {
       label: `${cat} challenge r${round}`, phase: 'Challenge', schema: OUT, model: 'sonnet',
       agentType: 'dma-insights:research-challenger',
     })
+    if (!c) {
+      log(`${cat} r${round}: the challenge agent failed — stopping; the driver re-reads the gate`)
+      return { category: cat, still_open: -1, gate: 'AGENT_ERROR', blocking_terms: ['agent_error: challenge did not return'] }
+    }
     prev = c
-    if (prev) log(`${cat} r${round}: gate ${prev.gate}, ${prev.still_open} open`)
-    if (prev && prev.gate === 'PASS') break
-    // Round 2 re-batches only what is still open: batches that finished stay finished.
-    const open = got.filter(r => (r.still_open || 0) > 0).length
-    if (open === 0 && got.length === batches.length) batches = [[`${cat} (cells the gate names)`]]
-    else batches = batches.filter((_, i) => !done[i] || (done[i].still_open || 0) > 0)
-    if (!batches.length) batches = [[`${cat} (cells the gate names)`]]
+    log(`${cat} r${round}: gate ${prev.gate}, ${prev.still_open} repair cell(s)`)
+    if (prev.gate === 'PASS') break
+    // A failing agent this round makes the next one a retry into the same
+    // fault: stop and let the driver decide.
+    if (got.length < jobs.length) {
+      log(`${cat} r${round}: ${jobs.length - got.length} research agent(s) failed — not starting another round`)
+      break
+    }
+    // Round 2 keeps unfinished open batches and repairs whatever the gate
+    // names now — read fresh from floors_<cat>.json, not from agent prose.
+    jobs = [
+      ...jobs.filter((j, i) => !isRepair(cat, j.caps) && !(REPAIR_BATCHES[cat] || []).includes(j.caps)
+                            && done[i] && (done[i].still_open || 0) > 0),
+      { caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r) },
+    ]
   }
   if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${A.rounds} round(s) — the driver's floors gate decides what happens next`)
   return prev

@@ -553,6 +553,10 @@ def main(argv=None) -> int:
     g = common(sub.add_parser("gate"))
     g.add_argument("--category", required=True)
     g.add_argument("--require-synthesis", action="store_true")
+    g.add_argument("--summary", action="store_true",
+                   help="print only the verdict, blocking term -> cells and the "
+                        "advisory term names (the full document is still "
+                        "written to 07_qa/floors_<cat>.json)")
 
     ab = common(sub.add_parser(
         "absence",
@@ -943,7 +947,8 @@ def main(argv=None) -> int:
         out = floors_gate.run(wb, a.category,
                               require_synthesis=a.require_synthesis,
                               qa_dir=run.qa_dir)
-        print(json.dumps(out, indent=2, sort_keys=True))
+        print(json.dumps(floors_gate.summary(out) if a.summary else out,
+                         indent=2, sort_keys=True))
         return 0 if out["gate"] == "PASS" else 1
     if a.cmd == "validate":
         return validator.main(["--workbook", str(run.workbook_path),

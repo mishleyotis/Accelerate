@@ -51,6 +51,10 @@ NEEDS_SCORING = "NEEDS_SCORING"
 READY_TO_SYNTHESISE = "READY_TO_SYNTHESISE"
 ALREADY_SERVED = "ALREADY_SERVED"
 AMBIGUOUS = "AMBIGUOUS"
+#: A run is in flight (snapshotted, not yet ingested). The connector cannot
+#: see it, so without this a resume request routed AMBIGUOUS or
+#: NEW_ENGAGEMENT (Susser Bank, 2026-10-05).
+RESUME_IN_FLIGHT = "RESUME_IN_FLIGHT"
 #: The owner asked for a new run of a client the corpus already holds
 #: (`--fresh`). Measured 2026-09-30 on SWBC: with one INGESTED run carrying
 #: 418 scored cells, every answer here pointed at that run and the command
@@ -95,6 +99,38 @@ def _run_bridge(display_id: str) -> dict:
     except json.JSONDecodeError:
         raise RuntimeError(
             f"get_client_state returned no JSON: {out.stdout[:300]!r}")
+
+
+def in_flight(client: str, runner=None) -> list:
+    """Run snapshots in the client's intake folder (`drive_fetch.py
+    list-backup`). Empty when Drive cannot be read: this check only ever
+    ADDS a resume answer, it never removes one the connector gave."""
+    runner = runner or _run_list_backup
+    try:
+        return list(runner(client).get("snapshots") or [])
+    except Exception:                                  # noqa: BLE001
+        return []
+
+
+def _run_list_backup(client: str) -> dict:
+    out = subprocess.run(
+        [sys.executable, os.path.join(HERE, "drive_fetch.py"), "list-backup",
+         "--client", client], capture_output=True, text=True, timeout=180)
+    return json.loads(out.stdout or "{}")
+
+
+def resume_verdict(asked_for: str, client: str, snaps: list) -> dict:
+    ids = sorted({s["run_id"] for s in snaps})
+    return {
+        "verdict": RESUME_IN_FLIGHT, "asked_for": asked_for, "runs_in_flight": ids,
+        "why": (f"the connector has no ingested run for {asked_for!r}, but the "
+                f"client's intake folder holds {len(ids)} in-flight run "
+                f"snapshot(s): {', '.join(ids)}. That is a run to RESUME, "
+                f"not a new engagement and not a near-match question."),
+        "next": (f"python3 -m engine.snapshot restore --run {ids[-1]} --client "
+                 f"\"{client}\"  then  python3 -m engine.pipeline plan --run "
+                 f"{ids[-1]} --root <the restored root>"),
+    }
 
 
 def _scored(runs: list) -> list:
@@ -223,6 +259,10 @@ def main(argv=None) -> int:
     except RuntimeError as e:
         print(f"ROUTE: UNKNOWN — {e}", file=sys.stderr)
         return 2
+    if out["verdict"] in (AMBIGUOUS, NEW_ENGAGEMENT) and not a.fresh:
+        snaps = in_flight(a.client)
+        if snaps:
+            out = resume_verdict(did, a.client, snaps)
 
     if a.json:
         print(json.dumps(out, indent=1))
@@ -236,10 +276,12 @@ def main(argv=None) -> int:
                   f"{m.get('legal_name') or ''}")
     # Exit code carries the verdict so a routine can branch without parsing:
     # 0 = synthesise, 3 = score first, 4 = new engagement, 5 = already
-    # served, 6 = ambiguous, 7 = new version (--fresh). Never 1: that is reserved for the script itself
+    # served, 6 = ambiguous, 7 = new version (--fresh), 8 = resume a run in
+    # flight. Never 1: that is reserved for the script itself
     # failing, and a routine must not read its own crash as a routing answer.
     return {READY_TO_SYNTHESISE: 0, NEEDS_SCORING: 3, NEW_ENGAGEMENT: 4,
-            ALREADY_SERVED: 5, AMBIGUOUS: 6, NEW_VERSION: 7}[out["verdict"]]
+            ALREADY_SERVED: 5, AMBIGUOUS: 6, NEW_VERSION: 7,
+            RESUME_IN_FLIGHT: 8}[out["verdict"]]
 
 
 if __name__ == "__main__":
