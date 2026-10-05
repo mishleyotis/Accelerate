@@ -581,6 +581,31 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0591",
+   "title": "A stalled research category could not be accepted as a gap: the driver asked a person to decide, but no mechanism recorded the decision and three gates refused it",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "Any of these: a gap waiver accepted from an agent rather than a person; a waiver covering a whole category or an unwaivable term; a waiver that still holds after a new cell fails; a waived cell given a score or default instead of null; a waived cell exempt from `unscored` without its caps-log disclosure.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gap_waiver.py::test_a_waiver_is_a_persons_named_bounded_decision"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gap_waiver.py::test_an_unwaivable_blocker_is_refused_by_name"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gap_waiver.py::test_a_waiver_passes_dispatch_until_a_new_cell_fails"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gap_waiver.py::test_scoring_opens_on_a_waived_category_and_leaves_the_cell_null"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

@@ -554,6 +554,18 @@ def main(argv=None) -> int:
     g.add_argument("--category", required=True)
     g.add_argument("--require-synthesis", action="store_true")
 
+    wv = common(sub.add_parser(
+        "waive",
+        help="a PERSON accepts a research gap: named cells of one category, "
+             "whose live floors blockers are only challenge_failed / "
+             "claim_unsupported, go to scoring UNSCORED and disclosed "
+             "(engine.waiver). Never a whole category, never an agent's call."))
+    wv.add_argument("--category", required=True)
+    wv.add_argument("--cell", action="append", required=True,
+                    help="a cell the live gate names; repeat per cell")
+    wv.add_argument("--by", required=True, help="the person deciding, by name")
+    wv.add_argument("--reason", required=True)
+
     ab = common(sub.add_parser(
         "absence",
         help="close a subcap with NO evidence as a DECLARED absence: every "
@@ -945,6 +957,16 @@ def main(argv=None) -> int:
                               qa_dir=run.qa_dir)
         print(json.dumps(out, indent=2, sort_keys=True))
         return 0 if out["gate"] == "PASS" else 1
+    if a.cmd == "waive":
+        from . import waiver
+        try:
+            out = waiver.record(wb, category=a.category, cells=a.cell,
+                                by=a.by, reason=a.reason)
+        except waiver.WaiverRefusal as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 2
+        print(json.dumps(out, indent=2, sort_keys=True))
+        return 0
     if a.cmd == "validate":
         return validator.main(["--workbook", str(run.workbook_path),
                                "--run-id", a.run])

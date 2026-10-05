@@ -1591,7 +1591,10 @@ class Pipeline:
                 withheld[cat] = (f"STALLED: no outcome moved across {n} worked "
                                  f"handoff(s) (--stall-rounds {self.opts.stall_rounds}); "
                                  f"{work} cell(s) still carry work — a person decides "
-                                 "whether to repair at the source or accept the gap")
+                                 "whether to repair at the source or accept the gap "
+                                 "(`engine.cli waive --category "
+                                 f"{cat} --cell <C> --by <person> --reason <why>`; "
+                                 "cells go to scoring unscored and disclosed)")
             else:
                 keep.append(cat)
         return keep, withheld, progress, stalls

@@ -149,11 +149,17 @@ def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
         out.append(f"PRELIM is open: {str(e)[:200]}")
     cats = sorted({c.split(".")[0] for c in wb.selected_subcaps()})
     gates = {}
+    from . import waiver
     for cat in cats:
         v = floors_gate.read_verdict(qa_dir, cat) if qa_dir else None
         gates[cat] = ({"verdict": "NOT_RUN"} if v is None else
                       {"verdict": v.get("gate"), "blocking": v.get("blocking"),
                        "require_synthesis": bool(v.get("require_synthesis"))})
+        # A person's waiver stands in for the PASS only while it accounts for
+        # every live blocker in the mode scoring requires (engine.waiver).
+        if gates[cat]["verdict"] != "PASS" and waiver.covers(wb, cat)[0]:
+            gates[cat] = {"verdict": "PASS", "blocking": [],
+                          "require_synthesis": True, "waived": True}
     try:
         handoff._assert_scoreable(gates)
     except SystemExit as e:
@@ -278,6 +284,13 @@ def open_stage(wb: RunWorkbook, qa_dir: Path | None) -> dict:
                    f"rows over {density['subcaps']} subcaps — below the Golden 1 "
                    f"reference. Disclosed, not blocking: scores are capped by the "
                    f"evidence ceiling, which is where thinness belongs")
+    # A waived gap is disclosed where scoring reads caps: one Caps_Applied_Log
+    # row per waived, unscored cell (engine.waiver), named on this row too.
+    from . import waiver
+    waived = waiver.disclose_in_caps_log(wb)
+    if waived:
+        detail += (f"; WAIVED: {len(waived)} cell(s) left unscored by a person's "
+                   f"recorded waiver ({', '.join(waived)})")
     L.append_gate(wb, gate="SCORING_OPENED", scope="run", verdict="PASS",
                   detail=detail, blocking=False)
     return {"stage": "assessment", "weight_set": set_id, "weights": weights,
@@ -880,6 +893,8 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     ss = {_clean(r.get("subcap_id")): r for r in wb.rows("Subcap_Scores")}
     cl = {_clean(r.get("subcap_id")) for r in wb.rows("Caps_Applied_Log")}
     declared_set = L.declared_absences(wb)
+    from . import waiver
+    waived = waiver.waived_cells(wb)
     by_cap: dict[str, list[float]] = {}
     # capabilities with at least one EVIDENCED scored cell — only these can
     # be held to the differentiation rule (see below)
@@ -892,6 +907,11 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
             f["unnamed"].append(cell)
         sc = _num(r.get("Score"))
         if sc is None:
+            # A waived cell is unscored ON PURPOSE (null, invariant 9) — but
+            # only while it is disclosed in the caps log, which feeds the
+            # safeguard-gates card.
+            if cell in waived and cell in cl:
+                continue
             f["unscored"].append(cell)
             continue
         if not (1.0 <= sc <= 5.0):

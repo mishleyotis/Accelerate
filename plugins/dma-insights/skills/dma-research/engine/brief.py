@@ -1287,8 +1287,16 @@ def categories_needing_dispatch(wb: RunWorkbook) -> dict:
                        if _clean(r.get("Dominant_Claim"))}
             stale = sorted({t for c, x in live.items() if c in claimed
                             for t in x["terms"]})
-        if g["verdict"] == "PASS" and v["verdict"] != "FAIL" and not en_fail \
-                and not stale:
+        floors_ok = g["verdict"] == "PASS" and not stale
+        if not floors_ok and v["verdict"] != "FAIL" and not en_fail:
+            # A person's recorded waiver (engine.waiver) stands in for the
+            # floors PASS only while it accounts for EVERY live blocker.
+            from . import waiver
+            ok, why = waiver.covers(wb, cat)
+            if ok:
+                floors_ok = True
+                out.setdefault("waived", {})[cat] = why
+        if floors_ok and v["verdict"] != "FAIL" and not en_fail:
             out["passed"].append(cat)
         else:
             out["dispatch"].append(cat)
