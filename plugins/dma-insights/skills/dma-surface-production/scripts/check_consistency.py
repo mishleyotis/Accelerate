@@ -3,9 +3,27 @@
 
     python scripts/check_consistency.py run/            # dir of <page>.json
     python scripts/check_consistency.py run/ --strict
+    python scripts/check_consistency.py run/ --bundle bundle.json \
+        [--catalogue catalogue.json] [--fit platform_fit.json]
 
 Each page passes its own submission independently, so a contradiction BETWEEN
 pages survives every per-page gate. This is the check that catches it.
+
+The run directory holds `<page>.json` for each page and, by convention, the
+tool output it reconciles against: `bundle.json` (get_report_bundle — the
+sub-vertical BINDING, primary plus supplementary, and the peer set),
+`catalogue.json` (get_capability_catalogue — the L3 areas per cell) and
+`fit.json` (get_platform_fit — the engine's rows). Flags override the
+convention. The binding is never typed (MEM-0559): `--supplementary` was a
+second copy of it a producer could omit, and omitting it reproduced the
+SWBC false block it was added to fix.
+
+Checks 16-27 are the cross-section invariants the contracts name and nothing
+executed until the SWBC gold audit (2026-10-04, RC-10 and RC-12): factor
+arithmetic, O5 = P1 = engine, tile states, area tabs, the candidate set,
+stair-step vs roadmap and platform order, one thin definition per payload,
+H6 index completeness, leadership and findings counts, and the identified
+peer set.
 """
 from __future__ import annotations
 import argparse, glob, json, os, re, sys
@@ -66,17 +84,781 @@ def num(x):
     try: return float(x)
     except (TypeError,ValueError): return None
 
-def main():
+# ── tool output the run is reconciled against ────────────────────────────
+
+def _load_tool_json(explicit, rundir, defaults):
+    """A saved tool response: the explicit path, else the first default name
+    present in the run directory. A `{"data": {...}}` wrapper (mcp_raw.py's
+    shape for some tools) is unwrapped."""
+    paths = [explicit] if explicit else [os.path.join(rundir, n) for n in defaults]
+    for path in paths:
+        if path and os.path.exists(path):
+            try:
+                d = json.load(open(path, encoding="utf-8"))
+            except Exception as e:
+                bad("BLOCK", "inputs", f"{path} is unreadable: {e}")
+                return {}
+            if isinstance(d, dict) and isinstance(d.get("data"), (dict, list)) \
+                    and not ({"sub_vertical", "platforms", "subcaps"} & set(d)):
+                d = d["data"]
+            return d if isinstance(d, (dict, list)) else {}
+    return {}
+
+
+def _connector_module(name):
+    """One of the connector's own modules (apps/mcp/dma_mcp/<name>.py), loaded
+    by path so the checker and the gate read one rule. None when no checkout
+    is reachable — a plugin install without the repository — and the caller
+    falls back."""
+    import importlib.util
+    here = os.path.dirname(os.path.abspath(__file__))
+    roots = [os.environ.get("DMA_INSIGHTS_REPO"), os.environ.get("DMA_REPO"),
+             os.environ.get("CLAUDE_PROJECT_DIR"),
+             os.path.abspath(os.path.join(here, *[os.pardir] * 5)), os.getcwd()]
+    for root in roots:
+        if not root:
+            continue
+        path = os.path.join(root, "apps", "mcp", "dma_mcp", f"{name}.py")
+        if os.path.exists(path):
+            spec = importlib.util.spec_from_file_location(f"_dma_{name}", path)
+            mod = importlib.util.module_from_spec(spec)
+            try:
+                spec.loader.exec_module(mod)
+            except Exception:
+                return None
+            return mod
+    return None
+
+
+def _connector_subverticals():
+    """The connector's own sub-vertical module (apps/mcp/dma_mcp/subverticals.py),
+    so the checker and ET-05 read one rule (MEM-0559; the fix_hint it shares
+    with MEM-0026/MEM-0032). None without a checkout: plain VC codes."""
+    return _connector_module("subverticals")
+
+
+def _binding(bundle, typed):
+    """(primary code, supplementary codes, note) — read from the bundle."""
+    sv = _connector_subverticals()
+
+    def resolve(raw):
+        if raw is None:
+            return None
+        if sv is not None:
+            return sv.resolve_subvertical(raw)
+        code = str(raw).strip().upper()
+        return code if code in SUBVERTICAL_CODES else None
+
+    if isinstance(bundle, dict) and ("sub_vertical" in bundle
+                                     or "supplementary_sub_verticals" in bundle):
+        primary = resolve(bundle.get("sub_vertical"))
+        raw_supp = bundle.get("supplementary_sub_verticals")
+        if sv is not None:
+            supp = set(sv.resolve_supplementary(raw_supp, primary))
+        else:
+            supp = {resolve(x) for x in (raw_supp or [])} - {None, primary}
+        if typed and primary and typed != primary:
+            bad("BLOCK", "binding",
+                f"--subvertical {typed} disagrees with the bundle's binding "
+                f"({primary}) — the bundle is what the connector's ET-05 reads; "
+                "fix the entity record or stop typing the code")
+        note = (f"binding: {primary or 'unresolved'}"
+                + (f"+{','.join(sorted(supp))}" if supp else "") + " (bundle)")
+        return primary, supp, note
+    if typed:
+        bad("WARN", "binding",
+            "no bundle in the run directory: the primary is the typed "
+            f"--subvertical {typed} and the supplementary binding is unknown, so a "
+            "supplementary variant cell will read as foreign (MEM-0559). Save "
+            "get_report_bundle's output as bundle.json")
+        return typed, set(), f"binding: {typed} (typed; supplementary unknown)"
+    return None, set(), "binding unknown — no bundle.json and no --subvertical"
+
+
+# ── 16-27 · cross-section invariants (SWBC gold audit 2026-10-04) ────────
+
+_NUMBER_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve "
+    "thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty".split())}
+_BAND_WORDS = ("Activating", "Building", "Competing", "Differentiating")
+_TILE_STATES_SCORED = (None, "READY", "SCORABLE")
+
+
+def _as_int(tok):
+    tok = str(tok).lower()
+    return int(tok) if tok.isdigit() else _NUMBER_WORDS.get(tok)
+
+
+def _stated_counts(text, nouns):
+    """Every '<number> <noun>' a sentence states, as (n, noun)."""
+    out = []
+    rx = re.compile(r"\b(\d+|" + "|".join(_NUMBER_WORDS) + r")\s+(?:named\s+|"
+                    r"senior\s+)?(" + "|".join(nouns) + r")\b", re.I)
+    for m in rx.finditer(text or ""):
+        n = _as_int(m.group(1))
+        if n is not None:
+            out.append((n, m.group(2).lower()))
+    return out
+
+
+#: The catalogue's vote tally welded onto an L3 label —
+#: `[L3-SF-DC-CORE] Data Cloud (count: 3)`. Not part of the area's name:
+#: apps/mcp fit.py and CG-42 strip it too, and the platform page strips it at
+#: render. Keyed with it, "Data Cloud (count: 3)" never matched a "Data Cloud"
+#: tile and the P1 candidate set blocked a complete run.
+_TALLY = re.compile(r"\s*\(\s*count\s*:\s*\d+\s*\)", re.I)
+
+
+def _untallied(name):
+    return _TALLY.sub("", str(name or "")).strip()
+
+
+def _key(name):
+    """A platform or area key: the [L3-...] tag when present, else the
+    lowercased name without punctuation (and without a `(count: N)` tally)."""
+    s = _untallied(name)
+    m = re.search(r"\[(L3-[^\]]+)\]", s)
+    if m:
+        return m.group(1).upper()
+    return re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+
+
+def _tile_keys(t):
+    keys = set()
+    for f in ("l3_area", "platform", "name"):
+        if t.get(f):
+            keys.add(_key(t[f]))
+            # the name half of "[L3-X] Name" also identifies the area
+            rest = re.sub(r"\[[^\]]*\]", "", _untallied(t[f])).strip()
+            if rest:
+                keys.add(_key(rest))
+    return keys - {""}
+
+
+def _tiles(P):
+    ps = P.get("platform", {}).get("platform_story", {})
+    return [t for t in (ps.get("platforms") or []) if isinstance(t, dict)], ps
+
+
+def _factor_total(t):
+    fs = [f for f in (t.get("factors") or []) if isinstance(f, dict)]
+    vals = [num(f.get("contribution")) for f in fs]
+    if not vals or any(v is None for v in vals):
+        return None
+    return sum(vals)
+
+
+def _arith(label, name, t, stated):
+    total = _factor_total(t)
+    if total is None or stated is None:
+        return
+    rm = num(t.get("readiness_multiplier"))
+    rel = num(t.get("relevance"))
+    expected = total * 100 * (rm if rm is not None else 1.0) * (rel if rel is not None else 1.0)
+    if abs(expected - stated) > 0.051:
+        parts = f"factors sum to {total:.4f} → {total * 100:.1f}"
+        parts += f" × readiness {rm:g}" if rm is not None else " × no readiness_multiplier"
+        parts += f" × relevance {rel:g}" if rel is not None else ""
+        bad("BLOCK", label,
+            f"{name}: {parts} = {expected:.1f}, and the tile states {stated:g} "
+            f"(Δ {abs(expected - stated):.1f}). The breakdown must equal the headline "
+            "(O5/P1 contract). If a readiness multiplier applies, carry "
+            "readiness_multiplier on the tile — the reader cannot see an r_layer "
+            "(SWBC MuleSoft: 69.3 against 58.9, RC-12(a))")
+
+
+def check_platform_arithmetic(P, fit):
+    """16-17 · factor arithmetic; O5 tile = P1 tile = engine."""
+    tiles, _ = _tiles(P)
+    o5 = [t for t in (P.get("overview", {}).get("opportunity", {}).get("tiles") or [])
+          if isinstance(t, dict)]
+    for t in tiles:
+        _arith("P1 arithmetic", t.get("platform"), t, num(t.get("fit_score")))
+    for t in o5:
+        _arith("O5 arithmetic", t.get("platform"), t,
+               num(t.get("composite", t.get("fit_score"))))
+    by_key = {}
+    for t in tiles:
+        for k in _tile_keys(t):
+            by_key.setdefault(k, t)
+    for t in o5:
+        p1 = next((by_key[k] for k in _tile_keys(t) if k in by_key), None)
+        if p1 is None:
+            if tiles:
+                bad("BLOCK", "O5 ↔ P1",
+                    f"opportunity tile {t.get('platform')!r} has no platform_story tile — "
+                    "O5 mirrors P1, same factors, same validations")
+            continue
+        diffs = []
+        c, f = num(t.get("composite", t.get("fit_score"))), num(p1.get("fit_score"))
+        if c is not None and f is not None and abs(c - f) > 0.051:
+            diffs.append(f"composite {c:g} vs fit_score {f:g}")
+        if t.get("rank") is not None and p1.get("rank") is not None \
+                and num(t["rank"]) != num(p1["rank"]):
+            diffs.append(f"rank {t['rank']} vs {p1['rank']}")
+        for fld in ("relevance", "readiness_multiplier"):
+            a_, b_ = num(t.get(fld)), num(p1.get(fld))
+            if a_ is not None and b_ is not None and abs(a_ - b_) > 0.0005:
+                diffs.append(f"{fld} {a_:g} vs {b_:g}")
+        ca = {str(x.get("name")): num(x.get("contribution")) for x in t.get("factors") or []
+              if isinstance(x, dict)}
+        cb = {str(x.get("name")): num(x.get("contribution")) for x in p1.get("factors") or []
+              if isinstance(x, dict)}
+        for n_ in sorted(set(ca) & set(cb)):
+            if ca[n_] is not None and cb[n_] is not None and abs(ca[n_] - cb[n_]) > 0.0005:
+                diffs.append(f"factor {n_!r} {ca[n_]:g} vs {cb[n_]:g}")
+        if diffs:
+            bad("BLOCK", "O5 ↔ P1",
+                f"{t.get('platform')}: the overview tile and the platform tile disagree — "
+                + "; ".join(diffs) + ". O5 copies P1's engine row; one of them is stale")
+    rows = (fit.get("platforms") if isinstance(fit, dict) else fit) or []
+    eng = {}
+    for r in rows:
+        if isinstance(r, dict):
+            for k in _tile_keys(r):
+                eng.setdefault(k, r)
+    if not eng:
+        return
+    for label, group in (("P1 ↔ engine", tiles), ("O5 ↔ engine", o5)):
+        for t in group:
+            e = next((eng[k] for k in _tile_keys(t) if k in eng), None)
+            if e is None:
+                continue
+            diffs = []
+            for fld, tol in (("relevance", 0.005), ("readiness_multiplier", 0.0005)):
+                a_, b_ = num(t.get(fld)), num(e.get(fld))
+                if a_ is not None and b_ is not None and abs(a_ - b_) > tol:
+                    diffs.append(f"{fld} {a_:g} on the tile, {b_:g} from the engine")
+            if label.startswith("P1") and t.get("state") and e.get("state") \
+                    and t["state"] != e["state"]:
+                diffs.append(f"state {t['state']} vs engine {e['state']}")
+            if diffs:
+                bad("BLOCK", label,
+                    f"{t.get('platform')}: " + "; ".join(diffs) + " — engine-owned fields "
+                    "are copied from get_platform_fit, never typed (SWBC: relevance 1.0 on "
+                    "every tile against 0.971-0.98, D-18)")
+
+
+def check_platform_states_and_areas(P, bundle, catalogue, entity_sv, supp):
+    """18-20 · tile states, recommendation areas, discards and the candidate set."""
+    tiles, ps = _tiles(P)
+    for t in tiles:
+        st = t.get("state")
+        if st not in _TILE_STATES_SCORED and (t.get("rank") is not None
+                                              or t.get("fit_score") is not None):
+            bad("BLOCK", "P1 state",
+                f"{t.get('platform')!r} is {st} and still carries rank {t.get('rank')} / "
+                f"fit_score {t.get('fit_score')}. A tile the engine cannot score has "
+                "rank:null and fit_score:null, or moves to discarded[] (SWBC GRC "
+                "TOO_NARROW ranked 8 at 22.8, D-19)")
+    tile_keys = set()
+    for t in tiles:
+        tile_keys |= _tile_keys(t)
+    recs = [r for _, rl in dig(P.get("platform", {}), "recommendations")
+            if isinstance(rl, list) for r in rl if isinstance(r, dict)]
+    if tiles and recs:
+        missing = {}
+        for r in recs:
+            area = r.get("l3_area")
+            if not area:
+                continue
+            rest = re.sub(r"\[[^\]]*\]", "", str(area)).strip()
+            if not ({_key(area), _key(rest)} & tile_keys):
+                missing.setdefault(str(area), []).append(r.get("rec_id"))
+        for area, ids in sorted(missing.items()):
+            bad("BLOCK", "P2 ↔ P1",
+                f"{', '.join(str(i) for i in ids)} file under {area!r}, which no "
+                "platform_story tile carries — the area tab renders empty. Add a tile "
+                "(fit_score:null, rank:null and the reason, for an advisory area) or "
+                "file the recommendation under the tile whose prerequisite it gates "
+                "(P1.md; SWBC REC-01/REC-11, D-19)")
+    discards = [d for d in (ps.get("discarded") or []) if isinstance(d, dict)]
+    for d in discards:
+        if not re.search(r"\b\d+\s+(?:scored\s+|served\s+|in-vertical\s+)?(?:cells?|"
+                         r"sub-?capabilit(?:y|ies))\b", str(d.get("reason") or ""), re.I):
+            bad("BLOCK", "P1 discards",
+                f"discard {d.get('platform')!r} states no cell count — every discard "
+                "reason carries the integer count of scored cells the area addresses, "
+                "so a reader can see what was set aside (RC-12(g), D-19)")
+    cells = (catalogue.get("subcaps") if isinstance(catalogue, dict) else None) or []
+    scores = (bundle.get("scores") if isinstance(bundle, dict) else None) or []
+    if not (cells and scores and tiles):
+        return
+    served = {s.get("subcap_id") for s in scores
+              if isinstance(s, dict) and num(s.get("score")) is not None}
+    if entity_sv:
+        served = {c for c in served if not variant_code(c) or variant_code(c) == entity_sv
+                  or variant_code(c) in supp}
+    from collections import Counter
+    count = Counter()
+    for c in cells:
+        if isinstance(c, dict) and c.get("subcap_id") in served:
+            for area in c.get("l3_platform_areas") or []:
+                # one area, whatever tally each cell's copy of it carries
+                count[_untallied(area)] += 1
+    covered = set(tile_keys)
+    for d in discards:
+        covered |= _tile_keys(d)
+    gaps = []
+    for area, n in count.most_common(10):
+        rest = re.sub(r"\[[^\]]*\]", "", str(area)).strip()
+        if not ({_key(area), _key(rest)} & covered):
+            gaps.append(f"{rest or area} ({n} cells)")
+    if gaps:
+        bad("BLOCK", "P1 candidate set",
+            "top-10 in-vertical L3 areas by scored-cell count that are neither a tile "
+            "nor a discard: " + "; ".join(gaps) + ". The candidate set comes from the "
+            "catalogue sweep (get_capability_catalogue), not from the report's "
+            "recommendations (SWBC: Tableau Pulse 78, Platform Foundation 82, Flow 58)")
+
+
+def check_stairstep_order(P):
+    """21 · stair-step vs roadmap phase order and the platform order of work."""
+    pl = P.get("platform", {})
+    st = pl.get("stairstep", {})
+    ladder = st.get("ladder") if isinstance(st.get("ladder"), dict) else st
+    steps = [s for s in (ladder.get("steps") or []) if isinstance(s, dict)]
+    to_level = ladder.get("to_level")
+    if isinstance(to_level, str) and to_level.strip() \
+            and not any(w.lower() in to_level.lower() for w in _BAND_WORDS):
+        bad("WARN", "P4 to_level",
+            f"to_level reads {to_level[:80]!r} — a condition, not a level. It names the "
+            "target band (one of the four words), with any projection labelled as "
+            "inference (D-20)")
+    if len(steps) < 2:
+        return
+    steps = sorted(steps, key=lambda s: num(s.get("step_level")) or 0)
+    tiles, _ = _tiles(P)
+    tile_keys = set()
+    for t in tiles:
+        tile_keys |= _tile_keys(t)
+    phase_of = {}
+    for ph in pl.get("roadmap", {}).get("phases") or []:
+        if isinstance(ph, dict):
+            for rid in ph.get("rec_ids") or []:
+                phase_of[rid] = num(ph.get("phase"))
+    recs = [r for r in (pl.get("recommendations", {}).get("recommendations") or [])
+            if isinstance(r, dict)]
+
+    def platform_rec(r):
+        """Advisory recommendations (no [L3-] tag and no tile) are
+        preconditions that may precede any step; the ladder's order is
+        argued against the platform recommendations."""
+        area = str(r.get("l3_area") or "")
+        rest = re.sub(r"\[[^\]]*\]", "", area).strip()
+        return "[L3-" in area or bool({_key(area), _key(rest)} & tile_keys)
+
+    seq = []
+    for s in steps:
+        cov = set(s.get("covered_subcap_ids") or [])
+        hits = [(phase_of.get(r.get("rec_id"), num(r.get("phase"))), r.get("rec_id"))
+                for r in recs if platform_rec(r)
+                and cov & {d.get("subcap_id") for d in r.get("dma_impact") or []
+                           if isinstance(d, dict)}]
+        hits = [h for h in hits if h[0] is not None]
+        if hits:
+            seq.append((s, min(hits)))
+    for i in range(len(seq)):
+        for j in range(i + 1, len(seq)):
+            (si, (pi, ri)), (sj, (pj, rj)) = seq[i], seq[j]
+            if pj < pi:
+                bad("BLOCK", "P4 ↔ P3 order",
+                    f"step {si.get('step_level')} ({si.get('label')!r}) is first lifted in "
+                    f"roadmap phase {pi:g} ({ri}), and the later step "
+                    f"{sj.get('step_level')} ({sj.get('label')!r}) in phase {pj:g} ({rj}). "
+                    "Step order == roadmap phase order (P4.md CONSISTENCY, RC-12(b))")
+
+    def dominant(s):
+        """The platform a step delivers: the tile whose gap cells it covers
+        most; a tie attributes it to none."""
+        cov = set(s.get("covered_subcap_ids") or [])
+        best, score, tie = None, 0, False
+        for t in tiles:
+            gaps = {g.get("subcap_id") if isinstance(g, dict) else g
+                    for g in (t.get("gaps") or [])}
+            if isinstance(t.get("addressable_cells"), list):
+                gaps |= {c for c in t["addressable_cells"] if isinstance(c, str)}
+            n = len(cov & gaps)
+            if n > score:
+                best, score, tie = t, n, False
+            elif n and n == score:
+                tie = True
+        return None if tie or score == 0 else best
+    owner = [(s, dominant(s)) for s in steps]
+    for i, (si, ti) in enumerate(owner):
+        if ti is None:
+            continue
+        deps = {_key(d) for d in ti.get("depends_on") or []}
+        for sj, tj in owner[i + 1:]:
+            if tj is None or tj is ti:
+                continue
+            if deps & _tile_keys(tj):
+                bad("BLOCK", "P4 ↔ P1 order",
+                    f"step {si.get('step_level')} ({si.get('label')!r}) delivers "
+                    f"{ti.get('platform')}'s gap cells, and {ti.get('platform')} "
+                    f"depends_on {tj.get('platform')}, which the later step "
+                    f"{sj.get('step_level')} ({sj.get('label')!r}) delivers. The ladder "
+                    "climbs against the platform order of work (SWBC: the customer "
+                    "record before the integration route, D-20)")
+
+
+def check_thin_definition(P):
+    """22 · one thin definition per payload. WHICH definition governs is an
+    OPEN adjudication (owner question 9: the DB column
+    `citable_evidence_count < 1` against the H2 contract 'fewer than three
+    linked items, or inherited/declared provenance') and is not resolved
+    here."""
+    cells = [c for _, cl in dig(P.get("heatmap", {}).get("cell_evidence", {}), "cells")
+             if isinstance(cl, list) for c in cl if isinstance(c, dict)]
+    neither, follows = [], {"db": [], "contract": []}
+    for c in cells:
+        if "thin" not in c or c.get("thin_override") or c.get("thin_reason"):
+            continue
+        items = c.get("items")
+        if isinstance(items, list):
+            n = len(items)
+            citable = sum(1 for x in items if not isinstance(x, dict)
+                          or str(x.get("excerpt") or "").strip())
+        else:
+            n = citable = len(c.get("e_ids") or [])
+        prov = str(c.get("provenance") or "").lower()
+        db_rule = citable < 1
+        contract_rule = n < 3 or prov.startswith(("inherited", "declared"))
+        thin = bool(c.get("thin"))
+        if thin != db_rule and thin != contract_rule:
+            neither.append(c.get("subcap_id"))
+        elif db_rule != contract_rule:
+            follows["db" if thin == db_rule else "contract"].append(c.get("subcap_id"))
+    if neither:
+        bad("BLOCK", "H2 thin",
+            f"{len(neither)} cell(s) carry a thin flag that NEITHER definition gives "
+            f"({', '.join(map(str, neither[:5]))}{' …' if len(neither) > 5 else ''}) — "
+            "thin is derived from the cell's own items, never copied (D-21)")
+    if follows["db"] and follows["contract"]:
+        bad("BLOCK", "H2 thin",
+            f"the payload applies two thin definitions: {len(follows['db'])} cell(s) "
+            f"follow citable<1 (e.g. {follows['db'][0]}) and {len(follows['contract'])} "
+            f"follow fewer-than-three/inherited (e.g. {follows['contract'][0]}). Which "
+            "definition governs is an open adjudication — apply one throughout, or "
+            "declare thin_override with a reason on the exceptions (RC-12(c), D-21)")
+    elif follows["db"] or follows["contract"]:
+        which = "citable<1 (the DB column)" if follows["db"] else \
+            "fewer-than-three/inherited (the H2 contract)"
+        bad("WARN", "H2 thin",
+            f"{len(follows['db'] or follows['contract'])} cell(s) are thin by {which} "
+            "and not by the other definition; that choice is an open adjudication "
+            "(owner question 9) — consistent here, flagged so it is not settled silently")
+
+
+_EID_LIST_KEYS = ("e_ids", "evidence_ids", "new_evidence_ids", "supporting_e_ids",
+                  "cited_e_ids")
+_EID_KEYS = ("e_id", "source_e_id", "evidence_id")
+
+
+def _cited_eids(node, out, where):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k in _EID_LIST_KEYS and isinstance(v, list):
+                for x in v:
+                    if isinstance(x, str):
+                        out.setdefault(x, set()).add(where)
+            elif k in _EID_KEYS and isinstance(v, str):
+                out.setdefault(v, set()).add(where)
+            else:
+                _cited_eids(v, out, where)
+    elif isinstance(node, list):
+        for v in node:
+            _cited_eids(v, out, where)
+
+
+def check_evidence_index(P):
+    """23 · H6 ⊇ every cited e_id; H7 rows ⊆ H6 (RC-12(d), D-27)."""
+    hm = P.get("heatmap", {})
+    rows = hm.get("evidence", {}).get("evidence")
+    if not isinstance(rows, list):
+        return
+    index = {r.get("e_id") for r in rows if isinstance(r, dict)}
+    cited = {}
+    for page, pay in P.items():
+        for sec, body in (pay.items() if isinstance(pay, dict) else []):
+            if page == "heatmap" and sec == "evidence":
+                continue
+            _cited_eids(body, cited, f"{page}.{sec}")
+    missing = sorted(e for e in cited if e not in index)
+    if missing:
+        ex = "; ".join(f"{e} (cited on {', '.join(sorted(cited[e]))})" for e in missing[:5])
+        bad("BLOCK", "H6 index",
+            f"{len(missing)} cited e_id(s) are not in heatmap.evidence, so their chips "
+            f"open nothing: {ex}{' …' if len(missing) > 5 else ''} (SWBC E-CC-925, D-27)")
+    age = [r.get("e_id") for r in hm.get("evidence_age", {}).get("rows") or []
+           if isinstance(r, dict)]
+    stray = sorted({e for e in age if e and e not in index})
+    if stray:
+        bad("BLOCK", "H6 index",
+            f"{len(stray)} evidence_age row(s) are not in heatmap.evidence: "
+            f"{', '.join(stray[:5])} — H7 rows ⊆ H6")
+
+
+def _whole_row_internal(marks, key):
+    rx = re.compile(rf"^{re.escape(key)}\[(\d+)\]$")
+    return {int(m.group(1)) for m in (rx.match(str(x)) for x in marks or []) if m}
+
+
+def check_leadership(P):
+    """24 · O7 counts are audience-neutral; tenure derives from appointed_on (D-24)."""
+    lead = P.get("overview", {}).get("leadership", {})
+    if not isinstance(lead, dict):
+        return
+    key = next((k for k in ("roster", "rows", "leaders") if isinstance(lead.get(k), list)), None)
+    if key is None:
+        return
+    rows = [r for r in lead[key] if isinstance(r, dict)]
+    n_int = len(rows)
+    n_cust = n_int - len(_whole_row_internal(lead.get("internal_only"), key))
+    text = " ".join(str(lead.get(k) or "") for k in ("narrative_thread", "summary", "synthesis"))
+    for n, noun in _stated_counts(text, ("executives", "leaders", "officers", "people",
+                                         "seats", "contacts")):
+        if n != n_int or n != n_cust:
+            bad("BLOCK", "O7 counts",
+                f"the leadership text states {n} {noun}; the internal roster serves "
+                f"{n_int} row(s) and the customer roster {n_cust}. A count in prose must "
+                "hold for every audience that reads it — state the count both see, or "
+                "none (SWBC: 'thirteen executives' over 14 rows, D-24)")
+    bare = [r.get("name") for r in rows
+            if r.get("tenure_months") is not None and not r.get("appointed_on")]
+    if bare:
+        bad("BLOCK", "O7 tenure",
+            f"{len(bare)} row(s) carry tenure_months with no appointed_on "
+            f"({', '.join(map(str, bare[:5]))}) — tenure is derived from the "
+            "appointment date, so fill appointed_on from the evidence or null the "
+            "tenure (D-24)")
+
+
+def check_findings(P):
+    """25 · O6 ranking basis agrees with the alignment scores; counts and chips (D-29)."""
+    F = P.get("overview", {}).get("findings", {})
+    if not isinstance(F, dict):
+        return
+    fnd = [f for f in (F.get("findings") or []) if isinstance(f, dict)]
+    if not fnd:
+        return
+
+    def score(f):
+        s = f.get("strategic_alignment_score")
+        if s is None and isinstance(f.get("strategic_alignment"), dict):
+            s = f["strategic_alignment"].get("score")
+        return num(s)
+    scored = [(f.get("f_id"), score(f)) for f in fnd]
+    if F.get("ranking_basis") == "impact_fallback" and any(s is not None for _, s in scored):
+        bad_pairs, seen_null, last = [], None, None
+        for fid, s in scored:
+            if s is None:
+                seen_null = seen_null or fid
+                continue
+            if seen_null:
+                bad_pairs.append(f"{fid} ({s:g}) is ranked below {seen_null} (no score)")
+            elif last is not None and s > last[1]:
+                bad_pairs.append(f"{fid} ({s:g}) is ranked below {last[0]} ({last[1]:g})")
+            last = (fid, s)
+        if bad_pairs:
+            bad("BLOCK", "O6 ranking",
+                "ranking_basis is impact_fallback while "
+                f"{', '.join(str(fid) for fid, s in scored if s is not None)} carry "
+                f"alignment scores, and {'; '.join(bad_pairs)}. Rank by the scores and "
+                "say so, or drop the scores (RC-12(h), D-29)")
+    for n, _ in _stated_counts(str(F.get("narrative_thread") or ""), ("findings",)):
+        if n != len(fnd):
+            bad("BLOCK", "O6 counts",
+                f"the findings narrative states {n} findings; the section carries {len(fnd)}")
+    if any(f.get("platform_chips") for f in fnd):
+        empty = [f.get("f_id") for f in fnd if not f.get("platform_chips")]
+        if empty:
+            bad("WARN", "O6 chips",
+                f"{', '.join(map(str, empty))} carry no platform_chips while the other "
+                "findings do — name the platform the finding argues for, or state none (D-29)")
+
+
+def _peer_key(name):
+    m = re.match(r"\W*([A-Za-z0-9]+)", str(name or ""))
+    return m.group(1).lower() if m else ""
+
+
+#: The fallback when no checkout is reachable: the statistic rows the corpus
+#: actually carries in a peer table (Baxter c1351d25: Median, P25, P75).
+_STAT_FALLBACK = {"median", "mean", "average", "avg", "p25", "p75", "p10",
+                  "p90", "q1", "q3", "min", "max", "top_quartile",
+                  "bottom_quartile", "peer_median", "peer_average",
+                  "cohort_median", "cohort_average", "peer_group", "benchmark"}
+
+
+def _statistic_rule():
+    """(is_statistic_name, split) — the connector's own (dma_mcp/peer_set.py),
+    so a Median row in a peer table is a statistic here exactly as it is at
+    AG-04; a fallback list without a checkout."""
+    mod = _connector_module("peer_set")
+    if mod is not None and hasattr(mod, "is_statistic_name"):
+        return mod.is_statistic_name, mod.split_locked
+
+    def is_stat(name):
+        return re.sub(r"[^a-z0-9]+", "_", str(name or "").lower()).strip("_") \
+            in _STAT_FALLBACK
+
+    def split(raw):
+        if raw is None:
+            return []
+        items = raw if isinstance(raw, list) else re.split(r"[|;\n]", str(raw))
+        return [str(x).strip() for x in items if x is not None and str(x).strip()]
+    return is_stat, split
+
+
+def identified_peers(P, bundle):
+    """The run's NAMED peer set, scored or not (RC-10(a)). The bundle's locked
+    set, where it states one, IS the set; otherwise the bundle's peer table
+    and any peer_deployments row on any page. Statistic rows (Median, P25,
+    P75, ...) are never peers, and a name joining several with ; or | is
+    split. {key: display name}, in first-seen order."""
+    is_stat, split = _statistic_rule()
+    out = {}
+
+    def add(name):
+        if isinstance(name, dict):
+            name = name.get("name") or name.get("peer_name") or name.get("peer")
+        for one in split(name if isinstance(name, list) else
+                         (None if name is None else str(name))):
+            if is_stat(one):
+                continue
+            k = _peer_key(one)
+            if k and k not in out:
+                out[k] = one
+    if isinstance(bundle, dict):
+        for k in ("locked_peer_set", "peer_set", "identified_peers"):
+            raw = bundle.get(k)
+            for x in (raw if isinstance(raw, list) else split(raw)):
+                add(x)
+        if out:
+            return out
+        for r in bundle.get("peer_table") or []:
+            if isinstance(r, dict):
+                add(r.get("peer_name") or r.get("peer"))
+    for pay in P.values():
+        for _, rows in dig(pay, "peer_deployments"):
+            for r in rows if isinstance(rows, list) else []:
+                if isinstance(r, dict):
+                    add(r.get("peer"))
+    return out
+
+
+def check_peers(P, bundle):
+    """26-27 · 'identified, not scored' is not 'no peers' (RC-10; D-08, D-17)."""
+    peers = identified_peers(P, bundle)
+    if not peers:
+        return
+    names = ", ".join(peers.values())
+    tiles, _ = _tiles(P)
+    for t in tiles:
+        rows = [r for r in (t.get("peer_deployments") or []) if isinstance(r, dict)]
+        problems = []
+        have = {_peer_key(r.get("peer")) for r in rows}
+        missing = [v for k, v in peers.items() if k not in have]
+        if missing:
+            problems.append(f"no peer_deployments row for {', '.join(missing)}")
+        for r in rows:
+            if r.get("deployed") not in (True, False, None):
+                problems.append(f"{r.get('peer')}: deployed is {r.get('deployed')!r}, "
+                                "not true/false/null")
+            if not str(r.get("basis") or "").strip():
+                problems.append(f"{r.get('peer')}: no basis — a deployed:null row states "
+                                "the ladder that could not establish it")
+        if not str(t.get("peer_synthesis") or "").strip():
+            problems.append("no peer_synthesis")
+        if problems:
+            bad("BLOCK", "P1 peers",
+                f"{t.get('platform')}: " + "; ".join(problems) + ". The run identified "
+                f"{names}: every tile carries one row per named peer (deployed:null with "
+                "its ladder where unestablished) and a peer_synthesis — identified-not-"
+                "scored is still a peer set (SWBC: 6 of 8 tiles bare, D-08)")
+    pillars = P.get("overview", {}).get("scores", {}).get("pillars")
+    entries = (list(pillars.values()) if isinstance(pillars, dict) else pillars) or []
+    silent, unstamped = [], []
+    for e in entries:
+        if not isinstance(e, dict) or e.get("peer_median") is not None:
+            continue
+        disc = str(e.get("proxy_disclosure") or "").lower()
+        if not any(re.search(rf"\b{re.escape(k)}", disc) for k in peers):
+            silent.append(str(e.get("pillar_id")))
+        if e.get("peer_basis") is None:
+            unstamped.append(str(e.get("pillar_id")))
+    if silent:
+        bad("BLOCK", "O1 peers",
+            f"pillar(s) {', '.join(silent)} disclose no peer median and name none of the "
+            f"identified peers ({names}). Name the cohort as 'identified, not scored' "
+            "wherever one exists, even with peer_basis cannot_estimate (RC-10(c), D-17)")
+    if unstamped:
+        bad("BLOCK", "O1 peers",
+            f"pillar(s) {', '.join(unstamped)} carry peer_basis null on a run with an "
+            "identified peer set — stamp cannot_estimate, so the absence renders with "
+            "its reason (RC-10(d))")
+    ws = P.get("heatmap", {}).get("workbook_scores")
+    if isinstance(ws, dict) and ws:
+        blob = json.dumps(ws).lower()
+        if not any(k in blob for k in peers) and "not scored" not in blob:
+            bad("WARN", "H4 peers",
+                f"the grid's peer row has no stated reason naming the identified peers "
+                f"({names}) — a peer row of blank boxes reads as 'not researched' "
+                "(D-17); state 'identified, not scored' in the section's empty_state")
+
+
+def check_dating(P):
+    """28 · dates that exist are applied (RC-07(e), D-23): an H7 undated
+    share above 20% with no dating rung recorded is a pass that was skipped,
+    not a measurement (SWBC 41.8% with 41 harvested dates never applied;
+    Baxter 0%)."""
+    age = P.get("heatmap", {}).get("evidence_age", {})
+    pct = num(age.get("undated_pct")) if isinstance(age, dict) else None
+    if pct is None or pct <= 20:
+        return
+    probes = json.dumps((age.get("r_layer") or {}).get("probes_run") or []).lower()
+    if not re.search(r"\bdat(e|ed|ing)\b", probes):
+        bad("WARN", "H7 dating",
+            f"undated_pct is {pct:g}% and r_layer records no dating rung. Harvest the "
+            "dates the evidence carries (datelines, filings, page metadata), verify each "
+            "against its excerpt and apply them through register_evidence before "
+            "reporting the share (RC-07(e))")
+
+
+def main(argv=None):
+    del issues[:]
     ap=argparse.ArgumentParser(); ap.add_argument("rundir"); ap.add_argument("--strict",action="store_true")
+    ap.add_argument("--bundle",metavar="JSON",
+                    help="get_report_bundle output (default: <rundir>/bundle.json). The "
+                         "entity's sub-vertical binding — primary AND supplementary — and "
+                         "its peer set are read from it, never typed (MEM-0559).")
+    ap.add_argument("--catalogue",metavar="JSON",
+                    help="get_capability_catalogue output (default: <rundir>/catalogue.json)")
+    ap.add_argument("--fit",metavar="JSON",
+                    help="get_platform_fit output (default: <rundir>/fit.json)")
     ap.add_argument("--subvertical",metavar="CODE",
-                    help="the entity's sub-vertical code (RB CU CL CIB FC AM RIA IC IB). "
-                         "Given, a cited variant cell belonging to another sub-vertical "
-                         "blocks; omitted, a mixture is reported as a warning.")
-    a=ap.parse_args()
-    entity_sv=(a.subvertical or "").strip().upper() or None
-    if entity_sv and entity_sv not in SUBVERTICAL_CODES:
-        print(f"  unknown sub-vertical code {entity_sv!r} — expected one of "
+                    help="a CROSS-CHECK only: the code you expect. The bundle is the "
+                         "binding; a typed code that disagrees with it blocks. Without a "
+                         "bundle it stands in for the primary, and the supplementary "
+                         "binding is unknown.")
+    ap.add_argument("--supplementary",metavar="CODES",default=None,
+                    help=argparse.SUPPRESS)
+    a=ap.parse_args(argv)
+    if a.supplementary is not None:
+        print("  --supplementary is retired: the supplementary binding is read from the "
+              "bundle (get_report_bundle → supplementary_sub_verticals), the same place "
+              "the connector's ET-05 reads it — MEM-0559. Pass --bundle <file> or put "
+              "bundle.json in the run directory.")
+        return 2
+    bundle=_load_tool_json(a.bundle, a.rundir, ("bundle.json","get_report_bundle.json"))
+    catalogue=_load_tool_json(a.catalogue, a.rundir, ("catalogue.json",))
+    fit=_load_tool_json(a.fit, a.rundir, ("fit.json","platform_fit.json"))
+    typed=(a.subvertical or "").strip().upper() or None
+    if typed and typed not in SUBVERTICAL_CODES:
+        print(f"  unknown sub-vertical code {typed!r} — expected one of "
               f"{' '.join(sorted(SUBVERTICAL_CODES))}"); return 2
+    entity_sv, supp, binding_note = _binding(bundle, typed)
     P={}
     for p in PAGES:
         f=os.path.join(a.rundir,f"{p}.json")
@@ -85,7 +867,8 @@ def main():
             except Exception as e: bad("BLOCK",p,f"unreadable: {e}")
     missing=[p for p in PAGES if p not in P]
     if missing: bad("INFO","run",f"pages absent from this check: {', '.join(missing)}")
-    print(f"\n  pages loaded: {', '.join(P) or 'none'}\n")
+    print(f"\n  pages loaded: {', '.join(P) or 'none'}")
+    print(f"  {binding_note}\n")
 
     # ── 1 · composite vs pillar means vs run history
     ov=P.get("overview",{}); hm=P.get("heatmap",{})
@@ -273,15 +1056,18 @@ def main():
         shape=", ".join(f"{c}×{len(v)}" for c,v in sorted(cited.items()))
         if entity_sv:
             for code,rows in sorted(cited.items()):
-                if code!=entity_sv:
+                if code!=entity_sv and code not in supp:
                     ex="; ".join(f"{p}:{cid}" for p,_,cid in rows[:3])
                     bad("BLOCK","sub-vertical scope",
                         f"{len(rows)} cited cell(s) are {code} variants on a {entity_sv} run — "
-                        f"they resolve in the workbook and render nowhere ({ex})")
+                        f"they resolve in the workbook and render nowhere ({ex})"
+                        + (f" — bound: {entity_sv}+{','.join(sorted(supp))}" if supp else ""))
         elif len(cited)>1:
             bad("WARN","sub-vertical scope",
-                f"cited variant cells span more than one sub-vertical ({shape}). One of them "
-                "is the entity's and the rest render nowhere — pass --subvertical to resolve")
+                f"cited variant cells span more than one sub-vertical ({shape}) and the "
+                "binding is unknown — put get_report_bundle's output in the run "
+                "directory as bundle.json (or pass --bundle) so primary and "
+                "supplementary sub-verticals are read, not guessed")
 
     # ── 13 · every served cell opens a drawer that says something
     ce=hm.get("cell_evidence",{})
@@ -308,7 +1094,8 @@ def main():
         if page=="heatmap": continue
         for path,cid in cells_cited(pay): elsewhere.setdefault(cid,set()).add(page)
     for cid,pages in sorted(elsewhere.items()):
-        if variant_code(cid) and entity_sv and variant_code(cid)!=entity_sv: continue
+        vc=variant_code(cid)
+        if vc and entity_sv and vc!=entity_sv and vc not in supp: continue
         d=drawer.get(cid)
         if d is None and known:
             bad("BLOCK","H2 ↔ pages",
@@ -352,6 +1139,17 @@ def main():
                 f"{len(miss)} of {len(anchors)} anchors share no vocabulary with the framing "
                 "sentence. Six coherent pages describing three assessments is the failure no "
                 "per-page gate can see — write the thesis, then the pages")
+
+    # ── 16-27 · the cross-section invariants the contracts name (RC-10, RC-12)
+    check_platform_arithmetic(P, fit)
+    check_platform_states_and_areas(P, bundle, catalogue, entity_sv, supp)
+    check_stairstep_order(P)
+    check_thin_definition(P)
+    check_evidence_index(P)
+    check_leadership(P)
+    check_findings(P)
+    check_peers(P, bundle)
+    check_dating(P)
 
     order={"BLOCK":0,"WARN":1,"INFO":2}
     issues.sort(key=lambda x:(order[x[0]],x[1]))

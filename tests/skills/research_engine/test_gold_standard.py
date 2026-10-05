@@ -5,7 +5,8 @@ synthetic gold-standard workbook/report and asserts the gate now catches it —
 and that a clean gold-standard artefact passes. Self-contained: builds its own
 fixtures with openpyxl / python-docx so CI needs no external Drive files.
 
-See docs/goeasy-findings-register.md and docs/GOLD-STANDARD.md.
+See plugins/dma-insights/docs/goeasy-findings-register.md and
+plugins/dma-insights/docs/GOLD-STANDARD.md.
 """
 import zipfile
 

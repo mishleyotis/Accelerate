@@ -10,7 +10,8 @@ from __future__ import annotations
 
 from .computed import apply as computed_apply
 from .redaction import page_forbidden, redact_section, redact_empty_state
-from .subverticals import scope_sections
+from .subverticals import (resolve_subvertical, resolve_supplementary,
+                           scope_sections)
 from .serving_spec import page_sections, readers, assemble
 from .value_chain import serve_value_chain
 
@@ -90,7 +91,8 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
                           ccg_catalog_version, completed_at, promoted_at,
                           assessment_date, assessment_date_basis,
                           assessment_date_source, refresh_due_date,
-                          entity_domain
+                          entity_domain, trading_name,
+                          supplementary_sub_verticals
                      FROM serving_directory
                     WHERE display_id = %s
                     -- NULLS LAST is load-bearing: `is_active` is a nullable
@@ -121,8 +123,17 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
             raise ApiError(404, "entity_not_found",
                            f"{display_id} has no active promoted run")
 
+    # `trading_name` travels so a reader whose `entity_name` is NULL still
+    # gets a name (the web's legal -> trading -> display id fallback), and
+    # the supplementary codes so every scope call below admits the variant
+    # cells of each sub-vertical the entity is bound to (0061). The display
+    # label stays the PRIMARY's alone.
     entity = {"display_id": picked[1], "entity_name": picked[2],
-              "sub_vertical": picked[3], "size_tier": picked[4]}
+              "trading_name": picked[21],
+              "sub_vertical": picked[3], "size_tier": picked[4],
+              "supplementary_sub_verticals": list(
+                  resolve_supplementary(picked[22],
+                                        resolve_subvertical(picked[3])))}
     run_meta = {"run_id": str(picked[5]), "request_id": picked[6],
                 "run_seq": picked[7],
                 "completed_at": picked[14].isoformat() if picked[14] else None,
@@ -208,7 +219,120 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #       the page, which is the worst pair: a hand check of the screen agrees
 #       with a green test and neither is looking at the body. A customer who
 #       fetched before this bump holds a body carrying the census.
-SERVE_RULES = "serve-rules@10"
+#   @11 2026-10-02 — the SWBC redaction audit. Customer bodies change under
+#       an unmoved promoted_at in five ways: the cell drawer withholds
+#       internal-origin and vendor/seller/pipeline-vocabulary evidence items
+#       whole and `grounded_on` counts the items served; `platform.starters`
+#       is withheld whole; dict-valued `linking_stats` is held to its
+#       allowlist; "account team" joins the seller net and a pipeline-
+#       vocabulary net (NOT_RUN in prose, tool names, RRF, k=60…) runs over
+#       every section and empty state; the value chain's empty state goes
+#       through the walker. The entity block also gains `trading_name` and
+#       `supplementary_sub_verticals` (0061). Before @11 was deployed it also
+#       took two walker fixes from the re-check: element paths are deleted
+#       highest index first, and an id-keyed map or wrapper dict is filtered
+#       by its values' keys, never its ids — @11 never served without them.
+#   @12 2026-10-04 — the SWBC gold audit and the owner's decisions of that
+#       day: ONE bump for every body change of the round-1 fixes, merged on
+#       one branch and not yet deployed. Bodies change under an unmoved
+#       promoted_at in these ways, each a reason on its own:
+#         · decision 1 / RC-08 — `overview.sentiment` serves customers a
+#           REDUCED card (bars + themes; no cell codes, internal sources,
+#           cap vocabulary or r_layer) instead of nothing;
+#         · DECISIONS D4 / D-12 — the customer tech register serves
+#           CONFIRMED and ABSENT rows only, and its layer rollup
+#           (`layers[].detected`) and the insights landscape tiles are
+#           recomputed from the filtered register;
+#         · D-11 — platform `estate_reach` and `integration_pathway` stop
+#           being hidden by a bare internal_only marking (a {path, why}
+#           marking is honoured), and dict markings are applied instead of
+#           silently skipped;
+#         · D-34 — an H5 safeguard-gate row whose every target section is
+#           withheld for the audience is dropped;
+#         · D-10 / 0063 — every citation and evidence row on a page is
+#           scoped: internal spans never serve; a shareable split span serves
+#           under its customer attribution, and ONLY on a run promoted at or
+#           after the span was minted (evidence.attribution_bound), so a span
+#           minted for a later run never changes a body already promoted;
+#         · RC-11 / D-15 (P3) — the insights landscape GAPS tile's `detail`
+#           is chosen per register from how each ABSENT row was established
+#           (`computed._gaps_detail`), not one fixed sentence;
+#         · RC-04 / RC-05 — `enrichment_status` counts firmographics by
+#           STATED values (a held null is not one) and sentiment is thin
+#           below 2 bars, not 1 (packages/shared/enrichment_register.json);
+#         · RC-09 — `context_tiles[].state` joins the customer allowlist.
+#       Any further change to these before @12 is first deployed rides on
+#       @12; after that, it is @13.
+SERVE_RULES = "serve-rules@12"
+
+
+#: Keys whose value is a list of cited evidence ids (chips), and the one
+#: whose value is a single cited id (a row).
+_CITATION_LISTS = ("e_ids", "supporting_e_ids", "evidence_ids")
+
+
+def cited_ids(data) -> set:
+    """Every evidence id a section body cites, at any depth."""
+    out: set = set()
+
+    def walk(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in _CITATION_LISTS and isinstance(v, list):
+                    out.update(e for e in v if isinstance(e, str) and e)
+                elif k == "e_id" and isinstance(v, str) and v:
+                    out.add(v)
+                else:
+                    walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(data)
+    return out
+
+
+def evidence_scope(cur, entity_id, ids, *, promoted_at) -> dict:
+    """Which of `ids` are INTERNAL SPANS (never served to a customer) and
+    which are shareable SPLIT SPANS (served under their customer
+    attribution). One entity-scoped query; ids are resolved through
+    `resolve_evidence_id` exactly as the drawer resolves them (0046), so a
+    superseded citation is judged by the row a reader would open.
+
+    RC-08 / D-10: the producer's `internal_only` marking was the only thing
+    between an internal-origin row and a customer chip, and on SWBC the
+    whole-row marking of 20 shareable discovery rows emptied 24 drawers. The
+    serve layer now decides from the stored origin and the 0063 split, and
+    the marking is no longer load-bearing for either direction.
+
+    `promoted_at` is the served run's, and it is REQUIRED: a span serves
+    under its attribution only on a run promoted at or after the span was
+    minted (evidence.attribution_bound). On a run promoted before, the span
+    is withheld like any internal row, so a span minted for a later run
+    changes nothing on the live one until a payload citing it is promoted
+    (RC-08 review, 2026-10-04).
+    """
+    from .evidence import attribution_bound
+    scope = {"withheld": set(), "attribution": {}}
+    wanted = sorted(i for i in (ids or ()) if isinstance(i, str) and i)
+    if not wanted:
+        return scope
+    cur.execute(
+        """SELECT w.cited, ei.origin::text, ei.customer_attribution,
+                  ei.customer_attribution_at
+             FROM unnest(%s::text[]) AS w(cited)
+             JOIN evidence_index ei
+               ON ei.e_id = resolve_evidence_id(w.cited)
+            WHERE ei.entity_id = %s""", (wanted, entity_id))
+    for cited, origin, attribution, attributed_at in cur.fetchall():
+        if (origin or "").lower() != "internal":
+            continue
+        if (isinstance(attribution, str) and attribution.strip()
+                and attribution_bound(attributed_at, promoted_at)):
+            scope["attribution"][cited] = attribution.strip()
+        else:
+            scope["withheld"].add(cited)
+    return scope
 
 
 def etag_for(run_meta: dict, audience: str) -> str:
@@ -341,9 +465,17 @@ def build_page(cur, page: str, display_id: str, audience: str,
         #
         # Same one-sided rule as everywhere else: base cells, family and
         # product variants, and an unresolved entity all keep everything.
-        scope_sections(entity.get("sub_vertical"), built["data"])
+        scope_sections(entity.get("sub_vertical"), built["data"],
+                       entity.get("supplementary_sub_verticals"))
+        scope = None
+        if audience == "customer":
+            ids = cited_ids(built["data"])
+            scope = (evidence_scope(cur, entity_id, ids,
+                                    promoted_at=run_meta.get("promoted_at"))
+                     if ids else None)
         data, report = redact_section(page, section, built["data"],
-                                      env.get("internal_only"), audience)
+                                      env.get("internal_only"), audience,
+                                      evidence_scope=scope)
         if data is None:
             entry = withheld_entry(report)
             if entry is None:
@@ -384,7 +516,12 @@ def build_page(cur, page: str, display_id: str, audience: str,
             "empty_state": empty,
         }
         removed = (len(report["paths_stripped"]) + len(report["keys_stripped"])
-                   + len(report["vendor_named"]) + len(empty_dropped))
+                   + len(report["vendor_named"]) + len(empty_dropped)
+                   # Rows a customer rule held back (D4, internal spans,
+                   # gate rows about withheld sections) are removals too.
+                   + report.get("d4_rows_withheld", 0)
+                   + report.get("evidence_scope_withheld", 0)
+                   + len(report.get("gates_withheld_target") or ()))
         if audience == "customer" and removed:
             # A COUNT, not the paths. The receipt exists so a reader can tell
             # blank-because-withheld from blank-because-empty, and for that

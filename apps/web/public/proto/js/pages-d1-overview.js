@@ -43,13 +43,13 @@ function ClientOverview({
     style: {
       marginBottom: 4
     }
-  }, entity.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(entity)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, [DMA.SUBVERTICAL_LABEL[entity.subvertical], entity.hq, entity.assets != null ? `${fmtAssets(entity.assets, entity.assets_unit)} assets` : null, entity.assessment_date ? `Assessment ${fmtDate(entity.assessment_date)}` : null, entity.members != null ? `${entity.members.toLocaleString()} members` : null].filter(Boolean).join(" · "))), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Customer-safe scorecard generated · ${entity.name}`, "success")
+    onClick: () => pushToast(`Customer-safe scorecard generated · ${entityName(entity)}`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -411,57 +411,98 @@ function FirmographicsPanel({
   entity,
   audience
 }) {
-  /* One absent-state builder for every pinned row, so the three states a
-     firmographic can be in stay distinguishable wherever they occur:
-        stated   the value renders
-       HELD     quarantined with the ladder that failed — a finding, and the
-                reason is the content
-       silent   nobody established it; it is in the connector's worklist
-      Held is read from `entity.held[slot]`, which app-root's firmoFields sets
-     for a pinned field. Before that existed, a held pinned field rendered no
-     row at all and was indistinguishable from one never asked for — which is
-     the exact confusion this whole component was rebuilt to end. */
-  /* One row builder. A row whose value cannot be established is NOT
-     rendered — owner adjudication 2026-08-14, replacing the three-state gap
-     vocabulary ("Not stated · queued for enrichment", "Held · reason") with
-     silence on the page.
-      The reason that is safe now and was not before: the omission is no longer
-     invisible to the SYSTEM. `list_enrichment_gaps(run_id)` computes the same
-     empty set from the staged payload, and audit_promoted_client.py fails on
-     it — so a field the reader never sees is still on the producer's worklist
-     and still blocks a clean audit. Hiding it from the page hid it from
-     everyone only while nothing else counted.
-      `held` is likewise not surfaced: a quarantine reason is internal
-     provenance, and the row it belonged to now simply does not appear. */
+  /* Three states a firmographic can be in, and each renders as itself:
+        stated   the value renders, with the producer's scope label when the
+                figure is about a named subsidiary or segment
+       HELD     quarantined by the producer — the row RENDERS as a stated
+                absence ("Not stated") with the producer's reason under it
+       silent   nobody stated it and nobody gave a reason — no row
+      OWNER DECISION 2 (2026-10-04) replaces the adjudications of 2026-08-14
+     and 2026-08-19 for the HELD state. Those removed a held row on the
+     premise that the omission was still visible to the system through
+     list_enrichment_gaps and the promoted-client audit. The gold audit of run
+     7968492e found that premise did not hold for the reader: six of ten
+     must-present fields were held and the strip simply got shorter, so a
+     client could not tell "the group publishes no consolidated revenue"
+     from "nobody looked". A held field is the most defensible statement on
+     this panel; it is now stated, never deleted.
+      The words are plain: "Not stated", then the reason. No workflow
+     vocabulary — "held", "queued", "quarantined" — reaches the page. */
+  const held = entity.held || {};
+  const scope = entity.scope || {};
   const rows = [];
-  const row = (k, v) => {
-    if (v !== null && v !== undefined && v !== "") rows.push([k, v]);
+  const has = v => v !== null && v !== undefined && v !== "";
+  const slot = (k, key, v) => {
+    if (has(v)) {
+      rows.push({
+        k,
+        v: scope[key] ? /*#__PURE__*/React.createElement(React.Fragment, null, v, /*#__PURE__*/React.createElement("span", {
+          style: {
+            color: "var(--z-muted)",
+            fontWeight: 400
+          }
+        }, " \xB7 ", scope[key])) : v
+      });
+      return;
+    }
+    if (key && Object.prototype.hasOwnProperty.call(held, key)) {
+      rows.push({
+        k,
+        absent: true,
+        reason: held[key]
+      });
+    }
   };
-  row(entity.assets_label || "Assets", fmtAssets(entity.assets, entity.assets_unit));
-  row("Employees", entity.employees != null ? entity.employees.toLocaleString() : null);
-  row("Branches", entity.branches != null ? String(entity.branches) : null);
-  row("Members", entity.members != null ? entity.members.toLocaleString() : null);
-  row("Customers", entity.customers != null ? entity.customers.toLocaleString() : null);
-  /* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
-     series the adapter computes, and printed again by the passthrough below
-     because `cagr` was missing from the pinned KEY set. Computed wins — a
-     growth rate is derived and the promoted series is its source of truth —
-     and a run that stated its own falls back in with its own basis. */
-  row("CAGR", entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : null);
-  row("Net worth ratio", entity.net_worth_ratio != null ? `${fx(entity.net_worth_ratio, 2)}%` : null);
-  row("Regulator", entity.regulator || null);
+  slot(entity.assets_label || "Assets", "assets", fmtAssets(entity.assets, entity.assets_unit));
+  slot("Employees", "employees", entity.employees != null ? entity.employees.toLocaleString() : null);
+  slot("Branches", "branches", entity.branches != null ? String(entity.branches) : null);
+  slot("Members", "members", entity.members != null ? entity.members.toLocaleString() : null);
+  slot("Customers", "customers", entity.customers != null ? entity.customers.toLocaleString() : null);
+  /* ONE CAGR row, and the PRODUCER's word decides it (RC-11 / D-05).
+     A stated rate renders with its basis; a held one renders as a stated
+     absence with the reason. Only where the producer said nothing does the
+     rate computed from the promoted series stand in — and the adapter
+     refuses to compute one over a series whose basis names a subsidiary or
+     segment. "Computed wins" printed a subsidiary's -6.8% as the firm's
+     growth directly beneath the producer's hold. */
+  slot("CAGR", "cagr", entity.stated_cagr != null ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}` : Object.prototype.hasOwnProperty.call(held, "cagr") ? null : entity.cagr != null ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}` : null);
+  slot("Net worth ratio", "net_worth_ratio", entity.net_worth_ratio != null ? `${fx(entity.net_worth_ratio, 2)}%` : null);
+  slot("Regulator", "regulator", entity.regulator || null);
   // Linked because a domain a reader cannot open is half a fact.
-  row("Website", entity.website ? /*#__PURE__*/React.createElement("a", {
+  slot("Website", "website", entity.website ? /*#__PURE__*/React.createElement("a", {
     href: /^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`,
     target: "_blank",
     rel: "noopener noreferrer"
   }, entity.website) : null);
-  row("HQ", entity.hq || null);
+  slot("HQ", "hq", entity.hq || null);
   // Footprint reads the regulatory section's jurisdictions first, then a
   // footprint the firmographics stated — both consumed by this one row.
-  row("Footprint", entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : null);
-  row("Charter", entity.charter || null);
-  row("Founded", entity.founded ? String(entity.founded).slice(0, 4) : null);
+  slot("Footprint", "footprint", entity.footprint?.length ? entity.footprint.join(" · ") : entity.stated_footprint ? String(entity.stated_footprint) : null);
+  slot("Charter", "charter", entity.charter || null);
+  slot("Founded", "founded", entity.founded ? String(entity.founded).slice(0, 4) : null);
+
+  // The passthrough: every other field the run stated, and every other field
+  // it held — the held ones as stated absences, exactly like a pinned row.
+  for (const f of entity.extra_fields || []) {
+    if (f.held) {
+      rows.push({
+        k: humaniseFieldName(f.field),
+        absent: true,
+        reason: f.reason || null
+      });
+    } else if (has(f.value)) {
+      const v = `${f.value}${f.unit ? ` ${f.unit}` : ""}`;
+      rows.push({
+        k: humaniseFieldName(f.field),
+        v: f.scope ? /*#__PURE__*/React.createElement(React.Fragment, null, v, /*#__PURE__*/React.createElement("span", {
+          style: {
+            color: "var(--z-muted)",
+            fontWeight: 400
+          }
+        }, " \xB7 ", f.scope)) : v
+      });
+    }
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: "var(--z-lav)",
@@ -480,19 +521,61 @@ function FirmographicsPanel({
       lineHeight: 1.5,
       marginBottom: 8
     }
-  }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, rows.map(([k, v], i) => /*#__PURE__*/React.createElement(Row, {
+  }, "The firmographics section did not arrive as a list of fields, so no figure below is read from it.") : null, rows.map((r, i) => r.absent ? /*#__PURE__*/React.createElement(AbsentRow, {
     key: `f${i}`,
-    k: k,
-    v: v
-  })), (entity.extra_fields || []).filter(f => !f.held && f.value !== null && f.value !== undefined && f.value !== "").map((f, i) => /*#__PURE__*/React.createElement(Row, {
-    key: `x${i}`,
-    k: humaniseFieldName(f.field),
-    v: `${f.value}${f.unit ? ` ${f.unit}` : ""}`
+    k: r.k,
+    reason: r.reason
+  }) : /*#__PURE__*/React.createElement(Row, {
+    key: `f${i}`,
+    k: r.k,
+    v: r.v
   })), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).firmographics,
     what: "firmographics",
     audience: audience
   }));
+}
+
+/* A stated absence on the firmographics strip: the label, "Not stated", and
+   the producer's reason on its own full-width line beneath — never squeezed
+   into the value column, which is how an italic sentence once overflowed it
+   between two figures. */
+function AbsentRow({
+  k,
+  reason
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    "data-firmo-absent": k,
+    style: {
+      padding: "3px 0",
+      fontSize: 11.5
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)",
+      flexShrink: 0,
+      whiteSpace: "nowrap"
+    }
+  }, k), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--z-muted)",
+      textAlign: "right"
+    }
+  }, "Not stated")), reason ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.5,
+      marginTop: 1,
+      overflowWrap: "anywhere"
+    }
+  }, reason) : null);
 }
 
 /* ── Score ring ─────────────────────────────────────────────────── */
@@ -2030,7 +2113,7 @@ function LeadershipPanel({
         fontWeight: 600,
         flexShrink: 0
       }
-    }, ex.gap_flag ? "?" : ex.name.split(" ").map(n => n[0]).join("").slice(0, 2)), /*#__PURE__*/React.createElement("div", {
+    }, ex.gap_flag ? "?" : initialsOf(ex.name)), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
         minWidth: 0
@@ -2300,13 +2383,13 @@ function FinancialTrajectoryD1({
       empty: "The financial-series section promoted with no years in it."
     })));
   }
-  const values = (f.total_assets || []).filter(v => v != null);
+  const values = (f.series_values || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
   const fte = (f.employees || [])[(f.employees || []).length - 1];
   const counts = [f.branches != null ? `${f.branches} branches` : null, fte != null ? `${fte.toLocaleString()} FTE` : null].filter(Boolean).join(" · ");
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
-    "data-source": "financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]"
+    "data-source": "overview.financial_series :: series[],net_income_m[],nim_pct[]"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2337,17 +2420,17 @@ function FinancialTrajectoryD1({
       alignItems: "center",
       gap: 5
     },
-    title: [y, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null, f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")
+    title: [y, f.series_values[i] != null ? `$${f.series_values[i]}${f.unit}` : null, f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null), /*#__PURE__*/React.createElement("div", {
+  }, f.series_values[i] != null ? `$${f.series_values[i]}${f.unit}` : null), /*#__PURE__*/React.createElement("div", {
     style: {
       width: "100%",
-      height: `${(f.total_assets[i] || 0) / maxA * 80}px`,
+      height: `${(f.series_values[i] || 0) / maxA * 80}px`,
       background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
       borderRadius: "4px 4px 0 0",
       transition: "height var(--motion-slow) var(--ease)"
@@ -2664,7 +2747,7 @@ function InProgressBanner({
       marginBottom: 12,
       lineHeight: 1.55
     }
-  }, entity.name, " is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5."), /*#__PURE__*/React.createElement("div", {
+  }, entityName(entity), " is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5."), /*#__PURE__*/React.createElement("div", {
     className: "batch-row",
     style: {
       marginBottom: 16

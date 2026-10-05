@@ -5,7 +5,7 @@ cause, and the durable fix. The gate that now makes each one loud lives in
 `engine/gold_standard.py`; every gate is exercised by
 `tests/skills/research_engine/test_gold_standard.py`. The gold standard those gates
 are calibrated to is the **Golden 1 Credit Union** reference package
-(`docs/GOLD-STANDARD.md`), named by the engagement owner as the best so far.
+(`plugins/dma-insights/docs/GOLD-STANDARD.md`), named by the engagement owner as the best so far.
 
 The findings share ONE deep root cause: **the work went around the pipeline.** The
 run's assessment stage was never run; the research workbook was hand-scored in place
@@ -52,7 +52,7 @@ PRODUCER on its own output before returning — not by a reviewer after.
 ## The one-turn discipline (why issues were caught in QA, not prevented)
 
 The session reached the gold standard by **iteration** — each defect was found by the
-owner, fixed, re-filed. The cost of that is in `docs/GOLD-STANDARD.md`: a producer must
+owner, fixed, re-filed. The cost of that is in `plugins/dma-insights/docs/GOLD-STANDARD.md`: a producer must
 (1) read the deliverable contract and the reference before authoring, (2) author to it,
 and (3) run `gold_standard` on its OWN output and not return until it passes. A finding
 that a gate catches is a finding the producer should have caught in step 3. The gate is

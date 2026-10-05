@@ -20,6 +20,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import ledger
+from . import promote_checks
 from . import rejections
 from .contracts import PAGES, SERVING_TABLES
 from .validation import validate_pass1
@@ -164,7 +165,7 @@ def _promoted_sections(live):
                     yield (page, name)
 
 
-def promote_run(conn, run_id) -> dict:
+def promote_run(conn, run_id, expected_revision=None) -> dict:
     registry = writer_registry()
     cur = conn.cursor()
     try:
@@ -175,6 +176,20 @@ def promote_run(conn, run_id) -> dict:
             conn.rollback()
             return {"promoted": False, "error": "unknown_run"}
         entity_id = row[0]
+
+        # IS THIS CONNECTOR THE ONE THE REPOSITORY'S GATES ASSUME? MEM-0039,
+        # MEM-0562: "fixed" was asserted from the repository while production
+        # ran an older copy, and a promote was nearly made against it. The
+        # connector cannot see the repository, so the caller states what its
+        # gates assumed (`expected_revision`, from
+        # promote_checks.local_revision); a mismatch refuses before anything
+        # is read. Without one the check is RECORDED as unchecked on the
+        # result — never reported as a match.
+        revision_refusal, revision_record = \
+            promote_checks.revision_check(expected_revision)
+        if revision_refusal:
+            conn.rollback()
+            return revision_refusal
 
         cur.execute(
             """SELECT enum_label(page), enum_label(status), id, payload,
@@ -247,9 +262,27 @@ def promote_run(conn, run_id) -> dict:
         refusing = {}
         families: dict = {}          # page -> {gate_id: count}, complete
         totals: dict = {}            # page -> how many blocking reasons
+        # …AND WHAT PASS 1 CANNOT SEE (RC-13, SWBC gold audit 2026-10-04).
+        # validate_pass1 is pure; the checks that depend on the world — the
+        # fit engine today (CG-30/CG-31), the run's own status (CG-STALE),
+        # the committed gold shape (CG-PAR) — ran once at submit, or never,
+        # and were carried forward on retained rows. They join pass 1's
+        # reasons per page and refuse the same way. promote_checks.py.
+        for sub in live.values():
+            sub["payload"] = promote_checks.payload_json(sub["payload"])
+        try:
+            world, world_report = promote_checks.extra_reasons(conn, run_id,
+                                                               live)
+        except Exception as exc:                  # noqa: BLE001
+            world = {p: [{"gate_id": "revalidation", "severity": "block",
+                          "message": f"the promote-time re-checks raised "
+                                     f"{type(exc).__name__}; unchecked is "
+                                     "not clean"}] for p in live}
+            world_report = {"error": str(exc)[:200]}
         for page, sub in sorted(live.items()):
             try:
-                now = validate_pass1(page, sub["payload"] or {})
+                now = validate_pass1(page, sub["payload"] or {}) \
+                    + world.get(page, [])
             except Exception as exc:      # noqa: BLE001
                 # A re-validation that CRASHED established nothing. It must
                 # not read as a clean page — that is the
@@ -294,6 +327,12 @@ def promote_run(conn, run_id) -> dict:
                 "blocking_total": totals,
                 "blocking_by_gate": families,
                 "truncated": {p: totals[p] > len(refusing[p]) for p in refusing},
+                # CG-PAR's measure of the whole run (structural gap count,
+                # the gold runs it was held to and the one left out, the
+                # count/fill WARNINGS, what was disclosed rather than
+                # refused) — so a parity refusal can be scoped in one read.
+                "promote_checks": world_report,
+                **revision_record,
                 "hint": (
                     "These pages hold a PASS issued by an earlier gate set and "
                     "do not pass today's. A retained verdict is a DATED "
@@ -440,7 +479,9 @@ def promote_run(conn, run_id) -> dict:
                # reads, which is the exact state that let 98 alerts reach a
                # dashboard unremarked in the first place.
                "open_alerts": alerts,
-               "stats": stats}
+               "stats": stats,
+               "promote_checks": world_report,
+               **revision_record}
         # The drift flag, DISCLOSED and never blocking. A promote carrying
         # five of seven facets forward is better than no promote; refusing it
         # would strand the five. The refusal lives on "is this client done?",

@@ -296,15 +296,15 @@ Probe sets per surface, the nine contradiction classes and the cross-check proce
 so a contradiction *between* pages survives every per-page gate:
 
 ```bash
-python scripts/check_consistency.py <rundir>/ --subvertical <CODE>   # all six together
+python scripts/check_consistency.py <rundir>/   # all six + bundle.json, catalogue.json, fit.json
 ```
 
-It reconciles the composite against the pillar means, the hero against the grid, gap rows
-against served scores, roadmap ids against the recommendation set, landscape counts against the
-register, O8 against C6, confidence against evidence count, and the framing sentence against
-the top finding. It also refuses a cited cell belonging to another sub-vertical, a served cell
-whose drawer says nothing, a coverage denominator that is not the served cell set, and a run
-whose five narrative anchors are about different constraints.
+It reconciles the composite against the pillar means, the hero against the grid, gap rows against
+served scores, roadmap ids against recommendations, landscape counts against the register, O8 against
+C6, confidence against evidence count, and the framing sentence against the top finding. It refuses a
+cell of another sub-vertical (binding read from `bundle.json`, MEM-0559), a silent drawer, a coverage
+denominator that is not the served set, five anchors about different constraints, and every RC-10/RC-12
+cross-section invariant listed in `scripts/README.md`.
 
 ### 7 · Submit and repair
 

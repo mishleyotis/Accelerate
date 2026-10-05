@@ -143,7 +143,7 @@ function ProspectingPage() {
               {matches.map(e => (
                 <button key={e.id} style={{ display: "flex", width: "100%", padding: "10px 14px", borderBottom: "1px solid var(--z-sep)", textAlign: "left", gap: 12, alignItems: "center" }} onClick={() => { setPicked(e); setQ(""); setDownloadReady(false); }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{e.name}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{entityName(e)}</div>
                     <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{DMA.SUBVERTICAL_LABEL[e.subvertical]} · {e.hq}</div>
                   </div>
                   <MaturityChip score={e.overall} />
@@ -166,7 +166,7 @@ function ProspectingPage() {
             <button className="btn btn-tertiary" disabled={exporting} onClick={() => { setExporting(true); setTimeout(() => { setExporting(false); setDownloadReady(true); }, 1400); }}>
               {exporting ? <span className="row"><span className="skel" style={{ width: 12, height: 12, borderRadius: 6 }} /> Generating…</span> : <><Icon name="download" size={13} /> Export PDF</>}
             </button>
-            <button className="btn btn-secondary" onClick={() => pushToast(`Downloaded standalone HTML scorecard · ${picked.name}`, "success")}><Icon name="download" size={13} /> Download HTML</button>
+            <button className="btn btn-secondary" onClick={() => pushToast(`Downloaded standalone HTML scorecard · ${entityName(picked)}`, "success")}><Icon name="download" size={13} /> Download HTML</button>
           </div>
           {downloadReady ? (
             <div className="co co-teal" style={{ marginBottom: 14 }}>
@@ -193,7 +193,7 @@ function ScorecardPreview({ e }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".1em" }}>Zennify · DMA Scorecard</div>
-          <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4 }}>{e.name}</div>
+          <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4 }}>{entityName(e)}</div>
           {/* Joined from the parts the entity actually states — fmtAssets now
               returns null for an absent figure (it used to return "-"), and a
               null inside this row previously would have printed the WORD

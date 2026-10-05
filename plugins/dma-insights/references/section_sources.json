@@ -109,6 +109,7 @@
      "kind": "card",
      "item_keys": [
       "audience",
+      "state",
       "rows",
       "e_ids"
      ],
@@ -1100,13 +1101,15 @@
    "required": true,
    "served": true,
    "disposition": "report",
-   "workbook_tabs": [],
+   "workbook_tabs": [
+    "Executive_Summary"
+   ],
    "report_sections": [
     "assessment.1",
     "client_research.2"
    ],
    "enrichment_sources": [],
-   "confidence": "none",
+   "confidence": "proposed",
    "cards": {
     "storyline_challenge.volleys": {
      "kind": "object_nested",
@@ -1479,6 +1482,8 @@
    "served": true,
    "disposition": "workbook",
    "workbook_tabs": [
+    "Executive_Summary",
+    "Handoff_Lock",
     "Peer_Benchmarks",
     "Pillar_Rollup",
     "Pillar_Summary"
@@ -1688,6 +1693,7 @@
    "served": true,
    "disposition": "report",
    "workbook_tabs": [
+    "Handoff_Lock",
     "Solution_Catalogue"
    ],
    "report_sections": [

@@ -10,7 +10,7 @@ Read `01-start-here/1-standing-clauses.md` before writing any section on this pa
 
 | Section | Required | Surfaces | Renders on |
 |---|---|---|---|
-| `timeline` | yes | C1 | D5 |
+| `timeline` | yes | C1 | D5 (whole page customer-withheld) |
 | `issue_register` | yes | C2 | D5 |
 | `regulatory_standing` | yes | C3 | D5 |
 | `context_sentiment` | yes | C4 | D5 |

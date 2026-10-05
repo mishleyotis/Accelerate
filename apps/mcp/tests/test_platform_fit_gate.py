@@ -214,7 +214,7 @@ class _CtxCur(_Cur):
 
     def execute(self, sql, args=None):
         if "FROM entities" in sql or "e.sub_vertical" in sql:
-            self._rows = [(self.sub,)]
+            self._rows = [(self.sub, None)]   # + supplementary (0061)
         elif "issue_register_raw" in sql:
             self._rows = [(p,) for p in self.issues]
         elif "techstack_raw" in sql:
@@ -362,6 +362,47 @@ def test_an_absent_row_in_the_promoted_register_is_greenfield_ground():
     assert with_absent["fit_score"] > without["fit_score"]
 
 
+def _greenfield_by_platform(items):
+    from dma_mcp import fit as fit_mod
+    cells = [("P2C3.4.1", 1.0, "P2C3", "servicing"),
+             ("P2C3.4.2", 1.5, "P2C3", "servicing")]
+    cands = [{"platform": p, "l3_area": "servicing", "alignment": 0.5,
+              "readiness": "green"}
+             for p in ("Salesforce Data Cloud", "Salesforce Service Cloud")]
+    got = fit_mod.platform_fit(_Conn(_RegCur(cells, items)), "run", cands)
+    return {r["platform"]: {f["name"]: f for f in r["factors"]}
+            ["Greenfield family"]["value"] for r in got["platforms"]}
+
+
+def test_an_absent_product_is_greenfield_for_that_product_only():
+    """MEM-0563 (SWBC 2026-10-05): Data Cloud's ABSENT row shares a cell with
+    the Service Cloud area, and the cell-only join credited Service Cloud
+    with Data Cloud's absence. The absent product's own card keeps it."""
+    gf = _greenfield_by_platform(
+        [{"status": "ABSENT", "product": "Salesforce Data Cloud",
+          "linked_subcap_ids": ["P2C3.4.1"]}])
+    assert gf == {"Salesforce Data Cloud": 1.0,
+                  "Salesforce Service Cloud": 0.0}
+
+
+def test_an_absent_product_no_card_proposes_marks_the_layer_empty():
+    """A row naming a product nobody on the page proposes says the layer is
+    unoccupied, so every card on its cells keeps the term."""
+    gf = _greenfield_by_platform(
+        [{"status": "ABSENT", "product": "Informatica MDM",
+          "linked_subcap_ids": ["P2C3.4.1"]}])
+    assert gf == {"Salesforce Data Cloud": 1.0,
+                  "Salesforce Service Cloud": 1.0}
+
+
+def test_product_names_match_without_the_vendor_prefix():
+    from dma_mcp.fit import _same_product
+    assert _same_product("Salesforce Data Cloud", "Data Cloud")
+    assert _same_product("MuleSoft Anypoint Platform", "MuleSoft Anypoint Platform")
+    assert not _same_product("Salesforce Data Cloud", "Salesforce Service Cloud")
+    assert not _same_product("", "Data Cloud")
+
+
 def test_an_incumbent_row_discounts_exactly_the_cells_it_links():
     cells = [("P1C1.1.1", 1.0, "P1C1", "mlops"),
              ("P1C1.1.2", 1.0, "P1C1", "mlops"),
@@ -398,7 +439,7 @@ def test_a_cell_both_held_and_absent_is_held():
         _RegCur([], [{"status": "ABSENT", "linked_subcap_ids": ["A"]},
                      {"status": "CONFIRMED", "linked_subcap_ids": ["A"]}]),
         "run")
-    assert held == {"A"} and absent == set()
+    assert held == {"A"} and absent == []
 
 
 def test_the_context_names_which_register_tier_supplied_the_terms():

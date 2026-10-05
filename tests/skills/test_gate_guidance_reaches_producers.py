@@ -37,7 +37,14 @@ PLUGIN = ROOT / "plugins" / "dma-insights"
 VALIDATORS = ("validation.py", "validation2.py", "gates.py", "submit.py",
               "promote.py", "register.py", "contracts.py", "transport.py")
 
-GATE_RE = re.compile(r"\b(?:AG|CG|ET|SG)-\d+\b")
+# `[a-z]?`: letter-suffixed ids (CG-18b and its siblings, RC-04/05/06/09,
+# 2026-10-04) are gates a producer meets; `\d+\b` alone could not see them.
+GATE_RE = re.compile(r"\b(?:AG|CG|ET|SG)-\d+[a-z]?\b")
+
+
+def _gate_key(g: str):
+    m = re.match(r"([A-Z]{2})-(\d+)([a-z]?)", g)
+    return (m.group(1), int(m.group(2)), m.group(3))
 
 #: Gates a producer cannot act on, each with the reason it is exempt. Adding
 #: to this list is allowed and is the escape hatch; adding to it WITHOUT a
@@ -92,7 +99,7 @@ def plugin_gates() -> set:
     # leaks past the directory exclusion — gov_auditor's own tests live
     # outside the skill folder.
     r = subprocess.run(
-        ["grep", "-rho", "-E", r"\b(AG|CG|ET|SG)-[0-9]+\b", str(PLUGIN),
+        ["grep", "-rho", "-E", r"\b(AG|CG|ET|SG)-[0-9]+[a-z]?\b", str(PLUGIN),
          "--exclude-dir", GOVERNANCE_NAMESPACE.name,
          "--exclude-dir", "tests", "--exclude", "test_*.py"],
         capture_output=True, text=True)
@@ -115,7 +122,7 @@ def test_the_governance_namespace_is_actually_excluded():
 def test_every_connector_gate_is_documented_for_the_producers():
     live, documented = connector_gates(), plugin_gates()
     missing = sorted(live - documented - set(NOT_PRODUCER_FACING),
-                     key=lambda g: (g[:2], int(g[3:])))
+                     key=_gate_key)
     assert not missing, (
         f"{len(missing)} gate(s) refuse a payload and appear nowhere in the "
         f"plugin: {missing}. Document each in "
@@ -151,7 +158,7 @@ def test_the_plugin_does_not_document_gates_the_connector_dropped():
     fail. What it must never do is stay silent about it.
     """
     live, documented = connector_gates(), plugin_gates()
-    ghosts = sorted(documented - live, key=lambda g: (g[:2], int(g[3:])))
+    ghosts = sorted(documented - live, key=_gate_key)
     if ghosts:
         print(f"\nNOTE: the plugin mentions {len(ghosts)} gate id(s) the "
               f"connector does not define: {ghosts}. Retired, renamed, or "

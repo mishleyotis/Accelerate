@@ -463,7 +463,30 @@ def claim_run(run_id: str, session_id: str, producer_version: str) -> dict:
 def register_evidence(run_id: str, item: dict) -> dict:
     """Mint before you cite. The server allocates the id and computes the
     rank score; dedup is by content, scoped to the entity; the excerpt is
-    verified verbatim against the fetched artefact."""
+    verified verbatim against the fetched artefact.
+
+    A CONNECTOR reading (Indeed employer data, the CFPB complaint API):
+    origin='connector' and connector={tool, query, retrieved_at, response}
+    (or response_sha256 of a response already stored). The tier is computed
+    from the tool (Indeed T3, CFPB T1) and the excerpt is verified against
+    the stored response, never by a fetch.
+
+    FACT is refused on a T3-T5 source, every origin (`fact_tier`): ET-10
+    refuses a cited FACT row there at submit, so an Indeed reading
+    registers as INFERENCE. The claim type is never rewritten for you.
+
+    A SPLIT of a partly sensitive internal row: origin='internal',
+    split_of=<parent e_id>, an excerpt that is a verbatim piece of the
+    parent's, and — for the span the client may read —
+    customer_attribution ("Client statement, discovery conversations,
+    <month year>"). A span without one never reaches a customer. A span is
+    strictly shorter than its parent — unless the WHOLE row is the client's
+    own statement: then send the parent's full excerpt with whole_row=true
+    and the attribution, and a NEW span row is minted (owner decision
+    2026-10-05; the parent itself is never labelled or served). The
+    attribution is set only on the span this call mints — re-registering
+    existing words under a different label is refused, never written;
+    re-registering the same span returns it (deduped)."""
     with _conn() as c:
         return register_mod.register_evidence(c, run_id, item, fetch=_fetch)
 
@@ -579,11 +602,20 @@ def submit_page_payload(run_id: str, page: str, payload: dict = None,
 
 @mcp.tool()
 @_traced
-def promote_run(run_id: str) -> dict:
+def promote_run(run_id: str, expected_revision: dict | None = None) -> dict:
     """All six pages, one transaction, all or nothing. incomplete_run
-    names the missing and unpassed pages; re-promotion is idempotent."""
+    names the missing and unpassed pages; re-promotion is idempotent.
+
+    Retained pages are re-checked against today's gates, the fit engine
+    (CG-30/CG-31), the run's own status (CG-STALE) and the committed gold
+    shape (CG-PAR: structural gaps refuse; counts and fill ratios come back
+    as `promote_checks.parity.warnings`) before anything is written.
+    `expected_revision` is the
+    contract/gold/gate-set fingerprint your checkout's gates assume
+    (promote_checks.local_revision): a mismatch refuses as
+    deployed_revision_behind; omitted, the result records it unchecked."""
     with _conn() as c:
-        return promote_mod.promote_run(c, run_id)
+        return promote_mod.promote_run(c, run_id, expected_revision)
 
 
 @mcp.tool()
@@ -1030,13 +1062,20 @@ def ingest_reviewer_feedback(limit: int = 200) -> dict:
 from dma_mcp import resources as resources_mod
 
 
+def _resource_reader(uri: str):
+    # A closure, not a `_uri=uri` default: mcp 2.0.1 reads every handler
+    # parameter as a URI-template variable and refuses a concrete URI whose
+    # handler declares one — the container then dies before it listens
+    # (deploy of 2026-10-02, revision dmai-mcp-00135).
+    def _reader():
+        return resources_mod.read_resource(uri)["text"]
+    return _reader
+
+
 def _register_resources() -> None:
     for entry in resources_mod.resource_index():
         uri = entry["uri"]
-
-        def _reader(_uri=uri):
-            return resources_mod.read_resource(_uri)["text"]
-
+        _reader = _resource_reader(uri)
         _reader.__name__ = "resource_" + re.sub(r"[^0-9a-zA-Z]+", "_", uri).strip("_")
         mcp.resource(uri, name=entry["name"], description=entry["description"],
                      mime_type=entry["mime_type"])(_reader)

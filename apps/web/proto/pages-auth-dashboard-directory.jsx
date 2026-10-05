@@ -233,7 +233,7 @@ function DashboardHome() {
                 <div key={e.id} style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 18, alignItems: "center", marginBottom: 8 }}>
                   <div>
                     <div className="row" style={{ marginBottom: 6 }}>
-                      <strong style={{ fontSize: 14 }}>{e.name}</strong>
+                      <strong style={{ fontSize: 14 }}>{entityName(e)}</strong>
                       <span className="b b-muted">{DMA.SUBVERTICAL_LABEL[e.subvertical]}</span>
                       <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Batch {r.current_batch} / 6 · {r.status.replace(/_/g, " ").toLowerCase()}</span>
                     </div>
@@ -285,7 +285,7 @@ function DashboardHome() {
               {stale.map(e => (
                 <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: "1px solid var(--z-sep)" }}>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600 }} className="txt-fit-1">{e.name}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600 }} className="txt-fit-1">{entityName(e)}</div>
                     <div style={{ fontSize: 10, color: "var(--z-muted)" }}>{relTime(e.assessment_date)}</div>
                   </div>
                   <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${e.id}/overview`)}>Rerun</button>
@@ -355,10 +355,10 @@ function DashboardEntityCard({ e }) {
     <div className="card-tile clickable" onClick={() => navigate(`/clients/${e.id}/overview`)} style={{ padding: 14, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10 }}>
         <div style={{ width: 36, height: 36, borderRadius: 8, background: `linear-gradient(135deg, ${matHex}, var(--z-mid))`, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
-          {e.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+          {initialsOf(entityName(e))}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }} className="txt-fit-2" title={e.name}>{e.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }} className="txt-fit-2" title={entityName(e)}>{entityName(e)}</div>
           <div style={{ fontSize: 10.5, color: "var(--z-muted)", marginTop: 2, lineHeight: 1.35 }} className="txt-fit-2" title={[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
@@ -501,7 +501,7 @@ function EntityDirectoryPage() {
               {filtered.map(e => (
                 <tr key={e.id} onClick={() => navigate(`/clients/${e.id}/overview`)}>
                   <td>
-                    <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{e.name}</div>
+                    <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{entityName(e)}</div>
                     <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{e.domain || e.assessment_id}</div>
                   </td>
                   <td>{DMA.SUBVERTICAL_LABEL[e.subvertical]}</td>
@@ -527,7 +527,7 @@ function EntityCard({ e }) {
     <div className="card-tile clickable" onClick={() => navigate(`/clients/${e.id}/overview`)}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 10 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, color: "var(--z-dark)", marginBottom: 2 }}>{e.name}</div>
+          <div style={{ fontWeight: 600, fontSize: 14, color: "var(--z-dark)", marginBottom: 2 }}>{entityName(e)}</div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{[DMA.SUBVERTICAL_LABEL[e.subvertical], e.hq].filter(Boolean).join(" · ")}</div>
         </div>
         {e.in_progress ? (

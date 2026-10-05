@@ -302,6 +302,82 @@ def _stated_overall_grain(wb):
     return None, None
 
 
+#: Labels under which `Executive_Summary` states the overall. Normalised
+#: through `_norm`; the first numeric cell to the label's right on the same
+#: row is the figure.
+_EXEC_OVERALL_LABELS = ("overall_maturity", "overall_maturity_score",
+                        "overall_score", "overall_composite",
+                        "composite_score", "overall")
+
+
+def _stated_overall_exec_summary(wb):
+    """The overall the `Executive_Summary` tab STATES (MEM-0561).
+
+    SWBC (run 7968492e, 2026-10-01): the workbook states "Overall Maturity"
+    — pillar-weighted 20/20/30/30 = 2.0073 — on Executive_Summary, and its
+    grain tabs carry no OVERALL row. The producers never opened the tab,
+    because `workbook_tab_coverage` called it run config, not client-facing,
+    and no reader claimed it, so the stated headline number had to be
+    recovered by hand in remediation.
+
+    READ, never derived, at the precision the workbook states it (invariant
+    6 bands the RAW score; a rounded copy can band one tier high in the
+    [x.995, x+1) windows — MEM-0560). Returns `(Decimal, "Executive_Summary!B4")`
+    or `(None, None)` when the tab or a numeric figure beside a recognised
+    label is absent. A band word in the value cell is not a figure.
+    """
+    present = {_tab_key(n): n for n in wb.sheetnames}
+    name = present.get(_tab_key("Executive_Summary"))
+    if name is None:
+        return None, None
+    ws = wb[name]
+    for r, row in enumerate(ws.iter_rows(min_row=1, max_row=80, values_only=True), 1):
+        for c, cell in enumerate(row[:12]):
+            if cell is None or _norm(cell) not in _EXEC_OVERALL_LABELS:
+                continue
+            for c2 in range(c + 1, min(len(row), c + 6)):
+                v = row[c2]
+                if v is None or str(v).strip() == "":
+                    continue
+                value = _decimal(v)
+                if value in (None, "UNPARSEABLE"):
+                    break          # the first filled cell is the figure, or none
+                letter = openpyxl.utils.get_column_letter(c2 + 1)
+                return value, f"{ws.title}!{letter}{r}"
+    return None, None
+
+
+def _stated_overall(wb, out: "WorkbookParse"):
+    """Set the composite from the workbook's stated sources, in order: the
+    grain tab's OVERALL row (`_stated_overall_grain`), then Executive_Summary.
+
+    Two stated sources that disagree by more than 0.005 are recorded as two
+    readings of one figure — never averaged, never silently resolved.
+    """
+    readings = []
+    grain = _stated_overall_grain(wb)
+    if grain[0] is not None:
+        readings.append(grain)
+    exec_ = _stated_overall_exec_summary(wb)
+    if exec_[0] is not None:
+        readings.append(exec_)
+    if out.composite is not None and out.composite_source_cell:
+        readings.insert(0, (out.composite, out.composite_source_cell))
+    if out.composite is None and readings:
+        out.composite, out.composite_source_cell = readings[0]
+    values = {float(v) for v, _ in readings}
+    if len(readings) > 1 and max(values) - min(values) > 0.005:
+        out.observations.append(Observation(
+            "stated_overall_disagreement", None,
+            {"readings": [{"value": str(v), "source_cell": s} for v, s in readings],
+             "used": out.composite_source_cell,
+             "reason": "the workbook states its overall in more than one place "
+                       "and the readings differ; the first stated source is "
+                       "served and the difference is a question for the "
+                       "assessor, never an average"}))
+    return out
+
+
 def parse_scoring_workbook(path: str) -> WorkbookParse:
     """Two shipped generations, detected by tab set:
     - claude_dma:  2_Scorecard (Effective_Score) + 3_Assessment facets
@@ -312,7 +388,7 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
     try:
         if "2_Scorecard" in wb.sheetnames:
             facets = _parse_assessment(wb["3_Assessment"]) if "3_Assessment" in wb.sheetnames else {}
-            return _parse_scorecard(wb["2_Scorecard"], facets)
+            return _stated_overall(wb, _parse_scorecard(wb["2_Scorecard"], facets))
         pillar_tabs = [t for t in wb.sheetnames if _is_pillar_tab(t)]
         if pillar_tabs:
             out = _parse_pillar_scoring(wb, pillar_tabs)
@@ -327,9 +403,9 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                                "cell, observation or toggled-out variant came "
                                "out of any of them"}))
             # The composite is stated on the rollup tab, not on a tab this
-            # generation has. Read there or the header serves no figure.
-            out.composite, out.composite_source_cell = _stated_overall_grain(wb)
-            return out
+            # generation has. Read there or the header serves no figure —
+            # and on Executive_Summary, where SWBC states it (MEM-0561).
+            return _stated_overall(wb, out)
         # Rollup-only variant: recognisably a DMA workbook (stated pillar/
         # category grains present) but carrying no subcap-grain tabs at
         # all. The package lands with zero scored cells and its stated
@@ -341,8 +417,7 @@ def parse_scoring_workbook(path: str) -> WorkbookParse:
                 {"tabs": list(wb.sheetnames)[:20],
                  "note": "rollup-only workbook: stated grains land, no cells"}))
             out.scored_cells = 0
-            out.composite, out.composite_source_cell = _stated_overall_grain(wb)
-            return out
+            return _stated_overall(wb, out)
         # A generation nobody has taught this parser. Raising is deliberate:
         # the caller records it and quarantines the package by name after
         # three attempts, which is louder than a run with no cells. The
@@ -516,6 +591,11 @@ def _declared_stage(wb) -> dict | None:
 
 
 
+#: The Handoff_Lock keys the app reads (the rest — catalogue hash, contract
+#: version — are the engine's own bookkeeping).
+_HANDOFF_PEER_KEYS = ("locked_peer_set", "peer_basis", "peer_n")
+
+
 def parse_run_metadata(path: str) -> dict:
     """The workbook's own `Run_Metadata` key/value tab, whole.
 
@@ -543,14 +623,23 @@ def parse_run_metadata(path: str) -> dict:
     """
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
     try:
-        if "Run_Metadata" not in wb.sheetnames:
-            return {}
         md = {}
-        for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
-            if row and row[0] and len(row) > 1 and row[1] is not None:
-                key = _norm(row[0])
-                if key and key not in md:
-                    md[key] = str(row[1]).strip()
+        if "Run_Metadata" in wb.sheetnames:
+            for row in wb["Run_Metadata"].iter_rows(min_row=1, values_only=True):
+                if row and row[0] and len(row) > 1 and row[1] is not None:
+                    key = _norm(row[0])
+                    if key and key not in md:
+                        md[key] = str(row[1]).strip()
+        # The research stage's frozen peer cohort (engine/workbook.py
+        # lock_peer_set). SWBC gold audit RC-10: peers IDENTIFIED but not
+        # SCORED reached the connector as no peer set at all, because nothing
+        # read this tab. Only the peer keys travel; Run_Metadata wins a tie.
+        if "Handoff_Lock" in wb.sheetnames:
+            for row in wb["Handoff_Lock"].iter_rows(min_row=1, values_only=True):
+                if row and row[0] and len(row) > 1 and row[1] is not None:
+                    key = _norm(row[0])
+                    if key in _HANDOFF_PEER_KEYS and key not in md:
+                        md[key] = str(row[1]).strip()
         return md
     finally:
         wb.close()
@@ -2998,6 +3087,8 @@ def _attach_peer_deployments(wb, items: list, observe) -> None:
 # claims, and which carry rows that nothing will ever read.
 _TAB_READERS = {
     "Run_Metadata": "parse_scoring_workbook",
+    # the frozen peer cohort (RC-10) -> run_manifest.payload.workbook_metadata
+    "Handoff_Lock": "parse_run_metadata",
     "Pillar_Summary": "parse_grain_summaries",
     "Category_Detail": "parse_grain_summaries",
     "Pillar_Rollup": "parse_grain_summaries",
@@ -3005,6 +3096,8 @@ _TAB_READERS = {
     "Peer_Benchmarks": "parse_peer_benchmarks",
     "Recommendations": "parse_recommendations",
     "Caps_Applied_Log": "parse_scoring_workbook",
+    # "Overall Maturity" — one of the composite's stated sources (MEM-0561).
+    "Executive_Summary": "parse_scoring_workbook",
     "Evidence_Master": "parse_evidence_master",
     "Evidence_Detail": "parse_evidence_master",
     "Evidence_Register": "parse_evidence_master",
@@ -3083,6 +3176,17 @@ _TAB_TARGET = {
                         "proposed"),
     "Issue_Register": (("context.issue_register", "platform.stairstep"),
                        "proposed"),
+    # MEM-0561: this tab STATES the client-facing headline — "Overall
+    # Maturity" with its weighting basis (SWBC 2.0073, 20/20/30/30). It was
+    # classified run config / not_client_facing, which told every producer
+    # the one tab carrying the hero composite was not theirs to read.
+    "Executive_Summary": (("overview.scores", "overview.exec_summary"),
+                          "proposed"),
+    # RC-10: the locked peer set — identified, not necessarily scored. Every
+    # platform tile owes one peer_deployments row per named peer, and O1
+    # names the cohort where no median exists (dma_mcp/peer_set.py).
+    "Handoff_Lock": (("platform.platform_story", "overview.scores"),
+                     "proposed"),
     "Financial_Trends": (("overview.financial_series",), "proposed"),
     "Solution_Catalogue": (("platform.platform_story",
                             "platform.recommendations",
@@ -3098,13 +3202,11 @@ _TAB_TARGET = {
     "Maturity_Rubric": ("run config", "not_client_facing"),
     "Pillar_Weights": ("run config", "not_client_facing"),
     "Catalogue_Meta": ("run config", "not_client_facing"),
-    "Handoff_Lock": ("run config", "not_client_facing"),
     "Cap_Triggers": ("run config", "not_client_facing"),
     "Capability_Definitions": ("run config", "not_client_facing"),
     "REF_Method": ("run config", "not_client_facing"),
     "DQ_Bank": ("run config", "not_client_facing"),
     "00_README": ("run config", "not_client_facing"),
-    "Executive_Summary": ("run config", "not_client_facing"),
     "Run_Metadata": ("run config", "not_client_facing"),
 }
 

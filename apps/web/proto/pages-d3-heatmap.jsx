@@ -154,6 +154,32 @@ function sectionReason(key) {
   return { state, es, stub };
 }
 
+/* ── A column null in EVERY row is one absence, stated once ─────────────
+   RC-03 (gold audit 2026-10-04): absence was modelled only at SECTION grain,
+   so a populated section with a 100%-null column — peer_median, sixteen
+   categories and four pillars — rendered sixteen silent cells and its reason
+   nowhere. The section's empty_state carries the reason; the sentences of it
+   that are about the PEER column are what the grid states, once. Where the
+   run gave no such sentence the grid says only what the payload shows. */
+function peerColumnReason() {
+  const { es } = sectionReason("heatmap.workbook_scores");
+  const reason = (es && typeof es.reason === "string") ? es.reason.trim() : "";
+  const about = reason.split(/(?<=[.!?])\s+/).filter(x => /\bpeers?\b/i.test(x)).join(" ");
+  return about || "No peer median is stated at this grain in this run.";
+}
+
+function PeerColumnFoot() {
+  return (
+    <div data-peer-column-absent="true"
+         style={{ marginTop: 10, borderTop: "1px solid var(--z-sep)", paddingTop: 8,
+                  fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+      <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".06em",
+                     marginRight: 6 }}>Peer column</span>
+      {peerColumnReason()}
+    </div>
+  );
+}
+
 /* The contract allows either shape for the workbook tables: an id-keyed object
    ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
    their own id. Both become a list of rows with `id`. */
@@ -413,13 +439,13 @@ function ClientHeatmap({ entity, run }) {
       <div className="page-head">
         <div>
           <div className="eyebrow">Maturity heatmap</div>
-          <h1>Where {entity.name} is today</h1>
+          <h1>Where {entityName(entity)} is today</h1>
           {/* maturityLabel returns null for a null composite, and .toLowerCase()
               on it took the whole page down. No composite, no band word. */}
           <div className="sub">{entity.subcaps.length} subcaps · {entity.subcaps.filter(s => s.thin).length} thin{overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted"}</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entityName(entity)} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
         </div>
       </div>
 
@@ -537,7 +563,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
       <div>
         <div className="row" style={{ marginBottom: 12 }}>
           <Icon name="sparkle" size={15} style={{ color: "var(--z-dpur)" }} />
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Strategic priorities for {entity.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Strategic priorities for {entityName(entity)}</div>
           
           <span className="spacer" />
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Click any focus area to drill in</span>
@@ -716,7 +742,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
               involved_subcap_ids per pillar), not weights in a composite —
               calling them weights implied the focus area score was a weighted
               roll-up of pillars, which nothing in the run says. */}
-          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entity.name}.</div>
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entityName(entity)}.</div>
         </div>
 
         <div className="card">
@@ -961,6 +987,8 @@ function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
           (H-06) and an adjudication about what the grid is allowed to
           publish — not something to settle by quietly starting to publish a
           pillar figure the run does not state. */}
+      {(pillars || []).length && (pillars || []).every(p => p.peer == null)
+        ? <PeerColumnFoot /> : null}
       {!anyScore ? (() => {
         const { stub } = sectionReason("heatmap.workbook_scores");
         return (
@@ -1005,6 +1033,9 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
       if (cap != null) row.capped += 1;
     });
   });
+  // Every category on screen with no peer median: one absence, said once.
+  const shownCats = rows.flatMap(p => p.cats || []);
+  const peerAllNull = showPeers && shownCats.length > 0 && shownCats.every(c => c.peer == null);
   return (
     <div className="card">
       {rows.map(p => {
@@ -1057,6 +1088,12 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                       {shown == null
                         ? <div style={{ fontSize: 10.5, fontWeight: 600 }}><EnrichmentGap what={`${c.id} score`} audience={audience} compact /></div>
                         : <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>}
+                      {/* ON THE FACE, not only in the title (RC-11 / D-32):
+                          the workbook states no figure for this category and
+                          the number above is the mean of its scored cells. */}
+                      {c.score == null && c.cellMean != null
+                        ? <div style={{ fontSize: 8, fontWeight: 600, lineHeight: 1.15 }}>cell mean · not a workbook figure</div>
+                        : null}
                       {c.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{c.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
@@ -1112,6 +1149,7 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
           </div>
         );
       })}
+      {peerAllNull ? <PeerColumnFoot /> : null}
       <CellTip tip={cellTip.tip} />
     </div>
   );
@@ -1454,7 +1492,7 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
         </p>
         <p style={{ marginTop: 8 }}>
           Which cells belong to which business process is the producer's claim
-          about {entity.name}'s operating model. The cell grain alone cannot
+          about {entityName(entity)}'s operating model. The cell grain alone cannot
           stand it up, so nothing is drawn here until the section promotes.
         </p>
       </div>
@@ -2159,4 +2197,5 @@ function Legend() {
 function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i); return h; }
 window.hashCode = hashCode;
 
-Object.assign(window, { ClientHeatmap, sectionReason });
+Object.assign(window, { ClientHeatmap, sectionReason, runPillarsOf, runCategoriesOf,
+                        PillarHeatmap, CategoryHeatmap });

@@ -315,11 +315,10 @@ def submit(run_id: str, page: str, payload: dict, producer: str) -> dict:
     parts = plan(payload, page)
     print(f"  {len(parts)} part(s), {size(payload):,} bytes", flush=True)
     for i, part in enumerate(parts, 1):
-        # The connector takes exactly one body per part: `items=` (append to
-        # the list at `path`, with `item_count` so a short part is caught) or
-        # `fields=` (shallow-merge an object at `path`). Sending
-        # kind/payload was refused ONE_BODY on every chunked page
-        # (2026-10-05, Cross Insurance heatmap).
+        # The connector takes exactly one body per part: `fields` (merge an
+        # object at `path`) or `items` (append to the list at `path`, with
+        # `item_count` so a short part is refused at receipt). It refused
+        # the older {kind, payload} shape with ONE_BODY.
         args = {"upload_id": upload, "part": i, "parts_total": len(parts),
                 "path": part["path"]}
         if part["kind"] == "items":

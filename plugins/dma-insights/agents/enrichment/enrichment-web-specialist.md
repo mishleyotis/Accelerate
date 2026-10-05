@@ -232,8 +232,10 @@ The specification calls this *"the most enrichable surface in the product —
 there are at least seven public sources, and the package usually carries one or
 two"*, and it is *"also the surface where thinness is most often mistaken for a
 finding"*. STEP 1 is **collect across all seven source families, do not stop at
-one**: Apple App Store, Google Play, Glassdoor, Indeed, CFPB complaint
-narratives by product (*"the complaint TEXT is the analysable part, not just the
+one**: Apple App Store, Google Play, Glassdoor, Indeed (through the Indeed
+connector's `get_company_data`, which the connector specialist holds — the
+page 403s; RC-07), CFPB complaint narratives by product (the CFPB complaint
+API's company filter and aggregations are a connector route at T1) (*"the complaint TEXT is the analysable part, not just the
 count"*), BBB, and Trustpilot or Google reviews — plus J.D. Power and Forrester
 rankings where the entity appears (T3) and any NPS the entity publishes itself
 (T4/T5, needs corroboration).

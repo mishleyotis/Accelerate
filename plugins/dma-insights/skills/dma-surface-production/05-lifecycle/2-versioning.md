@@ -73,6 +73,20 @@ retained, so:
 The atomic guarantee is unaffected: promotion is still all-or-nothing across all six pages.
 What changes is that five of them needed no re-synthesis.
 
+### A page promoted under an older gate set
+
+`promote_run` re-gates every RETAINED page against today's gates, so fixing one page can be
+refused on a page you did not touch (`retained_pages_fail_current_gates`). When the reason
+is a key the contract added after that client was promoted, the contract carries the
+migration beside the key and the refusal quotes it — do what it says to that one page,
+resubmit it, promote. Change nothing else on the page. Two such keys exist today
+(2026-10-04):
+
+| Key | Refused by | Migration |
+|---|---|---|
+| `context.context_sentiment.context_tiles[].state` (RC-09) | CG-03b | on each tile with no rated row: `WORKED_ABSENT` when its `sources_searched` ladder ran and every rung names an outcome, else `UNWORKED`. The refusal proposes the value from the tile's own ladder. Golden 1's promoted context page needs this on two tiles. |
+| `overview.firmographics.sub_vertical_undefined` (RC-06) | CG-02 | `false` when the primary sub-vertical has a set in `must_present_by_subvertical`; `true` only where research leaves it undefined (Farm Credit), and say so on the surface. Baxter's promoted overview needs this. |
+
 **Do not re-synthesise a passing page to make the run feel fresh.** It costs a full
 production cycle and changes `promoted_at` on rows whose content did not move, which makes
 a later regression harder to bisect.

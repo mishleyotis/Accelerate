@@ -65,14 +65,120 @@ def _institution(manifest: dict) -> dict:
                         d[key] = e[key]
     for key, aliases in (("sub_vertical", ("sub_vertical", "subvertical",
                                            "subvertical_initial")),
-                         ("size_tier", ("size_tier",))):
+                         ("size_tier", ("size_tier",)),
+                         ("trading_name", ("trading_name",)),
+                         ("domain", ("domain",))):
         if not d.get(key):
             for a in aliases:
                 v = manifest.get(a)
                 if isinstance(v, str) and v.strip():
                     d[key] = v.strip()
                     break
+    e = manifest.get("entity")
+    binding = manifest.get("binding")
+    for key in ("trading_name", "domain"):
+        if not d.get(key) and isinstance(e, dict) \
+                and isinstance(e.get(key), str) and e[key].strip():
+            d[key] = e[key].strip()
+    # 0061. The research engine records the owner's multi-LOB binding as
+    # `binding.supplementary_sub_verticals`; older shapes put it beside the
+    # primary. Only the catalogue's own codes are kept (the column CHECKs
+    # them), so an unreadable entry is dropped rather than refused.
+    supp = d.get("supplementary_sub_verticals")
+    for src in (binding if isinstance(binding, dict) else {}, manifest,
+                e if isinstance(e, dict) else {}):
+        if supp:
+            break
+        supp = src.get("supplementary_sub_verticals")
+    codes = _supplementary_codes(supp, d.get("sub_vertical"))
+    if codes:
+        d["supplementary_sub_verticals"] = codes
+    else:
+        d.pop("supplementary_sub_verticals", None)
     return d
+
+
+# The catalogue's VC codes — `SUBVERTICAL_CODES` in apps/api and apps/mcp
+# `subverticals.py`, and the vocabulary 0061's CHECK enforces.
+_SV_CODES = ("RB", "CU", "CL", "CIB", "FC", "AM", "RIA", "IC", "IB")
+_SV_NUMBERED = {f"SV{i}": c for i, c in enumerate(
+    ("RB", "CU", "CL", "CIB", "RIA", "AM", "IB", "IC", "FC"), start=1)}
+
+
+def _supplementary_codes(raw, primary=None) -> list | None:
+    """The supplementary codes a manifest states, as the column stores them:
+    the nine VC codes (or SV1-SV9), deduplicated, primary excluded, in the
+    stated order. None when nothing usable is stated."""
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        raw = re.split(r"[,;]", raw.strip().strip("{}"))
+    if not isinstance(raw, (list, tuple)):
+        return None
+    prim = str(primary or "").strip().upper()
+    prim = _SV_NUMBERED.get(prim, prim)
+    out = []
+    for item in raw:
+        code = str(item or "").strip().strip('"').upper()
+        code = _SV_NUMBERED.get(code, code)
+        if code in _SV_CODES and code != prim and code not in out:
+            out.append(code)
+    return out or None
+
+
+#: The identity columns an ingest may FILL on an entity already on file.
+#: Never overwritten: a value anyone has set — a human, a data revision, an
+#: earlier package — stands, and only a NULL is filled.
+_IDENTITY_COLUMNS = ("legal_name", "trading_name", "domain", "sub_vertical",
+                     "supplementary_sub_verticals", "size_tier",
+                     "primary_regulator", "jurisdictions")
+
+
+def _identity_values(inst: dict) -> dict:
+    return {
+        "legal_name": inst.get("name"),
+        "trading_name": inst.get("trading_name"),
+        "domain": inst.get("domain"),
+        "sub_vertical": inst.get("sub_vertical"),
+        "supplementary_sub_verticals": inst.get("supplementary_sub_verticals"),
+        "size_tier": inst.get("size_tier"),
+        "primary_regulator": inst.get("primary_regulator"),
+        "jurisdictions": [inst["geography"]] if inst.get("geography") else None,
+    }
+
+
+def fill_identity(cur, entity_id, inst: dict) -> list:
+    """Fill the entity's NULL identity columns from this package; return the
+    columns filled.
+
+    THE DEFECT THIS CLOSES. `persist_package` wrote identity only when it
+    INSERTED the entity. SWBC's row was created by a package that carried
+    none, and every later package that did carry its legal name and
+    sub-vertical changed nothing — the entity promoted with an empty record,
+    headers read "Where  is today", and the sub-vertical scope rule saw no
+    sub-vertical. Fill-where-NULL on every ingest makes the first package
+    that states a value the one that lands it, and never lets a later one
+    rewrite it.
+    """
+    values = {k: v for k, v in _identity_values(inst).items()
+              if v not in (None, "", [])}
+    if not values:
+        return []
+    cur.execute(f"SELECT {', '.join(_IDENTITY_COLUMNS)} FROM entities "
+                "WHERE id = %s", (entity_id,))
+    row = cur.fetchone()
+    if row is None:
+        return []
+    current = dict(zip(_IDENTITY_COLUMNS, row))
+    fill = {k: v for k, v in values.items() if current.get(k) is None}
+    if not fill:
+        return []
+    # COALESCE as well as the read above: a concurrent writer that set the
+    # column between the two statements still wins.
+    sets = ", ".join(f"{k} = COALESCE({k}, %s)" for k in fill)
+    cur.execute(f"UPDATE entities SET {sets} WHERE id = %s",
+                (*fill.values(), entity_id))
+    return sorted(fill)
 
 
 def _stated_overall(manifest: dict):
@@ -311,17 +417,23 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     display_id = _slug(inst.get("name") or resolution.entity_token)
     cur.execute("SELECT id FROM entities WHERE display_id = %s", (display_id,))
     row = cur.fetchone()
+    identity_filled: list = []
     if row:
         entity_id = row[0]
+        identity_filled = fill_identity(cur, entity_id, inst)
     else:
+        ident = _identity_values(inst)
         cur.execute(
-            """INSERT INTO entities (display_id, legal_name, sub_vertical, size_tier,
+            """INSERT INTO entities (display_id, legal_name, trading_name,
+                                     domain, sub_vertical,
+                                     supplementary_sub_verticals, size_tier,
                                      primary_regulator, jurisdictions, status,
                                      inference_confidence, created_at)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s, now()) RETURNING id""",
-            (display_id, inst.get("name"), inst.get("sub_vertical"),
-             inst.get("size_tier"), inst.get("primary_regulator"),
-             [inst["geography"]] if inst.get("geography") else None,
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, now()) RETURNING id""",
+            (display_id, ident["legal_name"], ident["trading_name"],
+             ident["domain"], ident["sub_vertical"],
+             ident["supplementary_sub_verticals"], ident["size_tier"],
+             ident["primary_regulator"], ident["jurisdictions"],
              resolution.status, resolution.confidence),
         )
         entity_id = cur.fetchone()[0]
@@ -453,22 +565,30 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
     # `completed_at` and `assessment_date` to resolve from one candidate list
     # over one document. Right-biased, so a real manifest key wins.
     dated_manifest = {**(wb_metadata or {}), **manifest}
-    composite = _round_once(workbook.composite)   # rounded ONCE
+    # The raw figure is kept BESIDE the 2dp one (0064, owner decision A):
+    # `composite` is the display value, rounded once here, and
+    # `composite_raw` is the value the workbook states, unrounded, so a
+    # band read from it is the band of the raw score (invariant 6).
+    composite_raw = workbook.composite
+    composite = _round_once(composite_raw)        # rounded ONCE
     composite_from_manifest = False
     stated_overall = _stated_overall(manifest)
     if composite is None and stated_overall is not None:
         # The workbook generation carries no composite figure; the manifest's
         # stated overall is READ (not derived), with its provenance recorded.
-        composite = _round_once(Decimal(str(stated_overall)))
+        composite_raw = Decimal(str(stated_overall))
+        composite = _round_once(composite_raw)
         composite_from_manifest = True
     cur.execute(
         """INSERT INTO runs (entity_id, request_id, run_seq, ccg_catalog_version,
-                             scored_cells, catalogue_cells, composite, status,
+                             scored_cells, catalogue_cells, composite,
+                             composite_raw, status,
                              completed_at, source_folder_id,
                              source_artefact_id, source_checksum)
-           VALUES (%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s,%s,%s) RETURNING id""",
+           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'INGESTED',%s,%s,%s,%s) RETURNING id""",
         (entity_id, manifest.get("run_id"), run_seq, pinned,
          len({s.subcap_id for s in workbook.scores}), catalogue_cells, composite,
+         composite_raw,
          _stated_completed_at(dated_manifest), source_folder_id,
          artefact_id, artefact_checksum),
     )
@@ -533,6 +653,11 @@ def persist_package(conn, *, manifest: dict, workbook: WorkbookParse,
             """INSERT INTO parser_observations (run_id, kind, detail, occurred_at)
                VALUES (%s,%s,%s, now())""", (run_id, kind, json.dumps(detail)))
         n_obs += 1
+
+    # Counted, never silent: a package that filled an empty identity on an
+    # entity already on file says which columns it filled.
+    if identity_filled:
+        _observe("entity_identity_filled", {"columns": identity_filled})
 
     # The landing rules live in one place (dma_worker.evidence_ids), shared
     # with the repair pass that re-lands what the id collision left

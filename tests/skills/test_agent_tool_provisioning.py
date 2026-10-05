@@ -161,6 +161,7 @@ PRODUCERS_WITH_A_CONNECTOR = {
     "production/techstack/techstack-register-producer.md",   # techstack: Explorium
     "production/techstack/techstack-layers-producer.md",     # techstack: Explorium
     "production/insights/insights-landscape-producer.md",    # landscape: Explorium
+    "production/overview/overview-market-producer.md",       # sentiment: Indeed ratings (RC-07)
 }
 CONNECTOR_PREFIXES = ("mcp__Exa__", "mcp__Tavily__", "mcp__Clay__",
                       "mcp__Vibe_Prospecting__", "mcp__Indeed__",
@@ -255,7 +256,10 @@ def _holders(prefix: str) -> set:
                                  "techstack-layers-producer",
                                  "insights-landscape-producer",
                                  "enrichment-connector-specialist"}),
-    ("mcp__Indeed__", {"technographic-scanner"}),
+    # RC-07 (SWBC gold audit 2026-10-04): the ratings read joins the
+    # sentiment path; job postings stay the scanner's.
+    ("mcp__Indeed__", {"technographic-scanner", "overview-market-producer",
+                       "enrichment-connector-specialist"}),
     ("mcp__Quartr__", set()),
     ("mcp__Google_Drive__", set()),
 ])
@@ -283,7 +287,7 @@ CONNECTOR_TIER = {
     "research-conductor": 11,                # web 2 + Agent/Ask 2 + exa 2 + tavily 2 + clay/people 3
     "surface-producer": 3,                   # Agent, Write, Edit — no web, no connector
     "technographic-scanner": 9,              # web 2 + explorium 3 + clay/company 3 + indeed 1
-    "enrichment-connector-specialist": 8,    # clay 5 + explorium 3
+    "enrichment-connector-specialist": 9,    # clay 5 + explorium 3 + indeed ratings 1 (RC-07)
     "enrichment-web-specialist": 6,          # web 2 + exa 2 + tavily 2
 }
 

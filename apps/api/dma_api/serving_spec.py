@@ -53,6 +53,13 @@ def readers() -> dict:
             item_cols, section_cols, env_cols, sys_cols = {}, {}, {}, {}
             derived_cols = []
             for c in w["columns"]:
+                # A RAW twin (0064, owner decision A) stores the same payload
+                # field as its display column, unscaled, so the generated band
+                # can read it. It is written, never read back: two columns
+                # bound to one path would serve whichever came last, and the
+                # payload's field is the 2dp display column's.
+                if c.get("raw_of"):
+                    continue
                 kind, _, rest = c["source"].partition(":")
                 # The spec carries SQL identifier quoting for reserved words
                 # ("window"), which the WRITER needs and the reader must not

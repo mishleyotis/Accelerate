@@ -113,8 +113,43 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   value. `migrations/prod_apply.py` is the migrate Job entrypoint; its
   VERIFY log lines are the production proof (private-IP DB).
 
+- **Gold-standard audit decisions** (user, 2026-10-04, after the SWBC
+  audit — `plugins/dma-insights/docs/GOLD-STANDARD.md` is the gold doc;
+  the old `docs/GOLD-STANDARD.md` path never existed):
+  - **Sentiment reaches customers as a reduced card** — ratings bars +
+    themes, no cell codes, internal sources, cap vocabulary or r_layer.
+    Supersedes TRD §11's customer withholding for `overview.sentiment`
+    only; `thought_leadership` stays withheld.
+  - **Firmographics**: subsidiary/segment figures are admissible when the
+    unit/basis names the entity; registry answers (charter, regulator,
+    branches) are stated, never held; held fields are capped (≤2 or 25% of
+    must-present, whichever is smaller) and a held field renders as a
+    stated absence with its reason — never disappears.
+  - **Connector-sourced evidence** (Indeed employer rating, CFPB complaint
+    API) registers under origin `connector` with tool, query and
+    retrieval date; Indeed T3, CFPB T1.
+  - Defaults taken: identified peers may be named to customers as
+    "identified, not scored"; discovery evidence splits into a shareable
+    re-attributed span and an internal span; DECISIONS D4 stands
+    (customer techstack rows CONFIRMED/ABSENT only); shape-only gold
+    fixtures (no values) may be committed; WebSearch/WebFetch is the
+    failover when Exa/Tavily credit runs out.
+  - **Raw band vs Backend Schema** (authority #1 vs invariant 6): keep
+    `composite` NUMERIC(4,2) for display as the schema states; an
+    expand-only `composite_raw` column carries the raw value and the band
+    is generated from it. `composite` is never widened.
+  - **Gold-parity gate (CG-PAR / Gate J)** blocks only on structural gaps
+    (a section or key the gold always serves is missing; a must-present
+    field null or held beyond the cap). List-length and fill-ratio
+    differences are warnings. Leave-one-out against gold; sub-vertical-
+    matched gold preferred, cross-sub-vertical gold for structure only.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).
 - Visual treatment of `CLAIMED` vs `INFERRED` on the tech register (render distinctly-but-provisionally; flagged for design).
+- H2/grid thin-evidence flag: DB generated column vs the H2 contract rule
+  (they disagree on 144 SWBC cells).
+- Techstack layer denominator (T-03/DNR-6): producer product slots vs the
+  server's cell count.
 - Partitioning: **not yet** (triggers/strategies documented in TRD §17; do not pre-build).
