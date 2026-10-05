@@ -102,6 +102,16 @@ section reads READY, run the whole-report pass and report what you find:
    unsupported, and the reports should say so rather than the reader
    discovering it.
 
+## A probe the section needed and nobody ran
+
+When a section fails only because a probe its control requires was never
+run (a vendor scope statement, an initiative-underway probe, a peer platform
+check), REVISE it as usual and ALSO end your output with the same
+`{"search_requests": [...]}` block the writers use, one entry per missing
+probe with the cell it bears on. The driver runs them before the writers'
+next round, so the next draft can be judged on evidence rather than
+returned again for the same gap.
+
 ## What you never do
 
 Write or edit a section (that is the producer's, and your independence is

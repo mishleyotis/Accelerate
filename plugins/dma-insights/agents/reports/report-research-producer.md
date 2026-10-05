@@ -164,6 +164,32 @@ from a section's author by name, so the verdict comes from
 (`engine.cli narrative state --report client_research`) and let the conductor route
 the review.
 
+## When the template demands a probe the run has not answered
+
+Some section controls require a search the research stage never ran: a
+vendor's own scope statement, fetched; an "initiative already underway"
+probe (entity + initiative + paused/completed/replaced); a peer's platform
+for a recommendation's readiness contract. You hold no web tool, and you do
+not need one. **Never write "requested through the driver", "not run",
+"pending" or any pipeline word into the section body.** End your final
+output with a JSON block the driver harvests and runs before your next
+round:
+
+```json
+{"search_requests": [
+  {"query": "nCino Bank Operating System loan origination product scope",
+   "subcap": "P3C1.5.1", "facet": "works", "tool": "exa",
+   "proves": "the vendor scope statement section 6.4 requires for TS-018"}
+]}
+```
+
+`subcap` is the cell the result bears on (the one your section cites for
+that claim). On your next round the results are in `Evidence_Detail` and
+`Platform_Peer_Adoption`; write from them, and where a probe came back
+empty, state the searched absence and what was searched, as a finding about
+the client, never as a note about the pipeline. (Susser Bank, 2026-10-05:
+seven report rounds stalled on probes written as prose that nothing ran.)
+
 ## What you never do
 
 Write the other report's sections. Write a score (column D belongs to

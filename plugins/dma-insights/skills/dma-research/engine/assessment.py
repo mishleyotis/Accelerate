@@ -839,9 +839,45 @@ def rollup(wb: RunWorkbook, *, headline: str | None = None) -> dict:
 
 # ── catalogue tabs ───────────────────────────────────────────────────────
 
+#: Zennify's own portfolio, read from the catalogue the assessment skill
+#: ships (`dma-assessment/references/zennify_solutions.md`, "Solution
+#: Overview"). A Solution_Catalogue row is a Zennify solution or it is not
+#: a recommendation this deliverable makes — Susser Bank (2026-10-05) shipped
+#: "Blend / Salesforce Flow orchestration" as a derived recommendation, a
+#: third-party product the catalogue does not carry. A non-Zennify product
+#: belongs in a card's rebuttal or alternatives, under the catalogue's own
+#: "Non-Zennify Solutions" rule, never as the platform.
+ZENNIFY_CATALOGUE = (Path(__file__).resolve().parents[2]
+                     / "dma-assessment" / "references" / "zennify_solutions.md")
+
+
+def zennify_solutions() -> list[str]:
+    try:
+        text = ZENNIFY_CATALOGUE.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    m = re.search(r"## Solution Overview(.*?)\n---", text, re.S)
+    return [x.strip() for x in re.findall(r"^\d+\.\s+(.+)$", m.group(1) if m else "", re.M)]
+
+
+def _zennify_named(platform: str) -> list[str]:
+    plat = _clean(platform).lower()
+    return [z for z in zennify_solutions() if z.lower() in plat]
+
+
 def solution(wb: RunWorkbook, *, sol_id: str, name: str, platform: str,
              categories, rec_id: str = "") -> dict:
     require_stage(wb)
+    portfolio = zennify_solutions()
+    if portfolio and not _zennify_named(platform):
+        raise ScoringRefusal(
+            f"platform {platform!r} names none of Zennify's solutions "
+            f"({'; '.join(portfolio)}). Pick the solution the catalogue's "
+            f"Solution-to-Gap matrix and 'Best For Gaps' tables give for these "
+            f"categories at their scores; where the client already runs a "
+            f"platform (a CONFIRMED Tech_Register row), frame the solution as "
+            f"extending it. A third-party product goes in the card's "
+            f"alternatives, not here.")
     sol_id = _clean(sol_id).upper()
     if not re.fullmatch(r"(REC|SOL)-\d{2}", sol_id):
         raise ScoringRefusal("solution id is REC-NN or SOL-NN")

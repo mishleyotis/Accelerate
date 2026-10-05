@@ -1377,9 +1377,18 @@ class Pipeline:
         if stage == "REPORTS":
             from . import narrative as N
             st = N.state(wb)
+            # A round that only serviced the probes the writers asked for
+            # moved the stage forward: the next round writes from them.
+            try:
+                from . import relay
+                served = sum(v for k, v in relay.state(self.run)["by_status"].items()
+                             if k in ("SERVED", "EMPTY"))
+            except Exception:                            # noqa: BLE001
+                served = 0
             return (sum(1 for x in st["reports"].values()
                         for sec in (x.get("sections") or []) if sec.get("status") == "READY"),
-                    sum(1 for x in st["reports"].values() if x.get("ready")))
+                    sum(1 for x in st["reports"].values() if x.get("ready")),
+                    served)
         return ()
 
     def _stalled(self, stage: str) -> bool:
@@ -2287,9 +2296,62 @@ class Pipeline:
         self._set_md("connector_ingest_after_seq", row.get("run_seq"))
         return f"version A ingested as {row['run_id']} (seq {row.get('run_seq')})"
 
+    def _reconcile_register(self) -> None:
+        """Refuse REPORTS while Tech_Register contradicts evidence the run
+        holds (`techscan.contradictions`). No report writer may change the
+        register, and every section that reads it inherits the error; at
+        Susser Bank (2026-10-05) that cost seven report rounds and eight
+        reopened sections before anyone looked at the sheet."""
+        from . import techscan as TS
+        bad = TS.contradictions(self.wb)
+        if not bad:
+            L.append_gate(self.wb, gate="TECH_REGISTER_RECONCILE", scope="run",
+                          verdict="PASS", blocking=False,
+                          detail="no CLAIMED row is named by T1-T3 non-broker evidence it does not cite")
+            return
+        lines = "; ".join(f"{b['ts_id']} {b['product']} CLAIMED, named by {', '.join(b['evidence_ids'])}"
+                          for b in bad)
+        L.append_gate(self.wb, gate="TECH_REGISTER_RECONCILE", scope="run",
+                      verdict="FAIL", blocking=True, detail=lines[:900])
+        raise StageRefused(
+            f"Tech_Register contradicts the run's own evidence: {lines}. Re-strike "
+            f"each row from the cited excerpts before any section is written: "
+            f"`python3 -m engine.techscan restrike --run {self.run.run_id} "
+            f"--root {self.run.root} --ts <TS-nnn> --status CONFIRMED|INFERRED "
+            f"--method job_posting|public_document|vendor_announcement --provider web "
+            f"--evidence-id <E-id> --basis '<what the excerpt says>'`, "
+            f"then `engine.techscan reconcile` until it exits 0.")
+
+    def _service_report_probes(self, round_no: int, after: str = "writers") -> int:
+        """Harvest the `search_requests` the report lanes emitted and run
+        them through specialist lanes. Always lane mode here: REPORTS has no
+        conductor waiting between rounds to service an orchestrator batch,
+        and the drain brief carries the owner's WebSearch failover for a
+        container whose lanes hold no connector."""
+        try:
+            from . import relay
+            logs = self.run.root / "agent_logs"
+            h = relay.harvest(self.run, [], logs_dir=logs, round_no=round_no)
+            if h["harvested"]:
+                self.opts.log(f"  [RELAY] {h['harvested']} report probe(s) from the {after}")
+            d = relay.drain_batch(self.run, self.wb, mode="lane",
+                                  out_dir=self._briefs(f"reports_relay_r{round_no}_{after}"))
+            if not d.get("lanes"):
+                return 0
+            self.opts.log(f"  [RELAY] running {d['requests']} report probe(s) over "
+                          f"{d['lanes']} specialist lane(s)")
+            self._count(self._dispatch(d, stage="REPORTS"))
+            rc = relay.reconcile(self.run, self.wb)
+            self.opts.log(f"  [RELAY] closed {rc.get('closed')}; still open {rc.get('still_open')}")
+            return int(d["requests"])
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"  [RELAY] report probes skipped ({e.__class__.__name__}: {str(e)[:120]})")
+            return 0
+
     def _stage_reports(self) -> str:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
+        self._reconcile_register()
         self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
             # READY reports go straight to render. Dispatching the producers
@@ -2300,9 +2362,13 @@ class Pipeline:
             self._rounds = r + 1
             b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
             self._count(self._dispatch(b, stage="REPORTS"))
+            # The probes the writers could not answer from the run, run now
+            # so the next round writes from evidence instead of "requested".
+            self._service_report_probes(r)
             v = brief.report_batch(self.wb, run=self.run,
                                    out_dir=self._briefs(f"reports_validator_r{r}"), validator=True)
             self._count(self._dispatch(v, stage="REPORTS"))
+            self._service_report_probes(r, after="validator")
             st = N.state(self.wb)
             if all(x.get("ready") for x in st["reports"].values()):
                 break

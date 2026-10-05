@@ -252,6 +252,15 @@ def requests(run: runstate.Run) -> dict:
                 row.update({k: prior[k] for k in ("note", "closed_at", "closed_by")
                             if k in prior})
             rows[rid] = row
+        elif kind == "reopen":
+            # A BLOCKED request whose blocker is gone (a fallback the owner
+            # sanctioned, a connector now bound) goes back on the queue under
+            # the SAME id, so its history shows both the block and the retry.
+            row = rows.get(rid)
+            if row is None:
+                continue
+            row["status"] = "OPEN"
+            row["history"].append({k: ev.get(k) for k in ("at", "event", "actor", "note")})
         elif kind in ("served", "empty", "blocked"):
             row = rows.get(rid)
             if row is None:
@@ -436,6 +445,12 @@ RUN_LEVEL_LANES = (DRAIN_AGENT, "enrichment-connector-specialist",
 #: what they cannot support from the run they emit as `search_requests`,
 #: each entry naming its `subcap` (from which `_one` derives the category).
 _SYNTHESIS_RE = re.compile(
+    # The report lanes, by the label the REPORTS stage gives them and by
+    # agent name. They hold no web tool either, and before this a probe a
+    # report section needed could only be written as "requested through the
+    # driver" — prose nobody harvested (Susser Bank, 2026-10-05: seven
+    # report rounds stalled on it).
+    r"^report-(assessment|client_research|research|validator)(-producer)?$|"
     r"^(overview|heatmap|insights|platform|techstack|context)-[a-z-]+-producer$|"
     r"^(finding-challenger|adversarial-verifier|evidence-integrity-checker|"
     r"exclusion-boundary-auditor|numeric-reconciliation-checker|"
@@ -542,6 +557,20 @@ def record(run: runstate.Run, req_ids, status: str, *, note: str = "",
     if len(done) == 1:
         out["id"] = done[0]
     return out
+
+
+def reopen(run: runstate.Run, req_ids=None, *, status: str = "BLOCKED",
+           note: str = "", actor: str = "") -> list[str]:
+    """Put requests back on the queue: the named ids, or every request in
+    `status` when none are named. Returns the ids reopened."""
+    rows = requests(run)
+    ids = [i for i in (req_ids or [r for r, v in rows.items()
+                                   if v["status"] == status.upper()])
+           if i in rows and rows[i]["status"] != "OPEN"]
+    for rid in ids:
+        _append(run, {"id": rid, "event": "reopen", "at": _utcnow(),
+                      "actor": actor, "note": note})
+    return ids
 
 
 def _matches(req: dict, row: dict) -> bool:
@@ -1066,10 +1095,16 @@ def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -
         "",
         "1. Run the query through a connector — `mcp__Exa__web_search_exa` or "
         "`mcp__Tavily__tavily_search` (Clay only where your manifest allows "
-        "and the request is about people or a company record). If the call is "
-        "refused or the tool is not present, do NOT retry another way and do "
-        "NOT run it through WebSearch instead: record it BLOCKED (step 4) with "
-        "the refusal text verbatim, and move on.",
+        "and the request is about people or a company record). If the "
+        "connector is refused, absent from your tool list, or out of credit, "
+        "run the SAME query through WebSearch (WebFetch for a named page) — "
+        "the owner's sanctioned failover (2026-10-04) — and log it honestly "
+        "with `--tool web_search` / `--tool web_fetch`, never as exa or "
+        "tavily, so the ENRICHMENT gate still measures that no connector ran. "
+        "Record BLOCKED (step 4) only when WebSearch is refused too, with the "
+        "refusal text verbatim. Susser Bank, 2026-10-05: 27 of 28 report "
+        "probes came back BLOCKED on an absent connector while the failover "
+        "sat unused, and the report stage could not close without them.",
         "2. Log the search the moment it returns, with the tool that ran it: "
         f"`python3 -m engine.cli search {rr} --subcap <cell> --facet <facet> "
         "--tool exa --query '<query>' --hits N --kept K --outcome '<one line>'` "
