@@ -1563,7 +1563,8 @@ class Pipeline:
         est, basis = self._workflow_estimate(cells, rcells, n, prev)
         doc["estimate"] = {"open_cells": cells, "repair_cells": rcells, "batches": nb,
                            "categories": n, "usd": est, "basis": basis,
-                           "spent_at_handoff": round(self._spent_usd, 2)}
+                           "spent_at_handoff": round(self._spent_usd, 2),
+                           "research_at_handoff": self._stage_usd("RESEARCH")}
         same = (prev.get("open_cells") == cells
                 and prev.get("repair_cells", 0) == rcells and (cells or rcells))
         then = prev.get("spent_at_handoff")
@@ -1635,6 +1636,15 @@ class Pipeline:
         self._save_state()
         return out
 
+    def _stage_usd(self, stage: str) -> float:
+        """What the cost ledger has recorded against one stage."""
+        try:
+            from . import cost
+            return round(sum(float(r["usd"]) for r in cost.ledger(self.run)
+                             if r.get("stage") == stage and r.get("usd") is not None), 2)
+        except Exception:                                  # noqa: BLE001
+            return 0.0
+
     def _workflow_estimate(self, cells: int, rcells: int, n: int,
                            prev: dict) -> tuple[float, str]:
         """Pilot constants, corrected by the run's own last round: the ratio
@@ -1645,9 +1655,15 @@ class Pipeline:
         basis = (f"pilot ${WORKFLOW_USD_PER_CELL}/cell + "
                  f"${CHALLENGE_USD_PER_CATEGORY}/category challenge")
         cal = self.state.get("workflow_calibration") or {}
+        research_now = self._stage_usd("RESEARCH")
         try:
-            spent_then = float(prev.get("spent_at_handoff"))
-            actual = round(self._spent_usd - spent_then, 2)
+            # RESEARCH spend only: a SCORING round between two handoffs is not
+            # what the research estimate predicted (Susser Bank, 2026-10-05:
+            # $11.82 of scoring read as research and inflated the ratio).
+            then = prev.get("research_at_handoff")
+            spent_then = float(then if then is not None else prev.get("spent_at_handoff"))
+            actual = round((research_now if then is not None else self._spent_usd)
+                           - spent_then, 2)
             if actual > 0 and float(prev.get("usd") or 0) > 0:
                 cal = {"ratio": round(max(1.0, actual / float(prev["usd"])), 3),
                        "per_category": round(actual / max(1, int(prev.get("categories")

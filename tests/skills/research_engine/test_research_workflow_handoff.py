@@ -233,9 +233,16 @@ def test_the_estimate_is_calibrated_by_the_last_round(tmp_path):
     p, disp, out = _drive(tmp_path, "workflow")
     q = P.Pipeline(p.run, p.opts)
     pilot = q._research_handoff()["estimate"]
+    from engine import cost
+    cost.record(p.run, stage="RESEARCH", elapsed_s=60, usd=round(pilot["usd"] * 3, 2),
+                note="workflow spend")              # the round cost 3x its estimate
+    # SCORING spend between two handoffs is not research and must not
+    # inflate the ratio.
+    cost.record(p.run, stage="SCORING", elapsed_s=60, usd=50.0, note="scoring lanes")
     q = P.Pipeline(p.run, p.opts)
-    q._spent_usd += pilot["usd"] * 3               # the round cost 3x its estimate
+    q._spent_usd += pilot["usd"] * 3 + 50.0
     est = q._research_handoff()["estimate"]
+    assert est["usd"] <= round(pilot["usd"] * 3, 2) + 0.05, (pilot, est)
     assert est["usd"] >= round(pilot["usd"] * 3, 2) - 0.01, (pilot, est)
     assert "calibrated" in est["basis"]
 
