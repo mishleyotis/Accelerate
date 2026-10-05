@@ -130,13 +130,23 @@ def test_decide_is_the_one_entry_bash_guard_calls():
 
 DUMPS = ("env | grep -i DMA_", "env", "printenv", "printenv | sort",
          "export -p", "declare -px", "set | head", "cat /proc/self/environ",
-         "ls; env | grep x", "x=$(env)", "cd /a && env | grep DMA_ | sed s/x/y/")
+         "ls; env | grep x", "x=$(env)", "cd /a && env | grep DMA_ | sed s/x/y/",
+         # the learning-grader's bypasses of the first version
+         "env 2>&1 | grep DMA", "export | grep DMA", "export", "env > /tmp/e",
+         "env -0", "/usr/bin/env | head", "command env", "printenv -0",
+         "set 2>&1|head", "env | cut -d= -f1,2", "env | cut -d= -f1-",
+         # proc-environ spellings the first version missed
+         "cat /proc/$PPID/environ", "cat /proc/${PPID}/environ",
+         "tr '\\0' '\\n' < /proc/thread-self/environ")
 NOT_DUMPS = ("env | cut -d= -f1", "env | sed 's/=.*//'",
              "env DMA_RUN_ROOT=/x python3 -m engine.pipeline env",
              "printenv HOME", "python3 -m engine.pipeline env 2>&1 | tail -25",
              "set -e; ls", "set -euo pipefail", "echo $HOME",
              "cd /x && DMA_RUN_ROOT=/r python3 -m engine.cli orient",
-             "grep -n env file.py", "export FOO=1")
+             "grep -n env file.py", "export FOO=1",
+             # the first version's false positive: Python in a heredoc
+             "python3 - <<'EOF'\nprint(set(a) | set(b))\nEOF",
+             "env -u FOO python3 x.py", "printenv PATH", "set -x")
 
 
 def test_a_whole_environment_dump_is_denied():

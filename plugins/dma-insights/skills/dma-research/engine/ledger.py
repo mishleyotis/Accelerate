@@ -1133,6 +1133,16 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     assert_actor_scope(actor, "synthesis", [subcap])
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
+    # A NEW SYNTHESIS INVALIDATES ANY PRIOR CHALLENGE, and a synthesis never
+    # certifies its own challenge (the challenge is independent, by a
+    # different actor, afterward). The old verdict judged prose that no longer
+    # exists, and `challenge_batch` skips a cell that already carries a
+    # verdict — so without clearing it a re-synthesised cell (a
+    # challenge_failed repair) would never be re-challenged and its stale FAIL
+    # would persist, unscoreable (MEM-0441 / MEM-0577). Always cleared,
+    # ignoring any verdict the record carries; the Challenge_Log row stays as
+    # history.
+    payload["Challenge_Verdict"] = ""
     wb.set_scoring(subcap, payload)
     if actor:
         record_provenance(wb, subcap, "synthesis", actor, session=session)

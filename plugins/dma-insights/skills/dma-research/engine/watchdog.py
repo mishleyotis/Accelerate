@@ -179,22 +179,29 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             f"({', '.join(open_work[:6])}). A re-run spends the next budget "
             f"on the same work: a PERSON raises --max-usd or narrows the "
             f"scope. No revive can close this one")
-    elif open_work and driver.get("last_outcome") == "STALLED":
+    elif (open_work or failed) and driver.get("last_outcome") == "STALLED":
         # The driver withheld every failing category (UNSERVABLE or STALLED
         # across worked handoffs) rather than hand out workflows that could
         # only report nothing. A revive would re-run the same refusal.
+        # Keyed on `failed` too, not only `open_work`: when the gate fails on
+        # cells that already hold a claim, `L.worklist` (claim-less cells
+        # only) is empty, and keying on it alone fell through to GATE_FAILED,
+        # whose resume plan names a single lane — the exact dispatch this
+        # state exists to prevent (arbor-bank-2026-10-05).
+        waiting = sorted(set(open_work) | set(failed))
         state, detail = "RESEARCH_WITHHELD", (
-            f"the driver withheld research on {len(open_work)} category(ies) "
-            f"({', '.join(open_work[:6])}): {str(driver.get('last_reason') or '')[:300]}")
-    elif open_work and driver.get("last_outcome") == "AWAITING_WORKFLOW":
+            f"the driver withheld research on {len(waiting)} category(ies) "
+            f"({', '.join(waiting[:6])}): {str(driver.get('last_reason') or '')[:300]}")
+    elif (open_work or failed) and driver.get("last_outcome") == "AWAITING_WORKFLOW":
         # Research is the conducting session's, as persisted workflows. The
         # next step is that handoff — never a single lane, which holds no
         # connector (arbor-bank-2026-10-05: the stop hook told a session to
         # dispatch research-p1c2-producer while P1C2's workflow was running).
+        waiting = sorted(set(open_work) | set(failed))
         state, detail = "AWAITING_WORKFLOW", (
             f"research is handed to the session as workflows "
             f"({run.qa_dir / 'research_workflow.json'}); "
-            f"{len(open_work)} category(ies) open")
+            f"{len(waiting)} category(ies) open or failing")
     elif budget["checkpoint_required"]:
         walls = budget.get("scopes_at_ceiling") or [budget.get("search_scope")]
         state, detail = "AT_BUDGET_CEILING", (

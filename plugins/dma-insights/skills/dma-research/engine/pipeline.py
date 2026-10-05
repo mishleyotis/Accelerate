@@ -1479,6 +1479,20 @@ class Pipeline:
                       + (f" ({r.get('bytes', 0) // 1024} KB)" if r.get("bytes") else "")
                       + (f" — {r['reason']}" if r.get("reason") else ""))
 
+    def _floors_blocking(self, cat: str):
+        """The floors gate's CURRENT blocking terms for one category,
+        evaluated without recording (`persist=False`). None when the
+        category is not in the catalogue. The live verdict, not the recorded
+        one: a stale FAIL that was repaired in-session now reads as the PASS
+        it is, and a never-recorded gate reads [] rather than 'NOT_RUN'."""
+        from . import floors_gate
+        try:
+            v = floors_gate.run(self.wb, cat, require_synthesis=True,
+                                persist=False)
+        except ValueError:
+            return None
+        return list(v.get("blocking") or [])
+
     def _withhold_unworkable(self, need: list[str], open_caps: dict,
                              prev_doc: dict) -> tuple[list, dict, dict, dict]:
         """Split the categories the gates want re-dispatched into those worth
@@ -1502,8 +1516,7 @@ class Pipeline:
             nobody worked (no workflow agent priced since — the session lost
             its tools) neither advances nor resets the count.
         """
-        from . import brief, floors_gate
-        reasons = brief.categories_needing_dispatch(self.wb)["reasons"]
+        from . import floors_gate
         now = self._research_progress()
         worked = self._workflow_agents_captured > 0
         prev_prog = prev_doc.get("progress") or {}
@@ -1518,17 +1531,28 @@ class Pipeline:
             if worked and before is not None:
                 n = 0 if any(c > p for c, p in zip(sig, before)) else n + 1
             stalls[cat] = n
-            why = [str(r) for r in reasons.get(cat, [])]
-            floors_only = [r for r in why
-                           if not r.startswith(("dispatch verifier:", "enrichment:"))]
-            challenge_owed = any(r in floors_gate.CHALLENGE_TERMS for r in why)
-            if work == 0 and floors_only and not challenge_owed \
-                    and len(floors_only) == len(why):
+            # THE LIVE GATE DECIDES, NOT THE RECORDED REASON. Reading the
+            # recorded `reasons` withheld a never-gated category (its row
+            # reads "floors gate NOT_RUN") and a category whose recorded FAIL
+            # was already repaired in-session (the live gate now PASSes) —
+            # both regressions measured by the learning loop on this run.
+            # A category is only UNSERVABLE when, evaluated NOW, the floors
+            # gate still fails, no researcher cell carries work, and nothing
+            # is owed to the challenge stage. A PASS or a NOT_RUN is handed
+            # out: the workflow's own challenge-and-gate records the verdict.
+            live_blocking = self._floors_blocking(cat)
+            if live_blocking is None:            # never gatable (unknown category)
+                keep.append(cat); continue
+            floors_blocking = [t for t in live_blocking
+                               if t not in floors_gate.CHALLENGE_TERMS]
+            challenge_owed = any(t in floors_gate.CHALLENGE_TERMS
+                                 for t in live_blocking)
+            if work == 0 and floors_blocking and not challenge_owed:
                 withheld[cat] = ("UNSERVABLE: the floors gate fails on "
-                                 f"{', '.join(floors_only)} but no cell carries work a "
+                                 f"{', '.join(floors_blocking)} but no cell carries work a "
                                  "researcher can be shown — a toolchain gap, not research; "
                                  "not dispatching a workflow that can only report nothing")
-            elif self.opts.stall_rounds and n >= self.opts.stall_rounds:
+            elif self.opts.stall_rounds and n >= self.opts.stall_rounds and floors_blocking:
                 withheld[cat] = (f"STALLED: no outcome moved across {n} worked "
                                  f"handoff(s) (--stall-rounds {self.opts.stall_rounds}); "
                                  f"{work} cell(s) still carry work — a person decides "
@@ -1565,6 +1589,8 @@ class Pipeline:
         try:
             prev_doc = json.loads(path.read_text())
         except (OSError, ValueError):
+            prev_doc = {}
+        if not isinstance(prev_doc, dict):      # a hand-edited / truncated file
             prev_doc = {}
         need, withheld, progress, stalls = self._withhold_unworkable(
             need, open_caps, prev_doc)

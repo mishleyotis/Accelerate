@@ -27,11 +27,55 @@ from pathlib import Path
 import pytest
 
 from engine import floors_gate, ledger as L, orient, pipeline as P, runstate
-from engine import pipeline_stub as S, preflight, watchdog
+from engine import pipeline_stub as S, preflight, watchdog, quality as Q
 from fixtures import (challenge, good_synthesis, new_run, preflight_doc,
-                      two_category_selection)
+                      two_category_selection, bank_evidence, synthesise)
 
 FACETS_BUT_PRIMARY = ("works", "fails", "value", "contradicts", "corroborates")
+
+
+# ── MEM-0441 / MEM-0577: a FAILED challenge blocks, is served, and clears ──
+
+def test_a_single_source_inference_is_refused_at_write():
+    """The checker mismatch that produced 80 of 101 failed dimensions: the
+    challenge fails a single-source INFERENCE, the write path did not."""
+    assert Q.claim_label_supported({"Claim_Label": "INFERENCE",
+                                    "Evidence_IDs": "E-1"}), \
+        "single-source INFERENCE must be refused at write to match the challenge"
+    assert Q.claim_label_supported({"Claim_Label": "INFERENCE",
+                                    "Evidence_IDs": "E-1, E-2"}) is None
+    assert Q.claim_label_supported({"Claim_Label": "FACT",
+                                    "Evidence_IDs": "E-1"}) is None  # one source is a FACT
+
+
+def test_a_failed_challenge_blocks_and_is_served_as_repair(tmp_path):
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    cat = cell.split(".")[0]
+    eids = bank_evidence(wb, cell, n=5)
+    synthesise(wb, cell, good_synthesis(cell, eids), verdict="FAIL")
+    v = floors_gate.run(wb, cat, require_synthesis=True, persist=False)
+    assert "challenge_failed" in v["blocking"] and cell in v["challenge_failed"]
+    assert "challenge_failed" in floors_gate.BLOCKING_TERMS
+    assert "challenge_failed" not in floors_gate.CHALLENGE_TERMS  # research repairs it
+    rw = floors_gate.repair_worklist(wb, cat)
+    assert cell in rw and "challenge_failed" in rw[cell]["terms"]
+
+
+def test_re_synthesis_clears_the_stale_challenge_verdict(tmp_path):
+    """challenge_batch skips a cell that already carries a verdict; without
+    clearing it a re-synthesised cell could never be re-challenged."""
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    eids = bank_evidence(wb, cell, n=5)
+    synthesise(wb, cell, good_synthesis(cell, eids), verdict="FAIL")
+    assert str(wb.scoring_row(cell).get("Challenge_Verdict")).upper() == "FAIL"
+    L.append_synthesis(wb, cell, good_synthesis(cell, eids),
+                       actor="surface-producer")           # re-synthesise
+    assert not str(wb.scoring_row(cell).get("Challenge_Verdict") or "").strip(), \
+        "re-synthesis must clear the stale challenge verdict"
 
 
 def _closed_with_primary_unfired(wb, cell):
@@ -88,6 +132,41 @@ def test_every_cell_level_blocking_term_has_a_repair_action():
     researcher is ever shown — the deadlock, re-opened by one edit."""
     owed = set(floors_gate.BLOCKING_TERMS) - set(floors_gate.CHALLENGE_TERMS)
     assert owed <= set(floors_gate.REPAIR_ACTIONS), owed - set(floors_gate.REPAIR_ACTIONS)
+
+
+#: Each cell-level blocking term in the SHAPE floors_gate.run emits it
+#: (floors_gate.py appends; quality.evidence_smear; brief.unattached). A key
+#: in REPAIR_ACTIONS is not enough: the learning-grader showed `dq_gaps`
+#: ("CELL:FIELD") and `evidence_smear` ({capability, subcaps}) had keys and
+#: still served no cell.
+EMITTED = {
+    "unresolved_citations": {"subcap": "P1C1.1.2", "ids": ["E-9"]},
+    "boilerplate": {"subcap": "P1C1.1.2", "field": "What_We_Found", "why": "x"},
+    "claim_unsupported": {"subcap": "P1C1.1.2", "why": "x"},
+    "absence_undeclared": "P1C1.1.2",
+    "evidence_smear": {"capability": "P1C1.1", "subcaps": ["P1C1.1.2", "P1C1.1.3"],
+                       "shared_evidence": ["E-1"], "detail": "x"},
+    "single_source_fact": {"subcap": "P1C1.1.2", "distinct_sources": ["a.example"]},
+    "synthesis_missing": "P1C1.1.2",
+    "dq_gaps": "P1C1.1.2:DQ_Works",
+    "absence_unsearched": "P1C1.1.2",
+    "volleys_incomplete": {"subcap": "P1C1.1.2", "missing": ["fails"], "fired": {}},
+    "absence_undeclared_empty": "P1C1.1.2",
+    "absence_over_evidence": {"subcap": "P1C1.1.2", "e_ids": ["E-1"],
+                              "declared_absent": True, "synthesised": True},
+    "primary_unfired": "P1C1.1.2",
+    "absence_single_tool": {"subcap": "P1C1.1.2", "tools": ["web_search"]},
+    "challenge_failed": "P1C1.1.2",
+}
+
+
+def test_every_cell_level_blocking_term_serves_its_cell():
+    owed = set(floors_gate.BLOCKING_TERMS) - set(floors_gate.CHALLENGE_TERMS)
+    assert owed <= set(EMITTED), f"add the emitted shape for {owed - set(EMITTED)}"
+    for term in sorted(owed):
+        rc = floors_gate.repair_cells({"blocking": [term], term: [EMITTED[term]]})
+        assert "P1C1.1.2" in rc, f"{term} names a cell the worklist does not serve"
+        assert all(c.count(".") == 2 for c in rc), f"{term} served a bogus id {list(rc)}"
 
 
 def test_repair_cells_reads_both_finding_shapes():
@@ -156,16 +235,17 @@ def _pipe(tmp_path, *, stall_rounds=2):
     return P.Pipeline(run, opts)
 
 
-def _fake_reasons(monkeypatch, reasons):
-    from engine import brief
-    monkeypatch.setattr(brief, "categories_needing_dispatch",
-                        lambda wb: {"dispatch": sorted(reasons), "passed": [],
-                                    "reasons": reasons})
+def _fake_blocking(monkeypatch, blocking: dict):
+    """Stub the LIVE floors-gate blocking terms per category — the seam
+    _withhold_unworkable now reads instead of the recorded reasons, so a
+    stale FAIL or a never-recorded gate cannot mislead it (D3/D4)."""
+    monkeypatch.setattr(P.Pipeline, "_floors_blocking",
+                        lambda self, cat: list(blocking.get(cat, [])))
 
 
 def test_a_failing_category_with_no_work_is_withheld(tmp_path, monkeypatch):
     p = _pipe(tmp_path)
-    _fake_reasons(monkeypatch, {"P1C1": ["boilerplate"]})
+    _fake_blocking(monkeypatch, {"P1C1": ["boilerplate"]})
     monkeypatch.setattr(P.Pipeline, "_research_progress", lambda self: {"P1C1": (1, 0, 0, 0, 0)})
     keep, withheld, _, _ = p._withhold_unworkable(["P1C1"], {}, {})
     assert keep == [] and withheld["P1C1"].startswith("UNSERVABLE")
@@ -173,15 +253,36 @@ def test_a_failing_category_with_no_work_is_withheld(tmp_path, monkeypatch):
 
 def test_challenge_only_work_is_still_handed(tmp_path, monkeypatch):
     p = _pipe(tmp_path)
-    _fake_reasons(monkeypatch, {"P1C1": ["challenge_missing"]})
+    _fake_blocking(monkeypatch, {"P1C1": ["challenge_missing"]})
     monkeypatch.setattr(P.Pipeline, "_research_progress", lambda self: {})
+    keep, withheld, _, _ = p._withhold_unworkable(["P1C1"], {}, {})
+    assert keep == ["P1C1"] and not withheld
+
+
+def test_a_never_gated_category_is_handed_out_not_withheld(tmp_path, monkeypatch):
+    """D3: a claimed-but-never-gated category reads [] live (it would pass),
+    so it is handed out — the workflow's own gate records the first verdict.
+    Withholding it was a regression the recorded 'NOT_RUN' reason caused."""
+    p = _pipe(tmp_path)
+    _fake_blocking(monkeypatch, {"P1C1": []})
+    monkeypatch.setattr(P.Pipeline, "_research_progress", lambda self: {})
+    keep, withheld, _, _ = p._withhold_unworkable(["P1C1"], {}, {})
+    assert keep == ["P1C1"] and not withheld
+
+
+def test_a_stale_recorded_fail_that_now_passes_is_handed_out(tmp_path, monkeypatch):
+    """D4: the recorded gate says FAIL, the live gate passes ([]). Judge by
+    the live gate, so a category repaired in-session is not withheld."""
+    p = _pipe(tmp_path)
+    _fake_blocking(monkeypatch, {"P1C1": []})       # live PASS despite a recorded FAIL
+    monkeypatch.setattr(P.Pipeline, "_research_progress", lambda self: {"P1C1": (5, 5, 0, 5, 0)})
     keep, withheld, _, _ = p._withhold_unworkable(["P1C1"], {}, {})
     assert keep == ["P1C1"] and not withheld
 
 
 def test_the_stall_count_survives_the_process(tmp_path, monkeypatch):
     p = _pipe(tmp_path, stall_rounds=2)
-    _fake_reasons(monkeypatch, {"P1C1": ["primary_unfired"]})
+    _fake_blocking(monkeypatch, {"P1C1": ["primary_unfired"]})
     monkeypatch.setattr(P.Pipeline, "_research_progress", lambda self: {"P1C1": (3, 1, 0, 2, 0)})
     work = {"P1C1": {"P1C1.1": 4}}
     sig = [3, 1, 0, 2, 0, -4]
@@ -290,3 +391,23 @@ def test_withheld_research_ends_on_a_person(tmp_path):
     assert "RESEARCH_WITHHELD" not in watchdog.AGENT_ADVANCEABLE
     plan = watchdog.resume_plan(row)
     assert plan["actionable"] is False and plan.get("needs") == "person"
+
+
+def test_awaiting_workflow_fires_when_every_failing_cell_is_claimed(tmp_path):
+    """D1: when the gate fails on cells that already hold a claim, L.worklist
+    (claim-less cells only) is empty. Keying the AWAITING_WORKFLOW state on it
+    alone fell through to GATE_FAILED, whose resume names a single lane — the
+    dispatch the state exists to prevent."""
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cat = wb.selected_subcaps()[0].split(".")[0]
+    for c in [s for s in wb.selected_subcaps() if s.startswith(cat)]:
+        _closed_with_primary_unfired(wb, c)          # claimed, gate will FAIL
+    floors_gate.run(wb, cat, require_synthesis=True, qa_dir=run.qa_dir)  # record FAIL
+    (run.qa_dir / "pipeline_state.json").write_text(
+        json.dumps({"last_outcome": "AWAITING_WORKFLOW"}))
+    row = watchdog.inspect(run)
+    # open_work (claim-less cells) is empty here; the state fires on `failed`.
+    assert row["state"] == "AWAITING_WORKFLOW", row
+    plan = watchdog.resume_plan(row)
+    assert plan.get("workflow") and not plan.get("agent")

@@ -58,9 +58,9 @@ from .workbook import (RunWorkbook, FLOOR_ITEMS, FLOOR_CATEGORY_ITEMS,
 #: the choice is reviewable: `advisory` in each verdict says which of these
 #: actually fired, so anyone arguing one should be promoted to blocking can
 #: see its real hit rate first instead of guessing.
-#: The per-cell terms that block. Every one except the two challenge terms
-#: (served by the challenge stage) must have a REPAIR_ACTIONS entry, so a
-#: blocking term can never name cells no researcher is shown — a test holds
+#: The per-cell terms that block. Every one except the two challenge-absence
+#: terms (served by the challenge stage) must have a REPAIR_ACTIONS entry, so
+#: a blocking term can never name cells no researcher is shown — a test holds
 #: the two lists together.
 BLOCKING_TERMS = (
     "unresolved_citations", "boilerplate", "claim_unsupported",
@@ -72,7 +72,14 @@ BLOCKING_TERMS = (
     # 2026-09-03 (owner issue 1): the primary question is owed on every
     # searched cell, and an empty cell must show an enrichment connector.
     "primary_unfired", "absence_single_tool",
+    # MEM-0441 / MEM-0577: a FAILED challenge verdict blocks and is served
+    # back as re-synthesis repair (not a challenge-stage term — the cell
+    # needs a new synthesis, then a fresh challenge).
+    "challenge_failed",
 )
+#: The challenge-ABSENCE terms: a verdict missing or not independent, served
+#: by the challenge stage, not by a research card. `challenge_failed` is NOT
+#: here — a failed verdict is a synthesis defect the research card repairs.
 CHALLENGE_TERMS = ("challenge_missing", "challenge_not_independent")
 
 ADVISORY_TERMS = (
@@ -279,7 +286,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "claim_unsupported": [], "contradicts_unprobed": [],
         "single_source_fact": [],
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
-        "challenge_not_independent": [],
+        "challenge_not_independent": [], "challenge_failed": [],
         "timeline_missing": [], "followups_outstanding": [],
         "absence_unsearched": [],
         # 2026-09-03 (owner: "marked as no evidence without any enrichment
@@ -528,6 +535,17 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
                             {"subcap": cell, "actor": challenger, "why": why})
                 if str(logged.get("Verdict") or "").upper() != verdict:
                     findings["challenge_missing"].append(cell)
+                elif verdict == "FAIL":
+                    # MEM-0441 / MEM-0577: the challenge FAILED and nothing
+                    # read the result. The verdict was present, matched the
+                    # log and was independent, so every check above passed and
+                    # the cell sailed through to SCORING, where
+                    # `engine.assessment score` then refuses it — a defect
+                    # found only after a whole run's budget was spent. A FAIL
+                    # blocks here, and the cell is served back as repair work
+                    # (re-synthesise from the evidence it holds, or declare
+                    # the absence) rather than re-researched from scratch.
+                    findings["challenge_failed"].append(cell)
 
     findings["evidence_smear"] = Q.evidence_smear(rows)
 
@@ -743,6 +761,12 @@ REPAIR_ACTIONS = {
     "absence_single_tool": "add a volley through an enrichment connector",
     "absence_over_evidence": "withdraw the absence or detach the evidence it contradicts",
     "synthesis_missing": "synthesise the cell from the evidence it already holds",
+    "challenge_failed": ("re-synthesise to answer the challenge: relabel a "
+                         "single-source claim to what that source states "
+                         "(FACT), or add the second source an INFERENCE needs, "
+                         "or declare the absence — then it is re-challenged. "
+                         "Use the evidence already registered; search only if a "
+                         "second source is genuinely required"),
     "unresolved_citations": "repoint the cited ids to registered evidence rows",
     "claim_unsupported": "re-synthesise so the claim follows from its evidence",
     "boilerplate": "rewrite the named field with a checkable figure, date, name or E-id",
@@ -751,12 +775,21 @@ REPAIR_ACTIONS = {
 }
 
 
-def _cell_of(item) -> str:
+def _cells_of(item) -> list[str]:
+    """Every cell one finding item names, in each shape the gate emits:
+    a bare id; "CELL:FIELD" (`dq_gaps`); {subcap|cell: ...}; and
+    {capability, subcaps: [...]} (`evidence_smear`). The learning-grader
+    measured the first version reading only the first and third, so two
+    blocking terms still named cells no researcher was shown."""
     if isinstance(item, str):
-        return item.strip()
+        c = item.strip().split(":", 1)[0].strip()
+        return [c] if c else []
     if isinstance(item, dict):
-        return str(item.get("subcap") or item.get("cell") or "").strip()
-    return ""
+        one = str(item.get("subcap") or item.get("cell") or "").strip()
+        many = [str(c).strip() for c in (item.get("subcaps") or item.get("cells") or [])
+                if str(c).strip()]
+        return ([one] if one else []) + [c for c in many if c != one]
+    return []
 
 
 def repair_cells(out: dict) -> dict[str, dict]:
@@ -778,21 +811,19 @@ def repair_cells(out: dict) -> dict[str, dict]:
     cells: dict[str, dict] = {}
     for term in sorted(blocking & set(REPAIR_ACTIONS)):
         for item in out.get(term) or []:
-            c = _cell_of(item)
-            if not c:
-                continue
-            slot = cells.setdefault(c, {"terms": [], "missing": [], "do": []})
-            if term not in slot["terms"]:
-                slot["terms"].append(term)
-                slot["do"].append(f"{term}: {REPAIR_ACTIONS[term]}")
             want = []
             if term == "primary_unfired":
                 want = [C.PRIMARY_FACET]
             elif isinstance(item, dict):
                 want = list(item.get("missing") or [])
-            for f in want:
-                if f not in slot["missing"]:
-                    slot["missing"].append(f)
+            for c in _cells_of(item):
+                slot = cells.setdefault(c, {"terms": [], "missing": [], "do": []})
+                if term not in slot["terms"]:
+                    slot["terms"].append(term)
+                    slot["do"].append(f"{term}: {REPAIR_ACTIONS[term]}")
+                for f in want:
+                    if f not in slot["missing"]:
+                        slot["missing"].append(f)
     return cells
 
 
