@@ -325,11 +325,14 @@ def claim_label_supported(row) -> str | None:
     # of 101 failed dimensions on arbor-bank-2026-10-05), unscoreable and
     # invisible to the floors worklist. Read and write enforce one rule now:
     # an INFERENCE combines two or more independent sources; a claim resting
-    # on one source is what that source states (FACT), not an inference.
+    # on one source is not an inference — and not a FACT either (the floors
+    # gate's single_source_fact and the challenge's claim_label_fit both want
+    # two source identities), so it is a CEILING_ESTIMATE with its band.
     if label == "INFERENCE" and len(ids) < 2:
         return ("INFERENCE resting on a single source — an inference combines "
                 "two or more independent sources; cite the second, or relabel "
-                "to what the one source states (FACT)")
+                "CEILING_ESTIMATE with its Ceiling_Band and Uncertainty (one "
+                "source carries no FACT either)")
     if label and label not in ("FACT", "INFERENCE", "HYPOTHESIS",
                               "CEILING_ESTIMATE"):
         return f"claim label {label!r} is not in the vocabulary"

@@ -752,8 +752,14 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
 REPAIR_ACTIONS = {
     "primary_unfired": "fire and log the cell's primary-facet query",
     "volleys_incomplete": "fire and log the missing facets listed",
-    "single_source_fact": ("register a second, independent source, or relabel "
-                           "the claim INFERENCE and re-synthesise"),
+    # One source cannot carry FACT (two source identities, here and in the
+    # challenge) nor INFERENCE (two sources, quality.claim_label_supported),
+    # so the no-research exit is CEILING_ESTIMATE with its Uncertainty band.
+    # Pointing FACT and INFERENCE at each other was a loop (arbor-bank).
+    "single_source_fact": ("relabel the claim CEILING_ESTIMATE with its "
+                           "Ceiling_Band and Uncertainty and re-synthesise from "
+                           "the evidence already registered, or register a "
+                           "second, independent source and keep FACT"),
     "absence_undeclared_empty": ("search it (primary + one connector volley), then "
                                  "register evidence or declare the absence"),
     "absence_undeclared": "declare the absence with its ladder, or register evidence",
@@ -762,9 +768,11 @@ REPAIR_ACTIONS = {
     "absence_over_evidence": "withdraw the absence or detach the evidence it contradicts",
     "synthesis_missing": "synthesise the cell from the evidence it already holds",
     "challenge_failed": ("re-synthesise to answer the challenge: relabel a "
-                         "single-source claim to what that source states "
-                         "(FACT), or add the second source an INFERENCE needs, "
-                         "or declare the absence — then it is re-challenged. "
+                         "single-source claim CEILING_ESTIMATE with its "
+                         "Ceiling_Band and Uncertainty (one source carries "
+                         "neither FACT nor INFERENCE), or add the second "
+                         "source FACT or INFERENCE needs, or declare the "
+                         "absence — then it is re-challenged. "
                          "Use the evidence already registered; search only if a "
                          "second source is genuinely required"),
     "unresolved_citations": "repoint the cited ids to registered evidence rows",

@@ -48,6 +48,20 @@ def test_a_single_source_inference_is_refused_at_write():
                                     "Evidence_IDs": "E-1"}) is None  # one source is a FACT
 
 
+def test_a_single_source_claim_has_an_exit_that_needs_no_new_source():
+    """arbor-bank: single_source_fact said "relabel INFERENCE", the write path
+    said "relabel FACT" — a loop with no exit short of new research. One
+    source passes as CEILING_ESTIMATE, and every repair text says so."""
+    assert Q.claim_label_supported({"Claim_Label": "CEILING_ESTIMATE",
+                                    "Evidence_IDs": "E-1"}) is None
+    assert "CEILING_ESTIMATE" in Q.claim_label_supported(
+        {"Claim_Label": "INFERENCE", "Evidence_IDs": "E-1"})
+    for term in ("single_source_fact", "challenge_failed"):
+        assert "CEILING_ESTIMATE" in floors_gate.REPAIR_ACTIONS[term], term
+    assert "relabel the claim INFERENCE" not in \
+        floors_gate.REPAIR_ACTIONS["single_source_fact"]
+
+
 def test_a_failed_challenge_blocks_and_is_served_as_repair(tmp_path):
     run = new_run(tmp_path, selected=two_category_selection(3))
     wb = run.open()
