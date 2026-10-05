@@ -67,7 +67,40 @@ const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-toke
   - CONNECTOR CHECK FIRST: you should hold Exa, Tavily and Clay (mcp__Exa__*, mcp__Tavily__*, mcp__Clay__*). If none of them is callable, stop after your first capability and return gate "NO_CONNECTORS" naming the tools you do have: no cell can be declared absent without one, so continuing only spends budget.
   - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
 
+// A placeholder batch ("P3C3 (all open capabilities)" / "(cells the gate
+// names)") means the driver routed no open cell. The open-cells prompt then
+// tells the agent to skip every closed cell — and the gate's blockers are ON
+// closed cells (measured 2026-10-05, Susser Bank round 2: 13 of 14 categories
+// spent a round each writing nothing; the one that passed did so only because
+// its challenger happened to put cell ids in blocking_terms). So a placeholder
+// batch works the gate's own per-cell findings from floors_<cat>.json instead.
+const isRepair = (cat, caps) => caps.length === 1 && String(caps[0]).startsWith(`${cat} (`)
+
+function repairPrompt(cat, round) {
+  const lc = cat.toLowerCase()
+  return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}, in REPAIR MODE. Work from ${ENG}; set ACT=research-${lc}-producer.
+Category ${cat} has NO open cells. Its floors gate FAILS on cells that are already synthesised or declared absent. Those cells are your batch: repair them in place. Do NOT skip a cell because it is closed.
+FIRST, once: python3 -c "import json;d=json.load(open('${A.root}/07_qa/floors_${cat}.json'));[print(k, json.dumps(d[k])) for k in d['blocking']]"
+That prints every BLOCKING term with the exact cells. Advisory terms (coverage, ai_overlay, timeline) are not yours.
+Per blocking term:
+  - primary_unfired: fire a primary web_search on the cell and log it (--facet primary).
+  - volleys_incomplete: fire and log each facet listed under "missing" for that cell. Register evidence for anything a search returns.
+  - single_source_fact: look for a second independent source (not the same domain). If you find one, register it. If you don't, re-synthesise the cell with Claim_Label INFERENCE. Never keep FACT on one domain.
+  - absence_undeclared_empty: the cell has no evidence and no absence. Fire primary plus one connector volley, then declare the absence with the hunted/ladder you actually ran.
+  - evidence_smear: give each named sibling subcap its own evidence, or re-synthesise so each states only what the shared item supports for that cell.
+  - boilerplate / synthesis_missing / absence_unsearched: rewrite the named field with a checkable figure, date, proper noun or E-id, or run the missing searches first.
+Re-synthesise with synthesise --json (the same command replaces the cell's synthesis). Every change goes through ONE engine.cli batch per capability, as below.
+
+${SHEET}
+
+${SEARCH_RULES}
+
+Never invent a source, a quote, a number or a person. Pass --actor $ACT on every write. Do not run the gate, because the challenge step runs it.
+Return: category ${cat}, cells_synthesised (cells re-synthesised), declared_absent, still_open 0, searches_logged, evidence_registered, gate "BATCH_DONE", blocking_terms (any you could not repair, each with its cell), and one-line notes.`
+}
+
 function batchPrompt(cat, caps, round, prev) {
+  if (isRepair(cat, caps)) return repairPrompt(cat, round)
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
 YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
