@@ -83,7 +83,7 @@ const DEGRADED_RULES = `DEGRADED RUN (the driver recorded enrichment_degraded; t
   - Declare an empty cell absent only after a primary WebSearch volley on it, and add --enrichment-unavailable to engine.cli absence (the connector volley cannot run). --hunted still names the exact queries, sites and nearest thing found.
   - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
 
-// REPAIR WORK IS ROUTED, NOT INFERRED (measured 2026-10-05, Susser Bank
+// REPAIR WORK IS ROUTED, NOT INFERRED (measured 2026-10-05, a CL run,
 // round 2): every blocker of 13 failing categories sat on a cell already
 // synthesised or declared absent, while the batch prompt said to skip closed
 // cells — so each category spent a round writing nothing. The driver now

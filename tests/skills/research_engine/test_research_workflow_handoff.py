@@ -56,7 +56,7 @@ def test_lanes_mode_is_unchanged(tmp_path):
 def test_the_shipped_workflow_names_no_client():
     src = (PLUGIN / P.RESEARCH_WORKFLOW).read_text()
     assert src.startswith("export const meta")
-    for leaked in ("swbc", "SWBC", "Angelica"):
+    for leaked in ("swbc", "SWBC", "Angelica", "susser", "Susser"):
         assert leaked not in src, f"the plugin workflow hard-codes {leaked!r}"
 
 

@@ -1,0 +1,81 @@
+export const meta = {
+  name: 'dma-pillar-scoring',
+  description: 'DMA scoring for ONE pillar (engine.pipeline hands one invocation per pillar): scorer lanes in parallel, then that pillar\'s independent critic, then the critic\'s moves applied, until the critic passes',
+  whenToUse: 'The SCORING stage of engine.pipeline in scoring_mode=workflow: one invocation per pillar, all started in one message, args from <run>/07_qa/scoring_workflow.json',
+  phases: [
+    { title: 'Score', detail: 'one agent per scoring brief (about 25-60 rows), fresh context each' },
+    { title: 'Critique', detail: 'the pillar\'s independent scoring-critic, as soon as ITS scorers finish' },
+    { title: 'Rescore', detail: 'the pillar\'s own scorer applies exactly the critic\'s --move rows' },
+  ],
+}
+
+// WHY A WORKFLOW PER PILLAR (owner, 2026-10-05: "running for hours — use
+// /workflows"). Measured on a 2026-10-05 run: SCORING took 294 min because the
+// driver ran every pillar's scorers, then ONE critic lane over all four
+// pillars, then a barrier — and the critic's moves were never handed back,
+// so it named the same rows four rounds running. Here each pillar is its own
+// workflow: its critic starts the moment its own scorers finish, its moves
+// go straight to its own scorer, and four pillars run side by side.
+//
+// args (engine.pipeline writes them to <root>/07_qa/scoring_workflow.json):
+//   {pillar, run, root, eng, plugin, briefs: [<scorer brief .md>, ...],
+//    critic_brief: <.md or "">, rounds}
+
+const A = args
+const R = `--run ${A.run} --root ${A.root}`
+const P = A.pillar
+const ACT = `scoring-${P.toLowerCase()}-producer`
+const OUT = {
+  type: 'object',
+  properties: {
+    pillar: { type: 'string' },
+    verdict: { type: 'string' },
+    scored: { type: 'number' },
+    moves: { type: 'number' },
+    notes: { type: 'string' },
+  },
+  required: ['pillar', 'verdict'],
+}
+
+const scorerPrompt = (file) => `You are ${ACT} for DMA run ${A.run}. Work from ${A.eng}, foreground commands, long timeouts.
+Your brief is the file ${file}: read it once and follow it exactly. Score EVERY row it lists through \`python3 -m engine.assessment score ${R} ... --actor ${ACT}\`.
+The engine refuses a score above the row's ceiling (its own Ceiling_Band top, 2.0 on own-site-only evidence, the evidence tiers) and a stale row without ADJ_STALE: read the refusal and re-strike lower or apply ADJ_STALE. Never edit a fact out of a rationale to pass a check.
+Return pillar ${P}, verdict "SCORED", scored (rows you struck), moves 0, and one-line notes.`
+
+const criticPrompt = (round) => `You are the scoring-critic for pillar ${P} of DMA run ${A.run}, round ${round}. Work from ${A.eng}.
+${A.critic_brief ? `Your brief is ${A.critic_brief}: read it first.` : ''}
+Critique pillar ${P} ONLY: re-derive a sample of its scores from their rationales and rubric descriptors and hunt the score that flatters. You struck none of them.
+Record exactly one verdict: python3 -m engine.assessment critique ${R} --pillar ${P} --verdict PASS|FAIL --actor scoring-critic --note '<80+ chars>' and, on a FAIL, one --move CELL:TARGET:why per row you would move (the engine refuses a FAIL without them).
+The engine already refuses band, own-site and stale breaches at write time — judge what a rule cannot.
+Return pillar ${P}, verdict PASS or FAIL as recorded, moves (how many --move you gave), and one-line notes.`
+
+const rescorePrompt = (round) => `You are ${ACT} for DMA run ${A.run}, round ${round}, RESCORE. Work from ${A.eng}.
+The independent critic moved rows of pillar ${P}. List them: python3 -m engine.assessment moves ${R} --pillar ${P}
+For EACH row: re-strike it at or below its "to" through python3 -m engine.assessment score ${R} --subcap <CELL> --score <to or lower> --actor ${ACT}, keeping its confidence and overlay (shown with the move), with the critic's reason at the head of the existing rationale. Touch no other row.
+Return pillar ${P}, verdict "RESCORED", scored (rows re-struck), moves 0, notes.`
+
+const scored = await parallel((A.briefs || []).map((f, i) => () => agent(scorerPrompt(f), {
+  label: `${P} score ${i + 1}/${A.briefs.length}`, phase: 'Score', schema: OUT, model: 'sonnet',
+  agentType: `dma-insights:${ACT}`,
+})))
+if ((A.briefs || []).length && !scored.filter(Boolean).length) {
+  return { pillar: P, verdict: 'AGENT_ERROR', notes: 'every scorer agent failed; nothing to critique' }
+}
+
+let last = null
+for (let round = 1; round <= (A.rounds || 3); round++) {
+  last = await agent(criticPrompt(round), {
+    label: `${P} critic r${round}`, phase: 'Critique', schema: OUT,
+    agentType: 'dma-insights:scoring-critic',
+  })
+  if (!last) return { pillar: P, verdict: 'AGENT_ERROR', notes: 'the critic did not return' }
+  log(`${P} r${round}: critic ${last.verdict}, ${last.moves || 0} move(s)`)
+  if (last.verdict === 'PASS') break
+  if (!last.moves) break                     // a FAIL the engine accepted always carries moves
+  const rs = await agent(rescorePrompt(round), {
+    label: `${P} rescore r${round}`, phase: 'Rescore', schema: OUT, model: 'sonnet',
+    agentType: `dma-insights:${ACT}`,
+  })
+  if (!rs) return { pillar: P, verdict: 'AGENT_ERROR', notes: 'the rescore agent did not return' }
+}
+return last

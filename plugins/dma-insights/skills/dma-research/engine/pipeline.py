@@ -127,6 +127,9 @@ EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
 #: in `research_mode="workflow"` — one invocation per category, its
 #: capability batches in parallel, then independent challenge -> floors gate.
 RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
+#: SCORING as one persisted workflow per pillar (scoring_mode="workflow").
+SCORING_WORKFLOW = "workflows/dma-pillar-scoring.js"
+SCORING_HANDOFF = "scoring_workflow.json"
 RESEARCH_HANDOFF = "research_workflow.json"
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
@@ -402,6 +405,11 @@ class Options:
     # default stays "lanes" so the stub and every test walk are unchanged;
     # the CLI defaults to "workflow" for the real dispatcher.
     research_mode: str = "lanes"
+    # Who runs SCORING. "workflow" hands it to the session as one persisted
+    # workflow per pillar (visible in /workflows, each pillar's critic starts
+    # when ITS scorers finish); "lanes" dispatches headless lanes, which is
+    # sound here because scoring needs no enrichment connector.
+    scoring_mode: str = "lanes"
     # How many FRESH lane instances the driver spends on a category whose
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
@@ -1139,6 +1147,21 @@ class Pipeline:
                                       f"before {st}; resume: {self.plan()['command']}")
                 return outcome
             t0 = self.opts.clock()
+            if st == "SCORING" and self.opts.scoring_mode == "workflow":
+                h = self._scoring_handoff()
+                if h.get("passed"):
+                    self._record(st, "PASS", h["summary"], t0)
+                    outcome["stages_run"].append(st)
+                    self._snapshot(st)
+                    continue
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
+                self.opts.log(f"[WORKFLOW] SCORING handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st, reason=h["summary"],
+                               handoff=h["file"], invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
                 if not h["invocations"]:
@@ -2192,6 +2215,112 @@ class Pipeline:
         self.reopen()
         return f"handoff written: {len(doc.get('subcap_records') or [])} records"
 
+    def _scoring_handoff(self) -> dict:
+        """Write one scoring-workflow invocation per pillar still owed.
+
+        The rollup and gate run first: when the workflows have done their
+        work, this is how the stage closes without another handoff. A
+        headline still owed after every pillar PASSES is one cheap headless
+        lane, not a workflow."""
+        from . import assessment as A
+        from . import brief
+        if C.stage_of(self._md()) != "assessment":
+            A.open_stage(self.wb, self.run.qa_dir)
+            self.reopen()
+        try:
+            A.rollup(self.wb)
+        except A.ScoringRefusal:
+            pass
+        v = A.gate(self.wb, self.run.qa_dir)
+        self.reopen()
+        if v.get("gate") == "PASS":
+            return {"passed": True, "summary": "SCORING gate PASS (workflow mode)"}
+        st = A.state(self.wb)
+        verdicts = st.get("critic_verdicts") or {}
+        pending = A.pending_moves(self.wb)["moves"]
+        b = brief.scoring_batch(self.wb, run=self.run, out_dir=self._briefs("scoring_wf"))
+        by_p: dict[str, list[str]] = {}
+        for row in self._lane_rows(b):
+            m = re.match(r"scoring-(P\d)", str(row.get("label") or ""))
+            if m:
+                by_p.setdefault(m.group(1), []).append(row["prompt_file"])
+        pillars = sorted({c[:2] for c in self.wb.selected_subcaps()})
+        owed = [p for p in pillars if by_p.get(p) or verdicts.get(p) != "PASS"
+                or any(m["subcap"].startswith(p) for m in pending)]
+        if not owed:
+            # every pillar PASSES and nothing is pending: only the headline
+            # (or another rollup term) is left — one headless lane.
+            c = brief.scoring_batch(self.wb, run=self.run,
+                                    out_dir=self._briefs("scoring_headline"), critic=True)
+            self._count(self._dispatch(c, stage="SCORING"))
+            try:
+                A.rollup(self.wb)
+            except A.ScoringRefusal:
+                pass
+            v = A.gate(self.wb, self.run.qa_dir)
+            self.reopen()
+            if v.get("gate") == "PASS":
+                return {"passed": True, "summary": "SCORING gate PASS (workflow mode)"}
+            raise StageRefused("SCORING gate FAIL with every pillar's critic PASS: "
+                               + ", ".join((v.get("blocking") or [])[:8]))
+        inv = [{"pillar": p, "run": self.run.run_id, "root": str(self.run.root),
+                "eng": str(PLUGIN / "skills" / "dma-research"), "plugin": str(PLUGIN),
+                "briefs": by_p.get(p, []), "critic_brief": "", "rounds": 3}
+               for p in owed]
+        doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per pillar — wait for all, then "
+                       "run `then`. No Workflow tool in this session? Re-run the driver "
+                       "with --scoring-mode lanes: scoring needs no connector.")}
+        path = self.run.qa_dir / SCORING_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        rows = sum(len(i["briefs"]) for i in inv)
+        return {"file": str(path), "invocations": inv,
+                "summary": f"{len(inv)} pillar workflow(s), {rows} scorer brief(s), "
+                           f"{len(pending)} pending critic move(s)"}
+
+    @staticmethod
+    def _lane_rows(batch: dict) -> list[dict]:
+        if not batch or not batch.get("batch") or not batch.get("lanes"):
+            return []
+        return json.loads(Path(batch["batch"]).read_text())
+
+    def _batch_pillars(self, batch: dict) -> set[str]:
+        """The pillars a scoring batch's scorer lanes are working."""
+        out = set()
+        for row in self._lane_rows(batch):
+            m = re.match(r"scoring-(P\d)", str(row.get("label") or ""))
+            if m:
+                out.add(m.group(1))
+        return out
+
+    def _only_pillars(self, batch: dict, *, include=None, exclude=None) -> dict:
+        rows = []
+        for row in self._lane_rows(batch):
+            m = re.match(r"scoring-critic-(P\d)", str(row.get("label") or ""))
+            p = m.group(1) if m else None
+            if p and include is not None and p not in include:
+                continue
+            if p and exclude is not None and p in exclude:
+                continue
+            if not p and include is not None:
+                continue                      # the headline lane runs once, unscoped
+            rows.append(row)
+        return self._write_batch(rows, Path(batch["batch"]).with_name("batch_selected.json")) \
+            if rows else {"lanes": 0}
+
+    def _merge_batches(self, batches: list[dict], name: str) -> dict:
+        rows = [row for b in batches for row in self._lane_rows(b)]
+        return self._write_batch(rows, self._briefs(name) / "batch.json") if rows else {"lanes": 0}
+
+    @staticmethod
+    def _write_batch(rows: list[dict], path: Path) -> dict:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+        return {"batch": str(path), "lanes": len(rows)}
+
     def _stage_scoring(self) -> str:
         from . import assessment as A
         from . import brief
@@ -2202,15 +2331,29 @@ class Pipeline:
         self._stalled("SCORING")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
+            # CONCURRENT, NOT SERIAL (measured 2026-10-05, Susser Bank:
+            # SCORING took 294 min). The solutions duty runs beside the
+            # scorers; a critic lane for every pillar that is already fully
+            # scored runs beside the re-score lanes of the others. Only a
+            # pillar still being scored waits for a second dispatch.
             b = brief.scoring_batch(self.wb, run=self.run, out_dir=self._briefs(f"scoring_r{r}"))
-            self._count(self._dispatch(b, stage="SCORING"))
+            first = [b]
             if r == 0:
-                s = brief.scoring_batch(self.wb, run=self.run,
-                                        out_dir=self._briefs("scoring_solutions"), solutions=True)
-                self._count(self._dispatch(s, stage="SCORING"))
-            c = brief.scoring_batch(self.wb, run=self.run,
-                                    out_dir=self._briefs(f"scoring_critic_r{r}"), critic=True)
-            self._count(self._dispatch(c, stage="SCORING"))
+                first.append(brief.scoring_batch(self.wb, run=self.run,
+                                                 out_dir=self._briefs("scoring_solutions"),
+                                                 solutions=True))
+            busy = self._batch_pillars(b)
+            c0 = brief.scoring_batch(self.wb, run=self.run,
+                                     out_dir=self._briefs(f"scoring_critic_r{r}a"), critic=True)
+            first.append(self._only_pillars(c0, exclude=busy))
+            self._count(self._dispatch(self._merge_batches(first, f"scoring_all_r{r}"),
+                                       stage="SCORING"))
+            if busy:
+                c = brief.scoring_batch(self.wb, run=self.run,
+                                        out_dir=self._briefs(f"scoring_critic_r{r}b"),
+                                        critic=True)
+                self._count(self._dispatch(self._only_pillars(c, include=busy),
+                                           stage="SCORING"))
             rollup_note = ""
             try:
                 A.rollup(self.wb)
@@ -2638,7 +2781,9 @@ def _build_opts(a) -> Options:
                    push=(not a.no_push) and a.dispatcher != "stub",
                    allow_stale_install=a.allow_stale_install, lanes=a.lanes,
                    toolkit_dir=Path(a.toolkits) if a.toolkits else None,
-                   research_mode=_research_mode(a))
+                   research_mode=_research_mode(a),
+                   scoring_mode=getattr(a, "scoring_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                   else "workflow"))
 
 
 def _research_mode(a) -> str:
@@ -2667,6 +2812,13 @@ def main(argv=None) -> int:
 
     r = common(sub.add_parser("run", help="drive the run to PROMOTE, gate by gate"))
     r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
+    r.add_argument("--scoring-mode", choices=("workflow", "lanes"), default=None,
+                   help="who runs SCORING: 'workflow' (default with the real "
+                        "dispatcher) hands it to the session as one persisted "
+                        "workflow per pillar, shown in /workflows; 'lanes' "
+                        "dispatches headless lanes (scoring needs no connector, "
+                        "so lanes are a sound fallback in a session without "
+                        "the Workflow tool)")
     r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
                    help="who runs RESEARCH: 'workflow' (default with the real "
                         "dispatcher) hands it to the session as one persisted "

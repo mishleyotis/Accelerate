@@ -139,7 +139,9 @@ def test_the_run_is_carried_through_every_stage_by_the_hook(walk):
     # a FAILED critic keeps the state and says the pillar must be re-scored
     A.critique(wb, pillar="P1", verdict="FAIL", actor="scoring-critic",
                note="Two rows flatter the evidence: the first reads M3 on a "
-                    "single T3 source; the fourth ignores its own counter.")
+                    "single T3 source; the fourth ignores its own counter.",
+               moves=[(next(c for c in wb.selected_subcaps() if c.startswith("P1")),
+                       1.0, "reads M3 on a single T3 source")])
     assert _state(run) == "CRITIC_PENDING"
     assert after_agent(env) is None, "CRITIC_PENDING was already announced"
     assert "re-scored" in watchdog.inspect(run)["resume"]["prompt"]
