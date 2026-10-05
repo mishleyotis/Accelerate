@@ -1,0 +1,52 @@
+# Repair safeguards — what started each repair, and what now stops it recurring
+
+Every issue that sent a cell back for repair on `arbor-bank-2026-10-05`
+(2026-10-05), mapped to the safeguard that now catches it, the test that
+pins the safeguard, and the finding that records it. The tests are also
+registered in `fixtures/permanent_regressions.json`, where
+`scripts/tests/test_permanent_regressions.py` fails the build if a pin is
+renamed or removed.
+
+"Where it bites" says when the defect is caught: **write** (the ledger
+refuses the row), **gate** (the floors gate blocks the category and serves
+the cell as repair), **packet** (what the independent challenger is shown),
+**card** (what the repairing researcher is shown), **dispatch** (which categories the driver hands out).
+
+## Mechanical safeguards (engine code, test-pinned)
+
+| # | Issue that started a repair | Where it bites | Safeguard | Pinned by | Finding |
+|---|---|---|---|---|---|
+| 1 | A single-source claim had no exit: `single_source_fact` said "relabel INFERENCE", the write path said "relabel FACT", and both labels need two sources | gate + write | Every single-source repair text names the one exit all checkers accept: `CEILING_ESTIMATE` with `Ceiling_Band` and `Uncertainty` | `test_a_single_source_claim_has_an_exit_that_needs_no_new_source` | MEM-0583 |
+| 2 | The challenge packet left out `Ceiling_Band` and `Uncertainty`, so `claim_label_fit` on a CEILING_ESTIMATE went NOT_RUN and the cell passed unjudged | packet | `brief._challenge_cell` ships `ceiling_band` and `uncertainty` | `test_the_packet_carries_the_band_a_ceiling_estimate_is_judged_on`, `test_the_packet_carries_the_fields_the_other_dimensions_read` | MEM-0584 |
+| 3 | A CEILING_ESTIMATE was written with no `Uncertainty` (14 of 69 on this run) | write + gate | `quality.claim_label_supported` refuses it; the floors gate files it as `claim_unsupported` | `test_a_ceiling_estimate_without_its_band_is_refused` | MEM-0585 |
+| 4 | Cells were re-synthesised without seeing the challenger's objection, and 5 of 9 failed again on the same objection | card | `floors_gate.repair_worklist` adds the latest FAIL's failed dimensions and rationale to the card as "the challenger failed: …" | `test_the_repair_card_carries_what_the_challenger_objected_to` | MEM-0586 |
+| 5 | An INFERENCE citing two ids from the same page passed the write path's id count | gate | The floors gate resolves INFERENCE evidence to source identity (host, otherwise source name), the same way `single_source_fact` does for FACT | `test_an_inference_on_two_ids_of_one_source_is_blocked` | MEM-0587 |
+| 6 | The entity's own site and social posts were registered at T1 (52 rows on this run) | write | `ledger.append_evidence` refuses own-site or social-host evidence at T1: register it at T2 if it is a hosted disclosure, T5 if it is marketing | `test_the_entitys_own_site_and_social_posts_are_never_t1` | MEM-0588 |
+| 7 | Three rules tightened mid-run and five categories kept a stale recorded PASS: 17 claimed cells the live gate refuses were never dispatched | dispatch | `brief.categories_needing_dispatch` re-reads the live worklist (persist=False) and re-dispatches a recorded PASS that now names a claimed cell | `test_a_recorded_pass_the_live_gate_now_refuses_is_redispatched` | MEM-0589 |
+| 8 | A FAILED challenge did not block the floors gate (fix carried in from `ccr-4d2dcfc5-77fgo8`) | gate | `challenge_failed` is a blocking term, and the cell is served as repair | `test_a_failed_challenge_blocks_and_is_served_as_repair` | MEM-0441 / MEM-0577 |
+| 9 | A re-synthesised cell kept its stale verdict and was never re-challenged (fix carried in) | write | `append_synthesis` clears `Challenge_Verdict`; selection reads the live column, not the log | `test_re_synthesis_clears_the_stale_challenge_verdict` | MEM-0441 / MEM-0577 |
+| 10 | A single-source INFERENCE passed the write path and failed the challenge (fix carried in) | write | `quality.claim_label_supported` refuses an INFERENCE with fewer than two ids | `test_a_single_source_inference_is_refused_at_write` | MEM-0441 / MEM-0577 |
+
+## Judgement safeguards (held by the independent challenger, no mechanical check)
+
+These need a reading of the excerpt against the claim. Nothing in the engine
+can decide them without a model call, so the safeguard is the independent
+challenge, plus #4, which now hands the challenger's objection to whoever
+repairs the cell.
+
+| Issue that started a repair | Example cells | Held by |
+|---|---|---|
+| Undated or former-officer evidence stated in the present tense (invariant 9: undated is UNVERIFIED, never current) | P1C2.6.4, P4C4.1.1 | challenge `recency` + #4 |
+| The claim names something no cited excerpt says | P1C2.9.RB1, P2C4.3.3, P3C1.3.RB1, P3C2.4.3 | challenge `evidence_sufficiency` + #4 (same shape as MEM-0288 downstream) |
+| The claim is contradicted by its own cited row, and the contradiction field says "none found" | P4C3.4.1, P3C2.3.1 | challenge `contradiction_handling` + #4 |
+
+If any of these recurs on a cell after the card carried the objection,
+treat that recurrence as a finding against the researcher prompt, not
+against the cell.
+
+## Open work, recorded and not yet done
+
+- **Re-grade arbor-bank's existing self-published rows.** By the user's
+  decision (2026-10-05), #6 applies forward only. The run's 52 own-site or
+  social rows at T1, cited by 55 cells, stay as filed until re-grading is
+  scheduled (MEM-0588).

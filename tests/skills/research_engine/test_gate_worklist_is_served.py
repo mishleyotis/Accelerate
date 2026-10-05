@@ -53,7 +53,8 @@ def test_a_single_source_claim_has_an_exit_that_needs_no_new_source():
     said "relabel FACT" — a loop with no exit short of new research. One
     source passes as CEILING_ESTIMATE, and every repair text says so."""
     assert Q.claim_label_supported({"Claim_Label": "CEILING_ESTIMATE",
-                                    "Evidence_IDs": "E-1"}) is None
+                                    "Evidence_IDs": "E-1",
+                                    "Uncertainty": 0.5}) is None
     assert "CEILING_ESTIMATE" in Q.claim_label_supported(
         {"Claim_Label": "INFERENCE", "Evidence_IDs": "E-1"})
     for term in ("single_source_fact", "challenge_failed"):
@@ -425,3 +426,90 @@ def test_awaiting_workflow_fires_when_every_failing_cell_is_claimed(tmp_path):
     assert row["state"] == "AWAITING_WORKFLOW", row
     plan = watchdog.resume_plan(row)
     assert plan.get("workflow") and not plan.get("agent")
+
+
+def test_a_ceiling_estimate_without_its_band_is_refused():
+    """arbor-bank: 14 CEILING_ESTIMATE rows carried no Uncertainty; they
+    PASSed while the challenge packet hid the column, FAILed once it showed."""
+    assert Q.claim_label_supported({"Claim_Label": "CEILING_ESTIMATE",
+                                    "Evidence_IDs": "E-1", "Uncertainty": ""})
+    assert Q.claim_label_supported({"Claim_Label": "CEILING_ESTIMATE",
+                                    "Evidence_IDs": "E-1"})
+    assert Q.claim_label_supported({"Claim_Label": "CEILING_ESTIMATE",
+                                    "Evidence_IDs": "E-1",
+                                    "Uncertainty": 0.5}) is None
+
+
+def test_the_repair_card_carries_what_the_challenger_objected_to(tmp_path):
+    """arbor-bank: the card said only "re-synthesise to answer the challenge";
+    five cells were re-synthesised blind and FAILed on the same objection."""
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    cat = cell.split(".")[0]
+    eids = bank_evidence(wb, cell, n=5)
+    synthesise(wb, cell, good_synthesis(cell, eids), verdict="FAIL")
+    rw = floors_gate.repair_worklist(wb, cat)
+    said = rw[cell].get("challenge") or ""
+    assert "ceiling reasoning stops at Competing" in said, said
+    assert any(d.startswith("the challenger failed:") for d in rw[cell]["do"])
+
+
+def test_an_inference_on_two_ids_of_one_source_is_blocked(tmp_path):
+    """arbor-bank P3C1.3.RB1 / P3C3.6.4: two E-ids on one page passed the
+    write path's id count and FAILed the challenge as one source."""
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    cat = cell.split(".")[0]
+    eids = bank_evidence(wb, cell, n=3)       # E1, E2 on acme.example; E3 ncua
+    rec = dict(good_synthesis(cell, eids[:2]), Claim_Label="INFERENCE",
+               Evidence_IDs=", ".join(eids[:2]))
+    synthesise(wb, cell, rec)
+    v = floors_gate.run(wb, cat, require_synthesis=True, persist=False)
+    hits = [x for x in v["claim_unsupported"] if x["subcap"] == cell]
+    assert hits and "one source identity" in hits[0]["why"], v["claim_unsupported"]
+    assert cell in floors_gate.repair_worklist(wb, cat)
+
+
+def test_the_entitys_own_site_and_social_posts_are_never_t1(tmp_path):
+    """arbor-bank: 50 own-site rows and 2 social posts filed T1. T1 is
+    regulatory / audited / a machine scan; an own site is at most T2
+    (a disclosure it hosts) and its marketing is T5."""
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    wb.append("Firmographics", {"Field": "website", "Value": "https://www.acme.example",
+                                "State": "STATED"})
+    span = ("Acme business banking clients enjoy Positive Pay with exception "
+            "alerts delivered to every authorised user each business morning.")
+    for url in ("https://acme.example/business/positive-pay",
+                "https://online.acme.example/x",
+                "https://www.facebook.com/acmebank/posts/1"):
+        with pytest.raises(L.LedgerRefusal, match="T1"):
+            L.append_evidence(wb, source_name="Acme page", source_url=url,
+                              tier="T1", excerpt=span, subcaps=[cell])
+    assert L.append_evidence(wb, source_name="Acme Annual Report 2025",
+                             source_url="https://acme.example/ar25.pdf",
+                             tier="T2", excerpt=span, subcaps=[cell])
+    assert L.append_evidence(wb, source_name="FFIEC call report",
+                             source_url="https://cdr.ffiec.gov/acme",
+                             tier="T1", excerpt=span + " (FFIEC)", subcaps=[cell])
+
+
+def test_a_recorded_pass_the_live_gate_now_refuses_is_redispatched(tmp_path):
+    """arbor-bank: three rules tightened mid-run; 17 claimed cells in five
+    recorded-PASS categories failed the live gate, and the driver trusted
+    the recorded rows."""
+    from engine import brief
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    cat = cell.split(".")[0]
+    eids = bank_evidence(wb, cell, n=5)
+    synthesise(wb, cell, good_synthesis(cell, eids))
+    L.append_gate(wb, gate="FLOORS", scope=cat, verdict="PASS", detail="all terms met")
+    wb.set_scoring(cell, {"Claim_Label": "CEILING_ESTIMATE", "Uncertainty": ""})
+    need = brief.categories_needing_dispatch(run.open())
+    assert cat in need["dispatch"], need
+    assert any("stale" in r for r in need["reasons"][cat])

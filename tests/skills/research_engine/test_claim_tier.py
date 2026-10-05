@@ -25,7 +25,7 @@ from fixtures import CAT, new_run
 EXCERPT = ("Alkami digital banking went live in Q3 2024 and reached 47 "
            "percent member adoption within ninety days of launch.")
 PAGE = "Acme Credit Union annual report 2025.\n" + EXCERPT + "\nEnd."
-URL = "https://acme.example/ar25"
+URL = "https://press.example/acme-ar25"   # not the entity's own site: own-site T1 is refused (MEM-0588)
 
 
 def _run(tmp_path):

@@ -76,6 +76,34 @@ def _refuse_on_drift(wb: RunWorkbook) -> None:
               "pin the catalogue (DMA_CATALOGUE) or the engine version first.")
 
 
+SOCIAL_HOSTS = ("facebook.com", "linkedin.com", "twitter.com", "x.com",
+                "instagram.com", "youtube.com", "tiktok.com")
+
+
+def _host(url: str) -> str:
+    h = str(url or "").split("//")[-1].split("/")[0].split("@")[-1]
+    return h.split(":")[0].lower().removeprefix("www.")
+
+
+def _self_published(wb, source_url: str) -> str:
+    """'the entity's own site' / 'a social-media post' / '' for a URL."""
+    h = _host(source_url)
+    if not h:
+        return ""
+    if any(h == s or h.endswith("." + s) for s in SOCIAL_HOSTS):
+        return "a social-media post"
+    try:
+        site = next((str(r.get("Value") or "") for r in wb.rows("Firmographics")
+                     if str(r.get("Field") or "").strip().lower() == "website"
+                     and r.get("Value")), "")
+    except Exception:
+        site = ""
+    own = _host(site if "//" in site else f"//{site}")
+    if own and (h == own or h.endswith("." + own)):
+        return "the entity's own site"
+    return ""
+
+
 def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None,
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str | None = None, origin: str = "public",
@@ -155,6 +183,22 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
             f"{C.SCAN_TIER} (contract.SCAN_TIER). Re-register it at "
             f"{C.SCAN_TIER}, or under the source that actually states the "
             f"claim if this is reportage about a scan rather than the scan")
+    # T1 is regulatory / audited / a verified machine scan — independently
+    # verified. The entity's OWN site and its social posts are never that.
+    # Measured arbor-bank-2026-10-05: 50 own-site rows and 2 social posts
+    # filed T1 (55 cells cited them), and a challenge FAILed P3C2.4.3 on a
+    # ceiling argued from "own-site marketing" over rows tiered T1/T2. T2
+    # stays open to a real disclosure the entity hosts (annual report,
+    # 10-K); marketing pages are T5. Refused, not re-tiered, like the scan
+    # rule above: the writer chooses which one it is.
+    if tier == "T1" and source_url:
+        why = _self_published(wb, source_url)
+        if why:
+            raise LedgerRefusal(
+                f"{source_url} is {why} and is filed at T1; T1 is regulatory, "
+                f"audited or a verified machine scan. Re-register it at T2 if "
+                f"it is an official disclosure (annual report, 10-K, investor "
+                f"deck) or at T5 if it is a marketing or product page")
     # After the excerpt and URL checks on purpose: a thin note is refused
     # on its length first (the message the notebook tests read back), and
     # only a citable span is then judged on what its tier can carry.

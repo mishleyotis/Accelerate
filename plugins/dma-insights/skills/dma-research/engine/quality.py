@@ -333,6 +333,15 @@ def claim_label_supported(row) -> str | None:
                 "two or more independent sources; cite the second, or relabel "
                 "CEILING_ESTIMATE with its Ceiling_Band and Uncertainty (one "
                 "source carries no FACT either)")
+    # A CEILING_ESTIMATE IS its uncertainty band (functional_language: "the
+    # evidence ids + the uncertainty"); the challenge's claim_label_fit fails
+    # one without it. arbor-bank wrote 14 with the column empty — they PASSed
+    # while the challenge packet hid the field, and FAILed once it showed it.
+    if label == "CEILING_ESTIMATE" and \
+            str(row.get("Uncertainty") if row.get("Uncertainty") is not None
+                else "").strip() == "":
+        return ("CEILING_ESTIMATE with no Uncertainty — the estimate is its "
+                "band; state the Uncertainty (e.g. 0.5) with the Ceiling_Band")
     if label and label not in ("FACT", "INFERENCE", "HYPOTHESIS",
                               "CEILING_ESTIMATE"):
         return f"claim label {label!r} is not in the vocabulary"

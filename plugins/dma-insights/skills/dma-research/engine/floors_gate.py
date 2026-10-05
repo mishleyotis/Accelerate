@@ -463,7 +463,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # registered URL's host, falling back to the source name — two pages
         # of the same annual report are one source, however many rows they
         # fill.
-        if str(r.get("Claim_Label") or "").strip().upper() == "FACT":
+        label = str(r.get("Claim_Label") or "").strip().upper()
+        if label in ("FACT", "INFERENCE"):
             idents = set()
             for e in eids:
                 row_e = register.get(e) or {}
@@ -471,9 +472,20 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
                 host = url.split("//")[-1].split("/")[0].lower() if url else ""
                 idents.add(host or str(row_e.get("Source_Name") or "").strip().lower())
             idents.discard("")
-            if len(idents) < 2:
+            if len(idents) < 2 and label == "FACT":
                 findings["single_source_fact"].append(
                     {"subcap": cell, "distinct_sources": sorted(idents)})
+            elif len(idents) < 2:
+                # The write path counts ids; two ids on one page are one
+                # source (arbor-bank P3C1.3.RB1, P3C3.6.4 FAILed challenge
+                # on exactly this). Identity is judged here, where the
+                # register is in hand.
+                findings["claim_unsupported"].append(
+                    {"subcap": cell,
+                     "why": (f"INFERENCE whose evidence resolves to one source "
+                             f"identity {sorted(idents)} — cite a second, "
+                             f"independent source, or relabel CEILING_ESTIMATE "
+                             f"with its Ceiling_Band and Uncertainty")})
 
         if Q.claims_absence(r.get("Dominant_Claim")):
             declared = str(r.get("Absence_Claimed") or "").upper() in \
@@ -835,10 +847,52 @@ def repair_cells(out: dict) -> dict[str, dict]:
     return cells
 
 
+def _challenge_objections(wb: RunWorkbook, cells) -> dict[str, str]:
+    """{cell: "<failed dimensions>: <rationale>"} from each cell's LATEST
+    Challenge_Log row, when that row is a FAIL."""
+    want = set(cells)
+    latest: dict[str, dict] = {}
+    try:
+        log = wb.rows("Challenge_Log")
+    except Exception:                    # an old workbook without the sheet
+        return {}
+    for row in log:                      # append-only: last row wins
+        c = str(row.get("SubCap_ID") or "")
+        if c in want:
+            latest[c] = row
+    out = {}
+    for c, row in latest.items():
+        if str(row.get("Verdict") or "").strip().upper() != "FAIL":
+            continue
+        dims = row.get("Dimensions")
+        if isinstance(dims, str):
+            try:
+                dims = json.loads(dims)
+            except ValueError:
+                dims = {}
+        failed = sorted(k for k, v in (dims or {}).items()
+                        if str(v).strip().upper() == "FAIL")
+        why = " ".join(str(row.get("Rationale") or "").split())[:700]
+        out[c] = f"{', '.join(failed) or 'FAIL'} — {why}"
+    return out
+
+
 def repair_worklist(wb: RunWorkbook, category: str) -> dict[str, dict]:
     """The live repair worklist for one category — evaluated, never recorded
-    (`persist=False`), so asking the question cannot change the verdict."""
-    return repair_cells(run(wb, category, require_synthesis=True, persist=False))
+    (`persist=False`), so asking the question cannot change the verdict.
+
+    A challenge_failed cell also carries WHAT the challenger objected to.
+    arbor-bank (2026-10-05): the card said only "re-synthesise to answer the
+    challenge", never the challenge — five cells were re-synthesised blind
+    and FAILed again on the identical objection (a former CTO's undated
+    profile in the present tense; a cited row listing AWS beside a claim of
+    "the only cloud step"). A repair the researcher cannot see is a retry."""
+    cells = repair_cells(run(wb, category, require_synthesis=True, persist=False))
+    failed = [c for c, v in cells.items() if "challenge_failed" in v["terms"]]
+    for c, said in _challenge_objections(wb, failed).items():
+        cells[c]["challenge"] = said
+        cells[c]["do"].append(f"the challenger failed: {said}")
+    return cells
 
 
 def read_verdict(qa_dir: Path, category: str) -> dict | None:

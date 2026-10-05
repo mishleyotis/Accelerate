@@ -469,6 +469,101 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0583",
+   "title": "Floors gate and write path gave opposite repair instructions for a single-source claim, so neither FACT nor INFERENCE could pass without new research",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A blocking term whose repair text sends the writer to a label another checker refuses. A single-source claim has one exit every checker accepts (CEILING_ESTIMATE with Ceiling_Band and Uncertainty), and every repair text names it.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_single_source_claim_has_an_exit_that_needs_no_new_source"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0584",
+   "title": "The challenge packet omitted Ceiling_Band and Uncertainty, so claim_label_fit on a CEILING_ESTIMATE recorded NOT_RUN and the cell passed unjudged",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A challenge packet that lacks a field one of the seven dimensions judges, so that dimension abstains and the cell PASSes unjudged.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_challenge_stage_cost.py::test_the_packet_carries_the_band_a_ceiling_estimate_is_judged_on"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_challenge_stage_cost.py::test_the_packet_carries_the_fields_the_other_dimensions_read"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0585",
+   "title": "The write path accepted a CEILING_ESTIMATE with no Uncertainty, a label the independent challenge fails",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A CEILING_ESTIMATE written, or passing the floors gate, without its Uncertainty.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_ceiling_estimate_without_its_band_is_refused"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0586",
+   "title": "The repair card never carried what the challenger objected to, so cells were re-synthesised blind and failed again on the same objection",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A challenge_failed cell served for repair without the challenger's failed dimensions and rationale on the card.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_repair_card_carries_what_the_challenger_objected_to"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0587",
+   "title": "The INFERENCE source check counted evidence ids, so two ids on one page passed as two sources",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "An INFERENCE whose evidence resolves to one source identity (host, else source name) passing the floors gate.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_an_inference_on_two_ids_of_one_source_is_blocked"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0588",
+   "title": "The entity's own website and its social posts were registered at T1, which the tier table reserves for regulatory, audited or machine-scan sources",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "An evidence row on the entity's own site or a social-media host registered at T1. (Forward-only by user decision; re-grading arbor-bank's existing 52 rows is separate open work recorded on the finding.)",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_entitys_own_site_and_social_posts_are_never_t1"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0589",
+   "title": "The research driver trusted a recorded floors PASS after the gate's rules tightened, so claimed cells the live gate refuses were never re-dispatched",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A category kept out of research dispatch on a recorded floors PASS while the live gate names a claimed cell for repair.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_recorded_pass_the_live_gate_now_refuses_is_redispatched"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

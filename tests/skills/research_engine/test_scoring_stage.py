@@ -147,7 +147,12 @@ def test_high_confidence_needs_two_source_identities(tmp_path):
         excerpt=("Alkami digital banking went live in Q3 2024 and reached 47 percent "
                  f"member adoption within ninety days, restated at {50+i} percent "
                  "in the 2025 report.")) for i in range(3)]
-    syn = good_synthesis(cell, eids); syn["Claim_Label"] = "INFERENCE"
+    # One source identity (acme.example): since MEM-0587 the floors gate
+    # refuses an INFERENCE resting on one identity, so the honest label for
+    # these rows is CEILING_ESTIMATE with its band — and HIGH confidence is
+    # still refused at scoring, which is what this test pins.
+    syn = good_synthesis(cell, eids)
+    syn.update(Claim_Label="CEILING_ESTIMATE", Uncertainty=0.5)
     synthesise(wb, cell, syn)
     synthesise(wb, cells[1], good_synthesis(cells[1], bank_evidence(wb, cells[1], n=5)))
     v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)

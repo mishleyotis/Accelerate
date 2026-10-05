@@ -1269,11 +1269,34 @@ def categories_needing_dispatch(wb: RunWorkbook) -> dict:
         # than worked again. `is_blocking` is that distinction.
         en = last_gate(wb, "ENRICHMENT", cat)
         en_fail = en["verdict"] == "FAIL" and en["is_blocking"]
-        if g["verdict"] == "PASS" and v["verdict"] != "FAIL" and not en_fail:
+        # A RECORDED PASS IS A PAST VERDICT, NOT A CURRENT ONE (MEM-0589).
+        # arbor-bank 2026-10-05: three gate rules tightened mid-run and 17
+        # cells in five recorded-PASS categories failed the live gate; the
+        # driver trusted the recorded rows and would have scored them
+        # unrepaired. The live worklist is evaluated with persist=False, so
+        # asking cannot change a verdict; a stale PASS is re-dispatched.
+        stale = []
+        if g["verdict"] == "PASS":
+            from . import floors_gate
+            try:
+                live = floors_gate.repair_worklist(wb, cat)
+            except ValueError:
+                live = {}
+            # Only CLAIMED cells: a gate cannot PASS over an unsynthesised
+            # cell, so a claimed cell it now refuses is a rule that moved.
+            claimed = {str(r.get("SubCap_ID")) for r in wb.scoring_rows()
+                       if _clean(r.get("Dominant_Claim"))}
+            stale = sorted({t for c, x in live.items() if c in claimed
+                            for t in x["terms"]})
+        if g["verdict"] == "PASS" and v["verdict"] != "FAIL" and not en_fail \
+                and not stale:
             out["passed"].append(cat)
         else:
             out["dispatch"].append(cat)
             reasons = list(g["blocking"]) if g["verdict"] != "PASS" else []
+            if stale:
+                reasons += [f"recorded PASS is stale; the live gate blocks on {t}"
+                            for t in stale]
             if g["verdict"] != "PASS" and not reasons:
                 reasons = [f"floors gate {g['verdict']}"]
             if v["verdict"] == "FAIL":
