@@ -85,7 +85,7 @@ const DEGRADED_RULES = `DEGRADED RUN (the driver recorded enrichment_degraded; t
 function batchPrompt(cat, caps, round, prev) {
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
-YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
+YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — every cell the card lists for them. The card lists two kinds: open cells (no claim yet) and cells carrying \`repair\` (they hold a claim and the floors gate is failing on them — do exactly what each repair line says, then re-synthesise or re-declare). A claimed cell the card does NOT list is done; skip it.
 ${prev ? `The category's last gate: ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 500)}. Close those for your cells.` : ''}
 Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (HYBRID run).
 
@@ -112,17 +112,25 @@ Return the gate verdict, its blocking terms, and how many cells are still open.`
 // --- PROMPTS END ---
 
 const BATCHES = A.batches || {}
-log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
+log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || []).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
 
 const results = await pipeline(A.cats, async (cat) => {
   let prev = null
-  let batches = BATCHES[cat] && BATCHES[cat].length ? BATCHES[cat] : [[`${cat} (all open capabilities)`]]
+  // Batches are REAL capability ids from the driver, which already counts the
+  // floors gate's repair cells as work. An empty list means no researcher has
+  // anything to do: the category is handed only for its challenge + gate.
+  // (arbor-bank-2026-10-05: an empty list became a label-only batch, a
+  // category name where a capability id belongs; the card matched none, and every
+  // such agent spent its context reporting "nothing open", both rounds.)
+  const original = BATCHES[cat] && BATCHES[cat].length ? BATCHES[cat] : []
+  let batches = original
   for (let round = 1; round <= A.rounds; round++) {
     const done = await parallel(batches.map((caps, i) => () => agent(batchPrompt(cat, caps, round, prev), {
       label: `${cat} r${round} b${i + 1} ${caps[0]}${caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
     })))
     const got = done.filter(Boolean)
-    log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)
+    const wrote = got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0) + (r.searches_logged || 0) + (r.evidence_registered || 0), 0)
+    if (batches.length) log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.cells_synthesised || 0) + (r.declared_absent || 0), 0)} cells closed, ${got.reduce((a, r) => a + (r.still_open || 0), 0)} open across ${batches.length} batch(es)`)
     const c = await agent(challengePrompt(cat, round), {
       label: `${cat} challenge r${round}`, phase: 'Challenge', schema: OUT, model: 'sonnet',
       agentType: 'dma-insights:research-challenger',
@@ -130,11 +138,16 @@ const results = await pipeline(A.cats, async (cat) => {
     prev = c
     if (prev) log(`${cat} r${round}: gate ${prev.gate}, ${prev.still_open} open`)
     if (prev && prev.gate === 'PASS') break
-    // Round 2 re-batches only what is still open: batches that finished stay finished.
-    const open = got.filter(r => (r.still_open || 0) > 0).length
-    if (open === 0 && got.length === batches.length) batches = [[`${cat} (cells the gate names)`]]
-    else batches = batches.filter((_, i) => !done[i] || (done[i].still_open || 0) > 0)
-    if (!batches.length) batches = [[`${cat} (cells the gate names)`]]
+    // Another round only buys something when this one moved the workbook: an
+    // identical re-dispatch of agents that wrote nothing writes nothing again.
+    if (!batches.length || wrote === 0) {
+      log(`${cat} r${round}: ${batches.length ? 'no research write this round' : 'no research batch'} — not paying for another round; the driver decides`)
+      break
+    }
+    // Round 2 re-runs the batches still carrying work; the card re-reads the
+    // gate, so a batch's repair cells reappear there if the gate still names them.
+    const still = batches.filter((_, i) => !done[i] || (done[i].still_open || 0) > 0)
+    batches = still.length ? still : original
   }
   if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${A.rounds} round(s) — the driver's floors gate decides what happens next`)
   return prev

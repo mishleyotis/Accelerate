@@ -571,22 +571,40 @@ class RunWorkbook:
                     f"A resumed run reads these two anchors and nothing else; "
                     f"an unfilled token is the AUD-0010 failure.")
         ws = self._sheet("Run_Metadata")
+        # A key already on the sheet (a write stamped `last_written_at`
+        # before this ran, or a template that ships rows) is updated, never
+        # appended again: one key, one row.
+        present = {str(ws.cell(row=r, column=1).value or "")
+                   for r in range(2, ws.max_row + 1)}
         for k in C.RUN_METADATA_KEYS:
-            ws.append([k, _cell(vals[k])])
+            if k in present:
+                self.set_metadata(k, vals[k], save=False)
+            else:
+                ws.append([k, _cell(vals[k])])
         self.save()
 
     def metadata(self) -> dict:
-        return {str(r["Key"]): r["Value"] for r in self.rows("Run_Metadata")}
+        # FIRST occurrence wins, the same row `set_metadata` writes. A dict
+        # comprehension keeps the LAST, so a key that appears twice read
+        # stale forever: arbor-bank-2026-10-05 carried `last_written_at`
+        # twice, every write refreshed row 1 and the watchdog read row 25 —
+        # "no write for 7843s" one second after a save.
+        out: dict = {}
+        for r in self.rows("Run_Metadata"):
+            out.setdefault(str(r["Key"]), r["Value"])
+        return out
 
     def set_metadata(self, key: str, value, *, save: bool = True) -> None:
         if key not in C.RUN_METADATA_KEYS:
             raise WorkbookError(f"Run_Metadata has no key {key!r}")
         ws = self._sheet("Run_Metadata")
+        hit = False
         for r in range(2, ws.max_row + 1):
             if str(ws.cell(row=r, column=1).value or "") == key:
+                # every copy, so a duplicated key can never disagree with itself
                 ws.cell(row=r, column=2, value=_cell(value))
-                break
-        else:
+                hit = True
+        if not hit:
             ws.append([key, _cell(value)])
         if save:
             self.save()

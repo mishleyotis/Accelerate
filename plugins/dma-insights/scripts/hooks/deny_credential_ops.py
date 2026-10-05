@@ -70,7 +70,87 @@ DENIALS = (
      "the service-account key file or path token by name"),
     (re.compile(r"\bDMA_ROUTINE_SA_KEY_B64\b|\bDMA_PATH_TOKEN\b"),
      "the credential environment variable by name"),
+    # ANY process's environ, however the pid is written — a number, self,
+    # thread-self, a glob, $$, $PPID, ${PPID}. The first version enumerated
+    # a few spellings and /proc/$PPID/environ walked past it.
+    (re.compile(r"/proc/[^/\s]+/environ\b"),
+     "a process environment read (list names only with `env | cut -d= -f1`)"),
 )
+
+# A WHOLE-ENVIRONMENT DUMP prints the credential without naming it.
+# Measured 2026-10-05 (arbor-bank-2026-10-05 resume): `env | grep -i DMA_`
+# run to find a run root printed DMA_ROUTINE_SA_KEY_B64's value into the
+# transcript; the by-name rule above never saw it. A segment whose command
+# is bare `env` / `printenv` / `export -p` / `declare -x|-p` / `set` dumps
+# every value; it is denied unless the next pipe stage keeps NAMES only.
+# `env VAR=x cmd` (env as a launcher), `printenv NAME`, `set -e` and
+# `export FOO=1` are untouched.
+#
+# Read at the grain of SHELL WORDS, per command segment: the first version
+# matched string prefixes, so it missed `env 2>&1 | grep`, `/usr/bin/env`,
+# bare `export` and `env -0`, and it split on parentheses, so the Python
+# expression `set(a) | set(b)` inside a heredoc read as a bare `set`.
+# Best-effort by design: a program that prints its own environment
+# (python -c 'print(os.environ)') is not a shell builtin and is not caught.
+_NAMES_ONLY = re.compile(
+    r"^\s*(?:cut\s+-d\s*['\"]?=['\"]?\s+-f\s*1(?![\d,-])|cut\s+-f\s*1(?![\d,-])\s+-d\s*['\"]?=['\"]?(?:\s|$)|"
+    r"sed\s+(?:-e\s+)?['\"]s/=\.\*//['\"]|awk\s+-F\s*['\"]?=['\"]?\s+['\"]\{\s*print \$1\s*\}['\"])")
+_SEGMENT = re.compile(r"\$\(|`|&&|\|\||;|\n|(?<![>&<0-9])&(?![>&])")
+_REDIRECT = re.compile(r"^(?:\d*>>?|\d*>&\d*|&>>?|<)\S*$")
+ENV_DUMP = ("a whole-environment dump (it prints every secret value; list "
+            "names only with `env | cut -d= -f1`)")
+
+
+def _words(stage: str) -> list[str]:
+    try:
+        import shlex
+        w = shlex.split(stage, posix=True)
+    except ValueError:
+        w = stage.split()
+    out, skip = [], False
+    for t in w:
+        if skip:
+            skip = False
+            continue
+        if _REDIRECT.match(t):
+            if t in (">", ">>", "<", "&>", "&>>") or re.fullmatch(r"\d+>>?", t):
+                skip = True            # the redirect target is the next word
+            continue
+        out.append(t)
+    while out and out[0] in ("sudo", "command", "builtin", "exec", "nohup"):
+        out = out[1:]
+    return out
+
+
+def _dumps(words: list[str]) -> bool:
+    if not words:
+        return False
+    head, args = words[0].rsplit("/", 1)[-1], words[1:]
+    if head in ("env", "printenv"):
+        # Only flags left: it prints the environment. A NAME=value word or a
+        # command after it makes env a launcher; a bare name makes printenv
+        # print one variable.
+        return all(a.startswith("-") for a in args)
+    if head == "set":
+        return not args
+    if head == "export":
+        return not args or args == ["-p"]
+    if head in ("declare", "typeset"):
+        flags = [a for a in args if a.startswith("-")]
+        names = [a for a in args if not a.startswith("-")]
+        return not names and (not flags or any(c in f for f in flags for c in "px"))
+    return False
+
+
+def _env_dump(command: str) -> bool:
+    for seg in _SEGMENT.split(command or ""):
+        stages = seg.split("|")
+        if _dumps(_words(stages[0].strip().rstrip(")").strip())):
+            nxt = stages[1] if len(stages) > 1 else ""
+            if not _NAMES_ONLY.match(nxt):
+                return True
+    return False
+
 
 REASON = (
     "Denied by dma-insights policy: the command carries {what}. No GitHub "
@@ -90,6 +170,8 @@ def decide(command: str) -> str | None:
     for rx, what in DENIALS:
         if rx.search(command or ""):
             return REASON.format(what=what)
+    if _env_dump(command):
+        return REASON.format(what=ENV_DUMP)
     return None
 
 

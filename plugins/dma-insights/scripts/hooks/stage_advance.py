@@ -155,7 +155,18 @@ def next_step(row: dict) -> str:
     lines = [head]
     if crit:
         lines.append(f"Completion criterion: {crit}.")
-    if plan.get("command"):
+    if plan.get("workflow"):
+        # Research in workflow mode is the session's, never a lane's: a lane
+        # holds no connector and would be a second writer on a category its
+        # workflow already owns (arbor-bank-2026-10-05).
+        lines.append(
+            f"Next: research runs as persisted workflows ({plan['workflow']}). "
+            "If they are still running, end the turn and wait for them. If they "
+            "have not been started, start every invocation in that file in ONE "
+            "message. When all have returned, run the driver: `"
+            + " ".join(plan.get("pipeline") or ["python3", "-m", "engine.pipeline", "run"])
+            + "`. Do not dispatch a research lane.")
+    elif plan.get("command"):
         lines.append("Next: run `" + " ".join(plan["command"]) + "`.")
     elif plan.get("agent"):
         agents = plan.get("parallel") or [plan["agent"]]

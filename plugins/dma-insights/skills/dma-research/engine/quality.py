@@ -318,6 +318,18 @@ def claim_label_supported(row) -> str | None:
         return "FACT resting on proxy searching alone"
     if label == "FACT" and not ids:
         return "FACT with no resolvable evidence id"
+    # MEM-0441 / MEM-0577: the challenge's claim_label_fit dimension fails an
+    # INFERENCE citing fewer than two sources, but this write-path check did
+    # not — so producers wrote single-source INFERENCEs that passed the
+    # synthesis gate and then failed their independent challenge in bulk (80
+    # of 101 failed dimensions on arbor-bank-2026-10-05), unscoreable and
+    # invisible to the floors worklist. Read and write enforce one rule now:
+    # an INFERENCE combines two or more independent sources; a claim resting
+    # on one source is what that source states (FACT), not an inference.
+    if label == "INFERENCE" and len(ids) < 2:
+        return ("INFERENCE resting on a single source — an inference combines "
+                "two or more independent sources; cite the second, or relabel "
+                "to what the one source states (FACT)")
     if label and label not in ("FACT", "INFERENCE", "HYPOTHESIS",
                               "CEILING_ESTIMATE"):
         return f"claim label {label!r} is not in the vocabulary"

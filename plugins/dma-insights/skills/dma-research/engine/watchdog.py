@@ -179,10 +179,36 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             f"({', '.join(open_work[:6])}). A re-run spends the next budget "
             f"on the same work: a PERSON raises --max-usd or narrows the "
             f"scope. No revive can close this one")
+    elif (open_work or failed) and driver.get("last_outcome") == "STALLED":
+        # The driver withheld every failing category (UNSERVABLE or STALLED
+        # across worked handoffs) rather than hand out workflows that could
+        # only report nothing. A revive would re-run the same refusal.
+        # Keyed on `failed` too, not only `open_work`: when the gate fails on
+        # cells that already hold a claim, `L.worklist` (claim-less cells
+        # only) is empty, and keying on it alone fell through to GATE_FAILED,
+        # whose resume plan names a single lane — the exact dispatch this
+        # state exists to prevent (arbor-bank-2026-10-05).
+        waiting = sorted(set(open_work) | set(failed))
+        state, detail = "RESEARCH_WITHHELD", (
+            f"the driver withheld research on {len(waiting)} category(ies) "
+            f"({', '.join(waiting[:6])}): {str(driver.get('last_reason') or '')[:300]}")
+    elif (open_work or failed) and driver.get("last_outcome") == "AWAITING_WORKFLOW":
+        # Research is the conducting session's, as persisted workflows. The
+        # next step is that handoff — never a single lane, which holds no
+        # connector (arbor-bank-2026-10-05: the stop hook told a session to
+        # dispatch research-p1c2-producer while P1C2's workflow was running).
+        waiting = sorted(set(open_work) | set(failed))
+        state, detail = "AWAITING_WORKFLOW", (
+            f"research is handed to the session as workflows "
+            f"({run.qa_dir / 'research_workflow.json'}); "
+            f"{len(waiting)} category(ies) open or failing")
     elif budget["checkpoint_required"]:
+        walls = budget.get("scopes_at_ceiling") or [budget.get("search_scope")]
         state, detail = "AT_BUDGET_CEILING", (
-            f"{budget['search_ops']} search-ops against a ceiling of "
-            f"{budget['search_op_ceiling']}; the run must checkpoint")
+            f"{budget['search_ops_since_checkpoint']} search-ops since the last "
+            f"checkpoint in {', '.join(str(w) for w in walls)} against a ceiling "
+            f"of {budget['search_op_ceiling']} ({budget['search_ops']} lifetime); "
+            f"that scope must checkpoint")
     elif open_work and _no_enrichment_connector(run):
         state, detail = "BLOCKED_NO_CONNECTOR", (
             f"{_no_enrichment_connector(run)} — no cell can be declared absent "
@@ -276,6 +302,14 @@ COMPLETION_CRITERIA = {
         "reads what the run already spent, so a plain re-run stops again "
         "before it dispatches anything — which is the point: the next "
         "budget must be a decision, not an hourly sweep"),
+    "RESEARCH_WITHHELD": (
+        "a PERSON reads the withheld reasons in research_workflow.json, "
+        "repairs at the source they name (or accepts the gap), and runs the "
+        "driver again. No lane and no revive can close this one"),
+    "AWAITING_WORKFLOW": (
+        "every invocation in <ROOT>/07_qa/research_workflow.json has run as a "
+        "Workflow in the conducting session, then its `then` command (the "
+        "driver) has run — never a single research lane"),
     "READY_FOR_HANDOFF": ("`engine.cli validate` FAILS=0, `engine.cli handoff` "
                           "written, `engine.assessment open` flips the stage"),
     "SCORING_OPEN": ("`engine.assessment state` shows scored == subcaps for "
@@ -464,7 +498,15 @@ def resume_plan(row: dict) -> dict:
                 "why": "the catalogue moved under this run; a person decides "
                        "whether to re-pin or retire it",
                 "detail": row.get("catalogue_drift")}
-    if state in ("BLOCKED_NO_CONNECTOR", "AT_USD_CEILING"):
+    if state == "AWAITING_WORKFLOW":
+        handoff = f"{root}/07_qa/research_workflow.json" if root else \
+            "<ROOT>/07_qa/research_workflow.json"
+        return {"actionable": True, "agent": None, "workflow": handoff,
+                "pipeline": pipeline_cmd,
+                "why": ("research runs as persisted workflows in the conducting "
+                        "session; a lane holds no connector"),
+                "detail": row.get("detail")}
+    if state in ("BLOCKED_NO_CONNECTOR", "AT_USD_CEILING", "RESEARCH_WITHHELD"):
         # Both END ON A PERSON. Until 2026-09-14 neither had a branch here,
         # so both fell to the default — "the run is working" — for runs that
         # structurally cannot advance, while COMPLETION_CRITERIA in this
@@ -762,6 +804,7 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
 ACTIONABLE = ("UNREADABLE", "HALTED", "BLOCKED_NO_CONNECTOR",
               "STALLED", "GATE_FAILED", "UNGATED",
               "AT_BUDGET_CEILING", "AT_USD_CEILING",
+              "AWAITING_WORKFLOW", "RESEARCH_WITHHELD",
               "PRELIM_OPEN", "NO_CLIENT_FOLDER",
               "MISSING_LOCALLY", "READY_FOR_HANDOFF",
               # the assessment-stage machine (2026-09-03)
@@ -777,7 +820,10 @@ AGENT_ADVANCEABLE = tuple(s for s in ACTIONABLE
                                        "BLOCKED_NO_CONNECTOR",
                                        # and a person decides whether this
                                        # run is worth another budget
-                                       "AT_USD_CEILING"))
+                                       "AT_USD_CEILING",
+                                       # the driver refused to hand out work
+                                       # that could only report nothing
+                                       "RESEARCH_WITHHELD"))
 
 
 def main(argv=None) -> int:

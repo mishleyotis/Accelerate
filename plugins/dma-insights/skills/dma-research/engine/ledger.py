@@ -1133,21 +1133,16 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     assert_actor_scope(actor, "synthesis", [subcap])
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
-    # A NEW SYNTHESIS VOIDS THE OLD VERDICT (measured 2026-10-01, Cross
-    # Insurance): a challenger FAILs a cell, the producer repairs it, and
-    # the row kept its FAIL. challenge-batch skips any row carrying a
-    # verdict and `assessment score` refuses any evidenced row that is not
-    # PASS, so a repaired cell could never be re-challenged nor scored. The
-    # verdict judged prose that no longer exists; clearing it puts the cell
-    # back in the challenge queue, and the floors gate reports it as
-    # challenge_missing until an independent actor judges the new text.
-    # And an author never writes a verdict at all: Challenge_Verdict is a
-    # pillar column, so a synthesis record carrying "PASS" used to land as
-    # the cell's challenge verdict with no challenger involved. Only
-    # `record_challenge`, which proves independence, sets it.
-    payload.pop("Challenge_Verdict", None)
-    if str(row.get("Challenge_Verdict") or "").strip():
-        payload["Challenge_Verdict"] = ""
+    # A NEW SYNTHESIS INVALIDATES ANY PRIOR CHALLENGE, and a synthesis never
+    # certifies its own challenge (the challenge is independent, by a
+    # different actor, afterward). The old verdict judged prose that no longer
+    # exists, and `challenge_batch` skips a cell that already carries a
+    # verdict — so without clearing it a re-synthesised cell (a
+    # challenge_failed repair) would never be re-challenged and its stale FAIL
+    # would persist, unscoreable (MEM-0441 / MEM-0577). Always cleared,
+    # ignoring any verdict the record carries; the Challenge_Log row stays as
+    # history.
+    payload["Challenge_Verdict"] = ""
     wb.set_scoring(subcap, payload)
     if actor:
         record_provenance(wb, subcap, "synthesis", actor, session=session)
@@ -1227,8 +1222,29 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # just no longer decides. The gate itself is unchanged in strength: over
     # the cap since the last checkpoint still stops, which is the half a
     # loosened ceiling would have silently lost (MEM-0338 / R27).
-    since = _ops_since_checkpoint(wb, category)
+    #
+    # AND IT MUST MEASURE IT AT THE SAME SCOPE (arbor-bank-2026-10-05).
+    # The wall is per conversation: `append_search` measures the window of
+    # the row's own scope (its category, PRELIM or RELAY). Called with no
+    # category, this function measured a RUN-WIDE window that nothing
+    # enforces — so after thirteen category workflows each fired a few
+    # searches, the watchdog and the stop hook reported "5750 search-ops
+    # against a ceiling of 60, the run must checkpoint" while every
+    # category had 42-60 searches left. The unscoped answer is now the
+    # enforced scope nearest its wall, named.
+    if category:
+        scope = category
+        since = _ops_since_checkpoint(wb, category)
+        at_wall = [category] if since >= SEARCH_OP_CEILING else []
+    else:
+        scopes = sorted({_search_scope(r) for r in wb.rows("Search_Log")})
+        windows = {s: _ops_since_checkpoint(wb, s) for s in scopes}
+        at_wall = sorted(s for s, v in windows.items() if v >= SEARCH_OP_CEILING)
+        scope = max(windows, key=windows.get) if windows else None
+        since = windows.get(scope, 0) if scope else 0
     return {
+        "search_scope": scope,
+        "scopes_at_ceiling": at_wall,
         # `search_ops` is a LIFETIME count (spend worth seeing); the budget is
         # `search_ops_since_checkpoint` against the ceiling. A lane that read
         # the first as usage stopped at "55 of 60" with 1 used (2026-09-30).
