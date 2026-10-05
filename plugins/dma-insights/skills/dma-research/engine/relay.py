@@ -445,12 +445,6 @@ RUN_LEVEL_LANES = (DRAIN_AGENT, "enrichment-connector-specialist",
 #: what they cannot support from the run they emit as `search_requests`,
 #: each entry naming its `subcap` (from which `_one` derives the category).
 _SYNTHESIS_RE = re.compile(
-    # The report lanes, by the label the REPORTS stage gives them and by
-    # agent name. They hold no web tool either, and before this a probe a
-    # report section needed could only be written as "requested through the
-    # driver" — prose nobody harvested (Susser Bank, 2026-10-05: seven
-    # report rounds stalled on it).
-    r"^report-(assessment|client_research|research|validator)(-producer)?$|"
     r"^(overview|heatmap|insights|platform|techstack|context)-[a-z-]+-producer$|"
     r"^(finding-challenger|adversarial-verifier|evidence-integrity-checker|"
     r"exclusion-boundary-auditor|numeric-reconciliation-checker|"
@@ -942,6 +936,16 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         "nothing usable); BLOCKED is a measured one and needs the refusal "
         "text; SERVED means at least one row was registered.",
         "",
+        "For a request whose purpose starts `peer platform:`, record one verdict "
+        "per platform it lists, for that peer, after logging the search: "
+        f"`python3 -m engine.assessment peer-adoption {rr} --product '<platform>' "
+        "--peer '<peer, as named in the request>' --verdict Y|N|UNKNOWN --basis "
+        "'<what was searched and what it showed>' --source '<url, or searched: <query>>'`. "
+        "Y needs a page naming that platform at that peer; UNKNOWN after a real "
+        "search is an honest answer. For a `vendor scope statement` request, "
+        "open the vendor's own product page and register the sentence that "
+        "says what the product does (T3).",
+        "",
         "## Refusals you will meet",
         "",
         f"- `engine.cli search` refuses a tool outside {list(C.SEARCH_TOOLS)} and a "
@@ -1061,6 +1065,96 @@ def batch(run: runstate.Run, wb, *, group_by: str = "capability",
 def _entity(wb) -> dict:
     md = wb.metadata() if wb is not None else {}
     return {"entity": md.get("entity_name") or "?", "sub_vertical": md.get("sub_vertical") or ""}
+
+
+#: Tech_Register layer -> the category whose cells a vendor scope statement
+#: for a product on that layer bears on.
+_LAYER_CATEGORY = {"OPS": "P3C1", "CUST": "P2C3", "DATA": "P4C1", "INFRA": "P4C3"}
+PEER_PROBE = "peer platform:"
+
+
+def report_probes(run: runstate.Run, wb) -> dict:
+    """Queue every probe the report templates demand, derived from what the
+    run already holds, BEFORE any writer starts.
+
+    The writers fill pinned templates from collected evidence and hold no web
+    tool; they neither research nor verify (owner, 2026-10-05). But the
+    templates require three probes the category research never runs: the
+    vendor's own scope statement for every platform the reports name, an
+    "initiative already underway" check per recommendation, and each locked
+    peer's adoption of each recommended platform. At Susser Bank nothing ran
+    them, writers wrote "requested through the driver", and the validator
+    returned the same sections for eleven rounds. Deterministic: the same
+    workbook queues the same requests, and a served one is never re-queued."""
+    entity = _entity(wb)["entity"]
+    cells = list(wb.selected_subcaps())
+
+    def first_cell(cat: str) -> str | None:
+        return next((c for c in cells if c.startswith(cat)), None)
+
+    reqs: list[tuple[str, str | None, str]] = []
+    sols = wb.rows("Solution_Catalogue")
+    for r in sols:
+        cats = [c.strip() for c in str(r.get("categories") or "").split(",") if c.strip()]
+        cell = first_cell(cats[0]) if cats else None
+        plat = str(r.get("platform") or "").strip()
+        name = str(r.get("solution_name") or "").strip()
+        if not (plat and cell):
+            continue
+        parts = [x.strip() for x in re.split(r"\+|/", plat) if x.strip()]
+        for part in parts:
+            reqs.append((f"{part} financial services banking product overview capabilities",
+                         cell, f"vendor scope statement for {part} ({r.get('solution_id')}), "
+                               f"fetched from the vendor's own page"))
+        # The client's own initiative, not Zennify's product: "Third-party
+        # risk, resilience and governance on the Zennify GRC Platform" asks
+        # whether the bank already runs a third-party-risk programme.
+        initiative = re.split(r"\s+(?:on|with|across|for)\s+|,", name)[0].strip() or name
+        reqs.append((f'"{entity}" {initiative} launched OR completed OR replaced OR paused',
+                     cell, f"initiative already underway for {r.get('solution_id')}: {name}"))
+    for r in wb.rows("Tech_Register"):
+        if str(r.get("Status") or "") != "CONFIRMED":
+            continue
+        prod = re.sub(r"\(.*?\)", "", str(r.get("Product") or "")).strip()
+        vend = str(r.get("Vendor") or "").strip()
+        if not prod or vend.lower() in ("", "unnamed", "none"):
+            continue
+        cell = (str(r.get("SubCap_IDs") or "").split(",")[0].strip()
+                or first_cell(_LAYER_CATEGORY.get(str(r.get("Layer") or ""), "")))
+        q = prod if prod.lower().startswith(vend.split()[0].lower()) else f"{vend} {prod}"
+        if cell:
+            reqs.append((f"{q} product overview",
+                         cell, f"vendor scope statement for {r.get('TS_ID')} {prod}"))
+    lock = wb.handoff_lock() or {}
+    peers = [re.sub(r"\s*\(.*?\)", "", p).strip()
+             for p in str(lock.get("locked_peer_set") or "").split("|") if p.strip()]
+    plats = []
+    for r in sols:
+        for part in re.split(r"\+|/", str(r.get("platform") or "")):
+            part = part.strip()
+            if part and part not in plats:
+                plats.append(part)
+    if peers and plats and sols:
+        cats = [c.strip() for c in str(sols[0].get("categories") or "").split(",") if c.strip()]
+        cell = first_cell(cats[0]) if cats else None
+        terms = " OR ".join(f'"{p}"' for p in plats[:6])
+        for peer in peers:
+            if cell:
+                reqs.append((f'"{peer}" {terms}', cell,
+                             f"{PEER_PROBE} {peer} | {'; '.join(plats)}"))
+    known = requests(run)
+    new, seen = [], set()
+    for q, cell, why in reqs:
+        if normalize(q) in seen:         # one search per question, whatever the cell
+            continue
+        seen.add(normalize(q))
+        r = _one({"query": q, "subcap": cell, "proves": why, "tool": "exa"}, None)
+        if r is None or r["id"] in known:
+            continue
+        _append(run, dict(r, event="open", lane="report-probes", round=None, at=_utcnow()))
+        known[r["id"]] = r
+        new.append(r["id"])
+    return {"derived": len(reqs), "queued": len(new), "ids": new}
 
 
 def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -> str:

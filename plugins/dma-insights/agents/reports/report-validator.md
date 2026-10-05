@@ -102,15 +102,15 @@ section reads READY, run the whole-report pass and report what you find:
    unsupported, and the reports should say so rather than the reader
    discovering it.
 
-## A probe the section needed and nobody ran
+## A probe the section needed and found nothing
 
-When a section fails only because a probe its control requires was never
-run (a vendor scope statement, an initiative-underway probe, a peer platform
-check), REVISE it as usual and ALSO end your output with the same
-`{"search_requests": [...]}` block the writers use, one entry per missing
-probe with the cell it bears on. The driver runs them before the writers'
-next round, so the next draft can be judged on evidence rather than
-returned again for the same gap.
+The driver runs every probe the templates demand before the writers start
+(`engine.relay.report_probes`). A section that states a searched absence,
+saying what was searched and that it established nothing, meets the control.
+Do not return it for a search the writer could not run: writers hold no web
+tool. Where a probe the control needs has no row in `Search_Log` at all,
+REVISE with the note `PROBE MISSING: <what>`. That is an upstream gap for the
+conductor, not a rewrite.
 
 ## What you never do
 

@@ -2322,36 +2322,45 @@ class Pipeline:
             f"--evidence-id <E-id> --basis '<what the excerpt says>'`, "
             f"then `engine.techscan reconcile` until it exits 0.")
 
-    def _service_report_probes(self, round_no: int, after: str = "writers") -> int:
-        """Harvest the `search_requests` the report lanes emitted and run
-        them through specialist lanes. Always lane mode here: REPORTS has no
-        conductor waiting between rounds to service an orchestrator batch,
-        and the drain brief carries the owner's WebSearch failover for a
-        container whose lanes hold no connector."""
+    def _report_probes(self) -> int:
+        """Run the probes the report templates demand BEFORE any writer
+        starts (`relay.report_probes`): vendor scope statements, initiative-
+        underway checks and peer platform adoption. Writers fill templates
+        from collected evidence and hold no web tool (owner, 2026-10-05), so
+        a probe nobody ran upstream is a gap no report round can close.
+        Always lane mode: REPORTS has no conductor between rounds to service
+        an orchestrator batch, and the drain brief carries the owner's
+        WebSearch failover for lanes that hold no connector."""
         try:
             from . import relay
-            logs = self.run.root / "agent_logs"
-            h = relay.harvest(self.run, [], logs_dir=logs, round_no=round_no)
-            if h["harvested"]:
-                self.opts.log(f"  [RELAY] {h['harvested']} report probe(s) from the {after}")
+            q = relay.report_probes(self.run, self.wb)
+            if q["queued"]:
+                self.opts.log(f"  [PROBES] {q['queued']} report probe(s) derived from "
+                              f"Solution_Catalogue, Tech_Register and the peer set")
             d = relay.drain_batch(self.run, self.wb, mode="lane",
-                                  out_dir=self._briefs(f"reports_relay_r{round_no}_{after}"))
+                                  out_dir=self._briefs("reports_probes"))
             if not d.get("lanes"):
                 return 0
-            self.opts.log(f"  [RELAY] running {d['requests']} report probe(s) over "
-                          f"{d['lanes']} specialist lane(s)")
+            self.opts.log(f"  [PROBES] running {d['requests']} probe(s) over {d['lanes']} lane(s)")
             self._count(self._dispatch(d, stage="REPORTS"))
             rc = relay.reconcile(self.run, self.wb)
-            self.opts.log(f"  [RELAY] closed {rc.get('closed')}; still open {rc.get('still_open')}")
+            st = relay.state(self.run)["by_status"]
+            self.opts.log(f"  [PROBES] closed {rc.get('closed')}; queue now {st}")
+            if st.get("OPEN"):
+                L.append_gate(self.wb, gate="REPORT_PROBES", scope="run", verdict="FAIL",
+                              blocking=False,
+                              detail=f"{st['OPEN']} probe(s) still OPEN after the drain; the "
+                                     f"writers state them as searched-not-established")
             return int(d["requests"])
         except Exception as e:                                  # noqa: BLE001
-            self.opts.log(f"  [RELAY] report probes skipped ({e.__class__.__name__}: {str(e)[:120]})")
+            self.opts.log(f"  [PROBES] skipped ({e.__class__.__name__}: {str(e)[:120]})")
             return 0
 
     def _stage_reports(self) -> str:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
         self._reconcile_register()
+        self._report_probes()
         self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
             # READY reports go straight to render. Dispatching the producers
@@ -2362,13 +2371,9 @@ class Pipeline:
             self._rounds = r + 1
             b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
             self._count(self._dispatch(b, stage="REPORTS"))
-            # The probes the writers could not answer from the run, run now
-            # so the next round writes from evidence instead of "requested".
-            self._service_report_probes(r)
             v = brief.report_batch(self.wb, run=self.run,
                                    out_dir=self._briefs(f"reports_validator_r{r}"), validator=True)
             self._count(self._dispatch(v, stage="REPORTS"))
-            self._service_report_probes(r, after="validator")
             st = N.state(self.wb)
             if all(x.get("ready") for x in st["reports"].values()):
                 break

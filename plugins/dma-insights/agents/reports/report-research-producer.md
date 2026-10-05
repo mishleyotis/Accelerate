@@ -164,31 +164,21 @@ from a section's author by name, so the verdict comes from
 (`engine.cli narrative state --report client_research`) and let the conductor route
 the review.
 
-## When the template demands a probe the run has not answered
+## You write from collected evidence only
 
-Some section controls require a search the research stage never ran: a
-vendor's own scope statement, fetched; an "initiative already underway"
-probe (entity + initiative + paused/completed/replaced); a peer's platform
-for a recommendation's readiness contract. You hold no web tool, and you do
-not need one. **Never write "requested through the driver", "not run",
-"pending" or any pipeline word into the section body.** End your final
-output with a JSON block the driver harvests and runs before your next
-round:
-
-```json
-{"search_requests": [
-  {"query": "nCino Bank Operating System loan origination product scope",
-   "subcap": "P3C1.5.1", "facet": "works", "tool": "exa",
-   "proves": "the vendor scope statement section 6.4 requires for TS-018"}
-]}
-```
-
-`subcap` is the cell the result bears on (the one your section cites for
-that claim). On your next round the results are in `Evidence_Detail` and
-`Platform_Peer_Adoption`; write from them, and where a probe came back
-empty, state the searched absence and what was searched, as a finding about
-the client, never as a note about the pipeline. (Susser Bank, 2026-10-05:
-seven report rounds stalled on probes written as prose that nothing ran.)
+You fill a pinned template from what the run already holds. You do not
+research and you do not verify, and you hold no web tool. Every probe a
+section control demands (the vendor's own scope statement, the "initiative
+already underway" check, each peer's adoption of a recommended platform) was
+run by the driver before you started, through `engine.relay.report_probes`.
+Its results are in `Evidence_Detail`, `Search_Log` and
+`Platform_Peer_Adoption`. Where a probe found nothing, state the searched
+absence as a finding about the client: what was searched, and that it
+established nothing. **Never write "requested through the driver", "not
+run", "pending", or any other pipeline word into a section body.** If a
+probe the template needs has no row at all, say so in your handback; the
+gap is upstream and not yours to fill. (Susser Bank, 2026-10-05: eleven
+report rounds were spent on probes written as prose that nothing ran.)
 
 ## What you never do
 
