@@ -2334,6 +2334,14 @@ class Pipeline:
         try:
             from . import relay
             q = relay.report_probes(self.run, self.wb)
+            # A new stage is a new conversation for the search ceiling: the
+            # research window per category was spent during RESEARCH, and
+            # without a fresh mark every probe on a busy category is refused
+            # unlogged (P2C3, 2026-10-05).
+            from . import runstate as RS_
+            cats = sorted({str(r.get("category") or "") for r in relay.open_requests(self.run)} - {""})
+            if cats:
+                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats)
             if q["queued"]:
                 self.opts.log(f"  [PROBES] {q['queued']} report probe(s) derived from "
                               f"Solution_Catalogue, Tech_Register and the peer set")

@@ -944,7 +944,13 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         "Y needs a page naming that platform at that peer; UNKNOWN after a real "
         "search is an honest answer. For a `vendor scope statement` request, "
         "open the vendor's own product page and register the sentence that "
-        "says what the product does (T3).",
+        "says what the product does (T3). For a request whose purpose starts "
+        "`peer layer:`, record one reading per register row it lists, for that "
+        f"peer: `python3 -m engine.techscan peer-record {rr} --ts <TS-nnn> "
+        "--peer '<peer>' --deployed|--not-deployed|--unknown --basis '<what was "
+        "searched and what it showed>' [--url <url>]`; name the vendor you found "
+        "in the basis even when it is not on the register (a peer on Jack Henry "
+        "when Susser's core is unknown is the finding).",
         "",
         "## Refusals you will meet",
         "",
@@ -1071,6 +1077,11 @@ def _entity(wb) -> dict:
 #: for a product on that layer bears on.
 _LAYER_CATEGORY = {"OPS": "P3C1", "CUST": "P2C3", "DATA": "P4C1", "INFRA": "P4C3"}
 PEER_PROBE = "peer platform:"
+PEER_LAYER = "peer layer:"
+_LAYER_TERMS = {"OPS": "core processor OR \"core banking\" OR \"loan origination\"",
+                "CUST": "\"online banking\" OR \"mobile banking\" OR \"digital banking\"",
+                "DATA": "\"data warehouse\" OR analytics",
+                "INFRA": "cloud OR \"identity\" OR security"}
 
 
 def report_probes(run: runstate.Run, wb) -> dict:
@@ -1134,14 +1145,62 @@ def report_probes(run: runstate.Run, wb) -> dict:
             part = part.strip()
             if part and part not in plats:
                 plats.append(part)
-    if peers and plats and sols:
-        cats = [c.strip() for c in str(sols[0].get("categories") or "").split(",") if c.strip()]
-        cell = first_cell(cats[0]) if cats else None
+    # Peer probes rotate over the solutions' categories: one category's
+    # search window cannot hold the whole peer set (Susser Bank, 2026-10-05:
+    # twelve probes on one P2C3 cell hit the 60-search ceiling unlogged).
+    sol_cells = [c for c in (first_cell(str(r.get("categories") or "").split(",")[0].strip())
+                             for r in sols) if c]
+    if peers and plats and sol_cells:
         terms = " OR ".join(f'"{p}"' for p in plats[:6])
+        for i, peer in enumerate(peers):
+            reqs.append((f'"{peer}" {terms}', sol_cells[i % len(sol_cells)],
+                         f"{PEER_PROBE} {peer} | {'; '.join(plats)}"))
+    # The estate section needs each peer's reading on every register layer
+    # (the core processor, the digital banking platform, ...) and every
+    # ABSENT row, not just the recommended platforms.
+    reg = wb.rows("Tech_Register")
+    for layer, cat in _LAYER_CATEGORY.items():
+        rows = [r for r in reg if str(r.get("Layer") or "") == layer]
+        if not rows:
+            continue
+        # Name systems, not consumer features: a row the bank's own feature
+        # page carries (Zelle, Quicken export) is not what a peer runs a
+        # layer on. An ABSENT core row asks about the core vendors.
+        sys_rows = [r for r in rows if str(r.get("Detection_Method") or "") != "public_document"]
+        names = (["Fiserv", "Jack Henry", "FIS"]
+                 if any("core" in str(r.get("Product") or "").lower()
+                        and str(r.get("Status") or "") == "ABSENT" for r in rows) else [])
+        rows_for_names = sys_rows
+        for r in sorted(rows_for_names, key=lambda r: ("CONFIRMED", "CLAIMED", "INFERRED", "ABSENT")
+                        .index(str(r.get("Status") or "ABSENT")) if str(r.get("Status") or "")
+                        in ("CONFIRMED", "CLAIMED", "INFERRED", "ABSENT") else 9):
+            v = re.sub(r"\(.*?\)", "", str(r.get("Vendor") or r.get("Product") or "")).strip()
+            v = v.split("/")[0].strip()
+            if v and v.lower() not in ("unnamed", "none") and v not in names:
+                names.append(v)
+        cell = first_cell(cat)
+        if not cell:
+            continue
+        ts_ids = ", ".join(str(r.get("TS_ID")) for r in rows)
+        terms = " OR ".join(f'"{n}"' for n in names[:4])
         for peer in peers:
-            if cell:
-                reqs.append((f'"{peer}" {terms}', cell,
-                             f"{PEER_PROBE} {peer} | {'; '.join(plats)}"))
+            reqs.append((f'"{peer}" {_LAYER_TERMS[layer]} {terms}'.strip(), cell,
+                         f"{PEER_LAYER} {peer} | layer {layer} | rows {ts_ids}"))
+    # An integration solution's readiness contract turns on whether the
+    # systems it would connect publish APIs: the vendor's developer docs.
+    if any("mulesoft" in str(r.get("platform") or "").lower() for r in sols):
+        icell = next((c for c in (first_cell(str(r.get("categories") or "").split(",")[0].strip())
+                                  for r in sols if "mulesoft" in str(r.get("platform") or "").lower())
+                      if c), None)
+        for r in reg:
+            if (str(r.get("Status") or "") != "CONFIRMED"
+                    or str(r.get("Layer") or "") not in ("OPS", "CUST")
+                    or str(r.get("Detection_Method") or "") == "public_document"):
+                continue                 # systems of record, not consumer features
+            v = str(r.get("Vendor") or "").split("/")[0].strip()
+            if icell and v and v.lower() not in ("unnamed", "none"):
+                reqs.append((f"{v} API developer documentation integration", icell,
+                             f"API documentation for {r.get('TS_ID')} {v} (integration readiness)"))
     known = requests(run)
     new, seen = [], set()
     for q, cell, why in reqs:
