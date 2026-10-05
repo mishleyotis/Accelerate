@@ -1428,8 +1428,15 @@ def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
                       "prompt_file": str(path), "chars": packet["packet_chars"]})
     batch_path = out_dir / batch_name
     batch_path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    # A TRIM IS NEVER SILENT. `_bound` dropping rows from a list a gate
+    # demands complete is how SCORING handed each pillar 3 of 185 rows for
+    # seven rounds (Susser Bank, 2026-10-05). The driver logs these.
+    trimmed = [{"lane": name, "trimmed": packet["trimmed"],
+                "dropped": len(packet.get("dropped") or [])}
+               for name, packet, _ in lanes if packet.get("trimmed")]
     return {"batch": str(batch_path), "lanes": len(rows), "briefs": wrote,
-            "dispatch": _dispatch_line(batch_path, run, stage)}
+            "dispatch": _dispatch_line(batch_path, run, stage),
+            **({"trimmed": trimmed} if trimmed else {})}
 
 
 def _engine(run) -> str:
@@ -1845,7 +1852,9 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                     continue
                 n_ev = len(_ids(r.get("Evidence_IDs")))
                 verdict = _clean(r.get("Challenge_Verdict"))
-                if n_ev and verdict.upper() != "PASS":
+                # The scorer's own refusal predicate, read from one place.
+                from .assessment import score_blockers
+                if score_blockers(wb, r):
                     blocked.append(f"{sub} ({verdict or 'unchallenged'})")
                     continue
                 rows.append({"subcap": sub, "name": C.subcap_names().get(sub),

@@ -542,6 +542,9 @@ class Pipeline:
     def _dispatch(self, batch: dict, *, stage: str) -> dict:
         if not batch.get("batch") or not batch.get("lanes"):
             return {"dispatched": 0, "ok": 0, "failed": []}
+        for t in batch.get("trimmed") or []:
+            self.opts.log(f"  [BRIEF] WARNING {stage} lane {t['lane']}: {t['dropped']} "
+                          f"row(s) dropped to fit the packet ceiling — {t['trimmed'][:160]}")
         summary = self.opts.dispatcher.dispatch(
             Path(batch["batch"]), stage=stage, lanes=self._lanes(),
             retries=self.opts.lane_retries, ctx=self)

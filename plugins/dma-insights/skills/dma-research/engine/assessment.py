@@ -134,6 +134,37 @@ SCORING_NAME = "scoring.json"
 SCORING_SCHEMA_VERSION = "scoring_v1"
 
 
+def score_blockers(wb: RunWorkbook, row: dict) -> list[str]:
+    """Why research must still act before this row CAN be scored — the ONE
+    predicate `score` refuses on, and that HANDOFF (`research_ready`), the
+    scoring brief and the floors gate read too.
+
+    Measured 2026-10-05 (Susser Bank): this rule lived only inside `score`.
+    The floors gate accepted a FAIL challenge, HANDOFF never asked, and the
+    scoring brief offered the rows anyway, so 104 rows were refused for the
+    first time inside SCORING, round after round, at a stage that cannot
+    repair them. A rule a downstream stage refuses on must be the rule every
+    upstream stage checks, read from one place."""
+    out = []
+    synthesised = bool(_clean(row.get("Dominant_Claim")))
+    eids = [i.split(":")[0] for i in _split_ids(row.get("Evidence_IDs"))
+            if i and i != C.NO_EVIDENCE]
+    declared = L.is_declared_absent(row, wb)
+    if eids and not synthesised:
+        out.append("the row holds evidence and no synthesis (volleyed): a "
+                   "score on raw evidence is the defect the research → "
+                   "synthesis → challenge → score order exists to stop")
+    if not eids and not declared:
+        out.append("the row holds no evidence and its absence was never "
+                   "declared (`engine.cli absence …` with the volley ladder); "
+                   "an unresearched cell cannot be scored, only a searched one")
+    if eids and _clean(row.get("Challenge_Verdict")).upper() != "PASS":
+        out.append(f"Challenge_Verdict is {_clean(row.get('Challenge_Verdict')) or 'empty'}: "
+                   f"a score reflects a claim that SURVIVED an independent "
+                   f"challenge, never one that failed or was never challenged")
+    return out
+
+
 def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
     """What must hold before a single score is struck."""
     from . import floors_gate, handoff, prelim
@@ -158,6 +189,23 @@ def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
         handoff._assert_scoreable(gates)
     except SystemExit as e:
         out.append(str(e))
+    # Every row scoring will be asked to score must be scoreable NOW — the
+    # same predicate `score` refuses on, checked here where research can
+    # still act rather than discovered inside SCORING.
+    sel = set(wb.selected_subcaps())
+    unscoreable = {}
+    for r in wb.scoring_rows():
+        sub = _clean(r.get("SubCap_ID"))
+        if sub in sel and r.get("Score") in (None, ""):
+            why = score_blockers(wb, r)
+            if why:
+                unscoreable[sub] = why[0]
+    if unscoreable:
+        first = next(iter(unscoreable.items()))
+        out.append(f"{len(unscoreable)} row(s) cannot be scored yet — research "
+                   f"must repair them first (e.g. {first[0]}: {first[1][:140]}). "
+                   f"Cells: {', '.join(sorted(unscoreable)[:12])}"
+                   + ("…" if len(unscoreable) > 12 else ""))
     unnamed = [str(r.get("SubCap_ID")) for r in wb.scoring_rows()
                if not _clean(r.get("SubCap_Name"))]
     if unnamed:
@@ -449,22 +497,9 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
     elif score is None:
         raise ScoringRefusal("a score needs --score, or --raw with its --adj / --cap inputs")
 
-    synthesised = bool(_clean(row.get("Dominant_Claim")))
     eids = [i.split(":")[0] for i in _split_ids(row.get("Evidence_IDs"))
             if i and i != C.NO_EVIDENCE]
-    declared = L.is_declared_absent(row, wb)
-    if eids and not synthesised:
-        problems.append("the row holds evidence and no synthesis (volleyed): a "
-                        "score on raw evidence is the defect the research → "
-                        "synthesis → challenge → score order exists to stop")
-    if not eids and not declared:
-        problems.append("the row holds no evidence and its absence was never "
-                        "declared (`engine.cli absence …` with the volley ladder); "
-                        "an unresearched cell cannot be scored, only a searched one")
-    if eids and _clean(row.get("Challenge_Verdict")).upper() != "PASS":
-        problems.append(f"Challenge_Verdict is {_clean(row.get('Challenge_Verdict')) or 'empty'}: "
-                        f"a score reflects a claim that SURVIVED an independent "
-                        f"challenge, never one that failed or was never challenged")
+    problems.extend(score_blockers(wb, row))
 
     sc = _num(score)
     if sc is None or not (1.0 <= sc <= 5.0):

@@ -73,3 +73,36 @@ def test_scoring_lanes_carry_every_scorable_row_and_hold_refused_ones(tmp_path):
     assert sorted(offered) == sorted(c for c in cells if c != held)
     rows = json.loads(Path(b["batch"]).read_text())
     assert len({r["label"] for r in rows}) == len(rows), "two lanes share a transcript"
+
+
+# ── one predicate, read by every stage that depends on it ─────────────────
+
+def test_handoff_refuses_a_row_the_scorer_would_refuse(tmp_path):
+    """The cross-stage contract: anything `engine.assessment score` refuses
+    on is caught by HANDOFF's `research_ready`, where research can still
+    act — not discovered inside SCORING."""
+    from engine import assessment as A
+    run, wb, cells, ev = researched_run(tmp_path)
+    assert not [x for x in A.research_ready(wb, run.qa_dir) if "cannot be scored" in x]
+    cell = _evidenced_cell(wb, ev)
+    wb.set_scoring(cell, {"Challenge_Verdict": "FAIL"})
+    got = [x for x in A.research_ready(wb, run.qa_dir) if "cannot be scored" in x]
+    assert got and cell in got[0]
+    assert A.score_blockers(wb, wb.scoring_row(cell))
+
+
+def test_a_research_pass_implies_every_row_is_scoreable(tmp_path):
+    """Upstream PASS must imply downstream acceptance, for every row."""
+    from engine import assessment as A
+    run, wb, cells, ev = researched_run(tmp_path)
+    assert floors_gate.run(wb, "P1C1", require_synthesis=True, persist=False)["gate"] == "PASS"
+    for c in cells:
+        assert not A.score_blockers(wb, wb.scoring_row(c)), c
+
+
+def test_a_trimmed_brief_is_reported(tmp_path):
+    rows = [{"agent": "x", "shared": {}, "big": ["y" * 400] * 40}]
+    packet = brief._bound(rows[0], "big")
+    assert packet.get("trimmed")
+    out = brief._write_lanes(tmp_path, [("lane-1", packet, "t")], run=None, stage="SCORING")
+    assert out["trimmed"][0]["lane"] == "lane-1" and out["trimmed"][0]["dropped"] > 0
