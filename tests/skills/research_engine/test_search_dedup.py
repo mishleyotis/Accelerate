@@ -96,7 +96,10 @@ def test_prior_queries_is_the_exclusion_list_for_a_cell(tmp_path):
     # run-level rows only when asked
     L.append_search(wb, subcap=None, facet="works", query="acme annual report 2025",
                     tool="web_search", hits=1, kept=1, prelim=True)
-    assert [g["query"] for g in L.prior_queries(wb, prelim=True)] == ["acme annual report 2025"]
+    # The fixture's PRELIM pass logs its own issue-register sweep (facet
+    # "issues"); this test's run-level row is the one under "works".
+    assert [g["query"] for g in L.prior_queries(wb, prelim=True)
+            if g.get("facet") != "issues"] == ["acme annual report 2025"]
     assert "acme annual report 2025" not in [g["query"] for g in L.prior_queries(wb, ["P1C1.1.1"])]
 
 
