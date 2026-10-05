@@ -182,9 +182,14 @@ alignment checks … thorough reasoning through the composite factor scoring"):
   engine's tie-break, so a wrong bit reorders the page.
 - **Alignment counts only as the entity's own words.** `alignment_basis:
   stated_objective` requires an `alignment_quote` resolving through
-  `get_evidence`; otherwise alignment stays null, the engine renormalises,
-  and the tile discloses `impact_fallback` — never a quote invented to reach
-  the stated basis.
+  `get_evidence`. Where none is stated the engine computes alignment from the
+  run's quoted focus areas (`client_focus_areas`, the priority quoted as
+  `FA-n: …`) — mirror it from the card like every other factor. Only a run
+  with no quoted focus areas renormalises and discloses `impact_fallback` —
+  never a quote invented to reach the stated basis.
+- **Greenfield is graded** (`greenfield_basis` on the row): open ground is
+  the share of the tile's cells no detected incumbent holds; an
+  `incumbent_product` zero is an expansion and the tile says so.
 
 **No colour and no band hex in any tile** (invariant 7). `tier` and `ers` on any
 nested evidence reference drop by class; `r_layer` reaches no audience.

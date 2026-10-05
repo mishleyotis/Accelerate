@@ -153,6 +153,17 @@ TOP_N = 5
 
 ALIGNMENT_STATED = "stated_objective"
 ALIGNMENT_FALLBACK = "impact_fallback"
+# Alignment computed from the client's OWN stated priorities (the run's focus
+# areas: verbatim quotes, each naming the cells it is about) rather than typed
+# by a producer. Measured 2026-10-05: producers almost never supplied an
+# alignment, so the term renormalised away on nearly every card and the 0.20
+# share the owner asked for weighed nothing. See dma_mcp.fit.
+ALIGNMENT_FOCUS_AREAS = "client_focus_areas"
+
+GREENFIELD_ABSENT = "register_absent"          # a row says the family is absent
+GREENFIELD_OPEN_GROUND = "register_open_ground"  # share of cells no incumbent holds
+GREENFIELD_INCUMBENT = "incumbent_product"     # the register already runs it
+GREENFIELD_UNMEASURED = "unmeasured"           # no register to read
 
 # ── reciprocal rank fusion ────────────────────────────────────────────
 #
@@ -244,6 +255,18 @@ class Candidate:
     readiness: str = "green"                    # green | amber | red
     alignment: float | None = None              # 0..1, the entity's own objective
     alignment_quote: str | None = None
+    # Where a KNOWN alignment came from: stated by the producer (default) or
+    # computed from the client's focus areas. Unknown stays None and
+    # renormalises, exactly as before.
+    alignment_basis: str | None = None
+    # GRADED greenfield, 0..1: the share of this platform's cells that the
+    # scanned register shows NO incumbent holding. A binary "family confirmed
+    # ABSENT" almost never fired — a technographic scan records what is
+    # present, not what is missing — so the term scored 0 on nearly every
+    # card (2026-10-05). `family_absent` still means 1.0 outright; None
+    # means unmeasured (no register), which contributes nothing.
+    greenfield: float | None = None
+    greenfield_basis: str | None = None
     # Platforms this one needs FIRST. Engine v2 computed a prerequisite DAG
     # beside the fit and this build dropped it; the omission was caught by
     # scoring a real client, where a workload the institution places ON the
@@ -380,8 +403,25 @@ def interconnect_of(cand: Candidate, all_gap_cells=None) -> float:
 
 
 def absent_of(cand: Candidate) -> float:
-    """Greenfield ground: the register confirms this family absent."""
-    return 1.0 if cand.family_absent else 0.0
+    """Greenfield ground, 0..1.
+
+    1.0 when the register confirms the family absent. Otherwise the graded
+    open-ground share the caller measured from the register (cells no
+    CONFIRMED or INFERRED incumbent holds; 0.0 when the register already runs
+    this very product). Unmeasured contributes 0.0 and says so on the row."""
+    if cand.family_absent:
+        return 1.0
+    if cand.greenfield is None:
+        return 0.0
+    return _clamp(float(cand.greenfield))
+
+
+def greenfield_basis_of(cand: Candidate) -> str:
+    if cand.family_absent:
+        return GREENFIELD_ABSENT
+    if cand.greenfield is None:
+        return GREENFIELD_UNMEASURED
+    return cand.greenfield_basis or GREENFIELD_OPEN_GROUND
 
 
 def readiness_multiplier(cand: Candidate) -> float:
@@ -454,7 +494,7 @@ def score(cand: Candidate, all_gap_cells=None) -> dict:
     if known_alignment:
         w_opp, w_int, w_abs, w_align = (W_OPPORTUNITY, W_INTERCONNECT,
                                         W_ABSENT, W_ALIGNMENT)
-        basis = ALIGNMENT_STATED
+        basis = cand.alignment_basis or ALIGNMENT_STATED
     else:
         # RENORMALISE, never score the unknown as zero: zero leaves the order
         # unchanged and drags every score down by a fifth, which makes a
@@ -491,6 +531,7 @@ def score(cand: Candidate, all_gap_cells=None) -> dict:
         "relevance": round(relevance, 3),
         "alignment_basis": basis,
         "alignment_quote": cand.alignment_quote,
+        "greenfield_basis": greenfield_basis_of(cand),
         "cells_addressed": len(cand.cells),
         "cells_driving": len(core_of(cand)),
         "evidence_strength_mean": round(mean_evidence_strength(cand), 4),

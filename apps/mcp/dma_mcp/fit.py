@@ -269,6 +269,117 @@ def _greenfield_cells(absent_rows, platform, platforms) -> set:
     return out
 
 
+
+def _staged_section(cur, run_id, page, section):
+    """The newest live submission's section body for this run, or None."""
+    try:
+        cur.execute(
+            """SELECT payload FROM submissions
+                WHERE run_id = %s AND page = %s
+                  AND superseded_at IS NULL
+                ORDER BY submitted_at DESC LIMIT 1""", (run_id, page))
+        row = cur.fetchone()
+    except Exception:                              # noqa: BLE001
+        return None
+    payload = row[0] if row else None
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except ValueError:
+            return None
+    if not isinstance(payload, dict):
+        return None
+    body = payload.get(section)
+    return body if isinstance(body, dict) else None
+
+
+def _capability(sid) -> str:
+    """`P2C3.2.4` -> `P2C3.2`; a variant `P4C3.8.IB1` -> `P4C3.8`."""
+    return str(sid).rsplit(".", 1)[0]
+
+
+def _focus_areas(cur, run_id) -> list:
+    """[(fa_id, capabilities, verbatim quote)] — the client's OWN stated
+    priorities, each naming the cells it is about (heatmap.focus_areas, H1).
+
+    THE ALIGNMENT SOURCE. The engine gives strategic alignment a 0.20 share
+    "quoting the entity's OWN stated objective", but only a producer could
+    supply it and producers almost never did, so the term renormalised away
+    on nearly every card (owner, 2026-10-05: "greenfield opportunities and
+    strategic alignment rarely receive scores"). The focus areas ARE the
+    entity's stated objectives, verbatim and cell-linked, so alignment is
+    computed from them: a fact about the client, not a judgement.
+    Matched at CAPABILITY grain: a priority names a capability by one or two
+    of its cells, and a platform reaches the capability, not that exact
+    subcap alone."""
+    body = _staged_section(cur, run_id, "heatmap", "focus_areas")
+    out = []
+    for fa in (body or {}).get("focus_areas") or []:
+        if not isinstance(fa, dict):
+            continue
+        caps = {_capability(s) for s in (fa.get("involved_subcap_ids") or [])
+                if s}
+        quote = str(fa.get("verbatim_quote") or "").strip()
+        if caps and quote:
+            out.append((str(fa.get("fa_id") or ""), caps, quote))
+    return out
+
+
+def _derived_alignment(sids, focus) -> tuple:
+    """(alignment 0..1, quote) for one candidate, or (None, None).
+
+    The share of the capabilities the client's stated priorities name that
+    this platform's cells reach. The quote is the priority it reaches most of,
+    verbatim, with its id — so a reader can check the number against the
+    client's own words."""
+    if not focus:
+        return None, None
+    named = set().union(*(caps for _, caps, _ in focus))
+    mine = {_capability(s) for s in sids}
+    hit = named & mine
+    best = max(focus, key=lambda f: (len(f[1] & mine), f[0]))
+    if not hit:
+        return 0.0, None
+    q = best[2]
+    if len(q) > 300:
+        q = q[:297].rstrip() + "..."
+    return len(hit) / len(named), f"{best[0]}: {q}"
+
+
+def _held_products(cur, run_id) -> list:
+    """Product names CONFIRMED or INFERRED in the promoted register. A
+    platform the client already runs is an expansion, never greenfield."""
+    body = _staged_section(cur, run_id, "techstack", "techstack")
+    out = []
+    for it in (body or {}).get("items") or []:
+        if isinstance(it, dict) and str(it.get("status") or "").upper() in (
+                "CONFIRMED", "INFERRED"):
+            out.append(str(it.get("product") or ""))
+    return [p for p in out if p]
+
+
+def _greenfield(sids, area_held, held_sids, held_products, platform,
+                register_measured) -> tuple:
+    """(greenfield 0..1 or None, basis) for one candidate — GRADED.
+
+    The binary "register row says ABSENT" almost never fired: a
+    technographic scan records what IS present. What a scanned register does
+    say is which of a platform's cells an incumbent already occupies, so the
+    open ground is the share it does not. Rules:
+      · no register at all -> None (unmeasured; scores nothing, says so);
+      · the register runs this very product -> 0.0 (an expansion);
+      · otherwise -> share of the cells no CONFIRMED/INFERRED row holds.
+    The weight stays the audited 0.08 share, so a graded term cannot
+    reintroduce the flat-absence skew the 2026-07 audit removed."""
+    if not register_measured or not sids:
+        return None, None
+    if any(_same_product(platform, p) for p in held_products):
+        return 0.0, engine.GREENFIELD_INCUMBENT
+    if area_held:
+        return 0.0, engine.GREENFIELD_INCUMBENT
+    open_cells = [s for s in sids if s not in held_sids]
+    return len(open_cells) / len(sids), engine.GREENFIELD_OPEN_GROUND
+
 def platform_fit(conn, run_id, candidates) -> dict:
     """Score and rank the candidate platforms for one run.
 
@@ -288,6 +399,13 @@ def platform_fit(conn, run_id, candidates) -> dict:
     absent_areas, held_areas = _register(cur, run_id)
     absent_rows, held_sids = _register_staged(cur, run_id)
     absent_sids = set().union(*(sids for _, sids in absent_rows))
+    focus = _focus_areas(cur, run_id)
+    held_products = _held_products(cur, run_id)
+    # Occupancy is MEASURED only when the register holds something a scan
+    # detected. A register of ABSENT rows alone says which families are
+    # missing, not who occupies the rest, so it grants no open ground to a
+    # neighbouring card (MEM-0563).
+    register_measured = bool(held_areas or held_sids or held_products)
     raw_sv, raw_supp = _entity_subvertical(cur, run_id)
     entity_code = subverticals.resolve_subvertical(raw_sv)
     entity_supp = subverticals.resolve_supplementary(raw_supp, entity_code)
@@ -350,6 +468,17 @@ def platform_fit(conn, run_id, candidates) -> dict:
         else:
             relevance = 1.0
         align = raw.get("alignment")
+        align_quote = raw.get("alignment_quote")
+        align_basis = None
+        if align is None:
+            # Not stated by the producer: computed from the client's own
+            # focus areas when the run has any. None still renormalises.
+            align, align_quote = _derived_alignment(sids, focus)
+            if align is not None:
+                align_basis = engine.ALIGNMENT_FOCUS_AREAS
+        green, green_basis = _greenfield(
+            sids, area in held_areas, held_sids, held_products, plat_name,
+            register_measured)
         built.append(engine.Candidate(
             platform=str(raw.get("platform") or "").strip() or "(unnamed)",
             l3_area=raw.get("l3_area"),
@@ -357,7 +486,10 @@ def platform_fit(conn, run_id, candidates) -> dict:
             family_absent=family_absent,
             readiness=_readiness_token(raw.get("readiness")),
             alignment=None if align is None else float(align),
-            alignment_quote=raw.get("alignment_quote"),
+            alignment_quote=align_quote,
+            alignment_basis=align_basis,
+            greenfield=green,
+            greenfield_basis=green_basis,
             depends_on=tuple(raw.get("depends_on") or ()),
             relevance=relevance))
 
@@ -413,6 +545,18 @@ def platform_fit(conn, run_id, candidates) -> dict:
             "tech workbook); the greenfield term and the incumbent discount "
             "were read from the promoted techstack register instead, by "
             "linked_subcap_ids. CLAIMED rows bind nothing either way.")
+    context["focus_areas"] = len(focus)
+    context["alignment_source"] = (engine.ALIGNMENT_FOCUS_AREAS if focus
+                                   else engine.ALIGNMENT_FALLBACK)
+    context["greenfield_source"] = ("register" if register_measured
+                                    else engine.GREENFIELD_UNMEASURED)
+    if not focus:
+        context["notes"].append(
+            "This run serves no client-stated focus areas with a verbatim "
+            "quote and named cells, so strategic alignment could not be "
+            "computed for any card a producer did not state one for; those "
+            "cards renormalise to the three-term blend. Author "
+            "heatmap.focus_areas and re-read this engine.")
     if not with_evidence:
         context["notes"].append(
             "No cell on this run carries a citable evidence span, so every "

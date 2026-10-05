@@ -119,7 +119,17 @@ cannot tell "the package carried none" from "nothing ever parsed one". An empty
 tile set or an empty per-cell platform vocabulary is a **catalogue or ingest load
 defect to report**, never licence to invent candidates or figures.
 
-Refuse to invent an `alignment_quote`. Alignment counts only when
+**Alignment is computed for you when you state none** (2026-10-05). The engine
+reads the run's own focus areas (`heatmap.focus_areas`: verbatim client
+quotes, each naming its cells) and scores alignment as the share of the
+capabilities those priorities name that the card's cells reach, at the full
+0.20 weight, with `alignment_basis: client_focus_areas` and the matching
+priority quoted as `FA-n: …`. Explain that number from the quoted priority;
+never recompute it. A run with no quoted focus areas still renormalises and
+reports `impact_fallback` — author `heatmap.focus_areas` first, then re-read
+the engine.
+
+Refuse to invent an `alignment_quote`. A STATED alignment counts only when
 `alignment_basis` is `stated_objective` and the quote is the entity's **own
 words** — board commitment, strategic plan, RFP, earnings language — resolving
 through `get_evidence` to a T1–T3 item for this entity and run. A paraphrase, an
@@ -165,7 +175,9 @@ by writing a quote.
 5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
    **§ `get_platform_fit` — you supply judgement, the engine supplies
    arithmetic** — the request and response shape and the three rules that change
-   the answer: `alignment` omitted renormalises and reports `impact_fallback`
+   the answer: `alignment` omitted is computed from the run's focus areas
+   (`client_focus_areas`), and renormalises to `impact_fallback` only when the
+   run has none
    (sending `0` instead claims you *established* it serves nothing, a different
    claim); `readiness` **multiplies**, so red prerequisites cannot reach the hot
    band and an unmapped phrase reads as RED; `l3_area` resolves which cells a

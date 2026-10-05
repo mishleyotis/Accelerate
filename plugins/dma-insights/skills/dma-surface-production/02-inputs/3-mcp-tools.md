@@ -139,9 +139,17 @@ to another institution** — stop, quarantine, escalate. Do not filter it out an
 ```
 
 - `alignment` is 0..1 against an objective the **entity** states — quote it in
-  `alignment_quote`. **Omit** it where you could not establish one: omitting renormalises to
-  the three-term blend and reports `impact_fallback`; sending 0 claims you established that
-  it serves nothing, which is a different claim.
+  `alignment_quote`. **Omit** it where you could not establish one: the engine then COMPUTES
+  it from the run's own focus areas (`heatmap.focus_areas` — verbatim quotes and their cells)
+  as the share of the stated priorities' capabilities the card reaches, and reports
+  `alignment_basis: client_focus_areas` with the priority quoted. Only a run with no quoted
+  focus areas renormalises to the three-term blend and reports `impact_fallback`. Sending 0
+  claims you established that it serves nothing, which is a different claim.
+- Greenfield is GRADED and computed from the scanned register: 1.0 for an ABSENT family, else
+  the share of the card's cells no CONFIRMED/INFERRED incumbent holds, 0.0 when the register
+  already runs the product; each row carries `greenfield_basis`
+  (`register_absent | register_open_ground | incumbent_product | unmeasured`) and `context`
+  carries `alignment_source`, `greenfield_source` and `focus_areas`.
 - `readiness` is the prerequisite verdict (green/amber/red or the page's own phrase). An
   unmapped phrase reads as RED — the multiplier is a safety property; ABSENT reads amber.
   Readiness MULTIPLIES, so red prerequisites cannot reach the hot band.
