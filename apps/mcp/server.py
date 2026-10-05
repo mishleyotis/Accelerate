@@ -471,14 +471,22 @@ def register_evidence(run_id: str, item: dict) -> dict:
     from the tool (Indeed T3, CFPB T1) and the excerpt is verified against
     the stored response, never by a fetch.
 
+    FACT is refused on a T3-T5 source, every origin (`fact_tier`): ET-10
+    refuses a cited FACT row there at submit, so an Indeed reading
+    registers as INFERENCE. The claim type is never rewritten for you.
+
     A SPLIT of a partly sensitive internal row: origin='internal',
     split_of=<parent e_id>, an excerpt that is a verbatim piece of the
     parent's, and — for the span the client may read —
     customer_attribution ("Client statement, discovery conversations,
     <month year>"). A span without one never reaches a customer. A span is
-    strictly shorter than its parent (the whole row is refused), and the
+    strictly shorter than its parent — unless the WHOLE row is the client's
+    own statement: then send the parent's full excerpt with whole_row=true
+    and the attribution, and a NEW span row is minted (owner decision
+    2026-10-05; the parent itself is never labelled or served). The
     attribution is set only on the span this call mints — re-registering
-    existing words under a different label is refused, never written."""
+    existing words under a different label is refused, never written;
+    re-registering the same span returns it (deduped)."""
     with _conn() as c:
         return register_mod.register_evidence(c, run_id, item, fetch=_fetch)
 

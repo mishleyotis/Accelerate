@@ -201,10 +201,22 @@ def _stated_counts(text, nouns):
     return out
 
 
+#: The catalogue's vote tally welded onto an L3 label —
+#: `[L3-SF-DC-CORE] Data Cloud (count: 3)`. Not part of the area's name:
+#: apps/mcp fit.py and CG-42 strip it too, and the platform page strips it at
+#: render. Keyed with it, "Data Cloud (count: 3)" never matched a "Data Cloud"
+#: tile and the P1 candidate set blocked a complete run.
+_TALLY = re.compile(r"\s*\(\s*count\s*:\s*\d+\s*\)", re.I)
+
+
+def _untallied(name):
+    return _TALLY.sub("", str(name or "")).strip()
+
+
 def _key(name):
     """A platform or area key: the [L3-...] tag when present, else the
-    lowercased name without punctuation."""
-    s = str(name or "")
+    lowercased name without punctuation (and without a `(count: N)` tally)."""
+    s = _untallied(name)
     m = re.search(r"\[(L3-[^\]]+)\]", s)
     if m:
         return m.group(1).upper()
@@ -217,7 +229,7 @@ def _tile_keys(t):
         if t.get(f):
             keys.add(_key(t[f]))
             # the name half of "[L3-X] Name" also identifies the area
-            rest = re.sub(r"\[[^\]]*\]", "", str(t[f])).strip()
+            rest = re.sub(r"\[[^\]]*\]", "", _untallied(t[f])).strip()
             if rest:
                 keys.add(_key(rest))
     return keys - {""}
@@ -382,7 +394,8 @@ def check_platform_states_and_areas(P, bundle, catalogue, entity_sv, supp):
     for c in cells:
         if isinstance(c, dict) and c.get("subcap_id") in served:
             for area in c.get("l3_platform_areas") or []:
-                count[area] += 1
+                # one area, whatever tally each cell's copy of it carries
+                count[_untallied(area)] += 1
     covered = set(tile_keys)
     for d in discards:
         covered |= _tile_keys(d)

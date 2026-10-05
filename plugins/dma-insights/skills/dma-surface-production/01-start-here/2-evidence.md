@@ -117,9 +117,12 @@ filter plus aggregations) returns the complaint count and timely-response share 
 96.2% — although the doctrine here said "Indeed 403 → omitted" and the card shipped one
 bar. Register such a reading with `register_evidence(origin='connector',
 connector={tool, query, retrieved_at, response})` (migration 0063): the server stamps the
-tier (Indeed T3, CFPB T1 — a tier you send is ignored), checks the excerpt verbatim against
-the stored response, and keeps it FACT without a URL. Never launder a connector reading as
-a URL-less INFERENCE. `02-inputs/enrichment_sources.json` lists the connector routes per
+tier (Indeed T3, CFPB T1 — a tier you send is ignored) and checks the excerpt verbatim
+against the stored response; no URL is needed. The claim type follows the tier, as ET-10
+reads it: a CFPB reading (T1) may be FACT; an Indeed reading (T3) registers as
+`claim_type='INFERENCE'` — FACT on it is refused at registration (`fact_tier`, naming
+ET-10), never rewritten for you. Never drop a connector reading, and never register it
+URL-less under another origin. `02-inputs/enrichment_sources.json` lists the connector routes per
 facet.
 
 That leaves exactly four honest moves, in this order, and inventing an id is not among them:

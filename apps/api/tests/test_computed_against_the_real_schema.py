@@ -347,6 +347,91 @@ def test_split_spans_resolve_through_the_api_role_and_serve_as_decided(seeded):
         api.close()
 
 
+WHOLE_ROW = ("The member said every branch keys new accounts by hand and "
+             "the call centre cannot see a loan application in flight.")
+WHOLE_LABEL = "Client statement, discovery conversations, October 2026"
+
+
+def _mint_whole_row(cur, eid):
+    """Owner decision 2026-10-05: a discovery row that is entirely a client
+    statement is shared WHOLE — a new row, split_of the parent, carrying the
+    parent's full excerpt and the customer attribution (0065). The parent
+    stays internal and unlabelled."""
+    cur.execute("""INSERT INTO evidence_index
+                     (e_id, entity_id, origin, source_name, excerpt,
+                      claim_type, tier)
+                   VALUES ('E-SCU-200', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2')""", (eid, WHOLE_ROW))
+    cur.execute("""INSERT INTO evidence_index
+                     (e_id, entity_id, origin, source_name, excerpt,
+                      claim_type, tier, customer_attribution, split_of)
+                   VALUES ('E-SCU-201', %s, 'internal', 'Discovery notes',
+                           %s, 'FACT', 'T2', %s, 'E-SCU-200')""",
+                (eid, WHOLE_ROW, WHOLE_LABEL))
+
+
+def _whole_drawer(acur, rid, eid, promoted_at, scope=None):
+    from dma_api.redaction import redact_section
+    data = {"cells": [{"subcap_id": "P1C1.1.1", "synthesis": "s",
+                       "e_ids": ["E-SCU-200", "E-SCU-201"],
+                       "grounded_on": 2}]}
+    computed.apply(acur, "heatmap", "cell_evidence", data,
+                   {"run_id": rid, "promoted_at": promoted_at}, eid)
+    assert data.get("computed_error") is None, data.get("computed_error")
+    out, _ = redact_section("heatmap", "cell_evidence", data, [],
+                            "customer", evidence_scope=scope)
+    return out["cells"][0]
+
+
+def test_a_whole_row_span_serves_exactly_like_a_shorter_span(seeded):
+    """pages.evidence_scope and computed.cell_items, read as svc_api, treat
+    the whole-row span exactly as they treat a shorter one: on the run
+    promoted BEFORE the mint both it and the parent are withheld (the live
+    run serves what it served); once re-promoted the span serves under its
+    attribution and the parent — the same words, internal and unlabelled —
+    is still withheld. Before 0065 the database refused the span itself."""
+    from dma_api import pages
+
+    conn, cur, rid, eid = seeded
+    live = _promoted_at(cur, rid)
+    _mint_whole_row(cur, eid)
+    conn.commit()
+    cur.execute("SELECT excerpt FROM evidence_index WHERE e_id = ANY(%s) "
+                "ORDER BY e_id", (["E-SCU-200", "E-SCU-201"],))
+    assert [r[0] for r in cur.fetchall()] == [WHOLE_ROW, WHOLE_ROW]
+
+    api = _connect("dmai-api@digital-maturity-assessor.iam")
+    try:
+        acur = api.cursor()
+        ids = {"E-SCU-200", "E-SCU-201"}
+        # the live run: nothing changed
+        assert pages.evidence_scope(acur, eid, ids, promoted_at=live) == {
+            "withheld": {"E-SCU-200", "E-SCU-201"}, "attribution": {}}
+        cell = _whole_drawer(acur, rid, eid, live)
+        assert cell["items"] == [] and cell["e_ids"] == []
+    finally:
+        api.close()
+
+    cur.execute("UPDATE runs SET promoted_at = now() WHERE id = %s", (rid,))
+    conn.commit()
+    again = _promoted_at(cur, rid)
+    assert again > live
+    api = _connect("dmai-api@digital-maturity-assessor.iam")
+    try:
+        acur = api.cursor()
+        scope = pages.evidence_scope(acur, eid, {"E-SCU-200", "E-SCU-201"},
+                                     promoted_at=again)
+        assert scope == {"withheld": {"E-SCU-200"},
+                         "attribution": {"E-SCU-201": WHOLE_LABEL}}
+        cell = _whole_drawer(acur, rid, eid, again, scope)
+        assert [i["e_id"] for i in cell["items"]] == ["E-SCU-201"]
+        assert cell["items"][0]["source_title"] == WHOLE_LABEL
+        assert cell["items"][0]["excerpt"] == WHOLE_ROW
+        assert cell["e_ids"] == ["E-SCU-201"] and cell["grounded_on"] == 1
+    finally:
+        api.close()
+
+
 def test_a_failed_computation_does_not_poison_the_rest_of_the_request(seeded):
     """PostgreSQL aborts the whole transaction on a failed statement, so
     without a savepoint the first bad query 25P02s every later one — and the
