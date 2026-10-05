@@ -447,7 +447,11 @@ def main(argv=None) -> int:
                         "and `volley_status` matches SubCap_ID exactly — a "
                         "sibling with no row of its own reads as never "
                         "searched. The search-op ceiling is charged once")
-    q.add_argument("--facet", choices=contract.DQ_FACETS)
+    q.add_argument("--facet", choices=contract.DQ_FACETS + contract.PRELIM_SHEET_FACETS,
+                   help="the volley for a cell; with --prelim, the connector-owned "
+                        "tab the search was for (focus_areas, issues, "
+                        "peer_deployments) — engine.prelim counts these before "
+                        "it accepts that tab as legitimately empty")
     q.add_argument("--query", required=True)
     q.add_argument("--actor", default=None,
                    help="the agent logging this search. Defaults to $DMA_ACTOR, "
@@ -821,6 +825,10 @@ def main(argv=None) -> int:
         print(json.dumps(orient.orient(wb, a.category, qa_dir=run.qa_dir),
                          indent=2, sort_keys=True)); return 0
     if a.cmd == "search":
+        if a.facet in contract.PRELIM_SHEET_FACETS and not a.prelim:
+            print(f"REFUSED: --facet {a.facet} names a PRELIM tab; pass --prelim "
+                  f"(it belongs to no cell)", file=sys.stderr)
+            return 1
         try:
             n = ledger.append_search(wb, subcap=list(a.subcap or []), facet=a.facet,
                                      query=a.query, tool=a.tool, hits=a.hits,

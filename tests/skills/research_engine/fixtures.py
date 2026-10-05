@@ -396,6 +396,30 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                         subcaps=[], evidence_ids=[eid],
                         source_urls=["https://ncua.example/callreport/2025"],
                         as_of="2025-12-31")
+    # THE THREE CONNECTOR-OWNED TABS, closed through the real gate: one
+    # client-stated priority, one peer deployment answer, and an issue
+    # register declared empty only after connector searches were logged
+    # against it (prelim.CONNECTOR_FLOOR).
+    cell = (list(wb.selected_subcaps()) or ["P1C1.1.1"])[0]
+    profile.focus(wb, fa_id="FA-01", title="Move decisioning off the core",
+                  quote=("We are moving credit decisioning off the core so that "
+                         "members get an answer in minutes rather than days."),
+                  document="2025 Annual Report", page="4", cells=[cell],
+                  evidence=eid, currency="CONFIRMED_CURRENT")
+    ts = next(r["TS_ID"] for r in wb.rows("Tech_Register") if r.get("TS_ID"))
+    techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU", deployed=None,
+                         basis="searched the peer's careers site and vendor "
+                               "case studies; no source names the platform")
+    for tool, q in (("tavily", f'"{entity}" consent order OR enforcement action'),
+                    ("exa", f"{entity} NCUA enforcement litigation breach")):
+        L.append_search(wb, subcap=[], facet="issues", query=q, tool=tool,
+                        hits=3, kept=0, outcome="no matter naming the entity",
+                        prelim=True, actor="enrichment-connector-specialist")
+    prelim.declare(wb, "issues", ladder=(
+        "NCUA enforcement orders, the state regulator's orders and CFPB "
+        "enforcement searched under the current name via Tavily and Exa on "
+        "2026-08-29; no consent order, enforcement action, suit or breach "
+        "names the entity"))
     prelim.complete(wb)
     return eid
 

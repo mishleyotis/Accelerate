@@ -551,10 +551,17 @@ def _search_scope(row: dict) -> str:
     PRELIM for institution-profile retrieval that names no cell, or RELAY for
     a connector search the in-session relay fired."""
     cell = str(row.get("SubCap_ID") or "").strip()
+    # A row with no cell is PRELIM retrieval whatever tool ran it. The relay
+    # always services a lane's request FOR a cell, so a cell-less connector
+    # search was never the relay's — and counting it as RELAY walled the
+    # PRELIM connector pass (Susser Bank, 2026-10-05: an Issue_Register
+    # registry sweep refused at "RELAY: 870 since its last checkpoint").
+    if not cell:
+        return "PRELIM"
     if (str(row.get("Tool") or "").strip() not in LANE_SEARCH_TOOLS
             and not _is_category_producer(row.get("Actor"), cell)):
         return "RELAY"
-    return cell.split(".")[0] if cell else "PRELIM"
+    return cell.split(".")[0]
 
 
 def _is_category_producer(actor, cell: str) -> bool:
@@ -653,8 +660,11 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     settled — `append_evidence(subcaps=[...])` — not here.
     """
     _refuse_on_drift(wb)
-    if facet is not None and facet not in C.DQ_FACETS:
-        raise LedgerRefusal(f"facet {facet!r} is not in {C.DQ_FACETS}")
+    if facet is not None and facet not in C.DQ_FACETS and not (
+            prelim and facet in C.PRELIM_SHEET_FACETS):
+        raise LedgerRefusal(
+            f"facet {facet!r} is not in {C.DQ_FACETS}"
+            + (f" (with --prelim also {C.PRELIM_SHEET_FACETS})" if prelim else ""))
     tool = str(tool or "").strip().lower()
     if tool not in C.SEARCH_TOOLS:
         raise LedgerRefusal(

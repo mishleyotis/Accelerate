@@ -497,6 +497,11 @@ SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
                 "explorium", "vibe", "indeed", "quartr", "drive", "internal")
 #: The connectors whose absence from a cell's searches means "no enrichment
 #: was attempted" — a declared absence must show at least one of these.
+#: The facets a `--prelim` search may carry: the connector-owned tabs
+#: PRELIM gates (engine/prelim.py SHEET_FACET). Kept here so the CLI's
+#: closed vocabulary and the gate read one list.
+PRELIM_SHEET_FACETS = ("focus_areas", "issues", "peer_deployments")
+
 ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS
                          if t not in ("web_search", "web_fetch"))
 

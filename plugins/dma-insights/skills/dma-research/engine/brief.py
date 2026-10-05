@@ -1485,11 +1485,24 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     connector = _bound({
         "agent": "enrichment-connector-specialist", "shared": sh,
         "first_commands": [f"python3 -m engine.prelim state {e}"],
-        "owed": [x for x in ("leadership", "firmographics", "peers") if x in st["open"]],
+        "owed": [x for x in ("leadership", "firmographics", "peers", "focus_areas",
+                             "issues", "peer_deployments") if x in st["open"]],
         "rules": common_rules + [
             "the contact pass names the leaders `leadership` needs (min two "
             "named people); the machine technographic scan is registered at "
             "T1, never T4 (the connector's ET-11; clay_taxonomy.json)",
+            "the three connector-owned tabs are yours too, and PRELIM will not "
+            "close without them: `focus_areas` (the client's own priorities, "
+            "verbatim 50-400 char quotes — `engine.profile focus`), `issues` "
+            "(enforcement actions, consent orders, litigation, breaches, CFPB "
+            "complaints, searched in the regulators' own registries under every "
+            "former name — `engine.profile issue`) and `peer_deployments` (does "
+            "each peer run the material register products — `engine.cli "
+            "techscan peer-record`, --unknown is an honest answer). Log every "
+            "search with `engine.cli search --prelim --facet "
+            "focus_areas|issues|peer_deployments`: a tab is accepted as empty "
+            "(`engine.prelim declare --section …`) only after "
+            "at least two such searches, one through a connector",
             "record every attempt with the outcome it had (RESOLVED, NOT_RUN, "
             "NO_SOURCE, FAILED) — a refused connector is stated, not dressed "
             "as a result"],

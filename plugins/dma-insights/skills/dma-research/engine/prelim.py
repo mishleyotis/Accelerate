@@ -103,7 +103,42 @@ SECTIONS = {
             "is going — the conference talks, bylines and interviews a "
             "category researcher weighs a finding against, and the only "
             "PRELIM section written in the client's own voice"),
+    # THE THREE TABS NOBODY OWNED (owner, 2026-10-05: "the 3 tabs usually
+    # get enriched using connectors — ensure there are clear gates"). Focus
+    # areas, the issue register and peer deployments had no stage before
+    # HANDOFF: no PRELIM section, no line in the connector brief, and one
+    # gate — completeness at HANDOFF, after research had spent its budget —
+    # which a free-text reason satisfied. Susser Bank reached HANDOFF with
+    # all three empty and nothing having asked a connector for any of them.
+    # They are PRELIM sections now: filled (or declared, with connector
+    # searches logged against them) before a category card is served.
+    "focus_areas": dict(
+        section_id="PRELIM-FOCUS", kind="sheet", sheet="Focus_Areas",
+        min_rows=1, facet="focus_areas",
+        heading="Client-stated priorities",
+        why="what the client says it is trying to do, in its own verbatim "
+            "words — the H1 focus areas and the frame every recommendation "
+            "is argued against"),
+    "issues": dict(
+        section_id="PRELIM-ISSUES", kind="sheet", sheet="Issue_Register",
+        min_rows=1, facet="issues",
+        heading="Open matters",
+        why="enforcement actions, consent orders, litigation, breaches and "
+            "complaint volumes — each one a ceiling on the cells it touches, "
+            "so it must be known before any cell is scored"),
+    "peer_deployments": dict(
+        section_id="PRELIM-PEERDEP", kind="sheet", sheet="Tech_Peer_Deployments",
+        min_rows=1, facet="peer_deployments",
+        heading="Peer deployments",
+        why="whether the peer set runs the client's platforms — the AG-04 "
+            "evidence behind every platform recommendation's peer argument"),
 }
+
+#: An empty connector-owned tab is a FINDING only when a connector looked.
+#: Declaring one of the sheet sections absent needs at least this many
+#: PRELIM searches logged with `--facet <section facet>`, at least one of
+#: them through an enrichment connector (Exa, Tavily, Clay, Explorium …).
+CONNECTOR_FLOOR = 2
 
 #: The workbook tab a PRELIM section owns. Declaring the section declares
 #: the tab, with the SAME ladder — one reason, in one place, at the stricter
@@ -112,7 +147,33 @@ OWNS_SHEET = {
     "timeline": "Entity_Timeline",
     "peers": "Peer_Benchmarks",
     "tech_baseline": "Tech_Register",
+    "focus_areas": "Focus_Areas",
+    "issues": "Issue_Register",
+    "peer_deployments": "Tech_Peer_Deployments",
 }
+
+#: The facet a connector-owned sheet's searches are logged under.
+SHEET_FACET = {spec["sheet"]: spec["facet"] for spec in SECTIONS.values()
+               if spec.get("kind") == "sheet"}
+
+
+def connector_backing(wb: RunWorkbook, facet: str) -> dict:
+    """The PRELIM searches logged against a connector-owned tab: how many,
+    through which tools, and whether that meets CONNECTOR_FLOOR."""
+    rows = [r for r in wb.rows("Search_Log")
+            if not _clean(r.get("SubCap_ID"))
+            and _clean(r.get("Facet")).lower() == facet]
+    tools = sorted({_clean(r.get("Tool")).lower() for r in rows if _clean(r.get("Tool"))})
+    enrich = [t for t in tools if t in C.ENRICHMENT_TOOLS]
+    ok = len(rows) >= CONNECTOR_FLOOR and bool(enrich)
+    return {"facet": facet, "searches": len(rows), "tools": tools,
+            "connector_tools": enrich, "met": ok,
+            "fix": ("" if ok else
+                    f"log the searches behind it: engine.cli search --prelim "
+                    f"--facet {facet} --tool exa|tavily|clay|explorium|… "
+                    f"--query '…' --hits N --kept K --outcome '…' — at least "
+                    f"{CONNECTOR_FLOOR}, one through an enrichment connector "
+                    f"(have {len(rows)}; tools {', '.join(tools) or 'none'})")}
 
 #: ONE FIX LINE FOR THE TECHNOLOGY BASELINE, whether it has no rows or
 #: three layers' worth. They are the same instruction and were two: the
@@ -261,6 +322,32 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                           f"({len(body)} found)",
                 "fix": f"engine.prelim narrate --section {key} --body '…'"}
 
+    if kind == "sheet":
+        sheet, need = spec["sheet"], int(spec.get("min_rows", 1))
+        n = len([r for r in wb.rows(sheet) if any(_clean(v) for v in r.values())])
+        if n >= need:
+            return {"section": key, "status": "RESEARCHED",
+                    "detail": f"{n} row(s) in {sheet}"}
+        from . import completeness as K
+        reason = K.reasons(wb).get(sheet)
+        back = connector_backing(wb, spec["facet"])
+        if reason and back["met"]:
+            return {"section": key, "status": "DECLARED",
+                    "detail": (f"{sheet} declared empty after {back['searches']} "
+                               f"connector-backed search(es) "
+                               f"({', '.join(back['tools'])}): {reason[:120]}")}
+        from .completeness import FILLED_BY
+        return {"section": key, "status": "OPEN",
+                "detail": (f"{sheet} has {n} row(s), {need} required"
+                           + (f"; declared empty but not connector-backed — "
+                              f"{back['searches']} search(es) logged under "
+                              f"--facet {spec['facet']}" if reason else "")),
+                "fix": (f"fill it through the connector pass: "
+                        f"{FILLED_BY.get(sheet, '')} — or, when a connector "
+                        f"search came back empty, declare it "
+                        f"(engine.prelim declare --section {key} --ladder …) "
+                        f"after you {back['fix'] or 'have logged the searches'}")}
+
     sheet, need = {
         "timeline": ("Entity_Timeline", spec.get("min_rows", 1)),
         "peers": ("Peer_Benchmarks", spec.get("min_rows", 1)),
@@ -359,9 +446,10 @@ def narrate(wb: RunWorkbook, section: str, *, heading: str | None,
             f"unknown PRELIM section {section!r}; one of "
             f"{', '.join(SECTIONS)}")
     if spec["kind"] != "narrative":
+        how = (f"rows in {spec['sheet']} ({__import__('engine.completeness', fromlist=['x']).FILLED_BY.get(spec['sheet'], '')})"
+               if spec["kind"] == "sheet" else f"`engine.prelim {spec['kind']}`")
         raise PrelimRefusal(
-            f"{section} is not a narrative section — close it with "
-            f"`engine.prelim {spec['kind']}` instead")
+            f"{section} is not a narrative section — close it with {how} instead")
     text = _clean(body)
     if len(text) < _MIN_BODY and not text.upper().startswith(NOT_AVAILABLE):
         raise PrelimRefusal(
@@ -406,6 +494,13 @@ def declare(wb: RunWorkbook, section: str, ladder: str,
     if spec is None:
         raise PrelimRefusal(f"unknown PRELIM section {section!r}")
     text = _clean(ladder)
+    if spec.get("kind") == "sheet":
+        back = connector_backing(wb, spec["facet"])
+        if not back["met"]:
+            raise PrelimRefusal(
+                f"{section} is enriched through connectors, and an empty "
+                f"{spec['sheet']} is a finding only when one looked. "
+                + back["fix"])
     if len(text) < _MIN_LADDER:
         raise PrelimRefusal(
             f"the ladder is {len(text)} chars; {_MIN_LADDER} is the floor. "

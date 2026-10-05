@@ -191,6 +191,20 @@ def declare(wb: RunWorkbook, sheet: str, reason: str) -> dict:
             f"the search that came back empty (>= {_MIN_REASON} chars, no "
             f"filler). An empty tab is either a finding or an omission, and "
             f"the reason is how a reader tells which.")
+    # A CONNECTOR-OWNED TAB IS EMPTY ONLY WHEN A CONNECTOR LOOKED (owner,
+    # 2026-10-05). Focus_Areas, Issue_Register and Tech_Peer_Deployments are
+    # filled by the PRELIM connector pass; a reason alone let Susser Bank's
+    # Issue_Register be declared empty while saying, in the reason itself,
+    # that no regulator's enforcement database had been queried.
+    from . import prelim as _prelim                     # noqa: PLC0415
+    facet = _prelim.SHEET_FACET.get(sheet)
+    if facet:
+        back = _prelim.connector_backing(wb, facet)
+        if not back["met"]:
+            raise CompletenessRefusal(
+                f"{sheet} is filled through the connector pass, and an empty "
+                f"one is a finding only when a connector looked. "
+                + back["fix"])
     have = reasons(wb)
     have[sheet] = _clean(reason)
     wb.set_metadata("empty_sheet_reasons", json.dumps(have, sort_keys=True))
@@ -422,8 +436,13 @@ def main(argv=None) -> int:
         print(f"{'COMPLETE' if out['complete'] else 'INCOMPLETE'} — "
               f"{out['populated']}/{out['total']} tabs populated{note}")
         for r in out["sheets"]:
+            # Every verdict `check` can emit has a mark; an unknown one
+            # prints as "?" rather than crashing the report (OUT_OF_STAGE /
+            # AHEAD_OF_STAGE were missing and raised KeyError, 2026-10-05).
             mark = {"POPULATED": "✓", "DECLARED_EMPTY": "·",
-                    "OUT_OF_SCOPE": "–", "EMPTY": "✗", "SHORT": "✗"}[r["verdict"]]
+                    "OUT_OF_SCOPE": "–", "OUT_OF_STAGE": "–",
+                    "AHEAD_OF_STAGE": "+", "ILLEGAL_DECLARATION": "✗", "EMPTY": "✗",
+                    "SHORT": "✗"}.get(r["verdict"], "?")
             print(f"  {mark} {r['sheet']:<22} {r['detail']}")
     return 0 if out["complete"] else 1
 
