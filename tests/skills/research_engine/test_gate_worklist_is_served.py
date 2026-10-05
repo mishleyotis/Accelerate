@@ -549,3 +549,16 @@ def test_no_module_derives_a_host_by_hand():
             for i, line in enumerate(p.read_text().splitlines(), 1)
             if re.search(r'split\("//"\)\[-1\]\.split\("/"\)', line)]
     assert not hits, hits
+
+
+def test_the_repair_card_carries_each_findings_own_reason():
+    """arbor-bank P3C3.3.1: the card said only "re-synthesise so the claim
+    follows from its evidence"; the reason (relabel CEILING_ESTIMATE) stayed
+    in the gate output and the researcher relabelled to FACT instead."""
+    out = {"blocking": ["claim_unsupported"],
+           "claim_unsupported": [{"subcap": "P1C1.1.2",
+                                  "why": "INFERENCE whose evidence resolves to one "
+                                         "source identity ['a.example']"}]}
+    do = floors_gate.repair_cells(out)["P1C1.1.2"]["do"]
+    assert any("one source identity" in d for d in do), do
+    assert "CEILING_ESTIMATE" in floors_gate.REPAIR_ACTIONS["claim_unsupported"]

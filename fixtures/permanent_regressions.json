@@ -606,6 +606,19 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0592",
+   "title": "The repair card carried only the generic action for a blocking term, never the finding's own reason, so a researcher took the refused exit",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A cell served for repair without the specific reason ('why') of each floors finding that names it.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_the_repair_card_carries_each_findings_own_reason"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

@@ -787,7 +787,10 @@ REPAIR_ACTIONS = {
                          "Use the evidence already registered; search only if a "
                          "second source is genuinely required"),
     "unresolved_citations": "repoint the cited ids to registered evidence rows",
-    "claim_unsupported": "re-synthesise so the claim follows from its evidence",
+    "claim_unsupported": ("re-synthesise so the claim follows from its evidence; "
+                          "a claim on one source identity is CEILING_ESTIMATE "
+                          "with Ceiling_Band and Uncertainty, never FACT or "
+                          "INFERENCE"),
     "boilerplate": "rewrite the named field with a checkable figure, date, name or E-id",
     "evidence_smear": "attach each evidence row only to the cells it actually answers",
     "dq_gaps": "answer the diagnostic questions listed for the cell",
@@ -835,11 +838,21 @@ def repair_cells(out: dict) -> dict[str, dict]:
                 want = [C.PRIMARY_FACET]
             elif isinstance(item, dict):
                 want = list(item.get("missing") or [])
+            # The finding's OWN reason rides on the card (MEM-0592): the
+            # generic action for claim_unsupported never said which label
+            # the evidence can carry, and a researcher relabelled a
+            # one-source INFERENCE to FACT — the other refused exit.
+            why = (" ".join(str(item.get("why") or "").split())
+                   if isinstance(item, dict) else "")
             for c in _cells_of(item):
                 slot = cells.setdefault(c, {"terms": [], "missing": [], "do": []})
                 if term not in slot["terms"]:
                     slot["terms"].append(term)
                     slot["do"].append(f"{term}: {REPAIR_ACTIONS[term]}")
+                if why:
+                    line = f"{term}, here: {why}"
+                    if line not in slot["do"]:
+                        slot["do"].append(line)
                 for f in want:
                     if f not in slot["missing"]:
                         slot["missing"].append(f)
