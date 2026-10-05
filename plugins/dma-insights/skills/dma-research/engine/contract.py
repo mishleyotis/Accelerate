@@ -871,6 +871,10 @@ RUN_METADATA_KEYS = (
     # Sheets that are legitimately empty for THIS run, each with the reason.
     # The completeness gate reads this; an unlisted empty sheet blocks.
     "empty_sheet_reasons",
+    # The scoring critic's structured moves {cell: {target, why, ...}}
+    # (engine.assessment.critic_moves): routed to the scorers, enforced by
+    # `score`, and blocking at the SCORING gate until applied.
+    "critic_moves",
     # The templates this run is BOUND to: the sha256 of
     # references/templates/report_templates.json + workbook_template.json +
     # gold_reference.json at `start`. `engine.template bind` writes it;

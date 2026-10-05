@@ -64,10 +64,18 @@ def test_issue8_every_lane_type_has_a_bounded_brief_and_a_real_agent(tmp_path):
     urun, uwb, ucells, uev = scored_run(tmp_path / "u")
     for c in ucells:
         uwb.set_scoring(c, {"Score": ""})
+    # A critic lane is written only for a pillar that is fully scored and
+    # not yet PASSED: so that view reads a scored run whose P1 critic FAILED.
+    from engine import assessment as A
+    crun, cwb, ccells, cev = scored_run(tmp_path / "c")
+    A.critique(cwb, pillar="P1", verdict="FAIL", actor="scoring-critic",
+               note="Re-derived every P1 row; one reads M3 on a single T3 source "
+                    "and must move down to its ceiling.",
+               moves=[(ccells[0], 1.0, "reads M3 on a single T3 source")])
     views = [
         brief.prelim_brief(wb, run=run, out_dir=tmp_path / "p"),
         brief.scoring_batch(uwb, run=urun, out_dir=tmp_path / "sc"),
-        brief.scoring_batch(swb, run=srun, out_dir=tmp_path / "scc", critic=True),
+        brief.scoring_batch(cwb, run=crun, out_dir=tmp_path / "scc", critic=True),
         brief.scoring_batch(swb, run=srun, out_dir=tmp_path / "scs", solutions=True),
         brief.report_batch(swb, run=srun, out_dir=tmp_path / "rp"),
         brief.report_batch(swb, run=srun, out_dir=tmp_path / "rpv", validator=True),

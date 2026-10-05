@@ -122,7 +122,9 @@ def test_issue6_a_critic_fail_redispatches_the_scoring_round(tmp_path):
             for pillar in sorted({c[:2] for c in wb.selected_subcaps()}):
                 A.critique(wb, pillar=pillar, verdict="FAIL", actor="scoring-critic",
                            note="Re-derived 4 of 6 rows: two rationales cite descriptors "
-                                "the rubric does not carry; ceilings hold; would move two scores.")
+                                "the rubric does not carry; ceilings hold; would move two scores.",
+                           moves=[(next(c for c in wb.selected_subcaps() if c.startswith(pillar)),
+                                   1.0, "a rationale cites a descriptor the rubric lacks")])
             return
         S.lane_critic(agent, prompt_file, ctx)
     handlers["scoring-critic"] = flaky_critic

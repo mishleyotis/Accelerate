@@ -172,6 +172,19 @@ over budget, with the figure) before the next command.
 python3 -m engine.pipeline run --run <RUN_ID> --root <ROOT> --max-wall-min 240 --lane-retries 1 --page-retries 2
 ```
 
+**SCORING runs as persisted workflows too — one per pillar.** At SCORING the
+driver stops `AWAITING_WORKFLOW` and writes `<ROOT>/07_qa/scoring_workflow.json`
+(workflow `/home/user/Accelerate/plugins/dma-insights/workflows/dma-pillar-scoring.js`,
+one `args` per pillar still owed). Start every invocation in ONE message; each
+pillar's scorers run in parallel, its own critic starts the moment they finish,
+and the critic's `--move CELL:TARGET:why` rows go straight back to that pillar's
+scorer (`engine.assessment moves`). Then run the file's `then`. The engine
+refuses, at write time, a score above the row's own Ceiling_Band, above 2.0 on
+own-site-only evidence, a stale row without ADJ_STALE, and STALE_DATA above LOW
+confidence — so the critic judges what a rule cannot. No Workflow tool in this
+session (a resumed session loses it)? `--scoring-mode lanes` is sound: scoring
+needs no connector. Never re-score rows by hand.
+
 **RESEARCH runs as persisted workflows — started by you.** The driver is a
 Python process and cannot start a Workflow, so at RESEARCH it stops with
 outcome `AWAITING_WORKFLOW` (exit 0) and writes
