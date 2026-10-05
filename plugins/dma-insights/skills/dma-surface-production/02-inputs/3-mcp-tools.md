@@ -1,6 +1,6 @@
 # The MCP connector
 
-34 tools in six groups. Read tools are free, idempotent and side-effect free. Write
+35 tools in six groups. Read tools are free, idempotent and side-effect free. Write
 tools are the only path into anything the product serves. Input schemas live
 server-side in `apps/mcp` (the `server.py` signatures, validated in `dma_mcp/*`) —
 this document is the map, not the schema; the connector's own refusals are the
@@ -20,6 +20,7 @@ contract's enforcement.
 | `get_platform_fit` | The fit score for each candidate platform, computed server-side and read by you — never recomputed, never re-ranked. |
 | `get_run_progress` | Per-page status, what is blocking promotion, and the current claim — where a resuming session sees where it left off. |
 | `get_staged_payload` | What you last submitted for a page — staged, verbatim, unredacted. The read half of submit; makes the one-section repair possible across sessions. |
+| `list_submissions` | Every submission a run has had, per page, oldest first — each verdict's status, blocking-reason count and gates, which row is live and which promoted. `get_run_progress` shows only the live row; read this when a page has been resubmitted more than twice, or a verdict names a submission id you no longer hold. |
 
 ## Claim — one write, no content
 
@@ -34,6 +35,7 @@ contract's enforcement.
 | `register_evidence` | Mint an id for an enrichment source before citing it. Server allocates `e_id`, computes `ers`; dedup by content hash, scoped to the entity; excerpt verified verbatim against the fetched artefact. |
 | `open_payload` | Open a chunked upload for a page too large to emit in one call; returns the connector-allocated `upload_id` and the byte limits. |
 | `append_payload_part` | Send one part of a chunked payload. Returns a receipt, never a verdict — a part is inert until the whole assembles. |
+| `get_upload_status` | (read) What has already arrived on a chunked upload — parts landed and missing, bytes and items held, whether the set is complete. Pass `upload_id`, or `run_id` (optionally `page`) to list the run's open uploads, so a resumed session finds the upload it already opened instead of resending everything. |
 | `submit_page_payload` | Validate (both passes), supersede the live row, stage, return the verdict — plus the rejection tickets the verdict opened, bumped or closed, and what the findings memory already knows about the gates that fired. |
 | `promote_run` | All six pages, one transaction, all or nothing. Re-promotion is idempotent; promoted staging rows are retained. |
 | `withdraw_run` | Take a promoted run off the client surface with a recorded reason (30-char minimum). Removes the run from `serving_directory` — delisted, not merely unopenable. Nothing is deleted; the way back is re-promoting. |
