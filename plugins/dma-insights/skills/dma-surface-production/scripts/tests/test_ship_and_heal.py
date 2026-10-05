@@ -322,3 +322,31 @@ def test_an_unreadable_contract_never_reads_as_ready(monkeypatch, tmp_path):
     (tmp_path / "context.a.json").write_text("{}")
     ready, waiting = ship_page.ready_pages(tmp_path, ["context"])
     assert ready == [] and "contract unreadable" in waiting[0][1]
+
+
+def test_chunked_parts_send_items_or_fields_never_kind_payload(monkeypatch):
+    """The connector's append_payload_part takes exactly one of `items=` or
+    `fields=`; sending kind/payload was refused ONE_BODY on every chunked page
+    (2026-10-05, Cross Insurance heatmap)."""
+    import ship_page
+    calls = []
+
+    def fake_mcp(tool, args):
+        calls.append((tool, args))
+        if tool == "open_payload":
+            return {"upload_id": "u1"}
+        if tool == "append_payload_part":
+            return {"ok": True, "part_bytes": 1}
+        return {"status": "pass"}
+
+    monkeypatch.setattr(ship_page, "mcp", fake_mcp)
+    monkeypatch.setattr(ship_page, "INLINE_MAX", 10)
+    payload = {"ceilings": {"rows": [{"a": i} for i in range(5)], "narrative_thread": "t"}}
+    ship_page.submit("r", "overview", payload, "p")
+    parts = [a for t, a in calls if t == "append_payload_part"]
+    assert parts
+    for a in parts:
+        assert "kind" not in a and "payload" not in a
+        assert ("items" in a) != ("fields" in a)
+        if "items" in a:
+            assert a["item_count"] == len(a["items"])
