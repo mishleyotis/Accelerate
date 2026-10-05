@@ -195,6 +195,20 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
     the evidence BEFORE any section is written, so the same contradiction
     costs one re-strike instead of a stage."""
     ev = wb.evidence_index()
+    # The source must be ABOUT this institution — its own page, a posting for
+    # it, a vendor story naming it. A vendor's general product page names the
+    # product and says nothing about who runs it (E-411, a MuleSoft scope
+    # statement, is not evidence that Susser Bank runs MuleSoft).
+    ent = re.sub(r"[^a-z0-9 ]", " ", str(wb.metadata().get("entity_name") or "").lower()).split()
+    ent_tok = next((t for t in ent if len(t) >= 4 and t not in ("bank", "credit", "union", "national",
+                                                                 "first", "trust", "federal")), "")
+
+    def about_entity(e) -> bool:
+        if not ent_tok:
+            return True
+        hay = (str(e.get("Excerpt") or "") + " " + str(e.get("Source_URL") or "")).lower()
+        return ent_tok in hay
+
     confirmed = {t.lower() for r in wb.rows("Tech_Register")
                  if str(r.get("Status") or "") == "CONFIRMED"
                  for t in _vendor_tokens(r)}
@@ -215,6 +229,7 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
                     # names a product without saying it is deployed here.
                     and str(e.get("Tier") or "").upper() in ("T1", "T2", "T3")
                     and pat.search(str(e.get("Excerpt") or ""))
+                    and about_entity(e)
                     and not any(h in str(e.get("Source_URL") or "").lower()
                                 for h in BROKER_HOSTS)]
             if hits:
