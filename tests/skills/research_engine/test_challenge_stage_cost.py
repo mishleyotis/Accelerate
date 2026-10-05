@@ -96,6 +96,19 @@ def test_the_packet_carries_the_fields_the_other_dimensions_read(tmp_path):
         assert key in cell, key
 
 
+def test_the_packet_carries_the_recency_the_ledger_wrote(tmp_path):
+    """The ledger writes Evidence_Detail.Recency; the packet read a
+    `Recency_Band` column no writer fills, so every live packet shipped
+    `recency_bands: []` and the challenger recorded recency NOT_RUN on
+    every cell (First Tech run, 2026-10-05: 1,081 banded rows, 0 shipped)."""
+    run, wb, cells = _synthesised(tmp_path)
+    out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")
+    cell = out["packets"][0]["cells_to_challenge"][0]
+    expected = L.recency_band("2025-06-01", wb)
+    assert cell["recency_bands"] == [expected]
+    assert all(row["recency"] == expected for row in cell["evidence"])
+
+
 def test_it_is_not_sent_to_the_research_card(tmp_path):
     run, wb, cells = _synthesised(tmp_path)
     out = brief.challenge_batch(wb, run=run, out_dir=tmp_path / "b")

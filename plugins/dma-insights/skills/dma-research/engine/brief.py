@@ -1590,7 +1590,7 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                       "source": _clean(x.get("Source_Name")),
                       "url": _clean(x.get("Source_URL")),
                       "tier": _clean(x.get("Tier")),
-                      "recency": _clean(x.get("Recency_Band")),
+                      "recency": _clean(x.get("Recency")),
                       "excerpt": _clean(x.get("Excerpt"))[:CHALLENGE_EXCERPT_WINDOW]}
                      for x in rows[:CHALLENGE_EVIDENCE_PER_CELL]],
         "evidence_total": len(eids),
@@ -1602,8 +1602,9 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                           "disposition": _clean(r.get("Contradiction_Disposition"))},
         # ceiling_reasoning
         "ceiling": _clean(r.get("Ceiling_Reasoning"))[:160],
-        "recency_bands": sorted({_clean(x.get("Recency_Band")) for x in rows
-                                 if _clean(x.get("Recency_Band"))}),
+        # Evidence_Detail.Recency is what ledger.append_evidence writes.
+        "recency_bands": sorted({_clean(x.get("Recency")) for x in rows
+                                 if _clean(x.get("Recency"))}),
     }
 
 
