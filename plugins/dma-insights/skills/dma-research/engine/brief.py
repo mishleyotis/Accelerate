@@ -1628,8 +1628,6 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
     sh = shared(wb)
     register = wb.evidence_index()
     only = {str(c).strip().upper() for c in (categories or [])}
-    challenged = {_clean(r.get("SubCap_ID")) for r in wb.rows("Challenge_Log")
-                  if _clean(r.get("Verdict"))}
     by_cat: dict[str, list] = {}
     for sheet in C.PILLAR_SHEETS:
         for r in wb.rows(sheet):
@@ -1640,7 +1638,13 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
                 continue
             if not _clean(r.get("Dominant_Claim")):
                 continue
-            if sub in challenged or _clean(r.get("Challenge_Verdict")):
+            # Re-challenge selection reads the CURRENT verdict column, not the
+            # Challenge_Log history: a cell re-synthesised to repair a FAILED
+            # challenge has its column cleared (append_synthesis) but keeps its
+            # old log row, and selecting on the log skipped exactly the cells
+            # that needed re-challenging (MEM-0441 / MEM-0577 repair). The log
+            # is history; the column is the live state.
+            if _clean(r.get("Challenge_Verdict")):
                 continue
             if L.is_declared_absent(r, wb):
                 continue          # an absence is gated by its ladder, not a challenge
