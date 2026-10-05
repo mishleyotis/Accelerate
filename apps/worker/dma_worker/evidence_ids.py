@@ -370,9 +370,13 @@ class EvidenceLander:
         """No PK hit -> the (entity_id, content_hash) dedup index fired: this
         content already lives under another of this entity's ids. Map to it
         and record — never silently."""
+        # `split_of IS NULL`: 0065's dedup key is (entity_id, content_hash,
+        # lineage), and a package row is never a split span — so the row it
+        # collided with is the unsplit one, never a span cut from it.
         self.cur.execute(
             f"""SELECT e_id FROM evidence_index
-                 WHERE entity_id = %s AND content_hash = {self.HASH_SQL}""",
+                 WHERE entity_id = %s AND content_hash = {self.HASH_SQL}
+                   AND split_of IS NULL""",
             (self.entity_id, url, claim_type, excerpt))
         hit = self.cur.fetchone()
         if hit is None:

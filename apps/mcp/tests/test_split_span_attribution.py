@@ -21,6 +21,19 @@ shorter than its parent; the dedup path never writes one; and the database
 refuses an attribution, its mint instant or the lineage changing after the
 INSERT (migration 0063's `evidence_span_fixed_at_mint`).
 
+OWNER DECISION 2026-10-05 — whole-row sharing. A discovery row that is
+ENTIRELY a client statement may be shared whole. The first rule refused any
+span equal to its parent (`split_span_whole_row`), and a producer published
+five rows with only the closing full stop trimmed: the rule's wording met,
+its intent not. Now a whole-row span is minted as a NEW row — split_of the
+parent, the parent's full excerpt, the customer attribution — when the
+producer says so with `whole_row: true`. Every guarantee above stands: the
+parent is never touched and never served, the dedup path never writes an
+attribution, and the content-hash dedup cannot fold the span into its
+parent because a span's identity includes its lineage (migration 0065's
+`evidence_dedup_lineage_uq`), while registering the same span twice is
+still the idempotent retry.
+
 The pure rules run without a database; the mint paths run against the
 migrated local database named by LOCAL_DATABASE_URL and skip honestly
 without one.
@@ -49,9 +62,11 @@ LABEL = "Client statement, discovery conversations, September 2026"
 
 
 # ── pure rules ─────────────────────────────────────────────────────────────
-def test_a_whole_row_span_is_refused():
-    """The whole parent is not a split: re-labelling it would publish every
-    word of it, the seller remark included."""
+def test_a_whole_row_span_is_refused_unless_declared():
+    """The whole parent, sent as an ordinary split, is refused: on a row that
+    carries a seller remark it would publish every word of it. It is shared
+    whole only when the producer declares the row is entirely the client's
+    statement (`whole_row: true`, owner decision 2026-10-05)."""
     bad = split_problem(PARENT, "ent-1", PARENT_EXCERPT)
     assert bad is not None and "whole_row" in bad, bad
     # the same words under different spacing and case are still the whole row
@@ -60,6 +75,31 @@ def test_a_whole_row_span_is_refused():
     assert bad is not None and "whole_row" in bad, bad
     # a strictly shorter verbatim piece is a split
     assert split_problem(PARENT, "ent-1", SPAN) is None
+    # the message says how to share a row whole on purpose
+    assert "whole_row" in split_problem(PARENT, "ent-1", PARENT_EXCERPT)
+
+
+def test_a_declared_whole_row_span_is_accepted():
+    assert split_problem(PARENT, "ent-1", PARENT_EXCERPT,
+                         whole_row=True) is None
+    respaced = "  " + PARENT_EXCERPT.upper().replace(" ", "   ") + " "
+    assert split_problem(PARENT, "ent-1", respaced, whole_row=True) is None
+
+
+def test_a_declared_whole_row_must_be_the_whole_row():
+    """`whole_row: true` on a shorter span — or one that is not verbatim — is
+    a contradiction, refused rather than guessed at."""
+    bad = split_problem(PARENT, "ent-1", SPAN, whole_row=True)
+    assert bad is not None and bad.startswith("split_whole_row_mismatch"), bad
+    bad = split_problem(PARENT, "ent-1", PARENT_EXCERPT + " More.",
+                        whole_row=True)
+    assert bad is not None and "not_verbatim" in bad, bad
+    # the foreign and non-internal refusals still come first
+    assert "foreign" in split_problem(PARENT, "ent-2", PARENT_EXCERPT,
+                                      whole_row=True)
+    public = ("E-CC-1", "ent-1", "producer", PARENT_EXCERPT)
+    assert "only an internal-origin row" in split_problem(
+        public, "ent-1", PARENT_EXCERPT, whole_row=True)
 
 
 def test_no_code_path_updates_an_attribution():
@@ -170,6 +210,112 @@ def test_the_whole_row_never_gains_an_attribution(seeded):
     assert _row(mcp, parent) == (None, None, None)
 
 
+def _whole(mcp, rid, parent, label=LABEL, **kw):
+    return register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": PARENT_EXCERPT, "split_of": parent,
+        "customer_attribution": label, "whole_row": True, **kw}, fetch=None)
+
+
+def _excerpt(mcp, e_id):
+    cur = mcp.cursor()
+    cur.execute("SELECT excerpt FROM evidence_index WHERE e_id = %s", (e_id,))
+    return cur.fetchone()[0]
+
+
+def test_a_whole_row_span_is_minted_as_a_new_row(seeded):
+    """Owner decision 2026-10-05: a NEW row — split_of the parent, the
+    parent's full excerpt, the attribution, stamped by the database — and
+    the parent untouched. The content-hash dedup does not fold it into the
+    parent although the words, claim and (absent) URL are identical."""
+    mcp, _admin, rid, _eid = seeded
+    parent = _parent(mcp, rid)
+    r = _whole(mcp, rid, parent)
+    assert r["errors"] == [] and r["deduped"] is False, r
+    assert r["e_id"] not in (None, parent), r
+    attribution, stamped, lineage = _row(mcp, r["e_id"])
+    assert (attribution, lineage) == (LABEL, parent)
+    assert stamped is not None, "the mint instant is stamped by the database"
+    assert _excerpt(mcp, r["e_id"]) == _excerpt(mcp, parent) == PARENT_EXCERPT
+    assert _row(mcp, parent) == (None, None, None), "the parent is untouched"
+
+
+def test_a_whole_row_span_stores_the_parents_exact_excerpt(seeded):
+    """The span IS the parent's text: a re-spaced or re-cased copy sent by
+    the producer is stored as the parent's own bytes, never the producer's."""
+    mcp, _admin, rid, _eid = seeded
+    parent = _parent(mcp, rid)
+    sent = PARENT_EXCERPT.replace(" ", "  ")
+    r = register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": sent, "split_of": parent,
+        "customer_attribution": LABEL, "whole_row": True}, fetch=None)
+    assert r["errors"] == [], r
+    assert _excerpt(mcp, r["e_id"]) == PARENT_EXCERPT
+
+
+def test_a_whole_row_span_re_registers_idempotently(seeded):
+    mcp, _admin, rid, _eid = seeded
+    parent = _parent(mcp, rid)
+    first = _whole(mcp, rid, parent)
+    assert first["errors"] == [], first
+    minted = _row(mcp, first["e_id"])
+    again = _whole(mcp, rid, parent)
+    assert again["errors"] == [] and again["deduped"] is True, again
+    assert again["e_id"] == first["e_id"]
+    assert _row(mcp, first["e_id"]) == minted, "a retry writes nothing"
+    cur = mcp.cursor()
+    cur.execute("""SELECT count(*) FROM evidence_index
+                    WHERE split_of = %s""", (parent,))
+    assert cur.fetchone()[0] == 1
+    # a different label on the same span is a different claim: refused
+    other = _whole(mcp, rid, parent,
+                   label="Client statement, board pack, August 2026")
+    assert other["e_id"] is None and any(
+        "split_span_exists" in e for e in other["errors"]), other
+    assert _row(mcp, first["e_id"]) == minted
+
+
+def test_a_whole_row_share_never_backfills_the_parent(seeded):
+    """No path writes an attribution onto an existing row: not the parent
+    re-registered with a label (no split_of), not a plain re-registration of
+    the parent's words, which dedups onto the PARENT — never onto the span
+    — and comes back unlabelled."""
+    mcp, _admin, rid, _eid = seeded
+    parent = _parent(mcp, rid)
+    span = _whole(mcp, rid, parent)
+    assert span["errors"] == [], span
+    labelled = register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": PARENT_EXCERPT, "claim_type": "FACT",
+        "tier": "T2", "customer_attribution": LABEL}, fetch=None)
+    assert labelled["e_id"] is None, labelled
+    plain = register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": PARENT_EXCERPT, "claim_type": "FACT",
+        "tier": "T2", "source_name": "Internal discovery notes"}, fetch=None)
+    assert plain["errors"] == [] and plain["deduped"] is True, plain
+    assert plain["e_id"] == parent, "the parent's words dedup to the parent"
+    assert _row(mcp, parent) == (None, None, None)
+
+
+def test_a_whole_row_span_needs_an_attribution(seeded):
+    """An unlabelled whole-row copy would be the parent again under a second
+    id — internal, never served, and nothing a reader gains."""
+    mcp, _admin, rid, _eid = seeded
+    parent = _parent(mcp, rid)
+    r = register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": PARENT_EXCERPT, "split_of": parent,
+        "whole_row": True}, fetch=None)
+    assert r["e_id"] is None and any(
+        e.startswith("whole_row") for e in r["errors"]), r
+
+
+def test_whole_row_without_a_split_is_refused(seeded):
+    mcp, _admin, rid, _eid = seeded
+    r = register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": PARENT_EXCERPT, "claim_type": "FACT",
+        "tier": "T2", "whole_row": True}, fetch=None)
+    assert r["e_id"] is None and any(
+        e.startswith("whole_row") for e in r["errors"]), r
+
+
 def test_dedup_never_backfills_an_attribution(seeded):
     mcp, _admin, rid, _eid = seeded
     parent = _parent(mcp, rid)
@@ -248,7 +394,9 @@ def test_the_database_refuses_an_attribution_after_mint(seeded):
         mcp.rollback()
     for e_id, excerpt, split_of in (
         ("E-SSB-901", SPAN + " (no split)", None),           # no lineage
-        ("E-SSB-902", PARENT_EXCERPT, parent),               # whole row
+        ("E-SSB-902", PARENT_EXCERPT + " And more.", parent),  # longer
+        ("E-SSB-903", "words the parent never said at any point in "
+                      "the discovery conversations", parent),  # not verbatim
     ):
         with pytest.raises(pg8000.dbapi.DatabaseError):
             cur.execute(
@@ -258,4 +406,17 @@ def test_the_database_refuses_an_attribution_after_mint(seeded):
                    VALUES (%s, %s, 'internal', 'x', %s, 'FACT', 'T2', %s, %s)""",
                 (e_id, eid, excerpt, LABEL, split_of))
         mcp.rollback()
+    assert _row(mcp, parent) == (None, None, None)
+    # 0065: the WHOLE row is a legal mint in the database (the connector
+    # demands `whole_row: true` for it), and it is a distinct row — the
+    # lineage-aware dedup key does not fold it into the parent.
+    cur.execute(
+        """INSERT INTO evidence_index
+             (e_id, entity_id, origin, source_name, excerpt,
+              claim_type, tier, customer_attribution, split_of)
+           VALUES ('E-SSB-904', %s, 'internal', 'x', %s, 'FACT', 'T2', %s, %s)
+           RETURNING customer_attribution_at""",
+        (eid, PARENT_EXCERPT, LABEL, parent))
+    assert cur.fetchone()[0] is not None
+    mcp.rollback()
     assert _row(mcp, parent) == (None, None, None)

@@ -22,10 +22,14 @@ Fail-closed rules enforced here:
   retrieval time, computes the tier from the tool (Indeed T3, CFPB T1) and
   verifies the excerpt against the STORED connector response, not a URL;
 - a span SPLIT from an internal row (`split_of`, RC-08 / D-10) is a verbatim
-  piece of the parent's excerpt, STRICTLY SHORTER than it, and only a span
-  carrying `customer_attribution` may ever reach a customer. The attribution
-  is written only by the INSERT that mints the span — never onto an existing
-  row, by any path (0063's trigger refuses it in the database too).
+  piece of the parent's excerpt, STRICTLY SHORTER than it — or, declared with
+  `whole_row: true`, the WHOLE of it (owner decision 2026-10-05: a discovery
+  row that is entirely a client statement is shared whole, as a NEW row) —
+  and only a span carrying `customer_attribution` may ever reach a customer.
+  The attribution is written only by the INSERT that mints the span — never
+  onto an existing row, by any path (0063's trigger refuses it in the
+  database too), and a span's dedup identity includes its lineage (0065) so
+  a whole-row span is never folded into its parent.
 """
 from __future__ import annotations
 
@@ -215,7 +219,19 @@ def connector_provenance(item: dict, now: datetime | None = None) -> dict:
 # unchanged ETag, and irreversibly. So: a split is strictly shorter than its
 # parent; the attribution goes on the row this call mints and nowhere else;
 # a dedup onto a row whose lineage or attribution differs is REFUSED rather
-# than reconciled. The api, for its part, serves the span under its label
+# than reconciled.
+#
+# WHOLE-ROW SHARING (owner decision 2026-10-05). A discovery row that is
+# ENTIRELY a client statement had no honest route: the strictly-shorter rule
+# had a producer publish five such rows with only the closing full stop
+# trimmed — the wording met, the intent not. Such a row is now shared WHOLE,
+# by the same mechanism as any span: a NEW row, split_of the parent, carrying
+# the parent's full excerpt (its stored bytes, not the producer's copy) and
+# the attribution. The producer DECLARES it with `whole_row: true` — the
+# whole row sent without the declaration is still refused, because on a row
+# that carries a seller remark it is the leak the split exists to stop. The
+# parent is never touched; the dedup key includes the lineage (0065), so
+# the span is its own row and a retry of it is the idempotent dedup. The api, for its part, serves the span under its label
 # only on a run promoted at or after the span was minted
 # (apps/api evidence.attribution_bound), so even a new span changes nothing
 # a customer reads until a payload citing it is promoted.
@@ -247,9 +263,11 @@ def attribution_problem(text) -> str | None:
     return None
 
 
-def split_problem(parent, entity_id, excerpt: str) -> str | None:
+def split_problem(parent, entity_id, excerpt: str,
+                  whole_row: bool = False) -> str | None:
     """Why a span cannot be split from `parent` (e_id, entity_id, origin,
-    excerpt), or None. Pure."""
+    excerpt), or None. Pure. `whole_row` is the producer's declaration that
+    the parent is entirely the client's statement and is shared whole."""
     if parent is None:
         return ("split_of: the parent row does not exist — split a span from "
                 "a registered internal row")
@@ -264,12 +282,22 @@ def split_problem(parent, entity_id, excerpt: str) -> str | None:
         return ("split_span_not_verbatim: a span is a verbatim piece of its "
                 "parent's excerpt — re-attribution changes the LABEL, never "
                 "the words")
+    if whole_row:
+        if span != whole:
+            return ("split_whole_row_mismatch: whole_row is declared but the "
+                    "excerpt is not the parent's whole excerpt. Send the "
+                    "parent's full excerpt to share the row whole, or drop "
+                    "whole_row to register a shorter span.")
+        return None
     if len(span) >= len(whole):
-        return ("split_span_whole_row: a split span is STRICTLY SHORTER than "
-                "its parent. The whole row is not a span — re-labelling it "
-                "would publish every word of it, the remarks the split exists "
-                "to keep internal included. Register the client's own "
-                "statement as its own, shorter span.")
+        return ("split_span_whole_row: this span is the parent's whole "
+                "excerpt. Sent as an ordinary split it is refused — on a row "
+                "that carries a seller or personal remark it would publish "
+                "every word, the remarks included. If the WHOLE row is the "
+                "client's own statement, resend with whole_row: true (owner "
+                "decision 2026-10-05); otherwise register the client's "
+                "statement as its own, shorter span. Never trim a character "
+                "to pass this check.")
     return None
 
 
@@ -421,10 +449,18 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     attribution = item.get("customer_attribution")
     attribution = (attribution.strip() if isinstance(attribution, str)
                    and attribution.strip() else None)
+    whole_row = item.get("whole_row") is True
     parent = None
     if attribution and not split_of:
         errors.append("customer_attribution: only a span SPLIT from an "
                       "internal row carries one — send split_of with it")
+    if whole_row and not split_of:
+        errors.append("whole_row: declares a span that is its parent's whole "
+                      "excerpt — send split_of=<the parent> with it")
+    elif whole_row and not attribution:
+        errors.append("whole_row: a whole-row span exists to be shared — "
+                      "send its customer_attribution. Without one it is the "
+                      "parent again under a second id, never served")
     if split_of:
         if origin != "internal":
             errors.append("split_of: a split span is internal material; "
@@ -435,10 +471,14 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
                       source_name
                  FROM evidence_index WHERE e_id = %s""", (split_of,))
         parent = cur.fetchone()
-        bad = split_problem(parent, entity_id, excerpt)
+        bad = split_problem(parent, entity_id, excerpt, whole_row=whole_row)
         if bad:
             errors.append(bad)
         elif parent is not None:
+            if whole_row:
+                # The span IS the parent's text: store the parent's own
+                # bytes, never the producer's re-spaced or re-cased copy.
+                excerpt = parent[3]
             # A span inherits what the producer did not restate: it is a
             # piece of the same document.
             claim = claim or (parent[4] or None)
@@ -680,11 +720,14 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
     if minted:
         kept_id, deduped, ers_out = e_id, False, ers
     else:
-        # the entity-scoped content hash fired: same URL+claim+span
+        # the entity-scoped content hash fired: same URL+claim+span, and the
+        # same lineage — 0065's key includes split_of, so a whole-row span
+        # is never answered with its parent, nor the parent with the span.
         cur.execute(
             f"""SELECT e_id FROM evidence_index
-                 WHERE entity_id = %s AND content_hash = {_HASH_SQL}""",
-            (entity_id, source_url, claim, excerpt))
+                 WHERE entity_id = %s AND content_hash = {_HASH_SQL}
+                   AND coalesce(split_of, '') = coalesce(%s, '')""",
+            (entity_id, source_url, claim, excerpt, split_of))
         kept_id = cur.fetchone()[0]
         deduped, ers_out = True, None
         # NEVER RECONCILED BY A WRITE. The same words are already a row; if

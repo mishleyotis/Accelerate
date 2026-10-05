@@ -141,9 +141,14 @@ O9.)
   client's own statement as a verbatim span with `split_of=<parent>` and
   `customer_attribution` ("Client statement, discovery conversations, <month year>"),
   and the seller or personal remark as a span with `split_of` and no attribution. A span
-  is strictly shorter than its parent (the whole row is refused), and an attribution is
-  set only when the span is minted — never added to an existing row; the client sees
-  the span only once a payload citing it is promoted. Cite
+  is strictly shorter than its parent — **except** a row that is ENTIRELY the client's own
+  statement, which is shared whole (owner decision 2026-10-05): send the parent's full
+  excerpt with `split_of=<parent>`, `customer_attribution` and `whole_row: true`, and a NEW
+  span row is minted (the parent stays internal, unlabelled, never served). Without
+  `whole_row: true` the whole excerpt is still refused, and never trim a character to
+  get past that. An attribution is set only when the span is minted — never added to an
+  existing row; the client sees the span only once a payload citing it is promoted, so
+  cite the NEW span id (not the parent) and re-promote. Cite
   the shareable span on the client-facing card; a drawer whose only items are internal
   argues over nothing for the customer, and the projection check
   (`packages/shared/customer_projection.py`) names it.

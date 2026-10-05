@@ -480,9 +480,13 @@ def register_evidence(run_id: str, item: dict) -> dict:
     parent's, and — for the span the client may read —
     customer_attribution ("Client statement, discovery conversations,
     <month year>"). A span without one never reaches a customer. A span is
-    strictly shorter than its parent (the whole row is refused), and the
+    strictly shorter than its parent — unless the WHOLE row is the client's
+    own statement: then send the parent's full excerpt with whole_row=true
+    and the attribution, and a NEW span row is minted (owner decision
+    2026-10-05; the parent itself is never labelled or served). The
     attribution is set only on the span this call mints — re-registering
-    existing words under a different label is refused, never written."""
+    existing words under a different label is refused, never written;
+    re-registering the same span returns it (deduped)."""
     with _conn() as c:
         return register_mod.register_evidence(c, run_id, item, fetch=_fetch)
 
