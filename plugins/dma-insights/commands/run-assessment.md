@@ -187,13 +187,21 @@ independent challenge and the floors gate, up to two rounds. Every batch
 writes through ONE `engine.cli batch` per capability (one workbook load, lock
 and save instead of ~10 s per command under the run-wide lock). The agents
 run in THIS session and hold Exa, Tavily and Clay themselves; one that finds
-none stops and returns `NO_CONNECTORS`. When all have returned, run the
+none stops and returns `NO_CONNECTORS` — except on a DEGRADED run, where the
+driver passes `degraded: true` and the agents search with WebSearch and close
+cells with `absence --enrichment-unavailable` instead of stopping. When all have returned, run the
 file's `then` command: the driver prices the workflow agents into the cost
 ledger (so the ceiling sees them), re-reads the floors gates, re-hands only
 categories still failing — and says so if the last handoff was never worked.
-If this session has no Workflow tool (a resumed session can lose it and the
-connectors), restart the session; `--research-mode lanes` is refused with the
-real dispatcher unless `--allow-lanes` waives it, because lanes hold no
+**No Workflow tool? Do not restart.** A resumed session can lose it. The
+handoff's `agent_prompts` names a directory of the SAME batch and challenge
+prompts, rendered from the workflow's own source
+(`workflows/render-prompts.mjs`), with a `manifest.json`. Spawn one in-session
+Agent per `batch` row (its file's text as the prompt, `model` and
+`subagent_type` from the row), all in one message; when a category's batches
+have returned, spawn its `challenge` row; then run `then`. Same work, same
+tier, same tools — no new session. `--research-mode lanes` stays refused with
+the real dispatcher unless `--allow-lanes` waives it, because lanes hold no
 connector and cannot pass a gate.
 
 **The run survives a fresh container.** The driver snapshots the run

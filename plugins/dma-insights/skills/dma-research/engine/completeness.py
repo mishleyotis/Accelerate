@@ -436,13 +436,12 @@ def main(argv=None) -> int:
         print(f"{'COMPLETE' if out['complete'] else 'INCOMPLETE'} — "
               f"{out['populated']}/{out['total']} tabs populated{note}")
         for r in out["sheets"]:
-            # Every verdict `check` can emit has a mark; an unknown one
-            # prints as "?" rather than crashing the report (OUT_OF_STAGE /
-            # AHEAD_OF_STAGE were missing and raised KeyError, 2026-10-05).
+            # check() also emits OUT_OF_STAGE / AHEAD_OF_STAGE / ILLEGAL_DECLARATION;
+            # an unmapped verdict crashed the printout after the verdict line.
             mark = {"POPULATED": "✓", "DECLARED_EMPTY": "·",
                     "OUT_OF_SCOPE": "–", "OUT_OF_STAGE": "–",
-                    "AHEAD_OF_STAGE": "+", "ILLEGAL_DECLARATION": "✗", "EMPTY": "✗",
-                    "SHORT": "✗"}.get(r["verdict"], "?")
+                    "AHEAD_OF_STAGE": "!", "EMPTY": "✗", "SHORT": "✗",
+                    "ILLEGAL_DECLARATION": "✗"}.get(r["verdict"], "?")
             print(f"  {mark} {r['sheet']:<22} {r['detail']}")
     return 0 if out["complete"] else 1
 

@@ -62,7 +62,7 @@ def test_indeed_is_t3_and_cfpb_is_t1():
     assert connector_family("cfpb.complaints_api") == ("cfpb", "T1")
     assert connector_family("consumerfinance.gov complaint search API") == \
         ("cfpb", "T1")
-    assert connector_family("mcp__Clay__search-companies") is None
+    assert connector_family("mcp__Exa__web_search_exa") is None
 
 
 def test_a_producer_tier_is_ignored_and_said_so():
@@ -72,7 +72,7 @@ def test_a_producer_tier_is_ignored_and_said_so():
 
 
 def test_an_unregistered_tool_is_refused():
-    p = connector_provenance(_indeed(tool="mcp__Clay__search-companies"),
+    p = connector_provenance(_indeed(tool="mcp__Exa__web_search_exa"),
                              now=NOW)
     assert any(e.startswith("connector_tool_unregistered") for e in p["errors"])
 
@@ -412,3 +412,36 @@ def test_a_discovery_row_splits_into_a_shareable_and_an_internal_span(seeded):
     cur.execute("SELECT customer_attribution FROM evidence_index "
                 "WHERE e_id = %s", (parent["e_id"],))
     assert cur.fetchone()[0] is None
+
+
+# ── Clay and Vibe Prospecting: tier by KIND (owner decision 2026-10-05) ──
+@pytest.mark.parametrize("tool", ["mcp__Clay__add-company-data-points",
+                                  "mcp__Vibe_Prospecting__enrich-business",
+                                  "Explorium enrich-business"])
+@pytest.mark.parametrize("kind,tier", [("technographic", "T1"),
+                                       ("firmographic", "T3")])
+def test_clay_and_vibe_are_admitted_with_the_tier_of_their_kind(tool, kind,
+                                                                tier):
+    """SWBC 2026-10-05: both scans were refused as unregistered tools, so a
+    run that had called them could cite neither. One call returns a machine
+    scan (T1) and modelled firmographics (T3), so the producer names the
+    kind and the server computes the tier from it."""
+    p = connector_provenance(_indeed(tool=tool, kind=kind), now=NOW)
+    assert p["errors"] == [], p["errors"]
+    assert p["tier"] == tier
+
+
+@pytest.mark.parametrize("kind", [None, "", "revenue", "stack"])
+def test_a_clay_reading_without_a_known_kind_is_refused(kind):
+    p = connector_provenance(_indeed(tool="mcp__Clay__add-company-data-points",
+                                     kind=kind), now=NOW)
+    assert any(e.startswith("connector.kind") for e in p["errors"]), p
+    assert p["tier"] is None
+
+
+def test_a_sent_tier_never_overrides_the_kind():
+    p = connector_provenance({**_indeed(tool="mcp__Clay__x",
+                                        kind="firmographic"), "tier": "T1"},
+                             now=NOW)
+    assert p["tier"] == "T3"
+    assert any("tier T1 ignored" in a for a in p["adjustments"])

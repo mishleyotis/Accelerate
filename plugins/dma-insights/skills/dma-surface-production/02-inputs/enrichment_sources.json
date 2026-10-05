@@ -57,10 +57,10 @@
         {
           "connector": "clay",
           "serves": "Annual Revenue and Headcount Growth company data points",
-          "tier_band": "T1-T2 when a filing is behind it; otherwise an inference",
+          "tier_band": "T3 as a connector reading (kind firmographic, owner decision 2026-10-05); T1-T2 when a filing is behind it and the filing is registered instead",
           "status": "wired",
           "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json",
-          "notes": "Session-bound: this organisation's trigger API refuses connector grants, so scheduled runs cannot hold it."
+          "notes": "Session-bound: this organisation's trigger API refuses connector grants, so scheduled runs cannot hold it. Registers under origin connector with kind firmographic (T3). Headcount Growth is a CAGR candidate under CG-18f: served only when an independent source corroborates it."
         },
         {
           "connector": "moodys",

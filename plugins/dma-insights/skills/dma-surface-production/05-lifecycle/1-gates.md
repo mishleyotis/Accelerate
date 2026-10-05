@@ -148,11 +148,11 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **81** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **83** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
-### CG · Corpus / contract (59)
+### CG · Corpus / contract (60)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -212,6 +212,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `CG-18c` | **The sub-vertical's firmographic set is present.** overview.firmographics carries every member of the run's primary sub-vertical set (must_present_by_subvertical), stated or held within the ceiling; Farm Credit declares sub_vertical_undefined. | block | — |
 | `CG-18d` | **A scoped figure names the entity it describes.** On O2 (unit) and O8 (basis) alike, a figure scoped to a subsidiary, segment or division names that part of the group. | block | — |
 | `CG-18e` | **The strip and the regulatory card agree.** When context.regulatory_standing states license_type or primary_regulator, overview.firmographics states charter and primary_regulator too, naming the same regulators. | block | — |
+| `CG-18f` | **A CAGR is ranked, and served only corroborated.** A served CAGR's unit names what grew, the window, the scope and the independent source that corroborates it. A held CAGR beside a financial series of two or more dated points states each computed candidate's rate and why none was… | block | — |
 | `CG-40b` | **A WORKED_ABSENT alert shows the ladder that worked it.** An H3 alert in state WORKED_ABSENT logs its queries_run and carries no rung left open (NOT_RUN, not fetched, blocked) without the failover that ran in its place. | block | — |
 | `CG-PAR` | **No page lacks the structure every gold run serves.** At promote, each staged page is compared with the committed shape-only gold (surface_gold.json: keys, list lengths and per-row null patterns of the promoted gold runs, no values). The run's own gold record is left out, and gold of its… *(registry-only: no module emits this id today)* | block | — |
 | `CG-STALE` | **A promoted page does not say its own run is withdrawn.** At promote, no section's empty_state or narrative_thread asserts that the run being promoted is withdrawn or withheld pending repair. *(registry-only: no module emits this id today)* | block | — |
@@ -236,7 +237,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `SG-S8` | **Sentiment rests on more than one line.** The count of rating rows across all audiences, computed at submit and never read from a declared displayed_lines, is greater than one; a self-published NPS (T4/T5) standing alone is thin whatever the count. *(registry-only: no module emits this id today)* | disclose | `gates/SG-S8.md` |
 | `SG-V4` | **Grounding against the run corpus.** Prose similarity against the narrowest applicable centroid (cell .62 / category .58 / pillar .55 / run .50); abstains to a recorded NOT_RUN below five members or without an embedding tier. *(registry-only: no module emits this id today)* | disclose | — |
 
-### ET · Enrichment trigger (12)
+### ET · Enrichment trigger (13)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -251,6 +252,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `ET-09` | **No other client named in this client's prose.** No payload string names another client in the corpus, unless that name is a peer recorded server-side for this run. | block | — |
 | `ET-10` | **A FACT rests on a T1 or T2 source.** Every cited evidence row labelled FACT carries tier T1 or T2. A T3-T5 row may be INFERENCE, HYPOTHESIS or CEILING_ESTIMATE; the label is derived from provenance, never typed. | block | — |
 | `ET-11` | **A machine technographic scan is a T1 source.** Every cited evidence row whose source names a technographic scan provider (Hubbl, BuiltWith, Wappalyzer, Explorium and their kind) carries tier T1. Machine-generated, timestamped deployment data is the strongest tier the ladder has;… | block | — |
+| `ET-12` | **The tech register is built on a machine scan.** The techstack page cites at least one connector-origin technographic reading (Clay Tech Stack or Vibe Prospecting technographics, registered with kind 'technographic', T1), or its r_layer records the scan as NOT_RUN naming both tools… | block | — |
 | `ET-05b` | **The regulatory card works its sub-vertical's regulators.** C3's ladder carries a rung naming a regulator of the run's primary sub-vertical family (regulator_family_by_subvertical) whose outcome is not open. | block | — |
 
 > **Emitted but not in the registry:** `SG-01`, `SG-06`. A verdict can name these and `explain_gate` cannot answer for them.

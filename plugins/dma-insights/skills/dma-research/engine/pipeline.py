@@ -162,6 +162,26 @@ class Dispatcher(Protocol):
                  ctx: "Pipeline") -> dict: ...
 
 
+
+def _this_engagement(rows: list[dict], request_id: str, reference_date: str) -> list[dict]:
+    """The pending rows that can be THIS run's ingest.
+
+    The connector stamps each row with the package's request id. Rows that
+    name ours are the answer; a row naming another request is another
+    engagement's. A row with no request id is legacy: it counts unless it
+    completed before this run's reference date. Without this, INGEST_A took
+    the entity's stale run from an earlier engagement on its first poll
+    (2026-10-01, Cross Insurance: seq 1 from 2026-09-13, not the seq 2 the
+    push created a minute later).
+    """
+    ours = [r for r in rows if request_id and str(r.get("request_id") or "") == request_id]
+    if ours:
+        return ours
+    ref = reference_date[:10]
+    return [r for r in rows if not r.get("request_id")
+            and not (ref and str(r.get("completed_at") or "")[:10]
+                     and str(r.get("completed_at"))[:10] < ref)]
+
 class ConnectorReads(Protocol):
     def pending_runs(self) -> list[dict]: ...
     def page_contract(self, page: str) -> dict: ...
@@ -287,15 +307,30 @@ class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
     the final call, promote_run through mcp_raw — the two audited paths."""
 
-    def __init__(self, producer: str = "engine.pipeline"):
+    def __init__(self, producer: str = "engine.pipeline", session: str | None = None):
         self.producer = producer
+        # ONE lease holder for every page this driver ships. ship_page.py
+        # mints a fresh session per process when none is exported, so the
+        # second page's claim was refused by the first page's live lease
+        # (2026-10-01, Cross Insurance: techstack shipped, heatmap refused
+        # "another session holds the lease" — the other session was us).
+        self.session = session or f"engine-pipeline-{os.getpid()}"
 
     def ship(self, connector_run, page, sections_dir, verdicts_out):
+        # A page with no section files is NOT shipped. ship_page.py prints
+        # "no section files … skipped" and exits 0, which this used to read
+        # as a pass (2026-10-01, Cross Insurance: five pages "PASS" in the
+        # driver's state, "missing" on the server, promote refused).
+        if not list(Path(sections_dir).glob(f"{page}.*.json")):
+            return {"status": "fail", "rc": None, "sg_v4_fails": [],
+                    "reasons": [f"no section files for {page} in {sections_dir}: "
+                                f"the page lane produced nothing to ship"]}
         r = subprocess.run(
             [sys.executable, str(SHIP_PAGE), connector_run, page,
              "--sections", str(sections_dir), "--producer", self.producer,
              "--claim", "--verdicts-out", str(verdicts_out)],
-            capture_output=True, text=True, timeout=1800)
+            capture_output=True, text=True, timeout=1800,
+            env={**os.environ, "DMA_AGENT_SESSION": self.session})
         verdict = {}
         if Path(verdicts_out).is_file():
             try:
@@ -1539,7 +1574,11 @@ class Pipeline:
                                    for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
-                "entity": md.get("entity_name") or "", "domain": site}
+                "entity": md.get("entity_name") or "", "domain": site,
+                # The workflow's connector rules stop every batch with
+                # NO_CONNECTORS when Exa/Tavily/Clay are absent — on a run the
+                # driver already proceeded DEGRADED, that closed nothing.
+                "degraded": bool(self.state.get("enrichment_degraded"))}
                for u, cats in sorted(by_unit.items())]
         doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
@@ -1577,14 +1616,17 @@ class Pipeline:
             doc["not_worked"] = (
                 f"the previous handoff named the same {cells} open and {rcells} "
                 "repair cells and no workflow spend has landed since: its "
-                "workflows never ran. Check this session has the Workflow tool "
-                "and Exa/Tavily/Clay (a resumed session can lose them; a restart "
-                "rebinds) — do NOT fall back to lanes, which hold no connector.")
+                "workflows never ran. If this session has no Workflow tool (a "
+                "resumed session can lose it), run the rendered prompts in "
+                "`agent_prompts` as in-session agents — no restart is needed. "
+                "Do NOT fall back to headless lanes, which hold no connector.")
             self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
         cap = self.budget_usd()
         if cap is not None:
             doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
                                    fits_budget=self._spent_usd + est <= cap)
+        path.write_text(json.dumps(doc, indent=1))
+        doc["agent_prompts"] = self._render_agent_prompts(path)
         path.write_text(json.dumps(doc, indent=1))
         return {"file": str(path), "invocations": inv, "stalled": stalled,
                 "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
@@ -1682,6 +1724,34 @@ class Pipeline:
         else:
             est = pilot
         return round(est, 2), basis
+
+    def _render_agent_prompts(self, handoff: Path) -> dict:
+        """The same batch/challenge prompts the workflow would run, on disk.
+
+        Measured 2026-10-01 (Cross Insurance): a resumed session came back
+        without the Workflow tool, and the handoff's only remedy was "restart
+        the session" — the owner would not, and the run sat at RESEARCH. The
+        prompts are rendered from the workflow's own source (render-prompts.mjs
+        evaluates its PROMPTS region), so a session without Workflow spawns
+        one in-session Agent per batch file, then the challenge file per
+        category, and runs `then` — identical work, no new session. Rendering
+        needs the handoff on disk first, so it is written once before this and
+        again after. A render failure is stated, never fatal."""
+        out = self.run.root / "briefs" / "research_agents"
+        script = PLUGIN / "workflows" / "render-prompts.mjs"
+        info = {"dir": str(out), "manifest": str(out / "manifest.json"),
+                "how": ("no Workflow tool: for each manifest row spawn ONE in-session Agent "
+                        "with the file's text as its prompt (model and subagent_type from "
+                        "the row) — every batch row in parallel, then each category's "
+                        "challenge row once its batches have returned — then run `then`")}
+        try:
+            r = subprocess.run(["node", str(script), str(handoff), str(out)],
+                               capture_output=True, text=True, timeout=120)
+            if r.returncode != 0:
+                info["error"] = (r.stderr or r.stdout).strip()[:300]
+        except (OSError, subprocess.SubprocessError) as exc:
+            info["error"] = f"{type(exc).__name__}: {exc}"[:300]
+        return info
 
     def _pull_toolkits(self) -> Path | None:
         """The four pillar toolkits, fetched into the run when none is named.
@@ -2181,6 +2251,13 @@ class Pipeline:
             mine = [r for r in rows
                     if str(r.get("display_id") or "").strip().lower() == ent_id
                     or str(r.get("entity_name") or "").strip().lower() == ent_name]
+            # A row that names a request id is THIS run's only if the id is
+            # ours. Without this, INGEST_A (after_seq=None) took the entity's
+            # stale pending run from an earlier engagement on its first poll
+            # (2026-10-01, Cross Insurance: seq 1 from 2026-09-13 instead of
+            # the seq 2 this push created a minute later).
+            mine = _this_engagement(mine, str(getattr(self.run, "run_id", "") or ""),
+                                    str(md.get("reference_date") or ""))
             fresh = [r for r in mine
                      if after_seq is None or int(r.get("run_seq") or 0) > int(after_seq)]
             if fresh:
@@ -2215,6 +2292,11 @@ class Pipeline:
         self._reset_counters()
         self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
+            # READY reports go straight to render. Dispatching the producers
+            # first (2026-10-01, Cross Insurance) had them rewrite sections an
+            # independent validator had just passed, reopening ten of them.
+            if all(x.get("ready") for x in N.state(self.wb)["reports"].values()):
+                break
             self._rounds = r + 1
             b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
             self._count(self._dispatch(b, stage="REPORTS"))
@@ -2537,7 +2619,9 @@ def _build_opts(a) -> Options:
         from . import pipeline_stub as S
         disp, reads, shipper = S.StubDispatcher.fixture_backed(), S.StubReads(), S.StubShipper()
     else:
-        disp, reads, shipper = AgentRunDispatcher(timeout=a.lane_timeout), McpReads(), ShipPageShipper()
+        disp, reads, shipper = (AgentRunDispatcher(timeout=a.lane_timeout), McpReads(),
+                                ShipPageShipper(session=os.environ.get("DMA_SHIP_SESSION")
+                                                or f"engine-pipeline-{a.run}"))
     return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
                    max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
                    allow_unverified_connectors=getattr(
