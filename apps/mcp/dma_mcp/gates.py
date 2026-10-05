@@ -1175,6 +1175,29 @@ GATES = {
               "reads as a broken sort and takes the surrounding argument "
               "down with it.",
               "block"),
+    "AG-10": ("Every recommendation is rebutted", None,
+              "Every scored platform card and every recommendation carries "
+              "an r_layer.counter of at least 30 words naming a specific "
+              "alternative (another candidate, a discarded platform, or a "
+              "named path: consolidate, extend the incumbent, native "
+              "connectors, defer) and a `Rebuttal:` probe stating how the "
+              "counter was resolved, citing the evidence that resolved it.",
+              "Owner, 2026-10-05: recommendations were not rebutted, so "
+              "nothing stress-tested them; AG-01 checked only that a verdict "
+              "existed. An unrebutted recommendation is an assertion.",
+              "block"),
+    "AG-13": ("A first place is earned, not inherited from breadth", None,
+              "When Addressable opportunity spreads by less than 0.02 across "
+              "the scored cards and the rank-1 card leads by a declared "
+              "sequence or by Catalogue interconnect, that card carries a "
+              "`Lead test:` probe citing client evidence that makes it the "
+              "constraint.",
+              "Cross Insurance Agency, 2026-10-05: every driving cell sat at "
+              "the 1.0 floor, opportunity read 0.987-0.991 on all five "
+              "cards, and the integration hub led on interconnect and a "
+              "declared dependency - 'many systems' standing in for an "
+              "argument.",
+              "block"),
     "SG-S8": ("Sentiment rests on more than one line",
               "Sentiment rests on a single source, so treat it as "
               "indicative only",

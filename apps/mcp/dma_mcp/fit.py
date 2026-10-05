@@ -545,6 +545,24 @@ def platform_fit(conn, run_id, candidates) -> dict:
             "tech workbook); the greenfield term and the incumbent discount "
             "were read from the promoted techstack register instead, by "
             "linked_subcap_ids. CLAIMED rows bind nothing either way.")
+    # SATURATION, SAID OUT LOUD. When every driving cell sits at the floor,
+    # Addressable opportunity reads ~0.99 on every card and stops separating
+    # them; Catalogue interconnect - which favours whichever hub touches the
+    # most categories - then decides the order by construction (Cross
+    # Insurance Agency, 2026-10-05: 0.987-0.991 on five cards, the
+    # integration hub first). AG-13 makes such a lead argue for itself.
+    opps = [f["value"] for p in ranked for f in p.get("factors") or ()
+            if f.get("name") == "Addressable opportunity"]
+    spread = (max(opps) - min(opps)) if len(opps) > 1 else None
+    context["opportunity_spread"] = None if spread is None else round(spread, 4)
+    if spread is not None and spread < 0.02:
+        context["notes"].append(
+            f"Addressable opportunity spreads by only {spread:.3f} across "
+            "these candidates, so it does not separate them; interconnect, "
+            "greenfield, alignment and any declared sequence decide the "
+            "order. A card that leads on interconnect or sequencing must "
+            "carry a `Lead test:` probe citing client evidence that it is "
+            "the constraint (AG-13) - breadth alone is not an argument.")
     context["focus_areas"] = len(focus)
     context["alignment_source"] = (engine.ALIGNMENT_FOCUS_AREAS if focus
                                    else engine.ALIGNMENT_FALLBACK)

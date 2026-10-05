@@ -337,6 +337,194 @@ def _check_rank_against_score(page: str, payload: dict) -> list:
     return out
 
 
+# ── AG-10 / AG-13 · recommendations are stress-tested, not asserted ───
+# Owner, 2026-10-05: "most just seem to be prioritizing MuleSoft just because
+# there are many systems. The recommendations are not rebutted to ensure
+# stress testing." Measured on Cross Insurance Agency: Addressable
+# opportunity read 0.987-0.991 on all five cards (every driving cell at the
+# 1.0 floor), so Catalogue interconnect - which favours whichever hub touches
+# the most categories - decided the order, and a producer-declared "Data
+# Cloud waits on it" sequenced the hub first. AG-01 checked that a verdict
+# EXISTED; nothing checked that the card had been argued against.
+
+_EID = re.compile(r"\bE-[A-Z0-9]+(?:-[A-Z0-9]+)*-?\d+\b")
+_ALT_PATH = ("consolidat", "native", "existing", "incumbent", "already run",
+             "defer", "status quo", "do nothing", "in-house", "in house",
+             "point-to-point", "point to point", "configure", "extend")
+_REBUTTAL_MIN_WORDS = 30
+
+
+def _platform_section(payload, name):
+    body = ((payload.get("sections") or {}).get(name)
+            or payload.get(name) or {})
+    if isinstance(body, dict) and isinstance(body.get("data"), dict):
+        body = body["data"]
+    return body if isinstance(body, dict) else {}
+
+
+def _aliases(name) -> set:
+    """How a counter may name a platform: whole, by each '/'-joined part
+    ('Snowflake / Power BI'), and without the vendor prefix ('Data Cloud')."""
+    out = set()
+    for part in [name] + str(name).split("/"):
+        part = re.sub(r"\s*\(.*?\)", "", part).strip().lower()
+        if len(part) >= 4:
+            out.add(part)
+            if part.startswith("salesforce ") and len(part) > 15:
+                out.add(part[len("salesforce "):])
+    return out
+
+
+def _probe(rl, prefix):
+    for p in (rl.get("probes_run") or []) if isinstance(rl, dict) else []:
+        if isinstance(p, str) and p.strip().lower().startswith(prefix):
+            return p
+    return None
+
+
+def _check_rebuttals(page: str, payload: dict) -> list:
+    """AG-10 - every ranked platform card and every recommendation carries a
+    rebuttal that was actually fought: a counter of at least 30 words that
+    names a specific alternative (another candidate, a discarded platform,
+    or a named path - consolidate, extend the incumbent, native connectors,
+    defer), and a `Rebuttal:` probe saying how it was resolved, citing the
+    evidence that resolved it."""
+    if page != "platform":
+        return []
+    story = _platform_section(payload, "platform_story")
+    recs = _platform_section(payload, "recommendations")
+    names = [str(r.get("platform") or "") for r in story.get("platforms") or []
+             if isinstance(r, dict)]
+    names += [str(d.get("platform") or "") for d in story.get("discarded") or []
+              if isinstance(d, dict)]
+    names = [n for n in names if n]
+    out = []
+    targets = [("platform_story", "platforms", r, i, str(r.get("platform") or ""))
+               for i, r in enumerate(story.get("platforms") or [])
+               if isinstance(r, dict) and r.get("fit_score") is not None]
+    targets += [("recommendations", "recommendations", r, i,
+                 str(r.get("l3_area") or r.get("title") or ""))
+                for i, r in enumerate(recs.get("recommendations") or [])
+                if isinstance(r, dict)]
+    for sec, field, row, i, own in targets:
+        rl = row.get("r_layer") if isinstance(row.get("r_layer"), dict) else {}
+        counter = str(rl.get("counter") or "")
+        low = counter.lower()
+        path = f"{sec}.{field}[{i}].r_layer"
+        problems = []
+        if len(counter.split()) < _REBUTTAL_MIN_WORDS:
+            problems.append(f"the counter is {len(counter.split())} words "
+                            f"(at least {_REBUTTAL_MIN_WORDS})")
+        others = [n for n in names if n.lower() not in own.lower()
+                  and own.lower() not in n.lower()]
+        if not (any(a in low for n in others for a in _aliases(n))
+                or any(t in low for t in _ALT_PATH)):
+            problems.append("it names no specific alternative - another "
+                            "candidate, a discarded platform, or a named path "
+                            "(consolidate, extend the incumbent, native "
+                            "connectors, defer)")
+        reb = _probe(rl, "rebuttal:")
+        if not reb or not _EID.search(reb):
+            problems.append("no `Rebuttal:` probe says how the counter was "
+                            "resolved and cites the evidence that resolved it")
+        if problems:
+            out.append(_reason(
+                "AG-10", sec, path,
+                f"{row.get('platform') or row.get('rec_id') or own!r} is "
+                "published without being stress-tested: " + "; ".join(problems)
+                + ". Argue the strongest case AGAINST it - the alternative a "
+                "sceptical buyer would raise - and record which way the "
+                "evidence settled it. An unrebutted recommendation is an "
+                "assertion."))
+    return out
+
+
+def _factor_value(row, name):
+    for f in row.get("factors") or []:
+        if isinstance(f, dict) and f.get("name") == name:
+            try:
+                return float(f.get("value") or 0.0)
+            except (TypeError, ValueError):
+                return 0.0
+    return None
+
+
+def _factor_contribution(row, name):
+    for f in row.get("factors") or []:
+        if isinstance(f, dict) and f.get("name") == name:
+            try:
+                return float(f.get("contribution") or 0.0)
+            except (TypeError, ValueError):
+                return 0.0
+    return 0.0
+
+
+#: Addressable opportunity this close across the scored cards no longer
+#: separates them.
+_OPPORTUNITY_SATURATED = 0.02
+
+
+def _check_lead_is_earned(page: str, payload: dict) -> list:
+    """AG-13 - a first place won on breadth or sequencing, while opportunity
+    cannot separate the cards, must say what in THIS client makes it the
+    constraint.
+
+    Fires when, across the scored cards, Addressable opportunity spreads by
+    less than 0.02 AND the rank-1 card leads either by a declared sequence
+    (`rank_basis` "sequenced: ...") or by Catalogue interconnect (remove its
+    interconnect contribution and it no longer leads the runner-up on
+    subtotal). Then the card needs a `Lead test:` probe citing client
+    evidence of the constraint - an integration failure, a stated
+    dependency, a regulator finding. "Many systems" is a count, and a count
+    is not a constraint."""
+    if page != "platform":
+        return []
+    story = _platform_section(payload, "platform_story")
+    rows = [r for r in story.get("platforms") or []
+            if isinstance(r, dict) and r.get("fit_score") is not None]
+    if len(rows) < 2:
+        return []
+    opps = [v for v in (_factor_value(r, "Addressable opportunity")
+                        for r in rows) if v is not None]
+    if len(opps) < 2 or max(opps) - min(opps) >= _OPPORTUNITY_SATURATED:
+        return []
+
+    def rank(r):
+        try:
+            return float(r.get("rank"))
+        except (TypeError, ValueError):
+            return 99.0
+    ordered = sorted(rows, key=rank)
+    lead, nxt = ordered[0], ordered[1]
+    sequenced = str(lead.get("rank_basis") or "").lower().startswith("sequenced")
+    try:
+        sub_lead, sub_next = float(lead.get("subtotal")), float(nxt.get("subtotal"))
+    except (TypeError, ValueError):
+        sub_lead = sub_next = None
+    hub_led = (sub_lead is not None and sub_lead > sub_next and
+               sub_lead - _factor_contribution(lead, "Catalogue interconnect")
+               <= sub_next - _factor_contribution(nxt, "Catalogue interconnect"))
+    if not (sequenced or hub_led):
+        return []
+    rl = lead.get("r_layer") if isinstance(lead.get("r_layer"), dict) else {}
+    probe = _probe(rl, "lead test:")
+    if probe and _EID.search(probe):
+        return []
+    i = (story.get("platforms") or []).index(lead)
+    why = ("a declared sequence" if sequenced else "Catalogue interconnect")
+    return [_reason(
+        "AG-13", "platform_story", f"platform_story.platforms[{i}].r_layer",
+        f"{lead.get('platform')!r} ranks first on {why} while Addressable "
+        f"opportunity cannot separate the cards (spread "
+        f"{max(opps) - min(opps):.3f} < {_OPPORTUNITY_SATURATED}). A hub that "
+        "touches many categories wins that tie by construction, so the lead "
+        "is not yet an argument. Add a `Lead test:` probe naming the client "
+        "evidence that makes this the constraint - an integration failure, a "
+        "dependency the client itself states, a finding - with its evidence "
+        "id; a count of systems is not a constraint. If no such evidence "
+        "exists, the card should not lead.")]
+
+
 def _check_peer_research(page: str, payload: dict) -> list:
     """AG-04 — a technographic claim about a NAMED peer carries its source.
 
@@ -4099,6 +4287,8 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     from .peer_set import check_named_peer_set
     reasons.extend(check_named_peer_set(conn, run_id, page, payload))
     reasons.extend(_check_rank_against_score(page, payload))
+    reasons.extend(_check_rebuttals(page, payload))
+    reasons.extend(_check_lead_is_earned(page, payload))
     # ET-08 runs BEFORE the cell gates below, because those all skip a
     # value they cannot parse as an id: a cell-link field holding a name
     # is invisible to every one of them, and this is where it is seen.
