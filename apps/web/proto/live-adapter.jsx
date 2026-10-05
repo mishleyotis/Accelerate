@@ -1541,6 +1541,11 @@ function adaptEvidence(evidenceEnvelope) {
     // sent — is why every drawer showed no traceable cell links.
     subcaps: e.linked_subcap_ids || e.subcaps || [],
     excerpt: e.excerpt || null,
+    // Every other id this row answers to: the workbook's own numbers
+    // (`package_local_ids`, 0036 — pages cite 'E-001' while the store keys
+    // 'E-CROSSINS-001') and the ids a merged listing row absorbed. Without
+    // them a chip citing the workbook number opened an empty drawer.
+    aliases: [...(e.package_local_ids || []), ...(e.also_filed_as || [])],
   }));
 }
 
