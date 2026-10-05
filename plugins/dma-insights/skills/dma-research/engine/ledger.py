@@ -81,8 +81,7 @@ SOCIAL_HOSTS = ("facebook.com", "linkedin.com", "twitter.com", "x.com",
 
 
 def _host(url: str) -> str:
-    h = str(url or "").split("//")[-1].split("/")[0].split("@")[-1]
-    return h.split(":")[0].lower().removeprefix("www.")
+    return C.source_host(url)
 
 
 def _self_published(wb, source_url: str) -> str:
@@ -242,9 +241,9 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     # URL + excerpt now reuses the existing row and cites it from any new
     # cell through `attach_evidence`, the reuse loop's own write.
     _norm = " ".join(text.split())
-    _url = str(source_url or "").strip()
+    _url = C.url_key(source_url)      # www. and a trailing slash are one page
     dup = next((str(r["E_ID"]) for r in wb.rows("Evidence_Detail")
-                if r.get("E_ID") and str(r.get("Source_URL") or "").strip() == _url
+                if r.get("E_ID") and C.url_key(r.get("Source_URL")) == _url
                 and " ".join(str(r.get("Excerpt") or "").split()) == _norm), None)
     if dup:
         new_cells = [c for c in cells if dup not in

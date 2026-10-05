@@ -1299,3 +1299,39 @@ if __name__ == "__main__":  # a one-line answer to "what is the shape?"
             print(line)
         sys.exit(0)
     print(json.dumps(counts(), indent=2))
+
+
+# ── source identity: ONE rule, every caller (MEM-0590) ───────────────────
+# arbor-bank 2026-10-05: six modules each derived "the host" with their own
+# split; none stripped "www.", so arborbanking.com and www.arborbanking.com
+# were two independent sources to the floors gate, the scorer and the ERS
+# corroboration count, and the ledger's same-span dedupe minted a second
+# row for the same page. A rule copied six times drifts six ways.
+
+def source_host(url) -> str:
+    """The registrable-ish host of a URL: lower-cased, no scheme, no
+    credentials, no port, no leading "www."; "" when there is none."""
+    u = str(url or "").strip()
+    if not u:
+        return ""
+    h = u.split("//", 1)[-1].split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
+    h = h.rsplit("@", 1)[-1].split(":", 1)[0].lower().rstrip(".")
+    return h[4:] if h.startswith("www.") else h
+
+
+def source_identity(url, name=None) -> str:
+    """Who said it: the host, else the source name (lower-cased)."""
+    return source_host(url) or str(name or "").strip().lower()
+
+
+def url_key(url) -> str:
+    """A URL compared as the same page: source_host + path (no trailing
+    slash) + query + fragment. Fragments stay — a fragment can address a
+    different span of one document."""
+    u = str(url or "").strip()
+    if not u:
+        return ""
+    rest = u.split("//", 1)[-1]
+    tail = rest[len(rest.split("/", 1)[0]):] if "/" in rest else ""
+    path, sep, more = tail.partition("?") if "?" in tail else tail.partition("#")
+    return source_host(u) + path.rstrip("/") + sep + more

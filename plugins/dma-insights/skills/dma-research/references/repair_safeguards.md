@@ -23,9 +23,10 @@ the cell as repair), **packet** (what the independent challenger is shown),
 | 5 | An INFERENCE citing two ids from the same page passed the write path's id count | gate | The floors gate resolves INFERENCE evidence to source identity (host, otherwise source name), the same way `single_source_fact` does for FACT | `test_an_inference_on_two_ids_of_one_source_is_blocked` | MEM-0587 |
 | 6 | The entity's own site and social posts were registered at T1 (52 rows on this run) | write | `ledger.append_evidence` refuses own-site or social-host evidence at T1: register it at T2 if it is a hosted disclosure, T5 if it is marketing | `test_the_entitys_own_site_and_social_posts_are_never_t1` | MEM-0588 |
 | 7 | Three rules tightened mid-run and five categories kept a stale recorded PASS: 17 claimed cells the live gate refuses were never dispatched | dispatch | `brief.categories_needing_dispatch` re-reads the live worklist (persist=False) and re-dispatches a recorded PASS that now names a claimed cell | `test_a_recorded_pass_the_live_gate_now_refuses_is_redispatched` | MEM-0589 |
-| 8 | A FAILED challenge did not block the floors gate (fix carried in from `ccr-4d2dcfc5-77fgo8`) | gate | `challenge_failed` is a blocking term, and the cell is served as repair | `test_a_failed_challenge_blocks_and_is_served_as_repair` | MEM-0441 / MEM-0577 |
-| 9 | A re-synthesised cell kept its stale verdict and was never re-challenged (fix carried in) | write | `append_synthesis` clears `Challenge_Verdict`; selection reads the live column, not the log | `test_re_synthesis_clears_the_stale_challenge_verdict` | MEM-0441 / MEM-0577 |
-| 10 | A single-source INFERENCE passed the write path and failed the challenge (fix carried in) | write | `quality.claim_label_supported` refuses an INFERENCE with fewer than two ids | `test_a_single_source_inference_is_refused_at_write` | MEM-0441 / MEM-0577 |
+| 8 | One website counted as two sources: six modules each parsed the host themselves and none stripped `www.`, so a single source looked corroborated (10 cells) and the same span was registered twice (10 rows) | write + gate + scoring | `contract.source_host` / `source_identity` / `url_key` are the only identity rule. All six callers use them, the dedupe compares `url_key`, and a test fails if a hand-rolled host split comes back | `test_www_and_bare_host_are_one_source_everywhere`, `test_no_module_derives_a_host_by_hand` | MEM-0590 |
+| 9 | A FAILED challenge did not block the floors gate (fix carried in from `ccr-4d2dcfc5-77fgo8`) | gate | `challenge_failed` is a blocking term, and the cell is served as repair | `test_a_failed_challenge_blocks_and_is_served_as_repair` | MEM-0441 / MEM-0577 |
+| 10 | A re-synthesised cell kept its stale verdict and was never re-challenged (fix carried in) | write | `append_synthesis` clears `Challenge_Verdict`; selection reads the live column, not the log | `test_re_synthesis_clears_the_stale_challenge_verdict` | MEM-0441 / MEM-0577 |
+| 11 | A single-source INFERENCE passed the write path and failed the challenge (fix carried in) | write | `quality.claim_label_supported` refuses an INFERENCE with fewer than two ids | `test_a_single_source_inference_is_refused_at_write` | MEM-0441 / MEM-0577 |
 
 ## Judgement safeguards (held by the independent challenger, no mechanical check)
 
@@ -49,4 +50,6 @@ against the cell.
 - **Re-grade arbor-bank's existing self-published rows.** By the user's
   decision (2026-10-05), #6 applies forward only. The run's 52 own-site or
   social rows at T1, cited by 55 cells, stay as filed until re-grading is
-  scheduled (MEM-0588).
+  scheduled (MEM-0588). This includes merging the 10 duplicate rows that the
+  `www.` drift created (MEM-0590). Until then, P3C1.3.RB1 cannot pass its
+  challenge: it cites one page three times at inflated tiers.

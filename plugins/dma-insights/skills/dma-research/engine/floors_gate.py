@@ -468,9 +468,8 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             idents = set()
             for e in eids:
                 row_e = register.get(e) or {}
-                url = str(row_e.get("Source_URL") or "").strip()
-                host = url.split("//")[-1].split("/")[0].lower() if url else ""
-                idents.add(host or str(row_e.get("Source_Name") or "").strip().lower())
+                idents.add(C.source_identity(row_e.get("Source_URL"),
+                                             row_e.get("Source_Name")))
             idents.discard("")
             if len(idents) < 2 and label == "FACT":
                 findings["single_source_fact"].append(

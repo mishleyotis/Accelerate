@@ -319,9 +319,7 @@ def ceiling_for(wb: RunWorkbook, row: dict) -> tuple[float, str]:
     idents = set()
     for e in eids:
         r = register.get(e) or {}
-        url = str(r.get("Source_URL") or "")
-        idents.add(url.split("//")[-1].split("/")[0].lower()
-                   or str(r.get("Source_Name") or "").lower())
+        idents.add(C.source_identity(r.get("Source_URL"), r.get("Source_Name")))
     idents.discard("")
     why = f"best tier {best} allows {ceil}"
     if len(idents) < 2 and ceil > 3.0:
@@ -489,8 +487,8 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
         problems.append("a row with no evidence carries LOW confidence and nothing else")
     if conf == "HIGH":
         register = wb.evidence_index()
-        idents = {(str((register.get(e) or {}).get("Source_URL") or "")
-                   .split("//")[-1].split("/")[0].lower()) for e in eids}
+        idents = {C.source_host((register.get(e) or {}).get("Source_URL"))
+                  for e in eids}
         idents.discard("")
         if len(idents) < 2:
             problems.append("HIGH confidence requires two source identities; "

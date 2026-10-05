@@ -96,12 +96,8 @@ def source_identity(row: dict) -> str:
     Host first, source name second — the same identity rule the floors
     gate's `single_source_fact` term uses, so the two cannot disagree about
     what counts as a second opinion."""
-    url = _clean(row.get("Source_URL"))
-    if url:
-        host = url.split("//")[-1].split("/")[0].lower()
-        if host:
-            return host
-    return _clean(row.get("Source_Name")).lower()
+    return C.source_identity(_clean(row.get("Source_URL")),
+                             _clean(row.get("Source_Name")))
 
 
 def specificity(row: dict, ranking: dict | None = None) -> tuple[float, str]:

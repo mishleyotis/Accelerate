@@ -513,3 +513,39 @@ def test_a_recorded_pass_the_live_gate_now_refuses_is_redispatched(tmp_path):
     need = brief.categories_needing_dispatch(run.open())
     assert cat in need["dispatch"], need
     assert any("stale" in r for r in need["reasons"][cat])
+
+
+def test_www_and_bare_host_are_one_source_everywhere(tmp_path):
+    """arbor-bank: six modules split hosts their own way and none stripped
+    'www.', so one site counted as two independent sources and the
+    same-span dedupe minted a second row for the same page."""
+    from engine import contract as C
+    assert C.source_host("https://www.ArborBanking.com/a/") == "arborbanking.com"
+    assert C.source_identity("http://arborbanking.com/x", "n") == \
+        C.source_identity("https://www.arborbanking.com/y", "m")
+    assert C.url_key("https://www.a.example/p/") == C.url_key("http://a.example/p")
+    assert C.url_key("https://a.example/p#1") != C.url_key("https://a.example/p#2")
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    span = ("Business clients approve pending ACH Origination and Online Wire "
+            "transactions from the mobile app with dual control enforced.")
+    a = L.append_evidence(wb, source_name="Acme mobile", tier="T3", excerpt=span,
+                          source_url="https://www.acme-site.example/mobile/",
+                          subcaps=[cell])
+    b = L.append_evidence(wb, source_name="Acme mobile page", tier="T3", excerpt=span,
+                          source_url="https://acme-site.example/mobile",
+                          subcaps=[cell])
+    assert a == b, "the same span on the same page must be one evidence row"
+
+
+def test_no_module_derives_a_host_by_hand():
+    """One rule, one place: a hand-rolled host split is how the www. drift began."""
+    import re
+    from pathlib import Path
+    from engine import contract as C
+    eng = Path(C.__file__).parent
+    hits = [f"{p.name}:{i}" for p in eng.glob("*.py")
+            for i, line in enumerate(p.read_text().splitlines(), 1)
+            if re.search(r'split\("//"\)\[-1\]\.split\("/"\)', line)]
+    assert not hits, hits

@@ -564,6 +564,23 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0590",
+   "title": "Six modules derived a source's host by their own string split and none stripped 'www.', so one website counted as two independent sources and the same-span dedupe minted duplicate rows",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "Any engine module deriving a source's host or identity outside contract.source_host/source_identity/url_key; one website (with and without 'www.', with and without a trailing slash) counted as two sources, or the same span on it registered as two rows.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_www_and_bare_host_are_one_source_everywhere"
+    },
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_no_module_derives_a_host_by_hand"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

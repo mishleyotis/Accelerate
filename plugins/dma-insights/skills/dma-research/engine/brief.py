@@ -262,9 +262,8 @@ def shared(wb: RunWorkbook) -> dict:
 
     hosts: dict[str, int] = {}
     for row in register.values():
-        url = _clean(row.get("Source_URL"))
-        host = url.split("//")[-1].split("/")[0].lower() if url else ""
-        key = host or _clean(row.get("Source_Name")).lower()
+        key = C.source_identity(_clean(row.get("Source_URL")),
+                                _clean(row.get("Source_Name")))
         if key:
             hosts[key] = hosts.get(key, 0) + 1
 
