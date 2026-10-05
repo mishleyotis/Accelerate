@@ -681,11 +681,31 @@ def rank(candidates, all_gap_cells=None) -> list:
                 f"within the {FUSION_BAND:g}-point near-tie band. Placings: "
                 f"{placing}. Fusion only reorders cards the fit does not "
                 f"separate by more than {FUSION_BAND:g} points.")
+        # A card can move without depending on anything: it is pulled up as a
+        # prerequisite, or it is displaced when a card above it is held back.
+        # Name which — "another card waits on it" was asserted for every
+        # moved card, true or not (Shield, SWBC 2026-10-05, MEM-0564).
+        waiting = [r["platform"] for r in rows
+                   if row["platform"] in (r.get("depends_on") or ())]
+        mine = fit_order.index(row["platform"])
+        held = [r["platform"] for r in rows[i:]
+                if r.get("depends_on")
+                and fit_order.index(r["platform"]) < mine]
+        pulled = [r["platform"] for r in rows[:i - 1]
+                  if fit_order.index(r["platform"]) > mine]
         row["rank_basis"] = (
             "fit" if not moved and fused_to == fused_from else
             "sequenced: it is held behind " + ", ".join(row["depends_on"])
             if moved and row["depends_on"] else
-            "sequenced: another card on this page waits on it" if moved else
+            "sequenced: " + ", ".join(waiting) + " waits on it"
+            if moved and waiting else
+            "sequenced: moved up while " + ", ".join(held) +
+            " is held behind its prerequisite"
+            if moved and held else
+            "sequenced: moved down so " + ", ".join(pulled) +
+            " can precede the card that needs it"
+            if moved and pulled else
+            "sequenced: moved by the prerequisite repair" if moved else
             f"rank fusion within the {FUSION_BAND:g}-point near-tie band")
         row["fit_basis"] = (
             "Computed by the shared platform-fit engine: 100 x ({terms})"

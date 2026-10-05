@@ -659,6 +659,22 @@ def register_evidence(conn, run_id, item: dict, fetch=None,
         identity_note = f"{identity_note}; {relation}" if identity_note else relation
         adjustments.append(relation)
     subcaps = [s for s in (item.get("linked_subcap_ids") or []) if s]
+    if split_of and parent is not None and not subcaps and not errors:
+        # A span is a piece of its parent's document, so it bears on the
+        # parent's cells unless the producer says otherwise. Minted bare, a
+        # whole-row span was an orphan every cell-grain section refused
+        # (ET-07 on insights and the roadmap, SWBC 2026-10-05, MEM-0079).
+        # Sending linked_subcap_ids narrows it; sending none inherits.
+        cur.execute(
+            """SELECT DISTINCT subcap_id FROM evidence_subcap_links
+                WHERE e_id = %s AND run_id = %s ORDER BY subcap_id""",
+            (split_of, run_id))
+        subcaps = [r[0] for r in cur.fetchall()]
+        if subcaps:
+            adjustments.append(
+                f"linked_subcap_ids inherited from {split_of} "
+                f"({len(subcaps)} cell(s)); send linked_subcap_ids to narrow "
+                "them")
 
     published = item.get("published_date")
     if isinstance(published, str):

@@ -420,3 +420,43 @@ def test_the_database_refuses_an_attribution_after_mint(seeded):
     assert cur.fetchone()[0] is not None
     mcp.rollback()
     assert _row(mcp, parent) == (None, None, None)
+
+
+def _links(mcp, e_id, rid):
+    cur = mcp.cursor()
+    cur.execute("""SELECT subcap_id FROM evidence_subcap_links
+                    WHERE e_id = %s AND run_id = %s ORDER BY subcap_id""",
+                (e_id, rid))
+    return [r[0] for r in cur.fetchall()]
+
+
+def _linked_parent(mcp, rid, cells):
+    r = register_evidence(mcp, rid, {
+        "origin": "internal", "excerpt": PARENT_EXCERPT, "claim_type": "FACT",
+        "tier": "T2", "source_name": "Internal discovery notes",
+        "published_date": "2026-09-01", "linked_subcap_ids": cells},
+        fetch=None)
+    assert r["errors"] == [], r
+    assert _links(mcp, r["e_id"], rid) == sorted(cells)
+    return r["e_id"]
+
+
+def test_a_span_sent_without_links_inherits_its_parents_cells(seeded):
+    """MEM-0079 (SWBC 2026-10-05): five whole-row spans were minted with no
+    cell links, so every cell-grain section refused them (ET-07). A span is
+    a piece of its parent's document and bears on the parent's cells."""
+    mcp, _admin, rid, _eid = seeded
+    cells = ["P1C1.1.1", "P1C1.1.2"]
+    parent = _linked_parent(mcp, rid, cells)
+    r = _whole(mcp, rid, parent)
+    assert r["errors"] == [], r
+    assert _links(mcp, r["e_id"], rid) == cells
+    assert any("inherited" in a for a in r.get("adjustments", [])), r
+
+
+def test_a_span_that_names_its_cells_is_not_widened(seeded):
+    mcp, _admin, rid, _eid = seeded
+    parent = _linked_parent(mcp, rid, ["P1C1.1.1", "P1C1.1.2"])
+    r = _whole(mcp, rid, parent, linked_subcap_ids=["P1C1.1.2"])
+    assert r["errors"] == [], r
+    assert _links(mcp, r["e_id"], rid) == ["P1C1.1.2"]

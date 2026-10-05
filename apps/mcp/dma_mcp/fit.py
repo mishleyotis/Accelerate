@@ -225,17 +225,48 @@ def _register_staged(cur, run_id) -> tuple:
     if not isinstance(payload, dict):
         return set(), set()
     items = ((payload.get("techstack") or {}).get("items")) or []
-    absent_sids, held_sids = set(), set()
+    absent_rows, held_sids = [], set()
     for it in items:
         if not isinstance(it, dict):
             continue
         status = str(it.get("status") or "").upper()
         sids = {str(s) for s in (it.get("linked_subcap_ids") or []) if s}
         if status == "ABSENT":
-            absent_sids |= sids
+            absent_rows.append((str(it.get("product") or ""), sids))
         elif status in ("CONFIRMED", "INFERRED"):
             held_sids |= sids
-    return absent_sids - held_sids, held_sids
+    return [(prod, sids - held_sids) for prod, sids in absent_rows
+            if sids - held_sids], held_sids
+
+
+def _product_key(name) -> str:
+    """A product or platform name reduced for matching: case, punctuation and
+    the vendor prefix dropped ("Salesforce Data Cloud" == "Data Cloud")."""
+    s = re.sub(r"[^a-z0-9]+", " ", str(name or "").lower()).strip()
+    return re.sub(r"^salesforce ", "", s)
+
+
+def _same_product(a, b) -> bool:
+    ka, kb = _product_key(a), _product_key(b)
+    return bool(ka and kb) and (ka == kb or ka in kb or kb in ka)
+
+
+def _greenfield_cells(absent_rows, platform, platforms) -> set:
+    """Cells an ABSENT register row makes greenfield for ONE candidate.
+
+    An absent PRODUCT is ground for that product: the row naming Data Cloud
+    absent is the Data Cloud card's open ground, never a neighbour's that
+    happens to share one of its cells — a cell-only join credited Service
+    Cloud with Data Cloud's absence and contradicted its own estate reach
+    (SWBC 2026-10-05, MEM-0563). A row naming a product no card on the page
+    proposes says the layer itself is empty, so it still counts for every
+    card on its cells."""
+    out = set()
+    for prod, sids in absent_rows:
+        owners = [p for p in platforms if _same_product(prod, p)]
+        if not owners or platform in owners:
+            out |= sids
+    return out
 
 
 def platform_fit(conn, run_id, candidates) -> dict:
@@ -255,7 +286,8 @@ def platform_fit(conn, run_id, candidates) -> dict:
     strength = _evidence_strength(cur, run_id)
     sev = _severities(cur, run_id)
     absent_areas, held_areas = _register(cur, run_id)
-    absent_sids, held_sids = _register_staged(cur, run_id)
+    absent_rows, held_sids = _register_staged(cur, run_id)
+    absent_sids = set().union(*(sids for _, sids in absent_rows))
     raw_sv, raw_supp = _entity_subvertical(cur, run_id)
     entity_code = subverticals.resolve_subvertical(raw_sv)
     entity_supp = subverticals.resolve_supplementary(raw_supp, entity_code)
@@ -283,9 +315,12 @@ def platform_fit(conn, run_id, candidates) -> dict:
             by_area.setdefault(a, []).append(sid)
 
     built, unmatched = [], []
+    plat_names = [str(raw.get("platform") or "").strip()
+                  for raw in candidates or [] if isinstance(raw, dict)]
     for raw in candidates or []:
         if not isinstance(raw, dict):
             continue
+        plat_name = str(raw.get("platform") or "").strip()
         area = _norm_area(raw.get("l3_area"))
         sids = by_area.get(area, [])
         if not sids:
@@ -298,7 +333,8 @@ def platform_fit(conn, run_id, candidates) -> dict:
         # candidate's own cells (Data Cloud absent, linked to the member-data
         # cells, is greenfield ground for the Data Cloud candidate).
         family_absent = (area in absent_areas
-                         or bool(absent_sids & set(sids)))
+                         or bool(_greenfield_cells(absent_rows, plat_name,
+                                                   plat_names) & set(sids)))
         # THE VERTICAL GUARD. "Out-of-vertical rank-1 is a defect: a carrier
         # platform must not top a bank's list." Relevance is the share of the
         # area's cells this entity's sub-vertical actually serves — computed
