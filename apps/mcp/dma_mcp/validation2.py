@@ -191,6 +191,17 @@ def _asserts_nothing(item: dict, declared=None) -> bool:
     return named("value") and "value" in item and item.get("value") in (None, "")
 
 
+def _absent_item_carried_by_section(item: dict, declared) -> bool:
+    """A declared `state` naming a worked absence, with every list on the item
+    empty: the item asserts no find of its own."""
+    if declared is None or "state" not in declared:
+        return False
+    if item.get("state") not in ("WORKED_ABSENT", "UNWORKED"):
+        return False
+    return not any(isinstance(v, list) and v
+                   for k, v in item.items() if k != "e_ids")
+
+
 def _check_item_evidence(page: str, payload: dict) -> list:
     """AG-03 — every claim carries an evidence id, inferences included.
 
@@ -214,9 +225,24 @@ def _check_item_evidence(page: str, payload: dict) -> list:
             if not isinstance(items, list):
                 continue
             declared = item_keys(page, name, fname) or None
+            section_ladder_ok = None   # computed once, only if needed
             for i, item in enumerate(items):
                 if not isinstance(item, dict) or _asserts_nothing(item, declared):
                     continue
+                # A FIXED-MEMBERSHIP item (CG-03b: exactly three sentiment
+                # tiles) whose declared `state` says the ladder ran and found
+                # nothing, and which carries no rows, makes no claim — when the
+                # SECTION's own ladder is complete. Its item shape declares no
+                # absence keys, so this is the only route CG-03b leaves open;
+                # without it the two gates deadlock (2026-10-05, Cross
+                # Insurance: the employee tile, whose review hosts all refuse
+                # the verifier, could be neither emitted nor omitted).
+                if _absent_item_carried_by_section(item, declared):
+                    if section_ladder_ok is None:
+                        section_ladder_ok = not _ladder_gaps(
+                            body, _mandatory_families(page, name))
+                    if section_ladder_ok:
+                        continue
                 if any(item.get(k) for k in ev_keys):
                     continue
                 shown = " or ".join(repr(k) for k in ev_keys)

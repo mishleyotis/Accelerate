@@ -440,6 +440,34 @@ class RunWorkbook:
                     return r
         raise WorkbookError(f"{sheet}: no row where {match!r}")
 
+    def delete_rows_where(self, sheet: str, match: dict, *, keep_first: bool = False,
+                          save: bool | None = None) -> int:
+        """Delete rows matching EVERY key in `match` (exact, stripped).
+
+        Exists for one purpose: collapsing duplicates a supersede must leave
+        as ONE row. `keep_first` keeps the first match and deletes the rest.
+        """
+        cols = list(C.SHEETS[sheet])
+        unknown = [k for k in match if k not in cols]
+        if unknown:
+            raise WorkbookError(f"{sheet}: no such column(s) {unknown}")
+        with self.transaction(f"delete {sheet}"):
+            ws = self._sheet(sheet)
+            idx = {k: cols.index(k) + 1 for k in match}
+            hits = [r for r in range(2, ws.max_row + 1)
+                    if all(str(ws.cell(row=r, column=i).value or "").strip().lower()
+                           == str(match[k] or "").strip().lower() for k, i in idx.items())]
+            if keep_first:
+                hits = hits[1:]
+            for r in reversed(hits):
+                ws.delete_rows(r)
+            if hits:
+                self._dirty = True
+                self._touch()
+                if save if save is not None else self.autosave:
+                    self.save()
+            return len(hits)
+
     # ── metadata, and the two anti-drift anchors ─────────────────────────
 
     _TOKENISH = ("{{", "}}", "TODO", "TBD")

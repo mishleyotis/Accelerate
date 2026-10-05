@@ -840,10 +840,26 @@ def peer_adoption(wb: RunWorkbook, *, product: str, peer: str, verdict: str,
                              "institution carries a research finding's burden")
     if v == "UNKNOWN" and len(_clean(basis)) < 20:
         raise ScoringRefusal("UNKNOWN carries what was searched and came back empty")
-    wb.append("Platform_Peer_Adoption", {
+    row = {
         "Product / Layer": _clean(product), "Peer": _clean(peer), "Verdict": v,
         "Basis": _clean(basis), "Source": _clean(source) or "not established",
-        "As at": _clean(as_of) or _utcnow()[:10]})
+        "As at": _clean(as_of) or _utcnow()[:10]}
+    # One verdict per (product, peer): a corrected verdict SUPERSEDES the old
+    # row. Appending left Y and UNKNOWN side by side for the same pair
+    # (2026-10-01, Cross Insurance), which no reader can resolve.
+    key = (row["Product / Layer"].lower(), row["Peer"].lower())
+    if any((_clean(r.get("Product / Layer")).lower(), _clean(r.get("Peer")).lower()) == key
+           for r in wb.rows("Platform_Peer_Adoption")):
+        old = next(r for r in wb.rows("Platform_Peer_Adoption")
+                   if (_clean(r.get("Product / Layer")).lower(),
+                       _clean(r.get("Peer")).lower()) == key)
+        m = {"Product / Layer": old.get("Product / Layer"), "Peer": old.get("Peer")}
+        wb.update_row_where("Platform_Peer_Adoption", m, row)
+        wb.delete_rows_where("Platform_Peer_Adoption",
+                             {"Product / Layer": row["Product / Layer"],
+                              "Peer": row["Peer"]}, keep_first=True)
+        return {"rows": len(wb.rows("Platform_Peer_Adoption")), "superseded": True}
+    wb.append("Platform_Peer_Adoption", row)
     return {"rows": len(wb.rows("Platform_Peer_Adoption"))}
 
 
@@ -867,6 +883,9 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     cl = {_clean(r.get("subcap_id")) for r in wb.rows("Caps_Applied_Log")}
     declared_set = L.declared_absences(wb)
     by_cap: dict[str, list[float]] = {}
+    # capabilities with at least one EVIDENCED scored cell — only these can
+    # be held to the differentiation rule (see below)
+    cap_evidenced: set[str] = set()
     for r in wb.scoring_rows():
         cell = _clean(r.get("SubCap_ID"))
         if not cell:
@@ -883,6 +902,8 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         declared = L.is_declared_absent(r, declared=declared_set)
+        if eids or not declared:
+            cap_evidenced.add(cell.rsplit(".", 1)[0])
         if eids and _clean(r.get("Challenge_Verdict")).upper() != "PASS":
             f["unchallenged_scored"].append(cell)
         if not eids and not declared:
@@ -921,9 +942,24 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     for cap, scores in sorted(by_cap.items()):
         if len(scores) >= 3:
             top = Counter(scores).most_common(1)[0][1]
-            if top == len(scores):
+            # A capability whose every scored cell is a DECLARED absence with
+            # no evidence is scored at the same evidence-floor by construction
+            # (measured 2026-10-01, Cross Insurance, degraded run: 38 such
+            # capabilities blocked SCORING). Uniform scores there are the
+            # honest result, and demanding spread would demand invented
+            # scores — so it is disclosed as low_differentiation, never
+            # blocking. Any capability with an evidenced cell keeps the rule.
+            # Likewise a capability held entirely at the scale floor: an
+            # identical 1.0 cannot be inflation (there is nothing below it),
+            # and evidenced cells there — stale, undated or single T4 rows —
+            # are re-derived to the floor by the scoring critic, whose
+            # verdict is what polices them (measured 2026-10-01, Cross
+            # Insurance: the critic itself held P1C1.1 / P2C3.1 / P2C3.5 at
+            # 1.0, and the gate then refused the critic's own result).
+            at_floor = all(abs(x - 1.0) < 1e-9 for x in scores)
+            if top == len(scores) and cap in cap_evidenced and not at_floor:
                 f["no_differentiation"].append(cap)
-            elif top / len(scores) > 0.6:
+            elif top == len(scores) or top / len(scores) > 0.6:
                 f["low_differentiation"].append(cap)
     pillars_in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
     critics = {}

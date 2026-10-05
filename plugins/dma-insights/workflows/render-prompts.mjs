@@ -1,0 +1,63 @@
+#!/usr/bin/env node
+// Render the research workflow's batch and challenge prompts to files, from the
+// SAME source the Workflow runtime executes (the region between the PROMPTS
+// markers in dma-pillar-research.js).
+//
+// Why: a resumed session can lose the Workflow tool (measured 2026-10-01, Cross
+// Insurance), and the only remedy was "restart the session" — an owner who
+// will not restart had a run stalled at RESEARCH with nothing to do. With the
+// prompts on disk the conducting session runs each one as an in-session Agent
+// (same prompt, same fast tier, same tools the workflow's agents would hold),
+// then runs the challenge prompt with the research-challenger agent type.
+//
+//   node render-prompts.mjs <research_workflow.json> <out_dir> [round]
+//
+// Writes <CAT>_b<N>.md per batch and <CAT>_challenge.md per category, plus
+// manifest.json: [{category, kind, file, model, subagent_type}].
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const [handoff, outDir, roundArg] = process.argv.slice(2)
+if (!handoff || !outDir) {
+  console.error('usage: render-prompts.mjs <research_workflow.json> <out_dir> [round]')
+  process.exit(2)
+}
+const round = Number(roundArg || 1)
+const here = path.dirname(fileURLToPath(import.meta.url))
+const src = fs.readFileSync(path.join(here, 'dma-pillar-research.js'), 'utf8')
+const b = src.indexOf('// --- PROMPTS BEGIN')
+const e = src.indexOf('// --- PROMPTS END')
+if (b < 0 || e < 0) {
+  console.error('PROMPTS markers missing in dma-pillar-research.js')
+  process.exit(3)
+}
+const region = src.slice(b, e)
+const doc = JSON.parse(fs.readFileSync(handoff, 'utf8'))
+fs.mkdirSync(outDir, { recursive: true })
+const manifest = []
+for (const inv of doc.invocations || []) {
+  const A = inv
+  const ENG = A.eng
+  const R = `--run ${A.run} --root ${A.root}`
+  const DOMAIN = A.domain || "<the entity's registrable domain, from engine.profile state>"
+  // eslint-disable-next-line no-new-func
+  const P = new Function('A', 'ENG', 'R', 'DOMAIN',
+    `${region}\nreturn { batchPrompt, challengePrompt }`)(A, ENG, R, DOMAIN)
+  for (const cat of inv.cats) {
+    const batches = (inv.batches || {})[cat] && inv.batches[cat].length
+      ? inv.batches[cat] : [[`${cat} (all open capabilities)`]]
+    batches.forEach((caps, i) => {
+      const f = path.join(outDir, `${cat}_b${i + 1}.md`)
+      fs.writeFileSync(f, P.batchPrompt(cat, caps, round, null))
+      manifest.push({ category: cat, kind: 'batch', file: f, model: 'sonnet',
+                      subagent_type: 'general-purpose' })
+    })
+    const f = path.join(outDir, `${cat}_challenge.md`)
+    fs.writeFileSync(f, P.challengePrompt(cat, round))
+    manifest.push({ category: cat, kind: 'challenge', file: f, model: 'sonnet',
+                    subagent_type: 'dma-insights:research-challenger' })
+  }
+}
+fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 1))
+console.log(`${manifest.length} prompt(s) -> ${outDir}`)

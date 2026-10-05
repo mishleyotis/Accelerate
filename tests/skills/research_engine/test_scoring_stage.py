@@ -344,3 +344,30 @@ def test_peer_median_is_recorded_through_its_own_refusals(tmp_path):
     out = prelim.peer_median(wb, category="P1C1", median=3.0, p25=2.5, p75=3.5,
                              basis="table", source="published peer table, FY2025")
     assert out["median"] == 3.0
+
+
+def test_uniform_scores_on_an_all_absence_capability_are_advisory(tmp_path):
+    # Measured 2026-10-01 (Cross Insurance, degraded run): a capability whose
+    # every cell is a declared absence is scored at one evidence-floor by
+    # construction. Blocking on that would demand invented spread.
+    run, wb, cells, ev = _researched(tmp_path, n=6, absent=6)
+    A.open_stage(wb, run.qa_dir)
+    for cell in cells:
+        _score(wb, cell, [], score=1.0, ai_applicability="NONE", confidence="LOW")
+    v = A.gate(wb, run.qa_dir)
+    assert "no_differentiation" not in v["blocking"], v["blocking"]
+    assert v["low_differentiation"], v
+
+
+def test_an_evidenced_capability_held_at_the_floor_is_advisory(tmp_path):
+    # the critic re-derives stale / single-T4 evidence to 1.0; an identical
+    # floor cannot be inflation, so it is disclosed, not blocked
+    run, wb, cells, ev = _researched(tmp_path, n=6, absent=3)
+    A.open_stage(wb, run.qa_dir)
+    for cell in cells:
+        if ev.get(cell):
+            _score(wb, cell, ev[cell], score=1.0, confidence="LOW")
+        else:
+            _score(wb, cell, [], score=1.0, ai_applicability="NONE", confidence="LOW")
+    v = A.gate(wb, run.qa_dir)
+    assert "no_differentiation" not in v["blocking"], v["blocking"]

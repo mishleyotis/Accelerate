@@ -133,6 +133,12 @@ CELLS_DETAILED = 8
 #: actually says cost less than the read they replace, but they are not
 #: free, so the packet gets a larger ceiling rather than no ceiling.
 CHALLENGE_CHAR_CEILING = 16000
+#: A scoring lane's rows are one-line records (id, name, label, band, verdict,
+#: evidence count, absent) and most of a degraded run's are declared absences
+#: scored at the floor. At the dispatch ceiling a lane got 8-11 of them a round
+#: once the ~4.3K shared header was paid (measured 2026-10-01, Cross Insurance:
+#: P2 needed ~17 rounds against a 10-round cap), so scoring gets its own.
+SCORING_CHAR_CEILING = 16000
 #: Cells per challenge lane. The stage is PAGED rather than trimmed: the
 #: floors gate demands every synthesised cell challenged, so a packet that
 #: silently kept three of forty could not converge in one round and said so
@@ -1357,17 +1363,29 @@ def _bound(packet: dict, *lists: str, ceiling: int | None = None,
     """
     cap = ceiling or BRIEF_CHAR_CEILING
     packet["packet_ceiling"] = cap
-    packet["packet_chars"] = len(json.dumps(packet, default=str))
+    # The dropped rows are measured OUTSIDE the packet. They used to be
+    # appended to packet["dropped"] inside the loop, so trimming never made
+    # the packet smaller and every list halved down to `floor` (measured
+    # 2026-10-01, Cross Insurance: each scoring lane got 3 rows a round,
+    # 10 rounds scored ~30 of ~190 cells per pillar and SCORING failed).
+    held = [r for r in (packet.pop("dropped", None) or [])]
+
+    def _size() -> int:
+        return len(json.dumps(packet, default=str))
+
+    packet["packet_chars"] = _size()
     for key in lists:
         while packet["packet_chars"] > cap and \
                 isinstance(packet.get(key), list) and len(packet[key]) > floor:
             keep = max(floor, len(packet[key]) // 2)
             dropped = packet[key][keep:]
             packet[key] = packet[key][:keep]
-            packet.setdefault("dropped", []).extend(dropped)
+            held.extend(dropped)
             packet["trimmed"] = (packet.get("trimmed") or "") + \
                 f"{key}: {len(dropped)} item(s) trimmed to stay under the ceiling; "
-            packet["packet_chars"] = len(json.dumps(packet, default=str))
+            packet["packet_chars"] = _size()
+    if held:
+        packet["dropped"] = held
     return packet
 
 
@@ -1391,6 +1409,13 @@ def _md(title: str, packet: dict) -> str:
     for k, v in packet.items():
         if k in ("shared", "first_commands", "agent", "packet_chars",
                  "packet_ceiling", "trimmed"):
+            continue
+        if k == "dropped":
+            # rows held for a later round: the lane is told how many, not
+            # handed them (that would undo the bound)
+            lines += ["## held for a later round", "",
+                      f"{len(v)} row(s) did not fit this packet; they are not "
+                      f"yours this round.", ""]
             continue
         lines += [f"## {k.replace('_', ' ')}", ""]
         if isinstance(v, list):
@@ -1628,8 +1653,6 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
     sh = shared(wb)
     register = wb.evidence_index()
     only = {str(c).strip().upper() for c in (categories or [])}
-    challenged = {_clean(r.get("SubCap_ID")) for r in wb.rows("Challenge_Log")
-                  if _clean(r.get("Verdict"))}
     by_cat: dict[str, list] = {}
     for sheet in C.PILLAR_SHEETS:
         for r in wb.rows(sheet):
@@ -1640,7 +1663,11 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
                 continue
             if not _clean(r.get("Dominant_Claim")):
                 continue
-            if sub in challenged or _clean(r.get("Challenge_Verdict")):
+            # The ROW's verdict decides, not the Challenge_Log: a cell
+            # re-synthesised after a FAIL has its verdict cleared
+            # (ledger.append_synthesis) and must be challenged again even
+            # though the log still holds the old verdict.
+            if _clean(r.get("Challenge_Verdict")):
                 continue
             if L.is_declared_absent(r, wb):
                 continue          # an absence is gated by its ladder, not a challenge
@@ -1844,7 +1871,7 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                     "a declared absence scores as the rubric's absence, with the "
                     "ladder in the rationale — never as a guess",
                 ],
-            }, "rows_to_score")
+            }, "rows_to_score", ceiling=SCORING_CHAR_CEILING)
             lanes.append((f"scoring-{pillar}", packet, f"Scoring — pillar {pillar}"))
     return _write_lanes(out_dir, lanes, run=run, stage="SCORING",
                         batch_name="batch_scoring.json")
@@ -1878,6 +1905,10 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             by_status.setdefault(str(sec_state.get("status")), []).append(
                 str(sec_state.get("id") or sec_state.get("section")))
         state = {"ready": full.get("ready"), "sections_by_status": by_status}
+        if full.get("ready") and not validator:
+            # A READY report has nothing for its producer to do; a lane handed
+            # one anyway rewrote validator-passed sections (2026-10-01).
+            continue
         sections = []
         for sec in spec.sections:
             row = {"id": sec.id, "heading": sec.heading, "kind": sec.kind,
@@ -1905,6 +1936,8 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "sections": sections,
             "report_min_words": N.report_min_words_for(wb, spec),
             "rules": [
+                "write ONLY the sections not READY in sections_state; a READY "
+                "section carries an independent verdict and rewriting it reopens it",
                 "every section goes through `engine.narrative write`, which refuses "
                 "prose that is not an argument and a body missing a block",
                 "a failing precondition means STOP and report — no --force writes a "
@@ -1926,7 +1959,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "first_commands": [
                 f"python3 -m engine.cli narrative state {e}",
                 f"python3 -m engine.cli narrative review {e} --report <KEY> --section <ID> "
-                f"--verdict READY|REVISE --actor report-validator --note '…'",
+                f"--verdict PASS|REVISE|FAIL --actor report-validator --note '…'",
                 f"python3 -m engine.gold_standard report <docx> --workbook <xlsx>"],
             "reports_state": {k: {"ready": v.get("ready"),
                                   "sections": [f"{x.get('id') or x.get('section')}:"

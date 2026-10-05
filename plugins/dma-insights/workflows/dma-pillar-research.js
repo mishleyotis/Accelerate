@@ -31,6 +31,8 @@ const ENG = A.eng
 const R = `--run ${A.run} --root ${A.root}`
 const DOMAIN = A.domain || '<the entity\'s registrable domain, from engine.profile state>'
 
+// --- PROMPTS BEGIN (render-prompts.mjs evaluates this region verbatim, so a
+// session without the Workflow tool runs the SAME prompts as in-session agents) ---
 const OUT = {
   type: 'object',
   properties: {
@@ -48,6 +50,7 @@ const OUT = {
 }
 
 const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — this is everything):
+  checkpoint:  python3 -m engine.cli checkpoint ${R} --category <CAT> --position '<your batch>'   (FIRST, once: you are a new conversation, so open the category's own search window)
   card:        python3 -m engine.cli card ${R} --capability <CAP>            (the cells, their questions and owed facets)
   log search:  python3 -m engine.cli search ${R} --subcap <CELL> [--subcap <CELL2>] --facet primary|works|fails|value|contradicts|corroborates --tool web_search|exa|tavily|clay|internal --query '<q>' --hits N --kept K --actor $ACT
   cache text:  python3 -m engine.cli fetch ${R} --url <U> --query '<question>' --via-text <file with the connector's text>
@@ -67,6 +70,18 @@ const SEARCH_RULES = `SEARCH ECONOMY (your context is the budget — a 200K-toke
   - CONNECTOR CHECK FIRST: you should hold Exa, Tavily and Clay (mcp__Exa__*, mcp__Tavily__*, mcp__Clay__*). If none of them is callable, stop after your first capability and return gate "NO_CONNECTORS" naming the tools you do have: no cell can be declared absent without one, so continuing only spends budget.
   - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
 
+// DEGRADED (engine.pipeline sets args.degraded when the connector baseline is
+// short — measured 2026-10-01, Cross Insurance: Exa 402, Tavily 432/429,
+// Firecrawl 402). The NO_CONNECTORS stop above would end EVERY batch after its
+// first capability and close nothing, which is exactly the stall the degraded
+// path exists to prevent; so a degraded run gets its own rules instead.
+const DEGRADED_RULES = `DEGRADED RUN (the driver recorded enrichment_degraded; this REPLACES the connector rules):
+  - Exa, Tavily and Firecrawl are unavailable for this run: do NOT call them and do NOT stop with NO_CONNECTORS.
+  - WebSearch / WebFetch are the search tools (log as --tool web_search). Fire a capability's queries in PARALLEL in one turn; WebFetch one URL at most per cell, then fetch --via-text.
+  - Clay search-contacts (companyIdentifiers ["${DOMAIN}"]) only when a cell asks who owns a function, once per batch.
+  - Declare an empty cell absent only after a primary WebSearch volley on it, and add --enrichment-unavailable to engine.cli absence (the connector volley cannot run). --hunted still names the exact queries, sites and nearest thing found.
+  - Never sleep, poll, background a command, or re-run the gate mid-batch. Run commands in the FOREGROUND with timeout 600000.`
+
 function batchPrompt(cat, caps, round, prev) {
   const lc = cat.toLowerCase()
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
@@ -76,8 +91,9 @@ Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --
 
 ${SHEET}
 
-${SEARCH_RULES}
+${A.degraded ? DEGRADED_RULES : SEARCH_RULES}
 
+START with ONE engine.cli checkpoint for ${cat} (the search-op ceiling is per category per conversation; several batches of one category share it otherwise, and the ceiling then refuses every later batch's searches and absences).
 LOOP, one capability at a time: card -> parallel searches (primary + the owed facets, one turn) -> cache connector text (fetch --via-text) -> write the synthesis/absence JSON files -> ONE engine.cli batch call for the whole capability. Finish a capability before starting the next.
 WRITES GO THROUGH engine.cli batch (mandatory): put every search log, evidence, attach, synthesise and absence line for the capability in one ops file — one command per line, (the "python3 -m engine.cli" prefix and --run/--root may be omitted) — then run: python3 -m engine.cli batch ${R} --file <ops file>
 One write outside a batch costs ~10 s under the run-wide lock that every researcher shares; a batch is one load, one lock, one save. The batch reports each command's result; fix and re-batch only the refused lines. Order inside the file matters: search logs, then evidence, then attach, then synthesise/absence.
@@ -92,6 +108,8 @@ function challengePrompt(cat, round) {
 3) python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis
 Return the gate verdict, its blocking terms, and how many cells are still open.`
 }
+
+// --- PROMPTS END ---
 
 const BATCHES = A.batches || {}
 log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
