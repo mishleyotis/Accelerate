@@ -1421,7 +1421,9 @@ def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
         path.write_text(_md(title, packet), encoding="utf-8")
         (out_dir / f"{name}.json").write_text(
             json.dumps(packet, indent=2, default=str), encoding="utf-8")
-        rows.append({"agent": packet["agent"], "prompt_file": str(path)})
+        # `label` names the lane's transcript: several lanes may run one agent
+        # (a pillar's scoring split across lanes) and must not share a log.
+        rows.append({"agent": packet["agent"], "prompt_file": str(path), "label": name})
         wrote.append({"lane": name, "agent": packet["agent"],
                       "prompt_file": str(path), "chars": packet["packet_chars"]})
     batch_path = out_dir / batch_name
@@ -1641,8 +1643,6 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
     sh = shared(wb)
     register = wb.evidence_index()
     only = {str(c).strip().upper() for c in (categories or [])}
-    challenged = {_clean(r.get("SubCap_ID")) for r in wb.rows("Challenge_Log")
-                  if _clean(r.get("Verdict"))}
     by_cat: dict[str, list] = {}
     for sheet in C.PILLAR_SHEETS:
         for r in wb.rows(sheet):
@@ -1653,7 +1653,10 @@ def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
                 continue
             if not _clean(r.get("Dominant_Claim")):
                 continue
-            if sub in challenged or _clean(r.get("Challenge_Verdict")):
+            # The ROW's verdict is the live one: a re-synthesis clears it
+            # (ledger.append_synthesis), and a cell skipped because it was
+            # ever challenged could never be challenged again after repair.
+            if _clean(r.get("Challenge_Verdict")):
                 continue
             if L.is_declared_absent(r, wb):
                 continue          # an absence is gated by its ladder, not a challenge
@@ -1819,8 +1822,20 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
         })
         lanes.append(("scoring-solutions", packet, "Scoring stage — solutions and peer adoption"))
     else:
+        # NO ROW IS DROPPED, AND NO REFUSED ROW IS OFFERED (measured
+        # 2026-10-05, Susser Bank): `shared` alone was ~34K chars against a
+        # 6.4K packet ceiling, so `_bound` halved `rows_to_score` from 185 to
+        # 3 for every pillar — seven rounds scored 57 of 708 cells at ~$44 —
+        # and some of the three were rows `engine.assessment score` refuses
+        # (evidence but no PASS challenge), so the lane spent its turns being
+        # told no. The scorer needs the run's identity, not its digest: it
+        # reads each challenged synthesis through the engine. Rows are packed
+        # into as many lanes as the ceiling needs; refused rows are listed
+        # for the research repair instead.
+        slim = {k: sh.get(k) for k in ("run_id", "entity", "sub_vertical",
+                                       "evidence_mode", "stage", "run_root")}
         for pillar in pillars:
-            rows = []
+            rows, blocked = [], []
             sheet = f"{pillar}_Subcap_Scoring"
             for r in wb.rows(sheet):
                 sub = _clean(r.get("SubCap_ID"))
@@ -1828,37 +1843,74 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                     continue
                 if r.get("Score") not in (None, ""):
                     continue
+                n_ev = len(_ids(r.get("Evidence_IDs")))
+                verdict = _clean(r.get("Challenge_Verdict"))
+                if n_ev and verdict.upper() != "PASS":
+                    blocked.append(f"{sub} ({verdict or 'unchallenged'})")
+                    continue
                 rows.append({"subcap": sub, "name": C.subcap_names().get(sub),
                              "label": _clean(r.get("Claim_Label")),
                              "ceiling_band": _clean(r.get("Ceiling_Band")),
-                             "challenge": _clean(r.get("Challenge_Verdict")) or "none",
-                             "evidence": len(_ids(r.get("Evidence_IDs"))),
+                             "challenge": verdict or "none",
+                             "evidence": n_ev,
                              "absent": bool(L.is_declared_absent(r, wb))})
-            packet = _bound({
-                "agent": f"scoring-{pillar.lower()}-producer", "shared": sh,
-                "first_commands": [
-                    f"python3 -m engine.assessment state {e}",
-                    f"python3 -m engine.cli orient {e} --category {pillar}C1",
-                    f"python3 -m engine.assessment score {e} --subcap <CELL> --score <0.5-5.0> "
-                    f"--confidence HIGH|MEDIUM|LOW --rationale '<150+ chars>' "
-                    f"--actor scoring-{pillar.lower()}-producer --ai-applicability … "
-                    f"--data-dependency … --data-readiness …"],
-                "pillar": pillar, "weight": weights.get(pillar),
-                "stage": st.get("stage"),
-                "rows_to_score": rows,
-                "rules": [
-                    "the stage is already open — `engine.assessment open` has NO "
-                    "--force; if `state` says research, stop and say so",
-                    "score only your pillar; read the challenged synthesis, do not "
-                    "re-research",
-                    "the engine refuses a score on an unchallenged row, above the "
-                    "evidence ceiling, with a rationale under 150 characters or "
-                    "citing nothing the row carries, or with a blank AI/data overlay",
-                    "a declared absence scores as the rubric's absence, with the "
-                    "ladder in the rationale — never as a guess",
-                ],
-            }, "rows_to_score")
-            lanes.append((f"scoring-{pillar}", packet, f"Scoring — pillar {pillar}"))
+            if not rows:
+                continue
+            def packet_for(chunk):
+                return {
+                    "agent": f"scoring-{pillar.lower()}-producer", "shared": slim,
+                    "first_commands": [
+                        f"python3 -m engine.assessment state {e}",
+                        f"python3 -m engine.assessment score {e} --subcap <CELL> --score <0.5-5.0> "
+                        f"--confidence HIGH|MEDIUM|LOW --rationale '<150+ chars>' "
+                        f"--actor scoring-{pillar.lower()}-producer --ai-applicability … "
+                        f"--data-dependency … --data-readiness …"],
+                    "pillar": pillar, "weight": weights.get(pillar),
+                    "stage": st.get("stage"),
+                    "rows_to_score": chunk,
+                    "rules": [
+                        "the stage is already open — `engine.assessment open` has NO "
+                        "--force; if `state` says research, stop and say so",
+                        "score ONLY the rows listed here, every one of them; read each "
+                        "row's challenged synthesis, do not re-research",
+                        "the engine refuses a score above the evidence ceiling, with a "
+                        "rationale under 150 characters or citing nothing the row "
+                        "carries, or with a blank or inconsistent AI/data overlay "
+                        "(--ai-evidence NONE_FOUND goes with --ai-applicability NONE)",
+                        "a declared absence scores as the rubric's absence, with the "
+                        "ladder in the rationale — never as a guess",
+                    ],
+                    **({"held_for_research": blocked[:8],
+                        "held_note": f"{len(blocked)} row(s) of this pillar carry "
+                                     f"evidence without a PASS challenge; the engine "
+                                     f"refuses them and research repairs them — "
+                                     f"do not attempt them"} if blocked else {}),
+                }
+            # Greedy to find how many lanes the ceiling needs (with headroom
+            # for the bookkeeping keys `_bound` adds), then even sizes, so no
+            # lane is a whole session for one row.
+            budget = BRIEF_CHAR_CEILING - 200
+            n_lanes, cur = 1, []
+            for row in rows:
+                if cur and len(json.dumps(packet_for(cur + [row]), default=str)) > budget:
+                    n_lanes, cur = n_lanes + 1, []
+                cur.append(row)
+            size = -(-len(rows) // n_lanes)
+            chunks = [rows[i:i + size] for i in range(0, len(rows), size)]
+            while size > 1 and any(len(json.dumps(packet_for(c), default=str)) > budget
+                                   for c in chunks):
+                size -= 1
+                chunks = [rows[i:i + size] for i in range(0, len(rows), size)]
+            even = -(-len(rows) // len(chunks))
+            spread = [rows[i:i + even] for i in range(0, len(rows), even)]
+            if len(spread) == len(chunks) and all(
+                    len(json.dumps(packet_for(c), default=str)) <= budget for c in spread):
+                chunks = spread
+            for k, chunk in enumerate(chunks, 1):
+                packet = _bound(packet_for(chunk))
+                name = f"scoring-{pillar}" if len(chunks) == 1 else f"scoring-{pillar}-{k:02d}"
+                lanes.append((name, packet, f"Scoring — pillar {pillar}"
+                              + (f" ({k} of {len(chunks)})" if len(chunks) > 1 else "")))
     return _write_lanes(out_dir, lanes, run=run, stage="SCORING",
                         batch_name="batch_scoring.json")
 

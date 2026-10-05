@@ -262,7 +262,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "claim_unsupported": [], "contradicts_unprobed": [],
         "single_source_fact": [],
         "ladder_overstated": [], "evidence_smear": [], "challenge_missing": [],
-        "challenge_not_independent": [],
+        "challenge_not_independent": [], "challenge_failed": [],
         "timeline_missing": [], "followups_outstanding": [],
         "absence_unsearched": [],
         # 2026-09-03 (owner: "marked as no evidence without any enrichment
@@ -485,6 +485,17 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             # ladder_overstated); demanding a challenge verdict on it would
             # only add a token-costly step with nothing to falsify.
             pass
+        elif verdict == "FAIL":
+            # MEM-0441: a FAILED challenge used to read as "challenged" and
+            # the gate PASSED the category — 103 of Susser Bank's cells
+            # (2026-10-05) reached SCORING on claims that had failed, where
+            # `engine.assessment score` refuses every one. The claim must be
+            # repaired (re-synthesised, which clears the verdict) and
+            # challenged again; the challenger's rationale says what failed.
+            logged = L.challenge_for(wb, cell) or {}
+            findings["challenge_failed"].append(
+                {"subcap": cell,
+                 "why": str(logged.get("Rationale") or logged.get("Notes") or "")[:300]})
         elif verdict not in ("PASS", "FAIL", "NOT_RUN") and \
                 not verdict.startswith("NOT_RUN"):
             findings["challenge_missing"].append(cell)
@@ -552,7 +563,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     blocking = [k for k in (
         "unresolved_citations", "boilerplate", "claim_unsupported",
         "absence_undeclared", "evidence_smear", "challenge_missing",
-        "challenge_not_independent", "single_source_fact",
+        "challenge_not_independent", "challenge_failed", "single_source_fact",
         "synthesis_missing", "dq_gaps", "absence_unsearched",
         "volleys_incomplete", "absence_undeclared_empty",
         "absence_over_evidence",

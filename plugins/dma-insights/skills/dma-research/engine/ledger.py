@@ -1022,6 +1022,10 @@ def challenge_for(wb: RunWorkbook, subcap: str) -> dict | None:
     return hits[-1] if hits else None
 
 
+def _clean_str(v) -> str:
+    return "" if v is None else str(v).strip()
+
+
 def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
                      actor: str | None = None, session: str = "") -> dict:
     """Write one subcap's synthesis onto its scoring row, or refuse.
@@ -1143,6 +1147,14 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     assert_actor_scope(actor, "synthesis", [subcap])
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
+    # A NEW SYNTHESIS IS A NEW CLAIM, AND ITS OLD VERDICT IS STALE. Measured
+    # 2026-10-05 (Susser Bank): 103 cells carried a FAIL verdict that a
+    # re-synthesis never cleared and `challenge_batch` (which skips any cell
+    # that has a verdict) never re-offered — so they could neither pass the
+    # challenge nor be scored, and SCORING looped on them. Clearing it here
+    # sends the repaired claim back to an independent challenger.
+    if _clean_str(row.get("Challenge_Verdict")):
+        payload["Challenge_Verdict"] = ""
     wb.set_scoring(subcap, payload)
     if actor:
         record_provenance(wb, subcap, "synthesis", actor, session=session)

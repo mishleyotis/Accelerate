@@ -94,6 +94,7 @@ Per blocking term:
   - absence_undeclared_empty / absence_unsearched: fire primary plus one connector volley, then declare the absence with the hunted/ladder you actually ran.
   - evidence_smear: give each named sibling its own evidence, or re-synthesise so each states only what the shared item supports for that cell.
   - boilerplate / synthesis_missing: rewrite the named field with a checkable figure, date, proper noun or E-id.
+  - challenge_failed: an independent challenger FAILED this claim. Read why first: python3 -c "from engine import runstate,ledger as L;from pathlib import Path;wb=runstate.locate('${A.run}',Path('${A.root}')).open();print(L.challenge_for(wb,'<CELL>'))". Repair exactly what it names (a missing counter-source, an overstated claim, an unregistered figure), with new searches and evidence where it asks for them, then re-synthesise. Re-synthesis clears the old verdict and the challenge step re-challenges it; never re-synthesise unchanged text.
   - a cell id equal to the category (${cat}) is a category-level finding: read its detail and act on the cells it names.
 Re-synthesise with synthesise --json (the same command replaces the cell's synthesis). Every change goes through ONE engine.cli batch per capability, as below.
 

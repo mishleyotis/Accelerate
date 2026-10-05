@@ -58,9 +58,15 @@ def test_issue8_every_lane_type_has_a_bounded_brief_and_a_real_agent(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path / "r")
     srun, swb, scells, sev = scored_run(tmp_path / "s")
     roster = _roster()
+    # The scorer lane is written only for rows still to score: a fully
+    # scored run gets none (an empty scoring lane is a session spent on
+    # nothing). So that view reads a scored run with its scores cleared.
+    urun, uwb, ucells, uev = scored_run(tmp_path / "u")
+    for c in ucells:
+        uwb.set_scoring(c, {"Score": ""})
     views = [
         brief.prelim_brief(wb, run=run, out_dir=tmp_path / "p"),
-        brief.scoring_batch(swb, run=srun, out_dir=tmp_path / "sc"),
+        brief.scoring_batch(uwb, run=urun, out_dir=tmp_path / "sc"),
         brief.scoring_batch(swb, run=srun, out_dir=tmp_path / "scc", critic=True),
         brief.scoring_batch(swb, run=srun, out_dir=tmp_path / "scs", solutions=True),
         brief.report_batch(swb, run=srun, out_dir=tmp_path / "rp"),
