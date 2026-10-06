@@ -199,10 +199,10 @@
       "context.context_sentiment"
      ],
      "purpose": "Lock the peer set and establish the direction of travel before any scoring begins.",
-     "minimum_data": "3 to 5 peers, each with size tier, key metric, geographic overlap percentage and a selection rationale. 5 years of financial data with a trend classification and a computed CAGR. 6 or more timeline rows across 3 or more distinct years. Sentiment from 2 or more sources with numeric ratings, sample sizes where published, and observation dates.",
+     "minimum_data": "The locked peer set — 3 or more peers; its size is the run's Handoff_Lock, never a fixed template number — each with size tier, geographic overlap percentage and a selection rationale, and a key metric on the run's focus areas only. Peer scores are the sub-vertical cohort mean of entities already assessed (Peer_Benchmarks), never a per-peer estimate. 5 years of financial data with a trend classification and a computed CAGR. 6 or more timeline rows across 3 or more distinct years. Sentiment from 2 or more sources with numeric ratings, sample sizes where published, and observation dates.",
      "must_include": "The peer set lock statement. Once this section is approved the peer set is immutable for the assessment.",
      "must_not": "Select peers on size alone.",
-     "fail_if": "Fewer than 3 peers, more than 5 peers, or any peer without a selection rationale.",
+     "fail_if": "Fewer than 3 peers, a peer list that differs from Handoff_Lock, or any peer without a selection rationale.",
      "checks": [
       {
        "pattern": "(?<!\\d)20[0-3]\\d(?!\\d)",
@@ -661,7 +661,7 @@
       "insights.landscape"
      ],
      "purpose": "Place the institution against the peer set locked during research, then do the same for the technology it actually runs.",
-     "minimum_data": "Between 3 and 5 peers, each with an overall score. Position stated for every pillar. Every register row a reader would ask about carries a peer breakdown. Every ABSENT row carries one too.",
+     "minimum_data": "The locked peer set (3 or more peers — the run's own count, never a fixed template number), each identified; the peer score is the sub-vertical cohort mean of entities already assessed. Position stated for every pillar. Every register row a reader would ask about carries a peer breakdown. Every ABSENT row carries one too.",
      "must_include": "The vendor's own scope statement, fetched and cited, before any boundary claim is written.",
      "must_not": "Introduce a peer that was not locked at research. Derive or project a score for any product. Assign fault to a vendor.",
      "fail_if": "The peer list differs from Handoff_Lock, a coverage share has no breakdown behind it, a deployed row has no source or no date, or a share disagrees with its own breakdown by more than one peer.",

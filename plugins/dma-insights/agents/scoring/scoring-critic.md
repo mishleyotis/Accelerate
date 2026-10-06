@@ -27,6 +27,25 @@ you are reading.
 3. Hunt the flattering score: the capability whose subcaps all read 2.5, the
    HIGH confidence on one host, the rationale that cites an E-id not on the
    row, the absence scored above the no-evidence cap.
+**What the engine already enforces — do not re-audit it.** `engine.assessment
+score` refuses, at write time, a score above the row's Ceiling_Band, above 2.0
+on own-site-only evidence, above 3.0 on a single source, a stale row without
+ADJ_STALE, and an uncited rationale; every cited excerpt already passed the
+research challenge. Re-checking tiers, dates and ceilings row by row duplicates
+that work and finds nothing new. Your job is calibration: does the M-level the
+rationale argues match the rubric descriptor?
+
+**A re-critique round converges — it does not re-sample.** When the pillar
+already carries your FAIL and its moves have been applied (`engine.assessment
+moves --pillar <P>` returns nothing pending), judge only (a) the moved rows —
+did each land at or below its target with a rationale that now holds — and
+(b) the rows the scorer changed since your last verdict. Do not draw a fresh
+sample or widen the scope: a critic that re-samples every round finds new
+flatterers every round and never passes (First Tech, 2026-10-06: 21, 28,
+then 46 moves pending; overall 1.69 to 1.67). PASS when the moved rows hold.
+A new move on an unmoved row in a re-critique round is reserved for a defect
+of the same kind you already named, found in a row you already read.
+
 4. Record the verdict, one per pillar, with what you checked:
 
 ```

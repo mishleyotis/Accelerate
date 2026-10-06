@@ -136,6 +136,17 @@ RESEARCH_HANDOFF = "research_workflow.json"
 #: blocker routed out of the writer loop, then one whole-report pass.
 REPORTS_WORKFLOW = "workflows/dma-reports.js"
 REPORTS_HANDOFF = "reports_workflow.json"
+#: PAGES_A / PAGES_B as one persisted workflow per ship group
+#: (pages_mode="workflow"): each page's per-surface producers in parallel,
+#: its challenger and consolidator, then its assembler — every page of the
+#: group side by side. The driver keeps shipping and promotion.
+PAGES_WORKFLOW = "workflows/dma-page-production.js"
+PAGES_HANDOFF = "pages_workflow.json"
+#: Every handoff the driver makes, per stage: the signature of what it handed
+#: and how many times. ONE guard for every workflow stage, so none of them can
+#: loop: an unchanged signature across `stall_rounds` handoffs, or more than
+#: `max_rounds` handoffs in all, stops the stage with its blockers named.
+HANDOFF_GUARD = "handoff_guard.json"
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
@@ -158,6 +169,23 @@ SELF_HEAL = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "self_hea
 
 def _utcnow() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def A_ScoringRefusal():
+    """The assessment module's refusal type, imported late (it imports the
+    workbook stack, which this module must not pull in at import time)."""
+    from .assessment import ScoringRefusal
+    return ScoringRefusal
+
+
+class AwaitingWorkflow(Exception):
+    """A stage handed its work to the conducting session as a persisted
+    workflow. Not a failure: the run stops AWAITING_WORKFLOW and resumes
+    from disk when the session re-runs the driver."""
+
+    def __init__(self, handoff: dict):
+        super().__init__(handoff.get("summary") or "awaiting workflow")
+        self.handoff = handoff
 
 
 class StageRefused(Exception):
@@ -311,6 +339,12 @@ class McpReads:
     def page_contract(self, page: str) -> dict:
         return self._call("get_page_contract", {"page": page})
 
+    def cohort_benchmarks(self, sub_vertical: str, *, display_id: str = "",
+                          entity_name: str = "") -> dict:
+        return self._call("get_cohort_benchmarks",
+                          {"sub_vertical": sub_vertical, "exclude_display_id": display_id,
+                           "exclude_entity_name": entity_name})
+
 
 class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
@@ -429,6 +463,14 @@ class Options:
     # SECTION, no round barrier, an upstream blocker taken out of the writer
     # loop. "lanes" keeps the round loop below; both run the preflight first.
     report_mode: str = "lanes"
+    # Who PRODUCES pages for PAGES_A / PAGES_B. "workflow" hands each ship
+    # group to the session as one persisted workflow (PAGES_WORKFLOW); the
+    # driver ships what lands, hands the failures back as repairs, and
+    # promotes. "lanes" is the phase-barrier lane path.
+    pages_mode: str = "lanes"
+    # Clear the workflow-handoff guard (HANDOFF_GUARD) before handing over:
+    # a person's explicit "allow more rounds" after a ceiling refusal.
+    reset_guard: bool = False
     # How many FRESH lane instances the driver spends on a category whose
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
@@ -1112,6 +1154,14 @@ class Pipeline:
                 runstate.release_driver_lock(self.run)
         try:
             self.state["last_outcome"] = out.get("outcome")
+            # What the watchdog needs to tell a running workflow from one a
+            # dead session was holding: which stage, which handoff, when.
+            if out.get("outcome") == "AWAITING_WORKFLOW":
+                self.state["awaiting"] = {"stage": out.get("stage"),
+                                          "handoff": out.get("handoff"),
+                                          "at": _utcnow(), "resume": out.get("resume")}
+            else:
+                self.state.pop("awaiting", None)
             self.state["spent_usd"] = round(self._spent_usd, 4)
             cap = self.budget_usd()
             self.state["budget_usd"] = (round(cap, 2) if cap else None)
@@ -1167,7 +1217,15 @@ class Pipeline:
                 return outcome
             t0 = self.opts.clock()
             if st == "SCORING" and self.opts.scoring_mode == "workflow":
-                h = self._scoring_handoff()
+                try:
+                    h = self._scoring_handoff()
+                except (StageRefused, A_ScoringRefusal()) as e:
+                    msg = str(e).strip() or e.__class__.__name__
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.opts.log(f"[{st}] STOPPED — {msg[:300]}")
+                    outcome.update(outcome="FAILED", stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
                 if h.get("passed"):
                     self._record(st, "PASS", h["summary"], t0)
                     outcome["stages_run"].append(st)
@@ -1232,7 +1290,19 @@ class Pipeline:
                                resume=self.plan()["command"])
                 return outcome
             try:
-                detail = getattr(self, f"_stage_{st.lower()}")()
+                try:
+                    detail = getattr(self, f"_stage_{st.lower()}")()
+                except AwaitingWorkflow as aw:
+                    h = aw.handoff
+                    self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                    self._snapshot(st)
+                    self.opts.log(f"[WORKFLOW] {st} handed to the conducting session: "
+                                  f"{h['summary']} — {h['file']}")
+                    outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
+                                   reason=h["summary"], handoff=h["file"],
+                                   invocations=h["invocations"],
+                                   resume=self.plan()["command"])
+                    return outcome
                 if self._step_stopped:
                     # `--step` inside RESEARCH: the stage RAN and is not
                     # done, which is the normal end of a step rather than a
@@ -2272,6 +2342,37 @@ class Pipeline:
         self.reopen()
         return f"handoff written: {len(doc.get('subcap_records') or [])} records"
 
+    def _cohort_peers(self) -> None:
+        """Fill blank peer figures from the sub-vertical cohort (owner,
+        2026-10-06) before any rollup computes a gap. A connector that
+        cannot answer leaves the blanks and says so: the gap stays null
+        rather than the stage stopping on a comparison it can disclose."""
+        from . import prelim
+        rows = self.wb.rows("Peer_Benchmarks")
+        if not rows or all(str(r.get("Peer_Median") or "").strip() for r in rows):
+            return
+        reads = getattr(self.opts.reads, "cohort_benchmarks", None)
+        if reads is None:
+            return
+        md = self._md()
+        sv = str(md.get("sub_vertical") or "").strip()
+        if not sv:
+            return
+        try:
+            data = reads(sv, display_id=str(md.get("entity_id") or ""),
+                         entity_name=str(md.get("entity_name") or ""))
+        except Exception as e:                       # noqa: BLE001
+            data = {"_error": f"{e.__class__.__name__}: {str(e)[:200]}"}
+        if not isinstance(data, dict) or data.get("_error") or data.get("error"):
+            self.opts.log(f"  [COHORT] peer figures not filled — connector said: "
+                          f"{str((data or {}).get('_error') or (data or {}).get('error'))[:200]}")
+            return
+        got = prelim.fill_cohort_peers(self.wb, data)
+        self.reopen()
+        self.opts.log(f"  [COHORT] {sv}: {len(got['filled'])} categor(ies) from "
+                      f"{got.get('entities')} assessed entit(ies); "
+                      f"{len(got['cannot_estimate'])} below the floor")
+
     def _scoring_handoff(self) -> dict:
         """Write one scoring-workflow invocation per pillar still owed.
 
@@ -2284,6 +2385,7 @@ class Pipeline:
         if C.stage_of(self._md()) != "assessment":
             A.open_stage(self.wb, self.run.qa_dir)
             self.reopen()
+        self._cohort_peers()
         try:
             A.rollup(self.wb)
         except A.ScoringRefusal:
@@ -2291,6 +2393,7 @@ class Pipeline:
         v = A.gate(self.wb, self.run.qa_dir)
         self.reopen()
         if v.get("gate") == "PASS":
+            self._handoff_clear("SCORING")
             return {"passed": True, "summary": "SCORING gate PASS (workflow mode)"}
         st = A.state(self.wb)
         verdicts = st.get("critic_verdicts") or {}
@@ -2320,10 +2423,32 @@ class Pipeline:
                 return {"passed": True, "summary": "SCORING gate PASS (workflow mode)"}
             raise StageRefused("SCORING gate FAIL with every pillar's critic PASS: "
                                + ", ".join((v.get("blocking") or [])[:8]))
+        # every score, verdict and pending move the stage measures: a
+        # workflow that moved any of them advanced the stage.
+        import hashlib
+        why = self._handoff_guard("SCORING", {
+            "owed": owed, "pending": pending, "verdicts": verdicts,
+            "state": hashlib.sha256(json.dumps(st, sort_keys=True, default=str)
+                                    .encode()).hexdigest()})
+        if why:
+            raise StageRefused(why + f": pillar(s) {', '.join(owed)} still owed; blocking: "
+                               + ", ".join((v.get("blocking") or [])[:8])
+                               + f". Repair at source, then resume: {self.plan()['command']}")
         inv = [{"pillar": p, "run": self.run.run_id, "root": str(self.run.root),
                 "eng": str(PLUGIN / "skills" / "dma-research"), "plugin": str(PLUGIN),
-                "briefs": by_p.get(p, []), "critic_brief": "", "rounds": 3}
+                "briefs": by_p.get(p, []), "critic_brief": "", "rounds": 3,
+                "solutions_brief": ""}
                for p in owed]
+        # THE SOLUTIONS DUTY rides on the first invocation while its tabs are
+        # empty — the lane path runs it beside the scorers, and the
+        # assessment report's preconditions stay shut without it.
+        if not all([r for r in self.wb.rows(t) if any(v not in (None, "") for v in r.values())]
+                   for t in ("Solution_Catalogue", "Platform_Peer_Adoption")):
+            sb = brief.scoring_batch(self.wb, run=self.run,
+                                     out_dir=self._briefs("scoring_wf_solutions"), solutions=True)
+            rows = self._lane_rows(sb)
+            if rows:
+                inv[0]["solutions_brief"] = rows[0]["prompt_file"]
         doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
@@ -2385,6 +2510,7 @@ class Pipeline:
         if C.stage_of(self._md()) != "assessment":
             A.open_stage(self.wb, self.run.qa_dir)
             self.reopen()
+        self._cohort_peers()
         self._stalled("SCORING")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
@@ -2555,6 +2681,67 @@ class Pipeline:
             self.opts.log(f"  [PROBES] skipped ({e.__class__.__name__}: {str(e)[:120]})")
             return 0
 
+    def _handoff_guard(self, stage: str, sig) -> str | None:
+        """Record one workflow handoff for `stage`; the reason to STOP, or None.
+
+        THE ONE LOOP GUARD (owner, 2026-10-06: "nothing ever gets stuck
+        looping"). A handoff is cheap for the driver and expensive for the
+        session: it buys a workflow's worth of agents. So two things stop a
+        stage instead of handing it again — the same signature (the work
+        handed, plus whatever the stage writes as it advances) across
+        `stall_rounds` consecutive handoffs, which means the last workflows
+        changed nothing; and more than `max_rounds` handoffs in all, which
+        means they keep changing things without converging. A fired guard
+        STAYS fired: a stall releases when its signature changes (a repair at
+        source), the ceiling on `--reset-guard` — so nothing that merely
+        re-runs the driver can turn a refusal back into spend."""
+        f = self.run.qa_dir / HANDOFF_GUARD
+        try:
+            book = json.loads(f.read_text())
+            if not isinstance(book, dict):
+                book = {}
+        except (OSError, ValueError):
+            book = {}
+        if self.opts.reset_guard:
+            book.pop(stage, None)
+        key = json.dumps(sig, sort_keys=True, default=str)
+        prev = book.get(stage) or {}
+        if prev.get("fired"):
+            # A FIRED guard keeps refusing — re-running the driver (a person,
+            # the hourly watchdog, a cron) must not buy the same workflow
+            # again. A stall releases only when what it measures changed (a
+            # repair at source); the round ceiling only on --reset-guard.
+            if prev.get("kind") == "stall" and prev.get("sig") != key:
+                prev = {}
+            else:
+                return prev["fired"] + (" (still refused: nothing changed since; "
+                                        "repair at source, or --reset-guard)")
+        same = int(prev.get("same") or 0) + 1 if prev.get("sig") == key else 0
+        n = int(prev.get("n") or 0) + 1
+        why, kind = None, None
+        if self.opts.stall_rounds and same >= self.opts.stall_rounds:
+            why, kind = (f"{stage}: the last {same + 1} workflow handoffs handed the same "
+                         f"work and nothing it measures moved, so another would buy the "
+                         f"same agents again"), "stall"
+        elif self.opts.max_rounds and n > self.opts.max_rounds:
+            why, kind = (f"{stage}: {n - 1} workflow handoffs without converging (ceiling "
+                         f"--max-rounds {self.opts.max_rounds}; --reset-guard to allow "
+                         f"more)"), "ceiling"
+        book[stage] = {"sig": key, "same": same, "n": n, "at": _utcnow(),
+                       "fired": why, "kind": kind}
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps(book, indent=1))
+        return why
+
+    def _handoff_clear(self, stage: str) -> None:
+        f = self.run.qa_dir / HANDOFF_GUARD
+        try:
+            book = json.loads(f.read_text())
+        except (OSError, ValueError):
+            return
+        if isinstance(book, dict) and book.pop(stage, None) is not None:
+            f.write_text(json.dumps(book, indent=1))
+
     def _reports_preflight(self) -> None:
         """Refuse REPORTS while a blocker no writer can close stands.
 
@@ -2597,6 +2784,7 @@ class Pipeline:
                                        qa_dir=self.run.qa_dir)["path"]).name
                    for spec in RS.SPECS.values()]
             self.reopen()
+            self._handoff_clear("REPORTS")
             return {"passed": True, "summary": "rendered: " + ", ".join(out)}
         ups = self._upstream_only()
         if ups:
@@ -2604,6 +2792,21 @@ class Pipeline:
                 "every open report section waits on an upstream item no writer can "
                 "close: " + "; ".join(f"{u['report']} §{u['section']} [{u['kind']}] "
                                        f"{u['detail']}" for u in ups[:8]))
+        # THE LOOP GUARD (owner, 2026-10-06): the same open sections, each
+        # with the same status and latest review, handed again and again is a
+        # workflow that changes nothing — stop instead of buying it again.
+        reviews = N.latest_reviews(self.wb)
+        sig = sorted([k, str(x.get("id") or x.get("section")), str(x.get("status")),
+                      x.get("words"),
+                      str((reviews.get((k, str(x.get("id") or x.get("section")))) or {})
+                          .get("at") or "")]
+                     for k, rep in st["reports"].items() if not rep.get("ready")
+                     for x in rep.get("sections") or [] if x.get("status") != "READY")
+        why = self._handoff_guard("REPORTS", sig)
+        if why:
+            raise StageRefused(why + ": " + ", ".join(f"{k}:{x[0]}" for k, *x in sig[:12])
+                               + f". Read the revise notes (`narrative state`), repair "
+                                 f"at source, then resume: {self.plan()['command']}")
         b = brief.report_section_briefs(self.wb, run=self.run,
                                         out_dir=self._briefs("reports_wf"))
         by_r: dict[str, list] = {}
@@ -2715,6 +2918,49 @@ class Pipeline:
             if text.strip():
                 (self.run.qa_dir / f"{name}_{p}.md").write_text(text, encoding="utf-8")
 
+    def _page_mtime(self, page: str) -> float:
+        """Newest section file of a page on disk (0 when there is none)."""
+        return max((f.stat().st_mtime for f in self._sections_dir().glob(f"{page}.*.json")),
+                   default=0.0)
+
+    def _ship_one(self, p: str, version: str, connector_run: str, verdicts: dict) -> bool:
+        """Ship one page's section files and record the verdict. True on pass."""
+        mtime = self._page_mtime(p)
+        res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
+                                     self.run.qa_dir / f"verdict_{p}_{version}.json")
+        sgv4 = res.get("sg_v4_fails") or []
+        if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
+            # The connector discloses-and-promotes SG-V4 (invariant 12);
+            # the driver reads the disclosure and REVISES ungrounded prose
+            # before accepting the page, rather than shipping the claim the
+            # grounding gate could not support (measured on the promoted
+            # Golden 1 overview: 249 SG-V4 FAILs, all ignored).
+            res = {**res, "status": "sg_v4_over_budget",
+                   "reasons": [f"SG-V4 grounding FAIL x{len(sgv4)} over "
+                               f"budget {self.opts.sg_v4_budget} — find "
+                               f"grounding or drop the claim"]
+                   + [f"{w.get('path')} (sim {w.get('similarity')} < "
+                      f"{w.get('threshold')})" for w in sgv4[:6]]}
+        rec = self.state["pages"].setdefault(p, {})
+        rec.update({"version": version, "status": res.get("status"),
+                    "reasons": (res.get("reasons") or [])[:12],
+                    "sg_v4_fails": len(sgv4),
+                    "attempts": int(rec.get("attempts") or 0) + 1,
+                    "connector_run": connector_run, "at": _utcnow()})
+        rec.setdefault("versions", {})[version] = res.get("status")
+        rec.setdefault("shipped_mtime", {})[version] = mtime
+        av = rec.setdefault("attempts_by_version", {})
+        av[version] = int(av.get(version) or 0) + 1
+        if res.get("status") == "claim_refused":
+            self._save_state()
+            raise StageRefused(
+                f"claim on {connector_run} refused while shipping {p}: another "
+                f"session holds the lease; wait for it to lapse, then run again")
+        if res.get("status") == "pass":
+            return True
+        verdicts[p] = (res.get("reasons") or [])[:12]
+        return False
+
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
         """Produce (lanes) and ship each page until it passes or the retries
         are spent. A FAIL re-dispatches ONLY that page, with the verdict's
@@ -2730,6 +2976,9 @@ class Pipeline:
                 verdicts = json.loads(verdicts_file.read_text())
             except ValueError:
                 verdicts = {}
+        if produce and self.opts.pages_mode == "workflow":
+            return self._ship_pages_workflow(pages, version, connector_run,
+                                             verdicts, verdicts_file)
         todo = [p for p in pages if not self._page_ok(p, version)]
         shipped = []
         for attempt in range(self.opts.page_retries + 1):
@@ -2770,38 +3019,10 @@ class Pipeline:
                             self._save_page_reports(pg, phase)
             still = []
             for p in todo:
-                res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
-                                             self.run.qa_dir / f"verdict_{p}_{version}.json")
-                sgv4 = res.get("sg_v4_fails") or []
-                if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
-                    # The connector discloses-and-promotes SG-V4 (invariant 12);
-                    # the driver reads the disclosure and REVISES ungrounded prose
-                    # before accepting the page, rather than shipping the claim the
-                    # grounding gate could not support (measured on the promoted
-                    # Golden 1 overview: 249 SG-V4 FAILs, all ignored).
-                    res = {**res, "status": "sg_v4_over_budget",
-                           "reasons": [f"SG-V4 grounding FAIL x{len(sgv4)} over "
-                                       f"budget {self.opts.sg_v4_budget} — find "
-                                       f"grounding or drop the claim"]
-                           + [f"{w.get('path')} (sim {w.get('similarity')} < "
-                              f"{w.get('threshold')})" for w in sgv4[:6]]}
-                rec = self.state["pages"].setdefault(p, {})
-                rec.update({"version": version, "status": res.get("status"),
-                            "reasons": (res.get("reasons") or [])[:12],
-                            "sg_v4_fails": len(sgv4),
-                            "attempts": int(rec.get("attempts") or 0) + 1,
-                            "connector_run": connector_run, "at": _utcnow()})
-                rec.setdefault("versions", {})[version] = res.get("status")
-                if res.get("status") == "claim_refused":
-                    self._save_state()
-                    raise StageRefused(
-                        f"claim on {connector_run} refused while shipping {p}: another "
-                        f"session holds the lease; wait for it to lapse, then run again")
-                if res.get("status") == "pass":
+                if self._ship_one(p, version, connector_run, verdicts):
                     shipped.append(p)
                 else:
                     still.append(p)
-                    verdicts[p] = (res.get("reasons") or [])[:12]
             self._save_state()
             verdicts_file.write_text(json.dumps(verdicts, indent=2, default=str))
             todo = still
@@ -2814,6 +3035,108 @@ class Pipeline:
                 + "; ".join(f"{p}: {', '.join(str(x)[:100] for x in verdicts.get(p, [])[:2])}"
                             for p in todo))
         return shipped
+
+    def _ship_pages_workflow(self, pages: tuple, version: str, connector_run: str,
+                             verdicts: dict, verdicts_file: Path) -> list[str]:
+        """Ship what the last page workflow left on disk; hand the rest back.
+
+        A page ships when its section files are newer than the ones it last
+        shipped (or it never shipped). A page that fails comes back in the
+        next handoff as a REPAIR — its assembler alone, carrying the
+        verdict's reasons — until `page_retries + 1` ships on this version
+        are spent, which stops the stage with the reasons named. The handoff
+        guard stops a group whose workflows leave nothing new on disk."""
+        shipped = []
+        todo = [p for p in pages if not self._page_ok(p, version)]
+        for p in todo:
+            rec = (self.state.get("pages") or {}).get(p) or {}
+            m = self._page_mtime(p)
+            last = (rec.get("shipped_mtime") or {}).get(version)
+            if m and (last is None or m > float(last)):
+                if self._ship_one(p, version, connector_run, verdicts):
+                    shipped.append(p)
+        self._save_state()
+        verdicts_file.write_text(json.dumps(verdicts, indent=2, default=str))
+        todo = [p for p in pages if not self._page_ok(p, version)]
+        if not todo:
+            self._handoff_clear(f"PAGES_{version}:{','.join(pages)}")
+            return shipped
+        tries = {p: int((((self.state.get("pages") or {}).get(p) or {})
+                         .get("attempts_by_version") or {}).get(version) or 0) for p in todo}
+        spent = [p for p in todo if tries[p] >= self.opts.page_retries + 1]
+        if spent:
+            raise StageRefused(
+                f"page(s) not passing on version {version} after "
+                f"{self.opts.page_retries + 1} ship(s): "
+                + "; ".join(f"{p}: {', '.join(str(x)[:100] for x in verdicts.get(p, [])[:2])}"
+                            for p in spent))
+        raise AwaitingWorkflow(self._pages_handoff(todo, version, connector_run,
+                                                   verdicts, verdicts_file, tries))
+
+    def _pages_handoff(self, todo: list, version: str, connector_run: str,
+                       verdicts: dict, verdicts_file: Path, tries: dict) -> dict:
+        """ONE page-production workflow invocation over `todo`. Briefs are the
+        lane path's own (`brief.page_batch`), one call per phase."""
+        from . import brief
+        stage = f"PAGES_{version}"
+        why = self._handoff_guard(f"{stage}:{','.join(todo)}",
+                                  [[p, self._page_mtime(p), tries.get(p, 0)] for p in todo])
+        if why:
+            last = "; ".join(f"{p}: {', '.join(str(x)[:100] for x in verdicts.get(p, [])[:2])}"
+                             for p in todo if verdicts.get(p))
+            raise StageRefused(why + f": {', '.join(todo)}"
+                               + (f". Last verdicts: {last}" if last else
+                                  ". The workflow left no section file on disk")
+                               + f". Repair at source, then resume: {self.plan()['command']}")
+        for p in todo:
+            self._contract_file(p)
+        repair = [p for p in todo if tries.get(p, 0) > 0 and self._page_mtime(p)]
+        fresh = [p for p in todo if p not in repair]
+        n = len(list((self.run.root / BRIEFS_DIR).glob(f"pages_wf_{version}_*_assemble"))) + 1
+        rows: dict[str, dict] = {}
+        for phase in brief.PAGE_PHASES:
+            pg = fresh if phase != "assemble" else list(todo)
+            if not pg:
+                continue
+            b = brief.page_batch(self.wb, run=self.run,
+                                 out_dir=self._briefs(f"pages_wf_{version}_{n}_{phase}"),
+                                 connector_run=connector_run,
+                                 contract_file=self._sections_dir() / "contracts",
+                                 verdicts_file=verdicts_file if verdicts else None,
+                                 pages=pg, phase=phase, sections_dir=self._sections_dir())
+            for r in self._lane_rows(b):
+                rows[str(r.get("label") or "")] = r
+        out = []
+        for p in todo:
+            frags = [{"agent": r["agent"], "brief": r["prompt_file"]}
+                     for lbl, r in sorted(rows.items())
+                     if lbl.startswith(f"page-{p}-") and lbl not in
+                     (f"page-{p}-challenge", f"page-{p}-consolidate")]
+            out.append({"page": p, "repair": p in repair,
+                        "fragments": [] if p in repair else frags,
+                        "challenge_brief": "" if p in repair else
+                        (rows.get(f"page-{p}-challenge") or {}).get("prompt_file", ""),
+                        "consolidate_brief": "" if p in repair else
+                        (rows.get(f"page-{p}-consolidate") or {}).get("prompt_file", ""),
+                        "assemble_brief": (rows.get(f"page-{p}") or {}).get("prompt_file", ""),
+                        "last_verdict": verdicts.get(p, [])[:12]})
+        inv = [{"run": self.run.run_id, "root": str(self.run.root),
+                "eng": str(PLUGIN / "skills" / "dma-research"), "version": version,
+                "connector_run": connector_run, "sections_dir": str(self._sections_dir()),
+                "qa_dir": str(self.run.qa_dir), "pages": out}]
+        doc = {"workflow": str(PLUGIN / PAGES_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start the invocation — Workflow({scriptPath: <workflow>, "
+                       "args: <invocation>}) — wait for it, then run `then`: the "
+                       "driver ships every page the workflow left on disk, hands "
+                       "failures back as repairs, and promotes. No Workflow tool in "
+                       "this session? Re-run the driver with --pages-mode lanes.")}
+        path = self.run.qa_dir / PAGES_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        return {"file": str(path), "invocations": inv,
+                "summary": f"1 page-production workflow for version {version}: "
+                           + ", ".join(p + (" (repair)" if p in repair else "") for p in todo)}
 
     def _stage_pages_a(self) -> str:
         self._reset_counters()
@@ -3037,7 +3360,10 @@ def _build_opts(a) -> Options:
                    scoring_mode=getattr(a, "scoring_mode", None) or ("lanes" if a.dispatcher == "stub"
                                                    else "workflow"),
                    report_mode=getattr(a, "report_mode", None) or ("lanes" if a.dispatcher == "stub"
-                                                 else "workflow"))
+                                                 else "workflow"),
+                   pages_mode=getattr(a, "pages_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                 else "workflow"),
+                   reset_guard=bool(getattr(a, "reset_guard", False)))
 
 
 def _research_mode(a) -> str:
@@ -3079,6 +3405,17 @@ def main(argv=None) -> int:
                         "workflow per report — a writer and a reviewer per "
                         "section, upstream blockers routed out of the loop; "
                         "'lanes' keeps the whole-report round loop")
+    r.add_argument("--reset-guard", action="store_true",
+                   help="clear the workflow-handoff guard first: a stage the "
+                        "guard refused (same work handed with nothing moving, or "
+                        "--max-rounds handoffs without converging) is handed again")
+    r.add_argument("--pages-mode", choices=("workflow", "lanes"), default=None,
+                   help="who PRODUCES pages for PAGES_A/PAGES_B: 'workflow' "
+                        "(default with the real dispatcher) hands each ship group "
+                        "to the session as one persisted workflow — every page's "
+                        "producers, challenger, consolidator and assembler, pages "
+                        "side by side; the driver still ships and promotes. "
+                        "'lanes' runs the phase-barrier lane path")
     r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
                    help="who runs RESEARCH: 'workflow' (default with the real "
                         "dispatcher) hands it to the session as one persisted "

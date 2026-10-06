@@ -165,10 +165,11 @@ validator's last full note. Write that section and no other: rewriting a
 sibling clears its independent verdict, and that is how passed sections were
 reopened round after round (Arbor Bank, 2026-10-06: 19 reopened).
 
-- **The LENGTH band is enforced at write.** `engine.narrative write` refuses a
-  body over the template's `words_max`, just as it refuses one under
-  `words_min`. Cut detail a sibling section already carries. Never cut a
-  figure or citation the argument needs.
+- **The LENGTH upper bound is guidance, not a constant.** `engine.narrative
+  write` measures it and returns `length_notes`; trim toward the band where a
+  sibling section already carries the detail, never by cutting a figure or a
+  citation the argument needs. Only the floor (`words_min`) refuses (owner,
+  2026-10-06).
 - **Return `BLOCKED_UPSTREAM` instead of writing around a gap.** Do this when
   the note asks for something you cannot supply from the run as it stands: a
   search nobody ran (`probe`), a sheet at odds with the prose (`sheet`), a

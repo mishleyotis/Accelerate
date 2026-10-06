@@ -87,6 +87,27 @@ def test_a_critic_fail_must_name_its_moves_and_they_are_enforced(tmp_path):
     assert "critic_moves_pending" not in A.gate(wb, run.qa_dir)["blocking"]
 
 
+def test_concurrent_critics_do_not_overwrite_each_others_moves(tmp_path):
+    """Pillar critics run as parallel processes, each holding its own handle
+    on the workbook. `critique` read the moves book from its in-memory copy
+    and saved outside the lock, so the second critic to finish rewrote the
+    book without the first one's moves. Measured on the First Tech run
+    (2026-10-06): P1's moves never reached Run_Metadata.critic_moves, its
+    scorer never saw them, and the critic failed the same rows every round
+    until the stall guard stopped SCORING."""
+    run, wb, cells, ev = scored_run(tmp_path)
+    a, b = [c for c in cells if ev.get(c)][:2]
+    other = run.open()                    # a second process's handle, loaded now
+    note = ("Re-derived every P1 row against its rubric descriptor; one row "
+            "flatters its evidence: it reads M3 on one T3 source only.")
+    A.critique(wb, pillar="P1", verdict="FAIL", actor="scoring-critic",
+               note=note, moves=[f"{a}:1.75:reads M3 on one T3 source"])
+    A.critique(other, pillar="P1", verdict="FAIL", actor="scoring-critic",
+               note=note, moves=[f"{b}:1.75:reads M3 on one T3 source"])
+    book = A.critic_moves(run.open())
+    assert a in book and b in book, f"a critic's moves were lost: {sorted(book)}"
+
+
 def test_a_critic_pass_withdraws_its_earlier_moves(tmp_path):
     run, wb, cells, ev = scored_run(tmp_path)
     cell = next(c for c in cells if ev.get(c))

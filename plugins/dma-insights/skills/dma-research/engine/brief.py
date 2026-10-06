@@ -1590,7 +1590,7 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                       "source": _clean(x.get("Source_Name")),
                       "url": _clean(x.get("Source_URL")),
                       "tier": _clean(x.get("Tier")),
-                      "recency": _clean(x.get("Recency_Band")),
+                      "recency": _clean(x.get("Recency")),
                       "excerpt": _clean(x.get("Excerpt"))[:CHALLENGE_EXCERPT_WINDOW]}
                      for x in rows[:CHALLENGE_EVIDENCE_PER_CELL]],
         "evidence_total": len(eids),
@@ -1602,8 +1602,12 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                           "disposition": _clean(r.get("Contradiction_Disposition"))},
         # ceiling_reasoning
         "ceiling": _clean(r.get("Ceiling_Reasoning"))[:160],
-        "recency_bands": sorted({_clean(x.get("Recency_Band")) for x in rows
-                                 if _clean(x.get("Recency_Band"))}),
+        # claim_label_fit and ceiling_reasoning judge the band the
+        # synthesis stated; the reasoning text alone does not carry it.
+        "ceiling_band": _clean(r.get("Ceiling_Band")),
+        # Evidence_Detail.Recency is what ledger.append_evidence writes.
+        "recency_bands": sorted({_clean(x.get("Recency")) for x in rows
+                                 if _clean(x.get("Recency"))}),
     }
 
 
@@ -2011,6 +2015,18 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                         batch_name="batch_scoring.json")
 
 
+#: A template's numbers are the Doc author's guidance for a TYPICAL run, not
+#: constants a section fails on (owner, 2026-10-06, First Tech: a six-peer
+#: locked set failed Client Research §4 four rounds running on "3 to 5 peers"
+#: and an 850-word LENGTH, and no rewrite could clear it). Only a FAIL IF
+#: line, an engine refusal or one of the six dimensions fails a section.
+TEMPLATE_NUMBERS_RULE = (
+    "template numbers are guidance, not constants: a LENGTH bound, a count "
+    "range in MINIMUM DATA or a peer-set size never alone fails a section; the "
+    "run's own locks (Handoff_Lock peer_n) win. Hard: FAIL IF, engine refusals, "
+    "the six dimensions")
+
+
 def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False) -> dict:
     """The two report producers (default) or the report validator."""
     from . import narrative as N, report_spec as RS, template as T
@@ -2090,6 +2106,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "section; --force on `report` yields a DRAFT_ no package accepts",
                 "the report's numbers are the sheets' numbers; cite only E-ids the "
                 "register carries",
+                TEMPLATE_NUMBERS_RULE,
                 "you never review your own sections — `report-validator` does",
                 "the gold gate (`engine.gold_standard report`) reads gold_reference.json",
                 "each section feeds a named app surface (`section_sources.json`); "
@@ -2118,6 +2135,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "adversarial pass (cross-section contradiction, prose figures vs "
                 "sheets, the strongest case the assessment is wrong)",
                 "the engine refuses a verdict from a section's own author",
+                TEMPLATE_NUMBERS_RULE,
             ],
         })
         lanes = [("report-validator", packet, "Report validation — both reports")]
@@ -2142,9 +2160,11 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
 # writer touches nothing else; and an `upstream` field on a review
 # (narrative.UPSTREAM_KINDS) that takes a section out of the writer loop.
 
-#: The peer-count rule the templates FAIL on (client_research §4, assessment
-#: §6). Read from the pinned control block when it states one.
-_PEER_RULE = re.compile(r"fewer than (\d+) peers, more than (\d+) peers", re.I)
+#: The peer-count FLOOR the templates FAIL on (client_research §4, assessment
+#: §6). Only the floor: the locked set's own size is the run's decision, and a
+#: template's upper number is guidance, not a constant (owner, 2026-10-06,
+#: First Tech: a six-peer set must not fail on "3 to 5").
+_PEER_RULE = re.compile(r"fewer than (\d+) peers", re.I)
 
 
 def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
@@ -2155,7 +2175,7 @@ def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
     sheets — where Arbor's knowable dead rounds came from."""
     from . import narrative as N, report_spec as RS
     out: list[dict] = []
-    # 1. owner: the locked peer set against the template's peer band
+    # 1. owner: the locked peer set against the template's peer FLOOR
     lock = wb.handoff_lock()
     peers = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p.strip()]
     for key, spec in RS.SPECS.items():
@@ -2163,13 +2183,13 @@ def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
             m = _PEER_RULE.search(sec.fail_if or "")
             if not m:
                 continue
-            lo, hi = int(m.group(1)), int(m.group(2))
-            if peers and not lo <= len(peers) <= hi:
+            lo = int(m.group(1))
+            if peers and len(peers) < lo:
                 out.append({"kind": "owner", "sections": [f"{key} §{sec.id}"],
-                            "detail": (f"the locked peer set holds {len(peers)} peers "
+                            "detail": (f"the locked peer set holds {len(peers)} peer(s) "
                                        f"({', '.join(peers)}) and the template FAILS "
-                                       f"outside {lo}-{hi}. The engagement owner cuts "
-                                       f"the set or records a waiver; no writer can.")})
+                                       f"below {lo}. The engagement owner widens the "
+                                       f"set; no writer can.")})
     # 2. scores: every served cell scored before the assessment cites totals
     unscored = []
     for sheet in ("P1_Subcap_Scoring", "P2_Subcap_Scoring",
@@ -2226,7 +2246,9 @@ def report_section_briefs(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
                         f"-{sec.cards_max or ''} of them, {sec.card_words_min or ''}"
                         f"-{sec.card_words_max or ''} words each"
                         if sec.kind in RS.CARD_KINDS else "")
-                     + ". The engine refuses a write outside the band.",
+                     + ". The floor refuses; the upper bound is measured and "
+                       "returned as `length_notes`, never refused.",
+                     f"- RULE: {TEMPLATE_NUMBERS_RULE}.",
                      f"- BLOCKS: {' · '.join(sec.blocks) or '(none declared)'}",
                      f"- READS: {', '.join(sec.inputs) or '-'}",
                      f"- MINIMUM DATA: {sec.minimum_data or '-'}",

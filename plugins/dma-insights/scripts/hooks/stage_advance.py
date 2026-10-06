@@ -155,7 +155,21 @@ def next_step(row: dict) -> str:
     lines = [head]
     if crit:
         lines.append(f"Completion criterion: {crit}.")
-    if plan.get("command"):
+    if plan.get("workflow"):
+        # A handoff nobody is running: name the exact Workflow calls.
+        try:
+            doc = json.loads(Path(plan["workflow"]).read_text())
+        except (OSError, ValueError):
+            doc = {}
+        lines.append(f"Next: start the {plan.get('stage') or ''} workflow from THIS "
+                     f"session — the driver cannot start one:")
+        for inv in doc.get("invocations") or []:
+            lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
+                         f"args: {json.dumps(inv)}}})")
+        if not doc:
+            lines.append(f"  (handoff not readable — open {plan['workflow']})")
+        lines.append(f"Then: {doc.get('then') or 'run the driver again'}.")
+    elif plan.get("command"):
         lines.append("Next: run `" + " ".join(plan["command"]) + "`.")
     elif plan.get("agent"):
         agents = plan.get("parallel") or [plan["agent"]]
@@ -411,6 +425,9 @@ def awaiting_workflow(event: dict) -> dict | None:
     mr = re.search(r"(/\S+?reports_workflow\.json)", text)
     if mr:
         return _reports_workflow_context(mr.group(1))
+    mp = re.search(r"(/\S+?pages_workflow\.json)", text)
+    if mp:
+        return _pages_workflow_context(mp.group(1))
     m = re.search(r"(/\S+?research_workflow\.json)", text)
     doc = {}
     if m:
@@ -693,6 +710,30 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception:                                      # noqa: BLE001
         sys.exit(0)                                        # fail open, silent
+
+
+def _pages_workflow_context(path: str) -> dict:
+    """PAGES_A / PAGES_B handed to the session: one persisted workflow per
+    ship group — every page's producers, challenger, consolidator and
+    assembler side by side. The driver ships and promotes after it."""
+    try:
+        doc = json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        doc = {}
+    lines = ["PAGE PRODUCTION IS YOURS, AS A PERSISTED WORKFLOW — start it now "
+             "(every page in the group runs its own chain, side by side, shown in "
+             "/workflows). Never submit or promote from it: the driver ships what "
+             "it leaves on disk and promotes:"]
+    for inv in doc.get("invocations") or []:
+        lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
+                     f"args: {json.dumps(inv)}}})")
+    if not doc:
+        lines.append(f"  (handoff file not readable — open {path})")
+    lines.append("  No Workflow tool in this session? Re-run the driver with "
+                 "--pages-mode lanes.")
+    lines.append(f"  THEN, when the workflow has returned: {doc.get('then') or 'the driver again'}")
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
+                                   "additionalContext": "\n".join(lines)}}
 
 
 def _reports_workflow_context(path: str) -> dict:

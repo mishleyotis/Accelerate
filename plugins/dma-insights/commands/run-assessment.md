@@ -187,8 +187,9 @@ needs no connector. Never re-score rows by hand.
 
 **REPORTS runs as persisted workflows too, one per report.** At REPORTS the
 driver first runs a preflight that refuses on blockers no writer can close: a
-locked peer set outside the template's band, or unscored cells. It names them
-in `REPORT_PREFLIGHT`; fix them at source and resume.
+locked peer set below the template's floor (its size above it is the run's
+own decision, never a refusal), or unscored cells. It names them in
+`REPORT_PREFLIGHT`; fix them at source and resume.
 Then it stops `AWAITING_WORKFLOW` and writes `<ROOT>/07_qa/reports_workflow.json`
 (workflow `workflows/dma-reports.js`, one `args` per open report), and you
 start every invocation in ONE message. Each open section is written by its
@@ -201,10 +202,43 @@ engine command, an owner decision with the person, scores through the pillar
 scorer and its critic), then run the file's `then`. With no Workflow tool,
 the handoff's `agent_prompts` holds the same prompts for in-session agents.
 `--report-mode lanes` keeps the old round loop, which now also stops the
-moment every open section waits upstream. Measured at Arbor Bank (2026-10-06):
+moment every open section waits upstream. The same open sections, statuses and
+reviews handed again across `--stall-rounds` handoffs stop the stage (the
+loop guard below). A template's LENGTH upper bound is measured and reported
+back on every write (`length_notes`), never refused. Measured at Arbor Bank (2026-10-06):
 whole-report lanes behind a round barrier took 430 min, 19 rounds and 137
 reviews, and a third of the returns were upstream items the writer could not
 close.
+
+**PAGES_A and PAGES_B run as persisted workflows too — one per ship group.**
+At each page group the driver ships whatever page section files are already
+on disk, then stops `AWAITING_WORKFLOW` with `<ROOT>/07_qa/pages_workflow.json`
+(workflow `${CLAUDE_PLUGIN_ROOT}/workflows/dma-page-production.js`). Every page
+of the group runs its own chain side by side: per-surface producers in
+parallel, then the finding-challenger and page-consolidator on the produce
+sections, then the page's surface-producer assembles. A page that failed its
+verdict comes back as a REPAIR (assembler alone, with the verdict's reasons)
+until `--page-retries` ships are spent. The workflow never submits or promotes:
+run the file's `then`, and the driver ships, hands back failures, and promotes.
+No Workflow tool? `--pages-mode lanes`.
+
+**Nothing loops.** Every workflow stage passes one guard
+(`<ROOT>/07_qa/handoff_guard.json`): the same work handed with nothing moved
+across `--stall-rounds` handoffs, or more than `--max-rounds` handoffs, stops
+the stage FAILED with its blockers named. A fired guard STAYS fired — re-running
+the driver (by you, the watchdog or a cron) does not buy the workflow again —
+until what it measures changes (a repair at source) or a person passes
+`--reset-guard`. The watchdog reports a handoff a dead session was holding as
+`AWAITING_WORKFLOW` and its `--revive` hands the Workflow calls to the session
+that ran it; a handoff still receiving writes reads `WORKFLOW_RUNNING` and is
+left alone.
+
+**Peer figures come from the sub-vertical cohort.** Before SCORING rolls up,
+the driver fills every blank `Peer_Benchmarks` figure from the connector's
+`get_cohort_benchmarks`: the mean of every other assessed entity in the
+sub-vertical (active promoted runs, floor of three, aggregates only). The
+locked peer set is identified, not scored; peer metrics are researched only on
+the run's focus areas (`relay.report_probes`).
 
 **RESEARCH runs as persisted workflows — started by you.** The driver is a
 Python process and cannot start a Workflow, so at RESEARCH it stops with
@@ -270,7 +304,8 @@ packets, challenge lanes, the floors gates; a FAILED category is re-dispatched
 with the handback and the gate's blocking terms, a PASSED one never) →
 HANDOFF → SCORING (four pillar lanes, the solutions duty, the critic, the
 rollup, the SCORING gate) → INGEST_A (the scored checkpoint pushed; the scan
-ingests it) → REPORTS (two producers and the validator into the pinned Docs,
+ingests it) → REPORTS (the section workflow: a writer and a validator per open section,
+then a whole-report cross-check, into the pinned Docs,
 rendered into the branded shell) → PAGES_A (techstack and heatmap shipped to
 version A through `ship_page.py --claim`) → PACKAGE (technographic scan,
 `assemble package`, the gold gate) → INGEST_B → PAGES_B (the A pages restaged

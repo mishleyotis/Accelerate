@@ -520,7 +520,10 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
                f"§{sec.id} '{sec.heading}' requires {sec.min_words}")
             + ". The floor is the section's job description, not a style "
               "preference.")
-    problems += _length_band(wb, report, sec, body, card_id if is_card else "")
+    # ADVISORY (owner, 2026-10-06): a template's LENGTH upper bound is
+    # guidance, not a constant a section is refused on. Reported back on the
+    # write, never refused; the floor above still refuses.
+    length_notes = _length_band(wb, report, sec, body, card_id if is_card else "")
     problems += _check_blocks(sec, body)
     # The countable MINIMUM DATA / MUST NOT rules. Per-card rules run on this
     # body; section-wide rules on a card section are measured across the
@@ -651,6 +654,7 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
     n = len(all_rows_for(wb, report).get(str(sec.id), []))
     return {"report": report, "section": str(sec.id), "card": card_id or None,
             "words": acc["words"], "accuracy": acc, "inferences": len(tags),
+            "length_notes": length_notes,
             "absence_claimed": absence_claimed,
             "cards_in_section": n if is_card else None,
             "section_words": sum(_words(_clean(r.get("Body")))
@@ -659,7 +663,11 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
 
 
 def _length_band(wb: RunWorkbook, report: str, sec, body: str, card_id: str) -> list[str]:
-    """The template's LENGTH band, enforced at write like its floor.
+    """The template's LENGTH upper bound, measured at write — and ADVISORY.
+
+    Owner ruling, 2026-10-06 (First Tech): the template's numbers are
+    guidance, not constants a section fails on. These notes come back on the
+    write result so a writer can trim; nothing is refused on them.
 
     `max_words` was advisory until 2026-10-06, and at Arbor Bank both reports
     shipped past it — the research profile at 10,346 words against a band

@@ -36,10 +36,10 @@ does not name all seven. Read the field, decide, write the verdict.
 | dimension | question | packet field that answers it |
 |---|---|---|
 | `evidence_sufficiency` | Do the cited rows, at their tiers, carry this claim — or stand near it? | `evidence[]` — the top cited rows by ERS: `{e_id, url, tier, recency, excerpt}` |
-| `claim_label_fit` | Does the excerpt earn the label (`contract.CLAIM_LABELS`)? `FACT` needs the excerpt to state it, on T1/T2, with two source identities; `INFERENCE` needs the inference named; `HYPOTHESIS` needs the proxy attempts listed; `CEILING_ESTIMATE` needs its uncertainty band. (`CONFIRMED / INFERRED / CLAIMED` are `Tech_Register` statuses, not labels.) | `label` + the `excerpt` of each cited row |
+| `claim_label_fit` | Does the excerpt earn the label (`contract.CLAIM_LABELS`)? `FACT` needs the excerpt to state it, on T1/T2, with two source identities; `INFERENCE` needs the inference named; `HYPOTHESIS` needs the proxy attempts listed; `CEILING_ESTIMATE` needs its uncertainty band. (`CONFIRMED / INFERRED / CLAIMED` are `Tech_Register` statuses, not labels.) | `label` + the `excerpt` of each cited row+ `ceiling_band` |
 | `facet_coverage` | Were the DQ facets the cell owes actually answered, or is one `works` query standing in for five volleys? | `facets_answered` (the facets with a logged search AND a citation) |
 | `contradiction_handling` | Was a contradicting source found, and does the claim carry it rather than drop it? | `contradiction` — the recorded contradicts-volley result, or its absence |
-| `ceiling_reasoning` | Does the ceiling the lane proposed follow from the evidence tiers present (T1/T2 5.0 · T3 4.0 · T4 2.5 · T5 2.0 · single source 3.0)? | `ceiling` — the proposed ceiling and band |
+| `ceiling_reasoning` | Does the ceiling the lane proposed follow from the evidence tiers present (T1/T2 5.0 · T3 4.0 · T4 2.5 · T5 2.0 · single source 3.0)? | `ceiling` (the reasoning) + `ceiling_band` (the band it concluded) |
 | `recency` | Is the evidence dated, and is the claim's tense honest about how old it is? Undated is `UNVERIFIED`, never current. | `recency_bands` — the ladder band per cited row |
 | `synthesis_quality` | Does the claim say one thing, in the entity's own terms, that a reader could argue with — or does it hedge, generalise, or claim more than the rows show? | `claim` — the dominant claim text |
 

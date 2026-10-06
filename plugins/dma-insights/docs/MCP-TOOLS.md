@@ -1,8 +1,8 @@
 # DMA Insights MCP connector — tool reference
 
-Generated from `apps/mcp/server.py` at commit `0119cb9828` (2026-09-28) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
+Generated from `apps/mcp/server.py` at commit `72832d2b03` (2026-10-06) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
 
-**35 tools.** Python MCP SDK over streamable HTTP, deployed as the `mcp` Cloud Run service on session-mode pooling (promotion holds locks).
+**36 tools.** Python MCP SDK over streamable HTTP, deployed as the `mcp` Cloud Run service on session-mode pooling (promotion holds locks).
 
 ## What constrains every tool here
 
@@ -26,36 +26,37 @@ These are properties of the connector, not advice — a tool that appears to off
 | 3 | [`get_page_contract`](#get-page-contract) | Read the assessment | Field tuples AND per-field doc text, verbatim |
 | 4 | [`get_evidence`](#get-evidence) | Read the assessment | The three-way split: found / not_found / foreign |
 | 5 | [`get_platform_fit`](#get-platform-fit) | Read the assessment | The fit score for each candidate platform, computed here and READ by you — never recomputed,… |
-| 6 | [`list_pending_runs`](#list-pending-runs) | Run and session state | Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest first, with their claim state… |
-| 7 | [`claim_run`](#claim-run) | Run and session state | Exclusive expiring lease — one session per run |
-| 8 | [`get_run_progress`](#get-run-progress) | Run and session state | Per-page status, what is blocking, and the current claim — so a resuming session sees where i… |
-| 9 | [`list_submissions`](#list-submissions) | Run and session state | Every submission this run has had, per page, oldest first — with each verdict's status, block… |
-| 10 | [`get_client_state`](#get-client-state) | Run and session state | What is currently served and every prior run — a rerun produced as though it were a first run… |
-| 11 | [`list_open_rejections`](#list-open-rejections) | Run and session state | Every payload this connector has REFUSED and nobody has repaired |
-| 12 | [`register_evidence`](#register-evidence) | Author and submit | Mint before you cite |
-| 13 | [`open_payload`](#open-payload) | Author and submit | Open a CHUNKED upload for a page too large to emit in one call, and get back the connector-al… |
-| 14 | [`append_payload_part`](#append-payload-part) | Author and submit | Send one part of a chunked payload |
-| 15 | [`get_upload_status`](#get-upload-status) | Author and submit | What has already arrived on a chunked upload — read-only |
-| 16 | [`submit_page_payload`](#submit-page-payload) | Author and submit | Validate (both passes), supersede the live row, stage, return the verdict |
-| 17 | [`get_staged_payload`](#get-staged-payload) | Author and submit | What you last submitted for a page — STAGED, verbatim, unredacted |
-| 18 | [`get_validation_verdict`](#get-validation-verdict) | Verdicts and promotion | A prior submission's verdict, with superseded state |
-| 19 | [`explain_gate`](#explain-gate) | Verdicts and promotion | A gate's definition and threshold history — direction of movement visible |
-| 20 | [`promote_run`](#promote-run) | Verdicts and promotion | All six pages, one transaction, all or nothing |
-| 21 | [`withdraw_run`](#withdraw-run) | Verdicts and promotion | Take a promoted run off the client surface, with a recorded reason |
-| 22 | [`list_withdrawn_runs`](#list-withdrawn-runs) | Verdicts and promotion | Every currently withdrawn run with its reason and who withdrew it |
-| 23 | [`record_enrichment`](#record-enrichment) | Enrichment ledger | Record that one FACET of a client was enriched |
-| 24 | [`list_enrichment_gaps`](#list-enrichment-gaps) | Enrichment ledger | Every empty field on this run's live submissions — your worklist |
-| 25 | [`record_finding`](#record-finding) | Findings memory | Record a defect in the findings memory |
-| 26 | [`search_findings`](#search-findings) | Findings memory | "Have we seen this before?" — asked both ways, because it is asked both ways |
-| 27 | [`list_open_findings`](#list-open-findings) | Findings memory | Everything not closed — OPEN, INVESTIGATING and RECURRED — worst first |
-| 28 | [`get_finding`](#get-finding) | Findings memory | One finding in full: every sighting in order, and every refinement made against it with its r… |
-| 29 | [`list_defect_classes`](#list-defect-classes) | Findings memory | The shared vocabulary, with each class's TELL (how it presents) and PROBE (the command or que… |
-| 30 | [`record_refinement`](#record-refinement) | Findings memory | What you CHANGED, in response to which findings |
-| 31 | [`resolve_finding`](#resolve-finding) | Findings memory | Close a finding by naming the refinement that closed it |
-| 32 | [`report_recurrence`](#report-recurrence) | Findings memory | A finding that was resolved and came back |
-| 33 | [`get_memory_digest`](#get-memory-digest) | Findings memory | Everything a weekly refinement pass needs, in one call: what came back, what is new, which re… |
-| 34 | [`list_reviewer_feedback`](#list-reviewer-feedback) | Reviewer feedback | Read reviewer verdicts on insight cards straight from `annotations`, with the actor and wheth… |
-| 35 | [`ingest_reviewer_feedback`](#ingest-reviewer-feedback) | Reviewer feedback | Turn every un-ingested Accept/Reject into memory |
+| 6 | [`get_cohort_benchmarks`](#get-cohort-benchmarks) | Read the assessment | The sub-vertical cohort's peer score per category: the MEAN of every other assessed entity's… |
+| 7 | [`list_pending_runs`](#list-pending-runs) | Run and session state | Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest first, with their claim state… |
+| 8 | [`claim_run`](#claim-run) | Run and session state | Exclusive expiring lease — one session per run |
+| 9 | [`get_run_progress`](#get-run-progress) | Run and session state | Per-page status, what is blocking, and the current claim — so a resuming session sees where i… |
+| 10 | [`list_submissions`](#list-submissions) | Run and session state | Every submission this run has had, per page, oldest first — with each verdict's status, block… |
+| 11 | [`get_client_state`](#get-client-state) | Run and session state | What is currently served and every prior run — a rerun produced as though it were a first run… |
+| 12 | [`list_open_rejections`](#list-open-rejections) | Run and session state | Every payload this connector has REFUSED and nobody has repaired |
+| 13 | [`register_evidence`](#register-evidence) | Author and submit | Mint before you cite |
+| 14 | [`open_payload`](#open-payload) | Author and submit | Open a CHUNKED upload for a page too large to emit in one call, and get back the connector-al… |
+| 15 | [`append_payload_part`](#append-payload-part) | Author and submit | Send one part of a chunked payload |
+| 16 | [`get_upload_status`](#get-upload-status) | Author and submit | What has already arrived on a chunked upload — read-only |
+| 17 | [`submit_page_payload`](#submit-page-payload) | Author and submit | Validate (both passes), supersede the live row, stage, return the verdict |
+| 18 | [`get_staged_payload`](#get-staged-payload) | Author and submit | What you last submitted for a page — STAGED, verbatim, unredacted |
+| 19 | [`get_validation_verdict`](#get-validation-verdict) | Verdicts and promotion | A prior submission's verdict, with superseded state |
+| 20 | [`explain_gate`](#explain-gate) | Verdicts and promotion | A gate's definition and threshold history — direction of movement visible |
+| 21 | [`promote_run`](#promote-run) | Verdicts and promotion | All six pages, one transaction, all or nothing |
+| 22 | [`withdraw_run`](#withdraw-run) | Verdicts and promotion | Take a promoted run off the client surface, with a recorded reason |
+| 23 | [`list_withdrawn_runs`](#list-withdrawn-runs) | Verdicts and promotion | Every currently withdrawn run with its reason and who withdrew it |
+| 24 | [`record_enrichment`](#record-enrichment) | Enrichment ledger | Record that one FACET of a client was enriched |
+| 25 | [`list_enrichment_gaps`](#list-enrichment-gaps) | Enrichment ledger | Every empty field on this run's live submissions — your worklist |
+| 26 | [`record_finding`](#record-finding) | Findings memory | Record a defect in the findings memory |
+| 27 | [`search_findings`](#search-findings) | Findings memory | "Have we seen this before?" — asked both ways, because it is asked both ways |
+| 28 | [`list_open_findings`](#list-open-findings) | Findings memory | Everything not closed — OPEN, INVESTIGATING and RECURRED — worst first |
+| 29 | [`get_finding`](#get-finding) | Findings memory | One finding in full: every sighting in order, and every refinement made against it with its r… |
+| 30 | [`list_defect_classes`](#list-defect-classes) | Findings memory | The shared vocabulary, with each class's TELL (how it presents) and PROBE (the command or que… |
+| 31 | [`record_refinement`](#record-refinement) | Findings memory | What you CHANGED, in response to which findings |
+| 32 | [`resolve_finding`](#resolve-finding) | Findings memory | Close a finding by naming the refinement that closed it |
+| 33 | [`report_recurrence`](#report-recurrence) | Findings memory | A finding that was resolved and came back |
+| 34 | [`get_memory_digest`](#get-memory-digest) | Findings memory | Everything a weekly refinement pass needs, in one call: what came back, what is new, which re… |
+| 35 | [`list_reviewer_feedback`](#list-reviewer-feedback) | Reviewer feedback | Read reviewer verdicts on insight cards straight from `annotations`, with the actor and wheth… |
+| 36 | [`ingest_reviewer_feedback`](#ingest-reviewer-feedback) | Reviewer feedback | Turn every un-ingested Accept/Reject into memory |
 
 ## Read the assessment
 
@@ -173,6 +174,26 @@ Each row comes back with `factors`, `subtotal`, `readiness_multiplier`,
 severity and evidence numbers. Copy them; a breakdown a reader cannot
 walk back to named cells explains nothing.
 
+### `get_cohort_benchmarks`
+
+```python
+get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = '',
+    exclude_entity_name: str = '') -> dict
+```
+
+| Parameter | Type | Default |
+|---|---|---|
+| `sub_vertical` | `str` | **required** |
+| `exclude_display_id` | `str` | `''` |
+| `exclude_entity_name` | `str` | `''` |
+
+The sub-vertical cohort's peer score per category: the MEAN of every
+other assessed entity's category score (its active, promoted run), with
+n, median and quartiles. Below three entities a category comes back with
+mean null and the reason — record it as cannot_estimate, never impute.
+Aggregates only; no entity is named. Pass the asking client's display id
+or legal name so it is not counted as its own peer.
+
 ## Run and session state
 
 Which runs exist, who holds them, and what is still outstanding. `list_open_rejections` is the one to read first in any producer session.
@@ -180,13 +201,22 @@ Which runs exist, who holds them, and what is still outstanding. `list_open_reje
 ### `list_pending_runs`
 
 ```python
-list_pending_runs() -> dict
+list_pending_runs(display_id: str | None = None, latest_only: bool = False) -> dict
 ```
 
-*No parameters.*
+| Parameter | Type | Default |
+|---|---|---|
+| `display_id` | `str | None` | `None` |
+| `latest_only` | `bool` | `False` |
 
 Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest
 first, with their claim state and whether they can be synthesised at all.
+
+`display_id` narrows to one client; `latest_only` drops the surplus runs
+of a duplicated request (the corpus counts below still describe the
+whole queue). Measured 2026-09-30: unfiltered, this returned 354 rows /
+157 KB — more than one tool result can carry — for a caller that wanted
+one client's newest run.
 
 `scored_cells` 0 means a RESEARCH-stage package: its score column is
 empty by contract, so there is nothing for a producer to serve and
@@ -315,6 +345,29 @@ register_evidence(run_id: str, item: dict) -> dict
 Mint before you cite. The server allocates the id and computes the
 rank score; dedup is by content, scoped to the entity; the excerpt is
 verified verbatim against the fetched artefact.
+
+A CONNECTOR reading (Indeed employer data, the CFPB complaint API):
+origin='connector' and connector={tool, query, retrieved_at, response}
+(or response_sha256 of a response already stored). The tier is computed
+from the tool (Indeed T3, CFPB T1) and the excerpt is verified against
+the stored response, never by a fetch.
+
+FACT is refused on a T3-T5 source, every origin (`fact_tier`): ET-10
+refuses a cited FACT row there at submit, so an Indeed reading
+registers as INFERENCE. The claim type is never rewritten for you.
+
+A SPLIT of a partly sensitive internal row: origin='internal',
+split_of=<parent e_id>, an excerpt that is a verbatim piece of the
+parent's, and — for the span the client may read —
+customer_attribution ("Client statement, discovery conversations,
+<month year>"). A span without one never reaches a customer. A span is
+strictly shorter than its parent — unless the WHOLE row is the client's
+own statement: then send the parent's full excerpt with whole_row=true
+and the attribution, and a NEW span row is minted (owner decision
+2026-10-05; the parent itself is never labelled or served). The
+attribution is set only on the span this call mints — re-registering
+existing words under a different label is refused, never written;
+re-registering the same span returns it (deduped).
 
 ### `open_payload`
 
@@ -520,15 +573,25 @@ visible.
 ### `promote_run`
 
 ```python
-promote_run(run_id: str) -> dict
+promote_run(run_id: str, expected_revision: dict | None = None) -> dict
 ```
 
 | Parameter | Type | Default |
 |---|---|---|
 | `run_id` | `str` | **required** |
+| `expected_revision` | `dict | None` | `None` |
 
 All six pages, one transaction, all or nothing. incomplete_run
 names the missing and unpassed pages; re-promotion is idempotent.
+
+Retained pages are re-checked against today's gates, the fit engine
+(CG-30/CG-31), the run's own status (CG-STALE) and the committed gold
+shape (CG-PAR: structural gaps refuse; counts and fill ratios come back
+as `promote_checks.parity.warnings`) before anything is written.
+`expected_revision` is the
+contract/gold/gate-set fingerprint your checkout's gates assume
+(promote_checks.local_revision): a mismatch refuses as
+deployed_revision_behind; omitted, the result records it unchecked.
 
 ### `withdraw_run`
 
@@ -975,4 +1038,4 @@ unreadable verdict is left un-ingested and named, not counted as nothing.
 
 ---
 
-_35 tools · generated from `apps/mcp/server.py` @ `0119cb9828`._
+_36 tools · generated from `apps/mcp/server.py` @ `72832d2b03`._

@@ -677,7 +677,8 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
 
 
 def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
-                basis: str, source: str, peer_scores: str = "") -> dict:
+                basis: str, source: str, peer_scores: str = "",
+                n: int | None = None) -> dict:
     """Record the peer FIGURES for one category — the median (and quartiles)
     the assessment's Gap_to_Peer is computed against.
 
@@ -745,8 +746,56 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
         "Peer_P75": hi if hi is not None else "",
         "Peer_Basis": f"{basis}: {_clean(source)}",
         "Peer_Scores": _clean(peer_scores),
+        **({"Peer_N": int(n)} if n is not None else {}),
         "As_Of": _utcnow()[:10]})
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
+
+
+def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False) -> dict:
+    """Record the SUB-VERTICAL COHORT as every category's peer figure.
+
+    Owner decision, 2026-10-06 (First Tech): peer scores are "an average of
+    current entities in the same subvert already assessed" — the connector's
+    `get_cohort_benchmarks`, the mean of every other assessed entity's
+    category score. The locked peer SET stays what the reports name
+    (identified, not scored); this fills the figure the gaps are computed
+    against. A category below the cohort floor is recorded cannot_estimate
+    with the connector's reason, so the gap stays null honestly (invariant 9).
+    A figure already on the row (a hand-recorded table) is kept unless
+    `overwrite`."""
+    cats = (cohort or {}).get("categories") or {}
+    sv = _clean((cohort or {}).get("sub_vertical")) or _clean(wb.metadata().get("sub_vertical"))
+    today = _utcnow()[:10]
+    filled, held, kept = [], [], []
+    for r in wb.rows("Peer_Benchmarks"):
+        cid = _clean(r.get("Category_ID")).upper()
+        if not cid:
+            continue
+        if _clean(r.get("Peer_Median")) and not overwrite:
+            kept.append(cid)
+            continue
+        c = cats.get(cid) or {}
+        n = int(c.get("n") or 0)
+        if c.get("mean") is None:
+            peer_median(wb, category=cid, median=None, basis="cannot_estimate",
+                        source=(f"sub-vertical cohort ({sv}) via get_cohort_benchmarks "
+                                f"{today}: " + (c.get("reason") or "no assessed entity "
+                                                "in the cohort scores this category")),
+                        n=n)
+            held.append(cid)
+            continue
+        mean = float(c["mean"])
+        lo, hi = c.get("p25"), c.get("p75")
+        if lo is None or hi is None or not float(lo) <= mean <= float(hi):
+            lo = hi = None
+        peer_median(wb, category=cid, median=mean, p25=lo, p75=hi, basis="recomputed",
+                    source=(f"sub-vertical cohort ({sv}): mean of {n} assessed entities' "
+                            f"{cid} scores on their active promoted runs, "
+                            f"get_cohort_benchmarks {today}"),
+                    n=n)
+        filled.append(cid)
+    return {"filled": filled, "cannot_estimate": held, "kept": kept,
+            "entities": (cohort or {}).get("entities")}
 
 
 # ── the client's SERVER-SIDE state, seeded before any category work ──────
