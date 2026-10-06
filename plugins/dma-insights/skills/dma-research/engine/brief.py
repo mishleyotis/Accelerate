@@ -1966,6 +1966,19 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             by_status.setdefault(str(sec_state.get("status")), []).append(
                 str(sec_state.get("id") or sec_state.get("section")))
         state = {"ready": full.get("ready"), "sections_by_status": by_status}
+        # THE VALIDATOR'S REASON GOES TO THE WRITER (MEM-0586/0594 shape, at
+        # the reports stage): arbor-bank 2026-10-06 stalled two rounds on five
+        # REVISE/FAIL sections whose brief named the ids and not the note.
+        latest: dict[str, str] = {}
+        for pv in wb.rows("Provenance"):
+            step = _clean(pv.get("Step"))
+            if step.startswith(f"report_review:{key}:"):
+                latest[step.rsplit(":", 1)[-1]] = _clean(pv.get("Detail"))
+        objections = {sid: latest[sid][:1500]
+                      for st_, ids in by_status.items()
+                      if st_ in ("REVISE", "FAIL") for sid in ids if sid in latest}
+        if objections:
+            state["validator_objections"] = objections
         if full.get("ready") and not validator:
             # A READY report has nothing for its producer to do; a lane handed
             # one anyway rewrote validator-passed sections (2026-10-01).

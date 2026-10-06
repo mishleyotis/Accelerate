@@ -691,7 +691,7 @@ def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
         "SubCap_ID": "", "Step": f"report_review:{report}:{sec.id}",
         "Actor": _clean(actor), "At": _utcnow(),
         "Detail": f"{v} — " + json.dumps(dimensions, sort_keys=True)
-                  + " — " + _clean(note)[:300]})
+                  + " — " + _clean(note)[:1500]})
     return {"report": report, "section": str(sec.id), "verdict": v,
             "actor": actor, "author": author, "rows_marked": touched}
 

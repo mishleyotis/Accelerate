@@ -583,3 +583,13 @@ def test_a_critic_fail_reaches_the_scorer_with_the_cells_it_names(tmp_path):
     assert "own-site" in p.get("critic_failed", "")
     hit = [x for x in p["rows_to_score"] if x["subcap"] == cell]
     assert hit and hit[0].get("rescore") is True
+
+
+def test_a_report_writer_sees_the_validators_objection():
+    """arbor-bank 2026-10-06: five sections sat at REVISE/FAIL for two rounds;
+    the writer's brief named the section ids and never the validator's note."""
+    import inspect
+    from engine import brief, narrative
+    src = inspect.getsource(brief.report_batch)
+    assert "validator_objections" in src and "report_review:" in src
+    assert "_clean(note)[:1500]" in inspect.getsource(narrative.review)
