@@ -248,12 +248,36 @@ def _fix_text(key: str, v: str) -> str:
             if m.start() == 0 or v[:m.start()].rstrip().endswith((".", ":", "!", "?")):
                 exp = exp[:1].upper() + exp[1:]
             v = v[:m.start()] + f"{exp} ({a})" + v[m.end():]
+    word = _cg11_reason(key, v)
+    if word:
+        i = v.find(word)
+        if i >= 0:
+            v = v[:i] + v[i].upper() + v[i + 1:]
+    return v
+
+
+def _cg11_reason(key: str, v: str):
+    """The connector's OWN CG-11 predicate (apps/mcp dma_mcp.validation), so
+    the fixer capitalises exactly what the gate refuses: its prose keys, its
+    never-touched keys, its 25-character floor, its camel-case exemption.
+    The local PROSE_LEAVES list missed `synthesis` and the gate refused it.
+    Falls back to the local list only where the connector is not on disk."""
+    try:
+        return _CONNECTOR_CG11(key, v)
+    except NameError:
+        pass
     if key in PROSE_LEAVES and v.strip():
-        lead = len(v) - len(v.lstrip())
         first = v.strip().split()[0]
         if first[:1].islower() and first[1:] == first[1:].lower():
-            v = v[:lead] + v[lead].upper() + v[lead + 1:]
-    return v
+            return first
+    return None
+
+
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[5] / "apps" / "mcp"))
+    from dma_mcp.validation import _sentence_case_reason as _CONNECTOR_CG11  # noqa: E402
+except Exception:                                    # pragma: no cover
+    pass
 
 
 def fix_style(obj, key: str = ""):
