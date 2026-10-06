@@ -562,3 +562,24 @@ def test_the_repair_card_carries_each_findings_own_reason():
     do = floors_gate.repair_cells(out)["P1C1.1.2"]["do"]
     assert any("one source identity" in d for d in do), do
     assert "CEILING_ESTIMATE" in floors_gate.REPAIR_ACTIONS["claim_unsupported"]
+
+
+def test_a_critic_fail_reaches_the_scorer_with_the_cells_it_names(tmp_path):
+    """arbor-bank: the critic FAILed P2/P3 five rounds running while the
+    scorer brief served only unscored rows — the named cells were scored, so
+    no scorer ever saw the critique."""
+    import json
+    from pathlib import Path
+    from engine import brief
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    pillar = cell.split("C")[0]
+    wb.set_scoring(cell, {"Score": 2.5})
+    L.append_gate(wb, gate="SCORING_CRITIC", scope=pillar, verdict="FAIL",
+                  detail=f"{cell} 2.5->2.0: own-site marketing is T5, max 2.0", blocking=True)
+    brief.scoring_batch(run.open(), run=run, out_dir=tmp_path / "s")
+    p = json.loads((tmp_path / "s" / f"scoring-{pillar}.json").read_text())
+    assert "own-site" in p.get("critic_failed", "")
+    hit = [x for x in p["rows_to_score"] if x["subcap"] == cell]
+    assert hit and hit[0].get("rescore") is True

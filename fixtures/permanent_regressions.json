@@ -619,6 +619,32 @@
     }
    ],
    "retirable": false
+  },
+  {
+   "finding_id": "MEM-0593",
+   "title": "A gap waiver recorded after scoring had already opened was never disclosed, so its cells read as plain 'unscored' and blocked the SCORING gate",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A waived cell reaching the SCORING gate without its Caps_Applied_Log disclosure, or being handed to a scorer, because the waiver was recorded after the stage opened.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gap_waiver.py::test_a_waiver_recorded_after_scoring_opened_is_still_disclosed"
+    }
+   ],
+   "retirable": false
+  },
+  {
+   "finding_id": "MEM-0594",
+   "title": "The scoring critic's FAIL never reached the scorers: the scorer brief served only unscored rows, so every cell the critic named was invisible and the loop stalled",
+   "flagged_by": "mishley.otiende (user) directive 2026-10-05 'ensure all issues initiating a repair have clear safeguards mapped', session_01Tu7V1nYLRNr89SSZq1Z7fo, engine run arbor-bank-2026-10-05",
+   "what_must_never_recur": "A pillar whose latest scoring-critic verdict is FAIL dispatched to its scorer without the critic's note and the cells it names.",
+   "pinned_by": [
+    {
+     "kind": "test",
+     "ref": "tests/skills/research_engine/test_gate_worklist_is_served.py::test_a_critic_fail_reaches_the_scorer_with_the_cells_it_names"
+    }
+   ],
+   "retirable": false
   }
  ]
 }

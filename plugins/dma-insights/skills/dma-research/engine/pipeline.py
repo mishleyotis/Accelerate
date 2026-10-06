@@ -2167,6 +2167,11 @@ class Pipeline:
         if C.stage_of(self._md()) != "assessment":
             A.open_stage(self.wb, self.run.qa_dir)
             self.reopen()
+        # A waiver recorded AFTER the stage first opened (a resumed run) is
+        # disclosed here too; open_stage alone missed it (MEM-0593).
+        from . import waiver
+        if waiver.disclose_in_caps_log(self.wb):
+            self.reopen()
         self._stalled("SCORING")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1

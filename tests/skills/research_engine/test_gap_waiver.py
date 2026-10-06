@@ -87,3 +87,20 @@ def test_scoring_opens_on_a_waived_category_and_leaves_the_cell_null(tmp_path):
     g = A.gate(wb3)
     assert cells[0] not in g["unscored"]
     assert cells[1] in g["unscored"], "only the waived cell is exempt"
+
+
+def test_a_waiver_recorded_after_scoring_opened_is_still_disclosed(tmp_path):
+    """arbor-bank: scoring had opened in an earlier session, so open_stage's
+    disclosure never ran and three waived cells read as plain `unscored`."""
+    import inspect
+    from engine import pipeline
+    src = inspect.getsource(pipeline.Pipeline._stage_scoring)
+    assert "disclose_in_caps_log" in src
+    run, wb, cat, cells = _failing(tmp_path)
+    waiver.record(wb, category=cat, cells=[cells[0]], by="Jo Analyst", reason=REASON)
+    out = brief.scoring_batch(run.open(), run=run, out_dir=tmp_path / "b")
+    import json
+    from pathlib import Path
+    rows = [x["subcap"] for f in Path(tmp_path / "b").rglob("scoring-*.json")
+            for x in json.loads(f.read_text()).get("rows_to_score", [])]
+    assert cells[0] not in rows, "a waived cell is not handed to a scorer"

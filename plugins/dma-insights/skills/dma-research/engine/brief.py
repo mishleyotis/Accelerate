@@ -1867,21 +1867,43 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
         })
         lanes.append(("scoring-solutions", packet, "Scoring stage — solutions and peer adoption"))
     else:
+        # THE CRITIC'S FAIL GOES TO THE SCORER (MEM-0594). Measured
+        # arbor-bank 2026-10-05: the critic FAILed P2 and P3 five rounds
+        # running, naming the cells and the corrections, while this brief
+        # served only UNSCORED rows — every row the critic named was already
+        # scored, so no scorer ever saw the critique and nothing moved.
+        critic_fail: dict[str, str] = {}
+        for g in wb.rows("Gate_Log"):
+            if _clean(g.get("Gate")) == "SCORING_CRITIC":
+                pl = _clean(g.get("Scope"))
+                if _clean(g.get("Verdict")).upper() == "FAIL":
+                    critic_fail[pl] = str(g.get("Detail") or "")
+                else:
+                    critic_fail.pop(pl, None)
+        from . import waiver
+        waived = waiver.waived_cells(wb)
         for pillar in pillars:
             rows = []
             sheet = f"{pillar}_Subcap_Scoring"
+            note = critic_fail.get(pillar, "")
+            named = set(re.findall(rf"\b{pillar}C\d+\.[0-9A-Z]+(?:\.[0-9A-Z]+)?\b", note))
             for r in wb.rows(sheet):
                 sub = _clean(r.get("SubCap_ID"))
                 if not sub or sub not in wb.selected_subcaps():
                     continue
-                if r.get("Score") not in (None, ""):
+                if r.get("Score") not in (None, "") and sub not in named:
                     continue
+                if sub in waived and r.get("Score") in (None, ""):
+                    continue            # unscored by a person's waiver, on purpose
                 rows.append({"subcap": sub, "name": C.subcap_names().get(sub),
                              "label": _clean(r.get("Claim_Label")),
                              "ceiling_band": _clean(r.get("Ceiling_Band")),
                              "challenge": _clean(r.get("Challenge_Verdict")) or "none",
                              "evidence": len(_ids(r.get("Evidence_IDs"))),
-                             "absent": bool(L.is_declared_absent(r, wb))})
+                             "absent": bool(L.is_declared_absent(r, wb)),
+                             **({"rescore": True, "current_score": r.get("Score")}
+                                if sub in named and r.get("Score") not in (None, "")
+                                else {})})
             packet = _bound({
                 "agent": f"scoring-{pillar.lower()}-producer", "shared": sh,
                 "first_commands": [
@@ -1893,6 +1915,7 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                     f"--data-dependency … --data-readiness …"],
                 "pillar": pillar, "weight": weights.get(pillar),
                 "stage": st.get("stage"),
+                **({"critic_failed": note[:2400]} if note else {}),
                 "rows_to_score": rows,
                 "rules": [
                     "the stage is already open — `engine.assessment open` has NO "
@@ -1904,6 +1927,10 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                     "citing nothing the row carries, or with a blank AI/data overlay",
                     "a declared absence scores as the rubric's absence, with the "
                     "ladder in the rationale — never as a guess",
+                    "rows marked `rescore` were named by the scoring critic, whose "
+                    "FAIL is in `critic_failed`: re-score each one, applying the "
+                    "correction where the evidence and rubric support it, or keep "
+                    "the score and answer the critic's point in the rationale",
                 ],
             }, "rows_to_score", ceiling=SCORING_CHAR_CEILING)
             lanes.append((f"scoring-{pillar}", packet, f"Scoring — pillar {pillar}"))
