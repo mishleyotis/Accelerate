@@ -603,6 +603,24 @@ def _category_of(subcap: str) -> str | None:
     return m.group(1) if m else None
 
 
+def _grid_name(name: str) -> str:
+    """A peer name as it can sit in the comma-separated `Peer_Names` cell.
+
+    Measured on Susser Bank (2026-10-06): the cohort was frozen as
+    "Inwood National Bank (Dallas, CERT 19080)" and "Horizon Bank, SSB
+    (Austin, CERT 3256)". The app's parser splits `Peer_Names` on commas, so
+    seven peers landed in the server's peer table as fifteen — "CERT 19080)"
+    among them — and any `Peer_Scores` list beside them would have been
+    dropped as a length mismatch. The lock keeps the name verbatim (it is
+    `|`-separated); only the grid's copy loses its inner commas."""
+    return re.sub(r"\s*,\s*", " ", _clean(name)).strip()
+
+
+def _grid_names(row: dict) -> list[str]:
+    return [n.strip() for n in str(row.get("Peer_Names") or "").split(",")
+            if n.strip()]
+
+
 def peers(wb: RunWorkbook, names: list[str], *, rule: str,
           basis: str = "inferred") -> dict:
     """Freeze the peer set. Before any score exists, by design.
@@ -642,7 +660,7 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
         raise PrelimRefusal(
             "this run has no selected subcapability, so there is no category "
             "for a peer comparison to be at. Select the scope first.")
-    names = ", ".join(clean)
+    names = ", ".join(_grid_name(n) for n in clean)
     for cid in cats:
         wb.append("Peer_Benchmarks", {
             # Category_Name is left for the assessment stage, which is where
@@ -707,6 +725,20 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
                             f"cannot_estimate to record that none could be had")
     if lo is not None and hi is not None and med is not None and not lo <= med <= hi:
         raise PrelimRefusal(f"median {med} is outside its own quartiles [{lo}, {hi}]")
+    # Peer_Scores is POSITIONAL against Peer_Names: the app's parser zips the
+    # two and drops every score when the lengths differ, rather than guess
+    # which peer got which figure. Refuse that here, where it can be fixed.
+    named = _grid_names(rows[0])
+    given = [s.strip() for s in _clean(peer_scores).split(",") if s.strip()]
+    if given and len(given) != len(named):
+        raise PrelimRefusal(
+            f"--peer-scores carries {len(given)} figure(s) and Peer_Names "
+            f"names {len(named)} peer(s) for {cid}; they are positional, so "
+            f"give one figure per named peer, in order (blank for a peer "
+            f"with none is not allowed — use NA)")
+    for s in given:
+        if s.upper() != "NA":
+            _num(s, "peer score")
     wb.update_row("Peer_Benchmarks", "Category_ID", rows[0]["Category_ID"], {
         "Peer_Median": med if med is not None else "",
         "Peer_P25": lo if lo is not None else "",

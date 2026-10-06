@@ -272,7 +272,16 @@ engine.assessment peer-adoption --run <R> --root <ROOT> …
 ```
 
 — one `Solution_Catalogue` row per platform, against the categories it
-addresses, and `Platform_Peer_Adoption` filled where a peer's deployment can
+addresses. **The platforms are Zennify's.** Derive each row from
+`skills/dma-assessment/references/zennify_solutions.md`: the Solution-to-Gap
+matrix and each solution's "Best For Gaps" table, read at the category's
+served score (Category_Rollup), and keep a category only where the catalogue
+gives that solution a fit at that score. Where the client already runs a
+platform (a CONFIRMED Tech_Register row — nCino on Salesforce, say), frame
+the solution as extending that org, not standing one up. A third-party
+product the catalogue does not carry (Blend, MeridianLink) is never the
+platform; it is an alternative the card's rebuttal weighs. `engine.assessment
+solution` refuses a platform that names no Zennify solution. Then record and `Platform_Peer_Adoption` filled where a peer's deployment can
 be examined and DECLARED (`engine.cli complete declare`) where it cannot. The
 SCORING gate does not pass with either tab silently empty.
 

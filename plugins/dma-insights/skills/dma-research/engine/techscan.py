@@ -49,6 +49,7 @@ import argparse
 import datetime as _dt
 import json
 import re
+import os
 import sys
 from collections import Counter
 from pathlib import Path
@@ -93,6 +94,13 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
     if not str(product or "").strip():
         raise ScanRefused("a register row names a PRODUCT; a bare vendor or "
                           "a category is the CG-20 defect")
+    if str(vendor or "").strip() and \
+            re.sub(r"\s*\(.*?\)", "", product).strip().lower() == str(vendor).strip().lower():
+        raise ScanRefused(
+            f"product and vendor are both {product.strip()!r}: name the thing the "
+            f"vendor supplies (e.g. 'DocuSign eSignature', 'Optimal Blue pricing "
+            f"engine'), from the detection basis. The connector refuses the "
+            f"duplicate at submit (CG-20); here it costs nothing.")
     if len(str(basis or "").strip()) < 15:
         raise ScanRefused("Detection_Basis is one real clause — what was "
                           "seen, where — not a token")
@@ -153,6 +161,137 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
         "DMA_Impact": _checked_impact(impact) if impact else None,
     })
     return ts_id
+
+
+#: Hosts whose pages RESELL a crawl (technographic brokers and the tech-
+#: stack lists that copy them). A mention there is the claim itself, never
+#: the corroboration a CLAIMED row is waiting for.
+BROKER_HOSTS = ("leadiq.", "zoominfo.", "builtwith.", "theirstack.", "6sense.",
+                "apollo.io", "slintel.", "enlyft.", "hginsights.", "clay.com",
+                "explorium.", "linkedin.com/company", "crunchbase.", "wappalyzer.")
+
+
+def _vendor_tokens(row) -> list[str]:
+    """The name a non-broker source would use for this row's product: the
+    product's own first word, and the vendor's only when the product has
+    none usable. Vendor-first matched 'Salesforce MuleSoft' on every
+    Salesforce mention and flagged MuleSoft for a Salesforce posting."""
+    out = []
+    for v in (row.get("Product"), row.get("Vendor")):
+        v = re.sub(r"\(.*?\)", " ", str(v or "")).strip()
+        if not v or v.lower() in ("unnamed", "none", "n/a"):
+            continue
+        first = re.split(r"[\s/,]+", v)[0]
+        if len(first) >= 4 and first.lower() not in (
+                "core", "online", "digital", "data", "loan", "microsoft"):
+            out.append(first)
+            break
+    return out
+
+
+def contradictions(wb: RunWorkbook) -> list[dict]:
+    """CLAIMED register rows that bank-authored or vendor evidence the run
+    already holds names, and which the row does not cite.
+
+    Susser Bank, 2026-10-05: TS-016 held Salesforce as a broker-only claim
+    while the bank's own nCino Administrator posting configured Salesforce,
+    and nCino, BankPoint and Q2 Centrix had no rows at all. Every report
+    section that read the register inherited the error, the validator
+    reopened eight sections on it, and seven report rounds were spent on a
+    fact no report writer may change. The register is reconciled against
+    the evidence BEFORE any section is written, so the same contradiction
+    costs one re-strike instead of a stage."""
+    ev = wb.evidence_index()
+    # The source must be ABOUT this institution — its own page, a posting for
+    # it, a vendor story naming it. A vendor's general product page names the
+    # product and says nothing about who runs it (E-411, a MuleSoft scope
+    # statement, is not evidence that Susser Bank runs MuleSoft).
+    ent = re.sub(r"[^a-z0-9 ]", " ", str(wb.metadata().get("entity_name") or "").lower()).split()
+    ent_tok = next((t for t in ent if len(t) >= 4 and t not in ("bank", "credit", "union", "national",
+                                                                 "first", "trust", "federal")), "")
+
+    def about_entity(e) -> bool:
+        if not ent_tok:
+            return True
+        hay = (str(e.get("Excerpt") or "") + " " + str(e.get("Source_URL") or "")).lower()
+        return ent_tok in hay
+
+    confirmed = {t.lower() for r in wb.rows("Tech_Register")
+                 if str(r.get("Status") or "") == "CONFIRMED"
+                 for t in _vendor_tokens(r)}
+    out = []
+    for r in wb.rows("Tech_Register"):
+        if str(r.get("Status") or "") != "CLAIMED":
+            continue
+        cited = {e.strip().split(":")[0] for e in str(r.get("Evidence_IDs") or "").split(",")}
+        for tok in _vendor_tokens(r):
+            if tok.lower() in confirmed:
+                continue
+            pat = re.compile(rf"\b{re.escape(tok)}\b", re.I)
+            hits = [eid for eid, e in ev.items()
+                    if eid not in cited
+                    # T1-T3: the bank's own pages, its postings, regulators
+                    # and the vendor. T4 is a directory or aggregator line
+                    # ("accessible through aggregators like Plaid"), which
+                    # names a product without saying it is deployed here.
+                    and str(e.get("Tier") or "").upper() in ("T1", "T2", "T3")
+                    and pat.search(str(e.get("Excerpt") or ""))
+                    and about_entity(e)
+                    and not any(h in str(e.get("Source_URL") or "").lower()
+                                for h in BROKER_HOSTS)]
+            if hits:
+                out.append({"ts_id": r.get("TS_ID"), "product": r.get("Product"),
+                            "status": "CLAIMED", "token": tok,
+                            "evidence_ids": sorted(hits)[:8]})
+                break
+    return out
+
+
+def restrike(wb: RunWorkbook, ts_id: str, *, status: str, method: str,
+             basis: str, providers, evidence_ids=None, product: str | None = None,
+             impact: str | None = None, actor: str = "") -> dict:
+    """Correct one register row IN PLACE, under the same refusals `record`
+    applies. `record` only appends, so before this a wrong row could be
+    corrected only by hand-editing the workbook, and a second row for the
+    same product double-counts its layer."""
+    row = next((r for r in wb.rows("Tech_Register")
+                if str(r.get("TS_ID") or "").upper() == str(ts_id).upper()), None)
+    if row is None:
+        raise ScanRefused(f"{ts_id} is not on Tech_Register")
+    # Validate exactly as a new row would be, without appending it.
+    probe = _Probe(wb)
+    record(probe, product=product or row["Product"], vendor=row.get("Vendor"),
+           layer=row["Layer"], status=status, method=method, basis=basis,
+           providers=providers, evidence_ids=evidence_ids, impact=impact)
+    vals = {k: v for k, v in probe.row.items()
+            if k not in ("TS_ID", "Layer", "Vendor", "Subcap_IDs", "SubCap_IDs",
+                         "Source_URLs", "As_Of") and (v is not None or k == "DMA_Impact")}
+    if impact is None:
+        vals.pop("DMA_Impact", None)
+    vals["As_Of"] = _utcnow()[:10]
+    wb.update_row("Tech_Register", "TS_ID", row["TS_ID"], vals)
+    wb.append("Provenance", {"Step": f"tech_register_restrike:{row['TS_ID']}",
+                             "Actor": actor or "techscan", "At": _utcnow(),
+                             "Detail": f"{row.get('Status')} -> {status}: {basis}"[:900]})
+    return {"ts_id": row["TS_ID"], "was": row.get("Status"), "now": status}
+
+
+class _Probe:
+    """A stand-in workbook that lets `record` validate a row without
+    writing it: reads go to the real workbook, the one append is caught."""
+
+    def __init__(self, wb):
+        self._wb, self.row = wb, None
+
+    def evidence_index(self):
+        return self._wb.evidence_index()
+
+    def rows(self, sheet):
+        return self._wb.rows(sheet)
+
+    def append(self, sheet, row, **_):
+        self.row = row
+        return 0
 
 
 def _providers_of(row) -> list[str]:
@@ -533,8 +672,19 @@ def import_explorium(wb: RunWorkbook, path, *, status: str = "CLAIMED",
                  + (f", broker confidence {r['confidence']}"
                     if r["confidence"] else "")
                  + f" — read from {Path(parsed['file']).name}")
+        product, vendor = r["product"], r["vendor"]
+        if str(vendor or "").strip().lower() == str(product or "").strip().lower():
+            # A one-column "Vendor / Product" export names the company once,
+            # and `record` refuses product == vendor (CG-20) — which refused
+            # EVERY row of such an export. The export's own category says what
+            # the company supplies here; without one the vendor is unstated,
+            # not repeated.
+            if r["category"]:
+                product = f"{product} {r['category']}"
+            else:
+                vendor = None
         try:
-            ts = record(wb, product=r["product"], vendor=r["vendor"],
+            ts = record(wb, product=product, vendor=vendor,
                         layer=r["layer"], status=status,
                         method="technographic_scan", basis=basis,
                         providers=["explorium"],
@@ -689,7 +839,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("record", "render", "status", "import-explorium",
-                 "clay-plan", "impact", "peer-record", "peers"):
+                 "clay-plan", "impact", "peer-record", "peers",
+                 "restrike", "reconcile"):
         s = sub.add_parser(name)
         s.add_argument("--run", required=True)
         s.add_argument("--root")
@@ -738,6 +889,16 @@ def main(argv=None) -> int:
             s.add_argument("--impact",
                            help=f"the T3 drilldown's headline card, "
                                 f"{IMPACT_MIN_WORDS}-{IMPACT_MAX_WORDS} words")
+        if name == "restrike":
+            s.add_argument("--ts", required=True, help="TS-nnn")
+            s.add_argument("--status", required=True, choices=C.TECH_STATUS)
+            s.add_argument("--method", required=True, choices=C.TECH_METHODS)
+            s.add_argument("--basis", required=True)
+            s.add_argument("--provider", action="append", default=[],
+                           choices=C.TECH_PROVIDERS, required=True)
+            s.add_argument("--evidence-id", action="append", default=[])
+            s.add_argument("--product")
+            s.add_argument("--impact")
         if name == "render":
             s.add_argument("--out")
             s.add_argument("--force", action="store_true")
@@ -752,6 +913,17 @@ def main(argv=None) -> int:
                     source_urls=a.url, as_of=a.as_of, impact=a.impact)
         print(json.dumps({"ts_id": ts, **scan_state(wb)}, indent=2))
         return 0
+    if a.cmd == "restrike":
+        print(json.dumps(restrike(wb, a.ts, status=a.status, method=a.method,
+                                  basis=a.basis, providers=a.provider,
+                                  evidence_ids=a.evidence_id, product=a.product,
+                                  impact=a.impact,
+                                  actor=os.environ.get("DMA_ACTOR", "")), indent=2))
+        return 0
+    if a.cmd == "reconcile":
+        bad = contradictions(wb)
+        print(json.dumps({"contradictions": bad}, indent=2))
+        return 1 if bad else 0
     if a.cmd == "render":
         out = render(wb, Path(a.out) if a.out else run.deliverables,
                      force=a.force)

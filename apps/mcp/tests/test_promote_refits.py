@@ -21,8 +21,8 @@ from _promote_fake import RUN, Conn, skeleton, wrote_anything  # noqa: E402
 from dma_mcp import fit as fit_mod  # noqa: E402
 from dma_mcp.promote import promote_run  # noqa: E402
 
-CELLS = [("P1C1.1.1", 2.0, "P1C1", "integration"),
-         ("P1C1.1.2", 1.5, "P1C1", "integration")]
+CELLS = [("P4C3.1.1", 2.0, "P4C3", "integration"),
+         ("P4C3.1.2", 1.5, "P4C3", "integration")]
 CARD = {"platform": "MuleSoft", "l3_area": "Integration", "alignment": 0.5,
         "readiness": "green"}
 # CG-03b (fix/mcp-gates-contract, RC-09) made these two required on every

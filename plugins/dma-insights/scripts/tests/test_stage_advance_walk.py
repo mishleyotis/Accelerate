@@ -168,7 +168,7 @@ def test_the_run_is_carried_through_every_stage_by_the_hook(walk):
     assert "Solution_Catalogue" in reason and "engine.completeness declare" in reason
     from engine import completeness
     A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
-               platform="Alkami", categories=["P1C1"])
+               platform="Financial Services Cloud", categories=["P1C1"])
     completeness.declare(
         wb, "Platform_Peer_Adoption",
         "no peer institution's deployment of the named products could be "

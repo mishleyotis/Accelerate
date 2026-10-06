@@ -382,7 +382,7 @@ def close_prelim(run, *, entity="Acme Credit Union"):
              "named as the digital banking platform in the 2025 call report"),
             ("Fiserv DNA", "Fiserv", "OPS", "CONFIRMED",
              "named as the core processor in the 2025 call report"),
-            ("Snowflake", "Snowflake", "DATA", "INFERRED",
+            ("Snowflake Data Cloud", "Snowflake", "DATA", "INFERRED",
              "two 2025 engineering postings require production Snowflake"),
             ("public cloud hosting", "none named", "INFRA", "ABSENT",
              "searched the call report, the careers site and three vendor "
@@ -829,7 +829,7 @@ def score_stage(run, wb, cells, ev):
     v = A.gate(wb, run.qa_dir)
     assert v["gate"] == "PASS", v["blocking"]
     A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
-               platform="Alkami", categories=["P1C1"])
+               platform="Financial Services Cloud", categories=["P1C1"])
     if not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())]:
         completeness.declare(
             wb, "Platform_Peer_Adoption",

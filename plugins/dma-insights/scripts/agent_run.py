@@ -227,6 +227,22 @@ ALLOWED = ",".join([
 _PRINT_LOCK = threading.Lock()
 
 
+def _structured_verdict(out: str) -> bool:
+    """True when the whole answer is one JSON object reporting work done:
+    at least one numeric field, and at least one of them non-zero."""
+    text = out.strip()
+    if text.startswith("```"):
+        text = text.strip("`").split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+    try:
+        doc = json.loads(text)
+    except ValueError:
+        return False
+    if not isinstance(doc, dict):
+        return False
+    nums = [v for v in doc.values() if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    return bool(nums) and any(v > 0 for v in nums)
+
+
 def verdict_of(name: str, rc: int, out: str, err: str) -> tuple:
     """(exit_code, note) for one finished dispatch.
 
@@ -237,6 +253,13 @@ def verdict_of(name: str, rc: int, out: str, err: str) -> tuple:
     verdicts reading as sixteen categories that found nothing.
     """
     blocked = [m for m in _BLOCKED_MARKERS if m in out or m in err]
+    if rc == 0 and not blocked and _structured_verdict(out):
+        # A brief that asks for ONLY a JSON verdict (the relay drain brief:
+        # {"served": n, "empty": n, ...}) gets a short answer by design.
+        # Length is a proxy for "said something"; a parsed object that
+        # carries counts IS something (Susser Bank, 2026-10-05: drain lanes
+        # that served their requests were graded FAILED(125) at 62 chars).
+        return rc, ""
     if rc == 0 and (len(out.strip()) < _MIN_VERDICT or blocked):
         return 125, (
             f"DISPATCH PRODUCED NOTHING: {name} exited 0 with "

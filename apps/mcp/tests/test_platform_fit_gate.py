@@ -80,15 +80,15 @@ class _Conn:
         return self._cur
 
 
-CELLS = [("P1C1.1.1", 2.0, "P1C1", "integration"),
-         ("P1C1.1.2", 1.5, "P1C1", "integration")]
+CELLS = [("P4C3.1.1", 2.0, "P4C3", "integration"),
+         ("P4C3.1.2", 1.5, "P4C3", "integration")]
 
 
 def test_a_card_with_no_fit_score_the_engine_can_score_is_refused():
     """Five nulls is exactly what the reported client shipped. A platform page
     whose cards cannot be ranked is not a ranking — and the refusal quotes the
     number the engine had ready, so the resubmission is a read, not a guess."""
-    wide = CELLS + [("P1C1.1.3", 1.0, "P1C1", "integration")]
+    wide = CELLS + [("P4C3.1.3", 1.0, "P4C3", "integration")]
     out = CHECK(_Conn(_Cur(wide)), "run", "platform",
                 page({"platform": "MuleSoft", "l3_area": "Integration",
                       "fit_score": None, "alignment": 0.5,
@@ -299,11 +299,11 @@ def test_depends_on_reaches_the_engine_so_its_own_ordering_passes():
     engine's own ranks — the workload-above-foundation defect, reintroduced
     by the check meant to prevent it."""
     from dma_mcp import fit as fit_mod
-    two = [("P1C1.1.1", 2.0, "P1C1", "integration"),
-           ("P1C1.1.2", 1.5, "P1C1", "integration"),
-           ("P1C1.2.1", 1.0, "P1C1", "workload"),
-           ("P1C1.2.2", 1.0, "P1C1", "workload"),
-           ("P1C1.2.3", 1.0, "P1C1", "workload")]
+    two = [("P4C3.1.1", 2.0, "P4C3", "integration"),
+           ("P4C3.1.2", 1.5, "P4C3", "integration"),
+           ("P4C3.2.1", 1.0, "P4C3", "workload"),
+           ("P4C3.2.2", 1.0, "P4C3", "workload"),
+           ("P4C3.2.3", 1.0, "P4C3", "workload")]
     cands = [
         {"platform": "Foundation", "l3_area": "Integration",
          "alignment": 0.2, "readiness": "green"},
@@ -348,14 +348,14 @@ def _fit_for(cells, items, cand):
 
 
 def test_an_absent_row_in_the_promoted_register_is_greenfield_ground():
-    cells = [("P1C1.1.1", 2.0, "P1C1", "data cloud"),
-             ("P1C1.1.2", 1.5, "P1C1", "data cloud"),
-             ("P1C1.1.3", 1.0, "P1C1", "data cloud")]
+    cells = [("P4C3.1.1", 2.0, "P4C3", "data cloud"),
+             ("P4C3.1.2", 1.5, "P4C3", "data cloud"),
+             ("P4C3.1.3", 1.0, "P4C3", "data cloud")]
     cand = {"platform": "Data Cloud", "l3_area": "data cloud",
             "alignment": 0.5, "readiness": "green"}
     without = _fit_for(cells, [], cand)["platforms"][0]
     with_absent = _fit_for(
-        cells, [{"status": "ABSENT", "linked_subcap_ids": ["P1C1.1.1"]}],
+        cells, [{"status": "ABSENT", "linked_subcap_ids": ["P4C3.1.1"]}],
         cand)["platforms"][0]
     gf = {f["name"]: f for f in with_absent["factors"]}["Greenfield family"]
     assert gf["value"] == 1.0
@@ -404,15 +404,15 @@ def test_product_names_match_without_the_vendor_prefix():
 
 
 def test_an_incumbent_row_discounts_exactly_the_cells_it_links():
-    cells = [("P1C1.1.1", 1.0, "P1C1", "mlops"),
-             ("P1C1.1.2", 1.0, "P1C1", "mlops"),
-             ("P1C1.1.3", 1.0, "P1C1", "mlops")]
+    cells = [("P4C3.1.1", 1.0, "P4C3", "mlops"),
+             ("P4C3.1.2", 1.0, "P4C3", "mlops"),
+             ("P4C3.1.3", 1.0, "P4C3", "mlops")]
     cand = {"platform": "MLflow", "l3_area": "mlops",
             "alignment": 0.5, "readiness": "green"}
     without = _fit_for(cells, [], cand)["platforms"][0]
     held = _fit_for(
         cells, [{"status": "INFERRED",
-                 "linked_subcap_ids": ["P1C1.1.1", "P1C1.1.2"]}],
+                 "linked_subcap_ids": ["P4C3.1.1", "P4C3.1.2"]}],
         cand)["platforms"][0]
     assert held["fit_score"] < without["fit_score"]
 
@@ -420,14 +420,14 @@ def test_an_incumbent_row_discounts_exactly_the_cells_it_links():
 def test_a_claimed_row_binds_nothing_in_either_direction():
     """CLAIMED is provisional by the register's own vocabulary: it must not
     discount a recommendation, and it must not deny a greenfield term."""
-    cells = [("P1C1.1.1", 1.0, "P1C1", "mlops"),
-             ("P1C1.1.2", 1.0, "P1C1", "mlops"),
-             ("P1C1.1.3", 1.0, "P1C1", "mlops")]
+    cells = [("P4C3.1.1", 1.0, "P4C3", "mlops"),
+             ("P4C3.1.2", 1.0, "P4C3", "mlops"),
+             ("P4C3.1.3", 1.0, "P4C3", "mlops")]
     cand = {"platform": "MLflow", "l3_area": "mlops",
             "alignment": 0.5, "readiness": "green"}
     without = _fit_for(cells, [], cand)["platforms"][0]
     claimed = _fit_for(
-        cells, [{"status": "CLAIMED", "linked_subcap_ids": ["P1C1.1.1"]}],
+        cells, [{"status": "CLAIMED", "linked_subcap_ids": ["P4C3.1.1"]}],
         cand)["platforms"][0]
     assert claimed["fit_score"] == without["fit_score"]
 
@@ -443,9 +443,9 @@ def test_a_cell_both_held_and_absent_is_held():
 
 
 def test_the_context_names_which_register_tier_supplied_the_terms():
-    cells = [("P1C1.1.1", 1.0, "P1C1", "mlops")]
+    cells = [("P4C3.1.1", 1.0, "P4C3", "mlops")]
     got = _fit_for(cells,
-                   [{"status": "ABSENT", "linked_subcap_ids": ["P1C1.1.1"]}],
+                   [{"status": "ABSENT", "linked_subcap_ids": ["P4C3.1.1"]}],
                    {"platform": "X", "l3_area": "mlops"})
     notes = " ".join(got["context"]["notes"])
     assert "promoted techstack register" in notes
@@ -564,3 +564,39 @@ def test_an_unrankable_platform_is_null_on_both_pages():
 
 def test_another_page_is_not_cg31_s_business():
     assert TILE_CHECK(None, "run", "platform", _ov({"platform": "X"})) == []
+
+
+# ── strategy, innovation funding and culture are not platform ground ─────
+#    (owner decision 2026-10-06, Susser Bank: "Cultural Due Diligence" was
+#    MuleSoft's top fit driver because the v7.0 catalogue maps every P1 cell
+#    to many platforms and an unevidenced P1 cell is the page's largest gap)
+
+def _cells_of(got, platform):
+    p = [x for x in got["platforms"] if x["platform"] == platform][0]
+    return {c["subcap_id"] for c in p.get("top_contributors") or []}
+
+
+def test_a_technology_platform_does_not_address_strategy_or_culture_cells():
+    from dma_mcp import fit as fit_mod
+    mixed = [("P1C1.5.7", 1.0, "P1C1", "integration"),
+             ("P1C3.5.4", 1.0, "P1C3", "integration"),
+             ("P1C4.10.1", 1.0, "P1C4", "integration"),
+             ("P1C2.6.1", 1.5, "P1C2", "integration"),
+             ("P4C3.3.1", 1.5, "P4C3", "integration")]
+    got = fit_mod.platform_fit(_Conn(_Cur(mixed)), "run", [
+        {"platform": "MuleSoft", "l3_area": "Integration",
+         "alignment": 0.5, "readiness": "green"}])
+    cells = _cells_of(got, "MuleSoft")
+    assert not cells & {"P1C1.5.7", "P1C3.5.4", "P1C4.10.1"}, cells
+    # governance and risk appetite stays platform ground (GRC, Shield)
+    assert {"P1C2.6.1", "P4C3.3.1"} <= cells, cells
+
+
+def test_an_advisory_candidate_keeps_its_strategy_cells():
+    from dma_mcp import fit as fit_mod
+    p1 = [("P1C1.1.1", 1.5, "P1C1", "strategy"),
+          ("P1C1.6.2", 1.5, "P1C1", "strategy")]
+    got = fit_mod.platform_fit(_Conn(_Cur(p1)), "run", [
+        {"platform": "Digital Strategy Workshop", "l3_area": "strategy",
+         "advisory": True, "alignment": 0.5, "readiness": "green"}])
+    assert _cells_of(got, "Digital Strategy Workshop") == {"P1C1.1.1", "P1C1.6.2"}

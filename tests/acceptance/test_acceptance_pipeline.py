@@ -142,10 +142,18 @@ def test_issue6_report_producers_start_from_a_brief_the_driver_wrote(tmp_path):
     out = P.Pipeline(run, opts).run_all()
     assert out["outcome"] == "STOPPED_AT_UNTIL"
     reps = [c for c in opts.dispatcher.calls if c["stage"] == "REPORTS"]
-    agents = [c["agent"] for c in reps]
+    # The report probes run BEFORE the writers (062b81c): a section control
+    # that needs a search is answered upstream, never by a writer, which
+    # holds no web tool. They are the probe lane, not a report lane.
+    probes = [c for c in reps if c["agent"] == "enrichment-web-specialist"]
+    writers = [c for c in reps if c["agent"] != "enrichment-web-specialist"]
+    if probes:
+        assert reps.index(probes[-1]) < reps.index(writers[0]), \
+            "the probes run before any writer starts"
+    agents = [c["agent"] for c in writers]
     assert agents[:2] == ["report-research-producer", "report-assessment-producer"]
     assert agents[2] == "report-validator"
-    for c in reps:
+    for c in writers:
         text = Path(c["prompt_file"]).read_text()
         assert "Your first commands" in text and "engine.cli narrative" in text
         assert "references/templates" in text or "gold_reference" in text
@@ -419,7 +427,10 @@ def test_the_cli_runs_the_stub_pipeline_end_to_end(tmp_path):
            "--folder-root", str(tmp_path / "client_out"), "--json"]
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(SKILL), timeout=900)
     assert r.returncode == 0, r.stderr[-1500:] + r.stdout[-800:]
-    out = json.loads(r.stdout[r.stdout.index("{"):])
+    # The --json document starts on its own line; log lines before it can
+    # carry a Python dict ("[PROBES] closed {'SERVED': 0, ...}").
+    start = 0 if r.stdout.startswith("{") else r.stdout.index("\n{") + 1
+    out = json.loads(r.stdout[start:])
     assert out["outcome"] == "COMPLETE"
     r = subprocess.run([sys.executable, "-m", "engine.pipeline", "plan", "--run", run.run_id,
                         "--root", str(run.root)], capture_output=True, text=True, cwd=str(SKILL))

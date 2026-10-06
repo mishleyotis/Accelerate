@@ -47,7 +47,7 @@ def _close_stage_tabs(wb):
     from engine import completeness
     if not [r for r in wb.rows("Solution_Catalogue") if any(r.values())]:
         A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
-                   platform="Alkami", categories=["P1C1"])
+                   platform="Financial Services Cloud", categories=["P1C1"])
     if not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())]:
         completeness.declare(
             wb, "Platform_Peer_Adoption",
