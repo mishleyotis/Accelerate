@@ -232,6 +232,15 @@ def sg_v4_grounding_fails(res: dict) -> list:
 #: failed page: the driver (`engine.pipeline`) waits for the lease to lapse
 #: and runs again, and it needs to tell the two apart.
 EXIT_CLAIM_REFUSED = 3
+#: A lane tried to submit. Measured 2026-10-06 (Arbor Bank): the
+#: techstack-surface-producer lane — whose definition says it "returns the
+#: assembled page JSON and never submits" — ran `ship_page.py --claim`
+#: itself. A lane carries no driver session, so the claim went in under a
+#: fresh `ship-page-<uuid>` and its two-hour lease refused the driver's own
+#: ship: PAGES_A failed with "another session holds the lease", and that
+#: session was the run's own lane. A lane returns section files; the driver
+#: ships them. `--dry-run` (assemble and precheck, submit nothing) stays open.
+EXIT_LANE_REFUSED = 4
 
 
 def local_precheck(page: str, payload: dict, *, repo: str | None = None) -> dict:
@@ -421,6 +430,13 @@ def main(argv=None) -> int:
                          "precheck; falls back to $DMA_INSIGHTS_REPO and the cwd")
     a = ap.parse_args(argv)
     verdicts: dict = {}
+    if (os.environ.get("DMA_IN_LANE") and not os.environ.get("DMA_SHIP_FROM_DRIVER")
+            and not a.dry_run):
+        print("REFUSED: ship_page.py submits and claims for the DRIVER only. This is a "
+              "lane (DMA_IN_LANE is set): write your section files and return — the "
+              "driver ships them under its own lease. Use --dry-run to precheck.",
+              file=sys.stderr)
+        return EXIT_LANE_REFUSED
 
     def _write_verdicts():
         if a.verdicts_out:

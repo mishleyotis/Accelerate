@@ -185,6 +185,27 @@ confidence — so the critic judges what a rule cannot. No Workflow tool in this
 session (a resumed session loses it)? `--scoring-mode lanes` is sound: scoring
 needs no connector. Never re-score rows by hand.
 
+**REPORTS runs as persisted workflows too, one per report.** At REPORTS the
+driver first runs a preflight that refuses on blockers no writer can close: a
+locked peer set outside the template's band, unscored cells, or open report
+probes. It names them in `REPORT_PREFLIGHT`; fix them at source and resume.
+Then it stops `AWAITING_WORKFLOW` and writes `<ROOT>/07_qa/reports_workflow.json`
+(workflow `workflows/dma-reports.js`, one `args` per open report), and you
+start every invocation in ONE message. Each open section is written by its
+report's producer and reviewed by `report-validator` on its own track, with no
+round barrier, and a writer touches only its section. A review that names an
+upstream item (`--upstream probe|sheet|evidence|owner|scores: …`) takes that
+section out of the loop and returns it to you. Service each one (a probe
+through `enrichment-web-specialist`, a sheet or evidence fix through its
+engine command, an owner decision with the person, scores through the pillar
+scorer and its critic), then run the file's `then`. With no Workflow tool,
+the handoff's `agent_prompts` holds the same prompts for in-session agents.
+`--report-mode lanes` keeps the old round loop, which now also stops the
+moment every open section waits upstream. Measured at Arbor Bank (2026-10-06):
+whole-report lanes behind a round barrier took 430 min, 19 rounds and 137
+reviews, and a third of the returns were upstream items the writer could not
+close.
+
 **RESEARCH runs as persisted workflows — started by you.** The driver is a
 Python process and cannot start a Workflow, so at RESEARCH it stops with
 outcome `AWAITING_WORKFLOW` (exit 0) and writes

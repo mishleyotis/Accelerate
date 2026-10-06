@@ -131,6 +131,11 @@ RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
 SCORING_WORKFLOW = "workflows/dma-pillar-scoring.js"
 SCORING_HANDOFF = "scoring_workflow.json"
 RESEARCH_HANDOFF = "research_workflow.json"
+#: REPORTS as one persisted workflow per report (report_mode="workflow"):
+#: every writable section written and reviewed on its own track, an upstream
+#: blocker routed out of the writer loop, then one whole-report pass.
+REPORTS_WORKFLOW = "workflows/dma-reports.js"
+REPORTS_HANDOFF = "reports_workflow.json"
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
@@ -341,7 +346,8 @@ class ShipPageShipper:
              "--sections", str(sections_dir), "--producer", self.producer,
              "--claim", "--verdicts-out", str(verdicts_out)],
             capture_output=True, text=True, timeout=1800,
-            env={**os.environ, "DMA_AGENT_SESSION": self.session})
+            env={**os.environ, "DMA_AGENT_SESSION": self.session,
+                 "DMA_SHIP_FROM_DRIVER": "1"})
         verdict = {}
         if Path(verdicts_out).is_file():
             try:
@@ -418,6 +424,11 @@ class Options:
     # when ITS scorers finish); "lanes" dispatches headless lanes, which is
     # sound here because scoring needs no enrichment connector.
     scoring_mode: str = "lanes"
+    # Who runs REPORTS. "workflow" hands it to the session as one persisted
+    # workflow per report (REPORTS_WORKFLOW): one writer and one reviewer per
+    # SECTION, no round barrier, an upstream blocker taken out of the writer
+    # loop. "lanes" keeps the round loop below; both run the preflight first.
+    report_mode: str = "lanes"
     # How many FRESH lane instances the driver spends on a category whose
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
@@ -1170,6 +1181,28 @@ class Pipeline:
                                handoff=h["file"], invocations=h["invocations"],
                                resume=self.plan()["command"])
                 return outcome
+            if st == "REPORTS" and self.opts.report_mode == "workflow":
+                try:
+                    h = self._reports_handoff()
+                except StageRefused as e:
+                    self._record(st, "FAIL", str(e)[:600], t0)
+                    self.opts.log(f"[{st}] FAIL — {str(e)[:300]}")
+                    outcome.update(outcome="FAILED", stage=st, reason=str(e)[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if h.get("passed"):
+                    self._record(st, "PASS", h["summary"], t0)
+                    outcome["stages_run"].append(st)
+                    self._snapshot(st)
+                    continue
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
+                self.opts.log(f"[WORKFLOW] REPORTS handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st, reason=h["summary"],
+                               handoff=h["file"], invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
                 if not h["invocations"]:
@@ -1765,7 +1798,7 @@ class Pipeline:
             est = pilot
         return round(est, 2), basis
 
-    def _render_agent_prompts(self, handoff: Path) -> dict:
+    def _render_agent_prompts(self, handoff: Path, kind: str = "research") -> dict:
         """The same batch/challenge prompts the workflow would run, on disk.
 
         Measured 2026-10-01 (Cross Insurance): a resumed session came back
@@ -1777,13 +1810,20 @@ class Pipeline:
         category, and runs `then` — identical work, no new session. Rendering
         needs the handoff on disk first, so it is written once before this and
         again after. A render failure is stated, never fatal."""
-        out = self.run.root / "briefs" / "research_agents"
+        out = self.run.root / "briefs" / f"{kind}_agents"
         script = PLUGIN / "workflows" / "render-prompts.mjs"
-        info = {"dir": str(out), "manifest": str(out / "manifest.json"),
-                "how": ("no Workflow tool: for each manifest row spawn ONE in-session Agent "
-                        "with the file's text as its prompt (model and subagent_type from "
-                        "the row) — every batch row in parallel, then each category's "
-                        "challenge row once its batches have returned — then run `then`")}
+        how = ("no Workflow tool: for each manifest row spawn ONE in-session Agent "
+               "with the file's text as its prompt (model and subagent_type from "
+               "the row) — every batch row in parallel, then each category's "
+               "challenge row once its batches have returned — then run `then`")
+        if kind == "reports":
+            how = ("no Workflow tool: for each manifest `write` row spawn ONE in-session "
+                   "Agent with the file's text as its prompt (subagent_type from the row), "
+                   "all in parallel; as each returns, spawn its `review` row (the "
+                   "report-validator — never the writer); a REVISE without upstream goes "
+                   "back to its writer once more; when every section of a report passes, "
+                   "spawn that report's `cross` row; then run `then`")
+        info = {"dir": str(out), "manifest": str(out / "manifest.json"), "how": how}
         try:
             r = subprocess.run(["node", str(script), str(handoff), str(out)],
                                capture_output=True, text=True, timeout=120)
@@ -2515,11 +2555,91 @@ class Pipeline:
             self.opts.log(f"  [PROBES] skipped ({e.__class__.__name__}: {str(e)[:120]})")
             return 0
 
+    def _reports_preflight(self) -> None:
+        """Refuse REPORTS while a blocker no writer can close stands.
+
+        Arbor Bank (2026-10-06) spent dead rounds on a six-peer set the
+        template fails, unscored cells every total moved with, and probes
+        nobody ran — each knowable before the first writer started."""
+        from . import brief
+        pre = brief.report_preflight(self.wb, run=self.run)
+        if not pre:
+            L.append_gate(self.wb, gate="REPORT_PREFLIGHT", scope="run", verdict="PASS",
+                          blocking=False, detail="no upstream blocker: peer band, "
+                          "scores and report probes all clear")
+            return
+        lines = "; ".join(f"[{p['kind']}] {', '.join(p['sections'])}: {p['detail']}"
+                          for p in pre)
+        L.append_gate(self.wb, gate="REPORT_PREFLIGHT", scope="run", verdict="FAIL",
+                      blocking=True, detail=lines[:900])
+        raise StageRefused(f"REPORTS has {len(pre)} upstream blocker(s) no writer can "
+                           f"close — resolve them, then resume: {lines}")
+
+    def _upstream_only(self) -> list[dict]:
+        """The upstream items, when EVERY open section waits on one."""
+        from . import narrative as N
+        st = N.state(self.wb)
+        if st["upstream"] and not any(r.get("writable") for r in st["reports"].values()):
+            return st["upstream"]
+        return []
+
+    def _reports_handoff(self) -> dict:
+        """One reports-workflow invocation per report still open."""
+        from . import brief, narrative as N, report_spec as RS, reports
+        self._reconcile_register()
+        self._report_probes()
+        self._reports_preflight()
+        st = N.state(self.wb)
+        if st["ready"]:
+            from . import grains
+            grains.recommendations(self.wb)
+            out = [Path(reports.render(self.wb, spec, self.run.deliverables,
+                                       qa_dir=self.run.qa_dir)["path"]).name
+                   for spec in RS.SPECS.values()]
+            self.reopen()
+            return {"passed": True, "summary": "rendered: " + ", ".join(out)}
+        ups = self._upstream_only()
+        if ups:
+            raise StageRefused(
+                "every open report section waits on an upstream item no writer can "
+                "close: " + "; ".join(f"{u['report']} §{u['section']} [{u['kind']}] "
+                                       f"{u['detail']}" for u in ups[:8]))
+        b = brief.report_section_briefs(self.wb, run=self.run,
+                                        out_dir=self._briefs("reports_wf"))
+        by_r: dict[str, list] = {}
+        for row in b["sections"]:
+            by_r.setdefault(row["report"], []).append(
+                {"section": row["section"], "brief": row["file"], "agent": row["agent"]})
+        inv = [{"report": k, "title": RS.SPECS[k].title, "run": self.run.run_id,
+                "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
+                "plugin": str(PLUGIN), "sections": by_r.get(k, []),
+                "ready": bool(st["reports"][k].get("ready")), "rounds": 3}
+               for k in RS.SPECS if not st["reports"][k].get("ready")]
+        doc = {"workflow": str(PLUGIN / REPORTS_WORKFLOW), "invocations": inv,
+               "upstream": st["upstream"], "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per report — wait for all, "
+                       "service every `upstream` item the workflows return (a probe "
+                       "through the enrichment specialist, a sheet through its engine "
+                       "command, an owner decision with the person), then run `then`. "
+                       "No Workflow tool? `agent_prompts` holds the same prompts for "
+                       "in-session agents, or re-run with --report-mode lanes.")}
+        path = self.run.qa_dir / REPORTS_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        doc["agent_prompts"] = self._render_agent_prompts(path, "reports")
+        path.write_text(json.dumps(doc, indent=1))
+        n = sum(len(i["sections"]) for i in inv)
+        return {"file": str(path), "invocations": inv,
+                "summary": f"{len(inv)} report workflow(s), {n} writable section(s), "
+                           f"{len(st['upstream'])} upstream item(s)"}
+
     def _stage_reports(self) -> str:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
         self._reconcile_register()
         self._report_probes()
+        self._reports_preflight()
         self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
             # READY reports go straight to render. Dispatching the producers
@@ -2536,6 +2656,15 @@ class Pipeline:
             st = N.state(self.wb)
             if all(x.get("ready") for x in st["reports"].values()):
                 break
+            ups = self._upstream_only()
+            if ups:
+                # Re-dispatching a writer against a section only an upstream
+                # actor can close buys a round that closes nothing.
+                raise StageRefused(
+                    "every open report section waits on an upstream item no writer "
+                    "can close: " + "; ".join(f"{u['report']} §{u['section']} "
+                                              f"[{u['kind']}] {u['detail']}"
+                                              for u in ups[:8]))
             self.opts.log("  reports not READY: " + "; ".join(
                 f"{k}: {len([s for s in x.get('sections') or [] if s.get('status') != 'READY'])} "
                 f"section(s) open" for k, x in st["reports"].items() if not x.get("ready")))
@@ -2906,7 +3035,9 @@ def _build_opts(a) -> Options:
                    toolkit_dir=Path(a.toolkits) if a.toolkits else None,
                    research_mode=_research_mode(a),
                    scoring_mode=getattr(a, "scoring_mode", None) or ("lanes" if a.dispatcher == "stub"
-                                                   else "workflow"))
+                                                   else "workflow"),
+                   report_mode=getattr(a, "report_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                 else "workflow"))
 
 
 def _research_mode(a) -> str:
@@ -2942,6 +3073,12 @@ def main(argv=None) -> int:
                         "dispatches headless lanes (scoring needs no connector, "
                         "so lanes are a sound fallback in a session without "
                         "the Workflow tool)")
+    r.add_argument("--report-mode", choices=("workflow", "lanes"), default=None,
+                   help="who runs REPORTS: 'workflow' (default with the real "
+                        "dispatcher) hands it to the session as one persisted "
+                        "workflow per report — a writer and a reviewer per "
+                        "section, upstream blockers routed out of the loop; "
+                        "'lanes' keeps the whole-report round loop")
     r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
                    help="who runs RESEARCH: 'workflow' (default with the real "
                         "dispatcher) hands it to the session as one persisted "

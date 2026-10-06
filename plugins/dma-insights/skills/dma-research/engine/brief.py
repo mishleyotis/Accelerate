@@ -2125,6 +2125,143 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                         batch_name="batch_reports.json")
 
 
+
+# ── REPORTS as a per-section workflow ───────────────────────────────────
+#
+# Measured 2026-10-06 (Arbor Bank): REPORTS ran 430 min over 19 driver
+# rounds and 137 validator reviews (99 non-PASS, 19 PASS->reopened). Each
+# round handed WHOLE reports to two writers and both reports to one
+# validator behind a barrier, so a passed section waited on the slowest
+# one and a writer rewriting its report reopened sections already passed.
+# More than a third of the non-PASS notes named something no writer could
+# supply — a probe never run, an owner decision (six peers against a Doc
+# that fails more than five), a sheet that disagreed with the prose — and
+# the writer was re-dispatched against each until the stall rule ended the
+# stage. Three things replace that: a PREFLIGHT that finds the knowable
+# blockers before any writer starts; one brief per open SECTION, so a
+# writer touches nothing else; and an `upstream` field on a review
+# (narrative.UPSTREAM_KINDS) that takes a section out of the writer loop.
+
+#: The peer-count rule the templates FAIL on (client_research §4, assessment
+#: §6). Read from the pinned control block when it states one.
+_PEER_RULE = re.compile(r"fewer than (\d+) peers, more than (\d+) peers", re.I)
+
+
+def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
+    """The blockers no report writer can close, found before any writer runs.
+
+    Each row is {kind, detail, sections} with kind in narrative.UPSTREAM_KINDS.
+    Deterministic and cheap: it reads the lock, the templates, the scoring
+    sheets and the probe queue — the four places Arbor's dead rounds came from."""
+    from . import narrative as N, report_spec as RS
+    out: list[dict] = []
+    # 1. owner: the locked peer set against the template's peer band
+    lock = wb.handoff_lock()
+    peers = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p.strip()]
+    for key, spec in RS.SPECS.items():
+        for sec in spec.sections:
+            m = _PEER_RULE.search(sec.fail_if or "")
+            if not m:
+                continue
+            lo, hi = int(m.group(1)), int(m.group(2))
+            if peers and not lo <= len(peers) <= hi:
+                out.append({"kind": "owner", "sections": [f"{key} §{sec.id}"],
+                            "detail": (f"the locked peer set holds {len(peers)} peers "
+                                       f"({', '.join(peers)}) and the template FAILS "
+                                       f"outside {lo}-{hi}. The engagement owner cuts "
+                                       f"the set or records a waiver; no writer can.")})
+    # 2. scores: every served cell scored before the assessment cites totals
+    unscored = []
+    for sheet in ("P1_Subcap_Scoring", "P2_Subcap_Scoring",
+                  "P3_Subcap_Scoring", "P4_Subcap_Scoring"):
+        try:
+            rows = wb.rows(sheet)
+        except Exception:                                    # noqa: BLE001
+            continue
+        unscored += [r.get("SubCap_ID") for r in rows
+                     if r.get("SubCap_ID") and r.get("Score") in (None, "")]
+    if unscored:
+        out.append({"kind": "scores", "sections": ["assessment (all)"],
+                    "detail": (f"{len(unscored)} served cell(s) carry no score "
+                               f"({', '.join(map(str, unscored[:6]))}"
+                               f"{'…' if len(unscored) > 6 else ''}). Every total the "
+                               f"assessment quotes moves when they are struck; strike "
+                               f"or formally exclude them first.")})
+    # 3. probe: the template probes queued upstream and still OPEN
+    if run is not None:
+        try:
+            from . import relay
+            open_ = relay.state(run)["open"]
+        except Exception:                                    # noqa: BLE001
+            open_ = []
+        if open_:
+            out.append({"kind": "probe", "sections": ["(sections citing them)"],
+                        "detail": (f"{len(open_)} report probe(s) still OPEN in the "
+                                   f"relay queue ({', '.join(map(str, open_[:6]))}). "
+                                   f"Drain them before writing, or the writers state "
+                                   f"searched-not-established and the validator "
+                                   f"returns the section.")})
+    return out
+
+
+def report_section_briefs(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
+    """One brief per WRITABLE section: open, and not waiting on an upstream
+    item. The writer reads its own section's control block, its length band
+    and the validator's last full note — and nothing that invites it to
+    touch a sibling."""
+    from . import narrative as N, report_spec as RS
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    e = _engine(run)
+    st = N.state(wb)
+    latest = N.latest_reviews(wb)
+    rows = []
+    for key, spec in RS.SPECS.items():
+        rep = st["reports"][key]
+        agent = ("report-research-producer" if key == "client_research"
+                 else "report-assessment-producer")
+        for sid in rep.get("writable") or []:
+            sec = spec.section(sid)
+            lr = latest.get((key, str(sid))) or {}
+            note = lr.get("note") if lr.get("verdict") != "PASS" else ""
+            band = (f"{sec.min_words}-{sec.max_words}" if sec.max_words
+                    else f"{sec.min_words}+")
+            lines = [f"# {spec.title} — §{sec.id} {sec.heading}", "",
+                     f"Report `{key}`, section `{sec.id}` ({sec.kind}). "
+                     f"Write THIS section only; every other section is someone "
+                     f"else's and rewriting one reopens it.", "",
+                     f"- LENGTH: {band} words for the section"
+                     + (f"; {sec.card_prefix}NN cards, {sec.cards_min or sec.card_floor}"
+                        f"-{sec.cards_max or ''} of them, {sec.card_words_min or ''}"
+                        f"-{sec.card_words_max or ''} words each"
+                        if sec.kind in RS.CARD_KINDS else "")
+                     + ". The engine refuses a write outside the band.",
+                     f"- BLOCKS: {' · '.join(sec.blocks) or '(none declared)'}",
+                     f"- READS: {', '.join(sec.inputs) or '-'}",
+                     f"- MINIMUM DATA: {sec.minimum_data or '-'}",
+                     f"- MUST INCLUDE: {sec.must_include or '-'}",
+                     f"- MUST NOT: {sec.must_not or '-'}",
+                     f"- FAIL IF: {sec.fail_if or '-'}", ""]
+            if note:
+                lines += ["## The validator's last note — address EVERY numbered fix, "
+                          "change nothing it says already stands", "", note, ""]
+            lines += ["## Commands", "",
+                      f"    python3 -m engine.cli narrative preconditions {e} --report {key}",
+                      f"    python3 -m engine.cli narrative contract --report {key}",
+                      f"    python3 -m engine.cli narrative write {e} --report {key} "
+                      f"--section {sec.id} --actor {agent} --json <record.json>"
+                      + (" --card <ID>" if sec.kind in RS.CARD_KINDS else ""), "",
+                      "If what the note asks for needs a search, a sheet fix, new "
+                      "evidence, an owner decision or a score you cannot make, do NOT "
+                      "write around it: return BLOCKED_UPSTREAM naming it."]
+            f = out_dir / f"{key}_s{sec.id}.md"
+            f.write_text("\n".join(lines), encoding="utf-8")
+            rows.append({"report": key, "section": str(sec.id), "agent": agent,
+                         "file": str(f), "revise": bool(note)})
+    return {"sections": rows, "upstream": st["upstream"],
+            "ready": {k: v.get("ready") for k, v in st["reports"].items()}}
+
+
 PAGES = ("techstack", "context", "heatmap", "overview", "insights", "platform")
 
 
@@ -2209,9 +2346,13 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 f"python3 -m engine.surface_export cards --page {page}"
                 f"   # the full card map (also the join://cards resource)",
                 f"# read the contract at the path below, not from memory",
+                # PRECHECK ONLY. This line carried `--claim` until 2026-10-06,
+                # so the techstack lane at Arbor Bank submitted and took the
+                # run's lease under its own id, and the driver's ship was then
+                # refused for two hours. The driver ships; a lane prechecks.
                 f"python3 plugins/dma-insights/skills/dma-surface-production/scripts/ship_page.py "
-                f"{connector_run} {page} --sections {sdir} --incremental "
-                f"--claim --verdicts-out <ROOT>/07_qa/verdict_{page}.json"],
+                f"{connector_run} {page} --sections {sdir} --dry-run"
+                f"   # precheck only: the DRIVER submits, a lane never claims"],
             "page": page, "connector_run_id": connector_run,
             "contract_file": str(cf),
             "ready_in_workbook": pst.get("ready"),
