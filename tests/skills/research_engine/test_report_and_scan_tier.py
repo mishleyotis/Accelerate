@@ -80,12 +80,9 @@ _ARGUMENT = {
 def _section(report="client_research", section="1", **over) -> dict:
     """A section that passes every check, so each test can break exactly one."""
     eids = [e for e in re.split(r",\s*", str(over.get("Evidence_IDs") or "")) if e]
-    rec = section_record(section, eids, report=report)
-    lines = rec["Body"].splitlines()
-    # the prose under test goes into the first block, after its heading
-    first = next((i for i, ln in enumerate(lines) if ln.startswith("## ")), -1)
-    lines.insert(first + 1, _PROSE)
-    rec["Body"] = "\n".join(lines)
+    # the prose under test goes into the first block, after its heading, and
+    # counts toward the section's LENGTH band (enforced at write since 2026-10-06)
+    rec = section_record(section, eids, report=report, lead=_PROSE)
     rec.update(_ARGUMENT)
     rec["Evidence_IDs"] = ", ".join(eids)
     rec.update(over)

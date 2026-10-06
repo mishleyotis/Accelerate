@@ -2746,14 +2746,14 @@ class Pipeline:
         """Refuse REPORTS while a blocker no writer can close stands.
 
         Arbor Bank (2026-10-06) spent dead rounds on a six-peer set the
-        template fails, unscored cells every total moved with, and probes
-        nobody ran — each knowable before the first writer started."""
+        template fails and on unscored cells every total moved with — each
+        knowable before the first writer started."""
         from . import brief
         pre = brief.report_preflight(self.wb, run=self.run)
         if not pre:
             L.append_gate(self.wb, gate="REPORT_PREFLIGHT", scope="run", verdict="PASS",
-                          blocking=False, detail="no upstream blocker: peer band, "
-                          "scores and report probes all clear")
+                          blocking=False, detail="no upstream blocker: peer band "
+                          "and scores clear")
             return
         lines = "; ".join(f"[{p['kind']}] {', '.join(p['sections'])}: {p['detail']}"
                           for p in pre)

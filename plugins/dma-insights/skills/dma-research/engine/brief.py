@@ -2171,8 +2171,8 @@ def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
     """The blockers no report writer can close, found before any writer runs.
 
     Each row is {kind, detail, sections} with kind in narrative.UPSTREAM_KINDS.
-    Deterministic and cheap: it reads the lock, the templates, the scoring
-    sheets and the probe queue — the four places Arbor's dead rounds came from."""
+    Deterministic and cheap: it reads the lock, the templates and the scoring
+    sheets — where Arbor's knowable dead rounds came from."""
     from . import narrative as N, report_spec as RS
     out: list[dict] = []
     # 1. owner: the locked peer set against the template's peer FLOOR
@@ -2207,20 +2207,11 @@ def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
                                f"{'…' if len(unscored) > 6 else ''}). Every total the "
                                f"assessment quotes moves when they are struck; strike "
                                f"or formally exclude them first.")})
-    # 3. probe: the template probes queued upstream and still OPEN
-    if run is not None:
-        try:
-            from . import relay
-            open_ = relay.state(run)["open"]
-        except Exception:                                    # noqa: BLE001
-            open_ = []
-        if open_:
-            out.append({"kind": "probe", "sections": ["(sections citing them)"],
-                        "detail": (f"{len(open_)} report probe(s) still OPEN in the "
-                                   f"relay queue ({', '.join(map(str, open_[:6]))}). "
-                                   f"Drain them before writing, or the writers state "
-                                   f"searched-not-established and the validator "
-                                   f"returns the section.")})
+    # Report probes still OPEN after the driver's drain are NOT a blocker:
+    # `_report_probes` records them as REPORT_PROBES (non-blocking) and the
+    # writers state each as searched-not-established, which the validator
+    # accepts. A probe never run at all leaves no row to find here; the
+    # validator names it per section with `--upstream 'probe: …'`.
     return out
 
 
