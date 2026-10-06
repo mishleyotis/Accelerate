@@ -36,7 +36,7 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
                     layer="DATA", status="INFERRED", method="job_posting",
                     providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")
-    techscan.record(wb, product="nCino", vendor="nCino", layer="OPS",
+    techscan.record(wb, product="nCino Bank Operating System", vendor="nCino", layer="OPS",
                     status="ABSENT", method="technographic_scan",
                     providers=["explorium"],
                     basis="scan of acme.example plus 4 searches for nCino "
@@ -64,12 +64,12 @@ def test_confirmed_requires_resolvable_evidence(tmp_path):
     """A confirmation nobody can open is a claim wearing a stronger word."""
     run, wb, cells = _run_with_scan(tmp_path)
     with pytest.raises(ScanRefused, match="CONFIRMED requires evidence"):
-        techscan.record(wb, product="Q2", vendor="Q2", layer="CUST",
+        techscan.record(wb, product="Q2 Digital Banking", vendor="Q2", layer="CUST",
                         status="CONFIRMED", method="vendor_announcement",
                         providers=["web"],
                         basis="the vendor's own press release names Acme")
     with pytest.raises(ScanRefused, match="do not resolve"):
-        techscan.record(wb, product="Q2", vendor="Q2", layer="CUST",
+        techscan.record(wb, product="Q2 Digital Banking", vendor="Q2", layer="CUST",
                         status="CONFIRMED", method="vendor_announcement",
                         providers=["web"],
                         basis="the vendor's own press release names Acme",
@@ -81,7 +81,7 @@ def test_absent_must_state_the_search_that_establishes_it(tmp_path):
     facts, and conflating them over-recommended by 28 fit points."""
     run, wb, cells = _run_with_scan(tmp_path)
     with pytest.raises(ScanRefused, match="AUD-0115"):
-        techscan.record(wb, product="Salesforce", vendor="Salesforce",
+        techscan.record(wb, product="Salesforce Financial Services Cloud", vendor="Salesforce",
                         layer="CUST", status="ABSENT",
                         method="technographic_scan", providers=["explorium"],
                         basis="we did not see it anywhere around")

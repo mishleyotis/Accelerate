@@ -232,6 +232,22 @@ from a section's author by name, so the verdict comes from
 (`engine.cli narrative state --report {key}`) and let the conductor route
 the review.
 
+{extra}## You write from collected evidence only
+
+You fill a pinned template from what the run already holds. You do not
+research and you do not verify, and you hold no web tool. Every probe a
+section control demands (the vendor's own scope statement, the "initiative
+already underway" check, each peer's adoption of a recommended platform) was
+run by the driver before you started, through `engine.relay.report_probes`.
+Its results are in `Evidence_Detail`, `Search_Log` and
+`Platform_Peer_Adoption`. Where a probe found nothing, state the searched
+absence as a finding about the client: what was searched, and that it
+established nothing. **Never write "requested through the driver", "not
+run", "pending", or any other pipeline word into a section body.** If a
+probe the template needs has no row at all, say so in your handback; the
+gap is upstream and not yours to fill. (Susser Bank, 2026-10-05: eleven
+report rounds were spent on probes written as prose that nothing ran.)
+
 ## What you never do
 
 Write the other report's sections. Write a score (column D belongs to
@@ -331,12 +347,26 @@ section reads READY, run the whole-report pass and report what you find:
    unsupported, and the reports should say so rather than the reader
    discovering it.
 
+## A probe the section needed and found nothing
+
+The driver runs every probe the templates demand before the writers start
+(`engine.relay.report_probes`). A section that states a searched absence,
+saying what was searched and that it established nothing, meets the control.
+Do not return it for a search the writer could not run: writers hold no web
+tool. Where a probe the control needs has no row in `Search_Log` at all,
+REVISE with the note `PROBE MISSING: <what>`. That is an upstream gap for the
+conductor, not a rewrite.
+
 ## What you never do
 
 Write or edit a section (that is the producer's, and your independence is
 the product). Pass a section you did not open the citations for. Turn a
 REVISE into a PASS because the run is late.
 """
+
+
+#: Assessment-only producer rules (§8 argues Zennify's own solutions).
+ASSESSMENT_EXTRA = '## Recommendations are Zennify\'s solutions\n\nSection 8 argues the `Solution_Catalogue` rows, which are Zennify solutions\n(`skills/dma-assessment/references/zennify_solutions.md`). Write each card\'s\nSolution block from that catalogue\'s positioning for the gap, and its\nreadiness contract against the client\'s CONFIRMED estate: a client already\non Salesforce (nCino is Salesforce-native) is extending an org, and the\ndiscovery question is edition, licensing and record-of-record, not whether\nan org exists. Name a non-Zennify product only in the rebuttal or as an\nalternative, under the catalogue\'s "Non-Zennify Solutions" rule. The\ncatalogue\'s investment ranges and timelines never appear: the template\nforbids durations.\n\n'
 
 
 def render(name: str, description: str, rel: str, model: str, effort: str,
@@ -407,7 +437,8 @@ def build() -> dict[str, str]:
         out[f"{name}.md"] = render(
             name, desc, f"reports/{name}.md", "sonnet", "high", 200,
             PRODUCER_BODY.format(title=spec.title, table=_section_table(key),
-                                 key=key, name=name, markdown=spec.markdown)
+                                 key=key, name=name, markdown=spec.markdown,
+                                 extra=ASSESSMENT_EXTRA if key == "assessment" else "")
             + GOLD_BLOCK)
     out["report-validator.md"] = render(
         "report-validator",

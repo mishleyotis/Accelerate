@@ -14,7 +14,10 @@ def test_shipper_exports_one_session_to_every_ship(monkeypatch, tmp_path):
         returncode, stdout, stderr = 0, "", ""
 
     def fake_run(cmd, **kw):
-        seen.append(kw.get("env", {}).get("DMA_AGENT_SESSION"))
+        # The deterministic pre-ship fixer (9bd0686) runs first and takes no
+        # lease; the claim is ship_page.py's, so that is the call to watch.
+        if any("ship_page" in str(c) for c in cmd):
+            seen.append(kw.get("env", {}).get("DMA_AGENT_SESSION"))
         return R()
 
     monkeypatch.setattr(P.subprocess, "run", fake_run)
