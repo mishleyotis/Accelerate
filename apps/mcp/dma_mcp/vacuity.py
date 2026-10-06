@@ -221,6 +221,61 @@ CLAIM_MIN_SHARED = 3
 # "  " all normalise to the same key. The set is the vocabulary of NOT
 # HAVING WRITTEN THE FIELD YET, which is what makes it refusable — an
 # honest absence has a reason and a ladder, never a dash.
+#: QUOTE SCAFFOLD — a synthesis assembled from excerpts rather than argued.
+#: Measured 2026-10-06 (Arbor Bank): a producer lane met the cell synthesis
+#: floor (40 words) by chaining verbatim excerpts behind fixed lead-ins —
+#: "For <client>, the cited source states: '…' A further cited source adds:
+#: '…'" — on 106 of 166 cells, and padded 21 more with "Also: '<an excerpt
+#: the sentence had already quoted>'". The template rule refused only the 40
+#: whose quoted CONTENT overlapped; the other 87 said as little and would
+#: have shipped. Measured on the promoted references the line is not near:
+#: Baxter's 706 cell syntheses carry no lead-in, no pad and a quote share of
+#: 0.00; Susser's 216 none and at most 0.29. Arbor's refused page: 108 lead-
+#: ins, 21 pads, 100 cells at or above 0.50.
+QUOTE_SCAFFOLD_KEYS = frozenset(("synthesis",))
+QUOTE_SHARE_LINE = 0.50
+QUOTE_SHARE_MIN_WORDS = 20
+_SOURCE_LEAD = re.compile(
+    r"\b(?:the|a|another|a\s+further|an\s+additional|one|a\s+second)\s+"
+    r"(?:cited\s+|registered\s+|linked\s+)?(?:source|excerpt|item)\s+"
+    r"(?:states|says|adds|notes|reports|reads)\s*:", re.I)
+_PAD_LEAD = re.compile(
+    r"(?:^|[.;]\s+)(?:also|further|additionally|in\s+addition|separately)\s*:"
+    r"\s*[\"'\u201c\u2018]", re.I)
+_QUOTED_SPAN = re.compile(
+    r"(?:^|(?<=[\s(:\[]))[\"'\u201c\u2018](.+?)[\"'\u201d\u2019](?=\s|[.,;:)\]]|$)", re.S)
+
+
+def quote_share(text: str) -> float:
+    """Share of a text's words that sit inside quotation marks."""
+    words = len(str(text or "").split())
+    if not words:
+        return 0.0
+    return sum(len(m.group(1).split()) for m in _QUOTED_SPAN.finditer(text)) / words
+
+
+def quote_scaffold(text: str) -> str | None:
+    """Why `text` is excerpts stitched together rather than an argument, or None."""
+    t = str(text or "")
+    m = _SOURCE_LEAD.search(t)
+    if m:
+        return (f"it reports its sources instead of arguing from them — the lead-in "
+                f"{m.group(0).strip()!r} introduces a quotation, not a claim")
+    m = _PAD_LEAD.search(t)
+    if m:
+        return (f"it pads with a further quotation behind {m.group(0).strip()!r} — "
+                f"an excerpt appended to reach a word count adds nothing the "
+                f"citation does not already carry")
+    words = len(t.split())
+    share = quote_share(t)
+    if words >= QUOTE_SHARE_MIN_WORDS and share >= QUOTE_SHARE_LINE:
+        return (f"{share:.0%} of its {words} words are quotation (line "
+                f"{QUOTE_SHARE_LINE:.0%}; the promoted references sit at or below "
+                f"29%) — the excerpts are the evidence, and this field is what "
+                f"they establish")
+    return None
+
+
 PLACEHOLDERS = frozenset((
     "", "na", "n a", "n/a", "tbd", "tba", "tk", "todo", "to do",
     "to be determined", "to be confirmed", "to be advised", "none",
@@ -1101,6 +1156,23 @@ def _check_templates(name, groups, declared=None) -> list:
     return out
 
 
+def _check_quote_scaffold(name, path, key, text) -> list:
+    if key not in QUOTE_SCAFFOLD_KEYS:
+        return []
+    why = quote_scaffold(text)
+    if not why:
+        return []
+    return [_reason(
+        name, path,
+        f"quote scaffold: {why}. A synthesis says, in its own words, what the "
+        "cited evidence establishes about THIS capability and what it means; "
+        "the verbatim excerpts already render beside it in the drawer. Where "
+        "the evidence says little, write the short honest version and mark "
+        "the cell thin (or record the absence with its sources_searched and "
+        "closure_condition) — never pad to the word floor with quotation, and "
+        "never generate these with a script")]
+
+
 def check_vacuity(page: str, payload: dict) -> list:
     """CG-15 over a whole page payload."""
     if not isinstance(payload, dict):
@@ -1150,6 +1222,7 @@ def check_vacuity(page: str, payload: dict) -> list:
             out.extend(_check_value(page, name, f"{name}.{fname}", fname,
                                     value, floor,
                                     records_absence(body, sec_keys)))
+            out.extend(_check_quote_scaffold(name, f"{name}.{fname}", fname, value))
 
         for fname, per_key in reg["items"].items():
             value = body.get(fname)
@@ -1172,6 +1245,7 @@ def check_vacuity(page: str, payload: dict) -> list:
                     path = f"{name}.{fname}{index}.{key}"
                     out.extend(_check_value(page, name, path, key, text,
                                             floor, exempt))
+                    out.extend(_check_quote_scaffold(name, path, key, text))
                     if not exempt:
                         groups.setdefault((f"{fname}[*].{key}", floor),
                                           []).append((path, text))
