@@ -368,7 +368,8 @@ def stage_preconditions(wb: RunWorkbook, report: str,
     cats = sorted({c.split(".")[0] for c in wb.selected_subcaps()})
     gates = {}
     for cat in cats:
-        v = floors_gate.read_verdict(qa_dir, cat) if qa_dir else None
+        from . import waiver
+        v = waiver.scoreable_verdict(wb, qa_dir, cat)
         gates[cat] = ({"verdict": "NOT_RUN"} if v is None else
                       {"verdict": v.get("gate"), "blocking": v.get("blocking"),
                        "require_synthesis": bool(v.get("require_synthesis"))})

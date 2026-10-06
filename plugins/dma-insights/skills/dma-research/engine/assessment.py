@@ -151,15 +151,10 @@ def research_ready(wb: RunWorkbook, qa_dir: Path | None) -> list[str]:
     gates = {}
     from . import waiver
     for cat in cats:
-        v = floors_gate.read_verdict(qa_dir, cat) if qa_dir else None
+        v = waiver.scoreable_verdict(wb, qa_dir, cat)
         gates[cat] = ({"verdict": "NOT_RUN"} if v is None else
                       {"verdict": v.get("gate"), "blocking": v.get("blocking"),
                        "require_synthesis": bool(v.get("require_synthesis"))})
-        # A person's waiver stands in for the PASS only while it accounts for
-        # every live blocker in the mode scoring requires (engine.waiver).
-        if gates[cat]["verdict"] != "PASS" and waiver.covers(wb, cat)[0]:
-            gates[cat] = {"verdict": "PASS", "blocking": [],
-                          "require_synthesis": True, "waived": True}
     try:
         handoff._assert_scoreable(gates)
     except SystemExit as e:

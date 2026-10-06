@@ -90,7 +90,8 @@ def orient(wb: RunWorkbook, category: str | None, *,
 
     gates = {}
     for c in cats:
-        v = floors_gate.read_verdict(qa_dir, c) if qa_dir else None
+        from . import waiver
+        v = waiver.scoreable_verdict(wb, qa_dir, c)
         gates[c] = {"verdict": "NOT_RUN",
                     "reason": "no recorded verdict at "
                               f"{qa_dir}/floors_{c}.json"} if v is None else v

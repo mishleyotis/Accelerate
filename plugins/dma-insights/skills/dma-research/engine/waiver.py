@@ -182,3 +182,25 @@ def disclose_in_caps_log(wb: RunWorkbook) -> list[str]:
     if done:
         wb.save()
     return done
+
+
+def scoreable_verdict(wb: RunWorkbook, qa_dir, category: str) -> dict | None:
+    """The category's floors verdict AS EVERY DOWNSTREAM READER MUST SEE IT —
+    the recorded floors_<cat>.json, with a covering waiver standing in for
+    its PASS. None when nothing was ever recorded (NOT RUN, never PASS).
+
+    ONE RULE, EVERY READER (MEM-0595). arbor-bank 2026-10-06: the waiver was
+    honoured by dispatch, research_ready and the SCORING gate, but five other
+    readers copied the recorded verdict their own way — the report
+    preconditions refused both reports on the three waived categories, and
+    orient / watchdog / the stage-advance hook told the session to re-dispatch
+    research a person had already accepted."""
+    from . import floors_gate
+    v = floors_gate.read_verdict(qa_dir, category) if qa_dir else None
+    if v is None or v.get("gate") == "PASS":
+        return v
+    ok, why = covers(wb, category)
+    if not ok:
+        return v
+    return dict(v, gate="PASS", blocking=[], require_synthesis=True,
+                waived=True, waiver=why)

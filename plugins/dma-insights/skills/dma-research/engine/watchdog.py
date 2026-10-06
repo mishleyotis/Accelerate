@@ -140,7 +140,8 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         w = L.worklist(wb, c)
         if w["pending"] or w["volleyed"]:
             open_work.append(c)
-        v = floors_gate.read_verdict(run.qa_dir, c)
+        from . import waiver
+        v = waiver.scoreable_verdict(wb, run.qa_dir, c)
         if v is None:
             ungated.append(c)
         elif v.get("gate") == "FAIL":
@@ -348,10 +349,12 @@ def _manifest(md: dict) -> dict:
 
 
 def _unscored_by_pillar(wb: RunWorkbook) -> dict[str, int]:
+    from . import waiver
+    waived = waiver.waived_cells(wb)       # unscored on purpose (MEM-0595)
     out: dict[str, int] = {}
     for r in wb.scoring_rows():
         cell = str(r.get("SubCap_ID") or "").strip()
-        if not cell:
+        if not cell or cell in waived:
             continue
         sc = str(r.get("Score") or "").strip()
         if not sc:

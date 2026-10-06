@@ -165,7 +165,8 @@ def build(wb: RunWorkbook, *, qa_dir: Path | None = None,
 
     gates = {}
     for cat in sorted(by_cat):
-        v = floors_gate.read_verdict(qa_dir, cat) if qa_dir else None
+        from . import waiver
+        v = waiver.scoreable_verdict(wb, qa_dir, cat)
         gates[cat] = ({"verdict": "NOT_RUN",
                        "reason": "the floors gate has no recorded verdict for "
                                  "this category"} if v is None

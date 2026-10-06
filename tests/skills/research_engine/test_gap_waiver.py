@@ -104,3 +104,26 @@ def test_a_waiver_recorded_after_scoring_opened_is_still_disclosed(tmp_path):
     rows = [x["subcap"] for f in Path(tmp_path / "b").rglob("scoring-*.json")
             for x in json.loads(f.read_text()).get("rows_to_score", [])]
     assert cells[0] not in rows, "a waived cell is not handed to a scorer"
+
+
+def test_every_downstream_reader_honours_a_covering_waiver(tmp_path):
+    """arbor-bank 2026-10-06: dispatch, research_ready and the SCORING gate
+    honoured the waiver; the report preconditions, handoff, orient and the
+    watchdog each re-read floors_<cat>.json and refused it."""
+    import inspect
+    from engine import handoff, narrative, orient, watchdog
+    run, wb, cat, cells = _failing(tmp_path)
+    assert waiver.scoreable_verdict(wb, run.qa_dir, cat)["gate"] == "FAIL"
+    waiver.record(wb, category=cat, cells=[cells[0]], by="Jo Analyst", reason=REASON)
+    v = waiver.scoreable_verdict(run.open(), run.qa_dir, cat)
+    assert v["gate"] == "PASS" and v["waived"]
+    for mod in (narrative, handoff, orient, watchdog, A):
+        src = inspect.getsource(mod)
+        assert "floors_gate.read_verdict(" not in src, mod.__name__
+    wb2 = run.open()
+    expected = sum(1 for r in wb2.scoring_rows()
+                   if str(r.get("SubCap_ID")).startswith(cat[:2])
+                   and str(r.get("SubCap_ID")) != cells[0]
+                   and not str(r.get("Score") or "").strip())
+    assert watchdog._unscored_by_pillar(wb2).get(cat[:2], 0) == expected, \
+        "a waived cell is not counted as unscored work"
