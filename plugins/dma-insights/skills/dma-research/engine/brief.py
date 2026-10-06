@@ -2194,12 +2194,15 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
         qa = Path(run.qa_dir) if run is not None else sdir.parent / "07_qa"
         packet = _bound({
             "agent": f"{page}-surface-producer", "shared": sh,
-            "output": (f"Write every section you own as ONE file: "
-                       f"`{sdir}/{page}.<section>.json` (flat, no subfolder; e.g. "
-                       f"`{sdir}/{page}.workbook_scores.json`), through Bash "
+            # The directory is named ONCE: it is the run root's, so its length
+            # is the run's, and three copies of it pushed a page lane past the
+            # packet ceiling on a longer root (CI runner, 2026-10-06).
+            "output": (f"Write every section you own as ONE file, "
+                       f"`{page}.<section>.json`, flat in `{sdir}` (no subfolder; "
+                       f"e.g. `{page}.workbook_scores.json`), through Bash "
                        f"(`python3 -c 'import json; json.dump(...)'`). `ship_page.py` "
-                       f"reads exactly `{sdir}/{page}.*.json`; a file anywhere else "
-                       f"is not shipped."),
+                       f"reads exactly `{page}.*.json` in that directory; a file "
+                       f"anywhere else is not shipped."),
             "first_commands": [
                 f"python3 -m engine.ship state {e}",
                 f"python3 -m engine.surface_export plan --page {page}",
