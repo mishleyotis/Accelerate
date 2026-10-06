@@ -2007,11 +2007,23 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
             "templates_read_before_authoring": templates,
             "preconditions_failing": pre,
             "sections_state": state,
+            # The validator's full note for every section still open: what
+            # to fix, in its own words. Without it the writer read a
+            # 300-character Provenance cut and missed every fix past it.
+            "revise_notes": {
+                sid: {"verdict": r.get("verdict"), "at": r.get("at"), "note": r.get("note")}
+                for (rep, sid), r in N.latest_reviews(wb, key).items()
+                if r.get("verdict") != "PASS"
+                and sid in {str(x) for st_, ids in (state.get("sections_by_status") or {}).items()
+                            if st_ != "READY" for x in ids}},
             "sections": sections,
             "report_min_words": N.report_min_words_for(wb, spec),
             "rules": [
                 "write ONLY the sections not READY in sections_state; a READY "
                 "section carries an independent verdict and rewriting it reopens it",
+                "for a section on REVISE, `revise_notes[<id>].note` is the validator's "
+                "full note: address EVERY numbered fix in it, and change nothing it "
+                "says already stands",
                 "every section goes through `engine.narrative write`, which refuses "
                 "prose that is not an argument and a body missing a block",
                 "a failing precondition means STOP and report — no --force writes a "
