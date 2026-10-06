@@ -209,6 +209,16 @@ shape, so they buy nothing at all.
   in the client's own terms, then what that establishes about the capability, then
   the one thing that would move it or the precise limit of what the evidence reaches.
   The evidence position belongs in the sentence as its warrant, not as its subject.
+  **Never stitch quotations to reach the floor, and never write syntheses with a
+  script.** At Arbor Bank (2026-10-06) a lane met the 40-word floor with a
+  generator that chained excerpts: "For <client>, the cited source states: '…' A
+  further cited source adds: '…'" on 106 of 166 cells, and "Also: '<an excerpt
+  already quoted>'" on 21 more. CG-15 now refuses all three forms as a **quote
+  scaffold**: a source-reporting lead-in, a padded quotation, or a synthesis at
+  50% quotation or more (Baxter's 706 sit at 0%, Susser's 216 at 29% at most). The
+  excerpts already render beside the synthesis in the drawer. A cell whose
+  evidence says little gets a short honest synthesis marked thin, or a recorded
+  absence (`thin`, `sources_searched`, `closure_condition`). Never pad it.
 - **Grain lock, before any prose.** The score, the peer median and the cell id must
   come from the same row of `subcap_scores`. One line pairing a sub-capability's
   score with a category's id produced 125 violations across the corpus. A mismatch
