@@ -54,7 +54,7 @@ def test_one_row_no_longer_closes_the_technology_baseline(tmp_path):
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
     eid = _profile_evidence(wb)
-    techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                     status="CONFIRMED", method="public_document",
                     basis="named as the digital banking platform",
                     providers=["web"], subcaps=[], evidence_ids=[eid],

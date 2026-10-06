@@ -32,7 +32,7 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
                     providers=["clay", "exa"],
                     subcaps=[cells[0]], evidence_ids=eids,
                     source_urls=["https://acme.example/ar25"])
-    techscan.record(wb, product="Snowflake", vendor="Snowflake",
+    techscan.record(wb, product="Snowflake Data Cloud", vendor="Snowflake",
                     layer="DATA", status="INFERRED", method="job_posting",
                     providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")

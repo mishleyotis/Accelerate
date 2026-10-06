@@ -382,7 +382,7 @@ def close_prelim(run, *, entity="Acme Credit Union"):
              "named as the digital banking platform in the 2025 call report"),
             ("Fiserv DNA", "Fiserv", "OPS", "CONFIRMED",
              "named as the core processor in the 2025 call report"),
-            ("Snowflake", "Snowflake", "DATA", "INFERRED",
+            ("Snowflake Data Cloud", "Snowflake", "DATA", "INFERRED",
              "two 2025 engineering postings require production Snowflake"),
             ("public cloud hosting", "none named", "INFRA", "ABSENT",
              "searched the call report, the careers site and three vendor "

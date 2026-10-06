@@ -672,8 +672,19 @@ def import_explorium(wb: RunWorkbook, path, *, status: str = "CLAIMED",
                  + (f", broker confidence {r['confidence']}"
                     if r["confidence"] else "")
                  + f" — read from {Path(parsed['file']).name}")
+        product, vendor = r["product"], r["vendor"]
+        if str(vendor or "").strip().lower() == str(product or "").strip().lower():
+            # A one-column "Vendor / Product" export names the company once,
+            # and `record` refuses product == vendor (CG-20) — which refused
+            # EVERY row of such an export. The export's own category says what
+            # the company supplies here; without one the vendor is unstated,
+            # not repeated.
+            if r["category"]:
+                product = f"{product} {r['category']}"
+            else:
+                vendor = None
         try:
-            ts = record(wb, product=r["product"], vendor=r["vendor"],
+            ts = record(wb, product=product, vendor=vendor,
                         layer=r["layer"], status=status,
                         method="technographic_scan", basis=basis,
                         providers=["explorium"],
