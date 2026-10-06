@@ -39,7 +39,7 @@ def _three_layer_scan(tmp_path):
                     providers=["clay", "exa"], subcaps=[cells[0]],
                     evidence_ids=eids,
                     source_urls=["https://acme.example/core"])
-    techscan.record(wb, product="Snowflake", vendor="Snowflake", layer="DATA",
+    techscan.record(wb, product="Snowflake Data Cloud", vendor="Snowflake", layer="DATA",
                     status="INFERRED", method="job_posting",
                     providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")

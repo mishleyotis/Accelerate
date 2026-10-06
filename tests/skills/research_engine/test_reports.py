@@ -175,7 +175,7 @@ def test_changing_the_workbook_changes_the_report(tmp_path):
     before = reports.render(wb, spec, run.deliverables)["citations"]
     # a sanctioned write to a sheet §8 curates …
     A.solution(wb, sol_id="SOL-02", name="Real-time fraud analytics",
-               platform="Verafin", categories=[wb.selected_subcaps()[0][:4]])
+               platform="GRC Platform", categories=[wb.selected_subcaps()[0][:4]])
     # … and an uncited register row, which the Doc forbids reproducing
     L.append_evidence(wb, source_name="NCUA call report 2025",
                       source_url="https://ncua.example/cr25", tier="T1",

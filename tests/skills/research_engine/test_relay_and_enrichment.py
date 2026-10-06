@@ -327,7 +327,10 @@ def test_drain_batch_writes_one_specialist_lane_per_category_with_a_label(tmp_pa
     for must in ("engine.cli search", "--tool exa", "engine.cli evidence", "engine.relay record",
                  "BLOCKED", "refusal text verbatim", f"--run {run.run_id} --root {run.root}"):
         assert must in text, must
-    assert "WebSearch instead" in text, "the brief forbids the silent fallback"
+    # The failover is sanctioned (owner, 2026-10-04) but never silent: it is
+    # logged as the tool that ran, never as a connector.
+    assert "--tool web_search" in text and "never as exa" in text, \
+        "the brief forbids a WebSearch logged as a connector"
     # restricted to one category when asked
     only = relay.drain_batch(run, run.open(), out_dir=tmp_path / "relay2",
                              categories=["P2C3"], mode="lane")

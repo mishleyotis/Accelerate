@@ -220,7 +220,7 @@ def lane_solutions(agent, prompt_file, ctx):
     wb = ctx.run.open()
     if not [r for r in wb.rows("Solution_Catalogue") if any(r.values())]:
         A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
-                   platform="Alkami", categories=[wb.selected_subcaps()[0][:4]])
+                   platform="Financial Services Cloud", categories=[wb.selected_subcaps()[0][:4]])
     if not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())] \
             and "Platform_Peer_Adoption" not in completeness.reasons(wb):
         completeness.declare(wb, "Platform_Peer_Adoption",

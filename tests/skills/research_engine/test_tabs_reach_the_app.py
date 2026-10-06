@@ -66,6 +66,48 @@ def test_the_peer_tab_lands_at_the_grain_the_app_reads(tmp_path):
     assert peers == {"Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU"}, peers
 
 
+_RULE = ("Texas commercial banks in the 2.4-4.3bn asset band in the same "
+         "metro markets selling to the same middle-market clients")
+
+
+def test_a_peer_name_with_a_comma_lands_as_one_peer_with_its_score(tmp_path):
+    """Susser Bank, 2026-10-06: names like "Horizon Bank, SSB (Austin, CERT
+    3256)" split on their inner commas and seven peers reached the server's
+    peer table as fifteen, "CERT 3256)" among them."""
+    from dma_worker.workbook_parser import parse_peer_benchmarks
+
+    run = new_run(tmp_path, prelim=False, n=8)
+    wb = run.open()
+    out = prelim.peers(wb, ["Inwood National Bank (Dallas, CERT 19080)",
+                            "Horizon Bank, SSB (Austin, CERT 3256)",
+                            "TexasBank (Fort Worth, CERT 19559)"],
+                       basis="inferred", rule=_RULE)
+    cat = out["categories"][0]
+    prelim.peer_median(wb, category=cat, median="1.50", p25="1.25", p75="1.75",
+                       basis="inferred", source="peer research 2026-10-06",
+                       peer_scores="1.25, 1.75, 1.50")
+    rows = parse_peer_benchmarks(str(run.workbook_path),
+                                 subject_names=["Acme Bank"], obs=[])
+    got = {n: s for r in rows if r["category_id"] == cat for n, s in r["peers"]}
+    assert len(got) == 3, got
+    assert not any("CERT" in n and "(" not in n for n in got), got
+    assert sorted(float(s) for s in got.values()) == [1.25, 1.5, 1.75], got
+    # The lock keeps the names verbatim; only the grid's copy is comma-safe.
+    assert "Horizon Bank, SSB (Austin, CERT 3256)" in \
+        wb.handoff_lock()["locked_peer_set"]
+
+
+def test_peer_scores_that_do_not_line_up_with_the_names_are_refused(tmp_path):
+    run = new_run(tmp_path, prelim=False, n=8)
+    wb = run.open()
+    out = prelim.peers(wb, ["Peer Alpha", "Peer Beta", "Peer Gamma"],
+                       basis="inferred", rule=_RULE)
+    with pytest.raises(prelim.PrelimRefusal, match="positional"):
+        prelim.peer_median(wb, category=out["categories"][0], median="1.5",
+                           basis="inferred", source="peer research 2026-10-06",
+                           peer_scores="1.25, 1.75")
+
+
 def test_a_frozen_peer_set_reads_as_named_and_unscored(tmp_path):
     """PRELIM freezes the cohort BEFORE any score exists. Those peers are
     real institutions with null scores — which is what the cohort should say
@@ -165,7 +207,7 @@ def test_a_peer_the_run_could_not_settle_is_null_not_a_negative(tmp_path):
     like data, which invariant 9 forbids."""
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
-    ts = techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    ts = techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                          status="CLAIMED", method="technographic_scan",
                          providers=["explorium"],
                          basis="the Explorium export carries this row")
@@ -189,7 +231,7 @@ def test_a_peer_the_run_could_not_settle_is_null_not_a_negative(tmp_path):
 def test_peer_coverage_is_null_when_nothing_was_established(tmp_path):
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
-    ts = techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    ts = techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                          status="CLAIMED", method="technographic_scan",
                          providers=["explorium"],
                          basis="the Explorium export carries this row")

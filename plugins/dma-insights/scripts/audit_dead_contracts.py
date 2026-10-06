@@ -78,6 +78,11 @@ READ_BY_OTHER_MEANS = {
     "cost_baseline.json": "engine.cost.measured_baseline reads the path from "
                           "$DMA_COST_BASELINE (cost.py: `export ... # every "
                           "projection then starts here`)",
+    "report_reviews.jsonl": "engine.narrative.latest_reviews reads it through "
+                            "_reviews_path(), which joins REVIEWS_FILE — the "
+                            "read line names neither, so the read-back scan "
+                            "misses it; the writer that feeds the next "
+                            "REVISE round its validator's whole note",
 }
 
 

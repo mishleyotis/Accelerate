@@ -246,7 +246,7 @@ def main():
                "--subcap", first, "--evidence-id",
                wb.rows("Evidence_Detail")[0]["E_ID"]],
               ["record", "--run", RUN, "--root", str(ROOT), "--product",
-               "Snowflake", "--vendor", "Snowflake", "--layer", "DATA",
+               "Snowflake Data Cloud", "--vendor", "Snowflake", "--layer", "DATA",
                "--status", "ABSENT", "--method", "technographic_scan",
                "--basis", "careers, engineering blog and builtwith scan "
                           "returned 0 hits 2023-2026"]):
