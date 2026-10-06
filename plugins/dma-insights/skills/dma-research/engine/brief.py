@@ -2068,9 +2068,27 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
 PAGES = ("techstack", "context", "heatmap", "overview", "insights", "platform")
 
 
+#: Page production phases, in order (owner/QA F-C01-021, 2026-09-28: a
+#: surface producer holds no Agent tool and assembles what the per-surface
+#: producers wrote; the driver must run them, then challenge and consolidate
+#: the `produce` sections, then assemble). Until 2026-10-06 the driver ran
+#: only the assembler: Susser Bank's heatmap lane returned a delegation plan
+#: and shipped nothing, three attempts running.
+PAGE_PHASES = ("fragments", "challenge", "consolidate", "assemble")
+PLUGIN_ROOT = Path(__file__).resolve().parents[3]
+
+
+def page_producers(page: str) -> list[str]:
+    """The per-surface producers for a page, from the roster on disk."""
+    d = PLUGIN_ROOT / "agents" / "production" / page
+    return sorted(f.stem for f in d.glob(f"{page}-*-producer.md")
+                  if f.stem != f"{page}-surface-producer") if d.is_dir() else []
+
+
 def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                contract_file: Path, verdicts_file: Path | None = None,
-               pages: list[str] | None = None) -> dict:
+               pages: list[str] | None = None, phase: str = "assemble",
+               sections_dir: Path | None = None) -> dict:
     """One `<page>-surface-producer` lane per page: the connector run id,
     the PATH of the page contract, the reasons the last verdict gave for
     that page — and NO payload bytes. A prompt that carries a payload is the
@@ -2111,8 +2129,17 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             by_route[_v["route"]] = by_route.get(_v["route"], 0) + 1
         page_drawers = [d for d in SX.drawers()
                         if str(d.get("renders_section") or "").startswith(f"{page}.")]
+        sdir = Path(sections_dir) if sections_dir else Path(contract_file).parent \
+            if Path(contract_file).is_dir() else Path(contract_file).parent.parent
+        qa = Path(run.qa_dir) if run is not None else sdir.parent / "07_qa"
         packet = _bound({
             "agent": f"{page}-surface-producer", "shared": sh,
+            "output": (f"Write every section you own as ONE file: "
+                       f"`{sdir}/{page}.<section>.json` (flat, no subfolder; e.g. "
+                       f"`{sdir}/{page}.workbook_scores.json`), through Bash "
+                       f"(`python3 -c 'import json; json.dump(...)'`). `ship_page.py` "
+                       f"reads exactly `{sdir}/{page}.*.json`; a file anywhere else "
+                       f"is not shipped."),
             "first_commands": [
                 f"python3 -m engine.ship state {e}",
                 f"python3 -m engine.surface_export plan --page {page}",
@@ -2120,7 +2147,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 f"   # the full card map (also the join://cards resource)",
                 f"# read the contract at the path below, not from memory",
                 f"python3 plugins/dma-insights/skills/dma-surface-production/scripts/ship_page.py "
-                f"{connector_run} {page} --sections <your sections dir> --incremental "
+                f"{connector_run} {page} --sections {sdir} --incremental "
                 f"--claim --verdicts-out <ROOT>/07_qa/verdict_{page}.json"],
             "page": page, "connector_run_id": connector_run,
             "contract_file": str(cf),
@@ -2192,7 +2219,47 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "item key the contract card does not declare",
             ],
         }, "last_verdict_reasons", "waiting_on")
-        lanes.append((f"page-{page}", packet, f"Page — {page}"))
+        produce = list(sp["produce"])
+        if phase == "fragments":
+            for agent in page_producers(page):
+                lanes.append((f"page-{page}-{agent}", {
+                    **packet, "agent": agent,
+                    "role": (f"You are ONE per-surface producer for the {page} page. Write "
+                             f"ONLY the section(s) your agent definition says you own, to "
+                             f"the paths in `output`. Do not assemble the page, do not "
+                             f"ship, do not touch another producer's file.")},
+                    f"Page {page} — {agent}"))
+        elif phase == "challenge":
+            if produce:
+                lanes.append((f"page-{page}-challenge", {
+                    **packet, "agent": "finding-challenger",
+                    "role": (f"Challenge the PRODUCE sections of the {page} page only: "
+                             + ", ".join(f"`{sdir}/{x}.json`" for x in produce)
+                             + ". `format_only_sections` were challenged at research and "
+                               "are not yours. Return your challenge report as your final "
+                               "message; the driver saves it for the consolidator.")},
+                    f"Page {page} — challenge"))
+        elif phase == "consolidate":
+            if produce:
+                lanes.append((f"page-{page}-consolidate", {
+                    **packet, "agent": "page-consolidator",
+                    "role": (f"Consolidate the {page} page from the section files at "
+                             f"`{sdir}/{page}.*.json` and the challenge report at "
+                             f"`{qa}/challenge_{page}.md`. Return the consolidated "
+                             f"changes (per section: the JSON path and its new value, "
+                             f"or the whole section) as your final message; the driver "
+                             f"saves it to `{qa}/consolidated_{page}.md` for the "
+                             f"assembler, who writes the files.")},
+                    f"Page {page} — consolidate"))
+        else:
+            role = (f"Assemble the {page} page from the per-surface files already at "
+                    f"`{sdir}/{page}.*.json`"
+                    + (f", applying the consolidated changes in `{qa}/consolidated_{page}.md`"
+                       if produce else "")
+                    + ". Reconcile across sections and leave every final section at "
+                      "the path in `output`. A section a per-surface producer did not "
+                      "write, you write yourself from the workbook per `section_plan`.")
+            lanes.append((f"page-{page}", {**packet, "role": role}, f"Page — {page}"))
     out = _write_lanes(out_dir, lanes, run=run, stage="PAGES",
                        batch_name="batch_pages.json")
     # the promise this view makes: no payload bytes in any prompt

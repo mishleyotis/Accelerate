@@ -2422,6 +2422,19 @@ class Pipeline:
             f.write_text(json.dumps(self.opts.reads.page_contract(page), indent=2, default=str))
         return f
 
+    def _save_page_reports(self, pages, phase: str) -> None:
+        """The challenger and consolidator return their reports as their
+        final message and hold no Write tool; the next phase reads a file."""
+        from . import relay
+        name = {"challenge": "challenge", "consolidate": "consolidated"}[phase]
+        for p in pages:
+            log = self.run.root / "agent_logs" / f"page-{p}-{phase}.jsonl"
+            if not log.is_file():
+                continue
+            text = relay.lane_output(log)
+            if text.strip():
+                (self.run.qa_dir / f"{name}_{p}.md").write_text(text, encoding="utf-8")
+
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
         """Produce (lanes) and ship each page until it passes or the retries
         are spent. A FAIL re-dispatches ONLY that page, with the verdict's
@@ -2445,13 +2458,23 @@ class Pipeline:
             if produce:
                 for p in todo:
                     self._contract_file(p)
-                b = brief.page_batch(self.wb, run=self.run,
-                                     out_dir=self._briefs(f"pages_{version}_{attempt}"),
-                                     connector_run=connector_run,
-                                     contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
-                                     verdicts_file=verdicts_file if verdicts else None,
-                                     pages=list(todo))
-                self._count(self._dispatch(b, stage=f"PAGES_{version}"))
+                # First attempt: every phase. A retry is a repair: the
+                # assembler alone, carrying the verdict's reasons.
+                phases = brief.PAGE_PHASES if attempt == 0 else ("assemble",)
+                for phase in phases:
+                    b = brief.page_batch(self.wb, run=self.run,
+                                         out_dir=self._briefs(f"pages_{version}_{attempt}_{phase}"),
+                                         connector_run=connector_run,
+                                         contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
+                                         verdicts_file=verdicts_file if verdicts else None,
+                                         pages=list(todo), phase=phase,
+                                         sections_dir=self._sections_dir())
+                    if not b.get("lanes"):
+                        continue
+                    self.opts.log(f"  [PAGES_{version}] {phase}: {b['lanes']} lane(s)")
+                    self._count(self._dispatch(b, stage=f"PAGES_{version}"))
+                    if phase in ("challenge", "consolidate"):
+                        self._save_page_reports(list(todo), phase)
             still = []
             for p in todo:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
