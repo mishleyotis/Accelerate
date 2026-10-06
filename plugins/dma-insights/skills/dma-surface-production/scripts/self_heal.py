@@ -290,8 +290,37 @@ def fix_style(obj, key: str = ""):
     if isinstance(obj, list):
         return [fix_style(v, key) for v in obj]
     if isinstance(obj, str) and len(obj) >= 1:
+        if key == "verdict":
+            return _verdict_word(obj)
         return _fix_text(key, obj)
     return obj
+
+
+#: The connector's r_layer.verdict vocabulary (AG-01). A producer writing a
+#: sentence here ("SURVIVES: public record shows...", "UNCERTAIN until
+#: discovery...") is refused; the reasoning already lives in the r_layer's
+#: other fields. Susser Bank, 2026-10-06: 19 refusals across three pages.
+VERDICTS = ("ACCEPT", "ACCEPTED", "CONFIRMED", "DROP", "DROPPED", "FAIL", "FAILED",
+            "HOLDS", "NOT_SUPPORTED", "PASS", "REFUTED", "REJECT", "REJECTED", "SHIP",
+            "SHIP_LOW_CONF", "SUPPORTED", "UNSUPPORTED", "WITHDRAWN")
+
+
+def _verdict_word(v: str) -> str:
+    t = v.strip().upper()
+    if t in VERDICTS:
+        return t
+    head = re.split(r"[^A-Z_]", t, 1)[0]
+    if head in VERDICTS:
+        return head
+    for needle, word in (("NOT_SUPPORTED", "NOT_SUPPORTED"), ("UNSUPPORT", "UNSUPPORTED"),
+                         ("REFUT", "REFUTED"), ("WITHDR", "WITHDRAWN"), ("REJECT", "REJECTED"),
+                         ("DROP", "DROPPED"), ("UNCERTAIN", "SHIP_LOW_CONF"),
+                         ("LOW_CONF", "SHIP_LOW_CONF"), ("SURVIV", "HOLDS"), ("HOLD", "HOLDS"),
+                         ("CONFIRM", "CONFIRMED"), ("SUPPORT", "SUPPORTED"), ("ACCEPT", "ACCEPTED"),
+                         ("PASS", "PASS"), ("SHIP", "SHIP")):
+        if needle in t.replace(" ", "_"):
+            return word
+    return v
 
 
 def check_bars(payload, findings):

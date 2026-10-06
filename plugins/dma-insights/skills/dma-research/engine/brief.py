@@ -2078,6 +2078,22 @@ PAGE_PHASES = ("fragments", "challenge", "consolidate", "assemble")
 PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 
 
+def _group_reasons(reasons) -> list[str]:
+    groups: dict = {}
+    for r in reasons or []:
+        if isinstance(r, dict):
+            k = (r.get("gate_id") or "?", r.get("section") or "?")
+            g = groups.setdefault(k, {"n": 0, "paths": [], "msg": str(r.get("message") or "")})
+            g["n"] += 1
+            if len(g["paths"]) < 3:
+                g["paths"].append(str(r.get("path") or ""))
+        else:
+            k = ("note", str(r)[:60])
+            groups.setdefault(k, {"n": 1, "paths": [], "msg": str(r)})
+    return [f"{gate} {sec} x{g['n']} (e.g. {', '.join(g['paths'])}): {g['msg'][:420]}"
+            for (gate, sec), g in list(groups.items())[:16]]
+
+
 def page_producers(page: str) -> list[str]:
     """The per-surface producers for a page, from the roster on disk."""
     d = PLUGIN_ROOT / "agents" / "production" / page
@@ -2192,7 +2208,11 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "read": f"join://drilldowns — {len(page_drawers)} panel(s) on this "
                         f"page; an authored one carries its synthesis prompt there",
             },
-            "last_verdict_reasons": [str(r)[:300] for r in (reasons or [])][:12],
+            # GROUPED, so every distinct defect fits: one line per (gate,
+            # section) with its count, an example path and the message. The
+            # raw list was cut to fit the packet ceiling and a repair lane
+            # never saw 3-9 of its reasons (Susser Bank PAGES_A/B, 2026-10-06).
+            "last_verdict_reasons": _group_reasons(reasons),
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
                 "the payload shape is law — never invent a field",
