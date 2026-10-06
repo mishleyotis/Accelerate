@@ -148,7 +148,7 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **83** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **85** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
@@ -217,7 +217,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `CG-PAR` | **No page lacks the structure every gold run serves.** At promote, each staged page is compared with the committed shape-only gold (surface_gold.json: keys, list lengths and per-row null patterns of the promoted gold runs, no values). The run's own gold record is left out, and gold of its… *(registry-only: no module emits this id today)* | block | — |
 | `CG-STALE` | **A promoted page does not say its own run is withdrawn.** At promote, no section's empty_state or narrative_thread asserts that the run being promoted is withdrawn or withheld pending repair. *(registry-only: no module emits this id today)* | block | — |
 
-### AG · Analytical (8)
+### AG · Analytical (10)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -227,8 +227,10 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `AG-04` | **A named peer's technographics carry their source.** Where peer_coverage is stated, a per-peer breakdown exists with one row per peer including the peers that could not be established (deployed: null); every deployed row carries a source_url and an as_of; and the share agrees with its own… | block | `gates/AG-04.md` |
 | `AG-05` | **One event, one direction, across both pages.** An event the timeline classifies as constraining (signal NEGATIVE / maturity_effect CONSTRAINED) must not be the same event a why-now signal names as the reason to act — matched on a shared evidence id, or on the same date and subject.… | block | — |
 | `AG-09` | **A rank that contradicts its own score says why.** For every platform P: if some platform Q ranks above P and scores below it, P carries a non-empty fit_basis or story_md. Rows missing either number are skipped, not failed. | block | — |
+| `AG-10` | **Every recommendation is rebutted.** Every scored platform card and every recommendation carries an r_layer.counter of at least 30 words naming a specific alternative (another candidate, a discarded platform, or a named path: consolidate, extend the incumbent, native… | block | — |
 | `AG-11` | **A why-now signal is an event, not a recap.** No signal's prose states this assessment's own pillar, category or composite figures where a dated external event belongs. | block | — |
 | `AG-12` | **A starter opens on an opportunity.** No conversation starter makes the client the subject of a failure — no contradiction claimed, no incapacity as the opening, no second-person absence, no ranking down. | block | — |
+| `AG-13` | **A first place is earned, not inherited from breadth.** When Addressable opportunity spreads by less than 0.02 across the scored cards and the rank-1 card leads by a declared sequence or by Catalogue interconnect, that card carries a `Lead test:` probe citing client evidence that makes it… | block | — |
 
 ### SG · Safeguard (2)
 
