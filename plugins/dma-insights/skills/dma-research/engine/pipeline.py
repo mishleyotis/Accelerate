@@ -304,6 +304,12 @@ class McpReads:
         return self._call("get_page_contract", {"page": page})
 
 
+#: SG-V4 paths that record a search or a detection rather than make a claim.
+_LADDER_PATH = re.compile(
+    r"(peer_deployments\[\d+\]\.basis|dropped\[\d+\]\.(reason|candidate)|"
+    r"detection_basis|sources_searched|queries_run|probes_run|reach_note)$")
+
+
 class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
     the final call, promote_run through mcp_raw — the two audited paths."""
@@ -2501,7 +2507,16 @@ class Pipeline:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
                                              self.run.qa_dir / f"verdict_{p}_{version}.json")
                 sgv4 = res.get("sg_v4_fails") or []
-                if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
+                # The budget is for CLAIMS. A line that records a search or
+                # how a row was detected (a peer row's basis, a dropped
+                # candidate's reason, detection_basis, sources_searched) has
+                # no excerpt to ground against by nature; the connector still
+                # discloses it (SG-V4 discloses and promotes, invariant 12),
+                # but it does not spend the budget. Susser Bank, 2026-10-06:
+                # 48 SG-V4 flags on techstack, 40 of them ladder/provenance.
+                claims = [w for w in sgv4 if not _LADDER_PATH.search(str(w.get("path") or ""))]
+                if res.get("status") == "pass" and len(claims) > self.opts.sg_v4_budget:
+                    sgv4 = claims
                     # The connector discloses-and-promotes SG-V4 (invariant 12);
                     # the driver reads the disclosure and REVISES ungrounded prose
                     # before accepting the page, rather than shipping the claim the
