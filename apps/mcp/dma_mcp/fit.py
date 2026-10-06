@@ -84,6 +84,21 @@ def _readiness_token(raw) -> str:
     return _READINESS_VERDICT.get(key, "red")
 
 
+#: Categories no technology platform addresses, whatever the catalogue lists.
+#:
+#: Owner decision 2026-10-06, after Susser Bank: the v7.0 catalogue maps every
+#: P1 cell to many platforms (all 205 to CRM Analytics, 178 to Platform
+#: Foundation, 94 to FSC), and an unevidenced P1 cell scores 1.0 — the largest
+#: gap on the page — so strategy and culture cells became the fit drivers of
+#: technology cards: "Cultural Due Diligence" was MuleSoft's top contributor
+#: and "Venture Allocation" drove Shield and Data Cloud. Digital strategy
+#: (P1C1), innovation funding (P1C3) and culture (P1C4) are moved by people
+#: and decisions, not by a product. Governance and risk appetite (P1C2) stays:
+#: GRC and Shield do address it. A candidate sent with `advisory: true` (a
+#: strategy workshop) keeps every cell its area lists.
+NON_PLATFORM_CATEGORIES = frozenset({"P1C1", "P1C3", "P1C4"})
+
+
 def _areas_of(raw) -> list:
     """`l3_platform_areas` is a text array on the catalogue row, and a couple
     of loads wrote it as a JSON string. Both shapes are read rather than one
@@ -323,6 +338,9 @@ def platform_fit(conn, run_id, candidates) -> dict:
         plat_name = str(raw.get("platform") or "").strip()
         area = _norm_area(raw.get("l3_area"))
         sids = by_area.get(area, [])
+        if not raw.get("advisory"):
+            sids = [s for s in sids
+                    if cells[s]["category"] not in NON_PLATFORM_CATEGORIES]
         if not sids:
             unmatched.append({"platform": raw.get("platform"),
                               "l3_area": raw.get("l3_area"),
