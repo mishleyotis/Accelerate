@@ -145,6 +145,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 AGENT_RUN = PLUGIN / "scripts" / "agent_run.py"
 MCP_RAW = PLUGIN / "scripts" / "mcp_raw.py"
 SHIP_PAGE = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "ship_page.py"
+SELF_HEAL = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "self_heal.py"
 
 
 def _utcnow() -> str:
@@ -325,6 +326,13 @@ class ShipPageShipper:
             return {"status": "fail", "rc": None, "sg_v4_fails": [],
                     "reasons": [f"no section files for {page} in {sections_dir}: "
                                 f"the page lane produced nothing to ship"]}
+        # The two mechanical surface rules (CG-11 capitals, CG-27
+        # abbreviations) are fixed deterministically before every submit: a
+        # producer repairing them by hand missed cases and spent all three
+        # attempts on them (Susser Bank, 2026-10-06: 55 findings, 2 pages).
+        subprocess.run([sys.executable, str(SELF_HEAL), "--sections", str(sections_dir),
+                        "--page", page, "--fix", "--no-cg15"],
+                       capture_output=True, text=True, timeout=600)
         r = subprocess.run(
             [sys.executable, str(SHIP_PAGE), connector_run, page,
              "--sections", str(sections_dir), "--producer", self.producer,
@@ -2458,23 +2466,36 @@ class Pipeline:
             if produce:
                 for p in todo:
                     self._contract_file(p)
-                # First attempt: every phase. A retry is a repair: the
-                # assembler alone, carrying the verdict's reasons.
-                phases = brief.PAGE_PHASES if attempt == 0 else ("assemble",)
-                for phase in phases:
-                    b = brief.page_batch(self.wb, run=self.run,
-                                         out_dir=self._briefs(f"pages_{version}_{attempt}_{phase}"),
-                                         connector_run=connector_run,
-                                         contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
-                                         verdicts_file=verdicts_file if verdicts else None,
-                                         pages=list(todo), phase=phase,
-                                         sections_dir=self._sections_dir())
-                    if not b.get("lanes"):
+                # First attempt: every phase, but only for a page with no
+                # section files on disk. A page already on disk (a resumed
+                # driver, a repaired file) ships first; regenerating it would
+                # overwrite the repair and re-pay every producer. A retry is
+                # a repair: the assembler alone, carrying the verdict's reasons.
+                on_disk = {p for p in todo if list(self._sections_dir().glob(f"{p}.*.json"))}
+                if attempt == 0:
+                    groups = [(brief.PAGE_PHASES, [p for p in todo if p not in on_disk])]
+                    if on_disk:
+                        self.opts.log(f"  [PAGES_{version}] on disk, shipping first: "
+                                      f"{', '.join(sorted(on_disk))}")
+                else:
+                    groups = [(("assemble",), list(todo))]
+                for phases, pg in groups:
+                    if not pg:
                         continue
-                    self.opts.log(f"  [PAGES_{version}] {phase}: {b['lanes']} lane(s)")
-                    self._count(self._dispatch(b, stage=f"PAGES_{version}"))
-                    if phase in ("challenge", "consolidate"):
-                        self._save_page_reports(list(todo), phase)
+                    for phase in phases:
+                        b = brief.page_batch(self.wb, run=self.run,
+                                             out_dir=self._briefs(f"pages_{version}_{attempt}_{phase}"),
+                                             connector_run=connector_run,
+                                             contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
+                                             verdicts_file=verdicts_file if verdicts else None,
+                                             pages=pg, phase=phase,
+                                             sections_dir=self._sections_dir())
+                        if not b.get("lanes"):
+                            continue
+                        self.opts.log(f"  [PAGES_{version}] {phase}: {b['lanes']} lane(s)")
+                        self._count(self._dispatch(b, stage=f"PAGES_{version}"))
+                        if phase in ("challenge", "consolidate"):
+                            self._save_page_reports(pg, phase)
             still = []
             for p in todo:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),

@@ -94,6 +94,13 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
     if not str(product or "").strip():
         raise ScanRefused("a register row names a PRODUCT; a bare vendor or "
                           "a category is the CG-20 defect")
+    if str(vendor or "").strip() and \
+            re.sub(r"\s*\(.*?\)", "", product).strip().lower() == str(vendor).strip().lower():
+        raise ScanRefused(
+            f"product and vendor are both {product.strip()!r}: name the thing the "
+            f"vendor supplies (e.g. 'DocuSign eSignature', 'Optimal Blue pricing "
+            f"engine'), from the detection basis. The connector refuses the "
+            f"duplicate at submit (CG-20); here it costs nothing.")
     if len(str(basis or "").strip()) < 15:
         raise ScanRefused("Detection_Basis is one real clause — what was "
                           "seen, where — not a token")

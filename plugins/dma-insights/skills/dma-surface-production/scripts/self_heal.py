@@ -236,6 +236,40 @@ def check_capitals(payload, findings):
                  f"uppercase letter after its first character (nCino, iOS) is "
                  f"the vendor's own spelling and is exempt"))
 
+def _fix_text(key: str, v: str) -> str:
+    """CG-27 then CG-11 on one string leaf, exactly as the checks read them."""
+    if key not in EXCERPT_FIELDS:
+        for a in sorted(EXPANSION, key=len, reverse=True):
+            pat = re.compile(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])")
+            m = pat.search(v)
+            if not m or "(" + a + ")" in v:
+                continue
+            exp = EXPANSION[a]
+            if m.start() == 0 or v[:m.start()].rstrip().endswith((".", ":", "!", "?")):
+                exp = exp[:1].upper() + exp[1:]
+            v = v[:m.start()] + f"{exp} ({a})" + v[m.end():]
+    if key in PROSE_LEAVES and v.strip():
+        lead = len(v) - len(v.lstrip())
+        first = v.strip().split()[0]
+        if first[:1].islower() and first[1:] == first[1:].lower():
+            v = v[:lead] + v[lead].upper() + v[lead + 1:]
+    return v
+
+
+def fix_style(obj, key: str = ""):
+    """Apply the two mechanical surface rules (CG-11 capitals, CG-27
+    abbreviations) in place. A producer repairing these by hand misses
+    cases: Susser Bank's heatmap and techstack failed three attempts on 55
+    of them (2026-10-06). Excerpts are verbatim and never touched."""
+    if isinstance(obj, dict):
+        return {k: fix_style(v, k) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [fix_style(v, key) for v in obj]
+    if isinstance(obj, str) and len(obj) >= 1:
+        return _fix_text(key, obj)
+    return obj
+
+
 def check_bars(payload, findings):
     """CG-44: a peer median and a delta with no score."""
     for path, v in walk(payload):
@@ -351,6 +385,9 @@ def main(argv=None) -> int:
     ap.add_argument("--no-cg15", action="store_true",
                     help="skip the CG-15 pass (stated in the output as NOT RUN)")
     ap.add_argument("--page", default=None)
+    ap.add_argument("--fix", action="store_true",
+                    help="rewrite the section files in place for the two mechanical "
+                         "rules (CG-11 capitals, CG-27 abbreviations), then check")
     ap.add_argument("--grains", type=Path, default=None)
     ap.add_argument("--entity", action="append", default=[],
                     help="the entity's legal name, for the ET-09 sweep, when "
@@ -365,6 +402,12 @@ def main(argv=None) -> int:
     payload: dict = {}
     for f in sorted(a.sections.glob(pattern)):
         body = json.loads(f.read_text(encoding="utf-8"))
+        if a.fix:
+            fixed = fix_style(body)
+            if fixed != body:
+                f.write_text(json.dumps(fixed, indent=2, ensure_ascii=False), encoding="utf-8")
+                print(f"fixed CG-11/CG-27 in {f.name}")
+            body = fixed
         payload[f.name] = body
 
     check_entity_article(payload, names, findings)
