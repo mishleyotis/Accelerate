@@ -333,7 +333,7 @@ def main():
         conf_args += ["--evidence-id", e]
     r_conf = cli(*conf_args, family="techscan")
     r_abs = cli("record", "--run", RUN, "--root", str(ROOT), "--product",
-                "Snowflake", "--vendor", "Snowflake", "--layer", "DATA",
+                "Snowflake Data Cloud", "--vendor", "Snowflake", "--layer", "DATA",
                 "--status", "ABSENT", "--method", "technographic_scan",
                 "--basis", "targeted search across careers, engineering blog and "
                            "builtwith scan returned 0 hits 2023-2026",

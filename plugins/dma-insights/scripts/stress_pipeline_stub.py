@@ -365,7 +365,7 @@ def main(argv=None) -> int:
           r.returncode == 0 and pages.get("heatmap", {}).get("attempts", 0) >= 2
           and pages.get("techstack", {}).get("attempts") == 1
           and pages.get("heatmap", {}).get("status") == "pass", json.dumps(pages)[:400])
-    briefs = sorted((root / "briefs").glob("pages_A_1/*.md"))
+    briefs = sorted((root / "briefs").glob("pages_A_1_*/*.md"))
     check("the re-dispatch brief carries the verdict's reasons",
           bool(briefs) and any("CG-99" in b.read_text() for b in briefs))
 
