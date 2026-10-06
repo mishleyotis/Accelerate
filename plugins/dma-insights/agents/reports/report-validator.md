@@ -102,6 +102,16 @@ section reads READY, run the whole-report pass and report what you find:
    unsupported, and the reports should say so rather than the reader
    discovering it.
 
+## A probe the section needed and found nothing
+
+The driver runs every probe the templates demand before the writers start
+(`engine.relay.report_probes`). A section that states a searched absence,
+saying what was searched and that it established nothing, meets the control.
+Do not return it for a search the writer could not run: writers hold no web
+tool. Where a probe the control needs has no row in `Search_Log` at all,
+REVISE with the note `PROBE MISSING: <what>`. That is an upstream gap for the
+conductor, not a rewrite.
+
 ## What you never do
 
 Write or edit a section (that is the producer's, and your independence is

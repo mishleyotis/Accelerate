@@ -413,6 +413,27 @@ def stage_preconditions(wb: RunWorkbook, report: str,
     return out
 
 
+_CITE_GROUP = re.compile(
+    r"\((\s*E-\d{3,4}(?::F\d+)?(?:\s*(?:,|;|/|and)\s*E-\d{3,4}(?::F\d+)?)*\s*)\)")
+_CITE_BARE = re.compile(r"(?<![\[\w])(E-\d{3,4}(?::F\d+)?)(?![\]\w])")
+_CITE_ONE = re.compile(r"E-\d{3,4}(?::F\d+)?")
+
+
+def normalize_citations(text: str) -> str:
+    """Every evidence id in the one form the renderer counts: `[E-028]`.
+
+    The renderer (`reports.CITE_RE`) and the template's evidence register
+    read only bracketed ids; `write` accepted "(E-028, E-030)" and bare table
+    cells, so a whole assessment that passed review on content rendered with
+    5 citations against a floor of 118 and every section was reopened on form
+    (Susser Bank, 2026-10-06). A citation's form is not the writer's choice:
+    normalised here, once, at the only write path."""
+    if not text:
+        return text
+    text = _CITE_GROUP.sub(lambda m: " ".join(f"[{x}]" for x in _CITE_ONE.findall(m.group(1))), text)
+    return _CITE_BARE.sub(r"[\1]", text)
+
+
 def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
           actor: str, card: str | None = None, run=None) -> dict:
     """Write one section — or one CARD of a list section — or refuse and say
@@ -437,7 +458,7 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
         raise NarrativeRefusal(
             f"the run is not ready for the {spec.title} — "
             f"{len(pre)} precondition(s) fail:\n  - " + "\n  - ".join(pre))
-    body = _clean_body(record.get("Body"))
+    body = normalize_citations(_clean_body(record.get("Body")))
     problems: list[str] = []
 
     is_card = sec.kind in RS.CARD_KINDS
@@ -626,6 +647,37 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
                                  .get(str(sec.id), []))}
 
 
+REVIEWS_FILE = "report_reviews.jsonl"
+
+
+def _reviews_path(wb: RunWorkbook) -> Path:
+    return Path(wb.path).resolve().parent / "07_qa" / REVIEWS_FILE
+
+
+def _append_review(wb: RunWorkbook, rec: dict) -> None:
+    p = _reviews_path(wb)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(rec, sort_keys=True, default=str) + "\n")
+
+
+def latest_reviews(wb: RunWorkbook, report: str | None = None) -> dict:
+    """(report, section) -> the newest full review record."""
+    p = _reviews_path(wb)
+    out: dict = {}
+    if not p.is_file():
+        return out
+    for raw in p.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            r = json.loads(raw)
+        except ValueError:
+            continue
+        if report and r.get("report") != report:
+            continue
+        out[(r.get("report"), str(r.get("section")))] = r
+    return out
+
+
 def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
            actor: str, dimensions: dict, note: str) -> dict:
     """An independent verdict on one section."""
@@ -691,6 +743,14 @@ def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
         "Actor": _clean(actor), "At": _utcnow(),
         "Detail": f"{v} — " + json.dumps(dimensions, sort_keys=True)
                   + " — " + _clean(note)[:300]})
+    # THE WHOLE NOTE, where the writer's next packet reads it. Provenance
+    # keeps 300 characters, and until 2026-10-06 that was the only copy: the
+    # validator's numbered fixes past the cut never reached the writer, who
+    # fixed what it could see and was returned for the rest, round after
+    # round (Susser Bank: REC-06's E-358 fix asked for three times).
+    _append_review(wb, {"report": report, "section": str(sec.id), "verdict": v,
+                        "actor": _clean(actor), "at": _utcnow(),
+                        "dimensions": dimensions, "note": _clean(note)})
     return {"report": report, "section": str(sec.id), "verdict": v,
             "actor": actor, "author": author, "rows_marked": touched}
 

@@ -164,6 +164,22 @@ from a section's author by name, so the verdict comes from
 (`engine.cli narrative state --report client_research`) and let the conductor route
 the review.
 
+## You write from collected evidence only
+
+You fill a pinned template from what the run already holds. You do not
+research and you do not verify, and you hold no web tool. Every probe a
+section control demands (the vendor's own scope statement, the "initiative
+already underway" check, each peer's adoption of a recommended platform) was
+run by the driver before you started, through `engine.relay.report_probes`.
+Its results are in `Evidence_Detail`, `Search_Log` and
+`Platform_Peer_Adoption`. Where a probe found nothing, state the searched
+absence as a finding about the client: what was searched, and that it
+established nothing. **Never write "requested through the driver", "not
+run", "pending", or any other pipeline word into a section body.** If a
+probe the template needs has no row at all, say so in your handback; the
+gap is upstream and not yours to fill. (Susser Bank, 2026-10-05: eleven
+report rounds were spent on probes written as prose that nothing ran.)
+
 ## What you never do
 
 Write the other report's sections. Write a score (column D belongs to

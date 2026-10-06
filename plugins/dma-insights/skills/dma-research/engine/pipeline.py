@@ -148,6 +148,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 AGENT_RUN = PLUGIN / "scripts" / "agent_run.py"
 MCP_RAW = PLUGIN / "scripts" / "mcp_raw.py"
 SHIP_PAGE = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "ship_page.py"
+SELF_HEAL = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "self_heal.py"
 
 
 def _utcnow() -> str:
@@ -328,6 +329,13 @@ class ShipPageShipper:
             return {"status": "fail", "rc": None, "sg_v4_fails": [],
                     "reasons": [f"no section files for {page} in {sections_dir}: "
                                 f"the page lane produced nothing to ship"]}
+        # The two mechanical surface rules (CG-11 capitals, CG-27
+        # abbreviations) are fixed deterministically before every submit: a
+        # producer repairing them by hand missed cases and spent all three
+        # attempts on them (Susser Bank, 2026-10-06: 55 findings, 2 pages).
+        subprocess.run([sys.executable, str(SELF_HEAL), "--sections", str(sections_dir),
+                        "--page", page, "--fix", "--no-cg15"],
+                       capture_output=True, text=True, timeout=600)
         r = subprocess.run(
             [sys.executable, str(SHIP_PAGE), connector_run, page,
              "--sections", str(sections_dir), "--producer", self.producer,
@@ -1400,9 +1408,18 @@ class Pipeline:
         if stage == "REPORTS":
             from . import narrative as N
             st = N.state(wb)
+            # A round that only serviced the probes the writers asked for
+            # moved the stage forward: the next round writes from them.
+            try:
+                from . import relay
+                served = sum(v for k, v in relay.state(self.run)["by_status"].items()
+                             if k in ("SERVED", "EMPTY"))
+            except Exception:                            # noqa: BLE001
+                served = 0
             return (sum(1 for x in st["reports"].values()
                         for sec in (x.get("sections") or []) if sec.get("status") == "READY"),
-                    sum(1 for x in st["reports"].values() if x.get("ready")))
+                    sum(1 for x in st["reports"].values() if x.get("ready")),
+                    served)
         return ()
 
     def _stalled(self, stage: str) -> bool:
@@ -2430,9 +2447,79 @@ class Pipeline:
         self._set_md("connector_ingest_after_seq", row.get("run_seq"))
         return f"version A ingested as {row['run_id']} (seq {row.get('run_seq')})"
 
+    def _reconcile_register(self) -> None:
+        """Refuse REPORTS while Tech_Register contradicts evidence the run
+        holds (`techscan.contradictions`). No report writer may change the
+        register, and every section that reads it inherits the error; at
+        Susser Bank (2026-10-05) that cost seven report rounds and eight
+        reopened sections before anyone looked at the sheet."""
+        from . import techscan as TS
+        bad = TS.contradictions(self.wb)
+        if not bad:
+            L.append_gate(self.wb, gate="TECH_REGISTER_RECONCILE", scope="run",
+                          verdict="PASS", blocking=False,
+                          detail="no CLAIMED row is named by T1-T3 non-broker evidence it does not cite")
+            return
+        lines = "; ".join(f"{b['ts_id']} {b['product']} CLAIMED, named by {', '.join(b['evidence_ids'])}"
+                          for b in bad)
+        L.append_gate(self.wb, gate="TECH_REGISTER_RECONCILE", scope="run",
+                      verdict="FAIL", blocking=True, detail=lines[:900])
+        raise StageRefused(
+            f"Tech_Register contradicts the run's own evidence: {lines}. Re-strike "
+            f"each row from the cited excerpts before any section is written: "
+            f"`python3 -m engine.techscan restrike --run {self.run.run_id} "
+            f"--root {self.run.root} --ts <TS-nnn> --status CONFIRMED|INFERRED "
+            f"--method job_posting|public_document|vendor_announcement --provider web "
+            f"--evidence-id <E-id> --basis '<what the excerpt says>'`, "
+            f"then `engine.techscan reconcile` until it exits 0.")
+
+    def _report_probes(self) -> int:
+        """Run the probes the report templates demand BEFORE any writer
+        starts (`relay.report_probes`): vendor scope statements, initiative-
+        underway checks and peer platform adoption. Writers fill templates
+        from collected evidence and hold no web tool (owner, 2026-10-05), so
+        a probe nobody ran upstream is a gap no report round can close.
+        Always lane mode: REPORTS has no conductor between rounds to service
+        an orchestrator batch, and the drain brief carries the owner's
+        WebSearch failover for lanes that hold no connector."""
+        try:
+            from . import relay
+            q = relay.report_probes(self.run, self.wb)
+            # A new stage is a new conversation for the search ceiling: the
+            # research window per category was spent during RESEARCH, and
+            # without a fresh mark every probe on a busy category is refused
+            # unlogged (P2C3, 2026-10-05).
+            from . import runstate as RS_
+            cats = sorted({str(r.get("category") or "") for r in relay.open_requests(self.run)} - {""})
+            if cats:
+                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats)
+            if q["queued"]:
+                self.opts.log(f"  [PROBES] {q['queued']} report probe(s) derived from "
+                              f"Solution_Catalogue, Tech_Register and the peer set")
+            d = relay.drain_batch(self.run, self.wb, mode="lane",
+                                  out_dir=self._briefs("reports_probes"))
+            if not d.get("lanes"):
+                return 0
+            self.opts.log(f"  [PROBES] running {d['requests']} probe(s) over {d['lanes']} lane(s)")
+            self._count(self._dispatch(d, stage="REPORTS"))
+            rc = relay.reconcile(self.run, self.wb)
+            st = relay.state(self.run)["by_status"]
+            self.opts.log(f"  [PROBES] closed {rc.get('closed')}; queue now {st}")
+            if st.get("OPEN"):
+                L.append_gate(self.wb, gate="REPORT_PROBES", scope="run", verdict="FAIL",
+                              blocking=False,
+                              detail=f"{st['OPEN']} probe(s) still OPEN after the drain; the "
+                                     f"writers state them as searched-not-established")
+            return int(d["requests"])
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"  [PROBES] skipped ({e.__class__.__name__}: {str(e)[:120]})")
+            return 0
+
     def _stage_reports(self) -> str:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
+        self._reconcile_register()
+        self._report_probes()
         self._stalled("REPORTS")
         for r in range(self.opts.max_rounds):
             # READY reports go straight to render. Dispatching the producers
@@ -2486,6 +2573,19 @@ class Pipeline:
             f.write_text(json.dumps(self.opts.reads.page_contract(page), indent=2, default=str))
         return f
 
+    def _save_page_reports(self, pages, phase: str) -> None:
+        """The challenger and consolidator return their reports as their
+        final message and hold no Write tool; the next phase reads a file."""
+        from . import relay
+        name = {"challenge": "challenge", "consolidate": "consolidated"}[phase]
+        for p in pages:
+            log = self.run.root / "agent_logs" / f"page-{p}-{phase}.jsonl"
+            if not log.is_file():
+                continue
+            text = relay.lane_output(log)
+            if text.strip():
+                (self.run.qa_dir / f"{name}_{p}.md").write_text(text, encoding="utf-8")
+
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
         """Produce (lanes) and ship each page until it passes or the retries
         are spent. A FAIL re-dispatches ONLY that page, with the verdict's
@@ -2509,13 +2609,36 @@ class Pipeline:
             if produce:
                 for p in todo:
                     self._contract_file(p)
-                b = brief.page_batch(self.wb, run=self.run,
-                                     out_dir=self._briefs(f"pages_{version}_{attempt}"),
-                                     connector_run=connector_run,
-                                     contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
-                                     verdicts_file=verdicts_file if verdicts else None,
-                                     pages=list(todo))
-                self._count(self._dispatch(b, stage=f"PAGES_{version}"))
+                # First attempt: every phase, but only for a page with no
+                # section files on disk. A page already on disk (a resumed
+                # driver, a repaired file) ships first; regenerating it would
+                # overwrite the repair and re-pay every producer. A retry is
+                # a repair: the assembler alone, carrying the verdict's reasons.
+                on_disk = {p for p in todo if list(self._sections_dir().glob(f"{p}.*.json"))}
+                if attempt == 0:
+                    groups = [(brief.PAGE_PHASES, [p for p in todo if p not in on_disk])]
+                    if on_disk:
+                        self.opts.log(f"  [PAGES_{version}] on disk, shipping first: "
+                                      f"{', '.join(sorted(on_disk))}")
+                else:
+                    groups = [(("assemble",), list(todo))]
+                for phases, pg in groups:
+                    if not pg:
+                        continue
+                    for phase in phases:
+                        b = brief.page_batch(self.wb, run=self.run,
+                                             out_dir=self._briefs(f"pages_{version}_{attempt}_{phase}"),
+                                             connector_run=connector_run,
+                                             contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
+                                             verdicts_file=verdicts_file if verdicts else None,
+                                             pages=pg, phase=phase,
+                                             sections_dir=self._sections_dir())
+                        if not b.get("lanes"):
+                            continue
+                        self.opts.log(f"  [PAGES_{version}] {phase}: {b['lanes']} lane(s)")
+                        self._count(self._dispatch(b, stage=f"PAGES_{version}"))
+                        if phase in ("challenge", "consolidate"):
+                            self._save_page_reports(pg, phase)
             still = []
             for p in todo:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),

@@ -252,6 +252,15 @@ def requests(run: runstate.Run) -> dict:
                 row.update({k: prior[k] for k in ("note", "closed_at", "closed_by")
                             if k in prior})
             rows[rid] = row
+        elif kind == "reopen":
+            # A BLOCKED request whose blocker is gone (a fallback the owner
+            # sanctioned, a connector now bound) goes back on the queue under
+            # the SAME id, so its history shows both the block and the retry.
+            row = rows.get(rid)
+            if row is None:
+                continue
+            row["status"] = "OPEN"
+            row["history"].append({k: ev.get(k) for k in ("at", "event", "actor", "note")})
         elif kind in ("served", "empty", "blocked"):
             row = rows.get(rid)
             if row is None:
@@ -542,6 +551,20 @@ def record(run: runstate.Run, req_ids, status: str, *, note: str = "",
     if len(done) == 1:
         out["id"] = done[0]
     return out
+
+
+def reopen(run: runstate.Run, req_ids=None, *, status: str = "BLOCKED",
+           note: str = "", actor: str = "") -> list[str]:
+    """Put requests back on the queue: the named ids, or every request in
+    `status` when none are named. Returns the ids reopened."""
+    rows = requests(run)
+    ids = [i for i in (req_ids or [r for r, v in rows.items()
+                                   if v["status"] == status.upper()])
+           if i in rows and rows[i]["status"] != "OPEN"]
+    for rid in ids:
+        _append(run, {"id": rid, "event": "reopen", "at": _utcnow(),
+                      "actor": actor, "note": note})
+    return ids
 
 
 def _matches(req: dict, row: dict) -> bool:
@@ -913,6 +936,22 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         "nothing usable); BLOCKED is a measured one and needs the refusal "
         "text; SERVED means at least one row was registered.",
         "",
+        "For a request whose purpose starts `peer platform:`, record one verdict "
+        "per platform it lists, for that peer, after logging the search: "
+        f"`python3 -m engine.assessment peer-adoption {rr} --product '<platform>' "
+        "--peer '<peer, as named in the request>' --verdict Y|N|UNKNOWN --basis "
+        "'<what was searched and what it showed>' --source '<url, or searched: <query>>'`. "
+        "Y needs a page naming that platform at that peer; UNKNOWN after a real "
+        "search is an honest answer. For a `vendor scope statement` request, "
+        "open the vendor's own product page and register the sentence that "
+        "says what the product does (T3). For a request whose purpose starts "
+        "`peer layer:`, record one reading per register row it lists, for that "
+        f"peer: `python3 -m engine.techscan peer-record {rr} --ts <TS-nnn> "
+        "--peer '<peer>' --deployed|--not-deployed|--unknown --basis '<what was "
+        "searched and what it showed>' [--url <url>]`; name the vendor you found "
+        "in the basis even when it is not on the register (a peer on Jack Henry "
+        "when Susser's core is unknown is the finding).",
+        "",
         "## Refusals you will meet",
         "",
         f"- `engine.cli search` refuses a tool outside {list(C.SEARCH_TOOLS)} and a "
@@ -1034,6 +1073,149 @@ def _entity(wb) -> dict:
     return {"entity": md.get("entity_name") or "?", "sub_vertical": md.get("sub_vertical") or ""}
 
 
+#: Tech_Register layer -> the category whose cells a vendor scope statement
+#: for a product on that layer bears on.
+_LAYER_CATEGORY = {"OPS": "P3C1", "CUST": "P2C3", "DATA": "P4C1", "INFRA": "P4C3"}
+PEER_PROBE = "peer platform:"
+PEER_LAYER = "peer layer:"
+_LAYER_TERMS = {"OPS": "core processor OR \"core banking\" OR \"loan origination\"",
+                "CUST": "\"online banking\" OR \"mobile banking\" OR \"digital banking\"",
+                "DATA": "\"data warehouse\" OR analytics",
+                "INFRA": "cloud OR \"identity\" OR security"}
+
+
+def report_probes(run: runstate.Run, wb) -> dict:
+    """Queue every probe the report templates demand, derived from what the
+    run already holds, BEFORE any writer starts.
+
+    The writers fill pinned templates from collected evidence and hold no web
+    tool; they neither research nor verify (owner, 2026-10-05). But the
+    templates require three probes the category research never runs: the
+    vendor's own scope statement for every platform the reports name, an
+    "initiative already underway" check per recommendation, and each locked
+    peer's adoption of each recommended platform. At Susser Bank nothing ran
+    them, writers wrote "requested through the driver", and the validator
+    returned the same sections for eleven rounds. Deterministic: the same
+    workbook queues the same requests, and a served one is never re-queued."""
+    entity = _entity(wb)["entity"]
+    cells = list(wb.selected_subcaps())
+
+    def first_cell(cat: str) -> str | None:
+        return next((c for c in cells if c.startswith(cat)), None)
+
+    reqs: list[tuple[str, str | None, str]] = []
+    sols = wb.rows("Solution_Catalogue")
+    for r in sols:
+        cats = [c.strip() for c in str(r.get("categories") or "").split(",") if c.strip()]
+        cell = first_cell(cats[0]) if cats else None
+        plat = str(r.get("platform") or "").strip()
+        name = str(r.get("solution_name") or "").strip()
+        if not (plat and cell):
+            continue
+        parts = [x.strip() for x in re.split(r"\+|/", plat) if x.strip()]
+        for part in parts:
+            reqs.append((f"{part} financial services banking product overview capabilities",
+                         cell, f"vendor scope statement for {part} ({r.get('solution_id')}), "
+                               f"fetched from the vendor's own page"))
+        # The client's own initiative, not Zennify's product: "Third-party
+        # risk, resilience and governance on the Zennify GRC Platform" asks
+        # whether the bank already runs a third-party-risk programme.
+        initiative = re.split(r"\s+(?:on|with|across|for)\s+|,", name)[0].strip() or name
+        reqs.append((f'"{entity}" {initiative} launched OR completed OR replaced OR paused',
+                     cell, f"initiative already underway for {r.get('solution_id')}: {name}"))
+    for r in wb.rows("Tech_Register"):
+        if str(r.get("Status") or "") != "CONFIRMED":
+            continue
+        prod = re.sub(r"\(.*?\)", "", str(r.get("Product") or "")).strip()
+        vend = str(r.get("Vendor") or "").strip()
+        if not prod or vend.lower() in ("", "unnamed", "none"):
+            continue
+        cell = (str(r.get("SubCap_IDs") or "").split(",")[0].strip()
+                or first_cell(_LAYER_CATEGORY.get(str(r.get("Layer") or ""), "")))
+        q = prod if prod.lower().startswith(vend.split()[0].lower()) else f"{vend} {prod}"
+        if cell:
+            reqs.append((f"{q} product overview",
+                         cell, f"vendor scope statement for {r.get('TS_ID')} {prod}"))
+    lock = wb.handoff_lock() or {}
+    peers = [re.sub(r"\s*\(.*?\)", "", p).strip()
+             for p in str(lock.get("locked_peer_set") or "").split("|") if p.strip()]
+    plats = []
+    for r in sols:
+        for part in re.split(r"\+|/", str(r.get("platform") or "")):
+            part = part.strip()
+            if part and part not in plats:
+                plats.append(part)
+    # Peer probes rotate over the solutions' categories: one category's
+    # search window cannot hold the whole peer set (Susser Bank, 2026-10-05:
+    # twelve probes on one P2C3 cell hit the 60-search ceiling unlogged).
+    sol_cells = [c for c in (first_cell(str(r.get("categories") or "").split(",")[0].strip())
+                             for r in sols) if c]
+    if peers and plats and sol_cells:
+        terms = " OR ".join(f'"{p}"' for p in plats[:6])
+        for i, peer in enumerate(peers):
+            reqs.append((f'"{peer}" {terms}', sol_cells[i % len(sol_cells)],
+                         f"{PEER_PROBE} {peer} | {'; '.join(plats)}"))
+    # The estate section needs each peer's reading on every register layer
+    # (the core processor, the digital banking platform, ...) and every
+    # ABSENT row, not just the recommended platforms.
+    reg = wb.rows("Tech_Register")
+    for layer, cat in _LAYER_CATEGORY.items():
+        rows = [r for r in reg if str(r.get("Layer") or "") == layer]
+        if not rows:
+            continue
+        # Name systems, not consumer features: a row the bank's own feature
+        # page carries (Zelle, Quicken export) is not what a peer runs a
+        # layer on. An ABSENT core row asks about the core vendors.
+        sys_rows = [r for r in rows if str(r.get("Detection_Method") or "") != "public_document"]
+        names = (["Fiserv", "Jack Henry", "FIS"]
+                 if any("core" in str(r.get("Product") or "").lower()
+                        and str(r.get("Status") or "") == "ABSENT" for r in rows) else [])
+        rows_for_names = sys_rows
+        for r in sorted(rows_for_names, key=lambda r: ("CONFIRMED", "CLAIMED", "INFERRED", "ABSENT")
+                        .index(str(r.get("Status") or "ABSENT")) if str(r.get("Status") or "")
+                        in ("CONFIRMED", "CLAIMED", "INFERRED", "ABSENT") else 9):
+            v = re.sub(r"\(.*?\)", "", str(r.get("Vendor") or r.get("Product") or "")).strip()
+            v = v.split("/")[0].strip()
+            if v and v.lower() not in ("unnamed", "none") and v not in names:
+                names.append(v)
+        cell = first_cell(cat)
+        if not cell:
+            continue
+        ts_ids = ", ".join(str(r.get("TS_ID")) for r in rows)
+        terms = " OR ".join(f'"{n}"' for n in names[:4])
+        for peer in peers:
+            reqs.append((f'"{peer}" {_LAYER_TERMS[layer]} {terms}'.strip(), cell,
+                         f"{PEER_LAYER} {peer} | layer {layer} | rows {ts_ids}"))
+    # An integration solution's readiness contract turns on whether the
+    # systems it would connect publish APIs: the vendor's developer docs.
+    if any("mulesoft" in str(r.get("platform") or "").lower() for r in sols):
+        icell = next((c for c in (first_cell(str(r.get("categories") or "").split(",")[0].strip())
+                                  for r in sols if "mulesoft" in str(r.get("platform") or "").lower())
+                      if c), None)
+        for r in reg:
+            if (str(r.get("Status") or "") != "CONFIRMED"
+                    or str(r.get("Layer") or "") not in ("OPS", "CUST")
+                    or str(r.get("Detection_Method") or "") == "public_document"):
+                continue                 # systems of record, not consumer features
+            v = str(r.get("Vendor") or "").split("/")[0].strip()
+            if icell and v and v.lower() not in ("unnamed", "none"):
+                reqs.append((f"{v} API developer documentation integration", icell,
+                             f"API documentation for {r.get('TS_ID')} {v} (integration readiness)"))
+    known = requests(run)
+    new, seen = [], set()
+    for q, cell, why in reqs:
+        if normalize(q) in seen:         # one search per question, whatever the cell
+            continue
+        seen.add(normalize(q))
+        r = _one({"query": q, "subcap": cell, "proves": why, "tool": "exa"}, None)
+        if r is None or r["id"] in known:
+            continue
+        _append(run, dict(r, event="open", lane="report-probes", round=None, at=_utcnow()))
+        known[r["id"]] = r
+        new.append(r["id"])
+    return {"derived": len(reqs), "queued": len(new), "ids": new}
+
+
 def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -> str:
     e = _entity(wb)
     rr = f"--run {run.run_id} --root {run.root}"
@@ -1066,10 +1248,16 @@ def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -
         "",
         "1. Run the query through a connector — `mcp__Exa__web_search_exa` or "
         "`mcp__Tavily__tavily_search` (Clay only where your manifest allows "
-        "and the request is about people or a company record). If the call is "
-        "refused or the tool is not present, do NOT retry another way and do "
-        "NOT run it through WebSearch instead: record it BLOCKED (step 4) with "
-        "the refusal text verbatim, and move on.",
+        "and the request is about people or a company record). If the "
+        "connector is refused, absent from your tool list, or out of credit, "
+        "run the SAME query through WebSearch (WebFetch for a named page) — "
+        "the owner's sanctioned failover (2026-10-04) — and log it honestly "
+        "with `--tool web_search` / `--tool web_fetch`, never as exa or "
+        "tavily, so the ENRICHMENT gate still measures that no connector ran. "
+        "Record BLOCKED (step 4) only when WebSearch is refused too, with the "
+        "refusal text verbatim. Susser Bank, 2026-10-05: 27 of 28 report "
+        "probes came back BLOCKED on an absent connector while the failover "
+        "sat unused, and the report stage could not close without them.",
         "2. Log the search the moment it returns, with the tool that ran it: "
         f"`python3 -m engine.cli search {rr} --subcap <cell> --facet <facet> "
         "--tool exa --query '<query>' --hits N --kept K --outcome '<one line>'` "
