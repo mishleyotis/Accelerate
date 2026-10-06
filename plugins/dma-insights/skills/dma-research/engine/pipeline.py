@@ -110,6 +110,24 @@ STATE_NAME = "pipeline_state.json"
 SECTIONS_DIR = "08_sections"
 BRIEFS_DIR = "briefs"
 
+#: Leaf keys whose value IS the evidence or its label, not prose about it: a
+#: verbatim excerpt, a quote, a source's name or title, a product name. An
+#: SG-V4 FAIL there is not ungrounded prose a producer can re-ground, so it
+#: does not count against `sg_v4_budget` (owner decision 2026-10-06, Arbor
+#: Bank: 660 of the heatmap's 789 FAILs sat on these fields).
+SG_V4_VERBATIM_LEAVES = frozenset({
+    "excerpt", "verbatim_quote", "quote", "source", "source_name",
+    "source_title", "title", "product", "candidate", "url"})
+
+
+def prose_sg_v4_fails(fails: list) -> list:
+    """The SG-V4 FAILs on prose — the ones the driver's budget counts."""
+    def leaf(path) -> str:
+        return re.sub(r"\[\d+\]$", "", str(path or "").rsplit(".", 1)[-1])
+    return [w for w in fails
+            if leaf(w.get("path") if isinstance(w, dict) else w)
+            not in SG_V4_VERBATIM_LEAVES]
+
 #: A clean stop (`--until`, the wall clock) is exit 0: the run is resumable
 #: and nothing failed. Everything else is exit 1, and STOPPED_BUDGET is
 #: deliberately among them — `watchdog --revive` records RESOLVED or FAILED
@@ -2772,7 +2790,7 @@ class Pipeline:
             for p in todo:
                 res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
                                              self.run.qa_dir / f"verdict_{p}_{version}.json")
-                sgv4 = res.get("sg_v4_fails") or []
+                sgv4 = prose_sg_v4_fails(res.get("sg_v4_fails") or [])
                 if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
                     # The connector discloses-and-promotes SG-V4 (invariant 12);
                     # the driver reads the disclosure and REVISES ungrounded prose
