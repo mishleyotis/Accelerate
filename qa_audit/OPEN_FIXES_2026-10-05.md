@@ -78,3 +78,11 @@ each research repair round ~45-55 min; whole run ~10 h of wall clock.
   deliberately allows. They pass from a checkout under /home/user. Fix: build
   the protected-path fixtures from a tmp dir outside the scratchpad, or skip
   with a reason when the repo root sits inside it.
+
+## Found while shipping Susser Bank pages (2026-10-06)
+
+- **ET-12 can never pass on a research-engine run.** `apps/worker/dma_worker/evidence_ids.py` writes every package evidence row with `origin='package'` and no `connector_tool`, so a Clay scan that really ran reaches the server without provenance. Fix: carry `Origin=connector` plus the tool, query and retrieved-at from Evidence_Detail into `evidence_index` (needs a worker deploy). Susser Bank shipped with an ET-12 disclosure in `r_layer.probes_run` instead.
+- **SG-V4 budget counts absence-ladder text.** The driver's `sg_v4_budget` (8) counted 48 SG-V4 flags on techstack. Half were peer `basis` lines and `detection_basis` that describe a search, which by nature has no excerpt to ground against. Decide whether the budget should exclude ladder fields, or whether those fields should cite the Search_Log rows.
+- **Alerts: the contract and CG-15 disagree.** The heatmap.alerts contract wants one alert per thin cell (486). CG-15 refuses alerts whose search rungs are shared with sibling cells. Research searches per capability, so most cells share rungs. The cell_evidence projector already collapses identical absences (43 of 494). Alerts need an owner decision: collapse them like cell_evidence, or give each cell its own rung.
+- **The REPORTS stall rule counts only READY sections.** Rounds that cleared several fixes inside one section counted as "no progress", and the driver had to be restarted by hand five times.
+- **Brief packet ceiling trims `last_verdict_reasons`.** A page repair lane gets 3 to 9 fewer reasons than the verdict carried.
