@@ -187,8 +187,8 @@ needs no connector. Never re-score rows by hand.
 
 **REPORTS runs as persisted workflows too, one per report.** At REPORTS the
 driver first runs a preflight that refuses on blockers no writer can close: a
-locked peer set outside the template's band, unscored cells, or open report
-probes. It names them in `REPORT_PREFLIGHT`; fix them at source and resume.
+locked peer set outside the template's band, or unscored cells. It names them
+in `REPORT_PREFLIGHT`; fix them at source and resume.
 Then it stops `AWAITING_WORKFLOW` and writes `<ROOT>/07_qa/reports_workflow.json`
 (workflow `workflows/dma-reports.js`, one `args` per open report), and you
 start every invocation in ONE message. Each open section is written by its
