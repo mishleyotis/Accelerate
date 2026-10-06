@@ -305,9 +305,19 @@ class McpReads:
 
 
 #: SG-V4 paths that record a search or a detection rather than make a claim.
+#: Verbatim spans and source identity (excerpt, quote, title, source name)
+#: are the evidence itself, not a claim about it: SG-V4 scores them against
+#: a cell centroid they were never written for (Susser Bank heatmap,
+#: 2026-10-06: 662 of 921 flags were verbatim excerpts).
 _LADDER_PATH = re.compile(
     r"(peer_deployments\[\d+\]\.basis|dropped\[\d+\]\.(reason|candidate)|"
-    r"detection_basis|sources_searched|queries_run|probes_run|reach_note)$")
+    r"detection_basis|sources_searched|queries_run|probes_run|reach_note|"
+    r"excerpt|verbatim_quote|quote|source_name|source_title|source_document|"
+    r"\.title|\]\.name)$"
+    # Section-level reasoning and absence records describe the run, not the
+    # client: the narrative thread, r_layer, an empty state, the producer
+    # stamp. Disclosed by SG-V4 like everything else; not budgeted as claims.
+    r"|(^|\.)(narrative_thread|producer_version)$|\.r_layer\.|\.empty_state\.")
 
 
 class ShipPageShipper:
