@@ -2015,6 +2015,22 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                         batch_name="batch_scoring.json")
 
 
+#: A template's numbers are the Doc author's guidance for a TYPICAL run, not
+#: constants a section fails on (owner, 2026-10-06, First Tech: a six-peer
+#: locked set failed Client Research §4 four rounds running on "3 to 5 peers"
+#: and an 850-word LENGTH, and no rewrite could clear it). Only a FAIL IF
+#: line, an engine refusal or one of the six dimensions fails a section.
+TEMPLATE_NUMBERS_RULE = (
+    "the template's numbers are guidance, not constants: a LENGTH range, a "
+    "count range in MINIMUM DATA ('3 to 5 …', '6 or more …') and a peer-set "
+    "size describe a typical run. Never FAIL or REVISE a section only because "
+    "it runs past a LENGTH upper bound or because the run's own locked set "
+    "(Handoff_Lock) has a different size than a template example. Hard "
+    "conditions are the section's FAIL IF line, the engine's refusals and the "
+    "six dimensions; a figure the run itself fixed (peer_n, scope, catalogue) "
+    "wins over a number in the Doc. Over-length is at most a note")
+
+
 def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False) -> dict:
     """The two report producers (default) or the report validator."""
     from . import narrative as N, report_spec as RS, template as T
@@ -2094,6 +2110,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "section; --force on `report` yields a DRAFT_ no package accepts",
                 "the report's numbers are the sheets' numbers; cite only E-ids the "
                 "register carries",
+                TEMPLATE_NUMBERS_RULE,
                 "you never review your own sections — `report-validator` does",
                 "the gold gate (`engine.gold_standard report`) reads gold_reference.json",
                 "each section feeds a named app surface (`section_sources.json`); "
@@ -2122,6 +2139,7 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                 "adversarial pass (cross-section contradiction, prose figures vs "
                 "sheets, the strongest case the assessment is wrong)",
                 "the engine refuses a verdict from a section's own author",
+                TEMPLATE_NUMBERS_RULE,
             ],
         })
         lanes = [("report-validator", packet, "Report validation — both reports")]

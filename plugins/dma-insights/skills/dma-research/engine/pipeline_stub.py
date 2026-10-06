@@ -443,6 +443,16 @@ class StubReads:
     def page_contract(self, page):
         return {**self.contract, "page": page}
 
+    #: the stub cohort: four assessed entities in every category
+    cohort = {"entities": 4, "floor": 3, "basis": "recomputed",
+              "categories": {f"P{p}C{c}": {"n": 4, "mean": 2.4, "median": 2.4,
+                                            "p25": 2.1, "p75": 2.8}
+                             for p in range(1, 5) for c in range(1, 6)}}
+
+    def cohort_benchmarks(self, sub_vertical, *, display_id="", entity_name=""):
+        self.cohort_calls = getattr(self, "cohort_calls", 0) + 1
+        return {**self.cohort, "sub_vertical": sub_vertical}
+
 
 class StubShipper:
     """Every page passes unless `verdicts` scripts otherwise:

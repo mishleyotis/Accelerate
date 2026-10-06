@@ -1078,6 +1078,11 @@ def _entity(wb) -> dict:
 _LAYER_CATEGORY = {"OPS": "P3C1", "CUST": "P2C3", "DATA": "P4C1", "INFRA": "P4C3"}
 PEER_PROBE = "peer platform:"
 PEER_LAYER = "peer layer:"
+#: One comparable metric per locked peer, on the run's FOCUS AREAS ONLY
+#: (owner, 2026-10-06): peer SCORES come from the sub-vertical cohort
+#: (`get_cohort_benchmarks`); what research adds is a figure a reader can
+#: weigh against the client's own stated priorities, not a census.
+PEER_FOCUS = "peer focus metric:"
 _LAYER_TERMS = {"OPS": "core processor OR \"core banking\" OR \"loan origination\"",
                 "CUST": "\"online banking\" OR \"mobile banking\" OR \"digital banking\"",
                 "DATA": "\"data warehouse\" OR analytics",
@@ -1186,6 +1191,18 @@ def report_probes(run: runstate.Run, wb) -> dict:
         for peer in peers:
             reqs.append((f'"{peer}" {_LAYER_TERMS[layer]} {terms}'.strip(), cell,
                          f"{PEER_LAYER} {peer} | layer {layer} | rows {ts_ids}"))
+    # The peer's comparable figure on each of the client's focus areas — and
+    # nowhere else: a metric per peer on every topic is a census nobody reads.
+    for fa in wb.rows("Focus_Areas"):
+        fa_id = str(fa.get("ID") or "").strip()
+        words = str(fa.get("Priority in the client's words") or "").strip()
+        fcells = [c.strip() for c in str(fa.get("Cells") or "").split(",") if c.strip()]
+        cell = next((c for c in fcells if c in cells), None) or (fcells[0] if fcells else None)
+        if not (fa_id and words and cell):
+            continue
+        for peer in peers:
+            reqs.append((f'"{peer}" {words} members OR percent OR million OR launched',
+                         cell, f"{PEER_FOCUS} {peer} | {fa_id} {words}"))
     # An integration solution's readiness contract turns on whether the
     # systems it would connect publish APIs: the vendor's developer docs.
     if any("mulesoft" in str(r.get("platform") or "").lower() for r in sols):

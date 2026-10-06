@@ -199,6 +199,36 @@ with their names rather than buying the same agents again. No Workflow tool in
 this session? `--reports-mode lanes` runs the old serial rounds — reports need no
 connector. Never write or review a section by hand.
 
+**PAGES_A and PAGES_B run as persisted workflows too — one per ship group.**
+At each page group the driver ships whatever page section files are already
+on disk, then stops `AWAITING_WORKFLOW` with `<ROOT>/07_qa/pages_workflow.json`
+(workflow `${CLAUDE_PLUGIN_ROOT}/workflows/dma-page-production.js`). Every page
+of the group runs its own chain side by side: per-surface producers in
+parallel, then the finding-challenger and page-consolidator on the produce
+sections, then the page's surface-producer assembles. A page that failed its
+verdict comes back as a REPAIR (assembler alone, with the verdict's reasons)
+until `--page-retries` ships are spent. The workflow never submits or promotes:
+run the file's `then`, and the driver ships, hands back failures, and promotes.
+No Workflow tool? `--pages-mode lanes`.
+
+**Nothing loops.** Every workflow stage passes one guard
+(`<ROOT>/07_qa/handoff_guard.json`): the same work handed with nothing moved
+across `--stall-rounds` handoffs, or more than `--max-rounds` handoffs, stops
+the stage FAILED with its blockers named. A fired guard STAYS fired — re-running
+the driver (by you, the watchdog or a cron) does not buy the workflow again —
+until what it measures changes (a repair at source) or a person passes
+`--reset-guard`. The watchdog reports a handoff a dead session was holding as
+`AWAITING_WORKFLOW` and its `--revive` hands the Workflow calls to the session
+that ran it; a handoff still receiving writes reads `WORKFLOW_RUNNING` and is
+left alone.
+
+**Peer figures come from the sub-vertical cohort.** Before SCORING rolls up,
+the driver fills every blank `Peer_Benchmarks` figure from the connector's
+`get_cohort_benchmarks`: the mean of every other assessed entity in the
+sub-vertical (active promoted runs, floor of three, aggregates only). The
+locked peer set is identified, not scored; peer metrics are researched only on
+the run's focus areas (`relay.report_probes`).
+
 **RESEARCH runs as persisted workflows — started by you.** The driver is a
 Python process and cannot start a Workflow, so at RESEARCH it stops with
 outcome `AWAITING_WORKFLOW` (exit 0) and writes

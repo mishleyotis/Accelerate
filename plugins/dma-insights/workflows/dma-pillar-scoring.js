@@ -19,7 +19,13 @@ export const meta = {
 //
 // args (engine.pipeline writes them to <root>/07_qa/scoring_workflow.json):
 //   {pillar, run, root, eng, plugin, briefs: [<scorer brief .md>, ...],
-//    critic_brief: <.md or "">, rounds}
+//    critic_brief: <.md or "">, rounds, solutions_brief: <.md or "">}
+//
+// `solutions_brief` rides on ONE invocation (the first pillar's) while the
+// Solution_Catalogue / Platform_Peer_Adoption tabs are still empty: the
+// technographic-scanner's solutions duty runs beside that pillar's scorers.
+// The lane path ran it beside the scorers; a workflow that dropped it left
+// the assessment report's preconditions shut forever (2026-10-06).
 
 const A = args
 const R = `--run ${A.run} --root ${A.root}`
@@ -54,10 +60,22 @@ The independent critic moved rows of pillar ${P}. List them: python3 -m engine.a
 For EACH row: re-strike it at or below its "to" through python3 -m engine.assessment score ${R} --subcap <CELL> --score <to or lower> --actor ${ACT}, keeping its confidence and overlay (shown with the move), with the critic's reason at the head of the existing rationale. Touch no other row.
 Return pillar ${P}, verdict "RESCORED", scored (rows re-struck), moves 0, notes.`
 
+const solutionsPrompt = (file) => `You are the technographic-scanner for DMA run ${A.run}, carrying the SCORING stage's solutions duty. Work from ${A.eng}, foreground commands, long timeouts.
+Your brief is ${file}: read it once and follow its rules exactly. Fill Solution_Catalogue (one row per platform the assessment can argue for, through engine.assessment solution) and Platform_Peer_Adoption (engine.assessment peer-adoption), DECLARING through engine.cli complete declare what cannot be examined. You score nothing and touch no pillar's rows.
+Return pillar ${P}, verdict "SOLUTIONS_DONE" or "BLOCKED" (with the refusal), scored 0, moves 0, notes.`
+
+const solutions = A.solutions_brief ? agent(solutionsPrompt(A.solutions_brief), {
+  label: 'solutions duty', phase: 'Score', schema: OUT,
+  agentType: 'dma-insights:technographic-scanner',
+}) : null
 const scored = await parallel((A.briefs || []).map((f, i) => () => agent(scorerPrompt(f), {
   label: `${P} score ${i + 1}/${A.briefs.length}`, phase: 'Score', schema: OUT, model: 'sonnet',
   agentType: `dma-insights:${ACT}`,
 })))
+if (solutions) {
+  const sol = await solutions
+  log(`solutions duty: ${sol ? sol.verdict : 'agent died'}`)
+}
 if ((A.briefs || []).length && !scored.filter(Boolean).length) {
   return { pillar: P, verdict: 'AGENT_ERROR', notes: 'every scorer agent failed; nothing to critique' }
 }

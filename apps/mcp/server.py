@@ -162,6 +162,22 @@ def get_capability_catalogue(run_id: str) -> dict:
 
 @mcp.tool()
 @_traced
+def get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = "",
+                          exclude_entity_name: str = "") -> dict:
+    """The sub-vertical cohort's peer score per category: the MEAN of every
+    other assessed entity's category score (its active, promoted run), with
+    n, median and quartiles. Below three entities a category comes back with
+    mean null and the reason — record it as cannot_estimate, never impute.
+    Aggregates only; no entity is named. Pass the asking client's display id
+    or legal name so it is not counted as its own peer."""
+    from dma_mcp import cohort as cohort_mod
+    with _conn() as c:
+        return cohort_mod.cohort_benchmarks(c, sub_vertical, exclude_display_id,
+                                            exclude_entity_name)
+
+
+@mcp.tool()
+@_traced
 def get_platform_fit(run_id: str, candidates: list) -> dict:
     """The fit score for each candidate platform, computed here and READ by
     you — never recomputed, never re-ranked (the contract's rule, and the

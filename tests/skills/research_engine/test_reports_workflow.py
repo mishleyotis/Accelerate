@@ -54,7 +54,7 @@ def test_an_unchanged_open_set_stops_the_stage_instead_of_rebuying_agents(tmp_pa
     assert not p._reports_handoff().get("stalled")
     assert not p._reports_handoff().get("stalled")
     h = p._reports_handoff()
-    assert h.get("stalled") and "stayed open" in h["summary"]
+    assert h.get("stalled") and "same work" in h["summary"]
 
 
 def test_the_cli_defaults_reports_to_the_workflow_with_the_real_dispatcher():

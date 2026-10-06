@@ -57,6 +57,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
 import argparse
 import datetime as _dt
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -97,6 +98,12 @@ def _driver_state(run) -> dict:
         return _json.loads(p.read_text()) if p.is_file() else {}
     except Exception:                                     # noqa: BLE001
         return {}
+
+
+def _handoff(driver: dict) -> str:
+    """The handoff file the driver last stopped on, when it is still on disk."""
+    f = str((driver.get("awaiting") or {}).get("handoff") or "")
+    return f if f and Path(f).is_file() else ""
 
 
 def _no_enrichment_connector(run) -> str:
@@ -164,6 +171,22 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             "PRELIM has not closed: "
             + (", ".join(pre["open"]) or "signed off never recorded")
             + " — no category card will be served until it does")
+    elif driver.get("last_outcome") == "AWAITING_WORKFLOW" and _handoff(driver):
+        # THE WORKFLOW HANDOFF (2026-10-06). The driver is a Python process
+        # and cannot start a Workflow, so every workflow stage ends the
+        # driver AWAITING_WORKFLOW with a handoff file. A session that dies
+        # holding one leaves a run nothing advances — and reviving it through
+        # the driver only rewrote the same handoff and called it RESOLVED.
+        # Quiet past the stall window means nobody is running it: say so,
+        # and revive by handing the workflow to the session that is here.
+        aw = driver.get("awaiting") or {}
+        quiet = idle is not None and idle > stall_seconds
+        state = "AWAITING_WORKFLOW" if quiet else "WORKFLOW_RUNNING"
+        detail = (f"{aw.get('stage')} was handed to a session as a persisted workflow "
+                  f"({aw.get('handoff')}) at {aw.get('at')}; "
+                  + (f"no write for {int(idle)}s since, so the session that held it is "
+                     f"gone — start the workflow from this session, then run the driver"
+                     if quiet else "writes are still landing, so it is running"))
     elif open_work and driver.get("last_outcome") == "STOPPED_BUDGET":
         # THE DOLLAR CEILING, which had no state of its own. A run the
         # budget stopped leaves FLOORS FAIL rows behind — exactly what a
@@ -221,6 +244,8 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         "search_ops": budget["search_ops"],
         "catalogue_drift": drift,
         "stage": C.stage_of(md),
+        "awaiting": driver.get("awaiting") if state in (
+            "AWAITING_WORKFLOW", "WORKFLOW_RUNNING") else None,
     }
     row.update(post)
     row["criterion"] = COMPLETION_CRITERIA.get(state, "")
@@ -249,6 +274,9 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
 #: What "done" means for each state — the gate that closes it, in one line,
 #: so a session or a hook reports a criterion rather than an impression.
 COMPLETION_CRITERIA = {
+    "AWAITING_WORKFLOW": ("the handoff's workflow is started from a live session "
+                          "(Workflow({scriptPath, args}) per invocation) and the "
+                          "driver is re-run; the stage's own gate then decides"),
     "PRELIM_OPEN": ("`engine.prelim complete` succeeds: all seven sections "
                     "narrated with cited evidence or declared with a ladder"),
     # The one criterion no agent can satisfy. Stated anyway, because a state
@@ -472,6 +500,12 @@ def resume_plan(row: dict) -> dict:
         return {"actionable": False, "agent": None, "needs": "person",
                 "why": COMPLETION_CRITERIA[state],
                 "detail": row.get("detail")}
+    if state == "AWAITING_WORKFLOW":
+        return {"actionable": True, "agent": None,
+                "workflow": (row.get("awaiting") or {}).get("handoff"),
+                "stage": (row.get("awaiting") or {}).get("stage"),
+                "why": "only a model session can start a Workflow; the driver "
+                       "cannot, so a revive hands the workflow to this session"}
     if state == "NO_CLIENT_FOLDER":
         return {"actionable": True, "agent": None,
                 "command": ["python3", "-m", "engine.assemble", "open",
@@ -690,6 +724,13 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
     if not plan.get("actionable"):
         return {"run_id": row.get("run_id"), "outcome": "NOT_RUN",
                 "reason": plan.get("why"), "state": row.get("state")}
+    if plan.get("workflow"):
+        # The line the stage_advance hook reads: it names the exact Workflow
+        # calls from the handoff file, in the session that ran this revive.
+        line = f"AWAITING_WORKFLOW at {plan.get('stage')} — {plan['workflow']}"
+        return {"run_id": row.get("run_id"), "outcome": "AWAITING_WORKFLOW",
+                "state": row.get("state"), "handoff": plan["workflow"],
+                "detail": line}
     if plan.get("command"):
         cmd = list(plan["command"])
         if dry_run:
@@ -716,11 +757,21 @@ def revive(row: dict, *, dry_run: bool = False, timeout: int = 3600) -> dict:
                     "resume_prompt": plan.get("prompt")}
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
                            cwd=str(Path(__file__).resolve().parents[1]))
+        out = r.stdout or r.stderr or ""
+        if r.returncode == 0 and "AWAITING_WORKFLOW" in out:
+            # The driver advanced as far as it can alone and handed the
+            # next stage over. That is not RESOLVED: nothing will run it
+            # unless this session starts the workflow.
+            m = re.search(r"(/\S+?_workflow\.json)", out)
+            return {"run_id": row.get("run_id"), "outcome": "AWAITING_WORKFLOW",
+                    "state": row.get("state"), "via": "engine.pipeline run",
+                    "handoff": m.group(1) if m else None,
+                    "detail": f"AWAITING_WORKFLOW — {m.group(1) if m else out.strip()[-300:]}"}
         return {"run_id": row.get("run_id"),
                 "outcome": "RESOLVED" if r.returncode == 0 else "FAILED",
                 "state": row.get("state"), "agent": plan.get("agent"),
                 "via": "engine.pipeline run",
-                "detail": (r.stdout or r.stderr).strip()[-400:]}
+                "detail": out.strip()[-400:]}
     runner = _agent_run()
     if runner is None:
         return {"run_id": row.get("run_id"), "outcome": "NOT_RUN",
@@ -766,7 +817,9 @@ ACTIONABLE = ("UNREADABLE", "HALTED", "BLOCKED_NO_CONNECTOR",
               "MISSING_LOCALLY", "READY_FOR_HANDOFF",
               # the assessment-stage machine (2026-09-03)
               "SCORING_OPEN", "CRITIC_PENDING", "SCORING_GATE_OPEN",
-              "REPORT_PRECONDITIONS_OPEN", "REPORTS_OPEN", "PACKAGE_UNSHIPPED")
+              "REPORT_PRECONDITIONS_OPEN", "REPORTS_OPEN", "PACKAGE_UNSHIPPED",
+              # a workflow handoff nobody is running (2026-10-06)
+              "AWAITING_WORKFLOW")
 
 #: States an AGENT can advance without a person: the ones a stage-advance
 #: hook may keep a session working on, and the watchdog may revive.
@@ -810,7 +863,7 @@ def main(argv=None) -> int:
                 # `--revive` walked the wrong list and re-dispatched states
                 # AGENT_ADVANCEABLE already excluded.
                 revived.append({"run_id": r.get("run_id"), "state": r["state"],
-                                "revived": False,
+                                "revived": False, "outcome": "NOT_RUN",
                                 "detail": "needs a person, not a re-dispatch: "
                                           + str(r.get("detail"))[:200]})
     if a.json:
@@ -827,7 +880,7 @@ def main(argv=None) -> int:
                   f"{v.get('agent') or v.get('would_run') or ''}  "
                   f"{v.get('reason') or v.get('detail') or ''}"[:200])
     if a.revive:
-        return 0 if all(v["outcome"] in ("RESOLVED", "DRY_RUN")
+        return 0 if all(v["outcome"] in ("RESOLVED", "DRY_RUN", "AWAITING_WORKFLOW")
                         for v in revived) else 1
     return 1 if any(r["state"] in ACTIONABLE for r in rows) else 0
 
