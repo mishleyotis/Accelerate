@@ -2021,14 +2021,10 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
 #: and an 850-word LENGTH, and no rewrite could clear it). Only a FAIL IF
 #: line, an engine refusal or one of the six dimensions fails a section.
 TEMPLATE_NUMBERS_RULE = (
-    "the template's numbers are guidance, not constants: a LENGTH range, a "
-    "count range in MINIMUM DATA ('3 to 5 …', '6 or more …') and a peer-set "
-    "size describe a typical run. Never FAIL or REVISE a section only because "
-    "it runs past a LENGTH upper bound or because the run's own locked set "
-    "(Handoff_Lock) has a different size than a template example. Hard "
-    "conditions are the section's FAIL IF line, the engine's refusals and the "
-    "six dimensions; a figure the run itself fixed (peer_n, scope, catalogue) "
-    "wins over a number in the Doc. Over-length is at most a note")
+    "template numbers are guidance, not constants: a LENGTH bound, a count "
+    "range in MINIMUM DATA or a peer-set size never alone fails a section; the "
+    "run's own locks (Handoff_Lock peer_n) win. Hard: FAIL IF, engine refusals, "
+    "the six dimensions")
 
 
 def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False) -> dict:
