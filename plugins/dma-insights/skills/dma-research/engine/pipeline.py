@@ -2525,6 +2525,15 @@ class Pipeline:
                 # but it does not spend the budget. Susser Bank, 2026-10-06:
                 # 48 SG-V4 flags on techstack, 40 of them ladder/provenance.
                 claims = [w for w in sgv4 if not _LADDER_PATH.search(str(w.get("path") or ""))]
+                if (res.get("status") == "pass" and claims
+                        and self.opts.sg_v4_budget > Options.sg_v4_budget
+                        and len(claims) > Options.sg_v4_budget):
+                    L.append_gate(self.wb, gate="SG_V4_BUDGET_OVERRIDE", scope=p,
+                                  verdict="PASS", blocking=False,
+                                  detail=(f"{len(claims)} SG-V4 claim flag(s) on {p} over the "
+                                          f"default budget {Options.sg_v4_budget}; promoted "
+                                          f"disclosed under owner override (budget "
+                                          f"{self.opts.sg_v4_budget}). Re-grounding owed."))
                 if res.get("status") == "pass" and len(claims) > self.opts.sg_v4_budget:
                     sgv4 = claims
                     # The connector discloses-and-promotes SG-V4 (invariant 12);
@@ -2778,6 +2787,7 @@ def _build_opts(a) -> Options:
                    stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
                    relay=not a.no_relay,
                    relay_mode=getattr(a, "relay_mode", Options.relay_mode),
+                   sg_v4_budget=getattr(a, "sg_v4_budget", None) or Options.sg_v4_budget,
                    step=getattr(a, "step", Options.step),
                    lane_retries=a.lane_retries, page_retries=a.page_retries,
                    ingest_poll_s=(0 if a.dispatcher == "stub" else a.ingest_poll_s),
@@ -2853,6 +2863,12 @@ def main(argv=None) -> int:
                         f"before the gap is disclosed instead (default {Options.enrichment_heals})")
     r.add_argument("--no-relay", action="store_true",
                    help="harvest search_requests but do not service them at all")
+    r.add_argument("--sg-v4-budget", type=int, default=None,
+                   help=f"SG-V4 claims a page may carry before the driver holds it "
+                        f"(default {Options.sg_v4_budget}). Raising it is an OWNER "
+                        f"decision and is recorded on the Gate_Log: SG-V4 discloses "
+                        f"and promotes (invariant 12); the budget is the driver's "
+                        f"own stricter hold")
     r.add_argument("--relay-mode", choices=("orchestrator", "lane"),
                    default=Options.relay_mode,
                    help=f"how harvested search_requests are serviced "
