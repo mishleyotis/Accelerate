@@ -408,6 +408,9 @@ def awaiting_workflow(event: dict) -> dict | None:
     ms = re.search(r"(/\S+?scoring_workflow\.json)", text)
     if ms:
         return _scoring_workflow_context(ms.group(1))
+    mr = re.search(r"(/\S+?reports_workflow\.json)", text)
+    if mr:
+        return _reports_workflow_context(mr.group(1))
     m = re.search(r"(/\S+?research_workflow\.json)", text)
     doc = {}
     if m:
@@ -690,6 +693,31 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception:                                      # noqa: BLE001
         sys.exit(0)                                        # fail open, silent
+
+
+def _reports_workflow_context(path: str) -> dict:
+    """REPORTS handed to the session: one persisted workflow over every open
+    section of both reports — a writer and an independent validator per
+    section, all at once (owner, 2026-10-06: serial per-report lanes took
+    hours a round on First Tech)."""
+    try:
+        doc = json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        doc = {}
+    lines = ["REPORTS ARE YOURS, AS A PERSISTED WORKFLOW — start it now (every "
+             "open section gets its own writer and validator in parallel, shown "
+             "in /workflows):"]
+    for inv in doc.get("invocations") or []:
+        lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
+                     f"args: {json.dumps(inv)}}})")
+    if not doc:
+        lines.append(f"  (handoff file not readable — open {path})")
+    lines.append("  No Workflow tool in this session? Re-run the driver with "
+                 "--reports-mode lanes — reports need no connector. Never write "
+                 "or review a section by hand.")
+    lines.append(f"  THEN, when the workflow has returned: {doc.get('then') or 'the driver again'}")
+    return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
+                                   "additionalContext": "\n".join(lines)}}
 
 
 def _scoring_workflow_context(path: str) -> dict:

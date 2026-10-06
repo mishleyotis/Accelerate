@@ -131,6 +131,14 @@ RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
 SCORING_WORKFLOW = "workflows/dma-pillar-scoring.js"
 SCORING_HANDOFF = "scoring_workflow.json"
 RESEARCH_HANDOFF = "research_workflow.json"
+#: REPORTS as one persisted workflow over every open SECTION of both reports
+#: (reports_mode="workflow"): one writer per section in parallel, its
+#: independent validator the moment it lands, a revise loop per section, then
+#: one whole-report cross-check per report. Owner, 2026-10-06: two serial
+#: lanes rewriting eleven sections each, then one validator reading all
+#: nineteen, took hours per round on First Tech.
+REPORTS_WORKFLOW = "workflows/dma-report-sections.js"
+REPORTS_HANDOFF = "reports_workflow.json"
 
 STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
           "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
@@ -418,6 +426,12 @@ class Options:
     # when ITS scorers finish); "lanes" dispatches headless lanes, which is
     # sound here because scoring needs no enrichment connector.
     scoring_mode: str = "lanes"
+    # Who runs REPORTS. "workflow" hands every open section to the session as
+    # one persisted workflow (REPORTS_WORKFLOW) — a writer and an independent
+    # validator per section, all sections at once; "lanes" is the old pair of
+    # serial headless rounds (one producer per report, then one validator for
+    # both). The CLI defaults to "workflow" with the real dispatcher.
+    reports_mode: str = "lanes"
     # How many FRESH lane instances the driver spends on a category whose
     # searches all ran through bare web_search before it discloses the gap
     # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
@@ -1170,6 +1184,26 @@ class Pipeline:
                                handoff=h["file"], invocations=h["invocations"],
                                resume=self.plan()["command"])
                 return outcome
+            if st == "REPORTS" and self.opts.reports_mode == "workflow":
+                h = self._reports_handoff()
+                if h.get("stalled"):
+                    self._record(st, "FAIL", h["summary"][:600], t0)
+                    self.opts.log(f"[{st}] STALLED — {h['summary'][:300]}")
+                    outcome.update(outcome="FAILED", stage=st, reason=h["summary"][:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if not h.get("passed"):
+                    self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                    self._snapshot(st)
+                    self.opts.log(f"[WORKFLOW] REPORTS handed to the conducting session: "
+                                  f"{h['summary']} — {h['file']}")
+                    outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
+                                   reason=h["summary"], handoff=h["file"],
+                                   invocations=h["invocations"],
+                                   resume=self.plan()["command"])
+                    return outcome
+                # every report READY: fall through — _stage_reports renders
+                # without dispatching anything.
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
                 h = self._research_handoff()
                 if not h["invocations"]:
@@ -2515,6 +2549,81 @@ class Pipeline:
             self.opts.log(f"  [PROBES] skipped ({e.__class__.__name__}: {str(e)[:120]})")
             return 0
 
+    def _reports_handoff(self) -> dict:
+        """Write ONE report-sections workflow invocation over every section
+        not READY in either report, or say both reports are READY.
+
+        The producer and validator briefs are the ones the lane path writes
+        (`brief.report_batch`), so a section's writer reads the same packet
+        and the same revise notes; only the unit of work changes — a section,
+        not a report. A handoff that finds the same open sections as the last
+        `stall_rounds` handoffs stops the stage instead of buying the same
+        agents again."""
+        from . import brief, narrative as N, report_spec as RS
+        self._reconcile_register()
+        self._report_probes()
+        st = N.state(self.wb)
+        open_ = []
+        for key, rep in st["reports"].items():
+            if rep.get("ready"):
+                continue
+            for sec in rep.get("sections") or []:
+                if str(sec.get("status")) != "READY":
+                    open_.append((key, str(sec.get("id") or sec.get("section"))))
+        stall_file = self.run.qa_dir / "reports_workflow_stall.json"
+        if not open_:
+            stall_file.unlink(missing_ok=True)
+            return {"passed": True, "summary": "both reports READY (workflow mode)"}
+        sig = sorted(f"{k}:{s}" for k, s in open_)
+        try:
+            prev = json.loads(stall_file.read_text())
+        except (OSError, ValueError):
+            prev = {}
+        same = int(prev.get("same") or 0) + 1 if prev.get("open") == sig else 0
+        stall_file.parent.mkdir(parents=True, exist_ok=True)
+        stall_file.write_text(json.dumps({"open": sig, "same": same}))
+        if same >= self.opts.stall_rounds:
+            return {"stalled": True,
+                    "summary": f"the same {len(sig)} report section(s) stayed open across "
+                               f"{same + 1} workflow handoff(s): {', '.join(sig[:12])}. "
+                               f"Read their revise notes (`narrative state`), repair at "
+                               f"source, then resume: {self.plan()['command']}"}
+        n = int(prev.get("n") or 0) + 1 if prev else 1
+        b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_wf{n}"))
+        v = brief.report_batch(self.wb, run=self.run,
+                               out_dir=self._briefs(f"reports_wf{n}_validator"), validator=True)
+        prod = {re.sub(r"^report-", "", str(r.get("label") or "")): r
+                for r in self._lane_rows(b)}
+        val = (self._lane_rows(v) or [{}])[0].get("prompt_file", "")
+        heads = {(k, sec.id): sec.heading for k, spec in RS.SPECS.items()
+                 for sec in spec.sections}
+        sections = [{"report": k, "section": s, "heading": heads.get((k, s), ""),
+                     "producer": (prod.get(k) or {}).get("agent")
+                     or ("report-research-producer" if k == "client_research"
+                         else "report-assessment-producer"),
+                     "brief": (prod.get(k) or {}).get("prompt_file", ""),
+                     "validator_brief": val}
+                    for k, s in open_]
+        inv = [{"run": self.run.run_id, "root": str(self.run.root),
+                "eng": str(PLUGIN / "skills" / "dma-research"), "rounds": 2,
+                "sections": sections}]
+        doc = {"workflow": str(PLUGIN / REPORTS_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start the invocation — Workflow({scriptPath: <workflow>, "
+                       "args: <invocation>}) — wait for it, then run `then`, which "
+                       "renders both reports once every section is READY. No "
+                       "Workflow tool in this session? Re-run the driver with "
+                       "--reports-mode lanes: reports need no connector.")}
+        path = self.run.qa_dir / REPORTS_HANDOFF
+        path.write_text(json.dumps(doc, indent=1))
+        stall_file.write_text(json.dumps({"open": sig, "same": same, "n": n}))
+        by_r: dict[str, int] = {}
+        for k, _ in open_:
+            by_r[k] = by_r.get(k, 0) + 1
+        return {"file": str(path), "invocations": inv,
+                "summary": f"1 report-sections workflow, {len(sections)} open section(s) ("
+                           + ", ".join(f"{k}: {c}" for k, c in sorted(by_r.items())) + ")"}
+
     def _stage_reports(self) -> str:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
@@ -2906,6 +3015,8 @@ def _build_opts(a) -> Options:
                    toolkit_dir=Path(a.toolkits) if a.toolkits else None,
                    research_mode=_research_mode(a),
                    scoring_mode=getattr(a, "scoring_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                   else "workflow"),
+                   reports_mode=getattr(a, "reports_mode", None) or ("lanes" if a.dispatcher == "stub"
                                                    else "workflow"))
 
 
@@ -2942,6 +3053,12 @@ def main(argv=None) -> int:
                         "dispatches headless lanes (scoring needs no connector, "
                         "so lanes are a sound fallback in a session without "
                         "the Workflow tool)")
+    r.add_argument("--reports-mode", choices=("workflow", "lanes"), default=None,
+                   help="who writes REPORTS: 'workflow' (default with the real "
+                        "dispatcher) hands every open section to the session as "
+                        "one persisted workflow — a writer and an independent "
+                        "validator per section, all in parallel, shown in "
+                        "/workflows; 'lanes' runs the serial per-report rounds")
     r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
                    help="who runs RESEARCH: 'workflow' (default with the real "
                         "dispatcher) hands it to the session as one persisted "

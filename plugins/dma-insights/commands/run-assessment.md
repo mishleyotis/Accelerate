@@ -185,6 +185,20 @@ confidence — so the critic judges what a rule cannot. No Workflow tool in this
 session (a resumed session loses it)? `--scoring-mode lanes` is sound: scoring
 needs no connector. Never re-score rows by hand.
 
+**REPORTS runs as one persisted workflow — one writer and one validator per
+section.** At REPORTS the driver stops `AWAITING_WORKFLOW` and writes
+`<ROOT>/07_qa/reports_workflow.json` (workflow
+`${CLAUDE_PLUGIN_ROOT}/workflows/dma-report-sections.js`, one `args` naming every
+section not READY in either report). Start it at once: each open section gets its
+own producer agent (`narrative write`, that section only) and, the moment it lands,
+an independent `report-validator` (`narrative review`); a REVISE goes straight
+back to that section's writer, and when every section of a report passes, one
+whole-report cross-check runs. Then run the file's `then`, which renders both
+reports. The same open sections across `--stall-rounds` handoffs stop the stage
+with their names rather than buying the same agents again. No Workflow tool in
+this session? `--reports-mode lanes` runs the old serial rounds — reports need no
+connector. Never write or review a section by hand.
+
 **RESEARCH runs as persisted workflows — started by you.** The driver is a
 Python process and cannot start a Workflow, so at RESEARCH it stops with
 outcome `AWAITING_WORKFLOW` (exit 0) and writes
@@ -249,7 +263,8 @@ packets, challenge lanes, the floors gates; a FAILED category is re-dispatched
 with the handback and the gate's blocking terms, a PASSED one never) →
 HANDOFF → SCORING (four pillar lanes, the solutions duty, the critic, the
 rollup, the SCORING gate) → INGEST_A (the scored checkpoint pushed; the scan
-ingests it) → REPORTS (two producers and the validator into the pinned Docs,
+ingests it) → REPORTS (the section workflow: a writer and a validator per open section,
+then a whole-report cross-check, into the pinned Docs,
 rendered into the branded shell) → PAGES_A (techstack and heatmap shipped to
 version A through `ship_page.py --claim`) → PACKAGE (technographic scan,
 `assemble package`, the gold gate) → INGEST_B → PAGES_B (the A pages restaged

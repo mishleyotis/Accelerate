@@ -44,7 +44,7 @@ Return pillar ${P}, verdict "SCORED", scored (rows you struck), moves 0, and one
 
 const criticPrompt = (round) => `You are the scoring-critic for pillar ${P} of DMA run ${A.run}, round ${round}. Work from ${A.eng}.
 ${A.critic_brief ? `Your brief is ${A.critic_brief}: read it first.` : ''}
-Critique pillar ${P} ONLY: re-derive a sample of its scores from their rationales and rubric descriptors and hunt the score that flatters. You struck none of them.
+Critique pillar ${P} ONLY. You struck none of its scores. ${round === 1 ? 'Round 1: re-derive a sample (at least one row per capability) from its rationale and rubric descriptor and hunt the score that flatters.' : 'Re-critique round: judge ONLY the rows you moved last round (did each land at or below its target with a rationale that now holds) and rows changed since your last verdict. Do not draw a fresh sample - a critic that re-samples every round never converges. PASS when the moved rows hold.'}
 Record exactly one verdict: python3 -m engine.assessment critique ${R} --pillar ${P} --verdict PASS|FAIL --actor scoring-critic --note '<80+ chars>' and, on a FAIL, one --move CELL:TARGET:why per row you would move (the engine refuses a FAIL without them).
 The engine already refuses band, own-site and stale breaches at write time — judge what a rule cannot.
 Return pillar ${P}, verdict PASS or FAIL as recorded, moves (how many --move you gave), and one-line notes.`
