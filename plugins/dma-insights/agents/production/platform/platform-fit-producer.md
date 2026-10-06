@@ -139,13 +139,13 @@ blend, and let the card **disclose** `impact_fallback`. Renormalisation exists s
 an unknown is never scored as zero; it is not a licence to reach the stated basis
 by writing a quote.
 
-## Stress-test every card before it ships (AG-10, AG-13 — blocking)
+## Stress-test every card before it ships (AG-14, AG-13 — blocking)
 
 Owner, 2026-10-05: recommendations were prioritising an integration hub
 "just because there are many systems", and nothing on the page argued against
 them. Two gates now refuse that:
 
-- **AG-10 — every scored card and every recommendation is rebutted.**
+- **AG-14 — every scored card and every recommendation is rebutted.**
   `r_layer.counter` (≥ 30 words) argues the strongest case AGAINST the card,
   naming a specific alternative a sceptical buyer would raise: another
   candidate, a discarded platform, or a named path (consolidate, extend the

@@ -337,7 +337,7 @@ def _check_rank_against_score(page: str, payload: dict) -> list:
     return out
 
 
-# ── AG-10 / AG-13 · recommendations are stress-tested, not asserted ───
+# ── AG-14 / AG-13 · recommendations are stress-tested, not asserted ───
 # Owner, 2026-10-05: "most just seem to be prioritizing MuleSoft just because
 # there are many systems. The recommendations are not rebutted to ensure
 # stress testing." Measured on Cross Insurance Agency: Addressable
@@ -383,7 +383,7 @@ def _probe(rl, prefix):
 
 
 def _check_rebuttals(page: str, payload: dict) -> list:
-    """AG-10 - every ranked platform card and every recommendation carries a
+    """AG-14 - every ranked platform card and every recommendation carries a
     rebuttal that was actually fought: a counter of at least 30 words that
     names a specific alternative (another candidate, a discarded platform,
     or a named path - consolidate, extend the incumbent, native connectors,
@@ -429,7 +429,7 @@ def _check_rebuttals(page: str, payload: dict) -> list:
                             "resolved and cites the evidence that resolved it")
         if problems:
             out.append(_reason(
-                "AG-10", sec, path,
+                "AG-14", sec, path,
                 f"{row.get('platform') or row.get('rec_id') or own!r} is "
                 "published without being stress-tested: " + "; ".join(problems)
                 + ". Argue the strongest case AGAINST it - the alternative a "

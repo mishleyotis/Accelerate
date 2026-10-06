@@ -1,4 +1,4 @@
-"""AG-10 / AG-13 — recommendations are stress-tested, and a first place won
+"""AG-14 / AG-13 — recommendations are stress-tested, and a first place won
 on breadth or sequencing argues for itself.
 
 Owner, 2026-10-05: "most just seem to be prioritizing MuleSoft just because
@@ -57,11 +57,11 @@ DC = _card("Salesforce Data Cloud", 2, 0.989, 0.25, 0.66 * 0.989 + 0.26 * 0.25)
 
 
 def test_both_gates_are_registered_and_block():
-    for g in ("AG-10", "AG-13"):
+    for g in ("AG-14", "AG-13"):
         assert G.GATES[g][-1] == "block"
 
 
-# ── AG-10 ──────────────────────────────────────────────────────────────
+# ── AG-14 ──────────────────────────────────────────────────────────────
 
 def test_a_fought_rebuttal_passes():
     assert V._check_rebuttals("platform", _page([copy.deepcopy(DC)])) == []
@@ -75,7 +75,7 @@ def test_a_counter_naming_no_alternative_is_refused():
     out = V._check_rebuttals("platform", _page([_card("Salesforce Data Cloud",
                                                       1, .9, .2, .7,
                                                       counter=vague)]))
-    assert out and out[0]["gate_id"] == "AG-10"
+    assert out and out[0]["gate_id"] == "AG-14"
     assert "names no specific alternative" in out[0]["message"]
 
 
@@ -100,7 +100,7 @@ def test_a_rebuttal_probe_must_cite_what_settled_it():
     out = V._check_rebuttals("platform", _page([_card(
         "Salesforce Data Cloud", 1, .9, .2, .7,
         probes=["Rebuttal: considered and rejected."])]))
-    assert out and out[0]["gate_id"] == "AG-10"
+    assert out and out[0]["gate_id"] == "AG-14"
 
 
 def test_a_short_counter_is_refused():

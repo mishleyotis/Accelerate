@@ -1175,7 +1175,7 @@ GATES = {
               "reads as a broken sort and takes the surrounding argument "
               "down with it.",
               "block"),
-    "AG-10": ("Every recommendation is rebutted", None,
+    "AG-14": ("Every recommendation is rebutted", None,
               "Every scored platform card and every recommendation carries "
               "an r_layer.counter of at least 30 words naming a specific "
               "alternative (another candidate, a discarded platform, or a "

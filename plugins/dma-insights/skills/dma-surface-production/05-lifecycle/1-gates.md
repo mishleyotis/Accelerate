@@ -227,10 +227,10 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `AG-04` | **A named peer's technographics carry their source.** Where peer_coverage is stated, a per-peer breakdown exists with one row per peer including the peers that could not be established (deployed: null); every deployed row carries a source_url and an as_of; and the share agrees with its own… | block | `gates/AG-04.md` |
 | `AG-05` | **One event, one direction, across both pages.** An event the timeline classifies as constraining (signal NEGATIVE / maturity_effect CONSTRAINED) must not be the same event a why-now signal names as the reason to act — matched on a shared evidence id, or on the same date and subject.… | block | — |
 | `AG-09` | **A rank that contradicts its own score says why.** For every platform P: if some platform Q ranks above P and scores below it, P carries a non-empty fit_basis or story_md. Rows missing either number are skipped, not failed. | block | — |
-| `AG-10` | **Every recommendation is rebutted.** Every scored platform card and every recommendation carries an r_layer.counter of at least 30 words naming a specific alternative (another candidate, a discarded platform, or a named path: consolidate, extend the incumbent, native… | block | — |
 | `AG-11` | **A why-now signal is an event, not a recap.** No signal's prose states this assessment's own pillar, category or composite figures where a dated external event belongs. | block | — |
 | `AG-12` | **A starter opens on an opportunity.** No conversation starter makes the client the subject of a failure — no contradiction claimed, no incapacity as the opening, no second-person absence, no ranking down. | block | — |
 | `AG-13` | **A first place is earned, not inherited from breadth.** When Addressable opportunity spreads by less than 0.02 across the scored cards and the rank-1 card leads by a declared sequence or by Catalogue interconnect, that card carries a `Lead test:` probe citing client evidence that makes it… | block | — |
+| `AG-14` | **Every recommendation is rebutted.** Every scored platform card and every recommendation carries an r_layer.counter of at least 30 words naming a specific alternative (another candidate, a discarded platform, or a named path: consolidate, extend the incumbent, native… | block | — |
 
 ### SG · Safeguard (2)
 
