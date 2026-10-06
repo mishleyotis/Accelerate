@@ -24,7 +24,7 @@ from test_acceptance_pipeline import _fresh, _opts
 
 
 def _wf_opts(tmp_path, **over):
-    return _opts(tmp_path, scoring_mode="workflow", reports_mode="workflow",
+    return _opts(tmp_path, scoring_mode="workflow", report_mode="workflow",
                  pages_mode="workflow", **over)
 
 
@@ -41,14 +41,13 @@ def _rows_for(doc: dict) -> list[dict]:
                 rows.insert(0, {"agent": "technographic-scanner",
                                 "prompt_file": inv["solutions_brief"]})
             rows.append({"agent": "scoring-critic", "prompt_file": ""})
-        elif name == "dma-report-sections.js":
+        elif name == "dma-reports.js":
             seen = set()
-            for s in inv["sections"]:
-                if (s["producer"], s["brief"]) not in seen:
-                    seen.add((s["producer"], s["brief"]))
-                    rows.append({"agent": s["producer"], "prompt_file": s["brief"]})
-            rows.append({"agent": "report-validator",
-                         "prompt_file": inv["sections"][0]["validator_brief"]})
+            for sec in inv["sections"]:
+                if (sec["agent"], inv["report"]) not in seen:
+                    seen.add((sec["agent"], inv["report"]))
+                    rows.append({"agent": sec["agent"], "prompt_file": sec["brief"]})
+            rows.append({"agent": "report-validator", "prompt_file": ""})
         elif name == "dma-page-production.js":
             for pg in inv["pages"]:
                 rows += [{"agent": f["agent"], "prompt_file": f["brief"]}
@@ -210,7 +209,7 @@ def test_the_watchdog_hands_an_orphaned_workflow_to_the_session_not_the_driver(t
 def test_the_cli_defaults_every_workflow_stage_to_the_workflow(tmp_path):
     import argparse
     src = Path(P.__file__).read_text()
-    for flag in ("--scoring-mode", "--reports-mode", "--pages-mode", "--research-mode"):
+    for flag in ("--scoring-mode", "--report-mode", "--pages-mode", "--research-mode"):
         assert f'"{flag}"' in src, flag
     a = argparse.Namespace(dispatcher="agent_run", lane_timeout=60, until=None,
                            max_wall_min=None, max_usd=None, max_rounds=3, stall_rounds=2,
@@ -219,5 +218,5 @@ def test_the_cli_defaults_every_workflow_stage_to_the_workflow(tmp_path):
                            folder_root=None, no_push=True, allow_stale_install=False,
                            lanes=1, toolkits=None, research_mode=None, run="R")
     o = P._build_opts(a)
-    assert (o.research_mode, o.scoring_mode, o.reports_mode, o.pages_mode) == \
+    assert (o.research_mode, o.scoring_mode, o.report_mode, o.pages_mode) == \
         ("workflow",) * 4

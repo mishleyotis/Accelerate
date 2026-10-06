@@ -189,7 +189,11 @@ def test_issue8_a_page_brief_carries_paths_and_verdict_reasons_never_payload_byt
     assert "RUN-9" in text and str(contract) in text
     assert "CG-14" in text and "Transformational" in text
     assert '"e_ids"' not in text                  # the contract's BYTES stay on disk
-    assert "ship_page.py" in text and "--claim" in text
+    # A lane prechecks; the DRIVER ships under its own lease. A brief that
+    # handed lanes `--claim` let the techstack lane at Arbor Bank (2026-10-06)
+    # take the run's lease under its own id and lock the driver out.
+    assert "ship_page.py" in text and "--dry-run" in text
+    assert "--claim" not in text
     with pytest.raises(ValueError, match="unknown page"):
         brief.page_batch(wb, run=run, out_dir=tmp_path / "pg2", connector_run="RUN-9",
                          contract_file=contract, pages=["dashboard"])

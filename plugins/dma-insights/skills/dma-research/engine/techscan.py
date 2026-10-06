@@ -189,9 +189,25 @@ def _vendor_tokens(row) -> list[str]:
     return out
 
 
+def _vendor_hosted(e, tok: str) -> bool:
+    """The vendor's own site is the vendor's CLAIM, not a confirmation.
+
+    Owner decision 2026-10-06 (Susser Bank): a vendor's case study about the
+    client, even one quoting the client's executive, is "a vendor page asserts
+    it", which the report template's status vocabulary calls CLAIMED. This
+    check used to count getbankpoint.com's Susser case study as evidence that
+    contradicted a CLAIMED BankPoint row, while the report validator refused
+    any section that printed the same row CONFIRMED, so the reports could not
+    pass either gate. CONFIRMED needs the bank's own source or an independent
+    one."""
+    host = re.sub(r"^https?://", "", str(e.get("Source_URL") or "").lower()).split("/")[0]
+    return bool(host) and tok.lower() in host.replace("-", "")
+
+
 def contradictions(wb: RunWorkbook) -> list[dict]:
-    """CLAIMED register rows that bank-authored or vendor evidence the run
-    already holds names, and which the row does not cite.
+    """CLAIMED register rows that bank-authored or independent evidence the
+    run already holds names, and which the row does not cite. The vendor's
+    own site never counts: it is the claim (`_vendor_hosted`).
 
     Susser Bank, 2026-10-05: TS-016 held Salesforce as a broker-only claim
     while the bank's own nCino Administrator posting configured Salesforce,
@@ -238,7 +254,8 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
                     and pat.search(str(e.get("Excerpt") or ""))
                     and about_entity(e)
                     and not any(h in str(e.get("Source_URL") or "").lower()
-                                for h in BROKER_HOSTS)]
+                                for h in BROKER_HOSTS)
+                    and not _vendor_hosted(e, tok)]
             if hits:
                 out.append({"ts_id": r.get("TS_ID"), "product": r.get("Product"),
                             "status": "CLAIMED", "token": tok,

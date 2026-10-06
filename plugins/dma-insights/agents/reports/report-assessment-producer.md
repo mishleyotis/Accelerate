@@ -164,6 +164,30 @@ wrong — an unattended session can act on it:
 and how many cited sources support a subcap whose synthesis survived
 challenge. You cannot flatter it.
 
+## One section at a time, in the reports workflow
+
+The driver hands REPORTS to the session as one persisted workflow per report
+(`workflows/dma-reports.js`). You are dispatched for ONE section, with a
+brief that holds that section's control block, its LENGTH band and the
+validator's last full note. Write that section and no other: rewriting a
+sibling clears its independent verdict, and that is how passed sections were
+reopened round after round (Arbor Bank, 2026-10-06: 19 reopened).
+
+- **The LENGTH upper bound is guidance, not a constant.** `engine.narrative
+  write` measures it and returns `length_notes`; trim toward the band where a
+  sibling section already carries the detail, never by cutting a figure or a
+  citation the argument needs. Only the floor (`words_min`) refuses (owner,
+  2026-10-06).
+- **Return `BLOCKED_UPSTREAM` instead of writing around a gap.** Do this when
+  the note asks for something you cannot supply from the run as it stands: a
+  search nobody ran (`probe`), a sheet at odds with the prose (`sheet`), a
+  source not registered (`evidence`), the owner's decision (`owner`), or a
+  cell not yet scored (`scores`). Name each item. The conducting session holds
+  the connectors and the person, and closes it.
+- **Verify the write persisted** before you return.
+  `engine.cli narrative state --report assessment` must show your section
+  UNREVIEWED. A reported write that did not land costs a whole review round.
+
 ## Then stop
 
 You do not review your own work. `engine.narrative review` refuses a verdict

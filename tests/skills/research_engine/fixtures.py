@@ -552,13 +552,31 @@ def section_record(section: str, eids, report="client_research", **over) -> dict
     # Scale the filler to the section's own floor: these tests are about the
     # refusals, and a body that trips the word floor first proves nothing
     # about the anatomy the test is aiming at.
+    # ...and to its CEILING: since 2026-10-06 `narrative.write` enforces the
+    # template's LENGTH band at both ends, so the filler grows sentence by
+    # sentence until the body clears the floor, rather than a whole paragraph
+    # per block (which overshot every short section's band).
     floor = sec.card_min_words or sec.min_words
-    nblocks = len(sec.blocks) or 1
-    w = len(para.split())
-    per = max(1, -(-floor // (nblocks * w)) + 1)
+    blocks = sec.blocks or ("",)
+    sentences = [x.strip() + "." for x in para.split(". ") if x.strip()]
+    sentences[-1] = sentences[-1].rstrip(".") + "."
     control = control_block(sec, eids)
+    fill: list[list[str]] = [[] for _ in blocks]
+    cites = " ".join(f"[{e}]" for e in eids)
+    fixed = sum(len(x.split()) for x in (control, *blocks)) + len(blocks) * (
+        4 + len(eids))
+
+    def _count():
+        return fixed + sum(len(s_.split()) for blk in fill for s_ in blk)
+    i = 0
+    while _count() < floor + 5:
+        fill[i % len(blocks)].append(sentences[i % len(sentences)])
+        i += 1
+    for blk in fill:
+        if not blk:
+            blk.append(sentences[0])
     body = []
-    for b in sec.blocks or ("",):
+    for b, blk in zip(blocks, fill):
         if b:
             body.append(f"## {b}")
         if control:
@@ -566,12 +584,11 @@ def section_record(section: str, eids, report="client_research", **over) -> dict
             # once, in the first block; the whole body is what is counted.
             body.append(control)
             control = ""
-        body.extend([para] * per)
+        body.append(" ".join(blk))
         # The renderer reads citations out of the BODY (`reports.CITE_RE`),
         # not out of Evidence_IDs, so a section that cites in the column and
         # not in the prose reads as uncited to the artefact a client opens.
-        body.append("Sources for this block: "
-                    + " ".join(f"[{e}]" for e in eids) + ".")
+        body.append("Sources for this block: " + cites + ".")
         body.append("")
     rec = {
         "Body": "\n".join(body).strip(),

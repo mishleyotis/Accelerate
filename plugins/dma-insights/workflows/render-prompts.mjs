@@ -10,7 +10,7 @@
 // (same prompt, same fast tier, same tools the workflow's agents would hold),
 // then runs the challenge prompt with the research-challenger agent type.
 //
-//   node render-prompts.mjs <research_workflow.json> <out_dir> [round]
+//   node render-prompts.mjs <research_workflow.json|reports_workflow.json> <out_dir> [round]
 //
 // Writes <CAT>_b<N>.md per batch and <CAT>_challenge.md per category, plus
 // manifest.json: [{category, kind, file, model, subagent_type}].
@@ -20,11 +20,55 @@ import { fileURLToPath } from 'node:url'
 
 const [handoff, outDir, roundArg] = process.argv.slice(2)
 if (!handoff || !outDir) {
-  console.error('usage: render-prompts.mjs <research_workflow.json> <out_dir> [round]')
+  console.error('usage: render-prompts.mjs <research_workflow.json|reports_workflow.json> <out_dir> [round]')
   process.exit(2)
 }
 const round = Number(roundArg || 1)
 const here = path.dirname(fileURLToPath(import.meta.url))
+const doc = JSON.parse(fs.readFileSync(handoff, 'utf8'))
+fs.mkdirSync(outDir, { recursive: true })
+
+function region (file) {
+  const text = fs.readFileSync(path.join(here, file), 'utf8')
+  const b = text.indexOf('// --- PROMPTS BEGIN')
+  const e = text.indexOf('// --- PROMPTS END')
+  if (b < 0 || e < 0) {
+    console.error(`PROMPTS markers missing in ${file}`)
+    process.exit(3)
+  }
+  return text.slice(b, e)
+}
+
+// REPORTS (engine.pipeline report_mode=workflow): the same write, review and
+// cross-section prompts dma-reports.js runs, one file each, so a session that
+// lost the Workflow tool runs them as in-session agents (Arbor Bank,
+// 2026-10-06: a restarted worker dropped the Workflow tool mid-run).
+if (String(doc.workflow || '').endsWith('dma-reports.js')) {
+  const reg = region('dma-reports.js')
+  const manifest = []
+  for (const A of doc.invocations || []) {
+    // eslint-disable-next-line no-new-func
+    const P = new Function('A', `${reg}\nreturn { writePrompt, reviewPrompt, crossPrompt }`)(A)
+    for (const s of A.sections || []) {
+      const w = path.join(outDir, `${A.report}_s${s.section}_write.md`)
+      fs.writeFileSync(w, P.writePrompt(s, round))
+      manifest.push({ report: A.report, section: String(s.section), kind: 'write', file: w,
+                      model: 'sonnet', subagent_type: `dma-insights:${s.agent}` })
+      const r = path.join(outDir, `${A.report}_s${s.section}_review.md`)
+      fs.writeFileSync(r, P.reviewPrompt(s, round))
+      manifest.push({ report: A.report, section: String(s.section), kind: 'review', file: r,
+                      subagent_type: 'dma-insights:report-validator' })
+    }
+    const x = path.join(outDir, `${A.report}_cross.md`)
+    fs.writeFileSync(x, P.crossPrompt(round))
+    manifest.push({ report: A.report, kind: 'cross', file: x,
+                    subagent_type: 'dma-insights:report-validator' })
+  }
+  fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 1))
+  console.log(`${manifest.length} prompt(s) -> ${outDir}`)
+  process.exit(0)
+}
+
 const src = fs.readFileSync(path.join(here, 'dma-pillar-research.js'), 'utf8')
 const b = src.indexOf('// --- PROMPTS BEGIN')
 const e = src.indexOf('// --- PROMPTS END')
@@ -32,9 +76,7 @@ if (b < 0 || e < 0) {
   console.error('PROMPTS markers missing in dma-pillar-research.js')
   process.exit(3)
 }
-const region = src.slice(b, e)
-const doc = JSON.parse(fs.readFileSync(handoff, 'utf8'))
-fs.mkdirSync(outDir, { recursive: true })
+const researchRegion = src.slice(b, e)
 const manifest = []
 for (const inv of doc.invocations || []) {
   const A = inv
@@ -43,7 +85,7 @@ for (const inv of doc.invocations || []) {
   const DOMAIN = A.domain || "<the entity's registrable domain, from engine.profile state>"
   // eslint-disable-next-line no-new-func
   const P = new Function('A', 'ENG', 'R', 'DOMAIN',
-    `${region}\nreturn { batchPrompt, challengePrompt }`)(A, ENG, R, DOMAIN)
+    `${researchRegion}\nreturn { batchPrompt, challengePrompt }`)(A, ENG, R, DOMAIN)
   for (const cat of inv.cats) {
     const batches = (inv.batches || {})[cat] && inv.batches[cat].length
       ? inv.batches[cat] : [[`${cat} (all open capabilities)`]]

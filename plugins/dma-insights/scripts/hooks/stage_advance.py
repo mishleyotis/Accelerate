@@ -737,26 +737,42 @@ def _pages_workflow_context(path: str) -> dict:
 
 
 def _reports_workflow_context(path: str) -> dict:
-    """REPORTS handed to the session: one persisted workflow over every open
-    section of both reports — a writer and an independent validator per
-    section, all at once (owner, 2026-10-06: serial per-report lanes took
-    hours a round on First Tech)."""
+    """REPORTS handed to the session: one persisted workflow per report.
+
+    Measured 2026-10-06 (Arbor Bank): REPORTS as whole-report lanes behind a
+    round barrier took 430 min over 19 rounds; a third of the returns named
+    something no writer could supply. Each report is now its own workflow, a
+    track per section, upstream items returned to this session to service."""
     try:
         doc = json.loads(Path(path).read_text())
     except (OSError, ValueError):
         doc = {}
-    lines = ["REPORTS ARE YOURS, AS A PERSISTED WORKFLOW — start it now (every "
-             "open section gets its own writer and validator in parallel, shown "
-             "in /workflows):"]
+    lines = ["REPORTS IS YOURS, AS PERSISTED WORKFLOWS — start ALL of these in ONE "
+             "message (one per report; each section is written and reviewed on its "
+             "own track, and an upstream blocker comes back to you instead of "
+             "looping the writer):"]
     for inv in doc.get("invocations") or []:
         lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
                      f"args: {json.dumps(inv)}}})")
     if not doc:
         lines.append(f"  (handoff file not readable — open {path})")
-    lines.append("  No Workflow tool in this session? Re-run the driver with "
-                 "--reports-mode lanes — reports need no connector. Never write "
-                 "or review a section by hand.")
-    lines.append(f"  THEN, when the workflow has returned: {doc.get('then') or 'the driver again'}")
+    ups = doc.get("upstream") or []
+    if ups:
+        lines.append(f"  ALREADY UPSTREAM ({len(ups)}) — service these yourself, they "
+                     f"are not in any workflow:")
+        for u in ups[:10]:
+            lines.append(f"    - {u.get('report')} §{u.get('section')} "
+                         f"[{u.get('kind')}] {u.get('detail')}")
+    lines.append("  When the workflows return, service every `upstream` row: a probe "
+                 "through enrichment-web-specialist, a sheet or evidence fix through its "
+                 "engine command, an owner decision with the person, scores through the "
+                 "pillar scorer and its critic.")
+    ap = doc.get("agent_prompts") or {}
+    lines.append("  No Workflow tool in this session? "
+                 + (f"The same prompts are on disk ({ap.get('manifest')}): {ap.get('how')}"
+                    if ap.get("manifest") else
+                    "Re-run the driver with --report-mode lanes."))
+    lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'the driver again'}")
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
                                    "additionalContext": "\n".join(lines)}}
 

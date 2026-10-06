@@ -95,6 +95,16 @@ VERDICTS = ("PASS", "REVISE", "FAIL")
 REVIEW_DIMENSIONS = ("evidence_support", "weighing_balance", "absence_rigour",
                      "inference_honesty", "bias_disclosure", "tone")
 
+#: What a REVISE can depend on that no writer can supply. Measured 2026-10-06
+#: (Arbor Bank): REPORTS ran 19 rounds and 137 reviews; 37 non-PASS notes
+#: named a missing probe, 34 an owner decision (six peers against a Doc that
+#: fails more than five) and 13 a workbook that moved under a passed section.
+#: The writer was re-dispatched against every one of them and could close
+#: none, so the stage looped until its stall rule ended it. A review that
+#: names its upstream blocker routes the section OUT of the writer loop and
+#: to the actor who can close it.
+UPSTREAM_KINDS = ("probe", "sheet", "evidence", "owner", "scores")
+
 
 class NarrativeRefusal(ValueError):
     """The section is not an argument yet, and here is what is missing."""
@@ -510,6 +520,10 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
                f"§{sec.id} '{sec.heading}' requires {sec.min_words}")
             + ". The floor is the section's job description, not a style "
               "preference.")
+    # ADVISORY (owner, 2026-10-06): a template's LENGTH upper bound is
+    # guidance, not a constant a section is refused on. Reported back on the
+    # write, never refused; the floor above still refuses.
+    length_notes = _length_band(wb, report, sec, body, card_id if is_card else "")
     problems += _check_blocks(sec, body)
     # The countable MINIMUM DATA / MUST NOT rules. Per-card rules run on this
     # body; section-wide rules on a card section are measured across the
@@ -640,11 +654,49 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
     n = len(all_rows_for(wb, report).get(str(sec.id), []))
     return {"report": report, "section": str(sec.id), "card": card_id or None,
             "words": acc["words"], "accuracy": acc, "inferences": len(tags),
+            "length_notes": length_notes,
             "absence_claimed": absence_claimed,
             "cards_in_section": n if is_card else None,
             "section_words": sum(_words(_clean(r.get("Body")))
                                  for r in all_rows_for(wb, report)
                                  .get(str(sec.id), []))}
+
+
+def _length_band(wb: RunWorkbook, report: str, sec, body: str, card_id: str) -> list[str]:
+    """The template's LENGTH upper bound, measured at write — and ADVISORY.
+
+    Owner ruling, 2026-10-06 (First Tech): the template's numbers are
+    guidance, not constants a section fails on. These notes come back on the
+    write result so a writer can trim; nothing is refused on them.
+
+    `max_words` was advisory until 2026-10-06, and at Arbor Bank both reports
+    shipped past it — the research profile at 10,346 words against a band
+    that sums to 5,000, the assessment at 20,443 against ~14,900 — with 18
+    review notes spent asking writers to cut. A ceiling the writer meets at
+    write time costs nothing; one a validator meets costs a round."""
+    out: list[str] = []
+    words = _words(body)
+    if card_id:
+        cmax = getattr(sec, "card_words_max", None)
+        if cmax and words > int(cmax):
+            out.append(f"this {sec.kind.replace('_', ' ')} is {words} words; each "
+                       f"one of §{sec.id} allows at most {cmax}. Cut to the band "
+                       f"— the Doc's LENGTH is a range, not a floor.")
+        if sec.max_words:
+            others = sum(_words(_clean(r.get("Body")))
+                         for r in all_rows_for(wb, report).get(str(sec.id), [])
+                         if _clean(r.get("Card_ID")) != card_id)
+            if others + words > int(sec.max_words):
+                out.append(f"§{sec.id} would run to {others + words} words across "
+                           f"its cards; the Doc allows at most {sec.max_words}. "
+                           f"Shorten this card or a sibling.")
+    elif sec.max_words and words > int(sec.max_words):
+        out.append(f"Body is {words} words; §{sec.id} '{sec.heading}' allows at "
+                   f"most {sec.max_words} (the Doc's LENGTH band is "
+                   f"{sec.min_words}-{sec.max_words}). Cut to the band — move "
+                   f"detail a sibling section already carries, never a figure "
+                   f"or a citation the argument needs.")
+    return out
 
 
 REVIEWS_FILE = "report_reviews.jsonl"
@@ -678,9 +730,37 @@ def latest_reviews(wb: RunWorkbook, report: str | None = None) -> dict:
     return out
 
 
+def parse_upstream(items) -> list[dict]:
+    """`KIND: what is needed` -> {kind, detail}; refused when the kind is
+    not one a writer cannot close."""
+    out = []
+    for raw in items or []:
+        if isinstance(raw, dict):
+            kind, detail = _clean(raw.get("kind")).lower(), _clean(raw.get("detail"))
+        else:
+            kind, _, detail = _clean(raw).partition(":")
+            kind, detail = kind.strip().lower(), detail.strip()
+        if kind not in UPSTREAM_KINDS:
+            raise NarrativeRefusal(
+                f"upstream kind {kind!r} is not one of {', '.join(UPSTREAM_KINDS)}. "
+                f"Anything else is a writer fix and belongs in the note.")
+        if len(detail) < 20:
+            raise NarrativeRefusal(
+                f"upstream {kind!r} needs a detail of 20+ chars naming exactly "
+                f"what must be supplied (the probe, the sheet field, the decision).")
+        out.append({"kind": kind, "detail": detail})
+    return out
+
+
 def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
-           actor: str, dimensions: dict, note: str) -> dict:
-    """An independent verdict on one section."""
+           actor: str, dimensions: dict, note: str, upstream=None) -> dict:
+    """An independent verdict on one section.
+
+    `upstream` names what the section waits on that no writer can supply
+    (UPSTREAM_KINDS). It routes the section out of the writer loop: a
+    REVISE that carries it is not re-dispatched to a writer until the
+    upstream item is closed and the section re-reviewed."""
+    ups = parse_upstream(upstream)
     spec, sec = section_spec(report, section_id)
     row = rows_for(wb, report).get(str(sec.id))
     if row is None:
@@ -708,6 +788,10 @@ def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
             "a review note under 80 chars is a rubber stamp. Say what you "
             "checked and what you found.")
     failed = [d for d, r in dimensions.items() if _clean(r).upper() != "PASS"]
+    if v == "PASS" and ups:
+        raise NarrativeRefusal(
+            "verdict PASS with an upstream blocker. A section that waits on "
+            "something is not ready; record REVISE and name what it waits on.")
     if v == "PASS" and failed:
         raise NarrativeRefusal(
             f"verdict PASS while {', '.join(failed)} did not pass. A verdict "
@@ -750,17 +834,20 @@ def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
     # round (Susser Bank: REC-06's E-358 fix asked for three times).
     _append_review(wb, {"report": report, "section": str(sec.id), "verdict": v,
                         "actor": _clean(actor), "at": _utcnow(),
-                        "dimensions": dimensions, "note": _clean(note)})
+                        "dimensions": dimensions, "note": _clean(note),
+                        "upstream": ups})
     return {"report": report, "section": str(sec.id), "verdict": v,
-            "actor": actor, "author": author, "rows_marked": touched}
+            "actor": actor, "author": author, "rows_marked": touched,
+            "upstream": ups}
 
 
 # ── the state of both reports ────────────────────────────────────────────
 
 def state(wb: RunWorkbook, report: str | None = None) -> dict:
     reports = [report] if report else list(RS.SPECS)
-    out = {"reports": {}, "blocking": []}
+    out = {"reports": {}, "blocking": [], "upstream": []}
     for key in reports:
+        latest = latest_reviews(wb, key)
         spec = RS.SPECS[key]
         have = rows_for(wb, key)
         every = all_rows_for(wb, key)
@@ -806,7 +893,12 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
                 st, detail = "READY", (
                     f"{_words(body)} words, PASS by "
                     f"{_clean(r.get('Review_Actor'))}")
+            ups = []
+            if st == "REVISE":
+                lr = latest.get((key, str(sec.id))) or {}
+                ups = list(lr.get("upstream") or [])
             secs.append({"section": str(sec.id), "heading": sec.heading,
+                         "max_words": sec.max_words, "upstream": ups,
                          "kind": sec.kind, "min_words": sec.min_words,
                          "words": sec_words, "cards": cards,
                          "card_floor": card_floor or None,
@@ -822,9 +914,16 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
                                  f"--section {sec.id}") if st == "UNREVIEWED"
                                 else None})
         open_ = [s["section"] for s in secs if s["status"] != "READY"]
+        blocked = [s["section"] for s in secs if s["upstream"]]
         words = sum(s["words"] for s in secs)
+        for s_ in secs:
+            for u in s_["upstream"]:
+                out["upstream"].append({"report": key, "section": s_["section"], **u})
         out["reports"][key] = {
             "title": spec.title, "sections": secs, "open": open_,
+            "blocked_upstream": blocked,
+            "writable": [x for x in open_ if x not in blocked],
+            "max_words": sum(int(s_.max_words or 0) for s_ in spec.sections) or None,
             "words": words, "min_words": report_min_words_for(wb, spec),
             "ready": not open_ and words >= report_min_words_for(wb, spec),
         }
@@ -877,6 +976,11 @@ def main(argv=None) -> int:
     r.add_argument("--verdict", required=True, choices=VERDICTS)
     r.add_argument("--actor", required=True)
     r.add_argument("--note", required=True)
+    r.add_argument("--upstream", action="append", default=[],
+                   help="KIND: detail — what this section waits on that no "
+                        "writer can supply; KIND is one of "
+                        + ", ".join(UPSTREAM_KINDS) + ". Repeatable. Routes "
+                        "the section out of the writer loop.")
     r.add_argument("--dimensions",
                    help="JSON {dimension: PASS|FAIL}; default all PASS on a "
                         "PASS verdict, which the refusals then re-check")
@@ -947,7 +1051,9 @@ def main(argv=None) -> int:
                             sec["status"]]
                         print(f"  {mark} §{sec['section']:<3} "
                               f"{sec['status']:<11} {sec['detail']}")
-                        if sec["fix"]:
+                        for u in sec.get("upstream") or []:
+                            print(f"       UPSTREAM {u['kind']}: {u['detail']}")
+                        if sec["fix"] and not sec.get("upstream"):
                             print(f"       fix: {sec['fix']}")
             return 0 if st["ready"] else 1
         if a.cmd == "write":
@@ -964,7 +1070,8 @@ def main(argv=None) -> int:
         dims = (json.loads(a.dimensions) if a.dimensions
                 else {d: "PASS" for d in REVIEW_DIMENSIONS})
         print(json.dumps(review(wb, a.report, a.section, verdict=a.verdict,
-                                actor=a.actor, dimensions=dims, note=a.note),
+                                actor=a.actor, dimensions=dims, note=a.note,
+                                upstream=a.upstream),
                          indent=2))
         return 0
     except NarrativeRefusal as e:

@@ -674,7 +674,12 @@ def _child_env(name: str) -> dict:
     guard could tell which lane was writing. Every write CLI now defaults
     its `--actor` to this, and `engine/scope.py` is what reads it.
     """
-    return {**os.environ, "DMA_STAGE_GUARD": "off", "DMA_ACTOR": name}
+    # DMA_IN_LANE: a lane never submits or claims (ship_page.py refuses).
+    # Without it a page lane's own `ship_page.py --claim` took the run's
+    # lease under a fresh id and locked the driver out (Arbor Bank,
+    # 2026-10-06: PAGES_A failed on a lease held by the run's own lane).
+    return {**os.environ, "DMA_STAGE_GUARD": "off", "DMA_ACTOR": name,
+            "DMA_IN_LANE": "1"}
 
 
 def _final_text(events: list, raw: str) -> str:

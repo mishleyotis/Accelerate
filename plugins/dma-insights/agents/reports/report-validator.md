@@ -98,6 +98,33 @@ Peer SCORES are the sub-vertical cohort mean of entities already assessed
 (`Peer_Benchmarks`, basis `recomputed`). Do not ask for a per-peer score, and
 do not ask for a peer metric outside the run's focus areas.
 
+### Name what the writer cannot fix: `--upstream`
+
+A REVISE goes back to the writer. Some fixes cannot come from a writer, who
+holds no web tool, cannot edit a sheet and cannot decide for the owner. Name
+those with one `--upstream 'KIND: exactly what is needed'` per item, and the
+section leaves the writer loop until it is supplied:
+
+| KIND | when |
+|---|---|
+| `probe` | a search the control needs has no `Search_Log` row |
+| `sheet` | a workbook tab disagrees with what the section must state (Firmographics, Focus_Areas, Peer_Benchmarks …) |
+| `evidence` | the fix needs a source registered that the register does not hold |
+| `owner` | only the engagement owner can decide (a peer set below the template's floor, a waiver) |
+| `scores` | a cell the section counts is unscored, or a rollup the prose quotes is about to move |
+
+Measured 2026-10-06 (Arbor Bank): 99 non-PASS reviews over 19 rounds. More
+than a third named an upstream item in prose only, so the writer was re-sent
+against it, again and again. A writer-fixable defect stays in the note.
+Never mark it upstream to end a loop, and never PASS a section that waits on
+something. The engine refuses PASS with `--upstream`.
+
+**One section at a time.** In the reports workflow you are handed one
+section, right after its writer returns. Review that section only. The
+whole-report pass below runs once, after every section of the report has
+your PASS. In it, withdraw a PASS by recording REVISE on that one section,
+with its numbered fixes. Never reopen a section that holds.
+
 ## The adversarial pass, before the reports ship
 
 Section verdicts are necessary and not sufficient — they are per-section, and
@@ -125,8 +152,8 @@ The driver runs every probe the templates demand before the writers start
 saying what was searched and that it established nothing, meets the control.
 Do not return it for a search the writer could not run: writers hold no web
 tool. Where a probe the control needs has no row in `Search_Log` at all,
-REVISE with the note `PROBE MISSING: <what>`. That is an upstream gap for the
-conductor, not a rewrite.
+REVISE with `--upstream 'probe: <what>'` and say it in the note too. That is
+an upstream gap for the conductor, not a rewrite.
 
 ## What you never do
 

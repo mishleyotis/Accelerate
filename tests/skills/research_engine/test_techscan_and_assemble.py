@@ -233,3 +233,49 @@ def test_verify_flags_the_gate_m_shape(tmp_path):
     v = assemble.verify(tmp_path / "packages" / "Acme Credit Union - DMA")
     assert v["complete"] is False
     assert any("gate-M" in c["detail"] for c in v["checks"] if not c["ok"])
+
+
+# ── a vendor's own case study is the vendor's claim (owner, 2026-10-06) ──
+
+def _claimed_pipeline_row(wb, cells):
+    from engine import ledger as L
+    vendor = L.append_evidence(
+        wb, source_name="Pipewise case study: Acme Credit Union",
+        source_url="https://www.pipewise.example/case-study-acme.pdf", tier="T3",
+        excerpt=("Acme Credit Union adopted the Pipewise Loan Pipeline module to "
+                 "track and manage every new loan in its commercial pipeline."),
+        subcaps=[cells[0]], published="2025-06-01")
+    techscan.record(wb, product="Pipewise Loan Pipeline", vendor="Pipewise",
+                    layer="OPS", status="CLAIMED", method="vendor_announcement",
+                    providers=["web"], evidence_ids=[vendor],
+                    basis="named only in the vendor's own case study about the client")
+    return vendor
+
+
+def test_a_vendor_hosted_case_study_does_not_contradict_a_claimed_row(tmp_path):
+    """Susser Bank: four more excerpts of BankPoint's own Susser PDF made the
+    reconcile check demand CONFIRMED while the validator refused it."""
+    from engine import ledger as L
+    run, wb, cells = _run_with_scan(tmp_path)
+    _claimed_pipeline_row(wb, cells)
+    L.append_evidence(
+        wb, source_name="Pipewise case study: Acme Credit Union (quote)",
+        source_url="https://www.pipewise.example/case-study-acme.pdf", tier="T3",
+        excerpt=("Pipewise is what makes large parts of our lending operation at "
+                 "Acme Credit Union scalable, the chief lending officer said."),
+        subcaps=[cells[0]], published="2025-06-01")
+    assert not [c for c in techscan.contradictions(wb) if c["token"] == "Pipewise"]
+
+
+def test_the_banks_own_page_still_contradicts_a_claimed_row(tmp_path):
+    from engine import ledger as L
+    run, wb, cells = _run_with_scan(tmp_path)
+    _claimed_pipeline_row(wb, cells)
+    own = L.append_evidence(
+        wb, source_name="Acme Credit Union careers: loan officer",
+        source_url="https://www.acmecu.example/careers/loan-officer", tier="T2",
+        excerpt=("Acme Credit Union loan officers manage their pipeline daily in "
+                 "Pipewise and keep every commercial deal current there."),
+        subcaps=[cells[0]], published="2026-01-10")
+    hits = [c for c in techscan.contradictions(wb) if c["token"] == "Pipewise"]
+    assert hits and own in hits[0]["evidence_ids"], hits
