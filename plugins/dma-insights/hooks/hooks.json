@@ -120,6 +120,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/workflow_inflight.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: workflow_inflight.py is MISSING from the installed plugin, so a handoff workflow this session starts is NOT recorded as in flight: the watchdog reads a quiet workflow as orphaned and the Stop hook asks for the same Workflow calls again, buying every agent twice. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every Workflow start leaves a session unable to run the stage.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -190,6 +200,16 @@
             "type": "command",
             "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deliverable_gate.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: deliverable_gate.py is MISSING from the installed plugin, so the gold-standard and template gates run only when an agent remembers to run them (QA audit F-M08-013). That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
             "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/workflow_inflight.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: workflow_inflight.py is MISSING from the installed plugin, so a handoff workflow this session starts is NOT recorded as in flight: the watchdog reads a quiet workflow as orphaned and the Stop hook asks for the same Workflow calls again, buying every agent twice. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every Workflow start leaves a session unable to run the stage.\"}'; exit 0; fi",
+            "timeout": 10
           }
         ]
       }

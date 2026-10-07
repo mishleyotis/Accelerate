@@ -273,7 +273,13 @@ def test_rewriting_a_section_clears_its_verdict(tmp_path):
              note="Opened both citations; the ladder has three rungs and a "
                   "date; the weighing names the rejected reading.")
     assert N.rows_for(wb, "client_research")["1"]["Review_Verdict"] == "PASS"
-    N.write(wb, "client_research", "1", rec, actor="report-research-producer")
+    # the identical record is NOT a rewrite: the PASS stands (2026-10-07)
+    out = N.write(wb, "client_research", "1", rec, actor="report-research-producer")
+    assert out.get("unchanged") and out.get("verdict_kept") == "PASS"
+    assert N.rows_for(wb, "client_research")["1"]["Review_Verdict"] == "PASS"
+    changed = dict(rec)
+    changed["Body"] = rec["Body"] + " A further sentence the validator has not seen."
+    N.write(wb, "client_research", "1", changed, actor="report-research-producer")
     assert not str(
         N.rows_for(wb, "client_research")["1"]["Review_Verdict"]).strip()
 

@@ -642,9 +642,41 @@ def write(wb: RunWorkbook, report: str, section_id: str, record: dict, *,
         "Card_ID": card_id,
     }
     key = {"Report": report, "Section_ID": str(sec.id), "Card_ID": card_id}
-    have = any(_clean(r.get("Card_ID")) == card_id
-               for r in all_rows_for(wb, report).get(str(sec.id), []))
+    old_row = next((r for r in all_rows_for(wb, report).get(str(sec.id), [])
+                    if _clean(r.get("Card_ID")) == card_id), None)
+    have = old_row is not None
     if have:
+        # AN UNCHANGED BODY IS NOT A REWRITE (measured 2026-10-07). A writer
+        # that re-sent the text a validator had already judged cleared the
+        # verdict and bought a second review of the same prose — under a
+        # PASS, a review for nothing; under a REVISE, the loop itself. The
+        # argument fields are compared with the body: the verdict covers all
+        # of them.
+        same = all(_clean(old_row.get(k)) == _clean(row.get(k))
+                   for k in ("Heading", "Body", "Evidence_IDs", "Weighing",
+                             "Absence_Basis", "Assumptions", "Bias_Notes",
+                             "Inference_Tags"))
+        if same:
+            old_v = _clean(old_row.get("Review_Verdict")).upper()
+            # A passage is refused outright. A CARD is a no-op instead: the
+            # validator's REVISE covers the whole list and its note names
+            # the cards that must change, so a card it did not name is
+            # legitimately re-sent unchanged beside the ones that did — and
+            # a list re-sent wholly unchanged leaves the section REVISE,
+            # which the driver's stall guard then stops.
+            if old_v in ("REVISE", "FAIL") and not is_card:
+                lr = (latest_reviews(wb, report).get((report, str(sec.id))) or {})
+                raise NarrativeRefusal(
+                    f"{report} §{sec.id}" + (f" card {card_id}" if card_id else "")
+                    + f": rewrite refused — the record is identical to the one the "
+                      f"validator marked {old_v}"
+                    + (f": {_clean(lr.get('note'))[:300]}" if lr.get("note") else "")
+                    + ". Change what the note names; re-sending the same text "
+                      "would only buy the same verdict again.")
+            acc0 = accuracy(wb, body, eids)
+            return {"report": report, "section": str(sec.id), "card": card_id or None,
+                    "words": acc0["words"], "unchanged": True,
+                    "verdict_kept": old_v or None}
         # Re-writing CLEARS the verdict: the thing that was reviewed no
         # longer exists. Keyed on the composite — Section_ID alone matched
         # the OTHER report's §N first and silently relabelled it.

@@ -235,6 +235,21 @@ techstack page's ET-12, CG-40 and CG-50 against the workbook
 `NEEDS_CONNECTOR_SESSION` and never revives it in place: resume in a session
 that holds them.
 
+**Nothing is done twice, and a stopped workflow is resumed, not restarted.**
+Every `Workflow(...)` you start is recorded by the plugin's own hook
+(`07_qa/workflow_inflight.json`, with its `wf_` run id once the tool returns).
+While one runs, the driver answers `WORKFLOW_RUNNING` and the watchdog says so
+— run `then` only when the workflows have returned. A workflow that stopped
+partway (a spend limit, a lost session) is resumed with
+`Workflow({resumeFromRunId: <its wf_ id>, scriptPath, args})`: its finished
+agents replay from cache and only the rest runs. Never start a second
+workflow for a handoff whose first one is still running or resumable. The
+engine, not the prompt, refuses the repeats the runs used to pay for: a
+re-synthesis identical to the text a challenger judged, a re-critique that
+draws a fresh sample after a FAIL, a report rewrite identical to the reviewed
+text, a re-score at the value the row already holds (see END-TO-END.md
+§"What is never done twice").
+
 **Nothing loops.** Every workflow stage passes one guard
 (`<ROOT>/07_qa/handoff_guard.json`): the same work handed with nothing moved
 across `--stall-rounds` handoffs, or more than `--max-rounds` handoffs, stops
@@ -294,7 +309,7 @@ before resuming: `python3 -m engine.snapshot restore --run <R>
 **The ceilings are enforced now, and they are the defaults** — name them only
 to change them. `--max-usd` defaults to $5 per pillar in scope and STOPS the
 run when the cost ledger crosses it; `--max-rounds 10` caps the rounds of any
-looping stage; `--stall-rounds 2` ends a stage after two consecutive rounds
+looping stage (research counts WORKED workflow rounds per category); `--stall-rounds 2` ends a stage after two consecutive rounds
 that advance nothing; `--max-wall-min 240` is a clean stop, not a failure;
 `--enrichment-heals 1` is how many fresh lane instances a category with no
 connector search gets before the gap is disclosed instead of worked again.

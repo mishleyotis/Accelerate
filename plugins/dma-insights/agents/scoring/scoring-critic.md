@@ -44,7 +44,11 @@ sample or widen the scope: a critic that re-samples every round finds new
 flatterers every round and never passes (First Tech, 2026-10-06: 21, 28,
 then 46 moves pending; overall 1.69 to 1.67). PASS when the moved rows hold.
 A new move on an unmoved row in a re-critique round is reserved for a defect
-of the same kind you already named, found in a row you already read.
+of the same kind you already named, found in a row you already read — and the
+engine holds you to it (2026-10-07): after a FAIL, `critique` refuses a
+`--move` on a row you neither moved before nor anyone re-scored since your
+last verdict, unless `--widen '<40+ chars naming the rule the earlier pass
+missed>'` puts the reason on the record.
 
 4. Record the verdict, one per pillar, with what you checked:
 

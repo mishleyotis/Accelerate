@@ -26,8 +26,34 @@ def _failed_then_repaired(tmp_path):
     synthesise(wb, cell, good_synthesis(cell, eids))
     challenge(wb, cell, verdict="FAIL")
     assert wb.scoring_row(cell)["Challenge_Verdict"] == "FAIL"
-    synthesise(wb, cell, good_synthesis(cell, eids))          # the repair
+    synthesise(wb, cell, repaired(good_synthesis(cell, eids)))   # the repair
     return run, wb, cell
+
+
+def repaired(rec: dict) -> dict:
+    """A repair CHANGES the text (2026-10-07): the engine refuses a record
+    identical to the one the challenger FAILED, because re-sending it only
+    buys the same verdict again."""
+    out = dict(rec)
+    out["What_We_Found"] = rec["What_We_Found"] + (
+        " The board pack's quarterly review is the counter-source the "
+        "challenger asked for, and it names the same cadence.")
+    return out
+
+
+def test_an_unchanged_resynthesis_under_a_fail_is_refused(tmp_path):
+    import pytest
+    run = new_run(tmp_path, n=3, prelim=False)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    eids = bank_evidence(wb, cell)
+    fire_volleys(wb, cell)
+    rec = good_synthesis(cell, eids)
+    synthesise(wb, cell, rec)
+    challenge(wb, cell, verdict="FAIL")
+    with pytest.raises(L.LedgerRefusal, match="identical"):
+        synthesise(wb, cell, dict(rec))
+    assert wb.scoring_row(cell)["Challenge_Verdict"] == "FAIL"   # nothing cleared
 
 
 def test_resynthesis_clears_the_stale_verdict(tmp_path):

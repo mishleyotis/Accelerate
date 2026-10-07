@@ -30,6 +30,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
     __package__ = "engine"
 
 import datetime as _dt
+import hashlib
 import json
 import re
 
@@ -625,6 +626,33 @@ def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
                  str(r.get("Facet") or "").strip()) for r in since})
 
 
+def window_cap(wb: RunWorkbook, scope: str | None) -> int:
+    """The search-op ceiling for one window — `SEARCH_OP_CEILING` per
+    conversation, or the cap the driver recorded when it opened the window.
+
+    THE WINDOW IS PER CONVERSATION; THE SCOPE IS PER CATEGORY (measured
+    2026-10-07). In workflow mode a category's open cells run as several
+    capability batches at once, each its own conversation, and all of them
+    share the category's one window of 60: the later batches were refused
+    mid-capability, closed nothing, and the category spent another round on
+    cells a lane had already paid to research. `runstate.checkpoint(cap=…)`
+    records the window's capacity for the batches the driver is handing —
+    the ceiling per conversation is unchanged, there are simply that many
+    conversations sharing the scope — and `append_search` reads it here. A
+    scope with no recorded cap keeps the single-conversation ceiling."""
+    try:
+        cp = json.loads(wb.metadata().get("checkpoint") or "{}")
+    except (ValueError, TypeError):
+        cp = {}
+    caps = cp.get("caps") if isinstance(cp.get("caps"), dict) else {}
+    if scope is None or scope not in caps:
+        return SEARCH_OP_CEILING
+    try:
+        return max(SEARCH_OP_CEILING, int(caps.get(scope) or 0))
+    except (TypeError, ValueError):
+        return SEARCH_OP_CEILING
+
+
 def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
                   outcome: str = "", prelim: bool = False,
@@ -707,10 +735,11 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     scope = _search_scope({"Tool": tool, "Actor": actor,
                            "SubCap_ID": "" if prelim or not cells else cells[0]})
     since = _ops_since_checkpoint(wb, scope)
-    if since >= SEARCH_OP_CEILING:
+    cap = window_cap(wb, scope)
+    if since >= cap:
         raise LedgerRefusal(
             f"search-op ceiling reached for {scope}: {since} since its last "
-            f"checkpoint, cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
+            f"checkpoint, cap {cap}. Checkpoint and stop — "
             f"`runstate.checkpoint(wb, '<where you got to>')` records the "
             f"position in the workbook and resets the window, and a fresh "
             f"conversation resumes from it. This is the wall that keeps a "
@@ -1016,6 +1045,37 @@ def record_challenge(wb: RunWorkbook, subcap: str, *, verdict: str, actor: str,
             "author": author, "failed_dimensions": failed}
 
 
+#: Synthesis fields a challenge never judges: the verdict is the
+#: challenger's, the timestamp is the write's.
+_SIGNATURE_EXCLUDED = frozenset({"Challenge_Verdict", "Retrieved_At"})
+
+
+def synthesis_signature(record: dict, row: dict | None = None) -> str:
+    """A content hash of what a challenger would judge: every synthesis
+    field the record carries (verdict and timestamp aside) plus the row's
+    evidence set. Two records with this signature are the same synthesis."""
+    body = {k: str(record.get(k) if record.get(k) is not None else "").strip()
+            for k in C.PILLAR_COLUMNS
+            if k in record and k not in _SIGNATURE_EXCLUDED}
+    eids = sorted({i.split(":")[0] for i in _split_ids((row or {}).get("Evidence_IDs"))
+                   if i and i != C.NO_EVIDENCE})
+    raw = json.dumps({"fields": body, "evidence": eids}, sort_keys=True)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
+
+
+def last_synthesis_signature(wb: RunWorkbook, subcap: str) -> str | None:
+    """The signature the last synthesis write recorded in Provenance, or
+    None (an older row, written before signatures were kept — always
+    treated as changed)."""
+    hits = [r for r in wb.rows("Provenance")
+            if str(r.get("SubCap_ID") or "") == subcap
+            and str(r.get("Step") or "") == "synthesis"]
+    if not hits:
+        return None
+    m = re.search(r"sig=([0-9a-f]{8,})", str(hits[-1].get("Detail") or ""))
+    return m.group(1) if m else None
+
+
 def challenge_for(wb: RunWorkbook, subcap: str) -> dict | None:
     hits = [r for r in wb.rows("Challenge_Log")
             if str(r.get("SubCap_ID") or "") == subcap]
@@ -1140,6 +1200,32 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     if problems:
         raise LedgerRefusal(
             f"{subcap}: synthesis refused — " + "; ".join(problems))
+    # AN UNCHANGED SYNTHESIS IS NOT A REPAIR (owner, 2026-10-07: "redoing
+    # research, redoing … synthesis, critics … leading to a lot of token
+    # consumption"). Re-sending the text a challenger already judged used
+    # to clear the verdict, which put the cell back in the challenge queue
+    # and bought a second independent challenge of the same prose — and
+    # under a FAIL it was the loop itself: the same text, the same FAIL,
+    # round after round. The signature covers every field the challenger
+    # reads plus the row's evidence set, so new evidence attached to the
+    # row counts as a change and the identical record does not.
+    sig = synthesis_signature(record, row)
+    prev_sig = last_synthesis_signature(wb, subcap)
+    if prev_sig and sig == prev_sig:
+        verdict = str(row.get("Challenge_Verdict") or "").strip().upper()
+        if verdict == "FAIL":
+            ch = challenge_for(wb, subcap) or {}
+            why = str(ch.get("Rationale") or "").strip()[:300]
+            raise LedgerRefusal(
+                f"{subcap}: re-synthesis refused — the record is identical to "
+                f"the one the independent challenger FAILED"
+                + (f" ({why})" if why else "")
+                + ". Repair what the verdict names — a counter-source, a "
+                  "narrower claim, a registered figure, new evidence on the "
+                  "row — and re-synthesise the changed text; re-sending the "
+                  "same text would only buy the same verdict again.")
+        return {"subcap": subcap, "written": [], "actor": actor,
+                "unchanged": True, "verdict_kept": verdict or None}
     assert_actor_scope(actor, "synthesis", [subcap])
     payload = {k: v for k, v in record.items() if k in C.PILLAR_COLUMNS}
     payload["Retrieved_At"] = _utcnow()
@@ -1160,7 +1246,8 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
         payload["Challenge_Verdict"] = ""
     wb.set_scoring(subcap, payload)
     if actor:
-        record_provenance(wb, subcap, "synthesis", actor, session=session)
+        record_provenance(wb, subcap, "synthesis", actor, f"sig={sig}",
+                          session=session)
     wb.recompute_coverage()
     # The cross-register ERS pass lands HERE rather than at every append.
     # Corroboration is a property of the whole register — a row banked first
@@ -1238,15 +1325,16 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # the cap since the last checkpoint still stops, which is the half a
     # loosened ceiling would have silently lost (MEM-0338 / R27).
     since = _ops_since_checkpoint(wb, category)
+    cap = window_cap(wb, category)
     return {
         # `search_ops` is a LIFETIME count (spend worth seeing); the budget is
         # `search_ops_since_checkpoint` against the ceiling. A lane that read
         # the first as usage stopped at "55 of 60" with 1 used (2026-09-30).
         "search_ops": n,
         "search_ops_since_checkpoint": since,
-        "window_remaining": max(0, SEARCH_OP_CEILING - since),
-        "search_op_ceiling": SEARCH_OP_CEILING,
-        "checkpoint_required": since >= SEARCH_OP_CEILING,
+        "window_remaining": max(0, cap - since),
+        "search_op_ceiling": cap,
+        "checkpoint_required": since >= cap,
         "evidence_items": len(ev),
         "subcaps_selected": len(rows),
         "subcaps_synthesised": synthesised,

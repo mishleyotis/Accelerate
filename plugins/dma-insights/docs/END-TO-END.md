@@ -660,3 +660,27 @@ lanes` is the headless-lane path the stub uses; with the real dispatcher it
 needs `--allow-lanes`. The driver snapshots the run to Drive at every stage
 boundary (`engine.snapshot`), and `engine.snapshot restore` brings it back
 on a fresh container.
+
+
+## What is never done twice (2026-10-07)
+
+Owner: *"a lot of issues on redoing research, redoing scoring, synthesis,
+critics, page production leading to a lot of token consumption. Ensure the
+entire flow is enforced and predictable such that the level of repetition
+reduces unless totally necessary."* The audit measured ten redo paths across
+the live runs; each is now refused or made a no-op by the engine rather than
+asked for in a prompt, and `tests/skills/research_engine/test_no_redo_enforcement.py`
+fails on the engine before each fix.
+
+| redo the runs paid for | what the engine does now |
+|---|---|
+| a re-synthesis identical to the text already challenged cleared the verdict and bought a second challenge; under a FAIL it was the loop | `ledger.append_synthesis` hashes the record plus the row's evidence set (`synthesis_signature`, kept in Provenance): unchanged under PASS is a no-op that keeps the PASS; unchanged under FAIL is **refused** naming the challenger's rationale; new evidence on the row is a change |
+| a category's concurrent capability batches shared ONE 60-op search window, so later batches were refused mid-capability and closed nothing | the handoff opens each category's window with `cap = 60 × (batches + repair batches) × rounds` (`runstate.checkpoint(cap=)`, `ledger.window_cap`); the batch prompts no longer checkpoint at start, which reset a sibling's window |
+| the gate's open cells rode in a capability batch AND a repair batch | `floors_gate.repair_cells(include_open=False)` (and `--repair-cells` on the CLI): a repair map carries closed cells only; the workflow's round-2 repair agent takes the open cells only when no batch is left to run |
+| research had no handoff ceiling — a category that closed one blocker a round was handed again indefinitely | `workflow_progress[cat].rounds` counts WORKED rounds; past `--max-rounds` the category is not handed (`--reset-guard` is the person's "allow more") |
+| a re-score at the row's existing value wrote Provenance (and barred its actor from critiquing) | `assessment.score` returns `unchanged` and writes nothing |
+| a re-critique drew a fresh sample every round | after a FAIL, `critique` refuses a `--move` on a row neither moved before nor re-scored since the last verdict, unless `--widen '<why>'` is put on the record; a PASS closes the pillar |
+| a report rewrite identical to the reviewed text cleared the verdict | `narrative.write` keeps a PASS on an identical record and **refuses** an identical record under REVISE, naming the note; the writer's brief now carries the current text to edit in place |
+| the REPORTS stall signature carried review timestamps, so it never fired | the signature is status, verdict, the count of numbered fixes and the upstream kinds — convergence, not activity |
+| a page repair brief trimmed the verdict's reasons 12 → 6 → 3 | `last_verdict_reasons` is never trimmed |
+| nothing recorded that a session had STARTED a handoff's workflows: a quiet one read as orphaned and the Stop hook asked for the same calls | `scripts/hooks/workflow_inflight.py` records every Workflow start (and its `wf_` id) in `07_qa/workflow_inflight.json`; the watchdog reads WORKFLOW_RUNNING while the record is fresh (section files count as activity), the driver returns `WORKFLOW_RUNNING` instead of re-handing, every handoff's `how` says to RESUME by id (`Workflow({resumeFromRunId})`), and the Stop hook's gap nudge is off while a workflow runs |

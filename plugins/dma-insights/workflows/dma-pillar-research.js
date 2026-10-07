@@ -51,7 +51,7 @@ const OUT = {
 }
 
 const SHEET = `COMMAND SHEET (exact; do not run --help, orient or kg route — this is everything):
-  checkpoint:  python3 -m engine.cli checkpoint ${R} --category <CAT> --position '<your batch>'   (FIRST, once: you are a new conversation, so open the category's own search window)
+  checkpoint:  python3 -m engine.cli checkpoint ${R} --category <CAT> --position '<your batch>'   (ONLY if a search is refused with "search-op ceiling reached": the driver already opened this category's window sized for every batch of this round, and a checkpoint at start would reset your siblings' window mid-capability)
   card:        python3 -m engine.cli card ${R} --capability <CAP>            (the cells, their questions and owed facets)
   log search:  python3 -m engine.cli search ${R} --subcap <CELL> [--subcap <CELL2>] --facet primary|works|fails|value|contradicts|corroborates --tool web_search|exa|tavily|clay|internal --query '<q>' --hits N --kept K --actor $ACT
   cache text:  python3 -m engine.cli fetch ${R} --url <U> --query '<question>' --via-text <file with the connector's text>
@@ -92,16 +92,21 @@ const DEGRADED_RULES = `DEGRADED RUN (the driver recorded enrichment_degraded; t
 const REPAIRS = A.repairs || {}
 const REPAIR_BATCHES = A.repair_batches || {}
 const isRepair = (cat, caps) => caps.length === 1 && String(caps[0]).startsWith(`${cat} (`)
-const READ_BLOCKERS = (cat) => `python3 -c "import json;from engine import floors_gate as F;print(json.dumps(F.blocking_cells(F.read_verdict('${A.root}/07_qa','${cat}'))))"`
+// ONE CELL, ONE LANE (measured 2026-10-07): the gate names open cells too
+// (absence_unsearched, volleys_incomplete, synthesis_missing), so a repair
+// agent that read the raw verdict worked the same cells as the open-cell
+// batches running beside it. `--repair-cells` leaves the open cells to the
+// batches; `--include-open` is for a round in which no batch runs.
+const READ_BLOCKERS = (cat, includeOpen) => `python3 -m engine.floors_gate ${R} --category ${cat} --repair-cells${includeOpen ? ' --include-open' : ''}`
 
-function repairPrompt(cat, cells, round) {
+function repairPrompt(cat, cells, round, includeOpen) {
   const lc = cat.toLowerCase()
   const named = cells && cells.length
-    ? `YOUR CELLS and the gate terms each one fails:\n${cells.map(c => `  ${c}: ${((REPAIRS[cat] || {})[c] || []).join(', ')}`).join('\n')}\nFor the detail of each finding (missing facets, the single source), run once: ${READ_BLOCKERS(cat)} and read ${A.root}/07_qa/floors_${cat}.json only for these cells.`
-    : `YOUR CELLS: every cell the gate names. Print them once (from ${ENG}): ${READ_BLOCKERS(cat)}\nThat is {cell: [blocking terms]}; read ${A.root}/07_qa/floors_${cat}.json for each finding's detail.`
+    ? `YOUR CELLS and the gate terms each one fails:\n${cells.map(c => `  ${c}: ${((REPAIRS[cat] || {})[c] || []).join(', ')}`).join('\n')}\nFor the detail of each finding (missing facets, the single source), run once: ${READ_BLOCKERS(cat, false)} and read ${A.root}/07_qa/floors_${cat}.json only for these cells.`
+    : `YOUR CELLS: every cell the gate names${includeOpen ? '' : ' that is already synthesised or declared absent — an OPEN cell (no synthesis, no absence) belongs to the capability batch running beside you; never touch one'}. Print them once (from ${ENG}): ${READ_BLOCKERS(cat, !!includeOpen)}\nThat is {cell: [blocking terms]}; read ${A.root}/07_qa/floors_${cat}.json for each finding's detail.`
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}, REPAIR batch. Work from ${ENG}; set ACT=research-${lc}-producer.
 These cells are ALREADY synthesised or declared absent, and the category's floors gate FAILS on them. Repair them in place. Do NOT skip a cell because it is closed. Touch no other cell.
-START with ONE engine.cli checkpoint for ${cat} (the search-op ceiling is per category per conversation; several batches of one category share it otherwise, and the ceiling then refuses every later batch's searches and absences).
+Do NOT run engine.cli checkpoint at start: the driver opened ${cat}'s search window sized for every batch of this round (checkpoint only if a search is refused with "search-op ceiling reached").
 ${named}
 Per blocking term:
   - primary_unfired: fire a primary web_search on the cell and log it (--facet primary).
@@ -112,7 +117,7 @@ Per blocking term:
   - boilerplate / synthesis_missing: rewrite the named field with a checkable figure, date, proper noun or E-id.
   - challenge_failed: an independent challenger FAILED this claim. Read why first: python3 -c "from engine import runstate,ledger as L;from pathlib import Path;wb=runstate.locate('${A.run}',Path('${A.root}')).open();print(L.challenge_for(wb,'<CELL>'))". Repair exactly what it names (a missing counter-source, an overstated claim, an unregistered figure), with new searches and evidence where it asks for them, then re-synthesise. Re-synthesis clears the old verdict and the challenge step re-challenges it; never re-synthesise unchanged text.
   - a cell id equal to the category (${cat}) is a category-level finding: read its detail and act on the cells it names.
-Re-synthesise with synthesise --json (the same command replaces the cell's synthesis). Every change goes through ONE engine.cli batch per capability, as below.
+Re-synthesise with synthesise --json (the same command replaces the cell's synthesis). The engine REFUSES a re-synthesis whose record is identical to the text the challenger FAILED — change what the verdict names, never re-send the same text. Every change goes through ONE engine.cli batch per capability, as below.
 
 ${SHEET}
 
@@ -134,7 +139,7 @@ ${SHEET}
 
 ${A.degraded ? DEGRADED_RULES : SEARCH_RULES}
 
-START with ONE engine.cli checkpoint for ${cat} (the search-op ceiling is per category per conversation; several batches of one category share it otherwise, and the ceiling then refuses every later batch's searches and absences).
+Do NOT run engine.cli checkpoint at start: the driver opened ${cat}'s search window sized for every batch of this round (checkpoint only if a search is refused with "search-op ceiling reached").
 LOOP, one capability at a time: card -> parallel searches (primary + the owed facets, one turn) -> cache connector text (fetch --via-text) -> write the synthesis/absence JSON files -> ONE engine.cli batch call for the whole capability. Finish a capability before starting the next.
 WRITES GO THROUGH engine.cli batch (mandatory): put every search log, evidence, attach, synthesise and absence line for the capability in one ops file — one command per line, (the "python3 -m engine.cli" prefix and --run/--root may be omitted) — then run: python3 -m engine.cli batch ${R} --file <ops file>
 One write outside a batch costs ~10 s under the run-wide lock that every researcher shares; a batch is one load, one lock, one save. The batch reports each command's result; fix and re-batch only the refused lines. Order inside the file matters: search logs, then evidence, then attach, then synthesise/absence.
@@ -165,7 +170,8 @@ const results = await pipeline(A.cats, async (cat) => {
     ...(BATCHES[cat] || []).map(caps => ({ caps, prompt: (r, p) => batchPrompt(cat, caps, r, p) })),
     ...(REPAIR_BATCHES[cat] || []).map(cells => ({ caps: cells, prompt: (r) => repairPrompt(cat, cells, r) })),
   ]
-  if (!jobs.length) jobs = [{ caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r) }]
+  // No routed work at all: the lone repair agent owns the open cells too.
+  if (!jobs.length) jobs = [{ caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r, true) }]
   for (let round = 1; round <= A.rounds; round++) {
     const done = await parallel(jobs.map((j, i) => () => agent(j.prompt(round, prev), {
       label: `${cat} r${round} b${i + 1} ${j.caps[0]}${j.caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
@@ -199,10 +205,15 @@ const results = await pipeline(A.cats, async (cat) => {
     }
     // Round 2 keeps unfinished open batches and repairs whatever the gate
     // names now — read fresh from floors_<cat>.json, not from agent prose.
+    // The two sets are DISJOINT: while an open batch re-runs, the repair
+    // agent reads closed cells only; with no open batch left it takes the
+    // open cells as well, so nothing the gate names is worked twice or not
+    // at all.
+    const reopen = jobs.filter((j, i) => !isRepair(cat, j.caps) && !(REPAIR_BATCHES[cat] || []).includes(j.caps)
+                                      && done[i] && (done[i].still_open || 0) > 0)
     jobs = [
-      ...jobs.filter((j, i) => !isRepair(cat, j.caps) && !(REPAIR_BATCHES[cat] || []).includes(j.caps)
-                            && done[i] && (done[i].still_open || 0) > 0),
-      { caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r) },
+      ...reopen,
+      { caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r, reopen.length === 0) },
     ]
   }
   if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${A.rounds} round(s) — the driver's floors gate decides what happens next`)
