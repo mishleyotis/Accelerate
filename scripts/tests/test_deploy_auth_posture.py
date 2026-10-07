@@ -333,6 +333,13 @@ def test_SHARE_OTP_IS_NEVER_SILENTLY_OFF():
     text = DEPLOY.read_text()
     assert "identitytoolkit.googleapis.com" in text
     assert 'if [ "$IDP_OK" = "yes" ]' in text
+    # The deployer grants itself the roles the step needs (it fell back to
+    # typed addresses on every release until it did), and a release that
+    # still cannot switch OTP on names the failing step and Google's error.
+    for role in ("roles/identitytoolkit.admin", "roles/serviceusage.apiKeysAdmin",
+                 "roles/serviceusage.serviceUsageAdmin"):
+        assert role in text, f"the deployer no longer self-grants {role}"
+    assert 'echo "  Why: ${IDP_WHY:-unknown}" >&2' in text, "the OTP-off warning no longer says why"
     assert "SHARE_IDP_API_KEY=dmai-share-idp-api-key" in text
     assert "one-time sign-in is OFF" in text
     assert "dmai-share-cookie-secret" in text

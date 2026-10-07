@@ -609,41 +609,88 @@ if [ -f apps/web/Dockerfile ]; then
   # otherwise the release says, loudly, that links admit typed addresses.
   SHARE_HOST="${SHARE_BASE_URL#https://}"
   IDP="https://identitytoolkit.googleapis.com"
-  gcloud services enable identitytoolkit.googleapis.com apikeys.googleapis.com \
-    --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
-  AT="$(gcloud auth print-access-token 2>/dev/null || true)"
+  # The deployer grants ITSELF what this needs, as the usage block does (it
+  # holds resourcemanager.projectIamAdmin): identitytoolkit.admin to read and
+  # set the config, serviceusage.apiKeysAdmin to create the key, and
+  # serviceusage.serviceUsageAdmin to enable the two APIs and to bill calls to
+  # this project (x-goog-user-project). Until 2026-10-07 nothing granted
+  # these, so every release fell back to typed addresses even after the
+  # owner enabled Identity Platform.
+  DEPLOYER_ACCT="${DEPLOYER_ACCT:-$(gcloud config get-value account 2>/dev/null || true)}"
+  IDP_ATTEMPTS=1
+  case "$DEPLOYER_ACCT" in
+    *.iam.gserviceaccount.com)
+      for role in roles/identitytoolkit.admin roles/serviceusage.apiKeysAdmin \
+                  roles/serviceusage.serviceUsageAdmin; do
+        if ! gcloud projects get-iam-policy "$PROJECT_ID" \
+             --flatten='bindings[].members' \
+             --filter="bindings.role=${role} AND bindings.members=serviceAccount:${DEPLOYER_ACCT}" \
+             --format='value(bindings.role)' 2>/dev/null | grep -q .; then
+          say "  share: granting ${DEPLOYER_ACCT} ${role}"
+          if gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+               --member="serviceAccount:${DEPLOYER_ACCT}" --role="$role" \
+               --condition=None --quiet >/dev/null 2>&1; then
+            IDP_ATTEMPTS=8   # a fresh grant takes up to ~2 min to propagate
+          else
+            echo "  share: could not grant ${role} to ${DEPLOYER_ACCT} (needs projectIamAdmin)" >&2
+          fi
+        fi
+      done ;;
+  esac
   idp() { curl -s -H "Authorization: Bearer ${AT}" -H "x-goog-user-project: ${PROJECT_ID}" \
             -H "content-type: application/json" "$@"; }
-  idp -X POST "${IDP}/v2/projects/${PROJECT_ID}/identityPlatform:initializeAuth" -d '{}' >/dev/null || true
-  if ! gcloud secrets describe dmai-share-idp-api-key --project="$PROJECT_ID" >/dev/null 2>&1; then
-    # An API key identifies the project to Identity Platform and is
-    # restricted to that one API; it is still kept in Secret Manager.
-    key_name() { gcloud services api-keys list --project="$PROJECT_ID" \
-      --filter="displayName='DMA share sign-in'" --format='value(name)' \
-      --limit=1 2>/dev/null || true; }
-    KEY_NAME="$(key_name)"
-    if [ -z "$KEY_NAME" ]; then
-      gcloud services api-keys create --project="$PROJECT_ID" \
-        --display-name="DMA share sign-in" \
-        --api-target=service=identitytoolkit.googleapis.com --quiet >/dev/null 2>&1 || true
+  # Google's own error message from a failed call (never a secret: requests
+  # carry the bearer token in a header, which is not echoed back).
+  idp_err() { python3 -c 'import json,sys
+try: e = json.load(sys.stdin).get("error") or {}
+except Exception: e = {}
+print((str(e.get("status") or "") + " " + str(e.get("message") or "")).strip()[:200] or "no error body")'; }
+  # One pass. Sets IDP_WHY to the step that failed and why, so a release that
+  # cannot switch OTP on says exactly what is missing.
+  idp_converge() {
+    gcloud services enable identitytoolkit.googleapis.com apikeys.googleapis.com \
+      --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
+    AT="$(gcloud auth print-access-token 2>/dev/null || true)"
+    idp -X POST "${IDP}/v2/projects/${PROJECT_ID}/identityPlatform:initializeAuth" -d '{}' >/dev/null || true
+    if ! gcloud secrets describe dmai-share-idp-api-key --project="$PROJECT_ID" >/dev/null 2>&1; then
+      # An API key identifies the project to Identity Platform and is
+      # restricted to that one API; it is still kept in Secret Manager.
+      key_name() { gcloud services api-keys list --project="$PROJECT_ID" \
+        --filter="displayName='DMA share sign-in'" --format='value(name)' \
+        --limit=1 2>/dev/null || true; }
       KEY_NAME="$(key_name)"
-    fi
-    if [ -n "$KEY_NAME" ]; then
+      if [ -z "$KEY_NAME" ]; then
+        gcloud services api-keys create --project="$PROJECT_ID" \
+          --display-name="DMA share sign-in" \
+          --api-target=service=identitytoolkit.googleapis.com --quiet >/dev/null 2>&1 || true
+        KEY_NAME="$(key_name)"
+      fi
+      if [ -z "$KEY_NAME" ]; then
+        IDP_WHY="could not create the 'DMA share sign-in' API key (serviceusage.apiKeysAdmin; apikeys.googleapis.com enabled)"
+        return 1
+      fi
       # Held in a variable for one command, never echoed; an empty read
       # creates nothing rather than an empty secret.
       KS="$(gcloud services api-keys get-key-string "$KEY_NAME" --project="$PROJECT_ID" \
         --format='value(keyString)' 2>/dev/null || true)"
-      if [ -n "$KS" ]; then
-        printf '%s' "$KS" | gcloud secrets create dmai-share-idp-api-key \
-          --project="$PROJECT_ID" --data-file=- --quiet >/dev/null 2>&1 || true
-      fi
+      if [ -z "$KS" ]; then IDP_WHY="could not read the API key string (serviceusage.apiKeysAdmin)"; return 1; fi
+      printf '%s' "$KS" | gcloud secrets create dmai-share-idp-api-key \
+        --project="$PROJECT_ID" --data-file=- --quiet >/dev/null 2>&1
+      local rc=$?
       unset KS
+      if [ "$rc" != 0 ]; then IDP_WHY="could not store the key as secret dmai-share-idp-api-key"; return 1; fi
     fi
-  fi
-  # Email link (passwordless) on; the share host authorised; Google's
-  # emailed link pointed at this service's own handler (/s/auth-action).
-  CFG="$(idp "${IDP}/admin/v2/projects/${PROJECT_ID}/config" || true)"
-  PATCH="$(printf '%s' "$CFG" | SHARE_HOST="$SHARE_HOST" SHARE_BASE_URL="$SHARE_BASE_URL" python3 -c '
+    # Email link (passwordless) on; the share host authorised; Google's
+    # emailed link pointed at this service's own handler (/s/auth-action).
+    local cfg code
+    cfg="$(idp -w '\n%{http_code}' "${IDP}/admin/v2/projects/${PROJECT_ID}/config" || true)"
+    code="${cfg##*$'\n'}"; cfg="${cfg%$'\n'*}"
+    if [ "$code" != "200" ]; then
+      IDP_WHY="reading the Identity Platform config returned HTTP ${code}: $(printf '%s' "$cfg" | idp_err)"
+      return 1
+    fi
+    local patch resp
+    patch="$(printf '%s' "$cfg" | SHARE_HOST="$SHARE_HOST" SHARE_BASE_URL="$SHARE_BASE_URL" python3 -c '
 import json, os, sys
 try: c = json.load(sys.stdin)
 except Exception: c = {}
@@ -652,15 +699,30 @@ if os.environ["SHARE_HOST"] and os.environ["SHARE_HOST"] not in doms: doms.appen
 print(json.dumps({"signIn": {"email": {"enabled": True, "passwordRequired": False}},
   "authorizedDomains": doms,
   "notification": {"sendEmail": {"callbackUri": os.environ["SHARE_BASE_URL"] + "/s/auth-action"}}}))')"
-  idp -X PATCH "${IDP}/admin/v2/projects/${PROJECT_ID}/config?updateMask=signIn.email.enabled,signIn.email.passwordRequired,authorizedDomains,notification.sendEmail.callbackUri" \
-    -d "$PATCH" >/dev/null || true
-  IDP_OK="$(idp "${IDP}/admin/v2/projects/${PROJECT_ID}/config" | SHARE_HOST="$SHARE_HOST" python3 -c '
+    resp="$(idp -w '\n%{http_code}' -X PATCH "${IDP}/admin/v2/projects/${PROJECT_ID}/config?updateMask=signIn.email.enabled,signIn.email.passwordRequired,authorizedDomains,notification.sendEmail.callbackUri" \
+      -d "$patch" || true)"
+    code="${resp##*$'\n'}"; resp="${resp%$'\n'*}"
+    if [ "$code" != "200" ]; then
+      IDP_WHY="updating the Identity Platform config returned HTTP ${code}: $(printf '%s' "$resp" | idp_err)"
+      return 1
+    fi
+    if [ "$(idp "${IDP}/admin/v2/projects/${PROJECT_ID}/config" | SHARE_HOST="$SHARE_HOST" python3 -c '
 import json, os, sys
 try: c = json.load(sys.stdin)
 except Exception: print("no"); sys.exit()
 e = (c.get("signIn") or {}).get("email") or {}
 ok = e.get("enabled") and not e.get("passwordRequired") and os.environ["SHARE_HOST"] in (c.get("authorizedDomains") or [])
-print("yes" if ok else "no")' || echo no)"
+print("yes" if ok else "no")' || echo no)" != "yes" ]; then
+      IDP_WHY="the config was accepted but did not read back with email-link sign-in on and ${SHARE_HOST} authorised"
+      return 1
+    fi
+    return 0
+  }
+  IDP_OK="no"; IDP_WHY=""
+  for attempt in $(seq 1 "$IDP_ATTEMPTS"); do
+    if idp_converge; then IDP_OK="yes"; break; fi
+    [ "$attempt" -lt "$IDP_ATTEMPTS" ] && sleep 15
+  done
   SHARE_SECRETS="SHARE_VERIFY_KEY=dmai-share-verify-key:latest,SHARE_COOKIE_SECRET=dmai-share-cookie-secret:latest"
   if [ "$IDP_OK" = "yes" ] && gcloud secrets describe dmai-share-idp-api-key --project="$PROJECT_ID" >/dev/null 2>&1; then
     gcloud secrets add-iam-policy-binding dmai-share-idp-api-key \
@@ -670,6 +732,7 @@ print("yes" if ok else "no")' || echo no)"
     say "  share: one-time sign-in links ON (Identity Platform, ${SHARE_HOST} authorised)"
   else
     echo "WARNING: share links are admitting TYPED addresses — one-time sign-in is OFF." >&2
+    echo "  Why: ${IDP_WHY:-unknown}" >&2
     echo "  Identity Platform could not be configured by this deployer. A project owner, once:" >&2
     echo "  Console > Identity Platform > Enable; Providers > Email/Password > enable," >&2
     echo "  'Email link (passwordless sign-in)'; Settings > Authorized domains > add ${SHARE_HOST};" >&2
