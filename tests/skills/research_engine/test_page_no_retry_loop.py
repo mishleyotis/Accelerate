@@ -45,3 +45,12 @@ def test_history_from_another_version_does_not_count():
     rec = {"version": "B", "status": "fail",
            "n_history": [["A", "fail", 3], ["B", "fail", 2]]}
     assert _why(rec) is None
+
+
+def test_an_sg_v4_prose_repair_that_does_not_lower_the_count_stops():
+    better = {"version": "B", "status": "sg_v4_over_budget",
+              "n_history": [["B", "sg_v4_over_budget", 0, 340], ["B", "sg_v4_over_budget", 0, 310]]}
+    assert _why(better) is None
+    stuck = {"version": "B", "status": "sg_v4_over_budget",
+             "n_history": [["B", "sg_v4_over_budget", 0, 306], ["B", "sg_v4_over_budget", 0, 306]]}
+    assert "did not converge" in _why(stuck)

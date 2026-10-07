@@ -2999,7 +2999,8 @@ class Pipeline:
                     "sg_v4_fails": len(sgv4),
                     "n_reasons": res.get("n_reasons"),
                     "n_history": ((rec.get("n_history") or [])
-                                  + [[version, res.get("status"), res.get("n_reasons")]])[-8:],
+                                  + [[version, res.get("status"), res.get("n_reasons"),
+                                      len(sgv4)]])[-8:],
                     "attempts": int(rec.get("attempts") or 0) + 1,
                     "connector_run": connector_run, "at": _utcnow()})
         rec.setdefault("versions", {})[version] = res.get("status")
@@ -3030,7 +3031,9 @@ class Pipeline:
           - a local check that could not RUN is an environment fault, not a
             content one; a repair lane cannot fix it.
           - a local refusal that did not SHRINK since the last repair means
-            the repair is not converging; another lane is the loop.
+            the repair is not converging; another lane is the loop. The same
+            holds for the driver's own SG-V4 budget on a page the connector
+            passed.
         """
         rec = self.state["pages"].get(p) or {}
         status = str(rec.get("status") or "")
@@ -3045,6 +3048,16 @@ class Pipeline:
         if status == "local_precheck_not_run":
             return "the local validation could not run (" + \
                    "; ".join(str(x)[:120] for x in (rec.get("reasons") or [])[:1]) + ")"
+        sg = [h for h in (rec.get("n_history") or [])
+              if h and h[0] == rec.get("version") and h[1] == "sg_v4_over_budget"
+              and len(h) > 3]
+        if status == "sg_v4_over_budget" and len(sg) >= 2 and sg[-1][3] >= sg[-2][3]:
+            # The connector PASSED this page; SG-V4 discloses and promotes.
+            # The budget is the driver's own bar, and a prose repair that
+            # leaves the grounding count no lower is the loop, not a fix.
+            return (f"the SG-V4 prose repair did not converge: {sg[-1][3]} grounding "
+                    f"fail(s) after repair, {sg[-2][3]} before (budget "
+                    f"{getattr(getattr(self, 'opts', None), 'sg_v4_budget', '?')})")
         hist = [h for h in (rec.get("n_history") or [])
                 if h and h[0] == rec.get("version") and h[1] == "local_precheck_fail"]
         if status == "local_precheck_fail" and isinstance(n, int) and len(hist) >= 2:

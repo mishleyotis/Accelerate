@@ -281,6 +281,15 @@ def local_precheck(page: str, payload: dict, *, repo: str | None = None) -> dict
             "reasons": reasons, "by_gate": by_gate}
 
 
+
+def server_order(payload: dict) -> dict:
+    """The section order the connector validates in. An inline payload
+    arrives as sent; a chunked one is reassembled from JSONB, which returns
+    keys shorter-first, then bytewise."""
+    if size(payload) <= INLINE_MAX:
+        return payload
+    return {k: payload[k] for k in sorted(payload, key=lambda k: (len(k), k))}
+
 def sure_to_submit(run_id: str, page: str, payload: dict, *, sections=None,
                    repo: str | None = None) -> dict:
     """Both validation passes, locally, before a submission is spent.
@@ -300,6 +309,13 @@ def sure_to_submit(run_id: str, page: str, payload: dict, *, sections=None,
     spec = importlib.util.spec_from_file_location("pass2_replay", HERE / "pass2_replay.py")
     p2 = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(p2)
+    # The server validates a CHUNKED payload as it reassembles it from
+    # Postgres JSONB, and JSONB does not keep key order: keys come back
+    # shorter-first, then bytewise. Gates that credit a citation to the
+    # FIRST section citing it (ET-07's exemption) therefore see a different
+    # section than this process's dict order. First Tech platform,
+    # 2026-10-07: clean here, refused on ET-07 at roadmap.e_ids.
+    payload = server_order(payload)
     r = p2.replay(run_id, page, payload, sections_dir=sections, repo=repo,
                   call=lambda tool, args: mcp(tool, args))
     return {**r, "stage": "pass2"}

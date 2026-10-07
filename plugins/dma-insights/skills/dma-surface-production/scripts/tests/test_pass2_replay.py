@@ -150,3 +150,18 @@ def test_ship_page_does_not_submit_a_page_pass2_refuses(tmp_path, monkeypatch, c
     v = json.loads((tmp_path / "v.json").read_text())
     assert v["overview"]["status"] == "local_precheck_fail"
     assert v["overview"]["stage"] == "pass2" and v["overview"]["n_reasons"] >= 1
+
+
+
+def test_a_chunked_page_is_replayed_in_the_order_the_server_reassembles_it(monkeypatch):
+    """JSONB returns keys shorter-first, then bytewise; ET-07 credits a
+    citation to the FIRST section citing it, so the order is part of the
+    verdict (First Tech platform 2026-10-07: clean locally in file order,
+    refused on ET-07 at roadmap.e_ids)."""
+    sp = _load("ship_page")
+    page = {"platform_story": {}, "recommendations": {}, "roadmap": {},
+            "stairstep": {}, "starters": {}}
+    assert list(sp.server_order(page)) == list(page), "inline arrives as sent"
+    monkeypatch.setattr(sp, "INLINE_MAX", 0)
+    assert list(sp.server_order(page)) == ["roadmap", "starters", "stairstep",
+                                           "platform_story", "recommendations"]
