@@ -61,6 +61,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 #: the plugin root, for `scripts/connector_contract.py`
@@ -72,6 +73,24 @@ from .workbook import RunWorkbook
 
 STALL_SECONDS = 900
 
+#: Where the session's Workflow hook records the handoff workflows it started
+#: (scripts/hooks/workflow_inflight.py), and how long such a record is
+#: believed without any sign of life. A page workflow writes section files
+#: and never the workbook, so "no workbook write for 15 minutes" alone read
+#: a live workflow as orphaned and the Stop hook told the session to start
+#: it again (measured 2026-10-07).
+INFLIGHT_NAME = "workflow_inflight.json"
+INFLIGHT_MAX_SECONDS = 6 * 3600
+#: Where the Workflow runtime keeps each workflow's agent transcripts (the
+#: same tree `engine.cost.capture_workflows` prices). When they are on this
+#: machine, a recorded workflow is RUNNING exactly while they are being
+#: written; when they are not (the hourly Routine runs in another
+#: container), the record is believed for INFLIGHT_MAX_SECONDS.
+WORKFLOW_TRANSCRIPTS = Path.home() / ".claude" / "projects"
+#: A workflow whose transcripts have not moved for this long has returned
+#: or died — either way it is not running.
+RUNNING_SECONDS = 600
+
 
 def _age(ts: str | None) -> float | None:
     if not ts:
@@ -82,6 +101,96 @@ def _age(ts: str | None) -> float | None:
     except ValueError:
         return None
     return (_dt.datetime.now(_dt.timezone.utc) - t).total_seconds()
+
+
+def inflight(run, max_age: float | None = INFLIGHT_MAX_SECONDS) -> list[dict]:
+    """The handoff workflows a session recorded as started and not yet
+    returned — entries younger than `max_age` seconds (None: every entry),
+    newest first."""
+    try:
+        p = run.qa_dir / INFLIGHT_NAME
+        doc = json.loads(p.read_text()) if p.is_file() else {}
+    except (OSError, ValueError):
+        return []
+    out = []
+    for key, w in (doc.get("workflows") or {}).items():
+        if not isinstance(w, dict):
+            continue
+        age = _age(w.get("started_at"))
+        if age is None or (max_age is not None and age > max_age):
+            continue
+        out.append({"key": key, "age_s": int(age), **w})
+    return sorted(out, key=lambda w: w["age_s"])
+
+
+def transcript_age(workflow_run_id: str | None, base: Path | None = None) -> float | None:
+    """Seconds since any agent transcript of `workflow_run_id` was last
+    written, or None when no transcript of it is on this machine."""
+    wid = str(workflow_run_id or "").strip()
+    if not wid:
+        return None
+    base = Path(base or WORKFLOW_TRANSCRIPTS)
+    newest = None
+    try:
+        for f in base.glob(f"*/*/subagents/workflows/{wid}/*.jsonl"):
+            m = f.stat().st_mtime
+            newest = m if newest is None else max(newest, m)
+    except OSError:
+        return None
+    return None if newest is None else max(0.0, time.time() - newest)
+
+
+def running(run, *, base: Path | None = None,
+            quiet_seconds: float | None = None) -> list[dict]:
+    """The in-flight records that are RUNNING: a transcript written within
+    `quiet_seconds`, or no transcript here to measure (believed until the
+    record ages out). A record whose transcript is on this machine and
+    quiet is a workflow that returned or died."""
+    if quiet_seconds is None:
+        quiet_seconds = RUNNING_SECONDS          # read at call time, not import time
+    out = []
+    for w in inflight(run):
+        age = transcript_age(w.get("workflow_run_id"), base)
+        if age is None or age <= quiet_seconds:
+            out.append({**w, "transcript_age_s": None if age is None else int(age)})
+    return out
+
+
+def clear_inflight(run) -> int:
+    """Forget the recorded workflows (the driver, when it is run as `then`
+    after they returned). Returns how many were forgotten."""
+    p = run.qa_dir / INFLIGHT_NAME
+    try:
+        doc = json.loads(p.read_text()) if p.is_file() else {}
+    except (OSError, ValueError):
+        doc = {}
+    n = len(doc.get("workflows") or {})
+    if p.is_file():
+        try:
+            p.write_text(json.dumps({"workflows": {}, "cleared_at":
+                                     _dt.datetime.now(_dt.timezone.utc)
+                                     .strftime("%Y-%m-%dT%H:%M:%SZ")}))
+        except OSError:
+            pass
+    return n
+
+
+def activity_age(run, md: dict | None = None) -> float | None:
+    """Seconds since the run was last WRITTEN TO by any lane: the workbook
+    (research, scoring, reports) or a page section file under 08_sections
+    (pages). None when nothing was ever written."""
+    ages = []
+    a = _age((md or {}).get("last_written_at"))
+    if a is not None:
+        ages.append(a)
+    try:
+        secs = run.root / "08_sections"
+        newest = max((f.stat().st_mtime for f in secs.glob("*.json")), default=None)
+        if newest is not None:
+            ages.append(max(0.0, time.time() - newest))
+    except OSError:
+        pass
+    return min(ages) if ages else None
 
 
 def _driver_state(run) -> dict:
@@ -138,7 +247,7 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
     except Exception as e:                                # noqa: BLE001
         return {"run_id": run.run_id, "state": "UNREADABLE", "detail": str(e)}
     md = wb.metadata()
-    idle = _age(md.get("last_written_at"))
+    idle = activity_age(run, md)
     tax = C.taxonomy()
     cats = sorted({str(r["SubCap_ID"]).split(".")[0]
                    for r in wb.scoring_rows() if r.get("SubCap_ID")})
@@ -191,12 +300,26 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         # and revive by handing the workflow to the session that is here.
         aw = driver.get("awaiting") or {}
         quiet = idle is not None and idle > stall_seconds
-        state = "AWAITING_WORKFLOW" if quiet else "WORKFLOW_RUNNING"
+        live = running(run, quiet_seconds=max(stall_seconds, RUNNING_SECONDS))
+        # A workflow the session RECORDED as started is running until it is
+        # returned, however quiet the workbook is: a research agent mid-search
+        # and a page producer writing section files both look idle here. Its
+        # transcripts, when they are on this machine, say when it stopped.
+        state = "AWAITING_WORKFLOW" if (quiet and not live) else "WORKFLOW_RUNNING"
         detail = (f"{aw.get('stage')} was handed to a session as a persisted workflow "
                   f"({aw.get('handoff')}) at {aw.get('at')}; "
-                  + (f"no write for {int(idle)}s since, so the session that held it is "
-                     f"gone — start the workflow from this session, then run the driver"
-                     if quiet else "writes are still landing, so it is running"))
+                  + (f"no write for {int(idle)}s since and no workflow recorded in "
+                     f"flight, so the session that held it is gone — start the "
+                     f"workflow from this session, then run the driver"
+                     if state == "AWAITING_WORKFLOW" else
+                     (f"{len(live)} workflow(s) recorded in flight by the session "
+                      f"({', '.join(str(w.get('label') or w['key']) for w in live[:4])}"
+                      f"; oldest {max(w['age_s'] for w in live)}s) — do not start "
+                      f"them again; resume a stopped one by its wf_ run id"
+                      if live else "writes are still landing, so it is running")))
+        # Live records say "running"; records too old to believe still say
+        # "started once — RESUME it by its run id rather than start another".
+        post["inflight"] = live or [w for w in inflight(run, max_age=None)]
     elif open_work and driver.get("last_outcome") == "STOPPED_BUDGET":
         # THE DOLLAR CEILING, which had no state of its own. A run the
         # budget stopped leaves FLOORS FAIL rows behind — exactly what a

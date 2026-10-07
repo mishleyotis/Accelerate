@@ -773,6 +773,38 @@ def blocking_cells(doc: dict | None) -> dict[str, list[str]]:
     return out
 
 
+def open_cells(wb: RunWorkbook, category: str | None = None) -> set[str]:
+    """Cells with no Dominant_Claim yet — neither synthesised nor declared
+    absent. These are the open-cell batches' work, never a repair's."""
+    out = set()
+    for r in wb.scoring_rows():
+        sc = str(r.get("SubCap_ID") or "").strip()
+        if not sc or str(r.get("Dominant_Claim") or "").strip():
+            continue
+        if category and not sc.startswith(category + "."):
+            continue
+        out.add(sc)
+    return out
+
+
+def repair_cells(doc: dict | None, wb: RunWorkbook | None = None, *,
+                 include_open: bool = True) -> dict[str, list[str]]:
+    """`blocking_cells`, optionally WITHOUT the cells that are still open.
+
+    ONE CELL, ONE LANE (measured 2026-10-07): the gate names every open cell
+    too (`absence_unsearched`, `volleys_incomplete`, `synthesis_missing`), so
+    the handoff routed each one to an open-cell batch AND to a repair batch,
+    and two agents researched the same cells side by side — the duplicate
+    spend the batch split exists to remove. With `include_open=False` the
+    repair map carries only closed cells (and category-level findings); the
+    open ones belong to the capability batches that are being dispatched."""
+    cells = blocking_cells(doc)
+    if include_open or wb is None:
+        return cells
+    opened = open_cells(wb)
+    return {c: t for c, t in cells.items() if c not in opened}
+
+
 def summary(doc: dict | None) -> dict:
     """The gate as an agent should read it: verdict, blocking term → cells,
     advisory term names. The full document runs to tens of KB (one row per
@@ -809,9 +841,20 @@ def main(argv=None) -> int:
     ap.add_argument("--root")
     ap.add_argument("--category", required=True)
     ap.add_argument("--require-synthesis", action="store_true")
+    ap.add_argument("--repair-cells", action="store_true",
+                    help="print {cell: [blocking terms]} from the RECORDED verdict "
+                         "(runs no gate) — the repair lane's worklist")
+    ap.add_argument("--include-open", action="store_true",
+                    help="with --repair-cells: keep cells that are still open "
+                         "(no synthesis, no absence); by default they are the "
+                         "open-cell batches' work and are left out")
     a = ap.parse_args(argv)
     r = runstate.locate(a.run, Path(a.root) if a.root else None)
     wb = r.open()
+    if a.repair_cells:
+        print(json.dumps(repair_cells(read_verdict(r.qa_dir, a.category), wb,
+                                      include_open=a.include_open), sort_keys=True))
+        return 0
     out = run(wb, a.category, require_synthesis=a.require_synthesis,
               qa_dir=r.qa_dir)
     print(json.dumps(out, indent=2, sort_keys=True))

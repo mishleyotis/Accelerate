@@ -229,7 +229,7 @@ def resume(run_id: str, root: Path | None = None) -> tuple[Run, dict]:
     }
 
 
-def checkpoint(wb: RunWorkbook, position: str, scope=None) -> None:
+def checkpoint(wb: RunWorkbook, position: str, scope=None, cap: int | None = None) -> None:
     """Record where the run got to, in the artefact that survives.
 
     The search-op count is recorded WITH the position because the ceiling is
@@ -251,15 +251,23 @@ def checkpoint(wb: RunWorkbook, position: str, scope=None) -> None:
         except (ValueError, TypeError):
             prev = {}
         marks = dict(prev.get("marks") or {}) if isinstance(prev.get("marks"), dict) else {}
+        # `caps`: the window's capacity per scope, recorded by the driver
+        # when it opens a round over several concurrent batches of one
+        # category (ledger.window_cap). A later checkpoint on the same scope
+        # that names no cap KEEPS the recorded one — an agent re-opening its
+        # window mid-round must not shrink it back to one conversation's.
+        caps = dict(prev.get("caps") or {}) if isinstance(prev.get("caps"), dict) else {}
         scopes = [scope] if isinstance(scope, str) else list(scope or [])
         for s in scopes:
             marks[s] = n
+            if cap is not None:
+                caps[s] = int(cap)
         wb.set_metadata("checkpoint", json.dumps(
             {"at": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
              "position": position,
              # the run-wide mark moves only on an unscoped checkpoint
              "search_ops": n if not scopes else int(prev.get("search_ops") or 0),
-             "marks": marks},
+             "marks": marks, "caps": caps},
             separators=(",", ":")), save=False)
         wb._dirty = True
 

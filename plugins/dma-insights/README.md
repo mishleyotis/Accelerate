@@ -67,6 +67,11 @@ hooks/     precheck_submit (refuses a doomed submit before the network)
                           engine commands, scripts and run-root writes, by
                           grammar; the guards are asked first and a push, a
                           credential or the deployables never pass)
+           workflow_inflight (records every handoff Workflow the session
+                          starts, with its wf_ run id, so the watchdog reads
+                          WORKFLOW_RUNNING instead of orphaned, the driver
+                          waits instead of re-handing, and a stopped one is
+                          RESUMED by id rather than started again)
            stage_advance (the research→scoring→reports→package machine, at
                           the three moments a session can act: after an
                           agent returns, after a headless dispatch or gate,

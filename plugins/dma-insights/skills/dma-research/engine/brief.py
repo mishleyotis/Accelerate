@@ -2258,6 +2258,26 @@ def report_section_briefs(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
             if note:
                 lines += ["## The validator's last note — address EVERY numbered fix, "
                           "change nothing it says already stands", "", note, ""]
+            # THE CURRENT TEXT RIDES WITH THE NOTE (measured 2026-10-07): a
+            # writer handed a note and no text re-authored the whole section
+            # from the spec each round, so a numbered fix on one paragraph
+            # cost a fresh draft of all of them and reopened what stood. The
+            # writer edits in place; the engine refuses a record identical
+            # to the one reviewed.
+            cur = N.all_rows_for(wb, key).get(str(sid)) or []
+            if cur:
+                lines += ["## The current text — EDIT IT IN PLACE: change what the "
+                          "note names and keep every sentence it does not; a record "
+                          "identical to the reviewed one is refused", ""]
+                for r in cur:
+                    cid = _clean(r.get("Card_ID"))
+                    lines += [f"### {('card ' + cid) if cid else 'body'}", "",
+                              str(r.get("Body") or "").strip(), ""]   # verbatim: its blocks matter
+                    for fld in ("Weighing", "Absence_Basis", "Assumptions",
+                                "Bias_Notes", "Inference_Tags", "Evidence_IDs"):
+                        if _clean(r.get(fld)):
+                            lines += [f"- {fld}: {_clean(r.get(fld))}"]
+                    lines.append("")
             lines += ["## Commands", "",
                       f"    python3 -m engine.cli narrative preconditions {e} --report {key}",
                       f"    python3 -m engine.cli narrative contract --report {key}",
@@ -2444,7 +2464,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "author it. `engine.surface_export.scaffold_card` refuses an "
                 "item key the contract card does not declare",
             ],
-        }, "last_verdict_reasons", "waiting_on")
+        }, "waiting_on")   # the verdict's reasons are the point of a repair brief: never trimmed
         produce = list(sp["produce"])
         if phase == "fragments":
             for agent in page_producers(page):

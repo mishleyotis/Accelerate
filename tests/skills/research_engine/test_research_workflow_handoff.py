@@ -148,6 +148,19 @@ def test_a_handoff_nobody_worked_is_called_out(tmp_path):
 # with 0 batches, a $6.16 estimate (it cost ~$21) and no stall detection,
 # because each workflow round is a fresh driver process.
 
+def _close(p, *cells):
+    """Synthesise the cells through the ledger, so the gate's finding sits on
+    a CLOSED cell (an open one is the capability batch's work, never a
+    repair's — 2026-10-07)."""
+    from engine import ledger as L
+    from fixtures import bank_evidence, good_synthesis
+    wb = p.run.open()
+    for cell in cells:
+        eids = bank_evidence(wb, cell)
+        L.append_synthesis(wb, cell, good_synthesis(cell, eids),
+                           actor=f"research-{cell.split('.')[0].lower()}-producer")
+
+
 def _fail_gate(p, cat, cell, term="single_source_fact"):
     doc = {"category": cat, "gate": "FAIL", "blocking": [term],
            "advisory": ["coverage_below_floor"],
@@ -179,6 +192,7 @@ def test_handoff_routes_the_gates_cells_even_when_closed(tmp_path):
     p, disp, out = _drive(tmp_path, "workflow")
     cat = out["invocations"][0]["cats"][0]
     cell = f"{cat}.1.1"
+    _close(p, cell)
     _fail_gate(p, cat, cell)
     h = P.Pipeline(p.run, p.opts)._research_handoff()
     inv = next(i for i in h["invocations"] if cat in i["cats"])
@@ -218,6 +232,7 @@ def test_a_repair_at_source_unstalls_the_category(tmp_path):
     p, disp, out = _drive(tmp_path, "workflow")
     p.opts.stall_rounds = 1
     cat = out["invocations"][0]["cats"][0]
+    _close(p, f"{cat}.1.1", f"{cat}.1.2")
     doc = _fail_gate(p, cat, f"{cat}.1.1")
     doc["single_source_fact"].append({"subcap": f"{cat}.1.2"})
     (p.run.qa_dir / f"floors_{cat}.json").write_text(json.dumps(doc))

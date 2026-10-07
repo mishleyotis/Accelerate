@@ -542,6 +542,10 @@ def main(argv=None) -> int:
     ck.add_argument("--run", required=True); ck.add_argument("--root")
     ck.add_argument("--category", required=True)
     ck.add_argument("--position", default="workflow dispatch")
+    ck.add_argument("--window-ops", type=int, default=None,
+                    help="the window's capacity when several concurrent batches "
+                         "of this category share it (the driver sets it per round); "
+                         "omitted, a recorded capacity is kept")
     sub.add_parser("synthesis-template",
                    help="the synthesis record `synthesise --json` takes: every "
                         "field, its floor and its vocabulary, from the ledger")
@@ -815,9 +819,11 @@ def main(argv=None) -> int:
 
     wb = run.open()
     if a.cmd == "checkpoint":
-        runstate.checkpoint(wb, a.position, scope=[a.category])
-        print(json.dumps({"checkpoint": a.category, "window_remaining":
-                          ledger.stats(wb, a.category)["window_remaining"]})); return 0
+        runstate.checkpoint(wb, a.position, scope=[a.category], cap=a.window_ops)
+        st = ledger.stats(wb, a.category)
+        print(json.dumps({"checkpoint": a.category,
+                          "window_remaining": st["window_remaining"],
+                          "window_cap": st["search_op_ceiling"]})); return 0
     if a.cmd == "card":
         print(json.dumps(orient.capability_card(wb, a.capability, run=run),
                          indent=1)); return 0

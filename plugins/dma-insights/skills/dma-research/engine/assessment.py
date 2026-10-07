@@ -680,6 +680,30 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
         raise ScoringRefusal(f"{subcap}: score refused — " + "; ".join(problems))
 
     caps_txt = _clean(caps) or ("no evidence: capped at 2.0" if not eids else "none applied")
+    # AN IDENTICAL RE-SCORE IS NOT A SCORE (measured 2026-10-07). A rescore
+    # lane that re-struck a row at the value it already held wrote a new
+    # Provenance row — which added its actor to the pillar's scorers (so
+    # that actor could never critique it) and read as "scored after the
+    # critic's PASS" to anything comparing timestamps. Nothing changed, so
+    # nothing is written.
+    same = (abs((_num(row.get("Score")) or -1) - sc) < 1e-9
+            and _clean(row.get("Confidence")).upper() == conf
+            and _clean(row.get("Rationale")) == rat
+            and abs((_num(row.get("Evidence_Ceiling")) or -1) - ec) < 1e-9
+            and _clean(row.get("Caps_Applied")) == caps_txt)
+    if same:
+        o = next((r for r in wb.rows("Subcap_Scores")
+                  if _clean(r.get("subcap_id")) == subcap), None)
+        same = o is not None and all(
+            _clean(o.get(k)) == v for k, v in (
+                ("ai_applicability", aa), ("data_dependency", _clean(data_dependency)),
+                ("data_readiness", dr), ("ai_evidence_ids", aie),
+                ("ai_blocker", _clean(ai_blocker) or "NONE"), ("peer_ai_signal", pas)))
+    if same:
+        return {"subcap": subcap, "score": sc, "confidence": conf,
+                "evidence_ceiling": ec, "caps_applied": caps_txt,
+                "level": rubric.maturity_level(sc), "band": C.band_of(sc),
+                "unchanged": True}
     with wb.transaction("assessment.score"):
         wb.set_scoring(subcap, {"Score": sc, "Confidence": conf,
                                 "Evidence_Ceiling": ec, "Caps_Applied": caps_txt,
@@ -753,8 +777,36 @@ def pending_moves(wb: RunWorkbook, pillar: str = "") -> dict:
     return {"pending": len(rows), "moves": rows}
 
 
+def last_critic(wb: RunWorkbook, pillar: str) -> tuple[str, str]:
+    """(when, verdict) of the pillar's last SCORING_CRITIC row — ('', '') if none."""
+    hits = [(_clean(g.get("Timestamp")), _clean(g.get("Verdict")).upper())
+            for g in wb.rows("Gate_Log")
+            if _clean(g.get("Gate")) == "SCORING_CRITIC"
+            and _clean(g.get("Scope")).upper() == _clean(pillar).upper()]
+    return hits[-1] if hits else ("", "")
+
+
+def last_critic_at(wb: RunWorkbook, pillar: str) -> str:
+    """When the pillar's last SCORING_CRITIC verdict was recorded ('' if never)."""
+    return last_critic(wb, pillar)[0]
+
+
+def rescored_since(wb: RunWorkbook, pillar: str, since: str) -> set[str]:
+    """Rows of `pillar` with a `score` Provenance row later than `since`."""
+    out = set()
+    for r in wb.rows("Provenance"):
+        if _clean(r.get("Step")) != "score":
+            continue
+        cell = _clean(r.get("SubCap_ID"))
+        # `>=`: the timestamps are whole seconds, and a re-score struck in
+        # the same second as the verdict is after it, not before.
+        if cell.startswith(_clean(pillar).upper()) and _clean(r.get("At")) >= since:
+            out.add(cell)
+    return out
+
+
 def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
-             note: str, moves=None) -> dict:
+             note: str, moves=None, widen: str = "") -> dict:
     """The adversarial critic pass on one pillar's scores, by somebody else.
 
     `moves`: [(cell, target, why)] or "CELL:TARGET[:why]" strings — every
@@ -798,6 +850,32 @@ def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
         raise ScoringRefusal("a FAIL names the rows it would move (--move CELL:TARGET:why, "
                              "repeatable); a FAIL with no move cannot be acted on, and the "
                              "scorers re-read prose for rows they cannot find")
+    # A RE-CRITIQUE CONVERGES OR IT IS NOT A RE-CRITIQUE (measured 2026-10-05
+    # and again 2026-10-07): a critic that draws a fresh sample every round
+    # finds a new row to move every round, and SCORING never closes. Once a
+    # verdict is on record for the pillar, a move may name only a row the
+    # critic already moved or a row re-scored since that verdict — the rows
+    # the round changed. A row it passed over last round and that nobody has
+    # touched is passed. `widen` is the critic's recorded reason to look past
+    # that (a rubric misread it can name), kept in the note for the record.
+    prev_at, prev_verdict = last_critic(wb, pillar)
+    # Only the convergence loop is held to this: a FAIL, its moves applied,
+    # the re-critique. A pillar whose last verdict was PASS is closed, and a
+    # critique that re-opens it on purpose draws whatever sample it likes.
+    if prev_at and prev_verdict == "FAIL" and parsed:
+        prior = {c for c in critic_moves(wb) if c.startswith(pillar)}
+        changed = rescored_since(wb, pillar, prev_at)
+        fresh = [c for c, _t, _w in parsed if c not in prior and c not in changed]
+        if fresh and len(_clean(widen)) < 40:
+            raise ScoringRefusal(
+                f"re-critique of {pillar}: --move names {', '.join(fresh)}, which "
+                f"you did not move before and nobody re-scored since your last "
+                f"verdict at {prev_at}. A re-critique judges the rows that moved "
+                f"(`engine.assessment moves`) and the rows changed since, so the "
+                f"round converges; to widen the sample anyway, state why in "
+                f"--widen '<40+ chars naming the rule the earlier pass missed>'.")
+        if fresh:
+            note = f"[WIDENED: {_clean(widen)[:200]}] " + _clean(note)
     # Read-modify-write of a book every pillar critic shares, and the critics
     # run as parallel processes: outside the lock, the second to finish
     # saved its stale copy over the first one's moves (First Tech,
@@ -1329,6 +1407,10 @@ def main(argv=None) -> int:
     cr.add_argument("--actor", required=True); cr.add_argument("--note", required=True)
     cr.add_argument("--move", action="append", default=[],
                     help="CELL:TARGET[:why], repeatable — required on a FAIL")
+    cr.add_argument("--widen", default="",
+                    help="on a re-critique: why a --move names a row you neither "
+                         "moved before nor anyone re-scored since your last verdict "
+                         "(40+ chars); without it such a move is refused")
     mv = common(sub.add_parser("moves", help="the scoring critic's pending moves "
                                              "(rows still above their target)"))
     mv.add_argument("--pillar", default="")
@@ -1373,7 +1455,7 @@ def main(argv=None) -> int:
                         ai_blocker=a.ai_blocker, peer_ai_signal=a.peer_ai_signal)
         elif a.cmd == "critique":
             out = critique(wb, pillar=a.pillar, verdict=a.verdict, actor=a.actor,
-                           note=a.note, moves=a.move)
+                           note=a.note, moves=a.move, widen=a.widen)
         elif a.cmd == "moves":
             out = pending_moves(wb, a.pillar)
         elif a.cmd == "rollup":

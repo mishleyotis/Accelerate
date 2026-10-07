@@ -168,6 +168,11 @@ def next_step(row: dict) -> str:
                          f"args: {json.dumps(inv)}}})")
         if not doc:
             lines.append(f"  (handoff not readable — open {plan['workflow']})")
+        for w in (row.get("inflight") or [])[:6]:
+            # Recorded as started by this or an earlier session: resume, never restart.
+            lines.append(f"  ALREADY STARTED {w.get('label') or w.get('key')}"
+                         + (f" — resume it: {w['resume']}" if w.get("resume")
+                            else " — do not start it again while it runs"))
         lines.append(f"Then: {doc.get('then') or 'run the driver again'}.")
     elif plan.get("command"):
         lines.append("Next: run `" + " ".join(plan["command"]) + "`.")
@@ -621,7 +626,12 @@ def _gaps_blocker(row: dict) -> str:
       * there is simply nothing open.
     """
     if row.get("state") in ("BLOCKED_NO_CONNECTOR", "AT_USD_CEILING",
-                            "HALTED", "UNREADABLE", "MISSING_LOCALLY"):
+                            "HALTED", "UNREADABLE", "MISSING_LOCALLY",
+                            # a handoff's workflows are running, or the
+                            # handoff itself is the next step (pass 1 names
+                            # it): a headless lane here would work the same
+                            # cells beside them (measured 2026-10-07)
+                            "WORKFLOW_RUNNING", "AWAITING_WORKFLOW"):
         return ""
     try:
         ctx = _ctx()

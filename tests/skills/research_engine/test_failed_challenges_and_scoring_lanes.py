@@ -43,8 +43,10 @@ def test_a_resynthesis_clears_the_verdict_and_is_challenged_again(tmp_path):
     cell = _evidenced_cell(wb, ev)
     challenge(wb, cell, verdict="FAIL", actor="research-challenger")
     assert wb.scoring_row(cell)["Challenge_Verdict"] == "FAIL"
-    L.append_synthesis(wb, cell, good_synthesis(cell, ev[cell]),
-                       actor="research-p1c1-producer")
+    rec = good_synthesis(cell, ev[cell])
+    rec["What_We_Found"] += (" The board pack's quarterly review is the counter-source "
+                             "the challenger asked for.")      # a repair changes the text
+    L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
     assert not str(wb.scoring_row(cell).get("Challenge_Verdict") or "").strip()
     v = floors_gate.run(wb, "P1C1", require_synthesis=True, persist=False)
     assert "challenge_missing" in v["blocking"] and "challenge_failed" not in v["blocking"]

@@ -185,6 +185,16 @@ SHIP_PAGE = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "ship_pag
 SELF_HEAL = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "self_heal.py"
 
 
+def _note_fixes(note) -> int:
+    """How many numbered fixes a validator's note lists (0 for none): `1.`,
+    `2)`, `(3)` at a line start or after whitespace, and `- [ ]` items. A
+    decimal (`2.0`) or a token ending in a digit (`M3.`) is not a fix."""
+    text = str(note or "")
+    n = len(re.findall(r"(?:^|(?<=\s))(?:\d{1,2}[.)]|\(\d{1,2}\))\s+(?=\S)", text))
+    n += len(re.findall(r"(?m)^\s*-\s*\[\s*\]\s+", text))
+    return n
+
+
 def _utcnow() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
@@ -573,6 +583,14 @@ RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
 WORKFLOW_USD_PER_CELL = 0.19
 CHALLENGE_USD_PER_CATEGORY = 0.44
 BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
+WORKFLOW_ROUNDS = 2   # research rounds inside ONE workflow invocation (batches, then repairs)
+#: What every workflow handoff says about a workflow that stopped partway.
+RESUME_HOW = ("A workflow that stopped partway (a spend limit, a lost session) is "
+              "RESUMED, never restarted: Workflow({resumeFromRunId: <its wf_ run "
+              "id>, scriptPath, args}) replays its finished agents from cache and "
+              "runs only what is left. Never start a second workflow for a handoff "
+              "whose first one is still running (`engine.watchdog` reads "
+              "WORKFLOW_RUNNING while 07_qa/workflow_inflight.json is fresh).")
 
 
 def _open_capabilities(wb) -> dict[str, dict[str, int]]:
@@ -1223,6 +1241,42 @@ class Pipeline:
             self.opts.log(f"  (outcome not recorded: {str(e)[:120]})")
         return out
 
+    def _workflows_running(self) -> dict | None:
+        """Refuse to drive while the session's handoff workflows are still
+        running; otherwise forget them (this run IS the handoff's `then`).
+
+        Measured 2026-10-07: nothing recorded that a session had started the
+        workflows a handoff named, so a driver re-run — a person, the hourly
+        watchdog, a Stop-hook nudge — re-handed the same stage while its
+        agents were mid-flight, and the loop guard counted it as a round.
+        `scripts/hooks/workflow_inflight.py` records each start; a record
+        younger than the stall window WITH a write landing inside it is a
+        workflow in flight. A quiet record is a workflow that died: forget
+        it and drive."""
+        from . import watchdog as W
+        recorded = W.inflight(self.run)
+        if not recorded:
+            return None
+        # MEASURED, NOT INFERRED: only a workflow whose transcripts are being
+        # written on this machine stops the driver. A session runs `then`
+        # the moment its workflows return — refusing that on "the workbook
+        # was written recently" would hold every stage for a stall window.
+        live = [w for w in W.running(self.run)
+                if w.get("transcript_age_s") is not None]
+        if live:
+            return {"outcome": "WORKFLOW_RUNNING", "stage": None,
+                    "reason": (f"{len(live)} handoff workflow(s) this session started are "
+                               f"still running ({', '.join(str(w.get('label') or w['key']) for w in live[:4])}; "
+                               f"newest transcript write {min(w['transcript_age_s'] for w in live)}s "
+                               f"ago) — driving now would hand the same stage again. Wait "
+                               f"for them to return, then run `then`; resume a stopped one "
+                               f"with its wf_ run id, never a second start."),
+                    "inflight": live}
+        n = W.clear_inflight(self.run)
+        self.opts.log(f"  (forgot {n} recorded workflow(s): returned, or no transcript "
+                      f"still being written — this run is their `then`)")
+        return None
+
     def _run_all(self) -> dict:
         from . import cli as _cli
         stale = _cli.refuse_on_stale_install()
@@ -1235,6 +1289,12 @@ class Pipeline:
         if blocked is not None:
             self.opts.log(f"[PREFLIGHT] BLOCKED — {blocked['reason'][:160]}")
             return blocked
+        running = self._workflows_running()
+        if running is not None:
+            self.opts.log(f"[DRIVER] REFUSED — {running['reason'][:200]}")
+            return running
+        from . import watchdog as _W
+        _W.clear_inflight(self.run)        # the workflows returned: this run is their `then`
         self._set_md("pipeline_version", PIPELINE_VERSION)
         self.state["invocations"].append({"at": _utcnow(), "until": self.opts.until})
         self._save_state()
@@ -1767,11 +1827,33 @@ class Pipeline:
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
         open_caps = _open_capabilities(self.wb)
-        repairs = {c: floors_gate.blocking_cells(
-                       floors_gate.read_verdict(self.run.qa_dir, c))
+        # ONE CELL, ONE LANE: an open cell rides in its capability batch; the
+        # repair map carries only closed cells the gate names (and category-
+        # level findings). Measured 2026-10-07: both maps carried the open
+        # cells, so two agents researched them side by side.
+        repairs = {c: floors_gate.repair_cells(
+                       floors_gate.read_verdict(self.run.qa_dir, c), self.wb,
+                       include_open=False)
                    for c in need}
         stalled = self._workflow_stalled(need, repairs)
         work = [c for c in sorted(need) if c not in stalled]
+        # THE SEARCH WINDOW IS OPENED HERE, SIZED FOR THE BATCHES (measured
+        # 2026-10-07): a category's batches run as concurrent conversations
+        # that share the category's one 60-op window, so the later ones were
+        # refused mid-capability and closed nothing. The window is opened
+        # once per handoff with capacity for every batch and repair batch of
+        # both in-workflow rounds; the per-conversation ceiling is unchanged,
+        # there are simply that many conversations in the scope.
+        if work:
+            units = {c: max(1, len(_batches(open_caps.get(c, {})))
+                            + len(_repair_batches(repairs.get(c) or {})))
+                     for c in work}
+            with self.wb.transaction("research workflow handoff"):
+                for c in work:
+                    runstate.checkpoint(
+                        self.wb, f"RESEARCH workflow handoff {_utcnow()}", scope=[c],
+                        cap=L.SEARCH_OP_CEILING * units[c] * WORKFLOW_ROUNDS)
+            self.reopen()
         by_unit = ({c: [c] for c in work} if RESEARCH_UNIT == "category"
                    else {u: [c for c in cs if c in work]
                          for u, cs in by_pillar.items() if any(c in work for c in cs)})
@@ -1782,7 +1864,7 @@ class Pipeline:
                 "repair_batches": {c: _repair_batches(repairs.get(c) or {})
                                    for c in cats},
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
-                "plugin": str(PLUGIN), "rounds": 2,
+                "plugin": str(PLUGIN), "rounds": WORKFLOW_ROUNDS,
                 "entity": md.get("entity_name") or "", "domain": site,
                 # The workflow's connector rules stop every batch with
                 # NO_CONNECTORS when Exa/Tavily/Clay are absent — on a run the
@@ -1793,7 +1875,8 @@ class Pipeline:
                "then": self.plan()["command"],
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per category — wait for all, "
-                       "then run `then`; the driver verifies the floors gates")}
+                       "then run `then`; the driver verifies the floors gates. "
+                       + RESUME_HOW)}
         if stalled:
             doc["stalled"] = stalled
         path = self.run.qa_dir / RESEARCH_HANDOFF
@@ -1855,9 +1938,13 @@ class Pipeline:
         blockers without adding a synthesis. A round only counts when spend
         landed since the last handoff: an unworked handoff is the
         `not_worked` warning, not a stall."""
-        if not self.opts.stall_rounds:
-            return []
         book = self.state.setdefault("workflow_progress", {})
+        if self.opts.reset_guard:
+            # A person's explicit "allow more rounds": the worked-round count
+            # starts again, the stall count with it.
+            for cat in list(book):
+                book[cat]["rounds"] = 0
+                book[cat]["stalls"] = 0
         last_spent = float(self.state.get("workflow_spent_at_handoff", -1.0))
         worked = round(self._spent_usd, 2) > round(last_spent, 2)
         now = self._research_progress()
@@ -1868,6 +1955,7 @@ class Pipeline:
                               for t in ts)
             prev = book.get(cat)
             stalls = int((prev or {}).get("stalls") or 0)
+            rounds = int((prev or {}).get("rounds") or 0)
             if prev is not None:
                 # Movement resets the count whoever caused it — a person who
                 # repaired at source un-stalls the category with no spend.
@@ -1877,12 +1965,27 @@ class Pipeline:
                     stalls = 0
                 elif worked:
                     stalls += 1
-            book[cat] = {"sig": sig, "blockers": blockers, "stalls": stalls}
-            if stalls >= self.opts.stall_rounds:
+                if worked:
+                    rounds += 1
+            book[cat] = {"sig": sig, "blockers": blockers, "stalls": stalls,
+                         "rounds": rounds}
+            if self.opts.stall_rounds and stalls >= self.opts.stall_rounds:
                 out.append(cat)
                 self.opts.log(f"  [RESEARCH] {cat}: no outcome moved and no blocker "
                               f"closed for {stalls} worked round(s) — not handing it "
                               f"again; {len(blockers)} blocker(s) remain")
+            elif self.opts.max_rounds and rounds >= self.opts.max_rounds:
+                # THE CEILING THE OTHER WORKFLOW STAGES ALREADY HAVE (the
+                # handoff guard's --max-rounds). Research measured progress
+                # only: a category that closed one blocker a round could be
+                # handed ten, twenty times. Worked rounds are counted per
+                # category and a category past the ceiling is not handed
+                # again until --reset-guard.
+                out.append(cat)
+                self.opts.log(f"  [RESEARCH] {cat}: handed {rounds} worked workflow "
+                              f"round(s), the --max-rounds ceiling — not handing it "
+                              f"again; {len(blockers)} blocker(s) remain "
+                              f"(--reset-guard to allow more)")
         for cat in list(book):
             if cat not in need:
                 book.pop(cat)
@@ -2520,7 +2623,7 @@ class Pipeline:
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per pillar — wait for all, then "
                        "run `then`. No Workflow tool in this session? Re-run the driver "
-                       "with --scoring-mode lanes: scoring needs no connector.")}
+                       "with --scoring-mode lanes: scoring needs no connector. " + RESUME_HOW)}
         path = self.run.qa_dir / SCORING_HANDOFF
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(doc, indent=1))
@@ -2862,10 +2965,20 @@ class Pipeline:
         # with the same status and latest review, handed again and again is a
         # workflow that changes nothing — stop instead of buying it again.
         reviews = N.latest_reviews(self.wb)
-        sig = sorted([k, str(x.get("id") or x.get("section")), str(x.get("status")),
-                      x.get("words"),
-                      str((reviews.get((k, str(x.get("id") or x.get("section")))) or {})
-                          .get("at") or "")]
+        # THE SIGNATURE MEASURES CONVERGENCE, NOT ACTIVITY (measured
+        # 2026-10-07). It used to carry the latest review's timestamp, so a
+        # round that re-reviewed a section and changed nothing about it still
+        # read as movement, and the stall guard could never fire: a section
+        # got six write/review cycles per handoff for ten handoffs. What a
+        # round must move is the section's status, its verdict, the number
+        # of fixes the validator still lists, or what it waits on.
+        def _sig_row(k, x):
+            sid = str(x.get("id") or x.get("section"))
+            lr = reviews.get((k, sid)) or {}
+            return [k, sid, str(x.get("status")), str(lr.get("verdict") or ""),
+                    _note_fixes(lr.get("note")),
+                    sorted(str(u.get("kind") or "") for u in (lr.get("upstream") or []))]
+        sig = sorted(_sig_row(k, x)
                      for k, rep in st["reports"].items() if not rep.get("ready")
                      for x in rep.get("sections") or [] if x.get("status") != "READY")
         why = self._handoff_guard("REPORTS", sig)
@@ -2892,7 +3005,7 @@ class Pipeline:
                        "through the enrichment specialist, a sheet through its engine "
                        "command, an owner decision with the person), then run `then`. "
                        "No Workflow tool? `agent_prompts` holds the same prompts for "
-                       "in-session agents, or re-run with --report-mode lanes.")}
+                       "in-session agents, or re-run with --report-mode lanes. " + RESUME_HOW)}
         path = self.run.qa_dir / REPORTS_HANDOFF
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(doc, indent=1))
@@ -3317,7 +3430,7 @@ class Pipeline:
                        "args: <invocation>}) — wait for it, then run `then`: the "
                        "driver ships every page the workflow left on disk, hands "
                        "failures back as repairs, and promotes. No Workflow tool in "
-                       "this session? Re-run the driver with --pages-mode lanes.")}
+                       "this session? Re-run the driver with --pages-mode lanes. " + RESUME_HOW)}
         path = self.run.qa_dir / PAGES_HANDOFF
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(doc, indent=1))
