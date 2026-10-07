@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify as verifySession } from "../../../lib/session";
 import { audit, mint, shareMode, shareUrl } from "../../../lib/share";
+import { ledgerBackend, recordLink } from "../../../lib/share-ledger";
 
 // POST /api/share — mint a client link (the IAP-fronted app only).
 //
@@ -25,6 +26,19 @@ export async function POST(req) {
   try {
     const { token, payload } = mint({ entity: body.entity, run: body.run,
                                       recipients: body.recipients, days: body.days });
+    // Recorded before it is handed out, so Admin › Client links can see and
+    // revoke every link there is. A ledger that is configured but cannot be
+    // written issues no link at all (lib/share-ledger).
+    const ledger = ledgerBackend();
+    if (ledger) {
+      try { await recordLink(payload, session.email, ledger); }
+      catch (e) {
+        audit("share_link_not_recorded", { jti: payload.jti, error: String(e.message || e).slice(0, 200) });
+        return NextResponse.json({ error: "share_ledger_unavailable",
+          detail: "The link could not be recorded for revocation, so it was not issued. Try again." },
+          { status: 503 });
+      }
+    }
     audit("share_link_minted", { jti: payload.jti, entity: payload.e, run: payload.r,
       by: session.email, emails: payload.a.m, domains: payload.a.d,
       expires_at: new Date(payload.exp * 1000).toISOString() });

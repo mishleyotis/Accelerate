@@ -579,6 +579,10 @@ function AdminPage() {
       {/* Usage at a glance — full view at /admin/usage (pages-admin-usage.jsx) */}
       {window.UsageGlanceCard ? <window.UsageGlanceCard /> : null}
 
+      {/* Client links: who was given a client dashboard, and taking it back
+          (pages-admin-share.jsx, lib/share-ledger.js). */}
+      {window.ShareLinksCard ? <window.ShareLinksCard /> : null}
+
       {/* PENDING_REVIEW entities. Production divergence: hidden. The live
           pipeline has no Phase 0 entity-inference step — the API always
           returns an empty list and Confirm/Reject wrote nothing. */}

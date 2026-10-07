@@ -63,6 +63,7 @@ export const SCRIPTS = [
   "proto/js/pages-d5-d6-tech-runs.js",
   "proto/js/pages-alerts-prospecting-admin.js",
   "proto/js/pages-admin-usage.js",
+  "proto/js/pages-admin-share.js",
   "proto/js/usage-tracker.js",
   "proto/js/pages-live-client.js",
   "proto/js/tweaks-panel.js",

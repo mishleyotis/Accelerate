@@ -295,6 +295,34 @@ if [ -f apps/web/Dockerfile ]; then
   # known before the service exists; the share block below re-reads the real
   # URL and corrects dmai-web if the two ever differ.
   SHARE_BASE_URL="${API_URL/dmai-api/dmai-share}"
+  # ── Client-link ledger (Admin › Client links; apps/web/lib/share-ledger.js).
+  # Every link generated and every revocation, in a private bucket rather than
+  # the application database (invariant 2: the database holds connector
+  # content; access to a link is not content). dmai-web writes; dmai-share
+  # only reads (granted in the share block below). Configured on BOTH
+  # services or on neither: a revocation the share service cannot read would
+  # be a revocation that does nothing.
+  SHARE_LEDGER_BUCKET="${PROJECT_ID}-dmai-share-ledger"
+  LEDGER_OK=""
+  if gcloud storage buckets describe "gs://${SHARE_LEDGER_BUCKET}" --project="$PROJECT_ID" >/dev/null 2>&1 \
+     || gcloud storage buckets create "gs://${SHARE_LEDGER_BUCKET}" --project="$PROJECT_ID" \
+          --location="$REGION" --uniform-bucket-level-access --public-access-prevention \
+          --quiet >/dev/null 2>&1; then
+    if gcloud storage buckets add-iam-policy-binding "gs://${SHARE_LEDGER_BUCKET}" \
+         --member="serviceAccount:dmai-web@${SA_DOMAIN}" --role="roles/storage.objectAdmin" \
+         --quiet >/dev/null 2>&1; then
+      LEDGER_OK=1
+    fi
+  fi
+  LEDGER_ENV=""
+  if [ -n "$LEDGER_OK" ]; then
+    LEDGER_ENV=";SHARE_LEDGER_BUCKET=${SHARE_LEDGER_BUCKET}"
+    say "  share: link ledger gs://${SHARE_LEDGER_BUCKET} (Admin › Client links can list and revoke)"
+  else
+    echo "WARNING: client-link ledger gs://${SHARE_LEDGER_BUCKET} could not be created or granted" \
+         "(needs storage.admin) — Admin › Client links cannot list or revoke; revoke through" \
+         "infra/share-revoked.txt until a project owner creates it." >&2
+  fi
   # Role grants (allowlists until the auth stage's users table): ADMIN and
   # ANALYST are strictly these emails; every other @zennify.com Google
   # account signs in as AE. Override per deploy via the environment.
@@ -421,7 +449,7 @@ if [ -f apps/web/Dockerfile ]; then
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
-    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};SHARE_BASE_URL=${SHARE_BASE_URL};USAGE_DATASET=${USAGE_DATASET}" \
+    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};SHARE_BASE_URL=${SHARE_BASE_URL};USAGE_DATASET=${USAGE_DATASET}${LEDGER_ENV}" \
     --set-secrets="SESSION_SECRET=dmai-session-secret:latest,SHARE_SIGNING_KEY=dmai-share-signing-key:latest" \
     --quiet
   # NO `--allow-unauthenticated` HERE, DELIBERATELY, AND NO
@@ -651,12 +679,20 @@ print("yes" if ok else "no")' || echo no)"
     --region="$REGION" --format='value(spec.template.spec.containers[0].image)')"
   # One link at a time: list its jti (shown in the share dialog and in the
   # share_link_minted log line) in infra/share-revoked.txt and release.
+  # The ledger, read-only: the internet-facing service can see a revocation
+  # but never write one. Without this grant every link would fail closed
+  # (503), so a failed grant fails the release instead.
+  if [ -n "$LEDGER_OK" ]; then
+    gcloud storage buckets add-iam-policy-binding "gs://${SHARE_LEDGER_BUCKET}" \
+      --member="serviceAccount:${SHARE_SA}" --role="roles/storage.objectViewer" --quiet >/dev/null \
+      || { echo "FATAL: could not grant dmai-share read on gs://${SHARE_LEDGER_BUCKET}" >&2; exit 1; }
+  fi
   SHARE_REVOKED="$(grep -v '^[[:space:]]*#' infra/share-revoked.txt 2>/dev/null \
     | tr -d '[:space:]' | paste -sd, - || true)"
   gcloud run deploy dmai-share --image="$WEB_IMAGE" \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="$SHARE_SA" \
-    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}" \
+    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}${LEDGER_ENV}" \
     --set-secrets="$SHARE_SECRETS" \
     --min-instances=0 --max-instances=10 --concurrency=80 \
     --allow-unauthenticated --quiet

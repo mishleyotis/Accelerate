@@ -1231,7 +1231,7 @@ function AdminPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "play",
     size: 13
-  }), " Import & jobs")))), window.UsageGlanceCard ? /*#__PURE__*/React.createElement(window.UsageGlanceCard, null) : null, LIVE ? null : /*#__PURE__*/React.createElement("div", {
+  }), " Import & jobs")))), window.UsageGlanceCard ? /*#__PURE__*/React.createElement(window.UsageGlanceCard, null) : null, window.ShareLinksCard ? /*#__PURE__*/React.createElement(window.ShareLinksCard, null) : null, LIVE ? null : /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     style: {
       marginBottom: 16

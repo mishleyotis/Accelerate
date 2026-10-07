@@ -259,6 +259,20 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `share_otp_*`, `share_access_*`).
   Reads go to svc_api as `audience=customer`, `role=AE`, the link's run,
   pages `overview·insights·heatmap·evidence·subcaps` only.
+  **Revoking access** (owner, same day: "the admin page should also have a
+  place where I can revoke access"): **Admin › Client links** lists every
+  link generated (client, recipients, who shared it, expiry) and an ADMIN can
+  revoke a whole link, remove one address or domain from it, or restore
+  either; a link generated before the ledger is revoked by pasting it. The
+  ledger is the private bucket `${PROJECT_ID}-dmai-share-ledger`
+  (`links/<jti>.json` at generation, `revoked/<jti>.json` per change, every
+  change attributed) — not the database, so invariant 2 stands. dmai-web
+  writes it (objectAdmin), dmai-share only reads it (objectViewer). Every
+  share request re-checks it (`lib/share-ledger.js liveLink`, cached ≤15 s),
+  so a change reaches readers already inside; an unreadable ledger **fails
+  closed** (503). A configured ledger that cannot record a new link issues no
+  link. `infra/share-revoked.txt` stays as break-glass. Tests:
+  `share-link.test.js`, `share-admin.test.js`, `test_deploy_auth_posture.py`.
 
 ## Open decisions — leave open, do not resolve silently
 
