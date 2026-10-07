@@ -2572,11 +2572,38 @@ function ValueChainView({
         height: 18,
         fontSize: 9,
         padding: 0,
-        border: 0
+        border: 0,
+        cursor: "pointer"
       },
       title: subcapTipText(s),
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Open ${s.id}`,
       onMouseEnter: cellTip.show(subcapTipText(s)),
       onMouseLeave: cellTip.hide
+      // Every cell opens its own drawer, as it does in the
+      // grid. The swatch used to have no handler, so a click
+      // fell through to the stage tile and only toggled it:
+      // most cells on this view could not be opened.
+      ,
+      onClick: e => {
+        e.stopPropagation();
+        cellTip.hide();
+        openSubcap({
+          kind: "subcap",
+          subcap: s
+        });
+      },
+      onKeyDown: e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          openSubcap({
+            kind: "subcap",
+            subcap: s
+          });
+        }
+      }
     }, s.score == null ? null : fx(s.score, 1)))), subs.length > STRIP ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,

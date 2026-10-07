@@ -133,6 +133,77 @@ function navigate(path, params) {
   }
   window.location.hash = buildHash(path, p).slice(1);
 }
+/* ── A release while the page is open ────────────────────────────────
+   The app is one page: moving between tabs never re-downloads its code, so a
+   tab opened before a release keeps running the old bundle (2026-10-07: the
+   client heatmap still greyed out an hour after the fix shipped). The boot
+   names the bundle build it loaded (DMA_LIVE.build, lib/build-id.js); this
+   asks /api/version on focus and every five minutes. When they differ it
+   says so with a Reload button, and the next tab change reloads by itself,
+   keeping the address. Not on a public client link: that service serves no
+   /api, and a recipient opens the link fresh. */
+let _updatePending = false;
+function UpdateWatcher() {
+  const [fresh, setFresh] = useState(false);
+  useEffect(() => {
+    const live = typeof window !== "undefined" && window.DMA_LIVE;
+    if (!live || !live.build || apiBase() !== "/api") return undefined;
+    let stopped = false;
+    const check = () => {
+      if (stopped || _updatePending) return;
+      fetch("/api/version", {
+        cache: "no-store"
+      }).then(r => r.ok ? r.json() : null).then(v => {
+        if (v && v.build && v.build !== live.build) {
+          _updatePending = true;
+          setFresh(true);
+        }
+      }).catch(() => {});
+    };
+    const onHash = () => {
+      if (_updatePending) window.location.reload();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    const timer = setInterval(check, 5 * 60 * 1000);
+    window.addEventListener("hashchange", onHash);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
+  if (!fresh) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    role: "status",
+    "data-update-banner": "",
+    style: {
+      position: "fixed",
+      left: "50%",
+      bottom: 18,
+      transform: "translateX(-50%)",
+      zIndex: 1000,
+      background: "var(--z-dark)",
+      color: "#fff",
+      borderRadius: 10,
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      boxShadow: "0 6px 24px rgba(0,0,0,.18)",
+      fontSize: 12.5,
+      maxWidth: "calc(100vw - 32px)"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "DMA Insights has been updated. Reload to see the latest version."), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary btn-sm",
+    onClick: () => window.location.reload()
+  }, "Reload"));
+}
 function useRoute() {
   const [route, setRoute] = useState(parseHash());
   useEffect(() => {
@@ -2417,6 +2488,7 @@ Object.assign(window, {
   buildHash,
   navigate,
   useRoute,
+  UpdateWatcher,
   isClientLink,
   clientLinkEntity,
   clientTabAllowed,

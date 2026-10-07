@@ -921,7 +921,7 @@ function App() {
     variant: "boot",
     dark: true
   });
-  return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(RootBoundary, null, /*#__PURE__*/React.createElement(Router, null)), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
+  return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(UpdateWatcher, null), /*#__PURE__*/React.createElement(RootBoundary, null, /*#__PURE__*/React.createElement(Router, null)), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
 }
 
 // Production divergence: mount OUTSIDE the host framework's hydration

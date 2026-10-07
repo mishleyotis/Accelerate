@@ -233,6 +233,15 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   reaches its own client's Overview · Insights · Heatmap and nothing else**
   — `clientLinkPath` (utils.jsx) clamps every `navigate()` and every typed
   route, `/login` and `/admin` included, to one of those three.
+  Later that day: **the value chain reaches clients** — its keys are built by
+  the server (catalogue joins: stages, cell ids, counts), so the generated
+  customer allowlist had dropped them all; they are classified in
+  `scripts/gen_customer_allowlist.py SERVER_DERIVED` and pinned by
+  `apps/api/tests/test_customer_allowlist.py`. Every value-chain cell swatch
+  opens its cell. **A release reaches open tabs**: the boot carries the
+  bundle's build fingerprint (`lib/build-id.js`), `UpdateWatcher` compares it
+  with `/api/version` and offers a reload (the next tab change reloads by
+  itself) — the owner saw the old heatmap an hour after the fix shipped.
 
 - **Public client share links** (user, 2026-10-07; supersedes PRD v1's
   "clients receive exports, not logins" for this route only): "Generate client
