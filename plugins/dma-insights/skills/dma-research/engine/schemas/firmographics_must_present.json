@@ -1,0 +1,201 @@
+{
+ "must_present_key": "field",
+ "must_present": [
+  "employees",
+  "CAGR",
+  "HQ",
+  "branches",
+  [
+   "founded_year",
+   "founded",
+   "year_founded"
+  ],
+  "primary_regulator",
+  "charter",
+  "website"
+ ],
+ "must_present_any": [
+  [
+   "AUM",
+   "total_assets",
+   "assets"
+  ],
+  [
+   "revenue",
+   "total_income",
+   "interest_income",
+   "commission_revenue",
+   "trading_revenue",
+   "premium_placed",
+   "DWP",
+   "direct_written_premium",
+   "shares",
+   "deposits",
+   "loan_portfolio",
+   "net_flows",
+   "investment_income"
+  ]
+ ],
+ "held_ceiling": {
+  "max_count": 2,
+  "max_share": 0.25,
+  "why": "Owner decision 2026-10-04 (RC-04/D-04): at most 2 held members or 25% of the must-present set, whichever is smaller. Read by CG-18b over the generic set (pass 1) and over the generic set plus must_present_by_subvertical (pass 2)."
+ },
+ "stated_not_held": [
+  "charter",
+  "primary_regulator",
+  "branches"
+ ],
+ "must_present_by_subvertical": {
+  "RB": [
+   [
+    "total_assets",
+    "assets"
+   ],
+   [
+    "deposits",
+    "total_deposits"
+   ],
+   [
+    "loans",
+    "total_loans",
+    "loans_and_leases",
+    "loan_portfolio"
+   ],
+   [
+    "NIM",
+    "net_interest_margin"
+   ],
+   "efficiency_ratio",
+   [
+    "NPL_ratio",
+    "nonperforming_loans_ratio",
+    "npl"
+   ]
+  ],
+  "CU": [
+   [
+    "total_assets",
+    "assets"
+   ],
+   [
+    "shares",
+    "member_shares",
+    "shares_and_deposits",
+    "deposits"
+   ],
+   [
+    "loans",
+    "total_loans",
+    "loans_and_leases",
+    "loan_portfolio"
+   ],
+   "net_worth_ratio",
+   [
+    "ROA",
+    "return_on_assets"
+   ],
+   [
+    "member_count",
+    "members"
+   ]
+  ],
+  "CL": [
+   [
+    "loan_portfolio",
+    "loans",
+    "total_loans",
+    "loans_and_leases"
+   ],
+   [
+    "CRE_concentration",
+    "cre_concentration_ratio"
+   ],
+   [
+    "c_i_volume",
+    "ci_volume",
+    "c_and_i_volume",
+    "commercial_and_industrial_loans"
+   ],
+   [
+    "NPA_ratio",
+    "nonperforming_assets_ratio"
+   ]
+  ],
+  "CIB": [
+   [
+    "revenue_by_segment",
+    "segment_revenue"
+   ],
+   "trading_revenue",
+   [
+    "IB_fees",
+    "investment_banking_fees"
+   ],
+   [
+    "AUM",
+    "assets_under_management"
+   ]
+  ],
+  "RIA": [
+   [
+    "AUM",
+    "assets_under_management"
+   ],
+   [
+    "client_count",
+    "clients"
+   ],
+   [
+    "revenue",
+    "total_revenue"
+   ],
+   [
+    "advisor_count",
+    "advisors",
+    "financial_advisors"
+   ]
+  ],
+  "AM": [
+   [
+    "AUM_by_strategy",
+    "aum"
+   ],
+   "fund_performance",
+   "net_flows",
+   [
+    "expense_ratios",
+    "expense_ratio"
+   ]
+  ],
+  "IB": [
+   [
+    "premium_placed",
+    "commission_revenue"
+   ],
+   [
+    "producer_count",
+    "producers"
+   ],
+   [
+    "acquisitions",
+    "acquisition_count"
+   ]
+  ],
+  "IC": [
+   [
+    "DWP",
+    "direct_written_premium"
+   ],
+   "combined_ratio",
+   "loss_ratio",
+   "investment_income",
+   [
+    "surplus",
+    "policyholder_surplus"
+   ]
+  ],
+  "FC": []
+ },
+ "_source": "packages/shared/contracts_data.json > overview.firmographics.fields.fields — copied verbatim; tests/skills/research_engine/test_firmographic_must_present_matches_connector.py refuses drift"
+}

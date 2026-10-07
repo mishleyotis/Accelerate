@@ -787,6 +787,37 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
 
 
+def peer_row_is_cohort_sourced(row: dict) -> bool:
+    """True when the row's figure (or its stated absence) came from the
+    connector's cohort — `fill_cohort_peers` wrote it."""
+    basis = _clean(row.get("Peer_Basis"))
+    return "get_cohort_benchmarks" in basis
+
+
+def peer_row_wants_cohort(row: dict, *, has_figure: bool) -> bool:
+    """Whether `fill_cohort_peers` should write this row.
+
+    Owner decision 2026-10-06: the peer figure IS the sub-vertical cohort
+    mean. So a row keeps its figure only when it is a hand-recorded TABLE
+    (a published peer table beats a mean of assessments) or already the
+    cohort's; a blank, a `cannot_estimate`, an `inferred` guess or a
+    `recomputed` figure from anywhere else is replaced. Monotone: a guess is
+    never replaced by a null — when the cohort has NO figure for the
+    category, only a blank or a cannot_estimate row is (re)written. Until
+    2026-10-07 the rule was "keep anything with a number", so Arbor Bank's
+    sixteen `inferred` placeholders shipped as the peer context the gaps were
+    computed against."""
+    basis = _clean(row.get("Peer_Basis")).lower()
+    median = _clean(row.get("Peer_Median"))
+    if peer_row_is_cohort_sourced(row):
+        return False
+    if basis.startswith("table"):
+        return False
+    if not median or basis.startswith("cannot_estimate"):
+        return True
+    return has_figure
+
+
 def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False) -> dict:
     """Record the SUB-VERTICAL COHORT as every category's peer figure.
 
@@ -797,8 +828,8 @@ def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False)
     (identified, not scored); this fills the figure the gaps are computed
     against. A category below the cohort floor is recorded cannot_estimate
     with the connector's reason, so the gap stays null honestly (invariant 9).
-    A figure already on the row (a hand-recorded table) is kept unless
-    `overwrite`."""
+    A hand-recorded table and a cohort-sourced row are kept unless
+    `overwrite`; everything else is written (`peer_row_wants_cohort`)."""
     cats = (cohort or {}).get("categories") or {}
     sv = _clean((cohort or {}).get("sub_vertical")) or _clean(wb.metadata().get("sub_vertical"))
     today = _utcnow()[:10]
@@ -807,11 +838,11 @@ def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False)
         cid = _clean(r.get("Category_ID")).upper()
         if not cid:
             continue
-        if _clean(r.get("Peer_Median")) and not overwrite:
-            kept.append(cid)
-            continue
         c = cats.get(cid) or {}
         n = int(c.get("n") or 0)
+        if not overwrite and not peer_row_wants_cohort(r, has_figure=c.get("mean") is not None):
+            kept.append(cid)
+            continue
         if c.get("mean") is None:
             peer_median(wb, category=cid, median=None, basis="cannot_estimate",
                         source=(f"sub-vertical cohort ({sv}) via get_cohort_benchmarks "

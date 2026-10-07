@@ -393,17 +393,11 @@ BAND_TOP = {"ACTIVATING": 1.75, "BUILDING": 2.75, "COMPETING": 3.75,
 STALE_MONTHS = 24
 
 
-def _own_hosts(wb: RunWorkbook) -> set[str]:
-    """The entity's own web identities: the Firmographics website, bare."""
-    out = set()
-    for r in wb.rows("Firmographics"):
-        if _clean(r.get("Field")).lower() == "website" and _clean(r.get("Value")):
-            out.add(_clean(r.get("Value")).lower().removeprefix("www."))
-    return out
-
-
-def _host(url: str) -> str:
-    return url.split("//")[-1].split("/")[0].lower().removeprefix("www.")
+# One definition of "the entity's own site": the ledger refuses T1 on it at
+# registration and `retier`; the CAP-OWN rule below caps a cell every source
+# of which sits on it.
+_own_hosts = L.own_hosts
+_host = L.host_of
 
 
 def mechanical_caps(wb: RunWorkbook, row: dict, *, idents=None) -> list[tuple]:

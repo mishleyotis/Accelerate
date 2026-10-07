@@ -170,9 +170,28 @@ def firmographic(wb: RunWorkbook, *, field: str, value=None, unit: str = "",
             "must_present_remaining": missing_firmographics(wb)}
 
 
-def missing_firmographics(wb: RunWorkbook) -> list[str]:
-    have = {_clean(r.get("Field")).lower() for r in wb.rows("Firmographics")}
-    return [f for f in C.FIRMOGRAPHIC_MUST_PRESENT if f not in have]
+def missing_firmographics(wb: RunWorkbook, *, subvertical: bool = False) -> list[str]:
+    """Canonical names of the must-present groups no Firmographics row
+    satisfies (a STATED, ABSENT or QUARANTINED row under ANY alias of the
+    group counts — the connector's CG-18 reads it the same way). The generic
+    set gates PRELIM; the sub-vertical set (`subvertical=True`) is what CG-18c
+    holds at submit, reported to the producer rather than gating research."""
+    have = {C.norm_firmographic(r.get("Field")) for r in wb.rows("Firmographics")}
+    sv = _clean(wb.metadata().get("sub_vertical"))
+    out = []
+    for group in C.firmographic_groups(sv if subvertical else None,
+                                       subvertical=subvertical):
+        if not any(C.norm_firmographic(a) in have for a in group):
+            out.append(group[0])
+    return out
+
+
+def missing_subvertical_firmographics(wb: RunWorkbook) -> list[str]:
+    """The sub-vertical set alone — what CG-18c will ask for at submit."""
+    sv = _clean(wb.metadata().get("sub_vertical"))
+    have = {C.norm_firmographic(r.get("Field")) for r in wb.rows("Firmographics")}
+    return [g[0] for g in C.firmographic_groups(sv, generic=False)
+            if not any(C.norm_firmographic(a) in have for a in g)]
 
 
 # ── focus areas (client priorities, verbatim) ────────────────────────────
@@ -375,6 +394,7 @@ def state(wb: RunWorkbook) -> dict:
         "firmographics": {
             "rows": len(wb.rows("Firmographics")),
             "must_present_missing": missing_firmographics(wb),
+            "subvertical_missing": missing_subvertical_firmographics(wb),
             "absent": [r["Field"] for r in wb.rows("Firmographics")
                        if _clean(r.get("State")) != "STATED"],
         },

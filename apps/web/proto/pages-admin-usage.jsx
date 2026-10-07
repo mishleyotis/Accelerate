@@ -56,7 +56,7 @@ const UA_FEATURES_PROTO = [
 const UA_FEATURES_LIVE = [
   ["evidence", "Evidence drawers opened"], ["insight", "Insight cards opened"],
   ["intelligence", "Intelligence panel opens"], ["insight_review", "Insight verdicts recorded"],
-  ["client_link", "Client links copied"],
+  ["client_link", "Client links created"],
 ];
 const uaFeatures = () => UA_LIVE() ? UA_FEATURES_LIVE : UA_FEATURES_PROTO;
 

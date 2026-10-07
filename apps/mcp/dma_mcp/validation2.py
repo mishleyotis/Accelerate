@@ -81,13 +81,7 @@ _FORBIDDEN_BANDS = ("Transformational", "M5")
 
 # Sections whose items are ranked or causal claims (the skill's page
 # packs put an R-Layer CHALLENGE step on each of these).
-_RANKED_SECTIONS = {
-    ("overview", "findings"),
-    ("insights", "insights"),
-    ("heatmap", "focus_areas"),
-    ("heatmap", "cohort_patterns"),
-    ("platform", "recommendations"),
-}
+from .validation import RANKED_SECTIONS as _RANKED_SECTIONS  # noqa: E402  one definition
 
 # AUD-0046: CG-07 compares a numeric score beside a grain id to what the run
 # SERVES, and it read two key names. `platform.recommendations[].dma_impact[]`
@@ -1623,12 +1617,11 @@ def _served_figures(conn, run_id) -> dict:
 
 #: What an r_layer verdict may say. AUD-0045: AG-01 asserted a verdict was
 #: PRESENT and never read it, so a self-REJECTED recommendation passed the
-#: one hard rule the template states.
-_ACCEPTING_VERDICTS = {"SHIP", "SUPPORTED", "HOLDS", "CONFIRMED", "PASS",
-                       "ACCEPT", "ACCEPTED", "SHIP_LOW_CONF"}
-_REJECTING_VERDICTS = {"REJECT", "REJECTED", "DROP", "DROPPED", "REFUTED",
-                       "FAIL", "FAILED", "NOT_SUPPORTED", "UNSUPPORTED",
-                       "WITHDRAWN"}
+#: one hard rule the template states. The vocabularies LIVE in validation.py
+#: since 2026-10-07 so pass 1 — the pure check ship_page.py replays locally —
+#: reads the verdict too; a vocabulary only the server knew sent Arbor Bank's
+#: cohort_patterns to the connector to learn that WITHDRAWN is a rejection.
+from .validation import _ACCEPTING_VERDICTS, _REJECTING_VERDICTS  # noqa: E402,F401
 
 
 def _walk_strings(node, path):
@@ -1746,6 +1739,36 @@ _V4_SKIP_KEYS = frozenset((
     "sources_searched", "plain_label", "justification", "empty_state",
     "note", "rationale",
 ))
+
+
+def _v4_fields(payload: dict) -> list:
+    """(path, text, scope_kind, scope_id) for every prose field SG-V4 reads.
+
+    The skip list applies to a string sitting DIRECTLY on an object as much
+    as to one under a nested key: until 2026-10-07 the direct-field loop
+    handed `obj[k]` to `_iter_prose` as a bare string, which only consults
+    `_V4_SKIP_KEYS` while descending a dict, so every `r_layer` note,
+    `rationale`, `empty_state` sentence and `closure_condition` on an object
+    was embedded and failed grounding (Arbor Bank heatmap: 789 FAILs, most on
+    producer metadata). One collector, one skip rule."""
+    fields = []
+    for name, body in (payload or {}).items():
+        if not isinstance(body, dict):
+            continue
+        for path, obj in _walk(body, name):
+            # an object UNDER a skipped key (r_layer.counter, provenance.x)
+            # is producer metadata all the way down
+            if any(seg in _V4_SKIP_KEYS
+                   for seg in re.sub(r"\[\d+\]", "", path).split(".")[1:]):
+                continue
+            kind, sid = _scope_for(obj)
+            for k, v in obj.items():
+                if k in _V4_SKIP_KEYS:
+                    continue
+                if isinstance(v, str):
+                    for p, text in _iter_prose(v, f"{path}.{k}"):
+                        fields.append((p, text, kind, sid))
+    return fields
 
 
 def _iter_prose(node, path):
@@ -4065,32 +4088,13 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 "yourself you took"))
                             continue
                         # AUD-0045: the gate checked that a verdict EXISTS
-                        # and never what it SAID, so a recommendation whose
-                        # own reasoning layer concluded REJECT shipped as a
-                        # recommendation. The template's one hard rule —
-                        # a self-rejected item is not published — was
-                        # enforced by nothing.
-                        verdict = str(rl.get("verdict") or "").strip().upper()
-                        if verdict in _REJECTING_VERDICTS:
-                            reasons.append(_reason(
-                                "AG-01", name,
-                                f"{name}.{fname}[{i}].r_layer.verdict",
-                                f"this item's own reasoning layer concluded "
-                                f"{verdict} and it is still being published. "
-                                f"A rejected hypothesis is a step in the "
-                                f"work, not a recommendation: drop the item, "
-                                f"or change the verdict because the reasoning "
-                                f"changed — never because the item is "
-                                f"inconvenient to lose."))
-                        elif verdict not in _ACCEPTING_VERDICTS:
-                            reasons.append(_reason(
-                                "AG-01", name,
-                                f"{name}.{fname}[{i}].r_layer.verdict",
-                                f"r_layer.verdict is {rl.get('verdict')!r}, "
-                                f"which is not in the vocabulary "
-                                f"{sorted(_ACCEPTING_VERDICTS | _REJECTING_VERDICTS)}. "
-                                f"A verdict nobody can read is a verdict "
-                                f"nobody can check."))
+                        # and never what it SAID. What the verdict SAYS —
+                        # rl.get("verdict") against _REJECTING_VERDICTS and
+                        # _ACCEPTING_VERDICTS — is judged in pass 1
+                        # (validation.check_r_layer_verdicts), the pure
+                        # check the local precheck replays; only the
+                        # presence rule needs the item-shape knowledge that
+                        # lives here.
 
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
@@ -4640,16 +4644,7 @@ def _run_v4(conn, run_id, page, payload, encoder) -> list:
         return [{"gate_id": "SG-V4", "result": "NOT_RUN", "page": page,
                  "not_run_reason": "No centroids for this run"}]
 
-    fields = []          # (path, text, scope_kind, scope_id)
-    for name, body in payload.items():
-        if not isinstance(body, dict):
-            continue
-        for path, obj in _walk(body, name):
-            kind, sid = _scope_for(obj)
-            for k, v in obj.items():
-                if isinstance(v, str):
-                    for p, text in _iter_prose(v, f"{path}.{k}"):
-                        fields.append((p, text, kind, sid))
+    fields = _v4_fields(payload)
 
     checked = failed = abstained = 0
     for path, text, kind, sid in fields:

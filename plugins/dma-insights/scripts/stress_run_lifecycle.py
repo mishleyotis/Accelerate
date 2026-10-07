@@ -301,9 +301,10 @@ def main(argv=None) -> int:
               ).returncode == 0
     for field, value, unit in (("website", "stress.example", "n/a"),
                                ("employees", "1240", "headcount"),
-                               ("assets_or_aum_or_revenue", "9.1bn", "USD assets"),
+                               ("total_assets", "9.1bn", "USD assets"),
+                               ("shares", "8.0bn", "USD member shares"),
                                ("branches", "38", "count"),
-                               ("headquarters", "Reno, NV", "n/a"),
+                               ("HQ", "Reno, NV", "n/a"),
                                ("founded", "1951", "year"),
                                ("primary_regulator", "NCUA", "n/a"),
                                ("charter", "state-chartered credit union", "n/a"),

@@ -43,6 +43,11 @@ function buildHash(path, params) {
    contain; this only decides the frame. */
 const CLIENT_LINK = (() => {
   try {
+    // On the public share service the boot names the link's client, and that
+    // wins over anything in the URL: a link opened with its fragment stripped
+    // or edited is still that client's dashboard and nothing else.
+    const sh = typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.share;
+    if (sh && sh.entity) return { entityId: sh.entity, shared: true };
     const { path, params } = parseHash();
     if (params.view !== "client") return null;
     const m = path.match(/^\/clients\/([^/]+)/);
@@ -50,6 +55,12 @@ const CLIENT_LINK = (() => {
   } catch (e) { return null; }
 })();
 function isClientLink() { return !!CLIENT_LINK; }
+/* Where the page reads from. The app's own BFF (/api) everywhere except a
+   public client link, whose reads go through that link's scoped route
+   (/s/<token>/api) — the only reads the share service answers. */
+function apiBase() {
+  return (typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.api_base) || "/api";
+}
 function clientLinkEntity() { return CLIENT_LINK ? CLIENT_LINK.entityId : null; }
 
 /* The tabs a client dashboard carries, in either client frame (the Client
@@ -993,7 +1004,7 @@ function useLivePage(displayId, page, audience, runId) {
     setState({ status: "loading" });
     const qs = new URLSearchParams({ audience: audience || "internal" });
     if (runId) qs.set("run", runId);
-    fetch(`/api/entity/${encodeURIComponent(displayId)}/${page}?${qs}`)
+    fetch(`${apiBase()}/entity/${encodeURIComponent(displayId)}/${page}?${qs}`)
       .then(r => r.json().then(body => ({ ok: r.ok, status: r.status, body })))
       .then(({ ok, body }) => {
         if (cancelled) return;
@@ -1063,9 +1074,9 @@ function useLiveEntity(displayId, audience, runId, actingRole) {
     const pages = ["overview", "heatmap", "insights", "platform", "context",
                    "techstack"];
     Promise.all([
-      ...pages.map(p => get(`/api/entity/${id}/${p}?${qs()}`)),
-      get(`/api/entity/${id}/evidence?${qs()}`),
-      get(`/api/entity/${id}/subcaps?${qs()}`),
+      ...pages.map(p => get(`${apiBase()}/entity/${id}/${p}?${qs()}`)),
+      get(`${apiBase()}/entity/${id}/evidence?${qs()}`),
+      get(`${apiBase()}/entity/${id}/subcaps?${qs()}`),
     ]).then((results) => {
       if (cancelled) return;
       const byPage = {};
@@ -1115,7 +1126,7 @@ function useLiveEntity(displayId, audience, runId, actingRole) {
       // render rather than before it — it cannot add a millisecond to the
       // page, and when the connector starts writing them they simply become
       // the preferred answer on the next open.
-      get(`/api/entity/${id}/answers?${qs()}`).then((r) => {
+      get(`${apiBase()}/entity/${id}/answers?${qs()}`).then((r) => {
         if (cancelled || !r.ok || window.DMA_ENTITY !== built) return;
         const rows = window.adaptAnswers(r.body);
         if (rows.length) built.answers = rows;
@@ -1620,7 +1631,7 @@ Object.assign(window, {
   clientProse,
   LoadingScreen, SectionLoader, ConnectionWatcher,
   parseHash, buildHash, navigate, useRoute,
-  isClientLink, clientLinkEntity, clientTabAllowed, clientLinkUrl, CLIENT_TABS,
+  isClientLink, clientLinkEntity, clientTabAllowed, clientLinkUrl, CLIENT_TABS, apiBase,
   fmtDate, fmtDateLong, fmtDatesInText, toDate,
   fmtMoney, fmtAssets, moneyMultiplier, isMoneyUnit, scaleMoneySeries,
   // Exported so the suite can assert them directly and so the adapter's

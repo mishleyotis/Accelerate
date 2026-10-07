@@ -789,9 +789,24 @@ class Pipeline:
         return kw
 
     def budget_usd(self) -> float | None:
-        """The run's dollar ceiling. `None` disables it."""
+        """The run's dollar ceiling. `None` disables it.
+
+        An owner-approved ceiling OUTLIVES the invocation that set it. Until
+        2026-10-07 a resume without `--max-usd` fell back to the per-pillar
+        default ($20 on a four-pillar run), so the state file — and the hooks
+        that read `budget_usd` from it — reported a $409 run as AT_BUDGET_
+        CEILING against a ceiling nobody approved (Arbor Bank). The ceiling
+        the owner set is recorded with its source and reused until a flag
+        replaces it; the per-pillar default is only ever a first estimate."""
         if self.opts.max_usd is not None:
             return None if self.opts.max_usd <= 0 else float(self.opts.max_usd)
+        rec = (self.state or {}).get("budget_usd_source")
+        if rec == "flag":
+            cap = (self.state or {}).get("budget_usd")
+            try:
+                return float(cap) if cap is not None else None
+            except (TypeError, ValueError):
+                pass
         try:
             from . import cost
             pillars = {c[:2] for c in self.wb.selected_subcaps()}
@@ -1056,11 +1071,26 @@ class Pipeline:
             return False
         shipped = (p.get("shipped_mtime") or {}).get(version)
         if shipped is None:
-            return True
+            # No ship time recorded for this version — a pass recorded by an
+            # older driver or by a hand ship. The verdict file the ship wrote
+            # is the next-best record of WHEN the connector saw the files;
+            # with neither, the pass cannot be tied to the files on disk and
+            # the page ships again (byte-identical content returns pass at
+            # the cost of one submit). Measured 2026-10-07 (Arbor Bank): the
+            # heatmap was repaired on disk after a pass with no recorded
+            # ship time, `_page_ok` said True, and PROMOTE promoted the
+            # staged copy the repair had replaced.
+            try:
+                vf = self.run.qa_dir / f"verdict_{page}_{version}.json"
+                shipped = vf.stat().st_mtime if vf.exists() else None
+            except Exception:                              # noqa: BLE001
+                shipped = None
+            if shipped is None:
+                return False
         try:
             return self._page_mtime(page) <= float(shipped) + 1e-6
         except Exception:                                  # noqa: BLE001
-            return True
+            return False
 
     def _pages_passed(self, pages, version) -> bool:
         return all(self._page_ok(p, version) for p in pages)
@@ -1218,6 +1248,10 @@ class Pipeline:
             self.state["spent_usd"] = round(self._spent_usd, 4)
             cap = self.budget_usd()
             self.state["budget_usd"] = (round(cap, 2) if cap else None)
+            if self.opts.max_usd is not None:
+                self.state["budget_usd_source"] = "flag"
+            elif self.state.get("budget_usd_source") != "flag":
+                self.state["budget_usd_source"] = "default"
             self._save_state()
         except Exception as e:                       # noqa: BLE001
             self.opts.log(f"  (outcome not recorded: {str(e)[:120]})")
@@ -2415,7 +2449,11 @@ class Pipeline:
         rather than the stage stopping on a comparison it can disclose."""
         from . import prelim
         rows = self.wb.rows("Peer_Benchmarks")
-        if not rows or all(str(r.get("Peer_Median") or "").strip() for r in rows):
+        # Runs whenever a row is not yet the cohort's (blank, a placeholder,
+        # a non-cohort figure) — a blank-only trigger left sixteen `inferred`
+        # placeholders standing on Arbor Bank (2026-10-07).
+        if not rows or not any(prelim.peer_row_wants_cohort(r, has_figure=True)
+                               for r in rows):
             return
         reads = getattr(self.opts.reads, "cohort_benchmarks", None)
         if reads is None:

@@ -30,7 +30,7 @@ export const FEATURES = new Set([
   "evidence",        // an evidence drawer opened
   "insight",         // an insight-card modal opened
   "intelligence",    // the Intelligence panel opened
-  "client_link",     // a client link copied
+  "client_link",     // a client share link created
 ]);
 
 // The longest single dwell a beacon may claim: a tab left visible over lunch

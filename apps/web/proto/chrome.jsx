@@ -322,12 +322,101 @@ function SettingsPopover({ onClose }) {
   );
 }
 
+/* ── Share with client ─────────────────────────────────────────────
+   Owner's rule (2026-10-07): a client link is shared TO named people, and
+   those addresses plus their organisations' domains are the link's
+   allowlist for this one DMA. The server mints (POST /api/share) and signs
+   the allowlist into the link; nothing here decides who is admitted. The
+   link travels from the sharer's own mailbox (a prefilled draft), so no
+   mail service and no third-party key exists anywhere in the app. */
+function ShareDialog({ entity, run, onClose }) {
+  const { pushToast } = useApp();
+  const [recipients, setRecipients] = useState("");
+  const [days, setDays] = useState(30);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [made, setMade] = useState(null);
+
+  const submit = () => {
+    setBusy(true); setError(null);
+    fetch("/api/share", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ entity: entity.id, run: run && (run.run_id || run.id),
+                             recipients, days }) })
+      .then(r => r.json().then(b => ({ ok: r.ok, b })))
+      .then(({ ok, b }) => {
+        setBusy(false);
+        if (ok) { if (window.trackUsage) window.trackUsage("client_link"); setMade(b); }
+        else setError(b.detail || b.error || "The link could not be created.");
+      })
+      .catch(() => { setBusy(false); setError("The link could not be created."); });
+  };
+  const copy = () => {
+    const done = () => pushToast("Client link copied", "success");
+    try { navigator.clipboard.writeText(made.url).then(done, () => window.prompt("Copy the client link", made.url)); }
+    catch (e) { window.prompt("Copy the client link", made.url); }
+  };
+  const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}`
+    + `?subject=${encodeURIComponent(`${entityName(entity)} · Digital Maturity Assessment`)}`
+    + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email. The link works until ${fmtDate(made.expires_at)}.`)}` : null;
+
+  return (
+    <div className="modal-mask" onClick={onClose}>
+      <div className="modal" role="dialog" aria-label="Share with client" onClick={e => e.stopPropagation()} style={{ width: 560 }}>
+        <div className="modal-head">
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--z-dark)" }}>Share with client</div>
+            <div style={{ fontSize: 12, color: "var(--z-muted)", marginTop: 2 }}>{entityName(entity)} · client dashboard only (Overview, Insights, Heatmap)</div>
+          </div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={18} /></button>
+        </div>
+        <div className="modal-body">
+          {!made ? (<>
+            <label style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Recipient email(s)</label>
+            <textarea className="inp" rows={2} style={{ width: "100%", marginTop: 6, resize: "vertical" }}
+              placeholder="jane@bcu.com, sam@bcu.com" value={recipients} onChange={e => setRecipients(e.target.value)} />
+            <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.5 }}>
+              Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only.
+            </div>
+            <div className="row" style={{ gap: 8, marginTop: 14, alignItems: "center" }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Link expires after</label>
+              <select className="inp" style={{ maxWidth: 140 }} value={days} onChange={e => setDays(Number(e.target.value))}>
+                {[7, 14, 30, 60, 90].map(d => <option key={d} value={d}>{d} days</option>)}
+              </select>
+            </div>
+            {error ? <div role="alert" style={{ marginTop: 12, fontSize: 12.5, color: "var(--z-below)" }}>{error}</div> : null}
+          </>) : (<>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", marginBottom: 6 }}>Who can open it</div>
+            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+              {made.allowlist.emails.map(e => <span key={e} className="chip">{e}</span>)}
+              {made.allowlist.domains.map(d => <span key={d} className="b b-teal">anyone @{d}</span>)}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--z-muted)", marginTop: 10 }}>Expires {fmtDate(made.expires_at)} · link {made.jti}</div>
+            <input className="inp" readOnly value={made.url} onFocus={e => e.target.select()} style={{ width: "100%", marginTop: 12, fontSize: 11.5 }} />
+          </>)}
+        </div>
+        <div className="modal-foot">
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{made ? "Send it from your own mailbox." : ""}</span>
+          <div className="row" style={{ gap: 8 }}>
+            {!made ? (
+              <button className="btn btn-primary" disabled={busy || !recipients.trim()} onClick={submit}>{busy ? "Creating…" : "Create link"}</button>
+            ) : (<>
+              <button className="btn btn-tertiary" onClick={copy}><Icon name="copy" size={12} /> Copy link</button>
+              <a className="btn btn-primary" href={mailto}><Icon name="envelope" size={12} /> Email link</a>
+            </>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Client bar (dark client-context strip + tabs) ──────────────── */
 function ClientBar({ entity, run, tab }) {
   const { audience, setAudience, role, pushToast } = useApp();
   const link = isClientLink();
   const isClient = audience === "customer";
   const [runOpen, setRunOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const fresh = entity.assessment_date ? DMA.helpers.freshnessOf(entity.assessment_date) : null;
   const isSuperseded = run && run.status !== "ACTIVE" && !run.status.includes("IN_PROGRESS");
   const dsPill = run?.data_source === "DRIVE_PARSE" ? "pill-drive" : "pill-api";
@@ -428,20 +517,12 @@ function ClientBar({ entity, run, tab }) {
           <Icon name="users" size={14} />
           <span><strong>Client Dashboard</strong></span>
           <span className="spacer" />
-          {/* The link opens this dashboard on its own — client audience, client
-              tabs, no Zennify navigation — pinned to the run on screen. */}
+          {/* A public link for named recipients, opened without a Zennify
+              login: this client, this run, the client dashboard only. */}
           <button className="btn btn-tertiary btn-sm"
                   style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
-                  onClick={() => {
-                    const url = clientLinkUrl(entity.id, tab, run && run.id);
-                    if (window.trackUsage) window.trackUsage("client_link");
-                    const done = () => pushToast("Client link copied", "success");
-                    try {
-                      navigator.clipboard.writeText(url).then(done,
-                        () => window.prompt("Copy the client link", url));
-                    } catch (e) { window.prompt("Copy the client link", url); }
-                  }}>
-            <Icon name="share" size={12} /> Copy client link
+                  onClick={() => setShareOpen(true)}>
+            <Icon name="share" size={12} /> Share with client
           </button>
           {/* nowrap + no shrink: at 1024px the flex row squeezed this button to
               133px against a 150px label and the theme clips rather than
@@ -451,6 +532,8 @@ function ClientBar({ entity, run, tab }) {
                   onClick={() => setAudience("internal")}>Switch back to Zennify view →</button>
         </div>
       ) : null}
+
+      {shareOpen ? <ShareDialog entity={entity} run={run} onClose={() => setShareOpen(false)} /> : null}
 
       {isSuperseded ? (
         <div className="superseded-banner">
@@ -509,4 +592,4 @@ function ClientShell({ entity, run, tab, children }) {
   );
 }
 
-Object.assign(window, { Sidebar, TopBar, ClientBar, PageShell, ClientShell });
+Object.assign(window, { Sidebar, TopBar, ClientBar, ShareDialog, PageShell, ClientShell });

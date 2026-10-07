@@ -158,7 +158,7 @@ const UA_ROLE_LABEL = {
 // export do not exist as actions in production; insight_review (an Accept or
 // Reject on an insight card, logged by the server on success) does.
 const UA_FEATURES_PROTO = [["intelligence", "Intelligence panel opens"], ["evidence", "Evidence drawers opened"], ["meeting_prep", "Meeting prep generated"], ["ae_note", "AE notes added"], ["export", "Exports"]];
-const UA_FEATURES_LIVE = [["evidence", "Evidence drawers opened"], ["insight", "Insight cards opened"], ["intelligence", "Intelligence panel opens"], ["insight_review", "Insight verdicts recorded"], ["client_link", "Client links copied"]];
+const UA_FEATURES_LIVE = [["evidence", "Evidence drawers opened"], ["insight", "Insight cards opened"], ["intelligence", "Intelligence panel opens"], ["insight_review", "Insight verdicts recorded"], ["client_link", "Client links created"]];
 const uaFeatures = () => UA_LIVE() ? UA_FEATURES_LIVE : UA_FEATURES_PROTO;
 
 /* ── preview-only mock (the prototype's seeded generator) ─────────── */

@@ -767,6 +767,224 @@ function SettingsPopover({
   })))));
 }
 
+/* ── Share with client ─────────────────────────────────────────────
+   Owner's rule (2026-10-07): a client link is shared TO named people, and
+   those addresses plus their organisations' domains are the link's
+   allowlist for this one DMA. The server mints (POST /api/share) and signs
+   the allowlist into the link; nothing here decides who is admitted. The
+   link travels from the sharer's own mailbox (a prefilled draft), so no
+   mail service and no third-party key exists anywhere in the app. */
+function ShareDialog({
+  entity,
+  run,
+  onClose
+}) {
+  const {
+    pushToast
+  } = useApp();
+  const [recipients, setRecipients] = useState("");
+  const [days, setDays] = useState(30);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [made, setMade] = useState(null);
+  const submit = () => {
+    setBusy(true);
+    setError(null);
+    fetch("/api/share", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        entity: entity.id,
+        run: run && (run.run_id || run.id),
+        recipients,
+        days
+      })
+    }).then(r => r.json().then(b => ({
+      ok: r.ok,
+      b
+    }))).then(({
+      ok,
+      b
+    }) => {
+      setBusy(false);
+      if (ok) {
+        if (window.trackUsage) window.trackUsage("client_link");
+        setMade(b);
+      } else setError(b.detail || b.error || "The link could not be created.");
+    }).catch(() => {
+      setBusy(false);
+      setError("The link could not be created.");
+    });
+  };
+  const copy = () => {
+    const done = () => pushToast("Client link copied", "success");
+    try {
+      navigator.clipboard.writeText(made.url).then(done, () => window.prompt("Copy the client link", made.url));
+    } catch (e) {
+      window.prompt("Copy the client link", made.url);
+    }
+  };
+  const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}` + `?subject=${encodeURIComponent(`${entityName(entity)} · Digital Maturity Assessment`)}` + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email. The link works until ${fmtDate(made.expires_at)}.`)}` : null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "modal-mask",
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    role: "dialog",
+    "aria-label": "Share with client",
+    onClick: e => e.stopPropagation(),
+    style: {
+      width: 560
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, "Share with client"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)",
+      marginTop: 2
+    }
+  }, entityName(entity), " \xB7 client dashboard only (Overview, Insights, Heatmap)")), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onClose,
+    "aria-label": "Close"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "x",
+    size: 18
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "modal-body"
+  }, !made ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, "Recipient email(s)"), /*#__PURE__*/React.createElement("textarea", {
+    className: "inp",
+    rows: 2,
+    style: {
+      width: "100%",
+      marginTop: 6,
+      resize: "vertical"
+    },
+    placeholder: "jane@bcu.com, sam@bcu.com",
+    value: recipients,
+    onChange: e => setRecipients(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      marginTop: 6,
+      lineHeight: 1.5
+    }
+  }, "Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only."), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      marginTop: 14,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, "Link expires after"), /*#__PURE__*/React.createElement("select", {
+    className: "inp",
+    style: {
+      maxWidth: 140
+    },
+    value: days,
+    onChange: e => setDays(Number(e.target.value))
+  }, [7, 14, 30, 60, 90].map(d => /*#__PURE__*/React.createElement("option", {
+    key: d,
+    value: d
+  }, d, " days")))), error ? /*#__PURE__*/React.createElement("div", {
+    role: "alert",
+    style: {
+      marginTop: 12,
+      fontSize: 12.5,
+      color: "var(--z-below)"
+    }
+  }, error) : null) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      marginBottom: 6
+    }
+  }, "Who can open it"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      flexWrap: "wrap"
+    }
+  }, made.allowlist.emails.map(e => /*#__PURE__*/React.createElement("span", {
+    key: e,
+    className: "chip"
+  }, e)), made.allowlist.domains.map(d => /*#__PURE__*/React.createElement("span", {
+    key: d,
+    className: "b b-teal"
+  }, "anyone @", d))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)",
+      marginTop: 10
+    }
+  }, "Expires ", fmtDate(made.expires_at), " \xB7 link ", made.jti), /*#__PURE__*/React.createElement("input", {
+    className: "inp",
+    readOnly: true,
+    value: made.url,
+    onFocus: e => e.target.select(),
+    style: {
+      width: "100%",
+      marginTop: 12,
+      fontSize: 11.5
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "modal-foot"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, made ? "Send it from your own mailbox." : ""), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, !made ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    disabled: busy || !recipients.trim(),
+    onClick: submit
+  }, busy ? "Creating…" : "Create link") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary",
+    onClick: copy
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "copy",
+    size: 12
+  }), " Copy link"), /*#__PURE__*/React.createElement("a", {
+    className: "btn btn-primary",
+    href: mailto
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "envelope",
+    size: 12
+  }), " Email link"))))));
+}
+
 /* ── Client bar (dark client-context strip + tabs) ──────────────── */
 function ClientBar({
   entity,
@@ -782,6 +1000,7 @@ function ClientBar({
   const link = isClientLink();
   const isClient = audience === "customer";
   const [runOpen, setRunOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const fresh = entity.assessment_date ? DMA.helpers.freshnessOf(entity.assessment_date) : null;
   const isSuperseded = run && run.status !== "ACTIVE" && !run.status.includes("IN_PROGRESS");
   const dsPill = run?.data_source === "DRIVE_PARSE" ? "pill-drive" : "pill-api";
@@ -936,20 +1155,11 @@ function ClientBar({
       whiteSpace: "nowrap",
       flexShrink: 0
     },
-    onClick: () => {
-      const url = clientLinkUrl(entity.id, tab, run && run.id);
-      if (window.trackUsage) window.trackUsage("client_link");
-      const done = () => pushToast("Client link copied", "success");
-      try {
-        navigator.clipboard.writeText(url).then(done, () => window.prompt("Copy the client link", url));
-      } catch (e) {
-        window.prompt("Copy the client link", url);
-      }
-    }
+    onClick: () => setShareOpen(true)
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "share",
     size: 12
-  }), " Copy client link"), /*#__PURE__*/React.createElement("button", {
+  }), " Share with client"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     style: {
       color: "#7C3500",
@@ -957,7 +1167,11 @@ function ClientBar({
       flexShrink: 0
     },
     onClick: () => setAudience("internal")
-  }, "Switch back to Zennify view \u2192")) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {
+  }, "Switch back to Zennify view \u2192")) : null, shareOpen ? /*#__PURE__*/React.createElement(ShareDialog, {
+    entity: entity,
+    run: run,
+    onClose: () => setShareOpen(false)
+  }) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {
     className: "superseded-banner"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "info",
@@ -1039,6 +1253,7 @@ Object.assign(window, {
   Sidebar,
   TopBar,
   ClientBar,
+  ShareDialog,
   PageShell,
   ClientShell
 });

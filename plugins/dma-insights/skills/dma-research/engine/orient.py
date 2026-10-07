@@ -118,10 +118,12 @@ def orient(wb: RunWorkbook, category: str | None, *,
     # 1. The wall comes first, and it is an instruction, not a number.
     if budget["checkpoint_required"]:
         do_first.append(
-            f"STOP: {budget['search_ops']} search-ops this run against a "
-            f"ceiling of {budget['search_op_ceiling']}. Checkpoint the run "
-            f"(runstate.checkpoint) and end the turn. Do not take the next "
-            f"card.")
+            f"STOP: {budget['search_ops_since_checkpoint']} search-ops in the "
+            f"{budget.get('window_scope') or 'run'} window since its last "
+            f"checkpoint, against a ceiling of {budget['search_op_ceiling']} "
+            f"(lifetime {budget['search_ops']}). Checkpoint that conversation "
+            f"(runstate.checkpoint, scope={budget.get('window_scope')!r}) and "
+            f"end the turn. Do not take the next card.")
 
     # 2. A recorded FAIL is work, and it is named.
     for c, g in gates.items():

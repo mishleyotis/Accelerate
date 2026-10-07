@@ -1,4 +1,6 @@
+import { notFound } from "next/navigation";
 import { BANDS, bandFor } from "../../lib/bands";
+import { shareMode } from "../../lib/share";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,8 @@ const DASHBOARDS = [
 const PAGE_ORDER = ["heatmap", "overview", "insights", "platform", "context", "techstack"];
 
 export default async function Home() {
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) notFound();
   const meta = await fetchMeta();
   const pages = meta?.serving?.pages ?? {};
   const promoted = meta?.serving?.promoted_runs ?? 0;

@@ -249,7 +249,13 @@ tool call is the cost this removes.
    `--enrichment-heals 1`. Name one only to change it. `STOPPED_BUDGET` exits
    1, the spend is remembered on disk, and a re-run REFUSES before dispatch —
    a second process does not get a second budget. Raising `--max-usd` is how
-   a run continues past it, and that raise is a person's decision, not yours.
+   a run continues past it, and that raise is a person's decision, not yours;
+   once raised it is REMEMBERED (`budget_usd_source: flag` in the run state), so
+   a resume without the flag keeps the owner's ceiling rather than falling back
+   to the per-pillar estimate. `--sg-v4-budget N` (default 8) is likewise the
+   owner's: it is the number of PROSE SG-V4 grounding FAILs a page may ship with
+   (verbatim excerpts, quotes and source names never count); a raise is recorded
+   as a non-blocking `SG_V4_BUDGET_RAISED` Gate_Log row and in `waivers`.
    Two watchdog states end on a person and never on an agent:
    `BLOCKED_NO_CONNECTOR` and `AT_USD_CEILING`.
 

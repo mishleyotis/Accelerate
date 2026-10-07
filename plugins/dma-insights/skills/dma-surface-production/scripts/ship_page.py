@@ -559,7 +559,10 @@ def main(argv=None) -> int:
                                   else "local_precheck_not_run",
                                   "stage": pre["stage"],
                                   "n_reasons": len(pre["reasons"]),
-                                  "reasons": pre["reasons"][:40] or [why],
+                                  # the FULL list: the driver and a repairing
+                                  # producer read this file, and a reason past
+                                  # the fortieth is still a reason the page fails
+                                  "reasons": pre["reasons"] or [why],
                                   "sg_v4_fails": []}
                 _write_verdicts()
                 failed.append(page)
@@ -568,7 +571,7 @@ def main(argv=None) -> int:
                   + (f"; unverified locally: {pre['unverified'][:6]}" if pre.get("unverified") else ""))
         res = submit(a.run_id, page, payload, a.producer)
         status, reasons = verdict_line(res)
-        verdicts[page] = {"status": status, "reasons": reasons[:40],
+        verdicts[page] = {"status": status, "reasons": reasons,
                           "n_reasons": len(reasons),
                           "sg_v4_fails": sg_v4_grounding_fails(res)}
         _write_verdicts()

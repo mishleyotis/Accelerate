@@ -135,6 +135,23 @@ def _value(source, ctx, section, item):
     raise ValueError(f"unknown source {source!r}")
 
 
+def _package_aliases(cur, entity_id) -> dict:
+    """package_local_id -> stored e_id for this entity (evidence_package_ids,
+    0036). Empty when the entity has no mappings or the table cannot be
+    read — an unmapped id is then written as given and the FK still judges
+    it, so the fallback never widens what promotes."""
+    if not entity_id:
+        return {}
+    try:
+        cur.execute("SELECT package_local_id, e_id FROM evidence_package_ids "
+                    "WHERE entity_id = %s", (entity_id,))
+        rows = cur.fetchall() or []
+    except Exception:                              # noqa: BLE001
+        return {}
+    return {str(a): str(b) for a, b in rows
+            if isinstance(a, str) and isinstance(b, str) and a != b}
+
+
 def _expand_h4_maps(section_payload: dict) -> list:
     """heatmap.workbook_scores: the contract's two required fields are
     OBJECT MAPS (pillars {P1..: {...}}, categories {PxCy: {...}}), not a
@@ -597,6 +614,8 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
             exprs.append("%s")
             per_row_sources.append(c)
     date_leaves = _date_paths().get((writer["page"], writer["section"]), set())
+    aliases = (_package_aliases(cur, ctx.get("entity_id"))
+               if any(c["column"] == "e_id" for c in per_row_sources) else {})
     written = 0
     for item in rows:
         values = []
@@ -604,6 +623,13 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
             v = _value(c["source"], ctx, section_payload, item)
             if v is ...:
                 v = None
+            if c["column"] == "e_id" and isinstance(v, str) and v in aliases:
+                # The producer cites the package-LOCAL id (E-001); the FK
+                # names the stored one (E-ARBORBAN-001). Resolved here, in
+                # the one place the column is bound, rather than by each
+                # producer remapping its rows: Arbor Bank's evidence_age
+                # promote failed on this FK with 232 rows to remap by hand.
+                v = aliases[v]
             # An envelope-only row is a carrier for the section's declared
             # absence, not a queue entry: it takes no lifecycle state, so it
             # cannot be counted as an open alert on a run that raised none.

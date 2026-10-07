@@ -51,6 +51,10 @@ python3 -m engine.pipeline run    --run $RUN --root $ROOT --max-wall-min 240 --l
 python3 -m engine.pipeline status --run $RUN --root $ROOT --watch
 ```
 
+Owner-set ceilings persist: `--max-usd` once given is reused by every later `run`
+without the flag (`budget_usd_source: flag`); `--sg-v4-budget N` counts prose
+grounding FAILs only and records its raise in the Gate_Log.
+
 **`run --step` is the conductor's mode, and it is the same run.** One
 research round, then `ROUND_COMPLETE` at exit 0, resumable, carrying
 `pending`: the relay batch files, the open categories, the stalled ones, the

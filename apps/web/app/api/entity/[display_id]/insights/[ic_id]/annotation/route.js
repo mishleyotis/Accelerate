@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../../../../lib/session";
 import { effectiveRole } from "../../../../../../../lib/identity";
 import { logUsage } from "../../../../../../../lib/usage";
+import { shareMode } from "../../../../../../../lib/share";
 
 // The write half of the entity proxy: an insight-card verdict. The SESSION's
 // email is the actor — forwarded by this route, never accepted from the
@@ -11,6 +12,8 @@ import { logUsage } from "../../../../../../../lib/usage";
 // fail-closed to a card on a promoted run; this route adds nothing to that
 // judgement, it only carries identity.
 export async function POST(req, { params }) {
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) return new Response("Not found", { status: 404 });
   const session = verify(cookies().get(COOKIE)?.value);
   if (!session) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });

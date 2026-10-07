@@ -18,6 +18,7 @@ contract's enforcement.
 | `get_page_contract` | The payload contract for one page: field tuples plus per-field `doc` text, and the `transport` envelope (byte limits, chunking steps). |
 | `get_evidence` | Resolve e_ids to full rows. Returns `found / not_found / foreign` separately; `foreign` halts production. |
 | `get_platform_fit` | The fit score for each candidate platform, computed server-side and read by you — never recomputed, never re-ranked. |
+| `get_cohort_benchmarks` | The sub-vertical cohort's peer figure — per category by default, per CELL with `subcap_ids=[…]` (up to 500). The figure a finding, an opportunity cell or a gap row cites as its peer; null with the reason below three entities; the asking client excluded by `exclude_display_id`. |
 | `get_run_progress` | Per-page status, what is blocking promotion, and the current claim — where a resuming session sees where it left off. |
 | `get_staged_payload` | What you last submitted for a page — staged, verbatim, unredacted. The read half of submit; makes the one-section repair possible across sessions. |
 
