@@ -42,7 +42,7 @@ material; the HTML docs above supersede them where they differ.
 ## Invariants — violating any of these is a bug, whatever the tests say
 
 1. **No model calls at request time.** Only embedding-model use is inside the MCP connector at submit (V4 grounding), local + deterministic. Serving path never touches it.
-2. **Content enters only through the connector.** API writes = annotations + alert actions only, both behind `Idempotency-Key`. No endpoint writes serving content.
+2. **Content enters only through the connector.** API writes = annotations + alert actions only, both behind `Idempotency-Key` (plus user grants — see the 2026-10-07 adjudication below). No endpoint writes serving content.
 3. **Promotion is atomic across all six pages** — one transaction, `SELECT … FOR UPDATE` on the run row, ordered writers, all-or-nothing. Promoted staging rows are **retained** (fix one page, re-promote, without re-synthesising five).
 4. **Fail-closed evidence.** Every cited id must resolve, belong to this entity and run, carry a verbatim excerpt (50–500 chars). `get_evidence` returns `found / not_found / foreign`; **`foreign` halts production**.
 5. **Audience redaction is server-side and default-deny.** `internal_only` paths stripped for customer audience; `entity_ids` in cohort patterns stripped for **every** audience. The walker + tests + contract must make marking unavoidable.
@@ -259,6 +259,21 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `share_otp_*`, `share_access_*`).
   Reads go to svc_api as `audience=customer`, `role=AE`, the link's run,
   pages `overview·insights·heatmap·evidence·subcaps` only.
+
+- **User role allocation** (user, 2026-10-07, after "you even removed user
+  role allocation from the admin page"): grants live in the Backend Schema's
+  `users` table, managed from Admin › Users & roles. This is a **third API
+  write** beside annotations and alert actions — workflow state about who may
+  read, never content: `POST /v1/admin/users` (invite · role · deactivate ·
+  reactivate), ADMIN-only from the verified IAP assertion, `Idempotency-Key`
+  required, every applied change one `session_log` row (`role_at_event` = the
+  role after) plus the actor's `idempotency_keys` row. `GET /v1/me` resolves
+  the role on sign-in and on every document load (a change lands on the next
+  page load; a deactivated account is turned away). `ADMIN_EMAILS` stays as
+  an owner floor (always an active Admin, cannot be demoted here) and an
+  admin cannot demote or deactivate themself; the deploy-time lists are the
+  fallback only when svc_api is unreachable. The POST-route census in
+  `apps/api/tests/test_alerts.py` names all three.
 
 ## Open decisions — leave open, do not resolve silently
 

@@ -59,11 +59,11 @@ test("admin home carries no non-functional surface", () => {
   assert.ok(t.includes("Delta scan"), "the delta scan fires the real Job — it stays");
   assert.ok(t.includes("No scans recorded yet"), "the scan line reads the real (empty) ledger");
   assert.ok(t.includes("Users & roles"));
-  // Grants are deploy-time allowlists: a role picker or a Deactivate button
-  // here changed nothing, so production renders the grant read-only.
-  const html = H.render(win.AdminPage, {}, ctx);
-  assert.ok(!/<select[^>]*aria-label="Role for/.test(html), "role picker rendered in production");
-  assert.ok(!t.includes("Deactivate") && !t.includes("Invite user"), "user actions rendered in production");
+  // Grants live in the users table (owner adjudication 2026-10-07): the card
+  // loads the real roster and carries the prototype's invite control; it
+  // never renders the preview's mock people.
+  assert.ok(t.includes("Loading users") && t.includes("Invite user"), "live roster controls missing");
+  for (const mock of ["Sara Lin", "Tom Reyes", "Dev Patel"]) assert.ok(!t.includes(mock), `mock user "${mock}" in production`);
 });
 
 test("the last-scan line states what the ledger row says", () => {

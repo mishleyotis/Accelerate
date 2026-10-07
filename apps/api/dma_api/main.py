@@ -6,9 +6,9 @@ stage 2 onward; stage 4 replaces the internals with the full read API
 (SQLAlchemy asyncpg, cursor pagination, ETag/304, Brotli) per TRD §19.
 It performs no inference and serves only promoted or catalogue rows —
 never staging, never ingested client material. Its only writes are the
-charter's two exceptions (alert actions here; annotations when they
-land), both into workflow tables behind Idempotency-Key — no endpoint
-writes serving content (invariant 2).
+charter's two exceptions (alert actions, annotations) plus user grants
+(owner adjudication 2026-10-07, dma_api.users), all into workflow tables
+behind Idempotency-Key — no endpoint writes serving content (invariant 2).
 """
 from __future__ import annotations
 
@@ -31,6 +31,7 @@ from . import subverticals
 from .pages import ApiError, build_page, etag_for, resolve_run
 from .redaction import normalise_audience, redact_evidence_response
 from .subverticals import SCOPE_TAG, scope_to_entity
+from .users import list_users, me as user_me, set_user
 
 _connect = db_connect
 
@@ -462,6 +463,78 @@ async def alert_actions(alert_id: int, request: Request,
             status_code, payload = alert_act(
                 cur, alert_id, body=body, idempotency_key=key, actor=str(row[0]),
                 audience=audience, role=role)
+        except ApiError as e:
+            conn.rollback()
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        conn.commit()
+        return JSONResponse(payload, status_code=status_code)
+    finally:
+        conn.close()
+
+
+def _actor_or_error(request):
+    try:
+        return verified_actor(request), None
+    except ActorError as e:
+        return None, JSONResponse({"error": e.code, "detail": e.detail},
+                                  status_code=e.status)
+
+
+@app.get("/v1/me")
+def whoami(request: Request):
+    """The verified caller's grant (dma_api.users.me). Sign-in and every
+    document load resolve the role here, so a change an Admin makes lands on
+    that person's next page load. Read-only."""
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        return JSONResponse(user_me(conn.cursor(), email))
+    finally:
+        conn.close()
+
+
+@app.get("/v1/admin/users")
+def admin_users(request: Request):
+    """TRD §19 `/api/v1/admin/users` — the roster, ADMIN only."""
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        try:
+            return JSONResponse(list_users(conn.cursor(), email))
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+    finally:
+        conn.close()
+
+
+@app.post("/v1/admin/users")
+async def admin_users_set(request: Request):
+    """The third API write (owner adjudication 2026-10-07, CLAUDE.md): invite,
+    change a role, deactivate or reactivate — workflow state about who may
+    read, never content. ADMIN only, Idempotency-Key required, every applied
+    change recorded in session_log (dma_api.users)."""
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "malformed_body",
+                             "detail": "the request body must be a JSON object"},
+                            status_code=400)
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            status_code, payload = set_user(
+                cur, email, body=body,
+                idempotency_key=request.headers.get("idempotency-key"))
         except ApiError as e:
             conn.rollback()
             return JSONResponse({"error": e.code, "detail": e.detail},
