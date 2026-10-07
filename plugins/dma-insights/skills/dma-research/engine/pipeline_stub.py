@@ -279,12 +279,27 @@ def lane_scanner(agent, prompt_file, ctx):
         lane_solutions(agent, prompt_file, ctx)
 
 
+def lane_relay(agent, prompt_file, ctx):
+    """enrichment-web-specialist servicing the REPORT probes the driver
+    queued: each search runs and keeps nothing, so each closes EMPTY — what a
+    real drain plus `relay.reconcile` records for a fruitless search. Research-
+    stage relay requests are left open, exactly as before (only the driver's
+    `report-probes` lane is serviced here)."""
+    from . import relay
+    for req in relay.open_requests(ctx.run):
+        if req.get("lane") == "report-probes":
+            relay.record(ctx.run, req["id"], "EMPTY",
+                         note="stub drain: searched, nothing kept",
+                         actor="enrichment-web-specialist (stub)", tool="exa")
+
+
 def default_handlers() -> dict:
     """agent-name prefix → handler."""
     return {
         "research-conductor": lane_prelim_conductor,
         "technographic-scanner": lane_scanner,
         "enrichment-connector-specialist": lane_noop,
+        "enrichment-web-specialist": lane_relay,
         "research-p": lane_research,
         "finding-challenger": lane_noop,
         "scoring-critic": lane_critic,
@@ -442,6 +457,16 @@ class StubReads:
 
     def page_contract(self, page):
         return {**self.contract, "page": page}
+
+    #: the stub cohort: four assessed entities in every category
+    cohort = {"entities": 4, "floor": 3, "basis": "recomputed",
+              "categories": {f"P{p}C{c}": {"n": 4, "mean": 2.4, "median": 2.4,
+                                            "p25": 2.1, "p75": 2.8}
+                             for p in range(1, 5) for c in range(1, 6)}}
+
+    def cohort_benchmarks(self, sub_vertical, *, display_id="", entity_name=""):
+        self.cohort_calls = getattr(self, "cohort_calls", 0) + 1
+        return {**self.cohort, "sub_vertical": sub_vertical}
 
 
 class StubShipper:

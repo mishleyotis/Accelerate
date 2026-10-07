@@ -105,6 +105,7 @@ def _is_ours(server: str) -> bool:
 
 DMA_TOOLS = {
     "get_report_bundle", "get_capability_catalogue", "get_platform_fit",
+    "get_cohort_benchmarks",
     "get_page_contract", "get_evidence", "get_run_progress",
     "get_staged_payload", "get_client_state", "list_open_rejections",
     # Read-only: what a chunked upload has already received. Added with the

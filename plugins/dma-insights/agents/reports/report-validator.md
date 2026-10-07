@@ -82,6 +82,22 @@ A `PASS` while any dimension failed is refused: a verdict that contradicts
 its own dimensions is not a verdict. A note under 80 characters is refused as
 a rubber stamp. Say what you checked and what you found.
 
+## The template's numbers are guidance, not constants
+
+A LENGTH range, a count range in MINIMUM DATA ("3 to 5 peers", "6 or more
+timeline rows") and a peer-set size describe a typical run. They are not
+failure conditions. Never FAIL or REVISE a section only because it runs past
+a LENGTH upper bound, or because the run's own locked peer set
+(`Handoff_Lock.peer_n`) differs from a number in the Doc. A figure the run
+itself fixed wins over the Doc's example. What fails a section: its FAIL IF
+line, an engine refusal, and the six dimensions above. Over-length is at
+most a note. (Owner, 2026-10-06: a six-peer set failed Client Research §4
+four rounds running on "3 to 5", and no rewrite could clear it.)
+
+Peer SCORES are the sub-vertical cohort mean of entities already assessed
+(`Peer_Benchmarks`, basis `recomputed`). Do not ask for a per-peer score, and
+do not ask for a peer metric outside the run's focus areas.
+
 ### Name what the writer cannot fix: `--upstream`
 
 A REVISE goes back to the writer. Some fixes cannot come from a writer, who
@@ -94,7 +110,7 @@ section leaves the writer loop until it is supplied:
 | `probe` | a search the control needs has no `Search_Log` row |
 | `sheet` | a workbook tab disagrees with what the section must state (Firmographics, Focus_Areas, Peer_Benchmarks …) |
 | `evidence` | the fix needs a source registered that the register does not hold |
-| `owner` | only the engagement owner can decide (a peer set outside the template's band, a waiver) |
+| `owner` | only the engagement owner can decide (a peer set below the template's floor, a waiver) |
 | `scores` | a cell the section counts is unscored, or a rollup the prose quotes is about to move |
 
 Measured 2026-10-06 (Arbor Bank): 99 non-PASS reviews over 19 rounds. More

@@ -798,17 +798,25 @@ def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
         raise ScoringRefusal("a FAIL names the rows it would move (--move CELL:TARGET:why, "
                              "repeatable); a FAIL with no move cannot be acted on, and the "
                              "scorers re-read prose for rows they cannot find")
-    book = critic_moves(wb)
-    if _clean(verdict).upper() == "PASS":
-        # A PASS is the critic's re-judgement of the whole pillar: whatever it
-        # named before and no longer names is withdrawn, not left pending.
-        book = {c: m for c, m in book.items() if not c.startswith(pillar)}
-        wb.set_metadata("critic_moves", json.dumps(book, sort_keys=True))
-    for cell, t, why in parsed:
-        book[cell] = {"target": t, "why": why[:300], "pillar": pillar,
-                      "by": _clean(actor), "at": L._utcnow()}
-    if parsed:
-        wb.set_metadata("critic_moves", json.dumps(book, sort_keys=True))
+    # Read-modify-write of a book every pillar critic shares, and the critics
+    # run as parallel processes: outside the lock, the second to finish
+    # saved its stale copy over the first one's moves (First Tech,
+    # 2026-10-06 — P1's moves never reached the scorer, and SCORING stalled
+    # on the same rows round after round). `transaction` locks, reloads what
+    # another process wrote, and saves once on exit.
+    with wb.transaction(f"critique {pillar}"):
+        book = critic_moves(wb)
+        if _clean(verdict).upper() == "PASS":
+            # A PASS is the critic's re-judgement of the whole pillar: whatever
+            # it named before and no longer names is withdrawn, not left pending.
+            book = {c: m for c, m in book.items() if not c.startswith(pillar)}
+        for cell, t, why in parsed:
+            book[cell] = {"target": t, "why": why[:300], "pillar": pillar,
+                          "by": _clean(actor), "at": L._utcnow()}
+        if _clean(verdict).upper() == "PASS" or parsed:
+            wb.set_metadata("critic_moves", json.dumps(book, sort_keys=True),
+                            save=False)
+            wb._dirty = True
     L.append_gate(wb, gate="SCORING_CRITIC", scope=pillar, verdict=_clean(verdict).upper(),
                   detail=f"{actor}: {_clean(note)[:400]}"
                          + (f" | moves: {', '.join(f'{c}->{t}' for c, t, _ in parsed)}"

@@ -528,7 +528,8 @@ def sign_off_sections(wb, actor="report-validator"):
     return signed
 
 
-def section_record(section: str, eids, report="client_research", **over) -> dict:
+def section_record(section: str, eids, report="client_research", *, lead: str = "",
+                   **over) -> dict:
     """A report section record shaped to the PINNED template: every block
     heading in order, body scaled to the section's own word floor, every
     block cited in the prose, and the four argument fields filled."""
@@ -563,22 +564,30 @@ def section_record(section: str, eids, report="client_research", **over) -> dict
     control = control_block(sec, eids)
     fill: list[list[str]] = [[] for _ in blocks]
     cites = " ".join(f"[{e}]" for e in eids)
-    fixed = sum(len(x.split()) for x in (control, *blocks)) + len(blocks) * (
+    # `lead` is caller prose placed first under the first heading; it counts
+    # toward the floor, so a test that brings its own paragraph still fits the
+    # band rather than landing a whole floor's filler on top of it.
+    fixed = sum(len(x.split()) for x in (control, lead, *blocks)) + len(blocks) * (
         4 + len(eids))
 
     def _count():
         return fixed + sum(len(s_.split()) for blk in fill for s_ in blk)
     i = 0
-    while _count() < floor + 5:
+    while _count() < floor + 5 and i < 10_000:
         fill[i % len(blocks)].append(sentences[i % len(sentences)])
         i += 1
     for blk in fill:
         if not blk:
-            blk.append(sentences[0])
+            # a block the floor did not need still carries a line, kept short
+            # so a tight band (e.g. 150-250) is not overrun by filler
+            blk.append("This block is read against the same register.")
     body = []
     for b, blk in zip(blocks, fill):
         if b:
             body.append(f"## {b}")
+        if lead:
+            body.append(lead)
+            lead = ""
         if control:
             # The Doc's MINIMUM DATA, in the countable form `Check` reads —
             # once, in the first block; the whole body is what is counted.
