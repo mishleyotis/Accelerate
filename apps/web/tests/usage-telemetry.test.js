@@ -169,6 +169,36 @@ test("a missing table reads as not_recording", async () => {
   assert.equal(r.status, "not_recording");
 });
 
+// BigQuery answers a missing dataset, a missing table and a missing grant with
+// one "Access Denied ... or perhaps it does not exist"; the metadata reads name
+// which step is actually missing (the production message of 2026-10-07).
+const DENIED = { status: 403, json: { error: { message:
+  "Access Denied: Table digital-maturity-assessor:dmai_usage.run_googleapis_com_stdout: User does not have permission to query table digital-maturity-assessor:dmai_usage.run_googleapis_com_stdout, or perhaps it does not exist." } } };
+function denied(ds, tb) {
+  return fakeBigQuery((url) => /\/queries/.test(url) ? DENIED
+    : /\/tables\//.test(url) ? { status: tb, json: {} } : { status: ds, json: {} });
+}
+
+test("the ambiguous Access Denied is diagnosed to the missing step", async () => {
+  let r = await S.readUsage(7, { env: ENV, fetchImpl: denied(404, 404).fetchImpl });
+  assert.equal(r.status, "not_recording");
+  assert.match(r.detail, /Dataset dmai_usage does not exist/);
+  r = await S.readUsage(7, { env: ENV, fetchImpl: denied(403, 403).fetchImpl });
+  assert.equal(r.status, "forbidden");
+  assert.match(r.detail, /dataViewer/);
+  r = await S.readUsage(7, { env: ENV, fetchImpl: denied(200, 200).fetchImpl });
+  assert.equal(r.status, "forbidden");
+  assert.match(r.detail, /jobUser/);
+});
+
+test("a live sink with no event yet is ok at zero, flagged as awaiting", async () => {
+  const r = await S.readUsage(7, { env: ENV, fetchImpl: denied(200, 404).fetchImpl });
+  assert.equal(r.status, "ok");
+  assert.equal(r.awaiting_first_event, true);
+  assert.deepEqual(r.events, []);
+  assert.deepEqual(r.last_seen, {});
+});
+
 test("rows come back typed, in wire order, with last-seen and recording-since", async () => {
   const { fetchImpl, calls } = fakeBigQuery((url, body) => {
     if (body && /GROUP BY email/.test(body.query)) {

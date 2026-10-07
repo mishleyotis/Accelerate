@@ -450,14 +450,21 @@ def absence_rows(wb, *, run=None) -> dict:
         elif (d or {}).get("not_determinable"):
             parts.append(f"Not determinable from public sources: "
                          f"{str(d['not_determinable']).rstrip('.')}.")
-        synthesis = " ".join(parts)
-        closure = (inferable["validation_question"] if inferable else
-                   (f"An internal artefact would settle it: {artefact.rstrip('.')}."
-                    if artefact else "An internal artefact from the client would settle it."))
+        # The drawer is served to the CUSTOMER: the lane's notes name the
+        # tools that searched and the budget they had, which the serve layer
+        # deletes for that audience and CG-52 refuses at submit (63 of 619
+        # First Tech drawers, 2026-10-07). What the search established stays;
+        # the plumbing stays in `sources_searched`, which no customer reads.
+        from .client_prose import client_safe
+        synthesis = client_safe(" ".join(parts))
+        closure = client_safe(
+            inferable["validation_question"] if inferable else
+            (f"An internal artefact would settle it: {artefact.rstrip('.')}."
+             if artefact else "An internal artefact from the client would settle it."))
         p = prov.get(cell, {})
         cells[cell] = {
             "subcap_id": cell, "e_ids": [], "items": [],
-            "reach_note": (f"declared absence at {rigour} rigour — {len(mine)} logged "
+            "reach_note": client_safe(f"declared absence at {rigour} rigour — {len(mine)} logged "
                            f"searches, volleys "
                            + ", ".join(f"{f} x{n}" for f, n in
                                        ((d or {}).get("facets_status") and

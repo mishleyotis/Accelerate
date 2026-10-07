@@ -219,6 +219,13 @@ shape, so they buy nothing at all.
   excerpts already render beside the synthesis in the drawer. A cell whose
   evidence says little gets a short honest synthesis marked thin, or a recorded
   absence (`thin`, `sources_searched`, `closure_condition`). Never pad it.
+  **Never name a search tool or a pipeline status in it** — "an Exa search found",
+  "Tavily returned", "NOT_RUN", "Clay". The customer is served this drawer, and
+  the serve layer deletes the WHOLE synthesis for that audience when it names one
+  (2026-10-07: 118 of 4,341 syntheses served empty to customers, 36 of 216 on
+  one client). CG-52 refuses it at submit. Say what the search established in
+  the client's terms ("a search of the bank's newsroom and regulator filings
+  found no…"); the tool belongs in `sources_searched`, which no customer reads.
 - **Grain lock, before any prose.** The score, the peer median and the cell id must
   come from the same row of `subcap_scores`. One line pairing a sub-capability's
   score with a category's id produced 125 violations across the corpus. A mismatch

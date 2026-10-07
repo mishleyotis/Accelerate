@@ -424,10 +424,13 @@ def test_routes_are_wired_with_the_trd_verbs():
         "TRD §08: POST /api/v1/alerts/{alert_id}/actions"
     post_routes = sorted(p for p, methods in routes.items() if "POST" in methods)
     assert post_routes == [
+        "/v1/admin/users",
         "/v1/alerts/{alert_id}/actions",
         "/v1/entities/{display_id}/insights/{ic_id}/annotation",
-    ], ("invariant 2 names exactly TWO write exceptions — alert actions and "
-        "annotations — and this census is the tripwire for a third")
+    ], ("invariant 2 names exactly two content-adjacent write exceptions — "
+        "alert actions and annotations — plus user grants (owner "
+        "adjudication 2026-10-07, CLAUDE.md); this census is the tripwire "
+        "for a fourth")
 
 
 # ── The annotation half of the two write exceptions ─────────────────────────

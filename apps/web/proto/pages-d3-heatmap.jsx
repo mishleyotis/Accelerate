@@ -1740,8 +1740,10 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
   const cit = subcap ? cellCitationsOf(subcap.id) : categoryCitationsOf(catCells);
   const linkedEv = cit.items;
 
-  // Issue caps (subcap only)
-  const caps = subcap ? DMA.issueCapsFor(subcap.id) : [];
+  // Issue caps (subcap only). The issue register is Context-page material and
+  // its caps are O1b ceilings — both withheld from the customer audience — so
+  // the customer drawer never lists them, whatever the client cache holds.
+  const caps = subcap && audience !== "customer" ? DMA.issueCapsFor(subcap.id) : [];
 
   // Peer comparison (for a category, the promoted category figures)
   const score = subcap ? numOf(subcap.score)

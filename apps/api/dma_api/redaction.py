@@ -51,39 +51,27 @@ from pathlib import Path
 import os
 import re
 
-# (page, section) withheld entirely from the customer audience.
-CUSTOMER_WITHHELD = frozenset((
-    ("overview", "ceilings"),            # O1b — TRD §11 rung table
-    # O9 `overview.sentiment` LEFT this set on 2026-10-04 by OWNER DECISION 1
-    # (SWBC gold audit, D-34): the customer receives a REDUCED card — bars
-    # and themes, without cell codes, internal sources, cap vocabulary or
-    # r_layer — built by `_project_sentiment` below. This supersedes TRD
-    # §11's withholding for that one section; thought_leadership stays.
-    ("overview", "thought_leadership"),   # O12 — TRD §11 rung table
-    # O10. The evidence CENSUS, not the evidence: tier histogram, item and
-    # fact counts, the self-sourced share and the gate line. It is how well
-    # WE evidenced the assessment, which is our method showing through, and
-    # it belongs beside the ceilings it explains rather than in front of the
-    # client. It sat outside this set until 2026-08-18 and was reaching the
-    # customer body in full; nothing rendered it only because the web
-    # adapter happens to drop those keys (live-adapter.jsx adaptCoverage),
-    # so a wire leak was standing behind a UI accident. Both promoted
-    # clients were affected, not one.
-    ("overview", "evidence_coverage"),    # O10 — the census, not the scores
-    ("heatmap", "alerts"),                # D7 Health, operational
-    ("heatmap", "evidence_age"),          # D7 Health, operational
-    ("heatmap", "cohort_patterns"),       # D7 Health + cross-entity
-    # P-starters: conversation openers WRITTEN FOR THE SELLER ("ask them
-    # which system…", "follow-up question"). MEM-0081 / T-2: key-stripping
-    # it left a customer card list whose every remaining field was a line
-    # of our talk track, so it is withheld whole — a section that is our
-    # preparation for the room has no redacted form.
-    ("platform", "starters"),
-))
+# `packages/shared` is resolved by the loader evidence.py already owns —
+# reused rather than re-written, because its comments record two separate
+# occasions when a fourth copy of these three lines shadowed the tracked file
+# with a stale staged one. Loaded FIRST: the customer-scope sets below are
+# read from it.
+from .evidence import _put_shared_on_path      # noqa: E402
+
+_put_shared_on_path()
+
+import internal_ids  # noqa: E402  packages/shared/internal_ids.py
+
+# (page, section) withheld entirely from the customer audience, the pages
+# withheld whole, and the sections no audience is served: defined ONCE in
+# packages/shared/internal_ids.py, because the connector's CG-52 decides at
+# SUBMIT which prose a customer reads and this module decides it at SERVE —
+# one rule held in two places drifts.
+CUSTOMER_WITHHELD = internal_ids.CUSTOMER_WITHHELD
 
 # Whole pages withheld from the customer audience: a locked state, not a
 # partial page. Requested with audience=customer -> 403 audience_forbidden.
-CUSTOMER_WITHHELD_PAGES = frozenset(("context",))
+CUSTOMER_WITHHELD_PAGES = internal_ids.CUSTOMER_WITHHELD_PAGES
 
 # Pages an AE has no route to (TRD §"403 audience_forbidden").
 #
@@ -104,31 +92,9 @@ ALWAYS_STRIP = {
                                      "insufficient_cohorts[*].entity_ids"),
 }
 
-# ── The surface-contract allowlist ─────────────────────────────────────
-#
-# Sections that are OUR RECORD OF OUR OWN METHOD rather than the client's
-# assessment, and therefore reach no audience at all. Owner instruction,
-# 2026-08-19, third round on the same material: "internal artifacts
-# (reasoning traces, capability ceiling, evidence coverage, tiers, counts,
-# uncertainty) are dropped at the payload boundary and render nowhere."
-#
-# Withholding them from the CUSTOMER audience was the previous rule, and it
-# was measured insufficient twice: the audience is a toggle in the browser,
-# so anybody who moved it met the capability-ceiling table, the evidence
-# census and a reasoning trace on the same screen as the client's own
-# scores. "Nowhere" is a different rule from "not by default", and it is
-# the one that was asked for.
-#
-# The sections are not deleted from the database or from the producer's
-# contract — they are still promoted, still validated, still auditable
-# through the connector. They are removed at the point where bytes leave
-# for a browser, which is the only boundary that decides what renders.
-NEVER_SERVED = frozenset((
-    ("overview", "ceilings"),            # O1b — the capability ceiling and
-                                         #       uncertainty table
-    ("overview", "evidence_coverage"),   # O10 — the census: tiers, counts,
-                                         #       the gate line, the share
-))
+# The surface-contract allowlist's NEVER_SERVED set lives in
+# packages/shared/internal_ids.py with its history.
+NEVER_SERVED = internal_ids.NEVER_SERVED
 
 # Keys stripped at any depth for EVERY audience, in every section.
 #
@@ -280,59 +246,19 @@ SELLER_VOCABULARY = re.compile(
 VENDOR_NAME = os.environ.get("ASSESSING_VENDOR_NAME", "Zennify")
 _VENDOR_RE = re.compile(re.escape(VENDOR_NAME), re.I) if VENDOR_NAME else None
 
-# Our PIPELINE's vocabulary in a sentence a client reads — a third net beside
-# the vendor and seller nets, and like them a backstop: producers are fixing
-# the prose (SWBC, 2026-10-02, measured on the withdrawn run), and this is
-# what still stands if one does not.
-#
-#   NOT_RUN            a gate status, inside PROSE. A safeguard gate's
-#                      `status: "NOT_RUN"` is designed to render (invariant
-#                      12) — so a value that IS the bare token is never
-#                      matched, and heatmap.safeguard_gates is exempt from
-#                      this one term: its reason text explains a NOT_RUN by
-#                      design.
-#   connector credit   the enrichment budget.
-#   Clay · Explorium · Exa · Tavily · Firecrawl
-#                      the enrichment and search tools. CASE-SENSITIVE and
-#                      bounded, so "clay", "exactly", "example" never match;
-#                      "Clay" followed by a capitalised word ("Clay Thompson,
-#                      CFO") is a person, not the tool, and is left alone.
-#   RRF · k=60 · engine v2 · hot band
-#                      retrieval-fusion and ranking internals.
-#
-# Same convention as the other nets: the FIELD holding the sentence goes
-# (a list element is blanked), never half a sentence, and every path is
-# recorded in the receipt.
-_INTERNAL_VOCAB_TERMS = (
-    ("NOT_RUN", re.compile(r"\bNOT_RUN\b")),
-    ("connector credit", re.compile(r"\bconnector[- ]credits?\b", re.I)),
-    ("Clay", re.compile(r"\bClay(?:\.com|'s)?\b(?!\s+[A-Z][a-z])")),
-    ("Explorium", re.compile(r"\bExplorium\b", re.I)),
-    ("Exa", re.compile(r"\bExa(?:\.ai)?\b")),
-    ("Tavily", re.compile(r"\bTavily\b", re.I)),
-    ("Firecrawl", re.compile(r"\bFire[- ]?crawl\b", re.I)),
-    ("RRF", re.compile(r"\bRRF\b")),
-    ("k=60", re.compile(r"\bk\s*=\s*60\b")),
-    ("engine v2", re.compile(r"\bengine[- ]v2\b", re.I)),
-    ("hot band", re.compile(r"\bhot[- ]bands?\b", re.I)),
-)
-# A value that is nothing but an enum token is a STATUS, not prose.
-_BARE_TOKEN = re.compile(r"^[A-Z][A-Z0-9_]*$")
-# Keys that hold a person's or an organisation's NAME: a client whose CFO is
-# called Clay is not leaking a tool.
-_VOCAB_EXEMPT_KEYS = frozenset({"name", "full_name", "person", "person_name",
-                                "display_name", "e_id", "gate_id", "gate"})
+# Our PIPELINE's vocabulary in a sentence a client reads: the terms, the
+# bare-token rule and the name-key exemption live in
+# packages/shared/internal_ids.py (PIPELINE_TERMS), where the connector's
+# CG-52 reads the same list to refuse that prose at SUBMIT. This module is the
+# serve-side backstop for runs promoted before the gate existed.
+_INTERNAL_VOCAB_TERMS = internal_ids.PIPELINE_TERMS
+_BARE_TOKEN = internal_ids.BARE_TOKEN
+_VOCAB_EXEMPT_KEYS = internal_ids.NAME_KEYS
 
 
 def internal_vocabulary(text, exempt=()) -> str | None:
     """The first pipeline term `text` names, or None."""
-    if not isinstance(text, str) or _BARE_TOKEN.match(text.strip()):
-        return None
-    for term, rx in _INTERNAL_VOCAB_TERMS:
-        if term not in exempt and rx.search(text):
-            return term
-    return None
-
+    return internal_ids.names_pipeline_term(text, exempt)
 
 def _strip_internal_vocabulary(node, path="", found=None, exempt=()) -> list:
     """Delete every field whose string names a pipeline term (list elements
@@ -566,15 +492,6 @@ def _strip_vendor(node, path="", found=None, pattern=None) -> list:
 _ALLOWLIST = None
 
 
-# `packages/shared` is resolved by the loader evidence.py already owns —
-# reused rather than re-written, because its comments record two separate
-# occasions when a fourth copy of these three lines shadowed the tracked file
-# with a stale staged one.
-from .evidence import _put_shared_on_path      # noqa: E402
-
-_put_shared_on_path()
-
-import internal_ids  # noqa: E402  packages/shared/internal_ids.py
 
 
 def _customer_allowlist() -> dict:

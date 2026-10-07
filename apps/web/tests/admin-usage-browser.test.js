@@ -49,11 +49,12 @@ function wire() {
   };
 }
 
-async function openApp(browser, base, hash, usageBody) {
+async function openApp(browser, base, hash, usageBody, users) {
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 1000 } });
   const p = await ctx.newPage();
   const errors = [], beacons = [];
   p.on("pageerror", (e) => errors.push(String(e.message)));
+  if (users) await p.route("**/api/admin/users", users);
   await p.route("**/api/admin/usage**", (r) => r.fulfill({ status: 200, contentType: "application/json",
                                                            body: JSON.stringify(usageBody) }));
   await p.route("**/api/usage", (r) => {
@@ -154,6 +155,77 @@ test("Import & jobs and Import audit are unreachable in production", { skip }, a
       assert.ok(!nav.some((n) => /^Import/.test(n)), nav.join(","));
       await ctx.close();
     }
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+test("Users & roles allocates roles through the users API", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  const roster = [
+    { email: "dma@zennify.com", display_name: "DMA", role: "ADMIN", is_active: true, signed_in: true, last_seen_at: null, created_at: null },
+    { email: "owner@zennify.com", display_name: "Owner", role: "ADMIN", is_active: true, signed_in: true, last_seen_at: null, created_at: null },
+    { email: "sam.reader@zennify.com", display_name: "Sam Reader", role: "AE", is_active: true, signed_in: true, last_seen_at: null, created_at: null },
+  ];
+  const posts = [];
+  const users = (r) => {
+    if (r.request().method() === "GET") {
+      return r.fulfill({ status: 200, contentType: "application/json",
+                         body: JSON.stringify({ users: roster, owner_floor: ["owner@zennify.com"], default_role: "AE" }) });
+    }
+    const body = JSON.parse(r.request().postData());
+    posts.push({ body, key: r.request().headers()["idempotency-key"] });
+    const u = { ...(roster.find(x => x.email === body.email) || { email: body.email, display_name: "New Person", role: "AE", is_active: true, signed_in: false }), ...body };
+    return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user: u, event: "role_changed" }) });
+  };
+  try {
+    const { ctx, p, errors } = await openApp(browser, base, "#/admin", wire(), users);
+    await p.waitForSelector('select[aria-label="Role for Sam Reader"]', { timeout: 10000 });
+    // The owner floor and the signed-in admin are locked; everyone else is editable.
+    assert.ok(await p.isDisabled('select[aria-label="Role for Owner"]'), "owner floor is not editable");
+    assert.ok(await p.isDisabled('select[aria-label="Role for DMA"]'), "an admin cannot change their own role");
+    await p.selectOption('select[aria-label="Role for Sam Reader"]', "ANALYST");
+    await p.waitForFunction(() => /role updated to Analyst/.test(document.body.innerText), null, { timeout: 5000 });
+    assert.deepEqual(posts[0].body, { email: "sam.reader@zennify.com", role: "ANALYST" });
+    assert.match(posts[0].key, /^[0-9a-f-]{36}$/, "every write carries an Idempotency-Key");
+    // Deactivate, then invite.
+    await p.click('tr:has-text("sam.reader@zennify.com") button:has-text("Deactivate")');
+    await p.waitForFunction(() => /Sam Reader deactivated/.test(document.body.innerText), null, { timeout: 5000 });
+    assert.deepEqual(posts[1].body, { email: "sam.reader@zennify.com", is_active: false });
+    await p.fill('input[placeholder="name@zennify.com"]', "new.person@zennify.com");
+    await p.selectOption('select[aria-label="Invite role"]', "ADMIN");
+    await p.click('button:has-text("Invite user")');
+    await p.waitForFunction(() => /new.person@zennify.com added as Admin/.test(document.body.innerText), null, { timeout: 5000 });
+    assert.deepEqual(posts[2].body, { email: "new.person@zennify.com", role: "ADMIN" });
+    // A usage-seen account without a row is listed as an AE and can be granted.
+    assert.ok(await p.isVisible('select[aria-label="Role for Ae One"]'), "seen-in-usage account is listed");
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+test("usage analytics renders its full layout at zero while awaiting the first event", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  const empty = { status: "ok", awaiting_first_event: true, generated_at: new Date().toISOString(), range_days: 30,
+                  fields: F, recording_since: null, truncated: false, last_seen: {}, events: [] };
+  try {
+    const { ctx, p, errors } = await openApp(browser, base, "#/admin/usage", empty);
+    await p.waitForFunction(() => /Recording is live/.test(document.body.innerText), null, { timeout: 10000 });
+    const t = await p.evaluate(() => document.body.textContent);
+    for (const want of ["Active users", "Sessions", "Avg session", "Pages / session", "Stickiest surface"]) {
+      assert.ok(t.includes(want), `layout section "${want}" missing while awaiting`);
+    }
+    assert.ok(!/Usage data is not readable|Not recording yet/.test(t));
+    assert.deepEqual(errors, []);
+    await ctx.close();
   } finally {
     await browser.close();
     server.close();

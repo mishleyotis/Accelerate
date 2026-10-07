@@ -93,14 +93,19 @@ function EvidenceDrawer() {
     unresolved = evidenceDrawer.evidenceId;
   }
 
-  // Tier filter
+  // Tier filter. The customer body carries no `tier` (the server strips the
+  // tier class for that audience — TRD, "evidence rank scores, tier weights:
+  // stripped"), so a tier is counted only where an item states one: keying
+  // the distribution on `undefined` printed "undefined · 12" as a filter and
+  // "undefined · undefined" on every customer item.
   const filtered = tierFilter === "ALL" ? items : items.filter(it => it.tier === tierFilter);
 
   // Tier distribution for filter
   const dist = {};
   items.forEach(it => {
-    dist[it.tier] = (dist[it.tier] || 0) + 1;
+    if (it.tier) dist[it.tier] = (dist[it.tier] || 0) + 1;
   });
+  const tiered = Object.keys(dist).length > 0;
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "drawer-mask",
     onClick: closeEvidence
@@ -162,7 +167,7 @@ function EvidenceDrawer() {
   }) : `Score ${fx(subcap.score, 1)}`, subcap.peerMedian != null ? ` · peer median ${fx(subcap.peerMedian, 1)}` : "", subcap.peer_basis === "category_proxy" ? " (peer proxy · category median)" : "", ".", " ", subcap.thin ? `Evidence is below the threshold of 3 — flagged as thin${subcap.closure_condition ? `. Closes on: ${subcap.closure_condition}` : "."}` : items.length ? `Grounded on ${items.length} item${items.length === 1 ? "" : "s"}${(() => {
     const tiers = [...new Set(items.map(i => i.tier).filter(Boolean))].sort();
     return tiers.length ? ` · ${tiers.join(", ")}` : "";
-  })()}.` : "No evidence linked at this grain."))) : null, items.length > 1 ? /*#__PURE__*/React.createElement("div", {
+  })()}.` : "No evidence linked at this grain."))) : null, items.length > 1 && tiered ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 5,
@@ -209,10 +214,10 @@ function EvidenceDrawer() {
       }
     }, /*#__PURE__*/React.createElement("span", {
       className: "chip"
-    }, it.id), /*#__PURE__*/React.createElement("span", {
+    }, it.id), it.tier ? /*#__PURE__*/React.createElement("span", {
       className: `tier-chip tier-${it.tier}`,
       title: tier?.desc
-    }, it.tier, " \xB7 ", tier?.label), it.claim ? /*#__PURE__*/React.createElement("span", {
+    }, it.tier, " \xB7 ", tier?.label) : null, it.claim ? /*#__PURE__*/React.createElement("span", {
       className: "b b-purple"
     }, it.claim) : null, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -314,7 +319,7 @@ function EvidenceDrawer() {
     onClick: () => {
       // An item with no excerpt copies as the citation without a quote,
       // never as an empty pair of quote marks pasted into a deck.
-      const lines = filtered.map(it => [`${it.id} · ${it.tier} · ${it.title}`, dwText(it.excerpt) ? `— "${dwText(it.excerpt)}"` : "— no excerpt served", `(${it.source_pretty || it.source || "no source url"})`].join(" ")).join("\n");
+      const lines = filtered.map(it => [`${it.id}${it.tier ? ` · ${it.tier}` : ""} · ${it.title}`, dwText(it.excerpt) ? `— "${dwText(it.excerpt)}"` : "— no excerpt served", `(${it.source_pretty || it.source || "no source url"})`].join(" ")).join("\n");
       try {
         navigator.clipboard.writeText(lines);
         pushToast(`Copied ${filtered.length} citation${filtered.length === 1 ? "" : "s"}`, "success");

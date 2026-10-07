@@ -3078,6 +3078,63 @@ def _check_customer_empty_state_prose(page, payload) -> list:
     return out[:6]
 
 
+# ── CG-52 · prose a customer reads names no pipeline tool ─────────────
+#
+# Build owner, 2026-10-07: "It is the customer view that lacks heatmap
+# details for most clients … Ensure no recurrence." Two causes were found.
+# The web app locked the customer out of the heatmap grid (fixed in
+# pages-d3-heatmap.jsx, pinned by apps/web/tests/heatmap-customer-view.test.js).
+# The other is this gate's: producers wrote the search tools into the prose a
+# customer reads ("An Exa search found…", "Tavily returned…", "NOT_RUN"), and
+# the serve layer's pipeline-vocabulary net deletes the WHOLE FIELD for the
+# customer. Measured across the eight promoted clients the connector could
+# enumerate that day: 118 of 4,341 cell syntheses served empty to the customer,
+# 36 of 216 on one client, with 755 "Exa" hits across the heatmap bodies.
+#
+# The net is right to delete them, and it is a backstop: the repair for a bad
+# sentence is a better sentence from the producer, not a blank drawer. So the
+# same term list (packages/shared/internal_ids.PIPELINE_TERMS — the serve net
+# reads it too) is refused here, at submit, on every heatmap section a
+# customer is served and on every customer-served section's narrative_thread
+# and empty_state.
+_CG52_ALL_KEYS_PAGES = frozenset({"heatmap"})
+_CG52_KEYS = frozenset({"narrative_thread", "empty_state"})
+
+
+def _check_customer_pipeline_vocabulary(page, payload) -> list:
+    """CG-52 - prose a customer is served names no pipeline tool."""
+    if not isinstance(payload, dict):
+        return []
+    hits = []
+    for section, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        keys = None if page in _CG52_ALL_KEYS_PAGES else _CG52_KEYS
+        for path, term in internal_ids.customer_prose_hits(
+                page, section, body, body.get("internal_only") or (), keys=keys):
+            hits.append((section, path, term))
+    if not hits:
+        return []
+    out = []
+    for section, path, term in hits[:8]:
+        out.append(_reason(
+            "CG-52", section, f"{page}.{section}.{path}",
+            f"this field reaches the CUSTOMER audience and names the pipeline "
+            f"term {term!r}. The serve layer deletes any customer field that "
+            f"names one (redaction's pipeline-vocabulary net), so as written "
+            f"the customer reads nothing here - on the heatmap that is an "
+            f"empty cell synthesis in the evidence drawer. Rewrite it in the "
+            f"client's terms: say what the search found or did not find "
+            f"('a web search of the bank's newsroom and regulator filings "
+            f"found no…'), never which tool ran it; a status like NOT_RUN "
+            f"becomes 'not assessed in this run' with the reason. The tool "
+            f"belongs in sources_searched or r_layer, which no customer is "
+            f"served."
+            + (f" {len(hits)} field(s) in this payload, first 8 listed."
+               if len(hits) > 8 else "")))
+    return out
+
+
 # ── CG-51 · a run that holds a peer set argues the techstack against it ──
 #
 # The owner, reviewing a promoted run: "the tech stack does not enforce peer
@@ -3984,6 +4041,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_prose_counts_what_is_served(page, payload))
     reasons.extend(_check_values_fit_their_columns(page, payload))
     reasons.extend(_check_customer_empty_state_prose(page, payload))
+    reasons.extend(_check_customer_pipeline_vocabulary(page, payload))
     reasons.extend(_check_named_product_is_in_its_excerpt(
         conn, run_id, page, payload))
     reasons.extend(_check_techstack_peer_comparison(

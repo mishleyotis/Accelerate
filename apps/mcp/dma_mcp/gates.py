@@ -689,6 +689,30 @@ GATES = {
               "the half-told page.",
               "block"),
 
+    "CG-52": ("Prose a customer is served names no pipeline tool", None,
+              "Every heatmap section a customer is served, and every customer-"
+              "served section's narrative_thread and empty_state, is free of "
+              "the pipeline vocabulary the serve layer deletes for that "
+              "audience (packages/shared/internal_ids.PIPELINE_TERMS: NOT_RUN "
+              "in prose, Clay, Explorium, Exa, Tavily, Firecrawl, connector "
+              "credit, RRF, k=60, engine v2, hot band). Skips sections and "
+              "pages withheld from the customer, keys no customer is served "
+              "(sources_searched, provenance, tier, r_layer, …), name keys, a "
+              "registered source's own name (source_name, publisher: the "
+              "evidence store's, not the producer's), verbatim fields "
+              "(abbreviations.EXCERPT_FIELDS: excerpts, quotes, urls, "
+              "headlines — never rewritten), "
+              "paths marked internal_only, and NOT_RUN on "
+              "heatmap.safeguard_gates, which renders it by design.",
+              "Build owner, 2026-10-07: 'It is the customer view that lacks "
+              "heatmap details for most clients … Ensure no recurrence.' "
+              "Producers wrote the search tools into customer prose and the "
+              "serve net deleted the whole field: 118 of 4,341 cell syntheses "
+              "served empty to the customer across eight promoted clients, 36 "
+              "of 216 on one. The net stays as the backstop; the repair is "
+              "the producer's sentence, refused here at submit.",
+              "block"),
+
     # RC-02 / RC-13 (SWBC gold audit, 2026-10-04). Both run at PROMOTE, over
     # the retained staged rows of the whole run (promote_checks.py).
     "CG-PAR": ("No page lacks the structure every gold run serves", None,

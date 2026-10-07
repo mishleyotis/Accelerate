@@ -89,6 +89,7 @@ here needs the whole book up front.
 | `CG-43` | the Context grid and the Overview bars are one dataset | `gates/CG-43.md` |
 | `ET-08` | a cell-link field carries a cell id, or names nothing | `gates/ET-08.md` |
 | `CG-50` | the product a row names appears in the span it cites | `gates/CG-50.md` |
+| `CG-52` | prose a customer is served names no pipeline tool | `gates/CG-52.md` |
 
 ## The citation stack
 
@@ -148,11 +149,11 @@ Three consequences:
 
 ## Every gate, by id
 
-The registry holds **83** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
+The registry holds **84** gates. This census is generated from `apps/mcp/dma_mcp/gates.py` by `plugins/dma-insights/scripts/gen_gates_md.py`, so a gate cannot exist in the connector and be absent here. The sections above go deeper on the ones that block most often; this table is what you read when a verdict names an id you have not seen.
 
 When the row below is not enough, the connector will explain itself: `explain_gate(gate_id)` returns the registry's own wording plus the threshold history. A verdict also carries the JSON path it fired on, so the repair routes from the path through `05-lifecycle/routing.md` to the owning per-surface producer without needing this file at all.
 
-### CG · Corpus / contract (60)
+### CG · Corpus / contract (61)
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
@@ -207,6 +208,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 | `CG-49` | **A client-visible absence does not name this system's machinery.** The four empty_state keys the serve allowlist keeps for a customer - reason, closure_condition, closure, kind - carry no MEM/REF finding id, gate id, CUSTOMER_WITHHELD, or connector tool call. Ordinary words like 'gate', 'connector' and… | block | `gates/CG-49.md` |
 | `CG-50` | **The product a techstack row names appears in the span it cites.** Every non-ABSENT techstack.items[] row is substring-tested against the excerpts of its own cited e_ids. Matching is by DISTINCTIVE TOKEN or MULTI-WORD PHRASE, never by a generic word alone: an excerpt saying 'Financial Services Cloud'… | block | `gates/CG-50.md` |
 | `CG-51` | **A run that holds a peer set argues the techstack against it.** When this run holds a peer set — a peer with a score recorded for it, or a techstack row already carrying peer_deployments — the techstack page owes two things: at least one register row carries a non-empty peer_deployments[], and the… | block | — |
+| `CG-52` | **Prose a customer is served names no pipeline tool.** Every heatmap section a customer is served, and every customer-served section's narrative_thread and empty_state, is free of the pipeline vocabulary the serve layer deletes for that audience (packages/shared/internal_ids.PIPELINE_TERMS:… | block | `gates/CG-52.md` |
 | `CG-03b` | **A shape the contract states in prose is whole.** Shapes that lived only in the page prose are machine contract (item_shape) and read: platform tiles carry peer_synthesis and an estate_reach with an integer cells_not_yet_reached, peer rows are whole; the C4 grid is three audience tiles… | block | — |
 | `CG-18b` | **A held member is a last resort: capped, routed, never an answer.** At most 2 must-present members are held, or 25% of the set, whichever is smaller; every held reason names the registry route searched; a structural answer (not chartered, regulated by line, no retail branches) is stated as a value. | block | — |
 | `CG-18c` | **The sub-vertical's firmographic set is present.** overview.firmographics carries every member of the run's primary sub-vertical set (must_present_by_subvertical), stated or held within the ceiling; Farm Credit declares sub_vertical_undefined. | block | — |
