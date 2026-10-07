@@ -316,7 +316,7 @@ if [ -f apps/web/Dockerfile ]; then
   #
   # CONVERGE, TOLERANT. Every step reads first and writes only when the state
   # is wrong, and a step the deployer lacks the grant for (logging.configWriter,
-  # bigquery.admin — infra/grants-for-admin.sh) warns and moves on: a release
+  # bigquery.user — self-granted below) warns and moves on: a release
   # must not abort over telemetry. The page states "not recording" until the
   # sink exists rather than showing an empty chart as if nobody came.
   #
@@ -326,15 +326,54 @@ if [ -f apps/web/Dockerfile ]; then
   USAGE_DATASET="${USAGE_DATASET:-dmai_usage}"
   USAGE_SINK="dmai-usage"
   usage_warn() { echo "  usage: WARN — $* (Usage analytics stays 'not recording' until fixed)" >&2; }
+
+  # The deployer grants ITSELF the two roles this block needs (owner,
+  # 2026-10-07: "have claude-deployer run it using the available secrets").
+  # It already holds resourcemanager.projectIamAdmin (grants-for-admin.sh,
+  # stage 0.1), so no owner step is left; CI reaches here as claude-deployer
+  # through Workload Identity — no key anywhere. Least privilege:
+  # logging.configWriter for the sink, bigquery.user to create the dataset
+  # (BigQuery makes the creator its dataOwner, which covers the two
+  # dataset-scoped grants below). Read first, write only what is missing.
+  DEPLOYER_ACCT="$(gcloud config get-value account 2>/dev/null || true)"
+  USAGE_ATTEMPTS=1
+  case "$DEPLOYER_ACCT" in
+    *.iam.gserviceaccount.com)
+      for role in roles/logging.configWriter roles/bigquery.user; do
+        if ! gcloud projects get-iam-policy "$PROJECT_ID" \
+             --flatten='bindings[].members' \
+             --filter="bindings.role=${role} AND bindings.members=serviceAccount:${DEPLOYER_ACCT}" \
+             --format='value(bindings.role)' 2>/dev/null | grep -q .; then
+          say "  usage: granting ${DEPLOYER_ACCT} ${role}"
+          if gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+               --member="serviceAccount:${DEPLOYER_ACCT}" --role="$role" \
+               --condition=None --quiet >/dev/null 2>&1; then
+            USAGE_ATTEMPTS=8   # a fresh grant takes up to ~2 min to propagate
+          else
+            usage_warn "could not grant ${role} to ${DEPLOYER_ACCT} (needs projectIamAdmin)"
+          fi
+        fi
+      done ;;
+    *) echo "  usage: deploying as '${DEPLOYER_ACCT:-unknown}', not a service account — roles are not self-granted" >&2 ;;
+  esac
+  # Retry a step only while a just-granted role may still be propagating.
+  usage_try() {
+    local n=0
+    until "$@" >/dev/null 2>&1; do
+      n=$((n + 1)); [ "$n" -ge "$USAGE_ATTEMPTS" ] && return 1
+      sleep 15
+    done
+  }
+
   gcloud services enable bigquery.googleapis.com --project="$PROJECT_ID" --quiet \
     >/dev/null 2>&1 || usage_warn "could not enable bigquery.googleapis.com"
   if ! bq --project_id="$PROJECT_ID" show --dataset "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1; then
     say "  usage: creating dataset ${USAGE_DATASET}"
-    bq --project_id="$PROJECT_ID" mk --dataset --location="$REGION" \
+    usage_try bq --project_id="$PROJECT_ID" mk --dataset --location="$REGION" \
       --default_partition_expiration=34560000 \
       --description="DMA Insights usage telemetry (web log sink). No client content." \
-      "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1 \
-      || usage_warn "could not create dataset ${USAGE_DATASET} (needs bigquery.admin)"
+      "${PROJECT_ID}:${USAGE_DATASET}" \
+      || usage_warn "could not create dataset ${USAGE_DATASET} (needs bigquery.user)"
   fi
   USAGE_FILTER='resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-web" AND jsonPayload.usage_v=1'
   USAGE_DEST="bigquery.googleapis.com/projects/${PROJECT_ID}/datasets/${USAGE_DATASET}"
@@ -342,8 +381,8 @@ if [ -f apps/web/Dockerfile ]; then
                  --format='value(filter)' 2>/dev/null || echo "__missing__")"
   if [ "$CUR_FILTER" = "__missing__" ]; then
     say "  usage: creating log sink ${USAGE_SINK}"
-    gcloud logging sinks create "$USAGE_SINK" "$USAGE_DEST" --project="$PROJECT_ID" \
-      --log-filter="$USAGE_FILTER" --use-partitioned-tables --quiet >/dev/null 2>&1 \
+    usage_try gcloud logging sinks create "$USAGE_SINK" "$USAGE_DEST" --project="$PROJECT_ID" \
+      --log-filter="$USAGE_FILTER" --use-partitioned-tables --quiet \
       || usage_warn "could not create log sink ${USAGE_SINK} (needs logging.configWriter)"
   elif [ "$CUR_FILTER" != "$USAGE_FILTER" ]; then
     say "  usage: correcting the ${USAGE_SINK} filter"
