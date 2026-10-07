@@ -232,6 +232,32 @@ def _path_pattern(path: str) -> str:
 SOURCE_IDENTITY_KEYS = frozenset({"source_name", "source_title", "publisher",
                                   "source_domain"})
 
+#: A VERBATIM span of an artefact or a person — the evidence store or the
+#: source holds it as written and nobody may rewrite it. The set is
+#: packages/shared/abbreviations.EXCERPT_FIELDS (excerpts, quotes, urls,
+#: names, headlines, source filenames…), read from the module that owns it
+#: rather than restated. Measured on Golden 1 (2026-10-07, nine rows): a
+#: registered technographic reading whose own text says "Clay + Vibe scan" —
+#: asking a producer to rewrite it would ask them to falsify a quote. The
+#: serve layer still decides what a customer sees of it.
+_VERBATIM = None
+
+
+def verbatim_keys() -> frozenset:
+    """abbreviations.EXCERPT_FIELDS, loaded from beside this file (both
+    images stage the two modules together; the engine's packaged copy never
+    calls this)."""
+    global _VERBATIM
+    if _VERBATIM is None:
+        import importlib.util
+        from pathlib import Path
+        path = Path(__file__).with_name("abbreviations.py")
+        spec = importlib.util.spec_from_file_location("_dma_abbreviations", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _VERBATIM = frozenset(mod.EXCERPT_FIELDS)
+    return _VERBATIM
+
 
 def customer_prose_hits(page: str, section: str, body, internal_only=(),
                         keys=None) -> list:
@@ -256,6 +282,7 @@ def customer_prose_hits(page: str, section: str, body, internal_only=(),
             p = p.strip()
             (wild if "[*]" in p else exact).add(p)
     exempt = ("NOT_RUN",) if (page, section) == ("heatmap", "safeguard_gates") else ()
+    verbatim = verbatim_keys()
     out = []
 
     def walk(node, path):
@@ -271,7 +298,7 @@ def customer_prose_hits(page: str, section: str, body, internal_only=(),
                 walk(v, f"{path}[{i}]")
         elif isinstance(node, str):
             leaf = path.rsplit(".", 1)[-1].split("[", 1)[0]
-            if leaf in NAME_KEYS or leaf in SOURCE_IDENTITY_KEYS:
+            if leaf in NAME_KEYS or leaf in SOURCE_IDENTITY_KEYS or leaf in verbatim:
                 return
             hit = names_pipeline_term(node, exempt)
             if hit:

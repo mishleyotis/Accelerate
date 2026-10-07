@@ -102,3 +102,10 @@ def test_a_registered_source_name_is_the_stores_not_the_producers():
     body = {"evidence": [{"e_id": "E-1", "source_name": "Clay technographic scan",
                           "excerpt": "x" * 60}]}
     assert I.customer_prose_hits("heatmap", "evidence", body) == []
+
+
+def test_a_verbatim_excerpt_is_never_asked_to_change():
+    import abbreviations as A
+    assert I.verbatim_keys() == frozenset(A.EXCERPT_FIELDS)
+    body = {"evidence": [{"e_id": "E-1", "excerpt": "Technographic scanning by Clay detected SAS."}]}
+    assert I.customer_prose_hits("heatmap", "evidence", body) == []

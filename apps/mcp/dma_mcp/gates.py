@@ -699,7 +699,9 @@ GATES = {
               "pages withheld from the customer, keys no customer is served "
               "(sources_searched, provenance, tier, r_layer, …), name keys, a "
               "registered source's own name (source_name, publisher: the "
-              "evidence store's, not the producer's), "
+              "evidence store's, not the producer's), verbatim fields "
+              "(abbreviations.EXCERPT_FIELDS: excerpts, quotes, urls, "
+              "headlines — never rewritten), "
               "paths marked internal_only, and NOT_RUN on "
               "heatmap.safeguard_gates, which renders it by design.",
               "Build owner, 2026-10-07: 'It is the customer view that lacks "
