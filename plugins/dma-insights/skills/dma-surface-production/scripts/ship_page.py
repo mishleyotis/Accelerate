@@ -193,7 +193,7 @@ def mcp(tool: str, args: dict) -> dict:
     try:
         p = subprocess.run(
             [sys.executable, str(MCP_RAW), "call", tool, "--args-file", path],
-            capture_output=True, text=True, timeout=900)
+            capture_output=True, text=True, timeout=1900)  # > mcp_raw SLOW_TOOLS (1800 s for submit)
         raw = (p.stdout or "").strip()
         if not raw:
             return {"_error": (p.stderr or "no output").strip()[:400]}

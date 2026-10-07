@@ -207,6 +207,8 @@ def check_acronyms(payload, findings):
             continue
         if path.rsplit(".", 1)[-1].split("[")[0] in EXCERPT_FIELDS:
             continue
+        if _is_identifier(path.rsplit(".", 1)[-1].split("[")[0], v):
+            continue
         for a in EXPANSION:
             if re.search(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])", v) \
                     and "(" + a + ")" not in v:
@@ -236,8 +238,24 @@ def check_capitals(payload, findings):
                  f"uppercase letter after its first character (nCino, iOS) is "
                  f"the vendor's own spelling and is exempt"))
 
+#: An identifier is never prose. First Tech (2026-10-07): the CG-27 fixer
+#: expanded "CU" inside cell ids — `P1C3.6.CU1` became
+#: `P1C3.6.Credit union (CU)1` on 32 cells and evidence links — and the
+#: connector refused every one as a cell the run does not carry (CG-14).
+_ID_VALUE = re.compile(r"^(?:P\d+C\d+(?:\.[A-Za-z0-9]+)*|E-[A-Za-z0-9-]+|"
+                       r"[A-Z]{1,4}-\d+[A-Za-z0-9-]*)$")
+
+
+def _is_identifier(key: str, v: str) -> bool:
+    k = str(key or "")
+    return (k == "id" or k.endswith("_id") or k.endswith("_ids") or k == "cells"
+            or bool(_ID_VALUE.match(v.strip())))
+
+
 def _fix_text(key: str, v: str) -> str:
     """CG-27 then CG-11 on one string leaf, exactly as the checks read them."""
+    if _is_identifier(key, v):
+        return v
     if key not in EXCERPT_FIELDS:
         for a in sorted(EXPANSION, key=len, reverse=True):
             pat = re.compile(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])")
