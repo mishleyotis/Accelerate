@@ -349,7 +349,7 @@ function UAHourHeat({ heat }) {
 }
 function UAStatus({ status }) {
   const cls = { Live: "b-teal", Active: "b-above", Idle: "b-org", Dormant: "b-muted", Never: "b-muted" }[status];
-  return <span className={`b ${cls}`} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>{status === "Live" ? <span className="live-dot" /> : null}{status === "Never" ? "Never signed in" : status}</span>;
+  return <span className={`b ${cls}`} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>{status === "Live" ? <span className="live-dot" /> : null}{status === "Never" ? "No activity yet" : status}</span>;
 }
 
 /* The store's non-ok states, by name. */
@@ -519,7 +519,7 @@ function UsagePage() {
       <div>
         <div className="eyebrow">Settings &amp; operations</div>
         <h1>Usage analytics</h1>
-        <div className="sub">Who's signed in, which pages they use, and how long they stay · {rangeLabel.toLowerCase()}
+        <div className="sub">Who uses DMA Insights, which pages they use, and how long they stay · {rangeLabel.toLowerCase()}
           {ok && model.recordingSince && model.recordingSince > bounds.from ? ` · recording since ${uaDate(model.recordingSince)}` : ""}</div>
       </div>
       <div className="actions">
@@ -594,7 +594,7 @@ function UsagePage() {
           {live.length ? live.map(s => { const u = rows.find(r => r.email === s.email) || { name: uaNameOf(s.email), role: s.role, email: s.email }; const p = s.pages[s.pages.length - 1]; return (
             <button key={s.id} onClick={() => setUserOpen(u.email)} style={{ display: "flex", width: "100%", gap: 10, alignItems: "center", padding: "8px 0", background: "none", border: 0, borderTop: "1px solid var(--z-sep)", cursor: "pointer", textAlign: "left" }}>
               <span style={{ width: 30, height: 30, borderRadius: "50%", background: UA_ROLE_COLOR[u.role], color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{uaInitials(u.name)}</span>
-              <span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "var(--z-dark)" }}>{u.name}</span><span style={{ display: "block", fontSize: 11, color: "var(--z-muted)" }} className="txt-fit-1">{p ? `On ${p.label}${p.clientName ? ` · ${p.clientName}` : ""}` : "Signed in"}</span></span>
+              <span style={{ flex: 1, minWidth: 0 }}><span style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "var(--z-dark)" }}>{u.name}</span><span style={{ display: "block", fontSize: 11, color: "var(--z-muted)" }} className="txt-fit-1">{p ? `On ${p.label}${p.clientName ? ` · ${p.clientName}` : ""}` : "Active now"}</span></span>
               <span style={{ fontSize: 11, color: "var(--z-body)", fontVariantNumeric: "tabular-nums" }}>{uaDur((model.now - s.start) / 1000)}</span>
             </button>
           ); }) : <div style={{ fontSize: 12, color: "var(--z-muted)", borderTop: "1px solid var(--z-sep)", paddingTop: 8 }}>Nobody is active right now.</div>}
@@ -652,11 +652,11 @@ function UsagePage() {
       {/* Users */}
       <div className="card flush">
         <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
-          <h3>Users · sign-ins &amp; time spent</h3>
+          <h3>Users · activity &amp; time spent</h3>
           <span className="spacer" />
           <input className="inp inp-sm" placeholder={showTeam ? "Search name, email, team" : "Search name or email"} value={q} onChange={e => setQ(e.target.value)} style={{ width: 210 }} />
           <select className="inp inp-sm" value={roleF} onChange={e => setRoleF(e.target.value)} style={{ maxWidth: 130 }}><option value="ALL">All roles</option><option value="AE">AE</option><option value="ANALYST">Analyst</option><option value="ADMIN">Admin</option></select>
-          <select className="inp inp-sm" value={statusF} onChange={e => setStatusF(e.target.value)} style={{ maxWidth: 140 }}><option value="ALL">All statuses</option><option>Live</option><option>Active</option><option>Idle</option><option>Dormant</option><option value="Never">Never signed in</option></select>
+          <select className="inp inp-sm" value={statusF} onChange={e => setStatusF(e.target.value)} style={{ maxWidth: 140 }}><option value="ALL">All statuses</option><option>Live</option><option>Active</option><option>Idle</option><option>Dormant</option><option value="Never">No activity yet</option></select>
         </div>
         <div style={{ overflowX: "auto" }}>
           <table className="tbl">

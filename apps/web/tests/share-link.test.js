@@ -342,3 +342,13 @@ test("a revocation names a real action and a real target", async () => {
   await assert.rejects(L.changeRevocation("../escape", { action: "revoke" }, backend), /not a link id/);
   await assert.rejects(L.changeRevocation("validLinkId1", { action: "revoke" }, null), /no ledger/);
 });
+
+/* The app is one document with a hash router: the sign-in page is "/#/login".
+   Sign out lands there, and the path "/login" redirects there rather than 404. */
+test("sign out and /login reach the hash route the app serves", () => {
+  const utils = fs.readFileSync(path.join(__dirname, "..", "proto", "utils.jsx"), "utf8");
+  assert.match(utils, /window\.location\.assign\("\/#\/login"\)/);
+  assert.ok(!/window\.location\.assign\("\/login"\)/.test(utils), "sign out sends the browser to a 404");
+  const login = fs.readFileSync(path.join(__dirname, "..", "app", "login", "route.js"), "utf8");
+  assert.match(login, /status: 307, headers: \{ location: "\/#\/login"/);
+});

@@ -1217,7 +1217,7 @@ function liveSectionState(live, name) {
    sign-in page. With IAP in front, the Google session itself persists —
    "Continue with Google" re-enters without a password prompt. */
 function signOutSession() {
-  const done = () => window.location.assign("/login");
+  const done = () => window.location.assign("/#/login");
   if (typeof window !== "undefined" && window.DMA_LIVE) {
     fetch("/api/signout", { method: "POST" }).then(done, done);
   } else {
