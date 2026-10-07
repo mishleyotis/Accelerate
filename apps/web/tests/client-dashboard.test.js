@@ -127,7 +127,7 @@ test("client bar · client copy, client tabs, a link to share", () => {
   const text = page("ClientBar", "customer", { tab: "overview" });
   assert.match(text, /Client Dashboard/);
   assert.match(text, /Switch back to Zennify view/);
-  assert.match(text, /Copy client link/);
+  assert.match(text, /Share with client/);
   assert.ok(!/Customer/.test(text), `"Customer" is still on the client bar: ${text}`);
   assert.ok(!/share-safe presentation mode/.test(text), "the old banner sentence is back");
   for (const tab of ["Platform", "Tech stack", "Context", "Health", "Runs"]) {

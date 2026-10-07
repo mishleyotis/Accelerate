@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { COOKIE, verify } from "../lib/session";
 import { verifyIapAssertion } from "../lib/iap";
 import { displayName, domainOk, grantedRole, roleGrants } from "../lib/identity";
+import { shareMode } from "../lib/share";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,9 @@ async function apiFetch(path) {
   }
 }
 
-const SCRIPTS = [
+// Exported for the public share page (app/s/[token]/route.js), which must
+// boot the same modules in the same order — one list, not two.
+export const SCRIPTS = [
   "vendor/react.production.min.js",
   "vendor/react-dom.production.min.js",
   // FIRST among the prototype's own modules: data.js throws without it,
@@ -64,6 +67,9 @@ const SCRIPTS = [
 ];
 
 export async function GET(req) {
+  // The public share service serves client links and nothing else: the app
+  // itself (directory, dashboard, sign-in) does not exist there.
+  if (shareMode()) return new Response("Not found", { status: 404 });
   let session = verify(cookies().get(COOKIE)?.value);
 
   // IAP already authenticated this request with Google. If the app
