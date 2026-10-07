@@ -281,6 +281,30 @@ def local_precheck(page: str, payload: dict, *, repo: str | None = None) -> dict
             "reasons": reasons, "by_gate": by_gate}
 
 
+def sure_to_submit(run_id: str, page: str, payload: dict, *, sections=None,
+                   repo: str | None = None) -> dict:
+    """Both validation passes, locally, before a submission is spent.
+
+    Owner, 2026-10-07: "You ought to be sure when submitting a page." Pass 1
+    (`local_precheck`) needs only the payload; pass 2 (`pass2_replay`) runs
+    the server's own `validate_pass2` against a read-only snapshot of the run
+    — the half that refused First Tech's heatmap on CG-14, CG-10, CG-48,
+    ET-09, AG-01 and AG-03 after pass 1 had passed it clean. A check that
+    could not run is `not_run`, and the caller refuses to submit on it: an
+    unchecked page is not a page we are sure of.
+    """
+    pre = local_precheck(page, payload, repo=repo)
+    if pre["status"] != "pass":
+        return {**pre, "stage": "pass1"}
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("pass2_replay", HERE / "pass2_replay.py")
+    p2 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(p2)
+    r = p2.replay(run_id, page, payload, sections_dir=sections, repo=repo,
+                  call=lambda tool, args: mcp(tool, args))
+    return {**r, "stage": "pass2"}
+
+
 def session_id() -> str:
     """The session token the claim is made under — the harness's when it
     exports one, otherwise a fresh one for this process."""
@@ -422,9 +446,9 @@ def main(argv=None) -> int:
                     help="write {page: {status, reasons}} JSON here — the "
                          "driver reads this rather than the transcript")
     ap.add_argument("--no-precheck", action="store_true",
-                    help="submit without running the server's pass-1 gates "
-                         "locally first (they catch 98%% of refusals; a page "
-                         "with a local blocking reason is otherwise not sent)")
+                    help="submit without running the server's pass-1 and "
+                         "pass-2 gates locally first. Without this flag a page "
+                         "is sent only when both ran and found nothing.")
     ap.add_argument("--repo", default=None,
                     help="checkout of the DMA Insights repository for the local "
                          "precheck; falls back to $DMA_INSIGHTS_REPO and the cwd")
@@ -483,9 +507,9 @@ def main(argv=None) -> int:
             # repair agent told to verify with it saw a clean run on a page
             # the connector's pass-1 gates refuse (First Tech, CG-15 x40).
             if not a.no_precheck:
-                pre = local_precheck(page, payload, repo=a.repo)
+                pre = sure_to_submit(a.run_id, page, payload, sections=a.sections, repo=a.repo)
                 if pre["status"] == "fail":
-                    print(f"{page}: DRY RUN — local precheck FAIL, "
+                    print(f"{page}: DRY RUN — local {pre['stage']} FAIL, "
                           f"{len(pre['reasons'])} blocking reason(s): "
                           + ", ".join(f"{g} x{n}" for g, n in sorted(pre["by_gate"].items())))
                     for r in pre["reasons"][:40]:
@@ -493,32 +517,43 @@ def main(argv=None) -> int:
                               str(r.get("message"))[:160])
                     failed.append(page)
                 elif pre["status"] == "not_run":
-                    print(f"{page}: DRY RUN — local precheck NOT RUN — {pre['why']}")
+                    print(f"{page}: DRY RUN — local {pre['stage']} NOT RUN — {pre['why']}")
+                    failed.append(page)
                 else:
-                    print(f"{page}: DRY RUN — local precheck clean ({pre['gates_from']})")
+                    print(f"{page}: DRY RUN — local precheck clean (pass 1 + pass 2, "
+                          f"{pre['gates_from']})"
+                          + (f"; unverified locally: {pre['unverified'][:6]}"
+                             if pre.get("unverified") else ""))
             continue
         if not a.no_precheck:
-            pre = local_precheck(page, payload, repo=a.repo)
-            if pre["status"] == "not_run":
-                print(f"{page}: local precheck NOT RUN — {pre['why']}")
-            elif pre["status"] == "fail":
-                print(f"{page}: NOT SUBMITTED — {len(pre['reasons'])} blocking "
-                      f"reason(s) from the server's own pass-1 gates, run locally "
-                      f"({pre['gates_from']}): "
-                      + ", ".join(f"{g} x{n}" for g, n in sorted(pre["by_gate"].items())))
+            pre = sure_to_submit(a.run_id, page, payload, sections=a.sections, repo=a.repo)
+            if pre["status"] != "pass":
+                # Fail closed: a page is submitted only when both passes ran
+                # locally and found nothing. NOT RUN is not a pass.
+                why = (f"{len(pre['reasons'])} blocking reason(s) from the server's own "
+                       f"{pre['stage']} gates, run locally ({pre.get('gates_from')}): "
+                       + ", ".join(f"{g} x{n}" for g, n in sorted(pre.get("by_gate", {}).items()))
+                       if pre["status"] == "fail" else
+                       f"the local {pre['stage']} check could not run — {pre.get('why')}")
+                print(f"{page}: NOT SUBMITTED — {why}")
                 for r in pre["reasons"][:12]:
                     print("   ", r.get("gate_id"), r.get("path"), "|",
                           str(r.get("message"))[:140])
-                verdicts[page] = {"status": "local_precheck_fail",
-                                  "reasons": pre["reasons"][:40], "sg_v4_fails": []}
+                verdicts[page] = {"status": "local_precheck_fail" if pre["status"] == "fail"
+                                  else "local_precheck_not_run",
+                                  "stage": pre["stage"],
+                                  "n_reasons": len(pre["reasons"]),
+                                  "reasons": pre["reasons"][:40] or [why],
+                                  "sg_v4_fails": []}
                 _write_verdicts()
                 failed.append(page)
                 continue
-            else:
-                print(f"{page}: local precheck clean ({pre['gates_from']})")
+            print(f"{page}: local precheck clean, pass 1 + pass 2 ({pre['gates_from']})"
+                  + (f"; unverified locally: {pre['unverified'][:6]}" if pre.get("unverified") else ""))
         res = submit(a.run_id, page, payload, a.producer)
         status, reasons = verdict_line(res)
         verdicts[page] = {"status": status, "reasons": reasons[:40],
+                          "n_reasons": len(reasons),
                           "sg_v4_fails": sg_v4_grounding_fails(res)}
         _write_verdicts()
         print(f"{page}: {status.upper()} — {len(reasons)} blocking reason(s)")

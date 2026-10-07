@@ -426,7 +426,8 @@ class ShipPageShipper:
                 verdict = {}
         status = verdict.get("status") or ("pass" if r.returncode == 0 else
                                            "claim_refused" if r.returncode == 3 else "fail")
-        return {"status": status, "reasons": verdict.get("reasons") or
+        return {"status": status, "n_reasons": verdict.get("n_reasons"),
+                "reasons": verdict.get("reasons") or
                 ([(r.stderr or r.stdout)[-400:]] if r.returncode else []),
                 "sg_v4_fails": verdict.get("sg_v4_fails") or [],
                 "rc": r.returncode}
@@ -2996,6 +2997,9 @@ class Pipeline:
         rec.update({"version": version, "status": res.get("status"),
                     "reasons": (res.get("reasons") or [])[:12],
                     "sg_v4_fails": len(sgv4),
+                    "n_reasons": res.get("n_reasons"),
+                    "n_history": ((rec.get("n_history") or [])
+                                  + [[version, res.get("status"), res.get("n_reasons")]])[-8:],
                     "attempts": int(rec.get("attempts") or 0) + 1,
                     "connector_run": connector_run, "at": _utcnow()})
         rec.setdefault("versions", {})[version] = res.get("status")
@@ -3011,6 +3015,44 @@ class Pipeline:
             return True
         verdicts[p] = (res.get("reasons") or [])[:12]
         return False
+
+    def _no_retry(self, p: str, attempt: int = 0) -> str | None:
+        """Why page `p` must NOT be retried, or None to allow one repair.
+
+        Owner, 2026-10-07: "Do not keep ingesting and this failure loop. You
+        ought to be sure when submitting a page." ship_page.py submits only
+        when BOTH validation passes ran locally and found nothing, so:
+
+          - a SERVER refusal after a clean local check means the local
+            replay missed a gate. The page gets ONE repair carrying the
+            server's own reasons; a second refusal on the same version halts
+            it, because a third submission could not be sure of anything.
+          - a local check that could not RUN is an environment fault, not a
+            content one; a repair lane cannot fix it.
+          - a local refusal that did not SHRINK since the last repair means
+            the repair is not converging; another lane is the loop.
+        """
+        rec = self.state["pages"].get(p) or {}
+        status = str(rec.get("status") or "")
+        n = rec.get("n_reasons")
+        refused = [h for h in (rec.get("n_history") or [])
+                   if h and h[0] == rec.get("version") and h[1] == "fail"]
+        if status == "fail" and len(refused) >= 2:
+            return (f"the connector refused it {len(refused)} times on this version "
+                    "after clean local checks — the replay is missing a gate, so a "
+                    "further submission cannot be sure; repair against the server's "
+                    "reasons by hand and confirm with ship_page.py --dry-run")
+        if status == "local_precheck_not_run":
+            return "the local validation could not run (" + \
+                   "; ".join(str(x)[:120] for x in (rec.get("reasons") or [])[:1]) + ")"
+        hist = [h for h in (rec.get("n_history") or [])
+                if h and h[0] == rec.get("version") and h[1] == "local_precheck_fail"]
+        if status == "local_precheck_fail" and isinstance(n, int) and len(hist) >= 2:
+            prev = hist[-2][2]
+            if isinstance(prev, int) and n >= prev:
+                return (f"the repair did not converge: {n} blocking reason(s) after "
+                        f"repair, {prev} before")
+        return None
 
     def _pages_preflight(self, pages: tuple, version: str) -> None:
         """The page gates whose inputs live in the workbook, read BEFORE a
@@ -3061,6 +3103,7 @@ class Pipeline:
                                              verdicts, verdicts_file)
         todo = [p for p in pages if not self._page_ok(p, version)]
         shipped = []
+        halted: dict = {}
         for attempt in range(self.opts.page_retries + 1):
             if not todo:
                 break
@@ -3101,6 +3144,10 @@ class Pipeline:
             for p in todo:
                 if self._ship_one(p, version, connector_run, verdicts):
                     shipped.append(p)
+                    continue
+                why = self._no_retry(p, attempt)
+                if why:
+                    halted[p] = why
                 else:
                     still.append(p)
             self._save_state()
@@ -3108,6 +3155,14 @@ class Pipeline:
             todo = still
             if todo and not produce:
                 break                     # a restage from disk is not retried by lanes
+        if halted:
+            raise StageRefused(
+                f"page(s) halted on version {version} — not retried, because a retry "
+                f"could not be sure of a different outcome: "
+                + "; ".join(f"{p}: {w}. Last verdict: "
+                            + ", ".join(str(x)[:100] for x in verdicts.get(p, [])[:2])
+                            for p, w in halted.items())
+                + (f". Still failing: {', '.join(todo)}" if todo else ""))
         if todo:
             raise StageRefused(
                 f"page(s) not passing on version {version} after "
@@ -3141,6 +3196,14 @@ class Pipeline:
         if not todo:
             self._handoff_clear(f"PAGES_{version}:{','.join(pages)}")
             return shipped
+        halted = {p: w for p in todo if (w := self._no_retry(p))}
+        if halted:
+            raise StageRefused(
+                f"page(s) halted on version {version} — not retried, because a retry "
+                f"could not be sure of a different outcome: "
+                + "; ".join(f"{p}: {w}. Last verdict: "
+                            + ", ".join(str(x)[:100] for x in verdicts.get(p, [])[:2])
+                            for p, w in halted.items()))
         tries = {p: int((((self.state.get("pages") or {}).get(p) or {})
                          .get("attempts_by_version") or {}).get(version) or 0) for p in todo}
         spent = [p for p in todo if tries[p] >= self.opts.page_retries + 1]
