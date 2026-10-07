@@ -290,3 +290,32 @@ def test_a_missing_oauth_secret_does_not_fail_the_release():
     src = DEPLOY.read_text(encoding="utf-8")
     assert "gcloud secrets describe" in src
     assert "MCP_OAUTH_MISSING" in src
+
+
+def test_THE_SHARE_SERVICE_IS_PUBLIC_ONLY_WITH_ITS_GATE_STANDING():
+    """Client share links (owner, 2026-10-07): `dmai-share` is public because
+    a client has no Zennify login — and it may be public ONLY as the share
+    service: SHARE_MODE on, the PUBLIC key alone (it can verify a link and
+    never mint one), its own service account, and a post-deploy probe that
+    fails the release if the app's own routes answer there. Drop any half and
+    this fails red before a deploy runs."""
+    block = _deploy_block("dmai-share")
+    assert PUBLIC_FLAG.search(block), "dmai-share is not deployed public"
+    assert "SHARE_MODE=1" in block, (
+        "dmai-share deploys public WITHOUT SHARE_MODE=1 — that is the whole "
+        "app, sign-in and directory included, on an open door")
+    assert "SHARE_VERIFY_KEY=dmai-share-verify-key" in block
+    assert "SHARE_SIGNING_KEY" not in block, (
+        "dmai-share carries the signing key: the internet-facing service "
+        "could mint links for any client")
+    assert 'service-account="$SHARE_SA"' in block, (
+        "dmai-share runs as another service's identity")
+    text = DEPLOY.read_text()
+    assert "dmai-share door probe failed" in text, (
+        "the post-deploy door probe is gone")
+    web = _deploy_block("dmai-web")
+    assert "SHARE_MODE" not in web, "dmai-web would serve as the share service"
+    lib = (ROOT / "apps" / "web" / "lib" / "share.js").read_text()
+    for needle in ("crypto.verify(", "revoked.has(p.jti)", "p.exp <= Math.floor",
+                   "CONSUMER_DOMAINS"):
+        assert needle in lib, f"apps/web/lib/share.js no longer carries {needle!r}"

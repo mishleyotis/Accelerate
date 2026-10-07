@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../../lib/session";
 import { effectiveRole } from "../../../../../lib/identity";
+import { shareMode } from "../../../../../lib/share";
 
 // The SPA's read path into the serving tier. The session's GRANTED role is
 // forwarded (never a client-supplied one), so the API can refuse a page the
@@ -18,6 +19,8 @@ const PAGES = new Set(["overview", "insights", "heatmap", "platform",
                        "answers"]);
 
 export async function GET(req, { params }) {
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) return new Response("Not found", { status: 404 });
   const session = verify(cookies().get(COOKIE)?.value);
   if (!session) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });

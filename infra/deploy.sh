@@ -266,6 +266,35 @@ if [ -f apps/web/Dockerfile ]; then
     --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
   API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
     --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
+  # Client share links (owner, 2026-10-07): an Ed25519 pair, created once.
+  # The PRIVATE key is mounted on dmai-web only (it mints); the PUBLIC key on
+  # dmai-share only (it verifies) — so the internet-facing service can never
+  # mint a link. Generated here, never echoed, never written outside a 0700
+  # temp dir that is removed before the next command. To revoke EVERY link at
+  # once: add a new version of both secrets (same two openssl lines).
+  if ! gcloud secrets describe dmai-share-signing-key --project="$PROJECT_ID" >/dev/null 2>&1; then
+    KD="$(mktemp -d)"; chmod 700 "$KD"
+    openssl genpkey -algorithm ed25519 -out "$KD/k.pem" 2>/dev/null
+    openssl pkey -in "$KD/k.pem" -pubout -out "$KD/pub.pem" 2>/dev/null
+    gcloud secrets create dmai-share-signing-key --project="$PROJECT_ID" \
+      --data-file="$KD/k.pem" --quiet
+    if gcloud secrets describe dmai-share-verify-key --project="$PROJECT_ID" >/dev/null 2>&1; then
+      gcloud secrets versions add dmai-share-verify-key --project="$PROJECT_ID" \
+        --data-file="$KD/pub.pem" --quiet
+    else
+      gcloud secrets create dmai-share-verify-key --project="$PROJECT_ID" \
+        --data-file="$KD/pub.pem" --quiet
+    fi
+    rm -rf "$KD"
+  fi
+  gcloud secrets add-iam-policy-binding dmai-share-signing-key \
+    --project="$PROJECT_ID" \
+    --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+    --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+  # The share service's URL follows the project's run.app pattern, so it is
+  # known before the service exists; the share block below re-reads the real
+  # URL and corrects dmai-web if the two ever differ.
+  SHARE_BASE_URL="${API_URL/dmai-api/dmai-share}"
   # Role grants (allowlists until the auth stage's users table): ADMIN and
   # ANALYST are strictly these emails; every other @zennify.com Google
   # account signs in as AE. Override per deploy via the environment.
@@ -278,8 +307,8 @@ if [ -f apps/web/Dockerfile ]; then
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
-    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo}" \
-    --set-secrets="SESSION_SECRET=dmai-session-secret:latest" \
+    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};SHARE_BASE_URL=${SHARE_BASE_URL}" \
+    --set-secrets="SESSION_SECRET=dmai-session-secret:latest,SHARE_SIGNING_KEY=dmai-share-signing-key:latest" \
     --quiet
   # NO `--allow-unauthenticated` HERE, DELIBERATELY, AND NO
   # `--no-allow-unauthenticated` EITHER. On an existing service gcloud
@@ -394,6 +423,70 @@ if [ -f apps/web/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
     --role="roles/run.invoker" --quiet >/dev/null 2>&1 || true
+fi
+
+# --- 2a · dmai-share (public client links; owner, 2026-10-07) ------------
+# The SAME image dmai-web just shipped, with SHARE_MODE=1: every route but
+# /s/<token>… answers 404 there (apps/web/tests/share-link.test.js fails CI
+# on a route that forgets). Ingress is open — a client has no Zennify login —
+# and identity is read in-app: a link signed by the key only dmai-web holds,
+# bound to one client and run, expiring, revocable, admitting only the email
+# addresses and organisation domains it was shared to. Its own service
+# account holds exactly two grants: invoke svc_api, read the PUBLIC key.
+if [ -f apps/web/Dockerfile ]; then
+  say "share (public client links)"
+  SHARE_SA="dmai-share@${SA_DOMAIN}"
+  if ! gcloud iam service-accounts describe "$SHARE_SA" --project="$PROJECT_ID" >/dev/null 2>&1; then
+    gcloud iam service-accounts create dmai-share --project="$PROJECT_ID" \
+      --display-name="DMA Insights public share links" --quiet || {
+      echo "FATAL: cannot create the dmai-share service account. A project owner" \
+           "runs once: gcloud iam service-accounts create dmai-share --project=$PROJECT_ID" >&2
+      exit 1; }
+  fi
+  gcloud secrets add-iam-policy-binding dmai-share-verify-key \
+    --project="$PROJECT_ID" --member="serviceAccount:${SHARE_SA}" \
+    --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+  gcloud run services add-iam-policy-binding dmai-api \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --member="serviceAccount:${SHARE_SA}" --role="roles/run.invoker" --quiet >/dev/null
+  WEB_IMAGE="$(gcloud run services describe dmai-web --project="$PROJECT_ID" \
+    --region="$REGION" --format='value(spec.template.spec.containers[0].image)')"
+  # One link at a time: list its jti (shown in the share dialog and in the
+  # share_link_minted log line) in infra/share-revoked.txt and release.
+  SHARE_REVOKED="$(grep -v '^[[:space:]]*#' infra/share-revoked.txt 2>/dev/null \
+    | tr -d '[:space:]' | paste -sd, - || true)"
+  gcloud run deploy dmai-share --image="$WEB_IMAGE" \
+    --project="$PROJECT_ID" --region="$REGION" \
+    --service-account="$SHARE_SA" \
+    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}" \
+    --set-secrets="SHARE_VERIFY_KEY=dmai-share-verify-key:latest" \
+    --min-instances=0 --max-instances=10 --concurrency=80 \
+    --allow-unauthenticated --quiet
+  share_url="$(gcloud run services describe dmai-share --project="$PROJECT_ID" \
+    --region="$REGION" --format='value(status.url)')"
+  if [ "$share_url" != "$SHARE_BASE_URL" ]; then
+    say "  share: correcting dmai-web SHARE_BASE_URL to ${share_url}"
+    gcloud run services update dmai-web --project="$PROJECT_ID" --region="$REGION" \
+      --update-env-vars="SHARE_BASE_URL=${share_url}" --quiet
+  fi
+  # Prove the door, both directions, or refuse to call this release done:
+  # the app's own routes must not exist on the public service, a junk link
+  # must be refused, and the static bundle must be served.
+  bad=""
+  for probe in "GET /" "POST /api/signin" "POST /api/share" "GET /status" \
+               "GET /api/entity/x/overview?audience=internal" "GET /s/not-a-token"; do
+    m="${probe%% *}"; u="${probe#* }"
+    c=$(curl -s -o /dev/null -w '%{http_code}' -X "$m" "${share_url}${u}" || echo 000)
+    [ "$c" = "404" ] || bad="${bad} ${probe}=${c}"
+  done
+  c=$(curl -s -o /dev/null -w '%{http_code}' "${share_url}/proto/app.css" || echo 000)
+  [ "$c" = "200" ] || bad="${bad} GET /proto/app.css=${c}"
+  if [ -n "$bad" ]; then
+    echo "FATAL: dmai-share door probe failed:${bad}. The public service is" \
+         "answering something other than client links. Refusing to call this" \
+         "deploy done." >&2; exit 1
+  fi
+  say "share: public, client links only — app routes 404, junk link 404, bundle 200 (${share_url})"
 fi
 
 # --- 2b · dmai-refresh (the web's refresh-request write path) -------------

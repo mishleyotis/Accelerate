@@ -170,6 +170,24 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   top bar / toggle, sticky for the document. Tests:
   `apps/web/tests/client-dashboard.test.js`.
 
+- **Public client share links** (user, 2026-10-07; supersedes PRD v1's
+  "clients receive exports, not logins" for this route only): "Share with
+  client" mints a link on the separate public service **`dmai-share`** (same
+  image, `SHARE_MODE=1`, every non-`/s/` route 404s — enforced by
+  `apps/web/tests/share-link.test.js` and a post-deploy door probe). The link
+  is Ed25519-signed (private key on `dmai-web` only, public key on
+  `dmai-share` only), bound to one client + run, 1–90 days, revocable
+  (`infra/share-revoked.txt` or key rotation). **Allowlist per DMA = the
+  recipients' emails + their organisation domains** (never a consumer
+  mailbox domain), signed into the link — no DB write path (invariant 2
+  stands). The recipient enters their work email at a gate; no Google
+  sign-in, no mail provider, no third-party key (owner's constraint). Known
+  limit, accepted: the typed email is self-attested — the protection is the
+  unguessable signed link delivered to the recipient's mailbox; every mint,
+  admit and refusal is logged (`share_link_minted` / `share_access_*`).
+  Reads go to svc_api as `audience=customer`, `role=AE`, the link's run,
+  pages `overview·insights·heatmap·evidence·subcaps` only.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).
@@ -178,9 +196,4 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   (they disagree on 144 SWBC cells).
 - Techstack layer denominator (T-03/DNR-6): producer product slots vs the
   server's cell count.
-- External access for the client link: the web service sits behind IAP and
-  PRD v1 scopes out "a customer-facing portal — clients receive exports, not
-  logins", so a client link opens only for someone IAP admits. Opening it to
-  a non-Zennify recipient (IAP grant per client, or a tokenised public
-  route) is a security/product decision for the owner.
 - Partitioning: **not yet** (triggers/strategies documented in TRD §17; do not pre-build).
