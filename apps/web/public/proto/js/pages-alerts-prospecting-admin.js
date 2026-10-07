@@ -213,7 +213,7 @@ function ProspectingPage() {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Customer-safe export"), /*#__PURE__*/React.createElement("h1", null, "Prospecting"), /*#__PURE__*/React.createElement("div", {
+  }, "Client-safe export"), /*#__PURE__*/React.createElement("h1", null, "Prospecting"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, "Search \u2192 one-page scorecard \u2192 export PDF or HTML")), /*#__PURE__*/React.createElement("span", {
     className: "b b-org",
@@ -223,7 +223,7 @@ function ProspectingPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
     size: 10
-  }), " CUSTOMER-SAFE MODE")), /*#__PURE__*/React.createElement("div", {
+  }), " CLIENT-SAFE MODE")), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16
@@ -320,7 +320,7 @@ function ProspectingPage() {
       fontWeight: 600,
       fontSize: 13
     }
-  }, "Scorecard preview \xB7 always Customer View"), /*#__PURE__*/React.createElement("span", {
+  }, "Scorecard preview \xB7 always Client view"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -371,7 +371,7 @@ function ProspectingPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "envelope",
     size: 22
-  })), /*#__PURE__*/React.createElement("h3", null, "Search to begin"), /*#__PURE__*/React.createElement("p", null, "Search the institution name to load a one-page scorecard. The export is always Customer-safe - internal fields are stripped.")));
+  })), /*#__PURE__*/React.createElement("h3", null, "Search to begin"), /*#__PURE__*/React.createElement("p", null, "Search the institution name to load a one-page scorecard. The export is always client-safe - internal fields are stripped.")));
 }
 function ScorecardPreview({
   e

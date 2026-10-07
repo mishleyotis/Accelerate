@@ -17,5 +17,12 @@ through svc_api"):
 - `app-root.jsx` — initial `authed` comes from the server-verified
   session in DMA_LIVE.
 
+- Client view (owner's client-view review, 2026-10-07): "Customer" reads
+  "Client", the client view carries Overview · Insights · Heatmap only and
+  hides the Zennify-only surfaces, and `?view=client` opens the chrome-less
+  client link (`chrome.jsx`, `utils.jsx`, `app-root.jsx`,
+  `pages-d1-overview.jsx`). Product behaviour, not data flow — recorded here
+  so `/prototype` is not mistaken for the current client view.
+
 Everything else is byte-identical to `/prototype`. Do not restyle here;
 the prototype wins on layout, interaction and visual rendering.

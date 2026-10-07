@@ -46,8 +46,63 @@ function buildHash(path, params) {
   const qs = keys.length ? "?" + keys.map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&") : "";
   return `#${path}${qs}`;
 }
+/* ── Client link ──────────────────────────────────────────────────────
+   A URL carrying `view=client` opens the CLIENT DASHBOARD on its own: client
+   audience, client tabs only, none of the Zennify chrome (nav, search,
+   notifications, settings, audience toggle, Intelligence). Decided ONCE, from
+   the hash the document was opened on, and sticky for the document's life —
+   so no in-page link, and no navigate() that forgets a param, can walk a
+   reader out of it. The server still decides what the customer audience may
+   contain; this only decides the frame. */
+const CLIENT_LINK = (() => {
+  try {
+    const {
+      path,
+      params
+    } = parseHash();
+    if (params.view !== "client") return null;
+    const m = path.match(/^\/clients\/([^/]+)/);
+    return m ? {
+      entityId: m[1]
+    } : null;
+  } catch (e) {
+    return null;
+  }
+})();
+function isClientLink() {
+  return !!CLIENT_LINK;
+}
+function clientLinkEntity() {
+  return CLIENT_LINK ? CLIENT_LINK.entityId : null;
+}
+
+/* The tabs a client dashboard carries, in either client frame (the Client
+   toggle while presenting, or a client link). Context, Health and Runs were
+   already internal; Platform and Tech stack were withdrawn from the client
+   view by the 2026-10-07 client-view review. One list, read by the tab strip
+   and by the router guard, so a tab cannot be hidden in one and reachable in
+   the other. */
+const CLIENT_TABS = ["overview", "insights", "heatmap"];
+function clientTabAllowed(tab) {
+  return CLIENT_TABS.includes(tab);
+}
+
+/* The shareable URL for one client page: this app's origin, the client
+   frame, the run pinned so the recipient reads what the sender read. */
+function clientLinkUrl(entityId, tab, runId) {
+  const params = {
+    view: "client"
+  };
+  if (runId) params.run = runId;
+  const t = clientTabAllowed(tab) ? tab : "overview";
+  return `${window.location.origin}${window.location.pathname}${buildHash(`/clients/${entityId}/${t}`, params)}`;
+}
 function navigate(path, params) {
-  window.location.hash = buildHash(path, params || {}).slice(1);
+  const p = {
+    ...(params || {})
+  };
+  if (CLIENT_LINK) p.view = "client";
+  window.location.hash = buildHash(path, p).slice(1);
 }
 function useRoute() {
   const [route, setRoute] = useState(parseHash());
@@ -2322,6 +2377,11 @@ Object.assign(window, {
   buildHash,
   navigate,
   useRoute,
+  isClientLink,
+  clientLinkEntity,
+  clientTabAllowed,
+  clientLinkUrl,
+  CLIENT_TABS,
   fmtDate,
   fmtDateLong,
   fmtDatesInText,
