@@ -1,11 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../lib/session";
+import { shareMode } from "../../../../lib/share";
 
 // Fires one execution of the package-scan worker Job (the same Job the
 // Cloud Scheduler trigger runs every 30 minutes). ADMIN sessions only —
 // the server-granted role, not the acting one.
 export async function POST() {
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) return new Response("Not found", { status: 404 });
   const session = verify(cookies().get(COOKIE)?.value);
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "Admin session required." }, { status: 403 });

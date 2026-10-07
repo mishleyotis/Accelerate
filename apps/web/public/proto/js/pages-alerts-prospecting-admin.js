@@ -213,7 +213,7 @@ function ProspectingPage() {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Customer-safe export"), /*#__PURE__*/React.createElement("h1", null, "Prospecting"), /*#__PURE__*/React.createElement("div", {
+  }, "Client-safe export"), /*#__PURE__*/React.createElement("h1", null, "Prospecting"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, "Search \u2192 one-page scorecard \u2192 export PDF or HTML")), /*#__PURE__*/React.createElement("span", {
     className: "b b-org",
@@ -223,7 +223,7 @@ function ProspectingPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
     size: 10
-  }), " CUSTOMER-SAFE MODE")), /*#__PURE__*/React.createElement("div", {
+  }), " CLIENT-SAFE MODE")), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16
@@ -320,7 +320,7 @@ function ProspectingPage() {
       fontWeight: 600,
       fontSize: 13
     }
-  }, "Scorecard preview \xB7 always Customer View"), /*#__PURE__*/React.createElement("span", {
+  }, "Scorecard preview \xB7 always Client view"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -371,7 +371,7 @@ function ProspectingPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "envelope",
     size: 22
-  })), /*#__PURE__*/React.createElement("h3", null, "Search to begin"), /*#__PURE__*/React.createElement("p", null, "Search the institution name to load a one-page scorecard. The export is always Customer-safe - internal fields are stripped.")));
+  })), /*#__PURE__*/React.createElement("h3", null, "Search to begin"), /*#__PURE__*/React.createElement("p", null, "Search the institution name to load a one-page scorecard. The export is always client-safe - internal fields are stripped.")));
 }
 function ScorecardPreview({
   e
@@ -851,6 +851,18 @@ function AdminUsersCard() {
   const {
     pushToast
   } = useApp();
+  // Production divergence: "Last active" reads the usage telemetry's last-seen
+  // (pages-admin-usage.jsx, shared fetch with the glance card). Until usage is
+  // recording, the honest word stays "Not recorded".
+  const usage = window.useUsageModel ? window.useUsageModel(7) : {
+    status: "not_configured"
+  };
+  const lastActive = u => {
+    if (!window.DMA_LIVE || usage.status !== "ok") return u.last;
+    const seen = usage.lastSeen[String(u.email).toLowerCase()];
+    if (u.email === sessionUser().email) return "now (this session)";
+    return seen ? window.uaRel(seen, false, usage.now) : "Never signed in";
+  };
   // Production divergence: LIVE mode renders the REAL role grants the
   // server resolves sign-ins against (DMA_LIVE.role_grants, admin
   // sessions only) — read-only until the users table lands; grants
@@ -987,7 +999,7 @@ function AdminUsersCard() {
     }
   }, /*#__PURE__*/React.createElement("table", {
     className: "tbl"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Role"), /*#__PURE__*/React.createElement("th", null, "Last active"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Role"), /*#__PURE__*/React.createElement("th", null, "Last active"), /*#__PURE__*/React.createElement("th", null, "Status"), LIVE ? null : /*#__PURE__*/React.createElement("th", {
     style: {
       textAlign: "right"
     }
@@ -1011,7 +1023,13 @@ function AdminUsersCard() {
     }
   }, u.email)), /*#__PURE__*/React.createElement("td", {
     "data-label": "Role"
-  }, /*#__PURE__*/React.createElement("select", {
+  }, LIVE ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted"
+  }, {
+    AE: "AE",
+    ANALYST: "Analyst",
+    ADMIN: "Admin"
+  }[u.role] || u.role) : /*#__PURE__*/React.createElement("select", {
     className: "inp inp-sm",
     value: u.role,
     onChange: e => setRole(u.id, e.target.value),
@@ -1031,11 +1049,11 @@ function AdminUsersCard() {
       fontSize: 11.5,
       color: "var(--z-muted)"
     }
-  }, u.last), /*#__PURE__*/React.createElement("td", {
+  }, lastActive(u)), /*#__PURE__*/React.createElement("td", {
     "data-label": "Status"
   }, /*#__PURE__*/React.createElement("span", {
     className: `b ${u.active ? "b-above" : "b-muted"}`
-  }, u.active ? "Active" : "Deactivated")), /*#__PURE__*/React.createElement("td", {
+  }, u.active ? "Active" : "Deactivated")), LIVE ? null : /*#__PURE__*/React.createElement("td", {
     "data-label": "Action",
     style: {
       textAlign: "right"
@@ -1102,6 +1120,21 @@ function AdminUsersCard() {
     name: "plus",
     size: 12
   }), " Invite user")));
+}
+
+/* The last package-scan execution as one line: when it started and what the
+   ledger says it did. A row the Job never finished says so — "running or
+   died" is a different fact from a completed scan. */
+function lastScanLabel(s) {
+  if (!s || !s.started_at) return "No scans recorded yet";
+  const when = new Date(s.started_at).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  if (!s.finished_at) return `Last scan ${when} · not finished`;
+  return `Last scan ${when} · ${(s.status || "").toLowerCase() || "status not recorded"}`;
 }
 
 /* ── /admin home + import + audit ────────────────────────────────── */
@@ -1180,13 +1213,25 @@ function AdminPage() {
   }), " Scanning\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
-  }), " Delta scan")), /*#__PURE__*/React.createElement("button", {
+  }), " Delta scan")), LIVE ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => navigate("/admin/usage")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "users",
+    size: 13
+  }), " Usage analytics") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary",
+    onClick: () => navigate("/admin/usage")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "users",
+    size: 13
+  }), " Usage analytics"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary",
     onClick: () => navigate("/admin/import")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "play",
     size: 13
-  }), " Import & jobs"))), /*#__PURE__*/React.createElement("div", {
+  }), " Import & jobs")))), window.UsageGlanceCard ? /*#__PURE__*/React.createElement(window.UsageGlanceCard, null) : null, LIVE ? null : /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     style: {
       marginBottom: 16
@@ -1276,7 +1321,7 @@ function AdminPage() {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, LIVE ? "History → Import audit" : "Last crawl 2 hr ago")), /*#__PURE__*/React.createElement("label", {
+  }, LIVE ? lastScanLabel((window.DMA_LIVE.import_scans || [])[0]) : "Last crawl 2 hr ago")), /*#__PURE__*/React.createElement("label", {
     className: "field-label"
   }, "Target folder ID"), /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -1312,12 +1357,17 @@ function AdminPage() {
       borderRadius: 6,
       border: "1px solid var(--z-sep)"
     }
-  }, folder), LIVE ? /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    onClick: () => pushToast("The intake folder is set on the worker Job (INTAKE_FOLDER_ID) at deploy time", "warn")
+  }, folder), LIVE ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted",
+    title: "Set on the worker Job (INTAKE_FOLDER_ID) at deploy time",
+    style: {
+      display: "inline-flex",
+      gap: 4,
+      alignItems: "center"
+    }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
-    size: 12
+    size: 11
   }), " Deploy-set") : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => setEditingFolder(true)
@@ -1369,7 +1419,7 @@ function AdminPage() {
   }), " Scanning\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 12
-  }), " Delta scan")), /*#__PURE__*/React.createElement("button", {
+  }), " Delta scan")), LIVE ? null : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     disabled: scanning,
     onClick: () => runScan("full")
@@ -1379,7 +1429,7 @@ function AdminPage() {
   }, "Import audit \u2192"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate("/admin/import")
-  }, "Job history \u2192"))), /*#__PURE__*/React.createElement("div", {
+  }, "Job history \u2192")))), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, LIVE ?
   /*#__PURE__*/
@@ -2091,5 +2141,6 @@ Object.assign(window, {
   ProspectingPage,
   AdminPage,
   ImportPage,
-  ImportAuditPage
+  ImportAuditPage,
+  lastScanLabel
 });

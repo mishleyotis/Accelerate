@@ -898,7 +898,7 @@ function IpAnswer({ res, onEv }) {
 
 /* ── Intelligence Panel ─────────────────────────────────────────── */
 function IntelligencePanel() {
-  const { ipOpen, setIpOpen, ipSurface, ipContext, authed, pushToast, openEvidence, openSubcap } = useApp();
+  const { ipOpen, setIpOpen, ipSurface, ipContext, authed, audience, pushToast, openEvidence, openSubcap } = useApp();
   const [text, setText] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [chat, setChat] = useState([]);          // [{role: 'user'|'ai', text}]
@@ -945,6 +945,9 @@ function IntelligencePanel() {
 
   // Never show before sign-in (rule of hooks: gate AFTER all hook calls)
   if (!authed) return null;
+  // Meeting prep is Zennify's own preparation: the client dashboard carries
+  // neither the button nor the panel it opens (client-view review 2026-10-07).
+  if (audience === "customer") return null;
 
   const ask = (question) => {
     const q = String(question || chatInput || "").trim();

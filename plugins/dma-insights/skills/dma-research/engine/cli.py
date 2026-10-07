@@ -511,6 +511,29 @@ def main(argv=None) -> int:
                         "category's cells (engine/scope.py); the servicing "
                         "tier registers against any cell in the run")
 
+    gl = common(sub.add_parser(
+        "gate-log", help="record one Gate_Log row (non-blocking by default) — the "
+                         "way a hand-driven step states a PASS, FAIL or NOT_RUN "
+                         "with its reason where a reader of the run looks"))
+    gl.add_argument("--gate", required=True)
+    gl.add_argument("--scope", default="run")
+    gl.add_argument("--verdict", required=True, choices=["PASS", "FAIL", "NOT_RUN"])
+    gl.add_argument("--detail", default="")
+    gl.add_argument("--blocking", action="store_true")
+
+    rt = common(sub.add_parser(
+        "retier", help="move one registered row to another tier, with the "
+                       "cascade the tier carries (claim label re-derived, ERS "
+                       "recomputed, Provenance and Gate_Log rows written). "
+                       "The entity's own domain is never T1."))
+    rt.add_argument("--e-id", required=True)
+    rt.add_argument("--tier", required=True, choices=[t for t in contract.TIERS
+                                                      if t != contract.NO_EVIDENCE])
+    rt.add_argument("--reason", required=True,
+                    help="why the tier changes (>=20 chars): the ladder rung the "
+                         "source actually sits on, and what was mis-filed")
+    rt.add_argument("--actor", default=None)
+
     at = common(sub.add_parser(
         "attach",
         help="cite an evidence row the run ALREADY holds from one of your "
@@ -877,6 +900,24 @@ def main(argv=None) -> int:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
         print(json.dumps({"e_id": eid, "profile": bool(a.profile)}, indent=2))
+        return 0
+    if a.cmd == "gate-log":
+        try:
+            ledger.append_gate(wb, gate=a.gate, scope=a.scope, verdict=a.verdict,
+                               detail=a.detail, blocking=a.blocking)
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps({"gate": a.gate, "scope": a.scope, "verdict": a.verdict}))
+        return 0
+    if a.cmd == "retier":
+        try:
+            out = ledger.retier_evidence(wb, a.e_id, a.tier, reason=a.reason,
+                                         run=run, actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
         return 0
     if a.cmd == "attach":
         cells = [c for c in (a.subcap or []) if str(c).strip()]

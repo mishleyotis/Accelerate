@@ -290,3 +290,49 @@ def test_a_missing_oauth_secret_does_not_fail_the_release():
     src = DEPLOY.read_text(encoding="utf-8")
     assert "gcloud secrets describe" in src
     assert "MCP_OAUTH_MISSING" in src
+
+
+def test_THE_SHARE_SERVICE_IS_PUBLIC_ONLY_WITH_ITS_GATE_STANDING():
+    """Client share links (owner, 2026-10-07): `dmai-share` is public because
+    a client has no Zennify login — and it may be public ONLY as the share
+    service: SHARE_MODE on, the PUBLIC key alone (it can verify a link and
+    never mint one), its own service account, and a post-deploy probe that
+    fails the release if the app's own routes answer there. Drop any half and
+    this fails red before a deploy runs."""
+    block = _deploy_block("dmai-share")
+    assert PUBLIC_FLAG.search(block), "dmai-share is not deployed public"
+    assert "SHARE_MODE=1" in block, (
+        "dmai-share deploys public WITHOUT SHARE_MODE=1 — that is the whole "
+        "app, sign-in and directory included, on an open door")
+    text0 = DEPLOY.read_text()
+    assert "SHARE_VERIFY_KEY=dmai-share-verify-key" in text0
+    assert '--set-secrets="$SHARE_SECRETS"' in block
+    secrets_line = [l for l in text0.splitlines() if l.strip().startswith("SHARE_SECRETS=")]
+    assert secrets_line and "SHARE_SIGNING_KEY" not in "".join(secrets_line), (
+        "dmai-share would carry the signing key")
+    assert "SHARE_SIGNING_KEY" not in block, (
+        "dmai-share carries the signing key: the internet-facing service "
+        "could mint links for any client")
+    assert 'service-account="$SHARE_SA"' in block, (
+        "dmai-share runs as another service's identity")
+    text = DEPLOY.read_text()
+    assert "dmai-share door probe failed" in text, (
+        "the post-deploy door probe is gone")
+    web = _deploy_block("dmai-web")
+    assert "SHARE_MODE" not in web, "dmai-web would serve as the share service"
+    lib = (ROOT / "apps" / "web" / "lib" / "share.js").read_text()
+    for needle in ("crypto.verify(", "revoked.has(p.jti)", "p.exp <= Math.floor",
+                   "CONSUMER_DOMAINS"):
+        assert needle in lib, f"apps/web/lib/share.js no longer carries {needle!r}"
+
+
+def test_SHARE_OTP_IS_NEVER_SILENTLY_OFF():
+    """One-time sign-in (Identity Platform) is switched on only when the live
+    config reads back correct, and a release that cannot switch it on says
+    so on stderr — a link admitting typed addresses is never a quiet state."""
+    text = DEPLOY.read_text()
+    assert "identitytoolkit.googleapis.com" in text
+    assert 'if [ "$IDP_OK" = "yes" ]' in text
+    assert "SHARE_IDP_API_KEY=dmai-share-idp-api-key" in text
+    assert "one-time sign-in is OFF" in text
+    assert "dmai-share-cookie-secret" in text

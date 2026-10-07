@@ -52,6 +52,12 @@ class Cur:
         self.sql.append(s)
         if "FOR UPDATE" in s and "FROM runs" in s:
             self._rows = [(ENTITY,)]
+        elif "s.subcap_id = ANY" in s or "FROM evidence_package_ids" in s \
+                or "FROM ccg_l3_platforms" in s:
+            # cohort cell peers, package-id aliases, L3 names: none seeded
+            self._rows = []
+        elif "e.sub_vertical, e.display_id" in s:
+            self._rows = [(self.sv, "ent", "Entity")] if self.sv else []
         elif s.startswith("SELECT enum_label(page)"):
             self._rows = [(p, "PASS", f"sub-{p}", body, "test@1", "producer")
                           for p, body in self.pages.items()]

@@ -99,6 +99,11 @@ def test_the_default_ceiling_comes_from_the_cost_model(tmp_path):
     from engine import cost
     p, _, _ = _drive(tmp_path, max_usd=10_000.0)
     p.opts.max_usd = None
+    # A ceiling an owner SET is remembered across invocations (2026-10-07,
+    # `budget_usd_source: flag`); the cost-model default is what a run that
+    # was never given one gets.
+    assert p.budget_usd() == 10_000.0, "the owner's ceiling outlives the flag"
+    p.state["budget_usd_source"] = "default"
     assert p.budget_usd() == cost.BUDGET_PER_PILLAR * 1, "one pillar in this fixture"
 
 

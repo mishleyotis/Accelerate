@@ -133,7 +133,12 @@ anchor_subcap_id, relevance, their_stack_context, rank, rank_rationale}`.
   "Greenfield family", "Strategic alignment"**. Any other factor name is refused
   by name.
 - `addressable_cells[]` — `{subcap_id, name, current, peer, gap,
-  feature_that_addresses_it}`. Every cell must be one **this run serves**, and
+  feature_that_addresses_it}`. `peer` is the cell's **own cohort figure** —
+  `get_cohort_benchmarks(sub_vertical, subcap_ids=[…every addressable cell…],
+  exclude_display_id=<this client>)` → `cells[subcap_id].mean`; `null` with the
+  tool's reason below the floor of three, never the category mean (Arbor Bank
+  served one cohort cell in six before the owner asked for the peer context to
+  be fixed, 2026-10-07). Every cell must be one **this run serves**, and
   `feature_that_addresses_it` names the platform capability that closes it, in
   words the client would recognise — and it is a **face field capped at 80
   characters** by CG-12 in

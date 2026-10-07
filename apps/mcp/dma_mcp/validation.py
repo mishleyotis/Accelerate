@@ -2062,6 +2062,72 @@ def _check_narrative_thread_is_per_section(page, payload) -> list:
     return out
 
 
+#: The sections whose items are RANKED claims and carry an r_layer verdict.
+#: Shared with pass 2 (validation2._RANKED_SECTIONS), which owns the
+#: presence rule; pass 1 owns what a written verdict may SAY.
+RANKED_SECTIONS = {
+    ("overview", "findings"),
+    ("insights", "insights"),
+    ("heatmap", "focus_areas"),
+    ("heatmap", "cohort_patterns"),
+    ("platform", "recommendations"),
+}
+
+#: What an r_layer verdict may say. AUD-0045: AG-01 asserted a verdict was
+#: PRESENT and never read it, so a self-REJECTED recommendation passed the
+#: one hard rule the template states. Moved here from pass 2 on 2026-10-07:
+#: a producer's local precheck (ship_page.py replays pass 1) could not see
+#: the vocabulary, so a `WITHDRAWN` cohort pattern reached the server to be
+#: refused (Arbor Bank) — a round trip for a rule that needs no database.
+_ACCEPTING_VERDICTS = {"SHIP", "SUPPORTED", "HOLDS", "CONFIRMED", "PASS",
+                       "ACCEPT", "ACCEPTED", "SHIP_LOW_CONF"}
+_REJECTING_VERDICTS = {"REJECT", "REJECTED", "DROP", "DROPPED", "REFUTED",
+                       "FAIL", "FAILED", "NOT_SUPPORTED", "UNSUPPORTED",
+                       "WITHDRAWN"}
+
+
+def check_r_layer_verdicts(page: str, payload: dict) -> list:
+    """AG-01, the readable half: every r_layer verdict a ranked section
+    WRITES is in the vocabulary and is not a rejection. Presence (an item
+    that asserts something and carries no verdict) stays in pass 2, where
+    the item-shape predicate lives."""
+    reasons = []
+    if not isinstance(payload, dict):
+        return reasons
+    for name, body in payload.items():
+        if (page, name) not in RANKED_SECTIONS or not isinstance(body, dict):
+            continue
+        for fname, val in body.items():
+            if not (isinstance(val, list) and val
+                    and all(isinstance(x, dict) for x in val)):
+                continue
+            for i, item in enumerate(val):
+                rl = item.get("r_layer")
+                if not isinstance(rl, dict) or not rl.get("verdict"):
+                    continue
+                verdict = str(rl.get("verdict") or "").strip().upper()
+                path = f"{name}.{fname}[{i}].r_layer.verdict"
+                if verdict in _REJECTING_VERDICTS:
+                    reasons.append(_reason(
+                        "AG-01", name, path,
+                        f"this item's own reasoning layer concluded "
+                        f"{verdict} and it is still being published. "
+                        f"A rejected hypothesis is a step in the "
+                        f"work, not a recommendation: drop the item, "
+                        f"or change the verdict because the reasoning "
+                        f"changed — never because the item is "
+                        f"inconvenient to lose."))
+                elif verdict not in _ACCEPTING_VERDICTS:
+                    reasons.append(_reason(
+                        "AG-01", name, path,
+                        f"r_layer.verdict is {rl.get('verdict')!r}, "
+                        f"which is not in the vocabulary "
+                        f"{sorted(_ACCEPTING_VERDICTS | _REJECTING_VERDICTS)}. "
+                        f"A verdict nobody can read is a verdict "
+                        f"nobody can check."))
+    return reasons
+
+
 def validate_pass1(page: str, payload: dict) -> list:
     if page not in PAGES:
         return [_reason("CG-01", None, page, f"unknown page {page!r}; pages are {list(PAGES)}")]
@@ -2223,6 +2289,9 @@ def validate_pass1(page: str, payload: dict) -> list:
     # CG-42 for the same reason: the card↔recommendation join is a relation
     # BETWEEN two sections of the platform page.
     reasons.extend(_check_recommendation_areas_join(page, payload))
+    # AG-01's readable half: a written verdict is in the vocabulary and is
+    # not a rejection — pure, so the local precheck catches it.
+    reasons.extend(check_r_layer_verdicts(page, payload))
 
     return reasons
 

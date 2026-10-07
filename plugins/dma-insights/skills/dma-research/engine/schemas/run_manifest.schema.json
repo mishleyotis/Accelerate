@@ -21,12 +21,15 @@
     "run_id": {"type": "string", "minLength": 1, "pattern": "^[^{}]+$"},
     "institution": {
       "type": "object",
-      "required": ["name", "entity_id", "sub_vertical"],
       "properties": {
         "name": {"type": "string", "minLength": 1, "pattern": "^[^{}]+$"},
         "entity_id": {"type": ["string", "null"]},
-        "sub_vertical": {"type": ["string", "null"]}
+        "sub_vertical": {"type": ["string", "null"]},
+        "supplementary_sub_verticals": {
+          "type": "array", "items": {"type": "string", "minLength": 1},
+          "description": "0061: the owner's bound supplementary LOBs, as catalogue codes; empty when the run binds one sub-vertical. The worker writes it to entities.supplementary_sub_verticals."}
       },
+      "required": ["name", "entity_id", "sub_vertical", "supplementary_sub_verticals"],
       "additionalProperties": false
     },
     "evidence_mode": {"type": ["string", "null"]},

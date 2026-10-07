@@ -51,6 +51,19 @@ python3 -m engine.pipeline run    --run $RUN --root $ROOT --max-wall-min 240 --l
 python3 -m engine.pipeline status --run $RUN --root $ROOT --watch
 ```
 
+Preventive gates the driver runs on its own (2026-10-07, after Arbor Bank): PRELIM
+does not close while the sub-vertical firmographic set has blank members; REPORTS
+runs the enforcement sweep (`07_qa/enforcement_rungs.json`) before any writer;
+PAGES_A/B refill cohort peers before any page lane is dispatched (ET-12 stays with
+`engine.page_preflight`, which stops the driver NEEDS_CONNECTOR); every ship records the server's contract version
+and a mid-run connector deploy is logged as `CONNECTOR_DRIFT` with the pages it
+staled. A section file written under `08_sections/` is pass-1 checked by a hook at
+write time (`section_precheck.py`).
+
+Owner-set ceilings persist: `--max-usd` once given is reused by every later `run`
+without the flag (`budget_usd_source: flag`); `--sg-v4-budget N` counts prose
+grounding FAILs only and records its raise in the Gate_Log.
+
 **`run --step` is the conductor's mode, and it is the same run.** One
 research round, then `ROUND_COMPLETE` at exit 0, resumable, carrying
 `pending`: the relay batch files, the open categories, the stalled ones, the

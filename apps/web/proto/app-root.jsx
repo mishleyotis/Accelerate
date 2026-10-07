@@ -61,7 +61,11 @@ function AppProvider({ children }) {
   // server-side and passes the verdict in DMA_LIVE.
   const [authed, setAuthed] = useState(
     !!(typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.authed));
-  const [audience, setAudience] = useState(TWEAK_DEFAULTS.audience_default);
+  // A client link is the client audience and nothing else: the toggle is not
+  // rendered there, and the setter is inert so no other control can flip it.
+  const [audience, _setAudience] = useState(
+    isClientLink() ? "customer" : TWEAK_DEFAULTS.audience_default);
+  const setAudience = isClientLink() ? () => {} : _setAudience;
   const [ipOpen, setIpOpen] = useState(TWEAK_DEFAULTS.ip_open_default);
   const [ipSurface, setIpSurface] = useState("why_now");
   const [ipContext, setIpContext] = useState(null);
@@ -99,7 +103,20 @@ function AppProvider({ children }) {
     });
   }, []);
 
-  const openEvidence = (evidenceId, subcap) => setEvidenceDrawer({ evidenceId, subcap });
+  // Production divergence: usage telemetry (usage-tracker.jsx). The tracker
+  // needs the audience and acting-as role, which live in this provider; the
+  // feature calls are no-ops outside production.
+  useEffect(() => {
+    if (window.setUsageContext) window.setUsageContext({ audience, acting_role: role });
+  }, [audience, role]);
+  useEffect(() => {
+    if (ipOpen && window.trackUsage) window.trackUsage("intelligence");
+  }, [ipOpen]);
+
+  const openEvidence = (evidenceId, subcap) => {
+    if (window.trackUsage) window.trackUsage("evidence");
+    setEvidenceDrawer({ evidenceId, subcap });
+  };
   const closeEvidence = () => setEvidenceDrawer(null);
   const openSubcap = (subcapId) => {
     // Find subcap across entities, jump to heatmap if on a client page
@@ -109,7 +126,10 @@ function AppProvider({ children }) {
       navigate(`/clients/${eid}/heatmap`, { subcap: subcapId });
     }
   };
-  const openInsight = id => setInsightModal(id);
+  const openInsight = id => {
+    if (window.trackUsage) window.trackUsage("insight");
+    setInsightModal(id);
+  };
   const closeInsight = () => setInsightModal(null);
   const openRec = id => setRecModal(id);
   const closeRec = () => setRecModal(null);
@@ -169,7 +189,7 @@ function MyTweaks() {
         ) : null}
         <TweakRadio label="Audience" value={tweaks.audience_default} onChange={v => setTweak("audience_default", v)} options={[
           { label: "Internal", value: "internal" },
-          { label: "Customer", value: "customer" },
+          { label: "Client", value: "customer" },
         ]} />
         <TweakToggle label="Intelligence panel default" value={tweaks.ip_open_default} onChange={v => setTweak("ip_open_default", v)} />
       </TweakSection>
@@ -420,6 +440,15 @@ function ClientRoute({ id, tab, sub }) {
   // already holds.
   const live = useLiveEntity(LIVE_MODE && entity ? entity.id : null,
                              audience, run && run.run_id, role);
+  // A tab the client dashboard does not carry lands on its overview, in both
+  // client frames — toggling to Client while on Platform, or a client link
+  // that names a withdrawn tab. The tab strip hides the same list.
+  const clientRedirect = audience === "customer" && !clientTabAllowed(tab);
+  useEffect(() => {
+    if (clientRedirect && entity) {
+      navigate(`/clients/${entity.id}/overview`, run ? { run: run.id } : null);
+    }
+  }, [clientRedirect, entity && entity.id]);
 
   if (!entity) {
     return <PageShell title="Not found"><div className="empty"><h3>Entity not found</h3></div></PageShell>;
@@ -509,7 +538,8 @@ function ClientRoute({ id, tab, sub }) {
           <p>{withheldReason}</p>
           <p style={{ marginTop: 8 }}>
             {audience === "customer"
-              ? "Switch back to the internal audience to read it."
+              ? (isClientLink() ? "It is not part of the client dashboard."
+                                : "Switch back to the Zennify view to read it.")
               : "Ask an administrator if you need access."}
           </p>
         </div>
@@ -518,7 +548,7 @@ function ClientRoute({ id, tab, sub }) {
   }
 
   let page = null;
-  switch (tab) {
+  switch (clientRedirect ? "overview" : tab) {
     case "overview":  page = <ClientOverview entity={ent} run={run} />; break;
     case "insights":  page = <ClientInsights entity={ent} run={run} />; break;
     case "heatmap":   page = <ClientHeatmap entity={ent} run={run} />; break;
@@ -553,8 +583,22 @@ function Router() {
   const { route, authed } = useApp();
   const { path } = route;
 
-  // Auth gate: always start at /login until signed in
-  if (!authed && path !== "/login") return <LoginPage />;
+  // Auth gate: always start at /login until signed in. (A public client link
+  // boots signed in; its reader never meets the Zennify login.)
+  if (!authed) return <LoginPage />;
+
+  // A client link reads its one client and its client tabs, and nothing
+  // else: any other route — another client, the directory, Platform or Tech
+  // stack, a sub-route, even /login — answers with that client's overview,
+  // before any other branch can draw the Zennify app around it. The address
+  // bar is corrected too, so the tab strip and the URL agree.
+  const shared = clientLinkEntity();
+  if (shared) {
+    const to = clientLinkPath(path);
+    if (to !== path) setTimeout(() => navigate(to, route.params.run ? { run: route.params.run } : null), 0);
+    return <ClientRoute id={shared} tab={to.split("/")[3]} />;
+  }
+
   if (path === "/login") return <LoginPage />;
 
   // Client-scoped routes — a component of its own because it holds hooks
@@ -575,8 +619,13 @@ function Router() {
       return <PageShell title="Not authorised"><div className="empty"><h3>Not authorised</h3><p>The admin console requires an ADMIN grant on your account.</p><button className="btn btn-primary" onClick={() => navigate("/")}>Back to Dashboard</button></div></PageShell>;
     }
     if (path === "/admin")                    return <AdminPage />;
-    if (path === "/admin/import")             return <ImportPage />;
-    if (path === "/admin/import/audit")       return <ImportAuditPage />;
+    if (path === "/admin/usage")              return <UsagePage />;
+    // Production divergence: Import & jobs and Import audit are not served
+    // (utils.adminRouteHidden) — direct hash navigation included.
+    if (!adminRouteHidden(path)) {
+      if (path === "/admin/import")           return <ImportPage />;
+      if (path === "/admin/import/audit")     return <ImportAuditPage />;
+    }
   }
 
   return <PageShell title="Not found"><div className="empty"><h3>Page not found</h3><p>{path}</p><button className="btn btn-primary" onClick={() => navigate("/")}>Back to Dashboard</button></div></PageShell>;

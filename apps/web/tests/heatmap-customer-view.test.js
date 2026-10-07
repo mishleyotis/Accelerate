@@ -16,6 +16,8 @@
  *              TRD's audience table SHOWS thin-evidence markers to the
  *              customer; what a customer may not see is stripped by the
  *              server (apps/api/dma_api/redaction.py), not hidden by a lock.
+ *              The unlock landed first in afadd6c (client-dashboard.test.js
+ *              pins it there too); this file pins it beside the drawer fixes.
  *   HM-CUST-2  The Issues overlay (issue register + caps) is Context-page and
  *              O1b-ceiling material, both customer-withheld, so it is not
  *              offered to the customer at all.

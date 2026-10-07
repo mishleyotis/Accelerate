@@ -84,14 +84,16 @@ Each section opens with a control block. LENGTH gives a word band for narrative 
 | :---- | :---- | :---- | :---- | :---- | :---- |
 | **website** | {{DOMAIN_BARE_LOWERCASE}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
 | employees | {{VALUE}} | headcount | {{DATE}} | {{E_ID}} | {{CONF}} |
-| assets_or_aum_or_revenue | {{VALUE}} | {{UNIT}} | {{DATE}} | {{E_ID}} | {{CONF}} |
+| total_assets (or AUM) | {{VALUE}} | {{UNIT}} | {{DATE}} | {{E_ID}} | {{CONF}} |
+| revenue-class figure (revenue, shares, deposits, loan_portfolio, premium_placed, DWP, net_flows …) | {{VALUE}} | {{UNIT}} | {{DATE}} | {{E_ID}} | {{CONF}} |
 | cagr | {{VALUE}} | {{PERCENT_A_YEAR_OVER_PERIOD}} | {{DATE}} | {{E_ID}} | {{CONF}} |
 | branches | {{INTEGER}} | count | {{DATE}} | {{E_ID}} | {{CONF}} |
-| headquarters | {{CITY_STATE}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
-| founded | {{YEAR}} | year | {{DATE}} | {{E_ID}} | {{CONF}} |
+| HQ | {{CITY_STATE}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
+| founded_year | {{YEAR}} | year | {{DATE}} | {{E_ID}} | {{CONF}} |
 | primary_regulator | {{REGULATOR}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
 | charter | {{CHARTER_TYPE}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
-| ownership | {{STRUCTURE}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
+| ownership (optional) | {{STRUCTURE}} | n/a | {{DATE}} | {{E_ID}} | {{CONF}} |
+| *sub-vertical set* (engine/schemas/firmographics_must_present.json → must_present_by_subvertical[{{SV}}]; CG-18c holds each missing member) | … | | | | |
 
 ###### *Field names follow the sub-vertical vocabulary. A credit union carries shares, member_count and net_worth_ratio; it never carries a bank's deposits. Undated share across the set: {{UNDATED_PCT}}, stated rather than hidden.*
 

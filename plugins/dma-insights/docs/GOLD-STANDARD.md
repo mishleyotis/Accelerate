@@ -159,3 +159,21 @@ The six app pages' gold — `fixtures/surface_gold.json` (shape only, no values)
 per-audience dispositions, the structural parity gate CG-PAR and its owner decisions —
 lives in [`GOLD-STANDARD-APP-PAGES.md`](GOLD-STANDARD-APP-PAGES.md). Per-surface
 producers read that file, not this one.
+
+## Decisions 2026-10-07 — Arbor Bank audit (owner-confirmed, closed in code)
+
+| Decision | Where it is enforced |
+|---|---|
+| The SG-V4 driver budget counts PROSE grounding failures only; verbatim excerpts, quotes and source names are what the page cites, not claims about it. `--sg-v4-budget` is the owner's and is logged (`SG_V4_BUDGET_RAISED`). | `engine/pipeline.py prose_sg_v4_fails`; `tests/skills/research_engine/test_sg_v4_budget_prose_only.py` |
+| SG-V4 never embeds producer metadata, on a nested key OR a direct field OR anything under it (`r_layer`, `rationale`, `empty_state`, `closure_condition`, …). | `apps/mcp/dma_mcp/validation2.py _v4_fields`; `apps/mcp/tests/test_audit_2026_10_07_connector_root_causes.py` |
+| A peer figure is the sub-vertical cohort's — category grain on the workbook, CELL grain wherever a cell is cited (findings, opportunity cells, gap rows): `get_cohort_benchmarks(subcap_ids=[…])`. A `table` row and a cohort row are kept; a placeholder is replaced; a guess is never replaced by a null. | `apps/mcp/dma_mcp/cohort.py cell_benchmarks`; `engine/prelim.py peer_row_wants_cohort`; `apps/mcp/dma_mcp/fit.py _cell_peers` |
+| An `INSUFFICIENT_EVIDENCE` platform never outranks a READY one; fusion never lifts it; a card is not pulled behind an unevidenced prerequisite. | `packages/shared/platform_fit.py _state_tier`; `apps/api/tests/test_platform_fit_engine.py` |
+| `l3_area` is the catalogue platform's name; the engine resolves it to the code. An unresolvable label is reported, never silently TOO_NARROW. | `apps/mcp/dma_mcp/fit.py _l3_names/_resolve_area` |
+| The entity's own domain is never T1; a mis-filed tier is re-tiered with its cascade and a logged reason, never edited in place. | `engine/ledger.py is_own_host / retier_evidence`; `engine.cli retier` |
+| The engine's firmographic must-present set is the connector's, vendored and asserted equal; the sub-vertical set is reported to the producer rather than gating PRELIM. | `engine/schemas/firmographics_must_present.json`; `engine/contract.py firmographic_groups` |
+| An enforcement sweep is code with positive controls; a zero without a passing control is NOT_RUN. | `plugins/dma-insights/scripts/enforcement_search.py`; `tests/skills/test_enforcement_search.py` |
+| An owner-approved `--max-usd` outlives the invocation; a resume never lowers it to the estimate. | `engine/pipeline.py budget_usd` (`budget_usd_source`) |
+| A passed page with no recorded ship time is shipped again; a repaired page is never promoted from its stale staged copy. | `engine/pipeline.py _page_ok` |
+| Package-local evidence ids on FK columns resolve through `evidence_package_ids` at promote. | `apps/mcp/dma_mcp/promote.py _package_aliases` |
+| The search-op ceiling is per conversation; a run-level reading is the worst conversation's window, named — never the lifetime count against the ceiling. | `engine/ledger.py worst_window / stats`; `engine/orient.py`; `engine/watchdog.py` |
+| Prevention over repair: PRELIM gates the sub-vertical firmographic set; REPORTS runs the enforcement sweep; PAGES preflight refills peers before any lane (ET-12 stays with `page_preflight` → NEEDS_CONNECTOR); a mid-run connector deploy is logged as CONNECTOR_DRIFT; section files are pass-1 checked at write time. | `engine/prelim.py`; `engine/pipeline.py _enforcement_sweep / _pages_preflight / mark_contract_drift`; `scripts/hooks/section_precheck.py` |

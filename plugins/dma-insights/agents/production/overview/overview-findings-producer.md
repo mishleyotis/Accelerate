@@ -194,10 +194,14 @@ promoted clients carry. Each finding is a complete object.
 - **`subcap_id` / `score` / `peer_median`** — **every finding is anchored.**
   `subcap_id` must be the cell whose score is quoted; `score` and `peer_median`
   are that cell's own figures at 2dp. The score chip and the anchor id must name
-  the *same* cell, within ±0.05 (W1_workbook_fidelity). Where the run's peer
-  table holds no figure for the anchor cell, `peer_median` is `null` **and the
-  section says why** — never imputed, never carried across from a neighbouring
-  grain.
+  the *same* cell, within ±0.05 (W1_workbook_fidelity). `peer_median` is the
+  anchor cell's **own cohort figure**: `get_cohort_benchmarks(sub_vertical,
+  subcap_ids=[…every finding's anchor…], exclude_display_id=<this client>)` →
+  `cells[subcap_id].mean` (the other assessed entities' scores for that cell, floor
+  three). Below the floor it is `null` **and the section says why**, quoting the
+  tool's reason — never imputed, never the category mean carried across from a
+  neighbouring grain (Arbor Bank served sixteen placeholder peers before the owner
+  asked for the empty peer context to be fixed, 2026-10-07).
 - **`linked_subcap_ids[]`** — every id must resolve to a cell **this run
   serves**; a dead link is a dead control.
 - **`platform_chips[]`** — platforms by name, or an empty array. An empty array

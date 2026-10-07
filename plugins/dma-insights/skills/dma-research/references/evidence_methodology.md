@@ -34,6 +34,17 @@ ERS ranges from 1.0 (lowest quality) to 5.0 (highest quality).
 - **Structured discovery notes with specific tech/metrics = T2** (formal engagement outputs)
 - **NEVER classify Hubbl as T4.** This is the most common misclassification — it suppresses
   scores via T4 ceilings when the data is actually machine-verified deployment evidence.
+- **The entity's own domain is never T1.** T1 is the regulator's or auditor's copy of a
+  filing (FDIC/NCUA/SEC/state register). The entity's own annual report, investor page,
+  press release or policy page is **T2** (official disclosure); its product, about and
+  careers pages are **T5** (marketing). The ledger refuses a public T1 whose URL sits on
+  the Firmographics `website` host (Arbor Bank, 2026-10-06: six own-site pages filed T1
+  carried FACT labels and lifted ceilings a marketing page cannot carry), and the
+  assessment caps a cell whose every source is the own site (CAP-OWN).
+- **A mis-filed tier is re-tiered, never edited in the sheet:** `python3 -m engine.cli
+  retier --run <R> --e-id E-NNN --tier T2 --reason "<the rung it sits on>"` re-derives
+  the claim label (a FACT cannot rest on T3 or weaker), recomputes ERS for the register,
+  and writes a Provenance row and a non-blocking `RETIER` Gate_Log row.
 
 **Recency Score** (weight: 25%):
 | Age | Score | Label |

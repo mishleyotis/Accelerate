@@ -20,6 +20,11 @@ function ClientOverview({
   } = useApp();
   const [scqaExp, setScqaExp] = useState(false);
   const layout = tweaks.overview_layout || "balanced";
+  // The client dashboard (client-view review, 2026-10-07): no Zennify actions
+  // (meeting prep, rerun), no executive narrative, no leadership roster, no
+  // financial trajectory. The sections still promote and still serve; this
+  // is what the client page puts in front of the client.
+  const isClient = audience === "customer";
   useEffect(() => {
     setIpSurface("why_now");
     setIpContext({
@@ -49,17 +54,17 @@ function ClientOverview({
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Customer-safe scorecard generated · ${entityName(entity)}`, "success")
+    onClick: () => pushToast(`Client-safe scorecard generated · ${entityName(entity)}`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
-  }), " Scorecard"), /*#__PURE__*/React.createElement("button", {
+  }), " Scorecard"), isClient ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: () => pushToast("Rerun queued - first batch in ~3 min", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
-  }), " Request rerun"), /*#__PURE__*/React.createElement("button", {
+  }), " Request rerun"), isClient ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
     onClick: () => {
       setIpSurface("why_now");
@@ -85,7 +90,7 @@ function ClientOverview({
     openEvidence: openEvidence,
     audience: audience,
     openSubcap: openSubcap
-  })), /*#__PURE__*/React.createElement(CardBoundary, {
+  })), isClient ? null : /*#__PURE__*/React.createElement(CardBoundary, {
     name: "executive narrative"
   }, /*#__PURE__*/React.createElement(SCQACard, {
     entity: entity,
@@ -102,7 +107,7 @@ function ClientOverview({
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "1.55fr 1fr",
+      gridTemplateColumns: isClient ? "1fr" : "1.55fr 1fr",
       gap: 16,
       marginBottom: 18
     }
@@ -112,11 +117,21 @@ function ClientOverview({
     entity: entity,
     openEvidence: openEvidence,
     audience: audience
-  })), /*#__PURE__*/React.createElement(CardBoundary, {
+  })), isClient ? null : /*#__PURE__*/React.createElement(CardBoundary, {
     name: "leadership panel"
   }, /*#__PURE__*/React.createElement(LeadershipPanel, {
     audience: audience
-  }))), /*#__PURE__*/React.createElement("div", {
+  }))), isClient ? DMA.sentimentFor(entity.id) ? /*#__PURE__*/React.createElement("div", {
+    className: "cards-grid-2",
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement(CardBoundary, {
+    name: "sentiment"
+  }, /*#__PURE__*/React.createElement(SentimentCard, {
+    entity: entity,
+    audience: audience
+  }))) : null : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "section-label",
     style: {
       display: "flex",
@@ -152,7 +167,7 @@ function ClientOverview({
   }, /*#__PURE__*/React.createElement(SentimentCard, {
     entity: entity,
     audience: audience
-  }))), audience !== "customer" ? /*#__PURE__*/React.createElement(CardBoundary, {
+  })))), audience !== "customer" ? /*#__PURE__*/React.createElement(CardBoundary, {
     name: "thought leadership"
   }, /*#__PURE__*/React.createElement(ThoughtLeadershipPanel, null)) : null);
 }
@@ -657,7 +672,13 @@ function WhyNowStrip({
   openSubcap
 }) {
   const [open, setOpen] = useState(null); // no drilldown until a card is chosen
-  const signals = DMA.whyNowFor(entity.id) || [];
+  /* A signal whose trigger did not reach this audience has no face. The
+     server withholds `trigger` from the client read when it names a person
+     from a contact source (Susser Bank WN-2, Cross Insurance WN-2 on
+     2026-10-07), and the card rendered as an empty box with only its kind
+     chip. The trigger IS the signal: without it there is nothing to show, so
+     the card is not drawn and the count says how many are. */
+  const signals = (DMA.whyNowFor(entity.id) || []).filter(s => s && s.label);
   const isCust = audience === "customer";
   const STR = {
     STRONG: "b-teal",
@@ -737,7 +758,7 @@ function WhyNowStrip({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, signals.length, " trigger", signals.length === 1 ? "" : "s", " \xB7 click any signal to drill into the evidence")), /*#__PURE__*/React.createElement("button", {
+  }, signals.length, " trigger", signals.length === 1 ? "" : "s", " \xB7 click any signal to drill into the evidence")), audience === "customer" ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate(`/clients/${entity.id}/context`)
   }, "View timeline ", /*#__PURE__*/React.createElement(Icon, {
@@ -825,14 +846,14 @@ function WhyNowStrip({
     style: {
       padding: "0 14px 14px"
     }
-  }, (isCust ? sel.impact : sel.detail) ? /*#__PURE__*/React.createElement("div", {
+  }, sel.detail ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12.5,
       color: "var(--z-body)",
       lineHeight: 1.6,
       marginBottom: 10
     }
-  }, isCust ? sel.impact : sel.detail) : null, !isCust && sel.metric ? /*#__PURE__*/React.createElement("div", {
+  }, sel.detail) : null, !isCust && sel.metric ? /*#__PURE__*/React.createElement("div", {
     className: "f-mono",
     style: {
       fontSize: 11.5,
@@ -845,7 +866,7 @@ function WhyNowStrip({
       display: "inline-block"
     }
   }, sel.metric) : null, sel.timeline ? /*#__PURE__*/React.createElement("button", {
-    onClick: () => navigate(`/clients/${entity.id}/context`),
+    onClick: isCust ? undefined : () => navigate(`/clients/${entity.id}/context`),
     style: {
       display: "flex",
       alignItems: "center",
@@ -853,7 +874,7 @@ function WhyNowStrip({
       background: "none",
       border: 0,
       padding: 0,
-      cursor: "pointer",
+      cursor: isCust ? "default" : "pointer",
       marginBottom: 12
     }
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -873,7 +894,7 @@ function WhyNowStrip({
       fontSize: 11.5,
       color: "var(--z-body)"
     }
-  }, sel.timeline.event), /*#__PURE__*/React.createElement(Icon, {
+  }, sel.timeline.event), isCust ? null : /*#__PURE__*/React.createElement(Icon, {
     name: "arrow-r",
     size: 10,
     style: {
@@ -1171,7 +1192,7 @@ function SCQABody({
   }, eid))) : null);
 }
 
-/* ── Opportunity Surface · per platform ───────────────────────────────
+/* ── Platform Opportunities (Opportunity Surface) ─────────────────────
    O8. Two defects, one component.
 
    THE SCORE COLUMN. The tile was a flex row with a shrinkable right-hand
@@ -1268,12 +1289,12 @@ function OpportunitySurfaceStrip({
       fontSize: 13,
       fontWeight: 600
     }
-  }, "Opportunity Surface \xB7 per platform"), /*#__PURE__*/React.createElement("div", {
+  }, "Platform Opportunities"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, "Composite fit score 0\u2013100")), /*#__PURE__*/React.createElement("button", {
+  }, "Composite fit score 0\u2013100")), audience === "customer" ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate(`/clients/${entity.id}/platform`, {
       run: run.id
@@ -1292,8 +1313,8 @@ function OpportunitySurfaceStrip({
     const sub = asText(t.headline) || (cat && cat.features ? cat.features.split(" · ").slice(0, 2).join(" · ") : null);
     return /*#__PURE__*/React.createElement("div", {
       key: pid,
-      className: "card-tile clickable",
-      onClick: () => navigate(`/clients/${entity.id}/platform`, {
+      className: `card-tile ${audience === "customer" ? "" : "clickable"}`,
+      onClick: audience === "customer" ? undefined : () => navigate(`/clients/${entity.id}/platform`, {
         platform: pid,
         run: run.id
       })
@@ -3031,9 +3052,11 @@ function ClientInsights({
   }));
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "page-head"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, audience === "customer" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Insight cards"), /*#__PURE__*/React.createElement("h1", null, DMA.INSIGHT_CARDS.length, " insight cards"), /*#__PURE__*/React.createElement("div", {
+  }, "Key insights"), /*#__PURE__*/React.createElement("h1", null, "Recommendations for ", entityName(entity))) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow"
+  }, "Insight cards"), /*#__PURE__*/React.createElement("h1", null, DMA.INSIGHT_CARDS.length, " insight cards")), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, /*#__PURE__*/React.createElement("span", {
     className: "b b-below",
@@ -3061,7 +3084,7 @@ function ClientInsights({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
-  }), " Export PDF"), /*#__PURE__*/React.createElement("button", {
+  }), " Export PDF"), isClientLink() ? null : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
     onClick: () => pushToast("Add a note from any insight card - click a card to start", "success")
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -3205,7 +3228,7 @@ function ClientInsights({
     })), !isCollapsed ? /*#__PURE__*/React.createElement("div", {
       className: "g2"
     }, g.items.map(renderCard)) : null);
-  }), /*#__PURE__*/React.createElement(CardBoundary, {
+  }), audience === "customer" ? null : /*#__PURE__*/React.createElement(CardBoundary, {
     name: "technology landscape"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card flush",

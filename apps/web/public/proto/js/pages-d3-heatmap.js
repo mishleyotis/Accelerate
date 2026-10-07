@@ -427,31 +427,23 @@ function ClientHeatmap({
     pushToast
   } = useApp();
   // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
-  // opens the page, then focus areas, then the value chain — for EVERY
-  // audience. The customer audience used to be locked out of the standard
-  // grid ("it carries every capped and thin cell"), which left a customer
-  // with the focus areas and the value chain only — on most clients a
-  // handful of cards and an empty arrangement. The PRD lists the heatmap
-  // dashboard as "internal + customer" across all five surfaces (H4 grid,
-  // H2 cell evidence, H6 evidence store), and the TRD's audience table SHOWS
-  // thin-evidence markers to the customer. What a customer may not see is
-  // removed by the server (redaction.py); the grid itself is theirs.
-  // Build owner, 2026-10-07: "It is the customer view that lacks heatmap
-  // details for most clients."
+  // opens the page, then focus areas, then the value chain — for every
+  // audience. The client view used to be locked out of the standard grid and
+  // opened on focus areas; the owner reversed that on 2026-10-07 ("the
+  // heatmaps should never be hidden"). The grid is the subcaps read the server
+  // already redacts for the customer audience; what stays internal is the
+  // Issues overlay, which reads the Context register (not a client page).
   const [mode, setMode] = useState(route.params.hm || "standard"); // standard | focus | value_chain
   const [zoom, setZoom] = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus] = useState(route.params.cat || null);
   const [showPeers, setShowPeers] = useState(true);
-  const [showIssues, setShowIssues] = useState(false);
+  const [issuesOn, setShowIssues] = useState(false);
+  // Off for the client audience whatever the toggle last said, so switching
+  // to the client view with the overlay on does not carry it across.
+  const showIssues = issuesOn && audience !== "customer";
   const [focusArea, setFocusArea] = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
-
-  // The Issues overlay is the issue register and its caps: Context-page
-  // material (customer-withheld) and O1b ceilings (customer-withheld). It is
-  // never offered to the customer audience, and a toggle left on from an
-  // internal read does not carry across the audience switch.
-  const issuesOn = showIssues && audience !== "customer";
 
   // `?subcap=` is how every other page opens a cell here: `openSubcap` in
   // app-root navigates to this tab with the id as a param. Nothing consumed
@@ -595,7 +587,7 @@ function ClientHeatmap({
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${showPeers ? "on" : ""}`,
     onClick: () => setShowPeers(p => !p)
-  }), "Peers"), audience !== "customer" ? /*#__PURE__*/React.createElement("label", {
+  }), "Peers"), audience === "customer" ? null : /*#__PURE__*/React.createElement("label", {
     className: "row",
     style: {
       fontSize: 11.5,
@@ -604,7 +596,7 @@ function ClientHeatmap({
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${showIssues ? "on" : ""}`,
     onClick: () => setShowIssues(p => !p)
-  }), "Issues") : null, /*#__PURE__*/React.createElement(Legend, null)), (pillarFocus || catFocus) && mode === "standard" ? /*#__PURE__*/React.createElement("div", {
+  }), "Issues"), /*#__PURE__*/React.createElement(Legend, null)), (pillarFocus || catFocus) && mode === "standard" ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 10,
@@ -637,13 +629,13 @@ function ClientHeatmap({
     openEvidence: openEvidence,
     openInsight: openInsight,
     audience: audience,
-    showIssues: issuesOn
+    showIssues: showIssues
   }) : mode === "value_chain" ? /*#__PURE__*/React.createElement(ValueChainView, {
     entity: entity,
     subcapsForFocusArea: subcapsForFocusArea,
     openSubcap: setSynthSubcap,
     openInsight: openInsight
-  }) : /*#__PURE__*/React.createElement(React.Fragment, null, issuesOn ? /*#__PURE__*/React.createElement(IssueRegisterBanner, {
+  }) : /*#__PURE__*/React.createElement(React.Fragment, null, showIssues ? /*#__PURE__*/React.createElement(IssueRegisterBanner, {
     entity: entity,
     onSubcap: s => setSynthSubcap({
       kind: "subcap",
@@ -663,7 +655,7 @@ function ClientHeatmap({
     pillars: pillars,
     pillarFocus: pillarFocus,
     showPeers: showPeers,
-    showIssues: issuesOn,
+    showIssues: showIssues,
     audience: audience,
     setCatFocus: c => {
       setCatFocus(c);
@@ -685,7 +677,7 @@ function ClientHeatmap({
     cats: cats,
     catFocus: catFocus,
     pillarFocus: pillarFocus,
-    showIssues: issuesOn,
+    showIssues: showIssues,
     audience: audience,
     drillCategory: c => {
       setCatFocus(c);
@@ -697,7 +689,7 @@ function ClientHeatmap({
     catFocus: catFocus,
     pillarFocus: pillarFocus,
     showPeers: showPeers,
-    showIssues: issuesOn,
+    showIssues: showIssues,
     audience: audience,
     setCatFocus: setCatFocus,
     onSynth: s => setSynthSubcap({
@@ -710,7 +702,7 @@ function ClientHeatmap({
     onClose: () => setSynthSubcap(null),
     openEvidence: openEvidence,
     openInsight: openInsight,
-    showIssues: issuesOn,
+    showIssues: showIssues,
     audience: audience
   }) : null);
 }

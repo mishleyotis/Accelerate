@@ -129,7 +129,7 @@ def test_the_ledger_refuses_foreign_evidence(tmp_path):
     with pytest.raises(L.LedgerRefusal) as e:
         L.append_evidence(wb, source_name="Acme 2025 annual report",
                           source_url="https://acme.example/ar2025",
-                          tier="T1", excerpt="x" * 120, subcaps=[foreign[0]],
+                          tier="T2", excerpt="x" * 120, subcaps=[foreign[0]],
                           actor="research-p1c1-producer")
     assert "only P1C1 cells" in str(e.value)
 
@@ -142,7 +142,7 @@ def test_the_servicing_tier_may_register_across_categories(tmp_path):
     cells = wb.selected_subcaps()[:2]
     eid = L.append_evidence(wb, source_name="Acme 2025 annual report",
                             source_url="https://acme.example/ar2025",
-                            tier="T1", excerpt="y" * 120, subcaps=list(cells),
+                            tier="T2", excerpt="y" * 120, subcaps=list(cells),
                             actor="enrichment-web-specialist")
     assert eid
 

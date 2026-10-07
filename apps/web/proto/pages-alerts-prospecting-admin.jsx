@@ -127,11 +127,11 @@ function ProspectingPage() {
     <PageShell title="Prospecting" crumbs={[{ label: "Prospecting" }]}>
       <div className="page-head">
         <div>
-          <div className="eyebrow">Customer-safe export</div>
+          <div className="eyebrow">Client-safe export</div>
           <h1>Prospecting</h1>
           <div className="sub">Search → one-page scorecard → export PDF or HTML</div>
         </div>
-        <span className="b b-org" style={{ alignSelf: "center" }}><Icon name="lock" size={10} /> CUSTOMER-SAFE MODE</span>
+        <span className="b b-org" style={{ alignSelf: "center" }}><Icon name="lock" size={10} /> CLIENT-SAFE MODE</span>
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
@@ -161,7 +161,7 @@ function ProspectingPage() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="row" style={{ marginBottom: 14 }}>
             <Icon name="evidence" size={16} />
-            <div style={{ fontWeight: 600, fontSize: 13 }}>Scorecard preview · always Customer View</div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Scorecard preview · always Client view</div>
             <span className="spacer" />
             <button className="btn btn-tertiary" disabled={exporting} onClick={() => { setExporting(true); setTimeout(() => { setExporting(false); setDownloadReady(true); }, 1400); }}>
               {exporting ? <span className="row"><span className="skel" style={{ width: 12, height: 12, borderRadius: 6 }} /> Generating…</span> : <><Icon name="download" size={13} /> Export PDF</>}
@@ -180,7 +180,7 @@ function ProspectingPage() {
         <div className="empty">
           <div className="icon"><Icon name="envelope" size={22} /></div>
           <h3>Search to begin</h3>
-          <p>Search the institution name to load a one-page scorecard. The export is always Customer-safe - internal fields are stripped.</p>
+          <p>Search the institution name to load a one-page scorecard. The export is always client-safe - internal fields are stripped.</p>
         </div>
       )}
     </PageShell>
@@ -387,6 +387,16 @@ function LiveImportStream() {
 /* ── Editable users & roles (Admin) ──────────────────────────────── */
 function AdminUsersCard() {
   const { pushToast } = useApp();
+  // Production divergence: "Last active" reads the usage telemetry's last-seen
+  // (pages-admin-usage.jsx, shared fetch with the glance card). Until usage is
+  // recording, the honest word stays "Not recorded".
+  const usage = window.useUsageModel ? window.useUsageModel(7) : { status: "not_configured" };
+  const lastActive = (u) => {
+    if (!window.DMA_LIVE || usage.status !== "ok") return u.last;
+    const seen = usage.lastSeen[String(u.email).toLowerCase()];
+    if (u.email === sessionUser().email) return "now (this session)";
+    return seen ? window.uaRel(seen, false, usage.now) : "Never signed in";
+  };
   // Production divergence: LIVE mode renders the REAL role grants the
   // server resolves sign-ins against (DMA_LIVE.role_grants, admin
   // sessions only) — read-only until the users table lands; grants
@@ -448,7 +458,9 @@ function AdminUsersCard() {
       </div>
       <div style={{ overflowX: "auto" }}>
         <table className="tbl">
-          <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
+          {/* Production divergence: grants are deploy-time allowlists, so the
+              role picker and Deactivate changed nothing — read-only here. */}
+          <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th>{LIVE ? null : <th style={{ textAlign: "right" }}>Action</th>}</tr></thead>
           <tbody>
             {users.map(u => (
               <tr key={u.id} style={{ opacity: u.active ? 1 : 0.55 }}>
@@ -457,17 +469,23 @@ function AdminUsersCard() {
                   <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{u.email}</div>
                 </td>
                 <td data-label="Role">
-                  <select className="inp inp-sm" value={u.role} onChange={e => setRole(u.id, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${u.name}`}>
-                    <option value="AE">AE</option>
-                    <option value="ANALYST">Analyst</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
+                  {LIVE ? (
+                    <span className="b b-muted">{{ AE: "AE", ANALYST: "Analyst", ADMIN: "Admin" }[u.role] || u.role}</span>
+                  ) : (
+                    <select className="inp inp-sm" value={u.role} onChange={e => setRole(u.id, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${u.name}`}>
+                      <option value="AE">AE</option>
+                      <option value="ANALYST">Analyst</option>
+                      <option value="ADMIN">Admin</option>
+                    </select>
+                  )}
                 </td>
-                <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{u.last}</td>
+                <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{lastActive(u)}</td>
                 <td data-label="Status"><span className={`b ${u.active ? "b-above" : "b-muted"}`}>{u.active ? "Active" : "Deactivated"}</span></td>
-                <td data-label="Action" style={{ textAlign: "right" }}>
-                  <button className="btn btn-tertiary btn-sm" onClick={() => toggleActive(u.id)}>{u.active ? "Deactivate" : "Reactivate"}</button>
-                </td>
+                {LIVE ? null : (
+                  <td data-label="Action" style={{ textAlign: "right" }}>
+                    <button className="btn btn-tertiary btn-sm" onClick={() => toggleActive(u.id)}>{u.active ? "Deactivate" : "Reactivate"}</button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -491,6 +509,16 @@ function AdminUsersCard() {
       )}
     </div>
   );
+}
+
+/* The last package-scan execution as one line: when it started and what the
+   ledger says it did. A row the Job never finished says so — "running or
+   died" is a different fact from a completed scan. */
+function lastScanLabel(s) {
+  if (!s || !s.started_at) return "No scans recorded yet";
+  const when = new Date(s.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  if (!s.finished_at) return `Last scan ${when} · not finished`;
+  return `Last scan ${when} · ${(s.status || "").toLowerCase() || "status not recorded"}`;
 }
 
 /* ── /admin home + import + audit ────────────────────────────────── */
@@ -535,12 +563,26 @@ function AdminPage() {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" disabled={scanning} onClick={() => runScan("delta")}>{scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={13} /> Delta scan</>}</button>
-          <button className="btn btn-primary" onClick={() => navigate("/admin/import")}><Icon name="play" size={13} /> Import &amp; jobs</button>
+          {/* Production divergence: Import & jobs is not served in production
+              (adminRouteHidden) — usage analytics takes the primary slot. */}
+          {LIVE ? (
+            <button className="btn btn-primary" onClick={() => navigate("/admin/usage")}><Icon name="users" size={13} /> Usage analytics</button>
+          ) : (
+            <>
+              <button className="btn btn-secondary" onClick={() => navigate("/admin/usage")}><Icon name="users" size={13} /> Usage analytics</button>
+              <button className="btn btn-primary" onClick={() => navigate("/admin/import")}><Icon name="play" size={13} /> Import &amp; jobs</button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* PENDING_REVIEW entities */}
-      <div className="card flush" style={{ marginBottom: 16 }}>
+      {/* Usage at a glance — full view at /admin/usage (pages-admin-usage.jsx) */}
+      {window.UsageGlanceCard ? <window.UsageGlanceCard /> : null}
+
+      {/* PENDING_REVIEW entities. Production divergence: hidden. The live
+          pipeline has no Phase 0 entity-inference step — the API always
+          returns an empty list and Confirm/Reject wrote nothing. */}
+      {LIVE ? null : <div className="card flush" style={{ marginBottom: 16 }}>
         <div className="card-head"><div className="row"><Icon name="users" size={14} /><h3>Pending review · Phase 0 entity inferences</h3></div><span className="b b-org">{DMA.PENDING_REVIEW.length} entities</span></div>
         <div className="card-body">
           {DMA.PENDING_REVIEW.map(e => (
@@ -562,7 +604,7 @@ function AdminPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Editable users & roles */}
       <AdminUsersCard />
@@ -573,7 +615,9 @@ function AdminPage() {
             <Icon name="drive" size={16} />
             <div style={{ fontWeight: 600, fontSize: 13 }}>Drive crawl</div>
             <span className="spacer" />
-            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{LIVE ? "History → Import audit" : "Last crawl 2 hr ago"}</span>
+            {/* Production divergence: the job-history page is not served, so
+                the last REAL scan-ledger row is stated here instead. */}
+            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{LIVE ? lastScanLabel((window.DMA_LIVE.import_scans || [])[0]) : "Last crawl 2 hr ago"}</span>
           </div>
 
           {/* Target folder: in production this is the deployed intake
@@ -590,7 +634,7 @@ function AdminPage() {
               <>
                 <span className="f-mono" style={{ flex: 1, fontSize: 12, padding: "7px 10px", background: "var(--z-bg)", borderRadius: 6, border: "1px solid var(--z-sep)" }}>{folder}</span>
                 {LIVE ? (
-                  <button className="btn btn-tertiary btn-sm" onClick={() => pushToast("The intake folder is set on the worker Job (INTAKE_FOLDER_ID) at deploy time", "warn")}><Icon name="lock" size={12} /> Deploy-set</button>
+                  <span className="b b-muted" title="Set on the worker Job (INTAKE_FOLDER_ID) at deploy time" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> Deploy-set</span>
                 ) : (
                   <button className="btn btn-tertiary btn-sm" onClick={() => setEditingFolder(true)}><Icon name="edit" size={12} /> Edit</button>
                 )}
@@ -615,9 +659,15 @@ function AdminPage() {
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-primary btn-sm" disabled={scanning} onClick={() => runScan("delta")}>{scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={12} /> Delta scan</>}</button>
-            <button className="btn btn-tertiary btn-sm" disabled={scanning} onClick={() => runScan("full")}>Full re-scan…</button>
-            <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import/audit")}>Import audit →</button>
-            <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import")}>Job history →</button>
+            {/* Production divergence: "Full re-scan" fired the same Job as the
+                delta scan, and the two links led to pages not served. */}
+            {LIVE ? null : (
+              <>
+                <button className="btn btn-tertiary btn-sm" disabled={scanning} onClick={() => runScan("full")}>Full re-scan…</button>
+                <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import/audit")}>Import audit →</button>
+                <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import")}>Job history →</button>
+              </>
+            )}
           </div>
         </div>
 
@@ -927,4 +977,4 @@ function ImportAuditPage() {
   );
 }
 
-Object.assign(window, { AlertsPage, ProspectingPage, AdminPage, ImportPage, ImportAuditPage });
+Object.assign(window, { AlertsPage, ProspectingPage, AdminPage, ImportPage, ImportAuditPage, lastScanLabel });

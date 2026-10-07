@@ -223,7 +223,7 @@ When the row below is not enough, the connector will explain itself: `explain_ga
 
 | Gate | What it asserts | On failure | Deep dive |
 |---|---|---|---|
-| `AG-01` | **Ranked or causal claims carry r_layer.** Any ranked/causal claim records hypothesis, counter, domain test, probes run and a verdict. | block | — |
+| `AG-01` | **Ranked or causal claims carry r_layer.** Any ranked/causal claim records hypothesis, counter, domain test, probes run and a verdict. The verdict is one of SHIP, SUPPORTED, HOLDS, CONFIRMED, PASS, ACCEPT, ACCEPTED, SHIP_LOW_CONF (published) or REJECT, REJECTED, DROP, DROPPED,… | block | — |
 | `AG-02` | **Counts are computed.** Where a surface declares its grounding, the number equals the length of the citation list. | block | — |
 | `AG-03` | **Every claim-bearing item cites evidence.** Per ITEM, not per section: a why-now card, finding, recommendation, insight, timeline event, issue, tech row, alert, cap, gate result, phase or starter that asserts something carries a non-empty evidence list of its own, read from the… | block | `gates/AG-03.md` |
 | `AG-04` | **A named peer's technographics carry their source.** Where peer_coverage is stated, a per-peer breakdown exists with one row per peer including the peers that could not be established (deployed: null); every deployed row carries a source_url and an as_of; and the share agrees with its own… | block | `gates/AG-04.md` |

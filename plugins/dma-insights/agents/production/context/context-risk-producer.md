@@ -109,6 +109,28 @@ Refuse to record any registry rung as a clean negative when it did not complete.
 `absence_of_enforcement.verified: true` requires the registries you actually
 searched — not the ones you meant to.
 
+**The driver has already run the sweep.** On an engine run, REPORTS writes
+`<run>/07_qa/enforcement_rungs.json` (your packet names it as `enforcement_rungs`)
+before any writer starts; read it first — its `sources_searched[]` is the ladder, its
+`verified` is the predicate. Run the script yourself only when the file is absent
+(a hand-driven run):
+
+**Run the sweep as code, not by hand.** `${CLAUDE_PLUGIN_ROOT}/scripts/enforcement_search.py
+--name "<legal name>" --name "<each trading name>" --cert <FDIC cert> --state <charter state>
+--out <run>/qa/enforcement_rungs.json` drives the FDIC Enforcement Decisions & Orders form
+(a Lightning app with no HTTP query), the CFPB actions index (`?title=`) and the configured
+state banking-department order searches (`STATE_ORDER_SEARCHES`; Nebraska today — add a
+state to the table rather than teaching the next producer its form), **with a positive
+control per source**: a zero is `VERIFIED_ABSENT` only when a name known to carry orders
+returned hits on the same mechanism in the same session; otherwise the rung is `NOT_RUN`
+with the reason. The script's `sources_searched[]` IS the rung shape CG-46 accepts
+(`{source, query, outcome, hits, url, retrieved_at, control}`), and its `verified` is the
+predicate this section states. Arbor Bank (2026-10-06) rediscovered every one of those
+facts inside a production round; a state the table does not know comes back as a named
+`NOT_RUN` rung so you search the department's page by hand and record it, never skip it.
+Register the registry pages you cite through the connector as usual — the script
+registers nothing.
+
 ## Reading order — which file answers which question
 
 1. `get_page_contract("context")` — the item-key contract for `issue_register` and
