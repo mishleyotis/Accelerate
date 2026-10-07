@@ -163,15 +163,24 @@ def get_capability_catalogue(run_id: str) -> dict:
 @mcp.tool()
 @_traced
 def get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = "",
-                          exclude_entity_name: str = "") -> dict:
+                          exclude_entity_name: str = "",
+                          subcap_ids: list | None = None) -> dict:
     """The sub-vertical cohort's peer score per category: the MEAN of every
     other assessed entity's category score (its active, promoted run), with
     n, median and quartiles. Below three entities a category comes back with
     mean null and the reason — record it as cannot_estimate, never impute.
     Aggregates only; no entity is named. Pass the asking client's display id
-    or legal name so it is not counted as its own peer."""
+    or legal name so it is not counted as its own peer.
+
+    Pass `subcap_ids` (up to 500) for the same cohort at CELL grain instead:
+    `cells` keyed by subcap id, each the mean of the other entities' scores
+    for that cell — the figure a finding, opportunity cell or gap row cites
+    as its own peer. The category mean is not a cell's peer figure."""
     from dma_mcp import cohort as cohort_mod
     with _conn() as c:
+        if subcap_ids:
+            return cohort_mod.cell_benchmarks(c, sub_vertical, subcap_ids,
+                                              exclude_display_id, exclude_entity_name)
         return cohort_mod.cohort_benchmarks(c, sub_vertical, exclude_display_id,
                                             exclude_entity_name)
 
