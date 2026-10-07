@@ -4,6 +4,7 @@ import { verifyIapAssertion } from "../lib/iap";
 import { displayName, domainOk, grantedRole, roleGrants } from "../lib/identity";
 import { deviceOf, logUsage } from "../lib/usage";
 import { shareMode } from "../lib/share";
+import { deactivatedHtml, resolveAccess } from "../lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -81,14 +82,31 @@ export async function GET(req) {
   // never re-types anything. The explicit /login page remains only for
   // post-sign-out and local dev.
   let setCookieValue = null;
+  const assertion = req.headers.get("x-goog-iap-jwt-assertion");
   if (!session) {
-    const iap = await verifyIapAssertion(req.headers.get("x-goog-iap-jwt-assertion"));
+    const iap = await verifyIapAssertion(assertion);
     if (iap && domainOk(iap.email)) {
       const role = grantedRole(iap.email);
       const name = displayName(iap.email);
       session = { email: iap.email, role, name };
+    }
+  }
+  // The grant is the users table's (lib/roles.js), re-read on every document
+  // load: a role an Admin changed lands here, and a deactivated account is
+  // turned away with its cookie cleared rather than served a stale role.
+  if (session) {
+    const access = await resolveAccess(session.email, assertion);
+    if (!access.active) {
+      return new Response(deactivatedHtml(session.email), {
+        status: 403,
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store",
+                   "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` },
+      });
+    }
+    if (access.role !== session.role || !verify(cookies().get(COOKIE)?.value)) {
+      session = { ...session, role: access.role };
       const { sign, maxAge } = await import("../lib/session");
-      setCookieValue = { value: sign(iap.email, role, name), maxAge: maxAge() };
+      setCookieValue = { value: sign(session.email, session.role, session.name), maxAge: maxAge() };
     }
   }
 

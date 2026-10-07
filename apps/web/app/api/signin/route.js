@@ -3,6 +3,7 @@ import { COOKIE, maxAge, sign } from "../../../lib/session";
 import { iapIdentity } from "../../../lib/iap";
 import { displayName, domainOk, grantedRole } from "../../../lib/identity";
 import { shareMode } from "../../../lib/share";
+import { resolveAccess } from "../../../lib/roles";
 
 // Sign-in mints the app session from the ONLY identity this app trusts:
 // the Google account IAP verified in front of this service. The request
@@ -32,7 +33,17 @@ export async function POST(req) {
       { status: 403 });
   }
 
-  const role = grantedRole(email);
+  // The grant is the users table's (lib/roles.js); a deactivated account is
+  // refused here exactly as the document route refuses it.
+  const access = iap
+    ? await resolveAccess(email, req.headers.get("x-goog-iap-jwt-assertion"))
+    : { role: grantedRole(email), active: true };
+  if (!access.active) {
+    return NextResponse.json(
+      { error: "This account's access has been deactivated. Ask an Admin to reactivate it." },
+      { status: 403 });
+  }
+  const role = access.role;
   const name = displayName(email);
   const res = NextResponse.json({ ok: true, role, email, name });
   res.cookies.set(COOKIE, sign(email, role, name), {

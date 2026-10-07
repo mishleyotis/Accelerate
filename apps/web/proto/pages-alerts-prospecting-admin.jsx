@@ -387,126 +387,145 @@ function LiveImportStream() {
 /* ── Editable users & roles (Admin) ──────────────────────────────── */
 function AdminUsersCard() {
   const { pushToast } = useApp();
-  // Production divergence: "Last active" reads the usage telemetry's last-seen
-  // (pages-admin-usage.jsx, shared fetch with the glance card). Until usage is
-  // recording, the honest word stays "Not recorded".
-  const usage = window.useUsageModel ? window.useUsageModel(7) : { status: "not_configured" };
-  const lastActive = (u) => {
-    if (!window.DMA_LIVE || usage.status !== "ok") return u.last;
-    const seen = usage.lastSeen[String(u.email).toLowerCase()];
-    if (u.email === sessionUser().email) return "now (this session)";
-    return seen ? window.uaRel(seen, false, usage.now) : "Never signed in";
-  };
-  // Production divergence: LIVE mode renders the REAL role grants the
-  // server resolves sign-ins against (DMA_LIVE.role_grants, admin
-  // sessions only) — read-only until the users table lands; grants
-  // change via deployment env, never via this card. The mutable mock
-  // roster renders solely in local preview.
   const LIVE = !!window.DMA_LIVE;
-  const liveGrantRows = (() => {
-    if (!LIVE) return null;
-    const g = window.DMA_LIVE.role_grants;
-    if (!g) return [];
-    const nameOf = (e) => {
-      const parts = e.split("@")[0].split(/[._-]+/).filter(Boolean);
-      if (parts.length === 1 && parts[0].length <= 3) return parts[0].toUpperCase();
-      return parts.map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || e;
-    };
-    const me = sessionUser().email;
-    const rows = [];
-    // Last-active is not an enrichable field: a deploy-time grant carries no
-    // sign-in history until the users table lands, so the honest word is that
-    // nothing recorded it, not a gap anyone can queue against the connector.
-    g.admins.forEach((e, i) => rows.push({ id: `adm-${i}`, name: nameOf(e), email: e, role: "ADMIN", active: true, last: e === me ? "now (this session)" : "Not recorded" }));
-    g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) =>
-      rows.push({ id: `ana-${i}`, name: nameOf(e), email: e, role: "ANALYST", active: true, last: e === me ? "now (this session)" : "Not recorded" }));
-    return rows;
-  })();
-  const [users, setUsers] = useState(LIVE ? (liveGrantRows || []) : [
-    { id: 1, name: "Mishley Andrade", email: "mishley@zennify.com", role: "ANALYST", active: true,  last: "2 min ago"  },
-    { id: 2, name: "Dev Patel",       email: "dev@zennify.com",     role: "ADMIN",   active: true,  last: "1 hr ago"   },
-    { id: 3, name: "Sara Lin",        email: "sara@zennify.com",    role: "AE",      active: true,  last: "Yesterday"  },
-    { id: 4, name: "Tom Reyes",       email: "tom@zennify.com",     role: "AE",      active: false, last: "3 wk ago"   },
+  // "Last active" reads the usage telemetry's last-seen (pages-admin-usage.jsx,
+  // one shared fetch with the glance card).
+  const usage = window.useUsageModel ? window.useUsageModel(7) : { status: "not_configured" };
+  const me = sessionUser().email;
+  // Production: the roster is the users table (svc_api /v1/admin/users, owner
+  // adjudication 2026-10-07). Every change is a real write the API records in
+  // session_log; the person's new role applies on their next page load.
+  // Local preview keeps the prototype's in-memory roster.
+  const [live, setLive] = useState({ status: LIVE ? "loading" : "ok", users: [], floor: [] });
+  const [busy, setBusy] = useState(null);
+  const [mock, setMock] = useState([
+    { email: "mishley@zennify.com", display_name: "Mishley Andrade", role: "ANALYST", is_active: true, last: "2 min ago" },
+    { email: "dev@zennify.com",     display_name: "Dev Patel",       role: "ADMIN",   is_active: true, last: "1 hr ago" },
+    { email: "sara@zennify.com",    display_name: "Sara Lin",        role: "AE",      is_active: true, last: "Yesterday" },
+    { email: "tom@zennify.com",     display_name: "Tom Reyes",       role: "AE",      is_active: false, last: "3 wk ago" },
   ]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("AE");
 
-  const setRole = (id, role) => {
-    if (LIVE) { pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn"); return; }
-    setUsers(us => us.map(u => u.id === id ? { ...u, role } : u)); pushToast(`Role updated to ${role}`, "success");
+  const load = () => fetch("/api/admin/users", { cache: "no-store" })
+    .then(r => r.json().then(b => ({ ok: r.ok, b })))
+    .then(({ ok, b }) => setLive(ok ? { status: "ok", users: b.users || [], floor: b.owner_floor || [] }
+                                    : { status: "error", detail: b.detail || b.error, users: [], floor: [] }))
+    .catch(() => setLive({ status: "error", detail: "The users service did not answer.", users: [], floor: [] }));
+  useEffect(() => { if (LIVE) load(); }, []);
+
+  const roleWord = r => ({ AE: "AE", ANALYST: "Analyst", ADMIN: "Admin" }[r] || r);
+  const nameOf = e => { const p = e.split("@")[0].split(/[._-]+/).filter(Boolean); return p.length === 1 && p[0].length <= 3 ? p[0].toUpperCase() : p.map(w => w[0].toUpperCase() + w.slice(1)).join(" "); };
+  const seen = LIVE && usage.status === "ok" ? usage.lastSeen : {};
+
+  // Everyone with a row, plus everyone the usage log has seen sign in without
+  // one: they are AEs by default, and giving them a role creates their row.
+  const users = LIVE ? (() => {
+    const rows = live.users.map(u => ({ ...u, known: true }));
+    const have = new Set(rows.map(u => u.email));
+    Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: "AE", is_active: true, signed_in: true, known: false }); });
+    return rows;
+  })() : mock;
+
+  const lastActive = u => {
+    if (!LIVE) return u.last;
+    if (u.email === me) return "now (this session)";
+    const s = seen[u.email];
+    if (s) return window.uaRel(s, false, usage.now);
+    if (u.last_seen_at) return window.uaRel(new Date(u.last_seen_at), false, new Date());
+    if (u.known && !u.signed_in) return "Invited";
+    return usage.status === "ok" ? "Never signed in" : "Not recorded";
   };
-  const toggleActive = (id) => {
-    if (LIVE) { pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn"); return; }
-    setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), { ...u, active: !u.active }) : u));
+  const locked = u => LIVE && live.floor.includes(u.email) ? "Owner account (ADMIN_EMAILS): always an active Admin"
+    : u.email === me ? "Your own access: ask another Admin to change it" : null;
+
+  const apply = (email, change, done) => {
+    if (!LIVE) {
+      setMock(us => us.some(u => u.email === email) ? us.map(u => u.email === email ? { ...u, ...change } : u)
+        : [...us, { email, display_name: nameOf(email), role: change.role || "AE", is_active: true, last: "Invited" }]);
+      done(); return;
+    }
+    setBusy(email);
+    fetch("/api/admin/users", { method: "POST", headers: { "content-type": "application/json", "idempotency-key": crypto.randomUUID() },
+                                body: JSON.stringify({ email, ...change }) })
+      .then(r => r.json().then(b => ({ ok: r.ok, b })))
+      .then(({ ok, b }) => {
+        setBusy(null);
+        if (!ok) { pushToast(b.detail || b.error || "The change was refused", "warn"); return; }
+        setLive(l => ({ ...l, users: l.users.some(u => u.email === b.user.email) ? l.users.map(u => u.email === b.user.email ? b.user : u) : [...l.users, b.user] }));
+        done(b);
+      })
+      .catch(() => { setBusy(null); pushToast("The users service did not answer", "warn"); });
   };
+  const after = " · applies on their next page load";
+  const setRole = (u, role) => apply(u.email, { role }, () => pushToast(`${u.display_name || nameOf(u.email)}: role updated to ${roleWord(role)}${LIVE ? after : ""}`, "success"));
+  const toggleActive = u => apply(u.email, { is_active: !u.is_active }, () => pushToast(`${u.display_name || nameOf(u.email)} ${u.is_active ? "deactivated" : "reactivated"}`, u.is_active ? "warn" : "success"));
   const invite = () => {
-    if (LIVE) { pushToast("Invites arrive with the users table; today every @zennify.com Google account signs in as AE automatically", "warn"); return; }
-    const email = inviteEmail.trim();
+    const email = inviteEmail.trim().toLowerCase();
     if (!email) { pushToast("Enter an email to invite", "warn"); return; }
     if (!/@zennify\.com$/i.test(email)) { pushToast("Only @zennify.com addresses can be invited", "warn"); return; }
-    const name = email.split("@")[0].split(".").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-    setUsers(us => [...us, { id: Date.now(), name, email, role: inviteRole, active: true, last: "Invited" }]);
-    pushToast(`Invitation sent to ${email}`, "success");
-    setInviteEmail("");
+    if (users.some(u => u.email === email && u.known !== false)) { pushToast(`${email} is already on the list`, "warn"); return; }
+    apply(email, { role: inviteRole }, () => {
+      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: they sign in with their Google account` : `Invitation sent to ${email}`, "success");
+      setInviteEmail("");
+    });
   };
 
   return (
     <div className="card flush" style={{ marginBottom: 16 }}>
       <div className="card-head">
         <div className="row"><Icon name="users" size={14} /><h3>Users &amp; roles</h3></div>
-        <span className="b b-muted">{users.filter(u => u.active).length} active</span>
+        <span className="b b-muted">{users.filter(u => u.is_active).length} active</span>
       </div>
+      {LIVE && live.status !== "ok" ? (
+        <div className="card-body" style={{ fontSize: 12, color: "var(--z-body)", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          {live.status === "loading" ? <span className="spinner" /> : <Icon name="info" size={13} style={{ flexShrink: 0, marginTop: 1 }} />}
+          <span>{live.status === "loading" ? "Loading users…" : <>The users list could not be read. <span className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)" }}>{live.detail}</span></>}</span>
+        </div>
+      ) : (
       <div style={{ overflowX: "auto" }}>
         <table className="tbl">
-          {/* Production divergence: grants are deploy-time allowlists, so the
-              role picker and Deactivate changed nothing — read-only here. */}
-          <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th>{LIVE ? null : <th style={{ textAlign: "right" }}>Action</th>}</tr></thead>
+          <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
           <tbody>
-            {users.map(u => (
-              <tr key={u.id} style={{ opacity: u.active ? 1 : 0.55 }}>
+            {users.map(u => { const lock = locked(u); const name = u.display_name || nameOf(u.email); return (
+              <tr key={u.email} style={{ opacity: u.is_active ? 1 : 0.55 }}>
                 <td data-label="User">
-                  <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{u.name}</div>
+                  <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{name}</div>
                   <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{u.email}</div>
                 </td>
                 <td data-label="Role">
-                  {LIVE ? (
-                    <span className="b b-muted">{{ AE: "AE", ANALYST: "Analyst", ADMIN: "Admin" }[u.role] || u.role}</span>
-                  ) : (
-                    <select className="inp inp-sm" value={u.role} onChange={e => setRole(u.id, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${u.name}`}>
-                      <option value="AE">AE</option>
-                      <option value="ANALYST">Analyst</option>
-                      <option value="ADMIN">Admin</option>
-                    </select>
-                  )}
+                  <select className="inp inp-sm" value={u.role} disabled={!!lock || busy === u.email} title={lock || undefined} onChange={e => setRole(u, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${name}`}>
+                    <option value="AE">AE</option>
+                    <option value="ANALYST">Analyst</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
                 </td>
                 <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{lastActive(u)}</td>
-                <td data-label="Status"><span className={`b ${u.active ? "b-above" : "b-muted"}`}>{u.active ? "Active" : "Deactivated"}</span></td>
-                {LIVE ? null : (
-                  <td data-label="Action" style={{ textAlign: "right" }}>
-                    <button className="btn btn-tertiary btn-sm" onClick={() => toggleActive(u.id)}>{u.active ? "Deactivate" : "Reactivate"}</button>
-                  </td>
-                )}
+                <td data-label="Status"><span className={`b ${u.is_active ? "b-above" : "b-muted"}`}>{u.is_active ? "Active" : "Deactivated"}</span></td>
+                <td data-label="Action" style={{ textAlign: "right" }}>
+                  {lock ? <span className="b b-muted" title={lock} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> {u.email === me ? "You" : "Owner"}</span>
+                    : <button className="btn btn-tertiary btn-sm" disabled={busy === u.email} onClick={() => toggleActive(u)}>{busy === u.email ? <span className="spinner" /> : (u.is_active ? "Deactivate" : "Reactivate")}</button>}
+                </td>
               </tr>
-            ))}
+            ); })}
           </tbody>
         </table>
       </div>
-      {LIVE ? (
-        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", fontSize: 11.5, color: "var(--z-muted)", display: "flex", gap: 8, alignItems: "flex-start" }}>
-          <Icon name="info" size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-          <span>Every other @zennify.com Google account signs in as <strong>AE</strong> automatically. ADMIN and ANALYST are deploy-time grants (ADMIN_EMAILS / ANALYST_EMAILS); per-user management arrives with the users table.</span>
-        </div>
-      ) : (
-        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-          <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
-          <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
-            <option value="AE">AE</option>
-            <option value="ANALYST">Analyst</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-          <button className="btn btn-primary btn-sm" onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
-        </div>
       )}
+      <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
+        <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
+          <option value="AE">AE</option>
+          <option value="ANALYST">Analyst</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+        <button className="btn btn-primary btn-sm" disabled={LIVE && live.status !== "ok"} onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
+      </div>
+      {LIVE ? (
+        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", fontSize: 11, color: "var(--z-muted)" }}>
+          Any other @zennify.com Google account signs in as an <strong>AE</strong>. A role change applies on that person's next page load; a deactivated account is turned away at its next load.
+        </div>
+      ) : null}
     </div>
   );
 }

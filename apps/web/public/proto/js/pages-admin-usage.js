@@ -492,7 +492,8 @@ function uaModelFromWire(body) {
     people,
     lastSeen,
     recordingSince: body.recording_since ? new Date(body.recording_since) : null,
-    truncated: !!body.truncated
+    truncated: !!body.truncated,
+    awaiting: !!body.awaiting_first_event
   };
 }
 
@@ -935,12 +936,45 @@ function UAStatus({
 const UA_STATE_COPY = {
   loading: ["Loading usage…", "Reading the usage dataset."],
   not_configured: ["Usage recording is not configured", "This deployment has no usage dataset (USAGE_DATASET). It is set by infra/deploy.sh."],
-  not_recording: ["Not recording yet", "The usage dataset or its table does not exist yet. It appears once the dmai-usage log sink exists (infra/deploy.sh) and the first usage event arrives — there is no backfill from before then."],
-  forbidden: ["Usage data is not readable", "The web service account lacks its BigQuery grants on the usage dataset (infra/deploy.sh grants them)."],
+  not_recording: ["Not recording yet", "The usage dataset does not exist yet. The release creates it together with the dmai-usage log sink; usage counts from that moment, with no backfill."],
+  forbidden: ["Usage data is not readable", "The web service account is missing a BigQuery grant. The release applies it; the line below names which one."],
   unreachable: ["Usage service unreachable", "The request to /api/admin/usage did not complete."],
   admin_session_required: ["Admin access required", "Usage analytics needs an ADMIN grant."],
   error: ["Usage data could not be read", null]
 };
+/* The sink is live and nothing has reached it yet: the layout renders at
+   zero, and this line says why the zeros are not "nobody came". */
+function UAAwaiting({
+  compact
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: compact ? "card-body" : "card",
+    style: compact ? {
+      borderBottom: "1px solid var(--z-sep)",
+      fontSize: 12,
+      color: "var(--z-body)"
+    } : {
+      marginBottom: 16,
+      fontSize: 12,
+      color: "var(--z-body)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      alignItems: "flex-start"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "live-dot",
+    style: {
+      marginTop: 5
+    }
+  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: "var(--z-dark)"
+    }
+  }, "Recording is live."), " The first usage events land within a minute of someone using the app; there is no backfill from before recording began.")));
+}
 function UAStateCard({
   state,
   compact
@@ -1472,7 +1506,7 @@ function UsagePage() {
     }, {
       label: "Usage analytics"
     }]
-  }, head, model.truncated ? /*#__PURE__*/React.createElement("div", {
+  }, head, model.awaiting ? /*#__PURE__*/React.createElement(UAAwaiting, null) : null, model.truncated ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16,
@@ -2171,7 +2205,9 @@ function UsageGlanceCard() {
       marginBottom: 16
     },
     "data-screen-label": "Admin \xB7 Usage at a glance"
-  }, header(live.length), /*#__PURE__*/React.createElement("div", {
+  }, header(live.length), model.awaiting ? /*#__PURE__*/React.createElement(UAAwaiting, {
+    compact: true
+  }) : null, /*#__PURE__*/React.createElement("div", {
     className: "card-body"
   }, /*#__PURE__*/React.createElement("div", {
     style: {

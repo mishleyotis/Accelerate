@@ -4,8 +4,10 @@
 //
 // Every state the store can be in is a state the page renders by name:
 //   not_configured  USAGE_DATASET / GCP_PROJECT unset on this deployment
-//   not_recording   the dataset or its table does not exist yet — the sink has
-//                   not been created, or no usage line has arrived since it was
+//   not_recording   the dataset does not exist yet (the sink was never created)
+//   ok + awaiting_first_event
+//                   the dataset exists and no usage line has arrived since the
+//                   sink was created: the page renders its layout at zero
 //   forbidden       the web service account lacks its BigQuery grants
 //   error           anything else, with BigQuery's own message
 // None of them renders as an empty chart: "nobody used the app" and "we are
@@ -159,6 +161,38 @@ export async function readUsage(rangeDays, { env = process.env, fetchImpl = fetc
       i === 7 ? (v == null ? null : Number(v)) : i === 8 ? (v == null ? null : v === "true") : v));
     return { ...base, status: "ok", recording_since, last_seen, truncated, events: wire };
   } catch (e) {
-    return { ...base, status: e.state || "error", detail: String(e.message || e).slice(0, 300) };
+    const d = await diagnose(cfg, e, fetchImpl).catch(() => null);
+    if (d && d.status === "ok") {
+      // The sink and its grants are in place and nothing has arrived yet:
+      // the page renders its full layout at zero, and says it is waiting.
+      return { ...base, status: "ok", awaiting_first_event: true, recording_since: null,
+               last_seen: {}, truncated: false, events: [] };
+    }
+    return { ...base, status: (d && d.status) || e.state || "error",
+             detail: (d && d.detail) || String(e.message || e).slice(0, 300) };
   }
+}
+
+// BigQuery answers a query on a missing dataset, a missing table and a missing
+// grant with the same "Access Denied ... or perhaps it does not exist". The
+// metadata reads tell them apart, so the page names the one step that is
+// actually missing rather than guessing.
+export async function diagnose(cfg, err, fetchImpl = fetch) {
+  const tok = await token(fetchImpl);
+  const base = `https://bigquery.googleapis.com/bigquery/v2/projects/${cfg.project}/datasets/${cfg.dataset}`;
+  const get = (u) => fetchImpl(u, { headers: { Authorization: `Bearer ${tok}` }, cache: "no-store" });
+  const ds = await get(base);
+  if (ds.status === 404) {
+    return { status: "not_recording", detail: `Dataset ${cfg.dataset} does not exist yet: the deploy creates it with the dmai-usage log sink.` };
+  }
+  if (ds.status === 403) {
+    return { status: "forbidden", detail: `dmai-web cannot read dataset ${cfg.dataset} (bigquery.dataViewer on the dataset is missing).` };
+  }
+  if (!ds.ok) return null;
+  const tb = await get(`${base}/tables/${cfg.table}`);
+  if (tb.status === 404) return { status: "ok" };
+  if (tb.ok && err && err.state === "forbidden") {
+    return { status: "forbidden", detail: "dmai-web can read the dataset but cannot run queries (roles/bigquery.jobUser on the project is missing)." };
+  }
+  return null;
 }

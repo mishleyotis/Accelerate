@@ -89,7 +89,7 @@ if [ -f apps/api/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-api@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights;IAP_AUDIENCE=/projects/${API_PROJECT_NUMBER}/locations/${REGION}/services/dmai-web" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights;IAP_AUDIENCE=/projects/${API_PROJECT_NUMBER}/locations/${REGION}/services/dmai-web;ADMIN_EMAILS=${ADMIN_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com}" \
     --concurrency=80 --min-instances=1 --no-allow-unauthenticated --quiet
   # web calls api service-to-service with an ID token
   gcloud run services add-iam-policy-binding dmai-api \
@@ -365,8 +365,11 @@ if [ -f apps/web/Dockerfile ]; then
     done
   }
 
-  gcloud services enable bigquery.googleapis.com --project="$PROJECT_ID" --quiet \
-    >/dev/null 2>&1 || usage_warn "could not enable bigquery.googleapis.com"
+  if ! gcloud services list --enabled --project="$PROJECT_ID" \
+       --filter='config.name=bigquery.googleapis.com' --format='value(config.name)' 2>/dev/null | grep -q .; then
+    gcloud services enable bigquery.googleapis.com --project="$PROJECT_ID" --quiet \
+      >/dev/null 2>&1 || usage_warn "could not enable bigquery.googleapis.com"
+  fi
   if ! bq --project_id="$PROJECT_ID" show --dataset "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1; then
     say "  usage: creating dataset ${USAGE_DATASET}"
     usage_try bq --project_id="$PROJECT_ID" mk --dataset --location="$REGION" \
@@ -395,19 +398,39 @@ if [ -f apps/web/Dockerfile ]; then
   # query at all.
   SINK_WRITER="$(gcloud logging sinks describe "$USAGE_SINK" --project="$PROJECT_ID" \
                   --format='value(writerIdentity)' 2>/dev/null || true)"
-  DS_POLICY="$(bq --project_id="$PROJECT_ID" get-iam-policy --format=prettyjson \
-                "${PROJECT_ID}:${USAGE_DATASET}" 2>/dev/null || true)"
-  if [ -n "$SINK_WRITER" ] && ! printf '%s' "$DS_POLICY" | grep -q "${SINK_WRITER#serviceAccount:}"; then
-    bq --project_id="$PROJECT_ID" add-iam-policy-binding --member="$SINK_WRITER" \
-      --role=roles/bigquery.dataEditor "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1 \
+  # Dataset-scoped access goes through the dataset's own access list (bq show
+  # → add the entry → bq update --source): every bq version supports it, where
+  # dataset IAM bindings through add-iam-policy-binding do not. READER is
+  # bigquery.dataViewer on the dataset, WRITER is bigquery.dataEditor.
+  usage_ds_access() {  # $1 READER|WRITER  $2 service-account email
+    local tmp rc
+    tmp="$(mktemp)"
+    bq --project_id="$PROJECT_ID" show --format=prettyjson \
+      "${PROJECT_ID}:${USAGE_DATASET}" > "$tmp" 2>/dev/null || { rm -f "$tmp"; return 1; }
+    python3 - "$tmp" "$1" "$2" <<'PY' && rc=0 || rc=$?
+import json, sys
+path, role, email = sys.argv[1:]
+access = json.load(open(path)).get("access", [])
+enough = {"READER": {"READER", "WRITER", "OWNER"}, "WRITER": {"WRITER", "OWNER"}}[role]
+if any(a.get("userByEmail", "").lower() == email.lower() and a.get("role") in enough for a in access):
+    sys.exit(3)
+access.append({"role": role, "userByEmail": email})
+json.dump({"access": access}, open(path, "w"))
+PY
+    if [ "$rc" = 3 ]; then rm -f "$tmp"; return 0; fi
+    if [ "$rc" != 0 ]; then rm -f "$tmp"; return 1; fi
+    say "  usage: granting ${2} ${1} on ${USAGE_DATASET}"
+    usage_try bq --project_id="$PROJECT_ID" update --source "$tmp" \
+      "${PROJECT_ID}:${USAGE_DATASET}" && rc=0 || rc=1
+    rm -f "$tmp"
+    return "$rc"
+  }
+  if [ -n "$SINK_WRITER" ]; then
+    usage_ds_access WRITER "${SINK_WRITER#serviceAccount:}" \
       || usage_warn "could not grant the sink writer dataEditor on ${USAGE_DATASET}"
   fi
-  if ! printf '%s' "$DS_POLICY" | grep -q "dmai-web@${SA_DOMAIN}"; then
-    bq --project_id="$PROJECT_ID" add-iam-policy-binding \
-      --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
-      --role=roles/bigquery.dataViewer "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1 \
-      || usage_warn "could not grant dmai-web dataViewer on ${USAGE_DATASET}"
-  fi
+  usage_ds_access READER "dmai-web@${SA_DOMAIN}" \
+    || usage_warn "could not grant dmai-web dataViewer on ${USAGE_DATASET}"
   if ! gcloud projects get-iam-policy "$PROJECT_ID" \
        --flatten='bindings[].members' \
        --filter="bindings.role=roles/bigquery.jobUser AND bindings.members=serviceAccount:dmai-web@${SA_DOMAIN}" \
