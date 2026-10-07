@@ -3537,8 +3537,6 @@ def _build_opts(a) -> Options:
                    relay_mode=getattr(a, "relay_mode", Options.relay_mode),
                    step=getattr(a, "step", Options.step),
                    lane_retries=a.lane_retries, page_retries=a.page_retries,
-                   sg_v4_budget=(Options.sg_v4_budget if getattr(a, "sg_v4_budget", None)
-                                 is None else a.sg_v4_budget),
                    ingest_poll_s=(0 if a.dispatcher == "stub" else a.ingest_poll_s),
                    ingest_timeout_s=a.ingest_timeout_s,
                    folder_root=Path(a.folder_root) if a.folder_root else None,
@@ -3670,11 +3668,6 @@ def main(argv=None) -> int:
                         "Past RESEARCH it advances exactly one stage.")
     r.add_argument("--lane-retries", type=int, default=1)
     r.add_argument("--page-retries", type=int, default=2)
-    r.add_argument("--sg-v4-budget", type=int, default=None,
-                   help="prose SG-V4 FAILs a page may carry and still be accepted "
-                        f"(default {Options.sg_v4_budget}). The connector discloses "
-                        "SG-V4 and promotes (invariant 12); raising it is an owner "
-                        "decision, recorded in Gate_Log on every page it admits")
     r.add_argument("--lane-timeout", type=int, default=2400)
     r.add_argument("--lanes", type=int)
     r.add_argument("--ingest-poll-s", type=float, default=60.0)
