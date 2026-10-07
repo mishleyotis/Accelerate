@@ -79,7 +79,45 @@ def test_all_four_layers_close_it(tmp_path):
                         providers=["web"], subcaps=[], evidence_ids=[eid],
                         source_urls=["https://example.test/a"],
                         as_of="2025-12-31")
+    # Four web-found layers are not a scan (owner, 2026-10-07, First Tech:
+    # five such rows closed PRELIM and ET-12 refused the page at PAGES_A).
+    st = _state(wb, "tech_baseline")
+    assert st["status"] == "OPEN" and "machine technographic scan" in st["detail"]
+    _declare_scan_not_run(wb)
     assert _state(wb, "tech_baseline")["status"] == "RESEARCHED"
+
+
+def _declare_scan_not_run(wb):
+    from engine import page_preflight as PP
+    for tool in ("clay", "vibe"):
+        PP.declare_not_run(wb, tool=tool, reason=(
+            f"{tool} returned no technographic profile for this domain on "
+            f"2026-08-29; recorded so the page states NOT_RUN"))
+
+
+def test_a_banked_connector_scan_closes_it_and_satisfies_the_page_preflight(tmp_path):
+    from engine import ledger as L, page_preflight as PP
+    run = new_run(tmp_path, prelim=False)
+    wb = run.open()
+    scan = L.append_evidence(
+        wb, source_name="Clay company Tech Stack (technographic scan)",
+        source_url="https://app.clay.com/technographics/x", tier="T1",
+        excerpt=("Technographic scan, detected technologies: OPS system, CUST "
+                 "system, DATA system and INFRA system, last seen 2026-08."),
+        subcaps=[], published="2026-08-28", origin="connector")
+    for layer in C.TECH_LAYERS:
+        techscan.record(wb, product=f"{layer} system", vendor="Vendor",
+                        layer=layer, status="INFERRED",
+                        method="technographic_scan",
+                        basis=f"{layer} system detected by the Clay scan",
+                        providers=["clay"], subcaps=[], evidence_ids=[scan],
+                        source_urls=["https://app.clay.com/technographics/x"],
+                        as_of="2026-08-28")
+    assert PP.machine_scan(wb)["state"] == "SCANNED"
+    assert _state(wb, "tech_baseline")["status"] == "RESEARCHED"
+    # the page preflight reads the same facts: no ET-12, no CG-50; CG-40 is
+    # excused by the scan (the ladder states the depth the scan found)
+    assert [b["gate"] for b in PP.preflight(wb)] == []
 
 
 def test_a_layer_searched_and_empty_closes_as_absent_not_as_a_gap(tmp_path):
@@ -101,6 +139,7 @@ def test_a_layer_searched_and_empty_closes_as_absent_not_as_a_gap(tmp_path):
                    if absent else f"named in the filing as the {layer} tier"),
             providers=["web"], subcaps=[], evidence_ids=[eid],
             source_urls=["https://example.test/a"], as_of="2025-12-31")
+    _declare_scan_not_run(wb)
     assert _state(wb, "tech_baseline")["status"] == "RESEARCHED"
     assert "ABSENT" in C.TECH_STATUS
 

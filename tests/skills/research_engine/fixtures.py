@@ -374,6 +374,18 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                  rule=("US credit unions in the 15-25bn asset band with a "
                        "geographic field of membership and a public core "
                        "platform decision since 2022"))
+    # THE MACHINE TECHNOGRAPHIC SCAN, in PRELIM (ET-12; owner, 2026-10-07):
+    # one Clay Tech Stack reading, banked as connector evidence and cited on
+    # the rows it detects, so the techstack page never meets ET-12 or CG-50
+    # at PAGES_A in a session that no longer holds the connector.
+    scan_eid = L.append_evidence(
+        wb, source_name=f"Clay company Tech Stack (technographic scan), {entity}",
+        source_url="https://app.clay.com/technographics/acme", tier="T1",
+        excerpt=("Technographic scan, detected technologies: Alkami Digital Banking "
+                 "(digital banking), Fiserv DNA (core processing), Snowflake Data "
+                 "Cloud (data warehouse); last seen 2026-08."),
+        subcaps=[], published="2026-08-28", origin="connector",
+        access_status="OK: Clay Tech Stack, retrieved 2026-08-29")
     # ALL FOUR LAYERS, in PRELIM. A layer nothing was found in is an
     # ABSENT row carrying the ladder — never a layer left out, which reads
     # to every later surface as a clean estate.
@@ -393,7 +405,7 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                         method="public_document",
                         basis=basis,
                         providers=["clay", "web"],
-                        subcaps=[], evidence_ids=[eid],
+                        subcaps=[], evidence_ids=[eid, scan_eid],
                         source_urls=["https://ncua.example/callreport/2025"],
                         as_of="2025-12-31")
     # THE THREE CONNECTOR-OWNED TABS, closed through the real gate: one

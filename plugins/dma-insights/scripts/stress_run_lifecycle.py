@@ -376,6 +376,14 @@ def main(argv=None) -> int:
                   "--method", "public_document", "--evidence", eid2,
                   "--provider", "clay", "--provider", "web",
                   "--basis", basis).returncode == 0
+    # THE MACHINE SCAN (2026-10-07): the baseline will not sign off without a
+    # Clay/Vibe technographic reading or a declared NOT_RUN for both. The walk
+    # has no connector, so it declares — through the CLI a conductor uses.
+    for tool in ("clay", "vibe"):
+        ok &= run("engine.page_preflight", "not-run", "--run", run_id,
+                  "--root", str(root), "--tool", tool, "--reason",
+                  f"{tool} returned no technographic profile for this "
+                  f"walk's domain; stated on the page as NOT_RUN").returncode == 0
     # THE THREE CONNECTOR-OWNED TABS (07112e90): focus areas, the issue
     # register and peer deployments are PRELIM sections now, and one closes
     # only with a row or a declaration backed by PRELIM searches logged

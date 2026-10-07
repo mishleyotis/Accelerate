@@ -222,6 +222,19 @@ until `--page-retries` ships are spent. The workflow never submits or promotes:
 run the file's `then`, and the driver ships, hands back failures, and promotes.
 No Workflow tool? `--pages-mode lanes`.
 
+**The machine technographic scan is banked at PRELIM, and pages are
+preflighted.** PRELIM's technology baseline does not sign off until a Clay Tech
+Stack and a Vibe Prospecting technographic reading are registered as connector
+evidence and cited on the rows they detect, or both are declared
+`python3 -m engine.page_preflight not-run --tool clay|vibe --reason …`. Those
+connectors are bound at PRELIM; by PAGES_A a resumed session may hold neither.
+Before PAGES_A or PAGES_B dispatches any page agent, the driver reads the
+techstack page's ET-12, CG-40 and CG-50 against the workbook
+(`engine.page_preflight check`). A blocker that needs a connector stops the run
+`NEEDS_CONNECTOR`, naming the tools. The watchdog reports
+`NEEDS_CONNECTOR_SESSION` and never revives it in place: resume in a session
+that holds them.
+
 **Nothing loops.** Every workflow stage passes one guard
 (`<ROOT>/07_qa/handoff_guard.json`): the same work handed with nothing moved
 across `--stall-rounds` handoffs, or more than `--max-rounds` handoffs, stops

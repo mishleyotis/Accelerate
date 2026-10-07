@@ -192,6 +192,24 @@ class StageRefused(Exception):
     """A stage could not complete; the message names the blocker."""
 
 
+class NeedsConnector(StageRefused):
+    """A stage cannot complete WITHOUT a connector this process cannot bind.
+
+    Owner, 2026-10-07 (First Tech): "connectors keep getting lost with no
+    self heal". A session binds its connectors once, at start; a resumed or
+    restarted one can come back without Clay or Vibe, and nothing inside a
+    process can re-bind them. What the driver CAN do is know which stages
+    need which connector, check the workbook for what they need BEFORE
+    dispatching anything, and stop with an outcome that says "resume in a
+    session holding X" — instead of spending page attempts to learn it.
+    The watchdog reads it as NEEDS_CONNECTOR_SESSION: a fresh session's
+    work, never a re-dispatch in this one."""
+
+    def __init__(self, msg: str, *, connectors=("clay", "vibe")):
+        super().__init__(msg)
+        self.connectors = tuple(connectors)
+
+
 # ── the three seams the driver talks through ─────────────────────────────
 
 class Dispatcher(Protocol):
@@ -1156,6 +1174,8 @@ class Pipeline:
             self.state["last_outcome"] = out.get("outcome")
             # What the watchdog needs to tell a running workflow from one a
             # dead session was holding: which stage, which handoff, when.
+            if out.get("outcome") != "NEEDS_CONNECTOR":
+                self.state.pop("needs_connector", None)
             if out.get("outcome") == "AWAITING_WORKFLOW":
                 self.state["awaiting"] = {"stage": out.get("stage"),
                                           "handoff": out.get("handoff"),
@@ -1326,6 +1346,19 @@ class Pipeline:
             except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
                     KeyError, RuntimeError) as e:
                 msg = str(e).strip() or e.__class__.__name__
+                if isinstance(e, NeedsConnector):
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.state["needs_connector"] = {
+                        "stage": st, "connectors": list(e.connectors),
+                        "reason": msg[:800], "at": _utcnow()}
+                    self._save_state()
+                    self.opts.log(f"[{st}] NEEDS_CONNECTOR — {msg[:300]}")
+                    outcome.update(outcome="NEEDS_CONNECTOR", stage=st, reason=msg[:800],
+                                   connectors=list(e.connectors),
+                                   resume=("in a session holding "
+                                           + " and ".join(e.connectors) + ": "
+                                           + self.plan()["command"]))
+                    return outcome
                 # A stage the BUDGET stopped has not failed its gate — it
                 # never got to finish trying. Reporting "still failing the
                 # floors gate" there sends the reader to repair research that
@@ -2961,6 +2994,33 @@ class Pipeline:
         verdicts[p] = (res.get("reasons") or [])[:12]
         return False
 
+    def _pages_preflight(self, pages: tuple, version: str) -> None:
+        """The page gates whose inputs live in the workbook, read BEFORE a
+        single page agent is dispatched (engine.page_preflight). First Tech
+        (2026-10-06) spent three techstack attempts at PAGES_A to learn
+        ET-12, CG-40 and CG-50 — every one knowable from the workbook. A
+        page that already passed on this version is not re-checked."""
+        from . import page_preflight as PP
+        todo = tuple(p for p in pages if not self._page_ok(p, version))
+        blockers = PP.preflight(self.wb, todo)
+        stage = f"PAGES_{version}"
+        if not blockers:
+            if "techstack" in todo:
+                L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
+                              blocking=False, detail="techstack: machine scan, depth and "
+                              "named-product citations clear in the workbook")
+            return
+        lines = "; ".join(f"[{b['gate']}] {b['detail']} — fix: {b['fix']}" for b in blockers)
+        L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="FAIL",
+                      blocking=True, detail=lines[:900])
+        msg = (f"{len(blockers)} page blocker(s) found in the workbook before any page "
+               f"agent ran: {lines}")
+        if any(b.get("needs_connector") for b in blockers):
+            raise NeedsConnector(msg + ". These need Clay and Vibe Prospecting; this "
+                                 "process cannot bind them — resume in a session that "
+                                 "holds both.")
+        raise StageRefused(msg)
+
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
         """Produce (lanes) and ship each page until it passes or the retries
         are spent. A FAIL re-dispatches ONLY that page, with the verdict's
@@ -2969,6 +3029,8 @@ class Pipeline:
         connector_run = str(self._md().get("connector_run_id") or "")
         if not connector_run:
             raise StageRefused("no connector run id — the checkpoint was never ingested")
+        if produce:
+            self._pages_preflight(pages, version)
         verdicts_file = self.run.qa_dir / f"verdicts_{version}.json"
         verdicts = {}
         if verdicts_file.is_file():

@@ -171,6 +171,16 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             "PRELIM has not closed: "
             + (", ".join(pre["open"]) or "signed off never recorded")
             + " — no category card will be served until it does")
+    elif driver.get("last_outcome") == "NEEDS_CONNECTOR":
+        # A stage that needs a connector this container never re-binds
+        # (owner, 2026-10-07: "connectors keep getting lost with no self
+        # heal"). Reviving the driver HERE would re-run into the same wall;
+        # the heal is a session that holds the connectors.
+        nc = driver.get("needs_connector") or {}
+        state, detail = "NEEDS_CONNECTOR_SESSION", (
+            f"{nc.get('stage') or 'a stage'} needs "
+            f"{' and '.join(nc.get('connectors') or ['a connector'])}, which "
+            f"this session does not hold: {str(nc.get('reason') or '')[:300]}")
     elif driver.get("last_outcome") == "AWAITING_WORKFLOW" and _handoff(driver):
         # THE WORKFLOW HANDOFF (2026-10-06). The driver is a Python process
         # and cannot start a Workflow, so every workflow stage ends the
@@ -246,6 +256,8 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
         "stage": C.stage_of(md),
         "awaiting": driver.get("awaiting") if state in (
             "AWAITING_WORKFLOW", "WORKFLOW_RUNNING") else None,
+        "needs_connector": driver.get("needs_connector")
+        if state == "NEEDS_CONNECTOR_SESSION" else None,
     }
     row.update(post)
     row["criterion"] = COMPLETION_CRITERIA.get(state, "")
@@ -274,6 +286,10 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
 #: What "done" means for each state — the gate that closes it, in one line,
 #: so a session or a hook reports a criterion rather than an impression.
 COMPLETION_CRITERIA = {
+    "NEEDS_CONNECTOR_SESSION": (
+        "a session that holds the named connectors (a fresh Claude Code "
+        "session, or a Routine with them attached) runs the repair the stage "
+        "names, then the driver; `engine.page_preflight check` exits 0"),
     "AWAITING_WORKFLOW": ("the handoff's workflow is started from a live session "
                           "(Workflow({scriptPath, args}) per invocation) and the "
                           "driver is re-run; the stage's own gate then decides"),
@@ -498,6 +514,12 @@ def resume_plan(row: dict) -> dict:
         # structurally cannot advance, while COMPLETION_CRITERIA in this
         # same module said the opposite.
         return {"actionable": False, "agent": None, "needs": "person",
+                "why": COMPLETION_CRITERIA[state],
+                "detail": row.get("detail")}
+    if state == "NEEDS_CONNECTOR_SESSION":
+        nc = row.get("needs_connector") or {}
+        return {"actionable": False, "agent": None, "needs": "connector_session",
+                "connectors": nc.get("connectors") or [],
                 "why": COMPLETION_CRITERIA[state],
                 "detail": row.get("detail")}
     if state == "AWAITING_WORKFLOW":
@@ -819,7 +841,9 @@ ACTIONABLE = ("UNREADABLE", "HALTED", "BLOCKED_NO_CONNECTOR",
               "SCORING_OPEN", "CRITIC_PENDING", "SCORING_GATE_OPEN",
               "REPORT_PRECONDITIONS_OPEN", "REPORTS_OPEN", "PACKAGE_UNSHIPPED",
               # a workflow handoff nobody is running (2026-10-06)
-              "AWAITING_WORKFLOW")
+              "AWAITING_WORKFLOW",
+              # a stage waiting on connectors this session lost (2026-10-07)
+              "NEEDS_CONNECTOR_SESSION")
 
 #: States an AGENT can advance without a person: the ones a stage-advance
 #: hook may keep a session working on, and the watchdog may revive.
@@ -830,7 +854,10 @@ AGENT_ADVANCEABLE = tuple(s for s in ACTIONABLE
                                        "BLOCKED_NO_CONNECTOR",
                                        # and a person decides whether this
                                        # run is worth another budget
-                                       "AT_USD_CEILING"))
+                                       "AT_USD_CEILING",
+                                       # a session holding the connectors
+                                       # heals it; a revive here cannot
+                                       "NEEDS_CONNECTOR_SESSION"))
 
 
 def main(argv=None) -> int:

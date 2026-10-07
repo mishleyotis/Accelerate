@@ -192,6 +192,20 @@ _TECH_FIX = (
     "scan document prints it as NOT SCANNED in red precisely because a "
     "missing layer reads to every later surface as a clean estate.")
 
+#: The machine technographic scan the techstack page's ET-12 requires, asked
+#: for in PRELIM where Clay and Vibe are bound — not discovered at PAGES_A.
+_SCAN_FIX = (
+    "run the machine technographic scan NOW, in PRELIM, while the connectors "
+    "are bound: Clay's company Tech Stack and Vibe Prospecting's "
+    "enrich-business technographics. Register each reading as connector "
+    "evidence (origin connector, a technographic source, T1) and cite it on "
+    "the Tech_Register rows it detects (`engine.cli techscan record --provider "
+    "clay|explorium --evidence-id <E-id> …`); a scan-only row stays INFERRED. "
+    "If a scan genuinely cannot run, declare it for BOTH tools: "
+    "`python3 -m engine.page_preflight not-run --tool clay --reason …` and "
+    "`--tool vibe …`. The techstack page is refused (ET-12, CG-40) without one "
+    "or the other, and by PAGES_A the session may no longer hold either tool.")
+
 #: PRELIM sections that must be RESEARCHED and may not be declared away.
 #: The financial review is the binding basis; declaring it absent is what
 #: `financials.not_run` in the preflight is for, under that file's own
@@ -386,6 +400,28 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                            f"{len(want_layers)} layers — nothing for "
                            f"{', '.join(missing)}"),
                 "fix": _TECH_FIX,
+            }
+    # Enforced at SIGN-OFF. A run whose PRELIM was signed off before this
+    # rule is not pulled back into PRELIM (that would re-buy the stage and
+    # block its category cards mid-research); the driver's page preflight
+    # (engine.page_preflight) stops it before PAGES instead, with this fix.
+    signed_off = _clean(wb.metadata().get("prelim_status")) == "COMPLETE"
+    if kind == "tech" and n >= need and not signed_off:
+        # THE MACHINE SCAN (owner, 2026-10-07, First Tech): five web-found
+        # rows across four layers closed this section, and the techstack page
+        # was refused three times at PAGES_A for the scan PRELIM never ran
+        # (ET-12) — in a session that by then held no Clay or Vibe. The scan
+        # belongs HERE, where the connectors are bound, and its readings are
+        # banked for every later stage. A scan that genuinely cannot run is
+        # declared NOT_RUN for both tools, which the payload then states.
+        from . import page_preflight as PP
+        scan = PP.machine_scan(wb)
+        if scan["state"] == "MISSING":
+            return {
+                "section": key, "status": "OPEN",
+                "detail": (f"{n} row(s) in {sheet}, but no machine technographic "
+                           f"scan: {scan['detail']}"),
+                "fix": _SCAN_FIX,
             }
     if n >= need:
         return {"section": key, "status": "RESEARCHED",
