@@ -1045,8 +1045,22 @@ class Pipeline:
         raise KeyError(stage)
 
     def _page_ok(self, page: str, version: str) -> bool:
+        """Passed on this version AND not edited since. A pass is a verdict on
+        the files that were shipped: a section repaired on disk afterwards
+        (First Tech overview, 2026-10-07, a why-now signal removed to agree
+        with the context timeline) is not the content the connector holds,
+        and promoting the staged copy would promote the version the repair
+        replaced."""
         p = (self.state.get("pages") or {}).get(page) or {}
-        return (p.get("versions") or {}).get(version) == "pass"
+        if (p.get("versions") or {}).get(version) != "pass":
+            return False
+        shipped = (p.get("shipped_mtime") or {}).get(version)
+        if shipped is None:
+            return True
+        try:
+            return self._page_mtime(page) <= float(shipped) + 1e-6
+        except Exception:                                  # noqa: BLE001
+            return True
 
     def _pages_passed(self, pages, version) -> bool:
         return all(self._page_ok(p, version) for p in pages)

@@ -54,3 +54,18 @@ def test_an_sg_v4_prose_repair_that_does_not_lower_the_count_stops():
     stuck = {"version": "B", "status": "sg_v4_over_budget",
              "n_history": [["B", "sg_v4_over_budget", 0, 306], ["B", "sg_v4_over_budget", 0, 306]]}
     assert "did not converge" in _why(stuck)
+
+
+def test_a_page_edited_after_it_passed_is_shipped_again(tmp_path):
+    sections = tmp_path / "08_sections"
+    sections.mkdir()
+    f = sections / "overview.why_now.json"
+    f.write_text("{}")
+    shipped = f.stat().st_mtime
+    d = SimpleNamespace(state={"pages": {"overview": {
+        "versions": {"B": "pass"}, "shipped_mtime": {"B": shipped}}}})
+    d._page_mtime = lambda page: max(x.stat().st_mtime for x in sections.glob(f"{page}.*.json"))
+    assert P.Pipeline._page_ok(d, "overview", "B")
+    import os
+    os.utime(f, (shipped + 60, shipped + 60))
+    assert not P.Pipeline._page_ok(d, "overview", "B"), "a repaired page is not the passed one"
