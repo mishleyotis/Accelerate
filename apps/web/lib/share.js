@@ -190,36 +190,78 @@ export function shareUrl(base, token, entity) {
 }
 
 /* ── The recipient's access ───────────────────────────────────────────
-   On first open the recipient states their work email; an address on the
-   allowlist is admitted and remembered for this link in an httpOnly cookie
-   scoped to the link's own path, so it never travels with another link.
+   On first open the recipient states their work email. An address off the
+   allowlist is refused there and then — no email is ever sent to it.
 
-   HONEST LIMIT, stated where it is enforced: with no mail provider and no
-   identity provider (owner's constraint, 2026-10-07) nothing PROVES the
-   reader owns the address they typed. What protects the dashboard is the
-   link itself — unguessable, signed, expiring, revocable, delivered to the
-   recipient's own mailbox by the sharer. The email gate keeps a forwarded
-   link from opening outside the named organisation for anyone who answers
-   it honestly, and it names every reader in the access log. The cookie is
-   therefore not signed: forging it is no easier than typing the address. */
+   OTP mode (`SHARE_IDP_API_KEY` present — owner, 2026-10-07): Google Cloud
+   Identity Platform emails that address a single-use sign-in link; only
+   following it from that inbox admits the reader. The address is PROVEN.
+
+   Attest mode (Identity Platform not configured yet): the address is taken
+   as typed. deploy.sh says so loudly on every release while this holds.
+
+   Either way the admission is a cookie signed with SHARE_COOKIE_SECRET
+   (HMAC-SHA256), naming this link's jti, the admitted address and an
+   expiry — so it cannot be forged into an OTP-verified session, cannot be
+   carried to another link, and is re-checked against the allowlist on
+   every read. Scoped to this link's own path. */
+export const ACCESS_DAYS = 7;
+
+export function verifyMode() {
+  return process.env.SHARE_IDP_API_KEY ? "otp" : "attest";
+}
+
+function cookieKey() {
+  const k = process.env.SHARE_COOKIE_SECRET;
+  return k && k.length >= 32 ? k : null;
+}
+
+const hmac = (key, data) => crypto.createHmac("sha256", key).update(data).digest("base64url");
+
 export function accessCookieName(payload) {
   return `dma_share_${payload.jti}`;
 }
 
-export function readAccess(payload, cookieValue) {
-  if (!cookieValue) return null;
+export function signAccess(payload, email, method, now = Date.now(), key = cookieKey()) {
+  if (!key) throw Object.assign(new Error("SHARE_COOKIE_SECRET is not configured"), { code: "not_configured" });
+  const exp = Math.min(payload.exp, Math.floor(now / 1000) + ACCESS_DAYS * 86400);
+  const body = b64u(JSON.stringify({ j: payload.jti, e: normaliseEmail(email), m: method, x: exp }));
+  return { value: `${body}.${hmac(key, body)}`, exp };
+}
+
+// The admitted address, or null. Signature, link, expiry and the allowlist
+// are all re-checked: a cookie minted before the address was revoked from a
+// re-shared link does not outlive the token it was minted under.
+export function readAccess(payload, cookieValue, now = Date.now(), key = cookieKey()) {
   try {
-    const email = Buffer.from(String(cookieValue), "base64url").toString();
-    return allowed(payload, email) ? normaliseEmail(email) : null;
+    if (!key || !cookieValue) return null;
+    const [body, mac] = String(cookieValue).split(".");
+    if (!body || !mac) return null;
+    const expect = hmac(key, body);
+    if (mac.length !== expect.length ||
+        !crypto.timingSafeEqual(Buffer.from(mac), Buffer.from(expect))) return null;
+    const c = JSON.parse(Buffer.from(body, "base64url").toString());
+    if (c.j !== payload.jti || !Number.isInteger(c.x) || c.x <= Math.floor(now / 1000)) return null;
+    return allowed(payload, c.e) ? c.e : null;
   } catch {
     return null;
   }
 }
 
-export function accessCookie(payload, token, email, now = Date.now()) {
-  const maxAge = Math.max(0, payload.exp - Math.floor(now / 1000));
-  return `${accessCookieName(payload)}=${Buffer.from(email).toString("base64url")}; ` +
+export function accessCookie(payload, token, email, method, now = Date.now(), key = cookieKey()) {
+  const { value, exp } = signAccess(payload, email, method, now, key);
+  const maxAge = Math.max(0, exp - Math.floor(now / 1000));
+  return `${accessCookieName(payload)}=${value}; ` +
     `Path=/s/${token}; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
+}
+
+// The share service's own public origin, as the client reached it (Cloud
+// Run terminates TLS and forwards the scheme).
+export function publicOrigin(req) {
+  const u = new URL(req.url);
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || u.host;
+  const proto = (req.headers.get("x-forwarded-proto") || u.protocol.replace(":", "")).split(",")[0];
+  return `${proto}://${host}`;
 }
 
 export function cookieFrom(req, name) {

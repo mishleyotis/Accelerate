@@ -180,11 +180,19 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   (`infra/share-revoked.txt` or key rotation). **Allowlist per DMA = the
   recipients' emails + their organisation domains** (never a consumer
   mailbox domain), signed into the link — no DB write path (invariant 2
-  stands). The recipient enters their work email at a gate; no Google
-  sign-in, no mail provider, no third-party key (owner's constraint). Known
-  limit, accepted: the typed email is self-attested — the protection is the
-  unguessable signed link delivered to the recipient's mailbox; every mint,
-  admit and refusal is logged (`share_link_minted` / `share_access_*`).
+  stands). The recipient enters their work email at a gate; an address off
+  the list is refused and nothing is sent. **One-time sign-in** (owner,
+  2026-10-07: "a service already integrated with Google Cloud Run"):
+  **Google Cloud Identity Platform** emails the allowlisted address a
+  single-use link (`sendOobCode` EMAIL_SIGNIN → `/s/auth-action` →
+  `/s/<token>/verify` → `signInWithEmailLink`); no Google account needed by
+  the recipient, no mail provider, no third-party key. Admission is an
+  HMAC-signed, path-scoped cookie (`dmai-share-cookie-secret`, ≤7 days,
+  ≤ link expiry). deploy.sh converges Identity Platform and switches OTP on
+  only when the live config reads back correct; otherwise the release warns
+  on stderr and the gate falls back to admitting the typed address. Every
+  mint, send, admit and refusal is logged (`share_link_minted`,
+  `share_otp_*`, `share_access_*`).
   Reads go to svc_api as `audience=customer`, `role=AE`, the link's run,
   pages `overview·insights·heatmap·evidence·subcaps` only.
 

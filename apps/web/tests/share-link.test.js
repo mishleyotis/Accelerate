@@ -116,17 +116,44 @@ test("the public service can verify but cannot mint", () => {
   assert.throws(() => S.mint({ ...BASE, recipients: "a@bcu.com" }, KEYS.publicKey));
 });
 
-test("the access cookie is per link, scoped to that link's path, and re-checked", () => {
+const SECRET = "x".repeat(48);
+
+test("the access cookie is signed, per link, path-scoped, expiring and re-checked", () => {
   const { token } = make();
   const p = check(token);
-  const c = S.accessCookie(p, token, "cfo@bcu.com", NOW);
+  const c = S.accessCookie(p, token, "cfo@bcu.com", "otp", NOW, SECRET);
   assert.match(c, new RegExp(`^dma_share_${p.jti}=`));
   assert.match(c, new RegExp(`Path=/s/${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")};`));
   assert.match(c, /HttpOnly; Secure; SameSite=Lax/);
-  const value = c.split(";")[0].split("=")[1];
-  assert.strictEqual(S.readAccess(p, value), "cfo@bcu.com");
-  // A cookie naming an address off the list admits nobody.
-  assert.strictEqual(S.readAccess(p, Buffer.from("x@evil.com").toString("base64url")), null);
+  const value = c.split(";")[0].slice(c.indexOf("=") + 1);
+  assert.strictEqual(S.readAccess(p, value, NOW, SECRET), "cfo@bcu.com");
+  // At most ACCESS_DAYS, never past the link itself.
+  assert.strictEqual(S.readAccess(p, value, NOW + (S.ACCESS_DAYS * 86400 + 5) * 1e3, SECRET), null);
+  // Forged: an unsigned address, a wrong key, another link's jti.
+  assert.strictEqual(S.readAccess(p, Buffer.from("cfo@bcu.com").toString("base64url"), NOW, SECRET), null);
+  assert.strictEqual(S.readAccess(p, value, NOW, "y".repeat(48)), null);
+  const other = check(make().token);
+  assert.strictEqual(S.readAccess(other, value, NOW, SECRET), null, "a cookie carried to another link");
+  // Without a secret nothing is admitted, and nothing can be signed.
+  assert.strictEqual(S.readAccess(p, value, NOW, null), null);
+  assert.throws(() => S.accessCookie(p, token, "cfo@bcu.com", "otp", NOW, null), /not configured/);
+});
+
+test("OTP mode is on exactly when Identity Platform is configured", () => {
+  const was = process.env.SHARE_IDP_API_KEY;
+  delete process.env.SHARE_IDP_API_KEY;
+  assert.strictEqual(S.verifyMode(), "attest");
+  process.env.SHARE_IDP_API_KEY = "test-key";
+  assert.strictEqual(S.verifyMode(), "otp");
+  if (was === undefined) delete process.env.SHARE_IDP_API_KEY; else process.env.SHARE_IDP_API_KEY = was;
+});
+
+test("the sign-in sender is rate-limited per link and address", async () => {
+  const O = require("../lib/share-otp.js");
+  for (let i = 0; i < 5; i++) assert.strictEqual(O.mayResend("j1", "a@bcu.com", NOW + i), true);
+  assert.strictEqual(O.mayResend("j1", "a@bcu.com", NOW + 10), false, "a sixth send inside the window");
+  assert.strictEqual(O.mayResend("j1", "b@bcu.com", NOW + 10), true, "another address is its own budget");
+  assert.strictEqual(O.mayResend("j1", "a@bcu.com", NOW + 16 * 60e3), true, "the window passes");
 });
 
 test("share responses are unframeable, unindexed, uncached and leak no Referer", () => {
@@ -168,7 +195,7 @@ test("no route runs on the share service unless it is a share route", () => {
     if (rel.startsWith(`s${path.sep}`)) {
       assert.match(src, /if \(!shareMode\(\)\) return new Response\("Not found", \{ status: 404 \}\)/,
         `${rel} serves outside the share service`);
-      assert.match(src, /verify\(params\.token\)/, `${rel} does not verify the token`);
+      assert.match(src, /verify\((params\.token|m\[1\])\)/, `${rel} does not verify the token`);
     } else {
       assert.match(src, /if \(shareMode\(\)\) (return new Response\("Not found", \{ status: 404 \}\)|notFound\(\))/,
         `${rel} runs on the public share service`);

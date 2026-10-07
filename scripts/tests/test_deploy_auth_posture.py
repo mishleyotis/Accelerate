@@ -304,7 +304,12 @@ def test_THE_SHARE_SERVICE_IS_PUBLIC_ONLY_WITH_ITS_GATE_STANDING():
     assert "SHARE_MODE=1" in block, (
         "dmai-share deploys public WITHOUT SHARE_MODE=1 — that is the whole "
         "app, sign-in and directory included, on an open door")
-    assert "SHARE_VERIFY_KEY=dmai-share-verify-key" in block
+    text0 = DEPLOY.read_text()
+    assert "SHARE_VERIFY_KEY=dmai-share-verify-key" in text0
+    assert '--set-secrets="$SHARE_SECRETS"' in block
+    secrets_line = [l for l in text0.splitlines() if l.strip().startswith("SHARE_SECRETS=")]
+    assert secrets_line and "SHARE_SIGNING_KEY" not in "".join(secrets_line), (
+        "dmai-share would carry the signing key")
     assert "SHARE_SIGNING_KEY" not in block, (
         "dmai-share carries the signing key: the internet-facing service "
         "could mint links for any client")
@@ -319,3 +324,15 @@ def test_THE_SHARE_SERVICE_IS_PUBLIC_ONLY_WITH_ITS_GATE_STANDING():
     for needle in ("crypto.verify(", "revoked.has(p.jti)", "p.exp <= Math.floor",
                    "CONSUMER_DOMAINS"):
         assert needle in lib, f"apps/web/lib/share.js no longer carries {needle!r}"
+
+
+def test_SHARE_OTP_IS_NEVER_SILENTLY_OFF():
+    """One-time sign-in (Identity Platform) is switched on only when the live
+    config reads back correct, and a release that cannot switch it on says
+    so on stderr — a link admitting typed addresses is never a quiet state."""
+    text = DEPLOY.read_text()
+    assert "identitytoolkit.googleapis.com" in text
+    assert 'if [ "$IDP_OK" = "yes" ]' in text
+    assert "SHARE_IDP_API_KEY=dmai-share-idp-api-key" in text
+    assert "one-time sign-in is OFF" in text
+    assert "dmai-share-cookie-secret" in text

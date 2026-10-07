@@ -449,6 +449,90 @@ if [ -f apps/web/Dockerfile ]; then
   gcloud run services add-iam-policy-binding dmai-api \
     --project="$PROJECT_ID" --region="$REGION" \
     --member="serviceAccount:${SHARE_SA}" --role="roles/run.invoker" --quiet >/dev/null
+  # The admission cookie's HMAC key (lib/share signAccess): generated here,
+  # never echoed, readable by dmai-share alone.
+  if ! gcloud secrets describe dmai-share-cookie-secret --project="$PROJECT_ID" >/dev/null 2>&1; then
+    head -c 48 /dev/urandom | base64 | gcloud secrets create dmai-share-cookie-secret \
+      --project="$PROJECT_ID" --data-file=- --quiet
+  fi
+  gcloud secrets add-iam-policy-binding dmai-share-cookie-secret \
+    --project="$PROJECT_ID" --member="serviceAccount:${SHARE_SA}" \
+    --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+
+  # ── One-time sign-in links: Google Cloud Identity Platform (owner,
+  # 2026-10-07). Google emails the recipient a single-use link; nothing is
+  # admitted until it is followed. Converged every release, tolerant of a
+  # deployer that lacks a permission — but the OUTCOME is never silent: OTP
+  # is switched on only when the live config reads back correct, and
+  # otherwise the release says, loudly, that links admit typed addresses.
+  SHARE_HOST="${SHARE_BASE_URL#https://}"
+  IDP="https://identitytoolkit.googleapis.com"
+  gcloud services enable identitytoolkit.googleapis.com apikeys.googleapis.com \
+    --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
+  AT="$(gcloud auth print-access-token 2>/dev/null || true)"
+  idp() { curl -s -H "Authorization: Bearer ${AT}" -H "x-goog-user-project: ${PROJECT_ID}" \
+            -H "content-type: application/json" "$@"; }
+  idp -X POST "${IDP}/v2/projects/${PROJECT_ID}/identityPlatform:initializeAuth" -d '{}' >/dev/null || true
+  if ! gcloud secrets describe dmai-share-idp-api-key --project="$PROJECT_ID" >/dev/null 2>&1; then
+    # An API key identifies the project to Identity Platform and is
+    # restricted to that one API; it is still kept in Secret Manager.
+    key_name() { gcloud services api-keys list --project="$PROJECT_ID" \
+      --filter="displayName='DMA share sign-in'" --format='value(name)' \
+      --limit=1 2>/dev/null || true; }
+    KEY_NAME="$(key_name)"
+    if [ -z "$KEY_NAME" ]; then
+      gcloud services api-keys create --project="$PROJECT_ID" \
+        --display-name="DMA share sign-in" \
+        --api-target=service=identitytoolkit.googleapis.com --quiet >/dev/null 2>&1 || true
+      KEY_NAME="$(key_name)"
+    fi
+    if [ -n "$KEY_NAME" ]; then
+      # Held in a variable for one command, never echoed; an empty read
+      # creates nothing rather than an empty secret.
+      KS="$(gcloud services api-keys get-key-string "$KEY_NAME" --project="$PROJECT_ID" \
+        --format='value(keyString)' 2>/dev/null || true)"
+      if [ -n "$KS" ]; then
+        printf '%s' "$KS" | gcloud secrets create dmai-share-idp-api-key \
+          --project="$PROJECT_ID" --data-file=- --quiet >/dev/null 2>&1 || true
+      fi
+      unset KS
+    fi
+  fi
+  # Email link (passwordless) on; the share host authorised; Google's
+  # emailed link pointed at this service's own handler (/s/auth-action).
+  CFG="$(idp "${IDP}/admin/v2/projects/${PROJECT_ID}/config" || true)"
+  PATCH="$(printf '%s' "$CFG" | SHARE_HOST="$SHARE_HOST" SHARE_BASE_URL="$SHARE_BASE_URL" python3 -c '
+import json, os, sys
+try: c = json.load(sys.stdin)
+except Exception: c = {}
+doms = list(c.get("authorizedDomains") or [])
+if os.environ["SHARE_HOST"] and os.environ["SHARE_HOST"] not in doms: doms.append(os.environ["SHARE_HOST"])
+print(json.dumps({"signIn": {"email": {"enabled": True, "passwordRequired": False}},
+  "authorizedDomains": doms,
+  "notification": {"sendEmail": {"callbackUri": os.environ["SHARE_BASE_URL"] + "/s/auth-action"}}}))')"
+  idp -X PATCH "${IDP}/admin/v2/projects/${PROJECT_ID}/config?updateMask=signIn.email.enabled,signIn.email.passwordRequired,authorizedDomains,notification.sendEmail.callbackUri" \
+    -d "$PATCH" >/dev/null || true
+  IDP_OK="$(idp "${IDP}/admin/v2/projects/${PROJECT_ID}/config" | SHARE_HOST="$SHARE_HOST" python3 -c '
+import json, os, sys
+try: c = json.load(sys.stdin)
+except Exception: print("no"); sys.exit()
+e = (c.get("signIn") or {}).get("email") or {}
+ok = e.get("enabled") and not e.get("passwordRequired") and os.environ["SHARE_HOST"] in (c.get("authorizedDomains") or [])
+print("yes" if ok else "no")' || echo no)"
+  SHARE_SECRETS="SHARE_VERIFY_KEY=dmai-share-verify-key:latest,SHARE_COOKIE_SECRET=dmai-share-cookie-secret:latest"
+  if [ "$IDP_OK" = "yes" ] && gcloud secrets describe dmai-share-idp-api-key --project="$PROJECT_ID" >/dev/null 2>&1; then
+    gcloud secrets add-iam-policy-binding dmai-share-idp-api-key \
+      --project="$PROJECT_ID" --member="serviceAccount:${SHARE_SA}" \
+      --role="roles/secretmanager.secretAccessor" --quiet >/dev/null
+    SHARE_SECRETS="${SHARE_SECRETS},SHARE_IDP_API_KEY=dmai-share-idp-api-key:latest"
+    say "  share: one-time sign-in links ON (Identity Platform, ${SHARE_HOST} authorised)"
+  else
+    echo "WARNING: share links are admitting TYPED addresses — one-time sign-in is OFF." >&2
+    echo "  Identity Platform could not be configured by this deployer. A project owner, once:" >&2
+    echo "  Console > Identity Platform > Enable; Providers > Email/Password > enable," >&2
+    echo "  'Email link (passwordless sign-in)'; Settings > Authorized domains > add ${SHARE_HOST};" >&2
+    echo "  then the next release creates the API key and switches OTP on." >&2
+  fi
   WEB_IMAGE="$(gcloud run services describe dmai-web --project="$PROJECT_ID" \
     --region="$REGION" --format='value(spec.template.spec.containers[0].image)')"
   # One link at a time: list its jti (shown in the share dialog and in the
@@ -459,7 +543,7 @@ if [ -f apps/web/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="$SHARE_SA" \
     --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}" \
-    --set-secrets="SHARE_VERIFY_KEY=dmai-share-verify-key:latest" \
+    --set-secrets="$SHARE_SECRETS" \
     --min-instances=0 --max-instances=10 --concurrency=80 \
     --allow-unauthenticated --quiet
   share_url="$(gcloud run services describe dmai-share --project="$PROJECT_ID" \

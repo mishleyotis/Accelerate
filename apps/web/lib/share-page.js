@@ -1,7 +1,7 @@
 // The pages the public share service renders: the email gate, the
 // dead-link page, and the client dashboard's own boot document.
 import { SCRIPTS } from "../app/route.js";
-import { SHARE_HEADERS } from "./share.js";
+import { SHARE_HEADERS, verifyMode } from "./share.js";
 
 const esc = (s) => String(s == null ? "" : s)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -48,12 +48,13 @@ export function gatePage(token, entityName, error, status = 200) {
   return html(status, frame("Digital Maturity Assessment", `
 <div><div class="loader-title">${esc(entityName || "Digital Maturity Assessment")}</div>
 <div class="loader-body" style="margin-top:6px">Digital Maturity Assessment · enter the work
-email this dashboard was shared with to open it.</div></div>
+email this dashboard was shared with${verifyMode() === "otp"
+  ? ". We will email you a one-time sign-in link." : " to open it."}</div></div>
 <form method="post" action="/s/${esc(token)}/access" style="display:flex;flex-direction:column;gap:10px;width:100%">
 <input class="inp" type="email" name="email" required autocomplete="email"
        placeholder="name@organisation.com" aria-label="Work email" style="width:100%">
 ${error ? `<div role="alert" style="font-size:12.5px;color:#9a3412">${esc(error)}</div>` : ""}
-<button class="btn btn-primary" type="submit">Open dashboard</button>
+<button class="btn btn-primary" type="submit">${verifyMode() === "otp" ? "Email me a sign-in link" : "Open dashboard"}</button>
 </form>`));
 }
 
@@ -77,4 +78,14 @@ export function dashboardPage(boot) {
 ${SCRIPTS.map((s) => `<script src="/${s}" defer></script>`).join("\n")}
 </body>
 </html>`);
+}
+
+// After the gate, in OTP mode: Google has emailed a single-use link.
+export function checkEmailPage(entityName, email) {
+  return html(200, frame("Check your email", `
+<div><div class="loader-title">Check your email</div>
+<div class="loader-body" style="margin-top:6px">We sent a one-time sign-in link to
+<strong>${esc(email)}</strong>. Open it on this device to see the
+${esc(entityName || "")} dashboard. The link works once and expires shortly.</div></div>
+<div class="loader-body" style="font-size:12px">Nothing arrived? Check spam, or go back and request a new link.</div>`));
 }
