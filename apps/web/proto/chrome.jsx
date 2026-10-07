@@ -8,7 +8,7 @@ const ROLE_LABEL = { AE: "Account executive", ANALYST: "Analyst",
 function Sidebar() {
   const { route, role, openAlerts, activeRuns, setAuthed, sidebarOpen, setSidebarOpen } = useApp();
   const path = route.path;
-  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit"];
+  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit", "/admin/usage"];
   const activeHref = (() => {
     if (path === "/") return "/";
     const matches = allHrefs.filter(h => h !== "/" && (path === h || path.startsWith(h + "/")));
@@ -58,8 +58,9 @@ function Sidebar() {
             <div className="sb-grp">
               <div className="sb-gl">Admin</div>
               <NavItem href="/admin"              icon="settings" label="Admin home" />
-              <NavItem href="/admin/import"       icon="drive"    label="Import &amp; jobs" />
-              <NavItem href="/admin/import/audit" icon="evidence" label="Import audit" />
+              {adminRouteHidden("/admin/import") ? null : <NavItem href="/admin/import"       icon="drive"    label="Import &amp; jobs" />}
+              {adminRouteHidden("/admin/import/audit") ? null : <NavItem href="/admin/import/audit" icon="evidence" label="Import audit" />}
+              <NavItem href="/admin/usage"        icon="users"    label="Usage analytics" />
             </div>
           ) : null}
         </nav>
@@ -433,6 +434,7 @@ function ClientBar({ entity, run, tab }) {
                   style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
                   onClick={() => {
                     const url = clientLinkUrl(entity.id, tab, run && run.id);
+                    if (window.trackUsage) window.trackUsage("client_link");
                     const done = () => pushToast("Client link copied", "success");
                     try {
                       navigator.clipboard.writeText(url).then(done,

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { COOKIE, verify } from "../lib/session";
 import { verifyIapAssertion } from "../lib/iap";
 import { displayName, domainOk, grantedRole, roleGrants } from "../lib/identity";
+import { deviceOf, logUsage } from "../lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,8 @@ const SCRIPTS = [
   "proto/js/pages-d3-d4.js",
   "proto/js/pages-d5-d6-tech-runs.js",
   "proto/js/pages-alerts-prospecting-admin.js",
+  "proto/js/pages-admin-usage.js",
+  "proto/js/usage-tracker.js",
   "proto/js/pages-live-client.js",
   "proto/js/tweaks-panel.js",
   "proto/js/app-root.js",
@@ -82,6 +85,10 @@ export async function GET(req) {
       setCookieValue = { value: sign(iap.email, role, name), maxAge: maxAge() };
     }
   }
+
+  // Usage telemetry: a signed-in document load (lib/usage.js). The hash route
+  // never reaches the server, so this says "opened the app", not which page.
+  if (session) logUsage("doc_load", session, { device: deviceOf(req.headers.get("user-agent")) });
 
   const [catalogue, directory, scans] = await Promise.all([
     apiFetch("/v1/catalogue"),

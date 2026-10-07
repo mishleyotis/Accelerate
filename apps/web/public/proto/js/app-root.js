@@ -117,10 +117,26 @@ function AppProvider({
       return next;
     });
   }, []);
-  const openEvidence = (evidenceId, subcap) => setEvidenceDrawer({
-    evidenceId,
-    subcap
-  });
+
+  // Production divergence: usage telemetry (usage-tracker.jsx). The tracker
+  // needs the audience and acting-as role, which live in this provider; the
+  // feature calls are no-ops outside production.
+  useEffect(() => {
+    if (window.setUsageContext) window.setUsageContext({
+      audience,
+      acting_role: role
+    });
+  }, [audience, role]);
+  useEffect(() => {
+    if (ipOpen && window.trackUsage) window.trackUsage("intelligence");
+  }, [ipOpen]);
+  const openEvidence = (evidenceId, subcap) => {
+    if (window.trackUsage) window.trackUsage("evidence");
+    setEvidenceDrawer({
+      evidenceId,
+      subcap
+    });
+  };
   const closeEvidence = () => setEvidenceDrawer(null);
   const openSubcap = subcapId => {
     // Find subcap across entities, jump to heatmap if on a client page
@@ -132,7 +148,10 @@ function AppProvider({
       });
     }
   };
-  const openInsight = id => setInsightModal(id);
+  const openInsight = id => {
+    if (window.trackUsage) window.trackUsage("insight");
+    setInsightModal(id);
+  };
   const closeInsight = () => setInsightModal(null);
   const openRec = id => setRecModal(id);
   const closeRec = () => setRecModal(null);
@@ -820,8 +839,13 @@ function Router() {
       }, "Back to Dashboard")));
     }
     if (path === "/admin") return /*#__PURE__*/React.createElement(AdminPage, null);
-    if (path === "/admin/import") return /*#__PURE__*/React.createElement(ImportPage, null);
-    if (path === "/admin/import/audit") return /*#__PURE__*/React.createElement(ImportAuditPage, null);
+    if (path === "/admin/usage") return /*#__PURE__*/React.createElement(UsagePage, null);
+    // Production divergence: Import & jobs and Import audit are not served
+    // (utils.adminRouteHidden) — direct hash navigation included.
+    if (!adminRouteHidden(path)) {
+      if (path === "/admin/import") return /*#__PURE__*/React.createElement(ImportPage, null);
+      if (path === "/admin/import/audit") return /*#__PURE__*/React.createElement(ImportAuditPage, null);
+    }
   }
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Not found"

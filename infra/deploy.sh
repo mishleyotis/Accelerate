@@ -275,10 +275,85 @@ if [ -f apps/web/Dockerfile ]; then
   # The IAP assertion audience for THIS service — the app rejects
   # assertions minted for anything else.
   IAP_AUDIENCE="/projects/${PROJECT_NUMBER}/locations/${REGION}/services/dmai-web"
+
+  # ── usage telemetry: web log lines → BigQuery ──────────────────────────
+  #
+  # The web service writes one structured stdout line per usage event
+  # (apps/web/lib/usage.js: page views, heartbeats, feature actions, client
+  # opens). A log sink routes ONLY those lines (jsonPayload.usage_v=1) into
+  # the dmai_usage dataset, which Admin › Usage analytics reads through
+  # /api/admin/usage. Nothing touches the application database: invariant 2
+  # keeps the API's writes to annotations and alert actions.
+  #
+  # CONVERGE, TOLERANT. Every step reads first and writes only when the state
+  # is wrong, and a step the deployer lacks the grant for (logging.configWriter,
+  # bigquery.admin — infra/grants-for-admin.sh) warns and moves on: a release
+  # must not abort over telemetry. The page states "not recording" until the
+  # sink exists rather than showing an empty chart as if nobody came.
+  #
+  # Retention: 400-day partitions — a year of quarter-over-quarter adoption,
+  # then gone. The sink only carries lines from its creation onward; there is
+  # no backfill.
+  USAGE_DATASET="${USAGE_DATASET:-dmai_usage}"
+  USAGE_SINK="dmai-usage"
+  usage_warn() { echo "  usage: WARN — $* (Usage analytics stays 'not recording' until fixed)" >&2; }
+  gcloud services enable bigquery.googleapis.com --project="$PROJECT_ID" --quiet \
+    >/dev/null 2>&1 || usage_warn "could not enable bigquery.googleapis.com"
+  if ! bq --project_id="$PROJECT_ID" show --dataset "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1; then
+    say "  usage: creating dataset ${USAGE_DATASET}"
+    bq --project_id="$PROJECT_ID" mk --dataset --location="$REGION" \
+      --default_partition_expiration=34560000 \
+      --description="DMA Insights usage telemetry (web log sink). No client content." \
+      "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1 \
+      || usage_warn "could not create dataset ${USAGE_DATASET} (needs bigquery.admin)"
+  fi
+  USAGE_FILTER='resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-web" AND jsonPayload.usage_v=1'
+  USAGE_DEST="bigquery.googleapis.com/projects/${PROJECT_ID}/datasets/${USAGE_DATASET}"
+  CUR_FILTER="$(gcloud logging sinks describe "$USAGE_SINK" --project="$PROJECT_ID" \
+                 --format='value(filter)' 2>/dev/null || echo "__missing__")"
+  if [ "$CUR_FILTER" = "__missing__" ]; then
+    say "  usage: creating log sink ${USAGE_SINK}"
+    gcloud logging sinks create "$USAGE_SINK" "$USAGE_DEST" --project="$PROJECT_ID" \
+      --log-filter="$USAGE_FILTER" --use-partitioned-tables --quiet >/dev/null 2>&1 \
+      || usage_warn "could not create log sink ${USAGE_SINK} (needs logging.configWriter)"
+  elif [ "$CUR_FILTER" != "$USAGE_FILTER" ]; then
+    say "  usage: correcting the ${USAGE_SINK} filter"
+    gcloud logging sinks update "$USAGE_SINK" "$USAGE_DEST" --project="$PROJECT_ID" \
+      --log-filter="$USAGE_FILTER" --quiet >/dev/null 2>&1 \
+      || usage_warn "could not update log sink ${USAGE_SINK}"
+  fi
+  # The sink writes as its own identity; the web reads as dmai-web. Dataset-
+  # scoped grants, plus the project-level jobUser BigQuery requires to run a
+  # query at all.
+  SINK_WRITER="$(gcloud logging sinks describe "$USAGE_SINK" --project="$PROJECT_ID" \
+                  --format='value(writerIdentity)' 2>/dev/null || true)"
+  DS_POLICY="$(bq --project_id="$PROJECT_ID" get-iam-policy --format=prettyjson \
+                "${PROJECT_ID}:${USAGE_DATASET}" 2>/dev/null || true)"
+  if [ -n "$SINK_WRITER" ] && ! printf '%s' "$DS_POLICY" | grep -q "${SINK_WRITER#serviceAccount:}"; then
+    bq --project_id="$PROJECT_ID" add-iam-policy-binding --member="$SINK_WRITER" \
+      --role=roles/bigquery.dataEditor "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1 \
+      || usage_warn "could not grant the sink writer dataEditor on ${USAGE_DATASET}"
+  fi
+  if ! printf '%s' "$DS_POLICY" | grep -q "dmai-web@${SA_DOMAIN}"; then
+    bq --project_id="$PROJECT_ID" add-iam-policy-binding \
+      --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+      --role=roles/bigquery.dataViewer "${PROJECT_ID}:${USAGE_DATASET}" >/dev/null 2>&1 \
+      || usage_warn "could not grant dmai-web dataViewer on ${USAGE_DATASET}"
+  fi
+  if ! gcloud projects get-iam-policy "$PROJECT_ID" \
+       --flatten='bindings[].members' \
+       --filter="bindings.role=roles/bigquery.jobUser AND bindings.members=serviceAccount:dmai-web@${SA_DOMAIN}" \
+       --format='value(bindings.role)' 2>/dev/null | grep -q jobUser; then
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+      --member="serviceAccount:dmai-web@${SA_DOMAIN}" \
+      --role=roles/bigquery.jobUser --condition=None --quiet >/dev/null 2>&1 \
+      || usage_warn "could not grant dmai-web bigquery.jobUser"
+  fi
+
   gcloud run deploy dmai-web --source=apps/web \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-web@${SA_DOMAIN}" \
-    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo}" \
+    --set-env-vars="^;^API_URL=${API_URL};ADMIN_EMAILS=${ADMIN_EMAILS};ANALYST_EMAILS=${ANALYST_EMAILS};IAP_AUDIENCE=${IAP_AUDIENCE};GCP_PROJECT=${PROJECT_ID};GCP_REGION=${REGION};WORKER_JOB=dmai-worker;INTAKE_FOLDER_ID=${INTAKE_FOLDER_ID:-1xIClbzw-SRBJ0Et3SOWnb7YhcBM8b6mo};USAGE_DATASET=${USAGE_DATASET}" \
     --set-secrets="SESSION_SECRET=dmai-session-secret:latest" \
     --quiet
   # NO `--allow-unauthenticated` HERE, DELIBERATELY, AND NO

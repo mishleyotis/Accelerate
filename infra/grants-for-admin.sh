@@ -25,6 +25,10 @@ grant roles/compute.networkUser                # attach Cloud Run revisions to t
 grant roles/redis.admin                        # Memorystore instance (skip if reusing dma-insights-redis)
 grant roles/cloudscheduler.admin               # the three mandatory Scheduler triggers
 
+# --- Usage telemetry (deploy.sh "usage telemetry"; tolerant until granted): ---
+grant roles/logging.configWriter               # the dmai-usage log sink (web usage lines → BigQuery)
+grant roles/bigquery.admin                     # the dmai_usage dataset and its two dataset-scoped grants
+
 # Already granted (verified): run.services/jobs.create, cloudsql.instances/users.create,
 # storage.buckets.create, secretmanager.secrets.create, cloudbuild.builds.create,
 # iam.serviceAccounts.actAs. Artifact Registry repo creation is NOT needed —

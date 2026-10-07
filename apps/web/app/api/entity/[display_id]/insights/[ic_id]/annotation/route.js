@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../../../../lib/session";
 import { effectiveRole } from "../../../../../../../lib/identity";
+import { logUsage } from "../../../../../../../lib/usage";
 
 // The write half of the entity proxy: an insight-card verdict. The SESSION's
 // email is the actor — forwarded by this route, never accepted from the
@@ -61,6 +62,12 @@ export async function POST(req, { params }) {
       body: JSON.stringify(body),
     });
     const text = await r.text();
+    // Usage telemetry (lib/usage.js): a verdict the API accepted. Logged on
+    // success only — a refused annotation is not a use of the feature.
+    if (r.ok) {
+      logUsage("feature", session, { feature: "insight_review",
+                                     client_id: display_id, page: "insights" });
+    }
     return new Response(text, {
       status: r.status,
       headers: { "content-type": "application/json" },

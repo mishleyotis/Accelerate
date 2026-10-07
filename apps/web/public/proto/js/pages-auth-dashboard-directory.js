@@ -655,7 +655,7 @@ function DashboardHome() {
     className: "muted"
   }, "Package scan"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, live && (live.import_scans || []).length ? `last ${relTime(live.import_scans[0].started_at)}` : "see import & jobs")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, live && (live.import_scans || []).length ? `last ${relTime(live.import_scans[0].started_at)}` : "no scans recorded yet")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
@@ -667,13 +667,13 @@ function DashboardHome() {
     className: "muted"
   }, "Vertex AI budget"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "$184 / $400"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, "$184 / $400"))), window.DMA_LIVE ? null : /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
   }, "Pending review"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, (live ? live.pending_review || [] : DMA.PENDING_REVIEW).length, " entities"))), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("span", null, DMA.PENDING_REVIEW.length, " entities"))), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     style: {
       width: "100%",
