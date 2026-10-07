@@ -33,7 +33,8 @@ BQ = textwrap.dedent("""\
     #!/bin/bash
     echo "bq $*" >> "$STATE/calls"
     case " $* " in
-      *" show "*) cat "$STATE/acl.json" ;;
+      *" show "*) [ "${BQ_SHOW_NOT_JSON:-0}" = 1 ] && { echo "Welcome to BigQuery!"; exit 0; }
+         cat "$STATE/acl.json" ;;
       *" update "*) [ "${BQ_UPDATE_FAIL:-0}" = 1 ] && exit 1
          src=$(echo "$*" | sed -E 's/.*--source ([^ ]+).*/\\1/'); cp "$src" "$STATE/acl.json" ;;
     esac
@@ -125,3 +126,18 @@ def test_second_run_writes_nothing(tmp_path):
 def test_bigquery_api_is_read_before_it_is_enabled():
     i = DEPLOY.index("gcloud services enable bigquery.googleapis.com")
     assert "gcloud services list --enabled" in DEPLOY[i - 400:i]
+
+
+def test_unreadable_show_output_falls_back_quietly(tmp_path):
+    """The 18:13 UTC release: `bq show` exited 0 with no JSON. The block must
+    fall through to the conditional binding without a Python traceback."""
+    log, _, proj, _ = _run(tmp_path, BQ_SHOW_NOT_JSON="1")
+    assert "Traceback" not in log, log
+    assert "WARN" not in log
+    assert len(proj) == 2
+
+
+def test_format_is_a_global_flag():
+    for line in DEPLOY.splitlines():
+        if "bq " in line and "prettyjson" in line and " show" in line:
+            assert line.index("--format=prettyjson") < line.index(" show"), line

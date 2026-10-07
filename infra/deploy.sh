@@ -436,14 +436,20 @@ if [ -f apps/web/Dockerfile ]; then
   #      (resource.name prefix), which needs only projectIamAdmin — the role
   #      the deployer just proved it holds by self-granting above.
   # READER is bigquery.dataViewer, WRITER is bigquery.dataEditor.
+  # --format is a bq GLOBAL flag and goes before the command: after `show` it
+  # yielded no JSON on the 18:13 UTC release, so the access-list route fell
+  # through to the conditional binding (which landed) with a traceback.
   USAGE_DS_RES="projects/${PROJECT_ID}/datasets/${USAGE_DATASET}"
   usage_acl_has() {  # $1 READER|WRITER  $2 email → 0 when the access list covers it
-    bq --project_id="$PROJECT_ID" show --format=prettyjson "${PROJECT_ID}:${USAGE_DATASET}" 2>/dev/null \
+    bq --project_id="$PROJECT_ID" --format=prettyjson show "${PROJECT_ID}:${USAGE_DATASET}" 2>/dev/null \
       | python3 -c '
 import json, sys
 role, email = sys.argv[1], sys.argv[2].lower()
 enough = {"READER": {"READER", "WRITER", "OWNER"}, "WRITER": {"WRITER", "OWNER"}}[role]
-access = json.load(sys.stdin).get("access", [])
+try:
+    access = json.load(sys.stdin).get("access", [])
+except ValueError:
+    sys.exit(1)  # no readable access list: the conditional binding decides
 sys.exit(0 if any(a.get("userByEmail", "").lower() == email and a.get("role") in enough for a in access) else 1)
 ' "$1" "$2"
   }
@@ -459,14 +465,17 @@ sys.exit(0 if any(a.get("userByEmail", "").lower() == email and a.get("role") in
     usage_cond_has "$role" "$member" && return 0
     say "  usage: granting ${2} ${role} on ${USAGE_DATASET}"
     tmp="$(mktemp)"
-    if bq --project_id="$PROJECT_ID" show --format=prettyjson \
+    if bq --project_id="$PROJECT_ID" --format=prettyjson show \
          "${PROJECT_ID}:${USAGE_DATASET}" > "$tmp" 2>/dev/null \
        && python3 - "$tmp" "$1" "$2" <<'PY' \
        && usage_try bq --project_id="$PROJECT_ID" update --source "$tmp" "${PROJECT_ID}:${USAGE_DATASET}" \
        && usage_acl_has "$1" "$2"; then
 import json, sys
 path, role, email = sys.argv[1:]
-ds = json.load(open(path))
+try:
+    ds = json.load(open(path))
+except ValueError:
+    sys.exit(1)  # no readable dataset JSON: fall back to the conditional binding
 ds.setdefault("access", []).append({"role": role, "userByEmail": email})
 json.dump(ds, open(path, "w"))
 PY
