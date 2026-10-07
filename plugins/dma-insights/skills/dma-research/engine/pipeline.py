@@ -2991,9 +2991,11 @@ class Pipeline:
 
     def _ship_one(self, p: str, version: str, connector_run: str, verdicts: dict) -> bool:
         """Ship one page's section files and record the verdict. True on pass."""
-        mtime = self._page_mtime(p)
         res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
                                      self.run.qa_dir / f"verdict_{p}_{version}.json")
+        # AFTER the ship: the deterministic pre-ship fixer rewrites section
+        # files inside it, and those rewritten files are what was submitted.
+        mtime = self._page_mtime(p)
         sgv4 = prose_sg_v4_fails(res.get("sg_v4_fails") or [])
         if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
             # The connector discloses-and-promotes SG-V4 (invariant 12);

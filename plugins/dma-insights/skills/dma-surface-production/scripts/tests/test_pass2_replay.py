@@ -26,6 +26,18 @@ def _load(name):
     return m
 
 
+
+@pytest.fixture(autouse=True)
+def _no_gold_parity(monkeypatch):
+    """The fixtures here are single-section pages, which the gold-shape
+    parity check rightly calls structurally incomplete. Parity has its own
+    test below; everywhere else it is held neutral."""
+    import sys
+    if str(REPO / "apps" / "mcp") not in sys.path:
+        sys.path.insert(0, str(REPO / "apps" / "mcp"))
+    from dma_mcp import promote_checks as pc
+    monkeypatch.setattr(pc, "gold_parity", lambda live, run_id=None, sub_vertical=None: ({}, {}))
+
 def _row(e_id, excerpt, links=("P1C1.1.1",), **kw):
     return {"e_id": e_id, "stored_id": e_id, "entity_id": ENTITY,
             "source_name": "NCUA 5300 call report", "source_url": "https://ncua.gov/x",
@@ -165,3 +177,25 @@ def test_a_chunked_page_is_replayed_in_the_order_the_server_reassembles_it(monke
     monkeypatch.setattr(sp, "INLINE_MAX", 0)
     assert list(sp.server_order(page)) == ["roadmap", "starters", "stairstep",
                                            "platform_story", "recommendations"]
+
+
+def test_the_promote_time_parity_gate_is_replayed_before_submit(monkeypatch):
+    """promote_run re-checks retained pages against the gold shape (CG-PAR).
+    First Tech overview, 2026-10-07: every submission passed and promotion
+    then refused the page. The replay runs that check too, so the refusal
+    arrives before a submission rather than after the last one."""
+    p2 = _load("pass2_replay")
+    _v2, _where = p2._connector_modules(str(REPO))
+    from dma_mcp import promote_checks as pc
+    seen = {}
+
+    def fake_parity(live, run_id=None, sub_vertical=None):
+        seen["pages"], seen["sv"] = list(live), sub_vertical
+        return ({"overview": [{"gate_id": "CG-PAR", "severity": "block", "section": "sentiment",
+                               "path": "overview.sentiment.gap_analysis",
+                               "message": "[key_absent] gap_analysis"}]}, {})
+
+    monkeypatch.setattr(pc, "gold_parity", fake_parity)
+    r = p2.replay(RUN, "overview", _series(13.083594321), repo=str(REPO), call=fake_call())
+    assert seen == {"pages": ["overview"], "sv": "CU"}
+    assert r["status"] == "fail" and r["by_gate"] == {"CG-PAR": 1}, r

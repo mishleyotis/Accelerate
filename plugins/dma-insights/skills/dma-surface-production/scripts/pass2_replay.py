@@ -20,7 +20,9 @@ list_pending_runs). The database calls the gates make are answered from that
 snapshot. A query the snapshot cannot answer is NOT guessed: it raises, the
 gate that issued it is reported under `unverified`, and the caller decides.
 SG gates (V4 grounding, S8) disclose and still promote, so they are not
-replayed here.
+replayed here. The promote-time re-checks that read only the page (gold
+parity CG-PAR, stale run state) are run too: promote_run refuses a retained
+page on them after every submission passed.
 
 Exit 0 = pass-2 clean, 1 = blocking reasons, 2 = could not run.
 """
@@ -332,6 +334,21 @@ def replay(run_id: str, page: str, payload: dict, *, sections_dir=None,
     finally:
         (v2.get_evidence, ev.get_evidence, ev._resolve, fit_mod.platform_fit,
          v2._run_s8, v2._run_v4) = saved
+    # The promote-time re-checks that read only the page itself: gold-shape
+    # parity (CG-PAR) and stale run state. First Tech overview, 2026-10-07:
+    # every submission passed and promote_run then refused the retained page
+    # on CG-PAR (sentiment.gap_analysis owed once two audiences existed).
+    # A page that cannot be promoted is not a page we are sure of either.
+    try:
+        from dma_mcp import promote_checks as pc
+        live = {page: {"payload": payload}}
+        reasons = list(reasons) + list(pc.stale_run_state(page, payload))
+        par, _rep = pc.gold_parity(live, run_id=run_id,
+                                   sub_vertical=snap.bundle.get("sub_vertical"))
+        reasons += [r for r in par.get(page, [])]
+    except Exception as exc:                                    # noqa: BLE001
+        return {"status": "not_run", "why": f"promote-time checks raised "
+                f"{type(exc).__name__}: {exc}"[:300], "reasons": [], "gates_from": where}
     blocking = [r for r in reasons if str(r.get("severity", "block")) == "block"
                 and not str(r.get("gate_id", "")).startswith("SG")]
     unverified = [r for r in blocking if "Unanswered" in str(r.get("message"))
