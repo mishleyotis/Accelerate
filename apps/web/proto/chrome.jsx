@@ -323,13 +323,15 @@ function SettingsPopover({ onClose }) {
 
 /* ── Client bar (dark client-context strip + tabs) ──────────────── */
 function ClientBar({ entity, run, tab }) {
-  const { audience, setAudience, role } = useApp();
+  const { audience, setAudience, role, pushToast } = useApp();
+  const link = isClientLink();
+  const isClient = audience === "customer";
   const [runOpen, setRunOpen] = useState(false);
   const fresh = entity.assessment_date ? DMA.helpers.freshnessOf(entity.assessment_date) : null;
   const isSuperseded = run && run.status !== "ACTIVE" && !run.status.includes("IN_PROGRESS");
   const dsPill = run?.data_source === "DRIVE_PARSE" ? "pill-drive" : "pill-api";
 
-  const TAB = (id, label, badge, icon) => (
+  const TAB = (id, label, badge, icon) => isClient && !clientTabAllowed(id) ? null : (
     <button key={id} className={`client-tab ${tab === id ? "on" : ""}`} onClick={() => navigate(`/clients/${entity.id}/${id}`, run ? { run: run.id } : null)}>
       {icon ? <Icon name={icon} size={13} /> : null}
       <span>{label}</span>
@@ -340,15 +342,30 @@ function ClientBar({ entity, run, tab }) {
   return (
     <>
       <div className="client-bar">
+        {/* A client link has no directory to go back to: the bar opens on the
+            client's name, and the run plumbing (status, data source) stays
+            with the Zennify view. */}
+        {link ? null : (
         <button className="icon-btn" style={{ color: "rgba(255,255,255,.7)" }} onClick={() => navigate("/clients")} title="Back to directory">
           <Icon name="chevron-l" size={16} />
         </button>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <div className="name">{entityName(entity)}</div>
-          {run ? <span className={`pill pill-active`}>{run.status.replace(/_/g, " ")}</span> : null}
-          {run ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span> : null}
-          {fresh ? <span className={`pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`}>● {fresh.label} · {fresh.months} mo</span> : null}
+          {run && !link ? <span className={`pill pill-active`}>{run.status.replace(/_/g, " ")}</span> : null}
+          {run && !link ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span> : null}
+          {fresh && !link ? <span className={`pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`}>● {fresh.label} · {fresh.months} mo</span> : null}
         </div>
+        {link ? (
+          <div className="client-bar-r">
+            {run ? (
+              <span className="run-selector" style={{ cursor: "default" }}>
+                <Icon name="calendar" size={12} />
+                <span>Assessed {fmtDate(run.date)}</span>
+              </span>
+            ) : null}
+          </div>
+        ) : (
         <div className="client-bar-r">
           <div style={{ position: "relative" }}>
             {/* Date only. The composite score used to render beside it
@@ -379,15 +396,16 @@ function ClientBar({ entity, run, tab }) {
             ) : null}
           </div>
 
-          <div className={`audience-toggle ${audience === "customer" ? "customer" : ""}`} title="Internal view shows full team-prep data. Customer view strips fields that should not be screen-shared.">
+          <div className={`audience-toggle ${audience === "customer" ? "customer" : ""}`} title="Internal view shows full team-prep data. Client view strips fields that should not be screen-shared.">
             <button className={audience === "internal" ? "on" : ""} onClick={() => setAudience("internal")}>
               <Icon name="lock" size={11} /> Internal
             </button>
             <button className={audience === "customer" ? "on" : ""} onClick={() => setAudience("customer")}>
-              <Icon name="users" size={11} /> Customer
+              <Icon name="users" size={11} /> Client
             </button>
           </div>
         </div>
+        )}
       </div>
 
       <div className="client-tabs">
@@ -404,17 +422,31 @@ function ClientBar({ entity, run, tab }) {
         {(role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null}
       </div>
 
-      {audience === "customer" ? (
+      {isClient && !link ? (
         <div className="customer-banner">
           <Icon name="users" size={14} />
-          <span><strong>Customer view</strong> - share-safe presentation mode · evidence rationale, ERS, alert counts, and the Context tab are hidden</span>
+          <span><strong>Client Dashboard</strong></span>
           <span className="spacer" />
+          {/* The link opens this dashboard on its own — client audience, client
+              tabs, no Zennify navigation — pinned to the run on screen. */}
+          <button className="btn btn-tertiary btn-sm"
+                  style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
+                  onClick={() => {
+                    const url = clientLinkUrl(entity.id, tab, run && run.id);
+                    const done = () => pushToast("Client link copied", "success");
+                    try {
+                      navigator.clipboard.writeText(url).then(done,
+                        () => window.prompt("Copy the client link", url));
+                    } catch (e) { window.prompt("Copy the client link", url); }
+                  }}>
+            <Icon name="share" size={12} /> Copy client link
+          </button>
           {/* nowrap + no shrink: at 1024px the flex row squeezed this button to
               133px against a 150px label and the theme clips rather than
               ellipsises, so the action read as "Switch back to Inter". */}
           <button className="btn btn-tertiary btn-sm"
                   style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
-                  onClick={() => setAudience("internal")}>Switch back to Internal →</button>
+                  onClick={() => setAudience("internal")}>Switch back to Zennify view →</button>
         </div>
       ) : null}
 
@@ -444,6 +476,19 @@ function PageShell({ title, crumbs, children, narrow, right }) {
 }
 
 function ClientShell({ entity, run, tab, children }) {
+  // A client link is the client dashboard alone: no sidebar (Dashboard,
+  // Clients, Alerts, Prospecting) and no top bar (search across every client,
+  // notifications, settings) — those are the Zennify app around it.
+  if (isClientLink()) {
+    return (
+      <div className="shell">
+        <div className="main">
+          <ClientBar entity={entity} run={run} tab={tab} />
+          <main className="page">{children}</main>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="shell">
       <Sidebar />

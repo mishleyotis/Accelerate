@@ -149,7 +149,7 @@ function ClientContext({
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "lock",
       size: 20
-    })), /*#__PURE__*/React.createElement("h3", null, "Context & timeline is internal-only"), /*#__PURE__*/React.createElement("p", null, "This dashboard contains internal team-preparation data. Switch back to Internal mode to view."));
+    })), /*#__PURE__*/React.createElement("h3", null, "Context & timeline is internal-only"), /*#__PURE__*/React.createElement("p", null, "This dashboard contains internal team-preparation data. Switch back to the Zennify view to read it."));
   }
   const allEvents = DMA.TIMELINE_EVENTS;
   const issues = DMA.ISSUES;

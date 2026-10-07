@@ -217,7 +217,11 @@ async function settle(page, quietMs = 400, timeoutMs = 15000) {
  * through the suites.
  */
 async function selectAudience(page, which) {
-  const want = String(which || "").toLowerCase();
+  // `which` is the AUDIENCE value ("internal" | "customer"); the toggle's
+  // label for the customer audience reads "Client" (client-view review,
+  // 2026-10-07), so the value is mapped to the label a reader clicks.
+  const v = String(which || "").toLowerCase();
+  const want = v === "customer" ? "client" : v;
   await page.evaluate((w) => {
     const b = [...document.querySelectorAll("button")]
       .find((n) => (n.textContent || "").trim().toLowerCase() === w);

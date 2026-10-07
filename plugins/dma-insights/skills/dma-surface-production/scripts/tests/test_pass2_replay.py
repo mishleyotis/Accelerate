@@ -199,3 +199,43 @@ def test_the_promote_time_parity_gate_is_replayed_before_submit(monkeypatch):
     r = p2.replay(RUN, "overview", _series(13.083594321), repo=str(REPO), call=fake_call())
     assert seen == {"pages": ["overview"], "sv": "CU"}
     assert r["status"] == "fail" and r["by_gate"] == {"CG-PAR": 1}, r
+
+
+def _snap_with(call):
+    p2 = _load("pass2_replay")
+    snap = p2.Snapshot.__new__(p2.Snapshot)
+    snap.call, snap.run_id, snap.unanswered = call, RUN, []
+    return p2, snap
+
+
+def test_the_sibling_is_the_server_s_live_copy_inline_and_chunked():
+    """CG-43 / AG-05 / CG-31 compare against the LIVE staged sibling. First
+    Tech context, 2026-10-07: the replay compared against the edited files
+    on disk and passed; the server compared against the older staged copy
+    and refused. Read inline `data` and chunked `parts` both."""
+    big = json.dumps({"bars": [{"e_id": "E-1"}]})
+    def call(tool, args):
+        assert tool == "get_staged_payload"
+        if "section" not in args:
+            return {"sections": {"scores": {"bytes": 10}, "sentiment": {"bytes": 999999}}}
+        if args["section"] == "scores":
+            return {"data": {"pillars": []}}
+        if not args.get("part"):
+            return {"parts": 2}
+        return {"chunk": big[:10] if args["part"] == 1 else big[10:]}
+    _p2, snap = _snap_with(call)
+    sib = snap.sibling("overview")
+    assert sib == {"scores": {"pillars": []}, "sentiment": {"bars": [{"e_id": "E-1"}]}}
+
+
+def test_an_unreadable_sibling_fails_closed_not_clean():
+    """The connector's gates swallow a failed sibling read and skip the
+    comparison. The replay records it, and replay() returns not_run."""
+    def call(tool, args):
+        if "section" not in args:
+            return {"sections": {"scores": {"bytes": 10}}}
+        return {"note": "described, neither data nor parts"}
+    p2, snap = _snap_with(call)
+    with pytest.raises(p2.Unanswered):
+        snap.sibling("overview")
+    assert snap.unanswered and snap.unanswered[0].startswith("sibling:overview")

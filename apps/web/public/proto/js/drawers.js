@@ -1290,6 +1290,7 @@ function IntelligencePanel() {
     ipSurface,
     ipContext,
     authed,
+    audience,
     pushToast,
     openEvidence,
     openSubcap
@@ -1340,6 +1341,9 @@ function IntelligencePanel() {
 
   // Never show before sign-in (rule of hooks: gate AFTER all hook calls)
   if (!authed) return null;
+  // Meeting prep is Zennify's own preparation: the client dashboard carries
+  // neither the button nor the panel it opens (client-view review 2026-10-07).
+  if (audience === "customer") return null;
   const ask = question => {
     const q = String(question || chatInput || "").trim();
     if (!q) return;

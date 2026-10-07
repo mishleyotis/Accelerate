@@ -63,7 +63,10 @@ function AppProvider({
   // Production divergence: the host page verifies the session cookie
   // server-side and passes the verdict in DMA_LIVE.
   const [authed, setAuthed] = useState(!!(typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.authed));
-  const [audience, setAudience] = useState(TWEAK_DEFAULTS.audience_default);
+  // A client link is the client audience and nothing else: the toggle is not
+  // rendered there, and the setter is inert so no other control can flip it.
+  const [audience, _setAudience] = useState(isClientLink() ? "customer" : TWEAK_DEFAULTS.audience_default);
+  const setAudience = isClientLink() ? () => {} : _setAudience;
   const [ipOpen, setIpOpen] = useState(TWEAK_DEFAULTS.ip_open_default);
   const [ipSurface, setIpSurface] = useState("why_now");
   const [ipContext, setIpContext] = useState(null);
@@ -229,7 +232,7 @@ function MyTweaks() {
       label: "Internal",
       value: "internal"
     }, {
-      label: "Customer",
+      label: "Client",
       value: "customer"
     }]
   }), /*#__PURE__*/React.createElement(TweakToggle, {
@@ -571,6 +574,17 @@ function ClientRoute({
   // SERVER decides what that role sees, rather than the client hiding fields it
   // already holds.
   const live = useLiveEntity(LIVE_MODE && entity ? entity.id : null, audience, run && run.run_id, role);
+  // A tab the client dashboard does not carry lands on its overview, in both
+  // client frames — toggling to Client while on Platform, or a client link
+  // that names a withdrawn tab. The tab strip hides the same list.
+  const clientRedirect = audience === "customer" && !clientTabAllowed(tab);
+  useEffect(() => {
+    if (clientRedirect && entity) {
+      navigate(`/clients/${entity.id}/overview`, run ? {
+        run: run.id
+      } : null);
+    }
+  }, [clientRedirect, entity && entity.id]);
   if (!entity) {
     return /*#__PURE__*/React.createElement(PageShell, {
       title: "Not found"
@@ -667,10 +681,10 @@ function ClientRoute({
       style: {
         marginTop: 8
       }
-    }, audience === "customer" ? "Switch back to the internal audience to read it." : "Ask an administrator if you need access.")));
+    }, audience === "customer" ? isClientLink() ? "It is not part of the client dashboard." : "Switch back to the Zennify view to read it." : "Ask an administrator if you need access.")));
   }
   let page = null;
-  switch (tab) {
+  switch (clientRedirect ? "overview" : tab) {
     case "overview":
       page = /*#__PURE__*/React.createElement(ClientOverview, {
         entity: ent,
@@ -771,6 +785,16 @@ function Router() {
   // (the live serving-tier read), and a hook inside a router branch would
   // change hook order as the route changes.
   const m = path.match(/^\/clients\/([^/]+)(?:\/([^/]+))?(?:\/(.+))?$/);
+  // A client link reads its one client and nothing else: any other route —
+  // another client, the directory, the dashboard — answers with the shared
+  // client's overview rather than the Zennify app around it.
+  const shared = clientLinkEntity();
+  if (shared && (!m || m[1] !== shared)) {
+    return /*#__PURE__*/React.createElement(ClientRoute, {
+      id: shared,
+      tab: "overview"
+    });
+  }
   if (m) return /*#__PURE__*/React.createElement(ClientRoute, {
     id: m[1],
     tab: m[2] || "overview",

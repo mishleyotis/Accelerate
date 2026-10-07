@@ -203,6 +203,18 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     `stats()` without a category). orient, the watchdog and the hooks print
     `search_ops_since_checkpoint` for that scope, never the lifetime count
     against the ceiling (a promoted run read "6332 against 60").
+- **Client view review** (user, 2026-10-07, `DMA_customer_view_feedback.docx`):
+  the customer audience is labelled **Client** in every reader-facing string
+  (banner "Client Dashboard", "Switch back to Zennify view →"; the API value
+  stays `customer`). The client view carries only Overview · Insights ·
+  Heatmap (`CLIENT_TABS`, `apps/web/proto/utils.jsx` — one list for tab
+  strip and router), and drops Meeting prep / the Intelligence panel,
+  Request rerun, the executive narrative, leadership panel, financial
+  trajectory and the Insights technology landscape. These are render-layer
+  hides; the sections still promote and serve. `#/clients/<id>/<tab>?view=client`
+  is the shareable **client link**: client audience locked, no sidebar /
+  top bar / toggle, sticky for the document. Tests:
+  `apps/web/tests/client-dashboard.test.js`.
 
 ## Open decisions — leave open, do not resolve silently
 
@@ -212,4 +224,9 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   (they disagree on 144 SWBC cells).
 - Techstack layer denominator (T-03/DNR-6): producer product slots vs the
   server's cell count.
+- External access for the client link: the web service sits behind IAP and
+  PRD v1 scopes out "a customer-facing portal — clients receive exports, not
+  logins", so a client link opens only for someone IAP admits. Opening it to
+  a non-Zennify recipient (IAP grant per client, or a tokenised public
+  route) is a security/product decision for the owner.
 - Partitioning: **not yet** (triggers/strategies documented in TRD §17; do not pre-build).

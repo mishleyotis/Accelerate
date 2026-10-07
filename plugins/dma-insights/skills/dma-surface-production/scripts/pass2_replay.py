@@ -168,25 +168,40 @@ class Snapshot:
         return self._others
 
     def sibling(self, page: str):
-        if self.sections_dir is not None:
-            local = load_sections(self.sections_dir, page)
-            if local:
-                return local
-        idx = self.call("get_staged_payload", {"run_id": self.run_id, "page": page})
-        out = {}
-        for s in idx.get("sections") or []:
-            name = s.get("name") if isinstance(s, dict) else s
-            if not name:
-                continue
-            body = self.call("get_staged_payload", {"run_id": self.run_id, "page": page,
-                                              "section": name})
-            if isinstance(body.get("body"), dict):
-                out[name] = body["body"]
-            elif isinstance(body.get("section"), dict):
-                out[name] = body["section"]
-            else:
-                raise Unanswered(f"staged {page}.{name} is described, not returned")
-        return out or None
+        """The sibling page as the SERVER holds it now — never the files on
+        disk. The connector compares against its live staged copy at the
+        moment of submit, so a sibling edited locally but not yet shipped is
+        not what this page is judged against. First Tech context,
+        2026-10-07: clean locally against the edited overview on disk,
+        refused on CG-43 because the live overview was the older copy."""
+        try:
+            idx = self.call("get_staged_payload", {"run_id": self.run_id, "page": page})
+            secs = idx.get("sections")
+            if not isinstance(secs, dict):
+                return None                      # no live sibling: nothing to compare
+            out = {}
+            for name in secs:
+                one = self.call("get_staged_payload", {"run_id": self.run_id,
+                                                       "page": page, "section": name})
+                if isinstance(one.get("data"), dict):
+                    out[name] = one["data"]
+                    continue
+                parts = int(one.get("parts") or 0)
+                if not parts:
+                    raise RuntimeError(f"{page}.{name}: neither data nor parts")
+                blob = "".join(
+                    self.call("get_staged_payload", {"run_id": self.run_id, "page": page,
+                                                     "section": name, "part": k}).get("chunk") or ""
+                    for k in range(1, parts + 1))
+                out[name] = json.loads(blob)
+            return out or None
+        except Exception as exc:                                # noqa: BLE001
+            # The connector's own gates swallow a failed sibling read and
+            # skip the comparison; a replay that did the same would report a
+            # check that never ran as clean. Recorded, and the caller fails
+            # closed on it.
+            self.unanswered.append(f"sibling:{page}: {type(exc).__name__}: {exc}"[:200])
+            raise Unanswered(f"sibling {page}")
 
 
 class Cursor:
@@ -349,6 +364,11 @@ def replay(run_id: str, page: str, payload: dict, *, sections_dir=None,
     except Exception as exc:                                    # noqa: BLE001
         return {"status": "not_run", "why": f"promote-time checks raised "
                 f"{type(exc).__name__}: {exc}"[:300], "reasons": [], "gates_from": where}
+    if any(u.startswith("sibling:") for u in snap.unanswered):
+        return {"status": "not_run", "why": "the live sibling page could not be read, so "
+                "the cross-page gates (AG-05, CG-43, CG-31) did not run: "
+                + "; ".join(u for u in snap.unanswered if u.startswith("sibling:")),
+                "reasons": [], "gates_from": where}
     blocking = [r for r in reasons if str(r.get("severity", "block")) == "block"
                 and not str(r.get("gate_id", "")).startswith("SG")]
     unverified = [r for r in blocking if "Unanswered" in str(r.get("message"))
