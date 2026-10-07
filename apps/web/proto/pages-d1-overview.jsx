@@ -6,6 +6,11 @@ function ClientOverview({ entity, run }) {
   const { audience, openEvidence, openInsight, openSubcap, role, setIpSurface, setIpContext, setIpOpen, tweaks, pushToast } = useApp();
   const [scqaExp, setScqaExp] = useState(false);
   const layout = tweaks.overview_layout || "balanced";
+  // The client dashboard (client-view review, 2026-10-07): no Zennify actions
+  // (meeting prep, rerun), no executive narrative, no leadership roster, no
+  // financial trajectory. The sections still promote and still serve; this
+  // is what the client page puts in front of the client.
+  const isClient = audience === "customer";
 
   useEffect(() => {
     setIpSurface("why_now");
@@ -31,9 +36,9 @@ function ClientOverview({ entity, run }) {
           ].filter(Boolean).join(" · ")}</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Customer-safe scorecard generated · ${entityName(entity)}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
-          <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued - first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>
-          <button className="btn btn-secondary" onClick={() => { setIpSurface("why_now"); setIpContext({ entity }); setIpOpen(true); }}><Icon name="sparkle" size={13} /> Meeting prep</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Client-safe scorecard generated · ${entityName(entity)}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
+          {isClient ? null : <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued - first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>}
+          {isClient ? null : <button className="btn btn-secondary" onClick={() => { setIpSurface("why_now"); setIpContext({ entity }); setIpOpen(true); }}><Icon name="sparkle" size={13} /> Meeting prep</button>}
         </div>
       </div>
 
@@ -48,24 +53,29 @@ function ClientOverview({ entity, run }) {
         <WhyNowStrip entity={entity} openEvidence={openEvidence} audience={audience} openSubcap={openSubcap} />
       </CardBoundary>
 
-      {/* SCQA */}
+      {/* SCQA — internal only */}
+      {isClient ? null : (
       <CardBoundary name="executive narrative">
         <SCQACard entity={entity} expanded={scqaExp} onToggle={() => setScqaExp(o => !o)} openEvidence={openEvidence} audience={audience} />
       </CardBoundary>
+      )}
 
-      {/* Opportunity Surface - per platform */}
+      {/* Platform opportunities */}
       <CardBoundary name="opportunity surface">
         <OpportunitySurfaceStrip entity={entity} run={run} audience={audience} />
       </CardBoundary>
 
-      {/* Two-column: Top findings + Leadership panel */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 16, marginBottom: 18 }}>
+      {/* Two-column: Top findings + Leadership panel (internal only; the
+          findings take the full width in the client dashboard) */}
+      <div style={{ display: "grid", gridTemplateColumns: isClient ? "1fr" : "1.55fr 1fr", gap: 16, marginBottom: 18 }}>
         <CardBoundary name="top findings">
           <TopFindingsCard entity={entity} openEvidence={openEvidence} audience={audience} />
         </CardBoundary>
+        {isClient ? null : (
         <CardBoundary name="leadership panel">
           <LeadershipPanel audience={audience} />
         </CardBoundary>
+        )}
       </div>
 
       {/* Evidence-driven analytics.
@@ -75,6 +85,16 @@ function ClientOverview({ entity, run }) {
           on the institution, and D7 Health is where that belongs. The sections
           still promote and still serve — nothing was deleted from the pipeline,
           only from this page. */}
+      {/* Client dashboard: the financial trajectory is internal, so the row
+          is the sentiment card alone, and only when the run states one — a
+          heading over an "absent" card is not something to show a client. */}
+      {isClient ? (DMA.sentimentFor(entity.id) ? (
+        <div className="cards-grid-2" style={{ marginBottom: 18 }}>
+          <CardBoundary name="sentiment">
+            <SentimentCard entity={entity} audience={audience} />
+          </CardBoundary>
+        </div>
+      ) : null) : (<>
       <div className="section-label" style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0 12px" }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", textTransform: "uppercase", letterSpacing: ".06em" }}>Evidence &amp; benchmarks</span>
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>extracted from scoring workbook · evidence index · peer set</span>
@@ -89,6 +109,7 @@ function ClientOverview({ entity, run }) {
           <SentimentCard entity={entity} audience={audience} />
         </CardBoundary>
       </div>
+      </>)}
 
       {/* Thought leadership panel - internal-only */}
       {audience !== "customer"
@@ -509,7 +530,8 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>Why now signals</div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{signals.length} trigger{signals.length === 1 ? "" : "s"} · click any signal to drill into the evidence</div>
         </div>
-        <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/context`)}>View timeline <Icon name="arrow-r" size={11} /></button>
+        {/* The timeline lives on Context, which the client dashboard does not carry. */}
+        {audience === "customer" ? null : <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/context`)}>View timeline <Icon name="arrow-r" size={11} /></button>}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
         {signals.map((s, i) => {
@@ -555,11 +577,12 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
             {!isCust && sel.metric ? <div className="f-mono" style={{ fontSize: 11.5, color: "var(--z-dark)", background: "#fff", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "7px 10px", marginBottom: 10, display: "inline-block" }}>{sel.metric}</div> : null}
             {/* timeline event → context */}
             {sel.timeline ? (
-              <button onClick={() => navigate(`/clients/${entity.id}/context`)} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: 0, padding: 0, cursor: "pointer", marginBottom: 12 }}>
+              <button onClick={isCust ? undefined : () => navigate(`/clients/${entity.id}/context`)} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: 0, padding: 0, cursor: isCust ? "default" : "pointer", marginBottom: 12 }}>
                 <Icon name="timeline" size={12} style={{ color: "var(--ph0)" }} />
                 <span className="f-mono" style={{ fontSize: 11, color: "var(--z-mid)" }}>{sel.timeline.date}</span>
                 <span style={{ fontSize: 11.5, color: "var(--z-body)" }}>{sel.timeline.event}</span>
-                <Icon name="arrow-r" size={10} style={{ color: "var(--z-muted)" }} />
+                {/* Context is not part of the client dashboard: the event is stated, not linked. */}
+                {isCust ? null : <Icon name="arrow-r" size={10} style={{ color: "var(--z-muted)" }} />}
               </button>
             ) : null}
             {/* the window — the clause naming what closes it, at full width */}
@@ -704,7 +727,7 @@ function SCQABody({ entity, expanded, openEvidence, audience }) {
   );
 }
 
-/* ── Opportunity Surface · per platform ───────────────────────────────
+/* ── Platform Opportunities (Opportunity Surface) ─────────────────────
    O8. Two defects, one component.
 
    THE SCORE COLUMN. The tile was a flex row with a shrinkable right-hand
@@ -770,10 +793,12 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
           <Icon name="platform" size={14} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Opportunity Surface · per platform</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Platform Opportunities</div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Composite fit score 0–100</div>
         </div>
-        <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>Open matrix <Icon name="arrow-r" size={11} /></button>
+        {/* The platform page is not part of the client dashboard, so in the
+            client view the tiles are the destination, not a door to it. */}
+        {audience === "customer" ? null : <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>Open matrix <Icon name="arrow-r" size={11} /></button>}
       </div>
       <div className="g5">
         {tiles.map((t, i) => {
@@ -785,7 +810,7 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
           const sub = asText(t.headline)
             || ((cat && cat.features) ? cat.features.split(" · ").slice(0, 2).join(" · ") : null);
           return (
-            <div key={pid} className="card-tile clickable" onClick={() => navigate(`/clients/${entity.id}/platform`, { platform: pid, run: run.id })}>
+            <div key={pid} className={`card-tile ${audience === "customer" ? "" : "clickable"}`} onClick={audience === "customer" ? undefined : () => navigate(`/clients/${entity.id}/platform`, { platform: pid, run: run.id })}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }}>{name}</div>
@@ -1853,8 +1878,15 @@ function ClientInsights({ entity, run }) {
     <div>
       <div className="page-head">
         <div>
-          <div className="eyebrow">Insight cards</div>
-          <h1>{DMA.INSIGHT_CARDS.length} insight cards</h1>
+          {/* The client dashboard names the page for its reader
+              (client-view review, 2026-10-07); the card count is ours. */}
+          {audience === "customer" ? (<>
+            <div className="eyebrow">Key insights</div>
+            <h1>Recommendations for {entityName(entity)}</h1>
+          </>) : (<>
+            <div className="eyebrow">Insight cards</div>
+            <h1>{DMA.INSIGHT_CARDS.length} insight cards</h1>
+          </>)}
           <div className="sub">
             <span className="b b-below" style={{ marginRight: 6 }}>{tierCounts[1]} ACT NOW</span>
             <span className="b b-org" style={{ marginRight: 6 }}>{tierCounts[2]} PLAN NEXT</span>
@@ -1868,7 +1900,8 @@ function ClientInsights({ entity, run }) {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${filtered.length} insight cards as PDF…`, "success")}><Icon name="download" size={13} /> Export PDF</button>
-          <button className="btn btn-secondary" onClick={() => pushToast("Add a note from any insight card - click a card to start", "success")}><Icon name="plus" size={13} /> Add note</button>
+          {/* Notes are Zennify's annotations; a client link carries none. */}
+          {isClientLink() ? null : <button className="btn btn-secondary" onClick={() => pushToast("Add a note from any insight card - click a card to start", "success")}><Icon name="plus" size={13} /> Add note</button>}
         </div>
       </div>
 
@@ -1932,7 +1965,9 @@ function ClientInsights({ entity, run }) {
         );
       })}
 
-      {/* Technology landscape sub-view */}
+      {/* Technology landscape sub-view — internal only: the client
+          dashboard carries no technology register to open it onto. */}
+      {audience === "customer" ? null : (
       <CardBoundary name="technology landscape">
       <div className="card flush" style={{ marginBottom: 18 }}>
         <div className="card-head">
@@ -1980,6 +2015,7 @@ function ClientInsights({ entity, run }) {
         </div>
       </div>
       </CardBoundary>
+      )}
     </div>
   );
 }

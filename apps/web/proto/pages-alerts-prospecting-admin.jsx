@@ -127,11 +127,11 @@ function ProspectingPage() {
     <PageShell title="Prospecting" crumbs={[{ label: "Prospecting" }]}>
       <div className="page-head">
         <div>
-          <div className="eyebrow">Customer-safe export</div>
+          <div className="eyebrow">Client-safe export</div>
           <h1>Prospecting</h1>
           <div className="sub">Search → one-page scorecard → export PDF or HTML</div>
         </div>
-        <span className="b b-org" style={{ alignSelf: "center" }}><Icon name="lock" size={10} /> CUSTOMER-SAFE MODE</span>
+        <span className="b b-org" style={{ alignSelf: "center" }}><Icon name="lock" size={10} /> CLIENT-SAFE MODE</span>
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
@@ -161,7 +161,7 @@ function ProspectingPage() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="row" style={{ marginBottom: 14 }}>
             <Icon name="evidence" size={16} />
-            <div style={{ fontWeight: 600, fontSize: 13 }}>Scorecard preview · always Customer View</div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Scorecard preview · always Client view</div>
             <span className="spacer" />
             <button className="btn btn-tertiary" disabled={exporting} onClick={() => { setExporting(true); setTimeout(() => { setExporting(false); setDownloadReady(true); }, 1400); }}>
               {exporting ? <span className="row"><span className="skel" style={{ width: 12, height: 12, borderRadius: 6 }} /> Generating…</span> : <><Icon name="download" size={13} /> Export PDF</>}
@@ -180,7 +180,7 @@ function ProspectingPage() {
         <div className="empty">
           <div className="icon"><Icon name="envelope" size={22} /></div>
           <h3>Search to begin</h3>
-          <p>Search the institution name to load a one-page scorecard. The export is always Customer-safe - internal fields are stripped.</p>
+          <p>Search the institution name to load a one-page scorecard. The export is always client-safe - internal fields are stripped.</p>
         </div>
       )}
     </PageShell>

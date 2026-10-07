@@ -772,13 +772,16 @@ function ClientBar({
   const {
     audience,
     setAudience,
-    role
+    role,
+    pushToast
   } = useApp();
+  const link = isClientLink();
+  const isClient = audience === "customer";
   const [runOpen, setRunOpen] = useState(false);
   const fresh = entity.assessment_date ? DMA.helpers.freshnessOf(entity.assessment_date) : null;
   const isSuperseded = run && run.status !== "ACTIVE" && !run.status.includes("IN_PROGRESS");
   const dsPill = run?.data_source === "DRIVE_PARSE" ? "pill-drive" : "pill-api";
-  const TAB = (id, label, badge, icon) => /*#__PURE__*/React.createElement("button", {
+  const TAB = (id, label, badge, icon) => isClient && !clientTabAllowed(id) ? null : /*#__PURE__*/React.createElement("button", {
     key: id,
     className: `client-tab ${tab === id ? "on" : ""}`,
     onClick: () => navigate(`/clients/${entity.id}/${id}`, run ? {
@@ -792,7 +795,7 @@ function ClientBar({
   }, badge) : null);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "client-bar"
-  }, /*#__PURE__*/React.createElement("button", {
+  }, link ? null : /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     style: {
       color: "rgba(255,255,255,.7)"
@@ -811,13 +814,23 @@ function ClientBar({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "name"
-  }, entityName(entity)), run ? /*#__PURE__*/React.createElement("span", {
+  }, entityName(entity)), run && !link ? /*#__PURE__*/React.createElement("span", {
     className: `pill pill-active`
-  }, run.status.replace(/_/g, " ")) : null, run ? /*#__PURE__*/React.createElement("span", {
+  }, run.status.replace(/_/g, " ")) : null, run && !link ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${dsPill}`
-  }, run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface") : null, fresh ? /*#__PURE__*/React.createElement("span", {
+  }, run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface") : null, fresh && !link ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`
-  }, "\u25CF ", fresh.label, " \xB7 ", fresh.months, " mo") : null), /*#__PURE__*/React.createElement("div", {
+  }, "\u25CF ", fresh.label, " \xB7 ", fresh.months, " mo") : null), link ? /*#__PURE__*/React.createElement("div", {
+    className: "client-bar-r"
+  }, run ? /*#__PURE__*/React.createElement("span", {
+    className: "run-selector",
+    style: {
+      cursor: "default"
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "calendar",
+    size: 12
+  }), /*#__PURE__*/React.createElement("span", null, "Assessed ", fmtDate(run.date))) : null) : /*#__PURE__*/React.createElement("div", {
     className: "client-bar-r"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -890,7 +903,7 @@ function ClientBar({
     className: `b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`
   }, r.data_source === "DRIVE_PARSE" ? "DRIVE" : "API")))) : null), /*#__PURE__*/React.createElement("div", {
     className: `audience-toggle ${audience === "customer" ? "customer" : ""}`,
-    title: "Internal view shows full team-prep data. Customer view strips fields that should not be screen-shared."
+    title: "Internal view shows full team-prep data. Client view strips fields that should not be screen-shared."
   }, /*#__PURE__*/React.createElement("button", {
     className: audience === "internal" ? "on" : "",
     onClick: () => setAudience("internal")
@@ -903,14 +916,14 @@ function ClientBar({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 11
-  }), " Customer")))), /*#__PURE__*/React.createElement("div", {
+  }), " Client")))), /*#__PURE__*/React.createElement("div", {
     className: "client-tabs"
-  }, TAB("overview", "Overview", null, "home"), TAB("insights", "Insights", null, "insight"), TAB("heatmap", "Heatmap", null, "heatmap"), TAB("platform", "Platform", null, "platform"), audience !== "customer" ? TAB("context", "Context", null, "timeline") : null, TAB("techstack", "Tech stack", null, "stack"), (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null, (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null), audience === "customer" ? /*#__PURE__*/React.createElement("div", {
+  }, TAB("overview", "Overview", null, "home"), TAB("insights", "Insights", null, "insight"), TAB("heatmap", "Heatmap", null, "heatmap"), TAB("platform", "Platform", null, "platform"), audience !== "customer" ? TAB("context", "Context", null, "timeline") : null, TAB("techstack", "Tech stack", null, "stack"), (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null, (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null), isClient && !link ? /*#__PURE__*/React.createElement("div", {
     className: "customer-banner"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 14
-  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "Customer view"), " - share-safe presentation mode \xB7 evidence rationale, ERS, alert counts, and the Context tab are hidden"), /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "Client Dashboard")), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
@@ -919,8 +932,27 @@ function ClientBar({
       whiteSpace: "nowrap",
       flexShrink: 0
     },
+    onClick: () => {
+      const url = clientLinkUrl(entity.id, tab, run && run.id);
+      const done = () => pushToast("Client link copied", "success");
+      try {
+        navigator.clipboard.writeText(url).then(done, () => window.prompt("Copy the client link", url));
+      } catch (e) {
+        window.prompt("Copy the client link", url);
+      }
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "share",
+    size: 12
+  }), " Copy client link"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary btn-sm",
+    style: {
+      color: "#7C3500",
+      whiteSpace: "nowrap",
+      flexShrink: 0
+    },
     onClick: () => setAudience("internal")
-  }, "Switch back to Internal \u2192")) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {
+  }, "Switch back to Zennify view \u2192")) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {
     className: "superseded-banner"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "info",
@@ -961,6 +993,22 @@ function ClientShell({
   tab,
   children
 }) {
+  // A client link is the client dashboard alone: no sidebar (Dashboard,
+  // Clients, Alerts, Prospecting) and no top bar (search across every client,
+  // notifications, settings) — those are the Zennify app around it.
+  if (isClientLink()) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "shell"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "main"
+    }, /*#__PURE__*/React.createElement(ClientBar, {
+      entity: entity,
+      run: run,
+      tab: tab
+    }), /*#__PURE__*/React.createElement("main", {
+      className: "page"
+    }, children)));
+  }
   return /*#__PURE__*/React.createElement("div", {
     className: "shell"
   }, /*#__PURE__*/React.createElement(Sidebar, null), /*#__PURE__*/React.createElement("div", {

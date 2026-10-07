@@ -124,7 +124,7 @@ function ClientContext({ entity, run }) {
       <div className="empty">
         <div className="icon"><Icon name="lock" size={20} /></div>
         <h3>Context &amp; timeline is internal-only</h3>
-        <p>This dashboard contains internal team-preparation data. Switch back to Internal mode to view.</p>
+        <p>This dashboard contains internal team-preparation data. Switch back to the Zennify view to read it.</p>
       </div>
     );
   }
