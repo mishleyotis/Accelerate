@@ -14,9 +14,11 @@
 // and verifies. A compromise of the internet-facing service therefore cannot
 // mint a link — it can only read what a valid link already reads.
 //
-// Revocation: every token carries a `jti`. One link is revoked by listing its
-// jti in infra/share-revoked.txt and redeploying; every link at once by
-// rotating the key (a new version of dmai-share-signing-key + verify-key).
+// Revocation: every token carries a `jti`. An ADMIN revokes a link, or removes
+// one address or domain from it, on Admin › Client links (lib/share-ledger,
+// effective within seconds). Break-glass, without the app: list the jti in
+// infra/share-revoked.txt and redeploy; every link at once by rotating the
+// key (a new version of dmai-share-signing-key + verify-key).
 import crypto from "crypto";
 
 export const TOKEN_VERSION = 1;
@@ -128,10 +130,17 @@ export function allowlistFor(recipients) {
 /* Whether `email` is on the token's allowlist: the address itself, or an
    address at one of its domains. Exact domain match only — sharing with
    @bcu.com does not admit @evil-bcu.com or @bcu.com.attacker.net. */
+// `payload.x` is what an ADMIN has since removed from this link's allowlist
+// (lib/share-ledger liveLink attaches it after the signature checks; it is
+// never in the token). A removed address is refused even under a still-listed
+// domain; a removed domain leaves only its explicitly named addresses.
 export function allowed(payload, email) {
   const e = normaliseEmail(email);
   if (!e || !payload || !payload.a) return false;
-  return (payload.a.m || []).includes(e) || (payload.a.d || []).includes(domainOf(e));
+  const x = payload.x || { m: [], d: [] };
+  if ((x.m || []).includes(e)) return false;
+  return (payload.a.m || []).includes(e) ||
+    ((payload.a.d || []).includes(domainOf(e)) && !(x.d || []).includes(domainOf(e)));
 }
 
 export function mint({ entity, run, days, recipients }, key = signingKey(), now = Date.now()) {

@@ -195,7 +195,9 @@ test("no route runs on the share service unless it is a share route", () => {
     if (rel.startsWith(`s${path.sep}`)) {
       assert.match(src, /if \(!shareMode\(\)\) return new Response\("Not found", \{ status: 404 \}\)/,
         `${rel} serves outside the share service`);
-      assert.match(src, /verify\((params\.token|m\[1\])\)/, `${rel} does not verify the token`);
+      // A link's own routes go through liveLink (signature + ledger
+      // revocation); the auth-action redirector only validates its target.
+      assert.match(src, /liveLink\(params\.token\)|verify\(m\[1\]\)/, `${rel} does not verify the token`);
     } else {
       assert.match(src, /if \(shareMode\(\)\) (return new Response\("Not found", \{ status: 404 \}\)|notFound\(\))/,
         `${rel} runs on the public share service`);
@@ -210,4 +212,133 @@ test("a share read never asks the API for anything but the customer audience", (
   assert.match(src, /searchParams\.set\("run", payload\.r\)/);
   assert.ok(!/audience", "internal"|directory/.test(src.replace(/\/\/.*$/gm, "")),
     "share-read reaches the internal audience or the directory");
+});
+
+/* ── Revocation (Admin › Client links, lib/share-ledger) ─────────────────
+   Owner, 2026-10-07: "The admin page should also have a place where I can
+   revoke access." The ledger is a directory here and a bucket in
+   production; the rules are the same code. */
+const os = require("node:os");
+const L = require("../lib/share-ledger.js");
+function ledger() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "share-ledger-"));
+  return { dir, backend: L.ledgerBackend({ SHARE_LEDGER_DIR: dir }) };
+}
+const withKey = async (fn) => {
+  const was = process.env.SHARE_VERIFY_KEY;
+  process.env.SHARE_VERIFY_KEY = KEYS.publicKey.export({ type: "spki", format: "pem" });
+  try { return await fn(); } finally {
+    if (was === undefined) delete process.env.SHARE_VERIFY_KEY; else process.env.SHARE_VERIFY_KEY = was;
+  }
+};
+const live = (over) => S.mint({ ...BASE, recipients: "jane@bcu.com, cfo.home@gmail.com", ...over }, KEYS.privateKey);
+
+test("a removed address is refused even under its still-listed domain; a removed domain keeps named addresses", () => {
+  const p = { ...check(make({ recipients: "jane@bcu.com, sam@bcu.com" }).token) };
+  p.x = { m: ["jane@bcu.com"], d: [] };
+  assert.strictEqual(S.allowed(p, "jane@bcu.com"), false, "a removed address still opens");
+  assert.strictEqual(S.allowed(p, "cfo@bcu.com"), true, "removing jane closed the whole domain");
+  p.x = { m: [], d: ["bcu.com"] };
+  assert.strictEqual(S.allowed(p, "cfo@bcu.com"), false, "a removed domain still admits its people");
+  assert.strictEqual(S.allowed(p, "sam@bcu.com"), true, "a named address fell with its domain");
+});
+
+test("revoking a link closes it at the door; restoring reopens it; every change is kept", async () => {
+  const { backend } = ledger();
+  const { token, payload } = live();
+  await withKey(async () => {
+    assert.ok((await L.liveLink(token, backend)).p, "a fresh link does not open");
+    await L.changeRevocation(payload.jti, { action: "revoke", by: "admin@zennify.com" }, backend);
+    L.clearRevocationCache();
+    assert.deepStrictEqual(await L.liveLink(token, backend), { p: null, why: "revoked" });
+    const r = await L.changeRevocation(payload.jti, { action: "restore", by: "admin@zennify.com" }, backend);
+    L.clearRevocationCache();
+    assert.ok((await L.liveLink(token, backend)).p, "a restored link stays closed");
+    assert.deepStrictEqual(r.history.map((h) => h.action), ["revoke", "restore"]);
+    assert.strictEqual(r.history[0].by, "admin@zennify.com");
+  });
+});
+
+test("removing a recipient refuses them at the gate AND ends a session they already hold", async () => {
+  const { backend } = ledger();
+  const { token, payload } = live();
+  const SECRET = "s".repeat(48);
+  await withKey(async () => {
+    const before = (await L.liveLink(token, backend)).p;
+    const { value } = S.signAccess(before, "cfo@bcu.com", "otp", NOW, SECRET);
+    assert.strictEqual(S.readAccess(before, value, NOW, SECRET), "cfo@bcu.com");
+    await L.changeRevocation(payload.jti, { action: "remove", domain: "@BCU.com" }, backend);
+    L.clearRevocationCache();
+    const after = (await L.liveLink(token, backend)).p;
+    assert.ok(after, "removing a domain killed the whole link");
+    assert.strictEqual(S.readAccess(after, value, NOW, SECRET), null, "an open session outlived the removal");
+    assert.strictEqual(S.allowed(after, "cfo@bcu.com"), false);
+    assert.strictEqual(S.allowed(after, "jane@bcu.com"), true, "jane is named; only the domain was removed");
+    assert.strictEqual(S.allowed(after, "cfo.home@gmail.com"), true);
+    await L.changeRevocation(payload.jti, { action: "readd", domain: "bcu.com" }, backend);
+    L.clearRevocationCache();
+    assert.strictEqual(S.readAccess((await L.liveLink(token, backend)).p, value, NOW, SECRET), "cfo@bcu.com");
+  });
+});
+
+test("a ledger that cannot be read fails closed", async () => {
+  const { token } = live();
+  const broken = { kind: "x", async read() { throw new Error("boom"); } };
+  L.clearRevocationCache();
+  await withKey(async () => {
+    assert.deepStrictEqual(await L.liveLink(token, broken), { p: null, why: "unavailable" });
+  });
+  // No ledger configured at all is not "unavailable": links run on the
+  // signature and the deploy-time revocation list alone.
+  await withKey(async () => { assert.ok((await L.liveLink(token, null)).p); });
+});
+
+test("a revocation is cached for at most REVOCATION_TTL_MS, then re-read", async () => {
+  let reads = 0;
+  const b = { async read() { reads++; return null; } };
+  L.clearRevocationCache();
+  await L.revocationOf("ttl-check-jti1", b, NOW);
+  await L.revocationOf("ttl-check-jti1", b, NOW + L.REVOCATION_TTL_MS - 1);
+  assert.strictEqual(reads, 1);
+  await L.revocationOf("ttl-check-jti1", b, NOW + L.REVOCATION_TTL_MS + 1);
+  assert.strictEqual(reads, 2, "a stale reading was served past its TTL");
+});
+
+test("the admin list: every recorded link with its status, and links revoked by id", async () => {
+  const { backend } = ledger();
+  const a = live(), b = live(), c = live({ days: 1 });
+  for (const l of [a, b, c]) await L.recordLink(l.payload, "ae@zennify.com", backend);
+  await assert.rejects(L.recordLink(a.payload, "ae@zennify.com", backend), "a link was recorded twice");
+  await L.changeRevocation(b.payload.jti, { action: "revoke" }, backend);
+  await L.changeRevocation("legacyLinkId", { action: "revoke" }, backend);
+  const { status, links } = await L.listLinks(backend, Date.now() + 2 * 86400e3);
+  assert.strictEqual(status, "ok");
+  const by = Object.fromEntries(links.map((l) => [l.jti, l]));
+  assert.strictEqual(by[a.payload.jti].status, "active");
+  assert.deepStrictEqual(by[a.payload.jti].emails, ["cfo.home@gmail.com", "jane@bcu.com"]);
+  assert.strictEqual(by[a.payload.jti].minted_by, "ae@zennify.com");
+  assert.strictEqual(by[b.payload.jti].status, "revoked");
+  assert.strictEqual(by[c.payload.jti].status, "expired");
+  // A link generated before the ledger existed, revoked by its id.
+  assert.strictEqual(by.legacyLinkId.status, "revoked");
+  assert.strictEqual(by.legacyLinkId.unrecorded, true);
+  assert.deepStrictEqual(await L.listLinks(null), { status: "not_configured", links: [] });
+});
+
+test("a pasted link or a bare id names the link; nothing else does", () => {
+  const { token, payload } = live();
+  assert.strictEqual(L.jtiFrom(S.shareUrl("https://dmai-share.example", token, BASE.entity)), payload.jti);
+  assert.strictEqual(L.jtiFrom(payload.jti), payload.jti);
+  for (const bad of ["", "https://example.com/", "../../etc", "a b c", "x".repeat(80)]) {
+    assert.strictEqual(L.jtiFrom(bad), null, bad);
+  }
+});
+
+test("a revocation names a real action and a real target", async () => {
+  const { backend } = ledger();
+  await assert.rejects(L.changeRevocation("validLinkId1", { action: "delete" }, backend), /unknown action/);
+  await assert.rejects(L.changeRevocation("validLinkId1", { action: "remove" }, backend), /email address or domain/);
+  await assert.rejects(L.changeRevocation("validLinkId1", { action: "remove", email: "not-an-email" }, backend), /email address or domain/);
+  await assert.rejects(L.changeRevocation("../escape", { action: "revoke" }, backend), /not a link id/);
+  await assert.rejects(L.changeRevocation("validLinkId1", { action: "revoke" }, null), /no ledger/);
 });

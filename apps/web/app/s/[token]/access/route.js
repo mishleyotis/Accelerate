@@ -1,7 +1,8 @@
 import { accessCookie, allowed, audit, normaliseEmail, publicOrigin, shareMode,
-         verify, verifyMode } from "../../../../lib/share";
+         verifyMode } from "../../../../lib/share";
+import { liveLink } from "../../../../lib/share-ledger";
 import { mayResend, sendSignInLink } from "../../../../lib/share-otp";
-import { checkEmailPage, deadLinkPage, gatePage } from "../../../../lib/share-page";
+import { checkEmailPage, deadLinkPage, gatePage, unavailablePage } from "../../../../lib/share-page";
 import { readAsLink } from "../../../../lib/share-read";
 
 export const dynamic = "force-dynamic";
@@ -15,8 +16,8 @@ export const dynamic = "force-dynamic";
 // On it, attest mode (Identity Platform not configured) → admitted as typed.
 export async function POST(req, { params }) {
   if (!shareMode()) return new Response("Not found", { status: 404 });
-  const p = verify(params.token);
-  if (!p) return deadLinkPage();
+  const { p, why } = await liveLink(params.token);
+  if (!p) return why === "unavailable" ? unavailablePage() : deadLinkPage();
   let email = null;
   try { email = normaliseEmail((await req.formData()).get("email")); } catch {}
 

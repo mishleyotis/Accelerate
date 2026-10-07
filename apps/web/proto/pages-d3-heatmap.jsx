@@ -1563,10 +1563,16 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
                 <>
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(subs.length, STRIP)}, 1fr)`, gap: 2 }}>
                     {subs.slice(0, STRIP).map(s => (
-                      <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}
-                        title={subcapTipText(s)}
+                      <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0, cursor: "pointer" }}
+                        title={subcapTipText(s)} role="button" tabIndex={0} aria-label={`Open ${s.id}`}
                         onMouseEnter={cellTip.show(subcapTipText(s))}
-                        onMouseLeave={cellTip.hide}>
+                        onMouseLeave={cellTip.hide}
+                        // Every cell opens its own drawer, as it does in the
+                        // grid. The swatch used to have no handler, so a click
+                        // fell through to the stage tile and only toggled it:
+                        // most cells on this view could not be opened.
+                        onClick={(e) => { e.stopPropagation(); cellTip.hide(); openSubcap({ kind: "subcap", subcap: s }); }}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openSubcap({ kind: "subcap", subcap: s }); } }}>
                         {/* 18px tall and up to twelve to a row: no wording
                             fits in this swatch, and `fx` painted an em dash
                             into it. The swatch already carries the "nothing

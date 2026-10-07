@@ -43,6 +43,14 @@ export function deadLinkPage() {
 Ask the person who shared it with you for a new link.</div></div>`));
 }
 
+// The ledger could not be read, so revocation could not be checked: the link
+// does not open (lib/share-ledger fails closed).
+export function unavailablePage() {
+  return html(503, frame("Link temporarily unavailable", `
+<div><div class="loader-title">This link can't be opened right now</div>
+<div class="loader-body" style="margin-top:6px">Please try again in a few minutes.</div></div>`));
+}
+
 // The gate: one field, posted to this link's own /access route.
 export function gatePage(token, entityName, error, status = 200) {
   return html(status, frame("Digital Maturity Assessment", `

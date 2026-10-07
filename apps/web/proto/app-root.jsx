@@ -672,6 +672,7 @@ function App() {
   return (
     <AppProvider>
       <ConnectionWatcher />
+      <UpdateWatcher />
       {/* The last stop, and only the last stop. Cards carry their own
           boundaries and every client page carries one inside its shell; this
           catches what is above both — the router itself, the shell's chrome,

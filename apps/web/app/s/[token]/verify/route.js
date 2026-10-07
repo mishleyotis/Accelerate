@@ -1,7 +1,8 @@
-import { accessCookie, allowed, audit, normaliseEmail, shareMode, verify,
+import { accessCookie, allowed, audit, normaliseEmail, shareMode,
          verifyMode } from "../../../../lib/share";
+import { liveLink } from "../../../../lib/share-ledger";
 import { completeSignIn } from "../../../../lib/share-otp";
-import { deadLinkPage, gatePage } from "../../../../lib/share-page";
+import { deadLinkPage, gatePage, unavailablePage } from "../../../../lib/share-page";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,8 @@ export const dynamic = "force-dynamic";
 // that address is still on this link's allowlist.
 export async function GET(req, { params }) {
   if (!shareMode()) return new Response("Not found", { status: 404 });
-  const p = verify(params.token);
-  if (!p) return deadLinkPage();
+  const { p, why } = await liveLink(params.token);
+  if (!p) return why === "unavailable" ? unavailablePage() : deadLinkPage();
   if (verifyMode() !== "otp") return gatePage(params.token, null);
   const q = new URL(req.url).searchParams;
   const email = normaliseEmail(q.get("e"));

@@ -1,5 +1,6 @@
-import { accessCookieName, audit, cookieFrom, readAccess, shareMode, verify } from "../../../lib/share";
-import { dashboardPage, deadLinkPage, gatePage } from "../../../lib/share-page";
+import { accessCookieName, audit, cookieFrom, readAccess, shareMode } from "../../../lib/share";
+import { liveLink } from "../../../lib/share-ledger";
+import { dashboardPage, deadLinkPage, gatePage, unavailablePage } from "../../../lib/share-page";
 import { entityRow, readAsLink } from "../../../lib/share-read";
 import { upstreamHeaders } from "../../../lib/upstream";
 
@@ -8,13 +9,14 @@ export const dynamic = "force-dynamic";
 // GET /s/<token> — a client link, on the public share service only.
 //
 //   bad / expired / revoked token  → the dead-link page (404)
+//   ledger unreadable              → refused (503): revocation unknown
 //   valid, reader not yet admitted → the email gate
 //   valid and admitted             → the client dashboard, booted with this
 //                                    link's one client and nothing else
 export async function GET(req, { params }) {
   if (!shareMode()) return new Response("Not found", { status: 404 });
-  const p = verify(params.token);
-  if (!p) return deadLinkPage();
+  const { p, why } = await liveLink(params.token);
+  if (!p) return why === "unavailable" ? unavailablePage() : deadLinkPage();
 
   // The reader's identity for this link (lib/share: readAccess). The name on
   // the gate comes from the client's own customer-audience payload.

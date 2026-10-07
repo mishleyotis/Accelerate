@@ -4,6 +4,7 @@ import { verifyIapAssertion } from "../lib/iap";
 import { displayName, domainOk, grantedRole, roleGrants } from "../lib/identity";
 import { deviceOf, logUsage } from "../lib/usage";
 import { shareMode } from "../lib/share";
+import { buildId } from "../lib/build-id";
 import { deactivatedHtml, resolveAccess } from "../lib/roles";
 
 export const dynamic = "force-dynamic";
@@ -64,6 +65,7 @@ export const SCRIPTS = [
   "proto/js/pages-d5-d6-tech-runs.js",
   "proto/js/pages-alerts-prospecting-admin.js",
   "proto/js/pages-admin-usage.js",
+  "proto/js/pages-admin-share.js",
   "proto/js/usage-tracker.js",
   "proto/js/pages-live-client.js",
   "proto/js/tweaks-panel.js",
@@ -134,6 +136,9 @@ export async function GET(req) {
     import_scans: session?.role === "ADMIN" ? (scans?.scans || []) : null,
     catalogue_version: catalogue?.version || null,
     dev_login: process.env.ALLOW_DEV_LOGIN === "1",
+    // The bundle build this page boots on (lib/build-id): the UpdateWatcher
+    // compares it with /api/version and offers a reload after a release.
+    build: buildId(),
     // `l3_id -> vendor, platform_name`, so the platform surfaces can
     // resolve a catalogue code instead of printing it. Boot-time and
     // cached, because the resolution has to be synchronous inside a

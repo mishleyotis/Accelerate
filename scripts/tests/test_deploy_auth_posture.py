@@ -333,6 +333,34 @@ def test_SHARE_OTP_IS_NEVER_SILENTLY_OFF():
     text = DEPLOY.read_text()
     assert "identitytoolkit.googleapis.com" in text
     assert 'if [ "$IDP_OK" = "yes" ]' in text
+    # The deployer grants itself the roles the step needs (it fell back to
+    # typed addresses on every release until it did), and a release that
+    # still cannot switch OTP on names the failing step and Google's error.
+    for role in ("roles/identitytoolkit.admin", "roles/serviceusage.apiKeysAdmin",
+                 "roles/serviceusage.serviceUsageAdmin"):
+        assert role in text, f"the deployer no longer self-grants {role}"
+    assert 'echo "  Why: ${IDP_WHY:-unknown}" >&2' in text, "the OTP-off warning no longer says why"
     assert "SHARE_IDP_API_KEY=dmai-share-idp-api-key" in text
     assert "one-time sign-in is OFF" in text
     assert "dmai-share-cookie-secret" in text
+
+
+def test_THE_LINK_LEDGER_IS_WRITTEN_BY_THE_APP_AND_ONLY_READ_BY_THE_PUBLIC_SERVICE():
+    """Admin › Client links (owner, 2026-10-07: "a place where I can revoke
+    access"). The revocation ledger is a private bucket: dmai-web (behind IAP)
+    writes it, the internet-facing dmai-share may only READ it — a compromised
+    share service must not be able to un-revoke a link. Both services get the
+    bucket or neither does (a revocation the share service cannot see would
+    do nothing), and a failed read grant fails the release."""
+    text = DEPLOY.read_text()
+    assert "--public-access-prevention" in text, "the ledger bucket could be made public"
+    grants = re.findall(r'gs://\$\{SHARE_LEDGER_BUCKET\}" \\\s*\n\s*--member="([^"]+)" --role="([^"]+)"', text)
+    assert ('serviceAccount:dmai-web@${SA_DOMAIN}', "roles/storage.objectAdmin") in grants, grants
+    assert ('serviceAccount:${SHARE_SA}', "roles/storage.objectViewer") in grants, grants
+    assert not any(m == "serviceAccount:${SHARE_SA}" and r != "roles/storage.objectViewer" for m, r in grants), (
+        "dmai-share was granted more than read on the revocation ledger")
+    assert "could not grant dmai-share read on gs://${SHARE_LEDGER_BUCKET}" in text
+    assert "${LEDGER_ENV}" in _deploy_block("dmai-web") and "${LEDGER_ENV}" in _deploy_block("dmai-share"), (
+        "the ledger is configured on one service and not the other")
+    lib = (ROOT / "apps" / "web" / "lib" / "share-ledger.js").read_text()
+    assert 'why: "unavailable"' in lib, "a ledger read failure no longer fails closed"

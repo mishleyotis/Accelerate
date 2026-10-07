@@ -21,7 +21,7 @@
   "uncertainty_band",
   "urf_modifiers"
  ],
- "generated_from_sha256": "aab667e0e4b57399dc4acf7ced2382d500517baaa3be448f64dfe835a5350250",
+ "generated_from_sha256": "f233a7b7d8e0decacce293a82d9db7b0c666460e64b60257560b631f0282af70",
  "sections": {
   "context.acquisitions": {
    "items": {
@@ -482,6 +482,14 @@
   },
   "heatmap.value_chain": {
    "items": {
+    "chains": [
+     "id",
+     "name",
+     "not_scored",
+     "stage_id",
+     "stage_order",
+     "subcaps"
+    ],
     "empty_state": [
      "closure_condition",
      "reason"
@@ -496,13 +504,19 @@
     ]
    },
    "keys": [
+    "arrangement_version",
+    "chains",
     "e_ids",
     "empty_state",
     "internal_only",
     "narrative_thread",
+    "not_applicable_stages",
+    "not_scored_cells",
     "produced_at",
     "producer_version",
-    "r_layer"
+    "r_layer",
+    "sub_vertical",
+    "version"
    ]
   },
   "heatmap.workbook_scores": {

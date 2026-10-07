@@ -233,6 +233,15 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   reaches its own client's Overview · Insights · Heatmap and nothing else**
   — `clientLinkPath` (utils.jsx) clamps every `navigate()` and every typed
   route, `/login` and `/admin` included, to one of those three.
+  Later that day: **the value chain reaches clients** — its keys are built by
+  the server (catalogue joins: stages, cell ids, counts), so the generated
+  customer allowlist had dropped them all; they are classified in
+  `scripts/gen_customer_allowlist.py SERVER_DERIVED` and pinned by
+  `apps/api/tests/test_customer_allowlist.py`. Every value-chain cell swatch
+  opens its cell. **A release reaches open tabs**: the boot carries the
+  bundle's build fingerprint (`lib/build-id.js`), `UpdateWatcher` compares it
+  with `/api/version` and offers a reload (the next tab change reloads by
+  itself) — the owner saw the old heatmap an hour after the fix shipped.
 
 - **Public client share links** (user, 2026-10-07; supersedes PRD v1's
   "clients receive exports, not logins" for this route only): "Generate client
@@ -259,6 +268,20 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `share_otp_*`, `share_access_*`).
   Reads go to svc_api as `audience=customer`, `role=AE`, the link's run,
   pages `overview·insights·heatmap·evidence·subcaps` only.
+  **Revoking access** (owner, same day: "the admin page should also have a
+  place where I can revoke access"): **Admin › Client links** lists every
+  link generated (client, recipients, who shared it, expiry) and an ADMIN can
+  revoke a whole link, remove one address or domain from it, or restore
+  either; a link generated before the ledger is revoked by pasting it. The
+  ledger is the private bucket `${PROJECT_ID}-dmai-share-ledger`
+  (`links/<jti>.json` at generation, `revoked/<jti>.json` per change, every
+  change attributed) — not the database, so invariant 2 stands. dmai-web
+  writes it (objectAdmin), dmai-share only reads it (objectViewer). Every
+  share request re-checks it (`lib/share-ledger.js liveLink`, cached ≤15 s),
+  so a change reaches readers already inside; an unreadable ledger **fails
+  closed** (503). A configured ledger that cannot record a new link issues no
+  link. `infra/share-revoked.txt` stays as break-glass. Tests:
+  `share-link.test.js`, `share-admin.test.js`, `test_deploy_auth_posture.py`.
 
 - **User role allocation** (user, 2026-10-07, after "you even removed user
   role allocation from the admin page"): grants live in the Backend Schema's

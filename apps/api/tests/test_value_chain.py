@@ -282,7 +282,8 @@ def test_redaction_runs_through_the_same_path_as_the_grid():
     # reaches no audience, so it can no longer show that a marking survives
     # for the analyst — it shows the stronger rule instead, below.
     built = _built(data={"note": "analyst reasoning",
-                         "r_layer": {"verdict": "analyst reasoning"}},
+                         "r_layer": {"verdict": "analyst reasoning"},
+                         "unclassified_probe": "a key nobody classified"},
                    env={"internal_only": ["note"]})
     internal = serve_value_chain(fresh(), ENTITY, RUN, built, "internal")
     assert internal["data"]["note"] == "analyst reasoning"
@@ -298,12 +299,16 @@ def test_redaction_runs_through_the_same_path_as_the_grid():
     assert customer["redacted_count"] >= 1
     assert "redacted_paths" not in customer
     assert customer["redaction_note"]
-    # SUPERSEDED 2026-08-19 by the customer serve allowlist: value_chain's
-    # contract declares no content fields yet (both reference runs serve it
-    # empty), so an unclassified `chains` key is DROPPED for the customer —
-    # fail-closed until the surface's contract lands. The internal audience
-    # above still carries the arrangement.
-    assert "chains" not in customer["data"], \
+    # The arrangement itself reaches the client (owner, 2026-10-07: "the
+    # heatmaps should never be hidden"; the client value chain had rendered
+    # "did not promote"). Its keys are classified as server-derived catalogue
+    # joins in scripts/gen_customer_allowlist.py SERVER_DERIVED. The 2026-08-19
+    # rule still stands for everything else: a key nobody classified is
+    # DROPPED for the customer.
+    assert customer["data"]["chains"] == internal["data"]["chains"]
+    assert customer["data"]["not_scored_cells"] == internal["data"]["not_scored_cells"]
+    assert "unclassified_probe" in internal["data"]
+    assert "unclassified_probe" not in customer["data"], \
         "an unclassified key served to a customer — the allowlist is open"
 
 
