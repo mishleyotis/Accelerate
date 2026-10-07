@@ -225,10 +225,18 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   is the shareable **client link**: client audience locked, no sidebar /
   top bar / toggle, sticky for the document. Tests:
   `apps/web/tests/client-dashboard.test.js`.
+  Owner follow-up the same day: **the heatmap is never hidden** — the
+  standard grid opens the client heatmap as it does the internal one (only
+  the Context-backed Issues overlay stays internal); **a why-now card never
+  renders empty** — a signal whose `trigger` the client read withholds is
+  not drawn, and the client drilldown prints the trigger; **a client link
+  reaches its own client's Overview · Insights · Heatmap and nothing else**
+  — `clientLinkPath` (utils.jsx) clamps every `navigate()` and every typed
+  route, `/login` and `/admin` included, to one of those three.
 
 - **Public client share links** (user, 2026-10-07; supersedes PRD v1's
-  "clients receive exports, not logins" for this route only): "Share with
-  client" mints a link on the separate public service **`dmai-share`** (same
+  "clients receive exports, not logins" for this route only): "Generate client
+  link" (recipient emails required first) mints a link on the separate public service **`dmai-share`** (same
   image, `SHARE_MODE=1`, every non-`/s/` route 404s — enforced by
   `apps/web/tests/share-link.test.js` and a post-deploy door probe). The link
   is Ed25519-signed (private key on `dmai-web` only, public key on

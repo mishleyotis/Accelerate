@@ -796,24 +796,32 @@ function Router() {
     path
   } = route;
 
-  // Auth gate: always start at /login until signed in
-  if (!authed && path !== "/login") return /*#__PURE__*/React.createElement(LoginPage, null);
+  // Auth gate: always start at /login until signed in. (A public client link
+  // boots signed in; its reader never meets the Zennify login.)
+  if (!authed) return /*#__PURE__*/React.createElement(LoginPage, null);
+
+  // A client link reads its one client and its client tabs, and nothing
+  // else: any other route — another client, the directory, Platform or Tech
+  // stack, a sub-route, even /login — answers with that client's overview,
+  // before any other branch can draw the Zennify app around it. The address
+  // bar is corrected too, so the tab strip and the URL agree.
+  const shared = clientLinkEntity();
+  if (shared) {
+    const to = clientLinkPath(path);
+    if (to !== path) setTimeout(() => navigate(to, route.params.run ? {
+      run: route.params.run
+    } : null), 0);
+    return /*#__PURE__*/React.createElement(ClientRoute, {
+      id: shared,
+      tab: to.split("/")[3]
+    });
+  }
   if (path === "/login") return /*#__PURE__*/React.createElement(LoginPage, null);
 
   // Client-scoped routes — a component of its own because it holds hooks
   // (the live serving-tier read), and a hook inside a router branch would
   // change hook order as the route changes.
   const m = path.match(/^\/clients\/([^/]+)(?:\/([^/]+))?(?:\/(.+))?$/);
-  // A client link reads its one client and nothing else: any other route —
-  // another client, the directory, the dashboard — answers with the shared
-  // client's overview rather than the Zennify app around it.
-  const shared = clientLinkEntity();
-  if (shared && (!m || m[1] !== shared)) {
-    return /*#__PURE__*/React.createElement(ClientRoute, {
-      id: shared,
-      tab: "overview"
-    });
-  }
   if (m) return /*#__PURE__*/React.createElement(ClientRoute, {
     id: m[1],
     tab: m[2] || "overview",

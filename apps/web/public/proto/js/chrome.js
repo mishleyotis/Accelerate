@@ -767,7 +767,7 @@ function SettingsPopover({
   })))));
 }
 
-/* ── Share with client ─────────────────────────────────────────────
+/* ── Generate client link ──────────────────────────────────────────
    Owner's rule (2026-10-07): a client link is shared TO named people, and
    those addresses plus their organisations' domains are the link's
    allowlist for this one DMA. The server mints (POST /api/share) and signs
@@ -826,14 +826,14 @@ function ShareDialog({
       window.prompt("Copy the client link", made.url);
     }
   };
-  const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}` + `?subject=${encodeURIComponent(`${entityName(entity)} · Digital Maturity Assessment`)}` + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email. The link works until ${fmtDate(made.expires_at)}.`)}` : null;
+  const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}` + `?subject=${encodeURIComponent(`${entityName(entity)} · Digital Maturity Assessment`)}` + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email: you will receive a one-time sign-in link at that address. The dashboard link works until ${fmtDate(made.expires_at)}.`)}` : null;
   return /*#__PURE__*/React.createElement("div", {
     className: "modal-mask",
     onClick: onClose
   }, /*#__PURE__*/React.createElement("div", {
     className: "modal",
     role: "dialog",
-    "aria-label": "Share with client",
+    "aria-label": "Generate client link",
     onClick: e => e.stopPropagation(),
     style: {
       width: 560
@@ -850,7 +850,7 @@ function ShareDialog({
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, "Share with client"), /*#__PURE__*/React.createElement("div", {
+  }, "Generate client link"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-muted)",
@@ -866,12 +866,14 @@ function ShareDialog({
   }))), /*#__PURE__*/React.createElement("div", {
     className: "modal-body"
   }, !made ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "share-recipients",
     style: {
       fontSize: 12,
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, "Recipient email(s)"), /*#__PURE__*/React.createElement("textarea", {
+  }, "Recipient email(s) \xB7 added to this link's allowlist"), /*#__PURE__*/React.createElement("textarea", {
+    id: "share-recipients",
     className: "inp",
     rows: 2,
     style: {
@@ -889,7 +891,7 @@ function ShareDialog({
       marginTop: 6,
       lineHeight: 1.5
     }
-  }, "Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only."), /*#__PURE__*/React.createElement("div", {
+  }, "Required before the link is generated. Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only."), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 8,
@@ -970,7 +972,7 @@ function ShareDialog({
     className: "btn btn-primary",
     disabled: busy || !recipients.trim(),
     onClick: submit
-  }, busy ? "Creating…" : "Create link") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+  }, busy ? "Generating…" : "Generate link") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
     onClick: copy
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1159,7 +1161,7 @@ function ClientBar({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "share",
     size: 12
-  }), " Share with client"), /*#__PURE__*/React.createElement("button", {
+  }), " Generate client link"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     style: {
       color: "#7C3500",

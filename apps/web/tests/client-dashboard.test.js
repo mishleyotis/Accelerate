@@ -17,6 +17,11 @@
  *            top bar, no audience toggle — and nothing in the page walks the
  *            reader out of it
  *
+ * Owner follow-up, 2026-10-07: the heatmap is never hidden (the standard grid
+ * opens the client heatmap too); a why-now card never renders empty; and a
+ * shared link reaches Overview · Insights · Heatmap of its own client and
+ * nothing else, whatever is typed into the address bar.
+ *
  * The internal view is asserted alongside each one: every hide is an
  * audience rule, and a rule that also emptied the Zennify view would pass a
  * client-only test.
@@ -62,6 +67,16 @@ function pages() {
                          discarded: [] }),
       findings: sec({ findings: [{ f_id: "F-01", title: "A finding title", theme: "TIMING" }],
                       ranking_basis: "Ranked by consequence." }),
+      // WN-2 is the shape the client read takes when the server withholds a
+      // trigger that names a person from a contact source: every other field
+      // present, `trigger` gone.
+      why_now: sec({ signals: [
+        { wn_id: "WN-1", kind: "REGULATORY", trigger: "The regulator published a new rule in June 2026. It applies from 2027.",
+          window: "Until the 2027 effective date.", why_this_sequence: "First, because the date is fixed.",
+          cost_of_acting_now: "Budget moves forward a year.", e_ids: [] },
+        { wn_id: "WN-2", kind: "LEADERSHIP", window: "No dated close established.",
+          why_this_sequence: "Second.", cost_of_acting_now: "Verification effort.", e_ids: [] },
+      ] }),
     } },
     insights: { sections: {
       insights: sec({ cards: [{ ic_id: "IC-001", title: "An insight", pillar_id: "P3",
@@ -106,6 +121,27 @@ test("overview · the Zennify view keeps all of it", () => {
 
 /* ── Insights ──────────────────────────────────────────────────────────── */
 
+test("why now · a signal whose trigger the client read withholds draws no empty card", () => {
+  for (const audience of ["customer", "internal"]) {
+    const text = page("ClientOverview", audience);
+    assert.match(text, /1 trigger ·/, `${audience}: the strip counts the faceless signal`);
+    assert.match(text, /The regulator published a new rule in June 2026\./, `${audience}: the real card is gone`);
+    assert.ok(!/MERGER|LEADERSHIP/.test(text), `${audience}: the faceless card still draws its chip`);
+  }
+});
+
+test("heatmap · the standard grid opens the client view too; the issue overlay stays internal", () => {
+  const client = page("ClientHeatmap", "customer");
+  const zennify = page("ClientHeatmap", "internal");
+  for (const [who, text] of [["client", client], ["zennify", zennify]]) {
+    assert.match(text, /Standard/, `${who}: no Standard view`);
+    assert.match(text, /Zoom/, `${who}: the heatmap did not open on the standard grid`);
+    assert.ok(!text.includes("not part of the customer view"), `${who}: the grid is still locked`);
+  }
+  assert.ok(!client.includes("Issues"), "the client heatmap offers the Context issue overlay");
+  assert.match(zennify, /Issues/, "the Zennify heatmap lost its issue overlay");
+});
+
 test("insights · the client view is headed for its reader, without the landscape", () => {
   const text = page("ClientInsights", "customer");
   assert.match(text, /Key insights/i);
@@ -127,7 +163,7 @@ test("client bar · client copy, client tabs, a link to share", () => {
   const text = page("ClientBar", "customer", { tab: "overview" });
   assert.match(text, /Client Dashboard/);
   assert.match(text, /Switch back to Zennify view/);
-  assert.match(text, /Share with client/);
+  assert.match(text, /Generate client link/);
   assert.ok(!/Customer/.test(text), `"Customer" is still on the client bar: ${text}`);
   assert.ok(!/share-safe presentation mode/.test(text), "the old banner sentence is back");
   for (const tab of ["Platform", "Tech stack", "Context", "Health", "Runs"]) {
@@ -136,6 +172,22 @@ test("client bar · client copy, client tabs, a link to share", () => {
   for (const tab of ["Overview", "Insights", "Heatmap"]) {
     assert.ok(text.includes(tab), `the client tab strip lost ${tab}`);
   }
+});
+
+test("generate client link · recipients first, then the link", () => {
+  const { win } = H.load();
+  H.installEntity(ID, pages());
+  const html = H.render(win.ShareDialog, { entity: ENTITY, run: RUN, onClose() {} },
+                        { audience: "customer", pushToast() {} });
+  const text = H.textOf(html);
+  assert.match(text, /Generate client link/);
+  assert.match(text, /Recipient email\(s\) · added to this link's allowlist/);
+  assert.match(html, /<textarea[^>]*id="share-recipients"/, "no recipient field before the link exists");
+  // Nothing is minted with an empty allowlist: the button is disabled until
+  // an address is entered (and /api/share refuses an empty list as well).
+  assert.match(html, /<button[^>]*disabled=""[^>]*>Generate link<\/button>/,
+    "Generate link is pressable with no recipient");
+  assert.ok(!/readonly/i.test(html), "a link is shown before one was generated");
 });
 
 test("client bar · the Zennify view keeps Platform and Tech stack, and no banner", () => {
@@ -224,12 +276,27 @@ test("client link · the dashboard alone, and no way out of it", { skip }, async
 
     // Every way out — the directory, the dashboard, another client — answers
     // with the shared client, never the Zennify app.
-    for (const out of ["#/clients", "#/", "#/clients/other-client/overview", "#/prospecting"]) {
+    // Typed into the address bar, not just clicked: the login page, admin,
+    // alerts, a withdrawn tab, a sub-route under one, Context.
+    for (const out of ["#/clients", "#/", "#/clients/other-client/overview", "#/prospecting",
+                       "#/login", "#/alerts", "#/admin", "#/admin/import",
+                       `#/clients/${ID}/platform`, `#/clients/${ID}/techstack/T-01`,
+                       `#/clients/${ID}/context`, `#/clients/${ID}/health`, "#/nonsense"]) {
       const esc = await open(browser, base, `#/clients/${ID}/insights?view=client`, out);
       assert.strictEqual(esc.nav, false, `${out} reached the sidebar`);
       assert.strictEqual(esc.topbar, false, `${out} reached the top bar`);
       assert.ok(!esc.text.includes("Other Client"), `${out} reached another client`);
       assert.match(esc.text, new RegExp(NAME), `${out} lost the shared client`);
+      assert.match(esc.hash, new RegExp(`^#/clients/${ID}/(overview|insights|heatmap)\\?.*view=client`),
+                   `${out} left the client tabs (${esc.hash})`);
+      assert.deepStrictEqual(esc.tabs, ["Overview", "Insights", "Heatmap"], `${out} changed the tab strip`);
+      assert.ok(!/Sign in|Not authorised|Page not found/.test(esc.text), `${out} drew a Zennify page`);
+    }
+
+    // The three client tabs stay where they are.
+    for (const tab of ["overview", "insights", "heatmap"]) {
+      const on = await open(browser, base, `#/clients/${ID}/overview?view=client`, `#/clients/${ID}/${tab}?view=client`);
+      assert.match(on.hash, new RegExp(`^#/clients/${ID}/${tab}\\?`), `${tab} bounced (${on.hash})`);
     }
 
     // The same app without the param is the Zennify app, unchanged.
