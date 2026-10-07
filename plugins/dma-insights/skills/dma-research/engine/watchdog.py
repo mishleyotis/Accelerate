@@ -214,8 +214,11 @@ def inspect(run: runstate.Run, *, stall_seconds: int = STALL_SECONDS) -> dict:
             f"scope. No revive can close this one")
     elif budget["checkpoint_required"]:
         state, detail = "AT_BUDGET_CEILING", (
-            f"{budget['search_ops']} search-ops against a ceiling of "
-            f"{budget['search_op_ceiling']}; the run must checkpoint")
+            f"{budget['search_ops_since_checkpoint']} search-ops in the "
+            f"{budget.get('window_scope') or 'run'} window since its last "
+            f"checkpoint, against a ceiling of {budget['search_op_ceiling']} "
+            f"(lifetime {budget['search_ops']}); that conversation must "
+            f"checkpoint")
     elif open_work and _no_enrichment_connector(run):
         state, detail = "BLOCKED_NO_CONNECTOR", (
             f"{_no_enrichment_connector(run)} — no cell can be declared absent "

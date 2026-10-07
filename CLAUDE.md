@@ -157,6 +157,53 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   - **Star ratings fill from zero** (rating ÷ top star); other scales keep
     the range they state.
 
+- **Arbor Bank audit decisions** (user, 2026-10-07, after the run promoted;
+  root causes closed in code with tests, each named here so they do not
+  recur):
+  - **SG-V4 driver budget counts prose only** — verbatim leaves (`excerpt`,
+    `verbatim_quote`, `quote`, `source*`, `title`, `product`, `candidate`,
+    `url`) never count; `--sg-v4-budget N` is an owner decision recorded as
+    a non-blocking `SG_V4_BUDGET_RAISED` Gate_Log row. SG-V4 itself skips
+    producer metadata (`_V4_SKIP_KEYS`) on direct fields and whole subtrees.
+  - **Owner ceilings persist**: `--max-usd` is remembered
+    (`budget_usd_source: flag`); a resume without the flag never falls back
+    to the per-pillar estimate.
+  - **Peer figures are the cohort's, at cell grain where a cell is cited**:
+    `get_cohort_benchmarks(subcap_ids=[…])`; the workbook's category rows
+    are refreshed whenever a row is not cohort-sourced (a `table` row and a
+    cohort row are kept; a guess is never replaced by a null); the fit
+    engine fills gap-row peers from the same cohort at fit time (invariant 8).
+  - **Platform ranking**: `INSUFFICIENT_EVIDENCE` ranks after every READY
+    candidate; fusion never lifts it; an unevidenced prerequisite is not
+    pulled ahead. `l3_area` names resolve through `ccg_l3_platforms`
+    (`platform_name`, with or without vendor) to the `[L3-…]` code; an
+    unresolvable label is reported in `unmatched[].resolved_to`.
+  - **Evidence tiers**: the entity's own domain is never T1 (ledger refuses;
+    `engine.cli retier` re-tiers with the label/ERS cascade and a logged
+    reason). Package-local `e_id`s on FK columns resolve through
+    `evidence_package_ids` at promote.
+  - **Firmographics**: the engine's must-present set IS the connector's
+    (`engine/schemas/firmographics_must_present.json`, vendored and
+    test-asserted equal to `packages/shared/contracts_data.json`); the
+    sub-vertical set is reported to the producer, the generic set gates
+    PRELIM.
+  - **Enforcement sweeps run as code** (`scripts/enforcement_search.py`:
+    FDIC ED&O, CFPB, configured state order searches, with positive
+    controls); a zero without a passing control is `NOT_RUN`, never a
+    verified absence.
+  - **AG-01 verdict vocabulary is read in pass 1** (local precheck), so a
+    `WITHDRAWN`/`REJECT` verdict never costs a server round trip.
+  - **Driver hygiene**: a passed page with no recorded ship time ships
+    again (verdict-file mtime is the fallback); verdict files keep the full
+    reason list; the manifest carries `supplementary_sub_verticals`;
+    `Search_Log.Seq` is allocated past the highest value, never from the
+    row count.
+  - **The search-op ceiling is per conversation, and the run-level reading
+    is the worst conversation's window, named** (`ledger.worst_window`;
+    `stats()` without a category). orient, the watchdog and the hooks print
+    `search_ops_since_checkpoint` for that scope, never the lifetime count
+    against the ceiling (a promoted run read "6332 against 60").
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

@@ -641,13 +641,65 @@ ISSUE_STATUSES = ("Active", "Resolved", "Terminated", "Monitoring")
 FIRMOGRAPHICS_COLUMNS = ("Field", "Value", "Unit", "As at", "Evidence",
                          "Conf.", "State", "Reason", "Route")
 FIRMOGRAPHIC_STATES = ("STATED", "ABSENT", "QUARANTINED")
-#: The Client Profile §1.1 must-present set. `website` is load-bearing in the
-#: app and required on every sub-vertical; the rest are stated or carry a
-#: reason, never blank.
-FIRMOGRAPHIC_MUST_PRESENT = (
-    "website", "employees", "assets_or_aum_or_revenue", "cagr", "branches",
-    "headquarters", "founded", "primary_regulator", "charter", "ownership",
-)
+#: The Client Profile §1.1 must-present set — THE CONNECTOR'S, verbatim.
+#:
+#: Until 2026-10-07 the engine spelled its own set (`headquarters`,
+#: `founded`, `assets_or_aum_or_revenue`, `ownership`) and the connector's
+#: CG-18 read another (`HQ`, `founded_year`, `total_assets` | `AUM`, a
+#: revenue-class group, a sub-vertical set), so a workbook the engine called
+#: complete produced an O2 strip the server held (Arbor Bank: CG-18c on the
+#: CL set, CAGR held after a single-source rate). One spec, vendored from
+#: `packages/shared/contracts_data.json` and asserted equal by a test.
+_FIRMOGRAPHICS_SPEC_PATH = Path(__file__).parent / "schemas" / "firmographics_must_present.json"
+
+
+def firmographics_spec() -> dict:
+    with open(_FIRMOGRAPHICS_SPEC_PATH, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def norm_firmographic(name) -> str:
+    """The connector's own member normaliser (validation._norm_member):
+    `founded_year`, `Founded Year` and `founded-year` are one member."""
+    return re.sub(r"[^a-z0-9]+", "_", str(name or "").lower()).strip("_")
+
+
+#: The names the engine used to spell these members, accepted on a WORKBOOK
+#: row so a run opened before 2026-10-07 still reads complete. They are not
+#: page names: the producer writes the canonical name (group[0]) on O2, which
+#: is what CG-18 reads.
+LEGACY_FIRMOGRAPHIC_ALIASES = {
+    "HQ": ("headquarters",),
+    "AUM": ("assets_or_aum_or_revenue",),
+    "revenue": ("assets_or_aum_or_revenue",),
+}
+
+
+def firmographic_groups(sub_vertical: str | None = None,
+                        *, generic: bool = True, subvertical: bool = True) -> list[list[str]]:
+    """Every must-present requirement as an alias group, canonical name
+    first: the generic members, the any-of groups, and (when asked) the
+    run's primary sub-vertical set. A sub-vertical with an EMPTY set (Farm
+    Credit) contributes nothing: the page declares `sub_vertical_undefined`."""
+    spec = firmographics_spec()
+    groups: list[list[str]] = []
+    if generic:
+        for want in spec.get("must_present") or []:
+            groups.append(list(want) if isinstance(want, (list, tuple)) else [want])
+        for group in spec.get("must_present_any") or []:
+            groups.append(list(group))
+        for g in groups:
+            g.extend(a for a in LEGACY_FIRMOGRAPHIC_ALIASES.get(g[0], ()) if a not in g)
+    if subvertical and sub_vertical:
+        for want in (spec.get("must_present_by_subvertical") or {}).get(
+                str(sub_vertical).strip().upper()) or []:
+            groups.append(list(want) if isinstance(want, (list, tuple)) else [want])
+    return groups
+
+
+#: The generic canonical names, for messages and the template; the GROUPS
+#: are what `profile.missing_firmographics` judges.
+FIRMOGRAPHIC_MUST_PRESENT = tuple(g[0] for g in firmographic_groups(None, subvertical=False))
 FOCUS_AREAS_COLUMNS = ("ID", "Priority in the client's words", "Verbatim quote",
                        "Document", "Page", "Cells", "Evidence_IDs",
                        "Currency_Status", "Currency_Note")

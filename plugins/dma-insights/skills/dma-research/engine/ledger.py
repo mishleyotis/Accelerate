@@ -76,6 +76,78 @@ def _refuse_on_drift(wb: RunWorkbook) -> None:
               "pin the catalogue (DMA_CATALOGUE) or the engine version first.")
 
 
+def own_hosts(wb: RunWorkbook) -> set[str]:
+    """The entity's own web identities: the Firmographics website, bare."""
+    out = set()
+    for r in wb.rows("Firmographics"):
+        if str(r.get("Field") or "").strip().lower() == "website" \
+                and str(r.get("Value") or "").strip():
+            out.add(str(r.get("Value")).strip().lower().removeprefix("www."))
+    return out
+
+
+def host_of(url: str | None) -> str:
+    return str(url or "").split("//")[-1].split("/")[0].lower().removeprefix("www.")
+
+
+def is_own_host(wb: RunWorkbook, url: str | None) -> bool:
+    h = host_of(url)
+    return bool(h) and any(h == o or h.endswith("." + o) for o in own_hosts(wb))
+
+
+def retier_evidence(wb: RunWorkbook, e_id: str, tier: str, *, reason: str,
+                    run=None, actor: str | None = None) -> dict:
+    """Move one registered row to another tier, with the cascade the tier
+    carries: the claim label is re-derived (a FACT cannot rest on T3 or
+    weaker), ERS is recomputed for the whole register (corroboration is a
+    property of the register), and the change is logged where a reader of
+    the run looks — a Provenance row and a non-blocking Gate_Log row. The
+    cells' ceilings are recomputed by the next `assessment` pass, which
+    reads the register rather than a stored tier."""
+    from . import ers as _ers
+    _refuse_on_drift(wb)
+    eid = str(e_id or "").strip().upper()
+    if tier not in C.TIERS:
+        raise LedgerRefusal(f"tier {tier!r} is not in {C.TIERS}")
+    if len(str(reason or "").strip()) < 20:
+        raise LedgerRefusal("say why the tier changes (--reason, >=20 chars): "
+                            "a re-tier with no reason is the silent downgrade "
+                            "the refusal at registration exists to prevent")
+    row = next((r for r in wb.rows("Evidence_Detail")
+                if str(r.get("E_ID") or "").strip().upper() == eid), None)
+    if row is None:
+        raise LedgerRefusal(f"{eid} is not in this run's register")
+    was = str(row.get("Tier") or "")
+    if was == tier:
+        raise LedgerRefusal(f"{eid} is already {tier}")
+    if tier == "T1" and str(row.get("Origin") or "public") == "public" \
+            and is_own_host(wb, row.get("Source_URL")):
+        raise LedgerRefusal(f"{eid} is on the entity's own domain, which is never T1")
+    label = str(row.get("Claim_Type") or "")
+    new_label = label
+    if label == "FACT" and tier not in C.FACT_TIERS:
+        new_label = C.claim_label_for(tier)
+    with wb.transaction("retier_evidence"):
+        wb.update_row("Evidence_Detail", "E_ID", row["E_ID"],
+                      {"Tier": tier, "Claim_Type": new_label}, save=False)
+        wb.append("Provenance", {
+            "SubCap_ID": "", "Step": "retier", "Actor": actor or "ledger",
+            "At": _utcnow(),
+            "Detail": (f"{eid}: {was} -> {tier}"
+                       + (f"; claim label {label} -> {new_label}" if new_label != label else "")
+                       + f". {str(reason).strip()}")[:900]}, save=False)
+        wb.append("Gate_Log", {
+            "Timestamp": _utcnow(), "Gate": "RETIER", "Scope": eid,
+            "Verdict": "PASS", "Blocking": False,
+            "Detail": f"{was} -> {tier}: {str(reason).strip()}"[:900]})
+    _ers.recompute(wb, run)
+    wb.reload() if hasattr(wb, "reload") else None
+    now = next((r for r in wb.rows("Evidence_Detail")
+                if str(r.get("E_ID") or "").strip().upper() == eid), {})
+    return {"e_id": eid, "was": was, "tier": tier, "claim_type": new_label,
+            "claim_type_was": label, "ers": now.get("ERS")}
+
+
 def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None,
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str | None = None, origin: str = "public",
@@ -141,6 +213,22 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             "a public source with no URL cannot be cited; register it with "
             "origin='internal' and it will be labelled, not laundered")
+    # THE ENTITY'S OWN SITE IS NEVER T1. The methodology's ladder puts
+    # regulatory and audited filings at T1, the entity's official
+    # disclosures at T2 and its marketing at T5; a page on the entity's own
+    # domain is at best the second rung. Measured 2026-10-06 (Arbor Bank):
+    # six own-site pages filed T1 (E-004, E-074, E-224, E-225, E-233, E-234)
+    # carried FACT labels and lifted ceilings a marketing page cannot carry,
+    # and nothing could re-tier them (`engine.cli retier` now can). Refused
+    # at the write, the way every other provenance rule is.
+    if origin == "public" and tier == "T1" and is_own_host(wb, source_url):
+        raise LedgerRefusal(
+            f"{source_url} is on the entity's own domain, which is never T1: "
+            f"a regulator's or auditor's copy of a filing is T1; the entity's "
+            f"own annual report, investor page or press release is T2 "
+            f"(official disclosure); its product and about pages are T5 "
+            f"(marketing). File it at the tier the ladder gives it "
+            f"(references/evidence_methodology.md).")
     # A machine technographic scan is T1 (contract.SCAN_TIER). Measured
     # 28-09-2026 (QA audit F-J04-015): 5 technographic rows on one staged
     # heatmap sat at T3, capping the ceilings their cells could reach.
@@ -625,6 +713,25 @@ def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
                  str(r.get("Facet") or "").strip()) for r in since})
 
 
+def windows(wb: RunWorkbook) -> dict:
+    """Every conversation's search window: {scope: distinct searches since
+    that scope's last checkpoint} for PRELIM, RELAY and each category that
+    has a Search_Log row."""
+    scopes = {_search_scope(r) for r in wb.rows("Search_Log")}
+    return {s: _ops_since_checkpoint(wb, s) for s in sorted(scopes)}
+
+
+def worst_window(wb: RunWorkbook) -> tuple:
+    """(scope, since) for the conversation closest to its ceiling — the
+    run-level reading of a per-conversation rule. A run with no search has
+    no window: ("", 0)."""
+    w = windows(wb)
+    if not w:
+        return "", 0
+    scope = max(w, key=lambda k: (w[k], k))
+    return scope, w[scope]
+
+
 def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
                   query: str, tool: str, hits: int, kept: int,
                   outcome: str = "", prelim: bool = False,
@@ -754,7 +861,12 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
                 f"card and the relay brief list what has been asked "
                 f"(QA audit F-D05-033, 28-09-2026).")
         cells = new_cells
-    seq = len(wb.rows("Search_Log"))
+    # Seq is allocated past the HIGHEST recorded value, not from the row
+    # count: a row the strip or a repair removed left `len(rows)` below the
+    # last Seq, and the next searches reused 6250-6253 on Arbor Bank
+    # (2026-10-06) — four rows nobody can cite unambiguously.
+    seq = max((int(float(r.get("Seq") or 0)) for r in wb.rows("Search_Log")
+               if str(r.get("Seq") or "").strip()), default=0)
     stamp = _utcnow()
     for cell in (cells or [None]):
         seq += 1
@@ -1237,13 +1349,26 @@ def stats(wb: RunWorkbook, category: str | None = None) -> dict:
     # just no longer decides. The gate itself is unchanged in strength: over
     # the cap since the last checkpoint still stops, which is the half a
     # loosened ceiling would have silently lost (MEM-0338 / R27).
-    since = _ops_since_checkpoint(wb, category)
+    # THE WINDOW IS PER CONVERSATION (2026-09-30), SO THE DECISION IS TOO.
+    # Asked about one category, the window is that category's. Asked about
+    # the run (orient, the watchdog, the hooks — none of which IS a
+    # conversation), the decision is the WORST conversation's window, named,
+    # never the run-wide count from the global mark: that count kept
+    # reporting a promoted run as AT_BUDGET_CEILING ("6332 search-ops
+    # against a ceiling of 60", Arbor Bank, 2026-10-07) with every lane's
+    # own window at zero, and cli.py had patched the same defect for one
+    # command only.
+    if category:
+        scope, since = category, _ops_since_checkpoint(wb, category)
+    else:
+        scope, since = worst_window(wb)
     return {
         # `search_ops` is a LIFETIME count (spend worth seeing); the budget is
         # `search_ops_since_checkpoint` against the ceiling. A lane that read
         # the first as usage stopped at "55 of 60" with 1 used (2026-09-30).
         "search_ops": n,
         "search_ops_since_checkpoint": since,
+        "window_scope": scope,
         "window_remaining": max(0, SEARCH_OP_CEILING - since),
         "search_op_ceiling": SEARCH_OP_CEILING,
         "checkpoint_required": since >= SEARCH_OP_CEILING,

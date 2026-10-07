@@ -169,7 +169,20 @@ by writing a quote.
    (sending `0` instead claims you *established* it serves nothing, a different
    claim); `readiness` **multiplies**, so red prerequisites cannot reach the hot
    band and an unmapped phrase reads as RED; `l3_area` resolves which cells a
-   candidate addresses and is never a list you write.
+   candidate addresses and is never a list you write. **Write it as the catalogue's
+   own `platform_name`** (`ccg_l3_platforms`, read from `get_report_bundle`'s
+   `l3_platforms` — "Financial Services Cloud", "MuleSoft Anypoint Platform"), with or
+   without the vendor; the engine resolves the name to the `[L3-…]` code the cells
+   list. A label that is neither a catalogue platform name nor a bracketed code
+   matches no cell and the engine returns it in `unmatched[]` with
+   `resolved_to` and the reason — Arbor Bank (2026-10-06) ranked five of five
+   candidates `TOO_NARROW` on product nicknames ("FSC", "Mule") before anyone read
+   that list. `alignment` is the client's **stated** objective quoted verbatim
+   (`alignment_quote`), or omitted: a platform family the client never named —
+   integration, on a client whose documents name onboarding and lending — gets no
+   alignment, and an `INSUFFICIENT_EVIDENCE` candidate ranks **after** every READY
+   one whatever its arithmetic (owner, 2026-10-07: "I keep on seeing MuleSoft ranking
+   first every run").
 6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/2-platform-story.md`
    — the shared platform reasoning: the fit score is not yours, the L3 unit, the
    stack register changing the answer, discarding with reasons, the effort
@@ -273,8 +286,13 @@ Per tile:
   row: a claim that cannot name the L4 feature that addresses the cell is not a
   fit claim. **Where a figure does not exist, the field and its basis agree on
   the same object** — the reference run writes `peer_score: null` **and**
-  `peer_basis: "cannot_estimate"` **and** a `peer_note` explaining that the
-  locked peer set is benchmarked at category grain, all on one row.
+  `peer_basis: "cannot_estimate"` **and** a `peer_note` explaining why, all on one
+  row. **The peer figure is the cell's own cohort mean:** `get_cohort_benchmarks(
+  sub_vertical, subcap_ids=[…every gap row's cell…])` returns `cells[subcap_id]`
+  with `n`, `mean` and the reason below the floor of three; `peer_basis:
+  "recomputed"` with the cohort named in `peer_note`. The engine fills the same
+  figure on `get_platform_fit`'s gap rows (`peer_median`), so the two agree by
+  construction; a category mean is not a cell's peer and is never written as one.
 - **`estate_reach`** — derived, never asserted, and the derivation ships with the
   numbers: `{derivation, by_category[], cells_not_yet_reached,
   cells_not_yet_reached_examples[], products_holding_this_layer[],

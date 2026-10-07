@@ -2429,9 +2429,10 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "empty_state where the contract offers it) — never a `fields` key, "
                 "which the contract does not declare (CG-04 refused it on Susser "
                 "Bank's value_chain); the app joins the arrangement server-side",
-                "a REQUIRED list the connector writes (safeguard_gates.gates) is "
-                "sent empty WITH an empty_state saying the platform writes it at "
-                "submission — an empty required list with no empty_state is CG-19",
+                "a REQUIRED list the APP fills at serve time (safeguard_gates.gates, "
+                "joined from gate_results by computed.safeguard_gates — no writer "
+                "stores it) is sent empty WITH an empty_state saying the platform "
+                "writes it — an empty required list with no empty_state is CG-19",
                 "an evidence_age row with no establishable date carries "
                 "age_months null, band 'undated', status 'UNDATED' — never a bare "
                 "null date (CG-10)",

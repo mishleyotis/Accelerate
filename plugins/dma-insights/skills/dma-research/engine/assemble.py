@@ -192,6 +192,16 @@ def _manifest_num(v):
         return None
 
 
+
+def _manifest_codes(value) -> list:
+    """The comma-joined sub-vertical list the workbook metadata stores, as
+    the list the manifest schema and the worker read. Empty stays empty."""
+    if isinstance(value, (list, tuple)):
+        items = value
+    else:
+        items = str(value or "").split(",")
+    return [s.strip() for s in items if str(s or "").strip()]
+
 def _manifest_str(v):
     return None if v is None or str(v).strip() == "" else str(v)
 
@@ -331,7 +341,16 @@ def manifest_doc(wb: RunWorkbook, *, status: str = "COMPLETE",
         "run_id": str(md.get("run_id") or ""),
         "institution": {"name": str(md.get("entity_name") or ""),
                         "entity_id": _manifest_str(md.get("entity_id")),
-                        "sub_vertical": _manifest_str(md.get("sub_vertical"))},
+                        "sub_vertical": _manifest_str(md.get("sub_vertical")),
+                        # 0061: the owner's multi-LOB binding. The worker
+                        # reads `institution.supplementary_sub_verticals`
+                        # into `entities.supplementary_sub_verticals`, and
+                        # every variant-cell gate (`subverticals.serves`,
+                        # the platform fit's vertical guard) reads that
+                        # column — a manifest that dropped the list made a
+                        # bound LOB's cells out-of-vertical at serve time.
+                        "supplementary_sub_verticals":
+                            _manifest_codes(md.get("supplementary_sub_verticals"))},
         "evidence_mode": _manifest_str(md.get("evidence_mode")),
         "scope_mode": _manifest_str(md.get("scope_mode")),
         "reference_date": _manifest_str(md.get("reference_date")),

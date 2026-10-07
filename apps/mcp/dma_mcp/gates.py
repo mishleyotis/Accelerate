@@ -1114,7 +1114,12 @@ GATES = {
               "block"),
     "AG-01": ("Ranked or causal claims carry r_layer", None,
               "Any ranked/causal claim records hypothesis, counter, domain "
-              "test, probes run and a verdict.",
+              "test, probes run and a verdict. The verdict is one of SHIP, "
+              "SUPPORTED, HOLDS, CONFIRMED, PASS, ACCEPT, ACCEPTED, "
+              "SHIP_LOW_CONF (published) or REJECT, REJECTED, DROP, DROPPED, "
+              "REFUTED, FAIL, FAILED, NOT_SUPPORTED, UNSUPPORTED, WITHDRAWN "
+              "(a rejected item is not published); the vocabulary is read in "
+              "pass 1, so the local precheck sees it.",
               "A verdict not written down is a step that can be skipped.",
               "block"),
     "AG-02": ("Counts are computed", None,

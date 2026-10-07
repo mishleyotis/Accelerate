@@ -116,6 +116,102 @@ def _areas_of(raw) -> list:
     return [_norm_area(x) for x in s.strip("{}").split(",") if x.strip()]
 
 
+_PAREN = re.compile(r"\s*\([^)]*\)")
+
+
+def _name_key(v) -> str:
+    """A platform NAME as a lookup key: lowercased, parentheticals and
+    the `(count: N)` suffix gone, whitespace collapsed."""
+    s = _AREA_COUNT.sub(" ", str(v or ""))
+    s = _PAREN.sub(" ", s)
+    return " ".join(s.lower().replace("&", "and").split())
+
+
+def _l3_names(cur, run_id) -> dict:
+    """name-key -> L3 code from `ccg_l3_platforms` for the run's catalogue.
+
+    A producer writes `l3_area` as the sayable name the page renders
+    ("Salesforce Financial Services Cloud", "MuleSoft"), and the catalogue
+    row carries the CODE in `l3_platform_areas`. Until 2026-10-07 the two
+    met only when the producer also wrote the bracketed code, so a card
+    naming the platform as a client would say it matched no cell and ranked
+    TOO_NARROW (Arbor Bank, five of five candidates). The name is resolved
+    through the catalogue's own `platform_name` / `vendor + platform_name`,
+    never by fuzzy guess: an unknown name stays unmatched and is reported."""
+    try:
+        cur.execute("""
+            SELECT p.l3_id, p.vendor, p.platform_name
+              FROM ccg_l3_platforms p
+             WHERE p.version = COALESCE(
+                      (SELECT r.ccg_catalog_version FROM runs r WHERE r.id = %s),
+                      (SELECT version FROM ccg_versions WHERE is_current))""",
+                    (run_id,))
+        rows = cur.fetchall() or []
+    except Exception:                              # noqa: BLE001
+        return {}
+    out: dict = {}
+    for row in rows:
+        if not isinstance(row, (list, tuple)) or len(row) < 3:
+            continue
+        code, vendor, name = (str(row[0] or "").strip().upper(),
+                              str(row[1] or "").strip(), str(row[2] or "").strip())
+        if not code or not name:
+            continue
+        keys = {_name_key(name)}
+        if vendor:
+            keys.add(_name_key(f"{vendor} {name}"))
+            if _name_key(name).startswith(_name_key(vendor) + " "):
+                keys.add(_name_key(name)[len(_name_key(vendor)) + 1:])
+        for k in keys:
+            if k and k not in out:
+                out[k] = code
+    return out
+
+
+def _resolve_area(raw, names: dict) -> str:
+    """The L3 code a card's `l3_area` names — the bracketed code when the
+    producer wrote one, else the catalogue platform the name resolves to,
+    else the normalised label (which matches a cell only if the catalogue
+    lists that label verbatim)."""
+    area = _norm_area(raw)
+    if not area or area.startswith("L3-"):
+        return area
+    return names.get(_name_key(raw), area)
+
+
+def _cell_peers(conn, cur, run_id, cells: dict) -> None:
+    """Fill `peer` on every cell that has none from the sub-vertical cohort
+    at CELL grain (cohort.cell_benchmarks) — computed at fit time, never
+    stored (invariant 8). `subcap_scores.peer_median` is written by nobody
+    (the workbook has no per-cell peer column), so until 2026-10-07 every
+    platform gap row served peer null while the overview served a category
+    mean the gap did not use."""
+    want = sorted(sid for sid, c in cells.items() if c.get("peer") is None)
+    if not want:
+        return
+    try:
+        cur.execute("""SELECT e.sub_vertical, e.display_id, e.legal_name
+                         FROM runs r JOIN entities e ON e.id = r.entity_id
+                        WHERE r.id = %s""", (run_id,))
+        row = cur.fetchone()
+    except Exception:                              # noqa: BLE001
+        row = None
+    if not row or not row[0]:
+        return
+    sv = str(row[0])
+    display_id = str(row[1] or "") if len(row) > 1 else ""
+    name = str(row[2] or "") if len(row) > 2 else ""
+    from . import cohort
+    try:
+        got = cohort.cell_benchmarks(conn, sv, want, exclude_display_id=display_id,
+                                     exclude_entity_name=name)
+    except Exception:                              # noqa: BLE001
+        return
+    for sid, v in ((got or {}).get("cells") or {}).items():
+        if sid in cells and isinstance(v, dict) and v.get("mean") is not None:
+            cells[sid]["peer"] = float(v["mean"])
+
+
 def _entity_subvertical(cur, run_id):
     """(raw primary sub_vertical, raw supplementary list) — 0061."""
     cur.execute("""SELECT e.sub_vertical, e.supplementary_sub_verticals
@@ -298,6 +394,8 @@ def platform_fit(conn, run_id, candidates) -> dict:
         return {"error": "unknown_run", "platforms": []}
 
     cells = _cells_for_run(cur, run_id)
+    _cell_peers(conn, cur, run_id, cells)
+    l3_names = _l3_names(cur, run_id)
     strength = _evidence_strength(cur, run_id)
     sev = _severities(cur, run_id)
     absent_areas, held_areas = _register(cur, run_id)
@@ -336,7 +434,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
         if not isinstance(raw, dict):
             continue
         plat_name = str(raw.get("platform") or "").strip()
-        area = _norm_area(raw.get("l3_area"))
+        area = _resolve_area(raw.get("l3_area"), l3_names)
         sids = by_area.get(area, [])
         if not raw.get("advisory"):
             sids = [s for s in sids
@@ -344,7 +442,12 @@ def platform_fit(conn, run_id, candidates) -> dict:
         if not sids:
             unmatched.append({"platform": raw.get("platform"),
                               "l3_area": raw.get("l3_area"),
-                              "reason": "no cell this run serves lists this L3 area"})
+                              "resolved_to": area or None,
+                              "reason": ("no cell this run serves lists this L3 area"
+                                         if area.startswith("L3-") else
+                                         "the label names no catalogue platform "
+                                         "(ccg_l3_platforms.platform_name) and no "
+                                         "bracketed [L3-…] code; no cell can match it")})
         rows = [_cell(sid, area in held_areas) for sid in sorted(sids)]
         # Greenfield from either tier: the raw register names an ABSENT area,
         # or the promoted register carries an ABSENT row linked to this
