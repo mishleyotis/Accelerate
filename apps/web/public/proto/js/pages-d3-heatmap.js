@@ -427,11 +427,18 @@ function ClientHeatmap({
     pushToast
   } = useApp();
   // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
-  // opens the page, then focus areas, then the value chain. The customer
-  // audience still cannot reach the standard grid (it carries every capped and
-  // thin cell), so it opens on focus areas — the ternary that used to return
-  // "focus" on both branches now actually branches.
-  const [mode, setMode] = useState(route.params.hm || (audience === "customer" ? "focus" : "standard")); // standard | focus | value_chain
+  // opens the page, then focus areas, then the value chain — for EVERY
+  // audience. The customer audience used to be locked out of the standard
+  // grid ("it carries every capped and thin cell"), which left a customer
+  // with the focus areas and the value chain only — on most clients a
+  // handful of cards and an empty arrangement. The PRD lists the heatmap
+  // dashboard as "internal + customer" across all five surfaces (H4 grid,
+  // H2 cell evidence, H6 evidence store), and the TRD's audience table SHOWS
+  // thin-evidence markers to the customer. What a customer may not see is
+  // removed by the server (redaction.py); the grid itself is theirs.
+  // Build owner, 2026-10-07: "It is the customer view that lacks heatmap
+  // details for most clients."
+  const [mode, setMode] = useState(route.params.hm || "standard"); // standard | focus | value_chain
   const [zoom, setZoom] = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus] = useState(route.params.cat || null);
@@ -440,14 +447,11 @@ function ClientHeatmap({
   const [focusArea, setFocusArea] = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
 
-  // In customer mode, lock to focus / value_chain views only. `mode` belongs in
-  // the deps: with `[audience]` alone the effect had already run by the time
-  // "Standard" was clicked, so the internal grid rendered for the customer
-  // audience. The button is also disabled below — the lock should not depend on
-  // an effect winning a race.
-  useEffect(() => {
-    if (audience === "customer" && mode === "standard") setMode("focus");
-  }, [audience, mode]);
+  // The Issues overlay is the issue register and its caps: Context-page
+  // material (customer-withheld) and O1b ceilings (customer-withheld). It is
+  // never offered to the customer audience, and a toggle left on from an
+  // internal read does not carry across the audience switch.
+  const issuesOn = showIssues && audience !== "customer";
 
   // `?subcap=` is how every other page opens a cell here: `openSubcap` in
   // app-root navigates to this tab with the id as a param. Nothing consumed
@@ -537,15 +541,7 @@ function ClientHeatmap({
     className: "toggle-row"
   }, /*#__PURE__*/React.createElement("button", {
     className: mode === "standard" ? "on" : "",
-    disabled: audience === "customer",
-    title: audience === "customer" ? "the full internal grid is not part of the customer view" : null,
-    style: audience === "customer" ? {
-      opacity: .45,
-      cursor: "not-allowed"
-    } : null,
-    onClick: () => {
-      if (audience !== "customer") setMode("standard");
-    }
+    onClick: () => setMode("standard")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "heatmap",
     size: 11
@@ -599,7 +595,7 @@ function ClientHeatmap({
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${showPeers ? "on" : ""}`,
     onClick: () => setShowPeers(p => !p)
-  }), "Peers"), /*#__PURE__*/React.createElement("label", {
+  }), "Peers"), audience !== "customer" ? /*#__PURE__*/React.createElement("label", {
     className: "row",
     style: {
       fontSize: 11.5,
@@ -608,7 +604,7 @@ function ClientHeatmap({
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${showIssues ? "on" : ""}`,
     onClick: () => setShowIssues(p => !p)
-  }), "Issues"), /*#__PURE__*/React.createElement(Legend, null)), (pillarFocus || catFocus) && mode === "standard" ? /*#__PURE__*/React.createElement("div", {
+  }), "Issues") : null, /*#__PURE__*/React.createElement(Legend, null)), (pillarFocus || catFocus) && mode === "standard" ? /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       marginTop: 10,
@@ -641,13 +637,13 @@ function ClientHeatmap({
     openEvidence: openEvidence,
     openInsight: openInsight,
     audience: audience,
-    showIssues: showIssues
+    showIssues: issuesOn
   }) : mode === "value_chain" ? /*#__PURE__*/React.createElement(ValueChainView, {
     entity: entity,
     subcapsForFocusArea: subcapsForFocusArea,
     openSubcap: setSynthSubcap,
     openInsight: openInsight
-  }) : /*#__PURE__*/React.createElement(React.Fragment, null, showIssues ? /*#__PURE__*/React.createElement(IssueRegisterBanner, {
+  }) : /*#__PURE__*/React.createElement(React.Fragment, null, issuesOn ? /*#__PURE__*/React.createElement(IssueRegisterBanner, {
     entity: entity,
     onSubcap: s => setSynthSubcap({
       kind: "subcap",
@@ -667,7 +663,7 @@ function ClientHeatmap({
     pillars: pillars,
     pillarFocus: pillarFocus,
     showPeers: showPeers,
-    showIssues: showIssues,
+    showIssues: issuesOn,
     audience: audience,
     setCatFocus: c => {
       setCatFocus(c);
@@ -689,7 +685,7 @@ function ClientHeatmap({
     cats: cats,
     catFocus: catFocus,
     pillarFocus: pillarFocus,
-    showIssues: showIssues,
+    showIssues: issuesOn,
     audience: audience,
     drillCategory: c => {
       setCatFocus(c);
@@ -701,7 +697,7 @@ function ClientHeatmap({
     catFocus: catFocus,
     pillarFocus: pillarFocus,
     showPeers: showPeers,
-    showIssues: showIssues,
+    showIssues: issuesOn,
     audience: audience,
     setCatFocus: setCatFocus,
     onSynth: s => setSynthSubcap({
@@ -714,7 +710,7 @@ function ClientHeatmap({
     onClose: () => setSynthSubcap(null),
     openEvidence: openEvidence,
     openInsight: openInsight,
-    showIssues: showIssues,
+    showIssues: issuesOn,
     audience: audience
   }) : null);
 }
@@ -2831,8 +2827,10 @@ function SynthesisDrawer({
   const cit = subcap ? cellCitationsOf(subcap.id) : categoryCitationsOf(catCells);
   const linkedEv = cit.items;
 
-  // Issue caps (subcap only)
-  const caps = subcap ? DMA.issueCapsFor(subcap.id) : [];
+  // Issue caps (subcap only). The issue register is Context-page material and
+  // its caps are O1b ceilings — both withheld from the customer audience — so
+  // the customer drawer never lists them, whatever the client cache holds.
+  const caps = subcap && audience !== "customer" ? DMA.issueCapsFor(subcap.id) : [];
 
   // Peer comparison (for a category, the promoted category figures)
   const score = subcap ? numOf(subcap.score) : catRow.score != null ? catRow.score : catRow.cellMean;
