@@ -111,11 +111,26 @@ function clientLinkUrl(entityId, tab, runId) {
   const t = clientTabAllowed(tab) ? tab : "overview";
   return `${window.location.origin}${window.location.pathname}${buildHash(`/clients/${entityId}/${t}`, params)}`;
 }
+
+/* Where a client link may go: its own client, a client tab, nothing else.
+   Anything else — another client, the directory, Platform, a sub-route under
+   a withdrawn tab, the login page — is that client's overview. Read by
+   navigate() and by the router, so neither a button nor a typed URL can
+   leave the client dashboard. */
+function clientLinkPath(path) {
+  const id = clientLinkEntity();
+  const m = String(path || "").match(/^\/clients\/([^/]+)(?:\/([^/?]+))?/);
+  const tab = m && m[2] ? m[2] : "overview";
+  return m && m[1] === id && clientTabAllowed(tab) ? `/clients/${id}/${tab}` : `/clients/${id}/overview`;
+}
 function navigate(path, params) {
   const p = {
     ...(params || {})
   };
-  if (CLIENT_LINK) p.view = "client";
+  if (CLIENT_LINK) {
+    p.view = "client";
+    path = clientLinkPath(path);
+  }
   window.location.hash = buildHash(path, p).slice(1);
 }
 function useRoute() {
@@ -2395,6 +2410,7 @@ Object.assign(window, {
   clientLinkEntity,
   clientTabAllowed,
   clientLinkUrl,
+  clientLinkPath,
   CLIENT_TABS,
   apiBase,
   fmtDate,

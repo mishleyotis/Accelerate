@@ -672,7 +672,13 @@ function WhyNowStrip({
   openSubcap
 }) {
   const [open, setOpen] = useState(null); // no drilldown until a card is chosen
-  const signals = DMA.whyNowFor(entity.id) || [];
+  /* A signal whose trigger did not reach this audience has no face. The
+     server withholds `trigger` from the client read when it names a person
+     from a contact source (Susser Bank WN-2, Cross Insurance WN-2 on
+     2026-10-07), and the card rendered as an empty box with only its kind
+     chip. The trigger IS the signal: without it there is nothing to show, so
+     the card is not drawn and the count says how many are. */
+  const signals = (DMA.whyNowFor(entity.id) || []).filter(s => s && s.label);
   const isCust = audience === "customer";
   const STR = {
     STRONG: "b-teal",
@@ -840,14 +846,14 @@ function WhyNowStrip({
     style: {
       padding: "0 14px 14px"
     }
-  }, (isCust ? sel.impact : sel.detail) ? /*#__PURE__*/React.createElement("div", {
+  }, sel.detail ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12.5,
       color: "var(--z-body)",
       lineHeight: 1.6,
       marginBottom: 10
     }
-  }, isCust ? sel.impact : sel.detail) : null, !isCust && sel.metric ? /*#__PURE__*/React.createElement("div", {
+  }, sel.detail) : null, !isCust && sel.metric ? /*#__PURE__*/React.createElement("div", {
     className: "f-mono",
     style: {
       fontSize: 11.5,

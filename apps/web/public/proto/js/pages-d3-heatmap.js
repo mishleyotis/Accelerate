@@ -427,27 +427,23 @@ function ClientHeatmap({
     pushToast
   } = useApp();
   // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
-  // opens the page, then focus areas, then the value chain. The customer
-  // audience still cannot reach the standard grid (it carries every capped and
-  // thin cell), so it opens on focus areas — the ternary that used to return
-  // "focus" on both branches now actually branches.
-  const [mode, setMode] = useState(route.params.hm || (audience === "customer" ? "focus" : "standard")); // standard | focus | value_chain
+  // opens the page, then focus areas, then the value chain — for every
+  // audience. The client view used to be locked out of the standard grid and
+  // opened on focus areas; the owner reversed that on 2026-10-07 ("the
+  // heatmaps should never be hidden"). The grid is the subcaps read the server
+  // already redacts for the customer audience; what stays internal is the
+  // Issues overlay, which reads the Context register (not a client page).
+  const [mode, setMode] = useState(route.params.hm || "standard"); // standard | focus | value_chain
   const [zoom, setZoom] = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus] = useState(route.params.cat || null);
   const [showPeers, setShowPeers] = useState(true);
-  const [showIssues, setShowIssues] = useState(false);
+  const [issuesOn, setShowIssues] = useState(false);
+  // Off for the client audience whatever the toggle last said, so switching
+  // to the client view with the overlay on does not carry it across.
+  const showIssues = issuesOn && audience !== "customer";
   const [focusArea, setFocusArea] = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
-
-  // In customer mode, lock to focus / value_chain views only. `mode` belongs in
-  // the deps: with `[audience]` alone the effect had already run by the time
-  // "Standard" was clicked, so the internal grid rendered for the customer
-  // audience. The button is also disabled below — the lock should not depend on
-  // an effect winning a race.
-  useEffect(() => {
-    if (audience === "customer" && mode === "standard") setMode("focus");
-  }, [audience, mode]);
 
   // `?subcap=` is how every other page opens a cell here: `openSubcap` in
   // app-root navigates to this tab with the id as a param. Nothing consumed
@@ -537,15 +533,7 @@ function ClientHeatmap({
     className: "toggle-row"
   }, /*#__PURE__*/React.createElement("button", {
     className: mode === "standard" ? "on" : "",
-    disabled: audience === "customer",
-    title: audience === "customer" ? "the full internal grid is not part of the customer view" : null,
-    style: audience === "customer" ? {
-      opacity: .45,
-      cursor: "not-allowed"
-    } : null,
-    onClick: () => {
-      if (audience !== "customer") setMode("standard");
-    }
+    onClick: () => setMode("standard")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "heatmap",
     size: 11
@@ -599,7 +587,7 @@ function ClientHeatmap({
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${showPeers ? "on" : ""}`,
     onClick: () => setShowPeers(p => !p)
-  }), "Peers"), /*#__PURE__*/React.createElement("label", {
+  }), "Peers"), audience === "customer" ? null : /*#__PURE__*/React.createElement("label", {
     className: "row",
     style: {
       fontSize: 11.5,

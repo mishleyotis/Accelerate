@@ -496,7 +496,13 @@ function ScoreRing({ score, size = 110 }) {
    Customer view keeps positive framing and strips internal rationale. */
 function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
   const [open, setOpen] = useState(null); // no drilldown until a card is chosen
-  const signals = DMA.whyNowFor(entity.id) || [];
+  /* A signal whose trigger did not reach this audience has no face. The
+     server withholds `trigger` from the client read when it names a person
+     from a contact source (Susser Bank WN-2, Cross Insurance WN-2 on
+     2026-10-07), and the card rendered as an empty box with only its kind
+     chip. The trigger IS the signal: without it there is nothing to show, so
+     the card is not drawn and the count says how many are. */
+  const signals = (DMA.whyNowFor(entity.id) || []).filter(s => s && s.label);
   const isCust = audience === "customer";
   const STR = { STRONG: "b-teal", LEADING: "b-purple", SUPPORTING: "b-muted" };
   const CLAIM = { FACT: "b-teal", INFERENCE: "b-purple", HYPOTHESIS: "b-org" };
@@ -571,8 +577,12 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
             <Icon name="chevron-u" size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
           </button>
           <div style={{ padding: "0 14px 14px" }}>
-            {(isCust ? sel.impact : sel.detail) ? (
-              <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>{isCust ? sel.impact : sel.detail}</div>
+            {/* The trigger in full, for every audience: the server has already
+                decided what the client read carries. The client branch used to
+                print `impact`, a field no payload serves, so every drilldown
+                opened onto nothing. */}
+            {sel.detail ? (
+              <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>{sel.detail}</div>
             ) : null}
             {!isCust && sel.metric ? <div className="f-mono" style={{ fontSize: 11.5, color: "var(--z-dark)", background: "#fff", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "7px 10px", marginBottom: 10, display: "inline-block" }}>{sel.metric}</div> : null}
             {/* timeline event → context */}
