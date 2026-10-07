@@ -478,6 +478,24 @@ def main(argv=None) -> int:
             for i, p in enumerate(plan(payload, page), 1):
                 print(f"  part {i:2d} {p['kind']:6s} {p['path'] or '(root)':28s}"
                       f" {size(p['body']):,}b")
+            # "assemble and precheck, submit nothing" (the flag's own help):
+            # until 2026-10-07 the dry run stopped before the precheck, so a
+            # repair agent told to verify with it saw a clean run on a page
+            # the connector's pass-1 gates refuse (First Tech, CG-15 x40).
+            if not a.no_precheck:
+                pre = local_precheck(page, payload, repo=a.repo)
+                if pre["status"] == "fail":
+                    print(f"{page}: DRY RUN — local precheck FAIL, "
+                          f"{len(pre['reasons'])} blocking reason(s): "
+                          + ", ".join(f"{g} x{n}" for g, n in sorted(pre["by_gate"].items())))
+                    for r in pre["reasons"][:40]:
+                        print("   ", r.get("gate_id"), r.get("path"), "|",
+                              str(r.get("message"))[:160])
+                    failed.append(page)
+                elif pre["status"] == "not_run":
+                    print(f"{page}: DRY RUN — local precheck NOT RUN — {pre['why']}")
+                else:
+                    print(f"{page}: DRY RUN — local precheck clean ({pre['gates_from']})")
             continue
         if not a.no_precheck:
             pre = local_precheck(page, payload, repo=a.repo)

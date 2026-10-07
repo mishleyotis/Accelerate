@@ -3425,7 +3425,10 @@ def _build_opts(a) -> Options:
                                                  else "workflow"),
                    pages_mode=getattr(a, "pages_mode", None) or ("lanes" if a.dispatcher == "stub"
                                                  else "workflow"),
-                   reset_guard=bool(getattr(a, "reset_guard", False)))
+                   reset_guard=bool(getattr(a, "reset_guard", False)),
+                   sg_v4_budget=int(getattr(a, "sg_v4_budget", None)
+                                    if getattr(a, "sg_v4_budget", None) is not None
+                                    else Options.sg_v4_budget))
 
 
 def _research_mode(a) -> str:
@@ -3467,6 +3470,12 @@ def main(argv=None) -> int:
                         "workflow per report — a writer and a reviewer per "
                         "section, upstream blockers routed out of the loop; "
                         "'lanes' keeps the whole-report round loop")
+    r.add_argument("--sg-v4-budget", type=int, default=None,
+                   help="SG-V4 grounding misses a page may carry and still be "
+                        "accepted by the driver (default 8). SG-V4 discloses and "
+                        "promotes (invariant 12); this is the driver's own revision "
+                        "policy, raised by a person for a page whose misses are "
+                        "ungroundable by construction (stated absences)")
     r.add_argument("--reset-guard", action="store_true",
                    help="clear the workflow-handoff guard first: a stage the "
                         "guard refused (same work handed with nothing moving, or "
