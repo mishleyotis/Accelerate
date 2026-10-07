@@ -9,6 +9,7 @@
 //
 // The deploy-time lists stay as a floor and a fallback, never a ceiling:
 //   ADMIN_EMAILS  always an active Admin (nobody can remove the last way in)
+//   no users row  the deploy-time grant (ANALYST_EMAILS, else AE)
 //   API unreachable or unconfigured → the deploy-time grant (lib/identity),
 //   so an outage of svc_api degrades to the old behaviour instead of locking
 //   everyone out of a page that would show nothing anyway.
@@ -33,6 +34,11 @@ export async function resolveAccess(email, assertion, { fetchImpl = fetch } = {}
     const b = await r.json();
     if (String(b.email || "").toLowerCase() !== e) {
       return { role: grantedRole(e), active: true, source: "deploy" };
+    }
+    // No row yet: the deploy-time grant still applies, so nobody granted by
+    // ANALYST_EMAILS before the users table took over loses access.
+    if (b.source === "default" || b.known === false) {
+      return { role: grantedRole(e), active: true, source: "default" };
     }
     const role = ["AE", "ANALYST", "ADMIN"].includes(b.role) ? b.role : "AE";
     return { role, active: b.is_active !== false, source: b.source || "users" };

@@ -423,7 +423,7 @@ function AdminUsersCard() {
   const users = LIVE ? (() => {
     const rows = live.users.map(u => ({ ...u, known: true }));
     const have = new Set(rows.map(u => u.email));
-    Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: "AE", is_active: true, signed_in: true, known: false }); });
+    Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE", is_active: true, signed_in: true, known: false }); });
     return rows;
   })() : mock;
 

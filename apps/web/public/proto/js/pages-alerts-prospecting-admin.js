@@ -944,7 +944,7 @@ function AdminUsersCard() {
       if (!have.has(e)) rows.push({
         email: e,
         display_name: nameOf(e),
-        role: "AE",
+        role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE",
         is_active: true,
         signed_in: true,
         known: false

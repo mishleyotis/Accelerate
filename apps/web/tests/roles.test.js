@@ -40,6 +40,12 @@ test("the users table decides the role and the active flag", withEnv(async () =>
   assert.equal((await R.resolveAccess("sam@zennify.com", "jwt", { fetchImpl })).active, false);
 }));
 
+test("no users row keeps the deploy-time grant", withEnv(async () => {
+  const { fetchImpl } = api({ email: "ana@zennify.com", role: "AE", is_active: true, source: "default", known: false });
+  assert.deepEqual(await R.resolveAccess("ana@zennify.com", "jwt", { fetchImpl }),
+                   { role: "ANALYST", active: true, source: "default" });
+}));
+
 test("an answer about somebody else, or an outage, falls back to the deploy grant", withEnv(async () => {
   let { fetchImpl } = api({ email: "other@zennify.com", role: "ADMIN", is_active: true });
   assert.deepEqual(await R.resolveAccess("sam@zennify.com", "jwt", { fetchImpl }),

@@ -398,36 +398,63 @@ if [ -f apps/web/Dockerfile ]; then
   # query at all.
   SINK_WRITER="$(gcloud logging sinks describe "$USAGE_SINK" --project="$PROJECT_ID" \
                   --format='value(writerIdentity)' 2>/dev/null || true)"
-  # Dataset-scoped access goes through the dataset's own access list (bq show
-  # → add the entry → bq update --source): every bq version supports it, where
-  # dataset IAM bindings through add-iam-policy-binding do not. READER is
-  # bigquery.dataViewer on the dataset, WRITER is bigquery.dataEditor.
+  # Dataset-scoped access, two routes, then a read-back. The 2026-10-07 16:10
+  # release showed `bq add-iam-policy-binding` on a dataset failing for the
+  # deployer, so:
+  #   1. the dataset's own access list (bq show → add the entry → bq update
+  #      --source with the whole dataset JSON — the documented route, which
+  #      the deployer may take as the dataset's creator, hence its OWNER);
+  #   2. if that is refused, a project binding CONDITIONED to this dataset
+  #      (resource.name prefix), which needs only projectIamAdmin — the role
+  #      the deployer just proved it holds by self-granting above.
+  # READER is bigquery.dataViewer, WRITER is bigquery.dataEditor.
+  USAGE_DS_RES="projects/${PROJECT_ID}/datasets/${USAGE_DATASET}"
+  usage_acl_has() {  # $1 READER|WRITER  $2 email → 0 when the access list covers it
+    bq --project_id="$PROJECT_ID" show --format=prettyjson "${PROJECT_ID}:${USAGE_DATASET}" 2>/dev/null \
+      | python3 -c '
+import json, sys
+role, email = sys.argv[1], sys.argv[2].lower()
+enough = {"READER": {"READER", "WRITER", "OWNER"}, "WRITER": {"WRITER", "OWNER"}}[role]
+access = json.load(sys.stdin).get("access", [])
+sys.exit(0 if any(a.get("userByEmail", "").lower() == email and a.get("role") in enough for a in access) else 1)
+' "$1" "$2"
+  }
+  usage_cond_has() {  # $1 role  $2 member → 0 when a project binding grants it
+    gcloud projects get-iam-policy "$PROJECT_ID" --flatten='bindings[].members' \
+      --filter="bindings.role=${1} AND bindings.members=${2}" \
+      --format='value(bindings.role)' 2>/dev/null | grep -q .
+  }
   usage_ds_access() {  # $1 READER|WRITER  $2 service-account email
-    local tmp rc
+    local role="roles/bigquery.dataViewer" member="serviceAccount:${2}" tmp
+    [ "$1" = WRITER ] && role="roles/bigquery.dataEditor"
+    usage_acl_has "$1" "$2" && return 0
+    usage_cond_has "$role" "$member" && return 0
+    say "  usage: granting ${2} ${role} on ${USAGE_DATASET}"
     tmp="$(mktemp)"
-    bq --project_id="$PROJECT_ID" show --format=prettyjson \
-      "${PROJECT_ID}:${USAGE_DATASET}" > "$tmp" 2>/dev/null || { rm -f "$tmp"; return 1; }
-    python3 - "$tmp" "$1" "$2" <<'PY' && rc=0 || rc=$?
+    if bq --project_id="$PROJECT_ID" show --format=prettyjson \
+         "${PROJECT_ID}:${USAGE_DATASET}" > "$tmp" 2>/dev/null \
+       && python3 - "$tmp" "$1" "$2" <<'PY' \
+       && usage_try bq --project_id="$PROJECT_ID" update --source "$tmp" "${PROJECT_ID}:${USAGE_DATASET}" \
+       && usage_acl_has "$1" "$2"; then
 import json, sys
 path, role, email = sys.argv[1:]
-access = json.load(open(path)).get("access", [])
-enough = {"READER": {"READER", "WRITER", "OWNER"}, "WRITER": {"WRITER", "OWNER"}}[role]
-if any(a.get("userByEmail", "").lower() == email.lower() and a.get("role") in enough for a in access):
-    sys.exit(3)
-access.append({"role": role, "userByEmail": email})
-json.dump({"access": access}, open(path, "w"))
+ds = json.load(open(path))
+ds.setdefault("access", []).append({"role": role, "userByEmail": email})
+json.dump(ds, open(path, "w"))
 PY
-    if [ "$rc" = 3 ]; then rm -f "$tmp"; return 0; fi
-    if [ "$rc" != 0 ]; then rm -f "$tmp"; return 1; fi
-    say "  usage: granting ${2} ${1} on ${USAGE_DATASET}"
-    usage_try bq --project_id="$PROJECT_ID" update --source "$tmp" \
-      "${PROJECT_ID}:${USAGE_DATASET}" && rc=0 || rc=1
+      rm -f "$tmp"; return 0
+    fi
     rm -f "$tmp"
-    return "$rc"
+    echo "  usage: dataset access list refused; binding ${role} conditioned to ${USAGE_DATASET}" >&2
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="$member" --role="$role" \
+      --condition="expression=resource.name.startsWith(\"${USAGE_DS_RES}\"),title=dmai-usage-dataset-only,description=Usage telemetry dataset only" \
+      --quiet >/dev/null 2>&1 && usage_cond_has "$role" "$member"
   }
   if [ -n "$SINK_WRITER" ]; then
     usage_ds_access WRITER "${SINK_WRITER#serviceAccount:}" \
       || usage_warn "could not grant the sink writer dataEditor on ${USAGE_DATASET}"
+  else
+    usage_warn "the ${USAGE_SINK} sink has no writer identity to grant"
   fi
   usage_ds_access READER "dmai-web@${SA_DOMAIN}" \
     || usage_warn "could not grant dmai-web dataViewer on ${USAGE_DATASET}"
