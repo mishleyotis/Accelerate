@@ -148,7 +148,7 @@ def test_the_workbook_carries_the_whole_run(finished_run):
     wb = finished_run.open()
     # 18 subcaps x (primary + 5 volleys); PRELIM's cell-less searches aside
     assert len([r for r in wb.rows("Search_Log") if r.get("SubCap_ID")]) == 108
-    assert len(wb.rows("Evidence_Detail")) == 56  # 18 x 3, + 2 profile rows
+    assert len(wb.rows("Evidence_Detail")) == 57  # 18 x 3, + 2 profile rows, + the PRELIM technographic scan
     gates = wb.rows("Gate_Log")
     assert [g["Scope"] for g in gates if g["Gate"] == "FLOORS"] == list(CATS)
     # then the scoring stage: opened, a critic per pillar, the gate itself
@@ -266,14 +266,15 @@ def test_the_app_parses_the_workbook_and_keeps_every_linkage(finished_run):
     assert stage.detail["stage"].startswith("assessment")
 
     r = wp.parse_research_workbook(str(finished_run.workbook_path))
-    # 18 subcaps x 3 sources, plus the two PRELIM profile rows (the binding
-    # preflight's financial statement and the institution profile). Those
-    # two support the CLIENT, not a capability cell, so they carry no
-    # subcap — and the app tolerates that per row, which this pins.
+    # 18 subcaps x 3 sources, plus the three PRELIM rows that support the
+    # CLIENT rather than a capability cell (the binding preflight's financial
+    # statement, the institution profile, and the machine technographic scan
+    # PRELIM banks since 2026-10-07). They carry no subcap — and the app
+    # tolerates that per row, which this pins.
     ledger = r["ledger"]
-    assert len(ledger) == 56
+    assert len(ledger) == 57
     unmapped = [x["e_id"] for x in ledger if not x["subcaps"]]
-    assert len(unmapped) == 2, unmapped
+    assert len(unmapped) == 3, unmapped
     assert all(x["source_url"] and x["published_date"] for x in ledger)
 
 
