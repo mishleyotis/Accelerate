@@ -418,7 +418,7 @@ function AdminUsersCard() {
   const nameOf = e => { const p = e.split("@")[0].split(/[._-]+/).filter(Boolean); return p.length === 1 && p[0].length <= 3 ? p[0].toUpperCase() : p.map(w => w[0].toUpperCase() + w.slice(1)).join(" "); };
   const seen = LIVE && usage.status === "ok" ? usage.lastSeen : {};
 
-  // Everyone with a row, plus everyone the usage log has seen sign in without
+  // Everyone with a row, plus everyone the usage log has seen active without
   // one: they are AEs by default, and giving them a role creates their row.
   const users = LIVE ? (() => {
     const rows = live.users.map(u => ({ ...u, known: true }));
@@ -433,8 +433,9 @@ function AdminUsersCard() {
     const s = seen[u.email];
     if (s) return window.uaRel(s, false, usage.now);
     if (u.last_seen_at) return window.uaRel(new Date(u.last_seen_at), false, new Date());
-    if (u.known && !u.signed_in) return "Invited";
-    return usage.status === "ok" ? "Never signed in" : "Not recorded";
+    // Activity, not sign-ins: people stay signed in for days, so the only
+    // honest "last active" is the last usage event the log recorded.
+    return usage.status === "ok" ? "No activity yet" : "Not recorded";
   };
   const locked = u => LIVE && live.floor.includes(u.email) ? "Owner account (ADMIN_EMAILS): always an active Admin"
     : u.email === me ? "Your own access: ask another Admin to change it" : null;
@@ -466,7 +467,7 @@ function AdminUsersCard() {
     if (!/@zennify\.com$/i.test(email)) { pushToast("Only @zennify.com addresses can be invited", "warn"); return; }
     if (users.some(u => u.email === email && u.known !== false)) { pushToast(`${email} is already on the list`, "warn"); return; }
     apply(email, { role: inviteRole }, () => {
-      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: they sign in with their Google account` : `Invitation sent to ${email}`, "success");
+      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: their Google account opens the app` : `Invitation sent to ${email}`, "success");
       setInviteEmail("");
     });
   };

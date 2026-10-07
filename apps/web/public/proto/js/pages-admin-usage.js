@@ -929,7 +929,7 @@ function UAStatus({
     }
   }, status === "Live" ? /*#__PURE__*/React.createElement("span", {
     className: "live-dot"
-  }) : null, status === "Never" ? "Never signed in" : status);
+  }) : null, status === "Never" ? "No activity yet" : status);
 }
 
 /* The store's non-ok states, by name. */
@@ -1427,7 +1427,7 @@ function UsagePage() {
     className: "eyebrow"
   }, "Settings & operations"), /*#__PURE__*/React.createElement("h1", null, "Usage analytics"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, "Who's signed in, which pages they use, and how long they stay \xB7 ", rangeLabel.toLowerCase(), ok && model.recordingSince && model.recordingSince > bounds.from ? ` · recording since ${uaDate(model.recordingSince)}` : "")), /*#__PURE__*/React.createElement("div", {
+  }, "Who uses DMA Insights, which pages they use, and how long they stay \xB7 ", rangeLabel.toLowerCase(), ok && model.recordingSince && model.recordingSince > bounds.from ? ` · recording since ${uaDate(model.recordingSince)}` : "")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
@@ -1710,7 +1710,7 @@ function UsagePage() {
         color: "var(--z-muted)"
       },
       className: "txt-fit-1"
-    }, p ? `On ${p.label}${p.clientName ? ` · ${p.clientName}` : ""}` : "Signed in")), /*#__PURE__*/React.createElement("span", {
+    }, p ? `On ${p.label}${p.clientName ? ` · ${p.clientName}` : ""}` : "Active now")), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
         color: "var(--z-body)",
@@ -1968,7 +1968,7 @@ function UsagePage() {
       flexWrap: "wrap",
       gap: 8
     }
-  }, /*#__PURE__*/React.createElement("h3", null, "Users \xB7 sign-ins & time spent"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Users \xB7 activity & time spent"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("input", {
     className: "inp inp-sm",
@@ -2004,7 +2004,7 @@ function UsagePage() {
     value: "ALL"
   }, "All statuses"), /*#__PURE__*/React.createElement("option", null, "Live"), /*#__PURE__*/React.createElement("option", null, "Active"), /*#__PURE__*/React.createElement("option", null, "Idle"), /*#__PURE__*/React.createElement("option", null, "Dormant"), /*#__PURE__*/React.createElement("option", {
     value: "Never"
-  }, "Never signed in"))), /*#__PURE__*/React.createElement("div", {
+  }, "No activity yet"))), /*#__PURE__*/React.createElement("div", {
     style: {
       overflowX: "auto"
     }

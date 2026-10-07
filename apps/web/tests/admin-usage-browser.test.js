@@ -78,11 +78,11 @@ test("usage analytics renders the live store and nothing from the mock", { skip 
   const { server, base } = await startServer(BOOT);
   try {
     const { ctx, p, errors } = await openApp(browser, base, "#/admin/usage", wire());
-    await p.waitForFunction(() => /Users · sign-ins/.test(document.body.innerText), null, { timeout: 10000 });
+    await p.waitForFunction(() => /Users · activity/.test(document.body.innerText), null, { timeout: 10000 });
     const text = await p.evaluate(() => document.body.innerText);
     assert.deepStrictEqual(errors, []);
     await assertNoStringifiedObjects(p, "usage analytics");
-    for (const want of ["Ae One", "Analyst One", "Never signed in", "Golden 1 Credit Union",
+    for (const want of ["Ae One", "Analyst One", "No activity yet", "Golden 1 Credit Union",
                         "Client · Platform", "Live now", "Evidence drawers opened"]) {
       assert.ok(text.includes(want), `usage page is missing "${want}"`);
     }

@@ -220,3 +220,28 @@ test("rows come back typed, in wire order, with last-seen and recording-since", 
   assert.equal(JSON.parse(q.opts.body).queryParameters[0].parameterValue.value, "15",
                "two periods plus today, so the page can compare");
 });
+
+/* Usage is measured from activity, not from sign-ins: most people stay signed
+   in for days. A beacon whose 8-hour app cookie has lapsed still carries the
+   IAP assertion Google puts on every request, and that is enough identity. */
+test("the beacon falls back to the IAP assertion when the session cookie has lapsed", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const src = fs.readFileSync(path.join(__dirname, "..", "app", "api", "usage", "route.js"), "utf8");
+  const cookieAt = src.indexOf("verify(cookies()");
+  const iapAt = src.indexOf("verifyIapAssertion(req.headers.get(\"x-goog-iap-jwt-assertion\"))");
+  assert.ok(cookieAt > 0 && iapAt > cookieAt, "cookie first, then the IAP assertion");
+  assert.match(src, /domainOk\(iap\.email\)/, "the IAP fallback keeps the @zennify.com domain rule");
+  assert.ok(!/not_signed_in/.test(src), "a lapsed sign-in is not a reason to drop usage");
+});
+
+test("usage surfaces speak of activity, never of sign-ins", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  for (const f of ["pages-admin-usage.jsx", "pages-alerts-prospecting-admin.jsx"]) {
+    const src = fs.readFileSync(path.join(__dirname, "..", "proto", f), "utf8")
+      .replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+    assert.ok(!/Never signed in|Who's signed in|sign-ins/.test(src), `${f} ties usage to sign-ins`);
+    assert.ok(!/u\.signed_in/.test(src), `${f} reads the OIDC binding as activity`);
+  }
+});
