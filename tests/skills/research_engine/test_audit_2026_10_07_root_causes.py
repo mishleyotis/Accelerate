@@ -187,12 +187,14 @@ def test_missing_firmographics_reads_aliases_and_groups(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path)
     assert profile.missing_firmographics(wb) == []
     eid = next(r["E_ID"] for r in wb.rows("Evidence_Detail") if r.get("E_ID"))
-    # CU sub-vertical set: what CG-18c will hold at submit, reported not gated
-    sv_missing = profile.missing_subvertical_firmographics(wb)
-    assert "net_worth_ratio" in sv_missing and "total_assets" not in sv_missing
-    profile.firmographic(wb, field="net_worth_ratio", value="11.2", unit="percent",
+    # CU sub-vertical set: the fixture carries it (PRELIM gates it); a member
+    # under any alias of its group satisfies it, a missing one is named
+    assert profile.missing_subvertical_firmographics(wb) == []
+    wb.update_row("Firmographics", "Field", "net_worth_ratio", {"Field": "nwr_retired"})
+    assert profile.missing_subvertical_firmographics(wb) == ["net_worth_ratio"]
+    profile.firmographic(wb, field="net worth ratio", value="11.2", unit="percent",
                          as_of="2025-12-31", evidence=eid, confidence="High")
-    assert "net_worth_ratio" not in profile.missing_subvertical_firmographics(wb)
+    assert profile.missing_subvertical_firmographics(wb) == []
 
 
 # ── O ────────────────────────────────────────────────────────────────────

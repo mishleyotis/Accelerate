@@ -2368,6 +2368,14 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 f"   # precheck only: the DRIVER submits, a lane never claims"],
             "page": page, "connector_run_id": connector_run,
             "contract_file": str(cf),
+            **({"enforcement_rungs": str(qa / "enforcement_rungs.json"),
+                "enforcement_rungs_rule": (
+                    "the driver's enforcement sweep (FDIC ED&O, CFPB, state orders, "
+                    "with controls) — C3's absence_of_enforcement.sources_searched[] "
+                    "IS this file's rungs; cite the registry pages through the "
+                    "connector; never re-search by hand what it already settled, "
+                    "and never write verified: true over a NOT_RUN rung")}
+               if page == "context" else {}),
             "ready_in_workbook": pst.get("ready"),
             "waiting_on": pst.get("waiting_on") or [],
             "recording_map_tabs": pst.get("recording_map_tabs") or [],
@@ -2429,10 +2437,9 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "empty_state where the contract offers it) — never a `fields` key, "
                 "which the contract does not declare (CG-04 refused it on Susser "
                 "Bank's value_chain); the app joins the arrangement server-side",
-                "a REQUIRED list the APP fills at serve time (safeguard_gates.gates, "
-                "joined from gate_results by computed.safeguard_gates — no writer "
-                "stores it) is sent empty WITH an empty_state saying the platform "
-                "writes it — an empty required list with no empty_state is CG-19",
+                "safeguard_gates.gates is REQUIRED but the app fills it at serve time "
+                "from gate_results: send it empty WITH an empty_state saying so — "
+                "empty with no empty_state is CG-19",
                 "an evidence_age row with no establishable date carries "
                 "age_months null, band 'undated', status 'UNDATED' — never a bare "
                 "null date (CG-10)",

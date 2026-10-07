@@ -511,6 +511,16 @@ def main(argv=None) -> int:
                         "category's cells (engine/scope.py); the servicing "
                         "tier registers against any cell in the run")
 
+    gl = common(sub.add_parser(
+        "gate-log", help="record one Gate_Log row (non-blocking by default) — the "
+                         "way a hand-driven step states a PASS, FAIL or NOT_RUN "
+                         "with its reason where a reader of the run looks"))
+    gl.add_argument("--gate", required=True)
+    gl.add_argument("--scope", default="run")
+    gl.add_argument("--verdict", required=True, choices=["PASS", "FAIL", "NOT_RUN"])
+    gl.add_argument("--detail", default="")
+    gl.add_argument("--blocking", action="store_true")
+
     rt = common(sub.add_parser(
         "retier", help="move one registered row to another tier, with the "
                        "cascade the tier carries (claim label re-derived, ERS "
@@ -890,6 +900,15 @@ def main(argv=None) -> int:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
         print(json.dumps({"e_id": eid, "profile": bool(a.profile)}, indent=2))
+        return 0
+    if a.cmd == "gate-log":
+        try:
+            ledger.append_gate(wb, gate=a.gate, scope=a.scope, verdict=a.verdict,
+                               detail=a.detail, blocking=a.blocking)
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps({"gate": a.gate, "scope": a.scope, "verdict": a.verdict}))
         return 0
     if a.cmd == "retier":
         try:

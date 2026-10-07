@@ -192,6 +192,16 @@
             "timeout": 120
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/section_precheck.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: section_precheck.py is MISSING from the installed plugin, so a section file written under 08_sections/ is NOT pass-1 checked at write time and every CG-04/CG-46/AG-01/AG-03 refusal waits for ship_page.py or the server. Stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a PostToolUse hook never blocks.\"}'; exit 0; fi",
+            "timeout": 20
+          }
+        ]
       }
     ],
     "Stop": [

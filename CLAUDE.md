@@ -198,6 +198,16 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     reason list; the manifest carries `supplementary_sub_verticals`;
     `Search_Log.Seq` is allocated past the highest value, never from the
     row count.
+  - **Prevention over repair** (user, 2026-10-07: "I want preventive
+    measures, hooks"): PRELIM gates the sub-vertical firmographic set
+    while the run is in research; REPORTS runs the enforcement sweep;
+    PAGES preflight refills cohort peers before any lane (ET-12 stays
+    with `engine.page_preflight` → NEEDS_CONNECTOR; `engine.cli gate-log`
+    records a hand-driven step's verdict); a mid-run connector deploy is
+    logged as `CONNECTOR_DRIFT`
+    and stales the pages passed under the old contract; a section file
+    written under `08_sections/` is pass-1 checked by the
+    `section_precheck.py` PostToolUse hook at write time.
   - **The search-op ceiling is per conversation, and the run-level reading
     is the worst conversation's window, named** (`ledger.worst_window`;
     `stats()` without a category). orient, the watchdog and the hooks print

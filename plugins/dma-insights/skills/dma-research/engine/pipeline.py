@@ -120,6 +120,54 @@ SG_V4_VERBATIM_LEAVES = frozenset({
     "source_title", "title", "product", "candidate", "url"})
 
 
+def _contract_version_of(progress, page: str) -> str | None:
+    """The `contract_version` get_run_progress reports for one page, whatever
+    shape the pages come in (a list of rows or a dict keyed by page)."""
+    if not isinstance(progress, dict):
+        return None
+    pages = progress.get("pages")
+    rows = (list(pages.values()) if isinstance(pages, dict) else
+            pages if isinstance(pages, list) else [])
+    for row in rows:
+        if isinstance(row, dict) and str(row.get("page") or "") == page:
+            cv = row.get("contract_version")
+            return str(cv) if cv else None
+    if isinstance(pages, dict) and isinstance(pages.get(page), dict):
+        cv = pages[page].get("contract_version")
+        return str(cv) if cv else None
+    return None
+
+
+def mark_contract_drift(state: dict, cv: str, *, page: str, version: str, now: str) -> dict | None:
+    """Pure: compare the server's contract version with the one the run
+    has been shipping under. First sighting records it; a change marks every
+    page passed under the old version `stale_contract` and returns what
+    drifted. The stages recorded before the change are named so the
+    conductor can judge what was produced under the old rules."""
+    was = state.get("contract_version")
+    if not was:
+        state["contract_version"] = cv
+        return None
+    if was == cv:
+        return None
+    stale = []
+    for pg, rec in (state.get("pages") or {}).items():
+        if not isinstance(rec, dict):
+            continue
+        for v, status in list((rec.get("versions") or {}).items()):
+            under = (rec.get("contract_version") or {}).get(v)
+            if status == "pass" and under and under != cv:
+                rec["versions"][v] = "stale_contract"
+                stale.append(f"{pg} v{v}")
+    stages = sorted(st for st, d in (state.get("stages") or {}).items()
+                    if isinstance(d, dict) and d.get("status") == "PASS")
+    drift = {"was": was, "now": cv, "at": now, "page": page, "version": version,
+             "stale_pages": stale, "stages_under_old": stages}
+    state["contract_version"] = cv
+    state.setdefault("connector_drift", []).append(drift)
+    return drift
+
+
 def prose_sg_v4_fails(fails: list) -> list:
     """The SG-V4 FAILs on prose — the ones the driver's budget counts."""
     def leaf(path) -> str:
@@ -381,6 +429,9 @@ class McpReads:
                           {"sub_vertical": sub_vertical, "exclude_display_id": display_id,
                            "exclude_entity_name": entity_name})
 
+    def run_progress(self, run_id: str) -> dict:
+        return self._call("get_run_progress", {"run_id": run_id})
+
 
 class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
@@ -469,6 +520,11 @@ class Options:
     # Start a run whose connector baseline was never recorded. The default
     # is to refuse: see `_connector_gate`.
     allow_unverified_connectors: bool = False
+    # Run the enforcement-register sweep (FDIC ED&O, CFPB, state orders, with
+    # controls) before the report writers start, so C3's absence ladder is
+    # a file the producer reads rather than a search it re-invents. Off only
+    # for an offline test.
+    enforcement_sweep: bool = True
     # A CEILING on rounds per looping stage. 3 refused categories that were
     # still gaining ground each round (owner, 2026-09-07); 10 is what the
     # owner resumed those runs with. `stall_rounds` is what keeps a large
@@ -2743,6 +2799,80 @@ class Pipeline:
             f"--evidence-id <E-id> --basis '<what the excerpt says>'`, "
             f"then `engine.techscan reconcile` until it exits 0.")
 
+    def _enforcement_sweep(self, *, force: bool = False) -> dict | None:
+        """Run `scripts/enforcement_search.py` once per run, before the
+        report writers, and leave `qa/enforcement_rungs.json` for the C3
+        producer. Names, FDIC applicability and the charter state are read
+        from the workbook; the result is a non-blocking Gate_Log row —
+        PASS when every rung completed and none found an action, NOT_RUN
+        with the reason otherwise. Never a stage stop: a registry that is
+        down is a rung that says so, which is what the page then says."""
+        import os
+        import subprocess
+        import time
+        if not self.opts.enforcement_sweep:
+            return None
+        if "PYTEST_CURRENT_TEST" in os.environ and not force:
+            return None                               # never the network from a test
+        out = self.run.qa_dir / "enforcement_rungs.json"
+        try:
+            if out.is_file() and (time.time() - out.stat().st_mtime) < 7 * 86400:
+                return json.loads(out.read_text())
+        except Exception:                            # noqa: BLE001
+            pass
+        script = Path(__file__).resolve().parents[3] / "scripts" / "enforcement_search.py"
+        md = self._md()
+        names = [str(md.get("entity_name") or "").strip()]
+        sv = str(md.get("sub_vertical") or "").strip().upper()
+        cert, state = "", ""
+        for r in self.wb.rows("Firmographics"):
+            f = str(r.get("Field") or "").strip().lower()
+            v = str(r.get("Value") or "").strip()
+            if f in ("fdic_cert", "fdic_certificate", "cert_number", "fdic_cert_number"):
+                cert = v
+            elif f in ("hq", "headquarters") and v:
+                m = re.search(r",\s*([A-Z]{2})\b", v)
+                state = m.group(1) if m else state
+        cmd = [sys.executable, str(script)] + [x for n in names if n for x in ("--name", n)]
+        if cert:
+            cmd += ["--cert", cert]
+        if state:
+            cmd += ["--state", state]
+        if sv == "CU":
+            cmd += ["--no-fdic"]
+        cmd += ["--out", str(out)]
+        detail, verdict = "", "NOT_RUN"
+        try:
+            if not script.is_file():
+                raise FileNotFoundError(script)
+            self.run.qa_dir.mkdir(parents=True, exist_ok=True)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
+            doc = json.loads(out.read_text()) if out.is_file() else {}
+            counts = doc.get("counts") or {}
+            if doc.get("verified"):
+                verdict, detail = "PASS", (f"{len(doc.get('sources_searched') or [])} rung(s), "
+                                           f"every one completed, no action found")
+            elif doc.get("actions_found"):
+                verdict, detail = "PASS", (f"{counts.get('RESOLVED')} rung(s) RESOLVED an "
+                                           f"action — the C3 producer records them with dates")
+            else:
+                detail = (f"{counts.get('NOT_RUN', '?')} rung(s) NOT_RUN: "
+                          + "; ".join(f"{x.get('source')}: {x.get('reason')}"
+                                      for x in (doc.get("sources_searched") or [])
+                                      if x.get("outcome") == "NOT_RUN")[:600]
+                          + (f" (exit {r.returncode}: {(r.stderr or '')[:120]})"
+                             if r.returncode not in (0, 2) else ""))
+        except Exception as e:                       # noqa: BLE001
+            detail = f"sweep did not run: {type(e).__name__}: {str(e)[:200]}"
+            doc = None
+        try:
+            L.append_gate(self.wb, gate="ENFORCEMENT_SWEEP", scope="run", verdict=verdict,
+                          blocking=False, detail=(detail or "no detail")[:900])
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        self.opts.log(f"  [ENFORCEMENT] {verdict}: {detail[:160]}")
+        return doc
+
     def _report_probes(self) -> int:
         """Run the probes the report templates demand BEFORE any writer
         starts (`relay.report_probes`): vendor scope statements, initiative-
@@ -2878,6 +3008,7 @@ class Pipeline:
         """One reports-workflow invocation per report still open."""
         from . import brief, narrative as N, report_spec as RS, reports
         self._reconcile_register()
+        self._enforcement_sweep()
         self._report_probes()
         self._reports_preflight()
         st = N.state(self.wb)
@@ -2945,6 +3076,7 @@ class Pipeline:
         from . import brief, narrative as N, report_spec as RS, reports
         self._reset_counters()
         self._reconcile_register()
+        self._enforcement_sweep()
         self._report_probes()
         self._reports_preflight()
         self._stalled("REPORTS")
@@ -3074,6 +3206,7 @@ class Pipeline:
                     "connector_run": connector_run, "at": _utcnow()})
         rec.setdefault("versions", {})[version] = res.get("status")
         rec.setdefault("shipped_mtime", {})[version] = mtime
+        self._note_contract_version(p, version, connector_run)
         av = rec.setdefault("attempts_by_version", {})
         av[version] = int(av.get(version) or 0) + 1
         if res.get("status") == "claim_refused":
@@ -3085,6 +3218,49 @@ class Pipeline:
             return True
         verdicts[p] = (res.get("reasons") or [])[:12]
         return False
+
+    def _note_contract_version(self, p: str, version: str, connector_run: str) -> None:
+        """Record the contract version the server judged this page under,
+        and surface a CONNECTOR DEPLOY MID-RUN the moment it happens.
+
+        Arbor Bank (2026-10-06): the connector was redeployed between
+        REPORTS and PAGES_B (CG-15, CG-30 and the fit engine changed), so
+        pages that had passed were refused on re-ship and the reports
+        argued a ranking the deployed engine no longer produced. Nothing
+        said so; each refusal was debugged as its own defect. Now the first
+        ship after a deploy logs CONNECTOR_DRIFT, records which stages were
+        produced under the old version, and marks every page passed under
+        it as `stale_contract` so `_page_ok` ships it again."""
+        reads = getattr(self.opts, "reads", None)
+        fn = getattr(reads, "run_progress", None)
+        if fn is None:
+            return
+        try:
+            prog = fn(connector_run)
+        except Exception:                            # noqa: BLE001
+            return
+        cv = _contract_version_of(prog, p)
+        if not cv:
+            return
+        rec = self.state["pages"].setdefault(p, {})
+        rec.setdefault("contract_version", {})[version] = cv
+        drift = mark_contract_drift(self.state, cv, page=p, version=version, now=_utcnow())
+        if drift:
+            self.opts.log(f"  [DRIFT] connector contract {drift['was']} -> {cv}: "
+                          f"{', '.join(drift['stale_pages']) or 'no page'} marked "
+                          f"stale_contract; stages produced under the old version: "
+                          f"{', '.join(drift['stages_under_old']) or 'none recorded'}")
+            try:
+                L.append_gate(self.wb, gate="CONNECTOR_DRIFT", scope="run", verdict="FAIL",
+                              blocking=False,
+                              detail=(f"connector contract changed mid-run "
+                                      f"{drift['was']} -> {cv} at {p} v{version}; pages "
+                                      f"passed under the old version re-ship; reports and "
+                                      f"sections produced under it may argue rules the "
+                                      f"deployed connector no longer applies — review "
+                                      f"before PROMOTE")[:900])
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gate log not written: {str(e)[:120]})")
 
     def _no_retry(self, p: str, attempt: int = 0) -> str | None:
         """Why page `p` must NOT be retried, or None to allow one repair.
@@ -3363,8 +3539,19 @@ class Pipeline:
                 "summary": f"1 page-production workflow for version {version}: "
                            + ", ".join(p + (" (repair)" if p in repair else "") for p in todo)}
 
+    def _pages_prepare(self, pages: tuple) -> None:
+        """What a page lane is NOT dispatched without. The peer figures are
+        refilled from the cohort here because a page produced over a
+        placeholder peer is a page re-produced (Arbor Bank, 2026-10-07:
+        sixteen `inferred` peers on the overview). ET-12 — the machine
+        technographic scan — is `page_preflight.preflight`, run by
+        `_ship_pages` before any lane, which stops the driver with
+        NEEDS_CONNECTOR rather than failing the stage."""
+        self._cohort_peers()
+
     def _stage_pages_a(self) -> str:
         self._reset_counters()
+        self._pages_prepare(PAGES_A)
         shipped = self._ship_pages(PAGES_A, "A", produce=True)
         return f"shipped to version A: {', '.join(shipped)}"
 
@@ -3402,6 +3589,7 @@ class Pipeline:
 
     def _stage_pages_b(self) -> str:
         self._reset_counters()
+        self._pages_prepare(tuple(p for g in PAGES_B for p in g))
         restaged = self._ship_pages(PAGES_A, "B", produce=False)   # from disk, no lanes
         shipped = []
         for group in PAGES_B:

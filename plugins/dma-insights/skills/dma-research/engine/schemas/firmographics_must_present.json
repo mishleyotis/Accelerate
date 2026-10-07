@@ -197,5 +197,5 @@
   ],
   "FC": []
  },
- "_source": "packages/shared/contracts_data.json > overview.firmographics.fields.fields — copied verbatim; tests/skills/research_engine/test_firmographic_must_present_matches_connector.py refuses drift"
+ "_source": "packages/shared/contracts_data.json > overview.firmographics.fields.fields — copied verbatim; tests/skills/research_engine/test_audit_2026_10_07_root_causes.py::test_the_engine_must_present_set_is_the_connectors refuses drift"
 }
