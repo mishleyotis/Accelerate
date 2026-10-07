@@ -227,8 +227,8 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `apps/web/tests/client-dashboard.test.js`.
 
 - **Public client share links** (user, 2026-10-07; supersedes PRD v1's
-  "clients receive exports, not logins" for this route only): "Share with
-  client" mints a link on the separate public service **`dmai-share`** (same
+  "clients receive exports, not logins" for this route only): "Generate client
+  link" (recipient emails required first) mints a link on the separate public service **`dmai-share`** (same
   image, `SHARE_MODE=1`, every non-`/s/` route 404s — enforced by
   `apps/web/tests/share-link.test.js` and a post-deploy door probe). The link
   is Ed25519-signed (private key on `dmai-web` only, public key on

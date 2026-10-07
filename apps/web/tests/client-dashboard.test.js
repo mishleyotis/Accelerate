@@ -127,7 +127,7 @@ test("client bar · client copy, client tabs, a link to share", () => {
   const text = page("ClientBar", "customer", { tab: "overview" });
   assert.match(text, /Client Dashboard/);
   assert.match(text, /Switch back to Zennify view/);
-  assert.match(text, /Share with client/);
+  assert.match(text, /Generate client link/);
   assert.ok(!/Customer/.test(text), `"Customer" is still on the client bar: ${text}`);
   assert.ok(!/share-safe presentation mode/.test(text), "the old banner sentence is back");
   for (const tab of ["Platform", "Tech stack", "Context", "Health", "Runs"]) {
@@ -136,6 +136,22 @@ test("client bar · client copy, client tabs, a link to share", () => {
   for (const tab of ["Overview", "Insights", "Heatmap"]) {
     assert.ok(text.includes(tab), `the client tab strip lost ${tab}`);
   }
+});
+
+test("generate client link · recipients first, then the link", () => {
+  const { win } = H.load();
+  H.installEntity(ID, pages());
+  const html = H.render(win.ShareDialog, { entity: ENTITY, run: RUN, onClose() {} },
+                        { audience: "customer", pushToast() {} });
+  const text = H.textOf(html);
+  assert.match(text, /Generate client link/);
+  assert.match(text, /Recipient email\(s\) · added to this link's allowlist/);
+  assert.match(html, /<textarea[^>]*id="share-recipients"/, "no recipient field before the link exists");
+  // Nothing is minted with an empty allowlist: the button is disabled until
+  // an address is entered (and /api/share refuses an empty list as well).
+  assert.match(html, /<button[^>]*disabled=""[^>]*>Generate link<\/button>/,
+    "Generate link is pressable with no recipient");
+  assert.ok(!/readonly/i.test(html), "a link is shown before one was generated");
 });
 
 test("client bar · the Zennify view keeps Platform and Tech stack, and no banner", () => {

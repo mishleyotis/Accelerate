@@ -321,7 +321,7 @@ function SettingsPopover({ onClose }) {
   );
 }
 
-/* ── Share with client ─────────────────────────────────────────────
+/* ── Generate client link ──────────────────────────────────────────
    Owner's rule (2026-10-07): a client link is shared TO named people, and
    those addresses plus their organisations' domains are the link's
    allowlist for this one DMA. The server mints (POST /api/share) and signs
@@ -352,25 +352,25 @@ function ShareDialog({ entity, run, onClose }) {
   };
   const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}`
     + `?subject=${encodeURIComponent(`${entityName(entity)} · Digital Maturity Assessment`)}`
-    + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email. The link works until ${fmtDate(made.expires_at)}.`)}` : null;
+    + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email: you will receive a one-time sign-in link at that address. The dashboard link works until ${fmtDate(made.expires_at)}.`)}` : null;
 
   return (
     <div className="modal-mask" onClick={onClose}>
-      <div className="modal" role="dialog" aria-label="Share with client" onClick={e => e.stopPropagation()} style={{ width: 560 }}>
+      <div className="modal" role="dialog" aria-label="Generate client link" onClick={e => e.stopPropagation()} style={{ width: 560 }}>
         <div className="modal-head">
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--z-dark)" }}>Share with client</div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--z-dark)" }}>Generate client link</div>
             <div style={{ fontSize: 12, color: "var(--z-muted)", marginTop: 2 }}>{entityName(entity)} · client dashboard only (Overview, Insights, Heatmap)</div>
           </div>
           <button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={18} /></button>
         </div>
         <div className="modal-body">
           {!made ? (<>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Recipient email(s)</label>
-            <textarea className="inp" rows={2} style={{ width: "100%", marginTop: 6, resize: "vertical" }}
+            <label htmlFor="share-recipients" style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Recipient email(s) · added to this link's allowlist</label>
+            <textarea id="share-recipients" className="inp" rows={2} style={{ width: "100%", marginTop: 6, resize: "vertical" }}
               placeholder="jane@bcu.com, sam@bcu.com" value={recipients} onChange={e => setRecipients(e.target.value)} />
             <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.5 }}>
-              Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only.
+              Required before the link is generated. Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only.
             </div>
             <div className="row" style={{ gap: 8, marginTop: 14, alignItems: "center" }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Link expires after</label>
@@ -393,7 +393,7 @@ function ShareDialog({ entity, run, onClose }) {
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{made ? "Send it from your own mailbox." : ""}</span>
           <div className="row" style={{ gap: 8 }}>
             {!made ? (
-              <button className="btn btn-primary" disabled={busy || !recipients.trim()} onClick={submit}>{busy ? "Creating…" : "Create link"}</button>
+              <button className="btn btn-primary" disabled={busy || !recipients.trim()} onClick={submit}>{busy ? "Generating…" : "Generate link"}</button>
             ) : (<>
               <button className="btn btn-tertiary" onClick={copy}><Icon name="copy" size={12} /> Copy link</button>
               <a className="btn btn-primary" href={mailto}><Icon name="envelope" size={12} /> Email link</a>
@@ -517,7 +517,7 @@ function ClientBar({ entity, run, tab }) {
           <button className="btn btn-tertiary btn-sm"
                   style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
                   onClick={() => setShareOpen(true)}>
-            <Icon name="share" size={12} /> Share with client
+            <Icon name="share" size={12} /> Generate client link
           </button>
           {/* nowrap + no shrink: at 1024px the flex row squeezed this button to
               133px against a 150px label and the theme clips rather than
