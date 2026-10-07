@@ -2997,6 +2997,21 @@ class Pipeline:
         # files inside it, and those rewritten files are what was submitted.
         mtime = self._page_mtime(p)
         sgv4 = prose_sg_v4_fails(res.get("sg_v4_fails") or [])
+        if res.get("status") == "pass" and Options.sg_v4_budget < len(sgv4) <= self.opts.sg_v4_budget:
+            # Admitted only because the owner raised the budget: recorded
+            # where a reader of the run looks, page by page.
+            self.state.setdefault("waivers", []).append(
+                {"at": _utcnow(), "page": p, "version": version,
+                 "sg_v4_budget": self.opts.sg_v4_budget, "sg_v4_prose_fails": len(sgv4)})
+            try:
+                L.append_gate(self.wb, gate="SG_V4_BUDGET_RAISED", scope=p, verdict="FAIL",
+                              detail=(f"OWNER_DECISION: {len(sgv4)} prose SG-V4 FAILs admitted "
+                                      f"on {p} (version {version}) under --sg-v4-budget "
+                                      f"{self.opts.sg_v4_budget}, default {Options.sg_v4_budget}; "
+                                      f"disclosed on the page by the connector (invariant 12)")[:900],
+                              blocking=False)
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gate log not written: {str(e)[:120]})")
         if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
             # The connector discloses-and-promotes SG-V4 (invariant 12);
             # the driver reads the disclosure and REVISES ungrounded prose

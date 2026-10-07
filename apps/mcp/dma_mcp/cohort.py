@@ -101,3 +101,65 @@ def cohort_benchmarks(conn, sub_vertical: str, exclude_display_id: str = "",
                 "method": "mean of each assessed entity's category mean on its active "
                           "promoted run; the asking entity excluded"})
     return out
+
+
+#: At most this many cells per call: a page's drilldowns ask for tens, and an
+#: unbounded list would turn one tool call into a corpus export.
+CELL_LIMIT = 500
+
+
+def cell_benchmarks(conn, sub_vertical: str, subcap_ids, exclude_display_id: str = "",
+                    exclude_entity_name: str = "") -> dict:
+    """The same cohort, at CELL grain: per subcap, the mean of the other
+    assessed entities' scores for that cell on their active, promoted runs.
+
+    Owner request, 2026-10-07 (Arbor Bank): the findings, opportunity cells and
+    platform gap rows carry a cell's own peer figure, and the category mean is
+    not that figure. Same rules as the category grain — one figure per entity,
+    the asking entity excluded, null with its reason below the floor, and no
+    entity, name or run id leaves the module."""
+    sv = str(sub_vertical or "").strip()
+    if not sv:
+        return {"error": "sub_vertical_required"}
+    ids = sorted({str(s).strip() for s in (subcap_ids or []) if str(s or "").strip()})
+    if not ids:
+        return {"error": "subcap_ids_required"}
+    if len(ids) > CELL_LIMIT:
+        return {"error": f"too_many_subcap_ids: {len(ids)} > {CELL_LIMIT}"}
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT COALESCE(e.display_id, e.id::text) AS ent,
+               lower(COALESCE(e.legal_name, e.trading_name, '')) AS name,
+               s.subcap_id, AVG(s.score) AS cell_score
+          FROM runs r
+          JOIN entities e ON e.id = r.entity_id
+          JOIN subcap_scores s ON s.run_id = r.id
+         WHERE r.is_active AND r.promoted_at IS NOT NULL
+           AND lower(e.sub_vertical) = lower(%s)
+           AND s.score IS NOT NULL AND s.subcap_id = ANY(%s)
+         GROUP BY ent, name, s.subcap_id
+        """,
+        (sv, ids))
+    ex_id = str(exclude_display_id or "").strip().lower()
+    ex_name = str(exclude_entity_name or "").strip().lower()
+    rows = []
+    for ent, name, sid, score in cur.fetchall():
+        if (ex_id and str(ent).lower() == ex_id) or (ex_name and name == ex_name):
+            continue
+        rows.append((ent, sid, float(score) if score is not None else None))
+    out = summarise(rows)
+    cells = out.pop("categories")
+    for v in cells.values():        # summarise speaks of categories; this is a cell
+        if v.get("reason"):
+            v["reason"] = v["reason"].replace("for this category", "for this cell")
+    for sid in ids:                 # a cell no peer scored is stated, never dropped
+        cells.setdefault(sid, {"n": 0, "mean": None, "median": None, "p25": None,
+                               "p75": None,
+                               "reason": f"0 assessed entities in the cohort score "
+                                         f"this cell; the floor is {FLOOR}"})
+    out.update({"cells": cells, "sub_vertical": sv, "basis": "recomputed",
+                "grain": "cell",
+                "method": "mean of each assessed entity's score for the cell on its "
+                          "active promoted run; the asking entity excluded"})
+    return out

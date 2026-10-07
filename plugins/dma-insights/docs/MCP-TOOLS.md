@@ -1,6 +1,6 @@
 # DMA Insights MCP connector — tool reference
 
-Generated from `apps/mcp/server.py` at commit `72832d2b03` (2026-10-06) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
+Generated from `apps/mcp/server.py` at commit `c8f50b0307` (2026-10-07) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
 
 **36 tools.** Python MCP SDK over streamable HTTP, deployed as the `mcp` Cloud Run service on session-mode pooling (promotion holds locks).
 
@@ -178,7 +178,7 @@ walk back to named cells explains nothing.
 
 ```python
 get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = '',
-    exclude_entity_name: str = '') -> dict
+    exclude_entity_name: str = '', subcap_ids: list | None = None) -> dict
 ```
 
 | Parameter | Type | Default |
@@ -186,6 +186,7 @@ get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = '',
 | `sub_vertical` | `str` | **required** |
 | `exclude_display_id` | `str` | `''` |
 | `exclude_entity_name` | `str` | `''` |
+| `subcap_ids` | `list | None` | `None` |
 
 The sub-vertical cohort's peer score per category: the MEAN of every
 other assessed entity's category score (its active, promoted run), with
@@ -193,6 +194,11 @@ n, median and quartiles. Below three entities a category comes back with
 mean null and the reason — record it as cannot_estimate, never impute.
 Aggregates only; no entity is named. Pass the asking client's display id
 or legal name so it is not counted as its own peer.
+
+Pass `subcap_ids` (up to 500) for the same cohort at CELL grain instead:
+`cells` keyed by subcap id, each the mean of the other entities' scores
+for that cell — the figure a finding, opportunity cell or gap row cites
+as its own peer. The category mean is not a cell's peer figure.
 
 ## Run and session state
 
@@ -1038,4 +1044,4 @@ unreadable verdict is left un-ingested and named, not counted as nothing.
 
 ---
 
-_36 tools · generated from `apps/mcp/server.py` @ `72832d2b03`._
+_36 tools · generated from `apps/mcp/server.py` @ `c8f50b0307`._
