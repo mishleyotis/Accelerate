@@ -18,7 +18,7 @@ function Sidebar() {
     setSidebarOpen
   } = useApp();
   const path = route.path;
-  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit"];
+  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit", "/admin/usage"];
   const activeHref = (() => {
     if (path === "/") return "/";
     const matches = allHrefs.filter(h => h !== "/" && (path === h || path.startsWith(h + "/")));
@@ -119,14 +119,18 @@ function Sidebar() {
     href: "/admin",
     icon: "settings",
     label: "Admin home"
-  }), /*#__PURE__*/React.createElement(NavItem, {
+  }), adminRouteHidden("/admin/import") ? null : /*#__PURE__*/React.createElement(NavItem, {
     href: "/admin/import",
     icon: "drive",
     label: "Import & jobs"
-  }), /*#__PURE__*/React.createElement(NavItem, {
+  }), adminRouteHidden("/admin/import/audit") ? null : /*#__PURE__*/React.createElement(NavItem, {
     href: "/admin/import/audit",
     icon: "evidence",
     label: "Import audit"
+  }), /*#__PURE__*/React.createElement(NavItem, {
+    href: "/admin/usage",
+    icon: "users",
+    label: "Usage analytics"
   })) : null), /*#__PURE__*/React.createElement("div", {
     className: "sb-foot"
   }, /*#__PURE__*/React.createElement("div", {
@@ -805,7 +809,10 @@ function ShareDialog({
       b
     }) => {
       setBusy(false);
-      if (ok) setMade(b);else setError(b.detail || b.error || "The link could not be created.");
+      if (ok) {
+        if (window.trackUsage) window.trackUsage("client_link");
+        setMade(b);
+      } else setError(b.detail || b.error || "The link could not be created.");
     }).catch(() => {
       setBusy(false);
       setError("The link could not be created.");

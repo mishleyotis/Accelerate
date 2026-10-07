@@ -311,13 +311,17 @@ function DashboardHome() {
                     <div className="row"><span className="muted">Package scan</span><span className="spacer" />
                       <span>{(live && (live.import_scans || []).length)
                         ? `last ${relTime(live.import_scans[0].started_at)}`
-                        : "see import & jobs"}</span></div>
+                        : "no scans recorded yet"}</span></div>
                   ) : (<>
                     <div className="row"><span className="muted">Drive crawl</span><span className="spacer" /><span>2 hr ago</span></div>
                     <div className="row"><span className="muted">Vertex AI budget</span><span className="spacer" /><span>$184 / $400</span></div>
                   </>)}
-                  <div className="row"><span className="muted">Pending review</span><span className="spacer" />
-                    <span>{(live ? (live.pending_review || []) : DMA.PENDING_REVIEW).length} entities</span></div>
+                  {/* Production divergence: no Phase 0 entity-inference step
+                      exists in the live pipeline, so the count was always 0. */}
+                  {window.DMA_LIVE ? null : (
+                    <div className="row"><span className="muted">Pending review</span><span className="spacer" />
+                      <span>{DMA.PENDING_REVIEW.length} entities</span></div>
+                  )}
                 </div>
                 <button className="btn btn-tertiary btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10 }} onClick={() => navigate("/admin")}>Open admin <Icon name="arrow-r" size={11} /></button>
               </div>

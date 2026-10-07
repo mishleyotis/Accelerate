@@ -1763,6 +1763,17 @@ function grantedRole() {
   return live ? live.role || "AE" : "ADMIN";
 }
 
+/* Admin pages the prototype carries that production does not serve, because
+   nothing behind them works there: Import & jobs played a scripted demo job
+   and Import audit read a fixture queue whose actions wrote nothing. ONE list,
+   read by the router and the sidebar, so a page cannot be hidden in one and
+   reachable in the other. Local preview keeps them — they are the prototype. */
+const ADMIN_HIDDEN_LIVE = ["/admin/import", "/admin/import/audit"];
+function adminRouteHidden(path) {
+  const live = typeof window !== "undefined" && !!window.DMA_LIVE;
+  return live && ADMIN_HIDDEN_LIVE.includes(path);
+}
+
 /* ── Brand mark ──────────────────────────────────────────────────── */
 function BrandMark({
   size = 28
@@ -2428,6 +2439,8 @@ Object.assign(window, {
   sessionUser,
   grantedRole,
   signOutSession,
+  ADMIN_HIDDEN_LIVE,
+  adminRouteHidden,
   useLivePage,
   useLiveEntity,
   liveSection,

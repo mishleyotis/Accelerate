@@ -103,7 +103,20 @@ function AppProvider({ children }) {
     });
   }, []);
 
-  const openEvidence = (evidenceId, subcap) => setEvidenceDrawer({ evidenceId, subcap });
+  // Production divergence: usage telemetry (usage-tracker.jsx). The tracker
+  // needs the audience and acting-as role, which live in this provider; the
+  // feature calls are no-ops outside production.
+  useEffect(() => {
+    if (window.setUsageContext) window.setUsageContext({ audience, acting_role: role });
+  }, [audience, role]);
+  useEffect(() => {
+    if (ipOpen && window.trackUsage) window.trackUsage("intelligence");
+  }, [ipOpen]);
+
+  const openEvidence = (evidenceId, subcap) => {
+    if (window.trackUsage) window.trackUsage("evidence");
+    setEvidenceDrawer({ evidenceId, subcap });
+  };
   const closeEvidence = () => setEvidenceDrawer(null);
   const openSubcap = (subcapId) => {
     // Find subcap across entities, jump to heatmap if on a client page
@@ -113,7 +126,10 @@ function AppProvider({ children }) {
       navigate(`/clients/${eid}/heatmap`, { subcap: subcapId });
     }
   };
-  const openInsight = id => setInsightModal(id);
+  const openInsight = id => {
+    if (window.trackUsage) window.trackUsage("insight");
+    setInsightModal(id);
+  };
   const closeInsight = () => setInsightModal(null);
   const openRec = id => setRecModal(id);
   const closeRec = () => setRecModal(null);
@@ -596,8 +612,13 @@ function Router() {
       return <PageShell title="Not authorised"><div className="empty"><h3>Not authorised</h3><p>The admin console requires an ADMIN grant on your account.</p><button className="btn btn-primary" onClick={() => navigate("/")}>Back to Dashboard</button></div></PageShell>;
     }
     if (path === "/admin")                    return <AdminPage />;
-    if (path === "/admin/import")             return <ImportPage />;
-    if (path === "/admin/import/audit")       return <ImportAuditPage />;
+    if (path === "/admin/usage")              return <UsagePage />;
+    // Production divergence: Import & jobs and Import audit are not served
+    // (utils.adminRouteHidden) — direct hash navigation included.
+    if (!adminRouteHidden(path)) {
+      if (path === "/admin/import")           return <ImportPage />;
+      if (path === "/admin/import/audit")     return <ImportAuditPage />;
+    }
   }
 
   return <PageShell title="Not found"><div className="empty"><h3>Page not found</h3><p>{path}</p><button className="btn btn-primary" onClick={() => navigate("/")}>Back to Dashboard</button></div></PageShell>;
