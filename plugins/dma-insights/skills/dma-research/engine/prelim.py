@@ -318,15 +318,33 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
             if key == "firmographics":
                 from . import profile as _profile
                 missing = _profile.missing_firmographics(wb)
-                if missing:
+                # The SUB-VERTICAL set too (CG-18c at submit): Arbor Bank
+                # (2026-10-06) closed PRELIM with the generic set and had
+                # its overview held on loan_portfolio, CRE_concentration,
+                # c_i_volume and NPA_ratio — four fields nobody had been
+                # asked for while the research lanes were still open.
+                # Gates while the run can still act on it (research stage);
+                # a scored or promoted run is not reopened by a rule that
+                # arrived after it closed — the gap is reported in
+                # `engine.profile status` instead.
+                sv_missing = (_profile.missing_subvertical_firmographics(wb)
+                              if C.stage_of(wb.metadata()) == "research" else [])
+                if missing or sv_missing:
+                    sv = _clean(wb.metadata().get("sub_vertical")) or "the sub-vertical"
                     return {
                         "section": key, "status": "OPEN",
                         "detail": (f"{len(body)} chars of narrative, but the "
-                                   f"Firmographics tab lacks {len(missing)} "
-                                   f"must-present field(s): {', '.join(missing)}"),
+                                   f"Firmographics tab lacks "
+                                   + (f"{len(missing)} must-present field(s): "
+                                      f"{', '.join(missing)}" if missing else "")
+                                   + ("; " if missing and sv_missing else "")
+                                   + (f"{len(sv_missing)} {sv} field(s) CG-18c holds "
+                                      f"at submit: {', '.join(sv_missing)}" if sv_missing else "")),
                         "fix": ("engine.profile firmographic --field <f> --value … "
                                 "--unit … --as-of … --evidence E-… (or --state "
-                                "ABSENT --reason … --route …) for each"),
+                                "ABSENT --reason … --route …) for each — a "
+                                "sub-vertical member the entity does not publish "
+                                "is ABSENT with the registry route, never blank"),
                     }
             return {"section": key, "status": "RESEARCHED",
                     "detail": f"{len(body)} chars, evidence "

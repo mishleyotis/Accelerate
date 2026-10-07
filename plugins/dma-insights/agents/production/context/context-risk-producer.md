@@ -109,6 +109,12 @@ Refuse to record any registry rung as a clean negative when it did not complete.
 `absence_of_enforcement.verified: true` requires the registries you actually
 searched — not the ones you meant to.
 
+**The driver has already run the sweep.** On an engine run, REPORTS writes
+`<run>/07_qa/enforcement_rungs.json` (your packet names it as `enforcement_rungs`)
+before any writer starts; read it first — its `sources_searched[]` is the ladder, its
+`verified` is the predicate. Run the script yourself only when the file is absent
+(a hand-driven run):
+
 **Run the sweep as code, not by hand.** `${CLAUDE_PLUGIN_ROOT}/scripts/enforcement_search.py
 --name "<legal name>" --name "<each trading name>" --cert <FDIC cert> --state <charter state>
 --out <run>/qa/enforcement_rungs.json` drives the FDIC Enforcement Decisions & Orders form

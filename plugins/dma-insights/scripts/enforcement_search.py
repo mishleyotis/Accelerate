@@ -271,7 +271,8 @@ def _browser_rung(source: str, query: str, res: dict, url: str) -> dict:
     return rung(source, query, "RESOLVED" if rows else "VERIFIED_ABSENT", hits=rows, url=url)
 
 
-def sweep(names: list, *, cert: str = "", state: str = "", with_controls: bool = True) -> dict:
+def sweep(names: list, *, cert: str = "", state: str = "", with_controls: bool = True,
+          fdic: bool = True) -> dict:
     names = [n for n in dict.fromkeys(str(x).strip() for x in names) if n]
     rungs = []
     # CFPB — one rung per name, controlled once
@@ -283,13 +284,13 @@ def sweep(names: list, *, cert: str = "", state: str = "", with_controls: bool =
     # browser steps
     steps = []
     fdic_src = "FDIC Enforcement Decisions & Orders (orders.fdic.gov)"
-    if cert:
+    if fdic and cert:
         steps.append({"id": "fdic:cert", "kind": "fdic", "url": FDIC_URL,
                       "label": "Cert Number", "value": str(cert), "query": f"cert {cert}"})
-    for n in names:
+    for n in (names if fdic else []):
         steps.append({"id": f"fdic:name:{n}", "kind": "fdic", "url": FDIC_URL,
                       "label": "Institution Name", "value": n, "query": n})
-    if with_controls:
+    if with_controls and fdic:
         steps.append({"id": "fdic:control", "kind": "fdic", "url": FDIC_URL,
                       "label": "Institution Name", "value": CONTROLS["fdic_edo"],
                       "query": CONTROLS["fdic_edo"]})
@@ -350,11 +351,14 @@ def main(argv=None) -> int:
                     help="a name the entity trades under (repeat for every brand)")
     ap.add_argument("--cert", default="", help="FDIC certificate number, when the entity is FDIC-insured")
     ap.add_argument("--state", default="", help="two-letter state of charter (drives the state order search)")
+    ap.add_argument("--no-fdic", action="store_true",
+                    help="skip the FDIC register (a credit union answers to the NCUA)")
     ap.add_argument("--no-controls", action="store_true",
                     help="skip the positive controls (every zero then stays NOT_RUN)")
     ap.add_argument("--out", help="write the rung document here (stdout otherwise)")
     a = ap.parse_args(argv)
-    doc = sweep(a.name, cert=a.cert, state=a.state, with_controls=not a.no_controls)
+    doc = sweep(a.name, cert=a.cert, state=a.state, with_controls=not a.no_controls,
+                fdic=not a.no_fdic)
     text = json.dumps(doc, indent=2)
     if a.out:
         with open(a.out, "w", encoding="utf-8") as fh:
