@@ -150,6 +150,9 @@ def cell_benchmarks(conn, sub_vertical: str, subcap_ids, exclude_display_id: str
         rows.append((ent, sid, float(score) if score is not None else None))
     out = summarise(rows)
     cells = out.pop("categories")
+    for v in cells.values():        # summarise speaks of categories; this is a cell
+        if v.get("reason"):
+            v["reason"] = v["reason"].replace("for this category", "for this cell")
     for sid in ids:                 # a cell no peer scored is stated, never dropped
         cells.setdefault(sid, {"n": 0, "mean": None, "median": None, "p25": None,
                                "p75": None,

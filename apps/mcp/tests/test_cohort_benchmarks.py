@@ -95,6 +95,7 @@ def test_a_cell_below_the_floor_or_unscored_is_null_with_its_reason():
     conn = _Conn([("cl-a", "a", "P1C1.1.1", 2.0), ("cl-b", "b", "P1C1.1.1", 3.0)])
     cells = cohort.cell_benchmarks(conn, "CL", ["P1C1.1.1", "P9C9.9.9"])["cells"]
     assert cells["P1C1.1.1"]["mean"] is None and "floor is 3" in cells["P1C1.1.1"]["reason"]
+    assert "for this cell" in cells["P1C1.1.1"]["reason"]
     assert cells["P9C9.9.9"]["mean"] is None and cells["P9C9.9.9"]["n"] == 0
 
 
