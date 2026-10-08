@@ -252,3 +252,21 @@ def test_the_workflow_stops_on_agent_errors_and_reads_the_summary():
     assert "AGENT_ERROR" in src and "if (!got.length)" in src and "if (!c)" in src
     assert "--require-synthesis --summary" in src
     assert "REPAIR_BATCHES" in src and "A.repairs" in src
+
+
+def test_an_open_cell_the_gate_names_is_handed_once_not_twice(tmp_path):
+    """B1 Bank, 2026-10-08: 310 open cells sat in BOTH the capability batch and
+    the repair batch (`absence_undeclared_empty`), and the workflow runs both
+    in parallel — every open cell got two racing agents and the estimate
+    counted it twice. A capability the repair batch covers leaves `batches`."""
+    p, disp, out = _drive(tmp_path, "workflow")
+    cat = out["invocations"][0]["cats"][0]
+    before = next(i for i in out["invocations"] if cat in i["cats"])["batches"][cat]
+    cap = before[0][0]
+    cell = f"{cap}.1"
+    _fail_gate(p, cat, cell, term="absence_undeclared_empty")
+    h = P.Pipeline(p.run, p.opts)._research_handoff()
+    inv = next(i for i in h["invocations"] if cat in i["cats"])
+    assert [cell] in inv["repair_batches"][cat]
+    assert all(cap not in b for b in inv["batches"][cat]), \
+        f"{cap} is handed as a capability batch AND a repair batch"

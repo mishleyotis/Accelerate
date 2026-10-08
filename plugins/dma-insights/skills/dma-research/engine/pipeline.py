@@ -1860,6 +1860,18 @@ class Pipeline:
         repairs = {c: floors_gate.blocking_cells(
                        floors_gate.read_verdict(self.run.qa_dir, c))
                    for c in need}
+        # ONE CELL, ONE AGENT (B1 Bank, 2026-10-08): an open cell the gate
+        # names as a repair (`absence_undeclared_empty` …) sat in BOTH the
+        # capability batch and the repair batch, and the workflow runs both
+        # in parallel — 310 open cells handed twice, two agents racing on
+        # each row, and the estimate counted them twice. The repair batch is
+        # the cell-precise one, so a capability it covers leaves `batches`.
+        from .brief import capability_of
+        for c in need:
+            covered = {capability_of(x) for x in (repairs.get(c) or {}) if "." in x}
+            if covered and c in open_caps:
+                open_caps[c] = {cap: k for cap, k in open_caps[c].items()
+                                if cap not in covered}
         stalled = self._workflow_stalled(need, repairs)
         work = [c for c in sorted(need) if c not in stalled]
         by_unit = ({c: [c] for c in work} if RESEARCH_UNIT == "category"
