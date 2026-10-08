@@ -58,11 +58,28 @@ bq --project_id="$PROJECT_ID" ls "${PROJECT_ID}:${USAGE_DATASET}" 2>&1 | head -1
 bq --project_id="$PROJECT_ID" --format=prettyjson query --nouse_legacy_sql \
   "SELECT COUNT(*) AS rows_total, FORMAT_TIMESTAMP('%FT%TZ', MAX(timestamp)) AS newest FROM \`${PROJECT_ID}.${USAGE_DATASET}.${USAGE_TABLE}\`" 2>&1 | mask | head -20
 
+echo "  the app's own read (lib/usage-store.js eventsSql, 30 days), run as this account:"
+if command -v node >/dev/null 2>&1; then
+  APP_SQL="$(cd "$(dirname "$0")/.." && node --input-type=module -e "
+import { eventsSql } from './apps/web/lib/usage-store.js';
+process.stdout.write(eventsSql({ project: '${PROJECT_ID}', dataset: '${USAGE_DATASET}', table: '${USAGE_TABLE}' }));" 2>/dev/null)"
+  if APP_OUT="$(bq --project_id="$PROJECT_ID" --format=csv query --nouse_legacy_sql --max_rows=1000000 \
+                 --parameter=days:INT64:30 "$APP_SQL" 2>&1)"; then
+    printf '%s\n' "$APP_OUT" | grep -v '^WARNING' \
+      | awk -F, 'NR==1{next} {n++; t[$2]++} END {printf "  OK rows %d:", n; for (k in t) printf " %s=%d", k, t[k]; print ""}'
+  else
+    echo "  QUERY FAILED:"; printf '%s\n' "$APP_OUT" | grep -v '^WARNING' | head -8 | mask
+  fi
+else
+  echo "  (node not on PATH; skipped)"
+fi
+
 hdr "5. grants on ${USAGE_DATASET}"
 bq --project_id="$PROJECT_ID" --format=prettyjson show "${PROJECT_ID}:${USAGE_DATASET}" 2>/dev/null \
   | python3 -c 'import json,sys
+raw = sys.stdin.read()
 try:
-    for a in json.load(sys.stdin).get("access", []): print("  acl", a.get("role"), a.get("userByEmail") or a.get("specialGroup") or a.get("groupByEmail") or "")
+    for a in json.loads(raw[raw.find("{"):]).get("access", []): print("  acl", a.get("role"), a.get("userByEmail") or a.get("specialGroup") or a.get("groupByEmail") or "")
 except ValueError: print("  (no readable dataset JSON)")' | mask
 gcloud projects get-iam-policy "$PROJECT_ID" --flatten='bindings[].members' \
   --filter='bindings.role~^roles/bigquery' \
@@ -75,5 +92,9 @@ gcloud logging read 'resource.type="cloud_run_revision" AND (resource.labels.ser
 gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-web" AND jsonPayload.usage_read.status!="ok"' \
   --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=5 \
   --format='table(timestamp,jsonPayload.usage_read.status,jsonPayload.usage_read.detail)' 2>&1 | mask
+echo "  why dmai-api refused an identity:"
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-api" AND jsonPayload.actor_refused.code:*' \
+  --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=10 \
+  --format='table(timestamp,jsonPayload.actor_refused.path,jsonPayload.actor_refused.code,jsonPayload.actor_refused.detail)' 2>&1 | mask
 
 exit 0

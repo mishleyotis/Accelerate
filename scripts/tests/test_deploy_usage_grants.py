@@ -34,6 +34,7 @@ BQ = textwrap.dedent("""\
     echo "bq $*" >> "$STATE/calls"
     case " $* " in
       *" show "*) [ "${BQ_SHOW_NOT_JSON:-0}" = 1 ] && { echo "Welcome to BigQuery!"; exit 0; }
+         [ "${BQ_SHOW_WARNING:-0}" = 1 ] && echo "WARNING: \`--scopes\` flag may not work as expected and will be ignored for account type external_account."
          cat "$STATE/acl.json" ;;
       *" update "*) [ "${BQ_UPDATE_FAIL:-0}" = 1 ] && exit 1
          src=$(echo "$*" | sed -E 's/.*--source ([^ ]+).*/\\1/'); cp "$src" "$STATE/acl.json" ;;
@@ -141,3 +142,13 @@ def test_format_is_a_global_flag():
     for line in DEPLOY.splitlines():
         if "bq " in line and "prettyjson" in line and " show" in line:
             assert line.index("--format=prettyjson") < line.index(" show"), line
+
+
+def test_a_warning_ahead_of_the_json_still_takes_the_access_list(tmp_path):
+    """The 2026-10-08 release under Workload Identity: bq printed a `--scopes`
+    WARNING on stdout before the dataset JSON, the parse failed, and the
+    access-list grant was never made — only the conditioned fallback."""
+    log, acl, proj, _ = _run(tmp_path, BQ_SHOW_WARNING="1")
+    assert ("WRITER", "service-1@gcp-sa-logging.iam.gserviceaccount.com") in acl
+    assert ("READER", "dmai-web@p.iam.gserviceaccount.com") in acl
+    assert proj == [] and "WARN" not in log, log

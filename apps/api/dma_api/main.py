@@ -477,6 +477,11 @@ def _actor_or_error(request):
     try:
         return verified_actor(request), None
     except ActorError as e:
+        # One structured line per refusal — the code and detail, never the
+        # token — so a 401 in production has a reason on record
+        # (infra/diagnose_usage.sh reads it).
+        print(json.dumps({"actor_refused": {"path": request.url.path, "code": e.code,
+                                            "detail": e.detail}}), flush=True)
         return None, JSONResponse({"error": e.code, "detail": e.detail},
                                   status_code=e.status)
 
