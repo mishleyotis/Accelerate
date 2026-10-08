@@ -914,6 +914,7 @@ def compute(wb: RunWorkbook) -> dict:
         })
     pillars = []
     overall_num = overall_den = 0.0
+    peer_num = peer_den = 0.0
     for pid in ("P1", "P2", "P3", "P4"):
         mine = [c for c in categories if c["pillar_id"] == pid]
         scores = [s for c in mine for s in cats.get(c["category_id"], [])]
@@ -923,6 +924,8 @@ def compute(wb: RunWorkbook) -> dict:
         w = weights.get(pid, 0.0)
         if m is not None:
             overall_num += m * w; overall_den += w
+        if meds:
+            peer_num += (sum(meds) / len(meds)) * w; peer_den += w
         pillars.append({"pillar_id": pid, "pillar_name": C.PILLAR_NAMES[pid],
                         "score": m, "weight": w,
                         "weighted_contribution": round(m * w, 4) if m is not None else None,
@@ -930,8 +933,10 @@ def compute(wb: RunWorkbook) -> dict:
                         "gap": round(m - med, 2) if (m is not None and med is not None) else None,
                         "level": rubric.maturity_level(m), "subcaps_scored": len(scores)})
     overall = round(overall_num / overall_den, 2) if overall_den else None
-    pmeds = [p["peer_median"] for p in pillars if p["peer_median"] is not None]
-    peer_overall = round(sum(pmeds) / len(pmeds), 2) if pmeds else None
+    # The peer overall on the SAME pinned weights as the client's overall
+    # (B1 Bank, 2026-10-08: an unweighted peer mean, 1.64, set against a
+    # CL_v1-weighted 1.43 compared unlike grains; weighted it is 1.65).
+    peer_overall = round(peer_num / peer_den, 2) if peer_den else None
     return {"categories": categories, "pillars": pillars, "overall": overall,
             "peer_overall": peer_overall,
             "gap_overall": (round(overall - peer_overall, 2)
