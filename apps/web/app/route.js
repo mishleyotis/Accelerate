@@ -105,7 +105,10 @@ export async function GET(req) {
                    "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` },
       });
     }
-    if (access.role !== session.role || !verify(cookies().get(COOKIE)?.value)) {
+    // Re-issued on EVERY document load, so the 8-hour cookie counts from the
+    // last load, not the first one of the day (2026-10-08: a cookie minted at
+    // 04:30 kept that expiry through every reload and lapsed mid-afternoon).
+    {
       session = { ...session, role: access.role };
       const { sign, maxAge } = await import("../lib/session");
       setCookieValue = { value: sign(session.email, session.role, session.name), maxAge: maxAge() };

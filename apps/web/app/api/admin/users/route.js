@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { COOKIE, verify } from "../../../../lib/session";
+import { requestSession } from "../../../../lib/request-session";
 import { shareMode } from "../../../../lib/share";
 import { ASSERTION_HEADER, upstreamHeaders } from "../../../../lib/upstream";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // non-Admin session and carries the assertion and the Idempotency-Key through.
 async function proxy(req, method, body) {
   if (shareMode()) return new Response("Not found", { status: 404 });
-  const session = verify(cookies().get(COOKIE)?.value);
+  const session = await requestSession(req, cookies());
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "admin_session_required" }, { status: 403 });
   }

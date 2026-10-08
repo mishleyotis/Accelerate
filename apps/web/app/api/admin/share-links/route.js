@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { COOKIE, verify } from "../../../../lib/session";
+import { requestSession } from "../../../../lib/request-session";
 import { audit, shareMode } from "../../../../lib/share";
 import { changeDomainAccess, changeRevocation, jtiFrom, ledgerBackend, listLinks } from "../../../../lib/share-ledger";
 
@@ -17,22 +17,22 @@ export const dynamic = "force-dynamic";
 //        action  revoke | restore | remove | readd
 //   POST { domain, action }   no link: the whole client domain, across every
 //        action  revoke | restore   live link (Whitelisted client domains)
-function admin() {
-  const session = verify(cookies().get(COOKIE)?.value);
+async function admin(req) {
+  const session = await requestSession(req, cookies());
   return session && session.role === "ADMIN" ? session : null;
 }
 const noStore = { "cache-control": "no-store" };
 
-export async function GET() {
+export async function GET(req) {
   // Not on the public share service: it serves client links only (lib/share).
   if (shareMode()) return new Response("Not found", { status: 404 });
-  if (!admin()) return NextResponse.json({ error: "admin_session_required" }, { status: 403 });
+  if (!(await admin(req))) return NextResponse.json({ error: "admin_session_required" }, { status: 403 });
   return NextResponse.json(await listLinks(), { headers: noStore });
 }
 
 export async function POST(req) {
   if (shareMode()) return new Response("Not found", { status: 404 });
-  const session = admin();
+  const session = await admin(req);
   if (!session) return NextResponse.json({ error: "admin_session_required" }, { status: 403 });
   if (!ledgerBackend()) {
     return NextResponse.json({ error: "share_ledger_not_configured",

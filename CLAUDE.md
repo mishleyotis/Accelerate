@@ -323,6 +323,14 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   zennify.com) is enrolled on visit too, and an owner with no row can still
   grant. Usage analytics filters (search · role · status) sit above every
   card and narrow all of them; Daily activity is sessions by role, no toggle.
+  **A lapsed session cookie never refuses an IAP-verified person** (2026-10-08,
+  "admin_session_required" in a tab open past the 8h cookie):
+  `lib/request-session.js` is the one session read for every API route —
+  cookie, else the IAP assertion (verified, role re-read, deactivated
+  refused) with the cookie re-issued; document loads re-issue it too. Grants
+  and session changes are proven on the real stack before they are called
+  fixed: `apps/web/tests/e2e/run.sh` (Chromium + next start + uvicorn +
+  Postgres, signed assertions; scenarios + concurrency stress).
 
 ## Open decisions — leave open, do not resolve silently
 
