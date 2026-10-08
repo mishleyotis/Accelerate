@@ -289,7 +289,18 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # Populated near the end of `run`, like the two volume terms, and
         # advisory for the reason recorded beside it in ADVISORY_TERMS.
         "reuse_ignored": [],
+        # B1 Bank, 2026-10-08: a figure the synthesis asserts that no excerpt
+        # registered to the cell carries. The write path refuses it
+        # (ledger.append_synthesis); the gate re-reads it so a row that got
+        # past the writer (a bracketed "[2025]" passed as a citation until
+        # quality._CITATION was narrowed to ids) cannot ride to scoring.
+        "ungrounded_figures": [],
     }
+    _excerpts: dict[str, list[str]] = {}
+    for er in wb.rows("Evidence_Detail"):
+        for c in Q._ids(er.get("SubCap_IDs")):
+            _excerpts.setdefault(c, []).append(
+                f"{er.get('Excerpt') or ''} {er.get('Anchor_Quote') or ''}")
     items = 0
     searched_cells = 0
     evidenced_cells = 0
@@ -323,6 +334,11 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
                 {"subcap": cell, "ids": sorted(set(dead))})
 
         synthesised = bool(str(r.get("Dominant_Claim") or "").strip())
+        if synthesised and eids:
+            figs = Q.ungrounded_numbers(r, _excerpts.get(cell, []))
+            if figs:
+                findings["ungrounded_figures"].append(
+                    {"subcap": cell, "figures": figs})
         if len(eids) < FLOOR_ITEMS:
             findings["closed_below_floor"].append(
                 {"subcap": cell, "items": len(eids), "floor": FLOOR_ITEMS})
@@ -570,6 +586,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # 2026-09-03 (owner issue 1): the primary question is owed on every
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
+        "ungrounded_figures",
     ) if findings[k]]
     # A category whose research has not converged is not challenged yet: the
     # challenge stage runs after the floors gate says the work is done, so

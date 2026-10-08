@@ -334,7 +334,16 @@ def claim_label_supported(row) -> str | None:
 # to the subcap has no provenance at all, and the refusal can name it.
 
 _NUM_TOKEN = re.compile(r"\d[\d,]*(?:\.\d+)?")
-_CITATION = re.compile(r"\[[^\]]*\]")   # [E-0001:F2] — ids are not figures
+#: A bracketed CITATION is ids only — [E-0001:F2], [E-192, E-195], [TS-004].
+#: It used to be ANY bracketed text, so "[2025]", "[July 15, 2025]" or
+#: "[27 hits]" passed as citations and a figure no excerpt carries slipped the
+#: grounding check by wearing brackets (B1 Bank, 2026-10-08: a research agent
+#: read this module after a refusal and bracketed its ungrounded figures).
+_ID = r"[A-Z][A-Z0-9]*-[A-Z0-9][\w.\-]*(?::\w+)?"
+_CITATION = re.compile(rf"\[\s*{_ID}(?:\s*[,;]\s*{_ID})*\s*\]")
+#: An id is never a figure, wherever it sits — "[E-877; fetch refused …]" is a
+#: citation with a note, and its digits are the id's, not a claim.
+_ID_TOKEN = re.compile(rf"\b{_ID}")
 
 #: Prose fields whose numbers must be grounded — the fields that CLAIM what
 #: sources say. NOT_RUN values are skipped whole ("no hits across four
@@ -356,7 +365,7 @@ def _figures(text: str) -> set[str]:
     alone — the false-positive cost outruns the risk — but decimals,
     percent-scale figures and years all check."""
     out = set()
-    for tok in _NUM_TOKEN.findall(_CITATION.sub(" ", text or "")):
+    for tok in _NUM_TOKEN.findall(_ID_TOKEN.sub(" ", _CITATION.sub(" ", text or ""))):
         plain = tok.replace(",", "")
         try:
             big = float(plain) >= 13 or "." in plain
