@@ -740,9 +740,8 @@ SERVICED_NOTE_MIN = 40
 
 def latest_serviced(wb: RunWorkbook, report: str | None = None) -> dict:
     """(report, section) -> the newest `serviced` record."""
-    p = Path(wb.path).resolve().parent / "07_qa" / SERVICED_FILE
     out: dict = {}
-    if not p.is_file():
+    if not (p := Path(wb.path).resolve().parent / "07_qa" / SERVICED_FILE).is_file():
         return out
     for raw in p.read_text(encoding="utf-8", errors="replace").splitlines():
         try:
