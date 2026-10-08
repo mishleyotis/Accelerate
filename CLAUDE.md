@@ -296,7 +296,23 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   an owner floor (always an active Admin, cannot be demoted here) and an
   admin cannot demote or deactivate themself; the deploy-time lists are the
   fallback only when svc_api is unreachable. The POST-route census in
-  `apps/api/tests/test_alerts.py` names all three.
+  `apps/api/tests/test_alerts.py` names all four.
+  Follow-up (user, 2026-10-08: "the user allocation leaves out the initial
+  allocation on the prototype. It should be 100% similar to the prototype"):
+  **`POST /v1/me` enrols the caller** on sign-in and every document load — a
+  first visit gets a `users` row with its allocated role (floor ADMIN,
+  `ANALYST_EMAILS` ANALYST, else AE) and a `login` session_log row; a return
+  touches `last_seen_at` at most every 5 min (`login` again after 8 h); a
+  deactivated visit logs `denied`. Idempotent by construction, writes only
+  `users` + `session_log`. The card is the prototype's row for row (role
+  select + Deactivate/Reactivate on every row, "Invited" for never seen);
+  server refusals are toasts. **Whitelisted client domains** (same day, "similar
+  to the user list above") sits under it: one row per domain the live client
+  links admit; Revoke access removes the domain and every address named at it
+  from every live link in the share ledger (`changeDomainAccess`), Restore puts
+  them back — ledger writes, not the database. Admin › Usage analytics blank in
+  production is diagnosed by `infra/diagnose_usage.sh` (end of every deploy,
+  and on demand via the `Production diagnostics` workflow on the default branch).
 
 ## Open decisions — leave open, do not resolve silently
 

@@ -269,6 +269,47 @@ export async function listLinks(backend = ledgerBackend(), now = Date.now()) {
   }
 }
 
+/* ── Whitelisted client domains ───────────────────────────────────────
+   Admin › Whitelisted client domains: every organisation domain the live
+   links admit, and one control per domain. Access at a domain is the domain
+   on a link's allowlist OR an address at it named on the link (lib/share
+   allowed), so taking a domain's access back removes BOTH from every link
+   that is still live — otherwise a named colleague would still get in — and
+   restoring puts both back. Expired and revoked links are left alone: they
+   already open for nobody. Each change is the per-link ledger write the
+   Client links card makes, attributed to the admin. */
+export function domainsOf(link) {
+  const out = new Set((link.domains || []).map((d) => String(d).toLowerCase()));
+  for (const e of link.emails || []) out.add(String(e).split("@")[1].toLowerCase());
+  return [...out];
+}
+
+export async function changeDomainAccess(domain, { action, by }, backend = ledgerBackend()) {
+  if (!backend) throw Object.assign(new Error("no ledger configured"), { code: "not_configured" });
+  const d = String(domain || "").trim().toLowerCase().replace(/^@/, "");
+  if (!DOMAIN.test(d)) throw Object.assign(new Error("name one domain"), { code: "bad_request" });
+  if (action !== "revoke" && action !== "restore") {
+    throw Object.assign(new Error("action is revoke or restore"), { code: "bad_request" });
+  }
+  const listed = await listLinks(backend);
+  if (listed.status !== "ok") throw new Unavailable(listed.detail || "the ledger could not be read");
+  const per = action === "revoke" ? "remove" : "readd";
+  const changed = [];
+  for (const l of listed.links) {
+    if (l.status !== "active" || !domainsOf(l).includes(d)) continue;
+    if ((l.domains || []).map((x) => x.toLowerCase()).includes(d)) {
+      await changeRevocation(l.jti, { action: per, domain: d, by }, backend);
+    }
+    for (const e of l.emails || []) {
+      if (String(e).toLowerCase().endsWith(`@${d}`)) {
+        await changeRevocation(l.jti, { action: per, email: e, by }, backend);
+      }
+    }
+    changed.push(l.jti);
+  }
+  return { domain: d, action, links: changed };
+}
+
 /* A pasted link or a bare id → the jti. A full link's token is decoded for
    its jti (no signature needed to READ the id; revoking an id is harmless if
    it names nothing). */

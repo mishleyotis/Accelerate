@@ -130,3 +130,74 @@ test("admin · client links says so when the ledger is not configured, rather th
     server.close();
   }
 });
+
+/* Owner, 2026-10-08: "the whitelist should show me a list of whitelisted
+   client domains and allow me to revoke access. Similar to the user list
+   above" — and the user list itself "100% similar to the prototype": a role
+   select and a Deactivate button on every row, a server refusal a toast. */
+test("admin · whitelisted client domains revoke in one request; users & roles is the prototype's card", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  try {
+    const page = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage();
+    const errors = []; page.on("pageerror", (e) => errors.push(String(e.message)));
+    const posts = [], userPosts = [];
+    await page.route("**/api/admin/share-links", (r) => {
+      if (r.request().method() === "POST") {
+        posts.push(JSON.parse(r.request().postData()));
+        return r.fulfill({ status: 200, contentType: "application/json",
+                           body: JSON.stringify({ domain: "bcu.com", action: "revoke", links: ["linkActive01"] }) });
+      }
+      return r.fulfill({ status: 200, contentType: "application/json",
+                         body: JSON.stringify({ status: "ok", links: LINKS }) });
+    });
+    await page.route("**/api/admin/users", (r) => {
+      if (r.request().method() === "POST") {
+        userPosts.push({ body: JSON.parse(r.request().postData()), key: r.request().headers()["idempotency-key"] });
+        return r.fulfill({ status: 409, contentType: "application/json",
+          body: JSON.stringify({ error: "owner_floor", detail: "dma@zennify.com is on the deploy-time owner list (ADMIN_EMAILS) and stays an active Admin" }) });
+      }
+      return r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ users: [
+        { email: "dma@zennify.com", display_name: "DMA", role: "ADMIN", is_active: true, last_seen_at: new Date().toISOString() },
+        { email: "sam.ae@zennify.com", display_name: "Sam Ae", role: "AE", is_active: true, last_seen_at: null },
+      ], owner_floor: ["dma@zennify.com"] }) });
+    });
+    await page.route("**/api/admin/usage**", (r) => r.fulfill({ status: 200, contentType: "application/json",
+      body: JSON.stringify({ status: "not_configured" }) }));
+    await openAdmin(page, base);
+
+    const users = page.locator(".card", { has: page.locator("h3", { hasText: "Users & roles" }) });
+    await users.locator("tbody tr", { hasText: "sam.ae@zennify.com" }).waitFor();
+    assert.equal(await users.locator("tbody select").count(), 2, "a row lost its role select");
+    assert.equal(await users.getByRole("button", { name: "Deactivate" }).count(), 2, "a row lost its Deactivate button");
+    assert.equal(await users.locator("tbody select:disabled").count(), 0);
+    const ut = await users.innerText();
+    assert.match(ut, /Invited/, "a user never seen reads as Invited, as in the prototype");
+    assert.match(ut, /1 min ago/);
+    assert.ok(!/Owner account|Any other @zennify\.com/.test(ut), ut);
+    await users.locator("tbody tr", { hasText: "dma@zennify.com" }).locator("select").selectOption("AE");
+    await settle(page);
+    assert.equal(userPosts.length, 1);
+    assert.deepStrictEqual(userPosts[0].body, { email: "dma@zennify.com", role: "AE" });
+    assert.match(userPosts[0].key, /^[0-9a-f-]{36}$/, "no Idempotency-Key on the write");
+    assert.match(await page.locator("body").innerText(), /owner list/, "the refusal was not shown");
+    assert.equal(await users.locator("tbody tr", { hasText: "dma@zennify.com" }).locator("select").inputValue(), "ADMIN",
+                 "a refused change left the row showing a role it does not hold");
+
+    const card = page.locator('[data-screen-label="Admin · Whitelisted client domains"]');
+    await card.locator('tr[data-domain="bcu.com"]').waitFor();
+    const text = await card.innerText();
+    assert.match(text, /@bcu\.com/);
+    assert.match(text, /Baxter Credit Union/);
+    assert.match(text, /jane@bcu\.com/);
+    assert.ok(!text.includes("cfo@bcu.com"), "a revoked link's recipient is listed as whitelisted");
+    await card.getByRole("button", { name: "Revoke access" }).click();
+    await settle(page);
+    assert.deepStrictEqual(posts, [{ domain: "bcu.com", action: "revoke" }]);
+    assert.deepStrictEqual(errors, []);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});

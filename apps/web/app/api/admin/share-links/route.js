@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../lib/session";
 import { audit, shareMode } from "../../../../lib/share";
-import { changeRevocation, jtiFrom, ledgerBackend, listLinks } from "../../../../lib/share-ledger";
+import { changeDomainAccess, changeRevocation, jtiFrom, ledgerBackend, listLinks } from "../../../../lib/share-ledger";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +15,8 @@ export const dynamic = "force-dynamic";
 //   POST { link, action, email?, domain? }
 //        link    a link id, or the pasted link itself
 //        action  revoke | restore | remove | readd
+//   POST { domain, action }   no link: the whole client domain, across every
+//        action  revoke | restore   live link (Whitelisted client domains)
 function admin() {
   const session = verify(cookies().get(COOKIE)?.value);
   return session && session.role === "ADMIN" ? session : null;
@@ -38,6 +40,18 @@ export async function POST(req) {
   }
   let body = {};
   try { body = await req.json(); } catch {}
+  if (!body.link && body.domain) {
+    try {
+      const out = await changeDomainAccess(body.domain, { action: body.action, by: session.email });
+      audit(`share_domain_${out.action === "revoke" ? "revoked" : "restored"}`,
+        { domain: out.domain, by: session.email, links: out.links });
+      return NextResponse.json(out, { headers: noStore });
+    } catch (e) {
+      const status = e.code === "bad_request" ? 400 : e.code === "not_configured" ? 503 : 502;
+      return NextResponse.json({ error: e.code || "ledger_unavailable", detail: e.message },
+        { status, headers: noStore });
+    }
+  }
   const jti = jtiFrom(body.link);
   if (!jti) {
     return NextResponse.json({ error: "bad_request", detail: "Paste a client link or its link ID." },

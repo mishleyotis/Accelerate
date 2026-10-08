@@ -325,6 +325,35 @@ test("the admin list: every recorded link with its status, and links revoked by 
   assert.deepStrictEqual(await L.listLinks(null), { status: "not_configured", links: [] });
 });
 
+test("a whitelisted client domain is revoked across every live link, named addresses included, and restored", async () => {
+  const { backend } = ledger();
+  const a = live(), b = live({ recipients: "cfo@bcu.com" }), other = live({ recipients: "ops@arbor.com" });
+  for (const l of [a, b, other]) await L.recordLink(l.payload, "ae@zennify.com", backend);
+  await L.changeRevocation(b.payload.jti, { action: "revoke" }, backend);   // already shut: left alone
+  await assert.rejects(L.changeDomainAccess("not a domain", { action: "revoke" }, backend), /name one domain/);
+  await assert.rejects(L.changeDomainAccess("bcu.com", { action: "remove" }, backend), /revoke or restore/);
+  const out = await L.changeDomainAccess("@BCU.com", { action: "revoke", by: "admin@zennify.com" }, backend);
+  assert.deepStrictEqual(out, { domain: "bcu.com", action: "revoke", links: [a.payload.jti] });
+  await withKey(async () => {
+    L.clearRevocationCache();
+    const p = (await L.liveLink(a.token, backend)).p;
+    assert.strictEqual(S.allowed(p, "jane@bcu.com"), false, "a named address outlived its domain's revocation");
+    assert.strictEqual(S.allowed(p, "cfo@bcu.com"), false);
+    assert.strictEqual(S.allowed(p, "cfo.home@gmail.com"), true, "another recipient lost access");
+    assert.ok(S.allowed((await L.liveLink(other.token, backend)).p, "ops@arbor.com"), "another client domain was touched");
+    const rev = await L.revocationOf(a.payload.jti, backend);
+    assert.ok(rev.history.every((h) => h.by === "admin@zennify.com"), "the change is not attributed");
+    await L.changeDomainAccess("bcu.com", { action: "restore", by: "admin@zennify.com" }, backend);
+    L.clearRevocationCache();
+    const back = (await L.liveLink(a.token, backend)).p;
+    assert.strictEqual(S.allowed(back, "jane@bcu.com"), true);
+    assert.strictEqual(S.allowed(back, "cfo@bcu.com"), true);
+  });
+  const shut = await L.revocationOf(b.payload.jti, backend);
+  assert.deepStrictEqual([shut.emails, shut.domains], [[], []], "a revoked link was edited");
+  assert.deepStrictEqual(L.domainsOf({ emails: ["Jane@BCU.com", "x@gmail.com"], domains: ["bcu.com"] }).sort(), ["bcu.com", "gmail.com"]);
+});
+
 test("a pasted link or a bare id names the link; nothing else does", () => {
   const { token, payload } = live();
   assert.strictEqual(L.jtiFrom(S.shareUrl("https://dmai-share.example", token, BASE.entity)), payload.jti);

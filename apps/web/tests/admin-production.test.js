@@ -64,6 +64,30 @@ test("admin home carries no non-functional surface", () => {
   // never renders the preview's mock people.
   assert.ok(t.includes("Loading users") && t.includes("Invite user"), "live roster controls missing");
   for (const mock of ["Sara Lin", "Tom Reyes", "Dev Patel"]) assert.ok(!t.includes(mock), `mock user "${mock}" in production`);
+  // The prototype's row: no lock badges, no footer note in its place.
+  for (const gone of ["Owner account", "Any other @zennify.com"]) assert.ok(!t.includes(gone), `"${gone}" is not in the prototype's card`);
+  // Whitelisted client domains sits under the user list, read from the ledger.
+  assert.ok(t.includes("Whitelisted client domains") && t.includes("Loading client domains"), t);
+  for (const mock of ["golden1.com", "arborbank.com"]) assert.ok(!t.includes(mock), `preview domain "${mock}" in production`);
+  assert.ok(t.indexOf("Users & roles") < t.indexOf("Whitelisted client domains"), "the domains card is not under the user list");
+});
+
+test("whitelisted client domains: one row per domain across live links, revoked only when every way in is closed", () => {
+  const rows = win.cdRows([
+    { jti: "a", entity: "bcu", status: "active", emails: ["jane@bcu.com", "x@gmail.com"], domains: ["bcu.com"], expires_at: "2026-11-01T00:00:00Z" },
+    { jti: "b", entity: "bcu", status: "active", emails: ["cfo@bcu.com"], domains: ["bcu.com"], expires_at: "2026-12-01T00:00:00Z",
+      revocation: { emails: ["cfo@bcu.com"], domains: ["bcu.com"] } },
+    { jti: "c", entity: "arbor", status: "expired", emails: ["ops@arbor.com"], domains: ["arbor.com"] },
+    { jti: "d", entity: "swbc", status: "active", emails: ["it@swbc.com"], domains: ["swbc.com"], revocation: { emails: ["it@swbc.com"], domains: ["swbc.com"] } },
+  ]);
+  const by = Object.fromEntries(rows.map(r => [r.domain, r]));
+  assert.deepEqual(Object.keys(by).sort(), ["bcu.com", "gmail.com", "swbc.com"], "an expired link's domain is listed");
+  assert.equal(by["bcu.com"].links, 2);
+  assert.equal(by["bcu.com"].open, 1, "one link still admits bcu.com");
+  assert.equal(by["bcu.com"].expires, "2026-12-01T00:00:00Z");
+  assert.deepEqual([...by["bcu.com"].emails].sort(), ["cfo@bcu.com", "jane@bcu.com"]);
+  assert.equal(by["swbc.com"].open, 0, "a domain with every way in removed reads as revoked");
+  assert.equal(rows[rows.length - 1].domain, "swbc.com", "revoked domains sort after active ones");
 });
 
 test("the last-scan line states what the ledger row says", () => {

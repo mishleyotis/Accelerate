@@ -35,6 +35,7 @@ test("the users table decides the role and the active flag", withEnv(async () =>
   assert.deepEqual(await R.resolveAccess("sam@zennify.com", "jwt", { fetchImpl }),
                    { role: "ANALYST", active: true, source: "users" });
   assert.equal(calls[0].url, "https://api.test/v1/me");
+  assert.equal(calls[0].opts.method, "POST", "the read also enrols the caller");
   assert.equal(calls[0].opts.headers["x-goog-iap-jwt-assertion"], "jwt", "the assertion is forwarded");
   ({ fetchImpl } = api({ email: "sam@zennify.com", role: "ADMIN", is_active: false, source: "users" }));
   assert.equal((await R.resolveAccess("sam@zennify.com", "jwt", { fetchImpl })).active, false);
@@ -54,6 +55,17 @@ test("an answer about somebody else, or an outage, falls back to the deploy gran
   assert.equal((await R.resolveAccess("ana@zennify.com", "jwt", { fetchImpl })).role, "ANALYST");
   assert.equal((await R.resolveAccess("sam@zennify.com", null, { fetchImpl })).source, "deploy",
                "no assertion, no lookup");
+}));
+
+test("an api older than enrolment (405) is read through its GET", withEnv(async () => {
+  const calls = [];
+  const fetchImpl = async (url, opts) => {
+    calls.push(opts.method || "GET");
+    if (opts.method === "POST") return { ok: false, status: 405, json: async () => ({}) };
+    return { ok: true, status: 200, json: async () => ({ email: "sam@zennify.com", role: "ADMIN", is_active: true, source: "users" }) };
+  };
+  assert.equal((await R.resolveAccess("sam@zennify.com", "jwt", { fetchImpl })).role, "ADMIN");
+  assert.deepEqual(calls, ["POST", "GET"]);
 }));
 
 test("a deactivated account sees a plain statement", () => {

@@ -31,7 +31,7 @@ from . import subverticals
 from .pages import ApiError, build_page, etag_for, resolve_run
 from .redaction import normalise_audience, redact_evidence_response
 from .subverticals import SCOPE_TAG, scope_to_entity
-from .users import list_users, me as user_me, set_user
+from .users import enrol as user_enrol, list_users, me as user_me, set_user
 
 _connect = db_connect
 
@@ -492,6 +492,31 @@ def whoami(request: Request):
     conn = _connect()
     try:
         return JSONResponse(user_me(conn.cursor(), email))
+    finally:
+        conn.close()
+
+
+@app.post("/v1/me")
+def whoami_enrol(request: Request):
+    """Enrol the verified caller, then answer their grant (dma_api.users.enrol):
+    a first visit gets a users row with its allocated role, a return touches
+    last_seen_at. Writes only users and session_log — workflow state about who
+    may read, under the 2026-10-07 user-grants adjudication; idempotent by
+    construction, so no Idempotency-Key is asked of a page load."""
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            out = user_enrol(cur, email)
+        except ApiError as e:
+            conn.rollback()
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        conn.commit()
+        return JSONResponse(out)
     finally:
         conn.close()
 
