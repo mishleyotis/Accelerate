@@ -70,6 +70,13 @@ _JWKS_TTL = 12 * 60 * 60
 
 _cache: dict = {"keys": None, "at": 0.0}
 
+# Clock skew allowed on `iat` only — expiry stays exact (checked again below). Two services with their own clocks verify
+# the same assertion (apps/web/lib/iap.js allows an `iat` up to 300 s ahead);
+# with none here, an assertion the web tier accepted could be refused by the
+# API one second later as "not yet valid" — the Users & roles roster read 401
+# in production on 2026-10-08 while the web tier admitted the same person.
+LEEWAY_S = 60
+
 
 class ActorError(Exception):
     """A write that cannot be attributed. Carries the API error shape."""
@@ -135,6 +142,11 @@ def verify_assertion(token: str | None, *, audience: str | None = None,
                          f"IAP assertions are ES256; got {header.get('alg')!r}")
     jwk = next((k for k in _jwks(fetch) if k.get("kid") == header.get("kid")), None)
     if jwk is None:
+        # Google rotates the IAP keys; a kid newer than the 12-hour cache is
+        # re-fetched once before it is refused.
+        reset_jwks_cache()
+        jwk = next((k for k in _jwks(fetch) if k.get("kid") == header.get("kid")), None)
+    if jwk is None:
         raise ActorError("actor_unverified",
                          "the assertion names a signing key that is not in "
                          "Google's published IAP key set")
@@ -144,16 +156,21 @@ def verify_assertion(token: str | None, *, audience: str | None = None,
         # configured". PyJWT enforces exp and rejects an `iat` in the future
         # (ImmatureSignatureError) on the way past, so neither is re-checked
         # below — a second, more lenient copy of a check the library already
-        # makes stricter would read as a tolerance that does not exist.
+        # makes stricter would read as a tolerance that does not exist. The
+        # one tolerance is LEEWAY_S of clock skew on `iat`, stated above;
+        # PyJWT's leeway also loosens `exp`, so expiry is re-checked exactly.
         claims = jwt.decode(
             token, PyJWK.from_dict(jwk).key, algorithms=["ES256"],
-            audience=audience, issuer=ISSUER,
+            audience=audience, issuer=ISSUER, leeway=LEEWAY_S,
             options={"require": ["exp", "iat", "iss", "aud", "email"]})
     except Exception as e:                                    # noqa: BLE001
         # The class, never the token and never the claim values.
         raise ActorError("actor_unverified",
                          f"the assertion did not verify: {type(e).__name__}")
 
+    if claims["exp"] <= time.time():
+        raise ActorError("actor_unverified",
+                         "the assertion did not verify: ExpiredSignatureError")
     email = (claims.get("email") or "").strip().lower()
     if not email:
         raise ActorError("actor_unverified",

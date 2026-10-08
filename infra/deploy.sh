@@ -446,8 +446,11 @@ if [ -f apps/web/Dockerfile ]; then
 import json, sys
 role, email = sys.argv[1], sys.argv[2].lower()
 enough = {"READER": {"READER", "WRITER", "OWNER"}, "WRITER": {"WRITER", "OWNER"}}[role]
+# Under Workload Identity bq prints a `--scopes` WARNING on stdout ahead of
+# the JSON (the 2026-10-08 release): read from the first brace.
+raw = sys.stdin.read()
 try:
-    access = json.load(sys.stdin).get("access", [])
+    access = json.loads(raw[raw.find("{"):]).get("access", [])
 except ValueError:
     sys.exit(1)  # no readable access list: the conditional binding decides
 sys.exit(0 if any(a.get("userByEmail", "").lower() == email and a.get("role") in enough for a in access) else 1)
@@ -476,8 +479,9 @@ sys.exit(0 if any(a.get("userByEmail", "").lower() == email and a.get("role") in
        && usage_acl_has "$1" "$2"; then
 import json, sys
 path, role, email = sys.argv[1:]
+raw = open(path).read()
 try:
-    ds = json.load(open(path))
+    ds = json.loads(raw[raw.find("{"):])  # past any WARNING line bq printed first
 except ValueError:
     sys.exit(1)  # no readable dataset JSON: fall back to the conditional binding
 ds.setdefault("access", []).append({"role": role, "userByEmail": email})
