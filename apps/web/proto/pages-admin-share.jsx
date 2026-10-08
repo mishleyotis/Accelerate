@@ -79,7 +79,7 @@ function ShareLinksCard() {
     const key = `${l.jti}:${removed ? "readd" : "remove"}:${value}`;
     const canEdit = l.status === "active";
     return (
-      <span key={`${kind}:${value}`} className="chip" style={{ display: "inline-flex", alignItems: "center", gap: 4,
+      <span key={`${kind}:${value}`} className="chip" style={{ display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", flexShrink: 0,
               textDecoration: removed ? "line-through" : "none", opacity: removed ? 0.6 : 1 }}
             title={removed ? "Access removed" : kind === "domain" ? `Anyone with an @${value} address` : value}>
         {kind === "domain" ? `anyone @${value}` : value}
@@ -116,9 +116,9 @@ function ShareLinksCard() {
       </div>
     );
     return (
-      <div style={{ overflowX: "auto" }}>
+      <div className="tbl-reflow reflow-early">
         <table className="tbl">
-          <thead><tr><th>Client</th><th>Shared with</th><th>Shared by</th><th>Expires</th><th>Status</th><th style={{ textAlign: "right" }}>Access</th></tr></thead>
+          <thead><tr><th>Client</th><th>Shared with</th><th className="col-drop">Shared by</th><th className="col-drop2">Expires</th><th>Status</th><th style={{ textAlign: "right" }}>Access</th></tr></thead>
           <tbody>
             {shown.map(l => {
               const st = SL_STATUS[l.status] || SL_STATUS.active;
@@ -126,7 +126,7 @@ function ShareLinksCard() {
                 <tr key={l.jti} data-link={l.jti} style={{ opacity: l.status === "active" ? 1 : 0.7 }}>
                   <td data-label="Client">
                     <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{l.unrecorded ? "Not recorded" : slClientName(l.entity)}</div>
-                    <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>Link ID {l.jti}</div>
+                    <div className="f-mono t-email" style={{ fontSize: 10, color: "var(--z-muted)" }}>Link ID {l.jti}</div>
                   </td>
                   <td data-label="Shared with">
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
@@ -135,12 +135,12 @@ function ShareLinksCard() {
                       {l.unrecorded ? <span className="muted" style={{ fontSize: 11.5 }}>Generated before the ledger; revoked by ID</span> : null}
                     </div>
                   </td>
-                  <td data-label="Shared by" style={{ fontSize: 11.5 }}>
+                  <td data-label="Shared by" className="col-drop" style={{ fontSize: 11.5 }}>
                     <div>{l.minted_by || "Not recorded"}</div>
                     <div className="muted" style={{ fontSize: 10.5 }}>{l.minted_at ? fmtDate(l.minted_at) : ""}</div>
                   </td>
-                  <td data-label="Expires" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{l.expires_at ? fmtDate(l.expires_at) : "Not recorded"}</td>
-                  <td data-label="Status"><span className={`b ${st.cls}`}>{st.label}</span></td>
+                  <td data-label="Expires" className="col-drop2" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{l.expires_at ? fmtDate(l.expires_at) : "Not recorded"}</td>
+                  <td data-label="Status"><span className={`b b-token ${st.cls}`}>{st.label}</span></td>
                   <td data-label="Access" style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                     {l.status === "active" ? (
                       confirm === l.jti ? (
@@ -179,7 +179,7 @@ function ShareLinksCard() {
     <div className="card flush" style={{ marginBottom: 16 }} data-screen-label="Admin · Client links">
       <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
         <div className="row"><Icon name="share" size={14} /><h3>Client links · access</h3></div>
-        {data && data.status === "ok" ? <span className="b b-teal">{counts.active || 0} active</span> : null}
+        {data && data.status === "ok" ? <span className="b b-teal b-token">{counts.active || 0} active</span> : null}
         <span className="spacer" />
         {data && data.status === "ok" ? (
           <div className="toggle-row" role="group" aria-label="Which links">
@@ -297,11 +297,11 @@ function ClientDomainsCard() {
     <div className="card flush" style={{ marginBottom: 16 }} data-screen-label="Admin · Whitelisted client domains">
       <div className="card-head">
         <div className="row"><Icon name="lock" size={14} /><h3>Whitelisted client domains</h3></div>
-        <span className="b b-muted">{rows.filter(r => r.open > 0).length} active</span>
+        <span className="b b-muted b-token">{rows.filter(r => r.open > 0).length} active</span>
       </div>
-      <div style={{ overflowX: "auto" }}>
+      <div className="tbl-reflow reflow-early">
         <table className="tbl">
-          <thead><tr><th>Domain</th><th>Client</th><th>Recipients</th><th>Expires</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
+          <thead><tr><th>Domain</th><th className="col-drop2">Client</th><th>Recipients</th><th className="col-drop">Expires</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
           <tbody>
             {note ? (
               <tr><td colSpan={6} style={{ fontSize: 12, color: "var(--z-muted)" }}>{note}</td></tr>
@@ -311,12 +311,12 @@ function ClientDomainsCard() {
                   <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>@{r.domain}</div>
                   <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.links} live link{r.links === 1 ? "" : "s"}</div>
                 </td>
-                <td data-label="Client" style={{ fontSize: 12 }}>{[...r.clients].map(slClientName).join(" · ")}</td>
+                <td data-label="Client" className="col-drop2" style={{ fontSize: 12 }}>{[...r.clients].map(slClientName).join(" · ")}</td>
                 <td data-label="Recipients" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>
-                  {[...r.emails].length ? [...r.emails].map(e => <div key={e} className="f-mono" style={{ fontSize: 10.5 }}>{e}</div>) : "Anyone at the domain"}
+                  {[...r.emails].length ? [...r.emails].map(e => <div key={e} className="f-mono t-email" style={{ fontSize: 10.5 }}>{e}</div>) : "Anyone at the domain"}
                 </td>
-                <td data-label="Expires" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{r.expires ? fmtDate(r.expires) : "Not recorded"}</td>
-                <td data-label="Status"><span className={`b ${on ? "b-above" : "b-muted"}`}>{on ? "Active" : "Revoked"}</span></td>
+                <td data-label="Expires" className="col-drop" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{r.expires ? fmtDate(r.expires) : "Not recorded"}</td>
+                <td data-label="Status"><span className={`b b-token ${on ? "b-above" : "b-muted"}`}>{on ? "Active" : "Revoked"}</span></td>
                 <td data-label="Action" style={{ textAlign: "right" }}>
                   <button className="btn btn-tertiary btn-sm" disabled={busy === r.domain} onClick={() => toggle(r)}>{on ? "Revoke access" : "Restore"}</button>
                 </td>

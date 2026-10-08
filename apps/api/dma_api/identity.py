@@ -127,7 +127,7 @@ def verify_assertion(token: str | None, *, audience: str | None = None,
         raise ActorError(
             "actor_unverified",
             "this write must be attributable to a verified person: forward "
-            "the IAP assertion in x-goog-iap-jwt-assertion. A caller-supplied "
+            "the IAP assertion in x-dmai-iap-assertion. A caller-supplied "
             "`actor` parameter is not an identity and is no longer accepted")
 
     import jwt
@@ -187,7 +187,12 @@ def verified_actor(request, claimed: str | None = None, *,
     matches the grant and is allowed through; naming somebody else is refused,
     because that is the attack rather than a mistake worth correcting quietly.
     """
-    token = request.headers.get("x-goog-iap-jwt-assertion")
+    # dmai-web forwards the assertion it received under its own header name:
+    # Google's front end does not deliver a caller-supplied
+    # `x-goog-iap-jwt-assertion` to this service. The token is verified
+    # identically whichever header carried it.
+    token = (request.headers.get("x-dmai-iap-assertion")
+             or request.headers.get("x-goog-iap-jwt-assertion"))
     ident = verify_assertion(token, audience=audience, fetch=fetch)
     if claimed and claimed.strip().lower() != ident["email"]:
         raise ActorError(

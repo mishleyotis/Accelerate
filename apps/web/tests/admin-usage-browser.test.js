@@ -233,3 +233,79 @@ test("usage analytics renders its full layout at zero while awaiting the first e
     server.close();
   }
 });
+
+/* Owner, 2026-10-08: "When I filter user activity, the filter should be on top
+   and all bottom components should adjust accordingly" — and "the daily
+   activity toggle feels off". The filter bar precedes every card, and a role
+   filter narrows the KPIs, the chart legend, the page table and the user
+   table alike; the chart has no metric toggle. */
+test("usage filters sit on top and narrow every card below them", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  try {
+    const { ctx, p, errors } = await openApp(browser, base, "#/admin/usage", wire());
+    await p.waitForSelector('[data-screen-label="Usage filters"]', { timeout: 10000 });
+    const order = await p.evaluate(() => {
+      const f = document.querySelector('[data-screen-label="Usage filters"]').getBoundingClientRect().top;
+      const kpi = [...document.querySelectorAll("*")].find(e => e.children.length === 0 && /^Active users$/i.test(e.textContent.trim()));
+      return { f, kpi: kpi.getBoundingClientRect().top };
+    });
+    assert.ok(order.f < order.kpi, "the filter bar is not above the cards it filters");
+    const kpi = async () => p.evaluate(() => {
+      const label = [...document.querySelectorAll("*")].find(e => e.children.length === 0 && /^Active users$/i.test(e.textContent.trim()));
+      return label.parentElement.textContent;
+    });
+    assert.match(await kpi(), /2/, "two people are active before filtering");
+    assert.equal(await p.locator('text="Active time"').count(), 0, "the daily metric toggle is gone");
+    await p.selectOption('select[aria-label="Role"]', "ADMIN");
+    await p.waitForFunction(() => /1 of \d+ (people|person)/.test(document.body.innerText), null, { timeout: 5000 });
+    assert.match(await kpi(), /1/, "the KPI tiles did not follow the role filter");
+    const text = await p.evaluate(() => document.body.innerText);
+    assert.ok(!text.includes("ae.one@zennify.com"), "the user table still lists an AE under an Admin filter");
+    assert.ok(!/Client · Platform/.test(text), "the page table still counts an AE's views under an Admin filter");
+    await p.click('button:has-text("Clear")');
+    await p.waitForFunction(() => /ae\.one@zennify\.com/.test(document.body.innerText), null, { timeout: 5000 });
+    assert.deepEqual(errors, []);
+    await ctx.close();
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+/* Owner, 2026-10-08, from a 1024px screenshot reading "Adm|in", "Activ|e" and
+   "zennify.co|m": items never wrap inside a chip, an address never breaks, and
+   a table reflows rather than scrolling sideways — at every width. */
+test("admin chips, addresses and tables hold their words at every width", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  try {
+    const { ctx, p } = await openApp(browser, base, "#/admin/usage", wire());
+    await p.waitForSelector('[data-screen-label="Usage filters"]', { timeout: 10000 });
+    for (const width of [1440, 1180, 1024, 900, 800, 600, 390]) {
+      await p.setViewportSize({ width, height: 1000 });
+      await p.waitForTimeout(150);
+      const bad = await p.evaluate(() => {
+        const out = [];
+        const lines = el => {
+          const lh = parseFloat(getComputedStyle(el).fontSize) * 1.25, tops = [];
+          const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n;
+          while ((n = w.nextNode())) { if (!n.textContent.trim()) continue; const r = document.createRange(); r.selectNodeContents(n); for (const q of r.getClientRects()) if (q.width > 1) tops.push(q.top); }
+          tops.sort((a, b) => a - b); let k = tops.length ? 1 : 0;
+          for (let i = 1; i < tops.length; i++) if (tops[i] - tops[i - 1] > lh * 0.6) k++;
+          return k;
+        };
+        document.querySelectorAll(".b, .t-email").forEach(el => { if (el.offsetParent && lines(el) > 1) out.push(el.innerText.replace(/\n/g, "⏎")); });
+        document.querySelectorAll(".tbl").forEach(t => { const b = t.parentElement; if (t.offsetParent && b.scrollWidth > b.clientWidth + 1) out.push(`table ${b.scrollWidth}>${b.clientWidth}`); });
+        return out;
+      });
+      assert.deepStrictEqual(bad, [], `at ${width}px: ${bad.join(" | ")}`);
+    }
+    await ctx.close();
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});

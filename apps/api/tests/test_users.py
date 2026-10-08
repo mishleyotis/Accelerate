@@ -254,6 +254,17 @@ def test_first_visit_enrols_with_the_allocated_role(email, role):
     assert [e[1:] for e in d.session_log] == [("login", role)]
 
 
+def test_an_owner_with_no_row_can_still_invite_an_admin():
+    """The owner floor administers even before its first enrolment: the row
+    is created (as ADMIN) so the change has someone to be attributed to."""
+    d = FakeDb([])
+    s, r = put(d, "owner@zennify.com", {"email": "new.admin@zennify.com", "role": "ADMIN"})
+    assert s == 201 and r["user"]["role"] == "ADMIN"
+    assert d.users["owner@zennify.com"]["role"] == "ADMIN"
+    s, r = put(d, "owner@zennify.com", {"email": "an.analyst@zennify.com", "role": "ANALYST"})
+    assert r["user"]["role"] == "ANALYST"
+
+
 def test_floor_email_with_no_row_enrols_as_admin():
     d = FakeDb([])
     out = enrol(d, "owner@zennify.com", env=ENV)

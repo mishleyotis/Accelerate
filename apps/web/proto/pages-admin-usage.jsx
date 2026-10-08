@@ -252,6 +252,15 @@ function uaAgg(model, from, to, onlyEmail) {
   return { S, users, secs, views, sessions: S.length, avg: S.length ? secs / S.length : 0, pps: S.length ? views / S.length : 0,
     pages: Object.values(pages).sort((a, b) => b.secs - a.secs), clients: Object.values(clients).sort((a, b) => b.secs - a.secs), feat, heat, daily };
 }
+/* The model narrowed to a set of people: every figure computed from it is
+   about them and nobody else. Recording bounds and `now` stay the store's. */
+function uaNarrow(model, emails) {
+  return { ...model,
+    sessions: model.sessions.filter(s => emails.has(s.email)),
+    sessionless: (model.sessionless || []).filter(e => emails.has(e.email)),
+    people: model.people.filter(u => emails.has(u.email)),
+  };
+}
 /* A prior-period comparison is only honest where recording covered it. */
 function uaPrevCovered(model, prevFrom) { return !!(model.recordingSince && model.recordingSince <= prevFrom); }
 function uaDur(s) { s = Math.round(s); if (s < 60) return `${s}s`; if (s < 3600) return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`; return `${Math.floor(s / 3600)}h ${String(Math.floor(s % 3600 / 60)).padStart(2, "0")}m`; }
@@ -306,8 +315,14 @@ function UASpark({ vals, color = UA_FILL, h = 22 }) {
   const max = Math.max(1, ...vals);
   return <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: h, width: 84 }}>{vals.map((v, i) => <div key={i} style={{ flex: 1, height: `${Math.max(v ? 8 : 4, v / max * 100)}%`, background: v ? color : "var(--z-sep)", borderRadius: 1 }} />)}</div>;
 }
-function UADailyChart({ daily, from, metric }) {
-  const vals = daily.map(d => metric === "sessions" ? d.AE + d.ANALYST + d.ADMIN : metric === "minutes" ? d.mins : d.users.size);
+/* Sessions per day, stacked by role. One measure, not a toggle between three
+   (owner, 2026-10-08: "the daily activity toggle feels off"): active time and
+   people per day were the KPI tiles' numbers restated as different charts,
+   and only one of the three carried the role legend. Each day's tooltip
+   still gives all of them. The one person's drawer draws minutes instead
+   (`minutes`), because for a single person roles do not split anything. */
+function UADailyChart({ daily, from, minutes }) {
+  const vals = daily.map(d => minutes ? d.mins : d.AE + d.ANALYST + d.ADMIN);
   const max = Math.max(1, ...vals), n = daily.length, every = n <= 7 ? 1 : n <= 30 ? 5 : 15;
   const gap = n > 60 ? 1 : n > 20 ? 3 : 10;
   return (
@@ -315,12 +330,15 @@ function UADailyChart({ daily, from, metric }) {
       <div style={{ display: "flex", alignItems: "flex-end", gap, height: 170, borderBottom: "1px solid var(--z-sep)" }}>
         {daily.map((d, i) => {
           const date = new Date(from.getTime() + i * UA_DAY);
-          const tip = `${uaDate(date)} · ${metric === "minutes" ? uaDur(d.mins * 60) + " active" : metric === "sessions" ? `${vals[i]} sessions (AE ${d.AE} · Analyst ${d.ANALYST} · Admin ${d.ADMIN})` : `${vals[i]} users`}`;
+          const parts = ["AE", "ANALYST", "ADMIN"].filter(r => d[r]).map(r => `${UA_ROLE_LABEL[r]} ${d[r]}`).join(" · ");
+          const tip = minutes ? `${uaDate(date)} · ${uaDur(d.mins * 60)} active` : vals[i]
+            ? `${uaDate(date)} · ${vals[i]} ${vals[i] === 1 ? "session" : "sessions"}${parts ? ` (${parts})` : ""} · ${d.users.size} ${d.users.size === 1 ? "person" : "people"} · ${uaDur(d.mins * 60)} active`
+            : `${uaDate(date)} · no sessions`;
           return (
             <div key={i} title={tip} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 1, cursor: "default" }}>
-              {metric === "sessions"
-                ? ["ADMIN", "ANALYST", "AE"].map(r => d[r] ? <div key={r} style={{ height: `${d[r] / max * 100}%`, background: UA_ROLE_COLOR[r], borderRadius: 2 }} /> : null)
-                : <div style={{ height: `${vals[i] / max * 100}%`, minHeight: vals[i] ? 2 : 0, background: UA_FILL, borderRadius: "3px 3px 0 0" }} />}
+              {minutes
+                ? <div style={{ height: `${vals[i] / max * 100}%`, minHeight: vals[i] ? 2 : 0, background: UA_FILL, borderRadius: "3px 3px 0 0" }} />
+                : ["ADMIN", "ANALYST", "AE"].map(r => d[r] ? <div key={r} style={{ height: `${d[r] / max * 100}%`, background: UA_ROLE_COLOR[r], borderRadius: 2 }} /> : null)}
             </div>
           );
         })}
@@ -349,7 +367,7 @@ function UAHourHeat({ heat }) {
 }
 function UAStatus({ status }) {
   const cls = { Live: "b-teal", Active: "b-above", Idle: "b-org", Dormant: "b-muted", Never: "b-muted" }[status];
-  return <span className={`b ${cls}`} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>{status === "Live" ? <span className="live-dot" /> : null}{status === "Never" ? "No activity yet" : status}</span>;
+  return <span className={`b b-token ${cls}`} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>{status === "Live" ? <span className="live-dot" /> : null}{status === "Never" ? "No activity yet" : status}</span>;
 }
 
 /* The store's non-ok states, by name. */
@@ -453,7 +471,7 @@ function UAUserDrawer({ user, model, from, to, rangeLabel, onClose }) {
             ))}
           </div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", marginBottom: 8 }}>Active time per day</div>
-          <div style={{ marginBottom: 18 }}><UADailyChart daily={agg.daily} from={from} metric="minutes" /></div>
+          <div style={{ marginBottom: 18 }}><UADailyChart daily={agg.daily} from={from} minutes /></div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", marginBottom: 8 }}>Where their time goes</div>
           <div style={{ marginBottom: 18 }}>
             {agg.pages.slice(0, 6).map(p => (
@@ -496,15 +514,28 @@ function UAUserDrawer({ user, model, from, to, rangeLabel, onClose }) {
 function UsagePage() {
   const { role, pushToast } = useApp();
   const [range, setRange] = useStateUA(30);
-  const [metric, setMetric] = useStateUA("sessions");
   const [q, setQ] = useStateUA("");
   const [roleF, setRoleF] = useStateUA("ALL");
   const [statusF, setStatusF] = useStateUA("ALL");
   const [sort, setSort] = useStateUA({ k: "last", dir: -1 });
   const [userOpen, setUserOpen] = useStateUA(null);
-  const model = useUsageModel(range);
-  const ok = model.status === "ok";
-  const bounds = useMemoUA(() => ok ? uaDayBounds(model.now, range) : null, [ok, model, range]);
+  const all = useUsageModel(range);
+  const ok = all.status === "ok";
+  const bounds = useMemoUA(() => ok ? uaDayBounds(all.now, range) : null, [ok, all, range]);
+  // The filter bar at the top decides WHO the whole page is about (owner,
+  // 2026-10-08: "the filter should be on top and all bottom components should
+  // adjust accordingly"). Status is read from everyone's own activity, then
+  // the model is narrowed to the matching people, and every card below —
+  // KPIs, signals, the chart, live now, pages, clients, the hour heatmap and
+  // the user table — is computed from that narrowed model.
+  const allRows = useMemoUA(() => ok ? uaRows(all, uaAgg(all, bounds.from, bounds.to), bounds.to) : [], [ok, all, bounds]);
+  const filtering = roleF !== "ALL" || statusF !== "ALL" || !!q.trim();
+  const keep = useMemoUA(() => {
+    const needle = q.trim().toLowerCase();
+    return new Set(allRows.filter(r => (roleF === "ALL" || r.role === roleF) && (statusF === "ALL" || r.status === statusF)
+      && (!needle || (r.name + " " + r.email + " " + (r.team || "")).toLowerCase().includes(needle))).map(r => r.email));
+  }, [allRows, roleF, statusF, q]);
+  const model = useMemoUA(() => !ok || !filtering ? all : uaNarrow(all, keep), [ok, all, filtering, keep]);
   const cur = useMemoUA(() => ok ? uaAgg(model, bounds.from, bounds.to) : null, [ok, model, bounds]);
   const prevFrom = bounds ? new Date(bounds.from.getTime() - range * UA_DAY) : null;
   const prevOk = ok && uaPrevCovered(model, prevFrom);
@@ -520,7 +551,7 @@ function UsagePage() {
         <div className="eyebrow">Settings &amp; operations</div>
         <h1>Usage analytics</h1>
         <div className="sub">Who uses DMA Insights, which pages they use, and how long they stay · {rangeLabel.toLowerCase()}
-          {ok && model.recordingSince && model.recordingSince > bounds.from ? ` · recording since ${uaDate(model.recordingSince)}` : ""}</div>
+          {ok && all.recordingSince && all.recordingSince > bounds.from ? ` · recording since ${uaDate(all.recordingSince)}` : ""}</div>
       </div>
       <div className="actions">
         <div className="toggle-row">{[7, 30, 90].map(r => <button key={r} className={range === r ? "on" : ""} onClick={() => setRange(r)}>{r}d</button>)}</div>
@@ -528,11 +559,11 @@ function UsagePage() {
       </div>
     </div>
   );
-  if (!ok) return <PageShell title="Usage analytics" crumbs={[{ label: "Admin", href: "/admin" }, { label: "Usage analytics" }]}>{head}<UAStateCard state={model} /></PageShell>;
+  if (!ok) return <PageShell title="Usage analytics" crumbs={[{ label: "Admin", href: "/admin" }, { label: "Usage analytics" }]}>{head}<UAStateCard state={all} /></PageShell>;
 
-  const shown = rows.filter(r => (roleF === "ALL" || r.role === roleF) && (statusF === "ALL" || r.status === statusF) && (!q || (r.name + r.email + (r.team || "")).toLowerCase().includes(q.toLowerCase())))
+  const shown = rows.slice()
     .sort((a, b) => { const k = sort.k; const av = k === "last" ? (a.last ? +a.last : 0) : a[k], bv = k === "last" ? (b.last ? +b.last : 0) : b[k]; return (typeof av === "string" ? av.localeCompare(bv) : av - bv) * sort.dir; });
-  const SortTh = ({ k, children, right }) => <th style={{ textAlign: right ? "right" : "left", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }} onClick={() => setSort(s => ({ k, dir: s.k === k ? -s.dir : (k === "name" ? 1 : -1) }))}>{children}{sort.k === k ? (sort.dir > 0 ? " ▲" : " ▼") : ""}</th>;
+  const SortTh = ({ k, children, right, cls }) => <th className={cls} style={{ textAlign: right ? "right" : "left", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }} onClick={() => setSort(s => ({ k, dir: s.k === k ? -s.dir : (k === "name" ? 1 : -1) }))}>{children}{sort.k === k ? (sort.dir > 0 ? " ▲" : " ▼") : ""}</th>;
 
   const live = model.sessions.filter(s => s.live);
   const atRisk = rows.filter(r => r.status === "Idle" || r.status === "Dormant");
@@ -543,14 +574,23 @@ function UsagePage() {
   const feats = uaFeatures();
   const featMax = Math.max(0, ...feats.map(([k]) => cur.feat[k] || 0));
   const respGrid = min => ({ display: "grid", gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${min}px), 1fr))`, gap: 16, marginBottom: 16 });
-  const showTeam = rows.some(r => r.team);
+  const showTeam = allRows.some(r => r.team);
+  const who = filtering ? `${keep.size} of ${allRows.length} ${allRows.length === 1 ? "person" : "people"}` : null;
+  const clear = () => { setQ(""); setRoleF("ALL"); setStatusF("ALL"); };
   const mailto = atRisk.length ? `mailto:${atRisk.map(r => r.email).join(",")}?subject=${encodeURIComponent("DMA Insights")}` : null;
 
   return (
     <PageShell title="Usage analytics" crumbs={[{ label: "Admin", href: "/admin" }, { label: "Usage analytics" }]}>
       {head}
-      {model.awaiting ? <UAAwaiting /> : null}
-      {model.truncated ? <div className="card" style={{ marginBottom: 16, fontSize: 12, color: "var(--z-org)" }}>This range holds more events than one read returns; the oldest are not shown. Choose a shorter range.</div> : null}
+      <div className="card ua-filters" data-screen-label="Usage filters">
+        <Icon name="filter" size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
+        <input className="inp inp-sm" aria-label="Search people" placeholder={showTeam ? "Search name, email, team" : "Search name or email"} value={q} onChange={e => setQ(e.target.value)} style={{ flex: "1 1 220px", minWidth: 0 }} />
+        <select className="inp inp-sm" aria-label="Role" value={roleF} onChange={e => setRoleF(e.target.value)} style={{ flex: "0 1 140px" }}><option value="ALL">All roles</option><option value="AE">AE</option><option value="ANALYST">Analyst</option><option value="ADMIN">Admin</option></select>
+        <select className="inp inp-sm" aria-label="Status" value={statusF} onChange={e => setStatusF(e.target.value)} style={{ flex: "0 1 150px" }}><option value="ALL">All statuses</option><option>Live</option><option>Active</option><option>Idle</option><option>Dormant</option><option value="Never">No activity yet</option></select>
+        {filtering ? <><span className="b b-teal b-token">{who}</span><button className="btn btn-tertiary btn-sm" onClick={clear}>Clear</button></> : null}
+      </div>
+      {all.awaiting ? <UAAwaiting /> : null}
+      {all.truncated ? <div className="card" style={{ marginBottom: 16, fontSize: 12, color: "var(--z-org)" }}>This range holds more events than one read returns; the oldest are not shown. Choose a shorter range.</div> : null}
 
       {/* KPIs */}
       <div style={{ ...respGrid(170), gap: 12 }}>
@@ -583,14 +623,14 @@ function UsagePage() {
         <div className="card" style={{ gridColumn: "span 2" }}>
           <div className="row" style={{ marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
             <h3 style={{ margin: 0, fontSize: 13 }}>Daily activity</h3>
-            {metric === "sessions" ? <div style={{ display: "flex", gap: 10 }}>{Object.entries(UA_ROLE_COLOR).map(([r, c]) => <span key={r} style={{ display: "inline-flex", gap: 5, alignItems: "center", fontSize: 11, color: "var(--z-body)" }}><span style={{ width: 9, height: 9, borderRadius: 2, background: c }} />{UA_ROLE_LABEL[r]}</span>)}</div> : null}
+            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>sessions per day, by role</span>
             <span className="spacer" />
-            <div className="toggle-row">{[["sessions", "Sessions"], ["minutes", "Active time"], ["users", "Users"]].map(([k, l]) => <button key={k} className={metric === k ? "on" : ""} onClick={() => setMetric(k)}>{l}</button>)}</div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>{Object.entries(UA_ROLE_COLOR).filter(([r]) => roleF === "ALL" || r === roleF).map(([r, c]) => <span key={r} style={{ display: "inline-flex", gap: 5, alignItems: "center", fontSize: 11, color: "var(--z-body)", whiteSpace: "nowrap" }}><span style={{ width: 9, height: 9, borderRadius: 2, background: c }} />{UA_ROLE_LABEL[r]}</span>)}</div>
           </div>
-          <UADailyChart daily={cur.daily} from={bounds.from} metric={metric} />
+          <UADailyChart daily={cur.daily} from={bounds.from} />
         </div>
         <div className="card">
-          <div className="row" style={{ marginBottom: 12 }}><h3 style={{ margin: 0, fontSize: 13 }}>Live now</h3><span className="b b-teal" style={{ display: "inline-flex", gap: 4 }}><span className="live-dot" /> {live.length}</span></div>
+          <div className="row" style={{ marginBottom: 12 }}><h3 style={{ margin: 0, fontSize: 13 }}>Live now</h3><span className="b b-teal b-token" style={{ display: "inline-flex", gap: 4 }}><span className="live-dot" /> {live.length}</span></div>
           {live.length ? live.map(s => { const u = rows.find(r => r.email === s.email) || { name: uaNameOf(s.email), role: s.role, email: s.email }; const p = s.pages[s.pages.length - 1]; return (
             <button key={s.id} onClick={() => setUserOpen(u.email)} style={{ display: "flex", width: "100%", gap: 10, alignItems: "center", padding: "8px 0", background: "none", border: 0, borderTop: "1px solid var(--z-sep)", cursor: "pointer", textAlign: "left" }}>
               <span style={{ width: 30, height: 30, borderRadius: "50%", background: UA_ROLE_COLOR[u.role], color: "#fff", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{uaInitials(u.name)}</span>
@@ -654,33 +694,31 @@ function UsagePage() {
         <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
           <h3>Users · activity &amp; time spent</h3>
           <span className="spacer" />
-          <input className="inp inp-sm" placeholder={showTeam ? "Search name, email, team" : "Search name or email"} value={q} onChange={e => setQ(e.target.value)} style={{ width: 210 }} />
-          <select className="inp inp-sm" value={roleF} onChange={e => setRoleF(e.target.value)} style={{ maxWidth: 130 }}><option value="ALL">All roles</option><option value="AE">AE</option><option value="ANALYST">Analyst</option><option value="ADMIN">Admin</option></select>
-          <select className="inp inp-sm" value={statusF} onChange={e => setStatusF(e.target.value)} style={{ maxWidth: 140 }}><option value="ALL">All statuses</option><option>Live</option><option>Active</option><option>Idle</option><option>Dormant</option><option value="Never">No activity yet</option></select>
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{who || `${allRows.length} ${allRows.length === 1 ? "person" : "people"}`}</span>
         </div>
-        <div style={{ overflowX: "auto" }}>
+        <div className="tbl-reflow reflow-early">
           <table className="tbl">
             <thead><tr>
               <SortTh k="name">User</SortTh><th>Role</th><th>Status</th><SortTh k="last">Last seen</SortTh>
-              <SortTh k="sessions" right>Sessions</SortTh><SortTh k="secs" right>Total time</SortTh><SortTh k="avg" right>Avg session</SortTh>
-              <th>Top page</th><th>Last 14 days</th><th></th>
+              <SortTh k="sessions" right cls="col-drop2">Sessions</SortTh><SortTh k="secs" right>Total time</SortTh><th className="col-drop" style={{ textAlign: "right", whiteSpace: "nowrap" }}>Avg session</th>
+              <th className="col-drop">Top page</th><th className="col-drop" style={{ whiteSpace: "nowrap" }}>Last 14 days</th><th></th>
             </tr></thead>
             <tbody>
               {shown.map(r => (
                 <tr key={r.email} onClick={() => setUserOpen(r.email)} style={{ cursor: "pointer" }}>
-                  <td data-label="User"><div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{r.name}</div><div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.email}</div></td>
-                  <td data-label="Role"><span className="b" style={{ background: UA_ROLE_COLOR[r.role] + "22", color: UA_ROLE_COLOR[r.role] }}>{UA_ROLE_LABEL[r.role]}</span></td>
+                  <td data-label="User"><div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{r.name}</div><div className="f-mono t-email" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.email}</div></td>
+                  <td data-label="Role"><span className="b b-token" style={{ background: UA_ROLE_COLOR[r.role] + "22", color: UA_ROLE_COLOR[r.role] }}>{UA_ROLE_LABEL[r.role]}</span></td>
                   <td data-label="Status"><UAStatus status={r.status} /></td>
                   <td data-label="Last seen" style={{ whiteSpace: "nowrap" }}>{uaRel(r.last, r.live, model.now)}</td>
-                  <td data-label="Sessions" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.sessions}</td>
+                  <td data-label="Sessions" className="col-drop2" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.sessions}</td>
                   <td data-label="Total time" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{uaDur(r.secs)}</td>
-                  <td data-label="Avg session" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{r.sessions ? uaDur(r.avg) : "No sessions"}</td>
-                  <td data-label="Top page" style={{ fontSize: 11.5 }}>{r.top}</td>
-                  <td data-label="Last 14 days"><UASpark vals={r.spark} color={UA_ROLE_COLOR[r.role]} /></td>
+                  <td data-label="Avg session" className="col-drop" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{r.sessions ? uaDur(r.avg) : "No sessions"}</td>
+                  <td data-label="Top page" className="col-drop" style={{ fontSize: 11.5 }}>{r.top}</td>
+                  <td data-label="Last 14 days" className="col-drop"><UASpark vals={r.spark} color={UA_ROLE_COLOR[r.role]} /></td>
                   <td style={{ textAlign: "right" }}><Icon name="chevron-r" size={13} style={{ color: "var(--z-muted)" }} /></td>
                 </tr>
               ))}
-              {!shown.length ? <tr><td colSpan={10} style={{ textAlign: "center", color: "var(--z-muted)", padding: 24 }}>No users match these filters.</td></tr> : null}
+              {!shown.length ? <tr><td colSpan={10} className="tbl-empty">No users match these filters.</td></tr> : null}
             </tbody>
           </table>
         </div>
@@ -708,7 +746,7 @@ function UsageGlanceCard() {
   const header = (liveCount) => (
     <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
       <div className="row"><Icon name="users" size={14} /><h3>Usage · last 7 days</h3></div>
-      {liveCount != null ? <span className="b b-teal" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><span className="live-dot" /> {liveCount} live now</span> : null}
+      {liveCount != null ? <span className="b b-teal b-token" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><span className="live-dot" /> {liveCount} live now</span> : null}
       <span className="spacer" />
       <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/usage")}>Open usage analytics <Icon name="arrow-r" size={11} /></button>
     </div>

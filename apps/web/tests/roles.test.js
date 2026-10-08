@@ -23,11 +23,15 @@ function api(body, status = 200) {
   return { fetchImpl, calls };
 }
 
-test("the owner floor is Admin without asking the API", withEnv(async () => {
-  const { fetchImpl, calls } = api({});
+test("the owner floor is Admin whatever the API says, and is still enrolled", withEnv(async () => {
+  const { fetchImpl, calls } = api({ email: "owner@zennify.com", role: "AE", is_active: false });
   assert.deepEqual(await R.resolveAccess("Owner@zennify.com", "jwt", { fetchImpl }),
                    { role: "ADMIN", active: true, source: "owner_floor" });
-  assert.equal(calls.length, 0);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].opts.method, "POST", "the owner is enrolled so the roster lists them");
+  const down = async () => { throw new Error("api down"); };
+  assert.equal((await R.resolveAccess("owner@zennify.com", "jwt", { fetchImpl: down })).role, "ADMIN",
+               "an api outage never locks the owner out");
 }));
 
 test("the users table decides the role and the active flag", withEnv(async () => {
@@ -36,7 +40,9 @@ test("the users table decides the role and the active flag", withEnv(async () =>
                    { role: "ANALYST", active: true, source: "users" });
   assert.equal(calls[0].url, "https://api.test/v1/me");
   assert.equal(calls[0].opts.method, "POST", "the read also enrols the caller");
-  assert.equal(calls[0].opts.headers["x-goog-iap-jwt-assertion"], "jwt", "the assertion is forwarded");
+  assert.equal(calls[0].opts.headers["x-dmai-iap-assertion"], "jwt", "the assertion is forwarded");
+  assert.equal(calls[0].opts.headers["x-goog-iap-jwt-assertion"], undefined,
+               "Google's own header name is not delivered to dmai-api (2026-10-08)");
   ({ fetchImpl } = api({ email: "sam@zennify.com", role: "ADMIN", is_active: false, source: "users" }));
   assert.equal((await R.resolveAccess("sam@zennify.com", "jwt", { fetchImpl })).active, false);
 }));

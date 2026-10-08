@@ -1059,14 +1059,14 @@ function AdminUsersCard() {
     name: "users",
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, "Users & roles")), /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted"
+    className: "b b-muted b-token"
   }, users.filter(u => u.is_active).length, " active")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      overflowX: "auto"
-    }
+    className: "tbl-reflow reflow-early"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tbl"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Role"), /*#__PURE__*/React.createElement("th", null, "Last active"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "User"), /*#__PURE__*/React.createElement("th", null, "Role"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop2"
+  }, "Last active"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
     style: {
       textAlign: "right"
     }
@@ -1098,7 +1098,7 @@ function AdminUsersCard() {
         color: "var(--z-dark)"
       }
     }, name), /*#__PURE__*/React.createElement("div", {
-      className: "f-mono",
+      className: "f-mono t-email",
       style: {
         fontSize: 10,
         color: "var(--z-muted)"
@@ -1122,14 +1122,16 @@ function AdminUsersCard() {
       value: "ADMIN"
     }, "Admin"))), /*#__PURE__*/React.createElement("td", {
       "data-label": "Last active",
+      className: "col-drop2",
       style: {
         fontSize: 11.5,
-        color: "var(--z-muted)"
+        color: "var(--z-muted)",
+        whiteSpace: "nowrap"
       }
     }, lastActive(u)), /*#__PURE__*/React.createElement("td", {
       "data-label": "Status"
     }, /*#__PURE__*/React.createElement("span", {
-      className: `b ${u.is_active ? "b-above" : "b-muted"}`
+      className: `b b-token ${u.is_active ? "b-above" : "b-muted"}`
     }, u.is_active ? "Active" : "Deactivated")), /*#__PURE__*/React.createElement("td", {
       "data-label": "Action",
       style: {
@@ -1420,7 +1422,7 @@ function AdminPage() {
       border: "1px solid var(--z-sep)"
     }
   }, folder), LIVE ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted",
+    className: "b b-muted b-token",
     title: "Set on the worker Job (INTAKE_FOLDER_ID) at deploy time",
     style: {
       display: "inline-flex",
