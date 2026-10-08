@@ -30,5 +30,12 @@ export async function GET(req) {
   }
   const body = await readUsage(days);
   if (body.status === "ok") cache.set(days, { at: Date.now(), body });
+  // A read that is not ok is one log line (infra/diagnose_usage.sh reads it),
+  // so "the panel is blank" has a recorded reason in production.
+  if (body.status !== "ok" || body.awaiting_first_event) {
+    console.log(JSON.stringify({ usage_read: {
+      status: body.awaiting_first_event ? "awaiting_first_event" : body.status,
+      detail: body.detail || body.error || null } }));
+  }
   return NextResponse.json(body, { headers: { "cache-control": "no-store" } });
 }

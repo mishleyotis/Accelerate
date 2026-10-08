@@ -184,11 +184,13 @@ test("Users & roles allocates roles through the users API", { skip }, async () =
   try {
     const { ctx, p, errors } = await openApp(browser, base, "#/admin", wire(), users);
     await p.waitForSelector('select[aria-label="Role for Sam Reader"]', { timeout: 10000 });
-    // The owner floor and the signed-in admin are locked; everyone else is editable.
-    assert.ok(await p.isDisabled('select[aria-label="Role for Owner"]'), "owner floor is not editable");
-    assert.ok(await p.isDisabled('select[aria-label="Role for DMA"]'), "an admin cannot change their own role");
+    // The prototype's card (owner, 2026-10-08): every row is editable; the
+    // server, not the page, refuses the owner floor and your own access.
+    for (const n of ["Owner", "DMA", "Sam Reader"]) {
+      assert.ok(!(await p.isDisabled(`select[aria-label="Role for ${n}"]`)), `${n}'s role select is locked`);
+    }
     await p.selectOption('select[aria-label="Role for Sam Reader"]', "ANALYST");
-    await p.waitForFunction(() => /role updated to Analyst/.test(document.body.innerText), null, { timeout: 5000 });
+    await p.waitForFunction(() => /Role updated to ANALYST/.test(document.body.innerText), null, { timeout: 5000 });
     assert.deepEqual(posts[0].body, { email: "sam.reader@zennify.com", role: "ANALYST" });
     assert.match(posts[0].key, /^[0-9a-f-]{36}$/, "every write carries an Idempotency-Key");
     // Deactivate, then invite.
@@ -198,7 +200,7 @@ test("Users & roles allocates roles through the users API", { skip }, async () =
     await p.fill('input[placeholder="name@zennify.com"]', "new.person@zennify.com");
     await p.selectOption('select[aria-label="Invite role"]', "ADMIN");
     await p.click('button:has-text("Invite user")');
-    await p.waitForFunction(() => /new.person@zennify.com added as Admin/.test(document.body.innerText), null, { timeout: 5000 });
+    await p.waitForFunction(() => /Access granted to new.person@zennify.com as Admin/.test(document.body.innerText), null, { timeout: 5000 });
     assert.deepEqual(posts[2].body, { email: "new.person@zennify.com", role: "ADMIN" });
     // A usage-seen account without a row is listed as an AE and can be granted.
     assert.ok(await p.isVisible('select[aria-label="Role for Ae One"]'), "seen-in-usage account is listed");

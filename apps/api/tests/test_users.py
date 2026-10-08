@@ -11,6 +11,12 @@
    response without a second write, and a reused key with a different body
    is a 409.
 4. The module writes only users, session_log and idempotency_keys.
+5. Enrolment (POST /v1/me): a first visit gets a row with its allocated role
+   (floor ADMIN, ANALYST_EMAILS ANALYST, else AE) and one `login` row; a
+   return inside five minutes writes nothing; a return after the cookie's
+   eight hours touches last_seen_at and logs `login`; a deactivated account
+   is logged `denied` and never reactivated by visiting; an existing role is
+   never overwritten by the allocation lists.
 """
 import re
 import sys
@@ -23,8 +29,8 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "apps" / "api"))
 
 from dma_api.pages import ApiError  # noqa: E402
-from dma_api.users import (WRITABLE_TABLES, display_name, list_users, me,  # noqa: E402
-                           set_user)
+from dma_api.users import (WRITABLE_TABLES, display_name, enrol, list_users,  # noqa: E402
+                           me, set_user)
 
 FLOOR = {"ADMIN_EMAILS": "owner@zennify.com"}
 
@@ -38,7 +44,7 @@ class FakeDb:
         for email, role, active in users:
             self.users[email] = {"id": str(uuid.uuid4()), "email": email, "role": role,
                                  "is_active": active, "display_name": display_name(email),
-                                 "google_sub": None}
+                                 "google_sub": None, "seen": None}
         self.session_log, self.keys, self.writes = [], {}, []
         self._out = []
 
@@ -54,7 +60,16 @@ class FakeDb:
         m = re.match(r"(INSERT INTO|UPDATE) (\w+)", s)
         if m:
             self.writes.append(m.group(2))
-        if s.startswith("SELECT id, role::text, is_active FROM users WHERE email"):
+        if s.startswith("SELECT id, role::text, is_active, last_seen_at IS NULL"):
+            u = self.users.get(params[0])
+            seen = u["seen"] if u else None
+            self._out = [(u["id"], u["role"], u["is_active"], seen is None or seen > 480,
+                          seen is None or seen > 5)] if u else []
+        elif s.startswith("UPDATE users SET last_seen_at"):
+            for u in self.users.values():
+                if u["id"] == params[0]:
+                    u["seen"] = 0
+        elif s.startswith("SELECT id, role::text, is_active FROM users WHERE email"):
             u = self.users.get(params[0])
             self._out = [(u["id"], u["role"], u["is_active"])] if u else []
         elif s.startswith("SELECT email::text") and "WHERE email" in s:
@@ -72,11 +87,20 @@ class FakeDb:
             for u in self.users.values():
                 if u["id"] == uid:
                     u["role"], u["is_active"] = role, active
+        elif s.startswith("INSERT INTO users") and "ON CONFLICT" in s:
+            email, name, role = params
+            if email in self.users:
+                self._out = []
+            else:
+                uid = str(uuid.uuid4())
+                self.users[email] = {"id": uid, "email": email, "role": role, "is_active": True,
+                                     "display_name": name, "google_sub": None, "seen": 0}
+                self._out = [(uid,)]
         elif s.startswith("INSERT INTO users"):
             email, name, role, active = params
             uid = str(uuid.uuid4())
             self.users[email] = {"id": uid, "email": email, "role": role, "is_active": active,
-                                 "display_name": name, "google_sub": None}
+                                 "display_name": name, "google_sub": None, "seen": None}
             self._out = [(uid,)]
         elif s.startswith("INSERT INTO session_log"):
             self.session_log.append(params)
@@ -213,3 +237,62 @@ def test_routes_use_the_verified_actor():
     src = (ROOT / "apps" / "api" / "dma_api" / "main.py").read_text()
     body = src[src.index("def _actor_or_error"):src.index("_SUBCAP_COLS = (")]
     assert "verified_actor(request)" in body and "actor:" not in body
+
+
+# ── 5. enrolment on visit ────────────────────────────────────────────────
+ENV = {**FLOOR, "ANALYST_EMAILS": "analyst@zennify.com"}
+
+
+@pytest.mark.parametrize("email,role", [("new.owner@zennify.com", "AE"),
+                                        ("analyst@zennify.com", "ANALYST"),
+                                        ("someone@zennify.com", "AE")])
+def test_first_visit_enrols_with_the_allocated_role(email, role):
+    d = db()
+    out = enrol(d, email, env=ENV)
+    assert out["enrolled"] is True and out["role"] == role and out["known"] is True
+    assert d.users[email]["role"] == role and d.users[email]["display_name"]
+    assert [e[1:] for e in d.session_log] == [("login", role)]
+
+
+def test_floor_email_with_no_row_enrols_as_admin():
+    d = FakeDb([])
+    out = enrol(d, "owner@zennify.com", env=ENV)
+    assert out["role"] == "ADMIN" and d.users["owner@zennify.com"]["role"] == "ADMIN"
+
+
+def test_return_visits_are_throttled():
+    d = db()
+    enrol(d, "someone@zennify.com", env=ENV)
+    writes = len(d.writes)
+    out = enrol(d, "someone@zennify.com", env=ENV)
+    assert out["enrolled"] is False and len(d.writes) == writes, "a reload inside 5 min writes nothing"
+    d.users["someone@zennify.com"]["seen"] = 30
+    enrol(d, "someone@zennify.com", env=ENV)
+    assert d.users["someone@zennify.com"]["seen"] == 0
+    assert [e[1] for e in d.session_log] == ["login"], "a touch inside 8h is not a new sign-in"
+    d.users["someone@zennify.com"]["seen"] = 600
+    enrol(d, "someone@zennify.com", env=ENV)
+    assert [e[1] for e in d.session_log] == ["login", "login"]
+
+
+def test_existing_role_is_never_overwritten_by_the_lists():
+    d = db()
+    d.users["ae@zennify.com"]["seen"] = 600
+    out = enrol(d, "ae@zennify.com", env={**ENV, "ANALYST_EMAILS": "ae@zennify.com"})
+    assert out["role"] == "AE" and d.users["ae@zennify.com"]["role"] == "AE"
+
+
+def test_deactivated_visit_is_denied_and_stays_deactivated():
+    d = db()
+    out = enrol(d, "gone@zennify.com", env=ENV)
+    assert out["is_active"] is False and d.users["gone@zennify.com"]["is_active"] is False
+    assert [e[1] for e in d.session_log] == ["denied"]
+
+
+def test_enrolment_refuses_other_domains_and_writes_only_its_tables():
+    d = db()
+    with pytest.raises(ApiError) as e:
+        enrol(d, "x@gmail.com", env=ENV)
+    assert e.value.code == "domain_forbidden" and d.writes == []
+    enrol(d, "fresh@zennify.com", env=ENV)
+    assert set(d.writes) <= {"users", "session_log"}

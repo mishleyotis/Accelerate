@@ -13,9 +13,12 @@ INSERT on `session_log`) and 0007 (INSERT on `idempotency_keys`).
 
 Routes (wired in main.py):
 
-  GET  /v1/me            the verified caller's grant — sign-in and every
-                         document load resolve the role here, so a change
-                         lands on the person's next page load
+  GET  /v1/me            the verified caller's grant (read-only)
+  POST /v1/me            the same answer, after enrolling the caller: sign-in
+                         and every document load call this, so everyone who
+                         opens the app has a roster row with the role they
+                         were allocated, and `last_seen_at` says when they
+                         were last here (touched at most every 5 minutes)
   GET  /v1/admin/users   the roster · ADMIN
   POST /v1/admin/users   invite · change role · deactivate · reactivate ·
                          ADMIN, Idempotency-Key required
@@ -104,6 +107,70 @@ def me(cur, email: str, *, env=None) -> dict:
                 "source": "default", "known": False}
     return {"email": email, "role": row["role"] or "AE",
             "is_active": row["is_active"], "source": "users", "known": True}
+
+
+def analyst_grants(env=None) -> list[str]:
+    raw = (env if env is not None else os.environ).get("ANALYST_EMAILS", "")
+    return [e.strip().lower() for e in raw.split(",") if e.strip()]
+
+
+def initial_role(email: str, env=None) -> str:
+    """The role a first visit is allocated: the owner floor is ADMIN, the
+    deploy-time analyst list is ANALYST, every other @zennify.com reader AE.
+    Only a first visit — an existing row's role is the Admins' to change."""
+    if email in owner_floor(env):
+        return "ADMIN"
+    if email in analyst_grants(env):
+        return "ANALYST"
+    return "AE"
+
+
+TOUCH_MINUTES = 5
+LOGIN_GAP_HOURS = 8   # the session cookie's life: a gap longer than it is a new sign-in
+
+
+def enrol(cur, email: str, *, env=None) -> dict:
+    """POST /v1/me — enrol the verified caller and answer their grant.
+
+    Idempotent by construction: a row is inserted only when none exists for
+    the email (the UNIQUE constraint backs this under a race), `last_seen_at`
+    moves only when it is older than TOUCH_MINUTES, and a `login` row is
+    written only for a first visit or a return after LOGIN_GAP_HOURS. A
+    deactivated account writes one `denied` row per refused visit and is never
+    reactivated by visiting."""
+    email = email.lower()
+    if not email.endswith(DOMAIN) or email.count("@") != 1:
+        raise ApiError(403, "domain_forbidden", f"only {DOMAIN} addresses are enrolled")
+    cur.execute("SELECT id, role::text, is_active, "
+                f"last_seen_at IS NULL OR last_seen_at < now() - interval '{LOGIN_GAP_HOURS} hours', "
+                f"last_seen_at IS NULL OR last_seen_at < now() - interval '{TOUCH_MINUTES} minutes' "
+                "FROM users WHERE email = %s", (email,))
+    rows = cur.fetchall()
+    enrolled = False
+    if not rows:
+        role = initial_role(email, env)
+        cur.execute("INSERT INTO users (email, display_name, role, is_active, last_seen_at) "
+                    "VALUES (%s, %s, %s::user_role_t, true, now()) "
+                    "ON CONFLICT (email) DO NOTHING RETURNING id",
+                    (email, display_name(email), role))
+        got = cur.fetchall()
+        if got:
+            cur.execute("INSERT INTO session_log (user_id, event, role_at_event) "
+                        "VALUES (%s, %s, %s::user_role_t)", (got[0][0], "login", role))
+            enrolled = True
+    else:
+        uid, role, active, gap, stale = rows[0]
+        if active is False:
+            cur.execute("INSERT INTO session_log (user_id, event, role_at_event) "
+                        "VALUES (%s, %s, %s::user_role_t)", (uid, "denied", role or "AE"))
+        elif stale:
+            cur.execute("UPDATE users SET last_seen_at = now() WHERE id = %s", (uid,))
+            if gap:
+                cur.execute("INSERT INTO session_log (user_id, event, role_at_event) "
+                            "VALUES (%s, %s, %s::user_role_t)", (uid, "login", role or "AE"))
+    out = me(cur, email, env=env)
+    out["enrolled"] = enrolled
+    return out
 
 
 def _admin_actor(cur, email: str, *, env=None) -> str:

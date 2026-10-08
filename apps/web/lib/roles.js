@@ -4,7 +4,10 @@
 //
 // Resolved on sign-in AND on every document load, so a change an Admin makes
 // lands on that person's next page load, and a deactivation shuts the door
-// on it. The identity sent is the IAP assertion the API verifies itself
+// on it. The call is POST /v1/me, which also ENROLS the caller: a first visit
+// gets a users row with its allocated role (owner floor ADMIN, ANALYST_EMAILS
+// ANALYST, else AE), so the Admin's roster lists everyone who has opened the
+// app, and last_seen_at says when they were last here. The identity sent is the IAP assertion the API verifies itself
 // (dma_api.identity); this module only forwards it.
 //
 // The deploy-time lists stay as a floor and a fallback, never a ceiling:
@@ -29,7 +32,9 @@ export async function resolveAccess(email, assertion, { fetchImpl = fetch } = {}
   try {
     const headers = await upstreamHeaders(base);
     headers["x-goog-iap-jwt-assertion"] = assertion;
-    const r = await fetchImpl(`${base}/v1/me`, { headers, cache: "no-store" });
+    let r = await fetchImpl(`${base}/v1/me`, { method: "POST", headers, cache: "no-store" });
+    // An api older than enrolment answers 405; its read-only GET still holds.
+    if (r.status === 405) r = await fetchImpl(`${base}/v1/me`, { headers, cache: "no-store" });
     if (!r.ok) return { role: grantedRole(e), active: true, source: "deploy" };
     const b = await r.json();
     if (String(b.email || "").toLowerCase() !== e) {

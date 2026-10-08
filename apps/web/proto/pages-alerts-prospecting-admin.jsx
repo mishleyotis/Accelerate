@@ -385,18 +385,34 @@ function LiveImportStream() {
 }
 
 /* ── Editable users & roles (Admin) ──────────────────────────────── */
+/* The prototype's card, row for row: User · Role · Last active · Status ·
+   Action, a role select and a Deactivate/Reactivate button on every row, the
+   invite row beneath. In production the roster is the users table (svc_api
+   /v1/admin/users, owner adjudication 2026-10-07): everyone who has opened the
+   app is enrolled there with the role they were allocated (POST /v1/me), every
+   change is a real write the API records in session_log, and it applies on the
+   person's next page load. What the server refuses (the owner floor, your own
+   Admin access) comes back as a toast and the row keeps its value. Local
+   preview keeps the prototype's in-memory roster. */
+function relActive(d, now) {
+  if (!d) return null;
+  const m = Math.max(0, (now - d) / 60000);
+  if (m < 60) return `${Math.max(1, Math.round(m))} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} hr ago`;
+  const dd = Math.round(m / 1440);
+  if (dd === 1) return "Yesterday";
+  if (dd < 7) return `${dd} days ago`;
+  return `${Math.round(dd / 7)} wk ago`;
+}
+
 function AdminUsersCard() {
   const { pushToast } = useApp();
   const LIVE = !!window.DMA_LIVE;
-  // "Last active" reads the usage telemetry's last-seen (pages-admin-usage.jsx,
-  // one shared fetch with the glance card).
+  // "Last active" is the later of the usage log's last event (pages-admin-usage.jsx,
+  // one shared fetch with the glance card) and the users row's last_seen_at.
   const usage = window.useUsageModel ? window.useUsageModel(7) : { status: "not_configured" };
-  const me = sessionUser().email;
-  // Production: the roster is the users table (svc_api /v1/admin/users, owner
-  // adjudication 2026-10-07). Every change is a real write the API records in
-  // session_log; the person's new role applies on their next page load.
-  // Local preview keeps the prototype's in-memory roster.
-  const [live, setLive] = useState({ status: LIVE ? "loading" : "ok", users: [], floor: [] });
+  const [live, setLive] = useState({ status: LIVE ? "loading" : "ok", users: [] });
   const [busy, setBusy] = useState(null);
   const [mock, setMock] = useState([
     { email: "mishley@zennify.com", display_name: "Mishley Andrade", role: "ANALYST", is_active: true, last: "2 min ago" },
@@ -409,36 +425,31 @@ function AdminUsersCard() {
 
   const load = () => fetch("/api/admin/users", { cache: "no-store" })
     .then(r => r.json().then(b => ({ ok: r.ok, b })))
-    .then(({ ok, b }) => setLive(ok ? { status: "ok", users: b.users || [], floor: b.owner_floor || [] }
-                                    : { status: "error", detail: b.detail || b.error, users: [], floor: [] }))
-    .catch(() => setLive({ status: "error", detail: "The users service did not answer.", users: [], floor: [] }));
+    .then(({ ok, b }) => setLive(ok ? { status: "ok", users: b.users || [] }
+                                    : { status: "error", detail: b.detail || b.error, users: [] }))
+    .catch(() => setLive({ status: "error", detail: "The users service did not answer.", users: [] }));
   useEffect(() => { if (LIVE) load(); }, []);
 
   const roleWord = r => ({ AE: "AE", ANALYST: "Analyst", ADMIN: "Admin" }[r] || r);
   const nameOf = e => { const p = e.split("@")[0].split(/[._-]+/).filter(Boolean); return p.length === 1 && p[0].length <= 3 ? p[0].toUpperCase() : p.map(w => w[0].toUpperCase() + w.slice(1)).join(" "); };
   const seen = LIVE && usage.status === "ok" ? usage.lastSeen : {};
 
-  // Everyone with a row, plus everyone the usage log has seen active without
-  // one: they are AEs by default, and giving them a role creates their row.
+  // Everyone with a row, plus anyone the usage log saw before enrolment
+  // existed: they hold the deploy-time grant, and a change creates their row.
   const users = LIVE ? (() => {
     const rows = live.users.map(u => ({ ...u, known: true }));
     const have = new Set(rows.map(u => u.email));
-    Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE", is_active: true, signed_in: true, known: false }); });
+    if (live.status === "ok") Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE", is_active: true, known: false }); });
     return rows;
   })() : mock;
 
   const lastActive = u => {
     if (!LIVE) return u.last;
-    if (u.email === me) return "now (this session)";
-    const s = seen[u.email];
-    if (s) return window.uaRel(s, false, usage.now);
-    if (u.last_seen_at) return window.uaRel(new Date(u.last_seen_at), false, new Date());
-    // Activity, not sign-ins: people stay signed in for days, so the only
-    // honest "last active" is the last usage event the log recorded.
-    return usage.status === "ok" ? "No activity yet" : "Not recorded";
+    const a = seen[u.email] || null;
+    const b = u.last_seen_at ? new Date(u.last_seen_at) : null;
+    const d = a && b ? (a > b ? a : b) : (a || b);
+    return relActive(d, new Date()) || "Invited";
   };
-  const locked = u => LIVE && live.floor.includes(u.email) ? "Owner account (ADMIN_EMAILS): always an active Admin"
-    : u.email === me ? "Your own access: ask another Admin to change it" : null;
 
   const apply = (email, change, done) => {
     if (!LIVE) {
@@ -458,8 +469,7 @@ function AdminUsersCard() {
       })
       .catch(() => { setBusy(null); pushToast("The users service did not answer", "warn"); });
   };
-  const after = " · applies on their next page load";
-  const setRole = (u, role) => apply(u.email, { role }, () => pushToast(`${u.display_name || nameOf(u.email)}: role updated to ${roleWord(role)}${LIVE ? after : ""}`, "success"));
+  const setRole = (u, role) => apply(u.email, { role }, () => pushToast(`Role updated to ${role}`, "success"));
   const toggleActive = u => apply(u.email, { is_active: !u.is_active }, () => pushToast(`${u.display_name || nameOf(u.email)} ${u.is_active ? "deactivated" : "reactivated"}`, u.is_active ? "warn" : "success"));
   const invite = () => {
     const email = inviteEmail.trim().toLowerCase();
@@ -467,7 +477,9 @@ function AdminUsersCard() {
     if (!/@zennify\.com$/i.test(email)) { pushToast("Only @zennify.com addresses can be invited", "warn"); return; }
     if (users.some(u => u.email === email && u.known !== false)) { pushToast(`${email} is already on the list`, "warn"); return; }
     apply(email, { role: inviteRole }, () => {
-      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: their Google account opens the app` : `Invitation sent to ${email}`, "success");
+      // No mail is sent in production: the row is the grant, and their Google
+      // account opens the app — so the toast says that, not "sent".
+      pushToast(LIVE ? `Access granted to ${email} as ${roleWord(inviteRole)}` : `Invitation sent to ${email}`, "success");
       setInviteEmail("");
     });
   };
@@ -478,24 +490,22 @@ function AdminUsersCard() {
         <div className="row"><Icon name="users" size={14} /><h3>Users &amp; roles</h3></div>
         <span className="b b-muted">{users.filter(u => u.is_active).length} active</span>
       </div>
-      {LIVE && live.status !== "ok" ? (
-        <div className="card-body" style={{ fontSize: 12, color: "var(--z-body)", display: "flex", gap: 8, alignItems: "flex-start" }}>
-          {live.status === "loading" ? <span className="spinner" /> : <Icon name="info" size={13} style={{ flexShrink: 0, marginTop: 1 }} />}
-          <span>{live.status === "loading" ? "Loading users…" : <>The users list could not be read. <span className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)" }}>{live.detail}</span></>}</span>
-        </div>
-      ) : (
       <div style={{ overflowX: "auto" }}>
         <table className="tbl">
           <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
           <tbody>
-            {users.map(u => { const lock = locked(u); const name = u.display_name || nameOf(u.email); return (
+            {LIVE && live.status !== "ok" ? (
+              <tr><td colSpan={5} style={{ fontSize: 12, color: "var(--z-muted)" }}>
+                {live.status === "loading" ? <><span className="spinner" /> Loading users…</> : <>The users list could not be read · <span className="f-mono" style={{ fontSize: 10.5 }}>{live.detail}</span></>}
+              </td></tr>
+            ) : users.map(u => { const name = u.display_name || nameOf(u.email); return (
               <tr key={u.email} style={{ opacity: u.is_active ? 1 : 0.55 }}>
                 <td data-label="User">
                   <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{name}</div>
                   <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{u.email}</div>
                 </td>
                 <td data-label="Role">
-                  <select className="inp inp-sm" value={u.role} disabled={!!lock || busy === u.email} title={lock || undefined} onChange={e => setRole(u, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${name}`}>
+                  <select className="inp inp-sm" value={u.role} disabled={busy === u.email} onChange={e => setRole(u, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${name}`}>
                     <option value="AE">AE</option>
                     <option value="ANALYST">Analyst</option>
                     <option value="ADMIN">Admin</option>
@@ -504,15 +514,13 @@ function AdminUsersCard() {
                 <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{lastActive(u)}</td>
                 <td data-label="Status"><span className={`b ${u.is_active ? "b-above" : "b-muted"}`}>{u.is_active ? "Active" : "Deactivated"}</span></td>
                 <td data-label="Action" style={{ textAlign: "right" }}>
-                  {lock ? <span className="b b-muted" title={lock} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> {u.email === me ? "You" : "Owner"}</span>
-                    : <button className="btn btn-tertiary btn-sm" disabled={busy === u.email} onClick={() => toggleActive(u)}>{busy === u.email ? <span className="spinner" /> : (u.is_active ? "Deactivate" : "Reactivate")}</button>}
+                  <button className="btn btn-tertiary btn-sm" disabled={busy === u.email} onClick={() => toggleActive(u)}>{u.is_active ? "Deactivate" : "Reactivate"}</button>
                 </td>
               </tr>
             ); })}
           </tbody>
         </table>
       </div>
-      )}
       <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
         <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
         <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
@@ -520,13 +528,8 @@ function AdminUsersCard() {
           <option value="ANALYST">Analyst</option>
           <option value="ADMIN">Admin</option>
         </select>
-        <button className="btn btn-primary btn-sm" disabled={LIVE && live.status !== "ok"} onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
+        <button className="btn btn-primary btn-sm" onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
       </div>
-      {LIVE ? (
-        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", fontSize: 11, color: "var(--z-muted)" }}>
-          Any other @zennify.com Google account signs in as an <strong>AE</strong>. A role change applies on that person's next page load; a deactivated account is turned away at its next load.
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -632,6 +635,10 @@ function AdminPage() {
 
       {/* Editable users & roles */}
       <AdminUsersCard />
+
+      {/* Whitelisted client domains, laid out as the user list above
+          (pages-admin-share.jsx): revoke or restore a domain's access. */}
+      {window.ClientDomainsCard ? <window.ClientDomainsCard /> : null}
 
       <div className="g2">
         <div className="card">

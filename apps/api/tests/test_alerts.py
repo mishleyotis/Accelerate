@@ -418,7 +418,10 @@ def test_enum_matches_the_migrations_alert_action_t():
 # ── route wiring ───────────────────────────────────────────────────────
 def test_routes_are_wired_with_the_trd_verbs():
     import dma_api.main as m
-    routes = {r.path: r.methods for r in m.app.routes if hasattr(r, "methods")}
+    routes = {}
+    for r in m.app.routes:
+        if hasattr(r, "methods"):
+            routes.setdefault(r.path, set()).update(r.methods)
     assert "GET" in routes["/v1/alerts"]
     assert "POST" in routes["/v1/alerts/{alert_id}/actions"], \
         "TRD §08: POST /api/v1/alerts/{alert_id}/actions"
@@ -427,10 +430,11 @@ def test_routes_are_wired_with_the_trd_verbs():
         "/v1/admin/users",
         "/v1/alerts/{alert_id}/actions",
         "/v1/entities/{display_id}/insights/{ic_id}/annotation",
+        "/v1/me",
     ], ("invariant 2 names exactly two content-adjacent write exceptions — "
-        "alert actions and annotations — plus user grants (owner "
-        "adjudication 2026-10-07, CLAUDE.md); this census is the tripwire "
-        "for a fourth")
+        "alert actions and annotations — plus user grants: the Admin's "
+        "roster write and the caller's own enrolment (owner adjudication "
+        "2026-10-07, CLAUDE.md); this census is the tripwire for another")
 
 
 # ── The annotation half of the two write exceptions ─────────────────────────

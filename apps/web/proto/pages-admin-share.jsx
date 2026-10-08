@@ -43,6 +43,8 @@ function ShareLinksCard() {
       .catch(() => setData({ status: "error", detail: "network", links: [] }));
   };
   useEffectSL(load, []);
+  // Whitelisted client domains changes the same ledger; re-read when it does.
+  useEffectSL(() => { const f = e => { if (e.detail !== "links") load(); }; window.addEventListener("dma-share-ledger-changed", f); return () => window.removeEventListener("dma-share-ledger-changed", f); }, []);
 
   const act = (link, action, target) => {
     const key = `${link}:${action}:${target ? (target.email || target.domain) : ""}`;
@@ -61,6 +63,7 @@ function ShareLinksCard() {
                        readd: `${target && (target.email || `@${target.domain}`)} restored` }[action];
         pushToast(what, "success");
         load();
+        window.dispatchEvent(new CustomEvent("dma-share-ledger-changed", { detail: "links" }));
         return true;
       })
       .catch(() => { setBusy(null); pushToast("That change was not saved", "warn"); return false; });
@@ -203,4 +206,127 @@ function ShareLinksCard() {
   );
 }
 
-Object.assign(window, { ShareLinksCard });
+/* ── Whitelisted client domains ─────────────────────────────────────
+   Owner, 2026-10-08: "the whitelist should show me a list of whitelisted
+   client domains and allow me to revoke access. Similar to the user list
+   above." One row per organisation domain a client link admits, laid out as
+   Users & roles is: Domain · Clients · Recipients · Expires · Status · Action.
+   Revoke access takes the domain AND every address named at it off every
+   live link (lib/share-ledger changeDomainAccess); Restore puts them back.
+   Expired and revoked links already open for nobody and are not counted. */
+function cdRows(links) {
+  const by = new Map();
+  for (const l of links) {
+    if (l.status !== "active") continue;
+    const rev = l.revocation || { emails: [], domains: [] };
+    const doms = new Set((l.domains || []).map(d => d.toLowerCase()));
+    (l.emails || []).forEach(e => doms.add(e.split("@")[1].toLowerCase()));
+    for (const d of doms) {
+      const r = by.get(d) || { domain: d, clients: new Set(), emails: new Set(), links: 0, open: 0, expires: null };
+      const named = (l.emails || []).filter(e => e.toLowerCase().endsWith(`@${d}`));
+      const domOpen = (l.domains || []).map(x => x.toLowerCase()).includes(d) && !(rev.domains || []).includes(d);
+      const emailOpen = named.some(e => !(rev.emails || []).includes(e));
+      r.links += 1;
+      if (domOpen || emailOpen) r.open += 1;
+      r.clients.add(l.entity);
+      named.forEach(e => r.emails.add(e));
+      if (l.expires_at && (!r.expires || l.expires_at > r.expires)) r.expires = l.expires_at;
+      by.set(d, r);
+    }
+  }
+  return [...by.values()].sort((a, b) => (b.open > 0) - (a.open > 0) || a.domain.localeCompare(b.domain));
+}
+
+function ClientDomainsCard() {
+  const { pushToast } = useApp();
+  const LIVE = !!window.DMA_LIVE;
+  const [data, setData] = useStateSL(LIVE ? null : { status: "ok", links: [
+    { jti: "p1", entity: "golden-1", status: "active", emails: ["cfo@golden1.com", "cio@golden1.com"], domains: ["golden1.com"], expires_at: "2026-11-06T00:00:00Z" },
+    { jti: "p2", entity: "arbor-bank", status: "active", emails: ["coo@arborbank.com"], domains: ["arborbank.com"], expires_at: "2026-10-30T00:00:00Z" },
+    { jti: "p3", entity: "swbc", status: "active", emails: ["it.lead@swbc.com"], domains: ["swbc.com"], revocation: { emails: ["it.lead@swbc.com"], domains: ["swbc.com"] }, expires_at: "2026-10-21T00:00:00Z" },
+  ] });
+  const [busy, setBusy] = useStateSL(null);
+  const load = () => {
+    if (!LIVE) return;
+    fetch("/api/admin/share-links", { cache: "no-store" })
+      .then(r => r.json().then(b => (r.ok ? b : { status: "error", detail: b.detail || b.error, links: [] })))
+      .then(setData)
+      .catch(() => setData({ status: "error", detail: "The client-link ledger did not answer.", links: [] }));
+  };
+  useEffectSL(load, []);
+  // The Client links card changes the same ledger; re-read when it does.
+  useEffectSL(() => { const f = e => { if (e.detail !== "domains") load(); }; window.addEventListener("dma-share-ledger-changed", f); return () => window.removeEventListener("dma-share-ledger-changed", f); }, []);
+
+  const rows = data && data.status === "ok" ? cdRows(data.links || []) : [];
+  const toggle = r => {
+    const action = r.open > 0 ? "revoke" : "restore";
+    if (!LIVE) {
+      setData(d => ({ ...d, links: d.links.map(l => {
+        if (!cdRows([l]).some(x => x.domain === r.domain)) return l;
+        const rev = l.revocation || { emails: [], domains: [] };
+        const named = (l.emails || []).filter(e => e.endsWith(`@${r.domain}`));
+        return { ...l, revocation: action === "revoke"
+          ? { emails: [...new Set([...rev.emails, ...named])], domains: [...new Set([...rev.domains, r.domain])] }
+          : { emails: rev.emails.filter(e => !named.includes(e)), domains: rev.domains.filter(x => x !== r.domain) } };
+      }) }));
+      pushToast(`@${r.domain} ${action === "revoke" ? "access revoked" : "access restored"}`, action === "revoke" ? "warn" : "success");
+      return;
+    }
+    setBusy(r.domain);
+    fetch("/api/admin/share-links", { method: "POST", headers: { "content-type": "application/json" },
+                                      body: JSON.stringify({ domain: r.domain, action }) })
+      .then(res => res.json().then(b => ({ ok: res.ok, b })))
+      .then(({ ok, b }) => {
+        setBusy(null);
+        if (!ok) { pushToast(b.detail || b.error || "That change was not saved", "warn"); return; }
+        const n = (b.links || []).length;
+        pushToast(`@${r.domain} ${action === "revoke" ? "access revoked" : "access restored"} · ${n} link${n === 1 ? "" : "s"}`, action === "revoke" ? "warn" : "success");
+        load();
+        window.dispatchEvent(new CustomEvent("dma-share-ledger-changed", { detail: "domains" }));
+      })
+      .catch(() => { setBusy(null); pushToast("That change was not saved", "warn"); });
+  };
+
+  const note = !data ? <><span className="spinner" /> Loading client domains…</>
+    : data.status === "not_configured" ? <>The client-link ledger is not configured on this deployment (<span className="f-mono">SHARE_LEDGER_BUCKET</span>).</>
+    : data.status !== "ok" ? <>The client-link ledger could not be read · <span className="f-mono" style={{ fontSize: 10.5 }}>{data.detail || "error"}</span></>
+    : !rows.length ? "No client domains are whitelisted: no live client link has been generated."
+    : null;
+
+  return (
+    <div className="card flush" style={{ marginBottom: 16 }} data-screen-label="Admin · Whitelisted client domains">
+      <div className="card-head">
+        <div className="row"><Icon name="lock" size={14} /><h3>Whitelisted client domains</h3></div>
+        <span className="b b-muted">{rows.filter(r => r.open > 0).length} active</span>
+      </div>
+      <div style={{ overflowX: "auto" }}>
+        <table className="tbl">
+          <thead><tr><th>Domain</th><th>Client</th><th>Recipients</th><th>Expires</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
+          <tbody>
+            {note ? (
+              <tr><td colSpan={6} style={{ fontSize: 12, color: "var(--z-muted)" }}>{note}</td></tr>
+            ) : rows.map(r => { const on = r.open > 0; return (
+              <tr key={r.domain} data-domain={r.domain} style={{ opacity: on ? 1 : 0.55 }}>
+                <td data-label="Domain">
+                  <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>@{r.domain}</div>
+                  <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.links} live link{r.links === 1 ? "" : "s"}</div>
+                </td>
+                <td data-label="Client" style={{ fontSize: 12 }}>{[...r.clients].map(slClientName).join(" · ")}</td>
+                <td data-label="Recipients" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>
+                  {[...r.emails].length ? [...r.emails].map(e => <div key={e} className="f-mono" style={{ fontSize: 10.5 }}>{e}</div>) : "Anyone at the domain"}
+                </td>
+                <td data-label="Expires" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{r.expires ? fmtDate(r.expires) : "Not recorded"}</td>
+                <td data-label="Status"><span className={`b ${on ? "b-above" : "b-muted"}`}>{on ? "Active" : "Revoked"}</span></td>
+                <td data-label="Action" style={{ textAlign: "right" }}>
+                  <button className="btn btn-tertiary btn-sm" disabled={busy === r.domain} onClick={() => toggle(r)}>{on ? "Revoke access" : "Restore"}</button>
+                </td>
+              </tr>
+            ); })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ShareLinksCard, ClientDomainsCard, cdRows });

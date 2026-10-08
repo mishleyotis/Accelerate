@@ -89,7 +89,7 @@ if [ -f apps/api/Dockerfile ]; then
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="dmai-api@${SA_DOMAIN}" \
     --network=default --subnet=default --vpc-egress=private-ranges-only \
-    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights;IAP_AUDIENCE=/projects/${API_PROJECT_NUMBER}/locations/${REGION}/services/dmai-web;ADMIN_EMAILS=${ADMIN_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com}" \
+    --set-env-vars="^;^DB_INSTANCE_CONNECTION_NAME=${PROJECT_ID}:${REGION}:dmai-pg;DB_USER=dmai-api@${PROJECT_ID}.iam;DB_NAME=dma_insights;IAP_AUDIENCE=/projects/${API_PROJECT_NUMBER}/locations/${REGION}/services/dmai-web;ADMIN_EMAILS=${ADMIN_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com};ANALYST_EMAILS=${ANALYST_EMAILS:-mishley.otiende@zennify.com,dma@zennify.com}" \
     --concurrency=80 --min-instances=1 --no-allow-unauthenticated --quiet
   # web calls api service-to-service with an ID token
   gcloud run services add-iam-policy-binding dmai-api \
@@ -462,7 +462,11 @@ sys.exit(0 if any(a.get("userByEmail", "").lower() == email and a.get("role") in
     local role="roles/bigquery.dataViewer" member="serviceAccount:${2}" tmp
     [ "$1" = WRITER ] && role="roles/bigquery.dataEditor"
     usage_acl_has "$1" "$2" && return 0
-    usage_cond_has "$role" "$member" && return 0
+    # The dataset's own access list is the grant BigQuery and the log router
+    # document; a conditioned project binding is only the fallback. So the
+    # access list is tried even when a conditioned binding already exists
+    # (the 18:13 UTC 2026-10-07 release left only the fallback in place, and
+    # usage stayed blank while the page was in use).
     say "  usage: granting ${2} ${role} on ${USAGE_DATASET}"
     tmp="$(mktemp)"
     if bq --project_id="$PROJECT_ID" --format=prettyjson show \
@@ -482,6 +486,7 @@ PY
       rm -f "$tmp"; return 0
     fi
     rm -f "$tmp"
+    usage_cond_has "$role" "$member" && return 0
     echo "  usage: dataset access list refused; binding ${role} conditioned to ${USAGE_DATASET}" >&2
     gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="$member" --role="$role" \
       --condition="expression=resource.name.startsWith(\"${USAGE_DS_RES}\"),title=dmai-usage-dataset-only,description=Usage telemetry dataset only" \
@@ -1097,6 +1102,11 @@ if command -v curl >/dev/null 2>&1; then
     esac
   fi
 fi
+
+# Read-only evidence for Admin › Usage analytics: does the sink write, do the
+# events land, can dmai-web read them. Never fails the release.
+say "diagnose: usage telemetry end to end"
+bash "$(dirname "$0")/diagnose_usage.sh" || echo "   (diagnostics did not complete)"
 
 say "deployed. Service URLs:"
 gcloud run services list --project="$PROJECT_ID" --region="$REGION" \

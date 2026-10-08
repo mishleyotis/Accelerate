@@ -847,25 +847,39 @@ function LiveImportStream() {
 }
 
 /* ── Editable users & roles (Admin) ──────────────────────────────── */
+/* The prototype's card, row for row: User · Role · Last active · Status ·
+   Action, a role select and a Deactivate/Reactivate button on every row, the
+   invite row beneath. In production the roster is the users table (svc_api
+   /v1/admin/users, owner adjudication 2026-10-07): everyone who has opened the
+   app is enrolled there with the role they were allocated (POST /v1/me), every
+   change is a real write the API records in session_log, and it applies on the
+   person's next page load. What the server refuses (the owner floor, your own
+   Admin access) comes back as a toast and the row keeps its value. Local
+   preview keeps the prototype's in-memory roster. */
+function relActive(d, now) {
+  if (!d) return null;
+  const m = Math.max(0, (now - d) / 60000);
+  if (m < 60) return `${Math.max(1, Math.round(m))} min ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h} hr ago`;
+  const dd = Math.round(m / 1440);
+  if (dd === 1) return "Yesterday";
+  if (dd < 7) return `${dd} days ago`;
+  return `${Math.round(dd / 7)} wk ago`;
+}
 function AdminUsersCard() {
   const {
     pushToast
   } = useApp();
   const LIVE = !!window.DMA_LIVE;
-  // "Last active" reads the usage telemetry's last-seen (pages-admin-usage.jsx,
-  // one shared fetch with the glance card).
+  // "Last active" is the later of the usage log's last event (pages-admin-usage.jsx,
+  // one shared fetch with the glance card) and the users row's last_seen_at.
   const usage = window.useUsageModel ? window.useUsageModel(7) : {
     status: "not_configured"
   };
-  const me = sessionUser().email;
-  // Production: the roster is the users table (svc_api /v1/admin/users, owner
-  // adjudication 2026-10-07). Every change is a real write the API records in
-  // session_log; the person's new role applies on their next page load.
-  // Local preview keeps the prototype's in-memory roster.
   const [live, setLive] = useState({
     status: LIVE ? "loading" : "ok",
-    users: [],
-    floor: []
+    users: []
   });
   const [busy, setBusy] = useState(null);
   const [mock, setMock] = useState([{
@@ -905,18 +919,15 @@ function AdminUsersCard() {
     b
   }) => setLive(ok ? {
     status: "ok",
-    users: b.users || [],
-    floor: b.owner_floor || []
+    users: b.users || []
   } : {
     status: "error",
     detail: b.detail || b.error,
-    users: [],
-    floor: []
+    users: []
   })).catch(() => setLive({
     status: "error",
     detail: "The users service did not answer.",
-    users: [],
-    floor: []
+    users: []
   }));
   useEffect(() => {
     if (LIVE) load();
@@ -932,21 +943,20 @@ function AdminUsersCard() {
   };
   const seen = LIVE && usage.status === "ok" ? usage.lastSeen : {};
 
-  // Everyone with a row, plus everyone the usage log has seen active without
-  // one: they are AEs by default, and giving them a role creates their row.
+  // Everyone with a row, plus anyone the usage log saw before enrolment
+  // existed: they hold the deploy-time grant, and a change creates their row.
   const users = LIVE ? (() => {
     const rows = live.users.map(u => ({
       ...u,
       known: true
     }));
     const have = new Set(rows.map(u => u.email));
-    Object.keys(seen).forEach(e => {
+    if (live.status === "ok") Object.keys(seen).forEach(e => {
       if (!have.has(e)) rows.push({
         email: e,
         display_name: nameOf(e),
         role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE",
         is_active: true,
-        signed_in: true,
         known: false
       });
     });
@@ -954,15 +964,11 @@ function AdminUsersCard() {
   })() : mock;
   const lastActive = u => {
     if (!LIVE) return u.last;
-    if (u.email === me) return "now (this session)";
-    const s = seen[u.email];
-    if (s) return window.uaRel(s, false, usage.now);
-    if (u.last_seen_at) return window.uaRel(new Date(u.last_seen_at), false, new Date());
-    // Activity, not sign-ins: people stay signed in for days, so the only
-    // honest "last active" is the last usage event the log recorded.
-    return usage.status === "ok" ? "No activity yet" : "Not recorded";
+    const a = seen[u.email] || null;
+    const b = u.last_seen_at ? new Date(u.last_seen_at) : null;
+    const d = a && b ? a > b ? a : b : a || b;
+    return relActive(d, new Date()) || "Invited";
   };
-  const locked = u => LIVE && live.floor.includes(u.email) ? "Owner account (ADMIN_EMAILS): always an active Admin" : u.email === me ? "Your own access: ask another Admin to change it" : null;
   const apply = (email, change, done) => {
     if (!LIVE) {
       setMock(us => us.some(u => u.email === email) ? us.map(u => u.email === email ? {
@@ -1011,10 +1017,9 @@ function AdminUsersCard() {
       pushToast("The users service did not answer", "warn");
     });
   };
-  const after = " · applies on their next page load";
   const setRole = (u, role) => apply(u.email, {
     role
-  }, () => pushToast(`${u.display_name || nameOf(u.email)}: role updated to ${roleWord(role)}${LIVE ? after : ""}`, "success"));
+  }, () => pushToast(`Role updated to ${role}`, "success"));
   const toggleActive = u => apply(u.email, {
     is_active: !u.is_active
   }, () => pushToast(`${u.display_name || nameOf(u.email)} ${u.is_active ? "deactivated" : "reactivated"}`, u.is_active ? "warn" : "success"));
@@ -1035,7 +1040,9 @@ function AdminUsersCard() {
     apply(email, {
       role: inviteRole
     }, () => {
-      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: their Google account opens the app` : `Invitation sent to ${email}`, "success");
+      // No mail is sent in production: the row is the grant, and their Google
+      // account opens the app — so the toast says that, not "sent".
+      pushToast(LIVE ? `Access granted to ${email} as ${roleWord(inviteRole)}` : `Invitation sent to ${email}`, "success");
       setInviteEmail("");
     });
   };
@@ -1053,31 +1060,7 @@ function AdminUsersCard() {
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, "Users & roles")), /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, users.filter(u => u.is_active).length, " active")), LIVE && live.status !== "ok" ? /*#__PURE__*/React.createElement("div", {
-    className: "card-body",
-    style: {
-      fontSize: 12,
-      color: "var(--z-body)",
-      display: "flex",
-      gap: 8,
-      alignItems: "flex-start"
-    }
-  }, live.status === "loading" ? /*#__PURE__*/React.createElement("span", {
-    className: "spinner"
-  }) : /*#__PURE__*/React.createElement(Icon, {
-    name: "info",
-    size: 13,
-    style: {
-      flexShrink: 0,
-      marginTop: 1
-    }
-  }), /*#__PURE__*/React.createElement("span", null, live.status === "loading" ? "Loading users…" : /*#__PURE__*/React.createElement(React.Fragment, null, "The users list could not be read. ", /*#__PURE__*/React.createElement("span", {
-    className: "f-mono",
-    style: {
-      fontSize: 10.5,
-      color: "var(--z-muted)"
-    }
-  }, live.detail)))) : /*#__PURE__*/React.createElement("div", {
+  }, users.filter(u => u.is_active).length, " active")), /*#__PURE__*/React.createElement("div", {
     style: {
       overflowX: "auto"
     }
@@ -1087,8 +1070,20 @@ function AdminUsersCard() {
     style: {
       textAlign: "right"
     }
-  }, "Action"))), /*#__PURE__*/React.createElement("tbody", null, users.map(u => {
-    const lock = locked(u);
+  }, "Action"))), /*#__PURE__*/React.createElement("tbody", null, LIVE && live.status !== "ok" ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+    colSpan: 5,
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)"
+    }
+  }, live.status === "loading" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "spinner"
+  }), " Loading users\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, "The users list could not be read \xB7 ", /*#__PURE__*/React.createElement("span", {
+    className: "f-mono",
+    style: {
+      fontSize: 10.5
+    }
+  }, live.detail)))) : users.map(u => {
     const name = u.display_name || nameOf(u.email);
     return /*#__PURE__*/React.createElement("tr", {
       key: u.email,
@@ -1113,8 +1108,7 @@ function AdminUsersCard() {
     }, /*#__PURE__*/React.createElement("select", {
       className: "inp inp-sm",
       value: u.role,
-      disabled: !!lock || busy === u.email,
-      title: lock || undefined,
+      disabled: busy === u.email,
       onChange: e => setRole(u, e.target.value),
       style: {
         maxWidth: 130
@@ -1141,24 +1135,11 @@ function AdminUsersCard() {
       style: {
         textAlign: "right"
       }
-    }, lock ? /*#__PURE__*/React.createElement("span", {
-      className: "b b-muted",
-      title: lock,
-      style: {
-        display: "inline-flex",
-        gap: 4,
-        alignItems: "center"
-      }
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "lock",
-      size: 11
-    }), " ", u.email === me ? "You" : "Owner") : /*#__PURE__*/React.createElement("button", {
+    }, /*#__PURE__*/React.createElement("button", {
       className: "btn btn-tertiary btn-sm",
       disabled: busy === u.email,
       onClick: () => toggleActive(u)
-    }, busy === u.email ? /*#__PURE__*/React.createElement("span", {
-      className: "spinner"
-    }) : u.is_active ? "Deactivate" : "Reactivate")));
+    }, u.is_active ? "Deactivate" : "Reactivate")));
   })))), /*#__PURE__*/React.createElement("div", {
     className: "card-body",
     style: {
@@ -1196,19 +1177,11 @@ function AdminUsersCard() {
     value: "ADMIN"
   }, "Admin")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary btn-sm",
-    disabled: LIVE && live.status !== "ok",
     onClick: invite
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "plus",
     size: 12
-  }), " Invite user")), LIVE ? /*#__PURE__*/React.createElement("div", {
-    className: "card-body",
-    style: {
-      borderTop: "1px solid var(--z-sep)",
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, "Any other @zennify.com Google account signs in as an ", /*#__PURE__*/React.createElement("strong", null, "AE"), ". A role change applies on that person's next page load; a deactivated account is turned away at its next load.") : null);
+  }), " Invite user")));
 }
 
 /* The last package-scan execution as one line: when it started and what the
@@ -1386,7 +1359,7 @@ function AdminPage() {
   }, "Reject"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate("/admin/import/audit")
-  }, "View source")))))), /*#__PURE__*/React.createElement(AdminUsersCard, null), /*#__PURE__*/React.createElement("div", {
+  }, "View source")))))), /*#__PURE__*/React.createElement(AdminUsersCard, null), window.ClientDomainsCard ? /*#__PURE__*/React.createElement(window.ClientDomainsCard, null) : null, /*#__PURE__*/React.createElement("div", {
     className: "g2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card"
