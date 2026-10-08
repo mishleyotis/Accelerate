@@ -24,7 +24,15 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
     wb = run.open()
     cells = wb.selected_subcaps()
     eids = bank_evidence(wb, cells[0])
-    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami",
+    # With PRELIM on, its baseline already holds Alkami and Snowflake; one
+    # product is one register row, so only what the baseline lacks is added.
+    held = {techscan.product_key(r["Product"]) for r in wb.rows("Tech_Register")}
+
+    def record(**kw):
+        if techscan.product_key(kw["product"]) not in held:
+            techscan.record(wb, **kw)
+
+    record(product="Alkami Digital Banking", vendor="Alkami",
                     layer="CUST", status="CONFIRMED",
                     method="public_document",
                     basis="named live in the 2025 annual report with an "
@@ -32,11 +40,11 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
                     providers=["clay", "exa"],
                     subcaps=[cells[0]], evidence_ids=eids,
                     source_urls=["https://acme.example/ar25"])
-    techscan.record(wb, product="Snowflake Data Cloud", vendor="Snowflake",
+    record(product="Snowflake Data Cloud", vendor="Snowflake",
                     layer="DATA", status="INFERRED", method="job_posting",
                     providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")
-    techscan.record(wb, product="nCino Bank Operating System", vendor="nCino", layer="OPS",
+    record(product="nCino Bank Operating System", vendor="nCino", layer="OPS",
                     status="ABSENT", method="technographic_scan",
                     providers=["explorium"],
                     basis="scan of acme.example plus 4 searches for nCino "

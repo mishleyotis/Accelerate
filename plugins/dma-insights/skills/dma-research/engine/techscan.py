@@ -143,8 +143,53 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
             "ABSENT must state the search that establishes the absence — "
             "'no register row' and 'confirmed absent' are different facts, "
             "and conflating them over-recommends the estate (AUD-0115)")
-    n = 1 + sum(1 for r in wb.rows("Tech_Register"))
-    ts_id = f"TS-{n:03d}"
+    # The id is allocated INSIDE the workbook lock, past the highest id on
+    # the register, never from the row count (B1 Bank, 2026-10-08: the
+    # driver's PRELIM scanner and a relay scanner recorded at once; a count
+    # read from a stale view outside the lock minted TS-004, -007, -009,
+    # -011, -017, -020, -024 and -027 twice, and a peer-record against any
+    # of them was ambiguous). Search_Log.Seq made the same mistake and was
+    # fixed the same way (Arbor Bank, 2026-10-07).
+    with wb.transaction("techscan record"):
+        rows = wb.rows("Tech_Register")
+        key = product_key(product)
+        clash = next((r for r in rows if product_key(r.get("Product")) == key), None)
+        if clash is not None:
+            raise ScanRefused(
+                f"{product.strip()!r} is already on the register as "
+                f"{clash.get('TS_ID')} ({clash.get('Status')}). One product is "
+                f"one row: change its status or evidence with `techscan "
+                f"restrike --ts {clash.get('TS_ID')} …`, never a second row "
+                f"that leaves the two to disagree.")
+        ts_id = next_ts_id(rows)
+        _append_register_row(wb, ts_id, product=product, vendor=vendor,
+                             layer=layer, status=status, basis=basis,
+                             method=method, provs=provs, subcaps=subcaps,
+                             eids=eids, source_urls=source_urls, as_of=as_of,
+                             impact=impact)
+    return ts_id
+
+
+def product_key(product) -> str:
+    """A product's identity on the register: case, punctuation, a trailing
+    parenthetical and internal spacing do not make a second product
+    ('SAP BusinessObjects' == 'SAP Business Objects')."""
+    s = re.sub(r"\s*\(.*?\)", "", str(product or "")).lower()
+    return re.sub(r"[^a-z0-9]+", "", s)
+
+
+def _ts_num(ts_id) -> int:
+    m = re.fullmatch(r"TS-(\d+)", str(ts_id or "").strip().upper())
+    return int(m.group(1)) if m else 0
+
+
+def next_ts_id(rows) -> str:
+    return f"TS-{1 + max((_ts_num(r.get('TS_ID')) for r in rows), default=0):03d}"
+
+
+def _append_register_row(wb, ts_id, *, product, vendor, layer, status, basis,
+                         method, provs, subcaps, eids, source_urls, as_of,
+                         impact):
     wb.append("Tech_Register", {
         "TS_ID": ts_id, "Product": product.strip(),
         "Vendor": (vendor or "").strip() or None,
@@ -155,12 +200,90 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
         "Detection_Basis": basis.strip(), "Detection_Method": method,
         "Providers": ", ".join(dict.fromkeys(provs)),
         "SubCap_IDs": ", ".join(subcaps or []) or None,
-        "Evidence_IDs": ", ".join(eids) or None,
+        "Evidence_IDs": ", ".join(eids or []) or None,
         "Source_URLs": ", ".join(source_urls or []) or None,
         "As_Of": as_of or _utcnow()[:10],
         "DMA_Impact": _checked_impact(impact) if impact else None,
     })
-    return ts_id
+
+
+_STATUS_RANK = {"CONFIRMED": 3, "INFERRED": 2, "CLAIMED": 1, "ABSENT": 0}
+
+
+def dedupe(wb: RunWorkbook, *, same=()) -> dict:
+    """Repair a register that holds one product twice or one TS_ID twice.
+
+    One product is one row: rows whose `product_key` agrees (or that a
+    person names as the same product with `same=[("A", "B")]`, B folded into
+    A) collapse onto the row with the strongest status, and the dropped
+    rows' providers, evidence ids, source URLs and cells are carried onto it
+    — a merge never loses a citation. Then every TS_ID that still names two
+    rows keeps its first row and the later ones are renumbered past the
+    highest id, so no id is ever reused. Peer rows follow a merged id to its
+    keeper; a peer row on an id that named two DIFFERENT products stays
+    where it is and is reported, because which product it meant is not the
+    engine's to guess."""
+    alias = {product_key(b): product_key(a) for a, b in same}
+    merged, renumbered, ambiguous_peers = [], [], []
+    with wb.transaction("techscan dedupe"):
+        rows = wb.rows("Tech_Register")
+        id_count = Counter(str(r.get("TS_ID") or "") for r in rows)
+        groups: dict[str, list[dict]] = {}
+        order: list[str] = []
+        for r in rows:
+            k = product_key(r.get("Product"))
+            k = alias.get(k, k)
+            if k not in groups:
+                groups[k] = []
+                order.append(k)
+            groups[k].append(r)
+        out, repoint = [], {}
+        for k in order:
+            g = groups[k]
+            best = max(range(len(g)), key=lambda i: (
+                _STATUS_RANK.get(str(g[i].get("Status")), -1), -i))
+            keep = dict(g[best])
+            for i, r in enumerate(g):
+                if i == best:
+                    continue
+                for col in ("Providers", "Evidence_IDs", "Source_URLs", "SubCap_IDs"):
+                    vals = _split_ids(keep.get(col)) + _split_ids(r.get(col))
+                    keep[col] = ", ".join(dict.fromkeys(v for v in vals if v)) or None
+                merged.append({"dropped": r.get("TS_ID"), "product": r.get("Product"),
+                               "status": r.get("Status"), "into": keep.get("TS_ID"),
+                               "kept_product": keep.get("Product"),
+                               "kept_status": keep.get("Status")})
+                if id_count[str(r.get("TS_ID"))] == 1:
+                    repoint[str(r.get("TS_ID"))] = str(keep.get("TS_ID"))
+            out.append(keep)
+        seen, n = set(), max((_ts_num(r.get("TS_ID")) for r in rows), default=0)
+        for r in out:
+            tid = str(r.get("TS_ID") or "")
+            if tid in seen:
+                n += 1
+                new = f"TS-{n:03d}"
+                renumbered.append({"was": tid, "now": new, "product": r.get("Product")})
+                r["TS_ID"] = new
+            seen.add(r["TS_ID"])
+        cols = list(C.SHEETS["Tech_Register"])
+        ws = wb._sheet("Tech_Register")
+        if ws.max_row >= 2:
+            ws.delete_rows(2, ws.max_row - 1)
+        for r in out:
+            wb.append("Tech_Register", {c: r.get(c) for c in cols})
+        survivors = Counter(str(r["TS_ID"]) for r in out)
+        for pr in wb.rows("Tech_Peer_Deployments"):
+            tid = str(pr.get("TS_ID") or "")
+            if tid in repoint:
+                wb.update_row_where("Tech_Peer_Deployments",
+                                    {"TS_ID": tid, "Peer": pr.get("Peer")},
+                                    {"TS_ID": repoint[tid]})
+            elif id_count[tid] > 1 and any(x["was"] == tid for x in renumbered):
+                ambiguous_peers.append({"ts_id": tid, "peer": pr.get("Peer")})
+        dup_left = [t for t, c in survivors.items() if c > 1]
+    return {"rows_before": len(rows), "rows_after": len(out), "merged": merged,
+            "renumbered": renumbered, "ambiguous_peer_rows": ambiguous_peers,
+            "duplicate_ids_left": dup_left}
 
 
 #: Hosts whose pages RESELL a crawl (technographic brokers and the tech-
@@ -857,7 +980,7 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("record", "render", "status", "import-explorium",
                  "clay-plan", "impact", "peer-record", "peers",
-                 "restrike", "reconcile"):
+                 "restrike", "reconcile", "dedupe"):
         s = sub.add_parser(name)
         s.add_argument("--run", required=True)
         s.add_argument("--root")
@@ -874,6 +997,11 @@ def main(argv=None) -> int:
             s.add_argument("--text", required=True,
                            help=f"{IMPACT_MIN_WORDS}-{IMPACT_MAX_WORDS} words: "
                                 f"what running this does to the assessment")
+        if name == "dedupe":
+            s.add_argument("--same", action="append", default=[],
+                           metavar="'PRODUCT A=PRODUCT B'",
+                           help="two names for one product; B folds into A "
+                                "(repeatable)")
         if name in ("peer-record", "peers"):
             s.add_argument("--ts", required=(name == "peer-record"))
         if name == "peer-record":
@@ -937,6 +1065,15 @@ def main(argv=None) -> int:
                                   impact=a.impact,
                                   actor=os.environ.get("DMA_ACTOR", "")), indent=2))
         return 0
+    if a.cmd == "dedupe":
+        pairs = []
+        for x in a.same:
+            if "=" not in x:
+                raise ScanRefused(f"--same {x!r}: write 'PRODUCT A=PRODUCT B'")
+            pairs.append(tuple(t.strip() for t in x.split("=", 1)))
+        out = dedupe(wb, same=pairs)
+        print(json.dumps(out, indent=2, default=str))
+        return 1 if out["duplicate_ids_left"] else 0
     if a.cmd == "reconcile":
         bad = contradictions(wb)
         print(json.dumps({"contradictions": bad}, indent=2))
