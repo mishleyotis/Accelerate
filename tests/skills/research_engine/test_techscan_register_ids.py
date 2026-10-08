@@ -113,3 +113,26 @@ def test_dedupe_folds_a_named_alias_and_repoints_its_peer_rows(tmp_path):
                                "Microsoft Azure Active Directory")])
     assert [r["TS_ID"] for r in wb.rows("Tech_Register")] == ["TS-021"]
     assert {r["TS_ID"] for r in wb.rows("Tech_Peer_Deployments")} == {"TS-021"}
+
+
+def test_a_vendor_mention_of_another_product_is_not_this_product():
+    """B1 Bank, 2026-10-08: "Cisco SD-WAN" matched "Cisco WebEx" and
+    "Amazon S3" matched "Amazon Route 53" on the vendor token alone."""
+    import re
+    def hit(product, text):
+        tok = techscan._vendor_tokens({"Product": product})[0]
+        pat = re.compile(rf"\b{re.escape(tok)}\b", re.I)
+        return techscan._names_this_product(pat, text, techscan._product_words({"Product": product}, tok))
+    assert not hit("Cisco SD-WAN", "tech_communications: Glia, Cisco WebEx, Zendesk")
+    assert not hit("Amazon S3", "Cloudflare, Amazon Route 53, Google Tag Manager")
+    assert hit("Amazon S3", "Dell EMC SAN, Amazon s3; networks")
+    assert hit("Cisco SD-WAN", "networks: Cisco SD-WAN, Riverbed SteelHead")
+    assert hit("Pipewise Loan Pipeline", "loan officers manage their pipeline daily in Pipewise and keep")
+
+
+def test_a_broker_technographic_reading_never_contradicts_a_claimed_row():
+    scan = {"Origin": "connector", "Source_Name": "Clay Website Technology Stack reading, b1bank.com"}
+    vibe = {"Origin": "connector", "Source_Name": "Vibe Prospecting (Explorium) technographics reading"}
+    cfpb = {"Origin": "connector", "Source_Name": "CFPB complaint database API"}
+    assert techscan._broker_reading(scan) and techscan._broker_reading(vibe)
+    assert not techscan._broker_reading(cfpb)

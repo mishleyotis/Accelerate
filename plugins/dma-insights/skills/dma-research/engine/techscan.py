@@ -327,6 +327,39 @@ def _vendor_hosted(e, tok: str) -> bool:
     return bool(host) and tok.lower() in host.replace("-", "")
 
 
+def _product_words(row, tok: str) -> set[str]:
+    """The words of the row's product after the matched token, lower-case:
+    {"sd-wan"} for "Cisco SD-WAN", {"s3"} for "Amazon S3"."""
+    prod = re.sub(r"\(.*?\)", " ", str(row.get("Product") or ""))
+    words = [w.lower() for w in re.split(r"\s+", prod) if w]
+    return {w for w in words if w != tok.lower()}
+
+
+def _names_this_product(pat, text: str, own: set[str]) -> bool:
+    """True when `text` names the token as THIS product. A vendor token
+    followed by another product's name ("Cisco WebEx", "Amazon Route 53") is
+    a different product from the same vendor, not this one (B1 Bank,
+    2026-10-08: both flagged CLAIMED "Cisco SD-WAN" / "Amazon S3" rows)."""
+    for m in pat.finditer(text):
+        nxt = re.match(r"\s+([A-Za-z0-9][\w\-]*)", text[m.end():])
+        if not nxt:
+            return True
+        word = nxt.group(1)
+        if word.lower() in own or not (word[0].isupper() or word[0].isdigit()):
+            return True
+    return False
+
+
+def _broker_reading(e) -> bool:
+    """A machine technographic reading (Clay Tech Stack, Vibe/Explorium) is a
+    broker's claim — the source a CLAIMED row already rests on — so it can
+    never be the bank-authored or independent evidence that contradicts one.
+    It carries no Source_URL, so BROKER_HOSTS cannot catch it by host."""
+    return (str(e.get("Origin") or "").lower() == "connector" and bool(re.search(
+        r"technograph|tech(nology)? stack|explorium|vibe prospecting|\bclay\b",
+        str(e.get("Source_Name") or ""), re.I)))
+
+
 def contradictions(wb: RunWorkbook) -> list[dict]:
     """CLAIMED register rows that bank-authored or independent evidence the
     run already holds names, and which the row does not cite. The vendor's
@@ -367,6 +400,7 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
             if tok.lower() in confirmed:
                 continue
             pat = re.compile(rf"\b{re.escape(tok)}\b", re.I)
+            own = _product_words(r, tok)
             hits = [eid for eid, e in ev.items()
                     if eid not in cited
                     # T1-T3: the bank's own pages, its postings, regulators
@@ -374,11 +408,12 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
                     # ("accessible through aggregators like Plaid"), which
                     # names a product without saying it is deployed here.
                     and str(e.get("Tier") or "").upper() in ("T1", "T2", "T3")
-                    and pat.search(str(e.get("Excerpt") or ""))
+                    and _names_this_product(pat, str(e.get("Excerpt") or ""), own)
                     and about_entity(e)
                     and not any(h in str(e.get("Source_URL") or "").lower()
                                 for h in BROKER_HOSTS)
-                    and not _vendor_hosted(e, tok)]
+                    and not _vendor_hosted(e, tok)
+                    and not _broker_reading(e)]
             if hits:
                 out.append({"ts_id": r.get("TS_ID"), "product": r.get("Product"),
                             "status": "CLAIMED", "token": tok,
