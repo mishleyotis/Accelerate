@@ -423,6 +423,55 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
     return out
 
 
+def link(wb: RunWorkbook, ts_id: str, subcaps=None) -> dict:
+    """Name the assessed cells a register row bears on (`SubCap_IDs`, which
+    the techstack page serves as `linked_subcap_ids`).
+
+    B1 Bank, 2026-10-08: `record` takes cells but no caller passed any and
+    nothing could set them afterwards, so all 31 rows served no linked
+    cells. Explicit cells must be catalogue cells of this run. With none
+    given, cells come from the row's own PRODUCT-SPECIFIC evidence only: a
+    broker technographic reading lists dozens of products, and inheriting
+    its cells would tie every product to the same ones."""
+    valid = {_clean_id(r.get("SubCap_ID")) for r in wb.scoring_rows()} - {""}
+    with wb.transaction("techscan link"):
+        row = next((r for r in wb.rows("Tech_Register")
+                    if str(r.get("TS_ID") or "").upper() == str(ts_id).upper()), None)
+        if row is None:
+            raise ScanRefused(f"{ts_id} is not on Tech_Register")
+        if subcaps:
+            want = [_clean_id(c) for c in subcaps if _clean_id(c)]
+            bad = [c for c in want if c not in valid]
+            if bad:
+                raise ScanRefused(f"{ts_id}: {', '.join(bad)} not a cell of this run")
+            source = "explicit"
+        else:
+            ev = wb.evidence_index()
+            want = []
+            for e in str(row.get("Evidence_IDs") or "").split(","):
+                er = ev.get(e.strip().split(":")[0])
+                if not er or _broker_reading(er):
+                    continue
+                want += [c for c in (_clean_id(x) for x in
+                                     str(er.get("SubCap_IDs") or "").split(","))
+                         if c in valid]
+            source = "evidence"
+            if not want:
+                raise ScanRefused(
+                    f"{ts_id}: no product-specific evidence names a cell; "
+                    f"pass --subcap for the cells this product bears on")
+        have = [c for c in (_clean_id(x) for x in
+                            str(row.get("SubCap_IDs") or "").split(",")) if c]
+        cells = list(dict.fromkeys(have + want))
+        wb.update_row_where("Tech_Register", {"TS_ID": row["TS_ID"]},
+                            {"SubCap_IDs": ", ".join(cells)})
+    return {"ts_id": row["TS_ID"], "subcaps": cells, "source": source}
+
+
+def _clean_id(x) -> str:
+    return str(x or "").strip().split(":")[0].strip()
+
+
 def restrike(wb: RunWorkbook, ts_id: str, *, status: str, method: str,
              basis: str, providers, evidence_ids=None, product: str | None = None,
              impact: str | None = None, actor: str = "") -> dict:
@@ -1029,7 +1078,7 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("record", "render", "status", "import-explorium",
                  "clay-plan", "impact", "peer-record", "peers",
-                 "restrike", "reconcile", "dedupe"):
+                 "restrike", "reconcile", "dedupe", "link"):
         s = sub.add_parser(name)
         s.add_argument("--run", required=True)
         s.add_argument("--root")
@@ -1093,6 +1142,12 @@ def main(argv=None) -> int:
             s.add_argument("--evidence-id", action="append", default=[])
             s.add_argument("--product")
             s.add_argument("--impact")
+        if name == "link":
+            s.add_argument("--ts", required=True, help="TS-nnn")
+            s.add_argument("--subcap", action="append", default=[],
+                           help="a cell this product bears on (repeatable); "
+                                "omit to take them from the row's own "
+                                "product-specific evidence")
         if name == "render":
             s.add_argument("--out")
             s.add_argument("--force", action="store_true")
@@ -1123,6 +1178,9 @@ def main(argv=None) -> int:
         out = dedupe(wb, same=pairs)
         print(json.dumps(out, indent=2, default=str))
         return 1 if out["duplicate_ids_left"] else 0
+    if a.cmd == "link":
+        print(json.dumps(link(wb, a.ts, subcaps=a.subcap), indent=2))
+        return 0
     if a.cmd == "reconcile":
         bad = contradictions(wb)
         print(json.dumps({"contradictions": bad}, indent=2))

@@ -153,3 +153,33 @@ def test_restrike_is_not_refused_as_a_duplicate_of_itself(tmp_path):
         techscan.restrike(wb, other, status="INFERRED", method="technographic_scan",
                           basis="renamed onto a product that already has its own row",
                           providers=["explorium"], product="Cisco SD-WAN")
+
+
+def test_link_names_the_cells_a_row_bears_on_and_refuses_a_foreign_cell(tmp_path):
+    """B1 Bank, 2026-10-08: nothing could set Tech_Register.SubCap_IDs after
+    a row was recorded, so all 31 rows served no linked cells."""
+    wb = _wb(tmp_path)
+    cell = wb.scoring_rows()[0]["SubCap_ID"]
+    ts = _rec(wb, "Glia Digital Customer Service")
+    out = techscan.link(wb, ts, subcaps=[cell])
+    assert out == {"ts_id": ts, "subcaps": [cell], "source": "explicit"}
+    with pytest.raises(ScanRefused, match="not a cell of this run"):
+        techscan.link(wb, ts, subcaps=["P9C9.9.9"])
+
+
+def test_link_from_evidence_ignores_a_broker_reading(tmp_path):
+    from .fixtures import bank_evidence
+    wb = _wb(tmp_path)
+    cell = wb.scoring_rows()[0]["SubCap_ID"]
+    eids = bank_evidence(wb, cell, n=3)
+    ts = _rec(wb, "Glia Digital Customer Service", evidence_ids=eids[:1])
+    assert techscan.link(wb, ts)["subcaps"] == [cell]
+    # a row citing only a broker technographic reading has no cells to inherit
+    ev = wb.evidence_index()[eids[1]]
+    wb.update_row_where("Evidence_Detail", {"E_ID": eids[1]},
+                        {"Origin": "connector",
+                         "Source_Name": "Clay Website Technology Stack reading"})
+    other = _rec(wb, "Zendesk support desk", evidence_ids=[eids[1]])
+    with pytest.raises(ScanRefused, match="no product-specific evidence"):
+        techscan.link(wb, other)
+    assert ev  # the row existed before it was re-attributed
