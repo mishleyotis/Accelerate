@@ -270,3 +270,15 @@ def test_an_open_cell_the_gate_names_is_handed_once_not_twice(tmp_path):
     assert [cell] in inv["repair_batches"][cat]
     assert all(cap not in b for b in inv["batches"][cat]), \
         f"{cap} is handed as a capability batch AND a repair batch"
+
+
+def test_reset_guard_rehands_a_stalled_category(tmp_path):
+    """B1 Bank, 2026-10-08: --reset-guard cleared the round guard but not the
+    per-category stall counts, so an owner's reset re-handed nothing."""
+    p, disp, out = _drive(tmp_path, "workflow")
+    cat = out["invocations"][0]["cats"][0]
+    p.opts.stall_rounds = 2
+    p.state["workflow_progress"] = {cat: {"sig": [0], "blockers": [], "stalls": 9}}
+    assert cat in p._workflow_stalled([cat], {})
+    p.opts.reset_guard = True
+    assert cat not in p._workflow_stalled([cat], {})

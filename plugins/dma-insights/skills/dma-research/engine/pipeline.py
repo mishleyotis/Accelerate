@@ -1960,6 +1960,13 @@ class Pipeline:
         if not self.opts.stall_rounds:
             return []
         book = self.state.setdefault("workflow_progress", {})
+        if self.opts.reset_guard:
+            # An owner's --reset-guard is the documented way to re-hand a
+            # stalled category (B1 Bank, 2026-10-08: six categories stalled
+            # only because the search cap was empty, and the reset cleared the
+            # round guard but left these counts, so nothing was re-handed).
+            for rec in book.values():
+                rec["stalls"] = 0
         last_spent = float(self.state.get("workflow_spent_at_handoff", -1.0))
         worked = round(self._spent_usd, 2) > round(last_spent, 2)
         now = self._research_progress()
