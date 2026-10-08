@@ -68,3 +68,6 @@ dma-insights-*.zip
 # offer real-looking measurements for commit. Set DMA_SOURCE_YIELD to put it
 # somewhere deliberate.
 plugins/dma-insights/fixtures/source_yield.json
+apps/web/tests/e2e/jwks.json
+apps/web/tests/e2e/iap-private.pem
+apps/web/tests/e2e/*.log

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { COOKIE, verify } from "../../../../lib/session";
+import { requestSession } from "../../../../lib/request-session";
 import { RANGES, readUsage } from "../../../../lib/usage-store";
 import { shareMode } from "../../../../lib/share";
 
@@ -18,7 +18,7 @@ const cache = new Map();
 export async function GET(req) {
   // Not on the public share service: it serves client links only (lib/share).
   if (shareMode()) return new Response("Not found", { status: 404 });
-  const session = verify(cookies().get(COOKIE)?.value);
+  const session = await requestSession(req, cookies());
   if (!session || session.role !== "ADMIN") {
     return NextResponse.json({ error: "admin_session_required" }, { status: 403 });
   }
