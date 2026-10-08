@@ -8,7 +8,7 @@
  *     "Licence and user-seat audit decides a…"
  *
  * `badge-never-shrinks.test.js` pins the CSS contract that fixes this
- * (`white-space: normal` + `max-width: 100%` + `overflow-wrap: anywhere`).
+ * (`white-space: normal` + `max-width: 100%` + `overflow-wrap: break-word`).
  * That test reads app.css and would keep passing if a call site imposed its
  * own `nowrap`, or wrapped a badge in a fixed-width box, or if a future
  * layout change reintroduced the pressure somewhere else entirely. This one

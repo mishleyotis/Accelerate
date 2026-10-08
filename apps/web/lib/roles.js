@@ -17,7 +17,7 @@
 //   so an outage of svc_api degrades to the old behaviour instead of locking
 //   everyone out of a page that would show nothing anyway.
 import { grantedRole } from "./identity.js";
-import { upstreamHeaders } from "./upstream.js";
+import { ASSERTION_HEADER, upstreamHeaders } from "./upstream.js";
 
 function floor() {
   return (process.env.ADMIN_EMAILS || "").toLowerCase().split(",")
@@ -26,12 +26,24 @@ function floor() {
 
 export async function resolveAccess(email, assertion, { fetchImpl = fetch } = {}) {
   const e = String(email || "").toLowerCase();
-  if (floor().includes(e)) return { role: "ADMIN", active: true, source: "owner_floor" };
   const base = process.env.API_URL;
+  if (floor().includes(e)) {
+    // The owners are Admins whatever any row says, but they are still
+    // enrolled and touched like everyone else, so the roster lists them with
+    // a real "last active" and their own changes have a row to attribute.
+    if (base && assertion) {
+      try {
+        const headers = await upstreamHeaders(base);
+        headers[ASSERTION_HEADER] = assertion;
+        await fetchImpl(`${base}/v1/me`, { method: "POST", headers, cache: "no-store" });
+      } catch {}
+    }
+    return { role: "ADMIN", active: true, source: "owner_floor" };
+  }
   if (!base || !assertion) return { role: grantedRole(e), active: true, source: "deploy" };
   try {
     const headers = await upstreamHeaders(base);
-    headers["x-goog-iap-jwt-assertion"] = assertion;
+    headers[ASSERTION_HEADER] = assertion;
     let r = await fetchImpl(`${base}/v1/me`, { method: "POST", headers, cache: "no-store" });
     // An api older than enrolment answers 405; its read-only GET still holds.
     if (r.status === 405) r = await fetchImpl(`${base}/v1/me`, { headers, cache: "no-store" });

@@ -315,6 +315,14 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   them back — ledger writes, not the database. Admin › Usage analytics blank in
   production is diagnosed by `infra/diagnose_usage.sh` (end of every deploy,
   and on demand via the `Production diagnostics` workflow on the default branch).
+  **The assertion travels web→api as `x-dmai-iap-assertion`** (2026-10-08:
+  every Users & roles change read "this write must be attributable to a
+  verified person" — Google's front end does not deliver a caller-supplied
+  `x-goog-iap-jwt-assertion` to dmai-api); the API verifies the token exactly
+  as before. The owner floor (`ADMIN_EMAILS` = mishley.otiende@ and dma@
+  zennify.com) is enrolled on visit too, and an owner with no row can still
+  grant. Usage analytics filters (search · role · status) sit above every
+  card and narrow all of them; Daily activity is sessions by role, no toggle.
 
 ## Open decisions — leave open, do not resolve silently
 

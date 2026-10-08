@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { COOKIE, verify } from "../../../../lib/session";
 import { shareMode } from "../../../../lib/share";
-import { upstreamHeaders } from "../../../../lib/upstream";
+import { ASSERTION_HEADER, upstreamHeaders } from "../../../../lib/upstream";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ async function proxy(req, method, body) {
   if (!base) return NextResponse.json({ error: "api_not_configured" }, { status: 501 });
   const headers = await upstreamHeaders(base);
   const assertion = req.headers.get("x-goog-iap-jwt-assertion");
-  if (assertion) headers["x-goog-iap-jwt-assertion"] = assertion;
+  if (assertion) headers[ASSERTION_HEADER] = assertion;
   if (method === "POST") {
     const key = req.headers.get("idempotency-key");
     if (!key) {

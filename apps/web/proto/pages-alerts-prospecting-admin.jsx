@@ -488,11 +488,11 @@ function AdminUsersCard() {
     <div className="card flush" style={{ marginBottom: 16 }}>
       <div className="card-head">
         <div className="row"><Icon name="users" size={14} /><h3>Users &amp; roles</h3></div>
-        <span className="b b-muted">{users.filter(u => u.is_active).length} active</span>
+        <span className="b b-muted b-token">{users.filter(u => u.is_active).length} active</span>
       </div>
-      <div style={{ overflowX: "auto" }}>
+      <div className="tbl-reflow reflow-early">
         <table className="tbl">
-          <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
+          <thead><tr><th>User</th><th>Role</th><th className="col-drop2">Last active</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
           <tbody>
             {LIVE && live.status !== "ok" ? (
               <tr><td colSpan={5} style={{ fontSize: 12, color: "var(--z-muted)" }}>
@@ -502,7 +502,7 @@ function AdminUsersCard() {
               <tr key={u.email} style={{ opacity: u.is_active ? 1 : 0.55 }}>
                 <td data-label="User">
                   <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{name}</div>
-                  <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{u.email}</div>
+                  <div className="f-mono t-email" style={{ fontSize: 10, color: "var(--z-muted)" }}>{u.email}</div>
                 </td>
                 <td data-label="Role">
                   <select className="inp inp-sm" value={u.role} disabled={busy === u.email} onChange={e => setRole(u, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${name}`}>
@@ -511,8 +511,8 @@ function AdminUsersCard() {
                     <option value="ADMIN">Admin</option>
                   </select>
                 </td>
-                <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{lastActive(u)}</td>
-                <td data-label="Status"><span className={`b ${u.is_active ? "b-above" : "b-muted"}`}>{u.is_active ? "Active" : "Deactivated"}</span></td>
+                <td data-label="Last active" className="col-drop2" style={{ fontSize: 11.5, color: "var(--z-muted)", whiteSpace: "nowrap" }}>{lastActive(u)}</td>
+                <td data-label="Status"><span className={`b b-token ${u.is_active ? "b-above" : "b-muted"}`}>{u.is_active ? "Active" : "Deactivated"}</span></td>
                 <td data-label="Action" style={{ textAlign: "right" }}>
                   <button className="btn btn-tertiary btn-sm" disabled={busy === u.email} onClick={() => toggleActive(u)}>{u.is_active ? "Deactivate" : "Reactivate"}</button>
                 </td>
@@ -665,7 +665,7 @@ function AdminPage() {
               <>
                 <span className="f-mono" style={{ flex: 1, fontSize: 12, padding: "7px 10px", background: "var(--z-bg)", borderRadius: 6, border: "1px solid var(--z-sep)" }}>{folder}</span>
                 {LIVE ? (
-                  <span className="b b-muted" title="Set on the worker Job (INTAKE_FOLDER_ID) at deploy time" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> Deploy-set</span>
+                  <span className="b b-muted b-token" title="Set on the worker Job (INTAKE_FOLDER_ID) at deploy time" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> Deploy-set</span>
                 ) : (
                   <button className="btn btn-tertiary btn-sm" onClick={() => setEditingFolder(true)}><Icon name="edit" size={12} /> Edit</button>
                 )}

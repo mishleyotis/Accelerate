@@ -180,6 +180,13 @@ def _admin_actor(cur, email: str, *, env=None) -> str:
     cur.execute("SELECT id, role::text, is_active FROM users WHERE email = %s",
                 (email,))
     rows = cur.fetchall()
+    if not rows and email in owner_floor(env):
+        # An owner who has never been enrolled still administers: enrol them
+        # (as ADMIN) so the change has a row to be attributed to.
+        enrol(cur, email, env=env)
+        cur.execute("SELECT id, role::text, is_active FROM users WHERE email = %s",
+                    (email,))
+        rows = cur.fetchall()
     if not rows:
         raise ApiError(403, "unknown_actor",
                        "the verified signed-in email resolves to no user row; "

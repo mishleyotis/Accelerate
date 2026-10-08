@@ -104,7 +104,7 @@ def test_a_missing_assertion_refuses_the_write():
     with pytest.raises(ActorError) as e:
         verify_assertion(None, audience=AUD, fetch=_fetch())
     assert e.value.status == 401 and e.value.code == "actor_unverified"
-    assert "x-goog-iap-jwt-assertion" in e.value.detail
+    assert "x-dmai-iap-assertion" in e.value.detail
 
 
 def test_the_query_parameter_alone_is_never_an_identity():
@@ -197,6 +197,18 @@ def test_a_refusal_is_logged_with_its_reason_and_never_the_token():
     body = src[src.index("def _actor_or_error"):src.index("_SUBCAP_COLS = (")]
     assert '"actor_refused"' in body and "e.code" in body and "e.detail" in body
     assert "x-goog-iap-jwt-assertion" not in body
+
+
+def test_the_assertion_dmai_web_forwards_under_its_own_header_verifies():
+    """2026-10-08: Google's front end does not deliver a caller-supplied
+    `x-goog-iap-jwt-assertion` to dmai-api, so every Users & roles change was
+    refused as unattributable. dmai-web forwards the same token as
+    `x-dmai-iap-assertion`; it is verified exactly as before."""
+    assert verified_actor(_Req(**{"x-dmai-iap-assertion": _token()}),
+                          audience=AUD, fetch=_fetch()) == EMAIL
+    with pytest.raises(ActorError):
+        verified_actor(_Req(**{"x-dmai-iap-assertion": _token(key=_other_key)}),
+                       audience=AUD, fetch=_fetch())
 
 
 def test_an_assertion_with_no_iat_is_refused():

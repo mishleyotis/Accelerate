@@ -723,13 +723,24 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
      spilling — the 2026-08-22 defect was shrink WITH nowrap, which this
      never reinstates. A short badge is unaffected: it fits, so it does not
      wrap. `max-width: 100%` keeps a single unbroken token inside its
-     container, and `overflow-wrap: anywhere` breaks one that has no space to
-     break at. Nothing here can clip, at any width, for any content. */
+     container, and `overflow-wrap: break-word` breaks one that has no space
+     to break at — but only once it would overflow.
+
+     NOT `anywhere` (2026-10-08, owner: "items should never feel wrapped up —
+     it should all fit in the chip"). `anywhere` also shrinks the badge's
+     min-content width to ONE character, and a table sizes its columns from
+     min-content: Users · activity read "Adm|in" and "Activ|e" at 1024px,
+     because the ten-column table squeezed its Role and Status columns to a
+     glyph. `break-word` keeps the overflow guarantee and lets the column keep
+     its word. Nothing here can clip, at any width, for any content. */
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   max-width: 100%;
   min-width: 0;
 }
+/* A badge that is one token — a role, a status, a count — is never broken
+   or wrapped at all: it holds its line and its row makes room for it. */
+.b-token { white-space: nowrap; overflow-wrap: normal; flex-shrink: 0; max-width: none; }
 .b-teal   { background: var(--z-ice);     color: var(--z-mid); }
 .b-ph0    { background: var(--ph0-lt);    color: var(--ph0); }
 .b-ph1    { background: var(--ph1-lt);    color: var(--ph1); }
@@ -980,7 +991,7 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
     word-break: break-word;
   }
   .tbl-reflow .tbl tbody td > * { max-width: 70%; text-align: right; }
-  .tbl-reflow .tbl tbody td.col-drop { display: flex; }
+  .tbl-reflow .tbl tbody td.col-drop, .tbl-reflow .tbl tbody td.col-drop2 { display: flex; }
   .tbl-reflow .tbl tbody td::before {
     content: attr(data-label);
     font-weight: 600; font-size: 10px; color: var(--z-muted);
@@ -1688,7 +1699,50 @@ select.inp { appearance: none; background-image: url("data:image/svg+xml;utf8,<s
 /* Universal overflow guards */
 * { min-width: 0; }
 img, svg, video { max-width: 100%; }
-.card, .card-tile, .modal, .drawer { overflow-wrap: anywhere; }
+/* `break-word`, not `anywhere`: both break a token that would overflow, but
+   `anywhere` also tells every table inside a card that its columns may shrink
+   to one character — emails then broke as "zennify.co|m" (2026-10-08). */
+.card, .card-tile, .modal, .drawer { overflow-wrap: break-word; }
+/* Usage analytics: the filter bar sits above every card it narrows, and stays
+   in reach while the page scrolls (owner, 2026-10-08). */
+.ua-filters {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 10px 14px; margin-bottom: 16px;
+  position: sticky; top: 0; z-index: 5;
+}
+/* A second, narrower step for wide tables: `col-drop2` columns leave below
+   640px of the table's own width, and return when the rows stack. */
+@container (max-width: 640px) {
+  .tbl-reflow .col-drop2 { display: none; }
+}
+/* `reflow-early`: the admin tables carry whole words (emails, roles, link
+   ids) that never break, so they take each reflow step sooner than a table
+   of numbers would — `col-drop` columns leave below 900px of the table's own
+   width, `col-drop2` below 760px, and the rows stack below 560px. */
+@container (max-width: 900px) {
+  .reflow-early .col-drop { display: none; }
+  .reflow-early > .tbl { min-width: 0; }
+}
+@container (max-width: 760px) {
+  .reflow-early .col-drop2 { display: none; }
+}
+@container (max-width: 560px) {
+  .reflow-early .tbl thead { display: none; }
+  .reflow-early .tbl tbody tr { display: block; padding: 10px 12px; border-bottom: 1px solid var(--z-sep); }
+  .reflow-early .tbl tbody td {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px; padding: 4px 0; border-bottom: 0; min-height: 22px;
+  }
+  .reflow-early .tbl tbody td.col-drop, .reflow-early .tbl tbody td.col-drop2 { display: flex; }
+  .reflow-early .tbl tbody td > * { max-width: 70%; text-align: right; }
+  .reflow-early .tbl tbody td::before {
+    content: attr(data-label);
+    font-weight: 600; font-size: 10px; color: var(--z-muted);
+    text-transform: uppercase; flex-shrink: 0;
+  }
+}
+/* An address is read as one thing: it never breaks inside a table row. */
+.tbl .t-email { overflow-wrap: normal; word-break: normal; white-space: nowrap; }
 
 /* ─── Text autofit helpers ─── */
 .txt-fit-1, .txt-fit-2, .txt-fit-3, .txt-fit-4 {

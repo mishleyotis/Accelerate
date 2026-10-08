@@ -634,6 +634,16 @@ function uaAgg(model, from, to, onlyEmail) {
     daily
   };
 }
+/* The model narrowed to a set of people: every figure computed from it is
+   about them and nobody else. Recording bounds and `now` stay the store's. */
+function uaNarrow(model, emails) {
+  return {
+    ...model,
+    sessions: model.sessions.filter(s => emails.has(s.email)),
+    sessionless: (model.sessionless || []).filter(e => emails.has(e.email)),
+    people: model.people.filter(u => emails.has(u.email))
+  };
+}
 /* A prior-period comparison is only honest where recording covered it. */
 function uaPrevCovered(model, prevFrom) {
   return !!(model.recordingSince && model.recordingSince <= prevFrom);
@@ -797,12 +807,18 @@ function UASpark({
     }
   })));
 }
+/* Sessions per day, stacked by role. One measure, not a toggle between three
+   (owner, 2026-10-08: "the daily activity toggle feels off"): active time and
+   people per day were the KPI tiles' numbers restated as different charts,
+   and only one of the three carried the role legend. Each day's tooltip
+   still gives all of them. The one person's drawer draws minutes instead
+   (`minutes`), because for a single person roles do not split anything. */
 function UADailyChart({
   daily,
   from,
-  metric
+  minutes
 }) {
-  const vals = daily.map(d => metric === "sessions" ? d.AE + d.ANALYST + d.ADMIN : metric === "minutes" ? d.mins : d.users.size);
+  const vals = daily.map(d => minutes ? d.mins : d.AE + d.ANALYST + d.ADMIN);
   const max = Math.max(1, ...vals),
     n = daily.length,
     every = n <= 7 ? 1 : n <= 30 ? 5 : 15;
@@ -817,7 +833,8 @@ function UADailyChart({
     }
   }, daily.map((d, i) => {
     const date = new Date(from.getTime() + i * UA_DAY);
-    const tip = `${uaDate(date)} · ${metric === "minutes" ? uaDur(d.mins * 60) + " active" : metric === "sessions" ? `${vals[i]} sessions (AE ${d.AE} · Analyst ${d.ANALYST} · Admin ${d.ADMIN})` : `${vals[i]} users`}`;
+    const parts = ["AE", "ANALYST", "ADMIN"].filter(r => d[r]).map(r => `${UA_ROLE_LABEL[r]} ${d[r]}`).join(" · ");
+    const tip = minutes ? `${uaDate(date)} · ${uaDur(d.mins * 60)} active` : vals[i] ? `${uaDate(date)} · ${vals[i]} ${vals[i] === 1 ? "session" : "sessions"}${parts ? ` (${parts})` : ""} · ${d.users.size} ${d.users.size === 1 ? "person" : "people"} · ${uaDur(d.mins * 60)} active` : `${uaDate(date)} · no sessions`;
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       title: tip,
@@ -831,21 +848,21 @@ function UADailyChart({
         gap: 1,
         cursor: "default"
       }
-    }, metric === "sessions" ? ["ADMIN", "ANALYST", "AE"].map(r => d[r] ? /*#__PURE__*/React.createElement("div", {
-      key: r,
-      style: {
-        height: `${d[r] / max * 100}%`,
-        background: UA_ROLE_COLOR[r],
-        borderRadius: 2
-      }
-    }) : null) : /*#__PURE__*/React.createElement("div", {
+    }, minutes ? /*#__PURE__*/React.createElement("div", {
       style: {
         height: `${vals[i] / max * 100}%`,
         minHeight: vals[i] ? 2 : 0,
         background: UA_FILL,
         borderRadius: "3px 3px 0 0"
       }
-    }));
+    }) : ["ADMIN", "ANALYST", "AE"].map(r => d[r] ? /*#__PURE__*/React.createElement("div", {
+      key: r,
+      style: {
+        height: `${d[r] / max * 100}%`,
+        background: UA_ROLE_COLOR[r],
+        borderRadius: 2
+      }
+    }) : null));
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -921,7 +938,7 @@ function UAStatus({
     Never: "b-muted"
   }[status];
   return /*#__PURE__*/React.createElement("span", {
-    className: `b ${cls}`,
+    className: `b b-token ${cls}`,
     style: {
       display: "inline-flex",
       gap: 4,
@@ -1266,7 +1283,7 @@ function UAUserDrawer({
   }, /*#__PURE__*/React.createElement(UADailyChart, {
     daily: agg.daily,
     from: from,
-    metric: "minutes"
+    minutes: true
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
@@ -1392,7 +1409,6 @@ function UsagePage() {
     pushToast
   } = useApp();
   const [range, setRange] = useStateUA(30);
-  const [metric, setMetric] = useStateUA("sessions");
   const [q, setQ] = useStateUA("");
   const [roleF, setRoleF] = useStateUA("ALL");
   const [statusF, setStatusF] = useStateUA("ALL");
@@ -1401,9 +1417,22 @@ function UsagePage() {
     dir: -1
   });
   const [userOpen, setUserOpen] = useStateUA(null);
-  const model = useUsageModel(range);
-  const ok = model.status === "ok";
-  const bounds = useMemoUA(() => ok ? uaDayBounds(model.now, range) : null, [ok, model, range]);
+  const all = useUsageModel(range);
+  const ok = all.status === "ok";
+  const bounds = useMemoUA(() => ok ? uaDayBounds(all.now, range) : null, [ok, all, range]);
+  // The filter bar at the top decides WHO the whole page is about (owner,
+  // 2026-10-08: "the filter should be on top and all bottom components should
+  // adjust accordingly"). Status is read from everyone's own activity, then
+  // the model is narrowed to the matching people, and every card below —
+  // KPIs, signals, the chart, live now, pages, clients, the hour heatmap and
+  // the user table — is computed from that narrowed model.
+  const allRows = useMemoUA(() => ok ? uaRows(all, uaAgg(all, bounds.from, bounds.to), bounds.to) : [], [ok, all, bounds]);
+  const filtering = roleF !== "ALL" || statusF !== "ALL" || !!q.trim();
+  const keep = useMemoUA(() => {
+    const needle = q.trim().toLowerCase();
+    return new Set(allRows.filter(r => (roleF === "ALL" || r.role === roleF) && (statusF === "ALL" || r.status === statusF) && (!needle || (r.name + " " + r.email + " " + (r.team || "")).toLowerCase().includes(needle))).map(r => r.email));
+  }, [allRows, roleF, statusF, q]);
+  const model = useMemoUA(() => !ok || !filtering ? all : uaNarrow(all, keep), [ok, all, filtering, keep]);
   const cur = useMemoUA(() => ok ? uaAgg(model, bounds.from, bounds.to) : null, [ok, model, bounds]);
   const prevFrom = bounds ? new Date(bounds.from.getTime() - range * UA_DAY) : null;
   const prevOk = ok && uaPrevCovered(model, prevFrom);
@@ -1427,7 +1456,7 @@ function UsagePage() {
     className: "eyebrow"
   }, "Settings & operations"), /*#__PURE__*/React.createElement("h1", null, "Usage analytics"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, "Who uses DMA Insights, which pages they use, and how long they stay \xB7 ", rangeLabel.toLowerCase(), ok && model.recordingSince && model.recordingSince > bounds.from ? ` · recording since ${uaDate(model.recordingSince)}` : "")), /*#__PURE__*/React.createElement("div", {
+  }, "Who uses DMA Insights, which pages they use, and how long they stay \xB7 ", rangeLabel.toLowerCase(), ok && all.recordingSince && all.recordingSince > bounds.from ? ` · recording since ${uaDate(all.recordingSince)}` : "")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("div", {
     className: "toggle-row"
@@ -1455,9 +1484,9 @@ function UsagePage() {
       label: "Usage analytics"
     }]
   }, head, /*#__PURE__*/React.createElement(UAStateCard, {
-    state: model
+    state: all
   }));
-  const shown = rows.filter(r => (roleF === "ALL" || r.role === roleF) && (statusF === "ALL" || r.status === statusF) && (!q || (r.name + r.email + (r.team || "")).toLowerCase().includes(q.toLowerCase()))).sort((a, b) => {
+  const shown = rows.slice().sort((a, b) => {
     const k = sort.k;
     const av = k === "last" ? a.last ? +a.last : 0 : a[k],
       bv = k === "last" ? b.last ? +b.last : 0 : b[k];
@@ -1466,8 +1495,10 @@ function UsagePage() {
   const SortTh = ({
     k,
     children,
-    right
+    right,
+    cls
   }) => /*#__PURE__*/React.createElement("th", {
+    className: cls,
     style: {
       textAlign: right ? "right" : "left",
       cursor: "pointer",
@@ -1496,7 +1527,13 @@ function UsagePage() {
     gap: 16,
     marginBottom: 16
   });
-  const showTeam = rows.some(r => r.team);
+  const showTeam = allRows.some(r => r.team);
+  const who = filtering ? `${keep.size} of ${allRows.length} ${allRows.length === 1 ? "person" : "people"}` : null;
+  const clear = () => {
+    setQ("");
+    setRoleF("ALL");
+    setStatusF("ALL");
+  };
   const mailto = atRisk.length ? `mailto:${atRisk.map(r => r.email).join(",")}?subject=${encodeURIComponent("DMA Insights")}` : null;
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Usage analytics",
@@ -1506,7 +1543,60 @@ function UsagePage() {
     }, {
       label: "Usage analytics"
     }]
-  }, head, model.awaiting ? /*#__PURE__*/React.createElement(UAAwaiting, null) : null, model.truncated ? /*#__PURE__*/React.createElement("div", {
+  }, head, /*#__PURE__*/React.createElement("div", {
+    className: "card ua-filters",
+    "data-screen-label": "Usage filters"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "filter",
+    size: 13,
+    style: {
+      color: "var(--z-muted)",
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    className: "inp inp-sm",
+    "aria-label": "Search people",
+    placeholder: showTeam ? "Search name, email, team" : "Search name or email",
+    value: q,
+    onChange: e => setQ(e.target.value),
+    style: {
+      flex: "1 1 220px",
+      minWidth: 0
+    }
+  }), /*#__PURE__*/React.createElement("select", {
+    className: "inp inp-sm",
+    "aria-label": "Role",
+    value: roleF,
+    onChange: e => setRoleF(e.target.value),
+    style: {
+      flex: "0 1 140px"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "ALL"
+  }, "All roles"), /*#__PURE__*/React.createElement("option", {
+    value: "AE"
+  }, "AE"), /*#__PURE__*/React.createElement("option", {
+    value: "ANALYST"
+  }, "Analyst"), /*#__PURE__*/React.createElement("option", {
+    value: "ADMIN"
+  }, "Admin")), /*#__PURE__*/React.createElement("select", {
+    className: "inp inp-sm",
+    "aria-label": "Status",
+    value: statusF,
+    onChange: e => setStatusF(e.target.value),
+    style: {
+      flex: "0 1 150px"
+    }
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "ALL"
+  }, "All statuses"), /*#__PURE__*/React.createElement("option", null, "Live"), /*#__PURE__*/React.createElement("option", null, "Active"), /*#__PURE__*/React.createElement("option", null, "Idle"), /*#__PURE__*/React.createElement("option", null, "Dormant"), /*#__PURE__*/React.createElement("option", {
+    value: "Never"
+  }, "No activity yet")), filtering ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "b b-teal b-token"
+  }, who), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary btn-sm",
+    onClick: clear
+  }, "Clear")) : null), all.awaiting ? /*#__PURE__*/React.createElement(UAAwaiting, null) : null, all.truncated ? /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16,
@@ -1602,19 +1692,28 @@ function UsagePage() {
       margin: 0,
       fontSize: 13
     }
-  }, "Daily activity"), metric === "sessions" ? /*#__PURE__*/React.createElement("div", {
+  }, "Daily activity"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "sessions per day, by role"), /*#__PURE__*/React.createElement("span", {
+    className: "spacer"
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
-      gap: 10
+      gap: 10,
+      flexWrap: "wrap"
     }
-  }, Object.entries(UA_ROLE_COLOR).map(([r, c]) => /*#__PURE__*/React.createElement("span", {
+  }, Object.entries(UA_ROLE_COLOR).filter(([r]) => roleF === "ALL" || r === roleF).map(([r, c]) => /*#__PURE__*/React.createElement("span", {
     key: r,
     style: {
       display: "inline-flex",
       gap: 5,
       alignItems: "center",
       fontSize: 11,
-      color: "var(--z-body)"
+      color: "var(--z-body)",
+      whiteSpace: "nowrap"
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
@@ -1623,18 +1722,9 @@ function UsagePage() {
       borderRadius: 2,
       background: c
     }
-  }), UA_ROLE_LABEL[r]))) : null, /*#__PURE__*/React.createElement("span", {
-    className: "spacer"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "toggle-row"
-  }, [["sessions", "Sessions"], ["minutes", "Active time"], ["users", "Users"]].map(([k, l]) => /*#__PURE__*/React.createElement("button", {
-    key: k,
-    className: metric === k ? "on" : "",
-    onClick: () => setMetric(k)
-  }, l)))), /*#__PURE__*/React.createElement(UADailyChart, {
+  }), UA_ROLE_LABEL[r])))), /*#__PURE__*/React.createElement(UADailyChart, {
     daily: cur.daily,
-    from: bounds.from,
-    metric: metric
+    from: bounds.from
   })), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1648,7 +1738,7 @@ function UsagePage() {
       fontSize: 13
     }
   }, "Live now"), /*#__PURE__*/React.createElement("span", {
-    className: "b b-teal",
+    className: "b b-teal b-token",
     style: {
       display: "inline-flex",
       gap: 4
@@ -1970,44 +2060,13 @@ function UsagePage() {
     }
   }, /*#__PURE__*/React.createElement("h3", null, "Users \xB7 activity & time spent"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("input", {
-    className: "inp inp-sm",
-    placeholder: showTeam ? "Search name, email, team" : "Search name or email",
-    value: q,
-    onChange: e => setQ(e.target.value),
+  }), /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 210
+      fontSize: 11,
+      color: "var(--z-muted)"
     }
-  }), /*#__PURE__*/React.createElement("select", {
-    className: "inp inp-sm",
-    value: roleF,
-    onChange: e => setRoleF(e.target.value),
-    style: {
-      maxWidth: 130
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "ALL"
-  }, "All roles"), /*#__PURE__*/React.createElement("option", {
-    value: "AE"
-  }, "AE"), /*#__PURE__*/React.createElement("option", {
-    value: "ANALYST"
-  }, "Analyst"), /*#__PURE__*/React.createElement("option", {
-    value: "ADMIN"
-  }, "Admin")), /*#__PURE__*/React.createElement("select", {
-    className: "inp inp-sm",
-    value: statusF,
-    onChange: e => setStatusF(e.target.value),
-    style: {
-      maxWidth: 140
-    }
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "ALL"
-  }, "All statuses"), /*#__PURE__*/React.createElement("option", null, "Live"), /*#__PURE__*/React.createElement("option", null, "Active"), /*#__PURE__*/React.createElement("option", null, "Idle"), /*#__PURE__*/React.createElement("option", null, "Dormant"), /*#__PURE__*/React.createElement("option", {
-    value: "Never"
-  }, "No activity yet"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      overflowX: "auto"
-    }
+  }, who || `${allRows.length} ${allRows.length === 1 ? "person" : "people"}`)), /*#__PURE__*/React.createElement("div", {
+    className: "tbl-reflow reflow-early"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tbl"
   }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement(SortTh, {
@@ -2016,14 +2075,25 @@ function UsagePage() {
     k: "last"
   }, "Last seen"), /*#__PURE__*/React.createElement(SortTh, {
     k: "sessions",
-    right: true
+    right: true,
+    cls: "col-drop2"
   }, "Sessions"), /*#__PURE__*/React.createElement(SortTh, {
     k: "secs",
     right: true
-  }, "Total time"), /*#__PURE__*/React.createElement(SortTh, {
-    k: "avg",
-    right: true
-  }, "Avg session"), /*#__PURE__*/React.createElement("th", null, "Top page"), /*#__PURE__*/React.createElement("th", null, "Last 14 days"), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, shown.map(r => /*#__PURE__*/React.createElement("tr", {
+  }, "Total time"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop",
+    style: {
+      textAlign: "right",
+      whiteSpace: "nowrap"
+    }
+  }, "Avg session"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop"
+  }, "Top page"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop",
+    style: {
+      whiteSpace: "nowrap"
+    }
+  }, "Last 14 days"), /*#__PURE__*/React.createElement("th", null))), /*#__PURE__*/React.createElement("tbody", null, shown.map(r => /*#__PURE__*/React.createElement("tr", {
     key: r.email,
     onClick: () => setUserOpen(r.email),
     style: {
@@ -2037,7 +2107,7 @@ function UsagePage() {
       color: "var(--z-dark)"
     }
   }, r.name), /*#__PURE__*/React.createElement("div", {
-    className: "f-mono",
+    className: "f-mono t-email",
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
@@ -2045,7 +2115,7 @@ function UsagePage() {
   }, r.email)), /*#__PURE__*/React.createElement("td", {
     "data-label": "Role"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "b",
+    className: "b b-token",
     style: {
       background: UA_ROLE_COLOR[r.role] + "22",
       color: UA_ROLE_COLOR[r.role]
@@ -2061,6 +2131,7 @@ function UsagePage() {
     }
   }, uaRel(r.last, r.live, model.now)), /*#__PURE__*/React.createElement("td", {
     "data-label": "Sessions",
+    className: "col-drop2",
     style: {
       textAlign: "right",
       fontVariantNumeric: "tabular-nums"
@@ -2073,17 +2144,21 @@ function UsagePage() {
     }
   }, uaDur(r.secs)), /*#__PURE__*/React.createElement("td", {
     "data-label": "Avg session",
+    className: "col-drop",
     style: {
       textAlign: "right",
-      fontVariantNumeric: "tabular-nums"
+      fontVariantNumeric: "tabular-nums",
+      whiteSpace: "nowrap"
     }
   }, r.sessions ? uaDur(r.avg) : "No sessions"), /*#__PURE__*/React.createElement("td", {
     "data-label": "Top page",
+    className: "col-drop",
     style: {
       fontSize: 11.5
     }
   }, r.top), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Last 14 days"
+    "data-label": "Last 14 days",
+    className: "col-drop"
   }, /*#__PURE__*/React.createElement(UASpark, {
     vals: r.spark,
     color: UA_ROLE_COLOR[r.role]
@@ -2099,11 +2174,7 @@ function UsagePage() {
     }
   })))), !shown.length ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
     colSpan: 10,
-    style: {
-      textAlign: "center",
-      color: "var(--z-muted)",
-      padding: 24
-    }
+    className: "tbl-empty"
   }, "No users match these filters.")) : null)))), userOpen ? /*#__PURE__*/React.createElement(UAUserDrawer, {
     user: rows.find(r => r.email === userOpen) || {
       email: userOpen,
@@ -2159,7 +2230,7 @@ function UsageGlanceCard() {
     name: "users",
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, "Usage \xB7 last 7 days")), liveCount != null ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-teal",
+    className: "b b-teal b-token",
     style: {
       display: "inline-flex",
       gap: 4,

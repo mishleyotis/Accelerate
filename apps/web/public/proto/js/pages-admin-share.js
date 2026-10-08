@@ -140,6 +140,8 @@ function ShareLinksCard() {
         display: "inline-flex",
         alignItems: "center",
         gap: 4,
+        whiteSpace: "nowrap",
+        flexShrink: 0,
         textDecoration: removed ? "line-through" : "none",
         opacity: removed ? 0.6 : 1
       },
@@ -201,12 +203,14 @@ function ShareLinksCard() {
       }
     }, show === "active" ? "No active client links." : "No client links have been generated yet.");
     return /*#__PURE__*/React.createElement("div", {
-      style: {
-        overflowX: "auto"
-      }
+      className: "tbl-reflow reflow-early"
     }, /*#__PURE__*/React.createElement("table", {
       className: "tbl"
-    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Client"), /*#__PURE__*/React.createElement("th", null, "Shared with"), /*#__PURE__*/React.createElement("th", null, "Shared by"), /*#__PURE__*/React.createElement("th", null, "Expires"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
+    }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Client"), /*#__PURE__*/React.createElement("th", null, "Shared with"), /*#__PURE__*/React.createElement("th", {
+      className: "col-drop"
+    }, "Shared by"), /*#__PURE__*/React.createElement("th", {
+      className: "col-drop2"
+    }, "Expires"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
       style: {
         textAlign: "right"
       }
@@ -226,7 +230,7 @@ function ShareLinksCard() {
           color: "var(--z-dark)"
         }
       }, l.unrecorded ? "Not recorded" : slClientName(l.entity)), /*#__PURE__*/React.createElement("div", {
-        className: "f-mono",
+        className: "f-mono t-email",
         style: {
           fontSize: 10,
           color: "var(--z-muted)"
@@ -246,6 +250,7 @@ function ShareLinksCard() {
         }
       }, "Generated before the ledger; revoked by ID") : null)), /*#__PURE__*/React.createElement("td", {
         "data-label": "Shared by",
+        className: "col-drop",
         style: {
           fontSize: 11.5
         }
@@ -256,6 +261,7 @@ function ShareLinksCard() {
         }
       }, l.minted_at ? fmtDate(l.minted_at) : "")), /*#__PURE__*/React.createElement("td", {
         "data-label": "Expires",
+        className: "col-drop2",
         style: {
           fontSize: 11.5,
           color: "var(--z-muted)"
@@ -263,7 +269,7 @@ function ShareLinksCard() {
       }, l.expires_at ? fmtDate(l.expires_at) : "Not recorded"), /*#__PURE__*/React.createElement("td", {
         "data-label": "Status"
       }, /*#__PURE__*/React.createElement("span", {
-        className: `b ${st.cls}`
+        className: `b b-token ${st.cls}`
       }, st.label)), /*#__PURE__*/React.createElement("td", {
         "data-label": "Access",
         style: {
@@ -319,7 +325,7 @@ function ShareLinksCard() {
     name: "share",
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, "Client links \xB7 access")), data && data.status === "ok" ? /*#__PURE__*/React.createElement("span", {
-    className: "b b-teal"
+    className: "b b-teal b-token"
   }, counts.active || 0, " active") : null, /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), data && data.status === "ok" ? /*#__PURE__*/React.createElement("div", {
@@ -558,14 +564,16 @@ function ClientDomainsCard() {
     name: "lock",
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, "Whitelisted client domains")), /*#__PURE__*/React.createElement("span", {
-    className: "b b-muted"
+    className: "b b-muted b-token"
   }, rows.filter(r => r.open > 0).length, " active")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      overflowX: "auto"
-    }
+    className: "tbl-reflow reflow-early"
   }, /*#__PURE__*/React.createElement("table", {
     className: "tbl"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Domain"), /*#__PURE__*/React.createElement("th", null, "Client"), /*#__PURE__*/React.createElement("th", null, "Recipients"), /*#__PURE__*/React.createElement("th", null, "Expires"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "Domain"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop2"
+  }, "Client"), /*#__PURE__*/React.createElement("th", null, "Recipients"), /*#__PURE__*/React.createElement("th", {
+    className: "col-drop"
+  }, "Expires"), /*#__PURE__*/React.createElement("th", null, "Status"), /*#__PURE__*/React.createElement("th", {
     style: {
       textAlign: "right"
     }
@@ -598,6 +606,7 @@ function ClientDomainsCard() {
       }
     }, r.links, " live link", r.links === 1 ? "" : "s")), /*#__PURE__*/React.createElement("td", {
       "data-label": "Client",
+      className: "col-drop2",
       style: {
         fontSize: 12
       }
@@ -609,12 +618,13 @@ function ClientDomainsCard() {
       }
     }, [...r.emails].length ? [...r.emails].map(e => /*#__PURE__*/React.createElement("div", {
       key: e,
-      className: "f-mono",
+      className: "f-mono t-email",
       style: {
         fontSize: 10.5
       }
     }, e)) : "Anyone at the domain"), /*#__PURE__*/React.createElement("td", {
       "data-label": "Expires",
+      className: "col-drop",
       style: {
         fontSize: 11.5,
         color: "var(--z-muted)"
@@ -622,7 +632,7 @@ function ClientDomainsCard() {
     }, r.expires ? fmtDate(r.expires) : "Not recorded"), /*#__PURE__*/React.createElement("td", {
       "data-label": "Status"
     }, /*#__PURE__*/React.createElement("span", {
-      className: `b ${on ? "b-above" : "b-muted"}`
+      className: `b b-token ${on ? "b-above" : "b-muted"}`
     }, on ? "Active" : "Revoked")), /*#__PURE__*/React.createElement("td", {
       "data-label": "Action",
       style: {

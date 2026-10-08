@@ -37,6 +37,13 @@
  * defect was shrink WITH nowrap, and that combination is what these tests
  * now forbid. A short badge is unaffected: it fits, so it does not wrap.
  *
+ * 2026-10-08 — `anywhere` itself billed: it shrinks a badge's min-content
+ * width to one character, and a table sizes its columns from min-content, so
+ * Users · activity read "Adm|in" and "Activ|e" at 1024px. `break-word` keeps
+ * the overflow guarantee without the collapse. One-token labels (a role, a
+ * status, a count) take `.b-token`: nowrap WITH flex-shrink 0, so they never
+ * wrap at all and their row makes room — never the spill-over combination.
+ *
  * Run with `npm run test:web`.
  */
 const { test } = require("node:test");
@@ -75,9 +82,12 @@ test("a badge cannot be wider than the box it sits in", () => {
   const rule = ruleFor(".b");
   assert.match(rule, /max-width:\s*100%/,
     "without this a single unbroken token still escapes its container");
-  assert.match(rule, /overflow-wrap:\s*anywhere/,
+  assert.match(rule, /overflow-wrap:\s*break-word/,
     "a label with no space to break at (a long id, a URL) needs an explicit "
     + "break opportunity or max-width cannot hold it");
+  assert.doesNotMatch(rule, /overflow-wrap:\s*anywhere/,
+    "`anywhere` collapses a badge's min-content to one glyph: table columns "
+    + "then break 'Admin' as 'Adm|in' (2026-10-08)");
 });
 
 test("the dangerous combination is nowrap WITH shrinking, and it is absent", () => {
@@ -101,6 +111,9 @@ test("no badge variant re-introduces nowrap", () => {
   const re = /(^|[},])\s*(\.b-[\w-]+)\s*\{([^}]*)\}/gm;
   let m;
   while ((m = re.exec(CSS)) !== null) {
+    // `.b-token` is the one deliberate nowrap: one-token labels, and only
+    // with flex-shrink 0 — it overflows visibly rather than spilling.
+    if (m[2] === ".b-token" && /flex-shrink:\s*0/.test(m[3])) continue;
     if (/white-space:\s*nowrap/.test(m[3])) offenders.push(m[2]);
   }
   assert.deepStrictEqual(offenders, [],
