@@ -3078,7 +3078,10 @@ class Pipeline:
                        "<workflow>, args: <invocation>}) per report — wait for all, "
                        "service every `upstream` item the workflows return (a probe "
                        "through the enrichment specialist, a sheet through its engine "
-                       "command, an owner decision with the person), then run `then`. "
+                       "command, an owner decision with the person), record each "
+                       "serviced section with `engine.narrative serviced --report R "
+                       "--section N --actor A --note <what was done>` so it returns "
+                       "to the writers, then run `then`. "
                        "No Workflow tool? `agent_prompts` holds the same prompts for "
                        "in-session agents, or re-run with --report-mode lanes.")}
         path = self.run.qa_dir / REPORTS_HANDOFF

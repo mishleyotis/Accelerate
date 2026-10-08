@@ -734,6 +734,58 @@ def latest_reviews(wb: RunWorkbook, report: str | None = None) -> dict:
     return out
 
 
+SERVICED_FILE = "report_upstream_serviced.jsonl"
+SERVICED_NOTE_MIN = 40
+
+
+def latest_serviced(wb: RunWorkbook, report: str | None = None) -> dict:
+    """(report, section) -> the newest `serviced` record."""
+    p = Path(wb.path).resolve().parent / "07_qa" / SERVICED_FILE
+    out: dict = {}
+    if not p.is_file():
+        return out
+    for raw in p.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            r = json.loads(raw)
+        except ValueError:
+            continue
+        if report and r.get("report") != report:
+            continue
+        out[(r.get("report"), str(r.get("section")))] = r
+    return out
+
+
+def serviced(wb: RunWorkbook, report: str, section_id: str, *, actor: str,
+             note: str) -> dict:
+    """Record that every upstream item the latest review of a section named
+    has been serviced, so the section returns to the writer loop.
+
+    B1 Bank, 2026-10-08: an upstream item lived on the latest review until
+    the section was reviewed AGAIN, and a held section was never handed to
+    a writer — so a serviced section could only reach its next review by the
+    conducting session re-adding it to the workflow by hand, twice. This is
+    not a review and never changes a verdict: the section stays REVISE until
+    an independent reviewer passes it."""
+    key = (report, str(section_id))
+    lr = latest_reviews(wb, report).get(key)
+    if not lr or not lr.get("upstream"):
+        raise NarrativeRefusal(
+            f"{report} §{section_id}: its latest review names no upstream item")
+    note = _clean(note)
+    if len(note) < SERVICED_NOTE_MIN:
+        raise NarrativeRefusal(
+            f"--note must say what was done for each item "
+            f"({SERVICED_NOTE_MIN}+ chars)")
+    rec = {"report": report, "section": str(section_id), "actor": _clean(actor),
+           "at": _utcnow(), "note": note, "review_at": lr.get("at"),
+           "items": len(lr.get("upstream") or [])}
+    p = Path(wb.path).resolve().parent / "07_qa" / SERVICED_FILE
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(rec) + "\n")
+    return rec
+
+
 def parse_upstream(items) -> list[dict]:
     """`KIND: what is needed` -> {kind, detail}; refused when the kind is
     not one a writer cannot close."""
@@ -852,6 +904,7 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
     out = {"reports": {}, "blocking": [], "upstream": []}
     for key in reports:
         latest = latest_reviews(wb, key)
+        done = latest_serviced(wb, key)
         spec = RS.SPECS[key]
         have = rows_for(wb, key)
         every = all_rows_for(wb, key)
@@ -901,6 +954,9 @@ def state(wb: RunWorkbook, report: str | None = None) -> dict:
             if st == "REVISE":
                 lr = latest.get((key, str(sec.id))) or {}
                 ups = list(lr.get("upstream") or [])
+                sv = done.get((key, str(sec.id))) or {}
+                if ups and str(sv.get("at") or "") > str(lr.get("at") or ""):
+                    ups = []
             secs.append({"section": str(sec.id), "heading": sec.heading,
                          "max_words": sec.max_words, "upstream": ups,
                          "kind": sec.kind, "min_words": sec.min_words,
@@ -989,6 +1045,16 @@ def main(argv=None) -> int:
                    help="JSON {dimension: PASS|FAIL}; default all PASS on a "
                         "PASS verdict, which the refusals then re-check")
 
+    sv = common(sub.add_parser(
+        "serviced",
+        help="every upstream item the section's latest review named has been "
+             "serviced: return it to the writer loop (not a review)"))
+    sv.add_argument("--report", required=True, choices=sorted(RS.SPECS))
+    sv.add_argument("--section", required=True)
+    sv.add_argument("--actor", required=True)
+    sv.add_argument("--note", required=True,
+                    help="what was done for each item (E-ids, TS ids, seqs)")
+
     c = sub.add_parser("contract")
     c.add_argument("--report", choices=sorted(RS.SPECS))
 
@@ -1065,6 +1131,10 @@ def main(argv=None) -> int:
             print(json.dumps(write(wb, a.report, a.section, rec,
                                    actor=a.actor, card=a.card, run=run),
                              indent=2))
+            return 0
+        if a.cmd == "serviced":
+            print(json.dumps(serviced(wb, a.report, a.section, actor=a.actor,
+                                      note=a.note), indent=2))
             return 0
         if a.cmd == "preconditions":
             pre = stage_preconditions(wb, a.report, run.qa_dir)

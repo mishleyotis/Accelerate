@@ -387,3 +387,31 @@ def test_a_docx_without_its_sidecar_is_recorded_as_incomplete(tmp_path):
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── a serviced upstream item returns the section to the writers ──────────
+
+def test_a_serviced_upstream_section_is_writable_again_until_its_next_review(tmp_path):
+    """B1 Bank, 2026-10-08: an upstream item stayed on the latest review until
+    the section was reviewed again, and the driver never handed a held section
+    to a writer, so a serviced section could not reach its next review."""
+    _, wb, eids = _ready_run(tmp_path)
+    N.write(wb, "client_research", "1", _section(Evidence_IDs=", ".join(eids)),
+            actor="report-research-producer")
+    dims = {d: "PASS" for d in N.REVIEW_DIMENSIONS}
+    dims["evidence_support"] = "REVISE"
+    N.review(wb, "client_research", "1", verdict="REVISE", actor="report-validator",
+             dimensions=dims, note="the cagr needs an independent corroboration " * 3,
+             upstream=["evidence: register the FDIC call-report point for FY2021"])
+    rep = N.state(wb, "client_research")["reports"]["client_research"]
+    assert "1" in rep["blocked_upstream"] and "1" not in rep["writable"]
+    with pytest.raises(N.NarrativeRefusal, match="40"):
+        N.serviced(wb, "client_research", "1", actor="conductor", note="done")
+    import time; time.sleep(1.1)           # timestamps are second-resolution
+    N.serviced(wb, "client_research", "1", actor="conductor",
+               note="registered E-972, FDIC call report 2021-12-31, cagr row cites it")
+    rep = N.state(wb, "client_research")["reports"]["client_research"]
+    sec = next(s for s in rep["sections"] if s["section"] == "1")
+    assert "1" in rep["writable"] and sec["status"] == "REVISE"
+    with pytest.raises(N.NarrativeRefusal, match="no upstream"):
+        N.serviced(wb, "client_research", "2", actor="conductor", note="x" * 50)
