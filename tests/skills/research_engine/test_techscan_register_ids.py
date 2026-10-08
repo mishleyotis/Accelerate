@@ -136,3 +136,20 @@ def test_a_broker_technographic_reading_never_contradicts_a_claimed_row():
     cfpb = {"Origin": "connector", "Source_Name": "CFPB complaint database API"}
     assert techscan._broker_reading(scan) and techscan._broker_reading(vibe)
     assert not techscan._broker_reading(cfpb)
+
+
+def test_restrike_is_not_refused_as_a_duplicate_of_itself(tmp_path):
+    """B1 Bank, 2026-10-08: after record() moved inside the workbook lock and
+    began refusing duplicate products, restrike's validation probe had no
+    transaction() and every restrike refused the row's own product."""
+    wb = _wb(tmp_path)
+    ts = _rec(wb, "Cisco SD-WAN", status="CLAIMED", providers=("explorium",), layer="INFRA")
+    out = techscan.restrike(wb, ts, status="INFERRED", method="technographic_scan",
+                            basis="listed under networks in the Vibe technographic reading",
+                            providers=["explorium"])
+    assert out == {"ts_id": ts, "was": "CLAIMED", "now": "INFERRED"}
+    other = _rec(wb, "NetApp storage", status="CLAIMED", providers=("explorium",), layer="INFRA")
+    with pytest.raises(ScanRefused, match="already on the register"):
+        techscan.restrike(wb, other, status="INFERRED", method="technographic_scan",
+                          basis="renamed onto a product that already has its own row",
+                          providers=["explorium"], product="Cisco SD-WAN")

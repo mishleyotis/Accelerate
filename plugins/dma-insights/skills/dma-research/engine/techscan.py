@@ -47,6 +47,7 @@ if __package__ in (None, ""):  # noqa: E402
 
 import argparse
 import datetime as _dt
+import contextlib
 import json
 import re
 import os
@@ -434,7 +435,7 @@ def restrike(wb: RunWorkbook, ts_id: str, *, status: str, method: str,
     if row is None:
         raise ScanRefused(f"{ts_id} is not on Tech_Register")
     # Validate exactly as a new row would be, without appending it.
-    probe = _Probe(wb)
+    probe = _Probe(wb, exclude_ts=row["TS_ID"])
     record(probe, product=product or row["Product"], vendor=row.get("Vendor"),
            layer=row["Layer"], status=status, method=method, basis=basis,
            providers=providers, evidence_ids=evidence_ids, impact=impact)
@@ -455,14 +456,27 @@ class _Probe:
     """A stand-in workbook that lets `record` validate a row without
     writing it: reads go to the real workbook, the one append is caught."""
 
-    def __init__(self, wb):
-        self._wb, self.row = wb, None
+    def __init__(self, wb, exclude_ts: str | None = None):
+        self._wb, self.row, self._exclude = wb, None, str(exclude_ts or "").upper()
 
     def evidence_index(self):
         return self._wb.evidence_index()
 
     def rows(self, sheet):
-        return self._wb.rows(sheet)
+        # The row being re-struck is not a duplicate of itself: `record`'s
+        # one-product-one-row check reads the OTHER rows (B1 Bank,
+        # 2026-10-08: every restrike refused its own product).
+        rows = self._wb.rows(sheet)
+        if sheet == "Tech_Register" and self._exclude:
+            rows = [r for r in rows
+                    if str(r.get("TS_ID") or "").upper() != self._exclude]
+        return rows
+
+    @contextlib.contextmanager
+    def transaction(self, why: str = ""):
+        # `record` allocates inside the real workbook's lock; a probe writes
+        # nothing, so there is nothing to lock.
+        yield self
 
     def append(self, sheet, row, **_):
         self.row = row
