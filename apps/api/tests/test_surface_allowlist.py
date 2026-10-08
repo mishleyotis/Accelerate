@@ -114,9 +114,32 @@ def test_the_serve_rules_tag_moved():
     """The ETag carries the rules version. Changing what is served without
     changing the tag serves the old body from every cache that has one."""
     from dma_api import pages
-    assert pages.SERVE_RULES == "serve-rules@12", (
+    assert pages.SERVE_RULES.startswith("serve-rules@13."), (
         "the allowlist changed what is served; bump SERVE_RULES or caches "
         "keep answering with the body that carried the ceilings table")
+
+
+def test_the_tag_carries_the_customer_allowlist_itself():
+    """2026-10-08, First Tech: the value chain's keys joined the customer
+    allowlist (2026-10-07) and SERVE_RULES stayed @12, so every browser that
+    had opened the client heatmap sent If-None-Match, got 304 and kept the
+    stage-less body — "did not promote" on a section the API was serving.
+    The tag now fingerprints customer_allowlist.json, so the next change to
+    what a client may receive moves the tag without anyone remembering to."""
+    import hashlib
+    from dma_api import pages
+    allow = Path(pages.__file__).with_name("customer_allowlist.json")
+    want = hashlib.sha256(allow.read_bytes()).hexdigest()[:8]
+    assert pages.SERVE_RULES.endswith("." + want)
+    assert pages._allowlist_fingerprint() == want
+
+
+def test_serve_rules_13_names_the_client_value_chain():
+    from dma_api import pages
+    src = Path(pages.__file__).read_text()
+    block = src[src.index("#   @13 "):src.index("SERVE_RULES = f")]
+    for needle in ("value chain", "chains", "SERVER_DERIVED", "304"):
+        assert needle in block, f"@13 does not name {needle!r}"
 
 
 def test_serve_rules_12_is_one_bump_naming_every_round1_body_change():
@@ -126,12 +149,12 @@ def test_serve_rules_12_is_one_bump_naming_every_round1_body_change():
     comment names each change, so the next reader of the tag can say what a
     body cached under @11 is missing."""
     import re
-    from dma_api import pages
-    assert pages.SERVE_RULES == "serve-rules@12"
     src = (Path(__file__).resolve().parents[1] / "dma_api"
            / "pages.py").read_text()
-    assert not re.search(r"#\s+@1[3-9]\b", src), "one bump, not two"
-    block = src[src.index("#   @12 "):src.index('SERVE_RULES = "serve-rules@12"')]
+    # @12 deployed 2026-10-04; @13 is the one bump after it (value chain).
+    assert len(re.findall(r"#\s+@13\b", src)) == 1, "one @13 entry"
+    assert not re.search(r"#\s+@1[4-9]\b", src)
+    block = src[src.index("#   @12 "):src.index("#   @13 ")]
     for change, needle in (
             ("decision 1, reduced sentiment card", "overview.sentiment"),
             ("decision 1, reduced sentiment card", "REDUCED card"),
