@@ -33,9 +33,119 @@ function buildHash(path, params) {
   const qs = keys.length ? "?" + keys.map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join("&") : "";
   return `#${path}${qs}`;
 }
-function navigate(path, params) {
-  window.location.hash = buildHash(path, params || {}).slice(1);
+/* ── Client link ──────────────────────────────────────────────────────
+   A URL carrying `view=client` opens the CLIENT DASHBOARD on its own: client
+   audience, client tabs only, none of the Zennify chrome (nav, search,
+   notifications, settings, audience toggle, Intelligence). Decided ONCE, from
+   the hash the document was opened on, and sticky for the document's life —
+   so no in-page link, and no navigate() that forgets a param, can walk a
+   reader out of it. The server still decides what the customer audience may
+   contain; this only decides the frame. */
+const CLIENT_LINK = (() => {
+  try {
+    // On the public share service the boot names the link's client, and that
+    // wins over anything in the URL: a link opened with its fragment stripped
+    // or edited is still that client's dashboard and nothing else.
+    const sh = typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.share;
+    if (sh && sh.entity) return { entityId: sh.entity, shared: true };
+    const { path, params } = parseHash();
+    if (params.view !== "client") return null;
+    const m = path.match(/^\/clients\/([^/]+)/);
+    return m ? { entityId: m[1] } : null;
+  } catch (e) { return null; }
+})();
+function isClientLink() { return !!CLIENT_LINK; }
+/* Where the page reads from. The app's own BFF (/api) everywhere except a
+   public client link, whose reads go through that link's scoped route
+   (/s/<token>/api) — the only reads the share service answers. */
+function apiBase() {
+  return (typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.api_base) || "/api";
 }
+function clientLinkEntity() { return CLIENT_LINK ? CLIENT_LINK.entityId : null; }
+
+/* The tabs a client dashboard carries, in either client frame (the Client
+   toggle while presenting, or a client link). Context, Health and Runs were
+   already internal; Platform and Tech stack were withdrawn from the client
+   view by the 2026-10-07 client-view review. One list, read by the tab strip
+   and by the router guard, so a tab cannot be hidden in one and reachable in
+   the other. */
+const CLIENT_TABS = ["overview", "insights", "heatmap"];
+function clientTabAllowed(tab) { return CLIENT_TABS.includes(tab); }
+
+/* The shareable URL for one client page: this app's origin, the client
+   frame, the run pinned so the recipient reads what the sender read. */
+function clientLinkUrl(entityId, tab, runId) {
+  const params = { view: "client" };
+  if (runId) params.run = runId;
+  const t = clientTabAllowed(tab) ? tab : "overview";
+  return `${window.location.origin}${window.location.pathname}${buildHash(`/clients/${entityId}/${t}`, params)}`;
+}
+
+/* Where a client link may go: its own client, a client tab, nothing else.
+   Anything else — another client, the directory, Platform, a sub-route under
+   a withdrawn tab, the login page — is that client's overview. Read by
+   navigate() and by the router, so neither a button nor a typed URL can
+   leave the client dashboard. */
+function clientLinkPath(path) {
+  const id = clientLinkEntity();
+  const m = String(path || "").match(/^\/clients\/([^/]+)(?:\/([^/?]+))?/);
+  const tab = m && m[2] ? m[2] : "overview";
+  return m && m[1] === id && clientTabAllowed(tab) ? `/clients/${id}/${tab}` : `/clients/${id}/overview`;
+}
+
+function navigate(path, params) {
+  const p = { ...(params || {}) };
+  if (CLIENT_LINK) { p.view = "client"; path = clientLinkPath(path); }
+  window.location.hash = buildHash(path, p).slice(1);
+}
+/* ── A release while the page is open ────────────────────────────────
+   The app is one page: moving between tabs never re-downloads its code, so a
+   tab opened before a release keeps running the old bundle (2026-10-07: the
+   client heatmap still greyed out an hour after the fix shipped). The boot
+   names the bundle build it loaded (DMA_LIVE.build, lib/build-id.js); this
+   asks /api/version on focus and every five minutes. When they differ it
+   says so with a Reload button, and the next tab change reloads by itself,
+   keeping the address. Not on a public client link: that service serves no
+   /api, and a recipient opens the link fresh. */
+let _updatePending = false;
+function UpdateWatcher() {
+  const [fresh, setFresh] = useState(false);
+  useEffect(() => {
+    const live = typeof window !== "undefined" && window.DMA_LIVE;
+    if (!live || !live.build || apiBase() !== "/api") return undefined;
+    let stopped = false;
+    const check = () => {
+      if (stopped || _updatePending) return;
+      fetch("/api/version", { cache: "no-store" })
+        .then(r => (r.ok ? r.json() : null))
+        .then(v => { if (v && v.build && v.build !== live.build) { _updatePending = true; setFresh(true); } })
+        .catch(() => {});
+    };
+    const onHash = () => { if (_updatePending) window.location.reload(); };
+    const onVisible = () => { if (document.visibilityState === "visible") check(); };
+    const timer = setInterval(check, 5 * 60 * 1000);
+    window.addEventListener("hashchange", onHash);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      stopped = true; clearInterval(timer);
+      window.removeEventListener("hashchange", onHash);
+      window.removeEventListener("focus", check);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
+  if (!fresh) return null;
+  return (
+    <div role="status" data-update-banner="" style={{ position: "fixed", left: "50%", bottom: 18, transform: "translateX(-50%)",
+         zIndex: 1000, background: "var(--z-dark)", color: "#fff", borderRadius: 10, padding: "10px 14px",
+         display: "flex", alignItems: "center", gap: 12, boxShadow: "0 6px 24px rgba(0,0,0,.18)", fontSize: 12.5,
+         maxWidth: "calc(100vw - 32px)" }}>
+      <span>DMA Insights has been updated. Reload to see the latest version.</span>
+      <button className="btn btn-primary btn-sm" onClick={() => window.location.reload()}>Reload</button>
+    </div>
+  );
+}
+
 function useRoute() {
   const [route, setRoute] = useState(parseHash());
   useEffect(() => {
@@ -253,6 +363,16 @@ function scaleBounds(scale) {
     const lo = Number(a), hi = Number(b);
     return isFinite(lo) && isFinite(hi) && hi > lo ? { min: lo, max: hi } : null;
   };
+  // A STAR RATING FILLS FROM ZERO, whatever range it states (owner decision
+  // 2026-10-05). Read as "1-5" a one-star rating sat at the floor and drew
+  // 0% — a real Better Business Bureau 1.0 rendered as the same empty rail a
+  // missing figure does. Stars are read the way a star display reads them:
+  // rating over the top star, so one star of five fills a fifth.
+  if (/\bstars?\b/i.test(s)) {
+    const tops = s.match(/\d+(?:\.\d+)?/g);
+    const hi = tops ? Number(tops[tops.length - 1]) : NaN;
+    return isFinite(hi) && hi > 0 ? { min: 0, max: hi } : null;
+  }
   // "a..b" first: it is the only notation that can carry a negative low
   // bound without the hyphen being ambiguous.
   let m = s.match(/(-?\d+(?:\.\d+)?)\s*\.\.\s*(-?\d+(?:\.\d+)?)/);
@@ -261,10 +381,8 @@ function scaleBounds(scale) {
   // is the separator.
   m = s.match(/(-?\d+(?:\.\d+)?)\s*(?:to|[-–—])\s*(-?\d+(?:\.\d+)?)/i);
   if (m) return num2(m[1], m[2]);
-  // A bare percentage or star rating states its bounds by convention.
+  // A bare percentage states its bounds by convention.
   if (/%/.test(s)) return { min: 0, max: 100 };
-  m = s.match(/(\d+(?:\.\d+)?)\s*stars?/i);
-  if (m) return num2(1, m[1]);
   // "out of 10", "5-point" — the upper bound stated in words.
   m = s.match(/(?:out of|scale of)\s*(\d+(?:\.\d+)?)/i)
       || s.match(/^(\d+(?:\.\d+)?)[- ]point\b/i);
@@ -858,6 +976,36 @@ function assetUrl(id, fallback) {
   return (typeof window !== "undefined" && window.__resources && window.__resources[id]) || fallback;
 }
 
+/* Avatar initials from a display name. A served name may be null — the
+   directory carries `legal_name` as-is and never invents one (invariant 9) —
+   and `null.split` on the dashboard unmounted the whole landing page on
+   sign-in. Null, empty or non-string gives "?", never a fabricated letter. */
+function initialsOf(name, n = 2) {
+  if (typeof name !== "string") return "?";
+  const parts = name.split(/\s+/).filter(Boolean);
+  return parts.length ? parts.map(w => w[0]).slice(0, n).join("") : "?";
+}
+
+/* THE name a client is shown by — the one fallback every header, title,
+   breadcrumb, sidebar row, avatar and toast reads.
+
+   legal name -> trading name -> display id. The directory serves
+   `legal_name` as-is and never invents one (invariant 9), so `name: null` is
+   a live shape: SWBC promoted with an empty entity record and every surface
+   that read `entity.name` directly rendered "Where  is today",
+   "Technology stack - ", an avatar of "?" and a toast "Exporting null…".
+   PR #55 fixed the landing card alone; one function is how the rest cannot
+   drift back. `display_id` arrives as `id` and `slug` from /v1/directory.
+   Never null: a client with no name at all is still "this client". */
+function entityName(e) {
+  if (!e || typeof e !== "object") return "this client";
+  for (const v of [e.name, e.legal_name, e.entity_name, e.trading_name,
+                   e.display_id, e.id, e.slug]) {
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return "this client";
+}
+
 /* ── Session identity (production divergence, data-flow only) ────────
    The signed-in user comes from the server-verified session in
    DMA_LIVE; the prototype's fixed persona remains only as the
@@ -916,7 +1064,7 @@ function useLivePage(displayId, page, audience, runId) {
     setState({ status: "loading" });
     const qs = new URLSearchParams({ audience: audience || "internal" });
     if (runId) qs.set("run", runId);
-    fetch(`/api/entity/${encodeURIComponent(displayId)}/${page}?${qs}`)
+    fetch(`${apiBase()}/entity/${encodeURIComponent(displayId)}/${page}?${qs}`)
       .then(r => r.json().then(body => ({ ok: r.ok, status: r.status, body })))
       .then(({ ok, body }) => {
         if (cancelled) return;
@@ -986,9 +1134,9 @@ function useLiveEntity(displayId, audience, runId, actingRole) {
     const pages = ["overview", "heatmap", "insights", "platform", "context",
                    "techstack"];
     Promise.all([
-      ...pages.map(p => get(`/api/entity/${id}/${p}?${qs()}`)),
-      get(`/api/entity/${id}/evidence?${qs()}`),
-      get(`/api/entity/${id}/subcaps?${qs()}`),
+      ...pages.map(p => get(`${apiBase()}/entity/${id}/${p}?${qs()}`)),
+      get(`${apiBase()}/entity/${id}/evidence?${qs()}`),
+      get(`${apiBase()}/entity/${id}/subcaps?${qs()}`),
     ]).then((results) => {
       if (cancelled) return;
       const byPage = {};
@@ -1038,7 +1186,7 @@ function useLiveEntity(displayId, audience, runId, actingRole) {
       // render rather than before it — it cannot add a millisecond to the
       // page, and when the connector starts writing them they simply become
       // the preferred answer on the next open.
-      get(`/api/entity/${id}/answers?${qs()}`).then((r) => {
+      get(`${apiBase()}/entity/${id}/answers?${qs()}`).then((r) => {
         if (cancelled || !r.ok || window.DMA_ENTITY !== built) return;
         const rows = window.adaptAnswers(r.body);
         if (rows.length) built.answers = rows;
@@ -1069,7 +1217,7 @@ function liveSectionState(live, name) {
    sign-in page. With IAP in front, the Google session itself persists —
    "Continue with Google" re-enters without a password prompt. */
 function signOutSession() {
-  const done = () => window.location.assign("/login");
+  const done = () => window.location.assign("/#/login");
   if (typeof window !== "undefined" && window.DMA_LIVE) {
     fetch("/api/signout", { method: "POST" }).then(done, done);
   } else {
@@ -1085,6 +1233,17 @@ function grantedRole() {
   // AE is what everyone outside the ADMIN/ANALYST allowlists gets — the
   // default view, granted server-side. Local preview keeps free switching.
   return live ? (live.role || "AE") : "ADMIN";
+}
+
+/* Admin pages the prototype carries that production does not serve, because
+   nothing behind them works there: Import & jobs played a scripted demo job
+   and Import audit read a fixture queue whose actions wrote nothing. ONE list,
+   read by the router and the sidebar, so a page cannot be hidden in one and
+   reachable in the other. Local preview keeps them — they are the prototype. */
+const ADMIN_HIDDEN_LIVE = ["/admin/import", "/admin/import/audit"];
+function adminRouteHidden(path) {
+  const live = typeof window !== "undefined" && !!window.DMA_LIVE;
+  return live && ADMIN_HIDDEN_LIVE.includes(path);
 }
 
 /* ── Brand mark ──────────────────────────────────────────────────── */
@@ -1371,7 +1530,8 @@ function fmtPct(n) {
 function entityMatches(e, q) {
   const ql = String(q == null ? "" : q).toLowerCase().trim();
   if (!ql) return true;
-  return [e && e.name, e && e.domain, e && e.id, e && e.slug]
+  return [e && e.name, e && e.trading_name, e && e.domain, e && e.id,
+          e && e.slug]
     .some(v => v != null && String(v).toLowerCase().includes(ql));
 }
 function relTime(s) {
@@ -1522,6 +1682,7 @@ function ConnectionWatcher() {
 
 /* ── Export to window ────────────────────────────────────────────── */
 Object.assign(window, {
+  initialsOf, entityName,
   useState, useEffect, useRef, useMemo, useCallback, createContext, useContext,
   AppCtx, useApp,
   Icon, BrandMark, ZennifyWordmark, PillarBadge, MaturityChip, ToastStack,
@@ -1529,7 +1690,8 @@ Object.assign(window, {
   SectionEmpty, SectionEmptyFoot, EnrichmentFlag, EnrichmentGap, findingChipId,
   clientProse,
   LoadingScreen, SectionLoader, ConnectionWatcher,
-  parseHash, buildHash, navigate, useRoute,
+  parseHash, buildHash, navigate, useRoute, UpdateWatcher,
+  isClientLink, clientLinkEntity, clientTabAllowed, clientLinkUrl, clientLinkPath, CLIENT_TABS, apiBase,
   fmtDate, fmtDateLong, fmtDatesInText, toDate,
   fmtMoney, fmtAssets, moneyMultiplier, isMoneyUnit, scaleMoneySeries,
   // Exported so the suite can assert them directly and so the adapter's
@@ -1541,5 +1703,6 @@ Object.assign(window, {
   humanText, parseMaybeJSON, looksSerialised, asText,
   fmtPct, relTime, FreshnessDot, fx, entityMatches,
   assetUrl, sessionUser, grantedRole, signOutSession,
+  ADMIN_HIDDEN_LIVE, adminRouteHidden,
   useLivePage, useLiveEntity, liveSection, liveSectionState,
 });

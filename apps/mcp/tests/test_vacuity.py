@@ -32,6 +32,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dma_mcp.contracts import PAGES, sections
 from dma_mcp.gates import GATES
 from dma_mcp.validation import validate_pass1
+from dma_mcp.vacuity import (QUOTE_SCAFFOLD_KEYS, QUOTE_SHARE_LINE, quote_scaffold,
+                             quote_share)
 from dma_mcp.vacuity import (CLAIM_MIN_WORDS, CLAIM_OVERLAP, FLOOR_FACTOR,
                              CLAIM_ALONE, GATE, TEMPLATE_OVERLAP, _overlap, check_vacuity,
                              claim_words, is_placeholder, item_keys,
@@ -915,3 +917,71 @@ def test_the_verdict_names_the_gate_the_path_and_the_arithmetic():
             assert r["gate_id"] == GATE and r["severity"] == "block"
             assert r["path"] and r["section"]
             assert any(ch.isdigit() for ch in r["message"]), r["message"]
+
+
+# ── quote scaffold: a synthesis stitched from excerpts is not an argument ──
+#
+# Arbor Bank, 2026-10-06: a producer lane met the 40-word cell floor by
+# chaining excerpts behind fixed lead-ins on 106 of 166 cells and padding 21
+# more with "Also: '<a quote already used>'". The template rule refused 40;
+# the rest would have shipped. Fixtures are verbatim from that page and from
+# the promoted Susser and Baxter heatmaps.
+
+ARBOR_LEAD = "For Arbor Bank, the cited source states: 'At Arbor Bank it’s our mission to help our clients and our communities grow.' [E-083] A further cited source adds: 'At Arbor Bank it’s our mission to help our clients and our communities grow.' [E-202]"
+ARBOR_PAD = "For Arbor Bank, privacy governance is a compliance notice more than a programme: the bank says it uses 'security measures that comply with federal law' including 'computer safeguards and secured files and buildings' [E-222]. Also: 'To protect your personal information from unauthorized access and use, we use security measures that comply with federal law.' [E-222]"
+SUSSER_HONEST = 'Search Engine Optimization (SEO): Searched web_search for "Susser Bank website digital marketing SEO social media email marketing" (9 hits, none about Susser Bank; SUSS Singapore and SEOBank pages), web_search for "Susser Bank marketing director OR chief marketing officer OR digital marketing job posting" (9 hits, no Susser Bank posting), Exa for "Susser Bank digital marketing social media presence and mobile app" and Exa for "Susser Bank Google Ads paid search advertising campaign OR local SEO Google Business Profile" (returned LinkedIn, Austin Chamber and a Datanyze profile listing Google Global Site Tag and Google Universal Analytics; nothing on SEO). Nearest thing: the Datanyze profile of Susser Bank. On the behavioral_delivery rung, proxy classes hunted: job postings, vendor-profile stack listings (Datanyze, LinkedIn company profile), chamber directory; none evidenced SEO. INFERENCE — The bank runs Google Analytics tags per Datanyze, so some web measurement exists, but SEO practice is unevidenced publicly; to validate: Does Susser Bank run SEO today, and who owns it?'   # the most quote-heavy promoted cell found (0.29)
+BAXTER_HONEST = 'BCU names three strategy pillars in its own materials — member-first, application programming interface-driven technology standards, and a data strategy to harness member intelligence for faster decisions — with a chief digital officer appointed in 2023 to make the institution digital-first and a board technology committee above it. The articulation is unusually specific for a credit union. Its most complete public statement dates from 2020, so what is current is inferred from the appointments since.'
+
+
+def _cell(synthesis, sid="P1C1.1.4"):
+    return {"subcap_id": sid, "e_ids": ["E-083"], "items": [], "reach_note": "",
+            "synthesis": synthesis, "provenance": "cited"}
+
+
+def _scaffold_reasons(*syntheses):
+    payload = {"cell_evidence": {**ENV, "cells": [
+        _cell(t, f"P1C1.1.{i + 1}") for i, t in enumerate(syntheses)]}}
+    return [r for r in _cg15("heatmap", payload) if "quote scaffold" in r["message"]]
+
+
+def test_a_synthesis_that_reports_its_sources_is_refused():
+    r = _scaffold_reasons(ARBOR_LEAD)
+    assert len(r) == 1 and r[0]["path"] == "cell_evidence.cells[0].synthesis"
+    assert "the cited source states:" in r[0]["message"]
+    assert r[0]["severity"] == "block"
+
+
+def test_a_synthesis_padded_with_a_further_quotation_is_refused():
+    r = _scaffold_reasons(ARBOR_PAD)
+    assert len(r) == 1 and "Also:" in r[0]["message"]
+
+
+def test_a_synthesis_that_is_mostly_quotation_is_refused():
+    heavy = ("Arbor Bank describes 'security measures that comply with federal law' "
+             "and 'computer safeguards and secured files and buildings' and says it "
+             "will 'protect your personal information from unauthorized access and use' [E-222].")
+    assert quote_share(heavy) >= QUOTE_SHARE_LINE
+    r = _scaffold_reasons(heavy)
+    assert len(r) == 1 and "are quotation" in r[0]["message"]
+
+
+def test_honest_promoted_syntheses_pass_the_quote_scaffold_rule():
+    """Measured: Baxter's 706 promoted cells sit at 0.00 quote share, Susser's
+    216 at most 0.29. Both representatives below must pass."""
+    assert quote_share(SUSSER_HONEST) < QUOTE_SHARE_LINE
+    assert quote_scaffold(SUSSER_HONEST) is None and quote_scaffold(BAXTER_HONEST) is None
+    assert _scaffold_reasons(SUSSER_HONEST, BAXTER_HONEST) == []
+
+
+def test_a_short_quotation_inside_an_argument_passes():
+    t = ("Arbor Bank prices certificates of deposit through a vendor platform it "
+         "adopted in 2022, which its own release says 'resulted in a recent spike in "
+         "deposits' [E-038]; that is a pricing capability, not a customer-insight one, "
+         "so this cell stays at Activating until a decision process is evidenced.")
+    assert quote_scaffold(t) is None
+
+
+def test_the_rule_reads_synthesis_fields_only():
+    """A field whose contract asks for a verbatim quote must not be refused for
+    quoting — the rule is bound to `synthesis`."""
+    assert QUOTE_SCAFFOLD_KEYS == frozenset(("synthesis",))

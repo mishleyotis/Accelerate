@@ -72,14 +72,26 @@ def test_the_measured_leak_is_gone():
 def test_only_the_four_allowed_keys_survive():
     out, _ = redact_empty_state(dict(PRODUCTION), "customer")
     assert set(out) <= KEEP, set(out) - KEEP
-    assert set(out) == {"kind", "reason", "closure_condition"}
+    # `reason` is an allowed KEY, but this production reason is written to
+    # "the account team" — seller vocabulary since 2026-10-02 — so the
+    # sentence goes whole (see the next two tests).
+    assert set(out) == {"kind", "closure_condition"}
+
+
+def test_a_reason_written_to_the_account_team_is_withheld_whole():
+    out, dropped = redact_empty_state(dict(PRODUCTION), "customer")
+    assert "reason" not in out
+    assert "reason (seller voice)" in dropped
 
 
 def test_the_reason_a_client_can_read_is_kept():
     """The point is not to empty the empty state. A reader must still learn
     why the surface is blank."""
-    out, _ = redact_empty_state(dict(PRODUCTION), "customer")
-    assert out["reason"] == PRODUCTION["reason"]
+    clean = {**PRODUCTION, "reason": ("Every fact behind these openers "
+                                      "already appears in this page's "
+                                      "findings.")}
+    out, _ = redact_empty_state(clean, "customer")
+    assert out["reason"] == clean["reason"]
     assert out["closure_condition"]
 
 
@@ -204,7 +216,10 @@ def test_the_redaction_receipt_counts_the_empty_state_too():
 
     from dma_api import pages
     src = inspect.getsource(pages)
-    assert "+ len(empty_dropped))" in src
+    # The empty state's removals are in the receipt's sum (since @12 the sum
+    # also counts the rows customer rules held back, so it no longer closes
+    # on this term).
+    assert "+ len(empty_dropped)" in src
 
 
 def test_the_four_keys_are_the_allowlists_own():

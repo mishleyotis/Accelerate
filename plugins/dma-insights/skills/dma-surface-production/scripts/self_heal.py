@@ -1,0 +1,504 @@
+#!/usr/bin/env python3
+"""The defects a real production run actually shipped, checked before submit.
+
+Every rule here is a gate refusal, a reviewer complaint or a rendered defect
+that cost a cycle on Golden 1 CU (2026-09-02). They are cheap, local, and run
+over the assembled payload — a submission SUPERSEDES the staged row, so a FAIL
+on a page that was passing costs that pass and blocks the promote for the other
+five. Answer locally what can be answered locally.
+
+    self_heal.py --sections DIR [--page PAGE] [--grains grains.json]
+
+Exit 1 if anything is found. Each finding names the JSON path, what is wrong,
+and what to do — never just "invalid".
+
+## The rules, and the run that earned each one
+
+ET-09 · ENTITY NAME.  The connector refuses a client-visible string that
+repeats the entity's own legal name with a leading article. It matches
+CASE-INSENSITIVELY. Three separate sweeps missed occurrences because they
+searched for the capitalised form only, and the gate found them each time —
+twelve of them, in prose AND in evidence excerpts. Excerpts must be
+RE-ANCHORED to a different verbatim span, never reworded: an excerpt is a
+quotation.
+
+NULL SWEEP.  A `null` that reaches a payload field renders as an empty slot
+the reader cannot distinguish from "not assessed". Derived values are
+computed or null-with-a-reason, never a bare null and never a sentinel.
+Reports every null in a non-optional position so each is a decision.
+
+CG-07 · QUOTED FIGURE.  A number written into prose must resolve, within
+0.05, to what the run serves at that grain. Golden 1 quoted the workbook's
+weighted 2.40 beside a served mean of 2.1115 and was refused four times
+before anyone read the arithmetic. Give `--grains` the run's stated grains to
+check pillar and category figures the same way the gate will.
+
+CG-12 · FACE BUDGET.  A field that renders in a chip is a LABEL, not a
+sentence. `prerequisites[].basis` shipped 291 characters into a pill that
+holds about 38. The budget here is the connector's; the app now wraps rather
+than clips, so this is about readability, not layout.
+
+CG-44 · A BAR WITH NO NUMBER.  A `peer_median` and a `delta` with a null
+`score` is a card that draws a comparison it cannot show — and the missing
+figure is recoverable as `peer + delta`. This refuses the null.
+
+INTERNAL MARKING.  `internal_only` is default-deny: a section that carries an
+`r_layer` (the reasoning layer) and does not name it in `internal_only` will
+promote the analyst's reasoning to a client.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+#: Keyed by a PATH pattern, not a leaf name. `basis` is a chip only under
+#: `prerequisites`; `financial_series[].basis` and
+#: `peer_deployments[].basis` are prose fields that render in full, and
+#: matching on the leaf reported 20 of them as defects on a page that had
+#: none. The connector's own `_FACE_BUDGETS` is path-keyed for this reason.
+FACE_BUDGETS = {
+    re.compile(r"recommendations\[\d+\]\.prerequisites\[\d+\]\.basis$"): 60,
+    re.compile(r"\.detection_basis$"): 160,
+}
+NUM = re.compile(r"(?<![\w.])([0-5]\.\d{1,2})(?![\w.])")
+
+
+def walk(obj, path=""):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield from walk(v, f"{path}.{k}" if path else k)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            yield from walk(v, f"{path}[{i}]")
+    else:
+        yield path, obj
+
+
+
+def containers(obj, path=""):
+    """Every dict and list in the tree, with its path — the counterpart to
+    `walk`, which yields only leaves."""
+    if isinstance(obj, dict):
+        yield path, obj
+        for k, v in obj.items():
+            yield from containers(v, f"{path}.{k}" if path else k)
+    elif isinstance(obj, list):
+        yield path, obj
+        for i, v in enumerate(obj):
+            yield from containers(v, f"{path}[{i}]")
+
+def entity_names(sections: Path) -> list[str]:
+    """The entity's own name, from whatever section states it."""
+    out = set()
+    for f in sections.glob("*.json"):
+        try:
+            body = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:                      # noqa: BLE001
+            continue
+        for p, v in walk(body):
+            if p.endswith(("legal_name", "entity_name")) and isinstance(v, str):
+                out.add(v.strip())
+    return sorted(out)
+
+
+def check_entity_article(payload, names, findings):
+    """ET-09, case-insensitively — which is how the gate matches, and how
+    three earlier sweeps missed the same twelve strings."""
+    pats = [(n, re.compile(rf"\bthe\s+{re.escape(n)}\b", re.IGNORECASE))
+            for n in names if n]
+    for path, v in walk(payload):
+        if not isinstance(v, str):
+            continue
+        for name, pat in pats:
+            m = pat.search(v)
+            if m:
+                how = ("re-anchor this excerpt to a different verbatim span; "
+                       "an excerpt is a quotation and must not be reworded"
+                       if "excerpt" in path else
+                       f"drop the article: {name}, not {m.group(0)}")
+                findings.append((path, f"ET-09: {m.group(0)!r}", how))
+
+
+def check_nulls(payload, findings):
+    """A null that DISAGREES WITH ITS SIBLINGS, which is the only kind worth
+    reporting.
+
+    A blanket null sweep is noise and was tried first: `empty_state: null` is
+    how the contract says "not empty", `resolved_on: null` is how an issue
+    says it is open, and flagging those buries the one that matters under
+    thirty that do not. Five of the six "nulls" reported on the first pass of
+    this rule were correct data.
+
+    The signal is a field present-and-populated on some rows of a list and
+    null on others: that is a row that LOST something its siblings kept, and
+    it is exactly how a producer drops a field mid-list. A field null on
+    every row is the contract saying the run does not carry it."""
+    # `walk` yields LEAVES, so it never hands back a list — iterating it here
+    # made this rule dead code that reported "clean" and was believed. The
+    # containers are walked directly.
+    for path, v in containers(payload):
+        if not isinstance(v, list) or len(v) < 2:
+            continue
+        rows = [r for r in v if isinstance(r, dict)]
+        if len(rows) < 2:
+            continue
+        for key in {k for r in rows for k in r}:
+            present = [r for r in rows if r.get(key) is not None]
+            missing = [i for i, r in enumerate(rows)
+                       if key in r and r.get(key) is None]
+            if present and missing and len(present) >= len(missing):
+                findings.append(
+                    (f"{path}[{missing[0]}].{key}",
+                     f"ADVISORY null on {len(missing)} row(s) but populated "
+                     f"on {len(present)}",
+                     "a field its siblings carry is a field this row lost; "
+                     "fill it or drop it from every row, so the reader is "
+                     "not left guessing which absences are meaningful"))
+
+
+def check_faces(payload, findings):
+    for path, v in walk(payload):
+        if not isinstance(v, str):
+            continue
+        for pat, budget in FACE_BUDGETS.items():
+            if pat.search(path) and len(v) > budget:
+                findings.append(
+                    (path, f"CG-12: {len(v)} chars in a {budget}-char chip",
+                     "this field is a STATUS LABEL; the record that settles "
+                     "it belongs in `note`, which renders beneath"))
+
+
+
+# The connector's OWN abbreviation table, imported. A first draft wrote its
+# own list and put AI, ML, BI, UI, UX, CI and CD on it — none of which the
+# gate enforces — so it reported a defect on a payload the server had just
+# PASSED. A local check stricter than the gate it mirrors sends a producer
+# to fix something that was never wrong, which is the same waste as missing
+# a defect, in the other direction.
+_SHARED = Path(__file__).resolve().parents[5] / "packages" / "shared"
+sys.path.insert(0, str(_SHARED))
+try:
+    from abbreviations import EXPANSION, EXCERPT_FIELDS
+except Exception as exc:                       # pragma: no cover
+    raise SystemExit(
+        f"cannot import the connector's abbreviation table ({exc!r}) — a "
+        "second copy of it here would be wrong the first time the gate "
+        "changed, in whichever direction hurts more")
+
+#: Fields whose first character CG-11 requires to be a capital. A prose field
+#: on a client surface begins with one; a first word carrying an uppercase
+#: letter after its first character (nCino, iOS, eBay) is the vendor's own
+#: spelling and is exempt.
+PROSE_LEAVES = ("reason", "rationale", "basis", "note", "detection_basis",
+                "narrative_thread", "framing", "why", "what", "counter",
+                "condition", "title", "statement", "closure_condition")
+
+
+def check_acronyms(payload, findings):
+    """CG-27, locally. Three of these blocked the BOTR techstack submission.
+
+    Excerpt fields are skipped: an excerpt is a verbatim span and is never
+    rewritten, so an abbreviation inside one is the source's, not ours."""
+    for path, v in walk(payload):
+        if not isinstance(v, str) or len(v) < 3:
+            continue
+        if path.rsplit(".", 1)[-1].split("[")[0] in EXCERPT_FIELDS:
+            continue
+        if _is_identifier(path.rsplit(".", 1)[-1].split("[")[0], v):
+            continue
+        for a in EXPANSION:
+            if re.search(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])", v) \
+                    and "(" + a + ")" not in v:
+                findings.append(
+                    (path, f"CG-27: {a!r} reaches a client surface unexplained",
+                     f"spell it out on first use in THIS field — the short "
+                     f"form is fine afterwards. Excerpts are verbatim spans "
+                     f"and are never rewritten; a label this app writes is"))
+                break
+
+
+def check_capitals(payload, findings):
+    """CG-11, locally. Nineteen of these blocked one BOTR submission — the
+    whole `dropped[]` array, because one f-string began with a lowercase
+    word."""
+    for path, v in walk(payload):
+        if not isinstance(v, str) or not v.strip():
+            continue
+        if not path.rsplit(".", 1)[-1].split("[")[0] in PROSE_LEAVES:
+            continue
+        first = v.strip().split()[0]
+        if first[:1].islower() and first[1:] == first[1:].lower():
+            findings.append(
+                (path, f"CG-11: begins {first!r}, lowercase",
+                 f"a prose field on a client surface begins with a capital — "
+                 f"write {first.capitalize()!r}. A first word with an "
+                 f"uppercase letter after its first character (nCino, iOS) is "
+                 f"the vendor's own spelling and is exempt"))
+
+#: An identifier is never prose. First Tech (2026-10-07): the CG-27 fixer
+#: expanded "CU" inside cell ids — `P1C3.6.CU1` became
+#: `P1C3.6.Credit union (CU)1` on 32 cells and evidence links — and the
+#: connector refused every one as a cell the run does not carry (CG-14).
+_ID_VALUE = re.compile(r"^(?:P\d+C\d+(?:\.[A-Za-z0-9]+)*|E-[A-Za-z0-9-]+|"
+                       r"[A-Z]{1,4}-\d+[A-Za-z0-9-]*)$")
+
+
+def _is_identifier(key: str, v: str) -> bool:
+    k = str(key or "")
+    return (k == "id" or k.endswith("_id") or k.endswith("_ids") or k == "cells"
+            or bool(_ID_VALUE.match(v.strip())))
+
+
+def _fix_text(key: str, v: str) -> str:
+    """CG-27 then CG-11 on one string leaf, exactly as the checks read them."""
+    if _is_identifier(key, v):
+        return v
+    if key not in EXCERPT_FIELDS:
+        for a in sorted(EXPANSION, key=len, reverse=True):
+            pat = re.compile(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])")
+            m = pat.search(v)
+            if not m or "(" + a + ")" in v:
+                continue
+            exp = EXPANSION[a]
+            if m.start() == 0 or v[:m.start()].rstrip().endswith((".", ":", "!", "?")):
+                exp = exp[:1].upper() + exp[1:]
+            v = v[:m.start()] + f"{exp} ({a})" + v[m.end():]
+    word = _cg11_reason(key, v)
+    if word:
+        i = v.find(word)
+        if i >= 0:
+            v = v[:i] + v[i].upper() + v[i + 1:]
+    return v
+
+
+def _cg11_reason(key: str, v: str):
+    """The connector's OWN CG-11 predicate (apps/mcp dma_mcp.validation), so
+    the fixer capitalises exactly what the gate refuses: its prose keys, its
+    never-touched keys, its 25-character floor, its camel-case exemption.
+    The local PROSE_LEAVES list missed `synthesis` and the gate refused it.
+    Falls back to the local list only where the connector is not on disk."""
+    try:
+        return _CONNECTOR_CG11(key, v)
+    except NameError:
+        pass
+    if key in PROSE_LEAVES and v.strip():
+        first = v.strip().split()[0]
+        if first[:1].islower() and first[1:] == first[1:].lower():
+            return first
+    return None
+
+
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[5] / "apps" / "mcp"))
+    from dma_mcp.validation import _sentence_case_reason as _CONNECTOR_CG11  # noqa: E402
+except Exception:                                    # pragma: no cover
+    pass
+
+
+def fix_style(obj, key: str = ""):
+    """Apply the two mechanical surface rules (CG-11 capitals, CG-27
+    abbreviations) in place. A producer repairing these by hand misses
+    cases: Susser Bank's heatmap and techstack failed three attempts on 55
+    of them (2026-10-06). Excerpts are verbatim and never touched."""
+    if isinstance(obj, dict):
+        return {k: fix_style(v, k) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [fix_style(v, key) for v in obj]
+    if isinstance(obj, str) and len(obj) >= 1:
+        return _fix_text(key, obj)
+    return obj
+
+
+def check_bars(payload, findings):
+    """CG-44: a peer median and a delta with no score."""
+    for path, v in walk(payload):
+        if not path.endswith(".peer_median"):
+            continue
+        base = path[: -len(".peer_median")]
+        row = {}
+        for p2, v2 in walk(payload):
+            if p2.startswith(base + "."):
+                row[p2[len(base) + 1:]] = v2
+        if row.get("score") is None and row.get("delta") is not None:
+            findings.append(
+                (base, "CG-44: peer_median and delta present, score null",
+                 f"serve {v} + {row['delta']} = "
+                 f"{round(float(v) + float(row['delta']), 2)}, or drop the "
+                 "delta — the card cannot show a comparison it does not make"))
+
+
+def check_internal_marking(payload, findings):
+    for sname, body in (payload or {}).items():
+        if not isinstance(body, dict):
+            continue
+        if "r_layer" in body:
+            marked = body.get("internal_only") or []
+            if not any("r_layer" in str(m) for m in marked):
+                findings.append(
+                    (f"{sname}.internal_only",
+                     "an r_layer is present and unmarked",
+                     "add 'r_layer' — redaction is default-deny, so an "
+                     "unmarked reasoning layer promotes to the client"))
+
+
+def check_quoted_figures(payload, grains, findings):
+    """CG-07, at pillar grain, against what the RUN serves."""
+    if not grains:
+        return
+    stated = {p["pillar_id"]: p.get("score")
+              for p in (grains.get("pillars") or []) if p.get("score") is not None}
+    for path, v in walk(payload):
+        if not isinstance(v, str) or "pillar" not in path.lower():
+            continue
+        for m in NUM.finditer(v):
+            q = float(m.group(1))
+            near = [pid for pid, s in stated.items() if abs(s - q) <= 0.05]
+            if stated and not near and any(pid in v for pid in stated):
+                findings.append(
+                    (path, f"CG-07: quoted {q} resolves to no stated grain",
+                     "the gate strikes a quoted figure against what the run "
+                     f"serves ({stated}); quote that, or attribute the "
+                     "difference in the same sentence"))
+            break
+
+
+def check_cg15(page, payload, findings, *, repo=None):
+    """CG-15 — template repetition — through the connector's own module.
+
+    Measured 28-09-2026 (QA audit F-O07-010): the local catch rate on 46
+    server refusals was 28% when measured on THIS script, because CG-15 had
+    no implementation here, while `precheck_gates.py` (which runs the
+    server's first validation pass) already carried it: replayed over the
+    same 102 cells, pass 1 catches 45 of the 46 (98%). The gate is
+    imported, never re-implemented; when the module is unreachable the
+    result is NOT RUN, stated as such, and NOT RUN is not a pass.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "check_repetition", Path(__file__).resolve().parent / "check_repetition.py")
+    cr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cr)
+    try:
+        _contracts, vacuity, _where = cr._load_connector(repo)
+    except SystemExit as exc:
+        findings.append(("*", "ADVISORY CG-15 NOT RUN",
+                         f"the connector's gate module is not reachable ({str(exc)[:120]}); "
+                         f"give it a checkout (--repo / $DMA_INSIGHTS_REPO). NOT RUN is "
+                         f"not a pass"))
+        return
+    pages: dict[str, dict] = {}
+    for name, body in payload.items():
+        parts = name[:-len(".json")].split(".") if name.endswith(".json") else name.split(".")
+        if len(parts) < 2:
+            continue
+        pg, section = parts[0], parts[1]
+        if page and pg != page:
+            continue
+        sec = pages.setdefault(pg, {}).setdefault(section, {})
+        if isinstance(body, dict):
+            sec.update(body)
+        else:
+            pages[pg][section] = body
+    for pg, sections in pages.items():
+        try:
+            reasons = vacuity.check_vacuity(pg, sections)
+        except Exception as exc:                              # noqa: BLE001
+            findings.append(("*", "ADVISORY CG-15 NOT RUN",
+                             f"check_vacuity raised {type(exc).__name__}: {str(exc)[:120]}"))
+            continue
+        for r in reasons:
+            if str(r.get("severity", "block")) != "block":
+                continue
+            findings.append((f"{pg}.{r.get('path')}", f"CG-15: {str(r.get('message'))[:200]}",
+                             "write the per-item argument the contract asked for — what is "
+                             "true of THIS item — or omit the item; the server refuses the "
+                             "group as one argument rendered N times"))
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--sections", required=True, type=Path)
+    ap.add_argument("--repo", default=None,
+                    help="checkout of the DMA Insights repository whose apps/mcp "
+                         "holds CG-15; falls back to $DMA_INSIGHTS_REPO and the cwd")
+    ap.add_argument("--no-cg15", action="store_true",
+                    help="skip the CG-15 pass (stated in the output as NOT RUN)")
+    ap.add_argument("--page", default=None)
+    ap.add_argument("--fix", action="store_true",
+                    help="rewrite the section files in place for the two mechanical "
+                         "rules (CG-11 capitals, CG-27 abbreviations), then check")
+    ap.add_argument("--grains", type=Path, default=None)
+    ap.add_argument("--entity", action="append", default=[],
+                    help="the entity's legal name, for the ET-09 sweep, when "
+                         "no section file states it")
+    a = ap.parse_args(argv)
+
+    grains = json.loads(a.grains.read_text()) if a.grains else None
+    names = sorted(set(entity_names(a.sections)) | set(a.entity))
+    pattern = f"{a.page}.*.json" if a.page else "*.json"
+
+    findings: list[tuple[str, str, str]] = []
+    payload: dict = {}
+    for f in sorted(a.sections.glob(pattern)):
+        body = json.loads(f.read_text(encoding="utf-8"))
+        if a.fix:
+            fixed = fix_style(body)
+            if fixed != body:
+                f.write_text(json.dumps(fixed, indent=2, ensure_ascii=False), encoding="utf-8")
+                print(f"fixed CG-11/CG-27 in {f.name}")
+            body = fixed
+        payload[f.name] = body
+
+    check_entity_article(payload, names, findings)
+    check_nulls(payload, findings)
+    check_faces(payload, findings)
+    check_acronyms(payload, findings)
+    check_capitals(payload, findings)
+    check_bars(payload, findings)
+    check_quoted_figures(payload, grains, findings)
+    for name, body in payload.items():
+        check_internal_marking({name.split(".")[1]: body}
+                               if name.count(".") >= 2 else {}, findings)
+    if a.no_cg15:
+        findings.append(("*", "ADVISORY CG-15 NOT RUN", "--no-cg15 was passed; NOT RUN is not a pass"))
+    else:
+        check_cg15(a.page, payload, findings, repo=a.repo)
+
+    # Two severities, and only one of them blocks.
+    #
+    # ET-09, CG-12, CG-44 and the redaction check restate a rule the
+    # connector enforces: a hit is a refusal waiting to happen, and a
+    # submission spent on it costs the staged pass it supersedes.
+    #
+    # The sibling-null rule is a HEURISTIC. It reads a field null on some
+    # rows and populated on others as a row that lost something — which is
+    # how a producer drops a field mid-list, and also how the contract
+    # expresses a tri-state. `deployed` is null on purpose ("unknown", and a
+    # coverage figure of 2/5 with three unknowns is not 2/5); a peer with no
+    # public filing has no `source_url`. Blocking on those would rebuild the
+    # noise this rule was retuned to remove, so it advises and a human reads
+    # it. Never let a heuristic hold a gate it cannot justify.
+    advisory = [f for f in findings if f[1].startswith("ADVISORY")]
+    blocking = [f for f in findings if not f[1].startswith("ADVISORY")]
+
+    if not findings:
+        print(f"self-heal: clean — {len(payload)} section file(s), "
+              f"entity {names or '(none stated)'}")
+        return 0
+    print(f"self-heal: {len(blocking)} blocking, {len(advisory)} advisory\n")
+    for label, group in (("BLOCKING", blocking), ("advisory", advisory)):
+        if not group:
+            continue
+        print(f"  --- {label} ---")
+        for path, what, how in group[:40]:
+            print(f"  {path}\n      {what}\n      -> {how}")
+        if len(group) > 40:
+            print(f"  … {len(group) - 40} more")
+    return 1 if blocking else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

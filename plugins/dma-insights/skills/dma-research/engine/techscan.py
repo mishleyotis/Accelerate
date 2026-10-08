@@ -47,8 +47,10 @@ if __package__ in (None, ""):  # noqa: E402
 
 import argparse
 import datetime as _dt
+import contextlib
 import json
 import re
+import os
 import sys
 from collections import Counter
 from pathlib import Path
@@ -93,6 +95,13 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
     if not str(product or "").strip():
         raise ScanRefused("a register row names a PRODUCT; a bare vendor or "
                           "a category is the CG-20 defect")
+    if str(vendor or "").strip() and \
+            re.sub(r"\s*\(.*?\)", "", product).strip().lower() == str(vendor).strip().lower():
+        raise ScanRefused(
+            f"product and vendor are both {product.strip()!r}: name the thing the "
+            f"vendor supplies (e.g. 'DocuSign eSignature', 'Optimal Blue pricing "
+            f"engine'), from the detection basis. The connector refuses the "
+            f"duplicate at submit (CG-20); here it costs nothing.")
     if len(str(basis or "").strip()) < 15:
         raise ScanRefused("Detection_Basis is one real clause — what was "
                           "seen, where — not a token")
@@ -135,8 +144,53 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
             "ABSENT must state the search that establishes the absence — "
             "'no register row' and 'confirmed absent' are different facts, "
             "and conflating them over-recommends the estate (AUD-0115)")
-    n = 1 + sum(1 for r in wb.rows("Tech_Register"))
-    ts_id = f"TS-{n:03d}"
+    # The id is allocated INSIDE the workbook lock, past the highest id on
+    # the register, never from the row count (B1 Bank, 2026-10-08: the
+    # driver's PRELIM scanner and a relay scanner recorded at once; a count
+    # read from a stale view outside the lock minted TS-004, -007, -009,
+    # -011, -017, -020, -024 and -027 twice, and a peer-record against any
+    # of them was ambiguous). Search_Log.Seq made the same mistake and was
+    # fixed the same way (Arbor Bank, 2026-10-07).
+    with wb.transaction("techscan record"):
+        rows = wb.rows("Tech_Register")
+        key = product_key(product)
+        clash = next((r for r in rows if product_key(r.get("Product")) == key), None)
+        if clash is not None:
+            raise ScanRefused(
+                f"{product.strip()!r} is already on the register as "
+                f"{clash.get('TS_ID')} ({clash.get('Status')}). One product is "
+                f"one row: change its status or evidence with `techscan "
+                f"restrike --ts {clash.get('TS_ID')} …`, never a second row "
+                f"that leaves the two to disagree.")
+        ts_id = next_ts_id(rows)
+        _append_register_row(wb, ts_id, product=product, vendor=vendor,
+                             layer=layer, status=status, basis=basis,
+                             method=method, provs=provs, subcaps=subcaps,
+                             eids=eids, source_urls=source_urls, as_of=as_of,
+                             impact=impact)
+    return ts_id
+
+
+def product_key(product) -> str:
+    """A product's identity on the register: case, punctuation, a trailing
+    parenthetical and internal spacing do not make a second product
+    ('SAP BusinessObjects' == 'SAP Business Objects')."""
+    s = re.sub(r"\s*\(.*?\)", "", str(product or "")).lower()
+    return re.sub(r"[^a-z0-9]+", "", s)
+
+
+def _ts_num(ts_id) -> int:
+    m = re.fullmatch(r"TS-(\d+)", str(ts_id or "").strip().upper())
+    return int(m.group(1)) if m else 0
+
+
+def next_ts_id(rows) -> str:
+    return f"TS-{1 + max((_ts_num(r.get('TS_ID')) for r in rows), default=0):03d}"
+
+
+def _append_register_row(wb, ts_id, *, product, vendor, layer, status, basis,
+                         method, provs, subcaps, eids, source_urls, as_of,
+                         impact):
     wb.append("Tech_Register", {
         "TS_ID": ts_id, "Product": product.strip(),
         "Vendor": (vendor or "").strip() or None,
@@ -147,12 +201,335 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
         "Detection_Basis": basis.strip(), "Detection_Method": method,
         "Providers": ", ".join(dict.fromkeys(provs)),
         "SubCap_IDs": ", ".join(subcaps or []) or None,
-        "Evidence_IDs": ", ".join(eids) or None,
+        "Evidence_IDs": ", ".join(eids or []) or None,
         "Source_URLs": ", ".join(source_urls or []) or None,
         "As_Of": as_of or _utcnow()[:10],
         "DMA_Impact": _checked_impact(impact) if impact else None,
     })
-    return ts_id
+
+
+_STATUS_RANK = {"CONFIRMED": 3, "INFERRED": 2, "CLAIMED": 1, "ABSENT": 0}
+
+
+def dedupe(wb: RunWorkbook, *, same=()) -> dict:
+    """Repair a register that holds one product twice or one TS_ID twice.
+
+    One product is one row: rows whose `product_key` agrees (or that a
+    person names as the same product with `same=[("A", "B")]`, B folded into
+    A) collapse onto the row with the strongest status, and the dropped
+    rows' providers, evidence ids, source URLs and cells are carried onto it
+    — a merge never loses a citation. Then every TS_ID that still names two
+    rows keeps its first row and the later ones are renumbered past the
+    highest id, so no id is ever reused. Peer rows follow a merged id to its
+    keeper; a peer row on an id that named two DIFFERENT products stays
+    where it is and is reported, because which product it meant is not the
+    engine's to guess."""
+    alias = {product_key(b): product_key(a) for a, b in same}
+    merged, renumbered, ambiguous_peers = [], [], []
+    with wb.transaction("techscan dedupe"):
+        rows = wb.rows("Tech_Register")
+        id_count = Counter(str(r.get("TS_ID") or "") for r in rows)
+        groups: dict[str, list[dict]] = {}
+        order: list[str] = []
+        for r in rows:
+            k = product_key(r.get("Product"))
+            k = alias.get(k, k)
+            if k not in groups:
+                groups[k] = []
+                order.append(k)
+            groups[k].append(r)
+        out, repoint = [], {}
+        for k in order:
+            g = groups[k]
+            best = max(range(len(g)), key=lambda i: (
+                _STATUS_RANK.get(str(g[i].get("Status")), -1), -i))
+            keep = dict(g[best])
+            for i, r in enumerate(g):
+                if i == best:
+                    continue
+                for col in ("Providers", "Evidence_IDs", "Source_URLs", "SubCap_IDs"):
+                    vals = _split_ids(keep.get(col)) + _split_ids(r.get(col))
+                    keep[col] = ", ".join(dict.fromkeys(v for v in vals if v)) or None
+                merged.append({"dropped": r.get("TS_ID"), "product": r.get("Product"),
+                               "status": r.get("Status"), "into": keep.get("TS_ID"),
+                               "kept_product": keep.get("Product"),
+                               "kept_status": keep.get("Status")})
+                if id_count[str(r.get("TS_ID"))] == 1:
+                    repoint[str(r.get("TS_ID"))] = str(keep.get("TS_ID"))
+            out.append(keep)
+        seen, n = set(), max((_ts_num(r.get("TS_ID")) for r in rows), default=0)
+        for r in out:
+            tid = str(r.get("TS_ID") or "")
+            if tid in seen:
+                n += 1
+                new = f"TS-{n:03d}"
+                renumbered.append({"was": tid, "now": new, "product": r.get("Product")})
+                r["TS_ID"] = new
+            seen.add(r["TS_ID"])
+        cols = list(C.SHEETS["Tech_Register"])
+        ws = wb._sheet("Tech_Register")
+        if ws.max_row >= 2:
+            ws.delete_rows(2, ws.max_row - 1)
+        for r in out:
+            wb.append("Tech_Register", {c: r.get(c) for c in cols})
+        survivors = Counter(str(r["TS_ID"]) for r in out)
+        for pr in wb.rows("Tech_Peer_Deployments"):
+            tid = str(pr.get("TS_ID") or "")
+            if tid in repoint:
+                wb.update_row_where("Tech_Peer_Deployments",
+                                    {"TS_ID": tid, "Peer": pr.get("Peer")},
+                                    {"TS_ID": repoint[tid]})
+            elif id_count[tid] > 1 and any(x["was"] == tid for x in renumbered):
+                ambiguous_peers.append({"ts_id": tid, "peer": pr.get("Peer")})
+        dup_left = [t for t, c in survivors.items() if c > 1]
+    return {"rows_before": len(rows), "rows_after": len(out), "merged": merged,
+            "renumbered": renumbered, "ambiguous_peer_rows": ambiguous_peers,
+            "duplicate_ids_left": dup_left}
+
+
+#: Hosts whose pages RESELL a crawl (technographic brokers and the tech-
+#: stack lists that copy them). A mention there is the claim itself, never
+#: the corroboration a CLAIMED row is waiting for.
+BROKER_HOSTS = ("leadiq.", "zoominfo.", "builtwith.", "theirstack.", "6sense.",
+                "apollo.io", "slintel.", "enlyft.", "hginsights.", "clay.com",
+                "explorium.", "linkedin.com/company", "crunchbase.", "wappalyzer.")
+
+
+def _vendor_tokens(row) -> list[str]:
+    """The name a non-broker source would use for this row's product: the
+    product's own first word, and the vendor's only when the product has
+    none usable. Vendor-first matched 'Salesforce MuleSoft' on every
+    Salesforce mention and flagged MuleSoft for a Salesforce posting."""
+    out = []
+    for v in (row.get("Product"), row.get("Vendor")):
+        v = re.sub(r"\(.*?\)", " ", str(v or "")).strip()
+        if not v or v.lower() in ("unnamed", "none", "n/a"):
+            continue
+        first = re.split(r"[\s/,]+", v)[0]
+        if len(first) >= 4 and first.lower() not in (
+                "core", "online", "digital", "data", "loan", "microsoft"):
+            out.append(first)
+            break
+    return out
+
+
+def _vendor_hosted(e, tok: str) -> bool:
+    """The vendor's own site is the vendor's CLAIM, not a confirmation.
+
+    Owner decision 2026-10-06 (Susser Bank): a vendor's case study about the
+    client, even one quoting the client's executive, is "a vendor page asserts
+    it", which the report template's status vocabulary calls CLAIMED. This
+    check used to count getbankpoint.com's Susser case study as evidence that
+    contradicted a CLAIMED BankPoint row, while the report validator refused
+    any section that printed the same row CONFIRMED, so the reports could not
+    pass either gate. CONFIRMED needs the bank's own source or an independent
+    one."""
+    host = re.sub(r"^https?://", "", str(e.get("Source_URL") or "").lower()).split("/")[0]
+    return bool(host) and tok.lower() in host.replace("-", "")
+
+
+def _product_words(row, tok: str) -> set[str]:
+    """The words of the row's product after the matched token, lower-case:
+    {"sd-wan"} for "Cisco SD-WAN", {"s3"} for "Amazon S3"."""
+    prod = re.sub(r"\(.*?\)", " ", str(row.get("Product") or ""))
+    words = [w.lower() for w in re.split(r"\s+", prod) if w]
+    return {w for w in words if w != tok.lower()}
+
+
+def _names_this_product(pat, text: str, own: set[str]) -> bool:
+    """True when `text` names the token as THIS product. A vendor token
+    followed by another product's name ("Cisco WebEx", "Amazon Route 53") is
+    a different product from the same vendor, not this one (B1 Bank,
+    2026-10-08: both flagged CLAIMED "Cisco SD-WAN" / "Amazon S3" rows)."""
+    for m in pat.finditer(text):
+        nxt = re.match(r"\s+([A-Za-z0-9][\w\-]*)", text[m.end():])
+        if not nxt:
+            return True
+        word = nxt.group(1)
+        if word.lower() in own or not (word[0].isupper() or word[0].isdigit()):
+            return True
+    return False
+
+
+def _broker_reading(e) -> bool:
+    """A machine technographic reading (Clay Tech Stack, Vibe/Explorium) is a
+    broker's claim — the source a CLAIMED row already rests on — so it can
+    never be the bank-authored or independent evidence that contradicts one.
+    It carries no Source_URL, so BROKER_HOSTS cannot catch it by host."""
+    return (str(e.get("Origin") or "").lower() == "connector" and bool(re.search(
+        r"technograph|tech(nology)? stack|explorium|vibe prospecting|\bclay\b",
+        str(e.get("Source_Name") or ""), re.I)))
+
+
+def contradictions(wb: RunWorkbook) -> list[dict]:
+    """CLAIMED register rows that bank-authored or independent evidence the
+    run already holds names, and which the row does not cite. The vendor's
+    own site never counts: it is the claim (`_vendor_hosted`).
+
+    Susser Bank, 2026-10-05: TS-016 held Salesforce as a broker-only claim
+    while the bank's own nCino Administrator posting configured Salesforce,
+    and nCino, BankPoint and Q2 Centrix had no rows at all. Every report
+    section that read the register inherited the error, the validator
+    reopened eight sections on it, and seven report rounds were spent on a
+    fact no report writer may change. The register is reconciled against
+    the evidence BEFORE any section is written, so the same contradiction
+    costs one re-strike instead of a stage."""
+    ev = wb.evidence_index()
+    # The source must be ABOUT this institution — its own page, a posting for
+    # it, a vendor story naming it. A vendor's general product page names the
+    # product and says nothing about who runs it (E-411, a MuleSoft scope
+    # statement, is not evidence that Susser Bank runs MuleSoft).
+    ent = re.sub(r"[^a-z0-9 ]", " ", str(wb.metadata().get("entity_name") or "").lower()).split()
+    ent_tok = next((t for t in ent if len(t) >= 4 and t not in ("bank", "credit", "union", "national",
+                                                                 "first", "trust", "federal")), "")
+
+    def about_entity(e) -> bool:
+        if not ent_tok:
+            return True
+        hay = (str(e.get("Excerpt") or "") + " " + str(e.get("Source_URL") or "")).lower()
+        return ent_tok in hay
+
+    confirmed = {t.lower() for r in wb.rows("Tech_Register")
+                 if str(r.get("Status") or "") == "CONFIRMED"
+                 for t in _vendor_tokens(r)}
+    out = []
+    for r in wb.rows("Tech_Register"):
+        if str(r.get("Status") or "") != "CLAIMED":
+            continue
+        cited = {e.strip().split(":")[0] for e in str(r.get("Evidence_IDs") or "").split(",")}
+        for tok in _vendor_tokens(r):
+            if tok.lower() in confirmed:
+                continue
+            pat = re.compile(rf"\b{re.escape(tok)}\b", re.I)
+            own = _product_words(r, tok)
+            hits = [eid for eid, e in ev.items()
+                    if eid not in cited
+                    # T1-T3: the bank's own pages, its postings, regulators
+                    # and the vendor. T4 is a directory or aggregator line
+                    # ("accessible through aggregators like Plaid"), which
+                    # names a product without saying it is deployed here.
+                    and str(e.get("Tier") or "").upper() in ("T1", "T2", "T3")
+                    and _names_this_product(pat, str(e.get("Excerpt") or ""), own)
+                    and about_entity(e)
+                    and not any(h in str(e.get("Source_URL") or "").lower()
+                                for h in BROKER_HOSTS)
+                    and not _vendor_hosted(e, tok)
+                    and not _broker_reading(e)]
+            if hits:
+                out.append({"ts_id": r.get("TS_ID"), "product": r.get("Product"),
+                            "status": "CLAIMED", "token": tok,
+                            "evidence_ids": sorted(hits)[:8]})
+                break
+    return out
+
+
+def link(wb: RunWorkbook, ts_id: str, subcaps=None) -> dict:
+    """Name the assessed cells a register row bears on (`SubCap_IDs`, which
+    the techstack page serves as `linked_subcap_ids`).
+
+    B1 Bank, 2026-10-08: `record` takes cells but no caller passed any and
+    nothing could set them afterwards, so all 31 rows served no linked
+    cells. Explicit cells must be catalogue cells of this run. With none
+    given, cells come from the row's own PRODUCT-SPECIFIC evidence only: a
+    broker technographic reading lists dozens of products, and inheriting
+    its cells would tie every product to the same ones."""
+    valid = {_clean_id(r.get("SubCap_ID")) for r in wb.scoring_rows()} - {""}
+    with wb.transaction("techscan link"):
+        row = next((r for r in wb.rows("Tech_Register")
+                    if str(r.get("TS_ID") or "").upper() == str(ts_id).upper()), None)
+        if row is None:
+            raise ScanRefused(f"{ts_id} is not on Tech_Register")
+        if subcaps:
+            want = [_clean_id(c) for c in subcaps if _clean_id(c)]
+            bad = [c for c in want if c not in valid]
+            if bad:
+                raise ScanRefused(f"{ts_id}: {', '.join(bad)} not a cell of this run")
+            source = "explicit"
+        else:
+            ev = wb.evidence_index()
+            want = []
+            for e in str(row.get("Evidence_IDs") or "").split(","):
+                er = ev.get(e.strip().split(":")[0])
+                if not er or _broker_reading(er):
+                    continue
+                want += [c for c in (_clean_id(x) for x in
+                                     str(er.get("SubCap_IDs") or "").split(","))
+                         if c in valid]
+            source = "evidence"
+            if not want:
+                raise ScanRefused(
+                    f"{ts_id}: no product-specific evidence names a cell; "
+                    f"pass --subcap for the cells this product bears on")
+        have = [c for c in (_clean_id(x) for x in
+                            str(row.get("SubCap_IDs") or "").split(",")) if c]
+        cells = list(dict.fromkeys(have + want))
+        wb.update_row_where("Tech_Register", {"TS_ID": row["TS_ID"]},
+                            {"SubCap_IDs": ", ".join(cells)})
+    return {"ts_id": row["TS_ID"], "subcaps": cells, "source": source}
+
+
+def _clean_id(x) -> str:
+    return str(x or "").strip().split(":")[0].strip()
+
+
+def restrike(wb: RunWorkbook, ts_id: str, *, status: str, method: str,
+             basis: str, providers, evidence_ids=None, product: str | None = None,
+             impact: str | None = None, actor: str = "") -> dict:
+    """Correct one register row IN PLACE, under the same refusals `record`
+    applies. `record` only appends, so before this a wrong row could be
+    corrected only by hand-editing the workbook, and a second row for the
+    same product double-counts its layer."""
+    row = next((r for r in wb.rows("Tech_Register")
+                if str(r.get("TS_ID") or "").upper() == str(ts_id).upper()), None)
+    if row is None:
+        raise ScanRefused(f"{ts_id} is not on Tech_Register")
+    # Validate exactly as a new row would be, without appending it.
+    probe = _Probe(wb, exclude_ts=row["TS_ID"])
+    record(probe, product=product or row["Product"], vendor=row.get("Vendor"),
+           layer=row["Layer"], status=status, method=method, basis=basis,
+           providers=providers, evidence_ids=evidence_ids, impact=impact)
+    vals = {k: v for k, v in probe.row.items()
+            if k not in ("TS_ID", "Layer", "Vendor", "Subcap_IDs", "SubCap_IDs",
+                         "Source_URLs", "As_Of") and (v is not None or k == "DMA_Impact")}
+    if impact is None:
+        vals.pop("DMA_Impact", None)
+    vals["As_Of"] = _utcnow()[:10]
+    wb.update_row("Tech_Register", "TS_ID", row["TS_ID"], vals)
+    wb.append("Provenance", {"Step": f"tech_register_restrike:{row['TS_ID']}",
+                             "Actor": actor or "techscan", "At": _utcnow(),
+                             "Detail": f"{row.get('Status')} -> {status}: {basis}"[:900]})
+    return {"ts_id": row["TS_ID"], "was": row.get("Status"), "now": status}
+
+
+class _Probe:
+    """A stand-in workbook that lets `record` validate a row without
+    writing it: reads go to the real workbook, the one append is caught."""
+
+    def __init__(self, wb, exclude_ts: str | None = None):
+        self._wb, self.row, self._exclude = wb, None, str(exclude_ts or "").upper()
+
+    def evidence_index(self):
+        return self._wb.evidence_index()
+
+    def rows(self, sheet):
+        # The row being re-struck is not a duplicate of itself: `record`'s
+        # one-product-one-row check reads the OTHER rows (B1 Bank,
+        # 2026-10-08: every restrike refused its own product).
+        rows = self._wb.rows(sheet)
+        if sheet == "Tech_Register" and self._exclude:
+            rows = [r for r in rows
+                    if str(r.get("TS_ID") or "").upper() != self._exclude]
+        return rows
+
+    @contextlib.contextmanager
+    def transaction(self, why: str = ""):
+        # `record` allocates inside the real workbook's lock; a probe writes
+        # nothing, so there is nothing to lock.
+        yield self
+
+    def append(self, sheet, row, **_):
+        self.row = row
+        return 0
 
 
 def _providers_of(row) -> list[str]:
@@ -313,7 +690,7 @@ def scan_state(wb: RunWorkbook) -> dict:
 # those two. They are not symmetric, and pretending they were is how a scan
 # reports detections it never made:
 #
-#   clay       REACHABLE from a session. `find-and-enrich-company` takes a
+#   clay       REACHABLE from a session. `search-companies` (by domain) takes a
 #              `Tech Stack` data point and `Open Jobs`; the scanner carries
 #              those tools. `CLAY_PLAN` fixes the call sequence so it is the
 #              same every run and the credit cost is bounded.
@@ -343,13 +720,15 @@ def scan_state(wb: RunWorkbook) -> dict:
 #: identifying call first (it creates the task), then the second data point
 #: against the entity ids it returned.
 CLAY_PLAN = (
-    ("mcp__Clay__find-and-enrich-company",
-     'companyIdentifier=<registrable domain>, '
-     'companyDataPoints=[{"type": "Tech Stack"}]',
-     "the register's spine: Clay's own technographic rows for this domain"),
+    # The live Clay connector (measured 2026-09-30) has no
+    # `find-and-enrich-company`: a company is FOUND with search-companies,
+    # which returns the taskId, and ENRICHED with add-company-data-points.
+    ("mcp__Clay__search-companies",
+     'dslQuery=\'select from companies where domain = "<registrable domain>" limit 1\'',
+     "identifies the company and creates the task every later call needs"),
     ("mcp__Clay__add-company-data-points",
-     'taskId=<from the call above>, entityIds=[<the company>], '
-     'dataPoints=[{"type": "Open Jobs"}]',
+     'taskId=<from the call above>, entityIds=[<the company entityId>], '
+     'dataPoints=[{"type": "Tech Stack"}, {"type": "Open Jobs"}]',
      "job postings are the highest-yield DATA and INFRA signal, and they "
      "are INFERRED evidence, never CONFIRMED"),
     ("mcp__Clay__get-task-context",
@@ -367,11 +746,11 @@ CLAY_PLAN = (
 #: research peers inside the synthesis session, which is the work a turn
 #: budget drops first.
 CLAY_PEER_PLAN = (
-    ("mcp__Clay__find-and-enrich-company",
-     'companyIdentifier=<the PEER\'s registrable domain>, '
-     'companyDataPoints=[{"type": "Tech Stack"}]',
-     "one call per peer in Peer_Benchmarks; the peer's estate, not the "
-     "client's"),
+    ("mcp__Clay__search-companies",
+     'dslQuery=\'select from companies where domain in ("<peer domain>", …) limit 10\' '
+     'then add-company-data-points taskId=<it>, dataPoints=[{"type": "Tech Stack"}]',
+     "one search for every peer in Peer_Benchmarks; the peers' estates, not "
+     "the client's"),
     ("engine.cli techscan peer-record",
      "--ts <TS-nnn> --peer <name> --deployed|--not-deployed --basis <clause> "
      "[--url <source>]",
@@ -531,8 +910,19 @@ def import_explorium(wb: RunWorkbook, path, *, status: str = "CLAIMED",
                  + (f", broker confidence {r['confidence']}"
                     if r["confidence"] else "")
                  + f" — read from {Path(parsed['file']).name}")
+        product, vendor = r["product"], r["vendor"]
+        if str(vendor or "").strip().lower() == str(product or "").strip().lower():
+            # A one-column "Vendor / Product" export names the company once,
+            # and `record` refuses product == vendor (CG-20) — which refused
+            # EVERY row of such an export. The export's own category says what
+            # the company supplies here; without one the vendor is unstated,
+            # not repeated.
+            if r["category"]:
+                product = f"{product} {r['category']}"
+            else:
+                vendor = None
         try:
-            ts = record(wb, product=r["product"], vendor=r["vendor"],
+            ts = record(wb, product=product, vendor=vendor,
                         layer=r["layer"], status=status,
                         method="technographic_scan", basis=basis,
                         providers=["explorium"],
@@ -687,7 +1077,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("record", "render", "status", "import-explorium",
-                 "clay-plan", "impact", "peer-record", "peers"):
+                 "clay-plan", "impact", "peer-record", "peers",
+                 "restrike", "reconcile", "dedupe", "link"):
         s = sub.add_parser(name)
         s.add_argument("--run", required=True)
         s.add_argument("--root")
@@ -704,6 +1095,11 @@ def main(argv=None) -> int:
             s.add_argument("--text", required=True,
                            help=f"{IMPACT_MIN_WORDS}-{IMPACT_MAX_WORDS} words: "
                                 f"what running this does to the assessment")
+        if name == "dedupe":
+            s.add_argument("--same", action="append", default=[],
+                           metavar="'PRODUCT A=PRODUCT B'",
+                           help="two names for one product; B folds into A "
+                                "(repeatable)")
         if name in ("peer-record", "peers"):
             s.add_argument("--ts", required=(name == "peer-record"))
         if name == "peer-record":
@@ -736,6 +1132,22 @@ def main(argv=None) -> int:
             s.add_argument("--impact",
                            help=f"the T3 drilldown's headline card, "
                                 f"{IMPACT_MIN_WORDS}-{IMPACT_MAX_WORDS} words")
+        if name == "restrike":
+            s.add_argument("--ts", required=True, help="TS-nnn")
+            s.add_argument("--status", required=True, choices=C.TECH_STATUS)
+            s.add_argument("--method", required=True, choices=C.TECH_METHODS)
+            s.add_argument("--basis", required=True)
+            s.add_argument("--provider", action="append", default=[],
+                           choices=C.TECH_PROVIDERS, required=True)
+            s.add_argument("--evidence-id", action="append", default=[])
+            s.add_argument("--product")
+            s.add_argument("--impact")
+        if name == "link":
+            s.add_argument("--ts", required=True, help="TS-nnn")
+            s.add_argument("--subcap", action="append", default=[],
+                           help="a cell this product bears on (repeatable); "
+                                "omit to take them from the row's own "
+                                "product-specific evidence")
         if name == "render":
             s.add_argument("--out")
             s.add_argument("--force", action="store_true")
@@ -750,6 +1162,29 @@ def main(argv=None) -> int:
                     source_urls=a.url, as_of=a.as_of, impact=a.impact)
         print(json.dumps({"ts_id": ts, **scan_state(wb)}, indent=2))
         return 0
+    if a.cmd == "restrike":
+        print(json.dumps(restrike(wb, a.ts, status=a.status, method=a.method,
+                                  basis=a.basis, providers=a.provider,
+                                  evidence_ids=a.evidence_id, product=a.product,
+                                  impact=a.impact,
+                                  actor=os.environ.get("DMA_ACTOR", "")), indent=2))
+        return 0
+    if a.cmd == "dedupe":
+        pairs = []
+        for x in a.same:
+            if "=" not in x:
+                raise ScanRefused(f"--same {x!r}: write 'PRODUCT A=PRODUCT B'")
+            pairs.append(tuple(t.strip() for t in x.split("=", 1)))
+        out = dedupe(wb, same=pairs)
+        print(json.dumps(out, indent=2, default=str))
+        return 1 if out["duplicate_ids_left"] else 0
+    if a.cmd == "link":
+        print(json.dumps(link(wb, a.ts, subcaps=a.subcap), indent=2))
+        return 0
+    if a.cmd == "reconcile":
+        bad = contradictions(wb)
+        print(json.dumps({"contradictions": bad}, indent=2))
+        return 1 if bad else 0
     if a.cmd == "render":
         out = render(wb, Path(a.out) if a.out else run.deliverables,
                      force=a.force)

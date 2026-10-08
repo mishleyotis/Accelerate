@@ -139,7 +139,7 @@ def walk_tree(intake_folder_id: str, token_fn=token_provider,
                     f["id"], tuple(segments + [f["name"]]), f["name"],
                     f.get("md5Checksum") or f.get("modifiedTime") or "",
                     int(f.get("size") or 0), f.get("mimeType") or "",
-                    tuple(ids)))
+                    tuple(ids), f.get("modifiedTime") or ""))
 
     rec(intake_folder_id, [], [], 0)
     return stats

@@ -26,11 +26,12 @@ it. Every gap a reader sees on a surface is already in it.
 WHAT COUNTS AS A GAP, and the distinction the whole module turns on:
 
     stated            a value is present                    -> not a gap
-    held              null, quarantined, WITH a reason       -> not a gap; it is
-                                                                a finding, and
-                                                                the reason is
-                                                                the content
-    silent            null, or absent from the payload       -> A GAP
+    held              null, quarantined, WITH a reason       -> a gap of kind
+                                                                held_hidden_at_
+                                                                render when it
+                                                                is a must-present
+                                                                member (below)
+    silent           null, or absent from the payload       -> A GAP
     empty-declared    the section declares an empty_state
                       with a ladder                          -> not a gap; the
                                                                 search happened
@@ -39,6 +40,20 @@ WHAT COUNTS AS A GAP, and the distinction the whole module turns on:
 A held field and a silent one look identical on a page rendering em dashes.
 That is precisely the damage: one is the assessment's most defensible output and
 the other is a hole, and the reader could not tell them apart.
+
+HELD IS COUNTED (RC-04, SWBC gold audit 2026-10-04; D-06, slice XC-03). This
+module once classed a held field as "not a gap" on the premise that its reason
+renders as a documented em dash. The renderer had hidden held rows since
+2026-08-14, so a run with 6 of 10 firmographics held returned 0 gaps here and
+0 in audit_promoted_client while the strip silently showed four facts. The
+rule now: a row may be hidden from a page, or uncounted on the worklist —
+never both. A held MUST-PRESENT member is reported as kind
+`held_hidden_at_render`, carrying its quarantine_reason and the section's
+closure_condition, and it is reported whatever empty state the section
+declares (owner decision 2, 2026-10-04: held fields are capped and render as
+a stated absence). Held fields outside a must-present set stay off the list:
+the contract does not name them, so their absence is a property of this
+client.
 """
 from __future__ import annotations
 
@@ -116,7 +131,8 @@ def _empty_declared(body) -> bool:
             and len(es["sources_searched"]) > 0)
 
 
-def _member_gaps(page, section, fname, spec, val, out) -> None:
+def _member_gaps(page, section, fname, spec, val, out,
+                 closure_condition=None) -> None:
     """A must-present member that is silent. The strongest gap class there is:
     the contract names it on every sub-vertical, so its absence is never a
     property of this client."""
@@ -135,7 +151,8 @@ def _member_gaps(page, section, fname, spec, val, out) -> None:
         if not _is_empty(item.get("value")):
             stated[name] = True
         elif is_held:
-            held[name] = reason
+            # The payload's own spelling: the path must address the row.
+            held[name] = (str(item.get(key)), reason)
     for want in members:
         # Mirrors CG-18: a member may be a list of aliases for one fact, any
         # of which satisfies it. Held here in step with validation.py because a
@@ -144,7 +161,12 @@ def _member_gaps(page, section, fname, spec, val, out) -> None:
         aliases = want if isinstance(want, (list, tuple)) else [want]
         norms = [_norm(a) for a in aliases]
         want = aliases[0]
-        if any(n in stated or n in held for n in norms):
+        if any(n in stated for n in norms):
+            continue
+        held_as = next((n for n in norms if n in held), None)
+        if held_as is not None:
+            out.append(_held_gap(page, section, fname, spec, *held[held_as],
+                                 closure_condition))
             continue
         out.append({
             "page": page, "section": section,
@@ -158,6 +180,36 @@ def _member_gaps(page, section, fname, spec, val, out) -> None:
                            "absence ladder and mark it quarantined with a "
                            "quarantine_reason",
         })
+    # A `must_present_any` group answered only by a held row is held too —
+    # CG-18 counts it as one requirement and CG-18b counts it against the
+    # ceiling, so the worklist must see it (SWBC's revenue and assets).
+    for group in spec.get("must_present_any") or []:
+        norms = [_norm(g) for g in group]
+        if any(n in stated for n in norms):
+            continue
+        held_as = next((n for n in norms if n in held), None)
+        if held_as is not None:
+            out.append(_held_gap(page, section, fname, spec, *held[held_as],
+                                 closure_condition))
+
+
+def _held_gap(page, section, fname, spec, name, reason, closure_condition):
+    return {
+        "page": page, "section": section,
+        "path": f"{section}.{fname}[{name}]",
+        "field": name, "kind": "held_hidden_at_render",
+        "reason": (f"{name!r} is a must-present member held with a quarantine "
+                   f"reason. It is not silent, but it is not stated either: it "
+                   f"counts against the section's held ceiling (CG-18b) and "
+                   f"renders as a stated absence, not as a fact"),
+        "quarantine_reason": reason,
+        "closure_condition": closure_condition,
+        "doc": (spec.get("doc") or "")[:400],
+        "closes_with": "run the route the quarantine_reason names and state "
+                       "the value with its provenance; a structural answer "
+                       "(not chartered, regulated by line, no retail "
+                       "branches) is stated, never held",
+    }
 
 
 def _norm(s) -> str:
@@ -194,7 +246,13 @@ def gaps_for_section(page: str, section: str, body: dict) -> list:
             continue
         val = body.get(fname)
         if isinstance(fspec.get("must_present"), list):
-            _member_gaps(page, section, fname, fspec, val, out)
+            # Before the empty-state short-circuit below, deliberately: a
+            # declared empty state answers for the section's ladder, never
+            # for a must-present member, silent or held.
+            es = body.get("empty_state")
+            _member_gaps(page, section, fname, fspec, val, out,
+                         closure_condition=(es.get("closure_condition")
+                                            if isinstance(es, dict) else None))
         if fspec.get("type") in NON_GAP_TYPES or not _is_empty(val):
             continue
         # A section that declared its empty state with a ladder has already
@@ -363,8 +421,8 @@ def list_enrichment_gaps(conn, run_id, page: str | None = None) -> dict:
     # `conditional` sits last on purpose: it is the only kind whose correct
     # resolution is often "do nothing", so it must never sit above a gap that
     # genuinely needs work.
-    order = {"must_present_member": 0, "empty_required": 1, "empty_optional": 2,
-             "conditional": 3}
+    order = {"must_present_member": 0, "held_hidden_at_render": 0,
+             "empty_required": 1, "empty_optional": 2, "conditional": 3}
     out, pages_read = [], []
     for pg, payload in rows:
         if page and pg != page:

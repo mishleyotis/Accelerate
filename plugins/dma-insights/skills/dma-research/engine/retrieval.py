@@ -178,6 +178,28 @@ def bm25_scores(query: str, docs: list[str], *, k1: float = BM25_K1,
     return out
 
 
+def matched_terms(query: str, doc: str, *, limit: int = 6) -> list[str]:
+    """Which of the query's own content words the document actually carries.
+
+    A BM25 score is a number nobody can argue with. The TERMS behind it are
+    what makes a proposal reviewable — a lane offered "E-012 scored 2.4" has
+    to take the ranker's word for it; a lane offered "E-012, matching
+    `alkami`, `onboarding`, `adoption`" can decide in one read whether the
+    row bears on its cell or shares three nouns with it. `brief.reusable`
+    ships both, and the second is the one that makes PROPOSE-never-attach
+    honest rather than decorative.
+
+    Deterministic, stdlib, same tokeniser as `bm25_scores`, so a term listed
+    here is a term that contributed to the score it is listed beside.
+    """
+    have = set(_tokens(doc))
+    out: list[str] = []
+    for t in _tokens(query):
+        if t in have and t not in out:
+            out.append(t)
+    return out[:limit]
+
+
 def rerank(question: str, fused: list[dict], *, floor: float = ABSTAIN_FLOOR
            ) -> dict:
     """BM25-rerank a fused list against the DQ text, with an abstain path.

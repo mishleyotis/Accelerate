@@ -22,6 +22,15 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+# The version these outputs carry is the plugin's, read from the one place it
+# is stated (.claude-plugin/plugin.json) through the engine's contract.
+# Measured 28-09-2026 (QA audit F-A03-020): this script carried its own
+# "governance_skill_version" literal beside a SKILL.md that said otherwise.
+_ENGINE_ROOT = Path(__file__).resolve().parents[2] / "dma-research"
+if str(_ENGINE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ENGINE_ROOT))
+from engine import contract as _contract  # noqa: E402
+
 GOLDEN_CASES_DIR = Path(__file__).parent.parent / "templates" / "golden_cases"
 
 PILLAR_NAMES = ["P1", "P2", "P3", "P4"]
@@ -454,7 +463,7 @@ def main():
     # Write output
     output = {
         "regression_date": __import__("datetime").datetime.utcnow().isoformat() + "Z",
-        "governance_skill_version": "2.1",
+        "governance_skill_version": _contract.plugin_version() or "unknown",
         "assessment_dir": str(args.assessment_dir),
         "overall_verdict": overall,
         "cases_run": len(active),

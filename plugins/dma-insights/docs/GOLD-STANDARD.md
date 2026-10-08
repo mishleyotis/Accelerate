@@ -1,0 +1,179 @@
+# The DMA deliverable gold standard
+
+**Read this, and open the reference package, BEFORE you author anything.** The gold
+standard is not a description — it is the **Golden 1 Credit Union** package
+(`DMA-2026-GOLDEN1-001`), named by the engagement owner as the best so far. Every
+number below is what that package meets. A producer that authors first and discovers
+the standard in QA has already failed the one-turn test; the point of this file is to
+let you understand the deliverable before you start, and to give you a gate
+(`engine/gold_standard.py`) you run on your OWN output before you return.
+
+This file covers three deliverables: the **workbook**, the two **reports**, and the
+six **app pages** (overview, heatmap, insights, platform, context, techstack — see
+*App pages* below, added 2026-10-04 after the SWBC gold audit found the app pages had
+no measurable gold at all: RC-01). Its path from the repository root is
+`plugins/dma-insights/docs/GOLD-STANDARD.md`; inside the plugin,
+`${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md`. A bare `docs/` path from the repository
+root is the read-only design-docs folder, and this file is not in it.
+
+## The deliverable-first loop (do this in order, every time)
+
+1. **Read the contract** — this file — and open the reference package's workbook and
+   both reports. Know the shape you are producing before the first cell.
+2. **Author to the contract**, mining the full evidence base (the workbook's
+   `Evidence_Detail`/`Evidence_Master`, `Tech_Register`, `Entity_Timeline`,
+   per-subcap findings), not a summary.
+3. **Run the gate on your own output** — `python3 -m engine.gold_standard {workbook|report|package} <path>` —
+   and do not return until it prints `PASS`. Mid-session, re-run it after any change
+   that touches a score, a section, or a figure. The gate is your pre-flight.
+
+## Workbook — the 43-sheet ASSESSMENT artefact (not the research workbook)
+
+The gold-standard workbook is the **assessment** stage's output, not the research
+engine's. It carries, at minimum:
+
+- `Executive_Summary` — a dashboard: Institution, Sub-Vertical, Evidence Mode,
+  **Overall Maturity with an M-band label** ("2.25 (M2)"), **Peer Median (est.)** with
+  the locked peer set, **Gap to Peer**, **Subcaps Scored** ("561 evidenced of 690,
+  81.3% coverage"), **Evidence Gaps (Unknown)**, per-pillar rows, and a one-line
+  **Headline**.
+- `P1..P4_Subcap_Scoring` — **every subcap carries a numeric score 1..5.** Never blank,
+  never 0, never "N/A". `SubCap_Name` filled from the catalogue on every row.
+- `Coverage` — **discloses the gaps**: `Category, Subcaps, Scored, Unknown_EvidenceGap,
+  Coverage_Pct`. Scoring every cell and hiding which rest on evidence is not the
+  standard; scoring every cell AND disclosing coverage is.
+- `Pillar_Summary` / `Pillar_Rollup` / `Category_Rollup` — **weighted** rollups (read
+  `Pillar_Weights`), an `OVERALL` row, `Gap_to_Peer`, `Maturity` (M-band).
+- `Peer_Benchmarks` — one row per peer with an overall estimate and posture, each
+  **labelled an estimate from public digital-maturity signals, not a formal DMA score**,
+  with a locked peer set.
+- `Firmographics` — `Field, Value, Unit, As at, Evidence`. A genuinely-absent field
+  reads `ABSENT (see 1.2)` with a route, never blank. (That is the WORKBOOK's word. The
+  app payload states the same absence as `quarantined: true` with a
+  `quarantine_reason` naming the route, and renders it as a stated absence — one rule
+  in two vocabularies; see *App pages → Held fields*. An earlier version of this line
+  said "never quarantined", which contradicted the app contract.)
+- `Focus_Areas` — client priorities with a **verbatim quote**, document, page, cells.
+- `Issue_Register` — real matters with `Severity, Status, Capability impact`.
+- `Solution_Catalogue`, `Cap_Triggers`, `Platform_Peer_Adoption`, `Maturity_Rubric`,
+  `Capability_Definitions`, `Technographic_Scan`, `Enrichment_Needed`.
+- **A 5-year financial trajectory** — the deepest fiscal series in the workbook must span
+  **≥5 years** of real financial metrics (revenue, income, assets, loans, ROE…). Carry it
+  in a `Financial_Trends` sheet (≥5 fiscal-year columns, ≥5 metric rows, a CAGR/growth
+  column) or dispersed across the evidence/scoring sheets as the reference does — either
+  satisfies the floor, but the depth is not optional.
+
+Only a **source-link** column (`Source_URLs`) may be empty on a row with no located
+source — the contract forbids a placeholder there and a URL cannot be invented.
+
+## Reports — author INTO the branded template, follow it exactly
+
+- **Every numbered section of the template** is reproduced (research: 1 Firmographics …
+  8 Workbook References; assessment: 1 Executive Summary … 11 Workbook Traceability,
+  plus the alignment appendix). Fill every `{{token}}`; leave none.
+- **Branding via the template's header** (the reference uses `header1.xml`, not embedded
+  fonts). Authoring a blank `Document()` throws the template away — do not.
+- **Depth, scaled from the reference and enforced**: distinct evidence citations at the
+  Golden 1 density — 115/690 subcaps for the assessment report, 47/690 for the research
+  report, scaled to the run's selected subcaps (`gold_standard.depth_floors`,
+  `reports.citation_floor`); words at the pinned Doc's own LENGTH floors (assessment
+  8,400, research 3,050, scaled by pillars in scope) and never above what the reference
+  itself meets. The old flat "≥60 citations" would have failed Golden 1's own research
+  report (47); a floor the reference fails is not a standard. Cite the evidence base, do
+  not summarise it. Both floors are checked by `reports.check`, `engine.gold_standard
+  report` and `assemble verify` (the gold gate), and `tests/skills/research_engine/
+  test_gold_reference.py` proves every floor is one the reference meets.
+- **Financial trajectory**: render a **5-year+ financial series** in prose — ≥5 fiscal
+  years, real financial metrics, and an explicit trend (CAGR / growth / year-over-year),
+  reconciling to the workbook's `Financial_Trends`.
+- **Assessment content contracts**: an **AI-and-data overlay in every pillar** (×4); a
+  **rebuttal on every recommendation** (steelman the strongest counter, then adjudicate);
+  pillar deep-dive headings carry **score vs peer median** ("2.40 vs 3.10").
+- **Coverage disclosed** in prose (evidenced vs Unknown), matching the workbook.
+- **Bands**: the four display bands only — Activating, Building, Competing, Differentiating.
+  The numeric maturity **score** (1–5, e.g. "2.25") is a different axis and is expected; a fifth
+  *band* word must never appear, and inventing one is the invariant 6 breach.
+- **Reconcile**: every figure the report renders equals the workbook's stated grain
+  within 0.01 on the overall.
+
+## Templates are pinned, bound and enforced — before the process begins
+
+- **Pinned**: the owner's two report Docs and the workbook template live in
+  `plugins/dma-insights/references/templates/` — `client_profile_template.md`,
+  `assessment_report_template.md`, `report_templates.json` (the section spec
+  the engine writes to: blocks, feeds, control-block checks), `workbook_template.json`
+  and `gold_reference.json` (the Golden 1 shape and depth measured, not recalled).
+- **Bound**: `engine.cli start` binds every run to the pinned digest
+  (`00_entity_profile/template_binding.json`, `Run_Metadata.template_binding`).
+  `orient` withholds the first card until the binding exists; the report
+  preconditions refuse without it; `engine.template report-drift` reports a Doc
+  export that has moved away from the JSON.
+- **Enforced**: `engine.narrative write` refuses a body that is not the Doc's
+  (blocks, card shape, countable minimum data); `gold_standard` checks the
+  rendered .docx by section number AND heading against the pin (GS-RPT-SECTIONS);
+  `workbook.create` seeds every `SubCap_Name` from the catalogue and refuses an
+  unnamed cell (GS-WB-NAMES). The session brief names the templates on every
+  research and report session, so no agent starts from a remembered shape.
+- **Evidence depth is gated per cell, not per category**: every askable volley
+  has a logged search for the cell (`volleys_incomplete`, blocking), the
+  primary diagnostic question is fired (`primary_unfired`, blocking), an
+  empty cell closes only as a DECLARED absence through `engine.cli absence` —
+  refused until an enrichment connector was asked (`absence_single_tool`,
+  blocking) — and the flag has ONE writer, proven by a Provenance row
+  (validator rule 8). Run-level density floors come from `gold_reference.json`
+  (rows per subcap, evidenced share) and gate `assessment open`.
+- **Mechanical, not advisory (2026-09-04)**: the `deny_artefact_writes`
+  PreToolUse hook refuses any `.xlsx`/`.docx` written outside the engine and
+  the retired writers (`populate_workbook.py`, `validate_workbook.py`,
+  `assessment_runner.py`) refuse and name the engine; `engine.cli start`
+  refuses on a stale marketplace install and on a zip whose manifest predates
+  its pinned templates (`engine.template zip-guard`); `narrative.write` and
+  `reports.render` run the stage preconditions on every call (`--force` is a
+  `DRAFT_` no package accepts); the report agents, the scoring tier and the
+  category researchers each get their own session brief naming the templates
+  and the gold reference; the driver (`engine.pipeline`) dispatches every lane
+  over a brief that carries the template paths. Nothing in this list depends
+  on an agent choosing to read this document.
+
+## No hedges
+
+These read as "the work was not finished" and must never ship: "Not established this
+run", "to be established at the surface-production stage", "no score yet", "queued for
+enrichment", "TBD", "N/A" standing in for a value. If a thing is genuinely unknown, it
+is an **Unknown evidence gap disclosed in Coverage** or an **ABSENT firmographic with a
+route** — a stated, structured absence, never a hedge. On the app pages the structured
+absence is an `empty_state` (reason, `sources_searched`, closure condition), a held
+field with its `quarantine_reason`, or a null member with its own `<member>_basis`.
+
+## The gate is the contract, executable
+
+`engine/gold_standard.py` encodes every rule above for the workbook and the reports and
+maps each to the goeasy finding it prevents
+(`plugins/dma-insights/docs/goeasy-findings-register.md`). Run it on your own output.
+Green is the definition of done. For the app pages the executable contract is CG-PAR
+and Gate J, below.
+
+## App pages
+
+The six app pages' gold — `fixtures/surface_gold.json` (shape only, no values), the
+per-audience dispositions, the structural parity gate CG-PAR and its owner decisions —
+lives in [`GOLD-STANDARD-APP-PAGES.md`](GOLD-STANDARD-APP-PAGES.md). Per-surface
+producers read that file, not this one.
+
+## Decisions 2026-10-07 — Arbor Bank audit (owner-confirmed, closed in code)
+
+| Decision | Where it is enforced |
+|---|---|
+| The SG-V4 driver budget counts PROSE grounding failures only; verbatim excerpts, quotes and source names are what the page cites, not claims about it. `--sg-v4-budget` is the owner's and is logged (`SG_V4_BUDGET_RAISED`). | `engine/pipeline.py prose_sg_v4_fails`; `tests/skills/research_engine/test_sg_v4_budget_prose_only.py` |
+| SG-V4 never embeds producer metadata, on a nested key OR a direct field OR anything under it (`r_layer`, `rationale`, `empty_state`, `closure_condition`, …). | `apps/mcp/dma_mcp/validation2.py _v4_fields`; `apps/mcp/tests/test_audit_2026_10_07_connector_root_causes.py` |
+| A peer figure is the sub-vertical cohort's — category grain on the workbook, CELL grain wherever a cell is cited (findings, opportunity cells, gap rows): `get_cohort_benchmarks(subcap_ids=[…])`. A `table` row and a cohort row are kept; a placeholder is replaced; a guess is never replaced by a null. | `apps/mcp/dma_mcp/cohort.py cell_benchmarks`; `engine/prelim.py peer_row_wants_cohort`; `apps/mcp/dma_mcp/fit.py _cell_peers` |
+| An `INSUFFICIENT_EVIDENCE` platform never outranks a READY one; fusion never lifts it; a card is not pulled behind an unevidenced prerequisite. | `packages/shared/platform_fit.py _state_tier`; `apps/api/tests/test_platform_fit_engine.py` |
+| `l3_area` is the catalogue platform's name; the engine resolves it to the code. An unresolvable label is reported, never silently TOO_NARROW. | `apps/mcp/dma_mcp/fit.py _l3_names/_resolve_area` |
+| The entity's own domain is never T1; a mis-filed tier is re-tiered with its cascade and a logged reason, never edited in place. | `engine/ledger.py is_own_host / retier_evidence`; `engine.cli retier` |
+| The engine's firmographic must-present set is the connector's, vendored and asserted equal; the sub-vertical set is reported to the producer rather than gating PRELIM. | `engine/schemas/firmographics_must_present.json`; `engine/contract.py firmographic_groups` |
+| An enforcement sweep is code with positive controls; a zero without a passing control is NOT_RUN. | `plugins/dma-insights/scripts/enforcement_search.py`; `tests/skills/test_enforcement_search.py` |
+| An owner-approved `--max-usd` outlives the invocation; a resume never lowers it to the estimate. | `engine/pipeline.py budget_usd` (`budget_usd_source`) |
+| A passed page with no recorded ship time is shipped again; a repaired page is never promoted from its stale staged copy. | `engine/pipeline.py _page_ok` |
+| Package-local evidence ids on FK columns resolve through `evidence_package_ids` at promote. | `apps/mcp/dma_mcp/promote.py _package_aliases` |
+| The search-op ceiling is per conversation; a run-level reading is the worst conversation's window, named — never the lifetime count against the ceiling. | `engine/ledger.py worst_window / stats`; `engine/orient.py`; `engine/watchdog.py` |
+| Prevention over repair: PRELIM gates the sub-vertical firmographic set; REPORTS runs the enforcement sweep; PAGES preflight refills peers before any lane (ET-12 stays with `page_preflight` → NEEDS_CONNECTOR); a mid-run connector deploy is logged as CONNECTOR_DRIFT; section files are pass-1 checked at write time. | `engine/prelim.py`; `engine/pipeline.py _enforcement_sweep / _pages_preflight / mark_contract_drift`; `scripts/hooks/section_precheck.py` |

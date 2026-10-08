@@ -26,6 +26,13 @@ CHECKLIST = [
  ("Contract","get_page_contract(page) per page. Read the doc text; do not recall the shape."),
  ("Bundle",  "get_report_bundle(run_id) and get_capability_catalogue(run_id). Cell NAMES come "
              "from the catalogue, never from report prose."),
+ ("Bind",    "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py check. A techstack "
+             "enrichment connector (Clay or Explorium) the session cannot bind BLOCKS the run "
+             "here; it is never a silent 'NOT_RUN, no binding' on the register (RC-07). Search "
+             "fails over Exa -> Tavily -> Firecrawl -> WebSearch/WebFetch "
+             "(enrichment_sources.json search_connectors._failover): a rung is NOT_RUN only "
+             "after the whole chain failed. Indeed ratings and the CFPB complaint API are "
+             "connector routes (origin='connector'), not 403 rungs."),
  ("Standing","Read 01-start-here/1-standing-clauses.md and 01-start-here/2-evidence.md before writing."),
  ("Shape",   "Write down the entity's sub-vertical, size tier, ownership and brand set. They "
              "decide which cells this run may serve, whether the workbook's peer cohort is a "
@@ -36,7 +43,8 @@ CHECKLIST = [
              "gets a synthesis — cited, inherited or declared, never silent."),
  ("Enrich",  "register_evidence BEFORE citing. The server allocates the id."),
  ("Check",   "scripts/check_payload.py locally before every submit; check_consistency.py "
-             "--subvertical <CODE> before promotion."),
+             "<rundir> --bundle <get_report_bundle.json> before promotion — the sub-vertical "
+             "binding (primary + supplementary) is read from the bundle, never typed (MEM-0559)."),
  ("Submit",  "Read the verdict literally. Repair the cause, not the symptom."),
  ("Promote", "promote_run once every page passes. All six or none."),
 ]

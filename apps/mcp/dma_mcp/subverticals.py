@@ -166,19 +166,51 @@ def variant_subvertical(subcap_id) -> str | None:
     return code if code in SUBVERTICAL_CODES else None
 
 
-def serves(subcap_id, entity_code: str | None) -> bool:
+def resolve_supplementary(raw, primary: str | None = None) -> tuple:
+    """The SUPPLEMENTARY sub-verticals an entity is bound to, as VC codes.
+
+    A multi-line-of-business institution is bound to one PRIMARY
+    sub-vertical (`entities.sub_vertical`, which alone drives its label) and
+    may carry supplementary ones whose variant cells are its own too —
+    SWBC: primary IB, supplementary IC, CL, RIA (owner-confirmed
+    2026-09-30). `raw` is the column as read: a list, a Postgres array
+    literal (`{IC,CL,RIA}`), a comma-separated string, or None.
+
+    Each entry resolves through `resolve_subvertical`, so either vocabulary
+    serves. An entry that resolves to nothing is DROPPED, not widened to
+    "keep everything": the primary already decided whether scoping is in
+    force, and an unreadable supplementary entry is no evidence that some
+    other sub-vertical's cells belong to this client. The primary itself
+    and repeats are dropped too. Order is the stated order.
+    """
+    if raw is None:
+        return ()
+    if isinstance(raw, str):
+        raw = [p for p in re.split(r"[,;]", raw.strip().strip("{}"))]
+    out = []
+    for item in raw:
+        code = resolve_subvertical(str(item).strip().strip('"')) \
+            if item is not None and str(item).strip() else None
+        if code and code != primary and code not in out:
+            out.append(code)
+    return tuple(out)
+
+
+def serves(subcap_id, entity_code: str | None, supplementary=()) -> bool:
     """May a run for an entity of `entity_code` serve this cell?
 
-    True for every base cell, every family/product variant and every
-    variant of the entity's own sub-vertical. False only for a variant
-    that names a DIFFERENT sub-vertical. An entity whose sub-vertical
-    resolves to None (unknown vocabulary) keeps everything: not knowing
-    who you are is not grounds for hiding scores.
+    True for every base cell, every family/product variant, every variant
+    of the entity's own sub-vertical and every variant of a SUPPLEMENTARY
+    sub-vertical it is bound to (`resolve_supplementary`). False only for a
+    variant that names a sub-vertical the entity is NOT bound to. An entity
+    whose primary sub-vertical resolves to None (unknown vocabulary) keeps
+    everything: not knowing who you are is not grounds for hiding scores.
     """
     if not entity_code:
         return True
     owner = variant_subvertical(subcap_id)
-    return owner is None or owner == entity_code
+    return (owner is None or owner == entity_code
+            or owner in (supplementary or ()))
 
 
 # ── END SHARED CORE — everything below is this service's own ──

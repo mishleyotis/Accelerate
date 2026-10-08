@@ -76,7 +76,7 @@ SECTIONS = {
         why="the revenue split the sub-vertical binding rests on; written "
             "by the binding preflight, not by hand"),
     "leadership": dict(
-        section_id="PRELIM-LEAD", kind="narrative",
+        section_id="PRELIM-LEAD", kind="narrative", min_named=2,
         heading="Leadership and digital ownership",
         why="who owns digital, and whether the role exists at all — a "
             "finding in itself, and the research report's second section"),
@@ -92,10 +92,53 @@ SECTIONS = {
             "set chosen after the fact is chosen to flatter"),
     "tech_baseline": dict(
         section_id="PRELIM-TECH", kind="tech", min_rows=1,
+        layers=C.TECH_LAYERS,
         heading="Technology baseline",
         why="the platforms already visible from outside, so category "
             "researchers recognise a system instead of re-discovering it"),
+    "thought_leadership": dict(
+        section_id="PRELIM-THOUGHT", kind="narrative",
+        heading="Thought leadership and stated direction",
+        why="what these leaders say in public about where the institution "
+            "is going — the conference talks, bylines and interviews a "
+            "category researcher weighs a finding against, and the only "
+            "PRELIM section written in the client's own voice"),
+    # THE THREE TABS NOBODY OWNED (owner, 2026-10-05: "the 3 tabs usually
+    # get enriched using connectors — ensure there are clear gates"). Focus
+    # areas, the issue register and peer deployments had no stage before
+    # HANDOFF: no PRELIM section, no line in the connector brief, and one
+    # gate — completeness at HANDOFF, after research had spent its budget —
+    # which a free-text reason satisfied. Susser Bank reached HANDOFF with
+    # all three empty and nothing having asked a connector for any of them.
+    # They are PRELIM sections now: filled (or declared, with connector
+    # searches logged against them) before a category card is served.
+    "focus_areas": dict(
+        section_id="PRELIM-FOCUS", kind="sheet", sheet="Focus_Areas",
+        min_rows=1, facet="focus_areas",
+        heading="Client-stated priorities",
+        why="what the client says it is trying to do, in its own verbatim "
+            "words — the H1 focus areas and the frame every recommendation "
+            "is argued against"),
+    "issues": dict(
+        section_id="PRELIM-ISSUES", kind="sheet", sheet="Issue_Register",
+        min_rows=1, facet="issues",
+        heading="Open matters",
+        why="enforcement actions, consent orders, litigation, breaches and "
+            "complaint volumes — each one a ceiling on the cells it touches, "
+            "so it must be known before any cell is scored"),
+    "peer_deployments": dict(
+        section_id="PRELIM-PEERDEP", kind="sheet", sheet="Tech_Peer_Deployments",
+        min_rows=1, facet="peer_deployments",
+        heading="Peer deployments",
+        why="whether the peer set runs the client's platforms — the AG-04 "
+            "evidence behind every platform recommendation's peer argument"),
 }
+
+#: An empty connector-owned tab is a FINDING only when a connector looked.
+#: Declaring one of the sheet sections absent needs at least this many
+#: PRELIM searches logged with `--facet <section facet>`, at least one of
+#: them through an enrichment connector (Exa, Tavily, Clay, Explorium …).
+CONNECTOR_FLOOR = 2
 
 #: The workbook tab a PRELIM section owns. Declaring the section declares
 #: the tab, with the SAME ladder — one reason, in one place, at the stricter
@@ -104,7 +147,64 @@ OWNS_SHEET = {
     "timeline": "Entity_Timeline",
     "peers": "Peer_Benchmarks",
     "tech_baseline": "Tech_Register",
+    "focus_areas": "Focus_Areas",
+    "issues": "Issue_Register",
+    "peer_deployments": "Tech_Peer_Deployments",
 }
+
+#: The facet a connector-owned sheet's searches are logged under.
+SHEET_FACET = {spec["sheet"]: spec["facet"] for spec in SECTIONS.values()
+               if spec.get("kind") == "sheet"}
+
+
+def connector_backing(wb: RunWorkbook, facet: str) -> dict:
+    """The PRELIM searches logged against a connector-owned tab: how many,
+    through which tools, and whether that meets CONNECTOR_FLOOR."""
+    rows = [r for r in wb.rows("Search_Log")
+            if not _clean(r.get("SubCap_ID"))
+            and _clean(r.get("Facet")).lower() == facet]
+    tools = sorted({_clean(r.get("Tool")).lower() for r in rows if _clean(r.get("Tool"))})
+    enrich = [t for t in tools if t in C.ENRICHMENT_TOOLS]
+    ok = len(rows) >= CONNECTOR_FLOOR and bool(enrich)
+    return {"facet": facet, "searches": len(rows), "tools": tools,
+            "connector_tools": enrich, "met": ok,
+            "fix": ("" if ok else
+                    f"log the searches behind it: engine.cli search --prelim "
+                    f"--facet {facet} --tool exa|tavily|clay|explorium|… "
+                    f"--query '…' --hits N --kept K --outcome '…' — at least "
+                    f"{CONNECTOR_FLOOR}, one through an enrichment connector "
+                    f"(have {len(rows)}; tools {', '.join(tools) or 'none'})")}
+
+#: ONE FIX LINE FOR THE TECHNOLOGY BASELINE, whether it has no rows or
+#: three layers' worth. They are the same instruction and were two: the
+#: empty case printed the old one-row command and said nothing about layers,
+#: so a run that had done no scanning at all was told less than one that had
+#: half-done it.
+_TECH_FIX = (
+    "run the four-layer technographic scan NOW, in PRELIM, not after the "
+    "categories: `engine.cli techscan clay-plan`, then `import-explorium` / "
+    "`record --provider … --layer <LAYER>` until OPS, CUST, DATA and INFRA "
+    "each carry a row — `techscan status` lists the ones still in "
+    "`layers_never_looked_at`. A layer you looked at and found nothing in "
+    "is a row with status ABSENT naming what you searched FOR, with the "
+    "search itself in its detection basis (the engine refuses an ABSENT "
+    "that does not state one). A layer simply left out is not that: the "
+    "scan document prints it as NOT SCANNED in red precisely because a "
+    "missing layer reads to every later surface as a clean estate.")
+
+#: The machine technographic scan the techstack page's ET-12 requires, asked
+#: for in PRELIM where Clay and Vibe are bound — not discovered at PAGES_A.
+_SCAN_FIX = (
+    "run the machine technographic scan NOW, in PRELIM, while the connectors "
+    "are bound: Clay's company Tech Stack and Vibe Prospecting's "
+    "enrich-business technographics. Register each reading as connector "
+    "evidence (origin connector, a technographic source, T1) and cite it on "
+    "the Tech_Register rows it detects (`engine.cli techscan record --provider "
+    "clay|explorium --evidence-id <E-id> …`); a scan-only row stays INFERRED. "
+    "If a scan genuinely cannot run, declare it for BOTH tools: "
+    "`python3 -m engine.page_preflight not-run --tool clay --reason …` and "
+    "`--tool vibe …`. The techstack page is refused (ET-12, CG-40) without one "
+    "or the other, and by PAGES_A the session may no longer hold either tool.")
 
 #: PRELIM sections that must be RESEARCHED and may not be declared away.
 #: The financial review is the binding basis; declaring it absent is what
@@ -136,6 +236,32 @@ def _narrative_rows(wb: RunWorkbook) -> dict[str, dict]:
     return out
 
 
+#: A personal name as it appears in a written section: two or more adjacent
+#: capitalised words. Deliberately crude and deliberately not a lookup — the
+#: floor it enforces is "somebody did the contact pass", and the reviewer who
+#: reads the section is the one who judges whether the names are right. It
+#: skips the openers that would otherwise read as names.
+_NAME_STOPWORDS = {
+    "Chief", "Digital", "Officer", "The", "Its", "Their", "A", "An",
+    "Credit", "Union", "Bank", "Board", "Executive", "Committee", "Group",
+    "Information", "Technology", "Operating", "Financial", "Data", "Product",
+    "Head", "Vice", "President", "Senior", "Managing", "Director", "Chair",
+}
+_NAME_RE = re.compile(r"\b([A-Z][a-z]{1,15})\s+([A-Z][a-z]{1,15})\b")
+
+
+def _named_people(body: str) -> list[str]:
+    """Distinct human names the section actually states."""
+    out = []
+    for first, last in _NAME_RE.findall(body):
+        if first in _NAME_STOPWORDS or last in _NAME_STOPWORDS:
+            continue
+        name = f"{first} {last}"
+        if name not in out:
+            out.append(name)
+    return out
+
+
 def _section_state(wb: RunWorkbook, key: str, spec: dict,
                    narr: dict[str, dict]) -> dict:
     sid = spec["section_id"]
@@ -153,6 +279,73 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
     kind = spec["kind"]
     if kind == "narrative":
         if len(body) >= _MIN_BODY:
+            # NAMED PEOPLE, NOT A DESCRIPTION OF A STRUCTURE (owner,
+            # 2026-08-31: leadership enrichment "with contacts"). A
+            # leadership section that closes on "digital ownership sits with
+            # a Chief Digital Officer" tells a category researcher nothing
+            # it can weigh: it cannot search that person's talks, match a
+            # LinkedIn post to a platform decision, or notice that the role
+            # was filled three months ago. The connector pass that answers
+            # this is Clay or Explorium, and it belongs here, before the
+            # categories, not in a surface producer months downstream.
+            need_named = int(spec.get("min_named") or 0)
+            if need_named:
+                found = _named_people(body)
+                if len(found) < need_named:
+                    return {
+                        "section": key, "status": "OPEN",
+                        "detail": (f"{len(body)} chars but names "
+                                   f"{len(found)} identifiable "
+                                   f"{'person' if len(found) == 1 else 'people'}"
+                                   f" ({', '.join(found) or 'none'}); "
+                                   f"{need_named} is the floor"),
+                        "fix": ("run the contact pass now — Clay or "
+                                "Explorium via the enrichment specialist — "
+                                "and name the people with their roles. "
+                                "Where a role genuinely has no public "
+                                "holder, say so as a finding with the "
+                                "ladder behind it: an unfilled digital "
+                                "ownership role is one of the most "
+                                "load-bearing facts a run can carry"),
+                    }
+            # THE STRUCTURED STRIP, NOT ONLY THE PROSE (contract v6,
+            # 2026-09-03). The Client Profile's §1 and the app's O2 strip
+            # read the Firmographics TAB — Field / Value / Unit / As at /
+            # Evidence / Conf. — and every must-present field is either
+            # STATED or ABSENT with a route. A firmographics paragraph with
+            # no rows behind it was how "57 of 138 clients shipped with no
+            # focus areas at all" had its firmographic twin.
+            if key == "firmographics":
+                from . import profile as _profile
+                missing = _profile.missing_firmographics(wb)
+                # The SUB-VERTICAL set too (CG-18c at submit): Arbor Bank
+                # (2026-10-06) closed PRELIM with the generic set and had
+                # its overview held on loan_portfolio, CRE_concentration,
+                # c_i_volume and NPA_ratio — four fields nobody had been
+                # asked for while the research lanes were still open.
+                # Gates while the run can still act on it (research stage);
+                # a scored or promoted run is not reopened by a rule that
+                # arrived after it closed — the gap is reported in
+                # `engine.profile status` instead.
+                sv_missing = (_profile.missing_subvertical_firmographics(wb)
+                              if C.stage_of(wb.metadata()) == "research" else [])
+                if missing or sv_missing:
+                    sv = _clean(wb.metadata().get("sub_vertical")) or "the sub-vertical"
+                    return {
+                        "section": key, "status": "OPEN",
+                        "detail": (f"{len(body)} chars of narrative, but the "
+                                   f"Firmographics tab lacks "
+                                   + (f"{len(missing)} must-present field(s): "
+                                      f"{', '.join(missing)}" if missing else "")
+                                   + ("; " if missing and sv_missing else "")
+                                   + (f"{len(sv_missing)} {sv} field(s) CG-18c holds "
+                                      f"at submit: {', '.join(sv_missing)}" if sv_missing else "")),
+                        "fix": ("engine.profile firmographic --field <f> --value … "
+                                "--unit … --as-of … --evidence E-… (or --state "
+                                "ABSENT --reason … --route …) for each — a "
+                                "sub-vertical member the entity does not publish "
+                                "is ABSENT with the registry route, never blank"),
+                    }
             return {"section": key, "status": "RESEARCHED",
                     "detail": f"{len(body)} chars, evidence "
                               f"{_clean(row.get('Evidence_IDs')) or 'none'}"}
@@ -161,22 +354,104 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                           f"({len(body)} found)",
                 "fix": f"engine.prelim narrate --section {key} --body '…'"}
 
+    if kind == "sheet":
+        sheet, need = spec["sheet"], int(spec.get("min_rows", 1))
+        n = len([r for r in wb.rows(sheet) if any(_clean(v) for v in r.values())])
+        if n >= need:
+            return {"section": key, "status": "RESEARCHED",
+                    "detail": f"{n} row(s) in {sheet}"}
+        from . import completeness as K
+        reason = K.reasons(wb).get(sheet)
+        back = connector_backing(wb, spec["facet"])
+        if reason and back["met"]:
+            return {"section": key, "status": "DECLARED",
+                    "detail": (f"{sheet} declared empty after {back['searches']} "
+                               f"connector-backed search(es) "
+                               f"({', '.join(back['tools'])}): {reason[:120]}")}
+        from .completeness import FILLED_BY
+        return {"section": key, "status": "OPEN",
+                "detail": (f"{sheet} has {n} row(s), {need} required"
+                           + (f"; declared empty but not connector-backed — "
+                              f"{back['searches']} search(es) logged under "
+                              f"--facet {spec['facet']}" if reason else "")),
+                "fix": (f"fill it through the connector pass: "
+                        f"{FILLED_BY.get(sheet, '')} — or, when a connector "
+                        f"search came back empty, declare it "
+                        f"(engine.prelim declare --section {key} --ladder …) "
+                        f"after you {back['fix'] or 'have logged the searches'}")}
+
     sheet, need = {
         "timeline": ("Entity_Timeline", spec.get("min_rows", 1)),
         "peers": ("Peer_Benchmarks", spec.get("min_rows", 1)),
         "tech": ("Tech_Register", spec.get("min_rows", 1)),
     }[kind]
-    n = len([r for r in wb.rows(sheet) if any(_clean(v) for v in r.values())])
+    rows = [r for r in wb.rows(sheet) if any(_clean(v) for v in r.values())]
+    n = len(rows)
+
+    # THE FOUR-LAYER FLOOR (owner, 2026-08-31: "Let the technographic scans
+    # happen in the prelim … such that when the category research happens
+    # they already have deep background from enrichment").
+    #
+    # One row used to close this section, which made the technology baseline
+    # whatever the first search happened to trip over, and left the
+    # deliberate four-layer scan to run AFTER the categories — by which time
+    # sixteen researchers had already re-discovered the estate one system at
+    # a time, each without knowing what the others found. The scan is the
+    # cheapest context in the run and it was being bought last.
+    #
+    # A layer where nothing was found is NOT a missing layer: it is an
+    # ABSENT row, which is the scanner's own vocabulary and the distinction
+    # that stops a gap in the looking from reading as a clean estate.
+    want_layers = tuple(spec.get("layers") or ())
+    if want_layers and n >= need:
+        # `techscan.scan_state` already computes this, under the name the
+        # scan's own renderer prints in red — "layers never looked at". Read
+        # it rather than recomputing beside it: two answers to one question
+        # is how a gate and the document it gates drift apart.
+        seen = {_clean(r.get("Layer")).upper() for r in rows}
+        missing = [lay for lay in want_layers if lay not in seen]
+        if missing:
+            return {
+                "section": key, "status": "OPEN",
+                "detail": (f"{sheet} has {n} row(s) but covers "
+                           f"{len(want_layers) - len(missing)} of "
+                           f"{len(want_layers)} layers — nothing for "
+                           f"{', '.join(missing)}"),
+                "fix": _TECH_FIX,
+            }
+    # Enforced at SIGN-OFF. A run whose PRELIM was signed off before this
+    # rule is not pulled back into PRELIM (that would re-buy the stage and
+    # block its category cards mid-research); the driver's page preflight
+    # (engine.page_preflight) stops it before PAGES instead, with this fix.
+    signed_off = _clean(wb.metadata().get("prelim_status")) == "COMPLETE"
+    if kind == "tech" and n >= need and not signed_off:
+        # THE MACHINE SCAN (owner, 2026-10-07, First Tech): five web-found
+        # rows across four layers closed this section, and the techstack page
+        # was refused three times at PAGES_A for the scan PRELIM never ran
+        # (ET-12) — in a session that by then held no Clay or Vibe. The scan
+        # belongs HERE, where the connectors are bound, and its readings are
+        # banked for every later stage. A scan that genuinely cannot run is
+        # declared NOT_RUN for both tools, which the payload then states.
+        from . import page_preflight as PP
+        scan = PP.machine_scan(wb)
+        if scan["state"] == "MISSING":
+            return {
+                "section": key, "status": "OPEN",
+                "detail": (f"{n} row(s) in {sheet}, but no machine technographic "
+                           f"scan: {scan['detail']}"),
+                "fix": _SCAN_FIX,
+            }
     if n >= need:
         return {"section": key, "status": "RESEARCHED",
-                "detail": f"{n} row(s) in {sheet}"}
+                "detail": (f"{n} row(s) in {sheet}"
+                           + (f", all {len(want_layers)} layers covered"
+                              if want_layers else ""))}
     verb = {"timeline": "timeline", "peers": "peers",
             "tech": "techscan record"}[kind]
     return {"section": key, "status": "OPEN",
             "detail": f"{sheet} has {n} row(s), {need} required",
             "fix": (f"engine.prelim {verb} …" if kind != "tech"
-                    else "engine.cli techscan clay-plan / "
-                         "import-explorium / record --provider …")}
+                    else _TECH_FIX)}
 
 
 def state(wb: RunWorkbook) -> dict:
@@ -225,9 +500,10 @@ def narrate(wb: RunWorkbook, section: str, *, heading: str | None,
             f"unknown PRELIM section {section!r}; one of "
             f"{', '.join(SECTIONS)}")
     if spec["kind"] != "narrative":
+        how = (f"rows in {spec['sheet']} ({__import__('engine.completeness', fromlist=['x']).FILLED_BY.get(spec['sheet'], '')})"
+               if spec["kind"] == "sheet" else f"`engine.prelim {spec['kind']}`")
         raise PrelimRefusal(
-            f"{section} is not a narrative section — close it with "
-            f"`engine.prelim {spec['kind']}` instead")
+            f"{section} is not a narrative section — close it with {how} instead")
     text = _clean(body)
     if len(text) < _MIN_BODY and not text.upper().startswith(NOT_AVAILABLE):
         raise PrelimRefusal(
@@ -272,6 +548,13 @@ def declare(wb: RunWorkbook, section: str, ladder: str,
     if spec is None:
         raise PrelimRefusal(f"unknown PRELIM section {section!r}")
     text = _clean(ladder)
+    if spec.get("kind") == "sheet":
+        back = connector_backing(wb, spec["facet"])
+        if not back["met"]:
+            raise PrelimRefusal(
+                f"{section} is enriched through connectors, and an empty "
+                f"{spec['sheet']} is a finding only when one looked. "
+                + back["fix"])
     if len(text) < _MIN_LADDER:
         raise PrelimRefusal(
             f"the ladder is {len(text)} chars; {_MIN_LADDER} is the floor. "
@@ -374,6 +657,24 @@ def _category_of(subcap: str) -> str | None:
     return m.group(1) if m else None
 
 
+def _grid_name(name: str) -> str:
+    """A peer name as it can sit in the comma-separated `Peer_Names` cell.
+
+    Measured on Susser Bank (2026-10-06): the cohort was frozen as
+    "Inwood National Bank (Dallas, CERT 19080)" and "Horizon Bank, SSB
+    (Austin, CERT 3256)". The app's parser splits `Peer_Names` on commas, so
+    seven peers landed in the server's peer table as fifteen — "CERT 19080)"
+    among them — and any `Peer_Scores` list beside them would have been
+    dropped as a length mismatch. The lock keeps the name verbatim (it is
+    `|`-separated); only the grid's copy loses its inner commas."""
+    return re.sub(r"\s*,\s*", " ", _clean(name)).strip()
+
+
+def _grid_names(row: dict) -> list[str]:
+    return [n.strip() for n in str(row.get("Peer_Names") or "").split(",")
+            if n.strip()]
+
+
 def peers(wb: RunWorkbook, names: list[str], *, rule: str,
           basis: str = "inferred") -> dict:
     """Freeze the peer set. Before any score exists, by design.
@@ -413,7 +714,7 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
         raise PrelimRefusal(
             "this run has no selected subcapability, so there is no category "
             "for a peer comparison to be at. Select the scope first.")
-    names = ", ".join(clean)
+    names = ", ".join(_grid_name(n) for n in clean)
     for cid in cats:
         wb.append("Peer_Benchmarks", {
             # Category_Name is left for the assessment stage, which is where
@@ -429,6 +730,256 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "categories": cats}
 
 
+def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
+                basis: str, source: str, peer_scores: str = "",
+                n: int | None = None) -> dict:
+    """Record the peer FIGURES for one category — the median (and quartiles)
+    the assessment's Gap_to_Peer is computed against.
+
+    Measured 2026-09-03: `peers` froze the SET and wrote the grid with every
+    Peer_Median blank, and nothing anywhere wrote the figure — so the rollup
+    computed `gap` from a column that was always empty and every Pillar_Summary
+    shipped Gap_to_Peer as null. A run that has peer figures records them here;
+    one that cannot estimate them says so with `basis=cannot_estimate` and no
+    median, and the gap stays null honestly (invariant 9)."""
+    cid = _clean(category).upper()
+    cats = {_category_of(c) for c in wb.selected_subcaps()}
+    if cid not in cats:
+        raise PrelimRefusal(f"{cid!r} is not a category in this run's scope "
+                            f"({', '.join(sorted(c for c in cats if c))})")
+    if basis not in C.PEER_BASIS:
+        raise PrelimRefusal(
+            f"peer basis {basis!r} is not one of {', '.join(C.PEER_BASIS)}")
+    rows = [r for r in wb.rows("Peer_Benchmarks")
+            if _clean(r.get("Category_ID")).upper() == cid]
+    if not rows:
+        raise PrelimRefusal(
+            f"no Peer_Benchmarks row for {cid}: freeze the peer set first "
+            f"(`engine.prelim peers --peer … --rule …`), which writes the grid")
+    if len(_clean(source)) < 12:
+        raise PrelimRefusal("say where the peer figure came from (--source, >=12 chars)")
+
+    def _num(v, name):
+        if v is None or _clean(v) == "":
+            return None
+        try:
+            x = float(v)
+        except (TypeError, ValueError):
+            raise PrelimRefusal(f"{name} {v!r} is not a number")
+        if not 1.0 <= x <= 5.0:
+            raise PrelimRefusal(f"{name} {x} is off the 1.0–5.0 maturity scale")
+        return x
+
+    med, lo, hi = _num(median, "median"), _num(p25, "p25"), _num(p75, "p75")
+    if basis == "cannot_estimate":
+        if med is not None:
+            raise PrelimRefusal("cannot_estimate carries NO median — a figure "
+                                "with that basis is a guess wearing a number")
+    elif med is None:
+        raise PrelimRefusal(f"basis {basis!r} carries a median; use "
+                            f"cannot_estimate to record that none could be had")
+    if lo is not None and hi is not None and med is not None and not lo <= med <= hi:
+        raise PrelimRefusal(f"median {med} is outside its own quartiles [{lo}, {hi}]")
+    # Peer_Scores is POSITIONAL against Peer_Names: the app's parser zips the
+    # two and drops every score when the lengths differ, rather than guess
+    # which peer got which figure. Refuse that here, where it can be fixed.
+    named = _grid_names(rows[0])
+    given = [s.strip() for s in _clean(peer_scores).split(",") if s.strip()]
+    if given and len(given) != len(named):
+        raise PrelimRefusal(
+            f"--peer-scores carries {len(given)} figure(s) and Peer_Names "
+            f"names {len(named)} peer(s) for {cid}; they are positional, so "
+            f"give one figure per named peer, in order (blank for a peer "
+            f"with none is not allowed — use NA)")
+    for s in given:
+        if s.upper() != "NA":
+            _num(s, "peer score")
+    wb.update_row("Peer_Benchmarks", "Category_ID", rows[0]["Category_ID"], {
+        "Peer_Median": med if med is not None else "",
+        "Peer_P25": lo if lo is not None else "",
+        "Peer_P75": hi if hi is not None else "",
+        "Peer_Basis": f"{basis}: {_clean(source)}",
+        "Peer_Scores": _clean(peer_scores),
+        **({"Peer_N": int(n)} if n is not None else {}),
+        "As_Of": _utcnow()[:10]})
+    return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
+
+
+def peer_row_is_cohort_sourced(row: dict) -> bool:
+    """True when the row's figure (or its stated absence) came from the
+    connector's cohort — `fill_cohort_peers` wrote it."""
+    basis = _clean(row.get("Peer_Basis"))
+    return "get_cohort_benchmarks" in basis
+
+
+def peer_row_wants_cohort(row: dict, *, has_figure: bool) -> bool:
+    """Whether `fill_cohort_peers` should write this row.
+
+    Owner decision 2026-10-06: the peer figure IS the sub-vertical cohort
+    mean. So a row keeps its figure only when it is a hand-recorded TABLE
+    (a published peer table beats a mean of assessments) or already the
+    cohort's; a blank, a `cannot_estimate`, an `inferred` guess or a
+    `recomputed` figure from anywhere else is replaced. Monotone: a guess is
+    never replaced by a null — when the cohort has NO figure for the
+    category, only a blank or a cannot_estimate row is (re)written. Until
+    2026-10-07 the rule was "keep anything with a number", so Arbor Bank's
+    sixteen `inferred` placeholders shipped as the peer context the gaps were
+    computed against."""
+    basis = _clean(row.get("Peer_Basis")).lower()
+    median = _clean(row.get("Peer_Median"))
+    if peer_row_is_cohort_sourced(row):
+        return False
+    if basis.startswith("table"):
+        return False
+    if not median or basis.startswith("cannot_estimate"):
+        return True
+    return has_figure
+
+
+def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False) -> dict:
+    """Record the SUB-VERTICAL COHORT as every category's peer figure.
+
+    Owner decision, 2026-10-06 (First Tech): peer scores are "an average of
+    current entities in the same subvert already assessed" — the connector's
+    `get_cohort_benchmarks`, the mean of every other assessed entity's
+    category score. The locked peer SET stays what the reports name
+    (identified, not scored); this fills the figure the gaps are computed
+    against. A category below the cohort floor is recorded cannot_estimate
+    with the connector's reason, so the gap stays null honestly (invariant 9).
+    A hand-recorded table and a cohort-sourced row are kept unless
+    `overwrite`; everything else is written (`peer_row_wants_cohort`)."""
+    cats = (cohort or {}).get("categories") or {}
+    sv = _clean((cohort or {}).get("sub_vertical")) or _clean(wb.metadata().get("sub_vertical"))
+    today = _utcnow()[:10]
+    filled, held, kept = [], [], []
+    for r in wb.rows("Peer_Benchmarks"):
+        cid = _clean(r.get("Category_ID")).upper()
+        if not cid:
+            continue
+        c = cats.get(cid) or {}
+        n = int(c.get("n") or 0)
+        if not overwrite and not peer_row_wants_cohort(r, has_figure=c.get("mean") is not None):
+            kept.append(cid)
+            continue
+        if c.get("mean") is None:
+            peer_median(wb, category=cid, median=None, basis="cannot_estimate",
+                        source=(f"sub-vertical cohort ({sv}) via get_cohort_benchmarks "
+                                f"{today}: " + (c.get("reason") or "no assessed entity "
+                                                "in the cohort scores this category")),
+                        n=n)
+            held.append(cid)
+            continue
+        mean = float(c["mean"])
+        lo, hi = c.get("p25"), c.get("p75")
+        if lo is None or hi is None or not float(lo) <= mean <= float(hi):
+            lo = hi = None
+        peer_median(wb, category=cid, median=mean, p25=lo, p75=hi, basis="recomputed",
+                    source=(f"sub-vertical cohort ({sv}): mean of {n} assessed entities' "
+                            f"{cid} scores on their active promoted runs, "
+                            f"get_cohort_benchmarks {today}"),
+                    n=n)
+        filled.append(cid)
+    return {"filled": filled, "cannot_estimate": held, "kept": kept,
+            "entities": (cohort or {}).get("entities")}
+
+
+# ── the client's SERVER-SIDE state, seeded before any category work ──────
+#
+# Measured 28-09-2026 (QA audit F-N06-014): a promoted run showed 4 of 7
+# enrichment facets never_enriched, blocking = 4, done = false — the
+# connector HELD the state and nothing on the research side read it, so
+# the produced pages served the empty state for facets the last run had
+# already established were missing. `get_client_state` and
+# `list_enrichment_gaps` are read at step 1a and written HERE, into the
+# Enrichment_Needed tab, one row per facet and one per must-present gap, so
+# PRELIM, the category lanes and the manifest all see what the server
+# already knows the run owes.
+
+ENRICHMENT_AREA = "connector facet"
+GAP_AREA = "staged gap"
+#: The server's facet states (dma_mcp.ledger.STATES) → the tab's statuses
+#: (engine.profile.ENRICHMENT_STATUSES). One owner each side; the mapping
+#: is the only bridge.
+FACET_STATE_STATUS = {"never_enriched": "OPEN", "enriched_not_promoted": "PARTIAL",
+                      "current": "RESOLVED"}
+
+
+def seed_enrichment(wb: RunWorkbook, client_state: dict,
+                    gaps: dict | None = None) -> dict:
+    """Write the connector's enrichment facets (and the staged gaps of the
+    latest run) into Enrichment_Needed. Idempotent on (area, field, status):
+    a re-seed adds nothing that is already there."""
+    from . import profile as _profile                              # noqa: PLC0415
+    have = {(str(r.get("Area") or ""), str(r.get("Field / cell") or ""),
+             str(r.get("Status") or "").upper())
+            for r in wb.rows("Enrichment_Needed")}
+    added, facets = [], {}
+    enrichment = (client_state or {}).get("enrichment") or {}
+    for row in enrichment.get("facets") or []:
+        facet = str(row.get("facet") or "").strip()
+        state = str(row.get("state") or "").strip()
+        status = FACET_STATE_STATUS.get(state)
+        if not facet or status is None:
+            continue
+        facets[facet] = status
+        closes = (f"record_enrichment('{facet}') after the section that carries it "
+                  f"is produced and promoted; server state at seed: {state}"
+                  + (f", last {row.get('enriched_at') or row.get('last_enriched_at')}"
+                     if row.get("enriched_at") or row.get("last_enriched_at") else ""))
+        key = (ENRICHMENT_AREA, facet, status)
+        if key in have:
+            continue
+        _profile.enrichment_needed(wb, area=ENRICHMENT_AREA, field=facet,
+                                   status=status, closes=closes)
+        have.add(key)
+        added.append({"area": ENRICHMENT_AREA, "field": facet, "status": status})
+    n_gaps = 0
+    for g in (gaps or {}).get("gaps") or []:
+        kind = str(g.get("kind") or "")
+        if kind not in ("must_present_member", "empty_required"):
+            continue
+        field = ".".join(str(g.get(k) or "") for k in ("page", "section", "field")
+                         if g.get(k)) or str(g.get("path") or "")
+        if not field:
+            continue
+        n_gaps += 1
+        key = (GAP_AREA, field, "OPEN")
+        if key in have:
+            continue
+        closes = str(g.get("closes_with") or g.get("doc") or
+                     f"the {kind} the contract names on every sub-vertical")[:400]
+        if len(closes) < 20:
+            closes = f"{closes} — a stated value or a declared empty_state with its ladder"
+        _profile.enrichment_needed(wb, area=GAP_AREA, field=field, status="OPEN",
+                                   closes=closes)
+        have.add(key)
+        added.append({"area": GAP_AREA, "field": field, "status": "OPEN"})
+    md = wb.metadata()
+    return {"run_id": md.get("run_id"), "entity": md.get("entity_name"),
+            "facets": facets, "facets_blocking": sorted(
+                f for f, s in facets.items() if s != "RESOLVED"),
+            "staged_gaps": n_gaps, "rows_added": added,
+            "rows_total": len(wb.rows("Enrichment_Needed")),
+            "served_pages": (client_state or {}).get("served_pages") or [],
+            "prior_runs": len((client_state or {}).get("runs") or [])}
+
+
+def enrichment_state(wb: RunWorkbook) -> dict:
+    """What the tab holds, in the manifest's shape: the connector facets by
+    status, the open staged gaps, and whether anything was seeded at all."""
+    facets: dict[str, str] = {}
+    gaps_open = 0
+    for r in wb.rows("Enrichment_Needed"):
+        area = str(r.get("Area") or "")
+        field = str(r.get("Field / cell") or "")
+        status = str(r.get("Status") or "").upper()
+        if area == ENRICHMENT_AREA and field:
+            facets[field] = status          # the latest row per facet wins
+        elif area == GAP_AREA and status == "OPEN":
+            gaps_open += 1
+    return {"facets": facets, "gaps_open": gaps_open, "seeded": bool(facets)}
+
+
 def complete(wb: RunWorkbook) -> dict:
     """Sign PRELIM off — refusing while anything is open."""
     st = state(wb)
@@ -442,6 +993,47 @@ def complete(wb: RunWorkbook) -> dict:
 
 
 # ── command line ─────────────────────────────────────────────────────────
+
+
+#: Prose columns a correction may touch. Identity columns (dates, peer names,
+#: scores, ids) are not here: those are frozen by design, and a "typo fix" to
+#: them is a re-bind, not an amendment.
+AMENDABLE = {"Entity_Timeline": ("Title", "Body"),
+             "Peer_Benchmarks": ("Peer_Basis",)}
+
+
+def amend(wb: RunWorkbook, *, sheet: str, column: str, find: str,
+          replace: str, why: str) -> dict:
+    """Correct a phrase in a PRELIM prose column, on every row carrying it.
+
+    `timeline` and `peers` only append, so a validator's correction ("no
+    source says FIRST CIO", "29th, not 27th") had no path but a duplicate
+    row. This rewrites the text in place and records why on the Gate_Log.
+    """
+    if column not in AMENDABLE.get(sheet, ()):
+        raise PrelimRefusal(f"amend touches only {AMENDABLE}; {sheet}.{column} "
+                            f"is not a prose column")
+    if not _clean(find) or len(_clean(why)) < 20:
+        raise PrelimRefusal("amend needs --find and a --why of >= 20 chars")
+    hits = 0
+    for r in wb.rows(sheet):
+        cur = str(r.get(column) or "")
+        if find in cur:
+            match = {k: r.get(k) for k in C.SHEETS[sheet][:2]}
+            match[column] = cur
+            wb.update_row_where(sheet, match, {column: cur.replace(find, replace)},
+                                save=False)
+            hits += 1
+    if not hits:
+        raise PrelimRefusal(f"{find!r} occurs in no {sheet}.{column} row")
+    wb.append("Gate_Log", {"Timestamp": _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds"),
+                           "Gate": "PRELIM_AMEND", "Scope": f"{sheet}.{column}",
+                           "Verdict": "AMENDED",
+                           "Detail": f"{hits} row(s): {find!r} -> {replace!r}; {_clean(why)}"},
+              save=False)
+    wb._dirty = True
+    wb.save()
+    return {"sheet": sheet, "column": column, "rows_amended": hits}
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="engine.prelim",
@@ -490,6 +1082,32 @@ def main(argv=None) -> int:
                    help="how the peer FIGURES will be obtained; this is the "
                         "token the handoff lock freezes")
 
+    m = common(sub.add_parser("peer-median"))
+    m.add_argument("--category", required=True)
+    m.add_argument("--median"); m.add_argument("--p25"); m.add_argument("--p75")
+    m.add_argument("--basis", required=True, choices=C.PEER_BASIS)
+    m.add_argument("--source", required=True,
+                   help="where the figure came from — the table, the "
+                        "recomputation, the inference")
+    m.add_argument("--peer-scores", default="")
+
+    se = common(sub.add_parser(
+        "seed-enrichment",
+        help="write the connector's enrichment facets (get_client_state) and "
+             "the latest run's staged gaps (list_enrichment_gaps) into "
+             "Enrichment_Needed — step 1a, before PRELIM"))
+    se.add_argument("--client-state", required=True,
+                    help="the get_client_state reply, as a JSON file")
+    se.add_argument("--gaps", default=None,
+                    help="the list_enrichment_gaps reply for the latest run, as JSON")
+
+    am = common(sub.add_parser("amend"))
+    am.add_argument("--sheet", required=True, choices=sorted(AMENDABLE))
+    am.add_argument("--column", required=True)
+    am.add_argument("--find", required=True)
+    am.add_argument("--replace", required=True)
+    am.add_argument("--why", required=True)
+
     common(sub.add_parser("complete"))
 
     a = ap.parse_args(argv)
@@ -516,6 +1134,11 @@ def main(argv=None) -> int:
                                      author=a.author), indent=2))
         elif a.cmd == "declare":
             print(json.dumps(declare(wb, a.section, a.ladder), indent=2))
+        elif a.cmd == "seed-enrichment":
+            cs = json.loads(Path(a.client_state).read_text(encoding="utf-8"))
+            gp = (json.loads(Path(a.gaps).read_text(encoding="utf-8"))
+                  if a.gaps else None)
+            print(json.dumps(seed_enrichment(wb, cs, gp), indent=2))
         elif a.cmd == "timeline":
             print(json.dumps(timeline(wb, date=a.date, event=a.event,
                                       signal=a.signal, kind=a.kind,
@@ -524,8 +1147,16 @@ def main(argv=None) -> int:
                                       claim_label=a.claim_label,
                                       subcaps=a.subcap,
                                       evidence=a.evidence), indent=2))
+        elif a.cmd == "amend":
+            print(json.dumps(amend(wb, sheet=a.sheet, column=a.column, find=a.find,
+                                   replace=a.replace, why=a.why), indent=2))
         elif a.cmd == "peers":
             print(json.dumps(peers(wb, a.peer, rule=a.rule, basis=a.basis),
+                             indent=2, default=str))
+        elif a.cmd == "peer-median":
+            print(json.dumps(peer_median(wb, category=a.category, median=a.median,
+                                         p25=a.p25, p75=a.p75, basis=a.basis,
+                                         source=a.source, peer_scores=a.peer_scores),
                              indent=2, default=str))
         else:
             print(json.dumps(complete(wb), indent=2))

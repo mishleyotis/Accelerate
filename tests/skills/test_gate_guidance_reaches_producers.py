@@ -37,7 +37,14 @@ PLUGIN = ROOT / "plugins" / "dma-insights"
 VALIDATORS = ("validation.py", "validation2.py", "gates.py", "submit.py",
               "promote.py", "register.py", "contracts.py", "transport.py")
 
-GATE_RE = re.compile(r"\b(?:AG|CG|ET|SG)-\d+\b")
+# `[a-z]?`: letter-suffixed ids (CG-18b and its siblings, RC-04/05/06/09,
+# 2026-10-04) are gates a producer meets; `\d+\b` alone could not see them.
+GATE_RE = re.compile(r"\b(?:AG|CG|ET|SG)-\d+[a-z]?\b")
+
+
+def _gate_key(g: str):
+    m = re.match(r"([A-Z]{2})-(\d+)([a-z]?)", g)
+    return (m.group(1), int(m.group(2)), m.group(3))
 
 #: Gates a producer cannot act on, each with the reason it is exempt. Adding
 #: to this list is allowed and is the escape hatch; adding to it WITHOUT a
@@ -92,7 +99,7 @@ def plugin_gates() -> set:
     # leaks past the directory exclusion — gov_auditor's own tests live
     # outside the skill folder.
     r = subprocess.run(
-        ["grep", "-rho", "-E", r"\b(AG|CG|ET|SG)-[0-9]+\b", str(PLUGIN),
+        ["grep", "-rho", "-E", r"\b(AG|CG|ET|SG)-[0-9]+[a-z]?\b", str(PLUGIN),
          "--exclude-dir", GOVERNANCE_NAMESPACE.name,
          "--exclude-dir", "tests", "--exclude", "test_*.py"],
         capture_output=True, text=True)
@@ -115,7 +122,7 @@ def test_the_governance_namespace_is_actually_excluded():
 def test_every_connector_gate_is_documented_for_the_producers():
     live, documented = connector_gates(), plugin_gates()
     missing = sorted(live - documented - set(NOT_PRODUCER_FACING),
-                     key=lambda g: (g[:2], int(g[3:])))
+                     key=_gate_key)
     assert not missing, (
         f"{len(missing)} gate(s) refuse a payload and appear nowhere in the "
         f"plugin: {missing}. Document each in "
@@ -151,7 +158,7 @@ def test_the_plugin_does_not_document_gates_the_connector_dropped():
     fail. What it must never do is stay silent about it.
     """
     live, documented = connector_gates(), plugin_gates()
-    ghosts = sorted(documented - live, key=lambda g: (g[:2], int(g[3:])))
+    ghosts = sorted(documented - live, key=_gate_key)
     if ghosts:
         print(f"\nNOTE: the plugin mentions {len(ghosts)} gate id(s) the "
               f"connector does not define: {ghosts}. Retired, renamed, or "
@@ -179,10 +186,11 @@ def test_the_gates_this_test_was_written_for_are_documented(gate):
 def test_the_producer_rulebook_is_where_they_live():
     """Not merely 'mentioned somewhere' for the six added on 2026-08-24: the
     gates file is what a producer reads before submitting."""
-    book = (PLUGIN / "skills" / "dma-surface-production" / "05-lifecycle"
-            / "1-gates.md").read_text()
+    gates = PLUGIN / "skills" / "dma-surface-production" / "05-lifecycle" / "gates"
     for gate in ("CG-44", "CG-45", "CG-46", "CG-47", "CG-48", "CG-49"):
-        assert f"### {gate}" in book, f"{gate} has no section of its own"
+        # one file per gate since W3-4 (F-E01-026); the book keeps the index
+        assert (gates / f"{gate}.md").is_file(), f"{gate} has no file of its own"
+        assert f"### {gate}" in (gates / f"{gate}.md").read_text()
 
 
 def test_the_reach_gate_does_not_teach_inventing_utilization():
@@ -191,7 +199,7 @@ def test_the_reach_gate_does_not_teach_inventing_utilization():
     to say so where the producer reads it — this is the standing instruction
     'no utilization inference', enforced against the documentation itself."""
     book = (PLUGIN / "skills" / "dma-surface-production" / "05-lifecycle"
-            / "1-gates.md").read_text()
+            / "gates" / "CG-45.md").read_text()
     body = book.split("### CG-45")[1].split("### ")[0]
     assert "never push you into inventing utilization" in body
     assert "nothing observed says how much of it is switched on" in body

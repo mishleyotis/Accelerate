@@ -45,7 +45,7 @@ def _run(tmp_path):
 def test_a_row_with_no_provider_is_refused(tmp_path):
     run, wb, cells = _run(tmp_path)
     with pytest.raises(ScanRefused, match="PROVIDER"):
-        techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+        techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                         status="CLAIMED", method="technographic_scan",
                         basis="a fifteen character basis clause here")
 
@@ -53,7 +53,7 @@ def test_a_row_with_no_provider_is_refused(tmp_path):
 def test_an_unknown_provider_is_refused(tmp_path):
     run, wb, cells = _run(tmp_path)
     with pytest.raises(ScanRefused, match="not in"):
-        techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+        techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                         status="CLAIMED", method="technographic_scan",
                         providers=["builtwith"],
                         basis="a fifteen character basis clause here")
@@ -63,7 +63,7 @@ def test_web_is_a_provider_not_an_exemption(tmp_path):
     """The failure mode this closes: 'a search found it' recorded as though
     provenance did not apply to it."""
     run, wb, cells = _run(tmp_path)
-    ts = techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    ts = techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                          status="CLAIMED", method="technographic_scan",
                          providers=["web"],
                          basis="the client's login page is served by Alkami")
@@ -73,7 +73,7 @@ def test_web_is_a_provider_not_an_exemption(tmp_path):
 
 def test_providers_are_deduplicated_in_order(tmp_path):
     run, wb, cells = _run(tmp_path)
-    ts = techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    ts = techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                          status="CLAIMED", method="technographic_scan",
                          providers=["clay", "web", "clay", "CLAY"],
                          basis="the client's login page is served by Alkami")
@@ -87,7 +87,7 @@ def test_broker_only_confirmed_is_refused(tmp_path):
     run, wb, cells = _run(tmp_path)
     eids = bank_evidence(wb, cells[0])
     with pytest.raises(ScanRefused, match="brokers only"):
-        techscan.record(wb, product="Snowflake", vendor="Snowflake",
+        techscan.record(wb, product="Snowflake Data Cloud", vendor="Snowflake",
                         layer="DATA", status="CONFIRMED",
                         method="technographic_scan",
                         providers=["clay", "explorium"], evidence_ids=eids,
@@ -100,7 +100,7 @@ def test_a_non_broker_provider_unlocks_confirmed(tmp_path):
     independently, then record BOTH providers."""
     run, wb, cells = _run(tmp_path)
     eids = bank_evidence(wb, cells[0])
-    ts = techscan.record(wb, product="Snowflake", vendor="Snowflake",
+    ts = techscan.record(wb, product="Snowflake Data Cloud", vendor="Snowflake",
                          layer="DATA", status="CONFIRMED",
                          method="vendor_announcement",
                          providers=["clay", "exa"], evidence_ids=eids,
@@ -200,11 +200,11 @@ def test_layer_for_declines_rather_than_reaching(tmp_path):
 def test_the_state_counts_providers_and_names_the_ones_that_never_ran(
         tmp_path):
     run, wb, cells = _run(tmp_path)
-    techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                     status="CLAIMED", method="technographic_scan",
                     providers=["clay"],
                     basis="Clay's Tech Stack data point carries this row")
-    techscan.record(wb, product="Snowflake", vendor="Snowflake", layer="DATA",
+    techscan.record(wb, product="Snowflake Data Cloud", vendor="Snowflake", layer="DATA",
                     status="INFERRED", method="job_posting",
                     providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")
@@ -218,7 +218,7 @@ def test_the_state_counts_providers_and_names_the_ones_that_never_ran(
 def test_the_rendered_scan_states_ran_or_not_run_per_contracted_source(
         tmp_path):
     run, wb, cells = _run(tmp_path)
-    techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                     status="CLAIMED", method="technographic_scan",
                     providers=["clay"],
                     basis="Clay's Tech Stack data point carries this row")
@@ -234,11 +234,10 @@ def test_the_rendered_scan_states_ran_or_not_run_per_contracted_source(
 def test_the_app_side_parser_still_reads_the_machine_copy(tmp_path):
     """The providers column is additive: the app's parser must not care."""
     import sys
-    sys.path.insert(0, "/home/user/Accelerate/apps/worker")
     from dma_worker.workbook_parser import parse_technographic_scan
 
     run, wb, cells = _run(tmp_path)
-    techscan.record(wb, product="Alkami", vendor="Alkami", layer="CUST",
+    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                     status="CLAIMED", method="technographic_scan",
                     providers=["clay"],
                     basis="Clay's Tech Stack data point carries this row")

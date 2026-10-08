@@ -63,7 +63,10 @@ function AppProvider({
   // Production divergence: the host page verifies the session cookie
   // server-side and passes the verdict in DMA_LIVE.
   const [authed, setAuthed] = useState(!!(typeof window !== "undefined" && window.DMA_LIVE && window.DMA_LIVE.authed));
-  const [audience, setAudience] = useState(TWEAK_DEFAULTS.audience_default);
+  // A client link is the client audience and nothing else: the toggle is not
+  // rendered there, and the setter is inert so no other control can flip it.
+  const [audience, _setAudience] = useState(isClientLink() ? "customer" : TWEAK_DEFAULTS.audience_default);
+  const setAudience = isClientLink() ? () => {} : _setAudience;
   const [ipOpen, setIpOpen] = useState(TWEAK_DEFAULTS.ip_open_default);
   const [ipSurface, setIpSurface] = useState("why_now");
   const [ipContext, setIpContext] = useState(null);
@@ -114,10 +117,26 @@ function AppProvider({
       return next;
     });
   }, []);
-  const openEvidence = (evidenceId, subcap) => setEvidenceDrawer({
-    evidenceId,
-    subcap
-  });
+
+  // Production divergence: usage telemetry (usage-tracker.jsx). The tracker
+  // needs the audience and acting-as role, which live in this provider; the
+  // feature calls are no-ops outside production.
+  useEffect(() => {
+    if (window.setUsageContext) window.setUsageContext({
+      audience,
+      acting_role: role
+    });
+  }, [audience, role]);
+  useEffect(() => {
+    if (ipOpen && window.trackUsage) window.trackUsage("intelligence");
+  }, [ipOpen]);
+  const openEvidence = (evidenceId, subcap) => {
+    if (window.trackUsage) window.trackUsage("evidence");
+    setEvidenceDrawer({
+      evidenceId,
+      subcap
+    });
+  };
   const closeEvidence = () => setEvidenceDrawer(null);
   const openSubcap = subcapId => {
     // Find subcap across entities, jump to heatmap if on a client page
@@ -129,7 +148,10 @@ function AppProvider({
       });
     }
   };
-  const openInsight = id => setInsightModal(id);
+  const openInsight = id => {
+    if (window.trackUsage) window.trackUsage("insight");
+    setInsightModal(id);
+  };
   const closeInsight = () => setInsightModal(null);
   const openRec = id => setRecModal(id);
   const closeRec = () => setRecModal(null);
@@ -229,7 +251,7 @@ function MyTweaks() {
       label: "Internal",
       value: "internal"
     }, {
-      label: "Customer",
+      label: "Client",
       value: "customer"
     }]
   }), /*#__PURE__*/React.createElement(TweakToggle, {
@@ -373,6 +395,12 @@ const FIRMO_ROWS = [
 const FIRMO_PINNED = new Set(FIRMO_ROWS.flatMap(r => r.keys));
 const FIRMO_SLOT = new Map(FIRMO_ROWS.flatMap(r => r.keys.map(k => [k, r.slot])));
 
+/* A producer's sentence, trimmed, or null — never a non-string coerced. */
+function trimmedOrNull(v) {
+  const t = typeof v === "string" ? v.trim() : "";
+  return t || null;
+}
+
 /* `AUM` and `total_assets` are the same row on this panel: the contract's
    must-present set names them as a disjunction ("AUM or assets"), so a
    sub-vertical states one or the other and the panel has one Assets row. */
@@ -411,8 +439,14 @@ function firmoFields(firmo) {
       if (f.quarantined) {
         const slot = FIRMO_SLOT.get(key);
         if (slot) {
+          // The producer's reason, or null — never a stand-in sentence of
+          // ours. "held by the producer" was workflow vocabulary on a
+          // client's strip; the panel states the absence in plain words and
+          // adds the reason only when there is one.
           out.held = out.held || {};
-          out.held[slot] = f.quarantine_reason || "held by the producer";
+          if (!(slot in out.held) || !out.held[slot]) {
+            out.held[slot] = trimmedOrNull(f.quarantine_reason);
+          }
         } else {
           out.extra_fields.push({
             field: f.field,
@@ -433,6 +467,15 @@ function firmoFields(firmo) {
        from the panel entirely. A figure written in words is a stated figure. */
     const coerced = numOrText(f.value);
     const num = typeof coerced === "number" ? coerced : null;
+    /* SCOPE (owner decision 2, 2026-10-04). A subsidiary's or a segment's
+       figure may stand on the strip when its unit names the unit it is
+       about — "USD billions, Example Mortgage Corporation, HMDA 2024". The
+       money formatter keeps the magnitude and drops the words after it, so
+       "$2.3B" rendered as though it were the group's. The producer's own
+       scope label travels with the figure: it starts at the unit's first
+       clause break, comma or semicolon, and a bare magnitude is no label
+       (`unitScope`, live-adapter.jsx, where the tests can reach it). */
+    const scopeOf = unitScope;
     if (!FIRMO_PINNED.has(key)) {
       /* The passthrough rendered `${value} ${unit}`, which printed
          `8051646636 USD` two rows under an Assets row rendering the same
@@ -453,12 +496,18 @@ function firmoFields(firmo) {
         raw_value: f.value,
         raw_unit: f.unit || null,
         as_of: f.as_of || null,
+        scope: shown != null ? scopeOf(f.unit) : null,
         held: false,
         reason: null
       });
       continue;
     }
-    switch (FIRMO_SLOT.get(key)) {
+    const slotKey = FIRMO_SLOT.get(key);
+    if (slotKey && scopeOf(f.unit)) {
+      out.scope = out.scope || {};
+      out.scope[slotKey] = scopeOf(f.unit);
+    }
+    switch (slotKey) {
       // One Assets row, whichever of the disjunction the sub-vertical states.
       case "assets":
         out.assets = num;
@@ -544,6 +593,17 @@ function ClientRoute({
   // SERVER decides what that role sees, rather than the client hiding fields it
   // already holds.
   const live = useLiveEntity(LIVE_MODE && entity ? entity.id : null, audience, run && run.run_id, role);
+  // A tab the client dashboard does not carry lands on its overview, in both
+  // client frames — toggling to Client while on Platform, or a client link
+  // that names a withdrawn tab. The tab strip hides the same list.
+  const clientRedirect = audience === "customer" && !clientTabAllowed(tab);
+  useEffect(() => {
+    if (clientRedirect && entity) {
+      navigate(`/clients/${entity.id}/overview`, run ? {
+        run: run.id
+      } : null);
+    }
+  }, [clientRedirect, entity && entity.id]);
   if (!entity) {
     return /*#__PURE__*/React.createElement(PageShell, {
       title: "Not found"
@@ -640,10 +700,10 @@ function ClientRoute({
       style: {
         marginTop: 8
       }
-    }, audience === "customer" ? "Switch back to the internal audience to read it." : "Ask an administrator if you need access.")));
+    }, audience === "customer" ? isClientLink() ? "It is not part of the client dashboard." : "Switch back to the Zennify view to read it." : "Ask an administrator if you need access.")));
   }
   let page = null;
-  switch (tab) {
+  switch (clientRedirect ? "overview" : tab) {
     case "overview":
       page = /*#__PURE__*/React.createElement(ClientOverview, {
         entity: ent,
@@ -736,8 +796,26 @@ function Router() {
     path
   } = route;
 
-  // Auth gate: always start at /login until signed in
-  if (!authed && path !== "/login") return /*#__PURE__*/React.createElement(LoginPage, null);
+  // Auth gate: always start at /login until signed in. (A public client link
+  // boots signed in; its reader never meets the Zennify login.)
+  if (!authed) return /*#__PURE__*/React.createElement(LoginPage, null);
+
+  // A client link reads its one client and its client tabs, and nothing
+  // else: any other route — another client, the directory, Platform or Tech
+  // stack, a sub-route, even /login — answers with that client's overview,
+  // before any other branch can draw the Zennify app around it. The address
+  // bar is corrected too, so the tab strip and the URL agree.
+  const shared = clientLinkEntity();
+  if (shared) {
+    const to = clientLinkPath(path);
+    if (to !== path) setTimeout(() => navigate(to, route.params.run ? {
+      run: route.params.run
+    } : null), 0);
+    return /*#__PURE__*/React.createElement(ClientRoute, {
+      id: shared,
+      tab: to.split("/")[3]
+    });
+  }
   if (path === "/login") return /*#__PURE__*/React.createElement(LoginPage, null);
 
   // Client-scoped routes — a component of its own because it holds hooks
@@ -769,8 +847,13 @@ function Router() {
       }, "Back to Dashboard")));
     }
     if (path === "/admin") return /*#__PURE__*/React.createElement(AdminPage, null);
-    if (path === "/admin/import") return /*#__PURE__*/React.createElement(ImportPage, null);
-    if (path === "/admin/import/audit") return /*#__PURE__*/React.createElement(ImportAuditPage, null);
+    if (path === "/admin/usage") return /*#__PURE__*/React.createElement(UsagePage, null);
+    // Production divergence: Import & jobs and Import audit are not served
+    // (utils.adminRouteHidden) — direct hash navigation included.
+    if (!adminRouteHidden(path)) {
+      if (path === "/admin/import") return /*#__PURE__*/React.createElement(ImportPage, null);
+      if (path === "/admin/import/audit") return /*#__PURE__*/React.createElement(ImportAuditPage, null);
+    }
   }
   return /*#__PURE__*/React.createElement(PageShell, {
     title: "Not found"
@@ -838,7 +921,7 @@ function App() {
     variant: "boot",
     dark: true
   });
-  return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(RootBoundary, null, /*#__PURE__*/React.createElement(Router, null)), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
+  return /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(ConnectionWatcher, null), /*#__PURE__*/React.createElement(UpdateWatcher, null), /*#__PURE__*/React.createElement(RootBoundary, null, /*#__PURE__*/React.createElement(Router, null)), /*#__PURE__*/React.createElement(EvidenceDrawer, null), /*#__PURE__*/React.createElement(InsightModal, null), /*#__PURE__*/React.createElement(RecommendationModal, null), /*#__PURE__*/React.createElement(NewRunModal, null), /*#__PURE__*/React.createElement(IntelligencePanel, null), /*#__PURE__*/React.createElement(MyTweaks, null));
 }
 
 // Production divergence: mount OUTSIDE the host framework's hydration

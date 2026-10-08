@@ -148,13 +148,71 @@ def test_the_deploy_verifies_the_posture_it_just_set():
 
 
 def test_web_is_exempt_and_the_reason_is_written_down():
-    """`dmai-web` IS deployed public, correctly — IAP sits in front of it and
-    does the authenticating. That exemption is load-bearing, so it must be
-    explained in the file rather than inferred from its absence here."""
+    """`dmai-web` is exempt from the closed-at-IAM rule because IAP sits in
+    front of it and does the authenticating. That exemption is load-bearing,
+    so it must be explained in the file rather than inferred from its
+    absence here."""
     text = DEPLOY.read_text()
     assert "dmai-web" in text and "iap" in text.lower(), (
         "dmai-web is deployed public with no IAP configuration in the same "
         "file; either it is protected somewhere unstated or it is exposed")
+
+
+def _web_deploy_block() -> str:
+    """The `gcloud run deploy dmai-web` invocation, flags and all."""
+    text = DEPLOY.read_text()
+    i = text.index("gcloud run deploy dmai-web")
+    # up to the first line that is not a continuation of the command
+    out = []
+    for line in text[i:].splitlines():
+        out.append(line)
+        if not line.rstrip().endswith("\\"):
+            break
+    return "\n".join(out)
+
+
+def test_the_web_deploy_does_not_re_open_the_door_it_then_closes():
+    """MEASURED 2026-09-04, in a release log.
+
+    The IAP block was rewritten on 2026-09-01 to converge — "read first and
+    write only when the state is actually wrong" — after a user loading the
+    app at 17:56:03 got IAP `Error code: 11` while that block rebuilt the
+    door around them. It still wrote on every release, because this command
+    two blocks earlier passed `--allow-unauthenticated` and re-granted
+    `allUsers`; the converge step then dutifully found it and removed it.
+    A guaranteed SetIamPolicy on the door, every release, from a block whose
+    entire purpose was to stop doing that.
+
+    On an existing service gcloud touches the IAM policy only when one of
+    the two flags is given. So the web deploy must give NEITHER, and the
+    converge block owns dmai-web's policy alone."""
+    block = _web_deploy_block()
+    assert PUBLIC_FLAG.search(block) is None, (
+        "the dmai-web deploy passes --allow-unauthenticated, which re-grants "
+        "allUsers on every release and forces the IAP converge block to "
+        "write to the service IAM policy every time — the churn that "
+        "produced IAP Error code: 11")
+    assert "--no-allow-unauthenticated" not in block, (
+        "the dmai-web deploy passes --no-allow-unauthenticated; that is also "
+        "an IAM write on a door IAP's converge block already owns. Pass "
+        "neither flag and let that block read-then-write")
+
+
+def test_the_converge_block_still_owns_the_web_door():
+    """Dropping the flag is only safe because something else guarantees the
+    two bindings that matter. If this block stops granting the IAP service
+    agent, dmai-web becomes uninvokable by the only principal that reaches
+    it."""
+    text = DEPLOY.read_text()
+    i = text.index("IAP_SA=")
+    block = text[i:i + 2500]
+    assert "add-iam-policy-binding dmai-web" in block and "IAP_SA" in block, (
+        "nothing grants the IAP service agent run.invoker on dmai-web; with "
+        "no --allow-unauthenticated on the deploy either, the door has no "
+        "one behind it")
+    assert "allUsers" in block and "remove-iam-policy-binding" in block, (
+        "nothing removes a public invoker grant from dmai-web, so one added "
+        "by hand would never be converged away")
 
 
 # ── the OAuth secrets a deploy must carry, derived from the code ──────────
@@ -232,3 +290,77 @@ def test_a_missing_oauth_secret_does_not_fail_the_release():
     src = DEPLOY.read_text(encoding="utf-8")
     assert "gcloud secrets describe" in src
     assert "MCP_OAUTH_MISSING" in src
+
+
+def test_THE_SHARE_SERVICE_IS_PUBLIC_ONLY_WITH_ITS_GATE_STANDING():
+    """Client share links (owner, 2026-10-07): `dmai-share` is public because
+    a client has no Zennify login — and it may be public ONLY as the share
+    service: SHARE_MODE on, the PUBLIC key alone (it can verify a link and
+    never mint one), its own service account, and a post-deploy probe that
+    fails the release if the app's own routes answer there. Drop any half and
+    this fails red before a deploy runs."""
+    block = _deploy_block("dmai-share")
+    assert PUBLIC_FLAG.search(block), "dmai-share is not deployed public"
+    assert "SHARE_MODE=1" in block, (
+        "dmai-share deploys public WITHOUT SHARE_MODE=1 — that is the whole "
+        "app, sign-in and directory included, on an open door")
+    text0 = DEPLOY.read_text()
+    assert "SHARE_VERIFY_KEY=dmai-share-verify-key" in text0
+    assert '--set-secrets="$SHARE_SECRETS"' in block
+    secrets_line = [l for l in text0.splitlines() if l.strip().startswith("SHARE_SECRETS=")]
+    assert secrets_line and "SHARE_SIGNING_KEY" not in "".join(secrets_line), (
+        "dmai-share would carry the signing key")
+    assert "SHARE_SIGNING_KEY" not in block, (
+        "dmai-share carries the signing key: the internet-facing service "
+        "could mint links for any client")
+    assert 'service-account="$SHARE_SA"' in block, (
+        "dmai-share runs as another service's identity")
+    text = DEPLOY.read_text()
+    assert "dmai-share door probe failed" in text, (
+        "the post-deploy door probe is gone")
+    web = _deploy_block("dmai-web")
+    assert "SHARE_MODE" not in web, "dmai-web would serve as the share service"
+    lib = (ROOT / "apps" / "web" / "lib" / "share.js").read_text()
+    for needle in ("crypto.verify(", "revoked.has(p.jti)", "p.exp <= Math.floor",
+                   "CONSUMER_DOMAINS"):
+        assert needle in lib, f"apps/web/lib/share.js no longer carries {needle!r}"
+
+
+def test_SHARE_OTP_IS_NEVER_SILENTLY_OFF():
+    """One-time sign-in (Identity Platform) is switched on only when the live
+    config reads back correct, and a release that cannot switch it on says
+    so on stderr — a link admitting typed addresses is never a quiet state."""
+    text = DEPLOY.read_text()
+    assert "identitytoolkit.googleapis.com" in text
+    assert 'if [ "$IDP_OK" = "yes" ]' in text
+    # The deployer grants itself the roles the step needs (it fell back to
+    # typed addresses on every release until it did), and a release that
+    # still cannot switch OTP on names the failing step and Google's error.
+    for role in ("roles/identitytoolkit.admin", "roles/serviceusage.apiKeysAdmin",
+                 "roles/serviceusage.serviceUsageAdmin"):
+        assert role in text, f"the deployer no longer self-grants {role}"
+    assert 'echo "  Why: ${IDP_WHY:-unknown}" >&2' in text, "the OTP-off warning no longer says why"
+    assert "SHARE_IDP_API_KEY=dmai-share-idp-api-key" in text
+    assert "one-time sign-in is OFF" in text
+    assert "dmai-share-cookie-secret" in text
+
+
+def test_THE_LINK_LEDGER_IS_WRITTEN_BY_THE_APP_AND_ONLY_READ_BY_THE_PUBLIC_SERVICE():
+    """Admin › Client links (owner, 2026-10-07: "a place where I can revoke
+    access"). The revocation ledger is a private bucket: dmai-web (behind IAP)
+    writes it, the internet-facing dmai-share may only READ it — a compromised
+    share service must not be able to un-revoke a link. Both services get the
+    bucket or neither does (a revocation the share service cannot see would
+    do nothing), and a failed read grant fails the release."""
+    text = DEPLOY.read_text()
+    assert "--public-access-prevention" in text, "the ledger bucket could be made public"
+    grants = re.findall(r'gs://\$\{SHARE_LEDGER_BUCKET\}" \\\s*\n\s*--member="([^"]+)" --role="([^"]+)"', text)
+    assert ('serviceAccount:dmai-web@${SA_DOMAIN}', "roles/storage.objectAdmin") in grants, grants
+    assert ('serviceAccount:${SHARE_SA}', "roles/storage.objectViewer") in grants, grants
+    assert not any(m == "serviceAccount:${SHARE_SA}" and r != "roles/storage.objectViewer" for m, r in grants), (
+        "dmai-share was granted more than read on the revocation ledger")
+    assert "could not grant dmai-share read on gs://${SHARE_LEDGER_BUCKET}" in text
+    assert "${LEDGER_ENV}" in _deploy_block("dmai-web") and "${LEDGER_ENV}" in _deploy_block("dmai-share"), (
+        "the ledger is configured on one service and not the other")
+    lib = (ROOT / "apps" / "web" / "lib" / "share-ledger.js").read_text()
+    assert 'why: "unavailable"' in lib, "a ledger read failure no longer fails closed"

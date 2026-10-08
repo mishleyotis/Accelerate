@@ -213,7 +213,7 @@ function ProspectingPage() {
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Customer-safe export"), /*#__PURE__*/React.createElement("h1", null, "Prospecting"), /*#__PURE__*/React.createElement("div", {
+  }, "Client-safe export"), /*#__PURE__*/React.createElement("h1", null, "Prospecting"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, "Search \u2192 one-page scorecard \u2192 export PDF or HTML")), /*#__PURE__*/React.createElement("span", {
     className: "b b-org",
@@ -223,7 +223,7 @@ function ProspectingPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
     size: 10
-  }), " CUSTOMER-SAFE MODE")), /*#__PURE__*/React.createElement("div", {
+  }), " CLIENT-SAFE MODE")), /*#__PURE__*/React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 16
@@ -289,7 +289,7 @@ function ProspectingPage() {
       fontSize: 13,
       fontWeight: 600
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"
@@ -320,7 +320,7 @@ function ProspectingPage() {
       fontWeight: 600,
       fontSize: 13
     }
-  }, "Scorecard preview \xB7 always Customer View"), /*#__PURE__*/React.createElement("span", {
+  }, "Scorecard preview \xB7 always Client view"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
@@ -346,7 +346,7 @@ function ProspectingPage() {
     size: 13
   }), " Export PDF")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast(`Downloaded standalone HTML scorecard · ${picked.name}`, "success")
+    onClick: () => pushToast(`Downloaded standalone HTML scorecard · ${entityName(picked)}`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -371,7 +371,7 @@ function ProspectingPage() {
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "envelope",
     size: 22
-  })), /*#__PURE__*/React.createElement("h3", null, "Search to begin"), /*#__PURE__*/React.createElement("p", null, "Search the institution name to load a one-page scorecard. The export is always Customer-safe - internal fields are stripped.")));
+  })), /*#__PURE__*/React.createElement("h3", null, "Search to begin"), /*#__PURE__*/React.createElement("p", null, "Search the institution name to load a one-page scorecard. The export is always client-safe - internal fields are stripped.")));
 }
 function ScorecardPreview({
   e
@@ -403,7 +403,7 @@ function ScorecardPreview({
       fontWeight: 600,
       marginTop: 4
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: "var(--z-muted)"
@@ -851,102 +851,175 @@ function AdminUsersCard() {
   const {
     pushToast
   } = useApp();
-  // Production divergence: LIVE mode renders the REAL role grants the
-  // server resolves sign-ins against (DMA_LIVE.role_grants, admin
-  // sessions only) — read-only until the users table lands; grants
-  // change via deployment env, never via this card. The mutable mock
-  // roster renders solely in local preview.
   const LIVE = !!window.DMA_LIVE;
-  const liveGrantRows = (() => {
-    if (!LIVE) return null;
-    const g = window.DMA_LIVE.role_grants;
-    if (!g) return [];
-    const nameOf = e => {
-      const parts = e.split("@")[0].split(/[._-]+/).filter(Boolean);
-      if (parts.length === 1 && parts[0].length <= 3) return parts[0].toUpperCase();
-      return parts.map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || e;
-    };
-    const me = sessionUser().email;
-    const rows = [];
-    // Last-active is not an enrichable field: a deploy-time grant carries no
-    // sign-in history until the users table lands, so the honest word is that
-    // nothing recorded it, not a gap anyone can queue against the connector.
-    g.admins.forEach((e, i) => rows.push({
-      id: `adm-${i}`,
-      name: nameOf(e),
-      email: e,
-      role: "ADMIN",
-      active: true,
-      last: e === me ? "now (this session)" : "Not recorded"
-    }));
-    g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) => rows.push({
-      id: `ana-${i}`,
-      name: nameOf(e),
-      email: e,
-      role: "ANALYST",
-      active: true,
-      last: e === me ? "now (this session)" : "Not recorded"
-    }));
-    return rows;
-  })();
-  const [users, setUsers] = useState(LIVE ? liveGrantRows || [] : [{
-    id: 1,
-    name: "Mishley Andrade",
+  // "Last active" reads the usage telemetry's last-seen (pages-admin-usage.jsx,
+  // one shared fetch with the glance card).
+  const usage = window.useUsageModel ? window.useUsageModel(7) : {
+    status: "not_configured"
+  };
+  const me = sessionUser().email;
+  // Production: the roster is the users table (svc_api /v1/admin/users, owner
+  // adjudication 2026-10-07). Every change is a real write the API records in
+  // session_log; the person's new role applies on their next page load.
+  // Local preview keeps the prototype's in-memory roster.
+  const [live, setLive] = useState({
+    status: LIVE ? "loading" : "ok",
+    users: [],
+    floor: []
+  });
+  const [busy, setBusy] = useState(null);
+  const [mock, setMock] = useState([{
     email: "mishley@zennify.com",
+    display_name: "Mishley Andrade",
     role: "ANALYST",
-    active: true,
+    is_active: true,
     last: "2 min ago"
   }, {
-    id: 2,
-    name: "Dev Patel",
     email: "dev@zennify.com",
+    display_name: "Dev Patel",
     role: "ADMIN",
-    active: true,
+    is_active: true,
     last: "1 hr ago"
   }, {
-    id: 3,
-    name: "Sara Lin",
     email: "sara@zennify.com",
+    display_name: "Sara Lin",
     role: "AE",
-    active: true,
+    is_active: true,
     last: "Yesterday"
   }, {
-    id: 4,
-    name: "Tom Reyes",
     email: "tom@zennify.com",
+    display_name: "Tom Reyes",
     role: "AE",
-    active: false,
+    is_active: false,
     last: "3 wk ago"
   }]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("AE");
-  const setRole = (id, role) => {
-    if (LIVE) {
-      pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn");
+  const load = () => fetch("/api/admin/users", {
+    cache: "no-store"
+  }).then(r => r.json().then(b => ({
+    ok: r.ok,
+    b
+  }))).then(({
+    ok,
+    b
+  }) => setLive(ok ? {
+    status: "ok",
+    users: b.users || [],
+    floor: b.owner_floor || []
+  } : {
+    status: "error",
+    detail: b.detail || b.error,
+    users: [],
+    floor: []
+  })).catch(() => setLive({
+    status: "error",
+    detail: "The users service did not answer.",
+    users: [],
+    floor: []
+  }));
+  useEffect(() => {
+    if (LIVE) load();
+  }, []);
+  const roleWord = r => ({
+    AE: "AE",
+    ANALYST: "Analyst",
+    ADMIN: "Admin"
+  })[r] || r;
+  const nameOf = e => {
+    const p = e.split("@")[0].split(/[._-]+/).filter(Boolean);
+    return p.length === 1 && p[0].length <= 3 ? p[0].toUpperCase() : p.map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+  };
+  const seen = LIVE && usage.status === "ok" ? usage.lastSeen : {};
+
+  // Everyone with a row, plus everyone the usage log has seen active without
+  // one: they are AEs by default, and giving them a role creates their row.
+  const users = LIVE ? (() => {
+    const rows = live.users.map(u => ({
+      ...u,
+      known: true
+    }));
+    const have = new Set(rows.map(u => u.email));
+    Object.keys(seen).forEach(e => {
+      if (!have.has(e)) rows.push({
+        email: e,
+        display_name: nameOf(e),
+        role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE",
+        is_active: true,
+        signed_in: true,
+        known: false
+      });
+    });
+    return rows;
+  })() : mock;
+  const lastActive = u => {
+    if (!LIVE) return u.last;
+    if (u.email === me) return "now (this session)";
+    const s = seen[u.email];
+    if (s) return window.uaRel(s, false, usage.now);
+    if (u.last_seen_at) return window.uaRel(new Date(u.last_seen_at), false, new Date());
+    // Activity, not sign-ins: people stay signed in for days, so the only
+    // honest "last active" is the last usage event the log recorded.
+    return usage.status === "ok" ? "No activity yet" : "Not recorded";
+  };
+  const locked = u => LIVE && live.floor.includes(u.email) ? "Owner account (ADMIN_EMAILS): always an active Admin" : u.email === me ? "Your own access: ask another Admin to change it" : null;
+  const apply = (email, change, done) => {
+    if (!LIVE) {
+      setMock(us => us.some(u => u.email === email) ? us.map(u => u.email === email ? {
+        ...u,
+        ...change
+      } : u) : [...us, {
+        email,
+        display_name: nameOf(email),
+        role: change.role || "AE",
+        is_active: true,
+        last: "Invited"
+      }]);
+      done();
       return;
     }
-    setUsers(us => us.map(u => u.id === id ? {
-      ...u,
-      role
-    } : u));
-    pushToast(`Role updated to ${role}`, "success");
+    setBusy(email);
+    fetch("/api/admin/users", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "idempotency-key": crypto.randomUUID()
+      },
+      body: JSON.stringify({
+        email,
+        ...change
+      })
+    }).then(r => r.json().then(b => ({
+      ok: r.ok,
+      b
+    }))).then(({
+      ok,
+      b
+    }) => {
+      setBusy(null);
+      if (!ok) {
+        pushToast(b.detail || b.error || "The change was refused", "warn");
+        return;
+      }
+      setLive(l => ({
+        ...l,
+        users: l.users.some(u => u.email === b.user.email) ? l.users.map(u => u.email === b.user.email ? b.user : u) : [...l.users, b.user]
+      }));
+      done(b);
+    }).catch(() => {
+      setBusy(null);
+      pushToast("The users service did not answer", "warn");
+    });
   };
-  const toggleActive = id => {
-    if (LIVE) {
-      pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn");
-      return;
-    }
-    setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), {
-      ...u,
-      active: !u.active
-    }) : u));
-  };
+  const after = " · applies on their next page load";
+  const setRole = (u, role) => apply(u.email, {
+    role
+  }, () => pushToast(`${u.display_name || nameOf(u.email)}: role updated to ${roleWord(role)}${LIVE ? after : ""}`, "success"));
+  const toggleActive = u => apply(u.email, {
+    is_active: !u.is_active
+  }, () => pushToast(`${u.display_name || nameOf(u.email)} ${u.is_active ? "deactivated" : "reactivated"}`, u.is_active ? "warn" : "success"));
   const invite = () => {
-    if (LIVE) {
-      pushToast("Invites arrive with the users table; today every @zennify.com Google account signs in as AE automatically", "warn");
-      return;
-    }
-    const email = inviteEmail.trim();
+    const email = inviteEmail.trim().toLowerCase();
     if (!email) {
       pushToast("Enter an email to invite", "warn");
       return;
@@ -955,17 +1028,16 @@ function AdminUsersCard() {
       pushToast("Only @zennify.com addresses can be invited", "warn");
       return;
     }
-    const name = email.split("@")[0].split(".").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-    setUsers(us => [...us, {
-      id: Date.now(),
-      name,
-      email,
-      role: inviteRole,
-      active: true,
-      last: "Invited"
-    }]);
-    pushToast(`Invitation sent to ${email}`, "success");
-    setInviteEmail("");
+    if (users.some(u => u.email === email && u.known !== false)) {
+      pushToast(`${email} is already on the list`, "warn");
+      return;
+    }
+    apply(email, {
+      role: inviteRole
+    }, () => {
+      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: their Google account opens the app` : `Invitation sent to ${email}`, "success");
+      setInviteEmail("");
+    });
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
@@ -981,7 +1053,31 @@ function AdminUsersCard() {
     size: 14
   }), /*#__PURE__*/React.createElement("h3", null, "Users & roles")), /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, users.filter(u => u.active).length, " active")), /*#__PURE__*/React.createElement("div", {
+  }, users.filter(u => u.is_active).length, " active")), LIVE && live.status !== "ok" ? /*#__PURE__*/React.createElement("div", {
+    className: "card-body",
+    style: {
+      fontSize: 12,
+      color: "var(--z-body)",
+      display: "flex",
+      gap: 8,
+      alignItems: "flex-start"
+    }
+  }, live.status === "loading" ? /*#__PURE__*/React.createElement("span", {
+    className: "spinner"
+  }) : /*#__PURE__*/React.createElement(Icon, {
+    name: "info",
+    size: 13,
+    style: {
+      flexShrink: 0,
+      marginTop: 1
+    }
+  }), /*#__PURE__*/React.createElement("span", null, live.status === "loading" ? "Loading users…" : /*#__PURE__*/React.createElement(React.Fragment, null, "The users list could not be read. ", /*#__PURE__*/React.createElement("span", {
+    className: "f-mono",
+    style: {
+      fontSize: 10.5,
+      color: "var(--z-muted)"
+    }
+  }, live.detail)))) : /*#__PURE__*/React.createElement("div", {
     style: {
       overflowX: "auto"
     }
@@ -991,76 +1087,79 @@ function AdminUsersCard() {
     style: {
       textAlign: "right"
     }
-  }, "Action"))), /*#__PURE__*/React.createElement("tbody", null, users.map(u => /*#__PURE__*/React.createElement("tr", {
-    key: u.id,
-    style: {
-      opacity: u.active ? 1 : 0.55
-    }
-  }, /*#__PURE__*/React.createElement("td", {
-    "data-label": "User"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontWeight: 600,
-      color: "var(--z-dark)"
-    }
-  }, u.name), /*#__PURE__*/React.createElement("div", {
-    className: "f-mono",
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, u.email)), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Role"
-  }, /*#__PURE__*/React.createElement("select", {
-    className: "inp inp-sm",
-    value: u.role,
-    onChange: e => setRole(u.id, e.target.value),
-    style: {
-      maxWidth: 130
-    },
-    "aria-label": `Role for ${u.name}`
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "AE"
-  }, "AE"), /*#__PURE__*/React.createElement("option", {
-    value: "ANALYST"
-  }, "Analyst"), /*#__PURE__*/React.createElement("option", {
-    value: "ADMIN"
-  }, "Admin"))), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Last active",
-    style: {
-      fontSize: 11.5,
-      color: "var(--z-muted)"
-    }
-  }, u.last), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Status"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `b ${u.active ? "b-above" : "b-muted"}`
-  }, u.active ? "Active" : "Deactivated")), /*#__PURE__*/React.createElement("td", {
-    "data-label": "Action",
-    style: {
-      textAlign: "right"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    onClick: () => toggleActive(u.id)
-  }, u.active ? "Deactivate" : "Reactivate"))))))), LIVE ? /*#__PURE__*/React.createElement("div", {
-    className: "card-body",
-    style: {
-      borderTop: "1px solid var(--z-sep)",
-      fontSize: 11.5,
-      color: "var(--z-muted)",
-      display: "flex",
-      gap: 8,
-      alignItems: "flex-start"
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "info",
-    size: 13,
-    style: {
-      flexShrink: 0,
-      marginTop: 1
-    }
-  }), /*#__PURE__*/React.createElement("span", null, "Every other @zennify.com Google account signs in as ", /*#__PURE__*/React.createElement("strong", null, "AE"), " automatically. ADMIN and ANALYST are deploy-time grants (ADMIN_EMAILS / ANALYST_EMAILS); per-user management arrives with the users table.")) : /*#__PURE__*/React.createElement("div", {
+  }, "Action"))), /*#__PURE__*/React.createElement("tbody", null, users.map(u => {
+    const lock = locked(u);
+    const name = u.display_name || nameOf(u.email);
+    return /*#__PURE__*/React.createElement("tr", {
+      key: u.email,
+      style: {
+        opacity: u.is_active ? 1 : 0.55
+      }
+    }, /*#__PURE__*/React.createElement("td", {
+      "data-label": "User"
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600,
+        color: "var(--z-dark)"
+      }
+    }, name), /*#__PURE__*/React.createElement("div", {
+      className: "f-mono",
+      style: {
+        fontSize: 10,
+        color: "var(--z-muted)"
+      }
+    }, u.email)), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Role"
+    }, /*#__PURE__*/React.createElement("select", {
+      className: "inp inp-sm",
+      value: u.role,
+      disabled: !!lock || busy === u.email,
+      title: lock || undefined,
+      onChange: e => setRole(u, e.target.value),
+      style: {
+        maxWidth: 130
+      },
+      "aria-label": `Role for ${name}`
+    }, /*#__PURE__*/React.createElement("option", {
+      value: "AE"
+    }, "AE"), /*#__PURE__*/React.createElement("option", {
+      value: "ANALYST"
+    }, "Analyst"), /*#__PURE__*/React.createElement("option", {
+      value: "ADMIN"
+    }, "Admin"))), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Last active",
+      style: {
+        fontSize: 11.5,
+        color: "var(--z-muted)"
+      }
+    }, lastActive(u)), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Status"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `b ${u.is_active ? "b-above" : "b-muted"}`
+    }, u.is_active ? "Active" : "Deactivated")), /*#__PURE__*/React.createElement("td", {
+      "data-label": "Action",
+      style: {
+        textAlign: "right"
+      }
+    }, lock ? /*#__PURE__*/React.createElement("span", {
+      className: "b b-muted",
+      title: lock,
+      style: {
+        display: "inline-flex",
+        gap: 4,
+        alignItems: "center"
+      }
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "lock",
+      size: 11
+    }), " ", u.email === me ? "You" : "Owner") : /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-tertiary btn-sm",
+      disabled: busy === u.email,
+      onClick: () => toggleActive(u)
+    }, busy === u.email ? /*#__PURE__*/React.createElement("span", {
+      className: "spinner"
+    }) : u.is_active ? "Deactivate" : "Reactivate")));
+  })))), /*#__PURE__*/React.createElement("div", {
     className: "card-body",
     style: {
       borderTop: "1px solid var(--z-sep)",
@@ -1097,11 +1196,34 @@ function AdminUsersCard() {
     value: "ADMIN"
   }, "Admin")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary btn-sm",
+    disabled: LIVE && live.status !== "ok",
     onClick: invite
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "plus",
     size: 12
-  }), " Invite user")));
+  }), " Invite user")), LIVE ? /*#__PURE__*/React.createElement("div", {
+    className: "card-body",
+    style: {
+      borderTop: "1px solid var(--z-sep)",
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, "Any other @zennify.com Google account signs in as an ", /*#__PURE__*/React.createElement("strong", null, "AE"), ". A role change applies on that person's next page load; a deactivated account is turned away at its next load.") : null);
+}
+
+/* The last package-scan execution as one line: when it started and what the
+   ledger says it did. A row the Job never finished says so — "running or
+   died" is a different fact from a completed scan. */
+function lastScanLabel(s) {
+  if (!s || !s.started_at) return "No scans recorded yet";
+  const when = new Date(s.started_at).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  if (!s.finished_at) return `Last scan ${when} · not finished`;
+  return `Last scan ${when} · ${(s.status || "").toLowerCase() || "status not recorded"}`;
 }
 
 /* ── /admin home + import + audit ────────────────────────────────── */
@@ -1180,13 +1302,25 @@ function AdminPage() {
   }), " Scanning\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
-  }), " Delta scan")), /*#__PURE__*/React.createElement("button", {
+  }), " Delta scan")), LIVE ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: () => navigate("/admin/usage")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "users",
+    size: 13
+  }), " Usage analytics") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary",
+    onClick: () => navigate("/admin/usage")
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "users",
+    size: 13
+  }), " Usage analytics"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary",
     onClick: () => navigate("/admin/import")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "play",
     size: 13
-  }), " Import & jobs"))), /*#__PURE__*/React.createElement("div", {
+  }), " Import & jobs")))), window.UsageGlanceCard ? /*#__PURE__*/React.createElement(window.UsageGlanceCard, null) : null, window.ShareLinksCard ? /*#__PURE__*/React.createElement(window.ShareLinksCard, null) : null, LIVE ? null : /*#__PURE__*/React.createElement("div", {
     className: "card flush",
     style: {
       marginBottom: 16
@@ -1276,7 +1410,7 @@ function AdminPage() {
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, LIVE ? "History → Import audit" : "Last crawl 2 hr ago")), /*#__PURE__*/React.createElement("label", {
+  }, LIVE ? lastScanLabel((window.DMA_LIVE.import_scans || [])[0]) : "Last crawl 2 hr ago")), /*#__PURE__*/React.createElement("label", {
     className: "field-label"
   }, "Target folder ID"), /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -1312,12 +1446,17 @@ function AdminPage() {
       borderRadius: 6,
       border: "1px solid var(--z-sep)"
     }
-  }, folder), LIVE ? /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-tertiary btn-sm",
-    onClick: () => pushToast("The intake folder is set on the worker Job (INTAKE_FOLDER_ID) at deploy time", "warn")
+  }, folder), LIVE ? /*#__PURE__*/React.createElement("span", {
+    className: "b b-muted",
+    title: "Set on the worker Job (INTAKE_FOLDER_ID) at deploy time",
+    style: {
+      display: "inline-flex",
+      gap: 4,
+      alignItems: "center"
+    }
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
-    size: 12
+    size: 11
   }), " Deploy-set") : /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => setEditingFolder(true)
@@ -1369,7 +1508,7 @@ function AdminPage() {
   }), " Scanning\u2026") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 12
-  }), " Delta scan")), /*#__PURE__*/React.createElement("button", {
+  }), " Delta scan")), LIVE ? null : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     disabled: scanning,
     onClick: () => runScan("full")
@@ -1379,7 +1518,7 @@ function AdminPage() {
   }, "Import audit \u2192"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     onClick: () => navigate("/admin/import")
-  }, "Job history \u2192"))), /*#__PURE__*/React.createElement("div", {
+  }, "Job history \u2192")))), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, LIVE ?
   /*#__PURE__*/
@@ -2091,5 +2230,6 @@ Object.assign(window, {
   ProspectingPage,
   AdminPage,
   ImportPage,
-  ImportAuditPage
+  ImportAuditPage,
+  lastScanLabel
 });

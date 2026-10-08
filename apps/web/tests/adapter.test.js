@@ -565,10 +565,19 @@ test("the tech layer rollup is computed from the register, not read from it", ()
   assert.deepStrictEqual(rows.map(r => r.layer), ["OPS", "CUST", "DATA"],
                          "only layers the register actually uses");
   const data = rows.find(r => r.layer === "DATA");
-  assert.strictEqual(data.expected, 2, "an ABSENT row is a slot, so it counts");
-  assert.strictEqual(data.detected, 1, "...but it is not detected");
+  // SUPERSEDED 2026-10-04 (RC-11 / D-16). This asserted `expected === 2`,
+  // the register's own row count, as the denominator — the circular rollup
+  // that rendered "5 of 5" on the audited run. No stated expected, no
+  // denominator; which one SHOULD be stated is open adjudication T-03/DNR-6.
+  assert.strictEqual(data.expected, null, "the rows are not their own denominator");
+  assert.strictEqual(data.detected, 1, "an ABSENT row is not detected");
   assert.strictEqual(data.is_primary_gap, true, "fewest confirmed wins");
-  assert.match(data.basis, /0 confirmed of 2/);
+  assert.match(data.basis, /^0 confirmed — fewer than any other layer$/);
+  // A STATED expected is still read and carried.
+  const stated = w.techLayersOf({ ...ts, layers: [{ layer: "DATA", expected: 8,
+    expected_basis: "eight roles" }] }).find(r => r.layer === "DATA");
+  assert.strictEqual(stated.expected, 8);
+  assert.strictEqual(stated.expected_basis, "eight roles");
   assert.strictEqual(rows.find(r => r.layer === "CUST").is_primary_gap, false,
                      "the best-covered layer is never the gap");
   assert.strictEqual(data.pillar_id, "P4", "the pillar comes off the rows");
@@ -620,4 +629,45 @@ test("a tech row with no promoted impact says so rather than computing one", () 
   assert.strictEqual(out[0].peer_coverage, null,
                      "0 would read as a researched share of zero");
   assert.deepStrictEqual(out[0].peer_deployments, []);
+});
+
+test("a star rating fills from zero, so the lowest score still draws", () => {
+  /* SWBC, 2026-10-05: a Better Business Bureau rating of 1.0 on "1-5 stars"
+     sat at the floor of its stated range and drew 0% — the same empty rail a
+     missing figure draws, so a real (and damning) rating read as no data.
+     Owner decision: stars are read as a star display reads them, rating
+     over the top star. Other notations keep the range they state. */
+  const w = require("./adapter-window");
+  assert.strictEqual(w.scaleFraction(1.0, "1-5 stars"), 0.2,
+    "one star of five fills a fifth, never nothing");
+  assert.ok(Math.abs(w.scaleFraction(4.9, "1-5 stars") - 0.98) < 1e-9);
+  assert.strictEqual(w.scaleFraction(3, "5 stars"), 0.6);
+  for (const v of [1, 1.5, 2.2, 3.1, 4.1, 5]) {
+    assert.ok(w.scaleFraction(v, "1-5 stars") > 0,
+      `a measured ${v}-star rating must draw a fill`);
+  }
+  assert.strictEqual(w.scaleFraction(4.3, "stars"), null,
+    "a notation stating no bound still draws no bar");
+  assert.strictEqual(w.scaleFraction(79.81, "NPS -100..100"),
+    (79.81 + 100) / 200, "NPS keeps its own range");
+  assert.ok(Math.abs(w.scaleFraction(96.2, "0-100 % of complaints answered on time")
+    - 0.962) < 1e-9);
+});
+
+// Cross Insurance, 2026-10-05: promoted pages cite the workbook's own
+// evidence numbers ('E-001') while the store keys the row 'E-CROSSINS-001'.
+// The drawer looked the chip's id up by `e.id` alone, so 956 citations
+// opened onto nothing. The API now names each row's workbook-local ids.
+test("a chip citing a workbook-local id opens its stored row", () => {
+  const w = load(LIVE);
+  const items = w.adaptEvidence({ items: [{
+    e_id: "E-CROSSINS-001", source_name: "Cross Insurance history",
+    excerpt: "Founded in 1954 at the kitchen table of Woodrow Cross, the agency…",
+    package_local_ids: ["E-001"], also_filed_as: ["E-CROSSINS-001-R2"] }] });
+  assert.deepStrictEqual(items[0].aliases, ["E-001", "E-CROSSINS-001-R2"]);
+  w.DMA_ENTITY = { id: "cross-insurance-agency", evidence: items };
+  assert.strictEqual(w.DMA.getEvidence("E-001").id, "E-CROSSINS-001");
+  assert.strictEqual(w.DMA.getEvidence("E-CROSSINS-001").id, "E-CROSSINS-001");
+  assert.strictEqual(w.DMA.getEvidence("E-002"), undefined,
+                     "an unmapped number still resolves to nothing");
 });

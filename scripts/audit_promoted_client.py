@@ -38,6 +38,11 @@ WHAT IT CHECKS, and why each one is here rather than in a gate at submit:
   F  REDACTION HOLDS       Invariant 5 is default-deny and server-side. Asserted
                            against the CUSTOMER body, because that is the one
                            whose failure reaches a person outside the company.
+  H  PROJECTION HOLDS      The other direction (RC-08): the customer body
+                           compared with the internal one. A drawer arguing
+                           over zero served items, or a section/list emptied
+                           for the customer with no stated withholding, is a
+                           hole — packages/shared/customer_projection.py.
 
 Usage:
     audit_promoted_client.py --api https://host [--entity slug] [--token T]
@@ -61,6 +66,11 @@ PAGES = ("overview", "heatmap", "insights", "platform", "context", "techstack")
 # vocabulary is three chances for one of them to be the stale one.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "packages" / "shared"))
 from abbreviations import EXCERPT_FIELDS, unexplained  # noqa: E402
+# H · THE CUSTOMER PROJECTION AGAINST THE INTERNAL ONE (RC-08). The one check
+# that needs BOTH bodies of a page: a drawer arguing over zero served items,
+# a section or list served empty to the customer with no stated withholding.
+# Shared with the api suite, so CI and this nightly scan run one rule.
+from customer_projection import check_page as projection_check  # noqa: E402
 DROP_MIN_ROWS = 3
 
 # Keys that legitimately hold prose written for a person, where an em dash is
@@ -488,9 +498,22 @@ def _register(root: Path) -> list:
         return []
 
 
+def check_projection(page, docs) -> list:
+    """H — run the shared customer-projection check when both bodies exist."""
+    if not (docs.get("internal") and docs.get("customer")):
+        return []
+    out = []
+    for f in projection_check(page, docs["internal"], docs["customer"]):
+        out.append(_v(f["level"], f["code"], page,
+                      f"{f['section']}.{f['path']}".rstrip("."),
+                      f["message"], audience="customer"))
+    return out
+
+
 def run_from_dir(d: Path, register) -> list:
     out = []
     for page in PAGES:
+        docs = {}
         for audience in ("internal", "customer"):
             f = d / f"{page}_{audience}.json"
             if not f.exists():
@@ -500,7 +523,9 @@ def run_from_dir(d: Path, register) -> list:
             except Exception as e:
                 out.append(_v("BLOCKER", "READ", page, str(f), f"unreadable: {e}"))
                 continue
+            docs[audience] = doc
             out.extend(audit_page(page, doc, audience, register))
+        out.extend(check_projection(page, docs))
     return out
 
 
@@ -537,8 +562,11 @@ def run_from_api(base: str, entity: str | None, token: str | None,
                    "no promoted entities to audit")]
     for slug in slugs:
         for page in PAGES:
+            docs = {}
             for audience in ("internal", "customer"):
                 doc, status = get(f"/v1/entities/{slug}/{page}?audience={audience}")
+                if doc is not None:
+                    docs[audience] = doc
                 if doc is None:
                     # context is internal-only; 403 to customer is correct.
                     if not (page == "context" and audience == "customer"
@@ -550,6 +578,9 @@ def run_from_api(base: str, entity: str | None, token: str | None,
                 for v in audit_page(page, doc, audience, register):
                     v["entity"] = slug
                     out.append(v)
+            for v in check_projection(page, docs):
+                v["entity"] = slug
+                out.append(v)
     return out
 
 

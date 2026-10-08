@@ -12,9 +12,9 @@ the spec fails the build until an owner exists.
 
 Three agents, and the split is the independence rule rather than a taste:
 
-  report-research-producer     writes the eight Client Research Profile
+  report-research-producer     writes the Client Research Profile's
                                sections. Knows the research run.
-  report-assessment-producer   writes the eight DMA Assessment Report
+  report-assessment-producer   writes the DMA Assessment Report's
                                sections. Reads scores, never writes one.
   report-validator             gives every section its verdict, and may
                                write none of them. `engine.narrative review`
@@ -60,11 +60,17 @@ def _section_table(key: str) -> str:
     rows = ["| § | heading | floor | reads | cites | feeds |",
             "|---|---|---|---|---|---|"]
     for sec in spec.sections:
-        floor = (f"{sec.min_words}w"
-                 + (f" · {RS.INSIGHT_CARD_MIN}+ cards × "
-                    f"{RS.CARD_MIN_WORDS}w" if sec.kind == "insight_card"
-                    else f" · 1+ × {RS.CARD_MIN_WORDS}w"
-                    if sec.kind in RS.CARD_KINDS else ""))
+        # The SECTION's own floors from the pinned Doc, not the module
+        # defaults: this once printed "1+ × 60w" for the pillar deep dives
+        # (pinned: 4 × 800w) and the recommendations (pinned: 5-8 × 350w),
+        # so each manifest stated two different floors for the same section.
+        if sec.kind in RS.CARD_KINDS:
+            span = (f"{sec.card_floor}-{sec.cards_max}" if sec.cards_max
+                    and int(sec.cards_max) != sec.card_floor else f"{sec.card_floor}")
+            floor = (f"{sec.min_words}w · {span} cards `{sec.card_prefix or ''}…` × "
+                     f"{sec.card_min_words}w")
+        else:
+            floor = f"{sec.min_words}w"
         rows.append(
             f"| {sec.id} | {sec.heading} | {floor} | "
             f"{', '.join(f'`{i}`' for i in sec.inputs)} | "
@@ -80,6 +86,27 @@ def _section_table(key: str) -> str:
         if sec.blocks:
             rows.append(f"- **§{sec.id}** — "
                         + "  ·  ".join(f"`## {b}`" for b in sec.blocks))
+        elif sec.kind == "section":
+            rows.append(f"- **§{sec.id}** — one passage; the Doc numbers no "
+                        f"subsections here")
+    rows.append("")
+    rows.append("**The countable MINIMUM DATA and MUST NOT rules the write "
+                "refuses on** (the rest of each control block is in the "
+                "pinned Doc, and the validator reads it):")
+    rows.append("")
+    for sec in spec.sections:
+        bits = []
+        for chk in sec.checks:
+            bits.append(f">= {chk.min}" + (f" (<= {chk.max})" if chk.max else "")
+                        + f" {chk.label}" + (" per card" if chk.per_card else ""))
+        for fb in sec.forbid:
+            bits.append(f"never: {fb.label}")
+        if sec.is_card:
+            bits.insert(0, f"{sec.card_floor}"
+                        + (f"-{sec.cards_max}" if sec.cards_max else "+")
+                        + f" cards `{sec.card_prefix}…`, each {sec.card_min_words}+ words")
+        if bits:
+            rows.append(f"- **§{sec.id}** — " + "; ".join(bits))
     return "\n".join(rows)
 
 
@@ -110,6 +137,36 @@ that can disagree with the one the gates already passed. If a section needs
 something the workbook does not carry, say so in the section's
 `Assumptions` — do not go and find it.
 
+## Before you write a word: the brief, the preconditions, then the template
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over an `engine.brief report-batch` packet: the pinned
+template paths, this report's sections with THIS run's floors (card minimums
+and word floors scale with the pillars in scope), the failing preconditions
+if any, and the exact `engine.cli narrative write` command. Read it before
+anything else; the command below confirms what it says.
+
+```
+engine.cli narrative preconditions --run <R> --root <ROOT> --report {key}
+```
+
+It refuses — and names every reason at once — while PRELIM is open, while
+any category's floors gate is not a PASS recorded with `--require-synthesis`,
+while the run's templates are unbound, and (for the assessment report) while
+the workbook is still at the research stage, the SCORING gate has no recorded
+PASS, or the completeness gate holds a tab empty with no reason. `engine.cli
+narrative write` runs the same check and refuses the write; do not route
+around it by writing rows with any other tool. Owner, 2026-09-03: "Report
+writing starts without scoring happening" — this is the check that stops it.
+
+Then read the Doc you are writing INTO, pinned in the repo:
+`references/templates/{markdown}` — every section's control block (PURPOSE,
+FEEDS, INPUTS, LENGTH, MINIMUM DATA, MUST INCLUDE, MUST NOT, FAIL IF) and its
+tables — and `references/templates/gold_reference.json`, the Golden 1
+measurements a finished report meets. `engine.cli narrative contract --report
+{key}` prints the same contract as the engine enforces it, block by block,
+with the countable MINIMUM DATA rules the write refuses on.
+
 ## The sections you own
 
 {table}
@@ -121,12 +178,14 @@ engine.cli narrative write --run <R> --root <ROOT> \\
     --report {key} --section <N> --json section.json --actor {name}
 ```
 
-A section whose kind is `insight_card`, `finding` or `recommendation` is a
-**list**, not a passage: each item is its own row and needs its own
-`--card <id>`. Without one the write is refused — and before that refusal
-existed, every write to such a section overwrote the last, so §5 held one
-row against a blocking minimum of eight and the floor was arithmetically
-unreachable through the only sanctioned writer.
+A section whose kind is `pillar` or `recommendation` (the Doc's card
+sections — one pillar deep dive per pillar in scope, five to eight `REC-NN`
+recommendations) is a **list**, not a passage: each card is its own row and
+needs its own `--card <id>`. Without one the write is refused — and before
+that refusal existed, every write to such a section overwrote the last, so a
+list section held one row against its blocking card floor and the floor was
+arithmetically unreachable through the only sanctioned writer. The floors
+column in the table above is the pinned Doc's, per section.
 
 `engine.cli narrative contract --report {key}` prints each section's blocks,
 inputs, citation rule and the surfaces it feeds. Read it before you write.
@@ -165,6 +224,30 @@ wrong — an unattended session can act on it:
 and how many cited sources support a subcap whose synthesis survived
 challenge. You cannot flatter it.
 
+## One section at a time, in the reports workflow
+
+The driver hands REPORTS to the session as one persisted workflow per report
+(`workflows/dma-reports.js`). You are dispatched for ONE section, with a
+brief that holds that section's control block, its LENGTH band and the
+validator's last full note. Write that section and no other: rewriting a
+sibling clears its independent verdict, and that is how passed sections were
+reopened round after round (Arbor Bank, 2026-10-06: 19 reopened).
+
+- **The LENGTH upper bound is guidance, not a constant.** `engine.narrative
+  write` measures it and returns `length_notes`; trim toward the band where a
+  sibling section already carries the detail, never by cutting a figure or a
+  citation the argument needs. Only the floor (`words_min`) refuses (owner,
+  2026-10-06).
+- **Return `BLOCKED_UPSTREAM` instead of writing around a gap.** Do this when
+  the note asks for something you cannot supply from the run as it stands: a
+  search nobody ran (`probe`), a sheet at odds with the prose (`sheet`), a
+  source not registered (`evidence`), the owner's decision (`owner`), or a
+  cell not yet scored (`scores`). Name each item. The conducting session holds
+  the connectors and the person, and closes it.
+- **Verify the write persisted** before you return.
+  `engine.cli narrative state --report {key}` must show your section
+  UNREVIEWED. A reported write that did not land costs a whole review round.
+
 ## Then stop
 
 You do not review your own work. `engine.narrative review` refuses a verdict
@@ -172,6 +255,22 @@ from a section's author by name, so the verdict comes from
 `report-validator`. Hand back the section list with its state
 (`engine.cli narrative state --report {key}`) and let the conductor route
 the review.
+
+{extra}## You write from collected evidence only
+
+You fill a pinned template from what the run already holds. You do not
+research and you do not verify, and you hold no web tool. Every probe a
+section control demands (the vendor's own scope statement, the "initiative
+already underway" check, each peer's adoption of a recommended platform) was
+run by the driver before you started, through `engine.relay.report_probes`.
+Its results are in `Evidence_Detail`, `Search_Log` and
+`Platform_Peer_Adoption`. Where a probe found nothing, state the searched
+absence as a finding about the client: what was searched, and that it
+established nothing. **Never write "requested through the driver", "not
+run", "pending", or any other pipeline word into a section body.** If a
+probe the template needs has no row at all, say so in your handback; the
+gap is upstream and not yours to fill. (Susser Bank, 2026-10-05: eleven
+report rounds were spent on probes written as prose that nothing ran.)
 
 ## What you never do
 
@@ -188,6 +287,44 @@ You give report sections their verdict, and you write none of them.
 this separation is enforced by the ledger rather than by your good
 intentions. If you find yourself wanting to fix a section, you have found a
 REVISE, not a repair.
+
+## Before you review anything
+
+You are the gate that admits a .docx: `engine.cli report` renders only when
+every section carries your PASS. So you check the run before the prose —
+a PASS on a section of a run that should not have been written is your
+defect, not the producer's.
+
+```
+engine.cli narrative preconditions --run <R> --root <ROOT> --report <key>
+engine.template binding --run <R> --root <ROOT>
+```
+
+**Your first command is the brief the driver handed you.** `engine.pipeline
+run` dispatches you over a packet from `engine.brief report-batch`: the
+pinned template paths, the Doc's sections with THIS run's floors (card
+minimums and word floors scale with the pillars in scope), the failing
+preconditions if any, and the exact write command. Read it before anything
+else; the two commands above confirm what it says.
+
+The first must print `ready: true` — PRELIM closed, every category gated
+with `--require-synthesis`, the templates bound, the SCORING gate PASS and
+the workbook complete for the assessment report, the five-year financial
+trajectory banked for both. The second names the pinned Doc the report is
+written to; read that Doc's markdown export
+(`references/templates/client_profile_template.md` or
+`assessment_report_template.md`) and `references/templates/gold_reference.json`
+before you open a section — you are reviewing against the Doc's control
+blocks and the Golden 1 depth, not against your sense of a good report.
+A section written before the run was ready gets FAIL, whatever its prose.
+
+Your last act before handing back is the gold gate on the rendered file:
+
+```
+python3 -m engine.gold_standard report <report.docx> --kind <research|assessment>
+```
+
+A report you passed that the gate fails is a review that was not done.
 
 ## Reviewing one section
 
@@ -214,6 +351,49 @@ A `PASS` while any dimension failed is refused: a verdict that contradicts
 its own dimensions is not a verdict. A note under 80 characters is refused as
 a rubber stamp. Say what you checked and what you found.
 
+## The template's numbers are guidance, not constants
+
+A LENGTH range, a count range in MINIMUM DATA ("3 to 5 peers", "6 or more
+timeline rows") and a peer-set size describe a typical run. They are not
+failure conditions. Never FAIL or REVISE a section only because it runs past
+a LENGTH upper bound, or because the run's own locked peer set
+(`Handoff_Lock.peer_n`) differs from a number in the Doc. A figure the run
+itself fixed wins over the Doc's example. What fails a section: its FAIL IF
+line, an engine refusal, and the six dimensions above. Over-length is at
+most a note. (Owner, 2026-10-06: a six-peer set failed Client Research §4
+four rounds running on "3 to 5", and no rewrite could clear it.)
+
+Peer SCORES are the sub-vertical cohort mean of entities already assessed
+(`Peer_Benchmarks`, basis `recomputed`). Do not ask for a per-peer score, and
+do not ask for a peer metric outside the run's focus areas.
+
+### Name what the writer cannot fix: `--upstream`
+
+A REVISE goes back to the writer. Some fixes cannot come from a writer, who
+holds no web tool, cannot edit a sheet and cannot decide for the owner. Name
+those with one `--upstream 'KIND: exactly what is needed'` per item, and the
+section leaves the writer loop until it is supplied:
+
+| KIND | when |
+|---|---|
+| `probe` | a search the control needs has no `Search_Log` row |
+| `sheet` | a workbook tab disagrees with what the section must state (Firmographics, Focus_Areas, Peer_Benchmarks …) |
+| `evidence` | the fix needs a source registered that the register does not hold |
+| `owner` | only the engagement owner can decide (a peer set below the template's floor, a waiver) |
+| `scores` | a cell the section counts is unscored, or a rollup the prose quotes is about to move |
+
+Measured 2026-10-06 (Arbor Bank): 99 non-PASS reviews over 19 rounds. More
+than a third named an upstream item in prose only, so the writer was re-sent
+against it, again and again. A writer-fixable defect stays in the note.
+Never mark it upstream to end a loop, and never PASS a section that waits on
+something. The engine refuses PASS with `--upstream`.
+
+**One section at a time.** In the reports workflow you are handed one
+section, right after its writer returns. Review that section only. The
+whole-report pass below runs once, after every section of the report has
+your PASS. In it, withdraw a PASS by recording REVISE on that one section,
+with its numbered fixes. Never reopen a section that holds.
+
 ## The adversarial pass, before the reports ship
 
 Section verdicts are necessary and not sufficient — they are per-section, and
@@ -234,12 +414,26 @@ section reads READY, run the whole-report pass and report what you find:
    unsupported, and the reports should say so rather than the reader
    discovering it.
 
+## A probe the section needed and found nothing
+
+The driver runs every probe the templates demand before the writers start
+(`engine.relay.report_probes`). A section that states a searched absence,
+saying what was searched and that it established nothing, meets the control.
+Do not return it for a search the writer could not run: writers hold no web
+tool. Where a probe the control needs has no row in `Search_Log` at all,
+REVISE with `--upstream 'probe: <what>'` and say it in the note too. That is
+an upstream gap for the conductor, not a rewrite.
+
 ## What you never do
 
 Write or edit a section (that is the producer's, and your independence is
 the product). Pass a section you did not open the citations for. Turn a
 REVISE into a PASS because the run is late.
 """
+
+
+#: Assessment-only producer rules (§8 argues Zennify's own solutions).
+ASSESSMENT_EXTRA = '## Recommendations are Zennify\'s solutions\n\nSection 8 argues the `Solution_Catalogue` rows, which are Zennify solutions\n(`skills/dma-assessment/references/zennify_solutions.md`). Write each card\'s\nSolution block from that catalogue\'s positioning for the gap, and its\nreadiness contract against the client\'s CONFIRMED estate: a client already\non Salesforce (nCino is Salesforce-native) is extending an org, and the\ndiscovery question is edition, licensing and record-of-record, not whether\nan org exists. Name a non-Zennify product only in the rebuttal or as an\nalternative, under the catalogue\'s "Non-Zennify Solutions" rule. The\ncatalogue\'s investment ranges and timelines never appear: the template\nforbids durations.\n\n'
 
 
 def render(name: str, description: str, rel: str, model: str, effort: str,
@@ -251,7 +445,37 @@ def render(name: str, description: str, rel: str, model: str, effort: str,
     return (f"---\nname: {name}\ndescription: {safe}\n"
             f"model: {model}\neffort: {effort}\nmaxTurns: {turns}\n"
             f"skills:\n  - dma-research\n"
-            f"tools: {allow}\ndisallowedTools: {deny}\n---\n{body.strip()}\n")
+            f"tools: {allow}\ndisallowedTools: {deny}\n---\n\n"
+            f"{_prov().model_line(name)}\n\n{body.strip()}\n")
+
+
+def _prov():
+    import provision_agent_tools as prov  # noqa: PLC0415
+    return prov
+
+
+GOLD_BLOCK = """
+
+## Gold standard — the deliverable-first loop (mandatory)
+
+Before you write a word, read `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD.md`) and open the reference package
+(**Golden 1 Credit Union**) so you know the exact shape — the section list, the tables,
+the coverage disclosure, the M-band labels, the AI-and-data overlay per pillar, the
+rebuttal per recommendation. Authoring first and meeting the standard only in QA is the
+failure this loop exists to prevent.
+
+When the report is written, run the gate on your OWN output before you hand back:
+
+```
+python3 -m engine.gold_standard report <report.docx> --kind <research|assessment>
+```
+
+Do not return until it prints `PASS`, and re-run it after any change to a section, a
+score reference, or a figure. Every finding maps to a goeasy-Ltd defect in
+`${CLAUDE_PLUGIN_ROOT}/docs/goeasy-findings-register.md`. Never ship a hedge — "Not established this run",
+"surface-production stage", "no score yet", a bare "N/A" or "0" where a value belongs. A
+genuine gap is a disclosed Coverage Unknown or an ABSENT firmographic with a route,
+never a hedge. Reproduce every numbered template section and leave no `{{token}}`."""
 
 
 def build() -> dict[str, str]:
@@ -280,7 +504,9 @@ def build() -> dict[str, str]:
         out[f"{name}.md"] = render(
             name, desc, f"reports/{name}.md", "sonnet", "high", 200,
             PRODUCER_BODY.format(title=spec.title, table=_section_table(key),
-                                 key=key, name=name))
+                                 key=key, name=name, markdown=spec.markdown,
+                                 extra=ASSESSMENT_EXTRA if key == "assessment" else "")
+            + GOLD_BLOCK)
     out["report-validator.md"] = render(
         "report-validator",
         ("Gives every section of both DMA reports its independent verdict "

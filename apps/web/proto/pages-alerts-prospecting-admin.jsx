@@ -127,11 +127,11 @@ function ProspectingPage() {
     <PageShell title="Prospecting" crumbs={[{ label: "Prospecting" }]}>
       <div className="page-head">
         <div>
-          <div className="eyebrow">Customer-safe export</div>
+          <div className="eyebrow">Client-safe export</div>
           <h1>Prospecting</h1>
           <div className="sub">Search → one-page scorecard → export PDF or HTML</div>
         </div>
-        <span className="b b-org" style={{ alignSelf: "center" }}><Icon name="lock" size={10} /> CUSTOMER-SAFE MODE</span>
+        <span className="b b-org" style={{ alignSelf: "center" }}><Icon name="lock" size={10} /> CLIENT-SAFE MODE</span>
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
@@ -143,7 +143,7 @@ function ProspectingPage() {
               {matches.map(e => (
                 <button key={e.id} style={{ display: "flex", width: "100%", padding: "10px 14px", borderBottom: "1px solid var(--z-sep)", textAlign: "left", gap: 12, alignItems: "center" }} onClick={() => { setPicked(e); setQ(""); setDownloadReady(false); }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{e.name}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{entityName(e)}</div>
                     <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{DMA.SUBVERTICAL_LABEL[e.subvertical]} · {e.hq}</div>
                   </div>
                   <MaturityChip score={e.overall} />
@@ -161,12 +161,12 @@ function ProspectingPage() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="row" style={{ marginBottom: 14 }}>
             <Icon name="evidence" size={16} />
-            <div style={{ fontWeight: 600, fontSize: 13 }}>Scorecard preview · always Customer View</div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Scorecard preview · always Client view</div>
             <span className="spacer" />
             <button className="btn btn-tertiary" disabled={exporting} onClick={() => { setExporting(true); setTimeout(() => { setExporting(false); setDownloadReady(true); }, 1400); }}>
               {exporting ? <span className="row"><span className="skel" style={{ width: 12, height: 12, borderRadius: 6 }} /> Generating…</span> : <><Icon name="download" size={13} /> Export PDF</>}
             </button>
-            <button className="btn btn-secondary" onClick={() => pushToast(`Downloaded standalone HTML scorecard · ${picked.name}`, "success")}><Icon name="download" size={13} /> Download HTML</button>
+            <button className="btn btn-secondary" onClick={() => pushToast(`Downloaded standalone HTML scorecard · ${entityName(picked)}`, "success")}><Icon name="download" size={13} /> Download HTML</button>
           </div>
           {downloadReady ? (
             <div className="co co-teal" style={{ marginBottom: 14 }}>
@@ -180,7 +180,7 @@ function ProspectingPage() {
         <div className="empty">
           <div className="icon"><Icon name="envelope" size={22} /></div>
           <h3>Search to begin</h3>
-          <p>Search the institution name to load a one-page scorecard. The export is always Customer-safe - internal fields are stripped.</p>
+          <p>Search the institution name to load a one-page scorecard. The export is always client-safe - internal fields are stripped.</p>
         </div>
       )}
     </PageShell>
@@ -193,7 +193,7 @@ function ScorecardPreview({ e }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
         <div>
           <div style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".1em" }}>Zennify · DMA Scorecard</div>
-          <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4 }}>{e.name}</div>
+          <div style={{ fontSize: 24, fontWeight: 600, marginTop: 4 }}>{entityName(e)}</div>
           {/* Joined from the parts the entity actually states — fmtAssets now
               returns null for an absent figure (it used to return "-"), and a
               null inside this row previously would have printed the WORD
@@ -387,110 +387,158 @@ function LiveImportStream() {
 /* ── Editable users & roles (Admin) ──────────────────────────────── */
 function AdminUsersCard() {
   const { pushToast } = useApp();
-  // Production divergence: LIVE mode renders the REAL role grants the
-  // server resolves sign-ins against (DMA_LIVE.role_grants, admin
-  // sessions only) — read-only until the users table lands; grants
-  // change via deployment env, never via this card. The mutable mock
-  // roster renders solely in local preview.
   const LIVE = !!window.DMA_LIVE;
-  const liveGrantRows = (() => {
-    if (!LIVE) return null;
-    const g = window.DMA_LIVE.role_grants;
-    if (!g) return [];
-    const nameOf = (e) => {
-      const parts = e.split("@")[0].split(/[._-]+/).filter(Boolean);
-      if (parts.length === 1 && parts[0].length <= 3) return parts[0].toUpperCase();
-      return parts.map(w => w[0].toUpperCase() + w.slice(1)).join(" ") || e;
-    };
-    const me = sessionUser().email;
-    const rows = [];
-    // Last-active is not an enrichable field: a deploy-time grant carries no
-    // sign-in history until the users table lands, so the honest word is that
-    // nothing recorded it, not a gap anyone can queue against the connector.
-    g.admins.forEach((e, i) => rows.push({ id: `adm-${i}`, name: nameOf(e), email: e, role: "ADMIN", active: true, last: e === me ? "now (this session)" : "Not recorded" }));
-    g.analysts.filter(e => !g.admins.includes(e)).forEach((e, i) =>
-      rows.push({ id: `ana-${i}`, name: nameOf(e), email: e, role: "ANALYST", active: true, last: e === me ? "now (this session)" : "Not recorded" }));
-    return rows;
-  })();
-  const [users, setUsers] = useState(LIVE ? (liveGrantRows || []) : [
-    { id: 1, name: "Mishley Andrade", email: "mishley@zennify.com", role: "ANALYST", active: true,  last: "2 min ago"  },
-    { id: 2, name: "Dev Patel",       email: "dev@zennify.com",     role: "ADMIN",   active: true,  last: "1 hr ago"   },
-    { id: 3, name: "Sara Lin",        email: "sara@zennify.com",    role: "AE",      active: true,  last: "Yesterday"  },
-    { id: 4, name: "Tom Reyes",       email: "tom@zennify.com",     role: "AE",      active: false, last: "3 wk ago"   },
+  // "Last active" reads the usage telemetry's last-seen (pages-admin-usage.jsx,
+  // one shared fetch with the glance card).
+  const usage = window.useUsageModel ? window.useUsageModel(7) : { status: "not_configured" };
+  const me = sessionUser().email;
+  // Production: the roster is the users table (svc_api /v1/admin/users, owner
+  // adjudication 2026-10-07). Every change is a real write the API records in
+  // session_log; the person's new role applies on their next page load.
+  // Local preview keeps the prototype's in-memory roster.
+  const [live, setLive] = useState({ status: LIVE ? "loading" : "ok", users: [], floor: [] });
+  const [busy, setBusy] = useState(null);
+  const [mock, setMock] = useState([
+    { email: "mishley@zennify.com", display_name: "Mishley Andrade", role: "ANALYST", is_active: true, last: "2 min ago" },
+    { email: "dev@zennify.com",     display_name: "Dev Patel",       role: "ADMIN",   is_active: true, last: "1 hr ago" },
+    { email: "sara@zennify.com",    display_name: "Sara Lin",        role: "AE",      is_active: true, last: "Yesterday" },
+    { email: "tom@zennify.com",     display_name: "Tom Reyes",       role: "AE",      is_active: false, last: "3 wk ago" },
   ]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("AE");
 
-  const setRole = (id, role) => {
-    if (LIVE) { pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn"); return; }
-    setUsers(us => us.map(u => u.id === id ? { ...u, role } : u)); pushToast(`Role updated to ${role}`, "success");
+  const load = () => fetch("/api/admin/users", { cache: "no-store" })
+    .then(r => r.json().then(b => ({ ok: r.ok, b })))
+    .then(({ ok, b }) => setLive(ok ? { status: "ok", users: b.users || [], floor: b.owner_floor || [] }
+                                    : { status: "error", detail: b.detail || b.error, users: [], floor: [] }))
+    .catch(() => setLive({ status: "error", detail: "The users service did not answer.", users: [], floor: [] }));
+  useEffect(() => { if (LIVE) load(); }, []);
+
+  const roleWord = r => ({ AE: "AE", ANALYST: "Analyst", ADMIN: "Admin" }[r] || r);
+  const nameOf = e => { const p = e.split("@")[0].split(/[._-]+/).filter(Boolean); return p.length === 1 && p[0].length <= 3 ? p[0].toUpperCase() : p.map(w => w[0].toUpperCase() + w.slice(1)).join(" "); };
+  const seen = LIVE && usage.status === "ok" ? usage.lastSeen : {};
+
+  // Everyone with a row, plus everyone the usage log has seen active without
+  // one: they are AEs by default, and giving them a role creates their row.
+  const users = LIVE ? (() => {
+    const rows = live.users.map(u => ({ ...u, known: true }));
+    const have = new Set(rows.map(u => u.email));
+    Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE", is_active: true, signed_in: true, known: false }); });
+    return rows;
+  })() : mock;
+
+  const lastActive = u => {
+    if (!LIVE) return u.last;
+    if (u.email === me) return "now (this session)";
+    const s = seen[u.email];
+    if (s) return window.uaRel(s, false, usage.now);
+    if (u.last_seen_at) return window.uaRel(new Date(u.last_seen_at), false, new Date());
+    // Activity, not sign-ins: people stay signed in for days, so the only
+    // honest "last active" is the last usage event the log recorded.
+    return usage.status === "ok" ? "No activity yet" : "Not recorded";
   };
-  const toggleActive = (id) => {
-    if (LIVE) { pushToast("Grants are set per deployment (ADMIN_EMAILS / ANALYST_EMAILS) until the users table lands", "warn"); return; }
-    setUsers(us => us.map(u => u.id === id ? (pushToast(`${u.name} ${u.active ? "deactivated" : "reactivated"}`, u.active ? "warn" : "success"), { ...u, active: !u.active }) : u));
+  const locked = u => LIVE && live.floor.includes(u.email) ? "Owner account (ADMIN_EMAILS): always an active Admin"
+    : u.email === me ? "Your own access: ask another Admin to change it" : null;
+
+  const apply = (email, change, done) => {
+    if (!LIVE) {
+      setMock(us => us.some(u => u.email === email) ? us.map(u => u.email === email ? { ...u, ...change } : u)
+        : [...us, { email, display_name: nameOf(email), role: change.role || "AE", is_active: true, last: "Invited" }]);
+      done(); return;
+    }
+    setBusy(email);
+    fetch("/api/admin/users", { method: "POST", headers: { "content-type": "application/json", "idempotency-key": crypto.randomUUID() },
+                                body: JSON.stringify({ email, ...change }) })
+      .then(r => r.json().then(b => ({ ok: r.ok, b })))
+      .then(({ ok, b }) => {
+        setBusy(null);
+        if (!ok) { pushToast(b.detail || b.error || "The change was refused", "warn"); return; }
+        setLive(l => ({ ...l, users: l.users.some(u => u.email === b.user.email) ? l.users.map(u => u.email === b.user.email ? b.user : u) : [...l.users, b.user] }));
+        done(b);
+      })
+      .catch(() => { setBusy(null); pushToast("The users service did not answer", "warn"); });
   };
+  const after = " · applies on their next page load";
+  const setRole = (u, role) => apply(u.email, { role }, () => pushToast(`${u.display_name || nameOf(u.email)}: role updated to ${roleWord(role)}${LIVE ? after : ""}`, "success"));
+  const toggleActive = u => apply(u.email, { is_active: !u.is_active }, () => pushToast(`${u.display_name || nameOf(u.email)} ${u.is_active ? "deactivated" : "reactivated"}`, u.is_active ? "warn" : "success"));
   const invite = () => {
-    if (LIVE) { pushToast("Invites arrive with the users table; today every @zennify.com Google account signs in as AE automatically", "warn"); return; }
-    const email = inviteEmail.trim();
+    const email = inviteEmail.trim().toLowerCase();
     if (!email) { pushToast("Enter an email to invite", "warn"); return; }
     if (!/@zennify\.com$/i.test(email)) { pushToast("Only @zennify.com addresses can be invited", "warn"); return; }
-    const name = email.split("@")[0].split(".").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-    setUsers(us => [...us, { id: Date.now(), name, email, role: inviteRole, active: true, last: "Invited" }]);
-    pushToast(`Invitation sent to ${email}`, "success");
-    setInviteEmail("");
+    if (users.some(u => u.email === email && u.known !== false)) { pushToast(`${email} is already on the list`, "warn"); return; }
+    apply(email, { role: inviteRole }, () => {
+      pushToast(LIVE ? `${email} added as ${roleWord(inviteRole)}: their Google account opens the app` : `Invitation sent to ${email}`, "success");
+      setInviteEmail("");
+    });
   };
 
   return (
     <div className="card flush" style={{ marginBottom: 16 }}>
       <div className="card-head">
         <div className="row"><Icon name="users" size={14} /><h3>Users &amp; roles</h3></div>
-        <span className="b b-muted">{users.filter(u => u.active).length} active</span>
+        <span className="b b-muted">{users.filter(u => u.is_active).length} active</span>
       </div>
+      {LIVE && live.status !== "ok" ? (
+        <div className="card-body" style={{ fontSize: 12, color: "var(--z-body)", display: "flex", gap: 8, alignItems: "flex-start" }}>
+          {live.status === "loading" ? <span className="spinner" /> : <Icon name="info" size={13} style={{ flexShrink: 0, marginTop: 1 }} />}
+          <span>{live.status === "loading" ? "Loading users…" : <>The users list could not be read. <span className="f-mono" style={{ fontSize: 10.5, color: "var(--z-muted)" }}>{live.detail}</span></>}</span>
+        </div>
+      ) : (
       <div style={{ overflowX: "auto" }}>
         <table className="tbl">
           <thead><tr><th>User</th><th>Role</th><th>Last active</th><th>Status</th><th style={{ textAlign: "right" }}>Action</th></tr></thead>
           <tbody>
-            {users.map(u => (
-              <tr key={u.id} style={{ opacity: u.active ? 1 : 0.55 }}>
+            {users.map(u => { const lock = locked(u); const name = u.display_name || nameOf(u.email); return (
+              <tr key={u.email} style={{ opacity: u.is_active ? 1 : 0.55 }}>
                 <td data-label="User">
-                  <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{u.name}</div>
+                  <div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{name}</div>
                   <div className="f-mono" style={{ fontSize: 10, color: "var(--z-muted)" }}>{u.email}</div>
                 </td>
                 <td data-label="Role">
-                  <select className="inp inp-sm" value={u.role} onChange={e => setRole(u.id, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${u.name}`}>
+                  <select className="inp inp-sm" value={u.role} disabled={!!lock || busy === u.email} title={lock || undefined} onChange={e => setRole(u, e.target.value)} style={{ maxWidth: 130 }} aria-label={`Role for ${name}`}>
                     <option value="AE">AE</option>
                     <option value="ANALYST">Analyst</option>
                     <option value="ADMIN">Admin</option>
                   </select>
                 </td>
-                <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{u.last}</td>
-                <td data-label="Status"><span className={`b ${u.active ? "b-above" : "b-muted"}`}>{u.active ? "Active" : "Deactivated"}</span></td>
+                <td data-label="Last active" style={{ fontSize: 11.5, color: "var(--z-muted)" }}>{lastActive(u)}</td>
+                <td data-label="Status"><span className={`b ${u.is_active ? "b-above" : "b-muted"}`}>{u.is_active ? "Active" : "Deactivated"}</span></td>
                 <td data-label="Action" style={{ textAlign: "right" }}>
-                  <button className="btn btn-tertiary btn-sm" onClick={() => toggleActive(u.id)}>{u.active ? "Deactivate" : "Reactivate"}</button>
+                  {lock ? <span className="b b-muted" title={lock} style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> {u.email === me ? "You" : "Owner"}</span>
+                    : <button className="btn btn-tertiary btn-sm" disabled={busy === u.email} onClick={() => toggleActive(u)}>{busy === u.email ? <span className="spinner" /> : (u.is_active ? "Deactivate" : "Reactivate")}</button>}
                 </td>
               </tr>
-            ))}
+            ); })}
           </tbody>
         </table>
       </div>
-      {LIVE ? (
-        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", fontSize: 11.5, color: "var(--z-muted)", display: "flex", gap: 8, alignItems: "flex-start" }}>
-          <Icon name="info" size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-          <span>Every other @zennify.com Google account signs in as <strong>AE</strong> automatically. ADMIN and ANALYST are deploy-time grants (ADMIN_EMAILS / ANALYST_EMAILS); per-user management arrives with the users table.</span>
-        </div>
-      ) : (
-        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-          <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
-          <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
-            <option value="AE">AE</option>
-            <option value="ANALYST">Analyst</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-          <button className="btn btn-primary btn-sm" onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
-        </div>
       )}
+      <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <input className="inp inp-sm" style={{ flex: 1, minWidth: 200 }} placeholder="name@zennify.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => { if (e.key === "Enter") invite(); }} />
+        <select className="inp inp-sm" value={inviteRole} onChange={e => setInviteRole(e.target.value)} style={{ maxWidth: 130 }} aria-label="Invite role">
+          <option value="AE">AE</option>
+          <option value="ANALYST">Analyst</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+        <button className="btn btn-primary btn-sm" disabled={LIVE && live.status !== "ok"} onClick={invite}><Icon name="plus" size={12} /> Invite user</button>
+      </div>
+      {LIVE ? (
+        <div className="card-body" style={{ borderTop: "1px solid var(--z-sep)", fontSize: 11, color: "var(--z-muted)" }}>
+          Any other @zennify.com Google account signs in as an <strong>AE</strong>. A role change applies on that person's next page load; a deactivated account is turned away at its next load.
+        </div>
+      ) : null}
     </div>
   );
+}
+
+/* The last package-scan execution as one line: when it started and what the
+   ledger says it did. A row the Job never finished says so — "running or
+   died" is a different fact from a completed scan. */
+function lastScanLabel(s) {
+  if (!s || !s.started_at) return "No scans recorded yet";
+  const when = new Date(s.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  if (!s.finished_at) return `Last scan ${when} · not finished`;
+  return `Last scan ${when} · ${(s.status || "").toLowerCase() || "status not recorded"}`;
 }
 
 /* ── /admin home + import + audit ────────────────────────────────── */
@@ -535,12 +583,30 @@ function AdminPage() {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" disabled={scanning} onClick={() => runScan("delta")}>{scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={13} /> Delta scan</>}</button>
-          <button className="btn btn-primary" onClick={() => navigate("/admin/import")}><Icon name="play" size={13} /> Import &amp; jobs</button>
+          {/* Production divergence: Import & jobs is not served in production
+              (adminRouteHidden) — usage analytics takes the primary slot. */}
+          {LIVE ? (
+            <button className="btn btn-primary" onClick={() => navigate("/admin/usage")}><Icon name="users" size={13} /> Usage analytics</button>
+          ) : (
+            <>
+              <button className="btn btn-secondary" onClick={() => navigate("/admin/usage")}><Icon name="users" size={13} /> Usage analytics</button>
+              <button className="btn btn-primary" onClick={() => navigate("/admin/import")}><Icon name="play" size={13} /> Import &amp; jobs</button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* PENDING_REVIEW entities */}
-      <div className="card flush" style={{ marginBottom: 16 }}>
+      {/* Usage at a glance — full view at /admin/usage (pages-admin-usage.jsx) */}
+      {window.UsageGlanceCard ? <window.UsageGlanceCard /> : null}
+
+      {/* Client links: who was given a client dashboard, and taking it back
+          (pages-admin-share.jsx, lib/share-ledger.js). */}
+      {window.ShareLinksCard ? <window.ShareLinksCard /> : null}
+
+      {/* PENDING_REVIEW entities. Production divergence: hidden. The live
+          pipeline has no Phase 0 entity-inference step — the API always
+          returns an empty list and Confirm/Reject wrote nothing. */}
+      {LIVE ? null : <div className="card flush" style={{ marginBottom: 16 }}>
         <div className="card-head"><div className="row"><Icon name="users" size={14} /><h3>Pending review · Phase 0 entity inferences</h3></div><span className="b b-org">{DMA.PENDING_REVIEW.length} entities</span></div>
         <div className="card-body">
           {DMA.PENDING_REVIEW.map(e => (
@@ -562,7 +628,7 @@ function AdminPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Editable users & roles */}
       <AdminUsersCard />
@@ -573,7 +639,9 @@ function AdminPage() {
             <Icon name="drive" size={16} />
             <div style={{ fontWeight: 600, fontSize: 13 }}>Drive crawl</div>
             <span className="spacer" />
-            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{LIVE ? "History → Import audit" : "Last crawl 2 hr ago"}</span>
+            {/* Production divergence: the job-history page is not served, so
+                the last REAL scan-ledger row is stated here instead. */}
+            <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{LIVE ? lastScanLabel((window.DMA_LIVE.import_scans || [])[0]) : "Last crawl 2 hr ago"}</span>
           </div>
 
           {/* Target folder: in production this is the deployed intake
@@ -590,7 +658,7 @@ function AdminPage() {
               <>
                 <span className="f-mono" style={{ flex: 1, fontSize: 12, padding: "7px 10px", background: "var(--z-bg)", borderRadius: 6, border: "1px solid var(--z-sep)" }}>{folder}</span>
                 {LIVE ? (
-                  <button className="btn btn-tertiary btn-sm" onClick={() => pushToast("The intake folder is set on the worker Job (INTAKE_FOLDER_ID) at deploy time", "warn")}><Icon name="lock" size={12} /> Deploy-set</button>
+                  <span className="b b-muted" title="Set on the worker Job (INTAKE_FOLDER_ID) at deploy time" style={{ display: "inline-flex", gap: 4, alignItems: "center" }}><Icon name="lock" size={11} /> Deploy-set</span>
                 ) : (
                   <button className="btn btn-tertiary btn-sm" onClick={() => setEditingFolder(true)}><Icon name="edit" size={12} /> Edit</button>
                 )}
@@ -615,9 +683,15 @@ function AdminPage() {
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-primary btn-sm" disabled={scanning} onClick={() => runScan("delta")}>{scanning ? <><span className="spinner" /> Scanning…</> : <><Icon name="refresh" size={12} /> Delta scan</>}</button>
-            <button className="btn btn-tertiary btn-sm" disabled={scanning} onClick={() => runScan("full")}>Full re-scan…</button>
-            <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import/audit")}>Import audit →</button>
-            <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import")}>Job history →</button>
+            {/* Production divergence: "Full re-scan" fired the same Job as the
+                delta scan, and the two links led to pages not served. */}
+            {LIVE ? null : (
+              <>
+                <button className="btn btn-tertiary btn-sm" disabled={scanning} onClick={() => runScan("full")}>Full re-scan…</button>
+                <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import/audit")}>Import audit →</button>
+                <button className="btn btn-tertiary btn-sm" onClick={() => navigate("/admin/import")}>Job history →</button>
+              </>
+            )}
           </div>
         </div>
 
@@ -927,4 +1001,4 @@ function ImportAuditPage() {
   );
 }
 
-Object.assign(window, { AlertsPage, ProspectingPage, AdminPage, ImportPage, ImportAuditPage });
+Object.assign(window, { AlertsPage, ProspectingPage, AdminPage, ImportPage, ImportAuditPage, lastScanLabel });

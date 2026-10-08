@@ -94,7 +94,55 @@ INTERNAL_FIELDS = ("ers", "specificity", "corroboration", "identity_note")
 _COLUMNS = ("e_id", "origin", "source_name", "source_url", "source_domain",
             "excerpt", "claim_type", "tier", "published_date", "reference_date",
             "age_months", "recency_band", "ers", "specificity", "corroboration",
-            "identity_ok", "identity_note")
+            "identity_ok", "identity_note",
+            # 0063 (RC-08 / D-10, decision 3). `customer_attribution` is what
+            # lets a shareable SPLIT span of internal material reach a
+            # customer (redaction.customer_evidence_items); the connector
+            # trio is the provenance of a connector-origin reading. All five
+            # are stripped from every customer item.
+            "customer_attribution", "split_of", "connector_tool",
+            "connector_query", "connector_retrieved_at",
+            # When the span's attribution was minted: what binds it to the
+            # runs promoted after it (`attribution_bound`). Stripped from
+            # every customer item like the rest of the provenance.
+            "customer_attribution_at")
+
+
+def _instant(value):
+    """A timezone-aware datetime from a driver value or an ISO string, or
+    None. Naive is read as UTC — the database's own clock."""
+    from datetime import datetime, timezone
+    if isinstance(value, str):
+        if not value.strip():
+            return None
+        try:
+            value = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if not isinstance(value, datetime):
+        return None
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+
+
+def attribution_bound(attributed_at, promoted_at) -> bool:
+    """May a shareable split span serve under its customer attribution on a
+    run promoted at `promoted_at`?
+
+    Only when the run was promoted AT OR AFTER the span was minted
+    (RC-08 / D-10; adversarial review, 2026-10-04). `evidence_index` is
+    shared by every run of an entity and read live, so without this a span
+    minted while producing a NEW run would change what customers read on the
+    run that is LIVE — and on every historical run citing the same id —
+    outside promotion (invariant 3) and under an unchanged ETag. Bound to the
+    promotion, a span reaches a run's customers only through a promote that
+    could have cited it, and that promote moves `promoted_at`, so the ETag.
+
+    Default-deny: either instant missing or unreadable is not bound.
+    """
+    minted, promoted = _instant(attributed_at), _instant(promoted_at)
+    if minted is None or promoted is None:
+        return False
+    return minted <= promoted
 
 
 def _row_to_item(row: tuple, columns=_COLUMNS) -> dict:
@@ -110,7 +158,8 @@ def _row_to_item(row: tuple, columns=_COLUMNS) -> dict:
     # the artefact and the verifier compares it against those bytes.
     if item.get("source_name"):
         item["source_name"] = _expand_abbrev(item["source_name"], "label")
-    for k in ("published_date", "reference_date"):
+    for k in ("published_date", "reference_date", "connector_retrieved_at",
+              "customer_attribution_at"):
         v = item.get(k)
         item[k] = v.isoformat() if hasattr(v, "isoformat") else v
     for k in ("ers",):
@@ -159,7 +208,7 @@ def cited_by_run(cur, run_id) -> list[str]:
 
 
 def fetch(cur, entity_id, e_ids: list[str] | None = None,
-          run_id=None) -> dict:
+          run_id=None, promoted_at=None) -> dict:
     """Evidence for one run of one entity, optionally filtered to specific ids.
 
     Returns `{items, found, not_found, foreign, distribution}`. The three id
@@ -183,6 +232,11 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
     the id's source and excerpt, and these ids walk back to the cells the item
     actually supports. Read from the link table, never inferred from prose, and
     scoped to the run so a prior run's linkage cannot answer for this one.
+
+    Each item also carries `attribution_bound`: whether a shareable split
+    span may serve under its customer attribution on the run promoted at
+    `promoted_at` (see `attribution_bound`). A caller that passes no
+    promotion gets every span unbound — withheld from a customer.
     """
     columns = _COLUMNS + ("linked_subcap_ids",)
     # LEFT JOIN LATERAL, not a plain join: an item with no linkage yet is still
@@ -197,6 +251,7 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
            + ("    AND k.run_id = %s" if run_id else "")
            + ") l ON TRUE WHERE e.entity_id = %s")
     params: list = ([run_id] if run_id else []) + [entity_id]
+    base_sql, base_params = sql, list(params)
     if e_ids:
         sql += " AND e.e_id = ANY(%s)"
         params.append(list(e_ids))
@@ -210,6 +265,25 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
     sql += " ORDER BY e.tier, e.e_id"
     cur.execute(sql, params)
     items = [_row_to_item(r, columns) for r in cur.fetchall()]
+    # A workbook-local id ('E-047') is a label scoped to ONE client (0036):
+    # pages cite it verbatim and the connector resolves it through
+    # `evidence_package_ids`. Resolve the ones the direct match missed the
+    # same way, entity-scoped by construction, so a cited local id opens its
+    # stored row instead of answering not_found and an empty drawer.
+    local_to_stored: dict = {}
+    if e_ids:
+        direct = {i["e_id"] for i in items}
+        local_to_stored = _local_ids(
+            cur, entity_id, [x for x in e_ids if x not in direct])
+        extra = sorted(set(local_to_stored.values()) - direct)
+        if extra:
+            cur.execute(base_sql + " AND e.e_id = ANY(%s) ORDER BY e.tier, e.e_id",
+                        base_params + [extra])
+            items += [_row_to_item(r, columns) for r in cur.fetchall()]
+    for item in items:
+        item["attribution_bound"] = bool(item.get("customer_attribution")) \
+            and attribution_bound(item.get("customer_attribution_at"),
+                                  promoted_at)
 
     # THE LISTING ONLY, and the asymmetry is the point. A row with no verbatim
     # span that references an artefact a sibling row already quotes adds
@@ -226,11 +300,14 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
     if not e_ids:
         items, merge_report = merge_same_source(items)
 
+    _attach_package_local_ids(cur, entity_id, items)
     found = [i["e_id"] for i in items]
     not_found: list[str] = []
     foreign: list[str] = []
     if e_ids:
-        missing = [x for x in e_ids if x not in set(found)]
+        have = set(found)
+        missing = [x for x in e_ids
+                   if x not in have and local_to_stored.get(x) not in have]
         if missing:
             # An id absent from THIS entity is either unknown or another
             # entity's. The distinction is the whole point of the gate, so it
@@ -247,6 +324,45 @@ def fetch(cur, entity_id, e_ids: list[str] | None = None,
             # indistinguishable from a query that lost rows.
             "merged": merge_report}
 
+
+
+def _local_ids(cur, entity_id, e_ids) -> dict:
+    """{package_local_id: stored e_id} for the requested ids THIS entity's
+    packages numbered. Entity in the WHERE, so another client's 'E-047'
+    can never answer for this one."""
+    wanted = [x for x in (e_ids or []) if x]
+    if not wanted:
+        return {}
+    cur.execute("SELECT package_local_id, e_id FROM evidence_package_ids "
+                "WHERE entity_id = %s AND package_local_id = ANY(%s)",
+                (entity_id, wanted))
+    return {r[0]: r[1] for r in cur.fetchall()}
+
+
+def _attach_package_local_ids(cur, entity_id, items) -> None:
+    """Name, on each item, the workbook-local ids that resolve to it.
+
+    The drawer indexes the listing by id, and promoted pages cite the
+    workbook's own numbers ('E-001') while the store keys the row as
+    'E-CROSSINS-001'. Without these aliases every such chip opened an empty
+    drawer (Cross Insurance, 2026-10-05: 956 citations, 70 ids)."""
+    for item in items:
+        item["package_local_ids"] = []
+    if not items:
+        return
+    # A merged listing row answers for the ids it absorbed (also_filed_as),
+    # so their local numbers are its aliases too.
+    owners = {i["e_id"]: [i["e_id"], *(i.get("also_filed_as") or [])]
+              for i in items}
+    cur.execute("SELECT e_id, array_agg(package_local_id ORDER BY "
+                "package_local_id) FROM evidence_package_ids "
+                "WHERE entity_id = %s AND e_id = ANY(%s) GROUP BY e_id",
+                (entity_id, sorted({x for ids in owners.values() for x in ids})))
+    by_stored = {r[0]: list(r[1] or []) for r in cur.fetchall()}
+    for item in items:
+        mine = owners[item["e_id"]]
+        item["package_local_ids"] = sorted(
+            {a for x in mine for a in by_stored.get(x, []) if a not in mine})
 
 def distribution(items: list[dict]) -> dict:
     """Tier and claim-class counts over the rows just read.
@@ -274,15 +390,18 @@ def distribution(items: list[dict]) -> dict:
 
 
 def redact_items(items: list[dict], audience: str) -> list[dict]:
-    """Strip the internal grading for the customer audience. Server-side and
-    default-deny, like every other redaction in this app: the customer's
-    document never contains the fields, rather than hiding them in the client."""
-    if audience != "customer":
+    """The items `audience` may see. Server-side and default-deny, like every
+    other redaction in this app: any audience that is not exactly `internal`
+    gets the customer rule, and the customer's document never contains what
+    is withheld rather than hiding it in the client.
+
+    The customer rule is `redaction.customer_evidence_items` — the grading,
+    and since 2026-10-02 everything else the page redactor applies: internal
+    -origin rows withheld whole, the vendor / seller / machinery / pipeline
+    vocabulary nets, the excluded key classes. It used to strip only
+    `INTERNAL_FIELDS`, and SWBC's customer drawer served our own discovery
+    write-up."""
+    if audience == "internal":
         return items
-    out = []
-    for i in items:
-        c = dict(i)
-        for k in INTERNAL_FIELDS:
-            c.pop(k, None)
-        out.append(c)
-    return out
+    from .redaction import customer_evidence_items   # redaction imports us
+    return customer_evidence_items(items)[0]

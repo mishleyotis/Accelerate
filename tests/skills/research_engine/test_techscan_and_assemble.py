@@ -24,7 +24,15 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
     wb = run.open()
     cells = wb.selected_subcaps()
     eids = bank_evidence(wb, cells[0])
-    techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami",
+    # With PRELIM on, its baseline already holds Alkami and Snowflake; one
+    # product is one register row, so only what the baseline lacks is added.
+    held = {techscan.product_key(r["Product"]) for r in wb.rows("Tech_Register")}
+
+    def record(**kw):
+        if techscan.product_key(kw["product"]) not in held:
+            techscan.record(wb, **kw)
+
+    record(product="Alkami Digital Banking", vendor="Alkami",
                     layer="CUST", status="CONFIRMED",
                     method="public_document",
                     basis="named live in the 2025 annual report with an "
@@ -32,11 +40,11 @@ def _run_with_scan(tmp_path, n=3, prelim=False):
                     providers=["clay", "exa"],
                     subcaps=[cells[0]], evidence_ids=eids,
                     source_urls=["https://acme.example/ar25"])
-    techscan.record(wb, product="Snowflake", vendor="Snowflake",
+    record(product="Snowflake Data Cloud", vendor="Snowflake",
                     layer="DATA", status="INFERRED", method="job_posting",
                     providers=["indeed"],
                     basis="two 2026 postings name Snowflake administration")
-    techscan.record(wb, product="nCino", vendor="nCino", layer="OPS",
+    record(product="nCino Bank Operating System", vendor="nCino", layer="OPS",
                     status="ABSENT", method="technographic_scan",
                     providers=["explorium"],
                     basis="scan of acme.example plus 4 searches for nCino "
@@ -64,12 +72,12 @@ def test_confirmed_requires_resolvable_evidence(tmp_path):
     """A confirmation nobody can open is a claim wearing a stronger word."""
     run, wb, cells = _run_with_scan(tmp_path)
     with pytest.raises(ScanRefused, match="CONFIRMED requires evidence"):
-        techscan.record(wb, product="Q2", vendor="Q2", layer="CUST",
+        techscan.record(wb, product="Q2 Digital Banking", vendor="Q2", layer="CUST",
                         status="CONFIRMED", method="vendor_announcement",
                         providers=["web"],
                         basis="the vendor's own press release names Acme")
     with pytest.raises(ScanRefused, match="do not resolve"):
-        techscan.record(wb, product="Q2", vendor="Q2", layer="CUST",
+        techscan.record(wb, product="Q2 Digital Banking", vendor="Q2", layer="CUST",
                         status="CONFIRMED", method="vendor_announcement",
                         providers=["web"],
                         basis="the vendor's own press release names Acme",
@@ -81,7 +89,7 @@ def test_absent_must_state_the_search_that_establishes_it(tmp_path):
     facts, and conflating them over-recommended by 28 fit points."""
     run, wb, cells = _run_with_scan(tmp_path)
     with pytest.raises(ScanRefused, match="AUD-0115"):
-        techscan.record(wb, product="Salesforce", vendor="Salesforce",
+        techscan.record(wb, product="Salesforce Financial Services Cloud", vendor="Salesforce",
                         layer="CUST", status="ABSENT",
                         method="technographic_scan", providers=["explorium"],
                         basis="we did not see it anywhere around")
@@ -116,33 +124,26 @@ def test_an_empty_register_refuses_unless_forced_and_then_says_not_run(tmp_path)
 # ── assembly: the four outputs, in the defined folder ────────────────────
 
 def _full_package(tmp_path):
-    from engine import floors_gate, report_spec as RS, reports
+    """The whole real path: researched, gated, SCORED, both reports through
+    the writer under the stage preconditions, the scan rendered, every tab
+    filled or stated."""
+    from engine import floors_gate
+    from fixtures import client_facts, score_stage, write_both_reports
     run, wb, cells = _run_with_scan(tmp_path, n=8, prelim=True)
+    ev = {}
     for cell in cells:
-        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell)))
+        ev[cell] = bank_evidence(wb, cell)
+        synthesise(wb, cell, good_synthesis(cell, ev[cell]))
     wb.append("Entity_Timeline", {
         "Event_Date": "2024-09-01", "Title": "Alkami go-live",
         "Kind": "PLATFORM", "Signal": "POSITIVE",
         "Signal": "EXPANSION", "SubCap_IDs": ", ".join(cells),
         "Evidence_IDs": "E-001"})
-    floors_gate.run(wb, CAT, qa_dir=run.qa_dir)
-    body = ("Acme Credit Union runs member-facing digital banking on Alkami, "
-            "live since Q3 2024, with adoption at 52 percent in the 2025 "
-            "annual report [E-001]. The board reviews the figure quarterly "
-            "and ties it to the cost-to-serve target for 2026 planning. ")
-    for spec in RS.SPECS.values():
-        for sec in spec.sections:
-            nn = RS.INSIGHT_CARD_MIN if sec.kind == "insight_card" else 1
-            for i in range(nn):
-                wb.append("Report_Narrative", {
-                    "Report": spec.key, "Section_ID": sec.id,
-                    "Heading": sec.heading, "Kind": sec.kind,
-                    "Body": body * max(1, (sec.min_words + 200) // 45),
-                    "Evidence_IDs": "E-001", "Author": "t",
-                    "Written_At": "2026-08-29T00:00:00Z"}, save=False)
-        wb.save()
-        sign_off_sections(wb)
-        reports.render(wb, spec, run.deliverables)
+    client_facts(wb, cells, ev)
+    v = floors_gate.run(wb, CAT, require_synthesis=True, qa_dir=run.qa_dir)
+    assert v["gate"] == "PASS", v["blocking"]
+    score_stage(run, wb, cells, ev)
+    write_both_reports(run, wb, cells, ev)
     techscan.render(wb, run.deliverables)
     make_shippable(wb)      # every tab filled or stated — the package gate
     return run, wb
@@ -240,3 +241,49 @@ def test_verify_flags_the_gate_m_shape(tmp_path):
     v = assemble.verify(tmp_path / "packages" / "Acme Credit Union - DMA")
     assert v["complete"] is False
     assert any("gate-M" in c["detail"] for c in v["checks"] if not c["ok"])
+
+
+# ── a vendor's own case study is the vendor's claim (owner, 2026-10-06) ──
+
+def _claimed_pipeline_row(wb, cells):
+    from engine import ledger as L
+    vendor = L.append_evidence(
+        wb, source_name="Pipewise case study: Acme Credit Union",
+        source_url="https://www.pipewise.example/case-study-acme.pdf", tier="T3",
+        excerpt=("Acme Credit Union adopted the Pipewise Loan Pipeline module to "
+                 "track and manage every new loan in its commercial pipeline."),
+        subcaps=[cells[0]], published="2025-06-01")
+    techscan.record(wb, product="Pipewise Loan Pipeline", vendor="Pipewise",
+                    layer="OPS", status="CLAIMED", method="vendor_announcement",
+                    providers=["web"], evidence_ids=[vendor],
+                    basis="named only in the vendor's own case study about the client")
+    return vendor
+
+
+def test_a_vendor_hosted_case_study_does_not_contradict_a_claimed_row(tmp_path):
+    """Susser Bank: four more excerpts of BankPoint's own Susser PDF made the
+    reconcile check demand CONFIRMED while the validator refused it."""
+    from engine import ledger as L
+    run, wb, cells = _run_with_scan(tmp_path)
+    _claimed_pipeline_row(wb, cells)
+    L.append_evidence(
+        wb, source_name="Pipewise case study: Acme Credit Union (quote)",
+        source_url="https://www.pipewise.example/case-study-acme.pdf", tier="T3",
+        excerpt=("Pipewise is what makes large parts of our lending operation at "
+                 "Acme Credit Union scalable, the chief lending officer said."),
+        subcaps=[cells[0]], published="2025-06-01")
+    assert not [c for c in techscan.contradictions(wb) if c["token"] == "Pipewise"]
+
+
+def test_the_banks_own_page_still_contradicts_a_claimed_row(tmp_path):
+    from engine import ledger as L
+    run, wb, cells = _run_with_scan(tmp_path)
+    _claimed_pipeline_row(wb, cells)
+    own = L.append_evidence(
+        wb, source_name="Acme Credit Union careers: loan officer",
+        source_url="https://www.acmecu.example/careers/loan-officer", tier="T2",
+        excerpt=("Acme Credit Union loan officers manage their pipeline daily in "
+                 "Pipewise and keep every commercial deal current there."),
+        subcaps=[cells[0]], published="2026-01-10")
+    hits = [c for c in techscan.contradictions(wb) if c["token"] == "Pipewise"]
+    assert hits and own in hits[0]["evidence_ids"], hits

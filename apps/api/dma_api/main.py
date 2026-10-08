@@ -6,12 +6,14 @@ stage 2 onward; stage 4 replaces the internals with the full read API
 (SQLAlchemy asyncpg, cursor pagination, ETag/304, Brotli) per TRD §19.
 It performs no inference and serves only promoted or catalogue rows —
 never staging, never ingested client material. Its only writes are the
-charter's two exceptions (alert actions here; annotations when they
-land), both into workflow tables behind Idempotency-Key — no endpoint
-writes serving content (invariant 2).
+charter's two exceptions (alert actions, annotations) plus user grants
+(owner adjudication 2026-10-07, dma_api.users), all into workflow tables
+behind Idempotency-Key — no endpoint writes serving content (invariant 2).
 """
 from __future__ import annotations
 
+import hashlib
+import json
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
@@ -23,18 +25,76 @@ from .answers import build_answers, search_answers
 from .cadence import cadence_for, entity_cadence, refresh_queue
 from .db import close as db_close, connect as db_connect
 from .diff import build_diff
-from .evidence import fetch as ev_fetch, redact_items as ev_redact
+from .evidence import fetch as ev_fetch
 from .identity import ActorError, verified_actor
 from . import subverticals
 from .pages import ApiError, build_page, etag_for, resolve_run
-from .redaction import normalise_audience
+from .redaction import normalise_audience, redact_evidence_response
 from .subverticals import SCOPE_TAG, scope_to_entity
+from .users import list_users, me as user_me, set_user
 
 _connect = db_connect
 
 
+#: How long startup will wait for the first connection before giving up and
+#: serving anyway. Bounded because Cloud Run reads a container that never
+#: reports ready as a failed revision — a slow first request is a bad minute,
+#: a revision that never goes live is an outage.
+WARMUP_TIMEOUT_S = 120
+
+
 @asynccontextmanager
 async def _lifespan(app):
+    """Open one connection BEFORE the first request, and say how long it took.
+
+    MEASURED 2026-09-01, on the revision that fixed the connector's refresh
+    strategy: the first requests to a new instance took 150s, 140s, 128s and
+    99s and then settled to 0.4s. All returned 200. A user reloading the app
+    in that window saw a browser that simply span. The database was idle
+    throughout — the time is the FIRST CONNECTION: constructing the
+    Connector, fetching instance metadata and minting the ephemeral
+    certificate, on a Cloud Run instance whose CPU is throttled outside a
+    request.
+
+    `run.googleapis.com/startup-cpu-boost` is already true on this service,
+    and it was no help, because boost covers container STARTUP and the first
+    connection happened on the first REQUEST. Opening it here moves that cost
+    inside the boosted window, before uvicorn accepts anything.
+
+    NEVER FATAL. A warm-up that raises must not stop the service from
+    starting — the routes still work, they just pay the cost once, which is
+    exactly today's behaviour and no worse. And it is BOUNDED: an unbounded
+    warm-up would trade a slow first request for a container that never
+    reports ready, which Cloud Run reads as a failed revision.
+
+    The print is the other half. Through the whole of today's outage this
+    service emitted no application log at all: uvicorn's access lines and
+    nothing else. One line naming the connection cost would have identified
+    it in seconds rather than from request latencies read backwards.
+    """
+    import asyncio
+    import time
+    t0 = time.monotonic()
+    try:
+        def _warm():
+            c = _connect()
+            try:
+                cur = c.cursor()
+                cur.execute("SELECT 1")
+                cur.fetchone()
+            finally:
+                c.close()
+        await asyncio.wait_for(asyncio.to_thread(_warm),
+                               timeout=WARMUP_TIMEOUT_S)
+        print(f"db: warm connection ready in {time.monotonic() - t0:.1f}s",
+              flush=True)
+    except asyncio.TimeoutError:
+        print(f"db: warm-up did not finish in {WARMUP_TIMEOUT_S}s "
+              f"({time.monotonic() - t0:.1f}s) — serving anyway, the first "
+              f"request will pay it", flush=True)
+    except Exception as exc:                      # noqa: BLE001 — see above
+        print(f"db: warm-up failed after {time.monotonic() - t0:.1f}s: "
+              f"{type(exc).__name__}: {exc} — serving anyway", flush=True)
     yield
     db_close()
 
@@ -203,7 +263,8 @@ def directory(audience: str | None = None, role: str | None = None):
                    composite, scored_cells, completed_at, promoted_at,
                    pillars, open_alerts, assessment_date,
                    assessment_date_basis, assessment_date_source,
-                   refresh_due_date
+                   refresh_due_date, trading_name,
+                   supplementary_sub_verticals
               FROM serving_directory
              ORDER BY entity_id, run_seq DESC""")
         by_entity: dict = {}
@@ -212,7 +273,8 @@ def directory(audience: str | None = None, role: str | None = None):
              request_id, run_seq, is_active, run_status, composite,
              scored_cells, completed_at, promoted_at, pillars,
              open_alerts, assessment_date, assessment_date_basis,
-             assessment_date_source, refresh_due_date) in cur.fetchall():
+             assessment_date_source, refresh_due_date, trading_name,
+             supplementary) in cur.fetchall():
             # THE RESOLVER decides both, never `.upper().replace(" ", "_")`.
             # The corpus writes 61 distinct spellings of nine sub-verticals —
             # `CU`, `SV2`, `Credit Unions`, `SV2 — Credit Unions`,
@@ -223,7 +285,17 @@ def directory(audience: str | None = None, role: str | None = None):
             labels[key] = label
             ent = by_entity.setdefault(str(eid), {
                 "id": display_id, "slug": display_id, "name": name,
+                # The name fallback's second rung (legal -> trading ->
+                # display id), so a row whose legal name is NULL still
+                # names the client rather than rendering blank.
+                "trading_name": trading_name,
                 "domain": None, "subvertical": key,
+                # Codes only, never labels: the label is the primary's.
+                "supplementary_subverticals": list(
+                    subverticals.resolve_supplementary(
+                        supplementary,
+                        key if key != subverticals.UNKNOWN_SUBVERTICAL
+                        else None)),
                 "size_tier": (size_tier or "").upper() or None,
                 "hq": None, "status": "ACTIVE",
                 "data_source": "DRIVE_PARSE",
@@ -401,6 +473,78 @@ async def alert_actions(alert_id: int, request: Request,
         conn.close()
 
 
+def _actor_or_error(request):
+    try:
+        return verified_actor(request), None
+    except ActorError as e:
+        return None, JSONResponse({"error": e.code, "detail": e.detail},
+                                  status_code=e.status)
+
+
+@app.get("/v1/me")
+def whoami(request: Request):
+    """The verified caller's grant (dma_api.users.me). Sign-in and every
+    document load resolve the role here, so a change an Admin makes lands on
+    that person's next page load. Read-only."""
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        return JSONResponse(user_me(conn.cursor(), email))
+    finally:
+        conn.close()
+
+
+@app.get("/v1/admin/users")
+def admin_users(request: Request):
+    """TRD §19 `/api/v1/admin/users` — the roster, ADMIN only."""
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        try:
+            return JSONResponse(list_users(conn.cursor(), email))
+        except ApiError as e:
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+    finally:
+        conn.close()
+
+
+@app.post("/v1/admin/users")
+async def admin_users_set(request: Request):
+    """The third API write (owner adjudication 2026-10-07, CLAUDE.md): invite,
+    change a role, deactivate or reactivate — workflow state about who may
+    read, never content. ADMIN only, Idempotency-Key required, every applied
+    change recorded in session_log (dma_api.users)."""
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "malformed_body",
+                             "detail": "the request body must be a JSON object"},
+                            status_code=400)
+    email, err = _actor_or_error(request)
+    if err:
+        return err
+    conn = _connect()
+    try:
+        cur = conn.cursor()
+        try:
+            status_code, payload = set_user(
+                cur, email, body=body,
+                idempotency_key=request.headers.get("idempotency-key"))
+        except ApiError as e:
+            conn.rollback()
+            return JSONResponse({"error": e.code, "detail": e.detail},
+                                status_code=e.status)
+        conn.commit()
+        return JSONResponse(payload, status_code=status_code)
+    finally:
+        conn.close()
+
+
 _SUBCAP_COLS = ("subcap_id", "capability_id", "category_id", "pillar_id",
                 "subcap_name", "l3_platform_areas", "l4_features", "score",
                 "confidence", "peer_median", "peer_n", "peer_basis",
@@ -445,8 +589,10 @@ def entity_subcaps(display_id: str, request: Request, response: Response,
         # derivation and the codes it deliberately does not treat as
         # foreign. Filtering HERE rather than in the SQL means one
         # vocabulary, shared with the value-chain derivation.
-        for r in scope_to_entity(cur.fetchall(), entity.get("sub_vertical"),
-                                 key=_SUBCAP_COLS.index("subcap_id")):
+        for r in scope_to_entity(
+                cur.fetchall(), entity.get("sub_vertical"),
+                key=_SUBCAP_COLS.index("subcap_id"),
+                supplementary=entity.get("supplementary_sub_verticals")):
             d = dict(zip(_SUBCAP_COLS, r))
             for k in ("score", "peer_median", "delta"):
                 d[k] = float(d[k]) if d[k] is not None else None
@@ -641,10 +787,27 @@ def entity_evidence(display_id: str, request: Request, response: Response,
             return JSONResponse({"error": e.code, "detail": e.detail},
                                 status_code=e.status)
         wanted = [x.strip() for x in (e_ids or "").split(",") if x.strip()]
+        # The run's promotion binds which split spans serve under their
+        # customer attribution (evidence.attribution_bound).
         res = ev_fetch(cur, entity_id, wanted or None,
-                       run_id=run_meta["run_id"])
-        res["items"] = ev_redact(res["items"], audience)
-        tag = etag_for(run_meta, f"{audience}.evidence")
+                       run_id=run_meta["run_id"],
+                       promoted_at=run_meta.get("promoted_at"))
+        # The whole body, not just the items: for the customer audience the
+        # tier census goes too, and withheld rows leave `found`.
+        res = redact_evidence_response(res, audience)
+        # THE DRAWER IS A LIVE READ, so its tag cannot be pinned to the
+        # promotion. `evidence_index` changes outside promotion — the worker's
+        # repair pass fills a null `source_url` from the package's own
+        # workbook without touching `promoted_at` — and a tag that ignores
+        # that answers 304 and keeps serving the URL-less copy the browser
+        # already has. MEASURED 2026-09-04: Golden 1's 497 blank drawers were
+        # filled by the pass and every cached client would have gone on
+        # seeing them blank. The content digest is a FOURTH component beside
+        # `SERVE_RULES`, which exists for the same reason one layer up.
+        digest = hashlib.sha256(
+            json.dumps(res, sort_keys=True, default=str).encode()
+        ).hexdigest()[:12]
+        tag = etag_for(run_meta, f"{audience}.evidence.{digest}")
         if request.headers.get("if-none-match") == tag:
             return Response(status_code=304, headers={"ETag": tag,
                                                       "Cache-Control": "private, max-age=0"})

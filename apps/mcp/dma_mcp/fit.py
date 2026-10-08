@@ -84,6 +84,21 @@ def _readiness_token(raw) -> str:
     return _READINESS_VERDICT.get(key, "red")
 
 
+#: Categories no technology platform addresses, whatever the catalogue lists.
+#:
+#: Owner decision 2026-10-06, after Susser Bank: the v7.0 catalogue maps every
+#: P1 cell to many platforms (all 205 to CRM Analytics, 178 to Platform
+#: Foundation, 94 to FSC), and an unevidenced P1 cell scores 1.0 — the largest
+#: gap on the page — so strategy and culture cells became the fit drivers of
+#: technology cards: "Cultural Due Diligence" was MuleSoft's top contributor
+#: and "Venture Allocation" drove Shield and Data Cloud. Digital strategy
+#: (P1C1), innovation funding (P1C3) and culture (P1C4) are moved by people
+#: and decisions, not by a product. Governance and risk appetite (P1C2) stays:
+#: GRC and Shield do address it. A candidate sent with `advisory: true` (a
+#: strategy workshop) keeps every cell its area lists.
+NON_PLATFORM_CATEGORIES = frozenset({"P1C1", "P1C3", "P1C4"})
+
+
 def _areas_of(raw) -> list:
     """`l3_platform_areas` is a text array on the catalogue row, and a couple
     of loads wrote it as a JSON string. Both shapes are read rather than one
@@ -101,12 +116,109 @@ def _areas_of(raw) -> list:
     return [_norm_area(x) for x in s.strip("{}").split(",") if x.strip()]
 
 
+_PAREN = re.compile(r"\s*\([^)]*\)")
+
+
+def _name_key(v) -> str:
+    """A platform NAME as a lookup key: lowercased, parentheticals and
+    the `(count: N)` suffix gone, whitespace collapsed."""
+    s = _AREA_COUNT.sub(" ", str(v or ""))
+    s = _PAREN.sub(" ", s)
+    return " ".join(s.lower().replace("&", "and").split())
+
+
+def _l3_names(cur, run_id) -> dict:
+    """name-key -> L3 code from `ccg_l3_platforms` for the run's catalogue.
+
+    A producer writes `l3_area` as the sayable name the page renders
+    ("Salesforce Financial Services Cloud", "MuleSoft"), and the catalogue
+    row carries the CODE in `l3_platform_areas`. Until 2026-10-07 the two
+    met only when the producer also wrote the bracketed code, so a card
+    naming the platform as a client would say it matched no cell and ranked
+    TOO_NARROW (Arbor Bank, five of five candidates). The name is resolved
+    through the catalogue's own `platform_name` / `vendor + platform_name`,
+    never by fuzzy guess: an unknown name stays unmatched and is reported."""
+    try:
+        cur.execute("""
+            SELECT p.l3_id, p.vendor, p.platform_name
+              FROM ccg_l3_platforms p
+             WHERE p.version = COALESCE(
+                      (SELECT r.ccg_catalog_version FROM runs r WHERE r.id = %s),
+                      (SELECT version FROM ccg_versions WHERE is_current))""",
+                    (run_id,))
+        rows = cur.fetchall() or []
+    except Exception:                              # noqa: BLE001
+        return {}
+    out: dict = {}
+    for row in rows:
+        if not isinstance(row, (list, tuple)) or len(row) < 3:
+            continue
+        code, vendor, name = (str(row[0] or "").strip().upper(),
+                              str(row[1] or "").strip(), str(row[2] or "").strip())
+        if not code or not name:
+            continue
+        keys = {_name_key(name)}
+        if vendor:
+            keys.add(_name_key(f"{vendor} {name}"))
+            if _name_key(name).startswith(_name_key(vendor) + " "):
+                keys.add(_name_key(name)[len(_name_key(vendor)) + 1:])
+        for k in keys:
+            if k and k not in out:
+                out[k] = code
+    return out
+
+
+def _resolve_area(raw, names: dict) -> str:
+    """The L3 code a card's `l3_area` names — the bracketed code when the
+    producer wrote one, else the catalogue platform the name resolves to,
+    else the normalised label (which matches a cell only if the catalogue
+    lists that label verbatim)."""
+    area = _norm_area(raw)
+    if not area or area.startswith("L3-"):
+        return area
+    return names.get(_name_key(raw), area)
+
+
+def _cell_peers(conn, cur, run_id, cells: dict) -> None:
+    """Fill `peer` on every cell that has none from the sub-vertical cohort
+    at CELL grain (cohort.cell_benchmarks) — computed at fit time, never
+    stored (invariant 8). `subcap_scores.peer_median` is written by nobody
+    (the workbook has no per-cell peer column), so until 2026-10-07 every
+    platform gap row served peer null while the overview served a category
+    mean the gap did not use."""
+    want = sorted(sid for sid, c in cells.items() if c.get("peer") is None)
+    if not want:
+        return
+    try:
+        cur.execute("""SELECT e.sub_vertical, e.display_id, e.legal_name
+                         FROM runs r JOIN entities e ON e.id = r.entity_id
+                        WHERE r.id = %s""", (run_id,))
+        row = cur.fetchone()
+    except Exception:                              # noqa: BLE001
+        row = None
+    if not row or not row[0]:
+        return
+    sv = str(row[0])
+    display_id = str(row[1] or "") if len(row) > 1 else ""
+    name = str(row[2] or "") if len(row) > 2 else ""
+    from . import cohort
+    try:
+        got = cohort.cell_benchmarks(conn, sv, want, exclude_display_id=display_id,
+                                     exclude_entity_name=name)
+    except Exception:                              # noqa: BLE001
+        return
+    for sid, v in ((got or {}).get("cells") or {}).items():
+        if sid in cells and isinstance(v, dict) and v.get("mean") is not None:
+            cells[sid]["peer"] = float(v["mean"])
+
+
 def _entity_subvertical(cur, run_id):
-    cur.execute("""SELECT e.sub_vertical FROM runs r
-                     JOIN entities e ON e.id = r.entity_id
+    """(raw primary sub_vertical, raw supplementary list) — 0061."""
+    cur.execute("""SELECT e.sub_vertical, e.supplementary_sub_verticals
+                     FROM runs r JOIN entities e ON e.id = r.entity_id
                     WHERE r.id = %s""", (run_id,))
     row = cur.fetchone()
-    return row[0] if row else None
+    return (row[0], row[1]) if row else (None, None)
 
 
 def _cells_for_run(cur, run_id) -> dict:
@@ -224,17 +336,48 @@ def _register_staged(cur, run_id) -> tuple:
     if not isinstance(payload, dict):
         return set(), set()
     items = ((payload.get("techstack") or {}).get("items")) or []
-    absent_sids, held_sids = set(), set()
+    absent_rows, held_sids = [], set()
     for it in items:
         if not isinstance(it, dict):
             continue
         status = str(it.get("status") or "").upper()
         sids = {str(s) for s in (it.get("linked_subcap_ids") or []) if s}
         if status == "ABSENT":
-            absent_sids |= sids
+            absent_rows.append((str(it.get("product") or ""), sids))
         elif status in ("CONFIRMED", "INFERRED"):
             held_sids |= sids
-    return absent_sids - held_sids, held_sids
+    return [(prod, sids - held_sids) for prod, sids in absent_rows
+            if sids - held_sids], held_sids
+
+
+def _product_key(name) -> str:
+    """A product or platform name reduced for matching: case, punctuation and
+    the vendor prefix dropped ("Salesforce Data Cloud" == "Data Cloud")."""
+    s = re.sub(r"[^a-z0-9]+", " ", str(name or "").lower()).strip()
+    return re.sub(r"^salesforce ", "", s)
+
+
+def _same_product(a, b) -> bool:
+    ka, kb = _product_key(a), _product_key(b)
+    return bool(ka and kb) and (ka == kb or ka in kb or kb in ka)
+
+
+def _greenfield_cells(absent_rows, platform, platforms) -> set:
+    """Cells an ABSENT register row makes greenfield for ONE candidate.
+
+    An absent PRODUCT is ground for that product: the row naming Data Cloud
+    absent is the Data Cloud card's open ground, never a neighbour's that
+    happens to share one of its cells — a cell-only join credited Service
+    Cloud with Data Cloud's absence and contradicted its own estate reach
+    (SWBC 2026-10-05, MEM-0563). A row naming a product no card on the page
+    proposes says the layer itself is empty, so it still counts for every
+    card on its cells."""
+    out = set()
+    for prod, sids in absent_rows:
+        owners = [p for p in platforms if _same_product(prod, p)]
+        if not owners or platform in owners:
+            out |= sids
+    return out
 
 
 def platform_fit(conn, run_id, candidates) -> dict:
@@ -251,12 +394,16 @@ def platform_fit(conn, run_id, candidates) -> dict:
         return {"error": "unknown_run", "platforms": []}
 
     cells = _cells_for_run(cur, run_id)
+    _cell_peers(conn, cur, run_id, cells)
+    l3_names = _l3_names(cur, run_id)
     strength = _evidence_strength(cur, run_id)
     sev = _severities(cur, run_id)
     absent_areas, held_areas = _register(cur, run_id)
-    absent_sids, held_sids = _register_staged(cur, run_id)
-    entity_code = subverticals.resolve_subvertical(
-        _entity_subvertical(cur, run_id))
+    absent_rows, held_sids = _register_staged(cur, run_id)
+    absent_sids = set().union(*(sids for _, sids in absent_rows))
+    raw_sv, raw_supp = _entity_subvertical(cur, run_id)
+    entity_code = subverticals.resolve_subvertical(raw_sv)
+    entity_supp = subverticals.resolve_supplementary(raw_supp, entity_code)
 
     def _cell(sid, area_held):
         return engine.Cell(
@@ -281,22 +428,34 @@ def platform_fit(conn, run_id, candidates) -> dict:
             by_area.setdefault(a, []).append(sid)
 
     built, unmatched = [], []
+    plat_names = [str(raw.get("platform") or "").strip()
+                  for raw in candidates or [] if isinstance(raw, dict)]
     for raw in candidates or []:
         if not isinstance(raw, dict):
             continue
-        area = _norm_area(raw.get("l3_area"))
+        plat_name = str(raw.get("platform") or "").strip()
+        area = _resolve_area(raw.get("l3_area"), l3_names)
         sids = by_area.get(area, [])
+        if not raw.get("advisory"):
+            sids = [s for s in sids
+                    if cells[s]["category"] not in NON_PLATFORM_CATEGORIES]
         if not sids:
             unmatched.append({"platform": raw.get("platform"),
                               "l3_area": raw.get("l3_area"),
-                              "reason": "no cell this run serves lists this L3 area"})
+                              "resolved_to": area or None,
+                              "reason": ("no cell this run serves lists this L3 area"
+                                         if area.startswith("L3-") else
+                                         "the label names no catalogue platform "
+                                         "(ccg_l3_platforms.platform_name) and no "
+                                         "bracketed [L3-…] code; no cell can match it")})
         rows = [_cell(sid, area in held_areas) for sid in sorted(sids)]
         # Greenfield from either tier: the raw register names an ABSENT area,
         # or the promoted register carries an ABSENT row linked to this
         # candidate's own cells (Data Cloud absent, linked to the member-data
         # cells, is greenfield ground for the Data Cloud candidate).
         family_absent = (area in absent_areas
-                         or bool(absent_sids & set(sids)))
+                         or bool(_greenfield_cells(absent_rows, plat_name,
+                                                   plat_names) & set(sids)))
         # THE VERTICAL GUARD. "Out-of-vertical rank-1 is a defect: a carrier
         # platform must not top a bank's list." Relevance is the share of the
         # area's cells this entity's sub-vertical actually serves — computed
@@ -306,7 +465,8 @@ def platform_fit(conn, run_id, candidates) -> dict:
         # design: not knowing who you are is not grounds for hiding scores).
         if entity_code and sids:
             served = sum(1 for sid in sids
-                         if subverticals.serves(sid, entity_code))
+                         if subverticals.serves(sid, entity_code,
+                                                entity_supp))
             relevance = served / len(sids)
         else:
             relevance = 1.0
@@ -323,6 +483,17 @@ def platform_fit(conn, run_id, candidates) -> dict:
             relevance=relevance))
 
     ranked = engine.rank(built, all_gap_cells=all_gaps)
+    # AN UNRESOLVED SUB-VERTICAL IS AN UNCHECKED GUARD, NOT A PERFECT SCORE.
+    # The engine scores it neutrally (1.0 keeps every cell, by design), but
+    # the row used to SAY 1.0 as well — and a producer copied "relevance 1.0"
+    # onto every tile of a run whose own reasoning trace called relevance
+    # unchecked (RC-13, SWBC gold audit 2026-10-04). Invariant 9: a derived
+    # value is computed or null, never a default that looks like data.
+    relevance_state = "checked" if entity_code else "unchecked"
+    if entity_code is None:
+        for p in ranked:
+            p["relevance"] = None
+            p["relevance_state"] = "unchecked"
     # WHAT THE ENGINE ACTUALLY HAD TO WORK WITH.
     #
     # `issue_register_raw` and `techstack_raw` are both EMPTY for at least one
@@ -341,6 +512,7 @@ def platform_fit(conn, run_id, candidates) -> dict:
         "register_cells_absent": len(absent_sids),
         "register_cells_held": len(held_sids),
         "entity_subvertical_code": entity_code,
+        "relevance_state": relevance_state,
         "notes": [],
     }
     if not sev:

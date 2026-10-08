@@ -233,8 +233,9 @@ def test_a_missing_toolkit_degrades_loudly_and_still_builds(tmp_path):
 def test_the_search_ledger_accepts_the_overlay_facets(tmp_path):
     run = new_run(tmp_path, n=2)
     wb = run.open()
+    before = len(wb.rows("Search_Log"))      # PRELIM's own connector searches
     n = L.append_search(wb, subcap=wb.selected_subcaps()[0],
                         facet="ai_deployment",
                         query='"Acme Credit Union" AI underwriting live',
                         tool="web_search", hits=3, kept=1)
-    assert n == 1
+    assert n == before + 1

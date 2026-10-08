@@ -437,7 +437,7 @@ def write_drift_report(gt, report_path):
         lines.append(f"")
         lines.append(f"The template's visible level labels were authored independently of the visible")
         lines.append(f"scores. These are mock-up artifacts — the config's 4-tier cutoffs")
-        lines.append(f"(1.50 / 2.50 / 3.50) are canonical. Batch 2 editors will re-derive labels from")
+        lines.append(f"(2.00 / 3.00 / 4.00 — the app's own bands, apps/web/lib/bands.js) are canonical. Batch 2 editors will re-derive labels from")
         lines.append(f"scores on first run.")
         lines.append(f"")
         for d in label_vs_score:

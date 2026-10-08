@@ -194,7 +194,19 @@ def organize_by_hierarchy(subcaps):
     return hierarchy
 
 
+RETIRED = """REFUSED: extract_diagnostic_questions.py is retired (2026-09-29, QA audit F-L11-042). The engine reads the Pillar toolkits at `engine.cli start` and `python3 -m engine.cli orient
+--run R --root ROOT --category C` serves each cell's diagnostic questions on its work card,
+filtered to the run's evidence mode. This script parsed the XLSX into a JSON nobody reads.
+"""
+
+
 def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():
     parser = argparse.ArgumentParser(description='Extract diagnostic questions from Pillar XLSX files')
     parser.add_argument('path', help='Path to single XLSX file or directory')
     parser.add_argument('--all', action='store_true', help='Process all XLSX files in directory')
@@ -254,4 +266,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
