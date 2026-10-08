@@ -727,16 +727,48 @@ def critic_moves(wb: RunWorkbook) -> dict[str, dict]:
     return got if isinstance(got, dict) else {}
 
 
+def last_scored_at(wb: RunWorkbook) -> dict[str, str]:
+    """{cell: the latest Provenance `score` timestamp} (ISO strings sort)."""
+    out: dict[str, str] = {}
+    for r in wb.rows("Provenance"):
+        if _clean(r.get("Step")) != "score":
+            continue
+        cell, at = _clean(r.get("SubCap_ID")), _clean(r.get("At"))
+        if cell and at > out.get(cell, ""):
+            out[cell] = at
+    return out
+
+
+def move_unapplied(mv: dict, cur, scored_at: str = "") -> bool:
+    """A critic move is unapplied while the score sits above its target OR
+    the row has not been re-scored since the move was recorded.
+
+    B1 Bank, 2026-10-08: the critic moved six P2 rows whose SCORE was right
+    but whose rationale argued the band above it ("MATURITY MATCH M3" under
+    an M2 score). Their target equalled the current score, so a score-only
+    test dropped them from `pending_moves` and from the scorer brief — the
+    rewrite never reached a scorer and the critic failed the same rows every
+    round. A move with target == score is a rewrite request, and it stays
+    pending until the row is re-scored after it."""
+    if cur is None:
+        return False
+    if cur > float(mv["target"]) + 1e-9:
+        return True
+    at = _clean(mv.get("at"))
+    return bool(at) and _clean(scored_at) < at
+
+
 def pending_moves(wb: RunWorkbook, pillar: str = "") -> dict:
     """The critic's moves still unapplied, with what a re-score needs."""
     ss = {_clean(r.get("subcap_id")): r for r in wb.rows("Subcap_Scores")}
+    scored_at = last_scored_at(wb)
     rows = []
     for cell, mv in sorted(critic_moves(wb).items()):
         if pillar and not cell.startswith(_clean(pillar).upper()):
             continue
         row = wb.scoring_row(cell) or {}
         cur = _num(row.get("Score"))
-        if cur is None or cur <= float(mv["target"]) + 1e-9:
+        if not move_unapplied(mv, cur, scored_at.get(cell, "")):
             continue
         o = ss.get(cell) or {}
         rows.append({"subcap": cell, "from": cur, "to": mv["target"], "why": mv.get("why"),
@@ -1207,9 +1239,10 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     for g in wb.rows("Gate_Log"):
         if _clean(g.get("Gate")) == "SCORING_CRITIC":
             critics[_clean(g.get("Scope"))] = _clean(g.get("Verdict")).upper()
+    _scored_at = last_scored_at(wb)
     for cell, mv in critic_moves(wb).items():
         cur = _num((wb.scoring_row(cell) or {}).get("Score"))
-        if cur is not None and cur > float(mv["target"]) + 1e-9:
+        if move_unapplied(mv, cur, _scored_at.get(cell, "")):
             f["critic_moves_pending"].append(f"{cell} {cur}->{mv['target']}")
     for p in pillars_in_scope:
         if p not in critics:

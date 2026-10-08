@@ -1919,6 +1919,7 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
         # for the research repair instead.
         slim = {k: sh.get(k) for k in ("run_id", "entity", "sub_vertical",
                                        "evidence_mode", "stage", "run_root")}
+        _scored_at = A.last_scored_at(wb)
         for pillar in pillars:
             rows, blocked = [], []
             sheet = f"{pillar}_Subcap_Scoring"
@@ -1933,7 +1934,8 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                         cur = float(r.get("Score"))
                     except (TypeError, ValueError):
                         cur = None
-                    if not move or cur is None or cur <= float(move["target"]) + 1e-9:
+                    if not move or not A.move_unapplied(
+                            move, cur, _scored_at.get(sub, "")):
                         continue
                     rescore = {"from": cur, "to": move["target"], "why": move.get("why")}
                 n_ev = len(_ids(r.get("Evidence_IDs")))

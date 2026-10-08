@@ -177,3 +177,24 @@ def test_the_scoring_workflow_ships_and_names_no_client():
     assert "engine.assessment moves" in src and "--move CELL:TARGET:why" in src
     for leaked in ("susser", "Susser", "swbc", "SWBC"):
         assert leaked not in src
+
+
+def test_a_rewrite_only_move_reaches_the_scorer_and_clears_on_rescore(tmp_path):
+    """B1 Bank, 2026-10-08: the critic moved rows whose SCORE was right but
+    whose rationale argued the band above it. Target == current score, so a
+    score-only test dropped the move from pending_moves and from the scorer
+    brief, and the critic failed the same rows every round."""
+    run, wb, cells, ev = scored_run(tmp_path)
+    cell = next(c for c in cells if ev.get(c))
+    cur = float(wb.scoring_row(cell)["Score"])
+    A.critique(wb, pillar="P1", verdict="FAIL", actor="scoring-critic",
+               note="Re-derived every P1 row against its rubric descriptor; one rationale argues M3 under an M2 score and must be rewritten to argue its own band.",
+               moves=[f"{cell}:{cur}:rationale argues M3 under an M2 score"])
+    assert [m for m in A.pending_moves(wb, "P1")["moves"] if m["subcap"] == cell]
+    assert "critic_moves_pending" in A.gate(wb, run.qa_dir)["blocking"]
+    b = brief.scoring_batch(wb, run=run, out_dir=tmp_path / "sc")
+    rows = [r for w in b["briefs"]
+            for r in json.loads(Path(w["prompt_file"].replace(".md", ".json")).read_text())["rows_to_score"]]
+    assert [r for r in rows if r["subcap"] == cell], "the rewrite never reached a scorer"
+    score_cell(wb, cell, ev[cell], score=cur)
+    assert not [m for m in A.pending_moves(wb, "P1")["moves"] if m["subcap"] == cell]
