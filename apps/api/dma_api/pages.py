@@ -263,7 +263,24 @@ def resolve_run(cur, display_id: str, run: str | None, allow_history: bool):
 #         · RC-09 — `context_tiles[].state` joins the customer allowlist.
 #       Any further change to these before @12 is first deployed rides on
 #       @12; after that, it is @13.
-SERVE_RULES = "serve-rules@12"
+#   @13 — the customer value chain (H9) serves its stages: the server-derived
+#         keys (`chains`, `not_scored_cells`, …) joined the customer allowlist
+#         (scripts/gen_customer_allowlist.py SERVER_DERIVED, 2026-10-07). The
+#         allowlist changed and this tag did not, so a browser holding the
+#         stage-less client heatmap kept receiving 304 and rendered "did not
+#         promote" after the fix was live (owner, 2026-10-08, First Tech).
+#
+# The tag also carries a fingerprint of customer_allowlist.json, so a change
+# to what the customer audience may receive moves every customer ETag by
+# itself; a change to redaction CODE still needs the manual @N bump above.
+def _allowlist_fingerprint() -> str:
+    import hashlib
+    from pathlib import Path
+    path = Path(__file__).with_name("customer_allowlist.json")
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+
+
+SERVE_RULES = f"serve-rules@13.{_allowlist_fingerprint()}"
 
 
 #: Keys whose value is a list of cited evidence ids (chips), and the one

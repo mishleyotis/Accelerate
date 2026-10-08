@@ -238,7 +238,9 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   customer allowlist had dropped them all; they are classified in
   `scripts/gen_customer_allowlist.py SERVER_DERIVED` and pinned by
   `apps/api/tests/test_customer_allowlist.py`. Every value-chain cell swatch
-  opens its cell. **A release reaches open tabs**: the boot carries the
+  opens its cell. **A change to what clients may receive moves the ETag**
+  (owner, 2026-10-08, First Tech still read "did not promote" from a cached
+  304): `SERVE_RULES` is `serve-rules@13.<sha8 of customer_allowlist.json>`. **A release reaches open tabs**: the boot carries the
   bundle's build fingerprint (`lib/build-id.js`), `UpdateWatcher` compares it
   with `/api/version` and offers a reload (the next tab change reloads by
   itself) — the owner saw the old heatmap an hour after the fix shipped.
