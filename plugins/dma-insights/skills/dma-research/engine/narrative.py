@@ -423,8 +423,12 @@ def stage_preconditions(wb: RunWorkbook, report: str,
     return out
 
 
+# A parenthesised OR bracketed id list. B1 Bank, 2026-10-08: only "(…)" was
+# split, so "[E-086, E-305, E-087]" reached _CITE_BARE, which bracketed the
+# middle id alone ("[E-086, [E-305], E-087]"), and "[E-086; E-305]" counted
+# as no citation at all under reports.CITE_RE.
 _CITE_GROUP = re.compile(
-    r"\((\s*E-\d{3,4}(?::F\d+)?(?:\s*(?:,|;|/|and)\s*E-\d{3,4}(?::F\d+)?)*\s*)\)")
+    r"[(\[](\s*E-\d{3,4}(?::F\d+)?(?:\s*(?:,|;|/|and)\s*E-\d{3,4}(?::F\d+)?)*\s*)[)\]]")
 _CITE_BARE = re.compile(r"(?<![\[\w])(E-\d{3,4}(?::F\d+)?)(?![\]\w])")
 _CITE_ONE = re.compile(r"E-\d{3,4}(?::F\d+)?")
 
