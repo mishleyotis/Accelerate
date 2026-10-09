@@ -799,6 +799,12 @@ jobs:
           "
       - working-directory: apps/web
         run: npm run build:proto
+      # The image serves the committed bundle and the release verifier compares
+      # it with a fresh build (2026-10-09: a JSX comment edited after the build
+      # shipped as "production is NOT serving HEAD"). A stale bundle fails here.
+      - name: The committed bundle is the source's build
+        working-directory: apps/web
+        run: git diff --exit-code --stat -- public/proto/js
       - working-directory: apps/web
         env:
           CI: "1"
