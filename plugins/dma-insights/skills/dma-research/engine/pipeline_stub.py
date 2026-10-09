@@ -63,6 +63,29 @@ def _utcnow() -> str:
 
 # ── the lanes, played by the fixtures ────────────────────────────────────
 
+def _attach_prelim(wb, cell: str, agent: str) -> list:
+    """What a real lane does with `shared.prelim_evidence`: cite the PRELIM
+    rows the register already holds from the first cell it works, instead
+    of re-finding them. Rows the register cites and no cell names are
+    attached (both ways, through the ledger); a row already named stays as
+    it is. This is the link ET-07 asks for at PAGES, made where the run
+    makes it — in RESEARCH, by the lane that read the packet."""
+    attached = []
+    idx = wb.evidence_index()
+    for r in wb.rows("Tech_Register"):
+        for e in str(r.get("Evidence_IDs") or "").split(","):
+            e = e.strip().split(":")[0]
+            row = idx.get(e)
+            if not row or str(row.get("SubCap_IDs") or "").strip() or e in attached:
+                continue
+            try:
+                L.attach_evidence(wb, e, [cell], actor=agent)
+                attached.append(e)
+            except L.LedgerRefusal:
+                continue
+    return attached
+
+
 def _evidence_by_cell(wb) -> dict:
     ev: dict = {}
     sel = set(wb.selected_subcaps())
@@ -138,6 +161,8 @@ def lane_research(agent, prompt_file, ctx):
     leave = _open_cells_owed(agent)
     if leave:
         cells = cells[:max(0, len(cells) - leave)]
+    if cells and _attach_prelim(wb, cells[0], agent):
+        ev = _evidence_by_cell(wb)
     if os.environ.get("DMA_STUB_WEB_ONLY", "") not in ("", "0"):
         return _lane_web_only(agent, wb, cells)
     for c in cells:

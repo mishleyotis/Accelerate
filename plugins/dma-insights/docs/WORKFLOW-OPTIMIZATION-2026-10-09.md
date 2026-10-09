@@ -310,11 +310,16 @@ envelope forces the design, not the prompt:
   change exposes: the fixture's PRELIM register rows named no cell, so the
   new ET-07 preflight refused PAGES_A with three blockers — exactly the
   B1 Bank shape, caught before any page agent ran rather than at the
-  connector. The fix is where a real run needs it: `techscan.record` links
-  its citations at the write, the fixture names a cell as the scanner does,
-  and the stub research lane banks its own rows before citing PRELIM's
-  (a lane that cites only the institution's rows for a cell's figures is
-  refused by the ungrounded-figure rule, as it should be). The walk then
+  connector. The fix is where a real run makes the link: `techscan.record`
+  links its citations at the write when the scanner names a cell, and the
+  research lane that reads `shared.prelim_evidence` attaches the PRELIM
+  rows it reuses (`pipeline_stub.lane_research` does so from the first cell
+  it works, through `ledger.attach_evidence`); the lane banks its own rows
+  before citing PRELIM's (a lane that cites only the institution's rows
+  for a cell's figures is refused by the ungrounded-figure rule, as it
+  should be). The fixture's PRELIM itself names no cell — a fixture that
+  gave a cell evidence by default would contradict every test that declares
+  that cell absent, and the ledger refuses an absence over evidence. The walk then
   met the second gate it was built to meet: the H1 floor (three to five
   client priorities) against a fixture that closed PRELIM with one, and the
   degraded lane that declared an absence over a cell PRELIM's rows already
