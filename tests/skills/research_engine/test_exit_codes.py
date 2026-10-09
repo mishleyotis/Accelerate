@@ -28,8 +28,11 @@ from fixtures import new_run
 #: AWAITING_WORKFLOW joined them on 2026-09-30: RESEARCH is handed to the
 #: conducting session as persisted pillar workflows (research_workflow.json);
 #: nothing failed and the driver resumes from disk once they return.
+#: SCOPE_COMPLETE joined them on 2026-10-09: an `--only-categories` pilot
+#: whose named scope passes its floors gate; the stage stays open for the
+#: rest and a run without the flag continues it.
 ZERO = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK", "ROUND_COMPLETE",
-        "AWAITING_WORKFLOW")
+        "AWAITING_WORKFLOW", "SCOPE_COMPLETE")
 ONE = ("STOPPED_BUDGET", "FAILED", "BLOCKED", "REFUSED")
 
 
