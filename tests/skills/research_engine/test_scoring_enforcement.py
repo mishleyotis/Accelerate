@@ -56,8 +56,8 @@ def test_stale_evidence_needs_adj_stale_and_low_confidence(tmp_path):
     with pytest.raises(A.ScoringRefusal, match="STALE_DATA"):
         score_cell(wb, cell, ev[cell], score=1.5, confidence="MEDIUM",
                    rationale=A._clean(row.get("Rationale")) or "")
-    from fixtures import RATIONALE
-    rat = "ADJ_STALE -0.3 applied: " + RATIONALE.format(e0=ev[cell][0], e1=ev[cell][1])
+    from fixtures import rationale_for
+    rat = "ADJ_STALE -0.3 applied: " + rationale_for(ev[cell], 1.5)
     assert score_cell(wb, cell, ev[cell], score=1.5, confidence="LOW",
                       rationale=rat)["score"] == 1.5
 

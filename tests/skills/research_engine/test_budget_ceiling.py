@@ -104,7 +104,10 @@ def test_the_default_ceiling_comes_from_the_cost_model(tmp_path):
     # was never given one gets.
     assert p.budget_usd() == 10_000.0, "the owner's ceiling outlives the flag"
     p.state["budget_usd_source"] = "default"
-    assert p.budget_usd() == cost.BUDGET_PER_PILLAR * 1, "one pillar in this fixture"
+    # 2026-10-09: the default is the stage envelopes' sum, never below the
+    # per-pillar figure — a run-wide wall under the envelopes would stop a
+    # run that is inside every one of them.
+    assert p.budget_usd() == cost.run_budget_default(1), "one pillar in this fixture"
 
 
 def test_the_ledger_gets_the_real_figures_not_an_estimate(tmp_path):

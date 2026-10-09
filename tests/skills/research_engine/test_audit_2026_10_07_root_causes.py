@@ -212,7 +212,7 @@ def test_an_owner_approved_ceiling_outlives_the_invocation_that_set_it():
 def test_a_default_ceiling_is_only_ever_an_estimate():
     from engine import cost
     d = _budget_driver(None, {"budget_usd": 20.0, "budget_usd_source": "default"})
-    assert P.Pipeline.budget_usd(d) == cost.BUDGET_PER_PILLAR * 2
+    assert P.Pipeline.budget_usd(d) == cost.run_budget_default(2)
 
 
 def test_a_flag_still_wins():

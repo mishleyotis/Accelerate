@@ -625,6 +625,7 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
         problems.append(f"the rationale cites none of the row's own evidence "
                         f"({', '.join(eids[:4])}); a rationale that cites nothing "
                         f"the row carries is prose about a different row")
+    problems += rubric_problems(rat, sc, eids, cited)
     if not eids and not re.search(r"(?i)no evidence|absence|searched|ladder|proxy", rat):
         problems.append("a no-evidence rationale states the searches and the "
                         "ladder that established the absence")
@@ -710,6 +711,61 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
 
 
 # ── the critic ───────────────────────────────────────────────────────────
+
+#: The gap-to-next-level clause, in the words scorers actually use. A
+#: rationale under its ceiling that names no gap argues the score from the
+#: evidence alone, which is the "score that flatters" the critic hunts.
+_GAP_WORDS = re.compile(
+    r"\b(gap|missing|absent|lacks?|lacking|no evidence of|not yet|unevidenced|"
+    r"would (?:need|require|lift)|short of|below|does not (?:yet )?(?:show|name|"
+    r"evidence|demonstrate)|to reach|next level|GAP TO NEXT)\b", re.I)
+_BAND_WORDS = {"ACTIVATING": "M1", "BUILDING": "M2", "COMPETING": "M3",
+               "DIFFERENTIATING": "M4"}
+
+
+def rubric_problems(rat: str, sc, eids: list[str], cited: set) -> list[str]:
+    """The critic's remaining mechanical rules, refused where the score is
+    written (2026-10-09). Measured on the critic notes of Arbor, Susser and
+    Cross (46 / 76 / 61 critic rounds): after the band, own-site and stale
+    caps moved to the write path (2026-10-05) the FAILs that remained were
+    "the rationale argues M3 and the score is M2", "names no gap to the
+    next level", and "cites E-ids that are not on the row" — each one a
+    round trip of ~70 minutes to re-read. Each is checkable in one line."""
+    out: list[str] = []
+    if sc is None:
+        return out
+    text = str(rat or "")
+    level = rubric.maturity_level(sc)                  # M1..M5 of the struck score
+    named = set(m.upper() for m in re.findall(r"\bM([1-5])\b", text))
+    named = {f"M{n}" for n in named}
+    for word, lv in _BAND_WORDS.items():
+        if re.search(rf"\b{word}\b", text, re.I):
+            named.add(lv)
+    if not named:
+        out.append(f"the rationale names no maturity level (M1–M5 or a band word); "
+                   f"the score {sc} is {level} — argue that level from the rubric "
+                   f"descriptor, then the gap to the next")
+    elif level not in named and not (level == "M5" and "M4" in named):
+        # The struck level must be among the levels argued. A rationale that
+        # argues M3 at length and names M2 only as "the gap" is the flattering
+        # shape the critic kept finding; one that mentions M3 as the target
+        # beside M2 as the finding is exactly right.
+        out.append(f"the rationale argues {', '.join(sorted(named))} but the score "
+                   f"{sc} is {level}; the level named must be the level struck "
+                   f"(name the next level only as the gap)")
+    if sc < 5.0 and not _GAP_WORDS.search(text):
+        out.append("the rationale names no gap to the next level (what is missing, "
+                   "absent, unevidenced or would be needed); a score under 5.0 "
+                   "argued from the evidence alone is the score that flatters")
+    if eids:
+        off = sorted(c for c in cited if c not in set(eids))
+        if off:
+            out.append(f"the rationale cites {', '.join(off[:4])}, which the row does "
+                       f"not carry; attach the row first (`engine.cli attach`) or "
+                       f"drop the citation — an off-row id is a claim the cell "
+                       f"cannot open")
+    return out
+
 
 def critic_moves(wb: RunWorkbook) -> dict[str, dict]:
     """{cell: {target, why, pillar, at}} — the critic's named score moves.
@@ -927,11 +983,22 @@ def rollup(wb: RunWorkbook, *, headline: str | None = None) -> dict:
     md = wb.metadata()
     prior = {_clean(r.get("Field")): r.get("Value") for r in wb.rows("Executive_Summary")}
     head = _clean(headline) or _clean(prior.get("Headline"))
-    if len(head) < 40:
+    if headline is not None and len(_clean(headline)) < 40:
         raise ScoringRefusal("--headline: the one line an executive reads first "
                              "(>=40 chars, institution-specific), e.g. 'Modern rails, "
                              "unbuilt member-relationship layer: sits ~1 band below "
                              "digital-leader peers'")
+    # THE HEADLINE NO LONGER HOLDS THE DASHBOARD HOSTAGE (2026-10-09). The
+    # rollup refused outright without one, so every SCORING gate on Arbor,
+    # Susser and Cross (21 / 36 / 29 FAIL rows, every one) carried
+    # `dashboard_incomplete=13; rollup_missing=2` while the scorers were
+    # still working — a fixed blocker that made the stage loop unreadable and
+    # re-dispatched critic lanes to clear a term no critic could clear. The
+    # grains and the dashboard are written from the scores; the headline is
+    # one row the critic adds when every pillar passes, and the gate names
+    # it as `headline_missing`, alone.
+    if len(head) < 40:
+        head = ""
     unknown = got["subcaps"] - got["evidenced"]
     def pct(a, b):
         return round(100 * a / b, 1) if b else None
@@ -992,7 +1059,8 @@ def rollup(wb: RunWorkbook, *, headline: str | None = None) -> dict:
             fields.append((f"{p['pillar_id']} {p['pillar_name']}",
                            f"{p['score']} ({p['level']})" if p["score"] is not None
                            else "not in scope"))
-        fields.append(("Headline", head))
+        if head:
+            fields.append(("Headline", head))
         _replace(wb, "Executive_Summary", [{"Field": f, "Value": v} for f, v in fields])
         wb.save()
     return {"overall": got["overall"], "peer_overall": got["peer_overall"],
@@ -1110,7 +1178,8 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         "subcap_scores_missing", "overlay_incomplete", "critic_missing",
         "critic_failed", "rollup_missing", "rollup_drift", "weights_sum",
         "dashboard_incomplete", "no_differentiation", "low_differentiation",
-        "stage_not_assessment", "stale_unadjusted", "critic_moves_pending")}
+        "stage_not_assessment", "stale_unadjusted", "critic_moves_pending",
+        "headline_missing")}
     if C.stage_of(md) != "assessment":
         f["stage_not_assessment"].append(C.stage_of(md))
     register = wb.evidence_index()
@@ -1236,7 +1305,8 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     fields = {_clean(r.get("Field")) for r in wb.rows("Executive_Summary")}
     for want in C.EXECUTIVE_SUMMARY_FIELDS:
         if not any(want.casefold() in have.casefold() for have in fields):
-            f["dashboard_incomplete"].append(want)
+            (f["headline_missing"] if want == "Headline" else
+             f["dashboard_incomplete"]).append(want)
     if not wb.rows("Coverage_Map"):
         f["rollup_missing"].append("Coverage_Map")
 
@@ -1247,7 +1317,7 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
         "caps_log_missing", "subcap_scores_missing", "overlay_incomplete",
         "critic_missing", "critic_failed", "rollup_missing", "rollup_drift",
         "weights_sum", "dashboard_incomplete", "no_differentiation",
-        "stale_unadjusted", "critic_moves_pending") if f[k]]
+        "stale_unadjusted", "critic_moves_pending", "headline_missing") if f[k]]
     verdict = "PASS" if not blocking else "FAIL"
     out = {"gate": verdict, "run_id": md.get("run_id"), "stage": C.stage_of(md),
            "subcaps": len(wb.selected_subcaps()), "scored": got["scored"],

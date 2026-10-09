@@ -250,6 +250,37 @@ def stale_run(run, prompt: str) -> str:
               "holds, or start that run first.")
 
 
+#: Which envelope an agent spends from, by its name (the roster's families).
+_AGENT_FAMILY = (
+    (("research-p", "research-challenger", "enrichment-", "technographic-scanner"), "RESEARCH"),
+    (("scoring-",), "SCORING"),
+    (("report-",), "REPORTS"),
+    (("-surface-producer", "-producer", "finding-challenger", "page-consolidator"), "PAGES"),
+)
+
+
+def _envelope_exhausted(agent: str, state: dict) -> dict | None:
+    """The spent envelope this agent would draw on, or None. Read from the
+    driver's `envelopes` block in pipeline_state.json (written every run);
+    a run with no envelopes recorded is not refused — an unknown ceiling is
+    not an exhausted one."""
+    envs = (state or {}).get("envelopes") or {}
+    if not isinstance(envs, dict) or not envs:
+        return None
+    name = str(agent or "").lower()
+    fam = None
+    for marks, f in _AGENT_FAMILY:
+        if any(m in name for m in marks):
+            fam = f
+            break
+    if not fam:
+        return None
+    env = envs.get(fam)
+    if isinstance(env, dict) and env.get("over") and env.get("ceiling"):
+        return {"family": fam, **env}
+    return None
+
+
 def stray_cells(agent: str, prompt: str) -> list[str]:
     """Cells of ANOTHER category named outside a leads_in/also_names block."""
     m = LANE.match(agent or "")
@@ -426,6 +457,15 @@ def decide(payload: dict) -> dict | None:
             f"lane's: that is why the watchdog keeps AT_USD_CEILING out of "
             f"AGENT_ADVANCEABLE. Raise the ceiling (`--max-usd`), narrow the "
             f"scope, or close the open cells as declared absences.")
+    env = _envelope_exhausted(agent, state)
+    if env:
+        return _deny(
+            f"dma-insights: {agent} was not dispatched — the {env['family']} envelope "
+            f"is spent (${float(env.get('spent') or 0):.2f} of "
+            f"${float(env.get('ceiling') or 0):.2f}). The owner's per-stage ceilings "
+            f"(research $10, scoring $5, reports $5) hold whatever the run-wide cap "
+            f"says; raise this one deliberately with `--stage-budget "
+            f"{env['family']}=<usd>`, or close the open work by hand.")
     r = ctx.rounds(run, state)
     if r["exhausted"]:
         return _deny(

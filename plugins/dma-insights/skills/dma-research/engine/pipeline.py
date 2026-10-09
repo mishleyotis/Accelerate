@@ -188,6 +188,9 @@ def prose_sg_v4_fails(fails: list) -> list:
 #: reads the exit code before it reads the JSON.
 EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
                       "ROUND_COMPLETE", "AWAITING_WORKFLOW")
+#: Stages that spend agents, and so are checked against their envelope
+#: before they start. Ingest waits, PACKAGE and PROMOTE spend none.
+SPENDING_STAGES = ("PRELIM", "RESEARCH", "SCORING", "REPORTS", "PAGES_A", "PAGES_B")
 
 #: The persisted workflow the RESEARCH stage hands to the conducting session
 #: in `research_mode="workflow"` — one invocation per category, its
@@ -517,6 +520,24 @@ class Options:
     # dollar ceiling, not the turn ceiling, is the thing that has to bite.
     # Set 0 to disable the ceiling and keep the old reporting-only behaviour.
     max_usd: float | None = None
+    # PER-STAGE ENVELOPES (owner, 2026-10-09): research <= $10, scoring <= $5,
+    # reports <= $5 for a 700+-cell run. `cost.STAGE_BUDGET_USD` holds the
+    # defaults; this dict overrides one family at a time (`--stage-budget
+    # RESEARCH=12`), is persisted in the state file and re-read on resume.
+    # A stage at its envelope stops as STOPPED_STAGE_BUDGET, naming the flag.
+    stage_budget: dict | None = None
+    # How many critic rounds a scoring workflow may spend per pillar before
+    # the driver re-reads the gate (was 3; measured 2026-10-05..08: P2 reached
+    # round 5, P3/P4 round 7, Arbor Bank R11/R15). The mechanical rules now
+    # refuse at write time, so a critic that has not passed by round 2 is
+    # naming judgement calls the scorer brief must carry, not re-sampling.
+    critic_rounds: int = 2
+    # A command that KICKS the package scan after a checkpoint push, so
+    # INGEST_A / INGEST_B do not idle for the Scheduler's half-hour cadence
+    # (measured: 1735-3217 s per ingest wait on every 2026-10 run). Typically
+    # `gcloud run jobs execute dmai-worker --region us-central1 --wait`.
+    # Never fatal: a kick that fails leaves the poll to the Scheduler.
+    ingest_kick_cmd: str | None = None
     # Start a run whose connector baseline was never recorded. The default
     # is to refuse: see `_connector_gate`.
     allow_unverified_connectors: bool = False
@@ -866,13 +887,83 @@ class Pipeline:
         try:
             from . import cost
             pillars = {c[:2] for c in self.wb.selected_subcaps()}
-            return cost.BUDGET_PER_PILLAR * max(1, len(pillars))
+            # The envelopes' sum, never below the review's per-pillar figure:
+            # a run-wide wall under the stage envelopes would stop a run that
+            # is inside every one of them.
+            return cost.run_budget_default(len(pillars))
         except Exception:                            # noqa: BLE001
             return None
 
     def _over_budget(self) -> bool:
         cap = self.budget_usd()
         return cap is not None and self._spent_usd >= cap
+
+    # ── the stage envelopes (2026-10-09) ───────────────────────────────
+    def stage_budgets(self) -> dict:
+        """Family -> ceiling: the cost model's defaults, the overrides this
+        run persisted, then this invocation's flag. Persisted so a resume
+        without the flag keeps the owner's figure (the same rule as
+        `budget_usd_source: flag`)."""
+        from . import cost
+        caps = dict(cost.STAGE_BUDGET_USD)
+        for k, v in ((self.state or {}).get("stage_budget_usd") or {}).items():
+            try:
+                caps[str(k).upper()] = float(v)
+            except (TypeError, ValueError):
+                continue
+        for k, v in (self.opts.stage_budget or {}).items():
+            caps[str(k).upper()] = float(v)
+        return caps
+
+    def _family_usd(self, stage: str) -> float:
+        """What the envelope family of `stage` has spent: every ledger row of
+        the family, plus the spend this process has counted and not yet
+        recorded when the running stage belongs to the family."""
+        from . import cost
+        fam = cost.stage_family(stage)
+        if fam is None:
+            return 0.0
+        try:
+            rows = cost.ledger(self.run)
+        except Exception:                            # noqa: BLE001
+            rows = []
+        spent = sum(float(r["usd"]) for r in rows
+                    if r.get("usd") is not None and cost.stage_family(r.get("stage")) == fam)
+        if cost.stage_family(getattr(self, "_running_stage", "") or "") == fam:
+            spent += max(0.0, self._spent_usd - self._recorded_usd)
+        return round(spent, 4)
+
+    def stage_budget_block(self, stage: str) -> dict | None:
+        """{family, ceiling, spent, remaining, over} for `stage`, or None
+        when the stage is paid from no envelope (the ingest waits)."""
+        from . import cost
+        fam = cost.stage_family(stage)
+        if fam is None:
+            return None
+        cap = self.stage_budgets().get(fam)
+        if cap is None or cap <= 0:
+            return {"family": fam, "ceiling": None, "spent": self._family_usd(stage),
+                    "remaining": None, "over": False}
+        spent = self._family_usd(stage)
+        return {"family": fam, "ceiling": round(float(cap), 2), "spent": spent,
+                "remaining": round(float(cap) - spent, 4),
+                "over": spent >= float(cap) - 1e-9}
+
+    def _over_stage_budget(self, stage: str) -> bool:
+        b = self.stage_budget_block(stage)
+        if b and b["over"]:
+            self._stage_budget_hit = b
+            return True
+        return False
+
+    def _stage_budget_refusal(self, stage: str) -> str:
+        b = self._stage_budget_hit or self.stage_budget_block(stage) or {}
+        return (f"AT_STAGE_BUDGET: the {b.get('family')} envelope is spent — "
+                f"${float(b.get('spent') or 0):.2f} of ${float(b.get('ceiling') or 0):.2f}. "
+                f"The stage was cut short, not refused. A person raises it "
+                f"(`--stage-budget {b.get('family')}=<usd>`), narrows the scope, or "
+                f"closes the open work by hand; the run-wide `--max-usd` does not "
+                f"raise an envelope.")
 
     # ── what the conductor must do before the next step ────────────────
     def _batch_request_ids(self, path) -> set | None:
@@ -1304,6 +1395,19 @@ class Pipeline:
             self.state["spent_usd"] = round(self._spent_usd, 4)
             cap = self.budget_usd()
             self.state["budget_usd"] = (round(cap, 2) if cap else None)
+            if self.opts.stage_budget:
+                book = dict((self.state or {}).get("stage_budget_usd") or {})
+                book.update({str(k).upper(): float(v)
+                             for k, v in self.opts.stage_budget.items()})
+                self.state["stage_budget_usd"] = book
+            try:
+                self.state["envelopes"] = {
+                    fam: self.stage_budget_block(st_)
+                    for fam, st_ in (("PRELIM", "PRELIM"), ("RESEARCH", "RESEARCH"),
+                                     ("SCORING", "SCORING"), ("REPORTS", "REPORTS"),
+                                     ("PAGES", "PAGES_A"))}
+            except Exception:                        # noqa: BLE001
+                pass
             if self.opts.max_usd is not None:
                 self.state["budget_usd_source"] = "flag"
             elif self.state.get("budget_usd_source") != "flag":
@@ -1358,6 +1462,14 @@ class Pipeline:
                                reason=f"--max-wall-min {self.opts.max_wall_min} reached "
                                       f"before {st}; resume: {self.plan()['command']}")
                 return outcome
+            if st in SPENDING_STAGES and self._over_stage_budget(st):
+                msg = self._stage_budget_refusal(st) + f" Resume: {self.plan()['command']}"
+                self.opts.log(f"[{st}] STOPPED — {msg[:300]}")
+                outcome.update(outcome="STOPPED_STAGE_BUDGET", stage=st, reason=msg[:800],
+                               envelope=self._stage_budget_hit,
+                               resume=self.plan()["command"])
+                return outcome
+            self._running_stage = st
             t0 = self.opts.clock()
             if st == "SCORING" and self.opts.scoring_mode == "workflow":
                 try:
@@ -1366,7 +1478,9 @@ class Pipeline:
                     msg = str(e).strip() or e.__class__.__name__
                     self._record(st, "FAIL", msg[:600], t0)
                     self.opts.log(f"[{st}] STOPPED — {msg[:300]}")
-                    outcome.update(outcome="FAILED", stage=st, reason=msg[:800],
+                    outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
+                                            in msg else "FAILED"),
+                                   stage=st, reason=msg[:800],
                                    resume=self.plan()["command"])
                     return outcome
                 if h.get("passed"):
@@ -1388,7 +1502,9 @@ class Pipeline:
                 except StageRefused as e:
                     self._record(st, "FAIL", str(e)[:600], t0)
                     self.opts.log(f"[{st}] FAIL — {str(e)[:300]}")
-                    outcome.update(outcome="FAILED", stage=st, reason=str(e)[:800],
+                    outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
+                                            in str(e) else "FAILED"),
+                                   stage=st, reason=str(e)[:800],
                                    resume=self.plan()["command"])
                     return outcome
                 if h.get("passed"):
@@ -1405,7 +1521,16 @@ class Pipeline:
                                resume=self.plan()["command"])
                 return outcome
             if st == "RESEARCH" and self.opts.research_mode == "workflow":
-                h = self._research_handoff()
+                try:
+                    h = self._research_handoff()
+                except StageRefused as e:
+                    self._record(st, "FAIL", str(e)[:600], t0)
+                    self.opts.log(f"[{st}] STOPPED — {str(e)[:300]}")
+                    outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
+                                            in str(e) else "FAILED"),
+                                   stage=st, reason=str(e)[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
                 if not h["invocations"]:
                     # Every category still failing has stopped moving: a
                     # handoff now would only buy agents that close nothing.
@@ -1496,6 +1621,15 @@ class Pipeline:
                     outcome.update(outcome="STOPPED_WALL_CLOCK", stage=st,
                                    reason=msg[:800], resume=self.plan()["command"])
                     return outcome
+                if self._budget_stopped and self._stage_budget_hit:
+                    msg = (self._stage_budget_refusal(st)
+                           + f" What it had reached when it stopped: {msg}")
+                    self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    outcome.update(outcome="STOPPED_STAGE_BUDGET", stage=st,
+                                   reason=msg[:800], envelope=self._stage_budget_hit,
+                                   resume=self.plan()["command"])
+                    return outcome
                 if self._budget_stopped:
                     msg = (f"stopped by the ${self.budget_usd():.2f} budget after "
                            f"spending ${self._spent_usd:.2f} — the stage was cut "
@@ -1545,6 +1679,9 @@ class Pipeline:
     _recorded_turns = 0
     _budget_stopped = False
     _wall_stopped = False
+    #: the envelope that stopped the stage, if one did (see `_over_stage_budget`)
+    _stage_budget_hit: dict | None = None
+    _running_stage: str = ""
     #: set by the RESEARCH round loop when `--step` ended a round cleanly.
     _step_stopped = False
 
@@ -1856,6 +1993,10 @@ class Pipeline:
         # holds its other three in a queue. Affordable only because writes
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
+        env = self.stage_budget_block("RESEARCH")
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal("RESEARCH"))
         open_caps = _open_capabilities(self.wb)
         repairs = {c: floors_gate.blocking_cells(
                        floors_gate.read_verdict(self.run.qa_dir, c))
@@ -1924,6 +2065,19 @@ class Pipeline:
         if cap is not None:
             doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
                                    fits_budget=self._spent_usd + est <= cap)
+        if env:
+            # THE ENVELOPE RIDES WITH THE WORK (2026-10-09). The workflow reads
+            # `budget` and spends at most one round when the estimate does not
+            # fit what is left, so the envelope is held by the agents that
+            # spend it, not only by the driver that reads the ledger after.
+            fits_env = (env["remaining"] is None) or (est <= env["remaining"])
+            doc["budget"] = {**env, "estimate_usd": est, "fits_envelope": fits_env,
+                             "raise_with": f"--stage-budget RESEARCH=<usd>"}
+            doc["estimate"]["fits_envelope"] = fits_env
+            for i in inv:
+                i["budget"] = doc["budget"]
+                if not fits_env:
+                    i["rounds"] = 1
         path.write_text(json.dumps(doc, indent=1))
         doc["agent_prompts"] = self._render_agent_prompts(path)
         path.write_text(json.dumps(doc, indent=1))
@@ -2197,6 +2351,12 @@ class Pipeline:
                 # ONE stage. This is the check that actually bites.
                 self.opts.log(f"  [RESEARCH] budget ${self._spent_usd:.2f} of "
                               f"${self.budget_usd():.2f} — stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
+            if self._over_stage_budget("RESEARCH"):
+                b = self._stage_budget_hit
+                self.opts.log(f"  [RESEARCH] envelope ${b['spent']:.2f} of ${b['ceiling']:.2f} "
+                              f"— stopping at round {self._rounds}")
                 self._budget_stopped = True
                 break
             if self._stalled("RESEARCH"):
@@ -2594,9 +2754,15 @@ class Pipeline:
             raise StageRefused(why + f": pillar(s) {', '.join(owed)} still owed; blocking: "
                                + ", ".join((v.get("blocking") or [])[:8])
                                + f". Repair at source, then resume: {self.plan()['command']}")
+        env = self.stage_budget_block("SCORING")
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal("SCORING"))
         inv = [{"pillar": p, "run": self.run.run_id, "root": str(self.run.root),
                 "eng": str(PLUGIN / "skills" / "dma-research"), "plugin": str(PLUGIN),
-                "briefs": by_p.get(p, []), "critic_brief": "", "rounds": 3,
+                "briefs": by_p.get(p, []), "critic_brief": "",
+                "rounds": int(self.opts.critic_rounds),
+                "budget": {**env, "raise_with": "--stage-budget SCORING=<usd>"} if env else None,
                 "solutions_brief": ""}
                for p in owed]
         # THE SOLUTIONS DUTY rides on the first invocation while its tabs are
@@ -2712,6 +2878,12 @@ class Pipeline:
             if v.get("gate") == "PASS":
                 return f"SCORING gate PASS after {r + 1} round(s)"
             self.opts.log(f"  SCORING gate {v.get('gate')}: {', '.join((v.get('blocking') or [])[:6])}")
+            if self._over_stage_budget("SCORING"):
+                b = self._stage_budget_hit
+                self.opts.log(f"  [SCORING] envelope ${b['spent']:.2f} of ${b['ceiling']:.2f} "
+                              f"— stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
             if self._stalled("SCORING"):
                 break
         v = A.gate(self.wb, self.run.qa_dir)
@@ -2728,6 +2900,7 @@ class Pipeline:
         ent_name = str(md.get("entity_name") or "").strip().lower()
         deadline = self.opts.clock() + self.opts.ingest_timeout_s
         polls = 0
+        self._kick_ingest(label)
         while True:
             polls += 1
             try:
@@ -2759,6 +2932,26 @@ class Pipeline:
                     f"({polls} poll(s)); the package scan runs every 30 minutes — "
                     f"check the intake push, then run the pipeline again")
             self.opts.sleep(self.opts.ingest_poll_s)
+
+    def _kick_ingest(self, label: str) -> None:
+        """Run the package scan NOW instead of waiting for its half-hour
+        Scheduler slot (measured 2026-10-05..08: 1735-3217 s idle per ingest,
+        twice a run). Never fatal — a failed kick leaves the poll to the
+        Scheduler and says so in the state."""
+        cmd = self.opts.ingest_kick_cmd
+        if not cmd:
+            return
+        rec = {"cmd": cmd, "at": _utcnow()}
+        try:
+            out = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                 timeout=900)
+            rec.update(rc=out.returncode, tail=(out.stdout or out.stderr)[-300:])
+            self.opts.log(f"  [{label}] ingest kick rc={out.returncode}")
+        except Exception as e:                       # noqa: BLE001
+            rec.update(error=str(e)[:300])
+            self.opts.log(f"  [{label}] ingest kick failed: {str(e)[:160]} — polling the Scheduler")
+        self.state.setdefault("ingest_kicks", []).append({"label": label, **rec})
+        self._save_state()
 
     def _stage_ingest_a(self) -> str:
         from . import assemble
@@ -3019,8 +3212,10 @@ class Pipeline:
                                        qa_dir=self.run.qa_dir)["path"]).name
                    for spec in RS.SPECS.values()]
             self.reopen()
+            self._thaw_evidence("both reports READY and rendered")
             self._handoff_clear("REPORTS")
             return {"passed": True, "summary": "rendered: " + ", ".join(out)}
+        self._freeze_evidence()
         ups = self._upstream_only()
         if ups:
             raise StageRefused(
@@ -3048,10 +3243,15 @@ class Pipeline:
         for row in b["sections"]:
             by_r.setdefault(row["report"], []).append(
                 {"section": row["section"], "brief": row["file"], "agent": row["agent"]})
+        env = self.stage_budget_block("REPORTS")
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal("REPORTS"))
         inv = [{"report": k, "title": RS.SPECS[k].title, "run": self.run.run_id,
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "sections": by_r.get(k, []),
-                "ready": bool(st["reports"][k].get("ready")), "rounds": 3}
+                "ready": bool(st["reports"][k].get("ready")), "rounds": 2,
+                "budget": {**env, "raise_with": "--stage-budget REPORTS=<usd>"} if env else None}
                for k in RS.SPECS if not st["reports"][k].get("ready")]
         doc = {"workflow": str(PLUGIN / REPORTS_WORKFLOW), "invocations": inv,
                "upstream": st["upstream"], "then": self.plan()["command"],
@@ -3086,6 +3286,7 @@ class Pipeline:
             # independent validator had just passed, reopening ten of them.
             if all(x.get("ready") for x in N.state(self.wb)["reports"].values()):
                 break
+            self._freeze_evidence()
             self._rounds = r + 1
             b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
             self._count(self._dispatch(b, stage="REPORTS"))
@@ -3107,6 +3308,12 @@ class Pipeline:
             self.opts.log("  reports not READY: " + "; ".join(
                 f"{k}: {len([s for s in x.get('sections') or [] if s.get('status') != 'READY'])} "
                 f"section(s) open" for k, x in st["reports"].items() if not x.get("ready")))
+            if self._over_stage_budget("REPORTS"):
+                b = self._stage_budget_hit
+                self.opts.log(f"  [REPORTS] envelope ${b['spent']:.2f} of ${b['ceiling']:.2f} "
+                              f"— stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
             if self._stalled("REPORTS"):
                 break
         st = N.state(self.wb)
@@ -3126,7 +3333,29 @@ class Pipeline:
             res = reports.render(self.wb, spec, self.run.deliverables, qa_dir=self.run.qa_dir)
             out.append(Path(res["path"]).name)
         self.reopen()
+        self._thaw_evidence("both reports READY and rendered")
         return "rendered: " + ", ".join(out)
+
+    def _freeze_evidence(self) -> None:
+        """Hold the register still while the sections are written (B1 Bank,
+        2026-10-08: rows registered mid-REPORTS reopened passed sections on
+        every whole-report pass). Idempotent; the thaw is `_thaw_evidence`
+        or `engine.narrative thaw` by the conducting session."""
+        try:
+            if not L.is_frozen(self.wb):
+                L.freeze(self.wb, f"REPORTS in progress (driver, round {self._rounds})")
+                self.opts.log("  [REPORTS] evidence register frozen: new rows go through "
+                              "BLOCKED_UPSTREAM (kind evidence) until both reports render")
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (evidence freeze not recorded: {str(e)[:120]})")
+
+    def _thaw_evidence(self, why: str) -> None:
+        try:
+            if L.is_frozen(self.wb):
+                L.thaw(self.wb, why)
+                self.reopen()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (evidence thaw not recorded: {str(e)[:120]})")
 
     def _sections_dir(self) -> Path:
         d = self.run.root / SECTIONS_DIR
@@ -3320,13 +3549,27 @@ class Pipeline:
         page that already passed on this version is not re-checked."""
         from . import page_preflight as PP
         todo = tuple(p for p in pages if not self._page_ok(p, version))
-        blockers = PP.preflight(self.wb, todo)
+        found = PP.preflight(self.wb, todo)
         stage = f"PAGES_{version}"
+        advisory = [b for b in found if b.get("severity") == "warn"]
+        blockers = [b for b in found if b.get("severity", "block") != "warn"]
+        if advisory:
+            L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="FAIL",
+                          blocking=False,
+                          detail=("advisory: " + "; ".join(
+                              f"[{b['gate']}] {b['detail']} — fix: {b['fix']}"
+                              for b in advisory))[:900])
+            self.opts.log(f"  [{stage}] {len(advisory)} advisory preflight finding(s) "
+                          f"(unlinked timeline citations) — the context producer states "
+                          f"them on the surface; link them at PRELIM to clear this line")
         if not blockers:
-            if "techstack" in todo:
+            if todo:
                 L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
-                              blocking=False, detail="techstack: machine scan, depth and "
-                              "named-product citations clear in the workbook")
+                              blocking=False,
+                              detail=f"{', '.join(todo)}: every cited row names a cell; "
+                                     f"the workbook floors hold"
+                                     + ("; techstack: machine scan, depth and named-product "
+                                        "citations clear" if "techstack" in todo else ""))
             return
         lines = "; ".join(f"[{b['gate']}] {b['detail']} — fix: {b['fix']}" for b in blockers)
         L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="FAIL",
@@ -3521,10 +3764,15 @@ class Pipeline:
                         (rows.get(f"page-{p}-consolidate") or {}).get("prompt_file", ""),
                         "assemble_brief": (rows.get(f"page-{p}") or {}).get("prompt_file", ""),
                         "last_verdict": verdicts.get(p, [])[:12]})
+        env = self.stage_budget_block(stage)
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal(stage))
         inv = [{"run": self.run.run_id, "root": str(self.run.root),
                 "eng": str(PLUGIN / "skills" / "dma-research"), "version": version,
                 "connector_run": connector_run, "sections_dir": str(self._sections_dir()),
-                "qa_dir": str(self.run.qa_dir), "pages": out}]
+                "qa_dir": str(self.run.qa_dir), "pages": out,
+                "budget": {**env, "raise_with": "--stage-budget PAGES=<usd>"} if env else None}]
         doc = {"workflow": str(PLUGIN / PAGES_WORKFLOW), "invocations": inv,
                "then": self.plan()["command"],
                "how": ("start the invocation — Workflow({scriptPath: <workflow>, "
@@ -3753,8 +4001,19 @@ def _build_opts(a) -> Options:
         disp, reads, shipper = (AgentRunDispatcher(timeout=a.lane_timeout), McpReads(),
                                 ShipPageShipper(session=os.environ.get("DMA_SHIP_SESSION")
                                                 or f"engine-pipeline-{a.run}"))
+    stage_budget = None
+    for item in (getattr(a, "stage_budget", None) or []):
+        k, _, v = str(item).partition("=")
+        try:
+            stage_budget = {**(stage_budget or {}), k.strip().upper(): float(v)}
+        except ValueError:
+            raise SystemExit(f"--stage-budget {item!r} is not STAGE=USD")
     return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
                    max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
+                   stage_budget=stage_budget,
+                   critic_rounds=int(getattr(a, "critic_rounds", None) or Options.critic_rounds),
+                   ingest_kick_cmd=(getattr(a, "ingest_kick_cmd", None)
+                                    or os.environ.get("DMA_INGEST_KICK_CMD") or None),
                    allow_unverified_connectors=getattr(
                        a, "allow_unverified_connectors", False),
                    max_rounds=a.max_rounds,
@@ -3865,6 +4124,18 @@ def main(argv=None) -> int:
                    help="dollar ceiling for the run; default is "
                         "cost.BUDGET_PER_PILLAR x pillars in scope. "
                         "0 disables it (report-only, the old behaviour).")
+    r.add_argument("--stage-budget", action="append", metavar="STAGE=USD",
+                   help="dollar envelope for one stage family (PRELIM, RESEARCH, "
+                        "SCORING, REPORTS, PAGES); defaults in cost.STAGE_BUDGET_USD "
+                        "(research 10, scoring 5, reports 5). Persisted on the run; "
+                        "a stage at its envelope stops as STOPPED_STAGE_BUDGET.")
+    r.add_argument("--critic-rounds", type=int, default=Options.critic_rounds,
+                   help=f"critic rounds a scoring workflow may spend per pillar "
+                        f"(default {Options.critic_rounds})")
+    r.add_argument("--ingest-kick-cmd", default=None,
+                   help="shell command that runs the package scan now (e.g. gcloud run "
+                        "jobs execute dmai-worker --region us-central1 --wait); "
+                        "default $DMA_INGEST_KICK_CMD; unset = wait for the Scheduler")
     r.add_argument("--max-rounds", type=int, default=Options.max_rounds,
                    help=f"ceiling on rounds per looping stage (default {Options.max_rounds}); "
                         f"a stage stops early only when --stall-rounds rounds advance nothing")

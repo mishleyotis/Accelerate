@@ -52,7 +52,7 @@ const criticPrompt = (round) => `You are the scoring-critic for pillar ${P} of D
 ${A.critic_brief ? `Your brief is ${A.critic_brief}: read it first.` : ''}
 Critique pillar ${P} ONLY. You struck none of its scores. ${round === 1 ? 'Round 1: re-derive a sample (at least one row per capability) from its rationale and rubric descriptor and hunt the score that flatters.' : 'Re-critique round: judge ONLY the rows you moved last round (did each land at or below its target with a rationale that now holds) and rows changed since your last verdict. Do not draw a fresh sample - a critic that re-samples every round never converges. PASS when the moved rows hold.'}
 Record exactly one verdict: python3 -m engine.assessment critique ${R} --pillar ${P} --verdict PASS|FAIL --actor scoring-critic --note '<80+ chars>' and, on a FAIL, one --move CELL:TARGET:why per row you would move (the engine refuses a FAIL without them).
-The engine already refuses band, own-site and stale breaches at write time — judge what a rule cannot.
+The engine already refuses, at write time: a score above the band / own-site / single-source / stale ceilings, a rationale that names no maturity level or names a level other than the one struck, a rationale with no gap to the next level, and an off-row E-id. Do NOT re-check those — judge what a rule cannot: does the evidence actually show the level argued; is the gap named the real one; is the rationale this institution's or anybody's. Sample at most ONE row per capability in round 1.
 Return pillar ${P}, verdict PASS or FAIL as recorded, moves (how many --move you gave), and one-line notes.`
 
 const rescorePrompt = (round) => `You are ${ACT} for DMA run ${A.run}, round ${round}, RESCORE. Work from ${A.eng}.
@@ -81,7 +81,14 @@ if ((A.briefs || []).length && !scored.filter(Boolean).length) {
 }
 
 let last = null
-for (let round = 1; round <= (A.rounds || 3); round++) {
+// CRITIC ROUNDS ARE CAPPED AT THE DRIVER'S --critic-rounds (default 2 since
+// 2026-10-09; measured 10-05..08: 46 / 76 / 61 critic rounds per run, with
+// the mechanical caps already refused at write time). Round 1 samples;
+// round 2 judges only the moved rows; a pillar still FAILing after that
+// returns to the driver, whose gate names the rows — not a third sample.
+const CRITIC_ROUNDS = A.rounds || 2
+if (A.budget && A.budget.ceiling != null) log(`${P}: SCORING envelope $${A.budget.spent} of $${A.budget.ceiling} spent`)
+for (let round = 1; round <= CRITIC_ROUNDS; round++) {
   last = await agent(criticPrompt(round), {
     label: `${P} critic r${round}`, phase: 'Critique', schema: OUT,
     agentType: 'dma-insights:scoring-critic',

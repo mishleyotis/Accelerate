@@ -49,8 +49,15 @@ def test_the_first_tech_register_is_refused_before_any_page_agent(tmp_path):
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
     _first_tech_shape(wb)
-    gates = {b["gate"]: b for b in PP.preflight(wb)}
-    assert set(gates) == {"ET-12", "CG-40", "CG-50"}
+    blockers = PP.preflight(wb)
+    gates = {b["gate"]: b for b in blockers}
+    # ET-07 joins the three (2026-10-09): both rows cite evidence that names
+    # no cell, which is the fourth refusal B1 Bank's first register drew from
+    # the connector — one id per blocker, named, not a connector matter.
+    assert set(gates) == {"ET-07", "ET-12", "CG-40", "CG-50"}
+    et07 = [b for b in blockers if b["gate"] == "ET-07"]
+    assert len(et07) == 2 and all(not b["needs_connector"] for b in et07)
+    assert all("Tech_Register:TS-00" in b["detail"] for b in et07)
     assert gates["ET-12"]["needs_connector"] and gates["CG-40"]["needs_connector"]
     assert not gates["CG-50"]["needs_connector"]
     assert "Reltio" in gates["CG-50"]["detail"]

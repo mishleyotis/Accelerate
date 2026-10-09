@@ -332,6 +332,30 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   fixed: `apps/web/tests/e2e/run.sh` (Chromium + next start + uvicorn +
   Postgres, signed assertions; scenarios + concurrency stress).
 
+- **Workflow optimisation** (user, 2026-10-09, after reading every DMA
+  session of 2026-09-25..10-09; `plugins/dma-insights/docs/WORKFLOW-OPTIMIZATION-2026-10-09.md`):
+  **per-stage envelopes are the budget** — PRELIM $2 · RESEARCH $10 ·
+  SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
+  `--stage-budget STAGE=USD`, persisted); a stage at its envelope stops as
+  `STOPPED_STAGE_BUDGET`, a handoff is refused `AT_STAGE_BUDGET`, and
+  `guard_dispatch` refuses the agent. Workflow agents are charged to the
+  stage their prompt names. **Rules a challenger or critic can state in one
+  sentence are refused at the write**: claim-label fit at `synthesise`
+  (FACT two identities; INFERENCE 2+ ids and a named step; a disposition for
+  an open contradiction) and the rubric at `score` (the level named is the
+  level struck; a gap to the next level; no off-row E-id). `rollup` never
+  waits for the headline (`headline_missing` is its own term). **The
+  register is frozen during REPORTS** (`engine.narrative freeze/thaw`);
+  writers route new facts BLOCKED_UPSTREAM. PRELIM rows ride in every
+  research packet (`shared.prelim_evidence`) and rank as proposals; report
+  writers cite from an ERS-ranked evidence pack in their brief. Page gates
+  readable from the workbook (ET-07 for every citing sheet — and `techscan.record`
+  links a register row's citations to the cells it names at the write, so the
+  techstack page never carries an unlinked one; the O7/C1/O1/H1
+  floors, the techstack three) run before any page agent. Lock waits are
+  recorded beside the lock; `--ingest-kick-cmd` runs the package scan
+  instead of waiting for the Scheduler.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

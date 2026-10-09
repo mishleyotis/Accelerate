@@ -95,7 +95,7 @@ def test_a_thin_or_uncited_rationale_is_refused(tmp_path):
         _score(wb, cells[0], ev[cells[0]], rationale="Demonstrates capability.")
     with pytest.raises(ScoringRefusal, match="cites none of the row's own evidence"):
         _score(wb, cells[0], ev[cells[0]],
-               rationale=RATIONALE.format(e0="E-900", e1="E-901"))
+               rationale=RATIONALE.format(e0="E-900", e1="E-901", lvl="M2"))
 
 
 def test_an_unchallenged_or_unresearched_row_cannot_be_scored(tmp_path):

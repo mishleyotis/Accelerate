@@ -77,7 +77,10 @@ OPS = ("search", "evidence", "attach", "synthesis", "absence", "challenge",
 _ALLOWED = {
     "search":    {"category-researcher", "servicing", "technographic-scanner"},
     "evidence":  {"category-researcher", "servicing", "technographic-scanner"},
-    "attach":    {"category-researcher", "servicing"},
+    # The scanner attaches only through `techscan.record`, which links a
+    # register row's own citations to the cells the row names (ET-07 at the
+    # write, 2026-10-09); it never attaches a row into a cell on its own.
+    "attach":    {"category-researcher", "servicing", "technographic-scanner"},
     "note":      {"category-researcher", "servicing"},
     "synthesis": {"category-researcher"},
     "absence":   {"category-researcher"},

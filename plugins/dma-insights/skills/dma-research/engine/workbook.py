@@ -39,6 +39,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
 
 import contextlib
 import datetime as _dt
+import json
 import os
 import tempfile
 import time
@@ -65,6 +66,49 @@ class WorkbookError(RuntimeError):
     pass
 
 
+#: Waits at or above this are recorded beside the lock as
+#: `<lock>.waits.jsonl` — one line per wait: when, how long, which writer.
+#: The owner's complaint (2026-10-09: "lock states on the toolkits also
+#: causes a lot of lags") had no measurement behind it: the only lock
+#: signal in three promoted runs was two lease refusals, because nothing
+#: wrote a wait down. `engine.cost report` reads this file per run.
+LOCK_WAIT_NOTE_S = float(os.environ.get("DMA_LOCK_WAIT_NOTE_S") or 2.0)
+
+
+def lock_waits_path(lock_path: Path) -> Path:
+    lock_path = Path(lock_path)
+    return lock_path.with_name(lock_path.name + ".waits.jsonl")
+
+
+def _note_lock_wait(lock_path: Path, waited_s: float, why: str, *, timed_out: bool) -> None:
+    try:
+        rec = {"at": _utcnow(), "waited_s": round(waited_s, 2), "why": (why or "")[:120],
+               "pid": os.getpid(), "timed_out": timed_out}
+        with open(lock_waits_path(lock_path), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec) + "\n")
+    except OSError:
+        pass
+
+
+def lock_wait_summary(lock_path: Path) -> dict:
+    """{waits, total_s, max_s, timed_out} from the waits file, or zeros."""
+    out = {"waits": 0, "total_s": 0.0, "max_s": 0.0, "timed_out": 0}
+    try:
+        for line in lock_waits_path(lock_path).read_text(encoding="utf-8").splitlines():
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            out["waits"] += 1
+            w = float(rec.get("waited_s") or 0)
+            out["total_s"] = round(out["total_s"] + w, 2)
+            out["max_s"] = max(out["max_s"], w)
+            out["timed_out"] += 1 if rec.get("timed_out") else 0
+    except OSError:
+        pass
+    return out
+
+
 @contextlib.contextmanager
 def file_lock(lock_path: Path, *, timeout: float = 120.0, why: str = ""):
     """Exclusive, cross-process flock on `lock_path`, polled until `timeout`.
@@ -83,20 +127,25 @@ def file_lock(lock_path: Path, *, timeout: float = 120.0, why: str = ""):
     lock_path = Path(lock_path)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     fh = open(lock_path, "a+")
+    t0 = time.monotonic()
     try:
-        deadline = time.monotonic() + timeout
+        deadline = t0 + timeout
         while True:
             try:
                 fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 break
             except OSError:
                 if time.monotonic() > deadline:
+                    _note_lock_wait(lock_path, time.monotonic() - t0, why, timed_out=True)
                     raise WorkbookError(
                         f"waited {timeout:.0f}s for {lock_path.name}"
                         f"{(' — ' + why) if why else ''}. Another writer is "
                         f"holding it; this is a stall, never a reason to write "
                         f"without the lock.")
                 time.sleep(0.05)
+        waited = time.monotonic() - t0
+        if waited >= LOCK_WAIT_NOTE_S:
+            _note_lock_wait(lock_path, waited, why, timed_out=False)
         yield
     finally:
         with contextlib.suppress(OSError):
@@ -548,6 +597,7 @@ class RunWorkbook:
             "prelim_completed_at": "",
             "empty_sheet_reasons": "",
             "critic_moves": "",
+            "evidence_freeze": "",
             # The Slack request this run answers, when it came from one.
             # `engine.cli start --slack-channel/--slack-thread-ts/
             # --requested-by` fills them; the automated intake always does

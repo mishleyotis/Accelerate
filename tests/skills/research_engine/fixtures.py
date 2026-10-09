@@ -391,6 +391,14 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                  "Cloud (data warehouse); last seen 2026-08."),
         subcaps=[], published="2026-08-28", origin="connector",
         access_status="OK: Clay Tech Stack, retrieved 2026-08-29")
+    # The cell the register rows (and so their citations) name. A register
+    # row that names no cell leaves its cited evidence unlinked, and the
+    # connector's ET-07 refuses the techstack page for it — `techscan.record`
+    # links the citations at the write, so the fixture names a cell the way
+    # the scanner does. The third selected cell, where the run has one, so
+    # the first and last cells keep the states the tests built on them.
+    _cells = list(wb.selected_subcaps())
+    link_cell = _cells[min(2, len(_cells) - 1)] if _cells else None
     # ALL FOUR LAYERS, in PRELIM. A layer nothing was found in is an
     # ABSENT row carrying the ladder — never a layer left out, which reads
     # to every later surface as a clean estate.
@@ -410,7 +418,8 @@ def close_prelim(run, *, entity="Acme Credit Union"):
                         method="public_document",
                         basis=basis,
                         providers=["clay", "web"],
-                        subcaps=[], evidence_ids=[eid, scan_eid],
+                        subcaps=[link_cell] if link_cell else [],
+                        evidence_ids=[eid, scan_eid],
                         source_urls=["https://ncua.example/callreport/2025"],
                         as_of="2025-12-31")
     # THE THREE CONNECTOR-OWNED TABS, closed through the real gate: one
@@ -418,11 +427,23 @@ def close_prelim(run, *, entity="Acme Credit Union"):
     # register declared empty only after connector searches were logged
     # against it (prelim.CONNECTOR_FLOOR).
     cell = (list(wb.selected_subcaps()) or ["P1C1.1.1"])[0]
-    profile.focus(wb, fa_id="FA-01", title="Move decisioning off the core",
-                  quote=("We are moving credit decisioning off the core so that "
-                         "members get an answer in minutes rather than days."),
-                  document="2025 Annual Report", page="4", cells=[cell],
-                  evidence=eid, currency="CONFIRMED_CURRENT")
+    # THREE stated priorities, not one: H1 serves three to five client
+    # priorities (Surface Spec; `page_preflight` S9 floor, 2026-10-09), and a
+    # fixture that closes PRELIM with one models the heatmap refusal B1 Bank
+    # drew rather than the run that passes it.
+    for fa_id, title, quote, page in (
+            ("FA-01", "Move decisioning off the core",
+             "We are moving credit decisioning off the core so that members "
+             "get an answer in minutes rather than days.", "4"),
+            ("FA-02", "One view of the member across channels",
+             "Our members should not have to repeat themselves when they move "
+             "from the app to the branch to the contact centre.", "6"),
+            ("FA-03", "Retire the paper in onboarding",
+             "Every new account we open still generates paper somewhere in "
+             "the back office, and we intend to end that this year.", "9")):
+        profile.focus(wb, fa_id=fa_id, title=title, quote=quote,
+                      document="2025 Annual Report", page=page, cells=[cell],
+                      evidence=eid, currency="CONFIRMED_CURRENT")
     ts = next(r["TS_ID"] for r in wb.rows("Tech_Register") if r.get("TS_ID"))
     techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU", deployed=None,
                          basis="searched the peer's careers site and vendor "
@@ -762,7 +783,7 @@ def write_report(wb, report, eids, *, actor=None, run=None):
 
 RATIONALE = ("[EVIDENCE] {e0} shows Alkami digital banking live since Q3 2024 with 47 "
              "percent adoption; {e1} confirms the 2025 restatement at 52 percent. "
-             "[MATURITY MATCH] Maps to M3 'standardized, documented' because the "
+             "[MATURITY MATCH] Maps to {lvl} because the "
              "platform is live and measured quarterly. [GAP TO NEXT] No evidence of "
              "optimisation loops or data-driven targeting. [COUNTER] None identified. "
              "[CEILING] Two T2 sources allow 5.0; single-source cap not triggered. "
@@ -824,14 +845,27 @@ def client_facts(wb, cells, ev):
             "reason and no category closed with an open enrichment request")
 
 
+def rationale_for(eids, score):
+    """The fixture rationale, arguing the level the score actually strikes
+    (the write path refuses a rationale that argues M3 for an M2 score —
+    the flattering shape the critic kept finding, 2026-10-09)."""
+    from engine import rubric
+    return RATIONALE.format(e0=eids[0], e1=eids[1], lvl=rubric.maturity_level(score))
+
+
+def absence_rationale(score):
+    from engine import rubric
+    return ("No evidence located after five volleys and a two-rung ladder "
+            "(direct, proxy); the leadership_title proxy was hunted across the "
+            "site, LinkedIn and the annual report and nothing names an owner. "
+            f"Scored {rubric.maturity_level(score)} at the no-evidence cap and "
+            "disclosed as an Unknown; the gap is the artefact itself — an "
+            "internal artefact would lift it.")
+
+
 def score_cell(wb, cell, eids, score=2.5, actor="scoring-p1-producer", **over):
     kw = dict(score=score, confidence="MEDIUM",
-              rationale=RATIONALE.format(e0=eids[0], e1=eids[1]) if eids else
-              ("No evidence located after five volleys and a two-rung ladder "
-               "(direct, proxy); the leadership_title proxy was hunted across the "
-               "site, LinkedIn and the annual report and nothing names an owner. "
-               "Scored at the no-evidence cap and disclosed as an Unknown; an "
-               "internal artefact would lift it."),
+              rationale=rationale_for(eids, score) if eids else absence_rationale(score),
               actor=actor, ai_applicability="ASSISTIVE",
               data_dependency="member master, transactions",
               data_readiness="AMBER")

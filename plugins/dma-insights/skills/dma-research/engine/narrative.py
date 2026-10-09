@@ -988,6 +988,18 @@ def main(argv=None) -> int:
     c = sub.add_parser("contract")
     c.add_argument("--report", choices=sorted(RS.SPECS))
 
+    # THE EVIDENCE FREEZE (B1 Bank, 2026-10-08: sections reopened by rows
+    # registered while they were being written). The driver freezes at the
+    # start of REPORTS and thaws when both reports render; a conducting
+    # session thaws by hand to service an `evidence` upstream item, then
+    # re-freezes.
+    fz = common(sub.add_parser("freeze", help="refuse new evidence rows while the "
+                                             "reports are written"))
+    fz.add_argument("--why", required=True)
+    th = common(sub.add_parser("thaw", help="re-open the register (records EVIDENCE_THAW)"))
+    th.add_argument("--why", required=True)
+    common(sub.add_parser("freeze-state"))
+
     pc = common(sub.add_parser(
         "preconditions",
         help="is the run READY for this report to be written? PRELIM closed, "
@@ -997,6 +1009,18 @@ def main(argv=None) -> int:
     pc.add_argument("--report", required=True, choices=sorted(RS.SPECS))
 
     a = ap.parse_args(argv)
+    if a.cmd in ("freeze", "thaw", "freeze-state"):
+        from . import ledger as _L
+        run = runstate.locate(a.run, a.root)
+        wb = run.open()
+        if a.cmd == "freeze":
+            out = _L.freeze(wb, a.why)
+        elif a.cmd == "thaw":
+            out = _L.thaw(wb, a.why)
+        else:
+            out = {"frozen": bool(_L.is_frozen(wb)), "why": _L.is_frozen(wb) or None}
+        print(json.dumps(out, indent=2))
+        return 0
     if a.cmd == "contract":
         for key in ([a.report] if a.report else sorted(RS.SPECS)):
             spec = RS.SPECS[key]
