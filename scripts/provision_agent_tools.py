@@ -249,6 +249,35 @@ RESEARCH_LANE = row(
         "engine.cli fetch windows, and emits every connector query as a "
         "search_requests entry; the orchestrator tier holds the connectors")
 
+#: THE RESEARCH TIERS (2026-10-09, decided against the gold workbook). The
+#: evidence COLLECTOR is the price tier's half of the gold row — a verbatim
+#: span the fetch cache verifies, a tier the ladder gives, a date the page
+#: states, attached to the cells it answers — so it holds the search tools a
+#: collector needs (WebSearch on a degraded run; Exa and Tavily when the
+#: session holds them) and WebFetch for the one page read per cell the
+#: command sheet allows, and writes only through engine.cli over Bash. It
+#: holds no Agent tool and no connector write; the actor scope refuses a
+#: synthesis or an absence from `research-pXcY-collector` at the write.
+RESEARCH_COLLECTOR = row(
+    web=WEB, external=["exa", "tavily"], reads="floor",
+    why="collects evidence for one batch of a category's open cells — searches "
+        "with WebSearch (Exa and Tavily when the session holds them), reads a "
+        "page as engine.cli fetch windows, registers verbatim spans through the "
+        "ledger's refusals — and writes no judgement; the category "
+        "orchestrator synthesises")
+
+#: The category ORCHESTRATOR is the judgement half: it reads the collectors'
+#: evidence pack and the floors gate's own terms, writes every synthesis and
+#: declared absence through one batch per capability, and names the gap cells
+#: a repair wave collects for. It searches nothing — a judge that can fetch
+#: becomes a second collector — so it is engine-only.
+RESEARCH_ORCHESTRATOR = row(
+    reads="floor",
+    why="judges one category's completeness from the collectors' evidence pack "
+        "and the floors gate's terms and writes its syntheses through engine.cli; "
+        "it searches nothing, so the price tier's collection and this tier's "
+        "judgement stay separable in the ledger")
+
 #: A per-surface producer: writes one surface from the run's REGISTERED
 #: evidence, records that an enrichment ran, and touches nothing else. It
 #: holds no web tool. Measured 28-09-2026 (QA audit F-D02-008): 31
@@ -400,6 +429,8 @@ ROLES = {
                                          "; writes its vetting report as a file"),
     "research/research-conductor": RESEARCH_CONDUCTOR,
     "research/technographic-scanner": TECHNOGRAPHIC_SCANNER,
+    "research/research-evidence-collector": RESEARCH_COLLECTOR,
+    "research/research-category-orchestrator": RESEARCH_ORCHESTRATOR,
     # C3-1: the Sonnet challenge pass over research syntheses. It reads
     # nothing but its brief; `engine.cli fetch` over Bash is its only
     # look-up. Read/Bash/Skill only — it greps nothing and globs nothing.
@@ -534,7 +565,9 @@ FM = re.compile(r"^---\n(.*?)\n---\n", re.S)
 
 # ── which model, and why ─────────────────────────────────────────────────
 #
-# Measured 28-09-2026 (QA audit F-C06-037): 58 sonnet / 15 opus / 1 haiku
+# Measured 28-09-2026 (QA audit F-C06-037): 58 sonnet / 15 opus / 1 haiku;
+# 2026-10-09 the research tiers added a haiku collector and a sonnet category
+# orchestrator (59 sonnet / 15 opus / 2 haiku)
 # and no agent stated why, so a reader could not tell a deliberate tier
 # from a default. The reason lives here, beside the grants, and the
 # manifest's first body line states it. `--write` writes both the
@@ -542,9 +575,11 @@ FM = re.compile(r"^---\n(.*?)\n---\n", re.S)
 # Moving an agent to a cheaper tier is a change to THIS table with its
 # reason, never a frontmatter edit.
 MODEL_REASONS: dict[str, tuple[str, str]] = {}
-_LANE = ("sonnet", "one category from a bounded packet through a fixed loop; the "
-                   "ledger refuses what a cell cannot carry, so the judgement is small "
-                   "and frequent — sixteen parallel lanes on the price tier")
+_LANE = ("sonnet", "the lane path works a whole category in one context — it collects "
+                   "AND synthesises, and the synthesis is the gold row's judgement; the "
+                   "workflow path splits that work into haiku collectors and a sonnet "
+                   "category orchestrator (2026-10-09), so this manifest is the "
+                   "lane-mode identity and the actor name the category's writes carry")
 for _c in ("p1c1", "p1c2", "p1c3", "p1c4", "p2c1", "p2c2", "p2c3", "p2c4",
            "p3c1", "p3c2", "p3c3", "p3c4", "p4c1", "p4c2", "p4c3", "p4c4"):
     MODEL_REASONS[f"research-{_c}-producer"] = _LANE
@@ -583,6 +618,20 @@ MODEL_REASONS.update({
     "finding-challenger": ("opus", "the strong-tier sample that calibrates the sonnet "
                                    "research-challenger, and the attack on every produced "
                                    "surface before consolidation"),
+    "research-evidence-collector": ("haiku", "collects evidence for one batch of open "
+                                             "cells: searches, verbatim spans the fetch "
+                                             "cache verifies, a tier from the ladder, a "
+                                             "date the page states — the ledger refuses "
+                                             "what is wrong with an evidence row, so no "
+                                             "judgement rides on the tier; it never "
+                                             "synthesises"),
+    "research-category-orchestrator": ("sonnet", "judges one category's completeness "
+                                                 "and writes every synthesis and absence "
+                                                 "from the collectors' evidence pack — the "
+                                                 "gold row's claim, triangulation, ceiling "
+                                                 "and label are judgement the challenge "
+                                                 "FAILs on, and a repair round re-pays a "
+                                                 "context floor"),
     "research-challenger": ("sonnet", "a full pass per category over a bounded packet, "
                                       "seven named dimensions; finding-challenger re-judges "
                                       "a 10 % sample on the strong tier"),

@@ -252,7 +252,8 @@ def stale_run(run, prompt: str) -> str:
 
 #: Which envelope an agent spends from, by its name (the roster's families).
 _AGENT_FAMILY = (
-    (("research-p", "research-challenger", "enrichment-", "technographic-scanner"), "RESEARCH"),
+    (("research-p", "research-challenger", "research-evidence-collector",
+      "research-category-orchestrator", "enrichment-", "technographic-scanner"), "RESEARCH"),
     (("scoring-",), "SCORING"),
     (("report-",), "REPORTS"),
     (("-surface-producer", "-producer", "finding-challenger", "page-consolidator"), "PAGES"),

@@ -11,7 +11,7 @@ exactly that shape).
 
 `scripts/provision_agent_tools.py` generates every `tools:` line from one
 role table, so the GRANTS cannot drift from each other. Nothing checked that
-the PROSE agrees with the grants. This does, for all 74 manifests, and it
+the PROSE agrees with the grants. This does, for all 76 manifests, and it
 also pins the headless dispatch path: every built-in an agent's grants name
 is in `agent_run.ALLOWED`, because `--permission-mode dontAsk` DENIES what is
 not pre-approved rather than asking (MEM-0111).
@@ -67,7 +67,7 @@ ALL = list(manifests())
 
 
 def test_the_roster_is_the_size_the_manifest_promises():
-    assert len(ALL) == 74
+    assert len(ALL) == 76
 
 
 @pytest.mark.parametrize("path,tools,dis,body", ALL,

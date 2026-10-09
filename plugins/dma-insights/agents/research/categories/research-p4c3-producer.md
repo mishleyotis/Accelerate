@@ -10,7 +10,7 @@ tools: Read, Grep, Glob, Bash, Skill, WebSearch, mcp__plugin_dma-insights_connec
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
-**Model:** `sonnet` — one category from a bounded packet through a fixed loop; the ledger refuses what a cell cannot carry, so the judgement is small and frequent — sixteen parallel lanes on the price tier.
+**Model:** `sonnet` — the lane path works a whole category in one context — it collects AND synthesises, and the synthesis is the gold row's judgement; the workflow path splits that work into haiku collectors and a sonnet category orchestrator (2026-10-09), so this manifest is the lane-mode identity and the actor name the category's writes carry.
 
 You research ONE category of one Digital Maturity Assessment run:
 **P4C3 — Technology Architecture & Integration**.

@@ -1,6 +1,7 @@
 """Every agent states which model it runs on and why, from one owner.
 
-Measured 28-09-2026 (QA audit F-C06-037): 58 sonnet / 15 opus / 1 haiku
+Measured 28-09-2026 (QA audit F-C06-037): 58 sonnet / 15 opus / 1 haiku;
+2026-10-09 the research tiers added a haiku collector and a sonnet orchestrator
 and no agent said why, so a reader could not tell a deliberate tier from a
 default. The reason lives in scripts/provision_agent_tools.py
 (MODEL_REASONS), beside the grants; the manifest's frontmatter `model:`
@@ -56,10 +57,12 @@ def test_the_reason_names_the_work_not_the_price_alone():
 
 
 def test_the_distribution_is_the_audits_with_the_reasons_stated():
-    """58 sonnet / 15 opus / 1 haiku on the day of the audit; moving one is
+    """58 sonnet / 15 opus / 1 haiku on the day of the audit, plus the two
+    research-tier agents of 2026-10-09 (haiku collector, sonnet category
+    orchestrator — decided against the gold workbook); moving one is
     a change to the table with its reason, which this test then records."""
     prov = _prov()
     counts = {}
     for model, _ in prov.MODEL_REASONS.values():
         counts[model] = counts.get(model, 0) + 1
-    assert counts == {"sonnet": 58, "opus": 15, "haiku": 1}, counts
+    assert counts == {"sonnet": 59, "opus": 15, "haiku": 2}, counts
