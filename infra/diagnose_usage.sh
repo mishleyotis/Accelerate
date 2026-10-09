@@ -5,7 +5,8 @@
 #
 #   1. the dmai-usage sink: destination, filter, writer identity
 #   2. sink write errors the log router recorded (the sink cannot write)
-#   3. usage lines dmai-web wrote to Cloud Logging (the browser reports)
+#   3. usage lines dmai-web and dmai-share wrote to Cloud Logging (the
+#      browser reports, and the client-link lines)
 #   4. the BigQuery table: does it exist, how many rows, newest event
 #   5. who holds what on the dataset (access list + conditioned bindings)
 #   6. refusals on the admin read paths (web /api/admin/*, api /v1/admin/*, /v1/me)
@@ -44,14 +45,16 @@ gcloud logging read 'logName:"logging.googleapis.com%2Fsink_error" OR (resource.
   --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=10 \
   --format='table(timestamp,severity,jsonPayload.error.details.message:label=ERROR)' 2>&1 | mask | head -30
 
-hdr "3. usage lines dmai-web wrote (last ${FRESHNESS})"
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-web" AND jsonPayload.usage_v=1' \
-  --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=500 \
-  --format='value(jsonPayload.usage.type)' 2>&1 | sort | uniq -c | head -20
-echo "  newest:"
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-web" AND jsonPayload.usage_v=1' \
-  --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=3 \
-  --format='table(timestamp,jsonPayload.usage.type,jsonPayload.usage.page,jsonPayload.usage.email)' 2>&1 | mask
+for SVC in dmai-web dmai-share; do
+  hdr "3. usage lines ${SVC} wrote (last ${FRESHNESS})"
+  gcloud logging read "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${SVC}\" AND jsonPayload.usage_v=1" \
+    --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=500 \
+    --format='value(jsonPayload.usage.type)' 2>&1 | sort | uniq -c | head -20
+  echo "  newest:"
+  gcloud logging read "resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"${SVC}\" AND jsonPayload.usage_v=1" \
+    --project="$PROJECT_ID" --freshness="$FRESHNESS" --limit=3 \
+    --format='table(timestamp,jsonPayload.usage.type,jsonPayload.usage.page,jsonPayload.usage.email)' 2>&1 | mask
+done
 
 hdr "4. BigQuery ${USAGE_DATASET}.${USAGE_TABLE}"
 bq --project_id="$PROJECT_ID" ls "${PROJECT_ID}:${USAGE_DATASET}" 2>&1 | head -10
@@ -70,6 +73,20 @@ process.stdout.write(eventsSql({ project: '${PROJECT_ID}', dataset: '${USAGE_DAT
   else
     echo "  QUERY FAILED:"; printf '%s\n' "$APP_OUT" | grep -v '^WARNING' | head -8 | mask
   fi
+  # The client-link reads (lib/usage-store.js linksSql + lastSeenSql), so a
+  # release proves the SQL the Client links card runs, not just its syntax.
+  for Q in linksSql lastSeenSql; do
+    QSQL="$(cd "$(dirname "$0")/.." && node --input-type=module -e "
+import { ${Q} } from './apps/web/lib/usage-store.js';
+process.stdout.write(${Q}({ project: '${PROJECT_ID}', dataset: '${USAGE_DATASET}', table: '${USAGE_TABLE}' }));" 2>/dev/null)"
+    if QOUT="$(bq --project_id="$PROJECT_ID" --format=csv query --nouse_legacy_sql --max_rows=1000000 "$QSQL" 2>&1)"; then
+      printf '%s\n' "$QOUT" | grep -v '^WARNING' | awk -v q="$Q" 'NR==1{next} {n++} END {printf "  OK %s rows %d\n", q, n}'
+      [ "$Q" = "lastSeenSql" ] && printf '%s\n' "$QOUT" | grep -v '^WARNING' \
+        | awk -F, 'NR==1{next} $4=="true"{c++} END {printf "  client-link-only people: %d\n", c}'
+    else
+      echo "  ${Q} FAILED:"; printf '%s\n' "$QOUT" | grep -v '^WARNING' | head -8 | mask
+    fi
+  done
 else
   echo "  (node not on PATH; skipped)"
 fi

@@ -4,6 +4,7 @@ import { liveLink } from "../../../../lib/share-ledger";
 import { completeSignIn } from "../../../../lib/share-otp";
 import { deadLinkPage, gatePage, unavailablePage } from "../../../../lib/share-page";
 import { checkSignIn, claimNonce } from "../../../../lib/share-throttle";
+import { clientSession, linkFields, logLinkEvent, logUsage } from "../../../../lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,7 @@ export async function GET(req, { params }) {
     const v = checkSignIn(p, email, q.get("i"), q.get("n"), q.get("s"));
     if (v !== "ok") {
       audit("share_otp_rejected", { jti: p.jti, entity: p.e, email, error: `code_${v}` });
+      logLinkEvent("link_refused", linkFields(p, { attempted_email: email, reason: "sign_in_link_rejected" }));
       return retry("That sign-in link is not valid. Enter your email to get a new one.");
     }
     let first;
@@ -46,6 +48,7 @@ export async function GET(req, { params }) {
     }
     if (!first) {
       audit("share_otp_rejected", { jti: p.jti, entity: p.e, email, error: "code_reused" });
+      logLinkEvent("link_refused", linkFields(p, { attempted_email: email, reason: "sign_in_link_reused" }));
       return retry("That sign-in link was already used. Enter your email to get a new one.");
     }
   } else {
@@ -54,10 +57,12 @@ export async function GET(req, { params }) {
     const r = await completeSignIn(email, code);
     if (!r.ok || r.email !== email) {
       audit("share_otp_rejected", { jti: p.jti, entity: p.e, email, error: r.error || "email_mismatch" });
+      logLinkEvent("link_refused", linkFields(p, { attempted_email: email, reason: "sign_in_link_rejected" }));
       return retry("That sign-in link has expired or was already used. Enter your email to get a new one.");
     }
   }
   audit("share_access_granted", { jti: p.jti, entity: p.e, email, method: "otp" });
+  logUsage("link_admit", clientSession(email), linkFields(p, { method: "otp" }));
   return new Response(null, { status: 303, headers: {
     location: `/s/${params.token}#/clients/${p.e}/overview?view=client`,
     "set-cookie": accessCookie(p, params.token, email, "otp"),

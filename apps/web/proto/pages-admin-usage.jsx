@@ -7,6 +7,9 @@
    heartbeat (live now), feature, and the server-observed client_open /
    doc_load / insight_review. A session is the browser's session id, rotated
    after 30 minutes without activity. Identity is the verified session's.
+   Client links (dmai-share): recipients are people with role CLIENT, their
+   page beacons carry the link id, and the share service's link_* lines say
+   which links were generated, opened, and refused (lib/usage LINK_EVENTS).
 
    Production divergences from the prototype (pages/admin-usage.jsx):
      · no team column — no team exists anywhere in this app's data
@@ -43,9 +46,13 @@ const uaLabel = k => (UA_PAGES[k] && UA_PAGES[k].label) || UA_EXTRA_LABEL[k] || 
 // Usage colours stay OFF the maturity-band ramp (gate N, invariant 7): a fill
 // on this page means a page or a role, never a maturity level.
 const UA_PAGE_COLOR = { dashboard: "#1C4A4D", clients: "#9AA9AA", overview: "#3B82C4", insights: "#735BA1", heatmap: "#D66D2A", platform: "#2E7DAF", context: "#5B8DB8", techstack: "#7FB7A4", health: "#C25B5B", runs: "#B9A27A", alerts: "#D99A3A", prospecting: "#8C6BB8", admin: "#3D5A5C", admin_usage: "#3D5A5C", login: "#9AA9AA", other: "#9AA9AA" };
-const UA_ROLE_COLOR = { AE: "#3B82C4", ANALYST: "#735BA1", ADMIN: "#D66D2A" };
+// CLIENT is a client-link reader on the public share service (lib/usage):
+// not a grant, never offered a role, but a person whose reading is measured.
+const UA_ROLE_COLOR = { AE: "#3B82C4", ANALYST: "#735BA1", ADMIN: "#D66D2A", CLIENT: "#B5487A" };
+const UA_STAFF = ["AE", "ANALYST", "ADMIN"];
+const UA_ROLES_ALL = ["AE", "ANALYST", "ADMIN", "CLIENT"];
 const UA_FILL = "#3B82C4";   // single-series bars and the hour heatmap
-const UA_ROLE_LABEL = { AE: "AE", ANALYST: "Analyst", ADMIN: "Admin" };
+const UA_ROLE_LABEL = { AE: "AE", ANALYST: "Analyst", ADMIN: "Admin", CLIENT: "Client" };
 // Feature actions, in display order. The prototype's meeting_prep / ae_note /
 // export do not exist as actions in production; insight_review (an Accept or
 // Reject on an insight card, logged by the server on success) does.
@@ -155,14 +162,22 @@ function uaModelFromWire(body) {
   const rows = (body.events || []).map(r => Object.fromEntries(F.map(f => [f, r[ix[f]]])));
   const bySid = new Map();
   const featureEvents = [];
+  const linkEvents = [];
   const roleOf = {};
   rows.forEach(r => {
-    if (r.email && r.role) roleOf[r.email] = r.role;
+    // A Zennify role always wins over CLIENT: someone on staff who opens a
+    // client link to check it is still staff.
+    if (r.email && r.role && (r.role !== "CLIENT" || !roleOf[r.email])) roleOf[r.email] = r.role;
     const t = new Date(r.t);
     if (r.type === "feature" && r.feature) featureEvents.push({ email: r.email, f: r.feature, at: t, sid: r.sid || null });
+    if (r.type && r.type.indexOf("link_") === 0) {
+      linkEvents.push({ type: r.type, email: r.email || null, at: t, jti: r.link_jti || null, client: r.client_id || null,
+                        method: r.method || null, attempted: r.attempted_email || null, reason: r.reason || null });
+      return;
+    }
     if (!r.sid || (r.type !== "page_view" && r.type !== "heartbeat" && r.type !== "feature")) return;
     let s = bySid.get(r.sid);
-    if (!s) { s = { id: r.sid, email: r.email, role: r.role, start: t, end: t, secs: 0, pages: [], features: [], device: r.device || "", lastBeat: null }; bySid.set(r.sid, s); }
+    if (!s) { s = { id: r.sid, email: r.email, role: r.role, link: r.link_jti || null, start: t, end: t, secs: 0, pages: [], features: [], device: r.device || "", lastBeat: null }; bySid.set(r.sid, s); }
     if (t > s.end) s.end = t;
     if (r.type === "heartbeat") { s.lastBeat = t; s.livePage = r.page; s.liveClient = r.client_id; return; }
     if (r.type === "feature") { s.features.push({ f: r.feature, at: t }); return; }
@@ -191,10 +206,33 @@ function uaModelFromWire(body) {
   const g = (window.DMA_LIVE && window.DMA_LIVE.role_grants) || { admins: [], analysts: [] };
   const lastSeen = {};
   Object.entries(body.last_seen || {}).forEach(([e, iso]) => { lastSeen[e] = new Date(iso); });
-  const emails = new Set([...(g.admins || []), ...(g.analysts || []), ...Object.keys(lastSeen)].map(e => e.toLowerCase()));
-  const grantRole = e => (g.admins || []).includes(e) ? "ADMIN" : (g.analysts || []).includes(e) ? "ANALYST" : "AE";
-  const people = [...emails].map(email => ({ email, name: uaNameOf(email), role: roleOf[email] || grantRole(email) }));
-  return { status: "ok", now, sessions, sessionless, people, lastSeen,
+  // Client links generated (every one retained, lib/usage-store linksSql).
+  // Their recipients are people too: a recipient who has never opened the
+  // link is "No activity yet", not missing.
+  const LF = body.link_fields || [];
+  const lx = Object.fromEntries(LF.map((f, i) => [f, i]));
+  const links = (body.links || []).map(a => ({
+    jti: a[lx.jti], at: new Date(a[lx.t]), by: a[lx.by] || null, byRole: a[lx.by_role] || null,
+    client: a[lx.client_id] || null, clientName: a[lx.client_id] ? uaClientName(a[lx.client_id]) : null,
+    run: a[lx.run_id] || null, recipients: a[lx.recipients] || [], domains: a[lx.domains] || [],
+    expires: a[lx.expires_at] ? new Date(a[lx.expires_at]) : null,
+  })).filter(l => l.jti);
+  const clientOf = {};
+  links.forEach(l => l.recipients.forEach(e => { clientOf[e] = l.clientName; }));
+  linkEvents.forEach(e => { if (e.email && e.client) clientOf[e.email] = uaClientName(e.client); });
+  sessions.forEach(s => { if (s.role === "CLIENT" && s.pages.length && s.pages[0].clientName) clientOf[s.email] = clientOf[s.email] || s.pages[0].clientName; });
+  const clientOnly = new Set((body.client_only || []).map(e => e.toLowerCase()));
+  const staff = new Set([...(g.admins || []), ...(g.analysts || [])].map(e => e.toLowerCase()));
+  links.forEach(l => l.recipients.forEach(e => { if (!staff.has(e) && !(roleOf[e] && roleOf[e] !== "CLIENT")) clientOnly.add(e); }));
+  Object.keys(lastSeen).forEach(e => { if (roleOf[e] && roleOf[e] !== "CLIENT") clientOnly.delete(e); });
+  const emails = new Set([...(g.admins || []), ...(g.analysts || []), ...Object.keys(lastSeen), ...clientOnly].map(e => e.toLowerCase()));
+  const grantRole = e => (g.admins || []).includes(e) ? "ADMIN" : (g.analysts || []).includes(e) ? "ANALYST" : clientOnly.has(e) ? "CLIENT" : "AE";
+  const people = [...emails].map(email => {
+    const role = roleOf[email] && !(roleOf[email] === "CLIENT" && staff.has(email)) ? roleOf[email] : grantRole(email);
+    return { email, name: uaNameOf(email), role, team: role === "CLIENT" && clientOf[email] ? `Client link · ${clientOf[email]}` : undefined };
+  });
+  return { status: "ok", now, sessions, sessionless, people, lastSeen, links, linkEvents,
+           clientOnly: new Set(people.filter(u => u.role === "CLIENT").map(u => u.email)),
            recordingSince: body.recording_since ? new Date(body.recording_since) : null,
            truncated: !!body.truncated, awaiting: !!body.awaiting_first_event };
 }
@@ -227,7 +265,7 @@ function useUsageModel(rangeDays) {
 function uaAgg(model, from, to, onlyEmail) {
   const S = model.sessions.filter(s => s.start >= from && s.start < to && (!onlyEmail || s.email === onlyEmail));
   const days = Math.max(1, Math.round((to - from) / UA_DAY));
-  const daily = Array.from({ length: days }, () => ({ AE: 0, ANALYST: 0, ADMIN: 0, mins: 0, users: new Set() }));
+  const daily = Array.from({ length: days }, () => ({ AE: 0, ANALYST: 0, ADMIN: 0, CLIENT: 0, mins: 0, users: new Set() }));
   const users = new Set(), pages = {}, clients = {}, feat = {};
   const heat = Array.from({ length: 7 }, () => Array(24).fill(0));
   let secs = 0, views = 0;
@@ -249,17 +287,58 @@ function uaAgg(model, from, to, onlyEmail) {
   (model.sessionless || []).forEach(e => {
     if (e.at >= from && e.at < to && (!onlyEmail || e.email === onlyEmail)) { feat[e.f] = (feat[e.f] || 0) + 1; users.add(e.email); }
   });
+  // A client reader who opened their link is a user of the period even if
+  // their browser's page beacons never arrived (blocked, closed at once).
+  (model.linkEvents || []).forEach(e => {
+    if (e.type === "link_open" && e.email && e.at >= from && e.at < to && (!onlyEmail || e.email === onlyEmail)) users.add(e.email);
+  });
   return { S, users, secs, views, sessions: S.length, avg: S.length ? secs / S.length : 0, pps: S.length ? views / S.length : 0,
     pages: Object.values(pages).sort((a, b) => b.secs - a.secs), clients: Object.values(clients).sort((a, b) => b.secs - a.secs), feat, heat, daily };
 }
 /* The model narrowed to a set of people: every figure computed from it is
    about them and nobody else. Recording bounds and `now` stay the store's. */
 function uaNarrow(model, emails) {
+  // A link stays in view while its sharer, a recipient or a reader does; a
+  // refusal (no person behind it) only alongside a link that stays.
+  const ev = model.linkEvents || [];
+  const links = (model.links || []).filter(l => emails.has(l.by) || l.recipients.some(e => emails.has(e))
+    || ev.some(e => e.jti === l.jti && e.email && emails.has(e.email)));
+  const kept = new Set([...links.map(l => l.jti), ...ev.filter(e => e.email && emails.has(e.email)).map(e => e.jti)]);
   return { ...model,
     sessions: model.sessions.filter(s => emails.has(s.email)),
     sessionless: (model.sessionless || []).filter(e => emails.has(e.email)),
     people: model.people.filter(u => emails.has(u.email)),
+    links,
+    linkEvents: ev.filter(e => e.email ? emails.has(e.email) : kept.has(e.jti)),
   };
+}
+
+/* Per link, for the period: who shared it, who it went to, who opened it, and
+   what they read. Reading time comes from the readers' own sessions, which
+   carry the link id; opens and refusals from the share service's lines. */
+function uaLinkRows(model, from, to) {
+  const ev = model.linkEvents || [];
+  const known = new Set((model.links || []).map(l => l.jti));
+  // A link with readers in range whose mint line predates retention still shows.
+  const orphan = {};
+  ev.forEach(e => { if (e.jti && !known.has(e.jti) && !orphan[e.jti]) orphan[e.jti] = { jti: e.jti, at: null, by: null, client: e.client, clientName: e.client ? uaClientName(e.client) : null, recipients: [], domains: [], expires: null }; });
+  return [...(model.links || []), ...Object.values(orphan)].map(l => {
+    const mine = ev.filter(e => e.jti === l.jti);
+    const inRange = mine.filter(e => e.at >= from && e.at < to);
+    const S = model.sessions.filter(s => s.link === l.jti && s.start >= from && s.start < to);
+    const readers = new Set([...inRange.filter(e => e.type === "link_open" && e.email).map(e => e.email), ...S.map(s => s.email)]);
+    const everOpened = new Set(mine.filter(e => (e.type === "link_open" || e.type === "link_admit") && e.email).map(e => e.email));
+    const opens = mine.filter(e => e.type === "link_open").map(e => e.at);
+    return { ...l, readers, everOpened,
+      opens: inRange.filter(e => e.type === "link_open").length,
+      refused: inRange.filter(e => e.type === "link_refused").length,
+      views: S.reduce((a, s) => a + s.pages.filter(p => p.view).length, 0),
+      secs: S.reduce((a, s) => a + s.secs, 0),
+      last: opens.length ? new Date(Math.max(...opens)) : null,
+      unopened: l.recipients.filter(e => !everOpened.has(e)),
+      created: !!(l.at && l.at >= from && l.at < to) };
+  }).filter(r => r.created || r.opens || r.refused || r.secs || r.views)
+    .sort((a, b) => (b.last || b.at || 0) - (a.last || a.at || 0));
 }
 /* A prior-period comparison is only honest where recording covered it. */
 function uaPrevCovered(model, prevFrom) { return !!(model.recordingSince && model.recordingSince <= prevFrom); }
@@ -322,7 +401,7 @@ function UASpark({ vals, color = UA_FILL, h = 22 }) {
    still gives all of them. The one person's drawer draws minutes instead
    (`minutes`), because for a single person roles do not split anything. */
 function UADailyChart({ daily, from, minutes }) {
-  const vals = daily.map(d => minutes ? d.mins : d.AE + d.ANALYST + d.ADMIN);
+  const vals = daily.map(d => minutes ? d.mins : d.AE + d.ANALYST + d.ADMIN + (d.CLIENT || 0));
   const max = Math.max(1, ...vals), n = daily.length, every = n <= 7 ? 1 : n <= 30 ? 5 : 15;
   const gap = n > 60 ? 1 : n > 20 ? 3 : 10;
   return (
@@ -330,7 +409,7 @@ function UADailyChart({ daily, from, minutes }) {
       <div style={{ display: "flex", alignItems: "flex-end", gap, height: 170, borderBottom: "1px solid var(--z-sep)" }}>
         {daily.map((d, i) => {
           const date = new Date(from.getTime() + i * UA_DAY);
-          const parts = ["AE", "ANALYST", "ADMIN"].filter(r => d[r]).map(r => `${UA_ROLE_LABEL[r]} ${d[r]}`).join(" · ");
+          const parts = UA_ROLES_ALL.filter(r => d[r]).map(r => `${UA_ROLE_LABEL[r]} ${d[r]}`).join(" · ");
           const tip = minutes ? `${uaDate(date)} · ${uaDur(d.mins * 60)} active` : vals[i]
             ? `${uaDate(date)} · ${vals[i]} ${vals[i] === 1 ? "session" : "sessions"}${parts ? ` (${parts})` : ""} · ${d.users.size} ${d.users.size === 1 ? "person" : "people"} · ${uaDur(d.mins * 60)} active`
             : `${uaDate(date)} · no sessions`;
@@ -338,7 +417,7 @@ function UADailyChart({ daily, from, minutes }) {
             <div key={i} title={tip} style={{ flex: 1, minWidth: 0, height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 1, cursor: "default" }}>
               {minutes
                 ? <div style={{ height: `${vals[i] / max * 100}%`, minHeight: vals[i] ? 2 : 0, background: UA_FILL, borderRadius: "3px 3px 0 0" }} />
-                : ["ADMIN", "ANALYST", "AE"].map(r => d[r] ? <div key={r} style={{ height: `${d[r] / max * 100}%`, background: UA_ROLE_COLOR[r], borderRadius: 2 }} /> : null)}
+                : ["CLIENT", "ADMIN", "ANALYST", "AE"].map(r => d[r] ? <div key={r} style={{ height: `${d[r] / max * 100}%`, background: UA_ROLE_COLOR[r], borderRadius: 2 }} /> : null)}
             </div>
           );
         })}
@@ -541,6 +620,7 @@ function UsagePage() {
   const prevOk = ok && uaPrevCovered(model, prevFrom);
   const prev = useMemoUA(() => prevOk ? uaAgg(model, prevFrom, bounds.from) : null, [prevOk, model, bounds]);
   const rows = useMemoUA(() => ok ? uaRows(model, cur, bounds.to) : [], [ok, model, cur]);
+  const linkRows = useMemoUA(() => ok ? uaLinkRows(model, bounds.from, bounds.to) : [], [ok, model, bounds]);
 
   if (role !== "ADMIN") return <PageShell title="Usage analytics"><div className="empty"><div className="icon"><Icon name="lock" size={22} /></div><h3>Admin access required</h3><p>Switch to the Admin role to view usage analytics.</p></div></PageShell>;
 
@@ -566,7 +646,14 @@ function UsagePage() {
   const SortTh = ({ k, children, right, cls }) => <th className={cls} style={{ textAlign: right ? "right" : "left", cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }} onClick={() => setSort(s => ({ k, dir: s.k === k ? -s.dir : (k === "name" ? 1 : -1) }))}>{children}{sort.k === k ? (sort.dir > 0 ? " ▲" : " ▼") : ""}</th>;
 
   const live = model.sessions.filter(s => s.live);
-  const atRisk = rows.filter(r => r.status === "Idle" || r.status === "Dormant");
+  // A nudge is for colleagues; a client who has not opened their link is
+  // the Client links signal's business, not an email from this page.
+  const atRisk = rows.filter(r => r.role !== "CLIENT" && (r.status === "Idle" || r.status === "Dormant"));
+  const madeLinks = linkRows.filter(l => l.created);
+  const recips = new Set(madeLinks.flatMap(l => l.recipients));
+  const openedRecips = new Set(madeLinks.flatMap(l => l.recipients.filter(e => l.everOpened.has(e))));
+  const clientReaders = new Set(linkRows.flatMap(l => [...l.readers]));
+  const hasClients = allRows.some(r => r.role === "CLIENT") || (all.links || []).length > 0;
   const sticky = cur.pages.filter(p => p.views).slice().sort((a, b) => b.secs / b.views - a.secs / a.views)[0];
   let peak = null; cur.heat.forEach((row, d) => row.forEach((v, h) => { if (v && (!peak || v > peak[2])) peak = [d, h, v]; }));
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -584,8 +671,8 @@ function UsagePage() {
       {head}
       <div className="card ua-filters" data-screen-label="Usage filters">
         <Icon name="filter" size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
-        <input className="inp inp-sm" aria-label="Search people" placeholder={showTeam ? "Search name, email, team" : "Search name or email"} value={q} onChange={e => setQ(e.target.value)} style={{ flex: "1 1 220px", minWidth: 0 }} />
-        <select className="inp inp-sm" aria-label="Role" value={roleF} onChange={e => setRoleF(e.target.value)} style={{ flex: "0 1 140px" }}><option value="ALL">All roles</option><option value="AE">AE</option><option value="ANALYST">Analyst</option><option value="ADMIN">Admin</option></select>
+        <input className="inp inp-sm" aria-label="Search people" placeholder={hasClients ? "Search name, email or client" : "Search name or email"} value={q} onChange={e => setQ(e.target.value)} style={{ flex: "1 1 220px", minWidth: 0 }} />
+        <select className="inp inp-sm" aria-label="Role" value={roleF} onChange={e => setRoleF(e.target.value)} style={{ flex: "0 1 140px" }}><option value="ALL">All roles</option><option value="AE">AE</option><option value="ANALYST">Analyst</option><option value="ADMIN">Admin</option><option value="CLIENT">Client (link)</option></select>
         <select className="inp inp-sm" aria-label="Status" value={statusF} onChange={e => setStatusF(e.target.value)} style={{ flex: "0 1 150px" }}><option value="ALL">All statuses</option><option>Live</option><option>Active</option><option>Idle</option><option>Dormant</option><option value="Never">No activity yet</option></select>
         {filtering ? <><span className="b b-teal b-token">{who}</span><button className="btn btn-tertiary btn-sm" onClick={clear}>Clear</button></> : null}
       </div>
@@ -608,6 +695,9 @@ function UsagePage() {
                             : `${cur.users.size} ${cur.users.size === 1 ? "person" : "people"} used DMA Insights ${rangeLabel.toLowerCase()}.`, null],
           ["Stickiest surface", sticky ? `${sticky.label} holds attention longest — ${uaDur(sticky.secs / sticky.views)} per visit.` : "No page views recorded in this period.", null],
           ["Peak usage", peak ? `${DAYS[peak[0]]}s around ${fmtH(peak[1])}–${fmtH(peak[1] + 1)}. Schedule releases outside this window.` : "No page views recorded in this period.", null],
+          ["Client links", madeLinks.length || clientReaders.size
+            ? `${madeLinks.length} ${madeLinks.length === 1 ? "link" : "links"} generated ${rangeLabel.toLowerCase()}${recips.size ? ` · ${openedRecips.size} of ${recips.size} ${recips.size === 1 ? "recipient has" : "recipients have"} opened` : ""} · ${clientReaders.size} client ${clientReaders.size === 1 ? "reader" : "readers"} in the period.`
+            : "No client links generated or opened in this period.", null],
           ["Needs a nudge", atRisk.length ? `${atRisk.map(r => r.name.split(" ")[0]).join(", ")} ${atRisk.length === 1 ? "hasn't" : "haven't"} been active in 7+ days.` : "Everyone seen has been active this week.", mailto],
         ].map(([t, body, href]) => (
           <div key={t}>
@@ -689,6 +779,48 @@ function UsagePage() {
         </div>
       </div>
 
+      {/* Client links: every link generated, who it went to, who opened it */}
+      {roleF === "ALL" || roleF === "CLIENT" || linkRows.length ? (
+      <div className="card flush" style={{ marginBottom: 16 }} data-screen-label="Usage · Client links">
+        <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
+          <div className="row"><Icon name="share" size={14} /><h3>Client links · generated &amp; opened</h3></div>
+          <span className="spacer" />
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{madeLinks.length} generated · {clientReaders.size} {clientReaders.size === 1 ? "reader" : "readers"} · {rangeLabel.toLowerCase()}</span>
+        </div>
+        <div className="tbl-reflow reflow-early">
+          <table className="tbl">
+            <thead><tr>
+              <th>Client</th><th>Shared by</th><th className="col-drop2" style={{ whiteSpace: "nowrap" }}>Created</th><th>Recipients</th>
+              <th style={{ textAlign: "right" }}>Opens</th><th className="col-drop2" style={{ textAlign: "right" }}>Views</th><th style={{ textAlign: "right", whiteSpace: "nowrap" }}>Read time</th>
+              <th className="col-drop" style={{ whiteSpace: "nowrap" }}>Last opened</th><th className="col-drop" style={{ textAlign: "right" }}>Refused</th>
+            </tr></thead>
+            <tbody>
+              {linkRows.map(l => (
+                <tr key={l.jti}>
+                  <td data-label="Client"><div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{l.clientName || l.client || "Unknown client"}</div>{l.expires ? <div style={{ fontSize: 10.5, color: l.expires < model.now ? "var(--z-org)" : "var(--z-muted)" }}>{l.expires < model.now ? "Expired" : "Expires"} {uaDate(l.expires)}</div> : null}</td>
+                  <td data-label="Shared by">{l.by ? <><div>{uaNameOf(l.by)}</div><div className="f-mono t-email" style={{ fontSize: 10, color: "var(--z-muted)" }}>{l.by}</div></> : <span style={{ color: "var(--z-muted)" }}>Before recording</span>}</td>
+                  <td data-label="Created" className="col-drop2" style={{ whiteSpace: "nowrap" }}>{l.at ? uaDate(l.at) : "Before recording"}</td>
+                  <td data-label="Recipients">
+                    {l.recipients.length ? l.recipients.map(e => (
+                      <button key={e} className="f-mono t-email" onClick={() => setUserOpen(e)} title={l.everOpened.has(e) ? "Opened" : "Not opened yet"} style={{ display: "block", background: "none", border: 0, padding: 0, cursor: "pointer", textAlign: "left", fontSize: 10.5, color: l.everOpened.has(e) ? "var(--z-dark)" : "var(--z-muted)" }}>{l.everOpened.has(e) ? "● " : "○ "}{e}</button>
+                    )) : <span style={{ color: "var(--z-muted)" }}>Not recorded</span>}
+                    {l.domains.length ? <div style={{ fontSize: 10, color: "var(--z-muted)" }}>Domains: {l.domains.join(", ")}</div> : null}
+                    {[...l.readers].filter(e => !l.recipients.includes(e)).map(e => <button key={e} className="f-mono t-email" onClick={() => setUserOpen(e)} title="Admitted by domain" style={{ display: "block", background: "none", border: 0, padding: 0, cursor: "pointer", textAlign: "left", fontSize: 10.5, color: "var(--z-dark)" }}>● {e}</button>)}
+                  </td>
+                  <td data-label="Opens" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{l.opens}</td>
+                  <td data-label="Views" className="col-drop2" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{l.views}</td>
+                  <td data-label="Read time" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{l.secs ? uaDur(l.secs) : "None yet"}</td>
+                  <td data-label="Last opened" className="col-drop" style={{ whiteSpace: "nowrap" }}>{l.last ? uaRel(l.last, false, model.now) : "Never"}</td>
+                  <td data-label="Refused" className="col-drop" style={{ textAlign: "right", fontVariantNumeric: "tabular-nums", color: l.refused ? "var(--z-org)" : undefined }}>{l.refused}</td>
+                </tr>
+              ))}
+              {!linkRows.length ? <tr><td colSpan={9} className="tbl-empty">No client links generated or opened in this period.</td></tr> : null}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      ) : null}
+
       {/* Users */}
       <div className="card flush">
         <div className="card-head" style={{ flexWrap: "wrap", gap: 8 }}>
@@ -706,7 +838,7 @@ function UsagePage() {
             <tbody>
               {shown.map(r => (
                 <tr key={r.email} onClick={() => setUserOpen(r.email)} style={{ cursor: "pointer" }}>
-                  <td data-label="User"><div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{r.name}</div><div className="f-mono t-email" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.email}</div></td>
+                  <td data-label="User"><div style={{ fontWeight: 600, color: "var(--z-dark)" }}>{r.name}</div><div className="f-mono t-email" style={{ fontSize: 10, color: "var(--z-muted)" }}>{r.email}</div>{r.team ? <div style={{ fontSize: 10.5, color: "var(--z-muted)" }}>{r.team}</div> : null}</td>
                   <td data-label="Role"><span className="b b-token" style={{ background: UA_ROLE_COLOR[r.role] + "22", color: UA_ROLE_COLOR[r.role] }}>{UA_ROLE_LABEL[r.role]}</span></td>
                   <td data-label="Status"><UAStatus status={r.status} /></td>
                   <td data-label="Last seen" style={{ whiteSpace: "nowrap" }}>{uaRel(r.last, r.live, model.now)}</td>
@@ -740,7 +872,7 @@ function UsageGlanceCard() {
     const cur = uaAgg(model, from, to);
     const prev = uaPrevCovered(model, prevFrom) ? uaAgg(model, prevFrom, from) : null;
     const trend = uaAgg(model, new Date(to.getTime() - 14 * UA_DAY), to);
-    const quiet = model.people.filter(u => { const l = model.lastSeen[u.email]; return l && (model.now - l) / UA_DAY >= 7; });
+    const quiet = model.people.filter(u => { const l = model.lastSeen[u.email]; return u.role !== "CLIENT" && l && (model.now - l) / UA_DAY >= 7; });
     return { cur, prev, trend, quiet, to, live: model.sessions.filter(s => s.live) };
   }, [ok, model]);
   const header = (liveCount) => (
@@ -760,7 +892,7 @@ function UsageGlanceCard() {
     ["Avg session", uaDur(cur.avg), pct(cur.avg, prev && prev.avg)],
     ["Active time", uaDur(cur.secs), pct(cur.secs, prev && prev.secs)],
   ];
-  const vals = trend.daily.map(d => d.AE + d.ANALYST + d.ADMIN), max = Math.max(1, ...vals);
+  const vals = trend.daily.map(d => d.AE + d.ANALYST + d.ADMIN + (d.CLIENT || 0)), max = Math.max(1, ...vals);
   const name = em => (model.people.find(u => u.email === em) || {}).name || uaNameOf(em);
   return (
     <div className="card flush" style={{ marginBottom: 16 }} data-screen-label="Admin · Usage at a glance">
@@ -818,4 +950,4 @@ function UsageGlanceCard() {
   );
 }
 
-Object.assign(window, { UsagePage, UsageGlanceCard, useUsageModel, uaModelFromWire, uaAgg, uaRows, uaDayBounds, uaPrevCovered, uaRel });
+Object.assign(window, { UsagePage, UsageGlanceCard, useUsageModel, uaModelFromWire, uaAgg, uaRows, uaLinkRows, uaNarrow, uaDayBounds, uaPrevCovered, uaRel });

@@ -8,6 +8,7 @@ import { checkEmailPage, deadLinkPage, gatePage, throttledPage,
          unavailablePage } from "../../../../lib/share-page";
 import { readAsLink } from "../../../../lib/share-read";
 import { admitSend, clientIp, judgeForm, signSignIn } from "../../../../lib/share-throttle";
+import { clientSession, linkFields, logLinkEvent, logUsage } from "../../../../lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,8 @@ export async function POST(req, { params }) {
   const nameOf = async () => ((await entityOf()) || {}).entity_name || null;
   if (!email || !allowed(p, email)) {
     audit("share_access_refused", { jti: p.jti, entity: p.e, email: email || "(unparseable)" });
+    logLinkEvent("link_refused", linkFields(p, { attempted_email: email || null,
+      reason: email ? "not_on_allowlist" : "unparseable" }));
     return gatePage(params.token, await nameOf(), email
       ? "That email is not on the access list for this dashboard. Ask the person who shared it with you to add it."
       : "Enter a valid email address.", 403);
@@ -98,6 +101,7 @@ export async function POST(req, { params }) {
         subject: msg.subject, text: msg.text, html: msg.html }));
       if (sent.ok) {
         audit("share_otp_sent", { jti: p.jti, entity: p.e, email, via: "gmail", from: sender.email });
+        logUsage("link_otp_sent", clientSession(email), linkFields(p, { via: "gmail" }));
         return checkEmailPage(await nameOf(), email, sender, p.exp * 1000);
       }
       audit("share_mail_fallback", { jti: p.jti, entity: p.e, email, from: sender.email,
@@ -111,6 +115,7 @@ export async function POST(req, { params }) {
         "The sign-in email could not be sent just now. Try again in a minute.", 502);
     }
     audit("share_otp_sent", { jti: p.jti, entity: p.e, email, via: "identity_platform" });
+    logUsage("link_otp_sent", clientSession(email), linkFields(p, { via: "identity_platform" }));
     return checkEmailPage(await nameOf(), email);
   }
 
@@ -118,6 +123,7 @@ export async function POST(req, { params }) {
   try { cookie = accessCookie(p, params.token, email, "attest"); }
   catch { return gatePage(params.token, await nameOf(), "This link cannot be opened right now.", 503); }
   audit("share_access_granted", { jti: p.jti, entity: p.e, email, method: "attest" });
+  logUsage("link_admit", clientSession(email), linkFields(p, { method: "attest" }));
   return new Response(null, { status: 303, headers: {
     location: `/s/${params.token}#/clients/${p.e}/overview?view=client`,
     "set-cookie": cookie, "cache-control": "no-store", "referrer-policy": "no-referrer" } });
