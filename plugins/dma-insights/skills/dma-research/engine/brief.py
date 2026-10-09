@@ -244,8 +244,15 @@ def category_of(subcap: str) -> str:
 
 # ── what the run knows, once ─────────────────────────────────────────────
 
-def shared(wb: RunWorkbook) -> dict:
+def shared(wb: RunWorkbook, *, prelim: bool = False) -> dict:
     """Run-wide state, derived. The one read a producer makes before its own.
+
+    `prelim=True` adds the PRELIM evidence block (`prelim_evidence`,
+    `prelim_rule`, …) — the RESEARCH packets' read, where a lane would
+    otherwise re-find the institution's rows. Scoring, report and page
+    lanes do not search, so their packets stay without it (the lane
+    ceiling is shared, and the block cost the report lane its fit:
+    acceptance issue 8, 2026-10-09).
 
     Everything here is a FACT the run has already paid for: an estate row, a
     named person, a peer, a registered source identity, a contradiction
@@ -306,8 +313,7 @@ def shared(wb: RunWorkbook) -> dict:
     prelim_queries = [s for s in wb.rows("Search_Log")
                       if _clean(s.get("Query")) and not _clean(s.get("SubCap_ID"))]
 
-    return {
-        "run_id": md.get("run_id"),
+    prelim_block = {
         "prelim_evidence": prelim_rows[:PRELIM_EVIDENCE_IN_PACKET],
         "prelim_evidence_total": len(prelim_rows),
         "prelim_queries_fired": len(prelim_queries),
@@ -315,6 +321,10 @@ def shared(wb: RunWorkbook) -> dict:
                         "profile, leaders, timeline or estate: `engine.cli attach --e-id "
                         "<E> --subcap <your cell>` cites a PRELIM row instead of "
                         "re-finding it"),
+    } if prelim else {}
+    return {
+        "run_id": md.get("run_id"),
+        **prelim_block,
         # THE ROOT, in every packet. Measured 2026-09-30 (SWBC, root outside
         # the default): research briefs named `--run R` and never the root,
         # so every lane's first engine call resolved to a directory that did
@@ -780,7 +790,7 @@ def dispatch(wb: RunWorkbook, category: str, *,
         # calls where 1 and ~17 would do. Kept IN the packet so
         # `as_markdown`, the packet_chars ceiling and every test that reads
         # `packet["shared"]` are untouched.
-        "shared": shared_block if shared_block is not None else shared(wb),
+        "shared": shared_block if shared_block is not None else shared(wb, prelim=True),
         "worklist": {k: (len(v) if isinstance(v, (list, tuple, set)) else v)
                      for k, v in wl.items() if k != "category"},
         "open_cells": len(open_cells),
@@ -1264,7 +1274,7 @@ def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
     # One shared block for the whole batch — it describes the run, not the
     # category. Every other batch builder already does this; `batch` was the
     # one that did not.
-    sh = shared(wb) if cats else None
+    sh = shared(wb, prelim=True) if cats else None
     # And ONE leads index. Like `shared` it describes the RUN — the rows
     # whose cells span categories are the same rows for every lane — and
     # rebuilding it per lane walked the whole register sixteen times to hand

@@ -56,7 +56,7 @@ def write_baseline(run, tools=BOUND_CONNECTORS):
 
 def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1",
             prelim: bool = True, folder: bool = True, selected=None,
-            baseline="bound"):
+            baseline="bound", link_prelim: bool = True):
     """A started run with its PRELIM phase closed and its client folder open.
 
     Both default ON because both are what a real run has: `orient` withholds
@@ -82,7 +82,7 @@ def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1",
         from engine import assemble
         assemble.open_folder(run, tmp_path / "client", push=False)
     if prelim:
-        close_prelim(run)
+        close_prelim(run, link_prelim=link_prelim)
     return run
 
 
@@ -294,7 +294,7 @@ def preflight_file(tmp_path, **kw):
     return p
 
 
-def close_prelim(run, *, entity="Acme Credit Union"):
+def close_prelim(run, *, entity="Acme Credit Union", link_prelim=True):
     """Do the preliminary research, for real, through the real refusals."""
     from engine import prelim, preflight, techscan
     # The financial review is PRELIM's `financials` section, and it is
@@ -397,8 +397,16 @@ def close_prelim(run, *, entity="Acme Credit Union"):
     # links the citations at the write, so the fixture names a cell the way
     # the scanner does. The third selected cell, where the run has one, so
     # the first and last cells keep the states the tests built on them.
+    # The third cell where the run has four or more, else the first — never
+    # the last, which the tests keep as the declared absence. `link_prelim=
+    # False` is for a run whose EVERY cell is a declared absence: a register
+    # that names a cell gives it evidence, and the ledger refuses an absence
+    # over evidence, so such a run's PRELIM names none (the shape ET-07
+    # then reports at PAGES, which those runs never reach).
     _cells = list(wb.selected_subcaps())
-    link_cell = _cells[min(2, len(_cells) - 1)] if _cells else None
+    link_cell = None
+    if link_prelim and _cells:
+        link_cell = _cells[2] if len(_cells) >= 4 else _cells[0]
     # ALL FOUR LAYERS, in PRELIM. A layer nothing was found in is an
     # ABSENT row carrying the ladder — never a layer left out, which reads
     # to every later surface as a clean estate.
@@ -792,7 +800,10 @@ RATIONALE = ("[EVIDENCE] {e0} shows Alkami digital banking live since Q3 2024 wi
 
 
 def researched_run(tmp_path, n=6, absent=1):
-    run = new_run(tmp_path, n=n)
+    # PRELIM's register names the third cell (first when n < 4); a run whose
+    # absent set reaches that cell gets a PRELIM that names none (close_prelim)
+    link_cell_index = 2 if n >= 4 else 0
+    run = new_run(tmp_path, n=n, link_prelim=(n - absent) > link_cell_index)
     wb = run.open()
     cells = wb.selected_subcaps()
     ev = {}

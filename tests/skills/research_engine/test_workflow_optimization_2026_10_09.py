@@ -347,7 +347,7 @@ def test_prelim_rows_are_proposed_to_cells_and_listed_in_the_shared_block(tmp_pa
                           tier="T3", origin="connector",
                           excerpt="Acme Credit Union runs digital banking on Alkami with member adoption measured quarterly by the board.",
                           subcaps=[], published="2025-06-01")
-    sh = brief.shared(wb)
+    sh = brief.shared(wb, prelim=True)
     assert sh["prelim_evidence_total"] >= 1
     mine = [r for r in sh["prelim_evidence"] if r["e_id"] == e]
     assert mine and mine[0]["origin"] == "connector"

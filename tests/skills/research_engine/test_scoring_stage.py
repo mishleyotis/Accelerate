@@ -148,6 +148,9 @@ def test_high_confidence_needs_two_source_identities(tmp_path):
                  f"member adoption within ninety days, restated at {50+i} percent "
                  "in the 2025 report.")) for i in range(3)]
     syn = good_synthesis(cell, eids); syn["Claim_Label"] = "INFERENCE"
+    # an INFERENCE names its step (claim-label fit at the write, 2026-10-09)
+    syn["Triangulation"] += (" Taken together the launch date and the restated "
+                             "figure suggest measured adoption, not deployment alone.")
     synthesise(wb, cell, syn)
     synthesise(wb, cells[1], good_synthesis(cells[1], bank_evidence(wb, cells[1], n=5)))
     v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
@@ -208,8 +211,12 @@ def test_rollup_states_every_grain_and_the_dashboard(tmp_path):
     run, wb, cells, ev = _researched(tmp_path)
     A.open_stage(wb, run.qa_dir)
     _score_all(wb, cells, ev)
-    with pytest.raises(ScoringRefusal, match="headline"):
-        A.rollup(wb)
+    # Without a headline the grains and the dashboard are still written, and
+    # the gate names what is open as `headline_missing` — not the thirteen
+    # dashboard fields a missing headline used to hide behind (2026-10-09).
+    out = A.rollup(wb)
+    assert out["overall"] is not None
+    assert "headline_missing" in A.gate(wb, run.qa_dir)["blocking"]
     out = A.rollup(wb, headline="Modern rails, unbuilt member-relationship layer: "
                                 "sits a band below digital-leader peers")
     assert out["overall"] is not None
