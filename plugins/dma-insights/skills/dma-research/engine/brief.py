@@ -122,7 +122,7 @@ REUSE_PER_CELL = 3
 #: PRELIM rows carried in every research packet's `shared` block (connector
 #: readings first, then by ERS). Twenty is the whole PRELIM register on the
 #: 2026-10 runs (26 / 26 / 30 rows) at ~100 chars each.
-PRELIM_EVIDENCE_IN_PACKET = 20
+PRELIM_EVIDENCE_IN_PACKET = 8
 
 #: How many open cells the packet details. Beyond this it reports the count
 #: and the producer asks `orient` for the next card, which is the paged
@@ -307,7 +307,7 @@ def shared(wb: RunWorkbook, *, prelim: bool = False) -> dict:
             "tier": _clean(row.get("Tier")),
             "origin": _clean(row.get("Origin")) or "public",
             "ers": float(row.get("ERS") or 0),
-            "excerpt": _clean(row.get("Excerpt"))[:100],
+            "excerpt": _clean(row.get("Excerpt"))[:80],
         })
     prelim_rows.sort(key=lambda r: (r["origin"] != "connector", -r["ers"], r["e_id"]))
     prelim_queries = [s for s in wb.rows("Search_Log")
@@ -317,10 +317,9 @@ def shared(wb: RunWorkbook, *, prelim: bool = False) -> dict:
         "prelim_evidence": prelim_rows[:PRELIM_EVIDENCE_IN_PACKET],
         "prelim_evidence_total": len(prelim_rows),
         "prelim_queries_fired": len(prelim_queries),
-        "prelim_rule": ("read `prelim_evidence` before searching for the institution's "
-                        "profile, leaders, timeline or estate: `engine.cli attach --e-id "
-                        "<E> --subcap <your cell>` cites a PRELIM row instead of "
-                        "re-finding it"),
+        "prelim_rule": ("read `prelim_evidence` before searching; `engine.cli attach "
+                        "--e-id <E> --subcap <your cell>` cites a PRELIM row instead "
+                        "of re-finding it"),
     } if prelim else {}
     return {
         "run_id": md.get("run_id"),
@@ -745,8 +744,14 @@ def dispatch(wb: RunWorkbook, category: str, *,
             # ranked it and the query terms behind the score, because a
             # suggestion a lane cannot audit is a suggestion it either takes
             # on faith or ignores — and taking it on faith is the 57.7%.
+            # PRELIM's rows are proposed by `reusable` like any other
+            # category's, but the packet carries them ONCE, in
+            # `shared.prelim_evidence` — repeating them under every cell is
+            # what put a re-dispatch packet 657 chars over its ceiling
+            # (acceptance issue 8, 2026-10-09).
             "proposed_from_other_categories":
-                got["proposed_from_other_categories"],
+                [o for o in got["proposed_from_other_categories"]
+                 if o.get("from_categories") != ["PRELIM"]],
         })
 
     # E2: the same open cells, grouped by the capability they answer under.
@@ -949,6 +954,23 @@ def dispatch(wb: RunWorkbook, category: str, *,
             if isinstance(v, list) and len(v) > 6:
                 hb[k] = v[:6] + [f"… and {len(v) - 6} more"]
         packet["packet_chars"] = len(json.dumps(packet, default=str))
+    sh_ = packet.get("shared") or {}
+    if packet["packet_chars"] > BRIEF_CHAR_CEILING and sh_.get("prelim_evidence"):
+        # PRELIM's rows are offers too, and the first to give way: the lane
+        # keeps the top rows (connector readings first, by ERS) and the
+        # count of what it is not shown; `engine.brief shared` serves the
+        # rest. A shared block a batch hands to every lane is copied before
+        # it is trimmed, so one lane's trim is not every lane's.
+        sh_ = dict(sh_)
+        n = len(sh_["prelim_evidence"])
+        keep_prelim = max(3, PRELIM_EVIDENCE_IN_PACKET // 2)
+        if n > keep_prelim:
+            sh_["prelim_evidence"] = sh_["prelim_evidence"][:keep_prelim]
+            sh_["prelim_evidence_trimmed"] = (
+                f"{n - keep_prelim} more PRELIM row(s) not shown — "
+                f"`engine.brief shared --run <R>` lists them")
+            packet["shared"] = sh_
+        packet["packet_chars"] = len(json.dumps(packet, default=str))
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and packet["leads_in"]:
         # Leads go BEFORE the work. A lead is an offer; `work_next` is the
         # lane's actual assignment, and trimming the assignment to make room
@@ -983,6 +1005,19 @@ def dispatch(wb: RunWorkbook, category: str, *,
             if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
                 break
             keep = max(1, keep // 2)
+    if packet["packet_chars"] > BRIEF_CHAR_CEILING and \
+            (packet.get("shared") or {}).get("prelim_evidence"):
+        # Still over with one cell of detail: the PRELIM rows give way to a
+        # pointer. The assignment and the gate terms are what the packet is
+        # for; the rows are one `engine.brief shared` read away.
+        sh_ = dict(packet["shared"])
+        n = len(sh_["prelim_evidence"])
+        sh_["prelim_evidence"] = []
+        sh_["prelim_evidence_trimmed"] = (
+            f"{n} PRELIM row(s) not shown to stay under the packet ceiling — "
+            f"`engine.brief shared --run <R>` lists them; cite them with `engine.cli attach`")
+        packet["shared"] = sh_
+        packet["packet_chars"] = len(json.dumps(packet, default=str))
     return packet
 
 
