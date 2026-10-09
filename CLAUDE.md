@@ -338,7 +338,11 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
   `--stage-budget STAGE=USD`, persisted); a stage at its envelope stops as
   `STOPPED_STAGE_BUDGET`, a handoff is refused `AT_STAGE_BUDGET`, and
-  `guard_dispatch` refuses the agent. Workflow agents are charged to the
+  `guard_dispatch` refuses the agent — when the envelopes are the binding
+  instrument: an explicit `--max-usd` is the owner's single ceiling and the
+  stop (`STOPPED_BUDGET`; raising it continues the run) with the envelopes
+  reporting only, and `--stage-budget` binds whatever else is set
+  (`pipeline.envelopes_binding`). Workflow agents are charged to the
   stage their prompt names. **Rules a challenger or critic can state in one
   sentence are refused at the write**: claim-label fit at `synthesise`
   (FACT two identities; INFERENCE 2+ ids and a named step; a disposition for

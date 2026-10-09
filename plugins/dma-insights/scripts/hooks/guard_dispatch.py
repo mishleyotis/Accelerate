@@ -276,7 +276,11 @@ def _envelope_exhausted(agent: str, state: dict) -> dict | None:
     if not fam:
         return None
     env = envs.get(fam)
-    if isinstance(env, dict) and env.get("over") and env.get("ceiling"):
+    # `binding` is the driver's call (pipeline.envelopes_binding): an owner
+    # ceiling below the envelopes' sum, or a ceiling switched off, leaves
+    # the envelopes reporting without stopping — and this guard with them.
+    if isinstance(env, dict) and env.get("over") and env.get("ceiling") \
+            and env.get("binding", True):
         return {"family": fam, **env}
     return None
 

@@ -915,6 +915,32 @@ class Pipeline:
             caps[str(k).upper()] = float(v)
         return caps
 
+    def envelopes_binding(self) -> tuple[bool, str]:
+        """Whether a spent envelope STOPS a stage, and why.
+
+        Three instruments, one of them the stop:
+        - `--stage-budget` (this invocation's or a persisted one) binds
+          whatever else is set: the owner named the stage's figure.
+        - `--max-usd` (this invocation's or the persisted flag) is the owner's
+          single run ceiling, and it is the stop: the run ends STOPPED_BUDGET
+          at the owner's own figure and raising it is how the run continues
+          (test_budget_ceiling); the envelopes report their spend and the
+          cost report prints them, but they stop nothing.
+        - Neither named: the envelopes partition the default ceiling (their
+          sum) and each one stops its stage — the default a run gets when
+          nobody typed a dollar figure, which is the run that used to read
+          "$20" and spend $409.
+        """
+        st = self.state or {}
+        if self.opts.stage_budget or st.get("stage_budget_usd"):
+            return True, "explicit --stage-budget"
+        if self.opts.max_usd is not None or st.get("budget_usd_source") == "flag":
+            cap = self.budget_usd()
+            return False, ("the owner named a run ceiling (--max-usd "
+                           + (f"${cap:.2f}" if cap is not None else "0, switched off")
+                           + "); it is the stop, and the envelopes report")
+        return True, "the envelopes partition the default run ceiling"
+
     def _family_usd(self, stage: str) -> float:
         """What the envelope family of `stage` has spent: every ledger row of
         the family, plus the spend this process has counted and not yet
@@ -941,13 +967,16 @@ class Pipeline:
         if fam is None:
             return None
         cap = self.stage_budgets().get(fam)
+        binding, why = self.envelopes_binding()
         if cap is None or cap <= 0:
             return {"family": fam, "ceiling": None, "spent": self._family_usd(stage),
-                    "remaining": None, "over": False}
+                    "remaining": None, "over": False, "binding": binding}
         spent = self._family_usd(stage)
+        at = spent >= float(cap) - 1e-9
         return {"family": fam, "ceiling": round(float(cap), 2), "spent": spent,
                 "remaining": round(float(cap) - spent, 4),
-                "over": spent >= float(cap) - 1e-9}
+                "over": at and binding, "at_ceiling": at,
+                "binding": binding, "binding_reason": why}
 
     def _over_stage_budget(self, stage: str) -> bool:
         b = self.stage_budget_block(stage)

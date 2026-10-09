@@ -151,6 +151,19 @@ it strikes (`rationale_for`, `absence_rationale`); the run-wide default is
 
 ---
 
+### Which dollar figure stops a run
+
+Three instruments, one of them the stop (`pipeline.envelopes_binding`):
+`--stage-budget STAGE=USD` binds whatever else is set; `--max-usd` is the
+owner's single run ceiling and the stop — the run ends `STOPPED_BUDGET` at
+the owner's figure and raising it is how it continues, while the envelopes
+report their spend (the cost report, the state file, the dispatch guard
+read the same `binding` flag) without stopping; a run with no dollar
+figure typed is bound by every envelope, which partition the default
+ceiling (their sum, $25 on four pillars). `--max-usd 0` switches the
+ceiling off, envelopes with it. The cost report judges the ceiling the
+driver persisted (`cost.run_budget`), never a default of its own.
+
 ## 4. The ideal-state workflow, stage by stage
 
 Each stage has an **entry predicate**, an **envelope**, a **first-time-right

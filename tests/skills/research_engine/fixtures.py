@@ -874,8 +874,23 @@ def absence_rationale(score):
 
 
 def score_cell(wb, cell, eids, score=2.5, actor="scoring-p1-producer", **over):
+    # The rationale argues the level the engine will STRIKE: for a `raw`
+    # call that is the applied final (ceiling and adjustments included), not
+    # the raw the scorer typed (the write refuses a rationale naming a
+    # level the score does not reach, 2026-10-09).
+    lvl_score = score
+    if lvl_score is None and over.get("raw") is not None:
+        from engine import assessment as A
+        try:
+            ceil0, _why = A.ceiling_for(wb, wb.scoring_row(cell) or {})
+            lvl_score = A.apply(over["raw"], ceiling=ceil0,
+                                adjustments=over.get("adjustments"),
+                                caps=over.get("cap_values"))["final"]
+        except Exception:                            # noqa: BLE001
+            lvl_score = None
     kw = dict(score=score, confidence="MEDIUM",
-              rationale=rationale_for(eids, score) if eids else absence_rationale(score),
+              rationale=(rationale_for(eids, lvl_score) if eids
+                         else absence_rationale(lvl_score)),
               actor=actor, ai_applicability="ASSISTIVE",
               data_dependency="member master, transactions",
               data_readiness="AMBER")

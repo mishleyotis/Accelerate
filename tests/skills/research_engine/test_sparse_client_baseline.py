@@ -111,8 +111,9 @@ def test_that_category_reaches_scoring_and_scores_at_the_M2_ceiling(tmp_path):
     out = A.score(wb, cells[0], score=1.0, confidence="LOW",
                   rationale=("No public artefact names this capability at the entity "
                              "after five volleys and both ladder rungs; the absence is "
-                             "declared with its proxy log, so the score sits at the "
-                             "floor the evidence ceiling allows."),
+                             "declared with its proxy log, so the score sits at M1 "
+                             "(Activating), the floor the evidence ceiling allows; the "
+                             "gap to Building is any evidenced artefact, which is missing."),
                   actor="scoring-p1-producer", evidence_ceiling=ceiling,
                   caps="none applied", ai_applicability="NONE",
                   data_dependency="LOW", data_readiness="UNKNOWN")

@@ -113,6 +113,11 @@ def _run_with_ledger(tmp_path):
     cost.record(run, stage="CHALLENGE", elapsed_s=30.0, usd=3.0, turns=12,
                 tokens=TOK, model="sonnet")
     cost.record(run, stage="KG", elapsed_s=5.0)
+    # the owner's ceiling, as the driver persists it (`--max-usd 5`): the
+    # report judges the figure the driver enforces, not a default of its own
+    import json
+    (run.qa_dir / "pipeline_state.json").write_text(json.dumps(
+        {"budget_usd": 5.0, "budget_usd_source": "flag"}))
     return run
 
 

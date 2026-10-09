@@ -537,10 +537,18 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None,
                 if sc < REUSE_PROPOSE_FLOOR:
                     break                    # the floor bites; abstain
                 doc = corpus[o["_at"]]
+                terms = R.matched_terms(q, doc)
+                if o.get("from_categories") == ["PRELIM"] and len(terms) < 2:
+                    # A PRELIM row is the INSTITUTION's — a scan, a filing, a
+                    # roster — and one shared token ("digital") is not a
+                    # bearing on a cell's question. Two is the floor for a
+                    # row no lane has yet placed; a single-token match stays
+                    # in `shared.prelim_evidence` for the lane to judge.
+                    continue
                 proposals.append({**{k: v for k, v in o.items() if k != "_at"},
                                   "proposed": True,
                                   "bm25_vs_question": sc,
-                                  "matched_terms": R.matched_terms(q, doc),
+                                  "matched_terms": terms,
                                   "how_to_use": (
                                       f"read it; if it bears on {subcap}, "
                                       f"`engine.cli attach --run {rid} --e-id "
@@ -970,7 +978,18 @@ def dispatch(wb: RunWorkbook, category: str, *,
                 f"{n - keep_prelim} more PRELIM row(s) not shown — "
                 f"`engine.brief shared --run <R>` lists them")
             packet["shared"] = sh_
-        packet["packet_chars"] = len(json.dumps(packet, default=str))
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
+        if packet["packet_chars"] > BRIEF_CHAR_CEILING:
+            # Still over: the rows give way to a pointer BEFORE a lead or a
+            # cell of the assignment does. The assignment and the gate terms
+            # are what the packet is for; the rows are one read away.
+            sh_["prelim_evidence"] = []
+            sh_["prelim_evidence_trimmed"] = (
+                f"{n} PRELIM row(s) not shown to stay under the packet ceiling — "
+                f"`engine.brief shared --run <R>` lists them; cite them with "
+                f"`engine.cli attach`")
+            packet["shared"] = sh_
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and packet["leads_in"]:
         # Leads go BEFORE the work. A lead is an offer; `work_next` is the
         # lane's actual assignment, and trimming the assignment to make room
@@ -1005,19 +1024,6 @@ def dispatch(wb: RunWorkbook, category: str, *,
             if packet["packet_chars"] <= BRIEF_CHAR_CEILING or keep == 1:
                 break
             keep = max(1, keep // 2)
-    if packet["packet_chars"] > BRIEF_CHAR_CEILING and \
-            (packet.get("shared") or {}).get("prelim_evidence"):
-        # Still over with one cell of detail: the PRELIM rows give way to a
-        # pointer. The assignment and the gate terms are what the packet is
-        # for; the rows are one `engine.brief shared` read away.
-        sh_ = dict(packet["shared"])
-        n = len(sh_["prelim_evidence"])
-        sh_["prelim_evidence"] = []
-        sh_["prelim_evidence_trimmed"] = (
-            f"{n} PRELIM row(s) not shown to stay under the packet ceiling — "
-            f"`engine.brief shared --run <R>` lists them; cite them with `engine.cli attach`")
-        packet["shared"] = sh_
-        packet["packet_chars"] = len(json.dumps(packet, default=str))
     return packet
 
 

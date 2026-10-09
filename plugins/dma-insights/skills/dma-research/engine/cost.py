@@ -802,6 +802,20 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
     return timings, summary
 
 
+def run_budget(run, pillars: int) -> float:
+    """The run's dollar ceiling as the driver holds it: the owner's persisted
+    `--max-usd` (`budget_usd_source: flag`, 2026-10-07 — a ceiling outlives
+    the invocation that set it), else the default. `report` and the hooks
+    judge the figure the driver enforces, never a different one."""
+    try:
+        st = json.loads((Path(run.qa_dir) / "pipeline_state.json").read_text())
+        if st.get("budget_usd_source") == "flag" and st.get("budget_usd") is not None:
+            return float(st["budget_usd"])
+    except (OSError, ValueError, AttributeError, TypeError):
+        pass
+    return run_budget_default(pillars)
+
+
 def stage_budget_overrides(run) -> dict:
     """Owner-set envelope overrides the driver persisted (`--stage-budget`),
     read from the run's pipeline state so `report` and the hooks judge the
@@ -840,7 +854,7 @@ def report(run, *, wb=None) -> dict:
                        "records": t["records"],
                        "retried": t["attempts"] > t["lanes"] > 0})
     total_min = round(summary["total_elapsed_s"] / 60.0, 1)
-    budget = run_budget_default(len(pillars))
+    budget = run_budget(run, len(pillars))
     usd = summary["total_usd"]
     over_time = total_min > TARGET_WALL_CLOCK_MIN
     over_budget = usd is not None and usd > budget

@@ -124,8 +124,9 @@ def _drive(tmp_path, **over):
                                   "finding-challenger": S.lane_noop})
     kw = dict(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(), push=False,
               folder_root=tmp_path / "client_out", ingest_poll_s=0, sleep=lambda s: None,
-              log=lambda s: None, until="RESEARCH", max_rounds=10, stall_rounds=0,
-              max_usd=0)
+              log=lambda s: None, until="RESEARCH", max_rounds=10, stall_rounds=0)
+    # no --max-usd: the envelopes are the stop (an owner's --max-usd is the
+    # single ceiling and the stop instead — pipeline.envelopes_binding)
     kw.update(over)
     p = P.Pipeline(run, P.Options(**kw))
     return p, disp, p.run_all()
@@ -167,7 +168,7 @@ def test_a_spent_envelope_refuses_the_workflow_handoff_before_any_agent(tmp_path
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
                                   sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
-                                  research_mode="workflow", max_usd=0))
+                                  research_mode="workflow"))
     out = p.run_all()
     assert out["outcome"] == "STOPPED_STAGE_BUDGET", out
     assert "AT_STAGE_BUDGET" in out["reason"] and "RESEARCH" in out["reason"]
@@ -182,7 +183,7 @@ def test_the_handoff_carries_the_envelope_and_caps_rounds_when_it_does_not_fit(t
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
                                   sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
-                                  research_mode="workflow", max_usd=0))
+                                  research_mode="workflow"))
     out = p.run_all()
     assert out["outcome"] == "AWAITING_WORKFLOW", out
     doc = json.loads(Path(out["handoff"]).read_text())
@@ -551,3 +552,35 @@ def test_et07_exempts_the_identity_grain_prelim_narratives(tmp_path):
                                    "Body": "x" * 60, "Evidence_IDs": orphan, "Kind": "narrative"})
     unl = PP.unlinked_citations(wb, ("overview",))
     assert orphan in unl and unl[orphan]["page"] == "overview"
+
+
+# ── 12. the envelopes partition the run ceiling ───────────────────────────
+
+def test_an_owner_ceiling_is_the_stop_and_the_envelopes_report(tmp_path):
+    """`--max-usd 12`: the owner's figure is the stop — the run ends
+    STOPPED_BUDGET at $12 and raising it is how it continues
+    (test_budget_ceiling) — and the RESEARCH envelope reports its spend
+    without stopping. `--stage-budget` binds whatever the ceiling says; a
+    run with no dollar figure typed is bound by every envelope."""
+    run = new_run(tmp_path, n=6)
+    base = dict(dispatcher=S.StubDispatcher(), reads=S.StubReads(), shipper=S.StubShipper(),
+                push=False, log=lambda s: None)
+    p = P.Pipeline(run, P.Options(**base, max_usd=12.0))
+    p._spent_usd = 11.0
+    p._running_stage = "RESEARCH"
+    b = p.stage_budget_block("RESEARCH")
+    assert b["binding"] is False and b["at_ceiling"] is True and b["over"] is False
+    assert "--max-usd" in b["binding_reason"] and "12.00" in b["binding_reason"]
+    assert p._over_budget() is False and p._over_stage_budget("RESEARCH") is False
+    p._spent_usd = 12.0
+    assert p._over_budget() is True
+    q = P.Pipeline(run, P.Options(**base, max_usd=0))
+    assert q.envelopes_binding()[0] is False
+    r = P.Pipeline(run, P.Options(**base, max_usd=12.0, stage_budget={"RESEARCH": 3.0}))
+    r._spent_usd = 3.0; r._running_stage = "RESEARCH"
+    assert r.envelopes_binding() == (True, "explicit --stage-budget")
+    assert r._over_stage_budget("RESEARCH") is True
+    s_ = P.Pipeline(run, P.Options(**base))
+    assert s_.envelopes_binding()[0] is True and s_.budget_usd() == 25.0
+    s_._spent_usd = 10.0; s_._running_stage = "RESEARCH"
+    assert s_._over_stage_budget("RESEARCH") is True
