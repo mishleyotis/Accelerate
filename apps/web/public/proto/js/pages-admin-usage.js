@@ -7,6 +7,9 @@
    heartbeat (live now), feature, and the server-observed client_open /
    doc_load / insight_review. A session is the browser's session id, rotated
    after 30 minutes without activity. Identity is the verified session's.
+   Client links (dmai-share): recipients are people with role CLIENT, their
+   page beacons carry the link id, and the share service's link_* lines say
+   which links were generated, opened, and refused (lib/usage LINK_EVENTS).
 
    Production divergences from the prototype (pages/admin-usage.jsx):
      · no team column — no team exists anywhere in this app's data

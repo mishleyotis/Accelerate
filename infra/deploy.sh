@@ -809,6 +809,106 @@ print("yes" if ok else "no")' || echo no)" != "yes" ]; then
     echo "  'Email link (passwordless sign-in)'; Settings > Authorized domains > add ${SHARE_HOST};" >&2
     echo "  then the next release creates the API key and switches OTP on." >&2
   fi
+  # ── Sign-in email budgets (apps/web/lib/share-throttle.js; owner,
+  # 2026-10-09: "ensure there are safeguards against [it] being spammed").
+  # Counters every dmai-share instance shares: per address, link, colleague,
+  # network and service (rl/, expire after two days), and the burned
+  # sign-in codes (used/, kept 92 days: a code is valid for as long as its
+  # share link, at most 90 days, and must stay burned that long). The share service
+  # FAILS CLOSED when the store cannot be read, so a store that cannot be
+  # made fails the release rather than leaving the gate unmetered.
+  SHARE_SENDS_BUCKET="${PROJECT_ID}-dmai-share-sends"
+  if ! gcloud storage buckets describe "gs://${SHARE_SENDS_BUCKET}" --project="$PROJECT_ID" >/dev/null 2>&1; then
+    gcloud storage buckets create "gs://${SHARE_SENDS_BUCKET}" --project="$PROJECT_ID" \
+      --location="$REGION" --uniform-bucket-level-access --public-access-prevention --quiet >/dev/null \
+      || { echo "FATAL: could not create gs://${SHARE_SENDS_BUCKET} (sign-in email budgets)" >&2; exit 1; }
+  fi
+  printf '%s' '{"rule":[{"action":{"type":"Delete"},"condition":{"age":2,"matchesPrefix":["rl/"]}},{"action":{"type":"Delete"},"condition":{"age":92,"matchesPrefix":["used/"]}}]}' > /tmp/dmai-sends-lifecycle.json
+  gcloud storage buckets update "gs://${SHARE_SENDS_BUCKET}" --project="$PROJECT_ID" \
+    --lifecycle-file=/tmp/dmai-sends-lifecycle.json --quiet >/dev/null \
+    || echo "WARNING: could not set the two-day expiry on gs://${SHARE_SENDS_BUCKET}" >&2
+  gcloud storage buckets add-iam-policy-binding "gs://${SHARE_SENDS_BUCKET}" \
+    --member="serviceAccount:${SHARE_SA}" --role="roles/storage.objectAdmin" --quiet >/dev/null \
+    || { echo "FATAL: could not grant dmai-share the sign-in email budgets bucket" >&2; exit 1; }
+  say "  share: sign-in email budgets gs://${SHARE_SENDS_BUCKET} (per address, link, colleague, network, service; fail closed)"
+
+  # ── Sign-in emails from the sharing colleague's own Gmail (owner,
+  # 2026-10-09: "sent through the AE's email … to ensure the email does not
+  # end up in spam"; "We own a Google suite"). apps/web/lib/share-mailer.js:
+  # dmai-share signs a JWT for the colleague (IAM signJwt on itself — no key)
+  # and Google exchanges it for a gmail.send token through domain-wide
+  # delegation, which a Workspace super admin grants once to the service
+  # account's client id. On only when that exchange, made here for a real
+  # sender, reads back gmail.send — it sends nothing. Otherwise Identity
+  # Platform keeps sending its own email and the release says why.
+  MAIL_ENV=""; MAIL_WHY=""
+  SHARE_SA_UID="$(gcloud iam service-accounts describe "$SHARE_SA" --project="$PROJECT_ID" \
+    --format='value(uniqueId)' 2>/dev/null || true)"
+  MAIL_DOMAINS="${SHARE_MAIL_SENDER_DOMAINS:-zennify.com}"
+  # The readback impersonates a real colleague: the first owner on a sender domain.
+  MAIL_PROBE="$(printf '%s' "${ADMIN_EMAILS:-}" | tr ',' '\n' | tr -d ' ' \
+    | grep -iE "@(${MAIL_DOMAINS//,/|})$" | head -1 || true)"
+  if [ -z "$SHARE_SA_UID" ]; then
+    MAIL_WHY="could not read the dmai-share service account's unique id"
+  elif [ "$IDP_OK" != "yes" ]; then
+    MAIL_WHY="one-time sign-in (Identity Platform) is off, so the share service sends no sign-in email at all"
+  elif [ -z "$MAIL_PROBE" ]; then
+    MAIL_WHY="no ADMIN_EMAILS address on ${MAIL_DOMAINS} to test delegated sending with"
+  else
+    gcloud services enable iamcredentials.googleapis.com gmail.googleapis.com \
+      --project="$PROJECT_ID" --quiet >/dev/null 2>&1 || true
+    # dmai-share signs its own JWTs (IAM Credentials signJwt on itself); the
+    # deployer may sign one as dmai-share to run this readback.
+    gcloud iam service-accounts add-iam-policy-binding "$SHARE_SA" --project="$PROJECT_ID" \
+      --member="serviceAccount:${SHARE_SA}" --role="roles/iam.serviceAccountTokenCreator" \
+      --quiet >/dev/null 2>&1 || MAIL_WHY="could not let ${SHARE_SA} sign its own JWTs (roles/iam.serviceAccountTokenCreator on itself)"
+    gcloud iam service-accounts add-iam-policy-binding "$SHARE_SA" --project="$PROJECT_ID" \
+      --member="serviceAccount:${DEPLOYER_ACCT}" --role="roles/iam.serviceAccountTokenCreator" \
+      --quiet >/dev/null 2>&1 || true
+    if [ -z "$MAIL_WHY" ]; then
+      NOW_S="$(date +%s)"
+      printf '{"iss":"%s","sub":"%s","scope":"https://www.googleapis.com/auth/gmail.send","aud":"https://oauth2.googleapis.com/token","iat":%s,"exp":%s}' \
+        "$SHARE_SA" "$MAIL_PROBE" "$NOW_S" "$((NOW_S + 600))" > /tmp/dmai-dwd-claims.json
+      SJWT=""
+      for attempt in 1 2 3 4; do
+        if gcloud iam service-accounts sign-jwt /tmp/dmai-dwd-claims.json /tmp/dmai-dwd.jwt \
+             --iam-account="$SHARE_SA" --project="$PROJECT_ID" --quiet >/dev/null 2>&1; then
+          SJWT="$(cat /tmp/dmai-dwd.jwt)"; break
+        fi
+        sleep 15
+      done
+      rm -f /tmp/dmai-dwd.jwt /tmp/dmai-dwd-claims.json
+      if [ -z "$SJWT" ]; then
+        MAIL_WHY="could not sign a test JWT as ${SHARE_SA} (roles/iam.serviceAccountTokenCreator for the deployer)"
+      else
+        MAIL_CHECK="$(curl -s -X POST https://oauth2.googleapis.com/token \
+          --data-urlencode "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer" \
+          --data-urlencode "assertion=${SJWT}" | python3 -c '
+import json, sys
+try: j = json.load(sys.stdin)
+except Exception: print("no response from Google"); sys.exit()
+if j.get("access_token") and "gmail.send" in (j.get("scope") or "gmail.send"): print("ok")
+else: print((str(j.get("error", "")) + ": " + str(j.get("error_description", "")))[:220])')"
+        unset SJWT
+        if [ "$MAIL_CHECK" = "ok" ]; then
+          MAIL_ENV=";SHARE_MAIL_SA=${SHARE_SA};SHARE_MAIL_SENDER_DOMAINS=${MAIL_DOMAINS}"
+        else
+          MAIL_WHY="delegated gmail.send token for ${MAIL_PROBE}: ${MAIL_CHECK}"
+        fi
+      fi
+    fi
+  fi
+  if [ -n "$MAIL_ENV" ]; then
+    say "  share: sign-in emails sent from the sharing colleague's own Gmail (domain-wide delegation, gmail.send only, no key)"
+  else
+    echo "WARNING: client sign-in emails come from Identity Platform's generic sender, not the colleague's Gmail." >&2
+    echo "  Why: ${MAIL_WHY:-unknown}" >&2
+    echo "  A Google Workspace super admin, once (no key is created; send-only, cannot read mail):" >&2
+    echo "  admin.google.com > Security > Access and data control > API controls > Manage domain-wide delegation > Add new" >&2
+    echo "       Client ID ${SHARE_SA_UID:-<dmai-share unique id>}   OAuth scope https://www.googleapis.com/auth/gmail.send" >&2
+    echo "  The next release reads it back and switches it on." >&2
+  fi
+
   WEB_IMAGE="$(gcloud run services describe dmai-web --project="$PROJECT_ID" \
     --region="$REGION" --format='value(spec.template.spec.containers[0].image)')"
   # One link at a time: list its jti (shown in the share dialog and in the
@@ -826,7 +926,7 @@ print("yes" if ok else "no")' || echo no)" != "yes" ]; then
   gcloud run deploy dmai-share --image="$WEB_IMAGE" \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="$SHARE_SA" \
-    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}${LEDGER_ENV}" \
+    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}${LEDGER_ENV};SHARE_SENDS_BUCKET=${SHARE_SENDS_BUCKET}${MAIL_ENV}" \
     --set-secrets="$SHARE_SECRETS" \
     --min-instances=0 --max-instances=10 --concurrency=80 \
     --allow-unauthenticated --quiet
