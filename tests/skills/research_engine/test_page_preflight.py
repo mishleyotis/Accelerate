@@ -85,6 +85,33 @@ def test_the_engine_and_the_connector_hold_the_same_cg50_tokens():
     assert floor and int(floor.group(1)) == PP.TECHSTACK_FLOOR
 
 
+def test_cg50_reads_product_phrases_only_as_the_connector_does(tmp_path):
+    """B1 Bank, 2026-10-08: both scans say only 'Q2'. CG-20 refuses vendor ==
+    product, and the mirror read the VENDOR's phrase ('q2 software') where the
+    connector reads the product's alone — so the preflight refused a row the
+    connector passed, and halted PAGES_A."""
+    src = (ROOT / "apps/mcp/dma_mcp/validation2.py").read_text()
+    assert "phrases = _name_phrases(product)\n" in src, \
+        "the connector's CG-50 phrase rule moved — re-mirror it here"
+    run = new_run(tmp_path, prelim=False)
+    wb = run.open()
+    scan = L.append_evidence(
+        wb, source_name="Clay company Tech Stack technographic scan",
+        source_url="https://example.test/scan", tier="T1",
+        excerpt=("Facebook, Instagram, LinkedIn, LinkedIn Ads, LinkedIn Insights, "
+                 "HSTS, Q2, Slack, CrUX Dataset, CrUX Top 1m, Glia"),
+        subcaps=[], published="2026-10-08")
+    for product, vendor in (("Q2", "Q2 Software"),
+                            ("Q2 Digital Banking Platform", "Q2 Holdings")):
+        techscan.record(wb, product=product, vendor=vendor, layer="CUST",
+                        status="INFERRED", method="public_document",
+                        basis="listed by the company technographic scan",
+                        providers=["clay"], subcaps=[], evidence_ids=[scan],
+                        as_of="2026-10-08")
+    flagged = [u["product"] for u in PP.unnamed_products(wb)]
+    assert flagged == ["Q2 Digital Banking Platform"]
+
+
 def test_the_driver_stops_needs_connector_at_pages_and_the_watchdog_says_why(tmp_path):
     from engine import pipeline as P, pipeline_stub as S, preflight
     from fixtures import preflight_doc
