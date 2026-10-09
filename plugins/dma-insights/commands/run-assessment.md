@@ -263,10 +263,20 @@ USD, and whether it fits `--max-usd`). In ONE message, start every invocation
 — `Workflow({scriptPath: <workflow>, args: <invocation>})` per category.
 Concurrency is capped per workflow (min(16, CPUs−2)), so sixteen category
 workflows are what makes research parallel; inside each, the category's open
-cells run as capability batches of ≤ 12 cells (a fresh context each), then an
-independent challenge and the floors gate, up to two rounds. Every batch
-writes through ONE `engine.cli batch` per capability (one workbook load, lock
-and save instead of ~10 s per command under the run-wide lock). The agents
+cells run as capability batches of ≤ 12 cells, each a fresh **haiku**
+`research-evidence-collector` (searches, verbatim spans the fetch cache
+verifies, tiers, stated dates — no judgement), then one **sonnet**
+`research-category-orchestrator` pass judges completeness from the gate
+summary and the evidence pack and writes every synthesis and declared
+absence, a gap-only collector wave repairs what it names, then the independent
+challenge and the floors gate (2026-10-09, decided against the gold workbook).
+Every batch writes through ONE `engine.cli batch` per capability (one workbook
+load, lock and save instead of ~10 s per command under the run-wide lock).
+**Every wave is priced before it starts** against the RESEARCH envelope and the
+category's own share (`budget` in the handoff); when the estimate does not fit,
+the driver hands whole categories end to end, cheapest first, and lists the
+rest under `deferred_for_budget` with the `--stage-budget RESEARCH=<usd>` that
+funds them — a deferred category is a decision for a person, not a loop. The agents
 run in THIS session and hold Exa, Tavily and Clay themselves; one that finds
 none stops and returns `NO_CONNECTORS` — except on a DEGRADED run, where the
 driver passes `degraded: true` and the agents search with WebSearch and close

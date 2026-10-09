@@ -359,6 +359,54 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   floors, the techstack three) run before any page agent. Lock waits are
   recorded beside the lock; `--ingest-kick-cmd` runs the package scan
   instead of waiting for the Scheduler.
+  **The research tiers** (user, same day, after the first stress test read
+  $137 against the $10 envelope; decided against the gold workbook's row
+  contract — `WORKFLOW-OPTIMIZATION-2026-10-09.md` §9): **haiku collects,
+  sonnet judges.** `research-evidence-collector` (haiku, actor
+  `research-pXcY-collector`, scope refuses synthesis/absence) registers the
+  gold EVIDENCE row — verbatim span the fetch cache verifies, ladder tier,
+  a date only when the page states it (the ledger now refuses a publication
+  date equal to the retrieval date unless the span or URL carries it), the
+  cells it answers; `research-category-orchestrator` (sonnet, actor
+  `research-pXcY-producer`) judges completeness and writes the gold
+  SYNTHESIS row and every declared absence; `research-challenger` stays
+  sonnet; the sixteen `research-pXcY-producer` manifests stay sonnet as the
+  lane-mode identity. **Cost = turns × context × rate**: `cost.research_price`
+  prices the tiered SHAPE (not a per-cell constant), identically degraded or
+  connector-backed, RECALIBRATED to the first live wave (P3C2, 26 cells,
+  degraded: $5.06 — collectors 29/48/47 turns on a 73.8K in-session floor,
+  the orchestrator 41): 686 cells ≈ $82 ($0.12/cell); all-sonnet ≈ $123;
+  the old pilot $137. **$10 is not reachable for 686 cells at gold quality
+  with any tiering**; the model says so instead of estimating to the
+  envelope, and the next lever is the floor (lane path 26.8K vs 73.8K
+  in-session). **The envelope is upheld by three instruments**: at handoff the
+  driver funds whole categories end to end, cheapest first, and lists the
+  rest under `deferred_for_budget` naming `--stage-budget RESEARCH=<usd>`
+  (an envelope that funds no category stops `AT_STAGE_BUDGET before
+  dispatch`, no agent paid for); in the workflow every wave is priced before
+  it starts (`budget.tier_usd`, `share_usd`, `usd_per_output_token` against
+  `budget.spent()`), the first wave reserving the orchestrator and the
+  challenge, a refused wave naming `unreached_cells`; after, the ledger —
+  which charges a workflow agent by its PHASE metadata (`stage_of_agent`),
+  never by what it read (the first wave's collectors were booked to PAGES
+  and its orchestrator to SCORING by the head scan; RESEARCH read $0).
+  Cards are written to `briefs/research_cards/<CAT>/` at handoff so a
+  collector reads its batch in one call. A recording dispatcher moves the
+  driver's recorded marker (PRELIM's $5.71 had read as RESEARCH's); an open
+  cell is never routed as a repair too; an agent type not bound in the
+  session runs as a plain subagent on the same model; a cached page text a
+  span was verified against is kept when a later fetch differs
+  (`.alt.txt`); `fetch` accepts `--actor`; an evidence id in prose is not
+  an ungrounded figure; transcript output tokens are read from the content
+  when the usage figure is the streamed chunk's; the governor converts
+  `budget.spent()` at the measured `cost.RUNTIME_USD_PER_TOKEN` (the
+  counter is 8–10× output tokens); the card owes the `primary` question the
+  gate blocks on; a gap-only wave reads `<CAT>/_repairs.json`; a category
+  deferred for budget never stalls; the challenge packet ships the judged
+  fields whole. Every defect is filed MEM-0610..0630 and tabled in §10 of
+  the optimisation doc (OPEN: the 74K in-session floor, the duplicate IMA
+  client folder, record_finding's raw error on an engine run id). Flags:
+  `--collector-model`, `--synthesis-model`, `--batch-cells`.
 
 ## Open decisions — leave open, do not resolve silently
 

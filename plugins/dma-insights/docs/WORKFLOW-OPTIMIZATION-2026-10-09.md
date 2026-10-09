@@ -201,10 +201,10 @@ envelope forces the design, not the prompt:
 - **Budget rides with the work** (#1): the workflow reads `budget` and spends
   one round when the estimate does not fit; the guard refuses the next agent
   when the envelope is spent.
-- Still owed to reach $0.014/cell: the Haiku tier for the mechanical turns
-  (log, attach, batch) and the context floor (66k tokens at turn 1 measured
-  on Northwest; the CLAUDE.md build charter and 54 skill listings load into
-  every research agent). Those two are the next 3–5× — see §6.
+- **The research tiers** (owner, 2026-10-09, same day — §9 below): haiku
+  collects, sonnet judges; every wave is priced before it starts; whole
+  categories are funded end to end or deferred by name. The pilot constant
+  is gone from the estimate: `cost.research_price` prices the SHAPE.
 
 ### SCORING — $5
 - The three scorer refusals and the headline fix (#8, #9) make round 1 the
@@ -373,3 +373,204 @@ envelope forces the design, not the prompt:
   `connector_tool` (ET-12 on a research-engine run); B1 shipped techstack
   under a 62-FAIL SG-V4 waiver for that reason.
 - The REPORTS stall rule counts READY sections only (OPEN_FIXES, 2026-10-06).
+
+## 9. The research tiers — haiku collects, sonnet judges (owner, 2026-10-09)
+
+**The ask.** "Whether research runs degraded or using connectors, my
+expectation is the great batching enables the budget to be as set … Use Haiku
+for the research agents and subagents such that they get evidence fast …
+ensure all gold standard scoring workbooks are filled eg the excerpts …
+efficient subcap clustering through category grain orchestrators that would
+now use Sonnet 5 to determine completeness … Or leave at sonnet 5 or use
+haiku? Please decide such that we do not end up with poor results … Ensure to
+use the gold standard workbook to decide."
+
+**What the first stress test found** (R-IMA-20261009, IMA Financial Group,
+686 T1_CORE cells, DEGRADED — Exa 402, Tavily 432):
+
+| reading | value | cause |
+|---|---|---|
+| RESEARCH estimate | **$137.38** against a $10 envelope | unbatched sonnet pilot constant ($0.19/cell + $0.44/category) |
+| RESEARCH envelope "spent" before any research agent ran | **$5.71** | PRELIM's row re-attributed: a dispatcher that records its own cost never moved the driver's recorded marker |
+| PRELIM | $5.71 against $2, 98 turns, **122K-token average context**, sonnet | the shape, not the tool: cost = turns × context × rate |
+| E-001 | `--published 2026-10-09` on an undated trade-press profile; excerpt a description, not a quote | a sonnet lane; nothing refused it |
+
+**The decision, taken against the gold workbook's row contract**
+(`references/templates/gold_reference.json`, `P1_Subcap_Scoring` headers;
+`engine/ledger.py SYNTHESIS_REQUIRED`):
+
+| gold row | fields | who can be wrong about it, and how it is caught | tier |
+|---|---|---|---|
+| **Evidence** | `Excerpt` verbatim 50–500 chars, `Tier`, `Date_Published`, `Recency` (computed), `ERS` (computed: tier · recency · specificity · corroboration), `SubCap_IDs`, `Source_URL` | mechanical. The ledger refuses a non-verbatim span against the fetch cache, a FACT on T3, an own-site T1, a scan below T1, a cell outside the run, an actor outside its category — and now a publication date equal to the retrieval date unless the page states it. Recency and ERS are computed server-side from what the collector supplies, so the collector cannot mis-score them. | **haiku** — `research-evidence-collector`, actor `research-pXcY-collector`, which the scope refuses `synthesis` and `absence` |
+| **Synthesis** | `Dominant_Claim` (one checkable thing), `What_We_Found` ≥120 chars, `Triangulation` (the step named), `Ceiling_Reasoning` + `Ceiling_Band` (tier table), `Claim_Label` the excerpts earn, `DQ_Works/Fails/Value/Corroborates/Contradicts`, `Why_It_Matters`, `DMA_Impact`, the declared absence's `--hunted` ladder | judgement. The challenge FAILs on exactly these seven dimensions, and a FAIL buys a repair round that re-pays a context floor. | **sonnet** — `research-category-orchestrator`, actor `research-pXcY-producer` (the category's identity, so the challenge's independence stays checkable) |
+| **Completeness** | the floors gate's blocking terms per cell; which cells a repair wave collects for | judgement over the whole category | **sonnet** — the same orchestrator pass |
+| **Challenge** | seven dimensions per cell | unchanged | **sonnet** — `research-challenger` |
+
+Why not haiku for synthesis: the measured failure mode of every run in §1 was
+not slow collection but syntheses the challenge sent back (212 / 141 floors
+rounds). A cheaper first draft that fails more often is not cheaper. Why not
+sonnet for collection: 2.0–2.5× on every rate for work the ledger already
+polices. The sixteen `research-pXcY-producer` manifests stay sonnet as the
+LANE-mode identity (one context that collects and synthesises) and the actor
+name the category's writes carry.
+
+**The price model** (`cost.research_price`, `cost.RESEARCH_TIERS`): cost =
+turns × context × rate, per tier shape — a collector batch of ≤12 cells is one
+open turn (checkpoint + every card of the batch in one `cat`; the driver
+writes the cards to `briefs/research_cards/<CAT>/` at handoff) plus two turns
+per capability (parallel searches; one Bash that caches text, writes the ops
+file and runs `engine.cli batch`); an orchestrator pass is three fixed turns
+plus one per ~8 cells; a challenge three plus one per ~10 cells. Degraded or
+connector-backed changes the search tool, never the shape, so the price is
+the same (pinned: `test_degraded_and_connector_backed_research_price_the_same`).
+
+| 686 cells, 16 categories | projected | per cell |
+|---|---|---|
+| unbatched sonnet pilot (the old estimate) | $137.38 | $0.19 |
+| all-sonnet at the new shape | $36.03 | $0.053 |
+| **haiku collectors + sonnet orchestrator + sonnet challenge** | **$26.73** | **$0.039** |
+| of which: collection $8.05 · repair wave $1.25 · orchestrator $12.33 · challenge $5.10 | | |
+
+The orchestrator line is the largest because synthesis OUTPUT is irreducible:
+686 gold-shaped rows ≈ 340K output tokens ≈ $3.40 on sonnet before a single
+reasoning turn. The physical floor of this shape (web text written to cache
++ synthesis output) is ~$6–7; **$10 is not reachable for 686 cells at gold
+quality with any tiering**, and the model says so instead of estimating to
+the envelope.
+
+**How the envelope is upheld anyway — three instruments, in order:**
+
+1. **At handoff, whole categories or none.** When the estimate does not fit
+   what is left of the envelope, the driver allocates the remainder to whole
+   categories end to end (collect + synthesise + challenge), cheapest first,
+   and lists the rest under `deferred_for_budget` with the flag that funds
+   them. On R-IMA-20261009: **$10 funds 6 of 16 categories** (P1C3, P3C1,
+   P3C2, P3C3, P3C4, P4C4); 10 deferred, ~$26.73 funds the scope. An envelope
+   that funds no category stops the stage `AT_STAGE_BUDGET before dispatch`
+   with the cheapest category's price — no agent is paid for.
+2. **In the workflow, every wave is priced before it starts.** The handoff
+   hands `budget.tier_usd` (collector batch, orchestrator, challenge),
+   `budget.share_usd` (the category's own end-to-end estimate) and
+   `budget.usd_per_output_token` (blended over the tiers). The governor
+   converts `budget.spent()` — the output tokens of every workflow in the turn
+   — at that rate and refuses a wave that would cross the run's remainder or
+   the category's share. The first wave RESERVES the orchestrator and the
+   challenge before it spends a dollar on a collector: evidence with no
+   synthesis buys nothing. A refused wave names its cells as
+   `unreached_cells` and the category returns `AT_STAGE_BUDGET`.
+3. **After the workflows, the ledger.** `capture_workflows` prices every
+   agent's transcript into the ledger by stage; the driver's envelope check
+   stops the stage when the measured spend crosses the ceiling; the dispatch
+   guard refuses the next agent of a spent family.
+
+**Other defects closed in the same change:** PRELIM's spend is no longer read
+as RESEARCH's (`_record` moves the recorded marker when the dispatcher books
+its own cost); an open cell is never routed as a repair too (48 of P1C1's 47
+open cells were, doubling its share); a workflow whose agent type is not bound
+in the session (the roster is bound at start — the first live wave failed
+three agents at $0 on `agent type not found`) runs the same prompt on the same
+model as a plain subagent and says so once.
+
+**Owner levers.** `--collector-model`, `--synthesis-model` (default haiku /
+sonnet), `--batch-cells` (12), `--stage-budget RESEARCH=<usd>` (the handoff
+prints the figure that funds the scope). `engine.cost report --by-stage` after
+the first tiered run replaces every projection above with a measurement, and
+`workflow_calibration` corrects the next estimate by the ratio.
+
+**Live measurement — wave 1** (R-IMA-20261009, P3C2, 26 cells, 3 collector
+batches, DEGRADED, 12.7 min wall; the new agent types were not bound in the
+session, so every agent ran as a plain workflow subagent on its model):
+
+| agent | model | turns | cache read | cache write | ≈ cost |
+|---|---|---|---|---|---|
+| collect P3C2.1–3 (11 cells) | haiku | 29 | 2.74M | 0.24M | $0.59 |
+| collect P3C2.4,5,7 (11 cells) | haiku | 48 | 5.11M | 0.64M | $1.33 |
+| collect P3C2.8 (4 cells) | haiku | 47 | 4.62M | 0.36M | $0.93 |
+| orchestrate (26 cells) | sonnet | 41 | 4.65M | 0.34M | $1.90 |
+| challenge (6 syntheses) | sonnet | 8 | 0.36M | 0.08M | $0.27 |
+| **wave** | | **173** | | | **$5.02 → $0.19/cell; 7 of 26 cells closed** |
+
+What it bought: 8 evidence rows, every excerpt verbatim against the fetch
+cache at the write, tiers from the ladder (a privacy notice T5, trade press
+T3, an AG-filed notice T2), NO fabricated date (4 of 5 undated rows banded
+UNVERIFIED; haiku refused to register a breach notice whose affiliation it
+could not confirm); 6 syntheses on sonnet that read as the gold row
+(HYPOTHESIS labels the excerpts earn, Triangulation naming the step,
+Ceiling_Reasoning from the tier table, Activating bands) and PASSED the
+independent challenge first time; 1 declared absence; a gap list naming,
+per cell, the facets still owed. The gate FAILED on volleys: the collectors
+fired one WebSearch per turn, skipped the `primary` facet on every cell and
+`fails`/`value` on many, so 19 cells could be neither synthesised nor
+declared absent.
+
+Where the dollars went, measured, and the fix for each:
+
+| driver | measured | fix |
+|---|---|---|
+| **turn-1 floor 73,778 tokens** — the in-session harness (system prompt, tool schemas, CLAUDE.md); the prompt is ~3K; the lane path measured 26.8K | 60–70 % of every turn's context; re-written on cache expiry (turns 1 and 2 both wrote 73.8K) | the largest lever left, and not a prompt edit: on a DEGRADED run nothing in research needs a session connector, so collectors and the orchestrator can run as headless haiku/sonnet lanes with the manifests' `maxTurns` bound (`agent_run.py`), a ~2.7× cut on the floor — next change |
+| one search per turn (12 / 25 / 22 WebSearch calls = 12 / 25 / 22 turns) | 4.8 turns per cell against a design of 0.6 | the collector prompt now enumerates the SIX volleys per capability (primary + five facets) to fire in ONE message and log with every cell; cards pre-rendered to disk |
+| the orchestrator read engine source for 17 turns to learn `absence`'s required flags (`--proxy-log`, the ladder shape) and the volley rule | 41 turns, half exploration | the exact signature, the ladder JSON and the "a cell missing a facet is a gap, never an absence" rule are in the prompt; "do not read skills/, docs/, engine/" |
+| `ungrounded figure '066'` — an E-id in prose read as a number | 6 syntheses refused once, re-written in brackets | `quality._CITATION` strips bare E-ids |
+| `fetch` refused `--actor` in batch lines; evidence then had no cache to verify against | 3 lines refused | `fetch` accepts the flag |
+| a re-fetch replaced a cached text two spans had been verified against | E-069/E-070 "not verbatim" against their own source | `fetch.store_text` keeps a verified text; the new one lands beside it |
+| the ledger charged the collectors to PAGES and the orchestrator to SCORING | RESEARCH envelope $0 after a $5.06 wave | `cost.stage_of_agent` reads the workflow PHASE metadata beside the transcript |
+| transcript `usage.output_tokens` is the streamed chunk's (3–8 per message) | every workflow agent since 2026-09-30 priced at ~0 output | `cost._output_tokens` reads the content's length when larger |
+| WebSearch payloads 3–7K chars | not a driver | — (degraded is not more expensive per search than Tavily basic) |
+
+**Recalibrated projection** (`cost.RESEARCH_TIERS` now carries the measured
+shapes; the orchestrator at ~24 turns assumes the prompt fix): 686 cells ≈
+**$81.72 ($0.12/cell)**; all-sonnet collection ≈ $123; the pilot $137.
+**$10 funds 2 categories end to end** (the driver handed P3C1 and P3C2 and
+deferred 14 by name). After wave 1 was booked ($5.06), the remainder funds
+P3C2's second pass alone. The envelope held: nothing was started that the
+envelope could not pay for, and the stage stops `AT_STAGE_BUDGET` with the
+fourteen categories and the figure (`--stage-budget RESEARCH=82`) named.
+
+**Live measurement — wave 2** (P3C2 again, six-volley prompt live, 2
+collector batches + 1 gap-only batch): the two collectors fired 18 WebSearch
+calls each and **closed the volley gaps** — P3C2.1.1 and P3C2.7.1 went from
+`primary_unfired` + `volleys_incomplete` to primary and all five facets
+logged. Two new defects stopped it short of synthesis: the gap-only
+collector found its six CLOSED cells on no card (cards covered open cells
+only) and did nothing, and the governor, converting the runtime's token
+counter at the output-token rate (8–10× too high), refused the orchestrator
+pass with $4.94 of envelope left. Both are fixed below. Wave cost ≈ $2.26.
+After both waves the driver's arithmetic was exact: $2.66 left, the cheapest
+category ~$4.20 end to end, so it stopped **AT_STAGE_BUDGET before dispatch**
+and named `--stage-budget RESEARCH=82` — no agent paid for that it could not
+finish.
+
+## 10. Findings register — every defect the live waves hit, root-caused
+
+Filed in the connector's findings memory (MEM-0610..0630, read by every
+session through `get_memory_digest`) and closed in code with a test, except
+where marked OPEN.
+
+| MEM | defect | root cause | fix | test |
+|---|---|---|---|---|
+| 0611 | estimate $137 vs $10 | per-cell sonnet pilot constant, never comparable to the envelope | `cost.research_price` (measured tiers); whole categories or none | `test_the_tiered_price_is_measured…`, `test_a_tight_envelope_hands_whole_categories…` |
+| 0612 | PRELIM's $5.71 read as RESEARCH's | recorded marker moved only on the non-recording path | `_record` moves it for a recording dispatcher | `test_prelim_spend_is_not_read_as_research_spend` |
+| 0613 | retrieval date as publication date | nothing refused it | ledger refuses `published == today` unless the span/URL states it | `test_todays_date_is_refused…` |
+| 0614 | open cells routed as repairs too | open batches and repairs assumed disjoint | repairs = closed cells only | `test_an_open_cell_is_never_routed_as_a_repair_too` |
+| 0615 | new agent type not bound → 3 agents failed | roster bound at session start | same prompt, same model, plain subagent; logged | `test_an_unbound_agent_type_runs…` |
+| 0616 | card omits the primary question (25/25 cells failed) | card and gate held the volley rule separately | card owes `primary`; facets from what is owed | `test_the_card_owes_the_primary_question…` |
+| 0617 | one search per turn, facets skipped | prompt did not name the six volleys | six volleys in one message, card log lines; verified live in wave 2 | `test_the_workflow_runs_collectors…` |
+| 0618 | orchestrator read source for the absence signature | brief omitted required flags | exact command + ladder JSON + "missing facet is a gap" in the prompt | `test_the_workflow_runs_collectors…` |
+| 0619 | E-id read as an ungrounded figure | citation strip matched brackets only | bare `E-NNN` stripped | `test_an_evidence_id_in_prose_is_not…` |
+| 0620 | `fetch --actor` refused | sheet and parser disagreed | `fetch` accepts `--actor` | `test_fetch_accepts_the_actor_flag…` |
+| 0621 | re-fetch overwrote verified text | destructive cache write | verified text kept, new one `.alt.txt` | `test_a_verified_cache_text_is_kept…` |
+| 0622 | collectors booked to PAGES, orchestrator to SCORING | transcript-head scan | phase metadata decides (`stage_of_agent`) | `test_a_workflow_agent_is_charged_by_its_phase…`, `test_capture_reads_the_phase_metadata…` |
+| 0623 | workflow output priced ~0 | `usage.output_tokens` is the streamed chunk's | max(usage, content length) | `test_workflow_output_tokens_are_read_from_the_content…` |
+| 0624 | governor refused a payable orchestrator pass | runtime counter converted at the output rate | measured `RUNTIME_USD_PER_TOKEN` | `test_the_governor_converts_the_runtime_counter…` |
+| 0625 | gap-only wave found no card | cards covered open cells only | `_repairs.json` per category | `test_a_gap_only_wave_gets_a_repair_card…` |
+| 0626 | 14 never-handed categories "stalled" | stall counted any spend as work on every category | only a handed category can stall | `test_a_category_deferred_for_budget_never_stalls` |
+| 0627 | challenger judged truncated claims | packet cut claim 200 / ceiling 160, no triangulation | judged fields whole to 700 chars | `test_the_challenger_sees_the_judged_fields_whole` |
+| 0630 | audit saw workflow-read artefacts as orphans | audit ignored `.js` readers | workflows count as code readers | `test_the_shipped_plugin_has_no_orphan` |
+| 0610 | `record_finding` returns a raw Postgres error for an engine run id | no input validation before the insert | OPEN — connector (apps/mcp) fix | — |
+| 0628 | snapshot fails on two client folders | two Drive folders for one entity | OPEN — owner adjudicates which folder is current | — |
+| 0629 | 73.8K in-session context floor per research agent | harness, not prompt | OPEN — the next cost lever: headless lanes on a degraded run (~27K floor) | — |
+
+Also fixed while running the suites: `test_a_scripts_own_subcommand_is_not_read_as_a_shell_verb`
+was red on the base branch because the hook ran from pytest's cwd, where the
+repo-relative script path does not exist; the test now runs the hook from
+the repository root.

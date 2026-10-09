@@ -661,11 +661,14 @@ is stated rather than absorbed.
 with the real dispatcher it stops at RESEARCH with outcome `AWAITING_WORKFLOW`
 and writes `<ROOT>/07_qa/research_workflow.json`: the plugin's
 `workflows/dma-pillar-research.js`, one `args` object per category (with its
-capability batches of ≤ 12 open cells) and a measured cost estimate. The
-conducting session starts one Workflow per category in one message — the
-runtime caps concurrency per workflow, so per-category workflows are the
-parallelism — and each runs its batches in parallel, then an independent
-challenge and the floors gate, up to two rounds; the agents hold the
+capability batches of ≤ 12 open cells) and a tiered cost estimate
+(`cost.research_price`). The conducting session starts one Workflow per
+category in one message — the runtime caps concurrency per workflow, so
+per-category workflows are the parallelism — and each runs its haiku
+collector batches in parallel, then a sonnet category orchestrator
+(completeness, syntheses, absences, the gap list), a gap-only repair wave,
+then an independent challenge and the floors gate; every wave is priced
+against the RESEARCH envelope before it starts; the agents hold the
 enrichment connectors themselves and write through `engine.cli batch`. The
 session then re-runs the driver, which charges the workflow agents' spend to
 the cost ledger, verifies the gates and goes on to HANDOFF. `--research-mode
