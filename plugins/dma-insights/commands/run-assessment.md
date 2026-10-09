@@ -284,7 +284,7 @@ cells with `absence --enrichment-unavailable` instead of stopping. When all have
 file's `then` command: the driver prices the workflow agents into the cost
 ledger (so the ceiling sees them), re-reads the floors gates, re-hands only
 categories still failing — and says so if the last handoff was never worked.
-**No Workflow tool? Do not restart.** A resumed session can lose it. The
+**No Workflow tool? Do not restart — and tell the owner first.** A resumed session can lose it; say so in one line ("this session has no Workflow tool; running RESEARCH as in-session agents") before the substitute starts, because nothing of it will show as a workflow. The
 handoff's `agent_prompts` names a directory of the SAME batch and challenge
 prompts, rendered from the workflow's own source
 (`workflows/render-prompts.mjs`), with a `manifest.json`. Spawn one in-session
@@ -312,6 +312,20 @@ continues the rest. `--tiers-direct` lets the driver run the lanes itself
 57-cell category; the full 686-cell IMA scope ≈ $26, so the $10 envelope
 funds whole categories cheapest first and names the rest — raising it is the
 owner's call.
+
+**Where the owner sees the run: the conversation.** The owner follows DMA
+sessions from the Claude app, and a workflow's progress view (`/workflows`)
+renders in the CLI, Desktop and IDE, not in a cloud session on the phone
+(measured 2026-10-09: "I never saw the workflow"). So every `engine.pipeline
+run` and `status` ends with an **OWNER UPDATE** block (spend against the
+ceiling and every envelope, categories passing and failing, what is handed
+and how it is being worked, the next command; also `07_qa/progress.md`), and
+you put that block in your reply verbatim at every handoff and every `then`
+(the stage_advance hook reminds you). When a workflow returns, relay its
+per-category lines the same way. A handoff worked by in-session agents
+instead of a workflow is recorded as a `HANDOFF_<STAGE>_WORKED_VIA` WARN row
+and named in the block, and its agents' spend is captured into the ledger
+like a workflow's — never silent, never unpriced.
 
 **The run survives a fresh container.** The driver snapshots the run
 (workbook, evidence, QA, briefs; not transcripts) to the client's Drive

@@ -85,6 +85,23 @@ MARKER = "stage_advance.json"
 #: nobody correlated, and a budget nobody counted.
 ROUND_COMMAND = re.compile(r"engine\.pipeline\s+run\b")
 
+#: ONE rule for a session with no Workflow tool, every stage (2026-10-09).
+#: The research handoff said "STOP and restart, never substitute agents"
+#: while run-assessment.md and the driver said "do not restart, run the
+#: rendered prompts as in-session agents" (the owner's own call at Cross
+#: Insurance, 2026-10-01) — two rules for one moment, and either way the
+#: owner was never told the work ran without a workflow.
+NO_WORKFLOW_FIRST = ("  No Workflow tool in this session? FIRST tell the owner in one line "
+                     "(\"this session has no Workflow tool; running <stage> as <fallback>\"), "
+                     "then: ")
+
+#: The owner follows DMA sessions from the Claude app, where /workflows does
+#: not render (workflows show in the CLI, Desktop and IDE). The conversation
+#: is the channel, so the driver's OWNER UPDATE block is relayed every time.
+OWNER_RELAY = ("RELAY TO THE OWNER: put the OWNER UPDATE block from this output in your "
+               "reply, verbatim — the owner follows this run from the Claude app, where "
+               "/workflows does not render. Do it at every handoff and every `then`.")
+
 #: Who drains a relay batch. The lanes hold no connector; this actor does.
 DRAIN_AGENT = "enrichment-web-specialist"
 
@@ -436,7 +453,8 @@ def awaiting_workflow(event: dict) -> dict | None:
         except (OSError, ValueError):
             doc = {}
     lines = ["RESEARCH IS YOURS, AS PERSISTED WORKFLOWS — start ALL of these in "
-             "ONE message (they run side by side and show in /workflows):"]
+             "ONE message (they run side by side; /workflows shows them in the CLI, "
+             "Desktop and IDE — the owner on the Claude app sees only what you relay):"]
     for inv in doc.get("invocations") or []:
         lines.append(f"  [ ] Workflow({{scriptPath: \"{doc.get('workflow')}\", "
                      f"args: {json.dumps(inv)}}})")
@@ -467,9 +485,16 @@ def awaiting_workflow(event: dict) -> dict | None:
         lines.append(f"  NOT RE-HANDED (no progress across worked rounds): "
                      f"{', '.join(doc['stalled'])} — their blockers need a repair at "
                      f"source, not another round")
-    lines.append("  If Workflow is not available in this session, STOP and restart the "
-                 "session (tools rebind at start). Never substitute Agent calls or "
-                 "`--research-mode lanes`: neither is persisted, and lanes hold no connector.")
+    tiers = any(i.get("tiers") for i in doc.get("invocations") or [])
+    ap = doc.get("agent_prompts") or {}
+    lines.append(NO_WORKFLOW_FIRST + (
+        "re-run the driver with --tiers-direct (a degraded run: the driver runs the "
+        "same lean lanes itself)." if tiers else
+        (f"run the rendered prompts as in-session agents ({ap.get('manifest')}): "
+         f"{ap.get('how')}. Never `--research-mode lanes`: lanes hold no connector."
+         if ap.get("manifest") else
+         "re-run the driver after restarting the session (no rendered prompts are on "
+         "disk). Never `--research-mode lanes`: lanes hold no connector.")))
     lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'engine.pipeline run'}")
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
                                    "additionalContext": "\n".join(lines)}}
@@ -545,6 +570,11 @@ def on_post_tool_use(event: dict) -> dict | None:
             # A round that handed back is a DIFFERENT announcement from a
             # stage that flipped: it carries a checklist, not a state.
             out = awaiting_workflow(event) or round_complete(event)
+            if "OWNER UPDATE ·" in _response_text(event):
+                ctx = ((out or {}).get("hookSpecificOutput") or {}).get("additionalContext")
+                return {"hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "additionalContext": (OWNER_RELAY + ("\n\n" + ctx if ctx else ""))}}
             if out:
                 return out
         if not STAGE_COMMANDS.search(cmd):
@@ -736,8 +766,7 @@ def _pages_workflow_context(path: str) -> dict:
                      f"args: {json.dumps(inv)}}})")
     if not doc:
         lines.append(f"  (handoff file not readable — open {path})")
-    lines.append("  No Workflow tool in this session? Re-run the driver with "
-                 "--pages-mode lanes.")
+    lines.append(NO_WORKFLOW_FIRST + "re-run the driver with --pages-mode lanes.")
     lines.append(f"  THEN, when the workflow has returned: {doc.get('then') or 'the driver again'}")
     return {"hookSpecificOutput": {"hookEventName": "PostToolUse",
                                    "additionalContext": "\n".join(lines)}}
@@ -775,8 +804,8 @@ def _reports_workflow_context(path: str) -> dict:
                  "engine command, an owner decision with the person, scores through the "
                  "pillar scorer and its critic.")
     ap = doc.get("agent_prompts") or {}
-    lines.append("  No Workflow tool in this session? "
-                 + (f"The same prompts are on disk ({ap.get('manifest')}): {ap.get('how')}"
+    lines.append(NO_WORKFLOW_FIRST
+                 + (f"the same prompts are on disk ({ap.get('manifest')}): {ap.get('how')}"
                     if ap.get("manifest") else
                     "Re-run the driver with --report-mode lanes."))
     lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'the driver again'}")
@@ -802,7 +831,7 @@ def _scoring_workflow_context(path: str) -> dict:
                      f"args: {json.dumps(inv)}}})")
     if not doc:
         lines.append(f"  (handoff file not readable — open {path})")
-    lines.append("  No Workflow tool in this session? Re-run the driver with "
+    lines.append(NO_WORKFLOW_FIRST + "re-run the driver with "
                  "--scoring-mode lanes — scoring needs no connector, so headless "
                  "lanes are sound. Never score rows by hand.")
     lines.append(f"  THEN, when every workflow has returned: {doc.get('then') or 'the driver again'}")

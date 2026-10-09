@@ -775,6 +775,7 @@ class Pipeline:
                 if cap["captured"]:
                     opts.log(f"  (workflow spend captured: {cap['captured']} agent(s), "
                              f"${cap['usd']:.2f})")
+                self._note_worked_via(cap)
             rows = cost.ledger(run)
             self._spent_usd = self._recorded_usd = round(
                 sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 4)
@@ -783,6 +784,108 @@ class Pipeline:
         except Exception as e:                       # noqa: BLE001
             self.opts.log(f"  (prior spend not read, starting from zero: "
                           f"{str(e)[:120]})")
+
+    def owner_update(self, out: dict | None = None) -> str:
+        """The run as its owner reads it, in a dozen lines.
+
+        Owner, 2026-10-09: "I never saw the workflow." The owner follows every
+        DMA session from the Claude app; workflows render in the CLI, Desktop
+        and IDE (`/workflows`), not in a cloud session on the phone, and in
+        that view the conversation is the only documented progress channel.
+        So every driver invocation ends with this block, the stage_advance
+        hook tells the session to relay it verbatim, and it is written to
+        07_qa/progress.md for anyone with the run folder."""
+        from . import cost as cost_mod, floors_gate
+        try:
+            rows = cost_mod.ledger(self.run)
+        except Exception:                                   # noqa: BLE001
+            rows = []
+        spent = round(sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 2)
+        by: dict[str, float] = {}
+        for r in rows:
+            if r.get("usd") is not None:
+                fam = cost_mod.stage_family(r["stage"]) or r["stage"]
+                by[fam] = round(by.get(fam, 0.0) + float(r["usd"]), 2)
+        cap = self.budget_usd()
+        md = self.wb.metadata()
+        lines = [f"OWNER UPDATE · {md.get('entity_name') or self.run.run_id} · {self.run.run_id}"]
+        lines.append(f"  spend ${spent:.2f}" + (f" of ${cap:.2f}" + (" — OVER the run ceiling"
+                                                                    if spent > cap + 1e-9 else "")
+                                                if cap is not None else ""))
+        env = self.stage_budgets()
+        lines.append("  envelopes " + " · ".join(
+            f"{k} ${by.get(k, 0.0):.2f}/{v:g}" + ("!" if by.get(k, 0.0) > v + 1e-9 else "")
+            for k, v in env.items()))
+        cats = sorted({c.split(".")[0] for c in self.wb.selected_subcaps()})
+        gates = {}
+        for c in cats:
+            try:
+                v = floors_gate.read_verdict(self.run.qa_dir, c) or {}
+            except Exception:                               # noqa: BLE001
+                v = {}
+            gates[c] = str(v.get("gate") or "—")
+        passed = [c for c in cats if gates[c] == "PASS"]
+        failing = [c for c in cats if gates[c] == "FAIL"]
+        lines.append(f"  research {len(passed)}/{len(cats)} categories pass"
+                     + (f" ({', '.join(passed)})" if passed else "")
+                     + (f"; failing {', '.join(failing)}" if failing else "")
+                     + f"; {len(cats) - len(passed) - len(failing)} not yet worked")
+        out = out or {}
+        if out.get("outcome"):
+            lines.append(f"  now {out['outcome']}" + (f" at {out['stage']}" if out.get("stage") else "")
+                         + (f" — {str(out.get('reason'))[:220]}" if out.get("reason") else ""))
+        if out.get("handoff"):
+            try:
+                doc = json.loads(Path(out["handoff"]).read_text())
+                inv = doc.get("invocations") or []
+                lines.append(f"  handed {Path(str(doc.get('workflow') or '')).name}: "
+                             f"{sum(len(i.get('cats') or []) for i in inv) or len(inv)} unit(s), "
+                             f"est ${(doc.get('estimate') or {}).get('usd')}"
+                             + (f"; deferred for budget: "
+                                f"{', '.join(c for d in doc['deferred_for_budget']['categories'] for c in d['cats'])}"
+                                if doc.get("deferred_for_budget") else ""))
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
+        if self.state.get("worked_via_warning"):
+            lines.append(f"  WARN {self.state['worked_via_warning'][:200]}")
+        nxt = out.get("resume") or self.plan().get("command")
+        if nxt:
+            lines.append(f"  next {nxt}")
+        text = "\n".join(lines)
+        try:
+            (self.run.qa_dir / "progress.md").write_text(text + "\n")
+        except OSError:
+            pass
+        return text
+
+    def _note_worked_via(self, cap: dict) -> None:
+        """Say HOW the last handoff was worked, where the owner reads the run.
+
+        Owner, 2026-10-09: "I never saw the workflow." A session without the
+        Workflow tool works a handoff through its rendered prompts as
+        in-session Agents (an allowed fallback since Cross Insurance,
+        2026-10-01) — the same work, but no persisted workflow, nothing in
+        /workflows, and until today no ledger row. The substitution is now
+        a recorded fact: a Gate_Log row per stage and a loud log line, so
+        it is never silent again."""
+        via = (cap or {}).get("by_via") or {}
+        if not via.get("agent"):
+            return
+        stages = sorted(k for k, v in ((cap or {}).get("by_stage") or {}).items()
+                        if (v.get("via") or {}).get("agent"))
+        msg = (f"{via['agent']} in-session agent(s) worked the last handoff "
+               f"({', '.join(stages) or 'unknown stage'}) — NOT a persisted workflow: "
+               f"nothing of it showed in /workflows. Start the handoff's Workflow; if "
+               f"this session has no Workflow tool, say so to the owner before "
+               f"substituting agents.")
+        self.opts.log(f"[WORKFLOW] WARNING: {msg}")
+        self.state["worked_via_warning"] = msg
+        for st in stages or ["RUN"]:
+            try:
+                L.append_gate(self.wb, gate=f"HANDOFF_{st}_WORKED_VIA", scope="run",
+                              verdict="WARN", detail=msg[:900], blocking=False)
+            except Exception:                                # noqa: BLE001
+                pass
 
     # ── plumbing ───────────────────────────────────────────────────────
     def reopen(self) -> RunWorkbook:
@@ -4856,17 +4959,27 @@ def main(argv=None) -> int:
                 rec = s.get("recorded") or {}
                 print(f"  {'✓' if s['done'] else '·'} {s['stage']:<10} {s['detail'][:90]}"
                       + (f"  [{rec.get('elapsed_s')}s]" if rec.get("elapsed_s") else ""))
+            try:
+                print("\n" + p.owner_update({"resume": plan.get("command")}))
+            except Exception as e:                          # noqa: BLE001
+                print(f"\nOWNER UPDATE unavailable: {str(e)[:160]}")
             if not a.watch or plan["complete"]:
                 return 0
             time.sleep(a.interval)
     opts = _build_opts(a)
     _install_terminate_handler()
-    out = Pipeline(run, opts).run_all()
+    p = Pipeline(run, opts)
+    out = p.run_all()
+    try:
+        upd = p.owner_update(out)
+    except Exception as e:                                  # noqa: BLE001
+        upd = f"OWNER UPDATE unavailable: {str(e)[:160]}"
     if a.json:
-        print(json.dumps(out, indent=2, default=str))
+        print(json.dumps({**out, "owner_update": upd}, indent=2, default=str))
     else:
         print(f"\n{out['outcome']}" + (f" at {out['stage']}" if out.get("stage") else "")
               + (f": {out['reason']}" if out.get("reason") else ""))
+        print("\n" + upd)
     return 0 if out["outcome"] in EXIT_ZERO_OUTCOMES else 1
 
 

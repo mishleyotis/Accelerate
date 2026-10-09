@@ -965,6 +965,7 @@ _PHASE_STAGE = {
     "fragments": "PAGES", "consolidate": "PAGES", "assemble": "PAGES",
 }
 _CATEGORY_LABEL = re.compile(r"^\s*P\d+C\d+\b", re.I)
+_NAMED_STAGE = re.compile(r"\b(PRELIM|RESEARCH|SCORING|REPORTS|PAGES)\b")
 
 
 def stage_of_agent(meta: dict | None, text: str) -> str:
@@ -985,6 +986,18 @@ def stage_of_agent(meta: dict | None, text: str) -> str:
         return "RESEARCH" if _CATEGORY_LABEL.match(label) else "PAGES"
     if phase in _PHASE_STAGE:
         return _PHASE_STAGE[phase]
+    # An in-session Agent (the no-Workflow fallback, or a relay the session
+    # services) carries its agent type and description instead of a phase.
+    # A stage the description NAMES wins: "Service PRELIM connector relay"
+    # (R-IMA-20261009, $8.85, 158 turns) was read as PAGES by its transcript
+    # head, which quotes connector output.
+    m = _NAMED_STAGE.search(label)
+    if m:
+        return m.group(1).upper()
+    named = f"{meta.get('agentType') or ''} {label}"
+    for stage, marks in _STAGE_MARKS:
+        if any(m in named for m in marks):
+            return stage
     return stage_of_transcript(text)
 
 
@@ -998,6 +1011,19 @@ def stage_of_transcript(text: str) -> str:
         if any(m in head for m in marks):
             return stage
     return "RESEARCH"
+
+
+def _first_prompt(text: str) -> str:
+    """The first user message of a transcript (the agent's prompt)."""
+    for line in text.splitlines()[:20]:
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if e.get("type") == "user":
+            c = (e.get("message") or {}).get("content")
+            return c if isinstance(c, str) else json.dumps(c)[:20000]
+    return ""
 
 
 def capture_workflows(run, *, base: Path | None = None) -> dict:
@@ -1026,9 +1052,22 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
     # Per STAGE, so the envelopes can read it (2026-10-09): one record per
     # stage family touched in this capture, not one RESEARCH row for all.
     by_stage: dict[str, dict] = {}
-    for f in sorted(base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")):
+    by_via = {"workflow": 0, "agent": 0}
+    # BOTH homes of a session's subagents (2026-10-09). A session without the
+    # Workflow tool runs the handoff's rendered prompts as in-session Agents
+    # (`agent_prompts`); their transcripts sit in `subagents/agent-*.jsonl`,
+    # not under `subagents/workflows/`, so that work was invisible twice:
+    # nothing showed in /workflows, and nothing reached the ledger the
+    # envelopes read.
+    paths = [(f, "workflow") for f in base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")]
+    paths += [(f, "agent") for f in base.glob("*/*/subagents/agent-*.jsonl")]
+    for f, via in sorted(paths, key=lambda p: str(p[0])):
         text = f.read_text(errors="replace")
         if run.run_id not in text:
+            continue
+        if via == "agent" and run.run_id not in _first_prompt(text):
+            # an in-session agent belongs to the run when its PROMPT names it
+            # — a helper that merely read the run's files is not its spend
             continue
         aid = f.stem[len("agent-"):]
         try:
@@ -1061,6 +1100,7 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
         usd_total += max(0.0, d_usd)
         turns_total += max(0, d_turns)
         n += 1
+        by_via[via] += 1
         slot = by_stage.setdefault(stage, {"usd": 0.0, "turns": 0, "n": 0, "model": model,
                                            "tokens": dict.fromkeys(tok_sum, 0)})
         slot["usd"] = round(slot["usd"] + max(0.0, d_usd), 4)
@@ -1071,18 +1111,25 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
             d_tok = max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
             tok_sum[k] += d_tok
             slot["tokens"][k] += d_tok
-        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok, "stage": stage}
+        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok, "stage": stage, "via": via}
+        slot.setdefault("via", {"workflow": 0, "agent": 0})[via] += 1
     if n:
         for stage, slot in sorted(by_stage.items()):
+            v = slot.get("via") or {}
+            kind = ("workflow agents" if not v.get("agent") else
+                    "in-session agents (no workflow)" if not v.get("workflow") else
+                    "workflow and in-session agents")
             record(run, stage=stage, elapsed_s=0.0, usd=slot["usd"],
                    turns=slot["turns"], tokens=slot["tokens"], model=slot["model"],
                    lanes=slot["n"],
-                   note=f"workflow agents: {slot['n']} charged to {stage} "
+                   note=f"{kind}: {slot['n']} charged to {stage} "
                         f"(delta since last capture)")
         seen_path.parent.mkdir(parents=True, exist_ok=True)
         seen_path.write_text(json.dumps(charged))
     return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total,
-            "by_stage": {k: {"usd": v["usd"], "turns": v["turns"], "agents": v["n"]}
+            "by_via": by_via,
+            "by_stage": {k: {"usd": v["usd"], "turns": v["turns"], "agents": v["n"],
+                             "via": v.get("via") or {}}
                          for k, v in by_stage.items()}}
 
 

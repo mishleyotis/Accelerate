@@ -1503,7 +1503,12 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
 #: as "nobody looked". Neither is true of a relay batch sitting on disk with
 #: its requests still OPEN — that is work in flight, and the gate must be able
 #: to say so without spending a heal on it.
-GATE_VERDICTS = ("PASS", "FAIL", "NOT_RUN", "PENDING_ORCHESTRATOR")
+#: PASS_SCOPE: a stage's NAMED scope (--only-categories) passed while the
+#: stage stays open; WARN: a non-blocking fact the owner must see (a handoff
+#: worked by in-session agents instead of a workflow). Both were written by
+#: the driver on 2026-10-09 before they were here, and `_record` swallowed the
+#: refusal — every verdict the driver writes is now pinned by a test.
+GATE_VERDICTS = ("PASS", "FAIL", "NOT_RUN", "PENDING_ORCHESTRATOR", "PASS_SCOPE", "WARN")
 
 
 def append_gate(wb: RunWorkbook, *, gate: str, scope: str, verdict: str,
