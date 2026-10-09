@@ -785,6 +785,15 @@ class Pipeline:
             self.opts.log(f"  (prior spend not read, starting from zero: "
                           f"{str(e)[:120]})")
 
+    def _session_lacks_workflow(self) -> bool:
+        """True only when the conducting session RECORDED that it holds no
+        Workflow tool; unknown (an older baseline) is not absent."""
+        try:
+            rec = json.loads((self.run.root / "connectors_baseline.json").read_text())
+        except (OSError, ValueError):
+            return False
+        return rec.get("workflow_tool") is False
+
     def owner_update(self, out: dict | None = None) -> str:
         """The run as its owner reads it, in a dozen lines.
 
@@ -1725,6 +1734,19 @@ class Pipeline:
                                handoff=h["file"], invocations=h["invocations"],
                                resume=self.plan()["command"])
                 return outcome
+            if st == "RESEARCH" and self._session_lacks_workflow() \
+                    and self.state.get("enrichment_degraded") \
+                    and self.opts.research_mode in ("auto", "tiers") and not self.opts.tiers_direct:
+                # The session recorded no Workflow tool (a resume drops it):
+                # a tiers handoff would wait on a workflow nobody can start.
+                # The driver runs the same lean lanes itself, and says so.
+                self.opts.research_mode, self.opts.tiers_direct = "tiers", True
+                self.opts.log("[RESEARCH] this session recorded NO Workflow tool "
+                              "(connectors_baseline.json workflow_tool=false): the driver "
+                              "runs the lean lanes itself (--tiers-direct). Tell the owner.")
+                self.state["worked_via_warning"] = (
+                    "this session has no Workflow tool; RESEARCH runs as lean headless "
+                    "lanes driven by engine.pipeline (no workflow to show)")
             if st == "RESEARCH" and self.opts.research_mode == "auto":
                 # AUTO (2026-10-09): a DEGRADED run needs no session connector
                 # for research, so it runs as lean headless TIERS (~10K-token

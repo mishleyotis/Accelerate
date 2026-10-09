@@ -167,7 +167,9 @@ def test_agent_run_passes_dma_actor_and_keeps_the_stage_guard_off():
     the conductor only, or sixteen lanes each hold themselves open."""
     src = (PLUGIN / "scripts" / "agent_run.py").read_text()
     assert '"DMA_STAGE_GUARD": "off"' in src
-    assert '"DMA_ACTOR": name' in src
+    # a lean lane carries its per-category actor (research-pXcY-collector);
+    # any other lane is identified by its agent name (2026-10-09)
+    assert '"DMA_ACTOR": actor or name' in src
 
 
 def test_the_actor_table_is_imported_never_restated():

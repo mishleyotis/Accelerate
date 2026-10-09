@@ -144,3 +144,41 @@ def test_the_skill_says_where_the_owner_sees_the_run():
     doc = (PLUGIN / "commands" / "run-assessment.md").read_text()
     assert "OWNER UPDATE" in doc and "Claude app" in doc
     assert "tell the owner" in doc.lower()
+
+
+# ── the Workflow tool drops on a resume (SWBC 10-01, B1 10-08, Cross, Arbor) ──
+
+def _contract():
+    spec = importlib.util.spec_from_file_location(
+        "connector_contract", PLUGIN / "scripts" / "connector_contract.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def test_the_baseline_records_the_workflow_tool_only_when_built_ins_were_listed(tmp_path):
+    cc = _contract()
+    assert cc.write_baseline(["Bash", "Read", "Workflow", "mcp__Clay__search-companies"],
+                             root=tmp_path / "a")["workflow_tool"] is True
+    assert cc.write_baseline(["Bash", "Read", "Agent"], root=tmp_path / "b")["workflow_tool"] is False
+    assert "workflow_tool" not in cc.write_baseline(["mcp__Clay__search-companies"],
+                                                    root=tmp_path / "c"), "unknown is not absent"
+
+
+def test_a_degraded_run_in_a_session_without_workflow_runs_the_lanes_itself(tmp_path):
+    run = new_run(tmp_path, selected=two_category_selection(3))
+    preflight.record(run, preflight_doc())
+    (run.root / "connectors_baseline.json").write_text(json.dumps(
+        {"present": [], "mcp_tools": [], "workflow_tool": False}))
+    logs = []
+    p = P.Pipeline(run, P.Options(dispatcher=S.StubDispatcher(S.default_handlers()),
+                                  reads=S.StubReads(), shipper=S.StubShipper(), push=False,
+                                  folder_root=tmp_path / "o", ingest_poll_s=0,
+                                  sleep=lambda s: None, log=logs.append, until="RESEARCH",
+                                  research_mode="auto", tiers_direct=False,
+                                  stage_budget={"RESEARCH": 100}))
+    p.state["enrichment_degraded"] = True
+    out = p.run_all()
+    assert out["outcome"] != "AWAITING_WORKFLOW", "no workflow handed to a session that cannot run one"
+    assert any("NO Workflow tool" in m for m in logs), logs
+    assert "no Workflow tool" in p.owner_update(out)

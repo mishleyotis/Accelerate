@@ -223,6 +223,14 @@ def write_baseline(tool_names, root=None) -> dict:
     rec = {"recorded_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
            "present": present,
            "mcp_tools": sorted(t for t in held if t.startswith("mcp__"))}
+    # THE WORKFLOW TOOL IS HELD OR NOT, AND ONLY THE SESSION KNOWS (2026-10-09).
+    # A resume or worker restart drops it ("No such tool available: Workflow.
+    # Workflow is disabled for this session" — SWBC 10-01, B1 10-08; Cross
+    # 10-01 and Arbor 10-06 the same). Recorded only when the list carries
+    # built-ins (a list of mcp__ names alone says nothing about Workflow), so
+    # an older baseline reads as unknown, never as absent.
+    if held & {"Bash", "Read", "Agent", "Edit"}:
+        rec["workflow_tool"] = "Workflow" in held
     path = baseline_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rec, indent=2) + "\n")

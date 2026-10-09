@@ -18,8 +18,14 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 **Record the connectors YOU hold before anything else runs.** No subprocess
 can enumerate a session's bound MCP tools (MEM-0112) — only you can, and
 every check below reads what you write here, so writing it second makes the
-first one lie. Write the list, one tool name per line, and hand it to the
-contract:
+first one lie. Write the list, one tool name per line — EVERY tool you hold,
+built-ins included (`Workflow`, `Agent`, `Bash`, …), because whether this
+session holds `Workflow` decides how research runs — and hand it to the
+contract. **A resumed session records it again before anything else**: a
+resume or worker restart can drop the Workflow tool (SWBC and B1 lost it
+mid-run), and a degraded run whose baseline says `workflow_tool: false`
+runs research as driver-run lean lanes instead of waiting on a workflow
+nobody can start:
 
 ```bash
 printf '%s\n' <every mcp__ tool name you hold> \
@@ -109,7 +115,8 @@ find-artifact --client "<Entity>"` and its `run_manifest.json`;
 `get_client_state`). An open run or an IN_PROGRESS manifest is a run to
 RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>` says
 where it stopped, and step 5 continues it. With `--resume <RUN_ID>` you skip
-straight to step 5.
+straight to step 5 — after step 1's tool baseline, which a resume always
+re-records.
 
 ## 3 · Preflight the binding — with the person
 

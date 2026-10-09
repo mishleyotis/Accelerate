@@ -432,6 +432,16 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `--hunted` is the cell's own (`hunted_shared`/`primary_shared` refused);
   collectors search in the sub-vertical's vocabulary
   (`engine/data/subvertical_lexicon.json`). MEM-0631..0636.
+  **The owner sees runs in the conversation** (user, same day: "I never
+  saw the workflow"; §12): DMA sessions are followed from the Claude app,
+  where `/workflows` does not render, so every `engine.pipeline run`/`status`
+  ends with an OWNER UPDATE block (`07_qa/progress.md`) the session relays
+  verbatim at every handoff and `then`. A session without the Workflow tool
+  tells the owner first, then takes the stage's fallback; the tool baseline
+  lists built-ins (`workflow_tool`), a resume re-records it, and a degraded
+  run without it runs research `--tiers-direct`. In-session agents whose
+  prompt names the run are priced into the ledger (the IMA PRELIM relay,
+  $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
 
 ## Open decisions — leave open, do not resolve silently
 

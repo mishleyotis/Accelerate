@@ -644,3 +644,24 @@ envelope cannot finish, degraded or not, so the budget is UPHELD by
 construction. Covering all 686 cells of a T1_CORE scope at the quality above
 takes ~$26 (`--stage-budget RESEARCH=26`), or a narrower scope. That figure
 is the owner's decision, not the driver's.
+
+## 12. "I never saw the workflow" — four root causes, measured, closed
+
+The owner's question, answered from the sessions themselves (31 sessions
+2026-09-28..10-09 by origin; nine DMA run sessions audited event by event)
+and the product documentation.
+
+| # | cause | evidence | fix | MEM |
+|---|---|---|---|---|
+| 1 | **The surface.** 27 of 31 sessions, and every DMA run session, are followed from the Claude Android app; workflows render in the CLI, Desktop and IDE (`/workflows`), and phone progress is documented only for Remote Control sessions | `list_sessions` origin; code.claude.com/docs/en/workflows, /remote-control | every `engine.pipeline run`/`status` ends with an **OWNER UPDATE** block (spend vs ceiling and each envelope, categories passing/failing, what is handed and how it is worked, next command; also `07_qa/progress.md`); the stage_advance hook makes the session relay it verbatim at every handoff and `then` | 0637 |
+| 2 | **The tool drops on a resume.** "No such tool available: Workflow. Workflow is disabled for this session" (SWBC 10-01 08:10); "The session restart removed the Workflow tool" (B1 10-08 17:37, then `--pages-mode lanes --allow-lanes`); Cross 10-01 and Arbor 10-06 the same | session events | step 1's tool baseline lists built-ins and records `workflow_tool`; a resume re-records it; a degraded run whose session holds no Workflow runs research as driver-run lean lanes (`--tiers-direct`) instead of handing a workflow nobody can start, and says so | 0639 |
+| 3 | **Silent substitution.** The hook said "STOP and restart, never substitute agents", the skill and driver said "do not restart, run the prompts as agents"; neither told the owner | grep of the plugin | one rule, every stage: tell the owner in one line, then the stage's fallback; a handoff worked by in-session agents writes `HANDOFF_<STAGE>_WORKED_VIA` WARN and shows in the update | 0639 |
+| 4 | **Unpriced substitutes.** In-session agents' transcripts (`subagents/agent-*.jsonl`) were never captured: R-IMA-20261009's PRELIM relay agent, $8.85 over 158 turns, never booked — the run read $18.41 of $25 while it had spent **$27.26** | the agent's own usage | `capture_workflows` prices an in-session agent whose PROMPT names the run, at the stage its description names (else its agent type), `via` recorded | 0638 |
+
+Also: before 09-30 (research), 10-05 (scoring), 10-06 (reports, pages) the
+stages ran as driver lanes, never as workflows — the 10-01 runs and Susser's
+two-hour report round ("I see that the report round does not use
+/workflows") predate the handoffs. And two driver verdicts (`PASS_SCOPE`)
+had never reached the Gate_Log: the ledger refused them and `_record`
+swallowed the refusal; `PASS_SCOPE` and `WARN` joined `GATE_VERDICTS` and a
+test scans every verdict the driver writes (MEM-0640).
