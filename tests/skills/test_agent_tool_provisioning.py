@@ -247,8 +247,13 @@ def _holders(prefix: str) -> set:
 
 
 @pytest.mark.parametrize("prefix,expected", [
-    ("mcp__Exa__", {"research-conductor", "enrichment-web-specialist"}),
-    ("mcp__Tavily__", {"research-conductor", "enrichment-web-specialist"}),
+    # 2026-10-09 (research tiers): the haiku evidence collector services a
+    # workflow wave's searches on a connector-backed run, the role the web
+    # specialist plays on the lane path.
+    ("mcp__Exa__", {"research-conductor", "enrichment-web-specialist",
+                    "research-evidence-collector"}),
+    ("mcp__Tavily__", {"research-conductor", "enrichment-web-specialist",
+                       "research-evidence-collector"}),
     ("mcp__Clay__", {"research-conductor", "enrichment-connector-specialist",
                      "technographic-scanner", "overview-people-producer"}),
     ("mcp__Vibe_Prospecting__", {"technographic-scanner",
@@ -282,13 +287,14 @@ def K(t: set) -> int:
     return len((t & CAPABILITY_BUILTINS) | _connector_tools(t))
 
 
-#: The five agents that exceed the ceiling, by design, each with its own.
+#: The six agents that exceed the ceiling, by design, each with its own.
 CONNECTOR_TIER = {
     "research-conductor": 11,                # web 2 + Agent/Ask 2 + exa 2 + tavily 2 + clay/people 3
     "surface-producer": 3,                   # Agent, Write, Edit — no web, no connector
     "technographic-scanner": 9,              # web 2 + explorium 3 + clay/company 3 + indeed 1
     "enrichment-connector-specialist": 9,    # clay 5 + explorium 3 + indeed ratings 1 (RC-07)
     "enrichment-web-specialist": 6,          # web 2 + exa 2 + tavily 2
+    "research-evidence-collector": 6,        # web 2 + exa 2 + tavily 2 (2026-10-09)
 }
 
 

@@ -525,6 +525,10 @@ CONNECTOR_TIER = {
     "technographic-scanner": 9,
     "enrichment-connector-specialist": 9,
     "enrichment-web-specialist": 6,
+    # 2026-10-09 (research tiers): the workflow path's collector services a
+    # wave's searches itself on a connector-backed run — the web specialist's
+    # role on the lane path, at the same ceiling.
+    "research-evidence-collector": 6,
 }
 
 

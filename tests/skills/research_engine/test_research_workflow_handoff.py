@@ -14,7 +14,8 @@ import json
 from pathlib import Path
 
 from engine import pipeline as P, pipeline_stub as S, preflight
-from fixtures import new_run, preflight_doc, two_category_selection
+from fixtures import (bank_evidence, good_synthesis, new_run, preflight_doc,
+                      synthesise, two_category_selection)
 
 PLUGIN = Path(__file__).resolve().parents[3] / "plugins" / "dma-insights"
 
@@ -148,6 +149,15 @@ def test_a_handoff_nobody_worked_is_called_out(tmp_path):
 # with 0 batches, a $6.16 estimate (it cost ~$21) and no stall detection,
 # because each workflow round is a fresh driver process.
 
+def _close(p, *cells):
+    """Synthesise cells so they are CLOSED. Since 2026-10-09 (MEM-0614) a
+    repair is routed only on a closed cell: an open cell is its open batch's
+    work, and routing it as a repair too collected for it twice."""
+    wb = p.run.open()
+    for cell in cells:
+        synthesise(wb, cell, good_synthesis(cell, bank_evidence(wb, cell, n=3)))
+
+
 def _fail_gate(p, cat, cell, term="single_source_fact"):
     doc = {"category": cat, "gate": "FAIL", "blocking": [term],
            "advisory": ["coverage_below_floor"],
@@ -179,6 +189,7 @@ def test_handoff_routes_the_gates_cells_even_when_closed(tmp_path):
     p, disp, out = _drive(tmp_path, "workflow")
     cat = out["invocations"][0]["cats"][0]
     cell = f"{cat}.1.1"
+    _close(p, cell)
     _fail_gate(p, cat, cell)
     h = P.Pipeline(p.run, p.opts)._research_handoff()
     inv = next(i for i in h["invocations"] if cat in i["cats"])
@@ -218,6 +229,7 @@ def test_a_repair_at_source_unstalls_the_category(tmp_path):
     p, disp, out = _drive(tmp_path, "workflow")
     p.opts.stall_rounds = 1
     cat = out["invocations"][0]["cats"][0]
+    _close(p, f"{cat}.1.1", f"{cat}.1.2")
     doc = _fail_gate(p, cat, f"{cat}.1.1")
     doc["single_source_fact"].append({"subcap": f"{cat}.1.2"})
     (p.run.qa_dir / f"floors_{cat}.json").write_text(json.dumps(doc))
@@ -231,6 +243,10 @@ def test_a_repair_at_source_unstalls_the_category(tmp_path):
 
 def test_the_estimate_is_calibrated_by_the_last_round(tmp_path):
     p, disp, out = _drive(tmp_path, "workflow")
+    # This test is about CALIBRATION, not the envelope: a round booked at 3x
+    # its estimate would otherwise spend the $10 RESEARCH envelope and the
+    # handoff would stop AT_STAGE_BUDGET before pricing (2026-10-09).
+    p.opts.stage_budget = {"RESEARCH": 1000.0}
     q = P.Pipeline(p.run, p.opts)
     pilot = q._research_handoff()["estimate"]
     from engine import cost
@@ -249,6 +265,9 @@ def test_the_estimate_is_calibrated_by_the_last_round(tmp_path):
 
 def test_the_workflow_stops_on_agent_errors_and_reads_the_summary():
     src = (PLUGIN / P.RESEARCH_WORKFLOW).read_text()
-    assert "AGENT_ERROR" in src and "if (!got.length)" in src and "if (!c)" in src
+    # An all-failed wave stops the category; a wave the governor refused
+    # (nothing ran) is AT_STAGE_BUDGET, not an agent error — hence the
+    # `ran.length &&` guard (2026-10-09).
+    assert "AGENT_ERROR" in src and "if (ran.length && !got.length)" in src and "if (!c)" in src
     assert "--require-synthesis --summary" in src
     assert "REPAIR_BATCHES" in src and "A.repairs" in src
