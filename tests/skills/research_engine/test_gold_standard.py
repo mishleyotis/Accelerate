@@ -238,6 +238,22 @@ def test_report_hedges_tokens_and_fifth_band_are_caught(tmp_path, inject, code):
     assert code in {f["code"] for f in GS.report_findings(rp, kind="assessment")}
 
 
+def test_the_gate_log_quoting_this_gate_is_not_a_stub(tmp_path):
+    """B1 Bank, 2026-10-08: the research report's 'Gates run on this
+    assessment' table printed an earlier GS-RPT-NOHEDGE row, and PACKAGE then
+    refused the package on that row alone — forever, since the log keeps it."""
+    quoted = [("Normal", "GSreport:assessmentFAIL1 finding(s): GS-RPT-NOHEDGE: stub "
+                         "marker 'placeholder' [GSY-04]; GS-WB-NOHEDGE: P2_Subcap_Scoring: "
+                         "2 hedge/placeholder cell(s); GS-RPT-NOHEDGE: 1x hedge "
+                         "'not established this run' [GSY-04]")]
+    rp = _docx(tmp_path / "DMA_Assessment_Report_x.docx", _assessment_body() + quoted)
+    assert "GS-RPT-NOHEDGE" not in {f["code"] for f in GS.report_findings(rp, kind="assessment")}
+    # …while the same word in the prose still fails.
+    rp = _docx(tmp_path / "DMA_Assessment_Report_y.docx",
+               _assessment_body() + quoted + [("Normal", "Peer score: placeholder.")])
+    assert "GS-RPT-NOHEDGE" in {f["code"] for f in GS.report_findings(rp, kind="assessment")}
+
+
 def test_m_level_scale_is_allowed(tmp_path):
     # M1..M5 is the maturity SCALE the reference uses; only a 5th BAND is banned.
     body = _assessment_body() + [("Normal", "The rubric runs M1 through M5.")]
