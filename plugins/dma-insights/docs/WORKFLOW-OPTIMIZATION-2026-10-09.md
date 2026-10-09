@@ -566,7 +566,7 @@ where marked OPEN.
 | 0626 | 14 never-handed categories "stalled" | stall counted any spend as work on every category | only a handed category can stall | `test_a_category_deferred_for_budget_never_stalls` |
 | 0627 | challenger judged truncated claims | packet cut claim 200 / ceiling 160, no triangulation | judged fields whole to 700 chars | `test_the_challenger_sees_the_judged_fields_whole` |
 | 0630 | audit saw workflow-read artefacts as orphans | audit ignored `.js` readers | workflows count as code readers | `test_the_shipped_plugin_has_no_orphan` |
-| 0610 | `record_finding` returns a raw Postgres error for an engine run id | no input validation before the insert | OPEN — connector (apps/mcp) fix | — |
+| 0610 | `record_finding` returns a raw Postgres error for an engine run id | no input validation before the insert | `memory._uuid_field_errors` refuses by field name (reaches production at the next `infra/deploy.sh`) | `test_a_non_uuid_run_id_is_refused_by_name_not_by_postgres` |
 | 0628 | snapshot fails on two client folders | two Drive folders for one entity | OPEN — owner adjudicates which folder is current | — |
 | 0629 | 73.8K in-session context floor per research agent | harness, not prompt | OPEN — the next cost lever: headless lanes on a degraded run (~27K floor) | — |
 

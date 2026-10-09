@@ -404,8 +404,8 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   gate blocks on; a gap-only wave reads `<CAT>/_repairs.json`; a category
   deferred for budget never stalls; the challenge packet ships the judged
   fields whole. Every defect is filed MEM-0610..0630 and tabled in §10 of
-  the optimisation doc (OPEN: the 74K in-session floor, the duplicate IMA
-  client folder, record_finding's raw error on an engine run id). Flags:
+  the optimisation doc (OPEN: the 74K in-session floor and the duplicate IMA
+  client folder). Flags:
   `--collector-model`, `--synthesis-model`, `--batch-cells`.
 
 ## Open decisions — leave open, do not resolve silently
