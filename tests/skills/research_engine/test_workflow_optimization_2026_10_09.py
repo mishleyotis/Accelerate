@@ -339,32 +339,44 @@ def test_the_narrative_cli_freezes_and_thaws(tmp_path):
 # ── 6. PRELIM evidence reaches the research lanes ──────────────────────────
 
 def test_prelim_rows_are_proposed_to_cells_and_listed_in_the_shared_block(tmp_path):
+    import re
     run = new_run(tmp_path, n=6)
     wb = run.open()
     cell = wb.selected_subcaps()[0]
-    # a PRELIM row: no cell, about digital banking, which the fixture's
-    # question text is about too
+    # a PRELIM row — no cell — written in the words the cell's own question
+    # uses, so two or more of its terms match (one shared token is not a
+    # bearing: a PRELIM row is the institution's, and the proposer abstains
+    # on a single match the way the reuse tests pin for other lanes' rows)
+    q = brief.question_text(wb, cell)
+    words = [w for w in re.findall(r"[A-Za-z]{6,}", q) if w.lower() not in
+             ("digital", "member", "members", "credit", "union", "acme")][:6]
+    assert len(words) >= 2, q
     e = L.append_evidence(wb, source_name="Clay company record", source_url="https://acme.example/about",
                           tier="T3", origin="connector",
-                          excerpt="Acme Credit Union runs digital banking on Alkami with member adoption measured quarterly by the board.",
+                          excerpt=(f"Acme Credit Union's public profile states its {words[0]} and "
+                                   f"{words[1]} {' '.join(words[2:])} programme, with member "
+                                   f"adoption measured quarterly by the board."),
                           subcaps=[], published="2025-06-01")
+    one = L.append_evidence(wb, source_name="Clay company record (HQ)", source_url="https://acme.example/hq",
+                            tier="T3", origin="connector",
+                            excerpt=("Acme Credit Union is headquartered in Springfield with "
+                                     "seventy-two branches and a digital channel."),
+                            subcaps=[], published="2025-06-01")
     sh = brief.shared(wb, prelim=True)
-    assert sh["prelim_evidence_total"] >= 1
+    assert sh["prelim_evidence_total"] >= 2
     mine = [r for r in sh["prelim_evidence"] if r["e_id"] == e]
     assert mine and mine[0]["origin"] == "connector"
     assert sh["prelim_evidence"][0]["origin"] == "connector", "connector readings rank first"
-    # PRELIM rows rank like any other lane's rows: the fixture's own PRELIM
-    # register row about the institution is proposed to a cell whose question
-    # it matches, labelled by origin and never attached for the lane
     # a register the size a worked category has (BM25's IDF collapses over a
     # corpus of four rows — the docstring on `reusable` says why), then the
     # PRELIM rows rank beside every other lane's rows
     for c in wb.selected_subcaps()[2:5]:
         bank_evidence(wb, c, n=3)
-    proposals = [o for c in wb.selected_subcaps()
-                 for o in brief.reusable(wb, c)["proposed_from_other_categories"]]
-    assert proposals and all(o["proposed"] for o in proposals)
-    assert any(o["from_categories"] == ["PRELIM"] for o in proposals), proposals
+    got = brief.reusable(wb, cell)["proposed_from_other_categories"]
+    hit = [o for o in got if o["e_id"] == e]
+    assert hit and hit[0]["from_categories"] == ["PRELIM"] and hit[0]["proposed"], got
+    assert len(hit[0]["matched_terms"]) >= 2
+    assert not [o for o in got if o["e_id"] == one], "one shared token is not a bearing"
 
 
 def test_the_dispatch_packet_tells_the_lane_to_read_prelim_first(tmp_path):
