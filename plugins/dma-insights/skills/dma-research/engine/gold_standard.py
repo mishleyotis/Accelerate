@@ -96,6 +96,10 @@ BANNED_HEDGES = (
     "no score yet", "no score exists yet", "queued for enrichment",
     "tbd", "todo", "placeholder", "lorem ipsum", "coming soon",
 )
+#: This module's own finding texts as the report's gate-log table quotes them
+#: back: "stub marker 'placeholder'", "3x hedge 'no score yet'",
+#: "hedge/placeholder cell(s)", "SubCap_Name blank/placeholder". Casefolded.
+_GATE_SELF_QUOTE = re.compile(r"(?:stub marker|\d+x hedge) '[^']*'|(?:hedge|blank)/placeholder")
 # A FIFTH band is the invariant breach — not the M1..M5 maturity SCALE, which the
 # reference package uses throughout ("2.25 (M2)"). Only a reachable 5th band word.
 BANNED_BAND_WORDS = ("transformational",)
@@ -491,12 +495,18 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
     if tok:
         out.append(Finding("GS-RPT-NOTOKENS", f"{len(tok)} leftover token(s): {tok[:3]}", "GSY-07"))
 
+    # The research report's "Gates run on this assessment" table quotes this
+    # gate's own findings back ("stub marker 'placeholder'", "hedge/placeholder
+    # cell(s)"). A finding quoted in the audit trail is not a stub in the
+    # prose; counting it made one logged failure permanent (B1 Bank,
+    # 2026-10-08: PACKAGE refused on the appendix row alone).
+    stub_scan = _GATE_SELF_QUOTE.sub(" ", low)
     for bad in BANNED_HEDGES:
         if bad in ("tbd", "todo", "placeholder"):
-            if re.search(rf"\b{re.escape(bad)}\b", low):
+            if re.search(rf"\b{re.escape(bad)}\b", stub_scan):
                 out.append(Finding("GS-RPT-NOHEDGE", f"stub marker {bad!r}", "GSY-04"))
-        elif bad in low:
-            out.append(Finding("GS-RPT-NOHEDGE", f"{low.count(bad)}x hedge {bad!r}", "GSY-04"))
+        elif bad in stub_scan:
+            out.append(Finding("GS-RPT-NOHEDGE", f"{stub_scan.count(bad)}x hedge {bad!r}", "GSY-04"))
 
     # GS-RPT-BANDS — a reachable FIFTH band, not the M1..M5 scale, is the breach.
     for bad in BANNED_BAND_WORDS:
