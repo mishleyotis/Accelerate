@@ -63,6 +63,29 @@ def _utcnow() -> str:
 
 # ── the lanes, played by the fixtures ────────────────────────────────────
 
+def _attach_prelim(wb, cell: str, agent: str) -> list:
+    """What a real lane does with `shared.prelim_evidence`: cite the PRELIM
+    rows the register already holds from the first cell it works, instead
+    of re-finding them. Rows the register cites and no cell names are
+    attached (both ways, through the ledger); a row already named stays as
+    it is. This is the link ET-07 asks for at PAGES, made where the run
+    makes it — in RESEARCH, by the lane that read the packet."""
+    attached = []
+    idx = wb.evidence_index()
+    for r in wb.rows("Tech_Register"):
+        for e in str(r.get("Evidence_IDs") or "").split(","):
+            e = e.strip().split(":")[0]
+            row = idx.get(e)
+            if not row or str(row.get("SubCap_IDs") or "").strip() or e in attached:
+                continue
+            try:
+                L.attach_evidence(wb, e, [cell], actor=agent)
+                attached.append(e)
+            except L.LedgerRefusal:
+                continue
+    return attached
+
+
 def _evidence_by_cell(wb) -> dict:
     ev: dict = {}
     sel = set(wb.selected_subcaps())
@@ -132,9 +155,14 @@ def lane_research(agent, prompt_file, ctx):
     cells = [c for c in wb.selected_subcaps() if c.startswith(cat)]
     last = wb.selected_subcaps()[-1]
     ev = _evidence_by_cell(wb)
+    register_cited = {str(e).split(":")[0].strip()
+                      for r in wb.rows("Tech_Register")
+                      for e in str(r.get("Evidence_IDs") or "").split(",") if e.strip()}
     leave = _open_cells_owed(agent)
     if leave:
         cells = cells[:max(0, len(cells) - leave)]
+    if cells and _attach_prelim(wb, cells[0], agent):
+        ev = _evidence_by_cell(wb)
     if os.environ.get("DMA_STUB_WEB_ONLY", "") not in ("", "0"):
         return _lane_web_only(agent, wb, cells)
     for c in cells:
@@ -144,7 +172,16 @@ def lane_research(agent, prompt_file, ctx):
         if c == last and len(cells) > 1:
             F.declare_absent(wb, c, actor=agent)
             continue
-        eids = ev.get(c) or F.bank_evidence(wb, c, n=5)
+        # PRELIM's register rows reach the cell they name (techscan.record
+        # links them at the write, 2026-10-09). They are the institution's
+        # evidence, not this cell's measured figures, so the lane banks its
+        # own five and cites them FIRST; the PRELIM rows ride behind, cited
+        # by the row and counted by the floors, the way a real lane that
+        # read `shared.prelim_evidence` would carry them.
+        have = list(ev.get(c) or [])
+        own = [e for e in have if e not in register_cited]
+        eids = (sorted(have, key=lambda e: e in register_cited) if len(own) >= 5
+                else F.bank_evidence(wb, c, n=5) + have)
         F.synthesise(wb, c, F.good_synthesis(c, eids), author=agent)
     F.client_facts(wb, wb.selected_subcaps(), _evidence_by_cell(wb))
     F.make_shippable(wb)
@@ -156,10 +193,21 @@ def _lane_web_only(agent, wb, cells):
     baseline, so this walks the refusal as readily as the success."""
     F = fixtures()
     ent = wb.metadata().get("entity_name") or "the entity"
+    ev = _evidence_by_cell(wb)
     for c in cells:
         row = next((r for r in wb.rows(f"{c[:2]}_Subcap_Scoring")
                     if r.get("SubCap_ID") == c), {})
         if str(row.get("Dominant_Claim") or "").strip() or L.is_declared_absent(row, wb):
+            continue
+        if ev.get(c):
+            # A cell PRELIM's register already reaches (techscan.record links
+            # its citations at the write) is not empty, and the ledger refuses
+            # an absence over its own evidence. A degraded lane does what a
+            # real one does with the institution's rows and no connector: it
+            # fires its volleys through the built-in tools and writes the
+            # INFERENCE those rows support, at the ceiling they allow.
+            F.fire_volleys(wb, c, n=0)
+            F.synthesise(wb, c, _degraded_synthesis(c, ev[c], ent), author=agent)
             continue
         # Every askable volley, both ladder rungs, through the BUILT-IN tools
         # only. `declare_absence` is called directly rather than through the
@@ -191,6 +239,49 @@ def _lane_web_only(agent, wb, cells):
             enrichment_unavailable=True)
     F.client_facts(wb, wb.selected_subcaps(), _evidence_by_cell(wb))
     F.make_shippable(wb)
+
+
+def _degraded_synthesis(cell: str, eids: list, ent: str) -> dict:
+    """The synthesis a lane without connectors writes on PRELIM's rows alone:
+    an INFERENCE from the institution's register (a technographic scan and
+    the call report) to the cell, every step named, no figure the excerpts
+    do not carry, a Building ceiling it does not reach past."""
+    cite = " ".join(f"[{e}:F1]" for e in eids[:2])
+    return {
+        "Dominant_Claim": (f"{ent} runs a named digital banking platform, which "
+                           f"suggests the capability is deployed but not measured."),
+        "Claim_Label": "INFERENCE",
+        "What_We_Found": (
+            f"The technographic scan names the digital banking platform and the "
+            f"core processor in service at {ent} {cite}, and the NCUA call report "
+            f"places the institution in the credit union field with a branch "
+            f"network. Taken together they imply the capability exists in "
+            f"production; nothing in the public record read here states its "
+            f"utilisation, so the reading stops at deployment."),
+        "Facet_Coverage": "works, corroborates",
+        "DQ_Works": ("The scan names the platform as live; no rollout date or "
+                     "adoption reading was found through the built-in tools."),
+        "DQ_Fails": ("NOT_RUN: no enrichment connector was bound in this "
+                     "container, so the delayed/descoped probe ran on web only."),
+        "DQ_Value": ("NOT_RUN: utilisation and outcome figures need a source the "
+                     "built-in tools did not surface."),
+        "DQ_Corroborates": (f"The NCUA call report corroborates the institution "
+                            f"and its field of membership {cite}."),
+        "DQ_Contradicts": ("NOT_RUN: enforcement and complaint registers were not "
+                           "reachable without a connector in this session."),
+        "Triangulation": (f"Two register rows from different identities — the scan "
+                          f"and the regulator's filing — are consistent with a "
+                          f"deployed platform {cite}; neither measures its use."),
+        "Ceiling_Reasoning": ("Deployment inferred from a scan with no utilisation "
+                              "reading supports a Building ceiling at most."),
+        "Why_It_Matters": ("A deployed platform with unmeasured adoption is where "
+                           "the cost-to-serve case is argued from inference."),
+        "DMA_Impact": ("Holds the capability at Building until a utilisation "
+                       "reading is registered; the register names the platform."),
+        "Ceiling_Band": "Building",
+        "Uncertainty": 0.5,
+        "Challenge_Verdict": "PASS",
+    }
 
 
 def lane_scoring(agent, prompt_file, ctx):

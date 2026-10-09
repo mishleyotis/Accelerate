@@ -673,3 +673,52 @@ lanes` is the headless-lane path the stub uses; with the real dispatcher it
 needs `--allow-lanes`. The driver snapshots the run to Drive at every stage
 boundary (`engine.snapshot`), and `engine.snapshot restore` brings it back
 on a fresh container.
+
+
+## Stage envelopes, write-time rules and the evidence freeze (2026-10-09)
+
+Measured on the 2026-09-25..10-09 runs (`docs/WORKFLOW-OPTIMIZATION-2026-10-09.md`):
+Arbor Bank $409, Susser Bank $450, B1 Bank $1,236 against a printed $20;
+research 55–62 % of the money, 212 / 141 floors rounds, 46 / 76 / 61 critic
+rounds, 137 / 154 report reviews, 55 / 76 page attempts.
+
+- **Envelopes.** `cost.STAGE_BUDGET_USD` — PRELIM $2, RESEARCH $10, SCORING
+  $5, REPORTS $5, PAGES $3 — are ceilings of their own beside `--max-usd`.
+  `--stage-budget RESEARCH=12` overrides one family and is persisted on the
+  run. A stage at its envelope stops as `STOPPED_STAGE_BUDGET` (exit 1) with
+  the flag that raises it; a workflow handoff is refused before any agent is
+  bought (`AT_STAGE_BUDGET`); the invocation carries `budget` and spends one
+  round when the estimate does not fit. `capture_workflows` books each
+  workflow agent to the stage its prompt names, so `engine.cost report`
+  prints `envelopes` / `over_envelopes`. `guard_dispatch.py` refuses an agent
+  whose family is spent.
+- **Challenge-at-write.** `synthesise` refuses a FACT on one source
+  identity, an INFERENCE with fewer than two ids or no named step, a
+  FACT/INFERENCE with no evidence id, and a DQ_Contradicts finding with no
+  disposition — the four sentences every challenge FAIL carried.
+- **Critic-at-write.** `assessment score` refuses a rationale that names no
+  maturity level or a level other than the one struck, one with no gap to the
+  next level, and an off-row E-id. `--critic-rounds` defaults to 2.
+  `rollup` writes the dashboard without a headline; `headline_missing` is its
+  own gate term.
+- **Evidence freeze.** The driver runs `engine.narrative freeze` when REPORTS
+  starts and `thaw` when both reports render; `append_evidence` refuses while
+  frozen and names BLOCKED_UPSTREAM (kind evidence). The conducting session
+  thaws, registers, re-freezes.
+- **PRELIM evidence reaches the lanes.** `shared.prelim_evidence` in every
+  research packet; `reusable()` proposes PRELIM rows as `["PRELIM"]`.
+- **Report evidence pack.** Each section brief carries the ERS-ranked rows
+  for its inputs, the strongest and weakest scored cells with their challenge
+  verdicts, and the critic's notes; the writer cites from it.
+- **The register links its citations at the write.** `techscan.record`
+  attaches every cited evidence row to the cells the register row names
+  (both ways, via `ledger.attach_evidence`), so a techstack citation never
+  reaches PAGES unlinked; a row that names no cell is what ET-07 then
+  reports, by id and by the rows citing it.
+- **Page gates before any page agent.** `engine.page_preflight check --page
+  <p>` reads ET-07 (cited rows linked to no cell; advisory for the timeline),
+  the floors behind CG-14 / S9_focus_invalid / CG-18c, and the techstack
+  three, for every page in hand.
+- **Measured waits.** Lock waits ≥ 2 s and every timeout land in
+  `<workbook>.lock.waits.jsonl`. `--ingest-kick-cmd` (or
+  `$DMA_INGEST_KICK_CMD`) runs the package scan before the ingest poll.

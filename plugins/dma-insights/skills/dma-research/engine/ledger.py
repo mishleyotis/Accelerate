@@ -148,6 +148,56 @@ def retier_evidence(wb: RunWorkbook, e_id: str, tier: str, *, reason: str,
             "claim_type_was": label, "ers": now.get("ERS")}
 
 
+#: THE REGISTER FREEZES WHILE THE REPORTS ARE WRITTEN (B1 Bank, 2026-10-08):
+#: evidence kept landing during REPORTS (998 -> 1005 rows), so every passed
+#: section failed the next whole-report pass on a figure that had moved under
+#: it — §8 was relaunched twice in twelve minutes, and the session's own fix
+#: was "I've stopped registering evidence until both reports pass". That is
+#: now a rule the ledger holds: `engine.narrative freeze` (the driver sets it
+#: when REPORTS starts) refuses a new register row until `thaw`. A writer
+#: that needs new evidence returns BLOCKED_UPSTREAM with kind `evidence`;
+#: the conducting session thaws, registers, re-freezes, and the sections
+#: that cited the moved facts are the ONLY ones reopened.
+FREEZE_KEY = "evidence_freeze"
+
+
+def is_frozen(wb: RunWorkbook) -> str:
+    """The freeze reason, or '' when the register is open."""
+    v = str(wb.metadata().get(FREEZE_KEY) or "").strip()
+    return "" if not v or v.upper() in ("NO", "OFF", "FALSE", "0") else v
+
+
+def refuse_if_frozen(wb: RunWorkbook, what: str) -> None:
+    why = is_frozen(wb)
+    if why:
+        raise LedgerRefusal(
+            f"the evidence register is FROZEN ({why}) — cannot {what}. The report "
+            f"sections are being written against the register as it stands; a row "
+            f"added now reopens every section whose figures it moves. If the fact "
+            f"is needed, return BLOCKED_UPSTREAM (kind evidence) so the conducting "
+            f"session thaws (`engine.narrative thaw`), registers it, re-freezes and "
+            f"reopens only the sections that cite it.")
+
+
+def freeze(wb: RunWorkbook, why: str) -> dict:
+    why = " ".join(str(why or "").split())
+    if len(why) < 10:
+        raise LedgerRefusal("freeze needs a reason of >= 10 chars (which stage, why)")
+    wb.set_metadata(FREEZE_KEY, f"{why} @ {_utcnow()}")
+    return {"frozen": True, "why": why, "rows": len(wb.evidence_index())}
+
+
+def thaw(wb: RunWorkbook, why: str) -> dict:
+    why = " ".join(str(why or "").split())
+    if len(why) < 10:
+        raise LedgerRefusal("thaw needs a reason of >= 10 chars (what is being registered)")
+    was = is_frozen(wb)
+    wb.set_metadata(FREEZE_KEY, "")
+    append_gate(wb, gate="EVIDENCE_THAW", scope="run", verdict="PASS", blocking=False,
+                detail=f"register thawed: {why[:300]} (was: {was[:200] or 'open'})")
+    return {"frozen": False, "why": why}
+
+
 def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None,
                     tier: str, excerpt: str, subcaps, published: str | None = None,
                     claim_type: str | None = None, origin: str = "public",
@@ -190,6 +240,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
     is UNVERIFIED, never current (invariant 9), and AUD-0020 measured
     aspiration laundering staleness the other way round."""
     _refuse_on_drift(wb)
+    refuse_if_frozen(wb, "register evidence")
     if tier not in C.TIERS:
         raise LedgerRefusal(f"tier {tier!r} is not in {C.TIERS}")
     # THE LABEL IS DERIVED FROM PROVENANCE, NOT TYPED. Until 28-09-2026 this
@@ -1134,6 +1185,85 @@ def challenge_for(wb: RunWorkbook, subcap: str) -> dict | None:
     return hits[-1] if hits else None
 
 
+#: Words that NAME an inference. An INFERENCE whose text carries none of
+#: them states a conclusion and hides the step (the challenger's own test:
+#: "INFERENCE needs 2+ evidence ids plus named logic").
+_INFERENCE_MARKERS = re.compile(
+    r"\b(infer|inferred|inference|implies|imply|suggests?|indicat(?:es|ing)|"
+    r"likely|probabl[ye]|consistent with|therefore|so (?:the|it|they)|because|"
+    r"points? to|which means)\b", re.I)
+
+
+def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
+                       row_eids: list[str]) -> list[str]:
+    """The claim-label rules the independent challenger applied by hand,
+    enforced where the synthesis is written.
+
+    Measured 2026-10-05..08 (Arbor, Susser, Cross): 205 / 135 / 26 challenge
+    FAILs, and the FAIL text was the SAME four sentences — "INFERENCE needs
+    2+ evidence ids and a named inference", "FACT needs two source
+    identities", "evidence[] is empty: the claim asserts specific content
+    but cites no registered row", "cell is in open_contradictions and the
+    disposition is empty". Each one cost a Sonnet challenge lane, a repair
+    batch and a re-challenge — the research rounds the owner measured. A
+    rule a challenger can state in one sentence is a rule the ledger can
+    refuse in one line, and the challenge lane then spends its judgement on
+    the dimensions a rule cannot read (synthesis quality, ceiling reasoning).
+
+    The SKILL's own table is the authority: FACT = T1/T2 ids, two source
+    identities; INFERENCE = 2+ evidence ids + the logic; HYPOTHESIS = ids +
+    the proxy attempts; CEILING_ESTIMATE = ids + the uncertainty."""
+    out: list[str] = []
+    label = str(merged.get("Claim_Label") or "").strip().upper()
+    register = wb.evidence_index()
+    # the row carries `E-004:F1` (fact-qualified); the register is keyed by E-id
+    row_eids = [str(e).split(":")[0] for e in row_eids if str(e).strip()]
+    rows = [register[e] for e in row_eids if e in register]
+    idents = set()
+    for r in rows:
+        url = str(r.get("Source_URL") or "")
+        idents.add(host_of(url) or str(r.get("Source_Name") or "").strip().lower())
+    idents.discard("")
+    claim = str(merged.get("Dominant_Claim") or "")
+    absence = Q.claims_absence(claim) or str(
+        merged.get("Absence_Claimed") or "").strip().upper() in ("YES", "TRUE", "1")
+    if label == "FACT" and rows and len(idents) < 2:
+        out.append(
+            f"FACT rests on one source identity ({', '.join(sorted(idents)) or 'unnamed'}); "
+            f"the challenger refuses it as claim_label_fit and the gate as "
+            f"single_source_fact — register a second independent source, or label "
+            f"the claim INFERENCE and name the step")
+    if label == "INFERENCE":
+        if len(row_eids) < 2 and not absence:
+            out.append(
+                f"INFERENCE cites {len(row_eids)} evidence id(s); the label needs 2+ "
+                f"ids plus the logic (SKILL claim-label table). One row supports a "
+                f"direct reading (FACT on T1/T2) or a HYPOTHESIS with its proxy attempts")
+        logic = " ".join(str(merged.get(k) or "") for k in
+                         ("Dominant_Claim", "Triangulation", "What_We_Found"))
+        if not _INFERENCE_MARKERS.search(logic):
+            out.append(
+                "INFERENCE names no inference: say what is inferred FROM what "
+                "(implies / suggests / likely / consistent with …) in Dominant_Claim "
+                "or Triangulation — a conclusion with the step hidden is what the "
+                "challenger fails as claim_label_fit")
+    if label in ("FACT", "INFERENCE", "CEILING_ESTIMATE") and not row_eids and not absence:
+        out.append(
+            f"{label} with no evidence id on the row: the claim asserts specific "
+            f"content and cites nothing a challenger can open (evidence_total=0). "
+            f"Register the source, or close the cell through `engine.cli absence`")
+    contra = str(merged.get("DQ_Contradicts") or "").strip()
+    disp = str(merged.get("Contradiction_Disposition") or "").strip()
+    if contra and not contra.upper().startswith(("NOT_RUN", "NO_FINDING", "NONE")) \
+            and len(disp) < 20:
+        out.append(
+            "DQ_Contradicts names a finding and Contradiction_Disposition does not "
+            "say what the synthesis did with it (>= 20 chars: outweighed by …, "
+            "superseded by …, reconciled as …) — an open contradiction fails "
+            "contradiction_handling at challenge")
+    return out
+
+
 def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
                      actor: str | None = None, session: str = "") -> dict:
     """Write one subcap's synthesis onto its scoring row, or refuse.
@@ -1206,6 +1336,7 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     bad = Q.claim_label_supported(merged)
     if bad:
         problems.append(bad)
+    problems += label_fit_problems(wb, subcap, merged, row_eids)
     # The band is the ceiling reasoning's CONCLUSION, and it must be stated
     # in the four-band vocabulary for any positively-evidenced claim: a
     # calibration run (2026-08-29) shipped six syntheses whose

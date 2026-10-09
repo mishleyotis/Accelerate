@@ -454,6 +454,13 @@ def awaiting_workflow(event: dict) -> dict | None:
                      + ("" if fit is None else (" — fits" if fit else
                         " — OVER BUDGET: raise --max-usd before starting, or the "
                         "driver stops at the ceiling mid-stage")))
+    env = doc.get("budget") or {}
+    if env.get("ceiling") is not None:
+        lines.append(f"  ENVELOPE: {env.get('family')} ${env.get('spent')} of ${env.get('ceiling')} "
+                     f"spent, ${env.get('remaining')} left"
+                     + ("" if env.get("fits_envelope", True) else
+                        f" — the estimate does not fit: the workflows run ONE round; raise it "
+                        f"deliberately with {env.get('raise_with')} or accept the disclosed gap"))
     if doc.get("not_worked"):
         lines.append(f"  WARNING: {doc['not_worked']}")
     if doc.get("stalled"):

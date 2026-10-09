@@ -65,6 +65,73 @@ CACHE_READ_MULT, CACHE_WRITE_MULT = 0.10, 1.25
 #: The review's ceiling. Per PILLAR, so a four-pillar engagement is $20.
 BUDGET_PER_PILLAR = 5.00
 
+#: PER-STAGE ENVELOPES (owner, 2026-10-09, after the 2026-09-25..10-09 runs):
+#: "research for the 700+ subcaps ... less than $10", scoring "less than $5
+#: for all subcaps", reports "less than $5". One run-wide ceiling could not
+#: hold any of those: RESEARCH spent the whole cap and every later stage ran
+#: over it or stopped, and `capture_workflows` charged EVERY workflow agent
+#: — scorers, critics, report writers, page producers — to RESEARCH, so the
+#: ledger could not even say which stage was over. Stage families group the
+#: ledger's stage names under the envelope that pays for them. Override one
+#: with `--stage-budget RESEARCH=12`; the run-wide ceiling (`--max-usd`)
+#: stays as the outer wall. A stage at its envelope stops with
+#: AT_STAGE_BUDGET and the exact flag that raises it — never silently.
+STAGE_BUDGET_USD = {
+    "PRELIM": 2.00,
+    "RESEARCH": 10.00,
+    "SCORING": 5.00,
+    "REPORTS": 5.00,
+    "PAGES": 3.00,
+}
+#: Ledger stage name -> envelope family. CHALLENGE and RELAY are research
+#: fan-outs; the two page groups share one envelope; ingest waits cost
+#: nothing and belong to none.
+STAGE_FAMILY = {
+    "PREFLIGHT": "PRELIM", "START": "PRELIM", "PRELIM": "PRELIM", "KG": "PRELIM",
+    "RESEARCH": "RESEARCH", "CHALLENGE": "RESEARCH", "RELAY": "RESEARCH",
+    "HANDOFF": "RESEARCH",
+    "SCORING": "SCORING",
+    "REPORTS": "REPORTS",
+    "PAGES_A": "PAGES", "PAGES_B": "PAGES", "PACKAGE": "PAGES", "PROMOTE": "PAGES",
+}
+
+
+def stage_family(stage: str) -> str | None:
+    """The envelope a ledger stage is paid from, or None (INGEST_A/B)."""
+    return STAGE_FAMILY.get(str(stage or "").strip().upper())
+
+
+def run_budget_default(pillars: int) -> float:
+    """The run-wide default when no `--max-usd` was given: the envelopes'
+    sum — never less than the review's per-pillar figure, so a one-pillar
+    engagement is not handed a four-pillar budget by the envelopes alone."""
+    return round(max(BUDGET_PER_PILLAR * max(1, int(pillars or 0)),
+                     sum(STAGE_BUDGET_USD.values())), 2)
+
+
+def envelopes(rows: list[dict], overrides: dict | None = None) -> dict:
+    """Spend per envelope family against its ceiling, from ledger rows.
+
+    {family: {ceiling, spent, remaining, over, stages: [...]}} for every
+    family the defaults name, plus any family an override names."""
+    caps = dict(STAGE_BUDGET_USD)
+    for k, v in (overrides or {}).items():
+        caps[str(k).upper()] = float(v)
+    out = {f: {"ceiling": c, "spent": 0.0, "remaining": c, "over": False, "stages": []}
+           for f, c in caps.items()}
+    for r in rows:
+        fam = stage_family(r.get("stage"))
+        if fam not in out or r.get("usd") is None:
+            continue
+        slot = out[fam]
+        slot["spent"] = round(slot["spent"] + float(r["usd"]), 4)
+        if r.get("stage") not in slot["stages"]:
+            slot["stages"].append(r.get("stage"))
+    for slot in out.values():
+        slot["remaining"] = round(slot["ceiling"] - slot["spent"], 4)
+        slot["over"] = slot["spent"] >= slot["ceiling"] - 1e-9
+    return out
+
 #: Golden 1, measured 2026-08-29. The baseline every projection starts from,
 #: kept as data so a re-measurement replaces it rather than arguing with it.
 MEASURED = {
@@ -584,6 +651,36 @@ def _model_of(name: str) -> str:
     return next((m for m in RATES if m in n), "sonnet")
 
 
+#: Which stage a workflow agent worked, read from the words its prompt has
+#: to carry (the workflow scripts' own prompt text). Order matters: a report
+#: writer's prompt names scores and pages too, so the stage-specific actor
+#: names are tried first and research last (the historical default).
+_STAGE_MARKS = (
+    ("SCORING", ("scoring-critic", "scoring-p1-producer", "scoring-p2-producer",
+                 "scoring-p3-producer", "scoring-p4-producer", "engine.assessment score",
+                 "engine.assessment critique", "RESCORE")),
+    ("REPORTS", ("report-validator", "report-research-producer",
+                 "report-assessment-producer", "engine.cli narrative write",
+                 "WHOLE-REPORT adversarial pass")),
+    ("PAGES", ("-surface-producer", "finding-challenger", "page-consolidator",
+               "You never submit, ship or promote", "connector run")),
+    ("RESEARCH", ("research-p", "research-challenger", "engine.cli batch",
+                  "engine.cli synthesise")),
+)
+
+
+def stage_of_transcript(text: str) -> str:
+    """The ledger stage a workflow agent's transcript belongs to. Reads the
+    FIRST 20K characters (the prompt lives there) so a 2 MB transcript is
+    not scanned, and falls back to RESEARCH, the stage every agent used to
+    be charged to."""
+    head = str(text or "")[:20000]
+    for stage, marks in _STAGE_MARKS:
+        if any(m in head for m in marks):
+            return stage
+    return "RESEARCH"
+
+
 def capture_workflows(run, *, base: Path | None = None) -> dict:
     """Charge this run's workflow agents to its ledger — the DELTA since the
     last capture, for every agent, finished, stopped or still running.
@@ -607,11 +704,15 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
     usd_total, turns_total, n = 0.0, 0, 0
     tok_sum = {"cache_read": 0, "cache_write": 0, "uncached": 0, "output": 0}
     model = "sonnet"
+    # Per STAGE, so the envelopes can read it (2026-10-09): one record per
+    # stage family touched in this capture, not one RESEARCH row for all.
+    by_stage: dict[str, dict] = {}
     for f in sorted(base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")):
         text = f.read_text(errors="replace")
         if run.run_id not in text:
             continue
         aid = f.stem[len("agent-"):]
+        stage = stage_of_transcript(text)
         tok = dict.fromkeys(tok_sum, 0)
         turns = 0
         for line in text.splitlines():
@@ -637,16 +738,29 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
         usd_total += max(0.0, d_usd)
         turns_total += max(0, d_turns)
         n += 1
+        slot = by_stage.setdefault(stage, {"usd": 0.0, "turns": 0, "n": 0, "model": model,
+                                           "tokens": dict.fromkeys(tok_sum, 0)})
+        slot["usd"] = round(slot["usd"] + max(0.0, d_usd), 4)
+        slot["turns"] += max(0, d_turns)
+        slot["n"] += 1
+        slot["model"] = model
         for k in tok_sum:
-            tok_sum[k] += max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
-        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok}
+            d_tok = max(0, tok[k] - int((prev.get("tokens") or {}).get(k, 0)))
+            tok_sum[k] += d_tok
+            slot["tokens"][k] += d_tok
+        charged[aid] = {"usd": usd, "turns": turns, "tokens": tok, "stage": stage}
     if n:
-        record(run, stage="RESEARCH", elapsed_s=0.0, usd=round(usd_total, 4),
-               turns=turns_total, tokens=tok_sum, model=model, lanes=n,
-               note=f"workflow agents: {n} charged (delta since last capture)")
+        for stage, slot in sorted(by_stage.items()):
+            record(run, stage=stage, elapsed_s=0.0, usd=slot["usd"],
+                   turns=slot["turns"], tokens=slot["tokens"], model=slot["model"],
+                   lanes=slot["n"],
+                   note=f"workflow agents: {slot['n']} charged to {stage} "
+                        f"(delta since last capture)")
         seen_path.parent.mkdir(parents=True, exist_ok=True)
         seen_path.write_text(json.dumps(charged))
-    return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total}
+    return {"captured": n, "usd": round(usd_total, 4), "turns": turns_total,
+            "by_stage": {k: {"usd": v["usd"], "turns": v["turns"], "agents": v["n"]}
+                         for k, v in by_stage.items()}}
 
 
 def _totals(rows: list[dict]) -> tuple[dict, dict]:
@@ -688,6 +802,32 @@ def _totals(rows: list[dict]) -> tuple[dict, dict]:
     return timings, summary
 
 
+def run_budget(run, pillars: int) -> float:
+    """The run's dollar ceiling as the driver holds it: the owner's persisted
+    `--max-usd` (`budget_usd_source: flag`, 2026-10-07 — a ceiling outlives
+    the invocation that set it), else the default. `report` and the hooks
+    judge the figure the driver enforces, never a different one."""
+    try:
+        st = json.loads((Path(run.qa_dir) / "pipeline_state.json").read_text())
+        if st.get("budget_usd_source") == "flag" and st.get("budget_usd") is not None:
+            return float(st["budget_usd"])
+    except (OSError, ValueError, AttributeError, TypeError):
+        pass
+    return run_budget_default(pillars)
+
+
+def stage_budget_overrides(run) -> dict:
+    """Owner-set envelope overrides the driver persisted (`--stage-budget`),
+    read from the run's pipeline state so `report` and the hooks judge the
+    same ceilings the driver enforces."""
+    try:
+        st = json.loads((Path(run.qa_dir) / "pipeline_state.json").read_text())
+        got = st.get("stage_budget_usd") or {}
+        return {str(k).upper(): float(v) for k, v in got.items()}
+    except (OSError, ValueError, AttributeError, TypeError):
+        return {}
+
+
 def report(run, *, wb=None) -> dict:
     """Per-stage wall clock against the schedule, USD against the budget.
     `within` is False when either is over — and the CLI exits 1 on it."""
@@ -714,13 +854,18 @@ def report(run, *, wb=None) -> dict:
                        "records": t["records"],
                        "retried": t["attempts"] > t["lanes"] > 0})
     total_min = round(summary["total_elapsed_s"] / 60.0, 1)
-    budget = round(BUDGET_PER_PILLAR * max(1, len(pillars)), 2)
+    budget = run_budget(run, len(pillars))
     usd = summary["total_usd"]
     over_time = total_min > TARGET_WALL_CLOCK_MIN
     over_budget = usd is not None and usd > budget
+    env = envelopes(rows, stage_budget_overrides(run))
     return {
         "run_id": wb.metadata().get("run_id"), "ledger": str(_ledger_path(run)),
         "records": len(rows), "stages": stages,
+        # THE ENVELOPES (2026-10-09): which stage family is over ITS ceiling,
+        # which is the question the owner asks and the run total cannot answer.
+        "envelopes": env,
+        "over_envelopes": sorted(f for f, e in env.items() if e["over"]),
         # The same rows, money first and largest first — what a reader wants
         # when the question is "where did the run's dollars go".
         "by_stage": sorted(
@@ -735,7 +880,7 @@ def report(run, *, wb=None) -> dict:
         "schedule_total_min": sch["total_min"],
         "total_usd": usd, "budget_usd": budget, "pillars": pillars,
         "over_wall_clock": over_time, "over_budget": over_budget,
-        "within": not (over_time or over_budget),
+        "within": not (over_time or over_budget or any(e["over"] for e in env.values())),
         "unrecorded": [st for st in STAGE_PHASE if st not in timings],
         "note": ("USD is None when no stage carried tokens or a price — "
                  "wall clock alone is judged" if usd is None else ""),

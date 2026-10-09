@@ -28,9 +28,14 @@ def _engine_workbook(tmp_path, *, n=6, synthesise=2):
                          root=tmp_path / "run", selected=selected)
     wb = run.open()
     for cell in wb.selected_subcaps()[:synthesise]:
+        # Two source IDENTITIES: a FACT on one host is refused at the write
+        # (claim-label fit, 2026-10-09 — the rule the challenger and the
+        # floors gate already applied as single_source_fact).
         eids = [L.append_evidence(
-            wb, source_name=f"Annual report {i}",
-            source_url=f"https://acme.example/ar#{i}", tier="T2",
+            wb, source_name=("NCUA Call Report 2025 — digital channel volumes"
+                             if i == 2 else f"Annual report {i}"),
+            source_url=(f"https://ncua.example/callreport/2025#{cell}"
+                        if i == 2 else f"https://acme.example/ar#{i}"), tier="T2",
             excerpt=("Alkami digital banking went live in Q3 2024 and reached "
                      "47 percent member adoption within ninety days, restated "
                      "at 52 percent in the 2025 annual report."),

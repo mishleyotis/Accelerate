@@ -170,11 +170,112 @@ def unnamed_products(wb) -> list:
     return out
 
 
+# ── ET-07 for every page: a cited row resolves to the cells it supports ──
+
+#: Sheets whose Evidence_IDs reach a page, and the page they reach. A row
+#: cited from one of these with no SubCap_IDs is the ET-07 refusal the
+#: connector gives one page at a time (B1 Bank, 2026-10-08/09: techstack x4,
+#: overview x6, context x4 — "finding them page by page cost three separate
+#: repair rounds").
+#: Firmographics and Financial_Trends are NOT here: the connector's
+#: `_IDENTITY_GRAIN` registry passes overview.firmographics and
+#: overview.financial_series as evidence about the institution, not a
+#: capability, and forcing a cell onto a call-report period file is the
+#: misattribution ET-07 exists to reduce.
+_CITING_SHEETS = {
+    "Tech_Register": ("Evidence_IDs", "techstack"),
+    "Entity_Timeline": ("Evidence_IDs", "context"),
+    "Issue_Register": ("Evidence_IDs", "context"),
+    "Focus_Areas": ("Evidence_IDs", "heatmap"),
+    "Report_Narrative": ("Evidence_IDs", "overview"),
+}
+#: Sheets whose unlinked citations are REPORTED before the page agents run
+#: but do not halt the stage: a timeline event is dated history whose cell
+#: link the context producer states on the surface (the connector's
+#: `_stated_unlinked` exception). Every other citing sheet reasons at cell
+#: grain and the connector refuses it outright.
+_ET07_ADVISORY_SHEETS = frozenset({"Entity_Timeline"})
+
+
+#: PRELIM narrative sections whose citations are about the INSTITUTION, not
+#: a capability — the connector's `_IDENTITY_GRAIN` exemption by section
+#: (overview.firmographics / financial_series / leadership /
+#: thought_leadership). A call report cited from the firmographics
+#: narrative names no cell because it should not; linking it to one would
+#: be the misattribution ET-07 exists to reduce.
+_ET07_IDENTITY_SECTIONS = frozenset({"PRELIM-FIRM", "PRELIM-FIN", "PRELIM-LEAD",
+                                     "PRELIM-THOUGHT"})
+
+
+def unlinked_citations(wb, pages) -> dict:
+    """{e_id: {page, cited_from}} for every cited row that names no cell."""
+    idx = wb.evidence_index()
+    out: dict = {}
+    for sheet, (col, page) in _CITING_SHEETS.items():
+        if page not in pages:
+            continue
+        for r in wb.rows(sheet):
+            if sheet == "Report_Narrative" and \
+                    _clean(r.get("Section_ID")).upper() in _ET07_IDENTITY_SECTIONS:
+                continue
+            for e in _ids(r.get(col)):
+                e = e.split(":")[0]
+                row = idx.get(e)
+                if row is None or _ids(row.get("SubCap_IDs")):
+                    continue
+                slot = out.setdefault(e, {"page": page, "cited_from": []})
+                label = sheet + ":" + _clean(r.get("TS_ID") or r.get("ID") or r.get("Title")
+                                             or r.get("Section_ID") or r.get("Field")
+                                             or r.get("Metric"))[:30]
+                if label not in slot["cited_from"]:
+                    slot["cited_from"].append(label)
+    return out
+
+
+#: The workbook floors behind the page gates that refused most often after
+#: the techstack three (2026-10-05..09): O7 needs two named leaders, C1 three
+#: dated events, O1 a locked peer set, H1 three focus areas with a quote.
+_PAGE_FLOORS = (
+    ("context", "Entity_Timeline", 3, "CG-14", "dated events on Entity_Timeline",
+     "engine.prelim timeline --date … --event … --signal … [--evidence E-…]"),
+    ("heatmap", "Focus_Areas", 3, "S9_focus_invalid", "focus areas with a verbatim quote",
+     "engine.profile focus … (the PRELIM focus_areas section; a verbatim client quote per row)"),
+    ("overview", "Peer_Benchmarks", 1, "CG-18c", "peer rows (a locked peer set)",
+     "engine.prelim peers --peer … --basis …"),
+)
+
+
+def page_floors(wb, pages) -> list:
+    out = []
+    for page, sheet, need, gate, what, fix in _PAGE_FLOORS:
+        if page not in pages:
+            continue
+        n = len([r for r in wb.rows(sheet) if any(str(v or "").strip() for v in r.values())])
+        if n < need:
+            out.append({"gate": gate, "page": page, "needs_connector": False,
+                        "detail": f"{sheet} holds {n} row(s); the {page} page needs "
+                                  f">= {need} {what}",
+                        "fix": fix})
+    return out
+
+
 # ── the preflight ─────────────────────────────────────────────────────────
 
 def preflight(wb, pages=("techstack",)) -> list:
     """The blockers, as {gate, page, detail, fix, needs_connector}."""
     out = []
+    pages = tuple(pages or ())
+    for e, u in sorted(unlinked_citations(wb, pages).items()):
+        advisory = all(c.split(":")[0] in _ET07_ADVISORY_SHEETS for c in u["cited_from"])
+        out.append({
+            "gate": "ET-07", "page": u["page"], "needs_connector": False,
+            "severity": "warn" if advisory else "block",
+            "detail": (f"{e} is cited from {', '.join(u['cited_from'][:3])} and names no "
+                       f"capability cell; the connector refuses the page (ET-07)"),
+            "fix": (f"`engine.cli attach --e-id {e} --subcap <the cell it supports>` "
+                    f"(or retire the citation); link every PRELIM and profile row "
+                    f"before PAGES, not one page at a time")})
+    out += page_floors(wb, pages)
     if "techstack" not in pages:
         return out
     rows = [r for r in wb.rows("Tech_Register") if _clean(r.get("TS_ID"))]

@@ -34,7 +34,7 @@ const R = `--run ${A.run} --root ${A.root}`
 const K = A.report
 
 const writePrompt = (s, round) => `You are ${s.agent} for DMA run ${A.run}, ${K} §${s.section}, round ${round}. Work from ${A.eng}, foreground commands, long timeouts.
-Your brief is the file ${s.brief}: read it once, then the section's latest state with \`python3 -m engine.cli narrative state ${R} --report ${K}\` (from round 2 on, the validator's newest note on §${s.section} is in ${A.root}/07_qa/report_reviews.jsonl — read the LAST entry for this report and section, in full).
+Your brief is the file ${s.brief}: read it once — its EVIDENCE PACK is what you cite (the register's own rows, ERS-ranked, with the cells they name and the run's challenge and critic verdicts); do not re-read the workbook to choose citations, and do not re-derive a score or a verdict the pack already carries. The register is FROZEN while the reports are written: a fact you need that no pack row carries is BLOCKED_UPSTREAM (kind evidence), never a new engine.cli evidence call. Then read the section's latest state with \`python3 -m engine.cli narrative state ${R} --report ${K}\` (from round 2 on, the validator's newest note on §${s.section} is in ${A.root}/07_qa/report_reviews.jsonl — read the LAST entry for this report and section, in full).
 Write §${s.section} ONLY, through \`python3 -m engine.cli narrative write ${R} --report ${K} --section ${s.section} --actor ${s.agent} --json <record.json>\` (cards: one write per card with --card). Every other section belongs to someone else: rewriting one clears its verdict.
 The engine refuses a body under the template's LENGTH floor, a figure no cited excerpt carries, and a citation the register does not hold. The LENGTH upper bound is guidance: the write returns length_notes; trim toward it without cutting a figure or citation the argument needs. Read each refusal and fix the cause; never delete a fact to pass a check.
 If the note asks for something you cannot supply from the run as it stands — a search nobody ran, a sheet that disagrees with the prose, evidence not registered, a decision only the engagement owner can make, a score not yet struck — do NOT write around it: return status BLOCKED_UPSTREAM with one upstream row per item, kind one of probe|sheet|evidence|owner|scores.
@@ -59,7 +59,8 @@ const WOUT = { type: 'object', properties: { report: { type: 'string' }, section
 const ROUT = { type: 'object', properties: { report: { type: 'string' }, section: { type: 'string' }, verdict: { type: 'string' }, upstream: UP, note: { type: 'string' } }, required: ['section', 'verdict'] }
 const XOUT = { type: 'object', properties: { report: { type: 'string' }, verdict: { type: 'string' }, reopened: { type: 'array', items: { type: 'string' } }, upstream: UP, notes: { type: 'string' } }, required: ['verdict'] }
 
-const ROUNDS = A.rounds || 3
+const ROUNDS = A.rounds || 2
+if (A.budget && A.budget.ceiling != null) log(`${K}: REPORTS envelope $${A.budget.spent} of $${A.budget.ceiling} spent`)
 
 // One section's track: write -> review, again only on a writer-fixable REVISE.
 async function track(s, startRound) {

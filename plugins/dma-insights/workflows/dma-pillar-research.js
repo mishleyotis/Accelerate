@@ -128,7 +128,8 @@ function batchPrompt(cat, caps, round, prev) {
   return `You are research-${lc}-producer for DMA run ${A.run} (${A.entity || 'the entity'}), round ${round}. Work from ${ENG}; set ACT=research-${lc}-producer.
 YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or declared absence is done; skip it).
 ${prev ? `The category's last gate: ${prev.gate}; blocking ${JSON.stringify(prev.blocking_terms || []).slice(0, 500)}. Close those for your cells.` : ''}
-Your brief's shared.internal_documents (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 4000, once) lists the run's internal documents: grep them for your cells and register what bears on them with --origin internal (HYBRID run).
+Your brief's shared block (python3 -m engine.brief dispatch ${R} --category ${cat} | head -c 6000, once) carries two things to read BEFORE any search: shared.internal_documents (HYBRID run: grep them for your cells, register with --origin internal) and shared.prelim_evidence — the institution's profile, leaders, timeline and connector scans PRELIM already registered (E-ids with excerpts). A fact a PRELIM row states is cited with 'attach --e-id <E> --subcap <cell>', never searched for again (measured 2026-10-05..08: 26 PRELIM rows per run, 0-2 ever cited).
+WRITE-TIME RULES the ledger refuses (no challenge round needed to learn them): FACT = two source identities on T1/T2; INFERENCE = 2+ evidence ids AND the step named (implies / suggests / consistent with …); a FACT/INFERENCE with no evidence id is refused (close the cell through 'absence' instead); a DQ_Contradicts finding needs a Contradiction_Disposition. A refused line in the batch result names the rule — fix that line, do not re-search.
 
 ${SHEET}
 
@@ -154,7 +155,17 @@ Return gate (as printed), blocking_terms as "term: cell, cell" strings copied fr
 // --- PROMPTS END ---
 
 const BATCHES = A.batches || {}
-log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${A.rounds} round(s)`)
+// THE ENVELOPE RIDES WITH THE WORK (2026-10-09). engine.pipeline hands
+// `budget` = {family, ceiling, spent, remaining, estimate_usd, fits_envelope}
+// for the RESEARCH envelope (default $10). When the estimate does not fit
+// what is left, the driver already set rounds to 1; here the second round
+// is also skipped once the first round's agents report more than the
+// remaining dollars would cover at the measured ~$0.19/cell, and the
+// handback says so instead of spending it.
+const BUDGET = A.budget || null
+const ROUNDS = BUDGET && BUDGET.fits_envelope === false ? 1 : (A.rounds || 2)
+log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || [[]]).length}`).join(', ')} batch(es) · up to ${ROUNDS} round(s)`
+    + (BUDGET && BUDGET.ceiling != null ? ` · RESEARCH envelope $${BUDGET.spent} of $${BUDGET.ceiling} spent, est $${BUDGET.estimate_usd}` : ''))
 
 const results = await pipeline(A.cats, async (cat) => {
   let prev = null
@@ -166,7 +177,7 @@ const results = await pipeline(A.cats, async (cat) => {
     ...(REPAIR_BATCHES[cat] || []).map(cells => ({ caps: cells, prompt: (r) => repairPrompt(cat, cells, r) })),
   ]
   if (!jobs.length) jobs = [{ caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r) }]
-  for (let round = 1; round <= A.rounds; round++) {
+  for (let round = 1; round <= ROUNDS; round++) {
     const done = await parallel(jobs.map((j, i) => () => agent(j.prompt(round, prev), {
       label: `${cat} r${round} b${i + 1} ${j.caps[0]}${j.caps.length > 1 ? '…' : ''}`, phase: 'Research', schema: OUT, model: 'sonnet',
     })))
@@ -205,7 +216,7 @@ const results = await pipeline(A.cats, async (cat) => {
       { caps: [`${cat} (cells the gate names)`], prompt: (r) => repairPrompt(cat, null, r) },
     ]
   }
-  if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${A.rounds} round(s) — the driver's floors gate decides what happens next`)
+  if (prev && prev.gate !== 'PASS') log(`${cat}: still failing after ${ROUNDS} round(s) — the driver's floors gate decides what happens next`)
   return prev
 })
 

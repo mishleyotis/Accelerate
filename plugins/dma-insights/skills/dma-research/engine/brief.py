@@ -119,6 +119,10 @@ BRIEF_CHAR_CEILING = 6400
 #: How many reusable rows a packet offers per open cell. The point is to
 #: make the producer's first move free, not to ship the register.
 REUSE_PER_CELL = 3
+#: PRELIM rows carried in every research packet's `shared` block (connector
+#: readings first, then by ERS). Twenty is the whole PRELIM register on the
+#: 2026-10 runs (26 / 26 / 30 rows) at ~100 chars each.
+PRELIM_EVIDENCE_IN_PACKET = 8
 
 #: How many open cells the packet details. Beyond this it reports the count
 #: and the producer asks `orient` for the next card, which is the paged
@@ -240,8 +244,15 @@ def category_of(subcap: str) -> str:
 
 # ── what the run knows, once ─────────────────────────────────────────────
 
-def shared(wb: RunWorkbook) -> dict:
+def shared(wb: RunWorkbook, *, prelim: bool = False) -> dict:
     """Run-wide state, derived. The one read a producer makes before its own.
+
+    `prelim=True` adds the PRELIM evidence block (`prelim_evidence`,
+    `prelim_rule`, …) — the RESEARCH packets' read, where a lane would
+    otherwise re-find the institution's rows. Scoring, report and page
+    lanes do not search, so their packets stay without it (the lane
+    ceiling is shared, and the block cost the report lane its fit:
+    acceptance issue 8, 2026-10-09).
 
     Everything here is a FACT the run has already paid for: an estate row, a
     named person, a peer, a registered source identity, a contradiction
@@ -282,8 +293,37 @@ def shared(wb: RunWorkbook) -> dict:
         cats[cat] = {k: (len(v) if isinstance(v, (list, tuple, set)) else v)
                      for k, v in wl.items() if k != "category"}
 
+    # PRELIM'S OWN ROWS, by id, so a lane can `engine.cli attach` one before
+    # it searches for the fact again. Connector-origin first (they are the
+    # technographic and firmographic readings every category weighs), then
+    # by ERS. Bounded: a packet that carries the whole register is the token
+    # bleed `_bound` exists to stop.
+    prelim_rows = []
+    for eid, row in register.items():
+        if _ids(row.get("SubCap_IDs")):
+            continue
+        prelim_rows.append({
+            "e_id": eid, "source": _clean(row.get("Source_Name"))[:60],
+            "tier": _clean(row.get("Tier")),
+            "origin": _clean(row.get("Origin")) or "public",
+            "ers": float(row.get("ERS") or 0),
+            "excerpt": _clean(row.get("Excerpt"))[:80],
+        })
+    prelim_rows.sort(key=lambda r: (r["origin"] != "connector", -r["ers"], r["e_id"]))
+    prelim_queries = [s for s in wb.rows("Search_Log")
+                      if _clean(s.get("Query")) and not _clean(s.get("SubCap_ID"))]
+
+    prelim_block = {
+        "prelim_evidence": prelim_rows[:PRELIM_EVIDENCE_IN_PACKET],
+        "prelim_evidence_total": len(prelim_rows),
+        "prelim_queries_fired": len(prelim_queries),
+        "prelim_rule": ("read `prelim_evidence` before searching; `engine.cli attach "
+                        "--e-id <E> --subcap <your cell>` cites a PRELIM row instead "
+                        "of re-finding it"),
+    } if prelim else {}
     return {
         "run_id": md.get("run_id"),
+        **prelim_block,
         # THE ROOT, in every packet. Measured 2026-09-30 (SWBC, root outside
         # the default): research briefs named `--run R` and never the root,
         # so every lane's first engine call resolved to a directory that did
@@ -466,6 +506,19 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None,
             item["from_categories"] = sorted({category_of(n) for n in named})
             item["_at"] = len(corpus) - 1        # its place in the corpus
             others.append(item)
+        elif eid not in cited:
+            # A ROW THAT NAMES NO CELL — PRELIM's firmographics, leadership,
+            # timeline and connector scans, registered before any category
+            # card was served. Measured 2026-10-05..08 (Arbor, Susser, Cross):
+            # 26 / 26 / 30 PRELIM rows, of which 2 / 1 / 0 were ever cited by
+            # a scored cell. The `named` test above excluded every one of
+            # them from the ranking, so the run paid for the institution's
+            # profile and then paid sixteen lanes to re-find it. They rank
+            # like any other lane's rows now, labelled by origin.
+            item["from_categories"] = ["PRELIM"]
+            item["origin"] = _clean(ev.get("Origin")) or "public"
+            item["_at"] = len(corpus) - 1
+            others.append(item)
 
     proposals = []
     if propose and others:
@@ -484,10 +537,18 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None,
                 if sc < REUSE_PROPOSE_FLOOR:
                     break                    # the floor bites; abstain
                 doc = corpus[o["_at"]]
+                terms = R.matched_terms(q, doc)
+                if o.get("from_categories") == ["PRELIM"] and len(terms) < 2:
+                    # A PRELIM row is the INSTITUTION's — a scan, a filing, a
+                    # roster — and one shared token ("digital") is not a
+                    # bearing on a cell's question. Two is the floor for a
+                    # row no lane has yet placed; a single-token match stays
+                    # in `shared.prelim_evidence` for the lane to judge.
+                    continue
                 proposals.append({**{k: v for k, v in o.items() if k != "_at"},
                                   "proposed": True,
                                   "bm25_vs_question": sc,
-                                  "matched_terms": R.matched_terms(q, doc),
+                                  "matched_terms": terms,
                                   "how_to_use": (
                                       f"read it; if it bears on {subcap}, "
                                       f"`engine.cli attach --run {rid} --e-id "
@@ -691,8 +752,14 @@ def dispatch(wb: RunWorkbook, category: str, *,
             # ranked it and the query terms behind the score, because a
             # suggestion a lane cannot audit is a suggestion it either takes
             # on faith or ignores — and taking it on faith is the 57.7%.
+            # PRELIM's rows are proposed by `reusable` like any other
+            # category's, but the packet carries them ONCE, in
+            # `shared.prelim_evidence` — repeating them under every cell is
+            # what put a re-dispatch packet 657 chars over its ceiling
+            # (acceptance issue 8, 2026-10-09).
             "proposed_from_other_categories":
-                got["proposed_from_other_categories"],
+                [o for o in got["proposed_from_other_categories"]
+                 if o.get("from_categories") != ["PRELIM"]],
         })
 
     # E2: the same open cells, grouped by the capability they answer under.
@@ -736,7 +803,7 @@ def dispatch(wb: RunWorkbook, category: str, *,
         # calls where 1 and ~17 would do. Kept IN the packet so
         # `as_markdown`, the packet_chars ceiling and every test that reads
         # `packet["shared"]` are untouched.
-        "shared": shared_block if shared_block is not None else shared(wb),
+        "shared": shared_block if shared_block is not None else shared(wb, prelim=True),
         "worklist": {k: (len(v) if isinstance(v, (list, tuple, set)) else v)
                      for k, v in wl.items() if k != "category"},
         "open_cells": len(open_cells),
@@ -895,6 +962,34 @@ def dispatch(wb: RunWorkbook, category: str, *,
             if isinstance(v, list) and len(v) > 6:
                 hb[k] = v[:6] + [f"… and {len(v) - 6} more"]
         packet["packet_chars"] = len(json.dumps(packet, default=str))
+    sh_ = packet.get("shared") or {}
+    if packet["packet_chars"] > BRIEF_CHAR_CEILING and sh_.get("prelim_evidence"):
+        # PRELIM's rows are offers too, and the first to give way: the lane
+        # keeps the top rows (connector readings first, by ERS) and the
+        # count of what it is not shown; `engine.brief shared` serves the
+        # rest. A shared block a batch hands to every lane is copied before
+        # it is trimmed, so one lane's trim is not every lane's.
+        sh_ = dict(sh_)
+        n = len(sh_["prelim_evidence"])
+        keep_prelim = max(3, PRELIM_EVIDENCE_IN_PACKET // 2)
+        if n > keep_prelim:
+            sh_["prelim_evidence"] = sh_["prelim_evidence"][:keep_prelim]
+            sh_["prelim_evidence_trimmed"] = (
+                f"{n - keep_prelim} more PRELIM row(s) not shown — "
+                f"`engine.brief shared --run <R>` lists them")
+            packet["shared"] = sh_
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
+        if packet["packet_chars"] > BRIEF_CHAR_CEILING:
+            # Still over: the rows give way to a pointer BEFORE a lead or a
+            # cell of the assignment does. The assignment and the gate terms
+            # are what the packet is for; the rows are one read away.
+            sh_["prelim_evidence"] = []
+            sh_["prelim_evidence_trimmed"] = (
+                f"{n} PRELIM row(s) not shown to stay under the packet ceiling — "
+                f"`engine.brief shared --run <R>` lists them; cite them with "
+                f"`engine.cli attach`")
+            packet["shared"] = sh_
+            packet["packet_chars"] = len(json.dumps(packet, default=str))
     if packet["packet_chars"] > BRIEF_CHAR_CEILING and packet["leads_in"]:
         # Leads go BEFORE the work. A lead is an offer; `work_next` is the
         # lane's actual assignment, and trimming the assignment to make room
@@ -1220,7 +1315,7 @@ def batch(wb: RunWorkbook, *, run: runstate.Run | None = None,
     # One shared block for the whole batch — it describes the run, not the
     # category. Every other batch builder already does this; `batch` was the
     # one that did not.
-    sh = shared(wb) if cats else None
+    sh = shared(wb, prelim=True) if cats else None
     # And ONE leads index. Like `shared` it describes the RUN — the rows
     # whose cells span categories are the same rows for every lane — and
     # rebuilding it per lane walked the whole register sixteen times to hand
@@ -2215,11 +2310,169 @@ def report_preflight(wb: RunWorkbook, *, run=None) -> list[dict]:
     return out
 
 
+#: Rows the report evidence pack carries per section, and the per-pillar
+#: cell sample the deep dives read. Bounded for the same reason every packet
+#: is: the pack is what the writer CITES, not the register re-read.
+REPORT_PACK_EVIDENCE = 24
+REPORT_PACK_CELLS = 10
+REPORT_BRIEF_CHAR_CEILING = 16000
+
+#: Which sheets' Evidence_IDs feed a section's pack, keyed by the section's
+#: declared `inputs` (report_templates.json). Sheets not listed here carry
+#: no citation column and feed the pack nothing.
+_PACK_SHEETS = {
+    "Issue_Register": ("Evidence_IDs", ("ID", "Type", "Severity", "Status", "Description")),
+    "Focus_Areas": ("Evidence_IDs", ("ID", "Priority in the client's words", "Cells")),
+    "Entity_Timeline": ("Evidence_IDs", ("Event_Date", "Title", "Signal")),
+    "Tech_Register": ("Evidence_IDs", ("TS_ID", "Product", "Vendor", "Layer", "Status")),
+    "Financial_Trends": ("Evidence_IDs", ("Metric", "Fiscal_Year", "Value", "Unit")),
+    "Firmographics": ("Evidence", ("Field", "Value", "Unit", "State")),
+}
+
+
+def report_evidence_pack(wb: RunWorkbook, sec, *, card: str | None = None) -> dict:
+    """What a section should cite, ranked — and what upstream already judged.
+
+    Measured 2026-10-05..08 (Arbor 137 reviews, Susser 154, Cross 95, B1 77
+    workflow dirs): the top REVISE class in every run was "citation form /
+    wrong E-id" (57 / 75 / 29), then "figure does not reconcile with the
+    sheet" (22 / 53 / 25). The writer's brief carried the section's control
+    block and a LIST OF SHEET NAMES; the writer then re-read the workbook
+    and chose its own citations, and the validator re-derived the same
+    figures from the same sheets a round later. The pack closes that gap at
+    the source: the ERS-ranked rows for the section's inputs, each with its
+    excerpt, the cells it names and whether their synthesis survived
+    challenge, plus the critic's note for each pillar in play — so the
+    writer cites what the register says and what the run already judged,
+    rather than re-deriving either."""
+    register = wb.evidence_index()
+    inputs = set(sec.inputs or ())
+    rows_by_id: dict[str, dict] = {}
+    anchors: list[dict] = []
+
+    def take(eid: str, why: str):
+        eid = eid.split(":")[0]
+        r = register.get(eid)
+        if not r:
+            return
+        slot = rows_by_id.setdefault(eid, {
+            "e_id": eid, "source": _clean(r.get("Source_Name"))[:70],
+            "tier": _clean(r.get("Tier")), "recency": _clean(r.get("Recency")),
+            "ers": float(r.get("ERS") or 0),
+            "cells": _ids(r.get("SubCap_IDs"))[:6],
+            "excerpt": _clean(r.get("Excerpt"))[:220], "for": []})
+        if why not in slot["for"]:
+            slot["for"].append(why)
+
+    for sheet, (col, show) in _PACK_SHEETS.items():
+        if sheet not in inputs:
+            continue
+        for r in wb.rows(sheet):
+            eids = _ids(r.get(col))
+            if not eids:
+                continue
+            label = " · ".join(_clean(r.get(k))[:40] for k in show if _clean(r.get(k)))
+            anchors.append({"sheet": sheet, "row": label[:120], "e_ids": eids[:4]})
+            for e in eids:
+                take(e, f"{sheet}: {label[:60]}")
+
+    cells: list[dict] = []
+    pillar = card if card and len(card) == 2 and card.startswith("P") else None
+    if inputs & {"Subcap_Scores", "Category_Rollup", "Pillar_Rollup", "Evidence_Detail"}:
+        scored = []
+        for r in wb.scoring_rows():
+            cell = _clean(r.get("SubCap_ID"))
+            if not cell or (pillar and not cell.startswith(pillar)):
+                continue
+            sc = r.get("Score")
+            try:
+                sc = float(sc)
+            except (TypeError, ValueError):
+                continue
+            eids = [i.split(":")[0] for i in _ids(r.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            if not eids:
+                continue
+            scored.append((sc, cell, r, eids))
+        # the strongest and the weakest evidenced cells — what a deep dive
+        # or a gap section argues from
+        scored.sort(key=lambda t: (t[0], t[1]))
+        pick = scored[:REPORT_PACK_CELLS // 2] + scored[-(REPORT_PACK_CELLS // 2):]
+        seen = set()
+        for sc, cell, r, eids in pick:
+            if cell in seen:
+                continue
+            seen.add(cell)
+            cells.append({
+                "cell": cell, "name": (C.subcap_names().get(cell) or "")[:60],
+                "score": sc, "confidence": _clean(r.get("Confidence")),
+                "challenge": _clean(r.get("Challenge_Verdict")) or "none",
+                "claim": _clean(r.get("Dominant_Claim"))[:160],
+                "rationale": _clean(r.get("Rationale"))[:200],
+                "e_ids": eids[:4]})
+            for e in eids[:4]:
+                take(e, f"cell {cell} ({sc})")
+
+    ranked = sorted(rows_by_id.values(), key=lambda r: (-r["ers"], r["e_id"]))
+    critic = {}
+    for g in wb.rows("Gate_Log"):
+        if _clean(g.get("Gate")) == "SCORING_CRITIC":
+            p_ = _clean(g.get("Scope"))
+            if not pillar or p_ == pillar:
+                critic[p_] = {"verdict": _clean(g.get("Verdict")),
+                              "note": _clean(g.get("Detail"))[:300]}
+    return {
+        "evidence": ranked[:REPORT_PACK_EVIDENCE],
+        "evidence_total": len(ranked),
+        "sheet_anchors": anchors[:REPORT_PACK_EVIDENCE],
+        "cells": cells,
+        "critic_notes": critic,
+        "rule": ("cite from `evidence` (the register's own rows, ranked by ERS); "
+                 "every figure in the body must appear in one of these excerpts or "
+                 "on a sheet row named in `sheet_anchors`; a cell's claim is what "
+                 "its synthesis says and its challenge verdict is the run's "
+                 "judgement of it — do not re-derive either"),
+    }
+
+
+def _pack_markdown(pack: dict) -> list[str]:
+    lines = ["## Evidence pack — cite from here (ERS-ranked; the register's own rows)", ""]
+    if not pack["evidence"]:
+        lines.append("(no registered row feeds this section's inputs; cite what the "
+                     "sheets name, or return BLOCKED_UPSTREAM kind evidence)")
+    for r in pack["evidence"]:
+        lines.append(f"- **{r['e_id']}** {r['tier']} {r['recency'] or 'UNVERIFIED'} "
+                     f"ERS {r['ers']:.2f} — {r['source']}"
+                     + (f" — cells {', '.join(r['cells'])}" if r['cells'] else "")
+                     + f"\n  for: {'; '.join(r['for'][:3])}\n  “{r['excerpt']}”")
+    if pack["evidence_total"] > len(pack["evidence"]):
+        lines.append(f"- … {pack['evidence_total'] - len(pack['evidence'])} more rows feed "
+                     f"these inputs; `engine.ers show` lists them by rank")
+    if pack["cells"]:
+        lines += ["", "## Scored cells to argue from (strongest and weakest evidenced; "
+                      "the challenge verdict is the run's judgement)", ""]
+        for c in pack["cells"]:
+            lines.append(f"- **{c['cell']}** {c['name']} — {c['score']} {c['confidence']}, "
+                         f"challenge {c['challenge']}, cites {', '.join(c['e_ids'])}\n"
+                         f"  claim: {c['claim']}\n  rationale: {c['rationale']}")
+    if pack["critic_notes"]:
+        lines += ["", "## The scoring critic's verdicts (reuse; do not re-judge)", ""]
+        for p_, v in sorted(pack["critic_notes"].items()):
+            lines.append(f"- {p_}: {v['verdict']} — {v['note']}")
+    if pack["sheet_anchors"]:
+        lines += ["", "## Sheet rows this section renders (the figures come from here)", ""]
+        for a in pack["sheet_anchors"]:
+            lines.append(f"- {a['sheet']}: {a['row']} [{', '.join(a['e_ids'])}]")
+    lines += ["", f"RULE: {pack['rule']}", ""]
+    return lines
+
+
 def report_section_briefs(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     """One brief per WRITABLE section: open, and not waiting on an upstream
-    item. The writer reads its own section's control block, its length band
-    and the validator's last full note — and nothing that invites it to
-    touch a sibling."""
+    item. The writer reads its own section's control block, its length band,
+    the validator's last full note, and — since 2026-10-09 — the ERS-ranked
+    evidence pack for its inputs with the run's upstream judgements, so it
+    cites what the register holds instead of re-reading the workbook."""
     from . import narrative as N, report_spec as RS
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -2258,6 +2511,15 @@ def report_section_briefs(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
             if note:
                 lines += ["## The validator's last note — address EVERY numbered fix, "
                           "change nothing it says already stands", "", note, ""]
+            pack = report_evidence_pack(wb, sec)
+            pack_lines = _pack_markdown(pack)
+            # the pack is bounded like every packet: halve the evidence
+            # rows until the brief fits, and say so
+            while len("\n".join(lines + pack_lines)) > REPORT_BRIEF_CHAR_CEILING \
+                    and len(pack["evidence"]) > 6:
+                pack["evidence"] = pack["evidence"][:max(6, len(pack["evidence"]) // 2)]
+                pack_lines = _pack_markdown(pack)
+            lines += pack_lines
             lines += ["## Commands", "",
                       f"    python3 -m engine.cli narrative preconditions {e} --report {key}",
                       f"    python3 -m engine.cli narrative contract --report {key}",

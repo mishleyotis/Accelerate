@@ -143,6 +143,29 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
             "ABSENT must state the search that establishes the absence — "
             "'no register row' and 'confirmed absent' are different facts, "
             "and conflating them over-recommends the estate (AUD-0115)")
+    # THE ROW LINKS ITS CITATIONS AT THE WRITE. The connector's ET-07 refuses
+    # a techstack page whose cited evidence row names no capability cell
+    # (B1 Bank, 2026-10-08/09: four techstack refusals, found one page at a
+    # time). A register row that names its cells has, by its own claim, the
+    # cells its citations support — so the register writes the link here,
+    # both ways, instead of leaving it for `engine.cli attach` after a
+    # refusal. A pair the cell already cites is left alone (the identity
+    # exists); an id that does not resolve is left for the status checks
+    # above and for `page_preflight`, never linked blind.
+    cells = [str(c).strip() for c in (subcaps or []) if str(c).strip()]
+    if cells and eids:
+        from . import ledger as _L
+        register = wb.evidence_index()
+        for e in eids:
+            e0 = e.split(":")[0]
+            if e0 not in register:
+                continue
+            sr_cites = {c for c in cells
+                        if e0 in [i.split(":")[0] for i in _split_ids(
+                            (wb.scoring_row(c) or {}).get("Evidence_IDs"))]}
+            todo = [c for c in cells if c not in sr_cites]
+            if todo:
+                _L.attach_evidence(wb, e0, todo, actor="technographic-scanner")
     n = 1 + sum(1 for r in wb.rows("Tech_Register"))
     ts_id = f"TS-{n:03d}"
     wb.append("Tech_Register", {
