@@ -304,7 +304,11 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   CTA by **call stage** — the share dialog asks, required, "Has the first
   sales call happened?" (`stage` in the ledger, never in the link): before →
   "Schedule a walkthrough"; after → thanks them for the call and "Book a
-  follow-up call" (mailto the colleague, plus reply). Zennify
+  follow-up call" (mailto the colleague, plus reply). The stage is
+  **remembered per client**: the dialog opens on the stage of that client's
+  most recent link (`GET /api/share?entity=`, `latestStageFor`), says so,
+  and the colleague can change it; a link with no stage gets the pre-call
+  email, never Identity Platform's generic one. Zennify
   design system (`lib/share-email.js`: palette from the app's design tokens,
   inline wordmark, one web link, text part, no tracking). The link is **the
   app's own one-time code**, signed and bound to the address, **valid for

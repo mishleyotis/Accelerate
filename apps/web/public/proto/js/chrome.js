@@ -787,6 +787,23 @@ function ShareDialog({
   // Has the first sales call happened? Asked before every link (owner,
   // 2026-10-09): it decides the follow-up the recipient's email offers.
   const [stage, setStage] = useState(null);
+  // …and remembered: the dialog opens on the stage recorded on this client's
+  // most recent link (GET /api/share?entity=), which the colleague can change.
+  const [remembered, setRemembered] = useState(null);
+  useEffect(() => {
+    if (!window.DMA_LIVE) return;
+    let live = true;
+    fetch(`/api/share?entity=${encodeURIComponent(entity.id)}`, {
+      cache: "no-store"
+    }).then(r => r.ok ? r.json() : null).then(b => {
+      if (!live || !b || !b.stage) return;
+      setRemembered(b);
+      setStage(s => s || b.stage);
+    }).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [entity.id]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [made, setMade] = useState(null);
@@ -950,7 +967,15 @@ function ShareDialog({
     value: v,
     checked: stage === v,
     onChange: () => setStage(v)
-  }), label))), /*#__PURE__*/React.createElement("div", {
+  }), label))), remembered && remembered.stage === stage ? /*#__PURE__*/React.createElement("div", {
+    "data-stage-remembered": true,
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-dark)",
+      marginTop: 6,
+      lineHeight: 1.5
+    }
+  }, "Remembered from the last link for ", entityName(entity), remembered.minted_at ? `, shared ${fmtDate(remembered.minted_at)}` : "", remembered.minted_by ? ` by ${remembered.minted_by}` : "", ". Change it if things have moved on.") : null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--z-muted)",

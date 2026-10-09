@@ -293,6 +293,24 @@ export async function listLinks(backend = ledgerBackend(), now = Date.now()) {
   }
 }
 
+/* ── The call stage a client is at (owner, 2026-10-09: "Is that call stage
+   persisted to ensure future links sent recall this?") ───────────────────
+   The stage recorded on this client's most recently generated link — so the
+   share dialog opens on it rather than asking from nothing. A link recorded
+   before the question existed carries no stage and is skipped. → { stage,
+   minted_by, minted_at, jti } | null; throws when the ledger cannot be read. */
+export async function latestStageFor(entity, backend = ledgerBackend()) {
+  if (!backend || !entity) return null;
+  const names = await backend.list("links/");
+  const rows = (await Promise.all(names.map((n) => backend.read(n))))
+    .map((r) => r && r.body)
+    .filter((b) => b && b.entity === entity && (b.stage === "before_first_call" || b.stage === "after_first_call"));
+  rows.sort((a, b) => String(b.minted_at || "").localeCompare(String(a.minted_at || "")));
+  const top = rows[0];
+  return top ? { stage: top.stage, minted_by: top.minted_by || null,
+                 minted_at: top.minted_at || null, jti: top.jti } : null;
+}
+
 /* ── Whitelisted client domains ───────────────────────────────────────
    Admin › Whitelisted client domains: every organisation domain the live
    links admit, and one control per domain. Access at a domain is the domain

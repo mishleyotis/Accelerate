@@ -371,3 +371,40 @@ test("generate client link · the call stage is asked, required, and sent with t
     server.close();
   }
 });
+
+test("generate client link · opens on the call stage remembered from the client's last link", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  try {
+    const p = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage();
+    const errors = []; p.on("pageerror", (e) => errors.push(String(e.message)));
+    await p.route("**/api/entity/**", (r) => r.fulfill({ status: 404, contentType: "application/json", body: "{}" }));
+    const asked = [];
+    await p.route("**/api/share?**", (r) => {
+      asked.push(new URL(r.request().url()).searchParams.get("entity"));
+      r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        stage: "after_first_call", minted_by: "sam.lee@zennify.com", minted_at: "2026-10-05T09:00:00Z" }) });
+    });
+    await p.goto(`${base}/#/clients/${ID}/overview`, { waitUntil: "domcontentloaded" });
+    await settle(p);
+    await p.locator(".audience-toggle button").nth(1).click();
+    await settle(p);
+    await p.click('button:has-text("Generate client link")');
+    await p.locator("[data-stage-remembered]").waitFor();
+    assert.deepStrictEqual(asked, [ID]);
+    assert.strictEqual(await p.isChecked('input[name="share-stage"][value="after_first_call"]'), true,
+      "the remembered stage is not pre-selected");
+    assert.match(await p.locator("[data-stage-remembered]").innerText(),
+      /Remembered from the last link for .+, shared .+ by sam\.lee@zennify\.com\. Change it if things have moved on\./);
+    await p.fill("#share-recipients", "jane@bcu.com");
+    assert.strictEqual(await p.locator('button:has-text("Generate link")').isDisabled(), false);
+    // The colleague can still change it; the note then goes, since it no longer applies.
+    await p.check('input[name="share-stage"][value="before_first_call"]');
+    assert.strictEqual(await p.locator("[data-stage-remembered]").count(), 0);
+    assert.deepStrictEqual(errors, []);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});

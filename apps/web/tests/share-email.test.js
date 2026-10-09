@@ -333,3 +333,25 @@ test("after the first sales call: thanks them for the call and asks for a follow
   assert.ok(!/recent call|follow-up call/i.test(before.text), "the pre-call email mentions a call that has not happened");
   assert.strictEqual(mail({ stage: undefined }).text, before.text, "a link recorded before the question defaults to pre-call");
 });
+
+test("the client's call stage is remembered: the newest link for that client wins", async () => {
+  const S = require("../lib/share.js");
+  const L = require("../lib/share-ledger.js");
+  const crypto = require("node:crypto");
+  const k = crypto.generateKeyPairSync("ed25519");
+  const dir = L.dirBackend(tmp());
+  const rec = async (entity, at, stage) => {
+    const { payload } = S.mint({ entity, run: "r1", recipients: "jane@bcu.com" }, k.privateKey, Date.parse(at));
+    await L.recordLink(payload, "mishley.otiende@zennify.com", dir, "Mishley Otiende", {}, stage);
+  };
+  assert.strictEqual(await L.latestStageFor("first-tech", dir), null, "nothing recorded yet");
+  await rec("first-tech", "2026-10-01T09:00:00Z", "before_first_call");
+  await rec("first-tech", "2026-10-05T09:00:00Z", "after_first_call");
+  await rec("first-tech", "2026-10-07T09:00:00Z", null);              // recorded before the question
+  await rec("other-client", "2026-10-08T09:00:00Z", "before_first_call");
+  const last = await L.latestStageFor("first-tech", dir);
+  assert.strictEqual(last.stage, "after_first_call");
+  assert.strictEqual(last.minted_by, "mishley.otiende@zennify.com");
+  assert.match(last.minted_at, /^2026-10-05/);
+  assert.strictEqual((await L.latestStageFor("other-client", dir)).stage, "before_first_call", "clients do not bleed");
+});

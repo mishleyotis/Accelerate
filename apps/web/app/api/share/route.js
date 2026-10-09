@@ -2,8 +2,28 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { requestSession } from "../../../lib/request-session";
 import { SHARE_STAGES, audit, mint, recipientNames, shareMode, shareUrl } from "../../../lib/share";
-import { ledgerBackend, recordLink } from "../../../lib/share-ledger";
+import { latestStageFor, ledgerBackend, recordLink } from "../../../lib/share-ledger";
 import { linkFields, logUsage } from "../../../lib/usage";
+
+// GET /api/share?entity=<slug> — the call stage recorded on this client's
+// most recent link, so the share dialog opens on it (owner, 2026-10-09).
+// → { stage: "before_first_call"|"after_first_call"|null, minted_by, minted_at }
+export async function GET(req) {
+  if (shareMode()) return new Response("Not found", { status: 404 });
+  const session = await requestSession(req, cookies());
+  if (!session) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
+  const entity = new URL(req.url).searchParams.get("entity") || "";
+  if (!/^[a-z0-9][a-z0-9-]{0,126}$/.test(entity)) {
+    return NextResponse.json({ error: "bad_request", detail: "name a client" }, { status: 400 });
+  }
+  try {
+    const last = await latestStageFor(entity);
+    return NextResponse.json(last || { stage: null }, { headers: { "cache-control": "no-store" } });
+  } catch {
+    // The dialog then simply asks: the stage is never guessed.
+    return NextResponse.json({ stage: null, unavailable: true }, { headers: { "cache-control": "no-store" } });
+  }
+}
 
 // POST /api/share — mint a client link (the IAP-fronted app only).
 //
