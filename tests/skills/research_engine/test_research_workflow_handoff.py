@@ -116,8 +116,11 @@ def test_lanes_need_a_stated_waiver_with_the_real_dispatcher():
         raise AssertionError("lanes ran on the real dispatcher without a waiver")
     a.allow_lanes = True
     assert P._research_mode(a) == "lanes"
+    # no flag is AUTO (2026-10-09): a connector-backed run resolves to the
+    # in-session workflow at RESEARCH, a degraded one to lean tiers
+    # (test_lean_tiers_2026_10_09::test_auto_*); never lanes
     assert P._research_mode(argparse.Namespace(research_mode=None, dispatcher="agent_run",
-                                               allow_lanes=False)) == "workflow"
+                                               allow_lanes=False)) == "auto"
     assert P._research_mode(argparse.Namespace(research_mode=None, dispatcher="stub",
                                                allow_lanes=False)) == "lanes"
 
