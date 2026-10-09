@@ -4,6 +4,7 @@ import { liveLink } from "../../../../lib/share-ledger";
 import { mayResend, sendSignInLink } from "../../../../lib/share-otp";
 import { checkEmailPage, deadLinkPage, gatePage, unavailablePage } from "../../../../lib/share-page";
 import { readAsLink } from "../../../../lib/share-read";
+import { clientSession, linkFields, logLinkEvent, logUsage } from "../../../../lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,8 @@ export async function POST(req, { params }) {
   };
   if (!email || !allowed(p, email)) {
     audit("share_access_refused", { jti: p.jti, entity: p.e, email: email || "(unparseable)" });
+    logLinkEvent("link_refused", linkFields(p, { attempted_email: email || null,
+      reason: email ? "not_on_allowlist" : "unparseable" }));
     return gatePage(params.token, await nameOf(), email
       ? "That email is not on the access list for this dashboard. Ask the person who shared it with you to add it."
       : "Enter a valid email address.", 403);
@@ -45,6 +48,7 @@ export async function POST(req, { params }) {
         "The sign-in email could not be sent just now. Try again in a minute.", 502);
     }
     audit("share_otp_sent", { jti: p.jti, entity: p.e, email });
+    logUsage("link_otp_sent", clientSession(email), linkFields(p));
     return checkEmailPage(await nameOf(), email);
   }
 
@@ -52,6 +56,7 @@ export async function POST(req, { params }) {
   try { cookie = accessCookie(p, params.token, email, "attest"); }
   catch { return gatePage(params.token, await nameOf(), "This link cannot be opened right now.", 503); }
   audit("share_access_granted", { jti: p.jti, entity: p.e, email, method: "attest" });
+  logUsage("link_admit", clientSession(email), linkFields(p, { method: "attest" }));
   return new Response(null, { status: 303, headers: {
     location: `/s/${params.token}#/clients/${p.e}/overview?view=client`,
     "set-cookie": cookie, "cache-control": "no-store", "referrer-policy": "no-referrer" } });

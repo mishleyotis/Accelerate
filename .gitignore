@@ -70,4 +70,6 @@ dma-insights-*.zip
 plugins/dma-insights/fixtures/source_yield.json
 apps/web/tests/e2e/jwks.json
 apps/web/tests/e2e/iap-private.pem
+apps/web/tests/e2e/share-*.pem
+apps/web/tests/e2e/share-ledger/
 apps/web/tests/e2e/*.log

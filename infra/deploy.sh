@@ -406,7 +406,10 @@ if [ -f apps/web/Dockerfile ]; then
       "${PROJECT_ID}:${USAGE_DATASET}" \
       || usage_warn "could not create dataset ${USAGE_DATASET} (needs bigquery.user)"
   fi
-  USAGE_FILTER='resource.type="cloud_run_revision" AND resource.labels.service_name="dmai-web" AND jsonPayload.usage_v=1'
+  # dmai-share writes the client-link lines (lib/usage LINK_EVENTS and the
+  # recipients' page beacons); dmai-web everything else. A sink filtered to
+  # dmai-web alone left every client reader unrecorded (owner, 2026-10-09).
+  USAGE_FILTER='resource.type="cloud_run_revision" AND (resource.labels.service_name="dmai-web" OR resource.labels.service_name="dmai-share") AND jsonPayload.usage_v=1'
   USAGE_DEST="bigquery.googleapis.com/projects/${PROJECT_ID}/datasets/${USAGE_DATASET}"
   CUR_FILTER="$(gcloud logging sinks describe "$USAGE_SINK" --project="$PROJECT_ID" \
                  --format='value(filter)' 2>/dev/null || echo "__missing__")"

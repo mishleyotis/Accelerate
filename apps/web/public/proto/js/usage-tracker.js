@@ -16,7 +16,8 @@
 
    A session is continuous activity with less than 30 minutes between events
    (the prototype's definition). Identity is never sent: the server reads it
-   from the session cookie. Local preview (no DMA_LIVE) sends nothing.
+   from the session cookie — on a client link, from the link's access cookie
+   (app/s/[token]/api/usage). Local preview (no DMA_LIVE) sends nothing.
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
   const noop = () => {};
@@ -68,17 +69,22 @@
       return memSid.sid;
     }
   }
+
+  // A client link (dmai-share) reports to its own scoped route under the
+  // booted api_base, where the reader's identity is the address the link
+  // admitted; the app reports to /api/usage.
+  const URL_ = LIVE.share && LIVE.api_base ? `${LIVE.api_base}/usage` : "/api/usage";
   function send(events) {
     const body = JSON.stringify({
       events
     });
     try {
-      if (navigator.sendBeacon && navigator.sendBeacon("/api/usage", new Blob([body], {
+      if (navigator.sendBeacon && navigator.sendBeacon(URL_, new Blob([body], {
         type: "application/json"
       }))) return;
     } catch (e) {}
     try {
-      fetch("/api/usage", {
+      fetch(URL_, {
         method: "POST",
         body,
         keepalive: true,
