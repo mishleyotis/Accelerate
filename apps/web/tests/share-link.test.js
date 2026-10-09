@@ -5,7 +5,7 @@
  *   · a client link opens without a Zennify login, on its own public service;
  *   · it is shared TO named people — their addresses and their organisations'
  *     domains are the allowlist, for that one DMA;
- *   · no mail provider, no identity provider, no third-party key.
+ *   · no third-party key (the sign-in email's sender: share-email.test.js).
  *
  * What makes it safe is asserted here rather than described: the token is
  * signed by a key the public service never holds, binds one client and one

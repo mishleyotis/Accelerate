@@ -284,6 +284,44 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   closed** (503). A configured ledger that cannot record a new link issues no
   link. `infra/share-revoked.txt` stays as break-glass. Tests:
   `share-link.test.js`, `share-admin.test.js`, `test_deploy_auth_posture.py`.
+  **The sign-in email** (owner, 2026-10-09, after Identity Platform's
+  default — "Sign in to n8n…" from noreply@…firebaseapp.com — landed in
+  spam; supersedes "no mail provider" above for this email only): sent
+  **from the Gmail of the colleague who shared the link** (or who re-added
+  that address/domain) — zennify.com is **Google Workspace** ("We own a
+  Google suite") — via the Gmail API with **domain-wide delegation**,
+  gmail.send only: dmai-share signs the JWT through IAM signJwt on itself
+  (**no key**); a Workspace super admin authorises its client id once.
+  deploy.sh switches it on only when a delegated token reads back gmail.send
+  for an ADMIN_EMAILS colleague (nothing is sent); otherwise, and for a link
+  with no zennify.com sharer, Identity Platform sends its own email.
+  **Content** (owner, same day): greets the recipient by name (a name given
+  as "Jane Doe <jane@…>" in the share dialog, recorded in the ledger, never
+  signed into the link; else first.last; else "Dear {client} team"); says
+  "Your {client} digital maturity assessment is ready" — never "dashboard";
+  explains how the client performs against its peers (four pillars,
+  benchmarked against comparable {sub-vertical} institutions); a follow-up
+  CTA by **call stage** — the share dialog asks, required, "Has the first
+  sales call happened?" (`stage` in the ledger, never in the link): before →
+  "Schedule a walkthrough"; after → thanks them for the call and "Book a
+  follow-up call" (mailto the colleague, plus reply). The stage is
+  **remembered per client**: the dialog opens on the stage of that client's
+  most recent link (`GET /api/share?entity=`, `latestStageFor`), says so,
+  and the colleague can change it; a link with no stage gets the pre-call
+  email, never Identity Platform's generic one. Zennify
+  design system (`lib/share-email.js`: palette from the app's design tokens,
+  inline wordmark, one web link, text part, no tracking). The link is **the
+  app's own one-time code**, signed and bound to the address, **valid for
+  the days the link was shared for** ("It is number of days not minutes"),
+  burned on first use (`used/<nonce>`); login validation is unchanged in
+  kind — only the inbox owner can follow it, no Google account needed
+  (owner chose this, 2026-10-09). **Anti-spam** (`lib/share-throttle.js`):
+  shared budgets in the private bucket `${PROJECT_ID}-dmai-share-sends` —
+  1/min, 4/h, 8/day per address per link; 20/h, 60/day per link; 15/day for
+  addresses admitted only by domain (enumeration); 150/day per colleague;
+  20/h per network; 600/day service — spent by atomic increment (a burst
+  sends once), **fail closed**; a honeypot and a signed form time on the gate
+  (no CAPTCHA). Stress: `apps/web/tests/e2e/share-mail.stress.js`.
 
 - **User role allocation** (user, 2026-10-07, after "you even removed user
   role allocation from the admin page"): grants live in the Backend Schema's

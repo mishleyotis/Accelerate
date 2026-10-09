@@ -188,6 +188,15 @@ test("generate client link · recipients first, then the link", () => {
   assert.match(html, /<button[^>]*disabled=""[^>]*>Generate link<\/button>/,
     "Generate link is pressable with no recipient");
   assert.ok(!/readonly/i.test(html), "a link is shown before one was generated");
+  // Owner, 2026-10-09: the dialog asks whether the first sales call has
+  // happened, and nothing is minted until it is answered.
+  assert.match(text, /Has the first sales call with .+ happened\?/);
+  assert.match(text, /Not yet: before the first call/);
+  assert.match(text, /Yes: after the first call/);
+  assert.equal((html.match(/type="radio"[^>]*name="share-stage"/g) || []).length, 2);
+  assert.ok(!/checked=""/.test(html), "a call stage is pre-selected; the colleague must choose");
+  assert.match(html, /Required: it decides the follow-up/);
+  assert.match(text, /Jane Doe <jane@bcu\.com>|Jane Doe &lt;jane@bcu\.com&gt;/, "the recipients hint does not show how to add a name");
 });
 
 test("client bar · the Zennify view keeps Platform and Tech stack, and no banner", () => {
@@ -304,6 +313,96 @@ test("client link · the dashboard alone, and no way out of it", { skip }, async
     assert.strictEqual(app.nav, true);
     assert.strictEqual(app.toggle, true);
     assert.ok(app.tabs.includes("Platform") && app.tabs.includes("Tech stack"));
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+test("generate client link · the call stage is asked, required, and sent with the request", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+    const p = await ctx.newPage();
+    const errors = []; p.on("pageerror", (e) => errors.push(String(e.message)));
+    const P = pages();
+    await p.route("**/api/entity/**", (r) => {
+      const m = new URL(r.request().url()).pathname.match(/\/api\/entity\/[^/]+\/([^/]+)/);
+      const body = m && P[m[1]];
+      r.fulfill(body ? { status: 200, contentType: "application/json",
+        body: JSON.stringify({ entity: { display_id: ID, entity_name: NAME },
+                               run: { run_id: RUN.run_id, request_id: RUN.id }, ...body }) }
+        : { status: 404, contentType: "application/json", body: '{"error":"not_found"}' });
+    });
+    const posts = [];
+    await p.route("**/api/share", (r) => {
+      posts.push(JSON.parse(r.request().postData()));
+      r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        url: "https://share.example/s/a.b#/x", jti: "linkAAAA01", expires_at: "2026-11-08T00:00:00Z",
+        allowlist: { emails: ["jane@bcu.com"], domains: ["bcu.com"] } }) });
+    });
+    await p.goto(`${base}/#/clients/${ID}/overview`, { waitUntil: "domcontentloaded" });
+    await settle(p);
+    await p.locator(".audience-toggle button").nth(1).click();   // the Client view carries the button
+    await settle(p);
+    await p.click('button:has-text("Generate client link")');
+    const gen = p.locator('button:has-text("Generate link")');
+    await p.fill("#share-recipients", "Jane Doe <jane@bcu.com>");
+    assert.strictEqual(await gen.isDisabled(), true, "Generate is pressable before the call stage is chosen");
+    await p.check('input[name="share-stage"][value="after_first_call"]');
+    assert.match(await p.locator(".modal").innerText(), /thanks them for the call and invites a follow-up call/);
+    assert.strictEqual(await gen.isDisabled(), false);
+    await gen.click();
+    await settle(p);
+    assert.strictEqual(posts.length, 1);
+    assert.strictEqual(posts[0].stage, "after_first_call");
+    assert.strictEqual(posts[0].recipients, "Jane Doe <jane@bcu.com>");
+    const href = decodeURIComponent(await p.locator('a:has-text("Email link")').getAttribute("href"));
+    assert.match(href, /Your .+ digital maturity assessment is ready/);
+    assert.match(href, /Hi Jane,/);
+    assert.match(href, /Thank you for your time on our recent call/);
+    assert.match(href, /follow-up call/);
+    assert.ok(!/dashboard/i.test(href), "the invitation still says 'dashboard'");
+    assert.deepStrictEqual(errors, []);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+test("generate client link · opens on the call stage remembered from the client's last link", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  try {
+    const p = await (await browser.newContext({ viewport: { width: 1400, height: 900 } })).newPage();
+    const errors = []; p.on("pageerror", (e) => errors.push(String(e.message)));
+    await p.route("**/api/entity/**", (r) => r.fulfill({ status: 404, contentType: "application/json", body: "{}" }));
+    const asked = [];
+    await p.route("**/api/share?**", (r) => {
+      asked.push(new URL(r.request().url()).searchParams.get("entity"));
+      r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+        stage: "after_first_call", minted_by: "sam.lee@zennify.com", minted_at: "2026-10-05T09:00:00Z" }) });
+    });
+    await p.goto(`${base}/#/clients/${ID}/overview`, { waitUntil: "domcontentloaded" });
+    await settle(p);
+    await p.locator(".audience-toggle button").nth(1).click();
+    await settle(p);
+    await p.click('button:has-text("Generate client link")');
+    await p.locator("[data-stage-remembered]").waitFor();
+    assert.deepStrictEqual(asked, [ID]);
+    assert.strictEqual(await p.isChecked('input[name="share-stage"][value="after_first_call"]'), true,
+      "the remembered stage is not pre-selected");
+    assert.match(await p.locator("[data-stage-remembered]").innerText(),
+      /Remembered from the last link for .+, shared .+ by sam\.lee@zennify\.com\. Change it if things have moved on\./);
+    await p.fill("#share-recipients", "jane@bcu.com");
+    assert.strictEqual(await p.locator('button:has-text("Generate link")').isDisabled(), false);
+    // The colleague can still change it; the note then goes, since it no longer applies.
+    await p.check('input[name="share-stage"][value="before_first_call"]');
+    assert.strictEqual(await p.locator("[data-stage-remembered]").count(), 0);
+    assert.deepStrictEqual(errors, []);
   } finally {
     await browser.close();
     server.close();

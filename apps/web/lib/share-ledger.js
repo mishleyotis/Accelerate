@@ -45,7 +45,7 @@ export function ledgerBackend(env = process.env) {
   return null;
 }
 
-class Unavailable extends Error {}
+export class Unavailable extends Error {}
 
 let tokenCache = null;
 async function gcsToken() {
@@ -59,7 +59,7 @@ async function gcsToken() {
   return t.access_token;
 }
 
-function gcsBackend(bucket) {
+export function gcsBackend(bucket) {
   const api = process.env.STORAGE_API || "https://storage.googleapis.com";
   const b = encodeURIComponent(bucket);
   const auth = async () => ({ Authorization: `Bearer ${await gcsToken()}` });
@@ -114,7 +114,7 @@ function gcsBackend(bucket) {
   };
 }
 
-function dirBackend(root) {
+export function dirBackend(root) {
   const file = (name) => path.join(root, ...name.split("/"));
   return {
     kind: "dir", where: root,
@@ -151,12 +151,20 @@ function dirBackend(root) {
 }
 
 /* ── Recording a link ──────────────────────────────────────────────── */
-export async function recordLink(payload, mintedBy, backend = ledgerBackend()) {
+// `mintedByName` is the colleague's display name from their session: the
+// sign-in email the recipient receives is sent from, and signed by, them.
+// `names` (email → name) greets each named recipient in their sign-in email.
+export async function recordLink(payload, mintedBy, backend = ledgerBackend(), mintedByName = null, names = null,
+                                 stage = null) {
   if (!backend) return false;
   const rec = {
     jti: payload.jti, entity: payload.e, run: payload.r,
     emails: payload.a.m, domains: payload.a.d,
     minted_by: mintedBy || null,
+    minted_by_name: mintedByName ? String(mintedByName).slice(0, 120) : null,
+    recipient_names: names && typeof names === "object" ? names : {},
+    // before_first_call | after_first_call — which follow-up the email offers.
+    stage: stage || null,
     minted_at: new Date(payload.iat * 1000).toISOString(),
     expires_at: new Date(payload.exp * 1000).toISOString(),
   };
@@ -164,6 +172,22 @@ export async function recordLink(payload, mintedBy, backend = ledgerBackend()) {
     throw new Unavailable(`link ${payload.jti} already recorded`);
   }
   return true;
+}
+
+/* ── Who shared a link (the share service, when it sends a sign-in) ───
+   → the links/<jti>.json record | null (not recorded — a link generated
+   before the ledger). Cached like a revocation; throws Unavailable when a
+   configured ledger cannot be read. */
+const recCache = new Map();
+export async function linkRecord(jti, backend = ledgerBackend(), now = Date.now()) {
+  if (!backend || !isJti(jti)) return null;
+  const hit = recCache.get(jti);
+  if (hit && hit.until > now) return hit.value;
+  const got = await backend.read(`links/${jti}.json`);
+  const value = got ? got.body : null;
+  recCache.set(jti, { value, until: now + 5 * 60 * 1000 });
+  if (recCache.size > 5000) recCache.delete(recCache.keys().next().value);
+  return value;
 }
 
 /* ── Reading a revocation (the share service, on every request) ────── */
@@ -267,6 +291,24 @@ export async function listLinks(backend = ledgerBackend(), now = Date.now()) {
   } catch (e) {
     return { status: "error", detail: String(e.message || e).slice(0, 300), links: [] };
   }
+}
+
+/* ── The call stage a client is at (owner, 2026-10-09: "Is that call stage
+   persisted to ensure future links sent recall this?") ───────────────────
+   The stage recorded on this client's most recently generated link — so the
+   share dialog opens on it rather than asking from nothing. A link recorded
+   before the question existed carries no stage and is skipped. → { stage,
+   minted_by, minted_at, jti } | null; throws when the ledger cannot be read. */
+export async function latestStageFor(entity, backend = ledgerBackend()) {
+  if (!backend || !entity) return null;
+  const names = await backend.list("links/");
+  const rows = (await Promise.all(names.map((n) => backend.read(n))))
+    .map((r) => r && r.body)
+    .filter((b) => b && b.entity === entity && (b.stage === "before_first_call" || b.stage === "after_first_call"));
+  rows.sort((a, b) => String(b.minted_at || "").localeCompare(String(a.minted_at || "")));
+  const top = rows[0];
+  return top ? { stage: top.stage, minted_by: top.minted_by || null,
+                 minted_at: top.minted_at || null, jti: top.jti } : null;
 }
 
 /* ── Whitelisted client domains ───────────────────────────────────────

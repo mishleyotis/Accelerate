@@ -36,11 +36,14 @@ test("same build: no banner; a new build: banner, and the next tab change reload
     const { page } = await open(browser, base, BOOT, "build-B");
     await page.locator("[data-update-banner]").waitFor();
     assert.match(await page.locator("[data-update-banner]").innerText(), /has been updated[\s\S]*Reload/);
+    // Wait for the reload's own load event: waitForLoadState("load") returns
+    // at once on a page already loaded, which made this a race on slow CI.
     let loads = 0;
     page.on("load", () => { loads++; });
+    const reloaded = page.waitForEvent("load", { timeout: 15000 }).catch(() => null);
     await page.evaluate(() => { location.hash = "/prospecting"; });
-    await page.waitForLoadState("load");
-    await page.waitForTimeout(300);
+    await reloaded;
+    await page.waitForTimeout(300);   // a second, unwanted reload would land here
     assert.strictEqual(loads, 1, "the next tab change did not reload onto the new build");
     assert.match(page.url(), /#\/prospecting$/, "the reload lost the address");
   } finally { await browser.close(); server.close(); }

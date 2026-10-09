@@ -108,16 +108,38 @@ export function domainOf(email) {
   return String(email).split("@")[1];
 }
 
-/* Recipients → {m: emails, d: domains}. Throws on any address that does not
-   parse: a typo silently dropped would be a colleague silently locked out. */
-export function allowlistFor(recipients) {
-  const list = Array.isArray(recipients) ? recipients
-    : String(recipients || "").split(/[\s,;]+/);
-  const m = new Set(), d = new Set();
+/* The recipients box → [{ email, name }]. Accepts bare addresses and
+   "Jane Doe <jane@bcu.com>", separated by commas, semicolons, new lines or
+   spaces. The name is only used to greet the person in their sign-in email
+   (it is recorded in the ledger, never signed into the link). Throws on any
+   entry that does not parse: a typo silently dropped would be a colleague
+   silently locked out. */
+const ENTRY = /(?:"([^"]*)"\s*<\s*([^<>\s]+)\s*>)|(?:([^"<>,;\n]*?)\s*<\s*([^<>\s]+)\s*>)|([^\s,;<>"]+@[^\s,;<>"]+)/g;
+export function parseRecipients(recipients) {
+  const out = [];
+  const list = Array.isArray(recipients) ? recipients : [String(recipients || "")];
   for (const raw of list) {
-    if (!String(raw || "").trim()) continue;
-    const e = normaliseEmail(raw);
-    if (!e) throw Object.assign(new Error(`not an email address: ${String(raw).slice(0, 80)}`), { code: "bad_request" });
+    const str = String(raw || "");
+    let rest = str;
+    for (const m of str.matchAll(ENTRY)) {
+      rest = rest.replace(m[0], " ");
+      const addr = m[2] || m[4] || m[5];
+      const rawName = m[1] || m[3] || "";
+      const e = normaliseEmail(addr);
+      if (!e) throw Object.assign(new Error(`not an email address: ${String(addr).slice(0, 80)}`), { code: "bad_request" });
+      const name = rawName ? rawName.replace(/[\u0000-\u001f<>"]/g, "").replace(/\s+/g, " ").trim().slice(0, 80) : "";
+      out.push({ email: e, name: name || null });
+    }
+    const left = rest.replace(/[\s,;]+/g, " ").trim();
+    if (left) throw Object.assign(new Error(`not an email address: ${left.slice(0, 80)}`), { code: "bad_request" });
+  }
+  return out;
+}
+
+/* Recipients → {m: emails, d: domains}. */
+export function allowlistFor(recipients) {
+  const m = new Set(), d = new Set();
+  for (const { email: e } of parseRecipients(recipients)) {
     m.add(e);
     const dom = domainOf(e);
     if (!CONSUMER_DOMAINS.has(dom)) d.add(dom);
@@ -125,6 +147,19 @@ export function allowlistFor(recipients) {
   if (!m.size) throw Object.assign(new Error("name at least one recipient email"), { code: "bad_request" });
   if (m.size > 25) throw Object.assign(new Error("at most 25 recipients per link"), { code: "bad_request" });
   return { m: [...m].sort(), d: [...d].sort() };
+}
+
+// Where the relationship stands when a link is shared (owner, 2026-10-09):
+// the share dialog asks, and the recipient's email follows — before the first
+// sales call it offers a walkthrough; after it, a follow-up call. Recorded in
+// the ledger with the link, never signed into it.
+export const SHARE_STAGES = ["before_first_call", "after_first_call"];
+
+// email → name, for the recipients given a name ("Jane Doe <jane@bcu.com>").
+export function recipientNames(recipients) {
+  const names = {};
+  for (const { email, name } of parseRecipients(recipients)) if (name) names[email] = name;
+  return names;
 }
 
 /* Whether `email` is on the token's allowlist: the address itself, or an

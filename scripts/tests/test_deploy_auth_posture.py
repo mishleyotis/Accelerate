@@ -364,3 +364,29 @@ def test_THE_LINK_LEDGER_IS_WRITTEN_BY_THE_APP_AND_ONLY_READ_BY_THE_PUBLIC_SERVI
         "the ledger is configured on one service and not the other")
     lib = (ROOT / "apps" / "web" / "lib" / "share-ledger.js").read_text()
     assert 'why: "unavailable"' in lib, "a ledger read failure no longer fails closed"
+
+
+def test_SIGN_IN_EMAILS_ARE_METERED_AND_COME_FROM_THE_COLLEAGUE_OR_SAY_WHY_NOT():
+    """Owner, 2026-10-09: the sign-in email is sent from the colleague who
+    shared the link — their own Gmail ("We own a Google suite") — and it
+    cannot be used to spam. The budget store is a private, expiring bucket
+    dmai-share must have; a store that cannot be made fails the release (the
+    share service fails closed without it). The sender is switched on only
+    after a delegated gmail.send token is read back for a real colleague,
+    with no key created, and a release without it prints the exact Workspace
+    admin step, never silence."""
+    text = DEPLOY.read_text()
+    share = _deploy_block("dmai-share")
+    assert "SHARE_SENDS_BUCKET=${SHARE_SENDS_BUCKET}" in share
+    assert "${MAIL_ENV}" in share, "the mailer config does not reach dmai-share"
+    assert "${MAIL_ENV}" not in _deploy_block("dmai-web"), "the IAP app has no business sending mail"
+    assert 'FATAL: could not grant dmai-share the sign-in email budgets bucket' in text
+    assert '"condition":{"age":2,"matchesPrefix":["rl/"]}' in text, "budget counters no longer expire"
+    # A burned sign-in code must outlive the longest share link (90 days).
+    assert '"condition":{"age":92,"matchesPrefix":["used/"]}' in text, "burned codes expire before their links"
+    assert "https://www.googleapis.com/auth/gmail.send" in text
+    assert '"gmail.send" in' in text, "the sender is switched on without reading back gmail.send"
+    assert "Manage domain-wide delegation" in text, "the Workspace admin step is no longer printed"
+    assert 'echo "  Why: ${MAIL_WHY:-unknown}" >&2' in text
+    for forbidden in ("service-accounts keys create", "client_secret", "--key-file", "SHARE_MAIL_TENANT_ID"):
+        assert forbidden not in text, f"a mail credential appeared in the deploy: {forbidden}"
