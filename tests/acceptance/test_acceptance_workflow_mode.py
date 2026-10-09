@@ -218,5 +218,8 @@ def test_the_cli_defaults_every_workflow_stage_to_the_workflow(tmp_path):
                            folder_root=None, no_push=True, allow_stale_install=False,
                            lanes=1, toolkits=None, research_mode=None, run="R")
     o = P._build_opts(a)
+    # research defaults to AUTO (2026-10-09): the in-session workflow on a
+    # connector-backed run, lean tiers on a degraded one — resolved at the
+    # stage (test_lean_tiers_2026_10_09::test_auto_*); the rest are workflows
     assert (o.research_mode, o.scoring_mode, o.report_mode, o.pages_mode) == \
-        ("workflow",) * 4
+        ("auto",) + ("workflow",) * 3
