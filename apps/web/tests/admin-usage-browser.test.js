@@ -309,3 +309,77 @@ test("admin chips, addresses and tables hold their words at every width", { skip
     server.close();
   }
 });
+
+/* Client-link readers (owner, 2026-10-09: "Usage analytics for clients
+   provided the link do not get registered. We also do not have them on the
+   filters"). The store's link fields and generated links render as: a
+   Client (link) role filter, every recipient and reader as a Client person
+   with their client, a Client links card naming who shared it and who has
+   and has not opened it — and Users & roles never offers a client a role. */
+const LF = [...F, "link_jti", "method", "attempted_email", "reason"];
+function clientWire() {
+  const now = Date.now();
+  const ago = (m) => new Date(now - m * 60000).toISOString();
+  const row = (o) => LF.map((f) => (f in o ? o[f] : null));
+  const base = wire();
+  const keep = base.events.map((r) => [...r, null, null, null, null]);
+  const J = "linkAAAA0001";
+  const reader = { email: "jane.reader@bcu-client.org", role: "CLIENT", client_id: "golden-1", link_jti: J, audience: "customer" };
+  return { ...base, fields: LF,
+    link_fields: ["t", "by", "by_role", "jti", "client_id", "run_id", "recipients", "domains", "expires_at"],
+    last_seen: { ...base.last_seen, "jane.reader@bcu-client.org": ago(5) },
+    client_only: ["jane.reader@bcu-client.org"],
+    links: [[ago(60 * 26), "dma@zennify.com", "ADMIN", J, "golden-1", "run-1",
+             ["jane.reader@bcu-client.org", "cfo@bcu-client.org"], ["bcu-client.org"], ago(-60 * 24 * 20)]],
+    events: [...keep,
+      row({ t: ago(60 * 25), type: "link_refused", role: "CLIENT", client_id: "golden-1", link_jti: J,
+            attempted_email: "someone@gmail.com", reason: "not_on_allowlist" }),
+      row({ ...reader, t: ago(60 * 24), type: "link_admit", method: "otp" }),
+      row({ ...reader, t: ago(60 * 24), type: "link_open" }),
+      row({ ...reader, t: ago(60 * 24 - 4), type: "page_view", sid: "clientSess01", page: "insights", path: "/clients/golden-1/insights",
+            dwell_ms: 240000, cont: false, entered_at: ago(60 * 24 - 1), device: "Desktop · Safari" }),
+    ] };
+}
+
+test("client-link readers are people, filterable as Client, with their links", { skip }, async () => {
+  const pw = resolvePlaywright();
+  const browser = await pw.chromium.launch({ executablePath: resolveChromium(), args: ["--no-sandbox"] });
+  const { server, base } = await startServer(BOOT);
+  const roster = [{ email: "dma@zennify.com", display_name: "DMA", role: "ADMIN", is_active: true, signed_in: true, last_seen_at: null, created_at: null }];
+  const users = (r) => r.fulfill({ status: 200, contentType: "application/json",
+    body: JSON.stringify({ users: roster, owner_floor: [], default_role: "AE" }) });
+  try {
+    const { ctx, p, errors } = await openApp(browser, base, "#/admin/usage", clientWire(), users);
+    await p.waitForFunction(() => /Client links · generated/.test(document.body.innerText), null, { timeout: 10000 });
+    assert.deepStrictEqual(errors, []);
+    const options = await p.locator('select[aria-label="Role"] option').allInnerTexts();
+    assert.ok(options.includes("Client (link)"), options.join(","));
+    const card = await p.locator('[data-screen-label="Usage · Client links"]').innerText();
+    for (const want of ["Golden 1 Credit Union", "dma@zennify.com", "● jane.reader@bcu-client.org",
+                        "○ cfo@bcu-client.org", "Domains: bcu-client.org", "4m 00s"]) {
+      assert.ok(card.includes(want), `Client links card is missing "${want}": ${card}`);
+    }
+    const signals = await p.locator(".card", { hasText: "Needs a nudge" }).innerText();
+    assert.match(signals.replace(/\n/g, " "), /1 link generated .* 1 of 2 recipients have opened/);
+    await p.selectOption('select[aria-label="Role"]', "CLIENT");
+    const table = () => p.locator(".card", { has: p.locator("h3", { hasText: "Users · activity" }) }).innerText();
+    const t = await table();
+    assert.match(t, /jane\.reader@bcu-client\.org/);
+    assert.match(t, /cfo@bcu-client\.org/);
+    assert.match(t, /Client link · Golden 1 Credit Union/);
+    assert.ok(!/ae\.one@zennify\.com/.test(t), "Client filter keeps staff out");
+    assert.ok(!/someone@gmail\.com/.test(await p.evaluate(() => document.body.innerText)), "a refused address is nobody");
+    await p.selectOption('select[aria-label="Role"]', "AE");
+    assert.ok(!/bcu-client\.org/.test(await table()));
+    assert.strictEqual(await p.locator('[data-screen-label="Usage · Client links"]').count(), 0,
+                       "a link nobody in the AE filter shared or read is not shown");
+    await p.evaluate(() => { location.hash = "/admin"; });
+    await p.waitForFunction(() => /Users & roles/.test(document.body.innerText) && !/Loading users/.test(document.body.innerText), null, { timeout: 10000 });
+    const rosterText = await p.locator(".card", { has: p.locator("h3", { hasText: "Users & roles" }) }).innerText();
+    assert.ok(!/bcu-client\.org/.test(rosterText), `Users & roles offers a client a role: ${rosterText}`);
+    await ctx.close();
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});

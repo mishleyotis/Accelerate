@@ -331,6 +331,23 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   and session changes are proven on the real stack before they are called
   fixed: `apps/web/tests/e2e/run.sh` (Chromium + next start + uvicorn +
   Postgres, signed assertions; scenarios + concurrency stress).
+  **Client-link usage is measured** (user, 2026-10-09: "Usage analytics for
+  clients provided the link do not get registered … All links generated should
+  be logged and usage analytics for each whitelisted login be tracked"). The
+  dmai-usage sink takes `dmai-web` **and `dmai-share`**. Server lines
+  (`lib/usage.js LINK_EVENTS`, never from a beacon): `link_minted` (sharer,
+  recipients, domains, expiry), `link_otp_sent`, `link_admit` (method),
+  `link_open`, `link_refused` (`email` null, `attempted_email` + reason — a
+  refused address is never a person). A reader's page beacons post to
+  `/s/<token>/api/usage`; identity is the address the link admitted (access
+  cookie, re-checked against the live allowlist), role **`CLIENT`**, audience
+  customer, link/client/run stamped server-side; a dead, revoked or removed
+  reader logs nothing. Admin › Usage analytics: role filter **Client (link)**,
+  every recipient and reader a Client person ("Client link · <client>",
+  unopened = No activity yet), a **Client links · generated & opened** card,
+  and a Client links signal; Users & roles never offers a client a role. The
+  e2e adds a `SHARE_MODE=1` server (`client-links.e2e.js` / `.stress.js`);
+  the store's SQL is proven on BigQuery by `infra/diagnose_usage.sh`.
 
 - **Workflow optimisation** (user, 2026-10-09, after reading every DMA
   session of 2026-09-25..10-09; `plugins/dma-insights/docs/WORKFLOW-OPTIMIZATION-2026-10-09.md`):

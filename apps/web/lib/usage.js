@@ -25,6 +25,22 @@ export const USAGE_V = 1;
 // that observe them and are never accepted from a beacon.
 export const BEACON_TYPES = new Set(["page_view", "heartbeat", "feature"]);
 
+// Client-link readers on the public share service (dmai-share). They are not
+// Zennify users and hold no grant: their role is CLIENT, and who they are is
+// the address the link admitted (lib/share readAccess), never the body's.
+export const CLIENT_ROLE = "CLIENT";
+
+// What the share service and the minting route observe about a client link.
+// Server-side only, never accepted from a beacon:
+//   link_minted    a link was generated (who shared it, client, recipients)
+//   link_otp_sent  a one-time sign-in email went to an allowlisted address
+//   link_admit     an allowlisted address was let in (method otp | attest)
+//   link_open      an admitted reader loaded the dashboard
+//   link_refused   an address was turned away (attempted_email, reason);
+//                  `email` stays null, so a stranger never becomes a person
+export const LINK_EVENTS = new Set(["link_minted", "link_otp_sent", "link_admit",
+                                    "link_open", "link_refused"]);
+
 // Feature actions the browser may report.
 export const FEATURES = new Set([
   "evidence",        // an evidence drawer opened
@@ -97,6 +113,34 @@ export function logUsage(type, session, fields, now) {
   if (!session || !session.email) return;
   try {
     process.stdout.write(JSON.stringify(usageLine(type, session, fields, now)) + "\n");
+  } catch {
+    // Telemetry never fails a request.
+  }
+}
+
+// The identity a client-link line is logged under.
+export function clientSession(email) {
+  return { email, role: CLIENT_ROLE };
+}
+
+// The fields every line about one link carries.
+export function linkFields(p, extra = {}) {
+  return { link_jti: p.jti, client_id: p.e, run_id: p.r, ...extra };
+}
+
+// A client reader's beacon event, made to say only what a client link can be:
+// the customer audience, no acting-as, the link's own client and run.
+export function clientBeaconFields(fields, p) {
+  return { ...fields, audience: "customer", acting_role: null, client_link: true,
+           ...linkFields(p) };
+}
+
+// A line with no person behind it (a refused address): the type and the
+// fields only. logUsage stays the path for anything a person did.
+export function logLinkEvent(type, fields, now) {
+  try {
+    process.stdout.write(JSON.stringify(
+      usageLine(type, { email: null, role: CLIENT_ROLE }, fields, now)) + "\n");
   } catch {
     // Telemetry never fails a request.
   }

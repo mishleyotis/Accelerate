@@ -3,6 +3,7 @@ import { liveLink } from "../../../lib/share-ledger";
 import { dashboardPage, deadLinkPage, gatePage, unavailablePage } from "../../../lib/share-page";
 import { entityRow, readAsLink } from "../../../lib/share-read";
 import { upstreamHeaders } from "../../../lib/upstream";
+import { clientSession, deviceOf, linkFields, logUsage } from "../../../lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,9 @@ export async function GET(req, { params }) {
   if (!email) return gatePage(params.token, body.entity.entity_name);
 
   audit("share_link_opened", { jti: p.jti, entity: p.e, run: p.r, email });
+  // Usage analytics: this recipient opened this link (lib/usage LINK_EVENTS).
+  logUsage("link_open", clientSession(email),
+           linkFields(p, { device: deviceOf(req.headers.get("user-agent")) }));
   const catRes = await fetch(`${process.env.API_URL}/v1/catalogue`, {
     headers: await upstreamHeaders(process.env.API_URL),
     cache: "no-store" }).catch(() => null);
