@@ -70,11 +70,19 @@ def test_a_scripts_own_subcommand_is_not_read_as_a_shell_verb():
     from pathlib import Path
     hook = (Path(__file__).resolve().parents[1] / "hooks" / "autoapprove_builtins.py")
 
+    # The command names the script relative to the REPOSITORY ROOT, and the
+    # hook resolves a script on disk (`_script_ok`) against its cwd — so the
+    # hook runs from the root, whatever directory pytest was started in.
+    # Started from plugins/dma-insights the path does not exist and the hook
+    # rightly says nothing (2026-10-09: red on the base branch for that
+    # reason alone).
+    repo = Path(__file__).resolve().parents[4]
+
     def decide(cmd):
         r = subprocess.run([sys.executable, str(hook)], text=True, timeout=60,
                            input=json.dumps({"tool_name": "Bash",
                                              "tool_input": {"command": cmd}}),
-                           capture_output=True)
+                           capture_output=True, cwd=str(repo))
         out = (r.stdout or "").strip()
         return (json.loads(out)["hookSpecificOutput"]["permissionDecision"]
                 if out else None)

@@ -664,6 +664,11 @@ def main(argv=None) -> int:
                          "span taken from it verifies exactly as a fetched "
                          "one does and no second fetch is bought")
     fe.add_argument("--json", action="store_true")
+    # Accepted and ignored: the command sheet says "pass --actor on every
+    # write", and a batch line that carries it failed here (R-IMA-20261009,
+    # three fetch lines refused; the evidence lines behind them then had no
+    # cache to verify against). A fetch is a read; the flag is harmless.
+    fe.add_argument("--actor", default=None, help=argparse.SUPPRESS)
 
     common(sub.add_parser("validate"))
     ch = common(sub.add_parser(

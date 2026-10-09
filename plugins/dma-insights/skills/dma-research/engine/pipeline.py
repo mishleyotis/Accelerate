@@ -532,6 +532,16 @@ class Options:
     # refuse at write time, so a critic that has not passed by round 2 is
     # naming judgement calls the scorer brief must carry, not re-sampling.
     critic_rounds: int = 2
+    # THE RESEARCH TIERS (owner, 2026-10-09, decided against the gold
+    # workbook): evidence collection on the price tier, synthesis and
+    # completeness judgement on sonnet. `cost.RESEARCH_TIERS` holds the
+    # shapes; these name the models the handoff writes into every
+    # invocation, so a workflow never chooses a tier itself.
+    collector_model: str = "haiku"
+    synthesis_model: str = "sonnet"
+    # Open cells per collector batch (whole capabilities); None = the cost
+    # model's RESEARCH_BATCH_CELLS.
+    batch_cells: int | None = None
     # A command that KICKS the package scan after a checkpoint push, so
     # INGEST_A / INGEST_B do not idle for the Scheduler's half-hour cadence
     # (measured: 1735-3217 s per ingest wait on every 2026-10 run). Typically
@@ -647,9 +657,9 @@ RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
 #: model (which said $13.80 for a run whose research alone cost $21+). Pilot
 #: 2026-09-30: one batch agent closed 12 cells for ~$2.25; its category's
 #: challenge ~$0.44. Re-measure with `engine.cost report` after each run.
-WORKFLOW_USD_PER_CELL = 0.19
-CHALLENGE_USD_PER_CATEGORY = 0.44
-BATCH_CELLS = 12   # open cells per research agent: finishes in one fresh context
+WORKFLOW_USD_PER_CELL = 0.19      # the unbatched sonnet pilot; superseded by
+CHALLENGE_USD_PER_CATEGORY = 0.44  # cost.research_price (2026-10-09), kept for the ledger's history
+BATCH_CELLS = 12   # open cells per collector: finishes in one fresh context (cost.RESEARCH_BATCH_CELLS)
 
 
 def _open_capabilities(wb) -> dict[str, dict[str, int]]:
@@ -810,8 +820,17 @@ class Pipeline:
             # one) is trusted with the money; the stub, and any lane whose
             # status file carried no cost, are not, and would otherwise
             # leave the run unpriced.
-            spend = ({} if getattr(self.opts.dispatcher, "records_cost", False)
-                     else self._spend_kw(cost))
+            if getattr(self.opts.dispatcher, "records_cost", False):
+                # The dispatcher wrote the money; what this process counted
+                # is now recorded too. Until 2026-10-09 the marker stayed
+                # put, so `_family_usd` read PRELIM's $5.71 as RESEARCH's
+                # (IMA Financial Group, R-IMA-20261009) — the envelope said
+                # "spent 5.71 of 10" before a research agent had run.
+                spend = {}
+                self._recorded_usd = self._spent_usd
+                self._recorded_turns = self._spent_turns
+            else:
+                spend = self._spend_kw(cost)
             cost.record(self.run, stage=stage, elapsed_s=elapsed, lanes=lanes or None,
                         attempts=attempts or None, note=f"pipeline {verdict}: {detail[:200]}",
                         wb=self.wb, **spend)
@@ -2022,25 +2041,43 @@ class Pipeline:
         # holds its other three in a queue. Affordable only because writes
         # are batched (engine.cli batch): the run-wide workbook lock is held
         # once per capability instead of once per command.
+        from . import cost as cost_mod
         env = self.stage_budget_block("RESEARCH")
         if env and env["over"]:
             self._stage_budget_hit = env
             raise StageRefused(self._stage_budget_refusal("RESEARCH"))
         open_caps = _open_capabilities(self.wb)
-        repairs = {c: floors_gate.blocking_cells(
-                       floors_gate.read_verdict(self.run.qa_dir, c))
+        # A cell that is still OPEN is its open batch's work; the gate names
+        # it too (absence_undeclared_empty, volleys_incomplete) and routing it
+        # as a repair as well collected for it twice (R-IMA-20261009: 48 of
+        # P1C1's 47 open cells handed again as repairs, doubling the share).
+        # Repairs are the gate's findings on CLOSED cells only.
+        still_open = {str(r.get("SubCap_ID") or "") for r in self.wb.scoring_rows()
+                      if not str(r.get("Dominant_Claim") or "").strip()}
+        repairs = {c: {cell: terms for cell, terms in floors_gate.blocking_cells(
+                           floors_gate.read_verdict(self.run.qa_dir, c)).items()
+                       if cell not in still_open and cell != c}
                    for c in need}
         stalled = self._workflow_stalled(need, repairs)
         work = [c for c in sorted(need) if c not in stalled]
         by_unit = ({c: [c] for c in work} if RESEARCH_UNIT == "category"
                    else {u: [c for c in cs if c in work]
                          for u, cs in by_pillar.items() if any(c in work for c in cs)})
+        limit = int(self.opts.batch_cells or cost_mod.RESEARCH_BATCH_CELLS)
         inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
-                "batches": {c: _batches(open_caps.get(c, {}))
+                "batches": {c: _batches(open_caps.get(c, {}), limit)
                             for c in cats},
                 "repairs": {c: repairs.get(c) or {} for c in cats},
-                "repair_batches": {c: _repair_batches(repairs.get(c) or {})
+                "repair_batches": {c: _repair_batches(repairs.get(c) or {}, limit)
                                    for c in cats},
+                # THE TIERS RIDE WITH THE WORK (2026-10-09): the workflow runs
+                # collectors on `models.collector`, the category orchestrator
+                # and the challenge on `models.synthesis`; it never picks.
+                "models": {"collector": self.opts.collector_model,
+                           "synthesis": self.opts.synthesis_model,
+                           "challenge": self.opts.synthesis_model},
+                "batch_cells": limit,
+                "cards_dir": str(self._research_cards(cats, open_caps, repairs)),
                 "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
                 "plugin": str(PLUGIN), "rounds": 2,
                 "entity": md.get("entity_name") or "", "domain": site,
@@ -2071,9 +2108,14 @@ class Pipeline:
             len(b) for i in inv for b in i["repair_batches"].values())
         cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
         rcells = sum(len(i["repairs"][c]) for i in inv for c in i["cats"])
-        est, basis = self._workflow_estimate(cells, rcells, n, prev)
+        ncaps = sum(len(open_caps.get(c, {})) for i in inv for c in i["cats"])
+        est, basis, price = self._workflow_estimate(cells, rcells, n, prev, capabilities=ncaps,
+                                                    batch_cells=limit)
         doc["estimate"] = {"open_cells": cells, "repair_cells": rcells, "batches": nb,
                            "categories": n, "usd": est, "basis": basis,
+                           "per_cell": price.get("per_cell"),
+                           "by_tier": price.get("by_tier"), "models": price.get("models"),
+                           "usd_per_output_token": price.get("usd_per_output_token"),
                            "spent_at_handoff": round(self._spent_usd, 2),
                            "research_at_handoff": self._stage_usd("RESEARCH")}
         same = (prev.get("open_cells") == cells
@@ -2100,21 +2142,122 @@ class Pipeline:
             # fit what is left, so the envelope is held by the agents that
             # spend it, not only by the driver that reads the ledger after.
             fits_env = (env["remaining"] is None) or (est <= env["remaining"])
+            remaining = env["remaining"]
+            per_cell = float(price.get("per_cell") or 0.0)
+            # WHOLE CATEGORIES, END TO END, OR NOT AT ALL (2026-10-09). A
+            # category is scored only when its cells are collected for,
+            # synthesised AND challenged; evidence with no synthesis buys
+            # nothing. So when the estimate does not fit, the envelope's
+            # remainder is allocated to whole categories, cheapest first (the
+            # most categories close), and the rest are DEFERRED in the
+            # handoff with the flag that funds them. No category fitting is
+            # AT_STAGE_BUDGET before any agent is paid for — a decision for a
+            # person, not a wave the governor refuses one batch at a time.
+            deferred = []
+            if not fits_env and remaining is not None:
+                def _est(i):
+                    cs = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
+                             for c in i["cats"])
+                    cp = sum(len(open_caps.get(c, {})) for c in i["cats"])
+                    pr = cost_mod.research_price(
+                        cs, categories=len(i["cats"]), capabilities=cp or None,
+                        batch_cells=limit, collector_model=self.opts.collector_model,
+                        synthesis_model=self.opts.synthesis_model)
+                    ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
+                    return round(pr["usd"] * max(1.0, ratio), 4)
+                left = float(remaining)
+                handed = []
+                for i in sorted(inv, key=_est):
+                    e_i = _est(i)
+                    if e_i <= left + 1e-9:
+                        handed.append(i); left -= e_i
+                        i.setdefault("_est", e_i)
+                    else:
+                        deferred.append({"cats": i["cats"], "estimate_usd": e_i})
+                if not handed:
+                    cheapest = min((d["estimate_usd"] for d in deferred), default=0.0)
+                    self._stage_budget_hit = {**env, "estimate_usd": est, "fits_envelope": False,
+                                              "cheapest_category_usd": cheapest}
+                    raise StageRefused(
+                        f"AT_STAGE_BUDGET before dispatch: the RESEARCH envelope has "
+                        f"${float(remaining):.2f} of ${float(env['ceiling'] or 0):.2f} left and the "
+                        f"cheapest category costs ~${cheapest:.2f} end to end (collect, "
+                        f"synthesise, challenge); the whole scope is ~${est:.2f} for "
+                        f"{cells} open + {rcells} repair cells at ${per_cell:.4f}/cell "
+                        f"({price.get('basis')}). No agent was paid for. A person raises it "
+                        f"(`--stage-budget RESEARCH={max(1, int(est) + 1)}` funds the scope) or "
+                        f"narrows the scope; the run-wide `--max-usd` does not raise an envelope.")
+                inv[:] = sorted(handed, key=lambda i: i["cats"])
+                doc["invocations"] = inv
+                if deferred:
+                    doc["deferred_for_budget"] = {
+                        "categories": deferred,
+                        "why": (f"the envelope's ${float(remaining):.2f} funds "
+                                f"{len(handed)} of {len(handed) + len(deferred)} categories end "
+                                f"to end; these wait for `--stage-budget RESEARCH=<usd>` "
+                                f"(~${est:.2f} funds the whole scope) or a narrower scope"),
+                    }
+                    self.opts.log(f"[WORKFLOW] RESEARCH envelope funds {len(handed)} of "
+                                  f"{len(handed) + len(deferred)} categories; "
+                                  f"{len(deferred)} deferred for budget")
+            affordable = (cells + rcells) if (remaining is None or per_cell <= 0) \
+                else int(max(0.0, float(remaining)) / per_cell)
             doc["budget"] = {**env, "estimate_usd": est, "fits_envelope": fits_env,
+                             "per_cell_usd": per_cell,
+                             "cells_affordable": min(cells + rcells, affordable),
+                             # dollars per OUTPUT token, blended over the tiers:
+                             # the workflow runtime exposes output tokens only
+                             # (budget.spent()), and this converts them to the
+                             # envelope's currency so a wave is refused BEFORE
+                             # it crosses the ceiling, not booked after
+                             "usd_per_output_token": price.get("usd_per_output_token"),
+                             # what the governor converts budget.spent() with:
+                             # the runtime's counter is not output tokens
+                             # (measured 8-10x larger), so the measured rate
+                             # rides here and the shape's rate is for reading
+                             "usd_per_runtime_token": price.get("usd_per_runtime_token"),
+                             # the per-wave prices the workflow's governor
+                             # checks a wave against before starting it
+                             "tier_usd": {"collector_batch": price.get("per_batch"),
+                                          "orchestrator": price.get("per_category_orchestrator"),
+                                          "challenge": price.get("per_category_challenge")},
                              "raise_with": f"--stage-budget RESEARCH=<usd>"}
             doc["estimate"]["fits_envelope"] = fits_env
+            total_cells = max(1, cells + rcells)
             for i in inv:
-                i["budget"] = doc["budget"]
+                mine = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
+                           for c in i["cats"])
+                # A handed category's share is ITS OWN end-to-end estimate when
+                # categories were allocated whole; otherwise the remainder is
+                # partitioned by cells.
+                share = (None if remaining is None
+                         else (i.get("_est") if i.get("_est") is not None
+                               else round(float(remaining) * mine / total_cells, 4)))
+                i.pop("_est", None)
+                # EVERY INVOCATION KNOWS ITS SHARE. Sixteen workflows spend
+                # one envelope at once; a per-invocation share, proportional
+                # to its cells, is what stops one category's waves eating
+                # the fifteen others' money.
+                i["budget"] = {**doc["budget"], "share_usd": share,
+                               "share_cells": mine,
+                               "estimate_usd": round(per_cell * mine, 4)}
                 if not fits_env:
                     i["rounds"] = 1
+        self.state["workflow_handed_last"] = sorted(c for i in inv for c in i["cats"])
+        self._save_state()
         path.write_text(json.dumps(doc, indent=1))
         doc["agent_prompts"] = self._render_agent_prompts(path)
         path.write_text(json.dumps(doc, indent=1))
         return {"file": str(path), "invocations": inv, "stalled": stalled,
                 "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
-                "summary": f"{n} categor{'y' if n == 1 else 'ies'}, {nb} batch(es) "
+                "deferred_for_budget": doc.get("deferred_for_budget"),
+                "summary": (f"{len(inv)} of {n} categories handed" if doc.get("deferred_for_budget")
+                            else f"{n} categor{'y' if n == 1 else 'ies'}")
+                           + f", {sum(len(b) for i in inv for b in i['batches'].values())} batch(es) "
                            f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
                            f"est ${est:.2f} for {cells} open + {rcells} repair cells"
+                           + (f" ({len(doc['deferred_for_budget']['categories'])} deferred for budget)"
+                              if doc.get("deferred_for_budget") else "")
                            + (f"; {len(stalled)} stalled, not re-handed: "
                               f"{', '.join(stalled)}" if stalled else "")}
 
@@ -2133,6 +2276,12 @@ class Pipeline:
         book = self.state.setdefault("workflow_progress", {})
         last_spent = float(self.state.get("workflow_spent_at_handoff", -1.0))
         worked = round(self._spent_usd, 2) > round(last_spent, 2)
+        # A category DEFERRED FOR BUDGET was not worked, whatever spend
+        # landed: R-IMA-20261009 handed 2 of 16 categories and the other 14
+        # were read as "no outcome moved for 2 worked rounds" and dropped
+        # from the next handoff. Only a category the last handoff carried
+        # can stall.
+        handed_last = set(self.state.get("workflow_handed_last") or need)
         now = self._research_progress()
         out = []
         for cat in need:
@@ -2148,7 +2297,7 @@ class Pipeline:
                          or len(blockers) < len(prev.get("blockers") or []))
                 if moved:
                     stalls = 0
-                elif worked:
+                elif worked and cat in handed_last:
                     stalls += 1
             book[cat] = {"sig": sig, "blockers": blockers, "stalls": stalls}
             if stalls >= self.opts.stall_rounds:
@@ -2173,14 +2322,26 @@ class Pipeline:
             return 0.0
 
     def _workflow_estimate(self, cells: int, rcells: int, n: int,
-                           prev: dict) -> tuple[float, str]:
-        """Pilot constants, corrected by the run's own last round: the ratio
-        of what it cost to what it was estimated at (never below 1), and a
-        floor of the measured cost per category handed (agents cost money
-        even when a category has nothing routed)."""
-        pilot = (cells + rcells) * WORKFLOW_USD_PER_CELL + n * CHALLENGE_USD_PER_CATEGORY
-        basis = (f"pilot ${WORKFLOW_USD_PER_CELL}/cell + "
-                 f"${CHALLENGE_USD_PER_CATEGORY}/category challenge")
+                           prev: dict, *, capabilities: int | None = None,
+                           batch_cells: int | None = None) -> tuple[float, str, dict]:
+        """The tiered price (`cost.research_price`: haiku collectors, a sonnet
+        orchestrator and challenge per category), corrected by the run's own
+        last round: the ratio of what it cost to what it was estimated at
+        (never below 1), and a floor of the measured cost per category handed
+        (agents cost money even when a category has nothing routed).
+
+        Until 2026-10-09 this was the unbatched sonnet pilot constant
+        ($0.19/cell + $0.44/category) — $137 for 686 cells against a $10
+        envelope, on a run that had not spent a research dollar."""
+        from . import cost
+        price = cost.research_price(
+            cells + rcells, categories=max(1, n), capabilities=capabilities,
+            batch_cells=int(batch_cells or cost.RESEARCH_BATCH_CELLS),
+            collector_model=self.opts.collector_model,
+            synthesis_model=self.opts.synthesis_model,
+            degraded=bool(self.state.get("enrichment_degraded")))
+        pilot = float(price["usd"])
+        basis = price["basis"]
         cal = self.state.get("workflow_calibration") or {}
         research_now = self._stage_usd("RESEARCH")
         try:
@@ -2203,9 +2364,62 @@ class Pipeline:
             est = max(pilot * float(cal["ratio"]), n * float(cal["per_category"]))
             basis += (f", calibrated by this run's last round (${cal['measured_usd']} "
                       f"measured: x{cal['ratio']}, floor ${cal['per_category']}/category)")
+            if pilot > 0:
+                price = dict(price, per_cell=round(price["per_cell"] * est / pilot, 4))
         else:
             est = pilot
-        return round(est, 2), basis
+        return round(est, 2), basis, price
+
+    def _research_cards(self, cats: list[str], open_caps: dict,
+                        repairs: dict | None = None) -> Path:
+        """Every open capability's card, on disk, compact — so a collector
+        reads its batch's cards in ONE Bash call instead of one `engine.cli
+        card` turn per capability (a turn re-reads the whole context; the
+        cards are a third of a collector's turns otherwise). Written at
+        handoff from the same `orient.capability_card` the CLI prints."""
+        from . import brief, orient
+        out = self.run.root / "briefs" / "research_cards"
+        try:
+            shared = brief.shared(self.wb, prelim=True)
+        except Exception as e:                           # noqa: BLE001
+            shared = {"error": f"{e.__class__.__name__}: {str(e)[:160]}"}
+        # The shared block a collector reads in its first call: PRELIM's
+        # evidence (cite, never re-search), the internal documents, the peers
+        # and the estate. One file per category, so the `cat` is one path.
+        shared_json = json.dumps(shared, separators=(",", ":"))[:16000]
+        for cat in cats:
+            d = out / cat
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "_shared.json").write_text(shared_json)
+            for cap in open_caps.get(cat, {}):
+                try:
+                    card = orient.capability_card(self.wb, cap, run=self.run)
+                except Exception as e:                   # noqa: BLE001
+                    card = {"capability": cap, "error": f"{e.__class__.__name__}: {str(e)[:160]}"}
+                (d / f"{cap}.json").write_text(json.dumps(card, separators=(",", ":")))
+            # THE REPAIR CARD. A gap-only wave collects for CLOSED cells (the
+            # gate's blockers), which the open-cell cards do not carry — the
+            # first live gap wave (R-IMA-20261009) found none of its six cells
+            # on any card and, rightly, did nothing. Their questions, per
+            # facet, from the DQ bank, with the gate term each cell fails.
+            rep = (repairs or {}).get(cat) or {}
+            if rep:
+                from . import kg
+                rows = {}
+                for cell, terms in sorted(rep.items()):
+                    try:
+                        dq = kg.dqs_for(self.wb, cell)
+                        qs = {str(q.get("facet") or "").lower(): q.get("question")
+                              for q in (dq.get("answerable") or dq.get("ask") or [])}
+                    except Exception:                    # noqa: BLE001
+                        qs = {}
+                    rows[cell] = {"terms": list(terms), "questions": qs}
+                (d / "_repairs.json").write_text(json.dumps(
+                    {"category": cat, "cells": rows,
+                     "note": "closed cells the gate names; collect for the facets "
+                             "each owes, log with the cell, register what comes back"},
+                    separators=(",", ":")))
+        return out
 
     def _render_agent_prompts(self, handoff: Path, kind: str = "research") -> dict:
         """The same batch/challenge prompts the workflow would run, on disk.
@@ -2223,8 +2437,10 @@ class Pipeline:
         script = PLUGIN / "workflows" / "render-prompts.mjs"
         how = ("no Workflow tool: for each manifest row spawn ONE in-session Agent "
                "with the file's text as its prompt (model and subagent_type from "
-               "the row) — every batch row in parallel, then each category's "
-               "challenge row once its batches have returned — then run `then`")
+               "the row) — every `collect` row in parallel (haiku collectors), then "
+               "the category's `orchestrate` row (sonnet: completeness, syntheses, "
+               "absences, gaps), a second collect pass by hand for any gaps it "
+               "names, then its `challenge` row — then run `then`")
         if kind == "reports":
             how = ("no Workflow tool: for each manifest `write` row spawn ONE in-session "
                    "Agent with the file's text as its prompt (subagent_type from the row), "
@@ -4041,6 +4257,9 @@ def _build_opts(a) -> Options:
                    max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
                    stage_budget=stage_budget,
                    critic_rounds=int(getattr(a, "critic_rounds", None) or Options.critic_rounds),
+                   collector_model=getattr(a, "collector_model", None) or Options.collector_model,
+                   synthesis_model=getattr(a, "synthesis_model", None) or Options.synthesis_model,
+                   batch_cells=getattr(a, "batch_cells", None),
                    ingest_kick_cmd=(getattr(a, "ingest_kick_cmd", None)
                                     or os.environ.get("DMA_INGEST_KICK_CMD") or None),
                    allow_unverified_connectors=getattr(
@@ -4158,6 +4377,19 @@ def main(argv=None) -> int:
                         "SCORING, REPORTS, PAGES); defaults in cost.STAGE_BUDGET_USD "
                         "(research 10, scoring 5, reports 5). Persisted on the run; "
                         "a stage at its envelope stops as STOPPED_STAGE_BUDGET.")
+    r.add_argument("--collector-model", default=Options.collector_model,
+                   choices=("haiku", "sonnet", "opus"),
+                   help="model the research workflow runs its evidence collectors on "
+                        f"(default {Options.collector_model}; the price tier — the "
+                        "ledger refuses what is wrong with an evidence row)")
+    r.add_argument("--synthesis-model", default=Options.synthesis_model,
+                   choices=("haiku", "sonnet", "opus"),
+                   help="model for the category orchestrator (completeness + synthesis) "
+                        f"and the challenge (default {Options.synthesis_model}; the "
+                        "gold row's judgement is not moved to the price tier)")
+    r.add_argument("--batch-cells", type=int, default=None,
+                   help="open cells per collector batch, whole capabilities "
+                        "(default cost.RESEARCH_BATCH_CELLS)")
     r.add_argument("--critic-rounds", type=int, default=Options.critic_rounds,
                    help=f"critic rounds a scoring workflow may spend per pillar "
                         f"(default {Options.critic_rounds})")

@@ -491,15 +491,34 @@ def capability_card(wb, capability: str, *, run=None) -> dict:
             continue                                   # synthesised with evidence
         vs = L.volley_status(wb, c, searches=searches)
         dq = kg.dqs_for(wb, c)
+        # THE PRIMARY QUESTION IS OWED TOO. `volley_status["missing"]` counts
+        # the five facets only, and the floors gate BLOCKS on an unfired
+        # primary (`primary_unfired`). Measured 2026-10-09 (R-IMA-20261009,
+        # P3C2): the card listed five facets, three collectors fired exactly
+        # those, and all 25 searched cells failed `primary_unfired` — work a
+        # card that names what the gate blocks on would not have left owed.
+        owed = ([C.PRIMARY_FACET] if not vs["primary_fired"] else []) + list(vs["missing"])
         open_cells.append({"cell": c, "name": names.get(c, ""),
-                           "missing": vs["missing"]})
-        for q in dq["ask"]:
-            f = str(q.get("facet") or "")
-            if f not in vs["missing"]:
-                continue
+                           "missing": owed})
+        # Every OWED facet gets a slot, question or none: a run whose DQ bank
+        # is empty (no KG, or a facet the bank does not phrase) still owes the
+        # volley, and a card that lists no facet hands the collector nothing
+        # to fire. The catalogue's own text stands in for the question.
+        for f in owed:
             slot = facets.setdefault(f, {"cells": [], "questions": []})
             if c not in slot["cells"]:
                 slot["cells"].append(c)
+        asked = {str(q.get("facet") or "") for q in dq["ask"] if q.get("question")}
+        for f in owed:
+            if f not in asked and len(facets[f]["questions"]) < 6:
+                facets[f]["questions"].append(
+                    {"cell": c, "q": f"{names.get(c, c)} — {f} "
+                                     f"(no DQ text in the bank; ask it of {md.get('entity_name') or 'the entity'})"})
+        for q in dq["ask"]:
+            f = str(q.get("facet") or "")
+            if f not in owed:
+                continue
+            slot = facets[f]
             if q.get("question") and len(slot["questions"]) < 6:
                 slot["questions"].append({"cell": c, "q": str(q["question"]).replace(
                     "{entity}", str(md.get("entity_name") or "the entity"))[:220]})

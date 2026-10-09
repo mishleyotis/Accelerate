@@ -43,6 +43,7 @@ if __package__ in (None, ""):  # noqa: E402
 import argparse
 import datetime as _dt
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -131,6 +132,212 @@ def envelopes(rows: list[dict], overrides: dict | None = None) -> dict:
         slot["remaining"] = round(slot["ceiling"] - slot["spent"], 4)
         slot["over"] = slot["spent"] >= slot["ceiling"] - 1e-9
     return out
+
+
+# ── THE RESEARCH PRICE MODEL (owner, 2026-10-09) ─────────────────────────
+#
+# "Whether research runs degraded or using connectors, my expectation is the
+# great batching enables the budget to be as set." The pilot constant
+# ($0.19/cell, sonnet, unbatched) priced 686 cells at $137 against a $10
+# envelope, and no prompt edit closes a 14x gap. What a research agent costs
+# is TURNS x CONTEXT x RATE (measured 2026-09-30: $0.031/turn on sonnet at a
+# 44K-token context; PRELIM on this run: 98 turns, 122K average context,
+# $5.71), so the model prices the SHAPE of the work by tier, and the shape
+# is what the workflow enforces:
+#
+#   collector    haiku   evidence only — a batch of <= BATCH_CELLS open cells,
+#                        cards read in ONE turn, then per capability ONE turn
+#                        of parallel searches and ONE turn that fetches, writes
+#                        the ops file and runs `engine.cli batch`. It writes
+#                        search logs, evidence (verbatim, tiered, dated only as
+#                        the page states), attaches; it synthesises nothing.
+#   orchestrator sonnet  one per category — reads the collectors' evidence
+#                        pack, judges completeness (coverage, the floors gate's
+#                        own terms), writes every synthesis and declared
+#                        absence through one batch per capability, and names
+#                        the gap cells a repair wave collects for.
+#   challenge    sonnet  the independent research-challenger, unchanged.
+#
+# WHY NOT HAIKU FOR SYNTHESIS (decided against the gold workbook, 2026-10-09):
+# the gold row — Dominant_Claim one checkable thing, What_We_Found >= 120
+# chars naming figures and dates, Triangulation naming the step, a ceiling
+# that follows the tier table, a label the excerpts earn — is the judgement
+# the challenge FAILs on, and a repair round re-pays a context floor. The
+# evidence row — a verbatim span the fetch cache verifies, a tier the
+# ladder gives, a date the page states — is mechanical, and the ledger
+# refuses what is wrong with it at the write. So the volume (collection) is
+# on the price tier and the judgement (synthesis, completeness, challenge)
+# stays on sonnet. Degraded or connector-backed changes WHICH tool the
+# collector searches with, not the shape, so the price is the same — the
+# invariant the owner asked for, pinned by test.
+#
+# Every figure here is a projection until `engine.cost report --by-stage`
+# measures the first run; `workflow_calibration` corrects the next estimate
+# by the ratio measured.
+RESEARCH_BATCH_CELLS = 12        # open cells per collector; whole capabilities
+CELLS_PER_CAPABILITY = 5.3       # v7.0 T1_CORE: 686 cells / 129 capabilities
+RESEARCH_TIERS = {
+    # per-turn shape: context re-read (cache read), new tokens written to the
+    # cache per turn (tool results), output tokens per turn.
+    #
+    # COLLECTOR, MEASURED 2026-10-09 (R-IMA-20261009 P3C2, three haiku
+    # collectors, degraded, in-session workflow subagents): 29 / 48 / 47
+    # turns for 3 / 3 / 1 capabilities (26 cells), turn-1 floor 73,778
+    # tokens (the in-session harness: system prompt, tool schemas, CLAUDE.md
+    # — the prompt itself is ~3K), ~106K average context, 12.4M cache-read
+    # and 1.23M cache-write tokens in all, ≈ $2.85 → $0.11/cell. Haiku ran
+    # one WebSearch per turn (12 / 25 / 22) rather than a capability's volley
+    # in one turn, and re-wrote the floor on cache expiry. The design shape
+    # (2 turns per capability on a 22K floor, $0.015/cell) is what the
+    # prompt asks for; the shape below is what was measured, and the
+    # estimate is honest before it is hopeful. WebSearch payloads were 3-7K
+    # chars each — the search tool is not the cost; turns x floor are.
+    "collector": {"model": "haiku", "floor_tokens": 74_000,
+                  "turns_fixed": 2, "turns_per_capability": 13,
+                  "growth_per_turn": 3_500, "output_per_turn": 400},
+    # ORCHESTRATOR, MEASURED 2026-10-09 (same wave, sonnet): 41 turns for 26
+    # cells (6 syntheses, 1 absence, 19 gaps named), ~$1.80 — about half the
+    # turns were spent reading engine source for the absence command's
+    # signature the prompt had left out; the prompt now carries it, so the
+    # shape below is the measured one at ~24 turns, not 41.
+    "orchestrator": {"model": "sonnet", "floor_tokens": 74_000,
+                     "turns_fixed": 10, "turns_per_cell": 1 / 2,
+                     "growth_per_turn": 3_000, "output_per_turn": 700},
+    # CHALLENGE, MEASURED 2026-10-09 (same wave, sonnet): one packet, six
+    # verdicts in one batch, the gate summary.
+    "challenge": {"model": "sonnet", "floor_tokens": 74_000,
+                  "turns_fixed": 6, "turns_per_cell": 1 / 8,
+                  "growth_per_turn": 3_000, "output_per_turn": 600},
+}
+
+
+#: DOLLARS PER TOKEN THE WORKFLOW RUNTIME COUNTS. The runtime's `budget.spent()`
+#: is the only in-flight spend signal a workflow has, and it is NOT output
+#: tokens: measured 2026-10-09 on R-IMA-20261009 — wave 1 reported 686,429
+#: tokens for a $5.02 wave (7.3e-6 $/token), wave 2 385,250 for $2.26
+#: (5.9e-6). The model's own output-token rate (6.0e-5) was 8-10x too high,
+#: and the governor refused an orchestrator pass the envelope could pay for.
+#: The upper of the two measurements is the conversion; `engine.cost report`
+#: after each run is where it is re-measured.
+RUNTIME_USD_PER_TOKEN = 7.5e-6
+
+
+def agent_usd(*, model: str, turns: float, floor_tokens: int, growth_per_turn: int,
+              output_per_turn: int) -> dict:
+    """One agent's projected cost from its shape: the floor is written once
+    and re-read every turn, each turn writes its growth and re-reads
+    everything written before it, output is billed at the output rate."""
+    r = RATES.get(model) or RATES["sonnet"]
+    t = max(1.0, float(turns))
+    # context at turn k = floor + growth*(k-1); summed over t turns
+    read_tokens = floor_tokens * t + growth_per_turn * (t * (t - 1) / 2)
+    write_tokens = floor_tokens + growth_per_turn * t
+    out_tokens = output_per_turn * t
+    usd = (read_tokens / 1e6 * r["in"] * CACHE_READ_MULT
+           + write_tokens / 1e6 * r["in"] * CACHE_WRITE_MULT
+           + out_tokens / 1e6 * r["out"])
+    return {"model": model, "turns": round(t, 1), "usd": round(usd, 4),
+            "output_tokens": int(out_tokens),
+            "usd_per_output_token": (usd / out_tokens if out_tokens else 0.0)}
+
+
+def collector_usd(cells: int, *, capabilities: int | None = None,
+                  model: str | None = None) -> dict:
+    """One collector batch of `cells` open cells (whole capabilities)."""
+    shape = dict(RESEARCH_TIERS["collector"])
+    caps = capabilities if capabilities is not None else max(1, round(cells / CELLS_PER_CAPABILITY))
+    turns = shape["turns_fixed"] + shape["turns_per_capability"] * max(1, caps)
+    return agent_usd(model=model or shape["model"], turns=turns,
+                     floor_tokens=shape["floor_tokens"],
+                     growth_per_turn=shape["growth_per_turn"],
+                     output_per_turn=shape["output_per_turn"])
+
+
+def _cell_tier_usd(tier: str, cells: int, model: str | None = None) -> dict:
+    shape = dict(RESEARCH_TIERS[tier])
+    turns = shape["turns_fixed"] + shape["turns_per_cell"] * max(0, cells)
+    return agent_usd(model=model or shape["model"], turns=turns,
+                     floor_tokens=shape["floor_tokens"],
+                     growth_per_turn=shape["growth_per_turn"],
+                     output_per_turn=shape["output_per_turn"])
+
+
+def research_price(cells: int, *, categories: int, capabilities: int | None = None,
+                   batch_cells: int = RESEARCH_BATCH_CELLS,
+                   collector_model: str | None = None,
+                   synthesis_model: str | None = None,
+                   repair_share: float = 0.15, degraded: bool = False) -> dict:
+    """What RESEARCH should cost for `cells` open cells over `categories`
+    categories at the tiered shape: collector batches, one orchestrator pass
+    per category, a repair wave over `repair_share` of the cells, one
+    challenge per category. `degraded` is recorded and changes nothing: the
+    shape is the price, the search tool is not."""
+    cells = max(0, int(cells)); categories = max(0, int(categories))
+    caps = int(capabilities) if capabilities else max(1, round(cells / CELLS_PER_CAPABILITY))
+    batches = max(0, -(-cells // max(1, int(batch_cells)))) if cells else 0
+    per_batch = collector_usd(min(cells, batch_cells) or batch_cells,
+                              capabilities=max(1, round(caps / max(1, batches))) if batches else None,
+                              model=collector_model)
+    repair_cells = round(cells * repair_share)
+    repair_batches = -(-repair_cells // max(1, int(batch_cells))) if repair_cells else 0
+    per_repair = collector_usd(min(repair_cells, batch_cells) or batch_cells,
+                               model=collector_model)
+    per_cat_cells = cells / categories if categories else 0
+    orch = _cell_tier_usd("orchestrator", round(per_cat_cells), synthesis_model)
+    orch_repair = _cell_tier_usd("orchestrator", round(per_cat_cells * repair_share),
+                                 synthesis_model)
+    chal = _cell_tier_usd("challenge", round(per_cat_cells))
+    by_tier = {
+        "collector": round(per_batch["usd"] * batches, 4),
+        "repair_collector": round(per_repair["usd"] * repair_batches, 4),
+        "orchestrator": round((orch["usd"] + orch_repair["usd"]) * categories, 4),
+        "challenge": round(chal["usd"] * categories, 4),
+    }
+    usd = round(sum(by_tier.values()), 2)
+    out_tokens = (per_batch["output_tokens"] * batches
+                  + per_repair["output_tokens"] * repair_batches
+                  + (orch["output_tokens"] + orch_repair["output_tokens"]) * categories
+                  + chal["output_tokens"] * categories)
+    return {
+        "usd": usd, "cells": cells, "categories": categories, "capabilities": caps,
+        "batches": batches, "repair_batches": repair_batches,
+        "per_cell": round(usd / cells, 4) if cells else 0.0,
+        "per_batch": per_batch["usd"], "per_category_orchestrator": round(orch["usd"], 4),
+        "per_category_challenge": round(chal["usd"], 4),
+        "by_tier": by_tier,
+        "models": {"collector": per_batch["model"], "orchestrator": orch["model"],
+                   "challenge": chal["model"]},
+        "output_tokens": int(out_tokens),
+        # the governor's conversion: dollars per OUTPUT token the workflow
+        # runtime can see (budget.spent() counts output tokens only), blended
+        # across the tiers by their projected output
+        "usd_per_output_token": round(usd / out_tokens, 8) if out_tokens else 0.0,
+        # the governor's conversion for the runtime's counter (see
+        # RUNTIME_USD_PER_TOKEN): measured, not derived from the shape
+        "usd_per_runtime_token": RUNTIME_USD_PER_TOKEN,
+        "degraded": bool(degraded),
+        "basis": (f"tiered shape: {batches} collector batch(es) on {per_batch['model']} "
+                  f"at ${per_batch['usd']:.3f} + {categories} orchestrator pass(es) on "
+                  f"{orch['model']} at ${orch['usd']:.3f} + {categories} challenge(s) at "
+                  f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave; "
+                  f"degraded or connector-backed prices the same"),
+    }
+
+
+def research_affordable(remaining_usd: float | None, cells: int, *, categories: int,
+                        **kw) -> dict:
+    """How many of `cells` the remaining envelope can close at the tiered
+    shape, and the batch count — what the handoff hands the workflow so it
+    stops at the wave the money runs out on, not after it."""
+    price = research_price(cells, categories=categories, **kw)
+    if remaining_usd is None:
+        return {"fits": True, "cells_affordable": cells, "price": price}
+    if price["usd"] <= float(remaining_usd):
+        return {"fits": True, "cells_affordable": cells, "price": price}
+    per_cell = price["per_cell"] or 1e-9
+    return {"fits": False, "cells_affordable": int(max(0.0, float(remaining_usd)) / per_cell),
+            "price": price,
+            "shortfall_usd": round(price["usd"] - float(remaining_usd), 2)}
 
 #: Golden 1, measured 2026-08-29. The baseline every projection starts from,
 #: kept as data so a re-measurement replaces it rather than arguing with it.
@@ -664,9 +871,73 @@ _STAGE_MARKS = (
                  "WHOLE-REPORT adversarial pass")),
     ("PAGES", ("-surface-producer", "finding-challenger", "page-consolidator",
                "You never submit, ship or promote", "connector run")),
-    ("RESEARCH", ("research-p", "research-challenger", "engine.cli batch",
+    ("RESEARCH", ("research-p", "research-challenger", "research-evidence-collector",
+                  "research-category-orchestrator", "engine.cli batch",
                   "engine.cli synthesise")),
 )
+
+
+#: chars per output token, the conservative figure for JSON and prose mixed
+_CHARS_PER_TOKEN = 3.6
+
+
+def _output_tokens(message: dict) -> int:
+    """The output tokens of one assistant message — the usage figure, or the
+    content's own length when the usage figure is implausibly small.
+
+    Measured 2026-10-09 (R-IMA-20261009, three haiku collectors): the
+    transcript's per-message `usage.output_tokens` read 3-8 for messages that
+    carried a 400-character tool call — the figure is the streamed opening
+    chunk's, not the message's. Every workflow agent the ledger had priced
+    since 2026-09-30 was priced at ~0 output. The content is a lower bound
+    (thinking blocks are not kept in the transcript), so the ledger reads
+    the larger of the two and under-counts less."""
+    u = message.get("usage") or {}
+    reported = int(u.get("output_tokens") or 0)
+    chars = 0
+    for c in message.get("content") or []:
+        if not isinstance(c, dict):
+            continue
+        if c.get("type") == "text":
+            chars += len(c.get("text") or "")
+        elif c.get("type") == "tool_use":
+            chars += len(json.dumps(c.get("input") or {}))
+        elif c.get("type") == "thinking":
+            chars += len(c.get("thinking") or "")
+    return max(reported, int(chars / _CHARS_PER_TOKEN))
+
+
+#: Workflow phase title -> ledger stage (the phase() names in workflows/*.js).
+#: "Challenge" is both the research challenge and the page challenge, so it is
+#: settled by the agent's label: a category id (P3C2 …) is research.
+_PHASE_STAGE = {
+    "collect": "RESEARCH", "synthesise": "RESEARCH", "repair": "RESEARCH", "research": "RESEARCH",
+    "score": "SCORING", "critique": "SCORING", "rescore": "SCORING",
+    "write": "REPORTS", "review": "REPORTS", "cross-section": "REPORTS",
+    "fragments": "PAGES", "consolidate": "PAGES", "assemble": "PAGES",
+}
+_CATEGORY_LABEL = re.compile(r"^\s*P\d+C\d+\b", re.I)
+
+
+def stage_of_agent(meta: dict | None, text: str) -> str:
+    """The ledger stage of one workflow agent: its workflow PHASE first (the
+    `.meta.json` the runtime writes beside the transcript carries
+    `workflowPhase` and the label), then the transcript head.
+
+    Measured 2026-10-09 (R-IMA-20261009): the research wave's four haiku
+    collectors were charged to PAGES and its orchestrator to SCORING by the
+    head scan — a fallback subagent's transcript opens with the harness relay
+    and the agents' own tool output, not the prompt — so the RESEARCH envelope
+    read $0.00 spent after a $5.06 wave. The phase is the workflow's own
+    statement of what the agent did and cannot be fooled by what it read."""
+    meta = meta or {}
+    phase = str(meta.get("workflowPhase") or "").strip().lower()
+    label = str(meta.get("description") or "")
+    if phase == "challenge":
+        return "RESEARCH" if _CATEGORY_LABEL.match(label) else "PAGES"
+    if phase in _PHASE_STAGE:
+        return _PHASE_STAGE[phase]
+    return stage_of_transcript(text)
 
 
 def stage_of_transcript(text: str) -> str:
@@ -712,7 +983,11 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
         if run.run_id not in text:
             continue
         aid = f.stem[len("agent-"):]
-        stage = stage_of_transcript(text)
+        try:
+            meta = json.loads(f.with_name(f"{f.stem}.meta.json").read_text())
+        except (OSError, ValueError):
+            meta = None
+        stage = stage_of_agent(meta, text)
         tok = dict.fromkeys(tok_sum, 0)
         turns = 0
         for line in text.splitlines():
@@ -729,7 +1004,7 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
             tok["cache_read"] += int(u.get("cache_read_input_tokens") or 0)
             tok["cache_write"] += int(u.get("cache_creation_input_tokens") or 0)
             tok["uncached"] += int(u.get("input_tokens") or 0)
-            tok["output"] += int(u.get("output_tokens") or 0)
+            tok["output"] += _output_tokens(m)
         usd = cost_of(model=model, **tok)["total_usd"]
         prev = charged.get(aid) or {"usd": 0.0, "turns": 0}
         d_usd, d_turns = round(usd - float(prev["usd"]), 4), turns - int(prev["turns"])

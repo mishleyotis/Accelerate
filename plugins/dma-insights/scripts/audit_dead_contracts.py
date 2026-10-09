@@ -20,8 +20,8 @@ is a literal in the same statement or the six lines above it, directly or
 through a module constant (`HANDBACK_DIR = "handbacks"`). The artefact TOKEN
 is the literal basename (`scoring.json`) or directory (`handbacks`).
 
-WHAT IS A READER. Any OTHER file that names the token: Python under the
-plugin (code reader), Markdown under the plugin (a documented consumer — an
+WHAT IS A READER. Any OTHER file that names the token: Python or a
+workflow script (`workflows/*.js`) under the plugin (code reader), Markdown under the plugin (a documented consumer — an
 agent told to read it), or Python under apps/worker, apps/api and
 packages/shared (the app ingests the package). Tests are not readers: a
 test that reads a file proves the writer works, not that the file is used.
@@ -140,7 +140,12 @@ def readers(root: Path, token: str, writer_files: set[str]) -> dict[str, list[st
     found = {"code": [], "doc": [], "app": []}
     for p in sorted(root.rglob("*")):
         rel = p.relative_to(root)
-        if p.suffix not in (".py", ".md", ".json", ".yml", ".yaml") or _skip(rel):
+        # The workflow scripts are code readers too: every handoff artefact the
+        # driver writes is consumed by a `workflows/*.js` prompt (the research
+        # cards' `_shared.json` / `_repairs.json`, 2026-10-09), and a scan that
+        # cannot see them reports a read contract as an orphan.
+        if p.suffix not in (".py", ".md", ".json", ".yml", ".yaml", ".js", ".mjs") \
+                or _skip(rel):
             continue
         try:
             text = p.read_text(errors="ignore")
@@ -152,7 +157,7 @@ def readers(root: Path, token: str, writer_files: set[str]) -> dict[str, list[st
             if p.suffix == ".py" and _reads_back(text, token):
                 found["code"].append(str(rel) + " (reads back)")
             continue
-        found["code" if p.suffix == ".py" else "doc"].append(str(rel))
+        found["code" if p.suffix in (".py", ".js", ".mjs") else "doc"].append(str(rel))
     repo = root.parent.parent
     for sub in APP_READER_ROOTS:
         base = repo / sub

@@ -76,6 +76,12 @@ if (b < 0 || e < 0) {
   console.error('PROMPTS markers missing in dma-pillar-research.js')
   process.exit(3)
 }
+// RESEARCH (2026-10-09, the tiers): one `collect` row per batch on the
+// collector model (research-evidence-collector), one `orchestrate` row per
+// category on the synthesis model (research-category-orchestrator), one
+// `challenge` row per category. A session without the Workflow tool runs the
+// collect rows in parallel, then the orchestrate row, then the challenge row;
+// the orchestrator's `gaps` are a second collect pass by hand if it names any.
 const researchRegion = src.slice(b, e)
 const manifest = []
 for (const inv of doc.invocations || []) {
@@ -83,21 +89,36 @@ for (const inv of doc.invocations || []) {
   const ENG = A.eng
   const R = `--run ${A.run} --root ${A.root}`
   const DOMAIN = A.domain || "<the entity's registrable domain, from engine.profile state>"
+  const MODELS = Object.assign({ collector: 'haiku', synthesis: 'sonnet', challenge: 'sonnet' }, A.models || {})
+  const CARDS = A.cards_dir || `${A.root}/briefs/research_cards`
   // eslint-disable-next-line no-new-func
-  const P = new Function('A', 'ENG', 'R', 'DOMAIN',
-    `${researchRegion}\nreturn { batchPrompt, challengePrompt }`)(A, ENG, R, DOMAIN)
+  const P = new Function('A', 'ENG', 'R', 'DOMAIN', 'MODELS', 'CARDS',
+    `${researchRegion}\nreturn { collectPrompt, synthPrompt, challengePrompt }`)(A, ENG, R, DOMAIN, MODELS, CARDS)
   for (const cat of inv.cats) {
     const batches = (inv.batches || {})[cat] && inv.batches[cat].length
       ? inv.batches[cat] : [[`${cat} (all open capabilities)`]]
     batches.forEach((caps, i) => {
-      const f = path.join(outDir, `${cat}_b${i + 1}.md`)
-      fs.writeFileSync(f, P.batchPrompt(cat, caps, round, null))
-      manifest.push({ category: cat, kind: 'batch', file: f, model: 'sonnet',
-                      subagent_type: 'general-purpose' })
+      const f = path.join(outDir, `${cat}_collect${i + 1}.md`)
+      fs.writeFileSync(f, P.collectPrompt(cat, caps, round, null))
+      manifest.push({ category: cat, kind: 'collect', file: f, model: MODELS.collector,
+                      subagent_type: 'dma-insights:research-evidence-collector' })
     })
+    const rb = (inv.repair_batches || {})[cat] || []
+    rb.forEach((cells, i) => {
+      const f = path.join(outDir, `${cat}_repair${i + 1}.md`)
+      const caps = [...new Set(cells.map(c => c.split('.').slice(0, 2).join('.')))]
+      const repairs = Object.fromEntries(cells.map(c => [c, ((inv.repairs || {})[cat] || {})[c] || []]))
+      fs.writeFileSync(f, P.collectPrompt(cat, caps, round, repairs))
+      manifest.push({ category: cat, kind: 'collect', file: f, model: MODELS.collector,
+                      subagent_type: 'dma-insights:research-evidence-collector' })
+    })
+    const o = path.join(outDir, `${cat}_orchestrate.md`)
+    fs.writeFileSync(o, P.synthPrompt(cat, round, [], null))
+    manifest.push({ category: cat, kind: 'orchestrate', file: o, model: MODELS.synthesis,
+                    subagent_type: 'dma-insights:research-category-orchestrator' })
     const f = path.join(outDir, `${cat}_challenge.md`)
     fs.writeFileSync(f, P.challengePrompt(cat, round))
-    manifest.push({ category: cat, kind: 'challenge', file: f, model: 'sonnet',
+    manifest.push({ category: cat, kind: 'challenge', file: f, model: MODELS.challenge,
                     subagent_type: 'dma-insights:research-challenger' })
   }
 }

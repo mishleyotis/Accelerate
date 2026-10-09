@@ -334,7 +334,12 @@ def claim_label_supported(row) -> str | None:
 # to the subcap has no provenance at all, and the refusal can name it.
 
 _NUM_TOKEN = re.compile(r"\d[\d,]*(?:\.\d+)?")
-_CITATION = re.compile(r"\[[^\]]*\]")   # [E-0001:F2] — ids are not figures
+#: [E-0001:F2] and a bare E-066 or E-066:F1 — ids are not figures. Measured
+#: 2026-10-09 (R-IMA-20261009 P3C2): six syntheses citing "E-066" in prose
+#: were refused for the ungrounded figure '066'; the writer re-wrote them in
+#: brackets, which is the form, but a refusal that reads an id as a number
+#: is the rule's defect, not the writer's.
+_CITATION = re.compile(r"\[[^\]]*\]|\bE-\d+(?::F\d+)?\b")
 
 #: Prose fields whose numbers must be grounded — the fields that CLAIM what
 #: sources say. NOT_RUN values are skipped whole ("no hits across four

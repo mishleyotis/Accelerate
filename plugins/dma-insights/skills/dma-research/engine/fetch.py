@@ -296,6 +296,11 @@ def normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip().casefold()
 
 
+#: a cached text at least this long is one the ledger may have verified a span
+#: against, and is never silently replaced
+KEEP_CACHED_MIN_CHARS = 200
+
+
 def cached_text(run, url: str) -> str | None:
     """The extracted text already held for this URL, or None."""
     p = cache_dir(run) / f"{_key(url)}.txt"
@@ -316,6 +321,25 @@ def store_text(run, url: str, text: str, *, content_type: str = "") -> dict:
     d = cache_dir(run)
     d.mkdir(parents=True, exist_ok=True)
     key = _key(url)
+    # A TEXT THE LEDGER HAS VERIFIED AGAINST IS KEPT. Measured 2026-10-09
+    # (R-IMA-20261009, E-069/E-070): a collector registered two spans
+    # against a cached page, then re-ran its fetches and REPLACED the cache
+    # with a different extraction (a WebFetch summary) — the rows now read
+    # "not verbatim" against their own source. The first substantive text
+    # under a URL stays; a later one is recorded beside it (`.alt.txt`) and
+    # the caller is told. A short or empty first text (a 403 page, a
+    # cookie wall) is replaced, because nothing could have been verified
+    # against it.
+    existing = cached_text(run, url)
+    if existing is not None and len(existing.strip()) >= KEEP_CACHED_MIN_CHARS \
+            and normalise(existing) != normalise(text):
+        (d / f"{key}.alt.txt").write_text(text, encoding="utf-8")
+        meta = json.loads((d / f"{key}.json").read_text(encoding="utf-8")) \
+            if (d / f"{key}.json").exists() else {"url": url}
+        meta.update(kept_existing=True, alt_chars=len(text),
+                    note=("the cached text was kept: rows may have been verified "
+                          "against it; the new text is beside it as .alt.txt"))
+        return meta
     (d / f"{key}.txt").write_text(text, encoding="utf-8")
     meta = {"url": url, "sha256": sha256(text), "fetched_at": _utcnow(),
             "chars": len(text), "content_type": content_type}

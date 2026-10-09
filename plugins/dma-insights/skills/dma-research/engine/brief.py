@@ -151,6 +151,10 @@ CELLS_PER_CHALLENGE_LANE = 12
 #: Cited rows shipped per cell, highest ERS first, and how much of each.
 CHALLENGE_EVIDENCE_PER_CELL = 4
 CHALLENGE_EXCERPT_WINDOW = 240
+#: the cap on each judged prose field in a challenge packet — whole for any
+#: synthesis the ledger accepts in practice (measured claims 150-320 chars,
+#: triangulations and ceilings 200-450), cut only past this
+CHALLENGE_FIELD_CHARS = 700
 
 #: THE REPORT PACKET'S OWN BUDGET, and why its sections are never trimmed.
 #:
@@ -1677,7 +1681,17 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
     rows.sort(key=lambda x: float(x.get("ERS") or 0), reverse=True)
     return {
         "subcap": sub, "name": C.subcap_names().get(sub),
-        "claim": _clean(r.get("Dominant_Claim"))[:200],
+        # THE FIELDS A DIMENSION JUDGES, WHOLE (2026-10-09). The claim was
+        # cut at 200 chars and the ceiling at 160; the first tiered wave's
+        # sonnet syntheses ran past both, and the challenger reported judging
+        # label fit and ceiling "on the visible text" (R-IMA-20261009, P3C2).
+        # A verdict on half a sentence is a verdict on a different claim. The
+        # caps below are the field floors' generous multiples; the packet's
+        # own ceiling and `_abridge` still bound the lane.
+        "claim": _clean(r.get("Dominant_Claim"))[:CHALLENGE_FIELD_CHARS],
+        # claim_label_fit for an INFERENCE is judged on the step it names
+        "triangulation": _clean(r.get("Triangulation"))[:CHALLENGE_FIELD_CHARS],
+        "what_we_found": _clean(r.get("What_We_Found"))[:CHALLENGE_FIELD_CHARS],
         "label": _clean(r.get("Claim_Label")),
         "author": L.actor_for(wb, sub, "synthesis"),
         # evidence_sufficiency, and the recency dimension
@@ -1693,10 +1707,10 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
         "facets_answered": sorted(f for f in C.DQ_FACETS
                                   if _clean(r.get(f"DQ_{f.title()}"))),
         # contradiction_handling
-        "contradiction": {"text": _clean(r.get("DQ_Contradicts"))[:160],
+        "contradiction": {"text": _clean(r.get("DQ_Contradicts"))[:CHALLENGE_FIELD_CHARS],
                           "disposition": _clean(r.get("Contradiction_Disposition"))},
         # ceiling_reasoning
-        "ceiling": _clean(r.get("Ceiling_Reasoning"))[:160],
+        "ceiling": _clean(r.get("Ceiling_Reasoning"))[:CHALLENGE_FIELD_CHARS],
         # claim_label_fit and ceiling_reasoning judge the band the
         # synthesis stated; the reasoning text alone does not carry it.
         "ceiling_band": _clean(r.get("Ceiling_Band")),

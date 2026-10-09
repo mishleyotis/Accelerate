@@ -317,6 +317,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
     assert_actor_scope(actor, "evidence", cells)
+    _refuse_retrieval_date_as_published(wb, published, text, source_url)
     access_status = _verified_access_status(
         wb, run, source_url, text, verify_excerpts, unverified_reason,
         access_status)
@@ -628,6 +629,39 @@ def _verified_access_status(wb, run, source_url, text, verify_excerpts,
             f"(`engine.cli fetch --via-text -` caches a connector's extract "
             f"under the URL, which verifies it properly.)")
     return f"UNVERIFIED: {reason}"
+
+
+def _refuse_retrieval_date_as_published(wb, published, excerpt: str, url: str | None):
+    """A `published` equal to TODAY is the retrieval date wearing the
+    publication date's clothes, unless the page itself states today's date.
+
+    Measured 2026-10-09 (IMA Financial Group, E-001): a sonnet PRELIM lane
+    registered a trade-press revenue profile with `--published 2026-10-09` —
+    the day it was read — so an undated page banded CURRENT and earned the
+    recency score a dated one earns. The prompt already said "never today's
+    date"; a rule the ledger refuses is the one that holds for every tier.
+    A press release genuinely issued today carries its date in the span or
+    the URL, and passes."""
+    from . import dates as _dates
+    d = _dates.resolve(published)
+    if not d:
+        return
+    today = _dt.date.today()
+    if d != today:
+        return
+    hay = f"{excerpt or ''} {url or ''}".lower()
+    forms = {today.isoformat(), today.strftime("%B %d, %Y").lower(),
+             today.strftime("%B %-d, %Y").lower(), today.strftime("%b %-d, %Y").lower(),
+             today.strftime("%d %B %Y").lower(), today.strftime("%-d %B %Y").lower(),
+             today.strftime("%Y/%m/%d"), today.strftime("%m/%d/%Y")}
+    if any(f in hay for f in forms):
+        return
+    raise LedgerRefusal(
+        f"published {published!r} is today's date, which is when the page was "
+        f"READ, not when it was published, and nothing in the excerpt or URL "
+        f"states it. Omit --published for an undated page (the row bands "
+        f"{C.RECENCY_UNVERIFIED}, never current), or quote the dated line the "
+        f"page carries.")
 
 
 def recency_band(published: str | None, wb: RunWorkbook | None = None) -> str:

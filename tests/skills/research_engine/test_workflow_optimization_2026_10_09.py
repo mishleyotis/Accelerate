@@ -176,6 +176,11 @@ def test_a_spent_envelope_refuses_the_workflow_handoff_before_any_agent(tmp_path
 
 
 def test_the_handoff_carries_the_envelope_and_caps_rounds_when_it_does_not_fit(tmp_path):
+    """$0.50 left of $10: since 2026-10-09 (the research tiers) a category is
+    funded END TO END or not at all, so no workflow is handed — the stage
+    stops AT_STAGE_BUDGET before dispatch naming the cheapest category's
+    price and the flag. With room for the category but not the whole scope,
+    the handoff carries the envelope and one round."""
     run = new_run(tmp_path, n=6)
     preflight.record(run, preflight_doc())
     cost.record(run, stage="RESEARCH", elapsed_s=60, usd=9.5)   # $0.50 left of $10
@@ -185,12 +190,26 @@ def test_the_handoff_carries_the_envelope_and_caps_rounds_when_it_does_not_fit(t
                                   sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
                                   research_mode="workflow"))
     out = p.run_all()
-    assert out["outcome"] == "AWAITING_WORKFLOW", out
-    doc = json.loads(Path(out["handoff"]).read_text())
-    assert doc["budget"]["family"] == "RESEARCH" and doc["budget"]["fits_envelope"] is False
+    assert out["outcome"] == "STOPPED_STAGE_BUDGET", out
+    assert "AT_STAGE_BUDGET before dispatch" in out["reason"]
+    assert "cheapest category costs" in out["reason"]
+    assert not [c for c in disp.calls if c["stage"] == "RESEARCH"]
+
+    run2 = new_run(tmp_path / "b", n=6)
+    preflight.record(run2, preflight_doc())
+    one = cost.research_price(6, categories=1)["usd"]
+    p2 = P.Pipeline(run2, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
+                                    push=False, folder_root=tmp_path / "out2", ingest_poll_s=0,
+                                    sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
+                                    research_mode="workflow",
+                                    stage_budget={"RESEARCH": round(one * 1.05, 2)}))
+    out2 = p2.run_all()
+    assert out2["outcome"] == "AWAITING_WORKFLOW", out2
+    doc = json.loads(Path(out2["handoff"]).read_text())
+    assert doc["budget"]["family"] == "RESEARCH"
     for inv in doc["invocations"]:
-        assert inv["budget"]["remaining"] == pytest.approx(0.5)
-        assert inv["rounds"] == 1, "a round that cannot be paid for is not handed"
+        assert inv["budget"]["share_usd"] is not None and inv["budget"]["share_usd"] > 0
+        assert inv["rounds"] in (1, 2)
 
 
 def test_the_critic_rounds_default_is_two():

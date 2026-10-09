@@ -37,6 +37,12 @@ import re
 
 #: `research-p1c1-producer` -> the one category it may write.
 _CATEGORY_RESEARCHER = re.compile(r"^research-(p\d+c\d+)-producer$", re.I)
+#: `research-p1c1-collector` -> the haiku evidence collector of one category
+#: (2026-10-09): it logs searches, registers and attaches evidence for its
+#: category's cells and writes NO judgement — a synthesis or an absence from a
+#: collector is refused at the write, which is what keeps the price tier on
+#: the mechanical half of the gold row.
+_CATEGORY_COLLECTOR = re.compile(r"^research-(p\d+c\d+)-collector$", re.I)
 #: `scoring-p1-producer` -> the one pillar it may score.
 _PILLAR_SCORER = re.compile(r"^scoring-(p\d+)-producer$", re.I)
 
@@ -75,13 +81,16 @@ OPS = ("search", "evidence", "attach", "synthesis", "absence", "challenge",
 #: op -> the classes allowed to perform it. A class absent from a row may
 #: not perform that op at all, whatever cell it names.
 _ALLOWED = {
-    "search":    {"category-researcher", "servicing", "technographic-scanner"},
-    "evidence":  {"category-researcher", "servicing", "technographic-scanner"},
+    "search":    {"category-researcher", "category-collector", "servicing",
+                  "technographic-scanner"},
+    "evidence":  {"category-researcher", "category-collector", "servicing",
+                  "technographic-scanner"},
     # The scanner attaches only through `techscan.record`, which links a
     # register row's own citations to the cells the row names (ET-07 at the
     # write, 2026-10-09); it never attaches a row into a cell on its own.
-    "attach":    {"category-researcher", "servicing", "technographic-scanner"},
-    "note":      {"category-researcher", "servicing"},
+    "attach":    {"category-researcher", "category-collector", "servicing",
+                  "technographic-scanner"},
+    "note":      {"category-researcher", "category-collector", "servicing"},
     "synthesis": {"category-researcher"},
     "absence":   {"category-researcher"},
     "challenge": {"challenger"},
@@ -90,7 +99,7 @@ _ALLOWED = {
 }
 
 #: Classes whose cells are restricted to a prefix of their own name.
-_SCOPED = {"category-researcher", "pillar-scorer"}
+_SCOPED = {"category-researcher", "category-collector", "pillar-scorer"}
 
 
 def actor_from_env() -> str:
@@ -113,6 +122,10 @@ def classify(actor: str | None) -> dict:
     m = _CATEGORY_RESEARCHER.match(name)
     if m:
         return {"actor": name, "class": "category-researcher",
+                "scope": m.group(1).upper()}
+    m = _CATEGORY_COLLECTOR.match(name)
+    if m:
+        return {"actor": name, "class": "category-collector",
                 "scope": m.group(1).upper()}
     m = _PILLAR_SCORER.match(name)
     if m:
@@ -153,7 +166,7 @@ def violation(actor: str | None, op: str, cells=None) -> str:
                 f"{'/'.join(sorted(allowed)) or 'nobody'} tier's write. "
                 f"A {who['class']} "
                 + ("retrieves for the run and forms no judgement"
-                   if who["class"] == "servicing" else
+                   if who["class"] in ("servicing", "category-collector") else
                    "writes only what its own tier is dispatched to write")
                 + " — see engine/scope.py.")
     if who["class"] not in _SCOPED:
