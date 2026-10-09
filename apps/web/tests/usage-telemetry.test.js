@@ -113,6 +113,8 @@ test("the sink filter in deploy.sh is the field this module writes", () => {
   const deploy = fs.readFileSync(path.join(__dirname, "..", "..", "..", "infra", "deploy.sh"), "utf8");
   assert.match(deploy, /jsonPayload\.usage_v=1/);
   assert.match(deploy, /resource\.labels\.service_name="dmai-web"/);
+  assert.match(deploy, /USAGE_FILTER='[^']*resource\.labels\.service_name="dmai-share"[^']*'/,
+               "the client-link lines are written by dmai-share; a dmai-web-only sink never records them");
   assert.match(deploy, /USAGE_DATASET=\$\{USAGE_DATASET\}/, "the web service is told its dataset");
 });
 
@@ -244,4 +246,93 @@ test("usage surfaces speak of activity, never of sign-ins", () => {
     assert.ok(!/Never signed in|Who's signed in|sign-ins/.test(src), `${f} ties usage to sign-ins`);
     assert.ok(!/u\.signed_in/.test(src), `${f} reads the OIDC binding as activity`);
   }
+});
+
+/* ── client links (owner, 2026-10-09) ──────────────────────────────── */
+const fs = require("node:fs");
+const path = require("node:path");
+const P = { jti: "linkAAAA0001", e: "golden-1", r: "run-1", exp: 1792771904 };
+
+function captured(fn) {
+  const real = process.stdout.write.bind(process.stdout);
+  const out = [];
+  process.stdout.write = (s) => { out.push(String(s)); return true; };
+  try { fn(); } finally { process.stdout.write = real; }
+  return out.map((s) => JSON.parse(s));
+}
+
+test("a client reader's beacon is logged as the admitted address, CLIENT, on this link only", () => {
+  const session = U.clientSession("jane@bcu.com");
+  const parsed = U.parseBeacon(JSON.stringify({ events: [ok({ email: "boss@zennify.com", role: "ADMIN",
+    audience: "internal", acting_role: "ADMIN", path: "/clients/other-client/insights" })] }), session, "Chrome/1", NOW);
+  const f = U.clientBeaconFields(parsed.events[0].fields, P);
+  const [line] = captured(() => U.logUsage("page_view", session, f, NOW));
+  assert.equal(line.usage_v, 1);
+  assert.deepEqual([line.usage.email, line.usage.role, line.usage.audience, line.usage.acting_role, line.usage.client_link],
+                   ["jane@bcu.com", "CLIENT", "customer", null, true]);
+  assert.deepEqual([line.usage.link_jti, line.usage.client_id, line.usage.run_id], ["linkAAAA0001", "golden-1", "run-1"],
+                   "the link's own client, whatever the path claimed");
+});
+
+test("a refused address is a link_refused line with no person behind it", () => {
+  const [line] = captured(() => U.logLinkEvent("link_refused",
+    U.linkFields(P, { attempted_email: "x@gmail.com", reason: "not_on_allowlist" }), NOW));
+  assert.equal(line.usage.type, "link_refused");
+  assert.equal(line.usage.email, null);
+  assert.equal(line.usage.attempted_email, "x@gmail.com");
+  assert.ok(U.LINK_EVENTS.has("link_refused") && !U.BEACON_TYPES.has("link_refused"), "never accepted from a beacon");
+  for (const t of U.LINK_EVENTS) assert.ok(!U.BEACON_TYPES.has(t), t);
+});
+
+test("every client-link step writes its usage line", () => {
+  const src = (f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+  assert.match(src("app/api/share/route.js"), /logUsage\("link_minted", session, linkFields\(payload, \{\s*recipients: payload\.a\.m, domains: payload\.a\.d/);
+  const access = src("app/s/[token]/access/route.js");
+  assert.match(access, /logLinkEvent\("link_refused"/);
+  assert.match(access, /logUsage\("link_otp_sent", clientSession\(email\)/);
+  assert.match(access, /logUsage\("link_admit", clientSession\(email\), linkFields\(p, \{ method: "attest" \}\)\)/);
+  const verify = src("app/s/[token]/verify/route.js");
+  assert.match(verify, /logLinkEvent\("link_refused"/);
+  assert.match(verify, /logUsage\("link_admit", clientSession\(email\), linkFields\(p, \{ method: "otp" \}\)\)/);
+  assert.match(src("app/s/[token]/route.js"), /logUsage\("link_open", clientSession\(email\)/);
+  const beacon = src("app/s/[token]/api/usage/route.js");
+  assert.match(beacon, /readAccess\(p, cookieFrom\(req, accessCookieName\(p\)\)\)/, "identity is the admitted address");
+  assert.match(beacon, /if \(!email\) return deny\(401/);
+  assert.match(src("proto/usage-tracker.jsx"), /LIVE\.share && LIVE\.api_base \? `\$\{LIVE\.api_base\}\/usage`/,
+               "a client link reports to its own route");
+});
+
+test("the store reads every generated link and marks client-only people", async () => {
+  const { fetchImpl } = fakeBigQuery((url, body) => {
+    const q = body ? body.query : "";
+    if (/GROUP BY email/.test(q)) {
+      return { status: 200, json: { jobComplete: true, rows: [
+        { f: [{ v: "a@zennify.com" }, { v: "2026-10-07T14:00:00.000Z" }, { v: "2026-09-01T09:00:00.000Z" }, { v: "false" }] },
+        { f: [{ v: "jane@bcu.com" }, { v: "2026-10-07T13:00:00.000Z" }, { v: "2026-10-06T09:00:00.000Z" }, { v: "true" }] }] } };
+    }
+    if (/= 'link_minted'/.test(q)) {
+      return { status: 200, json: { jobComplete: true, rows: [{ f: ["2026-10-06T08:00:00.000Z", "a@zennify.com", "ADMIN",
+        "linkAAAA0001", "golden-1", "run-1", '["jane@bcu.com","CFO@bcu.com"]', '["bcu.com"]', "2026-11-05T08:00:00.000Z"].map((v) => ({ v })) }] } };
+    }
+    return { status: 200, json: { jobComplete: true, rows: [] } };
+  });
+  const r = await S.readUsage(7, { env: ENV, fetchImpl });
+  assert.equal(r.status, "ok");
+  assert.deepEqual(r.link_fields, S.LINK_FIELDS);
+  assert.deepEqual(r.links, [["2026-10-06T08:00:00.000Z", "a@zennify.com", "ADMIN", "linkAAAA0001", "golden-1", "run-1",
+                              ["jane@bcu.com", "cfo@bcu.com"], ["bcu.com"], "2026-11-05T08:00:00.000Z"]]);
+  assert.deepEqual(r.client_only, ["jane@bcu.com"]);
+  assert.deepEqual(S.jsonList("not json"), []);
+  assert.deepEqual(S.jsonList(null), []);
+});
+
+test("the links query reads every retained mint, through JSON paths, with no reserved alias", () => {
+  const sql = S.linksSql({ project: "p", dataset: "d", table: "t" });
+  assert.match(sql, /WHERE JSON_VALUE\(u, '\$\.type'\) = 'link_minted'/);
+  assert.ok(!/INTERVAL/.test(sql), "a link shared months ago still names its recipients");
+  assert.match(sql, /JSON_VALUE_ARRAY\(u, '\$\.recipients'\)/);
+  assert.ok(!/\bAS by\b/i.test(sql), "BY is reserved in BigQuery");
+  assert.match(S.lastSeenSql({ project: "p", dataset: "d", table: "t" }), /LOGICAL_AND\([\s\S]*'CLIENT'\) AS client_only/);
+  assert.deepEqual(S.WIRE_FIELDS.slice(0, 14), ["t", "type", "email", "role", "sid", "page", "client_id",
+    "dwell_ms", "cont", "feature", "device", "entered_at", "audience", "acting_role"], "existing positions never move");
 });

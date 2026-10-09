@@ -23,8 +23,15 @@ const DS_IDENT = /^[A-Za-z0-9_]+$/;
 
 // The wire row, in order. Arrays rather than objects: a 90-day view carries
 // two periods of page views, and the field names would be most of the bytes.
+// Client-link fields ride at the end (lib/usage LINK_EVENTS): the link a line
+// is about, how a reader was admitted, and the address a refusal turned away.
 export const WIRE_FIELDS = ["t", "type", "email", "role", "sid", "page", "client_id",
-  "dwell_ms", "cont", "feature", "device", "entered_at", "audience", "acting_role"];
+  "dwell_ms", "cont", "feature", "device", "entered_at", "audience", "acting_role",
+  "link_jti", "method", "attempted_email", "reason"];
+
+// The wire row of one generated link (linksSql).
+export const LINK_FIELDS = ["t", "by", "by_role", "jti", "client_id", "run_id",
+  "recipients", "domains", "expires_at"];
 
 export const RANGES = [7, 14, 30, 90];
 const MAX_ROWS = 200000;
@@ -55,7 +62,9 @@ SELECT FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%E3SZ', timestamp) AS t,
        SAFE_CAST(${J("dwell_ms")} AS INT64) AS dwell_ms,
        SAFE_CAST(${J("cont")} AS BOOL) AS cont, ${J("feature")} AS feature,
        ${J("device")} AS device, ${J("entered_at")} AS entered_at,
-       ${J("audience")} AS audience, ${J("acting_role")} AS acting_role
+       ${J("audience")} AS audience, ${J("acting_role")} AS acting_role,
+       ${J("link_jti")} AS link_jti, ${J("method")} AS method,
+       LOWER(${J("attempted_email")}) AS attempted_email, ${J("reason")} AS reason
 FROM e
 WHERE ${J("type")} != 'heartbeat'
    OR timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)
@@ -64,13 +73,46 @@ LIMIT ${MAX_ROWS + 1}`;
 }
 
 // Last seen per person over everything retained, and when recording began.
+// `client_only` marks an address seen only through a client link (role
+// CLIENT): such a person is a client recipient, never a Zennify user, and the
+// Users & roles card must not offer them a role.
 export function lastSeenSql(cfg) {
   const t = `\`${cfg.project}.${cfg.dataset}.${cfg.table}\``;
   return `SELECT LOWER(JSON_VALUE(TO_JSON_STRING(jsonPayload.usage), '$.email')) AS email,
        FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%E3SZ', MAX(timestamp)) AS last,
-       FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%E3SZ', MIN(timestamp)) AS first
+       FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%E3SZ', MIN(timestamp)) AS first,
+       LOGICAL_AND(IFNULL(JSON_VALUE(TO_JSON_STRING(jsonPayload.usage), '$.role'), '') = 'CLIENT') AS client_only
 FROM ${t}
 GROUP BY email`;
+}
+
+// Every client link generated, over everything retained — not just the range:
+// a link shared two months ago still names who may open it, and a recipient
+// who never has is "No activity yet", not absent.
+export function linksSql(cfg) {
+  const t = `\`${cfg.project}.${cfg.dataset}.${cfg.table}\``;
+  return `WITH e AS (
+  SELECT timestamp, TO_JSON_STRING(jsonPayload.usage) AS u FROM ${t}
+)
+SELECT FORMAT_TIMESTAMP('%Y-%m-%dT%H:%M:%E3SZ', timestamp) AS t,
+       LOWER(${J("email")}) AS minted_by, ${J("role")} AS minted_by_role, ${J("link_jti")} AS jti,
+       ${J("client_id")} AS client_id, ${J("run_id")} AS run_id,
+       TO_JSON_STRING(JSON_VALUE_ARRAY(u, '$.recipients')) AS recipients,
+       TO_JSON_STRING(JSON_VALUE_ARRAY(u, '$.domains')) AS domains,
+       ${J("expires_at")} AS expires_at
+FROM e
+WHERE ${J("type")} = 'link_minted'
+ORDER BY timestamp
+LIMIT 5000`;
+}
+
+// '["a@b.com"]' (JSON_VALUE_ARRAY, as JSON text) → ["a@b.com"]; never throws.
+export function jsonList(v) {
+  try {
+    const a = JSON.parse(v || "[]");
+    return Array.isArray(a) ? a.map((x) => { try { return JSON.parse(x); } catch { return x; } })
+      .filter((x) => typeof x === "string" && x).map((x) => x.toLowerCase()) : [];
+  } catch { return []; }
 }
 
 // BigQuery's REST rows ({f:[{v}]}) → arrays in schema order.
@@ -142,31 +184,38 @@ export async function runQuery(cfg, sql, params, fetchImpl = fetch) {
 // The endpoint's whole answer for a range.
 export async function readUsage(rangeDays, { env = process.env, fetchImpl = fetch,
                                              now = new Date() } = {}) {
-  const base = { range_days: rangeDays, generated_at: now.toISOString(), fields: WIRE_FIELDS };
+  const base = { range_days: rangeDays, generated_at: now.toISOString(), fields: WIRE_FIELDS,
+                 link_fields: LINK_FIELDS };
   const cfg = usageConfig(env);
   if (!cfg) return { ...base, status: "not_configured" };
   try {
-    const [events, seen] = await Promise.all([
+    const [events, seen, minted] = await Promise.all([
       runQuery(cfg, eventsSql(cfg), { days: rangeDays * 2 + 1 }, fetchImpl),
       runQuery(cfg, lastSeenSql(cfg), {}, fetchImpl),
+      runQuery(cfg, linksSql(cfg), {}, fetchImpl),
     ]);
     const truncated = events.length > MAX_ROWS;
     const last_seen = {};
+    const client_only = [];
     let recording_since = null;
-    for (const [email, last, first] of seen) {
+    for (const [email, last, first, clientOnly] of seen) {
       if (email) last_seen[email] = last;
+      if (email && (clientOnly === true || clientOnly === "true")) client_only.push(email);
       if (first && (!recording_since || first < recording_since)) recording_since = first;
     }
+    const links = minted.map(([t, by, by_role, jti, client_id, run_id, rec, dom, expires_at]) =>
+      [t, by, by_role, jti, client_id, run_id, jsonList(rec), jsonList(dom), expires_at]);
     const wire = events.slice(0, MAX_ROWS).map((r) => r.map((v, i) =>
       i === 7 ? (v == null ? null : Number(v)) : i === 8 ? (v == null ? null : v === "true") : v));
-    return { ...base, status: "ok", recording_since, last_seen, truncated, events: wire };
+    return { ...base, status: "ok", recording_since, last_seen, client_only, links, truncated,
+             events: wire };
   } catch (e) {
     const d = await diagnose(cfg, e, fetchImpl).catch(() => null);
     if (d && d.status === "ok") {
       // The sink and its grants are in place and nothing has arrived yet:
       // the page renders its full layout at zero, and says it is waiting.
       return { ...base, status: "ok", awaiting_first_event: true, recording_since: null,
-               last_seen: {}, truncated: false, events: [] };
+               last_seen: {}, client_only: [], links: [], truncated: false, events: [] };
     }
     return { ...base, status: (d && d.status) || e.state || "error",
              detail: (d && d.detail) || String(e.message || e).slice(0, 300) };

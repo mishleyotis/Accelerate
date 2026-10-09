@@ -439,7 +439,10 @@ function AdminUsersCard() {
   const users = LIVE ? (() => {
     const rows = live.users.map(u => ({ ...u, known: true }));
     const have = new Set(rows.map(u => u.email));
-    if (live.status === "ok") Object.keys(seen).forEach(e => { if (!have.has(e)) rows.push({ email: e, display_name: nameOf(e), role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE", is_active: true, known: false }); });
+    // A client-link reader (usage role CLIENT) is not a Zennify user: never
+    // offered a role here (Admin › Usage analytics lists them as Client).
+    const clientOnly = (usage.status === "ok" && usage.clientOnly) || new Set();
+    if (live.status === "ok") Object.keys(seen).forEach(e => { if (!have.has(e) && !clientOnly.has(e)) rows.push({ email: e, display_name: nameOf(e), role: (((window.DMA_LIVE || {}).role_grants || {}).analysts || []).includes(e) ? "ANALYST" : "AE", is_active: true, known: false }); });
     return rows;
   })() : mock;
 

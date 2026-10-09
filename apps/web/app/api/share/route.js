@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { COOKIE, verify as verifySession } from "../../../lib/session";
+import { requestSession } from "../../../lib/request-session";
 import { audit, mint, shareMode, shareUrl } from "../../../lib/share";
 import { ledgerBackend, recordLink } from "../../../lib/share-ledger";
+import { linkFields, logUsage } from "../../../lib/usage";
 
 // POST /api/share — mint a client link (the IAP-fronted app only).
 //
@@ -14,7 +15,9 @@ import { ledgerBackend, recordLink } from "../../../lib/share-ledger";
 // link itself.
 export async function POST(req) {
   if (shareMode()) return new Response("Not found", { status: 404 });
-  const session = verifySession(cookies().get(COOKIE)?.value);
+  // The cookie, else the IAP assertion (lib/request-session): a tab open past
+  // the 8-hour cookie can still share.
+  const session = await requestSession(req, cookies());
   if (!session) return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
   const base = process.env.SHARE_BASE_URL;
   if (!base) {
@@ -42,6 +45,10 @@ export async function POST(req) {
     audit("share_link_minted", { jti: payload.jti, entity: payload.e, run: payload.r,
       by: session.email, emails: payload.a.m, domains: payload.a.d,
       expires_at: new Date(payload.exp * 1000).toISOString() });
+    // Usage analytics: every link generated, by whom, for whom (lib/usage).
+    logUsage("link_minted", session, linkFields(payload, {
+      recipients: payload.a.m, domains: payload.a.d,
+      expires_at: new Date(payload.exp * 1000).toISOString() }));
     return NextResponse.json({
       url: shareUrl(base, token, payload.e), jti: payload.jti,
       expires_at: new Date(payload.exp * 1000).toISOString(),
