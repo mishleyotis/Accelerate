@@ -284,6 +284,30 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   closed** (503). A configured ledger that cannot record a new link issues no
   link. `infra/share-revoked.txt` stays as break-glass. Tests:
   `share-link.test.js`, `share-admin.test.js`, `test_deploy_auth_posture.py`.
+  **The sign-in email** (owner, 2026-10-09, after Identity Platform's
+  default — "Sign in to n8n…" from noreply@…firebaseapp.com — landed in
+  spam; supersedes "no mail provider" above for this email only): sent
+  **from the mailbox of the colleague who shared the link** (or who
+  re-added that address/domain), via **Microsoft Graph Mail.Send** —
+  zennify.com is Microsoft 365 — through an Entra app that trusts
+  dmai-share's Google identity (federated credential; **no secret**).
+  Zennify-branded per the design system (`lib/share-email.js`: one link,
+  text part, inline wordmark, no remote images or tracking). It carries
+  **the app's own one-time code**, signed and bound to the address, **valid
+  for the days the link was shared for** ("It is number of days not
+  minutes"), burned on first use (`used/<nonce>` in the sends bucket). Login
+  validation is unchanged in kind — only the inbox owner can follow it, no
+  Google account needed (owner confirmed this choice, 2026-10-09). deploy.sh
+  switches it on only when the token exchange reads back Mail.Send
+  (`SHARE_MAIL_TENANT_ID`/`SHARE_MAIL_CLIENT_ID` repo variables); otherwise,
+  and for a link with no zennify.com sharer, Identity Platform sends its own
+  email (Google's code). **Anti-spam** (`lib/share-throttle.js`): shared
+  budgets in the private bucket `${PROJECT_ID}-dmai-share-sends` — 1/min,
+  4/h, 8/day per address per link; 20/h, 60/day per link; 15/day for
+  addresses admitted only by domain (enumeration); 150/day per colleague;
+  20/h per network; 600/day service — spent by atomic increment (a burst
+  sends once), **fail closed**; a honeypot and a signed form time on the gate
+  (no CAPTCHA). Stress: `apps/web/tests/e2e/share-mail.stress.js`.
 
 - **User role allocation** (user, 2026-10-07, after "you even removed user
   role allocation from the admin page"): grants live in the Backend Schema's

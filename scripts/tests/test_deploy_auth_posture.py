@@ -364,3 +364,31 @@ def test_THE_LINK_LEDGER_IS_WRITTEN_BY_THE_APP_AND_ONLY_READ_BY_THE_PUBLIC_SERVI
         "the ledger is configured on one service and not the other")
     lib = (ROOT / "apps" / "web" / "lib" / "share-ledger.js").read_text()
     assert 'why: "unavailable"' in lib, "a ledger read failure no longer fails closed"
+
+
+def test_SIGN_IN_EMAILS_ARE_METERED_AND_COME_FROM_THE_COLLEAGUE_OR_SAY_WHY_NOT():
+    """Owner, 2026-10-09: the sign-in email is sent from the colleague who
+    shared the link (their Microsoft 365 mailbox), and it cannot be used to
+    spam. The budget store is a private, expiring bucket that dmai-share must
+    have — a store that cannot be made fails the release, since the share
+    service fails closed without it. The mailer is switched on only after the
+    federated token exchange reads back Mail.Send, needs no secret, and a
+    release without it prints the exact setup steps, never silence."""
+    text = DEPLOY.read_text()
+    share = _deploy_block("dmai-share")
+    assert "SHARE_SENDS_BUCKET=${SHARE_SENDS_BUCKET}" in share
+    assert "${MAIL_ENV}" in share, "the mailer config does not reach dmai-share"
+    assert "${MAIL_ENV}" not in _deploy_block("dmai-web"), "the IAP app has no business sending mail"
+    assert 'FATAL: could not grant dmai-share the sign-in email budgets bucket' in text
+    assert '"condition":{"age":2,"matchesPrefix":["rl/"]}' in text, "budget counters no longer expire"
+    # A burned sign-in code must outlive the longest share link (90 days).
+    assert '"condition":{"age":92,"matchesPrefix":["used/"]}' in text, "burned codes expire before their links"
+    assert "api://AzureADTokenExchange" in text and '"Mail.Send" in roles' in text, (
+        "the mailer is switched on without reading back Mail.Send")
+    assert 'echo "  Why: ${MAIL_WHY:-unknown}" >&2' in text
+    assert "New-ApplicationAccessPolicy" in text, "the setup steps no longer restrict the app to the AEs"
+    for forbidden in ("client_secret", "SHARE_MAIL_SECRET", "--set-secrets=\"$SHARE_SECRETS,SHARE_MAIL"):
+        assert forbidden not in text, f"a mail secret appeared in the deploy: {forbidden}"
+    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
+    for v in ("SHARE_MAIL_TENANT_ID", "SHARE_MAIL_CLIENT_ID"):
+        assert f"{v}: ${{{{ vars.{v} }}}}" in ci, f"{v} is not passed to the deploy"

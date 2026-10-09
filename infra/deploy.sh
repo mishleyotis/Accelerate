@@ -806,6 +806,108 @@ print("yes" if ok else "no")' || echo no)" != "yes" ]; then
     echo "  'Email link (passwordless sign-in)'; Settings > Authorized domains > add ${SHARE_HOST};" >&2
     echo "  then the next release creates the API key and switches OTP on." >&2
   fi
+  # ── Sign-in email budgets (apps/web/lib/share-throttle.js; owner,
+  # 2026-10-09: "ensure there are safeguards against [it] being spammed").
+  # Counters every dmai-share instance shares: per address, link, colleague,
+  # network and service (rl/, expire after two days), and the burned
+  # sign-in codes (used/, kept 92 days: a code is valid for as long as its
+  # share link, at most 90 days, and must stay burned that long). The share service
+  # FAILS CLOSED when the store cannot be read, so a store that cannot be
+  # made fails the release rather than leaving the gate unmetered.
+  SHARE_SENDS_BUCKET="${PROJECT_ID}-dmai-share-sends"
+  if ! gcloud storage buckets describe "gs://${SHARE_SENDS_BUCKET}" --project="$PROJECT_ID" >/dev/null 2>&1; then
+    gcloud storage buckets create "gs://${SHARE_SENDS_BUCKET}" --project="$PROJECT_ID" \
+      --location="$REGION" --uniform-bucket-level-access --public-access-prevention --quiet >/dev/null \
+      || { echo "FATAL: could not create gs://${SHARE_SENDS_BUCKET} (sign-in email budgets)" >&2; exit 1; }
+  fi
+  printf '%s' '{"rule":[{"action":{"type":"Delete"},"condition":{"age":2,"matchesPrefix":["rl/"]}},{"action":{"type":"Delete"},"condition":{"age":92,"matchesPrefix":["used/"]}}]}' > /tmp/dmai-sends-lifecycle.json
+  gcloud storage buckets update "gs://${SHARE_SENDS_BUCKET}" --project="$PROJECT_ID" \
+    --lifecycle-file=/tmp/dmai-sends-lifecycle.json --quiet >/dev/null \
+    || echo "WARNING: could not set the two-day expiry on gs://${SHARE_SENDS_BUCKET}" >&2
+  gcloud storage buckets add-iam-policy-binding "gs://${SHARE_SENDS_BUCKET}" \
+    --member="serviceAccount:${SHARE_SA}" --role="roles/storage.objectAdmin" --quiet >/dev/null \
+    || { echo "FATAL: could not grant dmai-share the sign-in email budgets bucket" >&2; exit 1; }
+  say "  share: sign-in email budgets gs://${SHARE_SENDS_BUCKET} (per address, link, colleague, network, service; fail closed)"
+
+  # ── Sign-in emails from the sharing colleague's mailbox (owner,
+  # 2026-10-09; apps/web/lib/share-mailer.js). zennify.com is Microsoft 365:
+  # Graph Mail.Send through an Entra app that trusts dmai-share's Google
+  # identity (federated credential) — no secret is created or stored. The
+  # email carries the app's own single-use code, valid for the days the link
+  # was shared for. On only when the token exchange reads back Mail.Send;
+  # otherwise Identity Platform keeps sending its own email and the release
+  # says why.
+  MAIL_ENV=""; MAIL_WHY=""
+  SHARE_SA_UID="$(gcloud iam service-accounts describe "$SHARE_SA" --project="$PROJECT_ID" \
+    --format='value(uniqueId)' 2>/dev/null || true)"
+  if [ -z "${SHARE_MAIL_TENANT_ID:-}" ] && gcloud secrets describe dmai-share-mailer --project="$PROJECT_ID" >/dev/null 2>&1; then
+    MAILCFG="$(gcloud secrets versions access latest --secret=dmai-share-mailer --project="$PROJECT_ID" 2>/dev/null || true)"
+    SHARE_MAIL_TENANT_ID="$(printf '%s' "$MAILCFG" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("tenant_id",""))
+except Exception: print("")')"
+    SHARE_MAIL_CLIENT_ID="$(printf '%s' "$MAILCFG" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin).get("client_id",""))
+except Exception: print("")')"
+    unset MAILCFG
+  fi
+  GUID_RE='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+  if [ -z "$SHARE_SA_UID" ]; then
+    MAIL_WHY="could not read the dmai-share service account's unique id"
+  elif [ "$IDP_OK" != "yes" ]; then
+    MAIL_WHY="one-time sign-in (Identity Platform) is off, so the share service sends no sign-in email at all"
+  elif ! [[ "${SHARE_MAIL_TENANT_ID:-}" =~ $GUID_RE && "${SHARE_MAIL_CLIENT_ID:-}" =~ $GUID_RE ]]; then
+    MAIL_WHY="no Microsoft 365 mailer configured (repo variables SHARE_MAIL_TENANT_ID / SHARE_MAIL_CLIENT_ID, or secret dmai-share-mailer)"
+  else
+    # The token exchange, exactly as dmai-share makes it.
+    gcloud iam service-accounts add-iam-policy-binding "$SHARE_SA" --project="$PROJECT_ID" \
+      --member="serviceAccount:${DEPLOYER_ACCT}" --role="roles/iam.serviceAccountTokenCreator" \
+      --quiet >/dev/null 2>&1 || true
+    GIDT=""
+    for attempt in 1 2 3 4; do
+      GIDT="$(gcloud auth print-identity-token --impersonate-service-account="$SHARE_SA" \
+        --audiences="api://AzureADTokenExchange" 2>/dev/null || true)"
+      [ -n "$GIDT" ] && break; sleep 15
+    done
+    if [ -z "$GIDT" ]; then
+      MAIL_WHY="could not mint dmai-share's Google ID token to test the exchange (roles/iam.serviceAccountTokenCreator on ${SHARE_SA})"
+    else
+      MAIL_CHECK="$(curl -s -X POST "https://login.microsoftonline.com/${SHARE_MAIL_TENANT_ID}/oauth2/v2.0/token" \
+        --data-urlencode "client_id=${SHARE_MAIL_CLIENT_ID}" \
+        --data-urlencode "scope=https://graph.microsoft.com/.default" \
+        --data-urlencode "grant_type=client_credentials" \
+        --data-urlencode "client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer" \
+        --data-urlencode "client_assertion=${GIDT}" | python3 -c '
+import base64, json, sys
+try: j = json.load(sys.stdin)
+except Exception: print("no response from Entra"); sys.exit()
+t = j.get("access_token")
+if not t: print((j.get("error", "") + ": " + j.get("error_description", "").split("\r")[0])[:220]); sys.exit()
+p = t.split(".")[1]; p += "=" * (-len(p) % 4)
+roles = json.loads(base64.urlsafe_b64decode(p)).get("roles") or []
+print("ok" if "Mail.Send" in roles else "the token has no Mail.Send (grant the application permission and admin consent)")')"
+      unset GIDT
+      if [ "$MAIL_CHECK" = "ok" ]; then
+        MAIL_ENV=";SHARE_MAIL_TENANT_ID=${SHARE_MAIL_TENANT_ID};SHARE_MAIL_CLIENT_ID=${SHARE_MAIL_CLIENT_ID};SHARE_MAIL_SENDER_DOMAINS=${SHARE_MAIL_SENDER_DOMAINS:-zennify.com}"
+      else
+        MAIL_WHY="Entra token exchange: ${MAIL_CHECK}"
+      fi
+    fi
+  fi
+  if [ -n "$MAIL_ENV" ]; then
+    say "  share: sign-in emails sent from the sharing colleague's Microsoft 365 mailbox (Graph Mail.Send, federated, no secret)"
+  else
+    echo "WARNING: client sign-in emails come from Identity Platform's generic sender, not the colleague's mailbox." >&2
+    echo "  Why: ${MAIL_WHY:-unknown}" >&2
+    echo "  A Microsoft 365 admin, once (no secret is created):" >&2
+    echo "  1. Entra admin center > App registrations > New: 'Zennify DMA Insights mailer' (single tenant)." >&2
+    echo "  2. API permissions > Microsoft Graph > Application > Mail.Send > Grant admin consent." >&2
+    echo "  3. Certificates & secrets > Federated credentials > Add > Other issuer:" >&2
+    echo "       issuer https://accounts.google.com   subject ${SHARE_SA_UID:-<dmai-share unique id>}   audience api://AzureADTokenExchange" >&2
+    echo "  4. Exchange Online PowerShell — limit it to the people who share links:" >&2
+    echo "       New-ApplicationAccessPolicy -AppId <client id> -PolicyScopeGroupId <mail-enabled group of AEs> -AccessRight RestrictAccess" >&2
+    echo "  5. GitHub repo variables SHARE_MAIL_TENANT_ID and SHARE_MAIL_CLIENT_ID (IDs, not secrets); the next release switches it on." >&2
+  fi
+
   WEB_IMAGE="$(gcloud run services describe dmai-web --project="$PROJECT_ID" \
     --region="$REGION" --format='value(spec.template.spec.containers[0].image)')"
   # One link at a time: list its jti (shown in the share dialog and in the
@@ -823,7 +925,7 @@ print("yes" if ok else "no")' || echo no)" != "yes" ]; then
   gcloud run deploy dmai-share --image="$WEB_IMAGE" \
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="$SHARE_SA" \
-    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}${LEDGER_ENV}" \
+    --set-env-vars="^;^API_URL=${API_URL};SHARE_MODE=1;SHARE_REVOKED_JTIS=${SHARE_REVOKED}${LEDGER_ENV};SHARE_SENDS_BUCKET=${SHARE_SENDS_BUCKET}${MAIL_ENV}" \
     --set-secrets="$SHARE_SECRETS" \
     --min-instances=0 --max-instances=10 --concurrency=80 \
     --allow-unauthenticated --quiet

@@ -31,7 +31,7 @@ export async function POST(req) {
     // written issues no link at all (lib/share-ledger).
     const ledger = ledgerBackend();
     if (ledger) {
-      try { await recordLink(payload, session.email, ledger); }
+      try { await recordLink(payload, session.email, ledger, session.name); }
       catch (e) {
         audit("share_link_not_recorded", { jti: payload.jti, error: String(e.message || e).slice(0, 200) });
         return NextResponse.json({ error: "share_ledger_unavailable",

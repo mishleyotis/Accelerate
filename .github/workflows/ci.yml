@@ -878,4 +878,11 @@ jobs:
           python-version: '3.12'
       - name: infra/deploy.sh
         if: steps.cfg.outputs.ready == 'true'
+        env:
+          # Client sign-in emails from the sharing colleague's Microsoft 365
+          # mailbox (apps/web/lib/share-mailer.js). IDs, not secrets: the app
+          # registration trusts dmai-share's Google identity (federated).
+          SHARE_MAIL_TENANT_ID: ${{ vars.SHARE_MAIL_TENANT_ID }}
+          SHARE_MAIL_CLIENT_ID: ${{ vars.SHARE_MAIL_CLIENT_ID }}
+          SHARE_MAIL_SENDER_DOMAINS: ${{ vars.SHARE_MAIL_SENDER_DOMAINS }}
         run: bash infra/deploy.sh

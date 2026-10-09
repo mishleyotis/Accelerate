@@ -45,7 +45,7 @@ export function ledgerBackend(env = process.env) {
   return null;
 }
 
-class Unavailable extends Error {}
+export class Unavailable extends Error {}
 
 let tokenCache = null;
 async function gcsToken() {
@@ -59,7 +59,7 @@ async function gcsToken() {
   return t.access_token;
 }
 
-function gcsBackend(bucket) {
+export function gcsBackend(bucket) {
   const api = process.env.STORAGE_API || "https://storage.googleapis.com";
   const b = encodeURIComponent(bucket);
   const auth = async () => ({ Authorization: `Bearer ${await gcsToken()}` });
@@ -114,7 +114,7 @@ function gcsBackend(bucket) {
   };
 }
 
-function dirBackend(root) {
+export function dirBackend(root) {
   const file = (name) => path.join(root, ...name.split("/"));
   return {
     kind: "dir", where: root,
@@ -151,12 +151,15 @@ function dirBackend(root) {
 }
 
 /* ── Recording a link ──────────────────────────────────────────────── */
-export async function recordLink(payload, mintedBy, backend = ledgerBackend()) {
+// `mintedByName` is the colleague's display name from their session: the
+// sign-in email the recipient receives is sent from, and signed by, them.
+export async function recordLink(payload, mintedBy, backend = ledgerBackend(), mintedByName = null) {
   if (!backend) return false;
   const rec = {
     jti: payload.jti, entity: payload.e, run: payload.r,
     emails: payload.a.m, domains: payload.a.d,
     minted_by: mintedBy || null,
+    minted_by_name: mintedByName ? String(mintedByName).slice(0, 120) : null,
     minted_at: new Date(payload.iat * 1000).toISOString(),
     expires_at: new Date(payload.exp * 1000).toISOString(),
   };
@@ -164,6 +167,22 @@ export async function recordLink(payload, mintedBy, backend = ledgerBackend()) {
     throw new Unavailable(`link ${payload.jti} already recorded`);
   }
   return true;
+}
+
+/* ── Who shared a link (the share service, when it sends a sign-in) ───
+   → the links/<jti>.json record | null (not recorded — a link generated
+   before the ledger). Cached like a revocation; throws Unavailable when a
+   configured ledger cannot be read. */
+const recCache = new Map();
+export async function linkRecord(jti, backend = ledgerBackend(), now = Date.now()) {
+  if (!backend || !isJti(jti)) return null;
+  const hit = recCache.get(jti);
+  if (hit && hit.until > now) return hit.value;
+  const got = await backend.read(`links/${jti}.json`);
+  const value = got ? got.body : null;
+  recCache.set(jti, { value, until: now + 5 * 60 * 1000 });
+  if (recCache.size > 5000) recCache.delete(recCache.keys().next().value);
+  return value;
 }
 
 /* ── Reading a revocation (the share service, on every request) ────── */
