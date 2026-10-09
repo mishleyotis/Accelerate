@@ -346,8 +346,19 @@ envelope forces the design, not the prompt:
   now pins ET-07 beside ET-12 / CG-40 / CG-50 on the first-register shape:
   two unlinked ids, each named with the register rows citing it, neither a
   connector matter.
-- The engine suite, the plugin audits and the acceptance walks were run on
-  this tree; results in the PR description.
+- Run on this tree (2026-10-09): the stub chaos walk 34/34; the plugin
+  audits 376 passed; the acceptance walks 101 passed (one lane-ceiling case
+  failed on an earlier head and was fixed before the final run); scoring
+  stage + enforcement + audit 50 passed; budget ceiling + optimisation 47
+  passed; PRELIM phase, reproductions, KG, unsearched subcaps, actor scope
+  and page preflight passed after the three repairs named above. The full
+  engine suite runs in CI on the PR's head; its two shards are the record.
+- What the suites taught, each now a rule in code: the PRELIM block rides
+  in research packets only and gives way before a lead or a cell; a PRELIM
+  row is proposed to a cell on two matched terms, never one; the fixture's
+  PRELIM names no cell (the lane attaches); an owner's `--max-usd` is the
+  stop and the envelopes report; a `raw` score's rationale argues the
+  applied level.
 
 ## 8. Open, stated
 
