@@ -230,12 +230,18 @@ def _fetch_cmd(run, a) -> int:
                          max_windows=a.max_windows)
     out = {"url": a.url, "sha256": got["sha256"], "chars": len(got["text"]),
            "from_cache": got["from_cache"], "query": a.query,
+           "published": got.get("published"), "published_basis": got.get("published_basis"),
            "windows": wins}
     if a.json:
         print(json.dumps(out, indent=2))
         return 0
     print(f"{a.url}\n  sha256 {got['sha256']}  chars {out['chars']}  "
           f"cached {str(got['from_cache']).lower()}")
+    # The date the PAGE states (its publication metadata or its URL path),
+    # for `evidence --published` — never the retrieval date (2026-10-09).
+    print(f"  published {got.get('published') or 'not stated'}"
+          + (f" ({got.get('published_basis')})" if got.get("published") else
+             " — the row goes in undated (UNVERIFIED); never pass today's date"))
     if not wins:
         print(f"  NO WINDOW: nothing in this document carries the terms of "
               f"{a.query!r}. That is an answer — do not quote it anyway.")
@@ -875,7 +881,16 @@ def main(argv=None) -> int:
             since = ledger._ops_since_checkpoint(wb, "PRELIM")
             st.update(search_ops_since_checkpoint=since,
                       checkpoint_required=since >= ledger.SEARCH_OP_CEILING)
-        print(json.dumps({"seq": n, "window": cat or "PRELIM", **st}, indent=2)); return 0
+        cap = None if a.prelim else ledger._collector_scope(_actor(a), cells)
+        if cap:
+            # a collector lane reads ITS window, the one the wall measures
+            # (2026-10-09: lanes read the category's and reported a false
+            # "checkpoint needed" up to the orchestrator)
+            since = ledger._ops_since_checkpoint(wb, cap)
+            st.update(search_ops_since_checkpoint=since,
+                      window_remaining=max(0, ledger.SEARCH_OP_CEILING - since),
+                      checkpoint_required=since >= ledger.SEARCH_OP_CEILING)
+        print(json.dumps({"seq": n, "window": cap or cat or "PRELIM", **st}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
         if not cells and not a.profile:

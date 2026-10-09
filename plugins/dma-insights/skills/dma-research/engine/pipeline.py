@@ -187,7 +187,7 @@ def prose_sg_v4_fails(fails: list) -> list:
 #: re-dispatch it as a failure — and a conductor scripting `--step` in a loop
 #: reads the exit code before it reads the JSON.
 EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
-                      "ROUND_COMPLETE", "AWAITING_WORKFLOW")
+                      "ROUND_COMPLETE", "AWAITING_WORKFLOW", "SCOPE_COMPLETE")
 #: Stages that spend agents, and so are checked against their envelope
 #: before they start. Ingest waits, PACKAGE and PROMOTE spend none.
 SPENDING_STAGES = ("PRELIM", "RESEARCH", "SCORING", "REPORTS", "PAGES_A", "PAGES_B")
@@ -196,6 +196,9 @@ SPENDING_STAGES = ("PRELIM", "RESEARCH", "SCORING", "REPORTS", "PAGES_A", "PAGES
 #: in `research_mode="workflow"` — one invocation per category, its
 #: capability batches in parallel, then independent challenge -> floors gate.
 RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
+#: RESEARCH as lean tiers, visible: one runner per category drives the
+#: category's lean headless lanes (engine.tiers) — 2026-10-09
+TIERS_WORKFLOW = "workflows/dma-research-tiers.js"
 #: SCORING as one persisted workflow per pillar (scoring_mode="workflow").
 SCORING_WORKFLOW = "workflows/dma-pillar-scoring.js"
 SCORING_HANDOFF = "scoring_workflow.json"
@@ -259,6 +262,36 @@ class AwaitingWorkflow(Exception):
 
 class StageRefused(Exception):
     """A stage could not complete; the message names the blocker."""
+
+
+def _merge_tier_invocations(inv: list[dict]) -> dict:
+    """Many per-category tiers invocations as ONE: every category's work keyed
+    by category (as it already is), the per-category budget under `budgets`."""
+    first = inv[0]
+    cats = sorted(c for i in inv for c in i["cats"])
+    out = {k: v for k, v in first.items() if k not in ("cats", "pillar", "budget")}
+    out.update(pillar="ALL", cats=cats,
+               batches={c: b for i in inv for c, b in i["batches"].items()},
+               repairs={c: r for i in inv for c, r in i["repairs"].items()},
+               repair_batches={c: b for i in inv for c, b in i["repair_batches"].items()},
+               rounds=min(int(i.get("rounds") or 2) for i in inv))
+    budgets = {c: i["budget"] for i in inv if i.get("budget") for c in i["cats"]}
+    if budgets:
+        b0 = next(iter(budgets.values()))
+        out["budget"] = {**b0,
+                         "share_usd": (None if any(b.get("share_usd") is None for b in budgets.values())
+                                       else round(sum(float(b["share_usd"]) for b in
+                                                      {id(x): x for x in budgets.values()}.values()), 4)),
+                         "share_cells": sum(int(i["budget"].get("share_cells") or 0)
+                                            for i in inv if i.get("budget"))}
+        out["budgets"] = budgets
+    return out
+
+
+class ScopeComplete(StageRefused):
+    """The categories `--only-categories` named PASS the floors gate; the
+    stage stays open for the rest. Not a failure of the work asked for: the
+    run stops SCOPE_COMPLETE (exit 0) and a later run continues the stage."""
 
 
 class NeedsConnector(StageRefused):
@@ -542,6 +575,14 @@ class Options:
     # Open cells per collector batch (whole capabilities); None = the cost
     # model's RESEARCH_BATCH_CELLS.
     batch_cells: int | None = None
+    # Narrow RESEARCH to these categories (`--only-categories P2C2,P3C1`); the
+    # others stay open and are handed by a later run without the flag.
+    only_categories: list | None = None
+    # In tiers mode, run the lanes from THIS process (a Routine or CI with no
+    # session to start a workflow) instead of handing the session a visible
+    # `dma-research-tiers.js` workflow. The library default is direct (tests
+    # and the stub); the CLI's real-dispatcher default is the visible workflow.
+    tiers_direct: bool = True
     # A command that KICKS the package scan after a checkpoint push, so
     # INGEST_A / INGEST_B do not idle for the Scheduler's half-hour cadence
     # (measured: 1735-3217 s per ingest wait on every 2026-10 run). Typically
@@ -1307,7 +1348,20 @@ class Pipeline:
                 "complete": nxt is None,
                 "blockers": [r["detail"] for r in rows if not r["done"]][:3],
                 "command": (f"python3 -m engine.pipeline run --run {self.run.run_id} "
-                            f"--root {self.run.root}" if nxt else None)}
+                            f"--root {self.run.root}" + self._scope_flags() if nxt else None)}
+
+    def _scope_flags(self) -> str:
+        """The operator's scope rides in the resume command (2026-10-09): a
+        `then` that dropped `--only-categories` handed every category on the
+        next pass, and one that dropped `--research-mode tiers` on a
+        connector-backed run handed the in-session workflow instead."""
+        out = ""
+        if self.opts.research_mode in ("tiers",) and not self.state.get("enrichment_degraded"):
+            out += " --research-mode tiers"
+        if self.opts.only_categories:
+            out += " --only-categories " + ",".join(sorted(
+                c.strip().upper() for c in self.opts.only_categories if c.strip()))
+        return out
 
     # ── RUN ────────────────────────────────────────────────────────────
     def _connector_gate(self, nxt: str | None) -> dict | None:
@@ -1568,7 +1622,17 @@ class Pipeline:
                                handoff=h["file"], invocations=h["invocations"],
                                resume=self.plan()["command"])
                 return outcome
-            if st == "RESEARCH" and self.opts.research_mode == "workflow":
+            if st == "RESEARCH" and self.opts.research_mode == "auto":
+                # AUTO (2026-10-09): a DEGRADED run needs no session connector
+                # for research, so it runs as lean headless TIERS (~10K-token
+                # floor, exact per-lane cost); a connector-backed run hands the
+                # stage to the session, the only holder of Exa/Tavily/Clay.
+                self.opts.research_mode = ("tiers" if self.state.get("enrichment_degraded")
+                                           else "workflow")
+                self.opts.log(f"[RESEARCH] mode: {self.opts.research_mode} "
+                              f"({'degraded run: lean headless lanes' if self.opts.research_mode == 'tiers' else 'connector-backed: in-session workflow'})")
+            if st == "RESEARCH" and (self.opts.research_mode == "workflow" or (
+                    self.opts.research_mode == "tiers" and not self.opts.tiers_direct)):
                 try:
                     h = self._research_handoff()
                 except StageRefused as e:
@@ -1577,6 +1641,20 @@ class Pipeline:
                     outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
                                             in str(e) else "FAILED"),
                                    stage=st, reason=str(e)[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if not h["invocations"] and not h.get("stalled") and self.opts.only_categories:
+                    # The NAMED scope passes and nothing in it stalled
+                    # (R-IMA-20261009 P2C1, 2026-10-09: the `then` after a
+                    # passing round read "0 category(ies) … made no progress"
+                    # and exited FAILED on a scope that had just passed).
+                    only = sorted({c.strip().upper() for c in self.opts.only_categories if c.strip()})
+                    msg = (f"the named scope ({', '.join(only)}) PASSES the floors gate; "
+                           f"RESEARCH stays open for the categories outside --only-categories "
+                           f"— run again without the flag to continue")
+                    self._record(st, "PASS_SCOPE", msg[:600], t0)
+                    self.opts.log(f"[{st}] SCOPE_COMPLETE — {msg[:300]}")
+                    outcome.update(outcome="SCOPE_COMPLETE", stage=st, reason=msg[:800],
                                    resume=self.plan()["command"])
                     return outcome
                 if not h["invocations"]:
@@ -1642,6 +1720,13 @@ class Pipeline:
             except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
                     KeyError, RuntimeError) as e:
                 msg = str(e).strip() or e.__class__.__name__
+                if isinstance(e, ScopeComplete):
+                    self._record(st, "PASS_SCOPE", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    self.opts.log(f"[{st}] SCOPE COMPLETE — {msg[:300]}")
+                    outcome.update(outcome="SCOPE_COMPLETE", stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
                 if isinstance(e, NeedsConnector):
                     self._record(st, "FAIL", msg[:600], t0)
                     self.state["needs_connector"] = {
@@ -2019,6 +2104,12 @@ class Pipeline:
         """
         from . import brief, floors_gate
         need = brief.categories_needing_dispatch(self.wb)["dispatch"]
+        if self.opts.only_categories:
+            # A NAMED SCOPE (`--only-categories`): the owner narrows the stage
+            # to these categories — the remedy the envelope refusal names
+            # ("or narrows the scope"), and how one category is measured alone.
+            only = {c.strip().upper() for c in self.opts.only_categories if c.strip()}
+            need = [c for c in need if c in only]
         md = self._md()
         site = next((str(r.get("Value") or "") for r in self.wb.rows("Firmographics")
                      if str(r.get("Field") or "").lower() == "website"
@@ -2086,7 +2177,18 @@ class Pipeline:
                 # driver already proceeded DEGRADED, that closed nothing.
                 "degraded": bool(self.state.get("enrichment_degraded"))}
                for u, cats in sorted(by_unit.items())]
-        doc = {"workflow": str(PLUGIN / RESEARCH_WORKFLOW), "invocations": inv,
+        tiers_wf = self.opts.research_mode == "tiers" and not self.opts.tiers_direct
+        if tiers_wf:
+            # VISIBLE LEAN TIERS (owner, 2026-10-09: "I do not see the
+            # workflow"): one small haiku runner per category, in /workflows,
+            # starts the category's lean job (`engine.tiers`) and waits on it.
+            rnd = int(self.state.get("tiers_round") or 0)
+            self.state["tiers_round"] = rnd + 1
+            for i in inv:
+                i["round"] = rnd
+                i["tiers"] = True
+        doc = {"workflow": str(PLUGIN / (TIERS_WORKFLOW if tiers_wf else RESEARCH_WORKFLOW)),
+               "invocations": inv,
                "then": self.plan()["command"],
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per category — wait for all, "
@@ -2243,6 +2345,15 @@ class Pipeline:
                                "estimate_usd": round(per_cell * mine, 4)}
                 if not fits_env:
                     i["rounds"] = 1
+        if tiers_wf and len(inv) > 1:
+            # ONE RUNNER FOR THE ROUND (measured 2026-10-09, R-IMA-20261009):
+            # a runner is an in-session subagent, and its floor is the
+            # session's — $0.12-$0.31 a round for a few `wait` turns. One per
+            # category was ~$5 a round across sixteen, half the RESEARCH
+            # envelope spent on watching. The lanes are per category either
+            # way (`engine.tiers` starts one job each); only the face merges.
+            inv[:] = [_merge_tier_invocations(inv)]
+            doc["invocations"] = inv
         self.state["workflow_handed_last"] = sorted(c for i in inv for c in i["cats"])
         self._save_state()
         path.write_text(json.dumps(doc, indent=1))
@@ -2339,7 +2450,8 @@ class Pipeline:
             batch_cells=int(batch_cells or cost.RESEARCH_BATCH_CELLS),
             collector_model=self.opts.collector_model,
             synthesis_model=self.opts.synthesis_model,
-            degraded=bool(self.state.get("enrichment_degraded")))
+            degraded=bool(self.state.get("enrichment_degraded")),
+            lean=(self.opts.research_mode == "tiers"))
         pilot = float(price["usd"])
         basis = price["basis"]
         cal = self.state.get("workflow_calibration") or {}
@@ -2386,6 +2498,17 @@ class Pipeline:
         # The shared block a collector reads in its first call: PRELIM's
         # evidence (cite, never re-search), the internal documents, the peers
         # and the estate. One file per category, so the `cat` is one path.
+        # THE ENTITY'S OWN WORDS (2026-10-09): the sub-vertical lexicon rides
+        # in the card a collector reads first, so it translates each cell's
+        # catalogue question into how THIS business names it before searching.
+        try:
+            lex = json.loads((Path(__file__).resolve().parent / "data" /
+                              "subvertical_lexicon.json").read_text())
+            sv = str(self._md().get("sub_vertical") or "").upper()
+            if isinstance(shared, dict) and sv in lex:
+                shared = {"search_lexicon": {"sub_vertical": sv, **lex[sv]}, **shared}
+        except (OSError, ValueError):
+            pass
         shared_json = json.dumps(shared, separators=(",", ":"))[:16000]
         for cat in cats:
             d = out / cat
@@ -2481,6 +2604,8 @@ class Pipeline:
         return dest if have else None
 
     def _stage_research(self) -> str:
+        if self.opts.research_mode == "tiers":
+            return self._stage_research_tiers()
         from . import brief, cost, floors_gate
         self._reset_counters()
         # SAY IT BEFORE SPENDING IT. A lane that cannot finish its category in
@@ -2642,6 +2767,210 @@ class Pipeline:
                             for c in need["dispatch"][:4])
                 + self._stall_note())
         return self._research_summary(self._rounds)
+
+    # ── RESEARCH AS LEAN HEADLESS TIERS (2026-10-09) ───────────────────
+    #
+    # The owner: "fix the context floor too, run collectors headless". The
+    # in-session workflow subagent opened at 73,778 tokens (harness, CLAUDE.md,
+    # skills, 36 connector schemas) for a ~3K prompt; a LEAN lane opens at
+    # ~6.5K plus its manifest body (agent_run.py `lean_command`). The tiers are
+    # the workflow's: haiku collectors per capability batch, one sonnet
+    # orchestrator per category, one sonnet challenger, the floors gate — the
+    # prompts rendered from the SAME source (`render-prompts.mjs` evaluates the
+    # workflow's PROMPTS region), so the two paths cannot drift. What changes
+    # is who pays the floor and who reads the bill: every batch books its
+    # exact dollars to the ledger (`--record-stage`), so the envelope is read
+    # from spend, never estimated from a token counter.
+    TIER_TOOLS = {"collect": ["Bash", "Read", "WebSearch", "WebFetch"],
+                  "orchestrate": ["Bash", "Read"],
+                  "challenge": ["Bash", "Read"]}
+    TIER_AGENT = {"collect": "research-evidence-collector",
+                  "orchestrate": "research-category-orchestrator",
+                  "challenge": "research-challenger"}
+
+    def _tier_rows(self, manifest: list, kind: str, cats: list, rnd: int,
+                   extra_text: dict | None = None) -> list:
+        rows = []
+        for i, m in enumerate(r for r in manifest if r.get("kind") == kind
+                              and r.get("category") in cats):
+            cat = m["category"]
+            actor = {"collect": f"research-{cat.lower()}-collector",
+                     "orchestrate": f"research-{cat.lower()}-producer",
+                     "challenge": "research-challenger"}[kind]
+            pf = Path(m["file"])
+            if extra_text and extra_text.get(cat):
+                pf.write_text(pf.read_text() + extra_text[cat])
+            rows.append({"agent": self.TIER_AGENT[kind], "prompt_file": str(pf),
+                         "label": f"research-{cat.lower()}-{kind}-{Path(m['file']).stem.lower()}-r{rnd}",
+                         "lean": {"model": m.get("model"), "tools": self.TIER_TOOLS[kind],
+                                  "cwd": str(self.run.root), "actor": actor}})
+        return rows
+
+    def _tier_dispatch(self, rows: list, *, stage: str, name: str) -> dict:
+        if not rows:
+            return {"dispatched": 0, "ok": 0, "failed": []}
+        d = self._briefs(name)
+        d.mkdir(parents=True, exist_ok=True)
+        path = d / "batch.json"
+        path.write_text(json.dumps(rows, indent=1))
+        return self._dispatch({"batch": str(path), "lanes": len(rows)}, stage=stage)
+
+    def _collector_returns(self, cats: list, rnd: int) -> dict:
+        """Each category's collector returns (their final JSON), appended to
+        the orchestrator's prompt — the `nothing_found` notes the absence
+        ladder is written from. Read from the lanes' transcripts' final text."""
+        logs = self.run.root / "agent_logs"
+        out = {}
+        for cat in cats:
+            parts = []
+            for f in sorted(logs.glob(f"research-{cat.lower()}-collect-*-r{rnd}.status.json")):
+                tx = f.with_name(f.name.replace(".status.json", ".jsonl"))
+                final = ""
+                try:
+                    for line in tx.read_text(errors="replace").splitlines():
+                        try:
+                            ev = json.loads(line)
+                        except ValueError:
+                            continue
+                        if ev.get("type") == "result" and ev.get("result"):
+                            final = str(ev["result"])
+                except OSError:
+                    continue
+                if final:
+                    parts.append(final[-3500:])
+            if parts:
+                out[cat] = ("\n\nTHE COLLECTORS' RETURNS (their own reports; the "
+                            "workbook is the truth — trust a row, not a sentence):\n"
+                            + "\n---\n".join(parts))
+        return out
+
+    def tier_round(self, cats: list, r: int, manifest: list) -> dict:
+        """ONE tiers round for `cats`: collect, orchestrate, challenge, gate.
+
+        Called by the driver's own loop (`--tiers-direct`, a Routine or CI with
+        no session) and by `engine.tiers work`, the per-category job the
+        visible `dma-research-tiers.js` workflow starts. It writes no driver
+        state: several category jobs run it at once, and the state file is the
+        driver's. Returns per-phase {lanes, ok, failed, usd, elapsed_s} and
+        the gate per category."""
+        from . import floors_gate
+        out: dict = {"cats": list(cats), "round": r, "phases": {}, "gates": {}}
+
+        def phase(kind, stage, extra=None):
+            rows = self._tier_rows(manifest, kind, cats, r, extra_text=extra)
+            summ = self._tier_dispatch(rows, stage=stage,
+                                       name=f"tiers_{kind}_{'_'.join(c.lower() for c in cats)}_r{r}")
+            self._count(summ)
+            out["phases"][kind] = {"lanes": len(rows), "ok": summ.get("ok"),
+                                   "failed": len(summ.get("failed") or []),
+                                   "usd": summ.get("usd"), "turns": summ.get("turns"),
+                                   "elapsed_s": summ.get("elapsed_s")}
+            return summ
+
+        # 1. COLLECT — every batch of the categories, side by side.
+        phase("collect", "RESEARCH")
+        if self._over_stage_budget("RESEARCH"):
+            self._budget_stopped = True
+            self.opts.log("  [RESEARCH] envelope spent after collection — the syntheses "
+                          "are owed; stopping")
+            out["stopped"] = "AT_STAGE_BUDGET after collection"
+            return out
+        # 2. ORCHESTRATE — completeness, syntheses, absences, gaps.
+        phase("orchestrate", "RESEARCH", extra=self._collector_returns(cats, r))
+        # 3. CHALLENGE — the independent pass, then the gate.
+        if not self._over_stage_budget("RESEARCH"):
+            phase("challenge", "CHALLENGE")
+        self.reopen()
+        for cat in cats:
+            g = floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
+            out["gates"][cat] = floors_gate.summary(g) if isinstance(g, dict) else g
+        self._verify_research(cats)
+        self.reopen()
+        return out
+
+    def _stage_research_tiers(self) -> str:
+        from . import brief, floors_gate
+        self._reset_counters()
+        self._stalled("RESEARCH")
+        only = {c.strip().upper() for c in (self.opts.only_categories or []) if c.strip()}
+
+        def _need():
+            n = brief.categories_needing_dispatch(self.wb)
+            return [c for c in n["dispatch"] if not only or c in only]
+
+        for r in range(self.opts.max_rounds):
+            if not _need():
+                break
+            # The handoff does the pricing, the whole-category allocation, the
+            # repair routing, the stall book, the cards and the prompts; a
+            # spent envelope or one that funds no category raises here,
+            # before any lane is paid for.
+            try:
+                h = self._research_handoff()
+            except StageRefused as e:
+                if "AT_STAGE_BUDGET" in str(e):
+                    self._budget_stopped = True     # a budget stop, not a gate failure
+                raise
+            cats = [c for i in h["invocations"] for c in i["cats"]]
+            if not cats:
+                self.opts.log("  [RESEARCH] nothing handed this round (every open "
+                              "category stalled) — stopping")
+                break
+            self._rounds = r + 1
+            doc = json.loads(Path(h["file"]).read_text())
+            info = doc.get("agent_prompts") or {}
+            try:
+                manifest = json.loads(Path(info.get("manifest", "")).read_text())
+            except (OSError, ValueError):
+                raise StageRefused(f"the research prompts did not render "
+                                   f"({info.get('error') or 'no manifest'}) — "
+                                   f"node and workflows/render-prompts.mjs are required")
+            from . import runstate as _rs
+            _rs.checkpoint(self.wb, f"RESEARCH tiers round {r + 1}", scope=list(cats))
+            self.reopen()
+            self.opts.log(f"  [RESEARCH] tiers round {r + 1}: {len(cats)} categor"
+                          f"{'y' if len(cats) == 1 else 'ies'} "
+                          f"({', '.join(cats)}), est ${doc['estimate']['usd']:.2f} for the scope"
+                          + (f"; {len(doc['deferred_for_budget']['categories'])} deferred for budget"
+                             if doc.get("deferred_for_budget") else ""))
+            res = self.tier_round(cats, r, manifest)
+            if res.get("stopped"):
+                break
+            self._record_grain(cats)
+            self._backup_memory()
+            self.reopen()
+            if self._over_wall():
+                self._wall_stopped = True
+                break
+            if self._over_budget():
+                self._budget_stopped = True
+                break
+            if self._over_stage_budget("RESEARCH"):
+                self._budget_stopped = True
+                break
+            if self.opts.step:
+                break
+        still = _need()
+        rest = [c for c in brief.categories_needing_dispatch(self.wb)["dispatch"] if c not in only]
+        if not still and not (only and rest):
+            return self._research_summary(self._rounds)
+        if self._budget_stopped and self._stage_budget_hit:
+            raise StageRefused(self._stage_budget_refusal("RESEARCH"))
+        if self._wall_stopped or self.opts.step:
+            return (f"tiers stopped after {self._rounds} round(s); "
+                    f"{len(still)} categor{'y' if len(still) == 1 else 'ies'} still open")
+        if not still:
+            # The NAMED scope passed; the stage is not done while categories
+            # outside it are open, and says so rather than reading as a fail
+            # of the work it was asked to do.
+            raise ScopeComplete(f"the named scope ({', '.join(sorted(only))}) PASSES the floors "
+                               f"gate after {self._rounds} round(s); RESEARCH stays open for the "
+                               f"{len(rest)} categor{'y' if len(rest) == 1 else 'ies'} outside "
+                               f"--only-categories — run again without the flag (or with "
+                               f"them) to continue")
+        raise StageRefused(f"RESEARCH (tiers) did not converge in {self._rounds} round(s): "
+                           f"{', '.join(sorted(still))} still failing the floors "
+                           f"gate; the gate's own blockers are in 07_qa/floors_<CAT>.json")
 
     def _research_summary(self, rounds: int) -> str:
         """The stage detail names every category whose connector gap was
@@ -4260,6 +4589,9 @@ def _build_opts(a) -> Options:
                    collector_model=getattr(a, "collector_model", None) or Options.collector_model,
                    synthesis_model=getattr(a, "synthesis_model", None) or Options.synthesis_model,
                    batch_cells=getattr(a, "batch_cells", None),
+                   tiers_direct=bool(getattr(a, "tiers_direct", False) or a.dispatcher == "stub"),
+                   only_categories=([c for c in (getattr(a, "only_categories", None) or "").split(",") if c.strip()]
+                                    or None),
                    ingest_kick_cmd=(getattr(a, "ingest_kick_cmd", None)
                                     or os.environ.get("DMA_INGEST_KICK_CMD") or None),
                    allow_unverified_connectors=getattr(
@@ -4293,7 +4625,10 @@ def _research_mode(a) -> str:
     """Workflow is the enforced default. Lanes run only on the stub (CI) or
     when the waiver is stated, because a lane holds no enrichment connector
     and cannot pass a floors gate on a real run."""
-    mode = a.research_mode or ("lanes" if a.dispatcher == "stub" else "workflow")
+    # auto (the real dispatcher's default since 2026-10-09): a degraded run's
+    # research runs as lean headless tiers, a connector-backed run's as the
+    # in-session workflow — decided at RESEARCH from the run's own state.
+    mode = a.research_mode or ("lanes" if a.dispatcher == "stub" else "auto")
     if mode == "lanes" and a.dispatcher != "stub" and not getattr(a, "allow_lanes", False):
         raise SystemExit(
             "REFUSED: --research-mode lanes with the real dispatcher runs research "
@@ -4345,9 +4680,13 @@ def main(argv=None) -> int:
                         "producers, challenger, consolidator and assembler, pages "
                         "side by side; the driver still ships and promotes. "
                         "'lanes' runs the phase-barrier lane path")
-    r.add_argument("--research-mode", choices=("workflow", "lanes"), default=None,
-                   help="who runs RESEARCH: 'workflow' (default with the real "
-                        "dispatcher) hands it to the session as one persisted "
+    r.add_argument("--research-mode", choices=("auto", "tiers", "workflow", "lanes"), default=None,
+                   help="who runs RESEARCH: 'auto' (default with the real "
+                        "dispatcher) picks 'tiers' on a degraded run and "
+                        "'workflow' on a connector-backed one; 'tiers' runs the "
+                        "haiku collectors, sonnet orchestrator and challenger as "
+                        "LEAN headless lanes (~10K-token floor, exact cost per "
+                        "lane); 'workflow' hands it to the session as one persisted "
                         "workflow per category; 'lanes' dispatches headless "
                         "`claude -p` lanes, which hold NO enrichment connector "
                         "and never show in /workflows — with the real "
@@ -4387,6 +4726,14 @@ def main(argv=None) -> int:
                    help="model for the category orchestrator (completeness + synthesis) "
                         f"and the challenge (default {Options.synthesis_model}; the "
                         "gold row's judgement is not moved to the price tier)")
+    r.add_argument("--tiers-direct", action="store_true",
+                   help="with --research-mode tiers/auto: run the lean lanes from this "
+                        "process rather than handing the session the visible "
+                        "dma-research-tiers.js workflow (a Routine or CI with no session)")
+    r.add_argument("--only-categories", default=None,
+                   help="comma-separated categories RESEARCH may hand this run "
+                        "(e.g. P2C2); the rest stay open for a later run — the "
+                        "'narrow the scope' remedy, and how one category is measured")
     r.add_argument("--batch-cells", type=int, default=None,
                    help="open cells per collector batch, whole capabilities "
                         "(default cost.RESEARCH_BATCH_CELLS)")

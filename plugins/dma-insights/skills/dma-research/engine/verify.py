@@ -123,6 +123,22 @@ def research_lane_fabrication(category: str, agent_logs_dir) -> list:
     logs = Path(agent_logs_dir)
     lane = f"research-{str(category).lower()}-producer"
     transcript = logs / f"{lane}.jsonl"
+    # THE TIERED PATH (2026-10-09): searches are logged by the category's
+    # haiku COLLECTORS, one transcript per batch; they are witnessed together,
+    # because a collector that logged searches its siblings ran is not a
+    # fabrication and one that logged searches nobody ran is.
+    collectors = sorted(logs.glob(f"research-{str(category).lower()}-collect-*.jsonl"))
+    if collectors:
+        ws = [witness(t) for t in collectors]
+        ran = sum(w["ran"] for w in ws)
+        logged = sum(w["logged_searches"] for w in ws)
+        retrieved = sum(w["retrievals"] for w in ws)
+        if ran and logged >= _MIN_LOGGED and retrieved == 0:
+            return [f"fabricated_search: the category's collectors logged {logged} "
+                    f"search(es) to the Search_Log and made no retrieval call "
+                    f"across {len(collectors)} transcript(s)"]
+        if not transcript.is_file():
+            return []
     if not transcript.is_file():
         return []                       # cannot witness → never accuse
     w = witness(transcript)

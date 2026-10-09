@@ -567,10 +567,80 @@ where marked OPEN.
 | 0627 | challenger judged truncated claims | packet cut claim 200 / ceiling 160, no triangulation | judged fields whole to 700 chars | `test_the_challenger_sees_the_judged_fields_whole` |
 | 0630 | audit saw workflow-read artefacts as orphans | audit ignored `.js` readers | workflows count as code readers | `test_the_shipped_plugin_has_no_orphan` |
 | 0610 | `record_finding` returns a raw Postgres error for an engine run id | no input validation before the insert | `memory._uuid_field_errors` refuses by field name (reaches production at the next `infra/deploy.sh`) | `test_a_non_uuid_run_id_is_refused_by_name_not_by_postgres` |
-| 0628 | snapshot fails on two client folders | two Drive folders for one entity | OPEN — owner adjudicates which folder is current | — |
-| 0629 | 73.8K in-session context floor per research agent | harness, not prompt | OPEN — the next cost lever: headless lanes on a degraded run (~27K floor) | — |
+| 0628 | snapshot fails on two client folders | two Drive folders for one entity | owner chose "IMA Financial - DMA" (2026-10-09); `DMA_CLIENT_FOLDER` pins a decided folder by exact name or id for every drive call; snapshot pushed and restored round-trip | `test_the_owners_pin_chooses_and_never_redirects` |
+| 0629 | 73.8K in-session context floor per research agent | harness, not prompt | CLOSED by §11: lean headless lanes (6.5K floor measured; ~11.7K live with the manifest) | `test_lean_tiers_2026_10_09.py` |
 
 Also fixed while running the suites: `test_a_scripts_own_subcommand_is_not_read_as_a_shell_verb`
 was red on the base branch because the hook ran from pytest's cwd, where the
 repo-relative script path does not exist; the test now runs the hook from
 the repository root.
+
+## 11. Lean headless tiers — the context floor closed, measured on two whole categories
+
+"Fix the context floor too, run collectors headless" and "I do not see the
+workflow" (owner, 2026-10-09). On a DEGRADED run nothing in research needs a
+session connector, so `--research-mode auto` (the default) resolves to
+**tiers**: every collector, orchestrator and challenge is a lean headless
+`claude -p` child (`agent_run.py lean_command`: `--strict-mcp-config`,
+`--setting-sources ""`, only the tools the tier uses, the manifest body as
+`--append-system-prompt-file`, run from the run directory), and the session
+sees ONE persisted workflow per round, `workflows/dma-research-tiers.js`,
+whose haiku runner starts `engine.tiers` jobs and reports each category's
+phases, dollars and gate. A connector-backed run keeps the in-session
+workflow (the only holder of Exa/Tavily/Clay). `--tiers-direct` lets the
+driver run the lanes itself (stub, CI, a Routine with no Workflow tool).
+
+**Turn-1 context of one haiku child, measured:**
+
+| configuration | tokens |
+|---|---|
+| in-session workflow subagent | 73,778 |
+| `--agent`, from the repo root | 31,189 |
+| `--agent`, from the run directory | 18,344 |
+| lean (no MCP schemas, no settings, four tools) | 6,537 |
+| lean collector, live (manifest included) | ~11.7K (4,710 written + 7,028 read) |
+
+**Two whole categories, 57 cells each, R-IMA-20261009 (degraded, WebSearch only):**
+
+| | P2C2 (lean, first prompts) | P2C1 (lean, visible, cell-own primaries) |
+|---|---|---|
+| rounds to floors PASS | 2 | 2 |
+| wall clock | 557 s | 617 s + 777 s |
+| cost | $1.36 ($0.024/cell) | $2.09 + $1.28 = $3.37 ($0.059/cell) + runner $0.43 |
+| syntheses / absences | 4 / 53 | **20 / 37** |
+| evidence rows (tiers) | 4 (T3) | **20** (T2 2 · T3 3 · T5 15) |
+| per-cell primary queries (distinct) | 10 | **59** |
+| absence hunts (distinct) | 2 of 53 | **37 of 37** |
+| challenge | PASS | 3 FAIL → repaired → PASS |
+
+P2C1 cost more because it found more: five times the syntheses and evidence
+P2C2 found, every absence its own hunt. Round 1 was inflated by the
+shared-window defect below (14 cells closed nothing in round 0).
+
+**Defects the P2C1 run hit, each closed at the root:**
+
+| MEM | defect | root cause | fix | test |
+|---|---|---|---|---|
+| 0631 | 8 parallel collectors walled at the search ceiling; 19 logged searches refused, 14 cells closed nothing | the window was the CATEGORY's; eight conversations shared one actor and one 60-op window | a collector lane's window is its CAPABILITY (`ledger._collector_scope`); a category producer keeps the category's; the search CLI prints the lane's own window | `test_parallel_collectors_each_hold_their_capabilitys_window` |
+| 0632 | orchestrator burned 5 turns on one cell's What_We_Found | the anchor rule counted only bracketed `[E-NNN]`; "IMA" is no two-word proper noun; adding a year then tripped the ungrounded-figure rule | a bare E-id and a named domain are anchors | `test_a_bare_evidence_id_or_a_domain_is_a_checkable_anchor` |
+| 0633 | orchestrator learnt four write rules by refusal | prompt omitted them | the prompt states `--inferable`+`--validation-question`, cell-registered figures, absence-as-synthesis, the 20-char disposition | `test_the_orchestrator_is_told_every_rule_it_burned_turns_on` |
+| 0634 | 19 of 20 evidence rows UNVERIFIED though URLs read /20230406/ and /2024/07/ | `html_text` drops `<head>`; the windows carry no metadata, so a lane could not see the date the page states | `fetch.published_date` (publication meta, JSON-LD, a publication `<time>`, the URL path; never modified/copyright/retrieval) recorded beside the cache, printed by `fetch`, and filled at the evidence write when omitted | `test_the_page_states_its_date_and_nothing_else_does`, `test_an_omitted_date_is_filled_from_the_fetched_page` |
+| 0635 | a passing named scope exited FAILED ("0 categories … made no progress") | the workflow branch checked the stall before the scope | `--only-categories` that passes ends `SCOPE_COMPLETE` (exit 0) on both paths; the resume command carries the scope flags | `test_a_named_scope_that_passes_is_scope_complete_not_failed` |
+| 0636 | the visible runner's $0.62 booked to PAGES | no stage row for phase `Tiers` | `_PHASE_STAGE["tiers"] = RESEARCH`; the run's three rows re-attributed | `test_the_tiers_runner_is_booked_to_research` |
+| 0636 | one runner per category would spend ~$5 a round watching | a runner is an in-session subagent at the session floor ($0.12–$0.31 a round) | ONE runner per round (`_merge_tier_invocations`); `engine.tiers start/wait` take a comma list and print a brief, never the round result | `test_tiers_with_a_session_hand_the_visible_workflow`, `test_one_wait_reports_every_category_in_brief` |
+| — | `engine/tiers.py --help` failed the skills audit (and goal status), caught locally before push | relative import ran before the run-by-path guard | guard first | `test_the_audit_exits_zero_at_the_pinned_backlog` |
+
+**Price model refit** (`cost.LEAN_SHAPES` on three measured orchestrator and
+challenge passes; the lean repair wave 25% with its re-challenge): a 57-cell
+category projects **$2.17** (measured $1.36 and $3.37); **686 cells ≈ $26**
+plus ~$0.3 a round for the runner. The in-session projection was $81.72 and
+the pilot $137 — lean tiers cut research cost by ~3×, and the quality per
+dollar rose with it.
+
+**The $10 envelope at full scope, stated.** $10 funds about four 57-cell
+categories end to end. The allocator hands whole categories cheapest first
+and names the rest under `deferred_for_budget`; nothing is started that the
+envelope cannot finish, degraded or not, so the budget is UPHELD by
+construction. Covering all 686 cells of a T1_CORE scope at the quality above
+takes ~$26 (`--stage-budget RESEARCH=26`), or a narrower scope. That figure
+is the owner's decision, not the driver's.

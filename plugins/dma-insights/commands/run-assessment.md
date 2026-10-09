@@ -295,6 +295,24 @@ tier, same tools — no new session. `--research-mode lanes` stays refused with
 the real dispatcher unless `--allow-lanes` waives it, because lanes hold no
 connector and cannot pass a gate.
 
+**A DEGRADED run researches as lean headless tiers** (`--research-mode auto`,
+the default, 2026-10-09). Nothing in research needs a session connector when
+there is none, so every collector, orchestrator and challenge runs as a lean
+`claude -p` child at a ~6.5K-token floor (the in-session floor is 73.8K), with
+its exact cost booked. The handoff names `workflows/dma-research-tiers.js` and
+ONE invocation for the round: start it, and its haiku runner starts every
+category's job (`engine.tiers start`) and waits on them (`engine.tiers wait`),
+reporting each category's phases, dollars and gate in /workflows. The lanes
+are watchable live with `agent_run.py watch --log-dir <ROOT>/agent_logs`;
+`python3 -m engine.tiers status --run <R> --root <ROOT>` reads the jobs. Then
+run `then`. `--only-categories P2C1,P4C3` narrows the stage (a pilot); a
+passing scope ends `SCOPE_COMPLETE` (exit 0) and a run without the flag
+continues the rest. `--tiers-direct` lets the driver run the lanes itself
+(a Routine with no Workflow tool). Measured: ~10 minutes and $1.4–$3.4 a
+57-cell category; the full 686-cell IMA scope ≈ $26, so the $10 envelope
+funds whole categories cheapest first and names the rest — raising it is the
+owner's call.
+
 **The run survives a fresh container.** The driver snapshots the run
 (workbook, evidence, QA, briefs; not transcripts) to the client's Drive
 `memory-backup` folder at every stage boundary. On a new container, restore

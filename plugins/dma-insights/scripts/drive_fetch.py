@@ -51,6 +51,7 @@ import argparse
 import io
 import json
 import mimetypes
+import os
 import re
 import sys
 import time
@@ -139,6 +140,25 @@ def _find_client_folder(tok: str, client: str) -> dict:
     want = _norm(client)
     folders = [f for f in _list_children(tok, INTAKE_FOLDER_ID)
                if f["mimeType"] == FOLDER_MIME]
+    # THE OWNER'S PIN (2026-10-09, R-IMA-20261009 / MEM-0628): two folders
+    # ("IMA Financial - DMA", "IMA Financial Group - DMA") normalise to one
+    # identity, so every snapshot and push refused — correctly, a duplicate
+    # is a human's call. Once a person has made it, DMA_CLIENT_FOLDER names
+    # the chosen folder by its exact name or id, and every call (a restore
+    # in a fresh container included, before any workbook exists) honours
+    # it. A pin naming no visible folder, or a folder of another client, is
+    # refused rather than guessed around.
+    pin = os.environ.get("DMA_CLIENT_FOLDER", "").strip()
+    if pin:
+        got = [f for f in folders if f.get("id") == pin or f.get("name") == pin]
+        if len(got) != 1:
+            raise SystemExit(f"DMA_CLIENT_FOLDER={pin!r} names no single folder under the "
+                             f"intake tree — set it to the exact folder name or id")
+        if _norm(got[0]["name"]) != want and not _norm(got[0]["name"]).startswith(want + "-") \
+                and not want.startswith(_norm(got[0]["name"]) + "-"):
+            raise SystemExit(f"DMA_CLIENT_FOLDER={pin!r} is {got[0]['name']!r}, which is not "
+                             f"{client!r}'s folder — a pin never redirects a client")
+        return got[0]
     exact = [f for f in folders if _norm(f["name"]) == want]
     partial = [f for f in folders
                if _norm(f["name"]).startswith(want + "-")
@@ -150,7 +170,8 @@ def _find_client_folder(tok: str, client: str) -> dict:
         names = " | ".join(sorted(f["name"] for f in hit))
         raise SystemExit(
             f"multiple client folders matching {client!r}: {names} — "
-            f"duplicate folders are adjudicated by a human, never guessed")
+            f"duplicate folders are adjudicated by a human, never guessed; once "
+            f"decided, export DMA_CLIENT_FOLDER='<the chosen folder name or id>'")
     names = ", ".join(sorted(f["name"] for f in folders)) or "none visible"
     raise SystemExit(
         f"no client folder matching {client!r} under the intake tree — "

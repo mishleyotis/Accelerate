@@ -384,9 +384,49 @@ def lane_relay(agent, prompt_file, ctx):
                          actor="enrichment-web-specialist (stub)", tool="exa")
 
 
+def _category_in(prompt_file) -> str | None:
+    import re as _re
+    try:
+        text = Path(prompt_file).read_text()
+    except (OSError, TypeError):
+        return None
+    m = _re.search(r"for category (P\d+C\d+)", text)
+    return m.group(1) if m else None
+
+
+def lane_collect(agent, prompt_file, ctx):
+    """research-evidence-collector (tiers): fire every volley the cells of its
+    category owe, through the built-in web tool. The orchestrator stub writes
+    the evidence and syntheses, the way the real orchestrator writes from what
+    the collectors registered."""
+    F = fixtures()
+    cat = _category_in(prompt_file)
+    if not cat:
+        return
+    wb = ctx.run.open()
+    for c in [c for c in wb.selected_subcaps() if c.startswith(cat)]:
+        row = next((r for r in wb.rows(f"{c[:2]}_Subcap_Scoring") if r.get("SubCap_ID") == c), {})
+        if str(row.get("Dominant_Claim") or "").strip():
+            continue
+        try:
+            F.fire_volleys(wb, c, n=0)
+        except Exception:                                   # noqa: BLE001
+            pass
+
+
+def lane_orchestrate(agent, prompt_file, ctx):
+    """research-category-orchestrator (tiers): the category lane's own work,
+    under the category's actor — what the real orchestrator writes."""
+    cat = _category_in(prompt_file)
+    if cat:
+        lane_research(f"research-{cat.lower()}-producer", prompt_file, ctx)
+
+
 def default_handlers() -> dict:
     """agent-name prefix → handler."""
     return {
+        "research-evidence-collector": lane_collect,
+        "research-category-orchestrator": lane_orchestrate,
         "research-conductor": lane_prelim_conductor,
         "technographic-scanner": lane_scanner,
         "enrichment-connector-specialist": lane_noop,

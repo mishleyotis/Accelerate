@@ -404,9 +404,34 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   gate blocks on; a gap-only wave reads `<CAT>/_repairs.json`; a category
   deferred for budget never stalls; the challenge packet ships the judged
   fields whole. Every defect is filed MEM-0610..0630 and tabled in §10 of
-  the optimisation doc (OPEN: the 74K in-session floor and the duplicate IMA
-  client folder). Flags:
+  the optimisation doc. **IMA's folder is "IMA Financial - DMA"** (owner,
+  2026-10-09; "IMA Financial Group - DMA" also normalises to the identity):
+  every IMA command runs with `DMA_CLIENT_FOLDER='IMA Financial - DMA'`, the
+  pin `drive_fetch` honours (exact name or id, never a redirect to another
+  client). Flags:
   `--collector-model`, `--synthesis-model`, `--batch-cells`.
+  **Lean headless tiers** (user, same day: "fix the context floor too, run
+  collectors headless" · "I do not see the workflow"; §11): on a DEGRADED
+  run `--research-mode auto` (the default) runs every collector,
+  orchestrator and challenge as a lean `claude -p` child
+  (`agent_run.py lean_command`: no MCP schemas, no settings, only the tier's
+  tools, the manifest body appended; 6.5K turn-1 floor vs 73.8K in-session),
+  bounded host-wide by a flock lane pool (`DMA_LANE_POOL`, `DMA_TIER_LANES`
+  default 16); the session sees ONE persisted `dma-research-tiers.js` per
+  round whose haiku runner calls `engine.tiers start/wait` over every
+  category (one runner, not one per category — a runner sits at the
+  session floor). A connector-backed run keeps the in-session workflow;
+  `--tiers-direct` lets the driver run the lanes (stub/CI/Routine);
+  `--only-categories` narrows the stage and a passing scope ends
+  `SCOPE_COMPLETE`. Measured on two 57-cell categories: $1.36 and $3.37,
+  ~10 min a round; full 686-cell scope ≈ $26 (`cost.LEAN_SHAPES`). A
+  collector lane's search window is its CAPABILITY (eight parallel lanes
+  shared one category window and were walled); `fetch` records the date the
+  page states (publication metadata or URL path, never modified/retrieval)
+  and the ledger fills an omitted `--published` from it; every absence's
+  `--hunted` is the cell's own (`hunted_shared`/`primary_shared` refused);
+  collectors search in the sub-vertical's vocabulary
+  (`engine/data/subvertical_lexicon.json`). MEM-0631..0636.
 
 ## Open decisions — leave open, do not resolve silently
 

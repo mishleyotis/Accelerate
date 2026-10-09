@@ -89,7 +89,8 @@ def is_fluent_but_empty(text, *, must_name: list[str] | None = None) -> str | No
     anchors = 0
     anchors += len(re.findall(r"\b\d{4}\b", s))                    # a year
     anchors += len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:%|percent)", s))
-    anchors += len(re.findall(r"\[E-\d+(?::F\d+)?\]", s))          # a citation
+    anchors += len(re.findall(r"\bE-\d+(?::F\d+)?\b", s))          # a citation, bracketed or bare
+    anchors += len(re.findall(r"\b[\w-]+\.(?:com|org|net|gov|io|co|us)\b", s))  # a named domain
     anchors += len(re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b", s))
     if anchors == 0:
         return ("names no figure, date, proper noun or cited id — nothing in "

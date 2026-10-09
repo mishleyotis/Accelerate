@@ -216,6 +216,55 @@ def _ua_for(url: str) -> str:
     return _BROWSER_UA
 
 
+_META_DATE = (
+    (r'<meta[^>]+(?:property|name|itemprop)=["\'](?:article:published_time|datePublished|'
+     r'og:published_time|publish[_-]?date|pubdate|date|dc\.date(?:\.issued)?|'
+     r'sailthru\.date|parsely-pub-date)["\'][^>]*content=["\']([^"\']+)', "meta"),
+    (r'<meta[^>]+content=["\']([^"\']+)["\'][^>]*(?:property|name|itemprop)=["\']'
+     r'(?:article:published_time|datePublished|publish[_-]?date|pubdate)["\']', "meta"),
+    (r'"datePublished"\s*:\s*"([^"]+)"', "json-ld datePublished"),
+    # a <time> only when it says it is the publication (an events page is
+    # full of <time> elements that are not)
+    (r'<time[^>]*(?:pubdate|itemprop=["\']datePublished["\'])[^>]*datetime=["\']([^"\']+)',
+     "time element"),
+    (r'<time[^>]*datetime=["\']([^"\']+)["\'][^>]*(?:pubdate|itemprop=["\']datePublished["\'])',
+     "time element"),
+)
+
+
+def published_date(markup: str | None, url: str = "") -> tuple:
+    """(YYYY-MM-DD, basis) the PAGE states for itself, or (None, None).
+
+    Measured 2026-10-09 (R-IMA-20261009 P2C1): 19 of 20 evidence rows went
+    in UNVERIFIED — undated — although a news URL read /20230406/ and an
+    upload path /2024/07/. The collector may record only a date the page
+    states; it could not see one, because `html_text` drops <head> and the
+    windows it prints carry no metadata. The page's own publication metadata
+    (article:published_time, JSON-LD datePublished, a <time datetime>) is a
+    statement BY the page; a date in the URL path is the publisher's own
+    filing of it. A modified/updated date, a copyright year and the
+    retrieval date are never a publication date, and are not read here."""
+    for pat, basis in _META_DATE:
+        m = re.search(pat, markup or "", re.I)
+        if m:
+            d = _iso_day(m.group(1))
+            if d:
+                return d, basis
+    m = (re.search(r"/((?:19|20)\d{2})[/-](0[1-9]|1[0-2])[/-](0[1-9]|[12]\d|3[01])(?:/|\b)", url)
+         or re.search(r"/((?:19|20)\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])/", url))
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-{m.group(3)}", "url path"
+    m = re.search(r"/((?:19|20)\d{2})/(0[1-9]|1[0-2])/", url)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}-01", "url path (month)"
+    return None, None
+
+
+def _iso_day(v: str) -> str | None:
+    m = re.match(r"\s*((?:19|20)\d{2})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])", str(v or ""))
+    return f"{m.group(1)}-{m.group(2)}-{m.group(3)}" if m else None
+
+
 def _http_text(url: str) -> str | None:
     """GET the URL, hand back TEXT, None on failure with the reason recorded.
 
@@ -232,6 +281,7 @@ def _http_text(url: str) -> str | None:
 
     _http_text.last_error = None
     _http_text.last_content_type = ""
+    _http_text.last_published = (None, None)
     try:
         req = urllib.request.Request(url, headers={
             "User-Agent": _ua_for(url),
@@ -257,11 +307,14 @@ def _http_text(url: str) -> str | None:
                 f"the PDF at {url} has no text layer (a scan, or pypdf is not "
                 f"installed) — it is an image, not a document this can quote")
         return text
-    return html_text(raw.decode("utf-8", "replace"))
+    markup = raw.decode("utf-8", "replace")
+    _http_text.last_published = published_date(markup, url)
+    return html_text(markup)
 
 
 _http_text.last_error = None
 _http_text.last_content_type = ""
+_http_text.last_published = (None, None)
 
 
 # ── the run's cache: successes kept, failures never ──────────────────────
@@ -310,7 +363,8 @@ def cached_text(run, url: str) -> str | None:
         return None
 
 
-def store_text(run, url: str, text: str, *, content_type: str = "") -> dict:
+def store_text(run, url: str, text: str, *, content_type: str = "",
+               published: tuple = (None, None)) -> dict:
     """Put an already-extracted text in the cache under this URL.
 
     The seam `--via-text` uses: a servicing actor reads a page through a
@@ -341,8 +395,10 @@ def store_text(run, url: str, text: str, *, content_type: str = "") -> dict:
                           "against it; the new text is beside it as .alt.txt"))
         return meta
     (d / f"{key}.txt").write_text(text, encoding="utf-8")
+    pub, basis = published if published and published[0] else published_date(None, url)
     meta = {"url": url, "sha256": sha256(text), "fetched_at": _utcnow(),
-            "chars": len(text), "content_type": content_type}
+            "chars": len(text), "content_type": content_type,
+            "published": pub, "published_basis": basis}
     (d / f"{key}.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     return meta
 
@@ -376,7 +432,7 @@ def fetch_text(run, url: str, *, fetcher=None) -> dict:
     held = cached_text(run, url)
     if held is not None:
         return {"text": held, "sha256": sha256(held), "from_cache": True,
-                "error": None}
+                "error": None, **cached_published(run, url)}
     f = fetcher or _http_text
     try:
         text = f(url)
@@ -388,9 +444,25 @@ def fetch_text(run, url: str, *, fetcher=None) -> dict:
                 "error": (getattr(f, "last_error", None)
                           or f"no text came back from {url}")}
     meta = store_text(run, url, text,
-                      content_type=getattr(f, "last_content_type", "") or "")
+                      content_type=getattr(f, "last_content_type", "") or "",
+                      published=getattr(f, "last_published", None) or (None, None))
     return {"text": text, "sha256": meta["sha256"], "from_cache": False,
-            "error": None}
+            "error": None, "published": meta.get("published"),
+            "published_basis": meta.get("published_basis")}
+
+
+def cached_published(run, url: str) -> dict:
+    """The publication date recorded beside a cached page (or read off its
+    URL for a page cached before the date was recorded)."""
+    f = cache_dir(run) / f"{_key(url)}.json"
+    try:
+        meta = json.loads(f.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        meta = {}
+    if meta.get("published"):
+        return {"published": meta["published"], "published_basis": meta.get("published_basis")}
+    pub, basis = published_date(None, url)
+    return {"published": pub, "published_basis": basis}
 
 
 # ── windows: the only part of a page that leaves this process ────────────

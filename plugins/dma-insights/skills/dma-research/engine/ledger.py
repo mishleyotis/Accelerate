@@ -317,6 +317,22 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
     assert_actor_scope(actor, "evidence", cells)
+    if not str(published or "").strip() and source_url and run is not None:
+        # THE DATE THE PAGE STATES, FILLED AT THE WRITE (2026-10-09,
+        # R-IMA-20261009 P2C1: 19 of 20 rows undated, a news URL reading
+        # /20230406/ among them). `engine.cli fetch` records the page's own
+        # publication metadata or URL-path date beside the cached text; a
+        # writer who omitted --published gets it here, so dating does not
+        # depend on a lane copying a line. Never the retrieval date: a page
+        # stating today passes the refusal below on its URL, and one that
+        # does not is left undated rather than refused.
+        try:
+            from . import fetch as _fetch
+            got = _fetch.cached_published(run, source_url).get("published")
+        except Exception:                                    # noqa: BLE001
+            got = None
+        if got and got != _dt.date.today().isoformat():
+            published = got
     _refuse_retrieval_date_as_published(wb, published, text, source_url)
     access_status = _verified_access_status(
         wb, run, source_url, text, verify_excerpts, unverified_reason,
@@ -746,6 +762,27 @@ def _is_category_producer(actor, cell: str) -> bool:
     return bool(cat) and a == f"research-{cat}-producer"
 
 
+def _collector_scope(actor, cells) -> str | None:
+    """The window of a lean collector lane: its CAPABILITY, not its category.
+
+    Measured 2026-10-09, R-IMA-20261009 P2C1: eight collector lanes ran side
+    by side as one actor (`research-p2c1-collector`), each its OWN headless
+    conversation, and the category window — one conversation's ceiling —
+    counted all eight together. It reached 60 while lanes 4, 5 and 7 were
+    still logging, refused every search they had already fired (19 ops), and
+    14 cells closed nothing for want of a logged primary. The ceiling guards a
+    conversation's context; a collector's conversation is its batch, and a
+    batch is whole capabilities (one primary per cell plus five volleys, ~n+5
+    distinct ops, far below 60). So each capability carries its own window:
+    a lane that fires sixty genuinely different searches on one capability
+    still hits the wall."""
+    a = str(actor or "").strip().lower()
+    if not (a.startswith("research-") and a.endswith("-collector")) or not cells:
+        return None
+    caps = {".".join(str(c).split(".")[:2]) for c in cells}
+    return caps.pop() if len(caps) == 1 else None
+
+
 def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     """Searches FIRED since the last recorded checkpoint.
 
@@ -790,9 +827,13 @@ def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
         except (ValueError, TypeError):
             mark = 0
     since = [(i, r) for i, r in enumerate(rows) if i >= max(0, mark)]
-    if scope is not None:
+    if scope is not None and "." not in scope:
         since = [(i, r) for i, r in since if _search_scope(r) == scope]
     since = [r for _i, r in since]
+    if scope is not None and "." in scope:
+        # a collector lane's window is its CAPABILITY (see `_collector_scope`)
+        since = [r for r in since
+                 if str(r.get("SubCap_ID") or "").strip().startswith(scope + ".")]
     return len({(str(r.get("Query") or "").strip(),
                  str(r.get("Tool") or "").strip(),
                  str(r.get("Facet") or "").strip()) for r in since})
@@ -896,8 +937,9 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
     # researcher's own connector volleys against the category's window, the
     # relay's connector volleys against RELAY's. Uncounted relay rows were a
     # hole once researchers began firing connectors themselves (2026-09-30).
-    scope = _search_scope({"Tool": tool, "Actor": actor,
-                           "SubCap_ID": "" if prelim or not cells else cells[0]})
+    scope = _collector_scope(actor, cells) or _search_scope(
+        {"Tool": tool, "Actor": actor,
+         "SubCap_ID": "" if prelim or not cells else cells[0]})
     since = _ops_since_checkpoint(wb, scope)
     if since >= SEARCH_OP_CEILING:
         raise LedgerRefusal(
@@ -1693,6 +1735,57 @@ def enrichment_binding(wb: RunWorkbook) -> dict:
     return out
 
 
+def _norm_hunt(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "").strip().lower())
+
+
+def _cell_own_hunt_problems(wb: RunWorkbook, subcap: str, hunted: str) -> list:
+    """An absence is THIS cell's hunt, not its capability's.
+
+    Measured 2026-10-09 (R-IMA-20261009, P2C2, lean tiers): 52 absences in one
+    round, one shared opening; every cell of a capability carried the same
+    queries, the same ladder and the same --hunted text, because one primary
+    query per capability had been logged against all of its cells. The gate
+    counted a volley per cell, and no cell's own diagnostic question was ever
+    put to the entity. Two refusals, both answered by asking the cell's own
+    question:
+      * primary_shared — every `primary` search logged on this cell was
+        also logged as the primary of a sibling cell of the capability;
+      * hunted_shared — a sibling absence of the same capability already
+        carries this exact --hunted text."""
+    cap = ".".join(subcap.split(".")[:2])
+    sibs = [c for c in wb.selected_subcaps()
+            if c != subcap and ".".join(c.split(".")[:2]) == cap]
+    if not sibs:
+        return []
+    problems = []
+    rows = wb.rows("Search_Log")
+    mine = {_norm_hunt(r.get("Query")) for r in rows
+            if str(r.get("SubCap_ID") or "").strip() == subcap
+            and str(r.get("Facet") or "").strip() == C.PRIMARY_FACET and r.get("Query")}
+    theirs = {_norm_hunt(r.get("Query")) for r in rows
+              if str(r.get("SubCap_ID") or "").strip() in sibs
+              and str(r.get("Facet") or "").strip() == C.PRIMARY_FACET and r.get("Query")}
+    if mine and mine <= theirs:
+        problems.append(
+            f"primary_shared: every primary search on {subcap} is also a sibling "
+            f"cell's primary ({sorted(mine)[0][:80]!r}). The primary is THIS cell's "
+            f"own diagnostic question, asked in the entity's own words — fire it "
+            f"for {subcap} alone, log it with --subcap {subcap}, then declare")
+    want = _norm_hunt(hunted)
+    if want:
+        for r in wb.scoring_rows():
+            sc = str(r.get("SubCap_ID") or "")
+            if sc in sibs and _norm_hunt(r.get("What_We_Found")).startswith(
+                    "searched and not found: " + want):
+                problems.append(
+                    f"hunted_shared: {sc} already carries this exact --hunted text; "
+                    f"name {subcap}'s own question, the query that asked it and "
+                    f"what came back for it")
+                break
+    return problems
+
+
 def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
                     ladder: list[dict], proxy_log: str,
                     what_was_hunted: str, session: str = "",
@@ -1835,6 +1928,7 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
     if len(str(what_was_hunted or "").strip()) < 40:
         problems.append("--hunted: name what was looked for, where, and what "
                         "came back instead (>= 40 chars)")
+    problems += _cell_own_hunt_problems(wb, subcap, str(what_was_hunted or ""))
     # THE DOSSIER FIELDS (QA audit D-12, 28-09-2026): an absence that still
     # permits an inference carries the inference AND the question that would
     # validate it — one without the other is a guess or a homework list; a

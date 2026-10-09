@@ -222,6 +222,35 @@ RESEARCH_TIERS = {
 RUNTIME_USD_PER_TOKEN = 7.5e-6
 
 
+#: LEAN LANES (2026-10-09, agent_run.py `lean_command`): the floor a headless
+#: lane opens at with no MCP server, no settings source and only its own
+#: tools — measured 6,537 tokens for a bare haiku child — plus the manifest
+#: body appended as system prompt and the rendered prompt. Replaces the
+#: in-session 74K floor when RESEARCH runs as tiers; re-measured by the first
+#: tiered run's ledger.
+LEAN_FLOOR_TOKENS = {"collector": 8_000, "orchestrator": 16_000, "challenge": 10_000}
+#: THE LEAN SHAPES, MEASURED 2026-10-09 (R-IMA-20261009, P2C2, 57 cells, lean
+#: tiers): 7 haiku collectors $0.794 (11.9 turns, ~1.3 capabilities each —
+#: the lanes share one cached system prompt, so most of the floor is a cache
+#: READ at a tenth of the price), the sonnet orchestrator $0.355 in 11 turns
+#: for 57 cells, the challenger $0.088 in 3 turns; the category PASSED the
+#: floors gate in 2 rounds, 9.3 minutes, $1.36 in all. Fitted to those
+#: dollars; replace with the next run's ledger when it differs.
+LEAN_SHAPES = {
+    "collector": {"floor_tokens": 8_000, "turns_fixed": 2, "turns_per_capability": 7.6,
+                  "growth_per_turn": 3_000, "output_per_turn": 500},
+    # refit 2026-10-09 on three measured orchestrator passes (P2C2 57 cells
+    # $0.355/11 turns; P2C1 57 cells $0.571/17 turns, 24 cells $0.427/13):
+    # a category whose collectors register evidence writes ~5x the
+    # syntheses, and the turns follow the cells
+    "orchestrator": {"floor_tokens": 16_000, "turns_fixed": 5, "turns_per_cell": 0.2,
+                     "growth_per_turn": 3_000, "output_per_turn": 1_250},
+    # three measured challenges: $0.088, $0.170 (57 cells), $0.075 (24)
+    "challenge": {"floor_tokens": 10_000, "turns_fixed": 3, "turns_per_cell": 0.05,
+                  "growth_per_turn": 3_000, "output_per_turn": 800},
+}
+
+
 def agent_usd(*, model: str, turns: float, floor_tokens: int, growth_per_turn: int,
               output_per_turn: int) -> dict:
     """One agent's projected cost from its shape: the floor is written once
@@ -242,9 +271,11 @@ def agent_usd(*, model: str, turns: float, floor_tokens: int, growth_per_turn: i
 
 
 def collector_usd(cells: int, *, capabilities: int | None = None,
-                  model: str | None = None) -> dict:
+                  model: str | None = None, lean: bool = False) -> dict:
     """One collector batch of `cells` open cells (whole capabilities)."""
     shape = dict(RESEARCH_TIERS["collector"])
+    if lean:
+        shape.update(LEAN_SHAPES["collector"])
     caps = capabilities if capabilities is not None else max(1, round(cells / CELLS_PER_CAPABILITY))
     turns = shape["turns_fixed"] + shape["turns_per_capability"] * max(1, caps)
     return agent_usd(model=model or shape["model"], turns=turns,
@@ -253,8 +284,11 @@ def collector_usd(cells: int, *, capabilities: int | None = None,
                      output_per_turn=shape["output_per_turn"])
 
 
-def _cell_tier_usd(tier: str, cells: int, model: str | None = None) -> dict:
+def _cell_tier_usd(tier: str, cells: int, model: str | None = None,
+                   lean: bool = False) -> dict:
     shape = dict(RESEARCH_TIERS[tier])
+    if lean:
+        shape.update(LEAN_SHAPES[tier])
     turns = shape["turns_fixed"] + shape["turns_per_cell"] * max(0, cells)
     return agent_usd(model=model or shape["model"], turns=turns,
                      floor_tokens=shape["floor_tokens"],
@@ -266,27 +300,37 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
                    batch_cells: int = RESEARCH_BATCH_CELLS,
                    collector_model: str | None = None,
                    synthesis_model: str | None = None,
-                   repair_share: float = 0.15, degraded: bool = False) -> dict:
+                   repair_share: float | None = None, degraded: bool = False,
+                   lean: bool = False) -> dict:
     """What RESEARCH should cost for `cells` open cells over `categories`
     categories at the tiered shape: collector batches, one orchestrator pass
     per category, a repair wave over `repair_share` of the cells, one
     challenge per category. `degraded` is recorded and changes nothing: the
     shape is the price, the search tool is not."""
+    if repair_share is None:
+        # the lean second round measured 9% (P2C2) and 61% (P2C1, inflated by
+        # the shared-window wall since fixed) of the first, 2026-10-09; the
+        # in-session shape keeps the 15% it was fitted with
+        repair_share = 0.25 if lean else 0.15
     cells = max(0, int(cells)); categories = max(0, int(categories))
     caps = int(capabilities) if capabilities else max(1, round(cells / CELLS_PER_CAPABILITY))
     batches = max(0, -(-cells // max(1, int(batch_cells)))) if cells else 0
     per_batch = collector_usd(min(cells, batch_cells) or batch_cells,
                               capabilities=max(1, round(caps / max(1, batches))) if batches else None,
-                              model=collector_model)
+                              model=collector_model, lean=lean)
     repair_cells = round(cells * repair_share)
     repair_batches = -(-repair_cells // max(1, int(batch_cells))) if repair_cells else 0
     per_repair = collector_usd(min(repair_cells, batch_cells) or batch_cells,
-                               model=collector_model)
+                               model=collector_model, lean=lean)
     per_cat_cells = cells / categories if categories else 0
-    orch = _cell_tier_usd("orchestrator", round(per_cat_cells), synthesis_model)
+    orch = _cell_tier_usd("orchestrator", round(per_cat_cells), synthesis_model, lean=lean)
     orch_repair = _cell_tier_usd("orchestrator", round(per_cat_cells * repair_share),
-                                 synthesis_model)
-    chal = _cell_tier_usd("challenge", round(per_cat_cells))
+                                 synthesis_model, lean=lean)
+    chal = _cell_tier_usd("challenge", round(per_cat_cells), lean=lean)
+    if lean:
+        # a lean repair round re-challenges what it rewrote (measured $0.075)
+        chal = {**chal, "usd": chal["usd"] + _cell_tier_usd(
+            "challenge", round(per_cat_cells * repair_share), lean=lean)["usd"]}
     by_tier = {
         "collector": round(per_batch["usd"] * batches, 4),
         "repair_collector": round(per_repair["usd"] * repair_batches, 4),
@@ -316,7 +360,8 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
         # RUNTIME_USD_PER_TOKEN): measured, not derived from the shape
         "usd_per_runtime_token": RUNTIME_USD_PER_TOKEN,
         "degraded": bool(degraded),
-        "basis": (f"tiered shape: {batches} collector batch(es) on {per_batch['model']} "
+        "lean": bool(lean),
+        "basis": (("lean headless " if lean else "") + f"tiered shape: {batches} collector batch(es) on {per_batch['model']} "
                   f"at ${per_batch['usd']:.3f} + {categories} orchestrator pass(es) on "
                   f"{orch['model']} at ${orch['usd']:.3f} + {categories} challenge(s) at "
                   f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave; "
@@ -912,6 +957,9 @@ def _output_tokens(message: dict) -> int:
 #: settled by the agent's label: a category id (P3C2 …) is research.
 _PHASE_STAGE = {
     "collect": "RESEARCH", "synthesise": "RESEARCH", "repair": "RESEARCH", "research": "RESEARCH",
+    # the visible lean-tiers runner (workflows/dma-research-tiers.js) — booked
+    # as PAGES on 2026-10-09 before this row existed
+    "tiers": "RESEARCH",
     "score": "SCORING", "critique": "SCORING", "rescore": "SCORING",
     "write": "REPORTS", "review": "REPORTS", "cross-section": "REPORTS",
     "fragments": "PAGES", "consolidate": "PAGES", "assemble": "PAGES",

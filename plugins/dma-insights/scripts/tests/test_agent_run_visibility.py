@@ -142,7 +142,10 @@ def test_streaming_is_opt_in_so_the_default_path_is_untouched():
     """A run was in flight in another session when this landed. The default
     dispatch had to stay byte-for-byte the behaviour it already had."""
     import inspect
-    src = inspect.getsource(ar.dispatch)
+    # `dispatch` takes a host lane slot and delegates (2026-10-09); the
+    # default path's body is `_dispatch_one`, and it stays a plain run
+    assert "_dispatch_one(" in inspect.getsource(ar.dispatch)
+    src = inspect.getsource(ar._dispatch_one)
     assert "subprocess.run" in src and "capture_output=True" in src
     assert "stream-json" not in src
 

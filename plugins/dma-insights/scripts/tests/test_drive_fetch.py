@@ -67,6 +67,29 @@ def test_ambiguous_partials_refuse_instead_of_guessing(monkeypatch):
     assert "multiple" in str(e.value)
 
 
+def test_two_folders_of_one_identity_refuse_and_name_the_pin(monkeypatch):
+    monkeypatch.delenv("DMA_CLIENT_FOLDER", raising=False)
+    _with_children(monkeypatch, ["IMA Financial - DMA", "IMA Financial Group - DMA"])
+    with pytest.raises(SystemExit) as e:
+        drive_fetch._find_client_folder("tok", "IMA Financial Group")
+    assert "multiple" in str(e.value) and "DMA_CLIENT_FOLDER" in str(e.value)
+
+
+def test_the_owners_pin_chooses_and_never_redirects(monkeypatch):
+    rows = _with_children(monkeypatch, ["IMA Financial - DMA", "IMA Financial Group - DMA",
+                                        "Thrivent - DMA"])
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", "IMA Financial Group - DMA")
+    assert drive_fetch._find_client_folder("tok", "IMA Financial Group")["id"] == rows[1]["id"]
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", rows[0]["id"])
+    assert drive_fetch._find_client_folder("tok", "IMA Financial Group")["name"] == "IMA Financial - DMA"
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", "Thrivent - DMA")
+    with pytest.raises(SystemExit, match="never redirects"):
+        drive_fetch._find_client_folder("tok", "IMA Financial Group")
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", "IMA Financial Grp - DMA")
+    with pytest.raises(SystemExit, match="names no single folder"):
+        drive_fetch._find_client_folder("tok", "IMA Financial Group")
+
+
 def test_google_native_files_have_export_targets():
     for mime, (target, ext) in drive_fetch.EXPORTS.items():
         assert mime.startswith("application/vnd.google-apps.")

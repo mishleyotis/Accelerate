@@ -271,8 +271,118 @@ def verdict_of(name: str, rc: int, out: str, err: str) -> tuple:
     return rc, ""
 
 
+# ── ONE LANE POOL FOR THE HOST (2026-10-09) ────────────────────────────────
+#
+# The visible tiers workflow starts one job per category (engine.tiers), and
+# each job runs its own `run_batch`; sixteen of them each sizing themselves to
+# the host would hold sixteen times what it can. `DMA_LANE_POOL=<dir>:<n>`
+# makes every lane take one of n slot files (an exclusive flock) before its
+# child starts and give it back when the child ends — across processes, so the
+# host runs n lanes in all, whichever job they belong to.
+import contextlib as _contextlib
+
+
+@_contextlib.contextmanager
+def lane_slot(poll_s: float = 1.0):
+    spec = os.environ.get("DMA_LANE_POOL") or ""
+    if ":" not in spec:
+        yield None
+        return
+    import fcntl
+    d, n = spec.rsplit(":", 1)
+    pool = Path(d)
+    pool.mkdir(parents=True, exist_ok=True)
+    n = max(1, int(n or 1))
+    held = None
+    while held is None:
+        for i in range(n):
+            fh = open(pool / f"slot_{i}", "a+")
+            try:
+                fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                held = fh
+                break
+            except OSError:
+                fh.close()
+        if held is None:
+            time.sleep(poll_s)
+    try:
+        yield held.name
+    finally:
+        try:
+            fcntl.flock(held, fcntl.LOCK_UN)
+        finally:
+            held.close()
+
+
+# ── LEAN LANES (2026-10-09): only what the job needs in context ────────────
+#
+# Measured on R-IMA-20261009, first-turn context of one haiku child:
+#   in-session workflow subagent ........................ 73,778 tokens
+#   `claude -p --agent` from the repository root ......... 31,189
+#   the same from the run directory ...................... 18,344
+#   run dir, no MCP servers, no settings, four tools ...... 6,537
+# Every turn re-reads that floor, so it is most of a lane's bill. A research
+# collector needs Bash (the engine CLI), Read, WebSearch and WebFetch — not
+# the build charter, the plugin's hooks and skill listings, or thirty-six
+# connector tool schemas it never calls. A LEAN row runs the agent's own
+# manifest body as an appended system prompt over the default one, with
+# exactly the tools the row names, no MCP server, no settings source, from
+# the run directory. The engine's refusals (actor scope, the ledger) are the
+# write control either way; `DMA_ACTOR` carries the per-category identity.
+_FRONTMATTER = re.compile(r"^---\n(.*?)\n---\n", re.S)
+
+
+def _manifest(name: str) -> tuple[dict, str]:
+    """(frontmatter fields we read, body) of an agent manifest."""
+    path = roster()[name]
+    text = Path(path).read_text(encoding="utf-8")
+    m = _FRONTMATTER.match(text)
+    fm, body = ({}, text) if not m else ({}, text[m.end():])
+    if m:
+        for line in m.group(1).splitlines():
+            if ":" in line and not line.startswith((" ", "-")):
+                k, v = line.split(":", 1)
+                fm[k.strip()] = v.strip()
+    return fm, body
+
+
+def lean_command(name: str, lean: dict, prompt: str, *, stream: bool,
+                 scratch: Path) -> tuple[list, Path]:
+    """The argv and cwd of a lean lane. `lean` = {model?, tools: [..], cwd,
+    actor?}. The model defaults to the manifest's; the tools are REQUIRED —
+    a lean lane holds what the row names and nothing else."""
+    fm, body = _manifest(name)
+    tools = [t for t in (lean.get("tools") or []) if t]
+    if not tools:
+        raise ValueError(f"lean lane {name}: name its tools — a lean lane "
+                         f"holds exactly what the row lists")
+    model = str(lean.get("model") or fm.get("model") or "sonnet")
+    scratch.mkdir(parents=True, exist_ok=True)
+    sp = scratch / f"{name}.system.md"
+    sp.write_text(body, encoding="utf-8")
+    cmd = [CLAUDE_BIN, "-p", "--model", model,
+           "--permission-mode", "dontAsk",
+           "--strict-mcp-config", "--setting-sources", "",
+           "--tools", ",".join(tools), f"--allowedTools={','.join(tools)}",
+           "--append-system-prompt-file", str(sp),
+           "--exclude-dynamic-system-prompt-sections"]
+    if fm.get("maxTurns") and not lean.get("max_turns"):
+        pass                    # the CLI has no turn cap flag in -p; the prompt bounds it
+    if stream:
+        cmd += ["--output-format", "stream-json", "--verbose"]
+    cmd.append(prompt)
+    cwd = Path(lean.get("cwd") or scratch)
+    return cmd, cwd
+
+
 def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
-             allowed: str) -> dict:
+             allowed: str, *, lean: dict | None = None) -> dict:
+    with lane_slot():
+        return _dispatch_one(name, prompt, timeout, repo_root, allowed, lean=lean)
+
+
+def _dispatch_one(name: str, prompt: str, timeout: int, repo_root: Path,
+                  allowed: str, *, lean: dict | None = None) -> dict:
     """Run ONE agent to completion. Safe to call from several threads.
 
     subprocess.run blocks the calling thread and nothing else, so N of these
@@ -284,6 +394,10 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
            "--permission-mode", "dontAsk",
            "--add-dir", "/root/.dma",
            f"--allowedTools={allowed}", prompt]
+    cwd = repo_root
+    if lean:
+        cmd, cwd = lean_command(name, lean, prompt, stream=False,
+                                scratch=Path(lean.get("cwd") or repo_root) / ".lean")
     try:
         # start_new_session: the child leads its own process group, so a
         # signal aimed at THIS process never reaches it by accident and the
@@ -297,10 +411,10 @@ def dispatch(name: str, prompt: str, timeout: int, repo_root: Path,
         # dispatch them, and (it now carries `Agent`) re-dispatches scorers
         # already running, writing column D twice. The guard belongs to the
         # conductor, which is the only actor that knows the fan-out.
-        r = subprocess.run(cmd, cwd=repo_root, timeout=timeout,
+        r = subprocess.run(cmd, cwd=cwd, timeout=timeout,
                            capture_output=True, text=True,
                            start_new_session=True,
-                           env=_child_env(name))
+                           env=_child_env(name, (lean or {}).get("actor")))
     except subprocess.TimeoutExpired:
         return {"agent": name, "code": 124, "stdout": "", "stderr": "",
                 "note": f"DISPATCH TIMEOUT: {name} exceeded {timeout}s — "
@@ -660,7 +774,7 @@ def _model_of(model_usage) -> str:
     return ""
 
 
-def _child_env(name: str) -> dict:
+def _child_env(name: str, actor: str | None = None) -> dict:
     """The environment a lane is launched with.
 
     DMA_STAGE_GUARD=off: the Stop hook holds a session open while a run has
@@ -678,7 +792,9 @@ def _child_env(name: str) -> dict:
     # Without it a page lane's own `ship_page.py --claim` took the run's
     # lease under a fresh id and locked the driver out (Arbor Bank,
     # 2026-10-06: PAGES_A failed on a lease held by the run's own lane).
-    return {**os.environ, "DMA_STAGE_GUARD": "off", "DMA_ACTOR": name,
+    # A lean lane names its per-category identity (`research-p3c2-collector`)
+    # so the engine's actor scope governs its writes without a flag per line.
+    return {**os.environ, "DMA_STAGE_GUARD": "off", "DMA_ACTOR": actor or name,
             "DMA_IN_LANE": "1"}
 
 
@@ -717,7 +833,16 @@ def _pump(stream, kind: str, q: "queue.Queue") -> None:
 
 
 def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
-                       allowed: str, logs: Path, *, label: str | None = None) -> dict:
+                       allowed: str, logs: Path, *, label: str | None = None,
+                       lean: dict | None = None) -> dict:
+    with lane_slot():
+        return _dispatch_streaming_one(name, prompt, timeout, repo_root, allowed, logs,
+                                       label=label, lean=lean)
+
+
+def _dispatch_streaming_one(name: str, prompt: str, timeout: int, repo_root: Path,
+                            allowed: str, logs: Path, *, label: str | None = None,
+                            lean: dict | None = None) -> dict:
     """`dispatch`, with the child's events written as they arrive.
 
     The child is its own process group; the deadline is kept on a clock
@@ -754,15 +879,20 @@ def dispatch_streaming(name: str, prompt: str, timeout: int, repo_root: Path,
            "--add-dir", "/root/.dma",
            "--output-format", "stream-json", "--verbose",
            f"--allowedTools={allowed}", prompt]
+    cwd = repo_root
+    if lean:
+        cmd, cwd = lean_command(name, lean, prompt, stream=True, scratch=logs / ".lean")
+        st["lean"] = {"model": cmd[cmd.index("--model") + 1],
+                      "tools": cmd[cmd.index("--tools") + 1]}
     events, raw, err_parts = [], [], []
     try:
-        proc = subprocess.Popen(cmd, cwd=repo_root, text=True, bufsize=1,
+        proc = subprocess.Popen(cmd, cwd=cwd, text=True, bufsize=1,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 start_new_session=True,
                                 # same reason as `dispatch`: the stage guard
                                 # is the conductor's, never a lane's
-                                env=_child_env(name))
+                                env=_child_env(name, (lean or {}).get("actor")))
     except FileNotFoundError:
         st.update(state="failed", doing="claude CLI not on PATH")
         flush_status()
@@ -909,7 +1039,12 @@ def read_batch(path: Path) -> list:
         if not _LABEL_OK.match(label):
             raise SystemExit(f"{path}[{i}]: label {label!r} may only carry "
                              f"letters, digits, . _ @ : -")
-        out.append({"agent": name, "prompt": text, "label": label})
+        lean = row.get("lean")
+        if lean is not None:
+            if not isinstance(lean, dict) or not lean.get("tools"):
+                raise SystemExit(f"{path}[{i}]: lean lane for {name} must name its "
+                                 f"tools — a lean lane holds exactly what the row lists")
+        out.append({"agent": name, "prompt": text, "label": label, "lean": lean})
     return out
 
 
@@ -946,7 +1081,8 @@ def _now() -> str:
 def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
                           repo_root: Path, allowed: str, *, retries: int = 0,
                           backoff_s: float = DEFAULT_RETRY_BACKOFF_S,
-                          sleep=time.sleep, label: str | None = None) -> dict:
+                          sleep=time.sleep, label: str | None = None,
+                          lean: dict | None = None) -> dict:
     """`run_fn` until it returns a non-retryable code or the retries are
     spent. The result carries `attempts`, `started_at`, `ended_at`,
     `elapsed_s` and the per-attempt codes, so the batch summary — and the
@@ -956,6 +1092,8 @@ def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
     codes = []
     res = None
     extra = {"label": label} if label and label != name else {}
+    if lean:
+        extra["lean"] = lean
     total = max(0, int(retries)) + 1
     for k in range(1, total + 1):
         p = prompt
@@ -982,6 +1120,8 @@ def dispatch_with_retries(run_fn, name: str, prompt: str, timeout: int,
 #: without being told which stage it is. Longest prefix wins.
 _STAGE_OF_AGENT = (
     ("research-challenger", "CHALLENGE"),
+    ("research-evidence-collector", "RESEARCH"),
+    ("research-category-orchestrator", "RESEARCH"),
     ("research-conductor", "PRELIM"),
     ("research-p", "RESEARCH"),
     ("scoring-critic", "SCORING"),
@@ -1074,11 +1214,13 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
     # With --stream every lane writes its own live transcript and status, so
     # a person watching `agent_run.py watch` sees sixteen agents working
     # rather than one Bash call that has not returned yet.
-    base = ((lambda n, p, t, rr, al, label=None: dispatch_streaming(
-                n, p, t, rr, al, logs, label=label))
-            if logs else (lambda n, p, t, rr, al, label=None: dispatch(n, p, t, rr, al)))
-    run = (lambda n, p, t, rr, al, label=None: dispatch_with_retries(
-        base, n, p, t, rr, al, retries=retries, backoff_s=backoff_s, label=label))
+    base = ((lambda n, p, t, rr, al, label=None, lean=None: dispatch_streaming(
+                n, p, t, rr, al, logs, label=label, lean=lean))
+            if logs else (lambda n, p, t, rr, al, label=None, lean=None:
+                          dispatch(n, p, t, rr, al, lean=lean)))
+    run = (lambda n, p, t, rr, al, label=None, lean=None: dispatch_with_retries(
+        base, n, p, t, rr, al, retries=retries, backoff_s=backoff_s, label=label,
+        lean=lean))
     if logs:
         logs.mkdir(parents=True, exist_ok=True)
         print(f"streaming {len(rows)} lane(s) to {logs}\n"
@@ -1090,7 +1232,8 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
             futures = {pool.submit(run, r["agent"], r["prompt"], timeout,
-                                   repo_root, allowed, r.get("label")): r["agent"]
+                                   repo_root, allowed, r.get("label"),
+                                   r.get("lean")): r["agent"]
                        for r in rows}
             for fut in concurrent.futures.as_completed(futures):
                 res = fut.result()
