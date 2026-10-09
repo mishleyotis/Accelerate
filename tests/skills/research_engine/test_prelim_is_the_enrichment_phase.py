@@ -105,18 +105,24 @@ def test_a_banked_connector_scan_closes_it_and_satisfies_the_page_preflight(tmp_
         excerpt=("Technographic scan, detected technologies: OPS system, CUST "
                  "system, DATA system and INFRA system, last seen 2026-08."),
         subcaps=[], published="2026-08-28", origin="connector")
+    # The scanner names the cell each row bears on, and `record` links the
+    # cited scan row to it at the write (2026-10-09) — the register that
+    # reaches PAGES with no unlinked citation. A row recorded with no cell
+    # would leave `scan` unlinked and the preflight would say so (ET-07).
+    cell = wb.selected_subcaps()[0]
     for layer in C.TECH_LAYERS:
         techscan.record(wb, product=f"{layer} system", vendor="Vendor",
                         layer=layer, status="INFERRED",
                         method="technographic_scan",
                         basis=f"{layer} system detected by the Clay scan",
-                        providers=["clay"], subcaps=[], evidence_ids=[scan],
+                        providers=["clay"], subcaps=[cell], evidence_ids=[scan],
                         source_urls=["https://app.clay.com/technographics/x"],
                         as_of="2026-08-28")
+    assert cell in str(wb.evidence_index()[scan].get("SubCap_IDs") or "")
     assert PP.machine_scan(wb)["state"] == "SCANNED"
     assert _state(wb, "tech_baseline")["status"] == "RESEARCHED"
-    # the page preflight reads the same facts: no ET-12, no CG-50; CG-40 is
-    # excused by the scan (the ladder states the depth the scan found)
+    # the page preflight reads the same facts: no ET-07, no ET-12, no CG-50;
+    # CG-40 is excused by the scan (the ladder states the depth the scan found)
     assert [b["gate"] for b in PP.preflight(wb)] == []
 
 

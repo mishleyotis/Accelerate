@@ -145,8 +145,13 @@ def test_the_skeleton_never_closes_the_subcap(tmp_path):
     bank_evidence(wb, cell)
     with pytest.raises(LedgerRefusal):
         L.append_synthesis(wb, cell, SKELETON)
-    assert L.worklist(wb, CAT)["volleyed"] == [cell], \
+    # PRELIM's register reaches a cell of its own (techscan.record links its
+    # citations, 2026-10-09), so that cell is volleyed too; the one under
+    # test must be AMONG the open cells, and nowhere else
+    wl = L.worklist(wb, CAT)
+    assert cell in wl["volleyed"], \
         "a refused synthesis must leave the subcap open, not closed"
+    assert cell not in wl.get("done", []) and cell not in wl.get("closed", [])
 
 
 def test_the_skeleton_command_hands_out_no_fillable_values(tmp_path):
@@ -288,6 +293,7 @@ def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     # about the run's total row count.
     before_e = len(wb.rows("Evidence_Detail"))
     before_s = len(wb.rows("Search_Log"))
+    before_r = wb.coverage()[0]["Researched"]   # PRELIM's register reaches a cell
     cell = wb.selected_subcaps()[0]
     L.append_search(wb, subcap=cell, facet="works", query='"Acme" x',
                     tool="web_search", hits=3, kept=1)
@@ -306,7 +312,7 @@ def test_every_step_lands_in_the_workbook_as_it_happens(tmp_path):
     assert len(fresh.rows("Search_Log")) == before_s + 1 + 1 + len(L.askable_facets(fresh, cell))
     assert len(fresh.rows("Evidence_Detail")) == before_e + 3
     assert fresh.scoring_row(cell)["Dominant_Claim"]
-    assert fresh.coverage()[0]["Researched"] == 1
+    assert fresh.coverage()[0]["Researched"] == before_r + 1
 
 
 def test_a_good_run_reaches_a_passing_gate(tmp_path):
