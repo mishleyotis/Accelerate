@@ -109,8 +109,9 @@ export function checkEmailPage(entityName, email, sender, validUntil) {
     : "from Zennify";
   return html(200, frame("Check your email", `
 <div><div class="loader-title">Check your email</div>
-<div class="loader-body" style="margin-top:6px">We have sent a one-time sign-in link for the
-${esc(entityName || "")} dashboard to <strong>${esc(email)}</strong>, ${from}. It works once${
+<div class="loader-body" style="margin-top:6px">We have sent a secure sign-in link for
+${entityName ? `the ${esc(entityName)} digital maturity assessment` : "your digital maturity assessment"}
+to <strong>${esc(email)}</strong>, ${from}. It works once${
   validUntil ? ` and stays valid for ${esc(validity(Date.now(), validUntil))}` : ""}.</div></div>
 <div class="loader-body" style="font-size:12px">Nothing after a few minutes? Check your junk
 folder. You can request another link after a minute.</div>`));

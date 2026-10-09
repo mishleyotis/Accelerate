@@ -1,8 +1,8 @@
 // One-time sign-in links for client share links, through Google Cloud
 // Identity Platform (owner, 2026-10-07: "use a service already integrated
 // with Google Cloud Run" — no mail provider, no third-party key). Since
-// 2026-10-09 this is the FALLBACK: when the colleague's Microsoft 365
-// mailbox can send (lib/share-mailer), that email carries the app's own
+// 2026-10-09 this is the FALLBACK: when the colleague's own Gmail can
+// send (lib/share-mailer), that email carries the app's own
 // code instead, valid for the link's days.
 //
 // Google sends the email and owns the code: `sendOobCode` (EMAIL_SIGNIN)

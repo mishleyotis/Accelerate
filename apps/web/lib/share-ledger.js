@@ -153,13 +153,18 @@ export function dirBackend(root) {
 /* ── Recording a link ──────────────────────────────────────────────── */
 // `mintedByName` is the colleague's display name from their session: the
 // sign-in email the recipient receives is sent from, and signed by, them.
-export async function recordLink(payload, mintedBy, backend = ledgerBackend(), mintedByName = null) {
+// `names` (email → name) greets each named recipient in their sign-in email.
+export async function recordLink(payload, mintedBy, backend = ledgerBackend(), mintedByName = null, names = null,
+                                 stage = null) {
   if (!backend) return false;
   const rec = {
     jti: payload.jti, entity: payload.e, run: payload.r,
     emails: payload.a.m, domains: payload.a.d,
     minted_by: mintedBy || null,
     minted_by_name: mintedByName ? String(mintedByName).slice(0, 120) : null,
+    recipient_names: names && typeof names === "object" ? names : {},
+    // before_first_call | after_first_call — which follow-up the email offers.
+    stage: stage || null,
     minted_at: new Date(payload.iat * 1000).toISOString(),
     expires_at: new Date(payload.exp * 1000).toISOString(),
   };

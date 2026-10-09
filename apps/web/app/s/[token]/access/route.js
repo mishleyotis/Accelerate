@@ -19,8 +19,8 @@ export const dynamic = "force-dynamic";
 //      or an inhuman submission is answered like a success and sends nothing;
 //   2. the shared send budgets (admitSend): per address, link, colleague,
 //      network and service — fail closed;
-//   3. the email: from the colleague who shared the link, through their
-//      Microsoft 365 mailbox (lib/share-mailer), Zennify-branded
+//   3. the email: from the colleague who shared the link, through their own
+//      Gmail (lib/share-mailer, domain-wide delegation), Zennify-branded
 //      (lib/share-email); else Identity Platform's own email.
 //   The colleague's email carries the app's own signed, single-use code,
 //   valid for the days the link was shared for; Identity Platform's email
@@ -35,13 +35,14 @@ export async function POST(req, { params }) {
   try { form = await req.formData(); } catch {}
   const email = normaliseEmail(form && form.get("email"));
 
-  let clientName;
-  const nameOf = async () => {
-    if (clientName !== undefined) return clientName;
+  let entity;   // the client's own customer-audience entity block, read once
+  const entityOf = async () => {
+    if (entity !== undefined) return entity;
     const ov = await readAsLink(p, "overview");
-    try { clientName = JSON.parse(ov.body).entity.entity_name || null; } catch { clientName = null; }
-    return clientName;
+    try { entity = JSON.parse(ov.body).entity || null; } catch { entity = null; }
+    return entity;
   };
+  const nameOf = async () => ((await entityOf()) || {}).entity_name || null;
   if (!email || !allowed(p, email)) {
     audit("share_access_refused", { jti: p.jti, entity: p.e, email: email || "(unparseable)" });
     return gatePage(params.token, await nameOf(), email
@@ -64,9 +65,12 @@ export async function POST(req, { params }) {
     }
 
     const cfg = mailerConfig();
-    let sender = null;
+    let sender = null, record = null;
     if (cfg) {
-      try { sender = senderFor(await linkRecord(p.jti), await revocationOf(p.jti), email, cfg); }
+      try {
+        record = await linkRecord(p.jti);
+        sender = senderFor(record, await revocationOf(p.jti), email, cfg);
+      }
       catch (e) {
         audit("share_ledger_unavailable", { jti: p.jti, error: String(e.message || e).slice(0, 200) });
         return unavailablePage();
@@ -86,12 +90,14 @@ export async function POST(req, { params }) {
     if (sender) {
       const code = signSignIn(p.jti, email);
       const link = `${verifyUrl}&i=${code.i}&n=${code.n}&s=${encodeURIComponent(code.s)}`;
-      const msg = signInEmail({ client: await nameOf(), recipient: email, ae: sender,
-                                link, requestedAt: Date.now(), validUntil: p.exp * 1000 });
+      const msg = signInEmail({ client: await nameOf(), subVertical: ((await entityOf()) || {}).sub_vertical,
+                                recipient: email, recipientName: ((record && record.recipient_names) || {})[email] || null,
+                                ae: sender, link, stage: record && record.stage,
+                                requestedAt: Date.now(), validUntil: p.exp * 1000 });
       const sent = await sendAs(cfg, sender.email, buildMime({ from: sender, to: email,
         subject: msg.subject, text: msg.text, html: msg.html }));
       if (sent.ok) {
-        audit("share_otp_sent", { jti: p.jti, entity: p.e, email, via: "graph", from: sender.email });
+        audit("share_otp_sent", { jti: p.jti, entity: p.e, email, via: "gmail", from: sender.email });
         return checkEmailPage(await nameOf(), email, sender, p.exp * 1000);
       }
       audit("share_mail_fallback", { jti: p.jti, entity: p.e, email, from: sender.email,

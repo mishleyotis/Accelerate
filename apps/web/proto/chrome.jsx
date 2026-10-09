@@ -327,12 +327,15 @@ function SettingsPopover({ onClose }) {
    those addresses plus their organisations' domains are the link's
    allowlist for this one DMA. The server mints (POST /api/share) and signs
    the allowlist into the link; nothing here decides who is admitted. The
-   link travels from the sharer's own mailbox (a prefilled draft), so no
-   mail service and no third-party key exists anywhere in the app. */
+   link travels from the sharer's own mailbox (a prefilled draft); the
+   recipient's sign-in email is sent from it too (lib/share-mailer). */
 function ShareDialog({ entity, run, onClose }) {
   const { pushToast } = useApp();
   const [recipients, setRecipients] = useState("");
   const [days, setDays] = useState(30);
+  // Has the first sales call happened? Asked before every link (owner,
+  // 2026-10-09): it decides the follow-up the recipient's email offers.
+  const [stage, setStage] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [made, setMade] = useState(null);
@@ -341,7 +344,7 @@ function ShareDialog({ entity, run, onClose }) {
     setBusy(true); setError(null);
     fetch("/api/share", { method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ entity: entity.id, run: run && (run.run_id || run.id),
-                             recipients, days }) })
+                             recipients, days, stage }) })
       .then(r => r.json().then(b => ({ ok: r.ok, b })))
       .then(({ ok, b }) => {
         setBusy(false);
@@ -355,9 +358,33 @@ function ShareDialog({ entity, run, onClose }) {
     try { navigator.clipboard.writeText(made.url).then(done, () => window.prompt("Copy the client link", made.url)); }
     catch (e) { window.prompt("Copy the client link", made.url); }
   };
+  // The invitation the colleague sends from their own mailbox (owner,
+  // 2026-10-09): greets the recipients, says it is their digital maturity
+  // assessment benchmarked against peers, and offers a walkthrough.
+  const PEERS = { CU: "credit unions", RB: "regional banks", CL: "commercial lenders",
+    CIB: "corporate and investment banks", FC: "Farm Credit institutions", AM: "asset and wealth managers",
+    RIA: "RIAs and broker-dealers", IC: "insurance carriers", IB: "insurance brokers" };
+  const named = recipients.split(/[,;\n]+/).map(x => (x.match(/^\s*"?([^"<]+?)"?\s*</) || [])[1]).filter(Boolean)
+    .map(n => (n.includes(",") ? n.split(",")[1] : n).trim().split(/\s+/)[0]);
+  const hi = named.length ? `Hi ${named.join(" and ")},` : `Dear ${entityName(entity)} team,`;
+  const me = (window.DMA_LIVE && window.DMA_LIVE.name) || "";
+  const peers = PEERS[String(entity.subvertical || "").toUpperCase()] || "institutions";
+  const afterCall = stage === "after_first_call";
   const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}`
-    + `?subject=${encodeURIComponent(`${entityName(entity)} · Digital Maturity Assessment`)}`
-    + `&body=${encodeURIComponent(`Your Digital Maturity Assessment dashboard for ${entityName(entity)}:\n\n${made.url}\n\nOpen it and enter your work email: you will receive a one-time sign-in link at that address. The dashboard link works until ${fmtDate(made.expires_at)}.`)}` : null;
+    + `?subject=${encodeURIComponent(`Your ${entityName(entity)} digital maturity assessment is ready`)}`
+    + `&body=${encodeURIComponent([
+        hi, "",
+        afterCall
+          ? `Thank you for your time on our recent call. As promised, here is ${entityName(entity)}'s digital maturity assessment.`
+          : `I am pleased to share ${entityName(entity)}'s digital maturity assessment with you.`, "",
+        `Would you like to know how ${entityName(entity)} performs against its peers? Your assessment scores your organisation across four pillars: strategy and governance, customer experience, operations and risk, and data and technology. Each pillar is benchmarked against comparable ${peers}, so you can see where you lead and where the biggest opportunities lie.`, "",
+        `View your assessment: ${made.url}`, "",
+        `When you open it, enter your work email and you will receive a secure sign-in link at that address. The link is available until ${fmtDate(made.expires_at)}.`, "",
+        afterCall
+          ? "I would welcome a follow-up call to go deeper on the priorities we discussed and agree next steps. Reply to this email and we can book a time."
+          : "I would welcome the chance to walk your team through the findings. Reply to this email and we can find a time.", "",
+        "Kind regards,", me, "Zennify",
+      ].join("\n"))}` : null;
 
   return (
     <div className="modal-mask" onClick={onClose}>
@@ -373,10 +400,28 @@ function ShareDialog({ entity, run, onClose }) {
           {!made ? (<>
             <label htmlFor="share-recipients" style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Recipient email(s) · added to this link's allowlist</label>
             <textarea id="share-recipients" className="inp" rows={2} style={{ width: "100%", marginTop: 6, resize: "vertical" }}
-              placeholder="jane@bcu.com, sam@bcu.com" value={recipients} onChange={e => setRecipients(e.target.value)} />
+              placeholder="Jane Doe <jane@bcu.com>, sam@bcu.com" value={recipients} onChange={e => setRecipients(e.target.value)} />
             <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.5 }}>
-              Required before the link is generated. Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only.
+              Required before the link is generated. Add a name (Jane Doe &lt;jane@bcu.com&gt;) and the sign-in email greets them by it. Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only.
             </div>
+            <fieldset style={{ border: 0, padding: 0, margin: "14px 0 0" }}>
+              <legend style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", padding: 0 }}>Has the first sales call with {entityName(entity)} happened?</legend>
+              <div className="row" style={{ gap: 16, marginTop: 6, flexWrap: "wrap" }}>
+                {[["before_first_call", "Not yet: before the first call"], ["after_first_call", "Yes: after the first call"]].map(([v, label]) => (
+                  <label key={v} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--z-dark)", cursor: "pointer" }}>
+                    <input type="radio" name="share-stage" value={v} checked={stage === v} onChange={() => setStage(v)} />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.5 }}>
+                {stage === "after_first_call"
+                  ? "The client's sign-in email thanks them for the call and invites a follow-up call with you."
+                  : stage === "before_first_call"
+                    ? "The client's sign-in email invites them to schedule a walkthrough of the results with you."
+                    : "Required: it decides the follow-up the client's sign-in email offers."}
+              </div>
+            </fieldset>
             <div className="row" style={{ gap: 8, marginTop: 14, alignItems: "center" }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Link expires after</label>
               <select className="inp" style={{ maxWidth: 140 }} value={days} onChange={e => setDays(Number(e.target.value))}>
@@ -398,7 +443,7 @@ function ShareDialog({ entity, run, onClose }) {
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{made ? "Send it from your own mailbox." : ""}</span>
           <div className="row" style={{ gap: 8 }}>
             {!made ? (
-              <button className="btn btn-primary" disabled={busy || !recipients.trim()} onClick={submit}>{busy ? "Generating…" : "Generate link"}</button>
+              <button className="btn btn-primary" disabled={busy || !recipients.trim() || !stage} onClick={submit}>{busy ? "Generating…" : "Generate link"}</button>
             ) : (<>
               <button className="btn btn-tertiary" onClick={copy}><Icon name="copy" size={12} /> Copy link</button>
               <a className="btn btn-primary" href={mailto}><Icon name="envelope" size={12} /> Email link</a>

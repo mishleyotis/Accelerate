@@ -368,12 +368,13 @@ def test_THE_LINK_LEDGER_IS_WRITTEN_BY_THE_APP_AND_ONLY_READ_BY_THE_PUBLIC_SERVI
 
 def test_SIGN_IN_EMAILS_ARE_METERED_AND_COME_FROM_THE_COLLEAGUE_OR_SAY_WHY_NOT():
     """Owner, 2026-10-09: the sign-in email is sent from the colleague who
-    shared the link (their Microsoft 365 mailbox), and it cannot be used to
-    spam. The budget store is a private, expiring bucket that dmai-share must
-    have — a store that cannot be made fails the release, since the share
-    service fails closed without it. The mailer is switched on only after the
-    federated token exchange reads back Mail.Send, needs no secret, and a
-    release without it prints the exact setup steps, never silence."""
+    shared the link — their own Gmail ("We own a Google suite") — and it
+    cannot be used to spam. The budget store is a private, expiring bucket
+    dmai-share must have; a store that cannot be made fails the release (the
+    share service fails closed without it). The sender is switched on only
+    after a delegated gmail.send token is read back for a real colleague,
+    with no key created, and a release without it prints the exact Workspace
+    admin step, never silence."""
     text = DEPLOY.read_text()
     share = _deploy_block("dmai-share")
     assert "SHARE_SENDS_BUCKET=${SHARE_SENDS_BUCKET}" in share
@@ -383,12 +384,9 @@ def test_SIGN_IN_EMAILS_ARE_METERED_AND_COME_FROM_THE_COLLEAGUE_OR_SAY_WHY_NOT()
     assert '"condition":{"age":2,"matchesPrefix":["rl/"]}' in text, "budget counters no longer expire"
     # A burned sign-in code must outlive the longest share link (90 days).
     assert '"condition":{"age":92,"matchesPrefix":["used/"]}' in text, "burned codes expire before their links"
-    assert "api://AzureADTokenExchange" in text and '"Mail.Send" in roles' in text, (
-        "the mailer is switched on without reading back Mail.Send")
+    assert "https://www.googleapis.com/auth/gmail.send" in text
+    assert '"gmail.send" in' in text, "the sender is switched on without reading back gmail.send"
+    assert "Manage domain-wide delegation" in text, "the Workspace admin step is no longer printed"
     assert 'echo "  Why: ${MAIL_WHY:-unknown}" >&2' in text
-    assert "New-ApplicationAccessPolicy" in text, "the setup steps no longer restrict the app to the AEs"
-    for forbidden in ("client_secret", "SHARE_MAIL_SECRET", "--set-secrets=\"$SHARE_SECRETS,SHARE_MAIL"):
-        assert forbidden not in text, f"a mail secret appeared in the deploy: {forbidden}"
-    ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
-    for v in ("SHARE_MAIL_TENANT_ID", "SHARE_MAIL_CLIENT_ID"):
-        assert f"{v}: ${{{{ vars.{v} }}}}" in ci, f"{v} is not passed to the deploy"
+    for forbidden in ("service-accounts keys create", "client_secret", "--key-file", "SHARE_MAIL_TENANT_ID"):
+        assert forbidden not in text, f"a mail credential appeared in the deploy: {forbidden}"
