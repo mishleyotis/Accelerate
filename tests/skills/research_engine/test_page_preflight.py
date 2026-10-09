@@ -72,7 +72,10 @@ def test_a_declared_not_run_answers_et12_and_excuses_the_depth_floor(tmp_path):
             f"{tool} has no technographic profile for this domain, checked "
             f"2026-10-05; stated on the page as NOT_RUN"))
     assert PP.machine_scan(wb)["state"] == "DECLARED"
-    assert [b["gate"] for b in PP.preflight(wb)] == ["CG-50"]
+    # the declaration answers ET-12 and excuses CG-40; the two unlinked
+    # citations of the first-register shape stay ET-07 (2026-10-09), and the
+    # product-naming floor stays CG-50
+    assert [b["gate"] for b in PP.preflight(wb)] == ["ET-07", "ET-07", "CG-50"]
 
 
 def test_a_not_run_needs_its_reason(tmp_path):

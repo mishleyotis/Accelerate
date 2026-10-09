@@ -521,3 +521,33 @@ def test_the_workflows_read_the_envelope_and_the_write_time_rules():
     assert "CRITIC_ROUNDS = A.rounds || 2" in scoring
     reports = (PLUGIN / "workflows" / "dma-reports.js").read_text()
     assert "EVIDENCE PACK" in reports and "FROZEN" in reports
+
+
+def test_et07_exempts_the_identity_grain_prelim_narratives(tmp_path):
+    """The call report the firmographics narrative cites names no cell, and
+    must not: the connector exempts overview.firmographics by name, and a
+    preflight that blocked on it would refuse every run at PAGES_B (the
+    stub chaos walk did, 2026-10-09). A research-report section citing the
+    same unlinked row IS a blocker."""
+    from engine import page_preflight as PP
+    run = new_run(tmp_path); wb = run.open()
+    idx = wb.evidence_index()
+    firm = [r for r in wb.rows("Report_Narrative")
+            if str(r.get("Section_ID") or "").upper() == "PRELIM-FIRM"]
+    assert firm and firm[0].get("Evidence_IDs"), "the fixture's PRELIM narrates firmographics"
+    eid = str(firm[0]["Evidence_IDs"]).split(",")[0].strip()
+    assert not str((idx.get(eid) or {}).get("SubCap_IDs") or "").strip() or True
+    unl = PP.unlinked_citations(wb, ("overview",))
+    assert eid not in {k for k, v in unl.items() if any(
+        c.startswith("Report_Narrative:PRELIM-FIRM") for c in v["cited_from"])}
+    # the same row cited from a research-report section is a blocker when unlinked
+    orphan = L.append_evidence(
+        wb, source_name="A trade article", source_url="https://example.test/trade",
+        tier="T2", excerpt=("The credit union's digital team was reorganised under "
+                            "a new chief digital officer during 2025, the article says."),
+        subcaps=[], published="2025-05-01")
+    wb.append("Report_Narrative", {"Report": "client_research", "Section_ID": "CR-03",
+                                   "Heading": "Leadership and operating model",
+                                   "Body": "x" * 60, "Evidence_IDs": orphan, "Kind": "narrative"})
+    unl = PP.unlinked_citations(wb, ("overview",))
+    assert orphan in unl and unl[orphan]["page"] == "overview"

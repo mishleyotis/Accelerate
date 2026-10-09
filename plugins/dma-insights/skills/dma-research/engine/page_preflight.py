@@ -197,6 +197,16 @@ _CITING_SHEETS = {
 _ET07_ADVISORY_SHEETS = frozenset({"Entity_Timeline"})
 
 
+#: PRELIM narrative sections whose citations are about the INSTITUTION, not
+#: a capability — the connector's `_IDENTITY_GRAIN` exemption by section
+#: (overview.firmographics / financial_series / leadership /
+#: thought_leadership). A call report cited from the firmographics
+#: narrative names no cell because it should not; linking it to one would
+#: be the misattribution ET-07 exists to reduce.
+_ET07_IDENTITY_SECTIONS = frozenset({"PRELIM-FIRM", "PRELIM-FIN", "PRELIM-LEAD",
+                                     "PRELIM-THOUGHT"})
+
+
 def unlinked_citations(wb, pages) -> dict:
     """{e_id: {page, cited_from}} for every cited row that names no cell."""
     idx = wb.evidence_index()
@@ -205,6 +215,9 @@ def unlinked_citations(wb, pages) -> dict:
         if page not in pages:
             continue
         for r in wb.rows(sheet):
+            if sheet == "Report_Narrative" and \
+                    _clean(r.get("Section_ID")).upper() in _ET07_IDENTITY_SECTIONS:
+                continue
             for e in _ids(r.get(col)):
                 e = e.split(":")[0]
                 row = idx.get(e)
