@@ -23,7 +23,7 @@ The branch is the session's base ref (CLAUDE_CODE_BASE_REF, set by the
 harness), else DMA_REPO_BRANCH, else the default `bootstrap_session.sh`
 writes down — read from that file, never retyped here.
 
-    git_refs.py freshen [--repo DIR] [--branch NAME] [--no-fetch] [--json]
+    git_refs.py freshen [--repo <dir>] [--branch <ref>] [--no-fetch] [--json]
     git_refs.py spawn   # what the hook calls: freshen, detached, logged
 """
 from __future__ import annotations
