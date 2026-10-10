@@ -292,7 +292,15 @@ def write_baseline(tool_names, root=None, roster=None) -> dict:
     # typed nothing at all still gets a measured baseline.
     roster = roster or {}         # the CLI and ensure_baseline pass it;
     #                               a library call stays exactly what it says
-    from_transcript = set(roster.get("tools") or []) if roster.get("found") else set()
+    from_transcript = (set(roster.get("answering_tools")
+                           or roster.get("tools") or [])
+                       if roster.get("found") else set())
+    refused = dict(roster.get("refused_servers") or {})
+    if refused:
+        # A refusing server's tools are BOUND, but nothing typed can make
+        # them answer: drop them from the typed list too.
+        typed = {t for t in typed
+                 if not (t.startswith("mcp__") and t.split("__", 2)[1] in refused)}
     held = typed | from_transcript
     present = sorted(f for f in fam if _present(f, fam, held))
     sources = [s for s, got in (("typed", typed), ("transcript", from_transcript))
@@ -305,6 +313,8 @@ def write_baseline(tool_names, root=None, roster=None) -> dict:
                           or _os.environ.get("CLAUDE_CODE_SESSION_ID"))}
     if roster.get("found"):
         rec["transcript"] = roster.get("transcript")
+    if refused:
+        rec["refused_servers"] = refused
     # THE WORKFLOW TOOL IS HELD OR NOT, AND ONLY THE SESSION KNOWS (2026-10-09).
     # A resume or worker restart drops it ("No such tool available: Workflow.
     # Workflow is disabled for this session" — SWBC 10-01, B1 10-08; Cross
@@ -349,7 +359,7 @@ def ensure_baseline(root=None, roster=None) -> dict | None:
     roster = roster if roster is not None else _session_roster()
     if not roster.get("found") or not roster.get("mcp_tools"):
         return None
-    rec = write_baseline([], root, roster=roster)
+    rec = write_baseline([], root, roster=roster)     # answering tools only
     rec["adopted"] = True
     return rec
 
@@ -472,7 +482,13 @@ def main(argv=None) -> int:
                 return 2
         names = raw.splitlines()
         if a.cmd in ("check", "probe") and a.from_session and roster.get("found"):
-            names = sorted(set(names) | set(roster.get("tools") or []))
+            refused = roster.get("refused_servers") or {}
+            names = sorted({n for n in names if not (
+                n.startswith("mcp__") and n.split("__", 2)[1] in refused)}
+                | set(roster.get("answering_tools") or roster.get("tools") or []))
+            for srv, why in refused.items():
+                print(f"  BOUND, NOT ANSWERING  {srv}: {why[:120]}",
+                      file=sys.stderr)
 
         if a.cmd == "baseline":
             rec = write_baseline(names, a.root, roster=roster)

@@ -610,8 +610,15 @@ def connector_contract_check() -> dict:
                     "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
                     "baseline --tools - --root <RUN_ROOT>`, then re-run the "
                     "doctor")
-            rec = {"mcp_tools": roster.get("mcp_tools") or []}
-            source = ("this session's transcript (no run root yet — "
+            ans = roster.get("answering_tools")
+            rec = {"mcp_tools": [t for t in (ans if ans is not None
+                                             else roster.get("mcp_tools") or [])
+                                 if t.startswith("mcp__")]}
+            refused = roster.get("refused_servers") or {}
+            source = ("this session's transcript" + (
+                      f"; BOUND BUT REFUSING (out of credit / over plan): "
+                      f"{', '.join(sorted(refused))}" if refused else "")
+                      + " (no run root yet — "
                       "engine.pipeline adopts it as the run's baseline at "
                       "PREFLIGHT; nothing to type)")
         else:
@@ -620,8 +627,9 @@ def connector_contract_check() -> dict:
         if not out["ok"]:
             return _check(name, False,
                           f"{declared}. BASELINE IS SHORT: missing "
-                          f"{', '.join(out['missing'])} — no cell can be declared "
-                          f"absent without one, so no floors gate can pass.",
+                          f"{', '.join(out['missing'])} (per {source}) — no cell "
+                          f"can be declared absent without one, so no floors "
+                          f"gate can pass; a run proceeds DEGRADED.",
                           out["why"][:240])
         return _check(name, True,
                       f"{declared}. Baseline holds: "
