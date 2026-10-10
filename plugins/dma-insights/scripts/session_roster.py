@@ -27,6 +27,12 @@ WHAT IT CANNOT SEE, stated rather than guessed:
   * a session with tool search off lists its tools in the prompt, not the
     transcript: `found` is False and callers fall back to the typed list.
 
+BOUND IS NOT ANSWERING (Interac, 2026-10-10). A server whose latest call
+came back out of credit, over its plan or unauthorised is reported in
+`refused_servers` and left out of `answering_tools`; its next success puts
+it back. Consumers judge the contract on `answering_tools`, so a run whose
+search connectors are unfunded is marked DEGRADED instead of READY.
+
     session_roster.py [--session ID] [--transcript PATH] [--json]
 """
 from __future__ import annotations
@@ -35,10 +41,35 @@ import argparse
 import glob
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
 _WF_LOST = "No such tool available: Workflow"
+
+#: A connector that is BOUND but REFUSES — out of credit, over its plan,
+#: unauthorised. Interac (2026-10-10): Exa answered 402 "exceeded your
+#: credits limit" and Tavily 432 "exceeds your plan's set usage limit" on
+#: every call, while the contract — reading only the binding — said READY,
+#: so the run was never marked degraded and every lane met the same wall.
+#: Matched on the RESULT of a call to that server, never on prose elsewhere.
+_REFUSAL_STRICT = re.compile(
+    r"credits? limit|usage limit|exceeds? your plan|quota exceeded|"
+    r"insufficient (?:credits|funds)|payment required|top up|"
+    r"\b(?:error|status)\W{0,4}(?:402|432)\b|\((?:402|432)\)|"
+    r"\"status\":\s*(?:402|432)", re.I)
+
+
+#: …and only when the result is SHAPED like an error: a fetched page that
+#: mentions "usage limit" in its prose is content, not a refusal.
+_ERROR_SHAPE = re.compile(
+    r'^\W*\{?\s*"?error|\berror \(\d{3}\)|"status"\s*:\s*4\d\d|^\W*(?:Error|HTTP 4\d\d)',
+    re.I)
+
+
+def _server(tool: str) -> str | None:
+    parts = tool.split("__", 2)
+    return parts[1] if len(parts) == 3 and parts[0] == "mcp" else None
 
 
 def _config_dirs() -> list[Path]:
@@ -69,6 +100,7 @@ def read(path: Path | str) -> dict:
     found = False
     used: set[str] = set()
     calls: dict[str, str] = {}            # tool_use id -> tool name
+    refused: dict[str, str] = {}          # server -> why its last call failed
     workflow = None
     failed_servers = 0
     try:
@@ -122,11 +154,30 @@ def read(path: Path | str) -> dict:
                     continue
                 if c.get("type") == "tool_result":
                     name = calls.get(c.get("tool_use_id") or "")
-                    if name and not c.get("is_error"):
+                    if not name:
+                        continue
+                    body = c.get("content")
+                    text = body if isinstance(body, str) else json.dumps(body)
+                    srv = _server(name)
+                    # THE LATEST ANSWER WINS, per server: credit and quota
+                    # are per account, so one refusal speaks for the server
+                    # and one success (a top-up) clears it.
+                    head = (text or "")[:600]
+                    errorish = bool(c.get("is_error")) or bool(_ERROR_SHAPE.search(head[:200]))
+                    if srv and errorish and _REFUSAL_STRICT.search(head):
+                        refused[srv] = (text or "")[:160].replace("\n", " ")
+                        continue
+                    if srv:
+                        refused.pop(srv, None)
+                    if not c.get("is_error"):
                         used.add(name)      # answered: the tool is bound
     tools = sorted(held | {u for u in used if u.startswith("mcp__")})
+    answering = [t for t in tools if _server(t) not in refused]
     return {"found": found, "tools": tools,
             "mcp_tools": [t for t in tools if t.startswith("mcp__")],
+            # Bound AND not refusing on its latest call: what a run can use.
+            "answering_tools": answering,
+            "refused_servers": refused,
             "workflow_tool": workflow, "failed_mcp_servers": failed_servers,
             "transcript": str(path),
             "reason": ("" if found else

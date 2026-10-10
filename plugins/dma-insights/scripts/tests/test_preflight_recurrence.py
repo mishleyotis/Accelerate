@@ -154,6 +154,71 @@ class RosterFromTranscript(_Session):
         self.assertIsNone(sr.transcript_path("../../etc/passwd"))
 
 
+class BoundButRefusing(_Session):
+    """Interac, 2026-10-10: Exa answered 402 and Tavily 432 on every call
+    while the contract, reading only the binding, said READY — so the run
+    was never marked degraded and every lane met the same wall."""
+
+    EXA = "mcp__Exa__web_search_exa"
+    TAV = "mcp__Tavily__tavily_search"
+
+    def _refuse(self):
+        self.write(_delta(added=FULL + ["mcp__Tavily__tavily_extract"]),
+                   _call("e1", self.EXA),
+                   _result("e1", "web_search_exa error (402): You have exceeded "
+                           "your credits limit. Please top up", is_error=True),
+                   _call("t1", self.TAV),
+                   _result("t1", '{"error":"Search failed","status":432,"detail":'
+                           '{"error":"This request exceeds your plan\'s set usage '
+                           'limit."}}'))
+
+    def test_unfunded_search_connectors_read_as_missing(self):
+        self._refuse()
+        r = sr.current()
+        self.assertEqual(set(r["refused_servers"]), {"Exa", "Tavily"})
+        self.assertIn(self.EXA, r["tools"], "still bound")
+        self.assertNotIn(self.EXA, r["answering_tools"])
+        self.assertNotIn("mcp__Tavily__tavily_extract", r["answering_tools"],
+                         "the whole server is refused, not one tool")
+        self.assertEqual(cc.main(["check", "--from-session", "--strict"]), 1)
+
+    def test_the_adopted_baseline_is_degraded_and_says_why(self):
+        self._refuse()
+        rec = cc.ensure_baseline(self.tmp / "r")
+        self.assertNotIn("exa", rec["present"])
+        self.assertNotIn("tavily", rec["present"])
+        self.assertIn("clay", rec["present"])
+        self.assertIn("Exa", rec["refused_servers"])
+
+    def test_a_typed_list_cannot_bring_a_refusing_server_back(self):
+        self._refuse()
+        typed = self.tmp / "t.txt"
+        typed.write_text(f"Bash\n{self.EXA}\n{self.TAV}\n")
+        cc.main(["baseline", "--tools", str(typed), "--root", str(self.tmp / "r")])
+        rec = json.loads((self.tmp / "r" / "connectors_baseline.json").read_text())
+        self.assertNotIn("exa", rec["present"])
+
+    def test_a_top_up_puts_it_back(self):
+        self._refuse()
+        self.write(_call("e2", self.EXA),
+                   _result("e2", "Title: Interac annual report ... results"))
+        r = sr.current()
+        self.assertNotIn("Exa", r["refused_servers"])
+        self.assertIn(self.EXA, r["answering_tools"])
+
+    def test_a_page_that_mentions_a_usage_limit_is_content_not_a_refusal(self):
+        self.write(_delta(added=FULL), _call("e1", self.EXA),
+                   _result("e1", "Title: Pricing — every plan has a usage limit; "
+                           "exceeding your plan's quota pauses requests (402)."))
+        self.assertEqual(sr.current()["refused_servers"], {})
+
+    def test_the_doctor_names_the_refusing_servers(self):
+        self._refuse()
+        row = doctor.connector_contract_check()
+        self.assertFalse(row["ok"])
+        self.assertIn("REFUSING", row["detail"])
+
+
 class BaselineIsAdopted(_Session):
     def test_ensure_adopts_once_and_never_overwrites(self):
         self.write(_delta(added=FULL))
