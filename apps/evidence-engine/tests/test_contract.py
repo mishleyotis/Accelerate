@@ -56,6 +56,10 @@ def test_clause_truncation_is_refused_like_the_connector():
     assert C.clause_truncated(clipped)
     assert C.clause_truncated(clipped + " | " + clipped)
     assert C.clause_truncated("x" * 139 + ".") is None
+    # the historical widths too (golden v1 carries 80/100/120 clips)
+    for w in (80, 100, 120):
+        assert C.clause_truncated("y" * w), w
+        assert C.clause_truncated("y" * (w - 1) + ".") is None
 
 
 def test_sentence_completeness():

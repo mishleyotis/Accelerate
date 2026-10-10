@@ -456,7 +456,12 @@ class HttpFetcher:
         if res.status is not None and res.status >= 500:
             return True
         if res.status in (401, 403):
-            return self.breakers.get(host).snapshot()["streak_403"] >= ratelimit.STREAK_403
+            # A WAF's 403 does not change on a retry and the connector's own
+            # fetch would refuse the same live URL; the snapshot is the only
+            # path to that page (measured 2026-10-10: 5 of 35 golden URLs were
+            # surfaced and then lost to a single 403). The host breaker still
+            # opens on the streak.
+            return True
         if res.status is None:
             return (res.error.startswith("dns failure") or res.error.startswith("timed out")
                     or res.error.startswith("breaker_open"))
@@ -464,7 +469,7 @@ class HttpFetcher:
 
     async def get_or_archive(self, url: str, *, accept_pdf: bool = True) -> FetchResult:
         """Live first; when the page is dead (404/410, DNS, a timeout, an open host breaker,
-        5xx after the retry, or a 403 from a host on a 403 streak) serve the
+        5xx after the retry, or a 401/403) serve the
         closest Wayback snapshot with `via="archived"`, `archive_timestamp`
         and `final_url` = the `id_` snapshot URL. Neither: the live failure
         is returned and the caller emits no card."""

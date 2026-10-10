@@ -427,21 +427,24 @@ def test_get_or_archive_live_page_is_not_archived(web, clock):
     assert web.requests_for("archive.org") == []
 
 
-def test_get_or_archive_403_only_on_a_streak(web, clock):
+def test_get_or_archive_403_is_dead_at_page_level(web, clock):
+    """A WAF's 403 does not change on retry and the connector would refuse
+    the same live URL, so the FIRST 403 already goes to the snapshot
+    (eval v1, 2026-10-10: five golden URLs surfaced then lost to one 403).
+    The host breaker still counts the streak."""
     web.route(ENTITY, "/news/2024/old-release", html("denied", 403))
     _wayback_available(web, True)
     f = make(web, clock)
 
     async def go():
-        first = await f.get_or_archive(ORIGINAL)                   # streak 1: not dead
-        assert first.status == 403 and first.via == "live"
-        assert web.requests_for("archive.org") == []
-        await f.get(ORIGINAL)                                       # streak 2
-        third = await f.get_or_archive(ORIGINAL)                   # streak 3: dead ⇒ archive
-        return third
+        first = await f.get_or_archive(ORIGINAL)
+        assert first.via == "archived" and first.ok
+        assert web.requests_for("archive.org")
+        assert f.breakers.get(ENTITY).snapshot()["streak_403"] == 1
+        return first
 
     r = run(go())
-    assert r.via == "archived" and r.ok
+    assert r.final_url.startswith("https://web.archive.org/web/") and r.url == ORIGINAL
 
 
 def test_get_or_archive_timeout_once_then_archive(web, clock):

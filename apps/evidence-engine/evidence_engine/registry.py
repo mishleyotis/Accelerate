@@ -135,6 +135,18 @@ def _domain_host(d) -> str:
     return d[4:] if d.startswith("www.") else d
 
 
+#: Hosts the engine never fetches for a card: not evidence-grade (an
+#: encyclopaedia is a pointer to sources, never a source), and measured
+#: 2026-10-10 to answer 403 to the browser UA from Cloud origins — a wasted
+#: slot every brief. A hit here refunds its fetch slot.
+NEVER_FETCH_SUFFIXES = ("wikipedia.org", "wikimedia.org", "wiktionary.org")
+
+
+def never_fetch(url: str | None) -> bool:
+    host = host_of(url)
+    return any(host == s or host.endswith("." + s) for s in NEVER_FETCH_SUFFIXES)
+
+
 def is_own_host(url: str | None, entity: EntityRef | None) -> bool:
     """Host equals, or is a subdomain of, one of the entity's domains."""
     if entity is None:

@@ -39,6 +39,9 @@ EXCERPT_TARGET_WORDS = 40
 SOURCE_NAME_MAX = 160
 #: the connector's hard-clip signature width (packages/shared/excerpt_clip.py)
 CLAUSE_CLIP_WIDTH = 140
+#: Widths the connector clipped at historically (golden v1 carries 80/100/120
+#: clips too); the engine refuses every one, the connector only the current.
+CLAUSE_CLIP_WIDTHS = (80, 100, 120, CLAUSE_CLIP_WIDTH)
 CLAUSE_SPLIT = " | "
 
 
@@ -79,15 +82,16 @@ def iso_date(v) -> _dt.date | None:
         return None
 
 
-def clause_truncated(excerpt: str, width: int = CLAUSE_CLIP_WIDTH) -> str | None:
-    """The connector's own check (excerpt_clip.clause_truncated), copied."""
+def clause_truncated(excerpt: str, width: int | None = None) -> str | None:
+    """The connector's own check (excerpt_clip.clause_truncated), copied, over
+    every historical clip width unless one is named."""
     if not excerpt:
         return None
-    clipped = [c for c in str(excerpt).split(CLAUSE_SPLIT)
-               if len(c) == width and c[-1:].isalnum()]
-    if not clipped:
-        return None
-    return f"excerpt_clause_truncated: clause of exactly {width} chars ends mid-word"
+    widths = (width,) if width else CLAUSE_CLIP_WIDTHS
+    for w in widths:
+        if any(len(c) == w and c[-1:].isalnum() for c in str(excerpt).split(CLAUSE_SPLIT)):
+            return f"excerpt_clause_truncated: clause of exactly {w} chars ends mid-word"
+    return None
 
 
 _TERMINAL = re.compile(r"[.!?…]['\")\]]*$|[%)\]\"]$|\d$")

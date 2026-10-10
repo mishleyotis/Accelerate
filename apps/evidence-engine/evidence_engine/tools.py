@@ -28,6 +28,7 @@ from . import filings as F
 from . import pipeline as P
 from . import query as Q
 from . import ratelimit as RL
+from . import registry
 from . import rank as R
 from . import search as S
 from .config import settings
@@ -64,6 +65,23 @@ class _SearchCache:
 
     def put(self, key, value):
         self._s.put_search(str(key), value)
+
+
+#: Hits per host admitted before the rest of the list is considered.
+PER_HOST_CAP = 3
+
+
+def _host_diverse_order(hits: list[dict]) -> list[dict]:
+    """Hit order with no host taking more than PER_HOST_CAP of the leading
+    slots; the overflow follows, still in hit order, as back-fill."""
+    seen: dict[str, int] = {}
+    head, tail = [], []
+    for h in hits:
+        host = host_of(h["url"])
+        n = seen.get(host, 0)
+        (head if n < PER_HOST_CAP else tail).append(h)
+        seen[host] = n + 1
+    return head + tail
 
 
 @dataclass
@@ -119,34 +137,58 @@ class Engine:
                         "(owner decision) or wait for a free source's breaker to close."}
 
     async def _documents_for_hits(self, hits: list[dict], *, limit: int, reference, hits_by_key) -> tuple[list[Document], list[dict]]:
+        """Fetch up to `limit` ATTEMPTED documents from the hit list, in hit order.
+
+        Measured 2026-10-10 (eval v1): the own-domain `site:` query floods the top
+        of the fused list with one host, and robots/breaker refusals consumed
+        the slots, so a brief could spend its whole slice on a host it could
+        never read. Two rules: at most `PER_HOST_CAP` hits per host are taken
+        before the rest of the list is considered (the skipped ones back-fill
+        when the list is short), and a hit refused before any bytes moved
+        (robots, an open breaker, a never-fetch host) refunds its slot."""
         docs: list[Document] = []
         failures: list[dict] = []
-        sem = asyncio.Semaphore(6)
+        queue = _host_diverse_order(hits)
+        counted = 0
+        lock = asyncio.Lock()
 
-        async def one(h):
-            async with sem:
+        async def worker():
+            nonlocal counted
+            while True:
+                async with lock:
+                    if counted >= limit or not queue:
+                        return
+                    h = queue.pop(0)
+                    counted += 1
+                if registry.never_fetch(h["url"]):
+                    async with lock:
+                        counted -= 1
+                    failures.append({"url": h["url"], "reason": "never_fetch host (not evidence-grade; slot refunded)"})
+                    continue
                 doc, why = await P.fetch_document(h["url"], self.fetcher, self.store,
                                                   hits=hits_by_key.get(h["url_key"], []),
                                                   today=self.today, reference=reference)
-                return h, doc, why
-        tasks = [asyncio.ensure_future(one(h)) for h in hits[:limit]]
-        if not tasks:
+                if doc is None:
+                    if why and (why.startswith("robots_disallowed") or why.startswith("breaker_open")):
+                        async with lock:
+                            counted -= 1
+                        why = why + " (slot refunded)"
+                    failures.append({"url": h["url"], "reason": why})
+                else:
+                    docs.append(doc)
+
+        if not hits:
             return docs, failures
+        tasks = [asyncio.ensure_future(worker()) for _ in range(min(6, max(1, limit)))]
         done, pending = await asyncio.wait(tasks, timeout=settings().fetch_phase_budget_s)
-        for t in pending:
-            t.cancel()
-        for t in done:
-            try:
-                h, doc, why = t.result()
-            except Exception as exc:  # noqa: BLE001
+        for tk in pending:
+            tk.cancel()
+        for tk in done:
+            exc = tk.exception()
+            if exc is not None:
                 failures.append({"url": "?", "reason": f"{type(exc).__name__}: {str(exc)[:80]}"})
-                continue
-            if doc is None:
-                failures.append({"url": h["url"], "reason": why})
-            else:
-                docs.append(doc)
         if pending:
-            failures.append({"url": f"{len(pending)} url(s)",
+            failures.append({"url": f"{len(pending)} worker(s)",
                              "reason": f"fetch_phase_budget: still fetching after {settings().fetch_phase_budget_s:g}s — cancelled"})
         # deterministic order: the hit order, not completion order
         order = {h["url_key"]: i for i, h in enumerate(hits)}
@@ -387,7 +429,8 @@ class Engine:
             probs = C.item_problems(item, abbreviations=P.abbreviations())
             checks["contract"] = "ok" if not probs else "; ".join(probs)
             if item.get("published_date"):
-                checks["date"] = "ok" if C.recency_band(item["published_date"], self.today) != "UNVERIFIED" or True else "bad"
+                band = C.recency_band(item["published_date"], self.today)
+                checks["date"] = "ok" if band != "UNVERIFIED" else "bad: published_date does not parse as ISO or lies in the future"
                 checks["recency_now"] = C.recency_band(item["published_date"], self.today)
             else:
                 checks["date"] = "undated → UNVERIFIED (not guessed)"
@@ -397,7 +440,7 @@ class Engine:
                 if checks["liveness"] != "ok" and prov.get("url_status") == "live":
                     snap = await self.fetcher.wayback_snapshot(item["source_url"])
                     checks["archive_available"] = bool(snap)
-            bad = [k for k, v in checks.items() if isinstance(v, str) and (v.startswith("MISMATCH") or (k == "liveness" and v != "ok") or (k == "contract" and v != "ok"))]
+            bad = [k for k, v in checks.items() if isinstance(v, str) and (v.startswith("MISMATCH") or (k == "liveness" and v != "ok") or (k == "contract" and v != "ok") or (k == "date" and v.startswith("bad")))]
             results.append({"card_id": cid, "verdict": "PASS" if not bad else "FAIL", "failed": bad, "checks": checks})
         summary = {"passed": sum(1 for r in results if r["verdict"] == "PASS"),
                    "failed": sum(1 for r in results if r["verdict"] == "FAIL"),

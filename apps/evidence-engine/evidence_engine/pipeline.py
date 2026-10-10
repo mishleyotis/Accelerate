@@ -145,6 +145,9 @@ def entity_terms(entity: EntityRef | None) -> set[str]:
     return words - {"the", "and", "credit", "union", "bank", "federal", "inc", "corp", "financial", "group"}
 
 
+_MATCH_ORDER = {"confirmed": 0, "probable": 0, "ambiguous": 1}
+
+
 def build_cards(docs: list[Document], *, question: str, entity: EntityRef | None, facet: str | None,
                 query_ids_by_key: dict[str, list[str]] | None = None, facets_by_key: dict[str, list[str]] | None = None,
                 via_by_key: dict[str, str] | None = None, reference: _dt.date | None = None,
@@ -159,10 +162,17 @@ def build_cards(docs: list[Document], *, question: str, entity: EntityRef | None
     own_hosts = {d.lower() for d in (entity.domains if entity else [])}
     ab = abbreviations()
     today = today or _dt.date.today()
+    # Rank order within each entity-match class, confirmed/probable first:
+    # measured 2026-10-10, 37 % of cards were `ambiguous` (a namesake's
+    # newsroom) and displaced probable ones when max_cards bound.
+    judged = []
     for doc in docs:
-        key = url_key(doc.url)
         info = registry.classify(doc.final_url or doc.url, entity, source_name=doc.title)
         em, em_basis = E.match(doc, entity, info) if entity else ("ambiguous", "no entity supplied")
+        judged.append((_MATCH_ORDER.get(em, 9), doc, info, em, em_basis))
+    judged.sort(key=lambda j: j[0])
+    for _, doc, info, em, em_basis in judged:
+        key = url_key(doc.url)
         cands = X.select(doc.text, doc.verify_text, question, entity_terms=entity_terms(entity),
                          max_candidates=per_doc)
         if not cands:

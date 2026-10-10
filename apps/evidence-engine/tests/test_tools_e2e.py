@@ -336,3 +336,69 @@ def test_6d_edgar_global_cap_eight_per_second():
         assert sum(1 for b in stamps if a <= b < a + 1.0) <= 8
     assert stamps[-1] >= 11.5
     RL.reset()
+
+
+# ── tuning iteration 2 (eval v1, 2026-10-10) ─────────────────────────────
+
+def test_fetch_slice_is_host_diverse_with_back_fill():
+    from evidence_engine.tools import PER_HOST_CAP, _host_diverse_order
+    hits = [{"url": f"https://one.test/{i}", "url_key": f"one.test/{i}"} for i in range(6)]
+    hits += [{"url": "https://two.test/a", "url_key": "two.test/a"},
+             {"url": "https://three.test/a", "url_key": "three.test/a"}]
+    order = [h["url"] for h in _host_diverse_order(hits)]
+    assert order[:PER_HOST_CAP] == [f"https://one.test/{i}" for i in range(PER_HOST_CAP)]
+    assert order[PER_HOST_CAP:PER_HOST_CAP + 2] == ["https://two.test/a", "https://three.test/a"]
+    assert order[PER_HOST_CAP + 2:] == [f"https://one.test/{i}" for i in range(PER_HOST_CAP, 6)]
+    assert len(order) == len(hits)
+
+
+def test_refused_before_bytes_refunds_its_fetch_slot(engine):
+    """Robots, an open breaker and a never-fetch host take no slot: with
+    fetch_limit=2 and three such hits in front, both real pages are read."""
+    st = engine._test_state
+    front = [
+        {"url": "https://en.wikipedia.org/wiki/Example_FCU", "title": "wiki", "content": "x", "engine": "mojeek"},
+        {"url": "https://example-press.test/blocked/one", "title": "blocked", "content": "x", "engine": "brave"},
+        {"url": "https://example-press.test/blocked/two", "title": "blocked", "content": "x", "engine": "brave"},
+    ]
+    orig = SEARX_HITS[:]
+    SEARX_HITS[:] = front + orig[:2]
+    try:
+        # example-press.test refuses /blocked/ in robots for this test
+        import urllib.robotparser as rp
+        parser = rp.RobotFileParser()
+        parser.parse("User-agent: *\nDisallow: /blocked/\n".splitlines())
+        engine.fetcher._robots["example-press.test"] = (parser, 0.0)
+        out = run(engine.research_brief(run_id="R-h", entity=ENTITY, questions=["membership grew members"],
+                                        max_cards=4, fetch_limit=2))
+    finally:
+        SEARX_HITS[:] = orig
+    reasons = [f["reason"] for f in out["search"]["fetch_failures"]]
+    assert any("never_fetch" in r and "refunded" in r for r in reasons), reasons
+    assert out["search"]["fetched"] == 2, (out["search"]["fetched"], reasons)
+    assert not any("wikipedia" in u for u in st.requests)
+
+
+def test_ambiguous_cards_rank_after_probable_ones_when_budget_binds():
+    from evidence_engine import pipeline as P_
+    from evidence_engine.types import Document, EntityRef
+    ent = EntityRef(legal_name="Example Federal Credit Union", domains=["example-fcu.test"], aliases=["Example FCU"])
+    amb = "Example Pharmaceuticals reported total assets of $9.1 billion and 2,000 staff at June 30, 2026, the company said."
+    prob = "Example Federal Credit Union reported total assets of $3.1 billion and 212,000 members at June 30, 2026."
+    docs = [Document(url="https://namesake.test/a", final_url="https://namesake.test/a", title="Namesake", text=amb,
+                     verify_text=amb, published="2026-07-01", content_hash="a" * 64),
+            Document(url="https://herald.example.test/b", final_url="https://herald.example.test/b", title="Herald", text=prob,
+                     verify_text=prob, published="2026-07-01", content_hash="b" * 64)]
+    cards, _ = P_.build_cards(docs, question="total assets reported", entity=ent, facet="value",
+                              reference=TODAY, today=TODAY, max_cards=1)
+    assert len(cards) == 1 and cards[0]["provenance"]["entity_match"] == "probable"
+
+
+def test_verify_cards_date_check_can_fail(engine):
+    out = run(engine.research_brief(run_id="R-d", entity=ENTITY, questions=["membership grew members"], max_cards=1))
+    c = engine.store.get_card("R-d", out["cards"][0]["card_id"])
+    c["item"]["published_date"] = "2099-01-01"
+    engine.store.put_card("R-d", c)
+    v = run(engine.verify_cards(run_id="R-d", card_ids=[c["card_id"]], recheck_liveness=False))
+    assert v["results"][0]["checks"]["date"].startswith("bad")
+    assert v["results"][0]["verdict"] == "FAIL"

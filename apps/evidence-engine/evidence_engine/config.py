@@ -63,9 +63,9 @@ class Settings:
     # ── limits (Section 6 of the brief) ─────────────────────────────────
     sec_rps: float = field(default_factory=lambda: _float("EE_SEC_RPS", 8.0))
     host_rps: float = field(default_factory=lambda: _float("EE_HOST_RPS", 1.0))
-    #: Parallel: measured ceiling × 0.7; the default is deliberately
-    #: conservative until the Phase D ramp records the first 429.
-    parallel_rps: float = field(default_factory=lambda: _float("EE_PARALLEL_RPS", 1.0))
+    #: Parallel: measured ceiling × 0.7. The 2026-10-10 ramp (90 calls, 1/s
+    #: then 2/s, p50 1.9 s) recorded no 429 up to 2/s ⇒ 2 × 0.7.
+    parallel_rps: float = field(default_factory=lambda: _float("EE_PARALLEL_RPS", 1.4))
     searxng_rps: float = field(default_factory=lambda: _float("EE_SEARXNG_RPS", 4.0))
     arxiv_rps: float = field(default_factory=lambda: _float("EE_ARXIV_RPS", 1 / 3))
     fetch_timeout_s: float = field(default_factory=lambda: _float("EE_FETCH_TIMEOUT_S", 12.0))
