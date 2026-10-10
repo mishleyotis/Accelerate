@@ -440,8 +440,40 @@ class ToolRosterReconciliation(unittest.TestCase):
             row = doctor.tool_roster_check(
                 "https://example.invalid", "gcloud", "idtok",
                 {"description": "connector (99 tools)"})
-        self.assertFalse(row["ok"], row["detail"])
+        # A drifted ad WARNS — named, with the regenerating command — and
+        # never fails: it stopped every DMA session's preflight (Interac,
+        # 2026-10-10) while breaking nothing a hook relies on.
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertTrue(row.get("warn"), row)
         self.assertIn("99", row["detail"])
+        self.assertIn("manifest_counts.py --write", row["fix"])
+
+    def test_a_count_in_step_with_the_live_roster_is_clean(self):
+        import manifest_counts
+        live = manifest_counts.server_tools()
+        with mock.patch.object(doctor, "live_tool_names", return_value=live), \
+             mock.patch.object(doctor, "hook_matchers", return_value=[]), \
+             mock.patch.object(doctor, "_path_token",
+                               return_value=("tok", "test")):
+            row = doctor.tool_roster_check(
+                "https://example.invalid", "gcloud", "idtok",
+                doctor.read_manifest())
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertFalse(row.get("warn"), row["detail"])
+
+    def test_a_tool_deployed_before_the_checkout_pulls_is_named(self):
+        import manifest_counts
+        live = manifest_counts.server_tools() + ["brand_new_tool"]
+        with mock.patch.object(doctor, "live_tool_names", return_value=live), \
+             mock.patch.object(doctor, "hook_matchers", return_value=[]), \
+             mock.patch.object(doctor, "_path_token",
+                               return_value=("tok", "test")):
+            row = doctor.tool_roster_check(
+                "https://example.invalid", "gcloud", "idtok",
+                doctor.read_manifest())
+        self.assertTrue(row["ok"], row["detail"])
+        self.assertTrue(row.get("warn"))
+        self.assertIn("live only: brand_new_tool", row["detail"])
 
 
 class AutoApproverIsWired(unittest.TestCase):

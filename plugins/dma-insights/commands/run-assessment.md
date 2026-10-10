@@ -15,27 +15,38 @@ The engine is `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/`; every
 
 ## 1 · Tooling first, measured, never assumed
 
-**Record the connectors YOU hold before anything else runs.** No subprocess
-can enumerate a session's bound MCP tools (MEM-0112) — only you can, and
-every check below reads what you write here, so writing it second makes the
-first one lie. Write the list, one tool name per line — EVERY tool you hold,
-built-ins included (`Workflow`, `Agent`, `Bash`, …), because whether this
-session holds `Workflow` decides how research runs — and hand it to the
-contract. **A resumed session records it again before anything else**: a
-resume or worker restart can drop the Workflow tool (SWBC and B1 lost it
-mid-run), and a degraded run whose baseline says `workflow_tool: false`
-runs research as driver-run lean lanes instead of waiting on a workflow
-nobody can start:
+**Your connectors are measured, not typed.** Since 2026-10-10 the session's
+own transcript names every MCP tool it holds (`scripts/session_roster.py`
+folds Claude Code's `deferred_tools_delta` records, including a connector
+that drops mid-session), so there is nothing to transcribe — Interac's
+session typed 334 names by hand and abbreviated whole families on the first
+try. The doctor judges that roster before any run root exists, and
+`engine.pipeline run` writes it as the run's baseline at PREFLIGHT
+(`connector_contract.ensure_baseline`, `sources: ["transcript"]`). Check it
+in one line:
 
 ```bash
-printf '%s\n' <every mcp__ tool name you hold> \
-  | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" baseline --tools - --root <ROOT>
-printf '%s\n' <the same list> \
-  | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" check --tools - --strict
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" check --from-session --strict
 ```
 
-`--strict` is not optional. Without it a STOP still exits 0 and the gate you
-just built passes a session with no connectors at all — which is the exact
+Type a list ONLY to add what the transcript cannot see — the built-ins,
+because whether this session holds `Workflow` decides how research runs —
+and it is unioned with the measured roster, never instead of it. **A resumed
+session re-records** (a resume or worker restart can drop the Workflow tool;
+SWBC and B1 lost it mid-run): `printf 'Bash\nRead\nAgent\nWorkflow\n' |
+connector_contract.py baseline --tools - --root <ROOT>`, leaving `Workflow`
+out if you do not hold it. A degraded run whose baseline says
+`workflow_tool: false` runs research as driver-run lean lanes. When
+`check --from-session` says NO SESSION ROSTER (tool search off), fall back to
+typing every tool you hold:
+
+```bash
+printf '%s\n' <every tool name you hold> \
+  | python3 "${CLAUDE_PLUGIN_ROOT}/scripts/connector_contract.py" baseline --tools - --root <ROOT>
+```
+
+`--strict` is not optional. Without it a STOP still exits 0 and the gate
+passes a session with no connectors at all — which is the exact
 condition it exists to catch.
 
 **You are the connector tier.** Since 2026-09-14 the enrichment connectors
@@ -50,7 +61,7 @@ What the verdicts mean for the run, which is not what they meant before:
 
 | Verdict | What it is | What to do |
 |---|---|---|
-| No baseline written | Nothing knows whether a cell can be enriched or honestly declared absent | `engine.pipeline run` **REFUSES** at PREFLIGHT before a single lane is dispatched. Write the baseline. |
+| No baseline and no readable roster | Nothing knows whether a cell can be enriched or honestly declared absent | `engine.pipeline run` **REFUSES** at PREFLIGHT before a single lane is dispatched. Write the baseline by hand (above). A session whose transcript names its tools is never here — PREFLIGHT adopts that roster. |
 | Baseline short — families missing | A measured, disclosed limit | The run proceeds **DEGRADED**: it records `enrichment_degraded`, its lanes are told to close cells with `engine.cli absence … --enrichment-unavailable`, and the ENRICHMENT gate discloses the gap per category rather than re-dispatching against it. This is not a stop. |
 | Baseline complete | Enrichment is reachable through you | Ordinary run. |
 
@@ -70,15 +81,25 @@ cd "${CLAUDE_PLUGIN_ROOT}/skills/dma-research" && DMA_RUN_ROOT=<ROOT> python3 -m
 `doctor.py --heal` repairs a STALE / MISSING / DIVERGED install and re-checks
 once. Its `installed plugin` row judges the tree this session actually BOUND
 (measured; on a directory marketplace that is the checkout in place, and a
-lagging install record is cosmetic), so a session that binds the checkout
-reads OK through a heal. `UPDATED_MID_SESSION` means the bound tree moved
-under this session and THIS session still holds the old roster — carry on,
-because the driver dispatches every lane as a fresh child process that binds
-the current tree. Its `connector
-contract` row now reads the baseline you wrote: UNVERIFIED means you skipped
-the step above, and a short baseline is the DEGRADED row of the table, not a
-provisioning defect. Any OTHER row red after the heal is a provisioning
-defect: report the row and stop.
+lagging install record is cosmetic), and since 2026-10-10 it judges CONTENT:
+the SessionStart hook fingerprints what the session bound, so a branch
+switched and switched back — Interac's `git checkout` of a stale default
+branch, then a fast-forward to the commit it started on — reads OK. The same
+hook fast-forwards that stale local default-branch ref in the background
+(`git_refs.py`, never the checked-out branch, never the worktree), so a
+checkout of it lands on the tip. **Do not switch branches to "get current"**:
+the session's own branch is cloned at the tip. `UPDATED_MID_SESSION` now
+means bound files really differ (the row names them) and THIS session holds
+the old roster — carry on, because the driver dispatches every lane as a
+fresh child process that binds the current tree. Its `connector contract`
+row reads the run's baseline, else this session's transcript: UNVERIFIED
+means neither is readable, and a short roster is the DEGRADED row of the
+table, not a provisioning defect. `[warn]` rows are cosmetic — the
+`live tool roster` row warns when the manifest's "(N tools)" lags the
+deployed connector (`manifest_counts.py --write` in a PR fixes it; CI fails
+a PR that forgets) — and never a reason to stop or to ask the owner. Any
+row reading FAIL after the heal is a provisioning defect: report the row
+and stop.
 
 Pillar toolkits (the per-subcap diagnostic questions) are pulled by the KG
 stage into `<ROOT>/toolkits` when `DMA_TOOLKITS_DIR` is unset; set it only to
@@ -110,7 +131,8 @@ half-assessed and offer `--fresh`); 6 AMBIGUOUS — report the near matches, nev
 script failing, which is not a routing answer.
 
 Then the three places work already exists, before any research
-(`registry.py pull` + `registry.py list --open-only`; `drive_fetch.py
+(`python3 -m engine.registry pull` + `python3 -m engine.registry list
+--open-only`, from `${CLAUDE_PLUGIN_ROOT}/skills/dma-research`; `drive_fetch.py
 find-artifact --client "<Entity>"` and its `run_manifest.json`;
 `get_client_state`). An open run or an IN_PROGRESS manifest is a run to
 RESUME: `python3 -m engine.pipeline plan --run <RUN_ID> --root <ROOT>` says

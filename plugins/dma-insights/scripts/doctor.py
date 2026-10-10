@@ -133,8 +133,13 @@ def _cloud_run_service(host: str) -> str | None:
     return None
 
 
-def _check(name, ok, detail, fix=""):
-    return {"check": name, "ok": bool(ok), "detail": detail, "fix": fix}
+def _check(name, ok, detail, fix="", warn=False):
+    """One row. `warn` is a PASS that still prints its fix: a cosmetic lag
+    the owner should not be asked about, but that should not go unsaid."""
+    row = {"check": name, "ok": bool(ok), "detail": detail, "fix": fix}
+    if ok and warn:
+        row["warn"] = True
+    return row
 
 
 def classify_enforcement(status: int | None, error: str = "") -> dict:
@@ -584,16 +589,33 @@ def connector_contract_check() -> dict:
     # UNVERIFIED is not a pass.
     try:
         path = connector_contract.baseline_path(os.environ.get("DMA_RUN_ROOT"))
+        source = f"baseline at {path}"
         if not Path(path).is_file():
-            return _check(
-                name, False,
-                f"{declared} — derived from EXTERNAL. UNVERIFIED: no baseline at "
-                f"{path}, so nothing here has checked whether THIS session holds "
-                f"any of them.",
-                "from the session that holds the tools: "
-                "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
-                "baseline --tools - --root <RUN_ROOT>`, then re-run the doctor")
-        rec = json.loads(Path(path).read_text())
+            # MEASURED, NOT TYPED (Interac, 2026-10-10). This row failed
+            # every DMA session's first doctor run: the baseline is written
+            # under a run root, and the doctor runs before there is one. The
+            # session's transcript already names every MCP tool it holds
+            # (`session_roster.py`), so the row judges THAT — read-only; the
+            # pipeline writes the file itself at PREFLIGHT
+            # (`connector_contract.ensure_baseline`). Only a session whose
+            # roster cannot be read at all is still UNVERIFIED.
+            roster = connector_contract._session_roster()
+            if not roster.get("found"):
+                return _check(
+                    name, False,
+                    f"{declared} — derived from EXTERNAL. UNVERIFIED: no "
+                    f"baseline at {path}, and this session's roster could not "
+                    f"be read from its transcript ({roster.get('reason')}).",
+                    "from the session that holds the tools: "
+                    "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
+                    "baseline --tools - --root <RUN_ROOT>`, then re-run the "
+                    "doctor")
+            rec = {"mcp_tools": roster.get("mcp_tools") or []}
+            source = ("this session's transcript (no run root yet — "
+                      "engine.pipeline adopts it as the run's baseline at "
+                      "PREFLIGHT; nothing to type)")
+        else:
+            rec = json.loads(Path(path).read_text())
         out = connector_contract.check(rec.get("mcp_tools") or [])
         if not out["ok"]:
             return _check(name, False,
@@ -603,7 +625,7 @@ def connector_contract_check() -> dict:
                           out["why"][:240])
         return _check(name, True,
                       f"{declared}. Baseline holds: "
-                      f"{', '.join(out['present']) or 'none'}")
+                      f"{', '.join(out['present']) or 'none'} (per {source})")
     except Exception as exc:                                  # noqa: BLE001
         return _check(name, False,
                       f"{declared} — UNVERIFIED: {exc.__class__.__name__}: "
@@ -895,28 +917,57 @@ def tool_roster_check(base_url, gcloud, id_token, manifest: dict) -> dict:
             unresolved.append(matcher)
     advertised = re.search(r"\((\d+) tools\)", manifest.get("description") or "")
     advertised = int(advertised.group(1)) if advertised else None
-    problems = []
     if unresolved:
-        problems.append("hook matcher(s) name tools the connector does not "
-                        "serve: " + ", ".join(unresolved))
+        return _check(name, False,
+                      "hook matcher(s) name tools the connector does not "
+                      "serve: " + ", ".join(unresolved),
+                      "update hooks/hooks.json to the deployed connector's "
+                      "tool names")
+    # THE COUNT IN THE DESCRIPTION IS AN AD, NOT A CONTRACT (Interac,
+    # 2026-10-10). It failed this row at the start of every DMA session: the
+    # connector deploys continuously from the default branch, so the moment a
+    # tool lands the live count is ahead of whatever number a manifest was
+    # typed with, and run-assessment told the session to stop on any red
+    # row. What a stale count cannot do is break anything — the hooks above
+    # are what fire, and they are name-checked. So drift here is a WARN that
+    # names both numbers and the one command that regenerates them
+    # (`manifest_counts.py --write`, enforced in CI), never a FAIL.
+    repo_tools = None
+    try:
+        import manifest_counts                               # noqa: WPS433
+        repo_tools = manifest_counts.server_tools()
+    except Exception:                                         # noqa: BLE001
+        repo_tools = None
+    lag = []
     if advertised is None:
-        problems.append("manifest description advertises no '(N tools)' count")
+        lag.append("the manifest description states no '(N tools)' count")
     elif advertised != len(live):
-        problems.append(f"manifest advertises {advertised} tools, the "
-                        f"connector serves {len(live)}")
-    if problems:
-        return _check(name, False, "; ".join(problems),
-                      "update the hooks and the manifest description's "
-                      "'(N tools)' to match the deployed connector")
+        lag.append(f"the manifest advertises {advertised} tools, the "
+                   f"connector serves {len(live)}")
+    if repo_tools is not None and set(repo_tools) != set(live):
+        ahead = sorted(set(live) - set(repo_tools))
+        behind = sorted(set(repo_tools) - set(live))
+        lag.append("the deployed connector and this checkout differ"
+                   + (f" — live only: {', '.join(ahead)}" if ahead else "")
+                   + (f" — checkout only: {', '.join(behind)}" if behind else "")
+                   + " (a deploy in flight, or this checkout is behind)")
     # Say what was RECONCILED and what was merely counted — a row that reports
     # "all N resolve" while silently skipping most of them is the kind of
     # comfortable half-truth this build keeps removing.
+    detail = (f"{len(live)} live tools; {named} named connector matcher(s) "
+              f"resolve ({patterns} pattern, {foreign} non-connector "
+              f"matcher(s) not name-checked) "
+              f"(path token via {source}, value not shown)")
+    if lag:
+        return _check(name, True,
+                      "COSMETIC LAG, not a stop: " + "; ".join(lag) + ". "
+                      + detail,
+                      "python3 plugins/dma-insights/scripts/manifest_counts.py "
+                      "--write (in a PR; CI's manifest-count test enforces it)",
+                      warn=True)
     return _check(name, True,
                   f"{len(live)} live tools == manifest's advertised "
-                  f"{advertised}; {named} named connector matcher(s) resolve "
-                  f"({patterns} pattern, {foreign} non-connector matcher(s) "
-                  f"not name-checked) "
-                  f"(path token via {source}, value not shown)")
+                  f"{advertised}; " + detail.split("; ", 1)[1])
 
 
 def run_checks(base_url: str | None, heal: bool = False) -> list:
@@ -1073,8 +1124,10 @@ def main() -> int:
     else:
         print("DMA Insights — install doctor\n")
         for c in checks:
-            print(f"  [{'ok' if c['ok'] else 'FAIL'}] {c['check']:42} {c['detail']}")
-            if not c["ok"] and c["fix"]:
+            mark = ("FAIL" if not c["ok"] else "warn" if c.get("warn")
+                    else "ok")
+            print(f"  [{mark}] {c['check']:42} {c['detail']}")
+            if (not c["ok"] or c.get("warn")) and c["fix"]:
                 print(f"         -> {c['fix']}")
         bad = [c for c in checks if not c["ok"]]
         print(f"\n{len(checks) - len(bad)}/{len(checks)} checks passed."

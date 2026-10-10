@@ -111,8 +111,12 @@ def prompt_of(ti: dict) -> str:
 
 # ── the five refusals ─────────────────────────────────────────────────────
 
-def baseline_known(run) -> bool | None:
-    """True/False, or None when the question could not be asked."""
+def baseline_known(run, transcript: str | None = None) -> bool | None:
+    """True/False, or None when the question could not be asked.
+
+    A missing file is first ADOPTED from the session's transcript (the hook
+    event names it): the roster is measured there, so refusing a dispatch
+    because nobody typed it out was refusing a fact already on disk."""
     if run is None:
         return None
     try:
@@ -120,6 +124,12 @@ def baseline_known(run) -> bool | None:
         if scripts not in sys.path:
             sys.path.insert(0, scripts)
         import connector_contract                              # noqa: PLC0415
+        if not connector_contract.baseline_path(run.root).is_file():
+            roster = None
+            if transcript and os.environ.get("DMA_SESSION_ROSTER", "1") != "0":
+                import session_roster                          # noqa: PLC0415
+                roster = session_roster.read(transcript)
+            connector_contract.ensure_baseline(run.root, roster=roster)
         return connector_contract.baseline_path(run.root).is_file()
     except Exception:                                          # noqa: BLE001
         pass
@@ -437,7 +447,8 @@ def decide(payload: dict) -> dict | None:
     stale = stale_run(run, prompt)
     if stale:
         return _deny(f"dma-insights: {agent} was not dispatched — {stale}")
-    known = baseline_known(run) if SEARCHING.search(agent) else None
+    known = (baseline_known(run, payload.get("transcript_path"))
+             if SEARCHING.search(agent) else None)
     if known is False:
         return _deny(
             f"dma-insights: {agent} was not dispatched — run "

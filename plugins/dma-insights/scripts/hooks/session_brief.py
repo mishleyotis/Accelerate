@@ -427,6 +427,31 @@ def record_bind(event: dict) -> None:
         pass
 
 
+def freshen_refs(event: dict) -> None:
+    """Fast-forward a stale LOCAL default-branch ref, detached (`git_refs.py`).
+
+    A restored snapshot leaves that ref days behind while the session's own
+    branch is cloned fresh; a later `git checkout <default>` then rewinds
+    every bound file under the running session (Interac, 2026-10-10:
+    122 commits, read as UPDATED_MID_SESSION). Moving the ref at start —
+    never the checked-out branch, never the worktree — means the checkout
+    lands on the tip. Top-level SessionStart only; fails open.
+    """
+    hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    # SessionStart EXACTLY: the doctor's wiring check feeds every handler an
+    # empty event, and a measurement must not start a fetch as a side effect.
+    if hook != "SessionStart" or event.get("agent_type") \
+            or event.get("agentType"):
+        return
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        sys.path.insert(0, str(here))
+        import git_refs                                        # noqa: PLC0415
+        git_refs.spawn()
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        pass
+
+
 def param_echo_text() -> str:
     """The PreCompact echo for the located run, rendered; never fatal."""
     try:
@@ -448,6 +473,7 @@ def main() -> int:
     except Exception:            # noqa: BLE001 — fail OPEN, on purpose
         event = {}
     record_bind(event)
+    freshen_refs(event)
     text = brief(event)
     hook_name = str(event.get("hook_event_name") or event.get("hookEventName") or "")
     if hook_name in ("", "SessionStart", "PostCompact") and not (

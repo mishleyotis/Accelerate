@@ -11,8 +11,8 @@
       "name": "dma-insights",
       "source": "./plugins/dma-insights",
       "displayName": "DMA Insights",
-      "description": "The six Digital Maturity Assessment skills, 74 DMA agents \u2014 16 category researchers, a research challenger, a technographic scanner, two report producers, a report validator and a five-agent scoring tier, connectors held by the orchestrator tier \u2014 the remote MCP connector (34 tools), and the research ENGINE: a binding preflight the owner answers, a PRELIM phase that gates dispatch, ERS from RRF retrieval, report sections argued and independently reviewed, a measured cost model, and a watchdog.",
-      "version": "1.21.0",
+      "description": "The six Digital Maturity Assessment skills, 76 DMA agents \u2014 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier \u2014 the remote MCP connector (36 tools), and the research ENGINE: an owner-answered binding preflight, a gating PRELIM phase, ERS from RRF retrieval, reviewed report sections, per-stage budget envelopes and a watchdog.",
+      "version": "1.22.0",
       "category": "domain",
       "tags": [
         "dma",

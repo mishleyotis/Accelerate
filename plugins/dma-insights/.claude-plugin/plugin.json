@@ -1,8 +1,8 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "1.21.0",
-  "description": "The six Digital Maturity Assessment skills, 76 DMA agents \u2014 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier \u2014 the remote MCP connector (35 tools), and the research ENGINE: an owner-answered binding preflight, a gating PRELIM phase, ERS from RRF retrieval, reviewed report sections, per-stage budget envelopes and a watchdog.",
+  "version": "1.22.0",
+  "description": "The six Digital Maturity Assessment skills, 76 DMA agents \u2014 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier \u2014 the remote MCP connector (36 tools), and the research ENGINE: an owner-answered binding preflight, a gating PRELIM phase, ERS from RRF retrieval, reviewed report sections, per-stage budget envelopes and a watchdog.",
   "author": {
     "name": "Zennify \u2014 DMA Insights build"
   },
