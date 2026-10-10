@@ -142,12 +142,13 @@ def test_high_confidence_needs_two_source_identities(tmp_path):
     declare_absent(wb, cells[5])
     fire_volleys(wb, cell)
     eids = [L.append_evidence(
-        wb, source_name=f"Annual Report p{i}", source_url=f"https://acme.example/ar#{i}",
+        wb, source_name=f"Annual Report p{i}", source_url=f"https://filings.example/acme/ar#{i}",
         tier="T2", subcaps=[cell], published="2025-06-01",
         excerpt=("Alkami digital banking went live in Q3 2024 and reached 47 percent "
                  f"member adoption within ninety days, restated at {50+i} percent "
                  "in the 2025 report.")) for i in range(3)]
     syn = good_synthesis(cell, eids); syn["Claim_Label"] = "INFERENCE"
+    syn["Ceiling_Band"] = "Building"   # one source identity caps the band at 3.0 (2026-10-10)
     # an INFERENCE names its step (claim-label fit at the write, 2026-10-09)
     syn["Triangulation"] += (" Taken together the launch date and the restated "
                              "figure suggest measured adoption, not deployment alone.")

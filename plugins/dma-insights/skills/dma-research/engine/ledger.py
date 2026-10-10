@@ -317,8 +317,6 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
     assert_actor_scope(actor, "evidence", cells)
-    if cells:
-        _refuse_smear(wb, "E-PENDING", cells)
     if not str(published or "").strip() and source_url and run is not None:
         # THE DATE THE PAGE STATES, FILLED AT THE WRITE (2026-10-09,
         # R-IMA-20261009 P2C1: 19 of 20 rows undated, a news URL reading
@@ -428,49 +426,24 @@ ATTACH_STEP = "attach"
 DECLINE_STEP = "reuse_declined"
 
 
-def smear_created(wb: RunWorkbook, eid: str, cells: list[str]) -> list[dict]:
-    """The sibling smears citing `eid` from `cells` would CREATE — the gate's
-    own `evidence_smear` (>=3 siblings drawing >60% of their evidence from
-    the same rows), computed before and after the write, so only a smear this
-    write causes or widens is returned.
+def smear_of_cell(wb: RunWorkbook, cell: str) -> dict | None:
+    """The gate's `evidence_smear` finding this cell is part of NOW, or None.
 
-    R-INTERAC-20261010, P3C1: three P3C1.7 siblings were attached the same
-    three rows upstream (connector pass, pilot lanes); the gate found it after
-    the syntheses, the challenge and a repair round, and nothing could undo
-    it. The gate's rule, asked at the write, is what makes it a first-pass
-    rule instead of a repair."""
-    caps = {c.rsplit(".", 1)[0] for c in cells}
+    Asked at SYNTHESIS, not at registration: collection is complete when the
+    judgement is written, so the measurement is the one the gate will make —
+    asked at the register it was order-dependent (a capability-level source
+    registered first reads as 100% of every sibling before the cell-specific
+    rows arrive), and refused the engine's own one-source-many-cells notes."""
+    cap = cell.rsplit(".", 1)[0]
     rows = [{"SubCap_ID": str(r.get("SubCap_ID") or ""), "Evidence_IDs": r.get("Evidence_IDs")}
             for r in wb.scoring_rows()
-            if str(r.get("SubCap_ID") or "").rsplit(".", 1)[0] in caps]
-    before = {(x["capability"], tuple(x["subcaps"])) for x in Q.evidence_smear(rows)}
-    after = []
-    for r in rows:
-        r = dict(r)
-        if r["SubCap_ID"] in cells:
-            ids = [i for i in _split_ids(r.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
-            r["Evidence_IDs"] = ", ".join(ids + [f"{eid}:F1"])
-        after.append(r)
-    return [x for x in Q.evidence_smear(after)
-            if any(c in x["subcaps"] for c in cells)
-            and (x["capability"], tuple(x["subcaps"])) not in before]
+            if str(r.get("SubCap_ID") or "").rsplit(".", 1)[0] == cap]
+    return next((x for x in Q.evidence_smear(rows) if cell in x["subcaps"]), None)
 
 
-def _refuse_smear(wb: RunWorkbook, eid: str, cells: list[str]) -> None:
-    made = smear_created(wb, eid, cells)
-    if made:
-        x = made[0]
-        raise LedgerRefusal(
-            f"citing {eid} from {', '.join(cells)} would smear {x['capability']}: "
-            f"{x['detail']} ({', '.join(x['subcaps'])}; shared "
-            f"{', '.join(x['shared_evidence'])}). The gate blocks this as "
-            f"evidence_smear and no repair round can undo it. Cite the span only "
-            f"from the cell whose OWN question it answers, or register a span "
-            f"specific to each sibling")
-
-
-#: who may undo a citation: the conducting tier, never a lane (a lane that
-#: could detach could launder its own evidence out of a challenge)
+#: who may undo a citation beyond a category producer on its own cells: the
+#: conducting tier. Never a collector or another category's lane — one that
+#: could detach could launder evidence out of a judgement it does not own.
 DETACH_ACTORS = frozenset({"research-conductor"})
 DETACH_STEP = "detach"
 
@@ -479,9 +452,10 @@ def detach_evidence(wb: RunWorkbook, eid: str, cell: str, *, reason: str,
                     actor: str | None = None) -> dict:
     """Undo ONE citation (evidence row ↔ cell), audited.
 
-    The repair the smear rule needs and nothing else had: an attachment made
+    The remedy the smear rule needs and nothing else had: an attachment made
     upstream (a connector pass, a pilot lane) that does not answer the cell's
-    own question. Refuses: an actor outside DETACH_ACTORS; a reason under 20
+    own question. Refuses: an actor that is neither the category's producer
+    on its own cells nor in DETACH_ACTORS; a reason under 20
     characters; a pair that does not exist; a cell whose current synthesis
     still names the id (re-synthesise without it first — a synthesis must
     never cite a row its cell no longer carries). The row itself stays in the
@@ -489,11 +463,15 @@ def detach_evidence(wb: RunWorkbook, eid: str, cell: str, *, reason: str,
     it judged changed. Every detach is a Provenance row with the reason."""
     eid = str(eid or "").strip()
     who = str(actor or "").strip()
-    if who not in DETACH_ACTORS:
+    own = re.match(r"^research-(p\d+c\d+)-producer$", who, re.I)
+    if own and str(cell).upper().startswith(own.group(1).upper()):
+        pass                     # a category's judge, on its own category's cells
+    elif who not in DETACH_ACTORS:
         raise LedgerRefusal(
-            f"detach is the conducting tier's ({', '.join(sorted(DETACH_ACTORS))}), "
-            f"not {who or 'an unattributed writer'}'s: a lane that could detach "
-            f"could remove its own evidence from a challenge")
+            f"detach is the conducting tier's ({', '.join(sorted(DETACH_ACTORS))}) or "
+            f"the category producer's on its own cells, not "
+            f"{who or 'an unattributed writer'}'s: a collector or another category "
+            f"could otherwise remove evidence from a judgement it does not own")
     if len(str(reason or "").strip()) < 20:
         raise LedgerRefusal("detach needs a reason (>= 20 chars): why the row "
                             "does not answer this cell's own question")
@@ -594,8 +572,6 @@ def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
         if eid in [i.split(":")[0] for i in _split_ids(sr.get("Evidence_IDs"))
                    if i and i != C.NO_EVIDENCE]:
             already.append(cell)
-    if not already:
-        _refuse_smear(wb, eid, cells)
     if already:
         raise LedgerRefusal(
             f"{eid} is already cited by {', '.join(already)}. An attach that "
@@ -1579,6 +1555,20 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     if bad:
         problems.append(bad)
     problems += label_fit_problems(wb, subcap, merged, row_eids)
+    # SMEAR, AT THE JUDGEMENT (R-INTERAC-20261010, P3C1.7.1/7.2/7.4): the gate
+    # blocks a category whose siblings draw >60% of their evidence from the
+    # same rows, and no challenge or repair round can change evidence. The
+    # writer can: detach a shared row from the cells it does not answer, or
+    # register the span each sibling's own question needs — before writing.
+    sm = smear_of_cell(wb, subcap) if row_eids else None
+    if sm:
+        problems.append(
+            f"evidence_smear: {sm['detail']} ({', '.join(sm['subcaps'])}; shared "
+            f"{', '.join(sm['shared_evidence'])}) — the gate blocks it and no "
+            f"repair round can undo it. Before synthesising: `engine.cli detach "
+            f"--e-id <E> --subcap <cell> --reason '<why it does not answer that "
+            f"cell>'` from the siblings a shared row does not answer, or register "
+            f"a span specific to this cell")
     # The band is the ceiling reasoning's CONCLUSION, and it must be stated
     # in the four-band vocabulary for any positively-evidenced claim: a
     # calibration run (2026-08-29) shipped six syntheses whose

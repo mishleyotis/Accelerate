@@ -166,17 +166,26 @@ def _siblings(wb, n=3):
     return next(sorted(v)[:n] for _, v in sorted(caps.items()) if len(v) >= n)
 
 
-def test_one_span_cited_by_three_siblings_is_refused_at_the_write(tmp_path):
+def test_registration_is_not_refused_but_a_smeared_cell_cannot_be_synthesised(tmp_path):
+    """Asked at the register the rule was order-dependent and refused the
+    engine's own one-source-many-cells notes (5 suite failures); asked at the
+    judgement — collection complete — it is the gate's own measurement."""
     run = _new_run(tmp_path / "r")
     wb = run.open()
     sibs = _siblings(wb)
-    cap = sibs[0].rsplit(".", 1)[0]
-    with pytest.raises(L.LedgerRefusal, match=f"would smear {cap}"):
-        _evidence(wb, sibs, 1)                     # one new span to three empty siblings at once
-    e2 = _evidence(wb, sibs[:2], 2)                # two siblings is not a smear
-    with pytest.raises(L.LedgerRefusal, match=f"would smear {cap}"):
-        L.attach_evidence(wb, e2, [sibs[2]], actor="research-conductor")
-    _evidence(wb, sibs[2], 3)                      # a span specific to the third sibling is fine
+    shared = _evidence(wb, sibs, 1)                # registers: one span, three siblings
+    syn = {"Dominant_Claim": "Acme acknowledges complaints within five business days.",
+           "Claim_Label": "HYPOTHESIS"}
+    sm = L.smear_of_cell(wb, sibs[0])
+    assert sm and set(sibs) <= set(sm["subcaps"]) and any(shared in x for x in sm["shared_evidence"])
+    with pytest.raises(L.LedgerRefusal, match="evidence_smear"):
+        L.append_synthesis(wb, sibs[0], syn, actor=f"research-{sibs[0][:4].lower()}-producer")
+    # the remedy the refusal names: detach from the siblings it does not answer
+    actor = f"research-{sibs[0][:4].lower()}-producer"
+    for c in sibs[1:]:
+        L.detach_evidence(wb, shared, c, reason="the span answers only the first sibling's question",
+                          actor=actor)
+    assert L.smear_of_cell(wb, sibs[0]) is None
 
 
 def test_detach_undoes_an_upstream_citation_audited_and_conductor_only(tmp_path):
@@ -186,7 +195,11 @@ def test_detach_undoes_an_upstream_citation_audited_and_conductor_only(tmp_path)
     e = _evidence(wb, cell, 4)
     with pytest.raises(L.LedgerRefusal, match="conducting tier"):
         L.detach_evidence(wb, e, cell, reason="does not answer this cell's question",
-                          actor="research-p3c1-producer")
+                          actor=f"research-{cell[:4].lower()}-collector")
+    with pytest.raises(L.LedgerRefusal, match="conducting tier"):
+        other = "p4c4" if not cell.upper().startswith("P4C4") else "p1c1"
+        L.detach_evidence(wb, e, cell, reason="does not answer this cell's question",
+                          actor=f"research-{other}-producer")
     with pytest.raises(L.LedgerRefusal, match="reason"):
         L.detach_evidence(wb, e, cell, reason="no", actor="research-conductor")
     out = L.detach_evidence(wb, e, cell, reason="a complaint SLA, not exception categorisation",

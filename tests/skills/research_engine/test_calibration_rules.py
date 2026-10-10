@@ -74,7 +74,7 @@ def test_a_single_document_fact_blocks_the_gate(tmp_path):
     sub2 = small_selection(2)[1]
     eids2 = [L.append_evidence(
         wb, source_name=f"Annual Report 2025 p{i}",
-        source_url=f"https://acme.example/ar25#x{i}", tier="T2",
+        source_url=f"https://filings.example/acme/ar25#x{i}", tier="T2",
         excerpt=("Alkami digital banking went live in Q3 2024 and reached 47 "
                  f"percent member adoption within ninety days, restated at "
                  f"{50+i} percent in the 2025 report."),
@@ -91,6 +91,8 @@ def test_a_single_document_fact_blocks_the_gate(tmp_path):
     assert not str((wb.scoring_row(sub2) or {}).get("Dominant_Claim") or "").strip()
     # the same rows, labelled INFERENCE with the step named, are accepted
     syn = good_synthesis(sub2, eids2); syn["Claim_Label"] = "INFERENCE"
+    # one source identity caps the band at 3.0 (Building) at the write (2026-10-10)
+    syn["Ceiling_Band"] = "Building"
     syn["Triangulation"] += (" One source identity, so the launch and adoption "
                              "figures are read as consistent with deployment, not "
                              "corroborated.")
