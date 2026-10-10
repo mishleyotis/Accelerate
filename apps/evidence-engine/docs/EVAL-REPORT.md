@@ -1,6 +1,6 @@
 # Evidence engine — golden-set evaluation report
 
-Run `v1-20261010T192618Z` · 2026-10-10T19:26:18+00:00 → 2026-10-10T19:48:06+00:00 (1307.7 s) · golden **v1** (built 2026-10-10) · mode **LIVE** · results `eval/results/v1-20261010T192618Z.json`
+Run `v1-20261010T195014Z` · 2026-10-10T19:50:14+00:00 → 2026-10-10T20:00:23+00:00 (608.3 s) · golden **v1** (built 2026-10-10) · mode **LIVE** · results `eval/results/v1-20261010T195014Z.json`
 
 This is the FIRST measurement of the engine against the golden set: every live figure below is the baseline, not a tuned result. Nothing in this report was adjusted after the run.
 
@@ -8,16 +8,17 @@ This is the FIRST measurement of the engine against the golden set: every live f
 
 | Metric | Measured | Brief's bar | Verdict | Where measured |
 |---|---|---|---|---|
-| Excerpt fidelity (text[start:end]==excerpt ∧ normalised span in connector text) | 100.0% (51/51 cards) | 100% (hard) | MEETS | offline, over the live run's cards |
-| Boilerplate leakage (anti-pattern matches in produced excerpts) | 0 of 51 | 0 (hard) | MEETS | offline |
-| Syndication inflation (clusters whose cards disagree with membership) | 0 of 1 multi-URL clusters (73 clusters) | 0 (hard) | MEETS | offline |
-| Card size, item + minimal provenance (tokens) | mean 165.2 · p95 221 | ~120 target | ABOVE | offline (heuristic: 4 chars/token over compact JSON (tiktoken not installed)) |
-| URL liveness of produced cards (live or archived) | 100.0% (51/51; 0 unchecked for time) | 100% (hard) | MEETS | LIVE |
-| Source recall, same url_key | 27.8% (5/18) | ≥ 80% | BELOW | LIVE (baseline) |
-| Source recall, same host (loose) | 33.3% (6/18) | (informational) | — | LIVE |
-| Token efficiency on re-found URLs (full cleaned page → card, item+minimal) | 75.0% (1153 vs 4608 tokens over 6 URLs) | ≥ 60% | MEETS | LIVE fetch, offline count |
-| Token efficiency per produced card (its source page → the card) | 97.2% (12178 vs 439268 tokens, 74 cards) | (informational) | — | offline |
-| Generalisation (largest tuning↔held-out gap) | None points | ≤ 5 points | not measured | both |
+| Excerpt fidelity (text[start:end]==excerpt ∧ normalised span in connector text) | 100.0% (116/116 cards) | 100% (hard) | MEETS | offline, over the live run's cards |
+| Boilerplate leakage (anti-pattern matches in produced excerpts) | 0 of 116 | 0 (hard) | MEETS | offline |
+| Syndication inflation (clusters whose cards disagree with membership) | 0 of 2 multi-URL clusters (172 clusters) | 0 (hard) | MEETS | offline |
+| Card size, item + minimal provenance (tokens) | mean 165.9 · p95 219 | ~120 target | ABOVE | offline (heuristic: 4 chars/token over compact JSON (tiktoken not installed)) |
+| URL liveness of produced cards (live or archived) | 100.0% (117/117; 0 unchecked for time) | 100% (hard) | MEETS | LIVE |
+| Source recall, same url_key | 34.3% (12/35) | ≥ 80% | BELOW | LIVE (baseline) |
+| Source recall, same host (loose) | 40.0% (14/35) | (informational) | — | LIVE |
+| Search-level recall: golden URL surfaced, card OR fetch refused/dropped (lower bound) | 48.6% (12 carded + 5 surfaced-unreadable / 35) | (diagnostic) | — | LIVE |
+| Token efficiency on re-found URLs (full cleaned page → card, item+minimal) | 78.6% (2888 vs 13494 tokens over 14 URLs) | ≥ 60% | MEETS | LIVE fetch, offline count |
+| Token efficiency per produced card (its source page → the card) | 96.7% (28565 vs 864440 tokens, 174 cards) | (informational) | — | offline |
+| Generalisation (largest tuning↔held-out gap) | 22.0 points | ≤ 5 points | ABOVE | both |
 | Parallel rate-limit ceiling | no 429 observed up to 2/s → recommend `EE_PARALLEL_RPS=1.4` | measured, never assumed | — | LIVE |
 
 ## 2. What was measured live, what offline
@@ -25,12 +26,13 @@ This is the FIRST measurement of the engine against the golden set: every live f
 - **LIVE (network)**: `Engine.research_brief` with the real `HttpFetcher` and the Parallel Search MCP as the only discovery source (SearXNG is not deployed; `SEARXNG_URL` unset) — one call per sampled golden row, sequential; `verify_cards(recheck_liveness=True)` over every produced card; one fetch of every sampled golden URL through the engine's fetcher for the token-efficiency denominator; the Parallel ramp through `search.ParallelClient` directly.
 - **OFFLINE (no network)**: excerpt fidelity re-read from the Store, boilerplate matching, the golden-negative refusal census, syndication consistency, token counts.
 - Ranking ran **bm25-only** (no bundled models in this environment: `EE_MODELS_DIR` unset).
+- **Two passes over one store**: 18 row(s) were answered live in the prior pass `v1-20261010T192618Z` (its research phase hit the time deadline before the held-out rows); this pass ran the remaining 17 row(s) live and re-ran liveness, fetches, offline metrics and the ramp over everything. Cold elapsed times are each row's own first call.
 
 ## 3. Sample
 
 - Tuning: 25 rows = 25 distinct URLs drawn with seed 20261010 from 27 distinct positive URLs (one row per URL, the longest excerpt). Held-out: 10 rows, 10 distinct URLs — all of them.
 - research_brief arguments: `max_cards=8, token_budget=20000, provenance='full'`; time budget 1500.0 s.
-- The golden set has **no question field**. Each question is derived from the row's excerpt: its content words minus the entity's name tokens, stop words and any platform name the vendor guard (`query.guard`) would refuse — an agent does not know the vendor before it finds the evidence — as `What does <entity> report about <terms>?`. Platform names were stripped from 0 question(s).
+- The golden set has **no question field**. Each question is derived from the row's excerpt: its content words minus the entity's name tokens, stop words and any platform name the vendor guard (`query.guard`) would refuse — an agent does not know the vendor before it finds the evidence — as `What does <entity> report about <terms>?`. Platform names were stripped from 4 question(s).
 
 ### Entities derived from the golden rows
 
@@ -44,14 +46,17 @@ Derivation: the most frequent institution-shaped phrase (…Credit Union / Bank 
 
 ## 4. Source recall (baseline)
 
-| Split | Client key | Rows | Re-found (url_key) | Re-found (host) | Zero-card answers | Errors |
-|---|---|---|---|---|---|---|
-| tuning | baxter | 8 | 1 (12.5%) | 2 (25.0%) | 0 | 0 |
-| tuning | golden1 | 10 | 4 (40.0%) | 4 (40.0%) | 0 | 0 |
-| **tuning** | all | 18 | 5 (27.8%) | 6 (33.3%) | | |
-| **heldout** | all | 0 | 0 (n/a) | 0 (n/a) | | |
+| Split | Client key | Rows | Re-found (url_key) | Re-found (host) | Surfaced but unreadable | Zero-card answers | Errors |
+|---|---|---|---|---|---|---|---|
+| tuning | baxter | 15 | 3 (20.0%) | 5 (33.3%) | 2 | 0 | 0 |
+| tuning | golden1 | 10 | 4 (40.0%) | 4 (40.0%) | 2 | 0 | 0 |
+| heldout | logix | 10 | 5 (50.0%) | 5 (50.0%) | 1 | 0 | 0 |
+| **tuning** | all | 25 | 7 (28.0%) | 9 (36.0%) | 4 | | |
+| **heldout** | all | 10 | 5 (50.0%) | 5 (50.0%) | 1 | | |
 
-Re-found by golden tier: T1: 0/1; T2: 1/2; T3: 3/11; T4: 0/2; T5: 1/2.
+"Surfaced but unreadable": the search returned the golden URL but the engine emitted no card for it — fetch failed: http N from www.savvymoney.com (served by nginx) (WAF or access de ×1; fetch failed: http N from www.scworld.com (served by cloudflare) (WAF or access  ×1; fetch failed: http N from thefinancialbrand.com (served by cloudflare) (WAF or a ×1; fetch failed: timed out fetching www.goldenN.com after Ns ×1; fetch failed: http N from www.insight.com (served by AkamaiGHost) (WAF or access ×1. These are fetchability losses, not retrieval losses (the connector's own `register_evidence` fetch would refuse the same pages as `url_unreachable`).
+
+Re-found by golden tier: T1: 0/1; T2: 1/5; T3: 9/21; T4: 0/2; T5: 2/6.
 
 ### Per call
 
@@ -75,37 +80,37 @@ Re-found by golden tier: T1: 0/1; T2: 1/2; T3: 3/11; T4: 0/2; T5: 1/2.
 | G-9d8d0ecc | tuning | 1 | 23 | 1 | — | {"probable": 1} | 69289 ms |  |
 | G-9497e56e | tuning | 1 | 26 | 1 | — | {"probable": 1} | 77372 ms |  |
 | G-031af79c | tuning | 1 | 21 | 2 | — | {"probable": 1} | 171171 ms |  |
-| G-477d3bf9 | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-8d3ac455 | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-0e516f75 | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-52b47f1a | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-2ab20603 | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-40b1e5f2 | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-854ee8db | tuning | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-e17d0b25 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-3a1e7d51 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-7f981e71 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-7089793b | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-4a494c46 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-116af624 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-bde7e098 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-6a9172d1 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-b4c11e10 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
-| G-29834d49 | heldout | — | — | — | — | — | — | skipped: time budget exhausted |
+| G-477d3bf9 | tuning | 4 | 23 | 9 | — | {"probable": 2, "ambiguous": 2} | 15233 ms | stripped 1 platform name(s) |
+| G-8d3ac455 | tuning | 8 | 23 | 8 | — | {"probable": 1, "ambiguous": 7} | 40022 ms |  |
+| G-0e516f75 | tuning | 8 | 24 | 10 | url | {"ambiguous": 5, "probable": 3} | 12991 ms |  |
+| G-52b47f1a | tuning | 4 | 25 | 4 | host | {"probable": 1, "ambiguous": 2, "confirmed": 1} | 37479 ms |  |
+| G-2ab20603 | tuning | 7 | 22 | 9 | — | {"ambiguous": 4, "probable": 3} | 9207 ms |  |
+| G-40b1e5f2 | tuning | 6 | 25 | 9 | url | {"probable": 4, "ambiguous": 1, "confirmed": 1} | 22487 ms | stripped 1 platform name(s) |
+| G-854ee8db | tuning | 8 | 27 | 9 | — | {"probable": 2, "ambiguous": 5, "confirmed": 1} | 14509 ms | stripped 2 platform name(s) |
+| G-e17d0b25 | heldout | 7 | 23 | 8 | url | {"ambiguous": 4, "probable": 3} | 10003 ms |  |
+| G-3a1e7d51 | heldout | 8 | 24 | 9 | url | {"probable": 7, "ambiguous": 1} | 9954 ms |  |
+| G-7f981e71 | heldout | 3 | 24 | 4 | — | {"confirmed": 1, "probable": 2} | 8923 ms |  |
+| G-7089793b | heldout | 6 | 23 | 9 | url | {"ambiguous": 4, "probable": 2} | 9246 ms |  |
+| G-4a494c46 | heldout | 5 | 25 | 8 | — | {"probable": 4, "ambiguous": 1} | 7377 ms |  |
+| G-116af624 | heldout | 5 | 23 | 7 | — | {"probable": 4, "ambiguous": 1} | 8075 ms |  |
+| G-bde7e098 | heldout | 6 | 17 | 6 | url | {"probable": 4, "confirmed": 1, "ambiguous": 1} | 10540 ms |  |
+| G-6a9172d1 | heldout | 6 | 23 | 6 | url | {"probable": 4, "ambiguous": 2} | 8950 ms | stripped 1 platform name(s) |
+| G-b4c11e10 | heldout | 6 | 24 | 7 | — | {"probable": 5, "ambiguous": 1} | 10438 ms |  |
+| G-29834d49 | heldout | 3 | 21 | 3 | — | {"probable": 2, "ambiguous": 1} | 11880 ms |  |
 
 ## 5. Timing, counts, breakers
 
-- research_brief elapsed: mean 53736 ms · p95 171171 ms · max 171171 ms over 18 calls. Warm repeats: tuning cold 14916 ms → warm 5864 ms (cached search calls {'parallel': 5})
-- Totals: hits 431 · fetched 93 · cards 51 · fetch failures shown 121 · dropped shown 12 (the tool truncates both lists at 10 per answer, so these are lower bounds).
-- Phase wall time (s): {"research": 967.3, "warm_repeat": 5.9, "liveness": 37.5, "token_efficiency": 235.4, "ramp": 61.2}
-- Breakers open at the end: ['en.wikipedia.org', 'ori-cms-104.golden1.com', 'tyfone.com', 'www.businesswire.com', 'www.creditunionsonline.com', 'www.yahoo.com']. Parallel breaker: {"name": "parallel", "state": "closed", "backoff_s": 0.0, "retry_in_s": 0.0, "last_kind": null, "last_retry_after": null, "opens": 0, "streak_403": 0, "streak_empty": 0, "seconds_since_failure": null}. Coalescer: {"inflight": 0, "upstream_calls": 85, "joined": 0}.
+- research_brief elapsed: mean 34702 ms · p95 127341 ms · max 171171 ms over 35 calls. Warm repeats: tuning cold 14916 ms → warm 2167 ms (cached search calls {'parallel': 5}); heldout cold 10003 ms → warm 198 ms (cached search calls {'parallel': 5})
+- Totals: hits 827 · fetched 218 · cards 116 · fetch failures shown 200 · dropped shown 34 (the tool truncates both lists at 10 per answer, so these are lower bounds).
+- Phase wall time (s): {"research": 247.4, "warm_repeat": 2.4, "liveness": 92.0, "token_efficiency": 265.6}
+- Breakers open at the end: ['dockets.justia.com', 'www.businesswire.com', 'www.creditunionsonline.com', 'www.insight.com']. Parallel breaker: {"name": "parallel", "state": "closed", "backoff_s": 0.0, "retry_in_s": 0.0, "last_kind": null, "last_retry_after": null, "opens": 0, "streak_403": 0, "streak_empty": 0, "seconds_since_failure": null}. Coalescer: {"inflight": 0, "upstream_calls": 85, "joined": 0}.
 - Errors: 0
-- Drop reasons (shown subset): no verbatim sentence-complete span answers the question ×12
-- Fetch-failure reasons (shown subset): timed out fetching www.goldenN.com after Ns ×34; robots_disallowed ×28; timed out fetching goldenN.com after Ns ×10; http N from www.bcu.org ×9; http N from en.wikipedia.org (served by HAProxy) (WAF or access denied ×5; http N from ori-cms-N.goldenN.com (WAF or access denied) ×4; http N from tyfone.com (served by cloudflare) (WAF or access denied) ×3; http N from www.businesswire.com (served by AkamaiGHost) (WAF or acces ×3
+- Drop reasons (shown subset): no verbatim sentence-complete span answers the question ×34
+- Fetch-failure reasons (shown subset): robots_disallowed ×67; timed out fetching www.goldenN.com after Ns ×34; http N from www.bcu.org ×17; timed out fetching goldenN.com after Ns ×10; http N from www.creditunionsonline.com (served by cloudflare) (WAF or  ×7; http N from www.savvymoney.com (served by nginx) (WAF or access denied ×7; http N from www.businesswire.com (served by AkamaiGHost) (WAF or acces ×6; http N from en.wikipedia.org (served by HAProxy) (WAF or access denied ×5
 
 ## 6. Boilerplate: produced cards and the golden-negative census
 
-Produced excerpts matching an anti-pattern: **0** of 51.
+Produced excerpts matching an anti-pattern: **0** of 116.
 
 Golden NEGATIVE rows with a considered defect (hard_clip, not_sentence_complete, machine_text, internal_jargon): 131; the anti-pattern list + `contract.item_problems` excerpt rules would have refused **130** (99.2%).
 
@@ -123,10 +128,10 @@ Rows a defect class marks that NO rule refuses (gaps to extend the list from; go
 
 | Projection | Cards | Mean tokens | p95 | Min | Max |
 |---|---|---|---|---|---|
-| item + minimal provenance | 51 | 165.2 | 221 | 127 | 224 |
-| item + standard provenance | 51 | 207.0 | 259 | 168 | 266 |
-| item + full provenance | 51 | 315.6 | 375 | 269 | 385 |
-| item only | | 120.6 | 176 | | |
+| item + minimal provenance | 116 | 165.9 | 219 | 120 | 245 |
+| item + standard provenance | 116 | 207.8 | 262 | 165 | 288 |
+| item + full provenance | 116 | 315.7 | 375 | 269 | 390 |
+| item only | | 121.4 | 174 | | |
 
 Counter: heuristic: 4 chars/token over compact JSON (tiktoken not installed).
 
@@ -136,21 +141,21 @@ Tokens of CONTENT, not of a transcript: the denominator is the full cleaned text
 
 | Split | Sampled URLs | Re-found | Raw tokens (re-found) | Card tokens | Reduction | Fetch failed |
 |---|---|---|---|---|---|---|
-| tuning | 18 | 6 | 4608 | 1153 | 75.0% | 9 |
-| heldout | 0 | 0 | 0 | 0 | n/a | 0 |
-| **all** | 18 | 6 | 4608 | 1153 | 75.0% | 9 |
+| tuning | 25 | 9 | 9758 | 1675 | 82.8% | 11 |
+| heldout | 10 | 5 | 3736 | 1213 | 67.5% | 1 |
+| **all** | 35 | 14 | 13494 | 2888 | 78.6% | 12 |
 
-Secondary (every produced card against its own source page): 97.2% reduction, 74 cards. Raw tokens of ALL sampled golden pages the fetcher could read: 6903.
+Secondary (every produced card against its own source page): 96.7% reduction, 174 cards. Raw tokens of ALL sampled golden pages the fetcher could read: 34071.
 
 ## 9. Generalisation (tuning vs held-out, points)
 
-- source_recall_url: None
-- source_recall_host: None
-- url_liveness: None
-- token_reduction: None
-- excerpt_fidelity: None
-- max_gap_points: None
-- within_bar: None
+- source_recall_url: 22.0
+- source_recall_host: 14.0
+- url_liveness: 0.0
+- token_reduction: 15.3
+- excerpt_fidelity: 0.0
+- max_gap_points: 22.0
+- within_bar: False
 
 ## 10. Parallel rate-limit ramp
 
@@ -173,7 +178,6 @@ Secondary (every produced card against its own source page): 97.2% reduction, 74
 - Tuning positives were sampled (one row per distinct URL, seeded); a golden URL with several rows was asked ONE question.
 - Held-out positives: 10 rows from one client — the held-out split is small, so its recall moves in steps of ~8 points and the generalisation gap is coarse.
 - The Parallel ramp is a polite, short measurement (≤ 90 calls, ≤ 60 s) from one network location; a free anonymous tier's ceiling may differ by hour and by origin.
-- 7 tuning call(s) were skipped for time.
 
 ## 12. Golden-set version deltas
 

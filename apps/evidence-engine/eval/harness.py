@@ -470,6 +470,7 @@ async def run_research(engine, samples: list[dict], entities: dict, *, max_cards
         rec["refound_url_key"] = any(m == "url_key" for _, m in found)
         rec["refound_host"] = any(m in ("url_key", "host") for _, m in found)
         rec["matching_cards"] = [cid for cid, m in found if m]
+        rec["matching_cards_exact"] = [cid for cid, m in found if m == "url_key"]
         calls.append(rec)
         progress(f"  [{i + 1}/{len(samples)}] {row['golden_id']} {row['client']} cards={len(cards)} hits={s.get('hits')} "
                  f"fetched={s.get('fetched')} refound={'url' if rec['refound_url_key'] else ('host' if rec['refound_host'] else '-')} "
@@ -563,7 +564,13 @@ async def token_efficiency(engine, calls: list[dict], *, deadline: float) -> dic
         ps["urls"] += 1
         doc, why = await P.fetch_document(c["url"], engine.fetcher, engine.store, today=engine.today)
         raw = C.estimate_tokens(doc.text) if doc else None
-        matching = [card for card in (c.get("cards_full") or []) if card["card_id"] in (c.get("matching_cards") or [])]
+        # exact url_key matches only: a same-host card is another page and
+        # would inflate the numerator (runs before 2026-10-10T20:00Z counted
+        # host matches too — conservative, never flattering)
+        exact = c.get("matching_cards_exact")
+        if exact is None:
+            exact = c.get("matching_cards") or []
+        matching = [card for card in (c.get("cards_full") or []) if card["card_id"] in exact]
         card_tokens = C.estimate_tokens([Engine._project(card, "minimal") for card in matching]) if matching else 0
         row = {"golden_id": c["golden_id"], "raw_tokens": raw, "card_tokens_item_minimal": card_tokens,
                "cards": len(matching), "fetch_error": why, "via": doc.via if doc else None}

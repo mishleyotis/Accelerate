@@ -1,405 +1,343 @@
 {
- "_doc": [
-  "ENRICHMENT SOURCES — per facet, which connector authoritatively serves",
-  "it, in precedence order, and the tier band its output lands at.",
-  "",
-  "The facets are the ledger's seven (FACETS in apps/mcp/dma_mcp/ledger.py",
-  "and migration 0051) plus thought_leadership, which the enrichment",
-  "register tracks as a surface (overview.thought_leadership in",
-  "packages/shared/enrichment_register.json) but the ledger does not",
-  "version.",
-  "",
-  "`status` is grounded in the repo, not in intent:",
-  "  wired                 a code path or producer-session connector exists",
-  "                        and is named in `grounding`",
-  "  wired, not live       declared in code that records NOT_RUN with a",
-  "                        reason until a missing credential exists",
-  "  declared, not wired   named in a skill or plan only — no code path,",
-  "                        no repo consumer. Listing it here grants nothing.",
-  "",
-  "Nothing in this file opens a path into serving content. Whatever the",
-  "connector, the value travels the only path content may take: registered",
-  "through register_evidence citing the SOURCE the tool surfaced — never",
-  "the tool — and submitted through the connector (invariant 2). Tier",
-  "bands follow the underlying source per 02-inputs/clay_taxonomy.json and",
-  "01-start-here/2-evidence.md; a value with no traceable source is an",
-  "inference at any tier.",
-  "",
-  "Sources are ordered: the first entry is the one to try first, and a",
-  "later entry supplements rather than replaces an earlier one.",
-  "",
-  "`search_connectors` are the two SEARCH connectors the research tier",
-  "runs on. They serve no facet of their own — they find the SOURCE a",
-  "facet then cites — which is why they were missing from the facet table",
-  "(QA audit F-L11-042 pair 4) although the tier uses them most. Who holds",
-  "them is `scripts/provision_agent_tools.py` (repo root); the order is",
-  "RESEARCH-PROTOCOL.md § Tools."
- ],
- "facets": {
-  "firmographics": {
-   "serving_surface": "overview.firmographics",
-   "sources": [
-    {
-     "connector": "first_party",
-     "serves": "filings, call reports and annual reports — every firmographic field cites the filing it was read from",
-     "tier_band": "T1-T2",
-     "status": "wired",
-     "grounding": "register_evidence; packages/shared/enrichment_register.json (overview.firmographics: ran_observable false because a Clay-surfaced filing and a searched one are one row)"
+  "_doc": [
+    "ENRICHMENT SOURCES — per facet, which connector authoritatively serves",
+    "it, in precedence order, and the tier band its output lands at.",
+    "",
+    "The facets are the ledger's seven (FACETS in apps/mcp/dma_mcp/ledger.py,",
+    "migration 0051) plus thought_leadership, a surface the enrichment register",
+    "tracks (packages/shared/enrichment_register.json) but the ledger does not version.",
+    "",
+    "`status` is grounded in the repo, not in intent:",
+    "  wired                 a code path or producer-session connector exists, named in `grounding`",
+    "  wired, not live       declared in code that records NOT_RUN with a reason until a credential exists",
+    "  declared, not wired   named in a skill or plan only — no code path, no consumer; grants nothing",
+    "",
+    "Nothing here opens a path into serving content: whatever the connector, the",
+    "value is registered through register_evidence citing the SOURCE the tool",
+    "surfaced — never the tool — and submitted through the connector (invariant 2).",
+    "Tier bands follow the underlying source (02-inputs/clay_taxonomy.json,",
+    "01-start-here/2-evidence.md); a value with no traceable source is an inference.",
+    "",
+    "Sources are ordered: try the first first; a later entry supplements, never replaces.",
+    "`search_connectors` find the SOURCE a facet then cites; they serve no facet.",
+    "Holders: `scripts/provision_agent_tools.py` (repo root); order: RESEARCH-PROTOCOL.md § Tools."
+  ],
+  "facets": {
+    "firmographics": {
+      "serving_surface": "overview.firmographics",
+      "sources": [
+        {
+          "connector": "first_party",
+          "serves": "filings, call reports and annual reports — every firmographic field cites the filing it was read from",
+          "tier_band": "T1-T2",
+          "status": "wired",
+          "grounding": "register_evidence; packages/shared/enrichment_register.json (overview.firmographics: ran_observable false because a Clay-surfaced filing and a searched one are one row)"
+        },
+        {
+          "connector": "hmda",
+          "serves": "a mortgage subsidiary's origination series — the HMDA data browser filtered to its LEI, by year",
+          "tier_band": "T1",
+          "status": "wired",
+          "grounding": "register_evidence; owner decision 2, 2026-10-04",
+          "notes": "RC-07/D-23: SWBC Mortgage's series was public and never read. On the strip only with unit/basis naming the entity ('SWBC Mortgage Corporation, HMDA 2024'); never a group CAGR."
+        },
+        {
+          "connector": "clay",
+          "serves": "Annual Revenue and Headcount Growth company data points",
+          "tier_band": "T3 as a connector reading (kind firmographic, owner decision 2026-10-05); T1-T2 when a filing is behind it and the filing is registered instead",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json",
+          "notes": "Session-bound: this organisation's trigger API refuses connector grants, so scheduled runs cannot hold it. Registers under origin connector with kind firmographic (T3). Headcount Growth is a CAGR candidate under CG-18f: served only when an independent source corroborates it."
+        },
+        {
+          "connector": "moodys",
+          "serves": "structured financial ratios and credit metrics",
+          "tier_band": "T2-T3",
+          "status": "declared, not wired",
+          "grounding": "named in dma-research and dma-assessment skills (dual-source protocol) only; no app code path",
+          "notes": "Requires OAuth — unauthenticated in this environment."
+        },
+        {
+          "connector": "harmonic",
+          "serves": "headcount and funding firmographics for private entities",
+          "tier_band": "T3",
+          "status": "declared, not wired"
+        },
+        {
+          "connector": "cb_insights",
+          "serves": "private-company financials and market intelligence",
+          "tier_band": "T3",
+          "status": "declared, not wired",
+          "grounding": "appears only as a cited source name in the legacy snapshot's client data (apps/dma-insights, reference only)"
+        }
+      ]
     },
-    {
-     "connector": "hmda",
-     "serves": "a mortgage subsidiary's origination series — the HMDA data browser filtered to its LEI, by year",
-     "tier_band": "T1",
-     "status": "wired",
-     "grounding": "register_evidence; owner decision 2, 2026-10-04",
-     "notes": "RC-07/D-23: SWBC Mortgage's series was public and never read. On the strip only with unit/basis naming the entity ('SWBC Mortgage Corporation, HMDA 2024'); never a group CAGR."
+    "leadership": {
+      "serving_surface": "overview.leadership",
+      "sources": [
+        {
+          "connector": "clay",
+          "serves": "the leadership roster's contact routes — email, linkedin_url, phone, enrichment_basis — via search-contacts + add-contact-data-points and Summarize Work History",
+          "tier_band": "T2-T3",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; packages/shared/enrichment_register.json (overview.leadership: basis_key enrichment_basis, contact_keys email/linkedin_url/phone)",
+          "notes": "The returned TITLE must match the person searched for — surname plus employer is not identity. On failure, quarantine the field with its reason."
+        },
+        {
+          "connector": "first_party",
+          "serves": "named seats and tenure from proxy statements, leadership pages and filings",
+          "tier_band": "T1-T2",
+          "status": "wired",
+          "grounding": "register_evidence"
+        }
+      ]
     },
-    {
-     "connector": "clay",
-     "serves": "Annual Revenue and Headcount Growth company data points",
-     "tier_band": "T3 as a connector reading (kind firmographic, owner decision 2026-10-05); T1-T2 when a filing is behind it and the filing is registered instead",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json",
-     "notes": "Session-bound: this organisation's trigger API refuses connector grants, so scheduled runs cannot hold it. Registers under origin connector with kind firmographic (T3). Headcount Growth is a CAGR candidate under CG-18f: served only when an independent source corroborates it."
+    "peer_scores": {
+      "serving_surface": "heatmap.workbook_scores",
+      "sources": [
+        {
+          "connector": "corpus",
+          "serves": "peer cell scores — the peer table of promoted assessments, then the fallback ladder. No external connector serves a peer score",
+          "tier_band": "n/a — scores, not evidence",
+          "status": "wired",
+          "grounding": "02-inputs/2-clay-enrichment.md (What Clay cannot do: peer cell scores — no)"
+        },
+        {
+          "connector": "clay",
+          "serves": "peer platform deployments on the tech register (peer_deployments / peer_coverage) — not peer scores",
+          "tier_band": "T1 per established deployment",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; AG-04",
+          "notes": "AG-04 blocks a stated share without one row per peer (unknowns as deployed: null), source_url and as_of on every deployed: true row, and share-to-breakdown agreement within one peer. Identified-not-scored is still a peer set: one row per named peer on every tile, peer_basis cannot_estimate (RC-10)."
+        }
+      ]
     },
-    {
-     "connector": "moodys",
-     "serves": "structured financial ratios and credit metrics",
-     "tier_band": "T2-T3",
-     "status": "declared, not wired",
-     "grounding": "named in dma-research and dma-assessment skills (dual-source protocol) only; no app code path",
-     "notes": "Requires OAuth — unauthenticated in this environment."
+    "platform_readiness": {
+      "serving_surface": "platform.platform_story",
+      "sources": [
+        {
+          "connector": "clay",
+          "serves": "Open Jobs — hiring as the cheapest capability signal",
+          "tier_band": "T2-T3",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json"
+        },
+        {
+          "connector": "first_party",
+          "serves": "the entity's own careers pages, filings and announced programmes",
+          "tier_band": "T1-T2",
+          "status": "wired",
+          "grounding": "register_evidence"
+        },
+        {
+          "connector": "harmonic",
+          "serves": "team-growth and engineering-hiring trajectories",
+          "tier_band": "T3",
+          "status": "declared, not wired"
+        }
+      ]
     },
-    {
-     "connector": "harmonic",
-     "serves": "headcount and funding firmographics for private entities",
-     "tier_band": "T3",
-     "status": "declared, not wired"
+    "sentiment": {
+      "serving_surface": "overview.sentiment",
+      "sources": [
+        {
+          "connector": "first_party",
+          "serves": "client-satisfaction surveys the firm publishes itself, and retrievable ratings carrying sample size, scale and date",
+          "tier_band": "T1-T2",
+          "status": "wired",
+          "grounding": "register_evidence; packages/shared/enrichment_register.json (overview.sentiment closes_with)"
+        },
+        {
+          "connector": "indeed",
+          "tool": "mcp__Indeed__get_company_data",
+          "origin": "connector",
+          "serves": "employer ratings — the overall rating, the sub-ratings and the recommend counts, with the review count as n",
+          "tier_band": "T3",
+          "status": "wired",
+          "held_by": [
+            "overview-market-producer",
+            "enrichment-connector-specialist"
+          ],
+          "grounding": "register_evidence(origin='connector', connector={tool, query, retrieved_at, response}) — 0063; the server stamps T3",
+          "notes": "Owner decision 3 (2026-10-04): connector readings are evidence, never URL-less INFERENCE. SWBC: 3.1/5, 46 of 97 recommend."
+        },
+        {
+          "connector": "cfpb",
+          "tool": "CFPB Consumer Complaint Database API (search/api/v1) — company filter with aggs",
+          "origin": "connector",
+          "serves": "complaint aggregation by company name — count, product split, timely-response share",
+          "tier_band": "T1",
+          "status": "wired",
+          "grounding": "register_evidence(origin='connector', ...) — 0063 tiers CFPB T1",
+          "notes": "SWBC 2026-10-04: 213 complaints, 96.2% timely. A same-named company is recorded as an exclusion."
+        },
+        {
+          "connector": "clay",
+          "serves": "news sentiment — one route of several, never review-site depth",
+          "tier_band": "T3",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; 02-inputs/2-clay-enrichment.md (What Clay cannot do: sentiment at review-site depth — partial)",
+          "notes": "Glassdoor and ZipRecruiter pages 403 (url_unreachable): such a value is an inference with its route named, or omitted. Indeed is NOT a 403 rung — its connector answers (RC-07, 2026-10-04)."
+        }
+      ]
     },
-    {
-     "connector": "cb_insights",
-     "serves": "private-company financials and market intelligence",
-     "tier_band": "T3",
-     "status": "declared, not wired",
-     "grounding": "appears only as a cited source name in the legacy snapshot's client data (apps/dma-insights, reference only)"
+    "techstack": {
+      "serving_surface": "techstack.techstack",
+      "sources": [
+        {
+          "connector": "explorium",
+          "serves": "the machine technographic scan — LIVE in a producer session through the Vibe Prospecting MCP connector (match-business then enrich-business with technographics + webstack); the INGEST-time scan is the separate path and remains not live",
+          "tier_band": "T1",
+          "status": "wired; live in a producer session, not live at ingest",
+          "grounding": "producer-session MCP connector (match-business, enrich-business); the ingest path is packages/shared/enrichment_register.json; apps/worker/dma_worker/enrichment.py",
+          "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, its read-only calls (fetch-entities) are auto-approved by ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py, and its billed calls (match-business, enrich-business, 2 credits per enrichment per row) open only on the run's owner-written approval record, `engine.cli approve` -> 07_qa/approvals.json with the quoted cost (QA audit F-K01-003, 28-09-2026) — and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly. RC-07: an unbound Clay/Explorium scan blocks the preflight (connector_contract.py check), never a silent NOT_RUN."
+        },
+        {
+          "connector": "clay",
+          "serves": "the Tech Stack company data point in a producer session that holds the connector",
+          "tier_band": "T1",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json",
+          "notes": "A machine technographic scan is T1, never T4. Filing it at T4 caps the capability at L2.5 and silently suppresses the score — the commonest misclassification in the corpus."
+        },
+        {
+          "connector": "first_party",
+          "serves": "the entity's own platform statements — press releases, case studies, postings on its own domain",
+          "tier_band": "T1-T2",
+          "status": "wired",
+          "grounding": "register_evidence; detection_basis on the served row"
+        }
+      ]
+    },
+    "why_now": {
+      "serving_surface": "overview.why_now",
+      "sources": [
+        {
+          "connector": "clay",
+          "serves": "Recent News (T3), Latest Funding (T1-T2 when a filing is behind it), Open Jobs (T2-T3)",
+          "tier_band": "T1-T3 per data point, per clay_taxonomy.json",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json"
+        },
+        {
+          "connector": "first_party",
+          "serves": "the entity's own press releases and filings — the dated event itself",
+          "tier_band": "T1",
+          "status": "wired",
+          "grounding": "register_evidence"
+        },
+        {
+          "connector": "quartr",
+          "serves": "earnings-call transcripts and investor documents — announced initiatives in the entity's own words",
+          "tier_band": "T1-T2",
+          "status": "declared, not wired",
+          "grounding": "connector available to producer sessions; nothing in apps/ or this skill reads it"
+        },
+        {
+          "connector": "moodys",
+          "serves": "rating actions and sector outlooks",
+          "tier_band": "T2-T3",
+          "status": "declared, not wired",
+          "grounding": "named in dma-research and dma-assessment skills only; no app code path",
+          "notes": "Requires OAuth — unauthenticated in this environment."
+        },
+        {
+          "connector": "mergr",
+          "serves": "M&A and private-equity transaction history",
+          "tier_band": "T3",
+          "status": "declared, not wired"
+        },
+        {
+          "connector": "cb_insights",
+          "serves": "funding rounds and market signals",
+          "tier_band": "T3",
+          "status": "declared, not wired",
+          "grounding": "appears only as a cited source name in the legacy snapshot's client data (apps/dma-insights, reference only)"
+        }
+      ]
+    },
+    "thought_leadership": {
+      "serving_surface": "overview.thought_leadership",
+      "sources": [
+        {
+          "connector": "clay",
+          "serves": "the Find Thought Leadership contact data point",
+          "tier_band": "T2-T3 — T2 for a first-party publication or named conference; T3 for trade press",
+          "status": "wired",
+          "grounding": "producer-session MCP connector; packages/shared/enrichment_register.json (overview.thought_leadership closes_with)"
+        },
+        {
+          "connector": "first_party",
+          "serves": "the newsroom and trade-press rungs of the ladder — named executives in their own words",
+          "tier_band": "T1-T2",
+          "status": "wired",
+          "grounding": "register_evidence"
+        },
+        {
+          "connector": "quartr",
+          "serves": "transcripts — executives verbatim, dated, on the record",
+          "tier_band": "T1-T2",
+          "status": "declared, not wired",
+          "grounding": "connector available to producer sessions; nothing in apps/ or this skill reads it"
+        }
+      ]
     }
-   ]
   },
-  "leadership": {
-   "serving_surface": "overview.leadership",
-   "sources": [
-    {
-     "connector": "clay",
-     "serves": "the leadership roster's contact routes — email, linkedin_url, phone, enrichment_basis — via search-contacts + add-contact-data-points and Summarize Work History",
-     "tier_band": "T2-T3",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; packages/shared/enrichment_register.json (overview.leadership: basis_key enrichment_basis, contact_keys email/linkedin_url/phone)",
-     "notes": "The returned TITLE must match the person searched for — surname plus employer is not identity. On failure, quarantine the field with its reason."
+  "search_connectors": {
+    "research_layer": {
+      "serves": "free first: evidence (research_brief → register-ready cards; coverage.saturation is the stop rule); searxng, parallel, fetch, edgar: raw fallbacks on outage or dispute; alphaxiv: no holder",
+      "status": "wired; not live until deploy (parallel is live)",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "provision_agent_tools.py EXTERNAL + SLICES (verify slice: verifier, challenger, consolidator, surface-producer); docs/EVIDENCE-ENGINE-TOOLS.md"
     },
-    {
-     "connector": "first_party",
-     "serves": "named seats and tenure from proxy statements, leadership pages and filings",
-     "tier_band": "T1-T2",
-     "status": "wired",
-     "grounding": "register_evidence"
-    }
-   ]
-  },
-  "peer_scores": {
-   "serving_surface": "heatmap.workbook_scores",
-   "sources": [
-    {
-     "connector": "corpus",
-     "serves": "peer cell scores — the peer table of promoted assessments, then the fallback ladder. No external connector serves a peer score",
-     "tier_band": "n/a — scores, not evidence",
-     "status": "wired",
-     "grounding": "02-inputs/2-clay-enrichment.md (What Clay cannot do: peer cell scores — no)"
+    "exa": {
+      "serves": "the first paid search connector: a lane's emitted search_requests, fired per batch",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "provision_agent_tools.py EXTERNAL['exa']; the relay services the batch; brief.py defaults a request's tool to exa"
     },
-    {
-     "connector": "clay",
-     "serves": "peer platform deployments on the tech register (peer_deployments / peer_coverage) — not peer scores",
-     "tier_band": "T1 per established deployment",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; AG-04",
-     "notes": "AG-04 blocks a stated share without one row per peer (unknowns as deployed: null), source_url and as_of on every deployed: true row, and share-to-breakdown agreement within one peer. Identified-not-scored is still a peer set: one row per named peer on every tile, peer_basis cannot_estimate (RC-10)."
-    }
-   ]
-  },
-  "platform_readiness": {
-   "serving_surface": "platform.platform_story",
-   "sources": [
-    {
-     "connector": "clay",
-     "serves": "Open Jobs — hiring as the cheapest capability signal",
-     "tier_band": "T2-T3",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json"
+    "tavily": {
+      "serves": "the fallback search and the verbatim-extract path (tavily_extract lands in the run's fetch cache via `engine.cli fetch --via-text -`, so the excerpt verifies)",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "provision_agent_tools.py EXTERNAL['tavily']; the whole-page-fetch hook lists tavily_extract as a fetcher a lane may not call"
     },
-    {
-     "connector": "first_party",
-     "serves": "the entity's own careers pages, filings and announced programmes",
-     "tier_band": "T1-T2",
-     "status": "wired",
-     "grounding": "register_evidence"
+    "firecrawl": {
+      "serves": "the third paid provider: firecrawl_search when Exa and Tavily refuse",
+      "status": "wired",
+      "held_by": [],
+      "grounding": "autoapprove_connector.py ENRICHMENT_TOOLS; granted to no role"
     },
-    {
-     "connector": "harmonic",
-     "serves": "team-growth and engineering-hiring trajectories",
-     "tier_band": "T3",
-     "status": "declared, not wired"
-    }
-   ]
-  },
-  "sentiment": {
-   "serving_surface": "overview.sentiment",
-   "sources": [
-    {
-     "connector": "first_party",
-     "serves": "client-satisfaction surveys the firm publishes itself, and retrievable ratings carrying sample size, scale and date",
-     "tier_band": "T1-T2",
-     "status": "wired",
-     "grounding": "register_evidence; packages/shared/enrichment_register.json (overview.sentiment closes_with)"
+    "websearch_webfetch": {
+      "serves": "the last failover: built-in WebSearch/WebFetch when every paid provider refused",
+      "status": "wired",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "provision_agent_tools.py WEB; owner default 2026-10-04"
     },
-    {
-     "connector": "indeed",
-     "tool": "mcp__Indeed__get_company_data",
-     "origin": "connector",
-     "serves": "employer ratings — the overall rating, the sub-ratings and the recommend counts, with the review count as n",
-     "tier_band": "T3",
-     "status": "wired",
-     "held_by": [
-      "overview-market-producer",
-      "enrichment-connector-specialist"
-     ],
-     "grounding": "register_evidence(origin='connector', connector={tool, query, retrieved_at, response}) — 0063; the server stamps T3",
-     "notes": "Owner decision 3 (2026-10-04): connector readings are evidence, never URL-less INFERENCE. SWBC: 3.1/5, 46 of 97 recommend."
-    },
-    {
-     "connector": "cfpb",
-     "tool": "CFPB Consumer Complaint Database API (search/api/v1) — company filter with aggs",
-     "origin": "connector",
-     "serves": "complaint aggregation by company name — count, product split, timely-response share",
-     "tier_band": "T1",
-     "status": "wired",
-     "grounding": "register_evidence(origin='connector', ...) — 0063 tiers CFPB T1",
-     "notes": "SWBC 2026-10-04: 213 complaints, 96.2% timely. A same-named company is recorded as an exclusion."
-    },
-    {
-     "connector": "clay",
-     "serves": "news sentiment — one route of several, never review-site depth",
-     "tier_band": "T3",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; 02-inputs/2-clay-enrichment.md (What Clay cannot do: sentiment at review-site depth — partial)",
-     "notes": "Glassdoor and ZipRecruiter pages 403 (url_unreachable): such a value is an inference with its route named, or omitted. Indeed is NOT a 403 rung — its connector answers (RC-07, 2026-10-04)."
-    }
-   ]
-  },
-  "techstack": {
-   "serving_surface": "techstack.techstack",
-   "sources": [
-    {
-     "connector": "explorium",
-     "serves": "the machine technographic scan — LIVE in a producer session through the Vibe Prospecting MCP connector (match-business then enrich-business with technographics + webstack); the INGEST-time scan is the separate path and remains not live",
-     "tier_band": "T1",
-     "status": "wired; live in a producer session, not live at ingest",
-     "grounding": "producer-session MCP connector (match-business, enrich-business); the ingest path is packages/shared/enrichment_register.json; apps/worker/dma_worker/enrichment.py",
-     "notes": "CORRECTED 2026-08-23, and the previous note was costing every run its technographics. It read 'Ingest-scan only — no live API: the key is not in Secret Manager, and the routine records NOT_RUN with that reason until it is', which conflated TWO paths. The ingest scan does need a Secret Manager key and does not have one. The PRODUCER SESSION does not use a key at all — Vibe Prospecting/Explorium is an MCP connector authenticated at the session, its read-only calls (fetch-entities) are auto-approved by ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/autoapprove_connector.py, and its billed calls (match-business, enrich-business, 2 credits per enrichment per row) open only on the run's owner-written approval record, `engine.cli approve` -> 07_qa/approvals.json with the quoted cost (QA audit F-K01-003, 28-09-2026) — and it answers. Measured 2026-08-23 on three promoted clients: baxter-credit-union 392 premium technologies, axos-bank 357, logix-federal-credit-union 147, each broken into ~20 named categories (finance, IT security, platform and storage, BI and analytics, ...) and naming real core systems — Symitar Episys and Temenos for Baxter, Symitar Episys and Fiserv and FICO Falcon for Logix, Jack Henry SilverLake and nCino and Yodlee for Axos. Cost is 2 credits per enrichment per row. So a producer recording NOT_RUN for this facet was recording it for a source it could reach, which is how a register reaches a client with ten named products. WHAT EXPLORIUM IS FOR: it is the CANDIDATE LIST that makes the recursive search converge, not the citation. The tool console (vibeprospecting.explorium.ai) is still never a citable source (scripts/check_evidence.py TOOL_HOSTS) — each candidate is corroborated through a job posting, the entity's newsroom, a vendor release or a live technical read, and carries CONFIRMED/INFERRED/CLAIMED accordingly. RC-07: an unbound Clay/Explorium scan blocks the preflight (connector_contract.py check), never a silent NOT_RUN."
-    },
-    {
-     "connector": "clay",
-     "serves": "the Tech Stack company data point in a producer session that holds the connector",
-     "tier_band": "T1",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json",
-     "notes": "A machine technographic scan is T1, never T4. Filing it at T4 caps the capability at L2.5 and silently suppresses the score — the commonest misclassification in the corpus."
-    },
-    {
-     "connector": "first_party",
-     "serves": "the entity's own platform statements — press releases, case studies, postings on its own domain",
-     "tier_band": "T1-T2",
-     "status": "wired",
-     "grounding": "register_evidence; detection_basis on the served row"
-    }
-   ]
-  },
-  "why_now": {
-   "serving_surface": "overview.why_now",
-   "sources": [
-    {
-     "connector": "clay",
-     "serves": "Recent News (T3), Latest Funding (T1-T2 when a filing is behind it), Open Jobs (T2-T3)",
-     "tier_band": "T1-T3 per data point, per clay_taxonomy.json",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; 02-inputs/clay_taxonomy.json"
-    },
-    {
-     "connector": "first_party",
-     "serves": "the entity's own press releases and filings — the dated event itself",
-     "tier_band": "T1",
-     "status": "wired",
-     "grounding": "register_evidence"
-    },
-    {
-     "connector": "quartr",
-     "serves": "earnings-call transcripts and investor documents — announced initiatives in the entity's own words",
-     "tier_band": "T1-T2",
-     "status": "declared, not wired",
-     "grounding": "connector available to producer sessions; nothing in apps/ or this skill reads it"
-    },
-    {
-     "connector": "moodys",
-     "serves": "rating actions and sector outlooks",
-     "tier_band": "T2-T3",
-     "status": "declared, not wired",
-     "grounding": "named in dma-research and dma-assessment skills only; no app code path",
-     "notes": "Requires OAuth — unauthenticated in this environment."
-    },
-    {
-     "connector": "mergr",
-     "serves": "M&A and private-equity transaction history",
-     "tier_band": "T3",
-     "status": "declared, not wired"
-    },
-    {
-     "connector": "cb_insights",
-     "serves": "funding rounds and market signals",
-     "tier_band": "T3",
-     "status": "declared, not wired",
-     "grounding": "appears only as a cited source name in the legacy snapshot's client data (apps/dma-insights, reference only)"
-    }
-   ]
-  },
-  "thought_leadership": {
-   "serving_surface": "overview.thought_leadership",
-   "sources": [
-    {
-     "connector": "clay",
-     "serves": "the Find Thought Leadership contact data point",
-     "tier_band": "T2-T3 — T2 for a first-party publication or named conference; T3 for trade press",
-     "status": "wired",
-     "grounding": "producer-session MCP connector; packages/shared/enrichment_register.json (overview.thought_leadership closes_with)"
-    },
-    {
-     "connector": "first_party",
-     "serves": "the newsroom and trade-press rungs of the ladder — named executives in their own words",
-     "tier_band": "T1-T2",
-     "status": "wired",
-     "grounding": "register_evidence"
-    },
-    {
-     "connector": "quartr",
-     "serves": "transcripts — executives verbatim, dated, on the record",
-     "tier_band": "T1-T2",
-     "status": "declared, not wired",
-     "grounding": "connector available to producer sessions; nothing in apps/ or this skill reads it"
-    }
-   ]
+    "_rule": "A category lane holds none of these: it EMITS a search_requests entry; the servicing tier fires it and logs the tool that ran it (RESEARCH-PROTOCOL.md § Tools).",
+    "_failover": [
+      "exa",
+      "tavily",
+      "firecrawl",
+      "websearch_webfetch"
+    ],
+    "_failover_rule": "A refused, 402/429 or credit-exhausted provider hands the request to the next in _failover; NOT_RUN only after the whole chain failed, naming every provider tried (RC-07/D-22: 281 H3 alerts went NOT_RUN with no failover).",
+    "_free_chain": [
+      "evidence",
+      "searxng",
+      "parallel"
+    ]
   }
- },
- "search_connectors": {
-  "evidence_engine": {
-   "serves": "THE PRIMARY research interface (2026-10-10): research_brief turns an entity + facet + question into register-ready evidence cards (verbatim verified span, tier hint, licensed claim label, page-stated ISO date, origin cluster, entity match) with a coverage block (novelty, saturation stop rule, conflict candidates, ladder rungs searched); crawl_entity, filings_evidence, expand_context, verify_cards, coverage_report",
-   "status": "wired, not live until the Phase E deploy is approved",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist",
-    "research-evidence-collector",
-    "adversarial-verifier",
-    "finding-challenger",
-    "page-consolidator",
-    "surface-producer"
-   ],
-   "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['evidence'] and SLICES evidence/verify, evidence/challenge; apps/evidence-engine; plugin server `evidence` in .mcp.json via ${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py; docs/EVIDENCE-ENGINE-TOOLS.md",
-   "tier_role": "hints only — the registry's tier and the label it licenses; the ledger and the decision tree assign the final tier; the engine never links a cell or resolves a conflict"
-  },
-  "searxng": {
-   "serves": "raw fallback search (self-hosted SearXNG, FSI engine profile) and the engine's first search backend",
-   "status": "wired, not live until the Phase E deploy is approved",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "EXTERNAL['searxng']; infra/evidence-engine/searxng; ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/rate_gate.py 2/s burst 4; ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/source_health.py"
-  },
-  "parallel": {
-   "serves": "raw fallback search (Parallel Search MCP, free anonymous tier) and the engine's second search backend",
-   "status": "wired",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "EXTERNAL['parallel']; plugin server `parallel` (type http, https://search.parallel.ai/mcp); ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/rate_gate.py 0.5/s burst 2 until the Phase D ramp sets the ceiling"
-  },
-  "fetch": {
-   "serves": "raw fallback page read (mcp-server-fetch); a lane never holds it — a page read whole is the cost the engine exists to remove",
-   "status": "wired, not live until the Phase E deploy is approved",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "EXTERNAL['fetch']; infra/evidence-engine/fetch; ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_whole_page_fetch.py lists it as a fetcher; ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/rate_gate.py 1/s burst 2"
-  },
-  "edgar": {
-   "serves": "raw fallback filings (sec-edgar-mcp, AGPL-3.0 run unmodified); the engine uses edgartools in-process for card-grade filing evidence",
-   "status": "wired, not live until the Phase E deploy is approved",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "EXTERNAL['edgar']; infra/evidence-engine/edgar; ${CLAUDE_PLUGIN_ROOT}/scripts/hooks/rate_gate.py 4/s burst 4 (engine 8/s; SEC ceiling 10/s)"
-  },
-  "alphaxiv": {
-   "serves": "academic full text, called by agents directly (OAuth is per user); tool names unlisted until a signed-in session captures tools/list",
-   "status": "declared, not granted",
-   "held_by": [],
-   "grounding": "EXTERNAL['alphaxiv'] = []; plugin server `alphaxiv` (type http, https://api.alphaxiv.org/mcp/v1); doctor WARNING"
-  },
-  "exa": {
-   "serves": "the first search connector: a lane's emitted search_requests, fired by the conductor and the enrichment-web-specialist per capability batch",
-   "status": "wired",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['exa']; `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/relay.py` services the batch; brief.py defaults a request's tool to exa"
-  },
-  "tavily": {
-   "serves": "the fallback search and the verbatim-extract path (tavily_extract goes into the run's fetch cache with `engine.cli fetch --via-text -`, so the excerpt verifies)",
-   "status": "wired",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['tavily']; `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_whole_page_fetch.py` lists tavily_extract as a fetcher a lane may not call"
-  },
-  "firecrawl": {
-   "serves": "the third search provider: firecrawl_search when Exa and Tavily refuse or are out of credit",
-   "status": "wired",
-   "held_by": [],
-   "grounding": "autoapprove_connector.py ENRICHMENT_TOOLS; granted to no role"
-  },
-  "websearch_webfetch": {
-   "serves": "the last failover: built-in WebSearch/WebFetch when every paid provider refused",
-   "status": "wired",
-   "held_by": [
-    "research-conductor",
-    "enrichment-web-specialist"
-   ],
-   "grounding": "provision_agent_tools.py WEB; owner default 2026-10-04"
-  },
-  "_rule": "A category lane holds neither: it EMITS a connector volley as a search_requests entry and the servicing tier fires it, logging the search with the tool that ran it (RESEARCH-PROTOCOL.md § Tools).",
-  "_failover": [
-   "exa",
-   "tavily",
-   "firecrawl",
-   "websearch_webfetch"
-  ],
-  "_failover_rule": "A refused, 402/429 or credit-exhausted provider hands the request to the next in _failover. NOT_RUN only after the whole chain failed, naming every provider tried. RC-07/D-22: on 2026-10-01 credit ran out and 281 H3 alerts, the I1 probes and the techstack ABSENT search recorded NOT_RUN with no failover. 2026-10-10: `_free_chain` precedes this paid chain; a request reaches it only after the free chain is exhausted and spend is approved.",
-  "_free_chain": [
-   "evidence_engine",
-   "searxng",
-   "parallel"
-  ],
-  "_free_chain_rule": "Free first (brief §6b): the evidence engine, then SearXNG, then Parallel. Only when every free source is down or breaker-open does the request fall to `_failover` — and the engine then returns `needs_spend_approval` rather than spending; a paid rung is an owner decision."
- }
 }

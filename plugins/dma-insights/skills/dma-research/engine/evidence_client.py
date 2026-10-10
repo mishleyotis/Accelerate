@@ -30,7 +30,7 @@ from pathlib import Path
 
 ENGINE_DIR = Path(__file__).resolve().parent
 PLUGIN_ROOT = Path(os.environ.get("CLAUDE_PLUGIN_ROOT") or ENGINE_DIR.parents[2])
-SECRET = "dmai-evidence-path-token"
+SECRET_ID = "dmai-evidence-path-token"          # a Secret Manager NAME; the value is never here
 DEFAULT_BASE = "https://dmai-evidence-dukrne5v4a-uc.a.run.app"
 TIMEOUT_S = 180
 
@@ -42,7 +42,7 @@ def base_url() -> str:
 def mint_headers(aud: str) -> dict:
     helper = PLUGIN_ROOT / "scripts" / "evidence_auth_headers.sh"
     try:
-        out = subprocess.run(["bash", str(helper), aud, SECRET, "header"],
+        out = subprocess.run(["bash", str(helper), aud, SECRET_ID, "header"],
                              capture_output=True, text=True, timeout=60)
         return json.loads(out.stdout.strip() or "{}")
     except Exception as exc:  # noqa: BLE001

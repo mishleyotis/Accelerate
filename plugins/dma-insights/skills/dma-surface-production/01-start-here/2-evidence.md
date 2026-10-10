@@ -9,21 +9,10 @@ it; never create it.
 server allocates the id and computes the rank score. Registration is idempotent by content,
 so one annual report cited by six cards produces one row.
 
-## Evidence-engine cards register unchanged (2026-10-10)
+## Evidence-engine cards register unchanged
 
-The plugin's evidence engine (`mcp__plugin_dma-insights_evidence__research_brief`,
-`docs/EVIDENCE-ENGINE-TOOLS.md`) returns cards whose `item` block IS the
-`register_evidence` argument — `source_name`, `source_url`, a verbatim
-sentence-complete 50–500-character `excerpt` the engine verified against the page,
-the registry's `tier` hint, the `claim_type` that tier licenses, an ISO
-`published_date` only when the page states one, `linked_subcap_ids: []` and
-`origin: "producer"`. Register it as it stands: `register_evidence(run_id,
-item=card["item"])`, then link the cells YOU decided. Never retype the span, never
-raise the claim label, never raise the tier; lowering either is yours. Run
-`verify_cards` on every card a page cites before the submit (liveness, offsets,
-contract, date — confidence only moves down), and `expand_context` only to settle a
-disputed span. The engine never links a cell and never resolves a conflict: its
-`coverage.conflict_candidates` are yours to adjudicate (`apps/evidence-engine/docs/CARD-CONTRACT.md`).
+A card's `item` IS the `register_evidence` argument: register it as it stands, link the
+cells you decided, never retype the span or raise its label or tier; `verify_cards` first.
 
 ## Registering an excerpt: re-extract, never retype
 

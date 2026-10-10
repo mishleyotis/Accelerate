@@ -307,10 +307,6 @@ naming the gate, the JSON path and the arithmetic. Everything else returns a str
 
 ## The evidence engine (a separate server, 2026-10-10)
 
-Six more tools under the plugin server `evidence` — `research_brief`,
-`crawl_entity`, `filings_evidence`, `expand_context`, `verify_cards`,
-`coverage_report` — documented in `docs/EVIDENCE-ENGINE-TOOLS.md`. They
-return evidence CARDS, never serving content; a card's `item` is the
-`register_evidence` argument verbatim (`01-start-here/2-evidence.md`). The
-write-lock is unchanged: only `surface-producer` registers, submits and
-promotes.
+Six tools under the plugin server `evidence` (`docs/EVIDENCE-ENGINE-TOOLS.md`) return
+evidence CARDS, never serving content; a card's `item` is the `register_evidence`
+argument verbatim. The write-lock is unchanged.
