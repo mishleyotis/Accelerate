@@ -161,6 +161,8 @@ ONE MESSAGE OF SEARCHES PER CAPABILITY (the floors gate counts volleys per cell;
   - PRIMARY, ONE PER OPEN CELL: each cell's OWN diagnostic question, translated, as its own query, logged with --facet primary and --subcap <that cell> ALONE. A primary shared across cells is refused at the absence (primary_shared) — it never asked the cell's question.
   - FIVE FACET VOLLEYS PER CAPABILITY: works, fails, value, contradicts, corroborates — one query each, covering the capability's cells, logged once with every cell it bears on (the card's facets_owed[<facet>].log line, filled in).
   Fire all of them together in ONE message (a capability of 5 cells is 10 parallel WebSearch calls), never one per turn.
+  YOUR SEARCH WINDOW IS THE CAPABILITY'S: its cells + the five facets + a little slack (the ledger prints the figure and refuses the search past it). A facet volley is fired ONCE per capability and logged with every cell; a repair wave re-fires only the facet or primary the gate names, never the whole volley. When the ledger refuses a search as over the window, write what you have for that capability and move to the next — the cells you did not reach are the next round's, not this turn's.
+  YOUR LANE HAS A DOLLAR CEILING (--max-budget-usd, printed in your prompt's header by the driver when set): finish a capability's batch before starting the next, so what you wrote is kept if the ceiling stops you.
 READ A PAGE THE CHEAP WAY: python3 -m engine.cli fetch ${R} --url <U> --query '<what you need from it>' fetches the raw page itself, caches it, and prints the verbatim windows to quote — no model call. Use WebFetch only when fetch reports an error (403, paywall, script-only page), then cache its text with --via-text. Never read a page just to confirm a search snippet: register from the window fetch printed.
 Do not read any file under skills/, docs/ or engine/ (the sheet is complete); do not call ToolSearch or Firecrawl.
 
@@ -172,22 +174,30 @@ Never invent a source, a quote, a number, a date or a person. You write no synth
 Return: category ${cat}, capabilities, cells_touched, evidence_registered, attached, searches_logged, nothing_found (one string per cell with nothing citable, naming THAT cell's own primary query first: "<cell>: <its primary query>; <facet queries> -> <nearest thing found for this cell>"), refused (lines you could not fix, with the rule), status DONE|PARTIAL|NO_CONNECTORS|ERROR, and one-line notes.`
 }
 
-function synthPrompt(cat, wave, collected, cells) {
+function synthPrompt(cat, wave, collected, cells, resynth) {
   const lc = cat.toLowerCase()
   const notes = (collected || []).flatMap(c => c.nothing_found || []).slice(0, 80)
+  const rs = Object.entries(resynth || {})
   const scope = cells && cells.length
     ? `YOUR CELLS this pass: ${cells.join(', ')} — the gap list of the previous pass, re-collected for. Touch no other cell.`
     : `YOUR CELLS: every open cell of ${cat} the collectors touched, plus every cell they report in nothing_found.`
+  // RE-SYNTHESIS IS THIS TIER'S REPAIR (2026-10-10, R-INTERAC-20261010): a
+  // failed claim, a boilerplate row or a label the evidence does not earn is
+  // rewritten here — a new synthesis clears the old verdict and the
+  // challenger judges the new text. No collector is paid for these.
+  const resynthBlock = rs.length
+    ? `\nRE-SYNTHESISE THESE CLOSED CELLS (the gate names each with its reason; rewrite the row through 'synthesise' from the evidence it already carries — tense held to the recency band, label and ceiling to the tier table, a figure, date, proper noun or E-id in What_We_Found — or, when the rows do not carry a claim, close it through 'absence'; nothing new was collected for them unless THE COLLECTORS' RETURNS below say so):\n${rs.map(([c, why]) => `  ${c}: ${why}`).join('\n')}`
+    : ''
   return `You are research-category-orchestrator for category ${cat} of DMA run ${A.run} (${A.entity || 'the entity'}), pass ${wave}. Work from ${ENG}; set ACT=research-${lc}-producer and pass --actor $ACT on every write (the category's actor, so the challenge's independence is checkable). You hold no search tool: you judge what the collectors registered, and a cell whose evidence does not carry a claim is a GAP you name, never a search you run.
-${scope}
-TURN 1 (one Bash call): python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis --summary ; then the evidence pack — for each of your cells: python3 -m engine.brief reuse ${R} --subcap <CELL> --json (cites_now = the rows registered on the cell with excerpt, tier, published; names_this_cell and capability_siblings = rows you may attach with 'attach --e-id E --subcap <cell>'; proposed_from_other_categories = PRELIM rows to cite when the excerpt answers the cell). Read the gate exactly: advisory terms never block.
+${scope}${resynthBlock}
+TURN 1 (ONE Bash call, nothing else): cat ${CARDS}/${cat}/_pack.json — the driver rendered your whole evidence pack after the collectors returned: the gate's verdict and blocking term per cell (advisory terms never block), and per cell every registered row (E-id, excerpt, tier, published, recency, host), the facets with a logged search, the rows you may attach ('attach --e-id E --subcap <cell>') and the collectors' absence notes. Do NOT run the gate and do NOT call 'engine.brief reuse' per cell: the pack IS that read, once. Only if the pack file is missing, fall back to python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis --summary and python3 -m engine.brief reuse ${R} --subcap <CELL> --json per cell.
 THE COLLECTORS' ABSENCE NOTES (cells with nothing citable, their queries and the nearest thing found):
 ${notes.length ? notes.map(n => `  - ${n}`).join('\n') : '  (none reported)'}
 WHAT A GOLD SYNTHESIS ROW IS (python3 -m engine.cli synthesis-template prints the shape once): Dominant_Claim one checkable thing in the entity's own terms; What_We_Found >= 120 chars naming figures, dates and the E-ids that carry them; Triangulation naming the step from the excerpts to the claim; Ceiling_Reasoning following the tier table (T1/T2 5.0 · T3 4.0 · T4 2.5 · T5 2.0 · single source 3.0) with Ceiling_Band; Why_It_Matters and DMA_Impact specific to this cell; the five DQ facets answered from the logged searches or 'NOT_RUN: <reason>'. Your tense follows the recency band the rows carry — UNVERIFIED is never current.
 WRITE-TIME RULES the ledger refuses (no challenge round needed to learn them): FACT = two source identities on T1/T2; INFERENCE = 2+ evidence ids AND the step named (implies / suggests / consistent with …); a FACT/INFERENCE with no evidence id is refused (close the cell through 'absence' instead); a DQ_Contradicts finding needs a Contradiction_Disposition (>= 20 chars: outweighed by …, superseded by …); a Dominant_Claim that asserts an absence is not a synthesis — close it through 'absence'; every figure or year in a synthesis must appear in an excerpt registered on THAT cell (attach the row first, or drop the figure); What_We_Found names a figure, a date, a proper noun, a domain or an E-id; on 'absence', --inferable and --validation-question come together or not at all. A refused line in the batch result names the rule — fix that line, do not re-search.
-DECLARED ABSENCE — the exact command (every flag below is required; do not open --help, the engine source or the protocol to learn it):
-  python3 -m engine.cli absence ${R} --subcap <CELL> --actor $ACT --ladder '[{"rung":"direct","query":"<the primary query logged>"},{"rung":"proxy","query":"<the proxy query logged>"}]' --proxy-log '<which proxy class you hunted (a named owner, a vendor case study, a job posting, a filing) and where, and what came back>' --hunted '<the exact queries, the sites/tools searched and the nearest thing that came back — a proper noun, a date or an E-id; the gate refuses boilerplate>' --validation-question '<the one question a client interview would settle>'${A.degraded ? ' --enrichment-unavailable' : ''}
-  --hunted is THIS cell's hunt: its own primary query (from the collectors' notes or the Search_Log), the facet queries that bore on it, and the nearest thing that came back for IT. Never paste one capability-wide text into several cells — the ledger refuses hunted_shared, and a primary_shared refusal means the cell's own question was never asked: name it as "<cell>: primary_unfired — its own question" in gaps, never re-word around it.
+DECLARED ABSENCE — ONE LINE PER CELL (2026-10-10; do not open --help, the engine source or the protocol):
+  absence --subcap <CELL> --actor $ACT --from-log --note '<the nearest thing that came back for THIS cell: a proper noun, a date, an E-id, or "nothing naming it">'${A.degraded ? ' --enrichment-unavailable' : ''}
+  --from-log composes the ladder (the cell's own primary as the direct rung, one of its facet volleys as the proxy rung), the proxy log and the hunt from the cell's own Search_Log — the engine holds them; you decide WHICH cells are exhausted and what came back. Every refusal still applies: a primary_shared refusal means the cell's own question was never asked — name it as "<cell>: primary_unfired — its own question" in gaps, never re-word around it. The long form (--ladder / --proxy-log / --hunted / --validation-question) stays for a cell whose hunt you must state yourself — and there --hunted is THIS cell's own hunt (the ledger refuses hunted_shared: one capability-wide text pasted into several cells).
   A cell may be declared absent only when EVERY askable facet has a logged search on it (floors_${cat}.json "volleys_incomplete" lists the missing facets per cell): a cell with a missing facet is a GAP — name it as "<cell>: volleys_incomplete — <the missing facets>" so the repair wave fires them — never an absence. ${A.degraded ? 'This run is DEGRADED: every absence carries --enrichment-unavailable.' : 'A connector volley must also be logged on the cell.'}
 WRITES: per capability ONE ops file (attach lines, then synthesise lines — 'synthesise --subcap <CELL> --json <file> --actor $ACT' — then absence lines; the "python3 -m engine.cli" prefix and --run/--root may be omitted), then python3 -m engine.cli batch ${R} --file <ops>. About eight cells a turn. Never run the gate a second time; the challenge step runs it. Do not read any file under skills/, docs/ or engine/: everything the writes need is on this sheet, and the ledger's refusal names the rule when a line is wrong.
 Return: category ${cat}, cells_synthesised, declared_absent, gaps (one string per cell you could neither synthesise nor honestly declare absent: "<cell>: <gate term>, <gate term> — <the facet or source it still owes>" — this list is the repair wave's work, so name only what another search can close), refused, status DONE|PARTIAL|ERROR, one-line notes. Never score, never challenge, never submit, never promote.`
@@ -292,10 +302,10 @@ async function collectWave(cat, jobs, wave) {
   return { done, jobs: runnable }
 }
 
-async function synthesise(cat, wave, collected, cells) {
+async function synthesise(cat, wave, collected, cells, resynth) {
   if (!affordable(TIER_USD.orchestrator, `${cat} orchestrator pass ${wave}`)) return null
   est += TIER_USD.orchestrator
-  return spawn(synthPrompt(cat, wave, collected, cells), {
+  return spawn(synthPrompt(cat, wave, collected, cells, resynth), {
     label: `${cat} p${wave} orchestrate`, phase: wave === 1 ? 'Synthesise' : 'Repair',
     schema: SYNTH_OUT, model: MODELS.synthesis, agentType: 'dma-insights:research-category-orchestrator',
   })
@@ -309,9 +319,17 @@ const results = await pipeline(A.cats, async (cat) => {
     ...(REPAIR_BATCHES[cat] || []).map(cells => ({ caps: [...new Set(cells.map(c => c.split('.').slice(0, 2).join('.')))], cells,
                                                     repairs: Object.fromEntries(cells.map(c => [c, (REPAIRS[cat] || {})[c] || []])) })),
   ]
-  if (!jobs.length) jobs = [{ caps: [`${cat} (cells the gate names)`], repairs: REPAIRS[cat] || {}, gateOnly: true }]
+  // RE-SYNTHESIS NEEDS NO COLLECTOR (2026-10-10): a category whose only
+  // work is the closed cells the gate routed to the orchestrator skips the
+  // collect wave in round 1 and goes straight to the orchestrator and the
+  // challenge — Interac paid seven collector lanes for exactly this.
+  const RESYNTH = (A.resynth_reasons || {})[cat] || Object.fromEntries(
+    Object.entries((A.resynth || {})[cat] || {}).map(([c, t]) => [c, (t || []).join(', ')]))
+  const resynthOnly = !jobs.length && Object.keys(RESYNTH).length > 0
+  if (!jobs.length && !resynthOnly) jobs = [{ caps: [`${cat} (cells the gate names)`], repairs: REPAIRS[cat] || {}, gateOnly: true }]
   for (let round = 1; round <= ROUNDS; round++) {
-    const { done, jobs: ran } = await collectWave(cat, jobs, round)
+    const skipCollect = resynthOnly && round === 1
+    const { done, jobs: ran } = skipCollect ? { done: [], jobs: [] } : await collectWave(cat, jobs, round)
     const got = done.filter(Boolean)
     if (ran.length && !got.length) {
       // AN AGENT ERROR IS NOT A ROUND (measured 2026-10-05): nothing ran, so
@@ -319,13 +337,14 @@ const results = await pipeline(A.cats, async (cat) => {
       log(`${cat} r${round}: every collector failed — stopping; the driver re-hands it`)
       return { category: cat, still_open: -1, gate: 'AGENT_ERROR', blocking_terms: ['agent_error: no collector returned'], unreached_cells: unreached, spent_est_usd: est }
     }
-    if (!ran.length) {
+    if (!ran.length && !skipCollect) {
       log(`${cat} r${round}: no collector wave fit the envelope — handing back`)
       return { category: cat, still_open: -1, gate: 'AT_STAGE_BUDGET', blocking_terms: [`at_stage_budget: ${unreached.length} cell(s)/capabilit(ies) not reached`], unreached_cells: unreached, spent_est_usd: est }
     }
-    log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.evidence_registered || 0), 0)} evidence rows, ${got.reduce((a, r) => a + (r.cells_touched || 0), 0)} cells touched, ${got.reduce((a, r) => a + ((r.nothing_found || []).length), 0)} empty across ${ran.length} batch(es)`
+    if (skipCollect) log(`${cat} r1: ${Object.keys(RESYNTH).length} cell(s) routed to the orchestrator for re-synthesis — no collector paid for`)
+    else log(`${cat} r${round}: ${got.reduce((a, r) => a + (r.evidence_registered || 0), 0)} evidence rows, ${got.reduce((a, r) => a + (r.cells_touched || 0), 0)} cells touched, ${got.reduce((a, r) => a + ((r.nothing_found || []).length), 0)} empty across ${ran.length} batch(es)`
         + (got.some(r => r.status === 'NO_CONNECTORS') ? ' — NO_CONNECTORS reported' : ''))
-    const synth = await synthesise(cat, round, got, round === 1 ? null : Object.keys(jobs.reduce((a, j) => Object.assign(a, j.repairs || {}), {})))
+    const synth = await synthesise(cat, round, got, round === 1 ? null : Object.keys(jobs.reduce((a, j) => Object.assign(a, j.repairs || {}), {})), round === 1 ? RESYNTH : null)
     if (synth === null) {
       return { category: cat, still_open: -1, gate: 'AT_STAGE_BUDGET', blocking_terms: ['at_stage_budget: evidence collected, orchestrator pass not affordable — the syntheses are owed'], unreached_cells: unreached, spent_est_usd: est }
     }
@@ -368,6 +387,7 @@ const results = await pipeline(A.cats, async (cat) => {
       log(`${cat} r${round}: ${ran.length - got.length} collector(s) failed — not starting another round`)
       break
     }
+    if (skipCollect) break          // a re-synthesis pass is one pass; the driver re-reads the gate
     // Round 2 collects for whatever the gate names now — read fresh from
     // floors_<cat>.json by the collector, not from agent prose.
     jobs = [{ caps: [`${cat} (cells the gate names)`], repairs: Object.fromEntries((prev.blocking_terms || []).flatMap(s => {

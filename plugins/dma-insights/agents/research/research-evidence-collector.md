@@ -39,7 +39,14 @@ and a turn you did not need to spend is the saving.
    turn (`WebSearch`; Exa `numResults: 3` and Tavily `max_results: 3,
    search_depth: "basic"` when you hold them and the run is not degraded).
    One volley per capability covers all its cells — log it with several
-   `--subcap`.
+   `--subcap`. **Your search window is the capability's**: its cells + the
+   five facets + a little slack (`ledger.collector_ceiling`; the search CLI
+   prints `window` and `window_remaining`, and refuses past it). A repair
+   wave re-fires only the facet or primary the gate names, never the whole
+   volley (Interac P3C1, 2026-10-10: 5.4 distinct searches a cell against a
+   design of 2.2, 57 turns a lane). **Your lane has a dollar ceiling**
+   (`--max-budget-usd`, named at the top of your prompt): finish a
+   capability's batch before opening the next, so what you wrote is kept.
 3. **Per capability, one turn of writes.** ONE Bash call that (a) `engine.cli
    fetch --url <U> --query '<question>' --via-text <file>` caches the page
    text you will quote (one page per cell at most), (b) writes the ops file —

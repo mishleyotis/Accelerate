@@ -158,7 +158,8 @@ def test_auto_picks_tiers_on_a_degraded_run_and_the_workflow_otherwise(tmp_path)
 def test_a_spent_envelope_stops_the_tiers_before_any_lane(tmp_path):
     run = new_run(tmp_path, selected=two_category_selection(3))
     preflight.record(run, preflight_doc())
-    cost.record(run, stage="RESEARCH", elapsed_s=1, usd=9.99)
+    # a cent under the default envelope (the figure is the owner's; $28 since 2026-10-10)
+    cost.record(run, stage="RESEARCH", elapsed_s=1, usd=cost.STAGE_BUDGET_USD["RESEARCH"] - 0.01)
     disp = S.StubDispatcher(S.default_handlers())
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "o", ingest_poll_s=0,
@@ -359,8 +360,12 @@ def test_parallel_collectors_each_hold_their_capabilitys_window(tmp_path):
     cat = cells[0].split(".")[0]
     caps = sorted({".".join(c.split(".")[:2]) for c in cells if c.startswith(cat + ".")})
     actor = f"research-{cat.lower()}-collector"
-    # the category's window is spent by OTHER lanes of the same category
-    for i in range(L.SEARCH_OP_CEILING):
+    # the capability's window is spent by OTHER lanes of the same category
+    # (since 2026-10-10 the window is the capability's cells + the facet
+    # volleys + slack — `ledger.collector_ceiling` — not the 60-op wall)
+    window = L.collector_ceiling(wb, caps[0])
+    assert window < L.SEARCH_OP_CEILING
+    for i in range(window):
         L.append_search(wb, subcap=f"{caps[0]}.1" if f"{caps[0]}.1" in cells else
                         [c for c in cells if c.startswith(caps[0] + ".")][0],
                         facet="works", query=f"lane one query {i}", tool="web_search",
@@ -370,11 +375,16 @@ def test_parallel_collectors_each_hold_their_capabilitys_window(tmp_path):
         # a sibling lane on another capability still logs: its own conversation
         L.append_search(wb, subcap=other[0], facet="primary", query="its own question",
                         tool="web_search", hits=0, kept=0, actor=actor)
-    # the lane that fired sixty on ITS capability is walled
-    with pytest.raises(L.LedgerRefusal, match="ceiling"):
+    # the lane that spent ITS capability's window is walled
+    with pytest.raises(L.LedgerRefusal, match="window"):
         L.append_search(wb, subcap=[c for c in cells if c.startswith(caps[0] + ".")][0],
-                        facet="fails", query="the sixty-first", tool="web_search",
+                        facet="fails", query="the one past the window", tool="web_search",
                         hits=0, kept=0, actor=actor)
+    # the category producer's window is the category wall: fill it
+    for i in range(L.SEARCH_OP_CEILING - window - (1 if other else 0)):
+        L.append_search(wb, subcap=(other or cells)[0], facet="value",
+                        query=f"producer query {i}", tool="web_search", hits=0, kept=0,
+                        actor=f"research-{cat.lower()}-producer")
     # a category producer (one conversation for the category) keeps the category window
     with pytest.raises(L.LedgerRefusal, match="ceiling"):
         L.append_search(wb, subcap=(other or cells)[0], facet="value", query="producer query",

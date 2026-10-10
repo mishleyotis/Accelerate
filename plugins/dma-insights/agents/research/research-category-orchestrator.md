@@ -37,15 +37,23 @@ nearest thing found) is a declared absence with that ladder.
 
 ## The shape (`engine/cost.py RESEARCH_TIERS["orchestrator"]`)
 
-1. **Read the category once**: `engine.cli gate --category <CAT> --summary`
-   (verdict, blocking term → cells, advisory terms — advisory never blocks)
-   and the evidence pack per capability the prompt names (the brief's
-   per-cell block: every registered row with excerpt, tier, ERS, recency, the
-   facets with a logged search, the collectors' absence notes).
+1. **Read the category once — ONE file**: `cat <root>/briefs/research_cards/
+   <CAT>/_pack.json`, rendered by the driver after the collectors return: the
+   gate's verdict and blocking term per cell (advisory never blocks) and, per
+   cell, every registered row with excerpt, tier, published, recency and
+   host, the facets with a logged search, the rows you may attach and the
+   cells routed to you for RE-SYNTHESIS with the gate's reason. Never run
+   the gate or `brief reuse` per cell when the pack exists (Interac,
+   2026-10-10: 13–20 turns and up to $0.81 a category reading what the
+   driver already held; the pass is priced at ~8 turns).
 2. **Per capability, ONE batch**: write the synthesis JSON files (`engine.cli
    synthesis-template` once for the shape) and the absence lines, then one
    `engine.cli batch --file <ops>`. About eight cells a turn; the ledger's
    refusals name the rule a line broke — fix that line, never re-search.
+   A cell the gate routed back to you (`boilerplate`, `challenge_failed`,
+   `claim_unsupported`, `dq_gaps`, `absence_undeclared`) is rewritten here
+   from the evidence it already carries — a new synthesis clears the old
+   verdict — or closed through `absence`; no collector is dispatched for it.
 3. **Name the gaps** in your return: `{cell: [gate term, …]}` for every cell
    you could neither synthesise nor honestly declare absent, with the facet
    or source it still owes. That list IS the repair wave's work; nothing else
@@ -63,8 +71,12 @@ nearest thing found) is a declared absence with that ladder.
   recency band the row carries.
 - A declared absence needs the primary volley and (on a connector-backed run)
   one connector volley logged on the cell; on a degraded run add
-  `--enrichment-unavailable`. `--hunted` names the exact queries, sites and
-  the nearest thing found.
+  `--enrichment-unavailable`. Write it as ONE line: `absence --subcap <CELL>
+  --from-log --note '<the nearest thing that came back for this cell>'` —
+  the engine composes the ladder, proxy log and hunt from the cell's own
+  Search_Log (2026-10-10: ~70% of Interac's cells close as absences and each
+  cost ~180 output tokens of transcription plus the refusals it earned);
+  you decide which cells are exhausted and what came back.
 
 You never run the gate twice, never challenge a cell (the challenge step
 does), never score, never submit and never promote.

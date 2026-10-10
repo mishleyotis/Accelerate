@@ -418,10 +418,24 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             if why:
                 findings["boilerplate"].append(
                     {"subcap": cell, "field": field, "why": why})
-        why = Q.is_fluent_but_empty(r.get("What_We_Found"))
-        if why:
-            findings["boilerplate"].append(
-                {"subcap": cell, "field": "What_We_Found", "why": why})
+        # THE ANCHOR RULE IS FOR A SYNTHESIS, NOT FOR A DECLARED ABSENCE
+        # (R-INTERAC-20261010, 2026-10-10). `declare_absence` writes
+        # What_We_Found itself — "Searched and not found: <hunted>. Volleys
+        # fired: …" — and whether that hunt is checkable is proven by the
+        # writer's own refusals (every volley logged, the ladder's queries
+        # in the Search_Log, `--hunted` naming what came back, no sibling's
+        # text). Measured on Interac: fifteen declared absences across
+        # P1C4 / P3C1 / P1C3 failed `boilerplate` here because "Interac" is
+        # one capitalised word and the hunt named no year, so the category
+        # could never pass, and every round re-handed those cells to a
+        # COLLECTOR, which cannot touch a What_We_Found. Read and write must
+        # agree (AUD-0117): the writer never applies this rule to an
+        # absence, so neither does the gate.
+        if not L.is_declared_absent(r, declared=declared_set):
+            why = Q.is_fluent_but_empty(r.get("What_We_Found"))
+            if why:
+                findings["boilerplate"].append(
+                    {"subcap": cell, "field": "What_We_Found", "why": why})
 
         for f in L.DQ_FIELDS:
             v = str(r.get(f) or "").strip()
@@ -739,6 +753,70 @@ def read_verdict(qa_dir: Path, category: str) -> dict | None:
         return json.loads(p.read_text())
     except (ValueError, OSError):
         return None
+
+
+#: WHICH TIER REPAIRS A BLOCKING TERM (2026-10-10, R-INTERAC-20261010).
+#:
+#: Until this table existed every blocker on a closed cell was handed to a
+#: COLLECTOR wave, then the orchestrator, then the challenger — the full
+#: round at the full price. Measured on Interac after one tiers round: the
+#: 46 repair cells of five categories were `boilerplate` (15), `challenge_
+#: failed` (9, every reason a claim/tense/label defect: "present tense on an
+#: undated T4 row", "FACT on two interac.ca pages"), `challenge_missing` (8)
+#: — not one of them a collection gap — and seven collector lanes (~$3.40,
+#: 28–57 turns each) were paid to "collect for boilerplate". A term names
+#: the tier that can close it:
+#:   collect     the Search_Log or the register is short — a haiku lane
+#:   synthesise  the row's prose, label or disposition is wrong — the
+#:               orchestrator rewrites it (which clears the verdict)
+#:   challenge   the verdict is missing or not independent — a challenger
+#: A term in none of the sets routes to `synthesise` (the judgement tier
+#: reads the gate and decides), never silently to a collector.
+REPAIR_ROUTES = {
+    "collect": ("primary_unfired", "volleys_incomplete", "absence_unsearched",
+                "absence_single_tool", "evidence_smear", "single_source_fact"),
+    "synthesise": ("boilerplate", "claim_unsupported", "dq_gaps", "challenge_failed",
+                   "absence_undeclared", "absence_undeclared_empty",
+                   "absence_over_evidence", "unresolved_citations",
+                   "synthesis_missing"),
+    "challenge": ("challenge_missing", "challenge_not_independent"),
+}
+
+
+def route_repairs(blocking: dict[str, list[str]]) -> dict[str, dict[str, list[str]]]:
+    """{cell: [terms]} from `blocking_cells` → {tier: {cell: [its terms]}}.
+
+    A cell may appear under two tiers (a missing facet AND a failed claim);
+    each tier gets only the terms it can close. Order inside a tier follows
+    the gate's own list."""
+    out: dict[str, dict[str, list[str]]] = {"collect": {}, "synthesise": {}, "challenge": {}}
+    tier_of = {t: tier for tier, terms in REPAIR_ROUTES.items() for t in terms}
+    for cell, terms in (blocking or {}).items():
+        for t in terms:
+            tier = tier_of.get(t, "synthesise")
+            out[tier].setdefault(cell, [])
+            if t not in out[tier][cell]:
+                out[tier][cell].append(t)
+    return out
+
+
+def blocking_reasons(doc: dict | None) -> dict[str, str]:
+    """{cell: "term: why"} — the gate's own reason per repair cell, where
+    the finding carries one (the challenger's rationale, the boilerplate
+    rule), so the tier that repairs the cell reads WHY without re-reading
+    a tens-of-KB verdict file."""
+    out: dict[str, str] = {}
+    if not doc or doc.get("gate") == "PASS":
+        return out
+    for term in doc.get("blocking") or []:
+        for e in doc.get(term) or []:
+            if isinstance(e, dict) and e.get("subcap") and (e.get("why") or e.get("field")):
+                why = str(e.get("why") or "").strip()
+                field = str(e.get("field") or "").strip()
+                line = f"{term}" + (f" on {field}" if field else "") + (f": {why}" if why else "")
+                cur = out.get(str(e["subcap"]))
+                out[str(e["subcap"])] = (cur + " | " + line) if cur else line
+    return out
 
 
 def blocking_cells(doc: dict | None) -> dict[str, list[str]]:

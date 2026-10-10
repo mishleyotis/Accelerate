@@ -389,8 +389,8 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
 
 - **Workflow optimisation** (user, 2026-10-09, after reading every DMA
   session of 2026-09-25..10-09; `plugins/dma-insights/docs/WORKFLOW-OPTIMIZATION-2026-10-09.md`):
-  **per-stage envelopes are the budget** — PRELIM $2 · RESEARCH $10 ·
-  SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
+  **per-stage envelopes are the budget** — PRELIM $2 · RESEARCH $10 (raised
+  to **$28** on 2026-10-10, below) · SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
   `--stage-budget STAGE=USD`, persisted); a stage at its envelope stops as
   `STOPPED_STAGE_BUDGET`, a handoff is refused `AT_STAGE_BUDGET`, and
   `guard_dispatch` refuses the agent — when the envelopes are the binding
@@ -497,6 +497,42 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   run without it runs research `--tiers-direct`. In-session agents whose
   prompt names the run are priced into the ledger (the IMA PRELIM relay,
   $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
+
+- **Interac research cost audit** (user, 2026-10-10, "$10 for a successful
+  research pass across 16 categories … are you batching … and limiting tool
+  use?"; `WORKFLOW-OPTIMIZATION-2026-10-09.md` §13, read from the run's own
+  snapshot): one tiers round over five categories cost $10.94 ($0.059/cell),
+  0 of 5 passed, and all 46 repair cells were synthesis or verdict defects
+  handed to COLLECTORS. Closed in code: **a declared absence is never
+  `boilerplate`** (the gate's anchor rule is for syntheses; "Interac" is one
+  capitalised word); **repairs route by tier** (`floors_gate.REPAIR_ROUTES`:
+  collect / re-synthesise / re-challenge; a category with no collection gets
+  no collector lane; `challenge_missing` is closed in-round); **every lean
+  lane carries `--max-budget-usd`** at its priced shape × 1.5, a phase's caps
+  scaled to the envelope or the phase refused (`cost.lane_cap_usd`,
+  `budget_cut` reported); **a collector's search window is its capability's
+  cells + 5 facets + 3** (`ledger.collector_ceiling`), not the 60-op wall;
+  the orchestrator reads **one pre-rendered pack** (`_pack.json`); **the
+  engine composes a declared absence from the cell's own Search_Log**
+  (`absence --from-log --note`, the orchestrator decides which cells and what
+  came back); two challenge FAIL sentences are refused at the write (present
+  tense on UNVERIFIED/ARCHIVAL/STALE rows; one registrable domain is one
+  identity); the calibration floor follows cells, not categories.
+  **Measured the same day on an isolated copy of the run** (one lean
+  collector lane, P4C2.1–2, 12 cells: 22 searches, ~8 turns, 135 s, 5
+  evidence rows, **$0.2875 of which $0.22 is 22 × $0.01 WebSearch fees** —
+  the CLI bills every search request at $0.01 inside `total_cost_usd`):
+  **the search is the bill.** `cost.SEARCH_FEE_USD` prices it; the gold
+  contract's 1,342 searches for 686 cells are $13.42 of fees, so the
+  enforced shape prices 686 cells at **$27.49** ($0.040/cell; Interac
+  measured $0.082 with nothing passing) and **$10 funds ~250 cells (≈6
+  categories whole)** — the model says so and defers the rest by name. No
+  combination that keeps the gold row contract (one primary per cell, five
+  facets per capability) lands under $10 on WebSearch. **Owner's decision
+  (2026-10-10): "keep gold; envelope $28"** — `STAGE_BUDGET_USD["RESEARCH"]`
+  is 28.00, every quality rule stays, the lane caps hold the figure; the
+  default run ceiling (the envelopes' sum) is $43. PRELIM on opus ($4.86 vs
+  $2) is flagged, not changed.
 
 ## Open decisions — leave open, do not resolve silently
 

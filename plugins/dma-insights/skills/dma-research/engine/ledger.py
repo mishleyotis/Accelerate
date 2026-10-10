@@ -90,6 +90,24 @@ def host_of(url: str | None) -> str:
     return str(url or "").split("//")[-1].split("/")[0].lower().removeprefix("www.")
 
 
+_CC_SECOND_LEVEL = {"co", "com", "org", "net", "gov", "ac", "edu", "gc"}
+
+
+def source_identity(url: str | None) -> str:
+    """ONE SOURCE IDENTITY IS THE REGISTRABLE DOMAIN, not the host (2026-10-10,
+    R-INTERAC-20261010 P1C4.8.1: a FACT rested on `interac.ca` and
+    `newsroom.interac.ca`, two hosts of one publisher; the challenger
+    refused it, the write had let it through). `co.uk`-style second levels
+    keep three labels."""
+    h = host_of(url)
+    if not h:
+        return ""
+    parts = h.split(".")
+    if len(parts) >= 3 and parts[-2] in _CC_SECOND_LEVEL and len(parts[-1]) == 2:
+        return ".".join(parts[-3:])
+    return ".".join(parts[-2:]) if len(parts) >= 2 else h
+
+
 def is_own_host(wb: RunWorkbook, url: str | None) -> bool:
     h = host_of(url)
     return bool(h) and any(h == o or h.endswith("." + o) for o in own_hosts(wb))
@@ -783,6 +801,39 @@ def _collector_scope(actor, cells) -> str | None:
     return caps.pop() if len(caps) == 1 else None
 
 
+#: THE COLLECTOR'S WINDOW IS A BUDGET, NOT A WALL (2026-10-10, after
+#: R-INTERAC-20261010). `_collector_scope` gave each capability its own
+#: window on 2026-10-09 so eight parallel lanes stopped walling each other
+#: — but the window stayed SEARCH_OP_CEILING (60), a context-preservation
+#: figure sized for a category, and a capability of five cells could fire
+#: sixty searches before anything refused. Interac's P3C1 fired 200 distinct
+#: searches for 37 cells (5.4 a cell; 14.6 Search_Log rows a cell against
+#: the 6 the gate needs) and its collectors ran 57 turns a lane at $0.64.
+#: The design is one primary a cell plus one volley per facet per
+#: capability, logged with every cell: cells + len(FACETS). The window is
+#: that figure plus a little slack for a re-worded primary or a proxy rung
+#: — the owner's question, "are you limiting tool use accordingly", made
+#: into the number the ledger refuses past.
+COLLECTOR_WINDOW_SLACK = 3
+
+
+def collector_ceiling(wb: RunWorkbook, capability: str) -> int:
+    """Distinct searches a collector lane may fire on one capability: its
+    selected cells + the facet volleys + slack, never above the category
+    wall. A capability with no selected cells (a stale scope) keeps the
+    wall, so nothing is refused on a miscount."""
+    cap = str(capability or "").strip().upper()
+    if not cap or "." not in cap:
+        return SEARCH_OP_CEILING
+    try:
+        n = sum(1 for c in wb.selected_subcaps() if str(c).upper().startswith(cap + "."))
+    except Exception:                                   # noqa: BLE001
+        return SEARCH_OP_CEILING
+    if n <= 0:
+        return SEARCH_OP_CEILING
+    return min(SEARCH_OP_CEILING, n + len(C.FACETS) + COLLECTOR_WINDOW_SLACK)
+
+
 def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     """Searches FIRED since the last recorded checkpoint.
 
@@ -821,6 +872,13 @@ def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     marks = cp.get("marks") if isinstance(cp.get("marks"), dict) else {}
     if scope is not None and scope in marks:
         mark = int(marks.get(scope) or 0)
+    elif scope is not None and "." in scope and scope.split(".")[0] in marks:
+        # a collector lane's window is its capability's, measured from the
+        # CATEGORY checkpoint the lane wrote at its open (`engine.cli
+        # checkpoint --category`): a repair lane in a later round starts a
+        # fresh window instead of inheriting round 0's spent one (the
+        # per-capability window became a budget on 2026-10-10)
+        mark = int(marks.get(scope.split(".")[0]) or 0)
     else:
         try:
             mark = int(cp.get("search_ops") or 0)
@@ -941,7 +999,19 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
         {"Tool": tool, "Actor": actor,
          "SubCap_ID": "" if prelim or not cells else cells[0]})
     since = _ops_since_checkpoint(wb, scope)
-    if since >= SEARCH_OP_CEILING:
+    cap = collector_ceiling(wb, scope) if scope and "." in scope else SEARCH_OP_CEILING
+    if since >= cap:
+        if cap < SEARCH_OP_CEILING:
+            raise LedgerRefusal(
+                f"search window spent for {scope}: {since} distinct search(es) since "
+                f"its checkpoint against a window of {cap} (its cells + the "
+                f"{len(C.FACETS)} facet volleys + {COLLECTOR_WINDOW_SLACK} slack). "
+                f"The window is the capability's budget, not a context wall: one "
+                f"primary per cell, one volley per facet logged with every cell. "
+                f"Write what you have for this capability (fetch, evidence, attach, "
+                f"batch) and move to the next; a cell you did not reach is the next "
+                f"round's work, and re-firing a volley the log already carries buys "
+                f"nothing.")
         raise LedgerRefusal(
             f"search-op ceiling reached for {scope}: {since} since its last "
             f"checkpoint, cap {SEARCH_OP_CEILING}. Checkpoint and stop — "
@@ -1298,9 +1368,24 @@ def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
     idents = set()
     for r in rows:
         url = str(r.get("Source_URL") or "")
-        idents.add(host_of(url) or str(r.get("Source_Name") or "").strip().lower())
+        idents.add(source_identity(url) or str(r.get("Source_Name") or "").strip().lower())
     idents.discard("")
     claim = str(merged.get("Dominant_Claim") or "")
+    # TENSE FOLLOWS THE EVIDENCE AGE (2026-10-10). Six of Interac's nine
+    # challenge FAILs were one sentence: "claim says Interac 'runs' / 'provides'
+    # / 'delivers' in the present tense, but the only rows are undated T4
+    # postings (UNVERIFIED) / ARCHIVAL; undated is never current". A rule the
+    # challenger states in one sentence is refused here, before it costs a
+    # challenge lane, an orchestrator repair pass and a re-challenge.
+    recs = {str(r.get("Recency") or "").strip().upper() for r in rows}
+    if rows and recs and recs <= {"UNVERIFIED", "ARCHIVAL", "STALE"} \
+            and _PRESENT_TENSE.search(claim) and not _DATED_CLAIM.search(claim):
+        out.append(
+            f"the claim is in the present tense but every row it cites is "
+            f"{'/'.join(sorted(recs))} — undated or old evidence is never current. "
+            f"Date the claim (\"as of <year>\", \"reported in <year>\", \"a <year> "
+            f"posting sought …\") or state what the row shows (an open role, a past "
+            f"programme), not what the entity does today")
     absence = Q.claims_absence(claim) or str(
         merged.get("Absence_Claimed") or "").strip().upper() in ("YES", "TRUE", "1")
     if label == "FACT" and rows and len(idents) < 2:
@@ -1685,6 +1770,66 @@ def enrichment_status(wb: RunWorkbook, category: str,
 #: owed. `direct` is the entity itself; `proxy` is the template's own proxy
 #: class for the cell (leadership_title, regulator_filing, org_talent …).
 ABSENCE_RUNGS_REQUIRED = ("direct", "proxy")
+
+_PRESENT_TENSE = re.compile(
+    r"\b(runs|operates|provides|delivers|maintains|uses|offers|employs|holds|has|is|are|"
+    r"deploys|publishes|tracks|measures|monitors|manages|staffs)\b", re.I)
+_DATED_CLAIM = re.compile(
+    r"\b(19|20)\d\d\b|\bas of\b|\breported\b|\bformerly\b|\bpreviously\b|\bhistoric|"
+    r"\bsought\b|\bposting\b|\badvertised\b|\bonce\b|\bpast\b|\bundated\b", re.I)
+
+
+def compose_absence(wb: RunWorkbook, subcap: str, *, note: str | None = None) -> dict:
+    """The declared absence's ladder, proxy log and hunt, COMPOSED FROM THE
+    CELL'S OWN SEARCH_LOG (2026-10-10, R-INTERAC-20261010).
+
+    Why the engine writes this text: on Interac ~70% of cells close as
+    absences, and every one cost the sonnet orchestrator ~180 output tokens
+    of ladder JSON, proxy log, hunt and question — transcribed from the
+    collectors' notes and the Search_Log the engine already holds — plus
+    the refusals that transcription earned (`hunted_shared`, a ladder rung
+    the log never saw, a 39-char proxy log). The JUDGEMENT stays with the
+    orchestrator: it decides which cells are exhausted and names, per cell,
+    the nearest thing that came back (`note`). The engine supplies the
+    cell's own primary as the direct rung, one of its own facet volleys as
+    the proxy rung, and a hunt that names the cell, its queries, the tools
+    and the note — so it is never a sibling's text by construction. Every
+    refusal in `declare_absence` still applies to the result."""
+    rows = [r for r in wb.rows("Search_Log")
+            if str(r.get("SubCap_ID") or "").strip() == subcap]
+    cap = ".".join(subcap.split(".")[:2])
+    sibs = [c for c in wb.selected_subcaps() if c != subcap
+            and ".".join(c.split(".")[:2]) == cap]
+    sib_primaries = {_norm_hunt(r.get("Query")) for r in wb.rows("Search_Log")
+                     if str(r.get("SubCap_ID") or "").strip() in sibs
+                     and str(r.get("Facet") or "").strip() == C.PRIMARY_FACET}
+    primaries = [str(r.get("Query") or "") for r in rows
+                 if str(r.get("Facet") or "").strip() == C.PRIMARY_FACET and r.get("Query")]
+    own = [q for q in primaries if _norm_hunt(q) not in sib_primaries]
+    primary = (own or primaries or [""])[0]
+    by_facet: dict[str, str] = {}
+    for r in rows:
+        f = str(r.get("Facet") or "").strip()
+        if f and f != C.PRIMARY_FACET and r.get("Query") and f not in by_facet:
+            by_facet[f] = str(r.get("Query"))
+    proxy_facet = next((f for f in ("corroborates", "works", "value", "fails", "contradicts")
+                        if f in by_facet), next(iter(by_facet), ""))
+    proxy_q = by_facet.get(proxy_facet, "")
+    tools = sorted({str(r.get("Tool") or "").strip() for r in rows if r.get("Tool")})
+    name = C.subcap_names().get(subcap) or subcap
+    proxy_class = C.proxy_classes().get(subcap, "") or "named-owner"
+    came_back = str(note or "").strip() or "no page naming this capability at the entity"
+    facet_txt = "; ".join(f"{f}: {q}" for f, q in by_facet.items())
+    ladder = [{"rung": "direct", "query": primary}, {"rung": "proxy", "query": proxy_q}]
+    proxy_log = (f"hunted the {proxy_class} proxy for {name} ({subcap}) through the "
+                 f"{proxy_facet or 'facet'} volley '{proxy_q}' and {len(rows)} logged "
+                 f"search(es) over {', '.join(tools) or 'web_search'}; what came back: "
+                 f"{came_back}")
+    hunted = (f"{subcap} primary '{primary}' on {', '.join(tools) or 'web_search'}; "
+              f"facet queries {facet_txt}; {len(rows)} searches logged. Nearest thing "
+              f"that came back for {subcap}: {came_back}")
+    return {"ladder": ladder, "proxy_log": proxy_log, "what_was_hunted": hunted,
+            "primary": primary, "primary_is_own": bool(own), "tools": tools}
 
 
 def enrichment_binding(wb: RunWorkbook) -> dict:

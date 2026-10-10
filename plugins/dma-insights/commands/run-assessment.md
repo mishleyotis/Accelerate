@@ -337,10 +337,21 @@ are watchable live with `agent_run.py watch --log-dir <ROOT>/agent_logs`;
 run `then`. `--only-categories P2C1,P4C3` narrows the stage (a pilot); a
 passing scope ends `SCOPE_COMPLETE` (exit 0) and a run without the flag
 continues the rest. `--tiers-direct` lets the driver run the lanes itself
-(a Routine with no Workflow tool). Measured: ~10 minutes and $1.4–$3.4 a
-57-cell category; the full 686-cell IMA scope ≈ $26, so the $10 envelope
-funds whole categories cheapest first and names the rest — raising it is the
-owner's call.
+(a Routine with no Workflow tool). Measured 2026-10-09: ~10 minutes and
+$1.4–$3.4 a 57-cell category; Interac 2026-10-10: $0.059/cell and 0 of 5
+categories passing, which is what made every lane carry `--max-budget-usd`
+at its priced shape, a collector's search window its capability's cells + 5
+facets + 3, and a repair route to the tier that can close it (§13 of the
+optimisation doc). Measured the same day: every WebSearch request bills
+$0.01 inside the lane's cost — 77% of a disciplined collector lane — so the
+gold contract's ~1,340 searches for 686 cells are ~$13 of fees before a
+token is written. At the enforced shape a 43-cell category is ~$1.7 end to
+end and the 686-cell scope ≈ $27; the owner set the RESEARCH envelope to
+**$28** (2026-10-10, "keep gold") so a 16-category pass fits one run with
+every rule kept. A tighter `--stage-budget RESEARCH=<usd>` funds whole
+categories cheapest first and names the rest; funding Exa, relaxing a
+volley rule, or narrowing the scope (`--only-categories`) is the owner's
+call, never the driver's.
 
 **Where the owner sees the run: the conversation.** The owner follows DMA
 sessions from the Claude app, and a workflow's progress view (`/workflows`)

@@ -685,7 +685,7 @@ Arbor Bank $409, Susser Bank $450, B1 Bank $1,236 against a printed $20;
 research 55–62 % of the money, 212 / 141 floors rounds, 46 / 76 / 61 critic
 rounds, 137 / 154 report reviews, 55 / 76 page attempts.
 
-- **Envelopes.** `cost.STAGE_BUDGET_USD` — PRELIM $2, RESEARCH $10, SCORING
+- **Envelopes.** `cost.STAGE_BUDGET_USD` — PRELIM $2, RESEARCH $28 (owner, 2026-10-10; was $10), SCORING
   $5, REPORTS $5, PAGES $3 — are ceilings of their own beside `--max-usd`.
   `--stage-budget RESEARCH=12` overrides one family and is persisted on the
   run. A stage at its envelope stops as `STOPPED_STAGE_BUDGET` (exit 1) with

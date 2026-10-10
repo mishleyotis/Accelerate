@@ -29,9 +29,11 @@ PLUGIN = Path(__file__).resolve().parents[3] / "plugins" / "dma-insights"
 # ── 1. the envelopes ───────────────────────────────────────────────────────
 
 def test_the_owner_s_stage_envelopes_are_the_cost_model_s():
-    """Research <= $10, scoring <= $5, reports <= $5: the owner's figures,
-    stated once, and the run-wide default is their sum."""
-    assert cost.STAGE_BUDGET_USD["RESEARCH"] == 10.0
+    """Research <= $28 (the owner's 2026-10-10 figure, after the search fee
+    was measured: the $10 of 2026-10-09 funded six categories a run),
+    scoring <= $5, reports <= $5: the owner's figures, stated once, and the
+    run-wide default is their sum."""
+    assert cost.STAGE_BUDGET_USD["RESEARCH"] == 28.0
     assert cost.STAGE_BUDGET_USD["SCORING"] == 5.0
     assert cost.STAGE_BUDGET_USD["REPORTS"] == 5.0
     assert cost.run_budget_default(4) == sum(cost.STAGE_BUDGET_USD.values())
@@ -42,8 +44,9 @@ def test_challenge_and_relay_pay_from_the_research_envelope():
     rows = [{"stage": "RESEARCH", "usd": 6.0}, {"stage": "CHALLENGE", "usd": 3.0},
             {"stage": "RELAY", "usd": 2.0}, {"stage": "SCORING", "usd": 1.0},
             {"stage": "INGEST_A", "usd": None}]
-    env = cost.envelopes(rows)
+    env = cost.envelopes(rows, {"RESEARCH": 10.0})   # this test's explicit $10
     assert env["RESEARCH"]["spent"] == 11.0 and env["RESEARCH"]["over"]
+    assert not cost.envelopes(rows)["RESEARCH"]["over"]   # the default is $28 since 2026-10-10
     assert env["SCORING"]["spent"] == 1.0 and not env["SCORING"]["over"]
     assert cost.stage_family("INGEST_A") is None
     assert cost.stage_family("PAGES_B") == "PAGES"
@@ -135,8 +138,9 @@ def _drive(tmp_path, **over):
 def test_the_research_envelope_stops_the_stage_mid_round_with_its_remedy(tmp_path):
     """$4 a round against a $10 envelope: three rounds, then STOPPED_STAGE_BUDGET
     naming `--stage-budget RESEARCH=`, with the run-wide cap disabled — the
-    envelope is a ceiling of its own."""
-    p, disp, out = _drive(tmp_path)
+    envelope is a ceiling of its own. The $10 is this test's explicit figure
+    (the default envelope became $28 on 2026-10-10)."""
+    p, disp, out = _drive(tmp_path, stage_budget={"RESEARCH": 10.0})
     rounds = len([c for c in disp.calls if c["stage"] == "RESEARCH"])
     assert out["outcome"] == "STOPPED_STAGE_BUDGET", out
     assert rounds == 3, rounds
@@ -168,7 +172,7 @@ def test_a_spent_envelope_refuses_the_workflow_handoff_before_any_agent(tmp_path
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
                                   sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
-                                  research_mode="workflow"))
+                                  research_mode="workflow", stage_budget={"RESEARCH": 10.0}))
     out = p.run_all()
     assert out["outcome"] == "STOPPED_STAGE_BUDGET", out
     assert "AT_STAGE_BUDGET" in out["reason"] and "RESEARCH" in out["reason"]
@@ -188,7 +192,7 @@ def test_the_handoff_carries_the_envelope_and_caps_rounds_when_it_does_not_fit(t
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
                                   sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
-                                  research_mode="workflow"))
+                                  research_mode="workflow", stage_budget={"RESEARCH": 10.0}))
     out = p.run_all()
     assert out["outcome"] == "STOPPED_STAGE_BUDGET", out
     assert "AT_STAGE_BUDGET before dispatch" in out["reason"]
@@ -588,22 +592,22 @@ def test_et07_exempts_the_identity_grain_prelim_narratives(tmp_path):
 # ── 12. the envelopes partition the run ceiling ───────────────────────────
 
 def test_an_owner_ceiling_is_the_stop_and_the_envelopes_report(tmp_path):
-    """`--max-usd 12`: the owner's figure is the stop — the run ends
-    STOPPED_BUDGET at $12 and raising it is how it continues
+    """`--max-usd 30`: the owner's figure is the stop — the run ends
+    STOPPED_BUDGET at $30 and raising it is how it continues
     (test_budget_ceiling) — and the RESEARCH envelope reports its spend
     without stopping. `--stage-budget` binds whatever the ceiling says; a
     run with no dollar figure typed is bound by every envelope."""
     run = new_run(tmp_path, n=6)
     base = dict(dispatcher=S.StubDispatcher(), reads=S.StubReads(), shipper=S.StubShipper(),
                 push=False, log=lambda s: None)
-    p = P.Pipeline(run, P.Options(**base, max_usd=12.0))
-    p._spent_usd = 11.0
+    p = P.Pipeline(run, P.Options(**base, max_usd=30.0))
+    p._spent_usd = cost.STAGE_BUDGET_USD["RESEARCH"] + 1.0   # past the $28 envelope, under the ceiling
     p._running_stage = "RESEARCH"
     b = p.stage_budget_block("RESEARCH")
     assert b["binding"] is False and b["at_ceiling"] is True and b["over"] is False
-    assert "--max-usd" in b["binding_reason"] and "12.00" in b["binding_reason"]
+    assert "--max-usd" in b["binding_reason"] and "30.00" in b["binding_reason"]
     assert p._over_budget() is False and p._over_stage_budget("RESEARCH") is False
-    p._spent_usd = 12.0
+    p._spent_usd = 30.0
     assert p._over_budget() is True
     q = P.Pipeline(run, P.Options(**base, max_usd=0))
     assert q.envelopes_binding()[0] is False
@@ -612,6 +616,6 @@ def test_an_owner_ceiling_is_the_stop_and_the_envelopes_report(tmp_path):
     assert r.envelopes_binding() == (True, "explicit --stage-budget")
     assert r._over_stage_budget("RESEARCH") is True
     s_ = P.Pipeline(run, P.Options(**base))
-    assert s_.envelopes_binding()[0] is True and s_.budget_usd() == 25.0
-    s_._spent_usd = 10.0; s_._running_stage = "RESEARCH"
+    assert s_.envelopes_binding()[0] is True and s_.budget_usd() == sum(cost.STAGE_BUDGET_USD.values())
+    s_._spent_usd = cost.STAGE_BUDGET_USD["RESEARCH"]; s_._running_stage = "RESEARCH"
     assert s_._over_stage_budget("RESEARCH") is True

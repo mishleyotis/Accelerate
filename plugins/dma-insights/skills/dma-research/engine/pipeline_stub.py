@@ -167,6 +167,15 @@ def lane_research(agent, prompt_file, ctx):
         return _lane_web_only(agent, wb, cells)
     for c in cells:
         row = next((r for r in wb.rows(f"{c[:2]}_Subcap_Scoring") if r.get("SubCap_ID") == c), {})
+        if str(row.get("Challenge_Verdict") or "").strip().upper() == "FAIL":
+            # RE-SYNTHESIS (2026-10-10): what the real orchestrator does with
+            # a cell the gate routed back to it — rewrite the row from the
+            # evidence it carries; the new synthesis clears the verdict and
+            # the fixture's challenger judges the new text
+            have = [e for e in (ev.get(c) or [])]
+            eids = have if len(have) >= 2 else F.bank_evidence(wb, c, n=5) + have
+            F.synthesise(wb, c, F.good_synthesis(c, eids), author=agent)
+            continue
         if str(row.get("Dominant_Claim") or "").strip() or L.is_declared_absent(row, wb):
             continue
         if c == last and len(cells) > 1:
@@ -530,7 +539,20 @@ class StubDispatcher:
         if os.environ.get("DMA_STUB_NO_USD", "") in ("", "0"):
             per = float(os.environ.get("DMA_STUB_USD_PER_LANE") or 0.0)
             if per:
-                out["usd"] = round(per * len(rows), 4)
+                # A LEAN ROW'S CEILING BINDS THE STUB TOO (2026-10-10): a lane
+                # priced above its `lean.max_usd` is booked at the cap and
+                # counted `budget_cut`, the way `claude -p --max-budget-usd`
+                # ends the real child — so a stub walk proves the envelope
+                # cannot be crossed by a runaway lane.
+                usd, cut = 0.0, 0
+                for row in rows:
+                    cap = ((row.get("lean") or {}).get("max_usd"))
+                    if cap is not None and float(cap) > 0 and per > float(cap):
+                        usd += float(cap); cut += 1
+                    else:
+                        usd += per
+                out["usd"] = round(usd, 4)
+                out["budget_cut"] = cut
                 out["turns"] = _env_int("DMA_STUB_TURNS_PER_LANE") * len(rows) or None
         return out
 

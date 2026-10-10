@@ -366,8 +366,22 @@ def lean_command(name: str, lean: dict, prompt: str, *, stream: bool,
            "--tools", ",".join(tools), f"--allowedTools={','.join(tools)}",
            "--append-system-prompt-file", str(sp),
            "--exclude-dynamic-system-prompt-sections"]
-    if fm.get("maxTurns") and not lean.get("max_turns"):
-        pass                    # the CLI has no turn cap flag in -p; the prompt bounds it
+    # THE LANE'S PRICE IS ITS CEILING (2026-10-10, R-INTERAC-20261010). The
+    # CLI has no turn cap in -p, and the prompt's turn economy did not hold:
+    # Interac's collectors ran 28-57 turns against a priced 17 and the
+    # orchestrators 2x their shape, $15.13 of RESEARCH for five categories
+    # none of which passed. `--max-budget-usd` is the CLI's own dollar stop;
+    # the driver prices each lane (`cost.lane_cap_usd`) and the child ends
+    # at that figure with what it wrote under the lock kept. The figure is
+    # told to the lane, so it finishes a capability's batch before opening
+    # the next rather than being surprised mid-write.
+    max_usd = lean.get("max_usd")
+    if max_usd is not None and float(max_usd) > 0:
+        cmd += ["--max-budget-usd", f"{float(max_usd):.4f}"]
+        prompt = (f"LANE CEILING: this lane stops at ${float(max_usd):.2f} of model spend "
+                  f"(--max-budget-usd). Finish each capability's batch before starting the "
+                  f"next; what you have written is kept when the ceiling stops you.\n\n"
+                  + prompt)
     if stream:
         cmd += ["--output-format", "stream-json", "--verbose"]
     cmd.append(prompt)
@@ -719,6 +733,13 @@ def _summarise(event: dict, st: dict) -> None:
     elif kind == "result":
         st["doing"] = "done"
         st["result_subtype"] = event.get("subtype")
+        # a child the dollar ceiling stopped says so in its result subtype
+        # (`error_max_budget_usd`); recorded as `budget_cut` so the batch
+        # summary and the driver can count lanes the cap ended, which is a
+        # measurement of the shape, not a failure of the lane
+        sub = str(event.get("subtype") or "").lower()
+        if "budget" in sub:
+            st["budget_cut"] = True
         for key in ("total_cost_usd", "num_turns", "duration_ms",
                     "is_error"):
             if key in event:
@@ -969,7 +990,9 @@ def _dispatch_streaming_one(name: str, prompt: str, timeout: int, repo_root: Pat
     return {"agent": name, "label": label, "code": code, "stdout": out, "stderr": err,
             "note": note, "turns": st.get("num_turns"),
             "usd": st.get("total_cost_usd"),
-            "tokens": st.get("tokens"), "model": st.get("model")}
+            "tokens": st.get("tokens"), "model": st.get("model"),
+            "budget_cut": bool(st.get("budget_cut")),
+            "max_usd": (lean or {}).get("max_usd")}
 
 
 def watch(logs: Path, once: bool = False, interval: float = 3.0) -> int:
@@ -1278,6 +1301,10 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
                "retries_allowed": retries,
                "turns": turns or None,
                "usd": round(sum(usd_vals), 4) if usd_vals else None,
+               # lanes the dollar ceiling ended (lean rows with max_usd)
+               "budget_cut": sum(1 for r in results if r.get("budget_cut")),
+               "cap_usd": (round(sum(float(r.get("max_usd") or 0) for r in results), 4)
+                           if any(r.get("max_usd") is not None for r in results) else None),
                "tokens": tokens or None,
                # One batch is one agent tier in practice; where it is not,
                # the most common one prices the row.
@@ -1289,7 +1316,10 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
                      "attempt_codes": r.get("attempt_codes", [r["code"]]),
                      "started_at": r.get("started_at"),
                      "ended_at": r.get("ended_at"),
-                     "elapsed_s": r.get("elapsed_s")} for r in results],
+                     "elapsed_s": r.get("elapsed_s"),
+                     "turns": r.get("turns"), "usd": r.get("usd"),
+                     "max_usd": r.get("max_usd"),
+                     "budget_cut": bool(r.get("budget_cut"))} for r in results],
                    key=lambda d: d["agent"])}
     if timing_out:
         timing_out.parent.mkdir(parents=True, exist_ok=True)
