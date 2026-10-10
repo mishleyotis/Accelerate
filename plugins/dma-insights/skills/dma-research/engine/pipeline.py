@@ -557,7 +557,8 @@ class Options:
     # dollar ceiling, not the turn ceiling, is the thing that has to bite.
     # Set 0 to disable the ceiling and keep the old reporting-only behaviour.
     max_usd: float | None = None
-    # PER-STAGE ENVELOPES (owner, 2026-10-09): research <= $10, scoring <= $5,
+    # PER-STAGE ENVELOPES (owner, 2026-10-09; RESEARCH raised to $28 on
+    # 2026-10-10 once the search fee was measured): research <= $28, scoring <= $5,
     # reports <= $5 for a 700+-cell run. `cost.STAGE_BUDGET_USD` holds the
     # defaults; this dict overrides one family at a time (`--stage-budget
     # RESEARCH=12`), is persisted in the state file and re-read on resume.

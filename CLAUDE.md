@@ -389,8 +389,8 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
 
 - **Workflow optimisation** (user, 2026-10-09, after reading every DMA
   session of 2026-09-25..10-09; `plugins/dma-insights/docs/WORKFLOW-OPTIMIZATION-2026-10-09.md`):
-  **per-stage envelopes are the budget** — PRELIM $2 · RESEARCH $10 ·
-  SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
+  **per-stage envelopes are the budget** — PRELIM $2 · RESEARCH $10 (raised
+  to **$28** on 2026-10-10, below) · SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
   `--stage-budget STAGE=USD`, persisted); a stage at its envelope stops as
   `STOPPED_STAGE_BUDGET`, a handoff is refused `AT_STAGE_BUDGET`, and
   `guard_dispatch` refuses the agent — when the envelopes are the binding
@@ -528,9 +528,11 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   measured $0.082 with nothing passing) and **$10 funds ~250 cells (≈6
   categories whole)** — the model says so and defers the rest by name. No
   combination that keeps the gold row contract (one primary per cell, five
-  facets per capability) lands under $10 on WebSearch; the owner picks the
-  scope per run or the figure (`--stage-budget RESEARCH=28`), or funds Exa.
-  PRELIM on opus ($4.86 vs $2) is flagged, not changed.
+  facets per capability) lands under $10 on WebSearch. **Owner's decision
+  (2026-10-10): "keep gold; envelope $28"** — `STAGE_BUDGET_USD["RESEARCH"]`
+  is 28.00, every quality rule stays, the lane caps hold the figure; the
+  default run ceiling (the envelopes' sum) is $43. PRELIM on opus ($4.86 vs
+  $2) is flagged, not changed.
 
 ## Open decisions — leave open, do not resolve silently
 

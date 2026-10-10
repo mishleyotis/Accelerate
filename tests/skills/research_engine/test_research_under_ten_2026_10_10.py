@@ -381,10 +381,13 @@ def test_the_lean_price_is_the_enforced_shape_and_says_what_ten_dollars_funds():
     # the lane caps bound the priced shape with slack, never below it
     assert cost.lane_cap_usd("collect", 12, capabilities=2) >= p["per_batch"]
     assert cost.lane_cap_usd("orchestrate", 43) >= p["per_category_orchestrator"]
-    # what the default envelope funds, whole categories, cheapest first
+    # the owner's envelope ($28, 2026-10-10) funds the T1_CORE scope whole;
+    # the $10 of 2026-10-09 funded about six categories a run
     aff = cost.research_affordable(cost.STAGE_BUDGET_USD["RESEARCH"], 686, categories=16,
                                    capabilities=129, lean=True)
-    assert not aff["fits"] and 150 < aff["cells_affordable"] < 686
+    assert aff["fits"] and aff["cells_affordable"] == 686
+    ten = cost.research_affordable(10.0, 686, categories=16, capabilities=129, lean=True)
+    assert not ten["fits"] and 150 < ten["cells_affordable"] < 400
     # the in-session shape is untouched by the lean refit
     # the in-session shape moved only by the fees the search count bills
     insess = cost.research_price(686, categories=16, capabilities=129)

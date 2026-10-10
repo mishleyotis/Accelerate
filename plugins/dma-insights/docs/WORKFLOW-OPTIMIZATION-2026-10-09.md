@@ -800,6 +800,14 @@ cell. **The honest instrument is the one shipped**: the price says what the
 envelope funds, the caps make overspend impossible, and the owner picks the
 scope per run (`--only-categories`) or the figure.
 
+**The owner's decision (2026-10-10, asked with the table above): "Keep
+gold; envelope $28."** `cost.STAGE_BUDGET_USD["RESEARCH"]` is now 28.00:
+every rule of the gold row contract stays, a 16-category pass fits one run
+(686 cells $27.49, Interac's 715 $28.24), the lane caps hold the figure
+and the handoff never asks for more. The default run ceiling, the
+envelopes' sum, is $43. The $10 of 2026-10-09 was set before the search
+fee was measured; it funded six categories a run.
+
 Also found by the measurement: the P4C2 cards for cells 2.2.6–2.2.9
 carried no primary question (the lane wrote one from the cell name), and
 the 2.2.4 card's question did not match its cell name — a card defect

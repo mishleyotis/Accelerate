@@ -77,9 +77,16 @@ BUDGET_PER_PILLAR = 5.00
 #: with `--stage-budget RESEARCH=12`; the run-wide ceiling (`--max-usd`)
 #: stays as the outer wall. A stage at its envelope stops with
 #: AT_STAGE_BUDGET and the exact flag that raises it — never silently.
+#: RESEARCH $28 (owner, 2026-10-10, after the search fee was measured on
+#: Interac — "keep gold; envelope $28"): the gold row contract fires one
+#: primary per cell and five facet volleys per capability, ~1,386 searches
+#: for Interac's 715 cells at $0.01 each, so the $10 figure of 2026-10-09
+#: funded about six categories a run and asked for more money every run.
+#: $28 is the enforced shape's price for a 16-category pass (686 cells
+#: $27.49; 715 cells $28.24) with every rule kept; the lane caps hold it.
 STAGE_BUDGET_USD = {
     "PRELIM": 2.00,
-    "RESEARCH": 10.00,
+    "RESEARCH": 28.00,
     "SCORING": 5.00,
     "REPORTS": 5.00,
     "PAGES": 3.00,

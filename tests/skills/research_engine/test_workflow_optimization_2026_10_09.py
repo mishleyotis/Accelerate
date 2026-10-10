@@ -29,9 +29,11 @@ PLUGIN = Path(__file__).resolve().parents[3] / "plugins" / "dma-insights"
 # ── 1. the envelopes ───────────────────────────────────────────────────────
 
 def test_the_owner_s_stage_envelopes_are_the_cost_model_s():
-    """Research <= $10, scoring <= $5, reports <= $5: the owner's figures,
-    stated once, and the run-wide default is their sum."""
-    assert cost.STAGE_BUDGET_USD["RESEARCH"] == 10.0
+    """Research <= $28 (the owner's 2026-10-10 figure, after the search fee
+    was measured: the $10 of 2026-10-09 funded six categories a run),
+    scoring <= $5, reports <= $5: the owner's figures, stated once, and the
+    run-wide default is their sum."""
+    assert cost.STAGE_BUDGET_USD["RESEARCH"] == 28.0
     assert cost.STAGE_BUDGET_USD["SCORING"] == 5.0
     assert cost.STAGE_BUDGET_USD["REPORTS"] == 5.0
     assert cost.run_budget_default(4) == sum(cost.STAGE_BUDGET_USD.values())
@@ -135,8 +137,9 @@ def _drive(tmp_path, **over):
 def test_the_research_envelope_stops_the_stage_mid_round_with_its_remedy(tmp_path):
     """$4 a round against a $10 envelope: three rounds, then STOPPED_STAGE_BUDGET
     naming `--stage-budget RESEARCH=`, with the run-wide cap disabled — the
-    envelope is a ceiling of its own."""
-    p, disp, out = _drive(tmp_path)
+    envelope is a ceiling of its own. The $10 is this test's explicit figure
+    (the default envelope became $28 on 2026-10-10)."""
+    p, disp, out = _drive(tmp_path, stage_budget={"RESEARCH": 10.0})
     rounds = len([c for c in disp.calls if c["stage"] == "RESEARCH"])
     assert out["outcome"] == "STOPPED_STAGE_BUDGET", out
     assert rounds == 3, rounds
@@ -612,6 +615,6 @@ def test_an_owner_ceiling_is_the_stop_and_the_envelopes_report(tmp_path):
     assert r.envelopes_binding() == (True, "explicit --stage-budget")
     assert r._over_stage_budget("RESEARCH") is True
     s_ = P.Pipeline(run, P.Options(**base))
-    assert s_.envelopes_binding()[0] is True and s_.budget_usd() == 25.0
-    s_._spent_usd = 10.0; s_._running_stage = "RESEARCH"
+    assert s_.envelopes_binding()[0] is True and s_.budget_usd() == sum(cost.STAGE_BUDGET_USD.values())
+    s_._spent_usd = cost.STAGE_BUDGET_USD["RESEARCH"]; s_._running_stage = "RESEARCH"
     assert s_._over_stage_budget("RESEARCH") is True

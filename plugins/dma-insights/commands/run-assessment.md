@@ -346,10 +346,12 @@ optimisation doc). Measured the same day: every WebSearch request bills
 $0.01 inside the lane's cost — 77% of a disciplined collector lane — so the
 gold contract's ~1,340 searches for 686 cells are ~$13 of fees before a
 token is written. At the enforced shape a 43-cell category is ~$1.7 end to
-end and the 686-cell scope ≈ $27, so the $10 envelope funds ~6 categories
-whole, cheapest first, and names the rest — raising it (`--stage-budget
-RESEARCH=28`), funding Exa, relaxing a volley rule, or narrowing the scope
-(`--only-categories`) is the owner's call, never the driver's.
+end and the 686-cell scope ≈ $27; the owner set the RESEARCH envelope to
+**$28** (2026-10-10, "keep gold") so a 16-category pass fits one run with
+every rule kept. A tighter `--stage-budget RESEARCH=<usd>` funds whole
+categories cheapest first and names the rest; funding Exa, relaxing a
+volley rule, or narrowing the scope (`--only-categories`) is the owner's
+call, never the driver's.
 
 **Where the owner sees the run: the conversation.** The owner follows DMA
 sessions from the Claude app, and a workflow's progress view (`/workflows`)
