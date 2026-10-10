@@ -1535,8 +1535,11 @@ def _md(title: str, packet: dict) -> str:
 
 
 def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
-                 stage: str, batch_name: str = "batch.json") -> dict:
-    """Write <name>.md/.json per lane plus the agent_run batch array."""
+                 stage: str, batch_name: str = "batch.json",
+                 lean: dict | None = None) -> dict:
+    """Write <name>.md/.json per lane plus the agent_run batch array. `lean`
+    maps a lane name to its lean spec ({model, tools, cwd, actor}): the lane
+    then runs as a lean headless child on THAT model, not on its manifest's."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     rows, wrote = [], []
@@ -1547,7 +1550,10 @@ def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
             json.dumps(packet, indent=2, default=str), encoding="utf-8")
         # `label` names the lane's transcript: several lanes may run one agent
         # (a pillar's scoring split across lanes) and must not share a log.
-        rows.append({"agent": packet["agent"], "prompt_file": str(path), "label": name})
+        row = {"agent": packet["agent"], "prompt_file": str(path), "label": name}
+        if lean and lean.get(name):
+            row["lean"] = dict(lean[name])
+        rows.append(row)
         wrote.append({"lane": name, "agent": packet["agent"],
                       "prompt_file": str(path), "chars": packet["packet_chars"]})
     batch_path = out_dir / batch_name
@@ -1565,6 +1571,28 @@ def _write_lanes(out_dir: Path, lanes: list[tuple[str, dict, str]], *, run,
 
 def _engine(run) -> str:
     return f"--run {run.run_id} --root {run.root}" if run is not None else "--run <R> --root <ROOT>"
+
+
+#: THE PRELIM LANES' MODEL AND FLOOR (R-INTERAC-20261010, 2026-10-10). The
+#: conductor lane ran `--agent research-conductor`, whose manifest says opus,
+#: from the repo root (CLAUDE.md, skill listings, MCP schemas in every turn):
+#: 70 turns at a 133K average context, $4.31 of PRELIM's $4.86 against a $2
+#: envelope. PRELIM's narrative sections are sonnet judgement; the technology
+#: baseline is registration of what a scan read (haiku). Both run lean — no
+#: MCP (the connector pass is the session's relay), no settings, only the
+#: tools the work uses, from the run directory. The in-session
+#: research-conductor identity keeps its own manifest model.
+PRELIM_LANE_MODELS = {"prelim-conductor": "sonnet", "prelim-techscan": "haiku"}
+PRELIM_LANE_TOOLS = ["Bash", "Read", "WebSearch", "WebFetch"]
+
+
+def prelim_lean_specs(run) -> dict:
+    root = str(run.root) if run is not None else None
+    actors = {"prelim-conductor": "research-conductor",
+              "prelim-techscan": "technographic-scanner"}
+    return {name: {"model": model, "tools": list(PRELIM_LANE_TOOLS),
+                   "actor": actors[name], **({"cwd": root} if root else {})}
+            for name, model in PRELIM_LANE_MODELS.items()}
 
 
 def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
@@ -1653,7 +1681,7 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     out = _write_lanes(out_dir, [
         ("prelim-conductor", conductor, "PRELIM — the institution, before its capabilities"),
         ("prelim-techscan", scanner, "PRELIM — technology baseline"),
-    ], run=run, stage="PRELIM")
+    ], run=run, stage="PRELIM", lean=prelim_lean_specs(run))
     if owed_connector:
         path = Path(out_dir) / "prelim-connectors.orchestrator.md"
         connector["serviced_by"] = ("the conducting session: spawn ONE in-process "

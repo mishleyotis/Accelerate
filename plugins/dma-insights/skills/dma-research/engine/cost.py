@@ -53,15 +53,36 @@ from . import contract as C
 #: lane has, so `lane_turn_budget` reads them rather than restating one
 PLUGIN = __import__('pathlib').Path(__file__).resolve().parents[3]
 
-#: $ per 1M tokens, Anthropic first-party rates. Cache reads bill at 0.1x
-#: input, cache writes at 1.25x — which is why a long-lived context is cheap
-#: to KEEP and expensive to re-read many times.
+#: $ per 1M tokens, MEASURED against the CLI's own billed `total_cost_usd`
+#: (R-INTERAC-20261010, 2026-10-10). Cache reads bill at 0.1x input; cache
+#: writes at `cw` x input — the lean lanes write the 1-hour cache, which
+#: bills haiku at 2x (exact to the cent on 11 of 18 lanes and two controlled
+#: probes). The 4.x card this replaced priced haiku at $1/$5 (10x high) and
+#: opus at $5/$25, so every envelope decision taken on it over-reserved for
+#: haiku work and the cheapest correct tier looked like the dearest.
+#:   haiku-5-5   0.10 / 0.50, cw 2.0  — controlled probes + 11 lanes, residual 0
+#:   sonnet-5-5  2.26 / 11.30, cw 1.25 — least squares over 4 lanes, |res| <= $0.006
+#:   opus-5-5    3.09 / 15.45, cw 1.25 — ONE lane (prelim-conductor); re-measure
 RATES = {
-    "opus":   {"in": 5.00, "out": 25.00},
-    "sonnet": {"in": 2.00, "out": 10.00},
-    "haiku":  {"in": 1.00, "out": 5.00},
+    "opus":   {"in": 3.09, "out": 15.45, "cw": 1.25},
+    "sonnet": {"in": 2.26, "out": 11.30, "cw": 1.25},
+    "haiku":  {"in": 0.10, "out": 0.50, "cw": 2.00},
 }
 CACHE_READ_MULT, CACHE_WRITE_MULT = 0.10, 1.25
+
+#: PER-SEARCH FEES the model bill carries on top of tokens. WebSearch is a
+#: server tool billed $10 per 1,000 searches: measured 2026-10-10 as 62% of
+#: every lean research lane ($2.32 of $3.74 over 18 lanes; a 3-search probe
+#: billed $0.030 of fee + $0.0065 of tokens). The token model never had this
+#: term, so a WebSearch-heavy shape priced at a third of its bill. Connector
+#: searches (Exa, Tavily) carry no model-side fee — their vendor bills its own
+#: plan — which is why a collector that searches through a connector is the
+#: cheaper tier, not the dearer one.
+SEARCH_FEE_USD = {"web_search": 0.01}
+
+
+def _cw(r: dict) -> float:
+    return float(r.get("cw") or CACHE_WRITE_MULT)
 
 #: The review's ceiling. Per PILLAR, so a four-pillar engagement is $20.
 BUDGET_PER_PILLAR = 5.00
@@ -245,9 +266,12 @@ LEAN_SHAPES = {
     # syntheses, and the turns follow the cells
     "orchestrator": {"floor_tokens": 16_000, "turns_fixed": 5, "turns_per_cell": 0.2,
                      "growth_per_turn": 3_000, "output_per_turn": 1_250},
-    # three measured challenges: $0.088, $0.170 (57 cells), $0.075 (24)
-    "challenge": {"floor_tokens": 10_000, "turns_fixed": 3, "turns_per_cell": 0.05,
-                  "growth_per_turn": 3_000, "output_per_turn": 800},
+    # refit 2026-10-10 on the billed lean sonnet challenge of R-INTERAC-20261010
+    # P3C1 (23 cells, 7 turns, 33.9K cache-write, 117.9K cache-read, 4.8K out,
+    # $0.196): the 2026-10-09 shape (0.05 turns/cell, 3K growth) priced it at
+    # $0.115; this one prices it at $0.180
+    "challenge": {"floor_tokens": 10_000, "turns_fixed": 3, "turns_per_cell": 0.17,
+                  "growth_per_turn": 3_400, "output_per_turn": 700},
 }
 
 
@@ -263,7 +287,7 @@ def agent_usd(*, model: str, turns: float, floor_tokens: int, growth_per_turn: i
     write_tokens = floor_tokens + growth_per_turn * t
     out_tokens = output_per_turn * t
     usd = (read_tokens / 1e6 * r["in"] * CACHE_READ_MULT
-           + write_tokens / 1e6 * r["in"] * CACHE_WRITE_MULT
+           + write_tokens / 1e6 * r["in"] * _cw(r)
            + out_tokens / 1e6 * r["out"])
     return {"model": model, "turns": round(t, 1), "usd": round(usd, 4),
             "output_tokens": int(out_tokens),
@@ -301,12 +325,21 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
                    collector_model: str | None = None,
                    synthesis_model: str | None = None,
                    repair_share: float | None = None, degraded: bool = False,
-                   lean: bool = False) -> dict:
+                   lean: bool = False, search_tool: str | None = None) -> dict:
     """What RESEARCH should cost for `cells` open cells over `categories`
     categories at the tiered shape: collector batches, one orchestrator pass
     per category, a repair wave over `repair_share` of the cells, one
-    challenge per category. `degraded` is recorded and changes nothing: the
-    shape is the price, the search tool is not."""
+    challenge per category, plus the SEARCH FEES the bill carries.
+
+    The search tool is part of the price (measured 2026-10-10, superseding
+    the 2026-10-09 "degraded or connector-backed prices the same"): WebSearch
+    bills $0.01 a search on the model bill — 62% of a lean lane — while an
+    Exa or Tavily search bills the connector's own plan and nothing here.
+    The shape asks one primary per open cell and five facet volleys per
+    capability; `search_tool` defaults to WebSearch when the collectors hold
+    no connector (a degraded run, or lean lanes) and to the connector
+    otherwise. Connector searches are counted (`vendor_searches`) so the
+    owner sees the other bill; they add no model dollars."""
     if repair_share is None:
         # the lean second round measured 9% (P2C2) and 61% (P2C1, inflated by
         # the shared-window wall since fixed) of the first, 2026-10-09; the
@@ -331,11 +364,15 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
         # a lean repair round re-challenges what it rewrote (measured $0.075)
         chal = {**chal, "usd": chal["usd"] + _cell_tier_usd(
             "challenge", round(per_cat_cells * repair_share), lean=lean)["usd"]}
+    tool = search_tool or ("web_search" if (degraded or lean) else "connector")
+    searches = (cells + 5 * caps) + round(repair_cells * (1 + 5 / CELLS_PER_CAPABILITY))
+    fee = SEARCH_FEE_USD.get(tool, 0.0)
     by_tier = {
         "collector": round(per_batch["usd"] * batches, 4),
         "repair_collector": round(per_repair["usd"] * repair_batches, 4),
         "orchestrator": round((orch["usd"] + orch_repair["usd"]) * categories, 4),
         "challenge": round(chal["usd"] * categories, 4),
+        "search_fees": round(searches * fee, 4),
     }
     usd = round(sum(by_tier.values()), 2)
     out_tokens = (per_batch["output_tokens"] * batches
@@ -361,11 +398,15 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
         "usd_per_runtime_token": RUNTIME_USD_PER_TOKEN,
         "degraded": bool(degraded),
         "lean": bool(lean),
+        "search_tool": tool, "searches": searches,
+        "vendor_searches": 0 if fee else searches,
         "basis": (("lean headless " if lean else "") + f"tiered shape: {batches} collector batch(es) on {per_batch['model']} "
                   f"at ${per_batch['usd']:.3f} + {categories} orchestrator pass(es) on "
                   f"{orch['model']} at ${orch['usd']:.3f} + {categories} challenge(s) at "
-                  f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave; "
-                  f"degraded or connector-backed prices the same"),
+                  f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave + "
+                  f"{searches} searches via {tool}"
+                  + (f" at ${fee:.2f} each on the model bill" if fee
+                     else " (billed by the connector's own plan, $0 here)")),
     }
 
 
@@ -551,14 +592,16 @@ def _utcnow() -> str:
 
 
 def cost_of(*, cache_read: int = 0, cache_write: int = 0, uncached: int = 0,
-            output: int = 0, model: str = "sonnet") -> dict:
-    """One usage record, priced."""
+            output: int = 0, model: str = "sonnet", web_searches: int = 0) -> dict:
+    """One usage record, priced — tokens at the measured card plus the
+    per-search fee the bill carries for WebSearch (`SEARCH_FEE_USD`)."""
     r = RATES.get(model) or RATES["sonnet"]
     parts = {
         "cache_read": cache_read / 1e6 * r["in"] * CACHE_READ_MULT,
-        "cache_write": cache_write / 1e6 * r["in"] * CACHE_WRITE_MULT,
+        "cache_write": cache_write / 1e6 * r["in"] * _cw(r),
         "uncached_input": uncached / 1e6 * r["in"],
         "output": output / 1e6 * r["out"],
+        "search_fees": int(web_searches or 0) * SEARCH_FEE_USD["web_search"],
     }
     total = sum(parts.values())
     return {"model": model, "total_usd": round(total, 4),
@@ -566,7 +609,8 @@ def cost_of(*, cache_read: int = 0, cache_write: int = 0, uncached: int = 0,
             "share": {k: (round(v / total, 3) if total else 0.0)
                       for k, v in parts.items()},
             "tokens": {"cache_read": cache_read, "cache_write": cache_write,
-                       "uncached": uncached, "output": output}}
+                       "uncached": uncached, "output": output},
+            "web_searches": int(web_searches or 0)}
 
 
 #: A run's own measurements. `record` appends one JSON line per stage to
@@ -1076,7 +1120,7 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
             meta = None
         stage = stage_of_agent(meta, text)
         tok = dict.fromkeys(tok_sum, 0)
-        turns = 0
+        turns, searches, seen_ids = 0, 0, set()
         for line in text.splitlines():
             try:
                 e = json.loads(line)
@@ -1086,13 +1130,27 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
                 continue
             m = e.get("message") or {}
             u = m.get("usage") or {}
+            # A transcript writes one line PER CONTENT BLOCK of a message, each
+            # repeating the message's usage (measured 2026-10-10: a parallel
+            # volley of 15 tool calls is 15 lines of one usage). Summing lines
+            # charged that turn 15 times; the message id is the turn.
+            searches += sum(1 for c in (m.get("content") or [])
+                            if isinstance(c, dict) and c.get("type") == "tool_use"
+                            and c.get("name") == "WebSearch")
+            mid = m.get("id")
+            if mid and mid in seen_ids:
+                # the block's own content still counts as output written
+                tok["output"] += _output_tokens({"content": m.get("content")})
+                continue
+            if mid:
+                seen_ids.add(mid)
             turns += 1
             model = _model_of(m.get("model"))
             tok["cache_read"] += int(u.get("cache_read_input_tokens") or 0)
             tok["cache_write"] += int(u.get("cache_creation_input_tokens") or 0)
             tok["uncached"] += int(u.get("input_tokens") or 0)
             tok["output"] += _output_tokens(m)
-        usd = cost_of(model=model, **tok)["total_usd"]
+        usd = cost_of(model=model, web_searches=searches, **tok)["total_usd"]
         prev = charged.get(aid) or {"usd": 0.0, "turns": 0}
         d_usd, d_turns = round(usd - float(prev["usd"]), 4), turns - int(prev["turns"])
         if d_usd <= 0 and d_turns <= 0:
@@ -1460,7 +1518,7 @@ def main(argv=None) -> int:
         for m, r in RATES.items():
             print(f"  {m:<7} in {r['in']:>5.2f}  out {r['out']:>6.2f}  "
                   f"cache-read {r['in'] * CACHE_READ_MULT:.2f}  "
-                  f"cache-write {r['in'] * CACHE_WRITE_MULT:.2f}")
+                  f"cache-write {r['in'] * _cw(r):.2f}")
         print(f"\nMEASURED BASELINE — {base['label']}")
         print(f"  {base['subcaps']} subcaps, {base['turns']} turns, "
               f"{base['model']}: ${base['total_usd']:.2f}")

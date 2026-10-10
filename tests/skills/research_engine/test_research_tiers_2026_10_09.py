@@ -31,12 +31,22 @@ ROOT = PLUGIN.parents[1]
 
 # ── 1. the price model ─────────────────────────────────────────────────────
 
-def test_degraded_and_connector_backed_research_price_the_same():
-    """The owner's invariant: the search tool changes, the shape does not."""
+def test_degraded_and_connector_backed_differ_by_exactly_the_search_fee():
+    """2026-10-09 pinned 'degraded or connector-backed prices the same'. Measured
+    2026-10-10 (R-INTERAC-20261010): WebSearch bills $0.01 a search on the model
+    bill — 62% of a lean lane — while an Exa/Tavily search bills the connector's
+    plan. The SHAPE is still the same (every token tier equal); the bill differs
+    by the search fee and nothing else, and the connector's searches are counted
+    so the other bill is visible."""
     a = cost.research_price(686, categories=16, capabilities=129, degraded=False)
     b = cost.research_price(686, categories=16, capabilities=129, degraded=True)
-    assert a["usd"] == b["usd"] and a["per_cell"] == b["per_cell"]
-    assert b["degraded"] is True and "degraded or connector-backed prices the same" in b["basis"]
+    for tier in ("collector", "repair_collector", "orchestrator", "challenge"):
+        assert a["by_tier"][tier] == b["by_tier"][tier], tier
+    assert a["search_tool"] == "connector" and b["search_tool"] == "web_search"
+    assert a["by_tier"]["search_fees"] == 0 and a["vendor_searches"] == a["searches"] > 0
+    assert b["by_tier"]["search_fees"] == pytest.approx(b["searches"] * cost.SEARCH_FEE_USD["web_search"])
+    assert b["usd"] == pytest.approx(a["usd"] + b["by_tier"]["search_fees"], abs=0.02)
+    assert b["degraded"] is True and "via web_search" in b["basis"]
 
 
 def test_the_tiers_are_haiku_collection_and_sonnet_judgement():
@@ -83,7 +93,11 @@ def test_agent_usd_grows_with_turns_and_context():
     long_ = cost.agent_usd(model="haiku", turns=40, floor_tokens=20_000, growth_per_turn=8_000, output_per_turn=1_000)
     assert long_["usd"] > short["usd"] * 10, "cost is quadratic in turns: the context is re-read"
     s = cost.agent_usd(model="sonnet", turns=4, floor_tokens=20_000, growth_per_turn=8_000, output_per_turn=1_000)
-    assert s["usd"] == pytest.approx(short["usd"] * 2, rel=0.01), "sonnet is 2x haiku on every rate"
+    # measured 2026-10-10: sonnet-5-5 bills 22.6x haiku-5-5 per input token
+    # (haiku writes the 1h cache at 2x, sonnet at 1.25x), not the 2x of the
+    # 4.x card — the ratio is the card's, whatever it is
+    assert s["usd"] > short["usd"] * 10, "sonnet is an order of magnitude dearer than haiku"
+    assert cost.RATES["sonnet"]["in"] / cost.RATES["haiku"]["in"] == pytest.approx(22.6)
 
 
 # ── 2. the envelope reads only its own spend ───────────────────────────────
@@ -444,7 +458,9 @@ def test_the_governor_converts_the_runtime_counter_at_the_measured_rate():
     p = cost.research_price(26, categories=1, capabilities=7)
     assert p["usd_per_runtime_token"] == cost.RUNTIME_USD_PER_TOKEN
     assert 5e-6 <= cost.RUNTIME_USD_PER_TOKEN <= 1e-5
-    assert p["usd_per_output_token"] > 5 * cost.RUNTIME_USD_PER_TOKEN, "the two rates are different things"
+    # the two rates are different things; on the measured 5.5 card the blended
+    # output-token rate fell (haiku output 10x cheaper), so the gap is ~5x, not >5x
+    assert p["usd_per_output_token"] > 3 * cost.RUNTIME_USD_PER_TOKEN, "the two rates are different things"
     js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
     assert "BUDGET.usd_per_runtime_token" in js
 

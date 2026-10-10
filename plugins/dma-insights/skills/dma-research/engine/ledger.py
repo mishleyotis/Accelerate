@@ -317,6 +317,8 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             f"evidence names cells outside this run's engagement set: {foreign}")
     assert_actor_scope(actor, "evidence", cells)
+    if cells:
+        _refuse_smear(wb, "E-PENDING", cells)
     if not str(published or "").strip() and source_url and run is not None:
         # THE DATE THE PAGE STATES, FILLED AT THE WRITE (2026-10-09,
         # R-IMA-20261009 P2C1: 19 of 20 rows undated, a news URL reading
@@ -426,6 +428,110 @@ ATTACH_STEP = "attach"
 DECLINE_STEP = "reuse_declined"
 
 
+def smear_created(wb: RunWorkbook, eid: str, cells: list[str]) -> list[dict]:
+    """The sibling smears citing `eid` from `cells` would CREATE — the gate's
+    own `evidence_smear` (>=3 siblings drawing >60% of their evidence from
+    the same rows), computed before and after the write, so only a smear this
+    write causes or widens is returned.
+
+    R-INTERAC-20261010, P3C1: three P3C1.7 siblings were attached the same
+    three rows upstream (connector pass, pilot lanes); the gate found it after
+    the syntheses, the challenge and a repair round, and nothing could undo
+    it. The gate's rule, asked at the write, is what makes it a first-pass
+    rule instead of a repair."""
+    caps = {c.rsplit(".", 1)[0] for c in cells}
+    rows = [{"SubCap_ID": str(r.get("SubCap_ID") or ""), "Evidence_IDs": r.get("Evidence_IDs")}
+            for r in wb.scoring_rows()
+            if str(r.get("SubCap_ID") or "").rsplit(".", 1)[0] in caps]
+    before = {(x["capability"], tuple(x["subcaps"])) for x in Q.evidence_smear(rows)}
+    after = []
+    for r in rows:
+        r = dict(r)
+        if r["SubCap_ID"] in cells:
+            ids = [i for i in _split_ids(r.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+            r["Evidence_IDs"] = ", ".join(ids + [f"{eid}:F1"])
+        after.append(r)
+    return [x for x in Q.evidence_smear(after)
+            if any(c in x["subcaps"] for c in cells)
+            and (x["capability"], tuple(x["subcaps"])) not in before]
+
+
+def _refuse_smear(wb: RunWorkbook, eid: str, cells: list[str]) -> None:
+    made = smear_created(wb, eid, cells)
+    if made:
+        x = made[0]
+        raise LedgerRefusal(
+            f"citing {eid} from {', '.join(cells)} would smear {x['capability']}: "
+            f"{x['detail']} ({', '.join(x['subcaps'])}; shared "
+            f"{', '.join(x['shared_evidence'])}). The gate blocks this as "
+            f"evidence_smear and no repair round can undo it. Cite the span only "
+            f"from the cell whose OWN question it answers, or register a span "
+            f"specific to each sibling")
+
+
+#: who may undo a citation: the conducting tier, never a lane (a lane that
+#: could detach could launder its own evidence out of a challenge)
+DETACH_ACTORS = frozenset({"research-conductor"})
+DETACH_STEP = "detach"
+
+
+def detach_evidence(wb: RunWorkbook, eid: str, cell: str, *, reason: str,
+                    actor: str | None = None) -> dict:
+    """Undo ONE citation (evidence row ↔ cell), audited.
+
+    The repair the smear rule needs and nothing else had: an attachment made
+    upstream (a connector pass, a pilot lane) that does not answer the cell's
+    own question. Refuses: an actor outside DETACH_ACTORS; a reason under 20
+    characters; a pair that does not exist; a cell whose current synthesis
+    still names the id (re-synthesise without it first — a synthesis must
+    never cite a row its cell no longer carries). The row itself stays in the
+    register; the cell's challenge verdict is cleared, because the evidence
+    it judged changed. Every detach is a Provenance row with the reason."""
+    eid = str(eid or "").strip()
+    who = str(actor or "").strip()
+    if who not in DETACH_ACTORS:
+        raise LedgerRefusal(
+            f"detach is the conducting tier's ({', '.join(sorted(DETACH_ACTORS))}), "
+            f"not {who or 'an unattributed writer'}'s: a lane that could detach "
+            f"could remove its own evidence from a challenge")
+    if len(str(reason or "").strip()) < 20:
+        raise LedgerRefusal("detach needs a reason (>= 20 chars): why the row "
+                            "does not answer this cell's own question")
+    sr = wb.scoring_row(cell)
+    if sr is None:
+        raise LedgerRefusal(f"{cell} is not in this run's engagement set")
+    have = [i for i in _split_ids(sr.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+    keep = [i for i in have if i.split(":")[0] != eid]
+    if len(keep) == len(have):
+        raise LedgerRefusal(f"{cell} does not cite {eid}; nothing to detach")
+    prose = " ".join(str(sr.get(k) or "") for k in C.PILLAR_COLUMNS
+                     if k not in ("Evidence_IDs", "Source_URLs"))
+    if re.search(rf"\b{re.escape(eid)}\b", prose):
+        raise LedgerRefusal(
+            f"{cell}'s synthesis still names {eid}; re-synthesise the cell without "
+            f"it first, then detach — a synthesis must not cite a row its cell "
+            f"no longer carries")
+    register = wb.evidence_index()
+    with wb.transaction("detach_evidence"):
+        row = register.get(eid) or {}
+        named = [x.split(":")[0].strip() for x in _split_ids(row.get("SubCap_IDs"))
+                 if str(x).strip() and x.split(":")[0].strip() != cell]
+        wb.update_row("Evidence_Detail", "E_ID", eid,
+                      {"SubCap_IDs": ", ".join(named)}, save=False)
+        urls_kept = {str((register.get(i.split(":")[0]) or {}).get("Source_URL") or "")
+                     for i in keep}
+        urls = [u for u in _split_ids(sr.get("Source_URLs")) if u and u in urls_kept]
+        # empty is written as the sentinel / "" — set_scoring skips a None
+        wb.set_scoring(cell, {"Evidence_IDs": ", ".join(keep) or C.NO_EVIDENCE,
+                              "Source_URLs": ", ".join(urls),
+                              "Challenge_Verdict": ""}, save=False)
+        wb.append("Provenance", {"SubCap_ID": cell, "Step": DETACH_STEP, "Actor": who,
+                                 "At": _utcnow(),
+                                 "Detail": f"detached {eid}: {str(reason).strip()}"},
+                  save=False)
+    return {"detached": eid, "cell": cell, "evidence_ids": keep}
+
+
 def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
                     actor: str | None = None) -> dict:
     """Cite an EXISTING register row from another cell, without minting a
@@ -488,6 +594,8 @@ def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
         if eid in [i.split(":")[0] for i in _split_ids(sr.get("Evidence_IDs"))
                    if i and i != C.NO_EVIDENCE]:
             already.append(cell)
+    if not already:
+        _refuse_smear(wb, eid, cells)
     if already:
         raise LedgerRefusal(
             f"{eid} is already cited by {', '.join(already)}. An attach that "
@@ -1269,6 +1377,19 @@ _INFERENCE_MARKERS = re.compile(
     r"likely|probabl[ye]|consistent with|therefore|so (?:the|it|they)|because|"
     r"points? to|which means)\b", re.I)
 
+#: The highest legal score inside each band word — the same table as
+#: `assessment.BAND_TOP` (pinned equal by test; assessment imports this module).
+BAND_TOP = {"ACTIVATING": 1.75, "BUILDING": 2.75, "COMPETING": 3.75,
+            "DIFFERENTIATING": 5.0}
+#: A claim that says WHEN it was true. Years are allowed only when an excerpt
+#: on the cell carries them (the ungrounded-figure rule), so the words carry it.
+_TEMPORAL_QUALIFIER = re.compile(
+    r"\bas of\b|\bas at\b|\bat the time\b|\bhistoric(al(ly)?)?\b|\bpreviously\b|"
+    r"\bformerly\b|\bundated\b|\b(in|since|from|by|until) (19|20)\d\d\b|"
+    r"\b(stated|reported|published|announced|disclosed|described) (in|on|as of)\b|"
+    r"\blast (stated|reported|published|evidenced)\b|\bmost recent (public|published)\b|"
+    r"\bno (current|recent) (source|evidence)\b", re.I)
+
 
 def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
                        row_eids: list[str]) -> list[str]:
@@ -1328,6 +1449,51 @@ def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
             f"{label} with no evidence id on the row: the claim asserts specific "
             f"content and cites nothing a challenger can open (evidence_total=0). "
             f"Register the source, or close the cell through `engine.cli absence`")
+    # THE BAND MUST NOT CLAIM MORE THAN THE EVIDENCE'S OWN CAP (R-INTERAC-
+    # 20261010, P3C1 round 1: four cells citing only interac.ca held at
+    # Building and failed ceiling_reasoning; every repair round re-paid a
+    # sonnet lane). `assessment.mechanical_caps` already refuses the SCORE
+    # above 2.0 on own-site-only evidence and above 3.0 on one source
+    # identity; the band a synthesis states is that ceiling's conclusion, so
+    # the same caps bind it here, at the write, and the challenger never
+    # meets the mismatch.
+    band = str(merged.get("Ceiling_Band") or "").strip().upper()
+    if rows and band in BAND_TOP:
+        hosts = {host_of(str(r.get("Source_URL") or "")) for r in rows}
+        hosts.discard("")
+        own = own_hosts(wb)
+        own_only = bool(hosts) and bool(own) and all(
+            any(h == o or h.endswith("." + o) for o in own) for h in hosts) \
+            and len(hosts) == len(idents)
+        cap, why = (2.0, "every source sits on the entity's own site") if own_only else \
+                   (3.0, "the evidence has one source identity") if len(idents) < 2 else \
+                   (5.0, "")
+        if BAND_TOP[band] > cap:
+            allowed = [b.title() for b, top in BAND_TOP.items() if top <= cap]
+            out.append(
+                f"Ceiling_Band {band.title()} tops at {BAND_TOP[band]} but {why} "
+                f"(cap {cap}): state the band the cap allows ({' or '.join(allowed)}) "
+                f"and say so in Ceiling_Reasoning — the challenger fails the "
+                f"mismatch as ceiling_reasoning")
+    # TENSE FOLLOWS RECENCY (R-INTERAC-20261010, P3C1 round 1: five cells whose
+    # every row was DATED/STALE/ARCHIVAL written in unqualified present tense,
+    # failed as recency). When no cited row is CURRENT or RECENT, the claim
+    # must say when it was true.
+    # Only a row that STATES an old date triggers it: an undated (UNVERIFIED)
+    # row renders with its own band and the challenger passed present tense on
+    # it (2 of 2 measured) — refusing those would cost a write turn for nothing.
+    fresh = {"CURRENT", "RECENT"}
+    aged = {"DATED", "STALE", C.RECENCY_ARCHIVAL}
+    recencies = {str(r.get("Recency") or "").strip().upper() for r in rows}
+    if rows and not (recencies & fresh) and (recencies & aged) and not absence:
+        text = " ".join(str(merged.get(k) or "") for k in ("Dominant_Claim", "What_We_Found"))
+        if not _TEMPORAL_QUALIFIER.search(text):
+            out.append(
+                f"every row on this cell is {'/'.join(sorted(recencies)) or 'undated'} "
+                f"— none CURRENT or RECENT — and the claim is in unqualified present "
+                f"tense: say when it was true (as of <the row's date>, historically, "
+                f"at the time, undated) — the challenger fails present tense on "
+                f"stale rows as recency")
     contra = str(merged.get("DQ_Contradicts") or "").strip()
     disp = str(merged.get("Contradiction_Disposition") or "").strip()
     if contra and not contra.upper().startswith(("NOT_RUN", "NO_FINDING", "NONE")) \

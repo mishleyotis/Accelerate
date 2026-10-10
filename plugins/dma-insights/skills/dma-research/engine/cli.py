@@ -540,6 +540,18 @@ def main(argv=None) -> int:
                          "source actually sits on, and what was mis-filed")
     rt.add_argument("--actor", default=None)
 
+    dt = common(sub.add_parser(
+        "detach",
+        help="undo ONE citation (row <-> cell), audited — the conducting tier "
+             "only. For an attachment made upstream that does not answer the "
+             "cell's own question (the repair the smear rule needs). The row "
+             "stays in the register; the cell's challenge verdict is cleared."))
+    dt.add_argument("--e-id", required=True)
+    dt.add_argument("--subcap", required=True)
+    dt.add_argument("--reason", required=True,
+                    help=">= 20 chars: why the row does not answer this cell")
+    dt.add_argument("--actor", default=None, help="defaults to $DMA_ACTOR")
+
     at = common(sub.add_parser(
         "attach",
         help="cite an evidence row the run ALREADY holds from one of your "
@@ -934,6 +946,15 @@ def main(argv=None) -> int:
         try:
             out = ledger.retier_evidence(wb, a.e_id, a.tier, reason=a.reason,
                                          run=run, actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
+    if a.cmd == "detach":
+        try:
+            out = ledger.detach_evidence(wb, a.e_id, a.subcap, reason=a.reason,
+                                         actor=_actor(a))
         except ledger.LedgerRefusal as exc:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
