@@ -140,3 +140,50 @@ def test_an_unverified_container_is_refused_not_degraded(tmp_path):
     assert short_out["outcome"] != "BLOCKED"
     assert short_p.state["enrichment_degraded"], (
         "a container that PROVED the connector missing was not degraded")
+
+
+# ── the baseline nobody typed (Interac, 2026-10-10) ─────────────────────────
+
+def _transcript(tmp_path, monkeypatch, names):
+    """A session whose transcript names its MCP roster, as Claude Code
+    writes it — the session never typed a baseline."""
+    sid = "sess-adopt-0001"
+    d = tmp_path / "cfg" / "projects" / "-x"
+    d.mkdir(parents=True)
+    (d / f"{sid}.jsonl").write_text(json.dumps(
+        {"type": "attachment", "isSidechain": False,
+         "attachment": {"type": "deferred_tools_delta", "addedNames": names,
+                        "removedNames": []}}) + "\n")
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path / "cfg"))
+    monkeypatch.setenv("CLAUDE_CODE_SESSION_ID", sid)
+    monkeypatch.setenv("DMA_SESSION_ROSTER", "1")
+
+
+def test_a_measured_roster_is_adopted_instead_of_refused(tmp_path, monkeypatch):
+    """The refusal above stands for a container nobody can measure. A
+    session whose transcript names its connectors is measured: PREFLIGHT
+    writes the baseline from it and the run proceeds."""
+    _transcript(tmp_path, monkeypatch, BOUND)
+    p, disp, out = _drive(tmp_path, baseline=None)
+    assert out["outcome"] != "BLOCKED", out
+    rec = json.loads((p.run.root / "connectors_baseline.json").read_text())
+    assert rec["sources"] == ["transcript"]
+    assert {"exa", "tavily"} <= set(rec["present"])
+    assert not p.state.get("enrichment_degraded")
+
+
+def test_a_measured_short_roster_degrades_rather_than_refuses(tmp_path,
+                                                              monkeypatch):
+    _transcript(tmp_path, monkeypatch, SHORT)
+    p, disp, out = _drive(tmp_path, baseline=None)
+    assert out["outcome"] != "BLOCKED", out
+    assert p.state.get("enrichment_degraded")
+
+
+def test_a_typed_baseline_is_never_overwritten_by_the_transcript(tmp_path,
+                                                                 monkeypatch):
+    _transcript(tmp_path, monkeypatch, SHORT)
+    p, disp, out = _drive(tmp_path, baseline=BOUND)
+    rec = json.loads((p.run.root / "connectors_baseline.json").read_text())
+    assert "exa" in rec["present"], rec
+    assert not p.state.get("enrichment_degraded")

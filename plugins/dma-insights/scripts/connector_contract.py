@@ -140,13 +140,66 @@ def contract() -> dict:
     }
 
 
+import re as _re
+
+#: A claude.ai connector attached to a session can carry an opaque
+#: per-attachment UUID as its server segment instead of its friendly name.
+#: Tested AFTER canonicalisation, which has turned its hyphens to underscores.
+_OPAQUE_SERVER = _re.compile(
+    r"^[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}$",
+    _re.I)
+
+
+def _split(tool: str):
+    """(canonical server, tool segment) of an MCP tool name, or None."""
+    parts = tool.split("__", 2)
+    if len(parts) != 3 or parts[0] != "mcp":
+        return None
+    server = parts[1].replace("-", "_")
+    if server.startswith("claude_ai_"):
+        server = server[len("claude_ai_"):]
+    return server, parts[2]
+
+
 def _present(family: str, fam: dict[str, list[str]], held: set[str]) -> bool:
-    """A family answers when ANY of its tools is bound.
+    """A family answers when ANY of its tools is bound — under its friendly
+    server name OR under an opaque one.
 
     Any rather than all: a connector can expose a subset and still do the
     work, and demanding the full list turns a working session into a stop.
+
+    THE SERVER SEGMENT IS NOT STABLE (verification session for PR #89,
+    2026-10-10). A fresh cloud session held Exa as
+    `mcp__767c83d5-…__web_search_exa` and Tavily, Clay and Vibe Prospecting
+    the same way, and this check — matching `mcp__Exa__web_search_exa`
+    exactly — read "present: none" with 302 MCP tools bound. So a name is
+    compared on its canonical server (hyphens, the `claude_ai_` prefix), and
+    a server whose segment is an opaque UUID counts as a family only when it
+    exposes at least two of that family's tool names, or one that carries
+    the family's own brand (`web_search_exa`): one shared generic name
+    (`search_jobs` is Dice's as well as Indeed's) is not a signature.
     """
-    return any(t in held for t in fam.get(family, ()))
+    want = [_split(t) for t in fam.get(family, ())]
+    want = [w for w in want if w]
+    if not want:
+        return False
+    exact = set(want)
+    by_opaque: dict[str, set[str]] = {}
+    for t in held:
+        sp = _split(t)
+        if not sp:
+            continue
+        if sp in exact:
+            return True
+        if _OPAQUE_SERVER.match(sp[0]):
+            by_opaque.setdefault(sp[0], set()).add(sp[1])
+    names = {w[1] for w in want}
+    # A name that carries the family's own brand (`web_search_exa`,
+    # `tavily_search`) IS a signature on its own; generic names need two.
+    branded = {n for n in names if family.lower() in n.lower()}
+    need = min(2, len(names))
+    return any(segs & branded or len(segs & names) >= need
+               for segs in by_opaque.values())
 
 
 def check(tool_names, *, now_families=None) -> dict:
@@ -195,7 +248,19 @@ def baseline_path(root=None) -> Path:
     return base / "connectors_baseline.json"
 
 
-def write_baseline(tool_names, root=None) -> dict:
+def _session_roster(session_id=None) -> dict:
+    """This session's MCP roster from its transcript (`session_roster.py`);
+    {"found": False} wherever it cannot be read — never a guess."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import session_roster                                 # noqa: PLC0415
+        return session_roster.current(session_id)
+    except Exception as exc:                                  # noqa: BLE001
+        return {"found": False, "tools": [], "mcp_tools": [],
+                "workflow_tool": None, "reason": f"{type(exc).__name__}: {exc}"}
+
+
+def write_baseline(tool_names, root=None, roster=None) -> dict:
     """Record what this session ACTUALLY held when it started producing.
 
     WHY A BASELINE AND NOT JUST A CHECK (owner, 2026-08-31: "The connectors
@@ -217,24 +282,75 @@ def write_baseline(tool_names, root=None) -> dict:
     passed, and diffs against it at every stage boundary after.
     """
     import datetime as _dt
+    import os as _os
     fam = families()
-    held = {t.strip() for t in tool_names if t.strip()}
+    typed = {t.strip() for t in tool_names if t.strip()}
+    # THE TRANSCRIPT IS UNIONED IN (2026-10-10). A typed list is only as good
+    # as the typing: Interac's first attempt abbreviated whole families. The
+    # session's own roster (`session_roster.py`) is read whenever it exists,
+    # so a name the model dropped is still recorded — and a run whose model
+    # typed nothing at all still gets a measured baseline.
+    roster = roster or {}         # the CLI and ensure_baseline pass it;
+    #                               a library call stays exactly what it says
+    from_transcript = set(roster.get("tools") or []) if roster.get("found") else set()
+    held = typed | from_transcript
     present = sorted(f for f in fam if _present(f, fam, held))
+    sources = [s for s, got in (("typed", typed), ("transcript", from_transcript))
+               if got]
     rec = {"recorded_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
            "present": present,
-           "mcp_tools": sorted(t for t in held if t.startswith("mcp__"))}
+           "mcp_tools": sorted(t for t in held if t.startswith("mcp__")),
+           "sources": sources,
+           "session_id": (roster.get("session_id")
+                          or _os.environ.get("CLAUDE_CODE_SESSION_ID"))}
+    if roster.get("found"):
+        rec["transcript"] = roster.get("transcript")
     # THE WORKFLOW TOOL IS HELD OR NOT, AND ONLY THE SESSION KNOWS (2026-10-09).
     # A resume or worker restart drops it ("No such tool available: Workflow.
     # Workflow is disabled for this session" — SWBC 10-01, B1 10-08; Cross
     # 10-01 and Arbor 10-06 the same). Recorded only when the list carries
     # built-ins (a list of mcp__ names alone says nothing about Workflow), so
     # an older baseline reads as unknown, never as absent.
-    if held & {"Bash", "Read", "Agent", "Edit"}:
-        rec["workflow_tool"] = "Workflow" in held
+    if typed & {"Bash", "Read", "Agent", "Edit"}:
+        rec["workflow_tool"] = "Workflow" in typed
+    elif roster.get("workflow_tool") is not None:
+        # Proven by a Workflow call's own result in the transcript.
+        rec["workflow_tool"] = bool(roster["workflow_tool"])
     path = baseline_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rec, indent=2) + "\n")
     rec["path"] = str(path)
+    return rec
+
+
+def ensure_baseline(root=None, roster=None) -> dict | None:
+    """The run's baseline — ADOPTED from this session's transcript when the
+    session never wrote one. None only when neither exists.
+
+    WHY (Interac, 2026-10-10, and every run before it): PREFLIGHT, the
+    dispatch guard, `engine.pipeline env` and the doctor all refused on a
+    missing baseline, and the baseline existed only if the model typed every
+    tool it holds — after choosing a run root, which comes later than the
+    doctor. The facts were on disk the whole time, in the transcript. So
+    every reader calls this first: an existing file is never overwritten (a
+    typed baseline carries built-ins the transcript cannot see), and a
+    missing one is written from the measured roster with `sources:
+    ["transcript"]`. A container with no transcript (a Routine's stub, CI)
+    still gets None and still refuses — unverified is still not a pass.
+    """
+    path = baseline_path(root)
+    if path.is_file():
+        try:
+            rec = json.loads(path.read_text())
+        except (OSError, ValueError):
+            rec = {}
+        rec.update({"path": str(path), "adopted": False})
+        return rec
+    roster = roster if roster is not None else _session_roster()
+    if not roster.get("found") or not roster.get("mcp_tools"):
+        return None
+    rec = write_baseline([], root, roster=roster)
+    rec["adopted"] = True
     return rec
 
 
@@ -295,8 +411,11 @@ def main(argv=None) -> int:
     d = sub.add_parser("declare", help="the required set, from the registry")
     d.add_argument("--json", action="store_true")
     k = sub.add_parser("check", help="judge a session's bound tool names")
-    k.add_argument("--tools", required=True,
+    k.add_argument("--tools", default=None,
                    help="file of tool names, one per line; - for stdin")
+    k.add_argument("--from-session", action="store_true",
+                   help="read this session's roster from its transcript "
+                        "(unioned with --tools when both are given)")
     k.add_argument("--json", action="store_true")
     k.add_argument("--strict", action="store_true",
                    help="exit 1 when a required family is missing")
@@ -304,14 +423,20 @@ def main(argv=None) -> int:
                        help="record what this session holds, once, so a "
                             "later loss is distinguishable from never "
                             "having had it")
-    b.add_argument("--tools", required=True)
+    b.add_argument("--tools", default=None,
+                   help="optional: the transcript roster is always unioned in")
+    b.add_argument("--from-session", action="store_true",
+                   help="no typed list: record from the transcript alone")
     b.add_argument("--root", default=None,
                    help="the run root (default: $DMA_RUN_ROOT, else cwd)")
     b.add_argument("--json", action="store_true")
     r = sub.add_parser("probe",
                        help="diff this session's connectors against its own "
                             "baseline; run at every stage boundary")
-    r.add_argument("--tools", required=True)
+    r.add_argument("--tools", default=None)
+    r.add_argument("--from-session", action="store_true",
+                   help="judge NOW from the transcript — it sees a connector "
+                        "that dropped mid-session, which a typed list cannot")
     r.add_argument("--root", default=None)
     r.add_argument("--json", action="store_true")
     r.add_argument("--strict", action="store_true",
@@ -334,15 +459,28 @@ def main(argv=None) -> int:
                   "family no agent can call cannot be required here.")
             return 0
 
-        raw = (sys.stdin.read() if a.tools == "-"
+        if a.tools is None and not a.from_session:
+            print("give --tools <file|-> or --from-session", file=sys.stderr)
+            return 2
+        raw = ("" if a.tools is None else sys.stdin.read() if a.tools == "-"
                else Path(a.tools).read_text())
+        roster = _session_roster()
+        if a.from_session and not roster.get("found"):
+            print(f"NO SESSION ROSTER: {roster.get('reason')} — pass the "
+                  "tools with --tools instead", file=sys.stderr)
+            if a.tools is None:
+                return 2
+        names = raw.splitlines()
+        if a.cmd in ("check", "probe") and a.from_session and roster.get("found"):
+            names = sorted(set(names) | set(roster.get("tools") or []))
 
         if a.cmd == "baseline":
-            rec = write_baseline(raw.splitlines(), a.root)
+            rec = write_baseline(names, a.root, roster=roster)
             if a.json:
                 print(json.dumps(rec, indent=2))
             else:
-                print(f"baseline recorded at {rec['path']}")
+                print(f"baseline recorded at {rec['path']} "
+                      f"(from {' + '.join(rec.get('sources') or ['nothing'])})")
                 print(f"  present  {', '.join(rec['present']) or 'none'}")
                 print("  a stage boundary compares against this; without it "
                       "a lost connector is indistinguishable from one that "
@@ -350,7 +488,7 @@ def main(argv=None) -> int:
             return 0
 
         if a.cmd == "probe":
-            out = probe(raw.splitlines(), a.root)
+            out = probe(names, a.root)
             if a.json:
                 print(json.dumps(out, indent=2))
             else:
@@ -362,7 +500,7 @@ def main(argv=None) -> int:
                     print(f"  LOST REQUIRED: {', '.join(out['lost_required'])}")
             return 1 if (a.strict and not out["ok"]) else 0
 
-        out = check(raw.splitlines())
+        out = check(names)
         if a.json:
             print(json.dumps(out, indent=2))
         else:

@@ -33,6 +33,17 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "apps" / "mcp"))
 
+# A SUITE RUN INSIDE A CLAUDE SESSION MUST SEE THE MACHINE CI SEES. Since
+# 2026-10-10 the connector baseline is measured from the session's own
+# transcript (`session_roster.py`) and SessionStart fast-forwards a stale
+# default-branch ref (`git_refs.py`). Both read the live session through
+# CLAUDE_CODE_SESSION_ID — which every Bash child inherits — so the tests of
+# "no baseline is refused" passed on CI and failed in-session. Off by
+# default here; the tests of those two features switch them on against
+# fixtures they build.
+os.environ.setdefault("DMA_SESSION_ROSTER", "0")
+os.environ.setdefault("DMA_FRESHEN_REFS", "0")
+
 _DSN = os.environ.get(
     "LOCAL_DATABASE_URL",
     "postgresql://postgres:local@localhost:5432/dma_insights")

@@ -387,12 +387,29 @@ def record_bound_root(plugin_root, pid: str | None = None,
     if root is None:
         return None
     import time                                             # noqa: PLC0415
+    path = _bound_record_path(pid)
+    began = session_started_at()
+    # THE FINGERPRINT IS TAKEN ONCE, at the first record of this process:
+    # the hook also fires on compaction and subagent start, by which time
+    # the tree may have moved — and the question is what the session bound,
+    # not what is on disk now.
+    prior = _load(path)
+    kept = None
+    if (prior.get("pid") == int(pid) and prior.get("fingerprint")
+            and str(prior.get("plugin_root")) == str(root)
+            and isinstance(prior.get("recorded_at"), (int, float))
+            and began is not None
+            and prior["recorded_at"] >= began - MID_SESSION_GRACE_S):
+        kept = prior
     rec = {"pid": int(pid),
            "session_id": session_id or os.environ.get("CLAUDE_CODE_SESSION_ID"),
            "plugin_root": str(root),
-           "recorded_at": time.time(),
-           "process_started_at": session_started_at()}
-    path = _bound_record_path(pid)
+           "recorded_at": kept["recorded_at"] if kept else time.time(),
+           "process_started_at": began,
+           "fingerprint": (kept["fingerprint"] if kept
+                           else bound_fingerprint(root)),
+           "fingerprinted_at": (kept.get("fingerprinted_at") if kept
+                                else time.time())}
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".tmp")
@@ -496,6 +513,73 @@ def bound_root(session_pid: str | None = None) -> dict:
     return {"path": None, "source": None, "reason": "; ".join(why)}
 
 
+def _bound_component_files(root: Path) -> list:
+    """The files a session reads ONCE at start: BOUND_AT_START plus each
+    skill's SKILL.md. One list, so the timestamp and the fingerprint below
+    can never measure two different sets."""
+    root = Path(root)
+    candidates = [root / part for part in BOUND_AT_START]
+    skills = root / "skills"
+    if skills.is_dir():
+        candidates += [p / "SKILL.md" for p in skills.iterdir() if p.is_dir()]
+    out = []
+    for c in candidates:
+        if not c.exists():
+            continue
+        for f in ([c] if c.is_file() else sorted(c.rglob("*"))):
+            if f.is_file() and not any(sk in f.as_posix() for sk in _SKIP):
+                out.append(f)
+    return out
+
+
+#: Manifest keys a session does not act on: the ad and the number. A change
+#: to either alone is not "the roster moved under the session".
+_COSMETIC_MANIFEST_KEYS = ("description", "version")
+
+
+def bound_fingerprint(root: Path) -> dict:
+    """`relpath -> sha256` of what a session binds at start — CONTENT, not
+    mtimes.
+
+    WHY (Interac, 2026-10-10). The session checked out the local default
+    branch, which a restored snapshot had left 122 commits behind, then
+    fast-forwarded it straight back to the commit it started on. Every bound
+    file was rewritten twice and ended byte-identical to what the session
+    had loaded — and the doctor, reading mtimes, said UPDATED_MID_SESSION
+    and failed. A timestamp says a file was written; only content says the
+    session is running something different. The manifest is hashed without
+    its description and version, which no session acts on.
+    """
+    root = Path(root)
+    out = {}
+    for f in _bound_component_files(root):
+        rel = f.relative_to(root).as_posix()
+        try:
+            raw = f.read_bytes()
+        except OSError:
+            continue
+        if rel == ".claude-plugin/plugin.json":
+            try:
+                m = json.loads(raw)
+                for k in _COSMETIC_MANIFEST_KEYS:
+                    m.pop(k, None)
+                raw = json.dumps(m, sort_keys=True).encode()
+            except ValueError:
+                pass
+        out[rel] = hashlib.sha256(raw).hexdigest()
+    return out
+
+
+def moved_components(root: Path, recorded: dict | None) -> list | None:
+    """Bound files whose CONTENT differs from what the session recorded at
+    start (added, removed or changed), or None when nothing was recorded."""
+    if not isinstance(recorded, dict) or not recorded:
+        return None
+    now = bound_fingerprint(root)
+    return sorted(k for k in set(now) | set(recorded)
+                  if now.get(k) != recorded.get(k))
+
+
 def bound_components_changed_at(root: Path) -> float | None:
     """When the parts a session binds at start last changed, or None.
 
@@ -505,25 +589,13 @@ def bound_components_changed_at(root: Path) -> float | None:
     fixture. Measuring the whole tree would call each of those a mid-session
     rebind; measuring these files measures the claim actually being made.
     """
-    root = Path(root)
     latest = None
-    candidates = [root / part for part in BOUND_AT_START]
-    skills = root / "skills"
-    if skills.is_dir():
-        candidates += [p / "SKILL.md" for p in skills.iterdir() if p.is_dir()]
-    for c in candidates:
-        if not c.exists():
+    for f in _bound_component_files(Path(root)):
+        try:
+            m = f.stat().st_mtime
+        except OSError:
             continue
-        files = [c] if c.is_file() else [p for p in c.rglob("*") if p.is_file()]
-        for f in files:
-            rel = f.as_posix()
-            if any(sk in rel for sk in _SKIP):
-                continue
-            try:
-                m = f.stat().st_mtime
-            except OSError:
-                continue
-            latest = m if latest is None else max(latest, m)
+        latest = m if latest is None else max(latest, m)
     return latest
 
 
@@ -607,6 +679,8 @@ def installed(state_path: Path | None = None) -> dict:
               if (tree / "skills").is_dir() else 0)
     declared = _load(tree / ".claude-plugin" / "plugin.json")
     began = session_started_at()
+    round_trip = False
+    moved_files: list = []
     if in_place:
         version = declared.get("version")
         # The question "did the tree change under a running session" is
@@ -616,6 +690,20 @@ def installed(state_path: Path | None = None) -> dict:
         loaded_this = None if (began is None or changed_at is None) \
             else changed_at <= began + MID_SESSION_GRACE_S
         updated_at = _stamp(changed_at) if changed_at is not None else None
+        # A WRITE IS NOT A CHANGE. When the timestamps say "moved", ask the
+        # content what the SessionStart hook fingerprinted: a branch switch
+        # and back (Interac, 2026-10-10) rewrites every file and changes
+        # nothing, and a session running identical bytes is running the
+        # current tree.
+        if loaded_this is False:
+            rec = _load(_bound_record_path(os.environ.get("CLAUDE_PID") or "x"))
+            if str(rec.get("plugin_root")) == str(tree):
+                moved = moved_components(tree, rec.get("fingerprint"))
+                if moved == []:
+                    loaded_this = True
+                    round_trip = True
+                elif moved:
+                    moved_files = moved
     else:
         version = best.get("version")
         # `lastUpdated` moves on every update; `installedAt` is the first
@@ -640,6 +728,10 @@ def installed(state_path: Path | None = None) -> dict:
         # it. False: it changed after this session bound its agents.
         # None: no measurable session start — do not judge either way.
         "loaded_by_this_session": loaded_this,
+        # Rewritten after start, but byte-identical to what was bound.
+        "round_trip": round_trip,
+        # What actually differs from the bind, when something does.
+        "moved": moved_files,
         "agents": agents,
         "skills": skills,
         "declared_agents": len(declared.get("agents") or []),
@@ -1059,7 +1151,12 @@ def compare(repo_root: Path | None = None,
                 f"{inst.get('updated_at')} and this session's process started "
                 f"{_stamp(inst.get('session_started_at'))} (a pull or checkout "
                 f"moved the tree under a running session, which read those "
-                f"once at start and does not reload them)")
+                f"once at start and does not reload them)"
+                + (f"; CONTENT that differs from the bind: "
+                   f"{', '.join(inst['moved'][:8])}"
+                   + (f" (+{len(inst['moved']) - 8} more)"
+                      if len(inst['moved']) > 8 else "")
+                   if inst.get("moved") else ""))
         else:
             reasons.append(
                 f"{inst['version']} on disk matches the checkout, but the install "
@@ -1069,6 +1166,12 @@ def compare(repo_root: Path | None = None,
                 f"skills and hooks before that and does not reload them")
     else:
         status = "OK"
+        if inst.get("round_trip"):
+            reasons.append(
+                "the bound files were rewritten after this session started "
+                "but their CONTENT is what it bound (a branch switch and "
+                "back, or a pull to the commit it started on) — nothing "
+                "moved under it")
 
     if status == "STALE" and inst.get("agents") and pub.get("agents"):
         reasons.append(f"the session dispatches against {inst['agents']} "

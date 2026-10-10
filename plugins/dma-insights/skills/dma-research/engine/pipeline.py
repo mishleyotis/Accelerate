@@ -788,6 +788,19 @@ class Pipeline:
     def _session_lacks_workflow(self) -> bool:
         """True only when the conducting session RECORDED that it holds no
         Workflow tool; unknown (an older baseline) is not absent."""
+        # LIVE FIRST (2026-10-10): a Workflow call this session made and
+        # was refused is in its transcript the moment it happens, so a tool
+        # lost after the baseline was written is seen here without anyone
+        # re-recording — a baseline is a snapshot, the transcript is now.
+        try:
+            import sys as _sys
+            _sys.path.insert(0, str(PLUGIN / "scripts"))
+            import session_roster as _sr             # noqa: PLC0415
+            live = _sr.current()
+            if live.get("found") and live.get("workflow_tool") is not None:
+                return live["workflow_tool"] is False
+        except Exception:                            # noqa: BLE001
+            pass
         try:
             rec = json.loads((self.run.root / "connectors_baseline.json").read_text())
         except (OSError, ValueError):
@@ -1514,6 +1527,21 @@ class Pipeline:
         if not (STAGES.index("START") < STAGES.index(nxt)
                 <= STAGES.index("RESEARCH")):
             return None
+        # ADOPT BEFORE JUDGING (2026-10-10). A session that never typed its
+        # tool list still has one on disk — its transcript — so a missing
+        # baseline is written from the measured roster first, and only a
+        # container with no readable roster reaches the refusal below.
+        try:
+            import sys as _sys
+            _sys.path.insert(0, str(PLUGIN / "scripts"))
+            import connector_contract as _cc         # noqa: PLC0415
+            adopted = _cc.ensure_baseline(str(self.run.root))
+            if adopted and adopted.get("adopted"):
+                self.opts.log(
+                    f"[PREFLIGHT] connector baseline adopted from this "
+                    f"session's transcript: {', '.join(adopted['present']) or 'none'}")
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (session roster not read: {str(e)[:120]})")
         try:
             binding = L.enrichment_binding(self.wb)
         except Exception as e:                       # noqa: BLE001
@@ -4592,7 +4620,10 @@ def _connector_row(run_root=None) -> tuple:
     try:
         sys.path.insert(0, str(PLUGIN / "scripts"))
         import connector_contract as cc                       # noqa: PLC0415
-        path = cc.baseline_path(run_root or os.environ.get("DMA_RUN_ROOT"))
+        root = run_root or os.environ.get("DMA_RUN_ROOT")
+        path = cc.baseline_path(root)
+        if not _readable(path) and root:
+            cc.ensure_baseline(root)          # measured from the transcript
         if not _readable(path):
             return (name, False,
                     f"no connector baseline at {path} — UNVERIFIED, not a pass. {fix}")
