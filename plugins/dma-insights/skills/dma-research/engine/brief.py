@@ -1748,6 +1748,94 @@ def _abridge(packet: dict) -> dict:
     return packet
 
 
+PACK_EXCERPT_CHARS = 240
+PACK_ROWS_PER_CELL = 6
+
+
+def evidence_pack(wb: RunWorkbook, category: str, *, qa_dir=None) -> dict:
+    """ONE file the category orchestrator reads in its first turn
+    (2026-10-10, R-INTERAC-20261010) instead of `gate --summary` plus one
+    `brief reuse` call per cell: Interac's orchestrators spent 13-20 turns
+    and $0.28-0.81 a category (priced $0.36) reading what the driver already
+    held. Per cell: the row's state, the registered rows it cites (E-id,
+    excerpt window, tier, published, recency, host), the facets with a
+    logged search, the rows it may attach, its primary question, and the
+    gate's blocking terms with their reasons. Compact on purpose — the pack
+    rides in the lane's prompt, so every character is a floor token."""
+    from . import floors_gate as FG
+    from . import kg as _kg
+    cat = str(category or "").strip().upper()
+    register = wb.evidence_index()
+    searches = wb.rows("Search_Log")
+    declared = L.declared_absences(wb)
+    verdict = FG.read_verdict(Path(qa_dir), cat) if qa_dir else None
+    summary = FG.summary(verdict)
+    reasons = FG.blocking_reasons(verdict)
+    blocking_by_cell = FG.blocking_cells(verdict)
+    selected = set(wb.selected_subcaps())
+
+    def _row(e):
+        r = register.get(e) or {}
+        return {"e_id": e, "excerpt": _clean(r.get("Excerpt"))[:PACK_EXCERPT_CHARS],
+                "tier": _clean(r.get("Tier")), "published": _clean(r.get("Date_Published")),
+                "recency": _clean(r.get("Recency")),
+                "host": L.host_of(_clean(r.get("Source_URL"))) or _clean(r.get("Source_Name")),
+                "ers": r.get("ERS")}
+
+    cells = {}
+    for r in wb.scoring_rows():
+        sub = _clean(r.get("SubCap_ID"))
+        if not sub.startswith(cat + ".") or sub not in selected:
+            continue
+        eids = [i.split(":")[0] for i in _ids(r.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+        closed = bool(_clean(r.get("Dominant_Claim")))
+        absent = L.is_declared_absent(r, declared=declared)
+        vs = L.volley_status(wb, sub, searches)
+        try:
+            dq = _kg.dqs_for(wb, sub)
+            primary = next((q.get("question") for q in (dq.get("ask") or [])
+                            if str(q.get("facet") or "").lower() == C.PRIMARY_FACET), None)
+        except Exception:                                # noqa: BLE001
+            primary = None
+        entry = {
+            "name": C.subcap_names().get(sub),
+            "state": "absent" if absent else "synthesised" if closed else "open",
+            "question": primary,
+            "cites": [_row(e) for e in eids[:PACK_ROWS_PER_CELL]],
+            "cites_total": len(eids),
+            "facets_logged": {f: n for f, n in vs["fired"].items() if n},
+            "facets_missing": vs["missing"],
+            "primary_fired": bool(vs["primary_fired"]),
+        }
+        if closed:
+            entry["claim"] = _clean(r.get("Dominant_Claim"))[:300]
+            entry["label"] = _clean(r.get("Claim_Label"))
+            entry["verdict"] = _clean(r.get("Challenge_Verdict"))
+        if sub in blocking_by_cell:
+            entry["blocking"] = blocking_by_cell[sub]
+            if reasons.get(sub):
+                entry["why"] = reasons[sub][:600]
+        if not closed or absent or sub in blocking_by_cell:
+            try:
+                re_ = reusable(wb, sub, register=register)
+                att = [{"e_id": _clean(x.get("E_ID") or x.get("e_id")),
+                        "excerpt": _clean(x.get("Excerpt") or x.get("excerpt"))[:160],
+                        "tier": _clean(x.get("Tier") or x.get("tier"))}
+                       for bucket in ("names_this_cell", "capability_siblings")
+                       for x in (re_.get(bucket) or [])[:4]]
+                if att:
+                    entry["may_attach"] = att
+            except Exception:                            # noqa: BLE001
+                pass
+        cells[sub] = entry
+    return {"category": cat, "gate": summary, "cells": cells,
+            "rules": ("FACT = two source identities on T1/T2; INFERENCE = 2+ E-ids and the "
+                      "step named; What_We_Found names a figure, date, proper noun, host or "
+                      "E-id; tense follows the recency band (UNVERIFIED is never current); "
+                      "a cell with a missing facet is a gap, never an absence; a declared "
+                      "absence's --hunted is the cell's own")}
+
+
 def challenge_batch(wb: RunWorkbook, *, run, out_dir: Path,
                     categories: list[str] | None = None) -> dict:
     """The independent challenge over synthesised cells, PAGED.

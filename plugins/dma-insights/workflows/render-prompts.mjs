@@ -95,12 +95,18 @@ for (const inv of doc.invocations || []) {
   const P = new Function('A', 'ENG', 'R', 'DOMAIN', 'MODELS', 'CARDS',
     `${researchRegion}\nreturn { collectPrompt, synthPrompt, challengePrompt }`)(A, ENG, R, DOMAIN, MODELS, CARDS)
   for (const cat of inv.cats) {
-    const batches = (inv.batches || {})[cat] && inv.batches[cat].length
-      ? inv.batches[cat] : [[`${cat} (all open capabilities)`]]
+    // A COLLECT ROW ONLY WHERE THERE IS COLLECTION (2026-10-10): a category
+    // whose handoff lists no open batch and no collect repair gets NO
+    // collector — its work is the orchestrator's (re-synthesis) or the
+    // challenger's. The "(all open capabilities)" row stays only for a
+    // handoff written before batches existed (no `batches` key at all).
+    const hasBatches = inv.batches && Object.prototype.hasOwnProperty.call(inv.batches, cat)
+    const batches = hasBatches ? (inv.batches[cat] || []) : [[`${cat} (all open capabilities)`]]
     batches.forEach((caps, i) => {
       const f = path.join(outDir, `${cat}_collect${i + 1}.md`)
       fs.writeFileSync(f, P.collectPrompt(cat, caps, round, null))
       manifest.push({ category: cat, kind: 'collect', file: f, model: MODELS.collector,
+                      capabilities: caps,
                       subagent_type: 'dma-insights:research-evidence-collector' })
     })
     const rb = (inv.repair_batches || {})[cat] || []
@@ -110,10 +116,13 @@ for (const inv of doc.invocations || []) {
       const repairs = Object.fromEntries(cells.map(c => [c, ((inv.repairs || {})[cat] || {})[c] || []]))
       fs.writeFileSync(f, P.collectPrompt(cat, caps, round, repairs))
       manifest.push({ category: cat, kind: 'collect', file: f, model: MODELS.collector,
+                      capabilities: caps, cells,
                       subagent_type: 'dma-insights:research-evidence-collector' })
     })
     const o = path.join(outDir, `${cat}_orchestrate.md`)
-    fs.writeFileSync(o, P.synthPrompt(cat, round, [], null))
+    const resynth = ((inv.resynth_reasons || {})[cat]) || Object.fromEntries(
+      Object.entries(((inv.resynth || {})[cat]) || {}).map(([c, t]) => [c, (t || []).join(', ')]))
+    fs.writeFileSync(o, P.synthPrompt(cat, round, [], null, resynth))
     manifest.push({ category: cat, kind: 'orchestrate', file: o, model: MODELS.synthesis,
                     subagent_type: 'dma-insights:research-category-orchestrator' })
     const f = path.join(outDir, `${cat}_challenge.md`)

@@ -783,6 +783,39 @@ def _collector_scope(actor, cells) -> str | None:
     return caps.pop() if len(caps) == 1 else None
 
 
+#: THE COLLECTOR'S WINDOW IS A BUDGET, NOT A WALL (2026-10-10, after
+#: R-INTERAC-20261010). `_collector_scope` gave each capability its own
+#: window on 2026-10-09 so eight parallel lanes stopped walling each other
+#: — but the window stayed SEARCH_OP_CEILING (60), a context-preservation
+#: figure sized for a category, and a capability of five cells could fire
+#: sixty searches before anything refused. Interac's P3C1 fired 200 distinct
+#: searches for 37 cells (5.4 a cell; 14.6 Search_Log rows a cell against
+#: the 6 the gate needs) and its collectors ran 57 turns a lane at $0.64.
+#: The design is one primary a cell plus one volley per facet per
+#: capability, logged with every cell: cells + len(FACETS). The window is
+#: that figure plus a little slack for a re-worded primary or a proxy rung
+#: — the owner's question, "are you limiting tool use accordingly", made
+#: into the number the ledger refuses past.
+COLLECTOR_WINDOW_SLACK = 3
+
+
+def collector_ceiling(wb: RunWorkbook, capability: str) -> int:
+    """Distinct searches a collector lane may fire on one capability: its
+    selected cells + the facet volleys + slack, never above the category
+    wall. A capability with no selected cells (a stale scope) keeps the
+    wall, so nothing is refused on a miscount."""
+    cap = str(capability or "").strip().upper()
+    if not cap or "." not in cap:
+        return SEARCH_OP_CEILING
+    try:
+        n = sum(1 for c in wb.selected_subcaps() if str(c).upper().startswith(cap + "."))
+    except Exception:                                   # noqa: BLE001
+        return SEARCH_OP_CEILING
+    if n <= 0:
+        return SEARCH_OP_CEILING
+    return min(SEARCH_OP_CEILING, n + len(C.FACETS) + COLLECTOR_WINDOW_SLACK)
+
+
 def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     """Searches FIRED since the last recorded checkpoint.
 
@@ -821,6 +854,13 @@ def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     marks = cp.get("marks") if isinstance(cp.get("marks"), dict) else {}
     if scope is not None and scope in marks:
         mark = int(marks.get(scope) or 0)
+    elif scope is not None and "." in scope and scope.split(".")[0] in marks:
+        # a collector lane's window is its capability's, measured from the
+        # CATEGORY checkpoint the lane wrote at its open (`engine.cli
+        # checkpoint --category`): a repair lane in a later round starts a
+        # fresh window instead of inheriting round 0's spent one (the
+        # per-capability window became a budget on 2026-10-10)
+        mark = int(marks.get(scope.split(".")[0]) or 0)
     else:
         try:
             mark = int(cp.get("search_ops") or 0)
@@ -941,7 +981,19 @@ def append_search(wb: RunWorkbook, *, subcap, facet: str | None,
         {"Tool": tool, "Actor": actor,
          "SubCap_ID": "" if prelim or not cells else cells[0]})
     since = _ops_since_checkpoint(wb, scope)
-    if since >= SEARCH_OP_CEILING:
+    cap = collector_ceiling(wb, scope) if scope and "." in scope else SEARCH_OP_CEILING
+    if since >= cap:
+        if cap < SEARCH_OP_CEILING:
+            raise LedgerRefusal(
+                f"search window spent for {scope}: {since} distinct search(es) since "
+                f"its checkpoint against a window of {cap} (its cells + the "
+                f"{len(C.FACETS)} facet volleys + {COLLECTOR_WINDOW_SLACK} slack). "
+                f"The window is the capability's budget, not a context wall: one "
+                f"primary per cell, one volley per facet logged with every cell. "
+                f"Write what you have for this capability (fetch, evidence, attach, "
+                f"batch) and move to the next; a cell you did not reach is the next "
+                f"round's work, and re-firing a volley the log already carries buys "
+                f"nothing.")
         raise LedgerRefusal(
             f"search-op ceiling reached for {scope}: {since} since its last "
             f"checkpoint, cap {SEARCH_OP_CEILING}. Checkpoint and stop — "

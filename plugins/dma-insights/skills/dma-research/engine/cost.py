@@ -229,26 +229,116 @@ RUNTIME_USD_PER_TOKEN = 7.5e-6
 #: in-session 74K floor when RESEARCH runs as tiers; re-measured by the first
 #: tiered run's ledger.
 LEAN_FLOOR_TOKENS = {"collector": 8_000, "orchestrator": 16_000, "challenge": 10_000}
-#: THE LEAN SHAPES, MEASURED 2026-10-09 (R-IMA-20261009, P2C2, 57 cells, lean
-#: tiers): 7 haiku collectors $0.794 (11.9 turns, ~1.3 capabilities each —
-#: the lanes share one cached system prompt, so most of the floor is a cache
-#: READ at a tenth of the price), the sonnet orchestrator $0.355 in 11 turns
-#: for 57 cells, the challenger $0.088 in 3 turns; the category PASSED the
-#: floors gate in 2 rounds, 9.3 minutes, $1.36 in all. Fitted to those
-#: dollars; replace with the next run's ledger when it differs.
+#: THE LEAN SHAPES — ENFORCED, NOT HOPED (2026-10-10, after R-INTERAC-20261010).
+#:
+#: What was measured on 2026-10-09 (R-IMA-20261009, P2C2, 57 cells: 7
+#: haiku collectors $0.794 at 11.9 turns, the sonnet orchestrator $0.355
+#: in 11 turns, the challenger $0.088; the category $1.36 in two rounds)
+#: did not hold on the next entity. Interac, one tiers round, five
+#: categories, 185 cells, DEGRADED: collectors $6.87 over 18 lanes at
+#: 28–57 turns each (priced 17), orchestrators $0.28–0.81 at 13–20 turns
+#: (priced $0.36), challengers $0.10–0.23 (priced $0.20) — $0.059/cell,
+#: 0 of 5 categories passing, 46 repair cells, $15.13 of RESEARCH spent
+#: against the $10 envelope and a handoff asking for `--stage-budget
+#: RESEARCH=28`. Where the turns went, from the workbook: P3C1 fired 200
+#: distinct searches for 37 cells (5.4 a cell; the design is one primary
+#: a cell plus five facet volleys a capability, 2.2 a cell) because the
+#: repair rounds re-fired whole volleys, and the per-capability window was
+#: still the 60-op context wall, not a budget.
+#:
+#: So the shape below is the one the driver now ENFORCES rather than the
+#: one it measured: a collector lane's search window is its capability's
+#: cells + five facets + slack (`ledger.collector_ceiling`); every lane
+#: carries `--max-budget-usd` at its priced shape times `LANE_CAP_SLACK`
+#: (`lane_cap_usd`), scaled down so a phase's caps never exceed what is
+#: left of the envelope; a repair is routed to the tier that can close it
+#: (`floors_gate.REPAIR_ROUTES`), so a failed claim costs one orchestrator
+#: pass and one re-challenge, never a collector wave; and the orchestrator
+#: reads one pre-rendered pack instead of one `brief reuse` call a cell.
+#: The turns are the design's; the growth per turn is Interac's measured
+#: payload (a WebSearch volley of ~10 results lands ~12K tokens in one
+#: turn). `engine.cost report --by-stage` after the next tiered run is
+#: where these are re-measured; `lane_cap_usd` is where they bind.
 LEAN_SHAPES = {
-    "collector": {"floor_tokens": 8_000, "turns_fixed": 2, "turns_per_capability": 7.6,
-                  "growth_per_turn": 3_000, "output_per_turn": 500},
-    # refit 2026-10-09 on three measured orchestrator passes (P2C2 57 cells
-    # $0.355/11 turns; P2C1 57 cells $0.571/17 turns, 24 cells $0.427/13):
-    # a category whose collectors register evidence writes ~5x the
-    # syntheses, and the turns follow the cells
-    "orchestrator": {"floor_tokens": 16_000, "turns_fixed": 5, "turns_per_cell": 0.2,
-                     "growth_per_turn": 3_000, "output_per_turn": 1_250},
-    # three measured challenges: $0.088, $0.170 (57 cells), $0.075 (24)
+    # 1 open turn + per capability: ONE turn of parallel searches, ONE turn
+    # that fetches, writes the ops file and batches, ONE turn for refused
+    # lines; 1 turn to return
+    "collector": {"floor_tokens": 8_000, "turns_fixed": 2, "turns_per_capability": 3,
+                  "growth_per_turn": 5_000, "output_per_turn": 600},
+    # the pack rides in the prompt (floor), then ~8 cells a batch turn
+    "orchestrator": {"floor_tokens": 24_000, "turns_fixed": 3, "turns_per_cell": 0.12,
+                     "growth_per_turn": 2_000, "output_per_turn": 1_400},
+    # three measured challenges: $0.088, $0.170 (57 cells), $0.075 (24);
+    # Interac five more at $0.10–0.23 — the one tier that ran to shape
     "challenge": {"floor_tokens": 10_000, "turns_fixed": 3, "turns_per_cell": 0.05,
                   "growth_per_turn": 3_000, "output_per_turn": 800},
 }
+
+#: THE REPAIR MODEL, lean (2026-10-10). A repair round used to be priced as
+#: a 25% collector wave plus a full orchestrator pass plus a re-challenge
+#: of the same share — the measured shape of rounds whose every blocker
+#: went to a collector. Routed by tier, Interac's 46 repair cells were 0
+#: collection gaps, 24 re-syntheses and 8 re-challenges. The shares below
+#: are what the price carries: a 5% collector wave (headroom for a genuine
+#: gap), re-synthesis of `LEAN_RESYNTH_SHARE` of the cells (the challenge
+#: FAIL rate on Interac was 19 of 99 verdicts, over the ~40% of cells that
+#: carry a synthesis — ~8% of cells; 10% is the price), and a re-challenge
+#: of the same cells.
+LEAN_REPAIR_SHARE = 0.05
+LEAN_RESYNTH_SHARE = 0.10
+
+#: EVERY LANE CARRIES ITS PRICE AS A CEILING (2026-10-10). `claude -p
+#: --max-budget-usd` stops a child at a dollar figure; the lane's figure is
+#: its priced shape times this slack, never below the floor for its tier
+#: (a two-cell batch still opens a context). A lane that reaches its cap
+#: is reported `budget_cut`: what it wrote under the lock is kept, the
+#: cells it did not reach are open and the next round's work, and the
+#: envelope is never crossed by a lane that ran away — the Interac
+#: collectors that ran 3.3x their price would have been stopped at 1.5x.
+LANE_CAP_SLACK = 1.5
+LANE_CAP_FLOOR_USD = {"collector": 0.12, "orchestrator": 0.30, "challenge": 0.12}
+#: the smallest cap a phase scaled to a thin envelope may hand a lane — a
+#: cap below this buys an open turn and nothing else, so the phase is
+#: refused instead (`AT_STAGE_BUDGET`)
+LANE_CAP_MIN_USD = 0.05
+
+
+def lane_cap_usd(kind: str, cells: int, *, capabilities: int | None = None,
+                 model: str | None = None) -> float:
+    """The dollar ceiling one lean lane is dispatched with: its priced
+    shape x LANE_CAP_SLACK, floored per tier."""
+    kind = str(kind or "").lower()
+    if kind in ("collect", "collector"):
+        usd = collector_usd(max(1, int(cells)), capabilities=capabilities,
+                            model=model, lean=True)["usd"]
+        tier = "collector"
+    elif kind in ("orchestrate", "orchestrator"):
+        usd = _cell_tier_usd("orchestrator", max(0, int(cells)), model, lean=True)["usd"]
+        tier = "orchestrator"
+    else:
+        usd = _cell_tier_usd("challenge", max(0, int(cells)), model, lean=True)["usd"]
+        tier = "challenge"
+    return round(max(LANE_CAP_FLOOR_USD[tier], usd * LANE_CAP_SLACK), 4)
+
+
+def scale_caps_to(caps: list[float], remaining: float | None) -> tuple[list[float], float]:
+    """Scale a phase's lane caps so their sum fits `remaining` (None = no
+    envelope). Returns (caps, factor); a factor that would push any cap
+    under LANE_CAP_MIN_USD returns factor 0.0 — the phase is not affordable
+    and the caller refuses it rather than dispatching lanes that can only
+    open a context."""
+    if remaining is None or not caps:
+        return list(caps), 1.0
+    total = sum(caps)
+    if total <= float(remaining) + 1e-9:
+        return list(caps), 1.0
+    if float(remaining) <= 0:
+        return [0.0 for _ in caps], 0.0
+    f = float(remaining) / total
+    scaled = [round(c * f, 4) for c in caps]
+    if min(scaled) < LANE_CAP_MIN_USD:
+        return scaled, 0.0
+    return scaled, round(f, 4)
 
 
 def agent_usd(*, model: str, turns: float, floor_tokens: int, growth_per_turn: int,
@@ -301,18 +391,31 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
                    collector_model: str | None = None,
                    synthesis_model: str | None = None,
                    repair_share: float | None = None, degraded: bool = False,
-                   lean: bool = False) -> dict:
+                   lean: bool = False, synth_only_cells: int = 0) -> dict:
     """What RESEARCH should cost for `cells` open cells over `categories`
     categories at the tiered shape: collector batches, one orchestrator pass
     per category, a repair wave over `repair_share` of the cells, one
     challenge per category. `degraded` is recorded and changes nothing: the
-    shape is the price, the search tool is not."""
+    shape is the price, the search tool is not.
+
+    `synth_only_cells` are closed cells routed back to the orchestrator and
+    the challenger (a failed claim, a boilerplate row, a missing verdict —
+    `floors_gate.REPAIR_ROUTES`): they are priced on the judgement tiers
+    and buy no collector batch, which is the whole point of routing them.
+    On the lean shape the repair wave is `LEAN_REPAIR_SHARE` of the cells
+    for collectors and `LEAN_RESYNTH_SHARE` for re-synthesis + re-challenge."""
     if repair_share is None:
-        # the lean second round measured 9% (P2C2) and 61% (P2C1, inflated by
-        # the shared-window wall since fixed) of the first, 2026-10-09; the
-        # in-session shape keeps the 15% it was fitted with
-        repair_share = 0.25 if lean else 0.15
+        # lean: the routed repair model (see LEAN_REPAIR_SHARE); in-session
+        # shape keeps the 15% it was fitted with
+        repair_share = LEAN_REPAIR_SHARE if lean else 0.15
+    resynth_share = LEAN_RESYNTH_SHARE if lean else repair_share
     cells = max(0, int(cells)); categories = max(0, int(categories))
+    synth_only = max(0, int(synth_only_cells or 0))
+    if not cells:
+        # a round with nothing to collect IS the repair pass: pricing a
+        # repair of the repair on top would ask for money twice
+        repair_share = 0.0
+        resynth_share = 0.0
     caps = int(capabilities) if capabilities else max(1, round(cells / CELLS_PER_CAPABILITY))
     batches = max(0, -(-cells // max(1, int(batch_cells)))) if cells else 0
     per_batch = collector_usd(min(cells, batch_cells) or batch_cells,
@@ -322,15 +425,18 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
     repair_batches = -(-repair_cells // max(1, int(batch_cells))) if repair_cells else 0
     per_repair = collector_usd(min(repair_cells, batch_cells) or batch_cells,
                                model=collector_model, lean=lean)
-    per_cat_cells = cells / categories if categories else 0
+    judged = cells + synth_only                 # what the judgement tiers read
+    per_cat_cells = judged / categories if categories else 0
     orch = _cell_tier_usd("orchestrator", round(per_cat_cells), synthesis_model, lean=lean)
-    orch_repair = _cell_tier_usd("orchestrator", round(per_cat_cells * repair_share),
+    orch_repair = _cell_tier_usd("orchestrator", round(per_cat_cells * resynth_share),
                                  synthesis_model, lean=lean)
     chal = _cell_tier_usd("challenge", round(per_cat_cells), lean=lean)
-    if lean:
+    chal_repair = _cell_tier_usd("challenge", round(per_cat_cells * resynth_share), lean=lean)
+    if lean and resynth_share > 0:
         # a lean repair round re-challenges what it rewrote (measured $0.075)
-        chal = {**chal, "usd": chal["usd"] + _cell_tier_usd(
-            "challenge", round(per_cat_cells * repair_share), lean=lean)["usd"]}
+        chal = {**chal, "usd": chal["usd"] + chal_repair["usd"]}
+    if not resynth_share:
+        orch_repair = {**orch_repair, "usd": 0.0, "output_tokens": 0}
     by_tier = {
         "collector": round(per_batch["usd"] * batches, 4),
         "repair_collector": round(per_repair["usd"] * repair_batches, 4),
@@ -343,9 +449,10 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
                   + (orch["output_tokens"] + orch_repair["output_tokens"]) * categories
                   + chal["output_tokens"] * categories)
     return {
-        "usd": usd, "cells": cells, "categories": categories, "capabilities": caps,
+        "usd": usd, "cells": cells, "synth_only_cells": synth_only,
+        "categories": categories, "capabilities": caps,
         "batches": batches, "repair_batches": repair_batches,
-        "per_cell": round(usd / cells, 4) if cells else 0.0,
+        "per_cell": round(usd / judged, 4) if judged else 0.0,
         "per_batch": per_batch["usd"], "per_category_orchestrator": round(orch["usd"], 4),
         "per_category_challenge": round(chal["usd"], 4),
         "by_tier": by_tier,
@@ -364,8 +471,10 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
         "basis": (("lean headless " if lean else "") + f"tiered shape: {batches} collector batch(es) on {per_batch['model']} "
                   f"at ${per_batch['usd']:.3f} + {categories} orchestrator pass(es) on "
                   f"{orch['model']} at ${orch['usd']:.3f} + {categories} challenge(s) at "
-                  f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave; "
-                  f"degraded or connector-backed prices the same"),
+                  f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave"
+                  + (f" + re-synthesis of {int(resynth_share * 100)}%" if lean else "")
+                  + (f" + {synth_only} closed cell(s) re-judged" if synth_only else "")
+                  + "; degraded or connector-backed prices the same"),
     }
 
 

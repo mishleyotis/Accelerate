@@ -887,9 +887,11 @@ def main(argv=None) -> int:
             # (2026-10-09: lanes read the category's and reported a false
             # "checkpoint needed" up to the orchestrator)
             since = ledger._ops_since_checkpoint(wb, cap)
+            ceiling = ledger.collector_ceiling(wb, cap)
             st.update(search_ops_since_checkpoint=since,
-                      window_remaining=max(0, ledger.SEARCH_OP_CEILING - since),
-                      checkpoint_required=since >= ledger.SEARCH_OP_CEILING)
+                      window=ceiling,
+                      window_remaining=max(0, ceiling - since),
+                      checkpoint_required=since >= ceiling)
         print(json.dumps({"seq": n, "window": cap or cat or "PRELIM", **st}, indent=2)); return 0
     if a.cmd == "evidence":
         cells = [c for c in (a.subcap or []) if str(c).strip()]

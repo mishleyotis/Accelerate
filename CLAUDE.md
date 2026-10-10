@@ -498,6 +498,28 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   prompt names the run are priced into the ledger (the IMA PRELIM relay,
   $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
 
+- **Interac research cost audit** (user, 2026-10-10, "$10 for a successful
+  research pass across 16 categories … are you batching … and limiting tool
+  use?"; `WORKFLOW-OPTIMIZATION-2026-10-09.md` §13, read from the run's own
+  snapshot): one tiers round over five categories cost $10.94 ($0.059/cell),
+  0 of 5 passed, and all 46 repair cells were synthesis or verdict defects
+  handed to COLLECTORS. Closed in code: **a declared absence is never
+  `boilerplate`** (the gate's anchor rule is for syntheses; "Interac" is one
+  capitalised word); **repairs route by tier** (`floors_gate.REPAIR_ROUTES`:
+  collect / re-synthesise / re-challenge; a category with no collection gets
+  no collector lane; `challenge_missing` is closed in-round); **every lean
+  lane carries `--max-budget-usd`** at its priced shape × 1.5, a phase's caps
+  scaled to the envelope or the phase refused (`cost.lane_cap_usd`,
+  `budget_cut` reported); **a collector's search window is its capability's
+  cells + 5 facets + 3** (`ledger.collector_ceiling`), not the 60-op wall;
+  the orchestrator reads **one pre-rendered pack** (`_pack.json`); the
+  calibration floor follows cells, not categories. The enforced shape prices
+  686 cells at **$16.21** and Interac's 715 at $16.56; **$10 funds ~420 cells
+  (9–10 categories whole)** — the model says so and defers the rest by name.
+  Closing the last gap is the owner's: `--stage-budget RESEARCH=17`, the
+  universal-cell scope, or the `primary_shared` rule on degraded runs. PRELIM
+  on opus ($4.86 vs $2) is flagged, not changed.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

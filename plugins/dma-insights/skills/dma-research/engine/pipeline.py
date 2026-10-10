@@ -274,6 +274,10 @@ def _merge_tier_invocations(inv: list[dict]) -> dict:
                batches={c: b for i in inv for c, b in i["batches"].items()},
                repairs={c: r for i in inv for c, r in i["repairs"].items()},
                repair_batches={c: b for i in inv for c, b in i["repair_batches"].items()},
+               resynth={c: r for i in inv for c, r in (i.get("resynth") or {}).items()},
+               resynth_reasons={c: r for i in inv
+                                for c, r in (i.get("resynth_reasons") or {}).items()},
+               rechallenge={c: r for i in inv for c, r in (i.get("rechallenge") or {}).items()},
                rounds=min(int(i.get("rounds") or 2) for i in inv))
     budgets = {c: i["budget"] for i in inv if i.get("budget") for c in i["cats"]}
     if budgets:
@@ -2298,11 +2302,21 @@ class Pipeline:
         # Repairs are the gate's findings on CLOSED cells only.
         still_open = {str(r.get("SubCap_ID") or "") for r in self.wb.scoring_rows()
                       if not str(r.get("Dominant_Claim") or "").strip()}
-        repairs = {c: {cell: terms for cell, terms in floors_gate.blocking_cells(
-                           floors_gate.read_verdict(self.run.qa_dir, c)).items()
-                       if cell not in still_open and cell != c}
-                   for c in need}
-        stalled = self._workflow_stalled(need, repairs)
+        verdicts = {c: floors_gate.read_verdict(self.run.qa_dir, c) for c in need}
+        blockers = {c: {cell: terms for cell, terms in floors_gate.blocking_cells(verdicts[c]).items()
+                        if cell not in still_open and cell != c}
+                    for c in need}
+        # A REPAIR GOES TO THE TIER THAT CAN CLOSE IT (2026-10-10,
+        # R-INTERAC-20261010): a collector wave for the Search_Log gaps, the
+        # orchestrator for a failed or boilerplate claim, the challenger for
+        # a missing verdict. Interac's 46 repair cells were 0 / 24 / 8 by
+        # that split, and all 46 had been handed to collectors.
+        routed = {c: floors_gate.route_repairs(blockers[c]) for c in need}
+        repairs = {c: routed[c]["collect"] for c in need}
+        resynth = {c: routed[c]["synthesise"] for c in need}
+        rechallenge = {c: sorted(routed[c]["challenge"]) for c in need}
+        reasons = {c: floors_gate.blocking_reasons(verdicts[c]) for c in need}
+        stalled = self._workflow_stalled(need, blockers)
         work = [c for c in sorted(need) if c not in stalled]
         by_unit = ({c: [c] for c in work} if RESEARCH_UNIT == "category"
                    else {u: [c for c in cs if c in work]
@@ -2314,6 +2328,14 @@ class Pipeline:
                 "repairs": {c: repairs.get(c) or {} for c in cats},
                 "repair_batches": {c: _repair_batches(repairs.get(c) or {}, limit)
                                    for c in cats},
+                # closed cells the ORCHESTRATOR rewrites (a new synthesis
+                # clears the verdict) and the CHALLENGER re-judges — no
+                # collector is paid for either
+                "resynth": {c: resynth.get(c) or {} for c in cats},
+                "resynth_reasons": {c: {cell: reasons[c].get(cell, ", ".join(terms))
+                                        for cell, terms in (resynth.get(c) or {}).items()}
+                                    for c in cats},
+                "rechallenge": {c: rechallenge.get(c) or [] for c in cats},
                 # THE TIERS RIDE WITH THE WORK (2026-10-09): the workflow runs
                 # collectors on `models.collector`, the category orchestrator
                 # and the challenge on `models.synthesis`; it never picks.
@@ -2363,10 +2385,14 @@ class Pipeline:
             len(b) for i in inv for b in i["repair_batches"].values())
         cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
         rcells = sum(len(i["repairs"][c]) for i in inv for c in i["cats"])
+        scells = sum(len(i["resynth"][c]) for i in inv for c in i["cats"])
         ncaps = sum(len(open_caps.get(c, {})) for i in inv for c in i["cats"])
         est, basis, price = self._workflow_estimate(cells, rcells, n, prev, capabilities=ncaps,
-                                                    batch_cells=limit)
+                                                    batch_cells=limit, resynth=scells)
         doc["estimate"] = {"open_cells": cells, "repair_cells": rcells, "batches": nb,
+                           "resynth_cells": scells,
+                           "rechallenge_cells": sum(len(i["rechallenge"][c])
+                                                    for i in inv for c in i["cats"]),
                            "categories": n, "usd": est, "basis": basis,
                            "per_cell": price.get("per_cell"),
                            "by_tier": price.get("by_tier"), "models": price.get("models"),
@@ -2417,7 +2443,9 @@ class Pipeline:
                     pr = cost_mod.research_price(
                         cs, categories=len(i["cats"]), capabilities=cp or None,
                         batch_cells=limit, collector_model=self.opts.collector_model,
-                        synthesis_model=self.opts.synthesis_model)
+                        synthesis_model=self.opts.synthesis_model,
+                        lean=(self.opts.research_mode == "tiers"),
+                        synth_only_cells=sum(len(i["resynth"][c]) for c in i["cats"]))
                     ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
                     return round(pr["usd"] * max(1.0, ratio), 4)
                 left = float(remaining)
@@ -2481,7 +2509,7 @@ class Pipeline:
             total_cells = max(1, cells + rcells)
             for i in inv:
                 mine = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
-                           for c in i["cats"])
+                           + len(i["resynth"][c]) for c in i["cats"])
                 # A handed category's share is ITS OWN end-to-end estimate when
                 # categories were allocated whole; otherwise the remainder is
                 # partitioned by cells.
@@ -2587,7 +2615,8 @@ class Pipeline:
 
     def _workflow_estimate(self, cells: int, rcells: int, n: int,
                            prev: dict, *, capabilities: int | None = None,
-                           batch_cells: int | None = None) -> tuple[float, str, dict]:
+                           batch_cells: int | None = None,
+                           resynth: int = 0) -> tuple[float, str, dict]:
         """The tiered price (`cost.research_price`: haiku collectors, a sonnet
         orchestrator and challenge per category), corrected by the run's own
         last round: the ratio of what it cost to what it was estimated at
@@ -2604,7 +2633,8 @@ class Pipeline:
             collector_model=self.opts.collector_model,
             synthesis_model=self.opts.synthesis_model,
             degraded=bool(self.state.get("enrichment_degraded")),
-            lean=(self.opts.research_mode == "tiers"))
+            lean=(self.opts.research_mode == "tiers"),
+            synth_only_cells=int(resynth or 0))
         pilot = float(price["usd"])
         basis = price["basis"]
         cal = self.state.get("workflow_calibration") or {}
@@ -2618,17 +2648,31 @@ class Pipeline:
             actual = round((research_now if then is not None else self._spent_usd)
                            - spent_then, 2)
             if actual > 0 and float(prev.get("usd") or 0) > 0:
+                prev_cells = (int(prev.get("open_cells") or 0) + int(prev.get("repair_cells") or 0)
+                              + int(prev.get("resynth_cells") or 0))
                 cal = {"ratio": round(max(1.0, actual / float(prev["usd"])), 3),
                        "per_category": round(actual / max(1, int(prev.get("categories")
                                                                 or prev.get("cats") or 1)), 3),
+                       # THE FLOOR FOLLOWS THE CELLS, NOT THE CATEGORY COUNT
+                       # (R-INTERAC-20261010, 2026-10-10): a 46-cell repair
+                       # round over sixteen categories was floored at 16 x
+                       # the last FULL round's $0.659 per category — $10.55
+                       # for work the shape prices at a tenth of that — and
+                       # the handoff asked the owner for more money
+                       "per_cell": (round(actual / prev_cells, 4) if prev_cells else None),
                        "measured_usd": actual}
                 self.state["workflow_calibration"] = cal
         except (TypeError, ValueError):
             pass
         if cal:
-            est = max(pilot * float(cal["ratio"]), n * float(cal["per_category"]))
+            work = cells + rcells + int(resynth or 0)
+            floor = (work * float(cal["per_cell"]) if cal.get("per_cell")
+                     else n * float(cal["per_category"]))
+            est = max(pilot * float(cal["ratio"]), floor)
             basis += (f", calibrated by this run's last round (${cal['measured_usd']} "
-                      f"measured: x{cal['ratio']}, floor ${cal['per_category']}/category)")
+                      f"measured: x{cal['ratio']}, floor "
+                      + (f"${cal['per_cell']}/cell" if cal.get("per_cell")
+                         else f"${cal['per_category']}/category") + ")")
             if pilot > 0:
                 price = dict(price, per_cell=round(price["per_cell"] * est / pilot, 4))
         else:
@@ -2942,7 +2986,12 @@ class Pipeline:
                   "challenge": "research-challenger"}
 
     def _tier_rows(self, manifest: list, kind: str, cats: list, rnd: int,
-                   extra_text: dict | None = None) -> list:
+                   extra_text: dict | None = None, caps: dict | None = None) -> list:
+        """One lean lane row per manifest row of `kind` for `cats`. `caps`
+        = {category: {"cells": n, "capabilities": k}} prices the lane's
+        dollar ceiling (`cost.lane_cap_usd`) into `lean.max_usd` — the
+        figure `agent_run.py` passes as `--max-budget-usd`."""
+        from . import cost
         rows = []
         for i, m in enumerate(r for r in manifest if r.get("kind") == kind
                               and r.get("category") in cats):
@@ -2953,11 +3002,48 @@ class Pipeline:
             pf = Path(m["file"])
             if extra_text and extra_text.get(cat):
                 pf.write_text(pf.read_text() + extra_text[cat])
+            lean = {"model": m.get("model"), "tools": self.TIER_TOOLS[kind],
+                    "cwd": str(self.run.root), "actor": actor}
+            size = (caps or {}).get(cat) or {}
+            if kind == "collect":
+                # the batch's size: its repair cells, else the open cells
+                # under the capabilities the manifest row names
+                caplist = [str(x) for x in (m.get("capabilities") or [])]
+                if m.get("cells"):
+                    cells = len(m["cells"])
+                elif caplist:
+                    open_caps = _open_capabilities(self.wb).get(cat, {})
+                    cells = sum(int(open_caps.get(x) or 0) for x in caplist) or BATCH_CELLS
+                else:
+                    cells = int(size.get("batch_cells") or BATCH_CELLS)
+                lean["max_usd"] = cost.lane_cap_usd(
+                    "collect", cells, capabilities=len(caplist) or None,
+                    model=m.get("model"))
+            else:
+                lean["max_usd"] = cost.lane_cap_usd(kind, int(size.get("cells") or 0),
+                                                    model=m.get("model"))
             rows.append({"agent": self.TIER_AGENT[kind], "prompt_file": str(pf),
                          "label": f"research-{cat.lower()}-{kind}-{Path(m['file']).stem.lower()}-r{rnd}",
-                         "lean": {"model": m.get("model"), "tools": self.TIER_TOOLS[kind],
-                                  "cwd": str(self.run.root), "actor": actor}})
+                         "lean": lean})
         return rows
+
+    def _cap_rows_to_envelope(self, rows: list, stage: str) -> tuple[list, float]:
+        """Scale the rows' `lean.max_usd` so the phase cannot cross what is
+        left of the envelope. Returns (rows, factor); factor 0.0 means the
+        envelope cannot fund even the floors — the phase is refused."""
+        from . import cost
+        env = self.stage_budget_block(stage)
+        remaining = None if not env or not env.get("binding") else env.get("remaining")
+        caps = [float(r["lean"].get("max_usd") or 0) for r in rows]
+        scaled, f = cost.scale_caps_to(caps, remaining)
+        if f == 0.0:
+            return rows, 0.0
+        if f < 1.0:
+            for r, c in zip(rows, scaled):
+                r["lean"]["max_usd"] = c
+            self.opts.log(f"  [{stage}] lane caps scaled x{f} to the envelope's "
+                          f"${float(remaining):.2f} remaining ({len(rows)} lane(s))")
+        return rows, f
 
     def _tier_dispatch(self, rows: list, *, stage: str, name: str) -> dict:
         if not rows:
@@ -3008,31 +3094,70 @@ class Pipeline:
         the gate per category."""
         from . import floors_gate
         out: dict = {"cats": list(cats), "round": r, "phases": {}, "gates": {}}
+        work = self._tier_work(cats)
+        sizes = {c: {"cells": work[c]["judged"], "batch_cells": BATCH_CELLS} for c in cats}
 
-        def phase(kind, stage, extra=None):
-            rows = self._tier_rows(manifest, kind, cats, r, extra_text=extra)
+        def phase(kind, stage, use_cats, extra=None, suffix=""):
+            if not use_cats:
+                out["phases"][kind + suffix] = {"lanes": 0, "ok": 0, "failed": 0, "usd": 0.0,
+                                                "turns": 0, "elapsed_s": 0.0,
+                                                "skipped": "no work routed to this tier"}
+                return {"dispatched": 0, "ok": 0, "failed": []}
+            rows = self._tier_rows(manifest, kind, use_cats, r, extra_text=extra, caps=sizes)
+            rows, f = self._cap_rows_to_envelope(rows, stage)
+            if f == 0.0:
+                out["phases"][kind + suffix] = {"lanes": len(rows), "ok": 0, "failed": 0,
+                                                "usd": 0.0, "refused": "AT_STAGE_BUDGET: the "
+                                                "envelope cannot fund the lanes' floors"}
+                return {"dispatched": 0, "ok": 0, "failed": [], "refused": True}
             summ = self._tier_dispatch(rows, stage=stage,
-                                       name=f"tiers_{kind}_{'_'.join(c.lower() for c in cats)}_r{r}")
+                                       name=f"tiers_{kind}{suffix}_{'_'.join(c.lower() for c in use_cats)}_r{r}")
             self._count(summ)
-            out["phases"][kind] = {"lanes": len(rows), "ok": summ.get("ok"),
-                                   "failed": len(summ.get("failed") or []),
-                                   "usd": summ.get("usd"), "turns": summ.get("turns"),
-                                   "elapsed_s": summ.get("elapsed_s")}
+            out["phases"][kind + suffix] = {"lanes": len(rows), "ok": summ.get("ok"),
+                                            "failed": len(summ.get("failed") or []),
+                                            "usd": summ.get("usd"), "turns": summ.get("turns"),
+                                            "elapsed_s": summ.get("elapsed_s"),
+                                            "budget_cut": summ.get("budget_cut") or 0,
+                                            "cap_usd": round(sum(float(x["lean"].get("max_usd") or 0)
+                                                                 for x in rows), 4)}
             return summ
 
-        # 1. COLLECT — every batch of the categories, side by side.
-        phase("collect", "RESEARCH")
+        # 1. COLLECT — only the categories with open cells or a routed
+        #    collection gap (Interac paid seven collector lanes to "collect
+        #    for boilerplate").
+        collect_cats = [c for c in cats if work[c]["collect"]]
+        phase("collect", "RESEARCH", collect_cats)
         if self._over_stage_budget("RESEARCH"):
             self._budget_stopped = True
             self.opts.log("  [RESEARCH] envelope spent after collection — the syntheses "
                           "are owed; stopping")
             out["stopped"] = "AT_STAGE_BUDGET after collection"
             return out
-        # 2. ORCHESTRATE — completeness, syntheses, absences, gaps.
-        phase("orchestrate", "RESEARCH", extra=self._collector_returns(cats, r))
-        # 3. CHALLENGE — the independent pass, then the gate.
-        if not self._over_stage_budget("RESEARCH"):
-            phase("challenge", "CHALLENGE")
+        # 2. ORCHESTRATE — completeness, syntheses, absences, gaps, and the
+        #    re-synthesis of the cells the gate routed back here.
+        orch_cats = [c for c in cats if work[c]["collect"] or work[c]["resynth"]]
+        if orch_cats:
+            self._write_packs(orch_cats, r)
+        summ = phase("orchestrate", "RESEARCH", orch_cats, extra=self._collector_returns(cats, r))
+        if summ.get("refused"):
+            self._budget_stopped = True
+            out["stopped"] = "AT_STAGE_BUDGET before the orchestrator pass"
+            return out
+        # 3. CHALLENGE — every category whose synthesised cells lack a
+        #    verdict (new syntheses, re-syntheses, or a verdict the gate
+        #    found missing), then the gate.
+        self.reopen()
+        chal_cats = [c for c in cats
+                     if c in orch_cats or work[c]["rechallenge"] or self._unchallenged(c)]
+        if chal_cats and not self._over_stage_budget("RESEARCH"):
+            phase("challenge", "CHALLENGE", chal_cats)
+            self.reopen()
+            # A challenger that skipped cells (challenge_missing: 8 of
+            # Interac's 46 repair cells) used to cost a whole round; one
+            # more lane for the cells it missed costs its floor.
+            missed = [c for c in chal_cats if self._unchallenged(c)]
+            if missed and not self._over_stage_budget("RESEARCH"):
+                phase("challenge", "CHALLENGE", missed, suffix="_missed")
         self.reopen()
         for cat in cats:
             g = floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
@@ -3040,6 +3165,67 @@ class Pipeline:
         self._verify_research(cats)
         self.reopen()
         return out
+
+    def _tier_work(self, cats: list) -> dict:
+        """What each category's round has for each tier, from the handoff
+        the round was started from: open cells and collect repairs → a
+        collector wave; those or re-syntheses → an orchestrator pass;
+        re-challenges → a challenge lane. `judged` is what the judgement
+        tiers read (open + repaired + re-synthesised cells)."""
+        try:
+            doc = json.loads((self.run.qa_dir / RESEARCH_HANDOFF).read_text())
+        except (OSError, ValueError):
+            doc = {}
+        invs = doc.get("invocations") or []
+        out = {}
+        for c in cats:
+            inv = next((i for i in invs if c in i.get("cats", [])), {})
+            batches = (inv.get("batches") or {}).get(c) or []
+            repairs = (inv.get("repairs") or {}).get(c) or {}
+            resynth = (inv.get("resynth") or {}).get(c) or {}
+            rechal = (inv.get("rechallenge") or {}).get(c) or []
+            open_cells = sum(1 for r in self.wb.scoring_rows()
+                             if str(r.get("SubCap_ID") or "").startswith(c + ".")
+                             and not str(r.get("Dominant_Claim") or "").strip())
+            # a handoff written before batches existed names none: open
+            # cells are then the collector's work, as they always were
+            legacy = (not invs) or ("batches" not in inv)
+            collect = bool(batches) or bool(repairs) or (legacy and open_cells > 0)
+            out[c] = {"collect": collect, "resynth": bool(resynth), "rechallenge": bool(rechal),
+                      "judged": open_cells + len(repairs) + len(resynth)}
+        return out
+
+    def _unchallenged(self, cat: str) -> bool:
+        """True when a synthesised, non-absent cell of `cat` carries no
+        challenge verdict — the challenge-batch builder's own predicate."""
+        for r in self.wb.scoring_rows():
+            sc = str(r.get("SubCap_ID") or "")
+            if not sc.startswith(cat + ".") or not str(r.get("Dominant_Claim") or "").strip():
+                continue
+            if str(r.get("Challenge_Verdict") or "").strip():
+                continue
+            if L.is_declared_absent(r, self.wb):
+                continue
+            return True
+        return False
+
+    def _write_packs(self, cats: list, rnd: int) -> None:
+        """The orchestrator's evidence pack per category, rendered ONCE by
+        the driver after the collectors return (`brief.evidence_pack`), so
+        the sonnet pass reads one file instead of one `brief reuse` call a
+        cell (Interac: 13–20 turns, $0.28–0.81 a category against a priced
+        $0.36). Written beside the cards; the prompt names the path."""
+        from . import brief
+        for cat in cats:
+            try:
+                pack = brief.evidence_pack(self.wb, cat, qa_dir=self.run.qa_dir)
+            except Exception as e:                       # noqa: BLE001
+                self.opts.log(f"  [RESEARCH] {cat}: pack not rendered ({e.__class__.__name__}: "
+                              f"{str(e)[:120]}) — the orchestrator reads per cell")
+                continue
+            d = self.run.root / "briefs" / "research_cards" / cat
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "_pack.json").write_text(json.dumps(pack, separators=(",", ":"), default=str))
 
     def _stage_research_tiers(self) -> str:
         from . import brief, floors_gate

@@ -665,3 +665,112 @@ two-hour report round ("I see that the report round does not use
 had never reached the Gate_Log: the ledger refused them and `_record`
 swallowed the refusal; `PASS_SCOPE` and `WARN` joined `GATE_VERDICTS` and a
 test scans every verdict the driver writes (MEM-0640).
+
+## 13. Interac — the $10 research pass, measured on the run itself (2026-10-10)
+
+The owner's ask: "ensure the entire research loop costs less than $10 for
+Interac. I keep on getting repair attempts after every run and prompts to
+raise budgets across runs. Are you batching the research for multiple
+subcaps and limiting tool use accordingly? … $10 for a successful research
+pass across 16 categories." Read from the run's own snapshot
+(`run_snapshot_R-INTERAC-20261010.tar.gz`: ledger, state, handoffs, gate
+verdicts, workbook), not from a projection.
+
+**The run.** Interac Corp., RB with a CIB supplement, HYBRID, FULL scope:
+715 open cells. DEGRADED (Exa 402, Tavily missing). PRELIM $4.86 against the
+$2 envelope — two lanes on **opus** (the conductor, 82 turns, 9.9M cache-read
+tokens). Then RESEARCH:
+
+| handoff | what it said | what the owner did |
+|---|---|---|
+| 1 (04:19) | est **$84.15** (the in-session shape — the mode had not yet resolved to tiers), 2 of 16 categories handed, **14 deferred for budget** | raised `--stage-budget RESEARCH=28`, `--max-usd 45` |
+| 2 (06:05) | est $26.63 lean, 1 of 16 handed, 14 deferred | raised again (RESEARCH 55, run 80) |
+| tiers rounds 1–4 | five categories worked (P1C3, P1C4, P3C1, P3C2, P4C1); **0 of 5 pass**; 5–18 repair cells each; RESEARCH $15.13 | — |
+| 5 (06:51) | est $23.15 for 536 open + 46 repair cells, "calibrated … floor $0.659/category" | — |
+
+**Where the dollars went (one tiers round, five categories, 185 cells):**
+
+| tier | lanes | $ | turns/lane | priced |
+|---|---|---|---|---|
+| collectors (haiku) | 18 | 6.87 | 28–57 | 17 turns, $0.17/lane |
+| orchestrators (sonnet) | 5 | 3.23 | 13–20 | $0.36 |
+| challengers (sonnet) | 5 | 0.84 | 7–10 | $0.20 — ran to shape |
+| round | | **10.94 → $0.059/cell** | | $0.038 |
+| all rounds | | **15.13 → $0.082/cell**, 0/5 passing | | |
+
+**Why — five causes, each in the data:**
+
+1. **Repairs were the wrong tier's.** The 46 repair cells were
+   `boilerplate` 15 · `challenge_failed` 9 · `challenge_missing` 8 (+14
+   advisory-only). Not one was a collection gap, and every one was handed to
+   a **collector** wave ("collect for boilerplate"), then the orchestrator,
+   then the challenger — the full round at the full price, seven repair
+   lanes (~$3.40) that could not touch the field they were sent to fix.
+2. **The 15 `boilerplate` blockers were declared ABSENCES.** Their
+   What_We_Found is the engine's own text ("Searched and not found: P1C4.1.4
+   primary "Interac" "change readiness" … Nearest thing that came back for
+   P1C4.1."); the gate's anchor rule wants a year, a figure, an E-id, a host
+   or TWO capitalised words, and "Interac" is one. Writer and gate
+   disagreed, so those categories could never pass — the repair loop the
+   owner saw after every run, and specific to a one-word entity.
+3. **Searches were per cell, not per capability.** P3C1: 200 distinct
+   searches for 37 cells (5.4 a cell; 14.6 Search_Log rows a cell against
+   the 6 the gate needs). Half were facet volleys fired ~11 times per
+   capability instead of 5 — repair rounds re-fired whole volleys — and the
+   per-capability window was still the 60-op context wall, never a budget.
+   Nothing limited tool use: the lean lane had no turn or dollar cap
+   (`agent_run.py` noted the CLI has no `--max-turns`; it has
+   `--max-budget-usd`).
+4. **The orchestrator re-read what the driver held.** 13–20 turns a
+   category: `gate --summary` then one `brief reuse` call per cell.
+5. **The estimate asked for money twice over.** The first handoff priced
+   the in-session shape ($84) because the mode resolved to tiers only after
+   the degraded flag landed; the fifth floored a 46-cell repair round at
+   16 × the last FULL round's per-category spend ($10.55 for work the shape
+   prices at ~$1).
+
+**What changed (each enforced, each tested in
+`test_research_under_ten_2026_10_10.py`):**
+
+| fix | where | test |
+|---|---|---|
+| a declared absence is judged by the absence rules, never the prose anchor rule | `floors_gate.run` | `test_a_declared_absence_is_judged_by_its_hunt_not_by_the_anchor_rule` |
+| repairs routed by tier: collect / re-synthesise / re-challenge (`REPAIR_ROUTES`); the handoff carries `resynth`, `resynth_reasons`, `rechallenge`; no collect row is rendered for a category with no collection; `tier_round` runs only the tiers with work; the in-session workflow skips the collect wave for a re-synthesis-only category | `floors_gate`, `pipeline._research_handoff`, `render-prompts.mjs`, `dma-pillar-research.js` | `test_repairs_are_routed_…`, `test_the_handoff_sends_a_failed_claim_…`, `test_a_round_runs_only_the_tiers_that_have_work` |
+| `challenge_missing` closed in-round by one more challenge lane for the missed cells | `pipeline.tier_round` | (same stub run) |
+| every lean lane carries `--max-budget-usd` = its priced shape × 1.5 (`cost.lane_cap_usd`), a phase's caps scaled down to the envelope's remainder or the phase refused; a cut lane is `budget_cut` in the summary | `agent_run.lean_command`, `pipeline._tier_rows/_cap_rows_to_envelope`, stub | `test_lane_rows_carry_their_priced_ceiling_…`, `test_a_phases_caps_never_exceed_the_envelope`, `test_a_runaway_lane_is_booked_at_its_cap_…`, `test_a_thin_envelope_…` |
+| a collector lane's search window = the capability's cells + 5 facets + 3 (`ledger.collector_ceiling`), refused past it with "write what you have and move on"; the manifest and prompt say so | `ledger.append_search`, `cli search` | `test_the_collector_window_is_the_capabilitys_cells_plus_the_volleys` |
+| the orchestrator reads ONE pre-rendered pack (`briefs/research_cards/<CAT>/_pack.json`, written by the driver after the collectors return) — no gate call, no per-cell reads | `brief.evidence_pack`, `pipeline._write_packs`, prompt, manifest | `test_the_orchestrator_reads_one_pre_rendered_pack` |
+| the price is the enforced shape (`LEAN_SHAPES`: collector 2 + 3 turns/capability, orchestrator pack-fed, routed repair model `LEAN_REPAIR_SHARE`/`LEAN_RESYNTH_SHARE`; `synth_only_cells` buy no collector) | `cost.research_price` | `test_the_lean_price_is_the_enforced_shape_…` |
+| the calibration floor follows the cells, not the category count | `pipeline._workflow_estimate` | `test_the_calibration_floor_follows_the_cells_…` |
+| sixteen categories, one round, all PASS, no deferral, under the envelope — on the stub | `pipeline` | `test_sixteen_categories_are_handed_whole_and_pass_in_one_round` |
+
+**The arithmetic, stated.** At the enforced shape a 43-cell category costs
+**$1.10** end to end (collect $0.42 · orchestrate $0.41 · challenge $0.20 ·
+routed repair $0.07). The T1_CORE scope, 686 cells / 16 categories, prices
+at **$16.21 ($0.024/cell)**; Interac's 715 at **$16.56**. That is 3.5× below
+what Interac measured ($0.082/cell) and the caps make it a ceiling, not a
+hope — but it is **not $10**. $10 funds **~420 cells, about 9–10 of the 16
+categories whole**, cheapest first; the handoff names the rest under
+`deferred_for_budget`, and nothing is started that cannot finish. The gap
+to $10 is not a batching gap: the floor of the gold row contract on Interac
+is ~1,360 searches (one primary per cell, five facets per capability, the
+owner's 2026-09-03 and 2026-10-09 rules), ~715 judged rows on sonnet and a
+challenge of every synthesis. Three levers close it, and all three are the
+owner's, not the driver's:
+
+| lever | saves | what it costs |
+|---|---|---|
+| `--stage-budget RESEARCH=17` for a 715-cell HYBRID run | — | $7 over the envelope, once per run; the envelope figure was set for "700+ subcaps" at a shape that had never been measured |
+| scope: the 686 universal cells only (drop the CIB supplement's 29) | $0.35 | the CIB variants are not scored |
+| contract: let a capability's facet volleys count for an absence without a cell-own primary on a DEGRADED run (`primary_shared`) | ~$3 (≈ 500 searches) | the cell's own question was never asked — the rule the owner set 2026-10-09 |
+
+Not in the envelope but on the bill: PRELIM ran the conductor on **opus**
+($4.86 against $2). The lane caps apply to the research tiers only; the
+PRELIM lane model is the owner's call.
+
+**What the next Interac round measures** (`engine.cost report --by-stage`,
+`07_qa/lanes_*.json` → `budget_cut`, `cap_usd`, per-lane `turns`/`usd`):
+turns per collector lane against 9, `budget_cut` lanes (a cut lane means
+the shape, not the cap, is wrong), distinct searches per cell against 2.2,
+and the orchestrator's turns against 8. A measured round that lands under
+the price is the proof; one that is cut at the caps is the next finding.
