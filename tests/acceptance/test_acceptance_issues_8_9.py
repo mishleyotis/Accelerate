@@ -262,10 +262,11 @@ def test_issue9_cost_record_and_report_are_real_commands(tmp_path):
     rep = json.loads(out.stdout)
     assert out.returncode == 0 and rep["within"] and rep["stages"][0]["stage"] == "PRELIM"
     assert "RESEARCH" in rep["unrecorded"]
-    # $30 is over the run-wide default ($25 = the stage envelopes' sum, 2026-10-09)
-    # AND over the RESEARCH envelope ($10): the report must say both.
+    # $45 is over the run-wide default ($43 = the stage envelopes' sum since
+    # the RESEARCH envelope became $28 on 2026-10-10) AND over the RESEARCH
+    # envelope: the report must say both.
     _cli("engine.cost", "record", "--stage", "RESEARCH", "--elapsed-s", "9000",
-         "--usd", "30.00", run=run)
+         "--usd", "45.00", run=run)
     out = _cli("engine.cost", "report", "--json", run=run)
     rep = json.loads(out.stdout)
     assert out.returncode == 1 and rep["over_wall_clock"] and rep["over_budget"]
