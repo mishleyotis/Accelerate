@@ -158,7 +158,8 @@ def test_auto_picks_tiers_on_a_degraded_run_and_the_workflow_otherwise(tmp_path)
 def test_a_spent_envelope_stops_the_tiers_before_any_lane(tmp_path):
     run = new_run(tmp_path, selected=two_category_selection(3))
     preflight.record(run, preflight_doc())
-    cost.record(run, stage="RESEARCH", elapsed_s=1, usd=9.99)
+    # a cent under the default envelope (the figure is the owner's; $28 since 2026-10-10)
+    cost.record(run, stage="RESEARCH", elapsed_s=1, usd=cost.STAGE_BUDGET_USD["RESEARCH"] - 0.01)
     disp = S.StubDispatcher(S.default_handlers())
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "o", ingest_poll_s=0,
