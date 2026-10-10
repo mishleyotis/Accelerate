@@ -222,3 +222,36 @@ def test_detach_refuses_while_the_synthesis_still_names_the_row(tmp_path):
     with pytest.raises(L.LedgerRefusal, match="still names"):
         L.detach_evidence(wb, e, cell, reason="a complaint SLA, not exception categorisation",
                           actor="research-conductor")
+
+
+# ── structure: an empty, fully-searched cell needs no model to declare ─────
+
+from fixtures import fire_volleys  # noqa: E402
+
+
+def test_auto_absence_declares_from_the_search_log_and_keeps_every_refusal(tmp_path):
+    run = _new_run(tmp_path / "r")
+    wb = run.open()
+    a, b = _siblings(wb, 2)
+    fire_volleys(wb, a, tool="exa")                # all volleys, a connector, own primary
+    out = L.auto_absence(wb, a, actor=f"research-{a[:4].lower()}-producer", run=run)
+    row = wb.scoring_row(a)
+    assert row["Absence_Claimed"] == "YES" and out["rungs"] == ["direct", "proxy"]
+    assert a in row["What_We_Found"], "the hunt names the cell's own question"
+    # a cell with a missing volley is refused exactly as the manual path refuses it
+    with pytest.raises(L.LedgerRefusal):
+        L.auto_absence(wb, b, actor=f"research-{b[:4].lower()}-producer", run=run)
+    # web_search-only volleys on a connector-backed run: refused (no enrichment effort)
+    fire_volleys(wb, b, tool="web_search")
+    with pytest.raises(L.LedgerRefusal, match="enrichment connector"):
+        L.auto_absence(wb, b, actor=f"research-{b[:4].lower()}-producer", run=run)
+
+
+def test_auto_absence_refuses_an_evidenced_cell(tmp_path):
+    run = _new_run(tmp_path / "r")
+    wb = run.open()
+    cell = _siblings(wb, 1)[0]
+    fire_volleys(wb, cell, tool="exa")
+    _evidence(wb, cell, 9)
+    with pytest.raises(L.LedgerRefusal, match="carries evidence"):
+        L.auto_absence(wb, cell, actor=f"research-{cell[:4].lower()}-producer", run=run)

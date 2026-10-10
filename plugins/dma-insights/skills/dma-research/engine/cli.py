@@ -540,6 +540,16 @@ def main(argv=None) -> int:
                          "source actually sits on, and what was mis-filed")
     rt.add_argument("--actor", default=None)
 
+    aa = common(sub.add_parser(
+        "absence-auto",
+        help="declare EMPTY, fully-searched cells absent from the run's own "
+             "Search_Log — no model call. Every declare_absence refusal still "
+             "applies; a cell the manual path could not close is reported, "
+             "not closed"))
+    aa.add_argument("--category", default=None)
+    aa.add_argument("--subcap", action="append", default=[])
+    aa.add_argument("--actor", default=None, help="defaults to $DMA_ACTOR")
+
     dt = common(sub.add_parser(
         "detach",
         help="undo ONE citation (row <-> cell), audited — the conducting tier "
@@ -950,6 +960,26 @@ def main(argv=None) -> int:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
         print(json.dumps(out, indent=2))
+        return 0
+    if a.cmd == "absence-auto":
+        cells = [c for c in (a.subcap or []) if c.strip()] or [
+            str(r.get("SubCap_ID")) for r in wb.scoring_rows()
+            if a.category and str(r.get("SubCap_ID") or "").startswith(a.category.upper() + ".")]
+        closed, refused = [], {}
+        for c in cells:
+            row = wb.scoring_row(c) or {}
+            if str(row.get("Dominant_Claim") or "").strip():
+                continue                       # already synthesised or declared
+            ids = [i for i in str(row.get("Evidence_IDs") or "").split(",")
+                   if i.strip() and i.strip() != contract.NO_EVIDENCE]
+            if ids:
+                continue                       # evidenced: a judgement, not an absence
+            try:
+                ledger.auto_absence(wb, c, actor=_actor(a), run=run)
+                closed.append(c)
+            except ledger.LedgerRefusal as exc:
+                refused[c] = str(exc)[:300]
+        print(json.dumps({"declared": closed, "refused": refused}, indent=2))
         return 0
     if a.cmd == "detach":
         try:

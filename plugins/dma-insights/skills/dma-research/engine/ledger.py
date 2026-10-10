@@ -1900,6 +1900,68 @@ def _norm_hunt(text: str) -> str:
     return re.sub(r"\s+", " ", str(text or "").strip().lower())
 
 
+#: The facet whose query stands as the PROXY rung of an auto-declared ladder,
+#: in preference order: corroborates asks the third parties that would name
+#: the practice, fails/contradicts the record of it going wrong.
+_AUTO_PROXY_FACETS = ("corroborates", "contradicts", "fails", "value", "works")
+
+
+def auto_absence(wb: RunWorkbook, subcap: str, *, actor: str, run=None) -> dict:
+    """Declare an EMPTY, fully-searched cell absent from the run's own record —
+    no model call.
+
+    R-INTERAC-20261010: a model wrote every declared absence (a sonnet or
+    haiku turn per cell, ~45% of all cells) although every input to it is
+    already in the workbook: the cell's own primary query, the facet volleys
+    logged on it, the tools that ran them and what each returned (the
+    Search_Log's Kept and Outcome). The judgement that NOTHING citable came
+    back was the collector's, made when it registered nothing for the cell.
+    This writes the same `declare_absence` call from that record, so every
+    refusal there still applies (all volleys, the primary, an enrichment
+    connector, ladder queries that were fired, the cell's own hunt) — the
+    auto path can only close a cell the manual path would also close.
+
+    Refuses a cell that carries evidence or that the register names, exactly
+    as `declare_absence` does; returns its result otherwise."""
+    rows = [r for r in wb.rows("Search_Log")
+            if str(r.get("SubCap_ID") or "").strip() == subcap and r.get("Query")]
+    prim = [r for r in rows if str(r.get("Facet") or "").strip() == C.PRIMARY_FACET]
+    if not prim:
+        raise LedgerRefusal(f"{subcap}: no primary search logged — nothing to "
+                            f"declare an absence from")
+    sibs = {c for c in wb.selected_subcaps()
+            if c != subcap and ".".join(c.split(".")[:2]) == ".".join(subcap.split(".")[:2])}
+    sib_prim = {_norm_hunt(r.get("Query")) for r in wb.rows("Search_Log")
+                if str(r.get("SubCap_ID") or "").strip() in sibs
+                and str(r.get("Facet") or "").strip() == C.PRIMARY_FACET}
+    own = [r for r in prim if _norm_hunt(r.get("Query")) not in sib_prim] or prim
+    direct = own[0]
+    proxy = next((r for f in _AUTO_PROXY_FACETS for r in rows
+                  if str(r.get("Facet") or "").strip() == f), None)
+    if proxy is None:
+        raise LedgerRefusal(f"{subcap}: no facet volley logged — the proxy rung "
+                            f"has no query to stand on")
+
+    def _said(r):
+        out = str(r.get("Outcome") or "").strip()
+        return (f"{r.get('Tool') or 'search'} '{str(r.get('Query'))[:110]}' "
+                f"({r.get('Hits') or 0} hit(s), {r.get('Kept') or 0} kept"
+                + (f"; nearest: {out[:120]}" if out else "") + ")")
+    facets = [r for r in rows if r is not direct and r is not proxy]
+    hunted = (f"{subcap} own question: {_said(direct)}; proxy: {_said(proxy)}"
+              + (f"; also {len(facets)} facet search(es) incl. "
+                 + "; ".join(_said(r) for r in facets[:2]) if facets else ""))
+    pclass = C.proxy_classes().get(subcap, "a named owner or public artefact")
+    proxy_log = (f"proxy class {pclass} hunted through the {proxy.get('Facet')} "
+                 f"volley ({proxy.get('Tool')}): '{str(proxy.get('Query'))[:120]}' "
+                 f"returned {proxy.get('Hits') or 0} result(s), "
+                 f"{proxy.get('Kept') or 0} kept, none citable for {subcap}")
+    ladder = [{"rung": "direct", "query": direct.get("Query")},
+              {"rung": "proxy", "query": proxy.get("Query")}]
+    return declare_absence(wb, subcap, actor=actor, ladder=ladder,
+                           proxy_log=proxy_log, what_was_hunted=hunted, run=run)
+
+
 def _cell_own_hunt_problems(wb: RunWorkbook, subcap: str, hunted: str) -> list:
     """An absence is THIS cell's hunt, not its capability's.
 
