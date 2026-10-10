@@ -76,7 +76,7 @@ SUBVERTICAL_CODES = ("RB", "CU", "CL", "CIB", "FC", "AM", "RIA", "IC", "IB")
 # pre-fix 765-row body would otherwise revalidate to a 304 and keep it —
 # `promoted_at` does not move when the SERVING rule does. Bump on any
 # change to what `serves()` admits.
-SCOPE_TAG = "sv-scope@2"
+SCOPE_TAG = "sv-scope@3"
 
 # Surface-Spec / manifest spellings -> the catalogue's VC subvertical_code.
 # Two vocabularies exist: the serving tier stores the Surface Specification
@@ -231,19 +231,51 @@ def variant_subvertical(subcap_id) -> str | None:
     return code if code in SUBVERTICAL_CODES else None
 
 
-def serves(subcap_id, entity_code: str | None) -> bool:
+def resolve_supplementary(raw, primary: str | None = None) -> tuple:
+    """The SUPPLEMENTARY sub-verticals an entity is bound to, as VC codes.
+
+    A multi-line-of-business institution is bound to one PRIMARY
+    sub-vertical (`entities.sub_vertical`, which alone drives its label) and
+    may carry supplementary ones whose variant cells are its own too —
+    SWBC: primary IB, supplementary IC, CL, RIA (owner-confirmed
+    2026-09-30). `raw` is the column as read: a list, a Postgres array
+    literal (`{IC,CL,RIA}`), a comma-separated string, or None.
+
+    Each entry resolves through `resolve_subvertical`, so either vocabulary
+    serves. An entry that resolves to nothing is DROPPED, not widened to
+    "keep everything": the primary already decided whether scoping is in
+    force, and an unreadable supplementary entry is no evidence that some
+    other sub-vertical's cells belong to this client. The primary itself
+    and repeats are dropped too. Order is the stated order.
+    """
+    if raw is None:
+        return ()
+    if isinstance(raw, str):
+        raw = [p for p in re.split(r"[,;]", raw.strip().strip("{}"))]
+    out = []
+    for item in raw:
+        code = resolve_subvertical(str(item).strip().strip('"')) \
+            if item is not None and str(item).strip() else None
+        if code and code != primary and code not in out:
+            out.append(code)
+    return tuple(out)
+
+
+def serves(subcap_id, entity_code: str | None, supplementary=()) -> bool:
     """May a run for an entity of `entity_code` serve this cell?
 
-    True for every base cell, every family/product variant and every
-    variant of the entity's own sub-vertical. False only for a variant
-    that names a DIFFERENT sub-vertical. An entity whose sub-vertical
-    resolves to None (unknown vocabulary) keeps everything: not knowing
-    who you are is not grounds for hiding scores.
+    True for every base cell, every family/product variant, every variant
+    of the entity's own sub-vertical and every variant of a SUPPLEMENTARY
+    sub-vertical it is bound to (`resolve_supplementary`). False only for a
+    variant that names a sub-vertical the entity is NOT bound to. An entity
+    whose primary sub-vertical resolves to None (unknown vocabulary) keeps
+    everything: not knowing who you are is not grounds for hiding scores.
     """
     if not entity_code:
         return True
     owner = variant_subvertical(subcap_id)
-    return owner is None or owner == entity_code
+    return (owner is None or owner == entity_code
+            or owner in (supplementary or ()))
 
 
 # ── END SHARED CORE — everything below is this service's own ──
@@ -303,8 +335,12 @@ def display_name(raw) -> tuple:
 
 
 
-def scope_to_entity(rows, entity_sub_vertical, key=None) -> list:
-    """`rows` less the cells belonging to another sub-vertical.
+def scope_to_entity(rows, entity_sub_vertical, key=None,
+                    supplementary=None) -> list:
+    """`rows` less the cells belonging to a sub-vertical the entity is not
+    bound to — neither its primary nor one of its `supplementary` ones
+    (`entities.supplementary_sub_verticals`, read through
+    `resolve_supplementary`).
 
     `rows` may be bare cell ids (`key=None`), DB tuples (`key` an integer
     column index) or dicts (`key` a column name). Order is preserved — the
@@ -315,10 +351,11 @@ def scope_to_entity(rows, entity_sub_vertical, key=None) -> list:
     code = resolve_subvertical(entity_sub_vertical)
     if code is None:
         return list(rows)
+    extra = resolve_supplementary(supplementary, code)
     # One subscript serves both shapes: an integer indexes a DB tuple, a
     # string keys a dict.
     read = (lambda row: row) if key is None else (lambda row: row[key])
-    return [r for r in rows if serves(read(r), code)]
+    return [r for r in rows if serves(read(r), code, extra)]
 
 
 # ── serving a whole section, not just a row list ──────────────────────
@@ -335,8 +372,11 @@ def _is_cell_key(key: str) -> bool:
             or str(key) in _CELL_KEYS)
 
 
-def scope_sections(entity_sub_vertical, data) -> int:
+def scope_sections(entity_sub_vertical, data, supplementary=None) -> int:
     """Drop foreign-variant cells from a section payload, in place.
+
+    Foreign means "of a sub-vertical the entity is not bound to": a variant
+    of the primary or of a `supplementary` sub-vertical stays.
 
     Returns how many were dropped, so a caller can log or assert it rather
     than trust it (invariant 8: counted, never assumed).
@@ -353,6 +393,7 @@ def scope_sections(entity_sub_vertical, data) -> int:
     code = resolve_subvertical(entity_sub_vertical)
     if code is None or not isinstance(data, (dict, list)):
         return 0
+    extra = resolve_supplementary(supplementary, code)
     dropped = 0
 
     def walk(node):
@@ -361,7 +402,7 @@ def scope_sections(entity_sub_vertical, data) -> int:
             for key, value in list(node.items()):
                 if _is_cell_key(key) and isinstance(value, list):
                     kept = [v for v in value
-                            if not isinstance(v, str) or serves(v, code)]
+                            if not isinstance(v, str) or serves(v, code, extra)]
                     dropped += len(value) - len(kept)
                     node[key] = kept
                     continue
@@ -370,7 +411,7 @@ def scope_sections(entity_sub_vertical, data) -> int:
                     for item in value:
                         cell = (item.get("subcap_id") or item.get("cell_id")
                                 if isinstance(item, dict) else None)
-                        if cell and not serves(cell, code):
+                        if cell and not serves(cell, code, extra):
                             dropped += 1
                             continue
                         kept.append(item)

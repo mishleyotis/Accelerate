@@ -32,13 +32,51 @@ route → produce → challenge → consolidate → submit → learn
 | produce | the per-surface producer that owns the named surface, or the page producer when a whole page is in scope | no |
 | challenge | `finding-challenger` (dma-research discipline) | no |
 | consolidate | `page-consolidator` (refuses unchallenged input) | no |
-| submit + promote | `surface-producer` only | **yes** |
+| submit + promote | `surface-producer` on a hand-driven run; on a research-engine run the driver (`engine.pipeline`, through `ship_page.py --claim`) — nobody else | **yes** |
 | learn | `qa-overseer` (writes the findings memory) | memory only |
 
 The challenger runs BEFORE the consolidator, always: the consolidator's
 method assumes per-claim verdicts exist, and it refuses input without them.
 The qa-overseer runs at the END of every production or repair, green or not
 — a green run with a buried defect still gets its finding recorded.
+
+## Not every section is synthesised — check its disposition first
+
+`produce → challenge → consolidate` is the path for a section that is
+genuinely SYNTHESISED. Most sections are not. `${CLAUDE_PLUGIN_ROOT}/references/section_sources.json`
+(read it, or run `python3 -m engine.surface_export plan --page <page>`) gives
+every section a disposition, and the page brief carries the same split:
+
+- **convert** (`workbook` / `report`) — the section is FORMATTED from its
+  workbook tab(s) or a challenged report section. It is **not re-synthesised
+  and not re-challenged** — the research layer already challenged that
+  content, and a second challenge is the duplicate work this split exists to
+  remove. `engine.surface_export.scaffold` shapes and validates it against the
+  page contract before `ship_page.py` spends a submission. This is the large
+  majority of sections.
+- **produce** (`enrichment` / `synthesis`) — a per-surface producer writes it,
+  through `produce → challenge → consolidate`. `enrichment` sections need
+  their enrichment registered as evidence first. This is the ONLY set the
+  challenger and consolidator run on. Today that is `overview.leadership`,
+  `overview.sentiment`, `overview.thought_leadership` and
+  `heatmap.cohort_patterns`.
+- **server** — the section submits `fields: {}` plus the page thread; the app
+  joins the arrangement server-side (`heatmap.value_chain`).
+
+So before dispatching a per-surface producer, confirm the section's
+disposition is `produce`. A `convert` section routed through a producer is the
+duplicate synthesis (and the duplicate challenge) this table is drawn to avoid.
+
+The same map reaches the **card and the drawer**: `section_sources.json`'s
+`cards` block (also `join://cards`, or `engine.surface_export cards --section
+<page.section>`) gives every card array — each finding, insight, recommendation,
+tile, bar, register row — its own route and the exact tab COLUMNS / report
+section / enrichment facet that feed it; a card flagged `connector_authored`
+(safeguard gates) or a key under `computed_never_sent` is written by the app and
+must never be authored. `scaffold_card` refuses an item key the contract card
+does not declare. The `drilldowns` atlas (`join://drilldowns`, `… drawers`)
+says which drawer carries its own synthesis prompt (DD-1/2/3/4/7) and which
+render the parent card's payload — so a drawer is never produced twice either.
 
 ## Dispatch mode — the top session orchestrates, one level deep
 
@@ -53,7 +91,7 @@ could not dispatch the sanctioned re-vet). Two rules follow:
    consolidator, the vetter — via the Agent tool, in this file's order.
    Never delegate the pipeline to one enclosing orchestrator subagent: it
    cannot fan out, and an orchestrator that cannot dispatch improvises.
-   Where the Agent tool is genuinely absent, `scripts/agent_run.py` runs a
+   Where the Agent tool is genuinely absent, `${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py` runs a
    stage as a headless CLI session — same agents, same order, same
    refusals.
 2. **Verdict integrity survives dispatch.** A package-vetter REFUSE is
@@ -61,17 +99,37 @@ could not dispatch the sanctioned re-vet). Two rules follow:
    session — never by a producer's own re-analysis, however correct it
    reads.
 
-Division of labour is unchanged: headless children and subagents reach the
-DMA connector natively but carry NO claude.ai enrichment connectors — those
-exist only in the top session, attached to the Routine. Connector-bound
-searches (Clay, Exa, Tavily, Vibe-Prospecting, Indeed) run only in the top
-session: a dispatched producer that needs one emits it in a
-`search_requests` array (query + falsifier pairing + facet) instead of
-fabricating or skipping; the top session executes the requests through its
-real connectors, registers the evidence, logs the source outcomes in the
-yield ledger, and re-invokes the producer with the evidence ids. Enrichment
-honesty survives the hop: a search the top session refused or could not run
-is recorded not-run, never invented.
+Division of labour is unchanged: headless children reach the DMA connector
+natively but carry NO claude.ai enrichment connectors — those bind once, at
+session start, in the top session attached to the Routine, and a subagent
+inherits them only when it runs IN PROCESS through the Agent tool.
+Connector-bound searches (Clay, Exa, Tavily, Vibe-Prospecting, Indeed)
+therefore run only in the top session or one of its in-process subagents: a
+dispatched producer that needs one emits it in a `search_requests` array
+(query + falsifier pairing + facet) instead of fabricating or skipping.
+
+The hop is code, not etiquette — `engine.relay`, run inside every research
+round. `harvest` reads the requests out of the lane's own transcript and
+queues each once; `batch` deduplicates them by normalised query, groups them
+by capability, proposes the connector per query, and writes one index
+(`07_qa/relay_batch_r<N>.json`) plus a self-contained prompt per group under
+`briefs/relay_r<N>/`. The top session spins ONE fresh in-process subagent per
+prompt — Exa/Tavily batches to `enrichment-web-specialist`, Clay/Vibe to
+`enrichment-connector-specialist`. Those subagents write their findings
+straight to the workbook through `engine.cli search` and `engine.cli
+evidence` and close their requests with `engine.relay record`; the results
+never pass back through the top session's context, which is what keeps it
+flat across hundreds of queries. `reconcile` then closes the queue from the
+Search_Log itself, which is the only report those subagents file — and logs
+each closure to the cross-client source-yield ledger
+(`${CLAUDE_PLUGIN_ROOT}/scripts/source_yield.py`), so which pathway actually pays accumulates run
+over run without one extra token being spent to say it.
+
+Enrichment honesty survives the hop: a search a subagent refused or could not
+run is recorded BLOCKED with the refusal text verbatim, never invented and
+never quietly re-run through WebSearch. A batch nobody has serviced yet is
+`PENDING_ORCHESTRATOR` on the ENRICHMENT gate — non-blocking, and it never
+halts the run.
 
 ## Two tiers of producer, and which tier a request reaches
 
@@ -80,10 +138,17 @@ what the request *names*, not by how large the repair feels.
 
 - **Six page producers** — `overview-`, `insights-`, `heatmap-`,
   `platform-`, `context-` and `techstack-surface-producer`. A request that
-  names a **page** reaches one of these. A page producer no longer writes
-  section bodies itself: it fans the page out to the per-surface producers
-  below, and keeps page assembly, the page's narrative thread, the
-  cross-surface reconciliation and the hand-off to `finding-challenger`.
+  names a **page** reaches one of these. A page producer writes no section
+  bodies and DISPATCHES NOTHING — it holds no Agent tool, because a subagent
+  cannot spawn subagents (MEM-0106, rule 1 above). The TOP session runs the
+  page's per-surface producers first, in parallel where the ordered pairs
+  below allow, each writing its fragment to `sections/<page>.<section>.json`;
+  then it runs the page producer as the ASSEMBLER over those fragments:
+  page assembly, the page's narrative thread, the cross-surface
+  reconciliation and the hand-off to `finding-challenger`. Measured
+  28-09-2026 (QA audit F-C01-021): this file used to give the page producer
+  the dispatch itself while no page producer could — one topology now, and
+  `${CLAUDE_PLUGIN_ROOT}/scripts/tests/test_topology.py` holds the documented one to the actual.
 - **Twenty-four per-surface producers** — one agent per surface, or per
   tightly-coupled pair of surfaces that would contradict each other if two
   agents wrote them. A request that names a **surface** reaches exactly one
@@ -141,7 +206,7 @@ the outside world's two measurements of the same client; P3 and P4 are one
 order argued twice; C2 and C3 are the two halves of one risk claim; H2 and
 H6 are the same evidence seen per-cell and per-run.
 
-### Four ordered pairs the fan-out must respect
+### Four ordered pairs the dispatch order must respect
 
 Most surfaces on a page are independent and go out in parallel. Four are
 not, and a router that parallelises them will produce a page that
@@ -161,15 +226,16 @@ contradicts itself:
   the argument last, because a thread written over claims that later change
   is a thread that describes a page that no longer exists.
 
-## The page routing table — a page fans out
+## The page routing table — which producers a page assembles
 
-A request that names a page routes here. The page producer invokes the
-surface producers listed, then assembles.
+A request that names a page routes here. The top session invokes the
+surface producers listed, then the page producer, which assembles what they
+wrote.
 
 Agent names are written out in full here on purpose: a router that expands an
 abbreviation guesses, and a guessed agent name is a route to nothing.
 
-| page named | page producer | fans out to |
+| page named | page producer (assembles) | per-surface producers the top session runs first |
 |---|---|---|
 | overview / D1 | `overview-surface-producer` | `overview-hero-producer`, `overview-whynow-producer`, `overview-opportunity-producer`, `overview-findings-producer`, `overview-people-producer`, `overview-market-producer`, `overview-governance-producer`, then `overview-narrative-producer` last |
 | insights / D2 | `insights-surface-producer` | `insights-cards-producer`, and `insights-landscape-producer` once T1 is settled |
@@ -243,7 +309,7 @@ sub-vertical, an evidence mode) routes to **`research-conductor`**, which
 binds the run against a PREFLIGHT the engagement owner answered, opens the
 client folder, closes the PRELIM phase, builds the knowledge graph from the
 pillar toolkits, and dispatches one researcher per catalogue category —
-sixteen, generated from one template by `scripts/gen_research_agents.py`,
+sixteen, generated from one template by `${CLAUDE_PLUGIN_ROOT}/scripts/gen_research_agents.py`,
 each bound to its grain and nothing else. A repair that names a category
 (a FAILED floors gate, a challenged subcap) routes to that category's
 researcher directly, never through a full re-run — the same
@@ -267,6 +333,9 @@ smallest-true-unit rule as the per-surface producers above.
 | P4C2 Analytics & AI Enablement | `research-p4c2-producer` |
 | P4C3 Technology Architecture & Integration | `research-p4c3-producer` |
 | P4C4 Information Security & Cybersecurity | `research-p4c4-producer` |
+| evidence for one batch of a category's open cells; no judgement | `research-evidence-collector` (Haiku), research workflow |
+| a category's syntheses, absences and gap list from the collected evidence | `research-category-orchestrator` (Sonnet), research workflow |
+| the challenge pass over a converged category's syntheses — seven dimensions from the brief packet alone, one chained `engine.cli challenge` per cell; no web, no `get_evidence` | `research-challenger` (Sonnet), with a deterministic 10% Opus sample re-judged by `finding-challenger` |
 
 **Three phases run BEFORE any category is dispatched, and each is a gate
 rather than a habit:**
@@ -291,6 +360,56 @@ folder, and runs the memory backup-then-cleanup lifecycle. None of them
 touches the connector's write tools — a research run that is ready for
 surface production enters, like every package, through the package-vetter.
 
+## Orchestration — what one agent hands the next
+
+REPORTED 2026-09-03 by the engagement owner: "There is no orchestration
+existing between the subagents and main agents. Ensure efficient context
+management and information sharing where needed."
+
+Every dispatch in this table now carries a BRIEF rather than a prompt
+somebody typed. `engine.brief` is four derived views over the run's own
+sheets, so there is no second record to drift and no context to paste:
+
+| command | what it hands over |
+|---|---|
+| `engine.brief batch --out-dir <D>` | one bounded packet per category plus the `agent_run.py --batch` array — the conductor's whole dispatch |
+| `engine.brief dispatch --category C` | that category's packet: the run's shared state, each open cell's owed volleys AND the evidence already registered for it, sibling sources worth reading, the lane's own notebook digest, its search budget |
+| `engine.brief reuse --subcap X` | what the run already holds for X — read before searching, because the run has paid for it |
+| `engine.brief handback --category C` | what the category established, computed from the sheets, plus the leads its sources open for OTHER categories |
+
+Two rules follow from it, and both are enforced rather than advised: a
+producer's FIRST command is its brief (the manifests say so, and the session
+hook repeats it), and an empty cell cannot be declared absent while the
+register names it (`ledger.declare_absence` refuses; the floors gate carries
+`absence_over_evidence` blocking and `evidence_unattached` advisory). Every
+packet is measured against `BRIEF_CHAR_CEILING` — context sharing that is
+not bounded is the token bleed under another name.
+
+## The scoring tier — column D, after the research and before the reports
+
+REPORTED 2026-09-03 by the engagement owner: "Report writing starts without
+scoring happening." Nothing had owned the scores — `dma-assessment` built a
+separate workbook and the report producers read whatever they found. Five
+agents now own the SCORING stage of the research workbook, and the stage is
+gated at both ends by the engine rather than by the manifest.
+
+| what | agent | may critique? |
+|---|---|---|
+| open the stage (`engine.assessment open`) — refused until every category's floors gate is PASS with `--require-synthesis`, PRELIM is complete and the template binding is recorded | `research-conductor` | n/a |
+| P1's scores: one `engine.assessment score` per subcap — refuses an unchallenged row, a score above the evidence ceiling, a rationale under 150 chars or citing none of the row's own E-ids, an incomplete AI/data overlay | `scoring-p1-producer` | no |
+| P2 / P3 / P4, the same, in parallel | `scoring-p2-producer` · `scoring-p3-producer` · `scoring-p4-producer` | no |
+| the SCORING_CRITIC verdict per pillar — re-derives a sample, checks ceilings and differentiation; `engine.assessment critique` refuses a scorer as its own critic | `scoring-critic` | **only** |
+| the rollup (`engine.assessment rollup`: Pillar_Rollup, Category_Rollup, Coverage_Map, Executive_Summary) and the SCORING gate | `research-conductor` | n/a |
+
+The four producers run **in parallel**, one pillar each, and the critic runs
+per pillar as pillars land. `engine.assessment gate` blocks on `unscored`,
+`critic_missing`, `rollup_missing`, `score_above_ceiling`, `unchallenged_scored`,
+`overlay_incomplete`, `no_differentiation` and the rest, and records its
+verdict in `Gate_Log`. **No report section can be written until that verdict
+is PASS**: `engine.narrative write` runs the stage preconditions and refuses.
+After the gate, `engine.assemble checkpoint` ships the scored workbook to
+the client folder so the app can ingest it while the reports are written.
+
 ## The report tier — the four deliverables' prose
 
 The 2026-08-30 coverage audit measured sixteen report sections with **no
@@ -300,13 +419,25 @@ split is an independence rule rather than a taste.
 
 | what | agent | may review? |
 |---|---|---|
-| the Client Research Profile's 8 sections | `report-research-producer` | no |
-| the DMA Assessment Report's 8 sections | `report-assessment-producer` | no |
+| the Client Research Profile's 8 sections (the pinned Doc) | `report-research-producer` | no |
+| the DMA Assessment Report's 11 sections (the pinned Doc) | `report-assessment-producer` | no |
 | every section's verdict, and the whole-report adversarial pass | `report-validator` | **only** |
 | the technographic scan, as a deliverable rather than a side effect | `technographic-scanner` | n/a |
 
+Before a word: `engine.cli narrative preconditions --report <key>` must be
+empty. It lists every failing precondition at once — PRELIM open, no
+template binding, a category gate not PASS, the workbook incomplete, and
+for the assessment report a SCORING gate that is not PASS. Then the producer
+reads the pinned template (`references/templates/<report>.md`) and
+`gold_reference.json`; the section spec it writes to is loaded from
+`report_templates.json`, so a remembered shape cannot be written.
+
 A section is written through `engine.narrative write`, which refuses prose
-that is not an argument: it must state what was weighed AGAINST its own
+that is not an argument — and a body that is not the Doc's: the section's
+blocks in order, its card shape (`P1`..`P4` deep dives, `REC-NN`), and the
+countable MINIMUM DATA of its control block (five to seven findings, five
+fiscal years, the four layers, an AI-and-data overlay per pillar). It must
+also state what was weighed AGAINST its own
 conclusion, the proxy ladder behind any absence it asserts, the assumptions
 it made and which way they cut, the bias it carries, and every inference
 tagged with what would confirm it. `Accuracy_Basis` is computed from the
@@ -356,6 +487,14 @@ the table is closed: an id that is not one of these was not authored here, and
 a note naming one is a bug report about the id allocator, not a surface repair.
 
 ### After a compaction, a resume or a fork
+
+**The parameters survive the compaction.** `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/param_echo.py` runs at
+PreCompact and writes the run's id, root, workbook stage, pipeline position,
+budget and search-op count to `<run>/07_qa/param_echo.json`; the PostCompact
+brief prints that file back as `PARAMETER ECHO` before anything else. Read it
+first — it is the run's own record from before the summary, not the summary —
+and only then `engine.cli resume` for the rest (QA audit F-E10-034).
+
 
 A synthesis firing that produces six pages **will** compact. When it does, the
 routing rule, the memory rule and the submit boundary are whatever the
@@ -407,10 +546,10 @@ guessed against and fails the next one.
   consolidation, one submit. Still no page producer — it earns its place
   only when the page as a whole is being authored.
 - **One page wrong as a page** (the storyline is incoherent, the thread
-  contradicts the sections, most surfaces need rewriting): the page producer,
-  which fans out to all its surface producers, assembles, and hands one page
-  to the challenger.
-- **A fresh run**: pages fan out in parallel — each page's produce →
+  contradicts the sections, most surfaces need rewriting): the top session
+  runs all of that page's surface producers, then the page producer, which
+  assembles and hands one page to the challenger.
+- **A fresh run**: pages proceed in parallel — each page's produce →
   challenge → consolidate chain is independent of the others until the
   cross-page reconciliation, which the surface-producer runs before
   submitting the set. Promotion stays atomic across all six.
@@ -433,7 +572,7 @@ tokens of the search, the risk of a second answer that now needs
 reconciling, and a fresh chance to cite a worse source than the one the
 run's RRF consensus already ranked. New searching belongs only to gaps the
 enrichment planner names — and a dispatched producer emits those as
-`search_requests` for the top session (see Dispatch mode above), never
+`search_requests` for the relay to batch (see Dispatch mode above), never
 fires them itself.
 
 ## Memory duties per stage

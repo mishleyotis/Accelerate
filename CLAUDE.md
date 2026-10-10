@@ -42,7 +42,7 @@ material; the HTML docs above supersede them where they differ.
 ## Invariants — violating any of these is a bug, whatever the tests say
 
 1. **No model calls at request time.** Only embedding-model use is inside the MCP connector at submit (V4 grounding), local + deterministic. Serving path never touches it.
-2. **Content enters only through the connector.** API writes = annotations + alert actions only, both behind `Idempotency-Key`. No endpoint writes serving content.
+2. **Content enters only through the connector.** API writes = annotations + alert actions only, both behind `Idempotency-Key` (plus user grants — see the 2026-10-07 adjudication below). No endpoint writes serving content.
 3. **Promotion is atomic across all six pages** — one transaction, `SELECT … FOR UPDATE` on the run row, ordered writers, all-or-nothing. Promoted staging rows are **retained** (fix one page, re-promote, without re-synthesising five).
 4. **Fail-closed evidence.** Every cited id must resolve, belong to this entity and run, carry a verbatim excerpt (50–500 chars). `get_evidence` returns `found / not_found / foreign`; **`foreign` halts production**.
 5. **Audience redaction is server-side and default-deny.** `internal_only` paths stripped for customer audience; `entity_ids` in cohort patterns stripped for **every** audience. The walker + tests + contract must make marking unavoidable.
@@ -74,7 +74,7 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
 
 - **web**: Next.js App Router SSR, Tailwind tokens per prototype; one colour-resolver module.
 - **api**: FastAPI + SQLAlchemy(asyncpg). Cursor pagination by row comparison `(a,b) < (x,y)`; `ETag = run_id.promoted_epoch.audience`; Brotli/gzip as **app middleware** (Cloud Run doesn't compress); limits per TRD §19.
-- **mcp**: Python MCP SDK, streamable HTTP, 33 tools; validation/gates/promote live here. Embedding model (384-dim MiniLM/BGE-small class) bundled in-image, CPU, L2-normalised, `vector_cosine_ops`, **HNSW m=16 ef_construction=64 created once at migration**. Scoped centroids: cell 0.62 / category 0.58 / pillar 0.55 / run 0.50; V4 abstains to recorded `NOT_RUN` when centroid <5 members.
+- **mcp**: Python MCP SDK, streamable HTTP, 36 tools; validation/gates/promote live here. Embedding model (384-dim MiniLM/BGE-small class) bundled in-image, CPU, L2-normalised, `vector_cosine_ops`, **HNSW m=16 ef_construction=64 created once at migration**. Scoped centroids: cell 0.62 / category 0.58 / pillar 0.55 / run 0.50; V4 abstains to recorded `NOT_RUN` when centroid <5 members.
 - **worker + migrate**: Cloud Run Jobs (parse/embed batch; Alembic pre-deploy).
 - **DB**: Cloud SQL PostgreSQL 16 Enterprise Plus, Managed Connection Pooling — transaction mode; **`mcp` on session mode** (promote holds locks). IAM auth via Cloud SQL Python Connector, `pool_recycle=1800` + `pool_pre_ping`. asyncpg behind pooler: `statement_cache_size=0`, `NullPool`. Extensions: `vector, citext, pg_trgm, pgcrypto`.
 - **Redis**: Memorystore (claim leases, cache), Direct VPC egress. **GCS**: artefact bytes. **Secret Manager**: anything secret — never committed, never echoed. IAM DB auth → no DB password exists. No Anthropic key, no Clay key anywhere in this app.
@@ -113,8 +113,397 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   value. `migrations/prod_apply.py` is the migrate Job entrypoint; its
   VERIFY log lines are the production proof (private-IP DB).
 
+- **Gold-standard audit decisions** (user, 2026-10-04, after the SWBC
+  audit — `plugins/dma-insights/docs/GOLD-STANDARD.md` is the gold doc;
+  the old `docs/GOLD-STANDARD.md` path never existed):
+  - **Sentiment reaches customers as a reduced card** — ratings bars +
+    themes, no cell codes, internal sources, cap vocabulary or r_layer.
+    Supersedes TRD §11's customer withholding for `overview.sentiment`
+    only; `thought_leadership` stays withheld.
+  - **Firmographics**: subsidiary/segment figures are admissible when the
+    unit/basis names the entity; registry answers (charter, regulator,
+    branches) are stated, never held; held fields are capped (≤2 or 25% of
+    must-present, whichever is smaller) and a held field renders as a
+    stated absence with its reason — never disappears.
+  - **Connector-sourced evidence** (Indeed employer rating, CFPB complaint
+    API) registers under origin `connector` with tool, query and
+    retrieval date; Indeed T3, CFPB T1.
+  - Defaults taken: identified peers may be named to customers as
+    "identified, not scored"; discovery evidence splits into a shareable
+    re-attributed span and an internal span; DECISIONS D4 stands
+    (customer techstack rows CONFIRMED/ABSENT only); shape-only gold
+    fixtures (no values) may be committed; WebSearch/WebFetch is the
+    failover when Exa/Tavily credit runs out.
+  - **Raw band vs Backend Schema** (authority #1 vs invariant 6): keep
+    `composite` NUMERIC(4,2) for display as the schema states; an
+    expand-only `composite_raw` column carries the raw value and the band
+    is generated from it. `composite` is never widened.
+  - **Gold-parity gate (CG-PAR / Gate J)** blocks only on structural gaps
+    (a section or key the gold always serves is missing; a must-present
+    field null or held beyond the cap). List-length and fill-ratio
+    differences are warnings. Leave-one-out against gold; sub-vertical-
+    matched gold preferred, cross-sub-vertical gold for structure only.
+
+- **Enrichment and CAGR decisions** (user, 2026-10-05, after SWBC served
+  a held CAGR, an empty sentiment bar and a register no scan had touched):
+  - **Clay and Vibe Prospecting are admitted connector origins, tier by
+    kind** (`connector.kind`): `technographic` readings T1 (a scan-only
+    row stays INFERRED), `firmographic` readings (revenue band, LinkedIn
+    headcount and growth) T3. Both scans are mandatory on a hand-driven
+    run; ET-12 refuses a register that cites none and records no NOT_RUN.
+  - **CAGR**: compute every candidate, rank by validity, serve only a
+    figure an independent source corroborates; otherwise hold it with
+    each candidate's rate and why (CG-18f).
+  - **Star ratings fill from zero** (rating ÷ top star); other scales keep
+    the range they state.
+
+- **Arbor Bank audit decisions** (user, 2026-10-07, after the run promoted;
+  root causes closed in code with tests, each named here so they do not
+  recur):
+  - **SG-V4 driver budget counts prose only** — verbatim leaves (`excerpt`,
+    `verbatim_quote`, `quote`, `source*`, `title`, `product`, `candidate`,
+    `url`) never count; `--sg-v4-budget N` is an owner decision recorded as
+    a non-blocking `SG_V4_BUDGET_RAISED` Gate_Log row. SG-V4 itself skips
+    producer metadata (`_V4_SKIP_KEYS`) on direct fields and whole subtrees.
+  - **Owner ceilings persist**: `--max-usd` is remembered
+    (`budget_usd_source: flag`); a resume without the flag never falls back
+    to the per-pillar estimate.
+  - **Peer figures are the cohort's, at cell grain where a cell is cited**:
+    `get_cohort_benchmarks(subcap_ids=[…])`; the workbook's category rows
+    are refreshed whenever a row is not cohort-sourced (a `table` row and a
+    cohort row are kept; a guess is never replaced by a null); the fit
+    engine fills gap-row peers from the same cohort at fit time (invariant 8).
+  - **Platform ranking**: `INSUFFICIENT_EVIDENCE` ranks after every READY
+    candidate; fusion never lifts it; an unevidenced prerequisite is not
+    pulled ahead. `l3_area` names resolve through `ccg_l3_platforms`
+    (`platform_name`, with or without vendor) to the `[L3-…]` code; an
+    unresolvable label is reported in `unmatched[].resolved_to`.
+  - **Evidence tiers**: the entity's own domain is never T1 (ledger refuses;
+    `engine.cli retier` re-tiers with the label/ERS cascade and a logged
+    reason). Package-local `e_id`s on FK columns resolve through
+    `evidence_package_ids` at promote.
+  - **Firmographics**: the engine's must-present set IS the connector's
+    (`engine/schemas/firmographics_must_present.json`, vendored and
+    test-asserted equal to `packages/shared/contracts_data.json`); the
+    sub-vertical set is reported to the producer, the generic set gates
+    PRELIM.
+  - **Enforcement sweeps run as code** (`scripts/enforcement_search.py`:
+    FDIC ED&O, CFPB, configured state order searches, with positive
+    controls); a zero without a passing control is `NOT_RUN`, never a
+    verified absence.
+  - **AG-01 verdict vocabulary is read in pass 1** (local precheck), so a
+    `WITHDRAWN`/`REJECT` verdict never costs a server round trip.
+  - **Driver hygiene**: a passed page with no recorded ship time ships
+    again (verdict-file mtime is the fallback); verdict files keep the full
+    reason list; the manifest carries `supplementary_sub_verticals`;
+    `Search_Log.Seq` is allocated past the highest value, never from the
+    row count.
+  - **Prevention over repair** (user, 2026-10-07: "I want preventive
+    measures, hooks"): PRELIM gates the sub-vertical firmographic set
+    while the run is in research; REPORTS runs the enforcement sweep;
+    PAGES preflight refills cohort peers before any lane (ET-12 stays
+    with `engine.page_preflight` → NEEDS_CONNECTOR; `engine.cli gate-log`
+    records a hand-driven step's verdict); a mid-run connector deploy is
+    logged as `CONNECTOR_DRIFT`
+    and stales the pages passed under the old contract; a section file
+    written under `08_sections/` is pass-1 checked by the
+    `section_precheck.py` PostToolUse hook at write time.
+  - **The search-op ceiling is per conversation, and the run-level reading
+    is the worst conversation's window, named** (`ledger.worst_window`;
+    `stats()` without a category). orient, the watchdog and the hooks print
+    `search_ops_since_checkpoint` for that scope, never the lifetime count
+    against the ceiling (a promoted run read "6332 against 60").
+- **Client view review** (user, 2026-10-07, `DMA_customer_view_feedback.docx`):
+  the customer audience is labelled **Client** in every reader-facing string
+  (banner "Client Dashboard", "Switch back to Zennify view →"; the API value
+  stays `customer`). The client view carries only Overview · Insights ·
+  Heatmap (`CLIENT_TABS`, `apps/web/proto/utils.jsx` — one list for tab
+  strip and router), and drops Meeting prep / the Intelligence panel,
+  Request rerun, the executive narrative, leadership panel, financial
+  trajectory and the Insights technology landscape. These are render-layer
+  hides; the sections still promote and serve. `#/clients/<id>/<tab>?view=client`
+  is the shareable **client link**: client audience locked, no sidebar /
+  top bar / toggle, sticky for the document. Tests:
+  `apps/web/tests/client-dashboard.test.js`.
+  Owner follow-up the same day: **the heatmap is never hidden** — the
+  standard grid opens the client heatmap as it does the internal one (only
+  the Context-backed Issues overlay stays internal); **a why-now card never
+  renders empty** — a signal whose `trigger` the client read withholds is
+  not drawn, and the client drilldown prints the trigger; **a client link
+  reaches its own client's Overview · Insights · Heatmap and nothing else**
+  — `clientLinkPath` (utils.jsx) clamps every `navigate()` and every typed
+  route, `/login` and `/admin` included, to one of those three.
+  Later that day: **the value chain reaches clients** — its keys are built by
+  the server (catalogue joins: stages, cell ids, counts), so the generated
+  customer allowlist had dropped them all; they are classified in
+  `scripts/gen_customer_allowlist.py SERVER_DERIVED` and pinned by
+  `apps/api/tests/test_customer_allowlist.py`. Every value-chain cell swatch
+  opens its cell. **A change to what clients may receive moves the ETag**
+  (owner, 2026-10-08, First Tech still read "did not promote" from a cached
+  304): `SERVE_RULES` is `serve-rules@13.<sha8 of customer_allowlist.json>`. **A release reaches open tabs**: the boot carries the
+  bundle's build fingerprint (`lib/build-id.js`), `UpdateWatcher` compares it
+  with `/api/version` and offers a reload (the next tab change reloads by
+  itself) — the owner saw the old heatmap an hour after the fix shipped.
+
+- **Public client share links** (user, 2026-10-07; supersedes PRD v1's
+  "clients receive exports, not logins" for this route only): "Generate client
+  link" (recipient emails required first) mints a link on the separate public service **`dmai-share`** (same
+  image, `SHARE_MODE=1`, every non-`/s/` route 404s — enforced by
+  `apps/web/tests/share-link.test.js` and a post-deploy door probe). The link
+  is Ed25519-signed (private key on `dmai-web` only, public key on
+  `dmai-share` only), bound to one client + run, 1–90 days, revocable
+  (`infra/share-revoked.txt` or key rotation). **Allowlist per DMA = the
+  recipients' emails + their organisation domains** (never a consumer
+  mailbox domain), signed into the link — no DB write path (invariant 2
+  stands). The recipient enters their work email at a gate; an address off
+  the list is refused and nothing is sent. **One-time sign-in** (owner,
+  2026-10-07: "a service already integrated with Google Cloud Run"):
+  **Google Cloud Identity Platform** emails the allowlisted address a
+  single-use link (`sendOobCode` EMAIL_SIGNIN → `/s/auth-action` →
+  `/s/<token>/verify` → `signInWithEmailLink`); no Google account needed by
+  the recipient, no mail provider, no third-party key. Admission is an
+  HMAC-signed, path-scoped cookie (`dmai-share-cookie-secret`, ≤7 days,
+  ≤ link expiry). deploy.sh converges Identity Platform and switches OTP on
+  only when the live config reads back correct; otherwise the release warns
+  on stderr and the gate falls back to admitting the typed address. Every
+  mint, send, admit and refusal is logged (`share_link_minted`,
+  `share_otp_*`, `share_access_*`).
+  Reads go to svc_api as `audience=customer`, `role=AE`, the link's run,
+  pages `overview·insights·heatmap·evidence·subcaps` only.
+  **Revoking access** (owner, same day: "the admin page should also have a
+  place where I can revoke access"): **Admin › Client links** lists every
+  link generated (client, recipients, who shared it, expiry) and an ADMIN can
+  revoke a whole link, remove one address or domain from it, or restore
+  either; a link generated before the ledger is revoked by pasting it. The
+  ledger is the private bucket `${PROJECT_ID}-dmai-share-ledger`
+  (`links/<jti>.json` at generation, `revoked/<jti>.json` per change, every
+  change attributed) — not the database, so invariant 2 stands. dmai-web
+  writes it (objectAdmin), dmai-share only reads it (objectViewer). Every
+  share request re-checks it (`lib/share-ledger.js liveLink`, cached ≤15 s),
+  so a change reaches readers already inside; an unreadable ledger **fails
+  closed** (503). A configured ledger that cannot record a new link issues no
+  link. `infra/share-revoked.txt` stays as break-glass. Tests:
+  `share-link.test.js`, `share-admin.test.js`, `test_deploy_auth_posture.py`.
+  **The sign-in email** (owner, 2026-10-09, after Identity Platform's
+  default — "Sign in to n8n…" from noreply@…firebaseapp.com — landed in
+  spam; supersedes "no mail provider" above for this email only): sent
+  **from the Gmail of the colleague who shared the link** (or who re-added
+  that address/domain) — zennify.com is **Google Workspace** ("We own a
+  Google suite") — via the Gmail API with **domain-wide delegation**,
+  gmail.send only: dmai-share signs the JWT through IAM signJwt on itself
+  (**no key**); a Workspace super admin authorises its client id once.
+  deploy.sh switches it on only when a delegated token reads back gmail.send
+  for an ADMIN_EMAILS colleague (nothing is sent); otherwise, and for a link
+  with no zennify.com sharer, Identity Platform sends its own email.
+  **Content** (owner, same day): greets the recipient by name (a name given
+  as "Jane Doe <jane@…>" in the share dialog, recorded in the ledger, never
+  signed into the link; else first.last; else "Dear {client} team"); says
+  "Your {client} digital maturity assessment is ready" — never "dashboard";
+  explains how the client performs against its peers (four pillars,
+  benchmarked against comparable {sub-vertical} institutions); a follow-up
+  CTA by **call stage** — the share dialog asks, required, "Has the first
+  sales call happened?" (`stage` in the ledger, never in the link): before →
+  "Schedule a walkthrough"; after → thanks them for the call and "Book a
+  follow-up call" (mailto the colleague, plus reply). The stage is
+  **remembered per client**: the dialog opens on the stage of that client's
+  most recent link (`GET /api/share?entity=`, `latestStageFor`), says so,
+  and the colleague can change it; a link with no stage gets the pre-call
+  email, never Identity Platform's generic one. Zennify
+  design system (`lib/share-email.js`: palette from the app's design tokens,
+  inline wordmark, one web link, text part, no tracking). The link is **the
+  app's own one-time code**, signed and bound to the address, **valid for
+  the days the link was shared for** ("It is number of days not minutes"),
+  burned on first use (`used/<nonce>`); login validation is unchanged in
+  kind — only the inbox owner can follow it, no Google account needed
+  (owner chose this, 2026-10-09). **Anti-spam** (`lib/share-throttle.js`):
+  shared budgets in the private bucket `${PROJECT_ID}-dmai-share-sends` —
+  1/min, 4/h, 8/day per address per link; 20/h, 60/day per link; 15/day for
+  addresses admitted only by domain (enumeration); 150/day per colleague;
+  20/h per network; 600/day service — spent by atomic increment (a burst
+  sends once), **fail closed**; a honeypot and a signed form time on the gate
+  (no CAPTCHA). Stress: `apps/web/tests/e2e/share-mail.stress.js`.
+
+- **User role allocation** (user, 2026-10-07, after "you even removed user
+  role allocation from the admin page"): grants live in the Backend Schema's
+  `users` table, managed from Admin › Users & roles. This is a **third API
+  write** beside annotations and alert actions — workflow state about who may
+  read, never content: `POST /v1/admin/users` (invite · role · deactivate ·
+  reactivate), ADMIN-only from the verified IAP assertion, `Idempotency-Key`
+  required, every applied change one `session_log` row (`role_at_event` = the
+  role after) plus the actor's `idempotency_keys` row. `GET /v1/me` resolves
+  the role on sign-in and on every document load (a change lands on the next
+  page load; a deactivated account is turned away). `ADMIN_EMAILS` stays as
+  an owner floor (always an active Admin, cannot be demoted here) and an
+  admin cannot demote or deactivate themself; the deploy-time lists are the
+  fallback only when svc_api is unreachable. The POST-route census in
+  `apps/api/tests/test_alerts.py` names all four.
+  Follow-up (user, 2026-10-08: "the user allocation leaves out the initial
+  allocation on the prototype. It should be 100% similar to the prototype"):
+  **`POST /v1/me` enrols the caller** on sign-in and every document load — a
+  first visit gets a `users` row with its allocated role (floor ADMIN,
+  `ANALYST_EMAILS` ANALYST, else AE) and a `login` session_log row; a return
+  touches `last_seen_at` at most every 5 min (`login` again after 8 h); a
+  deactivated visit logs `denied`. Idempotent by construction, writes only
+  `users` + `session_log`. The card is the prototype's row for row (role
+  select + Deactivate/Reactivate on every row, "Invited" for never seen);
+  server refusals are toasts. **Whitelisted client domains** (same day, "similar
+  to the user list above") sits under it: one row per domain the live client
+  links admit; Revoke access removes the domain and every address named at it
+  from every live link in the share ledger (`changeDomainAccess`), Restore puts
+  them back — ledger writes, not the database. Admin › Usage analytics blank in
+  production is diagnosed by `infra/diagnose_usage.sh` (end of every deploy,
+  and on demand via the `Production diagnostics` workflow on the default branch).
+  **The assertion travels web→api as `x-dmai-iap-assertion`** (2026-10-08:
+  every Users & roles change read "this write must be attributable to a
+  verified person" — Google's front end does not deliver a caller-supplied
+  `x-goog-iap-jwt-assertion` to dmai-api); the API verifies the token exactly
+  as before. The owner floor (`ADMIN_EMAILS` = mishley.otiende@ and dma@
+  zennify.com) is enrolled on visit too, and an owner with no row can still
+  grant. Usage analytics filters (search · role · status) sit above every
+  card and narrow all of them; Daily activity is sessions by role, no toggle.
+  **A lapsed session cookie never refuses an IAP-verified person** (2026-10-08,
+  "admin_session_required" in a tab open past the 8h cookie):
+  `lib/request-session.js` is the one session read for every API route —
+  cookie, else the IAP assertion (verified, role re-read, deactivated
+  refused) with the cookie re-issued; document loads re-issue it too. Grants
+  and session changes are proven on the real stack before they are called
+  fixed: `apps/web/tests/e2e/run.sh` (Chromium + next start + uvicorn +
+  Postgres, signed assertions; scenarios + concurrency stress).
+  **Client-link usage is measured** (user, 2026-10-09: "Usage analytics for
+  clients provided the link do not get registered … All links generated should
+  be logged and usage analytics for each whitelisted login be tracked"). The
+  dmai-usage sink takes `dmai-web` **and `dmai-share`**. Server lines
+  (`lib/usage.js LINK_EVENTS`, never from a beacon): `link_minted` (sharer,
+  recipients, domains, expiry), `link_otp_sent`, `link_admit` (method),
+  `link_open`, `link_refused` (`email` null, `attempted_email` + reason — a
+  refused address is never a person). A reader's page beacons post to
+  `/s/<token>/api/usage`; identity is the address the link admitted (access
+  cookie, re-checked against the live allowlist), role **`CLIENT`**, audience
+  customer, link/client/run stamped server-side; a dead, revoked or removed
+  reader logs nothing. Admin › Usage analytics: role filter **Client (link)**,
+  every recipient and reader a Client person ("Client link · <client>",
+  unopened = No activity yet), a **Client links · generated & opened** card,
+  and a Client links signal; Users & roles never offers a client a role. The
+  e2e adds a `SHARE_MODE=1` server (`client-links.e2e.js` / `.stress.js`);
+  the store's SQL is proven on BigQuery by `infra/diagnose_usage.sh`.
+
+- **Workflow optimisation** (user, 2026-10-09, after reading every DMA
+  session of 2026-09-25..10-09; `plugins/dma-insights/docs/WORKFLOW-OPTIMIZATION-2026-10-09.md`):
+  **per-stage envelopes are the budget** — PRELIM $2 · RESEARCH $10 ·
+  SCORING $5 · REPORTS $5 · PAGES $3 (`cost.STAGE_BUDGET_USD`,
+  `--stage-budget STAGE=USD`, persisted); a stage at its envelope stops as
+  `STOPPED_STAGE_BUDGET`, a handoff is refused `AT_STAGE_BUDGET`, and
+  `guard_dispatch` refuses the agent — when the envelopes are the binding
+  instrument: an explicit `--max-usd` is the owner's single ceiling and the
+  stop (`STOPPED_BUDGET`; raising it continues the run) with the envelopes
+  reporting only, and `--stage-budget` binds whatever else is set
+  (`pipeline.envelopes_binding`). Workflow agents are charged to the
+  stage their prompt names. **Rules a challenger or critic can state in one
+  sentence are refused at the write**: claim-label fit at `synthesise`
+  (FACT two identities; INFERENCE 2+ ids and a named step; a disposition for
+  an open contradiction) and the rubric at `score` (the level named is the
+  level struck; a gap to the next level; no off-row E-id). `rollup` never
+  waits for the headline (`headline_missing` is its own term). **The
+  register is frozen during REPORTS** (`engine.narrative freeze/thaw`);
+  writers route new facts BLOCKED_UPSTREAM. PRELIM rows ride in every
+  research packet (`shared.prelim_evidence`) and rank as proposals; report
+  writers cite from an ERS-ranked evidence pack in their brief. Page gates
+  readable from the workbook (ET-07 for every citing sheet — and `techscan.record`
+  links a register row's citations to the cells it names at the write, so the
+  techstack page never carries an unlinked one; the O7/C1/O1/H1
+  floors, the techstack three) run before any page agent. Lock waits are
+  recorded beside the lock; `--ingest-kick-cmd` runs the package scan
+  instead of waiting for the Scheduler.
+  **The research tiers** (user, same day, after the first stress test read
+  $137 against the $10 envelope; decided against the gold workbook's row
+  contract — `WORKFLOW-OPTIMIZATION-2026-10-09.md` §9): **haiku collects,
+  sonnet judges.** `research-evidence-collector` (haiku, actor
+  `research-pXcY-collector`, scope refuses synthesis/absence) registers the
+  gold EVIDENCE row — verbatim span the fetch cache verifies, ladder tier,
+  a date only when the page states it (the ledger now refuses a publication
+  date equal to the retrieval date unless the span or URL carries it), the
+  cells it answers; `research-category-orchestrator` (sonnet, actor
+  `research-pXcY-producer`) judges completeness and writes the gold
+  SYNTHESIS row and every declared absence; `research-challenger` stays
+  sonnet; the sixteen `research-pXcY-producer` manifests stay sonnet as the
+  lane-mode identity. **Cost = turns × context × rate**: `cost.research_price`
+  prices the tiered SHAPE (not a per-cell constant), identically degraded or
+  connector-backed, RECALIBRATED to the first live wave (P3C2, 26 cells,
+  degraded: $5.06 — collectors 29/48/47 turns on a 73.8K in-session floor,
+  the orchestrator 41): 686 cells ≈ $82 ($0.12/cell); all-sonnet ≈ $123;
+  the old pilot $137. **$10 is not reachable for 686 cells at gold quality
+  with any tiering**; the model says so instead of estimating to the
+  envelope, and the next lever is the floor (lane path 26.8K vs 73.8K
+  in-session). **The envelope is upheld by three instruments**: at handoff the
+  driver funds whole categories end to end, cheapest first, and lists the
+  rest under `deferred_for_budget` naming `--stage-budget RESEARCH=<usd>`
+  (an envelope that funds no category stops `AT_STAGE_BUDGET before
+  dispatch`, no agent paid for); in the workflow every wave is priced before
+  it starts (`budget.tier_usd`, `share_usd`, `usd_per_output_token` against
+  `budget.spent()`), the first wave reserving the orchestrator and the
+  challenge, a refused wave naming `unreached_cells`; after, the ledger —
+  which charges a workflow agent by its PHASE metadata (`stage_of_agent`),
+  never by what it read (the first wave's collectors were booked to PAGES
+  and its orchestrator to SCORING by the head scan; RESEARCH read $0).
+  Cards are written to `briefs/research_cards/<CAT>/` at handoff so a
+  collector reads its batch in one call. A recording dispatcher moves the
+  driver's recorded marker (PRELIM's $5.71 had read as RESEARCH's); an open
+  cell is never routed as a repair too; an agent type not bound in the
+  session runs as a plain subagent on the same model; a cached page text a
+  span was verified against is kept when a later fetch differs
+  (`.alt.txt`); `fetch` accepts `--actor`; an evidence id in prose is not
+  an ungrounded figure; transcript output tokens are read from the content
+  when the usage figure is the streamed chunk's; the governor converts
+  `budget.spent()` at the measured `cost.RUNTIME_USD_PER_TOKEN` (the
+  counter is 8–10× output tokens); the card owes the `primary` question the
+  gate blocks on; a gap-only wave reads `<CAT>/_repairs.json`; a category
+  deferred for budget never stalls; the challenge packet ships the judged
+  fields whole. Every defect is filed MEM-0610..0630 and tabled in §10 of
+  the optimisation doc. **IMA's folder is "IMA Financial - DMA"** (owner,
+  2026-10-09; "IMA Financial Group - DMA" also normalises to the identity):
+  every IMA command runs with `DMA_CLIENT_FOLDER='IMA Financial - DMA'`, the
+  pin `drive_fetch` honours (exact name or id, never a redirect to another
+  client). Flags:
+  `--collector-model`, `--synthesis-model`, `--batch-cells`.
+  **Lean headless tiers** (user, same day: "fix the context floor too, run
+  collectors headless" · "I do not see the workflow"; §11): on a DEGRADED
+  run `--research-mode auto` (the default) runs every collector,
+  orchestrator and challenge as a lean `claude -p` child
+  (`agent_run.py lean_command`: no MCP schemas, no settings, only the tier's
+  tools, the manifest body appended; 6.5K turn-1 floor vs 73.8K in-session),
+  bounded host-wide by a flock lane pool (`DMA_LANE_POOL`, `DMA_TIER_LANES`
+  default 16); the session sees ONE persisted `dma-research-tiers.js` per
+  round whose haiku runner calls `engine.tiers start/wait` over every
+  category (one runner, not one per category — a runner sits at the
+  session floor). A connector-backed run keeps the in-session workflow;
+  `--tiers-direct` lets the driver run the lanes (stub/CI/Routine);
+  `--only-categories` narrows the stage and a passing scope ends
+  `SCOPE_COMPLETE`. Measured on two 57-cell categories: $1.36 and $3.37,
+  ~10 min a round; full 686-cell scope ≈ $26 (`cost.LEAN_SHAPES`). A
+  collector lane's search window is its CAPABILITY (eight parallel lanes
+  shared one category window and were walled); `fetch` records the date the
+  page states (publication metadata or URL path, never modified/retrieval)
+  and the ledger fills an omitted `--published` from it; every absence's
+  `--hunted` is the cell's own (`hunted_shared`/`primary_shared` refused);
+  collectors search in the sub-vertical's vocabulary
+  (`engine/data/subvertical_lexicon.json`). MEM-0631..0636.
+  **The owner sees runs in the conversation** (user, same day: "I never
+  saw the workflow"; §12): DMA sessions are followed from the Claude app,
+  where `/workflows` does not render, so every `engine.pipeline run`/`status`
+  ends with an OWNER UPDATE block (`07_qa/progress.md`) the session relays
+  verbatim at every handoff and `then`. A session without the Workflow tool
+  tells the owner first, then takes the stage's fallback; the tool baseline
+  lists built-ins (`workflow_tool`), a resume re-records it, and a degraded
+  run without it runs research `--tiers-direct`. In-session agents whose
+  prompt names the run are priced into the ledger (the IMA PRELIM relay,
+  $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).
 - Visual treatment of `CLAIMED` vs `INFERRED` on the tech register (render distinctly-but-provisionally; flagged for design).
+- H2/grid thin-evidence flag: DB generated column vs the H2 contract rule
+  (they disagree on 144 SWBC cells).
+- Techstack layer denominator (T-03/DNR-6): producer product slots vs the
+  server's cell count.
 - Partitioning: **not yet** (triggers/strategies documented in TRD §17; do not pre-build).

@@ -18,7 +18,11 @@ from dma_api.evidence import (INTERNAL_FIELDS, TIERS, distribution,  # noqa: E40
 COLS = ("e_id", "origin", "source_name", "source_url", "source_domain",
         "excerpt", "claim_type", "tier", "published_date", "reference_date",
         "age_months", "recency_band", "ers", "specificity", "corroboration",
-        "identity_ok", "identity_note")
+        "identity_ok", "identity_note",
+        # 0063: the split-span and connector provenance columns.
+        "customer_attribution", "split_of", "connector_tool",
+        "connector_query", "connector_retrieved_at",
+        "customer_attribution_at")
 
 
 def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
@@ -31,6 +35,9 @@ def _row(e_id, tier="T2", claim="FACT", entity="A", identity_ok=True, ers=4.2,
             "reference_date": None, "age_months": 7, "recency_band": "CURRENT",
             "ers": ers, "specificity": 3, "corroboration": 2,
             "identity_ok": identity_ok, "identity_note": None,
+            "customer_attribution": None, "split_of": None,
+            "connector_tool": None, "connector_query": None,
+            "connector_retrieved_at": None, "customer_attribution_at": None,
             # The runs whose evidence_subcap_links carry this row. The read
             # path's LEFT JOIN LATERAL is run-scoped, so a row linked only
             # under ANOTHER run reports no cells here — which is exactly the
@@ -48,9 +55,11 @@ class _Cur:
     citation sweep over the run's promoted rows, and the second select that
     decides not_found vs foreign."""
 
-    def __init__(self, rows, cited=()):
+    def __init__(self, rows, cited=(), package_ids=()):
         self.rows, self._out, self.queries = rows, [], []
         self.cited = list(cited)
+        # (entity, package_local_id, stored e_id) — evidence_package_ids.
+        self.package_ids = list(package_ids)
 
     def execute(self, sql, params=None):
         self.queries.append(sql)
@@ -72,6 +81,17 @@ class _Cur:
                          if not (has_run and run not in r["_runs"])
                          else tuple(list(r[c] for c in COLS) + [[]])
                          for r in picked]
+        elif "SELECT package_local_id, e_id FROM evidence_package_ids" in sql:
+            entity, wanted = params
+            self._out = [(loc, e) for ent, loc, e in self.package_ids
+                         if ent == entity and loc in wanted]
+        elif "FROM evidence_package_ids" in sql and "array_agg" in sql:
+            entity, stored = params
+            agg = {}
+            for ent, loc, e in self.package_ids:
+                if ent == entity and e in stored:
+                    agg.setdefault(e, []).append(loc)
+            self._out = [(e, sorted(v)) for e, v in agg.items()]
         elif "unnest(e_ids)" in sql:
             self._out = [(e,) for e in self.cited]
         elif "WHERE e_id = ANY" in sql:
@@ -234,3 +254,34 @@ def test_the_citation_sweep_reads_the_writer_spec_not_a_hand_list():
     for r in readers().values():
         if r["grain"] == "none":
             assert r["table"] not in tables, "the evidence store is not per-run"
+
+
+# ── workbook-local ids (0036) reach the drawer ─────────────────────────
+# Cross Insurance, 2026-10-05: pages cite the workbook's own numbers
+# ('E-001') while the store keys the row 'E-CROSSINS-001'. The listing is
+# indexed by id in the browser, so every such chip opened an empty drawer.
+
+def test_the_listing_names_each_rows_workbook_local_ids():
+    cur = _Cur([_row("E-CROSSINS-001"), _row("E-CC-7")],
+               package_ids=[("A", "E-001", "E-CROSSINS-001")])
+    res = fetch(cur, "A")
+    by = {i["e_id"]: i for i in res["items"]}
+    assert by["E-CROSSINS-001"]["package_local_ids"] == ["E-001"]
+    assert by["E-CC-7"]["package_local_ids"] == []
+
+
+def test_a_cited_local_id_resolves_to_its_stored_row():
+    cur = _Cur([_row("E-CROSSINS-001")],
+               package_ids=[("A", "E-001", "E-CROSSINS-001")])
+    res = fetch(cur, "A", ["E-001"])
+    assert [i["e_id"] for i in res["items"]] == ["E-CROSSINS-001"]
+    assert res["not_found"] == [] and res["foreign"] == []
+    assert res["items"][0]["excerpt"], "the drawer opens on the excerpt"
+
+
+def test_another_entitys_local_number_never_answers_for_this_one():
+    cur = _Cur([_row("E-OTHER-001", entity="B")],
+               package_ids=[("B", "E-001", "E-OTHER-001")])
+    res = fetch(cur, "A", ["E-001"])
+    assert res["items"] == [] and res["found"] == []
+    assert res["not_found"] == ["E-001"]

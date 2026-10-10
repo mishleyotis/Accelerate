@@ -104,7 +104,7 @@ def test_a_missing_assertion_refuses_the_write():
     with pytest.raises(ActorError) as e:
         verify_assertion(None, audience=AUD, fetch=_fetch())
     assert e.value.status == 401 and e.value.code == "actor_unverified"
-    assert "x-goog-iap-jwt-assertion" in e.value.detail
+    assert "x-dmai-iap-assertion" in e.value.detail
 
 
 def test_the_query_parameter_alone_is_never_an_identity():
@@ -170,6 +170,45 @@ def test_an_assertion_from_the_future_is_refused():
         verify_assertion(_token(iat=int(time.time()) + 3600), audience=AUD,
                          fetch=_fetch())
     assert e.value.code == "actor_unverified"
+
+
+def test_clock_skew_on_iat_is_tolerated_but_expiry_is_exact():
+    """2026-10-08: the web tier admitted a person whose assertion the API then
+    refused (401 on /v1/admin/users) — two clocks, one with no tolerance. An
+    `iat` a few seconds ahead verifies; an expiry a second past does not."""
+    now = int(time.time())
+    assert verify_assertion(_token(iat=now + 20), audience=AUD, fetch=_fetch())["email"] == EMAIL
+    with pytest.raises(ActorError):
+        verify_assertion(_token(exp=now - 1, iat=now - 600), audience=AUD, fetch=_fetch())
+
+
+def test_a_rotated_key_newer_than_the_cache_is_fetched_once():
+    calls = []
+    def fetch():
+        calls.append(1)
+        return {"keys": [_jwk(_key)] if len(calls) > 1 else [_jwk(_other_key, kid="old")]}
+    verify_assertion(_token(kid="old", key=_other_key), audience=AUD, fetch=fetch)  # warms the cache
+    assert verify_assertion(_token(), audience=AUD, fetch=fetch)["email"] == EMAIL
+    assert len(calls) == 2, "the new kid was not re-fetched"
+
+
+def test_a_refusal_is_logged_with_its_reason_and_never_the_token():
+    src = (ROOT / "apps" / "api" / "dma_api" / "main.py").read_text()
+    body = src[src.index("def _actor_or_error"):src.index("_SUBCAP_COLS = (")]
+    assert '"actor_refused"' in body and "e.code" in body and "e.detail" in body
+    assert "x-goog-iap-jwt-assertion" not in body
+
+
+def test_the_assertion_dmai_web_forwards_under_its_own_header_verifies():
+    """2026-10-08: Google's front end does not deliver a caller-supplied
+    `x-goog-iap-jwt-assertion` to dmai-api, so every Users & roles change was
+    refused as unattributable. dmai-web forwards the same token as
+    `x-dmai-iap-assertion`; it is verified exactly as before."""
+    assert verified_actor(_Req(**{"x-dmai-iap-assertion": _token()}),
+                          audience=AUD, fetch=_fetch()) == EMAIL
+    with pytest.raises(ActorError):
+        verified_actor(_Req(**{"x-dmai-iap-assertion": _token(key=_other_key)}),
+                       audience=AUD, fetch=_fetch())
 
 
 def test_an_assertion_with_no_iat_is_refused():

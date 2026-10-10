@@ -1,8 +1,8 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "1.12.4",
-  "description": "The six Digital Maturity Assessment skills, 68 DMA agents \u2014 16 category researchers, a technographic scanner, two report producers and a report validator \u2014 the remote MCP connector (33 tools), and the research ENGINE: a binding preflight the engagement owner answers, a PRELIM phase that gates dispatch, ERS computed from RRF retrieval, report sections written as arguments with independent review, a measured cost model, and a watchdog that revives a stopped run.",
+  "version": "1.22.0",
+  "description": "The six Digital Maturity Assessment skills, 76 DMA agents \u2014 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier \u2014 the remote MCP connector (36 tools), and the research ENGINE: an owner-answered binding preflight, a gating PRELIM phase, ERS from RRF retrieval, reviewed report sections, per-stage budget envelopes and a watchdog.",
   "author": {
     "name": "Zennify \u2014 DMA Insights build"
   },
@@ -31,6 +31,11 @@
     }
   },
   "mcpServers": "./.mcp.json",
+  "commands": [
+    "./commands/doctor.md",
+    "./commands/setup-routines.md",
+    "./commands/run-assessment.md"
+  ],
   "agents": [
     "./agents/checkers/evidence-integrity-checker.md",
     "./agents/checkers/exclusion-boundary-auditor.md",
@@ -98,7 +103,15 @@
     "./agents/research/categories/research-p4c2-producer.md",
     "./agents/research/categories/research-p4c3-producer.md",
     "./agents/research/categories/research-p4c4-producer.md",
+    "./agents/research/research-category-orchestrator.md",
+    "./agents/research/research-challenger.md",
     "./agents/research/research-conductor.md",
-    "./agents/research/technographic-scanner.md"
+    "./agents/research/research-evidence-collector.md",
+    "./agents/research/technographic-scanner.md",
+    "./agents/scoring/scoring-critic.md",
+    "./agents/scoring/scoring-p1-producer.md",
+    "./agents/scoring/scoring-p2-producer.md",
+    "./agents/scoring/scoring-p3-producer.md",
+    "./agents/scoring/scoring-p4-producer.md"
   ]
 }

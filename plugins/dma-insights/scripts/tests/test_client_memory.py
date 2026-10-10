@@ -71,3 +71,46 @@ def test_no_hashtag_numbering_in_the_template():
     """The owner's no-hashtags rule applies to what we generate too."""
     import re
     assert not re.search(r"#\d", client_memory.skeleton("c-client"))
+
+
+# ── F-G05-017 · locked, versioned, capped ────────────────────────────────
+
+def test_write_note_is_versioned_and_refuses_a_stale_version(tmp_path):
+    p = tmp_path / "c-client.md"
+    out = client_memory.write_note(p, "overview.why_now", "first", "run11111111", client="c-client")
+    assert out["version"] == client_memory.version_of(p.read_text(encoding="utf-8"))
+    assert out["previous"] == client_memory.version_of(client_memory.skeleton("c-client"))
+    v = out["version"]
+    with pytest.raises(SystemExit, match="version mismatch"):
+        client_memory.write_note(p, "overview.why_now", "second", None, expect_version="deadbeefdeadbeef")
+    assert "second" not in p.read_text()
+    out2 = client_memory.write_note(p, "overview.why_now", "second", None, expect_version=v)
+    assert out2["previous"] == v and "second" in p.read_text()
+    assert not (tmp_path / "c-client.md.tmp").exists()
+
+
+def test_the_cap_is_stated_and_refuses(tmp_path):
+    p = tmp_path / "c-client.md"
+    p.write_text(client_memory.skeleton("c-client") + "\n" + ("x" * client_memory.CAP_BYTES))
+    with pytest.raises(SystemExit, match="cap"):
+        client_memory.write_note(p, "overview.why_now", "one more", None)
+    assert client_memory.size_of(p)["over_cap"]
+    q = tmp_path / "d-client.md"
+    q.write_text(client_memory.skeleton("d-client") + "\n" + ("x" * int(client_memory.CAP_BYTES * 0.85)))
+    out = client_memory.write_note(q, "overview.why_now", "still fits", None)
+    assert out["consolidate_due"] is True
+
+
+def test_the_cli_prints_the_version_and_honours_expect_version(tmp_path, capsys):
+    d = str(tmp_path)
+    assert client_memory.main(["note", "--client", "c-client", "--section", "overview.why_now",
+                               "--text", "hello", "--dir", d]) == 0
+    line = capsys.readouterr().out
+    assert "version " in line and "% of cap" in line
+    assert client_memory.main(["version", "--client", "c-client", "--dir", d]) == 0
+    v = json.loads(capsys.readouterr().out)["version"]
+    with pytest.raises(SystemExit):
+        client_memory.main(["note", "--client", "c-client", "--section", "overview.why_now",
+                            "--text", "again", "--dir", d, "--expect-version", "0000000000000000"])
+    assert client_memory.main(["note", "--client", "c-client", "--section", "overview.why_now",
+                               "--text", "again", "--dir", d, "--expect-version", v]) == 0

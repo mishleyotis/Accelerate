@@ -11,9 +11,13 @@ on:
 # commit replaces. Keyed on the ref, so a push run only ever cancels an older
 # push run and a pull_request run an older pull_request run: which of the two
 # survives stays deterministic, and the merge-commit build is still measured.
+#
+# Except on the default branch: a push there runs the `deploy` job, and
+# cancelling a deploy between the migrate Job and the service roll leaves
+# production half-released. Default-branch runs queue instead.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != format('refs/heads/{0}', github.event.repository.default_branch) }}
 
 jobs:
   gates:
@@ -61,6 +65,17 @@ jobs:
           python3 scripts/gen_proto_bands.py --check
           python3 plugins/dma-insights/scripts/check_taxonomy_drift.py
 
+      - name: The deck skill's generated docs are in sync with its colour owner
+        # QA audit F-M08-013 (28-09-2026): a generated doc nobody regenerates
+        # is a rule held in two places; this fails the push that lets them drift.
+        run: cd plugins/dma-insights/skills/dma-first-call-deck && python3 scripts/utils/check_docs_in_sync.py
+
+      - name: Every artefact the plugin writes has a reader
+        # QA audit F-J02-011 (28-09-2026): six artefacts had a writer and no
+        # reader. A file with a writer, a gate and no reader is the most
+        # expensive shape there is; this fails the push that adds one.
+        run: python3 plugins/dma-insights/scripts/audit_dead_contracts.py --strict
+
       - name: Gate C — no render dead ends
         run: python3 scripts/gate_c_no_render_dead_ends.py
       # A shared contract the serving code READS must be in the image that
@@ -105,8 +120,10 @@ jobs:
       # found by a human with two browser tabs. Structure only, never values:
       # a thinner number is an assessment result, and a gate that argued
       # otherwise would push every client toward the reference's answers.
-      # Here it runs its own rules against fixtures; the corpus-gate-scanner
-      # runs it --api against the two promoted clients nightly.
+      # Here it runs its own rules against fixtures. (This comment used to say
+      # the corpus-gate-scanner runs it --api nightly; it never did — RC-02,
+      # 2026-10-04. What does run against real runs is CG-PAR inside
+      # promote_run, the same rules from apps/mcp/dma_mcp/parity.py.)
       # Driven end-to-end against a committed pair carrying three of the four
       # gaps it exists for, plus a WITHHELD section it must stay silent about.
       # `compare_page`'s rules are unit-tested; this asserts the CLI around
@@ -142,8 +159,39 @@ jobs:
           for want in section_empty key_absent key_empty; do
             echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want"; exit 1; }
           done
-          echo "$out" | grep -q ceilings && { echo "Gate J reported a withheld section as a gap"; exit 1; }
-          echo "Gate J: refuses a thinner target, stays silent on a withheld section."
+          # A gap line is "  [kind] page.section…"; the withheld line names the
+          # section on its own line and is not a gap.
+          echo "$out" | grep -qE '^ +\[[a-z_]+\] overview\.ceilings' && { echo "Gate J reported a withheld section as a gap"; exit 1; }
+          echo "$out" | grep -q "withheld by audience.*overview.ceilings" || { echo "Gate J stopped reporting withheld sections separately"; exit 1; }
+          echo "Gate J: refuses a thinner target, reports a withheld section separately."
+      # RC-02 (SWBC gold audit, 2026-10-04): the step above compares top-level
+      # keys of a synthetic pair; it could not see ten firmographic fields
+      # with six held against a gold stating fifteen of sixteen. This one
+      # runs the ROW-grain rules against the committed shape-only gold
+      # (fixtures/surface_gold.json, cut from the promoted gold runs by
+      # scripts/gen_surface_gold.py) with a target shaped like that run.
+      # Owner decision B (2026-10-04): only a STRUCTURAL gap fails the gate
+      # (a section or key the gold always serves is missing; a must-present
+      # field null or held beyond the cap); the stated share and the fill
+      # ratios must still be REPORTED, as warnings. Each gold run meeting the
+      # standard of the others (leave-one-out) is asserted in
+      # scripts/tests/test_gate_j_item_grain.py.
+      - name: Gate J — the committed gold shape refuses a thin target
+        run: |
+          set +e
+          out=$(python3 scripts/gate_j_surface_parity.py \
+                  --gold fixtures/surface_gold.json \
+                  --target-file fixtures/parity/target-thin-overview.json \
+                  --page overview --sub-vertical CU)
+          code=$?
+          echo "$out"
+          test "$code" -eq 1 || { echo "Gate J did not refuse a thin target against the gold"; exit 1; }
+          for want in "^  \[held_beyond_cap\] overview.firmographics.fields" "^  \[key_absent\] overview.sentiment.gap_analysis" "^  (warning) \[stated_share\] overview.firmographics.fields" "^  (warning) \[item_fill\]"; do
+            echo "$out" | grep -q "$want" || { echo "Gate J stopped reporting $want against the gold"; exit 1; }
+          done
+          # A count is never a structural gap: no blocking line may name one.
+          echo "$out" | grep -qE '^  \[(list_len|item_fill|stated_share)\]' && { echo "Gate J refused on a count or fill ratio"; exit 1; }
+          echo "Gate J: the gold shape refuses a thin target on structure and warns on its counts."
       # The curation covered 115 of the specification's 127 surfaces and walked
       # past twelve — three whole Insights surfaces carrying eighteen P0 checks
       # among them, in neither artefact, not included and not excluded. Nothing
@@ -274,7 +322,14 @@ jobs:
       # constraints-py311.txt pins 1.2.0, which is what a dev box already
       # has); only this runner did not, which is exactly why the suite was
       # green locally and red here.
-      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx -r apps/api/requirements.txt
+      # python-pptx, the fourth repetition: W1 of the QA remediation
+      # (28-09-2026) landed three tests that render one heatmap block through
+      # the deck skill's editor to prove its fills equal apps/web/lib/bands.js,
+      # and heatmap_editor.py imports pptx at module load. Green locally (a
+      # dev box has it; the deck skill declares it), red here on
+      # ModuleNotFoundError — the runner was testing a program that cannot
+      # render a deck.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which
@@ -370,10 +425,37 @@ jobs:
           # ^SKIPPED matched nothing, every time. The build that overran the
           # ceiling printed the header and then no reasons, which is how a
           # diagnostic fails: not by being absent, by being empty.
+          # packages/shared/tests/ joined this list on 2026-09-01. It holds
+          # one file — the guard that every service takes its Cloud SQL
+          # Connector from packages/shared/cloudsql.py — and no pytest
+          # invocation in this workflow had ever collected it, so the rule was
+          # enforced only where someone happened to run it by hand. It also
+          # carried an allowlist excusing apps/api/dma_api/db.py; that file's
+          # Connector defaulted to a background refresh, which a CPU-throttled
+          # Cloud Run instance cannot advance, and dmai-api answered every
+          # database-backed route with a 504 through the afternoon of
+          # 2026-09-01 with the suite green. A check CI cannot see is not a
+          # check.
+          # `tests/skills/` and `tests/acceptance/` moved to their own job
+          # on 2026-09-03. The research-engine suite alone runs ~24 minutes
+          # serially against a 25-minute clock, and the merge of #27 (34 new
+          # tests) tipped it: four jobs green, this one CANCELLED at the
+          # timeout on the default branch. Splitting it is the fix rather
+          # than a bigger number — the two halves now run in parallel, and
+          # the engine half runs under xdist, so total wall clock FELL.
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
+                 packages/shared/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 tests/skills/ infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
-          n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1)
+                 infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
+          # `|| true` is load-bearing. This step runs under `bash -e`
+          # with pipefail, and pytest prints NO "N skipped" when nothing
+          # skipped — so grep exits 1, the pipeline exits 1, and the shell
+          # dies ON THE ASSIGNMENT, before the ceiling is ever compared.
+          # Measured 2026-09-14 in run 34866563499: "82 passed in 528.40s"
+          # immediately followed by "Process completed with exit code 1",
+          # a green suite reported as a failed check. A clean result must
+          # not be the input this cannot survive.
+          n=$(grep -oE '[0-9]+ skipped' /tmp/pytest.txt | grep -oE '^[0-9]+' | tail -1 || true)
           # Ceiling raised 11 -> 12 on 2026-08-22 for exactly one test:
           # test_evidence_verbatim.py::test_the_real_package_yields_real_excerpts,
           # which runs end to end against a client package pulled from Drive
@@ -419,6 +501,207 @@ jobs:
                  /tmp/pytest.txt | tail -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # THE RESEARCH ENGINE AND THE ACCEPTANCE SUITE, on their own clock.
+  #
+  # Carved out of the unit-test job on 2026-09-03 for a measured reason: the
+  # engine suite is 503 tests that walk real .xlsx workbooks through
+  # openpyxl, ~24 minutes serially, and it shared a 25-minute clock with
+  # every other Python suite in the repo. That is not a suite that is too
+  # slow, it is a suite in the wrong job: nothing in it needs Postgres, and
+  # every test writes into its own tmp_path, so it parallelises cleanly.
+  # `--dist loadfile` keeps a module's tests on one worker, which is what
+  # the module-scoped fixtures (the rendered-report ones) need.
+  #
+  # tests/acceptance/ was carved out of this job on 2026-09-14 and given its
+  # own runner, for the same measured reason the pair was carved out of the
+  # unit job eleven days earlier: TOGETHER THEY NO LONGER FIT THE CLOCK.
+  #
+  #   run 34819539760 (29fd001)          24m33s   success, by 27 seconds
+  #   run 34819547411 (29fd001, push)    25m00s   CANCELLED at the timeout
+  #   run 34819551889 (29fd001, PR #23)  25m00s   CANCELLED at the timeout
+  #   run 34846479926 (PR #37)           25m00s   CANCELLED at the timeout
+  #   run 34857231504 (PR #37)           25m00s   CANCELLED at the timeout
+  #   run 34860634063 (9aa1bab)          25m00s   CANCELLED at the timeout
+  #
+  # Six runs of three different trees; one passed, with 27 seconds in hand.
+  # That is not a flaky runner, it is a job over its budget — and it fails as
+  # `cancelled`, which reads like somebody pressed a button rather than like
+  # a red test, so it had been quietly not-checking these 1083 tests for a
+  # week. A suite CI does not finish is not a check, the same way a suite CI
+  # does not collect is not a check.
+  #
+  # Measured 2026-09-14 on a 4-core box, `-n auto --dist loadfile`, the same
+  # shape as a hosted runner: tests/skills 790s (1001 passed, 6 skipped),
+  # tests/acceptance 455s (82 passed). Split, the two run in parallel, so the
+  # wall clock falls as well — which is the argument the previous split made
+  # and it still holds. The split is the fix; a bigger ceiling on the pair
+  # would have hidden the next doubling exactly as this one hid the last.
+  #
+  # THEN MEASURED AGAIN, ON THE RUNNER, because the box above under-predicted
+  # it by half: this half alone took 20m58s in run 34867836045 and about the
+  # same in 34867830632 — green, with four minutes in hand. Four minutes is
+  # not margin on a job whose own history includes a 24m33s pass and a 25m00s
+  # timeout of the same tree: that spread is bigger than what is left.
+  #
+  # So this clock is 35, and that is NOT the bigger number this comment warns
+  # against. `timeout-minutes` is a hang detector — Gate L exists because a
+  # step once sat for 33 minutes against GitHub's six-HOUR default — and a
+  # hang detector set to the honest runtime does not detect hangs, it reports
+  # slow runners as failures. Sized at 1.7x measured, still 10 under Gate L's
+  # 45-minute ceiling, and a real hang is still red within the hour. What
+  # must never happen again is the SUM outgrowing a clock unnoticed; that is
+  # what the split and the measurements above are for.
+  # MEASURED AGAIN, 28-09-2026: the W1 and W2 QA-remediation tiers added
+  # about 190 tests to this suite, and the pull_request run on dc7c123
+  # finished in 33m06s while its push twin on the same commit hit this clock
+  # at 35m00s. Four minutes of margin was already the warning above; two is
+  # none. The split is the fix, as the comment above says: two shards over
+  # the research-engine files (odd and even in `ls` order — deterministic,
+  # every file in exactly one shard) each on its own runner and clock, and
+  # the hooks-and-routing half of tests/skills rides with shard 0. Each shard
+  # is expected to halve the 33 minutes; the first shard runs record the
+  # figure, and the clock stays at 35 until they do.
+  research-engine-tests:
+    name: Research engine suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      # The same set the unit job installs, plus xdist. `python-docx` is a
+      # COLLECTION-time import in three of these modules, so a missing one
+      # aborts the run rather than skipping a test; `pypdf` and the worker's
+      # own deps are here because tests/skills reaches into dma_worker for
+      # the parser contracts it asserts against.
+      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx jsonschema
+      - name: The engine suite, in parallel, and a suite that skips silently fails
+        run: |
+          set -o pipefail
+          # every research_engine file lands in exactly one shard; shard 0
+          # also carries the top-level tests/skills files (hooks, routing)
+          files=$(ls tests/skills/research_engine/test_*.py | awk -v s="${{ matrix.shard }}" 'NR%2==s')
+          if [ "${{ matrix.shard }}" = "0" ]; then files="$files $(ls tests/skills/test_*.py)"; fi
+          echo "shard ${{ matrix.shard }}: $(echo $files | wc -w) files"
+          # shellcheck disable=SC2086
+          python -m pytest $files \
+                 -q -rfs -p no:cacheprovider -n auto --dist loadfile \
+                 2>&1 | tee /tmp/engine-pytest.txt
+          # `|| true` is load-bearing. This step runs under `bash -e`
+          # with pipefail, and pytest prints NO "N skipped" when nothing
+          # skipped — so grep exits 1, the pipeline exits 1, and the shell
+          # dies ON THE ASSIGNMENT, before the ceiling is ever compared.
+          # Measured 2026-09-14 in run 34866563499: "82 passed in 528.40s"
+          # immediately followed by "Process completed with exit code 1",
+          # a green suite reported as a failed check. A clean result must
+          # not be the input this cannot survive.
+          n=$(grep -oE '[0-9]+ skipped' /tmp/engine-pytest.txt | grep -oE '^[0-9]+' | tail -1 || true)
+          # Measured 2026-09-03 on this runner's shape: the skips are the
+          # Drive-identity and network-gated ones. Same ratchet as the unit
+          # job — the answer to a skip is almost never a bigger number. Every
+          # skip the pair reported was in this half (6 of 6, measured
+          # 2026-09-14), so the ceiling comes here unchanged.
+          echo "skipped: ${n:-0} (ceiling 8)"
+          if [ "${n:-0}" -gt 8 ]; then
+            echo "--- the reasons, most common first ---"
+            grep '^SKIPPED' /tmp/engine-pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
+            exit 1
+          fi
+      - name: Report the result where the check can show it
+        if: always()
+        run: |
+          {
+            echo '### Research engine (shard ${{ matrix.shard }})'
+            echo '```'
+            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/engine-pytest.txt | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # THE ACCEPTANCE SUITE, on its own clock — same substrate, own runner.
+  #
+  # It rode with the engine suite because it is the same cost profile; it
+  # rides alone now because the sum stopped fitting (see above). It must run
+  # on every push or it decays into documentation: it was written 2026-09-03
+  # from the owner's own reported issues, and every one of those issues is
+  # only closed for as long as this suite is actually finishing.
+  acceptance-tests:
+    name: Acceptance suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q pytest pytest-xdist openpyxl pg8000 pypdf httpx python-docx jsonschema
+      - name: Acceptance, in parallel, and a suite that skips silently fails
+        run: |
+          set -o pipefail
+          python -m pytest tests/acceptance/ \
+                 -q -rfs -p no:cacheprovider -n auto --dist loadfile \
+                 2>&1 | tee /tmp/acceptance-pytest.txt
+          # `|| true` is load-bearing. This step runs under `bash -e`
+          # with pipefail, and pytest prints NO "N skipped" when nothing
+          # skipped — so grep exits 1, the pipeline exits 1, and the shell
+          # dies ON THE ASSIGNMENT, before the ceiling is ever compared.
+          # Measured 2026-09-14 in run 34866563499: "82 passed in 528.40s"
+          # immediately followed by "Process completed with exit code 1",
+          # a green suite reported as a failed check. A clean result must
+          # not be the input this cannot survive.
+          n=$(grep -oE '[0-9]+ skipped' /tmp/acceptance-pytest.txt | grep -oE '^[0-9]+' | tail -1 || true)
+          # Zero, and zero is the honest ceiling: this suite contains no
+          # `pytest.skip` and no `skipif` at all, so a skip here is a test
+          # that started declining to run, which is the one thing a ratchet
+          # exists to catch. Measured 2026-09-14: 82 passed, 0 skipped.
+          echo "skipped: ${n:-0} (ceiling 0)"
+          if [ "${n:-0}" -gt 0 ]; then
+            echo "--- the reasons, most common first ---"
+            grep '^SKIPPED' /tmp/acceptance-pytest.txt | sed 's/.*: //' | sort | uniq -c | sort -rn | head
+            exit 1
+          fi
+      - name: Report the result where the check can show it
+        if: always()
+        run: |
+          {
+            echo '### Acceptance'
+            echo '```'
+            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/acceptance-pytest.txt | tail -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # THE WALKS. The unit and acceptance suites pin every refusal; these shell
+  # the REAL command line in the order a run meets it — start, PRELIM, the
+  # gates, the stage flip, the second run that supersedes, and the driver
+  # (`engine.pipeline run --dispatcher stub`) end to end with chaos: a lane
+  # that produces nothing twice, an ingest that never arrives, a page verdict
+  # FAIL, a wall-clock stop, a refused promote, a v6 workbook in flight.
+  # Until 2026-09-04 four stress_*.py scripts existed and none ran in CI.
+  # The toolkit-dependent walk (stress_research_pipeline.py, real pillar
+  # toolkits from Drive) stays manual and is documented as such.
+  research-walks:
+    name: Research walks (lifecycle, stage, pipeline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -q openpyxl python-docx pypdf httpx pg8000 jsonschema
+      - name: Lifecycle walk
+        run: python plugins/dma-insights/scripts/stress_run_lifecycle.py
+      - name: Stage and supersede walk
+        run: python plugins/dma-insights/scripts/stress_stage_and_supersede.py
+      - name: Pipeline walk (stub dispatcher, with chaos)
+        run: python plugins/dma-insights/scripts/stress_pipeline_stub.py
 
   # The frontend has its own suite (node's built-in runner, no framework) and
   # it too had never run here. It is the only place the COMPILED bundle is
@@ -516,6 +799,12 @@ jobs:
           "
       - working-directory: apps/web
         run: npm run build:proto
+      # The image serves the committed bundle and the release verifier compares
+      # it with a fresh build (2026-10-09: a JSX comment edited after the build
+      # shipped as "production is NOT serving HEAD"). A stale bundle fails here.
+      - name: The committed bundle is the source's build
+        working-directory: apps/web
+        run: git diff --exit-code --stat -- public/proto/js
       - working-directory: apps/web
         env:
           CI: "1"
@@ -540,3 +829,59 @@ jobs:
   # Per-service lint/type/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
   # the first commit so no code was ever merged without them.
+
+  # Every merge to the default branch ships: infra/deploy.sh runs against
+  # production once every job above has passed on that commit, so nothing
+  # that merged lingers undeployed (SWBC was re-promoted against an API that
+  # did not carry its redaction fixes, because merging and deploying were two
+  # steps and only one was taken).
+  #
+  # Auth is Workload Identity Federation as claude-deployer — no key exists.
+  # The trust is set up once by infra/github-deploy-wif.sh and only honours
+  # this repository on the default branch. Until the owner has run it and set
+  # the two repository variables, this job says so and skips the deploy.
+  deploy:
+    name: Deploy to Cloud Run (default branch)
+    if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: [gates, schema-qa, python-tests, research-engine-tests, acceptance-tests, research-walks, web-tests, promoted-client-audit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    # One release at a time, and never cancelled part-way.
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Deploy credentials configured?
+        id: cfg
+        env:
+          WIF: ${{ vars.GCP_WIF_PROVIDER }}
+          SA: ${{ vars.GCP_DEPLOYER_SA }}
+        run: |
+          if [ -n "$WIF" ] && [ -n "$SA" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Deploy skipped::GCP_WIF_PROVIDER / GCP_DEPLOYER_SA are not set. Run infra/github-deploy-wif.sh once as a project owner and set the variables it prints."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          fetch-depth: 0
+      - uses: google-github-actions/auth@v2
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          python-version: '3.12'
+      - name: infra/deploy.sh
+        if: steps.cfg.outputs.ready == 'true'
+        run: bash infra/deploy.sh

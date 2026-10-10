@@ -170,6 +170,42 @@ function sectionReason(key) {
   };
 }
 
+/* ── A column null in EVERY row is one absence, stated once ─────────────
+   RC-03 (gold audit 2026-10-04): absence was modelled only at SECTION grain,
+   so a populated section with a 100%-null column — peer_median, sixteen
+   categories and four pillars — rendered sixteen silent cells and its reason
+   nowhere. The section's empty_state carries the reason; the sentences of it
+   that are about the PEER column are what the grid states, once. Where the
+   run gave no such sentence the grid says only what the payload shows. */
+function peerColumnReason() {
+  const {
+    es
+  } = sectionReason("heatmap.workbook_scores");
+  const reason = es && typeof es.reason === "string" ? es.reason.trim() : "";
+  const about = reason.split(/(?<=[.!?])\s+/).filter(x => /\bpeers?\b/i.test(x)).join(" ");
+  return about || "No peer median is stated at this grain in this run.";
+}
+function PeerColumnFoot() {
+  return /*#__PURE__*/React.createElement("div", {
+    "data-peer-column-absent": "true",
+    style: {
+      marginTop: 10,
+      borderTop: "1px solid var(--z-sep)",
+      paddingTop: 8,
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      lineHeight: 1.55
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      textTransform: "uppercase",
+      letterSpacing: ".06em",
+      marginRight: 6
+    }
+  }, "Peer column"), peerColumnReason());
+}
+
 /* The contract allows either shape for the workbook tables: an id-keyed object
    ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
    their own id. Both become a list of rows with `id`. */
@@ -391,27 +427,23 @@ function ClientHeatmap({
     pushToast
   } = useApp();
   // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
-  // opens the page, then focus areas, then the value chain. The customer
-  // audience still cannot reach the standard grid (it carries every capped and
-  // thin cell), so it opens on focus areas — the ternary that used to return
-  // "focus" on both branches now actually branches.
-  const [mode, setMode] = useState(route.params.hm || (audience === "customer" ? "focus" : "standard")); // standard | focus | value_chain
+  // opens the page, then focus areas, then the value chain — for every
+  // audience. The client view used to be locked out of the standard grid and
+  // opened on focus areas; the owner reversed that on 2026-10-07 ("the
+  // heatmaps should never be hidden"). The grid is the subcaps read the server
+  // already redacts for the customer audience; what stays internal is the
+  // Issues overlay, which reads the Context register (not a client page).
+  const [mode, setMode] = useState(route.params.hm || "standard"); // standard | focus | value_chain
   const [zoom, setZoom] = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus] = useState(route.params.cat || null);
   const [showPeers, setShowPeers] = useState(true);
-  const [showIssues, setShowIssues] = useState(false);
+  const [issuesOn, setShowIssues] = useState(false);
+  // Off for the client audience whatever the toggle last said, so switching
+  // to the client view with the overlay on does not carry it across.
+  const showIssues = issuesOn && audience !== "customer";
   const [focusArea, setFocusArea] = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
-
-  // In customer mode, lock to focus / value_chain views only. `mode` belongs in
-  // the deps: with `[audience]` alone the effect had already run by the time
-  // "Standard" was clicked, so the internal grid rendered for the customer
-  // audience. The button is also disabled below — the lock should not depend on
-  // an effect winning a race.
-  useEffect(() => {
-    if (audience === "customer" && mode === "standard") setMode("focus");
-  }, [audience, mode]);
 
   // `?subcap=` is how every other page opens a cell here: `openSubcap` in
   // app-root navigates to this tab with the id as a param. Nothing consumed
@@ -463,13 +495,13 @@ function ClientHeatmap({
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Maturity heatmap"), /*#__PURE__*/React.createElement("h1", null, "Where ", entity.name, " is today"), /*#__PURE__*/React.createElement("div", {
+  }, "Maturity heatmap"), /*#__PURE__*/React.createElement("h1", null, "Where ", entityName(entity), " is today"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, entity.subcaps.length, " subcaps \xB7 ", entity.subcaps.filter(s => s.thin).length, " thin", overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Exporting ${entity.name} heatmap as PDF…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} heatmap as PDF…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -501,15 +533,7 @@ function ClientHeatmap({
     className: "toggle-row"
   }, /*#__PURE__*/React.createElement("button", {
     className: mode === "standard" ? "on" : "",
-    disabled: audience === "customer",
-    title: audience === "customer" ? "the full internal grid is not part of the customer view" : null,
-    style: audience === "customer" ? {
-      opacity: .45,
-      cursor: "not-allowed"
-    } : null,
-    onClick: () => {
-      if (audience !== "customer") setMode("standard");
-    }
+    onClick: () => setMode("standard")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "heatmap",
     size: 11
@@ -563,7 +587,7 @@ function ClientHeatmap({
   }, /*#__PURE__*/React.createElement("span", {
     className: `switch ${showPeers ? "on" : ""}`,
     onClick: () => setShowPeers(p => !p)
-  }), "Peers"), /*#__PURE__*/React.createElement("label", {
+  }), "Peers"), audience === "customer" ? null : /*#__PURE__*/React.createElement("label", {
     className: "row",
     style: {
       fontSize: 11.5,
@@ -715,7 +739,7 @@ function FocusAreaView({
         fontSize: 13,
         fontWeight: 600
       }
-    }, "Strategic priorities for ", entity.name), /*#__PURE__*/React.createElement("span", {
+    }, "Strategic priorities for ", entityName(entity)), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -1076,7 +1100,7 @@ function FocusAreaView({
       color: "var(--z-muted)",
       lineHeight: 1.5
     }
-  }, "Share of the ", (fa.subcaps || []).length, " cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for ", entity.name, ".")), /*#__PURE__*/React.createElement("div", {
+  }, "Share of the ", (fa.subcaps || []).length, " cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for ", entityName(entity), ".")), /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, /*#__PURE__*/React.createElement("div", {
     className: "row",
@@ -1568,7 +1592,7 @@ function PillarHeatmap({
         marginTop: 10
       }
     }, p.cats.length, " categories \xB7 ", p.cellCount, " subcaps \xB7 click to drill"));
-  })), !anyScore ? (() => {
+  })), (pillars || []).length && (pillars || []).every(p => p.peer == null) ? /*#__PURE__*/React.createElement(PeerColumnFoot, null) : null, !anyScore ? (() => {
     const {
       stub
     } = sectionReason("heatmap.workbook_scores");
@@ -1631,6 +1655,9 @@ function CategoryHeatmap({
       if (cap != null) row.capped += 1;
     });
   });
+  // Every category on screen with no peer median: one absence, said once.
+  const shownCats = rows.flatMap(p => p.cats || []);
+  const peerAllNull = showPeers && shownCats.length > 0 && shownCats.every(c => c.peer == null);
   return /*#__PURE__*/React.createElement("div", {
     className: "card"
   }, rows.map(p => {
@@ -1735,7 +1762,13 @@ function CategoryHeatmap({
           fontSize: 13,
           fontWeight: 700
         }
-      }, fx(shown, 1)), c.thin > 0 ? /*#__PURE__*/React.createElement("div", {
+      }, fx(shown, 1)), c.score == null && c.cellMean != null ? /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 8,
+          fontWeight: 600,
+          lineHeight: 1.15
+        }
+      }, "cell mean \xB7 not a workbook figure") : null, c.thin > 0 ? /*#__PURE__*/React.createElement("div", {
         style: {
           fontSize: 8,
           fontWeight: 600
@@ -1819,7 +1852,7 @@ function CategoryHeatmap({
         fontStyle: "italic"
       }
     }, c.name || "unnamed in catalogue")))));
-  }), /*#__PURE__*/React.createElement(CellTip, {
+  }), peerAllNull ? /*#__PURE__*/React.createElement(PeerColumnFoot, null) : null, /*#__PURE__*/React.createElement(CellTip, {
     tip: cellTip.tip
   }));
 }
@@ -2428,7 +2461,7 @@ function ValueChainView({
       style: {
         marginTop: 8
       }
-    }, "Which cells belong to which business process is the producer's claim about ", entity.name, "'s operating model. The cell grain alone cannot stand it up, so nothing is drawn here until the section promotes."));
+    }, "Which cells belong to which business process is the producer's claim about ", entityName(entity), "'s operating model. The cell grain alone cannot stand it up, so nothing is drawn here until the section promotes."));
   }
   const mapped = new Set();
   for (const vc of chains) for (const s of subcapsForStage(entity, vc)) mapped.add(s.id);
@@ -2539,11 +2572,38 @@ function ValueChainView({
         height: 18,
         fontSize: 9,
         padding: 0,
-        border: 0
+        border: 0,
+        cursor: "pointer"
       },
       title: subcapTipText(s),
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Open ${s.id}`,
       onMouseEnter: cellTip.show(subcapTipText(s)),
       onMouseLeave: cellTip.hide
+      // Every cell opens its own drawer, as it does in the
+      // grid. The swatch used to have no handler, so a click
+      // fell through to the stage tile and only toggled it:
+      // most cells on this view could not be opened.
+      ,
+      onClick: e => {
+        e.stopPropagation();
+        cellTip.hide();
+        openSubcap({
+          kind: "subcap",
+          subcap: s
+        });
+      },
+      onKeyDown: e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          openSubcap({
+            kind: "subcap",
+            subcap: s
+          });
+        }
+      }
     }, s.score == null ? null : fx(s.score, 1)))), subs.length > STRIP ? /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 10,
@@ -2786,8 +2846,10 @@ function SynthesisDrawer({
   const cit = subcap ? cellCitationsOf(subcap.id) : categoryCitationsOf(catCells);
   const linkedEv = cit.items;
 
-  // Issue caps (subcap only)
-  const caps = subcap ? DMA.issueCapsFor(subcap.id) : [];
+  // Issue caps (subcap only). The issue register is Context-page material and
+  // its caps are O1b ceilings — both withheld from the customer audience — so
+  // the customer drawer never lists them, whatever the client cache holds.
+  const caps = subcap && audience !== "customer" ? DMA.issueCapsFor(subcap.id) : [];
 
   // Peer comparison (for a category, the promoted category figures)
   const score = subcap ? numOf(subcap.score) : catRow.score != null ? catRow.score : catRow.cellMean;
@@ -3600,5 +3662,9 @@ function hashCode(s) {
 window.hashCode = hashCode;
 Object.assign(window, {
   ClientHeatmap,
-  sectionReason
+  sectionReason,
+  runPillarsOf,
+  runCategoriesOf,
+  PillarHeatmap,
+  CategoryHeatmap
 });

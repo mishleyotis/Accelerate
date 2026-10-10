@@ -18,7 +18,7 @@ function Sidebar() {
     setSidebarOpen
   } = useApp();
   const path = route.path;
-  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit"];
+  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit", "/admin/usage"];
   const activeHref = (() => {
     if (path === "/") return "/";
     const matches = allHrefs.filter(h => h !== "/" && (path === h || path.startsWith(h + "/")));
@@ -119,14 +119,18 @@ function Sidebar() {
     href: "/admin",
     icon: "settings",
     label: "Admin home"
-  }), /*#__PURE__*/React.createElement(NavItem, {
+  }), adminRouteHidden("/admin/import") ? null : /*#__PURE__*/React.createElement(NavItem, {
     href: "/admin/import",
     icon: "drive",
     label: "Import & jobs"
-  }), /*#__PURE__*/React.createElement(NavItem, {
+  }), adminRouteHidden("/admin/import/audit") ? null : /*#__PURE__*/React.createElement(NavItem, {
     href: "/admin/import/audit",
     icon: "evidence",
     label: "Import audit"
+  }), /*#__PURE__*/React.createElement(NavItem, {
+    href: "/admin/usage",
+    icon: "users",
+    label: "Usage analytics"
   })) : null), /*#__PURE__*/React.createElement("div", {
     className: "sb-foot"
   }, /*#__PURE__*/React.createElement("div", {
@@ -172,7 +176,7 @@ function TopBar({
     if (!ql) return null;
     const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4).map(e => ({
       kind: "entity",
-      title: e.name,
+      title: entityName(e),
       sub: DMA.SUBVERTICAL_LABEL[e.subvertical],
       route: `/clients/${e.id}/overview`,
       icon: "users"
@@ -763,6 +767,317 @@ function SettingsPopover({
   })))));
 }
 
+/* ── Generate client link ──────────────────────────────────────────
+   Owner's rule (2026-10-07): a client link is shared TO named people, and
+   those addresses plus their organisations' domains are the link's
+   allowlist for this one DMA. The server mints (POST /api/share) and signs
+   the allowlist into the link; nothing here decides who is admitted. The
+   link travels from the sharer's own mailbox (a prefilled draft); the
+   recipient's sign-in email is sent from it too (lib/share-mailer). */
+function ShareDialog({
+  entity,
+  run,
+  onClose
+}) {
+  const {
+    pushToast
+  } = useApp();
+  const [recipients, setRecipients] = useState("");
+  const [days, setDays] = useState(30);
+  // Has the first sales call happened? Asked before every link (owner,
+  // 2026-10-09): it decides the follow-up the recipient's email offers.
+  const [stage, setStage] = useState(null);
+  // …and remembered: the dialog opens on the stage recorded on this client's
+  // most recent link (GET /api/share?entity=), which the colleague can change.
+  const [remembered, setRemembered] = useState(null);
+  useEffect(() => {
+    if (!window.DMA_LIVE) return;
+    let live = true;
+    fetch(`/api/share?entity=${encodeURIComponent(entity.id)}`, {
+      cache: "no-store"
+    }).then(r => r.ok ? r.json() : null).then(b => {
+      if (!live || !b || !b.stage) return;
+      setRemembered(b);
+      setStage(s => s || b.stage);
+    }).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [entity.id]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [made, setMade] = useState(null);
+  const submit = () => {
+    setBusy(true);
+    setError(null);
+    fetch("/api/share", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        entity: entity.id,
+        run: run && (run.run_id || run.id),
+        recipients,
+        days,
+        stage
+      })
+    }).then(r => r.json().then(b => ({
+      ok: r.ok,
+      b
+    }))).then(({
+      ok,
+      b
+    }) => {
+      setBusy(false);
+      if (ok) {
+        if (window.trackUsage) window.trackUsage("client_link");
+        setMade(b);
+      } else setError(b.detail || b.error || "The link could not be created.");
+    }).catch(() => {
+      setBusy(false);
+      setError("The link could not be created.");
+    });
+  };
+  const copy = () => {
+    const done = () => pushToast("Client link copied", "success");
+    try {
+      navigator.clipboard.writeText(made.url).then(done, () => window.prompt("Copy the client link", made.url));
+    } catch (e) {
+      window.prompt("Copy the client link", made.url);
+    }
+  };
+  // The invitation the colleague sends from their own mailbox (owner,
+  // 2026-10-09): greets the recipients, says it is their digital maturity
+  // assessment benchmarked against peers, and offers a walkthrough.
+  const PEERS = {
+    CU: "credit unions",
+    RB: "regional banks",
+    CL: "commercial lenders",
+    CIB: "corporate and investment banks",
+    FC: "Farm Credit institutions",
+    AM: "asset and wealth managers",
+    RIA: "RIAs and broker-dealers",
+    IC: "insurance carriers",
+    IB: "insurance brokers"
+  };
+  const named = recipients.split(/[,;\n]+/).map(x => (x.match(/^\s*"?([^"<]+?)"?\s*</) || [])[1]).filter(Boolean).map(n => (n.includes(",") ? n.split(",")[1] : n).trim().split(/\s+/)[0]);
+  const hi = named.length ? `Hi ${named.join(" and ")},` : `Dear ${entityName(entity)} team,`;
+  const me = window.DMA_LIVE && window.DMA_LIVE.name || "";
+  const peers = PEERS[String(entity.subvertical || "").toUpperCase()] || "institutions";
+  const afterCall = stage === "after_first_call";
+  const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}` + `?subject=${encodeURIComponent(`Your ${entityName(entity)} digital maturity assessment is ready`)}` + `&body=${encodeURIComponent([hi, "", afterCall ? `Thank you for your time on our recent call. As promised, here is ${entityName(entity)}'s digital maturity assessment.` : `I am pleased to share ${entityName(entity)}'s digital maturity assessment with you.`, "", `Would you like to know how ${entityName(entity)} performs against its peers? Your assessment scores your organisation across four pillars: strategy and governance, customer experience, operations and risk, and data and technology. Each pillar is benchmarked against comparable ${peers}, so you can see where you lead and where the biggest opportunities lie.`, "", `View your assessment: ${made.url}`, "", `When you open it, enter your work email and you will receive a secure sign-in link at that address. The link is available until ${fmtDate(made.expires_at)}.`, "", afterCall ? "I would welcome a follow-up call to go deeper on the priorities we discussed and agree next steps. Reply to this email and we can book a time." : "I would welcome the chance to walk your team through the findings. Reply to this email and we can find a time.", "", "Kind regards,", me, "Zennify"].join("\n"))}` : null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "modal-mask",
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    role: "dialog",
+    "aria-label": "Generate client link",
+    onClick: e => e.stopPropagation(),
+    style: {
+      width: 560
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal-head"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, "Generate client link"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)",
+      marginTop: 2
+    }
+  }, entityName(entity), " \xB7 client dashboard only (Overview, Insights, Heatmap)")), /*#__PURE__*/React.createElement("button", {
+    className: "icon-btn",
+    onClick: onClose,
+    "aria-label": "Close"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "x",
+    size: 18
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "modal-body"
+  }, !made ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "share-recipients",
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, "Recipient email(s) \xB7 added to this link's allowlist"), /*#__PURE__*/React.createElement("textarea", {
+    id: "share-recipients",
+    className: "inp",
+    rows: 2,
+    style: {
+      width: "100%",
+      marginTop: 6,
+      resize: "vertical"
+    },
+    placeholder: "Jane Doe <jane@bcu.com>, sam@bcu.com",
+    value: recipients,
+    onChange: e => setRecipients(e.target.value)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      marginTop: 6,
+      lineHeight: 1.5
+    }
+  }, "Required before the link is generated. Add a name (Jane Doe <jane@bcu.com>) and the sign-in email greets them by it. Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only."), /*#__PURE__*/React.createElement("fieldset", {
+    style: {
+      border: 0,
+      padding: 0,
+      margin: "14px 0 0"
+    }
+  }, /*#__PURE__*/React.createElement("legend", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      padding: 0
+    }
+  }, "Has the first sales call with ", entityName(entity), " happened?"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 16,
+      marginTop: 6,
+      flexWrap: "wrap"
+    }
+  }, [["before_first_call", "Not yet: before the first call"], ["after_first_call", "Yes: after the first call"]].map(([v, label]) => /*#__PURE__*/React.createElement("label", {
+    key: v,
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 12.5,
+      color: "var(--z-dark)",
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "radio",
+    name: "share-stage",
+    value: v,
+    checked: stage === v,
+    onChange: () => setStage(v)
+  }), label))), remembered && remembered.stage === stage ? /*#__PURE__*/React.createElement("div", {
+    "data-stage-remembered": true,
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-dark)",
+      marginTop: 6,
+      lineHeight: 1.5
+    }
+  }, "Remembered from the last link for ", entityName(entity), remembered.minted_at ? `, shared ${fmtDate(remembered.minted_at)}` : "", remembered.minted_by ? ` by ${remembered.minted_by}` : "", ". Change it if things have moved on.") : null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: "var(--z-muted)",
+      marginTop: 4,
+      lineHeight: 1.5
+    }
+  }, stage === "after_first_call" ? "The client's sign-in email thanks them for the call and invites a follow-up call with you." : stage === "before_first_call" ? "The client's sign-in email invites them to schedule a walkthrough of the results with you." : "Required: it decides the follow-up the client's sign-in email offers.")), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8,
+      marginTop: 14,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)"
+    }
+  }, "Link expires after"), /*#__PURE__*/React.createElement("select", {
+    className: "inp",
+    style: {
+      maxWidth: 140
+    },
+    value: days,
+    onChange: e => setDays(Number(e.target.value))
+  }, [7, 14, 30, 60, 90].map(d => /*#__PURE__*/React.createElement("option", {
+    key: d,
+    value: d
+  }, d, " days")))), error ? /*#__PURE__*/React.createElement("div", {
+    role: "alert",
+    style: {
+      marginTop: 12,
+      fontSize: 12.5,
+      color: "var(--z-below)"
+    }
+  }, error) : null) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      marginBottom: 6
+    }
+  }, "Who can open it"), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 6,
+      flexWrap: "wrap"
+    }
+  }, made.allowlist.emails.map(e => /*#__PURE__*/React.createElement("span", {
+    key: e,
+    className: "chip"
+  }, e)), made.allowlist.domains.map(d => /*#__PURE__*/React.createElement("span", {
+    key: d,
+    className: "b b-teal"
+  }, "anyone @", d))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "var(--z-muted)",
+      marginTop: 10
+    }
+  }, "Expires ", fmtDate(made.expires_at), " \xB7 link ", made.jti), /*#__PURE__*/React.createElement("input", {
+    className: "inp",
+    readOnly: true,
+    value: made.url,
+    onFocus: e => e.target.select(),
+    style: {
+      width: "100%",
+      marginTop: 12,
+      fontSize: 11.5
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "modal-foot"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-muted)"
+    }
+  }, made ? "Send it from your own mailbox." : ""), /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 8
+    }
+  }, !made ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    disabled: busy || !recipients.trim() || !stage,
+    onClick: submit
+  }, busy ? "Generating…" : "Generate link") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary",
+    onClick: copy
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "copy",
+    size: 12
+  }), " Copy link"), /*#__PURE__*/React.createElement("a", {
+    className: "btn btn-primary",
+    href: mailto
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "envelope",
+    size: 12
+  }), " Email link"))))));
+}
+
 /* ── Client bar (dark client-context strip + tabs) ──────────────── */
 function ClientBar({
   entity,
@@ -772,13 +1087,17 @@ function ClientBar({
   const {
     audience,
     setAudience,
-    role
+    role,
+    pushToast
   } = useApp();
+  const link = isClientLink();
+  const isClient = audience === "customer";
   const [runOpen, setRunOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const fresh = entity.assessment_date ? DMA.helpers.freshnessOf(entity.assessment_date) : null;
   const isSuperseded = run && run.status !== "ACTIVE" && !run.status.includes("IN_PROGRESS");
   const dsPill = run?.data_source === "DRIVE_PARSE" ? "pill-drive" : "pill-api";
-  const TAB = (id, label, badge, icon) => /*#__PURE__*/React.createElement("button", {
+  const TAB = (id, label, badge, icon) => isClient && !clientTabAllowed(id) ? null : /*#__PURE__*/React.createElement("button", {
     key: id,
     className: `client-tab ${tab === id ? "on" : ""}`,
     onClick: () => navigate(`/clients/${entity.id}/${id}`, run ? {
@@ -792,7 +1111,7 @@ function ClientBar({
   }, badge) : null);
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "client-bar"
-  }, /*#__PURE__*/React.createElement("button", {
+  }, link ? null : /*#__PURE__*/React.createElement("button", {
     className: "icon-btn",
     style: {
       color: "rgba(255,255,255,.7)"
@@ -811,13 +1130,23 @@ function ClientBar({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "name"
-  }, entity.name), run ? /*#__PURE__*/React.createElement("span", {
+  }, entityName(entity)), run && !link ? /*#__PURE__*/React.createElement("span", {
     className: `pill pill-active`
-  }, run.status.replace(/_/g, " ")) : null, run ? /*#__PURE__*/React.createElement("span", {
+  }, run.status.replace(/_/g, " ")) : null, run && !link ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${dsPill}`
-  }, run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface") : null, fresh ? /*#__PURE__*/React.createElement("span", {
+  }, run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface") : null, fresh && !link ? /*#__PURE__*/React.createElement("span", {
     className: `pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`
-  }, "\u25CF ", fresh.label, " \xB7 ", fresh.months, " mo") : null), /*#__PURE__*/React.createElement("div", {
+  }, "\u25CF ", fresh.label, " \xB7 ", fresh.months, " mo") : null), link ? /*#__PURE__*/React.createElement("div", {
+    className: "client-bar-r"
+  }, run ? /*#__PURE__*/React.createElement("span", {
+    className: "run-selector",
+    style: {
+      cursor: "default"
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "calendar",
+    size: 12
+  }), /*#__PURE__*/React.createElement("span", null, "Assessed ", fmtDate(run.date))) : null) : /*#__PURE__*/React.createElement("div", {
     className: "client-bar-r"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -890,7 +1219,7 @@ function ClientBar({
     className: `b ${r.data_source === "DRIVE_PARSE" ? "b-ph0" : "b-ph1"}`
   }, r.data_source === "DRIVE_PARSE" ? "DRIVE" : "API")))) : null), /*#__PURE__*/React.createElement("div", {
     className: `audience-toggle ${audience === "customer" ? "customer" : ""}`,
-    title: "Internal view shows full team-prep data. Customer view strips fields that should not be screen-shared."
+    title: "Internal view shows full team-prep data. Client view strips fields that should not be screen-shared."
   }, /*#__PURE__*/React.createElement("button", {
     className: audience === "internal" ? "on" : "",
     onClick: () => setAudience("internal")
@@ -903,14 +1232,14 @@ function ClientBar({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 11
-  }), " Customer")))), /*#__PURE__*/React.createElement("div", {
+  }), " Client")))), /*#__PURE__*/React.createElement("div", {
     className: "client-tabs"
-  }, TAB("overview", "Overview", null, "home"), TAB("insights", "Insights", null, "insight"), TAB("heatmap", "Heatmap", null, "heatmap"), TAB("platform", "Platform", null, "platform"), audience !== "customer" ? TAB("context", "Context", null, "timeline") : null, TAB("techstack", "Tech stack", null, "stack"), (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null, (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null), audience === "customer" ? /*#__PURE__*/React.createElement("div", {
+  }, TAB("overview", "Overview", null, "home"), TAB("insights", "Insights", null, "insight"), TAB("heatmap", "Heatmap", null, "heatmap"), TAB("platform", "Platform", null, "platform"), audience !== "customer" ? TAB("context", "Context", null, "timeline") : null, TAB("techstack", "Tech stack", null, "stack"), (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("health", "Health", entity.open_alerts, "shield") : null, (role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null), isClient && !link ? /*#__PURE__*/React.createElement("div", {
     className: "customer-banner"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 14
-  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "Customer view"), " - share-safe presentation mode \xB7 evidence rationale, ERS, alert counts, and the Context tab are hidden"), /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "Client Dashboard")), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
@@ -919,8 +1248,23 @@ function ClientBar({
       whiteSpace: "nowrap",
       flexShrink: 0
     },
+    onClick: () => setShareOpen(true)
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "share",
+    size: 12
+  }), " Generate client link"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-tertiary btn-sm",
+    style: {
+      color: "#7C3500",
+      whiteSpace: "nowrap",
+      flexShrink: 0
+    },
     onClick: () => setAudience("internal")
-  }, "Switch back to Internal \u2192")) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {
+  }, "Switch back to Zennify view \u2192")) : null, shareOpen ? /*#__PURE__*/React.createElement(ShareDialog, {
+    entity: entity,
+    run: run,
+    onClose: () => setShareOpen(false)
+  }) : null, isSuperseded ? /*#__PURE__*/React.createElement("div", {
     className: "superseded-banner"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "info",
@@ -961,6 +1305,22 @@ function ClientShell({
   tab,
   children
 }) {
+  // A client link is the client dashboard alone: no sidebar (Dashboard,
+  // Clients, Alerts, Prospecting) and no top bar (search across every client,
+  // notifications, settings) — those are the Zennify app around it.
+  if (isClientLink()) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "shell"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "main"
+    }, /*#__PURE__*/React.createElement(ClientBar, {
+      entity: entity,
+      run: run,
+      tab: tab
+    }), /*#__PURE__*/React.createElement("main", {
+      className: "page"
+    }, children)));
+  }
   return /*#__PURE__*/React.createElement("div", {
     className: "shell"
   }, /*#__PURE__*/React.createElement(Sidebar, null), /*#__PURE__*/React.createElement("div", {
@@ -970,7 +1330,7 @@ function ClientShell({
       label: "Clients",
       href: "/clients"
     }, {
-      label: entity.name
+      label: entityName(entity)
     }, {
       label: tab[0].toUpperCase() + tab.slice(1).replace("stack", " stack")
     }]
@@ -986,6 +1346,7 @@ Object.assign(window, {
   Sidebar,
   TopBar,
   ClientBar,
+  ShareDialog,
   PageShell,
   ClientShell
 });

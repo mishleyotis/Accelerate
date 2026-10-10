@@ -112,9 +112,11 @@ def test_the_withheld_set_is_not_silently_shrunk():
     """A guard on the guard. Removing a section from CUSTOMER_WITHHELD is a
     decision about what a client may read, and it must be made in a diff a
     reviewer can see rather than by an import that quietly resolves smaller."""
+    # ("overview", "sentiment") was removed IN THIS VISIBLE DIFF on 2026-10-04
+    # by OWNER DECISION 1 (SWBC gold audit, D-34): customers receive a
+    # reduced card — redaction._project_sentiment — instead of nothing.
     assert CUSTOMER_WITHHELD >= frozenset((
         ("overview", "ceilings"),
-        ("overview", "sentiment"),
         ("overview", "thought_leadership"),
         ("overview", "evidence_coverage"),
         ("heatmap", "alerts"),

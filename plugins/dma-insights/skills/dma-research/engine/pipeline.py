@@ -1,0 +1,5040 @@
+"""engine.pipeline — THE DRIVER. One command runs an assessment from a started
+run to a promoted one, gate by gate, dispatching lanes over briefs and
+shipping pages to the connector as the work becomes ready.
+
+    python3 -m engine.pipeline run    --run <R> --root <ROOT> [--dispatcher agent_run|stub]
+                                      [--until STAGE] [--step] [--max-wall-min N] [--max-rounds N]
+                                      [--stall-rounds N] [--enrichment-heals N] [--no-relay]
+                                      [--lane-retries N] [--page-retries N]
+                                      [--ingest-poll-s S --ingest-timeout-s S]
+                                      [--folder-root DIR] [--no-push] [--allow-stale-install]
+    python3 -m engine.pipeline plan   --run <R> --root <ROOT>      # done / next / blockers; dispatches nothing
+    python3 -m engine.pipeline status --run <R> --root <ROOT> [--watch]
+    python3 -m engine.pipeline env                                 # every hard dependency, measured
+    python3 -m engine.pipeline stages                              # the stage table
+
+WHY (owner, 2026-09-03, issues 6–9): the conductor NARRATED ten stages and
+dispatched most of them "with the run id and the root"; the scorers, the
+critic, the report producers and the page producers had no brief; the
+handback was computed and never fed back; nothing recorded where six hours
+went; ship-as-you-go stopped at a Cloud Scheduler hop nobody drove. This
+module is the mechanism the prose described.
+
+THE STAGE TABLE (in order; each stage has a DONE predicate read from the
+workbook and the run tree, WORK that dispatches lanes over `engine.brief`
+packets and runs engine commands, and a GATE that must PASS before the next
+stage starts):
+
+    PREFLIGHT  the binding is recorded (preflight answered)          — checked, never done here
+    START      the run exists and is bound to the pinned templates   — checked, never done here
+    PRELIM     the institution before its capabilities               lanes: conductor (PRELIM-only), scanner, connectors
+    KG         DQ_Bank seeded from the toolkits (fallback stated)     engine.kg build
+    RESEARCH   every category's floors gate PASS                     lanes: 16 researchers → challengers → gates
+               (+ verifier, + ENRICHMENT gate, + relay drain)         → relay → gates; rounds
+    HANDOFF    research_handoff.json, research_ready == []           engine.handoff
+    SCORING    SCORING gate PASS                                     lanes: 4 scorers, solutions, critic → rollup → gate
+    INGEST_A   checkpoint pushed; connector ingested version A       engine.assemble checkpoint → poll list_pending_runs
+    REPORTS    both reports READY and rendered                        lanes: 2 producers → validator; rounds
+    PAGES_A    techstack + heatmap shipped to version A               lanes: page producers → ship_page --claim
+    PACKAGE    '<Entity> - DMA' verified (gold gate clean), pushed    engine.techscan render, engine.assemble package
+    INGEST_B   connector ingested version B                           poll list_pending_runs
+    PAGES_B    A pages restaged from disk; overview, insights,        lanes → ship_page
+               platform, then context (after overview) shipped to B
+    PROMOTE    promote_run — the final connector call                 ship_page / mcp_raw
+
+Exactly TWO ingests (a scored checkpoint and the package), so a run gets two
+versions rather than eighteen; the early pages ship to version A while the
+reports are written, are restaged from disk to version B, and `promote_run`
+is the last call the pipeline makes.
+
+ROUNDS ARE A CEILING, NOT A PROXY FOR PROGRESS (owner, 2026-09-07). The
+driver refused a category after three rounds while categories were still
+gaining ground each round — one hit 100% coverage in round two. `--max-rounds`
+now defaults to 10 and every looping stage measures its own progress between
+rounds (research: passing categories, evidence rows, searches, syntheses,
+declared absences, connector searches; scoring: scored rows, critic passes,
+gate terms; reports: READY sections; PRELIM: closed sections). A stage stops
+EARLY only when `--stall-rounds` consecutive rounds advanced none of them —
+so a big budget cannot spin on a stage that has stopped moving, and a stage
+that is moving is not refused for being slow.
+
+CONNECTOR USAGE IS MEASURED, HEALED, THEN DISCLOSED (MEM-0333). After each
+research round the driver (1) harvests the `search_requests` every lane
+emitted into `07_qa/search_relay.jsonl` (`engine.relay`), (2) dispatches
+`enrichment-web-specialist` lanes to run them through the connectors they
+hold and reconciles what came back against the Search_Log, and (3) records an
+ENRICHMENT gate per category from the Search_Log's Tool column. A category
+whose every search ran through bare web_search is re-dispatched as a FRESH
+lane instance carrying the measured reason (grants refused / never attempted /
+logged as web_search) — up to `--enrichment-heals` times — and after that the
+same FAIL is written NON-blocking: disclosed in Gate_Log and the driver
+state, never silently passed and never a wall the run cannot get past when
+the harness bound no connector to a headless child.
+
+Every stage records `STAGE_<NAME>` in Gate_Log with its verdict and wall
+clock, appends to the cost ledger (`engine.cost record`), writes the driver
+state to `07_qa/pipeline_state.json` and heartbeats the registry — so a run
+that stops says where, and `run` again continues from the first stage whose
+DONE predicate is false. Connector WRITES go only through `ship_page.py`;
+connector READS go through `mcp_raw.py`; the driver never holds a payload.
+"""
+from __future__ import annotations
+
+# Runnable both ways: -m engine.<module>, or by path for --help (audit_skills).
+if __package__ in (None, ""):  # noqa: E402
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.dirname(_os.path.dirname(
+        _os.path.abspath(__file__))))
+    __package__ = "engine"
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Callable, Protocol
+
+from . import contract as C
+from . import ledger as L
+from . import runstate
+from .workbook import RunWorkbook
+
+PIPELINE_VERSION = "1.0"
+STATE_NAME = "pipeline_state.json"
+SECTIONS_DIR = "08_sections"
+BRIEFS_DIR = "briefs"
+
+#: Leaf keys whose value IS the evidence or its label, not prose about it: a
+#: verbatim excerpt, a quote, a source's name or title, a product name. An
+#: SG-V4 FAIL there is not ungrounded prose a producer can re-ground, so it
+#: does not count against `sg_v4_budget` (owner decision 2026-10-06, Arbor
+#: Bank: 660 of the heatmap's 789 FAILs sat on these fields).
+SG_V4_VERBATIM_LEAVES = frozenset({
+    "excerpt", "verbatim_quote", "quote", "source", "source_name",
+    "source_title", "title", "product", "candidate", "url"})
+
+
+def _contract_version_of(progress, page: str) -> str | None:
+    """The `contract_version` get_run_progress reports for one page, whatever
+    shape the pages come in (a list of rows or a dict keyed by page)."""
+    if not isinstance(progress, dict):
+        return None
+    pages = progress.get("pages")
+    rows = (list(pages.values()) if isinstance(pages, dict) else
+            pages if isinstance(pages, list) else [])
+    for row in rows:
+        if isinstance(row, dict) and str(row.get("page") or "") == page:
+            cv = row.get("contract_version")
+            return str(cv) if cv else None
+    if isinstance(pages, dict) and isinstance(pages.get(page), dict):
+        cv = pages[page].get("contract_version")
+        return str(cv) if cv else None
+    return None
+
+
+def mark_contract_drift(state: dict, cv: str, *, page: str, version: str, now: str) -> dict | None:
+    """Pure: compare the server's contract version with the one the run
+    has been shipping under. First sighting records it; a change marks every
+    page passed under the old version `stale_contract` and returns what
+    drifted. The stages recorded before the change are named so the
+    conductor can judge what was produced under the old rules."""
+    was = state.get("contract_version")
+    if not was:
+        state["contract_version"] = cv
+        return None
+    if was == cv:
+        return None
+    stale = []
+    for pg, rec in (state.get("pages") or {}).items():
+        if not isinstance(rec, dict):
+            continue
+        for v, status in list((rec.get("versions") or {}).items()):
+            under = (rec.get("contract_version") or {}).get(v)
+            if status == "pass" and under and under != cv:
+                rec["versions"][v] = "stale_contract"
+                stale.append(f"{pg} v{v}")
+    stages = sorted(st for st, d in (state.get("stages") or {}).items()
+                    if isinstance(d, dict) and d.get("status") == "PASS")
+    drift = {"was": was, "now": cv, "at": now, "page": page, "version": version,
+             "stale_pages": stale, "stages_under_old": stages}
+    state["contract_version"] = cv
+    state.setdefault("connector_drift", []).append(drift)
+    return drift
+
+
+def prose_sg_v4_fails(fails: list) -> list:
+    """The SG-V4 FAILs on prose — the ones the driver's budget counts."""
+    def leaf(path) -> str:
+        return re.sub(r"\[\d+\]$", "", str(path or "").rsplit(".", 1)[-1])
+    return [w for w in fails
+            if leaf(w.get("path") if isinstance(w, dict) else w)
+            not in SG_V4_VERBATIM_LEAVES]
+
+#: A clean stop (`--until`, the wall clock) is exit 0: the run is resumable
+#: and nothing failed. Everything else is exit 1, and STOPPED_BUDGET is
+#: deliberately among them — `watchdog --revive` records RESOLVED or FAILED
+#: from this code, and a sweep that called a budget stop RESOLVED would be
+#: lying about a run that needs a person to raise the ceiling.
+#: ROUND_COMPLETE is `--step`'s clean stop: one research round ran, the work
+#: it prepared for the conductor is named in `pending`, and the run is
+#: resumable from the state on disk. Nothing failed, so the sweep must not
+#: re-dispatch it as a failure — and a conductor scripting `--step` in a loop
+#: reads the exit code before it reads the JSON.
+EXIT_ZERO_OUTCOMES = ("COMPLETE", "STOPPED_AT_UNTIL", "STOPPED_WALL_CLOCK",
+                      "ROUND_COMPLETE", "AWAITING_WORKFLOW", "SCOPE_COMPLETE")
+#: Stages that spend agents, and so are checked against their envelope
+#: before they start. Ingest waits, PACKAGE and PROMOTE spend none.
+SPENDING_STAGES = ("PRELIM", "RESEARCH", "SCORING", "REPORTS", "PAGES_A", "PAGES_B")
+
+#: The persisted workflow the RESEARCH stage hands to the conducting session
+#: in `research_mode="workflow"` — one invocation per category, its
+#: capability batches in parallel, then independent challenge -> floors gate.
+RESEARCH_WORKFLOW = "workflows/dma-pillar-research.js"
+#: RESEARCH as lean tiers, visible: one runner per category drives the
+#: category's lean headless lanes (engine.tiers) — 2026-10-09
+TIERS_WORKFLOW = "workflows/dma-research-tiers.js"
+#: SCORING as one persisted workflow per pillar (scoring_mode="workflow").
+SCORING_WORKFLOW = "workflows/dma-pillar-scoring.js"
+SCORING_HANDOFF = "scoring_workflow.json"
+RESEARCH_HANDOFF = "research_workflow.json"
+#: REPORTS as one persisted workflow per report (report_mode="workflow"):
+#: every writable section written and reviewed on its own track, an upstream
+#: blocker routed out of the writer loop, then one whole-report pass.
+REPORTS_WORKFLOW = "workflows/dma-reports.js"
+REPORTS_HANDOFF = "reports_workflow.json"
+#: PAGES_A / PAGES_B as one persisted workflow per ship group
+#: (pages_mode="workflow"): each page's per-surface producers in parallel,
+#: its challenger and consolidator, then its assembler — every page of the
+#: group side by side. The driver keeps shipping and promotion.
+PAGES_WORKFLOW = "workflows/dma-page-production.js"
+PAGES_HANDOFF = "pages_workflow.json"
+#: Every handoff the driver makes, per stage: the signature of what it handed
+#: and how many times. ONE guard for every workflow stage, so none of them can
+#: loop: an unchanged signature across `stall_rounds` handoffs, or more than
+#: `max_rounds` handoffs in all, stops the stage with its blockers named.
+HANDOFF_GUARD = "handoff_guard.json"
+
+STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING",
+          "INGEST_A", "REPORTS", "PAGES_A", "PACKAGE", "INGEST_B", "PAGES_B",
+          "PROMOTE")
+
+#: Which pages ship at which version. `ship.PAGE_NEEDS` decides: techstack
+#: and heatmap need the scored workbook and no report; overview, insights and
+#: platform read a READY report; context renders after overview (O9 before
+#: C4, `ship.PAGE_AFTER`). So the early pages are the two the scan can serve
+#: from a scored checkpoint, and the rest wait for the package.
+PAGES_A = ("techstack", "heatmap")
+PAGES_B = (("overview", "insights", "platform"), ("context",))
+
+PLUGIN = Path(__file__).resolve().parents[3]
+AGENT_RUN = PLUGIN / "scripts" / "agent_run.py"
+MCP_RAW = PLUGIN / "scripts" / "mcp_raw.py"
+SHIP_PAGE = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "ship_page.py"
+SELF_HEAL = PLUGIN / "skills" / "dma-surface-production" / "scripts" / "self_heal.py"
+
+
+def _utcnow() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def A_ScoringRefusal():
+    """The assessment module's refusal type, imported late (it imports the
+    workbook stack, which this module must not pull in at import time)."""
+    from .assessment import ScoringRefusal
+    return ScoringRefusal
+
+
+class AwaitingWorkflow(Exception):
+    """A stage handed its work to the conducting session as a persisted
+    workflow. Not a failure: the run stops AWAITING_WORKFLOW and resumes
+    from disk when the session re-runs the driver."""
+
+    def __init__(self, handoff: dict):
+        super().__init__(handoff.get("summary") or "awaiting workflow")
+        self.handoff = handoff
+
+
+class StageRefused(Exception):
+    """A stage could not complete; the message names the blocker."""
+
+
+def _merge_tier_invocations(inv: list[dict]) -> dict:
+    """Many per-category tiers invocations as ONE: every category's work keyed
+    by category (as it already is), the per-category budget under `budgets`."""
+    first = inv[0]
+    cats = sorted(c for i in inv for c in i["cats"])
+    out = {k: v for k, v in first.items() if k not in ("cats", "pillar", "budget")}
+    out.update(pillar="ALL", cats=cats,
+               batches={c: b for i in inv for c, b in i["batches"].items()},
+               repairs={c: r for i in inv for c, r in i["repairs"].items()},
+               repair_batches={c: b for i in inv for c, b in i["repair_batches"].items()},
+               rounds=min(int(i.get("rounds") or 2) for i in inv))
+    budgets = {c: i["budget"] for i in inv if i.get("budget") for c in i["cats"]}
+    if budgets:
+        b0 = next(iter(budgets.values()))
+        out["budget"] = {**b0,
+                         "share_usd": (None if any(b.get("share_usd") is None for b in budgets.values())
+                                       else round(sum(float(b["share_usd"]) for b in
+                                                      {id(x): x for x in budgets.values()}.values()), 4)),
+                         "share_cells": sum(int(i["budget"].get("share_cells") or 0)
+                                            for i in inv if i.get("budget"))}
+        out["budgets"] = budgets
+    return out
+
+
+class ScopeComplete(StageRefused):
+    """The categories `--only-categories` named PASS the floors gate; the
+    stage stays open for the rest. Not a failure of the work asked for: the
+    run stops SCOPE_COMPLETE (exit 0) and a later run continues the stage."""
+
+
+class NeedsConnector(StageRefused):
+    """A stage cannot complete WITHOUT a connector this process cannot bind.
+
+    Owner, 2026-10-07 (First Tech): "connectors keep getting lost with no
+    self heal". A session binds its connectors once, at start; a resumed or
+    restarted one can come back without Clay or Vibe, and nothing inside a
+    process can re-bind them. What the driver CAN do is know which stages
+    need which connector, check the workbook for what they need BEFORE
+    dispatching anything, and stop with an outcome that says "resume in a
+    session holding X" — instead of spending page attempts to learn it.
+    The watchdog reads it as NEEDS_CONNECTOR_SESSION: a fresh session's
+    work, never a re-dispatch in this one."""
+
+    def __init__(self, msg: str, *, connectors=("clay", "vibe")):
+        super().__init__(msg)
+        self.connectors = tuple(connectors)
+
+
+# ── the three seams the driver talks through ─────────────────────────────
+
+class Dispatcher(Protocol):
+    def dispatch(self, batch_path: Path, *, stage: str, lanes: int, retries: int,
+                 ctx: "Pipeline") -> dict: ...
+
+
+
+def _this_engagement(rows: list[dict], request_id: str, reference_date: str) -> list[dict]:
+    """The pending rows that can be THIS run's ingest.
+
+    The connector stamps each row with the package's request id. Rows that
+    name ours are the answer; a row naming another request is another
+    engagement's. A row with no request id is legacy: it counts unless it
+    completed before this run's reference date. Without this, INGEST_A took
+    the entity's stale run from an earlier engagement on its first poll
+    (2026-10-01, Cross Insurance: seq 1 from 2026-09-13, not the seq 2 the
+    push created a minute later).
+    """
+    ours = [r for r in rows if request_id and str(r.get("request_id") or "") == request_id]
+    if ours:
+        return ours
+    ref = reference_date[:10]
+    return [r for r in rows if not r.get("request_id")
+            and not (ref and str(r.get("completed_at") or "")[:10]
+                     and str(r.get("completed_at"))[:10] < ref)]
+
+class ConnectorReads(Protocol):
+    def pending_runs(self) -> list[dict]: ...
+    def page_contract(self, page: str) -> dict: ...
+
+
+class Shipper(Protocol):
+    def ship(self, connector_run: str, page: str, sections_dir: Path,
+             verdicts_out: Path) -> dict: ...
+    def promote(self, connector_run: str) -> dict: ...
+
+
+class AgentRunDispatcher:
+    """Real lanes: `agent_run.py --batch` as a child process, with retries,
+    timings and the cost record the batch itself writes."""
+
+    #: THE BATCH WRITES ITS OWN LEDGER ROW (`--record-stage`, below), so the
+    #: driver must not write the same spend again. Measured 2026-09-14: it
+    #: did, under the stage it was closing — which for a research round is
+    #: RESEARCH, the stage that CONTAINS the challenge and relay batches. So
+    #: a run's ledger roughly doubled and the challenge lanes' money was
+    #: reported as research, while `_over_budget` read the doubled total and
+    #: bit at half the real ceiling.
+    records_cost = True
+
+    def __init__(self, timeout: int = 2400, stream: bool = True):
+        self.timeout, self.stream = timeout, stream
+
+    def dispatch(self, batch_path, *, stage, lanes, retries, ctx):
+        timing = ctx.run.qa_dir / f"lanes_{stage}_{int(time.time())}.json"
+        cmd = [sys.executable, str(AGENT_RUN), "--batch", str(batch_path),
+               "--lanes", str(lanes), "--retries", str(retries),
+               "--timeout", str(self.timeout), "--timing-out", str(timing),
+               "--record-run", ctx.run.run_id, "--record-root", str(ctx.run.root),
+               "--record-stage", stage]
+        if self.stream:
+            cmd += ["--stream", "--log-dir", str(ctx.run.root / "agent_logs")]
+        # Popen + communicate rather than subprocess.run, so that when THIS
+        # process is interrupted (SIGINT, the SIGTERM handler in main, any
+        # exception) the batch gets SIGTERM — which agent_run turns into a
+        # kill of every lane's process group — instead of the SIGKILL
+        # subprocess.run sends, which leaves sixteen `claude` children and
+        # their grandchildren running with nobody to reap them (owner,
+        # 2026-09-07: "50 processes still running, load still climbing").
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, cwd=str(PLUGIN.parents[1]))
+        # HEARTBEAT WHILE THE BATCH RUNS. Measured 2026-09-30 (SWBC): a
+        # research batch ran 40 min, the lock's heartbeat went stale at 30,
+        # a second driver was started on the "dead" run and `stop` refused
+        # to signal the live one. communicate() with a timeout lets the lock
+        # be refreshed every minute without losing either pipe.
+        err = ""
+        try:
+            while True:
+                try:
+                    _out, err = proc.communicate(timeout=60)
+                    break
+                except subprocess.TimeoutExpired:
+                    try:
+                        runstate.heartbeat_driver_lock(ctx.run)
+                    except Exception:                    # noqa: BLE001
+                        pass
+        except BaseException:
+            _terminate(proc)
+            raise
+        summary = {}
+        if timing.is_file():
+            try:
+                summary = json.loads(timing.read_text())
+            except ValueError:
+                summary = {}
+        summary.setdefault("rc", proc.returncode)
+        summary.setdefault("stderr_tail", (err or "")[-600:])
+        return summary
+
+
+def _terminate(proc: "subprocess.Popen", grace_s: float = 30.0) -> None:
+    """SIGTERM the batch and give it time to reap its lanes; SIGKILL after."""
+    if proc.poll() is not None:
+        return
+    try:
+        proc.terminate()
+        proc.wait(timeout=grace_s)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+    except ProcessLookupError:
+        pass
+
+
+class McpReads:
+    """Connector READS over `mcp_raw.py call` — no payload ever in a prompt."""
+
+    def _call(self, tool: str, args: dict | None = None) -> dict:
+        r = subprocess.run([sys.executable, str(MCP_RAW), "call", tool,
+                            "--args", json.dumps(args or {})],
+                           capture_output=True, text=True, timeout=600)
+        raw = (r.stdout or "").strip()
+        try:
+            return json.loads(raw) if raw else {"_error": (r.stderr or "no output")[:300]}
+        except ValueError:
+            return {"_error": raw[:300]}
+
+    def pending_runs(self, display_id: str | None = None) -> list[dict]:
+        # Narrowed server-side when the connector supports it (it returned
+        # 157 KB unfiltered, measured 2026-09-30); an older connector refuses
+        # the argument, and then the full list is filtered by the caller.
+        out = self._call("list_pending_runs",
+                         {"display_id": display_id, "latest_only": False}) \
+            if display_id else {"_error": "no filter"}
+        if isinstance(out, dict) and (out.get("_error") or not out.get("pending")):
+            # refused by an older connector, or nothing under that id (the
+            # caller also matches on entity_name): read the whole queue.
+            out = self._call("list_pending_runs")
+        if isinstance(out, dict):
+            return list(out.get("pending") or out.get("runs") or [])
+        return list(out or [])
+
+    def page_contract(self, page: str) -> dict:
+        return self._call("get_page_contract", {"page": page})
+
+    def cohort_benchmarks(self, sub_vertical: str, *, display_id: str = "",
+                          entity_name: str = "") -> dict:
+        return self._call("get_cohort_benchmarks",
+                          {"sub_vertical": sub_vertical, "exclude_display_id": display_id,
+                           "exclude_entity_name": entity_name})
+
+    def run_progress(self, run_id: str) -> dict:
+        return self._call("get_run_progress", {"run_id": run_id})
+
+
+class ShipPageShipper:
+    """Connector WRITES only through ship_page.py (claim, submit) and, for
+    the final call, promote_run through mcp_raw — the two audited paths."""
+
+    def __init__(self, producer: str = "engine.pipeline", session: str | None = None):
+        self.producer = producer
+        # ONE lease holder for every page this driver ships. ship_page.py
+        # mints a fresh session per process when none is exported, so the
+        # second page's claim was refused by the first page's live lease
+        # (2026-10-01, Cross Insurance: techstack shipped, heatmap refused
+        # "another session holds the lease" — the other session was us).
+        self.session = session or f"engine-pipeline-{os.getpid()}"
+
+    def ship(self, connector_run, page, sections_dir, verdicts_out):
+        # A page with no section files is NOT shipped. ship_page.py prints
+        # "no section files … skipped" and exits 0, which this used to read
+        # as a pass (2026-10-01, Cross Insurance: five pages "PASS" in the
+        # driver's state, "missing" on the server, promote refused).
+        if not list(Path(sections_dir).glob(f"{page}.*.json")):
+            return {"status": "fail", "rc": None, "sg_v4_fails": [],
+                    "reasons": [f"no section files for {page} in {sections_dir}: "
+                                f"the page lane produced nothing to ship"]}
+        # The two mechanical surface rules (CG-11 capitals, CG-27
+        # abbreviations) are fixed deterministically before every submit: a
+        # producer repairing them by hand missed cases and spent all three
+        # attempts on them (Susser Bank, 2026-10-06: 55 findings, 2 pages).
+        subprocess.run([sys.executable, str(SELF_HEAL), "--sections", str(sections_dir),
+                        "--page", page, "--fix", "--no-cg15"],
+                       capture_output=True, text=True, timeout=600)
+        r = subprocess.run(
+            [sys.executable, str(SHIP_PAGE), connector_run, page,
+             "--sections", str(sections_dir), "--producer", self.producer,
+             "--claim", "--verdicts-out", str(verdicts_out)],
+            capture_output=True, text=True, timeout=1800,
+            env={**os.environ, "DMA_AGENT_SESSION": self.session,
+                 "DMA_SHIP_FROM_DRIVER": "1"})
+        verdict = {}
+        if Path(verdicts_out).is_file():
+            try:
+                verdict = json.loads(Path(verdicts_out).read_text()).get(page) or {}
+            except ValueError:
+                verdict = {}
+        status = verdict.get("status") or ("pass" if r.returncode == 0 else
+                                           "claim_refused" if r.returncode == 3 else "fail")
+        return {"status": status, "n_reasons": verdict.get("n_reasons"),
+                "reasons": verdict.get("reasons") or
+                ([(r.stderr or r.stdout)[-400:]] if r.returncode else []),
+                "sg_v4_fails": verdict.get("sg_v4_fails") or [],
+                "rc": r.returncode}
+
+    def promote(self, connector_run):
+        r = subprocess.run([sys.executable, str(MCP_RAW), "call", "promote_run",
+                            "--args", json.dumps({"run_id": connector_run})],
+                           capture_output=True, text=True, timeout=600)
+        try:
+            return json.loads((r.stdout or "").strip() or "{}")
+        except ValueError:
+            return {"_error": (r.stdout or r.stderr)[-300:]}
+
+
+# ── options and state ────────────────────────────────────────────────────
+
+@dataclass
+class Options:
+    dispatcher: Dispatcher
+    reads: ConnectorReads
+    shipper: Shipper
+    until: str | None = None
+    # FOUR HOURS, and it is a default rather than prose. It lived only in
+    # the conductor's dispatch line and the command's example, so a driver
+    # invoked any other way ran unbounded in wall clock.
+    max_wall_min: float | None = 240.0
+    # A DOLLAR CEILING, enforced. `cost.BUDGET_PER_PILLAR` x pillars in scope
+    # when left None. Measured 2026-09-12: the budget was computed, reported
+    # and never enforced — `cost.record` raises only on a missing duration and
+    # `cost report`'s verdict is a shell exit code no automated path reads
+    # ("reported over budget WITH the figure, and still runs",
+    # docs/ROUTINES.md). One research round at the lanes' own turn ceiling was
+    # ~$83 against a $20 four-pillar budget when that ceiling was 200, and ten
+    # rounds are allowed. The ceiling is 340 now, sized so a category finishes
+    # in ONE dispatch rather than being re-dispatched — which is why the
+    # dollar ceiling, not the turn ceiling, is the thing that has to bite.
+    # Set 0 to disable the ceiling and keep the old reporting-only behaviour.
+    max_usd: float | None = None
+    # PER-STAGE ENVELOPES (owner, 2026-10-09): research <= $10, scoring <= $5,
+    # reports <= $5 for a 700+-cell run. `cost.STAGE_BUDGET_USD` holds the
+    # defaults; this dict overrides one family at a time (`--stage-budget
+    # RESEARCH=12`), is persisted in the state file and re-read on resume.
+    # A stage at its envelope stops as STOPPED_STAGE_BUDGET, naming the flag.
+    stage_budget: dict | None = None
+    # How many critic rounds a scoring workflow may spend per pillar before
+    # the driver re-reads the gate (was 3; measured 2026-10-05..08: P2 reached
+    # round 5, P3/P4 round 7, Arbor Bank R11/R15). The mechanical rules now
+    # refuse at write time, so a critic that has not passed by round 2 is
+    # naming judgement calls the scorer brief must carry, not re-sampling.
+    critic_rounds: int = 2
+    # THE RESEARCH TIERS (owner, 2026-10-09, decided against the gold
+    # workbook): evidence collection on the price tier, synthesis and
+    # completeness judgement on sonnet. `cost.RESEARCH_TIERS` holds the
+    # shapes; these name the models the handoff writes into every
+    # invocation, so a workflow never chooses a tier itself.
+    collector_model: str = "haiku"
+    synthesis_model: str = "sonnet"
+    # Open cells per collector batch (whole capabilities); None = the cost
+    # model's RESEARCH_BATCH_CELLS.
+    batch_cells: int | None = None
+    # Narrow RESEARCH to these categories (`--only-categories P2C2,P3C1`); the
+    # others stay open and are handed by a later run without the flag.
+    only_categories: list | None = None
+    # In tiers mode, run the lanes from THIS process (a Routine or CI with no
+    # session to start a workflow) instead of handing the session a visible
+    # `dma-research-tiers.js` workflow. The library default is direct (tests
+    # and the stub); the CLI's real-dispatcher default is the visible workflow.
+    tiers_direct: bool = True
+    # A command that KICKS the package scan after a checkpoint push, so
+    # INGEST_A / INGEST_B do not idle for the Scheduler's half-hour cadence
+    # (measured: 1735-3217 s per ingest wait on every 2026-10 run). Typically
+    # `gcloud run jobs execute dmai-worker --region us-central1 --wait`.
+    # Never fatal: a kick that fails leaves the poll to the Scheduler.
+    ingest_kick_cmd: str | None = None
+    # Start a run whose connector baseline was never recorded. The default
+    # is to refuse: see `_connector_gate`.
+    allow_unverified_connectors: bool = False
+    # Run the enforcement-register sweep (FDIC ED&O, CFPB, state orders, with
+    # controls) before the report writers start, so C3's absence ladder is
+    # a file the producer reads rather than a search it re-invents. Off only
+    # for an offline test.
+    enforcement_sweep: bool = True
+    # A CEILING on rounds per looping stage. 3 refused categories that were
+    # still gaining ground each round (owner, 2026-09-07); 10 is what the
+    # owner resumed those runs with. `stall_rounds` is what keeps a large
+    # ceiling honest: consecutive rounds that advance nothing end the stage.
+    max_rounds: int = 10
+    stall_rounds: int = 2
+    # WHO RUNS RESEARCH. "lanes" is this driver dispatching headless
+    # `claude -p` category lanes through agent_run.py. "workflow" hands the
+    # stage to the conducting session as one persisted workflow per pillar
+    # (RESEARCH_WORKFLOW), records PENDING_ORCHESTRATOR and exits AWAITING_WORKFLOW; the session runs them
+    # and re-runs the driver, which verifies the floors gates and goes on.
+    #
+    # ROOT CAUSE this closes (owner, 2026-09-30: "research works as background
+    # tasks and not real persisted /workflows"): this driver is a Python
+    # process and only a model session can start a Workflow, so every
+    # research round ran as a thread pool of headless children — invisible
+    # to /workflows, not resumable by run id, and holding no enrichment
+    # connector (which is the whole reason the relay exists). The library
+    # default stays "lanes" so the stub and every test walk are unchanged;
+    # the CLI defaults to "workflow" for the real dispatcher.
+    research_mode: str = "lanes"
+    # Who runs SCORING. "workflow" hands it to the session as one persisted
+    # workflow per pillar (visible in /workflows, each pillar's critic starts
+    # when ITS scorers finish); "lanes" dispatches headless lanes, which is
+    # sound here because scoring needs no enrichment connector.
+    scoring_mode: str = "lanes"
+    # Who runs REPORTS. "workflow" hands it to the session as one persisted
+    # workflow per report (REPORTS_WORKFLOW): one writer and one reviewer per
+    # SECTION, no round barrier, an upstream blocker taken out of the writer
+    # loop. "lanes" keeps the round loop below; both run the preflight first.
+    report_mode: str = "lanes"
+    # Who PRODUCES pages for PAGES_A / PAGES_B. "workflow" hands each ship
+    # group to the session as one persisted workflow (PAGES_WORKFLOW); the
+    # driver ships what lands, hands the failures back as repairs, and
+    # promotes. "lanes" is the phase-barrier lane path.
+    pages_mode: str = "lanes"
+    # Clear the workflow-handoff guard (HANDOFF_GUARD) before handing over:
+    # a person's explicit "allow more rounds" after a ceiling refusal.
+    reset_guard: bool = False
+    # How many FRESH lane instances the driver spends on a category whose
+    # searches all ran through bare web_search before it discloses the gap
+    # instead of working it again (the ENRICHMENT gate). 0 = disclose only.
+    enrichment_heals: int = 1
+    # Service the harvested `search_requests` each round. Off = harvest and
+    # disclose, never drain.
+    relay: bool = True
+    # HOW they are serviced. "orchestrator" (the default) writes one batch
+    # file plus a self-contained prompt per capability and dispatches
+    # nothing: the conductor spins a fresh in-process subagent per prompt,
+    # which inherits the session's connectors. "lane" is the pre-2026-09-14
+    # headless `enrichment-web-specialist` dispatch, right only where the
+    # container itself holds the connectors. This field is why the relay
+    # stage cannot go quiet: the driver reads the mode it asked for, so a
+    # change of default is a change of behaviour the log states, not a
+    # branch that silently stops being taken.
+    relay_mode: str = "orchestrator"
+    # ONE ROUND, THEN HAND BACK. In orchestrator mode the driver prepares
+    # relay work it cannot itself service — the connectors live in the
+    # conductor's session, not in this process — so a driver that keeps
+    # looping is a driver spending lanes on a gap only the conductor can
+    # close. `--step` runs exactly one research round, records what is
+    # pending and returns ROUND_COMPLETE; the conductor services the batch
+    # with its own in-process subagents and steps again. The handover is the
+    # state on disk, never this process.
+    step: bool = False
+    lane_retries: int = 1
+    page_retries: int = 2
+    # SG-V4 (embedding grounding) disclosures the connector promotes anyway
+    # (invariant 12); the driver REVISES a page whose FAIL count exceeds this,
+    # so ungrounded prose is re-grounded rather than shipped. A small budget
+    # tolerates a legitimate paraphrase drifting below threshold; 249 (Golden 1)
+    # does not.
+    sg_v4_budget: int = 8
+    ingest_poll_s: float = 60.0
+    ingest_timeout_s: float = 3600.0
+    folder_root: Path | None = None
+    push: bool = True
+    allow_stale_install: bool = False
+    lanes: int | None = None
+    toolkit_dir: Path | None = None
+    sleep: Callable[[float], None] = time.sleep
+    clock: Callable[[], float] = time.monotonic
+    log: Callable[[str], None] = field(default=lambda s: print(s, flush=True))
+
+
+def _load_state(path: Path) -> dict:
+    if path.is_file():
+        try:
+            return json.loads(path.read_text())
+        except ValueError:
+            pass
+    return {"pipeline_version": PIPELINE_VERSION, "stages": {}, "pages": {},
+            "connector": {}, "package": {}, "invocations": []}
+
+
+
+RESEARCH_UNIT = "category"   # one workflow per category ("pillar" groups four)
+#: I-16: the estimate is the MEASURED workflow rate, not the levered lane
+#: model (which said $13.80 for a run whose research alone cost $21+). Pilot
+#: 2026-09-30: one batch agent closed 12 cells for ~$2.25; its category's
+#: challenge ~$0.44. Re-measure with `engine.cost report` after each run.
+WORKFLOW_USD_PER_CELL = 0.19      # the unbatched sonnet pilot; superseded by
+CHALLENGE_USD_PER_CATEGORY = 0.44  # cost.research_price (2026-10-09), kept for the ledger's history
+BATCH_CELLS = 12   # open cells per collector: finishes in one fresh context (cost.RESEARCH_BATCH_CELLS)
+
+
+def _open_capabilities(wb) -> dict[str, dict[str, int]]:
+    """{category: {capability: open cells}} — open = no Dominant_Claim yet
+    (a synthesis and a declared absence both write one)."""
+    from .brief import capability_of, category_of
+    out: dict[str, dict[str, int]] = {}
+    for r in wb.scoring_rows():
+        sc = str(r.get("SubCap_ID") or "")
+        if not sc or str(r.get("Dominant_Claim") or "").strip():
+            continue
+        caps = out.setdefault(category_of(sc), {})
+        caps[capability_of(sc)] = caps.get(capability_of(sc), 0) + 1
+    return out
+
+
+def _batches(caps: dict[str, int], limit: int = BATCH_CELLS) -> list[list[str]]:
+    """Whole capabilities packed in order into batches of <= `limit` open
+    cells (a capability larger than the limit is a batch of its own)."""
+    out: list[list[str]] = []
+    cur: list[str] = []
+    n = 0
+    for cap in sorted(caps, key=lambda c: [int(x) if x.isdigit() else x
+                                           for x in re.split(r"(\d+)", c)]):
+        k = caps[cap]
+        if cur and n + k > limit:
+            out.append(cur); cur, n = [], 0
+        cur.append(cap); n += k
+    if cur:
+        out.append(cur)
+    return out
+
+def _repair_batches(repairs: dict[str, list[str]],
+                    limit: int = BATCH_CELLS) -> list[list[str]]:
+    """The gate's repair cells, kept together by capability and packed into
+    batches of <= `limit` cells — the same unit `_batches` uses for open work."""
+    from .brief import capability_of
+    caps: dict[str, list[str]] = {}
+    for cell in sorted(repairs):
+        caps.setdefault(capability_of(cell) if "." in cell else cell, []).append(cell)
+    out: list[list[str]] = []
+    cur: list[str] = []
+    for cap in sorted(caps, key=lambda c: [int(x) if x.isdigit() else x
+                                           for x in re.split(r"(\d+)", c)]):
+        if cur and len(cur) + len(caps[cap]) > limit:
+            out.append(cur); cur = []
+        cur.extend(caps[cap])
+    if cur:
+        out.append(cur)
+    return out
+
+
+class Pipeline:
+    def __init__(self, run: runstate.Run, opts: Options):
+        self.run, self.opts = run, opts
+        self.wb = run.open()
+        self.state_path = run.qa_dir / STATE_NAME
+        self.state = _load_state(self.state_path)
+        self.t_start = opts.clock()
+        self.dispatched: list[dict] = []
+        # THE CEILING MUST SURVIVE THE PROCESS. `_spent_usd` is a class
+        # attribute starting at 0.0, and nothing read the ledger back — so
+        # a resume, or the hourly `watchdog --revive`, began every run at
+        # zero and could spend a full budget again, once an hour, forever.
+        # The ledger is the run's own record of what it has already spent.
+        try:
+            from . import cost
+            # Workflow agents run in the session, not under this process:
+            # price the finished ones first so the ceiling sees them (I-37).
+            if opts.push:
+                cap = cost.capture_workflows(run)
+                if cap["captured"]:
+                    opts.log(f"  (workflow spend captured: {cap['captured']} agent(s), "
+                             f"${cap['usd']:.2f})")
+                self._note_worked_via(cap)
+            rows = cost.ledger(run)
+            self._spent_usd = self._recorded_usd = round(
+                sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 4)
+            self._spent_turns = self._recorded_turns = sum(
+                int(r.get("turns") or 0) for r in rows)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (prior spend not read, starting from zero: "
+                          f"{str(e)[:120]})")
+
+    def _session_lacks_workflow(self) -> bool:
+        """True only when the conducting session RECORDED that it holds no
+        Workflow tool; unknown (an older baseline) is not absent."""
+        # LIVE FIRST (2026-10-10): a Workflow call this session made and
+        # was refused is in its transcript the moment it happens, so a tool
+        # lost after the baseline was written is seen here without anyone
+        # re-recording — a baseline is a snapshot, the transcript is now.
+        try:
+            import sys as _sys
+            _sys.path.insert(0, str(PLUGIN / "scripts"))
+            import session_roster as _sr             # noqa: PLC0415
+            live = _sr.current()
+            if live.get("found") and live.get("workflow_tool") is not None:
+                return live["workflow_tool"] is False
+        except Exception:                            # noqa: BLE001
+            pass
+        try:
+            rec = json.loads((self.run.root / "connectors_baseline.json").read_text())
+        except (OSError, ValueError):
+            return False
+        return rec.get("workflow_tool") is False
+
+    def owner_update(self, out: dict | None = None) -> str:
+        """The run as its owner reads it, in a dozen lines.
+
+        Owner, 2026-10-09: "I never saw the workflow." The owner follows every
+        DMA session from the Claude app; workflows render in the CLI, Desktop
+        and IDE (`/workflows`), not in a cloud session on the phone, and in
+        that view the conversation is the only documented progress channel.
+        So every driver invocation ends with this block, the stage_advance
+        hook tells the session to relay it verbatim, and it is written to
+        07_qa/progress.md for anyone with the run folder."""
+        from . import cost as cost_mod, floors_gate
+        try:
+            rows = cost_mod.ledger(self.run)
+        except Exception:                                   # noqa: BLE001
+            rows = []
+        spent = round(sum(float(r["usd"]) for r in rows if r.get("usd") is not None), 2)
+        by: dict[str, float] = {}
+        for r in rows:
+            if r.get("usd") is not None:
+                fam = cost_mod.stage_family(r["stage"]) or r["stage"]
+                by[fam] = round(by.get(fam, 0.0) + float(r["usd"]), 2)
+        cap = self.budget_usd()
+        md = self.wb.metadata()
+        lines = [f"OWNER UPDATE · {md.get('entity_name') or self.run.run_id} · {self.run.run_id}"]
+        lines.append(f"  spend ${spent:.2f}" + (f" of ${cap:.2f}" + (" — OVER the run ceiling"
+                                                                    if spent > cap + 1e-9 else "")
+                                                if cap is not None else ""))
+        env = self.stage_budgets()
+        lines.append("  envelopes " + " · ".join(
+            f"{k} ${by.get(k, 0.0):.2f}/{v:g}" + ("!" if by.get(k, 0.0) > v + 1e-9 else "")
+            for k, v in env.items()))
+        cats = sorted({c.split(".")[0] for c in self.wb.selected_subcaps()})
+        gates = {}
+        for c in cats:
+            try:
+                v = floors_gate.read_verdict(self.run.qa_dir, c) or {}
+            except Exception:                               # noqa: BLE001
+                v = {}
+            gates[c] = str(v.get("gate") or "—")
+        passed = [c for c in cats if gates[c] == "PASS"]
+        failing = [c for c in cats if gates[c] == "FAIL"]
+        lines.append(f"  research {len(passed)}/{len(cats)} categories pass"
+                     + (f" ({', '.join(passed)})" if passed else "")
+                     + (f"; failing {', '.join(failing)}" if failing else "")
+                     + f"; {len(cats) - len(passed) - len(failing)} not yet worked")
+        out = out or {}
+        if out.get("outcome"):
+            lines.append(f"  now {out['outcome']}" + (f" at {out['stage']}" if out.get("stage") else "")
+                         + (f" — {str(out.get('reason'))[:220]}" if out.get("reason") else ""))
+        if out.get("handoff"):
+            try:
+                doc = json.loads(Path(out["handoff"]).read_text())
+                inv = doc.get("invocations") or []
+                lines.append(f"  handed {Path(str(doc.get('workflow') or '')).name}: "
+                             f"{sum(len(i.get('cats') or []) for i in inv) or len(inv)} unit(s), "
+                             f"est ${(doc.get('estimate') or {}).get('usd')}"
+                             + (f"; deferred for budget: "
+                                f"{', '.join(c for d in doc['deferred_for_budget']['categories'] for c in d['cats'])}"
+                                if doc.get("deferred_for_budget") else ""))
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
+        if self.state.get("worked_via_warning"):
+            lines.append(f"  WARN {self.state['worked_via_warning'][:200]}")
+        nxt = out.get("resume") or self.plan().get("command")
+        if nxt:
+            lines.append(f"  next {nxt}")
+        text = "\n".join(lines)
+        try:
+            (self.run.qa_dir / "progress.md").write_text(text + "\n")
+        except OSError:
+            pass
+        return text
+
+    def _note_worked_via(self, cap: dict) -> None:
+        """Say HOW the last handoff was worked, where the owner reads the run.
+
+        Owner, 2026-10-09: "I never saw the workflow." A session without the
+        Workflow tool works a handoff through its rendered prompts as
+        in-session Agents (an allowed fallback since Cross Insurance,
+        2026-10-01) — the same work, but no persisted workflow, nothing in
+        /workflows, and until today no ledger row. The substitution is now
+        a recorded fact: a Gate_Log row per stage and a loud log line, so
+        it is never silent again."""
+        via = (cap or {}).get("by_via") or {}
+        if not via.get("agent"):
+            return
+        stages = sorted(k for k, v in ((cap or {}).get("by_stage") or {}).items()
+                        if (v.get("via") or {}).get("agent"))
+        msg = (f"{via['agent']} in-session agent(s) worked the last handoff "
+               f"({', '.join(stages) or 'unknown stage'}) — NOT a persisted workflow: "
+               f"nothing of it showed in /workflows. Start the handoff's Workflow; if "
+               f"this session has no Workflow tool, say so to the owner before "
+               f"substituting agents.")
+        self.opts.log(f"[WORKFLOW] WARNING: {msg}")
+        self.state["worked_via_warning"] = msg
+        for st in stages or ["RUN"]:
+            try:
+                L.append_gate(self.wb, gate=f"HANDOFF_{st}_WORKED_VIA", scope="run",
+                              verdict="WARN", detail=msg[:900], blocking=False)
+            except Exception:                                # noqa: BLE001
+                pass
+
+    # ── plumbing ───────────────────────────────────────────────────────
+    def reopen(self) -> RunWorkbook:
+        """Lanes write the FILE; the driver re-reads it after every batch."""
+        self.wb = self.run.open()
+        return self.wb
+
+    def _save_state(self):
+        # WRITE-THEN-RENAME. The watchdog, the hooks and the next driver all
+        # read this file, and it was written in place — so a reader arriving
+        # mid-write saw half a document and could not tell that from a run
+        # that had recorded nothing.
+        runstate._write_atomic(self.state_path,
+                               json.dumps(self.state, indent=2, default=str))
+
+    def _md(self) -> dict:
+        return self.wb.metadata()
+
+    def _set_md(self, key: str, value):
+        self.wb.set_metadata(key, value)
+
+    def _lanes(self) -> int:
+        from . import cost
+        return int(self.opts.lanes or cost.PARALLEL_LANES)
+
+    def _dispatch(self, batch: dict, *, stage: str) -> dict:
+        if not batch.get("batch") or not batch.get("lanes"):
+            return {"dispatched": 0, "ok": 0, "failed": []}
+        for t in batch.get("trimmed") or []:
+            self.opts.log(f"  [BRIEF] WARNING {stage} lane {t['lane']}: {t['dropped']} "
+                          f"row(s) dropped to fit the packet ceiling — {t['trimmed'][:160]}")
+        summary = self.opts.dispatcher.dispatch(
+            Path(batch["batch"]), stage=stage, lanes=self._lanes(),
+            retries=self.opts.lane_retries, ctx=self)
+        self.dispatched.append({"stage": stage, "batch": batch["batch"],
+                                "lanes": batch["lanes"],
+                                "failed": summary.get("failed") or []})
+        self.reopen()
+        return summary
+
+    def _briefs(self, name: str) -> Path:
+        """`<prefix>_r<N>` numbers rounds across driver PROCESSES (I-44): a
+        resumed driver used to restart at r0 and overwrite the previous
+        process's briefs and relay batches. The first use of a prefix in a
+        process reads how many rounds are already on disk and continues."""
+        m = re.fullmatch(r"(.+)_r(\d+)", name)
+        if m:
+            prefix, r = m.group(1), int(m.group(2))
+            base = getattr(self, "_round_base", None)
+            if base is None:
+                base = self._round_base = {}
+            if prefix not in base:
+                d = self.run.root / BRIEFS_DIR
+                done = [int(x.name.rsplit("_r", 1)[1]) for x in
+                        (d.glob(f"{prefix}_r*") if d.is_dir() else [])
+                        if x.name.rsplit("_r", 1)[1].isdigit()
+                        and x.name.rsplit("_r", 1)[0] == prefix]
+                base[prefix] = (max(done) + 1) if done else 0
+            name = f"{prefix}_r{base[prefix] + r}"
+        return self.run.root / BRIEFS_DIR / name
+
+    def _record(self, stage: str, verdict: str, detail: str, t0: float,
+                *, rounds: int = 0, lanes: int = 0, attempts: int = 0):
+        elapsed = round(self.opts.clock() - t0, 1)
+        try:
+            L.append_gate(self.wb, gate=f"STAGE_{stage}", scope="run",
+                          verdict=verdict,
+                          detail=f"{detail} [elapsed {elapsed}s; rounds {rounds}]"[:900],
+                          blocking=True)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        try:
+            from . import cost
+            # The spend rides here only when the dispatcher did not already
+            # write it. A dispatcher that records its own batches (the real
+            # one) is trusted with the money; the stub, and any lane whose
+            # status file carried no cost, are not, and would otherwise
+            # leave the run unpriced.
+            if getattr(self.opts.dispatcher, "records_cost", False):
+                # The dispatcher wrote the money; what this process counted
+                # is now recorded too. Until 2026-10-09 the marker stayed
+                # put, so `_family_usd` read PRELIM's $5.71 as RESEARCH's
+                # (IMA Financial Group, R-IMA-20261009) — the envelope said
+                # "spent 5.71 of 10" before a research agent had run.
+                spend = {}
+                self._recorded_usd = self._spent_usd
+                self._recorded_turns = self._spent_turns
+            else:
+                spend = self._spend_kw(cost)
+            cost.record(self.run, stage=stage, elapsed_s=elapsed, lanes=lanes or None,
+                        attempts=attempts or None, note=f"pipeline {verdict}: {detail[:200]}",
+                        wb=self.wb, **spend)
+        except Exception as e:                       # noqa: BLE001
+            # A swallowed cost failure is how a run spends $96 against a $20
+            # budget and leaves a ledger that says nothing. Still non-fatal —
+            # accounting must not kill a good stage — but it is now LOUD and
+            # it is recorded in the run state.
+            self.opts.log(f"  (COST NOT RECORDED — the ledger is now incomplete: "
+                          f"{e.__class__.__name__}: {str(e)[:160]})")
+            self.state.setdefault("cost_errors", []).append(
+                {"stage": stage, "error": f"{e.__class__.__name__}: {str(e)[:200]}"})
+        st = self.state["stages"].setdefault(stage, {})
+        st.update({"verdict": verdict, "detail": detail[:600], "elapsed_s": elapsed,
+                   "ended_at": _utcnow(), "rounds": rounds})
+        st["runs"] = int(st.get("runs") or 0) + 1
+        self._save_state()
+        try:
+            from . import registry
+            registry.log(self.run, event="STAGE", position=f"{stage}:{verdict}",
+                         detail=detail[:200])
+        except Exception:                            # noqa: BLE001
+            pass
+        self.opts.log(f"[{stage}] {verdict} — {detail[:160]} ({elapsed}s)")
+
+    def _over_wall(self) -> bool:
+        # `None` disables it; 0 does NOT — a zero wall clock stops at the
+        # next boundary, which is how the walk and an operator ask for
+        # "stop cleanly now, I will resume". Reading 0 as "unbounded" would
+        # turn the one flag that stops a runaway run into the one that
+        # unleashes it.
+        if self.opts.max_wall_min is None:
+            return False
+        return (self.opts.clock() - self.t_start) / 60.0 >= self.opts.max_wall_min
+
+    def _spend_kw(self, cost) -> dict:
+        """The spend to attribute to the stage that just ended — the DELTA
+        since the last record, not the run total, so the ledger's rows sum to
+        the run instead of each restating it. Silent when the dispatcher
+        reported no cost (the stub, or a lane whose status file carried none):
+        `cost.record` then falls back to its own estimate, and a zero we made
+        up would be worse than an absence."""
+        kw = {}
+        usd = round(self._spent_usd - self._recorded_usd, 4)
+        turns = self._spent_turns - self._recorded_turns
+        if usd > 0:
+            kw["usd"] = usd
+            self._recorded_usd = self._spent_usd
+        if turns > 0:
+            kw["turns"] = turns
+            self._recorded_turns = self._spent_turns
+        return kw
+
+    def budget_usd(self) -> float | None:
+        """The run's dollar ceiling. `None` disables it.
+
+        An owner-approved ceiling OUTLIVES the invocation that set it. Until
+        2026-10-07 a resume without `--max-usd` fell back to the per-pillar
+        default ($20 on a four-pillar run), so the state file — and the hooks
+        that read `budget_usd` from it — reported a $409 run as AT_BUDGET_
+        CEILING against a ceiling nobody approved (Arbor Bank). The ceiling
+        the owner set is recorded with its source and reused until a flag
+        replaces it; the per-pillar default is only ever a first estimate."""
+        if self.opts.max_usd is not None:
+            return None if self.opts.max_usd <= 0 else float(self.opts.max_usd)
+        rec = (self.state or {}).get("budget_usd_source")
+        if rec == "flag":
+            cap = (self.state or {}).get("budget_usd")
+            try:
+                return float(cap) if cap is not None else None
+            except (TypeError, ValueError):
+                pass
+        try:
+            from . import cost
+            pillars = {c[:2] for c in self.wb.selected_subcaps()}
+            # The envelopes' sum, never below the review's per-pillar figure:
+            # a run-wide wall under the stage envelopes would stop a run that
+            # is inside every one of them.
+            return cost.run_budget_default(len(pillars))
+        except Exception:                            # noqa: BLE001
+            return None
+
+    def _over_budget(self) -> bool:
+        cap = self.budget_usd()
+        return cap is not None and self._spent_usd >= cap
+
+    # ── the stage envelopes (2026-10-09) ───────────────────────────────
+    def stage_budgets(self) -> dict:
+        """Family -> ceiling: the cost model's defaults, the overrides this
+        run persisted, then this invocation's flag. Persisted so a resume
+        without the flag keeps the owner's figure (the same rule as
+        `budget_usd_source: flag`)."""
+        from . import cost
+        caps = dict(cost.STAGE_BUDGET_USD)
+        for k, v in ((self.state or {}).get("stage_budget_usd") or {}).items():
+            try:
+                caps[str(k).upper()] = float(v)
+            except (TypeError, ValueError):
+                continue
+        for k, v in (self.opts.stage_budget or {}).items():
+            caps[str(k).upper()] = float(v)
+        return caps
+
+    def envelopes_binding(self) -> tuple[bool, str]:
+        """Whether a spent envelope STOPS a stage, and why.
+
+        Three instruments, one of them the stop:
+        - `--stage-budget` (this invocation's or a persisted one) binds
+          whatever else is set: the owner named the stage's figure.
+        - `--max-usd` (this invocation's or the persisted flag) is the owner's
+          single run ceiling, and it is the stop: the run ends STOPPED_BUDGET
+          at the owner's own figure and raising it is how the run continues
+          (test_budget_ceiling); the envelopes report their spend and the
+          cost report prints them, but they stop nothing.
+        - Neither named: the envelopes partition the default ceiling (their
+          sum) and each one stops its stage — the default a run gets when
+          nobody typed a dollar figure, which is the run that used to read
+          "$20" and spend $409.
+        """
+        st = self.state or {}
+        if self.opts.stage_budget or st.get("stage_budget_usd"):
+            return True, "explicit --stage-budget"
+        if self.opts.max_usd is not None or st.get("budget_usd_source") == "flag":
+            cap = self.budget_usd()
+            return False, ("the owner named a run ceiling (--max-usd "
+                           + (f"${cap:.2f}" if cap is not None else "0, switched off")
+                           + "); it is the stop, and the envelopes report")
+        return True, "the envelopes partition the default run ceiling"
+
+    def _family_usd(self, stage: str) -> float:
+        """What the envelope family of `stage` has spent: every ledger row of
+        the family, plus the spend this process has counted and not yet
+        recorded when the running stage belongs to the family."""
+        from . import cost
+        fam = cost.stage_family(stage)
+        if fam is None:
+            return 0.0
+        try:
+            rows = cost.ledger(self.run)
+        except Exception:                            # noqa: BLE001
+            rows = []
+        spent = sum(float(r["usd"]) for r in rows
+                    if r.get("usd") is not None and cost.stage_family(r.get("stage")) == fam)
+        if cost.stage_family(getattr(self, "_running_stage", "") or "") == fam:
+            spent += max(0.0, self._spent_usd - self._recorded_usd)
+        return round(spent, 4)
+
+    def stage_budget_block(self, stage: str) -> dict | None:
+        """{family, ceiling, spent, remaining, over} for `stage`, or None
+        when the stage is paid from no envelope (the ingest waits)."""
+        from . import cost
+        fam = cost.stage_family(stage)
+        if fam is None:
+            return None
+        cap = self.stage_budgets().get(fam)
+        binding, why = self.envelopes_binding()
+        if cap is None or cap <= 0:
+            return {"family": fam, "ceiling": None, "spent": self._family_usd(stage),
+                    "remaining": None, "over": False, "binding": binding}
+        spent = self._family_usd(stage)
+        at = spent >= float(cap) - 1e-9
+        return {"family": fam, "ceiling": round(float(cap), 2), "spent": spent,
+                "remaining": round(float(cap) - spent, 4),
+                "over": at and binding, "at_ceiling": at,
+                "binding": binding, "binding_reason": why}
+
+    def _over_stage_budget(self, stage: str) -> bool:
+        b = self.stage_budget_block(stage)
+        if b and b["over"]:
+            self._stage_budget_hit = b
+            return True
+        return False
+
+    def _stage_budget_refusal(self, stage: str) -> str:
+        b = self._stage_budget_hit or self.stage_budget_block(stage) or {}
+        return (f"AT_STAGE_BUDGET: the {b.get('family')} envelope is spent — "
+                f"${float(b.get('spent') or 0):.2f} of ${float(b.get('ceiling') or 0):.2f}. "
+                f"The stage was cut short, not refused. A person raises it "
+                f"(`--stage-budget {b.get('family')}=<usd>`), narrows the scope, or "
+                f"closes the open work by hand; the run-wide `--max-usd` does not "
+                f"raise an envelope.")
+
+    # ── what the conductor must do before the next step ────────────────
+    def _batch_request_ids(self, path) -> set | None:
+        """Every relay request id a written batch carries, or None when the
+        file cannot be read — the batch index is on disk, so a batch whose
+        file went missing is reported as pending rather than quietly dropped."""
+        try:
+            b = json.loads(Path(path).read_text())
+        except Exception:                            # noqa: BLE001
+            return None
+        ids = set()
+        for g in b.get("groups") or []:
+            for q in g.get("queries") or []:
+                ids.update(str(i) for i in (q.get("request_ids") or []))
+        return ids
+
+    def _batch_categories(self, path) -> set:
+        """The categories whose cells a written relay batch names."""
+        try:
+            b = json.loads(Path(path).read_text())
+        except Exception:                            # noqa: BLE001
+            return set()
+        cats = set()
+        for g in b.get("groups") or []:
+            for q in g.get("queries") or []:
+                for cell in q.get("subcaps") or []:
+                    head = str(cell).split(".")[0].strip().upper()
+                    if head:
+                        cats.add(head)
+        return cats
+
+    def _relay_blocked(self, category: str) -> int:
+        """How many of this category's relay requests a connector REFUSED.
+
+        The difference that decides whether a pending batch is work in flight
+        or a measured gap: BLOCKED is recorded only by an actor that tried
+        and was refused, and `relay.record` will not write it without the
+        refusal text."""
+        try:
+            from . import relay
+            by_cat = relay.state(self.run)["by_category"]
+        except Exception:                            # noqa: BLE001
+            return 0
+        return int((by_cat.get(str(category).upper()) or {}).get("BLOCKED") or 0)
+
+    def _pending_relay_batches(self) -> list[str]:
+        """The recorded batches that still have OPEN requests.
+
+        FROM THE QUEUE, NOT FROM THE LIST. `state["relay_batches"]` is
+        append-only — nothing removes a path once written — so a conductor
+        that serviced a batch would read its own finished work back as
+        outstanding for the rest of the run. The queue is what knows: a
+        batch whose every request has been closed is done, whoever closed it.
+        """
+        recorded = [str(p) for p in (self.state.get("relay_batches") or [])]
+        try:
+            from . import relay
+            rows = relay.requests(self.run)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (relay queue not read: {str(e)[:120]})")
+            return recorded
+        still_open = {rid for rid, r in rows.items() if r.get("status") == "OPEN"}
+        out = []
+        for p in recorded:
+            ids = self._batch_request_ids(p)
+            if ids is None or (ids & still_open):
+                out.append(p)
+        return out
+
+    def pending(self) -> dict:
+        """What is outstanding when a step hands back.
+
+        The conductor cannot read this process's memory and the driver cannot
+        reach a connector, so the handover is a payload: which batches still
+        need servicing, which categories are still open, what stalled, what
+        is left of the budget and the rounds, and — when `engine.brief` can
+        say — where the evidence gaps are.
+        """
+        from . import brief
+        out: dict = {"relay_batches": self._pending_relay_batches(),
+                     "open_categories": [], "stalled": list(self._cat_stalled),
+                     "budget": {"spent": 0.0, "ceiling": None, "remaining": None},
+                     "rounds_remaining": max(0, int(self.opts.max_rounds) - self._rounds),
+                     "gaps": None}
+        try:
+            cats = sorted({brief.category_of(c) for c in self.wb.selected_subcaps()})
+            out["open_categories"] = [
+                c for c in cats
+                if brief.last_gate(self.wb, "FLOORS", c)["verdict"] != "PASS"]
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (open categories not read: {str(e)[:120]})")
+        try:
+            from . import cost
+            spent = round(sum(float(r["usd"]) for r in cost.ledger(self.run)
+                              if r.get("usd") is not None), 4)
+            cap = self.budget_usd()
+            out["budget"] = {"spent": spent,
+                             "ceiling": (round(cap, 2) if cap else None),
+                             "remaining": (round(cap - spent, 4) if cap else None)}
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (budget not read: {str(e)[:120]})")
+        # FEATURE-DETECTED. `brief.gaps` is being built alongside this; until
+        # it lands the field is null rather than absent, so a conductor
+        # reading the payload never has to ask which shape it got.
+        gaps = getattr(brief, "gaps", None)
+        if callable(gaps):
+            try:
+                out["gaps"] = gaps(self.wb, self.run)
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gaps not computed: {str(e)[:120]})")
+        return out
+
+    def _backup_memory(self) -> None:
+        """Push the notebooks to Drive once, and NEVER fail the round on it.
+
+        The .md notebooks are the only part of the run tree a dead container
+        loses outright, so the copy is worth a call every round. It is worth
+        no more than that: a backup that cannot run records why and the round
+        carries on, because the whole point of a resumable round is that it
+        ends.
+
+        Gated on `--push` for the same reason every other Drive call is: a
+        run told not to talk to Drive does not talk to Drive.
+        """
+        if not self.opts.push:
+            return
+        try:
+            from . import memory
+            fn = getattr(memory, "backup", None)
+            if not callable(fn):
+                status = "NOT_RUN: engine.memory has no backup entry point"
+            else:
+                r = fn(self.run)
+                status = (str(r.get("outcome") or "RESOLVED")
+                          if isinstance(r, dict) else "RESOLVED")
+        except Exception as e:                       # noqa: BLE001
+            status = f"NOT_RUN: {e.__class__.__name__}: {str(e)[:120]}"
+            self.opts.log(f"  (memory backup skipped: {status})")
+        self.state["memory_backup"] = {"at": _utcnow(), "status": status}
+        self._save_state()
+
+    # ── DONE predicates ────────────────────────────────────────────────
+    def done(self, stage: str) -> tuple[bool, str]:
+        md = self._md()
+        wb = self.wb
+        if stage == "PREFLIGHT":
+            # An API start records `UNSTATED — …` as its basis; that is the
+            # absence of a binding, not one. The recorded preflight file is
+            # the other proof (`preflight.record`, which `engine.cli start`
+            # and the binding preflight both write).
+            sv = str(md.get("sv_basis") or "").strip()
+            sha = str(md.get("preflight_sha") or "").strip()
+            ok = bool(sha) or (bool(sv) and not sv.upper().startswith("UNSTATED"))
+            if not ok:
+                return ok, ("no binding basis on the run: start it with `engine.cli start "
+                            "--preflight <answered preflight.json>`")
+            from . import intake
+            miss = intake.missing_for_mode(self.run.root, md.get("evidence_mode"))
+            return (miss is None), (miss or "binding recorded")
+        if stage == "START":
+            from . import template as T
+            b = T.binding_state(wb)
+            return bool(b["bound"]), ("bound to the pinned templates" if b["bound"]
+                                      else f"unbound: {b['fix']}")
+        if stage == "PRELIM":
+            from . import prelim
+            st = prelim.state(wb)
+            ok = st["prelim_status"] == "COMPLETE"
+            return ok, ("PRELIM complete" if ok else f"PRELIM open: {', '.join(st['open'])}")
+        if stage == "KG":
+            from . import completeness
+            n = len([r for r in wb.rows("DQ_Bank") if any(r.values())])
+            ok = n > 0 or "DQ_Bank" in completeness.reasons(wb)
+            return ok, (f"DQ_Bank {n} rows" if ok else "DQ_Bank empty")
+        if stage == "RESEARCH":
+            from . import brief
+            need = brief.categories_needing_dispatch(wb)
+            ok = not need["dispatch"]
+            return ok, ("every category gate PASS" if ok else
+                        f"categories not passing: {', '.join(need['dispatch'])}")
+        if stage == "HANDOFF":
+            from . import assessment as A
+            from . import handoff
+            hp = self.run.deliverables / handoff.HANDOFF_NAME
+            pre = A.research_ready(wb, self.run.qa_dir)
+            packet = handoff.verify_packet(hp)
+            ok = not pre and not packet
+            return ok, ("handoff written and verified; research ready" if ok else
+                        (f"{len(pre)} research-ready blocker(s): {pre[0][:160]}" if pre
+                         else f"handoff packet: {packet[0][:160]}"))
+        if stage == "SCORING":
+            from . import assessment as A
+            from . import handoff
+            last = (A.state(wb).get("last_scoring_gate") or {})
+            passed = str(last.get("verdict") or "") == "PASS"
+            packet = handoff.verify_packet(self.run.qa_dir / A.SCORING_NAME,
+                                           schema_version=A.SCORING_SCHEMA_VERSION)
+            ok = passed and not packet
+            return ok, ("SCORING gate PASS; findings packet verified" if ok else
+                        (f"SCORING gate {last.get('verdict') or 'NOT_RUN'}" if not passed
+                         else f"scoring packet: {packet[0][:160]}"))
+        if stage == "INGEST_A":
+            ok = bool(str(md.get("connector_run_id") or "").strip())
+            return ok, (f"connector run {md.get('connector_run_id')}" if ok
+                        else "no connector run id: checkpoint not ingested")
+        if stage == "REPORTS":
+            from . import narrative as N
+            st = N.state(wb)
+            ready = all(v.get("ready") for v in st["reports"].values())
+            files = [sorted(self.run.deliverables.glob(p)) for p in
+                     ("Client_Profile_Research_*.docx", "DMA_Assessment_Report_*.docx")]
+            recs = [r for r in wb.rows("Recommendations") if any(r.values())]
+            ok = ready and all(files) and bool(recs)
+            return ok, ("both reports READY and rendered; recommendations projected" if ok else
+                        ("reports not READY: " + ", ".join(
+                            k for k, v in st["reports"].items() if not v.get("ready"))
+                         if not ready else
+                         "reports READY but not rendered" if not all(files) else
+                         "Recommendations not projected from the report's REC cards"))
+        if stage == "PAGES_A":
+            ok = self._pages_passed(PAGES_A, "A")
+            return ok, ("techstack, heatmap shipped to version A" if ok else
+                        f"pending: {', '.join(p for p in PAGES_A if not self._page_ok(p, 'A'))}")
+        if stage == "PACKAGE":
+            pk = self.state.get("package") or {}
+            ok = bool(pk.get("verified")) and Path(str(pk.get("folder") or "/nonexistent")).is_dir()
+            return ok, (f"package verified at {pk.get('folder')}" if ok else "no verified package")
+        if stage == "INGEST_B":
+            prev, cur = md.get("connector_run_id_prev"), md.get("connector_run_id")
+            ok = bool(str(prev or "").strip()) and str(cur) != str(prev)
+            return ok, (f"version B ingested as {cur} (A was {prev})" if ok
+                        else "package not yet ingested as a new version")
+        if stage == "PAGES_B":
+            allp = PAGES_A + tuple(p for g in PAGES_B for p in g)
+            ok = self._pages_passed(allp, "B")
+            return ok, ("all six pages PASS on version B" if ok else
+                        f"pending: {', '.join(p for p in allp if not self._page_ok(p, 'B'))}")
+        if stage == "PROMOTE":
+            ok = bool(str(md.get("promoted_at") or "").strip())
+            return ok, (f"promoted at {md.get('promoted_at')}" if ok else "not promoted")
+        raise KeyError(stage)
+
+    def _page_ok(self, page: str, version: str) -> bool:
+        """Passed on this version AND not edited since. A pass is a verdict on
+        the files that were shipped: a section repaired on disk afterwards
+        (First Tech overview, 2026-10-07, a why-now signal removed to agree
+        with the context timeline) is not the content the connector holds,
+        and promoting the staged copy would promote the version the repair
+        replaced."""
+        p = (self.state.get("pages") or {}).get(page) or {}
+        if (p.get("versions") or {}).get(version) != "pass":
+            return False
+        shipped = (p.get("shipped_mtime") or {}).get(version)
+        if shipped is None:
+            # No ship time recorded for this version — a pass recorded by an
+            # older driver or by a hand ship. The verdict file the ship wrote
+            # is the next-best record of WHEN the connector saw the files;
+            # with neither, the pass cannot be tied to the files on disk and
+            # the page ships again (byte-identical content returns pass at
+            # the cost of one submit). Measured 2026-10-07 (Arbor Bank): the
+            # heatmap was repaired on disk after a pass with no recorded
+            # ship time, `_page_ok` said True, and PROMOTE promoted the
+            # staged copy the repair had replaced.
+            try:
+                vf = self.run.qa_dir / f"verdict_{page}_{version}.json"
+                shipped = vf.stat().st_mtime if vf.exists() else None
+            except Exception:                              # noqa: BLE001
+                shipped = None
+            if shipped is None:
+                return False
+        try:
+            return self._page_mtime(page) <= float(shipped) + 1e-6
+        except Exception:                                  # noqa: BLE001
+            return False
+
+    def _pages_passed(self, pages, version) -> bool:
+        return all(self._page_ok(p, version) for p in pages)
+
+    # ── PLAN ───────────────────────────────────────────────────────────
+    def plan(self) -> dict:
+        rows, nxt = [], None
+        for st in STAGES:
+            try:
+                ok, why = self.done(st)
+            except Exception as e:                   # noqa: BLE001
+                ok, why = False, f"could not evaluate: {str(e)[:160]}"
+            rows.append({"stage": st, "done": ok, "detail": why,
+                         "recorded": (self.state.get("stages") or {}).get(st)})
+            if nxt is None and not ok:
+                nxt = st
+        return {"run_id": self.run.run_id, "root": str(self.run.root),
+                "stages": rows, "next": nxt,
+                "complete": nxt is None,
+                "blockers": [r["detail"] for r in rows if not r["done"]][:3],
+                "command": (f"python3 -m engine.pipeline run --run {self.run.run_id} "
+                            f"--root {self.run.root}" + self._scope_flags() if nxt else None)}
+
+    def _scope_flags(self) -> str:
+        """The operator's scope rides in the resume command (2026-10-09): a
+        `then` that dropped `--only-categories` handed every category on the
+        next pass, and one that dropped `--research-mode tiers` on a
+        connector-backed run handed the in-session workflow instead."""
+        out = ""
+        if self.opts.research_mode in ("tiers",) and not self.state.get("enrichment_degraded"):
+            out += " --research-mode tiers"
+        if self.opts.only_categories:
+            out += " --only-categories " + ",".join(sorted(
+                c.strip().upper() for c in self.opts.only_categories if c.strip()))
+        return out
+
+    # ── RUN ────────────────────────────────────────────────────────────
+    def _connector_gate(self, nxt: str | None) -> dict | None:
+        """Refuse, degrade or proceed, on the run's OWN recorded baseline.
+
+        THE $96.65 SHAPE, measured 2026-09-12: with no enrichment connector
+        bound, `declare_absence` refuses every empty cell, so no floors gate
+        can pass, so the driver re-dispatches sixteen categories until
+        something stops it. The degraded path built on 2026-09-13 makes such
+        a container honest — but it lifts only on a RECORDED baseline, and
+        nothing on the run path wrote or read one.
+
+        Three answers, and the difference between the last two is the whole
+        point:
+
+          bound      proceed, silently.
+          short      proceed DEGRADED: the container provably never had a
+                     connector, so its absences are written at reduced
+                     rigour and the run says so.
+          unknown    REFUSE. Unverified is not a diagnosis: a baseline
+                     nobody wrote cannot prove a connector missing, and
+                     treating it as proof would open the degraded path to
+                     every run that skipped its preflight.
+
+        Only for a run that has not yet passed RESEARCH — the stage that
+        spends the money. A run past it is not re-refused over a file
+        nothing will read again.
+        """
+        if nxt is None or nxt not in STAGES:
+            return None
+        # AFTER the run has legitimately begun, and BEFORE it dispatches.
+        # PREFLIGHT and START carry their own refusals — an unanswered
+        # binding, a missing entity — and those are the more fundamental
+        # facts about a run: a run nobody confirmed the sub-vertical for
+        # should be told THAT, not told about its connectors. PRELIM is the
+        # first stage that dispatches a lane, so it is the first this gate
+        # must stand in front of.
+        if not (STAGES.index("START") < STAGES.index(nxt)
+                <= STAGES.index("RESEARCH")):
+            return None
+        # ADOPT BEFORE JUDGING (2026-10-10). A session that never typed its
+        # tool list still has one on disk — its transcript — so a missing
+        # baseline is written from the measured roster first, and only a
+        # container with no readable roster reaches the refusal below.
+        try:
+            import sys as _sys
+            _sys.path.insert(0, str(PLUGIN / "scripts"))
+            import connector_contract as _cc         # noqa: PLC0415
+            adopted = _cc.ensure_baseline(str(self.run.root))
+            if adopted and adopted.get("adopted"):
+                self.opts.log(
+                    f"[PREFLIGHT] connector baseline adopted from this "
+                    f"session's transcript: {', '.join(adopted['present']) or 'none'}")
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (session roster not read: {str(e)[:120]})")
+        try:
+            binding = L.enrichment_binding(self.wb)
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (connector baseline not read: {str(e)[:120]})")
+            return None
+        if binding["known"] and not binding["bound"]:
+            self.state["enrichment_degraded"] = {
+                "missing": list(binding["missing"]), "reason": binding["reason"],
+                "at": _utcnow()}
+            self._save_state()
+            self.opts.log(
+                f"[PREFLIGHT] DEGRADED — no enrichment connector in this "
+                f"container ({', '.join(binding['missing'])}). Empty cells "
+                f"close at REDUCED rigour, with the reason on the row.")
+            return None
+        if binding["known"]:
+            return None
+        if self.opts.allow_unverified_connectors:
+            self.state.setdefault("waivers", []).append(
+                {"at": _utcnow(), "unverified_connectors":
+                    "started with no connector baseline, by --allow-unverified-connectors"})
+            self._save_state()
+            return None
+        import sys as _sys
+        _sys.path.insert(0, str(PLUGIN / "scripts"))
+        try:
+            import connector_contract as cc          # noqa: PLC0415
+            where = cc.baseline_path(str(self.run.root))
+        except Exception:                            # noqa: BLE001
+            where = self.run.root / "connectors_baseline.json"
+        return {"outcome": "BLOCKED", "stage": "PREFLIGHT", "dispatched": [],
+                "stages_run": [],
+                "reason": (
+                    f"this run has no connector baseline at {where}, so nothing "
+                    f"can say whether an enrichment connector is bound — and "
+                    f"UNVERIFIED IS NOT A PASS. Without one, an empty cell can "
+                    f"neither be enriched nor honestly declared absent, no "
+                    f"floors gate can pass, and the driver re-dispatches until "
+                    f"its ceiling: that is the $96.65 run of 2026-09-12. From "
+                    f"the session that HOLDS the tools, before dispatching "
+                    f"anything:\n  python3 $CLAUDE_PLUGIN_ROOT/scripts/"
+                    f"connector_contract.py baseline --tools - --root "
+                    f"{self.run.root}\nA container that genuinely has none "
+                    f"records that too, and the run continues at reduced "
+                    f"rigour. Override with --allow-unverified-connectors.")}
+
+    def run_all(self) -> dict:
+        """Drive the run, and RECORD HOW IT ENDED.
+
+        The outcome used to live only in the return value, so the hourly
+        watchdog — which reads the workbook and the qa dir, not this
+        process's memory — could not tell a run the dollar ceiling had
+        stopped from one whose gates had failed. They leave the same rows
+        behind, and one of them must not be re-dispatched.
+        """
+        # ONE DRIVER PER RUN. Two of them dispatch the same category twice
+        # and spend two budgets against one ceiling, and nothing stopped
+        # that: the only lock in the engine is the per-workbook flock, which
+        # serialises ROWS. A dead pid or a stale heartbeat is reaped rather
+        # than waited on — a run nobody can resume because a gone
+        # container's file is still there is the worse failure.
+        try:
+            runstate.acquire_driver_lock(
+                self.run, command=f"engine.pipeline run (until={self.opts.until})")
+            locked = True
+        except runstate.DriverLocked as e:
+            self.opts.log(f"[DRIVER] REFUSED — {e}")
+            return {"outcome": "REFUSED", "reason": str(e), "stage": None,
+                    "holder": e.holder}
+        except Exception as e:                       # noqa: BLE001
+            # The lock is advisory. Failing to take one must not stop a run
+            # that would otherwise be the only driver.
+            self.opts.log(f"  (driver lock not taken: {e.__class__.__name__}: "
+                          f"{str(e)[:120]})")
+            locked = False
+        try:
+            out = self._run_all()
+        finally:
+            if locked:
+                runstate.release_driver_lock(self.run)
+        try:
+            self.state["last_outcome"] = out.get("outcome")
+            # What the watchdog needs to tell a running workflow from one a
+            # dead session was holding: which stage, which handoff, when.
+            if out.get("outcome") != "NEEDS_CONNECTOR":
+                self.state.pop("needs_connector", None)
+            if out.get("outcome") == "AWAITING_WORKFLOW":
+                self.state["awaiting"] = {"stage": out.get("stage"),
+                                          "handoff": out.get("handoff"),
+                                          "at": _utcnow(), "resume": out.get("resume")}
+            else:
+                self.state.pop("awaiting", None)
+            self.state["spent_usd"] = round(self._spent_usd, 4)
+            cap = self.budget_usd()
+            self.state["budget_usd"] = (round(cap, 2) if cap else None)
+            if self.opts.stage_budget:
+                book = dict((self.state or {}).get("stage_budget_usd") or {})
+                book.update({str(k).upper(): float(v)
+                             for k, v in self.opts.stage_budget.items()})
+                self.state["stage_budget_usd"] = book
+            try:
+                self.state["envelopes"] = {
+                    fam: self.stage_budget_block(st_)
+                    for fam, st_ in (("PRELIM", "PRELIM"), ("RESEARCH", "RESEARCH"),
+                                     ("SCORING", "SCORING"), ("REPORTS", "REPORTS"),
+                                     ("PAGES", "PAGES_A"))}
+            except Exception:                        # noqa: BLE001
+                pass
+            if self.opts.max_usd is not None:
+                self.state["budget_usd_source"] = "flag"
+            elif self.state.get("budget_usd_source") != "flag":
+                self.state["budget_usd_source"] = "default"
+            self._save_state()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (outcome not recorded: {str(e)[:120]})")
+        return out
+
+    def _run_all(self) -> dict:
+        from . import cli as _cli
+        stale = _cli.refuse_on_stale_install()
+        if stale and not self.opts.allow_stale_install:
+            return {"outcome": "REFUSED", "reason": stale, "stage": None}
+        if stale:
+            self.state.setdefault("waivers", []).append(
+                {"at": _utcnow(), "stale_install": stale[:300]})
+        blocked = self._connector_gate(self.plan()["next"])
+        if blocked is not None:
+            self.opts.log(f"[PREFLIGHT] BLOCKED — {blocked['reason'][:160]}")
+            return blocked
+        self._set_md("pipeline_version", PIPELINE_VERSION)
+        self.state["invocations"].append({"at": _utcnow(), "until": self.opts.until})
+        self._save_state()
+        outcome = {"outcome": "COMPLETE", "stage": None, "stages_run": [],
+                   "dispatched": self.dispatched}
+        for st in STAGES:
+            ok, why = self.done(st)
+            if ok:
+                self.state["stages"].setdefault(st, {}).setdefault("verdict", "PASS")
+                self.state["stages"][st]["done_detail"] = why
+                self._save_state()
+                self.opts.log(f"[{st}] done — {why[:140]}")
+                if self.opts.until == st:
+                    outcome.update(outcome="STOPPED_AT_UNTIL", stage=st)
+                    return outcome
+                continue
+            if st in ("PREFLIGHT", "START"):
+                self._record(st, "FAIL", why, self.opts.clock())
+                outcome.update(outcome="BLOCKED", stage=st, reason=why)
+                return outcome
+            if self._over_budget():
+                outcome.update(outcome="STOPPED_BUDGET", stage=st,
+                               reason=f"spent ${self._spent_usd:.2f} of a "
+                                      f"${self.budget_usd():.2f} budget before {st}; "
+                                      f"resume: {self.plan()['command']}")
+                self.opts.log(f"[{st}] STOPPED — budget ${self._spent_usd:.2f} "
+                              f"of ${self.budget_usd():.2f}")
+                return outcome
+            if self._over_wall():
+                outcome.update(outcome="STOPPED_WALL_CLOCK", stage=st,
+                               reason=f"--max-wall-min {self.opts.max_wall_min} reached "
+                                      f"before {st}; resume: {self.plan()['command']}")
+                return outcome
+            if st in SPENDING_STAGES and self._over_stage_budget(st):
+                msg = self._stage_budget_refusal(st) + f" Resume: {self.plan()['command']}"
+                self.opts.log(f"[{st}] STOPPED — {msg[:300]}")
+                outcome.update(outcome="STOPPED_STAGE_BUDGET", stage=st, reason=msg[:800],
+                               envelope=self._stage_budget_hit,
+                               resume=self.plan()["command"])
+                return outcome
+            self._running_stage = st
+            t0 = self.opts.clock()
+            if st == "SCORING" and self.opts.scoring_mode == "workflow":
+                try:
+                    h = self._scoring_handoff()
+                except (StageRefused, A_ScoringRefusal()) as e:
+                    msg = str(e).strip() or e.__class__.__name__
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.opts.log(f"[{st}] STOPPED — {msg[:300]}")
+                    outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
+                                            in msg else "FAILED"),
+                                   stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if h.get("passed"):
+                    self._record(st, "PASS", h["summary"], t0)
+                    outcome["stages_run"].append(st)
+                    self._snapshot(st)
+                    continue
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
+                self.opts.log(f"[WORKFLOW] SCORING handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st, reason=h["summary"],
+                               handoff=h["file"], invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
+            if st == "REPORTS" and self.opts.report_mode == "workflow":
+                try:
+                    h = self._reports_handoff()
+                except StageRefused as e:
+                    self._record(st, "FAIL", str(e)[:600], t0)
+                    self.opts.log(f"[{st}] FAIL — {str(e)[:300]}")
+                    outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
+                                            in str(e) else "FAILED"),
+                                   stage=st, reason=str(e)[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if h.get("passed"):
+                    self._record(st, "PASS", h["summary"], t0)
+                    outcome["stages_run"].append(st)
+                    self._snapshot(st)
+                    continue
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
+                self.opts.log(f"[WORKFLOW] REPORTS handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st, reason=h["summary"],
+                               handoff=h["file"], invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
+            if st == "RESEARCH" and self._session_lacks_workflow() \
+                    and self.state.get("enrichment_degraded") \
+                    and self.opts.research_mode in ("auto", "tiers") and not self.opts.tiers_direct:
+                # The session recorded no Workflow tool (a resume drops it):
+                # a tiers handoff would wait on a workflow nobody can start.
+                # The driver runs the same lean lanes itself, and says so.
+                self.opts.research_mode, self.opts.tiers_direct = "tiers", True
+                self.opts.log("[RESEARCH] this session recorded NO Workflow tool "
+                              "(connectors_baseline.json workflow_tool=false): the driver "
+                              "runs the lean lanes itself (--tiers-direct). Tell the owner.")
+                self.state["worked_via_warning"] = (
+                    "this session has no Workflow tool; RESEARCH runs as lean headless "
+                    "lanes driven by engine.pipeline (no workflow to show)")
+            if st == "RESEARCH" and self.opts.research_mode == "auto":
+                # AUTO (2026-10-09): a DEGRADED run needs no session connector
+                # for research, so it runs as lean headless TIERS (~10K-token
+                # floor, exact per-lane cost); a connector-backed run hands the
+                # stage to the session, the only holder of Exa/Tavily/Clay.
+                self.opts.research_mode = ("tiers" if self.state.get("enrichment_degraded")
+                                           else "workflow")
+                self.opts.log(f"[RESEARCH] mode: {self.opts.research_mode} "
+                              f"({'degraded run: lean headless lanes' if self.opts.research_mode == 'tiers' else 'connector-backed: in-session workflow'})")
+            if st == "RESEARCH" and (self.opts.research_mode == "workflow" or (
+                    self.opts.research_mode == "tiers" and not self.opts.tiers_direct)):
+                try:
+                    h = self._research_handoff()
+                except StageRefused as e:
+                    self._record(st, "FAIL", str(e)[:600], t0)
+                    self.opts.log(f"[{st}] STOPPED — {str(e)[:300]}")
+                    outcome.update(outcome=("STOPPED_STAGE_BUDGET" if "AT_STAGE_BUDGET"
+                                            in str(e) else "FAILED"),
+                                   stage=st, reason=str(e)[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if not h["invocations"] and not h.get("stalled") and self.opts.only_categories:
+                    # The NAMED scope passes and nothing in it stalled
+                    # (R-IMA-20261009 P2C1, 2026-10-09: the `then` after a
+                    # passing round read "0 category(ies) … made no progress"
+                    # and exited FAILED on a scope that had just passed).
+                    only = sorted({c.strip().upper() for c in self.opts.only_categories if c.strip()})
+                    msg = (f"the named scope ({', '.join(only)}) PASSES the floors gate; "
+                           f"RESEARCH stays open for the categories outside --only-categories "
+                           f"— run again without the flag to continue")
+                    self._record(st, "PASS_SCOPE", msg[:600], t0)
+                    self.opts.log(f"[{st}] SCOPE_COMPLETE — {msg[:300]}")
+                    outcome.update(outcome="SCOPE_COMPLETE", stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if not h["invocations"]:
+                    # Every category still failing has stopped moving: a
+                    # handoff now would only buy agents that close nothing.
+                    # The blockers are named so a person can repair at source.
+                    from . import brief
+                    reasons = brief.categories_needing_dispatch(self.wb)["reasons"]
+                    msg = (f"{len(h['stalled'])} category(ies) still failing the floors "
+                           f"gate made no progress across {self.opts.stall_rounds} worked "
+                           f"workflow round(s), so none was handed again: "
+                           + "; ".join(f"{c}: {', '.join((reasons.get(c) or [])[:4])}"
+                                       for c in h["stalled"][:6])
+                           + f". Repair at source, then resume: {self.plan()['command']}")
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.opts.log(f"[{st}] STALLED — {msg[:300]}")
+                    outcome.update(outcome="FAILED", stage=st, reason=msg[:800],
+                                   stalled=h["stalled"], resume=self.plan()["command"])
+                    return outcome
+                self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                self._snapshot(st)
+                self.opts.log(f"[WORKFLOW] RESEARCH handed to the conducting session: "
+                              f"{h['summary']} — {h['file']}")
+                outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
+                               reason=h["summary"], handoff=h["file"],
+                               invocations=h["invocations"],
+                               resume=self.plan()["command"])
+                return outcome
+            try:
+                try:
+                    detail = getattr(self, f"_stage_{st.lower()}")()
+                except AwaitingWorkflow as aw:
+                    h = aw.handoff
+                    self._record(st, "PENDING_ORCHESTRATOR", "workflow: " + h["summary"], t0)
+                    self._snapshot(st)
+                    self.opts.log(f"[WORKFLOW] {st} handed to the conducting session: "
+                                  f"{h['summary']} — {h['file']}")
+                    outcome.update(outcome="AWAITING_WORKFLOW", stage=st,
+                                   reason=h["summary"], handoff=h["file"],
+                                   invocations=h["invocations"],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if self._step_stopped:
+                    # `--step` inside RESEARCH: the stage RAN and is not
+                    # done, which is the normal end of a step rather than a
+                    # refusal. The gate row says PENDING_ORCHESTRATOR for the
+                    # same reason the ENRICHMENT rows do — the work is in
+                    # flight with the only actor that holds a connector.
+                    self._record(st, "PENDING_ORCHESTRATOR", detail, t0,
+                                 rounds=self._rounds, lanes=self._lane_count,
+                                 attempts=self._attempts)
+                    outcome.update(outcome="ROUND_COMPLETE", stage=st,
+                                   reason=detail, pending=self.pending(),
+                                   resume=self.plan()["command"])
+                    return outcome
+                ok2, why2 = self.done(st)
+                if not ok2:
+                    raise StageRefused(f"stage ran but is not done: {why2}")
+                self._record(st, "PASS", detail, t0, rounds=self._rounds,
+                             lanes=self._lane_count, attempts=self._attempts)
+                outcome["stages_run"].append(st)
+                self._snapshot(st)
+            except (StageRefused, SystemExit, L.LedgerRefusal, ValueError,
+                    KeyError, RuntimeError) as e:
+                msg = str(e).strip() or e.__class__.__name__
+                if isinstance(e, ScopeComplete):
+                    self._record(st, "PASS_SCOPE", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    self.opts.log(f"[{st}] SCOPE COMPLETE — {msg[:300]}")
+                    outcome.update(outcome="SCOPE_COMPLETE", stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                if isinstance(e, NeedsConnector):
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.state["needs_connector"] = {
+                        "stage": st, "connectors": list(e.connectors),
+                        "reason": msg[:800], "at": _utcnow()}
+                    self._save_state()
+                    self.opts.log(f"[{st}] NEEDS_CONNECTOR — {msg[:300]}")
+                    outcome.update(outcome="NEEDS_CONNECTOR", stage=st, reason=msg[:800],
+                                   connectors=list(e.connectors),
+                                   resume=("in a session holding "
+                                           + " and ".join(e.connectors) + ": "
+                                           + self.plan()["command"]))
+                    return outcome
+                # A stage the BUDGET stopped has not failed its gate — it
+                # never got to finish trying. Reporting "still failing the
+                # floors gate" there sends the reader to repair research that
+                # was simply cut short, which is the wrong repair.
+                if self._wall_stopped:
+                    msg = (f"stopped by the {self.opts.max_wall_min}-minute wall "
+                           f"clock — the stage was cut short, not refused. "
+                           f"Resume with `{self.plan()['command']}`; what it had "
+                           f"reached when it stopped: {msg}")
+                    self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    outcome.update(outcome="STOPPED_WALL_CLOCK", stage=st,
+                                   reason=msg[:800], resume=self.plan()["command"])
+                    return outcome
+                if self._budget_stopped and self._stage_budget_hit:
+                    msg = (self._stage_budget_refusal(st)
+                           + f" What it had reached when it stopped: {msg}")
+                    self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    outcome.update(outcome="STOPPED_STAGE_BUDGET", stage=st,
+                                   reason=msg[:800], envelope=self._stage_budget_hit,
+                                   resume=self.plan()["command"])
+                    return outcome
+                if self._budget_stopped:
+                    msg = (f"stopped by the ${self.budget_usd():.2f} budget after "
+                           f"spending ${self._spent_usd:.2f} — the stage was cut "
+                           f"short, not refused. Raise --max-usd or narrow scope, "
+                           f"then resume; what it had reached when it stopped: {msg}")
+                    self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                                 lanes=self._lane_count, attempts=self._attempts)
+                    outcome.update(outcome="STOPPED_BUDGET", stage=st, reason=msg[:800],
+                                   resume=self.plan()["command"])
+                    return outcome
+                self._record(st, "FAIL", msg[:600], t0, rounds=self._rounds,
+                             lanes=self._lane_count, attempts=self._attempts)
+                outcome.update(outcome="FAILED", stage=st, reason=msg[:800],
+                               resume=self.plan()["command"])
+                return outcome
+            if self.opts.until == st:
+                outcome.update(outcome="STOPPED_AT_UNTIL", stage=st)
+                return outcome
+            if self.opts.step:
+                # A stage that FINISHED under `--step` is still one step: the
+                # flag means "advance once and hand back", so a run already
+                # past RESEARCH walks the table one stage per invocation
+                # rather than running to PROMOTE behind the conductor's back.
+                outcome.update(outcome="ROUND_COMPLETE", stage=st,
+                               pending=self.pending(),
+                               resume=self.plan()["command"])
+                return outcome
+        return outcome
+
+    # per-stage bookkeeping the record reads
+    _rounds = 0
+    _lane_count = 0
+    _attempts = 0
+    _last_sig: tuple | None = None
+    _stalls = 0
+    _stalled_at: int | None = None
+    #: per-category stall bookkeeping for RESEARCH (see `_research_stalled`)
+    _cat_sig: dict = {}
+    _cat_stalls: dict = {}
+    _cat_stalled: list = []
+
+    #: run-scoped spend — deliberately NOT cleared by `_reset_counters`,
+    #: because a ceiling that forgets the previous stage is not a ceiling.
+    _spent_usd = 0.0
+    _spent_turns = 0
+    _recorded_usd = 0.0
+    _recorded_turns = 0
+    _budget_stopped = False
+    _wall_stopped = False
+    #: the envelope that stopped the stage, if one did (see `_over_stage_budget`)
+    _stage_budget_hit: dict | None = None
+    _running_stage: str = ""
+    #: set by the RESEARCH round loop when `--step` ended a round cleanly.
+    _step_stopped = False
+
+    def _reset_counters(self):
+        self._rounds = self._lane_count = self._attempts = 0
+        self._last_sig, self._stalls, self._stalled_at = None, 0, None
+        self._cat_sig, self._cat_stalls, self._cat_stalled = {}, {}, []
+
+    # ── progress between rounds ────────────────────────────────────────
+    #
+    # Each looping stage has a signature: a tuple of counts that can only
+    # go up as the stage advances. A round that raises none of them advanced
+    # nothing, whatever the lanes reported. The signature is read from the
+    # WORKBOOK the lanes write, so it measures the substrate, not the prose.
+
+    def _research_progress(self) -> dict[str, tuple]:
+        """Per-category OUTCOME counters for the RESEARCH stage.
+
+        THIS DELIBERATELY EXCLUDES THE RAW `Search_Log` ROW COUNT, and the
+        reason is the whole bug. Measured 2026-09-12 against the real
+        driver: `len(searches)` sat in the run-level signature and
+        `_stalled` clears on `any(c > p ...)`, so ONE extra `web_search`
+        row anywhere reset the stall counter for all sixteen categories.
+        A lane that logs searches and resolves nothing is the cheapest
+        thing a stuck lane does — so the counter meant to STOP the loop was
+        the one a stuck loop was guaranteed to raise. Replaying the failing
+        run's shape: nine rounds, `stalls=0` every round, never stopped.
+        With the row count removed it stops at round 2.
+
+        Two changes, both load-bearing:
+          * only OUTCOMES count — a cell closed, a synthesis written, an
+            absence declared, a connector actually asked. A search is
+            activity, not progress.
+          * the counters are PER CATEGORY, so one moving category can no
+            longer vouch for fifteen stuck ones.
+        """
+        from . import brief, floors_gate
+        from .workbook import _split_ids
+        wb = self.wb
+        register = wb.evidence_index()
+        declared = L.declared_absences(wb)
+        passed = set(brief.categories_needing_dispatch(wb)["passed"])
+        acc: dict[str, list] = {}
+
+        def slot(cat: str) -> list:
+            return acc.setdefault(cat, [0, 0, 0, 0, 0])
+
+        for r in wb.scoring_rows():
+            cell = str(r.get("SubCap_ID") or "").strip()
+            if not cell:
+                continue
+            s = slot(cell.split(".")[0])
+            eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
+                    if i and i != C.NO_EVIDENCE]
+            # THE SAME PREDICATE THE GATE USES, deliberately imported rather
+            # than restated: this counted a one-way citation as progress
+            # while the gate demanded the link run both ways, so a lane that
+            # cited ids the register did not name back kept the stall
+            # counter moving through rounds the gate could never pass.
+            if floors_gate.cell_evidenced(cell, eids, register):
+                s[0] += 1                                    # evidenced cells
+            if str(r.get("Dominant_Claim") or "").strip():
+                s[1] += 1                                    # syntheses
+            if cell in declared:
+                s[2] += 1                                    # declared absences
+        for sr in wb.rows("Search_Log"):
+            if str(sr.get("Tool") or "").strip().lower() in C.ENRICHMENT_TOOLS:
+                cell = str(sr.get("SubCap_ID") or "").strip()
+                if cell:
+                    slot(cell.split(".")[0])[3] += 1          # connector asked
+        for cat in passed:
+            slot(cat)[4] = 1                                  # category closed
+        return {c: tuple(v) for c, v in acc.items()}
+
+    def _research_stalled(self, categories: list[str]) -> list[str]:
+        """The categories whose OWN outcomes have not moved for
+        `stall_rounds` consecutive rounds. Those stop being dispatched; the
+        rest carry on. Before this, a stall was an all-or-nothing property
+        of the whole stage, so fifteen stuck categories rode along on the
+        one that was still moving."""
+        if not self.opts.stall_rounds:
+            return []
+        now = self._research_progress()
+        stalled = []
+        for cat in categories:
+            sig, prev = now.get(cat, ()), self._cat_sig.get(cat)
+            if prev is not None and not any(c > p for c, p in zip(sig, prev)):
+                self._cat_stalls[cat] = self._cat_stalls.get(cat, 0) + 1
+            else:
+                self._cat_stalls[cat] = 0
+            self._cat_sig[cat] = sig
+            if self._cat_stalls.get(cat, 0) >= self.opts.stall_rounds:
+                stalled.append(cat)
+        return stalled
+
+    def _progress(self, stage: str) -> tuple:
+        wb = self.wb
+        if stage == "PRELIM":
+            from . import prelim
+            st = prelim.state(wb)
+            return (sum(1 for sec in st.get("sections") or [] if sec.get("status") != "OPEN"),)
+        if stage == "RESEARCH":
+            # The run-level view is the SUM of the per-category outcome
+            # counters, so it stays comparable for the record — but the
+            # decision to keep dispatching is made per category, by
+            # `_research_stalled`. See `_research_progress` for why the raw
+            # Search_Log row count is no longer in here.
+            by = self._research_progress()
+            return tuple(sum(v[i] for v in by.values()) for i in range(5)) if by else (0,) * 5
+        if stage == "SCORING":
+            from . import assessment as A
+            st = A.state(wb)
+            last = st.get("last_scoring_gate") or {}
+            blocking = last.get("blocking") or []
+            return (sum(1 for r in wb.scoring_rows()
+                        if str(r.get("SubCap_ID") or "") in set(wb.selected_subcaps())
+                        and r.get("Score") not in (None, "")),
+                    sum(1 for v in (st.get("critic_verdicts") or {}).values() if v == "PASS"),
+                    -len(blocking) if last else -(10 ** 6))
+        if stage == "REPORTS":
+            from . import narrative as N
+            st = N.state(wb)
+            # A round that only serviced the probes the writers asked for
+            # moved the stage forward: the next round writes from them.
+            try:
+                from . import relay
+                served = sum(v for k, v in relay.state(self.run)["by_status"].items()
+                             if k in ("SERVED", "EMPTY"))
+            except Exception:                            # noqa: BLE001
+                served = 0
+            return (sum(1 for x in st["reports"].values()
+                        for sec in (x.get("sections") or []) if sec.get("status") == "READY"),
+                    sum(1 for x in st["reports"].values() if x.get("ready")),
+                    served)
+        return ()
+
+    def _stalled(self, stage: str) -> bool:
+        """Record this round's signature; True when `stall_rounds` consecutive
+        rounds advanced nothing. The first call seeds and never stalls."""
+        sig = self._progress(stage)
+        prev, self._last_sig = self._last_sig, sig
+        if prev is None:
+            self._stalls = 0
+            return False
+        if any(c > p for c, p in zip(sig, prev)):
+            self._stalls = 0
+            return False
+        self._stalls += 1
+        if self.opts.stall_rounds and self._stalls >= self.opts.stall_rounds:
+            self._stalled_at = self._rounds
+            self.opts.log(f"  [{stage}] no progress for {self._stalls} consecutive round(s) "
+                          f"— stopping at round {self._rounds} of {self.opts.max_rounds}")
+            return True
+        return False
+
+    def _stall_note(self) -> str:
+        if self._stalled_at is None:
+            return ""
+        return (f" — stopped at round {self._stalled_at}: the last {self._stalls} round(s) "
+                f"advanced nothing the stage measures, so more rounds would not have helped")
+
+    def _record_grain(self, categories) -> None:
+        """WHICH GRAIN THE LANE ACTUALLY USED, per category, per round.
+
+        `lane_fit` projects the capability-grain design and says a full run
+        fits. That is a property of the WORK. Whether a lane took the
+        grouping its packet offered is a property of the RUN, and nothing
+        measured it — a lane that fires a query per cell costs 2.1x the
+        projection and looks identical in every report, until the round
+        budget runs out and the category is re-dispatched. Recorded, never
+        enforced: the packet asks, the measurement says whether asking
+        worked, and a term that BLOCKED on it would stop a lane that had
+        good reason."""
+        try:
+            from . import cost
+            seen = self.state.setdefault("grain_observed", {})
+            for cat in categories:
+                g = cost.grain_observed(self.wb, cat)
+                seen[cat] = {k: g[k] for k in ("grain", "ratio", "rows",
+                                               "distinct_searches")}
+                if g["grain"] == "per_subcap":
+                    self.opts.log(f"  [GRAIN] {cat}: {g['why']}")
+            self._save_state()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (grain not measured: {e.__class__.__name__}: "
+                          f"{str(e)[:120]})")
+
+    def _count(self, summary: dict):
+        self._lane_count += int(summary.get("dispatched") or 0)
+        self._attempts += sum(int(l.get("attempts") or 1)
+                              for l in (summary.get("lanes_detail") or []))
+        # REAL SPEND, not an estimate. `agent_run.py` already sums each lane's
+        # `total_cost_usd` into the batch summary; this used to read
+        # `dispatched` and `attempts` out of that dict and drop the one figure
+        # that could stop a runaway run.
+        usd = summary.get("usd")
+        if usd is not None:
+            self._spent_usd += float(usd)
+        turns = summary.get("turns")
+        if turns is not None:
+            self._spent_turns += int(turns)
+
+    # ── STAGES ─────────────────────────────────────────────────────────
+    def _stage_prelim(self) -> str:
+        from . import brief, prelim
+        self._reset_counters()
+        self._stalled("PRELIM")
+        for r in range(self.opts.max_rounds):
+            self._rounds = r + 1
+            b = brief.prelim_brief(self.wb, run=self.run, out_dir=self._briefs(f"prelim_r{r}"))
+            orch = b.get("orchestrator")
+            if orch:
+                self.opts.log(f"[RELAY] PRELIM connector brief for the conducting session "
+                              f"(owed {', '.join(orch['owed'])}): {orch['prompt_file']}")
+                self.state["prelim_orchestrator"] = orch
+                self._save_state()
+            self._count(self._dispatch(b, stage="PRELIM"))
+            st = prelim.state(self.wb)
+            if orch and st["open"] and set(st["open"]) <= set(orch["owed"]):
+                # Only the connector-owed sections remain, and only the session
+                # can close them: wait for it rather than re-dispatching lanes
+                # that cannot (which is what used to stall the stage).
+                st = self._await_prelim(set(orch["owed"]))
+            if not st["open"]:
+                if st["recorded_status"] != "COMPLETE":
+                    prelim.complete(self.wb)
+                return f"PRELIM closed after {r + 1} round(s)"
+            if self._stalled("PRELIM"):
+                break
+        raise StageRefused(f"PRELIM still open after {self._rounds} round(s): "
+                           f"{', '.join(prelim.state(self.wb)['open'])}{self._stall_note()}")
+
+    def _await_prelim(self, owed: set) -> dict:
+        from . import prelim
+        limit = float(os.environ.get("DMA_ORCHESTRATOR_WAIT_S", "2700"))
+        t0 = self.opts.clock()
+        while True:
+            self.reopen()
+            st = prelim.state(self.wb)
+            if not (set(st["open"]) & owed) or self.opts.clock() - t0 >= limit:
+                return st
+            time.sleep(30)
+
+    def _stage_kg(self) -> str:
+        from . import kg
+        self._reset_counters()
+        tk = self.opts.toolkit_dir or (Path(os.environ["DMA_TOOLKITS_DIR"])
+                                       if os.environ.get("DMA_TOOLKITS_DIR") else None)
+        if tk is None:
+            tk = self._pull_toolkits()
+        out = kg.build(self.wb, toolkit_dir=tk)
+        self.reopen()
+        n = len([r for r in self.wb.rows("DQ_Bank") if any(r.values())])
+        probs = out.get("problems") if isinstance(out, dict) else None
+        return (f"DQ_Bank seeded: {n} rows" + (f"; {len(probs)} problem(s) stated: "
+                                                  f"{probs[0][:120]}" if probs else ""))
+
+    def _snapshot(self, stage: str) -> None:
+        """A durable copy at every stage boundary (engine.snapshot): the run
+        otherwise lives only in this container until PACKAGE. Off when the
+        run does not push (stub / CI); a failed backup is logged, never
+        fatal — the next boundary tries again."""
+        if not self.opts.push:
+            return
+        from . import snapshot
+        r = snapshot.push(self.run)
+        self.opts.log(f"[SNAPSHOT] {stage}: {r['outcome']}"
+                      + (f" ({r.get('bytes', 0) // 1024} KB)" if r.get("bytes") else "")
+                      + (f" — {r['reason']}" if r.get("reason") else ""))
+
+    def _research_handoff(self) -> dict:
+        """Write the per-category workflow invocations the session runs.
+
+        Three things this must do that it did not (measured 2026-10-05,
+        Susser Bank, rounds 2-3):
+          * ROUTE THE GATE'S CELLS. A category's blockers sit on cells that
+            are already synthesised or declared absent; routing only open
+            cells handed 13 categories a round with nothing to work.
+            `repairs` carries the cells and terms from floors_<cat>.json.
+          * STOP A CATEGORY THAT DID NOT MOVE. Each workflow round is a new
+            driver process, so the in-memory per-category stall counter was
+            reset every round and never fired. Progress is kept in the
+            state file instead (`workflow_progress`).
+          * PRICE WHAT WAS MEASURED. The pilot constant priced a round that
+            routed only repairs at $6.16; it cost ~$21. The run's own last
+            round calibrates the next estimate.
+        """
+        from . import brief, floors_gate
+        need = brief.categories_needing_dispatch(self.wb)["dispatch"]
+        if self.opts.only_categories:
+            # A NAMED SCOPE (`--only-categories`): the owner narrows the stage
+            # to these categories — the remedy the envelope refusal names
+            # ("or narrows the scope"), and how one category is measured alone.
+            only = {c.strip().upper() for c in self.opts.only_categories if c.strip()}
+            need = [c for c in need if c in only]
+        md = self._md()
+        site = next((str(r.get("Value") or "") for r in self.wb.rows("Firmographics")
+                     if str(r.get("Field") or "").lower() == "website"
+                     and r.get("Value")), "")
+        by_pillar: dict[str, list[str]] = {}
+        for c in sorted(need):
+            by_pillar.setdefault(c[:2], []).append(c)
+        # The work unit is a BATCH OF CAPABILITIES, not a category (measured
+        # 2026-09-30, SWBC): one agent per category reached 116-200K tokens of
+        # context in 39-71 turns — connector results, not reasoning — and
+        # ended with 0 of 43-68 cells synthesised. A batch of open cells small
+        # enough to finish inside one fresh context is what the workflow fans
+        # out; the category's challenge + gate still run once, after it.
+        #
+        # ONE INVOCATION PER CATEGORY, not per pillar (owner's spec: "each
+        # pillar has a separate workflow for each of its 4 categories"). The
+        # workflow runtime caps concurrency PER WORKFLOW (min(16, CPUs-2): 2
+        # on a 4-CPU host), so four pillar workflows ran 8 agents; sixteen
+        # category workflows run 32, and a pillar's slow category no longer
+        # holds its other three in a queue. Affordable only because writes
+        # are batched (engine.cli batch): the run-wide workbook lock is held
+        # once per capability instead of once per command.
+        from . import cost as cost_mod
+        env = self.stage_budget_block("RESEARCH")
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal("RESEARCH"))
+        open_caps = _open_capabilities(self.wb)
+        # A cell that is still OPEN is its open batch's work; the gate names
+        # it too (absence_undeclared_empty, volleys_incomplete) and routing it
+        # as a repair as well collected for it twice (R-IMA-20261009: 48 of
+        # P1C1's 47 open cells handed again as repairs, doubling the share).
+        # Repairs are the gate's findings on CLOSED cells only.
+        still_open = {str(r.get("SubCap_ID") or "") for r in self.wb.scoring_rows()
+                      if not str(r.get("Dominant_Claim") or "").strip()}
+        repairs = {c: {cell: terms for cell, terms in floors_gate.blocking_cells(
+                           floors_gate.read_verdict(self.run.qa_dir, c)).items()
+                       if cell not in still_open and cell != c}
+                   for c in need}
+        stalled = self._workflow_stalled(need, repairs)
+        work = [c for c in sorted(need) if c not in stalled]
+        by_unit = ({c: [c] for c in work} if RESEARCH_UNIT == "category"
+                   else {u: [c for c in cs if c in work]
+                         for u, cs in by_pillar.items() if any(c in work for c in cs)})
+        limit = int(self.opts.batch_cells or cost_mod.RESEARCH_BATCH_CELLS)
+        inv = [{"pillar": u[:2], "cats": cats, "run": self.run.run_id,
+                "batches": {c: _batches(open_caps.get(c, {}), limit)
+                            for c in cats},
+                "repairs": {c: repairs.get(c) or {} for c in cats},
+                "repair_batches": {c: _repair_batches(repairs.get(c) or {}, limit)
+                                   for c in cats},
+                # THE TIERS RIDE WITH THE WORK (2026-10-09): the workflow runs
+                # collectors on `models.collector`, the category orchestrator
+                # and the challenge on `models.synthesis`; it never picks.
+                "models": {"collector": self.opts.collector_model,
+                           "synthesis": self.opts.synthesis_model,
+                           "challenge": self.opts.synthesis_model},
+                "batch_cells": limit,
+                "cards_dir": str(self._research_cards(cats, open_caps, repairs)),
+                "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
+                "plugin": str(PLUGIN), "rounds": 2,
+                "entity": md.get("entity_name") or "", "domain": site,
+                # The workflow's connector rules stop every batch with
+                # NO_CONNECTORS when Exa/Tavily/Clay are absent — on a run the
+                # driver already proceeded DEGRADED, that closed nothing.
+                "degraded": bool(self.state.get("enrichment_degraded"))}
+               for u, cats in sorted(by_unit.items())]
+        tiers_wf = self.opts.research_mode == "tiers" and not self.opts.tiers_direct
+        if tiers_wf:
+            # VISIBLE LEAN TIERS (owner, 2026-10-09: "I do not see the
+            # workflow"): one small haiku runner per category, in /workflows,
+            # starts the category's lean job (`engine.tiers`) and waits on it.
+            rnd = int(self.state.get("tiers_round") or 0)
+            self.state["tiers_round"] = rnd + 1
+            for i in inv:
+                i["round"] = rnd
+                i["tiers"] = True
+        doc = {"workflow": str(PLUGIN / (TIERS_WORKFLOW if tiers_wf else RESEARCH_WORKFLOW)),
+               "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per category — wait for all, "
+                       "then run `then`; the driver verifies the floors gates")}
+        if stalled:
+            doc["stalled"] = stalled
+        path = self.run.qa_dir / RESEARCH_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # ENFORCEMENT (I-54): a handoff re-issued with the SAME work means
+        # the last one was never worked — the session lost Workflow or its
+        # connectors (a resume can drop both), or started no workflow.
+        # Say so in the handoff instead of re-issuing it silently forever.
+        try:
+            prev = json.loads(path.read_text()).get("estimate") or {}
+        except (OSError, ValueError):
+            prev = {}
+        n = sum(len(i["cats"]) for i in inv)
+        nb = sum(len(b) for i in inv for b in i["batches"].values()) + sum(
+            len(b) for i in inv for b in i["repair_batches"].values())
+        cells = sum(sum(open_caps.get(c, {}).values()) for i in inv for c in i["cats"])
+        rcells = sum(len(i["repairs"][c]) for i in inv for c in i["cats"])
+        ncaps = sum(len(open_caps.get(c, {})) for i in inv for c in i["cats"])
+        est, basis, price = self._workflow_estimate(cells, rcells, n, prev, capabilities=ncaps,
+                                                    batch_cells=limit)
+        doc["estimate"] = {"open_cells": cells, "repair_cells": rcells, "batches": nb,
+                           "categories": n, "usd": est, "basis": basis,
+                           "per_cell": price.get("per_cell"),
+                           "by_tier": price.get("by_tier"), "models": price.get("models"),
+                           "usd_per_output_token": price.get("usd_per_output_token"),
+                           "spent_at_handoff": round(self._spent_usd, 2),
+                           "research_at_handoff": self._stage_usd("RESEARCH")}
+        same = (prev.get("open_cells") == cells
+                and prev.get("repair_cells", 0) == rcells and (cells or rcells))
+        then = prev.get("spent_at_handoff")
+        # No spend recorded on the old handoff (one written before this field
+        # existed) keeps the old rule: same work named again means not worked.
+        if same and (then is None or round(self._spent_usd, 2) <= float(then)):
+            doc["not_worked"] = (
+                f"the previous handoff named the same {cells} open and {rcells} "
+                "repair cells and no workflow spend has landed since: its "
+                "workflows never ran. If this session has no Workflow tool (a "
+                "resumed session can lose it), run the rendered prompts in "
+                "`agent_prompts` as in-session agents — no restart is needed. "
+                "Do NOT fall back to headless lanes, which hold no connector.")
+            self.opts.log(f"[WORKFLOW] WARNING: {doc['not_worked']}")
+        cap = self.budget_usd()
+        if cap is not None:
+            doc["estimate"].update(spent_usd=round(self._spent_usd, 2), budget_usd=cap,
+                                   fits_budget=self._spent_usd + est <= cap)
+        if env:
+            # THE ENVELOPE RIDES WITH THE WORK (2026-10-09). The workflow reads
+            # `budget` and spends at most one round when the estimate does not
+            # fit what is left, so the envelope is held by the agents that
+            # spend it, not only by the driver that reads the ledger after.
+            fits_env = (env["remaining"] is None) or (est <= env["remaining"])
+            remaining = env["remaining"]
+            per_cell = float(price.get("per_cell") or 0.0)
+            # WHOLE CATEGORIES, END TO END, OR NOT AT ALL (2026-10-09). A
+            # category is scored only when its cells are collected for,
+            # synthesised AND challenged; evidence with no synthesis buys
+            # nothing. So when the estimate does not fit, the envelope's
+            # remainder is allocated to whole categories, cheapest first (the
+            # most categories close), and the rest are DEFERRED in the
+            # handoff with the flag that funds them. No category fitting is
+            # AT_STAGE_BUDGET before any agent is paid for — a decision for a
+            # person, not a wave the governor refuses one batch at a time.
+            deferred = []
+            if not fits_env and remaining is not None:
+                def _est(i):
+                    cs = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
+                             for c in i["cats"])
+                    cp = sum(len(open_caps.get(c, {})) for c in i["cats"])
+                    pr = cost_mod.research_price(
+                        cs, categories=len(i["cats"]), capabilities=cp or None,
+                        batch_cells=limit, collector_model=self.opts.collector_model,
+                        synthesis_model=self.opts.synthesis_model)
+                    ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
+                    return round(pr["usd"] * max(1.0, ratio), 4)
+                left = float(remaining)
+                handed = []
+                for i in sorted(inv, key=_est):
+                    e_i = _est(i)
+                    if e_i <= left + 1e-9:
+                        handed.append(i); left -= e_i
+                        i.setdefault("_est", e_i)
+                    else:
+                        deferred.append({"cats": i["cats"], "estimate_usd": e_i})
+                if not handed:
+                    cheapest = min((d["estimate_usd"] for d in deferred), default=0.0)
+                    self._stage_budget_hit = {**env, "estimate_usd": est, "fits_envelope": False,
+                                              "cheapest_category_usd": cheapest}
+                    raise StageRefused(
+                        f"AT_STAGE_BUDGET before dispatch: the RESEARCH envelope has "
+                        f"${float(remaining):.2f} of ${float(env['ceiling'] or 0):.2f} left and the "
+                        f"cheapest category costs ~${cheapest:.2f} end to end (collect, "
+                        f"synthesise, challenge); the whole scope is ~${est:.2f} for "
+                        f"{cells} open + {rcells} repair cells at ${per_cell:.4f}/cell "
+                        f"({price.get('basis')}). No agent was paid for. A person raises it "
+                        f"(`--stage-budget RESEARCH={max(1, int(est) + 1)}` funds the scope) or "
+                        f"narrows the scope; the run-wide `--max-usd` does not raise an envelope.")
+                inv[:] = sorted(handed, key=lambda i: i["cats"])
+                doc["invocations"] = inv
+                if deferred:
+                    doc["deferred_for_budget"] = {
+                        "categories": deferred,
+                        "why": (f"the envelope's ${float(remaining):.2f} funds "
+                                f"{len(handed)} of {len(handed) + len(deferred)} categories end "
+                                f"to end; these wait for `--stage-budget RESEARCH=<usd>` "
+                                f"(~${est:.2f} funds the whole scope) or a narrower scope"),
+                    }
+                    self.opts.log(f"[WORKFLOW] RESEARCH envelope funds {len(handed)} of "
+                                  f"{len(handed) + len(deferred)} categories; "
+                                  f"{len(deferred)} deferred for budget")
+            affordable = (cells + rcells) if (remaining is None or per_cell <= 0) \
+                else int(max(0.0, float(remaining)) / per_cell)
+            doc["budget"] = {**env, "estimate_usd": est, "fits_envelope": fits_env,
+                             "per_cell_usd": per_cell,
+                             "cells_affordable": min(cells + rcells, affordable),
+                             # dollars per OUTPUT token, blended over the tiers:
+                             # the workflow runtime exposes output tokens only
+                             # (budget.spent()), and this converts them to the
+                             # envelope's currency so a wave is refused BEFORE
+                             # it crosses the ceiling, not booked after
+                             "usd_per_output_token": price.get("usd_per_output_token"),
+                             # what the governor converts budget.spent() with:
+                             # the runtime's counter is not output tokens
+                             # (measured 8-10x larger), so the measured rate
+                             # rides here and the shape's rate is for reading
+                             "usd_per_runtime_token": price.get("usd_per_runtime_token"),
+                             # the per-wave prices the workflow's governor
+                             # checks a wave against before starting it
+                             "tier_usd": {"collector_batch": price.get("per_batch"),
+                                          "orchestrator": price.get("per_category_orchestrator"),
+                                          "challenge": price.get("per_category_challenge")},
+                             "raise_with": f"--stage-budget RESEARCH=<usd>"}
+            doc["estimate"]["fits_envelope"] = fits_env
+            total_cells = max(1, cells + rcells)
+            for i in inv:
+                mine = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
+                           for c in i["cats"])
+                # A handed category's share is ITS OWN end-to-end estimate when
+                # categories were allocated whole; otherwise the remainder is
+                # partitioned by cells.
+                share = (None if remaining is None
+                         else (i.get("_est") if i.get("_est") is not None
+                               else round(float(remaining) * mine / total_cells, 4)))
+                i.pop("_est", None)
+                # EVERY INVOCATION KNOWS ITS SHARE. Sixteen workflows spend
+                # one envelope at once; a per-invocation share, proportional
+                # to its cells, is what stops one category's waves eating
+                # the fifteen others' money.
+                i["budget"] = {**doc["budget"], "share_usd": share,
+                               "share_cells": mine,
+                               "estimate_usd": round(per_cell * mine, 4)}
+                if not fits_env:
+                    i["rounds"] = 1
+        if tiers_wf and len(inv) > 1:
+            # ONE RUNNER FOR THE ROUND (measured 2026-10-09, R-IMA-20261009):
+            # a runner is an in-session subagent, and its floor is the
+            # session's — $0.12-$0.31 a round for a few `wait` turns. One per
+            # category was ~$5 a round across sixteen, half the RESEARCH
+            # envelope spent on watching. The lanes are per category either
+            # way (`engine.tiers` starts one job each); only the face merges.
+            inv[:] = [_merge_tier_invocations(inv)]
+            doc["invocations"] = inv
+        self.state["workflow_handed_last"] = sorted(c for i in inv for c in i["cats"])
+        self._save_state()
+        path.write_text(json.dumps(doc, indent=1))
+        doc["agent_prompts"] = self._render_agent_prompts(path)
+        path.write_text(json.dumps(doc, indent=1))
+        return {"file": str(path), "invocations": inv, "stalled": stalled,
+                "estimate": doc["estimate"], "not_worked": doc.get("not_worked"),
+                "deferred_for_budget": doc.get("deferred_for_budget"),
+                "summary": (f"{len(inv)} of {n} categories handed" if doc.get("deferred_for_budget")
+                            else f"{n} categor{'y' if n == 1 else 'ies'}")
+                           + f", {sum(len(b) for i in inv for b in i['batches'].values())} batch(es) "
+                           f"over {len(inv)} {RESEARCH_UNIT} workflow(s), "
+                           f"est ${est:.2f} for {cells} open + {rcells} repair cells"
+                           + (f" ({len(doc['deferred_for_budget']['categories'])} deferred for budget)"
+                              if doc.get("deferred_for_budget") else "")
+                           + (f"; {len(stalled)} stalled, not re-handed: "
+                              f"{', '.join(stalled)}" if stalled else "")}
+
+    def _workflow_stalled(self, need: list[str], repairs: dict) -> list[str]:
+        """Categories whose outcomes AND blockers did not move across
+        `stall_rounds` worked workflow rounds. Persisted in the state file,
+        because every workflow round is a fresh driver process.
+
+        Progress is any outcome counter rising (`_research_progress`) OR the
+        set of (cell, term) blockers shrinking — a repair round closes
+        blockers without adding a synthesis. A round only counts when spend
+        landed since the last handoff: an unworked handoff is the
+        `not_worked` warning, not a stall."""
+        if not self.opts.stall_rounds:
+            return []
+        book = self.state.setdefault("workflow_progress", {})
+        last_spent = float(self.state.get("workflow_spent_at_handoff", -1.0))
+        worked = round(self._spent_usd, 2) > round(last_spent, 2)
+        # A category DEFERRED FOR BUDGET was not worked, whatever spend
+        # landed: R-IMA-20261009 handed 2 of 16 categories and the other 14
+        # were read as "no outcome moved for 2 worked rounds" and dropped
+        # from the next handoff. Only a category the last handoff carried
+        # can stall.
+        handed_last = set(self.state.get("workflow_handed_last") or need)
+        now = self._research_progress()
+        out = []
+        for cat in need:
+            sig = list(now.get(cat, ()))
+            blockers = sorted(f"{cell}:{t}" for cell, ts in (repairs.get(cat) or {}).items()
+                              for t in ts)
+            prev = book.get(cat)
+            stalls = int((prev or {}).get("stalls") or 0)
+            if prev is not None:
+                # Movement resets the count whoever caused it — a person who
+                # repaired at source un-stalls the category with no spend.
+                moved = (any(a > b for a, b in zip(sig, prev.get("sig") or []))
+                         or len(blockers) < len(prev.get("blockers") or []))
+                if moved:
+                    stalls = 0
+                elif worked and cat in handed_last:
+                    stalls += 1
+            book[cat] = {"sig": sig, "blockers": blockers, "stalls": stalls}
+            if stalls >= self.opts.stall_rounds:
+                out.append(cat)
+                self.opts.log(f"  [RESEARCH] {cat}: no outcome moved and no blocker "
+                              f"closed for {stalls} worked round(s) — not handing it "
+                              f"again; {len(blockers)} blocker(s) remain")
+        for cat in list(book):
+            if cat not in need:
+                book.pop(cat)
+        self.state["workflow_spent_at_handoff"] = round(self._spent_usd, 2)
+        self._save_state()
+        return out
+
+    def _stage_usd(self, stage: str) -> float:
+        """What the cost ledger has recorded against one stage."""
+        try:
+            from . import cost
+            return round(sum(float(r["usd"]) for r in cost.ledger(self.run)
+                             if r.get("stage") == stage and r.get("usd") is not None), 2)
+        except Exception:                                  # noqa: BLE001
+            return 0.0
+
+    def _workflow_estimate(self, cells: int, rcells: int, n: int,
+                           prev: dict, *, capabilities: int | None = None,
+                           batch_cells: int | None = None) -> tuple[float, str, dict]:
+        """The tiered price (`cost.research_price`: haiku collectors, a sonnet
+        orchestrator and challenge per category), corrected by the run's own
+        last round: the ratio of what it cost to what it was estimated at
+        (never below 1), and a floor of the measured cost per category handed
+        (agents cost money even when a category has nothing routed).
+
+        Until 2026-10-09 this was the unbatched sonnet pilot constant
+        ($0.19/cell + $0.44/category) — $137 for 686 cells against a $10
+        envelope, on a run that had not spent a research dollar."""
+        from . import cost
+        price = cost.research_price(
+            cells + rcells, categories=max(1, n), capabilities=capabilities,
+            batch_cells=int(batch_cells or cost.RESEARCH_BATCH_CELLS),
+            collector_model=self.opts.collector_model,
+            synthesis_model=self.opts.synthesis_model,
+            degraded=bool(self.state.get("enrichment_degraded")),
+            lean=(self.opts.research_mode == "tiers"))
+        pilot = float(price["usd"])
+        basis = price["basis"]
+        cal = self.state.get("workflow_calibration") or {}
+        research_now = self._stage_usd("RESEARCH")
+        try:
+            # RESEARCH spend only: a SCORING round between two handoffs is not
+            # what the research estimate predicted (Susser Bank, 2026-10-05:
+            # $11.82 of scoring read as research and inflated the ratio).
+            then = prev.get("research_at_handoff")
+            spent_then = float(then if then is not None else prev.get("spent_at_handoff"))
+            actual = round((research_now if then is not None else self._spent_usd)
+                           - spent_then, 2)
+            if actual > 0 and float(prev.get("usd") or 0) > 0:
+                cal = {"ratio": round(max(1.0, actual / float(prev["usd"])), 3),
+                       "per_category": round(actual / max(1, int(prev.get("categories")
+                                                                or prev.get("cats") or 1)), 3),
+                       "measured_usd": actual}
+                self.state["workflow_calibration"] = cal
+        except (TypeError, ValueError):
+            pass
+        if cal:
+            est = max(pilot * float(cal["ratio"]), n * float(cal["per_category"]))
+            basis += (f", calibrated by this run's last round (${cal['measured_usd']} "
+                      f"measured: x{cal['ratio']}, floor ${cal['per_category']}/category)")
+            if pilot > 0:
+                price = dict(price, per_cell=round(price["per_cell"] * est / pilot, 4))
+        else:
+            est = pilot
+        return round(est, 2), basis, price
+
+    def _research_cards(self, cats: list[str], open_caps: dict,
+                        repairs: dict | None = None) -> Path:
+        """Every open capability's card, on disk, compact — so a collector
+        reads its batch's cards in ONE Bash call instead of one `engine.cli
+        card` turn per capability (a turn re-reads the whole context; the
+        cards are a third of a collector's turns otherwise). Written at
+        handoff from the same `orient.capability_card` the CLI prints."""
+        from . import brief, orient
+        out = self.run.root / "briefs" / "research_cards"
+        try:
+            shared = brief.shared(self.wb, prelim=True)
+        except Exception as e:                           # noqa: BLE001
+            shared = {"error": f"{e.__class__.__name__}: {str(e)[:160]}"}
+        # The shared block a collector reads in its first call: PRELIM's
+        # evidence (cite, never re-search), the internal documents, the peers
+        # and the estate. One file per category, so the `cat` is one path.
+        # THE ENTITY'S OWN WORDS (2026-10-09): the sub-vertical lexicon rides
+        # in the card a collector reads first, so it translates each cell's
+        # catalogue question into how THIS business names it before searching.
+        try:
+            lex = json.loads((Path(__file__).resolve().parent / "data" /
+                              "subvertical_lexicon.json").read_text())
+            sv = str(self._md().get("sub_vertical") or "").upper()
+            if isinstance(shared, dict) and sv in lex:
+                shared = {"search_lexicon": {"sub_vertical": sv, **lex[sv]}, **shared}
+        except (OSError, ValueError):
+            pass
+        shared_json = json.dumps(shared, separators=(",", ":"))[:16000]
+        for cat in cats:
+            d = out / cat
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "_shared.json").write_text(shared_json)
+            for cap in open_caps.get(cat, {}):
+                try:
+                    card = orient.capability_card(self.wb, cap, run=self.run)
+                except Exception as e:                   # noqa: BLE001
+                    card = {"capability": cap, "error": f"{e.__class__.__name__}: {str(e)[:160]}"}
+                (d / f"{cap}.json").write_text(json.dumps(card, separators=(",", ":")))
+            # THE REPAIR CARD. A gap-only wave collects for CLOSED cells (the
+            # gate's blockers), which the open-cell cards do not carry — the
+            # first live gap wave (R-IMA-20261009) found none of its six cells
+            # on any card and, rightly, did nothing. Their questions, per
+            # facet, from the DQ bank, with the gate term each cell fails.
+            rep = (repairs or {}).get(cat) or {}
+            if rep:
+                from . import kg
+                rows = {}
+                for cell, terms in sorted(rep.items()):
+                    try:
+                        dq = kg.dqs_for(self.wb, cell)
+                        qs = {str(q.get("facet") or "").lower(): q.get("question")
+                              for q in (dq.get("answerable") or dq.get("ask") or [])}
+                    except Exception:                    # noqa: BLE001
+                        qs = {}
+                    rows[cell] = {"terms": list(terms), "questions": qs}
+                (d / "_repairs.json").write_text(json.dumps(
+                    {"category": cat, "cells": rows,
+                     "note": "closed cells the gate names; collect for the facets "
+                             "each owes, log with the cell, register what comes back"},
+                    separators=(",", ":")))
+        return out
+
+    def _render_agent_prompts(self, handoff: Path, kind: str = "research") -> dict:
+        """The same batch/challenge prompts the workflow would run, on disk.
+
+        Measured 2026-10-01 (Cross Insurance): a resumed session came back
+        without the Workflow tool, and the handoff's only remedy was "restart
+        the session" — the owner would not, and the run sat at RESEARCH. The
+        prompts are rendered from the workflow's own source (render-prompts.mjs
+        evaluates its PROMPTS region), so a session without Workflow spawns
+        one in-session Agent per batch file, then the challenge file per
+        category, and runs `then` — identical work, no new session. Rendering
+        needs the handoff on disk first, so it is written once before this and
+        again after. A render failure is stated, never fatal."""
+        out = self.run.root / "briefs" / f"{kind}_agents"
+        script = PLUGIN / "workflows" / "render-prompts.mjs"
+        how = ("no Workflow tool: for each manifest row spawn ONE in-session Agent "
+               "with the file's text as its prompt (model and subagent_type from "
+               "the row) — every `collect` row in parallel (haiku collectors), then "
+               "the category's `orchestrate` row (sonnet: completeness, syntheses, "
+               "absences, gaps), a second collect pass by hand for any gaps it "
+               "names, then its `challenge` row — then run `then`")
+        if kind == "reports":
+            how = ("no Workflow tool: for each manifest `write` row spawn ONE in-session "
+                   "Agent with the file's text as its prompt (subagent_type from the row), "
+                   "all in parallel; as each returns, spawn its `review` row (the "
+                   "report-validator — never the writer); a REVISE without upstream goes "
+                   "back to its writer once more; when every section of a report passes, "
+                   "spawn that report's `cross` row; then run `then`")
+        info = {"dir": str(out), "manifest": str(out / "manifest.json"), "how": how}
+        try:
+            r = subprocess.run(["node", str(script), str(handoff), str(out)],
+                               capture_output=True, text=True, timeout=120)
+            if r.returncode != 0:
+                info["error"] = (r.stderr or r.stdout).strip()[:300]
+        except (OSError, subprocess.SubprocessError) as exc:
+            info["error"] = f"{type(exc).__name__}: {exc}"[:300]
+        return info
+
+    def _pull_toolkits(self) -> Path | None:
+        """The four pillar toolkits, fetched into the run when none is named.
+
+        Measured 2026-09-30 (SWBC): no instruction anywhere told a session to
+        set DMA_TOOLKITS_DIR or run `drive_fetch.py pull-toolkits`, so KG fell
+        back to the 71 category questions on every run whose operator did not
+        already know — per-subcap diagnostics lost silently, with `env`
+        listing it as a soft row. The toolkits are on the intake Drive and
+        the service account can read them; fetching them is the default now,
+        and a fetch that fails is logged and degrades exactly as before."""
+        dest = self.run.root / "toolkits"
+        have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
+        if len(have) == 4:
+            return dest
+        r = subprocess.run([sys.executable, str(PLUGIN / "scripts" / "drive_fetch.py"),
+                            "pull-toolkits", "--dest", str(dest)],
+                           capture_output=True, text=True, timeout=600)
+        have = sorted(dest.glob("Pillar*_Scoring_Toolkit.xlsx"))
+        self.opts.log(f"  [KG] pull-toolkits rc={r.returncode}: {len(have)} of 4 "
+                      f"toolkits in {dest}")
+        return dest if have else None
+
+    def _stage_research(self) -> str:
+        if self.opts.research_mode == "tiers":
+            return self._stage_research_tiers()
+        from . import brief, cost, floors_gate
+        self._reset_counters()
+        # SAY IT BEFORE SPENDING IT. A lane that cannot finish its category in
+        # the turns it is given does not fail loudly — it runs out, hands back,
+        # and is re-dispatched, re-paying its context floor cold each time.
+        # Measured 2026-09-12 at T1_CORE: 16 of 16 categories over, 37.7
+        # lane-equivalents of work against 16 lanes. Knowable before a single
+        # lane starts, and it was never computed. It projects capability
+        # grain now (2026-09-13), which with the manifests at 340 turns puts
+        # a full T1_CORE run at 11.5 lane-equivalents and every category
+        # inside its lane — so a FAIL here means a scope this driver really
+        # cannot finish, not the standing state of every run.
+        try:
+            fit = cost.lane_fit(self.wb)
+            if not fit["ok"]:
+                self.opts.log(f"  [RESEARCH] LANE FIT: {fit['why'][:400]}")
+                self.state["lane_fit"] = {k: fit[k] for k in
+                                          ("lane_turns", "over", "projected_turns",
+                                           "lane_equivalents")}
+                self._save_state()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (lane fit not projected: {str(e)[:120]})")
+        self._stalled("RESEARCH")                        # seed the signature
+        for r in range(self.opts.max_rounds):
+            need = brief.categories_needing_dispatch(self.wb)
+            if not need["dispatch"]:
+                return self._research_summary(r)
+            # A category whose own outcomes have not moved for `stall_rounds`
+            # rounds stops being dispatched. The rest carry on — a stall is a
+            # property of a category, not of the stage (see
+            # `_research_stalled`).
+            work = [c for c in need["dispatch"] if c not in self._cat_stalled]
+            if not work:
+                self._stalled_at = self._rounds
+                self.opts.log(f"  [RESEARCH] every open category has stalled "
+                              f"({', '.join(sorted(self._cat_stalled))}) — stopping at "
+                              f"round {self._rounds} of {self.opts.max_rounds}")
+                break
+            self._rounds = r + 1               # a round is counted when it dispatches
+            # Each dispatch is a FRESH conversation per category, so each
+            # category's search window opens here (ledger: the ceiling is per
+            # conversation; it used to be one run-wide window for all lanes) —
+            # BEFORE the brief is rendered, so the budget it prints is the one
+            # the lane actually has.
+            from . import runstate as _rs
+            _rs.checkpoint(self.wb, f"RESEARCH round {r + 1} dispatch", scope=list(work))
+            self.reopen()
+            b = brief.batch(self.wb, run=self.run, out_dir=self._briefs(f"research_r{r}"),
+                            only=work, with_handback=(r > 0))
+            self._count(self._dispatch(b, stage="RESEARCH"))
+            # CHALLENGE ONLY WHAT HAS CONVERGED. The stage used to run for
+            # every category every round, on one opus lane per category —
+            # judging syntheses the next round would rewrite. The probe is
+            # the floors gate with its challenge terms deferred, asked
+            # WITHOUT recording: a PASS written here would read as "this
+            # category is done" and the challenge it asks about would never
+            # be dispatched.
+            converged = [c for c in work
+                         if floors_gate.run(self.wb, c, require_synthesis=True,
+                                            require_challenge=False,
+                                            persist=False)["gate"] == "PASS"]
+            cb = brief.challenge_batch(self.wb, run=self.run, categories=converged,
+                                       out_dir=self._briefs(f"challenge_r{r}")) \
+                if converged else {"lanes": 0}
+            if cb.get("lanes"):
+                self._count(self._dispatch(cb, stage="CHALLENGE"))
+            if cb.get("deferred_cells"):
+                # Empty by construction since 2026-09-16 — a trim re-pages
+                # rather than deferring. Kept as a loud alarm: if this ever
+                # fires again the stage has stopped converging and the
+                # category cannot close, which is worth a line in the log
+                # rather than a silent four-round grind.
+                self.opts.log(f"  [CHALLENGE] {len(cb['deferred_cells'])} cell(s) "
+                              f"did not fit their page and stay unchallenged: "
+                              f"{', '.join(cb['deferred_cells'][:6])}")
+            if cb.get("abridged_cells"):
+                self.opts.log(f"  [CHALLENGE] {len(cb['abridged_cells'])} cell(s) "
+                              f"ship with their weakest evidence rows held back "
+                              f"to fit the lane budget: "
+                              f"{', '.join(cb['abridged_cells'][:6])}")
+            for cat in work:
+                floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
+            self._verify_research(work)
+            self._enrich_research(work, r)
+            self._record_grain(work)
+            # THE ROUND IS THE UNIT THAT SURVIVES. The notebooks are the one
+            # thing in the run tree that a dead container loses and no gate
+            # can rebuild, so the backup happens at the end of every round
+            # rather than at the end of the stage — a stage that is stopped
+            # by a ceiling, a stall or `--step` has still earned its copy.
+            self._backup_memory()
+            self.reopen()
+            newly = self._research_stalled(work)
+            for cat in newly:
+                if cat not in self._cat_stalled:
+                    self._cat_stalled.append(cat)
+                    self.opts.log(f"  [RESEARCH] {cat}: no outcome moved for "
+                                  f"{self.opts.stall_rounds} round(s) — not dispatching it "
+                                  f"again; more rounds would not have helped")
+            if self._over_wall():
+                # The same argument as the budget, for the other ceiling:
+                # ten rounds of sixteen lanes happen inside ONE stage, so a
+                # between-stages-only wall clock cannot stop the stage that
+                # spends the hours.
+                self.opts.log(f"  [RESEARCH] wall clock "
+                              f"{self.opts.max_wall_min} min reached — stopping "
+                              f"at round {self._rounds}")
+                self._wall_stopped = True
+                break
+            if self._over_budget():
+                # A between-stages-only ceiling cannot stop the stage that
+                # spends the money: ten rounds x 16 lanes all happen inside
+                # ONE stage. This is the check that actually bites.
+                self.opts.log(f"  [RESEARCH] budget ${self._spent_usd:.2f} of "
+                              f"${self.budget_usd():.2f} — stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
+            if self._over_stage_budget("RESEARCH"):
+                b = self._stage_budget_hit
+                self.opts.log(f"  [RESEARCH] envelope ${b['spent']:.2f} of ${b['ceiling']:.2f} "
+                              f"— stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
+            if self._stalled("RESEARCH"):
+                break
+            if self.opts.step:
+                # ONE ROUND, then hand back — the round loop is not run a
+                # second time here, it is re-entered by the next `--step`
+                # from the state on disk. The stall and ceiling checks come
+                # first on purpose: a round that stopped for one of those
+                # reasons must keep saying so rather than report a clean step.
+                if not brief.categories_needing_dispatch(self.wb)["dispatch"]:
+                    # …unless the round FINISHED the stage. Handing back here
+                    # would cost a whole extra invocation to discover that
+                    # there was nothing left to do.
+                    continue
+                self._step_stopped = True
+                self.opts.log(f"  [RESEARCH] --step: round {self._rounds} complete; "
+                              f"handing back to the conductor")
+                break
+        if self._step_stopped:
+            return f"round {self._rounds} complete (--step); RESEARCH continues"
+        need = brief.categories_needing_dispatch(self.wb)
+        if need["dispatch"]:
+            # A category held back by the ENRICHMENT gate ALONE is disclosed,
+            # not refused: the budget is spent, the floors gate passed it,
+            # and a stage that cannot end while the harness binds no connector
+            # to a headless child is a wall, not a gate.
+            only_enrichment = brief.enrichment_failing_only(self.wb, need["dispatch"])
+            if only_enrichment:
+                self._disclose_enrichment(only_enrichment, why="round budget spent")
+                self.reopen()
+                need = brief.categories_needing_dispatch(self.wb)
+        if need["dispatch"]:
+            raise StageRefused(
+                f"{len(need['dispatch'])} category(ies) still failing the floors gate after "
+                f"{self._rounds} round(s): "
+                + "; ".join(f"{c}: {', '.join(need['reasons'][c][:4])}"
+                            for c in need["dispatch"][:4])
+                + self._stall_note())
+        return self._research_summary(self._rounds)
+
+    # ── RESEARCH AS LEAN HEADLESS TIERS (2026-10-09) ───────────────────
+    #
+    # The owner: "fix the context floor too, run collectors headless". The
+    # in-session workflow subagent opened at 73,778 tokens (harness, CLAUDE.md,
+    # skills, 36 connector schemas) for a ~3K prompt; a LEAN lane opens at
+    # ~6.5K plus its manifest body (agent_run.py `lean_command`). The tiers are
+    # the workflow's: haiku collectors per capability batch, one sonnet
+    # orchestrator per category, one sonnet challenger, the floors gate — the
+    # prompts rendered from the SAME source (`render-prompts.mjs` evaluates the
+    # workflow's PROMPTS region), so the two paths cannot drift. What changes
+    # is who pays the floor and who reads the bill: every batch books its
+    # exact dollars to the ledger (`--record-stage`), so the envelope is read
+    # from spend, never estimated from a token counter.
+    TIER_TOOLS = {"collect": ["Bash", "Read", "WebSearch", "WebFetch"],
+                  "orchestrate": ["Bash", "Read"],
+                  "challenge": ["Bash", "Read"]}
+    TIER_AGENT = {"collect": "research-evidence-collector",
+                  "orchestrate": "research-category-orchestrator",
+                  "challenge": "research-challenger"}
+
+    def _tier_rows(self, manifest: list, kind: str, cats: list, rnd: int,
+                   extra_text: dict | None = None) -> list:
+        rows = []
+        for i, m in enumerate(r for r in manifest if r.get("kind") == kind
+                              and r.get("category") in cats):
+            cat = m["category"]
+            actor = {"collect": f"research-{cat.lower()}-collector",
+                     "orchestrate": f"research-{cat.lower()}-producer",
+                     "challenge": "research-challenger"}[kind]
+            pf = Path(m["file"])
+            if extra_text and extra_text.get(cat):
+                pf.write_text(pf.read_text() + extra_text[cat])
+            rows.append({"agent": self.TIER_AGENT[kind], "prompt_file": str(pf),
+                         "label": f"research-{cat.lower()}-{kind}-{Path(m['file']).stem.lower()}-r{rnd}",
+                         "lean": {"model": m.get("model"), "tools": self.TIER_TOOLS[kind],
+                                  "cwd": str(self.run.root), "actor": actor}})
+        return rows
+
+    def _tier_dispatch(self, rows: list, *, stage: str, name: str) -> dict:
+        if not rows:
+            return {"dispatched": 0, "ok": 0, "failed": []}
+        d = self._briefs(name)
+        d.mkdir(parents=True, exist_ok=True)
+        path = d / "batch.json"
+        path.write_text(json.dumps(rows, indent=1))
+        return self._dispatch({"batch": str(path), "lanes": len(rows)}, stage=stage)
+
+    def _collector_returns(self, cats: list, rnd: int) -> dict:
+        """Each category's collector returns (their final JSON), appended to
+        the orchestrator's prompt — the `nothing_found` notes the absence
+        ladder is written from. Read from the lanes' transcripts' final text."""
+        logs = self.run.root / "agent_logs"
+        out = {}
+        for cat in cats:
+            parts = []
+            for f in sorted(logs.glob(f"research-{cat.lower()}-collect-*-r{rnd}.status.json")):
+                tx = f.with_name(f.name.replace(".status.json", ".jsonl"))
+                final = ""
+                try:
+                    for line in tx.read_text(errors="replace").splitlines():
+                        try:
+                            ev = json.loads(line)
+                        except ValueError:
+                            continue
+                        if ev.get("type") == "result" and ev.get("result"):
+                            final = str(ev["result"])
+                except OSError:
+                    continue
+                if final:
+                    parts.append(final[-3500:])
+            if parts:
+                out[cat] = ("\n\nTHE COLLECTORS' RETURNS (their own reports; the "
+                            "workbook is the truth — trust a row, not a sentence):\n"
+                            + "\n---\n".join(parts))
+        return out
+
+    def tier_round(self, cats: list, r: int, manifest: list) -> dict:
+        """ONE tiers round for `cats`: collect, orchestrate, challenge, gate.
+
+        Called by the driver's own loop (`--tiers-direct`, a Routine or CI with
+        no session) and by `engine.tiers work`, the per-category job the
+        visible `dma-research-tiers.js` workflow starts. It writes no driver
+        state: several category jobs run it at once, and the state file is the
+        driver's. Returns per-phase {lanes, ok, failed, usd, elapsed_s} and
+        the gate per category."""
+        from . import floors_gate
+        out: dict = {"cats": list(cats), "round": r, "phases": {}, "gates": {}}
+
+        def phase(kind, stage, extra=None):
+            rows = self._tier_rows(manifest, kind, cats, r, extra_text=extra)
+            summ = self._tier_dispatch(rows, stage=stage,
+                                       name=f"tiers_{kind}_{'_'.join(c.lower() for c in cats)}_r{r}")
+            self._count(summ)
+            out["phases"][kind] = {"lanes": len(rows), "ok": summ.get("ok"),
+                                   "failed": len(summ.get("failed") or []),
+                                   "usd": summ.get("usd"), "turns": summ.get("turns"),
+                                   "elapsed_s": summ.get("elapsed_s")}
+            return summ
+
+        # 1. COLLECT — every batch of the categories, side by side.
+        phase("collect", "RESEARCH")
+        if self._over_stage_budget("RESEARCH"):
+            self._budget_stopped = True
+            self.opts.log("  [RESEARCH] envelope spent after collection — the syntheses "
+                          "are owed; stopping")
+            out["stopped"] = "AT_STAGE_BUDGET after collection"
+            return out
+        # 2. ORCHESTRATE — completeness, syntheses, absences, gaps.
+        phase("orchestrate", "RESEARCH", extra=self._collector_returns(cats, r))
+        # 3. CHALLENGE — the independent pass, then the gate.
+        if not self._over_stage_budget("RESEARCH"):
+            phase("challenge", "CHALLENGE")
+        self.reopen()
+        for cat in cats:
+            g = floors_gate.run(self.wb, cat, require_synthesis=True, qa_dir=self.run.qa_dir)
+            out["gates"][cat] = floors_gate.summary(g) if isinstance(g, dict) else g
+        self._verify_research(cats)
+        self.reopen()
+        return out
+
+    def _stage_research_tiers(self) -> str:
+        from . import brief, floors_gate
+        self._reset_counters()
+        self._stalled("RESEARCH")
+        only = {c.strip().upper() for c in (self.opts.only_categories or []) if c.strip()}
+
+        def _need():
+            n = brief.categories_needing_dispatch(self.wb)
+            return [c for c in n["dispatch"] if not only or c in only]
+
+        for r in range(self.opts.max_rounds):
+            if not _need():
+                break
+            # The handoff does the pricing, the whole-category allocation, the
+            # repair routing, the stall book, the cards and the prompts; a
+            # spent envelope or one that funds no category raises here,
+            # before any lane is paid for.
+            try:
+                h = self._research_handoff()
+            except StageRefused as e:
+                if "AT_STAGE_BUDGET" in str(e):
+                    self._budget_stopped = True     # a budget stop, not a gate failure
+                raise
+            cats = [c for i in h["invocations"] for c in i["cats"]]
+            if not cats:
+                self.opts.log("  [RESEARCH] nothing handed this round (every open "
+                              "category stalled) — stopping")
+                break
+            self._rounds = r + 1
+            doc = json.loads(Path(h["file"]).read_text())
+            info = doc.get("agent_prompts") or {}
+            try:
+                manifest = json.loads(Path(info.get("manifest", "")).read_text())
+            except (OSError, ValueError):
+                raise StageRefused(f"the research prompts did not render "
+                                   f"({info.get('error') or 'no manifest'}) — "
+                                   f"node and workflows/render-prompts.mjs are required")
+            from . import runstate as _rs
+            _rs.checkpoint(self.wb, f"RESEARCH tiers round {r + 1}", scope=list(cats))
+            self.reopen()
+            self.opts.log(f"  [RESEARCH] tiers round {r + 1}: {len(cats)} categor"
+                          f"{'y' if len(cats) == 1 else 'ies'} "
+                          f"({', '.join(cats)}), est ${doc['estimate']['usd']:.2f} for the scope"
+                          + (f"; {len(doc['deferred_for_budget']['categories'])} deferred for budget"
+                             if doc.get("deferred_for_budget") else ""))
+            res = self.tier_round(cats, r, manifest)
+            if res.get("stopped"):
+                break
+            self._record_grain(cats)
+            self._backup_memory()
+            self.reopen()
+            if self._over_wall():
+                self._wall_stopped = True
+                break
+            if self._over_budget():
+                self._budget_stopped = True
+                break
+            if self._over_stage_budget("RESEARCH"):
+                self._budget_stopped = True
+                break
+            if self.opts.step:
+                break
+        still = _need()
+        rest = [c for c in brief.categories_needing_dispatch(self.wb)["dispatch"] if c not in only]
+        if not still and not (only and rest):
+            return self._research_summary(self._rounds)
+        if self._budget_stopped and self._stage_budget_hit:
+            raise StageRefused(self._stage_budget_refusal("RESEARCH"))
+        if self._wall_stopped or self.opts.step:
+            return (f"tiers stopped after {self._rounds} round(s); "
+                    f"{len(still)} categor{'y' if len(still) == 1 else 'ies'} still open")
+        if not still:
+            # The NAMED scope passed; the stage is not done while categories
+            # outside it are open, and says so rather than reading as a fail
+            # of the work it was asked to do.
+            raise ScopeComplete(f"the named scope ({', '.join(sorted(only))}) PASSES the floors "
+                               f"gate after {self._rounds} round(s); RESEARCH stays open for the "
+                               f"{len(rest)} categor{'y' if len(rest) == 1 else 'ies'} outside "
+                               f"--only-categories — run again without the flag (or with "
+                               f"them) to continue")
+        raise StageRefused(f"RESEARCH (tiers) did not converge in {self._rounds} round(s): "
+                           f"{', '.join(sorted(still))} still failing the floors "
+                           f"gate; the gate's own blockers are in 07_qa/floors_<CAT>.json")
+
+    def _research_summary(self, rounds: int) -> str:
+        """The stage detail names every category whose connector gap was
+        disclosed rather than closed — on both exits, so the record never
+        reads as a clean pass when it was not one."""
+        disclosed = sorted((self.state.get("enrichment_disclosed") or {}).keys())
+        return (f"every category PASS after {rounds} round(s)"
+                + (f"; ENRICHMENT disclosed (no connector search) for {', '.join(disclosed)}"
+                   if disclosed else ""))
+
+    def _enrich_research(self, categories, round_no: int) -> None:
+        """The connector half of a research round (MEM-0333; owner 2026-09-07).
+
+        1. HARVEST the `search_requests` this round's lanes emitted into the
+           relay queue — a lane that could not run a connector said so; the
+           saying must land somewhere.
+        2. RECONCILE what the previous round's batches closed, then DRAIN
+           the rest. In the default `orchestrator` mode that means writing
+           one batch file and one self-contained prompt per capability and
+           dispatching NOTHING: the conductor spins a fresh in-process
+           subagent per prompt, which inherits the session's connectors,
+           and the driver records the batch path and carries on rather than
+           stopping on it. In `lane` mode it is the old dispatch: one
+           `enrichment-web-specialist` lane per category with open requests,
+           then a reconcile against the Search_Log those lanes wrote.
+        3. GATE: per category, an ENRICHMENT row from the Search_Log's Tool
+           column. A category whose cells this round's batch names, with
+           requests still OPEN and none of them BLOCKED, is
+           PENDING_ORCHESTRATOR: work in flight with the only actor that
+           holds a connector, so no heal is spent and nothing is disclosed.
+           Otherwise: zero connector searches → FAIL, BLOCKING while the heal
+           budget lasts (the category re-enters the round loop as a FRESH lane
+           instance carrying the measured reason — grants / instruction /
+           logging / manifest — and the open requests), then FAIL
+           NON-BLOCKING: disclosed, recorded, and no longer a re-dispatch.
+
+        FAIL-SAFE BY CONSTRUCTION, like the verifier: an error in the relay
+        leaves the category exactly as the floors gate found it, logged."""
+        try:
+            from . import relay
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"[ENRICH] skipped: relay unavailable ({e.__class__.__name__})")
+            return
+        logs = self.run.root / "agent_logs"
+        #: categories whose cells are named by a batch this round wrote and
+        #: that nothing in this container can service — see the gate loop.
+        pending_cats: set = set()
+        try:
+            h = relay.harvest(self.run, list(categories), logs_dir=logs, round_no=round_no)
+            if h["harvested"]:
+                self.opts.log(f"[RELAY] harvested {h['harvested']} search request(s): "
+                              f"{h['by_category']}")
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"[RELAY] harvest skipped ({e.__class__.__name__}: {str(e)[:120]})")
+        if self.opts.relay:
+            try:
+                # RECONCILE FIRST, every round: in orchestrator mode the
+                # batches of the previous round were serviced by subagents
+                # the driver never saw, so their Search_Log rows are the
+                # only report that they landed. Reconciling before draining
+                # means this round's batch carries what is still open, not
+                # what was open when the driver last looked.
+                rc0 = relay.reconcile(self.run, self.wb)
+                n0 = sum((rc0.get("closed") or {}).values())
+                if n0:
+                    self.opts.log(f"[RELAY] reconciled {n0} serviced request(s) "
+                                  f"{rc0['closed']}; still open {rc0['still_open']}")
+                d = relay.drain_batch(self.run, self.wb, out_dir=self._briefs(f"relay_r{round_no}"),
+                                      categories=list(categories),
+                                      mode=self.opts.relay_mode)
+                if d.get("lanes"):
+                    self.opts.log(f"[RELAY] draining {d['requests']} request(s) over "
+                                  f"{d['lanes']} specialist lane(s)")
+                    self._count(self._dispatch(d, stage="RELAY"))
+                    rc = relay.reconcile(self.run, self.wb)
+                    self.opts.log(f"[RELAY] reconciled: {rc['closed']}; "
+                                  f"still open {rc['still_open']}")
+                elif d.get("batch_file"):
+                    # ORCHESTRATOR MODE. The driver does not stop on a
+                    # pending batch and does not pretend it was serviced:
+                    # it records where the work is and carries on, and the
+                    # conductor services it between rounds.
+                    self.opts.log(
+                        f"[RELAY] {d['pending']} request(s) → "
+                        f"{len(d['prompts'])} batch(es) for the conductor: "
+                        f"{d['batch_file']}")
+                    pend = self.state.setdefault("relay_batches", [])
+                    if d["batch_file"] not in pend:
+                        pend.append(d["batch_file"])
+                    pending_cats = self._batch_categories(d["batch_file"])
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[RELAY] drain skipped ({e.__class__.__name__}: {str(e)[:120]})")
+        heals = self.state.setdefault("enrichment_heals", {})
+        for cat in categories:
+            try:
+                plan = relay.heal_plan(self.run, self.wb, cat, logs_dir=logs)
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[ENRICH] {cat}: skipped ({e.__class__.__name__})")
+                continue
+            st = plan["status"]
+            try:
+                # A BATCH IN FLIGHT IS NOT A GAP. In orchestrator mode the
+                # driver writes the relay work and hands it to the conductor,
+                # whose in-process subagents are the only actors here holding
+                # a connector. Until that batch comes back, this category has
+                # no connector search because nobody has run one yet — not
+                # because a connector refused. Spending a heal on it buys a
+                # fresh lane's context floor to rediscover a tool this
+                # container does not have, and disclosing it states a gap
+                # that is merely unfinished work. So: a non-blocking row that
+                # names the state, no heal, no disclosure.
+                #
+                # The exception is the one measurement that changes the
+                # diagnosis: a request the conductor recorded BLOCKED. That
+                # IS a connector refusing, and it falls through to the heal
+                # and disclosure path below like any other measured gap.
+                if (cat in pending_cats and st["enrichment_searches"] == 0
+                        and not self._relay_blocked(cat)):
+                    L.append_gate(
+                        self.wb, gate="ENRICHMENT", scope=cat,
+                        verdict="PENDING_ORCHESTRATOR", blocking=False,
+                        detail=(f"{plan['open_requests']} relay request(s) batched for the "
+                                f"conductor and not yet serviced; {st['searches']} search(es) "
+                                f"so far all through {', '.join(st['tools']) or 'nothing'}"))
+                    self.opts.log(f"[ENRICH] {cat}: PENDING — {plan['open_requests']} "
+                                  f"relay request(s) with the conductor; no heal spent")
+                    continue
+                if st["searches"] == 0:
+                    L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="NOT_RUN",
+                                  detail=plan["reason"], blocking=False)
+                    continue
+                if st["enrichment_searches"] > 0:
+                    L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="PASS",
+                                  detail=plan["reason"], blocking=False)
+                    heals.pop(cat, None)
+                    (self.state.get("enrichment_disclosed") or {}).pop(cat, None)
+                    continue
+                used = int(heals.get(cat) or 0)
+                terms = [f"no enrichment connector was asked: {st['searches']} search(es) all "
+                         f"through {', '.join(st['tools']) or 'nothing'}",
+                         f"heal={plan['heal']}: {plan['reason']}",
+                         f"open relay requests {plan['open_requests']}"]
+                blocked = self._relay_blocked(cat)
+                if blocked:
+                    terms.append(f"{blocked} relay request(s) recorded BLOCKED: a "
+                                 f"connector refused them, so this is a measured "
+                                 f"gap and not a batch still in flight")
+                if plan["heal"] == "unbound":
+                    # A heal is a FRESH LANE INSTANCE. Spending one on an
+                    # unbound connector buys a full context floor to rediscover
+                    # that the tool is still absent — there is nothing in the
+                    # container for a retry to reach. Disclose at once and keep
+                    # the budget for the gaps a lane can actually close.
+                    self._disclose_enrichment([cat], why="connector unbound in this "
+                                                         "container — a retry cannot reach it",
+                                              plans={cat: plan})
+                    self.opts.log(f"[ENRICH] {cat}: UNBOUND — disclosed without spending "
+                                  f"a heal; {plan['reason'][:120]}")
+                    continue
+                if used < self.opts.enrichment_heals:
+                    heals[cat] = used + 1
+                    terms.append(f"fresh lane instance {used + 1} of {self.opts.enrichment_heals}")
+                    L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="FAIL",
+                                  detail="; ".join(terms), blocking=True)
+                    self.opts.log(f"[ENRICH] {cat}: REVISE — {terms[0][:100]}; heal={plan['heal']}")
+                else:
+                    self._disclose_enrichment([cat], why=f"heal budget spent ({used})",
+                                              plans={cat: plan})
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[ENRICH] {cat}: gate write skipped ({e.__class__.__name__})")
+        self._save_state()
+
+    def _disclose_enrichment(self, categories, *, why: str, plans: dict | None = None) -> None:
+        """Write the ENRICHMENT FAIL for these categories NON-blocking and
+        record it in the driver state — a stated gap, never a silent pass."""
+        from . import relay
+        disclosed = self.state.setdefault("enrichment_disclosed", {})
+        for cat in categories:
+            plan = (plans or {}).get(cat)
+            if plan is None:
+                try:
+                    plan = relay.heal_plan(self.run, self.wb, cat,
+                                           logs_dir=self.run.root / "agent_logs")
+                except Exception as e:                          # noqa: BLE001
+                    plan = {"heal": "unmeasured", "reason": f"{e.__class__.__name__}",
+                            "status": {"searches": None, "tools": []}, "open_requests": None}
+            st = plan["status"]
+            detail = "; ".join([
+                f"DISCLOSED ({why}): no enrichment connector was asked for {cat}",
+                f"{st.get('searches')} search(es) all through {', '.join(st.get('tools') or []) or 'nothing'}",
+                f"heal={plan['heal']}: {plan['reason']}",
+                f"open relay requests {plan.get('open_requests')}"])
+            try:
+                L.append_gate(self.wb, gate="ENRICHMENT", scope=cat, verdict="FAIL",
+                              detail=detail[:900], blocking=False)
+            except Exception as e:                              # noqa: BLE001
+                self.opts.log(f"[ENRICH] {cat}: disclosure not written ({e.__class__.__name__})")
+            disclosed[cat] = {"at": _utcnow(), "why": why, "heal": plan["heal"],
+                              "reason": str(plan["reason"])[:300],
+                              "searches": st.get("searches"), "tools": st.get("tools"),
+                              "open_requests": plan.get("open_requests")}
+            self.opts.log(f"[ENRICH] {cat}: DISCLOSED — {detail[:140]}")
+        self._save_state()
+
+    def _verify_research(self, categories) -> None:
+        """The dispatch verifier for RESEARCH. After the floors gate reads the
+        Search_Log a lane wrote, this reads the lane's own transcript and
+        REVISEs a category whose logged searches no retrieval could have
+        produced — the fabrication the substrate gates structurally cannot
+        see. It records a DISPATCH_VERIFY row per category; a FAIL re-enters
+        the round loop through categories_needing_dispatch, with the reason in
+        the re-dispatch brief. FAIL-SAFE BY CONSTRUCTION: any error leaves the
+        category exactly as the floors gate found it, because a verifier that
+        cannot read the work must never block a run on a guess."""
+        try:
+            from . import verify
+        except Exception:                                   # noqa: BLE001
+            return
+        logs = self.run.root / "agent_logs"
+        for cat in categories:
+            try:
+                reasons = verify.research_lane_fabrication(cat, logs)
+            except Exception as e:                          # noqa: BLE001
+                self.opts.log(f"[VERIFY] {cat}: skipped ({e.__class__.__name__})")
+                continue
+            try:
+                if reasons:
+                    L.append_gate(self.wb, gate="DISPATCH_VERIFY", scope=cat,
+                                  verdict="FAIL", detail="; ".join(sorted(reasons)),
+                                  blocking=True)
+                    self.opts.log(f"[VERIFY] {cat}: REVISE — {reasons[0][:120]}")
+                else:
+                    L.append_gate(self.wb, gate="DISPATCH_VERIFY", scope=cat,
+                                  verdict="PASS",
+                                  detail="logged searches witnessed by retrieval "
+                                         "in the lane transcript", blocking=False)
+            except Exception as e:                          # noqa: BLE001
+                self.opts.log(f"[VERIFY] {cat}: gate write skipped ({e.__class__.__name__})")
+
+    def _stage_handoff(self) -> str:
+        from . import assessment as A
+        from . import handoff
+        self._reset_counters()
+        from . import intake
+        pre = A.research_ready(self.wb, self.run.qa_dir)
+        blk = intake.handoff_blocker(self.wb, self.run.root)
+        if blk:
+            pre = list(pre) + [blk]
+        if pre:
+            raise StageRefused("research is not ready to score:\n  - " + "\n  - ".join(pre))
+        doc = handoff.build(self.wb, qa_dir=self.run.qa_dir, strict=True)
+        out = self.run.deliverables / handoff.HANDOFF_NAME
+        # Through the packet writer, never bare json: the stage's own
+        # verification reads the sha256 sidecar write_packet leaves, and a
+        # packet written without it is "not written by engine.handoff"
+        # (measured 28-09-2026 on the CI pipeline walk, after the packet
+        # gained its hash).
+        handoff.write_packet(doc, out)
+        self.reopen()
+        return f"handoff written: {len(doc.get('subcap_records') or [])} records"
+
+    def _cohort_peers(self) -> None:
+        """Fill blank peer figures from the sub-vertical cohort (owner,
+        2026-10-06) before any rollup computes a gap. A connector that
+        cannot answer leaves the blanks and says so: the gap stays null
+        rather than the stage stopping on a comparison it can disclose."""
+        from . import prelim
+        rows = self.wb.rows("Peer_Benchmarks")
+        # Runs whenever a row is not yet the cohort's (blank, a placeholder,
+        # a non-cohort figure) — a blank-only trigger left sixteen `inferred`
+        # placeholders standing on Arbor Bank (2026-10-07).
+        if not rows or not any(prelim.peer_row_wants_cohort(r, has_figure=True)
+                               for r in rows):
+            return
+        reads = getattr(self.opts.reads, "cohort_benchmarks", None)
+        if reads is None:
+            return
+        md = self._md()
+        sv = str(md.get("sub_vertical") or "").strip()
+        if not sv:
+            return
+        try:
+            data = reads(sv, display_id=str(md.get("entity_id") or ""),
+                         entity_name=str(md.get("entity_name") or ""))
+        except Exception as e:                       # noqa: BLE001
+            data = {"_error": f"{e.__class__.__name__}: {str(e)[:200]}"}
+        if not isinstance(data, dict) or data.get("_error") or data.get("error"):
+            self.opts.log(f"  [COHORT] peer figures not filled — connector said: "
+                          f"{str((data or {}).get('_error') or (data or {}).get('error'))[:200]}")
+            return
+        got = prelim.fill_cohort_peers(self.wb, data)
+        self.reopen()
+        self.opts.log(f"  [COHORT] {sv}: {len(got['filled'])} categor(ies) from "
+                      f"{got.get('entities')} assessed entit(ies); "
+                      f"{len(got['cannot_estimate'])} below the floor")
+
+    def _scoring_handoff(self) -> dict:
+        """Write one scoring-workflow invocation per pillar still owed.
+
+        The rollup and gate run first: when the workflows have done their
+        work, this is how the stage closes without another handoff. A
+        headline still owed after every pillar PASSES is one cheap headless
+        lane, not a workflow."""
+        from . import assessment as A
+        from . import brief
+        if C.stage_of(self._md()) != "assessment":
+            A.open_stage(self.wb, self.run.qa_dir)
+            self.reopen()
+        self._cohort_peers()
+        try:
+            A.rollup(self.wb)
+        except A.ScoringRefusal:
+            pass
+        v = A.gate(self.wb, self.run.qa_dir)
+        self.reopen()
+        if v.get("gate") == "PASS":
+            self._handoff_clear("SCORING")
+            return {"passed": True, "summary": "SCORING gate PASS (workflow mode)"}
+        st = A.state(self.wb)
+        verdicts = st.get("critic_verdicts") or {}
+        pending = A.pending_moves(self.wb)["moves"]
+        b = brief.scoring_batch(self.wb, run=self.run, out_dir=self._briefs("scoring_wf"))
+        by_p: dict[str, list[str]] = {}
+        for row in self._lane_rows(b):
+            m = re.match(r"scoring-(P\d)", str(row.get("label") or ""))
+            if m:
+                by_p.setdefault(m.group(1), []).append(row["prompt_file"])
+        pillars = sorted({c[:2] for c in self.wb.selected_subcaps()})
+        owed = [p for p in pillars if by_p.get(p) or verdicts.get(p) != "PASS"
+                or any(m["subcap"].startswith(p) for m in pending)]
+        if not owed:
+            # every pillar PASSES and nothing is pending: only the headline
+            # (or another rollup term) is left — one headless lane.
+            c = brief.scoring_batch(self.wb, run=self.run,
+                                    out_dir=self._briefs("scoring_headline"), critic=True)
+            self._count(self._dispatch(c, stage="SCORING"))
+            try:
+                A.rollup(self.wb)
+            except A.ScoringRefusal:
+                pass
+            v = A.gate(self.wb, self.run.qa_dir)
+            self.reopen()
+            if v.get("gate") == "PASS":
+                return {"passed": True, "summary": "SCORING gate PASS (workflow mode)"}
+            raise StageRefused("SCORING gate FAIL with every pillar's critic PASS: "
+                               + ", ".join((v.get("blocking") or [])[:8]))
+        # every score, verdict and pending move the stage measures: a
+        # workflow that moved any of them advanced the stage.
+        import hashlib
+        why = self._handoff_guard("SCORING", {
+            "owed": owed, "pending": pending, "verdicts": verdicts,
+            "state": hashlib.sha256(json.dumps(st, sort_keys=True, default=str)
+                                    .encode()).hexdigest()})
+        if why:
+            raise StageRefused(why + f": pillar(s) {', '.join(owed)} still owed; blocking: "
+                               + ", ".join((v.get("blocking") or [])[:8])
+                               + f". Repair at source, then resume: {self.plan()['command']}")
+        env = self.stage_budget_block("SCORING")
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal("SCORING"))
+        inv = [{"pillar": p, "run": self.run.run_id, "root": str(self.run.root),
+                "eng": str(PLUGIN / "skills" / "dma-research"), "plugin": str(PLUGIN),
+                "briefs": by_p.get(p, []), "critic_brief": "",
+                "rounds": int(self.opts.critic_rounds),
+                "budget": {**env, "raise_with": "--stage-budget SCORING=<usd>"} if env else None,
+                "solutions_brief": ""}
+               for p in owed]
+        # THE SOLUTIONS DUTY rides on the first invocation while its tabs are
+        # empty — the lane path runs it beside the scorers, and the
+        # assessment report's preconditions stay shut without it.
+        if not all([r for r in self.wb.rows(t) if any(v not in (None, "") for v in r.values())]
+                   for t in ("Solution_Catalogue", "Platform_Peer_Adoption")):
+            sb = brief.scoring_batch(self.wb, run=self.run,
+                                     out_dir=self._briefs("scoring_wf_solutions"), solutions=True)
+            rows = self._lane_rows(sb)
+            if rows:
+                inv[0]["solutions_brief"] = rows[0]["prompt_file"]
+        doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per pillar — wait for all, then "
+                       "run `then`. No Workflow tool in this session? Re-run the driver "
+                       "with --scoring-mode lanes: scoring needs no connector.")}
+        path = self.run.qa_dir / SCORING_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        rows = sum(len(i["briefs"]) for i in inv)
+        return {"file": str(path), "invocations": inv,
+                "summary": f"{len(inv)} pillar workflow(s), {rows} scorer brief(s), "
+                           f"{len(pending)} pending critic move(s)"}
+
+    @staticmethod
+    def _lane_rows(batch: dict) -> list[dict]:
+        if not batch or not batch.get("batch") or not batch.get("lanes"):
+            return []
+        return json.loads(Path(batch["batch"]).read_text())
+
+    def _batch_pillars(self, batch: dict) -> set[str]:
+        """The pillars a scoring batch's scorer lanes are working."""
+        out = set()
+        for row in self._lane_rows(batch):
+            m = re.match(r"scoring-(P\d)", str(row.get("label") or ""))
+            if m:
+                out.add(m.group(1))
+        return out
+
+    def _only_pillars(self, batch: dict, *, include=None, exclude=None) -> dict:
+        rows = []
+        for row in self._lane_rows(batch):
+            m = re.match(r"scoring-critic-(P\d)", str(row.get("label") or ""))
+            p = m.group(1) if m else None
+            if p and include is not None and p not in include:
+                continue
+            if p and exclude is not None and p in exclude:
+                continue
+            if not p and include is not None:
+                continue                      # the headline lane runs once, unscoped
+            rows.append(row)
+        return self._write_batch(rows, Path(batch["batch"]).with_name("batch_selected.json")) \
+            if rows else {"lanes": 0}
+
+    def _merge_batches(self, batches: list[dict], name: str) -> dict:
+        rows = [row for b in batches for row in self._lane_rows(b)]
+        return self._write_batch(rows, self._briefs(name) / "batch.json") if rows else {"lanes": 0}
+
+    @staticmethod
+    def _write_batch(rows: list[dict], path: Path) -> dict:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+        return {"batch": str(path), "lanes": len(rows)}
+
+    def _stage_scoring(self) -> str:
+        from . import assessment as A
+        from . import brief
+        self._reset_counters()
+        if C.stage_of(self._md()) != "assessment":
+            A.open_stage(self.wb, self.run.qa_dir)
+            self.reopen()
+        self._cohort_peers()
+        self._stalled("SCORING")
+        for r in range(self.opts.max_rounds):
+            self._rounds = r + 1
+            # CONCURRENT, NOT SERIAL (measured 2026-10-05, Susser Bank:
+            # SCORING took 294 min). The solutions duty runs beside the
+            # scorers; a critic lane for every pillar that is already fully
+            # scored runs beside the re-score lanes of the others. Only a
+            # pillar still being scored waits for a second dispatch.
+            b = brief.scoring_batch(self.wb, run=self.run, out_dir=self._briefs(f"scoring_r{r}"))
+            first = [b]
+            if r == 0:
+                first.append(brief.scoring_batch(self.wb, run=self.run,
+                                                 out_dir=self._briefs("scoring_solutions"),
+                                                 solutions=True))
+            busy = self._batch_pillars(b)
+            c0 = brief.scoring_batch(self.wb, run=self.run,
+                                     out_dir=self._briefs(f"scoring_critic_r{r}a"), critic=True)
+            first.append(self._only_pillars(c0, exclude=busy))
+            self._count(self._dispatch(self._merge_batches(first, f"scoring_all_r{r}"),
+                                       stage="SCORING"))
+            if busy:
+                c = brief.scoring_batch(self.wb, run=self.run,
+                                        out_dir=self._briefs(f"scoring_critic_r{r}b"),
+                                        critic=True)
+                self._count(self._dispatch(self._only_pillars(c, include=busy),
+                                           stage="SCORING"))
+            rollup_note = ""
+            try:
+                A.rollup(self.wb)
+            except A.ScoringRefusal as e:
+                rollup_note = str(e)[:200]
+                if "headline" in rollup_note.lower():
+                    rollup_note = ("the rollup has no headline — the scoring-critic lane "
+                                   "records it (`engine.assessment rollup --headline '<one "
+                                   "institution-specific line, 40+ chars>'`) after its verdicts")
+                self.opts.log(f"  rollup refused: {rollup_note}")
+            v = A.gate(self.wb, self.run.qa_dir)
+            self.reopen()
+            if v.get("gate") == "PASS":
+                return f"SCORING gate PASS after {r + 1} round(s)"
+            self.opts.log(f"  SCORING gate {v.get('gate')}: {', '.join((v.get('blocking') or [])[:6])}")
+            if self._over_stage_budget("SCORING"):
+                b = self._stage_budget_hit
+                self.opts.log(f"  [SCORING] envelope ${b['spent']:.2f} of ${b['ceiling']:.2f} "
+                              f"— stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
+            if self._stalled("SCORING"):
+                break
+        v = A.gate(self.wb, self.run.qa_dir)
+        raise StageRefused(f"SCORING gate {v.get('gate')} after {self._rounds} round(s): "
+                           + ", ".join((v.get("blocking") or [])[:8])
+                           + (f"; {rollup_note}" if rollup_note else "")
+                           + self._stall_note())
+
+    def _ingest(self, label: str, *, after_seq: int | None) -> dict:
+        """Poll list_pending_runs until the entity's newest run is newer than
+        `after_seq`. Returns the row. Refuses on timeout — loudly."""
+        md = self._md()
+        ent_id = str(md.get("entity_id") or "").strip().lower()
+        ent_name = str(md.get("entity_name") or "").strip().lower()
+        deadline = self.opts.clock() + self.opts.ingest_timeout_s
+        polls = 0
+        self._kick_ingest(label)
+        while True:
+            polls += 1
+            try:
+                rows = self.opts.reads.pending_runs(display_id=ent_id or None)
+            except TypeError:                     # a reader without the filter
+                rows = self.opts.reads.pending_runs()
+            mine = [r for r in rows
+                    if str(r.get("display_id") or "").strip().lower() == ent_id
+                    or str(r.get("entity_name") or "").strip().lower() == ent_name]
+            # A row that names a request id is THIS run's only if the id is
+            # ours. Without this, INGEST_A (after_seq=None) took the entity's
+            # stale pending run from an earlier engagement on its first poll
+            # (2026-10-01, Cross Insurance: seq 1 from 2026-09-13 instead of
+            # the seq 2 this push created a minute later).
+            mine = _this_engagement(mine, str(getattr(self.run, "run_id", "") or ""),
+                                    str(md.get("reference_date") or ""))
+            fresh = [r for r in mine
+                     if after_seq is None or int(r.get("run_seq") or 0) > int(after_seq)]
+            if fresh:
+                fresh.sort(key=lambda r: int(r.get("run_seq") or 0))
+                row = fresh[-1]
+                self.state["connector"][label] = {"row": row, "polls": polls, "at": _utcnow()}
+                self._save_state()
+                return row
+            if self.opts.clock() >= deadline:
+                raise StageRefused(
+                    f"{label}: the connector did not ingest a new version for "
+                    f"{md.get('entity_name')} within {self.opts.ingest_timeout_s:.0f}s "
+                    f"({polls} poll(s)); the package scan runs every 30 minutes — "
+                    f"check the intake push, then run the pipeline again")
+            self.opts.sleep(self.opts.ingest_poll_s)
+
+    def _kick_ingest(self, label: str) -> None:
+        """Run the package scan NOW instead of waiting for its half-hour
+        Scheduler slot (measured 2026-10-05..08: 1735-3217 s idle per ingest,
+        twice a run). Never fatal — a failed kick leaves the poll to the
+        Scheduler and says so in the state."""
+        cmd = self.opts.ingest_kick_cmd
+        if not cmd:
+            return
+        rec = {"cmd": cmd, "at": _utcnow()}
+        try:
+            out = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                 timeout=900)
+            rec.update(rc=out.returncode, tail=(out.stdout or out.stderr)[-300:])
+            self.opts.log(f"  [{label}] ingest kick rc={out.returncode}")
+        except Exception as e:                       # noqa: BLE001
+            rec.update(error=str(e)[:300])
+            self.opts.log(f"  [{label}] ingest kick failed: {str(e)[:160]} — polling the Scheduler")
+        self.state.setdefault("ingest_kicks", []).append({"label": label, **rec})
+        self._save_state()
+
+    def _stage_ingest_a(self) -> str:
+        from . import assemble
+        self._reset_counters()
+        ck = assemble.checkpoint(self.run, self.opts.folder_root, push=self.opts.push,
+                                 stage_reached="SCORING_PASS")
+        self.state["connector"]["checkpoint_a"] = {"folder": ck.get("folder"),
+                                                   "pushed": ck.get("pushed"), "at": _utcnow()}
+        self._save_state()
+        row = self._ingest("ingest_a", after_seq=None)
+        self._set_md("connector_run_id", row["run_id"])
+        self._set_md("connector_ingest_after_seq", row.get("run_seq"))
+        return f"version A ingested as {row['run_id']} (seq {row.get('run_seq')})"
+
+    def _reconcile_register(self) -> None:
+        """Refuse REPORTS while Tech_Register contradicts evidence the run
+        holds (`techscan.contradictions`). No report writer may change the
+        register, and every section that reads it inherits the error; at
+        Susser Bank (2026-10-05) that cost seven report rounds and eight
+        reopened sections before anyone looked at the sheet."""
+        from . import techscan as TS
+        bad = TS.contradictions(self.wb)
+        if not bad:
+            L.append_gate(self.wb, gate="TECH_REGISTER_RECONCILE", scope="run",
+                          verdict="PASS", blocking=False,
+                          detail="no CLAIMED row is named by T1-T3 non-broker evidence it does not cite")
+            return
+        lines = "; ".join(f"{b['ts_id']} {b['product']} CLAIMED, named by {', '.join(b['evidence_ids'])}"
+                          for b in bad)
+        L.append_gate(self.wb, gate="TECH_REGISTER_RECONCILE", scope="run",
+                      verdict="FAIL", blocking=True, detail=lines[:900])
+        raise StageRefused(
+            f"Tech_Register contradicts the run's own evidence: {lines}. Re-strike "
+            f"each row from the cited excerpts before any section is written: "
+            f"`python3 -m engine.techscan restrike --run {self.run.run_id} "
+            f"--root {self.run.root} --ts <TS-nnn> --status CONFIRMED|INFERRED "
+            f"--method job_posting|public_document|vendor_announcement --provider web "
+            f"--evidence-id <E-id> --basis '<what the excerpt says>'`, "
+            f"then `engine.techscan reconcile` until it exits 0.")
+
+    def _enforcement_sweep(self, *, force: bool = False) -> dict | None:
+        """Run `scripts/enforcement_search.py` once per run, before the
+        report writers, and leave `qa/enforcement_rungs.json` for the C3
+        producer. Names, FDIC applicability and the charter state are read
+        from the workbook; the result is a non-blocking Gate_Log row —
+        PASS when every rung completed and none found an action, NOT_RUN
+        with the reason otherwise. Never a stage stop: a registry that is
+        down is a rung that says so, which is what the page then says."""
+        import os
+        import subprocess
+        import time
+        if not self.opts.enforcement_sweep:
+            return None
+        if "PYTEST_CURRENT_TEST" in os.environ and not force:
+            return None                               # never the network from a test
+        out = self.run.qa_dir / "enforcement_rungs.json"
+        try:
+            if out.is_file() and (time.time() - out.stat().st_mtime) < 7 * 86400:
+                return json.loads(out.read_text())
+        except Exception:                            # noqa: BLE001
+            pass
+        script = Path(__file__).resolve().parents[3] / "scripts" / "enforcement_search.py"
+        md = self._md()
+        names = [str(md.get("entity_name") or "").strip()]
+        sv = str(md.get("sub_vertical") or "").strip().upper()
+        cert, state = "", ""
+        for r in self.wb.rows("Firmographics"):
+            f = str(r.get("Field") or "").strip().lower()
+            v = str(r.get("Value") or "").strip()
+            if f in ("fdic_cert", "fdic_certificate", "cert_number", "fdic_cert_number"):
+                cert = v
+            elif f in ("hq", "headquarters") and v:
+                m = re.search(r",\s*([A-Z]{2})\b", v)
+                state = m.group(1) if m else state
+        cmd = [sys.executable, str(script)] + [x for n in names if n for x in ("--name", n)]
+        if cert:
+            cmd += ["--cert", cert]
+        if state:
+            cmd += ["--state", state]
+        if sv == "CU":
+            cmd += ["--no-fdic"]
+        cmd += ["--out", str(out)]
+        detail, verdict = "", "NOT_RUN"
+        try:
+            if not script.is_file():
+                raise FileNotFoundError(script)
+            self.run.qa_dir.mkdir(parents=True, exist_ok=True)
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
+            doc = json.loads(out.read_text()) if out.is_file() else {}
+            counts = doc.get("counts") or {}
+            if doc.get("verified"):
+                verdict, detail = "PASS", (f"{len(doc.get('sources_searched') or [])} rung(s), "
+                                           f"every one completed, no action found")
+            elif doc.get("actions_found"):
+                verdict, detail = "PASS", (f"{counts.get('RESOLVED')} rung(s) RESOLVED an "
+                                           f"action — the C3 producer records them with dates")
+            else:
+                detail = (f"{counts.get('NOT_RUN', '?')} rung(s) NOT_RUN: "
+                          + "; ".join(f"{x.get('source')}: {x.get('reason')}"
+                                      for x in (doc.get("sources_searched") or [])
+                                      if x.get("outcome") == "NOT_RUN")[:600]
+                          + (f" (exit {r.returncode}: {(r.stderr or '')[:120]})"
+                             if r.returncode not in (0, 2) else ""))
+        except Exception as e:                       # noqa: BLE001
+            detail = f"sweep did not run: {type(e).__name__}: {str(e)[:200]}"
+            doc = None
+        try:
+            L.append_gate(self.wb, gate="ENFORCEMENT_SWEEP", scope="run", verdict=verdict,
+                          blocking=False, detail=(detail or "no detail")[:900])
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        self.opts.log(f"  [ENFORCEMENT] {verdict}: {detail[:160]}")
+        return doc
+
+    def _report_probes(self) -> int:
+        """Run the probes the report templates demand BEFORE any writer
+        starts (`relay.report_probes`): vendor scope statements, initiative-
+        underway checks and peer platform adoption. Writers fill templates
+        from collected evidence and hold no web tool (owner, 2026-10-05), so
+        a probe nobody ran upstream is a gap no report round can close.
+        Always lane mode: REPORTS has no conductor between rounds to service
+        an orchestrator batch, and the drain brief carries the owner's
+        WebSearch failover for lanes that hold no connector."""
+        try:
+            from . import relay
+            q = relay.report_probes(self.run, self.wb)
+            # A new stage is a new conversation for the search ceiling: the
+            # research window per category was spent during RESEARCH, and
+            # without a fresh mark every probe on a busy category is refused
+            # unlogged (P2C3, 2026-10-05).
+            from . import runstate as RS_
+            cats = sorted({str(r.get("category") or "") for r in relay.open_requests(self.run)} - {""})
+            if cats:
+                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats)
+            if q["queued"]:
+                self.opts.log(f"  [PROBES] {q['queued']} report probe(s) derived from "
+                              f"Solution_Catalogue, Tech_Register and the peer set")
+            d = relay.drain_batch(self.run, self.wb, mode="lane",
+                                  out_dir=self._briefs("reports_probes"))
+            if not d.get("lanes"):
+                return 0
+            self.opts.log(f"  [PROBES] running {d['requests']} probe(s) over {d['lanes']} lane(s)")
+            self._count(self._dispatch(d, stage="REPORTS"))
+            rc = relay.reconcile(self.run, self.wb)
+            st = relay.state(self.run)["by_status"]
+            self.opts.log(f"  [PROBES] closed {rc.get('closed')}; queue now {st}")
+            if st.get("OPEN"):
+                L.append_gate(self.wb, gate="REPORT_PROBES", scope="run", verdict="FAIL",
+                              blocking=False,
+                              detail=f"{st['OPEN']} probe(s) still OPEN after the drain; the "
+                                     f"writers state them as searched-not-established")
+            return int(d["requests"])
+        except Exception as e:                                  # noqa: BLE001
+            self.opts.log(f"  [PROBES] skipped ({e.__class__.__name__}: {str(e)[:120]})")
+            return 0
+
+    def _handoff_guard(self, stage: str, sig) -> str | None:
+        """Record one workflow handoff for `stage`; the reason to STOP, or None.
+
+        THE ONE LOOP GUARD (owner, 2026-10-06: "nothing ever gets stuck
+        looping"). A handoff is cheap for the driver and expensive for the
+        session: it buys a workflow's worth of agents. So two things stop a
+        stage instead of handing it again — the same signature (the work
+        handed, plus whatever the stage writes as it advances) across
+        `stall_rounds` consecutive handoffs, which means the last workflows
+        changed nothing; and more than `max_rounds` handoffs in all, which
+        means they keep changing things without converging. A fired guard
+        STAYS fired: a stall releases when its signature changes (a repair at
+        source), the ceiling on `--reset-guard` — so nothing that merely
+        re-runs the driver can turn a refusal back into spend."""
+        f = self.run.qa_dir / HANDOFF_GUARD
+        try:
+            book = json.loads(f.read_text())
+            if not isinstance(book, dict):
+                book = {}
+        except (OSError, ValueError):
+            book = {}
+        if self.opts.reset_guard:
+            book.pop(stage, None)
+        key = json.dumps(sig, sort_keys=True, default=str)
+        prev = book.get(stage) or {}
+        if prev.get("fired"):
+            # A FIRED guard keeps refusing — re-running the driver (a person,
+            # the hourly watchdog, a cron) must not buy the same workflow
+            # again. A stall releases only when what it measures changed (a
+            # repair at source); the round ceiling only on --reset-guard.
+            if prev.get("kind") == "stall" and prev.get("sig") != key:
+                prev = {}
+            else:
+                return prev["fired"] + (" (still refused: nothing changed since; "
+                                        "repair at source, or --reset-guard)")
+        same = int(prev.get("same") or 0) + 1 if prev.get("sig") == key else 0
+        n = int(prev.get("n") or 0) + 1
+        why, kind = None, None
+        if self.opts.stall_rounds and same >= self.opts.stall_rounds:
+            why, kind = (f"{stage}: the last {same + 1} workflow handoffs handed the same "
+                         f"work and nothing it measures moved, so another would buy the "
+                         f"same agents again"), "stall"
+        elif self.opts.max_rounds and n > self.opts.max_rounds:
+            why, kind = (f"{stage}: {n - 1} workflow handoffs without converging (ceiling "
+                         f"--max-rounds {self.opts.max_rounds}; --reset-guard to allow "
+                         f"more)"), "ceiling"
+        book[stage] = {"sig": key, "same": same, "n": n, "at": _utcnow(),
+                       "fired": why, "kind": kind}
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps(book, indent=1))
+        return why
+
+    def _handoff_clear(self, stage: str) -> None:
+        f = self.run.qa_dir / HANDOFF_GUARD
+        try:
+            book = json.loads(f.read_text())
+        except (OSError, ValueError):
+            return
+        if isinstance(book, dict) and book.pop(stage, None) is not None:
+            f.write_text(json.dumps(book, indent=1))
+
+    def _reports_preflight(self) -> None:
+        """Refuse REPORTS while a blocker no writer can close stands.
+
+        Arbor Bank (2026-10-06) spent dead rounds on a six-peer set the
+        template fails and on unscored cells every total moved with — each
+        knowable before the first writer started."""
+        from . import brief
+        pre = brief.report_preflight(self.wb, run=self.run)
+        if not pre:
+            L.append_gate(self.wb, gate="REPORT_PREFLIGHT", scope="run", verdict="PASS",
+                          blocking=False, detail="no upstream blocker: peer band "
+                          "and scores clear")
+            return
+        lines = "; ".join(f"[{p['kind']}] {', '.join(p['sections'])}: {p['detail']}"
+                          for p in pre)
+        L.append_gate(self.wb, gate="REPORT_PREFLIGHT", scope="run", verdict="FAIL",
+                      blocking=True, detail=lines[:900])
+        raise StageRefused(f"REPORTS has {len(pre)} upstream blocker(s) no writer can "
+                           f"close — resolve them, then resume: {lines}")
+
+    def _upstream_only(self) -> list[dict]:
+        """The upstream items, when EVERY open section waits on one."""
+        from . import narrative as N
+        st = N.state(self.wb)
+        if st["upstream"] and not any(r.get("writable") for r in st["reports"].values()):
+            return st["upstream"]
+        return []
+
+    def _reports_handoff(self) -> dict:
+        """One reports-workflow invocation per report still open."""
+        from . import brief, narrative as N, report_spec as RS, reports
+        self._reconcile_register()
+        self._enforcement_sweep()
+        self._report_probes()
+        self._reports_preflight()
+        st = N.state(self.wb)
+        if st["ready"]:
+            from . import grains
+            grains.recommendations(self.wb)
+            out = [Path(reports.render(self.wb, spec, self.run.deliverables,
+                                       qa_dir=self.run.qa_dir)["path"]).name
+                   for spec in RS.SPECS.values()]
+            self.reopen()
+            self._thaw_evidence("both reports READY and rendered")
+            self._handoff_clear("REPORTS")
+            return {"passed": True, "summary": "rendered: " + ", ".join(out)}
+        self._freeze_evidence()
+        ups = self._upstream_only()
+        if ups:
+            raise StageRefused(
+                "every open report section waits on an upstream item no writer can "
+                "close: " + "; ".join(f"{u['report']} §{u['section']} [{u['kind']}] "
+                                       f"{u['detail']}" for u in ups[:8]))
+        # THE LOOP GUARD (owner, 2026-10-06): the same open sections, each
+        # with the same status and latest review, handed again and again is a
+        # workflow that changes nothing — stop instead of buying it again.
+        reviews = N.latest_reviews(self.wb)
+        sig = sorted([k, str(x.get("id") or x.get("section")), str(x.get("status")),
+                      x.get("words"),
+                      str((reviews.get((k, str(x.get("id") or x.get("section")))) or {})
+                          .get("at") or "")]
+                     for k, rep in st["reports"].items() if not rep.get("ready")
+                     for x in rep.get("sections") or [] if x.get("status") != "READY")
+        why = self._handoff_guard("REPORTS", sig)
+        if why:
+            raise StageRefused(why + ": " + ", ".join(f"{k}:{x[0]}" for k, *x in sig[:12])
+                               + f". Read the revise notes (`narrative state`), repair "
+                                 f"at source, then resume: {self.plan()['command']}")
+        b = brief.report_section_briefs(self.wb, run=self.run,
+                                        out_dir=self._briefs("reports_wf"))
+        by_r: dict[str, list] = {}
+        for row in b["sections"]:
+            by_r.setdefault(row["report"], []).append(
+                {"section": row["section"], "brief": row["file"], "agent": row["agent"]})
+        env = self.stage_budget_block("REPORTS")
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal("REPORTS"))
+        inv = [{"report": k, "title": RS.SPECS[k].title, "run": self.run.run_id,
+                "root": str(self.run.root), "eng": str(PLUGIN / "skills" / "dma-research"),
+                "plugin": str(PLUGIN), "sections": by_r.get(k, []),
+                "ready": bool(st["reports"][k].get("ready")), "rounds": 2,
+                "budget": {**env, "raise_with": "--stage-budget REPORTS=<usd>"} if env else None}
+               for k in RS.SPECS if not st["reports"][k].get("ready")]
+        doc = {"workflow": str(PLUGIN / REPORTS_WORKFLOW), "invocations": inv,
+               "upstream": st["upstream"], "then": self.plan()["command"],
+               "how": ("start every invocation in ONE message — Workflow({scriptPath: "
+                       "<workflow>, args: <invocation>}) per report — wait for all, "
+                       "service every `upstream` item the workflows return (a probe "
+                       "through the enrichment specialist, a sheet through its engine "
+                       "command, an owner decision with the person), then run `then`. "
+                       "No Workflow tool? `agent_prompts` holds the same prompts for "
+                       "in-session agents, or re-run with --report-mode lanes.")}
+        path = self.run.qa_dir / REPORTS_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        doc["agent_prompts"] = self._render_agent_prompts(path, "reports")
+        path.write_text(json.dumps(doc, indent=1))
+        n = sum(len(i["sections"]) for i in inv)
+        return {"file": str(path), "invocations": inv,
+                "summary": f"{len(inv)} report workflow(s), {n} writable section(s), "
+                           f"{len(st['upstream'])} upstream item(s)"}
+
+    def _stage_reports(self) -> str:
+        from . import brief, narrative as N, report_spec as RS, reports
+        self._reset_counters()
+        self._reconcile_register()
+        self._enforcement_sweep()
+        self._report_probes()
+        self._reports_preflight()
+        self._stalled("REPORTS")
+        for r in range(self.opts.max_rounds):
+            # READY reports go straight to render. Dispatching the producers
+            # first (2026-10-01, Cross Insurance) had them rewrite sections an
+            # independent validator had just passed, reopening ten of them.
+            if all(x.get("ready") for x in N.state(self.wb)["reports"].values()):
+                break
+            self._freeze_evidence()
+            self._rounds = r + 1
+            b = brief.report_batch(self.wb, run=self.run, out_dir=self._briefs(f"reports_r{r}"))
+            self._count(self._dispatch(b, stage="REPORTS"))
+            v = brief.report_batch(self.wb, run=self.run,
+                                   out_dir=self._briefs(f"reports_validator_r{r}"), validator=True)
+            self._count(self._dispatch(v, stage="REPORTS"))
+            st = N.state(self.wb)
+            if all(x.get("ready") for x in st["reports"].values()):
+                break
+            ups = self._upstream_only()
+            if ups:
+                # Re-dispatching a writer against a section only an upstream
+                # actor can close buys a round that closes nothing.
+                raise StageRefused(
+                    "every open report section waits on an upstream item no writer "
+                    "can close: " + "; ".join(f"{u['report']} §{u['section']} "
+                                              f"[{u['kind']}] {u['detail']}"
+                                              for u in ups[:8]))
+            self.opts.log("  reports not READY: " + "; ".join(
+                f"{k}: {len([s for s in x.get('sections') or [] if s.get('status') != 'READY'])} "
+                f"section(s) open" for k, x in st["reports"].items() if not x.get("ready")))
+            if self._over_stage_budget("REPORTS"):
+                b = self._stage_budget_hit
+                self.opts.log(f"  [REPORTS] envelope ${b['spent']:.2f} of ${b['ceiling']:.2f} "
+                              f"— stopping at round {self._rounds}")
+                self._budget_stopped = True
+                break
+            if self._stalled("REPORTS"):
+                break
+        st = N.state(self.wb)
+        not_ready = [k for k, x in st["reports"].items() if not x.get("ready")]
+        if not_ready:
+            raise StageRefused(f"reports not READY after {self._rounds} round(s): "
+                               f"{', '.join(not_ready)}; blocking: "
+                               + "; ".join(str(b)[:120] for b in (st.get("blocking") or [])[:4])
+                               + self._stall_note())
+        # The Recommendations tab is PROJECTED from the assessment report's
+        # REC cards (the pinned Doc's §8), never authored — an engine step,
+        # so the driver runs it, not a lane.
+        from . import grains
+        grains.recommendations(self.wb)
+        out = []
+        for key, spec in RS.SPECS.items():
+            res = reports.render(self.wb, spec, self.run.deliverables, qa_dir=self.run.qa_dir)
+            out.append(Path(res["path"]).name)
+        self.reopen()
+        self._thaw_evidence("both reports READY and rendered")
+        return "rendered: " + ", ".join(out)
+
+    def _freeze_evidence(self) -> None:
+        """Hold the register still while the sections are written (B1 Bank,
+        2026-10-08: rows registered mid-REPORTS reopened passed sections on
+        every whole-report pass). Idempotent; the thaw is `_thaw_evidence`
+        or `engine.narrative thaw` by the conducting session."""
+        try:
+            if not L.is_frozen(self.wb):
+                L.freeze(self.wb, f"REPORTS in progress (driver, round {self._rounds})")
+                self.opts.log("  [REPORTS] evidence register frozen: new rows go through "
+                              "BLOCKED_UPSTREAM (kind evidence) until both reports render")
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (evidence freeze not recorded: {str(e)[:120]})")
+
+    def _thaw_evidence(self, why: str) -> None:
+        try:
+            if L.is_frozen(self.wb):
+                L.thaw(self.wb, why)
+                self.reopen()
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (evidence thaw not recorded: {str(e)[:120]})")
+
+    def _sections_dir(self) -> Path:
+        d = self.run.root / SECTIONS_DIR
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def _contract_file(self, page: str) -> Path:
+        d = self._sections_dir() / "contracts"
+        d.mkdir(parents=True, exist_ok=True)
+        f = d / f"{page}.json"
+        if not f.is_file():
+            f.write_text(json.dumps(self.opts.reads.page_contract(page), indent=2, default=str))
+        return f
+
+    def _save_page_reports(self, pages, phase: str) -> None:
+        """The challenger and consolidator return their reports as their
+        final message and hold no Write tool; the next phase reads a file."""
+        from . import relay
+        name = {"challenge": "challenge", "consolidate": "consolidated"}[phase]
+        for p in pages:
+            log = self.run.root / "agent_logs" / f"page-{p}-{phase}.jsonl"
+            if not log.is_file():
+                continue
+            text = relay.lane_output(log)
+            if text.strip():
+                (self.run.qa_dir / f"{name}_{p}.md").write_text(text, encoding="utf-8")
+
+    def _page_mtime(self, page: str) -> float:
+        """Newest section file of a page on disk (0 when there is none)."""
+        return max((f.stat().st_mtime for f in self._sections_dir().glob(f"{page}.*.json")),
+                   default=0.0)
+
+    def _ship_one(self, p: str, version: str, connector_run: str, verdicts: dict) -> bool:
+        """Ship one page's section files and record the verdict. True on pass."""
+        res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
+                                     self.run.qa_dir / f"verdict_{p}_{version}.json")
+        # AFTER the ship: the deterministic pre-ship fixer rewrites section
+        # files inside it, and those rewritten files are what was submitted.
+        mtime = self._page_mtime(p)
+        sgv4 = prose_sg_v4_fails(res.get("sg_v4_fails") or [])
+        if res.get("status") == "pass" and Options.sg_v4_budget < len(sgv4) <= self.opts.sg_v4_budget:
+            # Admitted only because the owner raised the budget: recorded
+            # where a reader of the run looks, page by page.
+            self.state.setdefault("waivers", []).append(
+                {"at": _utcnow(), "page": p, "version": version,
+                 "sg_v4_budget": self.opts.sg_v4_budget, "sg_v4_prose_fails": len(sgv4)})
+            try:
+                L.append_gate(self.wb, gate="SG_V4_BUDGET_RAISED", scope=p, verdict="FAIL",
+                              detail=(f"OWNER_DECISION: {len(sgv4)} prose SG-V4 FAILs admitted "
+                                      f"on {p} (version {version}) under --sg-v4-budget "
+                                      f"{self.opts.sg_v4_budget}, default {Options.sg_v4_budget}; "
+                                      f"disclosed on the page by the connector (invariant 12)")[:900],
+                              blocking=False)
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        if res.get("status") == "pass" and len(sgv4) > self.opts.sg_v4_budget:
+            # The connector discloses-and-promotes SG-V4 (invariant 12);
+            # the driver reads the disclosure and REVISES ungrounded prose
+            # before accepting the page, rather than shipping the claim the
+            # grounding gate could not support (measured on the promoted
+            # Golden 1 overview: 249 SG-V4 FAILs, all ignored).
+            res = {**res, "status": "sg_v4_over_budget",
+                   "reasons": [f"SG-V4 grounding FAIL x{len(sgv4)} over "
+                               f"budget {self.opts.sg_v4_budget} — find "
+                               f"grounding or drop the claim"]
+                   + [f"{w.get('path')} (sim {w.get('similarity')} < "
+                      f"{w.get('threshold')})" for w in sgv4[:6]]}
+        rec = self.state["pages"].setdefault(p, {})
+        rec.update({"version": version, "status": res.get("status"),
+                    "reasons": (res.get("reasons") or [])[:12],
+                    "sg_v4_fails": len(sgv4),
+                    "n_reasons": res.get("n_reasons"),
+                    "n_history": ((rec.get("n_history") or [])
+                                  + [[version, res.get("status"), res.get("n_reasons"),
+                                      len(sgv4)]])[-8:],
+                    "attempts": int(rec.get("attempts") or 0) + 1,
+                    "connector_run": connector_run, "at": _utcnow()})
+        rec.setdefault("versions", {})[version] = res.get("status")
+        rec.setdefault("shipped_mtime", {})[version] = mtime
+        self._note_contract_version(p, version, connector_run)
+        av = rec.setdefault("attempts_by_version", {})
+        av[version] = int(av.get(version) or 0) + 1
+        if res.get("status") == "claim_refused":
+            self._save_state()
+            raise StageRefused(
+                f"claim on {connector_run} refused while shipping {p}: another "
+                f"session holds the lease; wait for it to lapse, then run again")
+        if res.get("status") == "pass":
+            return True
+        verdicts[p] = (res.get("reasons") or [])[:12]
+        return False
+
+    def _note_contract_version(self, p: str, version: str, connector_run: str) -> None:
+        """Record the contract version the server judged this page under,
+        and surface a CONNECTOR DEPLOY MID-RUN the moment it happens.
+
+        Arbor Bank (2026-10-06): the connector was redeployed between
+        REPORTS and PAGES_B (CG-15, CG-30 and the fit engine changed), so
+        pages that had passed were refused on re-ship and the reports
+        argued a ranking the deployed engine no longer produced. Nothing
+        said so; each refusal was debugged as its own defect. Now the first
+        ship after a deploy logs CONNECTOR_DRIFT, records which stages were
+        produced under the old version, and marks every page passed under
+        it as `stale_contract` so `_page_ok` ships it again."""
+        reads = getattr(self.opts, "reads", None)
+        fn = getattr(reads, "run_progress", None)
+        if fn is None:
+            return
+        try:
+            prog = fn(connector_run)
+        except Exception:                            # noqa: BLE001
+            return
+        cv = _contract_version_of(prog, p)
+        if not cv:
+            return
+        rec = self.state["pages"].setdefault(p, {})
+        rec.setdefault("contract_version", {})[version] = cv
+        drift = mark_contract_drift(self.state, cv, page=p, version=version, now=_utcnow())
+        if drift:
+            self.opts.log(f"  [DRIFT] connector contract {drift['was']} -> {cv}: "
+                          f"{', '.join(drift['stale_pages']) or 'no page'} marked "
+                          f"stale_contract; stages produced under the old version: "
+                          f"{', '.join(drift['stages_under_old']) or 'none recorded'}")
+            try:
+                L.append_gate(self.wb, gate="CONNECTOR_DRIFT", scope="run", verdict="FAIL",
+                              blocking=False,
+                              detail=(f"connector contract changed mid-run "
+                                      f"{drift['was']} -> {cv} at {p} v{version}; pages "
+                                      f"passed under the old version re-ship; reports and "
+                                      f"sections produced under it may argue rules the "
+                                      f"deployed connector no longer applies — review "
+                                      f"before PROMOTE")[:900])
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+
+    def _no_retry(self, p: str, attempt: int = 0) -> str | None:
+        """Why page `p` must NOT be retried, or None to allow one repair.
+
+        Owner, 2026-10-07: "Do not keep ingesting and this failure loop. You
+        ought to be sure when submitting a page." ship_page.py submits only
+        when BOTH validation passes ran locally and found nothing, so:
+
+          - a SERVER refusal after a clean local check means the local
+            replay missed a gate. The page gets ONE repair carrying the
+            server's own reasons; a second refusal on the same version halts
+            it, because a third submission could not be sure of anything.
+          - a local check that could not RUN is an environment fault, not a
+            content one; a repair lane cannot fix it.
+          - a local refusal that did not SHRINK since the last repair means
+            the repair is not converging; another lane is the loop. The same
+            holds for the driver's own SG-V4 budget on a page the connector
+            passed.
+        """
+        rec = self.state["pages"].get(p) or {}
+        status = str(rec.get("status") or "")
+        n = rec.get("n_reasons")
+        refused = [h for h in (rec.get("n_history") or [])
+                   if h and h[0] == rec.get("version") and h[1] == "fail"]
+        if status == "fail" and len(refused) >= 2:
+            return (f"the connector refused it {len(refused)} times on this version "
+                    "after clean local checks — the replay is missing a gate, so a "
+                    "further submission cannot be sure; repair against the server's "
+                    "reasons by hand and confirm with ship_page.py --dry-run")
+        if status == "local_precheck_not_run":
+            return "the local validation could not run (" + \
+                   "; ".join(str(x)[:120] for x in (rec.get("reasons") or [])[:1]) + ")"
+        sg = [h for h in (rec.get("n_history") or [])
+              if h and h[0] == rec.get("version") and h[1] == "sg_v4_over_budget"
+              and len(h) > 3]
+        if status == "sg_v4_over_budget" and len(sg) >= 2 and sg[-1][3] >= sg[-2][3]:
+            # The connector PASSED this page; SG-V4 discloses and promotes.
+            # The budget is the driver's own bar, and a prose repair that
+            # leaves the grounding count no lower is the loop, not a fix.
+            return (f"the SG-V4 prose repair did not converge: {sg[-1][3]} grounding "
+                    f"fail(s) after repair, {sg[-2][3]} before (budget "
+                    f"{getattr(getattr(self, 'opts', None), 'sg_v4_budget', '?')})")
+        hist = [h for h in (rec.get("n_history") or [])
+                if h and h[0] == rec.get("version") and h[1] == "local_precheck_fail"]
+        if status == "local_precheck_fail" and isinstance(n, int) and len(hist) >= 2:
+            prev = hist[-2][2]
+            if isinstance(prev, int) and n >= prev:
+                return (f"the repair did not converge: {n} blocking reason(s) after "
+                        f"repair, {prev} before")
+        return None
+
+    def _pages_preflight(self, pages: tuple, version: str) -> None:
+        """The page gates whose inputs live in the workbook, read BEFORE a
+        single page agent is dispatched (engine.page_preflight). First Tech
+        (2026-10-06) spent three techstack attempts at PAGES_A to learn
+        ET-12, CG-40 and CG-50 — every one knowable from the workbook. A
+        page that already passed on this version is not re-checked."""
+        from . import page_preflight as PP
+        todo = tuple(p for p in pages if not self._page_ok(p, version))
+        found = PP.preflight(self.wb, todo)
+        stage = f"PAGES_{version}"
+        advisory = [b for b in found if b.get("severity") == "warn"]
+        blockers = [b for b in found if b.get("severity", "block") != "warn"]
+        if advisory:
+            L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="FAIL",
+                          blocking=False,
+                          detail=("advisory: " + "; ".join(
+                              f"[{b['gate']}] {b['detail']} — fix: {b['fix']}"
+                              for b in advisory))[:900])
+            self.opts.log(f"  [{stage}] {len(advisory)} advisory preflight finding(s) "
+                          f"(unlinked timeline citations) — the context producer states "
+                          f"them on the surface; link them at PRELIM to clear this line")
+        if not blockers:
+            if todo:
+                L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
+                              blocking=False,
+                              detail=f"{', '.join(todo)}: every cited row names a cell; "
+                                     f"the workbook floors hold"
+                                     + ("; techstack: machine scan, depth and named-product "
+                                        "citations clear" if "techstack" in todo else ""))
+            return
+        lines = "; ".join(f"[{b['gate']}] {b['detail']} — fix: {b['fix']}" for b in blockers)
+        L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="FAIL",
+                      blocking=True, detail=lines[:900])
+        msg = (f"{len(blockers)} page blocker(s) found in the workbook before any page "
+               f"agent ran: {lines}")
+        if any(b.get("needs_connector") for b in blockers):
+            raise NeedsConnector(msg + ". These need Clay and Vibe Prospecting; this "
+                                 "process cannot bind them — resume in a session that "
+                                 "holds both.")
+        raise StageRefused(msg)
+
+    def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
+        """Produce (lanes) and ship each page until it passes or the retries
+        are spent. A FAIL re-dispatches ONLY that page, with the verdict's
+        reasons in its brief."""
+        from . import brief
+        connector_run = str(self._md().get("connector_run_id") or "")
+        if not connector_run:
+            raise StageRefused("no connector run id — the checkpoint was never ingested")
+        if produce:
+            self._pages_preflight(pages, version)
+        verdicts_file = self.run.qa_dir / f"verdicts_{version}.json"
+        verdicts = {}
+        if verdicts_file.is_file():
+            try:
+                verdicts = json.loads(verdicts_file.read_text())
+            except ValueError:
+                verdicts = {}
+        if produce and self.opts.pages_mode == "workflow":
+            return self._ship_pages_workflow(pages, version, connector_run,
+                                             verdicts, verdicts_file)
+        todo = [p for p in pages if not self._page_ok(p, version)]
+        shipped = []
+        halted: dict = {}
+        for attempt in range(self.opts.page_retries + 1):
+            if not todo:
+                break
+            if produce:
+                for p in todo:
+                    self._contract_file(p)
+                # First attempt: every phase, but only for a page with no
+                # section files on disk. A page already on disk (a resumed
+                # driver, a repaired file) ships first; regenerating it would
+                # overwrite the repair and re-pay every producer. A retry is
+                # a repair: the assembler alone, carrying the verdict's reasons.
+                on_disk = {p for p in todo if list(self._sections_dir().glob(f"{p}.*.json"))}
+                if attempt == 0:
+                    groups = [(brief.PAGE_PHASES, [p for p in todo if p not in on_disk])]
+                    if on_disk:
+                        self.opts.log(f"  [PAGES_{version}] on disk, shipping first: "
+                                      f"{', '.join(sorted(on_disk))}")
+                else:
+                    groups = [(("assemble",), list(todo))]
+                for phases, pg in groups:
+                    if not pg:
+                        continue
+                    for phase in phases:
+                        b = brief.page_batch(self.wb, run=self.run,
+                                             out_dir=self._briefs(f"pages_{version}_{attempt}_{phase}"),
+                                             connector_run=connector_run,
+                                             contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
+                                             verdicts_file=verdicts_file if verdicts else None,
+                                             pages=pg, phase=phase,
+                                             sections_dir=self._sections_dir())
+                        if not b.get("lanes"):
+                            continue
+                        self.opts.log(f"  [PAGES_{version}] {phase}: {b['lanes']} lane(s)")
+                        self._count(self._dispatch(b, stage=f"PAGES_{version}"))
+                        if phase in ("challenge", "consolidate"):
+                            self._save_page_reports(pg, phase)
+            still = []
+            for p in todo:
+                if self._ship_one(p, version, connector_run, verdicts):
+                    shipped.append(p)
+                    continue
+                why = self._no_retry(p, attempt)
+                if why:
+                    halted[p] = why
+                else:
+                    still.append(p)
+            self._save_state()
+            verdicts_file.write_text(json.dumps(verdicts, indent=2, default=str))
+            todo = still
+            if todo and not produce:
+                break                     # a restage from disk is not retried by lanes
+        if halted:
+            raise StageRefused(
+                f"page(s) halted on version {version} — not retried, because a retry "
+                f"could not be sure of a different outcome: "
+                + "; ".join(f"{p}: {w}. Last verdict: "
+                            + ", ".join(str(x)[:100] for x in verdicts.get(p, [])[:2])
+                            for p, w in halted.items())
+                + (f". Still failing: {', '.join(todo)}" if todo else ""))
+        if todo:
+            raise StageRefused(
+                f"page(s) not passing on version {version} after "
+                f"{self.opts.page_retries + 1} attempt(s): "
+                + "; ".join(f"{p}: {', '.join(str(x)[:100] for x in verdicts.get(p, [])[:2])}"
+                            for p in todo))
+        return shipped
+
+    def _ship_pages_workflow(self, pages: tuple, version: str, connector_run: str,
+                             verdicts: dict, verdicts_file: Path) -> list[str]:
+        """Ship what the last page workflow left on disk; hand the rest back.
+
+        A page ships when its section files are newer than the ones it last
+        shipped (or it never shipped). A page that fails comes back in the
+        next handoff as a REPAIR — its assembler alone, carrying the
+        verdict's reasons — until `page_retries + 1` ships on this version
+        are spent, which stops the stage with the reasons named. The handoff
+        guard stops a group whose workflows leave nothing new on disk."""
+        shipped = []
+        todo = [p for p in pages if not self._page_ok(p, version)]
+        for p in todo:
+            rec = (self.state.get("pages") or {}).get(p) or {}
+            m = self._page_mtime(p)
+            last = (rec.get("shipped_mtime") or {}).get(version)
+            if m and (last is None or m > float(last)):
+                if self._ship_one(p, version, connector_run, verdicts):
+                    shipped.append(p)
+        self._save_state()
+        verdicts_file.write_text(json.dumps(verdicts, indent=2, default=str))
+        todo = [p for p in pages if not self._page_ok(p, version)]
+        if not todo:
+            self._handoff_clear(f"PAGES_{version}:{','.join(pages)}")
+            return shipped
+        halted = {p: w for p in todo if (w := self._no_retry(p))}
+        if halted:
+            raise StageRefused(
+                f"page(s) halted on version {version} — not retried, because a retry "
+                f"could not be sure of a different outcome: "
+                + "; ".join(f"{p}: {w}. Last verdict: "
+                            + ", ".join(str(x)[:100] for x in verdicts.get(p, [])[:2])
+                            for p, w in halted.items()))
+        tries = {p: int((((self.state.get("pages") or {}).get(p) or {})
+                         .get("attempts_by_version") or {}).get(version) or 0) for p in todo}
+        spent = [p for p in todo if tries[p] >= self.opts.page_retries + 1]
+        if spent:
+            raise StageRefused(
+                f"page(s) not passing on version {version} after "
+                f"{self.opts.page_retries + 1} ship(s): "
+                + "; ".join(f"{p}: {', '.join(str(x)[:100] for x in verdicts.get(p, [])[:2])}"
+                            for p in spent))
+        raise AwaitingWorkflow(self._pages_handoff(todo, version, connector_run,
+                                                   verdicts, verdicts_file, tries))
+
+    def _pages_handoff(self, todo: list, version: str, connector_run: str,
+                       verdicts: dict, verdicts_file: Path, tries: dict) -> dict:
+        """ONE page-production workflow invocation over `todo`. Briefs are the
+        lane path's own (`brief.page_batch`), one call per phase."""
+        from . import brief
+        stage = f"PAGES_{version}"
+        why = self._handoff_guard(f"{stage}:{','.join(todo)}",
+                                  [[p, self._page_mtime(p), tries.get(p, 0)] for p in todo])
+        if why:
+            last = "; ".join(f"{p}: {', '.join(str(x)[:100] for x in verdicts.get(p, [])[:2])}"
+                             for p in todo if verdicts.get(p))
+            raise StageRefused(why + f": {', '.join(todo)}"
+                               + (f". Last verdicts: {last}" if last else
+                                  ". The workflow left no section file on disk")
+                               + f". Repair at source, then resume: {self.plan()['command']}")
+        for p in todo:
+            self._contract_file(p)
+        repair = [p for p in todo if tries.get(p, 0) > 0 and self._page_mtime(p)]
+        fresh = [p for p in todo if p not in repair]
+        n = len(list((self.run.root / BRIEFS_DIR).glob(f"pages_wf_{version}_*_assemble"))) + 1
+        rows: dict[str, dict] = {}
+        for phase in brief.PAGE_PHASES:
+            pg = fresh if phase != "assemble" else list(todo)
+            if not pg:
+                continue
+            b = brief.page_batch(self.wb, run=self.run,
+                                 out_dir=self._briefs(f"pages_wf_{version}_{n}_{phase}"),
+                                 connector_run=connector_run,
+                                 contract_file=self._sections_dir() / "contracts",
+                                 verdicts_file=verdicts_file if verdicts else None,
+                                 pages=pg, phase=phase, sections_dir=self._sections_dir())
+            for r in self._lane_rows(b):
+                rows[str(r.get("label") or "")] = r
+        out = []
+        for p in todo:
+            frags = [{"agent": r["agent"], "brief": r["prompt_file"]}
+                     for lbl, r in sorted(rows.items())
+                     if lbl.startswith(f"page-{p}-") and lbl not in
+                     (f"page-{p}-challenge", f"page-{p}-consolidate")]
+            out.append({"page": p, "repair": p in repair,
+                        "fragments": [] if p in repair else frags,
+                        "challenge_brief": "" if p in repair else
+                        (rows.get(f"page-{p}-challenge") or {}).get("prompt_file", ""),
+                        "consolidate_brief": "" if p in repair else
+                        (rows.get(f"page-{p}-consolidate") or {}).get("prompt_file", ""),
+                        "assemble_brief": (rows.get(f"page-{p}") or {}).get("prompt_file", ""),
+                        "last_verdict": verdicts.get(p, [])[:12]})
+        env = self.stage_budget_block(stage)
+        if env and env["over"]:
+            self._stage_budget_hit = env
+            raise StageRefused(self._stage_budget_refusal(stage))
+        inv = [{"run": self.run.run_id, "root": str(self.run.root),
+                "eng": str(PLUGIN / "skills" / "dma-research"), "version": version,
+                "connector_run": connector_run, "sections_dir": str(self._sections_dir()),
+                "qa_dir": str(self.run.qa_dir), "pages": out,
+                "budget": {**env, "raise_with": "--stage-budget PAGES=<usd>"} if env else None}]
+        doc = {"workflow": str(PLUGIN / PAGES_WORKFLOW), "invocations": inv,
+               "then": self.plan()["command"],
+               "how": ("start the invocation — Workflow({scriptPath: <workflow>, "
+                       "args: <invocation>}) — wait for it, then run `then`: the "
+                       "driver ships every page the workflow left on disk, hands "
+                       "failures back as repairs, and promotes. No Workflow tool in "
+                       "this session? Re-run the driver with --pages-mode lanes.")}
+        path = self.run.qa_dir / PAGES_HANDOFF
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(doc, indent=1))
+        return {"file": str(path), "invocations": inv,
+                "summary": f"1 page-production workflow for version {version}: "
+                           + ", ".join(p + (" (repair)" if p in repair else "") for p in todo)}
+
+    def _pages_prepare(self, pages: tuple) -> None:
+        """What a page lane is NOT dispatched without. The peer figures are
+        refilled from the cohort here because a page produced over a
+        placeholder peer is a page re-produced (Arbor Bank, 2026-10-07:
+        sixteen `inferred` peers on the overview). ET-12 — the machine
+        technographic scan — is `page_preflight.preflight`, run by
+        `_ship_pages` before any lane, which stops the driver with
+        NEEDS_CONNECTOR rather than failing the stage."""
+        self._cohort_peers()
+
+    def _stage_pages_a(self) -> str:
+        self._reset_counters()
+        self._pages_prepare(PAGES_A)
+        shipped = self._ship_pages(PAGES_A, "A", produce=True)
+        return f"shipped to version A: {', '.join(shipped)}"
+
+    def _stage_package(self) -> str:
+        from . import assemble, grains, techscan
+        self._reset_counters()
+        if not [r for r in self.wb.rows("Recommendations") if any(r.values())]:
+            grains.recommendations(self.wb)
+        if not list(self.run.deliverables.glob("Technographic_Scan_*.docx")):
+            techscan.render(self.wb, self.run.deliverables)
+        pkg = assemble.package(self.run, self.opts.folder_root, push=self.opts.push)
+        self.state["package"] = {"folder": pkg["folder"], "verified": pkg["verified"],
+                                 "gold_findings": pkg["verification"].get("gold_findings"),
+                                 "pushed": pkg.get("pushed"), "at": _utcnow()}
+        self._save_state()
+        if not pkg["verified"]:
+            bad = [c for c in pkg["verification"]["checks"] if not c["ok"]]
+            raise StageRefused("package did not verify: " + "; ".join(
+                f"{c['check']}: {c['detail'][:120]}" for c in bad[:4]))
+        self.reopen()
+        return f"package verified at {pkg['folder']}" + (" and pushed" if self.opts.push else "")
+
+    def _stage_ingest_b(self) -> str:
+        self._reset_counters()
+        md = self._md()
+        prev = str(md.get("connector_run_id") or "")
+        after = md.get("connector_ingest_after_seq")
+        row = self._ingest("ingest_b", after_seq=int(after) if str(after or "").strip() else None)
+        if str(row["run_id"]) == prev:
+            raise StageRefused("the connector returned the same run as version A")
+        self._set_md("connector_run_id_prev", prev)
+        self._set_md("connector_run_id", row["run_id"])
+        self._set_md("connector_ingest_after_seq", row.get("run_seq"))
+        return f"version B ingested as {row['run_id']} (seq {row.get('run_seq')}; A was {prev})"
+
+    def _stage_pages_b(self) -> str:
+        self._reset_counters()
+        self._pages_prepare(tuple(p for g in PAGES_B for p in g))
+        restaged = self._ship_pages(PAGES_A, "B", produce=False)   # from disk, no lanes
+        shipped = []
+        for group in PAGES_B:
+            shipped += self._ship_pages(group, "B", produce=True)
+        return f"restaged {', '.join(restaged)}; shipped {', '.join(shipped)} to version B"
+
+    def _stage_promote(self) -> str:
+        self._reset_counters()
+        connector_run = str(self._md().get("connector_run_id") or "")
+        res = self.opts.shipper.promote(connector_run)
+        if not res.get("promoted"):
+            raise StageRefused(f"promote_run refused: {json.dumps(res)[:400]}")
+        when = res.get("promoted_at") or _utcnow()
+        self._set_md("promoted_at", when)
+        self.state["connector"]["promoted"] = {"run_id": connector_run, "at": when,
+                                               "stats": res.get("stats")}
+        self._save_state()
+        return f"promoted {connector_run} at {when}"
+
+
+# ── env: every hard dependency, measured ─────────────────────────────────
+
+def _readable(path: Path) -> bool:
+    """`Path.is_file()` swallows ENOENT and RE-RAISES everything else — EACCES
+    included. Measured 2026-09-04: on a CI runner `/root/.dma/sa.json` is
+    unreadable rather than absent, and `env` raised PermissionError instead of
+    reporting a missing identity rung. An environment check that crashes on the
+    environment it is checking has answered nothing."""
+    try:
+        return Path(path).is_file()
+    except OSError:
+        return False
+
+
+def _is_dir(path) -> bool:
+    try:
+        return Path(path).is_dir()
+    except OSError:
+        return False
+
+
+def _connector_row(run_root=None) -> tuple:
+    """(name, ok, detail) for the enrichment-connector baseline.
+
+    `run_root` is passed rather than read from the environment: the answer
+    is about a RUN, and reading `$DMA_RUN_ROOT` or the cwd made it about
+    wherever the process happened to be standing.
+    """
+    name = "enrichment connectors"
+    fix = ("run `python3 $CLAUDE_PLUGIN_ROOT/scripts/connector_contract.py "
+           "baseline --tools -` from the session that holds the tools, before "
+           "dispatching anything")
+    try:
+        sys.path.insert(0, str(PLUGIN / "scripts"))
+        import connector_contract as cc                       # noqa: PLC0415
+        root = run_root or os.environ.get("DMA_RUN_ROOT")
+        path = cc.baseline_path(root)
+        if not _readable(path) and root:
+            cc.ensure_baseline(root)          # measured from the transcript
+        if not _readable(path):
+            return (name, False,
+                    f"no connector baseline at {path} — UNVERIFIED, not a pass. {fix}")
+        rec = json.loads(Path(path).read_text())
+        out = cc.check(rec.get("mcp_tools") or [])
+        if out["ok"]:
+            return (name, True, f"present: {', '.join(out['present']) or 'none'}")
+        return (name, False,
+                f"STOP — missing {', '.join(out['missing'])}. Without one of these "
+                f"NO cell can be declared absent, so no floors gate can pass and "
+                f"the run will re-dispatch until its ceiling. {out['why'][:200]}")
+    except Exception as e:                                    # noqa: BLE001
+        return (name, False, f"could not be judged: {e.__class__.__name__}: "
+                             f"{str(e)[:160]} — UNVERIFIED, not a pass. {fix}")
+
+
+def env_check(run_root=None) -> dict:
+    checks = []
+
+    def ck(name, ok, detail):
+        checks.append({"check": name, "ok": bool(ok), "detail": detail})
+
+    for mod in ("openpyxl", "docx"):
+        try:
+            __import__(mod)
+            ck(f"python:{mod}", True, "importable")
+        except ImportError:
+            ck(f"python:{mod}", False, f"pip install {'python-docx' if mod == 'docx' else mod}")
+    ck("claude CLI", shutil.which("claude") is not None,
+       "on PATH" if shutil.which("claude") else
+       "not on PATH: real lanes cannot be dispatched (--dispatcher stub can)")
+    for name, p in (("agent_run.py", AGENT_RUN), ("mcp_raw.py", MCP_RAW),
+                    ("ship_page.py", SHIP_PAGE),
+                    ("drive_fetch.py", PLUGIN / "scripts" / "drive_fetch.py")):
+        ck(name, _readable(p), str(p))
+    ident = any([shutil.which("gcloud"), _readable(Path("/root/.dma/sa.json")),
+                 os.environ.get("DMA_ROUTINE_SA_KEY_B64")])
+    ck("connector identity", ident,
+       "gcloud / /root/.dma/sa.json / DMA_ROUTINE_SA_KEY_B64" if ident else
+       "no identity rung readable here: the connector stages (INGEST_A, "
+       "PAGES_*, PROMOTE) will fail; PRELIM..PACKAGE and --dispatcher stub "
+       "do not need one")
+    # THE ROW THAT WAS NOT HERE. Measured 2026-09-12: a run started with no
+    # enrichment connector bound at all. Nothing could then be declared absent
+    # (`declare_absence` requires one of C.ENRICHMENT_TOOLS), so no floors gate
+    # could pass, so the driver re-dispatched sixteen categories ~18 times for
+    # $96.65 and closed nothing. `connector_contract.py` already declares the
+    # required set with verdict STOP, is tested, and is wired into the Routine
+    # prompts — and was called from nowhere on the `/run-assessment` path: not
+    # here, not by the command, not by the conductor.
+    #
+    # A session's bound MCP tools live in the model's context and no subprocess
+    # can enumerate them (MEM-0112), so this reads the BASELINE the command
+    # layer writes with `connector_contract.py baseline --tools -`. An absent
+    # baseline is reported as UNVERIFIED, never as a pass: "no enrichment
+    # connector" and "nobody looked" must not wear the same face.
+    ck(*_connector_row())
+    tk = os.environ.get("DMA_TOOLKITS_DIR")
+    ck("toolkits", bool(tk and _is_dir(tk)),
+       tk or "DMA_TOOLKITS_DIR unset — the KG stage pulls the four toolkits from the intake Drive into <run>/toolkits; if that fails it falls back to the 71 category questions and says so")
+    from . import template as T
+    g = T.zip_guard()
+    ck("templates vs manifest", g["ok"], g.get("fix") or f"{g['status']} ({g.get('installed')})")
+    try:
+        from . import cli as _cli
+        stale = _cli.refuse_on_stale_install()
+        ck("install", not stale, stale[:200] if stale else "not judged stale")
+    except Exception as e:                           # noqa: BLE001
+        ck("install", True, f"not judged: {str(e)[:100]}")
+    # A hard failure is one that stops a run HERE. `toolkits` is a stated
+    # fallback, and an identity rung is only needed for the connector stages —
+    # a checkout with neither still plans, tests and drives the stub.
+    # `enrichment connectors` is deliberately NOT in the exempt list: a run
+    # without one cannot close a single empty cell, so letting it start is
+    # letting it burn. `toolkits` is a stated fallback and an identity rung is
+    # only needed for the connector stages.
+    hard = [c for c in checks if not c["ok"]
+            and c["check"] not in ("toolkits", "connector identity", "claude CLI")]
+    return {"ok": not hard, "checks": checks,
+            "hard_failures": [c["check"] for c in hard]}
+
+
+# ── command line ─────────────────────────────────────────────────────────
+
+def _install_terminate_handler() -> None:
+    """SIGTERM becomes an exception, so the dispatcher can hand the running
+    batch SIGTERM (and it its lanes) before this process exits; the default
+    action would end the driver with the lanes still running."""
+    import signal
+
+    def _on_term(signum, _frame):
+        raise SystemExit(f"terminated by signal {signum}: the running batch was told to stop "
+                         f"its lanes; resume with `engine.pipeline run`")
+    try:
+        signal.signal(signal.SIGTERM, _on_term)
+    except (ValueError, OSError):          # not the main thread, or no signals here
+        pass
+
+
+def _build_opts(a) -> Options:
+    if a.dispatcher == "stub":
+        from . import pipeline_stub as S
+        disp, reads, shipper = S.StubDispatcher.fixture_backed(), S.StubReads(), S.StubShipper()
+    else:
+        disp, reads, shipper = (AgentRunDispatcher(timeout=a.lane_timeout), McpReads(),
+                                ShipPageShipper(session=os.environ.get("DMA_SHIP_SESSION")
+                                                or f"engine-pipeline-{a.run}"))
+    stage_budget = None
+    for item in (getattr(a, "stage_budget", None) or []):
+        k, _, v = str(item).partition("=")
+        try:
+            stage_budget = {**(stage_budget or {}), k.strip().upper(): float(v)}
+        except ValueError:
+            raise SystemExit(f"--stage-budget {item!r} is not STAGE=USD")
+    return Options(dispatcher=disp, reads=reads, shipper=shipper, until=a.until,
+                   max_wall_min=a.max_wall_min, max_usd=getattr(a, 'max_usd', None),
+                   stage_budget=stage_budget,
+                   critic_rounds=int(getattr(a, "critic_rounds", None) or Options.critic_rounds),
+                   collector_model=getattr(a, "collector_model", None) or Options.collector_model,
+                   synthesis_model=getattr(a, "synthesis_model", None) or Options.synthesis_model,
+                   batch_cells=getattr(a, "batch_cells", None),
+                   tiers_direct=bool(getattr(a, "tiers_direct", False) or a.dispatcher == "stub"),
+                   only_categories=([c for c in (getattr(a, "only_categories", None) or "").split(",") if c.strip()]
+                                    or None),
+                   ingest_kick_cmd=(getattr(a, "ingest_kick_cmd", None)
+                                    or os.environ.get("DMA_INGEST_KICK_CMD") or None),
+                   allow_unverified_connectors=getattr(
+                       a, "allow_unverified_connectors", False),
+                   max_rounds=a.max_rounds,
+                   stall_rounds=a.stall_rounds, enrichment_heals=a.enrichment_heals,
+                   relay=not a.no_relay,
+                   relay_mode=getattr(a, "relay_mode", Options.relay_mode),
+                   step=getattr(a, "step", Options.step),
+                   lane_retries=a.lane_retries, page_retries=a.page_retries,
+                   ingest_poll_s=(0 if a.dispatcher == "stub" else a.ingest_poll_s),
+                   ingest_timeout_s=a.ingest_timeout_s,
+                   folder_root=Path(a.folder_root) if a.folder_root else None,
+                   push=(not a.no_push) and a.dispatcher != "stub",
+                   allow_stale_install=a.allow_stale_install, lanes=a.lanes,
+                   toolkit_dir=Path(a.toolkits) if a.toolkits else None,
+                   research_mode=_research_mode(a),
+                   scoring_mode=getattr(a, "scoring_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                   else "workflow"),
+                   report_mode=getattr(a, "report_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                 else "workflow"),
+                   pages_mode=getattr(a, "pages_mode", None) or ("lanes" if a.dispatcher == "stub"
+                                                 else "workflow"),
+                   reset_guard=bool(getattr(a, "reset_guard", False)),
+                   sg_v4_budget=int(getattr(a, "sg_v4_budget", None)
+                                    if getattr(a, "sg_v4_budget", None) is not None
+                                    else Options.sg_v4_budget))
+
+
+def _research_mode(a) -> str:
+    """Workflow is the enforced default. Lanes run only on the stub (CI) or
+    when the waiver is stated, because a lane holds no enrichment connector
+    and cannot pass a floors gate on a real run."""
+    # auto (the real dispatcher's default since 2026-10-09): a degraded run's
+    # research runs as lean headless tiers, a connector-backed run's as the
+    # in-session workflow — decided at RESEARCH from the run's own state.
+    mode = a.research_mode or ("lanes" if a.dispatcher == "stub" else "auto")
+    if mode == "lanes" and a.dispatcher != "stub" and not getattr(a, "allow_lanes", False):
+        raise SystemExit(
+            "REFUSED: --research-mode lanes with the real dispatcher runs research "
+            "as headless `claude -p` children — invisible to /workflows, not "
+            "resumable, holding no Exa/Tavily/Clay — so no floors gate can pass. "
+            "Drop the flag (RESEARCH is handed to the session as one workflow per "
+            "category), or pass --allow-lanes to waive it deliberately.")
+    return mode
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(prog="engine.pipeline", description=__doc__.split("\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    def common(p):
+        p.add_argument("--run", required=True)
+        p.add_argument("--root")
+        return p
+
+    r = common(sub.add_parser("run", help="drive the run to PROMOTE, gate by gate"))
+    r.add_argument("--dispatcher", choices=("agent_run", "stub"), default="agent_run")
+    r.add_argument("--scoring-mode", choices=("workflow", "lanes"), default=None,
+                   help="who runs SCORING: 'workflow' (default with the real "
+                        "dispatcher) hands it to the session as one persisted "
+                        "workflow per pillar, shown in /workflows; 'lanes' "
+                        "dispatches headless lanes (scoring needs no connector, "
+                        "so lanes are a sound fallback in a session without "
+                        "the Workflow tool)")
+    r.add_argument("--report-mode", choices=("workflow", "lanes"), default=None,
+                   help="who runs REPORTS: 'workflow' (default with the real "
+                        "dispatcher) hands it to the session as one persisted "
+                        "workflow per report — a writer and a reviewer per "
+                        "section, upstream blockers routed out of the loop; "
+                        "'lanes' keeps the whole-report round loop")
+    r.add_argument("--sg-v4-budget", type=int, default=None,
+                   help="SG-V4 grounding misses a page may carry and still be "
+                        "accepted by the driver (default 8). SG-V4 discloses and "
+                        "promotes (invariant 12); this is the driver's own revision "
+                        "policy, raised by a person for a page whose misses are "
+                        "ungroundable by construction (stated absences)")
+    r.add_argument("--reset-guard", action="store_true",
+                   help="clear the workflow-handoff guard first: a stage the "
+                        "guard refused (same work handed with nothing moving, or "
+                        "--max-rounds handoffs without converging) is handed again")
+    r.add_argument("--pages-mode", choices=("workflow", "lanes"), default=None,
+                   help="who PRODUCES pages for PAGES_A/PAGES_B: 'workflow' "
+                        "(default with the real dispatcher) hands each ship group "
+                        "to the session as one persisted workflow — every page's "
+                        "producers, challenger, consolidator and assembler, pages "
+                        "side by side; the driver still ships and promotes. "
+                        "'lanes' runs the phase-barrier lane path")
+    r.add_argument("--research-mode", choices=("auto", "tiers", "workflow", "lanes"), default=None,
+                   help="who runs RESEARCH: 'auto' (default with the real "
+                        "dispatcher) picks 'tiers' on a degraded run and "
+                        "'workflow' on a connector-backed one; 'tiers' runs the "
+                        "haiku collectors, sonnet orchestrator and challenger as "
+                        "LEAN headless lanes (~10K-token floor, exact cost per "
+                        "lane); 'workflow' hands it to the session as one persisted "
+                        "workflow per category; 'lanes' dispatches headless "
+                        "`claude -p` lanes, which hold NO enrichment connector "
+                        "and never show in /workflows — with the real "
+                        "dispatcher it needs --allow-lanes")
+    r.add_argument("--allow-lanes", action="store_true",
+                   help="waive the workflow requirement and run RESEARCH as "
+                        "headless lanes with the real dispatcher (the path the "
+                        "owner rejected on 2026-09-30); recorded in the gate log")
+    r.add_argument("--until", choices=STAGES, help="stop after this stage")
+    r.add_argument("--max-wall-min", type=float, default=Options.max_wall_min,
+                   help=f"wall-clock ceiling in minutes (default "
+                        f"{Options.max_wall_min:.0f}). 0 stops cleanly at the "
+                        f"next boundary and resumes; there is no 'unbounded'.")
+    r.add_argument("--allow-unverified-connectors", action="store_true",
+                   help="start a run whose connector baseline was never "
+                        "recorded. The default is to refuse: without one, "
+                        "nothing can say whether an empty cell can be "
+                        "enriched or honestly declared absent, and the run "
+                        "re-dispatches until its ceiling. The waiver is "
+                        "recorded on the run.")
+    r.add_argument("--max-usd", type=float, default=Options.max_usd,
+                   help="dollar ceiling for the run; default is "
+                        "cost.BUDGET_PER_PILLAR x pillars in scope. "
+                        "0 disables it (report-only, the old behaviour).")
+    r.add_argument("--stage-budget", action="append", metavar="STAGE=USD",
+                   help="dollar envelope for one stage family (PRELIM, RESEARCH, "
+                        "SCORING, REPORTS, PAGES); defaults in cost.STAGE_BUDGET_USD "
+                        "(research 10, scoring 5, reports 5). Persisted on the run; "
+                        "a stage at its envelope stops as STOPPED_STAGE_BUDGET.")
+    r.add_argument("--collector-model", default=Options.collector_model,
+                   choices=("haiku", "sonnet", "opus"),
+                   help="model the research workflow runs its evidence collectors on "
+                        f"(default {Options.collector_model}; the price tier — the "
+                        "ledger refuses what is wrong with an evidence row)")
+    r.add_argument("--synthesis-model", default=Options.synthesis_model,
+                   choices=("haiku", "sonnet", "opus"),
+                   help="model for the category orchestrator (completeness + synthesis) "
+                        f"and the challenge (default {Options.synthesis_model}; the "
+                        "gold row's judgement is not moved to the price tier)")
+    r.add_argument("--tiers-direct", action="store_true",
+                   help="with --research-mode tiers/auto: run the lean lanes from this "
+                        "process rather than handing the session the visible "
+                        "dma-research-tiers.js workflow (a Routine or CI with no session)")
+    r.add_argument("--only-categories", default=None,
+                   help="comma-separated categories RESEARCH may hand this run "
+                        "(e.g. P2C2); the rest stay open for a later run — the "
+                        "'narrow the scope' remedy, and how one category is measured")
+    r.add_argument("--batch-cells", type=int, default=None,
+                   help="open cells per collector batch, whole capabilities "
+                        "(default cost.RESEARCH_BATCH_CELLS)")
+    r.add_argument("--critic-rounds", type=int, default=Options.critic_rounds,
+                   help=f"critic rounds a scoring workflow may spend per pillar "
+                        f"(default {Options.critic_rounds})")
+    r.add_argument("--ingest-kick-cmd", default=None,
+                   help="shell command that runs the package scan now (e.g. gcloud run "
+                        "jobs execute dmai-worker --region us-central1 --wait); "
+                        "default $DMA_INGEST_KICK_CMD; unset = wait for the Scheduler")
+    r.add_argument("--max-rounds", type=int, default=Options.max_rounds,
+                   help=f"ceiling on rounds per looping stage (default {Options.max_rounds}); "
+                        f"a stage stops early only when --stall-rounds rounds advance nothing")
+    r.add_argument("--stall-rounds", type=int, default=Options.stall_rounds,
+                   help=f"consecutive rounds with no measured progress that end a stage "
+                        f"(default {Options.stall_rounds}; 0 disables)")
+    r.add_argument("--enrichment-heals", type=int, default=Options.enrichment_heals,
+                   help=f"fresh lane instances spent on a category with no connector search "
+                        f"before the gap is disclosed instead (default {Options.enrichment_heals})")
+    r.add_argument("--no-relay", action="store_true",
+                   help="harvest search_requests but do not service them at all")
+    r.add_argument("--relay-mode", choices=("orchestrator", "lane"),
+                   default=Options.relay_mode,
+                   help=f"how harvested search_requests are serviced "
+                        f"(default {Options.relay_mode}): 'orchestrator' "
+                        f"writes one batch file plus a prompt per capability "
+                        f"for the conductor's own subagents, which hold the "
+                        f"connectors; 'lane' dispatches headless "
+                        f"enrichment-web-specialist lanes, which hold none "
+                        f"unless the container itself is bound")
+    r.add_argument("--step", action="store_true",
+                   help="run exactly ONE research round and return "
+                        "ROUND_COMPLETE (exit 0), with what is outstanding in "
+                        "the `pending` payload. The conductor services the "
+                        "relay batch with its own in-process subagents — the "
+                        "only actors that hold a connector — and steps again. "
+                        "Past RESEARCH it advances exactly one stage.")
+    r.add_argument("--lane-retries", type=int, default=1)
+    r.add_argument("--page-retries", type=int, default=2)
+    r.add_argument("--lane-timeout", type=int, default=2400)
+    r.add_argument("--lanes", type=int)
+    r.add_argument("--ingest-poll-s", type=float, default=60.0)
+    r.add_argument("--ingest-timeout-s", type=float, default=3600.0)
+    r.add_argument("--folder-root")
+    r.add_argument("--no-push", action="store_true")
+    r.add_argument("--toolkits")
+    r.add_argument("--allow-stale-install", action="store_true")
+    r.add_argument("--json", action="store_true")
+    common(sub.add_parser("plan", help="done / next / blockers — dispatches nothing"))
+    st = common(sub.add_parser("status"))
+    st.add_argument("--watch", action="store_true")
+    st.add_argument("--interval", type=float, default=15.0)
+    sp = common(sub.add_parser("stop", help="SIGTERM the driver that HOLDS this run's "
+                                "lock (its real pid) and wait for it to release"))
+    sp.add_argument("--wait-s", type=float, default=120.0)
+    sub.add_parser("env", help="every hard dependency, measured")
+    sub.add_parser("stages", help="the stage table")
+
+    a = ap.parse_args(argv)
+    if a.cmd == "stages":
+        print(__doc__.split("THE STAGE TABLE")[1].split("Exactly TWO")[0])
+        return 0
+    if a.cmd == "env":
+        out = env_check()
+        print(json.dumps(out, indent=2))
+        return 0 if out["ok"] else 1
+    run = runstate.locate(a.run, Path(a.root) if a.root else None)
+    if a.cmd == "stop":
+        # Measured 2026-09-30 (SWBC): an operator "stopped" the driver with the
+        # pid a shell captured for `nohup setsid …`; setsid had forked, that pid
+        # was a dead wrapper, and the real driver ran a whole extra research
+        # round on stale code past the budget. The driver lock names the pid
+        # that actually holds the run; this signals that one and waits.
+        held = runstate.read_driver_lock(run)
+        pid = int((held or {}).get("pid") or 0)
+        # A stale HEARTBEAT is not a dead PROCESS: trust /proc over the beat
+        # (a live driver with a stale lock is the state that let two drivers
+        # run one research round on 2026-09-30).
+        alive_driver = False
+        if pid:
+            try:
+                cmdline = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace")
+                alive_driver = "engine.pipeline" in cmdline and run.run_id in cmdline
+            except OSError:
+                alive_driver = False
+        if not held or not (held.get("live") or alive_driver):
+            print(json.dumps({"stopped": False, "why": "no live driver holds this run",
+                              "lock": held}, indent=2, default=str))
+            return 0
+        import signal as _signal
+        try:
+            os.kill(pid, _signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        t0 = time.time()
+        while time.time() - t0 < a.wait_s:
+            try:
+                os.kill(pid, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(1)
+        alive = True
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            alive = False
+        print(json.dumps({"stopped": not alive, "pid": pid,
+                          "waited_s": round(time.time() - t0, 1)}, indent=2))
+        return 0 if not alive else 1
+    if a.cmd == "plan":
+        opts = Options(dispatcher=None, reads=None, shipper=None)  # type: ignore[arg-type]
+        print(json.dumps(Pipeline(run, opts).plan(), indent=2, default=str))
+        return 0
+    if a.cmd == "status":
+        while True:
+            p = Pipeline(run, Options(dispatcher=None, reads=None, shipper=None))  # type: ignore[arg-type]
+            plan = p.plan()
+            print(f"{_utcnow()}  run {run.run_id}  next: {plan['next'] or 'COMPLETE'}")
+            for s in plan["stages"]:
+                rec = s.get("recorded") or {}
+                print(f"  {'✓' if s['done'] else '·'} {s['stage']:<10} {s['detail'][:90]}"
+                      + (f"  [{rec.get('elapsed_s')}s]" if rec.get("elapsed_s") else ""))
+            try:
+                print("\n" + p.owner_update({"resume": plan.get("command")}))
+            except Exception as e:                          # noqa: BLE001
+                print(f"\nOWNER UPDATE unavailable: {str(e)[:160]}")
+            if not a.watch or plan["complete"]:
+                return 0
+            time.sleep(a.interval)
+    opts = _build_opts(a)
+    _install_terminate_handler()
+    p = Pipeline(run, opts)
+    out = p.run_all()
+    try:
+        upd = p.owner_update(out)
+    except Exception as e:                                  # noqa: BLE001
+        upd = f"OWNER UPDATE unavailable: {str(e)[:160]}"
+    if a.json:
+        print(json.dumps({**out, "owner_update": upd}, indent=2, default=str))
+    else:
+        print(f"\n{out['outcome']}" + (f" at {out['stage']}" if out.get("stage") else "")
+              + (f": {out['reason']}" if out.get("reason") else ""))
+        print("\n" + upd)
+    return 0 if out["outcome"] in EXIT_ZERO_OUTCOMES else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

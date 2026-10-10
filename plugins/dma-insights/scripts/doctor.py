@@ -52,6 +52,14 @@ from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parent
+
+# The two sibling modules that own facts this file only reports. Imported at
+# module level rather than inside a check so that a broken sibling fails the
+# doctor loudly at import, where it is one obvious traceback, instead of
+# silently skipping the row that was supposed to catch the problem.
+sys.path.insert(0, str(HERE))
+import connector_contract                                       # noqa: E402
+import plugin_version                                           # noqa: E402
 DEFAULT_AUD = "https://dmai-mcp-dukrne5v4a-uc.a.run.app"
 
 # The plugin ships exactly these counts. A floor (agents >=5, skills >=6)
@@ -125,8 +133,13 @@ def _cloud_run_service(host: str) -> str | None:
     return None
 
 
-def _check(name, ok, detail, fix=""):
-    return {"check": name, "ok": bool(ok), "detail": detail, "fix": fix}
+def _check(name, ok, detail, fix="", warn=False):
+    """One row. `warn` is a PASS that still prints its fix: a cosmetic lag
+    the owner should not be asked about, but that should not go unsaid."""
+    row = {"check": name, "ok": bool(ok), "detail": detail, "fix": fix}
+    if ok and warn:
+        row["warn"] = True
+    return row
 
 
 def classify_enforcement(status: int | None, error: str = "") -> dict:
@@ -407,18 +420,44 @@ def inventory_checks(plugin_root: Path = PLUGIN) -> list:
     return rows
 
 
-def installed_plugin_check() -> dict:
+def installed_plugin_check(heal: bool = False) -> dict:
     """Is the plugin the session LOADS the one this checkout publishes?
 
     The row `inventory_checks` cannot be. Those counts come from the repo;
     this one comes from the install cache, and on 2026-08-23 they read 47
     and 5 on the same container. Everything it compares is read at call
     time from a manifest or the install state — no version literal lives in
-    this file, which is the whole point (see plugin_version.py)."""
+    this file, which is the whole point (see plugin_version.py).
+
+    WHY THIS ROW CAN HEAL ITSELF (owner, 2026-08-31: "Plugin version should
+    always pick the most recent bump and self heal"). It could not, and the
+    consequence was measured the same day: a firing whose STEP 0a read
+    "doctor.py — not green, STOP" met `STALE: installed 0.9.12 (47 agents)
+    vs published 1.13.0 (68 agents)` and stopped, having done nothing. STALE
+    is the one verdict an update fixes without a judgment call, and
+    `plugin_version.heal()` has run that update since 2026-08-24 — but this
+    row only ever called `compare()`, so the doctor could NEVER go green on
+    a stale container and every caller that required a green doctor was
+    requiring something unreachable. A gate whose pass condition cannot be
+    reached is not a gate, it is a stop.
+
+    So `--heal` threads through to the same self-healing loop
+    `plugin_version.py --heal` runs: update, re-measure, one final verdict.
+    It is opt-in because a plain `doctor.py` must stay a pure measurement —
+    a check that mutates the machine it is measuring cannot be trusted to
+    report what it found.
+    """
     try:
-        sys.path.insert(0, str(HERE))
-        import plugin_version                                   # noqa: PLC0415
         v = plugin_version.compare()
+        if heal and not v["ok"]:
+            healed, heal_log = plugin_version.heal(v)
+            if healed is None:                  # the update ran — re-measure
+                before = plugin_version.summary(v)
+                v = plugin_version.compare()
+                v.setdefault("reasons", []).insert(0, f"before --heal: {before}")
+                v["reasons"][1:1] = heal_log
+            elif heal_log:                      # heal attempted, could not run
+                v.setdefault("reasons", []).extend(heal_log)
     except Exception as exc:                                    # noqa: BLE001
         return _check("installed plugin", False,
                       f"could not be determined: {exc}",
@@ -427,17 +466,180 @@ def installed_plugin_check() -> dict:
     detail = plugin_version.summary(v)
     if v["reasons"]:
         detail += " — " + "; ".join(v["reasons"])
-    return _check("installed plugin", v["ok"], detail, v["fix"])
+    fix = v["fix"]
+    if not v["ok"] and not heal:
+        fix = (f"{fix}  |  or re-run this doctor as `doctor.py --heal`, which "
+               "runs that update and re-checks in one command")
+    return _check("installed plugin", v["ok"], detail, fix)
 
 
 def enabled_state_check(manifest: dict) -> dict:
-    """Informational only: defaultEnabled=false is the shipped state, not a
-    defect, so this row reports and never fails."""
+    """What the manifest ships as, and what this container actually has.
+
+    Informational only, and deliberately: `defaultEnabled=false` is the
+    shipped state rather than a defect, and the LIVE reading — measured from
+    `enabledPlugins` in settings.json, which is where a switched-off plugin
+    is actually recorded — already fails the installed-plugin row above as
+    DISABLED, where the heal that fixes it lives. Reporting it twice would
+    give one fact two verdicts.
+    """
     enabled = manifest.get("defaultEnabled")
+    live = plugin_version.enabled_state()
+    live_txt = {True: "enabled", False: "DISABLED — loads nothing",
+                None: "no settings file says either way"}[live]
     return _check(
         "plugin enabled state", True,
         f"defaultEnabled={json.dumps(enabled)} — the plugin ships disabled and "
-        "must be enabled per install (informational row, never fails)")
+        f"must be enabled per install; this container: {live_txt} "
+        "(informational row, never fails)")
+
+
+def concurrent_writers_check() -> dict:
+    """Whether THIS install's engine can survive two writers on one workbook.
+
+    WHY A CHECK AND NOT A DOCSTRING. Until 2026-08-31 `next_evidence_id`
+    ended with "two writers to one workbook is not a supported topology and
+    never was". That was a statement of scope; it was read as a guarantee,
+    and it was read again AFTER the lock landed — a session on a stale
+    install quoted the deleted sentence as authority and began building a
+    shard-and-merge harness with disjoint evidence-id ranges to work around
+    a defect that no longer existed. Prose in a file cannot tell you which
+    version of the file you are running. A capability check can.
+
+    Answered from the INSTALLED tree rather than the checkout, because the
+    installed tree is what a session's agents actually execute.
+    """
+    name = "concurrent workbook writers"
+    try:
+        v = plugin_version.compare()
+        inst = v.get("installed") or {}
+        # The tree the SESSION binds (measured) over the record's cache
+        # copy: on a directory marketplace they differ, and the session's
+        # agents execute the former (2026-09-16).
+        root = inst.get("bound_path") or inst.get("install_path")
+        eng = (Path(root) / "skills" / "dma-research" / "engine" /
+               "workbook.py") if root else None
+        if not eng or not eng.is_file():
+            return _check(name, True,
+                          "SKIPPED: no installed engine to read "
+                          f"({eng or 'no install path'})")
+        src = eng.read_text()
+        # `fcntl` OR `flock`: the marker is the LOCK, not one spelling
+        # of it. Pinning a single token would make this check fail on
+        # a correct engine that acquired the lock another way, which
+        # is the false alarm that sends someone back to sharding.
+        safe = ("def transaction(" in src
+                and ("flock" in src or "fcntl" in src))
+        stale_claim = "not a supported topology and never was" in src
+        detail = (
+            "SAFE: the installed engine takes an exclusive lock across "
+            "reload-mutate-save, so concurrent writers to one workbook do "
+            "not lose each other's rows"
+            if safe else
+            "UNSAFE: the installed engine has no cross-process lock, so two "
+            "writers to one workbook silently clobber each other. Shard onto "
+            "separate workbooks, or update the plugin")
+        if stale_claim:
+            detail += (". This install still carries the docstring saying "
+                       "two writers are 'not a supported topology' — that "
+                       "sentence was deleted when the lock landed, so a "
+                       "session reading it here is reading a STALE install")
+        return _check(name, True, detail,
+                      "" if safe else "doctor.py --heal, then re-dispatch: "
+                      "a running session keeps the engine it started with")
+    except Exception as exc:                                # noqa: BLE001
+        return _check(name, True, f"SKIPPED: {exc}")
+
+
+def connector_contract_check() -> dict:
+    """Which connector families a firing REQUIRES, derived not typed.
+
+    THE HALF A SCRIPT CAN CHECK. A session's bound MCP tools live in the
+    model's context and no subprocess can enumerate them (MEM-0112), so this
+    row proves the other half: that every family the contract stops a firing
+    for is one the agents are actually provisioned with. On 2026-08-31 a
+    Routine prompt required "Firecrawl" — named in no agent's tools, in no
+    role in the provisioner, and nowhere in docs/CONNECTORS.md — which would
+    have stopped every firing on a connector the pipeline cannot call. A
+    requirement written as prose is never compared to anything.
+    """
+    name = "connector contract"
+    try:
+        c = connector_contract.contract()
+    except connector_contract.ContractBroken as exc:
+        return _check(name, False, str(exc),
+                      "reconcile the required set in "
+                      "plugins/dma-insights/scripts/connector_contract.py "
+                      "with EXTERNAL in scripts/provision_agent_tools.py — "
+                      "one of them is wrong, and the registry is the one the "
+                      "agents are built from")
+    anyof = "; ".join(" or ".join(g) for g in c["required_any"])
+    declared = (f"required {', '.join(c['required'])}"
+                + (f"; at least one of {anyof}" if anyof else "")
+                + f"; optional {', '.join(c['optional'])}")
+    # THE HALF THIS ROW USED TO SKIP. It returned True unconditionally — it
+    # only proved the contract NAMES families the registry defines, never that
+    # this session holds any. So the doctor went green on a session with zero
+    # enrichment connectors, which is the exact state that cost a live run
+    # $96.65 (2026-09-12). commands/doctor.md has always said it: "A doctor
+    # that passes while the tools are absent has checked the wrong thing."
+    #
+    # A session's bound tools cannot be read from a subprocess (MEM-0112), so
+    # the honest verdict when no baseline has been written is UNVERIFIED — and
+    # UNVERIFIED is not a pass.
+    try:
+        path = connector_contract.baseline_path(os.environ.get("DMA_RUN_ROOT"))
+        source = f"baseline at {path}"
+        if not Path(path).is_file():
+            # MEASURED, NOT TYPED (Interac, 2026-10-10). This row failed
+            # every DMA session's first doctor run: the baseline is written
+            # under a run root, and the doctor runs before there is one. The
+            # session's transcript already names every MCP tool it holds
+            # (`session_roster.py`), so the row judges THAT — read-only; the
+            # pipeline writes the file itself at PREFLIGHT
+            # (`connector_contract.ensure_baseline`). Only a session whose
+            # roster cannot be read at all is still UNVERIFIED.
+            roster = connector_contract._session_roster()
+            if not roster.get("found"):
+                return _check(
+                    name, False,
+                    f"{declared} — derived from EXTERNAL. UNVERIFIED: no "
+                    f"baseline at {path}, and this session's roster could not "
+                    f"be read from its transcript ({roster.get('reason')}).",
+                    "from the session that holds the tools: "
+                    "`printf '%s\\n' <your mcp__ tools> | connector_contract.py "
+                    "baseline --tools - --root <RUN_ROOT>`, then re-run the "
+                    "doctor")
+            ans = roster.get("answering_tools")
+            rec = {"mcp_tools": [t for t in (ans if ans is not None
+                                             else roster.get("mcp_tools") or [])
+                                 if t.startswith("mcp__")]}
+            refused = roster.get("refused_servers") or {}
+            source = ("this session's transcript" + (
+                      f"; BOUND BUT REFUSING (out of credit / over plan): "
+                      f"{', '.join(sorted(refused))}" if refused else "")
+                      + " (no run root yet — "
+                      "engine.pipeline adopts it as the run's baseline at "
+                      "PREFLIGHT; nothing to type)")
+        else:
+            rec = json.loads(Path(path).read_text())
+        out = connector_contract.check(rec.get("mcp_tools") or [])
+        if not out["ok"]:
+            return _check(name, False,
+                          f"{declared}. BASELINE IS SHORT: missing "
+                          f"{', '.join(out['missing'])} (per {source}) — no cell "
+                          f"can be declared absent without one, so no floors "
+                          f"gate can pass; a run proceeds DEGRADED.",
+                          out["why"][:240])
+        return _check(name, True,
+                      f"{declared}. Baseline holds: "
+                      f"{', '.join(out['present']) or 'none'} (per {source})")
+    except Exception as exc:                                  # noqa: BLE001
+        return _check(name, False,
+                      f"{declared} — UNVERIFIED: {exc.__class__.__name__}: "
+                      f"{str(exc)[:160]}",
+                      "re-run `connector_contract.py baseline --tools -` from the "
+                      "session that holds the tools")
 
 
 def deps_check(plugin_root: Path = PLUGIN, offline: bool = False) -> dict:
@@ -723,31 +925,60 @@ def tool_roster_check(base_url, gcloud, id_token, manifest: dict) -> dict:
             unresolved.append(matcher)
     advertised = re.search(r"\((\d+) tools\)", manifest.get("description") or "")
     advertised = int(advertised.group(1)) if advertised else None
-    problems = []
     if unresolved:
-        problems.append("hook matcher(s) name tools the connector does not "
-                        "serve: " + ", ".join(unresolved))
+        return _check(name, False,
+                      "hook matcher(s) name tools the connector does not "
+                      "serve: " + ", ".join(unresolved),
+                      "update hooks/hooks.json to the deployed connector's "
+                      "tool names")
+    # THE COUNT IN THE DESCRIPTION IS AN AD, NOT A CONTRACT (Interac,
+    # 2026-10-10). It failed this row at the start of every DMA session: the
+    # connector deploys continuously from the default branch, so the moment a
+    # tool lands the live count is ahead of whatever number a manifest was
+    # typed with, and run-assessment told the session to stop on any red
+    # row. What a stale count cannot do is break anything — the hooks above
+    # are what fire, and they are name-checked. So drift here is a WARN that
+    # names both numbers and the one command that regenerates them
+    # (`manifest_counts.py --write`, enforced in CI), never a FAIL.
+    repo_tools = None
+    try:
+        import manifest_counts                               # noqa: WPS433
+        repo_tools = manifest_counts.server_tools()
+    except Exception:                                         # noqa: BLE001
+        repo_tools = None
+    lag = []
     if advertised is None:
-        problems.append("manifest description advertises no '(N tools)' count")
+        lag.append("the manifest description states no '(N tools)' count")
     elif advertised != len(live):
-        problems.append(f"manifest advertises {advertised} tools, the "
-                        f"connector serves {len(live)}")
-    if problems:
-        return _check(name, False, "; ".join(problems),
-                      "update the hooks and the manifest description's "
-                      "'(N tools)' to match the deployed connector")
+        lag.append(f"the manifest advertises {advertised} tools, the "
+                   f"connector serves {len(live)}")
+    if repo_tools is not None and set(repo_tools) != set(live):
+        ahead = sorted(set(live) - set(repo_tools))
+        behind = sorted(set(repo_tools) - set(live))
+        lag.append("the deployed connector and this checkout differ"
+                   + (f" — live only: {', '.join(ahead)}" if ahead else "")
+                   + (f" — checkout only: {', '.join(behind)}" if behind else "")
+                   + " (a deploy in flight, or this checkout is behind)")
     # Say what was RECONCILED and what was merely counted — a row that reports
     # "all N resolve" while silently skipping most of them is the kind of
     # comfortable half-truth this build keeps removing.
+    detail = (f"{len(live)} live tools; {named} named connector matcher(s) "
+              f"resolve ({patterns} pattern, {foreign} non-connector "
+              f"matcher(s) not name-checked) "
+              f"(path token via {source}, value not shown)")
+    if lag:
+        return _check(name, True,
+                      "COSMETIC LAG, not a stop: " + "; ".join(lag) + ". "
+                      + detail,
+                      "python3 plugins/dma-insights/scripts/manifest_counts.py "
+                      "--write (in a PR; CI's manifest-count test enforces it)",
+                      warn=True)
     return _check(name, True,
                   f"{len(live)} live tools == manifest's advertised "
-                  f"{advertised}; {named} named connector matcher(s) resolve "
-                  f"({patterns} pattern, {foreign} non-connector matcher(s) "
-                  f"not name-checked) "
-                  f"(path token via {source}, value not shown)")
+                  f"{advertised}; " + detail.split("; ", 1)[1])
 
 
-def run_checks(base_url: str | None) -> list:
+def run_checks(base_url: str | None, heal: bool = False) -> list:
     out = []
     manifest = read_manifest()
 
@@ -758,11 +989,13 @@ def run_checks(base_url: str | None) -> list:
         str(manifest_path) if manifest_path.exists() else "not found",
         "install the plugin from the marketplace: /plugin marketplace add "
         "mishleyotis/Accelerate, then /plugin install dma-insights@zennify-dma"))
-    out.append(installed_plugin_check())
+    out.append(installed_plugin_check(heal))
     out.append(enabled_state_check(manifest))
     mcp_json = PLUGIN / ".mcp.json"
     out.append(_check("connector definition", mcp_json.exists(),
                       str(mcp_json) if mcp_json.exists() else "not found"))
+    out.append(connector_contract_check())
+    out.append(concurrent_writers_check())
     out.append(hooks_wired_check())
     out.extend(inventory_checks())
     out.append(deps_check(offline=base_url is None))
@@ -880,6 +1113,10 @@ def main() -> int:
                     help="offline run: skip the network rows (audience "
                          "comparison, enforcement probe, tool roster)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--heal", action="store_true",
+                    help="on a STALE/MISSING/INCOMPLETE install, run the "
+                         "plugin update itself (container-local cache only) "
+                         "and re-check, so one command can reach green")
     args = ap.parse_args()
 
     # The audience and enforcement rows are the two SECURITY checks, and a
@@ -889,14 +1126,16 @@ def main() -> int:
     base_url = None if args.no_probe else (
         args.base_url or manifest_base_url() or DEFAULT_AUD)
 
-    checks = run_checks(base_url)
+    checks = run_checks(base_url, args.heal)
     if args.json:
         print(json.dumps({"checks": checks}, indent=1))
     else:
         print("DMA Insights — install doctor\n")
         for c in checks:
-            print(f"  [{'ok' if c['ok'] else 'FAIL'}] {c['check']:42} {c['detail']}")
-            if not c["ok"] and c["fix"]:
+            mark = ("FAIL" if not c["ok"] else "warn" if c.get("warn")
+                    else "ok")
+            print(f"  [{mark}] {c['check']:42} {c['detail']}")
+            if (not c["ok"] or c.get("warn")) and c["fix"]:
                 print(f"         -> {c['fix']}")
         bad = [c for c in checks if not c["ok"]]
         print(f"\n{len(checks) - len(bad)}/{len(checks)} checks passed."

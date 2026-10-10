@@ -51,6 +51,7 @@ import argparse
 import io
 import json
 import mimetypes
+import os
 import re
 import sys
 import time
@@ -139,6 +140,25 @@ def _find_client_folder(tok: str, client: str) -> dict:
     want = _norm(client)
     folders = [f for f in _list_children(tok, INTAKE_FOLDER_ID)
                if f["mimeType"] == FOLDER_MIME]
+    # THE OWNER'S PIN (2026-10-09, R-IMA-20261009 / MEM-0628): two folders
+    # ("IMA Financial - DMA", "IMA Financial Group - DMA") normalise to one
+    # identity, so every snapshot and push refused — correctly, a duplicate
+    # is a human's call. Once a person has made it, DMA_CLIENT_FOLDER names
+    # the chosen folder by its exact name or id, and every call (a restore
+    # in a fresh container included, before any workbook exists) honours
+    # it. A pin naming no visible folder, or a folder of another client, is
+    # refused rather than guessed around.
+    pin = os.environ.get("DMA_CLIENT_FOLDER", "").strip()
+    if pin:
+        got = [f for f in folders if f.get("id") == pin or f.get("name") == pin]
+        if len(got) != 1:
+            raise SystemExit(f"DMA_CLIENT_FOLDER={pin!r} names no single folder under the "
+                             f"intake tree — set it to the exact folder name or id")
+        if _norm(got[0]["name"]) != want and not _norm(got[0]["name"]).startswith(want + "-") \
+                and not want.startswith(_norm(got[0]["name"]) + "-"):
+            raise SystemExit(f"DMA_CLIENT_FOLDER={pin!r} is {got[0]['name']!r}, which is not "
+                             f"{client!r}'s folder — a pin never redirects a client")
+        return got[0]
     exact = [f for f in folders if _norm(f["name"]) == want]
     partial = [f for f in folders
                if _norm(f["name"]).startswith(want + "-")
@@ -150,7 +170,8 @@ def _find_client_folder(tok: str, client: str) -> dict:
         names = " | ".join(sorted(f["name"] for f in hit))
         raise SystemExit(
             f"multiple client folders matching {client!r}: {names} — "
-            f"duplicate folders are adjudicated by a human, never guessed")
+            f"duplicate folders are adjudicated by a human, never guessed; once "
+            f"decided, export DMA_CLIENT_FOLDER='<the chosen folder name or id>'")
     names = ", ".join(sorted(f["name"] for f in folders)) or "none visible"
     raise SystemExit(
         f"no client folder matching {client!r} under the intake tree — "
@@ -257,13 +278,46 @@ def pull(client: str) -> int:
                 _download(tok, mem, MEMORY_DIR)
                 (MEMORY_DIR / mem["name"]).rename(local)
             print(f"memory: landed {mem['name']!r} -> {local}")
+        # the version this session pulled — what `push-memory` checks against
+        try:
+            _record_pulled(_slug(client), _file_version(tok, mem["id"]))
+        except Exception as exc:                              # noqa: BLE001
+            print(f"memory: version not recorded ({type(exc).__name__}); "
+                  f"push-memory will refuse until it is — pull again or --force")
     else:
         print("memory: none in the client folder yet — "
               "client_memory.py init creates the skeleton")
     return 0 if got else 1
 
 
-def push_memory(client: str) -> int:
+def _file_version(tok: str, file_id: str) -> dict:
+    """The remote's version token: Drive's own md5 and modifiedTime."""
+    q = urllib.parse.urlencode({"fields": "id,name,md5Checksum,modifiedTime",
+                                "supportsAllDrives": "true"})
+    with _req(tok, f"{API}/files/{file_id}?{q}") as resp:
+        d = json.load(resp)
+    return {"id": d.get("id", file_id), "md5Checksum": d.get("md5Checksum"),
+            "modifiedTime": d.get("modifiedTime")}
+
+
+def _pulled_path(slug: str) -> Path:
+    return MEMORY_DIR / f"{slug}.pulled.json"
+
+
+def _record_pulled(slug: str, version: dict) -> None:
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    _pulled_path(slug).write_text(json.dumps(version, indent=2), encoding="utf-8")
+
+
+def _pulled_version(slug: str) -> dict | None:
+    p = _pulled_path(slug)
+    try:
+        return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else None
+    except (OSError, ValueError):
+        return None
+
+
+def push_memory(client: str, *, force: bool = False) -> int:
     slug = _slug(client)
     local = MEMORY_DIR / f"{slug}.md"
     if not local.is_file():
@@ -276,11 +330,37 @@ def push_memory(client: str) -> int:
     existing = _find_memory_file(tok, folder["id"], client)
     body = local.read_bytes()
     if existing:
+        # THE VERSION TOKEN (QA audit F-G05-017, 28-09-2026): this PATCH
+        # replaced the Drive copy whatever it held, so two sessions on one
+        # client were last-writer-wins across Drive. The push now carries
+        # the version the session PULLED and refuses when the remote has
+        # moved since: pull again, merge, push. `--force` is the recorded
+        # override, never the default.
+        remote = _file_version(tok, existing["id"])
+        pulled = _pulled_version(slug)
+        if not force:
+            if pulled is None:
+                raise SystemExit(
+                    f"memory push refused: {remote_name!r} exists in Drive and this "
+                    f"session never pulled it (no {_pulled_path(slug).name}), so the "
+                    f"push would overwrite a version nobody here has read. Run "
+                    f"`drive_fetch.py pull --client {client}` first, merge, then push; "
+                    f"`--force` overrides and is recorded. (QA audit F-G05-017)")
+            if pulled.get("md5Checksum") != remote.get("md5Checksum"):
+                raise SystemExit(
+                    f"memory push refused: {remote_name!r} changed in Drive since it "
+                    f"was pulled (pulled {pulled.get('modifiedTime')}, remote now "
+                    f"{remote.get('modifiedTime')}). Another session wrote it. Pull "
+                    f"again, merge your entries into the current file, then push; "
+                    f"`--force` overrides and is recorded. (QA audit F-G05-017)")
         url = (f"{UPLOAD}/files/{existing['id']}?uploadType=media"
                f"&supportsAllDrives=true")
         with _req(tok, url, data=body, method="PATCH",
                   ctype="text/markdown") as resp:
             json.load(resp)
+        _record_pulled(slug, {**_file_version(tok, existing["id"]),
+                              "forced": bool(force and (pulled is None or
+                                             pulled.get("md5Checksum") != remote.get("md5Checksum")))})
         if existing["name"] != remote_name:
             # heal a file pushed under a variant slug: one client, one
             # memory file, canonical name = the display_id's slug
@@ -305,7 +385,12 @@ def push_memory(client: str) -> int:
         url = f"{UPLOAD}/files?uploadType=multipart&supportsAllDrives=true"
         with _req(tok, url, data=payload.getvalue(), method="POST",
                   ctype=f"multipart/related; boundary={boundary}") as resp:
-            json.load(resp)
+            created = json.load(resp)
+        if isinstance(created, dict) and created.get("id"):
+            try:
+                _record_pulled(slug, _file_version(tok, created["id"]))
+            except Exception:                                 # noqa: BLE001
+                pass                                          # the push stands
         print(f"memory created in Drive: {remote_name!r} in {folder['name']!r}")
     return 0
 
@@ -713,6 +798,9 @@ def main(argv=None) -> int:
     p_pull.add_argument("--client", required=True)
     p_push = sub.add_parser("push-memory")
     p_push.add_argument("--client", required=True)
+    p_push.add_argument("--force", action="store_true",
+                        help="push even if the Drive copy moved since the pull "
+                             "(recorded); the default refuses (F-G05-017)")
     p_b = sub.add_parser("push-bundle")
     p_b.add_argument("--client", required=True)
     p_b.add_argument("--file", required=True)
@@ -763,8 +851,25 @@ def main(argv=None) -> int:
              "memory-backup folder (the in-flight safety copy "
              "engine/memory.py maintains)")
     p_bk.add_argument("--client", required=True)
-    p_bk.add_argument("--file", required=True)
-    p_bk.add_argument("--name", default=None)
+    p_bk.add_argument("--file", default=None)
+    p_bk.add_argument("--many", nargs="+", default=None,
+                      help="several paths in ONE call — one token exchange "
+                           "and one folder lookup for the whole round's "
+                           "notebooks instead of one process per file")
+    p_bk.add_argument("--name", default=None,
+                      help="remote name for a single --file")
+    p_pb = sub.add_parser(
+        "pull-backup",
+        help="download the client's memory-backup folder into --dest — the "
+             "mirror of push-backup, what engine/memory.py restore calls "
+             "on a fresh container")
+    p_pb.add_argument("--client", required=True)
+    p_pb.add_argument("--dest", required=True)
+    p_lb = sub.add_parser(
+        "list-backup",
+        help="list the run snapshots in the client's memory-backup folder "
+             "(JSON, read-only) — how route_client sees a run in flight")
+    p_lb.add_argument("--client", required=True)
     p_fn = sub.add_parser(
         "push-final",
         help="push one finished deliverable to the ROOT of the client's "
@@ -786,6 +891,14 @@ def main(argv=None) -> int:
     p_pk.add_argument("--name", default=None,
                       help="remote path under the client folder "
                            "(default: the file's own name)")
+    p_ar = sub.add_parser(
+        "archive-remote",
+        help="move the intake folder's previous package into "
+             "_superseded/<run>/ before a new run writes (never deletes)")
+    p_ar.add_argument("--client", required=True)
+    p_ar.add_argument("--run-id", required=True)
+    p_ar.add_argument("--opened-at", default=None)
+    p_ar.add_argument("--dry-run", action="store_true")
     p_rv = sub.add_parser(
         "push-review",
         help="one review artefact (e.g. the packaged plugin zip) into the "
@@ -801,7 +914,7 @@ def main(argv=None) -> int:
     if a.cmd == "pull":
         return pull(a.client)
     if a.cmd == "push-memory":
-        return push_memory(a.client)
+        return push_memory(a.client, force=a.force)
     if a.cmd == "push-bundle":
         return push_bundle(a.client, a.file, a.name)
     if a.cmd == "push-ledger":
@@ -815,13 +928,21 @@ def main(argv=None) -> int:
     if a.cmd == "pull-toolkits":
         return pull_toolkits(a.dest)
     if a.cmd == "push-backup":
-        return push_backup(a.client, a.file, a.name)
+        return push_backup(a.client, a.file, a.name, a.many)
+    if a.cmd == "pull-backup":
+        return pull_backup(a.client, a.dest)
+    if a.cmd == "list-backup":
+        return list_backup(a.client)
     if a.cmd == "push-final":
         return push_final(a.client, a.file)
     if a.cmd == "cleanup-backup":
         return cleanup_backup(a.client)
     if a.cmd == "push-package":
         return push_package(a.client, a.file, a.name)
+    if a.cmd == "archive-remote":
+        r = archive_remote(a.client, a.run_id, a.opened_at, dry_run=a.dry_run)
+        print(json.dumps(r, indent=1))
+        return 1 if r.get("failed") else 0
     if a.cmd == "push-review":
         return push_review(a.file, a.name)
     if a.cmd == "find-artifact":
@@ -895,22 +1016,205 @@ def push_package(client: str, file_path: str, name: str | None) -> int:
     return 0
 
 
-def push_backup(client: str, file_path: str, name: str | None) -> int:
-    """One research-notebook or workbook file into the client's
+#: Root items a supersede never moves: the archive itself, the synthesis-side
+#: 'DMAI - <Client>' folder (a different tree with its own lifecycle) and
+#: the in-flight memory backup.
+_ARCHIVE_KEEP = ("_superseded", BACKUP_FOLDER)
+
+
+def archive_remote(client: str, run_id: str, opened_at: str | None = None,
+                   *, dry_run: bool = False) -> dict:
+    """Move the intake folder's PREVIOUS package into `_superseded/<label>/`.
+
+    THE DEFECT THIS CLOSES, measured 2026-09-30 on SWBC. `assemble.
+    _archive_existing` supersedes a prior package by reading the LOCAL
+    folder's run_manifest.json. A run on a fresh container has no local
+    folder, so it reported "no previous package here" while the Drive
+    folder held the 2026-09-11 package at its root — and `push-package`
+    then OVERWROTE that run's manifest with the new run's identity. The
+    silent merge CLIENT-SELECTION.md section 2 calls closed was open for
+    every run that did not reuse the container that made the last one.
+
+    Same shape as the local archive: nothing is deleted, the folder keeps its
+    name and id, and every item moves whole. When the remote manifest
+    already names THIS run (a resume, or the partial state the defect left),
+    only items modified before this run's `opened_at` move — so a resume
+    never archives its own deliverables."""
+    tok = _token()
+    folder = _find_client_folder(tok, client)
+    q = urllib.parse.urlencode({
+        "q": f"'{folder['id']}' in parents and trashed = false",
+        "fields": "files(id,name,mimeType,modifiedTime)", "pageSize": 200,
+        "supportsAllDrives": "true", "includeItemsFromAllDrives": "true"})
+    with _req(tok, f"{API}/files?{q}") as resp:
+        items = json.load(resp).get("files", [])
+    prior_run, prior_opened = "", ""
+    man = next((f for f in items if f["name"] == "run_manifest.json"), None)
+    if man:
+        try:
+            with _req(tok, f"{API}/files/{man['id']}?alt=media"
+                           f"&supportsAllDrives=true") as resp:
+                was = json.load(resp)
+            prior_run = str(was.get("run_id") or "")
+            prior_opened = str(was.get("opened_at") or "")
+        except Exception:                                   # noqa: BLE001
+            pass
+    same_run = prior_run == run_id
+    cutoff = (opened_at or prior_opened) if same_run else None
+    movable = []
+    for f in items:
+        if f["name"] in _ARCHIVE_KEEP or f["name"].startswith("DMAI - "):
+            continue
+        if same_run and f["name"] == "run_manifest.json":
+            continue
+        if cutoff and str(f.get("modifiedTime") or "") >= cutoff:
+            continue
+        movable.append(f)
+    if not movable:
+        return {"archived": None, "reason": ("same run, nothing older"
+                                             if same_run else
+                                             "no previous package on Drive")}
+    stamp = max(str(f.get("modifiedTime") or "")[:10] for f in movable)
+    label = (f"{prior_run}_{stamp}" if prior_run and not same_run
+             else f"prior-package_{stamp}")
+    out = {"archived": f"{folder['name']}/_superseded/{label}",
+           "prior_run": prior_run or None,
+           "moved": [f["name"] for f in movable], "failed": []}
+    if dry_run:
+        out["dry_run"] = True
+        return out
+    home = _ensure_folder(tok, _ensure_folder(tok, folder["id"], "_superseded"),
+                          label)
+    for f in movable:
+        url = (f"{API}/files/{f['id']}?addParents={home}"
+               f"&removeParents={folder['id']}&supportsAllDrives=true")
+        try:
+            with _req(tok, url, data=b"{}", method="PATCH",
+                      ctype="application/json") as resp:
+                json.load(resp)
+        except urllib.error.HTTPError as e:
+            out["failed"].append({"name": f["name"], "http": e.code})
+    _upload_bytes(tok, home, "SUPERSEDED.json", json.dumps({
+        "run_id": prior_run or None, "superseded_by": run_id,
+        "superseded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "moved": out["moved"], "failed": out["failed"]}, indent=2).encode(),
+        "application/json")
+    return out
+
+
+def push_backup(client: str, file_path: str | None, name: str | None,
+                many: list | None = None) -> int:
+    """Research-notebook and workbook files into the client's
     'memory-backup' folder — the IN-FLIGHT safety copy of the .md memory
     layer, so a dead container does not cost the notebook. This is the
     folder `cleanup-backup` later removes, once engine/memory.py has
-    verified every entry is consolidated into the workbook."""
-    local = Path(file_path)
-    if not local.is_file():
-        raise SystemExit(f"no such file: {local}")
+    verified every entry is consolidated into the workbook.
+
+    `--many` takes a LIST of paths and pushes them under ONE token exchange
+    and ONE folder resolution. A sixteen-lane run backs up sixteen notebooks
+    plus the workbook at every round end; one call per file meant seventeen
+    processes, seventeen SA assertions and seventeen client-folder lookups
+    for a job whose whole point is to be cheap enough to do every round.
+    `--name` renames a single `--file` only — a rename cannot be meaningful
+    for a batch, so asking for both is refused rather than half-applied.
+    """
+    paths = [Path(f) for f in (many or [])] or ([Path(file_path)]
+                                                if file_path else [])
+    if not paths:
+        raise SystemExit("push-backup needs --file or --many")
+    if many and name:
+        raise SystemExit("--name renames one --file; it cannot name a batch")
+    missing = [str(p) for p in paths if not p.is_file()]
+    if missing:
+        # Validated BEFORE the first upload: a batch that pushes four files
+        # and then dies on a typo leaves a half-done backup whose caller was
+        # told nothing succeeded.
+        raise SystemExit(f"no such file: {', '.join(missing)}")
     tok = _token()
     folder, chosen = _insights_root(tok, client)
-    ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
-                                "application/octet-stream")
-    remote = f"{BACKUP_FOLDER}/{name or local.name}"
-    verb = _upload_bytes(tok, chosen["id"], remote, local.read_bytes(), ctype)
-    print(f"backup {verb}: {chosen['name']}/{remote} in {folder['name']!r}")
+    failed = 0
+    for local in paths:
+        ctype = _MIME_BY_SUFFIX.get(local.suffix.lower(),
+                                    "application/octet-stream")
+        remote = f"{BACKUP_FOLDER}/{name or local.name}"
+        try:
+            verb = _upload_bytes(tok, chosen["id"], remote,
+                                 local.read_bytes(), ctype)
+        except (urllib.error.URLError, OSError) as e:
+            failed += 1
+            print(f"backup FAILED: {chosen['name']}/{remote}: {e}")
+            continue
+        print(f"backup {verb}: {chosen['name']}/{remote} "
+              f"in {folder['name']!r}")
+    return 1 if failed else 0
+
+
+def pull_backup(client: str, dest: str) -> int:
+    """The client's 'memory-backup' folder, back down into `dest` — the
+    mirror of push-backup and the half the lifecycle was missing.
+
+    A safety copy nothing can fetch is not a safety copy: until this verb
+    existed the notebooks were pushed every round and a fresh container
+    still had no way to get them, so `engine.memory restore` had nothing to
+    call. Same client, same folder, same identity (the service account, not
+    a connector); downloading instead of uploading.
+
+    NO BACKUP IS NOT AN ERROR. A client with nothing pushed yet prints what
+    it looked at and returns 0 with `dest` empty — engine/memory.py reads
+    the empty directory as its own NOT_RUN, which is the honest outcome,
+    where a nonzero exit here would read as a broken Drive."""
+    tok = _token()
+    folder, chosen = _insights_root(tok, client)
+    out = Path(dest)
+    out.mkdir(parents=True, exist_ok=True)
+    hits = [f for f in _list_children(tok, chosen["id"])
+            if f["mimeType"] == FOLDER_MIME and f["name"] == BACKUP_FOLDER]
+    if not hits:
+        print(f"pull-backup: no {BACKUP_FOLDER!r} folder under "
+              f"{chosen['name']} in {folder['name']!r} — nothing backed up "
+              f"for this client yet")
+        return 0
+    n = 0
+    for h in hits:
+        for f in _list_children(tok, h["id"]):
+            if f["mimeType"] == FOLDER_MIME:
+                continue
+            _download(tok, f, out)
+            n += 1
+    print(f"pull-backup: {n} file(s) <- {chosen['name']}/{BACKUP_FOLDER} "
+          f"in {folder['name']!r} -> {out}")
+    return 0
+
+
+def list_backup(client: str) -> int:
+    """The run snapshots in the client's memory-backup folder, as JSON —
+    read-only: it creates no folder (unlike `_insights_root`).
+
+    route_client used to consult the connector alone, and a run still in
+    RESEARCH is not in the connector yet: Susser Bank (2026-10-05) routed
+    AMBIGUOUS against five unrelated banks while its intake folder held a
+    snapshot from an hour before. This is what lets it see that run."""
+    tok = _token()
+    out = {"client": client, "snapshots": []}
+    try:
+        folder = _find_client_folder(tok, client)
+    except SystemExit as e:
+        out["reason"] = str(e)[:300]
+        print(json.dumps(out))
+        return 0
+    out["client_folder"] = folder["name"]
+    want = _insights_name(folder["name"])
+    kids = [f for f in _list_children(tok, folder["id"]) if f["mimeType"] == FOLDER_MIME]
+    dmai = (next((f for f in kids if f["name"] == want), None)
+            or next((f for f in kids if f["name"].startswith("DMAI - ")), None))
+    for h in ([f for f in _list_children(tok, dmai["id"])
+               if f["mimeType"] == FOLDER_MIME and f["name"] == BACKUP_FOLDER]
+              if dmai else []):
+        for f in _list_children(tok, h["id"]):
+            m = re.fullmatch(r"run_snapshot_(.+)\.tar\.gz", f["name"])
+            if m:
+                out["snapshots"].append({"name": f["name"], "run_id": m.group(1)})
+    print(json.dumps(out))
     return 0
 
 

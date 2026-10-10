@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { COOKIE, verify } from "../../../../../lib/session";
+import { requestSession } from "../../../../../lib/request-session";
 import { effectiveRole } from "../../../../../lib/identity";
+import { logUsage } from "../../../../../lib/usage";
+import { shareMode } from "../../../../../lib/share";
 
 // The SPA's read path into the serving tier. The session's GRANTED role is
 // forwarded (never a client-supplied one), so the API can refuse a page the
@@ -18,7 +20,9 @@ const PAGES = new Set(["overview", "insights", "heatmap", "platform",
                        "answers"]);
 
 export async function GET(req, { params }) {
-  const session = verify(cookies().get(COOKIE)?.value);
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) return new Response("Not found", { status: 404 });
+  const session = await requestSession(req, cookies());
   if (!session) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
   }
@@ -42,6 +46,13 @@ export async function GET(req, { params }) {
   // an AE that sends role=ADMIN is still answered as an AE. The client's value
   // is a request, never a grant.
   const role = effectiveRole(session.role, url.searchParams.get("role"));
+  // Usage telemetry (lib/usage.js): opening a client reads all six pages at
+  // once, so the overview read alone marks one "client opened" — a server-
+  // observed record that does not depend on the browser's beacon.
+  if (page === "overview") {
+    logUsage("client_open", session, { client_id: display_id, audience,
+                                      acting_role: role, page: "overview" });
+  }
   const target = new URL(`${base}/v1/entities/${encodeURIComponent(display_id)}/${page}`);
   target.searchParams.set("audience", audience);
   target.searchParams.set("role", role);

@@ -60,6 +60,11 @@ MODULES = {
     "cffi": ("cffi", "dma-assessment: ingest_evidence — pdfplumber's "
                      "cryptography backend; its absence surfaces as "
                      "ModuleNotFoundError _cffi_backend"),
+    # Added 2026-09-28 (QA audit F-N01-019): run_manifest.json is validated
+    # against engine/schemas/run_manifest.schema.json before it is written.
+    "jsonschema": ("jsonschema", "dma-research: engine.assemble write_manifest; "
+                                 "dma-governance: gov_auditor IV-02; "
+                                 "dma-assessment: validate_contracts"),
 }
 
 

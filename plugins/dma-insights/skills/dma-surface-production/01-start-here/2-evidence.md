@@ -105,18 +105,35 @@ your filing note.
 
 ## A source that blocks retrieval cannot be cited at all
 
-Glassdoor, Indeed, ZipRecruiter and the Glassdoor mirrors all return 403 to automated
-fetches. A figure whose only source is one of those is **unciteable** — there is no id to
-carry it.
+Glassdoor, ZipRecruiter, the Glassdoor mirrors and a WEB FETCH of `indeed.com` all return
+403 to automated fetches. A figure whose only route is one of those pages is **unciteable
+by URL** — there is no id to carry it.
 
-That leaves exactly three honest moves, and inventing an id is not among them:
+**A refused web page is not a refused source when a connector reaches it** (SWBC gold
+audit 2026-10-04, RC-07; owner decision 3). The Indeed connector's
+`mcp__Indeed__get_company_data` returns the employer rating, the sub-ratings and the
+recommend counts — on SWBC 3.1/5 and 46 of 97 — and the CFPB complaint API (company
+filter plus aggregations) returns the complaint count and timely-response share — 213 and
+96.2% — although the doctrine here said "Indeed 403 → omitted" and the card shipped one
+bar. Register such a reading with `register_evidence(origin='connector',
+connector={tool, query, retrieved_at, response})` (migration 0063): the server stamps the
+tier (Indeed T3, CFPB T1 — a tier you send is ignored) and checks the excerpt verbatim
+against the stored response; no URL is needed. The claim type follows the tier, as ET-10
+reads it: a CFPB reading (T1) may be FACT; an Indeed reading (T3) registers as
+`claim_type='INFERENCE'` — FACT on it is refused at registration (`fact_tier`, naming
+ET-10), never rewritten for you. Never drop a connector reading, and never register it
+URL-less under another origin. `02-inputs/enrichment_sources.json` lists the connector routes per
+facet.
 
-1. Find the same figure somewhere retrievable (an aggregator that republishes it with
+That leaves exactly four honest moves, in this order, and inventing an id is not among them:
+
+1. Read it through the connector that serves it (above), and cite the connector-origin row.
+2. Find the same figure somewhere retrievable (an aggregator that republishes it with
    attribution, a filing, a press release) and cite THAT.
-2. Carry it as an explicit inference with its route named — what you saw, where, and that the
+3. Carry it as an explicit inference with its route named — what you saw, where, and that the
    source could not be fetched.
-3. Omit the figure, and record the attempt in `sources_searched` as a rung that did not
-   resolve.
+4. Omit the figure, and record the attempt in `sources_searched` as a rung that did not
+   resolve — naming the connector call that failed as well as the page that refused.
 
 A blocked source belongs in the ladder, never in an `e_ids` list, and never behind a number
 presented as cited. `01-start-here/4-absence-protocol.md` owns the ladder's shape.
@@ -128,7 +145,7 @@ the ladder can tell them apart.
 
 | Class | What happened | What the ladder says |
 |---|---|---|
-| **Blocked** | The host refuses automated retrieval outright — 403 to every fetch. Measured: `glassdoor.com`, `indeed.com`, `ziprecruiter.com`, `trustpilot.com`, `creditunionsonline.com`, `depositaccounts.com`, `cutimes.com`, `bbb.org` profile pages | the source exists and cannot be cited; name the status code |
+| **Blocked** | The host refuses automated retrieval outright — 403 to every fetch. Measured: `glassdoor.com`, `indeed.com` (the page — the Indeed connector still answers; RC-07), `ziprecruiter.com`, `trustpilot.com`, `creditunionsonline.com`, `depositaccounts.com`, `cutimes.com`, `bbb.org` profile pages | the source exists and cannot be cited; name the status code |
 | **Gone** | The URL 404s or the host no longer serves that path. Measured: machine-scan consoles (`vibeprospecting.explorium.ai`), and an institution's own press archive after a site rebuild | there is nothing behind this id; retire it rather than re-point it |
 | **Reachable but the span is not in the artefact** | The fetch succeeds and the number you can see in a browser is **not** in the bytes the verifier receives | the source was reached and the figure could not be verified — say which half failed |
 

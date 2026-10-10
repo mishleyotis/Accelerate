@@ -32,6 +32,7 @@ name is "DMA Insights".
 from __future__ import annotations
 
 import os
+import re
 from contextlib import contextmanager
 
 from mcp.server import MCPServer
@@ -74,21 +75,43 @@ def _encoder():
     return _ENCODER
 
 
+# ── ONE Cloud SQL Connector, imported ────────────────────────────────
+#
+# `Connector()` per connection is one Cloud SQL ADMIN API call per
+# connection (it fetches connectSettings on construction), and under
+# NullPool every checkout is a new connection. That is what produced the
+# 429 on sqladmin.googleapis.com/.../connectSettings during a live intake
+# firing on 2026-08-31. packages/shared/cloudsql.py holds the cached one.
+#
+# Roots built LAZILY and image-first: in the image this module is
+# /app/<pkg>/<name>.py, so `parents[3]` raises IndexError and a tuple
+# literal would raise before the image path it would have found is tried.
+import sys as _sys
+from pathlib import Path as _Path
+
+
+def _shared_roots():
+    here = _Path(__file__).resolve()
+    roots = [here.parent / "shared", here.parent.parent / "shared"]
+    if len(here.parents) > 3:
+        roots.append(here.parents[3] / "packages" / "shared")
+    return roots
+
+
+for _cand in _shared_roots():
+    if _cand.exists() and str(_cand) not in _sys.path:
+        _sys.path.insert(0, str(_cand))
+
+from cloudsql import connect as _cloudsql_connect  # noqa: E402
+
 @contextmanager
 def _conn():
-    if os.environ.get("LOCAL_DATABASE_URL"):
-        import pg8000.dbapi
-        url = os.environ["LOCAL_DATABASE_URL"]
-        host = url.split("@")[1].split(":")[0]
-        c = pg8000.dbapi.connect(user="dmai-mcp@digital-maturity-assessor.iam",
-                                 password="local", host=host, port=5432,
-                                 database="dma_insights")
-    else:
-        from google.cloud.sql.connector import Connector
-        c = Connector().connect(
-            os.environ["DB_INSTANCE_CONNECTION_NAME"], "pg8000",
-            user=os.environ["DB_USER"], db=os.environ["DB_NAME"],
-            enable_iam_auth=True, ip_type="PRIVATE")
+    # The CONNECTION closes per call; the CONNECTOR does not. Building a
+    # Connector here — which this did until 2026-08-31 — spends one Cloud
+    # SQL Admin API request per tool call and leaks its refresh task, and
+    # a firing that walks the queue makes dozens in a minute.
+    c = _cloudsql_connect(
+        local_user="dmai-mcp@digital-maturity-assessor.iam")
     try:
         yield c
     finally:
@@ -135,6 +158,31 @@ def get_capability_catalogue(run_id: str) -> dict:
     never copy a name out of report prose."""
     with _conn() as c:
         return bundle_mod.get_capability_catalogue(c, run_id)
+
+
+@mcp.tool()
+@_traced
+def get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = "",
+                          exclude_entity_name: str = "",
+                          subcap_ids: list | None = None) -> dict:
+    """The sub-vertical cohort's peer score per category: the MEAN of every
+    other assessed entity's category score (its active, promoted run), with
+    n, median and quartiles. Below three entities a category comes back with
+    mean null and the reason — record it as cannot_estimate, never impute.
+    Aggregates only; no entity is named. Pass the asking client's display id
+    or legal name so it is not counted as its own peer.
+
+    Pass `subcap_ids` (up to 500) for the same cohort at CELL grain instead:
+    `cells` keyed by subcap id, each the mean of the other entities' scores
+    for that cell — the figure a finding, opportunity cell or gap row cites
+    as its own peer. The category mean is not a cell's peer figure."""
+    from dma_mcp import cohort as cohort_mod
+    with _conn() as c:
+        if subcap_ids:
+            return cohort_mod.cell_benchmarks(c, sub_vertical, subcap_ids,
+                                              exclude_display_id, exclude_entity_name)
+        return cohort_mod.cohort_benchmarks(c, sub_vertical, exclude_display_id,
+                                            exclude_entity_name)
 
 
 @mcp.tool()
@@ -215,6 +263,26 @@ def get_run_progress(run_id: str) -> dict:
     not be re-synthesised."""
     with _conn() as c:
         return claims_mod.get_run_progress(c, run_id)
+
+
+@mcp.tool()
+@_traced
+def list_submissions(run_id: str, page: str = "") -> dict:
+    """Every submission this run has had, per page, oldest first — with
+    each verdict's status, blocking-reason count and gates, which row is
+    live and which promoted.
+
+    `get_run_progress` shows the LIVE row per page and nothing behind it.
+    This is the history: attempts per page, the attempt on which a page
+    first passed, and the gate families each refusal named. Read it when a
+    page has been resubmitted more than twice — a repair that keeps landing
+    on the same gate is a repair to change, not to repeat — and when a
+    verdict refers to a submission id you no longer hold.
+
+    Pass `page` to narrow to one page. Read-only.
+    """
+    with _conn() as c:
+        return claims_mod.list_submissions(c, run_id, page)
 
 
 @mcp.tool()
@@ -300,15 +368,29 @@ def list_open_rejections(display_id: str = "", page: str = "",
 
 @mcp.tool()
 @_traced
-def list_pending_runs() -> dict:
+def list_pending_runs(display_id: str | None = None,
+                      latest_only: bool = False) -> dict:
     """Runs awaiting synthesis (INGESTED/CLAIMED/SYNTHESISING), oldest
-    first, with their claim state."""
+    first, with their claim state and whether they can be synthesised at all.
+
+    `display_id` narrows to one client; `latest_only` drops the surplus runs
+    of a duplicated request (the corpus counts below still describe the
+    whole queue). Measured 2026-09-30: unfiltered, this returned 354 rows /
+    157 KB — more than one tool result can carry — for a caller that wanted
+    one client's newest run.
+
+    `scored_cells` 0 means a RESEARCH-stage package: its score column is
+    empty by contract, so there is nothing for a producer to serve and
+    nothing it is permitted to derive. `synthesisable` is None where the
+    ingest recorded no count — unknown, which is not the same claim as zero.
+    """
     with _conn() as c:
         cur = c.cursor()
         cur.execute("""
             SELECT r.id, e.display_id, e.legal_name, r.request_id,
                    enum_label(r.status), r.completed_at,
-                   cl.held_by, cl.expires_at > now(), r.run_seq
+                   cl.held_by, cl.expires_at > now(), r.run_seq,
+                   r.scored_cells
               FROM runs r
               JOIN entities e ON e.id = r.entity_id
               LEFT JOIN run_claims cl ON cl.run_id = r.id
@@ -334,6 +416,11 @@ def list_pending_runs() -> dict:
         per_request: dict = {}
         for r in rows:
             per_request.setdefault((r[1], r[3]), []).append(r[8])
+        shown = rows
+        if display_id:
+            shown = [r for r in shown if r[1] == display_id]
+        if latest_only:
+            shown = [r for r in shown if r[8] == max(per_request[(r[1], r[3])])]
         return {"pending": [
             {"run_id": str(r[0]), "display_id": r[1], "entity_name": r[2],
              "request_id": r[3], "status": r[4],
@@ -341,9 +428,43 @@ def list_pending_runs() -> dict:
              "run_seq": r[8],
              "runs_for_request": len(per_request[(r[1], r[3])]),
              "is_latest_for_request": r[8] == max(per_request[(r[1], r[3])]),
+             # WHETHER THERE IS ANYTHING TO SERVE, said here rather than
+             # discovered by a producer that has already been spent.
+             #
+             # Measured 2026-08-30 on goeasy-ltd: four INGESTED runs, all
+             # `scored_cells` 0, `composite` null, request id
+             # DMA-RES-GSY-... — a RESEARCH package, whose score column is
+             # empty BY CONTRACT (rule 4) and which the workbook parser had
+             # already identified as such, filing a `workbook_stage`
+             # observation reading "research — column D is empty by
+             # contract" with 679 of 696 rows in scope and unscored.
+             #
+             # That observation went into the ingest record and no further.
+             # This queue row carried run_seq, claim state and duplicate
+             # counts — everything needed to pick BETWEEN runs, and nothing
+             # about whether any of them could be synthesised at all. So the
+             # run read as ordinary work, a session was spent opening it,
+             # and synthesis is forbidden from deriving a score
+             # (invariant: the app writes no prose and ranks nothing), so
+             # there was never an outcome other than "nothing to serve".
+             #
+             # `scored_cells` is None where the ingest never wrote one. That
+             # is UNKNOWN, not zero, and the two are different claims — a
+             # caller that collapsed them would either spend on emptiness or
+             # refuse honest work. Both are reported; `synthesis_queue.py`
+             # decides what to do with each.
+             "scored_cells": r[9],
+             "synthesisable": None if r[9] is None else r[9] > 0,
              "claim": None if r[6] is None else
                       {"held_by": r[6], "live": bool(r[7])}}
-            for r in rows],
+            for r in shown],
+            # The corpus-level shape of the same fact, so a scheduler about
+            # to fan out knows before it starts how much of this queue is
+            # research-stage rather than assessment work.
+            "unscored_runs": sum(1 for r in rows if r[9] == 0),
+            "unknown_score_runs": sum(1 for r in rows if r[9] is None),
+            "filtered": {"display_id": display_id, "latest_only": latest_only,
+                         "corpus_rows": len(rows)},
             # The corpus-level number, so a scheduler about to fan out over
             # this list knows what share of it is duplicate before it starts.
             "duplicate_requests": sum(1 for v in per_request.values() if len(v) > 1),
@@ -367,7 +488,30 @@ def claim_run(run_id: str, session_id: str, producer_version: str) -> dict:
 def register_evidence(run_id: str, item: dict) -> dict:
     """Mint before you cite. The server allocates the id and computes the
     rank score; dedup is by content, scoped to the entity; the excerpt is
-    verified verbatim against the fetched artefact."""
+    verified verbatim against the fetched artefact.
+
+    A CONNECTOR reading (Indeed employer data, the CFPB complaint API):
+    origin='connector' and connector={tool, query, retrieved_at, response}
+    (or response_sha256 of a response already stored). The tier is computed
+    from the tool (Indeed T3, CFPB T1) and the excerpt is verified against
+    the stored response, never by a fetch.
+
+    FACT is refused on a T3-T5 source, every origin (`fact_tier`): ET-10
+    refuses a cited FACT row there at submit, so an Indeed reading
+    registers as INFERENCE. The claim type is never rewritten for you.
+
+    A SPLIT of a partly sensitive internal row: origin='internal',
+    split_of=<parent e_id>, an excerpt that is a verbatim piece of the
+    parent's, and — for the span the client may read —
+    customer_attribution ("Client statement, discovery conversations,
+    <month year>"). A span without one never reaches a customer. A span is
+    strictly shorter than its parent — unless the WHOLE row is the client's
+    own statement: then send the parent's full excerpt with whole_row=true
+    and the attribution, and a NEW span row is minted (owner decision
+    2026-10-05; the parent itself is never labelled or served). The
+    attribution is set only on the span this call mints — re-registering
+    existing words under a different label is refused, never written;
+    re-registering the same span returns it (deduped)."""
     with _conn() as c:
         return register_mod.register_evidence(c, run_id, item, fetch=_fetch)
 
@@ -399,7 +543,8 @@ def open_payload(run_id: str, page: str, producer_version: str = "") -> dict:
 @_traced
 def append_payload_part(upload_id: str, part: int, parts_total: int,
                         path: str = "", items: list = None,
-                        fields: dict = None, item_count: int = 0) -> dict:
+                        fields: dict = None, item_count: int = 0,
+                        repartition: bool = False) -> dict:
     """Send one part of a chunked payload. Returns a receipt, never a verdict —
     nothing is validated until the whole assembles.
 
@@ -418,11 +563,39 @@ def append_payload_part(upload_id: str, part: int, parts_total: int,
     Parts are applied in ascending index at assembly, so the same set of parts
     always assembles to the same bytes. Resending an index REPLACES it: a
     dropped connection costs one part, not the transmission.
+
+    `parts_total` is fixed by the first part that arrives — that is what makes
+    an incomplete transmission detectable. If the chunking plan genuinely
+    changes, send part 1 of the NEW plan with `repartition=true`: it discards
+    the old plan's parts and adopts the new length, and the receipt says how
+    many it discarded. Resuming an interrupted transmission needs none of
+    that — call `get_upload_status(upload_id)` and resend only its
+    `missing_parts` with the parts_total already declared.
     """
     with _conn() as c:
         return transport_mod.append_payload_part(
             c, upload_id, part, parts_total, path=path, items=items,
-            fields=fields, item_count=item_count)
+            fields=fields, item_count=item_count, repartition=repartition)
+
+
+@mcp.tool()
+@_traced
+def get_upload_status(upload_id: str = "", run_id: str = "",
+                      page: str = "") -> dict:
+    """What has already arrived on a chunked upload — read-only.
+
+    Answers the question a producer resuming after an interruption could not
+    previously ask: which parts landed, which are missing, how many bytes and
+    items are held, and whether the set is complete. Nothing is written.
+
+    Pass `upload_id` for one upload, or `run_id` (optionally with `page`) to
+    list that run's OPEN uploads newest first — so a session that lost its
+    place finds the upload it already opened instead of starting a new one and
+    resending everything.
+    """
+    with _conn() as c:
+        return transport_mod.upload_status(c, upload_id=upload_id or None,
+                                           run_id=run_id or None, page=page)
 
 
 @mcp.tool()
@@ -454,11 +627,20 @@ def submit_page_payload(run_id: str, page: str, payload: dict = None,
 
 @mcp.tool()
 @_traced
-def promote_run(run_id: str) -> dict:
+def promote_run(run_id: str, expected_revision: dict | None = None) -> dict:
     """All six pages, one transaction, all or nothing. incomplete_run
-    names the missing and unpassed pages; re-promotion is idempotent."""
+    names the missing and unpassed pages; re-promotion is idempotent.
+
+    Retained pages are re-checked against today's gates, the fit engine
+    (CG-30/CG-31), the run's own status (CG-STALE) and the committed gold
+    shape (CG-PAR: structural gaps refuse; counts and fill ratios come back
+    as `promote_checks.parity.warnings`) before anything is written.
+    `expected_revision` is the
+    contract/gold/gate-set fingerprint your checkout's gates assume
+    (promote_checks.local_revision): a mismatch refuses as
+    deployed_revision_behind; omitted, the result records it unchecked."""
     with _conn() as c:
-        return promote_mod.promote_run(c, run_id)
+        return promote_mod.promote_run(c, run_id, expected_revision)
 
 
 @mcp.tool()
@@ -565,7 +747,12 @@ def record_enrichment(display_id: str, facet: str, source: str,
                     (display_id,))
         row = cur.fetchone()
         if row is None:
-            return {"error": "unknown_entity", "display_id": display_id}
+            # Same dead end `get_client_state` had, and the same repair. A
+            # rule enforced in one of the two places it is needed is the
+            # half-fix this codebase keeps meeting.
+            return {"error": "unknown_entity", "display_id": display_id,
+                    "did_you_mean": bundle_mod.near_display_ids(
+                        cur, display_id)}
         entity_id = row[0]
         try:
             version = ledger_mod.record_enrichment(
@@ -885,6 +1072,41 @@ def ingest_reviewer_feedback(limit: int = 200) -> dict:
     with _conn() as c:
         return feedback_mod.ingest_reviewer_feedback(c, limit=limit,
                                                      encoder=_encoder())
+
+
+# ── resources: the schemas an agent fills, as first-class MCP resources ──
+#
+# The same page contracts, the dual-source section map and the gold-standard
+# web-app requirements the read TOOLS above serve, exposed as resources so a
+# producer can enumerate (resources/list) and read (resources/read) them.
+# Read-only, no database, no encoder; the content lives in dma_mcp.resources
+# (pure, offline-testable) and each entry is registered as a concrete
+# resource so every schema is discoverable rather than hidden behind a
+# template. Registration adds no @mcp.tool, so the documented tool count is
+# unchanged.
+from dma_mcp import resources as resources_mod
+
+
+def _resource_reader(uri: str):
+    # A closure, not a `_uri=uri` default: mcp 2.0.1 reads every handler
+    # parameter as a URI-template variable and refuses a concrete URI whose
+    # handler declares one — the container then dies before it listens
+    # (deploy of 2026-10-02, revision dmai-mcp-00135).
+    def _reader():
+        return resources_mod.read_resource(uri)["text"]
+    return _reader
+
+
+def _register_resources() -> None:
+    for entry in resources_mod.resource_index():
+        uri = entry["uri"]
+        _reader = _resource_reader(uri)
+        _reader.__name__ = "resource_" + re.sub(r"[^0-9a-zA-Z]+", "_", uri).strip("_")
+        mcp.resource(uri, name=entry["name"], description=entry["description"],
+                     mime_type=entry["mime_type"])(_reader)
+
+
+_register_resources()
 
 
 def build_app():

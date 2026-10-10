@@ -23,6 +23,17 @@ v5.0-shaped workbook — the vetting rule, the rulebook lineage notes, the grid
 producer's version check. Those lines carry a lineage marker and are allowed.
 The distinction is the whole value of this check: a blanket search-and-replace
 would delete the mechanism that spots a v5.0 package.
+
+WIDENED 28-09-2026 (QA audit F-L14-041). The shipped prose carried a band rule
+the app does not have — "0.00–1.49 Activating, 1.50–2.49 Building, 2.50–3.49
+Competing, 3.50–5.00 Differentiating" (the app cuts strictly at 2 / 3 / 4 on
+the raw score), the retired fifth-band hex #185F60 on Differentiating, an
+"M5 | Transformational" rubric row, "17 rollups" and "~72 capabilities" — and
+this check passed with 0 findings because its M5/Transformational rules wanted
+a band word on the same line. `Transformational` is now flagged wherever it
+appears (a line that states the prohibition, or a lineage line, stays exempt);
+the deck cut-offs, the retired hex and the two counts have rules of their own;
+`deprecated/` directories are not scanned.
 """
 from __future__ import annotations
 
@@ -38,11 +49,26 @@ sys.path.insert(0, str(PLUGIN / "skills" / "dma-research"))
 
 SCAN_DIRS = ("skills", "agents", "docs", "commands")
 SCAN_EXT = (".md", ".py", ".json")
-SKIP_PARTS = {"__pycache__", "engine"}   # the engine COMPUTES these counts
+SKIP_PARTS = {"__pycache__", "engine", "deprecated"}   # the engine COMPUTES these counts; deprecated/ is not shipped prose
+
+
+def _retired_scripts() -> frozenset:
+    """The retired writers, read from their one owner (audit_skills.py): a
+    retired script's legacy body names the JSON plane it used to write, and
+    that is history behind a refusal, not a claim."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("audit_skills", HERE / "audit_skills.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return frozenset(mod.RETIRED_WRITERS)
+
+
+RETIRED_SCRIPTS = _retired_scripts()
 
 #: Lines mentioning the retired taxonomy on purpose. One of these words on
 #: the line makes the literal a lineage statement rather than a claim about
 #: the current catalogue.
+P1C5_RANGE = re.compile(r"\bP1C1\s*[-–]\s*P1C5\b")
 LINEAGE = re.compile(
     r"v5\.0|v5-|\bv5\b|HISTORICAL|NOT_COMPARABLE|lineage|retired|superseded|"
     r"P1C5|Baxter|older catalogue|previous catalogue", re.I)
@@ -54,7 +80,7 @@ FORBIDDING = re.compile(
     r"must not|never|forbid|prohibit|no fifth|unreachable|does not exist|"
     r"do not write|refus|reject|invariant 6|appear nowhere|is not a band|"
     r"there is no|there are no|no longer|not a band|has four|four bands|"
-    r"nowhere|removed|banned|illegal|violation",
+    r"nowhere|removed|banned|illegal|violation|do not exist|any occurrence",
     re.I)
 
 #: The evidence-CEILING scale, which is a different vocabulary from the
@@ -71,6 +97,23 @@ CEILING_SCALE = re.compile(r"M1\s*[-–—]\s*M5|`M1`\s*[-–—]\s*`M5`|ceiling
 TAXONOMY_CONTEXT = re.compile(
     r"subcap|sub-cap|subcapabilit|sub-capabilit|cell|row|capabilit|question|"
     r"total|count|coverage|taxonom|scored|scoring", re.I)
+
+#: Moody's as a SOURCE the run should call, rather than a line saying it is
+#: not wired: the enrichment inventory and the agents that refuse it must
+#: name it to refuse it.
+MOODYS_CLAIM = re.compile(
+    r"connector|enrichment|search|source|data|scorecard|protocol|dual", re.I)
+NOT_WIRED = re.compile(r"not wired|unauthenticated|grants nothing|OAuth", re.I)
+
+#: A batch-era stop, on a line about batches or checkpoints.
+#: The deck skill's "wait for continue" is a person approving a slide-plan
+#: batch, so the research tier's numbered batches and its checkpoint are the
+#: context, not the word "batch" alone.
+BATCH_CONTEXT = re.compile(r"Batch\s*[1-6]\b|BATCH\s*[1-6]\b|HANDOFF SUMMARY|[Cc]heckpoint")
+
+#: LEGACY as a recency band, not the LEGACY_ANCHORED arc shape or a
+#: "legacy system" in an estate.
+RECENCY_CONTEXT = re.compile(r"CURRENT|RECENT|DATED|ARCHIVAL|recency|months?|mo\b", re.I)
 
 #: A band claim. `M5` inside a ceiling expression or a file:line reference
 #: is neither.
@@ -100,18 +143,13 @@ EXEMPT = {
      "the workbook's"): "names both scales and teaches the difference",
     ("skills/dma-assessment/references/workbook_specification.md",
      "Maturity level text"): "the 1-5 SCORE scale, a workbook column",
-    ("skills/dma-assessment/templates/04_scores_template.json",
-     "maturity_level"): "the 1-5 SCORE the assessment writes",
-    ("skills/dma-assessment/templates/evidence_index.md",
-     "Level_Indicated"): "the SCORE level a piece of evidence indicates",
     ("skills/dma-governance/scripts/gov_auditor.py",
      "maturity_keywords"): "matches SCORE tokens in prose, including a "
                            "fifth level written by mistake — the detector "
                            "needs the token it detects",
-    ("skills/dma-first-call-deck/references/_generated/brand_level_tables.md",
-     "Transformational"): "the mapping table FROM the retired level name TO "
-                          "the band it renders as; deleting it removes the "
-                          "translation",
+    ("agents/checkers/exclusion-boundary-auditor.md",
+     "`entity_ids`, `Transformational`"): "the excluded-vocabulary net names "
+                                          "the token it excludes",
     ("skills/dma-surface-production/01-start-here/5-colour-and-bands.md",
      "maturity scale defines"): "the file that teaches the distinction",
     ("skills/dma-surface-production/01-start-here/5-colour-and-bands.md",
@@ -124,7 +162,7 @@ EXEMPT = {
      "Differentiating`."): "states the prohibition",
     ("agents/production/heatmap/heatmap-grid-producer.md",
      "band anywhere"): "states the prohibition",
-    ("skills/dma-surface-production/03-pages/rulebooks/heatmap.md",
+    ("skills/dma-surface-production/03-pages/rulebooks/heatmap/H4.md",
      "Shape notes, measured"): "the measured shape of a v5.0-pinned client",
     ("skills/dma-surface-production/scripts/check_payload.py",
      "MEM-0022"): "a recorded historical defect, not a current claim",
@@ -134,6 +172,14 @@ EXEMPT = {
      "which is the claim this"): "quotes the stale claim in order to retract it",
     ("skills/dma-research/scripts/merge_evidence.py",
      "baked into the signature"): "quotes the removed default to explain it",
+    # ── the batch-era rules (29-09-2026) ──
+    ("docs/HEADLESS-AUDIT-2026-09-03.md", ""): "a dated audit record of what "
+                                              "the container held that day",
+    ("docs/END-TO-END.md", "evidence_index.json` is classified"):
+        "a recorded ingest behaviour (AUD-0091) for a legacy package's index file",
+    ("skills/dma-research/references/CHANGELOG.md", ""): "version history, by name",
+    ("skills/dma-surface-production/02-inputs/5-corpus-map.md",
+     "748 of 752"): "a measured artefact of the reference package",
 }
 
 
@@ -169,7 +215,56 @@ def rules(c: dict):
          "Activating / Building / Competing / Differentiating", BAND_CONTEXT),
         (re.compile(r"\bTransformational\b"), "Transformational",
          "the fifth band's name; invariant 6 forbids it in code, enum or "
-         "prose", BAND_CONTEXT),
+         "prose — the fifth SCORE level is 'Leading' (engine/rubric.py)", None),
+        (re.compile(r"0\.00\s*[–-]\s*1\.49|1\.50\s*[–-]\s*2\.49|"
+                    r"2\.50\s*[–-]\s*3\.49|3\.50\s*[–-]\s*5\.00"),
+         "1.50 / 2.50 / 3.50 band cut-offs",
+         "bands are strict less-than on the raw score: <2 Activating · "
+         "<3 Building · <4 Competing · ≥4 Differentiating "
+         "(apps/web/lib/bands.js ≡ engine.contract.band_of)", BAND_CONTEXT),
+        (re.compile(r"185F60", re.I), "#185F60",
+         "the retired fifth-band hex; Differentiating renders #139F94 and "
+         "only apps/web/lib/bands.js maps a band to a colour", None),
+        (re.compile(r"\b17\s+rollups\b", re.I), "17 rollups",
+         f"one rollup per category: {c['categories']} in "
+         f"{c['catalogue_version']}", None),
+        (re.compile(r"~\s*72\s+capabilit", re.I), "~72 capabilities",
+         f"the catalogue holds {c['capabilities']} capabilities", None),
+        # ── the batch era's tokens (QA audit F-L11-042, 29-09-2026) ──
+        (re.compile(r"\b06_handoff\b"), "06_handoff",
+         "the run tree is engine.runstate.SUBDIRS; the handoff is the packet "
+         "`engine.cli handoff` writes under 07_qa", None),
+        (re.compile(r"/home/claude/"), "/home/claude/",
+         "no container path in prose: the run root is <ROOT>/<RUN_ID>", None),
+        (re.compile(r"Moody"), "Moody's",
+         "declared, not wired (02-inputs/enrichment_sources.json); the "
+         "connectors are Exa, Tavily, Clay and Explorium, and the tools rule "
+         "is RESEARCH-PROTOCOL.md § Tools", MOODYS_CLAIM),
+        (re.compile(r"\bP1C1\s*[-–]\s*P1C5\b"), "P1C1-P1C5",
+         "P1C5 is the killed 17th category: the governance and strategy "
+         "categories are P1C1–P1C4", None),
+        (re.compile(r"safeguard_gates\.md"), "safeguard_gates.md",
+         "retired: the 16 research-era gates; the SG family lives in "
+         "apps/mcp/dma_mcp/gates.py alone", None),
+        # the research plane's file and the assessment's checkpoint copy alike
+        (re.compile(r"evidence_index\.json"), "evidence_index.json",
+         "no JSON plane beside the run; evidence enters through "
+         "`engine.cli evidence` and lives in the workbook", None),
+        # the research tier's batch stop — the deck skill's "wait for
+        # continue" is a person approving a slide plan, which is the point
+        (re.compile(r"[Ww]ait for ['\"“]?continue"), "wait for continue",
+         "nothing waits for continue: the driver re-dispatches and a lane "
+         "out of budget checkpoints and ends its turn", BATCH_CONTEXT),
+        # the 18/36 ladder boundaries, not any 18-month span
+        (re.compile(r"<\s*18\s*mo\b|\b18\s*[-–]\s*36\s*mo"), "18-month recency",
+         "the recency ladder is contract.RECENCY_LADDER: CURRENT <12 · RECENT "
+         "<24 · DATED <36 · STALE <48 · ARCHIVAL, UNVERIFIED undated", None),
+        (re.compile(r"\bLEGACY\b"), "LEGACY (recency)",
+         "the 36–48 month band is STALE (QA Report B-09; contract.RECENCY_LADDER)",
+         RECENCY_CONTEXT),
+        (re.compile(r"\bweb_fetch\b"), "web_fetch",
+         "a page is read as windows through `engine.cli fetch`; a whole-page "
+         "fetch is the largest lever on the bill (RESEARCH-PROTOCOL.md § Tools)", None),
     )
 
 
@@ -182,13 +277,14 @@ def scan(root: Path | None = None) -> list[dict]:
         if not base.is_dir():
             continue
         for p in sorted(base.rglob("*")):
-            if p.suffix not in SCAN_EXT or SKIP_PARTS & set(p.parts):
+            if p.suffix not in SCAN_EXT or SKIP_PARTS & set(p.parts) \
+                    or p.name in RETIRED_SCRIPTS:
                 continue
             for n, line in enumerate(p.read_text(errors="ignore").splitlines(), 1):
-                if LINEAGE.search(line):
+                if LINEAGE.search(line) and not P1C5_RANGE.search(line):
                     continue
                 rel = str(p.relative_to(root))
-                if FORBIDDING.search(line) or _exempt(rel, line):
+                if FORBIDDING.search(line) or NOT_WIRED.search(line) or _exempt(rel, line):
                     continue
                 for rx, literal, correction, gate in rules(c):
                     if not rx.search(line):

@@ -460,7 +460,7 @@ function DashboardHome() {
       style: {
         fontSize: 14
       }
-    }, e.name), /*#__PURE__*/React.createElement("span", {
+    }, entityName(e)), /*#__PURE__*/React.createElement("span", {
       className: "b b-muted"
     }, DMA.SUBVERTICAL_LABEL[e.subvertical]), /*#__PURE__*/React.createElement("span", {
       style: {
@@ -610,7 +610,7 @@ function DashboardHome() {
       fontWeight: 600
     },
     className: "txt-fit-1"
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       color: "var(--z-muted)"
@@ -655,7 +655,7 @@ function DashboardHome() {
     className: "muted"
   }, "Package scan"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, live && (live.import_scans || []).length ? `last ${relTime(live.import_scans[0].started_at)}` : "see import & jobs")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, live && (live.import_scans || []).length ? `last ${relTime(live.import_scans[0].started_at)}` : "no scans recorded yet")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
@@ -667,13 +667,13 @@ function DashboardHome() {
     className: "muted"
   }, "Vertex AI budget"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, "$184 / $400"))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("span", null, "$184 / $400"))), window.DMA_LIVE ? null : /*#__PURE__*/React.createElement("div", {
     className: "row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "muted"
   }, "Pending review"), /*#__PURE__*/React.createElement("span", {
     className: "spacer"
-  }), /*#__PURE__*/React.createElement("span", null, (live ? live.pending_review || [] : DMA.PENDING_REVIEW).length, " entities"))), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("span", null, DMA.PENDING_REVIEW.length, " entities"))), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
     style: {
       width: "100%",
@@ -776,7 +776,7 @@ function DashboardEntityCard({
       fontWeight: 700,
       flexShrink: 0
     }
-  }, e.name.split(" ").map(n => n[0]).slice(0, 2).join("")), /*#__PURE__*/React.createElement("div", {
+  }, initialsOf(entityName(e))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       minWidth: 0
@@ -789,8 +789,8 @@ function DashboardEntityCard({
       lineHeight: 1.3
     },
     className: "txt-fit-2",
-    title: e.name
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+    title: entityName(e)
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: "var(--z-muted)",
@@ -1086,7 +1086,7 @@ function EntityDirectoryPage() {
       fontWeight: 600,
       color: "var(--z-dark)"
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     className: "f-mono",
     style: {
       fontSize: 10,
@@ -1148,7 +1148,7 @@ function EntityCard({
       color: "var(--z-dark)",
       marginBottom: 2
     }
-  }, e.name), /*#__PURE__*/React.createElement("div", {
+  }, entityName(e)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: "var(--z-muted)"

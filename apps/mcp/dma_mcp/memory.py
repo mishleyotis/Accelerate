@@ -151,10 +151,34 @@ def _clean(rows):
 
 
 # ── record ──────────────────────────────────────────────────────────────
+#: The finding's foreign keys are UUID columns. Measured 2026-10-09: 19 calls
+#: carrying an engine run id ("R-IMA-20261009") came back as a bare Postgres
+#: 22P02 and recorded nothing (MEM-0610) — a refusal that named no field. They
+#: are checked before the insert and refused by name.
+_UUID_FIELDS = ("run_id", "entity_id", "annotation_id")
+
+
+def _uuid_field_errors(finding: dict) -> list[str]:
+    import uuid as _uuid
+    out = []
+    for f in _UUID_FIELDS:
+        v = finding.get(f)
+        if v in (None, ""):
+            continue
+        try:
+            _uuid.UUID(str(v))
+        except (ValueError, AttributeError, TypeError):
+            out.append(
+                f"{f}: {str(v)[:60]!r} is not a UUID — {f} takes the "
+                f"connector's id (claim_run / get_client_state return it). "
+                f"An engine run id (R-…) or an entity slug belongs in `note`.")
+    return out
+
+
 def record_finding(conn, finding: dict, encoder=None) -> dict:
     """Idempotent by content hash. Returns the finding id, whether it deduped,
     and the sighting that this call added."""
-    cur = conn.cursor()
+    cur = conn.cursor() if conn is not None else None
     errors = []
 
     title = str(finding.get("title") or "").strip()
@@ -185,6 +209,10 @@ def record_finding(conn, finding: dict, encoder=None) -> dict:
         errors.append(f"raised_by_kind: {raised_by_kind!r} not in {RAISERS}")
     if not raised_by:
         errors.append("raised_by: required — the agent, gate or person by name")
+    errors += _uuid_field_errors(finding)
+    if errors and cur is None:
+        return {"finding_id": None, "deduped": False, "sighting_id": None,
+                "errors": errors}
 
     known = _known_classes(cur)
     new_class = finding.get("new_class")

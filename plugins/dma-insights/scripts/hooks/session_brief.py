@@ -32,25 +32,48 @@ network, no state, fails OPEN — a brief that cannot decide prints, because
 failing closed costs the brief on exactly the session that needed it.
 """
 import json
+import os
+import re
 import sys
+from pathlib import Path
 
 ROUTING = "skills/dma-surface-production/05-lifecycle/routing.md"
 
+def _produce_sections() -> str:
+    """The sections that go producer → challenger → consolidator, read from
+    their one owner (references/section_sources.json: disposition
+    `enrichment` or `synthesis`) so the brief cannot drift from the map."""
+    try:
+        here = Path(__file__).resolve().parent.parent.parent
+        d = json.loads((here / "references" / "section_sources.json").read_text(encoding="utf-8"))
+        names = sorted(k for k, v in d["sections"].items()
+                       if v.get("disposition") in ("enrichment", "synthesis"))
+        return ", ".join(names) if names else "the sections section_sources.json marks produce"
+    except Exception:  # noqa: BLE001 — the brief must print whatever the file holds
+        return "the sections references/section_sources.json marks produce"
+
+
 CORE = (
-    "dma-insights: route before you produce. Entry fork first — an entity + "
-    "evidence mode with NO package yet is a RESEARCH engagement "
-    "(research-conductor produces the package; it is not Drive ingestion) "
-    "and it opens with the binding preflight — a financial-statement review, "
-    "an LOB census and an AskUserQuestion the engagement owner ANSWERED, "
-    "never a sub-vertical you inferred; then PRELIM, which gates every "
-    "category card. "
-    "A finished '<Client> - DMA' folder goes to package-vetter, then "
-    "production; a repair naming a surface or page routes by the table. In "
-    "production: one surface -> that page's per-surface producer, then "
-    "finding-challenger, then page-consolidator; only the surface-producer "
-    "submits or promotes. Read get_memory_digest before authoring anything, "
-    "and end every production with the qa-overseer so the findings memory "
-    f"learns. Routing table: {ROUTING}"
+    "dma-insights: route before you produce.\n"
+    "1. Entry fork: an entity + evidence mode with NO package yet is a RESEARCH "
+    "engagement (research-conductor produces the package; it is not Drive "
+    "ingestion). It opens with the binding preflight — a financial-statement "
+    "review, an LOB census and an AskUserQuestion the engagement owner ANSWERED, "
+    "never a sub-vertical you inferred — then PRELIM, which gates every category "
+    "card.\n"
+    "2. A finished '<Client> - DMA' folder goes to package-vetter, then production; "
+    "a repair naming a surface or page routes by the table.\n"
+    "3. Production: check the section's disposition first (`python3 -m "
+    "engine.surface_export plan --page <page>`). `convert` sections are formatted "
+    "from the workbook and NOT re-challenged; only `produce` sections ("
+    f"{_produce_sections()}) go per-surface producer -> finding-challenger -> "
+    "page-consolidator.\n"
+    "4. Submit and promote: the surface-producer on a hand-driven run, the driver "
+    "(engine.pipeline through ship_page.py) on a research-engine run — nobody "
+    "else submits.\n"
+    "5. Read get_memory_digest before authoring anything; end every production "
+    "with the qa-overseer so the findings memory learns.\n"
+    f"Routing table: {ROUTING}"
 )
 
 #: The research children work a different substrate (the scoring workbook,
@@ -60,56 +83,386 @@ CORE = (
 #: a mess. They get their own.
 RESEARCH_BRIEF = (
     "dma-insights research tier: the workbook is the substrate — what you do "
-    "not write there did not happen. First command (and after ANY "
-    "interruption or compaction): engine.cli orient --run <R> --root <ROOT> "
-    "--category <YOURS>; obey its do_first literally, then engine.memory "
-    "status for notes your context no longer holds. Protocol: "
-    "skills/dma-research/references/RESEARCH-PROTOCOL.md — the five volleys "
-    "in order (works, fails, value, contradicts, corroborates; every one "
-    "answered or NOT_RUN with reason), the memory notebook, the refusals. "
-    "PRELIM ran before you: the institution profile, timeline, peer set and "
-    "technology baseline are already in the workbook (Report_Narrative "
-    "PRELIM-* rows, Entity_Timeline, Peer_Benchmarks, Tech_Register) — read "
-    "them before your first search rather than re-researching them, and if "
-    "orient says PRELIM is open, say so and stop instead of working a card "
-    "the phase gate is holding. "
-    "Work only your own category; never score, never submit, never promote."
+    "not write there did not happen.\n"
+    "1. First command (and after ANY interruption or compaction): engine.brief "
+    "dispatch --run <R> --root <ROOT> --category <YOURS> — one bounded packet: "
+    "what the run already knows, the evidence ALREADY registered for your open "
+    "cells (read it before searching; the run paid for it), the volleys each cell "
+    "still owes, your own notebook compacted — so a lost context costs a read "
+    "and not a re-search.\n"
+    "2. Then engine.cli orient --run <R> --root <ROOT> --category <YOURS> for the "
+    "work card; obey its do_first literally.\n"
+    "3. Protocol: skills/dma-research/references/RESEARCH-PROTOCOL.md — the five "
+    "volleys in order (works, fails, value, contradicts, corroborates; every one "
+    "FIRED and logged per cell — the floors gate counts them, and an empty cell "
+    "closes only as a declared absence via `engine.cli absence`), the tools rule "
+    "(§ Tools: WebSearch, engine.cli fetch windows, connector volleys EMITTED as "
+    "search_requests), the memory notebook, the refusals.\n"
+    "4. PRELIM ran before you: the institution profile, timeline, peer set and "
+    "technology baseline are already in the workbook (Report_Narrative PRELIM-* "
+    "rows, Entity_Timeline, Peer_Benchmarks, Tech_Register) — read them before "
+    "your first search; if orient says PRELIM is open, say so and stop.\n"
+    "5. The templates are pinned in references/templates/ and bound into the run "
+    "at start; read gold_reference.json before you author anything.\n"
+    "6. Report with engine.brief handback --category <YOURS>: the gate verdict, "
+    "the deferred-question count, the techscan rows, anything UNTESTED, and "
+    "search_requests for every connector query you could not fire.\n"
+    "7. Work only your own category; never score, never submit, never promote."
 )
+
+#: Appended to a tier brief when the agent's own name says which slice of
+#: the workbook is its own. Until 2026-09-14 "work only your own category"
+#: was advice: no write path checked it (MEM-0514), sixteen lanes wrote one
+#: workbook in parallel, and the lock that serialised the rows said nothing
+#: about which rows. The engine refuses it now, so the brief states the
+#: boundary as a fact the lane will meet rather than a request it may
+#: forget — and names the one way a cross-category find is meant to travel,
+#: because a lane that has been refused needs somewhere to put the finding.
+SCOPE_RULE = (
+    "\nYOUR SCOPE IS {scope}, and it is enforced, not requested: the ledger "
+    "refuses a search, an evidence row, a synthesis or an absence you write "
+    "against any other {kind}, and so does the guard in front of it. A "
+    "source that genuinely bears on another {kind}'s cell travels through "
+    "your handback, which the run carries to the lane that owns it — never "
+    "by writing that lane's row yourself."
+)
+
+
+def scope_rule(name: str) -> str:
+    """The scope sentence for an agent whose name declares one."""
+    m = re.match(r"^research-(p\d+c\d+)-producer$", name or "", re.I)
+    if m:
+        return SCOPE_RULE.format(scope=m.group(1).upper(), kind="category")
+    m = re.match(r"^scoring-(p\d+)-producer$", name or "", re.I)
+    if m:
+        return SCOPE_RULE.format(scope=m.group(1).upper(), kind="pillar")
+    return ""
+
+#: The SCORING tier (scoring-p1..p4-producer, scoring-critic). Measured
+#: 2026-09-03: these agents received CORE + SUBAGENT — the production
+#: submit-boundary rule — and no word about the assessment stage they run.
+SCORING_BRIEF = (
+    "dma-insights scoring tier: the workbook is the substrate and column D is "
+    "yours alone.\n"
+    "1. First command (and after ANY interruption or compaction): "
+    "engine.assessment state --run <R> --root <ROOT>. The driver hands you a "
+    "packet from engine.brief scoring-batch — the rows still unscored, their "
+    "labels, ceilings and challenge verdicts, the exact score command; read it "
+    "before re-deriving anything from the workbook.\n"
+    "2. `engine.assessment open` has NO --force: it refuses until every "
+    "category's floors gate is a PASS recorded with --require-synthesis, PRELIM "
+    "is closed, the five-year financial trajectory is banked and the run's "
+    "evidence density meets the Golden 1 floors — if it refuses, the research "
+    "is not finished and you say so rather than scoring around it.\n"
+    "3. Score only through `engine.assessment score` (--raw, the adjustments and "
+    "the caps; the engine does the arithmetic and the quarter-point). It "
+    "refuses an unsynthesised or unchallenged row, a score above its evidence "
+    "ceiling, a rationale under 150 chars or one citing nothing the row "
+    "carries, a blank AI-and-data overlay.\n"
+    "4. The critic is a DIFFERENT actor from every scorer; `engine.assessment "
+    "gate` must record PASS before any report section may be written.\n"
+    "5. Read references/templates/gold_reference.json (the Golden 1 shape) and "
+    "skills/dma-assessment/references/scoring_methodology.md before the first "
+    "score.\n"
+    "6. Score only your own pillar; never write a report section, never submit, "
+    "never promote."
+)
+
+#: The REPORT tier (report-research-producer, report-assessment-producer,
+#: report-validator). Measured 2026-09-03: `report-research-producer` matched
+#: the substring "research-" and received the CATEGORY RESEARCHER's brief —
+#: "fire five volleys, engine.brief dispatch --category <YOURS>" — while the
+#: other two received no template or precondition pointer at all.
+REPORT_BRIEF = (
+    "dma-insights report tier: the run is finished before you start, and the "
+    "report is written INTO a pinned Doc, not a remembered shape.\n"
+    "1. First command (and after ANY interruption or compaction): engine.cli "
+    "narrative preconditions --run <R> --root <ROOT> --report "
+    "<client_research|assessment> — it must print ready; if it does not, STOP "
+    "and report what it names (PRELIM open, a category gate not PASS, the "
+    "templates unbound, the SCORING gate not PASS, the workbook incomplete, the "
+    "five-year financial trajectory missing). Owner, 2026-09-03: 'report writing "
+    "starts without scoring happening' — this is the check that stops it, and "
+    "`engine.cli narrative write` runs it again on every write.\n"
+    "2. Then engine.template binding --run <R> --root <ROOT>, and read the Doc "
+    "you write to — references/templates/client_profile_template.md or "
+    "assessment_report_template.md — and references/templates/gold_reference.json "
+    "(the Golden 1 depth) before you open a section.\n"
+    "3. Write only through `engine.cli narrative write` (blocks in the Doc's "
+    "order, the card floors, the countable minimum data); render only through "
+    "`engine.cli report`, which authors into the branded shell.\n"
+    "4. Run `python3 -m engine.gold_standard report <docx> --kind <k>` on your "
+    "own output before you hand back. The validator writes no section and "
+    "passes none whose citations it did not open.\n"
+    "5. Never score, never submit, never promote."
+)
+
+#: The install states on which research, scoring and report work is REFUSED
+#: rather than warned about. UPDATED_MID_SESSION is not one: the disk is
+#: fixed and child processes bind the healed install.
+REFUSING_INSTALL_STATES = ("STALE", "MISSING", "INCOMPLETE", "DIVERGED",
+                           "DISABLED", "MANIFEST_SPLIT")
 
 #: What each start source needs ON TOP of the core rule. `resume`, `compact`
 #: and `fork` used to print nothing at all.
 BY_SOURCE = {
     "startup": "",
     "clear": "",
-    "resume": (" This session RESUMED: re-read the routing table before "
+    "resume": ("\nThis session RESUMED: re-read the routing table before "
                "acting — a resumed turn carries whatever context survived, "
                "not necessarily this rule."),
-    "compact": (" This session was COMPACTED: the routing rule, the memory "
+    "compact": ("\nThis session was COMPACTED: the routing rule, the memory "
                 f"rule and the submit boundary are NOT guaranteed to have "
                 f"survived the summary. Re-read {ROUTING} § After a "
-                f"compaction before your next tool call."),
-    "fork": (" This session is a FORK: it inherits a transcript it did not "
+                f"compaction before your next tool call, and recover WHERE "
+                f"YOU WERE from the run rather than from the summary: "
+                f"`python3 -m engine.cli resume --run <RUN> --root <ROOT>` "
+                f"(the run's own state), then `engine.brief dispatch "
+                f"--category <YOURS>` or `engine.pipeline plan` for the next "
+                f"step. What the summary kept is not evidence of what the "
+                f"run holds."),
+    "fork": ("\nThis session is a FORK: it inherits a transcript it did not "
              "write. Confirm which run and which surface you own before "
              "producing anything."),
 }
 
 SUBAGENT = (
-    " You are a SUBAGENT. You do not inherit the parent's brief — this is it. "
-    "Produce only the surface you were dispatched for; do not re-produce a "
-    "page to repair a field, and do not submit or promote: that boundary "
-    "belongs to the surface-producer alone."
+    "\nYou are a SUBAGENT. You do not inherit the parent's brief — this is it. "
+    "Produce only the surface you were dispatched for and return it to your "
+    "invoker; do not re-produce a page to repair a field. Submission and "
+    "promotion belong to the surface-producer (hand-driven) or the driver "
+    "(engine run): you do not submit or promote."
 )
+
+
+def install_warning() -> str:
+    """One sentence when this container's plugin is not what the repo ships.
+
+    WHY THE HOOK CARRIES IT (owner, 2026-08-31: "Does the plugin have similar
+    routine ingrained?"). Until now the staleness check lived only in a
+    Routine prompt: the intake Routine ran it, and every other session — an
+    interactive one, a synthesis lane, a watchdog firing — started on
+    whatever the container's snapshot happened to hold and found out only
+    when something behaved oddly. A firing had already died on
+    `STALE: installed 0.9.12 (47 agents) vs published 1.13.0 (68 agents)`,
+    and nothing outside that one prompt would ever have said so.
+
+    IT REPORTS AND DOES NOT REPAIR, deliberately. The repair uninstalls and
+    reinstalls the plugin cache — the very directory the session is binding
+    its agents from as this hook runs — and it takes far longer than the
+    hook's 10-second budget. Mutating an install underneath a binding session
+    would turn a stale roster into no roster. So the hook names the state and
+    the one command that fixes it, and the session decides.
+
+    Fails OPEN, like the rest of this file: a version check that cannot run
+    must never cost the routing brief.
+    """
+    zip_text = ""
+    try:
+        # The install judging ITSELF (the Cowork zip path): manifest version
+        # vs the plugin version the pinned templates were pinned for.
+        eng = Path(__file__).resolve().parent.parent.parent / "skills" / "dma-research"
+        sys.path.insert(0, str(eng))
+        from engine import template as _T                      # noqa: PLC0415
+        g = _T.zip_guard()
+        if not g.get("ok"):
+            zip_text = (f" INSTALL CHECK (zip guard): this install's manifest is "
+                        f"{g.get('installed')} but its pinned templates require plugin "
+                        f"{g.get('required')} — the upload PREDATES ITS OWN TEMPLATES. "
+                        f"RESEARCH, SCORING AND REPORT WORK IS REFUSED ON THIS INSTALL: "
+                        f"`engine.cli start` refuses it too. {g.get('fix')}")
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        zip_text = ""
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        sys.path.insert(0, str(here))
+        import plugin_version                                  # noqa: PLC0415
+        v = plugin_version.compare()
+        if v["ok"]:
+            return zip_text
+        status = str(v.get("status") or "")
+        refusing = status in REFUSING_INSTALL_STATES
+        return (f" INSTALL CHECK, from this container rather than from "
+                f"expectation: {plugin_version.summary(v)}. This session is "
+                f"NOT running what the checkout publishes."
+                + (f" RESEARCH, SCORING AND REPORT WORK IS REFUSED ON THIS "
+                   f"INSTALL: do not run /dma-insights:run-assessment, "
+                   f"`engine.pipeline run` or `engine.cli start`, and do not "
+                   f"dispatch any research, scoring or report agent, until "
+                   f"`python3 plugins/dma-insights/scripts/doctor.py --heal` "
+                   f"reports OK — the engine's own `start` refuses on this "
+                   f"state too (measured 2026-09-03: a 0.9.12 install ran "
+                   f"none of the gates the checkout publishes)."
+                   if refusing else
+                   f" Before you rely on an agent, a skill or a hook, run "
+                   f"`python3 plugins/dma-insights/scripts/doctor.py --heal` "
+                   f"— it applies the repair this status needs and re-checks "
+                   f"in one command.")
+                + f" If it comes back UPDATED_MID_SESSION the disk is fixed and "
+                f"THIS session still holds the old roster (they bind once, at "
+                f"start): keep working, but dispatch stages as fresh child "
+                f"processes via `agent_run.py` / `engine.pipeline run`, which "
+                f"bind the repaired install.") + zip_text
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        return zip_text
 
 
 def brief(event: dict) -> str:
     hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
     agent = str(event.get("agent_type") or event.get("agentType") or "")
     if hook == "SubagentStart" or agent:
-        if "research-" in agent:
-            return RESEARCH_BRIEF
+        # Route by the agent's TIER, on its name after the plugin prefix.
+        # A substring test on "research-" sent report-research-producer the
+        # category researcher's brief (measured 2026-09-03).
+        name = agent.split(":", 1)[-1]
+        if name.startswith("report-"):
+            return REPORT_BRIEF
+        if name.startswith("scoring-"):
+            return SCORING_BRIEF + scope_rule(name)
+        if name.startswith("research-") or name == "technographic-scanner":
+            return RESEARCH_BRIEF + scope_rule(name)
+        if name == "surface-producer":
+            # The one agent allowed to submit was being told "do not submit
+            # or promote" (QA audit F-L11-042, pair 23): SUBAGENT is for the
+            # producers under it, not for it.
+            return CORE
         return CORE + SUBAGENT
+    # PostCompact is the compaction event itself — it carries the summary and
+    # a "manual"/"auto" trigger, not a SessionStart `source`. It was the
+    # binding that was missing rather than the handling: `BY_SOURCE["compact"]`
+    # already existed and only SessionStart could reach it, so a compaction
+    # that did NOT restart the session re-entered with no brief at all.
+    if hook == "PostCompact":
+        return CORE + BY_SOURCE["compact"] + install_warning()
     source = str(event.get("source") or "startup")
-    return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"])
+    # Top-level sessions only. A subagent runs inside a parent that already
+    # saw this and cannot act on it — its parent is mid-flight — so telling
+    # each of 68 of them turns a warning into wallpaper.
+    return CORE + BY_SOURCE.get(source, BY_SOURCE["resume"]) + install_warning()
+
+
+#: Set to skip the connector read at session start (a test harness, an
+#: offline session). The brief then SAYS the queue was not read.
+NO_CONNECTOR_ENV = "DMA_BRIEF_NO_CONNECTOR"
+
+
+def connector_outstanding(*, rpc=None, has_identity=None,
+                          timeout: float = 8.0) -> str:
+    """What the connector says is outstanding, stated in the brief.
+
+    Measured 28-09-2026 (QA audit F-O04-007, regression seed 16): 200 open
+    rejections, one at five attempts and eleven days, and nothing in the
+    plugin read `list_open_rejections` at session start — the instruction
+    existed as prose, and verdicts were found by a person. This reads the
+    queue once, with a short timeout, and puts the answer in front of the
+    session before it chooses a run. Never fatal, never fabricated: with no
+    identity it says nothing (there is nothing to ask with), and a read
+    that fails says so and names the command, because an unread queue is
+    not an empty one.
+    """
+    if os.environ.get(NO_CONNECTOR_ENV):
+        return ""
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        if str(here) not in sys.path:
+            sys.path.insert(0, str(here))
+        if has_identity is None:
+            import gcp_token                                    # noqa: PLC0415
+            key, _src = gcp_token.load_key("/root/.dma/sa.json")
+            has_identity = key is not None
+        if not has_identity:
+            return ""
+        if rpc is None:
+            import mcp_raw                                      # noqa: PLC0415
+            rpc = mcp_raw.rpc
+        d = rpc("tools/call", {"name": "list_open_rejections",
+                               "arguments": {"limit": 50}}, timeout=timeout)
+        content = (d.get("result") or {}).get("content") or []
+        text = (content[0].get("text") if content and content[0].get("type") == "text"
+                else json.dumps(d.get("result", d)))
+        doc = json.loads(text)
+        if not isinstance(doc, dict):
+            raise ValueError("unexpected reply shape")
+    except Exception as exc:                 # noqa: BLE001 — reported, not silent
+        return (f" CONNECTOR QUEUE NOT READ ({type(exc).__name__}): before choosing "
+                f"a run, run `python3 scripts/mcp_raw.py call list_open_rejections "
+                f"--args '{{}}'` — an unread queue is not an empty one.")
+    rows = doc.get("rejections") or []
+    if not rows:
+        return " CONNECTOR QUEUE: 0 open rejections."
+    top = "; ".join(
+        f"{r.get('display_id')} {r.get('page')} {r.get('gate_id')} x{r.get('attempts')}"
+        + (f" (run seq {r.get('run_seq')})" if r.get("run_seq") is not None else "")
+        for r in rows[:5])
+    return (f" CONNECTOR QUEUE (read this first): {doc.get('open', len(rows))} open "
+            f"rejection(s), {doc.get('looping', 0)} past two attempts, pages "
+            f"{', '.join(doc.get('pages') or [])}; worst first: {top}. Repair or "
+            f"withdraw before producing anything new; past two attempts CHANGE "
+            f"APPROACH. `get_run_progress <run>` names the PASS pages you must "
+            f"not re-synthesise; `list_submissions <run>` is the attempt history.")
+
+
+def record_bind(event: dict) -> None:
+    """Write down which plugin tree THIS session bound, for the checks that
+    run later in the session without the hook's environment.
+
+    This hook runs from inside the bound tree — its own path is
+    `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_brief.py` — with
+    CLAUDE_PLUGIN_ROOT and CLAUDE_PID in its environment, so it is the one
+    place in the session that can state the bind as a fact rather than read
+    it off the install record. `doctor.py` and `plugin_version.py`, run
+    from the Bash tool, have neither variable and read this record instead
+    (`plugin_version.bound_root`, rung "record"). Measured 2026-09-16: the
+    record said 1.19.0, the session had bound the 1.20.0 checkout in place,
+    and every check that read the record said STALE. Fails open.
+    """
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        sys.path.insert(0, str(here))
+        import plugin_version                                  # noqa: PLC0415
+        root = os.environ.get("CLAUDE_PLUGIN_ROOT") or str(here.parent)
+        plugin_version.record_bound_root(
+            root, session_id=str(event.get("session_id") or "") or None)
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        pass
+
+
+def freshen_refs(event: dict) -> None:
+    """Fast-forward a stale LOCAL default-branch ref, detached (`git_refs.py`).
+
+    A restored snapshot leaves that ref days behind while the session's own
+    branch is cloned fresh; a later `git checkout <default>` then rewinds
+    every bound file under the running session (Interac, 2026-10-10:
+    122 commits, read as UPDATED_MID_SESSION). Moving the ref at start —
+    never the checked-out branch, never the worktree — means the checkout
+    lands on the tip. Top-level SessionStart only; fails open.
+    """
+    hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    # SessionStart EXACTLY: the doctor's wiring check feeds every handler an
+    # empty event, and a measurement must not start a fetch as a side effect.
+    if hook != "SessionStart" or event.get("agent_type") \
+            or event.get("agentType"):
+        return
+    try:
+        here = Path(__file__).resolve().parent.parent          # scripts/
+        sys.path.insert(0, str(here))
+        import git_refs                                        # noqa: PLC0415
+        git_refs.spawn()
+    except Exception:            # noqa: BLE001 — fail OPEN, on purpose
+        pass
+
+
+def param_echo_text() -> str:
+    """The PreCompact echo for the located run, rendered; never fatal."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import _runctx                                        # noqa: PLC0415
+        import param_echo                                     # noqa: PLC0415
+        run = _runctx.locate()
+        return param_echo.render(param_echo.read_echo(run) if run else None)
+    except Exception:            # noqa: BLE001 — the brief never fails on the echo
+        return (" PARAMETER ECHO: unreadable — recover the run with "
+                "`python3 -m engine.cli resume` before anything else.")
 
 
 def main() -> int:
@@ -119,17 +472,41 @@ def main() -> int:
             event = {}
     except Exception:            # noqa: BLE001 — fail OPEN, on purpose
         event = {}
+    record_bind(event)
+    freshen_refs(event)
     text = brief(event)
+    hook_name = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    if hook_name in ("", "SessionStart", "PostCompact") and not (
+            event.get("agent_type") or event.get("agentType")):
+        # Top-level sessions only: a subagent's parent already saw it.
+        text += connector_outstanding()
+    if hook_name == "PostCompact" or (
+            hook_name == "SessionStart" and str(event.get("source") or "") == "compact"):
+        # The parameters the summary may have dropped, written by
+        # param_echo.py at PreCompact (F-E10-034); read back here, so a
+        # compacted session knows its run, root, stage and budget before
+        # its first tool call rather than after `engine.cli resume`.
+        text += param_echo_text()
     # SubagentStart takes `additionalContexts`; SessionStart takes plain
     # stdout. Emitting the JSON form for a subagent is what actually puts the
     # brief in the child's context — printing to stdout there would be
     # swallowed, which is the AUD-0004 failure wearing a fix.
-    if event.get("hook_event_name") == "SubagentStart" or \
-            event.get("hookEventName") == "SubagentStart":
+    hook = str(event.get("hook_event_name") or event.get("hookEventName") or "")
+    if hook == "SubagentStart":
         print(json.dumps({
             "hookSpecificOutput": {
                 "hookEventName": "SubagentStart",
                 "additionalContexts": [text],
+            }
+        }))
+    elif hook == "PostCompact":
+        # PostCompact takes the same `additionalContext` shape every
+        # non-SessionStart hook does. Printing to stdout here would be
+        # swallowed — which is the AUD-0054 failure wearing a fix.
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "PostCompact",
+                "additionalContext": text,
             }
         }))
     else:

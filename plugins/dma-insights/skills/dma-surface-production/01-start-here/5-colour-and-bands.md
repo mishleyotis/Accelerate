@@ -29,7 +29,7 @@ boundary. When you write a band word, resolve it from the raw score.
 
 The resolver has four branches. Anything at or above 4.0 returns "Differentiating". A score of
 4.6 does not render as Transformational, even though the maturity scale defines M5 and the
-design documents publish a hex for it (#185F60).
+older design documents published a dark-teal hex for it — a hex that must not appear anywhere now.
 
 **What to do:** use the four reachable band words. Do not write "Transformational" in prose —
 it will not match what renders. If a genuine M5 appears in the workbook, say
@@ -81,7 +81,7 @@ Four places, all avoidable:
 2. **A posture chip that disagrees with the composite's band.** LEADING beside a composite that
    bands as Building will read as an error whether or not the peer maths supports it. If the
    peer position genuinely justifies it, say so in the framing sentence.
-3. **"Transformational"** — see above.
+3. **A fifth band word** — see § 1 above.
 4. **A pillar described as strong whose cell fills read amber.** Check the fills you are
    describing, not your impression of the pillar.
 

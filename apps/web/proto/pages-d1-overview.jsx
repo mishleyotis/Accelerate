@@ -6,6 +6,11 @@ function ClientOverview({ entity, run }) {
   const { audience, openEvidence, openInsight, openSubcap, role, setIpSurface, setIpContext, setIpOpen, tweaks, pushToast } = useApp();
   const [scqaExp, setScqaExp] = useState(false);
   const layout = tweaks.overview_layout || "balanced";
+  // The client dashboard (client-view review, 2026-10-07): no Zennify actions
+  // (meeting prep, rerun), no executive narrative, no leadership roster, no
+  // financial trajectory. The sections still promote and still serve; this
+  // is what the client page puts in front of the client.
+  const isClient = audience === "customer";
 
   useEffect(() => {
     setIpSurface("why_now");
@@ -21,7 +26,7 @@ function ClientOverview({ entity, run }) {
       <div className="page-head" style={{ marginBottom: 18 }}>
         <div>
           <div className="eyebrow">Entity intelligence</div>
-          <h1 style={{ marginBottom: 4 }}>{entity.name}</h1>
+          <h1 style={{ marginBottom: 4 }}>{entityName(entity)}</h1>
           <div className="sub">{[
             DMA.SUBVERTICAL_LABEL[entity.subvertical],
             entity.hq,
@@ -31,9 +36,9 @@ function ClientOverview({ entity, run }) {
           ].filter(Boolean).join(" · ")}</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Customer-safe scorecard generated · ${entity.name}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
-          <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued - first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>
-          <button className="btn btn-secondary" onClick={() => { setIpSurface("why_now"); setIpContext({ entity }); setIpOpen(true); }}><Icon name="sparkle" size={13} /> Meeting prep</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Client-safe scorecard generated · ${entityName(entity)}`, "success")}><Icon name="download" size={13} /> Scorecard</button>
+          {isClient ? null : <button className="btn btn-tertiary" onClick={() => pushToast("Rerun queued - first batch in ~3 min", "success")}><Icon name="refresh" size={13} /> Request rerun</button>}
+          {isClient ? null : <button className="btn btn-secondary" onClick={() => { setIpSurface("why_now"); setIpContext({ entity }); setIpOpen(true); }}><Icon name="sparkle" size={13} /> Meeting prep</button>}
         </div>
       </div>
 
@@ -48,24 +53,29 @@ function ClientOverview({ entity, run }) {
         <WhyNowStrip entity={entity} openEvidence={openEvidence} audience={audience} openSubcap={openSubcap} />
       </CardBoundary>
 
-      {/* SCQA */}
+      {/* SCQA — internal only */}
+      {isClient ? null : (
       <CardBoundary name="executive narrative">
         <SCQACard entity={entity} expanded={scqaExp} onToggle={() => setScqaExp(o => !o)} openEvidence={openEvidence} audience={audience} />
       </CardBoundary>
+      )}
 
-      {/* Opportunity Surface - per platform */}
+      {/* Platform opportunities */}
       <CardBoundary name="opportunity surface">
         <OpportunitySurfaceStrip entity={entity} run={run} audience={audience} />
       </CardBoundary>
 
-      {/* Two-column: Top findings + Leadership panel */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.55fr 1fr", gap: 16, marginBottom: 18 }}>
+      {/* Two-column: Top findings + Leadership panel (internal only; the
+          findings take the full width in the client dashboard) */}
+      <div style={{ display: "grid", gridTemplateColumns: isClient ? "1fr" : "1.55fr 1fr", gap: 16, marginBottom: 18 }}>
         <CardBoundary name="top findings">
           <TopFindingsCard entity={entity} openEvidence={openEvidence} audience={audience} />
         </CardBoundary>
+        {isClient ? null : (
         <CardBoundary name="leadership panel">
           <LeadershipPanel audience={audience} />
         </CardBoundary>
+        )}
       </div>
 
       {/* Evidence-driven analytics.
@@ -75,6 +85,16 @@ function ClientOverview({ entity, run }) {
           on the institution, and D7 Health is where that belongs. The sections
           still promote and still serve — nothing was deleted from the pipeline,
           only from this page. */}
+      {/* Client dashboard: the financial trajectory is internal, so the row
+          is the sentiment card alone, and only when the run states one — a
+          heading over an "absent" card is not something to show a client. */}
+      {isClient ? (DMA.sentimentFor(entity.id) ? (
+        <div className="cards-grid-2" style={{ marginBottom: 18 }}>
+          <CardBoundary name="sentiment">
+            <SentimentCard entity={entity} audience={audience} />
+          </CardBoundary>
+        </div>
+      ) : null) : (<>
       <div className="section-label" style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "4px 0 12px" }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", textTransform: "uppercase", letterSpacing: ".06em" }}>Evidence &amp; benchmarks</span>
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>extracted from scoring workbook · evidence index · peer set</span>
@@ -89,6 +109,7 @@ function ClientOverview({ entity, run }) {
           <SentimentCard entity={entity} audience={audience} />
         </CardBoundary>
       </div>
+      </>)}
 
       {/* Thought leadership panel - internal-only */}
       {audience !== "customer"
@@ -317,65 +338,88 @@ function SnapshotStrip({ entity, run, layout, audience }) {
 
 /* ── Firmographics · the promoted figures, and only those ─────────── */
 function FirmographicsPanel({ entity, audience }) {
-  /* One absent-state builder for every pinned row, so the three states a
-     firmographic can be in stay distinguishable wherever they occur:
+  /* Three states a firmographic can be in, and each renders as itself:
 
-       stated   the value renders
-       HELD     quarantined with the ladder that failed — a finding, and the
-                reason is the content
-       silent   nobody established it; it is in the connector's worklist
+       stated   the value renders, with the producer's scope label when the
+                figure is about a named subsidiary or segment
+       HELD     quarantined by the producer — the row RENDERS as a stated
+                absence ("Not stated") with the producer's reason under it
+       silent   nobody stated it and nobody gave a reason — no row
 
-     Held is read from `entity.held[slot]`, which app-root's firmoFields sets
-     for a pinned field. Before that existed, a held pinned field rendered no
-     row at all and was indistinguishable from one never asked for — which is
-     the exact confusion this whole component was rebuilt to end. */
-  /* One row builder. A row whose value cannot be established is NOT
-     rendered — owner adjudication 2026-08-14, replacing the three-state gap
-     vocabulary ("Not stated · queued for enrichment", "Held · reason") with
-     silence on the page.
+     OWNER DECISION 2 (2026-10-04) replaces the adjudications of 2026-08-14
+     and 2026-08-19 for the HELD state. Those removed a held row on the
+     premise that the omission was still visible to the system through
+     list_enrichment_gaps and the promoted-client audit. The gold audit of run
+     7968492e found that premise did not hold for the reader: six of ten
+     must-present fields were held and the strip simply got shorter, so a
+     client could not tell "the group publishes no consolidated revenue"
+     from "nobody looked". A held field is the most defensible statement on
+     this panel; it is now stated, never deleted.
 
-     The reason that is safe now and was not before: the omission is no longer
-     invisible to the SYSTEM. `list_enrichment_gaps(run_id)` computes the same
-     empty set from the staged payload, and audit_promoted_client.py fails on
-     it — so a field the reader never sees is still on the producer's worklist
-     and still blocks a clean audit. Hiding it from the page hid it from
-     everyone only while nothing else counted.
-
-     `held` is likewise not surfaced: a quarantine reason is internal
-     provenance, and the row it belonged to now simply does not appear. */
+     The words are plain: "Not stated", then the reason. No workflow
+     vocabulary — "held", "queued", "quarantined" — reaches the page. */
+  const held = entity.held || {};
+  const scope = entity.scope || {};
   const rows = [];
-  const row = (k, v) => { if (v !== null && v !== undefined && v !== "") rows.push([k, v]); };
+  const has = (v) => v !== null && v !== undefined && v !== "";
+  const slot = (k, key, v) => {
+    if (has(v)) {
+      rows.push({ k, v: scope[key]
+        ? <>{v}<span style={{ color: "var(--z-muted)", fontWeight: 400 }}> · {scope[key]}</span></>
+        : v });
+      return;
+    }
+    if (key && Object.prototype.hasOwnProperty.call(held, key)) {
+      rows.push({ k, absent: true, reason: held[key] });
+    }
+  };
 
-  row(entity.assets_label || "Assets", fmtAssets(entity.assets, entity.assets_unit));
-  row("Employees", entity.employees != null ? entity.employees.toLocaleString() : null);
-  row("Branches", entity.branches != null ? String(entity.branches) : null);
-  row("Members", entity.members != null ? entity.members.toLocaleString() : null);
-  row("Customers", entity.customers != null ? entity.customers.toLocaleString() : null);
-  /* ONE CAGR row. It rendered twice until 2026-08-14: pinned here from the
-     series the adapter computes, and printed again by the passthrough below
-     because `cagr` was missing from the pinned KEY set. Computed wins — a
-     growth rate is derived and the promoted series is its source of truth —
-     and a run that stated its own falls back in with its own basis. */
-  row("CAGR", entity.cagr != null
-    ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
-    : entity.stated_cagr != null
-      ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}`
+  slot(entity.assets_label || "Assets", "assets", fmtAssets(entity.assets, entity.assets_unit));
+  slot("Employees", "employees", entity.employees != null ? entity.employees.toLocaleString() : null);
+  slot("Branches", "branches", entity.branches != null ? String(entity.branches) : null);
+  slot("Members", "members", entity.members != null ? entity.members.toLocaleString() : null);
+  slot("Customers", "customers", entity.customers != null ? entity.customers.toLocaleString() : null);
+  /* ONE CAGR row, and the PRODUCER's word decides it (RC-11 / D-05).
+     A stated rate renders with its basis; a held one renders as a stated
+     absence with the reason. Only where the producer said nothing does the
+     rate computed from the promoted series stand in — and the adapter
+     refuses to compute one over a series whose basis names a subsidiary or
+     segment. "Computed wins" printed a subsidiary's -6.8% as the firm's
+     growth directly beneath the producer's hold. */
+  slot("CAGR", "cagr", entity.stated_cagr != null
+    ? `${fx(entity.stated_cagr, 1)}%${entity.stated_cagr_basis ? ` · ${entity.stated_cagr_basis}` : ""}`
+    : Object.prototype.hasOwnProperty.call(held, "cagr") ? null
+    : entity.cagr != null
+      ? `${fmtPct(entity.cagr)}${entity.cagr_basis ? ` · ${entity.cagr_basis}` : ""}`
       : null);
-  row("Net worth ratio", entity.net_worth_ratio != null
+  slot("Net worth ratio", "net_worth_ratio", entity.net_worth_ratio != null
     ? `${fx(entity.net_worth_ratio, 2)}%` : null);
-  row("Regulator", entity.regulator || null);
+  slot("Regulator", "regulator", entity.regulator || null);
   // Linked because a domain a reader cannot open is half a fact.
-  row("Website", entity.website
+  slot("Website", "website", entity.website
     ? <a href={/^https?:/i.test(entity.website) ? entity.website : `https://${entity.website}`}
          target="_blank" rel="noopener noreferrer">{entity.website}</a>
     : null);
-  row("HQ", entity.hq || null);
+  slot("HQ", "hq", entity.hq || null);
   // Footprint reads the regulatory section's jurisdictions first, then a
   // footprint the firmographics stated — both consumed by this one row.
-  row("Footprint", entity.footprint?.length ? entity.footprint.join(" · ")
+  slot("Footprint", "footprint", entity.footprint?.length ? entity.footprint.join(" · ")
     : entity.stated_footprint ? String(entity.stated_footprint) : null);
-  row("Charter", entity.charter || null);
-  row("Founded", entity.founded ? String(entity.founded).slice(0, 4) : null);
+  slot("Charter", "charter", entity.charter || null);
+  slot("Founded", "founded", entity.founded ? String(entity.founded).slice(0, 4) : null);
+
+  // The passthrough: every other field the run stated, and every other field
+  // it held — the held ones as stated absences, exactly like a pinned row.
+  for (const f of entity.extra_fields || []) {
+    if (f.held) {
+      rows.push({ k: humaniseFieldName(f.field), absent: true, reason: f.reason || null });
+    } else if (has(f.value)) {
+      const v = `${f.value}${f.unit ? ` ${f.unit}` : ""}`;
+      rows.push({ k: humaniseFieldName(f.field), v: f.scope
+        ? <>{v}<span style={{ color: "var(--z-muted)", fontWeight: 400 }}> · {f.scope}</span></>
+        : v });
+    }
+  }
 
   return (
     <div style={{ background: "var(--z-lav)", borderRadius: 12, padding: 16 }}>
@@ -389,30 +433,30 @@ function FirmographicsPanel({ entity, audience }) {
           figure below is read from it.
         </div>
       ) : null}
-      {rows.map(([k, v], i) => <Row key={`f${i}`} k={k} v={v} />)}
-      {/* A HELD field renders NO ROW. Owner rule, 2026-08-19: "when there is
-          no revenue figure, remove the Revenue row entirely. Do not show the
-          explanation."
-
-          What this printed instead, measured from the live app: a Revenue
-          label with, in its value column, "A credit union returns its surplus
-          to members rather than reporting commercial revenue, so no..." — a
-          sentence set in italic, overflowing its column, between Loans and
-          Leases and ROA. The explanation is true and it is ours; the reader
-          asked for a number.
-
-          The row is still on the wire and still quarantined with its reason,
-          because CG-18 is right that a must-present member may be stated or
-          held but never simply deleted. This is the render deciding not to
-          draw it, which is the correct place for that decision. */}
-      {(entity.extra_fields || [])
-        .filter(f => !f.held && f.value !== null && f.value !== undefined && f.value !== "")
-        .map((f, i) => (
-          <Row key={`x${i}`} k={humaniseFieldName(f.field)}
-               v={`${f.value}${f.unit ? ` ${f.unit}` : ""}`} />
-        ))}
+      {rows.map((r, i) => r.absent
+        ? <AbsentRow key={`f${i}`} k={r.k} reason={r.reason} />
+        : <Row key={`f${i}`} k={r.k} v={r.v} />)}
       <EnrichmentFlag s={(DMA.LIVE_ENRICHMENT || {}).firmographics}
                       what="firmographics" audience={audience} />
+    </div>
+  );
+}
+
+/* A stated absence on the firmographics strip: the label, "Not stated", and
+   the producer's reason on its own full-width line beneath — never squeezed
+   into the value column, which is how an italic sentence once overflowed it
+   between two figures. */
+function AbsentRow({ k, reason }) {
+  return (
+    <div data-firmo-absent={k} style={{ padding: "3px 0", fontSize: 11.5 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+        <span style={{ color: "var(--z-muted)", flexShrink: 0, whiteSpace: "nowrap" }}>{k}</span>
+        <span style={{ color: "var(--z-muted)", textAlign: "right" }}>Not stated</span>
+      </div>
+      {reason ? (
+        <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5, marginTop: 1,
+                      overflowWrap: "anywhere" }}>{reason}</div>
+      ) : null}
     </div>
   );
 }
@@ -452,7 +496,13 @@ function ScoreRing({ score, size = 110 }) {
    Customer view keeps positive framing and strips internal rationale. */
 function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
   const [open, setOpen] = useState(null); // no drilldown until a card is chosen
-  const signals = DMA.whyNowFor(entity.id) || [];
+  /* A signal whose trigger did not reach this audience has no face. The
+     server withholds `trigger` from the client read when it names a person
+     from a contact source (Susser Bank WN-2, Cross Insurance WN-2 on
+     2026-10-07), and the card rendered as an empty box with only its kind
+     chip. The trigger IS the signal: without it there is nothing to show, so
+     the card is not drawn and the count says how many are. */
+  const signals = (DMA.whyNowFor(entity.id) || []).filter(s => s && s.label);
   const isCust = audience === "customer";
   const STR = { STRONG: "b-teal", LEADING: "b-purple", SUPPORTING: "b-muted" };
   const CLAIM = { FACT: "b-teal", INFERENCE: "b-purple", HYPOTHESIS: "b-org" };
@@ -486,7 +536,8 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)" }}>Why now signals</div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>{signals.length} trigger{signals.length === 1 ? "" : "s"} · click any signal to drill into the evidence</div>
         </div>
-        <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/context`)}>View timeline <Icon name="arrow-r" size={11} /></button>
+        {/* The timeline lives on Context, which the client dashboard does not carry. */}
+        {audience === "customer" ? null : <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/context`)}>View timeline <Icon name="arrow-r" size={11} /></button>}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
         {signals.map((s, i) => {
@@ -526,17 +577,22 @@ function WhyNowStrip({ entity, openEvidence, audience, openSubcap }) {
             <Icon name="chevron-u" size={15} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
           </button>
           <div style={{ padding: "0 14px 14px" }}>
-            {(isCust ? sel.impact : sel.detail) ? (
-              <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>{isCust ? sel.impact : sel.detail}</div>
+            {/* The trigger in full, for every audience: the server has already
+                decided what the client read carries. The client branch used to
+                print `impact`, a field no payload serves, so every drilldown
+                opened onto nothing. */}
+            {sel.detail ? (
+              <div style={{ fontSize: 12.5, color: "var(--z-body)", lineHeight: 1.6, marginBottom: 10 }}>{sel.detail}</div>
             ) : null}
             {!isCust && sel.metric ? <div className="f-mono" style={{ fontSize: 11.5, color: "var(--z-dark)", background: "#fff", border: "1px solid var(--z-sep)", borderRadius: 6, padding: "7px 10px", marginBottom: 10, display: "inline-block" }}>{sel.metric}</div> : null}
             {/* timeline event → context */}
             {sel.timeline ? (
-              <button onClick={() => navigate(`/clients/${entity.id}/context`)} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: 0, padding: 0, cursor: "pointer", marginBottom: 12 }}>
+              <button onClick={isCust ? undefined : () => navigate(`/clients/${entity.id}/context`)} style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: 0, padding: 0, cursor: isCust ? "default" : "pointer", marginBottom: 12 }}>
                 <Icon name="timeline" size={12} style={{ color: "var(--ph0)" }} />
                 <span className="f-mono" style={{ fontSize: 11, color: "var(--z-mid)" }}>{sel.timeline.date}</span>
                 <span style={{ fontSize: 11.5, color: "var(--z-body)" }}>{sel.timeline.event}</span>
-                <Icon name="arrow-r" size={10} style={{ color: "var(--z-muted)" }} />
+                {/* Context is not part of the client dashboard: the event is stated, not linked. */}
+                {isCust ? null : <Icon name="arrow-r" size={10} style={{ color: "var(--z-muted)" }} />}
               </button>
             ) : null}
             {/* the window — the clause naming what closes it, at full width */}
@@ -681,7 +737,7 @@ function SCQABody({ entity, expanded, openEvidence, audience }) {
   );
 }
 
-/* ── Opportunity Surface · per platform ───────────────────────────────
+/* ── Platform Opportunities (Opportunity Surface) ─────────────────────
    O8. Two defects, one component.
 
    THE SCORE COLUMN. The tile was a flex row with a shrinkable right-hand
@@ -747,10 +803,12 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
           <Icon name="platform" size={14} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Opportunity Surface · per platform</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Platform Opportunities</div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>Composite fit score 0–100</div>
         </div>
-        <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>Open matrix <Icon name="arrow-r" size={11} /></button>
+        {/* The platform page is not part of the client dashboard, so in the
+            client view the tiles are the destination, not a door to it. */}
+        {audience === "customer" ? null : <button className="btn btn-tertiary btn-sm" onClick={() => navigate(`/clients/${entity.id}/platform`, { run: run.id })}>Open matrix <Icon name="arrow-r" size={11} /></button>}
       </div>
       <div className="g5">
         {tiles.map((t, i) => {
@@ -762,7 +820,7 @@ function OpportunitySurfaceStrip({ entity, run, audience }) {
           const sub = asText(t.headline)
             || ((cat && cat.features) ? cat.features.split(" · ").slice(0, 2).join(" · ") : null);
           return (
-            <div key={pid} className="card-tile clickable" onClick={() => navigate(`/clients/${entity.id}/platform`, { platform: pid, run: run.id })}>
+            <div key={pid} className={`card-tile ${audience === "customer" ? "" : "clickable"}`} onClick={audience === "customer" ? undefined : () => navigate(`/clients/${entity.id}/platform`, { platform: pid, run: run.id })}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: "var(--z-dark)", lineHeight: 1.3 }}>{name}</div>
@@ -1242,7 +1300,7 @@ function LeadershipPanel({ audience }) {
           return (
             <div key={ex.id} style={{ display: "flex", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--z-sep)" }}>
               <div style={{ width: 36, height: 36, borderRadius: 18, background: ex.gap_flag ? "var(--z-sep)" : "linear-gradient(135deg, var(--z-teal), var(--z-mid))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
-                {ex.gap_flag ? "?" : ex.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {ex.gap_flag ? "?" : initialsOf(ex.name)}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
@@ -1418,7 +1476,7 @@ function FinancialTrajectoryD1({ entity, audience }) {
       </div>
     );
   }
-  const values = (f.total_assets || []).filter(v => v != null);
+  const values = (f.series_values || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
   const fte = (f.employees || [])[(f.employees || []).length - 1];
   const counts = [
@@ -1426,7 +1484,7 @@ function FinancialTrajectoryD1({ entity, audience }) {
     fte != null ? `${fte.toLocaleString()} FTE` : null,
   ].filter(Boolean).join(" · ");
   return (
-    <div className="card flush" data-source="financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]">
+    <div className="card flush" data-source="overview.financial_series :: series[],net_income_m[],nim_pct[]">
       <div className="card-head">
         <div className="row"><Icon name="money" size={14} /><h3>Financial trajectory</h3></div>
         <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{f.headline}</span>
@@ -1438,10 +1496,10 @@ function FinancialTrajectoryD1({ entity, audience }) {
               no NIM — so every live bar whispered "NIM null%" on hover. */}
           {f.fy.map((y, i) => (
             <div key={y} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}
-                 title={[y, f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null,
+                 title={[y, f.series_values[i] != null ? `$${f.series_values[i]}${f.unit}` : null,
                          f.nim_pct[i] != null ? `NIM ${f.nim_pct[i]}%` : null].filter(Boolean).join(" · ")}>
-              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{f.total_assets[i] != null ? `$${f.total_assets[i]}${f.unit}` : null}</div>
-              <div style={{ width: "100%", height: `${(f.total_assets[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
+              <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--z-dark)" }}>{f.series_values[i] != null ? `$${f.series_values[i]}${f.unit}` : null}</div>
+              <div style={{ width: "100%", height: `${(f.series_values[i] || 0) / maxA * 80}px`, background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))", borderRadius: "4px 4px 0 0", transition: "height var(--motion-slow) var(--ease)" }} />
               <div className="f-mono" style={{ fontSize: 9.5, color: "var(--z-muted)" }}>{y.replace("FY", "'")}</div>
             </div>
           ))}
@@ -1635,7 +1693,7 @@ function InProgressBanner({ run, entity }) {
           <span className="spacer" />
           <span className="b b-ph1">SSE LIVE</span>
         </div>
-        <p style={{ fontSize: 12, color: "#1E3A8A", marginBottom: 12, lineHeight: 1.55 }}>{entity.name} is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5.</p>
+        <p style={{ fontSize: 12, color: "#1E3A8A", marginBottom: 12, lineHeight: 1.55 }}>{entityName(entity)} is currently being researched. Subcap scoring begins at Batch 4. Insight cards appear after Batch 5.</p>
         <div className="batch-row" style={{ marginBottom: 16 }}>
           {["Setup","Evidence","Peers","Scoring","Analysis","Final"].map((b, i) => (
             <div key={b} className={`batch-pill ${i + 1 < run.current_batch ? "done" : i + 1 === run.current_batch ? "active" : ""}`}>{i+1} {b}</div>
@@ -1830,8 +1888,15 @@ function ClientInsights({ entity, run }) {
     <div>
       <div className="page-head">
         <div>
-          <div className="eyebrow">Insight cards</div>
-          <h1>{DMA.INSIGHT_CARDS.length} insight cards</h1>
+          {/* The client dashboard names the page for its reader
+              (client-view review, 2026-10-07); the card count is ours. */}
+          {audience === "customer" ? (<>
+            <div className="eyebrow">Key insights</div>
+            <h1>Recommendations for {entityName(entity)}</h1>
+          </>) : (<>
+            <div className="eyebrow">Insight cards</div>
+            <h1>{DMA.INSIGHT_CARDS.length} insight cards</h1>
+          </>)}
           <div className="sub">
             <span className="b b-below" style={{ marginRight: 6 }}>{tierCounts[1]} ACT NOW</span>
             <span className="b b-org" style={{ marginRight: 6 }}>{tierCounts[2]} PLAN NEXT</span>
@@ -1845,7 +1910,8 @@ function ClientInsights({ entity, run }) {
         </div>
         <div className="actions">
           <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${filtered.length} insight cards as PDF…`, "success")}><Icon name="download" size={13} /> Export PDF</button>
-          <button className="btn btn-secondary" onClick={() => pushToast("Add a note from any insight card - click a card to start", "success")}><Icon name="plus" size={13} /> Add note</button>
+          {/* Notes are Zennify's annotations; a client link carries none. */}
+          {isClientLink() ? null : <button className="btn btn-secondary" onClick={() => pushToast("Add a note from any insight card - click a card to start", "success")}><Icon name="plus" size={13} /> Add note</button>}
         </div>
       </div>
 
@@ -1909,7 +1975,9 @@ function ClientInsights({ entity, run }) {
         );
       })}
 
-      {/* Technology landscape sub-view */}
+      {/* Technology landscape sub-view — internal only: the client
+          dashboard carries no technology register to open it onto. */}
+      {audience === "customer" ? null : (
       <CardBoundary name="technology landscape">
       <div className="card flush" style={{ marginBottom: 18 }}>
         <div className="card-head">
@@ -1957,6 +2025,7 @@ function ClientInsights({ entity, run }) {
         </div>
       </div>
       </CardBoundary>
+      )}
     </div>
   );
 }

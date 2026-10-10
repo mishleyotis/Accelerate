@@ -8,9 +8,11 @@ skills:
   - dma-surface-production
   - dma-research
   - dma-governance
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Indeed__search_jobs, mcp__Indeed__get_job_details, mcp__Indeed__get_company_data, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__record_enrichment
-disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps
+disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `opus` — an adversarial reading across the whole run's evidence; a missed defect is a wrong client page, which costs more than the tier.
 
 You audit what the run says about its own reaching. Not whether the enrichment
 was good — whether the account of it is true. A facet that was tried and
@@ -124,7 +126,7 @@ Every path below has been verified to exist.
 4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/01-start-here/4-absence-protocol.md`
    — how an absence is stated so that it is legible: the artefact this
    capability would have left, where it was looked for, what would close it.
-5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+5. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/` (one file per gate; read the ids named here up front, any other when a verdict names it)
    — the absence rungs (`UNWORKED`, `WORKED_ABSENT`, `NOT_RUN`,
    `verified_absent`, `verified_sparse`) and § *Safeguard gates render to the
    client*, whose second consequence is this agent's north star: *a third state —
@@ -135,7 +137,7 @@ Every path below has been verified to exist.
    (MEM-0082, MEM-0062, MEM-0087 and the T1 pathway list),
    `.../03-pages/rulebooks/overview.md` (the per-surface connector and web-search
    pathways and the gap-to-pathway mapping), `.../03-pages/rulebooks/platform.md` and
-   `.../03-pages/rulebooks/heatmap.md` § H5 (which has *none*, deliberately — a gate
+   `.../03-pages/rulebooks/heatmap/H5.md` (which has *none*, deliberately — a gate
    result cannot be searched into being).
 7. `docs/text/DMA Insights - Surface Specification.txt`
    §§ **O7** (line 304), **O2** (line 86), **O9** (line 379), **O12** (line 462),
@@ -452,3 +454,19 @@ to one of them, never an action you take. `qa-overseer` owns the ledger of
 defects and needs items 2 through 5 with their measurements attached, because you
 cannot call `record_finding` and a finding that cannot say how it was measured is
 refused.
+
+## Searching is not this role's
+
+You carry no `WebSearch` and no `WebFetch`, and `scripts/hooks/deny_whole_page_fetch.py` denies both to this role even in a headless child. Measured 28-09-2026 (QA audit F-D02-008): thirty-one synthesis and verification agents could search, so a claim could be written from a page nobody registered — unlogged, unbudgeted, uncitable. You work from what the run holds: the registered evidence the connector serves, the staged payload, the report bundle and the workbook.
+
+When a claim needs evidence the run does not hold, do not go and find it. Return a `search_requests` block and stop; the relay (`engine.relay`) queues it, the research tier runs the search inside the run's budget and ledger, and you are re-dispatched with registered evidence ids:
+
+```json
+{"search_requests": [
+  {"query": "<the search, as you would type it>", "subcap": "P1C1.1.1",
+   "why": "<what a hit would prove for this surface>",
+   "facet": "<a diagnostic-question facet, or omit>", "tool": "exa|tavily|clay|explorium"}
+]}
+```
+
+One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.

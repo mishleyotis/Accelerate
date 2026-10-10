@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { COOKIE, verify } from "../../../../../../../lib/session";
+import { requestSession } from "../../../../../../../lib/request-session";
 import { effectiveRole } from "../../../../../../../lib/identity";
+import { logUsage } from "../../../../../../../lib/usage";
+import { shareMode } from "../../../../../../../lib/share";
 
 // The write half of the entity proxy: an insight-card verdict. The SESSION's
 // email is the actor — forwarded by this route, never accepted from the
@@ -10,7 +12,9 @@ import { effectiveRole } from "../../../../../../../lib/identity";
 // fail-closed to a card on a promoted run; this route adds nothing to that
 // judgement, it only carries identity.
 export async function POST(req, { params }) {
-  const session = verify(cookies().get(COOKIE)?.value);
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) return new Response("Not found", { status: 404 });
+  const session = await requestSession(req, cookies());
   if (!session) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
   }
@@ -61,6 +65,12 @@ export async function POST(req, { params }) {
       body: JSON.stringify(body),
     });
     const text = await r.text();
+    // Usage telemetry (lib/usage.js): a verdict the API accepted. Logged on
+    // success only — a refused annotation is not a use of the feature.
+    if (r.ok) {
+      logUsage("feature", session, { feature: "insight_review",
+                                     client_id: display_id, page: "insights" });
+    }
     return new Response(text, {
       status: r.status,
       headers: { "content-type": "application/json" },
