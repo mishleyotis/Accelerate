@@ -864,9 +864,15 @@ class Pipeline:
             try:
                 doc = json.loads(Path(out["handoff"]).read_text())
                 inv = doc.get("invocations") or []
+                est = doc.get("estimate") or {}
                 lines.append(f"  handed {Path(str(doc.get('workflow') or '')).name}: "
                              f"{sum(len(i.get('cats') or []) for i in inv) or len(inv)} unit(s), "
-                             f"est ${(doc.get('estimate') or {}).get('usd')}"
+                             f"est ${est.get('usd')}"
+                             # the search is the bill (measured 2026-10-10): the
+                             # owner sees the count and the fee, not only a total
+                             + (f" ({est.get('searches')} searches x $0.01 = "
+                                f"${float(est.get('search_fees_usd') or 0):.2f} fees)"
+                                if est.get("searches") else "")
                              + (f"; deferred for budget: "
                                 f"{', '.join(c for d in doc['deferred_for_budget']['categories'] for c in d['cats'])}"
                                 if doc.get("deferred_for_budget") else ""))
@@ -2391,6 +2397,10 @@ class Pipeline:
                                                     batch_cells=limit, resynth=scells)
         doc["estimate"] = {"open_cells": cells, "repair_cells": rcells, "batches": nb,
                            "resynth_cells": scells,
+                           # the bill is the searches: the gold contract's count
+                           # for this scope and the fee it bills (2026-10-10)
+                           "searches": price.get("searches"),
+                           "search_fees_usd": price.get("search_fees_usd"),
                            "rechallenge_cells": sum(len(i["rechallenge"][c])
                                                     for i in inv for c in i["cats"]),
                            "categories": n, "usd": est, "basis": basis,

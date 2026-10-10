@@ -357,10 +357,24 @@ def test_the_lean_price_is_the_enforced_shape_and_says_what_ten_dollars_funds():
     instead of estimating to the envelope — and far below Interac's measured
     $0.059/cell."""
     p = cost.research_price(686, categories=16, capabilities=129, lean=True)
-    assert 10.0 < p["usd"] < 22.0, p["usd"]
-    assert p["per_cell"] < 0.059 / 2
+    assert 10.0 < p["usd"] < 35.0, p["usd"]
+    # the measured Interac round was $0.059/cell with 0 of 5 categories
+    # passing; the enforced shape prices below it and PASSES
+    assert p["per_cell"] < 0.059
     assert p["by_tier"]["repair_collector"] < p["by_tier"]["collector"] * 0.1
-    assert "re-synthesis" in p["basis"]
+    assert "re-synthesis" in p["basis"] and "search fees" in p["basis"]
+    # THE SEARCH IS THE BILL (measured 2026-10-10): the gold contract's
+    # searches — one primary per cell, five facet volleys per capability —
+    # at $0.01 each are most of the collectors' price and half the pass
+    floor = 686 + 5 * 129                       # the contract's count, before the repair wave
+    assert floor <= p["searches"] <= floor * 1.1, p["searches"]
+    assert p["search_fees_usd"] == pytest.approx(p["searches"] * cost.SEARCH_FEE_USD, abs=0.01)
+    assert p["search_fees_usd"] > p["usd"] * 0.4
+    batch = cost.collector_usd(12, capabilities=2, lean=True)
+    assert batch["searches"] == 22 and batch["search_fee_usd"] == pytest.approx(0.22)
+    # the measured lane (P4C2.1-2, 12 cells, 22 searches) cost $0.2875;
+    # the priced batch sits within 15% above it, never below the fees
+    assert 0.2875 <= batch["usd"] <= 0.2875 * 1.15, batch
     # a closed cell routed back to the orchestrator buys no collector batch
     q = cost.research_price(0, categories=1, capabilities=None, lean=True, synth_only_cells=12)
     assert q["batches"] == 0 and q["by_tier"]["collector"] == 0 and q["by_tier"]["orchestrator"] > 0
@@ -370,9 +384,11 @@ def test_the_lean_price_is_the_enforced_shape_and_says_what_ten_dollars_funds():
     # what the default envelope funds, whole categories, cheapest first
     aff = cost.research_affordable(cost.STAGE_BUDGET_USD["RESEARCH"], 686, categories=16,
                                    capabilities=129, lean=True)
-    assert not aff["fits"] and 300 < aff["cells_affordable"] < 686
+    assert not aff["fits"] and 150 < aff["cells_affordable"] < 686
     # the in-session shape is untouched by the lean refit
-    assert cost.research_price(686, categories=16, capabilities=129)["usd"] == pytest.approx(81.72, abs=0.5)
+    # the in-session shape moved only by the fees the search count bills
+    insess = cost.research_price(686, categories=16, capabilities=129)
+    assert insess["usd"] == pytest.approx(81.72 + insess["search_fees_usd"], abs=0.6)
 
 
 def test_the_calibration_floor_follows_the_cells_not_the_category_count(tmp_path):
@@ -529,5 +545,5 @@ def test_a_re_synthesis_pass_is_priced_and_packed_small():
     assert cost.lane_cap_usd("resynth", 4) < cost.lane_cap_usd("orchestrate", 4)
     assert cost.lane_cap_usd("resynth", 4) >= cost.LANE_CAP_FLOOR_USD["resynth"]
     p = cost.research_price(686, categories=16, capabilities=129, lean=True)
-    assert p["usd"] < 16.21, "the engine-composed absence and the small repair pass are in the price"
+    assert p["by_tier"]["orchestrator"] < 6.57, "the engine-composed absence and the small repair pass are in the price"
     assert cost.LEAN_SHAPES["resynth"]["floor_tokens"] < cost.LEAN_SHAPES["orchestrator"]["floor_tokens"]

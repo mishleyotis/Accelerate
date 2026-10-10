@@ -373,18 +373,57 @@ def agent_usd(*, model: str, turns: float, floor_tokens: int, growth_per_turn: i
             "usd_per_output_token": (usd / out_tokens if out_tokens else 0.0)}
 
 
+#: THE SEARCH IS THE BILL (measured 2026-10-10, R-INTERAC-20261010, on an
+#: isolated copy of the run). The CLI prices every WebSearch request at
+#: $0.01 inside `total_cost_usd` (its price table carries
+#: `webSearchRequests: 0.01`; Anthropic's rate is $10 per 1,000 searches):
+#:   - one haiku lane, one WebSearch, 379 output tokens: $0.0125
+#:   - one lean collector lane, P4C2.1-2, 12 cells, 2 capabilities, the
+#:     enforced shape to the letter (22 WebSearch calls = 12 primaries + 10
+#:     facet volleys, 5 Bash, ~8 real turns, 135 s, every cell volleyed on
+#:     six facets, 5 evidence rows): $0.2875 — $0.22 of it search fees,
+#:     ~$0.07 tokens (cache write 75.5K, cache read 273K, output 25K).
+#: Interac's measured collectors ($6.87 for ~600 distinct searches) are
+#: the same arithmetic. So a collector batch is priced as its SEARCHES
+#: times the fee plus its token shape, and the gold row contract — one
+#: primary per cell, five facet volleys per capability — has a fee floor of
+#: (cells + 5 x capabilities) x $0.01 that no prompt, batch size or model
+#: tier moves. Connector searches (Exa ~$0.005, Tavily ~$0.008 a credit)
+#: are billed outside the ledger at the same order of magnitude, so the
+#: owner's invariant "degraded or connector-backed prices the same" holds
+#: by pricing both at the fee.
+SEARCH_FEE_USD = 0.01
+FACETS_PER_CAPABILITY = 5
+
+
+def searches_for(cells: int, capabilities: int | None = None) -> int:
+    """The gold contract's search count for a batch: one primary per cell
+    plus one volley per facet per capability."""
+    cells = max(0, int(cells))
+    caps = capabilities if capabilities is not None else max(1, round(cells / CELLS_PER_CAPABILITY))
+    return cells + FACETS_PER_CAPABILITY * max(1, int(caps)) if cells else 0
+
+
 def collector_usd(cells: int, *, capabilities: int | None = None,
                   model: str | None = None, lean: bool = False) -> dict:
-    """One collector batch of `cells` open cells (whole capabilities)."""
+    """One collector batch of `cells` open cells (whole capabilities): its
+    token shape plus the search fees of the gold contract's volleys."""
     shape = dict(RESEARCH_TIERS["collector"])
     if lean:
         shape.update(LEAN_SHAPES["collector"])
     caps = capabilities if capabilities is not None else max(1, round(cells / CELLS_PER_CAPABILITY))
     turns = shape["turns_fixed"] + shape["turns_per_capability"] * max(1, caps)
-    return agent_usd(model=model or shape["model"], turns=turns,
-                     floor_tokens=shape["floor_tokens"],
-                     growth_per_turn=shape["growth_per_turn"],
-                     output_per_turn=shape["output_per_turn"])
+    out = agent_usd(model=model or shape["model"], turns=turns,
+                    floor_tokens=shape["floor_tokens"],
+                    growth_per_turn=shape["growth_per_turn"],
+                    output_per_turn=shape["output_per_turn"])
+    n = searches_for(cells, caps)
+    out["searches"] = n
+    out["search_fee_usd"] = round(n * SEARCH_FEE_USD, 4)
+    out["tokens_usd"] = out["usd"]
+    out["usd"] = round(out["usd"] + out["search_fee_usd"], 4)
+    out["usd_per_output_token"] = (out["usd"] / out["output_tokens"] if out["output_tokens"] else 0.0)
+    return out
 
 
 def _cell_tier_usd(tier: str, cells: int, model: str | None = None,
@@ -453,6 +492,11 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
         chal = {**chal, "usd": chal["usd"] + chal_repair["usd"]}
     if not resynth_share:
         orch_repair = {**orch_repair, "usd": 0.0, "output_tokens": 0}
+    # the fee is carried inside the collector lines (a batch's price is
+    # what its lane is capped at) and reported beside them
+    search_fees = round(per_batch["search_fee_usd"] * batches
+                        + per_repair["search_fee_usd"] * repair_batches, 4)
+    searches = per_batch["searches"] * batches + per_repair["searches"] * repair_batches
     by_tier = {
         "collector": round(per_batch["usd"] * batches, 4),
         "repair_collector": round(per_repair["usd"] * repair_batches, 4),
@@ -468,6 +512,10 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
         "usd": usd, "cells": cells, "synth_only_cells": synth_only,
         "categories": categories, "capabilities": caps,
         "batches": batches, "repair_batches": repair_batches,
+        # the search count the gold contract fires and what it bills: the
+        # part of the price no tiering moves
+        "searches": int(searches), "search_fees_usd": search_fees,
+        "search_fee_usd": SEARCH_FEE_USD,
         "per_cell": round(usd / judged, 4) if judged else 0.0,
         "per_batch": per_batch["usd"], "per_category_orchestrator": round(orch["usd"], 4),
         "per_category_challenge": round(chal["usd"], 4),
@@ -490,6 +538,8 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
                   f"${chal['usd']:.3f} + a {int(repair_share * 100)}% repair wave"
                   + (f" + re-synthesis of {int(resynth_share * 100)}%" if lean else "")
                   + (f" + {synth_only} closed cell(s) re-judged" if synth_only else "")
+                  + f"; {int(searches)} searches x ${SEARCH_FEE_USD:.2f} = ${search_fees:.2f} "
+                  f"of it is search fees (measured 2026-10-10)"
                   + "; degraded or connector-backed prices the same"),
     }
 

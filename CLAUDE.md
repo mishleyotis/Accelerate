@@ -517,13 +517,20 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   (`absence --from-log --note`, the orchestrator decides which cells and what
   came back); two challenge FAIL sentences are refused at the write (present
   tense on UNVERIFIED/ARCHIVAL/STALE rows; one registrable domain is one
-  identity); the calibration floor follows cells, not categories. The
-  enforced shape prices 686 cells at **$14.07** and Interac's 715 at $14.38;
-  **$10 funds ~490 cells (≈11 categories whole)** — the model says so and
-  defers the rest by name. Closing the last gap is the owner's:
-  `--stage-budget RESEARCH=15`, the `primary_shared` rule on degraded runs,
-  a haiku challenger, or the universal-cell scope. PRELIM on opus ($4.86 vs
-  $2) is flagged, not changed.
+  identity); the calibration floor follows cells, not categories.
+  **Measured the same day on an isolated copy of the run** (one lean
+  collector lane, P4C2.1–2, 12 cells: 22 searches, ~8 turns, 135 s, 5
+  evidence rows, **$0.2875 of which $0.22 is 22 × $0.01 WebSearch fees** —
+  the CLI bills every search request at $0.01 inside `total_cost_usd`):
+  **the search is the bill.** `cost.SEARCH_FEE_USD` prices it; the gold
+  contract's 1,342 searches for 686 cells are $13.42 of fees, so the
+  enforced shape prices 686 cells at **$27.49** ($0.040/cell; Interac
+  measured $0.082 with nothing passing) and **$10 funds ~250 cells (≈6
+  categories whole)** — the model says so and defers the rest by name. No
+  combination that keeps the gold row contract (one primary per cell, five
+  facets per capability) lands under $10 on WebSearch; the owner picks the
+  scope per run or the figure (`--stage-budget RESEARCH=28`), or funds Exa.
+  PRELIM on opus ($4.86 vs $2) is flagged, not changed.
 
 ## Open decisions — leave open, do not resolve silently
 

@@ -746,29 +746,64 @@ tokens). Then RESEARCH:
 | the calibration floor follows the cells, not the category count | `pipeline._workflow_estimate` | `test_the_calibration_floor_follows_the_cells_…` |
 | sixteen categories, one round, all PASS, no deferral, under the envelope — on the stub | `pipeline` | `test_sixteen_categories_are_handed_whole_and_pass_in_one_round` |
 
-**The arithmetic, stated.** At the enforced shape a 43-cell category costs
-**$0.96** end to end (collect $0.42 · orchestrate $0.28 · challenge $0.20 ·
-routed repair $0.07). The T1_CORE scope, 686 cells / 16 categories, prices
-at **$14.07 ($0.021/cell)**; Interac's 715 at **$14.38**. That is 4× below
-what Interac measured ($0.082/cell) and the caps make it a ceiling, not a
-hope — but it is **not $10**. $10 funds **~490 cells, about 11 of the 16
-categories whole**, cheapest first; the handoff names the rest under
-`deferred_for_budget`, and nothing is started that cannot finish. Where the
-$14 sits: collectors $6.1 (1,360 searches at ~1.2K tokens of WebSearch
-payload each, written once to the cache and re-read a few times — the
-largest line and the one no prompt edit moves), orchestrators $4.4,
-challenges $3.3, routed repairs $0.3. The gap to $10 is not a batching gap:
-the floor of the gold row contract on Interac is one primary per cell,
-five facets per capability (the owner's 2026-09-03 rule), ~715 judged rows
-on sonnet and a challenge of every synthesis. The levers that close it are
-the owner's, not the driver's:
+**Measured on Interac, not projected (2026-10-10, same day).** One lean
+collector lane was run against an isolated copy of R-INTERAC-20261010 —
+P4C2.1–P4C2.2, 12 never-worked cells, 2 capabilities, `--max-budget-usd
+0.40` — with the enforced shape:
 
-| lever | saves | what it costs |
+| | measured | priced |
 |---|---|---|
-| `--stage-budget RESEARCH=15` for a 715-cell HYBRID run | — | $5 over the envelope, once per run; the envelope figure was set for "700+ subcaps" at a shape that had never been measured |
-| contract: let a capability's facet volleys stand for an absence without a cell-own primary on a DEGRADED run (`primary_shared` off) | ~$2.3 (≈ 500 searches) → ~$12 | the cell's own question is never put to the entity — the depth rule of 2026-10-09 |
-| tier: the challenger on haiku | ~$2.6 → with the row above ≈ $9.5 | the owner chose sonnet for every judgement tier on 2026-10-09 |
-| scope: the 686 universal cells only (drop the CIB supplement's 29) | $0.3 | the CIB variants are not scored |
+| WebSearch calls | **22** = 12 primaries + 10 facet volleys | 22 |
+| real turns | ~8 (two volleys of 7 and 15 parallel searches, two write turns, open, return) | 8 |
+| wall clock | 135 s | — |
+| rows | 69 Search_Log rows (6 facets on every cell), 5 evidence rows (T2/T3) | — |
+| tokens | cache write 75.5K · cache read 273K · output 25K | — |
+| **cost** | **$0.2875**, of which **$0.22 is 22 × $0.01 search fees** | $0.32 |
+
+The CLI bills every WebSearch request at **$0.01** inside `total_cost_usd`
+(its price table: `webSearchRequests: 0.01`; a one-search haiku probe cost
+$0.0125). Interac's measured collectors — $6.87 for ~600 distinct searches
+— are the same arithmetic. **The search is the bill**: 77% of a disciplined
+collector lane, and the part no batch size, prompt or model tier moves.
+`cost.SEARCH_FEE_USD` now prices it (`searches_for`: cells + 5 ×
+capabilities; the fee rides inside the collector line and is reported as
+`searches` / `search_fees_usd` on the price, the handoff estimate and the
+owner update). The model's 12-cell batch is $0.32 against the measured
+$0.29.
+
+**The arithmetic, stated.** At the enforced shape a 43-cell category costs
+**~$1.7** end to end (collect $1.19 of which $0.87 fees · orchestrate $0.28
+· challenge $0.20 · routed repair $0.07). The T1_CORE scope, 686 cells / 16
+categories, prices at **$27.49 ($0.040/cell)**: 1,342 searches = **$13.42
+fees**, collectors' tokens $6.4, orchestrators $4.4, challenges $3.3. That is
+2× below what Interac measured ($0.082/cell, nothing passing) and the caps
+make it a ceiling — but **$10 funds ~250 cells, about 6 of the 16
+categories whole**, cheapest first; the handoff names the rest under
+`deferred_for_budget`, and nothing is started that cannot finish. The gap
+to $10 is not a batching gap: it is the gold row contract's search count
+(one primary per cell, five facets per capability — the owner's 2026-09-03
+and 2026-10-09 rules) at the search fee. The levers are the owner's, not
+the driver's:
+
+| lever | searches | saves | what it costs |
+|---|---|---|---|
+| `--stage-budget RESEARCH=28` for a 715-cell HYBRID run | 1,386 | — | the envelope figure was set for "700+ subcaps" before the fee was measured |
+| fund Exa (`~$0.005` a search, `numResults: 3`) so the run is not DEGRADED | 1,386 | ~$7 of ledger (fees move to Exa credits, ~$7) | credits outside the ledger; the pass still ≈ $21 ledger + $7 credits |
+| contract: let a capability's facet volleys stand for an absence without a cell-own primary on a DEGRADED run (`primary_shared` off) | ~870 | ~$5.2 → ~$22 | the cell's own question is never put to the entity — the depth rule of 2026-10-09 |
+| contract: five facet volleys per CATEGORY, not per capability | ~770 | ~$5.7 | the 2026-09-03 volley structure |
+| both contract rows | ~300 | ~$10.6 → ~$17 | both rules |
+| scope: the 686 universal cells only (drop the CIB supplement's 29) | −44 | $0.5 | the CIB variants are not scored |
+
+No combination that keeps the gold row contract lands under $10 on
+WebSearch; a 16-category pass under $10 needs ≤ ~700 searches, one per
+cell. **The honest instrument is the one shipped**: the price says what the
+envelope funds, the caps make overspend impossible, and the owner picks the
+scope per run (`--only-categories`) or the figure.
+
+Also found by the measurement: the P4C2 cards for cells 2.2.6–2.2.9
+carried no primary question (the lane wrote one from the cell name), and
+the 2.2.4 card's question did not match its cell name — a card defect
+(MEM-0616's test covers presence, not every cell) for the next change.
 
 Not in the envelope but on the bill: PRELIM ran the conductor on **opus**
 ($4.86 against $2). The lane caps apply to the research tiers only; the

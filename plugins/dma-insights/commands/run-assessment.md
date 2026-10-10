@@ -342,11 +342,14 @@ $1.4–$3.4 a 57-cell category; Interac 2026-10-10: $0.059/cell and 0 of 5
 categories passing, which is what made every lane carry `--max-budget-usd`
 at its priced shape, a collector's search window its capability's cells + 5
 facets + 3, and a repair route to the tier that can close it (§13 of the
-optimisation doc). At the enforced shape a 43-cell category is ~$0.96 end to
-end and the 686-cell scope ≈ $14, so the $10 envelope funds ~11 categories
+optimisation doc). Measured the same day: every WebSearch request bills
+$0.01 inside the lane's cost — 77% of a disciplined collector lane — so the
+gold contract's ~1,340 searches for 686 cells are ~$13 of fees before a
+token is written. At the enforced shape a 43-cell category is ~$1.7 end to
+end and the 686-cell scope ≈ $27, so the $10 envelope funds ~6 categories
 whole, cheapest first, and names the rest — raising it (`--stage-budget
-RESEARCH=15`), relaxing the cell-own primary on a degraded run, a haiku
-challenger, or narrowing the scope is the owner's call, never the driver's.
+RESEARCH=28`), funding Exa, relaxing a volley rule, or narrowing the scope
+(`--only-categories`) is the owner's call, never the driver's.
 
 **Where the owner sees the run: the conversation.** The owner follows DMA
 sessions from the Claude app, and a workflow's progress view (`/workflows`)
