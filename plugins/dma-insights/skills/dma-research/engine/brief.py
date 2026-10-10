@@ -1752,7 +1752,8 @@ PACK_EXCERPT_CHARS = 240
 PACK_ROWS_PER_CELL = 6
 
 
-def evidence_pack(wb: RunWorkbook, category: str, *, qa_dir=None) -> dict:
+def evidence_pack(wb: RunWorkbook, category: str, *, qa_dir=None,
+                  cells: list[str] | None = None) -> dict:
     """ONE file the category orchestrator reads in its first turn
     (2026-10-10, R-INTERAC-20261010) instead of `gate --summary` plus one
     `brief reuse` call per cell: Interac's orchestrators spent 13-20 turns
@@ -1773,6 +1774,7 @@ def evidence_pack(wb: RunWorkbook, category: str, *, qa_dir=None) -> dict:
     reasons = FG.blocking_reasons(verdict)
     blocking_by_cell = FG.blocking_cells(verdict)
     selected = set(wb.selected_subcaps())
+    only = {str(c).strip() for c in (cells or []) if str(c).strip()} or None
 
     def _row(e):
         r = register.get(e) or {}
@@ -1786,6 +1788,8 @@ def evidence_pack(wb: RunWorkbook, category: str, *, qa_dir=None) -> dict:
     for r in wb.scoring_rows():
         sub = _clean(r.get("SubCap_ID"))
         if not sub.startswith(cat + ".") or sub not in selected:
+            continue
+        if only is not None and sub not in only:
             continue
         eids = [i.split(":")[0] for i in _ids(r.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
         closed = bool(_clean(r.get("Dominant_Claim")))

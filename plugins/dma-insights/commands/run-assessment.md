@@ -342,11 +342,11 @@ $1.4–$3.4 a 57-cell category; Interac 2026-10-10: $0.059/cell and 0 of 5
 categories passing, which is what made every lane carry `--max-budget-usd`
 at its priced shape, a collector's search window its capability's cells + 5
 facets + 3, and a repair route to the tier that can close it (§13 of the
-optimisation doc). At the enforced shape a 43-cell category is ~$1.10 end to
-end and the 686-cell scope ≈ $16, so the $10 envelope funds ~9–10 categories
+optimisation doc). At the enforced shape a 43-cell category is ~$0.96 end to
+end and the 686-cell scope ≈ $14, so the $10 envelope funds ~11 categories
 whole, cheapest first, and names the rest — raising it (`--stage-budget
-RESEARCH=17`), narrowing the scope, or relaxing the cell-own primary on a
-degraded run is the owner's call, never the driver's.
+RESEARCH=15`), relaxing the cell-own primary on a degraded run, a haiku
+challenger, or narrowing the scope is the owner's call, never the driver's.
 
 **Where the owner sees the run: the conversation.** The owner follows DMA
 sessions from the Claude app, and a workflow's progress view (`/workflows`)

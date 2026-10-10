@@ -90,6 +90,24 @@ def host_of(url: str | None) -> str:
     return str(url or "").split("//")[-1].split("/")[0].lower().removeprefix("www.")
 
 
+_CC_SECOND_LEVEL = {"co", "com", "org", "net", "gov", "ac", "edu", "gc"}
+
+
+def source_identity(url: str | None) -> str:
+    """ONE SOURCE IDENTITY IS THE REGISTRABLE DOMAIN, not the host (2026-10-10,
+    R-INTERAC-20261010 P1C4.8.1: a FACT rested on `interac.ca` and
+    `newsroom.interac.ca`, two hosts of one publisher; the challenger
+    refused it, the write had let it through). `co.uk`-style second levels
+    keep three labels."""
+    h = host_of(url)
+    if not h:
+        return ""
+    parts = h.split(".")
+    if len(parts) >= 3 and parts[-2] in _CC_SECOND_LEVEL and len(parts[-1]) == 2:
+        return ".".join(parts[-3:])
+    return ".".join(parts[-2:]) if len(parts) >= 2 else h
+
+
 def is_own_host(wb: RunWorkbook, url: str | None) -> bool:
     h = host_of(url)
     return bool(h) and any(h == o or h.endswith("." + o) for o in own_hosts(wb))
@@ -1350,9 +1368,24 @@ def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
     idents = set()
     for r in rows:
         url = str(r.get("Source_URL") or "")
-        idents.add(host_of(url) or str(r.get("Source_Name") or "").strip().lower())
+        idents.add(source_identity(url) or str(r.get("Source_Name") or "").strip().lower())
     idents.discard("")
     claim = str(merged.get("Dominant_Claim") or "")
+    # TENSE FOLLOWS THE EVIDENCE AGE (2026-10-10). Six of Interac's nine
+    # challenge FAILs were one sentence: "claim says Interac 'runs' / 'provides'
+    # / 'delivers' in the present tense, but the only rows are undated T4
+    # postings (UNVERIFIED) / ARCHIVAL; undated is never current". A rule the
+    # challenger states in one sentence is refused here, before it costs a
+    # challenge lane, an orchestrator repair pass and a re-challenge.
+    recs = {str(r.get("Recency") or "").strip().upper() for r in rows}
+    if rows and recs and recs <= {"UNVERIFIED", "ARCHIVAL", "STALE"} \
+            and _PRESENT_TENSE.search(claim) and not _DATED_CLAIM.search(claim):
+        out.append(
+            f"the claim is in the present tense but every row it cites is "
+            f"{'/'.join(sorted(recs))} — undated or old evidence is never current. "
+            f"Date the claim (\"as of <year>\", \"reported in <year>\", \"a <year> "
+            f"posting sought …\") or state what the row shows (an open role, a past "
+            f"programme), not what the entity does today")
     absence = Q.claims_absence(claim) or str(
         merged.get("Absence_Claimed") or "").strip().upper() in ("YES", "TRUE", "1")
     if label == "FACT" and rows and len(idents) < 2:
@@ -1737,6 +1770,66 @@ def enrichment_status(wb: RunWorkbook, category: str,
 #: owed. `direct` is the entity itself; `proxy` is the template's own proxy
 #: class for the cell (leadership_title, regulator_filing, org_talent …).
 ABSENCE_RUNGS_REQUIRED = ("direct", "proxy")
+
+_PRESENT_TENSE = re.compile(
+    r"\b(runs|operates|provides|delivers|maintains|uses|offers|employs|holds|has|is|are|"
+    r"deploys|publishes|tracks|measures|monitors|manages|staffs)\b", re.I)
+_DATED_CLAIM = re.compile(
+    r"\b(19|20)\d\d\b|\bas of\b|\breported\b|\bformerly\b|\bpreviously\b|\bhistoric|"
+    r"\bsought\b|\bposting\b|\badvertised\b|\bonce\b|\bpast\b|\bundated\b", re.I)
+
+
+def compose_absence(wb: RunWorkbook, subcap: str, *, note: str | None = None) -> dict:
+    """The declared absence's ladder, proxy log and hunt, COMPOSED FROM THE
+    CELL'S OWN SEARCH_LOG (2026-10-10, R-INTERAC-20261010).
+
+    Why the engine writes this text: on Interac ~70% of cells close as
+    absences, and every one cost the sonnet orchestrator ~180 output tokens
+    of ladder JSON, proxy log, hunt and question — transcribed from the
+    collectors' notes and the Search_Log the engine already holds — plus
+    the refusals that transcription earned (`hunted_shared`, a ladder rung
+    the log never saw, a 39-char proxy log). The JUDGEMENT stays with the
+    orchestrator: it decides which cells are exhausted and names, per cell,
+    the nearest thing that came back (`note`). The engine supplies the
+    cell's own primary as the direct rung, one of its own facet volleys as
+    the proxy rung, and a hunt that names the cell, its queries, the tools
+    and the note — so it is never a sibling's text by construction. Every
+    refusal in `declare_absence` still applies to the result."""
+    rows = [r for r in wb.rows("Search_Log")
+            if str(r.get("SubCap_ID") or "").strip() == subcap]
+    cap = ".".join(subcap.split(".")[:2])
+    sibs = [c for c in wb.selected_subcaps() if c != subcap
+            and ".".join(c.split(".")[:2]) == cap]
+    sib_primaries = {_norm_hunt(r.get("Query")) for r in wb.rows("Search_Log")
+                     if str(r.get("SubCap_ID") or "").strip() in sibs
+                     and str(r.get("Facet") or "").strip() == C.PRIMARY_FACET}
+    primaries = [str(r.get("Query") or "") for r in rows
+                 if str(r.get("Facet") or "").strip() == C.PRIMARY_FACET and r.get("Query")]
+    own = [q for q in primaries if _norm_hunt(q) not in sib_primaries]
+    primary = (own or primaries or [""])[0]
+    by_facet: dict[str, str] = {}
+    for r in rows:
+        f = str(r.get("Facet") or "").strip()
+        if f and f != C.PRIMARY_FACET and r.get("Query") and f not in by_facet:
+            by_facet[f] = str(r.get("Query"))
+    proxy_facet = next((f for f in ("corroborates", "works", "value", "fails", "contradicts")
+                        if f in by_facet), next(iter(by_facet), ""))
+    proxy_q = by_facet.get(proxy_facet, "")
+    tools = sorted({str(r.get("Tool") or "").strip() for r in rows if r.get("Tool")})
+    name = C.subcap_names().get(subcap) or subcap
+    proxy_class = C.proxy_classes().get(subcap, "") or "named-owner"
+    came_back = str(note or "").strip() or "no page naming this capability at the entity"
+    facet_txt = "; ".join(f"{f}: {q}" for f, q in by_facet.items())
+    ladder = [{"rung": "direct", "query": primary}, {"rung": "proxy", "query": proxy_q}]
+    proxy_log = (f"hunted the {proxy_class} proxy for {name} ({subcap}) through the "
+                 f"{proxy_facet or 'facet'} volley '{proxy_q}' and {len(rows)} logged "
+                 f"search(es) over {', '.join(tools) or 'web_search'}; what came back: "
+                 f"{came_back}")
+    hunted = (f"{subcap} primary '{primary}' on {', '.join(tools) or 'web_search'}; "
+              f"facet queries {facet_txt}; {len(rows)} searches logged. Nearest thing "
+              f"that came back for {subcap}: {came_back}")
+    return {"ladder": ladder, "proxy_log": proxy_log, "what_was_hunted": hunted,
+            "primary": primary, "primary_is_own": bool(own), "tools": tools}
 
 
 def enrichment_binding(wb: RunWorkbook) -> dict:

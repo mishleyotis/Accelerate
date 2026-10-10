@@ -599,12 +599,20 @@ def main(argv=None) -> int:
              "cell ends a run empty."))
     ab.add_argument("--subcap", required=True)
     ab.add_argument("--actor", required=True)
-    ab.add_argument("--ladder", required=True,
+    ab.add_argument("--from-log", action="store_true",
+                    help="compose the ladder, proxy log and hunt from THIS cell's own "
+                         "Search_Log (its primary as the direct rung, one of its facet "
+                         "volleys as the proxy rung); pass --note with the nearest "
+                         "thing that came back. Every refusal still applies")
+    ab.add_argument("--note", default=None,
+                    help="with --from-log: the nearest thing that came back for this "
+                         "cell (a proper noun, a date, an E-id, or 'nothing')")
+    ab.add_argument("--ladder", default=None,
                     help="JSON list of {rung: direct|proxy|peer|regulatory, "
-                         "query: <the query as logged>}")
-    ab.add_argument("--proxy-log", required=True,
+                         "query: <the query as logged>} (not with --from-log)")
+    ab.add_argument("--proxy-log", default=None,
                     help="which proxy class was hunted and what came back")
-    ab.add_argument("--hunted", required=True,
+    ab.add_argument("--hunted", default=None,
                     help="what was looked for, where, and what came back instead")
     ab.add_argument("--inferable", default=None,
                     help="what the absence still lets you INFER (>= 30 chars); "
@@ -972,12 +980,20 @@ def main(argv=None) -> int:
                                                  actor=a.actor), indent=2))
         return 0
     if a.cmd == "absence":
-        lad = json.loads(a.ladder)
-        if isinstance(lad, dict):
-            lad = [lad]
+        if a.from_log:
+            comp = ledger.compose_absence(wb, a.subcap, note=a.note)
+            lad, proxy_log, hunted = comp["ladder"], comp["proxy_log"], comp["what_was_hunted"]
+        else:
+            if not (a.ladder and a.proxy_log and a.hunted):
+                raise SystemExit("absence: pass --from-log [--note …], or all of "
+                                 "--ladder, --proxy-log and --hunted")
+            lad = json.loads(a.ladder)
+            if isinstance(lad, dict):
+                lad = [lad]
+            proxy_log, hunted = a.proxy_log, a.hunted
         print(json.dumps(ledger.declare_absence(
-            wb, a.subcap, actor=a.actor, ladder=lad, proxy_log=a.proxy_log,
-            what_was_hunted=a.hunted,
+            wb, a.subcap, actor=a.actor, ladder=lad, proxy_log=proxy_log,
+            what_was_hunted=hunted,
             enrichment_unavailable=a.enrichment_unavailable,
             inferable=a.inferable, validation_question=a.validation_question,
             not_determinable=a.not_determinable, run=run), indent=2))

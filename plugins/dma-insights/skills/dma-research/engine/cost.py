@@ -265,9 +265,18 @@ LEAN_SHAPES = {
     # lines; 1 turn to return
     "collector": {"floor_tokens": 8_000, "turns_fixed": 2, "turns_per_capability": 3,
                   "growth_per_turn": 5_000, "output_per_turn": 600},
-    # the pack rides in the prompt (floor), then ~8 cells a batch turn
-    "orchestrator": {"floor_tokens": 24_000, "turns_fixed": 3, "turns_per_cell": 0.12,
-                     "growth_per_turn": 2_000, "output_per_turn": 1_400},
+    # the pack rides in the prompt (floor), then ~10 cells a batch turn.
+    # Output derived, not fitted: a 43-cell category on Interac is ~13
+    # syntheses (~450 tokens of JSON each) and ~30 absences, which the
+    # engine now composes from the Search_Log (`absence --from-log`, ~25
+    # output tokens a line instead of ~180) — ~7.6K output over ~7 turns.
+    "orchestrator": {"floor_tokens": 20_000, "turns_fixed": 3, "turns_per_cell": 0.10,
+                     "growth_per_turn": 2_000, "output_per_turn": 1_050},
+    # a RE-SYNTHESIS pass reads a pack of only the cells routed back to it
+    # (`_pack_repair.json`) and rewrites those: a small floor, two turns
+    # plus one per ~7 cells
+    "resynth": {"floor_tokens": 10_000, "turns_fixed": 2, "turns_per_cell": 0.15,
+                "growth_per_turn": 2_000, "output_per_turn": 1_200},
     # three measured challenges: $0.088, $0.170 (57 cells), $0.075 (24);
     # Interac five more at $0.10–0.23 — the one tier that ran to shape
     "challenge": {"floor_tokens": 10_000, "turns_fixed": 3, "turns_per_cell": 0.05,
@@ -296,7 +305,8 @@ LEAN_RESYNTH_SHARE = 0.10
 #: envelope is never crossed by a lane that ran away — the Interac
 #: collectors that ran 3.3x their price would have been stopped at 1.5x.
 LANE_CAP_SLACK = 1.5
-LANE_CAP_FLOOR_USD = {"collector": 0.12, "orchestrator": 0.30, "challenge": 0.12}
+LANE_CAP_FLOOR_USD = {"collector": 0.12, "orchestrator": 0.30, "challenge": 0.12,
+                      "resynth": 0.10}
 #: the smallest cap a phase scaled to a thin envelope may hand a lane — a
 #: cap below this buys an open turn and nothing else, so the phase is
 #: refused instead (`AT_STAGE_BUDGET`)
@@ -315,6 +325,9 @@ def lane_cap_usd(kind: str, cells: int, *, capabilities: int | None = None,
     elif kind in ("orchestrate", "orchestrator"):
         usd = _cell_tier_usd("orchestrator", max(0, int(cells)), model, lean=True)["usd"]
         tier = "orchestrator"
+    elif kind == "resynth":
+        usd = _cell_tier_usd("resynth", max(0, int(cells)), model, lean=True)["usd"]
+        tier = "resynth"
     else:
         usd = _cell_tier_usd("challenge", max(0, int(cells)), model, lean=True)["usd"]
         tier = "challenge"
@@ -376,7 +389,9 @@ def collector_usd(cells: int, *, capabilities: int | None = None,
 
 def _cell_tier_usd(tier: str, cells: int, model: str | None = None,
                    lean: bool = False) -> dict:
-    shape = dict(RESEARCH_TIERS[tier])
+    # the re-synthesis pass exists only on the lean shape; in-session it is
+    # the orchestrator's own shape
+    shape = dict(RESEARCH_TIERS["orchestrator" if tier == "resynth" else tier])
     if lean:
         shape.update(LEAN_SHAPES[tier])
     turns = shape["turns_fixed"] + shape["turns_per_cell"] * max(0, cells)
@@ -428,7 +443,8 @@ def research_price(cells: int, *, categories: int, capabilities: int | None = No
     judged = cells + synth_only                 # what the judgement tiers read
     per_cat_cells = judged / categories if categories else 0
     orch = _cell_tier_usd("orchestrator", round(per_cat_cells), synthesis_model, lean=lean)
-    orch_repair = _cell_tier_usd("orchestrator", round(per_cat_cells * resynth_share),
+    orch_repair = _cell_tier_usd("resynth" if lean else "orchestrator",
+                                 round(per_cat_cells * resynth_share),
                                  synthesis_model, lean=lean)
     chal = _cell_tier_usd("challenge", round(per_cat_cells), lean=lean)
     chal_repair = _cell_tier_usd("challenge", round(per_cat_cells * resynth_share), lean=lean)

@@ -71,8 +71,12 @@ nearest thing found) is a declared absence with that ladder.
   recency band the row carries.
 - A declared absence needs the primary volley and (on a connector-backed run)
   one connector volley logged on the cell; on a degraded run add
-  `--enrichment-unavailable`. `--hunted` names the exact queries, sites and
-  the nearest thing found.
+  `--enrichment-unavailable`. Write it as ONE line: `absence --subcap <CELL>
+  --from-log --note '<the nearest thing that came back for this cell>'` —
+  the engine composes the ladder, proxy log and hunt from the cell's own
+  Search_Log (2026-10-10: ~70% of Interac's cells close as absences and each
+  cost ~180 output tokens of transcription plus the refusals it earned);
+  you decide which cells are exhausted and what came back.
 
 You never run the gate twice, never challenge a cell (the challenge step
 does), never score, never submit and never promote.

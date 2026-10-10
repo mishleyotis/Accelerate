@@ -3019,6 +3019,10 @@ class Pipeline:
                 lean["max_usd"] = cost.lane_cap_usd(
                     "collect", cells, capabilities=len(caplist) or None,
                     model=m.get("model"))
+            elif kind == "orchestrate" and size.get("resynth_only"):
+                # a re-synthesis pass: the small shape, the small pack
+                lean["max_usd"] = cost.lane_cap_usd("resynth", int(size.get("cells") or 0),
+                                                    model=m.get("model"))
             else:
                 lean["max_usd"] = cost.lane_cap_usd(kind, int(size.get("cells") or 0),
                                                     model=m.get("model"))
@@ -3095,7 +3099,9 @@ class Pipeline:
         from . import floors_gate
         out: dict = {"cats": list(cats), "round": r, "phases": {}, "gates": {}}
         work = self._tier_work(cats)
-        sizes = {c: {"cells": work[c]["judged"], "batch_cells": BATCH_CELLS} for c in cats}
+        sizes = {c: {"cells": work[c]["judged"], "batch_cells": BATCH_CELLS,
+                     "resynth_only": bool(work[c]["resynth"] and not work[c]["collect"])}
+                 for c in cats}
 
         def phase(kind, stage, use_cats, extra=None, suffix=""):
             if not use_cats:
@@ -3137,7 +3143,8 @@ class Pipeline:
         #    re-synthesis of the cells the gate routed back here.
         orch_cats = [c for c in cats if work[c]["collect"] or work[c]["resynth"]]
         if orch_cats:
-            self._write_packs(orch_cats, r)
+            self._write_packs(orch_cats, r, only={c: sorted(work[c]["resynth_cells"])
+                                                  for c in orch_cats if sizes[c]["resynth_only"]})
         summ = phase("orchestrate", "RESEARCH", orch_cats, extra=self._collector_returns(cats, r))
         if summ.get("refused"):
             self._budget_stopped = True
@@ -3192,6 +3199,7 @@ class Pipeline:
             legacy = (not invs) or ("batches" not in inv)
             collect = bool(batches) or bool(repairs) or (legacy and open_cells > 0)
             out[c] = {"collect": collect, "resynth": bool(resynth), "rechallenge": bool(rechal),
+                      "resynth_cells": list(resynth),
                       "judged": open_cells + len(repairs) + len(resynth)}
         return out
 
@@ -3209,7 +3217,7 @@ class Pipeline:
             return True
         return False
 
-    def _write_packs(self, cats: list, rnd: int) -> None:
+    def _write_packs(self, cats: list, rnd: int, only: dict | None = None) -> None:
         """The orchestrator's evidence pack per category, rendered ONCE by
         the driver after the collectors return (`brief.evidence_pack`), so
         the sonnet pass reads one file instead of one `brief reuse` call a
@@ -3217,15 +3225,22 @@ class Pipeline:
         $0.36). Written beside the cards; the prompt names the path."""
         from . import brief
         for cat in cats:
+            cells = (only or {}).get(cat)
             try:
-                pack = brief.evidence_pack(self.wb, cat, qa_dir=self.run.qa_dir)
+                pack = brief.evidence_pack(self.wb, cat, qa_dir=self.run.qa_dir, cells=cells)
             except Exception as e:                       # noqa: BLE001
                 self.opts.log(f"  [RESEARCH] {cat}: pack not rendered ({e.__class__.__name__}: "
                               f"{str(e)[:120]}) — the orchestrator reads per cell")
                 continue
             d = self.run.root / "briefs" / "research_cards" / cat
             d.mkdir(parents=True, exist_ok=True)
+            # a re-synthesis-only pass gets a pack of only its cells, under
+            # the same name the prompt reads (the full pack would be the
+            # whole category's floor paid to rewrite four rows)
             (d / "_pack.json").write_text(json.dumps(pack, separators=(",", ":"), default=str))
+            if cells is not None:
+                (d / "_pack_repair.json").write_text(
+                    json.dumps(pack, separators=(",", ":"), default=str))
 
     def _stage_research_tiers(self) -> str:
         from . import brief, floors_gate

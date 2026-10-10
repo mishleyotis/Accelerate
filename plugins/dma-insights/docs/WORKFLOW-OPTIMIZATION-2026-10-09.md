@@ -740,29 +740,35 @@ tokens). Then RESEARCH:
 | every lean lane carries `--max-budget-usd` = its priced shape × 1.5 (`cost.lane_cap_usd`), a phase's caps scaled down to the envelope's remainder or the phase refused; a cut lane is `budget_cut` in the summary | `agent_run.lean_command`, `pipeline._tier_rows/_cap_rows_to_envelope`, stub | `test_lane_rows_carry_their_priced_ceiling_…`, `test_a_phases_caps_never_exceed_the_envelope`, `test_a_runaway_lane_is_booked_at_its_cap_…`, `test_a_thin_envelope_…` |
 | a collector lane's search window = the capability's cells + 5 facets + 3 (`ledger.collector_ceiling`), refused past it with "write what you have and move on"; the manifest and prompt say so | `ledger.append_search`, `cli search` | `test_the_collector_window_is_the_capabilitys_cells_plus_the_volleys` |
 | the orchestrator reads ONE pre-rendered pack (`briefs/research_cards/<CAT>/_pack.json`, written by the driver after the collectors return) — no gate call, no per-cell reads | `brief.evidence_pack`, `pipeline._write_packs`, prompt, manifest | `test_the_orchestrator_reads_one_pre_rendered_pack` |
-| the price is the enforced shape (`LEAN_SHAPES`: collector 2 + 3 turns/capability, orchestrator pack-fed, routed repair model `LEAN_REPAIR_SHARE`/`LEAN_RESYNTH_SHARE`; `synth_only_cells` buy no collector) | `cost.research_price` | `test_the_lean_price_is_the_enforced_shape_…` |
+| the price is the enforced shape (`LEAN_SHAPES`: collector 2 + 3 turns/capability, orchestrator pack-fed, a small `resynth` shape for the repair pass, routed repair model `LEAN_REPAIR_SHARE`/`LEAN_RESYNTH_SHARE`; `synth_only_cells` buy no collector; a collect-free round is priced as the repair pass it is) | `cost.research_price` | `test_the_lean_price_is_the_enforced_shape_…` |
+| **the engine composes a declared absence from the cell's own Search_Log** (`absence --from-log --note`): the orchestrator decides which cells are exhausted and what came back; the ladder, proxy log and hunt are the cell's own by construction (~70% of Interac's cells are absences, ~180 output tokens each on sonnet, plus `hunted_shared` / ladder refusals) | `ledger.compose_absence`, `cli absence --from-log`, prompt, manifest | `test_the_engine_composes_an_absence_from_the_cells_own_log` |
+| **two challenge FAIL sentences refused at the write**: a present-tense claim whose every row is UNVERIFIED/ARCHIVAL/STALE (6 of Interac's 9 FAILs), and a FACT whose two "identities" are two hosts of one registrable domain (`newsroom.interac.ca` + `interac.ca`) | `ledger` label rules, `source_identity` | `test_tense_follows_the_evidence_age_at_the_write`, `test_one_publisher_is_one_identity_whatever_the_host` |
 | the calibration floor follows the cells, not the category count | `pipeline._workflow_estimate` | `test_the_calibration_floor_follows_the_cells_…` |
 | sixteen categories, one round, all PASS, no deferral, under the envelope — on the stub | `pipeline` | `test_sixteen_categories_are_handed_whole_and_pass_in_one_round` |
 
 **The arithmetic, stated.** At the enforced shape a 43-cell category costs
-**$1.10** end to end (collect $0.42 · orchestrate $0.41 · challenge $0.20 ·
+**$0.96** end to end (collect $0.42 · orchestrate $0.28 · challenge $0.20 ·
 routed repair $0.07). The T1_CORE scope, 686 cells / 16 categories, prices
-at **$16.21 ($0.024/cell)**; Interac's 715 at **$16.56**. That is 3.5× below
+at **$14.07 ($0.021/cell)**; Interac's 715 at **$14.38**. That is 4× below
 what Interac measured ($0.082/cell) and the caps make it a ceiling, not a
-hope — but it is **not $10**. $10 funds **~420 cells, about 9–10 of the 16
+hope — but it is **not $10**. $10 funds **~490 cells, about 11 of the 16
 categories whole**, cheapest first; the handoff names the rest under
-`deferred_for_budget`, and nothing is started that cannot finish. The gap
-to $10 is not a batching gap: the floor of the gold row contract on Interac
-is ~1,360 searches (one primary per cell, five facets per capability, the
-owner's 2026-09-03 and 2026-10-09 rules), ~715 judged rows on sonnet and a
-challenge of every synthesis. Three levers close it, and all three are the
-owner's, not the driver's:
+`deferred_for_budget`, and nothing is started that cannot finish. Where the
+$14 sits: collectors $6.1 (1,360 searches at ~1.2K tokens of WebSearch
+payload each, written once to the cache and re-read a few times — the
+largest line and the one no prompt edit moves), orchestrators $4.4,
+challenges $3.3, routed repairs $0.3. The gap to $10 is not a batching gap:
+the floor of the gold row contract on Interac is one primary per cell,
+five facets per capability (the owner's 2026-09-03 rule), ~715 judged rows
+on sonnet and a challenge of every synthesis. The levers that close it are
+the owner's, not the driver's:
 
 | lever | saves | what it costs |
 |---|---|---|
-| `--stage-budget RESEARCH=17` for a 715-cell HYBRID run | — | $7 over the envelope, once per run; the envelope figure was set for "700+ subcaps" at a shape that had never been measured |
-| scope: the 686 universal cells only (drop the CIB supplement's 29) | $0.35 | the CIB variants are not scored |
-| contract: let a capability's facet volleys count for an absence without a cell-own primary on a DEGRADED run (`primary_shared`) | ~$3 (≈ 500 searches) | the cell's own question was never asked — the rule the owner set 2026-10-09 |
+| `--stage-budget RESEARCH=15` for a 715-cell HYBRID run | — | $5 over the envelope, once per run; the envelope figure was set for "700+ subcaps" at a shape that had never been measured |
+| contract: let a capability's facet volleys stand for an absence without a cell-own primary on a DEGRADED run (`primary_shared` off) | ~$2.3 (≈ 500 searches) → ~$12 | the cell's own question is never put to the entity — the depth rule of 2026-10-09 |
+| tier: the challenger on haiku | ~$2.6 → with the row above ≈ $9.5 | the owner chose sonnet for every judgement tier on 2026-10-09 |
+| scope: the 686 universal cells only (drop the CIB supplement's 29) | $0.3 | the CIB variants are not scored |
 
 Not in the envelope but on the bill: PRELIM ran the conductor on **opus**
 ($4.86 against $2). The lane caps apply to the research tiers only; the

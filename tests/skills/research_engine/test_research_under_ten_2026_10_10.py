@@ -210,6 +210,14 @@ def test_a_round_runs_only_the_tiers_that_have_work(tmp_path):
     g = FG.read_verdict(p.run.qa_dir, a)
     assert g["gate"] == "PASS", FG.summary(g)
     assert p.state["stages"]["RESEARCH"]["rounds"] == 1
+    # the re-synthesis-only pass read a pack of only its cells, under the
+    # small resynth ceiling
+    rep = p.run.root / "briefs" / "research_cards" / a / "_pack_repair.json"
+    assert rep.is_file() and set(json.loads(rep.read_text())["cells"]) == {state["cell"]}
+    rows = [r for b in (p.run.root / "briefs").glob("tiers_orchestrate*/batch.json")
+            for r in json.loads(b.read_text())]
+    mine = [r for r in rows if r["lean"]["actor"] == f"research-{a.lower()}-producer"]
+    assert mine and mine[0]["lean"]["max_usd"] == cost.lane_cap_usd("resynth", 1)
     tiers = sorted((p.run.root / "briefs").glob("tiers_*"))
     kinds = {t.name.split("_")[1] for t in tiers}
     assert {"collect", "orchestrate", "challenge"} <= kinds
@@ -419,3 +427,107 @@ def test_sixteen_categories_are_handed_whole_and_pass_in_one_round(tmp_path, mon
     research = sum(float(r["usd"]) for r in cost.ledger(p.run)
                    if r.get("stage") in ("RESEARCH", "CHALLENGE") and r.get("usd"))
     assert 0 < research < cost.STAGE_BUDGET_USD["RESEARCH"]
+
+
+# ── 7. the second cut: absences the engine composes, two FAILs refused at the write ──
+
+def test_the_engine_composes_an_absence_from_the_cells_own_log(tmp_path):
+    """~70% of Interac's cells close as absences; each cost the orchestrator
+    ~180 output tokens of transcription plus the refusals it earned. The
+    engine composes the ladder, proxy log and hunt from the cell's own
+    Search_Log; the orchestrator decides which cells and what came back."""
+    from engine import cli
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cells = wb.selected_subcaps()
+    cat = cells[0].split(".")[0]
+    a, b = cells[0], cells[1]
+    for c in (a, b):
+        fire_volleys(wb, c, n=0)
+        L.append_search(wb, subcap=c, facet="primary", query=f'"Acme Credit Union" {c} its own question',
+                        tool="exa", hits=0, kept=0, outcome="no hits")
+    comp = L.compose_absence(wb, a, note="an Acme careers page naming a data engineer")
+    assert comp["primary_is_own"] and comp["ladder"][0]["rung"] == "direct"
+    # the direct rung is one of THIS cell's own primaries, never a sibling's
+    assert a in comp["ladder"][0]["query"] and b not in comp["ladder"][0]["query"]
+    assert comp["ladder"][1]["rung"] == "proxy" and comp["ladder"][1]["query"]
+    assert a in comp["what_was_hunted"] and "careers page" in comp["what_was_hunted"]
+    assert len(comp["proxy_log"]) >= 40
+    rc = cli.main(["absence", "--run", run.run_id, "--root", str(run.root), "--subcap", a,
+                   "--actor", f"research-{cat.lower()}-producer", "--from-log",
+                   "--note", "an Acme careers page naming a data engineer"])
+    assert rc == 0
+    # the sibling's composed hunt is its own: no hunted_shared, no primary_shared
+    rc = cli.main(["absence", "--run", run.run_id, "--root", str(run.root), "--subcap", b,
+                   "--actor", f"research-{cat.lower()}-producer", "--from-log"])
+    assert rc == 0
+    wb = run.open()
+    for c in (a, b):
+        row = wb.scoring_row(c)
+        assert L.is_declared_absent(row, wb) and c in str(row.get("What_We_Found"))
+    g = FG.run(wb, cat, require_synthesis=True, require_challenge=False, qa_dir=run.qa_dir)
+    assert a not in FG.blocking_cells(g) and b not in FG.blocking_cells(g), FG.summary(g)
+    # the long form still requires its three flags
+    with pytest.raises(SystemExit):
+        cli.main(["absence", "--run", run.run_id, "--root", str(run.root), "--subcap", cells[2],
+                  "--actor", f"research-{cat.lower()}-producer"])
+    js = (PLUGIN / "workflows" / "dma-pillar-research.js").read_text()
+    assert "--from-log --note" in js
+
+
+def test_tense_follows_the_evidence_age_at_the_write(tmp_path):
+    """Six of Interac's nine challenge FAILs: 'claim says Interac runs … in
+    the present tense, but the only rows are undated T4 postings'."""
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    fire_volleys(wb, cell, n=3)
+    # undated rows (no --published): UNVERIFIED; the excerpts carry the
+    # figures the fixture synthesis states, so only the tense is at issue
+    e1 = L.append_evidence(wb, source_name="Job board", source_url=f"https://jobs.example/{cell}/1",
+                           tier="T4", excerpt="Alkami digital banking went live in Q3 2024 and reached "
+                           "47 percent adoption within ninety days; seeking a change manager.",
+                           subcaps=[cell])
+    e2 = L.append_evidence(wb, source_name="Trade press", source_url=f"https://press.example/{cell}",
+                           tier="T3", excerpt="The 2025 report restates member adoption at 52 percent, "
+                           "up from 47 percent at ninety days, per an undated posting.", subcaps=[cell])
+    assert {wb.evidence_index()[e]["Recency"] for e in (e1, e2)} == {"UNVERIFIED"}
+    rec = good_synthesis(cell, [e1, e2])
+    rec["Claim_Label"] = "INFERENCE"
+    rec["Dominant_Claim"] = "Acme Credit Union runs a CAB-led change management practice."
+    rec["Triangulation"] = f"Two undated postings imply a CAB-led practice [{e1}:F1] [{e2}:F1]."
+    with pytest.raises(L.LedgerRefusal, match="present tense"):
+        L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
+    rec["Dominant_Claim"] = ("An undated posting sought a change manager to run a CAB-led "
+                             "practice; whether it is staffed today is not shown.")
+    L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
+
+
+def test_one_publisher_is_one_identity_whatever_the_host(tmp_path):
+    """P1C4.8.1: FACT on interac.ca and newsroom.interac.ca — two hosts, one
+    publisher — passed the write and failed the challenge."""
+    assert L.source_identity("https://newsroom.interac.ca/x") == "interac.ca"
+    assert L.source_identity("https://www.interac.ca/en/y") == "interac.ca"
+    assert L.source_identity("https://news.bbc.co.uk/z") == "bbc.co.uk"
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    fire_volleys(wb, cell, n=3)
+    e1 = L.append_evidence(wb, source_name="Interac year in review",
+                           source_url=f"https://interac.ca/review#{cell}", tier="T2",
+                           excerpt="Alkami digital banking went live in Q3 2024 and reached 47 percent adoption within ninety days.",
+                           subcaps=[cell], published="2025-06-01")
+    e2 = L.append_evidence(wb, source_name="Interac newsroom",
+                           source_url=f"https://newsroom.interac.ca/post#{cell}", tier="T2",
+                           excerpt="The 2025 report restates member adoption at 52 percent, up from 47 percent at ninety days.",
+                           subcaps=[cell], published="2025-06-01")
+    with pytest.raises(L.LedgerRefusal, match="one source identity"):
+        L.append_synthesis(wb, cell, good_synthesis(cell, [e1, e2]), actor="research-p1c1-producer")
+
+
+def test_a_re_synthesis_pass_is_priced_and_packed_small():
+    assert cost.lane_cap_usd("resynth", 4) < cost.lane_cap_usd("orchestrate", 4)
+    assert cost.lane_cap_usd("resynth", 4) >= cost.LANE_CAP_FLOOR_USD["resynth"]
+    p = cost.research_price(686, categories=16, capabilities=129, lean=True)
+    assert p["usd"] < 16.21, "the engine-composed absence and the small repair pass are in the price"
+    assert cost.LEAN_SHAPES["resynth"]["floor_tokens"] < cost.LEAN_SHAPES["orchestrator"]["floor_tokens"]

@@ -512,13 +512,18 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   scaled to the envelope or the phase refused (`cost.lane_cap_usd`,
   `budget_cut` reported); **a collector's search window is its capability's
   cells + 5 facets + 3** (`ledger.collector_ceiling`), not the 60-op wall;
-  the orchestrator reads **one pre-rendered pack** (`_pack.json`); the
-  calibration floor follows cells, not categories. The enforced shape prices
-  686 cells at **$16.21** and Interac's 715 at $16.56; **$10 funds ~420 cells
-  (9–10 categories whole)** — the model says so and defers the rest by name.
-  Closing the last gap is the owner's: `--stage-budget RESEARCH=17`, the
-  universal-cell scope, or the `primary_shared` rule on degraded runs. PRELIM
-  on opus ($4.86 vs $2) is flagged, not changed.
+  the orchestrator reads **one pre-rendered pack** (`_pack.json`); **the
+  engine composes a declared absence from the cell's own Search_Log**
+  (`absence --from-log --note`, the orchestrator decides which cells and what
+  came back); two challenge FAIL sentences are refused at the write (present
+  tense on UNVERIFIED/ARCHIVAL/STALE rows; one registrable domain is one
+  identity); the calibration floor follows cells, not categories. The
+  enforced shape prices 686 cells at **$14.07** and Interac's 715 at $14.38;
+  **$10 funds ~490 cells (≈11 categories whole)** — the model says so and
+  defers the rest by name. Closing the last gap is the owner's:
+  `--stage-budget RESEARCH=15`, the `primary_shared` rule on degraded runs,
+  a haiku challenger, or the universal-cell scope. PRELIM on opus ($4.86 vs
+  $2) is flagged, not changed.
 
 ## Open decisions — leave open, do not resolve silently
 
