@@ -206,6 +206,61 @@ class BaselineIsAdopted(_Session):
         self.assertEqual(cc.main(["check", "--from-session", "--strict"]), 0)
 
 
+class OpaqueServerNames(unittest.TestCase):
+    """The verification session for PR #89 held every connector under a
+    per-attachment UUID (`mcp__767c83d5-…__web_search_exa`) and the contract,
+    matching friendly names exactly, read "present: none" over 302 tools."""
+
+    U = "767c83d5-ff58-4e3f-b900-e68d469eed7a"
+    V = "a2a0fb32-e011-42b6-a375-cb87e878286f"
+    C = "1b306a35-0082-4326-b8b4-f10f6540dc15"
+    X = "b978d40e-c704-447d-8130-e74da6b51487"
+
+    def _t(self, srv, *names):
+        return [f"mcp__{srv}__{n}" for n in names]
+
+    def test_the_verification_sessions_real_roster_is_ready(self):
+        held = (self._t(self.U, "web_search_exa", "web_fetch_exa")
+                + self._t(self.V, "tavily_search", "tavily_extract",
+                          "tavily_crawl")
+                + self._t(self.C, "search-contacts", "search-companies",
+                          "get-task-context")
+                + self._t(self.X, "match-business", "enrich-business"))
+        out = cc.check(held)
+        self.assertEqual(out["verdict"], "READY", out)
+        self.assertEqual(set(out["present"]),
+                         {"exa", "tavily", "clay", "explorium"})
+
+    def test_one_shared_generic_name_is_not_a_signature(self):
+        """Dice serves `search_jobs` too; that alone is not Indeed."""
+        held = self._t("5e0fe4f4-8fd9-448d-a1b5-fafc63f9aa67",
+                       "search_jobs", "get_company", "get_job_details")
+        self.assertNotIn("indeed", cc.check(held)["present"])
+        self.assertNotIn("indeed", cc.check(["mcp__Dice__search_jobs",
+                                             "mcp__Dice__get_company"])["present"])
+
+    def test_a_brand_bearing_name_is_its_own_signature(self):
+        self.assertIn("exa", cc.check(self._t(self.U, "web_search_exa"))
+                      ["present"])
+        self.assertIn("tavily", cc.check(self._t(self.V, "tavily_search"))
+                      ["present"])
+
+    def test_generic_names_split_across_two_servers_do_not_add_up(self):
+        held = (self._t(self.C, "search-contacts")
+                + self._t(self.X, "get-task-context"))
+        self.assertNotIn("clay", cc.check(held)["present"])
+
+    def test_friendly_spellings_still_resolve(self):
+        out = cc.check(["mcp__claude_ai_Exa__web_search_exa",
+                        "mcp__Tavily__tavily_search"])
+        self.assertEqual(set(out["present"]), {"exa", "tavily"})
+
+    def test_a_short_opaque_roster_is_still_short(self):
+        out = cc.check(self._t(self.C, "search-contacts", "search-companies"))
+        self.assertEqual(out["verdict"], "STOP")
+        self.assertIn("exa", out["missing"])
+
+
 class DoctorContractRow(_Session):
     def test_the_first_doctor_run_is_green_without_a_run_root(self):
         """THE INTERAC ROW: doctor before any root exists."""

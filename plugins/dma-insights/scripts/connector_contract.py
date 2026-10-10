@@ -140,13 +140,66 @@ def contract() -> dict:
     }
 
 
+import re as _re
+
+#: A claude.ai connector attached to a session can carry an opaque
+#: per-attachment UUID as its server segment instead of its friendly name.
+#: Tested AFTER canonicalisation, which has turned its hyphens to underscores.
+_OPAQUE_SERVER = _re.compile(
+    r"^[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}$",
+    _re.I)
+
+
+def _split(tool: str):
+    """(canonical server, tool segment) of an MCP tool name, or None."""
+    parts = tool.split("__", 2)
+    if len(parts) != 3 or parts[0] != "mcp":
+        return None
+    server = parts[1].replace("-", "_")
+    if server.startswith("claude_ai_"):
+        server = server[len("claude_ai_"):]
+    return server, parts[2]
+
+
 def _present(family: str, fam: dict[str, list[str]], held: set[str]) -> bool:
-    """A family answers when ANY of its tools is bound.
+    """A family answers when ANY of its tools is bound — under its friendly
+    server name OR under an opaque one.
 
     Any rather than all: a connector can expose a subset and still do the
     work, and demanding the full list turns a working session into a stop.
+
+    THE SERVER SEGMENT IS NOT STABLE (verification session for PR #89,
+    2026-10-10). A fresh cloud session held Exa as
+    `mcp__767c83d5-…__web_search_exa` and Tavily, Clay and Vibe Prospecting
+    the same way, and this check — matching `mcp__Exa__web_search_exa`
+    exactly — read "present: none" with 302 MCP tools bound. So a name is
+    compared on its canonical server (hyphens, the `claude_ai_` prefix), and
+    a server whose segment is an opaque UUID counts as a family only when it
+    exposes at least two of that family's tool names, or one that carries
+    the family's own brand (`web_search_exa`): one shared generic name
+    (`search_jobs` is Dice's as well as Indeed's) is not a signature.
     """
-    return any(t in held for t in fam.get(family, ()))
+    want = [_split(t) for t in fam.get(family, ())]
+    want = [w for w in want if w]
+    if not want:
+        return False
+    exact = set(want)
+    by_opaque: dict[str, set[str]] = {}
+    for t in held:
+        sp = _split(t)
+        if not sp:
+            continue
+        if sp in exact:
+            return True
+        if _OPAQUE_SERVER.match(sp[0]):
+            by_opaque.setdefault(sp[0], set()).add(sp[1])
+    names = {w[1] for w in want}
+    # A name that carries the family's own brand (`web_search_exa`,
+    # `tavily_search`) IS a signature on its own; generic names need two.
+    branded = {n for n in names if family.lower() in n.lower()}
+    need = min(2, len(names))
+    return any(segs & branded or len(segs & names) >= need
+               for segs in by_opaque.values())
 
 
 def check(tool_names, *, now_families=None) -> dict:
