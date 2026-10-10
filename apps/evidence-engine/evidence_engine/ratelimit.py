@@ -56,10 +56,15 @@ Sleep = Callable[[float], Awaitable[None]]
 #: Failure kinds a breaker opens on (brief §6). `403` and `empty` are the
 #: raw observations; they open only as the streaks `403_streak` (3 in a
 #: row) and `empty_streak` (5 in a row).
-FAILURE_KINDS = frozenset({"429", "captcha", "403_streak", "empty_streak", "5xx"})
-RAW_KINDS = frozenset({"403", "empty"})
+FAILURE_KINDS = frozenset({"429", "captcha", "403_streak", "empty_streak", "5xx", "timeout_streak"})
+RAW_KINDS = frozenset({"403", "empty", "timeout"})
 STREAK_403 = 3
 STREAK_EMPTY = 5
+#: Measured 2026-10-10 (golden-set run 1): one own-domain host timed out on
+#: every URL, each costing the full timeout, and a brief spent 70-170 s on
+#: it. The second timeout opens the host for the backoff window so the rest
+#: of the brief falls straight to the Wayback snapshot.
+STREAK_TIMEOUT = 2
 
 STATE_CLOSED = "closed"
 STATE_OPEN = "open"
@@ -199,6 +204,7 @@ class CircuitBreaker:
         self._probe_out = False        # a half-open probe has been handed out
         self._streak_403 = 0
         self._streak_empty = 0
+        self._streak_timeout = 0
         self._failures = 0             # opens, lifetime
         self._last_kind: str | None = None
         self._last_retry_after: float | None = None
@@ -242,6 +248,7 @@ class CircuitBreaker:
         self._probe_out = False
         self._streak_403 = 0
         self._streak_empty = 0
+        self._streak_timeout = 0
         self._last_retry_after = None
 
     def record_failure(self, kind: str, retry_after: float | None = None) -> bool:
@@ -262,6 +269,11 @@ class CircuitBreaker:
             if self._streak_empty < STREAK_EMPTY:
                 return self.state == STATE_OPEN
             kind = "empty_streak"
+        elif kind == "timeout":
+            self._streak_timeout += 1
+            if self._streak_timeout < STREAK_TIMEOUT:
+                return self.state == STATE_OPEN
+            kind = "timeout_streak"
         if kind not in FAILURE_KINDS:
             raise ValueError(f"unknown failure kind {kind!r}; one of {sorted(FAILURE_KINDS | RAW_KINDS)}")
 
@@ -302,6 +314,7 @@ class CircuitBreaker:
             "opens": self._failures,
             "streak_403": self._streak_403,
             "streak_empty": self._streak_empty,
+            "streak_timeout": self._streak_timeout,
             "seconds_since_failure": (round(now - self._last_failure_at, 3)
                                       if self._last_failure_at is not None else None),
         }

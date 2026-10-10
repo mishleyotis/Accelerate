@@ -376,6 +376,8 @@ class HttpFetcher:
                 breaker.record_success()
                 return res
             if status is None:
+                if res.error and res.error.startswith("timed out"):
+                    breaker.record_failure("timeout")        # the 2nd opens the host
                 return res                                   # transport failure, described
             if 200 <= status < 400:
                 breaker.record_success()
@@ -456,11 +458,12 @@ class HttpFetcher:
         if res.status in (401, 403):
             return self.breakers.get(host).snapshot()["streak_403"] >= ratelimit.STREAK_403
         if res.status is None:
-            return res.error.startswith("dns failure") or res.error.startswith("timed out")
+            return (res.error.startswith("dns failure") or res.error.startswith("timed out")
+                    or res.error.startswith("breaker_open"))
         return False
 
     async def get_or_archive(self, url: str, *, accept_pdf: bool = True) -> FetchResult:
-        """Live first; when the page is dead (404/410, DNS, two timeouts,
+        """Live first; when the page is dead (404/410, DNS, a timeout, an open host breaker,
         5xx after the retry, or a 403 from a host on a 403 streak) serve the
         closest Wayback snapshot with `via="archived"`, `archive_timestamp`
         and `final_url` = the `id_` snapshot URL. Neither: the live failure
@@ -470,10 +473,9 @@ class HttpFetcher:
         res = await self.get(url, accept_pdf=accept_pdf)
         if res.ok:
             return res
-        if res.error and res.error.startswith("timed out"):
-            res = await self.get(url, accept_pdf=accept_pdf)   # the second timeout is the verdict
-            if res.ok:
-                return res
+        # No second live attempt on a timeout (measured 2026-10-10: it doubled
+        # a 30 s stall to 60 s per URL on a host that never answered); the
+        # host breaker remembers the first and the snapshot is the fallback.
         if not self._is_dead(res, host):
             return res
         snap = await self.wayback_snapshot(url)

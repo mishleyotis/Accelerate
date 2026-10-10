@@ -333,7 +333,7 @@ def test_dns_timeout_and_tls_wording(web, clock):
 
     a, b, c = run(go())
     assert a.status is None and a.error == "dns failure for gone.test — the URL is wrong or the domain is gone"
-    assert b.error == "timed out fetching slow.test after 30s — retry"
+    assert b.error == "timed out fetching slow.test after 12s — retry"   # EE_FETCH_TIMEOUT_S default, 2026-10-10
     assert c.error.startswith("tls failure talking to badcert.test")
     assert clock.retry_slept == []                                    # none of these is retried
 
@@ -444,13 +444,15 @@ def test_get_or_archive_403_only_on_a_streak(web, clock):
     assert r.via == "archived" and r.ok
 
 
-def test_get_or_archive_timeout_twice_then_archive(web, clock):
+def test_get_or_archive_timeout_once_then_archive(web, clock):
+    """One live attempt, not two (measured 2026-10-10: the retry doubled a
+    30 s stall to 60 s per URL on a host that never answered)."""
     web.route(ENTITY, "/news/2024/old-release", httpx.ReadTimeout("slow"))
     _wayback_available(web, True)
     f = make(web, clock)
     r = run(f.get_or_archive(ORIGINAL))
     assert r.via == "archived"
-    assert len(web.requests_for(ENTITY, "/news/2024/old-release")) == 2
+    assert len(web.requests_for(ENTITY, "/news/2024/old-release")) == 1
 
 
 def test_wayback_snapshot_with_before_timestamp(web, clock):

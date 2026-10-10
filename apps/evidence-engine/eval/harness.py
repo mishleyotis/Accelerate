@@ -692,6 +692,25 @@ async def _raw_probe(url: str) -> tuple[int | None, str | None]:
 
 # ── assembly ───────────────────────────────────────────────────────────────
 
+def surfaced_but_unreadable(c: dict) -> str | None:
+    """The golden URL was in the search results (it reached the fetcher) but
+    no card came of it: the fetch failed or no span survived. Read from the
+    answer's `fetch_failures` / `dropped` lists (each truncated at 10, so
+    this is a lower bound). Returns the reason, else None."""
+    from evidence_engine.fetch import url_key
+    if c.get("refound_url_key"):
+        return None
+    gk = url_key(c["url"])
+    s = c.get("search") or {}
+    for f in s.get("fetch_failures") or []:
+        if url_key(f.get("url") or "") == gk:
+            return "fetch failed: " + (f.get("reason") or "").split(" — ")[0]
+    for d in s.get("dropped") or []:
+        if url_key(d.get("url") or "") == gk:
+            return "fetched, no span: " + (d.get("reason") or "")
+    return None
+
+
 def recall_table(calls: list[dict]) -> dict:
     per = {}
     for c in calls:
@@ -699,10 +718,16 @@ def recall_table(calls: list[dict]) -> dict:
             continue
         k = (c["split"], c["client"])
         d = per.setdefault(k, {"split": c["split"], "client": c["client"], "rows": 0, "refound_url": 0, "refound_host": 0,
-                               "errors": 0, "zero_cards": 0, "guard_refusals": 0})
+                               "surfaced_unreadable": 0, "errors": 0, "zero_cards": 0, "guard_refusals": 0,
+                               "unreadable_reasons": collections.Counter()})
         d["rows"] += 1
         d["refound_url"] += bool(c.get("refound_url_key"))
         d["refound_host"] += bool(c.get("refound_host"))
+        why = surfaced_but_unreadable(c)
+        c["surfaced_but_unreadable"] = why
+        if why:
+            d["surfaced_unreadable"] += 1
+            d["unreadable_reasons"][re.sub(r"\d+", "N", why)[:80]] += 1
         d["errors"] += bool(c.get("error"))
         d["zero_cards"] += not c.get("card_ids")
         d["guard_refusals"] += any(v.get("kind") == "refused" for v in c.get("guard_violations") or [])
@@ -710,16 +735,17 @@ def recall_table(calls: list[dict]) -> dict:
     for d in rows:
         d["recall_url"] = _pct(d["refound_url"], d["rows"])
         d["recall_host"] = _pct(d["refound_host"], d["rows"])
-    by_split = {}
-    for s in ("tuning", "heldout"):
-        ss = [d for d in rows if d["split"] == s]
+        d["recall_surfaced"] = _pct(d["refound_url"] + d["surfaced_unreadable"], d["rows"])
+        d["unreadable_reasons"] = dict(d["unreadable_reasons"].most_common())
+    def agg(ss: list[dict]) -> dict:
         n = sum(d["rows"] for d in ss)
-        by_split[s] = {"rows": n, "refound_url": sum(d["refound_url"] for d in ss), "refound_host": sum(d["refound_host"] for d in ss),
-                       "recall_url": _pct(sum(d["refound_url"] for d in ss), n), "recall_host": _pct(sum(d["refound_host"] for d in ss), n)}
-    n = sum(d["rows"] for d in rows)
-    overall = {"rows": n, "refound_url": sum(d["refound_url"] for d in rows), "refound_host": sum(d["refound_host"] for d in rows),
-               "recall_url": _pct(sum(d["refound_url"] for d in rows), n), "recall_host": _pct(sum(d["refound_host"] for d in rows), n)}
-    return {"per_client": rows, "per_split": by_split, "overall": overall}
+        ru = sum(d["refound_url"] for d in ss)
+        su = sum(d["surfaced_unreadable"] for d in ss)
+        return {"rows": n, "refound_url": ru, "refound_host": sum(d["refound_host"] for d in ss), "surfaced_unreadable": su,
+                "recall_url": _pct(ru, n), "recall_host": _pct(sum(d["refound_host"] for d in ss), n),
+                "recall_surfaced": _pct(ru + su, n)}
+    by_split = {s: agg([d for d in rows if d["split"] == s]) for s in ("tuning", "heldout")}
+    return {"per_client": rows, "per_split": by_split, "overall": agg(rows)}
 
 
 def _gap(a, b) -> float | None:
@@ -798,6 +824,8 @@ def write_report(res: dict, path: Path = REPORT_PATH) -> None:
     L.append(f"| Source recall, same url_key | {_fmt_share(sr.get('recall_url'))} ({sr.get('refound_url')}/{sr.get('rows')}) | ≥ 80% | "
              f"{_verdict(sr.get('recall_url'), BARS['source_recall'])} | LIVE (baseline) |")
     L.append(f"| Source recall, same host (loose) | {_fmt_share(sr.get('recall_host'))} ({sr.get('refound_host')}/{sr.get('rows')}) | (informational) | — | LIVE |")
+    L.append(f"| Search-level recall: golden URL surfaced, card OR fetch refused/dropped (lower bound) | {_fmt_share(sr.get('recall_surfaced'))} "
+             f"({sr.get('refound_url')} carded + {sr.get('surfaced_unreadable')} surfaced-unreadable / {sr.get('rows')}) | (diagnostic) | — | LIVE |")
     te = m.get("token_efficiency", {})
     ov = te.get("overall", {})
     L.append(f"| Token efficiency on re-found URLs (full cleaned page → card, item+minimal) | {_fmt_share(ov.get('reduction_refound'))} "
@@ -858,17 +886,26 @@ def write_report(res: dict, path: Path = REPORT_PATH) -> None:
     L.append("")
     L.append("## 4. Source recall (baseline)")
     L.append("")
-    L.append("| Split | Client key | Rows | Re-found (url_key) | Re-found (host) | Zero-card answers | Errors |")
-    L.append("|---|---|---|---|---|---|---|")
+    L.append("| Split | Client key | Rows | Re-found (url_key) | Re-found (host) | Surfaced but unreadable | Zero-card answers | Errors |")
+    L.append("|---|---|---|---|---|---|---|---|")
     for d in m.get("source_recall", {}).get("per_client", []):
         L.append(f"| {d['split']} | {d['client']} | {d['rows']} | {d['refound_url']} ({_fmt_share(d['recall_url'])}) | "
-                 f"{d['refound_host']} ({_fmt_share(d['recall_host'])}) | {d['zero_cards']} | {d['errors']} |")
+                 f"{d['refound_host']} ({_fmt_share(d['recall_host'])}) | {d['surfaced_unreadable']} | {d['zero_cards']} | {d['errors']} |")
     ps = m.get("source_recall", {}).get("per_split", {})
     for sp in ("tuning", "heldout"):
         d = ps.get(sp, {})
         L.append(f"| **{sp}** | all | {d.get('rows')} | {d.get('refound_url')} ({_fmt_share(d.get('recall_url'))}) | "
-                 f"{d.get('refound_host')} ({_fmt_share(d.get('recall_host'))}) | | |")
+                 f"{d.get('refound_host')} ({_fmt_share(d.get('recall_host'))}) | {d.get('surfaced_unreadable')} | | |")
     L.append("")
+    reasons = collections.Counter()
+    for d in m.get("source_recall", {}).get("per_client", []):
+        for k, v in (d.get("unreadable_reasons") or {}).items():
+            reasons[k] += v
+    if reasons:
+        L.append("\"Surfaced but unreadable\": the search returned the golden URL but the engine emitted no card for it — "
+                + "; ".join(f"{k} ×{v}" for k, v in reasons.most_common()) + ". These are fetchability losses, not retrieval losses "
+                "(the connector's own `register_evidence` fetch would refuse the same pages as `url_unreachable`).")
+        L.append("")
     tiers = collections.Counter((c.get("golden_tier"), bool(c.get("refound_url_key"))) for c in res["calls"] if not c.get("skipped"))
     L.append("Re-found by golden tier: " + "; ".join(
         f"{t}: {tiers.get((t, True), 0)}/{tiers.get((t, True), 0) + tiers.get((t, False), 0)}"
@@ -1135,6 +1172,9 @@ async def _main_async(a) -> dict:
             print("[harness] Parallel ramp …")
             metrics["parallel_ramp"] = await parallel_ramp(engine.parallel)
             phases["ramp"] = round(time.monotonic() - t, 1)
+        elif a.prior and (prior.get("metrics") or {}).get("parallel_ramp"):
+            # measured once per day is polite enough; the prior pass's ramp stands
+            metrics["parallel_ramp"] = dict(prior["metrics"]["parallel_ramp"], measured_in=prior_id)
         health = RL.health()
     finally:
         await engine.fetcher.aclose()

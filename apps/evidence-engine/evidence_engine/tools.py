@@ -129,12 +129,28 @@ class Engine:
                                                   hits=hits_by_key.get(h["url_key"], []),
                                                   today=self.today, reference=reference)
                 return h, doc, why
-        results = await asyncio.gather(*(one(h) for h in hits[:limit]))
-        for h, doc, why in results:
+        tasks = [asyncio.ensure_future(one(h)) for h in hits[:limit]]
+        if not tasks:
+            return docs, failures
+        done, pending = await asyncio.wait(tasks, timeout=settings().fetch_phase_budget_s)
+        for t in pending:
+            t.cancel()
+        for t in done:
+            try:
+                h, doc, why = t.result()
+            except Exception as exc:  # noqa: BLE001
+                failures.append({"url": "?", "reason": f"{type(exc).__name__}: {str(exc)[:80]}"})
+                continue
             if doc is None:
                 failures.append({"url": h["url"], "reason": why})
             else:
                 docs.append(doc)
+        if pending:
+            failures.append({"url": f"{len(pending)} url(s)",
+                             "reason": f"fetch_phase_budget: still fetching after {settings().fetch_phase_budget_s:g}s — cancelled"})
+        # deterministic order: the hit order, not completion order
+        order = {h["url_key"]: i for i, h in enumerate(hits)}
+        docs.sort(key=lambda d: order.get(url_key(d.url), 1 << 30))
         return docs, failures
 
     # ── 1 · research_brief ───────────────────────────────────────────────
