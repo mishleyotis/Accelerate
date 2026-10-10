@@ -1,10 +1,10 @@
 {
   "name": "dma-insights",
   "displayName": "DMA Insights",
-  "version": "1.22.0",
-  "description": "The six Digital Maturity Assessment skills, 76 DMA agents \u2014 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier \u2014 the remote MCP connector (36 tools), and the research ENGINE: an owner-answered binding preflight, a gating PRELIM phase, ERS from RRF retrieval, reviewed report sections, per-stage budget envelopes and a watchdog.",
+  "version": "1.23.0",
+  "description": "The six Digital Maturity Assessment skills, 76 DMA agents — 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier — the remote MCP connector (36 tools), the free open-source evidence engine with its SearXNG, Fetch, EDGAR, Parallel and alphaXiv connectors, and the research ENGINE: binding preflight, gating PRELIM, ERS, budget envelopes, watchdog.",
   "author": {
-    "name": "Zennify \u2014 DMA Insights build"
+    "name": "Zennify — DMA Insights build"
   },
   "license": "UNLICENSED",
   "keywords": [
@@ -28,6 +28,13 @@
       "type": "directory",
       "title": "DMA Insights repo checkout",
       "description": "Optional. Absolute path to a checkout of the DMA Insights repository. Only skills/dma-surface-production/scripts/precheck_gates.py uses it, to import the connector's own gate modules from apps/mcp rather than re-implementing them. Leave empty and precheck_gates.py reports which gates it could not run instead of guessing."
+    },
+    "evidence_base_url": {
+      "type": "string",
+      "title": "Evidence engine base URL",
+      "description": "Cloud Run URL of the deployed dmai-evidence service, no trailing slash. Override only for a staging deployment; the three self-hosted backends (searxng, fetch, edgar) derive theirs from the same project.",
+      "default": "https://dmai-evidence-dukrne5v4a-uc.a.run.app",
+      "required": false
     }
   },
   "mcpServers": "./.mcp.json",

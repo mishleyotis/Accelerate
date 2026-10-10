@@ -6,7 +6,7 @@ effort: high
 maxTurns: 120
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -52,3 +52,11 @@ evidence, thread rewrites, and anything you left for the qa-overseer to
 record. The surface-producer submits; you never do.
 
 Enrichment connectors beyond Clay are chosen per gap from `02-inputs/enrichment_sources.json`.
+
+## Evidence-engine cards (2026-10-10)
+
+When two surfaces disagree about a figure both cite from an evidence-engine
+card, settle it from the span: `verify_cards` on the card ids (a FAIL means
+the citation is withdrawn, not the figure restated) and `expand_context` for
+the sentences around the span. Never a new search — a question the run cannot
+answer from its cards is returned as `search_requests`.

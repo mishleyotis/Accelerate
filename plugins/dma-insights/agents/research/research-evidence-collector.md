@@ -4,7 +4,7 @@ description: Collects evidence for ONE batch of a category's open cells in one D
 model: haiku
 effort: medium
 maxTurns: 40
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -34,9 +34,11 @@ and a turn you did not need to spend is the saving.
    file of your batch (`<root>/briefs/research_cards/<CAT>/<CAP>.json`, written
    by the driver at handoff) in the SAME Bash call. The card names each open
    cell, the facets it owes and the diagnostic question per facet.
-2. **Per capability, one turn of searches.** Fire the primary query and the
-   owed-facet queries for every cell of the capability IN PARALLEL in one
-   turn (`WebSearch`; Exa `numResults: 3` and Tavily `max_results: 3,
+2. **Per capability, one turn of searches.** Fire ONE `research_brief` on the
+   evidence engine with the capability's primary question and owed facets
+   (its cards are register-ready; stop a facet when `coverage.saturation` is
+   true), then any uncovered queries IN PARALLEL in the same turn
+   (`WebSearch`; Exa `numResults: 3` and Tavily `max_results: 3,
    search_depth: "basic"` when you hold them and the run is not degraded).
    One volley per capability covers all its cells — log it with several
    `--subcap`.
@@ -86,3 +88,24 @@ registered, searches logged, the cells for which NOTHING citable came back
 the declared absence from your note, so make it checkable: a proper noun, a
 date or an E-id), refused lines you could not fix, and one line of notes.
 You never score, never challenge, never submit and never promote.
+
+## The evidence engine first (2026-10-10)
+
+The plugin's **evidence engine** (`mcp__plugin_dma-insights_evidence__*`,
+six tools) is the first rung of every search. `research_brief` takes the
+entity (legal name, domains, charter or CIK), the sub-vertical, the facet and
+the question(s) and returns **register-ready cards**: `card["item"]` is the
+exact `register_evidence` item and the exact `engine.cli evidence` flag set
+(`--source --url --tier --excerpt --published --claim-type`), a verbatim
+sentence-complete 50–500-character span the engine verified against the
+page, the registry's tier **hint**, the claim label that tier licenses, an
+ISO date only when the page states one, and provenance (recency band, origin
+cluster, syndication count, entity match, ladder rung). You decide the cells
+(`--subcap`), the final tier and any lowering of the claim label; the engine
+never does. Respect `coverage.saturation`: when it reads true for a facet,
+stop searching that facet. `expand_context` is for disambiguation or a
+challenge only; `verify_cards` re-runs liveness, offsets and dates. A result
+carrying `needs_spend_approval` means no free source can answer — report it,
+never route to a paid tool on your own. The raw fallbacks (SearXNG, Fetch,
+EDGAR, Parallel) are for an engine outage or a disputed card, are rate-gated
+by the plugin, and every use is logged.

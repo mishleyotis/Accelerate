@@ -860,7 +860,12 @@ def _scoped_prefixes(manifest: dict) -> list:
             .get("mcpServers") or {}
     except (OSError, ValueError):
         servers = {"connector": None}
-    return [f"mcp__plugin_{plugin_name}_{server}__" for server in servers]
+    # Only the CONNECTOR's servers: the roster below is the connector's tool
+    # list, and a research-layer server (evidence, searxng, …; 2026-10-10)
+    # serves its own tools, which research_layer.py checks separately.
+    connector_servers = [s for s, spec in servers.items()
+                         if spec is None or "mcp_proxy.py" in json.dumps(spec)]
+    return [f"mcp__plugin_{plugin_name}_{server}__" for server in connector_servers]
 
 
 def tool_roster_check(base_url, gcloud, id_token, manifest: dict) -> dict:
@@ -995,6 +1000,25 @@ def run_checks(base_url: str | None, heal: bool = False) -> list:
     out.append(_check("connector definition", mcp_json.exists(),
                       str(mcp_json) if mcp_json.exists() else "not found"))
     out.append(connector_contract_check())
+    # The research layer (2026-10-10): six connectors, each declared,
+    # reachable and serving tools; a raw fallback down is a WARNING, the
+    # engine down is a stop only when no search fallback exists.
+    try:
+        import research_layer                                 # noqa: WPS433
+        fams = set()
+        try:
+            roster = connector_contract._session_roster()
+            tools_held = roster.get("answering_tools") or roster.get("mcp_tools") or []
+            fams = {f for f, names in connector_contract.families().items()
+                    if any(t in tools_held for t in names)}
+        except Exception:                                      # noqa: BLE001
+            fams = set()
+        out.extend(research_layer.checks(probe_network=base_url is not None,
+                                         baseline_families=fams))
+    except Exception as exc:                                   # noqa: BLE001
+        out.append(_check("research layer", False,
+                          f"research_layer.py could not run: {type(exc).__name__}: {str(exc)[:120]}",
+                          "reinstall the plugin; scripts/research_layer.py ships with it"))
     out.append(concurrent_writers_check())
     out.append(hooks_wired_check())
     out.extend(inventory_checks())

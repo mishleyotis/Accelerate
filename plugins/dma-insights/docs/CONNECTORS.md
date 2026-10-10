@@ -440,3 +440,40 @@ curl -sD- -o /dev/null -X POST $M/mcp                # 401 + WWW-Authenticate: r
 
 A 401 on the two well-known paths means the identity gate is standing
 where discovery must be public — the defect fixed on 2026-08-20.
+
+## The research layer — the evidence engine and five open-source connectors (2026-10-10)
+
+Agents go to the **evidence engine** first; the other five are escape hatches
+(an engine outage, a disputed card, debugging), rate-gated and logged.
+
+| Plugin server | Tools | Hosted | Access path | Licence |
+|---|---|---|---|---|
+| `evidence` | 6 (`docs/EVIDENCE-ENGINE-TOOLS.md`) | Cloud Run `dmai-evidence` (`apps/evidence-engine`) | `scripts/evidence_proxy.py`: Google ID token for the service's audience + `X-DMA-Path-Token` from Secret Manager `dmai-evidence-path-token` — the same rungs as the connector, a sibling helper (`evidence_auth_headers.sh`), nothing to paste | FastMCP Apache-2.0; trafilatura, htmldate Apache-2.0; pypdfium2 BSD/Apache; rank-bm25 Apache-2.0; datasketch, edgartools MIT; fastembed Apache-2.0 (models MIT/Apache-2.0) |
+| `searxng` | 4 (`searxng_web_search`, `searxng_search_suggestions`, `searxng_instance_info`, `web_url_read`) | Cloud Run `dmai-searxng` (`infra/evidence-engine/searxng`) | ID token + secret path segment `/mcp-<token>` from `dmai-searxng-path-token` | SearXNG AGPL-3.0 (unmodified, source linked); mcp-searxng MIT; Supergateway MIT |
+| `fetch` | 1 (`fetch`) | Cloud Run `dmai-fetch` | ID token + `/mcp-<token>` | mcp-server-fetch MIT |
+| `edgar` | 18 served, 6 granted | Cloud Run `dmai-edgar` | ID token + `/mcp-<token>`; `SEC_EDGAR_USER_AGENT` set | sec-edgar-mcp **AGPL-3.0** (run unmodified; the service root links its source) |
+| `parallel` | `web_search` (and a whole-page read tool the lanes are denied) | vendor, `https://search.parallel.ai/mcp`, anonymous free tier | `type: http`, no key | vendor terms (free for exploration and light use; rate limits unpublished — measured in Phase D) |
+| `alphaxiv` | unlisted (401 anonymously) | vendor, `https://api.alphaxiv.org/mcp/v1`, OAuth per user | `type: http`; the session signs in | vendor terms |
+
+**Who holds what** (`scripts/provision_agent_tools.py`): the engine is held
+by `research-conductor`, `enrichment-web-specialist`,
+`research-evidence-collector` (all six tools), by `adversarial-verifier` and
+`finding-challenger` (`verify_cards`, `expand_context`, one independent
+`research_brief`) and by `page-consolidator` and `surface-producer`
+(`verify_cards`, `expand_context`). The raw fallbacks are held by the
+servicing tier only. **Per-page producers are unchanged**: the owner's
+2026-09-14 decision that producers hold no search tool and emit
+`search_requests` stands — the brief's table would have given them the
+engine directly; that deviation is recorded here for the owner to overturn.
+
+**Backstops**: `hooks/rate_gate.py` (PreToolUse on the four raw fallbacks;
+per-source bucket under a `fcntl` lock, exit 2 with a redirect to
+`research_brief`, FAIL OPEN), `hooks/source_health.py` (PostToolUse on all
+six; `/root/.dma/source_health.jsonl` + a counts sidecar), the
+whole-page-fetch guard now lists the raw readers, and the doctor's six
+`research layer:` rows (`scripts/research_layer.py`): a raw fallback down is
+a WARNING; the engine down is a BLOCKER only when no search fallback exists.
+
+**Nothing live yet**: the four Cloud Run services are created by
+`infra/evidence-engine/deploy-evidence.sh` only after the plan in
+`apps/evidence-engine/docs/DEPLOY-PLAN.md` is approved.

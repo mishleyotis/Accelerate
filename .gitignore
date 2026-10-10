@@ -73,3 +73,11 @@ apps/web/tests/e2e/iap-private.pem
 apps/web/tests/e2e/share-*.pem
 apps/web/tests/e2e/share-ledger/
 apps/web/tests/e2e/*.log
+
+# Evidence-engine golden set: real staged evidence rows of named clients
+# (verbatim, internal-package rows included). Rebuilt on demand by
+# apps/evidence-engine/eval/build_golden.py --fetch; only the manifest
+# (hashes, counts) is committed.
+apps/evidence-engine/eval/golden/*/raw/
+apps/evidence-engine/eval/golden/*/*_positives.json
+apps/evidence-engine/eval/golden/*/*_negatives.json

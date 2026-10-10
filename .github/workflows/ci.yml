@@ -64,6 +64,7 @@ jobs:
           python3 plugins/dma-insights/scripts/gen_gates_md.py --check
           python3 scripts/gen_proto_bands.py --check
           python3 plugins/dma-insights/scripts/check_taxonomy_drift.py
+          python3 plugins/dma-insights/scripts/gen_evidence_tools_md.py --check
 
       - name: The deck skill's generated docs are in sync with its colour owner
         # QA audit F-M08-013 (28-09-2026): a generated doc nobody regenerates
@@ -329,7 +330,11 @@ jobs:
       # dev box has it; the deck skill declares it), red here on
       # ModuleNotFoundError — the runner was testing a program that cannot
       # render a deck.
-      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt
+      # The evidence engine's suite (apps/evidence-engine/tests, 2026-10-10) runs
+      # offline — mocked transports, no model download (EE_MODELS_DIR unset) —
+      # but imports fastmcp, trafilatura, htmldate, pypdfium2, datasketch,
+      # rank-bm25 and edgartools, so its requirements install here.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt -r apps/evidence-engine/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which
@@ -446,7 +451,7 @@ jobs:
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
                  packages/shared/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
+                 infra/jobs/tests/ apps/evidence-engine/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
           # `|| true` is load-bearing. This step runs under `bash -e`
           # with pipefail, and pytest prints NO "N skipped" when nothing
           # skipped — so grep exits 1, the pipeline exits 1, and the shell

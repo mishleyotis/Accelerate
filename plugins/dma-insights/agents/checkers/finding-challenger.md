@@ -7,7 +7,7 @@ maxTurns: 100
 skills:
   - dma-research
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -175,3 +175,15 @@ When a claim needs evidence the run does not hold, do not go and find it. Return
 ```
 
 One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.
+
+## Evidence-engine cards (2026-10-10)
+
+A surface that cites an evidence-engine card is attacked with the engine's
+own checks: `verify_cards` re-runs liveness, verbatim-offset integrity,
+contract and date checks on every card id you are asked to believe
+(confidence only moves down — a FAIL is final until the card is re-issued);
+`expand_context` reads the sentences around a disputed span, on demand,
+never a whole page; and ONE independent `research_brief` on the evidence
+engine may hunt a falsifier — cards only, no page ever enters your context.
+A card whose `entity_match` is `ambiguous` is not evidence about the entity
+until the span itself says so.

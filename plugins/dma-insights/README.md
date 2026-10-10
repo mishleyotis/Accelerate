@@ -7,7 +7,10 @@
 
 The six Digital Maturity Assessment skills, the 73 DMA agents, two operator
 commands, the session/submit/verdict hooks and the remote DMA Insights MCP
-connector, as one installable plugin.
+connector, as one installable plugin. Since 1.23.0 the plugin also binds
+the **research layer**: the free open-source evidence engine (`evidence`, six
+tools returning register-ready cards) and five connectors (`searxng`, `fetch`,
+`edgar`, `parallel`, `alphaxiv`) — docs/CONNECTORS.md § The research layer.
 
 **The research engine lives in `skills/dma-research/engine/`, and the
 workbook is its substrate.** Every research step appends to the scoring

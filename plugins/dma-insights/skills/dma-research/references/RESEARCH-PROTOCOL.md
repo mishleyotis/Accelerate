@@ -24,9 +24,18 @@ connector is required", "never fetch a page" beside "fetch every rich document w
    the web — the run paid for these rows already.
 2. **The toolkit's named artefacts**, read through `engine.cli fetch` on the URL the
    card or the source catalogue gives. A researcher told what to look for stops fishing.
-3. **`WebSearch`** for discovery — the one web tool a lane holds. Its result list is
+3. **The evidence engine** — `research_brief` on the plugin's `evidence` server, when the
+   session binds it: entity + facet + question in, register-ready CARDS out (a verbatim
+   span the engine verified, the registry's tier hint, the licensed claim label, the
+   page-stated ISO date, origin cluster, entity match) plus a coverage block whose
+   `saturation: true` is the stop rule for that facet. A card's `item` is the exact
+   `engine.cli evidence` flag set; you add the `--subcap` cells and may lower the label.
+   `expand_context` only to disambiguate; `verify_cards` before anything is believed. A
+   `needs_spend_approval` result is reported, never routed to a paid tool. On a lean
+   headless lane (no MCP) the same engine answers over Bash: `engine.cli evidence-brief`.
+4. **`WebSearch`** for discovery — the one web tool a lane holds. Its result list is
    small; it finds the URL you then window.
-4. **Connector volleys** — `exa` first for search, `tavily` as the fallback and the
+5. **Connector volleys** — `exa` first for search, `tavily` as the fallback and the
    verbatim-extract path, `clay` for people, `explorium` for the estate. A lane EMITS
    these as `search_requests`; the conductor and the relay lanes fire them, and log
    each with the tool that ran it. The floors gate wants one connector search per
@@ -34,7 +43,7 @@ connector is required", "never fetch a page" beside "fetch every rich document w
    it. `moodys`, `harmonic` and `cb_insights` are declared, not wired
    (`${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/enrichment_sources.json`):
    never a rung, never a NOT_RUN.
-5. **Reading a page** is `engine.cli fetch` — windows, sha256, the cache the ledger
+6. **Reading a page** is `engine.cli fetch` — windows, sha256, the cache the ledger
    verifies excerpts against. `WebFetch`, Exa's fetch and Tavily's extract are the
    servicing tier's tools; a servicing actor puts what it extracted into the same
    cache with `--via-text -` so the excerpt verifies like any other. A lane never

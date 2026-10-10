@@ -1,0 +1,109 @@
+# Vendor and platform names a QUERY may not carry unless the name came from
+# a card (evidence-led follow-up, query.guard's exception path). One name per
+# line; `#` comments; multiword names are matched whole, word-bounded,
+# case-insensitive. This is the engine's own list of common FSI vendors —
+# core banking, digital banking, CRM, cloud, payments, fraud/identity,
+# data, lending, insurance, wealth, contact centre — NOT the repo's
+# platform catalogue. A name that is also an English word is left out
+# (blend, alloy, encompass, segment) so the guard never refuses prose.
+
+# core banking
+Jack Henry
+Symitar
+Episys
+Fiserv
+Finastra
+FIS
+Temenos
+Corelation
+KeyStone
+Thought Machine
+Mambu
+nCino
+FLEXCUBE
+Finacle
+Silverlake
+NuPoint
+
+# digital banking
+Alkami
+Lumin Digital
+Backbase
+Banno
+Tyfone
+Narmi
+MANTL
+Q2 Digital
+
+# CRM / marketing
+Salesforce
+Microsoft Dynamics
+HubSpot
+Creatio
+Total Expert
+Marketo
+Adobe Experience
+Braze
+
+# cloud / data platform
+Amazon Web Services
+AWS
+Microsoft Azure
+Google Cloud
+Snowflake
+Databricks
+Tableau
+Power BI
+Informatica
+Collibra
+Alteryx
+Plaid
+
+# payments
+Visa DPS
+Mastercard
+Zelle
+Marqeta
+Stripe
+Adyen
+ACI Worldwide
+Payrailz
+
+# fraud / identity
+Verafin
+NICE Actimize
+Feedzai
+BioCatch
+Socure
+Jumio
+Mitek
+Onfido
+ThreatMetrix
+LexisNexis Risk
+
+# lending
+MeridianLink
+Origence
+CU Direct
+
+# insurance
+Guidewire
+Duck Creek
+Applied Epic
+Vertafore
+Majesco
+
+# wealth
+Envestnet
+Black Diamond
+Addepar
+Tamarac
+eMoney
+Redtail
+
+# contact centre
+Genesys
+NICE CXone
+Five9
+Glia
+Talkdesk

@@ -82,6 +82,16 @@
         ]
       },
       {
+        "matcher": "mcp__plugin_dma-insights_searxng__searxng_web_search|mcp__plugin_dma-insights_searxng__searxng_search_suggestions|mcp__plugin_dma-insights_searxng__searxng_instance_info|mcp__plugin_dma-insights_searxng__web_url_read|mcp__plugin_dma-insights_fetch__fetch|mcp__plugin_dma-insights_edgar__get_company_facts|mcp__plugin_dma-insights_edgar__get_recent_filings|mcp__plugin_dma-insights_edgar__get_filing_sections|mcp__plugin_dma-insights_edgar__get_filing_content|mcp__plugin_dma-insights_edgar__get_financials|mcp__plugin_dma-insights_edgar__get_xbrl_concepts|mcp__plugin_dma-insights_parallel__web_search|mcp__plugin_dma-insights_parallel__web_fetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/rate_gate.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: rate_gate.py is MISSING from the installed plugin, so the raw research fallbacks (SearXNG, Fetch, EDGAR, Parallel) are NOT rate-gated on this host and a session can burst a source the evidence engine would have throttled. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "mcp__.*",
         "hooks": [
           {
@@ -200,6 +210,16 @@
             "type": "command",
             "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/section_precheck.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: section_precheck.py is MISSING from the installed plugin, so a section file written under 08_sections/ is NOT pass-1 checked at write time and every CG-04/CG-46/AG-01/AG-03 refusal waits for ship_page.py or the server. Stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a PostToolUse hook never blocks.\"}'; exit 0; fi",
             "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_dma-insights_evidence__research_brief|mcp__plugin_dma-insights_evidence__crawl_entity|mcp__plugin_dma-insights_evidence__filings_evidence|mcp__plugin_dma-insights_evidence__expand_context|mcp__plugin_dma-insights_evidence__verify_cards|mcp__plugin_dma-insights_evidence__coverage_report|mcp__plugin_dma-insights_searxng__searxng_web_search|mcp__plugin_dma-insights_searxng__searxng_search_suggestions|mcp__plugin_dma-insights_searxng__searxng_instance_info|mcp__plugin_dma-insights_searxng__web_url_read|mcp__plugin_dma-insights_fetch__fetch|mcp__plugin_dma-insights_edgar__get_company_facts|mcp__plugin_dma-insights_edgar__get_recent_filings|mcp__plugin_dma-insights_edgar__get_filing_sections|mcp__plugin_dma-insights_edgar__get_filing_content|mcp__plugin_dma-insights_edgar__get_financials|mcp__plugin_dma-insights_edgar__get_xbrl_concepts|mcp__plugin_dma-insights_parallel__web_search|mcp__plugin_dma-insights_parallel__web_fetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/source_health.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: source_health.py is MISSING from the installed plugin, so research-layer calls are NOT logged to source_health.jsonl and no 429/403 streak is visible to the doctor. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
           }
         ]
       }
