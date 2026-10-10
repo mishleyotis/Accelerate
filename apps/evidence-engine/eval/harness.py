@@ -822,6 +822,12 @@ def write_report(res: dict, path: Path = REPORT_PATH) -> None:
              "census, syndication consistency, token counts.")
     L.append(f"- Ranking ran **{', '.join(sorted({c.get('rerank') or '?' for c in res['calls'] if not c.get('skipped')}))}** "
              "(no bundled models in this environment: `EE_MODELS_DIR` unset).")
+    if res.get("prior_run"):
+        n_prior = len(res.get("rows_from_prior") or [])
+        L.append(f"- **Two passes over one store**: {n_prior} row(s) were answered live in the prior pass `{res['prior_run']}` "
+                 f"(its research phase hit the time deadline before the held-out rows); this pass ran the remaining "
+                 f"{sum(1 for c in res['calls'] if not c.get('from_prior') and not c.get('skipped'))} row(s) live and re-ran liveness, "
+                 "fetches, offline metrics and the ramp over everything. Cold elapsed times are each row's own first call.")
     L.append("")
     L.append("## 3. Sample")
     L.append("")
@@ -1062,12 +1068,24 @@ async def _main_async(a) -> dict:
     print(f"[harness] {run_id} · {len(samples)} questions · data_dir={data_dir} · live={a.live}")
     for c, e in entities.items():
         print(f"[entity] {c}: {e['legal_name']!r} domains={e['domains']} aliases={e['aliases']}")
+    prior_calls: dict[str, dict] = {}
+    prior_id = None
+    if a.prior:
+        prior = json.loads(Path(a.prior).read_text(encoding="utf-8"))
+        prior_id = prior.get("run_id")
+        for c in prior.get("calls") or []:
+            if not c.get("skipped") and not c.get("error") and c.get("elapsed_ms") is not None:
+                prior_calls[c["golden_id"]] = dict(c, from_prior=prior_id)
+        print(f"[harness] prior run {prior_id}: {len(prior_calls)} answered rows reused (same store, cold timings kept)")
     try:
         if a.live:
             t = time.monotonic()
             research_deadline = t_all + a.time_budget_s * 0.55
-            calls = await run_research(engine, samples, entities, max_cards=a.max_cards, token_budget=a.token_budget,
-                                       provenance=a.provenance, deadline=research_deadline)
+            todo = [s for s in samples if s["golden_id"] not in prior_calls]
+            fresh = {c["golden_id"]: c for c in await run_research(
+                engine, todo, entities, max_cards=a.max_cards, token_budget=a.token_budget,
+                provenance=a.provenance, deadline=research_deadline)}
+            calls = [prior_calls.get(s["golden_id"]) or fresh[s["golden_id"]] for s in samples]
             phases["research"] = round(time.monotonic() - t, 1)
             t = time.monotonic()
             if time.monotonic() < deadline:
@@ -1148,6 +1166,7 @@ async def _main_async(a) -> dict:
                    "rows_with_platform_names_stripped": sum(1 for c in calls if c.get("platform_names_stripped")),
                    "golden_ids": [s["golden_id"] for s in samples]},
         "calls": calls, "warm": warm, "metrics": metrics, "timing": timing, "health": health,
+        "prior_run": prior_id, "rows_from_prior": sorted(prior_calls) if prior_calls else [],
         "results_path": str(results_path.relative_to(ROOT)),
         "data_dir": str(data_dir),
     }
@@ -1173,6 +1192,9 @@ def main(argv=None) -> int:
     ap.add_argument("--time-budget-s", type=float, default=1500.0, help="whole-run wall-clock cap; later phases shrink to fit")
     ap.add_argument("--data-dir", default=None, help="engine store (default: $EE_DATA_DIR or ./.eval-data)")
     ap.add_argument("--report", default=None, help="markdown path (default docs/EVAL-REPORT.md)")
+    ap.add_argument("--prior", default=None,
+                    help="a previous results JSON over the SAME store: its answered rows are reused (cold timings kept) "
+                         "and only the rows it skipped or never reached run live")
     a = ap.parse_args(argv)
     asyncio.run(_main_async(a))
     return 0
