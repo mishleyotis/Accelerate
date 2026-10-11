@@ -238,11 +238,17 @@ rendered output and asserting the same verdicts the recordings assert.
 
 1. `drive_fetch.py check` — REQUIRED: the intake folder answers the SA.
 2. Connector-tool presence — REQUIRED (owner: the routine never runs in
-   degrade mode): Exa, Tavily and at least one of Clay/Vibe-Prospecting
-   present, or the firing STOPS naming exactly what it carries. Attachment
-   happens on the Routine's own EDIT screen in the routines UI — the
-   connector browse list's Use buttons enable a connector for the org,
-   not for a Routine (measured 2026-08-20).
+   degrade mode): an open-web reader — ANY of Exa, Tavily, the plugin's
+   evidence engine, SearXNG or Parallel (`connector_contract.SEARCH_ANY`;
+   owner 2026-10-11: "runs will never run degraded due to the open source
+   connectors") — and at least one of Clay/Vibe-Prospecting present, or the
+   firing STOPS naming exactly what it carries. When Exa and Tavily refuse,
+   agents fall back in the free-chain order: engine `research_brief`, then
+   `searxng` / `parallel`, then WebSearch, each search logged under the tool
+   that ran it. Attachment of a vendor connector happens on the Routine's
+   own EDIT screen in the routines UI — the connector browse list's Use
+   buttons enable a connector for the org, not for a Routine (measured
+   2026-08-20); the plugin's own servers need no attachment.
 3. The connector roster (33 tools) via the doctor — REQUIRED.
 
 ## Per-surface connector use cases
