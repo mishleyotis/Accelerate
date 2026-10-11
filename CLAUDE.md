@@ -213,6 +213,16 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     `stats()` without a category). orient, the watchdog and the hooks print
     `search_ops_since_checkpoint` for that scope, never the lifetime count
     against the ceiling (a promoted run read "6332 against 60").
+- **The research phase enforces /workflows** (user, 2026-10-11: "the research
+  phase should still enforce /workflows"; supersedes the 2026-10-09 AUTO rule
+  that sent a DEGRADED run to lean headless tiers): `--research-mode auto`
+  resolves to the in-session workflow whether or not Exa/Tavily are bound —
+  since the research layer (2026-10-10) the workflow's collectors,
+  orchestrator and challenger hold the plugin's `evidence` server and
+  Parallel, so a degraded run researches inside `/workflows`. Lean tiers run
+  only on an explicit `--research-mode tiers`, or as the announced fallback
+  of a session that recorded no Workflow tool (`--tiers-direct`, owner told).
+  Test: `tests/skills/research_engine/test_lean_tiers_2026_10_09.py`.
 - **Client view review** (user, 2026-10-07, `DMA_customer_view_feedback.docx`):
   the customer audience is labelled **Client** in every reader-facing string
   (banner "Client Dashboard", "Switch back to Zennify view →"; the API value
