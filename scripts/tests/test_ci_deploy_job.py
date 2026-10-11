@@ -53,3 +53,39 @@ def test_deploy_authenticates_without_a_key():
 def test_deploy_runs_the_release_script():
     steps = _wf()["jobs"]["deploy"]["steps"]
     assert any(s.get("run", "").strip() == "bash infra/deploy.sh" for s in steps)
+
+
+def test_deploy_runs_the_evidence_gate_after_the_release_script():
+    """The evidence engine rides the same merge-to-default release, behind
+    its approval file; the gate step follows deploy.sh and runs under the
+    same credential check."""
+    steps = _wf()["jobs"]["deploy"]["steps"]
+    runs = [s.get("run", "").strip() for s in steps]
+    assert "bash infra/evidence-engine/ci_gate.sh" in runs
+    assert runs.index("bash infra/evidence-engine/ci_gate.sh") > runs.index("bash infra/deploy.sh")
+    gate = next(s for s in steps if s.get("run", "").strip() == "bash infra/evidence-engine/ci_gate.sh")
+    assert gate.get("if") == "steps.cfg.outputs.ready == 'true'"
+
+
+def test_the_evidence_approval_gate_refuses_until_recall_clears_the_threshold(tmp_path):
+    import importlib.util
+    import json
+    spec = importlib.util.spec_from_file_location("approval_check", ROOT / "infra" / "evidence-engine" / "approval_check.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    ok, why = mod.check(tmp_path / "APPROVAL.json")
+    assert not ok and "absent" in why
+    results = tmp_path / "r.json"; results.write_text("{}")
+    base = {"approved_by": "owner", "date": "2026-10-11", "golden_version": "v1", "results": str(results)}
+    low = dict(base, recall_url_tuning=0.95, recall_url_heldout=0.60)
+    (tmp_path / "APPROVAL.json").write_text(json.dumps(low))
+    ok, why = mod.check(tmp_path / "APPROVAL.json")
+    assert not ok and "held-out 60.0%" in why
+    good = dict(base, recall_url_tuning=0.92, recall_url_heldout=0.91)
+    (tmp_path / "APPROVAL.json").write_text(json.dumps(good))
+    ok, why = mod.check(tmp_path / "APPROVAL.json")
+    assert ok and why.startswith("APPROVED")
+    # the committed tree carries no approval unless it clears the bar
+    live = ROOT / "infra" / "evidence-engine" / "APPROVAL.json"
+    if live.exists():
+        assert mod.check(live)[0], "an APPROVAL.json that does not clear the threshold must not be committed"

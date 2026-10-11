@@ -3,37 +3,24 @@
     "ENRICHMENT SOURCES — per facet, which connector authoritatively serves",
     "it, in precedence order, and the tier band its output lands at.",
     "",
-    "The facets are the ledger's seven (FACETS in apps/mcp/dma_mcp/ledger.py",
-    "and migration 0051) plus thought_leadership, which the enrichment",
-    "register tracks as a surface (overview.thought_leadership in",
-    "packages/shared/enrichment_register.json) but the ledger does not",
-    "version.",
+    "The facets are the ledger's seven (FACETS in apps/mcp/dma_mcp/ledger.py,",
+    "migration 0051) plus thought_leadership, a surface the enrichment register",
+    "tracks (packages/shared/enrichment_register.json) but the ledger does not version.",
     "",
     "`status` is grounded in the repo, not in intent:",
-    "  wired                 a code path or producer-session connector exists",
-    "                        and is named in `grounding`",
-    "  wired, not live       declared in code that records NOT_RUN with a",
-    "                        reason until a missing credential exists",
-    "  declared, not wired   named in a skill or plan only — no code path,",
-    "                        no repo consumer. Listing it here grants nothing.",
+    "  wired                 a code path or producer-session connector exists, named in `grounding`",
+    "  wired, not live       declared in code that records NOT_RUN with a reason until a credential exists",
+    "  declared, not wired   named in a skill or plan only — no code path, no consumer; grants nothing",
     "",
-    "Nothing in this file opens a path into serving content. Whatever the",
-    "connector, the value travels the only path content may take: registered",
-    "through register_evidence citing the SOURCE the tool surfaced — never",
-    "the tool — and submitted through the connector (invariant 2). Tier",
-    "bands follow the underlying source per 02-inputs/clay_taxonomy.json and",
-    "01-start-here/2-evidence.md; a value with no traceable source is an",
-    "inference at any tier.",
+    "Nothing here opens a path into serving content: whatever the connector, the",
+    "value is registered through register_evidence citing the SOURCE the tool",
+    "surfaced — never the tool — and submitted through the connector (invariant 2).",
+    "Tier bands follow the underlying source (02-inputs/clay_taxonomy.json,",
+    "01-start-here/2-evidence.md); a value with no traceable source is an inference.",
     "",
-    "Sources are ordered: the first entry is the one to try first, and a",
-    "later entry supplements rather than replaces an earlier one.",
-    "",
-    "`search_connectors` are the two SEARCH connectors the research tier",
-    "runs on. They serve no facet of their own — they find the SOURCE a",
-    "facet then cites — which is why they were missing from the facet table",
-    "(QA audit F-L11-042 pair 4) although the tier uses them most. Who holds",
-    "them is `scripts/provision_agent_tools.py` (repo root); the order is",
-    "RESEARCH-PROTOCOL.md § Tools."
+    "Sources are ordered: try the first first; a later entry supplements, never replaces.",
+    "`search_connectors` find the SOURCE a facet then cites; they serve no facet.",
+    "Holders: `scripts/provision_agent_tools.py` (repo root); order: RESEARCH-PROTOCOL.md § Tools."
   ],
   "facets": {
     "firmographics": {
@@ -297,26 +284,35 @@
     }
   },
   "search_connectors": {
+    "research_layer": {
+      "serves": "free first: evidence (research_brief → register-ready cards; coverage.saturation is the stop rule); searxng, parallel, fetch, edgar: raw fallbacks on outage or dispute; alphaxiv: no holder",
+      "status": "wired; not live until deploy (parallel is live)",
+      "held_by": [
+        "research-conductor",
+        "enrichment-web-specialist"
+      ],
+      "grounding": "provision_agent_tools.py EXTERNAL + SLICES (verify slice: verifier, challenger, consolidator, surface-producer); docs/EVIDENCE-ENGINE-TOOLS.md"
+    },
     "exa": {
-      "serves": "the first search connector: a lane's emitted search_requests, fired by the conductor and the enrichment-web-specialist per capability batch",
+      "serves": "the first paid search connector: a lane's emitted search_requests, fired per batch",
       "status": "wired",
       "held_by": [
         "research-conductor",
         "enrichment-web-specialist"
       ],
-      "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['exa']; `${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/relay.py` services the batch; brief.py defaults a request's tool to exa"
+      "grounding": "provision_agent_tools.py EXTERNAL['exa']; the relay services the batch; brief.py defaults a request's tool to exa"
     },
     "tavily": {
-      "serves": "the fallback search and the verbatim-extract path (tavily_extract goes into the run's fetch cache with `engine.cli fetch --via-text -`, so the excerpt verifies)",
+      "serves": "the fallback search and the verbatim-extract path (tavily_extract lands in the run's fetch cache via `engine.cli fetch --via-text -`, so the excerpt verifies)",
       "status": "wired",
       "held_by": [
         "research-conductor",
         "enrichment-web-specialist"
       ],
-      "grounding": "`scripts/provision_agent_tools.py` (repo root) EXTERNAL['tavily']; `${CLAUDE_PLUGIN_ROOT}/scripts/hooks/deny_whole_page_fetch.py` lists tavily_extract as a fetcher a lane may not call"
+      "grounding": "provision_agent_tools.py EXTERNAL['tavily']; the whole-page-fetch hook lists tavily_extract as a fetcher a lane may not call"
     },
     "firecrawl": {
-      "serves": "the third search provider: firecrawl_search when Exa and Tavily refuse or are out of credit",
+      "serves": "the third paid provider: firecrawl_search when Exa and Tavily refuse",
       "status": "wired",
       "held_by": [],
       "grounding": "autoapprove_connector.py ENRICHMENT_TOOLS; granted to no role"
@@ -330,13 +326,18 @@
       ],
       "grounding": "provision_agent_tools.py WEB; owner default 2026-10-04"
     },
-    "_rule": "A category lane holds neither: it EMITS a connector volley as a search_requests entry and the servicing tier fires it, logging the search with the tool that ran it (RESEARCH-PROTOCOL.md § Tools).",
+    "_rule": "A category lane holds none of these: it EMITS a search_requests entry; the servicing tier fires it and logs the tool that ran it (RESEARCH-PROTOCOL.md § Tools).",
     "_failover": [
       "exa",
       "tavily",
       "firecrawl",
       "websearch_webfetch"
     ],
-    "_failover_rule": "A refused, 402/429 or credit-exhausted provider hands the request to the next in _failover. NOT_RUN only after the whole chain failed, naming every provider tried. RC-07/D-22: on 2026-10-01 credit ran out and 281 H3 alerts, the I1 probes and the techstack ABSENT search recorded NOT_RUN with no failover."
+    "_failover_rule": "A refused, 402/429 or credit-exhausted provider hands the request to the next in _failover; NOT_RUN only after the whole chain failed, naming every provider tried (RC-07/D-22: 281 H3 alerts went NOT_RUN with no failover).",
+    "_free_chain": [
+      "evidence",
+      "searxng",
+      "parallel"
+    ]
   }
 }

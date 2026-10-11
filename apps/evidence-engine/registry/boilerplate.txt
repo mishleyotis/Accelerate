@@ -1,0 +1,57 @@
+# Boilerplate and marketing anti-patterns — a span matching ANY line is never
+# emitted as an excerpt. One Python regex per line, case-insensitive,
+# matched with re.search against the candidate span. Lines starting with '#'
+# are comments. Extend from measured defects (docs/EVAL-REPORT.md lists the
+# additions and the golden-set row that motivated each).
+#
+# --- chrome: cookie banners, navigation, legal footers -----------------
+\bcookies?\b.*\b(accept|consent|policy|preferences|settings)\b
+\b(accept|manage)\s+(all\s+)?cookies\b
+\bprivacy\s+(policy|notice|statement)\b.*\b(terms|conditions)\b
+\bterms\s+(of|and)\s+(use|service|conditions)\b
+\ball\s+rights\s+reserved\b
+\b(skip|jump)\s+to\s+(main\s+)?content\b
+\b(log|sign)\s*in\b.*\b(register|enroll|open an account)\b
+\brouting\s+number\b.*\bnmls\b
+\bnmls\s*(id|#|number)?\s*:?\s*\d{3,}\s*$
+\bequal\s+housing\s+(lender|opportunity)\b\s*$
+\bfederally\s+insured\s+by\s+(the\s+)?(ncua|fdic)\b\s*$
+\bmember\s+fdic\b\s*$
+^\s*(home|menu|search|contact(\s+us)?|about(\s+us)?|careers|locations?)\s*$
+\b(click|tap)\s+here\b
+\bread\s+more\b\s*$
+\bshare\s+(this|on)\s+(page|article|facebook|twitter|linkedin)\b
+\b(subscribe|sign\s+up)\s+(to|for)\s+(our\s+)?(newsletter|updates|alerts)\b
+\bjavascript\s+(is|must\s+be)\s+(disabled|enabled)\b
+\byour\s+browser\s+(is|does\s+not)\b
+\b(loading|please\s+wait)\.{2,}
+# --- generic marketing with no checkable content ------------------------
+\bindustry[- ]leading\b
+\bworld[- ]class\b
+\bbest[- ]in[- ]class\b
+\bcutting[- ]edge\b
+\bstate[- ]of[- ]the[- ]art\b(?![^.]*\b(data\s+center|facility|branch)\b)
+\binnovative\s+solutions?\b
+\bseamless\s+(experience|integration|journey)\b
+\bcommitted\s+to\s+(excellence|innovation|digital\s+transformation)\b
+\bpassionate\s+about\b
+\bone[- ]stop\s+shop\b
+\bunlock\s+(the\s+)?(power|potential|value)\s+of\b
+\bempower(s|ing)?\s+(our\s+)?(members|customers|clients)\s+to\b(?![^.]*\d)
+\bwe\s+(are|'re)\s+(here|dedicated|committed)\s+to\s+(help|serv)
+\bexperience\s+the\s+difference\b
+\bmission\s+is\s+to\s+(help|serve|provide)\b(?![^.]*\d)
+\bbanking\s+made\s+(easy|simple)\b
+# --- internal and framework jargon that must never be quoted ------------
+\b[Pp][1-4][Cc]\d(\.\d+){0,2}\b
+\b(subcap|subcapability|sub-capability)\b
+\bmaturity\s+(level|score)\s+[1-5M]\b
+\bdiagnostic\s+question\b
+\bevidence\s+(tier|ladder)\s+T[1-5]\b
+\bceiling\s+estimate\b
+# --- placeholders and machine text -------------------------------------
+\blorem\s+ipsum\b
+\{\{[^}]+\}\}
+\[(insert|placeholder|tbd|todo)[^\]]*\]
+^\s*\{"[a-zA-Z]+"\s*:
+"averageUserRating"\s*:

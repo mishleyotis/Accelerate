@@ -494,7 +494,11 @@ TECH_BROKERS = ("clay", "explorium")
 #: asked before a cell is declared absent. `web_search`/`web_fetch` are the
 #: built-in tools; everything after them is an enrichment connector.
 SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
-                "explorium", "vibe", "indeed", "quartr", "drive", "internal")
+                "explorium", "vibe", "indeed", "quartr", "drive", "internal",
+                # the research layer (2026-10-10): the engine is the one
+                # search the floors gate counts for a lean lane; the raw
+                # fallbacks are logged under their own names
+                "evidence_engine", "searxng", "parallel", "edgar")
 #: The connectors whose absence from a cell's searches means "no enrichment
 #: was attempted" — a declared absence must show at least one of these.
 #: The facets a `--prelim` search may carry: the connector-owned tabs

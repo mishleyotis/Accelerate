@@ -304,3 +304,9 @@ naming the gate, the JSON path and the arithmetic. Everything else returns a str
 | Withdrawing deletes nothing; re-promoting restores | That there is a restore tool — the way back is passing the gates again |
 | Memory writes touch no serving content and cannot break a submit | That "changed" closes a finding — `record_refinement` then `resolve_finding`, deliberately two steps |
 | The contract cannot drift from the validator | That a remembered field shape is still current |
+
+## The evidence engine (a separate server, 2026-10-10)
+
+Six tools under the plugin server `evidence` (`docs/EVIDENCE-ENGINE-TOOLS.md`) return
+evidence CARDS, never serving content; a card's `item` is the `register_evidence`
+argument verbatim. The write-lock is unchanged.

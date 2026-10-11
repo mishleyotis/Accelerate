@@ -138,7 +138,11 @@ def test_only_categories_narrows_the_stage_and_says_the_rest_is_open(tmp_path):
     assert out["outcome"] == "SCOPE_COMPLETE" and "P1C1" in out["reason"], out
 
 
-def test_auto_picks_tiers_on_a_degraded_run_and_the_workflow_otherwise(tmp_path):
+def test_auto_picks_the_workflow_degraded_or_not(tmp_path):
+    """Owner, 2026-10-11: the research phase enforces /workflows. A degraded
+    run's collectors research through the evidence server and Parallel
+    inside the workflow; lean tiers are an explicit flag or the fallback of
+    a session with no Workflow tool, never auto's answer."""
     p, disp, out = _tiers(tmp_path, research_mode="auto")
     # the fixture's baseline is complete: connector-backed, so the workflow
     assert p.opts.research_mode == "workflow" and out["outcome"] == "AWAITING_WORKFLOW"
@@ -151,8 +155,8 @@ def test_auto_picks_tiers_on_a_degraded_run_and_the_workflow_otherwise(tmp_path)
                                    research_mode="auto", stage_budget={"RESEARCH": 100}))
     q.state["enrichment_degraded"] = {"missing": ["exa", "tavily"]}
     q._save_state()
-    q.run_all()
-    assert q.opts.research_mode == "tiers"
+    out2 = q.run_all()
+    assert q.opts.research_mode == "workflow" and out2["outcome"] == "AWAITING_WORKFLOW"
 
 
 def test_a_spent_envelope_stops_the_tiers_before_any_lane(tmp_path):

@@ -267,6 +267,18 @@ def _holders(prefix: str) -> set:
                        "enrichment-connector-specialist"}),
     ("mcp__Quartr__", set()),
     ("mcp__Google_Drive__", set()),
+    # 2026-10-10 (the research layer): the engine is PRIMARY on the search
+    # tier; the verifiers and the two assemblers hold its verify slice; the
+    # raw fallbacks stay with the servicing tier only.
+    ("mcp__plugin_dma-insights_evidence__", {"research-conductor", "enrichment-web-specialist",
+                                             "research-evidence-collector", "adversarial-verifier",
+                                             "finding-challenger", "page-consolidator",
+                                             "surface-producer"}),
+    ("mcp__plugin_dma-insights_searxng__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__plugin_dma-insights_fetch__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__plugin_dma-insights_edgar__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__plugin_dma-insights_parallel__", {"research-conductor", "enrichment-web-specialist"}),
+    ("mcp__plugin_dma-insights_alphaxiv__", set()),
 ])
 def test_only_the_connector_tier_holds_a_connector(prefix, expected):
     """Exact holder sets, by family. Quartr is declared and not wired (every
@@ -289,12 +301,12 @@ def K(t: set) -> int:
 
 #: The six agents that exceed the ceiling, by design, each with its own.
 CONNECTOR_TIER = {
-    "research-conductor": 11,                # web 2 + Agent/Ask 2 + exa 2 + tavily 2 + clay/people 3
-    "surface-producer": 3,                   # Agent, Write, Edit — no web, no connector
+    "research-conductor": 30,                # 11 + the research layer 19 (evidence 6, searxng 4, fetch 1, edgar 6, parallel 2)
+    "surface-producer": 5,                   # Agent, Write, Edit + evidence/verify 2 — no web, no search
     "technographic-scanner": 9,              # web 2 + explorium 3 + clay/company 3 + indeed 1
     "enrichment-connector-specialist": 9,    # clay 5 + explorium 3 + indeed ratings 1 (RC-07)
-    "enrichment-web-specialist": 6,          # web 2 + exa 2 + tavily 2
-    "research-evidence-collector": 6,        # web 2 + exa 2 + tavily 2 (2026-10-09)
+    "enrichment-web-specialist": 25,         # web 2 + exa 2 + tavily 2 + the research layer 19
+    "research-evidence-collector": 12,       # web 2 + exa 2 + tavily 2 + evidence 6 (2026-10-10)
 }
 
 
@@ -349,6 +361,9 @@ FAMILY_WORD = {
     "exa": r"\bExa\b", "tavily": r"\bTavily\b", "clay": r"\bClay\b",
     "explorium": r"\bExplorium\b|Vibe.Prospecting", "indeed": r"\bIndeed\b",
     "quartr": r"\bQuartr\b", "drive": r"\bDrive\b",
+    "evidence": r"evidence engine|research_brief|verify_cards",
+    "searxng": r"SearXNG|searxng", "fetch": r"\bFetch\b|mcp-server-fetch|`fetch`",
+    "edgar": r"\bEDGAR\b", "parallel": r"\bParallel\b", "alphaxiv": r"alphaXiv",
 }
 INSTRUCTED = {
     "Agent": re.compile(r"\bAgent tool\b|\bvia the Agent\b|\bsubagent|\bdispatch", re.I),

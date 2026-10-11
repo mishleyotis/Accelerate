@@ -9,6 +9,11 @@ it; never create it.
 server allocates the id and computes the rank score. Registration is idempotent by content,
 so one annual report cited by six cards produces one row.
 
+## Evidence-engine cards register unchanged
+
+A card's `item` IS the `register_evidence` argument: register it as it stands, link the
+cells you decided, never retype the span or raise its label or tier; `verify_cards` first.
+
 ## Registering an excerpt: re-extract, never retype
 
 The excerpt is verified against the **fetched artefact**, fail-closed, at registration. What

@@ -64,6 +64,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
 
 import argparse
 import json
+import shlex
 import sys
 from pathlib import Path
 
@@ -566,6 +567,25 @@ def main(argv=None) -> int:
                     help="with --decline: what the row is actually about and "
                          "why it does not answer this cell")
 
+    eb = sub.add_parser("evidence-brief", help="ask the evidence engine for register-ready "
+                        "cards over HTTP (the Bash path for a lane that binds no MCP server); "
+                        "prints the cards and the exact batch lines to register them")
+    eb.add_argument("--run", required=True); eb.add_argument("--root")
+    eb.add_argument("--legal-name", required=True, dest="legal_name")
+    eb.add_argument("--domain", action="append", default=[], help="the entity's own domain(s)")
+    eb.add_argument("--alias", action="append", default=[])
+    eb.add_argument("--question", action="append", required=True)
+    eb.add_argument("--facet", default=None, choices=list(contract.FACETS))
+    eb.add_argument("--sub-vertical", default=None, dest="sub_vertical")
+    eb.add_argument("--subcap", action="append", default=[],
+                    help="the cell(s) the brief is for — rendered into every batch line")
+    eb.add_argument("--max-cards", type=int, default=8, dest="max_cards")
+    eb.add_argument("--token-budget", type=int, default=2400, dest="token_budget")
+    eb.add_argument("--reference-date", default=None, dest="reference_date")
+    eb.add_argument("--charter", default=None); eb.add_argument("--cik", default=None)
+    eb.add_argument("--actor", default=None)
+    eb.add_argument("--json", action="store_true")
+
     ck = sub.add_parser("checkpoint", help="open a fresh search window for one "
                         "category (a new conversation — a workflow agent starting work)")
     ck.add_argument("--run", required=True); ck.add_argument("--root")
@@ -742,6 +762,28 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     if a.cmd == "batch":
         return _batch(a)
+    # No workbook, no lock: the engine answers over HTTP and the lane
+    # registers the cards through `batch` afterwards.
+    if a.cmd == "evidence-brief":
+        from . import evidence_client as _ec
+        out = _ec.brief(run_id=a.run, legal_name=a.legal_name, domains=a.domain,
+                        questions=a.question, facet=a.facet, sub_vertical=a.sub_vertical,
+                        subcaps=a.subcap, max_cards=a.max_cards, token_budget=a.token_budget,
+                        reference_date=a.reference_date, aliases=a.alias, charter=a.charter,
+                        cik=a.cik, actor=a.actor or _actor(a))
+        if a.json:
+            print(json.dumps(out, indent=2)); return 0 if "error" not in out else 1
+        if "error" in out:
+            print(f"REFUSED: {out['error']}", file=sys.stderr); return 1
+        if out.get("needs_spend_approval"):
+            print("NEEDS_SPEND_APPROVAL: no free source can answer; report it — never route to a "
+                  "paid tool yourself.\n" + json.dumps(out.get("free_sources", {}), indent=2)); return 2
+        cov = out.get("coverage", {})
+        print(f"{len(out.get('cards', []))} card(s); novelty {cov.get('novelty')}; "
+              f"saturation {cov.get('saturation')}; ladder {cov.get('ladder_searched')}")
+        for line in out.get("batch_lines", []):
+            print(" ".join(shlex.quote(x) for x in line))
+        return 0
     if a.cmd == "synthesis-template":
         # Measured 2026-09-30 (SWBC, P2C3): a lane spent ~20 turns grepping the
         # ledger to learn what this record needs. It is printed from the same

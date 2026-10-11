@@ -64,6 +64,7 @@ jobs:
           python3 plugins/dma-insights/scripts/gen_gates_md.py --check
           python3 scripts/gen_proto_bands.py --check
           python3 plugins/dma-insights/scripts/check_taxonomy_drift.py
+          python3 plugins/dma-insights/scripts/gen_evidence_tools_md.py --check
 
       - name: The deck skill's generated docs are in sync with its colour owner
         # QA audit F-M08-013 (28-09-2026): a generated doc nobody regenerates
@@ -329,6 +330,11 @@ jobs:
       # dev box has it; the deck skill declares it), red here on
       # ModuleNotFoundError — the runner was testing a program that cannot
       # render a deck.
+      # The evidence engine's requirements do NOT install here: fastmcp 4.1
+      # needs starlette >= 1.0 and uvicorn >= 0.35, FastAPI 0.115 needs
+      # starlette < 0.42 and the API pins uvicorn 0.30 — pip answered
+      # ResolutionImpossible on the first run of #92 (2026-10-11). The engine
+      # ships in its own image in production and gets its own venv below.
       - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
@@ -487,6 +493,16 @@ jobs:
       # step — so the pytest summary is unreachable from the job's tail and a
       # diagnosis costs three round trips. The step summary is returned with
       # the check itself.
+      # The evidence engine's suite (apps/evidence-engine/tests, 2026-10-10):
+      # offline — mocked transports, no model download (EE_MODELS_DIR unset) —
+      # in a venv of its own because its pins cannot coexist with the API's
+      # (see the install step). Under `bash -e` + pipefail a red suite fails
+      # the step through the tee.
+      - name: Evidence engine suite, in its own interpreter
+        run: |
+          python -m venv /tmp/ee-venv
+          /tmp/ee-venv/bin/pip install -q pytest -r apps/evidence-engine/requirements.txt
+          /tmp/ee-venv/bin/python -m pytest apps/evidence-engine/tests/ -q -rfs 2>&1 | tee /tmp/pytest-ee.txt
       - name: Report the result where the check can show it
         if: always()
         run: |
@@ -497,8 +513,8 @@ jobs:
             # -rf prints, and the "___ test_name ___" headers pytest always
             # emits for a failure even under -q. Either alone has been the
             # empty set on a red build.
-            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
-                 /tmp/pytest.txt | tail -40
+            grep -hE '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/pytest.txt /tmp/pytest-ee.txt 2>/dev/null | tail -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -885,3 +901,10 @@ jobs:
       - name: infra/deploy.sh
         if: steps.cfg.outputs.ready == 'true'
         run: bash infra/deploy.sh
+      # The evidence engine rides the same release, gated: nothing is created
+      # until infra/evidence-engine/APPROVAL.json clears the owner's recall
+      # threshold (approval_check.py); until then the step says so and passes.
+      # A failure HERE never un-ships web/api/mcp (they deployed above).
+      - name: infra/evidence-engine/ci_gate.sh (approved releases only)
+        if: steps.cfg.outputs.ready == 'true'
+        run: bash infra/evidence-engine/ci_gate.sh

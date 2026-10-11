@@ -1776,14 +1776,20 @@ class Pipeline:
                     "this session has no Workflow tool; RESEARCH runs as lean headless "
                     "lanes driven by engine.pipeline (no workflow to show)")
             if st == "RESEARCH" and self.opts.research_mode == "auto":
-                # AUTO (2026-10-09): a DEGRADED run needs no session connector
-                # for research, so it runs as lean headless TIERS (~10K-token
-                # floor, exact per-lane cost); a connector-backed run hands the
-                # stage to the session, the only holder of Exa/Tavily/Clay.
-                self.opts.research_mode = ("tiers" if self.state.get("enrichment_degraded")
-                                           else "workflow")
-                self.opts.log(f"[RESEARCH] mode: {self.opts.research_mode} "
-                              f"({'degraded run: lean headless lanes' if self.opts.research_mode == 'tiers' else 'connector-backed: in-session workflow'})")
+                # AUTO (owner, 2026-10-11: "the research phase should still
+                # enforce /workflows"): the in-session workflow, degraded or
+                # not. Since the research layer (2026-10-10) the workflow's
+                # collectors, orchestrator and challenger hold the plugin's
+                # `evidence` server and Parallel — free search a run without
+                # Exa/Tavily can research with — so the 2026-10-09 reason for
+                # headless tiers on a degraded run (no session connector to
+                # hand the stage to) no longer holds. Tiers run only on an
+                # explicit --research-mode tiers, or when this session has no
+                # Workflow tool (handled above: --tiers-direct, owner told).
+                self.opts.research_mode = "workflow"
+                self.opts.log("[RESEARCH] mode: workflow (in-session /workflows, enforced; "
+                              + ("degraded run: the collectors research through the evidence server and Parallel"
+                                 if self.state.get("enrichment_degraded") else "connector-backed") + ")")
             if st == "RESEARCH" and (self.opts.research_mode == "workflow" or (
                     self.opts.research_mode == "tiers" and not self.opts.tiers_direct)):
                 try:

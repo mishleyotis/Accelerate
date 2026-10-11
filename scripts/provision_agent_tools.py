@@ -141,6 +141,39 @@ EXTERNAL = {
                 "mcp__Google_Drive__read_file_content",
                 "mcp__Google_Drive__download_file_content",
                 "mcp__Google_Drive__get_file_metadata"],
+    # ── THE RESEARCH LAYER (2026-10-10, apps/evidence-engine) ──────────────
+    # The evidence engine is the PRIMARY research interface: one
+    # `research_brief` replaces a search → open → read → excerpt loop and
+    # returns register-ready cards (docs/CARD-CONTRACT.md). Plugin-declared
+    # servers (`.mcp.json`), scoped `mcp__plugin_dma-insights_<server>__`.
+    "evidence": ["mcp__plugin_dma-insights_evidence__research_brief",
+                 "mcp__plugin_dma-insights_evidence__crawl_entity",
+                 "mcp__plugin_dma-insights_evidence__filings_evidence",
+                 "mcp__plugin_dma-insights_evidence__expand_context",
+                 "mcp__plugin_dma-insights_evidence__verify_cards",
+                 "mcp__plugin_dma-insights_evidence__coverage_report"],
+    # The RAW fallbacks: an engine outage, a disputed card, debugging. Their
+    # use is rate-gated (hooks/rate_gate.py) and logged (hooks/source_health.py).
+    # Tool names verified against each server on 2026-10-10 (DISCOVERY §4).
+    "searxng": ["mcp__plugin_dma-insights_searxng__searxng_web_search",
+                "mcp__plugin_dma-insights_searxng__searxng_search_suggestions",
+                "mcp__plugin_dma-insights_searxng__searxng_instance_info",
+                "mcp__plugin_dma-insights_searxng__web_url_read"],
+    "fetch":   ["mcp__plugin_dma-insights_fetch__fetch"],
+    # sec-edgar-mcp serves 18 tools; the six a researcher reaches for.
+    "edgar":   ["mcp__plugin_dma-insights_edgar__get_company_facts",
+                "mcp__plugin_dma-insights_edgar__get_recent_filings",
+                "mcp__plugin_dma-insights_edgar__get_filing_sections",
+                "mcp__plugin_dma-insights_edgar__get_filing_content",
+                "mcp__plugin_dma-insights_edgar__get_financials",
+                "mcp__plugin_dma-insights_edgar__get_xbrl_concepts"],
+    "parallel": ["mcp__plugin_dma-insights_parallel__web_search",
+                 "mcp__plugin_dma-insights_parallel__web_fetch"],
+    # alphaXiv is OAuth per user; its tool names cannot be listed without a
+    # signed-in session (401 anonymously, DISCOVERY §4), so the family is
+    # declared and granted to no role until a live listing is captured —
+    # the doctor reports it as a WARNING, never a stop.
+    "alphaxiv": [],
 }
 
 #: Slices of a family, for a role that needs one half of it. `clay/people`
@@ -159,6 +192,15 @@ SLICES = {
     # are two different reads with two different holders.
     "indeed/jobs":    ["mcp__Indeed__search_jobs"],
     "indeed/ratings": ["mcp__Indeed__get_company_data"],
+    # The verifier's slice of the engine: re-check a card and read around
+    # its span; never a new search (an adversary that can reach outside the
+    # run it judges is a participant). `evidence/challenge` adds the one
+    # independent research_brief a challenger may fire to falsify.
+    "evidence/verify":    ["mcp__plugin_dma-insights_evidence__verify_cards",
+                           "mcp__plugin_dma-insights_evidence__expand_context"],
+    "evidence/challenge": ["mcp__plugin_dma-insights_evidence__verify_cards",
+                           "mcp__plugin_dma-insights_evidence__expand_context",
+                           "mcp__plugin_dma-insights_evidence__research_brief"],
 }
 
 
@@ -259,12 +301,13 @@ RESEARCH_LANE = row(
 #: holds no Agent tool and no connector write; the actor scope refuses a
 #: synthesis or an absence from `research-pXcY-collector` at the write.
 RESEARCH_COLLECTOR = row(
-    web=WEB, external=["exa", "tavily"], reads="floor",
-    why="collects evidence for one batch of a category's open cells — searches "
-        "with WebSearch (Exa and Tavily when the session holds them), reads a "
-        "page as engine.cli fetch windows, registers verbatim spans through the "
-        "ledger's refusals — and writes no judgement; the category "
-        "orchestrator synthesises")
+    web=WEB, external=["evidence", "exa", "tavily"], reads="floor",
+    why="collects evidence for one batch of a category's open cells — the "
+        "evidence engine's research_brief FIRST (register-ready cards, the "
+        "saturation stop rule), WebSearch (Exa and Tavily when the session "
+        "holds them) as the fallback, reads a page as engine.cli fetch windows, "
+        "registers verbatim spans through the ledger's refusals — and writes no "
+        "judgement; the category orchestrator synthesises")
 
 #: The category ORCHESTRATOR is the judgement half: it reads the collectors'
 #: evidence pack and the floors gate's own terms, writes every synthesis and
@@ -339,9 +382,11 @@ TECHNOGRAPHIC_SCANNER = row(
 #: AskUserQuestion is load-bearing: the binding preflight REFUSES a run
 #: whose sub-vertical and evidence mode were not confirmed by a person.
 RESEARCH_CONDUCTOR = row(
-    web=WEB, external=["exa", "tavily", "clay/people"], reads="floor",
+    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel",
+                       "exa", "tavily", "clay/people"], reads="floor",
     extra=["Agent", "AskUserQuestion"],
-    why="holds Exa, Tavily and Clay because it services every lane's "
+    why="holds the evidence engine, its raw fallbacks (SearXNG, Fetch, EDGAR, "
+        "Parallel), Exa, Tavily and Clay because it services every lane's "
         "search_requests per capability batch; its preflight is the "
         "connector contract's caller")
 
@@ -352,9 +397,11 @@ RESEARCH_CONDUCTOR = row(
 #: one owner, the qa-overseer, which every production ends with.
 SURFACE_PRODUCER = row(
     reads="orchestrator", writes=CONTENT_TOOLS + LEDGER_TOOLS,
-    extra=["Agent", "Write", "Edit"],
+    extra=["Agent", "Write", "Edit"], external=["evidence/verify"],
     why="claims, assembles, submits and promotes; dispatches producers and "
-        "writes their fragments to disk")
+        "writes their fragments to disk; verify_cards on every engine card a "
+        "page cites before the submit, and expand_context to settle a "
+        "disputed span — never a new search")
 
 #: Services Clay and Explorium `search_requests` and records what each
 #: returned. No web: a connector specialist that could fall back to
@@ -379,10 +426,14 @@ MARKET_PRODUCER = row(
 #: Services Exa/Tavily batches (the relay drain). Exa is the search; Tavily
 #: is the fallback and the verbatim-extract path.
 WEB_SPECIALIST = row(
-    web=WEB, external=["exa", "tavily"], reads="enrichment",
+    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel",
+                       "exa", "tavily"], reads="enrichment",
     writes=LEDGER_TOOLS,
-    why="services the Exa and Tavily batches the orchestrator hands it; "
-        "Tavily extract is its verbatim-excerpt read")
+    why="services the search batches the orchestrator hands it through the "
+        "evidence engine first (research_brief, crawl_entity, filings_evidence), "
+        "the raw fallbacks (SearXNG, Fetch, EDGAR, Parallel) when the engine is "
+        "down or a card is disputed, then Exa and Tavily; Tavily extract is its "
+        "verbatim-excerpt read of last resort")
 
 #: Read-only auditors. They exist to disbelieve a result, and an adversary
 #: that can repair what it found is not an adversary. No web at all: a
@@ -397,9 +448,11 @@ AUDITOR = row(
 #: Verifiers attack a passing result from the run's own evidence. A
 #: falsifier the run does not hold is returned as search_requests.
 VERIFIER = row(
-    reads="checker",
-    why="attacks a result that already passed, from the run's evidence; a "
-        "falsifier it cannot find there is returned as search_requests; "
+    reads="checker", external=["evidence/challenge"],
+    why="attacks a result that already passed, from the run's evidence; "
+        "verify_cards re-checks every engine card it is asked to believe, "
+        "expand_context reads around a disputed span, and ONE independent "
+        "research_brief may hunt a falsifier — cards only, never a page; "
         "repairs nothing")
 
 #: Engine-only agents: every write goes through the engine CLI over Bash
@@ -423,7 +476,11 @@ MEMORY_WRITER = row(
 #: exposes is denied. `extra` is built-ins beyond CORE and the web pair.
 ROLES = {
     "orchestration/surface-producer": SURFACE_PRODUCER,
-    "orchestration/page-consolidator": ENGINE_ONLY,
+    "orchestration/page-consolidator": dict(
+        ENGINE_ONLY, external=["evidence/verify"],
+        why=ENGINE_ONLY["why"] + "; verify_cards and expand_context on the "
+                                 "engine cards the surfaces cite, to settle a "
+                                 "cross-surface disagreement from the span itself"),
     "orchestration/package-vetter": dict(ENGINE_ONLY, extra=["Write"],
                                          why=ENGINE_ONLY["why"] +
                                          "; writes its vetting report as a file"),
@@ -520,15 +577,16 @@ DEFAULTS = {
 #: The agents allowed past K = 5, each with its own ceiling. The test suite
 #: pins this dict against its own copy, so a new entry is a visible decision.
 CONNECTOR_TIER = {
-    "research-conductor": 11,
-    "surface-producer": 3,
+    # 2026-10-10: + evidence 6 + searxng 4 + fetch 1 + edgar 6 + parallel 2 = 19
+    "research-conductor": 30,
+    "surface-producer": 5,                   # + evidence/verify 2
     "technographic-scanner": 9,
     "enrichment-connector-specialist": 9,
-    "enrichment-web-specialist": 6,
+    "enrichment-web-specialist": 25,         # 6 + 19
     # 2026-10-09 (research tiers): the workflow path's collector services a
     # wave's searches itself on a connector-backed run — the web specialist's
-    # role on the lane path, at the same ceiling.
-    "research-evidence-collector": 6,
+    # role on the lane path, at the same ceiling. 2026-10-10: + evidence 6.
+    "research-evidence-collector": 12,
 }
 
 
