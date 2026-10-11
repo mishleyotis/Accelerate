@@ -116,9 +116,13 @@ _CAPTCHA = re.compile(r"captcha|access denied|unusual traffic", re.I)
 #: query takes the first engines with budget. Override: EE_SEARXNG_ENGINES
 #: "google cse:0.2,bing:0.5,...".
 ENGINE_RATES: dict[str, float] = {
-    "google cse": 0.2, "bing": 0.5, "mwmbl": 0.4, "brave": 0.15,
-    "duckduckgo": 0.1, "qwant": 0.08, "wikipedia": 0.3,
+    "google cse": 0.2, "bing": 0.5, "bing news": 0.3, "duckduckgo news": 0.15,
+    "mwmbl": 0.4, "brave": 0.15, "duckduckgo": 0.1, "qwant": 0.08, "wikipedia": 0.3,
 }
+#: Bing News and DuckDuckGo News answered 4/4 on-entity for an IMA query on
+#: 2026-10-11 while DuckDuckGo's WEB search was on CAPTCHA and Google News
+#: denied access — free, keyless, and an entity's press coverage is evidence.
+#: No paid engine is in the pool (owner, 2026-10-11: "avoid paid APIs").
 ENGINE_BURST = 2
 ENGINES_PER_QUERY = 3
 #: Seconds an engine rests after SearXNG reports it unresponsive, by reason.

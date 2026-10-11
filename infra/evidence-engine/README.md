@@ -44,10 +44,11 @@ three fixes:
 | every upstream engine saw the whole query stream from Cloud Run's shared egress | the evidence engine's `search.EnginePool` sends each query only to engines with budget left (Google CSE 0.2/s, Bing 0.5/s, mwmbl 0.4/s, Brave 0.15/s, …, per instance; `EE_SEARXNG_ENGINES` overrides) and rests an engine SearXNG reports blocked for the cool-off its reason earns; with no engine free the query skips SearXNG instead of waiting. A named engine list is sent WITHOUT `categories` — SearXNG queries the union of the two |
 | `useragent_suffix: "dmai-evidence-engine"` labelled every request automated | removed |
 
-Pacing ends the blocks we caused; it cannot vouch for an egress IP other
-tenants share. The one general engine no CAPTCHA can block is the official
-Brave Search API: store a key as Secret Manager secret
-`dmai-brave-search-api-key` (an owner decision — a paid key, see
-`APPROVAL.json`) and the next deploy mounts it, `searxng/entrypoint.sh`
-activates `braveapi`, and the engine's pool puts it first. Watch the pacing
-live in `coverage_report` → `sources_health.searxng_engines`.
+Free and keyless only (owner, 2026-10-11: "avoid paid APIs"). Bing News
+and DuckDuckGo News are in the rotation — both answered 4/4 about the entity
+while DuckDuckGo's web search was on CAPTCHA. Measured and left out: GDELT
+(429: its one-request-per-5-seconds limit is per IP, and the egress is
+shared), Google News (access denied), Brave News (engine crash). Pacing ends
+the blocks we caused; when a shared egress IP is blocked anyway, the engine
+rests that engine and Parallel carries the query. Watch it live in
+`coverage_report` → `sources_health.searxng_engines`.

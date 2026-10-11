@@ -25,9 +25,11 @@
 #     User-Agent, which labels every request automated.
 #   * google (access denied at any rate from datacentre egress), mojeek,
 #     startpage and yep (PoW CAPTCHA / access denied) are left out.
-#   * braveapi (the official Brave Search API) is listed inactive: with an
-#     api key it is the one general engine no CAPTCHA can block — an owner
-#     decision (a paid key; infra/evidence-engine/APPROVAL.json).
+#   * free and keyless only (owner, 2026-10-11: "avoid paid APIs"): Bing
+#     News and DuckDuckGo News join the rotation — both answered 4/4 about
+#     the entity while DuckDuckGo web search was on CAPTCHA; GDELT (429 per
+#     shared IP), Google News (access denied) and Brave News (engine crash)
+#     were measured and left out.
 #   * suspended_times give a blocked engine a measured cool-off instead of
 #     the default day-long suspension.
 use_default_settings: true`), so only the deltas are stated.
@@ -61,7 +63,6 @@ use_default_settings:
       - semantic scholar
       - openalex
       - crossref
-      - braveapi
 
 general:
   debug: false
@@ -128,9 +129,6 @@ engines:
   - name: wikipedia
     disabled: false
     weight: 0.5
-  # the official Brave Search API: active only when the owner supplies a key
-  - name: braveapi
-    inactive: true
   # ── news ──
   - name: bing news
     disabled: false
