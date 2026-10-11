@@ -1190,10 +1190,14 @@ if command -v curl >/dev/null 2>&1; then
   say "smoke: does the api still reach the database?"
   API_URL="$(gcloud run services describe dmai-api --project="$PROJECT_ID" \
              --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
-  SMOKE_TOKEN="$(gcloud auth print-identity-token \
-                 --audiences="$API_URL" 2>/dev/null || true)"
-  if [ -z "$API_URL" ] || [ -z "$SMOKE_TOKEN" ]; then
-    echo "   NOT PROBED — no api URL or no identity token for this account"
+  # shellcheck source=lib/id_token.sh
+  . "$(dirname "$0")/lib/id_token.sh"
+  SMOKE_TOKEN=""
+  if [ -n "$API_URL" ]; then id_token_into SMOKE_TOKEN "$API_URL" || true; fi
+  if [ -z "$API_URL" ]; then
+    echo "   NOT PROBED — no api URL"
+  elif [ -z "$SMOKE_TOKEN" ]; then
+    echo "   NOT PROBED — no identity token for this account ($ID_TOKEN_WHY)"
   else
     # 45s, not 300: a healthy connection is milliseconds and the failure
     # being watched for is an unbounded hang, so waiting out Cloud Run's

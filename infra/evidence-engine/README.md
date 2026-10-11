@@ -8,8 +8,8 @@ refuses to run without `EE_DEPLOY_APPROVED=1`.
 | Service | Image | Role | Exposure |
 |---|---|---|---|
 | `dmai-evidence` | `apps/evidence-engine/Dockerfile` | the evidence engine (FastMCP, streamable HTTP, six tools) | `--no-allow-unauthenticated`, invoker = the plugin's identity rungs; capability header `X-DMA-Path-Token` as a second factor, exactly like `dmai-mcp` |
-| `dmai-searxng` | `searxng/Dockerfile` | SearXNG on `127.0.0.1:8080` inside the container + `mcp-searxng` over Supergateway on `$PORT` | reached by the engine over its JSON API through the gateway's `/searx-json` proxy path; raw MCP tools on `/mcp` as the fallback connector |
-| `dmai-fetch` | `fetch/Dockerfile` | `mcp-server-fetch` over Supergateway (`supercorp/supergateway:uvx`) | raw fallback read tool |
+| `dmai-searxng` | `searxng/Dockerfile` | SearXNG (official image, digest-pinned; Void Linux, so Node is copied in from `node:22-bookworm-slim`) on `127.0.0.1:8080` inside the container + `mcp-searxng@2.5.1` over Supergateway 3.4.0 behind the door on `$PORT` | reached by the engine over its JSON API through the gateway's `/searx-json` proxy path; raw MCP tools on `/mcp` as the fallback connector |
+| `dmai-fetch` | `fetch/Dockerfile` | `mcp-server-fetch` over Supergateway (`supercorp/supergateway:4.1.0-uvx`, digest-pinned) | raw fallback read tool |
 | `dmai-edgar` | `edgar/Dockerfile` | `sec-edgar-mcp` (AGPL-3.0, run unmodified; `/` links its source) over Supergateway | raw fallback filings tool |
 
 Secret Manager: `dmai-evidence-path-token`, `dmai-searxng-path-token`,
@@ -26,3 +26,7 @@ health can be measured before and after (`searxng/health.sh`).
 Licences (verified 2026-10-10): SearXNG AGPL-3.0 (run unmodified, source
 linked), Supergateway MIT, mcp-searxng MIT, mcp-server-fetch MIT,
 sec-edgar-mcp AGPL-3.0 (run unmodified, source linked).
+
+## Images are proved before a release
+
+`image_smoke.sh` builds `searxng`, `fetch` and `edgar` and probes each through its door (`image_probe.py`: healthz, wrong path 404, `tools/list` names the tools the plugin binds, and for SearXNG the engine's JSON door). CI job `evidence-images` runs it on every pull request and `deploy` waits for it. Every `FROM` is digest-pinned; raising a pin is a reviewed change that this job proves (2026-10-11: the first approved release failed building `dmai-searxng` against a floating `latest`).
