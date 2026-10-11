@@ -56,6 +56,7 @@ from urllib.parse import urlsplit, urlunsplit, quote
 import httpx
 
 from . import ratelimit
+from .tls import trust_context
 from .config import settings
 from .types import FetchResult
 
@@ -258,7 +259,7 @@ class HttpFetcher:
         self._client = httpx.AsyncClient(
             http2=use_http2, follow_redirects=True,
             timeout=httpx.Timeout(s.fetch_timeout_s), transport=transport,
-            max_redirects=10)
+            max_redirects=10, verify=trust_context())
         self.requests_made = 0
 
     # composition --------------------------------------------------------

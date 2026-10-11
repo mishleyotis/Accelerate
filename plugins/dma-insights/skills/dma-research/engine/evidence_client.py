@@ -50,13 +50,37 @@ def mint_headers(aud: str) -> dict:
         return {}
 
 
+def _trust_context():
+    """System roots PLUS any bundle the environment names: with SSL_CERT_FILE
+    alone OpenSSL drops the system store, and a proxy that tunnels instead
+    of terminating TLS then fails every call (measured 2026-10-11)."""
+    import ssl
+    ctx = ssl.create_default_context()
+    try:
+        ctx.load_default_certs()
+    except Exception:  # noqa: BLE001
+        pass
+    for var in ("SSL_CERT_FILE", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE"):
+        path = os.environ.get(var)
+        if path and os.path.isfile(path):
+            try:
+                ctx.load_verify_locations(cafile=path)
+            except (ssl.SSLError, OSError):
+                pass
+    return ctx
+
+
 def _post(url: str, body: dict, headers: dict, opener=None) -> dict:
     req = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST")
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json, text/event-stream")
     for k, v in headers.items():
         req.add_header(k, v)
-    open_ = opener or urllib.request.urlopen
+    if opener is None:
+        def open_(request, timeout):
+            return urllib.request.urlopen(request, timeout=timeout, context=_trust_context())
+    else:
+        open_ = opener
     with open_(req, timeout=TIMEOUT_S) as r:
         raw = r.read().decode("utf-8", errors="replace")
     if "text/event-stream" in (getattr(r, "headers", {}).get("Content-Type", "") if hasattr(r, "headers") else ""):

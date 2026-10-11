@@ -185,7 +185,9 @@ class ParallelClient:
 
 def _fastmcp_factory(url: str):
     from fastmcp import Client  # imported lazily: tests inject a fake
-    return Client(url)
+    from fastmcp.client.transports import StreamableHttpTransport
+    from .tls import trust_context
+    return Client(StreamableHttpTransport(url, verify=trust_context()))
 
 
 def parse_parallel_result(result) -> dict:

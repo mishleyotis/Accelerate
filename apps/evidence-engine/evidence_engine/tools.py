@@ -71,12 +71,27 @@ class _SearchCache:
 PER_HOST_CAP = 3
 
 
-def _host_diverse_order(hits: list[dict]) -> list[dict]:
-    """Hit order with no host taking more than PER_HOST_CAP of the leading
-    slots; the overflow follows, still in hit order, as back-fill."""
+def _host_diverse_order(hits: list[dict], entity: EntityRef | None = None) -> list[dict]:
+    """Hit order for the fetch slice: hits that NAME the entity (legal name
+    or an alias in title/snippet, or the entity's own host) come before hits
+    that do not — measured 2026-10-11: a metasearch for one credit union's
+    questions returned 128 hits, the top of the fused list a pharmaceutical
+    namesake's catalogue, and the twelve-slot slice fetched nothing the
+    question was about. Within a band the fused order holds, and no host
+    takes more than PER_HOST_CAP of the leading slots; the overflow
+    follows, still in order, as back-fill."""
+    def names_entity(h: dict) -> int:
+        if entity is None:
+            return 1
+        if registry.is_own_host(h.get("url"), entity):
+            return 2
+        hay = normalise(" ".join(str(h.get(k) or "") for k in ("title", "snippet", "url")))
+        names = [entity.legal_name] + list(entity.aliases or [])
+        return 1 if any(normalise(n) and normalise(n) in hay for n in names) else 0
+    banded = sorted(enumerate(hits), key=lambda ih: (-names_entity(ih[1]), ih[0]))
     seen: dict[str, int] = {}
     head, tail = [], []
-    for h in hits:
+    for _, h in banded:
         host = host_of(h["url"])
         n = seen.get(host, 0)
         (head if n < PER_HOST_CAP else tail).append(h)
@@ -136,7 +151,8 @@ class Engine:
                 "note": "The engine never spends silently. Approve a paid source explicitly "
                         "(owner decision) or wait for a free source's breaker to close."}
 
-    async def _documents_for_hits(self, hits: list[dict], *, limit: int, reference, hits_by_key) -> tuple[list[Document], list[dict]]:
+    async def _documents_for_hits(self, hits: list[dict], *, limit: int, reference, hits_by_key,
+                                  entity: EntityRef | None = None) -> tuple[list[Document], list[dict]]:
         """Fetch up to `limit` ATTEMPTED documents from the hit list, in hit order.
 
         Measured 2026-10-10 (eval v1): the own-domain `site:` query floods the top
@@ -148,7 +164,7 @@ class Engine:
         (robots, an open breaker, a never-fetch host) refunds its slot."""
         docs: list[Document] = []
         failures: list[dict] = []
-        queue = _host_diverse_order(hits)
+        queue = _host_diverse_order(hits, entity)
         counted = 0
         lock = asyncio.Lock()
 
@@ -236,7 +252,7 @@ class Engine:
         hits = fan["hits"]
         hits_by_key = {h["url_key"]: h.get("hits", []) for h in hits}
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
-                                                        hits_by_key=hits_by_key)
+                                                        hits_by_key=hits_by_key, entity=ent)
         ranked = R.rank_chunks(question, docs, top_k=max_cards * 3, facet_text=facet or "")
         order = []
         for r in ranked["ranked"]:

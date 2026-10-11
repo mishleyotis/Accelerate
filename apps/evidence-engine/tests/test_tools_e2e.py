@@ -368,10 +368,12 @@ def test_refused_before_bytes_refunds_its_fetch_slot(engine):
     """Robots, an open breaker and a never-fetch host take no slot: with
     fetch_limit=2 and three such hits in front, both real pages are read."""
     st = engine._test_state
+    # every front hit NAMES the entity, so the entity-first ordering keeps
+    # them ahead of the trade copy and the refund rule is what is measured
     front = [
-        {"url": "https://en.wikipedia.org/wiki/Example_FCU", "title": "wiki", "content": "x", "engine": "mojeek"},
-        {"url": "https://example-press.test/blocked/one", "title": "blocked", "content": "x", "engine": "brave"},
-        {"url": "https://example-press.test/blocked/two", "title": "blocked", "content": "x", "engine": "brave"},
+        {"url": "https://en.wikipedia.org/wiki/Example_FCU", "title": "Example FCU - Wikipedia", "content": "x", "engine": "mojeek"},
+        {"url": "https://example-press.test/blocked/one", "title": "Example FCU blocked", "content": "x", "engine": "brave"},
+        {"url": "https://example-press.test/blocked/two", "title": "Example FCU blocked", "content": "x", "engine": "brave"},
     ]
     orig = SEARX_HITS[:]
     SEARX_HITS[:] = front + orig[:2]
@@ -414,3 +416,18 @@ def test_verify_cards_date_check_can_fail(engine):
     v = run(engine.verify_cards(run_id="R-d", card_ids=[c["card_id"]], recheck_liveness=False))
     assert v["results"][0]["checks"]["date"].startswith("bad")
     assert v["results"][0]["verdict"] == "FAIL"
+
+
+def test_fetch_slice_puts_hits_naming_the_entity_first():
+    from evidence_engine.tools import _host_diverse_order
+    from evidence_engine.types import EntityRef
+    ent = EntityRef(legal_name="Example Federal Credit Union", domains=["example-fcu.test"], aliases=["Example FCU"])
+    hits = [{"url": "https://namesake-pharma.test/catalog", "url_key": "k1", "title": "Example Pharma catalogue", "snippet": "products"},
+            {"url": "https://namesake-pharma.test/jobs", "url_key": "k2", "title": "Careers at Example Pharma", "snippet": ""},
+            {"url": "https://trade.test/story", "url_key": "k3", "title": "Example FCU rolls out new app", "snippet": "the credit union said"},
+            {"url": "https://www.example-fcu.test/about", "url_key": "k4", "title": "About us", "snippet": ""},
+            {"url": "https://other.test/x", "url_key": "k5", "title": "Unrelated", "snippet": "Example Federal Credit Union is cited here"}]
+    order = [h["url_key"] for h in _host_diverse_order(hits, ent)]
+    assert order[0] == "k4", "the entity's own host first"
+    assert order[1:3] == ["k3", "k5"], "then hits naming the entity, in fused order"
+    assert order[3:] == ["k1", "k2"], "the namesake last"
