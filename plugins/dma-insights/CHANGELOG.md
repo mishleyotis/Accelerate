@@ -82,6 +82,9 @@ having to state that the engine could check at the write:
   `DQ_Contradicts` anyway. A `DQ_<facet>` stating a finding now needs a
   Search_Log row on that cell for that facet, else `NOT_RUN: <why>`; the
   ledger refuses it at the write and the orchestrator prompt says so.
+  The challenge packet's `facets_answered` no longer counts a `NOT_RUN` /
+  `NO_FINDING` field (it told challengers a volley fired that the record
+  says did not); those facets ride in `facets_not_run`.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

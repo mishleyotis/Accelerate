@@ -511,3 +511,21 @@ def test_an_unfired_facet_written_as_not_run_is_accepted(tmp_path):
     rec = good_synthesis(cell, eids)
     rec["DQ_Contradicts"] = "NOT_RUN: the contradicts volley timed out in the evidence engine twice"
     L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
+
+
+# ── 10. the challenge packet never lists a NOT_RUN facet as answered ──────
+#
+# P3C2.2.CIB1's challenger: "the contradiction field says no contradicts
+# volley was logged (engine timeout), although facets_answered lists
+# contradicts" — the packet counted any non-empty DQ field, NOT_RUN included,
+# and challengers failed facet_coverage on the contradiction it implied.
+
+def test_the_challenge_packet_separates_answered_from_not_run_facets(tmp_path):
+    from engine import brief
+    run, wb, cells, _ = researched_run(tmp_path, n=6, absent=1)
+    cell = cells[0]
+    row = {str(r["SubCap_ID"]): r for r in wb.scoring_rows()}[cell]
+    pkt = brief._challenge_cell(wb, row, cell, wb.evidence_index())
+    assert "contradicts" not in pkt["facets_answered"] and "fails" not in pkt["facets_answered"]
+    assert {"contradicts", "fails"} <= set(pkt["facets_not_run"])
+    assert {"works", "value", "corroborates"} <= set(pkt["facets_answered"])

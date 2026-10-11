@@ -1723,8 +1723,16 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                      for x in rows[:CHALLENGE_EVIDENCE_PER_CELL]],
         "evidence_total": len(eids),
         # facet_coverage
+        # a facet written NOT_RUN / NO_FINDING is NOT answered: listing it
+        # here told challengers a volley fired that the record says did not,
+        # and they failed facet_coverage on the contradiction (R-INTERAC-20261010)
         "facets_answered": sorted(f for f in C.DQ_FACETS
-                                  if _clean(r.get(f"DQ_{f.title()}"))),
+                                  if _clean(r.get(f"DQ_{f.title()}"))
+                                  and not _clean(r.get(f"DQ_{f.title()}")).upper()
+                                  .startswith(("NOT_RUN", "NO_FINDING"))),
+        "facets_not_run": sorted(f for f in C.DQ_FACETS
+                                 if _clean(r.get(f"DQ_{f.title()}")).upper()
+                                 .startswith(("NOT_RUN", "NO_FINDING"))),
         # contradiction_handling
         "contradiction": {"text": _clean(r.get("DQ_Contradicts"))[:CHALLENGE_FIELD_CHARS],
                           "disposition": _clean(r.get("Contradiction_Disposition"))},
